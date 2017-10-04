@@ -18,7 +18,7 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.FsPathResolver;
+import org.eclipse.che.api.fs.server.FsPaths;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.plugin.php.shared.Constants;
@@ -26,12 +26,12 @@ import org.eclipse.che.plugin.php.shared.Constants;
 public class PhpProjectGenerator implements CreateProjectHandler {
 
   private final FsManager fsManager;
-  private final FsPathResolver fsPathResolver;
+  private final FsPaths fsPaths;
 
   @Inject
-  public PhpProjectGenerator(FsManager fsManager, FsPathResolver fsPathResolver) {
+  public PhpProjectGenerator(FsManager fsManager, FsPaths fsPaths) {
     this.fsManager = fsManager;
-    this.fsPathResolver = fsPathResolver;
+    this.fsPaths = fsPaths;
   }
 
   @Override
@@ -41,7 +41,7 @@ public class PhpProjectGenerator implements CreateProjectHandler {
     fsManager.createDirectory(projectWsPath);
     InputStream inputStream =
         getClass().getClassLoader().getResourceAsStream("files/default_php_content");
-    String wsPath = fsPathResolver.resolve(projectWsPath, "hello.php");
+    String wsPath = fsPaths.resolve(projectWsPath, "hello.php");
     fsManager.createFile(wsPath, inputStream);
   }
 

@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
-import org.eclipse.che.api.project.server.WorkspaceProjectsSyncer;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 
 /** @author Anatolii Bazko */
@@ -93,31 +92,31 @@ public class ProjectApiUtils {
     //    JavaModelManager.getDeltaState().initializeRoots(true);
   }
 //
-//  private static class TestWorkspaceHolder extends WorkspaceProjectsSyncer {
-//    private List<ProjectConfigDto> projects;
-//
-//    TestWorkspaceHolder(List<ProjectConfigDto> projects) {
-//      super(null, synchronizeWorkspace);
-//      this.projects = projects;
-//    }
-//
-//    @Override
-//    public List<? extends ProjectConfig> getProjects() {
-//      return projects;
-//    }
-//
-//    @Override
-//    public String getWorkspaceId() {
-//      return "id";
-//    }
-//
-//    @Override
-//    protected void addProject(ProjectConfig project) throws ServerException {}
-//
-//    @Override
-//    protected void updateProject(ProjectConfig project) throws ServerException {}
-//
-//    @Override
-//    protected void removeProject(ProjectConfig project) throws ServerException {}
-//  }
+  //  private static class TestWorkspaceHolder extends WorkspaceProjectsSyncer {
+  //    private List<ProjectConfigDto> projects;
+  //
+  //    TestWorkspaceHolder(List<ProjectConfigDto> projects) {
+  //      super(null, synchronizeWorkspace);
+  //      this.projects = projects;
+  //    }
+  //
+  //    @Override
+  //    public List<? extends ProjectConfig> getProjects() {
+  //      return projects;
+  //    }
+  //
+  //    @Override
+  //    public String getWorkspaceId() {
+  //      return "id";
+  //    }
+  //
+  //    @Override
+  //    protected void addProject(ProjectConfig project) throws ServerException {}
+  //
+  //    @Override
+  //    protected void updateProject(ProjectConfig project) throws ServerException {}
+  //
+  //    @Override
+  //    protected void removeProject(ProjectConfig project) throws ServerException {}
+  //  }
 }

@@ -1548,7 +1548,6 @@ public class RenameTypeTest extends RefactoringTest {
             new File(BaseTest.class.getResource("/projects").getFile()),
             new ProjectItemModifiedEvent(
                 ProjectItemModifiedEvent.EventType.CREATED,
-                "projects",
                 fProject.getElementName(),
                 file.getFullPath().toOSString(),
                 false));

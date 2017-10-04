@@ -69,7 +69,8 @@ public interface FsManager {
   InputStream zipFileToInputStream(String wsPath)
       throws NotFoundException, ServerException, ConflictException;
 
-  String zipFileToString(String wsPath) throws NotFoundException, ServerException, ConflictException;
+  String zipFileToString(String wsPath)
+      throws NotFoundException, ServerException, ConflictException;
 
   byte[] zipFileToByteArray(String wsPath)
       throws NotFoundException, ServerException, ConflictException;
@@ -83,7 +84,8 @@ public interface FsManager {
   InputStream tarFileToInputStream(String wsPath)
       throws NotFoundException, ServerException, ConflictException;
 
-  String tarFileToString(String wsPath) throws NotFoundException, ServerException, ConflictException;
+  String tarFileToString(String wsPath)
+      throws NotFoundException, ServerException, ConflictException;
 
   byte[] tarFileToByteArray(String wsPath)
       throws NotFoundException, ServerException, ConflictException;

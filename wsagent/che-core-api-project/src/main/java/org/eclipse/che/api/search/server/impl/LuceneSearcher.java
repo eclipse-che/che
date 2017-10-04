@@ -70,7 +70,7 @@ import org.apache.lucene.util.IOUtils;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.util.FileCleaner;
-import org.eclipse.che.api.fs.server.FsPathResolver;
+import org.eclipse.che.api.fs.server.FsPaths;
 import org.eclipse.che.api.search.server.SearchResult;
 import org.eclipse.che.api.search.server.Searcher;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
@@ -98,7 +98,7 @@ public class LuceneSearcher implements Searcher {
   private final Set<PathMatcher> excludePatterns;
   private final ExecutorService executor;
   private final File indexDirectory;
-  private final FsPathResolver fsPathResolver;
+  private final FsPaths fsPaths;
 
   private File root;
   private IndexWriter luceneIndexWriter;
@@ -111,11 +111,11 @@ public class LuceneSearcher implements Searcher {
       @Named("vfs.index_filter_matcher") Set<PathMatcher> excludePatterns,
       @Named("vfs.local.fs_index_root_dir") File indexDirectory,
       @Named("che.user.workspaces.storage") File root,
-      FsPathResolver fsPathResolver) {
+      FsPaths fsPaths) {
     this.indexDirectory = indexDirectory;
     this.root = root;
     this.excludePatterns = excludePatterns;
-    this.fsPathResolver = fsPathResolver;
+    this.fsPaths = fsPaths;
 
     executor =
         newSingleThreadExecutor(
@@ -413,7 +413,7 @@ public class LuceneSearcher implements Searcher {
       return;
     }
 
-    String wsPath = fsPathResolver.toWsPath(fsPath);
+    String wsPath = fsPaths.toWsPath(fsPath);
 
     try (Reader fContentReader = isNotExcluded(fsPath) ? newBufferedReader(fsPath) : null) {
       luceneIndexWriter.updateDocument(
@@ -428,7 +428,7 @@ public class LuceneSearcher implements Searcher {
 
   @Override
   public final void delete(Path fsPath) throws ServerException {
-    String wsPath = fsPathResolver.toWsPath(fsPath);
+    String wsPath = fsPaths.toWsPath(fsPath);
     try {
       if (fsPath.toFile().isFile()) {
         Term term = new Term(PATH_FIELD, wsPath);
@@ -447,12 +447,12 @@ public class LuceneSearcher implements Searcher {
 
   @Override
   public final void update(Path fsPath) throws ServerException {
-    String wsPath = fsPathResolver.toWsPath(fsPath);
+    String wsPath = fsPaths.toWsPath(fsPath);
     doUpdate(new Term(PATH_FIELD, wsPath), fsPath);
   }
 
   private void doUpdate(Term deleteTerm, Path fsPath) throws ServerException {
-    String wsPath = fsPathResolver.toWsPath(fsPath);
+    String wsPath = fsPaths.toWsPath(fsPath);
     try (Reader fContentReader = isNotExcluded(fsPath) ? newBufferedReader(fsPath) : null) {
       luceneIndexWriter.updateDocument(deleteTerm, createDocument(wsPath, fContentReader));
     } catch (OutOfMemoryError oome) {
@@ -464,7 +464,7 @@ public class LuceneSearcher implements Searcher {
   }
 
   private Document createDocument(String wsPath, Reader reader) throws ServerException {
-    String name = fsPathResolver.getName(wsPath);
+    String name = fsPaths.getName(wsPath);
     Document doc = new Document();
     doc.add(new StringField(PATH_FIELD, wsPath, Field.Store.YES));
     doc.add(new TextField(NAME_FIELD, name, Field.Store.YES));

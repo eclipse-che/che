@@ -14,7 +14,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.FsPathResolver;
+import org.eclipse.che.api.fs.server.FsPaths;
 import org.eclipse.che.api.project.server.ProjectManager;
 
 /**
@@ -27,14 +27,14 @@ import org.eclipse.che.api.project.server.ProjectManager;
 @Singleton
 public class ZendDbgLocationHandler {
 
-  private final FsPathResolver fsPathResolver;
+  private final FsPaths fsPaths;
   private final FsManager fsManager;
   private final ProjectManager projectManager;
 
   @Inject
   public ZendDbgLocationHandler(
-      FsPathResolver fsPathResolver, FsManager fsManager, ProjectManager projectManager) {
-    this.fsPathResolver = fsPathResolver;
+      FsPaths fsPaths, FsManager fsManager, ProjectManager projectManager) {
+    this.fsPaths = fsPaths;
     this.fsManager = fsManager;
     this.projectManager = projectManager;
   }
@@ -55,7 +55,7 @@ public class ZendDbgLocationHandler {
    */
   public Location convertToVFS(Location dbgLocation) {
     String remotePath = dbgLocation.getResourceProjectPath();
-    String wsPath = fsPathResolver.toAbsoluteWsPath(remotePath);
+    String wsPath = fsPaths.absolutize(remotePath);
     if (!fsManager.exists(wsPath)) {
       return null;
     }
@@ -65,7 +65,7 @@ public class ZendDbgLocationHandler {
             .getClosest(wsPath)
             .orElseThrow(() -> new IllegalArgumentException("Can't find project"))
             .getPath();
-    String target = fsPathResolver.getName(wsPath);
+    String target = fsPaths.getName(wsPath);
     int lineNumber = dbgLocation.getLineNumber();
     return new LocationImpl(
         target,

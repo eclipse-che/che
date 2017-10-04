@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.project.server.importer;
+package org.eclipse.che.api.project.server.impl;
 
 import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableSet;
@@ -24,41 +24,35 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.eclipse.che.api.project.server.importer.ProjectImporter;
-import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
+import org.eclipse.che.api.project.server.ProjectImporter;
 
 /** @author Vitaly Parfonov */
 @Singleton
-public class SimpleProjectImporterRegistry implements ProjectImporterRegistry {
+public class ProjectImporterRegistry {
 
   private final Map<String, ProjectImporter> importers = new ConcurrentHashMap<>();
 
   @Inject
-  public SimpleProjectImporterRegistry(Set<ProjectImporter> importers) {
+  public ProjectImporterRegistry(Set<ProjectImporter> importers) {
     importers.forEach(importer -> this.importers.put(importer.getId(), importer));
   }
 
-  @Override
   public Optional<ProjectImporter> get(String type) {
     return type == null ? empty() : ofNullable(importers.get(type));
   }
 
-  @Override
   public ProjectImporter getOrNull(String type) {
     return get(type).orElse(null);
   }
 
-  @Override
   public boolean isRegistered(String type) {
     return type != null && importers.containsKey(type);
   }
 
-  @Override
   public Set<ProjectImporter> getAll() {
     return unmodifiableSet(new HashSet<>(importers.values()));
   }
 
-  @Override
   public List<ProjectImporter> getAllAsList() {
     return unmodifiableList(new ArrayList<>(importers.values()));
   }

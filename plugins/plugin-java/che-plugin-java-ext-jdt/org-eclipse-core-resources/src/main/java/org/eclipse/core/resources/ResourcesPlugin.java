@@ -15,7 +15,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import javax.annotation.PostConstruct;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.FsPathResolver;
+import org.eclipse.che.api.fs.server.FsPaths;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.core.internal.resources.Workspace;
 import org.eclipse.core.filesystem.EFS;
@@ -188,7 +188,7 @@ public class ResourcesPlugin {
       @Named("che.jdt.workspace.index.dir") String indexPath,
       @Named("che.user.workspaces.storage") String workspacePath,
       Provider<ProjectManager> projectManager,
-      Provider<FsPathResolver> pathResolverProvider,
+      Provider<FsPaths> pathResolverProvider,
       Provider<FsManager> fsManagerProvider) {
     ResourcesPlugin.indexPath = indexPath;
     ResourcesPlugin.workspacePath = workspacePath;

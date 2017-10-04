@@ -34,18 +34,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class FileUpdater {
+class FileUpdater {
 
   private static final Logger LOG = LoggerFactory.getLogger(FileUpdater.class);
 
-  private final SimpleFsPathResolver pathResolver;
+  private final StandardFsPaths pathResolver;
 
   @Inject
-  public FileUpdater(SimpleFsPathResolver pathResolver) {
+  FileUpdater(StandardFsPaths pathResolver) {
     this.pathResolver = pathResolver;
   }
 
-  public void update(String wsPath, BiConsumer<InputStream, OutputStream> updater)
+  void update(String wsPath, BiConsumer<InputStream, OutputStream> updater)
       throws NotFoundException, ConflictException, ServerException {
     try {
       String parentWsPath = pathResolver.getParentWsPath(wsPath);
@@ -67,30 +67,30 @@ public class FileUpdater {
     }
   }
 
-  public void update(String wsPath, InputStream content)
+  void update(String wsPath, InputStream content)
       throws NotFoundException, ConflictException, ServerException {
     updateInternally(wsPath, () -> readStream(content).getBytes());
   }
 
-  public void update(String wsPath, String content)
+  void update(String wsPath, String content)
       throws NotFoundException, ConflictException, ServerException {
     updateInternally(wsPath, content::getBytes);
   }
 
-  public void update(String wsPath, byte[] content)
+  void update(String wsPath, byte[] content)
       throws NotFoundException, ConflictException, ServerException {
     updateInternally(wsPath, () -> content);
   }
 
-  public boolean updateQuietly(String wsPath, InputStream content) {
+  boolean updateQuietly(String wsPath, InputStream content) {
     return updateInternallyAndQuietly(wsPath, () -> readStream(content).getBytes());
   }
 
-  public boolean updateQuietly(String wsPath, String content) {
+  boolean updateQuietly(String wsPath, String content) {
     return updateInternallyAndQuietly(wsPath, content::getBytes);
   }
 
-  public boolean updateQuietly(String wsPath, byte[] content) {
+  boolean updateQuietly(String wsPath, byte[] content) {
     return updateInternallyAndQuietly(wsPath, () -> content);
   }
 
@@ -101,9 +101,7 @@ public class FileUpdater {
     try {
       Files.write(fsPath, supplier.get());
     } catch (IOException e) {
-      String message = "Failed to update file: " + wsPath;
-      LOG.error(message);
-      throw new ServerException(message, e);
+      throw new ServerException("Failed to update file " + wsPath, e);
     }
   }
 
@@ -122,8 +120,7 @@ public class FileUpdater {
 
       return true;
     } catch (IOException | NotFoundException | ConflictException | ServerException e) {
-      String message = "Failed to quietly update file: " + wsPath;
-      LOG.error(message, e);
+      LOG.error("Failed to quietly update file {}", wsPath, e);
     }
     return false;
   }

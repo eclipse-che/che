@@ -28,30 +28,29 @@ import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.FsPathResolver;
+import org.eclipse.che.api.fs.server.FsPaths;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
 import org.eclipse.che.api.project.shared.NewProjectConfig;
 
 @Singleton
-public class ValidatingProjectManager
-    implements ProjectManager {
+public class ValidatingProjectManager implements ProjectManager {
 
   private final SynchronizingProjectManager synchronizingProjectManager;
   private final FsManager fsManager;
   private final ProjectConfigRegistry projectConfigRegistry;
-  private final FsPathResolver fsPathResolver;
+  private final FsPaths fsPaths;
 
   @Inject
   public ValidatingProjectManager(
       SynchronizingProjectManager synchronizingProjectManager,
       FsManager fsManager,
       ProjectConfigRegistry projectConfigRegistry,
-      FsPathResolver fsPathResolver) {
+      FsPaths fsPaths) {
     this.fsManager = fsManager;
     this.synchronizingProjectManager = synchronizingProjectManager;
     this.projectConfigRegistry = projectConfigRegistry;
-    this.fsPathResolver = fsPathResolver;
+    this.fsPaths = fsPaths;
   }
 
   @Override
@@ -92,14 +91,14 @@ public class ValidatingProjectManager
   @Override
   public Set<RegisteredProject> createAll(Map<ProjectConfig, Map<String, String>> projectConfigs)
       throws ConflictException, ForbiddenException, ServerException, NotFoundException,
-      BadRequestException {
+          BadRequestException {
     for (ProjectConfig projectConfig : projectConfigs.keySet()) {
       String wsPath = projectConfig.getPath();
       if (wsPath == null) {
         throw new BadRequestException("Path is not defined.");
       }
 
-      String parentWsPath = fsPathResolver.getParentWsPath(wsPath);
+      String parentWsPath = fsPaths.getParentWsPath(wsPath);
       if (!fsManager.isRoot(parentWsPath) || !fsManager.existsAsDirectory(parentWsPath)) {
         throw new NotFoundException("Parent does not exist: " + parentWsPath);
       }
@@ -120,13 +119,13 @@ public class ValidatingProjectManager
   @Override
   public RegisteredProject create(ProjectConfig projectConfig, Map<String, String> options)
       throws ConflictException, ForbiddenException, ServerException, NotFoundException,
-      BadRequestException {
+          BadRequestException {
     String wsPath = projectConfig.getPath();
     if (wsPath == null) {
       throw new BadRequestException("Path is not defined.");
     }
 
-    String parentWsPath = fsPathResolver.getParentWsPath(wsPath);
+    String parentWsPath = fsPaths.getParentWsPath(wsPath);
     if (!fsManager.isRoot(parentWsPath) || !fsManager.existsAsDirectory(parentWsPath)) {
       throw new NotFoundException("Parent does not exist: " + parentWsPath);
     }
@@ -146,7 +145,7 @@ public class ValidatingProjectManager
   @Override
   public Set<RegisteredProject> updateAll(Set<ProjectConfig> projectConfigs)
       throws ForbiddenException, ServerException, NotFoundException, ConflictException,
-      BadRequestException {
+          BadRequestException {
 
     for (ProjectConfig projectConfig : projectConfigs) {
       String wsPath = projectConfig.getPath();
@@ -164,7 +163,7 @@ public class ValidatingProjectManager
   @Override
   public RegisteredProject update(ProjectConfig projectConfig)
       throws ForbiddenException, ServerException, NotFoundException, ConflictException,
-      BadRequestException {
+          BadRequestException {
     String wsPath = projectConfig.getPath();
     if (wsPath == null) {
       throw new BadRequestException("Project workspace path is not defined");
@@ -231,7 +230,7 @@ public class ValidatingProjectManager
       throw new NotFoundException("Project directory does not exist or is a file: " + srcWsPath);
     }
 
-    String dstParentWsPath = fsPathResolver.getParentWsPath(dstWsPath);
+    String dstParentWsPath = fsPaths.getParentWsPath(dstWsPath);
     if (!fsManager.existsAsDirectory(dstParentWsPath)) {
       throw new NotFoundException(
           "Destination parent directory does not exist or is a file: " + dstParentWsPath);
@@ -247,23 +246,23 @@ public class ValidatingProjectManager
   @Override
   public RegisteredProject setType(String wsPath, String type, boolean asMixin)
       throws ConflictException, NotFoundException, ServerException, BadRequestException,
-      ForbiddenException {
+          ForbiddenException {
     return synchronizingProjectManager.setType(wsPath, type, asMixin);
   }
 
   @Override
   public RegisteredProject removeType(String wsPath, String type)
       throws ConflictException, NotFoundException, ServerException, BadRequestException,
-      ForbiddenException {
+          ForbiddenException {
     return synchronizingProjectManager.removeType(wsPath, type);
   }
 
   @Override
   public RegisteredProject doImport(
-      NewProjectConfig newProjectConfig, boolean rewrite, BiConsumer<String, String> consumer)
+      NewProjectConfig projectConfig, boolean rewrite, BiConsumer<String, String> consumer)
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-      NotFoundException, BadRequestException {
-    return synchronizingProjectManager.doImport(newProjectConfig, rewrite, consumer);
+          NotFoundException, BadRequestException {
+    return synchronizingProjectManager.doImport(projectConfig, rewrite, consumer);
   }
 
   @Override
@@ -272,7 +271,7 @@ public class ValidatingProjectManager
       boolean rewrite,
       BiConsumer<String, String> consumer)
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-      NotFoundException, BadRequestException {
+          NotFoundException, BadRequestException {
     return synchronizingProjectManager.doImport(newProjectConfigs, rewrite, consumer);
   }
 
@@ -283,7 +282,7 @@ public class ValidatingProjectManager
       boolean rewrite,
       BiConsumer<String, String> consumer)
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-      NotFoundException {
+          NotFoundException {
     return synchronizingProjectManager.doImport(wsPath, sourceStorage, rewrite, consumer);
   }
 
@@ -293,7 +292,7 @@ public class ValidatingProjectManager
       boolean rewrite,
       BiConsumer<String, String> consumer)
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-      NotFoundException {
+          NotFoundException {
     return synchronizingProjectManager.doImport(projectLocations, rewrite, consumer);
   }
 

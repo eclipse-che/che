@@ -18,9 +18,9 @@ import com.google.inject.Provider;
 import java.util.Arrays;
 import java.util.List;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.fs.server.FsPathResolver;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
+import org.eclipse.che.api.fs.server.FsPaths;
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.ide.ext.java.shared.Constants;
 import org.eclipse.che.plugin.java.server.projecttype.AbstractJavaInitHandler;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -42,13 +42,13 @@ public class PlainJavaInitHandler extends AbstractJavaInitHandler {
   private static final Logger LOG = LoggerFactory.getLogger(PlainJavaInitHandler.class);
   private final ClasspathBuilder classpathBuilder;
   private final Provider<ProjectManager> projectRegistryProvider;
-  private final Provider<FsPathResolver> pathResolverProvider;
+  private final Provider<FsPaths> pathResolverProvider;
 
   @Inject
   public PlainJavaInitHandler(
       ClasspathBuilder classpathBuilder,
       Provider<ProjectManager> projectRegistryProvider,
-      Provider<FsPathResolver> pathResolverProvider) {
+      Provider<FsPaths> pathResolverProvider) {
     this.classpathBuilder = classpathBuilder;
     this.projectRegistryProvider = projectRegistryProvider;
     this.pathResolverProvider = pathResolverProvider;
@@ -73,7 +73,7 @@ public class PlainJavaInitHandler extends AbstractJavaInitHandler {
       return;
     }
 
-    String wsPath = pathResolverProvider.get().toAbsoluteWsPath(javaProject.getPath().toOSString());
+    String wsPath = pathResolverProvider.get().absolutize(javaProject.getPath().toOSString());
     RegisteredProject project =
         projectRegistryProvider
             .get()

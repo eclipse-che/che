@@ -15,12 +15,11 @@ import static java.util.Collections.emptyMap;
 import java.util.Map;
 import org.eclipse.che.api.core.model.project.type.ProjectType;
 import org.eclipse.che.api.core.model.project.type.Value;
-import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
 
 public interface ProjectTypeResolver {
 
-  static ProjectTypeResolution newDefaultResolution(String type, Map<String, Value> attributes,
-      boolean match) {
+  static ProjectTypeResolution newDefaultResolution(
+      String type, Map<String, Value> attributes, boolean match) {
     return new ProjectTypeResolution(type, attributes) {
       @Override
       public boolean matched() {

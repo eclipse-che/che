@@ -21,21 +21,21 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.fs.server.FsDtoConverter;
+import org.eclipse.che.api.fs.server.FsPaths;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 
 @Singleton
 public class SimpleFsDtoConverter implements FsDtoConverter {
 
-  private final SimpleFsPathResolver pathResolver;
+  private final FsPaths fsPaths;
   private final ProjectManager projectManager;
   private final ExecutiveFsManager executiveFsManager;
 
   @Inject
   public SimpleFsDtoConverter(
-      SimpleFsPathResolver pathResolver, ProjectManager projectManager,
-      ExecutiveFsManager executiveFsManager) {
-    this.pathResolver = pathResolver;
+      FsPaths fsPaths, ProjectManager projectManager, ExecutiveFsManager executiveFsManager) {
+    this.fsPaths = fsPaths;
     this.projectManager = projectManager;
     this.executiveFsManager = executiveFsManager;
   }
@@ -43,15 +43,16 @@ public class SimpleFsDtoConverter implements FsDtoConverter {
   @Override
   public ItemReference asDto(String wsPath) throws NotFoundException {
     if (!executiveFsManager.exists(wsPath)) {
-      throw new NotFoundException("Can't find item: " + wsPath);
+      throw new NotFoundException("Can't find item " + wsPath);
     }
 
-    File file = pathResolver.toFsPath(wsPath).toFile();
+    File file = fsPaths.toFsPath(wsPath).toFile();
     String name = file.getName();
-    String projectPath = projectManager
-        .getClosest(wsPath)
-        .orElseThrow(() -> new NotFoundException("Can't find project that item belongs to"))
-        .getPath();
+    String projectPath =
+        projectManager
+            .getClosest(wsPath)
+            .orElseThrow(() -> new NotFoundException("Can't find project for item " + wsPath))
+            .getPath();
 
     String type;
     if (projectManager.isRegistered(wsPath)) {
@@ -79,21 +80,20 @@ public class SimpleFsDtoConverter implements FsDtoConverter {
   }
 
   @Override
-  public List<ItemReference> asDto(List<String> paths) throws NotFoundException {
+  public List<ItemReference> asDto(List<String> wsPaths) throws NotFoundException {
     List<ItemReference> result = new LinkedList<>();
-    for (String path : paths) {
+    for (String path : wsPaths) {
       result.add(asDto(path));
     }
     return result;
   }
 
   @Override
-  public Set<ItemReference> asDto(Set<String> paths) throws NotFoundException {
+  public Set<ItemReference> asDto(Set<String> wsPaths) throws NotFoundException {
     Set<ItemReference> result = new HashSet<>();
-    for (String path : paths) {
+    for (String path : wsPaths) {
       result.add(asDto(path));
     }
     return result;
   }
-
 }

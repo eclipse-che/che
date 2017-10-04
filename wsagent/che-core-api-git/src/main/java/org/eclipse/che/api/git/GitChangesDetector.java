@@ -32,12 +32,12 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.FsPathResolver;
+import org.eclipse.che.api.fs.server.FsPaths;
 import org.eclipse.che.api.watcher.server.FileWatcherManager;
 import org.eclipse.che.api.git.shared.FileChangedEventDto;
 import org.eclipse.che.api.git.shared.Status;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.api.project.shared.dto.event.GitChangeEventDto;
 import org.eclipse.che.api.watcher.server.FileWatcherManager;
 import org.eclipse.che.api.project.server.ProjectManager;
@@ -60,7 +60,7 @@ public class GitChangesDetector {
   private final FileWatcherManager manager;
   private final FsManager fsManager;
   private final ProjectManager projectManager;
-  private final FsPathResolver fsPathResolver;
+  private final FsPaths fsPaths;
   private final GitConnectionFactory gitConnectionFactory;
 
   private final Set<String> endpointIds = newConcurrentHashSet();
@@ -73,13 +73,13 @@ public class GitChangesDetector {
       FileWatcherManager manager,
       FsManager fsManager,
       ProjectManager projectManager,
-      FsPathResolver fsPathResolver,
+      FsPaths fsPaths,
       GitConnectionFactory gitConnectionFactory) {
     this.transmitter = transmitter;
     this.manager = manager;
     this.fsManager = fsManager;
     this.projectManager = projectManager;
-    this.fsPathResolver = fsPathResolver;
+    this.fsPaths = fsPaths;
     this.gitConnectionFactory = gitConnectionFactory;
   }
 
@@ -117,8 +117,7 @@ public class GitChangesDetector {
   }
 
   private Consumer<String> deleteConsumer() {
-    return it -> {
-    };
+    return it -> {};
   }
 
   private Consumer<String> fsEventConsumer() {
@@ -134,7 +133,7 @@ public class GitChangesDetector {
                 .orElseThrow(() -> new NotFoundException("Can't find project"));
 
         String projectWsPath = project.getPath();
-        Path projectFsPath = fsPathResolver.toFsPath(projectWsPath);
+        Path projectFsPath = fsPaths.toFsPath(projectWsPath);
         String stringifiedProjectFsPath = projectFsPath.toString();
         Status status =
             gitConnectionFactory

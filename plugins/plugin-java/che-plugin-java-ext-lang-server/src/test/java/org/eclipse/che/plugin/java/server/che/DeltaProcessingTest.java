@@ -45,7 +45,6 @@ public class DeltaProcessingTest extends BaseTest {
             new File(BaseTest.class.getResource("/projects").getFile()),
             new ProjectItemModifiedEvent(
                 ProjectItemModifiedEvent.EventType.DELETED,
-                "projects",
                 "test",
                 "/test/src/main/java/org/eclipse/che/test/MyClass.java",
                 false));
@@ -72,7 +71,6 @@ public class DeltaProcessingTest extends BaseTest {
             new File(BaseTest.class.getResource("/projects").getFile()),
             new ProjectItemModifiedEvent(
                 ProjectItemModifiedEvent.EventType.DELETED,
-                "projects",
                 "test",
                 "/test/src/main/java/org/eclipse/che/test",
                 true));
@@ -99,7 +97,6 @@ public class DeltaProcessingTest extends BaseTest {
             workspace,
             new ProjectItemModifiedEvent(
                 ProjectItemModifiedEvent.EventType.CREATED,
-                "projects",
                 "test",
                 "/test/src/main/java/org/eclipse/che/test/NewClass.java",
                 false));

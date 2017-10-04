@@ -17,9 +17,9 @@ import org.eclipse.che.api.project.shared.dto.ItemReference;
 
 public interface FsDtoConverter {
 
-  ItemReference asDto(String path) throws NotFoundException;
+  ItemReference asDto(String wsPath) throws NotFoundException;
 
-  List<ItemReference> asDto(List<String> paths) throws NotFoundException;
+  List<ItemReference> asDto(List<String> wsPaths) throws NotFoundException;
 
-  Set<ItemReference> asDto(Set<String> paths) throws NotFoundException;
+  Set<ItemReference> asDto(Set<String> wsPaths) throws NotFoundException;
 }

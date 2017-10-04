@@ -10,21 +10,13 @@
  */
 package org.eclipse.che.api.fs.server.impl;
 
-import static com.google.common.collect.ImmutableSet.copyOf;
-import static java.util.Arrays.stream;
-import static java.util.Collections.emptySet;
-import static java.util.stream.Collectors.toSet;
-
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
-import java.util.function.Predicate;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.apache.commons.fileupload.FileItem;
@@ -45,8 +37,7 @@ public class SuspendingFsManager implements FsManager {
 
   @Inject
   public SuspendingFsManager(
-      FileWatcherManager fileWatcherManager,
-      ExecutiveFsManager executiveFsManager) {
+      FileWatcherManager fileWatcherManager, ExecutiveFsManager executiveFsManager) {
     this.fileWatcherManager = fileWatcherManager;
     this.executiveFsManager = executiveFsManager;
   }
@@ -145,7 +136,7 @@ public class SuspendingFsManager implements FsManager {
       fileWatcherManager.suspend();
       executiveFsManager.unzipDirectory(wsPath, content, skipRoot);
     } finally {
-     fileWatcherManager.resume();
+      fileWatcherManager.resume();
     }
   }
 

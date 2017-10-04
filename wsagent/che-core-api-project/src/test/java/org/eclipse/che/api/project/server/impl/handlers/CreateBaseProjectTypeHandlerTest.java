@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.project.server.handlers;
+package org.eclipse.che.api.project.server.impl.handlers;
 
 import org.testng.annotations.Test;
 

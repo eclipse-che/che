@@ -33,14 +33,13 @@ import org.eclipse.che.api.project.shared.NewProjectConfig;
 public class SynchronizingProjectManager implements ProjectManager {
 
   private final ExecutiveProjectManager executiveProjectManager;
-  private final ProjectSynchronizer synchronizer;
+  private final ProjectSynchronizer projectSynchronizer;
 
   @Inject
   public SynchronizingProjectManager(
-      ExecutiveProjectManager executiveProjectManager,
-      ProjectSynchronizer synchronizer) {
+      ExecutiveProjectManager executiveProjectManager, ProjectSynchronizer projectSynchronizer) {
     this.executiveProjectManager = executiveProjectManager;
-    this.synchronizer = synchronizer;
+    this.projectSynchronizer = projectSynchronizer;
   }
 
   @Override
@@ -81,44 +80,44 @@ public class SynchronizingProjectManager implements ProjectManager {
   @Override
   public Set<RegisteredProject> createAll(Map<ProjectConfig, Map<String, String>> projectConfigs)
       throws ConflictException, ForbiddenException, ServerException, NotFoundException,
-      BadRequestException {
+          BadRequestException {
     try {
       return executiveProjectManager.createAll(projectConfigs);
     } finally {
-      synchronizer.synchronize();
+      projectSynchronizer.synchronize();
     }
   }
 
   @Override
   public RegisteredProject create(ProjectConfig projectConfig, Map<String, String> options)
       throws ConflictException, ForbiddenException, ServerException, NotFoundException,
-      BadRequestException {
+          BadRequestException {
     try {
       return executiveProjectManager.create(projectConfig, options);
     } finally {
-      synchronizer.synchronize();
+      projectSynchronizer.synchronize();
     }
   }
 
   @Override
   public Set<RegisteredProject> updateAll(Set<ProjectConfig> projectConfigs)
       throws ForbiddenException, ServerException, NotFoundException, ConflictException,
-      BadRequestException {
+          BadRequestException {
     try {
       return executiveProjectManager.updateAll(projectConfigs);
     } finally {
-      synchronizer.synchronize();
+      projectSynchronizer.synchronize();
     }
   }
 
   @Override
   public RegisteredProject update(ProjectConfig projectConfig)
       throws ForbiddenException, ServerException, NotFoundException, ConflictException,
-      BadRequestException {
+          BadRequestException {
     try {
       return executiveProjectManager.update(projectConfig);
     } finally {
-      synchronizer.synchronize();
+      projectSynchronizer.synchronize();
     }
   }
 
@@ -128,7 +127,7 @@ public class SynchronizingProjectManager implements ProjectManager {
     try {
       return executiveProjectManager.deleteAll(wsPaths);
     } finally {
-      synchronizer.synchronize();
+      projectSynchronizer.synchronize();
     }
   }
 
@@ -138,7 +137,7 @@ public class SynchronizingProjectManager implements ProjectManager {
     try {
       return executiveProjectManager.delete(wsPath);
     } finally {
-      synchronizer.synchronize();
+      projectSynchronizer.synchronize();
     }
   }
 
@@ -148,7 +147,7 @@ public class SynchronizingProjectManager implements ProjectManager {
     try {
       return executiveProjectManager.deleteAll();
     } finally {
-      synchronizer.synchronize();
+      projectSynchronizer.synchronize();
     }
   }
 
@@ -158,7 +157,7 @@ public class SynchronizingProjectManager implements ProjectManager {
     try {
       return executiveProjectManager.copy(srcWsPath, dstWsPath, overwrite);
     } finally {
-      synchronizer.synchronize();
+      projectSynchronizer.synchronize();
     }
   }
 
@@ -168,38 +167,38 @@ public class SynchronizingProjectManager implements ProjectManager {
     try {
       return executiveProjectManager.move(srcWsPath, dstWsPath, overwrite);
     } finally {
-      synchronizer.synchronize();
+      projectSynchronizer.synchronize();
     }
   }
 
   @Override
   public RegisteredProject setType(String wsPath, String type, boolean asMixin)
       throws ConflictException, NotFoundException, ServerException, BadRequestException,
-      ForbiddenException {
+          ForbiddenException {
     try {
       return executiveProjectManager.setType(wsPath, type, asMixin);
     } finally {
-      synchronizer.synchronize();
+      projectSynchronizer.synchronize();
     }
   }
 
   @Override
   public RegisteredProject removeType(String wsPath, String type)
       throws ConflictException, NotFoundException, ServerException, BadRequestException,
-      ForbiddenException {
+          ForbiddenException {
     try {
       return executiveProjectManager.removeType(wsPath, type);
     } finally {
-      synchronizer.synchronize();
+      projectSynchronizer.synchronize();
     }
   }
 
   @Override
   public RegisteredProject doImport(
-      NewProjectConfig newProjectConfig, boolean rewrite, BiConsumer<String, String> consumer)
+      NewProjectConfig projectConfig, boolean rewrite, BiConsumer<String, String> consumer)
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-      NotFoundException, BadRequestException {
-    return executiveProjectManager.doImport(newProjectConfig, rewrite, consumer);
+          NotFoundException, BadRequestException {
+    return executiveProjectManager.doImport(projectConfig, rewrite, consumer);
   }
 
   @Override
@@ -208,7 +207,7 @@ public class SynchronizingProjectManager implements ProjectManager {
       boolean rewrite,
       BiConsumer<String, String> consumer)
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-      NotFoundException, BadRequestException {
+          NotFoundException, BadRequestException {
     return executiveProjectManager.doImport(newProjectConfigs, rewrite, consumer);
   }
 
@@ -219,7 +218,7 @@ public class SynchronizingProjectManager implements ProjectManager {
       boolean rewrite,
       BiConsumer<String, String> consumer)
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-      NotFoundException {
+          NotFoundException {
     return executiveProjectManager.doImport(wsPath, sourceStorage, rewrite, consumer);
   }
 
@@ -229,7 +228,7 @@ public class SynchronizingProjectManager implements ProjectManager {
       boolean rewrite,
       BiConsumer<String, String> consumer)
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-      NotFoundException {
+          NotFoundException {
     return executiveProjectManager.doImport(projectLocations, rewrite, consumer);
   }
 

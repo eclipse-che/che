@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.project.server.importer;
+package org.eclipse.che.api.project.server;
 
 import java.io.IOException;
 import java.util.function.Supplier;

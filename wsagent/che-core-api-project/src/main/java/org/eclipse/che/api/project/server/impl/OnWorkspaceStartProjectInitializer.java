@@ -10,13 +10,13 @@
  */
 package org.eclipse.che.api.project.server.impl;
 
-import static org.eclipse.che.api.fs.server.FsPathResolver.ROOT;
+import static org.eclipse.che.api.fs.server.FsPaths.ROOT;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ConflictException;
@@ -25,47 +25,44 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
 
 @Singleton
-public class SimpleProjectInitializer implements ProjectInitializer {
+public class OnWorkspaceStartProjectInitializer {
 
-  private final FsManager fileSystemManager;
+  private final FsManager fsManager;
   private final ProjectSynchronizer projectSynchronizer;
   private final ProjectConfigRegistry projectConfigRegistry;
-  private final ProjectHandlerRegistry projectHandlers;
+  private final ProjectHandlerRegistry projectHandlerRegistry;
 
   @Inject
-  public SimpleProjectInitializer(
-      FsManager fileSystemManager,
+  public OnWorkspaceStartProjectInitializer(
+      FsManager fsManager,
       ProjectSynchronizer projectSynchronizer,
       ProjectConfigRegistry projectConfigRegistry,
-      ProjectHandlerRegistry projectHandlers) {
-    this.fileSystemManager = fileSystemManager;
+      ProjectHandlerRegistry projectHandlerRegistry) {
+    this.fsManager = fsManager;
     this.projectSynchronizer = projectSynchronizer;
     this.projectConfigRegistry = projectConfigRegistry;
-    this.projectHandlers = projectHandlers;
+    this.projectHandlerRegistry = projectHandlerRegistry;
   }
 
-  @Override
+  @PostConstruct
   public void initialize()
-      throws ConflictException, NotFoundException, ServerException, ForbiddenException,
-      IOException {
+      throws ConflictException, NotFoundException, ServerException, ForbiddenException {
     initializeRegisteredProjects();
     initializeNotRegisteredProjects();
     firePostInitializationHandlers();
   }
 
-  private void initializeRegisteredProjects()
-      throws ServerException {
+  private void initializeRegisteredProjects() throws ServerException {
     for (ProjectConfig projectConfig : projectSynchronizer.getAll()) {
       projectConfigRegistry.put(projectConfig, false, false);
     }
   }
 
   private void initializeNotRegisteredProjects() throws ServerException {
-    Set<String> wsPaths = fileSystemManager.getDirectoryWsPaths(ROOT);
+    Set<String> wsPaths = fsManager.getDirectoryWsPaths(ROOT);
     for (String wsPath : wsPaths) {
       if (!projectConfigRegistry.isRegistered(wsPath)) {
         projectConfigRegistry.put(wsPath, true, true);
@@ -85,7 +82,7 @@ public class SimpleProjectInitializer implements ProjectInitializer {
       types.add(project.getType());
 
       for (String type : types) {
-        Optional<ProjectInitHandler> hOptional = projectHandlers.getProjectInitHandler(type);
+        Optional<ProjectInitHandler> hOptional = projectHandlerRegistry.getProjectInitHandler(type);
         if (hOptional.isPresent()) {
           hOptional.get().onProjectInitialized(project.getBaseFolder());
         }

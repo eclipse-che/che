@@ -13,21 +13,14 @@ package org.eclipse.che.api.watcher.server;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.function.Consumer;
-import javax.inject.Singleton;
 
-/**
- * Facade for all dynamic file watcher system related operations.
- */
+/** Facade for all dynamic file watcher system related operations. */
 public interface FileWatcherManager {
 
-  /**
-   * Suspend dynamic file watching system. If already suspended does nothing
-   */
+  /** Suspend dynamic file watching system. If already suspended does nothing */
   void suspend();
 
-  /**
-   * Resume dynamic file watching system. If already resumed does nothing
-   */
+  /** Resume dynamic file watching system. If already resumed does nothing */
   void resume();
 
   /**

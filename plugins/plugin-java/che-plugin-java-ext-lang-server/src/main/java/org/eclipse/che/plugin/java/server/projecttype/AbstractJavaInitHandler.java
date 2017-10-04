@@ -15,7 +15,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.fs.server.FsPathResolver;
+import org.eclipse.che.api.fs.server.FsPaths;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -42,19 +42,19 @@ public abstract class AbstractJavaInitHandler implements ProjectInitHandler {
 
   private ResourcesPlugin plugin;
 
-  private FsPathResolver fsPathResolver;
+  private FsPaths fsPaths;
 
   @Inject
-  void init(ResourcesPlugin plugin, FsPathResolver fsPathResolver) {
+  void init(ResourcesPlugin plugin, FsPaths fsPaths) {
     this.plugin = plugin;
-    this.fsPathResolver = fsPathResolver;
+    this.fsPaths = fsPaths;
   }
 
   @Override
   public final void onProjectInitialized(String wsPath)
       throws ServerException, ForbiddenException, ConflictException, NotFoundException {
     IProject project =
-        ResourcesPlugin.getWorkspace().getRoot().getProject(fsPathResolver.toAbsoluteWsPath(wsPath));
+        ResourcesPlugin.getWorkspace().getRoot().getProject(fsPaths.absolutize(wsPath));
     IJavaProject javaProject = JavaCore.create(project);
     initializeClasspath(javaProject);
   }

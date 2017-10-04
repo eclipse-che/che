@@ -12,9 +12,11 @@ package org.eclipse.che.api.fs.server;
 
 import java.nio.file.Path;
 
-public interface FsPathResolver {
+public interface FsPaths {
 
   String ROOT = "/";
+
+  String SEPARATOR = "/";
 
   Path toFsPath(String wsPath);
 
@@ -22,15 +24,17 @@ public interface FsPathResolver {
 
   boolean isRoot(String wsPath);
 
-  boolean isRoot(Path fsPath);
-
-  String toAbsoluteWsPath(String wsPath);
-
-  Path toAbsoluteFsPath(String wsPath);
-
   String getName(String wsPath);
 
   String getParentWsPath(String wsPath);
 
-  String resolve(String parentWsPath, String name);
+  String resolve(String wsPath, String name);
+
+  default boolean isRoot(Path fsPath) {
+    return isRoot(toWsPath(fsPath));
+  }
+
+  default String absolutize(String wsPath) {
+    return toWsPath(toFsPath(wsPath));
+  }
 }

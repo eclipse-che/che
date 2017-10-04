@@ -19,7 +19,6 @@ import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar
 import static org.eclipse.che.ide.api.resources.Resource.FOLDER;
 import static org.eclipse.che.ide.api.resources.Resource.PROJECT;
 
-import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import javax.validation.constraints.NotNull;
@@ -36,7 +35,6 @@ import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Folder;
 import org.eclipse.che.ide.api.resources.Project;
-import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.wizard.AbstractWizard;
 import org.eclipse.che.ide.resource.Path;
 
@@ -82,9 +80,10 @@ public class ProjectWizard extends AbstractWizard<MutableProjectConfig> {
           .then(onComplete(callback))
           .catchError(onFailure(callback));
     } else if (mode == UPDATE) {
-      String path = dataObject.getPath().startsWith("/")
-          ? dataObject.getPath().substring(1)
-          : dataObject.getPath();
+      String path =
+          dataObject.getPath().startsWith("/")
+              ? dataObject.getPath().substring(1)
+              : dataObject.getPath();
 
       appContext
           .getWorkspaceRoot()

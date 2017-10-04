@@ -36,10 +36,10 @@ public class FilePacker {
 
   private static final Logger LOG = LoggerFactory.getLogger(FilePacker.class);
 
-  private final SimpleFsPathResolver pathResolver;
+  private final StandardFsPaths pathResolver;
 
   @Inject
-  public FilePacker(SimpleFsPathResolver pathResolver) {
+  public FilePacker(StandardFsPaths pathResolver) {
     this.pathResolver = pathResolver;
   }
 

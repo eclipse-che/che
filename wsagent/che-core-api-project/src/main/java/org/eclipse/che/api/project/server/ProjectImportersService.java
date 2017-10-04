@@ -24,7 +24,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.project.server.impl.ProjectDtoConverter;
-import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
+import org.eclipse.che.api.project.server.impl.ProjectImporterRegistry;
 import org.eclipse.che.api.project.shared.dto.ProjectImporterData;
 import org.eclipse.che.api.project.shared.dto.ProjectImporterDescriptor;
 
@@ -52,11 +52,7 @@ public class ProjectImportersService extends Service {
   @Produces(MediaType.APPLICATION_JSON)
   public ProjectImporterData getImportersData() {
     final List<ProjectImporterDescriptor> importers =
-        projectImporterRegistry
-            .getAll()
-            .stream()
-            .map(ProjectDtoConverter::asDto)
-            .collect(toList());
+        projectImporterRegistry.getAll().stream().map(ProjectDtoConverter::asDto).collect(toList());
     return newDto(ProjectImporterData.class)
         .withImporters(importers)
         .withConfiguration(configuration);

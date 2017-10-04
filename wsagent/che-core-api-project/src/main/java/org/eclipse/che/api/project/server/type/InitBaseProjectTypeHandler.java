@@ -18,9 +18,9 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
+import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

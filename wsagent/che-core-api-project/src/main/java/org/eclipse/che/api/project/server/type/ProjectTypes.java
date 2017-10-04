@@ -15,6 +15,8 @@ import static java.lang.String.format;
 import static org.eclipse.che.api.core.ErrorCodes.ATTRIBUTE_NAME_PROBLEM;
 import static org.eclipse.che.api.core.ErrorCodes.PROJECT_TYPE_IS_NOT_REGISTERED;
 
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,9 +26,6 @@ import java.util.Set;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.project.ProjectProblem;
 import org.eclipse.che.api.core.model.project.type.Attribute;
-import org.eclipse.che.api.project.server.type.ProjectTypeDef;
-import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
-import org.eclipse.che.api.project.server.type.ProjectTypeResolver;
 import org.eclipse.che.api.workspace.shared.ProjectProblemImpl;
 
 /** @author gazarenkov */
@@ -35,19 +34,20 @@ public class ProjectTypes {
   private final String projectPath;
   private final ProjectTypeRegistry projectTypeRegistry;
   private final ProjectTypeResolver projectTypeResolver;
-  private ProjectTypeDef primary;
   private final Map<String, ProjectTypeDef> mixins;
   private final Map<String, ProjectTypeDef> all;
   private final Map<String, Attribute> attributeDefs;
   private final List<ProjectProblem> problems;
+  private ProjectTypeDef primary;
 
+  @AssistedInject
   public ProjectTypes(
-      String projectPath,
-      String type,
-      List<String> mixinTypes,
+      @Assisted("projectPath") String projectPath,
+      @Assisted("type") String type,
+      @Assisted("mixinTypes") List<String> mixinTypes,
       ProjectTypeRegistry projectTypeRegistry,
       ProjectTypeResolver projectTypeResolver,
-      List<ProjectProblem> problems) {
+      @Assisted("problems") List<ProjectProblem> problems) {
     this.projectTypeResolver = projectTypeResolver;
     mixins = new HashMap<>();
     all = new HashMap<>();

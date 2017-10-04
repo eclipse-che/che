@@ -22,18 +22,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class FileCopier {
+class FileCopier {
 
   private static final Logger LOG = LoggerFactory.getLogger(FileCopier.class);
 
-  private final SimpleFsPathResolver pathResolver;
+  private final StandardFsPaths pathResolver;
 
   @Inject
-  public FileCopier(SimpleFsPathResolver pathResolver) {
+  FileCopier(StandardFsPaths pathResolver) {
     this.pathResolver = pathResolver;
   }
 
-  public void copy(String srcWsPath, String dstWsPath)
+  void copy(String srcWsPath, String dstWsPath)
       throws NotFoundException, ConflictException, ServerException {
     Path srcFsPath = pathResolver.toFsPath(srcWsPath);
     Path dstFsPath = pathResolver.toFsPath(dstWsPath);
@@ -41,26 +41,22 @@ public class FileCopier {
     try {
       Files.copy(srcFsPath, dstFsPath);
     } catch (IOException e) {
-      String msg = "Failed to copy file: " + srcWsPath;
-      LOG.error(msg);
-      throw new ServerException(msg, e);
+      throw new ServerException("Failed to copy file " + srcWsPath + " to " + dstWsPath, e);
     }
   }
 
-  public boolean copyQuietly(String srcWsPath, String dstWsPath) {
+  boolean copyQuietly(String srcWsPath, String dstWsPath) {
     try {
       Path srcFsPath = pathResolver.toFsPath(srcWsPath);
       Path dstFsPath = pathResolver.toFsPath(dstWsPath);
 
-      Path fileName = srcFsPath.getFileName();
-
-      Files.createDirectories(dstFsPath);
-      Files.deleteIfExists(dstFsPath.resolve(fileName));
+      Files.createDirectories(dstFsPath.getParent());
+      Files.deleteIfExists(dstFsPath);
 
       Files.copy(srcFsPath, dstFsPath);
       return true;
     } catch (IOException e) {
-      LOG.error("Failed to quietly delete file: " + srcWsPath);
+      LOG.error("Failed to quietly copy file {}", srcWsPath, e);
       return false;
     }
   }

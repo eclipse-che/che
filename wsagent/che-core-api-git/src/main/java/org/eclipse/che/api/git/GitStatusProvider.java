@@ -11,10 +11,10 @@
 package org.eclipse.che.api.git;
 
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.api.project.server.impl.VcsStatusProvider.VcsStatus.ADDED;
-import static org.eclipse.che.api.project.server.impl.VcsStatusProvider.VcsStatus.MODIFIED;
-import static org.eclipse.che.api.project.server.impl.VcsStatusProvider.VcsStatus.NOT_MODIFIED;
-import static org.eclipse.che.api.project.server.impl.VcsStatusProvider.VcsStatus.UNTRACKED;
+import static org.eclipse.che.api.project.server.VcsStatusProvider.VcsStatus.ADDED;
+import static org.eclipse.che.api.project.server.VcsStatusProvider.VcsStatus.MODIFIED;
+import static org.eclipse.che.api.project.server.VcsStatusProvider.VcsStatus.NOT_MODIFIED;
+import static org.eclipse.che.api.project.server.VcsStatusProvider.VcsStatus.UNTRACKED;
 
 import java.util.HashMap;
 import java.util.List;
@@ -22,13 +22,12 @@ import java.util.Map;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.FsPathResolver;
+import org.eclipse.che.api.fs.server.FsPaths;
 import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.shared.Status;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
-import org.eclipse.che.api.project.server.impl.VcsStatusProvider;
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.VcsStatusProvider;
+import org.eclipse.che.api.project.server.impl.RegisteredProject;
 
 /**
  * Git implementation of {@link VcsStatusProvider}.
@@ -38,19 +37,14 @@ import org.eclipse.che.api.project.server.ProjectManager;
 public class GitStatusProvider implements VcsStatusProvider {
 
   private final GitConnectionFactory gitConnectionFactory;
-  private final FsManager fsManager;
-  private final FsPathResolver fsPathResolver;
+  private final FsPaths fsPaths;
   private final ProjectManager projectManager;
 
   @Inject
   public GitStatusProvider(
-      GitConnectionFactory gitConnectionFactory,
-      FsManager fsManager,
-      FsPathResolver fsPathResolver,
-      ProjectManager projectManager) {
+      GitConnectionFactory gitConnectionFactory, FsPaths fsPaths, ProjectManager projectManager) {
     this.gitConnectionFactory = gitConnectionFactory;
-    this.fsManager = fsManager;
-    this.fsPathResolver = fsPathResolver;
+    this.fsPaths = fsPaths;
     this.projectManager = projectManager;
   }
 
@@ -66,8 +60,8 @@ public class GitStatusProvider implements VcsStatusProvider {
           projectManager
               .getClosest(wsPath)
               .orElseThrow(() -> new NotFoundException("Can't find project"));
-      String projectFsPath = fsPathResolver.toFsPath(project.getPath()).toString();
-      String projectName = fsPathResolver.getName(project.getPath());
+      String projectFsPath = fsPaths.toFsPath(project.getPath()).toString();
+      String projectName = fsPaths.getName(project.getPath());
       String itemPath = wsPath.substring(wsPath.indexOf(projectName + "/"));
       Status status =
           gitConnectionFactory.getConnection(projectFsPath).status(singletonList(itemPath));
@@ -95,7 +89,7 @@ public class GitStatusProvider implements VcsStatusProvider {
           projectManager
               .getClosest(wsPath)
               .orElseThrow(() -> new NotFoundException("Can't find project"));
-      String projectFsPath = fsPathResolver.toFsPath(project.getPath()).toString();
+      String projectFsPath = fsPaths.toFsPath(project.getPath()).toString();
       Status status = gitConnectionFactory.getConnection(projectFsPath).status(paths);
       paths.forEach(
           path -> {

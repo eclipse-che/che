@@ -31,10 +31,10 @@ public class FileCreator {
 
   private static final Logger LOG = LoggerFactory.getLogger(FileCreator.class);
 
-  private final SimpleFsPathResolver pathResolver;
+  private final StandardFsPaths pathResolver;
 
   @Inject
-  public FileCreator(SimpleFsPathResolver pathResolver) {
+  public FileCreator(StandardFsPaths pathResolver) {
     this.pathResolver = pathResolver;
   }
 
@@ -139,8 +139,7 @@ public class FileCreator {
         if (contentItem == null) {
           contentItem = item;
         } else {
-          String message = "Expected no more than one file to upload";
-          LOG.error(message);
+          LOG.error("Expected no more than one file to upload");
         }
       } else if ("name".equals(item.getFieldName())) {
         fileName = item.getString().trim();
@@ -179,7 +178,7 @@ public class FileCreator {
         Files.createFile(fsPath);
       }
     } catch (IOException e) {
-      throw new ServerException("Failed to create file: " + wsPath, e);
+      throw new ServerException("Failed to create file " + wsPath, e);
     }
   }
 
@@ -195,7 +194,7 @@ public class FileCreator {
 
       return true;
     } catch (IOException | ConflictException | NotFoundException | ServerException e) {
-      LOG.error("Failed to quietly create file: " + wsPath, e);
+      LOG.error("Failed to quietly create file {}", wsPath, e);
       return false;
     }
   }

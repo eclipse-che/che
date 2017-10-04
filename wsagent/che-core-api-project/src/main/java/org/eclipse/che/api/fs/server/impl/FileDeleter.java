@@ -12,43 +12,39 @@ package org.eclipse.che.api.fs.server.impl;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.fs.server.FsPaths;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class FileDeleter {
+class FileDeleter {
 
   private static final Logger LOG = LoggerFactory.getLogger(FileDeleter.class);
 
-  private final SimpleFsPathResolver pathResolver;
+  private final FsPaths pathResolver;
 
   @Inject
-  public FileDeleter(SimpleFsPathResolver pathResolver) {
+  FileDeleter(FsPaths pathResolver) {
     this.pathResolver = pathResolver;
   }
 
-  public void delete(String wsPath) throws NotFoundException, ServerException {
-    Path fsPath = pathResolver.toFsPath(wsPath);
-
+  void delete(String wsPath) throws NotFoundException, ServerException {
     try {
-      Files.delete(fsPath);
+      Files.delete(pathResolver.toFsPath(wsPath));
     } catch (IOException e) {
-      LOG.error("Failed to delete file: " + wsPath);
-      throw new ServerException("Failed to delete file: " + wsPath, e);
+      throw new ServerException("Failed to delete file " + wsPath, e);
     }
   }
 
-  public boolean deleteQuietly(String wsPath) {
+  boolean deleteQuietly(String wsPath) {
     try {
-      Path fsPath = pathResolver.toFsPath(wsPath);
-      return Files.deleteIfExists(fsPath);
+      return Files.deleteIfExists(pathResolver.toFsPath(wsPath));
     } catch (IOException e) {
-      LOG.error("Failed to quietly delete file: " + wsPath);
+      LOG.error("Failed to quietly delete file {}", wsPath);
       return false;
     }
   }

@@ -25,16 +25,16 @@ import org.eclipse.che.api.fs.server.FsManager;
 public class SimpleProjectQualifier implements ProjectQualifier {
 
   private final ProjectTypeRegistry projectTypeRegistry;
-  private final FsManager fileSystemManager;
+  private final FsManager fsManager;
   private final ProjectTypeResolver projectTypeResolver;
 
   @Inject
   public SimpleProjectQualifier(
       ProjectTypeRegistry projectTypeRegistry,
-      FsManager fileSystemManager,
+      FsManager fsManager,
       ProjectTypeResolver projectTypeResolver) {
     this.projectTypeRegistry = projectTypeRegistry;
-    this.fileSystemManager = fileSystemManager;
+    this.fsManager = fsManager;
     this.projectTypeResolver = projectTypeResolver;
   }
 
@@ -44,11 +44,11 @@ public class SimpleProjectQualifier implements ProjectQualifier {
 
     ProjectTypeDef projectType = projectTypeRegistry.getProjectType(projectTypeId);
     if (projectType == null) {
-      throw new NotFoundException("Project Type to estimate needed.");
+      throw new NotFoundException("Project type required");
     }
 
-    if (!fileSystemManager.isDirectory(wsPath)) {
-      throw new NotFoundException("Path is not a directory:" + wsPath);
+    if (!fsManager.existsAsDirectory(wsPath)) {
+      throw new NotFoundException("Item is not a directory or does not exist " + wsPath);
     }
 
     return projectTypeResolver.resolve(projectType, wsPath);

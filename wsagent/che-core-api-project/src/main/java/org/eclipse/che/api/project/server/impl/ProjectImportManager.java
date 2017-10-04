@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.project.server.importer;
+package org.eclipse.che.api.project.server.impl;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.io.File.separator;
@@ -38,14 +38,10 @@ import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.FsPathResolver;
+import org.eclipse.che.api.fs.server.FsPaths;
+import org.eclipse.che.api.project.server.ProjectImporter;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
-import org.eclipse.che.api.project.server.impl.NewProjectConfigImpl;
-import org.eclipse.che.api.project.server.impl.ProjectConfigRegistry;
-import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
-import org.eclipse.che.api.project.server.impl.ProjectSynchronizer;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.eclipse.che.api.project.shared.NewProjectConfig;
@@ -54,7 +50,7 @@ import org.eclipse.che.api.project.shared.NewProjectConfig;
 public class ProjectImportManager {
 
   private final FsManager fsManager;
-  private final FsPathResolver fsPathResolver;
+  private final FsPaths fsPaths;
   private final ProjectSynchronizer projectSynchronizer;
   private final ProjectConfigRegistry projectConfigRegistry;
   private final ProjectImporterRegistry projectImporterRegistry;
@@ -63,13 +59,13 @@ public class ProjectImportManager {
   @Inject
   public ProjectImportManager(
       FsManager fsManager,
-      FsPathResolver fsPathResolver,
+      FsPaths fsPaths,
       ProjectConfigRegistry projectConfigs,
       ProjectSynchronizer projectSynchronizer,
       ProjectImporterRegistry projectImporterRegistry,
       ProjectHandlerRegistry projectHandlerRegistry) {
     this.fsManager = fsManager;
-    this.fsPathResolver = fsPathResolver;
+    this.fsPaths = fsPaths;
     this.projectSynchronizer = projectSynchronizer;
     this.projectConfigRegistry = projectConfigs;
     this.projectImporterRegistry = projectImporterRegistry;
@@ -81,7 +77,7 @@ public class ProjectImportManager {
       boolean rewrite,
       BiConsumer<String, String> consumer)
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-      NotFoundException, BadRequestException {
+          NotFoundException, BadRequestException {
     for (NewProjectConfig projectConfig : newProjectConfigs) {
       String wsPath = projectConfig.getPath();
       if (isNullOrEmpty(wsPath)) {
@@ -119,7 +115,7 @@ public class ProjectImportManager {
   public RegisteredProject doImport(
       NewProjectConfig projectConfig, boolean rewrite, BiConsumer<String, String> consumer)
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-      NotFoundException, BadRequestException {
+          NotFoundException, BadRequestException {
     String wsPath = projectConfig.getPath();
     if (isNullOrEmpty(wsPath)) {
       throw new BadRequestException("Path for new project should be defined");
@@ -146,7 +142,7 @@ public class ProjectImportManager {
           throw new BadRequestException("Path is not defined.");
         }
 
-        String projectParentWsPath = fsPathResolver.getParentWsPath(projectWsPath);
+        String projectParentWsPath = fsPaths.getParentWsPath(projectWsPath);
         if (!fsManager.isRoot(projectParentWsPath)
             || !fsManager.existsAsDirectory(projectParentWsPath)) {
           throw new NotFoundException("The parent '" + projectParentWsPath + "' does not exist.");
@@ -211,7 +207,7 @@ public class ProjectImportManager {
       boolean rewrite,
       BiConsumer<String, String> jsonRpcConsumer)
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-      NotFoundException {
+          NotFoundException {
     for (Entry<String, SourceStorage> entry : projectLocations.entrySet()) {
       String wsPath = entry.getKey();
 
@@ -263,10 +259,10 @@ public class ProjectImportManager {
       boolean rewrite,
       BiConsumer<String, String> jsonRpcConsumer)
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-      NotFoundException {
+          NotFoundException {
     String type = sourceStorage.getType();
 
-    String parentWsPath = fsPathResolver.getParentWsPath(wsPath);
+    String parentWsPath = fsPaths.getParentWsPath(wsPath);
     if (!fsManager.existsAsDirectory(parentWsPath)) {
       throw new NotFoundException("Project parent does not exist: " + parentWsPath);
     }
@@ -296,7 +292,7 @@ public class ProjectImportManager {
   private RegisteredProject doImportInternally(
       String wsPath, SourceStorage sourceStorage, BiConsumer<String, String> jsonRpcConsumer)
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-      NotFoundException {
+          NotFoundException {
     String type = sourceStorage.getType();
     ProjectImporter importer = projectImporterRegistry.getOrNull(type);
 
@@ -309,7 +305,9 @@ public class ProjectImportManager {
     }
 
     if (projectSynchronizer
-        .getAll().stream().anyMatch(it -> Objects.equals(it.getPath(), wsPath))) {
+        .getAll()
+        .stream()
+        .anyMatch(it -> Objects.equals(it.getPath(), wsPath))) {
       Set<ProjectConfig> newProjectConfigs =
           projectSynchronizer
               .getAll()
@@ -345,8 +343,7 @@ public class ProjectImportManager {
           }
 
           @Override
-          public void close() throws IOException {
-          }
+          public void close() throws IOException {}
         };
   }
 }

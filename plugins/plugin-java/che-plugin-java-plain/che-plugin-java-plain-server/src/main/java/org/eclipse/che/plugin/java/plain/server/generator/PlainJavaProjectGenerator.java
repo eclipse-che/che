@@ -25,7 +25,7 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.FsPathResolver;
+import org.eclipse.che.api.fs.server.FsPaths;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.plugin.java.plain.server.projecttype.ClasspathBuilder;
@@ -44,14 +44,14 @@ public class PlainJavaProjectGenerator implements CreateProjectHandler {
   private static final String FILE_NAME = "Main.java";
 
   private final ClasspathBuilder classpathBuilder;
-  private final FsPathResolver fsPathResolver;
+  private final FsPaths fsPaths;
   private final FsManager fsManager;
 
   @Inject
   protected PlainJavaProjectGenerator(
-      ClasspathBuilder classpathBuilder, FsPathResolver fsPathResolver, FsManager fsManager) {
+      ClasspathBuilder classpathBuilder, FsPaths fsPaths, FsManager fsManager) {
     this.classpathBuilder = classpathBuilder;
-    this.fsPathResolver = fsPathResolver;
+    this.fsPaths = fsPaths;
     this.fsManager = fsManager;
   }
 
@@ -69,13 +69,13 @@ public class PlainJavaProjectGenerator implements CreateProjectHandler {
 
     fsManager.createDirectory(projectWsPath);
 
-    String outputDirWsPath = fsPathResolver.resolve(projectWsPath, DEFAULT_OUTPUT_FOLDER_VALUE);
+    String outputDirWsPath = fsPaths.resolve(projectWsPath, DEFAULT_OUTPUT_FOLDER_VALUE);
     fsManager.createDirectory(outputDirWsPath);
 
-    String sourceDirWsPath = fsPathResolver.resolve(projectWsPath, sourceFolders.get(0));
+    String sourceDirWsPath = fsPaths.resolve(projectWsPath, sourceFolders.get(0));
     fsManager.createDirectory(sourceDirWsPath);
 
-    String mainJavaWsPath = fsPathResolver.resolve(sourceDirWsPath, FILE_NAME);
+    String mainJavaWsPath = fsPaths.resolve(sourceDirWsPath, FILE_NAME);
     fsManager.createFile(
         mainJavaWsPath,
         getClass().getClassLoader().getResourceAsStream("files/main_class_content"));

@@ -40,11 +40,9 @@ public class PomModificationDetector {
     id =
         manager.registerByMatcher(
             it -> !isDirectory(it) && POM_XML.equals(it.getFileName().toString()),
-            it -> {
-            },
+            it -> {},
             it -> eventService.publish(newDto(PomModifiedEventDto.class).withPath(it)),
-            it -> {
-            });
+            it -> {});
   }
 
   @PreDestroy

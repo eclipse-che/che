@@ -59,44 +59,34 @@ public class FileWatcherApiModule extends AbstractModule {
     bind(FileTreeWalker.class).asEagerSingleton();
 
     newSetBinder(
-        binder(), new TypeLiteral<Consumer<Path>>() {
-        }, Names.named("che.fs.directory.update"));
+        binder(), new TypeLiteral<Consumer<Path>>() {}, Names.named("che.fs.directory.update"));
     newSetBinder(
-        binder(), new TypeLiteral<Consumer<Path>>() {
-        }, Names.named("che.fs.directory.create"));
+        binder(), new TypeLiteral<Consumer<Path>>() {}, Names.named("che.fs.directory.create"));
     newSetBinder(
-        binder(), new TypeLiteral<Consumer<Path>>() {
-        }, Names.named("che.fs.directory.delete"));
+        binder(), new TypeLiteral<Consumer<Path>>() {}, Names.named("che.fs.directory.delete"));
     newSetBinder(
-        binder(), new TypeLiteral<PathMatcher>() {
-        }, Names.named("che.fs.directory.excludes"));
-    newSetBinder(
-        binder(), new TypeLiteral<Consumer<Path>>() {
-        }, Names.named("che.fs.file.update"));
-    newSetBinder(
-        binder(), new TypeLiteral<Consumer<Path>>() {
-        }, Names.named("che.fs.file.create"));
-    newSetBinder(
-        binder(), new TypeLiteral<Consumer<Path>>() {
-        }, Names.named("che.fs.file.delete"));
-    newSetBinder(
-        binder(), new TypeLiteral<PathMatcher>() {
-        }, Names.named("che.fs.file.excludes"));
+        binder(), new TypeLiteral<PathMatcher>() {}, Names.named("che.fs.directory.excludes"));
+    newSetBinder(binder(), new TypeLiteral<Consumer<Path>>() {}, Names.named("che.fs.file.update"));
+    newSetBinder(binder(), new TypeLiteral<Consumer<Path>>() {}, Names.named("che.fs.file.create"));
+    newSetBinder(binder(), new TypeLiteral<Consumer<Path>>() {}, Names.named("che.fs.file.delete"));
+    newSetBinder(binder(), new TypeLiteral<PathMatcher>() {}, Names.named("che.fs.file.excludes"));
   }
 
   private void configureFileWatcherManagerPathMatcher() {
+    newSetBinder(binder(), new TypeLiteral<Consumer<Path>>() {}, Names.named("che.fs.file.create"))
+        .addBinding()
+        .to(FileWatcherByPathMatcher.class);
+    newSetBinder(binder(), new TypeLiteral<Consumer<Path>>() {}, Names.named("che.fs.file.delete"))
+        .addBinding()
+        .to(FileWatcherByPathMatcher.class);
     newSetBinder(
-        binder(), new TypeLiteral<Consumer<Path>>() {
-        }, Names.named("che.fs.file.create")).addBinding().to(FileWatcherByPathMatcher.class);
+            binder(), new TypeLiteral<Consumer<Path>>() {}, Names.named("che.fs.directory.create"))
+        .addBinding()
+        .to(FileWatcherByPathMatcher.class);
     newSetBinder(
-        binder(), new TypeLiteral<Consumer<Path>>() {
-        }, Names.named("che.fs.file.delete")).addBinding().to(FileWatcherByPathMatcher.class);
-    newSetBinder(
-        binder(), new TypeLiteral<Consumer<Path>>() {
-        }, Names.named("che.fs.directory.create")).addBinding().to(FileWatcherByPathMatcher.class);
-    newSetBinder(
-        binder(), new TypeLiteral<Consumer<Path>>() {
-        }, Names.named("che.fs.directory.delete")).addBinding().to(FileWatcherByPathMatcher.class);
+            binder(), new TypeLiteral<Consumer<Path>>() {}, Names.named("che.fs.directory.delete"))
+        .addBinding()
+        .to(FileWatcherByPathMatcher.class);
   }
 
   private void configureVfsEvent() {
