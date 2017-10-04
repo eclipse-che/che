@@ -196,7 +196,7 @@ public class ProjectExplorer {
    * @param libraryName name of library
    */
   public void waitLibraryIsPresent(String libraryName) {
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, TIMEOUT_30_SEC)
         .until(
             ExpectedConditions.presenceOfElementLocated(
                 By.xpath(String.format("//div[@synthetic='true'and @name='%s']", libraryName))));
@@ -208,7 +208,7 @@ public class ProjectExplorer {
    * @param libraryName name of library
    */
   public void waitLibraryIsNotPresent(String libraryName) {
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, TIMEOUT_30_SEC)
         .until(
             ExpectedConditions.invisibilityOfElementLocated(
                 By.xpath(String.format("//div[@synthetic='true'and @name='%s']", libraryName))));
@@ -216,8 +216,11 @@ public class ProjectExplorer {
 
   /**
    * wait visible item in project explorer with path (For Example in project with name:'Test'
-   * presents folder 'src' and there is present locates file 'pom.xpl' path will be
+   * presents folder 'src' and there is present locates file 'pom.xml' path will be
    * next:'Test/src/pom.xml')
+   *
+   * With [string-length(text()) > 0] we will be sure 'div' not empty and contains some text here
+   * we suggest it will be name of node but for now we don't check name to equals
    *
    * @param path
    */
@@ -277,7 +280,7 @@ public class ProjectExplorer {
 
   /**
    * select item in project explorer with path For Example in project with name:'Test' presents
-   * folder 'src' and there is present locates file 'pom.xpl' path will be next:'Test/src/pom.xml')
+   * folder 'src' and there is present locates file 'pom.xml' path will be next:'Test/src/pom.xml')
    *
    * @param path full path to project item
    */
