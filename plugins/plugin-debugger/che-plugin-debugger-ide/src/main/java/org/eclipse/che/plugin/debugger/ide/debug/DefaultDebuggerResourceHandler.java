@@ -15,6 +15,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.List;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -23,6 +24,7 @@ import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.resources.SearchItemReference;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 
 /** @author Anatoliy Bazko */
@@ -197,7 +199,8 @@ public class DefaultDebuggerResourceHandler implements DebuggerResourceHandler {
         .getWorkspaceRoot()
         .search(location.getTarget(), "")
         .then(
-            resources -> {
+            result -> {
+              List<SearchItemReference> resources = result.getItemReferences();
               if (resources.isEmpty()) {
                 callback.onFailure(
                     new IllegalArgumentException(location.getTarget() + " not found."));

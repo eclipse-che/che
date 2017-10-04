@@ -91,6 +91,7 @@ import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.project.shared.dto.MoveOptions;
+import org.eclipse.che.api.project.shared.dto.ProjectSearchResponseDto;
 import org.eclipse.che.api.project.shared.dto.SearchResultDto;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.project.shared.dto.TreeElement;
@@ -2081,10 +2082,11 @@ public class ProjectServiceTest {
             null,
             null);
     assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
-    List<SearchResultDto> result = (List<SearchResultDto>) response.getEntity();
-    assertEquals(result.size(), 2);
+    ProjectSearchResponseDto result = (ProjectSearchResponseDto) response.getEntity();
+    List<SearchResultDto> itemReferences = result.getItemReferences();
+    assertEquals(itemReferences.size(), 2);
     Set<String> paths = new LinkedHashSet<>(2);
-    for (SearchResultDto resultDto : result) {
+    for (SearchResultDto resultDto : itemReferences) {
       paths.add(resultDto.getItemReference().getPath());
     }
     Assert.assertTrue(paths.contains("/my_project/a/b/test.txt"));
@@ -2117,11 +2119,12 @@ public class ProjectServiceTest {
             null,
             null);
     assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
-    List<SearchResultDto> result = (List<SearchResultDto>) response.getEntity();
-    assertEquals(result.size(), 2);
+    ProjectSearchResponseDto result = (ProjectSearchResponseDto) response.getEntity();
+    List<SearchResultDto> itemReferences = result.getItemReferences();
+    assertEquals(itemReferences.size(), 2);
     Set<String> paths = new LinkedHashSet<>(1);
     paths.addAll(
-        result
+        itemReferences
             .stream()
             .map((SearchResultDto t) -> t.getItemReference().getPath())
             .collect(Collectors.toList()));
@@ -2154,11 +2157,12 @@ public class ProjectServiceTest {
             null,
             null);
     assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
-    List<SearchResultDto> result = (List<SearchResultDto>) response.getEntity();
-    assertEquals(result.size(), 1);
+    ProjectSearchResponseDto result = (ProjectSearchResponseDto) response.getEntity();
+    List<SearchResultDto> itemReferences = result.getItemReferences();
+    assertEquals(itemReferences.size(), 1);
     Set<String> paths = new LinkedHashSet<>(1);
     paths.addAll(
-        result
+        itemReferences
             .stream()
             .map((SearchResultDto t) -> t.getItemReference().getPath())
             .collect(Collectors.toList()));
@@ -2215,11 +2219,12 @@ public class ProjectServiceTest {
             null,
             null);
     assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
-    List<SearchResultDto> result = (List<SearchResultDto>) response.getEntity();
-    assertEquals(result.size(), 1);
+    ProjectSearchResponseDto result = (ProjectSearchResponseDto) response.getEntity();
+    List<SearchResultDto> itemReferences = result.getItemReferences();
+    assertEquals(itemReferences.size(), 1);
     Set<String> paths = new LinkedHashSet<>(1);
     paths.addAll(
-        result
+        itemReferences
             .stream()
             .map((SearchResultDto t) -> t.getItemReference().getPath())
             .collect(Collectors.toList()));
@@ -2274,11 +2279,12 @@ public class ProjectServiceTest {
             null,
             null);
     assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
-    List<SearchResultDto> result = (List<SearchResultDto>) response.getEntity();
-    assertEquals(result.size(), 2);
+    ProjectSearchResponseDto result = (ProjectSearchResponseDto) response.getEntity();
+    List<SearchResultDto> itemReferences = result.getItemReferences();
+    assertEquals(itemReferences.size(), 2);
     Set<String> paths = new LinkedHashSet<>(2);
     paths.addAll(
-        result
+        itemReferences
             .stream()
             .map((SearchResultDto t) -> t.getItemReference().getPath())
             .collect(Collectors.toList()));
@@ -2322,11 +2328,12 @@ public class ProjectServiceTest {
             null,
             null);
     assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
-    List<SearchResultDto> result = (List<SearchResultDto>) response.getEntity();
-    assertEquals(result.size(), 2);
+    ProjectSearchResponseDto result = (ProjectSearchResponseDto) response.getEntity();
+    List<SearchResultDto> itemReferences = result.getItemReferences();
+    assertEquals(itemReferences.size(), 2);
     Set<String> paths = new LinkedHashSet<>(2);
     paths.addAll(
-        result
+        itemReferences
             .stream()
             .map((SearchResultDto t) -> t.getItemReference().getPath())
             .collect(Collectors.toList()));
@@ -2377,11 +2384,12 @@ public class ProjectServiceTest {
             null,
             null);
     assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
-    List<SearchResultDto> result = (List<SearchResultDto>) response.getEntity();
-    assertEquals(result.size(), 1);
+    ProjectSearchResponseDto result = (ProjectSearchResponseDto) response.getEntity();
+    List<SearchResultDto> itemReferences = result.getItemReferences();
+    assertEquals(itemReferences.size(), 1);
     Set<String> paths = new LinkedHashSet<>(1);
     paths.addAll(
-        result
+        itemReferences
             .stream()
             .map((SearchResultDto t) -> t.getItemReference().getPath())
             .collect(Collectors.toList()));
@@ -2435,11 +2443,12 @@ public class ProjectServiceTest {
             null,
             null);
     assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
-    List<SearchResultDto> result = (List<SearchResultDto>) response.getEntity();
-    assertEquals(result.size(), 1);
+    ProjectSearchResponseDto result = (ProjectSearchResponseDto) response.getEntity();
+    List<SearchResultDto> itemReferences = result.getItemReferences();
+    assertEquals(itemReferences.size(), 1);
     Set<String> paths = new LinkedHashSet<>(1);
     paths.addAll(
-        result
+        itemReferences
             .stream()
             .map((SearchResultDto t) -> t.getItemReference().getPath())
             .collect(Collectors.toList()));
@@ -2472,11 +2481,13 @@ public class ProjectServiceTest {
             null,
             null);
     assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
-    List<SearchResultDto> result = (List<SearchResultDto>) response.getEntity();
-    assertEquals(result.size(), 2);
+    ProjectSearchResponseDto result = (ProjectSearchResponseDto) response.getEntity();
+    List<SearchResultDto> itemReferences = result.getItemReferences();
+    assertEquals(itemReferences.size(), 2);
     assertEqualsNoOrder(
         new Object[] {
-          result.get(0).getItemReference().getPath(), result.get(1).getItemReference().getPath()
+          itemReferences.get(0).getItemReference().getPath(),
+          itemReferences.get(1).getItemReference().getPath()
         },
         new Object[] {"/my_project/a/b/test.txt", "/my_project/x/y/test.txt"});
   }
@@ -2507,9 +2518,11 @@ public class ProjectServiceTest {
             null,
             null);
     assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
-    List<SearchResultDto> result = (List<SearchResultDto>) response.getEntity();
-    assertEquals(result.size(), 1);
-    Assert.assertTrue(result.get(0).getItemReference().getPath().equals("/my_project/c/test.txt"));
+    ProjectSearchResponseDto result = (ProjectSearchResponseDto) response.getEntity();
+    List<SearchResultDto> itemReferences = result.getItemReferences();
+    assertEquals(itemReferences.size(), 1);
+    Assert.assertTrue(
+        itemReferences.get(0).getItemReference().getPath().equals("/my_project/c/test.txt"));
   }
 
   private void validateFileLinks(ItemReference item) {
