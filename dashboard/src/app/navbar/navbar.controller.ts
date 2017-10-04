@@ -55,6 +55,7 @@ export class CheNavBarController {
   private organizations: Array<che.IOrganization>;
   private cheKeycloak: CheKeycloak;
   private cheService: CheService;
+  private isPermissionServiceAvailable: boolean;
 
   /**
    * Default constructor
@@ -92,7 +93,10 @@ export class CheNavBarController {
     cheAPI.getWorkspace().fetchWorkspaces();
     cheAPI.getFactory().fetchFactories();
 
+    this.isPermissionServiceAvailable = false;
     this.resolvePermissionServiceAvailability().then((isAvailable: boolean) => {
+      this.isPermissionServiceAvailable = isAvailable;
+
       if (isAvailable) {
         if (this.chePermissions.getSystemPermissions()) {
           this.updateData();
