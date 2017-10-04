@@ -131,6 +131,7 @@ OPENSHIFT_FLAVOR=${OPENSHIFT_FLAVOR:-${DEFAULT_OPENSHIFT_FLAVOR}}
 # TODO move this env variable as a config map in the deployment config
 # as soon as the 'che-multiuser' branch is merged to master
 CHE_WORKSPACE_LOGS="/data/logs/machine/logs" \
+CHE_HOST="${OPENSHIFT_NAMESPACE_URL}"
 
 if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
   if [ -z "${MINISHIFT_IP}" ]; then
@@ -364,7 +365,9 @@ MULTI_USER_REPLACEMENT_STRING="          - name: \"CHE_WORKSPACE_LOGS\"
           - name: \"CHE_KEYCLOAK_REALM\"
             value: \"${CHE_KEYCLOAK_REALM}\"
           - name: \"CHE_KEYCLOAK_CLIENT__ID\"
-            value: \"${CHE_KEYCLOAK_CLIENT__ID}\""
+            value: \"${CHE_KEYCLOAK_CLIENT__ID}\"
+          - name: \"CHE_HOST\"
+            value: \"${CHE_HOST}\""
 
 # TODO When merging the multi-user work to master, this replacement string should
 # be replaced by the corresponding change in the fabric8 deployment descriptor
