@@ -83,13 +83,14 @@ public class AppStateManager {
     }
   }
 
-  public void restoreWorkspaceState(String wsId) {
+  public Promise<Void> restoreWorkspaceState(String wsId) {
     if (allWsState.hasKey(wsId)) {
-      restoreState(allWsState.getObject(wsId));
+      return restoreState(allWsState.getObject(wsId));
     }
+    return promises.resolve(null);
   }
 
-  private void restoreState(JsonObject settings) {
+  private Promise<Void> restoreState(JsonObject settings) {
     try {
       if (settings.hasKey(WORKSPACE)) {
         JsonObject workspace = settings.getObject(WORKSPACE);
@@ -108,10 +109,12 @@ public class AppStateManager {
                     ignored -> component.loadState(workspace.getObject(key)));
           }
         }
+        return sequentialRestore;
       }
     } catch (JsonException e) {
       Log.error(getClass(), e);
     }
+    return promises.resolve(null);
   }
 
   public Promise<Void> persistWorkspaceState(String wsId) {
