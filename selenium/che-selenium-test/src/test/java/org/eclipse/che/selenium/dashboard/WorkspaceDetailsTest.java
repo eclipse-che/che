@@ -41,7 +41,7 @@ import org.testng.annotations.Test;
 public class WorkspaceDetailsTest {
   private static final String WORKSPACE = NameGenerator.generate("java-mysql", 4);
   private static final String PROJECT_NAME = "web-java-petclinic";
-  private List<String> AgentsList =
+  private List<String> agentsList =
       Arrays.asList(
           "C# language server",
           "Exec",
@@ -54,11 +54,11 @@ public class WorkspaceDetailsTest {
           "Terminal",
           "TypeScript language server",
           "Workspace API");
-  private List<Boolean> AgentsStateList =
+  private List<Boolean> agentsStateList =
       Arrays.asList(false, true, false, false, false, false, false, true, true, false, true);
-  private List<String> VariablesList =
+  private List<String> variablesList =
       Arrays.asList("MYSQL_DATABASE", "MYSQL_PASSWORD", "MYSQL_ROOT_PASSWORD", "MYSQL_USER");
-  private List<String> ValuesList = Arrays.asList("petclinic", "password", "password", "petclinic");
+  private List<String> valuesList = Arrays.asList("petclinic", "password", "password", "petclinic");
 
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private ProjectExplorer projectExplorer;
@@ -75,7 +75,6 @@ public class WorkspaceDetailsTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    dashboard.open();
     createWsFromJavaMySqlStack();
   }
 
@@ -90,63 +89,64 @@ public class WorkspaceDetailsTest {
     dashboardWorkspace.selectMachine("Environment variables", "dev-machine");
     dashboardWorkspace.clickOnAddEnvVariableButton();
     dashboardWorkspace.checkAddNewEnvVarialbleDialogIsOpen();
-    dashboardWorkspace.addNewEnvironmentVariable("logi", "qaadmin");
+    dashboardWorkspace.addNewEnvironmentVariable("logi", "admin");
     dashboardWorkspace.clickOnAddDialogButton();
-    dashboardWorkspace.checkEnvVariableExists("logi");
-    dashboardWorkspace.checkValue("logi", "qaadmin");
+    Assert.assertTrue(dashboardWorkspace.checkEnvVariableExists("logi"));
+    dashboardWorkspace.checkValueExists("logi", "admin");
     dashboardWorkspace.clickOnEditEnvVariableButton("logi");
     dashboardWorkspace.enterEnvVariableName("login");
     dashboardWorkspace.clickOnUpdateDialogButton();
-    dashboardWorkspace.checkValue("login", "qaadmin");
+    dashboardWorkspace.checkValueExists("login", "admin");
     dashboardWorkspace.clickOnEnvVariableCheckbox("login");
     dashboardWorkspace.clickOnDeleteBtn();
     dashboardWorkspace.clickOnDeleteDialogButton();
     clickOnSaveButton();
+    dashboardWorkspace.checkValueIsNotExists("login", "admin");
 
     dashboardWorkspace.selectMachine("Environment variables", "db");
-    for (String name : VariablesList) {
+    for (int i = 0; i < variablesList.size(); i++) {
       loader.waitOnClosed();
-      dashboardWorkspace.clickOnDeleteEnvVariableButton(name);
+      dashboardWorkspace.clickOnDeleteEnvVariableButton(variablesList.get(i));
       dashboardWorkspace.clickOnDeleteDialogButton();
+      dashboardWorkspace.checkValueIsNotExists(variablesList.get(i), valuesList.get(i));
     }
     clickOnSaveButton();
 
-    for (int i = 0; i < VariablesList.size(); i++) {
+    for (int i = 0; i < variablesList.size(); i++) {
       loader.waitOnClosed();
       dashboardWorkspace.clickOnAddEnvVariableButton();
       dashboardWorkspace.checkAddNewEnvVarialbleDialogIsOpen();
-      dashboardWorkspace.addNewEnvironmentVariable(VariablesList.get(i), ValuesList.get(i));
+      dashboardWorkspace.addNewEnvironmentVariable(variablesList.get(i), valuesList.get(i));
       dashboardWorkspace.clickOnAddDialogButton();
-      dashboardWorkspace.checkEnvVariableExists(VariablesList.get(i));
-      dashboardWorkspace.checkValue(VariablesList.get(i), ValuesList.get(i));
+      Assert.assertTrue(dashboardWorkspace.checkEnvVariableExists(variablesList.get(i)));
+      dashboardWorkspace.checkValueExists(variablesList.get(i), valuesList.get(i));
     }
     clickOnSaveButton();
   }
 
   @Test(priority = 1)
   public void workingWithAgents() {
-    Boolean b;
     dashboardWorkspace.selectTabInWorspaceMenu(TabNames.AGENTS);
     dashboardWorkspace.selectMachine("Workspace Agents", "dev-machine");
-    for (String agentName : AgentsList) {
+    for (String agentName : agentsList) {
       dashboardWorkspace.checkAgentExists(agentName);
     }
 
-    for (int i = 0; i < AgentsList.size(); i++) {
-      b = dashboardWorkspace.getAgentState(AgentsList.get(i));
-      Assert.assertEquals(b, AgentsStateList.get(i));
-      dashboardWorkspace.switchAgentState(AgentsList.get(i));
+    for (int i = 0; i < agentsList.size(); i++) {
+      Assert.assertEquals(
+          dashboardWorkspace.getAgentState(agentsList.get(i)), agentsStateList.get(i));
+      dashboardWorkspace.switchAgentState(agentsList.get(i));
     }
     clickOnSaveButton();
 
-    for (String agentName : AgentsList) {
+    for (String agentName : agentsList) {
       dashboardWorkspace.switchAgentState(agentName);
     }
-    for (int i = 0; i < AgentsList.size(); i++) {
-      b = dashboardWorkspace.getAgentState(AgentsList.get(i));
-      Assert.assertEquals(b, AgentsStateList.get(i));
-    }
     clickOnSaveButton();
+    for (int i = 0; i < agentsList.size(); i++) {
+      Assert.assertEquals(
+          dashboardWorkspace.getAgentState(agentsList.get(i)), agentsStateList.get(i));
+    }
   }
 
   @Test(priority = 2)
@@ -159,8 +159,8 @@ public class WorkspaceDetailsTest {
     dashboardWorkspace.enterPort("8080");
     dashboardWorkspace.enterProtocol("https");
     dashboardWorkspace.clickOnAddDialogButton();
-    dashboardWorkspace.checkServerExists("agen", "8080");
     clickOnSaveButton();
+    dashboardWorkspace.checkServerExists("agen", "8080");
 
     dashboardWorkspace.clickOnEditServerButton("agen");
     dashboardWorkspace.enterReference("agent");
@@ -171,6 +171,7 @@ public class WorkspaceDetailsTest {
     dashboardWorkspace.clickOnDeleteServerButton("agent");
     dashboardWorkspace.clickOnDeleteDialogButton();
     clickOnSaveButton();
+    dashboardWorkspace.checkServerIsNotExists("agent", "80");
   }
 
   @Test(priority = 3)
@@ -201,6 +202,7 @@ public class WorkspaceDetailsTest {
     loader.waitOnClosed();
     dashboardWorkspace.clickOnDeleteMachineButton(machineName);
     dashboardWorkspace.clickOnDeleteDialogButton();
+    dashboardWorkspace.checkMachineIsNotExists(machineName);
   }
 
   @Test(priority = 4)
@@ -233,6 +235,7 @@ public class WorkspaceDetailsTest {
   }
 
   private void createWsFromJavaMySqlStack() {
+    dashboard.open();
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(NavigationBar.MenuItem.WORKSPACES);
     dashboardWorkspace.waitToolbarTitleName("Workspaces");

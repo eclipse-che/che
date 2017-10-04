@@ -3,7 +3,7 @@
   <div class="edit-env-variable-dialog-content">
     <ng-form flex layout="column" name="envVariableForm">
       <che-input-box che-label-name="Name"
-                     id="new-variable-name"
+                     id="variable-name-input"
                      che-form="envVariableForm"
                      che-name="name"
                      che-place-holder="Environment variable name"
@@ -17,7 +17,7 @@
       <che-label-container che-label-name="Value">
         <div class="edit-variable-dialog-textarea">
           <che-textarea che-form="envVariableForm"
-                        id="new-variable-value"
+                        id="variable-value-input"
                         che-name="value"
                         che-place-holder="New environment variable value"
                         ng-model="editEnvVariableDialogController.value"
@@ -34,7 +34,7 @@
 
         <che-button-notice che-button-title="Cancel"
                            ng-click="editEnvVariableDialogController.hide()"
-                           tabindex="0"  id="Cancel-dialog-button"></che-button-notice>
+                           tabindex="0"  id="cancel-dialog-button"></che-button-notice>
       </div>
     </ng-form>
   </div>

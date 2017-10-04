@@ -170,7 +170,7 @@ public class DashboardWorkspace {
     String VARIABLE_CHECKBOX = "//md-checkbox[@aria-label='Environment-Variable-%s']";
     String VARIABLE_NAME = "//span[@variable-name='%s']";
     String VARIABLE_VALUE = "//div[@id='env-variable-name-%s']//span[@variable-value='%s']";
-    String NEW_ENV_VARIABLE_NAME = "new-variable-name";
+    String NEW_ENV_VARIABLE_NAME = "variable-name-input";
     String NEW_ENV_VARIABLE_VALUE = "//textarea[@name='deskvalue']";
     String EDIT_ENV_VARIABLE = "//div[@edit-variable='%s']";
     String DELETE_ENV_VARIABLE = "//div[@delete-variable='%s']";
@@ -182,9 +182,9 @@ public class DashboardWorkspace {
     String DELETE_SERVER_BUTTON = "//div[@delete-server='%s']";
     String ADD_SERVER_BUTTON = "//che-button-primary[@che-button-title='Add Server']/button";
     String ADD_NEW_SERVER_DIALOG_NAME = "//md-dialog/che-popup[@title='Add a new server']";
-    String ADD_SERVER_REFERENCE_FIELD = "new-server-reference";
-    String ADD_SERVER_PORT_FIELD = "new-server-port";
-    String ADD_SERVER_PROTOCOL_FIELD = "new-server-protocol";
+    String ADD_SERVER_REFERENCE_FIELD = "server-reference-input";
+    String ADD_SERVER_PORT_FIELD = "server-port-input";
+    String ADD_SERVER_PROTOCOL_FIELD = "server-protocol-input";
     String AGENT_NAME = "//span[@agent-name='%s']";
     String AGENT_DESCRIPTION = "//span[@agent-description='%s']";
     String AGENT_STATE = "//md-switch[@agent-switch='%s']";
@@ -707,6 +707,14 @@ public class DashboardWorkspace {
     loader.waitOnClosed();
   }
 
+  public void checkMachineIsNotExists(String machineName) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.invisibilityOfElementLocated(
+                By.xpath(format(Locators.MACHINE_NAME, machineName))));
+    loader.waitOnClosed();
+  }
+
   public void clickOnAddMachineButton() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.ADD_MACHINE_BUTTON)))
@@ -869,6 +877,14 @@ public class DashboardWorkspace {
     loader.waitOnClosed();
   }
 
+  public void checkServerIsNotExists(String serverName, String port) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.invisibilityOfElementLocated(
+                By.xpath(format(Locators.SERVER_PORT, serverName, port))));
+    loader.waitOnClosed();
+  }
+
   public void clickOnDeleteServerButton(String serverName) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
@@ -908,7 +924,7 @@ public class DashboardWorkspace {
         .click();
   }
 
-  public boolean getAgentState(String agentName) {
+  public Boolean getAgentState(String agentName) {
     String state =
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
             .until(
@@ -969,7 +985,7 @@ public class DashboardWorkspace {
     enterEnvVariableValue(value);
   }
 
-  public boolean checkEnvVariableExists(String varName) {
+  public Boolean checkEnvVariableExists(String varName) {
     return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
@@ -978,10 +994,18 @@ public class DashboardWorkspace {
         .equals(varName);
   }
 
-  public void checkValue(String varName, String varValue) {
+  public void checkValueExists(String varName, String varValue) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(format(Locators.VARIABLE_VALUE, varName, varValue))));
+    loader.waitOnClosed();
+  }
+
+  public void checkValueIsNotExists(String varName, String varValue) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.invisibilityOfElementLocated(
                 By.xpath(format(Locators.VARIABLE_VALUE, varName, varValue))));
     loader.waitOnClosed();
   }
