@@ -32,7 +32,7 @@ public class ActionApiModule extends AbstractGinModule {
 
     bind(StartUpActionsProcessor.class).in(Singleton.class);
     GinMapBinder.newMapBinder(binder(), String.class, WsAgentComponent.class)
-        .addBinding("Start-up actions processor")
+        .addBinding("ZZ Start-up actions processor")
         .to(StartUpActionsProcessor.class);
 
     bind(FindActionView.class).to(FindActionViewImpl.class).in(Singleton.class);

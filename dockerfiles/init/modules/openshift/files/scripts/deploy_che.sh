@@ -97,7 +97,7 @@ if [ "${CHE_MULTI_USER}" == "true" ]; then
   DEFAULT_CHE_KEYCLOAK_DISABLED="false"
   CHE_DEDICATED_KEYCLOAK=${CHE_DEDICATED_KEYCLOAK:-"true"}
   DEFAULT_CHE_IMAGE_REPO="docker.io/eclipse/che-server-multiuser"
-else 
+else
   DEFAULT_CHE_KEYCLOAK_DISABLED="true"
   CHE_DEDICATED_KEYCLOAK="false"
   DEFAULT_CHE_IMAGE_REPO="docker.io/eclipse/che-server"
@@ -262,7 +262,7 @@ fi
 # for postgres and optionally Keycloak
 # -------------------------------------------------------------
 
-COMMAND_DIR=$(dirname "$0") 
+COMMAND_DIR=$(dirname "$0")
 
 if [ "${CHE_MULTI_USER}" == "true" ]; then
     if [ "${CHE_DEDICATED_KEYCLOAK}" == "true" ]; then
@@ -270,7 +270,7 @@ if [ "${CHE_MULTI_USER}" == "true" ]; then
     else
         "${COMMAND_DIR}"/multi-user/deploy_postgres_only.sh
     fi
-    
+
     "${COMMAND_DIR}"/multi-user/wait_until_postgres_is_available.sh
 fi
 
@@ -294,7 +294,7 @@ if [ "${CHE_DEDICATED_KEYCLOAK}" == "true" ]; then
     echo "[CHE] **ERROR**: The dedicated Postgres server should be started in Openshift project ${CHE_OPENSHIFT_PROJECT} before starting the Che server"
     exit 1
   fi
-    
+
   CHE_KEYCLOAK_AUTH__SERVER__URL=${CHE_KEYCLOAK_AUTH__SERVER__URL:-"http://${CHE_KEYCLOAK_SERVER_ROUTE}/auth"}
   CHE_KEYCLOAK_REALM=${CHE_KEYCLOAK_REALM:-"che"}
   CHE_KEYCLOAK_CLIENT__ID=${CHE_KEYCLOAK_CLIENT__ID:-"che-public"}

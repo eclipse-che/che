@@ -55,7 +55,7 @@ public class PagesTest {
   }
 
   @Test
-  public void eagerlyIteratesAllElements() {
+  public void eagerlyIteratesAllElements() throws Exception {
     ArrayList<String> result = Lists.newArrayList(Pages.iterate(testSource::getStrings, 2));
 
     assertEquals(result, testSource.strings);

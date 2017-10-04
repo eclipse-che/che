@@ -129,6 +129,7 @@ public interface TestMenuCommandsConstants {
     String PROJECT_GIT_URL = GIT_MENU_PREFFIX + "gitUrl";
     String INITIALIZE_REPOSITORY = GIT_MENU_PREFFIX + "gitInitRepository";
     String DELETE_REPOSITORY = GIT_MENU_PREFFIX + "gitDeleteRepository";
+    String REVERT_COMMIT = GIT_MENU_PREFFIX + "gitRevertCommit";
 
     interface Remotes {
       String REMOTES_TOP = "gwt-debug-topmenu/Git/gitRemoteGroup";
