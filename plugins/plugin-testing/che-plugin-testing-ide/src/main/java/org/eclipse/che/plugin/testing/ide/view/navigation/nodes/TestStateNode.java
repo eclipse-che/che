@@ -79,16 +79,16 @@ public class TestStateNode extends AbstractTreeNode implements HasPresentation {
     }
     if (testState.getDescription() == TestStateDescription.PASSED) {
       presentation.setPresentableTextCss("color: green;");
-      presentation.getUserElement().setId(DEBUG_ID_PREFIX + "test_state_passed");
+      presentation.getUserElement().setId(DEBUG_ID_PREFIX + "test-state-passed");
       presentation.setPresentableIcon(testResources.testResultSuccessIcon());
     } else if (testState.getDescription() == TestStateDescription.IGNORED) {
       presentation.setPresentableTextCss("text-decoration: line-through; color: yellow;");
-      presentation.getUserElement().setId(DEBUG_ID_PREFIX + "test_state_ignore");
+      presentation.getUserElement().setId(DEBUG_ID_PREFIX + "test-state-ignore");
       presentation.setPresentableIcon(testResources.testResultSkippedIcon());
     } else if (testState.getDescription() == TestStateDescription.FAILED
         || testState.getDescription() == TestStateDescription.ERROR) {
       presentation.setPresentableTextCss("color: red;");
-      presentation.getUserElement().setId(DEBUG_ID_PREFIX + "test_state_failed");
+      presentation.getUserElement().setId(DEBUG_ID_PREFIX + "test-state-failed");
       presentation.setPresentableIcon(testResources.testResultFailureIcon());
     } else if (testState.getDescription() == TestStateDescription.RUNNING) {
       presentation.setPresentableIcon(testResources.testInProgressIcon());

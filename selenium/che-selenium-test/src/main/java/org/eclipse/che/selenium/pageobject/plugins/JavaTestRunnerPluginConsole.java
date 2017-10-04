@@ -36,9 +36,9 @@ public class JavaTestRunnerPluginConsole extends Consoles {
       "//div[contains(@id,'gwt-uid')]//div[text()='%s']";
   private static final String TEST_OUTPUT_XPATH =
       "//div[@focused]//div[@id='gwt-debug-commandConsoleLines']//pre";
-  private static final String METHODS_MARKED_AS_PASSED = "gwt-debug-test_state_passed";
-  private static final String METHODS_MARKED_AS_FAILED = "gwt-debug-test_state_failed";
-  private static final String METHODS_MARKED_AS_IGNORED = "gwt-debug-test_state_ignore";
+  private static final String METHODS_MARKED_AS_PASSED = "gwt-debug-test-state-passed";
+  private static final String METHODS_MARKED_AS_FAILED = "gwt-debug-test-state-failed";
+  private static final String METHODS_MARKED_AS_IGNORED = "gwt-debug-test-state-ignore";
   private static final String TEST_RESULT_NAVIGATION_TREE = "gwt-debug-test-tree-navigation-panel";
 
   @FindAll({@FindBy(xpath = TEST_OUTPUT_XPATH)})
