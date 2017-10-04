@@ -58,6 +58,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.net.ssl.SSLHandshakeException;
+import javax.validation.constraints.NotNull;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
@@ -97,6 +98,13 @@ import org.eclipse.che.api.git.params.RmParams;
 import org.eclipse.che.api.git.params.TagCreateParams;
 import org.eclipse.che.api.git.shared.*;
 import org.eclipse.che.api.git.shared.RebaseResponse.RebaseStatus;
+import org.eclipse.che.api.git.shared.Remote;
+import org.eclipse.che.api.git.shared.RemoteReference;
+import org.eclipse.che.api.git.shared.RevertResult;
+import org.eclipse.che.api.git.shared.Revision;
+import org.eclipse.che.api.git.shared.ShowFileContentResponse;
+import org.eclipse.che.api.git.shared.Status;
+import org.eclipse.che.api.git.shared.Tag;
 import org.eclipse.che.api.git.shared.event.GitCommitEvent;
 import org.eclipse.che.api.git.shared.event.GitRepositoryInitializedEvent;
 import org.eclipse.che.api.git.shared.event.GitResetEvent;
@@ -120,6 +128,7 @@ import org.eclipse.jgit.api.RebaseCommand;
 import org.eclipse.jgit.api.RebaseResult;
 import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.ResetCommand.ResetType;
+import org.eclipse.jgit.api.RevertCommand;
 import org.eclipse.jgit.api.RmCommand;
 import org.eclipse.jgit.api.StatusCommand;
 import org.eclipse.jgit.api.TagCommand;
@@ -148,6 +157,7 @@ import org.eclipse.jgit.lib.RepositoryCache;
 import org.eclipse.jgit.lib.RepositoryState;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.merge.ResolveMerger;
+import org.eclipse.jgit.merge.ResolveMerger.MergeFailureReason;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevObject;
 import org.eclipse.jgit.revwalk.RevTag;
@@ -1668,6 +1678,71 @@ class JGitConnection implements GitConnection {
       eventService.publish(newDto(GitResetEvent.class).withStatus(status(emptyList())));
     } catch (GitAPIException exception) {
       throw new GitException(exception.getMessage(), exception);
+    }
+  }
+
+  @Override
+  public RevertResult revert(String commit) throws GitException {
+    RevCommit revCommit;
+    RevertCommand revertCommand = getGit().revert();
+    try {
+      revertCommand.include(this.repository.resolve(commit));
+      revCommit = revertCommand.call();
+    } catch (IOException | GitAPIException exception) {
+      throw new GitException(exception.getMessage(), exception);
+    }
+
+    return newDto(RevertResult.class)
+        .withRevertedCommits(getRevertedCommits(revertCommand))
+        .withConflicts(getRevertConflicts(revertCommand))
+        .withNewHead(revCommit != null ? revCommit.getId().getName() : null);
+  }
+
+  private List<String> getRevertedCommits(RevertCommand revertCommand) {
+    List<Ref> jGitRevertedCommits = revertCommand.getRevertedRefs();
+    List<String> revertedCommits = new ArrayList<String>();
+    if (jGitRevertedCommits != null) {
+      jGitRevertedCommits.forEach(ref -> revertedCommits.add(ref.getObjectId().name()));
+    }
+    return revertedCommits;
+  }
+
+  private Map<String, RevertResult.RevertStatus> getRevertConflicts(RevertCommand revertCommand) {
+    Map<String, RevertResult.RevertStatus> conflicts = new HashMap<>();
+    if (revertCommand.getFailingResult() != null) {
+      Map<String, MergeFailureReason> failingPaths =
+          revertCommand.getFailingResult().getFailingPaths();
+      if (failingPaths != null && !failingPaths.isEmpty()) {
+        failingPaths
+            .entrySet()
+            .forEach(
+                failure ->
+                    conflicts.put(
+                        failure.getKey(),
+                        getRevertStatusFromMergeFailureReason(failure.getValue())));
+      }
+    }
+    List<String> unmergedPaths = revertCommand.getUnmergedPaths();
+    if (unmergedPaths != null && !unmergedPaths.isEmpty()) {
+      unmergedPaths
+          .stream()
+          .filter(unmergedPath -> !conflicts.containsKey(unmergedPath))
+          .forEach(unmergedPath -> conflicts.put(unmergedPath, RevertResult.RevertStatus.FAILED));
+    }
+    return conflicts;
+  }
+
+  private RevertResult.RevertStatus getRevertStatusFromMergeFailureReason(
+      @NotNull MergeFailureReason mergeFailureReason) {
+    switch (mergeFailureReason) {
+      case COULD_NOT_DELETE:
+        return RevertResult.RevertStatus.COULD_NOT_DELETE;
+      case DIRTY_INDEX:
+        return RevertResult.RevertStatus.DIRTY_INDEX;
+      case DIRTY_WORKTREE:
+        return RevertResult.RevertStatus.DIRTY_WORKTREE;
+      default:
+        return RevertResult.RevertStatus.FAILED;
     }
   }
 

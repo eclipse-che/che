@@ -95,11 +95,11 @@ public class GitIndexChangedDetector {
   }
 
   private Consumer<String> createConsumer() {
-    return EMPTY_CONSUMER;
+    return fsEventConsumer();
   }
 
   private Consumer<String> modifyConsumer() {
-    return fsEventConsumer();
+    return EMPTY_CONSUMER;
   }
 
   private Consumer<String> deleteConsumer() {
