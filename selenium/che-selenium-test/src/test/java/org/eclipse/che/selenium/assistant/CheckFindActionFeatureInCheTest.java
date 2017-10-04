@@ -44,6 +44,7 @@ public class CheckFindActionFeatureInCheTest {
           + "Commit ... [Alt+C]  GitCommandGroup\n"
           + "Commit...  SvnFileCommandGroup\n"
           + "Community  Help\n"
+          + "Revert commit...  GitCommandGroup\n"
           + "SvnCredentialsCommandGroup  Subversion";
 
   private static final String THIRD_ACTION_NAME_EXPECTED_ARRAY_LOCAL_MODE =
@@ -72,6 +73,7 @@ public class CheckFindActionFeatureInCheTest {
           + "Execute default command of Debug goal [Alt+D] \n"
           + "Execute default command of Run goal [Alt+R] \n"
           + "GitCommandGroup \n"
+          + "Revert commit...  GitCommandGroup\n"
           + "SvnAddCommandGroup \n"
           + "SvnCredentialsCommandGroup  Subversion\n"
           + "SvnFileCommandGroup \n"
@@ -105,6 +107,7 @@ public class CheckFindActionFeatureInCheTest {
         ProjectTemplates.MAVEN_SPRING);
 
     ide.open(testWorkspace);
+    projectExplorer.waitProjectExplorer();
     projectExplorer.waitVisibleItem(PROJECT_NAME);
     projectExplorer.selectItem(PROJECT_NAME);
     menu.runCommand(
