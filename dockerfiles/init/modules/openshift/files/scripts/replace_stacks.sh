@@ -6,6 +6,8 @@
 # http://www.eclipse.org/legal/epl-v10.html
 #
 
+set -e
+
 echo "[CHE] This script is going to replace Che stacks for current Che instance"
 
 command -v oc >/dev/null 2>&1 || { echo >&2 "[CHE] [ERROR] Command line tool oc (https://docs.openshift.org/latest/cli_reference/get_started_cli.html) is required but it's not installed. Aborting."; exit 1; }

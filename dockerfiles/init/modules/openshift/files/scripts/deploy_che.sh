@@ -21,6 +21,23 @@
 
 set -e
 
+# ----------------
+# helper functions
+# ----------------
+
+# append_after_match allows to append content after matching line
+# this is needed to append content of yaml files
+# first arg is mathing string, second string to insert after match
+append_after_match() {
+    while IFS= read -r line
+    do
+      printf '%s\n' "$line"
+      if [[ "$line" == *"$1"* ]];then
+          printf '%s\n' "$2"
+      fi
+    done < /dev/stdin
+}
+
 # --------------
 # Print Che logo 
 # --------------
@@ -340,15 +357,14 @@ CHE_IMAGE="${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}"
 # e.g. docker.io/rhchestage => docker.io\/rhchestage
 CHE_IMAGE_SANITIZED=$(echo "${CHE_IMAGE}" | sed 's/\//\\\//g')
 
-MULTI_USER_REPLACEMENT_STRING="s+- env:+- env:\\n\
-          - name: \"CHE_WORKSPACE_LOGS\"\\n\
-            value: \"${CHE_WORKSPACE_LOGS}\"\\n\
-          - name: \"CHE_KEYCLOAK_AUTH__SERVER__URL\"\\n\
-            value: \"${CHE_KEYCLOAK_AUTH__SERVER__URL}\"\\n\
-          - name: \"CHE_KEYCLOAK_REALM\"\\n\
-            value: \"${CHE_KEYCLOAK_REALM}\"\\n\
-          - name: \"CHE_KEYCLOAK_CLIENT__ID\"\\n\
-            value: \"${CHE_KEYCLOAK_CLIENT__ID}\"+"
+MULTI_USER_REPLACEMENT_STRING="          - name: \"CHE_WORKSPACE_LOGS\"
+            value: \"${CHE_WORKSPACE_LOGS}\"
+          - name: \"CHE_KEYCLOAK_AUTH__SERVER__URL\"
+            value: \"${CHE_KEYCLOAK_AUTH__SERVER__URL}\"
+          - name: \"CHE_KEYCLOAK_REALM\"
+            value: \"${CHE_KEYCLOAK_REALM}\"
+          - name: \"CHE_KEYCLOAK_CLIENT__ID\"
+            value: \"${CHE_KEYCLOAK_CLIENT__ID}\""
 
 # TODO When merging the multi-user work to master, this replacement string should
 # be replaced by the corresponding change in the fabric8 deployment descriptor
@@ -373,8 +389,8 @@ if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
     sed "s|    keycloak-github-endpoint:.*|    keycloak-github-endpoint: ${KEYCLOAK_GITHUB_ENDPOINT}|" | \
     grep -v -e "tls:" -e "insecureEdgeTerminationPolicy: Redirect" -e "termination: edge" | \
     if [ "${CHE_KEYCLOAK_DISABLED}" == "true" ]; then sed "s/    keycloak-disabled: \"false\"/    keycloak-disabled: \"true\"/" ; else cat -; fi | \
-    sed "$MULTI_USER_REPLACEMENT_STRING" | \
     sed "$MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING" | \
+    append_after_match "env:" "${MULTI_USER_REPLACEMENT_STRING}" | \
     oc apply --force=true -f -
 elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
   echo "[CHE] Deploying Che on OSIO (image ${CHE_IMAGE})"
@@ -385,8 +401,8 @@ elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
     sed "s/          image:.*/          image: \"${CHE_IMAGE_SANITIZED}\"/" | \
     sed "s/          imagePullPolicy:.*/          imagePullPolicy: \"${IMAGE_PULL_POLICY}\"/" | \
     if [ "${CHE_KEYCLOAK_DISABLED}" == "true" ]; then sed "s/    keycloak-disabled: \"false\"/    keycloak-disabled: \"true\"/" ; else cat -; fi | \
-    sed "$MULTI_USER_REPLACEMENT_STRING" | \
     sed "$MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING" | \
+    append_after_match "env:" "${MULTI_USER_REPLACEMENT_STRING}" | \
     oc apply --force=true -f -
 else
   echo "[CHE] Deploying Che on OpenShift Container Platform (image ${CHE_IMAGE})"
@@ -403,8 +419,8 @@ else
     if [ "${ENABLE_SSL}" == "false" ]; then grep -v -e "tls:" -e "insecureEdgeTerminationPolicy: Redirect" -e "termination: edge" ; else cat -; fi | \
     if [ "${ENABLE_SSL}" == "false" ]; then sed "s/    che.docker.server_evaluation_strategy.custom.external.protocol: https/    che.docker.server_evaluation_strategy.custom.external.protocol: http/" ; else cat -; fi | \
     if [ "${K8S_VERSION_PRIOR_TO_1_6}" == "true" ]; then sed "s/    che-openshift-precreate-subpaths: \"false\"/    che-openshift-precreate-subpaths: \"true\"/"  ; else cat -; fi | \
-    sed "$MULTI_USER_REPLACEMENT_STRING" | \
     sed "$MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING" | \
+    append_after_match "env:" "${MULTI_USER_REPLACEMENT_STRING}" | \
     oc apply --force=true -f -
 fi
 echo
