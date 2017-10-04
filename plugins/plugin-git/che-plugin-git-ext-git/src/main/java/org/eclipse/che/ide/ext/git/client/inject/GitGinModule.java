@@ -45,6 +45,8 @@ import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsolePresenter;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputPartView;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputPartViewImpl;
+import org.eclipse.che.ide.ext.git.client.panel.GitPanelView;
+import org.eclipse.che.ide.ext.git.client.panel.GitPanelViewImpl;
 import org.eclipse.che.ide.ext.git.client.preference.CommitterPreferencePresenter;
 import org.eclipse.che.ide.ext.git.client.pull.PullView;
 import org.eclipse.che.ide.ext.git.client.pull.PullViewImpl;
@@ -94,6 +96,7 @@ public class GitGinModule extends AbstractGinModule {
     bind(FetchView.class).to(FetchViewImpl.class).in(Singleton.class);
     bind(PullView.class).to(PullViewImpl.class).in(Singleton.class);
     bind(HistoryView.class).to(HistoryViewImpl.class).in(Singleton.class);
+    bind(GitPanelView.class).to(GitPanelViewImpl.class).in(Singleton.class);
     bind(GitOutputPartView.class).to(GitOutputPartViewImpl.class);
     bind(ChangesPanelView.class).to(ChangesPanelViewImpl.class);
     install(
