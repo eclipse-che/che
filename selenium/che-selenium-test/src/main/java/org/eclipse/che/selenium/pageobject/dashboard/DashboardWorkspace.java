@@ -994,12 +994,13 @@ public class DashboardWorkspace {
         .equals(varName);
   }
 
-  public void checkValueExists(String varName, String varValue) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+  public Boolean checkValueExists(String varName, String varValue) {
+    loader.waitOnClosed();
+    return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(format(Locators.VARIABLE_VALUE, varName, varValue))));
-    loader.waitOnClosed();
+                By.xpath(format(Locators.VARIABLE_VALUE, varName, varValue))))
+        .isDisplayed();
   }
 
   public void checkValueIsNotExists(String varName, String varValue) {
