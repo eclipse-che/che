@@ -28,6 +28,8 @@ import org.eclipse.che.plugin.java.inject.JavaModule;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Evgen Vidolob
@@ -36,6 +38,8 @@ import org.eclipse.lsp4j.services.LanguageServer;
  */
 @Singleton
 public class JavaLanguageServerLauncher extends LanguageServerLauncherTemplate {
+  private static final Logger LOG = LoggerFactory.getLogger(JavaLanguageServerLauncher.class);
+
   private static final String REGEX = ".*\\.java";
   private static final LanguageServerDescription DESCRIPTION = createServerDescription();
 
@@ -53,9 +57,15 @@ public class JavaLanguageServerLauncher extends LanguageServerLauncherTemplate {
 
   protected LanguageServer connectToLanguageServer(
       final Process languageServerProcess, LanguageClient client) {
+    Object javaLangClient =
+        Proxy.newProxyInstance(
+            getClass().getClassLoader(),
+            new Class[] {LanguageClient.class, JavaLanguageClient.class},
+            new DynamicWrapper(this, client));
+
     Launcher<JavaLanguageServer> launcher =
         Launcher.createLauncher(
-            client,
+            javaLangClient,
             JavaLanguageServer.class,
             languageServerProcess.getInputStream(),
             languageServerProcess.getOutputStream());
@@ -68,6 +78,10 @@ public class JavaLanguageServerLauncher extends LanguageServerLauncherTemplate {
                 new Class[] {LanguageServer.class, FileContentAccess.class},
                 new DynamicWrapper(new JavaLSWrapper(proxy), proxy));
     return wrapped;
+  }
+
+  public void sendStatusReport(StatusReport report) {
+    LOG.info("{}: {}", report.getType(), report.getMessage());
   }
 
   protected Process startLanguageServerProcess(String projectPath) throws LanguageServerException {
