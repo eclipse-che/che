@@ -434,7 +434,6 @@
             <class name="org.eclipse.che.selenium.projectexplorer.CreateNewNotJavaFilesTest"/>
             <class name="org.eclipse.che.selenium.projectexplorer.CreateNewPackageFromContextMenuTest"/>
             <class name="org.eclipse.che.selenium.projectexplorer.CreateNewPackagesWithHelpCreationJavaClassTest"/>
-            <class name="org.eclipse.che.selenium.projectexplorer.CreatePackagesAndFilesWithHelpIconCreateTest"/>
             <class name="org.eclipse.che.selenium.projectexplorer.CreateProjectInSelectedFolderTest"/>
             <class name="org.eclipse.che.selenium.projectexplorer.CreateProjectsForArtikPluginTest"/>
             <class name="org.eclipse.che.selenium.projectexplorer.CreateProjectTest"/>
