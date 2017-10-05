@@ -129,7 +129,7 @@ public class DebugExternalClassTest {
         debugConfig.getXpathToІRunDebugCommand(PROJECT));
 
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
-    editor.waitAcitveBreakpoint(19);
+    editor.waitActiveBreakpoint(19);
     debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_INTO);
 
     // then
@@ -156,7 +156,7 @@ public class DebugExternalClassTest {
         debugConfig.getXpathToІRunDebugCommand(PROJECT));
 
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
-    editor.waitAcitveBreakpoint(23);
+    editor.waitActiveBreakpoint(23);
     debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_INTO);
 
     // then
@@ -195,7 +195,7 @@ public class DebugExternalClassTest {
         debugConfig.getXpathToІRunDebugCommand(PROJECT));
 
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
-    editor.waitAcitveBreakpoint(27);
+    editor.waitActiveBreakpoint(27);
     debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_INTO);
 
     // then
