@@ -75,7 +75,6 @@ public class OrionBreakpointRuler implements Gutter {
               String line = editorOverlay.getModel().getLine(fromLine);
 
               if (linesAdded > 0 || linesRemoved > 0 || line.trim().isEmpty()) {
-                removeAnnotations(getAnnotationsFrom(fromLine));
                 lineCallback.onLineNumberingChange(fromLine, linesRemoved, linesAdded);
               }
             }
@@ -147,8 +146,6 @@ public class OrionBreakpointRuler implements Gutter {
 
   private OrionAnnotationOverlay toAnnotation(Element element, int line) {
     int lineStart = editorOverlay.getModel().getLineStart(line);
-    int lineEnd = editorOverlay.getModel().getLineEnd(line);
-
     OrionAnnotationOverlay annotation = OrionAnnotationOverlay.create();
 
     OrionStyleOverlay styleOverlay = OrionStyleOverlay.create();
@@ -157,7 +154,7 @@ public class OrionBreakpointRuler implements Gutter {
     annotation.setStyle(styleOverlay);
     annotation.setType(CHE_BREAKPOINT);
     annotation.setStart(lineStart);
-    annotation.setEnd(lineEnd);
+    annotation.setEnd(lineStart);
 
     return annotation;
   }
@@ -166,11 +163,6 @@ public class OrionBreakpointRuler implements Gutter {
     int lineStart = editorOverlay.getModel().getLineStart(line);
     int lineEnd = editorOverlay.getModel().getLineEnd(line);
     return doGetAnnotations(lineStart, lineEnd);
-  }
-
-  private OrionAnnotationOverlay[] getAnnotationsFrom(int fromLine) {
-    int lineStart = editorOverlay.getModel().getLineStart(fromLine);
-    return doGetAnnotations(lineStart, Integer.MAX_VALUE);
   }
 
   private OrionAnnotationOverlay[] getAllAnnotations() {
