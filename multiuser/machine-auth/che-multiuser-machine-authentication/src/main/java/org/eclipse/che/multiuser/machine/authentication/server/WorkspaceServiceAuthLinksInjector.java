@@ -13,8 +13,6 @@ package org.eclipse.che.multiuser.machine.authentication.server;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.util.LinksHelper.createLink;
-import static org.eclipse.che.api.machine.shared.Constants.EXEC_AGENT_REFERENCE;
-import static org.eclipse.che.api.machine.shared.Constants.TERMINAL_REFERENCE;
 import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
 import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_WEBSOCKET_REFERENCE;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_STOP_WORKSPACE;
@@ -31,8 +29,8 @@ import javax.ws.rs.core.UriBuilder;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.ServiceContext;
+import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.rest.shared.dto.LinkParameter;
-import org.eclipse.che.api.environment.server.MachineLinksInjector;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.ServerDto;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
@@ -61,12 +59,13 @@ public class WorkspaceServiceAuthLinksInjector extends WorkspaceServiceLinksInje
   public WorkspaceServiceAuthLinksInjector(
       @Named("che.api") String apiEndpoint,
       HttpJsonRequestFactory httpJsonRequestFactory,
-      MachineLinksInjector machineLinksInjector) {
+      MachineAuthLinksInjector machineLinksInjector) {
     super(machineLinksInjector);
     this.tokenServiceBaseUrl = apiEndpoint + MACHINE_SERVICE_PATH;
     this.httpJsonRequestFactory = httpJsonRequestFactory;
   }
 
+  @Override
   protected void injectRuntimeLinks(
       WorkspaceDto workspace, URI ideUri, UriBuilder uriBuilder, ServiceContext serviceContext) {
     final WorkspaceRuntimeDto runtime = workspace.getRuntime();
@@ -101,6 +100,8 @@ public class WorkspaceServiceAuthLinksInjector extends WorkspaceServiceLinksInje
 
       final MachineDto devMachine = runtime.getDevMachine();
       if (devMachine != null) {
+        injectMachineLinks(devMachine, serviceContext);
+
         final Collection<ServerDto> servers = devMachine.getRuntime().getServers().values();
         servers
             .stream()
@@ -109,74 +110,24 @@ public class WorkspaceServiceAuthLinksInjector extends WorkspaceServiceLinksInje
             .ifPresent(
                 wsAgent -> {
                   runtime.getLinks().add(createLink("GET", wsAgent.getUrl(), WSAGENT_REFERENCE));
-                  runtime
-                      .getLinks()
-                      .add(
-                          createLink(
-                              "GET",
-                              UriBuilder.fromUri(wsAgent.getUrl())
-                                  .path("ws")
-                                  .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
-                                  .build()
-                                  .toString(),
-                              WSAGENT_WEBSOCKET_REFERENCE));
+                  Link wsAgentWebsocketLink =
+                      createLink(
+                          "GET",
+                          UriBuilder.fromUri(wsAgent.getUrl())
+                              .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
+                              .path("/ws")
+                              .queryParam(MACHINE_TOKEN, machineToken)
+                              .build()
+                              .toString(),
+                          WSAGENT_WEBSOCKET_REFERENCE,
+                          ImmutableList.of(
+                              newDto(LinkParameter.class)
+                                  .withName(MACHINE_TOKEN)
+                                  .withDefaultValue(machineToken)
+                                  .withRequired(true)));
 
-                  devMachine
-                      .getLinks()
-                      .add(
-                          createLink(
-                              "GET",
-                              UriBuilder.fromUri(wsAgent.getUrl())
-                                  .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
-                                  .path("/ws")
-                                  .queryParam(MACHINE_TOKEN, machineToken)
-                                  .build()
-                                  .toString(),
-                              WSAGENT_WEBSOCKET_REFERENCE,
-                              ImmutableList.of(
-                                  newDto(LinkParameter.class)
-                                      .withName(MACHINE_TOKEN)
-                                      .withDefaultValue(machineToken)
-                                      .withRequired(true))));
-                });
-
-        servers
-            .stream()
-            .filter(server -> TERMINAL_REFERENCE.equals(server.getRef()))
-            .findAny()
-            .ifPresent(
-                terminal -> {
-                  devMachine
-                      .getLinks()
-                      .add(
-                          createLink(
-                              "GET",
-                              UriBuilder.fromUri(terminal.getUrl())
-                                  .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
-                                  .queryParam(MACHINE_TOKEN, machineToken)
-                                  .path("/pty")
-                                  .build()
-                                  .toString(),
-                              TERMINAL_REFERENCE));
-                });
-        servers
-            .stream()
-            .filter(server -> EXEC_AGENT_REFERENCE.equals(server.getRef()))
-            .findAny()
-            .ifPresent(
-                exec -> {
-                  devMachine
-                      .getLinks()
-                      .add(
-                          createLink(
-                              "GET",
-                              UriBuilder.fromUri(exec.getUrl())
-                                  .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
-                                  .queryParam(MACHINE_TOKEN, machineToken)
-                                  .path("/connect")
-                                  .build()
-                                  .toString(),
-                              EXEC_AGENT_REFERENCE));
+                  runtime.getLinks().add(wsAgentWebsocketLink);
+                  devMachine.getLinks().add(wsAgentWebsocketLink);
                 });
       }
     }
