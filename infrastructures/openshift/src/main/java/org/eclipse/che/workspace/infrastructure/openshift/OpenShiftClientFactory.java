@@ -12,16 +12,17 @@ package org.eclipse.che.workspace.infrastructure.openshift;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
-import io.fabric8.kubernetes.client.Config;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
+import io.fabric8.openshift.client.OpenShiftConfig;
+import io.fabric8.openshift.client.OpenShiftConfigBuilder;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.commons.annotation.Nullable;
 
 /** @author Sergii Leshchenko */
 public class OpenShiftClientFactory {
-  private final Config config;
+  private final OpenShiftConfig config;
 
   @Inject
   public OpenShiftClientFactory(
@@ -29,22 +30,23 @@ public class OpenShiftClientFactory {
       @Nullable @Named("che.infra.openshift.username") String username,
       @Nullable @Named("che.infra.openshift.password") String password,
       @Nullable @Named("che.infra.openshift.trust_certs") Boolean doTrustCerts) {
-    config = new Config();
+    OpenShiftConfigBuilder configBuilder = new OpenShiftConfigBuilder();
     if (!isNullOrEmpty(masterUrl)) {
-      config.setMasterUrl(masterUrl);
+      configBuilder.withMasterUrl(masterUrl);
     }
 
     if (!isNullOrEmpty(username)) {
-      config.setUsername(username);
+      configBuilder.withUsername(username);
     }
 
     if (!isNullOrEmpty(password)) {
-      config.setPassword(password);
+      configBuilder.withPassword(password);
     }
 
     if (doTrustCerts != null) {
-      config.setTrustCerts(doTrustCerts);
+      configBuilder.withTrustCerts(doTrustCerts);
     }
+    config = configBuilder.build();
   }
 
   public OpenShiftClient create() {

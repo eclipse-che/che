@@ -19,7 +19,7 @@ import {CheWorkspace, WorkspaceStatus} from '../../../components/api/workspace/c
 interface IPage {
   title: string;
   content: string;
-  icon: string;
+  icon?: string;
   index: number;
 }
 
@@ -135,13 +135,15 @@ export class WorkspaceDetailsService {
    * @param icon page icon
    * @param index optional page index (order)
    */
-  addPage(title: string, content: string, icon: string, index: number): void {
+  addPage(title: string, content: string, icon?: string, index?: number): void {
     let page: IPage = {
       title: title,
       content: content,
-      icon: icon,
       index: index || this.pages.length
     };
+    if (icon) {
+      page.icon = icon;
+    }
     this.pages.push(page);
   }
 
@@ -213,7 +215,7 @@ export class WorkspaceDetailsService {
       return this.$q.when();
     }
 
-    const initStatus = oldWorkspace.status;
+    const initStatus = oldWorkspace && oldWorkspace.status;
 
     const oldConfig = angular.copy(oldWorkspace.config);
     delete oldConfig.projects;

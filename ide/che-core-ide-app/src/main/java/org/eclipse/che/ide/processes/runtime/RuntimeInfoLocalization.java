@@ -38,7 +38,7 @@ public interface RuntimeInfoLocalization extends Messages {
   @DefaultMessage("Protocol")
   String cellTableProtocolColumn();
 
-  @DefaultMessage("Url")
+  @DefaultMessage("URL")
   String cellTableUrlColumn();
 
   @DefaultMessage("Servers")

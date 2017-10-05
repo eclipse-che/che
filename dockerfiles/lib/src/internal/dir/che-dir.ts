@@ -277,7 +277,7 @@ export class CheDir {
     Log.getLogger().debug('Che file parsing object is ', JSON.stringify(this.chefileStruct));
     Log.getLogger().debug('Che workspace parsing object is ', JSON.stringify(this.chefileStructWorkspace));
 
-    this.authData.port = this.chefileStruct.server.port;
+    this.authData.getMasterLocation().setPort(this.chefileStruct.server.port);
 
   }
 
@@ -693,7 +693,7 @@ export class CheDir {
     let promises : Array<Promise<any>> = new Array<Promise<any>>();
     Log.getLogger().info(this.i18n.get('up.updating-project'));
 
-    var projectAPI:Project = new Project(workspaceDto);
+    var projectAPI:Project = new Project(workspaceDto, this.authData);
 
     this.chefileStructWorkspace.projects.forEach(project => {
       // no location, use inner project
@@ -787,10 +787,8 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
     if (execAgentURI.includes("localhost")) {
       execAgentURI = execAgentServer.getProperties().getInternalUrl();
     }
-    let execAgentAuthData = AuthData.parse(execAgentURI, this.authData.username, this.authData.password);
-    execAgentAuthData.token = this.authData.getToken();
 
-    let execAgentServiceClient:ExecAgentServiceClientImpl = new ExecAgentServiceClientImpl(this.workspace, execAgentAuthData);
+    let execAgentServiceClient:ExecAgentServiceClientImpl = new ExecAgentServiceClientImpl(this.workspace, this.authData, execAgentURI);
 
     let uuid:string = UUID.build();
 
@@ -800,7 +798,7 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
     customCommand.type = 'custom';
     
    // store in workspace the public key
-   return execAgentServiceClient.executeCommand(workspaceDto, machineId, customCommand, uuid, false);
+   return execAgentServiceClient.executeCommand(customCommand, uuid, false);
  
 }
 
@@ -914,9 +912,7 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
     if (execAgentURI.includes("localhost")) {
       execAgentURI = execAgentServer.getProperties().getInternalUrl();
     }
-    let execAgentAuthData = AuthData.parse(execAgentURI, this.authData.username, this.authData.password);
-    execAgentAuthData.token = this.authData.getToken();
-    let execAgentServiceClientImpl:ExecAgentServiceClientImpl = new ExecAgentServiceClientImpl(this.workspace, execAgentAuthData);
+    let execAgentServiceClientImpl:ExecAgentServiceClientImpl = new ExecAgentServiceClientImpl(this.workspace, this.authData, execAgentURI);
 
     if (this.chefileStructWorkspace.postload.actions && this.chefileStructWorkspace.postload.actions.length > 0) {
       Log.getLogger().info(this.i18n.get("executeCommandsFromCurrentWorkspace.executing"));
@@ -934,7 +930,7 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
             customCommand.type = workspaceCommand.type;
             customCommand.attributes = workspaceCommand.attributes;
             Log.getLogger().debug('Executing post-loading workspace command \'' + postLoadingCommand.command + '\'.');
-            promises.push(execAgentServiceClientImpl.executeCommand(workspaceDto, machineId, customCommand, uuid, false));
+            promises.push(execAgentServiceClientImpl.executeCommand(customCommand, uuid, false));
           }
         });
       } else if (postLoadingCommand.script) {
@@ -942,7 +938,7 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
         customCommand.commandLine = postLoadingCommand.script;
         customCommand.name = 'custom postloading command';
         Log.getLogger().debug('Executing post-loading script \'' + postLoadingCommand.script + '\'.');
-        promises.push(execAgentServiceClientImpl.executeCommand(workspaceDto, machineId, customCommand, uuid, false));
+        promises.push(execAgentServiceClientImpl.executeCommand(customCommand, uuid, false));
       }
 
 
@@ -1118,22 +1114,22 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
 
 
   checkCheIsNotRunning() : Promise <boolean> {
-    var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace', 200);
+    var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/workspace', 200);
     return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
       return false;
     }, (error) => {
-      // find error when connecting so probaly not running
+      // find error when connecting so probably not running
       return true;
     });
   }
 
 
   checkCheIsRunning() : Promise<boolean> {
-    var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace', 200);
+    var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/workspace', 200);
     return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
       return true;
     }, (error) => {
-      // find error when connecting so probaly not running
+      // find error when connecting so probably not running
       return false;
     });
   }

@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import javax.naming.NamingException;
 import org.eclipse.persistence.internal.sessions.AbstractSession;
-import org.eclipse.persistence.internal.sessions.cdi.EntityListenerInjectionManager;
+import org.eclipse.persistence.internal.sessions.cdi.InjectionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Yevhenii Voevodin
  */
-public class GuiceEntityListenerInjectionManager implements EntityListenerInjectionManager {
+public class GuiceEntityListenerInjectionManager implements InjectionManager {
 
   private static final Logger LOG =
       LoggerFactory.getLogger(GuiceEntityListenerInjectionManager.class);
@@ -51,7 +51,7 @@ public class GuiceEntityListenerInjectionManager implements EntityListenerInject
   @Inject private Injector injector;
 
   @Override
-  public Object createEntityListenerAndInjectDependancies(Class entityListenerClass)
+  public Object createManagedBeanAndInjectDependencies(Class entityListenerClass)
       throws NamingException {
     try {
       return injector.getInstance(entityListenerClass);

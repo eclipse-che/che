@@ -288,7 +288,8 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
       String name = entry.getKey();
       DockerMachine machine = entry.getValue();
       ServersReadinessChecker checker =
-          new ServersReadinessChecker(name, machine.getServers(), serverCheckerFactory);
+          new ServersReadinessChecker(
+              getContext().getIdentity(), name, machine.getServers(), serverCheckerFactory);
       checker.checkOnce(new ServerReadinessHandler(name));
     }
   }
@@ -320,7 +321,8 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
 
     checkInterruption();
     ServersReadinessChecker readinessChecker =
-        new ServersReadinessChecker(name, machine.getServers(), serverCheckerFactory);
+        new ServersReadinessChecker(
+            getContext().getIdentity(), name, machine.getServers(), serverCheckerFactory);
     readinessChecker.startAsync(new ServerReadinessHandler(name));
     readinessChecker.await();
   }

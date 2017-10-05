@@ -62,8 +62,6 @@ import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.WorkspaceSharedPool;
-import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
-import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao.RemoveSnapshotsBeforeWorkspaceRemovedEventSubscriber;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao.RemoveWorkspaceBeforeAccountRemovedEventSubscriber;
 import org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
@@ -183,7 +181,6 @@ public class CascadeRemovalTest {
                 install(new AccountModule());
                 install(new SshJpaModule());
                 install(new WorkspaceJpaModule());
-                //                install(new MachineJpaModule());
                 bind(WorkspaceManager.class);
 
                 WorkspaceRuntimes wR =
@@ -292,11 +289,7 @@ public class CascadeRemovalTest {
   @DataProvider(name = "beforeAccountRemoveRollbackActions")
   public Object[][] beforeAccountRemoveActions() {
     return new Class[][] {
-      {RemoveWorkspaceBeforeAccountRemovedEventSubscriber.class, BeforeAccountRemovedEvent.class},
-      {
-        RemoveSnapshotsBeforeWorkspaceRemovedEventSubscriber.class,
-        BeforeWorkspaceRemovedEvent.class
-      },
+      {RemoveWorkspaceBeforeAccountRemovedEventSubscriber.class, BeforeAccountRemovedEvent.class}
     };
   }
 
@@ -316,12 +309,14 @@ public class CascadeRemovalTest {
     sshDao.create(sshPair2 = createSshPair(user.getId(), "service", "name2"));
   }
 
-  private void wipeTestData() throws ConflictException, ServerException, NotFoundException {
+  private void wipeTestData() throws Exception {
     sshDao.remove(sshPair1.getOwner(), sshPair1.getService(), sshPair1.getName());
     sshDao.remove(sshPair2.getOwner(), sshPair2.getService(), sshPair2.getName());
 
     workspaceDao.remove(workspace1.getId());
     workspaceDao.remove(workspace2.getId());
+
+    notFoundToNull(() -> userDao.getById(user.getId()));
 
     preferenceDao.remove(user.getId());
 

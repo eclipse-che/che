@@ -17,14 +17,7 @@ import static org.eclipse.che.ide.orion.compare.CompareInitializer.GIT_COMPARE_M
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -37,7 +30,6 @@ import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
@@ -113,41 +105,28 @@ final class PreviewViewImpl extends Window implements PreviewView {
         createButton(
             locale.moveDialogButtonBack(),
             "preview-back-button",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onBackButtonClicked();
-              }
-            });
+            event -> delegate.onBackButtonClicked());
 
     Button cancelButton =
         createButton(
             locale.moveDialogButtonCancel(),
             "preview-cancel-button",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                hide();
-                delegate.onCancelButtonClicked();
-              }
+            event -> {
+              hide();
+              delegate.onCancelButtonClicked();
             });
 
     Button acceptButton =
         createButton(
             locale.moveDialogButtonOk(),
             "preview-ok-button",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onAcceptButtonClicked();
-              }
-            });
+            event -> delegate.onAcceptButtonClicked());
 
     addButtonToFooter(acceptButton);
     addButtonToFooter(cancelButton);
     addButtonToFooter(backButton);
 
-    diff.getElement().setId(Document.get().createUniqueId());
+    diff.getElement().setId("compareParentDiv");
     showDiff(null);
   }
 
@@ -184,13 +163,10 @@ final class PreviewViewImpl extends Window implements PreviewView {
 
     final SelectionModel<RefactoringPreview> selectionModel = new SingleSelectionModel<>();
     selectionModel.addSelectionChangeHandler(
-        new SelectionChangeEvent.Handler() {
-          @Override
-          public void onSelectionChange(SelectionChangeEvent event) {
-            RefactoringPreview selectedNode =
-                (RefactoringPreview) ((SingleSelectionModel) selectionModel).getSelectedObject();
-            delegate.onSelectionChanged(selectedNode);
-          }
+        event -> {
+          RefactoringPreview selectedNode =
+              (RefactoringPreview) ((SingleSelectionModel) selectionModel).getSelectedObject();
+          delegate.onSelectionChanged(selectedNode);
         });
 
     Tree tree = new Tree();
@@ -205,16 +181,13 @@ final class PreviewViewImpl extends Window implements PreviewView {
     }
 
     tree.addSelectionHandler(
-        new SelectionHandler<TreeItem>() {
-          @Override
-          public void onSelection(SelectionEvent<TreeItem> event) {
-            if (selectedElement != null) {
-              selectedElement.getStyle().setProperty("background", "transparent");
-            }
-
-            selectedElement = event.getSelectedItem().getWidget().getElement();
-            selectedElement.getStyle().setProperty("background", getEditorSelectionColor());
+        event -> {
+          if (selectedElement != null) {
+            selectedElement.getStyle().setProperty("background", "transparent");
           }
+
+          selectedElement = event.getSelectedItem().getWidget().getElement();
+          selectedElement.getStyle().setProperty("background", getEditorSelectionColor());
         });
 
     treePanel.add(tree);
@@ -230,12 +203,9 @@ final class PreviewViewImpl extends Window implements PreviewView {
     itemCheckBox.getElement().getStyle().setMarginTop(3, PX);
     Label name = new Label(changeName);
     name.addClickHandler(
-        new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-            delegate.onSelectionChanged(containerChanges.get(root));
-            root.setSelected(true);
-          }
+        event -> {
+          delegate.onSelectionChanged(containerChanges.get(root));
+          root.setSelected(true);
         });
     name.getElement().getStyle().setFloat(LEFT);
     element.add(itemCheckBox);
@@ -246,17 +216,14 @@ final class PreviewViewImpl extends Window implements PreviewView {
     element.getElement().getParentElement().getStyle().setMargin(1, PX);
 
     itemCheckBox.addValueChangeHandler(
-        new ValueChangeHandler<Boolean>() {
-          @Override
-          public void onValueChange(ValueChangeEvent<Boolean> event) {
-            checkChildrenState(root, event.getValue());
-            checkParentState(root, event.getValue());
+        event -> {
+          checkChildrenState(root, event.getValue());
+          checkParentState(root, event.getValue());
 
-            RefactoringPreview change = containerChanges.get(root);
-            change.setEnabled(event.getValue());
+          RefactoringPreview change = containerChanges.get(root);
+          change.setEnabled(event.getValue());
 
-            delegate.onEnabledStateChanged(change);
-          }
+          delegate.onEnabledStateChanged(change);
         });
 
     if (children.isEmpty()) {
@@ -352,7 +319,9 @@ final class PreviewViewImpl extends Window implements PreviewView {
     oldFile.setContent(preview.getOldContent());
     oldFile.setName(preview.getFileName());
 
-    compare.update(newFile, oldFile);
+    if (compare != null) {
+      compare.update(newFile, oldFile);
+    }
   }
 
   private void prepareDiffEditor(@NotNull ChangePreview preview) {

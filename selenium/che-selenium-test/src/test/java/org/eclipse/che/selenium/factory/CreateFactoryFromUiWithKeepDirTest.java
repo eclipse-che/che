@@ -26,7 +26,7 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.CreateFactoryWidget;
@@ -60,7 +60,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
   };
   private static final String FACTORY_NAME = NameGenerator.generate("keepFactory", 2);
 
-  @Inject private DefaultTestUser user;
+  @Inject private TestUser user;
   @Inject private CodenvyEditor editor;
   @Inject private TestWorkspace testWorkspace;
   @Inject private Ide ide;

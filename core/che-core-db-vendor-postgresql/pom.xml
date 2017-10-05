@@ -22,12 +22,21 @@
     <name>Che Core :: DB :: Vendor PostgreSQL</name>
     <dependencies>
         <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-db</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
-            <artifactId>eclipselink</artifactId>
+            <artifactId>org.eclipse.persistence.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>javax.persistence</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

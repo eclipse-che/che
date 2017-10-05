@@ -25,8 +25,8 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClientFactory;
 import org.eclipse.che.selenium.core.configuration.ConfigurationException;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.utils.WorkspaceDtoDeserializer;
 import org.slf4j.Logger;
@@ -44,21 +44,24 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
   private final int poolSize;
   private final ArrayBlockingQueue<TestWorkspace> testWorkspaceQueue;
   private final ScheduledExecutorService executor;
-  private final DefaultTestUser defaultUser;
+  private final TestUser defaultUser;
   private final int defaultMemoryGb;
-  private final TestWorkspaceServiceClient workspaceServiceClient;
+  private final TestWorkspaceServiceClient testWorkspaceServiceClient;
+  private final TestWorkspaceServiceClientFactory testWorkspaceServiceClientFactory;
   private final WorkspaceDtoDeserializer workspaceDtoDeserializer;
 
   @Inject
   public TestWorkspaceProviderImpl(
       @Named("sys.threads") int threads,
       @Named("workspace.default_memory_gb") int defaultMemoryGb,
-      DefaultTestUser defaultUser,
-      TestWorkspaceServiceClient workspaceServiceClient,
-      WorkspaceDtoDeserializer workspaceDtoDeserializer) {
+      TestUser defaultUser,
+      WorkspaceDtoDeserializer workspaceDtoDeserializer,
+      TestWorkspaceServiceClient testWorkspaceServiceClient,
+      TestWorkspaceServiceClientFactory testWorkspaceServiceClientFactory) {
     this.defaultUser = defaultUser;
     this.defaultMemoryGb = defaultMemoryGb;
-    this.workspaceServiceClient = workspaceServiceClient;
+    this.testWorkspaceServiceClient = testWorkspaceServiceClient;
+    this.testWorkspaceServiceClientFactory = testWorkspaceServiceClientFactory;
     this.workspaceDtoDeserializer = workspaceDtoDeserializer;
 
     if (threads == 0) {
@@ -89,7 +92,7 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
         owner,
         memoryGB,
         workspaceDtoDeserializer.deserializeWorkspaceTemplate(template),
-        workspaceServiceClient);
+        testWorkspaceServiceClientFactory.create(owner.getEmail(), owner.getPassword()));
   }
 
   private boolean hasDefaultValues(TestUser testUser, int memoryGB, String template) {
@@ -103,10 +106,10 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
       // insure workspace is running
       TestWorkspace testWorkspace = testWorkspaceQueue.take();
       WorkspaceStatus testWorkspaceStatus =
-          workspaceServiceClient.getById(testWorkspace.getId()).getStatus();
+          testWorkspaceServiceClient.getById(testWorkspace.getId()).getStatus();
 
       if (testWorkspaceStatus != WorkspaceStatus.RUNNING) {
-        workspaceServiceClient.start(
+        testWorkspaceServiceClient.start(
             testWorkspace.getId(), testWorkspace.getName(), testWorkspace.getOwner());
       }
 
@@ -182,7 +185,8 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
                           WorkspaceTemplate.DEFAULT),
                       workspaceServiceClient);
             } catch (Exception e) {
-              // scheduled executor service doesn't log any exceptions, so log possible exception here
+              // scheduled executor service doesn't log any exceptions, so log possible exception
+              // here
               LOG.error(e.getLocalizedMessage(), e);
               throw e;
             }

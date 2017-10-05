@@ -15,7 +15,7 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabAction;
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -46,7 +46,7 @@ public class SplitEditorFeatureTest {
   private static final String TEXT = "some text";
 
   @Inject private TestWorkspace workspace;
-  @Inject private DefaultTestUser defaultTestUser;
+  @Inject private TestUser defaultTestUser;
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Loader loader;

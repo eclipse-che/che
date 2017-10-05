@@ -15,7 +15,7 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestStacksConstants;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.ToastLoader;
@@ -33,7 +33,7 @@ public class CreateWorkspaceOnDashboardTest {
 
   @Inject private NavigationBar navigationBar;
   @Inject private CreateWorkspace createWorkspace;
-  @Inject private DefaultTestUser defaultTestUser;
+  @Inject private TestUser defaultTestUser;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Loader loader;
   @Inject private MachineTerminal terminal;

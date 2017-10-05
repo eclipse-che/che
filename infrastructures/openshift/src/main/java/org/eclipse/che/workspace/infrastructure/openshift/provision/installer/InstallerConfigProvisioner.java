@@ -18,6 +18,7 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.Pod;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -66,6 +67,10 @@ public class InstallerConfigProvisioner implements ConfigurationProvisioner {
       InternalEnvironment environment, OpenShiftEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
+    String devMachineName =
+        WsAgentMachineFinderUtil.getWsAgentServerMachine(environment)
+            .orElseThrow(() -> new InfrastructureException("Machine with wsagent not found"));
+
     for (Pod pod : osEnv.getPods().values()) {
       String podName = pod.getMetadata().getName();
       for (Container container : pod.getSpec().getContainers()) {
@@ -73,33 +78,38 @@ public class InstallerConfigProvisioner implements ConfigurationProvisioner {
         String machineName = podName + "/" + containerName;
         InternalMachineConfig machineConf = environment.getMachines().get(machineName);
 
-        Map<String, ServerConfig> name2Server = new HashMap<>();
-        for (Installer installer : machineConf.getInstallers()) {
-          provisionEnv(container, installer.getProperties());
-          name2Server.putAll(installer.getServers());
-        }
-        ServerExposer serverExposer = new ServerExposer(machineName, container, osEnv);
-        serverExposer.expose("agents", name2Server);
+        doProvisionContainer(osEnv, container, identity, machineName, machineConf);
 
-        // CHE_API is used by installers for agent binary downloading
-        container.getEnv().removeIf(env -> "CHE_API".equals(env.getName()));
-        container.getEnv().add(new EnvVar("CHE_API", cheServerEndpoint, null));
-      }
-    }
-    // TODO incorrect place for env variable addition. workspace ID is needed for wsagent server, not installer
-    // WORKSPACE_ID is required only by workspace agent
-    String devMachineName =
-        WsAgentMachineFinderUtil.getWsAgentServerMachine(environment)
-            .orElseThrow(() -> new InfrastructureException("Machine with wsagent not found"));
-    for (Pod pod : osEnv.getPods().values()) {
-      for (Container container : pod.getSpec().getContainers()) {
-        final String machineName = pod.getMetadata().getName() + "/" + container.getName();
+        // TODO incorrect place for env variable addition. workspace ID is needed for wsagent server, not installer
+        // WORKSPACE_ID is required only by workspace agent
         if (devMachineName.equals(machineName)) {
-          container.getEnv().removeIf(env -> "CHE_WORKSPACE_ID".equals(env.getName()));
-          container.getEnv().add(new EnvVar("CHE_WORKSPACE_ID", identity.getWorkspaceId(), null));
+          putEnv(container.getEnv(), "CHE_WORKSPACE_ID", identity.getWorkspaceId());
         }
       }
     }
+  }
+
+  protected void doProvisionContainer(
+      OpenShiftEnvironment osEnv,
+      Container container,
+      RuntimeIdentity identity,
+      String machineName,
+      InternalMachineConfig machineConf) {
+    Map<String, ServerConfig> name2Server = new HashMap<>();
+    for (Installer installer : machineConf.getInstallers()) {
+      provisionEnv(container, installer.getProperties());
+      name2Server.putAll(installer.getServers());
+    }
+    ServerExposer serverExposer = new ServerExposer(machineName, container, osEnv);
+    serverExposer.expose("agents", name2Server);
+
+    // CHE_API is used by installers for agent binary downloading
+    putEnv(container.getEnv(), "CHE_API", cheServerEndpoint);
+  }
+
+  protected void putEnv(List<EnvVar> envs, String key, String value) {
+    envs.removeIf(env -> key.equals(env.getName()));
+    envs.add(new EnvVar(key, value, null));
   }
 
   private void provisionEnv(Container container, Map<String, String> properties) {

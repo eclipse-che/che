@@ -15,7 +15,10 @@ import static java.util.Collections.emptySet;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.util.loging.Log;
+import org.eclipse.che.security.oauth.SecurityTokenProvider;
 
 /**
  * Contain all routines related to a web socket connection initialization
@@ -28,17 +31,20 @@ public class WebSocketInitializer {
   private final WebSocketPropertyManager propertyManager;
   private final WebSocketActionManager actionManager;
   private final UrlResolver urlResolver;
+  private SecurityTokenProvider securityTokenProvider;
 
   @Inject
   public WebSocketInitializer(
       WebSocketConnectionManager connectionManager,
       WebSocketPropertyManager propertyManager,
       WebSocketActionManager actionManager,
-      UrlResolver urlResolver) {
+      UrlResolver urlResolver,
+      SecurityTokenProvider securityTokenProvider) {
     this.connectionManager = connectionManager;
     this.propertyManager = propertyManager;
     this.actionManager = actionManager;
     this.urlResolver = urlResolver;
+    this.securityTokenProvider = securityTokenProvider;
   }
 
   /**
@@ -61,16 +67,27 @@ public class WebSocketInitializer {
    * @param initActions actions to be performed each time the connection is established
    */
   public void initialize(String endpointId, String url, Set<Runnable> initActions) {
-    Log.debug(getClass(), "Initializing with url: " + url);
+    securityTokenProvider
+        .getSecurityToken()
+        .then(
+            new Operation<String>() {
+              @Override
+              public void apply(String token) throws OperationException {
+                String separator = url.contains("?") ? "&" : "?";
+                final String secureUrl = url + separator + "token=" + token;
 
-    urlResolver.setMapping(endpointId, url);
+                Log.debug(getClass(), "Initializing with secureUrl: " + secureUrl);
 
-    propertyManager.initializeConnection(url);
+                urlResolver.setMapping(endpointId, secureUrl);
 
-    actionManager.setOnEstablishActions(url, initActions);
+                propertyManager.initializeConnection(secureUrl);
 
-    connectionManager.initializeConnection(url);
-    connectionManager.establishConnection(url);
+                actionManager.setOnEstablishActions(secureUrl, initActions);
+
+                connectionManager.initializeConnection(secureUrl);
+                connectionManager.establishConnection(secureUrl);
+              }
+            });
   }
 
   /**

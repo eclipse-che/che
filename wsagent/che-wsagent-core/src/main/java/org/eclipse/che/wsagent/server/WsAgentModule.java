@@ -11,10 +11,7 @@
 package org.eclipse.che.wsagent.server;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
-import javax.inject.Named;
 import org.eclipse.che.api.core.rest.ApiInfoService;
-import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.inject.DynaModule;
 
 /**
@@ -40,21 +37,5 @@ public class WsAgentModule extends AbstractModule {
     install(new org.eclipse.che.git.impl.jgit.JGitModule());
     install(new org.eclipse.che.api.core.jsonrpc.impl.JsonRpcModule());
     install(new org.eclipse.che.api.core.websocket.impl.WebSocketModule());
-  }
-
-  //it's need for WSocketEventBusClient and in the future will be replaced with the property
-  @Named("notification.client.event_subscriptions")
-  @Provides
-  @SuppressWarnings("unchecked")
-  Pair<String, String>[] eventSubscriptionsProvider(@Named("event.bus.url") String eventBusURL) {
-    return new Pair[] {Pair.of(eventBusURL, "")};
-  }
-
-  //it's need for EventOriginClientPropagationPolicy and in the future will be replaced with the property
-  @Named("notification.client.propagate_events")
-  @Provides
-  @SuppressWarnings("unchecked")
-  Pair<String, String>[] propagateEventsProvider(@Named("event.bus.url") String eventBusURL) {
-    return new Pair[] {Pair.of(eventBusURL, "")};
   }
 }

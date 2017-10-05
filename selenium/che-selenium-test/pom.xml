@@ -30,12 +30,20 @@
     </properties>
     <dependencies>
         <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.inject.extensions</groupId>
+            <artifactId>guice-assistedinject</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.annotation</groupId>
@@ -140,7 +148,7 @@
                                 </property>
                                 <property>
                                     <name>listener</name>
-                                    <value>org.eclipse.che.selenium.core.CheSeleniumTesHandler</value>
+                                    <value>org.eclipse.che.selenium.core.CheSeleniumTestHandler</value>
                                 </property>
                             </properties>
                         </configuration>

@@ -143,11 +143,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
-            <artifactId>eclipselink</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.persistence</groupId>
             <artifactId>javax.persistence</artifactId>
             <scope>provided</scope>
         </dependency>
@@ -159,6 +154,16 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>org.eclipse.persistence.core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>org.eclipse.persistence.jpa</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

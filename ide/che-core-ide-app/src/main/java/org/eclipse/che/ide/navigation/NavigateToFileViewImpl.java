@@ -10,18 +10,14 @@
  */
 package org.eclipse.che.ide.navigation;
 
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.logical.shared.ResizeEvent;
-import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -114,42 +110,30 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
     fileName.getElement().setAttribute("placeholder", locale.navigateToFileSearchIsCaseSensitive());
 
     setPopupPositionAndShow(
-        new PositionCallback() {
-          @Override
-          public void setPosition(int offsetWidth, int offsetHeight) {
-            setPopupPosition(
-                (com.google.gwt.user.client.Window.getClientWidth() / 2) - (offsetWidth / 2),
-                (com.google.gwt.user.client.Window.getClientHeight() / 4) - (offsetHeight / 2));
-            // Set 'clip' css property to auto when show animation is finished.
-            new Timer() {
-              @Override
-              public void run() {
-                getElement().getStyle().setProperty("clip", "auto");
-                delegate.onFileNameChanged(fileName.getText());
-              }
-            }.schedule(300);
-          }
+        (offsetWidth, offsetHeight) -> {
+          setPopupPosition(
+              (Window.getClientWidth() / 2) - (offsetWidth / 2),
+              (Window.getClientHeight() / 4) - (offsetHeight / 2));
+          // Set 'clip' css property to auto when show animation is finished.
+          new Timer() {
+            @Override
+            public void run() {
+              getElement().getStyle().setProperty("clip", "auto");
+              delegate.onFileNameChanged(fileName.getText());
+            }
+          }.schedule(300);
         });
 
-    Scheduler.get()
-        .scheduleDeferred(
-            new Scheduler.ScheduledCommand() {
-              @Override
-              public void execute() {
-                fileName.setFocus(true);
-              }
-            });
+    new Timer() {
+      @Override
+      public void run() {
+        fileName.setFocus(true);
+      }
+    }.schedule(300);
 
     // Add window resize handler
     if (resizeHandler == null) {
-      resizeHandler =
-          Window.addResizeHandler(
-              new ResizeHandler() {
-                @Override
-                public void onResize(ResizeEvent event) {
-                  updatePositionAndSize();
-                }
-              });
+      resizeHandler = Window.addResizeHandler(event -> updatePositionAndSize());
     }
   }
 
@@ -179,7 +163,9 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
 
   @Override
   public void hidePopup() {
-    suggestionsContainer.removeFromParent();
+    if (suggestionsContainer != null) {
+      suggestionsContainer.removeFromParent();
+    }
     suggestionsPanel.setVisible(false);
 
     suggestionsPanel.getElement().getStyle().setWidth(400, Style.Unit.PX);
@@ -197,6 +183,9 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
   public void showItems(List<SearchResultDto> items) {
     // Hide popup if it is nothing to show
     if (items.isEmpty()) {
+      if (suggestionsContainer == null) {
+        return;
+      }
       suggestionsContainer.getElement().setInnerHTML("");
       suggestionsContainer.removeFromParent();
       suggestionsPanel.setVisible(false);
@@ -218,7 +207,7 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
     suggestionsContainer.getElement().appendChild(((com.google.gwt.dom.client.Element) itemHolder));
     list =
         SimpleList.create(
-            (SimpleList.View) suggestionsContainer.getElement().cast(),
+            suggestionsContainer.getElement().cast(),
             (Element) suggestionsContainer.getElement(),
             itemHolder,
             resources.defaultSimpleListCss(),
@@ -288,7 +277,7 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
         if (list != null) {
           list.getSelectionModel().selectPrevious();
         }
-        return;
+        break;
 
       case KeyCodes.KEY_DOWN:
         event.stopPropagation();
@@ -296,7 +285,7 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
         if (list != null) {
           list.getSelectionModel().selectNext();
         }
-        return;
+        break;
 
       case KeyCodes.KEY_PAGEUP:
         event.stopPropagation();
@@ -304,7 +293,7 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
         if (list != null) {
           list.getSelectionModel().selectPreviousPage();
         }
-        return;
+        break;
 
       case KeyCodes.KEY_PAGEDOWN:
         event.stopPropagation();
@@ -312,7 +301,7 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
         if (list != null) {
           list.getSelectionModel().selectNextPage();
         }
-        return;
+        break;
 
       case KeyCodes.KEY_ENTER:
         event.stopPropagation();
@@ -321,22 +310,23 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
         if (selectedItem != null) {
           delegate.onFileSelected(Path.valueOf(selectedItem.getItemReference().getPath()));
         }
-        return;
+        break;
 
       case KeyCodes.KEY_ESCAPE:
         event.stopPropagation();
         event.preventDefault();
         hidePopup();
-        return;
+        break;
+      default:
+        //here need some delay to be sure input box initiated with given value
+        //in manually testing hard to reproduce this problem but it reproduced with selenium tests
+        new Timer() {
+          @Override
+          public void run() {
+            delegate.onFileNameChanged(fileName.getText());
+          }
+        }.schedule(300);
+        break;
     }
-
-    Scheduler.get()
-        .scheduleDeferred(
-            new Command() {
-              @Override
-              public void execute() {
-                delegate.onFileNameChanged(fileName.getText());
-              }
-            });
   }
 }

@@ -17,11 +17,11 @@ import {CustomValidator} from './custom-validator.directive';
 import {UniqueStackNameValidator} from './unique-stack-name-validator.directive';
 import {CityNameValidator} from './city-name-validator.directive';
 import {CustomAsyncValidator} from './custom-async-validator.directive';
-
+import {UniqueTeamNameValidator} from './unique-team-name-validator.directive';
 
 export class ValidatorConfig {
 
-  constructor(register) {
+  constructor(register: che.IRegisterService) {
 
     register.directive('gitUrl', GitUrlValidator)
       .directive('cityNameValidator', CityNameValidator)
@@ -29,6 +29,7 @@ export class ValidatorConfig {
       .directive('uniqueWorkspaceName', UniqueWorkspaceNameValidator)
       .directive('customValidator', CustomValidator)
       .directive('customAsyncValidator', CustomAsyncValidator)
-      .directive('uniqueStackName', UniqueStackNameValidator);
+      .directive('uniqueStackName', UniqueStackNameValidator)
+      .directive('uniqueTeamName', UniqueTeamNameValidator);
   }
 }

@@ -90,8 +90,8 @@ public class RoutesAnnotations {
     /**
      * Retrieves server configuration from route annotations and returns (ref -> server config) map.
      */
-    public Map<String, ServerConfig> servers() {
-      Map<String, ServerConfig> servers = new HashMap<>();
+    public Map<String, ServerConfigImpl> servers() {
+      Map<String, ServerConfigImpl> servers = new HashMap<>();
       for (Map.Entry<String, String> entry : annotations.entrySet()) {
         Matcher refMatcher = SERVER_ANNOTATION_PATTERN.matcher(entry.getKey());
         if (refMatcher.matches()) {

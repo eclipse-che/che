@@ -1,4 +1,7 @@
 IMAGE_INIT=eclipse/che-init:latest
 IMAGE_CHE=eclipse/che-server:latest
-IMAGE_COMPOSE=docker/compose:1.8.1
+IMAGE_CHE_MULTIUSER=eclipse/che-server-multiuser:latest
+IMAGE_COMPOSE=docker/compose:1.10.1
 IMAGE_TRAEFIK=traefik:v1.3.0-rc3
+IMAGE_POSTGRES=centos/postgresql-96-centos7
+IMAGE_KEYCLOACK=jboss/keycloak-openshift:3.3.0.CR2-2

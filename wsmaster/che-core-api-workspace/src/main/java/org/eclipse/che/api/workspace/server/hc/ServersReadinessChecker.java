@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import javax.ws.rs.core.UriBuilder;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
@@ -40,6 +41,7 @@ public class ServersReadinessChecker {
           "wsagent/http", "/api/",
           "exec-agent/http", "/process",
           "terminal", "/");
+  private final RuntimeIdentity runtimeIdentity;
   private final String machineName;
   private final Map<String, ? extends Server> servers;
   private final ServerCheckerFactory serverCheckerFactory;
@@ -55,9 +57,11 @@ public class ServersReadinessChecker {
    * @param servers map of servers in a machine
    */
   public ServersReadinessChecker(
+      RuntimeIdentity runtimeIdentity,
       String machineName,
       Map<String, ? extends Server> servers,
       ServerCheckerFactory serverCheckerFactory) {
+    this.runtimeIdentity = runtimeIdentity;
     this.machineName = machineName;
     this.servers = servers;
     this.serverCheckerFactory = serverCheckerFactory;
@@ -175,6 +179,6 @@ public class ServersReadinessChecker {
           "Server " + serverRef + " URL is invalid. Error: " + e.getMessage(), e);
     }
 
-    return serverCheckerFactory.httpChecker(url, machineName, serverRef, timer);
+    return serverCheckerFactory.httpChecker(url, runtimeIdentity, machineName, serverRef, timer);
   }
 }

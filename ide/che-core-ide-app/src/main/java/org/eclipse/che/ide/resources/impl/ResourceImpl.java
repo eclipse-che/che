@@ -16,11 +16,11 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOf;
 import static org.eclipse.che.ide.api.resources.marker.Marker.CREATED;
 import static org.eclipse.che.ide.api.resources.marker.Marker.REMOVED;
 import static org.eclipse.che.ide.api.resources.marker.Marker.UPDATED;
+import static org.eclipse.che.ide.util.Arrays.remove;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects;
@@ -238,28 +238,19 @@ abstract class ResourceImpl implements Resource {
   public boolean deleteMarker(String type) {
     checkArgument(!isNullOrEmpty(type), "Invalid marker type occurred");
 
-    int size = markers.length;
     int index = -1;
 
     for (int i = 0; i < markers.length; i++) {
-      if (markers[i].getType().equals(type)) {
+      Marker marker = markers[i];
+      if (marker.getType().equals(type)) {
         index = i;
-        resourceManager.notifyMarkerChanged(this, markers[i], REMOVED);
+        markers = remove(markers, marker);
+        resourceManager.notifyMarkerChanged(this, marker, REMOVED);
         break;
       }
     }
 
-    if (index == -1) {
-      return false;
-    }
-
-    final int numMoved = markers.length - index - 1;
-    if (numMoved > 0) {
-      arraycopy(markers, index + 1, markers, index, numMoved);
-    }
-    markers = copyOf(markers, --size);
-
-    return true;
+    return index != -1;
   }
 
   /** {@inheritDoc} */

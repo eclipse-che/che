@@ -87,9 +87,8 @@ export class CheWorkspace {
    */
   constructor($resource: ng.resource.IResourceService, $http: ng.IHttpService, $q: ng.IQService, cheJsonRpcApi: CheJsonRpcApi,
               $websocket: ng.websocket.IWebSocketProvider, $location: ng.ILocationService, proxySettings : string, userDashboardConfig: any,
-              lodash: any, cheEnvironmentRegistry: CheEnvironmentRegistry, $log: ng.ILogService, cheBranding: CheBranding) {
+              lodash: any, cheEnvironmentRegistry: CheEnvironmentRegistry, $log: ng.ILogService, cheBranding: CheBranding, keycloakAuth: any) {
     this.workspaceStatuses = ['RUNNING', 'STOPPED', 'PAUSED', 'STARTING', 'STOPPING', 'ERROR'];
-
     // keep resource
     this.$q = $q;
     this.$resource = $resource;
@@ -140,9 +139,11 @@ export class CheWorkspace {
 
     this.fetchWorkspaceSettings();
 
+    let keycloakToken = keycloakAuth.isPresent ? '?token=' + keycloakAuth.keycloak.token : '';
     const CONTEXT_FETCHER_ID = 'websocketContextFetcher';
     const callback = () => {
       this.jsonRpcApiLocation = this.formJsonRpcApiLocation($location, proxySettings, userDashboardConfig.developmentMode) + cheBranding.getWebsocketContext();
+      this.jsonRpcApiLocation += keycloakToken;
       this.cheJsonRpcMasterApi = cheJsonRpcApi.getJsonRpcMasterApi(this.jsonRpcApiLocation);
       cheBranding.unregisterCallback(CONTEXT_FETCHER_ID);
     };
@@ -312,7 +313,7 @@ export class CheWorkspace {
       });
       return this.workspaces;
     }, (error: any) => {
-      if (error.status === 304) {
+      if (error && error.status === 304) {
         return this.workspaces;
       }
       return this.$q.reject(error);
@@ -354,7 +355,7 @@ export class CheWorkspace {
       this.updateWorkspacesList(workspace);
       defer.resolve();
     }, (error: any) => {
-      if (error.status === 304) {
+      if (error && error.status === 304) {
         defer.resolve();
         return;
       }

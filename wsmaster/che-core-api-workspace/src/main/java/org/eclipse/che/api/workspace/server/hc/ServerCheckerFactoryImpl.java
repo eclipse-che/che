@@ -13,6 +13,8 @@ package org.eclipse.che.api.workspace.server.hc;
 import java.net.URL;
 import java.util.Timer;
 import java.util.concurrent.TimeUnit;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 
 /**
  * Creates {@link TerminalHttpConnectionServerChecker} for terminal server and {@link
@@ -23,7 +25,8 @@ import java.util.concurrent.TimeUnit;
 public class ServerCheckerFactoryImpl implements ServerCheckerFactory {
   @Override
   public HttpConnectionServerChecker httpChecker(
-      URL url, String machineName, String serverRef, Timer timer) {
+      URL url, RuntimeIdentity identity, String machineName, String serverRef, Timer timer)
+      throws InfrastructureException {
     // TODO add readiness endpoint to terminal and remove this
     // workaround needed because terminal server doesn't have endpoint to check it readiness
     if ("terminal".equals(serverRef)) {

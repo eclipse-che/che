@@ -86,7 +86,7 @@ public class InstallerConfigProvisionerTest {
 
     installerConfigProvisioner.provision(environment, osEnv, runtimeIdentity);
 
-    verify(osEnv, times(2)).getPods();
+    verify(osEnv, times(1)).getPods();
     verify(runtimeIdentity, atLeast(1)).getWorkspaceId();
     verify(environment, times(2)).getMachines();
     assertTrue(envVariables.size() == 3);

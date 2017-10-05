@@ -15,7 +15,7 @@ import com.google.inject.name.Named;
 import java.util.Random;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -48,7 +48,7 @@ public class KeepDirectoryGitImportTest {
 
   @Inject private TestWorkspace ws;
   @Inject private Ide ide;
-  @Inject private DefaultTestUser productUser;
+  @Inject private TestUser productUser;
 
   @Inject
   @Named("github.username")
@@ -84,11 +84,9 @@ public class KeepDirectoryGitImportTest {
     preferences.regenerateAndUploadSshKeyOnGithub(gitHubUsername, gitHubPassword);
   }
 
-  @Test(
-    enabled = false,
-    description = "Need to fix the issue https://github.com/eclipse/che/issues/1853"
-  )
-  public void keepDirectoryGitImport() throws Exception {
+  // TODO should be fixed by issue https://github.com/eclipse/che/issues/6486
+  @Test
+  public void keepDirectoryGitImportTest() throws Exception {
     // Check the 'keep directory' from SSH Git url
     projectExplorer.waitProjectExplorer();
     makeKeepDirectoryFromGitUrl(

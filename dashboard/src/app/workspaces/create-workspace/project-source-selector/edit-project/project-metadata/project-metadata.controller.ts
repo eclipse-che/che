@@ -12,8 +12,6 @@
 
 import {ProjectMetadataService} from './project-metadata.service';
 import {ProjectSourceSelectorService} from '../../project-source-selector.service';
-import {ActionType} from '../../project-source-selector-action-type.enum';
-import {ProjectSource} from '../../project-source.enum';
 import {EditProjectService} from '../edit-project.service';
 
 /**

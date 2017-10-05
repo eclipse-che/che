@@ -16,12 +16,16 @@ import static java.util.Objects.requireNonNull;
 import com.google.inject.persist.Transactional;
 import java.util.Collection;
 import java.util.List;
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
+import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 import org.eclipse.che.core.db.jpa.DuplicateKeyException;
 
 /**
@@ -159,5 +163,26 @@ public class JpaSnapshotDao implements SnapshotDao {
     manager.flush();
     newSnapshots.forEach(manager::persist);
     return existing;
+  }
+
+  @Singleton
+  public static class RemoveSnapshotsBeforeWorkspaceRemovedEventSubscriber
+      extends CascadeEventSubscriber<BeforeWorkspaceRemovedEvent> {
+
+    @Inject private EventService eventService;
+    @Inject private SnapshotDao snapshotDao;
+
+    @PostConstruct
+    public void subscribe() {
+      eventService.subscribe(this, BeforeWorkspaceRemovedEvent.class);
+    }
+
+    @Override
+    public void onCascadeEvent(BeforeWorkspaceRemovedEvent event) throws Exception {
+      List<SnapshotImpl> toRemove = snapshotDao.findSnapshots(event.getWorkspace().getId());
+      for (SnapshotImpl snapshot : toRemove) {
+        snapshotDao.removeSnapshot(snapshot.getId());
+      }
+    }
   }
 }

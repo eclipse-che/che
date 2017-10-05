@@ -114,6 +114,14 @@ import {StackSelectorTagsFilter} from './create-workspace/stack-selector/stack-s
 import {CheWorkspaceStatusButton} from './workspace-details/status-button/workspace-status-button.directive';
 import {CreateWorkspaceController} from './create-workspace/create-workspace.controller';
 import {CreateWorkspaceSvc} from './create-workspace/create-workspace.service';
+
+import {ShareWorkspaceController} from './share-workspace/share-workspace.controller';
+import {ShareWorkspace} from './share-workspace/share-workspace.directive';
+import {AddDeveloperController} from './share-workspace/add-developers/add-developers.controller';
+import {AddMemberController} from './share-workspace/add-members/add-members.controller';
+import {UserItemController} from './share-workspace/user-item/user-item.controller';
+import {UserItem} from './share-workspace/user-item/user-item.directive';
+
 import {WorkspaceConfigService} from './workspace-config.service';
 import {WorkspaceMachines} from './workspace-details/workspace-machines/workspace-machines.directive';
 import {WorkspaceMachinesController} from './workspace-details/workspace-machines/workspace-machines.controller';
@@ -286,6 +294,13 @@ export class WorkspacesConfig {
 
     register.controller('CreateWorkspaceController', CreateWorkspaceController);
     register.service('createWorkspaceSvc', CreateWorkspaceSvc);
+
+    register.controller('ShareWorkspaceController', ShareWorkspaceController);
+    register.directive('shareWorkspace', ShareWorkspace);
+    register.controller('addDeveloperController', AddDeveloperController);
+    register.controller('addMemberController', AddMemberController);
+    register.controller('UserItemController', UserItemController);
+    register.directive('userItem', UserItem);
 
     register.service('workspaceConfigService', WorkspaceConfigService);
 

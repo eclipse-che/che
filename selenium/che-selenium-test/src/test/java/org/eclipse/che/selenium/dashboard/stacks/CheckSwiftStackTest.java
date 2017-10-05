@@ -15,7 +15,7 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestStacksConstants;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
@@ -32,7 +32,7 @@ public class CheckSwiftStackTest {
   private static final String WS_NAME = NameGenerator.generate("workspace", 4);
   private static final String PROJECT_NAME = "swift";
 
-  @Inject private DefaultTestUser user;
+  @Inject private TestUser user;
   @Inject private NavigationBar navigationBar;
   @Inject private CreateWorkspace createWorkspace;
   @Inject private Dashboard dashboard;

@@ -21,6 +21,7 @@ import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
@@ -129,6 +130,7 @@ public class AutocompleteFeaturesInEditorTest {
   @Inject private CodenvyEditor editor;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -174,6 +176,7 @@ public class AutocompleteFeaturesInEditorTest {
     editor.launchAutocompleteAndWaitContainer();
     editor.enterAutocompleteProposal("toString() : String");
     editor.typeTextIntoEditor(";");
+    consoles.closeProcessesArea();
     editor.waitTextIntoEditor(contentAfterEditing);
     editor.waitTabFileWithSavedStatus("AppController");
   }
@@ -181,9 +184,10 @@ public class AutocompleteFeaturesInEditorTest {
   //need for check ready - state the ide editor
   private void reparseEditorCode() {
     editor.setCursorToLine(36);
-    editor.typeTextIntoEditor("a");
+    editor.typeTextIntoEditor("a;");
     editor.waitMarkerInPosition(ERROR_MARKER, 36);
     editor.typeTextIntoEditor(Keys.END.toString());
+    editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
     editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
     editor.waitMarkerDisappears(ERROR_MARKER, 36);
   }

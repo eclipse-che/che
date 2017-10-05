@@ -25,6 +25,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import elemental.events.Event;
+import elemental.events.EventRemover;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -99,6 +100,8 @@ public class AppContextImpl implements AppContext, SelectionChangedHandler, Reso
   private ResourceManager resourceManager;
   private Map<String, String> properties;
 
+  private EventRemover appStateEventRemover;
+
   @Inject
   public AppContextImpl(
       EventBus eventBus,
@@ -121,11 +124,6 @@ public class AppContextImpl implements AppContext, SelectionChangedHandler, Reso
     eventBus.addHandler(ResourceChangedEvent.getType(), this);
     eventBus.addHandler(WorkspaceStoppedEvent.TYPE, workspaceStateHandler);
     eventBus.addHandler(WorkspaceStoppingEvent.TYPE, workspaceStateHandler);
-
-    // in some cases IDE doesn't save preferences on window close
-    // so try to save if window lost focus
-    Elements.getWindow()
-        .addEventListener(Event.BLUR, evt -> appStateManager.get().persistWorkspaceState());
   }
 
   private static native String getMasterApiPathFromIDEConfig() /*-{
@@ -144,6 +142,16 @@ public class AppContextImpl implements AppContext, SelectionChangedHandler, Reso
   /** Sets the current workspace. */
   public void setWorkspace(WorkspaceImpl workspace) {
     this.workspace = new WorkspaceImpl(workspace);
+
+    if (appStateEventRemover != null) {
+      appStateEventRemover.remove();
+    }
+
+    // in some cases IDE doesn't save preferences on window close
+    // so try to save if window lost focus
+    appStateEventRemover =
+        Elements.getWindow()
+            .addEventListener(Event.BLUR, evt -> appStateManager.get().persistWorkspaceState());
   }
 
   @Override

@@ -8,8 +8,6 @@
 # Contributors:
 #   Marian Labuda - Initial Implementation
 
-set -e
-
 BATS_BASE_DIR=$(cd "$(dirname "$0")"/..; pwd)
 . "${BATS_BASE_DIR}"/build.include
 BATS_BASE_DIR=$(get_mount_path "${BATS_BASE_DIR}")
@@ -40,6 +38,8 @@ run_test_in_docker_container() {
 }
 
 echo "Running tests in container from image $IMAGE_NAME"
+echo "Running functionals bats tests for overriding images"
+run_test_in_docker_container override_image_tests.bats ""
 echo "Running functional bats tests for CLI prompts and usage"
 run_test_in_docker_container cli_prompts_usage_tests.bats ""
 echo "Running functionals bats tests for config command"
