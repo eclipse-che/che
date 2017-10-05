@@ -32,7 +32,7 @@ import org.eclipse.che.api.environment.server.CheEnvironmentValidator;
  */
 @Singleton
 public class DefaultWorkspaceValidator implements WorkspaceValidator {
-  /* should contain [3, 20] characters, first and last character is letter or digit, available characters {A-Za-z0-9.-_}*/
+  /* should contain [3, 100] characters, first and last character is letter or digit, available characters {A-Za-z0-9.-_}*/
   private static final Pattern WS_NAME =
       Pattern.compile("[a-zA-Z0-9][-_.a-zA-Z0-9]{1,98}[a-zA-Z0-9]");
 
