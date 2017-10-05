@@ -34,7 +34,7 @@ public class GwtPagePresenterTest {
   private static final String GWT_MODULE = "org.eclipse.CHE";
   private static final String CODE_SERVER_ADDRESS = "127.0.0.1";
   private static final String COMMAND_LINE =
-      "mvn -Psdm -pl :assembly-ide-war -am clean gwt:codeserver -f "
+      "mvn clean gwt:run-codeserver -f "
           + WORK_DIR
           + " -Dgwt.module="
           + GWT_MODULE
