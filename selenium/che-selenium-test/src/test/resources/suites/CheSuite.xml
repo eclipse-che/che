@@ -122,7 +122,7 @@
             <class name="org.eclipse.che.selenium.editor.autocomplete.QuickFixAndCodeAssistantFeaturesTest"/>
             <class name="org.eclipse.che.selenium.editor.autocomplete.ShowHintsCommandTest"/>
             <class name="org.eclipse.che.selenium.editor.CheckReplaceFeatureInEditorTest"/>
-            <class name="org.eclipse.che.selenium.editor.CheckRestoringOfSplitEditor">
+            <class name="org.eclipse.che.selenium.editor.CheckRestoringOfSplitEditorTest">
                 <methods>
                     <exclude name="checkRestoringStateSplittedEditor"/>
                 </methods>
