@@ -279,15 +279,6 @@ public class FindTextFeatureTest {
     findText.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
     findText.sendCommandByKeyboardInFindInfoPanel(ARROW_RIGHT.toString());
     findText.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
-    findText.selectItemInFindInfoPanelByDoubleClick(
-        pathToSayHelloFile, "20:    public String sayHello(String name)");
-    editor.waitActiveEditor();
-    editor.waitActiveTabFileName("SayHello");
-    editor.waitTextIntoEditor("String");
-    Assert.assertEquals(editor.getPositionOfLine(), 20);
-    findText.clickHideBtnFindInfoPanel();
-    findText.clickFindTab();
-    findText.waitFindInfoPanelIsOpen();
     findText.selectItemInFindInfoPanel(
         pathToAppControllerFile,
         "26:    String numGuessByUser = request.getParameter(\"numGuess\");");
@@ -295,6 +286,12 @@ public class FindTextFeatureTest {
     findText.sendCommandByKeyboardInFindInfoPanel(Keys.ENTER.toString());
     editor.waitActiveTabFileName("AppController");
     Assert.assertEquals(editor.getPositionOfLine(), 22);
+    findText.selectItemInFindInfoPanelByDoubleClick(
+        pathToSayHelloFile, "20:    public String sayHello(String name)");
+    editor.waitActiveEditor();
+    editor.waitActiveTabFileName("SayHello");
+    editor.waitTextIntoEditor("String");
+    Assert.assertEquals(editor.getPositionOfLine(), 20);
     editor.closeAllTabsByContextMenu();
   }
 
