@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.ide.command.editor.page.goal;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import java.util.Optional;
@@ -60,7 +62,8 @@ public class GoalPage extends AbstractCommandEditorPage implements GoalPageView.
 
   @Override
   protected void initialize() {
-    initialGoal = editedCommand.getGoal();
+    String goal = editedCommand.getGoal();
+    initialGoal = isNullOrEmpty(goal) ? goalRegistry.getDefaultGoal().getId() : goal;
 
     view.setAvailableGoals(goalRegistry.getAllGoals());
     view.setGoal(initialGoal);

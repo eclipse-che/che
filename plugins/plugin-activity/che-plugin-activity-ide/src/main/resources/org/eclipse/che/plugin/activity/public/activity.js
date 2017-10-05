@@ -59,11 +59,15 @@ var ActivityTracker = new function () {
         request.open("PUT", ActivityTracker.url, true);
 
         var keycloak = window['_keycloak'];
-        if (keycloak && keycloak.token) {
-            var token = "Bearer " + keycloak.token;
-            request.setRequestHeader("Authorization", token);
+        if (keycloak) {
+            keycloak.updateToken(5)
+                .success(function (refreshed) {
+                    var token = "Bearer " + keycloak.token;
+                    request.setRequestHeader("Authorization", token);
+                    request.send();
+                });
+        } else {
+            request.send();
         }
-
-        request.send();
     };
 };

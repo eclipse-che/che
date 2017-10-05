@@ -55,6 +55,7 @@ export class CheNavBarController {
   private organizations: Array<che.IOrganization>;
   private cheKeycloak: CheKeycloak;
   private cheService: CheService;
+  private isPermissionServiceAvailable: boolean;
 
   /**
    * Default constructor
@@ -92,24 +93,31 @@ export class CheNavBarController {
     cheAPI.getWorkspace().fetchWorkspaces();
     cheAPI.getFactory().fetchFactories();
 
-    if (this.isPermissionServiceAvailable()) {
-      if (this.chePermissions.getSystemPermissions()) {
-        this.updateData();
-      } else {
-        this.chePermissions.fetchSystemPermissions().finally(() => {
+    this.isPermissionServiceAvailable = false;
+    this.resolvePermissionServiceAvailability().then((isAvailable: boolean) => {
+      this.isPermissionServiceAvailable = isAvailable;
+
+      if (isAvailable) {
+        if (this.chePermissions.getSystemPermissions()) {
           this.updateData();
-        });
+        } else {
+          this.chePermissions.fetchSystemPermissions().finally(() => {
+            this.updateData();
+          });
+        }
       }
-    }
+    });
   }
 
   /**
-   * Returns <code>true</code> if Permissions service is available.
+   * Resolves promise with <code>true</code> if Permissions service is available.
    *
-   * @returns {boolean}
+   * @returns {ng.IPromise<boolean>}
    */
-  isPermissionServiceAvailable(): boolean {
-    return this.cheService.isServiceAvailable(this.chePermissions.getPermissionsServicePath());
+  resolvePermissionServiceAvailability(): ng.IPromise<boolean> {
+    return this.cheService.fetchServices().then(() => {
+      return this.cheService.isServiceAvailable(this.chePermissions.getPermissionsServicePath());
+    });
   }
 
   /**
