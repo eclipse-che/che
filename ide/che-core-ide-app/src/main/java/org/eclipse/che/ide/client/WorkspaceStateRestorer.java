@@ -38,7 +38,12 @@ public class WorkspaceStateRestorer implements WsAgentComponent {
 
   @Override
   public void start(Callback<WsAgentComponent, Exception> callback) {
-    managerProvider.get().restoreWorkspaceState(appContextProvider.get().getWorkspaceId());
-    callback.onSuccess(this);
+    managerProvider
+        .get()
+        .restoreWorkspaceState(appContextProvider.get().getWorkspaceId())
+        .then(
+            arg -> {
+              callback.onSuccess(WorkspaceStateRestorer.this);
+            });
   }
 }
