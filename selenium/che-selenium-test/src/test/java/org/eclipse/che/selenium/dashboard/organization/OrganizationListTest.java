@@ -52,7 +52,7 @@ public class OrganizationListTest {
   public void setUp() throws Exception {
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
     organization = organizationServiceClient.create(NameGenerator.generate("organization", 5));
-    organizations = organizationServiceClient.getList();
+    organizations = organizationServiceClient.getAll();
   }
 
   @AfterClass

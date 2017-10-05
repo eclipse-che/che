@@ -41,11 +41,11 @@ public class TestOrganizationServiceClient {
     this.requestFactory = requestFactory;
   }
 
-  public List<OrganizationDto> getList() throws Exception {
-    return getList(null);
+  public List<OrganizationDto> getAll() throws Exception {
+    return getAll(null);
   }
 
-  public List<OrganizationDto> getList(@Nullable String parent) throws Exception {
+  public List<OrganizationDto> getAll(@Nullable String parent) throws Exception {
     List<OrganizationDto> organizations =
         requestFactory.fromUrl(getApiUrl()).request().asList(OrganizationDto.class);
 
@@ -105,7 +105,7 @@ public class TestOrganizationServiceClient {
   }
 
   public void deleteAll(String user) throws Exception {
-    getList(user)
+    getAll(user)
         .stream()
         .filter(organization -> organization.getParent() != null)
         .forEach(

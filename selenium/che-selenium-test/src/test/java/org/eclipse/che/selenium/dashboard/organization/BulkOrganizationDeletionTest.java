@@ -65,7 +65,7 @@ public class BulkOrganizationDeletionTest {
 
     organization1 = organizationServiceClient.create(organizationName1);
     organization2 = organizationServiceClient.create(organizationName2);
-    organizations = organizationServiceClient.getList();
+    organizations = organizationServiceClient.getAll();
   }
 
   @AfterClass

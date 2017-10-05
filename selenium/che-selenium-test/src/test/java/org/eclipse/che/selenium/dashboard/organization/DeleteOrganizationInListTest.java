@@ -62,7 +62,7 @@ public class DeleteOrganizationInListTest {
 
     String organizationName = NameGenerator.generate("organization", 5);
     organization = organizationServiceClient.create(organizationName);
-    organizations = organizationServiceClient.getList();
+    organizations = organizationServiceClient.getAll();
   }
 
   @AfterClass
