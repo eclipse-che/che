@@ -58,45 +58,6 @@ abstract class ResourceImpl implements Resource {
 
   /** {@inheritDoc} */
   @Override
-  public boolean isFile() {
-    return getResourceType() == FILE;
-  }
-
-  @Override
-  public File asFile() {
-    checkState(isFile(), "Current resource is not a file");
-
-    return (File) this;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public boolean isFolder() {
-    return getResourceType() == FOLDER;
-  }
-
-  @Override
-  public Folder asFolder() {
-    checkState(isFolder(), "Current resource is not a folder");
-
-    return (Folder) this;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public boolean isProject() {
-    return getResourceType() == PROJECT;
-  }
-
-  @Override
-  public Project asProject() {
-    checkState(isProject(), "Current resource is not a project");
-
-    return (Project) this;
-  }
-
-  /** {@inheritDoc} */
-  @Override
   public Promise<Resource> copy(Path destination) {
     return copy(destination, false);
   }
