@@ -18,4 +18,8 @@ public interface ProjectSearchResponseDto {
   List<SearchResultDto> getItemReferences();
 
   ProjectSearchResponseDto withItemReferences(List<SearchResultDto> itemReferences);
+
+  int getTotalHits();
+
+  ProjectSearchResponseDto withTotalHits(int totalHits);
 }

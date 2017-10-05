@@ -10,10 +10,13 @@
  */
 package org.eclipse.che.selenium.git;
 
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.GO_INTO;
+
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import java.util.Random;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
+import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -29,22 +32,15 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.WarningDialog;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.git.Git;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev */
-//TODO Test is disabled. See issue - https://github.com/eclipse/che/issues/1853
 public class KeepDirectoryGitImportTest {
-  private static final Logger LOG = LoggerFactory.getLogger(KeepDirectoryGitImportTest.class);
-  public static final String PROJECT_NAME_1 = "KeepDirectoryProject_1_" + new Random().nextInt(999);
-  public static final String PROJECT_NAME_2 = "KeepDirectoryProject_2_" + new Random().nextInt(999);
-  public static final String PROJECT_NAME_3 = "KeepDirectoryProject_3_" + new Random().nextInt(999);
-  public static final String PROJECT_NAME_4 = "KeepDirectoryProject_4_" + new Random().nextInt(999);
+  public static final String PROJECT_NAME = NameGenerator.generate("KeepDirectoryProject", 4);
   public static final String DIRECTORY_NAME_1 = "my-lib";
   public static final String DIRECTORY_NAME_2 = "my-lib/src/test";
-  private static final String GO_INTO_ID = "gwt-debug-contextMenu/goInto";
 
   @Inject private TestWorkspace ws;
   @Inject private Ide ide;
@@ -70,6 +66,7 @@ public class KeepDirectoryGitImportTest {
   @Inject private WarningDialog warningDialog;
   @Inject private Preferences preferences;
   @Inject private TestGitHubServiceClient gitHubClientService;
+  @Inject private TestProjectServiceClient projectServiceClient;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -80,71 +77,66 @@ public class KeepDirectoryGitImportTest {
         TestMenuCommandsConstants.Profile.PROFILE_MENU,
         TestMenuCommandsConstants.Profile.PREFERENCES);
     preferences.waitPreferencesForm();
-    gitHubClientService.deleteAllGrants(gitHubPassword, gitHubPassword);
+    gitHubClientService.deleteAllGrants(gitHubUsername, gitHubPassword);
     preferences.regenerateAndUploadSshKeyOnGithub(gitHubUsername, gitHubPassword);
   }
 
-  // TODO should be fixed by issue https://github.com/eclipse/che/issues/6486
-  @Test
-  public void keepDirectoryGitImportTest() throws Exception {
-    // Check the 'keep directory' from SSH Git url
+  @AfterMethod
+  public void tearDown() throws Exception {
+    projectServiceClient.deleteResource(ws.getId(), PROJECT_NAME);
+  }
+
+  @Test(priority = 1)
+  public void keepDirectoryImportBySshUrlTest() throws Exception {
     projectExplorer.waitProjectExplorer();
     makeKeepDirectoryFromGitUrl(
         "git@github.com:" + gitHubUsername + "/java-multimodule.git",
-        PROJECT_NAME_1,
+        PROJECT_NAME,
         DIRECTORY_NAME_1);
-    projectExplorer.waitItem(PROJECT_NAME_1);
-    projectExplorer.selectVisibleItem(PROJECT_NAME_1);
-    projectExplorer.openItemByPath(PROJECT_NAME_1);
+    projectExplorer.waitItem(PROJECT_NAME);
+    projectExplorer.selectVisibleItem(PROJECT_NAME);
+    projectExplorer.openItemByPath(PROJECT_NAME);
     loader.waitOnClosed();
-    projectExplorer.waitItemIsDisappeared(PROJECT_NAME_1 + "/my-webapp");
-    projectExplorer.waitItem(PROJECT_NAME_1 + "/my-lib");
-    expandDirectoryMyLib(PROJECT_NAME_1);
+    projectExplorer.waitItemIsDisappeared(PROJECT_NAME + "/my-webapp");
+    projectExplorer.waitItem(PROJECT_NAME + "/my-lib");
+    expandDirectoryMyLib(PROJECT_NAME);
+  }
 
-    // Check the 'keep directory' for configured project
-    loader.waitOnClosed();
-    makeKeepDirectoryFromGitUrl(
-        "git@github.com:" + gitHubUsername + "/java-multimodule2.git",
-        PROJECT_NAME_2,
-        DIRECTORY_NAME_1);
-    projectExplorer.waitItem(PROJECT_NAME_2);
-    projectExplorer.selectVisibleItem(PROJECT_NAME_2);
-    projectExplorer.openItemByPath(PROJECT_NAME_2);
-    projectExplorer.waitItemIsDisappeared(PROJECT_NAME_2 + "/my-webapp");
-    projectExplorer.waitItemInVisibleArea("my-lib");
-    projectExplorer.waitItem(PROJECT_NAME_2 + "/my-lib");
-    projectExplorer.openItemByPath(PROJECT_NAME_2 + "/my-lib");
-    projectExplorer.waitItem(PROJECT_NAME_2 + "/my-lib/src");
-
-    // Check the 'keep directory' from https git url
+  @Test(priority = 2)
+  public void keepDirectoryImportByHttpsUrlTest() throws Exception {
+    projectExplorer.waitProjectExplorer();
     makeKeepDirectoryFromGitUrl(
         "https://github.com/" + gitHubUsername + "/java-multimodule2.git",
-        PROJECT_NAME_3,
+        PROJECT_NAME,
         DIRECTORY_NAME_2);
-    projectExplorer.waitItem(PROJECT_NAME_3);
-    projectExplorer.selectVisibleItem(PROJECT_NAME_3);
-    projectExplorer.openItemByPath(PROJECT_NAME_3);
-    projectExplorer.waitItem(PROJECT_NAME_3 + "/my-lib");
-    projectExplorer.openItemByPath(PROJECT_NAME_3 + "/my-lib");
-    projectExplorer.openItemByPath(PROJECT_NAME_3 + "/my-lib/src");
-    projectExplorer.openItemByPath(PROJECT_NAME_3 + "/my-lib/src/test");
-    projectExplorer.openItemByPath(PROJECT_NAME_3 + "/my-lib/src/test/java");
-    projectExplorer.openItemByPath(PROJECT_NAME_3 + "/my-lib/src/test/java/hello");
-    projectExplorer.openItemByPath(
-        PROJECT_NAME_3 + "/my-lib/src/test/java/hello/SayHelloTest.java");
+    projectExplorer.waitItem(PROJECT_NAME);
+    projectExplorer.selectVisibleItem(PROJECT_NAME);
+    projectExplorer.openItemByPath(PROJECT_NAME);
+    projectExplorer.waitItem(PROJECT_NAME + "/my-lib");
+    projectExplorer.openItemByPath(PROJECT_NAME + "/my-lib");
+    projectExplorer.openItemByPath(PROJECT_NAME + "/my-lib/src");
+    projectExplorer.openItemByPath(PROJECT_NAME + "/my-lib/src/test");
+    projectExplorer.openItemByPath(PROJECT_NAME + "/my-lib/src/test/java");
+    projectExplorer.openItemByPath(PROJECT_NAME + "/my-lib/src/test/java/hello");
+    projectExplorer.openItemByPath(PROJECT_NAME + "/my-lib/src/test/java/hello/SayHelloTest.java");
     loader.waitOnClosed();
     editor.waitActiveEditor();
-    projectExplorer.waitItemIsDisappeared(PROJECT_NAME_3 + "/my-lib/src/main");
-    projectExplorer.waitItemIsDisappeared(PROJECT_NAME_3 + "/my-webapp");
-    projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME_3 + "/my-lib/src/test");
-    projectExplorer.clickOnItemInContextMenu(GO_INTO_ID);
-    projectExplorer.waitDisappearItemByPath(PROJECT_NAME_3 + "/src/my-lib");
+    projectExplorer.waitItemIsDisappeared(PROJECT_NAME + "/my-lib/src/main");
+    projectExplorer.waitItemIsDisappeared(PROJECT_NAME + "/my-webapp");
+    projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/my-lib/src/test");
+    projectExplorer.clickOnItemInContextMenu(GO_INTO);
+    projectExplorer.waitDisappearItemByPath(PROJECT_NAME + "/src/my-lib");
     projectExplorer.waitItemInVisibleArea("test");
     projectExplorer.waitItemInVisibleArea("java");
     projectExplorer.waitItemInVisibleArea("hello");
     projectExplorer.waitItemInVisibleArea("SayHelloTest.java");
+    projectExplorer.clickGoBackButton();
+    projectExplorer.waitItem(PROJECT_NAME + "/my-lib/src");
+  }
 
-    // Check the 'keep directory' from GitHub
+  @Test(priority = 3)
+  public void keepDirectoryImportFromGitHub() throws Exception {
+    projectExplorer.waitProjectExplorer();
     menu.runCommand(
         TestMenuCommandsConstants.Workspace.WORKSPACE,
         TestMenuCommandsConstants.Workspace.IMPORT_PROJECT);
@@ -158,7 +150,7 @@ public class KeepDirectoryGitImportTest {
     importProject.selectItemInAccountList(
         gitHubClientService.getName(gitHubUsername, gitHubPassword));
     importProject.selectProjectByName("java-multimodule");
-    importProject.typeProjectName(PROJECT_NAME_4);
+    importProject.typeProjectName(PROJECT_NAME);
     importProject.waitKeepDirectoryIsNotSelected();
     importProject.clickOnKeepDirectoryCheckbox();
     importProject.waitKeepDirectoryIsSelected();
@@ -167,26 +159,28 @@ public class KeepDirectoryGitImportTest {
     importProject.waitMainFormIsClosed();
     loader.waitOnClosed();
     projectExplorer.waitProjectExplorer();
-    projectExplorer.waitItem(PROJECT_NAME_4);
-    projectExplorer.selectVisibleItem(PROJECT_NAME_4);
-    projectExplorer.openItemByPath(PROJECT_NAME_4);
+    projectExplorer.waitItem(PROJECT_NAME);
+    projectExplorer.selectVisibleItem(PROJECT_NAME);
+    projectExplorer.openItemByPath(PROJECT_NAME);
     loader.waitOnClosed();
-    projectExplorer.waitItemIsDisappeared(PROJECT_NAME_4 + "/my-lib");
-    projectExplorer.waitItem(PROJECT_NAME_4 + "/my-webapp");
-    projectExplorer.openItemByPath(PROJECT_NAME_4 + "/my-webapp");
-    projectExplorer.openItemByPath(PROJECT_NAME_4 + "/my-webapp/src");
+    projectExplorer.waitItemIsDisappeared(PROJECT_NAME + "/my-lib");
+    projectExplorer.waitItem(PROJECT_NAME + "/my-webapp");
+    projectExplorer.openItemByPath(PROJECT_NAME + "/my-webapp");
+    projectExplorer.openItemByPath(PROJECT_NAME + "/my-webapp/src");
     loader.waitOnClosed();
-    projectExplorer.openItemByPath(PROJECT_NAME_4 + "/my-webapp/src/main");
+    projectExplorer.openItemByPath(PROJECT_NAME + "/my-webapp/src/main");
     loader.waitOnClosed();
-    projectExplorer.waitItem(PROJECT_NAME_4 + "/my-webapp/src/main/webapp");
-    projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME_4 + "/my-webapp");
-    projectExplorer.clickOnItemInContextMenu(GO_INTO_ID);
+    projectExplorer.waitItem(PROJECT_NAME + "/my-webapp/src/main/webapp");
+    projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/my-webapp");
+    projectExplorer.clickOnItemInContextMenu(GO_INTO);
     loader.waitOnClosed();
     projectExplorer.waitItemInVisibleArea("my-webapp");
-    projectExplorer.waitItemIsDisappeared(PROJECT_NAME_4);
+    projectExplorer.waitItemIsDisappeared(PROJECT_NAME);
+    projectExplorer.clickGoBackButton();
+    projectExplorer.waitItem(PROJECT_NAME);
   }
 
-  public void makeKeepDirectoryFromGitUrl(String url, String projectName, String folderName)
+  private void makeKeepDirectoryFromGitUrl(String url, String projectName, String folderName)
       throws Exception {
     menu.runCommand(
         TestMenuCommandsConstants.Workspace.WORKSPACE,
@@ -207,7 +201,7 @@ public class KeepDirectoryGitImportTest {
     projectExplorer.waitProjectExplorer();
   }
 
-  public void expandDirectoryMyLib(String projectName) throws Exception {
+  private void expandDirectoryMyLib(String projectName) throws Exception {
     projectExplorer.openItemByPath(projectName + "/my-lib");
     projectExplorer.openItemByPath(projectName + "/my-lib/src");
     projectExplorer.openItemByPath(projectName + "/my-lib/src/main");

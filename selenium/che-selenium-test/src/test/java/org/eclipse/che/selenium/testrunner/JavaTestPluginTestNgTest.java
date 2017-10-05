@@ -150,7 +150,7 @@ public class JavaTestPluginTestNgTest {
   }
 
   @Test(priority = 2)
-  public void shouldExecuteAlltets() throws InterruptedException {
+  public void shouldExecuteAlltests() throws InterruptedException {
     // given
     projectExplorer.openItemByPath(PATH_TO_ANOTHER_TEST_CLASS);
 

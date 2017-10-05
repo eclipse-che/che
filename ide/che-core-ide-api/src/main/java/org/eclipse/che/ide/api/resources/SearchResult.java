@@ -10,74 +10,25 @@
  */
 package org.eclipse.che.ide.api.resources;
 
-import java.util.ArrayList;
 import java.util.List;
-import org.eclipse.che.api.project.shared.Constants;
-import org.eclipse.che.api.project.shared.SearchOccurrence;
-import org.eclipse.che.api.project.shared.dto.SearchOccurrenceDto;
-import org.eclipse.che.api.project.shared.dto.SearchResultDto;
 
-/** @author Vitalii Parfonov */
+/** Class contains an information about result of the text search operation. */
 public class SearchResult {
+  private List<SearchItemReference> itemReferences;
+  private int totalHits;
 
-  private String name;
-  private String path;
-  private String project;
-  private String contentUrl;
-  private List<SearchOccurrence> occurrences;
-
-  public SearchResult(SearchResultDto searchResultDto) {
-    name = searchResultDto.getItemReference().getName();
-    path = searchResultDto.getItemReference().getPath();
-    project = searchResultDto.getItemReference().getProject();
-    if (searchResultDto.getItemReference().getLink(Constants.LINK_REL_GET_CONTENT) != null) {
-      contentUrl =
-          searchResultDto.getItemReference().getLink(Constants.LINK_REL_GET_CONTENT).getHref();
-    }
-    final List<SearchOccurrenceDto> dtos = searchResultDto.getSearchOccurrences();
-    occurrences = new ArrayList<>(dtos.size());
-    for (SearchOccurrence dto : dtos) {
-      occurrences.add(new SearchOccurrenceImpl(dto));
-    }
+  public SearchResult(List<SearchItemReference> itemReferences, int totalHits) {
+    this.itemReferences = itemReferences;
+    this.totalHits = totalHits;
   }
 
-  public String getName() {
-    return name;
+  /** returns list of found items {@link SearchItemReference} */
+  public List<SearchItemReference> getItemReferences() {
+    return itemReferences;
   }
 
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public String getPath() {
-    return path;
-  }
-
-  public void setPath(String path) {
-    this.path = path;
-  }
-
-  public String getProject() {
-    return project;
-  }
-
-  public void setProject(String project) {
-    this.project = project;
-  }
-
-  public List<SearchOccurrence> getOccurrences() {
-    return occurrences;
-  }
-
-  public void setOccurrences(List<SearchOccurrence> occurrences) {
-    this.occurrences = occurrences;
-  }
-
-  public String getContentUrl() {
-    return contentUrl;
-  }
-
-  public void setContentUrl(String contentUrl) {
-    this.contentUrl = contentUrl;
+  /** returns total file count where requested text was found */
+  public int getTotalHits() {
+    return totalHits;
   }
 }
