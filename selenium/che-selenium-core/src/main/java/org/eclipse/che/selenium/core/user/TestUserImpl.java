@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.core.user;
 import static java.lang.String.format;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import java.util.ArrayList;
@@ -47,12 +48,12 @@ public class TestUserImpl implements TestUser {
   /** To instantiate user with generated email and password. */
   @Inject
   public TestUserImpl(
-      TestUserServiceClient userServiceClient,
+      Provider<TestUserServiceClient> userServiceClient,
       TestAuthServiceClient authServiceClient,
       TestWorkspaceServiceClientFactory wsServiceClientFactory)
       throws Exception {
     this(
-        userServiceClient,
+        userServiceClient.get(),
         authServiceClient,
         wsServiceClientFactory,
         NameGenerator.generate("user", 6) + "@some.mail");
@@ -90,7 +91,7 @@ public class TestUserImpl implements TestUser {
     this.userServiceClient.create(name, email, password);
     this.authToken = authServiceClient.login(name, password);
     this.id = userServiceClient.findByEmail(email).getId();
-    LOG.info("User name='{}', password '{}', id='{}' has been created", name, password, id);
+    LOG.info("User name='{}', password='{}', id='{}' has been created", name, password, id);
     this.workspaceServiceClient = wsServiceClientFactory.create(email, password);
   }
 
