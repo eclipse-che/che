@@ -8,18 +8,16 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.pageobject.site;
+package org.eclipse.che.selenium.core.entrance;
+
+import org.eclipse.che.selenium.core.user.TestUser;
 
 /** @author Dmytro Nochevnov */
-public interface LoginPage {
-
+public interface Entrance {
   /**
-   * Login Page of product.
+   * Login to product.
    *
-   * @param username login username
-   * @param password login password
+   * @param user user to login
    */
-  void login(String username, String password);
-
-  boolean isOpened();
+  void login(TestUser user);
 }
