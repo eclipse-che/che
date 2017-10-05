@@ -35,7 +35,6 @@ import org.testng.annotations.Test;
 public class CheckBreakPointStateTest {
   private static final String PROJECT_NAME = NameGenerator.generate("project", 3);
   private static final String PROJECT_NAME_2 = NameGenerator.generate("project", 3);
-  private static final String PROJECT_NAME_3 = NameGenerator.generate("project", 3);
   private static final String PATH_PREFFIX = "/src/main/java/org/eclipse/qa/examples/";
   private static final String PATH_TO_PROJECT_WITH_ONE_CLASS = PROJECT_NAME + PATH_PREFFIX;
   private static final String PATH_TO_PROJECT_WITH_TWO_CLASSES = PROJECT_NAME_2 + PATH_PREFFIX;
@@ -64,22 +63,15 @@ public class CheckBreakPointStateTest {
     testProjectServiceClient.importProject(
         ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME_2, ProjectTemplates.MAVEN_SPRING);
 
-    testProjectServiceClient.importProject(
-        ws.getId(),
-        Paths.get(getClass().getResource("/projects/debugStepInto").toURI()),
-        PROJECT_NAME_3,
-        ProjectTemplates.MAVEN_SPRING);
-
     ide.open(ws);
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.waitItem(PROJECT_NAME_2);
-    projectExplorer.waitItem(PROJECT_NAME_3);
+    projectExplorer.quickExpandWithJavaScript();
   }
 
   @Test
   public void shouldReorderBreakpointsWhenFileEdited() throws Exception {
-    projectExplorer.expandPathInProjectExplorerAndOpenFile(
-        PROJECT_NAME_3 + "/src/main/java/org.eclipse.qa.examples", "AppController.java");
+    projectExplorer.openItemByPath(PATH_TO_PROJECT_WITH_ONE_CLASS + "AppController.java");
 
     // given
     editor.setCursorToLine(26);
@@ -104,8 +96,7 @@ public class CheckBreakPointStateTest {
     // when (remove the current line)
     editor.deleteCurrentLine();
     // then
-    editor.waitBreakpointRemoved(25);
-    editor.waitBreakpointRemoved(26);
+    editor.waitInactiveBreakpoint(26);
     editor.waitInactiveBreakpoint(28);
     editor.waitInactiveBreakpoint(30);
     editor.waitInactiveBreakpoint(37);
@@ -126,7 +117,6 @@ public class CheckBreakPointStateTest {
     String expectedBreakpointsForGreetingClass =
         "AppController.java:29\n" + "AppController.java:30\n" + "AppController.java:31";
 
-    projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PATH_TO_PROJECT_WITH_TWO_CLASSES + "AdditonalClass.java");
     editor.waitActiveEditor();
     editor.setInactiveBreakpoint(7);
