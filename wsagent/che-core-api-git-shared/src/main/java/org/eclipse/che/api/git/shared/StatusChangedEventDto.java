@@ -20,19 +20,19 @@ import org.eclipse.che.dto.shared.DTO;
  * @author Igor Vinokur
  */
 @DTO
-public interface IndexChangedEventDto {
+public interface StatusChangedEventDto {
 
   /** Status of the repository. */
   Status getStatus();
 
   void setStatus(Status status);
 
-  IndexChangedEventDto withStatus(Status status);
+  StatusChangedEventDto withStatus(Status status);
 
   /** Map of modified files and their edited regions. */
   Map<String, List<EditedRegion>> getModifiedFiles();
 
   void setModifiedFiles(Map<String, List<EditedRegion>> modifiedFiles);
 
-  IndexChangedEventDto withModifiedFiles(Map<String, List<EditedRegion>> modifiedFiles);
+  StatusChangedEventDto withModifiedFiles(Map<String, List<EditedRegion>> modifiedFiles);
 }

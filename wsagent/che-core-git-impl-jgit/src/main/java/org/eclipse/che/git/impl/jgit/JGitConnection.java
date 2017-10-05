@@ -130,7 +130,6 @@ import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.git.shared.Tag;
 import org.eclipse.che.api.git.shared.event.GitCommitEvent;
 import org.eclipse.che.api.git.shared.event.GitRepositoryInitializedEvent;
-import org.eclipse.che.api.git.shared.event.GitResetEvent;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.proxy.ProxyAuthenticator;
 import org.eclipse.che.plugin.ssh.key.script.SshKeyProvider;
@@ -750,7 +749,15 @@ class JGitConnection implements GitConnection {
           gerritSupportConfigValue != null ? Boolean.valueOf(gerritSupportConfigValue) : false;
       commitCommand.setInsertChangeId(isGerritSupportConfigured);
       RevCommit result = commitCommand.call();
-      eventService.publish(newDto(GitCommitEvent.class).withStatus(status(emptyList())));
+      Map<String, List<EditedRegion>> modifiedFiles = new HashMap<>();
+      for (String file : status.getChanged()) {
+        modifiedFiles.put(file, getEditedRegions(file));
+      }
+      eventService.publish(
+          newDto(GitCommitEvent.class)
+              .withStatus(status(emptyList()))
+              .withModifiedFiles(modifiedFiles));
+
       GitUser gitUser = newDto(GitUser.class).withName(committerName).withEmail(committerEmail);
 
       return newDto(Revision.class)
@@ -1741,7 +1748,6 @@ class JGitConnection implements GitConnection {
       }
 
       resetCommand.call();
-      eventService.publish(newDto(GitResetEvent.class).withStatus(status(emptyList())));
     } catch (GitAPIException exception) {
       throw new GitException(exception.getMessage(), exception);
     }

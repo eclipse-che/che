@@ -23,8 +23,8 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.git.shared.EditedRegion;
 import org.eclipse.che.api.git.shared.FileChangedEventDto;
-import org.eclipse.che.api.git.shared.IndexChangedEventDto;
 import org.eclipse.che.api.git.shared.Status;
+import org.eclipse.che.api.git.shared.StatusChangedEventDto;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorOpenedEvent;
 import org.eclipse.che.ide.api.git.GitServiceClient;
@@ -94,8 +94,8 @@ public class GitChangesHandler {
 
     configurator
         .newConfiguration()
-        .methodName("event/git/indexChanged")
-        .paramsAsDto(IndexChangedEventDto.class)
+        .methodName("event/git/statusChanged")
+        .paramsAsDto(StatusChangedEventDto.class)
         .noResult()
         .withBiConsumer(this::apply);
   }
@@ -114,6 +114,9 @@ public class GitChangesHandler {
                         .equals(Path.valueOf(dto.getPath())))
         .forEach(
             node -> {
+              setVcsStatusToEditorsFile(
+                  Path.valueOf(dto.getPath()), VcsStatus.from(dto.getStatus().toString()));
+
               ((ResourceNode) node)
                   .getData()
                   .asFile()
@@ -146,6 +149,18 @@ public class GitChangesHandler {
             });
   }
 
+  private void setVcsStatusToEditorsFile(Path filePath, VcsStatus status) {
+    editorAgentProvider
+        .get()
+        .getOpenedEditors()
+        .stream()
+        .filter(
+            editor ->
+                editor.getEditorInput().getFile().getLocation().equals(filePath)
+                    && editor instanceof HasVcsChangeMarkerRender)
+        .forEach(editor -> ((File) editor.getEditorInput().getFile()).setVcsStatus(status));
+  }
+
   private void handleEditedRegions(List<EditedRegion> editedRegions, VcsChangeMarkerRender render) {
     render.clearAllChangeMarkers();
     editedRegions.forEach(
@@ -154,7 +169,7 @@ public class GitChangesHandler {
                 edition.getBeginLine(), edition.getEndLine(), edition.getType()));
   }
 
-  public void apply(String endpointId, IndexChangedEventDto dto) {
+  public void apply(String endpointId, StatusChangedEventDto dto) {
     Tree tree = projectExplorerPresenterProvider.get().getTree();
     Status status = dto.getStatus();
     tree.getNodeStorage()

@@ -32,24 +32,25 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.git.shared.EditedRegion;
-import org.eclipse.che.api.git.shared.IndexChangedEventDto;
 import org.eclipse.che.api.git.shared.Status;
+import org.eclipse.che.api.git.shared.StatusChangedEventDto;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
 import org.slf4j.Logger;
 
 /**
- * Detects changes in index file and sends message to client Git handler.
+ * Detects changes in index and ORIG_HEAD files and sends message to client Git handler.
  *
  * @author Igor Vinokur
  */
-public class GitIndexChangedDetector {
-  private static final Logger LOG = getLogger(GitIndexChangedDetector.class);
+public class GitStatusChangedDetector {
+  private static final Logger LOG = getLogger(GitStatusChangedDetector.class);
 
   private static final String GIT_DIR = ".git";
   private static final String INDEX_FILE = "index";
+  private static final String ORIG_HEAD_FILE = "ORIG_HEAD";
   private static final String INCOMING_METHOD = "track/git-index";
-  private static final String OUTGOING_METHOD = "event/git/indexChanged";
+  private static final String OUTGOING_METHOD = "event/git/statusChanged";
 
   private final RequestTransmitter transmitter;
   private final FileWatcherManager manager;
@@ -58,10 +59,11 @@ public class GitIndexChangedDetector {
 
   private final Set<String> endpointIds = newConcurrentHashSet();
 
-  private int id;
+  private int indexId;
+  private int origHeadId;
 
   @Inject
-  public GitIndexChangedDetector(
+  public GitStatusChangedDetector(
       RequestTransmitter transmitter,
       FileWatcherManager manager,
       Provider<ProjectManager> projectManagerProvider,
@@ -83,32 +85,33 @@ public class GitIndexChangedDetector {
   }
 
   @PostConstruct
-  public void startWatcher() {
-    id = manager.registerByMatcher(matcher(), createConsumer(), modifyConsumer(), deleteConsumer());
+  public void startWatchers() {
+    indexId =
+        manager.registerByMatcher(
+            indexMatcher(), fsEventConsumer(), EMPTY_CONSUMER, EMPTY_CONSUMER);
+    origHeadId =
+        manager.registerByMatcher(
+            OrigHeadMatcher(), fsEventConsumer(), fsEventConsumer(), EMPTY_CONSUMER);
   }
 
   @PreDestroy
-  public void stopWatcher() {
-    manager.unRegisterByMatcher(id);
+  public void stopWatchers() {
+    manager.unRegisterByMatcher(indexId);
+    manager.unRegisterByMatcher(origHeadId);
   }
 
-  private PathMatcher matcher() {
+  private PathMatcher OrigHeadMatcher() {
+    return it ->
+        !isDirectory(it)
+            && ORIG_HEAD_FILE.equals(it.getFileName().toString())
+            && GIT_DIR.equals(it.getParent().getFileName().toString());
+  }
+
+  private PathMatcher indexMatcher() {
     return it ->
         !isDirectory(it)
             && INDEX_FILE.equals(it.getFileName().toString())
             && GIT_DIR.equals(it.getParent().getFileName().toString());
-  }
-
-  private Consumer<String> createConsumer() {
-    return fsEventConsumer();
-  }
-
-  private Consumer<String> modifyConsumer() {
-    return EMPTY_CONSUMER;
-  }
-
-  private Consumer<String> deleteConsumer() {
-    return EMPTY_CONSUMER;
   }
 
   private Consumer<String> fsEventConsumer() {
@@ -127,7 +130,7 @@ public class GitIndexChangedDetector {
                 .toIoFile()
                 .getAbsolutePath();
         GitConnection connection = gitConnectionFactory.getConnection(projectPath);
-        Status status = gitConnectionFactory.getConnection(projectPath).status(emptyList());
+        Status status = connection.status(emptyList());
         Status statusDto = newDto(Status.class);
         statusDto.setAdded(status.getAdded());
         statusDto.setUntracked(status.getUntracked());
@@ -139,20 +142,16 @@ public class GitIndexChangedDetector {
 
         Map<String, List<EditedRegion>> modifiedFiles = new HashMap<>();
         for (String file : status.getChanged()) {
-          modifiedFiles.put(
-              file, gitConnectionFactory.getConnection(projectPath).getEditedRegions(file));
-        }
-        for (String file : status.getModified()) {
           modifiedFiles.put(file, connection.getEditedRegions(file));
         }
 
-        IndexChangedEventDto indexChangeEventDto =
-            newDto(IndexChangedEventDto.class).withStatus(status).withModifiedFiles(modifiedFiles);
+        StatusChangedEventDto statusChangeEventDto =
+            newDto(StatusChangedEventDto.class).withStatus(status).withModifiedFiles(modifiedFiles);
         transmitter
             .newRequest()
             .endpointId(id)
             .methodName(OUTGOING_METHOD)
-            .paramsAsDto(indexChangeEventDto)
+            .paramsAsDto(statusChangeEventDto)
             .sendAndSkipResult();
       } catch (ServerException | NotFoundException e) {
         String errorMessage = e.getMessage();
