@@ -24,6 +24,7 @@ import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.action.GenericActionsFactory;
 import org.eclipse.che.selenium.core.action.MacOSActionsFactory;
 import org.eclipse.che.selenium.core.client.CheTestUserServiceClient;
+import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClientFactory;
 import org.eclipse.che.selenium.core.configuration.SeleniumTestConfiguration;
@@ -43,6 +44,7 @@ import org.eclipse.che.selenium.core.provider.TestSvnRepo1Provider;
 import org.eclipse.che.selenium.core.provider.TestSvnRepo2Provider;
 import org.eclipse.che.selenium.core.provider.TestSvnUsernameProvider;
 import org.eclipse.che.selenium.core.requestfactory.CheTestDefaultUserHttpJsonRequestFactory;
+import org.eclipse.che.selenium.core.requestfactory.TestCheAdminHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactoryCreator;
 import org.eclipse.che.selenium.core.user.CheDefaultTestUser;
@@ -117,5 +119,13 @@ public class CheSeleniumSuiteModule extends AbstractModule {
   @Provides
   public ActionsFactory getActionFactory() {
     return isMac() ? new MacOSActionsFactory() : new GenericActionsFactory();
+  }
+
+  @Provides
+  @Named("admin")
+  public TestOrganizationServiceClient getAdminOrganizationServiceClient(
+      TestApiEndpointUrlProvider apiEndpointUrlProvider,
+      TestCheAdminHttpJsonRequestFactory requestFactory) {
+    return new TestOrganizationServiceClient(apiEndpointUrlProvider, requestFactory);
   }
 }
