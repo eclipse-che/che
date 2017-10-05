@@ -10,6 +10,7 @@
  */
 'use strict';
 import {CheProfile} from '../../../../components/api/che-profile.factory';
+import {CheUser} from '../../../../components/api/che-user.factory';
 
 /**
  * This class is handling the controller for the add members popup
@@ -58,16 +59,25 @@ export class AddMemberController {
 
   private cheTeam: che.api.ICheTeam;
 
+  private cheUser: CheUser;
+
+  private $log: ng.ILogService;
+
+  private cheListHelper: che.widget.ICheListHelper;
+
   /**
    * Default constructor.
    * @ngInject for Dependency injection
    */
   constructor($q: ng.IQService, $mdDialog: angular.material.IDialogService, lodash: any, cheTeam: che.api.ICheTeam,
-              chePermissions: che.api.IChePermissions, cheProfile: CheProfile) {
+              chePermissions: che.api.IChePermissions, cheProfile: CheProfile, cheUser: CheUser, $log: ng.ILogService,
+              $scope: ng.IScope, cheListHelperFactory: che.widget.ICheListHelperFactory) {
     this.$q = $q;
     this.$mdDialog = $mdDialog;
     this.lodash = lodash;
     this.cheTeam = cheTeam;
+    this.cheUser = cheUser;
+    this.$log = $log;
 
     this.chePermissions = chePermissions;
     this.cheProfile = cheProfile;
@@ -81,6 +91,12 @@ export class AddMemberController {
     if (this.team) {
      this.fetchTeamMembers();
     }
+
+    const helperId = 'add-members';
+    this.cheListHelper = cheListHelperFactory.getHelper(helperId);
+    $scope.$on('$destroy', () => {
+      cheListHelperFactory.removeHelper(helperId);
+    });
   }
 
   fetchTeamMembers(): void {
@@ -112,19 +128,21 @@ export class AddMemberController {
         continue;
       }
 
-      let user = this.cheProfile.getProfileById(userId);
-
-      if (user) {
-        this.formUserItem(user, permission);
-      } else {
-        let promise = this.cheProfile.fetchProfileById(userId).then(() => {
-          this.formUserItem(this.cheProfile.getProfileById(userId), permission);
-        });
-        promises.push(promise);
+      if (this.cheUser.getUserFromId(userId)) {
+        this.formUserItem(this.cheUser.getUserFromId(userId), permission);
+        continue;
       }
+
+      const promise = this.cheUser.fetchUserId(userId).then(() => {
+        this.formUserItem(this.cheUser.getUserFromId(userId), permission);
+      }, (error: any) => {
+        this.$log.log(`Failed to fetch user by ID with error ${error}`);
+      });
+      promises.push(promise);
     }
 
     this.$q.all(promises).finally(() => {
+      this.cheListHelper.setList(this.members, 'email');
       this.isLoading = false;
     });
   }
@@ -138,6 +156,7 @@ export class AddMemberController {
   formUserItem(user: any, permissions: any): void {
     user.name = this.cheProfile.getFullName(user.attributes);
     let userItem = angular.copy(user);
+    userItem.userId = user.id;
     userItem.permissions = permissions;
     this.members.push(userItem);
   }
@@ -156,10 +175,8 @@ export class AddMemberController {
   shareWorkspace() {
     let checkedUsers = [];
 
-    Object.keys(this.membersSelectedStatus).forEach((key: string) => {
-      if (this.membersSelectedStatus[key] === true) {
-        checkedUsers.push({userId: key, isTeamAdmin: this.isTeamAdmin(key)});
-      }
+    this.cheListHelper.getSelectedItems().forEach((member: any) => {
+      checkedUsers.push({userId: member.userId, isTeamAdmin: this.isTeamAdmin(member.userId)});
     });
 
     let permissionPromises = this.callbackController.shareWorkspace(checkedUsers);
@@ -194,74 +211,4 @@ export class AddMemberController {
     });
   }
 
-  /**
-   * Return <code>true</code> if all members in list are checked.
-   * @returns {boolean}
-   */
-  isAllMembersSelected(): boolean {
-    return this.isAllSelected;
-  }
-
-  /**
-   * Returns <code>true</code> if all members in list are not checked.
-   * @returns {boolean}
-   */
-  isNoMemberSelected(): boolean {
-    return this.isNoSelected;
-  }
-
-  /**
-   * Make all members in list selected.
-   */
-  selectAllMembers(): void {
-    this.members.forEach((member: any) => {
-      this.membersSelectedStatus[member.userId] = true;
-    });
-  }
-
-  /**
-   * Make all members in list deselected.
-   */
-  deselectAllMembers(): void {
-    this.members.forEach((member: any) => {
-      this.membersSelectedStatus[member.userId] = false;
-    });
-  }
-
-  /**
-   * Change bulk selection value.
-   */
-  changeBulkSelection(): void {
-    if (this.isBulkChecked) {
-      this.deselectAllMembers();
-      this.isBulkChecked = false;
-    } else {
-      this.selectAllMembers();
-      this.isBulkChecked = true;
-    }
-    this.updateSelectedStatus();
-  }
-
-  /**
-   * Update members selected status.
-   */
-  updateSelectedStatus(): void {
-    this.isNoSelected = true;
-    this.isAllSelected = true;
-
-    Object.keys(this.membersSelectedStatus).forEach((key: string) => {
-      if (this.membersSelectedStatus[key]) {
-        this.isNoSelected = false;
-      } else {
-        this.isAllSelected = false;
-      }
-    });
-
-    if (this.isNoSelected) {
-      this.isBulkChecked = false;
-      return;
-    }
-
-    this.isBulkChecked = (this.isAllSelected && Object.keys(this.membersSelectedStatus).length === this.members.length);
-  }
 }

@@ -153,9 +153,11 @@ export class WorkspacesConfig {
 
   constructor(register: che.IRegisterService) {
 
+    /* tslint:disable */
     new StackSelectorScopeFilter(register);
     new StackSelectorSearchFilter(register);
     new StackSelectorTagsFilter(register);
+    /* tslint:enable */
 
     register.controller('WorkspaceDetailsSshCtrl', WorkspaceDetailsSshCtrl);
     register.directive('workspaceDetailsSsh', WorkspaceDetailsSsh);
@@ -297,8 +299,8 @@ export class WorkspacesConfig {
 
     register.controller('ShareWorkspaceController', ShareWorkspaceController);
     register.directive('shareWorkspace', ShareWorkspace);
-    register.controller('addDeveloperController', AddDeveloperController);
-    register.controller('addMemberController', AddMemberController);
+    register.controller('AddDeveloperController', AddDeveloperController);
+    register.controller('AddMemberController', AddMemberController);
     register.controller('UserItemController', UserItemController);
     register.directive('userItem', UserItem);
 

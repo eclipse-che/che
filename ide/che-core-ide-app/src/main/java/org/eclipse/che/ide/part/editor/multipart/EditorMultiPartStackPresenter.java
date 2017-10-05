@@ -188,10 +188,13 @@ public class EditorMultiPartStackPresenter
     }
   }
 
-  private void removePartStack(EditorPartStack editorPartStack) {
+  @Override
+  public void removePartStack(EditorPartStack editorPartStack) {
     if (activeEditorPartStack == editorPartStack) {
       activeEditorPartStack = null;
     }
+
+    editorPartStack.getParts().forEach(editorPartStack::removePart);
 
     view.removePartStack(editorPartStack);
     partStackPresenters.remove(editorPartStack);
@@ -241,7 +244,7 @@ public class EditorMultiPartStackPresenter
   }
 
   @Nullable
-  private EditorPartStack getPartStackByTabId(@NotNull String tabId) {
+  public EditorPartStack getPartStackByTabId(@NotNull String tabId) {
     for (EditorPartStack editorPartStack : partStackPresenters) {
       PartPresenter editorPart = editorPartStack.getPartByTabId(tabId);
       if (editorPart != null) {

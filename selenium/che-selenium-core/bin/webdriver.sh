@@ -36,18 +36,7 @@ getRecommendedThreadCount() {
 }
 
 detectDockerInterfaceIp() {
-    local interfaces=("docker"
-                      "docker0")
-
-    for interface in ${interfaces[@]}; do
-        ifconfig ${interface} >/dev/null 2>&1
-        if [[ $? == 0 ]]; then
-            echo $(/sbin/ifconfig ${interface} | grep 'inet ' |  awk '{print $2}' | sed -e "s#addr:##")
-            return 0
-        fi
-    done
-
-    return 1
+    docker run --rm --net host eclipse/che-ip:nightly
 }
 
 initVariables() {

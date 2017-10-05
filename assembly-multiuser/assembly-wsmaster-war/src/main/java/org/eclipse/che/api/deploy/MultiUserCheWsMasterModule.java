@@ -18,6 +18,8 @@ import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.hc.ServerCheckerFactoryImpl;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.mail.template.ST.STTemplateProcessorImpl;
+import org.eclipse.che.mail.template.TemplateProcessor;
 import org.eclipse.che.multiuser.api.permission.server.AdminPermissionInitializer;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 import org.eclipse.che.multiuser.api.permission.server.PermissionCheckerImpl;
@@ -40,6 +42,8 @@ public class MultiUserCheWsMasterModule extends AbstractModule {
     bind(ServerCheckerFactoryImpl.class).to(AuthServerCheckerFactoryImpl.class);
     bind(InstallerConfigProvisioner.class).to(MultiuserInstallerConfigProvisioner.class);
     install(new OpenShiftInfraModule());
+
+    bind(TemplateProcessor.class).to(STTemplateProcessorImpl.class);
 
     bind(DataSource.class).toProvider(org.eclipse.che.core.db.JndiDataSourceProvider.class);
     install(new org.eclipse.che.multiuser.api.permission.server.jpa.SystemPermissionsJpaModule());

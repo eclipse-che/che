@@ -103,15 +103,6 @@ public class AppStateManager {
     }
   }
 
-  @VisibleForTesting
-  void restoreWorkspaceState() {
-    final String wsId = appContext.getWorkspace().getId();
-
-    if (allWsState.hasKey(wsId)) {
-      restoreState(allWsState.getObject(wsId));
-    }
-  }
-
   private void restoreWorkspaceStateWithDelay() {
     new Timer() {
       @Override
@@ -121,7 +112,17 @@ public class AppStateManager {
     }.schedule(1000);
   }
 
-  private void restoreState(JsonObject settings) {
+  @VisibleForTesting
+  Promise<Void> restoreWorkspaceState() {
+    final String wsId = appContext.getWorkspace().getId();
+
+    if (allWsState.hasKey(wsId)) {
+      return restoreState(allWsState.getObject(wsId));
+    }
+    return promises.resolve(null);
+  }
+
+  private Promise<Void> restoreState(JsonObject settings) {
     try {
       if (settings.hasKey(WORKSPACE)) {
         JsonObject workspace = settings.getObject(WORKSPACE);
@@ -137,10 +138,12 @@ public class AppStateManager {
                     ignored -> component.loadState(workspace.getObject(key)));
           }
         }
+        return sequentialRestore;
       }
     } catch (JsonException e) {
       Log.error(getClass(), e);
     }
+    return promises.resolve(null);
   }
 
   public Promise<Void> persistWorkspaceState() {

@@ -16,6 +16,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADE
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MULTIPLE;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -220,7 +221,7 @@ public class ProjectExplorer {
    * @param libraryName name of library
    */
   public void waitLibraryIsPresent(String libraryName) {
-    new WebDriverWait(seleniumWebDriver, 30)
+    new WebDriverWait(seleniumWebDriver, WIDGET_TIMEOUT_SEC)
         .until(
             ExpectedConditions.presenceOfElementLocated(
                 By.xpath(String.format("//div[@synthetic='true'and @name='%s']", libraryName))));
@@ -232,7 +233,7 @@ public class ProjectExplorer {
    * @param libraryName name of library
    */
   public void waitLibraryIsNotPresent(String libraryName) {
-    new WebDriverWait(seleniumWebDriver, 25)
+    new WebDriverWait(seleniumWebDriver, WIDGET_TIMEOUT_SEC)
         .until(
             ExpectedConditions.invisibilityOfElementLocated(
                 By.xpath(String.format("//div[@synthetic='true'and @name='%s']", libraryName))));
@@ -240,14 +241,17 @@ public class ProjectExplorer {
 
   /**
    * wait visible item in project explorer with path (For Example in project with name:'Test'
-   * presents folder 'src' and there is present locates file 'pom.xpl' path will be
+   * presents folder 'src' and there is present locates file 'pom.xml' path will be
    * next:'Test/src/pom.xml')
+   *
+   * <p>With [string-length(text()) > 0] we will be sure 'div' not empty and contains some text here
+   * we suggest it will be name of node but for now we don't check name to equals
    *
    * @param path
    */
   public void waitVisibleItem(String path) {
-    String locator = "//div[@path='/" + path + "']/div";
-    new WebDriverWait(seleniumWebDriver, 20)
+    String locator = "//div[@path='/" + path + "']//div[string-length(text()) > 0]";
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)));
   }
 
@@ -301,7 +305,7 @@ public class ProjectExplorer {
 
   /**
    * select item in project explorer with path For Example in project with name:'Test' presents
-   * folder 'src' and there is present locates file 'pom.xpl' path will be next:'Test/src/pom.xml')
+   * folder 'src' and there is present locates file 'pom.xml' path will be next:'Test/src/pom.xml')
    *
    * @param path full path to project item
    */
@@ -429,7 +433,7 @@ public class ProjectExplorer {
    */
   public void openVisiblePackage(String packageName) {
     String locator = "//div[text()='" + packageName + "']";
-    new WebDriverWait(seleniumWebDriver, 10)
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)));
     WebElement visiblePacksge = seleniumWebDriver.findElement(By.xpath(locator));
     actionsFactory.createAction(seleniumWebDriver).doubleClick(visiblePacksge).perform();
@@ -496,7 +500,7 @@ public class ProjectExplorer {
 
   /** wait for context menu. */
   public void waitContextMenu() {
-    new WebDriverWait(seleniumWebDriver, 30)
+    new WebDriverWait(seleniumWebDriver, WIDGET_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOfElementLocated(By.id(Locators.CONTEXT_MENU_ID)));
   }
 
@@ -506,7 +510,7 @@ public class ProjectExplorer {
    * @param item
    */
   public void clickOnItemInContextMenu(String item) {
-    new WebDriverWait(seleniumWebDriver, 10)
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOfElementLocated(By.id(item)))
         .click();
   }
@@ -523,7 +527,7 @@ public class ProjectExplorer {
   }
 
   public void waitContextMenuPopUpClosed() {
-    new WebDriverWait(seleniumWebDriver, 10)
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.CONTEXT_MENU_ID)));
   }
 
@@ -565,7 +569,7 @@ public class ProjectExplorer {
    */
   public List<String> getNamesAllProjects() {
     List<WebElement> projects =
-        new WebDriverWait(seleniumWebDriver, 10)
+        new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
             .until(
                 ExpectedConditions.visibilityOfAllElementsLocatedBy(
                     By.xpath(Locators.ALL_PROJECTS_XPATH)));
@@ -612,7 +616,7 @@ public class ProjectExplorer {
 
   /** wait refresh button and click this one */
   public void clickOnRefreshTreeButton() {
-    new WebDriverWait(seleniumWebDriver, 10)
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOf(refreshProjectButton))
         .click();
   }

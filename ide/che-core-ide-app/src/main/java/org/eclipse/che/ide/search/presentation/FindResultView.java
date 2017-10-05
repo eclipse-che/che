@@ -33,16 +33,34 @@ public interface FindResultView extends View<FindResultView.ActionDelegate> {
   void setVisible(boolean visible);
 
   /**
+   * Sets whether next result button is enable.
+   *
+   * @param enable visible - true to enable the button, false to disable it
+   */
+  void setNextBtnActive(boolean enable);
+
+  /**
+   * Sets whether previous result button is enable.
+   *
+   * @param enable visible - true to enable the button, false to disable it
+   */
+  void setPreviousBtnActive(boolean enable);
+
+  /**
    * Activate Find results part and showing all occurrences.
    *
-   * @param nodes list of files which contains requested text
+   * @param result search result of requested text
    * @param request requested text
    */
-  void showResults(List<SearchResult> resources, String request);
+  void showResults(SearchResult result, String request);
 
   Tree getTree();
 
   interface ActionDelegate extends BaseActionDelegate {
     void onSelectionChanged(List<Node> selection);
+
+    void onNextButtonClicked();
+
+    void onPreviousButtonClicked();
   }
 }

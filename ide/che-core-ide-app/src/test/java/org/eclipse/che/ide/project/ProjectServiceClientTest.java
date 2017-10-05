@@ -35,7 +35,7 @@ import org.eclipse.che.api.project.shared.dto.CopyOptions;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.project.shared.dto.MoveOptions;
 import org.eclipse.che.api.project.shared.dto.NewProjectConfigDto;
-import org.eclipse.che.api.project.shared.dto.SearchResultDto;
+import org.eclipse.che.api.project.shared.dto.ProjectSearchResponseDto;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.project.shared.dto.TreeElement;
 import org.eclipse.che.api.promises.client.Promise;
@@ -43,6 +43,7 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.project.QueryExpression;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.AsyncRequest;
@@ -84,8 +85,8 @@ public class ProjectServiceClientTest {
   @Mock private Unmarshallable<ItemReference> unmarshallableItemRef;
   @Mock private Unmarshallable<List<ProjectConfigDto>> unmarshallablePrjsConf;
   @Mock private Unmarshallable<ProjectConfigDto> unmarshallablePrjConf;
-  @Mock private Unmarshallable<List<SearchResultDto>> unmarshallableSearch;
-  @Mock private Promise<List<SearchResultDto>> searchPromise;
+  @Mock private Unmarshallable<ProjectSearchResponseDto> unmarshallableSearch;
+  @Mock private Promise<ProjectSearchResponseDto> searchPromise;
   @Mock private Unmarshallable<List<SourceEstimation>> unmarshallbleSourcesEstimation;
   @Mock private Unmarshallable<SourceEstimation> unmarshallbleSourceEstimation;
   @Mock private Unmarshallable<TreeElement> unmarshallableTreeElem;
@@ -121,7 +122,8 @@ public class ProjectServiceClientTest {
         .thenReturn(unmarshallbleSourcesEstimation);
     when(unmarshaller.newUnmarshaller(SourceEstimation.class))
         .thenReturn(unmarshallbleSourceEstimation);
-    when(unmarshaller.newListUnmarshaller(SearchResultDto.class)).thenReturn(unmarshallableSearch);
+    when(unmarshaller.newUnmarshaller(ProjectSearchResponseDto.class))
+        .thenReturn(unmarshallableSearch);
     when(unmarshaller.newUnmarshaller(TreeElement.class)).thenReturn(unmarshallableTreeElem);
     when(unmarshaller.newUnmarshaller(ProjectConfigDto.class)).thenReturn(unmarshallablePrjConf);
 
@@ -140,7 +142,7 @@ public class ProjectServiceClientTest {
 
     client.getTree(Path.EMPTY, 1, true);
 
-    verify(asyncRequest, never()).loader(any(AsyncRequestLoader.class)); //see CHE-3467
+    verify(asyncRequest, never()).loader(any(AsyncRequestLoader.class)); // see CHE-3467
   }
 
   @Test
@@ -203,7 +205,7 @@ public class ProjectServiceClientTest {
     verify(asyncRequest).header(ACCEPT, MimeType.APPLICATION_JSON);
     verify(loaderFactory).newLoader("Searching...");
     verify(asyncRequest).loader(messageLoader);
-    verify(unmarshaller).newListUnmarshaller(SearchResultDto.class);
+    verify(unmarshaller).newUnmarshaller(ProjectSearchResponseDto.class);
     verify(asyncRequest).send(unmarshallableSearch);
   }
 

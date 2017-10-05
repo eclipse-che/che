@@ -22,7 +22,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
-public class CheckOpendDialogThroughFindActionTest {
+public class CheckOpenedDialogThroughFindActionTest {
 
   @Inject private TestWorkspace testWorkspace;
   @Inject private FindAction findAction;

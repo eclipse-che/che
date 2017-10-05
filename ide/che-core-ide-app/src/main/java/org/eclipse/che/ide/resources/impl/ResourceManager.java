@@ -66,6 +66,7 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.filewatcher.ClientServerEventService;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
+import org.eclipse.che.ide.api.project.QueryExpression;
 import org.eclipse.che.ide.api.project.type.ProjectTypeRegistry;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
@@ -83,7 +84,6 @@ import org.eclipse.che.ide.api.vcs.VcsStatus;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.project.ProjectServiceClient;
-import org.eclipse.che.ide.project.QueryExpression;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.Arrays;
 
@@ -1280,7 +1280,7 @@ public final class ResourceManager {
     return promises.resolve(null);
   }
 
-  protected Promise<List<SearchResult>> search(
+  protected Promise<SearchResult> search(
       final Container container, String fileMask, String contentMask) {
     QueryExpression queryExpression = new QueryExpression();
     if (!isNullOrEmpty(contentMask)) {
@@ -1293,6 +1293,10 @@ public final class ResourceManager {
       queryExpression.setPath(container.getLocation().toString());
     }
 
+    return ps.search(queryExpression);
+  }
+
+  protected Promise<SearchResult> search(QueryExpression queryExpression) {
     return ps.search(queryExpression);
   }
 

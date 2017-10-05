@@ -22,11 +22,11 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import javax.annotation.PreDestroy;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.entrance.Entrance;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
-import org.eclipse.che.selenium.pageobject.site.LoginPage;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -43,7 +43,7 @@ public class Dashboard {
 
   private final TestIdeUrlProvider testIdeUrlProvider;
   private final TestDashboardUrlProvider testDashboardUrlProvider;
-  private final LoginPage loginPage;
+  private final Entrance entrance;
 
   @Inject
   public Dashboard(
@@ -51,12 +51,12 @@ public class Dashboard {
       TestUser defaultUser,
       TestIdeUrlProvider testIdeUrlProvider,
       TestDashboardUrlProvider testDashboardUrlProvider,
-      LoginPage loginPage) {
+      Entrance entrance) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.defaultUser = defaultUser;
     this.testIdeUrlProvider = testIdeUrlProvider;
     this.testDashboardUrlProvider = testDashboardUrlProvider;
-    this.loginPage = loginPage;
+    this.entrance = entrance;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -194,9 +194,7 @@ public class Dashboard {
   /** Open dashboard as default uses */
   public void open() {
     seleniumWebDriver.get(testDashboardUrlProvider.get().toString());
-    if (loginPage.isOpened()) {
-      loginPage.login(defaultUser.getName(), defaultUser.getPassword());
-    }
+    entrance.login(defaultUser);
   }
 
   public WebDriver driver() {

@@ -7,7 +7,7 @@
     <div layout="row"
          layout-align="start center"
          class="che-checkbox-area" ng-if="memberItemController.editable">
-      <che-list-item-checked ng-model="memberItemController.callback.cheListHelper.itemsSelectionStatus[memberItemController.member.userId]"
+      <che-list-item-checked ng-model="memberItemController.callback.cheListHelper.itemsSelectionStatus[memberItemController.member.email]"
                              ng-click="memberItemController.callback.cheListHelper.updateBulkSelectionStatus()"
                              ng-show="!memberItemController.isOwner"
                              che-aria-label-checkbox="member {{memberItemController.member.userId}}"></che-list-item-checked>

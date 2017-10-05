@@ -101,4 +101,7 @@ public interface GitResources extends ClientBundle {
 
   @Source("controls/git-output-icon.svg")
   SVGResource gitOutput();
+
+  @Source("controls/revert.svg")
+  SVGResource revert();
 }

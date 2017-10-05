@@ -39,6 +39,7 @@ import org.eclipse.che.ide.ext.git.client.action.PushAction;
 import org.eclipse.che.ide.ext.git.client.action.RemoveFromIndexAction;
 import org.eclipse.che.ide.ext.git.client.action.ResetFilesAction;
 import org.eclipse.che.ide.ext.git.client.action.ResetToCommitAction;
+import org.eclipse.che.ide.ext.git.client.action.RevertCommitAction;
 import org.eclipse.che.ide.ext.git.client.action.ShowBranchesAction;
 import org.eclipse.che.ide.ext.git.client.action.ShowMergeAction;
 import org.eclipse.che.ide.ext.git.client.action.ShowRemoteAction;
@@ -74,6 +75,7 @@ public class GitExtension {
       DeleteRepositoryAction deleteAction,
       AddToIndexAction addToIndexAction,
       ResetToCommitAction resetToCommitAction,
+      RevertCommitAction revertCommitAction,
       RemoveFromIndexAction removeFromIndexAction,
       CommitAction commitAction,
       CheckoutReferenceAction checkoutReferenceAction,
@@ -133,6 +135,8 @@ public class GitExtension {
     commandGroup.add(compareGroup);
     actionManager.registerAction("gitResetToCommit", resetToCommitAction);
     commandGroup.add(resetToCommitAction);
+    actionManager.registerAction("gitRevertCommit", revertCommitAction);
+    commandGroup.add(revertCommitAction);
     actionManager.registerAction("gitRemoveFromIndexCommit", removeFromIndexAction);
     commandGroup.add(removeFromIndexAction);
     actionManager.registerAction(GIT_SHOW_COMMIT_WINDOW, commitAction);
