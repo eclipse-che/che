@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -306,9 +307,13 @@ public abstract class SeleniumTestHandler
     String filename = NameGenerator.generate(testName + "_", 8) + ".png";
 
     try {
+      String pageSource = webDriver.getPageSource();
+      Path dmpDirectory = Paths.get("target/htmldump", filename + ".html");
+      Files.createDirectories(dmpDirectory.getParent());
+      Files.write(dmpDirectory, pageSource.getBytes(), StandardOpenOption.CREATE);
+
       byte[] data = webDriver.getScreenshotAs(OutputType.BYTES);
       Path screenshot = Paths.get(screenshotDir, filename);
-
       Files.createDirectories(screenshot.getParent());
       Files.copy(new ByteArrayInputStream(data), screenshot);
     } catch (WebDriverException | IOException e) {
