@@ -36,7 +36,6 @@ import org.eclipse.che.api.workspace.server.model.impl.stack.StackComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackSourceImpl;
 import org.eclipse.che.api.workspace.server.stack.image.StackIcon;
-import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotImpl;
 
 /**
  * Defines method for creating tests object instances.
@@ -132,19 +131,6 @@ public final class TestObjectsFactory {
 
   public static SshPairImpl createSshPair(String owner, String service, String name) {
     return new SshPairImpl(owner, service, name, "public-key", "private-key");
-  }
-
-  public static SnapshotImpl createSnapshot(String snapshotId, String workspaceId) {
-    return new SnapshotImpl(
-        snapshotId,
-        "type",
-        null,
-        System.currentTimeMillis(),
-        workspaceId,
-        snapshotId + "_description",
-        true,
-        "dev-machine",
-        snapshotId + "env-name");
   }
 
   public static StackImpl createStack(String id, String name) {

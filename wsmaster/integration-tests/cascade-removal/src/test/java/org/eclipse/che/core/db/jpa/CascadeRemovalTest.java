@@ -13,7 +13,6 @@ package org.eclipse.che.core.db.jpa;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createAccount;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createPreferences;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createProfile;
-import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createSnapshot;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createSshPair;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createUser;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createWorkspace;
@@ -63,7 +62,6 @@ import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.WorkspaceSharedPool;
-import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao.RemoveWorkspaceBeforeAccountRemovedEventSubscriber;
 import org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
@@ -86,10 +84,6 @@ import org.eclipse.che.core.db.h2.jpa.eclipselink.H2ExceptionHandler;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
 import org.eclipse.che.inject.lifecycle.InitModule;
-import org.eclipse.che.workspace.infrastructure.docker.snapshot.JpaSnapshotDao;
-import org.eclipse.che.workspace.infrastructure.docker.snapshot.JpaSnapshotDao.RemoveSnapshotsBeforeWorkspaceRemovedEventSubscriber;
-import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotDao;
-import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotImpl;
 import org.h2.Driver;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -111,7 +105,6 @@ public class CascadeRemovalTest {
   private ProfileDao profileDao;
   private WorkspaceDao workspaceDao;
   private SshDao sshDao;
-  private SnapshotDao snapshotDao;
 
   /** Account and User are a root of dependency tree. */
   private AccountImpl account;
@@ -131,13 +124,6 @@ public class CascadeRemovalTest {
   private WorkspaceImpl workspace1;
 
   private WorkspaceImpl workspace2;
-
-  /** Snapshots depend on workspace. */
-  private SnapshotImpl snapshot1;
-
-  private SnapshotImpl snapshot2;
-  private SnapshotImpl snapshot3;
-  private SnapshotImpl snapshot4;
 
   /** SshPairs depend on user. */
   private SshPairImpl sshPair1;
@@ -171,7 +157,6 @@ public class CascadeRemovalTest {
                             MachineConfigImpl.class,
                             SourceStorageImpl.class,
                             ServerConfigImpl.class,
-                            SnapshotImpl.class,
                             StackImpl.class,
                             CommandImpl.class,
                             RecipeImpl.class,
@@ -196,9 +181,6 @@ public class CascadeRemovalTest {
                 install(new AccountModule());
                 install(new SshJpaModule());
                 install(new WorkspaceJpaModule());
-                bind(SnapshotDao.class).to(JpaSnapshotDao.class);
-                bind(JpaSnapshotDao.RemoveSnapshotsBeforeWorkspaceRemovedEventSubscriber.class)
-                    .asEagerSingleton();
                 bind(WorkspaceManager.class);
 
                 WorkspaceRuntimes wR =
@@ -232,7 +214,6 @@ public class CascadeRemovalTest {
     profileDao = injector.getInstance(ProfileDao.class);
     sshDao = injector.getInstance(SshDao.class);
     workspaceDao = injector.getInstance(WorkspaceDao.class);
-    snapshotDao = injector.getInstance(SnapshotDao.class);
   }
 
   @AfterMethod
@@ -255,8 +236,6 @@ public class CascadeRemovalTest {
     assertTrue(preferenceDao.getPreferences(user.getId()).isEmpty());
     assertTrue(sshDao.get(user.getId()).isEmpty());
     assertTrue(workspaceDao.getByNamespace(user.getName()).isEmpty());
-    assertTrue(snapshotDao.findSnapshots(workspace1.getId()).isEmpty());
-    assertTrue(snapshotDao.findSnapshots(workspace2.getId()).isEmpty());
   }
 
   @Test(dataProvider = "beforeUserRemoveRollbackActions")
@@ -310,11 +289,7 @@ public class CascadeRemovalTest {
   @DataProvider(name = "beforeAccountRemoveRollbackActions")
   public Object[][] beforeAccountRemoveActions() {
     return new Class[][] {
-      {RemoveWorkspaceBeforeAccountRemovedEventSubscriber.class, BeforeAccountRemovedEvent.class},
-      {
-        RemoveSnapshotsBeforeWorkspaceRemovedEventSubscriber.class,
-        BeforeWorkspaceRemovedEvent.class
-      },
+      {RemoveWorkspaceBeforeAccountRemovedEventSubscriber.class, BeforeAccountRemovedEvent.class}
     };
   }
 
@@ -330,11 +305,6 @@ public class CascadeRemovalTest {
     workspaceDao.create(workspace1 = createWorkspace("workspace1", account));
     workspaceDao.create(workspace2 = createWorkspace("workspace2", account));
 
-    snapshotDao.saveSnapshot(snapshot1 = createSnapshot("snapshot1", workspace1.getId()));
-    snapshotDao.saveSnapshot(snapshot2 = createSnapshot("snapshot2", workspace1.getId()));
-    snapshotDao.saveSnapshot(snapshot3 = createSnapshot("snapshot3", workspace2.getId()));
-    snapshotDao.saveSnapshot(snapshot4 = createSnapshot("snapshot4", workspace2.getId()));
-
     sshDao.create(sshPair1 = createSshPair(user.getId(), "service", "name1"));
     sshDao.create(sshPair2 = createSshPair(user.getId(), "service", "name2"));
   }
@@ -342,11 +312,6 @@ public class CascadeRemovalTest {
   private void wipeTestData() throws Exception {
     sshDao.remove(sshPair1.getOwner(), sshPair1.getService(), sshPair1.getName());
     sshDao.remove(sshPair2.getOwner(), sshPair2.getService(), sshPair2.getName());
-
-    doRemoveSnapshot(snapshot1.getId());
-    doRemoveSnapshot(snapshot2.getId());
-    doRemoveSnapshot(snapshot3.getId());
-    doRemoveSnapshot(snapshot4.getId());
 
     workspaceDao.remove(workspace1.getId());
     workspaceDao.remove(workspace2.getId());
@@ -360,14 +325,6 @@ public class CascadeRemovalTest {
     userDao.remove(user.getId());
 
     accountDao.remove(account.getId());
-  }
-
-  private void doRemoveSnapshot(String snapshotId) throws Exception {
-    try {
-      snapshotDao.removeSnapshot(snapshotId);
-    } catch (NotFoundException e) {
-      //ignore
-    }
   }
 
   private static <T> T notFoundToNull(Callable<T> action) throws Exception {
