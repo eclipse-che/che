@@ -285,6 +285,9 @@ public class FindTextFeatureTest {
     editor.waitActiveTabFileName("SayHello");
     editor.waitTextIntoEditor("String");
     Assert.assertEquals(editor.getPositionOfLine(), 20);
+    findText.clickHideBtnFindInfoPanel();
+    findText.clickFindTab();
+    findText.waitFindInfoPanelIsOpen();
     findText.selectItemInFindInfoPanel(
         pathToAppControllerFile,
         "26:    String numGuessByUser = request.getParameter(\"numGuess\");");
