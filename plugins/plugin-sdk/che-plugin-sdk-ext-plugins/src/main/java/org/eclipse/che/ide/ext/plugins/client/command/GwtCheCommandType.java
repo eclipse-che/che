@@ -67,7 +67,7 @@ public class GwtCheCommandType implements CommandType {
 
   @Override
   public String getCommandLineTemplate() {
-    return COMMAND_TEMPLATE + " -bindAddress 0.0.0.0";
+    return COMMAND_TEMPLATE;
   }
 
   @Override

@@ -80,15 +80,6 @@ class GwtCheCommandModel {
   }
 
   String toCommandLine() {
-    final StringBuilder cmd =
-        new StringBuilder(
-            COMMAND_TEMPLATE
-                .replace("$GWT_MODULE", gwtModule.trim())
-                .replace("$CHE_CLASSPATH", '"' + classPath + '"'));
-    if (!codeServerAddress.trim().isEmpty()) {
-      cmd.append(" -bindAddress ").append(codeServerAddress.trim());
-    }
-
-    return cmd.toString();
+    return COMMAND_TEMPLATE;
   }
 }
