@@ -19,6 +19,7 @@ public final class TestProjectExplorerContextMenuConstants {
   public static final String COMMANDS = "contextMenu/Commands";
   public static final String PREVIEW = "contextMenu/Preview";
   public static final String SHOW_REFERENCES = "contextMenu/Show References";
+  public static final String GO_INTO = "gwt-debug-contextMenu/goInto";
   public static final String CUT = "contextMenu/Cut";
   public static final String PASTE = "contextMenu/Paste";
   public static final String RENAME = "contextMenu/Rename...";

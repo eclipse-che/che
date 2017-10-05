@@ -525,6 +525,13 @@ public class ProjectExplorer {
     collapseAllBtn.click();
   }
 
+  /** click on the 'go back' in the project explorer */
+  public void clickGoBackButton() {
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(ExpectedConditions.elementToBeClickable(goBackBtn));
+    goBackBtn.click();
+  }
+
   /** launch the 'Refactor Rename' form by keyboard after select a package or Java class */
   public void launchRefactorByKeyboard() {
     loader.waitOnClosed();
