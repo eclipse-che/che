@@ -17,7 +17,7 @@
 
     <groupId>org.eclipse.che.test</groupId>
     <artifactId>my-dynamodule-test-module</artifactId>
-    <version>${project.version}</version>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Test of Eclipse Che DynaModule plugin</name>
 
@@ -25,7 +25,6 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-wsagent-core</artifactId>
-            <version>5.19.0-SNAPSHOT</version>
             <type>war</type>
         </dependency>
     </dependencies>

@@ -126,7 +126,7 @@ public class DynaModuleListGeneratorMojoTest {
 
   /** Check that the plugin is able to scan war files */
   @Test
-  public void testScanWarFiles() throws Exception {
+  public void testWarFiles() throws Exception {
 
     File projectCopy = this.resources.getBasedir("project");
     File pom = new File(projectCopy, "pom.xml");

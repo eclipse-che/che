@@ -96,7 +96,7 @@ public class DynaModuleListGeneratorMojoProjectStub extends MavenProjectStub {
     Artifact artifact = Mockito.mock(Artifact.class);
     when(artifact.getArtifactId()).thenReturn(getDependencies().get(0).getArtifactId());
     when(artifact.getGroupId()).thenReturn(getDependencies().get(0).getGroupId());
-    when(artifact.getVersion()).thenReturn(getDependencies().get(0).getVersion());
+    when(artifact.getVersion()).thenReturn(System.getProperty("currentVersion"));
     when(artifact.getType()).thenReturn(getDependencies().get(0).getType());
     HashSet hashSet = new HashSet<Artifact>();
     hashSet.add(artifact);
