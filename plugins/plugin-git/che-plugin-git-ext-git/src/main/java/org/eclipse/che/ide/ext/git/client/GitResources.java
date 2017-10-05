@@ -39,6 +39,9 @@ public interface GitResources extends ClientBundle {
   @Source({"git.css", "org/eclipse/che/ide/api/ui/style.css"})
   GitCSS gitCSS();
 
+  @Source("panel/git.svg")
+  SVGResource git();
+
   @Source("push/arrow.svg")
   SVGResource arrow();
 

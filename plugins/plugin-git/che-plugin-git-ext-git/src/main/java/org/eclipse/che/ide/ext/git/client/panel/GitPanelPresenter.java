@@ -29,8 +29,10 @@ import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
+import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelPresenter;
+import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
  * Presenter for the left-side Git panel.
@@ -48,6 +50,7 @@ public class GitPanelPresenter extends BasePresenter
   private final ChangesPanelPresenter changesPanelPresenter;
   private final AppContext appContext;
   private final NotificationManager notificationManager;
+  private final GitResources gitResources;
   private final GitLocalizationConstant locale;
 
   private Project currentProject;
@@ -61,12 +64,14 @@ public class GitPanelPresenter extends BasePresenter
       AppContext appContext,
       EventBus eventBus,
       NotificationManager notificationManager,
+      GitResources gitResources,
       GitLocalizationConstant locale) {
     this.view = view;
     this.service = service;
     this.changesPanelPresenter = changesPanelPresenter;
     this.appContext = appContext;
     this.notificationManager = notificationManager;
+    this.gitResources = gitResources;
     this.locale = locale;
 
     this.view.setDelegate(this);
@@ -109,6 +114,11 @@ public class GitPanelPresenter extends BasePresenter
   @Override
   public String getTitle() {
     return locale.panelTitle();
+  }
+
+  @Override
+  public SVGResource getTitleImage() {
+    return gitResources.git();
   }
 
   @Override
