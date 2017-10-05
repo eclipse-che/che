@@ -55,7 +55,7 @@ public class DefaultWorkspaceValidator implements WorkspaceValidator {
     checkNotNull(config.getName(), "Workspace name required");
     checkArgument(
         WS_NAME.matcher(config.getName()).matches(),
-        "Incorrect workspace name, it must be between 3 and 20 characters and may contain digits, "
+        "Incorrect workspace name, it must be between 3 and 100 characters and may contain digits, "
             + "latin letters, underscores, dots, dashes and should start and end only with digits, "
             + "latin letters or underscores");
 
