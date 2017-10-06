@@ -87,5 +87,20 @@ public interface ProjectExplorerView extends View<ProjectExplorerView.ActionDele
 
   Tree getTree();
 
-  interface ActionDelegate extends BaseActionDelegate {}
+  /**
+   * Change state of the 'Link with editor' button.
+   *
+   * @param activated the button will be activated when {@code activated} is {@code true} and
+   *     deactivated otherwise
+   */
+  void activateLinkWithEditorButton(boolean activated);
+
+  interface ActionDelegate extends BaseActionDelegate {
+
+    /**
+     * Performs any actions appropriate in response to user has clicked on the 'Link with editor'
+     * button.
+     */
+    void onLinkWithEditorButtonClicked();
+  }
 }

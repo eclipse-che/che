@@ -31,7 +31,6 @@ import java.util.Set;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.Resources;
-import org.eclipse.che.ide.actions.LinkWithEditorAction;
 import org.eclipse.che.ide.actions.RefreshPathAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
@@ -77,6 +76,7 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
   private final SkipHiddenNodesInterceptor skipHiddenNodesInterceptor;
 
   private ToolButton goBackButton;
+  private ToolButton linkWithEditorButton;
 
   private static final String GO_BACK_BUTTON_ID = "goBackButton";
   private static final String COLLAPSE_ALL_BUTTON_ID = "collapseAllButton";
@@ -86,17 +86,16 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
 
   @Inject
   public ProjectExplorerViewImpl(
-      final Resources resources,
-      final ContextMenu contextMenu,
-      final CoreLocalizationConstant coreLocalizationConstant,
       final Set<NodeInterceptor> nodeInterceptorSet,
-      final SkipHiddenNodesInterceptor skipHiddenNodesInterceptor,
-      final LinkWithEditorAction linkWithEditorAction,
-      final RefreshPathAction refreshPathAction,
-      final PresentationFactory presentationFactory,
-      final Provider<PerspectiveManager> managerProvider,
-      final ActionManager actionManager,
-      final EmptyTreePanel emptyTreePanel) {
+      Resources resources,
+      ContextMenu contextMenu,
+      CoreLocalizationConstant coreLocalizationConstant,
+      SkipHiddenNodesInterceptor skipHiddenNodesInterceptor,
+      RefreshPathAction refreshPathAction,
+      PresentationFactory presentationFactory,
+      Provider<PerspectiveManager> managerProvider,
+      ActionManager actionManager,
+      EmptyTreePanel emptyTreePanel) {
     super(resources);
     this.skipHiddenNodesInterceptor = skipHiddenNodesInterceptor;
 
@@ -163,22 +162,17 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
     collapseAllButton.setVisible(true);
     addToolButton(collapseAllButton);
 
-    ToolButton linkedEditorButton = new ToolButton(FontAwesome.EXCHANGE);
-    linkedEditorButton.addClickHandler(
-        new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-            linkWithEditorAction.actionPerformed(null);
-          }
-        });
+    linkWithEditorButton = new ToolButton(FontAwesome.EXCHANGE);
+    linkWithEditorButton.getElement().setAttribute("name", LINK_WITH_EDITOR_ID);
+    linkWithEditorButton.addClickHandler(event -> delegate.onLinkWithEditorButtonClicked());
     Tooltip.create(
-        (elemental.dom.Element) linkedEditorButton.getElement(),
+        (elemental.dom.Element) linkWithEditorButton.getElement(),
         BOTTOM,
         MIDDLE,
-        "Link with editor");
-    linkedEditorButton.ensureDebugId(LINK_WITH_EDITOR_ID);
-    linkedEditorButton.setVisible(true);
-    addToolButton(linkedEditorButton);
+        coreLocalizationConstant.projectExplorerLinkWithEditorTooltip());
+    linkWithEditorButton.ensureDebugId(LINK_WITH_EDITOR_ID);
+    linkWithEditorButton.setVisible(true);
+    addToolButton(linkWithEditorButton);
 
     ToolButton refreshPathButton = new ToolButton(FontAwesome.REFRESH);
     refreshPathButton.addClickHandler(
@@ -221,6 +215,11 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
   @Override
   public Tree getTree() {
     return tree;
+  }
+
+  @Override
+  public void activateLinkWithEditorButton(boolean activated) {
+    linkWithEditorButton.getElement().setAttribute("activated", String.valueOf(activated));
   }
 
   /** {@inheritDoc} */
