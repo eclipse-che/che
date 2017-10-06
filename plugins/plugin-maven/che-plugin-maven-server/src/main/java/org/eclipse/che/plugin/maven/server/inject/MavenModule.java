@@ -18,7 +18,6 @@ import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import java.nio.file.PathMatcher;
 import java.util.Collections;
-import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
@@ -26,7 +25,6 @@ import org.eclipse.che.api.project.server.type.ValueProviderFactory;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.maven.server.MavenTerminal;
 import org.eclipse.che.plugin.maven.generator.archetype.MavenArchetypeJsonRpcMessenger;
-import org.eclipse.che.plugin.maven.lsp.MavenLanguageServerLauncher;
 import org.eclipse.che.plugin.maven.server.PomModificationDetector;
 import org.eclipse.che.plugin.maven.server.core.MavenJsonRpcCommunication;
 import org.eclipse.che.plugin.maven.server.core.MavenProgressNotifier;
@@ -86,11 +84,10 @@ public class MavenModule extends AbstractModule {
 
     bind(PomChangeListener.class).asEagerSingleton();
     bind(PomModificationDetector.class).asEagerSingleton();
-    Multibinder.newSetBinder(binder(), LanguageServerLauncher.class)
-        .addBinding()
-        .to(MavenLanguageServerLauncher.class)
-        .asEagerSingleton();
-    ;
+    //    Multibinder.newSetBinder(binder(), LanguageServerLauncher.class)
+    //        .addBinding()
+    //        .to(MavenLanguageServerLauncher.class)
+    //        .asEagerSingleton();
 
     LanguageDescription description = new LanguageDescription();
     description.setLanguageId("pom");
