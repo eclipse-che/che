@@ -6,22 +6,26 @@ import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.registry.LanguageServerDescription;
 import org.eclipse.che.api.languageserver.registry.ServerInitializerImpl;
+import org.eclipse.che.api.languageserver.registry.ServerInitializerObserver;
 import org.eclipse.che.api.languageserver.service.FileContentAccess;
 import org.eclipse.che.api.languageserver.util.DynamicWrapper;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
+import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ProjectProxyLauncher implements LanguageServerLauncher {
+public class ProjectProxyLauncher implements LanguageServerLauncher, ServerInitializerObserver {
   private static class State {
     public static final int INIT = 0;
     public static final int LAUNCHING = 1;
     public static final int LAUNCHED = 2;
     public static final int INITIALIZING = 3;
     public static final int INITIALIZED = 4;
+    public static final int POST_INITIALIZING = 5;
+    public static final int POST_INITIALIZED = 6;
   }
 
   private static final Logger LOG = LoggerFactory.getLogger(ServerInitializerImpl.class);
@@ -191,6 +195,42 @@ public class ProjectProxyLauncher implements LanguageServerLauncher {
             }
           });
       return res;
+    }
+  }
+
+  @Override
+  public void onServerInitialized(
+      LanguageServerLauncher launcher,
+      LanguageServer server,
+      ServerCapabilities capabilities,
+      String projectPath) {
+    boolean mustRun = false;
+    synchronized (launchLock) {
+      if (state < State.INITIALIZED) {
+        throw new IllegalStateException();
+      } else if (state == State.INITIALIZED) {
+        state = State.POST_INITIALIZING;
+        launchLock.notifyAll();
+        mustRun = true;
+      } else if (state == State.POST_INITIALIZED) {
+        return;
+      } else {
+        while (state == State.POST_INITIALIZING) {
+          try {
+            launchLock.wait();
+          } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return;
+          }
+        }
+      }
+    }
+    if (mustRun) {
+      wrappedLauncher.onServerInitialized(wrappedLauncher, server, capabilities, "/");
+      synchronized (launchLock) {
+        state = State.POST_INITIALIZED;
+        launchLock.notifyAll();
+      }
     }
   }
 }
