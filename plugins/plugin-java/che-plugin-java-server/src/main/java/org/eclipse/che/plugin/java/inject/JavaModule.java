@@ -23,21 +23,28 @@ import org.eclipse.che.plugin.java.languageserver.ProjectProxyLauncher;
 /** @author Anatolii Bazko */
 @DynaModule
 public class JavaModule extends AbstractModule {
-  public static final String LANGUAGE_ID = "java";
-  private static final String[] EXTENSIONS = new String[] {"java"};
-  private static final String MIME_TYPE = "text/x-java-source";
+  public static final String JAVA_SOURCE = "javaSource";
+  public static final String JAVA_CLASS = "javaClass";
 
   @Override
   protected void configure() {
     Multibinder.newSetBinder(binder(), LanguageServerLauncher.class)
         .addBinding()
         .toInstance(new ProjectProxyLauncher(new JavaLanguageServerLauncher()));
-    LanguageDescription description = new LanguageDescription();
-    description.setFileExtensions(asList(EXTENSIONS));
-    description.setLanguageId(LANGUAGE_ID);
-    description.setMimeType(MIME_TYPE);
+    LanguageDescription javaSource = new LanguageDescription();
+    javaSource.setFileExtensions(asList("java"));
+    javaSource.setLanguageId(JAVA_SOURCE);
+    javaSource.setMimeType("text/x-java-source");
     Multibinder.newSetBinder(binder(), LanguageDescription.class)
         .addBinding()
-        .toInstance(description);
+        .toInstance(javaSource);
+
+    LanguageDescription javaClass = new LanguageDescription();
+    javaClass.setFileExtensions(asList("class"));
+    javaClass.setLanguageId(JAVA_CLASS);
+    javaClass.setMimeType("text/x-java-class");
+    Multibinder.newSetBinder(binder(), LanguageDescription.class)
+        .addBinding()
+        .toInstance(javaClass);
   }
 }
