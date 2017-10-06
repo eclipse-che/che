@@ -13,16 +13,10 @@ package org.eclipse.che.ide.websocket.impl;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.security.oauth.SecurityTokenProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -38,53 +32,40 @@ public class WebSocketInitializerTest {
   @Mock private WebSocketPropertyManager propertyManager;
   @Mock private UrlResolver urlResolver;
   @Mock private WebSocketActionManager webSocketActionManager;
-  @Mock private SecurityTokenProvider securityTokenProvider;
-  @Mock private Promise promise;
-  @Captor private ArgumentCaptor<Operation<String>> operation;
   @InjectMocks private WebSocketInitializer initializer;
 
   @Before
-  public void setUp() throws Exception {
-    when(securityTokenProvider.getSecurityToken()).thenReturn(promise);
-  }
+  public void setUp() throws Exception {}
 
   @After
   public void tearDown() throws Exception {}
 
   @Test
-  public void shouldSetUrlMappingOnInitialize() throws OperationException {
-
-    initializer.initialize("id", "http://test.com");
-    verify(promise).then(operation.capture());
-    operation.getValue().apply("token");
-    verify(securityTokenProvider).getSecurityToken();
-    verify(urlResolver).setMapping("id", "http://test.com?token=token");
-  }
-
-  @Test
-  public void shouldRunConnectionManagerInitializeConnectionOnInitialize()
-      throws OperationException {
-    initializer.initialize("id", "http://test.com");
-    verify(promise).then(operation.capture());
-    operation.getValue().apply("token");
-    verify(securityTokenProvider).getSecurityToken();
-    verify(connectionManager).initializeConnection("http://test.com?token=token");
-  }
-
-  @Test
-  public void shouldRunPropertyManagerInitializeConnectionOnInitialize() throws OperationException {
+  public void shouldSetUrlMappingOnInitialize() {
     initializer.initialize("id", "url");
-    verify(promise).then(operation.capture());
-    operation.getValue().apply("token");
-    verify(propertyManager).initializeConnection("url?token=token");
+
+    verify(urlResolver).setMapping("id", "url");
   }
 
   @Test
-  public void shouldRunEstablishConnectionOnInitialize() throws OperationException {
+  public void shouldRunConnectionManagerInitializeConnectionOnInitialize() {
     initializer.initialize("id", "url");
-    verify(promise).then(operation.capture());
-    operation.getValue().apply("token");
-    verify(connectionManager).establishConnection("url?token=token");
+
+    verify(connectionManager).initializeConnection("url");
+  }
+
+  @Test
+  public void shouldRunPropertyManagerInitializeConnectionOnInitialize() {
+    initializer.initialize("id", "url");
+
+    verify(propertyManager).initializeConnection("url");
+  }
+
+  @Test
+  public void shouldRunEstablishConnectionOnInitialize() {
+    initializer.initialize("id", "url");
+
+    verify(connectionManager).establishConnection("url");
   }
 
   @Test

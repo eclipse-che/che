@@ -10,6 +10,10 @@
  */
 package org.eclipse.che.plugin.testing.ide.view.navigation.nodes;
 
+import static com.google.gwt.user.client.ui.UIObject.DEBUG_ID_PREFIX;
+import static org.eclipse.che.ide.util.dom.Elements.createSpanElement;
+
+import com.google.gwt.dom.client.Element;
 import com.google.inject.assistedinject.Assisted;
 import java.util.ArrayList;
 import java.util.List;
@@ -69,18 +73,22 @@ public class TestStateNode extends AbstractTreeNode implements HasPresentation {
   @Override
   public void updatePresentation(NodePresentation presentation) {
     presentation.setPresentableText(testState.getPresentation());
+    presentation.setUserElement((Element) createSpanElement());
     if (testState.isSuite()) {
       return;
     }
     if (testState.getDescription() == TestStateDescription.PASSED) {
       presentation.setPresentableTextCss("color: green;");
+      presentation.getUserElement().setId(DEBUG_ID_PREFIX + "test-state-passed");
       presentation.setPresentableIcon(testResources.testResultSuccessIcon());
     } else if (testState.getDescription() == TestStateDescription.IGNORED) {
       presentation.setPresentableTextCss("text-decoration: line-through; color: yellow;");
+      presentation.getUserElement().setId(DEBUG_ID_PREFIX + "test-state-ignore");
       presentation.setPresentableIcon(testResources.testResultSkippedIcon());
     } else if (testState.getDescription() == TestStateDescription.FAILED
         || testState.getDescription() == TestStateDescription.ERROR) {
       presentation.setPresentableTextCss("color: red;");
+      presentation.getUserElement().setId(DEBUG_ID_PREFIX + "test-state-failed");
       presentation.setPresentableIcon(testResources.testResultFailureIcon());
     } else if (testState.getDescription() == TestStateDescription.RUNNING) {
       presentation.setPresentableIcon(testResources.testInProgressIcon());

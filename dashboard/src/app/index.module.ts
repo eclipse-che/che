@@ -45,6 +45,8 @@ const initModule = angular.module('userDashboard', ['ngAnimate', 'ngCookies', 'n
   'angular-websocket', 'ui.bootstrap', 'ui.codemirror', 'ngMaterial', 'ngMessages', 'angularMoment', 'angular.filter',
   'ngDropdowns', 'ngLodash', 'angularCharts', 'uuid4', 'angularFileUpload', 'ui.gravatar']);
 
+window.name = 'NG_DEFER_BOOTSTRAP!';
+
 declare const Keycloak: Function;
 function buildKeycloakConfig(keycloakSettings: any) {
   return {
@@ -110,7 +112,7 @@ promise.then((keycloakSettings: any) => {
 }).catch((error: any) => {
   console.error('Keycloak initialization failed with error: ', error);
 }).then(() => {
-  angular.bootstrap(document, ['userDashboard'], {strictDi: true}); // manually bootstrap Angular
+  angular.resumeBootstrap();
 });
 
 // add a global resolve flag on all routes (user needs to be resolved first)

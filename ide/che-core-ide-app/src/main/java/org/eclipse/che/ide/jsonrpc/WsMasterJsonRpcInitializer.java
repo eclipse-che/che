@@ -48,6 +48,7 @@ import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
+import org.eclipse.che.security.oauth.SecurityTokenProvider;
 
 /** Initializes JSON-RPC connection to the workspace master. */
 @Singleton
@@ -59,6 +60,7 @@ public class WsMasterJsonRpcInitializer {
   private final EventBus eventBus;
   private final SubscriptionManagerClient subscriptionManagerClient;
   private final WorkspaceServiceClient workspaceServiceClient;
+  private final SecurityTokenProvider securityTokenProvider;
 
   @Inject
   public WsMasterJsonRpcInitializer(
@@ -67,13 +69,15 @@ public class WsMasterJsonRpcInitializer {
       AppContext appContext,
       EventBus eventBus,
       SubscriptionManagerClient subscriptionManagerClient,
-      WorkspaceServiceClient workspaceServiceClient) {
+      WorkspaceServiceClient workspaceServiceClient,
+      SecurityTokenProvider securityTokenProvider) {
     this.initializer = initializer;
     this.requestTransmitter = requestTransmitter;
     this.appContext = appContext;
     this.eventBus = eventBus;
     this.subscriptionManagerClient = subscriptionManagerClient;
     this.workspaceServiceClient = workspaceServiceClient;
+    this.securityTokenProvider = securityTokenProvider;
 
     eventBus.addHandler(BasicIDEInitializedEvent.TYPE, e -> initialize());
     eventBus.addHandler(WorkspaceStartingEvent.TYPE, e -> initialize());
@@ -86,30 +90,39 @@ public class WsMasterJsonRpcInitializer {
   }
 
   private void initialize() {
-    WorkspaceImpl workspace = appContext.getWorkspace();
-    String url = workspace.getLinks().get(LINK_REL_ENVIRONMENT_STATUS_CHANNEL);
+    securityTokenProvider
+        .getSecurityToken()
+        .then(
+            token -> {
+              WorkspaceImpl workspace = appContext.getWorkspace();
+              String url = workspace.getLinks().get(LINK_REL_ENVIRONMENT_STATUS_CHANNEL);
 
-    if (workspace.getStatus() == STOPPED || url == null) {
-      return;
-    }
+              if (workspace.getStatus() == STOPPED || url == null) {
+                return;
+              }
 
-    String separator = url.contains("?") ? "&" : "?";
-    Optional<String> appWebSocketId = appContext.getApplicationWebsocketId();
-    String queryParams = appWebSocketId.map(id -> separator + "clientId=" + id).orElse("");
-    String wsMasterEndpointURL = url + queryParams;
+              char separator = url.contains("?") ? '&' : '?';
+              Optional<String> appWebSocketId = appContext.getApplicationWebsocketId();
+              String queryParams =
+                  separator
+                      + "token="
+                      + token
+                      + appWebSocketId.map(id -> "&clientId=" + id).orElse("");
+              String wsMasterEndpointURL = url + queryParams;
 
-    Map<String, String> initProperties = singletonMap("url", wsMasterEndpointURL);
+              Map<String, String> initProperties = singletonMap("url", wsMasterEndpointURL);
 
-    Set<Runnable> initActions = new HashSet<>();
-    initActions.add(this::subscribeToEvents);
+              Set<Runnable> initActions = new HashSet<>();
+              initActions.add(this::subscribeToEvents);
 
-    if (!appWebSocketId.isPresent()) {
-      initActions.add(this::processWsId);
-    }
+              if (!appWebSocketId.isPresent()) {
+                initActions.add(this::processWsId);
+              }
 
-    initActions.add(this::checkStatuses);
+              initActions.add(this::checkStatuses);
 
-    initializer.initialize(WS_MASTER_JSON_RPC_ENDPOINT_ID, initProperties, initActions);
+              initializer.initialize(WS_MASTER_JSON_RPC_ENDPOINT_ID, initProperties, initActions);
+            });
   }
 
   private void processWsId() {
