@@ -36,7 +36,7 @@ public interface MemberAddedEventDto extends OrganizationEventDto {
 
   MemberAddedEventDto withMember(UserDto member);
 
-  /** Returns name of user who initiated member invitation */
+  @Override
   String getInitiator();
 
   void setInitiator(String initiator);

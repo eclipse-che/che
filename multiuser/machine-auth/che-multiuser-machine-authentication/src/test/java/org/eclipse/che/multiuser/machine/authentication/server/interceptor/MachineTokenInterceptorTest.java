@@ -63,6 +63,7 @@ public class MachineTokenInterceptorTest {
 
     Module module =
         new AbstractModule() {
+          @Override
           public void configure() {
             //Bind manager and his dep-s. To bind interceptor, guice must create intercepted class by himself.
             bind(WorkspaceDao.class).toInstance(mock(WorkspaceDao.class));

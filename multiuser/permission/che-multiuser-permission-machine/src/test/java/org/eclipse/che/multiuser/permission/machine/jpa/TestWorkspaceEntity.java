@@ -49,6 +49,7 @@ public class TestWorkspaceEntity implements Workspace {
     this.accountId = accountId;
   }
 
+  @Override
   public String getId() {
     return id;
   }

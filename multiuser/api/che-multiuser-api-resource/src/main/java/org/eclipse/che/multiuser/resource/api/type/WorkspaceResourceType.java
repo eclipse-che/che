@@ -22,7 +22,7 @@ public class WorkspaceResourceType extends AbstractExhaustibleResource {
   public static final String ID = "workspace";
   public static final String UNIT = "item";
 
-  private static final Set<String> SUPPORTED_UNITS = ImmutableSet.of(UNIT);
+  private static final ImmutableSet<String> SUPPORTED_UNITS = ImmutableSet.of(UNIT);
 
   @Override
   public String getId() {

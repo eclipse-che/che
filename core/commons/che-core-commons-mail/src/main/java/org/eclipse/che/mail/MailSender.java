@@ -152,7 +152,9 @@ public class MailSender {
     try {
       if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
         executor.shutdownNow();
-        if (!executor.awaitTermination(60, TimeUnit.SECONDS)) LOG.warn("Pool did not terminate");
+        if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+          LOG.warn("Pool did not terminate");
+        }
       }
     } catch (InterruptedException ie) {
       executor.shutdownNow();

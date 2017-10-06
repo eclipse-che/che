@@ -44,6 +44,7 @@ public class MachineTokenServiceClientImpl implements MachineTokenServiceClient 
     this.baseUrl = restContext + MACHINE_TOKEN_SERVICE_PATH;
   }
 
+  @Override
   public Promise<MachineTokenDto> getMachineToken() {
     return asyncRequestFactory
         .createGetRequest(baseUrl + appContext.getWorkspaceId())

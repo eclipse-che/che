@@ -107,8 +107,8 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory
   /**
    * Going to check is this request goes to WsAgent
    *
-   * @param url
-   * @return
+   * @param url initial request url
+   * @return is given url means request to the ws-agent
    */
   protected boolean isWsAgentRequest(String url) {
     if (appContext.getWorkspace() == null

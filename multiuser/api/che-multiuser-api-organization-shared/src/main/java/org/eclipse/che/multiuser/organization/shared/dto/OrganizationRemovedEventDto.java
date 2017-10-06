@@ -29,7 +29,7 @@ public interface OrganizationRemovedEventDto extends OrganizationEventDto {
   @Override
   OrganizationRemovedEventDto withType(EventType eventType);
 
-  /** Returns name of user who initiated organization removal */
+  @Override
   String getInitiator();
 
   void setInitiator(String initiator);
