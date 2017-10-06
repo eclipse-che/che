@@ -1587,5 +1587,135 @@
     "tags": [
       "Ceylon"
     ]
+  },
+  {
+    "name": "vertx-http-booster",
+    "displayName": "vertx-http-booster",
+    "path": "/vertx-http-booster",
+    "description": "HTTP Vert.x Booster",
+    "projectType": "maven",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "java"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/openshiftio-vertx-boosters/vertx-http-booster",
+      "parameters": {}
+    },
+    "commands": [],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "Vert.x"
+    ]
+  },
+  {
+    "name": "vertx-health-checks-booster",
+    "displayName": "vertx-health-checks-booster",
+    "path": "/vertx-health-checks-booster",
+    "description": "Booster demonstrating health checks and recovery",
+    "projectType": "maven",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "java"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/openshiftio-vertx-boosters/vertx-health-checks-booster",
+      "parameters": {}
+    },
+    "commands": [],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "vert.x"
+    ]
+  },
+  {
+    "name": "spring-boot-http-booster",
+    "displayName": "spring-boot-http-booster",
+    "path": "/spring-boot-http-booster",
+    "description": "Quickstart to expose a REST Greeting endpoint using SpringBoot and Apache Tomcat in embedded mode",
+    "projectType": "maven",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "java"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/snowdrop/spring-boot-http-booster",
+      "parameters": {}
+    },
+    "commands": [],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "Spring Boot"
+    ]
+  },
+  {
+    "name": "spring-boot-health-check-booster",
+    "displayName": "spring-boot-health-check-booster",
+    "path": "/spring-boot-health-check-booster",
+    "description": "Quickstart to demonstrate OpenShift health probes working with Spring Boot Actuator",
+    "projectType": "maven",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "java"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/snowdrop/spring-boot-health-check-booster",
+      "parameters": {}
+    },
+    "commands": [],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "spring boot"
+    ]
+  },
+  {
+    "name": "wfswarm-rest-http",
+    "displayName": "wfswarm-rest-http",
+    "path": "/wfswarm-rest-http",
+    "description": "Quickstart to expose a REST Greeting endpoint using Wildfly Swarm",
+    "projectType": "maven",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "java"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/wildfly-swarm-openshiftio-boosters/wfswarm-rest-http",
+      "parameters": {}
+    },
+    "commands": [],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "Wildfly Swarm"
+    ]
   }
 ]

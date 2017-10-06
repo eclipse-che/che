@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -202,8 +203,8 @@ public abstract class SeleniumTestHandler
   private void onTestFinish(ITestResult result) {
     if (result.getStatus() == ITestResult.FAILURE || result.getStatus() == ITestResult.SKIP) {
       ofNullable(result.getThrowable()).ifPresent(e -> LOG.error("" + e.getMessage(), e));
-
       captureScreenshot(result);
+      captureHtmlSource(result);
     }
   }
 
@@ -259,6 +260,13 @@ public abstract class SeleniumTestHandler
     webDrivers.forEach(webDriver -> captureScreenshot(result, webDriver));
   }
 
+  private void captureHtmlSource(ITestResult result) {
+    Set<SeleniumWebDriver> webDrivers = new HashSet<>();
+    Object testInstance = result.getInstance();
+    collectInjectedWebDrivers(testInstance, webDrivers);
+    webDrivers.forEach(webDriver -> dumpHtmlCodeFromTheCurrentPage(result, webDriver));
+  }
+
   /**
    * Iterates recursively throw all fields and collects instances of {@link SeleniumWebDriver}.
    *
@@ -308,11 +316,23 @@ public abstract class SeleniumTestHandler
     try {
       byte[] data = webDriver.getScreenshotAs(OutputType.BYTES);
       Path screenshot = Paths.get(screenshotDir, filename);
-
       Files.createDirectories(screenshot.getParent());
       Files.copy(new ByteArrayInputStream(data), screenshot);
     } catch (WebDriverException | IOException e) {
       LOG.error(format("Can't capture screenshot for test %s", testName), e);
+    }
+  }
+
+  private void dumpHtmlCodeFromTheCurrentPage(ITestResult result, SeleniumWebDriver webDriver) {
+    String testName = result.getTestClass().getName() + "." + result.getMethod().getMethodName();
+    String filename = NameGenerator.generate(testName + "_", 8) + ".html";
+    try {
+      String pageSource = webDriver.getPageSource();
+      Path dmpDirectory = Paths.get("target/htmldump", filename);
+      Files.createDirectories(dmpDirectory.getParent());
+      Files.write(dmpDirectory, pageSource.getBytes(), StandardOpenOption.CREATE);
+    } catch (WebDriverException | IOException e) {
+      LOG.error(format("Can't dump of html source for test %s", testName), e);
     }
   }
 
