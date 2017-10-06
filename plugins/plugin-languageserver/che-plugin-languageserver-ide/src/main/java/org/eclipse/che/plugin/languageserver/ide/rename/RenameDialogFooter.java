@@ -24,7 +24,8 @@ public class RenameDialogFooter extends InputDialogFooter {
   private final Button previewButton;
 
   @Inject
-  public RenameDialogFooter(UILocalizationConstant messages, LanguageServerLocalization localization) {
+  public RenameDialogFooter(
+      UILocalizationConstant messages, LanguageServerLocalization localization) {
     super(messages);
     previewButton = new Button();
     previewButton.setText(localization.renameDialogPreviewLabel());

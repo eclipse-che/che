@@ -79,10 +79,6 @@
             <artifactId>che-core-orion-editor</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-java-ext-lang-client</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.lsp4j</groupId>
             <artifactId>org.eclipse.lsp4j</artifactId>
             <exclusions>

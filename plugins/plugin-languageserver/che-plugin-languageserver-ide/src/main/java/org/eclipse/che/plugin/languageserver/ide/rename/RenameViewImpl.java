@@ -38,7 +38,6 @@ import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
 import org.eclipse.che.ide.ui.smartTree.Tree;
-import org.eclipse.che.ide.ui.window.Window;
 import org.eclipse.che.ide.util.dom.Elements;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerLocalization;
 import org.eclipse.che.plugin.languageserver.ide.rename.RenameView.ActionDelegate;
