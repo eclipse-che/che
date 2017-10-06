@@ -78,4 +78,9 @@ public class DefaultAgentLauncher implements AgentLauncher {
   public String getMachineType() {
     return "any";
   }
+
+  @Override
+  public boolean shouldBlockMachineStartOnError() {
+    return true;
+  }
 }
