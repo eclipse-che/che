@@ -22,11 +22,11 @@
     <packaging>jar</packaging>
     <name>Che Multiuser :: PostgreSQL Tck</name>
     <properties>
-        <db.image.name>postgres:9.4</db.image.name>
+        <db.image.name>centos/postgresql-96-centos7</db.image.name>
         <jdbc.driver>org.postgresql.Driver</jdbc.driver>
-        <jdbc.password>multiuser</jdbc.password>
-        <jdbc.url>jdbc:postgresql://${docker.host.address}:${jdbc.port}/multiuser</jdbc.url>
-        <jdbc.user>multiuser</jdbc.user>
+        <jdbc.password>che</jdbc.password>
+        <jdbc.url>jdbc:postgresql://${docker.host.address}:${jdbc.port}/che</jdbc.url>
+        <jdbc.user>postgres</jdbc.user>
     </properties>
     <dependencies>
         <dependency>
@@ -253,15 +253,17 @@
                                             <port>jdbc.port:5432</port>
                                         </ports>
                                         <wait>
-                                            <log>database system is ready to accept connections</log>
-                                            <time>20000</time>
+                                            <log>server started</log>
+                                            <time>60000</time>
                                         </wait>
                                         <restartPolicy>
                                             <name>always</name>
                                         </restartPolicy>
                                         <env>
-                                            <POSTGRES_PASSWORD>${jdbc.password}</POSTGRES_PASSWORD>
-                                            <POSTGRES_USER>${jdbc.user}</POSTGRES_USER>
+                                            <POSTGRESQL_PASSWORD>password</POSTGRESQL_PASSWORD>
+                                            <POSTGRESQL_USER>user</POSTGRESQL_USER>
+                                            <POSTGRESQL_DATABASE>che</POSTGRESQL_DATABASE>
+                                            <POSTGRESQL_ADMIN_PASSWORD>${jdbc.password}</POSTGRESQL_ADMIN_PASSWORD>
                                         </env>
                                     </run>
                                 </image>
