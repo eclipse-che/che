@@ -88,6 +88,16 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-api-permission</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-permission-workspace</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>com.jayway.restassured</groupId>
             <artifactId>rest-assured</artifactId>
             <scope>test</scope>
@@ -123,11 +133,11 @@
             </resource>
         </resources>
         <plugins>
-            <!-- compiler inlines constants, so it is impossible to find reference on dependency -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
+                    <!-- compiler inlines constants, so it is impossible to find reference on dependency -->
                     <execution>
                         <id>analyze</id>
                         <configuration>

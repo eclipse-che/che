@@ -38,6 +38,7 @@ import org.eclipse.che.plugin.ssh.key.client.manage.SshKeyManagerPresenter;
 import org.eclipse.che.security.oauth.JsOAuthWindow;
 import org.eclipse.che.security.oauth.OAuthCallback;
 import org.eclipse.che.security.oauth.OAuthStatus;
+import org.eclipse.che.security.oauth.SecurityTokenProvider;
 
 /** @author Roman Nikitenko */
 public class GitHubAuthenticatorImpl
@@ -55,6 +56,7 @@ public class GitHubAuthenticatorImpl
   private final GitHubLocalizationConstant locale;
   private final String baseUrl;
   private final AppContext appContext;
+  private final SecurityTokenProvider securityTokenPærovider;
   private String authenticationUrl;
 
   @Inject
@@ -65,10 +67,12 @@ public class GitHubAuthenticatorImpl
       DialogFactory dialogFactory,
       GitHubLocalizationConstant locale,
       NotificationManager notificationManager,
-      AppContext appContext) {
+      AppContext appContext,
+      SecurityTokenProvider securityTokenPærovider) {
     this.registry = registry;
     this.sshServiceClient = sshServiceClient;
     this.view = view;
+    this.securityTokenPærovider = securityTokenPærovider;
     this.view.setDelegate(this);
     this.locale = locale;
     this.baseUrl = appContext.getMasterEndpoint();
@@ -125,9 +129,11 @@ public class GitHubAuthenticatorImpl
   private void showAuthWindow() {
     JsOAuthWindow authWindow;
     if (authenticationUrl == null) {
-      authWindow = new JsOAuthWindow(getAuthUrl(), "error.url", 500, 980, this);
+      authWindow =
+          new JsOAuthWindow(getAuthUrl(), "error.url", 500, 980, this, securityTokenPærovider);
     } else {
-      authWindow = new JsOAuthWindow(authenticationUrl, "error.url", 500, 980, this);
+      authWindow =
+          new JsOAuthWindow(authenticationUrl, "error.url", 500, 980, this, securityTokenPærovider);
     }
     authWindow.loginWithOAuth();
   }

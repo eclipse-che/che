@@ -98,6 +98,9 @@ export class NamespaceSelectorSvc {
         return namespace.label;
       });
       return this.fetchNamespaceInfoById(this.namespaceId);
+    }).catch((error: any) => {
+      this.$log.error(`Cannot fetch namespaces: ${error}`);
+      return this.$q.when(null);
     }).then(() => {
       if (this.namespaceId) {
         return this.$q.when();
@@ -113,9 +116,6 @@ export class NamespaceSelectorSvc {
         const user = this.cheUser.getUser();
         this.namespaceId = user.name;
       });
-    }).catch((error: any) => {
-      // this.$log.error(`Cannot fetch namespaces: ${error}`);
-      return this.$q.reject(`Cannot fetch namespaces: ${error}`);
     }).then(() => {
       return this.$q.when(this.namespaceId);
     });

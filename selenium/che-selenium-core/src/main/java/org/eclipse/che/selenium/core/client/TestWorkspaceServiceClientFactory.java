@@ -10,7 +10,10 @@
  */
 package org.eclipse.che.selenium.core.client;
 
+import com.google.inject.assistedinject.Assisted;
+
 /** @author Dmytro Nochevnov */
 public interface TestWorkspaceServiceClientFactory {
-  TestWorkspaceServiceClient create(String authToken);
+  TestWorkspaceServiceClient create(
+      @Assisted("email") String email, @Assisted("password") String password);
 }
