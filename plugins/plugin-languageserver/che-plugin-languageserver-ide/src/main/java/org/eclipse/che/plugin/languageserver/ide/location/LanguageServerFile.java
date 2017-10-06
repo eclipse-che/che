@@ -1,16 +1,12 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2012-2017 Red Hat, Inc. All rights reserved. This program and the accompanying
+ * materials are made available under the terms of the Eclipse Public License v1.0 which accompanies
+ * this distribution, and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Red Hat, Inc. - initial API and implementation
+ * Contributors: Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.plugin.languageserver.ide.location;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.che.api.languageserver.shared.dto.DtoClientImpls.FileContentParametersDto;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedLocation;
 import org.eclipse.che.api.languageserver.shared.model.FileContentParameters;
@@ -20,8 +16,6 @@ import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 
 public class LanguageServerFile implements VirtualFile {
-  private static AtomicInteger nextId = new AtomicInteger();
-
   private final ExtendedLocation location;
   private final Path path;
   private final TextDocumentServiceClient textDocumentService;
@@ -30,7 +24,7 @@ public class LanguageServerFile implements VirtualFile {
       TextDocumentServiceClient textDocumentService, ExtendedLocation location) {
     this.textDocumentService = textDocumentService;
     this.location = location;
-    this.path = new Path("/lsvirtual/" + String.valueOf(nextId.getAndIncrement()));
+    this.path = new Path(location.getLocation().getUri().substring("file://".length()));
   }
 
   @Override
