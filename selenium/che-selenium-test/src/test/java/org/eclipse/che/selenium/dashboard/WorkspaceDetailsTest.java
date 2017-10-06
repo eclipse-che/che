@@ -41,7 +41,7 @@ import org.testng.annotations.Test;
 public class WorkspaceDetailsTest {
   private static final String WORKSPACE = NameGenerator.generate("java-mysql", 4);
   private static final String PROJECT_NAME = "web-java-petclinic";
-  private List<String> agentsList =
+  private List<String> agents =
       Arrays.asList(
           "C# language server",
           "Exec",
@@ -54,11 +54,11 @@ public class WorkspaceDetailsTest {
           "Terminal",
           "TypeScript language server",
           "Workspace API");
-  private List<Boolean> agentsStateList =
+  private List<Boolean> agentsStates =
       Arrays.asList(false, true, false, false, false, false, false, true, true, false, true);
-  private List<String> variablesList =
+  private List<String> variables =
       Arrays.asList("MYSQL_DATABASE", "MYSQL_PASSWORD", "MYSQL_ROOT_PASSWORD", "MYSQL_USER");
-  private List<String> valuesList = Arrays.asList("petclinic", "password", "password", "petclinic");
+  private List<String> values = Arrays.asList("petclinic", "password", "password", "petclinic");
 
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private ProjectExplorer projectExplorer;
@@ -113,24 +113,23 @@ public class WorkspaceDetailsTest {
 
     //delete all variable from db machine, check they don't exist and save changes
     dashboardWorkspace.selectMachine("Environment variables", "db");
-    for (int i = 0; i < variablesList.size(); i++) {
+    for (int i = 0; i < variables.size(); i++) {
       loader.waitOnClosed();
-      dashboardWorkspace.clickOnDeleteEnvVariableButton(variablesList.get(i));
+      dashboardWorkspace.clickOnDeleteEnvVariableButton(variables.get(i));
       dashboardWorkspace.clickOnDeleteDialogButton();
-      dashboardWorkspace.checkValueIsNotExists(variablesList.get(i), valuesList.get(i));
+      dashboardWorkspace.checkValueIsNotExists(variables.get(i), values.get(i));
     }
     clickOnSaveButton();
 
     //restore variables to db machine, check they exist and save changes
-    for (int i = 0; i < variablesList.size(); i++) {
+    for (int i = 0; i < variables.size(); i++) {
       loader.waitOnClosed();
       dashboardWorkspace.clickOnAddEnvVariableButton();
       dashboardWorkspace.checkAddNewEnvVarialbleDialogIsOpen();
-      dashboardWorkspace.addNewEnvironmentVariable(variablesList.get(i), valuesList.get(i));
+      dashboardWorkspace.addNewEnvironmentVariable(variables.get(i), values.get(i));
       dashboardWorkspace.clickOnAddDialogButton();
-      Assert.assertTrue(dashboardWorkspace.checkEnvVariableExists(variablesList.get(i)));
-      Assert.assertTrue(
-          dashboardWorkspace.checkValueExists(variablesList.get(i), valuesList.get(i)));
+      Assert.assertTrue(dashboardWorkspace.checkEnvVariableExists(variables.get(i)));
+      Assert.assertTrue(dashboardWorkspace.checkValueExists(variables.get(i), values.get(i)));
     }
     clickOnSaveButton();
   }
@@ -141,26 +140,24 @@ public class WorkspaceDetailsTest {
 
     //check all needed agents in dev-machine exist
     dashboardWorkspace.selectMachine("Workspace Agents", "dev-machine");
-    for (String agentName : agentsList) {
+    for (String agentName : agents) {
       dashboardWorkspace.checkAgentExists(agentName);
     }
 
     //switch all agents and save changes
-    for (int i = 0; i < agentsList.size(); i++) {
-      Assert.assertEquals(
-          dashboardWorkspace.getAgentState(agentsList.get(i)), agentsStateList.get(i));
-      dashboardWorkspace.switchAgentState(agentsList.get(i));
+    for (int i = 0; i < agents.size(); i++) {
+      Assert.assertEquals(dashboardWorkspace.getAgentState(agents.get(i)), agentsStates.get(i));
+      dashboardWorkspace.switchAgentState(agents.get(i));
     }
     clickOnSaveButton();
 
     //switch all agents, save changes and check its states are as previous(by default for the Java-MySql stack)
-    for (String agentName : agentsList) {
+    for (String agentName : agents) {
       dashboardWorkspace.switchAgentState(agentName);
     }
     clickOnSaveButton();
-    for (int i = 0; i < agentsList.size(); i++) {
-      Assert.assertEquals(
-          dashboardWorkspace.getAgentState(agentsList.get(i)), agentsStateList.get(i));
+    for (int i = 0; i < agents.size(); i++) {
+      Assert.assertEquals(dashboardWorkspace.getAgentState(agents.get(i)), agentsStates.get(i));
     }
   }
 
