@@ -23,10 +23,12 @@
     <name>Che Multiuser :: PostgreSQL Tck</name>
     <properties>
         <db.image.name>centos/postgresql-96-centos7</db.image.name>
+        <jdbc.admin.name>postgres</jdbc.admin.name>
+        <jdbc.admin.password>che2</jdbc.admin.password>
         <jdbc.driver>org.postgresql.Driver</jdbc.driver>
-        <jdbc.password>che</jdbc.password>
         <jdbc.url>jdbc:postgresql://${docker.host.address}:${jdbc.port}/che</jdbc.url>
-        <jdbc.user>postgres</jdbc.user>
+        <jdbc.user.name>user</jdbc.user.name>
+        <jdbc.user.password>che1</jdbc.user.password>
     </properties>
     <dependencies>
         <dependency>
@@ -211,8 +213,8 @@
                             <systemPropertyVariables>
                                 <jdbc.driver>${jdbc.driver}</jdbc.driver>
                                 <jdbc.url>${jdbc.url}</jdbc.url>
-                                <jdbc.user>${jdbc.user}</jdbc.user>
-                                <jdbc.password>${jdbc.password}</jdbc.password>
+                                <jdbc.user>${jdbc.admin.name}</jdbc.user>
+                                <jdbc.password>${jdbc.admin.password}</jdbc.password>
                             </systemPropertyVariables>
                             <includes>
                                 <include>**/tck/**</include>
@@ -260,10 +262,10 @@
                                             <name>always</name>
                                         </restartPolicy>
                                         <env>
-                                            <POSTGRESQL_PASSWORD>password</POSTGRESQL_PASSWORD>
-                                            <POSTGRESQL_USER>user</POSTGRESQL_USER>
+                                            <POSTGRESQL_USER>${jdbc.user.name}</POSTGRESQL_USER>
+                                            <POSTGRESQL_PASSWORD>${jdbc.user.password}</POSTGRESQL_PASSWORD>
                                             <POSTGRESQL_DATABASE>che</POSTGRESQL_DATABASE>
-                                            <POSTGRESQL_ADMIN_PASSWORD>${jdbc.password}</POSTGRESQL_ADMIN_PASSWORD>
+                                            <POSTGRESQL_ADMIN_PASSWORD>${jdbc.admin.password}</POSTGRESQL_ADMIN_PASSWORD>
                                         </env>
                                     </run>
                                 </image>
