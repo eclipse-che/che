@@ -22,7 +22,7 @@
     <packaging>jar</packaging>
     <name>Integration Tests :: PostgreSQL</name>
     <properties>
-        <db.image.name>postgres:9.4</db.image.name>
+        <db.image.name>centos/postgresql-96-centos7</db.image.name>
         <jdbc.driver>org.postgresql.Driver</jdbc.driver>
         <jdbc.password>che</jdbc.password>
         <jdbc.url>jdbc:postgresql://${docker.host.address}:${jdbc.port}/che</jdbc.url>
@@ -251,8 +251,8 @@
                             <systemPropertyVariables>
                                 <jdbc.driver>${jdbc.driver}</jdbc.driver>
                                 <jdbc.url>${jdbc.url}</jdbc.url>
-                                <jdbc.user>${jdbc.user}</jdbc.user>
-                                <jdbc.password>${jdbc.password}</jdbc.password>
+                                <jdbc.user>postgres</jdbc.user>
+                                <jdbc.password>che22</jdbc.password>
                             </systemPropertyVariables>
                             <includes>
                                 <include>**/tck/**</include>
@@ -289,15 +289,17 @@
                                             <port>jdbc.port:5432</port>
                                         </ports>
                                         <wait>
-                                            <log>database system is ready to accept connections</log>
+                                            <log>server started</log>
                                             <time>60000</time>
                                         </wait>
                                         <restartPolicy>
                                             <name>always</name>
                                         </restartPolicy>
                                         <env>
-                                            <POSTGRES_PASSWORD>${jdbc.password}</POSTGRES_PASSWORD>
-                                            <POSTGRES_USER>${jdbc.user}</POSTGRES_USER>
+                                            <POSTGRESQL_PASSWORD>${jdbc.password}</POSTGRESQL_PASSWORD>
+                                            <POSTGRESQL_USER>${jdbc.user}</POSTGRESQL_USER>
+                                            <POSTGRESQL_DATABASE>che</POSTGRESQL_DATABASE>
+                                            <POSTGRESQL_ADMIN_PASSWORD>che22</POSTGRESQL_ADMIN_PASSWORD>
                                         </env>
                                     </run>
                                 </image>
