@@ -16,7 +16,6 @@ import com.google.inject.Singleton;
 import java.util.Map;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
 
 /** @author Musienko Maxim */
@@ -30,7 +29,7 @@ public class TestProfileServiceClient {
   public TestProfileServiceClient(
       TestApiEndpointUrlProvider apiEndpointProvider,
       HttpJsonRequestFactory requestFactory,
-      DefaultTestUser defaultTestUser) {
+      TestUser defaultTestUser) {
     this.apiEndpoint = apiEndpointProvider.get().toString();
     this.requestFactory = requestFactory;
     this.defaultTestUser = defaultTestUser;

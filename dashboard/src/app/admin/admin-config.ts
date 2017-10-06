@@ -11,15 +11,16 @@
 'use strict';
 
 import {AdminsPluginsConfig} from './plugins/plugins-config';
+import {AdminsUserManagementConfig} from './user-management/user-management-config';
 
 /**
  * @author Florent Benoit
  */
 export class AdminsConfig {
 
-  constructor(register) {
+  constructor(register: che.IRegisterService) {
     new AdminsPluginsConfig(register);
-
+    new AdminsUserManagementConfig(register);
   }
 }
 

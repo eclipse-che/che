@@ -11,6 +11,10 @@
 package org.eclipse.che.security.oauth;
 
 import com.google.gwt.user.client.Window;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.ide.util.loging.Log;
 
 /** @author Vladislav Zhukovskii */
 public class JsOAuthWindow {
@@ -19,16 +23,23 @@ public class JsOAuthWindow {
   private OAuthStatus authStatus;
   private int popupHeight;
   private int popupWidth;
+  private SecurityTokenProvider provider;
   private int clientHeight;
   private int clientWidth;
   private OAuthCallback callback;
 
   public JsOAuthWindow(
-      String authUrl, String errUrl, int popupHeight, int popupWidth, OAuthCallback callback) {
+      String authUrl,
+      String errUrl,
+      int popupHeight,
+      int popupWidth,
+      OAuthCallback callback,
+      SecurityTokenProvider provider) {
     this.authUrl = authUrl;
     this.errUrl = errUrl;
     this.popupHeight = popupHeight;
     this.popupWidth = popupWidth;
+    this.provider = provider;
     this.clientHeight = Window.getClientHeight();
     this.clientWidth = Window.getClientWidth();
     this.callback = callback;
@@ -46,7 +57,25 @@ public class JsOAuthWindow {
   }
 
   public void loginWithOAuth() {
-    loginWithOAuth(authUrl, errUrl, popupHeight, popupWidth, clientHeight, clientWidth);
+    provider
+        .getSecurityToken()
+        .then(
+            new Operation<String>() {
+              @Override
+              public void apply(String arg) throws OperationException {
+                if (arg != null) {
+                  authUrl = authUrl + "&token=" + arg;
+                }
+                loginWithOAuth(authUrl, errUrl, popupHeight, popupWidth, clientHeight, clientWidth);
+              }
+            })
+        .catchError(
+            new Operation<PromiseError>() {
+              @Override
+              public void apply(PromiseError arg) throws OperationException {
+                Log.error(getClass(), arg);
+              }
+            });
   }
 
   private native void loginWithOAuth(

@@ -9,7 +9,7 @@
  *   Red Hat, Inc.- initial API and implementation
  */
 
-import {org} from "../../../api/dto/che-dto"
+import {org} from "../../dto/che-dto"
 import {AuthData} from "../auth/auth-data";
 import {HttpJsonRequest} from "../../../spi/http/default-http-json-request";
 import {DefaultHttpJsonRequest} from "../../../spi/http/default-http-json-request";
@@ -45,7 +45,7 @@ export class Ssh {
      *         when any other error occurs during ssh pair fetching
      */
     getPair(service: string, name: string):Promise<org.eclipse.che.api.ssh.shared.dto.SshPairDto> {
-        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/ssh/' + service + '/find?name=' + name, 200);
+        let jsonRequest: HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/ssh/' + service + '/find?name=' + name, 200);
         return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
             return jsonResponse.asDto(org.eclipse.che.api.ssh.shared.dto.SshPairDtoImpl);
         });

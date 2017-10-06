@@ -6,6 +6,8 @@
 # http://www.eclipse.org/legal/epl-v10.html
 #
 
+set -e
+
 echo "[CHE] This script is going to wait until Che is deployed and available"
 
 command -v oc >/dev/null 2>&1 || { echo >&2 "[CHE] [ERROR] Command line tool oc (https://docs.openshift.org/latest/cli_reference/get_started_cli.html) is required but it's not installed. Aborting."; exit 1; }
@@ -34,7 +36,7 @@ while [ "${available}" != "\"True\"" ] && [ ${SECONDS} -lt ${end} ]; do
   sleep ${POLLING_INTERVAL_SEC}
 done
 
-if [ "${progressing}" == "\"True\"" ] && [ "${available}" == "\"True\"" ]; then
+if [ "${progressing}" == "\"True\"" ]; then
   echo "[CHE] Che deployed successfully"
 elif [ "${progressing}" == "False" ]; then
   echo "[CHE] [ERROR] Che deployment failed. Aborting. Run command 'oc rollout status che' to get more details."
@@ -44,7 +46,7 @@ elif [ ${SECONDS} -lt ${end} ]; then
   exit 1
 fi
 
-che_http_status=$(curl -s -o /dev/null -I -w "%{http_code}" "${CHE_API_ENDPOINT}/system/state")
+che_http_status=$(curl -s -o /dev/null -I -w "%{http_code}" "${CHE_API_ENDPOINT}/")
 if [ "${che_http_status}" == "200" ]; then  
   echo "[CHE] Che is up and running"
 else

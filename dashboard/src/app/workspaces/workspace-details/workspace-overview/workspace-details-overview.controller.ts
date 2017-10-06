@@ -218,8 +218,12 @@ export class WorkspaceDetailsOverviewController {
    * @returns {string}
    */
   getWorkspaceStatus(): string {
+    const unknown = 'unknown';
+    if (!this.workspaceDetails) {
+      return unknown;
+    }
     const workspace = this.cheWorkspace.getWorkspaceById(this.workspaceDetails.id);
-    return workspace ? workspace.status : 'unknown';
+    return workspace ? workspace.status : unknown;
   }
 
   /**

@@ -29,6 +29,7 @@ import org.eclipse.che.plugin.ssh.key.client.SshKeyUploader;
 import org.eclipse.che.security.oauth.JsOAuthWindow;
 import org.eclipse.che.security.oauth.OAuthCallback;
 import org.eclipse.che.security.oauth.OAuthStatus;
+import org.eclipse.che.security.oauth.SecurityTokenProvider;
 
 /**
  * Uploads SSH keys for github.com.
@@ -45,6 +46,7 @@ public class GitHubSshKeyUploader implements SshKeyUploader, OAuthCallback {
   private final ProductInfoDataProvider productInfoDataProvider;
   private final DialogFactory dialogFactory;
   private final AppContext appContext;
+  private final SecurityTokenProvider securityTokenProvider;
 
   private AsyncCallback<Void> callback;
   private String userId;
@@ -56,7 +58,8 @@ public class GitHubSshKeyUploader implements SshKeyUploader, OAuthCallback {
       NotificationManager notificationManager,
       ProductInfoDataProvider productInfoDataProvider,
       DialogFactory dialogFactory,
-      AppContext appContext) {
+      AppContext appContext,
+      SecurityTokenProvider securityTokenProvider) {
     this.gitHubService = gitHubService;
     this.baseUrl = appContext.getMasterEndpoint();
     this.constant = constant;
@@ -64,6 +67,7 @@ public class GitHubSshKeyUploader implements SshKeyUploader, OAuthCallback {
     this.productInfoDataProvider = productInfoDataProvider;
     this.dialogFactory = dialogFactory;
     this.appContext = appContext;
+    this.securityTokenProvider = securityTokenProvider;
   }
 
   /** {@inheritDoc} */
@@ -124,7 +128,8 @@ public class GitHubSshKeyUploader implements SshKeyUploader, OAuthCallback {
             + Window.Location.getHost()
             + "/ws/"
             + appContext.getWorkspace().getConfig().getName();
-    JsOAuthWindow authWindow = new JsOAuthWindow(authUrl, "error.url", 500, 980, this);
+    JsOAuthWindow authWindow =
+        new JsOAuthWindow(authUrl, "error.url", 500, 980, this, securityTokenProvider);
     authWindow.loginWithOAuth();
   }
 

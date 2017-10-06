@@ -17,7 +17,10 @@ import com.google.inject.assistedinject.Assisted;
  * @author Dmytro Nochevnov
  */
 public interface TestUserFactory {
-  TestUser create(@Assisted("email") String email);
 
-  TestUser create(@Assisted("email") String email, @Assisted("password") String password);
+  /** Creates new test user with generated password */
+  TestUserImpl create(@Assisted("email") String email);
+
+  /** Creates new test user with given e-mail and password */
+  TestUserImpl create(@Assisted("email") String email, @Assisted("password") String password);
 }

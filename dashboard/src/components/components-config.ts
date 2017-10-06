@@ -27,6 +27,7 @@ import {CheStepsContainer} from './steps-container/steps-container.directive';
 import {CheErrorMessagesConfig} from './error-messages/che-error-messages-config';
 import {ServiceConfig} from './service/service-config';
 import {RandomSvc} from './utils/random.service';
+import {InterceptorConfig} from './interceptor/interceptor-config';
 
 export class ComponentsConfig {
 
@@ -44,6 +45,8 @@ export class ComponentsConfig {
     new WidgetConfig(register);
     new CheErrorMessagesConfig(register);
     new ServiceConfig(register);
+
+    new InterceptorConfig(register);
 
     register.directive('cheStepsContainer', CheStepsContainer);
 

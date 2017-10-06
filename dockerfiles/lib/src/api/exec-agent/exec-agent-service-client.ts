@@ -8,15 +8,14 @@
  * Contributors:
  *   Red Hat, Inc.- initial API and implementation
  */
-import {org} from "../../api/dto/che-dto";
 import {ProcessTerminatedEventPromiseMessageBusSubscriber} from "./process-terminated-event-promise-subscriber";
 import {AuthData} from "../wsmaster/auth/auth-data";
 import {Websocket} from "../../spi/websocket/websocket";
 import {Workspace} from "../wsmaster/workspace/workspace";
 import {CheFileStructWorkspaceCommand} from "../../internal/dir/chefile-struct/che-file-struct";
-import {Log} from "../../spi/log/log";
 import {JsonRpcBus} from "../../spi/websocket/json-rpc-bus";
 import {ProcessAckPromiseMessageBusSubscriber} from "./process-ack-event-promise-subscriber";
+import {ServerLocation} from "../../utils/server-location";
 
 /**
  * Exec Agent service allowing to start/stop processes
@@ -36,22 +35,29 @@ export class ExecAgentServiceClientImpl {
 
     workspace : Workspace;
 
-    constructor(workspace : Workspace, authData : AuthData) {
+    /**
+     * Location of exec agent server
+     */
+    serverLocation: ServerLocation;
+
+    constructor(workspace : Workspace, authData : AuthData, serverURL : string) {
         this.workspace = workspace;
         this.authData = authData;
+        this.serverLocation = ServerLocation.parse(serverURL);
         this.websocket = new Websocket();
     }
 
-    getJsonRpcBus(workspaceDto : org.eclipse.che.api.workspace.shared.dto.WorkspaceDto): Promise<JsonRpcBus> {
-        var protocol:string;
-        if (this.authData.isSecured()) {
+    getJsonRpcBus(): Promise<JsonRpcBus> {
+        let protocol: string;
+        if (this.serverLocation.isSecure()) {
             protocol = 'wss';
         } else {
             protocol = 'ws';
         }
 
-        // get links for WS
-        var link:string = protocol + '://' + this.authData.hostname + ":" + this.authData.port + '/connect';
+
+        // get links for Websocket
+        let link: string = protocol + '://' + this.serverLocation.getHostname() + ":" + this.serverLocation.getPort() + '/connect';
 
         return this.websocket.getJsonRpcBus(link + '?token=' + this.authData.getToken());
     }
@@ -59,9 +65,7 @@ export class ExecAgentServiceClientImpl {
     /**
      * Create a workspace and return a promise with content of WorkspaceDto in case of success
      */
-    executeCommand(workspaceDto : org.eclipse.che.api.workspace.shared.dto.WorkspaceDto,
-                   machineId:string,
-                   cheFileStructWorkspaceCommand:CheFileStructWorkspaceCommand,
+    executeCommand(cheFileStructWorkspaceCommand:CheFileStructWorkspaceCommand,
                    uuid:string,
                    asynchronous : boolean = true):Promise<boolean> {
 
@@ -80,7 +84,7 @@ export class ExecAgentServiceClientImpl {
         // get JSON RPC Bus
         let processTerminatedEventPromiseMessageBusSubscriber : ProcessTerminatedEventPromiseMessageBusSubscriber;
         let userJsonRpcBus : JsonRpcBus;
-        return this.getJsonRpcBus(workspaceDto).then((jsonRpcBus:JsonRpcBus) => {
+        return this.getJsonRpcBus().then((jsonRpcBus:JsonRpcBus) => {
             userJsonRpcBus = jsonRpcBus;
             processTerminatedEventPromiseMessageBusSubscriber = new ProcessTerminatedEventPromiseMessageBusSubscriber(jsonRpcBus);
             let processAckPromiseMessageBusSubscriber : ProcessAckPromiseMessageBusSubscriber = new ProcessAckPromiseMessageBusSubscriber(uuid, jsonRpcBus, asynchronous, processTerminatedEventPromiseMessageBusSubscriber);

@@ -119,11 +119,11 @@ public class MachineLinksInjector {
           .filter(server -> EXEC_AGENT_REFERENCE.equals(server.getRef()))
           .findAny()
           .ifPresent(
-              terminal ->
+              execAgent ->
                   links.add(
                       createLink(
                           "GET",
-                          UriBuilder.fromUri(terminal.getUrl())
+                          UriBuilder.fromUri(execAgent.getUrl())
                               .scheme("https".equals(scheme) ? "wss" : "ws")
                               .path("/connect")
                               .build()

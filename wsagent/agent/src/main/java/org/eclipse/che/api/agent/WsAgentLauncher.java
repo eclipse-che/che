@@ -13,12 +13,12 @@ package org.eclipse.che.api.agent;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static org.eclipse.che.api.workspace.shared.Constants.WS_AGENT_PROCESS_NAME;
 
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
+import org.eclipse.che.api.agent.server.WsAgentHealthChecker;
 import org.eclipse.che.api.agent.server.WsAgentPingRequestFactory;
 import org.eclipse.che.api.agent.server.launcher.AgentLauncher;
 import org.eclipse.che.api.agent.shared.model.Agent;
@@ -26,12 +26,11 @@ import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.rest.HttpJsonRequest;
-import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.api.environment.server.MachineProcessManager;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
+import org.eclipse.che.api.workspace.shared.dto.WsAgentHealthStateDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +50,7 @@ public class WsAgentLauncher implements AgentLauncher {
 
   private final Provider<MachineProcessManager> machineProcessManagerProvider;
   private final WsAgentPingRequestFactory wsAgentPingRequestFactory;
+  private final WsAgentHealthChecker wsAgentHealthChecker;
   private final long wsAgentMaxStartTimeMs;
   private final long wsAgentPingDelayMs;
   private final String pingTimedOutErrorMessage;
@@ -59,6 +59,7 @@ public class WsAgentLauncher implements AgentLauncher {
   @Inject
   public WsAgentLauncher(
       Provider<MachineProcessManager> machineProcessManagerProvider,
+      WsAgentHealthChecker wsAgentHealthChecker,
       WsAgentPingRequestFactory wsAgentPingRequestFactory,
       @Nullable @Named("machine.ws_agent.run_command") String wsAgentRunCommand,
       @Named("che.workspace.agent.dev.max_start_time_ms") long wsAgentMaxStartTimeMs,
@@ -66,6 +67,7 @@ public class WsAgentLauncher implements AgentLauncher {
       @Named("che.workspace.agent.dev.ping_timeout_error_msg") String pingTimedOutErrorMessage) {
     this.machineProcessManagerProvider = machineProcessManagerProvider;
     this.wsAgentPingRequestFactory = wsAgentPingRequestFactory;
+    this.wsAgentHealthChecker = wsAgentHealthChecker;
     this.wsAgentMaxStartTimeMs = wsAgentMaxStartTimeMs;
     this.wsAgentPingDelayMs = wsAgentPingDelayMs;
     this.pingTimedOutErrorMessage = pingTimedOutErrorMessage;
@@ -84,17 +86,15 @@ public class WsAgentLauncher implements AgentLauncher {
 
   @Override
   public void launch(Instance machine, Agent agent) throws ServerException {
-    final HttpJsonRequest wsAgentPingRequest;
+    final String wsAgentPingUrl;
     try {
-      wsAgentPingRequest = createPingRequest(machine);
+      wsAgentPingUrl = wsAgentPingRequestFactory.createRequest(machine).getUrl();
     } catch (ServerException e) {
       throw new MachineException(e.getServiceError());
     }
 
     String script =
         agent.getScript() + "\n" + firstNonNull(wsAgentRunCommand, DEFAULT_WS_AGENT_RUN_COMMAND);
-
-    final String wsAgentPingUrl = wsAgentPingRequest.getUrl();
     try {
       // for server side type of command mean nothing
       // but we will use it as marker on
@@ -117,7 +117,7 @@ public class WsAgentLauncher implements AgentLauncher {
           pingStartTimestamp);
 
       while (System.currentTimeMillis() - pingStartTimestamp < wsAgentMaxStartTimeMs) {
-        if (pingWsAgent(wsAgentPingRequest)) {
+        if (pingWsAgent(machine)) {
           return;
         } else {
           Thread.sleep(wsAgentPingDelayMs);
@@ -142,18 +142,13 @@ public class WsAgentLauncher implements AgentLauncher {
     return String.format(WS_AGENT_PROCESS_OUTPUT_CHANNEL, workspaceId);
   }
 
-  // forms the ping request based on information about the machine.
-  protected HttpJsonRequest createPingRequest(Instance machine) throws ServerException {
-    return wsAgentPingRequestFactory.createRequest(machine);
-  }
-
-  private boolean pingWsAgent(HttpJsonRequest wsAgentPingRequest) throws ServerException {
+  private boolean pingWsAgent(Instance machine) throws ServerException {
     try {
-      final HttpJsonResponse pingResponse = wsAgentPingRequest.request();
-      if (pingResponse.getResponseCode() == HttpURLConnection.HTTP_OK) {
+      WsAgentHealthStateDto state = wsAgentHealthChecker.check(machine);
+      if (state.getCode() == HttpURLConnection.HTTP_OK) {
         return true;
       }
-    } catch (ApiException | IOException ignored) {
+    } catch (ApiException ignored) {
     }
     return false;
   }

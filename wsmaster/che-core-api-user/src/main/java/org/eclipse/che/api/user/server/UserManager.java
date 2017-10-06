@@ -53,6 +53,8 @@ import org.eclipse.che.api.user.server.spi.UserDao;
 @Singleton
 public class UserManager {
 
+  public static final String PERSONAL_ACCOUNT = "personal";
+
   private final UserDao userDao;
   private final ProfileDao profileDao;
   private final PreferenceDao preferencesDao;
@@ -273,7 +275,6 @@ public class UserManager {
     } catch (NotFoundException ignored) {
       return;
     }
-
     preferencesDao.remove(id);
     profileDao.remove(id);
     eventService.publish(new BeforeUserRemovedEvent(user)).propagateException();
