@@ -14,7 +14,6 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableSet;
-import java.util.Set;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.multiuser.resource.api.type.ResourceType;
@@ -34,7 +33,8 @@ import org.testng.annotations.Test;
 public class ResourceValidatorTest {
   private static final String RESOURCE_TYPE = "test";
   private static final String DEFAULT_RESOURCE_UNIT = "mb";
-  private static final Set<String> SUPPORTED_UNITS = ImmutableSet.of(DEFAULT_RESOURCE_UNIT, "gb");
+  private static final ImmutableSet<String> SUPPORTED_UNITS =
+      ImmutableSet.of(DEFAULT_RESOURCE_UNIT, "gb");
   @Mock private ResourceType resourceType;
 
   private ResourceValidator validator;

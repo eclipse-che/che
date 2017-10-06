@@ -36,7 +36,7 @@ public interface MemberRemovedEventDto extends OrganizationEventDto {
 
   MemberRemovedEventDto withMember(UserDto member);
 
-  /** Returns name of user who initiated member removal */
+  @Override
   String getInitiator();
 
   void setInitiator(String initiator);

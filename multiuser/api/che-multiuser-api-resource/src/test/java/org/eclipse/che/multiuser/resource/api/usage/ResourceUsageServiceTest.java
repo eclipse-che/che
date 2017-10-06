@@ -82,7 +82,7 @@ public class ResourceUsageServiceTest {
     assertEquals(resources.size(), 1);
     final ResourceDto fetchedResource = resources.get(0);
     assertEquals(fetchedResource.getType(), RESOURCE_TYPE);
-    assertEquals(new Long(fetchedResource.getAmount()), RESOURCE_AMOUNT);
+    assertEquals(Long.valueOf(fetchedResource.getAmount()), RESOURCE_AMOUNT);
     assertEquals(fetchedResource.getUnit(), RESOURCE_UNIT);
   }
 
@@ -104,7 +104,7 @@ public class ResourceUsageServiceTest {
     assertEquals(resources.size(), 1);
     final ResourceDto fetchedResource = resources.get(0);
     assertEquals(fetchedResource.getType(), RESOURCE_TYPE);
-    assertEquals(new Long(fetchedResource.getAmount()), RESOURCE_AMOUNT);
+    assertEquals(Long.valueOf(fetchedResource.getAmount()), RESOURCE_AMOUNT);
     assertEquals(fetchedResource.getUnit(), RESOURCE_UNIT);
   }
 
@@ -126,7 +126,7 @@ public class ResourceUsageServiceTest {
     assertEquals(resources.size(), 1);
     final ResourceDto fetchedResource = resources.get(0);
     assertEquals(fetchedResource.getType(), RESOURCE_TYPE);
-    assertEquals(new Long(fetchedResource.getAmount()), RESOURCE_AMOUNT);
+    assertEquals(Long.valueOf(fetchedResource.getAmount()), RESOURCE_AMOUNT);
     assertEquals(fetchedResource.getUnit(), RESOURCE_UNIT);
   }
 

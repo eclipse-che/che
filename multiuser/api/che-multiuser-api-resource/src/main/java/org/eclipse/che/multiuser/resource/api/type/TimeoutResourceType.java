@@ -25,7 +25,7 @@ public class TimeoutResourceType implements ResourceType {
   public static final String ID = "timeout";
   public static final String UNIT = "minute";
 
-  private static final Set<String> SUPPORTED_UNITS = ImmutableSet.of(UNIT);
+  private static final ImmutableSet<String> SUPPORTED_UNITS = ImmutableSet.of(UNIT);
 
   @Override
   public String getId() {

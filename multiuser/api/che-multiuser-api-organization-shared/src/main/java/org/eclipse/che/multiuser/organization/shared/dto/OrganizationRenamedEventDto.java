@@ -43,7 +43,7 @@ public interface OrganizationRenamedEventDto extends OrganizationEventDto {
 
   OrganizationRenamedEventDto withNewName(String newName);
 
-  /** Returns name of user who initiated organization rename */
+  @Override
   String getInitiator();
 
   void setInitiator(String initiator);

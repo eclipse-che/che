@@ -13,8 +13,7 @@ package org.eclipse.che.commons.auth.token;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Try to extract token from request in 3 steps. 1. From query parameter. 2. From header. 3. From
- * cookie.
+ * Try to extract token from request from query parameter and then from header.
  *
  * @author Sergii Kabashniuk
  */

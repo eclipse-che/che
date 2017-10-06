@@ -60,6 +60,7 @@ public class MultiuserStackLoader extends StackLoader {
     this.permissionsDao = permissionsDao;
   }
 
+  @Override
   protected void loadStack(StackImpl stack, Path imagePath) {
     setIconData(stack, imagePath);
     try {

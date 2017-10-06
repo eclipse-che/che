@@ -434,6 +434,7 @@ public class StackPermissionsFilterTest {
 
   @Filter
   public static class EnvironmentFilter implements RequestFilter {
+    @Override
     public void doFilter(GenericContainerRequest request) {
       EnvironmentContext.getCurrent().setSubject(subject);
     }
