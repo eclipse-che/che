@@ -22,7 +22,6 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.P
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.PROJECT;
 
 import com.google.inject.Inject;
-import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
@@ -39,7 +38,7 @@ import org.testng.annotations.Test;
 
 /** @author Igor Vnokur */
 public class GitColorsTest {
-  private static final String PROJECT_NAME = NameGenerator.generate("GitColors_", 4);
+  private static final String PROJECT_NAME = NameGenerator.generate("project", 4);
 
   @Inject private TestWorkspace ws;
   @Inject private Ide ide;
@@ -57,9 +56,11 @@ public class GitColorsTest {
 
   @BeforeClass
   public void prepare() throws Exception {
-    URL resource = getClass().getResource("/projects/default-spring-project");
     testProjectServiceClient.importProject(
-        ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME, ProjectTemplates.MAVEN_SPRING);
+        ws.getId(),
+        Paths.get(getClass().getResource("/projects/default-spring-project").toURI()),
+        PROJECT_NAME,
+        ProjectTemplates.MAVEN_SPRING);
     ide.open(ws);
   }
 
@@ -76,8 +77,8 @@ public class GitColorsTest {
     events.waitExpectedMessage(GIT_INITIALIZED_SUCCESS);
 
     // Check file colors are yellow
-    projectExplorer.waitItemToBeYellow(PROJECT_NAME + "/README.md");
-    projectExplorer.waitItemToBeYellow(PROJECT_NAME + "/pom.xml");
+    projectExplorer.waitYellowNode(PROJECT_NAME + "/README.md");
+    projectExplorer.waitYellowNode(PROJECT_NAME + "/pom.xml");
 
     // perform init commit
     projectExplorer.selectItem(PROJECT_NAME);
@@ -87,8 +88,8 @@ public class GitColorsTest {
 
     // Check file to be in default color
     projectExplorer.openItemByPath(PROJECT_NAME + "/README.md");
-    projectExplorer.waitItemToBeDefaultColor(PROJECT_NAME + "/README.md");
-    editor.waitTabLabelToBeDefaultColor("README.md");
+    projectExplorer.waitDefaultColorNode(PROJECT_NAME + "/README.md");
+    editor.waitDefaultColorTab("README.md");
 
     // Remove file from index
     menu.runCommand(GIT, REMOVE_FROM_INDEX);
@@ -97,8 +98,8 @@ public class GitColorsTest {
     git.confirmRemoveFromIndexForm();
 
     // Check file colors are yellow
-    projectExplorer.waitItemToBeYellow(PROJECT_NAME + "/README.md");
-    editor.waitTabLabelToBeYellow("README.md");
+    projectExplorer.waitYellowNode(PROJECT_NAME + "/README.md");
+    editor.waitYellowTab("README.md");
 
     // Add to index
     menu.runCommand(GIT, ADD_TO_INDEX);
@@ -106,8 +107,8 @@ public class GitColorsTest {
     git.confirmAddToIndexForm();
 
     // Check files are in default color
-    projectExplorer.waitItemToBeDefaultColor(PROJECT_NAME + "/README.md");
-    editor.waitTabLabelToBeDefaultColor("README.md");
+    projectExplorer.waitDefaultColorNode(PROJECT_NAME + "/README.md");
+    editor.waitDefaultColorTab("README.md");
   }
 
   @Test(priority = 1)
@@ -118,15 +119,15 @@ public class GitColorsTest {
     terminal.typeIntoTerminal("git rm --cached README.md" + Keys.ENTER);
 
     // Check file colors are yellow
-    projectExplorer.waitItemToBeYellow(PROJECT_NAME + "/README.md");
-    editor.waitTabLabelToBeYellow("README.md");
+    projectExplorer.waitYellowNode(PROJECT_NAME + "/README.md");
+    editor.waitYellowTab("README.md");
 
     // Add to index
     terminal.typeIntoTerminal("git add README.md" + Keys.ENTER);
 
     // Check files are in default color
-    projectExplorer.waitItemToBeDefaultColor(PROJECT_NAME + "/README.md");
-    editor.waitTabLabelToBeDefaultColor("README.md");
+    projectExplorer.waitDefaultColorNode(PROJECT_NAME + "/README.md");
+    editor.waitDefaultColorTab("README.md");
   }
 
   @Test(priority = 2)
@@ -138,10 +139,10 @@ public class GitColorsTest {
     askForValueDialog.typeAndWaitText("newFile");
     askForValueDialog.clickOkBtn();
     askForValueDialog.waitFormToClose();
-    editor.waitTabLabelToBeYellow("newFile");
+    editor.waitYellowTab("newFile");
 
     // check that the file color is yellow
-    projectExplorer.waitItemToBeYellow(PROJECT_NAME + "/newFile");
+    projectExplorer.waitYellowNode(PROJECT_NAME + "/newFile");
 
     // add file to index
     projectExplorer.selectItem(PROJECT_NAME + "/newFile");
@@ -151,28 +152,28 @@ public class GitColorsTest {
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
 
     // check that file color is green
-    projectExplorer.waitItemToBeGreen(PROJECT_NAME + "/newFile");
-    editor.waitTabLabelToBeGreen("newFile");
+    projectExplorer.waitGreenNode(PROJECT_NAME + "/newFile");
+    editor.waitGreenTab("newFile");
   }
 
   @Test(priority = 3)
   public void testModifiedFilesColor() {
     // Check file is colored in default color
-    projectExplorer.waitItemToBeDefaultColor(PROJECT_NAME + "/README.md");
-    editor.waitTabLabelToBeDefaultColor("README.md");
+    projectExplorer.waitDefaultColorNode(PROJECT_NAME + "/README.md");
+    editor.waitDefaultColorTab("README.md");
 
     // Make a change
     editor.selectTabByName("README.md");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.waitTabFileWithSavedStatus("README.md");
-    projectExplorer.waitItemToBeBlue(PROJECT_NAME + "/README.md");
-    editor.waitTabLabelToBeBlue("README.md");
+    projectExplorer.waitBlueNode(PROJECT_NAME + "/README.md");
+    editor.waitBlueTab("README.md");
 
     // check that the file color is blue
     editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
     editor.waitTabFileWithSavedStatus("README.md");
-    projectExplorer.waitItemToBeDefaultColor(PROJECT_NAME + "/README.md");
-    editor.waitTabLabelToBeDefaultColor("README.md");
+    projectExplorer.waitDefaultColorNode(PROJECT_NAME + "/README.md");
+    editor.waitDefaultColorTab("README.md");
   }
 
   @Test(priority = 4)
@@ -183,8 +184,8 @@ public class GitColorsTest {
     editor.waitTabFileWithSavedStatus("README.md");
 
     // check that the file color is blue
-    projectExplorer.waitItemToBeBlue(PROJECT_NAME + "/README.md");
-    editor.waitTabLabelToBeBlue("README.md");
+    projectExplorer.waitBlueNode(PROJECT_NAME + "/README.md");
+    editor.waitBlueTab("README.md");
 
     // Perform commit
     projectExplorer.selectItem(PROJECT_NAME);
@@ -193,10 +194,10 @@ public class GitColorsTest {
     git.waitCommitFormClosed();
 
     // Check files are colored in default color
-    projectExplorer.waitItemToBeDefaultColor(PROJECT_NAME + "/newFile");
-    projectExplorer.waitItemToBeDefaultColor(PROJECT_NAME + "/README.md");
-    editor.waitTabLabelToBeDefaultColor("newFile");
-    editor.waitTabLabelToBeDefaultColor("README.md");
+    projectExplorer.waitDefaultColorNode(PROJECT_NAME + "/newFile");
+    projectExplorer.waitDefaultColorNode(PROJECT_NAME + "/README.md");
+    editor.waitDefaultColorTab("newFile");
+    editor.waitDefaultColorTab("README.md");
   }
 
   @Test(priority = 5)
@@ -209,6 +210,7 @@ public class GitColorsTest {
     git.clickResetBtn();
     git.waitResetWindowClose();
 
+    loader.waitOnClosed();
     terminal.selectTerminalTab();
     terminal.typeIntoTerminal("cd " + PROJECT_NAME + Keys.ENTER);
     terminal.typeIntoTerminal("git config --global user.email \"git@email.com\"" + Keys.ENTER);
@@ -217,10 +219,10 @@ public class GitColorsTest {
     terminal.waitExpectedTextIntoTerminal("2 files changed, 1 insertion(+), 1 deletion(-)");
 
     // Check files are colored in default color
-    projectExplorer.waitItemToBeDefaultColor(PROJECT_NAME + "/newFile");
-    projectExplorer.waitItemToBeDefaultColor(PROJECT_NAME + "/README.md");
-    editor.waitTabLabelToBeDefaultColor("newFile");
-    editor.waitTabLabelToBeDefaultColor("README.md");
+    projectExplorer.waitDefaultColorNode(PROJECT_NAME + "/newFile");
+    projectExplorer.waitDefaultColorNode(PROJECT_NAME + "/README.md");
+    editor.waitDefaultColorTab("newFile");
+    editor.waitDefaultColorTab("README.md");
   }
 
   @Test(priority = 6)
@@ -229,9 +231,9 @@ public class GitColorsTest {
     askDialog.acceptDialogWithText("Are you sure you want to delete ");
 
     // Check files are colored in default color
-    projectExplorer.waitItemToBeDefaultColor(PROJECT_NAME + "/newFile");
-    projectExplorer.waitItemToBeDefaultColor(PROJECT_NAME + "/README.md");
-    editor.waitTabLabelToBeDefaultColor("newFile");
-    editor.waitTabLabelToBeDefaultColor("README.md");
+    projectExplorer.waitDefaultColorNode(PROJECT_NAME + "/newFile");
+    projectExplorer.waitDefaultColorNode(PROJECT_NAME + "/README.md");
+    editor.waitDefaultColorTab("newFile");
+    editor.waitDefaultColorTab("README.md");
   }
 }

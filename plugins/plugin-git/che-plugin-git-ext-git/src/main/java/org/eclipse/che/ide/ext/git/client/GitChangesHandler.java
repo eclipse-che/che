@@ -73,6 +73,7 @@ public class GitChangesHandler {
           }
           VcsChangeMarkerRender render =
               ((HasVcsChangeMarkerRender) event.getEditor()).getVcsChangeMarkersRender();
+
           Path location = event.getFile().getLocation();
           gitServiceClient
               .getEditedRegions(location.uptoSegment(1), location.removeFirstSegments(1))
@@ -220,14 +221,18 @@ public class GitChangesHandler {
                 tab.setTitleColor(NOT_MODIFIED.getColor());
               }
 
-              String file =
+              String filePath =
                   editor.getEditorInput().getFile().getLocation().removeFirstSegments(1).toString();
-              VcsChangeMarkerRender render =
-                  ((HasVcsChangeMarkerRender) editor).getVcsChangeMarkersRender();
-              if (dto.getModifiedFiles().keySet().contains(file)) {
-                handleEditedRegions(dto.getModifiedFiles().get(file), render);
-              } else {
-                render.clearAllChangeMarkers();
+
+              if (editor instanceof HasVcsChangeMarkerRender) {
+                VcsChangeMarkerRender render =
+                    ((HasVcsChangeMarkerRender) editor).getVcsChangeMarkersRender();
+
+                if (dto.getModifiedFiles().keySet().contains(filePath)) {
+                  handleEditedRegions(dto.getModifiedFiles().get(filePath), render);
+                } else {
+                  render.clearAllChangeMarkers();
+                }
               }
             });
   }

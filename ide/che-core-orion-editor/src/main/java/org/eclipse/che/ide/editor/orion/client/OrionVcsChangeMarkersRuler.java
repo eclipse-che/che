@@ -40,9 +40,7 @@ public class OrionVcsChangeMarkersRuler implements Gutter {
   }
 
   @Override
-  public void addGutterItem(int line, String gutterId, Element element) {
-    //Not implemented
-  }
+  public void addGutterItem(int line, String gutterId, Element element) {}
 
   @Override
   public void addGutterItem(int lineStart, int lineEnd, String gutterId, Element element) {
@@ -56,18 +54,13 @@ public class OrionVcsChangeMarkersRuler implements Gutter {
 
   @Override
   public void addGutterItem(
-      int line, String gutterId, Element element, final LineNumberingChangeCallback lineCallback) {
-    //Not implemented
-  }
+      int line, String gutterId, Element element, final LineNumberingChangeCallback lineCallback) {}
 
   @Override
-  public void removeGutterItem(int lineStart, String gutterId) {
-    //Not implemented
-  }
+  public void removeGutterItem(int lineStart, String gutterId) {}
 
   @Override
   public Element getGutterItem(int lineStart, String gutterId) {
-    //Not implemented
     return null;
   }
 

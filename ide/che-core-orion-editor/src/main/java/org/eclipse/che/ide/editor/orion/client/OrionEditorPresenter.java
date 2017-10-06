@@ -1191,18 +1191,16 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
                 OrionExtRulerOverlay.RulerLocation.LEFT.getLocation(),
                 OrionExtRulerOverlay.RulerOverview.PAGE.getOverview(),
                 orionExtRulerOverlay -> {
-                  int rulerPosition = 0;
-                  OrionExtRulerOverlay rulerLines = getRuler(rulers, "ruler lines");
-                  if (rulerLines != null) {
-                    rulerPosition = rulers.indexOf(rulerLines) + 1;
-                  } else {
-                    OrionExtRulerOverlay rulerAnnotations = getRuler(rulers, "ruler annotations");
-                    if (rulerAnnotations != null) {
-                      rulerPosition = rulers.indexOf(rulerAnnotations) + 1;
+                  int rulerPosition;
+                  for (rulerPosition = 0; rulerPosition < rulers.size() - 1; rulerPosition++) {
+                    String rulerStyleClass = rulers.get(rulerPosition).getStyle().getStyleClass();
+
+                    if ("ruler lines".equals(rulerStyleClass)) {
+                      break;
                     }
                   }
 
-                  textView.addRuler(orionExtRulerOverlay, rulerPosition);
+                  textView.addRuler(orionExtRulerOverlay, rulerPosition + 1);
                   OrionVcsChangeMarkersRuler orionVcsChangeMarkersRuler =
                       new OrionVcsChangeMarkersRuler(
                           orionExtRulerOverlay, editorWidget.getEditor());
@@ -1211,14 +1209,6 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
                       vcsChangeMarkerRenderFactory.create(orionVcsChangeMarkersRuler);
                   resolve.apply(null);
                 }));
-  }
-
-  private OrionExtRulerOverlay getRuler(List<OrionExtRulerOverlay> rulers, String className) {
-    return rulers
-        .stream()
-        .filter(ruler -> className.equals(ruler.getStyle().getStyleClass()))
-        .findAny()
-        .orElse(null);
   }
 
   @Override
