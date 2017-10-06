@@ -27,7 +27,7 @@ while [ "${available}" != "\"True\"" ] && [ ${SECONDS} -lt ${end} ]; do
   sleep ${POLLING_INTERVAL_SEC}
 done
 
-if [ "${progressing}" == "\"True\"" ] && [ "${available}" == "\"True\"" ]; then
+if [ "${progressing}" == "\"True\"" ]; then
   echo "[CHE] Postgres deployed successfully"
 elif [ "${progressing}" == "False" ]; then
   echo "[CHE] [ERROR] Postgres deployment failed. Aborting. Run command 'oc rollout status postgres' to get more details."
