@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.languageserver.ide.rename.model;
 
 import org.eclipse.che.api.languageserver.shared.model.ExtendedTextEdit;
 
-/** */
+/** Holds {@link ExtendedTextEdit} and file path */
 public class RenameChange {
 
   private final ExtendedTextEdit textEdit;

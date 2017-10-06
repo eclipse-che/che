@@ -26,9 +26,10 @@ import org.eclipse.che.api.languageserver.shared.model.ExtendedTextDocumentEdit;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedWorkspaceEdit;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.autocomplete.AutoCompleteResources;
-import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
+import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
+import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.ide.ui.SplitterFancyUtil;
 import org.eclipse.che.ide.ui.list.SimpleList;
 import org.eclipse.che.ide.ui.list.SimpleList.ListEventDelegate;
@@ -37,12 +38,18 @@ import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
 import org.eclipse.che.ide.ui.smartTree.Tree;
+import org.eclipse.che.ide.ui.window.Window;
 import org.eclipse.che.ide.util.dom.Elements;
+import org.eclipse.che.plugin.languageserver.ide.LanguageServerLocalization;
 import org.eclipse.che.plugin.languageserver.ide.rename.RenameView.ActionDelegate;
 import org.eclipse.che.plugin.languageserver.ide.rename.model.RenameProject;
+import org.eclipse.che.plugin.languageserver.ide.rename.node.ProjectNode;
 import org.eclipse.che.plugin.languageserver.ide.rename.node.RenameNodeFactory;
 
-/** */
+/**
+ * Implementation of the rename view. Presents rename edits as tree of changes: Project-> Folder->
+ * File-> Edits
+ */
 public class RenameViewImpl extends BaseView<ActionDelegate> implements RenameView {
 
   private final Tree tree;
@@ -55,13 +62,15 @@ public class RenameViewImpl extends BaseView<ActionDelegate> implements RenameVi
   private SimpleList<String> lsList;
   private Map<String, ExtendedWorkspaceEdit> editMap;
   private String currentLSId;
+
   @Inject
   public RenameViewImpl(
       PartStackUIResources resources,
       SplitterFancyUtil splitterFancyUtil,
       Resources coreRes,
       AutoCompleteResources autoCompleteResources,
-      RenameNodeFactory nodeFactory) {
+      RenameNodeFactory nodeFactory,
+      LanguageServerLocalization localization) {
     super(resources);
     this.nodeFactory = nodeFactory;
     splitLayoutPanel = new SplitLayoutPanel(1);
@@ -96,18 +105,26 @@ public class RenameViewImpl extends BaseView<ActionDelegate> implements RenameVi
               public void onListItemDoubleClicked(Element listItemBase, String itemData) {}
             });
     splitterFancyUtil.tuneSplitter(splitLayoutPanel);
-    //    splitLayoutPanel.setWidgetHidden(editPanel, true);
+    splitLayoutPanel.setWidgetHidden(editPanel, true);
 
     treeDock = new DockLayoutPanel(Unit.PX);
     FlowPanel buttonPanel = new FlowPanel();
     treeDock.addSouth(buttonPanel, 25);
-    Button refactorButton = new Button();
-    refactorButton.setText("Do Rename");
-
     splitLayoutPanel.add(treeDock);
 
+    Button refactorButton = new Button();
+    refactorButton.addClickHandler(event -> delegate.applyRename());
+    refactorButton.setText(localization.renameViewDoRenameLabel());
+    refactorButton.getElement().getStyle().setMarginLeft(1, Unit.EM);
+    refactorButton
+        .getElement()
+        .getStyle()
+        .setBackgroundColor(Style.theme.getPrimaryButtonBackground());
+
     Button cancelButton = new Button();
-    cancelButton.setText("Cancel");
+    cancelButton.addClickHandler(event -> delegate.cancel());
+    cancelButton.setText(localization.renameViewCancelLabel());
+    cancelButton.getElement().getStyle().setMarginLeft(1, Unit.EM);
 
     buttonPanel.add(refactorButton);
     buttonPanel.add(cancelButton);
@@ -137,10 +154,27 @@ public class RenameViewImpl extends BaseView<ActionDelegate> implements RenameVi
 
   @Override
   public void showRenameResult(Map<String, ExtendedWorkspaceEdit> editMap) {
+    if (editMap.size() == 1) {
+      splitLayoutPanel.setWidgetHidden(editPanel, true);
+    } else {
+      splitLayoutPanel.setWidgetHidden(editPanel, false);
+    }
     this.editMap = editMap;
     currentLSId = null;
     lsList.render(new ArrayList<>(editMap.keySet()));
     lsList.getSelectionModel().selectNext();
     selectedEditSet(lsList.getSelectionModel().getSelectedItem());
+  }
+
+  @Override
+  public List<RenameProject> getRenameProjects() {
+    List<RenameProject> result = new ArrayList<>();
+    List<Node> rootNodes = tree.getRootNodes();
+    for (Node node : rootNodes) {
+      if (node instanceof ProjectNode) {
+        result.add(((ProjectNode) node).getProject());
+      }
+    }
+    return result;
   }
 }

@@ -24,7 +24,7 @@ import org.eclipse.che.ide.ui.smartTree.presentation.AbstractPresentationNode;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 import org.eclipse.che.plugin.languageserver.ide.rename.model.RenameFile;
 
-/** */
+/** Tree node, represent {@link RenameFile} */
 public class FileNode extends AbstractPresentationNode {
 
   private final NodesResources resources;

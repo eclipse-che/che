@@ -17,28 +17,36 @@ import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextBox;
+import elemental.events.Event;
 import elemental.events.KeyboardEvent;
 import javax.inject.Inject;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
+import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.runtime.OperationCanceledException;
+import org.eclipse.che.ide.util.input.CharCodeWithModifiers;
+import org.eclipse.che.ide.util.input.SignalEvent;
+import org.eclipse.che.ide.util.input.SignalEventUtils;
 
-/** */
+/** Input box overlay for entering new name */
 class RenameInputBox extends PopupPanel {
 
   private final PromiseProvider promiseProvider;
+  private final int keyDigest;
   private TextBox valueTextBox;
 
   @Inject
-  public RenameInputBox(PromiseProvider promiseProvider) {
+  public RenameInputBox(PromiseProvider promiseProvider, KeyBindingAgent keyBindingAgent) {
     super(true, true);
     this.promiseProvider = promiseProvider;
     valueTextBox = new TextBox();
+    CharCodeWithModifiers keyBinding = keyBindingAgent.getKeyBinding("LS.rename");
+    keyDigest = keyBinding.getKeyDigest();
     valueTextBox.addStyleName("orionCodenvy");
     setWidget(valueTextBox);
   }
 
-  public Promise<String> setPositionAndShow(int x, int y, String value) {
+  Promise<String> setPositionAndShow(int x, int y, String value, Runnable openWindow) {
     setPopupPosition(x, y);
     valueTextBox.setValue(value);
     return promiseProvider.create(
@@ -67,10 +75,21 @@ class RenameInputBox extends PopupPanel {
                   registration.removeHandler();
                   hide(false);
                   callback.onSuccess(valueTextBox.getValue());
+                } else {
+                  SignalEvent signalEvent = SignalEventUtils.create((Event) event.getNativeEvent());
+                  if (keyDigest == CharCodeWithModifiers.computeKeyDigest(signalEvent)) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    openWindow.run();
+                  }
                 }
               };
           valueTextBox.addDomHandler(handler, KeyDownEvent.getType());
         });
+  }
+
+  String getInputValue() {
+    return valueTextBox.getValue();
   }
 
   @Override

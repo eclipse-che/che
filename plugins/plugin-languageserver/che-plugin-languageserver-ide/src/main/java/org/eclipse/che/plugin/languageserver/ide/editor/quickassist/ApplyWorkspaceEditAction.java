@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import javax.inject.Singleton;
 import org.eclipse.che.api.languageserver.shared.dto.DtoClientImpls.FileEditParamsDto;
 import org.eclipse.che.api.languageserver.shared.model.FileEditParams;
 import org.eclipse.che.api.languageserver.shared.util.RangeComparator;
@@ -50,6 +51,7 @@ import org.eclipse.lsp4j.TextDocumentEdit;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.WorkspaceEdit;
 
+@Singleton
 public class ApplyWorkspaceEditAction extends Action {
   private static final Comparator<TextEdit> COMPARATOR =
       RangeComparator.transform(new RangeComparator().reversed(), TextEdit::getRange);
@@ -86,6 +88,10 @@ public class ApplyWorkspaceEditAction extends Action {
     List<Object> arguments = qaEvent.getArguments();
     WorkspaceEdit edit =
         dtoFactory.createDtoFromJson(arguments.get(0).toString(), WorkspaceEdit.class);
+    applyWorkspaceEdit(edit);
+  }
+
+  public void applyWorkspaceEdit(WorkspaceEdit edit) {
     List<Supplier<Promise<Void>>> undos = new ArrayList<>();
 
     StatusNotification notification =
@@ -125,7 +131,7 @@ public class ApplyWorkspaceEditAction extends Action {
               notification.setStatus(Status.FAIL);
               notification.setContent(localization.applyWorkspaceActionNotificationUndoing());
               promiseHelper
-                  .forEach(undos.iterator(), (d) -> d.get(), (Void v) -> {})
+                  .forEach(undos.iterator(), Supplier::get, (Void v) -> {})
                   .then(
                       (Void v) -> {
                         notification.setContent(

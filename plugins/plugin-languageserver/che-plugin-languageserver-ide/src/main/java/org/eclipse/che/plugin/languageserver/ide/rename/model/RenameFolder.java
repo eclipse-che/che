@@ -11,9 +11,12 @@
 
 package org.eclipse.che.plugin.languageserver.ide.rename.model;
 
-import java.util.List;
+import static java.util.stream.Collectors.toList;
 
-/** */
+import java.util.List;
+import org.eclipse.lsp4j.TextDocumentEdit;
+
+/** Synthetic object for tree, represent folder with files. */
 public class RenameFolder {
   private final String name;
   private final List<RenameFile> files;
@@ -29,5 +32,9 @@ public class RenameFolder {
 
   public List<RenameFile> getFiles() {
     return files;
+  }
+
+  public List<TextDocumentEdit> getTextDocumentEdit() {
+    return files.stream().map(RenameFile::getTextDocumentEdit).collect(toList());
   }
 }

@@ -25,6 +25,7 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedTextDocumentEdit;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedTextEdit;
+import org.eclipse.che.api.languageserver.shared.model.ExtendedWorkspaceEdit;
 import org.eclipse.che.api.languageserver.shared.model.RenameResult;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.position.PositionConverter.PixelCoordinates;
@@ -38,6 +39,7 @@ import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.runtime.OperationCanceledException;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerLocalization;
+import org.eclipse.che.plugin.languageserver.ide.editor.quickassist.ApplyWorkspaceEditAction;
 import org.eclipse.che.plugin.languageserver.ide.rename.RenameView.ActionDelegate;
 import org.eclipse.che.plugin.languageserver.ide.rename.model.RenameChange;
 import org.eclipse.che.plugin.languageserver.ide.rename.model.RenameFile;
@@ -45,10 +47,12 @@ import org.eclipse.che.plugin.languageserver.ide.rename.model.RenameFolder;
 import org.eclipse.che.plugin.languageserver.ide.rename.model.RenameProject;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.lsp4j.RenameParams;
+import org.eclipse.lsp4j.TextDocumentEdit;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
+import org.eclipse.lsp4j.WorkspaceEdit;
 import org.slf4j.Logger;
 
-/** */
+/** Main controller for rename feature, calls rename and shows rename edits */
 @Singleton
 public class RenamePresenter extends BasePresenter implements ActionDelegate {
 
@@ -61,8 +65,13 @@ public class RenamePresenter extends BasePresenter implements ActionDelegate {
   private final RenameView view;
   private final WorkspaceAgent workspaceAgent;
   private final AppContext appContext;
+  private final ApplyWorkspaceEditAction workspaceEditAction;
+  private final Provider<RenameDialog> renameWindow;
   private final Map<List<ExtendedTextDocumentEdit>, List<RenameProject>> projectCache =
       new HashMap<>();
+  private RenameInputBox inputBox;
+  private boolean showPreview;
+  private TextEditor textEditor;
 
   @Inject
   public RenamePresenter(
@@ -72,7 +81,9 @@ public class RenamePresenter extends BasePresenter implements ActionDelegate {
       Provider<RenameInputBox> renameInputBoxProvider,
       RenameView view,
       WorkspaceAgent workspaceAgent,
-      AppContext appContext) {
+      AppContext appContext,
+      ApplyWorkspaceEditAction workspaceEditAction,
+      Provider<RenameDialog> renameWindow) {
     this.localization = localization;
     this.client = client;
     this.dtoFactory = dtoFactory;
@@ -80,6 +91,8 @@ public class RenamePresenter extends BasePresenter implements ActionDelegate {
     this.view = view;
     this.workspaceAgent = workspaceAgent;
     this.appContext = appContext;
+    this.workspaceEditAction = workspaceEditAction;
+    this.renameWindow = renameWindow;
     view.setDelegate(this);
   }
 
@@ -104,9 +117,8 @@ public class RenamePresenter extends BasePresenter implements ActionDelegate {
   }
 
   public void rename(TextEditor editor) {
-    projectCache.clear();
-    TextPosition cursorPosition = editor.getCursorPosition();
-
+    textEditor = editor;
+    TextPosition cursorPosition = textEditor.getCursorPosition();
     int cursorOffset = editor.getCursorOffset();
     Position wordAtOffset = editor.getWordAtOffset(cursorOffset);
     if (wordAtOffset == null) {
@@ -115,24 +127,62 @@ public class RenamePresenter extends BasePresenter implements ActionDelegate {
     }
     PixelCoordinates pixelCoordinates =
         editor.getPositionConverter().offsetToPixel(wordAtOffset.offset);
-    RenameInputBox inputBox = renameInputBoxProvider.get();
+    String oldName = editor.getDocument().getContentRange(wordAtOffset.offset, wordAtOffset.length);
+
+    if (inputBox != null) {
+      showWindow(cursorPosition, editor, oldName);
+      return;
+    }
+    projectCache.clear();
+
+    inputBox = renameInputBoxProvider.get();
     inputBox
         .setPositionAndShow(
             pixelCoordinates.getX(),
             pixelCoordinates.getY(),
-            editor.getDocument().getContentRange(wordAtOffset.offset, wordAtOffset.length))
+            oldName,
+            () -> showWindow(cursorPosition, editor, oldName))
         .then(
             newName -> {
               editor.setFocus();
-              callRename(newName, cursorPosition, editor);
+              inputBox = null;
+              if (!oldName.equals(newName)) {
+                callRename(newName, cursorPosition, editor);
+              }
             })
         .catchError(
             err -> {
               editor.setFocus();
+              inputBox = null;
               if (!(err.getCause() instanceof OperationCanceledException)) {
                 LOG.error(err.getMessage());
               }
             });
+  }
+
+  private void showWindow(TextPosition cursorPosition, TextEditor editor, String oldName) {
+    String value = inputBox.getInputValue();
+    inputBox.hide(false);
+    inputBox = null;
+
+    showPreview = false;
+    RenameDialog renameDialog = this.renameWindow.get();
+    renameDialog.show(
+        value,
+        oldName,
+        newName -> {
+          renameDialog.closeDialog();
+          callRename(newName, cursorPosition, editor);
+        },
+        newName -> {
+          showPreview = true;
+          renameDialog.closeDialog();
+          callRename(newName, cursorPosition, editor);
+        },
+        () -> {
+          renameDialog.closeDialog();
+          editor.setFocus();
+        });
   }
 
   private void callRename(String newName, TextPosition cursorPosition, TextEditor editor) {
@@ -159,9 +209,20 @@ public class RenamePresenter extends BasePresenter implements ActionDelegate {
 
   private void handleRename(RenameResult renameResult) {
     if (!renameResult.getRenameResults().isEmpty()) {
-      workspaceAgent.openPart(this, PartStackType.INFORMATION);
-      workspaceAgent.setActivePart(this);
-      view.showRenameResult(renameResult.getRenameResults());
+      ExtendedWorkspaceEdit workspaceEdit =
+          renameResult
+              .getRenameResults()
+              .get(renameResult.getRenameResults().keySet().iterator().next());
+      if (renameResult.getRenameResults().size() == 1
+          && workspaceEdit.getDocumentChanges().size() == 1
+          && !showPreview) {
+        List<RenameProject> renameProjects = convert(workspaceEdit.getDocumentChanges());
+        applyRename(renameProjects);
+      } else {
+        workspaceAgent.openPart(this, PartStackType.INFORMATION);
+        workspaceAgent.setActivePart(this);
+        view.showRenameResult(renameResult.getRenameResults());
+      }
     }
   }
 
@@ -192,6 +253,30 @@ public class RenamePresenter extends BasePresenter implements ActionDelegate {
     return result;
   }
 
+  @Override
+  public void cancel() {
+    workspaceAgent.hidePart(this);
+    workspaceAgent.removePart(this);
+    textEditor.setFocus();
+  }
+
+  @Override
+  public void applyRename() {
+    List<RenameProject> projects = view.getRenameProjects();
+    applyRename(projects);
+    workspaceAgent.hidePart(this);
+    workspaceAgent.removePart(this);
+    textEditor.setFocus();
+  }
+
+  private void applyRename(List<RenameProject> projects) {
+    List<TextDocumentEdit> edits = new ArrayList<>();
+    for (RenameProject project : projects) {
+      edits.addAll(project.getTextDocumentEdits());
+    }
+    workspaceEditAction.applyWorkspaceEdit(new WorkspaceEdit(edits));
+  }
+
   private List<RenameFolder> getRenameFolders(
       Project project, List<ExtendedTextDocumentEdit> edits) {
 
@@ -199,7 +284,8 @@ public class RenamePresenter extends BasePresenter implements ActionDelegate {
 
     Map<String, List<RenameFile>> files = new HashMap<>();
     for (ExtendedTextDocumentEdit edit : edits) {
-      String filePath = edit.getTextDocument().getUri();
+      String uri = edit.getTextDocument().getUri();
+      String filePath = uri;
       filePath = filePath.substring(project.getPath().length() + 1);
       String folderPath = filePath.substring(0, filePath.lastIndexOf('/'));
       String fileName = filePath.substring(filePath.lastIndexOf('/') + 1, filePath.length());
@@ -208,7 +294,7 @@ public class RenamePresenter extends BasePresenter implements ActionDelegate {
       }
       files
           .get(folderPath)
-          .add(new RenameFile(fileName, getRenameChanges(edit.getEdits(), edit.getTextDocument().getUri())));
+          .add(new RenameFile(fileName, uri, getRenameChanges(edit.getEdits(), uri)));
     }
 
     for (String folderPath : files.keySet()) {

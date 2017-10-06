@@ -24,12 +24,11 @@ import org.eclipse.che.ide.ui.smartTree.presentation.AbstractPresentationNode;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 import org.eclipse.che.plugin.languageserver.ide.rename.model.RenameProject;
 
-/** */
+/** Tree node, represent {@link RenameProject} */
 public class ProjectNode extends AbstractPresentationNode {
 
   private final NodesResources resources;
   private final PromiseProvider promiseProvider;
-  private final RenameNodeFactory factory;
   private final RenameProject project;
 
   private final List<Node> children;
@@ -42,7 +41,6 @@ public class ProjectNode extends AbstractPresentationNode {
       @Assisted RenameProject project) {
     this.resources = resources;
     this.promiseProvider = promiseProvider;
-    this.factory = factory;
     this.project = project;
     children = project.getFolders().stream().map(factory::create).collect(toList());
   }
@@ -66,5 +64,9 @@ public class ProjectNode extends AbstractPresentationNode {
   public void updatePresentation(NodePresentation presentation) {
     presentation.setPresentableText(project.getName());
     presentation.setPresentableIcon(resources.projectFolder());
+  }
+
+  public RenameProject getProject() {
+    return project;
   }
 }

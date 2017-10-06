@@ -24,34 +24,42 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
+import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerLocalization;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConfiguration;
 import org.eclipse.lsp4j.ServerCapabilities;
 
-/** */
+/** Action for rename feature */
 @Singleton
 public class LSRenameAction extends AbstractPerspectiveAction {
 
   private final EditorAgent editorAgent;
   private final RenamePresenter renamePresenter;
+  private final WorkspaceAgent workspaceAgent;
 
   @Inject
   public LSRenameAction(
       LanguageServerLocalization localization,
       EditorAgent editorAgent,
-      RenamePresenter renamePresenter) {
+      RenamePresenter renamePresenter,
+      WorkspaceAgent workspaceAgent) {
     super(
         singletonList(PROJECT_PERSPECTIVE_ID),
         localization.renameActionTitle(),
         localization.renameActionTitle());
     this.editorAgent = editorAgent;
     this.renamePresenter = renamePresenter;
+    this.workspaceAgent = workspaceAgent;
   }
 
   @Override
   public void updateInPerspective(ActionEvent event) {
     EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
     Presentation presentation = event.getPresentation();
+    if (activeEditor != workspaceAgent.getActivePart()) {
+      presentation.setEnabledAndVisible(false);
+      return;
+    }
     if (Objects.nonNull(activeEditor) && activeEditor instanceof TextEditor) {
       TextEditorConfiguration configuration = ((TextEditor) activeEditor).getConfiguration();
       if (configuration instanceof LanguageServerEditorConfiguration) {

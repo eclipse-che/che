@@ -24,7 +24,7 @@ import org.eclipse.che.ide.ui.smartTree.presentation.AbstractPresentationNode;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 import org.eclipse.che.plugin.languageserver.ide.rename.model.RenameFolder;
 
-/** */
+/** Tree node, represent {@link RenameFolder} */
 public class FolderNode extends AbstractPresentationNode {
 
   private final NodesResources resources;

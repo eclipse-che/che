@@ -36,7 +36,7 @@ import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
 import org.eclipse.che.plugin.languageserver.ide.rename.model.RenameChange;
 import org.eclipse.lsp4j.Range;
 
-/** */
+/** Tree node, represent edit in file */
 public class ChangeNode extends AbstractPresentationNode implements HasAction {
 
   private final TreeStyles styles;

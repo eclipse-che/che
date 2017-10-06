@@ -77,4 +77,16 @@ public interface LanguageServerLocalization extends Messages {
 
   @Key("rename.view.tooltip")
   String renameViewTooltip();
+
+  @Key("rename.dialog.label")
+  String renameDialogLabel();
+
+  @Key("rename.dialog.preview.label")
+  String renameDialogPreviewLabel();
+
+  @Key("rename.view.cancel.label")
+  String renameViewCancelLabel();
+
+  @Key("rename.view.do.rename.label")
+  String renameViewDoRenameLabel();
 }

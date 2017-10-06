@@ -40,6 +40,7 @@ import org.eclipse.che.ide.api.dialogs.InputValidator;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.resources.RenamingSupport;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.resource.Path;
@@ -60,6 +61,7 @@ public class RenameItemAction extends AbstractPerspectiveAction {
   private final NotificationManager notificationManager;
   private final DialogFactory dialogFactory;
   private final AppContext appContext;
+  private final WorkspaceAgent workspaceAgent;
 
   @Inject
   public RenameItemAction(
@@ -69,7 +71,8 @@ public class RenameItemAction extends AbstractPerspectiveAction {
       EditorAgent editorAgent,
       NotificationManager notificationManager,
       DialogFactory dialogFactory,
-      AppContext appContext) {
+      AppContext appContext,
+      WorkspaceAgent workspaceAgent) {
     super(
         singletonList(PROJECT_PERSPECTIVE_ID),
         localization.renameItemActionText(),
@@ -82,6 +85,7 @@ public class RenameItemAction extends AbstractPerspectiveAction {
     this.notificationManager = notificationManager;
     this.dialogFactory = dialogFactory;
     this.appContext = appContext;
+    this.workspaceAgent = workspaceAgent;
   }
 
   /** {@inheritDoc} */
@@ -115,7 +119,7 @@ public class RenameItemAction extends AbstractPerspectiveAction {
         new InputCallback() {
           @Override
           public void accepted(final String value) {
-            //we shouldn't perform renaming file with the same name
+            // we shouldn't perform renaming file with the same name
             if (!value.trim().equals(resourceName)) {
 
               closeRelatedEditors(resource);
@@ -165,6 +169,13 @@ public class RenameItemAction extends AbstractPerspectiveAction {
   /** {@inheritDoc} */
   @Override
   public void updateInPerspective(@NotNull ActionEvent e) {
+
+    if (workspaceAgent.getActivePart() == null
+        || workspaceAgent.getActivePart() instanceof EditorPartPresenter) {
+      e.getPresentation().setEnabledAndVisible(false);
+      return;
+    }
+
     final Resource[] resources = appContext.getResources();
     e.getPresentation().setVisible(true);
 
