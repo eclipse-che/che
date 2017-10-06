@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.pageobject.git;
 
+import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
@@ -95,7 +96,10 @@ public class GitRevertCommit {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
-                By.xpath("//*[contains(text(),'" + revision + "')]")))
+                By.xpath(
+                    format(
+                        "//div[@id='%s']//*[contains(text(),'%s')]",
+                        REVERT_COMMIT_PANEL, revision))))
         .click();
   }
 }
