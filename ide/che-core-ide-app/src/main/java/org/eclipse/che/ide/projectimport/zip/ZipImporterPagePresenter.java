@@ -32,7 +32,6 @@ public class ZipImporterPagePresenter extends AbstractWizardPage<MutableProjectC
   private static final RegExp URL_REGEX =
       RegExp.compile("(https?|ftp)://(-\\.)?([^\\s/?\\.#-]+\\.?)+(/[^\\s]*)?");
   private static final RegExp WHITESPACE = RegExp.compile("^\\s");
-  private static final RegExp END_URL = RegExp.compile(".zip$");
 
   private CoreLocalizationConstant locale;
   private ZipImporterPageView view;
@@ -156,11 +155,6 @@ public class ZipImporterPagePresenter extends AbstractWizardPage<MutableProjectC
   private boolean isUrlCorrect(@NotNull String url) {
     if (isNullOrEmpty(url)) {
       view.showUrlError("");
-      return false;
-    }
-
-    if (!END_URL.test(url)) {
-      view.showUrlError(locale.importProjectMessageUrlInvalid());
       return false;
     }
 

@@ -238,7 +238,7 @@ public interface ProjectServiceClient {
    * @see ItemReference
    * @since 4.4.0
    */
-  Promise<List<SearchResult>> search(QueryExpression expression);
+  Promise<SearchResult> search(QueryExpression expression);
 
   /**
    * Gets list of {@link SourceEstimation} for all supposed project types.

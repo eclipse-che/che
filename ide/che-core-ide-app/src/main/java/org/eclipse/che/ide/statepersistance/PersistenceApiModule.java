@@ -30,7 +30,7 @@ public class PersistenceApiModule extends AbstractGinModule {
   @Override
   protected void configure() {
     GinMapBinder.newMapBinder(binder(), String.class, WsAgentComponent.class)
-        .addBinding("ZZ Restore Workspace State")
+        .addBinding("ZY Restore Workspace State")
         .to(WorkspaceStateRestorer.class);
 
     GinMultibinder<StateComponent> stateComponents =
