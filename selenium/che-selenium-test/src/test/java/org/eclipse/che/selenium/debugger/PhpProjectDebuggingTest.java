@@ -128,6 +128,7 @@ public class PhpProjectDebuggingTest {
         ProjectExplorer.CommandsGoal.COMMON, PROJECT, DEBUG_PHP_SCRIPT_COMMAND_NAME);
 
     debugPanel.openDebugPanel();
+    editor.waitAcitveBreakpoint(14);
 
     // then
     debugPanel.waitDebugHighlightedText("<?php include 'lib.php';?>");
@@ -180,6 +181,7 @@ public class PhpProjectDebuggingTest {
     startWebPhpScriptInDebugMode();
 
     debugPanel.openDebugPanel();
+    editor.waitAcitveBreakpoint(14);
 
     // then
     editor.waitAcitveBreakpoint(14);
