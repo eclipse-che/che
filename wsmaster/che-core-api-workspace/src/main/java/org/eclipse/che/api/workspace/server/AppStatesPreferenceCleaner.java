@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.deploy;
+package org.eclipse.che.api.workspace.server;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
