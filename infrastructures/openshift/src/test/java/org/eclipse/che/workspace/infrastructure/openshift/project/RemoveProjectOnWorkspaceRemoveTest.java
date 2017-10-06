@@ -19,7 +19,7 @@ import static org.mockito.Mockito.when;
 
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.workspace.server.event.WorkspaceRemovedEvent;
+import org.eclipse.che.api.workspace.shared.event.WorkspaceRemovedEvent;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;

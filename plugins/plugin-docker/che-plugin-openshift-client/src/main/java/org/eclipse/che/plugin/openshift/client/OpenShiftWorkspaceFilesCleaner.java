@@ -24,7 +24,7 @@ import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.event.ServerIdleEvent;
-import org.eclipse.che.api.workspace.server.event.WorkspaceRemovedEvent;
+import org.eclipse.che.api.workspace.shared.event.WorkspaceRemovedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

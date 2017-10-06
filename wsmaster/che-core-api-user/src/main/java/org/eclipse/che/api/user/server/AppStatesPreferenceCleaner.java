@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.workspace.server;
+package org.eclipse.che.api.user.server;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -23,9 +23,7 @@ import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.eclipse.che.api.user.server.PreferenceManager;
-import org.eclipse.che.api.user.server.UserManager;
-import org.eclipse.che.api.workspace.server.event.WorkspaceRemovedEvent;
+import org.eclipse.che.api.workspace.shared.event.WorkspaceRemovedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

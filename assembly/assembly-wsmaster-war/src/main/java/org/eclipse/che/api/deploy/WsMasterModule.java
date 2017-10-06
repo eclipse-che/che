@@ -164,6 +164,6 @@ public class WsMasterModule extends AbstractModule {
 
     bind(ServerCheckerFactory.class).to(ServerCheckerFactoryImpl.class);
 
-    bind(org.eclipse.che.api.workspace.server.AppStatesPreferenceCleaner.class);
+    bind(org.eclipse.che.api.user.server.AppStatesPreferenceCleaner.class);
   }
 }
