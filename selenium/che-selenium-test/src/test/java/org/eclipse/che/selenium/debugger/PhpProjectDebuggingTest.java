@@ -128,7 +128,6 @@ public class PhpProjectDebuggingTest {
         ProjectExplorer.CommandsGoal.COMMON, PROJECT, DEBUG_PHP_SCRIPT_COMMAND_NAME);
 
     debugPanel.openDebugPanel();
-    editor.waitAcitveBreakpoint(14);
 
     // then
     debugPanel.waitDebugHighlightedText("<?php include 'lib.php';?>");
@@ -138,8 +137,8 @@ public class PhpProjectDebuggingTest {
     debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.RESUME_BTN_ID);
 
     // then
-    editor.waitAcitveBreakpoint(14);
     editor.waitTabFileWithSavedStatus("lib.php");
+    editor.waitAcitveBreakpoint(14);
     debugPanel.waitDebugHighlightedText("return \"Hello, $name\"");
     debugPanel.waitTextInVariablesPanel("$name=\"man\"");
 
@@ -181,11 +180,10 @@ public class PhpProjectDebuggingTest {
     startWebPhpScriptInDebugMode();
 
     debugPanel.openDebugPanel();
-    editor.waitAcitveBreakpoint(14);
 
     // then
-    editor.waitAcitveBreakpoint(14);
     editor.waitTabFileWithSavedStatus("lib.php");
+    editor.waitAcitveBreakpoint(14);
     debugPanel.waitDebugHighlightedText("return \"Hello, $name\"");
     debugPanel.waitTextInVariablesPanel("$name=\"man\"");
 
