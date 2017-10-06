@@ -13,8 +13,8 @@ package org.eclipse.che.selenium.dashboard;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 
 import com.google.inject.Inject;
-import java.util.Arrays;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
@@ -41,24 +41,9 @@ import org.testng.annotations.Test;
 public class WorkspaceDetailsTest {
   private static final String WORKSPACE = NameGenerator.generate("java-mysql", 4);
   private static final String PROJECT_NAME = "web-java-petclinic";
-  private List<String> agents =
-      Arrays.asList(
-          "C# language server",
-          "Exec",
-          "File sync",
-          "Git credentials",
-          "JSON language server",
-          "PHP language server",
-          "Python language server",
-          "SSH",
-          "Terminal",
-          "TypeScript language server",
-          "Workspace API");
-  private List<Boolean> agentsStates =
-      Arrays.asList(false, true, false, false, false, false, false, true, true, false, true);
-  private List<String> variables =
-      Arrays.asList("MYSQL_DATABASE", "MYSQL_PASSWORD", "MYSQL_ROOT_PASSWORD", "MYSQL_USER");
-  private List<String> values = Arrays.asList("petclinic", "password", "password", "petclinic");
+
+  private Map<String, Boolean> agents = new HashMap<>();
+  private Map<String, String> variables = new HashMap<>();
 
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private ProjectExplorer projectExplorer;
@@ -75,6 +60,7 @@ public class WorkspaceDetailsTest {
 
   @BeforeClass
   public void setUp() throws Exception {
+    createMaps();
     createWsFromJavaMySqlStack();
   }
 
@@ -113,23 +99,22 @@ public class WorkspaceDetailsTest {
 
     //delete all variable from db machine, check they don't exist and save changes
     dashboardWorkspace.selectMachine("Environment variables", "db");
-    for (int i = 0; i < variables.size(); i++) {
-      loader.waitOnClosed();
-      dashboardWorkspace.clickOnDeleteEnvVariableButton(variables.get(i));
+    for (String variable : variables.keySet()) {
+      dashboardWorkspace.clickOnDeleteEnvVariableButton(variable);
       dashboardWorkspace.clickOnDeleteDialogButton();
-      dashboardWorkspace.checkValueIsNotExists(variables.get(i), values.get(i));
+      dashboardWorkspace.checkValueIsNotExists(variable, variables.get(variable));
     }
     clickOnSaveButton();
 
     //restore variables to db machine, check they exist and save changes
-    for (int i = 0; i < variables.size(); i++) {
+    for (String variable : variables.keySet()) {
       loader.waitOnClosed();
       dashboardWorkspace.clickOnAddEnvVariableButton();
       dashboardWorkspace.checkAddNewEnvVarialbleDialogIsOpen();
-      dashboardWorkspace.addNewEnvironmentVariable(variables.get(i), values.get(i));
+      dashboardWorkspace.addNewEnvironmentVariable(variable, variables.get(variable));
       dashboardWorkspace.clickOnAddDialogButton();
-      Assert.assertTrue(dashboardWorkspace.checkEnvVariableExists(variables.get(i)));
-      Assert.assertTrue(dashboardWorkspace.checkValueExists(variables.get(i), values.get(i)));
+      Assert.assertTrue(dashboardWorkspace.checkEnvVariableExists(variable));
+      Assert.assertTrue(dashboardWorkspace.checkValueExists(variable, variables.get(variable)));
     }
     clickOnSaveButton();
   }
@@ -140,24 +125,24 @@ public class WorkspaceDetailsTest {
 
     //check all needed agents in dev-machine exist
     dashboardWorkspace.selectMachine("Workspace Agents", "dev-machine");
-    for (String agentName : agents) {
-      dashboardWorkspace.checkAgentExists(agentName);
+    for (String agent : agents.keySet()) {
+      dashboardWorkspace.checkAgentExists(agent);
     }
 
     //switch all agents and save changes
-    for (int i = 0; i < agents.size(); i++) {
-      Assert.assertEquals(dashboardWorkspace.getAgentState(agents.get(i)), agentsStates.get(i));
-      dashboardWorkspace.switchAgentState(agents.get(i));
+    for (String agent : agents.keySet()) {
+      Assert.assertEquals(dashboardWorkspace.getAgentState(agent), agents.get(agent));
+      dashboardWorkspace.switchAgentState(agent);
     }
     clickOnSaveButton();
 
     //switch all agents, save changes and check its states are as previous(by default for the Java-MySql stack)
-    for (String agentName : agents) {
-      dashboardWorkspace.switchAgentState(agentName);
+    for (String agent : agents.keySet()) {
+      dashboardWorkspace.switchAgentState(agent);
     }
     clickOnSaveButton();
-    for (int i = 0; i < agents.size(); i++) {
-      Assert.assertEquals(dashboardWorkspace.getAgentState(agents.get(i)), agentsStates.get(i));
+    for (String agent : agents.keySet()) {
+      Assert.assertEquals(dashboardWorkspace.getAgentState(agent), agents.get(agent));
     }
   }
 
@@ -246,6 +231,25 @@ public class WorkspaceDetailsTest {
     //check that created machine exists in the Process Console tree
     consoles.waitProcessInProcessConsoleTree("machine");
     consoles.waitTabNameProcessIsPresent("machine");
+  }
+
+  private void createMaps() {
+    agents.put("C# language server", false);
+    agents.put("Exec", true);
+    agents.put("File sync", false);
+    agents.put("Git credentials", false);
+    agents.put("JSON language server", false);
+    agents.put("PHP language server", false);
+    agents.put("Python language server", false);
+    agents.put("SSH", true);
+    agents.put("Terminal", true);
+    agents.put("TypeScript language server", false);
+    agents.put("Workspace API", true);
+
+    variables.put("MYSQL_DATABASE", "petclinic");
+    variables.put("MYSQL_PASSWORD", "password");
+    variables.put("MYSQL_ROOT_PASSWORD", "password");
+    variables.put("MYSQL_USER", "petclinic");
   }
 
   private void clickOnSaveButton() {
