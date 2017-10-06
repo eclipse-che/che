@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.miscellaneous;
 
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static org.openqa.selenium.Keys.ARROW_DOWN;
 import static org.openqa.selenium.Keys.ARROW_RIGHT;
 
@@ -188,7 +189,7 @@ public class FindTextFeatureTest {
     findText.clickOnSearchButtonMainForm();
     findText.waitFindInfoPanelIsOpen();
     findText.sendCommandByKeyboardInFindInfoPanel(ARROW_RIGHT.toString());
-    findText.waitExpectedTextInFindInfoPanel(PR_1_EXPECTED_TEXT_1);
+    findText.waitExpectedTextInFindInfoPanel(asList(PR_1_EXPECTED_TEXT_1.split("\n")));
     findText.selectItemInFindInfoPanel(
         format("/%s/readme.con", PROJECT_NAME),
         "1:   Filesystem 1K-blocks Used Available Use% Mounted on");
@@ -208,7 +209,7 @@ public class FindTextFeatureTest {
     findText.clickOnSearchButtonMainForm();
     findText.waitFindInfoPanelIsOpen();
     findText.sendCommandByKeyboardInFindInfoPanel(ARROW_RIGHT.toString());
-    findText.waitExpectedTextInFindInfoPanel(PR_1_EXPECTED_TEXT_2);
+    findText.waitExpectedTextInFindInfoPanel(asList(PR_1_EXPECTED_TEXT_2.split("\n")));
     findText.selectItemInFindInfoPanel(
         format("/%s/readme.api", PROJECT_NAME), "1:   FindTextFeatureTest");
     findText.sendCommandByKeyboardInFindInfoPanel(Keys.ENTER.toString());
@@ -249,7 +250,7 @@ public class FindTextFeatureTest {
     findText.waitPathIntoRootField("/" + PROJECT_NAME);
     findText.clickOnSearchButtonMainForm();
     findText.waitFindInfoPanelIsOpen();
-    findText.waitExpectedTextInFindInfoPanel(PR_2_EXPECTED_TEXT_1);
+    findText.waitExpectedTextInFindInfoPanel(asList(PR_2_EXPECTED_TEXT_1.split("\n")));
     findText.sendCommandByKeyboardInFindInfoPanel(ARROW_RIGHT.toString());
     findText.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
     findText.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
@@ -284,13 +285,6 @@ public class FindTextFeatureTest {
     editor.waitActiveTabFileName("SayHello");
     editor.waitTextIntoEditor("String");
     Assert.assertEquals(editor.getPositionOfLine(), 20);
-    findText.selectItemInFindInfoPanel(
-        pathToAppControllerFile,
-        "26:    String numGuessByUser = request.getParameter(\"numGuess\");");
-    findText.sendCommandByKeyboardInFindInfoPanel(Keys.ARROW_UP.toString());
-    findText.sendCommandByKeyboardInFindInfoPanel(Keys.ENTER.toString());
-    editor.waitActiveTabFileName("AppController");
-    Assert.assertEquals(editor.getPositionOfLine(), 22);
     editor.closeAllTabsByContextMenu();
   }
 
@@ -306,7 +300,7 @@ public class FindTextFeatureTest {
     findText.waitPathIntoRootField("/" + PROJECT_NAME);
     findText.clickOnSearchButtonMainForm();
     findText.waitFindInfoPanelIsOpen();
-    findText.waitExpectedTextInFindInfoPanel(PR_3_EXPECTED_TEXT_1);
+    findText.waitExpectedTextInFindInfoPanel(asList(PR_3_EXPECTED_TEXT_1.split("\n")));
     projectExplorer.selectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.FIND);
     findText.waitFindTextMainFormIsOpen();
@@ -332,7 +326,7 @@ public class FindTextFeatureTest {
     findText.setAndWaitStateSearchRootCheckbox(false);
     findText.waitPathIntoRootField("/" + PR_4_PATH_1);
     findText.clickOnSearchButtonMainForm();
-    findText.waitExpectedTextInFindInfoPanel(PR_4_EXPECTED_TEXT_1);
+    findText.waitExpectedTextInFindInfoPanel(asList(PR_4_EXPECTED_TEXT_1.split("\n")));
 
     projectExplorer.selectItem(PROJECT_NAME);
     findText.launchFindFormByKeyboard();
@@ -350,7 +344,7 @@ public class FindTextFeatureTest {
     findText.waitPathIntoRootField(PR_4_PATH_2);
     findText.clickOnSearchButtonMainForm();
     findText.waitFindInfoPanelIsOpen();
-    findText.waitExpectedTextInFindInfoPanel(PR_4_EXPECTED_TEXT_2);
+    findText.waitExpectedTextInFindInfoPanel(asList(PR_4_EXPECTED_TEXT_2.split("\n")));
   }
 
   @Test
@@ -366,7 +360,7 @@ public class FindTextFeatureTest {
     findText.waitTextIntoFileNameFilter("*.java");
     findText.clickOnSearchButtonMainForm();
     findText.waitFindInfoPanelIsOpen();
-    findText.waitExpectedTextInFindInfoPanel(PR_5_EXPECTED_TEXT_1);
+    findText.waitExpectedTextInFindInfoPanel(asList(PR_5_EXPECTED_TEXT_1.split("\n")));
     findText.waitExpectedTextIsNotPresentInFindInfoPanel(PR_5_EXPECTED_TEXT_2);
 
     projectExplorer.selectItem(PROJECT_NAME);
@@ -380,7 +374,7 @@ public class FindTextFeatureTest {
     findText.clickOnSearchButtonMainForm();
     findText.waitFindInfoPanelIsOpen();
     findText.waitExpectedTextIsNotPresentInFindInfoPanel(PR_5_EXPECTED_TEXT_1);
-    findText.waitExpectedTextInFindInfoPanel(PR_5_EXPECTED_TEXT_2);
+    findText.waitExpectedTextInFindInfoPanel(asList(PR_5_EXPECTED_TEXT_2.split("\n")));
   }
 
   private void createFileFromAPI(String path, String fileName, String content) throws Exception {

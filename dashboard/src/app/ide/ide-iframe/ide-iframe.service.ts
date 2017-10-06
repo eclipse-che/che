@@ -9,28 +9,47 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import {CheUIElementsInjectorService} from '../../../components/service/injector/che-ui-elements-injector.service';
 
 /*global $:false */
+
+interface IIdeIFrameRootScope extends ng.IRootScopeService {
+  showIDE: boolean;
+  hideLoader: boolean;
+  hideNavbar: boolean;
+}
+
 
 /**
  * Defines a service for displaying iframe for displaying the IDE.
  * @author Florent Benoit
  */
 class IdeIFrameSvc {
+  private cheUIElementsInjectorService: CheUIElementsInjectorService;
+  private $timeout: ng.ITimeoutService;
+  private $compile: ng.ICompileService;
+  private $location: ng.ILocationService;
+  private $mdSidenav: ng.material.ISidenavService;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor ($timeout, $compile, $rootScope, $location, $window, $mdSidenav, cheUIElementsInjectorService) {
-    this.cheUIElementsInjectorService = cheUIElementsInjectorService;
+  constructor($window: ng.IWindowService,
+              $timeout: ng.ITimeoutService,
+              $compile: ng.ICompileService,
+              $location: ng.ILocationService,
+              $rootScope: IIdeIFrameRootScope,
+              $mdSidenav: ng.material.ISidenavService,
+              cheUIElementsInjectorService: CheUIElementsInjectorService) {
     this.$timeout = $timeout;
     this.$compile = $compile;
     this.$location = $location;
     this.$mdSidenav = $mdSidenav;
+    this.cheUIElementsInjectorService = cheUIElementsInjectorService;
 
-    $window.addEventListener("message", (event) => {
-      if ("show-ide" === event.data) {
+    $window.addEventListener('message', (event: any) => {
+      if ('show-ide' === event.data) {
         // check whether user is still waiting for IDE
         if (/\/ide\//.test($location.path())) {
           $rootScope.$apply(() => {
@@ -39,16 +58,16 @@ class IdeIFrameSvc {
           });
         }
 
-      } else if ("show-workspaces" === event.data) {
+      } else if ('show-workspaces' === event.data) {
         $rootScope.$apply(() => {
           $location.path('/workspaces');
         });
 
-      } else if ("show-navbar" === event.data) {
+      } else if ('show-navbar' === event.data) {
         $rootScope.hideNavbar = false;
         $mdSidenav('left').open();
 
-      } else if ("hide-navbar" === event.data) {
+      } else if ('hide-navbar' === event.data) {
         $rootScope.hideNavbar = true;
         $mdSidenav('left').close();
       }
