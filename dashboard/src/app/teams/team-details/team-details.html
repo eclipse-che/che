@@ -8,9 +8,12 @@
 </che-toolbar>
 <md-content md-scroll-y flex md-theme="default"
             ng-if="teamDetailsController.team && teamDetailsController.hasTeamAccess">
-  <md-tabs md-dynamic-height md-stretch-tabs="auto"
+  <md-tabs md-dynamic-height
+           md-disable-animation
+           md-stretch-tabs="auto"
            md-selected="teamDetailsController.selectedTabIndex"
-           md-center-tabs="">
+           md-center-tabs="false"
+           md-no-ink-bar>
 
     <!-- Settings Tab -->
     <md-tab md-on-select="teamDetailsController.onSelectTab(teamDetailsController.tab.Settings);">
