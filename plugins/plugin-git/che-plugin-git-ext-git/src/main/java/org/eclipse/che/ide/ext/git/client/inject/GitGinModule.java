@@ -17,8 +17,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistrar;
-import org.eclipse.che.ide.ext.git.client.GitChangesHandler;
-import org.eclipse.che.ide.ext.git.client.GitCheckoutHandler;
+import org.eclipse.che.ide.ext.git.client.eventhandlers.GitCheckoutHandler;
 import org.eclipse.che.ide.ext.git.client.add.AddToIndexView;
 import org.eclipse.che.ide.ext.git.client.add.AddToIndexViewImpl;
 import org.eclipse.che.ide.ext.git.client.branch.BranchView;
@@ -35,6 +34,8 @@ import org.eclipse.che.ide.ext.git.client.compare.revisionslist.RevisionListView
 import org.eclipse.che.ide.ext.git.client.compare.revisionslist.RevisionListViewImpl;
 import org.eclipse.che.ide.ext.git.client.fetch.FetchView;
 import org.eclipse.che.ide.ext.git.client.fetch.FetchViewImpl;
+import org.eclipse.che.ide.ext.git.client.eventhandlers.GitFileChangedHandler;
+import org.eclipse.che.ide.ext.git.client.eventhandlers.GitStatusChangedHandler;
 import org.eclipse.che.ide.ext.git.client.history.HistoryView;
 import org.eclipse.che.ide.ext.git.client.history.HistoryViewImpl;
 import org.eclipse.che.ide.ext.git.client.importer.GitImportWizardRegistrar;
@@ -47,6 +48,8 @@ import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputPartView;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputPartViewImpl;
 import org.eclipse.che.ide.ext.git.client.panel.GitPanelView;
 import org.eclipse.che.ide.ext.git.client.panel.GitPanelViewImpl;
+import org.eclipse.che.ide.ext.git.client.plugins.EditorTabsColorizer;
+import org.eclipse.che.ide.ext.git.client.plugins.ProjectExplorerTreeColorizer;
 import org.eclipse.che.ide.ext.git.client.preference.CommitterPreferencePresenter;
 import org.eclipse.che.ide.ext.git.client.pull.PullView;
 import org.eclipse.che.ide.ext.git.client.pull.PullViewImpl;
@@ -105,6 +108,10 @@ public class GitGinModule extends AbstractGinModule {
             .build(GitOutputConsoleFactory.class));
 
     bind(GitCheckoutHandler.class).asEagerSingleton();
-    bind(GitChangesHandler.class).asEagerSingleton();
+    bind(GitStatusChangedHandler.class).asEagerSingleton();
+    bind(GitFileChangedHandler.class).asEagerSingleton();
+
+    bind(ProjectExplorerTreeColorizer.class).asEagerSingleton();
+    bind(EditorTabsColorizer.class).asEagerSingleton();
   }
 }

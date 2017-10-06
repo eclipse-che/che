@@ -18,7 +18,10 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
+import org.eclipse.che.api.git.shared.Status;
+import org.eclipse.che.api.project.shared.dto.event.GitChangeEventDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
@@ -32,6 +35,10 @@ import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelPresenter;
+import org.eclipse.che.ide.ext.git.client.eventhandlers.GitFileChangedHandler;
+import org.eclipse.che.ide.ext.git.client.eventhandlers.GitFileChangedHandler.GitFileChangesSubscriber;
+import org.eclipse.che.ide.ext.git.client.eventhandlers.GitStatusChangedHandler;
+import org.eclipse.che.ide.ext.git.client.eventhandlers.GitStatusChangedHandler.GitStatusChangesSubscriber;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
@@ -41,7 +48,8 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  */
 @Singleton
 public class GitPanelPresenter extends BasePresenter
-    implements GitPanelView.ActionDelegate, ActivePartChangedHandler {
+    implements GitPanelView.ActionDelegate, ActivePartChangedHandler, GitFileChangesSubscriber,
+    GitStatusChangesSubscriber {
 
   private static final String REVISION = "HEAD";
 
@@ -49,6 +57,8 @@ public class GitPanelPresenter extends BasePresenter
   private final GitServiceClient service;
   private final ChangesPanelPresenter changesPanelPresenter;
   private final AppContext appContext;
+  private final GitFileChangedHandler gitFileChangedHandler;
+  private final GitStatusChangedHandler gitStatusChangedHandler;
   private final NotificationManager notificationManager;
   private final GitResources gitResources;
   private final GitLocalizationConstant locale;
@@ -63,6 +73,8 @@ public class GitPanelPresenter extends BasePresenter
       WorkspaceAgent workspaceAgent,
       AppContext appContext,
       EventBus eventBus,
+      GitFileChangedHandler gitFileChangedHandler,
+      GitStatusChangedHandler gitStatusChangedHandler,
       NotificationManager notificationManager,
       GitResources gitResources,
       GitLocalizationConstant locale) {
@@ -70,6 +82,8 @@ public class GitPanelPresenter extends BasePresenter
     this.service = service;
     this.changesPanelPresenter = changesPanelPresenter;
     this.appContext = appContext;
+    this.gitFileChangedHandler = gitFileChangedHandler;
+    this.gitStatusChangedHandler = gitStatusChangedHandler;
     this.notificationManager = notificationManager;
     this.gitResources = gitResources;
     this.locale = locale;
@@ -83,6 +97,8 @@ public class GitPanelPresenter extends BasePresenter
       workspaceAgent.openPart(this, PartStackType.NAVIGATION);
     }
     eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
+
+    subscribeToGitEvents();
   }
 
   /** Invoked each time when panel is activated. */
@@ -153,5 +169,26 @@ public class GitPanelPresenter extends BasePresenter
     if (event.getActivePart() != null && event.getActivePart() instanceof GitPanelPresenter) {
       update();
     }
+  }
+
+  private void subscribeToGitEvents() {
+    gitFileChangedHandler.subscribe(this);
+    gitStatusChangedHandler.subscribe(this);
+  }
+
+  @PreDestroy
+  private void unsubscribeFromGitEvents() {
+    gitFileChangedHandler.unsubscribe(this);
+    gitStatusChangedHandler.unsubscribe(this);
+  }
+
+  @Override
+  public void onFileUnderGitChanged(String endpointId, GitChangeEventDto dto) {
+
+  }
+
+  @Override
+  public void onGitStatusChanged(String endpointId, Status status) {
+
   }
 }
