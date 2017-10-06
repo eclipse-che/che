@@ -1,12 +1,9 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2012-2017 Red Hat, Inc. All rights reserved. This program and the accompanying
+ * materials are made available under the terms of the Eclipse Public License v1.0 which accompanies
+ * this distribution, and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Red Hat, Inc. - initial API and implementation
+ * Contributors: Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.plugin.java.languageserver;
 
@@ -18,13 +15,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
+import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
-import org.eclipse.che.api.languageserver.registry.DocumentFilter;
 import org.eclipse.che.api.languageserver.registry.LanguageServerDescription;
+import org.eclipse.che.api.languageserver.registry.ServerInitializerObserver;
 import org.eclipse.che.api.languageserver.service.FileContentAccess;
 import org.eclipse.che.api.languageserver.util.DynamicWrapper;
-import org.eclipse.che.plugin.java.inject.JavaModule;
+import org.eclipse.lsp4j.DidChangeConfigurationParams;
+import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
@@ -37,10 +38,10 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Mäder
  */
 @Singleton
-public class JavaLanguageServerLauncher extends LanguageServerLauncherTemplate {
+public class JavaLanguageServerLauncher extends LanguageServerLauncherTemplate
+    implements ServerInitializerObserver {
   private static final Logger LOG = LoggerFactory.getLogger(JavaLanguageServerLauncher.class);
 
-  private static final String REGEX = ".*\\.java";
   private static final LanguageServerDescription DESCRIPTION = createServerDescription();
 
   private final Path launchScript;
@@ -104,8 +105,19 @@ public class JavaLanguageServerLauncher extends LanguageServerLauncherTemplate {
     LanguageServerDescription description =
         new LanguageServerDescription(
             "org.eclipse.che.plugin.java.languageserver",
-            null,
-            Arrays.asList(new DocumentFilter(JavaModule.LANGUAGE_ID, REGEX, null)));
+            Arrays.asList("javaSource", "javaClass", "pom"),
+            Collections.emptyList());
     return description;
+  }
+
+  @Override
+  public void onServerInitialized(
+      LanguageServerLauncher launcher,
+      LanguageServer server,
+      ServerCapabilities capabilities,
+      String projectPath) {
+    Map<String, String> settings =
+        Collections.singletonMap("java.configuration.updateBuildConfiguration", "automatic");
+    server.getWorkspaceService().didChangeConfiguration(new DidChangeConfigurationParams(settings));
   }
 }
