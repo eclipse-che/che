@@ -8,21 +8,23 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.workspace.server.event;
+package org.eclipse.che.api.workspace.shared.event;
 
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.notification.EventOrigin;
 
 /**
- * Informs about workspace creation.
+ * Informs that workspace was removed.
  *
  * @author Sergii Leschenko
+ * @author Alexander Andrienko
  */
 @EventOrigin("workspace")
-public class WorkspaceCreatedEvent {
+public class WorkspaceRemovedEvent {
+
   private final Workspace workspace;
 
-  public WorkspaceCreatedEvent(Workspace workspace) {
+  public WorkspaceRemovedEvent(Workspace workspace) {
     this.workspace = workspace;
   }
 
