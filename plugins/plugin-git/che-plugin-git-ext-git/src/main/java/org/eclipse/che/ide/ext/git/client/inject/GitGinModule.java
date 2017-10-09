@@ -17,7 +17,8 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistrar;
-import org.eclipse.che.ide.ext.git.client.eventhandlers.GitCheckoutHandler;
+import org.eclipse.che.ide.ext.git.client.GitEventSubscribable;
+import org.eclipse.che.ide.ext.git.client.GitEventsHandler;
 import org.eclipse.che.ide.ext.git.client.add.AddToIndexView;
 import org.eclipse.che.ide.ext.git.client.add.AddToIndexViewImpl;
 import org.eclipse.che.ide.ext.git.client.branch.BranchView;
@@ -34,8 +35,6 @@ import org.eclipse.che.ide.ext.git.client.compare.revisionslist.RevisionListView
 import org.eclipse.che.ide.ext.git.client.compare.revisionslist.RevisionListViewImpl;
 import org.eclipse.che.ide.ext.git.client.fetch.FetchView;
 import org.eclipse.che.ide.ext.git.client.fetch.FetchViewImpl;
-import org.eclipse.che.ide.ext.git.client.eventhandlers.GitFileChangedHandler;
-import org.eclipse.che.ide.ext.git.client.eventhandlers.GitStatusChangedHandler;
 import org.eclipse.che.ide.ext.git.client.history.HistoryView;
 import org.eclipse.che.ide.ext.git.client.history.HistoryViewImpl;
 import org.eclipse.che.ide.ext.git.client.importer.GitImportWizardRegistrar;
@@ -100,6 +99,7 @@ public class GitGinModule extends AbstractGinModule {
     bind(PullView.class).to(PullViewImpl.class).in(Singleton.class);
     bind(HistoryView.class).to(HistoryViewImpl.class).in(Singleton.class);
     bind(GitPanelView.class).to(GitPanelViewImpl.class).in(Singleton.class);
+    bind(GitEventSubscribable.class).to(GitEventsHandler.class).in(Singleton.class);
     bind(GitOutputPartView.class).to(GitOutputPartViewImpl.class);
     bind(ChangesPanelView.class).to(ChangesPanelViewImpl.class);
     install(
@@ -107,9 +107,7 @@ public class GitGinModule extends AbstractGinModule {
             .implement(GitOutputConsole.class, GitOutputConsolePresenter.class)
             .build(GitOutputConsoleFactory.class));
 
-    bind(GitCheckoutHandler.class).asEagerSingleton();
-    bind(GitStatusChangedHandler.class).asEagerSingleton();
-    bind(GitFileChangedHandler.class).asEagerSingleton();
+    bind(GitEventsHandler.class).asEagerSingleton();
 
     bind(ProjectExplorerTreeColorizer.class).asEagerSingleton();
     bind(EditorTabsColorizer.class).asEagerSingleton();

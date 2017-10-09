@@ -16,12 +16,12 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-import javax.annotation.PreDestroy;
-import javax.inject.Inject;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.project.shared.dto.event.GitChangeEventDto;
+import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
@@ -31,14 +31,13 @@ import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.ext.git.client.GitEventSubscribable;
+import org.eclipse.che.ide.ext.git.client.GitEventsSubscriber;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelPresenter;
-import org.eclipse.che.ide.ext.git.client.eventhandlers.GitFileChangedHandler;
-import org.eclipse.che.ide.ext.git.client.eventhandlers.GitFileChangedHandler.GitFileChangesSubscriber;
-import org.eclipse.che.ide.ext.git.client.eventhandlers.GitStatusChangedHandler;
-import org.eclipse.che.ide.ext.git.client.eventhandlers.GitStatusChangedHandler.GitStatusChangesSubscriber;
+import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
@@ -48,8 +47,7 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  */
 @Singleton
 public class GitPanelPresenter extends BasePresenter
-    implements GitPanelView.ActionDelegate, ActivePartChangedHandler, GitFileChangesSubscriber,
-    GitStatusChangesSubscriber {
+    implements GitPanelView.ActionDelegate, ActivePartChangedHandler, GitEventsSubscriber {
 
   private static final String REVISION = "HEAD";
 
@@ -57,8 +55,6 @@ public class GitPanelPresenter extends BasePresenter
   private final GitServiceClient service;
   private final ChangesPanelPresenter changesPanelPresenter;
   private final AppContext appContext;
-  private final GitFileChangedHandler gitFileChangedHandler;
-  private final GitStatusChangedHandler gitStatusChangedHandler;
   private final NotificationManager notificationManager;
   private final GitResources gitResources;
   private final GitLocalizationConstant locale;
@@ -73,8 +69,7 @@ public class GitPanelPresenter extends BasePresenter
       WorkspaceAgent workspaceAgent,
       AppContext appContext,
       EventBus eventBus,
-      GitFileChangedHandler gitFileChangedHandler,
-      GitStatusChangedHandler gitStatusChangedHandler,
+      GitEventSubscribable subscribeToGitEvents,
       NotificationManager notificationManager,
       GitResources gitResources,
       GitLocalizationConstant locale) {
@@ -82,8 +77,6 @@ public class GitPanelPresenter extends BasePresenter
     this.service = service;
     this.changesPanelPresenter = changesPanelPresenter;
     this.appContext = appContext;
-    this.gitFileChangedHandler = gitFileChangedHandler;
-    this.gitStatusChangedHandler = gitStatusChangedHandler;
     this.notificationManager = notificationManager;
     this.gitResources = gitResources;
     this.locale = locale;
@@ -91,35 +84,34 @@ public class GitPanelPresenter extends BasePresenter
     this.view.setDelegate(this);
     this.view.setChangesPanelView(this.changesPanelPresenter.getView());
 
-    this.currentProject = null;
+    this.currentProject = null; // no selection in project explorer
 
     if (partStack == null || !partStack.containsPart(this)) {
       workspaceAgent.openPart(this, PartStackType.NAVIGATION);
     }
     eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
 
-    subscribeToGitEvents();
+    subscribeToGitEvents.addSubscriber(this);
   }
 
   /** Invoked each time when panel is activated. */
   private void update() {
     Project selectedProject = appContext.getRootProject();
-    // TODO handle deleted project
-    //if (selectedProject != currentProject) {
-    currentProject = selectedProject;
+    // TODO handle no project, selectedProject == null
+    if (selectedProject != currentProject) {
+      currentProject = selectedProject;
 
-    service
-        .diff(currentProject.getLocation(), null, NAME_STATUS, false, 0, REVISION, false)
-        .then(
-            diff -> {
-              updateChangedFiles(new AlteredFiles(currentProject, diff));
-            })
-        .catchError(
-            arg -> {
-              currentProject = null; // To retry on next panel update TODO delete it
-              notificationManager.notify(locale.diffFailed(), FAIL, NOT_EMERGE_MODE);
-            });
-    //}
+      service
+          .diff(currentProject.getLocation(), null, NAME_STATUS, false, 0, REVISION, false)
+          .then(
+              diff -> {
+                updateChangedFiles(new AlteredFiles(currentProject, diff));
+              })
+          .catchError(
+              arg -> {
+                notificationManager.notify(locale.diffFailed(), FAIL, NOT_EMERGE_MODE);
+              });
+    }
   }
 
   // TODO invoke from file watcher subscriber or on open panel
@@ -171,24 +163,18 @@ public class GitPanelPresenter extends BasePresenter
     }
   }
 
-  private void subscribeToGitEvents() {
-    gitFileChangedHandler.subscribe(this);
-    gitStatusChangedHandler.subscribe(this);
-  }
-
-  @PreDestroy
-  private void unsubscribeFromGitEvents() {
-    gitFileChangedHandler.unsubscribe(this);
-    gitStatusChangedHandler.unsubscribe(this);
-  }
-
   @Override
   public void onFileUnderGitChanged(String endpointId, GitChangeEventDto dto) {
-
+    Log.info(getClass(), "FILE_UNDER_GIT: " + dto.getType() + ':' + dto.getPath());
   }
 
   @Override
   public void onGitStatusChanged(String endpointId, Status status) {
+    Log.info(getClass(), "STATUS_CHANGED: " + status);
+  }
 
+  @Override
+  public void onGitCheckout(String endpointId, GitCheckoutEventDto dto) {
+    Log.info(getClass(), "CHECKOUT: " + dto.getName());
   }
 }
