@@ -15,7 +15,6 @@ import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
@@ -27,7 +26,6 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.debug.DebugPanel;
-import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -50,7 +48,6 @@ public class CheckBreakPointStateTest {
   @Inject private AskDialog askDialog;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private SeleniumWebDriver seleniumWebDriver;
-  @Inject private ActionsFactory actionsFactory;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -70,46 +67,6 @@ public class CheckBreakPointStateTest {
   }
 
   @Test
-  public void shouldReorderBreakpointsWhenFileEdited() throws Exception {
-    projectExplorer.openItemByPath(PATH_TO_PROJECT_WITH_ONE_CLASS + "AppController.java");
-
-    // given
-    editor.setCursorToLine(26);
-    editor.setInactiveBreakpoint(26);
-    editor.setInactiveBreakpoint(29);
-    editor.setInactiveBreakpoint(31);
-    editor.setCursorToLine(38);
-    editor.setInactiveBreakpoint(38);
-
-    // when (removes the first character in the line)
-    editor.setCursorToDefinedLineAndChar(26, 1);
-    actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.DELETE).build().perform();
-    // then
-    editor.waitInactiveBreakpoint(26);
-
-    // when (removes the last character in the line)
-    editor.setCursorToDefinedLineAndChar(26, 65);
-    actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.BACK_SPACE).build().perform();
-    // then
-    editor.waitInactiveBreakpoint(26);
-
-    // when (remove the current line)
-    editor.deleteCurrentLine();
-    // then
-    editor.waitInactiveBreakpoint(26);
-    editor.waitInactiveBreakpoint(28);
-    editor.waitInactiveBreakpoint(30);
-    editor.waitInactiveBreakpoint(37);
-
-    // when (add a new line)
-    actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.ENTER).build().perform();
-    // then
-    editor.waitInactiveBreakpoint(29);
-    editor.waitInactiveBreakpoint(31);
-    editor.waitInactiveBreakpoint(38);
-  }
-
-  @Test(priority = 1)
   public void checkStateAfterDeletionFileAndFolder() throws Exception {
     String expectedBreakpointsForAdditionalClass =
         "AdditonalClass.java:7\n" + "AdditonalClass.java:9";
@@ -146,7 +103,7 @@ public class CheckBreakPointStateTest {
     projectExplorer.waitDisappearItemByPath(PROJECT_NAME_2);
   }
 
-  @Test(priority = 2)
+  @Test(priority = 1)
   public void checkStateAfterDeletionProject() {
     String expectedBreakpointsForGreetingClass =
         "AppController.java:29\n" + "AppController.java:31\n" + "AppController.java:34";
