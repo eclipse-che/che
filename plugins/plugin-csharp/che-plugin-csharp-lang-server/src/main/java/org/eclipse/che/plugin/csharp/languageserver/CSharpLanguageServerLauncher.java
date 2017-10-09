@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.Collections;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
 import org.eclipse.che.api.languageserver.registry.DocumentFilter;
@@ -98,7 +98,7 @@ public class CSharpLanguageServerLauncher extends LanguageServerLauncherTemplate
         new LanguageServerDescription(
             "org.eclipse.che.plugin.csharp.languageserver",
             null,
-            Arrays.asList(new DocumentFilter(CSharpModule.LANGUAGE_ID, REGEX, null)));
+            Collections.singletonList(new DocumentFilter(CSharpModule.LANGUAGE_ID, REGEX, null)));
     return description;
   }
 

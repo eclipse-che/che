@@ -8,13 +8,15 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.ext.java.client.search.node;
+
+package org.eclipse.che.ide.ui.smartTree.presentation;
 
 import org.eclipse.che.ide.api.data.tree.AbstractTreeNode;
-import org.eclipse.che.ide.ui.smartTree.presentation.HasPresentation;
-import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 
-/** @author Evgen Vidolob */
+/**
+ * Abstract class for utilize holding and creating {@link NodePresentation}, implements {@link
+ * HasPresentation#getPresentation(boolean)}
+ */
 public abstract class AbstractPresentationNode extends AbstractTreeNode implements HasPresentation {
 
   private NodePresentation nodePresentation;
