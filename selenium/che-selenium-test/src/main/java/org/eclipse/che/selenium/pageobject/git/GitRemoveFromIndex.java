@@ -28,7 +28,7 @@ public class GitRemoveFromIndex {
   interface Locators {
     String REMOVE_BTN_ID = "git-removeFromIndex-remove";
     String REMOVE_TO_INDEX_FORM = "gwt-debug-git-removeFromIndex-window";
-    String ONLY_INDEX_CHKBOX_ID = "gwt-debug-git-removeFromIndex-removeFromIndexOnly-input";
+    String ONLY_INDEX_CHKBOX_ID = "gwt-debug-git-removeFromIndex-removeFromIndexOnly";
   }
 
   @FindBy(id = Locators.REMOVE_TO_INDEX_FORM)

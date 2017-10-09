@@ -10,6 +10,9 @@
  */
 package org.eclipse.che.api.git.shared.event;
 
+import java.util.List;
+import java.util.Map;
+import org.eclipse.che.api.git.shared.EditedRegion;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.dto.shared.DTO;
 
@@ -27,4 +30,11 @@ public interface GitCommitEvent extends GitEvent {
   void setStatus(Status status);
 
   GitCommitEvent withStatus(Status status);
+
+  /** Map of modified files and their edited regions. */
+  Map<String, List<EditedRegion>> getModifiedFiles();
+
+  void setModifiedFiles(Map<String, List<EditedRegion>> modifiedFiles);
+
+  GitCommitEvent withModifiedFiles(Map<String, List<EditedRegion>> modifiedFiles);
 }

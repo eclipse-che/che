@@ -36,12 +36,84 @@ import IdeIFrameSvc from './ide/ide-iframe/ide-iframe.service';
 import {CheIdeFetcher} from '../components/ide-fetcher/che-ide-fetcher.service';
 import {RouteHistory} from '../components/routing/route-history.service';
 import {CheUIElementsInjectorService} from '../components/service/injector/che-ui-elements-injector.service';
-import {WorkspaceDetailsService} from './workspaces/workspace-details/workspace-details.service';
+import {OrganizationsConfig} from './organizations/organizations-config';
+import {TeamsConfig} from './teams/teams-config';
+import {ProfileConfig} from './profile/profile-config';
 
 // init module
 const initModule = angular.module('userDashboard', ['ngAnimate', 'ngCookies', 'ngTouch', 'ngSanitize', 'ngResource', 'ngRoute',
   'angular-websocket', 'ui.bootstrap', 'ui.codemirror', 'ngMaterial', 'ngMessages', 'angularMoment', 'angular.filter',
-  'ngDropdowns', 'ngLodash', 'angularCharts', 'uuid4', 'angularFileUpload']);
+  'ngDropdowns', 'ngLodash', 'angularCharts', 'uuid4', 'angularFileUpload', 'ui.gravatar']);
+
+window.name = 'NG_DEFER_BOOTSTRAP!';
+
+declare const Keycloak: Function;
+function buildKeycloakConfig(keycloakSettings: any) {
+  return {
+    url: keycloakSettings['che.keycloak.auth_server_url'],
+    realm: keycloakSettings['che.keycloak.realm'],
+    clientId: keycloakSettings['che.keycloak.client_id']
+  };
+}
+interface IResolveFn<T> {
+  (value: T | PromiseLike<T>): Promise<T>;
+}
+interface IRejectFn<T> {
+  (reason: any): Promise<T>;
+}
+function keycloakLoad(keycloakSettings: any) {
+  return new Promise((resolve: IResolveFn<any>, reject: IRejectFn<any>) => {
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = keycloakSettings['che.keycloak.auth_server_url'] + '/js/keycloak.js';
+    script.addEventListener('load', resolve);
+    script.addEventListener('error', () => reject('Error loading script.'));
+    script.addEventListener('abort', () => reject('Script loading aborted.'));
+    document.head.appendChild(script);
+  });
+}
+function keycloakInit(keycloakConfig: any) {
+  return new Promise((resolve: IResolveFn<any>, reject: IRejectFn<any>) => {
+    const keycloak = Keycloak(keycloakConfig);
+    keycloak.init({
+      onLoad: 'login-required', checkLoginIframe: false
+    }).success(() => {
+      resolve(keycloak);
+    }).error((error: any) => {
+      reject(error);
+    });
+  });
+}
+
+const keycloakAuth = {
+  isPresent: false,
+  keycloak: null,
+  config: null
+};
+initModule.constant('keycloakAuth', keycloakAuth);
+
+const promise = new Promise((resolve: IResolveFn<any>, reject: IRejectFn<any>) => {
+  angular.element.get('/api/keycloak/settings').then(resolve, reject);
+});
+promise.then((keycloakSettings: any) => {
+  keycloakAuth.config = buildKeycloakConfig(keycloakSettings);
+
+  // load Keycloak
+  return keycloakLoad(keycloakSettings).then(() => {
+    // init Keycloak
+    return keycloakInit(keycloakAuth.config);
+  }).then((keycloak: any) => {
+    keycloakAuth.isPresent = true;
+    keycloakAuth.keycloak = keycloak;
+    /* tslint:disable */
+    window['_keycloak'] = keycloak;
+    /* tslint:enable */
+  });
+}).catch((error: any) => {
+  console.error('Keycloak initialization failed with error: ', error);
+}).then(() => {
+  angular.resumeBootstrap();
+});
 
 // add a global resolve flag on all routes (user needs to be resolved first)
 initModule.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
@@ -113,12 +185,10 @@ initModule.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) 
  * Setup route redirect module
  */
 initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$timeout', 'ideIFrameSvc', 'cheIdeFetcher', 'routeHistory', 'cheUIElementsInjectorService', 'workspaceDetailsService',
-  ($rootScope: che.IRootScopeService, $location: ng.ILocationService, $routeParams: ng.route.IRouteParamsService, routingRedirect: RoutingRedirect, $timeout: ng.ITimeoutService, ideIFrameSvc: IdeIFrameSvc, cheIdeFetcher: CheIdeFetcher, routeHistory: RouteHistory, cheUIElementsInjectorService: CheUIElementsInjectorService, workspaceDetailsService: WorkspaceDetailsService) => {
+  ($rootScope: che.IRootScopeService, $location: ng.ILocationService, $routeParams: ng.route.IRouteParamsService, routingRedirect: RoutingRedirect, $timeout: ng.ITimeoutService, ideIFrameSvc: IdeIFrameSvc, cheIdeFetcher: CheIdeFetcher, routeHistory: RouteHistory, cheUIElementsInjectorService: CheUIElementsInjectorService) => {
     $rootScope.hideLoader = false;
     $rootScope.waitingLoaded = false;
     $rootScope.showIDE = false;
-
-    workspaceDetailsService.addPage('SSH', '<workspace-details-ssh></workspace-details-ssh>', 'icon-ic_vpn_key_24px');
 
     // here only to create instances of these components
     /* tslint:disable */
@@ -171,45 +241,6 @@ initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$
     });
   }
 ]);
-
-// add interceptors
-initModule.factory('ETagInterceptor', ($window: ng.IWindowService, $cookies: ng.cookies.ICookiesService, $q: ng.IQService) => {
-
-  const etagMap = {};
-
-  return {
-    request: (config: any) => {
-      // add IfNoneMatch request on the che api if there is an existing eTag
-      if ('GET' === config.method) {
-        if (config.url.indexOf('/api') === 0) {
-          const eTagURI = etagMap[config.url];
-          if (eTagURI) {
-            config.headers = config.headers || {};
-            angular.extend(config.headers, {'If-None-Match': eTagURI});
-          }
-        }
-      }
-      return config || $q.when(config);
-    },
-    response: (response: any) => {
-
-      // if response is ok, keep ETag
-      if ('GET' === response.config.method) {
-        if (response.status === 200) {
-          const responseEtag = response.headers().etag;
-          if (responseEtag) {
-            if (response.config.url.indexOf('/api') === 0) {
-
-              etagMap[response.config.url] = responseEtag;
-            }
-          }
-        }
-
-      }
-      return response || $q.when(response);
-    }
-  };
-});
 
 initModule.config(($mdThemingProvider: ng.material.IThemingProvider, jsonColors: any) => {
 
@@ -357,11 +388,6 @@ initModule.constant('userDashboardConfig', {
   developmentMode: DEV
 });
 
-initModule.config(['$routeProvider', '$httpProvider', ($routeProvider: che.route.IRouteProvider, $httpProvider: ng.IHttpProvider) => {
-  // add the ETag interceptor for Che API
-  $httpProvider.interceptors.push('ETagInterceptor');
-}]);
-
 const instanceRegister = new Register(initModule);
 
 if (DEV) {
@@ -386,4 +412,7 @@ new WorkspacesConfig(instanceRegister);
 new DashboardConfig(instanceRegister);
 new StacksConfig(instanceRegister);
 new FactoryConfig(instanceRegister);
+new OrganizationsConfig(instanceRegister);
+new TeamsConfig(instanceRegister);
+new ProfileConfig(instanceRegister);
 /* tslint:enable */

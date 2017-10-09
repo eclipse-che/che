@@ -68,10 +68,11 @@ public class TestWorkspaceServiceClient {
       TestApiEndpointUrlProvider apiEndpointProvider,
       TestUserNamespaceResolver userNamespaceResolver,
       TestUserHttpJsonRequestFactoryCreator userHttpJsonRequestFactoryCreator,
-      @Assisted String authToken) {
+      @Assisted("email") String email,
+      @Assisted("password") String password) {
     this(
         apiEndpointProvider,
-        userHttpJsonRequestFactoryCreator.create(authToken),
+        userHttpJsonRequestFactoryCreator.create(email, password),
         userNamespaceResolver);
   }
 
@@ -283,7 +284,7 @@ public class TestWorkspaceServiceClient {
 
   private long convertToByte(int numberOfMemValue, MemoryMeasure desiredMeasureMemory) {
     long calculatedValue = 0;
-    //represents values of bytes in 1 megabyte (2x20)
+    // represents values of bytes in 1 megabyte (2x20)
     final long MEGABYTES_CONST = 1048576;
 
     // represents values of bytes in 1 gygabyte (2x30)

@@ -18,7 +18,7 @@ import java.util.List;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
@@ -72,7 +72,7 @@ public class UpdateListOfLibraryTest {
   @Inject private CodenvyEditor editor;
   @Inject private Loader loader;
   @Inject private MavenPluginStatusBar mavenPluginStatusBar;
-  @Inject private DefaultTestUser defaultTestUser;
+  @Inject private TestUser defaultTestUser;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private Consoles consoles;
 

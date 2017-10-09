@@ -22,7 +22,6 @@ import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestBuildConstants;
-import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -35,9 +34,7 @@ import org.testng.annotations.Test;
 /** @author Igor Ohrimenko */
 public class CheckBasicFunctionalityInCommandsExplorerTest {
 
-  @InjectTestWorkspace(memoryGb = 4)
-  private TestWorkspace testWorkspace;
-
+  @Inject private TestWorkspace testWorkspace;
   @Inject private Ide ide;
   @Inject private CommandsExplorer commandsExplorer;
   @Inject private CommandsEditor commandsEditor;

@@ -13,9 +13,10 @@ package org.eclipse.che.api.git;
 import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static java.nio.file.Files.isDirectory;
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.api.project.shared.dto.event.GitChangeEventDto.Type.ADDED;
-import static org.eclipse.che.api.project.shared.dto.event.GitChangeEventDto.Type.MODIFIED;
-import static org.eclipse.che.api.project.shared.dto.event.GitChangeEventDto.Type.UNTRACKED;
+import static org.eclipse.che.api.git.shared.FileChangedEventDto.Status.ADDED;
+import static org.eclipse.che.api.git.shared.FileChangedEventDto.Status.MODIFIED;
+import static org.eclipse.che.api.git.shared.FileChangedEventDto.Status.NOT_MODIFIED;
+import static org.eclipse.che.api.git.shared.FileChangedEventDto.Status.UNTRACKED;
 import static org.eclipse.che.api.vfs.watcher.FileWatcherManager.EMPTY_CONSUMER;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -31,9 +32,9 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.git.shared.FileChangedEventDto;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.shared.dto.event.GitChangeEventDto;
 import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
 import org.slf4j.Logger;
 
@@ -124,25 +125,30 @@ public class GitChangesDetector {
                 .getVirtualFile()
                 .toIoFile()
                 .getAbsolutePath();
-        Status status =
-            gitConnectionFactory.getConnection(projectPath).status(singletonList(itemPath));
-        GitChangeEventDto.Type type;
+        GitConnection connection = gitConnectionFactory.getConnection(projectPath);
+        Status status = connection.status(singletonList(itemPath));
+        FileChangedEventDto.Status fileStatus;
         if (status.getAdded().contains(itemPath)) {
-          type = ADDED;
+          fileStatus = ADDED;
         } else if (status.getUntracked().contains(itemPath)) {
-          type = UNTRACKED;
+          fileStatus = UNTRACKED;
         } else if (status.getModified().contains(itemPath)
             || status.getChanged().contains(itemPath)) {
-          type = MODIFIED;
+          fileStatus = MODIFIED;
         } else {
-          type = GitChangeEventDto.Type.NOT_MODIFIED;
+          fileStatus = NOT_MODIFIED;
         }
 
         transmitter
             .newRequest()
             .endpointId(id)
             .methodName(OUTGOING_METHOD)
-            .paramsAsDto(newDto(GitChangeEventDto.class).withPath(path).withType(type))
+            .paramsAsDto(
+                newDto(FileChangedEventDto.class)
+                    .withPath(path)
+                    .withStatus(fileStatus)
+                    .withEditedRegions(
+                        gitConnectionFactory.getConnection(projectPath).getEditedRegions(itemPath)))
             .sendAndSkipResult();
       } catch (NotFoundException | ServerException e) {
         String errorMessage = e.getMessage();

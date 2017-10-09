@@ -10,24 +10,28 @@
  */
 import {AuthData} from "../../api/wsmaster/auth/auth-data";
 import {Log} from "../log/log";
-import {org} from "../../api/dto/che-dto";
 import {ErrorMessage} from "../error/error-message";
+import {ServerLocation} from "../../utils/server-location";
 /**
  * Implementation of a Request on the remote server
  * @author Florent Benoit
  */
 export class DefaultHttpJsonRequest implements HttpJsonRequest {
 
-    authData : AuthData;
     body : any = {};
+    /**
+     * The HTTP library used to call REST API.
+     */
     http: any;
     options: any;
     expectedStatusCode : number;
 
 
-    constructor(authData : AuthData, url : string,  expectedStatusCode: number) {
-        this.authData  = authData;
-        if (authData.isSecured()) {
+    constructor(authData : AuthData, server : ServerLocation, path : string, expectedStatusCode: number) {
+        if (!server) {
+            server = authData.getMasterLocation();
+        }
+        if (server.isSecure()) {
             this.http = require('https');
         } else {
             this.http = require('http');
@@ -35,17 +39,18 @@ export class DefaultHttpJsonRequest implements HttpJsonRequest {
         this.expectedStatusCode = expectedStatusCode;
 
         this.options = {
-            hostname: this.authData.getHostname(),
-            port: this.authData.getPort(),
-            path: url,
+            hostname: server.getHostname(),
+            port: server.getPort(),
+            path: path,
             method: 'GET',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
-                'Content-Type': 'application/json;charset=UTF-8',
-                'Authorization': this.authData.getToken()
+                'Content-Type': 'application/json;charset=UTF-8'
             }
         };
-
+        if (authData) {
+            this.options.headers.Authorization = authData.getAuthorizationHeaderValue();
+        }
     }
 
 
@@ -115,7 +120,7 @@ export class DefaultHttpJsonRequest implements HttpJsonRequest {
             });
 
             let stringified : string = JSON.stringify(this.body);
-            Log.getLogger().debug('Send request', this.options.path, 'with method', this.options.method, "using ip/port", this.authData.hostname + ":" + this.authData.port, ' body:', stringified);
+            Log.getLogger().debug('Send request', this.options.path, 'with method', this.options.method, "using ip/port", this.options.hostname + ":" + this.options.port, ' body:', stringified);
             req.write(stringified);
             req.end();
 

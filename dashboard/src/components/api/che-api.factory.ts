@@ -16,7 +16,6 @@ import {CheFactory} from './che-factory.factory';
 import {CheFactoryTemplate} from './che-factory-template.factory';
 import {ChePreferences} from './che-preferences.factory';
 import {CheProjectTemplate} from './che-project-template.factory';
-import {CheWebsocket} from './che-websocket.factory';
 import {CheService} from './che-service.factory';
 import {CheRecipe} from './che-recipe.factory';
 import {CheRecipeTemplate} from './che-recipe-template.factory';
@@ -47,6 +46,8 @@ export class CheAPI {
   private cheAgent: CheAgent;
   private cheSsh: CheSsh;
   private cheUser: CheUser;
+  private chePermissions: che.api.IChePermissions;
+  private cheOrganization: che.api.ICheOrganization;
 
   /**
    * Default constructor that is using resource
@@ -55,7 +56,7 @@ export class CheAPI {
   constructor(cheWorkspace: CheWorkspace, cheFactory: CheFactory, cheFactoryTemplate: CheFactoryTemplate, cheProfile: CheProfile,
               chePreferences: ChePreferences, cheProjectTemplate: CheProjectTemplate, cheService: CheService,
               cheRecipe: CheRecipe, cheRecipeTemplate: CheRecipeTemplate, cheStack: CheStack, cheOAuthProvider: CheOAuthProvider,
-              cheAgent: CheAgent, cheSsh: CheSsh, cheUser: CheUser) {
+              cheAgent: CheAgent, cheSsh: CheSsh, cheUser: CheUser, chePermissions: che.api.IChePermissions, cheOrganization: che.api.ICheOrganization) {
     this.cheWorkspace = cheWorkspace;
     this.cheProfile = cheProfile;
     this.cheFactory = cheFactory;
@@ -70,6 +71,8 @@ export class CheAPI {
     this.cheAgent = cheAgent;
     this.cheSsh = cheSsh;
     this.cheUser = cheUser;
+    this.chePermissions = chePermissions;
+    this.cheOrganization = cheOrganization;
   }
 
   /**
@@ -183,5 +186,21 @@ export class CheAPI {
    */
   getUser(): CheUser {
     return this.cheUser;
+  }
+
+  /**
+   * The Che Permissions API
+   * @returns {che.api.IChePermissions|*}
+   */
+  getPermissions(): che.api.IChePermissions {
+    return this.chePermissions;
+  }
+
+  /**
+   * The Che Organization API
+   * @return {che.api.ICheOrganization}
+   */
+  getOrganization(): che.api.ICheOrganization {
+    return this.cheOrganization;
   }
 }
