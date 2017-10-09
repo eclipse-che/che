@@ -17,6 +17,7 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.environment.server.EnvironmentParser;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;

@@ -162,7 +162,8 @@ public final class DtoConverter {
     return newDto(StackFrameDumpDto.class)
         .withVariables(variablesDto)
         .withFields(fieldsDto)
-        .withLocation(asDto(stackFrameDump.getLocation()));
+        .withLocation(
+            stackFrameDump.getLocation() == null ? null : asDto(stackFrameDump.getLocation()));
   }
 
   public static DebuggerEventDto asDto(DebuggerEvent debuggerEvent) {

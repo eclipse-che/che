@@ -48,6 +48,7 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory
   private final AppContext appContext;
 
   private String machineToken;
+  private String wsAgentBaseUrl;
   private String csrfToken;
 
   @Inject
@@ -99,6 +100,7 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory
   @Override
   public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
     machineToken = null;
+    wsAgentBaseUrl = null;
   }
 
   /**

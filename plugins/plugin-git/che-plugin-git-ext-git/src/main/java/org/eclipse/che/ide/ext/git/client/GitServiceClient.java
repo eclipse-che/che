@@ -16,6 +16,7 @@ import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.BranchListMode;
 import org.eclipse.che.api.git.shared.CheckoutRequest;
 import org.eclipse.che.api.git.shared.DiffType;
+import org.eclipse.che.api.git.shared.EditedRegion;
 import org.eclipse.che.api.git.shared.LogResponse;
 import org.eclipse.che.api.git.shared.MergeResult;
 import org.eclipse.che.api.git.shared.PullResponse;
@@ -285,6 +286,14 @@ public interface GitServiceClient {
       int renameLimit,
       String commitA,
       boolean cached);
+
+  /**
+   * Get list of edited regions (insertions, modifications, removals) of the file.
+   *
+   * @param project project (root of GIT repository)
+   * @param filePath path to the file
+   */
+  Promise<List<EditedRegion>> getEditedRegions(Path project, Path filePath);
 
   /**
    * Get the file content from specified revision or branch.

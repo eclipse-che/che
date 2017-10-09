@@ -1,5 +1,3 @@
-<?php include 'lib.php';?>
-<?php
 /*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
@@ -10,7 +8,11 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
+package org.eclipse.che.api.git.shared;
 
-
-echo sayHello("man");
-?>
+/** Type of the change in the file. */
+public enum EditedRegionType {
+  INSERTION,
+  MODIFICATION,
+  DELETION
+}

@@ -17,6 +17,9 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistrar;
+import org.eclipse.che.ide.api.vcs.VcsChangeMarkerRender;
+import org.eclipse.che.ide.api.vcs.VcsChangeMarkerRenderFactory;
+import org.eclipse.che.ide.ext.git.client.GitChangeMarkerRender;
 import org.eclipse.che.ide.ext.git.client.GitChangesHandler;
 import org.eclipse.che.ide.ext.git.client.GitCheckoutHandler;
 import org.eclipse.che.ide.ext.git.client.GitServiceClient;
@@ -80,6 +83,11 @@ public class GitGinModule extends AbstractGinModule {
     GinMultibinder.newSetBinder(binder(), PreferencePagePresenter.class)
         .addBinding()
         .to(CommitterPreferencePresenter.class);
+
+    install(
+        new GinFactoryModuleBuilder()
+            .implement(VcsChangeMarkerRender.class, GitChangeMarkerRender.class)
+            .build(VcsChangeMarkerRenderFactory.class));
 
     bind(AddToIndexView.class).to(AddToIndexViewImpl.class).in(Singleton.class);
     bind(ResetToCommitView.class).to(ResetToCommitViewImpl.class).in(Singleton.class);

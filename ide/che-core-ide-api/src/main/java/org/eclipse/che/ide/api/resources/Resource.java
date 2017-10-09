@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.ide.api.resources;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
 import org.eclipse.che.api.promises.client.Promise;
@@ -97,7 +99,9 @@ public interface Resource extends Comparable<Resource> {
    * @see Resource#FILE
    * @since 4.4.0
    */
-  boolean isFile();
+  default boolean isFile() {
+    return getResourceType() == FILE;
+  }
 
   /**
    * Casts current resource to the {@link File} if the last one's represents a file.
@@ -119,7 +123,11 @@ public interface Resource extends Comparable<Resource> {
    * @see Resource#FILE
    * @since 5.1.0
    */
-  File asFile();
+  default File asFile() {
+    checkState(isFile(), "Current resource is not a file");
+
+    return (File) this;
+  }
 
   /**
    * Returns {@code true} if current represents a folder.
@@ -129,7 +137,9 @@ public interface Resource extends Comparable<Resource> {
    * @see Resource#FOLDER
    * @since 4.4.0
    */
-  boolean isFolder();
+  default boolean isFolder() {
+    return getResourceType() == FOLDER;
+  }
 
   /**
    * Casts current resource to the {@link Folder} if the last one's represents a folder.
@@ -151,7 +161,11 @@ public interface Resource extends Comparable<Resource> {
    * @see Resource#FOLDER
    * @since 5.1.0
    */
-  Folder asFolder();
+  default Folder asFolder() {
+    checkState(isFolder(), "Current resource is not a folder");
+
+    return (Folder) this;
+  }
 
   /**
    * Returns {@code true} if current represents a project.
@@ -161,7 +175,9 @@ public interface Resource extends Comparable<Resource> {
    * @see Resource#PROJECT
    * @since 4.4.0
    */
-  boolean isProject();
+  default boolean isProject() {
+    return getResourceType() == PROJECT;
+  }
 
   /**
    * Casts current resource to the {@link Project} if the last one's represents a project.
@@ -183,7 +199,11 @@ public interface Resource extends Comparable<Resource> {
    * @see Resource#PROJECT
    * @since 5.1.0
    */
-  Project asProject();
+  default Project asProject() {
+    checkState(isProject(), "Current resource is not a project");
+
+    return (Project) this;
+  }
 
   /**
    * Copies resource to given {@code destination} path. Copy operation performs asynchronously and

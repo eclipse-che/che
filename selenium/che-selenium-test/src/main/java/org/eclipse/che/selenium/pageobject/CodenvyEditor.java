@@ -59,6 +59,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class CodenvyEditor {
 
   public static final String CLOSE_ALL_TABS = "gwt-debug-contextMenu/closeAllEditors";
+  public static final String VCS_RULER = "//div[@class='ruler vcs']/div";
 
   public static final class EditorContextMenu {
     public static final String REFACTORING = "contextMenu/Refactoring";
@@ -145,7 +146,9 @@ public class CodenvyEditor {
         "//div[@class='annotationLine currentLine' and @role='presentation']";
     public static final String ACTIVE_TAB_FILE_NAME = "//div[@active]/descendant::div[text()='%s']";
     public static final String TAB_FILE_NAME_XPATH =
-        "//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[text()='%s']";
+        "//div[@id='gwt-debug-editorPartStack-tabsPanel']//div[text()='%s']";
+    public static final String TAB_FILE_NAME_AND_STYLE =
+        "//div[@id='gwt-debug-editorPartStack-tabsPanel']//div[text()='%s' and @style='%s']";
     public static final String TAB_FILE_CLOSE_ICON =
         "//div[@id='gwt-debug-editorMultiPartStack-contentPanel']//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[text()='%s']/following::div[1]";
 
@@ -572,6 +575,88 @@ public class CodenvyEditor {
     expectedNumberOfActiveLine(position);
   }
 
+  /** Wait for no Git change markers in the opened editor. */
+  public void waitNoGitChangeMarkers() {
+
+    List<WebElement> rulerVcsElements = seleniumWebDriver.findElements(By.xpath(VCS_RULER));
+
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            (ExpectedCondition<Boolean>)
+                webDriver ->
+                    rulerVcsElements
+                        .stream()
+                        .allMatch(element -> "".equals(element.getAttribute("class"))));
+  }
+
+  /**
+   * Wait for Git insertion marker in the opened editor.
+   *
+   * @param startLine line number of the markers start
+   * @param endLine line number of the markers end
+   */
+  public void waitGitInsertionMarkerInPosition(int startLine, int endLine) {
+
+    List<WebElement> rulerVcsElements =
+        seleniumWebDriver.findElements(By.xpath("//div[@class='ruler vcs']/div"));
+
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            (ExpectedCondition<Boolean>)
+                webDriver -> {
+                  for (int i = startLine; i <= endLine; i++) {
+                    if (!"git-change-marker insertion"
+                        .equals(rulerVcsElements.get(i).getAttribute("class"))) {
+                      return false;
+                    }
+                  }
+                  return true;
+                });
+  }
+
+  /**
+   * Wait for Git modification marker in the opened editor.
+   *
+   * @param startLine line number of the markers start
+   * @param endLine line number of the markers end
+   */
+  public void waitGitModificationMarkerInPosition(int startLine, int endLine) {
+
+    List<WebElement> rulerVcsElements =
+        seleniumWebDriver.findElements(By.xpath("//div[@class='ruler vcs']/div"));
+
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            (ExpectedCondition<Boolean>)
+                webDriver -> {
+                  for (int i = startLine; i <= endLine; i++) {
+                    if (!"git-change-marker modification"
+                        .equals(rulerVcsElements.get(i).getAttribute("class"))) {
+                      return false;
+                    }
+                  }
+                  return true;
+                });
+  }
+
+  /**
+   * Wait for Git deletion marker in the opened editor.
+   *
+   * @param line line number of the marker
+   */
+  public void waitGitDeletionMarkerInPosition(int line) {
+
+    List<WebElement> rulerVcsElements =
+        seleniumWebDriver.findElements(By.xpath("//div[@class='ruler vcs']/div"));
+
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            (ExpectedCondition<Boolean>)
+                webDriver ->
+                    "git-change-marker deletion"
+                        .equals(rulerVcsElements.get(line).getAttribute("class")));
+  }
+
   /**
    * wait the marker and click him
    *
@@ -904,6 +989,44 @@ public class CodenvyEditor {
             visibilityOfElementLocated(
                 By.xpath(String.format(Locators.TAB_FILE_NAME_XPATH, nameOfFile))))
         .click();
+  }
+
+  public void waitYellowTab(String fileName) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(
+                    String.format(
+                        Locators.TAB_FILE_NAME_AND_STYLE, fileName, "color: rgb(224, 185, 29);"))));
+  }
+
+  public void waitGreenTab(String fileName) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(
+                    String.format(
+                        Locators.TAB_FILE_NAME_AND_STYLE, fileName, "color: rgb(114, 173, 66);"))));
+  }
+
+  public void waitBlueTab(String fileName) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(
+                    String.format(
+                        Locators.TAB_FILE_NAME_AND_STYLE, fileName, "color: rgb(49, 147, 212);"))));
+  }
+
+  public void waitDefaultColorTab(String fileName) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(
+                    String.format(
+                        Locators.TAB_FILE_NAME_AND_STYLE,
+                        fileName,
+                        "color: rgb(255, 255, 255);"))));
   }
 
   /**

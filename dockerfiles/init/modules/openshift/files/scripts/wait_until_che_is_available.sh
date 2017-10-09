@@ -36,7 +36,7 @@ while [ "${available}" != "\"True\"" ] && [ ${SECONDS} -lt ${end} ]; do
   sleep ${POLLING_INTERVAL_SEC}
 done
 
-if [ "${progressing}" == "\"True\"" ] && [ "${available}" == "\"True\"" ]; then
+if [ "${progressing}" == "\"True\"" ]; then
   echo "[CHE] Che deployed successfully"
 elif [ "${progressing}" == "False" ]; then
   echo "[CHE] [ERROR] Che deployment failed. Aborting. Run command 'oc rollout status che' to get more details."

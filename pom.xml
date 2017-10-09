@@ -236,12 +236,6 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.assembly-multiuser</groupId>
-                <artifactId>assembly-ide-war</artifactId>
-                <version>${che.version}</version>
-                <classifier>classes</classifier>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.assembly-multiuser</groupId>
                 <artifactId>assembly-wsagent-server</artifactId>
                 <version>${che.version}</version>
                 <type>tar.gz</type>
@@ -259,8 +253,8 @@
                 <type>war</type>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.che.assembly-multiuser</groupId>
-                <artifactId>che-dashboard-war</artifactId>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-account</artifactId>
                 <version>${che.version}</version>
                 <type>war</type>
             </dependency>
@@ -914,6 +908,11 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-docker-machine-auth</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-ext-dashboard-client</artifactId>
                 <version>${che.version}</version>
             </dependency>
@@ -1437,17 +1436,6 @@
                 <groupId>org.eclipse.che.selenium</groupId>
                 <artifactId>che-selenium-test</artifactId>
                 <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.postgresql</groupId>
-                <artifactId>postgresql</artifactId>
-                <version>${jdbc.postgresql-driver.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.github.kirviq</groupId>
-                <artifactId>dumbster</artifactId>
-                <version>${com.dumbster.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
