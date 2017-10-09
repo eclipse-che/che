@@ -17,6 +17,7 @@ import static org.eclipse.che.api.core.websocket.impl.WebsocketIdService.randomC
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.websocket.CloseReason;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
@@ -39,6 +40,7 @@ public abstract class BasicWebSocketEndpoint {
   private final MessagesReSender reSender;
   private final WebSocketMessageReceiver receiver;
   private final WebsocketIdService identificationService;
+  private final Map<Session, StringBuffer> sessionMessagesBuffer = new ConcurrentHashMap<>();
 
   public BasicWebSocketEndpoint(
       WebSocketSessionRegistry registry,
@@ -63,9 +65,22 @@ public abstract class BasicWebSocketEndpoint {
 
     registry.add(combinedEndpointId, session);
     reSender.resend(combinedEndpointId);
+    sessionMessagesBuffer.put(session, new StringBuffer());
   }
 
   @OnMessage
+  public void onMessage(String messagePart, boolean last, Session session) {
+    StringBuffer buffer = sessionMessagesBuffer.get(session);
+    buffer.append(messagePart);
+    if (last) {
+      try {
+        onMessage(buffer.toString(), session);
+      } finally {
+        buffer.setLength(0);
+      }
+    }
+  }
+
   public void onMessage(String message, Session session) {
     Optional<String> endpointIdOptional = registry.get(session);
 
@@ -98,6 +113,7 @@ public abstract class BasicWebSocketEndpoint {
       LOG.debug("Close reason: {}:{}", closeReason.getReasonPhrase(), closeReason.getCloseCode());
 
       registry.remove(combinedEndpointId);
+      sessionMessagesBuffer.remove(session);
     } else {
       LOG.warn("Closing unidentified session");
     }
