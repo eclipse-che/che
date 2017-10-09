@@ -1,4 +1,14 @@
-package org.eclipse.che.ide.ext.git.client;
+/*
+ * Copyright (c) 2012-2017 Red Hat, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
+package org.eclipse.che.ide.ext.git.client.plugins;
 
 import static org.eclipse.che.ide.api.vcs.VcsStatus.MODIFIED;
 
@@ -17,18 +27,18 @@ import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.vcs.HasVcsChangeMarkerRender;
 import org.eclipse.che.ide.api.vcs.VcsChangeMarkerRender;
+import org.eclipse.che.ide.ext.git.client.GitEventSubscribable;
+import org.eclipse.che.ide.ext.git.client.GitEventsSubscriber;
 import org.eclipse.che.ide.resource.Path;
 
-/**
- * @author Igor Vinokur
- */
+/** @author Igor Vinokur */
 @Singleton
-public class GitChangeMarker implements GitEventsSubscriber {
+public class GitChangeMarkerManager implements GitEventsSubscriber {
 
   private final Provider<EditorAgent> editorAgentProvider;
 
   @Inject
-  public GitChangeMarker(
+  public GitChangeMarkerManager(
       GitEventSubscribable subscribeToGitEvents,
       EventBus eventBus,
       GitServiceClient gitServiceClient,
@@ -58,8 +68,10 @@ public class GitChangeMarker implements GitEventsSubscriber {
 
   private void handleEditedRegions(List<EditedRegion> editedRegions, VcsChangeMarkerRender render) {
     render.clearAllChangeMarkers();
-    editedRegions.forEach(edition -> render
-        .addChangeMarker(edition.getBeginLine(), edition.getEndLine(), edition.getType()));
+    editedRegions.forEach(
+        edition ->
+            render.addChangeMarker(
+                edition.getBeginLine(), edition.getEndLine(), edition.getType()));
   }
 
   @Override
@@ -72,15 +84,16 @@ public class GitChangeMarker implements GitEventsSubscriber {
             editor ->
                 editor.getEditorInput().getFile().getLocation().equals(Path.valueOf(dto.getPath()))
                     && editor instanceof HasVcsChangeMarkerRender)
-        .forEach(editor -> {
-          VcsChangeMarkerRender render =
-              ((HasVcsChangeMarkerRender) editor).getVcsChangeMarkersRender();
-          if (((File) editor.getEditorInput().getFile()).getVcsStatus() != MODIFIED) {
-            render.clearAllChangeMarkers();
-          } else {
-            handleEditedRegions(dto.getEditedRegions(), render);
-          }
-        });
+        .forEach(
+            editor -> {
+              VcsChangeMarkerRender render =
+                  ((HasVcsChangeMarkerRender) editor).getVcsChangeMarkersRender();
+              if (((File) editor.getEditorInput().getFile()).getVcsStatus() != MODIFIED) {
+                render.clearAllChangeMarkers();
+              } else {
+                handleEditedRegions(dto.getEditedRegions(), render);
+              }
+            });
   }
 
   @Override
@@ -92,8 +105,8 @@ public class GitChangeMarker implements GitEventsSubscriber {
         .filter(editor -> editor instanceof HasVcsChangeMarkerRender)
         .forEach(
             editor -> {
-              String filePath = editor.getEditorInput().getFile().getLocation()
-                  .removeFirstSegments(1).toString();
+              String filePath =
+                  editor.getEditorInput().getFile().getLocation().removeFirstSegments(1).toString();
               VcsChangeMarkerRender render =
                   ((HasVcsChangeMarkerRender) editor).getVcsChangeMarkersRender();
               if (statusChangedEventDto.getModifiedFiles().keySet().contains(filePath)) {
@@ -105,6 +118,5 @@ public class GitChangeMarker implements GitEventsSubscriber {
   }
 
   @Override
-  public void onGitCheckout(String endpointId, GitCheckoutEventDto dto) {
-  }
+  public void onGitCheckout(String endpointId, GitCheckoutEventDto dto) {}
 }

@@ -101,6 +101,5 @@ public class EditorTabsColorizer implements GitEventsSubscriber {
   }
 
   @Override
-  public void onGitCheckout(String endpointId, GitCheckoutEventDto dto) {
-  }
+  public void onGitCheckout(String endpointId, GitCheckoutEventDto dto) {}
 }

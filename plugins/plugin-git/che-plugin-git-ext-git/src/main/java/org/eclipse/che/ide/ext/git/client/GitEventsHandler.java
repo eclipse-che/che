@@ -16,7 +16,6 @@ import java.util.HashSet;
 import java.util.Set;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.git.shared.FileChangedEventDto;
-import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.git.shared.StatusChangedEventDto;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
 
@@ -69,7 +68,8 @@ public class GitEventsHandler implements GitEventSubscribable {
     }
   }
 
-  private void onStatusChangedHandler(String endpointId, StatusChangedEventDto statusChangedEventDto) {
+  private void onStatusChangedHandler(
+      String endpointId, StatusChangedEventDto statusChangedEventDto) {
     for (GitEventsSubscriber subscriber : subscribers) {
       subscriber.onGitStatusChanged(endpointId, statusChangedEventDto);
     }
