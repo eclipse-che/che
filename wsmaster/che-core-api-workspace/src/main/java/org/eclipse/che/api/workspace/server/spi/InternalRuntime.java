@@ -11,7 +11,6 @@
 package org.eclipse.che.api.workspace.server.spi;
 
 import static java.util.stream.Collectors.toMap;
-import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.HashMap;
 import java.util.List;
@@ -27,7 +26,6 @@ import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
-import org.slf4j.Logger;
 
 /**
  * Implementation of concrete Runtime
@@ -35,8 +33,6 @@ import org.slf4j.Logger;
  * @author gazarenkov
  */
 public abstract class InternalRuntime<T extends RuntimeContext> implements Runtime {
-
-  private static final Logger LOG = getLogger(InternalRuntime.class);
 
   private final T context;
   private final URLRewriter urlRewriter;
@@ -139,15 +135,9 @@ public abstract class InternalRuntime<T extends RuntimeContext> implements Runti
 
     try {
       internalStop(stopOptions);
-    } catch (InternalInfrastructureException e) {
-      LOG.error(
-          "Error occurs on stop of workspace {}. Error: {}",
-          context.getIdentity().getWorkspaceId(),
-          e.getMessage());
-    } catch (InfrastructureException e) {
-      LOG.debug(e.getMessage(), e);
+    } finally {
+      status = WorkspaceStatus.STOPPED;
     }
-    status = WorkspaceStatus.STOPPED;
   }
 
   /**

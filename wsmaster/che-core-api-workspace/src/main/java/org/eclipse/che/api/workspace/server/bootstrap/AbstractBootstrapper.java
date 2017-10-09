@@ -53,7 +53,7 @@ public abstract class AbstractBootstrapper {
           BootstrapperStatus status = event.getStatus();
           //skip starting status event
           if (status.equals(BootstrapperStatus.DONE) || status.equals(BootstrapperStatus.FAILED)) {
-            //check boostrapper belongs to current runtime and machine
+            //check bootstrapper belongs to current runtime and machine
             RuntimeIdentityDto runtimeId = event.getRuntimeId();
             if (event.getMachineName().equals(machineName)
                 && runtimeIdentity.getEnvName().equals(runtimeId.getEnvName())

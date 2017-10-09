@@ -67,7 +67,7 @@ public class DockerMachineCreator {
 
     return new DockerMachine(
         container.getId(),
-        container.getImage(),
+        container.getConfig().getImage(),
         docker,
         new ServersMapper(hostname).map(networkSettings.getPorts(), configs),
         registry,

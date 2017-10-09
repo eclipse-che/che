@@ -11,20 +11,17 @@
 package org.eclipse.che.api.workspace.server;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
-import static com.google.common.base.Throwables.getCausalChain;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
-import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOPPED_BY;
 
 import com.google.inject.Inject;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import javax.inject.Singleton;
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.shared.model.Account;
@@ -38,8 +35,6 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.shared.event.WorkspaceCreatedEvent;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -69,7 +64,6 @@ public class WorkspaceManager {
   private final WorkspaceDao workspaceDao;
   private final WorkspaceRuntimes runtimes;
   private final AccountManager accountManager;
-  private final WorkspaceSharedPool sharedPool;
   private final EventService eventService;
   private final WorkspaceValidator validator;
 
@@ -79,13 +73,11 @@ public class WorkspaceManager {
       WorkspaceRuntimes runtimes,
       EventService eventService,
       AccountManager accountManager,
-      WorkspaceValidator validator,
-      WorkspaceSharedPool sharedPool) {
+      WorkspaceValidator validator) {
     this.workspaceDao = workspaceDao;
     this.runtimes = runtimes;
     this.accountManager = accountManager;
     this.eventService = eventService;
-    this.sharedPool = sharedPool;
     this.validator = validator;
   }
 
@@ -273,7 +265,7 @@ public class WorkspaceManager {
     }
 
     workspaceDao.remove(workspaceId);
-    LOG.info("Workspace '{}' removed by user '{}'", workspaceId, sessionUserNameOr("undefined"));
+    LOG.info("Workspace '{}' removed by user '{}'", workspaceId, sessionUserNameOrUndefined());
   }
 
   /**
@@ -344,13 +336,24 @@ public class WorkspaceManager {
 
     requireNonNull(workspaceId, "Required non-null workspace id");
     final WorkspaceImpl workspace = normalizeState(workspaceDao.get(workspaceId), true);
-    checkWorkspaceIsRunningOrStarting(workspace, "stop");
-    stopAsync(workspace, options);
+    checkWorkspaceIsRunningOrStarting(workspace);
+    if (!workspace.isTemporary()) {
+      workspace.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
+      workspaceDao.update(workspace);
+    }
+
+    runtimes
+        .stopAsync(workspace, options)
+        .whenComplete(
+            (aVoid, throwable) -> {
+              if (workspace.isTemporary()) {
+                removeWorkspaceQuietly(workspace);
+              }
+            });
   }
 
   /** Asynchronously starts given workspace. */
-  private CompletableFuture<Void> startAsync(
-      WorkspaceImpl workspace, String envName, Map<String, String> options)
+  private void startAsync(WorkspaceImpl workspace, String envName, Map<String, String> options)
       throws ConflictException, NotFoundException, ServerException {
     if (envName != null && !workspace.getConfig().getEnvironments().containsKey(envName)) {
       throw new NotFoundException(
@@ -362,81 +365,23 @@ public class WorkspaceManager {
     workspaceDao.update(workspace);
     final String env = firstNonNull(envName, workspace.getConfig().getDefaultEnv());
 
-    return runtimes
+    runtimes
         .startAsync(workspace, env, firstNonNull(options, Collections.emptyMap()))
-        .thenRun(
-            () ->
-                LOG.info(
-                    "Workspace '{}:{}' with id '{}' started by user '{}'",
-                    workspace.getNamespace(),
-                    workspace.getConfig().getName(),
-                    workspace.getId(),
-                    sessionUserNameOr("undefined")))
         .exceptionally(
             ex -> {
               if (workspace.isTemporary()) {
                 removeWorkspaceQuietly(workspace);
               }
-              for (Throwable cause : getCausalChain(ex)) {
-                if (cause instanceof InfrastructureException
-                    && !(cause instanceof InternalInfrastructureException)) {
-
-                  // InfrastructureException is supposed to be an exception that can't be solved
-                  // by the admin, so should not be logged (but not InternalInfrastructureException).
-                  // It will prevent bothering the admin when user made a mistake in WS configuration.
-                  return null;
-                }
-              }
-              LOG.error(ex.getLocalizedMessage(), ex);
               return null;
             });
   }
 
-  private CompletableFuture<Void> stopAsync(WorkspaceImpl workspace, Map<String, String> options)
-      throws ConflictException, NotFoundException, ServerException {
-    if (!workspace.isTemporary()) {
-      workspace.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
-      workspaceDao.update(workspace);
-    }
-    String stoppedBy = sessionUserNameOr(workspace.getAttributes().get(WORKSPACE_STOPPED_BY));
-    LOG.info(
-        "Workspace '{}/{}' with id '{}' is being stopped by user '{}'",
-        workspace.getNamespace(),
-        workspace.getConfig().getName(),
-        workspace.getId(),
-        firstNonNull(stoppedBy, "undefined"));
-
-    return sharedPool.runAsync(
-        () -> {
-          try {
-            runtimes.stop(workspace.getId(), options);
-
-            LOG.info(
-                "Workspace '{}/{}' with id '{}' stopped by user '{}'",
-                workspace.getNamespace(),
-                workspace.getConfig().getName(),
-                workspace.getId(),
-                firstNonNull(stoppedBy, "undefined"));
-          } catch (Exception ex) {
-            LOG.error(ex.getLocalizedMessage(), ex);
-          } finally {
-            if (workspace.isTemporary()) {
-              removeWorkspaceQuietly(workspace);
-            }
-          }
-        });
-  }
-
-  private void checkWorkspaceIsRunningOrStarting(WorkspaceImpl workspace, String operation)
-      throws ConflictException {
+  private void checkWorkspaceIsRunningOrStarting(WorkspaceImpl workspace) throws ConflictException {
     if (workspace.getStatus() != RUNNING && workspace.getStatus() != STARTING) {
       throw new ConflictException(
           format(
-              "Could not %s the workspace '%s/%s' because its status is '%s'.",
-              operation,
-              workspace.getNamespace(),
-              workspace.getConfig().getName(),
-              workspace.getStatus()));
+              "Could not stop the workspace '%s/%s' because its status is '%s'.",
+              workspace.getNamespace(), workspace.getConfig().getName(), workspace.getStatus()));
     }
   }
 
@@ -448,12 +393,12 @@ public class WorkspaceManager {
     }
   }
 
-  private String sessionUserNameOr(String nameIfNoUser) {
+  private String sessionUserNameOrUndefined() {
     final Subject subject = EnvironmentContext.getCurrent().getSubject();
     if (!subject.isAnonymous()) {
       return subject.getUserName();
     }
-    return nameIfNoUser;
+    return "undefined";
   }
 
   private WorkspaceImpl normalizeState(WorkspaceImpl workspace, boolean includeRuntimes)
@@ -486,7 +431,7 @@ public class WorkspaceManager {
         account.getName(),
         workspace.getConfig().getName(),
         workspace.getId(),
-        sessionUserNameOr("undefined"));
+        sessionUserNameOrUndefined());
     eventService.publish(new WorkspaceCreatedEvent(workspace));
     return workspace;
   }
@@ -515,31 +460,4 @@ public class WorkspaceManager {
     }
     return workspaceDao.get(wsName, namespace);
   }
-
-  // FIXME: this code is from master version of runtimes, where
-  // WorkspaceRuntimes is responsible for statuses management.
-  //
-  //    /** Adds runtime data (whole or status only) and extra attributes to each of the given workspaces. */
-  //    private void injectRuntimeAndAttributes(List<WorkspaceImpl> workspaces, boolean statusOnly) throws SnapshotException {
-  //        if (statusOnly) {
-  //            for (WorkspaceImpl workspace : workspaces) {
-  //                workspace.setStatus(runtimes.getStatus(workspace.getId()));
-  //                addExtraAttributes(workspace);
-  //            }
-  //        } else {
-  //            for (WorkspaceImpl workspace : workspaces) {
-  //                runtimes.injectRuntime(workspace);
-  //                addExtraAttributes(workspace);
-  //            }
-  //        }
-  //    }
-  //
-  //    /** Adds attributes that are not originally stored in workspace but should be published. */
-  //    private void addExtraAttributes(WorkspaceImpl workspace) throws SnapshotException {
-  //        // snapshotted_at
-  //        List<SnapshotImpl> snapshots = snapshotDao.findSnapshots(workspace.getId());
-  //        if (!snapshots.isEmpty()) {
-  //            workspace.getAttributes().put(SNAPSHOTTED_AT_ATTRIBUTE_NAME, Long.toString(snapshots.get(0).getCreationDate()));
-  //        }
-  //    }
 }

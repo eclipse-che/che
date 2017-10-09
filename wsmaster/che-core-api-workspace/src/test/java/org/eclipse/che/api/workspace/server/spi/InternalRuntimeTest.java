@@ -225,7 +225,10 @@ public class InternalRuntimeTest {
     // given
     setRunningRuntime();
     doThrow(new InfrastructureException("")).when(internalRuntime).internalStop(any());
-    internalRuntime.stop(emptyMap());
+    try {
+      internalRuntime.stop(emptyMap());
+    } catch (InfrastructureException ignore) {
+    }
 
     // when
     internalRuntime.start(emptyMap());
