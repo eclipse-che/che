@@ -10,17 +10,36 @@
  */
 package org.eclipse.che.plugin.languageserver.ide.service;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedPublishDiagnosticsParams;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.plugin.languageserver.ide.editor.PublishDiagnosticsProcessor;
 
 /** Subscribes and receives JSON-RPC messages related to 'textDocument/publishDiagnostics' events */
 @Singleton
 public class PublishDiagnosticsReceiver {
+
+  @Inject
+  public PublishDiagnosticsReceiver(RequestTransmitter transmitter, EventBus eventBus) {
+    eventBus.addHandler(
+        WsAgentStateEvent.TYPE,
+        new WsAgentStateHandler() {
+          @Override
+          public void onWsAgentStarted(WsAgentStateEvent event) {
+            subscribe(transmitter);
+          }
+
+          @Override
+          public void onWsAgentStopped(WsAgentStateEvent event) {}
+        });
+  }
+
   @Inject
   private void configureReceiver(
       Provider<PublishDiagnosticsProcessor> provider, RequestHandlerConfigurator configurator) {
@@ -32,7 +51,6 @@ public class PublishDiagnosticsReceiver {
         .withConsumer(params -> provider.get().processDiagnostics(params));
   }
 
-  @Inject
   private void subscribe(RequestTransmitter transmitter) {
     transmitter
         .newRequest()
