@@ -20,7 +20,7 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestStacksConstants;
 import org.eclipse.che.selenium.core.constant.TestWorkspaceConstants;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
@@ -45,7 +45,7 @@ public class WorkspaceDetailsTest {
   private Map<String, Boolean> agents = new HashMap<>();
   private Map<String, String> variables = new HashMap<>();
 
-  @Inject private DefaultTestUser defaultTestUser;
+  @Inject private TestUser testUser;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Loader loader;
   @Inject private NavigationBar navigationBar;
@@ -66,7 +66,7 @@ public class WorkspaceDetailsTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    workspaceServiceClient.delete(WORKSPACE, defaultTestUser.getName());
+    workspaceServiceClient.delete(WORKSPACE, testUser.getName());
   }
 
   @Test
@@ -99,23 +99,26 @@ public class WorkspaceDetailsTest {
 
     //delete all variable from db machine, check they don't exist and save changes
     dashboardWorkspace.selectMachine("Environment variables", "db");
-    for (String variable : variables.keySet()) {
-      dashboardWorkspace.clickOnDeleteEnvVariableButton(variable);
-      dashboardWorkspace.clickOnDeleteDialogButton();
-      dashboardWorkspace.checkValueIsNotExists(variable, variables.get(variable));
-    }
+    variables.forEach(
+        (name, value) -> {
+          dashboardWorkspace.clickOnDeleteEnvVariableButton(name);
+          dashboardWorkspace.clickOnDeleteDialogButton();
+          dashboardWorkspace.checkValueIsNotExists(name, value);
+        });
+
     clickOnSaveButton();
 
     //restore variables to db machine, check they exist and save changes
-    for (String variable : variables.keySet()) {
-      loader.waitOnClosed();
-      dashboardWorkspace.clickOnAddEnvVariableButton();
-      dashboardWorkspace.checkAddNewEnvVarialbleDialogIsOpen();
-      dashboardWorkspace.addNewEnvironmentVariable(variable, variables.get(variable));
-      dashboardWorkspace.clickOnAddDialogButton();
-      Assert.assertTrue(dashboardWorkspace.checkEnvVariableExists(variable));
-      Assert.assertTrue(dashboardWorkspace.checkValueExists(variable, variables.get(variable)));
-    }
+    variables.forEach(
+        (name, value) -> {
+          loader.waitOnClosed();
+          dashboardWorkspace.clickOnAddEnvVariableButton();
+          dashboardWorkspace.checkAddNewEnvVarialbleDialogIsOpen();
+          dashboardWorkspace.addNewEnvironmentVariable(name, value);
+          dashboardWorkspace.clickOnAddDialogButton();
+          Assert.assertTrue(dashboardWorkspace.checkEnvVariableExists(name));
+          Assert.assertTrue(dashboardWorkspace.checkValueExists(name, value));
+        });
     clickOnSaveButton();
   }
 
@@ -125,25 +128,29 @@ public class WorkspaceDetailsTest {
 
     //check all needed agents in dev-machine exist
     dashboardWorkspace.selectMachine("Workspace Agents", "dev-machine");
-    for (String agent : agents.keySet()) {
-      dashboardWorkspace.checkAgentExists(agent);
-    }
+    agents.forEach(
+        (name, value) -> {
+          dashboardWorkspace.checkAgentExists(name);
+        });
 
     //switch all agents and save changes
-    for (String agent : agents.keySet()) {
-      Assert.assertEquals(dashboardWorkspace.getAgentState(agent), agents.get(agent));
-      dashboardWorkspace.switchAgentState(agent);
-    }
+    agents.forEach(
+        (name, value) -> {
+          Assert.assertEquals(dashboardWorkspace.getAgentState(name), value);
+          dashboardWorkspace.switchAgentState(name);
+        });
     clickOnSaveButton();
 
     //switch all agents, save changes and check its states are as previous(by default for the Java-MySql stack)
-    for (String agent : agents.keySet()) {
-      dashboardWorkspace.switchAgentState(agent);
-    }
+    agents.forEach(
+        (name, value) -> {
+          dashboardWorkspace.switchAgentState(name);
+        });
     clickOnSaveButton();
-    for (String agent : agents.keySet()) {
-      Assert.assertEquals(dashboardWorkspace.getAgentState(agent), agents.get(agent));
-    }
+    agents.forEach(
+        (name, value) -> {
+          Assert.assertEquals(dashboardWorkspace.getAgentState(name), value);
+        });
   }
 
   @Test
