@@ -13,8 +13,10 @@ package org.eclipse.che.api.project.server.impl;
 import static java.io.File.separator;
 import static java.util.Collections.emptyMap;
 import static java.util.Optional.empty;
+import static org.eclipse.che.api.fs.server.WsPathUtils.getName;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -34,7 +36,6 @@ import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.FsPaths;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
@@ -48,7 +49,6 @@ import org.eclipse.che.api.project.shared.NewProjectConfig;
 public class ExecutiveProjectManager implements ProjectManager {
 
   private final FsManager fsManager;
-  private final FsPaths fsPaths;
   private final ProjectQualifier projectQualifier;
   private final ProjectConfigRegistry projectConfigRegistry;
   private final ProjectHandlerRegistry projectHandlerRegistry;
@@ -57,13 +57,11 @@ public class ExecutiveProjectManager implements ProjectManager {
   @Inject
   public ExecutiveProjectManager(
       FsManager fsManager,
-      FsPaths fsPaths,
       ProjectConfigRegistry projectConfigRegistry,
       ProjectHandlerRegistry projectHandlerRegistry,
       ProjectQualifier projectQualifier,
       ProjectImportManager projectImportManager) {
     this.fsManager = fsManager;
-    this.fsPaths = fsPaths;
     this.projectConfigRegistry = projectConfigRegistry;
     this.projectHandlerRegistry = projectHandlerRegistry;
     this.projectQualifier = projectQualifier;
@@ -126,7 +124,7 @@ public class ExecutiveProjectManager implements ProjectManager {
       projects.add(registeredProject);
     }
 
-    return projects;
+    return Collections.unmodifiableSet(projects);
   }
 
   @Override
@@ -149,7 +147,7 @@ public class ExecutiveProjectManager implements ProjectManager {
 
       generator.onCreateProject(wsPath, valueMap, options == null ? new HashMap<>() : options);
     } else {
-      fsManager.createDirectory(wsPath);
+      fsManager.createDir(wsPath);
     }
 
     RegisteredProject project = projectConfigRegistry.put(projectConfig, true, false);
@@ -169,7 +167,7 @@ public class ExecutiveProjectManager implements ProjectManager {
       projects.add(registeredProject);
     }
 
-    return projects;
+    return Collections.unmodifiableSet(projects);
   }
 
   @Override
@@ -191,13 +189,13 @@ public class ExecutiveProjectManager implements ProjectManager {
       delete(wsPath).ifPresent(projects::add);
     }
 
-    return projects;
+    return Collections.unmodifiableSet(projects);
   }
 
   @Override
   public Optional<RegisteredProject> delete(String wsPath)
       throws ServerException, ForbiddenException, NotFoundException, ConflictException {
-    fsManager.deleteDirectory(wsPath);
+    fsManager.delete(wsPath);
 
     return projectConfigRegistry.remove(wsPath);
   }
@@ -214,13 +212,13 @@ public class ExecutiveProjectManager implements ProjectManager {
         throw new ServerException(e);
       }
     }
-    return deleted;
+    return Collections.unmodifiableSet(deleted);
   }
 
   @Override
   public RegisteredProject copy(String srcWsPath, String dstWsPath, boolean overwrite)
       throws ServerException, NotFoundException, ConflictException, ForbiddenException {
-    fsManager.copyDirectory(srcWsPath, dstWsPath);
+    fsManager.copy(srcWsPath, dstWsPath);
 
     RegisteredProject oldProjectConfig =
         projectConfigRegistry.get(srcWsPath).orElseThrow(IllegalStateException::new);
@@ -330,12 +328,12 @@ public class ExecutiveProjectManager implements ProjectManager {
   @Override
   public RegisteredProject move(String srcWsPath, String dstWsPath, boolean overwrite)
       throws ServerException, NotFoundException, ConflictException, ForbiddenException {
-    fsManager.moveDirectory(srcWsPath, dstWsPath);
+    fsManager.move(srcWsPath, dstWsPath);
 
     RegisteredProject oldProjectConfig =
         projectConfigRegistry.remove(srcWsPath).orElseThrow(IllegalStateException::new);
 
-    String dstName = fsPaths.getName(dstWsPath);
+    String dstName = getName(dstWsPath);
     NewProjectConfig newProjectConfig =
         new NewProjectConfigImpl(
             dstWsPath,

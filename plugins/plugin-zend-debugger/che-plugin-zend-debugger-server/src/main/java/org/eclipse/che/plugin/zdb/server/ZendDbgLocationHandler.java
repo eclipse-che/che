@@ -9,12 +9,15 @@
  */
 package org.eclipse.che.plugin.zdb.server;
 
+import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
+import static org.eclipse.che.api.fs.server.WsPathUtils.getName;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.FsPaths;
+import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.project.server.ProjectManager;
 
 /**
@@ -27,14 +30,14 @@ import org.eclipse.che.api.project.server.ProjectManager;
 @Singleton
 public class ZendDbgLocationHandler {
 
-  private final FsPaths fsPaths;
+  private final PathTransformer pathTransformer;
   private final FsManager fsManager;
   private final ProjectManager projectManager;
 
   @Inject
   public ZendDbgLocationHandler(
-      FsPaths fsPaths, FsManager fsManager, ProjectManager projectManager) {
-    this.fsPaths = fsPaths;
+      PathTransformer pathTransformer, FsManager fsManager, ProjectManager projectManager) {
+    this.pathTransformer = pathTransformer;
     this.fsManager = fsManager;
     this.projectManager = projectManager;
   }
@@ -55,7 +58,7 @@ public class ZendDbgLocationHandler {
    */
   public Location convertToVFS(Location dbgLocation) {
     String remotePath = dbgLocation.getResourceProjectPath();
-    String wsPath = fsPaths.absolutize(remotePath);
+    String wsPath = absolutize(remotePath);
     if (!fsManager.exists(wsPath)) {
       return null;
     }
@@ -65,7 +68,7 @@ public class ZendDbgLocationHandler {
             .getClosest(wsPath)
             .orElseThrow(() -> new IllegalArgumentException("Can't find project"))
             .getPath();
-    String target = fsPaths.getName(wsPath);
+    String target = getName(wsPath);
     int lineNumber = dbgLocation.getLineNumber();
     return new LocationImpl(
         target,

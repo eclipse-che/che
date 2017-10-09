@@ -112,7 +112,7 @@ public class GitCheckoutDetector {
   private Consumer<String> fsEventConsumer() {
     return it -> {
       try {
-        String content = fsManager.readFileAsString(it);
+        String content = fsManager.readAsString(it);
         Type type = content.contains("ref:") ? BRANCH : REVISION;
         String name = type == REVISION ? content : PATTERN.split(content)[1];
 

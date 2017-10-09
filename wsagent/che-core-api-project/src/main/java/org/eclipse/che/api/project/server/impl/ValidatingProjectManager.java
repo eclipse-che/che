@@ -11,6 +11,8 @@
 package org.eclipse.che.api.project.server.impl;
 
 import static java.io.File.separator;
+import static org.eclipse.che.api.fs.server.WsPathUtils.getParentWsPath;
+import static org.eclipse.che.api.fs.server.WsPathUtils.isRoot;
 
 import java.util.List;
 import java.util.Map;
@@ -28,7 +30,6 @@ import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.FsPaths;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
 import org.eclipse.che.api.project.shared.NewProjectConfig;
@@ -39,18 +40,15 @@ public class ValidatingProjectManager implements ProjectManager {
   private final SynchronizingProjectManager synchronizingProjectManager;
   private final FsManager fsManager;
   private final ProjectConfigRegistry projectConfigRegistry;
-  private final FsPaths fsPaths;
 
   @Inject
   public ValidatingProjectManager(
       SynchronizingProjectManager synchronizingProjectManager,
       FsManager fsManager,
-      ProjectConfigRegistry projectConfigRegistry,
-      FsPaths fsPaths) {
+      ProjectConfigRegistry projectConfigRegistry) {
     this.fsManager = fsManager;
     this.synchronizingProjectManager = synchronizingProjectManager;
     this.projectConfigRegistry = projectConfigRegistry;
-    this.fsPaths = fsPaths;
   }
 
   @Override
@@ -98,8 +96,8 @@ public class ValidatingProjectManager implements ProjectManager {
         throw new BadRequestException("Path is not defined.");
       }
 
-      String parentWsPath = fsPaths.getParentWsPath(wsPath);
-      if (!fsManager.isRoot(parentWsPath) || !fsManager.existsAsDirectory(parentWsPath)) {
+      String parentWsPath = getParentWsPath(wsPath);
+      if (!isRoot(parentWsPath) || !fsManager.existsAsDir(parentWsPath)) {
         throw new NotFoundException("Parent does not exist: " + parentWsPath);
       }
 
@@ -125,8 +123,8 @@ public class ValidatingProjectManager implements ProjectManager {
       throw new BadRequestException("Path is not defined.");
     }
 
-    String parentWsPath = fsPaths.getParentWsPath(wsPath);
-    if (!fsManager.isRoot(parentWsPath) || !fsManager.existsAsDirectory(parentWsPath)) {
+    String parentWsPath = getParentWsPath(wsPath);
+    if (!isRoot(parentWsPath) || !fsManager.existsAsDir(parentWsPath)) {
       throw new NotFoundException("Parent does not exist: " + parentWsPath);
     }
 
@@ -153,7 +151,7 @@ public class ValidatingProjectManager implements ProjectManager {
         throw new BadRequestException("Project workspace path is not defined");
       }
 
-      if (!fsManager.existsAsDirectory(wsPath)) {
+      if (!fsManager.existsAsDir(wsPath)) {
         throw new NotFoundException("Directory does not exist: " + wsPath);
       }
     }
@@ -169,7 +167,7 @@ public class ValidatingProjectManager implements ProjectManager {
       throw new BadRequestException("Project workspace path is not defined");
     }
 
-    if (!fsManager.existsAsDirectory(wsPath)) {
+    if (!fsManager.existsAsDir(wsPath)) {
       throw new NotFoundException("Directory does not exist: " + wsPath);
     }
 
@@ -198,12 +196,12 @@ public class ValidatingProjectManager implements ProjectManager {
   public RegisteredProject copy(String srcWsPath, String dstWsPath, boolean overwrite)
       throws ServerException, NotFoundException, ConflictException, ForbiddenException {
 
-    if (!fsManager.existsAsDirectory(srcWsPath)) {
+    if (!fsManager.existsAsDir(srcWsPath)) {
       throw new NotFoundException("Project directory does not exist or is a file: " + srcWsPath);
     }
 
     String parentWsPath = dstWsPath.substring(0, dstWsPath.lastIndexOf(separator));
-    if (!fsManager.existsAsDirectory(parentWsPath)) {
+    if (!fsManager.existsAsDir(parentWsPath)) {
       throw new NotFoundException(
           "Destination parent does not exist or is a file: " + parentWsPath);
     }
@@ -226,17 +224,17 @@ public class ValidatingProjectManager implements ProjectManager {
       throw new NotFoundException("Project is not registered: " + srcWsPath);
     }
 
-    if (!fsManager.existsAsDirectory(srcWsPath)) {
+    if (!fsManager.existsAsDir(srcWsPath)) {
       throw new NotFoundException("Project directory does not exist or is a file: " + srcWsPath);
     }
 
-    String dstParentWsPath = fsPaths.getParentWsPath(dstWsPath);
-    if (!fsManager.existsAsDirectory(dstParentWsPath)) {
+    String dstParentWsPath = getParentWsPath(dstWsPath);
+    if (!fsManager.existsAsDir(dstParentWsPath)) {
       throw new NotFoundException(
           "Destination parent directory does not exist or is a file: " + dstParentWsPath);
     }
 
-    if (!overwrite && fsManager.existsAsDirectory(dstWsPath)) {
+    if (!overwrite && fsManager.existsAsDir(dstWsPath)) {
       throw new ConflictException("Destination item exists but overwrite is false: " + dstWsPath);
     }
 

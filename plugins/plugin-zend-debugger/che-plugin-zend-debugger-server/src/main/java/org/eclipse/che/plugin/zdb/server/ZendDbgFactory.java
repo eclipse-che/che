@@ -86,8 +86,6 @@ public class ZendDbgFactory implements DebuggerFactory {
         new ZendDbgSettings(debugPort, clientHostIPProp, breakAtFirstLine, useSslEncryption),
         new ZendDbgLocationHandler(null, null, null),
         debuggerCallback,
-        null,
-        null,
         null);
   }
 }

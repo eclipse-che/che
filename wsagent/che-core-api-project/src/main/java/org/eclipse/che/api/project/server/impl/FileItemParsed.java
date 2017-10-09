@@ -8,10 +8,15 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.fs.server.impl;
+package org.eclipse.che.api.project.server.impl;
 
-@FunctionalInterface
-interface FunctionWithException<T, R, E extends Throwable> {
+import java.io.InputStream;
 
-  R apply(T t) throws E;
+public interface FileItemParsed {
+
+  String getName();
+
+  InputStream getContent();
+
+  boolean getOverwrite();
 }

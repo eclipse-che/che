@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.plugin.java.plain.server.rest;
 
+import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
 import static org.eclipse.core.runtime.Path.fromOSString;
 import static org.eclipse.jdt.core.JavaCore.newContainerEntry;
 import static org.eclipse.jdt.core.JavaCore.newLibraryEntry;
@@ -31,7 +32,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.fs.server.FsPaths;
+import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.impl.NewProjectConfigImpl;
 import org.eclipse.che.api.project.server.impl.RegisteredProject;
@@ -56,12 +57,12 @@ public class ClasspathUpdaterService {
   private static final JavaModel model = JavaModelManager.getJavaModelManager().getJavaModel();
 
   private final ProjectManager projectManager;
-  private final FsPaths fsPaths;
+  private final PathTransformer pathTransformer;
 
   @Inject
-  public ClasspathUpdaterService(ProjectManager projectManager, FsPaths fsPaths) {
+  public ClasspathUpdaterService(ProjectManager projectManager, PathTransformer pathTransformer) {
     this.projectManager = projectManager;
-    this.fsPaths = fsPaths;
+    this.pathTransformer = pathTransformer;
   }
 
   /**
@@ -92,7 +93,7 @@ public class ClasspathUpdaterService {
   private void updateProjectConfig(String projectWsPath)
       throws IOException, ForbiddenException, ConflictException, NotFoundException, ServerException,
           BadRequestException {
-    String wsPath = fsPaths.absolutize(projectWsPath);
+    String wsPath = absolutize(projectWsPath);
     RegisteredProject project =
         projectManager
             .get(wsPath)

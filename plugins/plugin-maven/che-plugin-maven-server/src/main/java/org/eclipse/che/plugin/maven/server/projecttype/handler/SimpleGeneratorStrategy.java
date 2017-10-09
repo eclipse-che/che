@@ -82,7 +82,7 @@ public class SimpleGeneratorStrategy implements GeneratorStrategy {
     model.setModelVersion("4.0.0");
 
     String pomXml;
-    fsManager.createDirectory(projectPath);
+    fsManager.createDir(projectPath);
 
     pomXml = projectPath + separator + "pom.xml";
 
@@ -113,7 +113,7 @@ public class SimpleGeneratorStrategy implements GeneratorStrategy {
     if (sourceFolders != null) {
       String sourceFolder = sourceFolders.getString();
       String sourceFolderPath = projectPath + separator + sourceFolder;
-      fsManager.createDirectory(sourceFolderPath);
+      fsManager.createDir(sourceFolderPath);
       if (!DEFAULT_SOURCE_FOLDER.equals(sourceFolder)) {
         model.setBuild(new Build().setSourceDirectory(sourceFolder));
       }
@@ -122,7 +122,7 @@ public class SimpleGeneratorStrategy implements GeneratorStrategy {
     if (testSourceFolders != null) {
       String testSourceFolder = testSourceFolders.getString();
       String testSourceFolderPath = projectPath + separator + testSourceFolder;
-      fsManager.createDirectory(testSourceFolderPath);
+      fsManager.createDir(testSourceFolderPath);
 
       if (!DEFAULT_TEST_SOURCE_FOLDER.equals(testSourceFolder)) {
         Build build = model.getBuild();

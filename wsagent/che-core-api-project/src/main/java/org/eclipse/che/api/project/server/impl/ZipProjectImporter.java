@@ -92,7 +92,7 @@ public class ZipProjectImporter implements ProjectImporter {
         skipFirstLevel = Boolean.parseBoolean(parameters.get("skipFirstLevel"));
       }
 
-      fsManager.unzipDirectory(dst, zip, skipFirstLevel);
+      fsManager.unzip(dst, zip, skipFirstLevel);
     }
   }
 

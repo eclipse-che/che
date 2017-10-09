@@ -8,10 +8,11 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.fs.server.impl;
+package org.eclipse.che.api.project.server.impl;
 
-@FunctionalInterface
-interface SupplierWithException<T, E extends Throwable> {
+import org.eclipse.che.api.core.rest.ServiceContext;
 
-  T get() throws E;
+public interface ProjectServiceApiFactory {
+
+  ProjectServiceApi create(ServiceContext serviceContext);
 }

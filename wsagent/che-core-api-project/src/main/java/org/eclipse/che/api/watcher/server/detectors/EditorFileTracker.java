@@ -31,7 +31,6 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
@@ -56,6 +55,7 @@ import org.slf4j.Logger;
  */
 @Singleton
 public class EditorFileTracker {
+
   private static final Logger LOG = getLogger(EditorFileTracker.class);
 
   private static final String OUTGOING_METHOD = "event:file-state-changed";
@@ -66,9 +66,9 @@ public class EditorFileTracker {
   private final RequestTransmitter transmitter;
   private final FileWatcherManager fileWatcherManager;
   private final FsManager fsManager;
-  private File root;
   private final EventService eventService;
   private final EventSubscriber<FileTrackingOperationEvent> fileOperationEventSubscriber;
+  private File root;
 
   @Inject
   public EditorFileTracker(
@@ -230,7 +230,7 @@ public class EditorFileTracker {
       return file == null
           ? Hashing.md5().hashString("", defaultCharset()).toString()
           : hash(file, Hashing.md5()).toString();
-    } catch (IOException | NotFoundException e) {
+    } catch (IOException e) {
       LOG.error("Error trying to read {} file and broadcast it", wsPath, e);
     }
     return null;

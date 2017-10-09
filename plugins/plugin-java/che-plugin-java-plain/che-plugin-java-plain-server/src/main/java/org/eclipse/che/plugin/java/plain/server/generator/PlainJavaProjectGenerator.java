@@ -11,6 +11,7 @@
 package org.eclipse.che.plugin.java.plain.server.generator;
 
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.api.fs.server.WsPathUtils.resolve;
 import static org.eclipse.che.ide.ext.java.shared.Constants.JAVAC;
 import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
 import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.DEFAULT_LIBRARY_FOLDER_VALUE;
@@ -25,7 +26,6 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.FsPaths;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.plugin.java.plain.server.projecttype.ClasspathBuilder;
@@ -44,14 +44,11 @@ public class PlainJavaProjectGenerator implements CreateProjectHandler {
   private static final String FILE_NAME = "Main.java";
 
   private final ClasspathBuilder classpathBuilder;
-  private final FsPaths fsPaths;
   private final FsManager fsManager;
 
   @Inject
-  protected PlainJavaProjectGenerator(
-      ClasspathBuilder classpathBuilder, FsPaths fsPaths, FsManager fsManager) {
+  protected PlainJavaProjectGenerator(ClasspathBuilder classpathBuilder, FsManager fsManager) {
     this.classpathBuilder = classpathBuilder;
-    this.fsPaths = fsPaths;
     this.fsManager = fsManager;
   }
 
@@ -67,15 +64,15 @@ public class PlainJavaProjectGenerator implements CreateProjectHandler {
       sourceFolders = singletonList(DEFAULT_SOURCE_FOLDER_VALUE);
     }
 
-    fsManager.createDirectory(projectWsPath);
+    fsManager.createDir(projectWsPath);
 
-    String outputDirWsPath = fsPaths.resolve(projectWsPath, DEFAULT_OUTPUT_FOLDER_VALUE);
-    fsManager.createDirectory(outputDirWsPath);
+    String outputDirWsPath = resolve(projectWsPath, DEFAULT_OUTPUT_FOLDER_VALUE);
+    fsManager.createDir(outputDirWsPath);
 
-    String sourceDirWsPath = fsPaths.resolve(projectWsPath, sourceFolders.get(0));
-    fsManager.createDirectory(sourceDirWsPath);
+    String sourceDirWsPath = resolve(projectWsPath, sourceFolders.get(0));
+    fsManager.createDir(sourceDirWsPath);
 
-    String mainJavaWsPath = fsPaths.resolve(sourceDirWsPath, FILE_NAME);
+    String mainJavaWsPath = resolve(sourceDirWsPath, FILE_NAME);
     fsManager.createFile(
         mainJavaWsPath,
         getClass().getClassLoader().getResourceAsStream("files/main_class_content"));

@@ -10,6 +10,10 @@
  */
 package org.eclipse.che.core.internal.resources;
 
+import static org.eclipse.che.api.fs.server.WsPathUtils.ROOT;
+import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
+import static org.eclipse.che.api.fs.server.WsPathUtils.resolve;
+
 import com.google.inject.Provider;
 import java.io.InputStream;
 import java.net.URI;
@@ -24,7 +28,7 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.FsPaths;
+import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
@@ -83,7 +87,7 @@ public class Workspace implements IWorkspace {
   private static final Logger LOG = LoggerFactory.getLogger(Workspace.class);
   protected final IWorkspaceRoot defaultRoot = new WorkspaceRoot(Path.ROOT, this);
   private final Provider<ProjectManager> projectManager;
-  private final Provider<FsPaths> pathResolverProvider;
+  private final Provider<PathTransformer> pathTransformerProvider;
   private final Provider<FsManager> fsManagerProvider;
   /**
    * Work manager should never be accessed directly because accessor asserts that workspace is still
@@ -105,11 +109,11 @@ public class Workspace implements IWorkspace {
   public Workspace(
       String path,
       Provider<ProjectManager> projectManager,
-      Provider<FsPaths> pathResolverProvider,
+      Provider<PathTransformer> pathTransformerProvider,
       Provider<FsManager> fsManagerProvider) {
     this.wsPath = path;
     this.projectManager = projectManager;
-    this.pathResolverProvider = pathResolverProvider;
+    this.pathTransformerProvider = pathTransformerProvider;
     this.fsManagerProvider = fsManagerProvider;
     _workManager = new WorkManager(this);
     _workManager.startup(null);
@@ -137,9 +141,7 @@ public class Workspace implements IWorkspace {
   }
 
   public String getAbsoluteWorkspacePath() {
-    String rootWsPath = pathResolverProvider.get().ROOT;
-    java.nio.file.Path rootFsPath = pathResolverProvider.get().toFsPath(rootWsPath);
-    return rootFsPath.toString();
+    return pathTransformerProvider.get().transform(ROOT).toString();
   }
 
   public Resource newResource(IPath path, int type) {
@@ -768,7 +770,7 @@ public class Workspace implements IWorkspace {
   }
 
   public ResourceInfo getResourceInfo(IPath path) {
-    String wsPath = pathResolverProvider.get().absolutize(path.toOSString());
+    String wsPath = absolutize(path.toOSString());
     return fsManagerProvider.get().exists(wsPath) ? newElement(getType(wsPath)) : null;
   }
 
@@ -805,8 +807,8 @@ public class Workspace implements IWorkspace {
 
   public IResource[] getChildren(IPath path) {
 
-    String parentWsPath = pathResolverProvider.get().absolutize(path.toOSString());
-    if (fsManagerProvider.get().existsAsDirectory(parentWsPath)) {
+    String parentWsPath = absolutize(path.toOSString());
+    if (fsManagerProvider.get().existsAsDir(parentWsPath)) {
       List<String> allChildrenWsPaths =
           new ArrayList<>(fsManagerProvider.get().getAllChildrenWsPaths(parentWsPath));
       if (!allChildrenWsPaths.isEmpty()) {
@@ -832,19 +834,18 @@ public class Workspace implements IWorkspace {
       switch (resource.getType()) {
         case IResource.FILE:
           String newName = path.lastSegment();
-          String childWsPath =
-              pathResolverProvider.get().absolutize(path.removeLastSegments(1).toOSString());
+          String childWsPath = absolutize(path.removeLastSegments(1).toOSString());
 
           if (!fsManagerProvider.get().exists(childWsPath)) {
             throw new NotFoundException(
                 "Can't find parent folder: " + path.removeLastSegments(1).toOSString());
           }
-          String newFileWsPath = pathResolverProvider.get().resolve(childWsPath, newName);
+          String newFileWsPath = resolve(childWsPath, newName);
           fsManagerProvider.get().createFile(newFileWsPath);
           break;
         case IResource.FOLDER:
-          String directoryWsPath = pathResolverProvider.get().absolutize(path.toOSString());
-          fsManagerProvider.get().createDirectory(directoryWsPath);
+          String directoryWsPath = absolutize(path.toOSString());
+          fsManagerProvider.get().createDir(directoryWsPath);
           break;
         case IResource.PROJECT:
           ProjectConfigImpl projectConfig = new ProjectConfigImpl();
@@ -867,9 +868,9 @@ public class Workspace implements IWorkspace {
 
   public void setFileContent(File file, InputStream content) {
     try {
-      String fileWsPath = pathResolverProvider.get().absolutize(file.getFullPath().toOSString());
+      String fileWsPath = absolutize(file.getFullPath().toOSString());
       if (fsManagerProvider.get().existsAsFile(fileWsPath)) {
-        fsManagerProvider.get().updateFile(fileWsPath, content);
+        fsManagerProvider.get().update(fileWsPath, content);
       }
     } catch (ServerException | NotFoundException | ConflictException e) {
       ResourcesPlugin.log(e);
@@ -900,11 +901,11 @@ public class Workspace implements IWorkspace {
       File file, InputStream content, int updateFlags, boolean append, IProgressMonitor monitor)
       throws CoreException {
     try {
-      String fileWsPath = pathResolverProvider.get().absolutize(file.getFullPath().toOSString());
+      String fileWsPath = absolutize(file.getFullPath().toOSString());
       if (!fsManagerProvider.get().existsAsFile(fileWsPath)) {
         fsManagerProvider.get().createFile(fileWsPath, content);
       } else {
-        fsManagerProvider.get().updateFile(fileWsPath, content);
+        fsManagerProvider.get().update(fileWsPath, content);
       }
     } catch (ConflictException | ServerException | NotFoundException e) {
       throw new CoreException(new Status(0, "", e.getMessage(), e));
@@ -914,28 +915,31 @@ public class Workspace implements IWorkspace {
   public void standardMoveFile(
       IFile file, IFile destination, int updateFlags, IProgressMonitor monitor)
       throws CoreException {
-    String srcWsPath = pathResolverProvider.get().absolutize(file.getFullPath().toOSString());
+    String srcWsPath = absolutize(file.getFullPath().toOSString());
     String dstDirectoryWsPath =
-        pathResolverProvider
-            .get()
-            .absolutize(destination.getFullPath().removeLastSegments(1).toOSString());
-    String dstWsPath =
-        pathResolverProvider.get().resolve(dstDirectoryWsPath, destination.getName());
+        absolutize(destination.getFullPath().removeLastSegments(1).toOSString());
+    String dstWsPath = resolve(dstDirectoryWsPath, destination.getName());
 
-    fsManagerProvider.get().moveFileQuietly(srcWsPath, dstWsPath);
+    try {
+      fsManagerProvider.get().move(srcWsPath, dstWsPath);
+    } catch (NotFoundException | ConflictException | ServerException e) {
+      throw new CoreException(new Status(0, "", e.getMessage(), e));
+    }
   }
 
   public void standardMoveFolder(
       IFolder folder, IFolder destination, int updateFlags, IProgressMonitor monitor)
       throws CoreException {
-    String srcWsPath = pathResolverProvider.get().absolutize(folder.getFullPath().toOSString());
+    String srcWsPath = absolutize(folder.getFullPath().toOSString());
     String dstParentWsPath =
-        pathResolverProvider
-            .get()
-            .absolutize(destination.getFullPath().removeLastSegments(1).toOSString());
-    String dstWsPath = pathResolverProvider.get().resolve(dstParentWsPath, destination.getName());
+        absolutize(destination.getFullPath().removeLastSegments(1).toOSString());
+    String dstWsPath = resolve(dstParentWsPath, destination.getName());
 
-    fsManagerProvider.get().moveDirectoryQuietly(srcWsPath, dstWsPath);
+    try {
+      fsManagerProvider.get().move(srcWsPath, dstWsPath);
+    } catch (NotFoundException | ConflictException | ServerException e) {
+      throw new CoreException(new Status(0, "", e.getMessage(), e));
+    }
   }
 
   public void standardMoveProject(

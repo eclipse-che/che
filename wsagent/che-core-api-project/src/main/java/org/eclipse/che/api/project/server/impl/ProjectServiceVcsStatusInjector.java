@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.api.project.server.impl;
 
+import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +22,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.fs.server.FsPaths;
+import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.VcsStatusProvider;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
@@ -35,15 +37,17 @@ import org.eclipse.che.api.project.shared.dto.TreeElement;
 public class ProjectServiceVcsStatusInjector {
 
   private final ProjectManager projectManager;
-  private final FsPaths fsPaths;
+  private final PathTransformer pathTransformer;
   private final Set<VcsStatusProvider> vcsStatusProviders;
 
   @Inject
   public ProjectServiceVcsStatusInjector(
-      ProjectManager projectManager, Set<VcsStatusProvider> vcsStatusProviders, FsPaths fsPaths) {
+      ProjectManager projectManager,
+      Set<VcsStatusProvider> vcsStatusProviders,
+      PathTransformer pathTransformer) {
     this.projectManager = projectManager;
     this.vcsStatusProviders = vcsStatusProviders;
-    this.fsPaths = fsPaths;
+    this.pathTransformer = pathTransformer;
   }
 
   /**
@@ -118,7 +122,7 @@ public class ProjectServiceVcsStatusInjector {
             .findAny();
     if (treeElementOptional.isPresent()) {
       String project = normalizeProjectPath(treeElementOptional.get().getNode().getProject());
-      String projectWsPath = fsPaths.absolutize(project);
+      String projectWsPath = absolutize(project);
       Optional<VcsStatusProvider> vcsStatusProviderOptional = getVcsStatusProvider(projectWsPath);
       if (vcsStatusProviderOptional.isPresent()) {
         List<String> treeElementFiles =

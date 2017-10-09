@@ -47,7 +47,7 @@ public class SimpleProjectQualifier implements ProjectQualifier {
       throw new NotFoundException("Project type required");
     }
 
-    if (!fsManager.existsAsDirectory(wsPath)) {
+    if (!fsManager.existsAsDir(wsPath)) {
       throw new NotFoundException("Item is not a directory or does not exist " + wsPath);
     }
 

@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.api.languageserver.service;
 
+import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
 import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.prefixURI;
 import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.removePrefixUri;
 import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.truish;
@@ -31,7 +32,6 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.FsPaths;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.registry.InitializedLanguageServer;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
@@ -43,7 +43,6 @@ import org.eclipse.che.api.languageserver.shared.model.FileEditParams;
 import org.eclipse.che.api.languageserver.shared.util.CharStreamEditor;
 import org.eclipse.che.api.languageserver.util.LSOperation;
 import org.eclipse.che.api.languageserver.util.OperationUtil;
-import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.TextEdit;
 import org.slf4j.Logger;
@@ -61,23 +60,17 @@ public class WorkspaceService {
 
   private static final Logger LOG = LoggerFactory.getLogger(WorkspaceService.class);
   private final FsManager fsManager;
-  private final FsPaths fsPaths;
   private LanguageServerRegistry registry;
-  private ProjectManager projectManager;
   private RequestHandlerConfigurator requestHandler;
 
   @Inject
   public WorkspaceService(
       LanguageServerRegistry registry,
-      ProjectManager projectManager,
       RequestHandlerConfigurator requestHandler,
-      FsManager fsManager,
-      FsPaths fsPaths) {
+      FsManager fsManager) {
     this.registry = registry;
-    this.projectManager = projectManager;
     this.requestHandler = requestHandler;
     this.fsManager = fsManager;
-    this.fsPaths = fsPaths;
   }
 
   @PostConstruct
@@ -106,12 +99,12 @@ public class WorkspaceService {
   private List<TextEditDto> editFile(FileEditParams params) {
     try {
       String path = LanguageServiceUtils.removePrefixUri(params.getUri());
-      String wsPath = fsPaths.absolutize(path);
+      String wsPath = absolutize(path);
 
       if (fsManager.existsAsFile(wsPath)) {
         List<TextEdit> undo = new ArrayList<>();
 
-        fsManager.updateFile(
+        fsManager.update(
             wsPath,
             (in, out) -> {
               OutputStreamWriter w = new OutputStreamWriter(out);

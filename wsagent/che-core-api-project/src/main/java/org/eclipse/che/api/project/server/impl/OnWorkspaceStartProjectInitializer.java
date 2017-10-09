@@ -10,12 +10,11 @@
  */
 package org.eclipse.che.api.project.server.impl;
 
-import static org.eclipse.che.api.fs.server.FsPaths.ROOT;
+import static org.eclipse.che.api.fs.server.WsPathUtils.ROOT;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -62,8 +61,7 @@ public class OnWorkspaceStartProjectInitializer {
   }
 
   private void initializeNotRegisteredProjects() throws ServerException {
-    Set<String> wsPaths = fsManager.getDirectoryWsPaths(ROOT);
-    for (String wsPath : wsPaths) {
+    for (String wsPath : fsManager.getDirWsPaths(ROOT)) {
       if (!projectConfigRegistry.isRegistered(wsPath)) {
         projectConfigRegistry.put(wsPath, true, true);
       }

@@ -160,7 +160,7 @@ public class EditorWorkingCopyManager {
               String projectPath = workingCopy.getProjectPath();
               String workingCopyPath = projectPath + separator + toWorkingCopyPath(path);
               if (fsManager.existsAsFile(workingCopyPath)) {
-                fsManager.deleteFile(workingCopyPath);
+                fsManager.delete(workingCopyPath);
               }
             }
             workingCopiesStorage.remove(path);
@@ -184,7 +184,7 @@ public class EditorWorkingCopyManager {
             String projectPath = workingCopy.getProjectPath();
             String workingCopyPath = projectPath + separator + toWorkingCopyPath(oldPath);
             if (fsManager.existsAsFile(workingCopyPath)) {
-              fsManager.deleteFile(workingCopyPath);
+              fsManager.delete(workingCopyPath);
             }
             break;
           }
@@ -231,7 +231,7 @@ public class EditorWorkingCopyManager {
 
       String originalFileContent;
       if (fsManager.existsAsFile(originalFilePath)) {
-        InputStream inputStream = fsManager.readFileAsInputStream(originalFilePath);
+        InputStream inputStream = fsManager.read(originalFilePath);
         originalFileContent = IOUtils.toString(inputStream);
       } else {
         return false;
@@ -258,7 +258,7 @@ public class EditorWorkingCopyManager {
       throws NotFoundException, ServerException, ConflictException, ForbiddenException,
           IOException {
 
-    InputStream fileContentAsStream = fsManager.readFileAsInputStream(filePath);
+    InputStream fileContentAsStream = fsManager.read(filePath);
     byte[] fileContentAsBytes = IOUtils.toByteArray(fileContentAsStream);
 
     String projectPath =
@@ -288,9 +288,9 @@ public class EditorWorkingCopyManager {
       String projectPath = workingCopy.getProjectPath();
       String workingCopyStoragePath = projectPath + WORKING_COPIES_DIR;
 
-      if (fsManager.existsAsDirectory(projectPath)) {
-        if (!fsManager.existsAsDirectory(workingCopyStoragePath)) {
-          fsManager.createDirectory(workingCopyStoragePath);
+      if (fsManager.existsAsDir(projectPath)) {
+        if (!fsManager.existsAsDir(workingCopyStoragePath)) {
+          fsManager.createDir(workingCopyStoragePath);
         }
       } else {
         throw new ServerException("No project directory exists " + projectPath);
@@ -299,7 +299,7 @@ public class EditorWorkingCopyManager {
       if (fsManager.existsAsFile(originalFilePath)) {
         String workingCopyFilePath =
             workingCopyStoragePath + separator + toWorkingCopyPath(originalFilePath);
-        fsManager.updateFile(workingCopyFilePath, new ByteArrayInputStream(content));
+        fsManager.update(workingCopyFilePath, new ByteArrayInputStream(content));
       } else {
         fsManager.createFile(workingCopy.getPath(), new ByteArrayInputStream(content));
       }

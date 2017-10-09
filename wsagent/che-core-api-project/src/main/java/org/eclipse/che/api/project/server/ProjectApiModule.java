@@ -22,6 +22,8 @@ import org.eclipse.che.api.project.server.impl.OnWorkspaceStartProjectInitialize
 import org.eclipse.che.api.project.server.impl.ProjectConfigRegistry;
 import org.eclipse.che.api.project.server.impl.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.impl.ProjectImporterRegistry;
+import org.eclipse.che.api.project.server.impl.ProjectServiceApi;
+import org.eclipse.che.api.project.server.impl.ProjectServiceApiFactory;
 import org.eclipse.che.api.project.server.impl.ProjectSynchronizer;
 import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.api.project.server.impl.RegisteredProjectFactory;
@@ -80,5 +82,10 @@ public class ProjectApiModule extends AbstractModule {
         new FactoryModuleBuilder()
             .implement(ProjectTypes.class, ProjectTypes.class)
             .build(ProjectTypesFactory.class));
+
+    install(
+        new FactoryModuleBuilder()
+            .implement(ProjectServiceApi.class, ProjectServiceApi.class)
+            .build(ProjectServiceApiFactory.class));
   }
 }

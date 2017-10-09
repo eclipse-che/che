@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.plugin.java.server;
 
+import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -18,7 +20,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.eclipse.che.api.fs.server.FsPaths;
+import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.notification.ProjectCreatedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
@@ -44,7 +46,7 @@ public class ProjectListeners {
   private final File workspace;
   private final ProjectManager projectRegistry;
   private final ProjectTypeRegistry projectTypeRegistry;
-  private final FsPaths fsPaths;
+  private final PathTransformer pathTransformer;
 
   @Inject
   public ProjectListeners(
@@ -52,11 +54,11 @@ public class ProjectListeners {
       EventService eventService,
       ProjectManager projectRegistry,
       ProjectTypeRegistry projectTypeRegistry,
-      FsPaths fsPaths) {
+      PathTransformer pathTransformer) {
     this.projectRegistry = projectRegistry;
     this.projectTypeRegistry = projectTypeRegistry;
     workspace = new File(workspacePath);
-    this.fsPaths = fsPaths;
+    this.pathTransformer = pathTransformer;
     eventService.subscribe(new ProjectCreated());
     eventService.subscribe(
         new EventSubscriber<ProjectItemModifiedEvent>() {
@@ -96,7 +98,7 @@ public class ProjectListeners {
 
   private boolean isJavaProject(String projectPath) {
     try {
-      String wsPath = fsPaths.absolutize(projectPath);
+      String wsPath = absolutize(projectPath);
       ProjectConfig project =
           projectRegistry
               .get(wsPath)

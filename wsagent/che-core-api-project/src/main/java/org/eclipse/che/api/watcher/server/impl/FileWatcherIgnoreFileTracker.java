@@ -22,6 +22,7 @@ import static java.nio.file.StandardOpenOption.APPEND;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import static org.eclipse.che.api.fs.server.WsPathUtils.resolve;
 import static org.eclipse.che.api.project.shared.Constants.CHE_DIR;
 import static org.eclipse.che.api.watcher.server.impl.FileWatcherUtils.toInternalPath;
 import static org.eclipse.che.api.watcher.server.impl.FileWatcherUtils.toNormalPath;
@@ -49,7 +50,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.api.fs.server.FsPaths;
+import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.api.watcher.server.FileWatcherManager;
@@ -81,7 +82,7 @@ public class FileWatcherIgnoreFileTracker {
   private final RequestTransmitter transmitter;
   private final FileWatcherManager fileWatcherManager;
   private final ProjectManager projectManager;
-  private final FsPaths fsPaths;
+  private final PathTransformer pathTransformer;
   private final RequestHandlerConfigurator configurator;
   private final Path root;
   private int fileWatchingOperationID;
@@ -90,11 +91,11 @@ public class FileWatcherIgnoreFileTracker {
   public FileWatcherIgnoreFileTracker(
       FileWatcherManager fileWatcherManager,
       RequestTransmitter transmitter,
-      FsPaths fsPaths,
+      PathTransformer pathTransformer,
       RequestHandlerConfigurator configurator,
       ProjectManager projectManager,
       @Named("che.user.workspaces.storage") File root) {
-    this.fsPaths = fsPaths;
+    this.pathTransformer = pathTransformer;
     this.projectManager = projectManager;
     this.transmitter = transmitter;
     this.fileWatcherManager = fileWatcherManager;
@@ -162,7 +163,7 @@ public class FileWatcherIgnoreFileTracker {
     ;
     return isNullOrEmpty(project.getPath())
         ? ""
-        : fsPaths.resolve(project.getPath(), FILE_WATCHER_IGNORE_FILE_PATH);
+        : resolve(project.getPath(), FILE_WATCHER_IGNORE_FILE_PATH);
   }
 
   private void startTrackingIgnoreFile() {

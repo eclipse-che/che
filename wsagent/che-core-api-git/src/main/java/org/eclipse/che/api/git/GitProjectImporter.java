@@ -13,6 +13,7 @@ package org.eclipse.che.api.git;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.api.core.ErrorCodes.FAILED_CHECKOUT;
 import static org.eclipse.che.api.core.ErrorCodes.FAILED_CHECKOUT_WITH_START_POINT;
+import static org.eclipse.che.api.fs.server.WsPathUtils.getName;
 import static org.eclipse.che.api.git.GitBasicAuthenticationCredentialsProvider.clearCredentials;
 import static org.eclipse.che.api.git.GitBasicAuthenticationCredentialsProvider.setCurrentCredentials;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_ALL;
@@ -41,7 +42,7 @@ import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.FsPaths;
+import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.params.CheckoutParams;
 import org.eclipse.che.api.git.params.CloneParams;
@@ -64,18 +65,18 @@ public class GitProjectImporter implements ProjectImporter {
   private final GitConnectionFactory gitConnectionFactory;
   private final EventService eventService;
   private final FsManager fsManager;
-  private final FsPaths fsPaths;
+  private final PathTransformer pathTransformer;
 
   @Inject
   public GitProjectImporter(
       GitConnectionFactory gitConnectionFactory,
       EventService eventService,
       FsManager fsManager,
-      FsPaths fsPaths) {
+      PathTransformer pathTransformer) {
     this.gitConnectionFactory = gitConnectionFactory;
     this.eventService = eventService;
     this.fsManager = fsManager;
-    this.fsPaths = fsPaths;
+    this.pathTransformer = pathTransformer;
   }
 
   @Override
@@ -165,9 +166,9 @@ public class GitProjectImporter implements ProjectImporter {
         }
       }
       // Get path to local file. Git works with local filesystem only.
-      final String localPath = fsPaths.toFsPath(dst).toString();
+      final String localPath = pathTransformer.transform(dst).toString();
       final String location = src.getLocation();
-      final String projectName = fsPaths.getName(dst);
+      final String projectName = getName(dst);
 
       // Converting steps
       // 1. Clone to temporary folder on same device with /projects
@@ -188,7 +189,7 @@ public class GitProjectImporter implements ProjectImporter {
           git.checkout(CheckoutParams.create(branch));
         }
       } else {
-        if (fsManager.getAllChildren(dst).isEmpty()) {
+        if (fsManager.getAllChildrenNames(dst).isEmpty()) {
           cloneRepository(git, "origin", location, recursiveEnabled);
           if (commitId != null) {
             checkoutCommit(git, commitId);

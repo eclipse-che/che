@@ -10,6 +10,9 @@
  */
 package org.eclipse.che.plugin.java.server.rest;
 
+import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
+import static org.eclipse.che.api.fs.server.WsPathUtils.resolve;
+
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -27,7 +30,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.FsPaths;
+import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.ide.ext.java.shared.dto.Change;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IJavaProject;
@@ -48,13 +51,14 @@ public class JavaFormatterService {
   private static final JavaModel model = JavaModelManager.getJavaModelManager().getJavaModel();
 
   private final FsManager fsManager;
-  private final FsPaths fsPaths;
+  private final PathTransformer pathTransformer;
   private Formatter formatter;
 
   @Inject
-  public JavaFormatterService(FsManager fsManager, FsPaths fsPaths, Formatter formatter) {
+  public JavaFormatterService(
+      FsManager fsManager, PathTransformer pathTransformer, Formatter formatter) {
     this.fsManager = fsManager;
-    this.fsPaths = fsPaths;
+    this.pathTransformer = pathTransformer;
     this.formatter = formatter;
   }
 
@@ -104,18 +108,18 @@ public class JavaFormatterService {
           String content)
       throws ServerException {
     try {
-      String rootCheFolderWsPath = fsPaths.absolutize(CHE_FOLDER);
+      String rootCheFolderWsPath = absolutize(CHE_FOLDER);
 
-      if (!fsManager.existsAsDirectory(rootCheFolderWsPath)) {
-        fsManager.createDirectory(rootCheFolderWsPath);
+      if (!fsManager.existsAsDir(rootCheFolderWsPath)) {
+        fsManager.createDir(rootCheFolderWsPath);
       }
 
-      String cheFormatterWsPath = fsPaths.resolve(rootCheFolderWsPath, CHE_FORMATTER_XML);
+      String cheFormatterWsPath = resolve(rootCheFolderWsPath, CHE_FORMATTER_XML);
 
       if (!fsManager.existsAsFile(cheFormatterWsPath)) {
         fsManager.createFile(cheFormatterWsPath, content);
       } else {
-        fsManager.updateFile(cheFormatterWsPath, content);
+        fsManager.update(cheFormatterWsPath, content);
       }
     } catch (ServerException | ConflictException | NotFoundException e) {
       throw new ServerException(e);
@@ -137,19 +141,19 @@ public class JavaFormatterService {
           String content)
       throws ServerException, NotFoundException {
     try {
-      String projectWsPath = fsPaths.absolutize(projectPath);
-      String projectCheFolderWsPath = fsPaths.resolve(projectWsPath, CHE_FOLDER);
+      String projectWsPath = absolutize(projectPath);
+      String projectCheFolderWsPath = resolve(projectWsPath, CHE_FOLDER);
 
-      if (!fsManager.existsAsDirectory(projectCheFolderWsPath)) {
-        fsManager.createDirectory(projectCheFolderWsPath);
+      if (!fsManager.existsAsDir(projectCheFolderWsPath)) {
+        fsManager.createDir(projectCheFolderWsPath);
       }
 
-      String cheFormatterWsPath = fsPaths.resolve(projectCheFolderWsPath, CHE_FORMATTER_XML);
+      String cheFormatterWsPath = resolve(projectCheFolderWsPath, CHE_FORMATTER_XML);
 
       if (!fsManager.existsAsFile(cheFormatterWsPath)) {
         fsManager.createFile(cheFormatterWsPath, content);
       } else {
-        fsManager.updateFile(cheFormatterWsPath, content);
+        fsManager.update(cheFormatterWsPath, content);
       }
 
     } catch (ConflictException | NotFoundException e) {
@@ -158,11 +162,6 @@ public class JavaFormatterService {
   }
 
   private File getFormatterFromRootFolder(String formatterPath) {
-    try {
-      String formatterWsPath = fsPaths.absolutize(formatterPath);
-      return fsManager.toIoFile(formatterWsPath);
-    } catch (NotFoundException e) {
-      return null;
-    }
+    return fsManager.toIoFile(absolutize(formatterPath));
   }
 }

@@ -10,16 +10,9 @@
  */
 package org.eclipse.che.api.project.server;
 
-import static java.io.File.separator;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
-import static org.eclipse.che.api.project.server.impl.ProjectDtoConverter.asDto;
-import static org.eclipse.che.api.project.shared.Constants.EVENT_IMPORT_OUTPUT_PROGRESS;
 import static org.eclipse.che.api.project.shared.Constants.LINK_REL_CREATE_BATCH_PROJECTS;
 import static org.eclipse.che.api.project.shared.Constants.LINK_REL_CREATE_PROJECT;
 import static org.eclipse.che.api.project.shared.Constants.LINK_REL_GET_PROJECTS;
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -28,17 +21,9 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
@@ -52,57 +37,32 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.apache.commons.fileupload.FileItem;
-import org.apache.tika.Tika;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
-import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
-import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
-import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.Description;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
-import org.eclipse.che.api.fs.server.FsDtoConverter;
-import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.FsPaths;
-import org.eclipse.che.api.project.server.impl.ProjectDtoConverter;
-import org.eclipse.che.api.project.server.impl.ProjectServiceLinksInjector;
-import org.eclipse.che.api.project.server.impl.ProjectServiceVcsStatusInjector;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
-import org.eclipse.che.api.project.server.notification.ProjectCreatedEvent;
-import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
-import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
+import org.eclipse.che.api.project.server.impl.ProjectServiceApi;
+import org.eclipse.che.api.project.server.impl.ProjectServiceApiFactory;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
-import org.eclipse.che.api.project.shared.dto.ImportProgressRecordDto;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.project.shared.dto.MoveOptions;
 import org.eclipse.che.api.project.shared.dto.NewProjectConfigDto;
-import org.eclipse.che.api.project.shared.dto.ProjectSearchRequestDto;
 import org.eclipse.che.api.project.shared.dto.ProjectSearchResponseDto;
-import org.eclipse.che.api.project.shared.dto.SearchOccurrenceDto;
-import org.eclipse.che.api.project.shared.dto.SearchResultDto;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.project.shared.dto.TreeElement;
 import org.eclipse.che.api.search.server.SearchResult;
-import org.eclipse.che.api.search.server.Searcher;
-import org.eclipse.che.api.search.server.impl.LuceneSearcher;
-import org.eclipse.che.api.search.server.impl.QueryExpression;
-import org.eclipse.che.api.search.server.impl.SearchResultEntry;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.commons.lang.ws.rs.ExtMediaType;
-import org.eclipse.che.dto.server.DtoFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Project API.
@@ -118,39 +78,11 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class ProjectService extends Service {
 
-  private static final Logger LOG = LoggerFactory.getLogger(ProjectService.class);
-  private static Tika TIKA;
-
-  private final ProjectManager projectManager;
-  private final FsManager fsManager;
-  private final FsDtoConverter fsDtoConverter;
-  private final Searcher searcher;
-  private final EventService eventService;
-  private final ProjectServiceLinksInjector linksInjector;
-  private final ProjectServiceVcsStatusInjector vcsStatusInjector;
-  private final RequestTransmitter transmitter;
-  private final FsPaths fsPaths;
+  private final ProjectServiceApi projectServiceApi;
 
   @Inject
-  public ProjectService(
-      Searcher searcher,
-      ProjectManager projectManager,
-      FsManager fsManager,
-      FsDtoConverter fsDtoConverter,
-      EventService eventService,
-      ProjectServiceLinksInjector linksInjector,
-      ProjectServiceVcsStatusInjector vcsStatusInjector,
-      RequestTransmitter transmitter,
-      FsPaths fsPaths) {
-    this.projectManager = projectManager;
-    this.fsManager = fsManager;
-    this.fsDtoConverter = fsDtoConverter;
-    this.searcher = searcher;
-    this.eventService = eventService;
-    this.linksInjector = linksInjector;
-    this.vcsStatusInjector = vcsStatusInjector;
-    this.transmitter = transmitter;
-    this.fsPaths = fsPaths;
+  public ProjectService(ProjectServiceApiFactory projectServiceApiFactory) {
+    this.projectServiceApi = projectServiceApiFactory.create(getServiceContext());
   }
 
   @GET
@@ -168,12 +100,7 @@ public class ProjectService extends Service {
   public List<ProjectConfigDto> getProjects()
       throws IOException, ServerException, ConflictException, ForbiddenException {
 
-    return projectManager
-        .getAll()
-        .stream()
-        .map(ProjectDtoConverter::asDto)
-        .map(this::injectProjectLinks)
-        .collect(Collectors.toList());
+    return projectServiceApi.getProjects();
   }
 
   @GET
@@ -193,12 +120,8 @@ public class ProjectService extends Service {
       @ApiParam(value = "Path to requested project", required = true) @PathParam("path")
           String wsPath)
       throws NotFoundException, ForbiddenException, ServerException, ConflictException {
-    wsPath = fsPaths.absolutize(wsPath);
-    return projectManager
-        .get(wsPath)
-        .map(ProjectDtoConverter::asDto)
-        .map(this::injectProjectLinks)
-        .orElseThrow(() -> new NotFoundException("Project is not found"));
+
+    return projectServiceApi.getProject(wsPath);
   }
 
   @POST
@@ -218,20 +141,7 @@ public class ProjectService extends Service {
       throws ConflictException, ForbiddenException, ServerException, NotFoundException,
           BadRequestException {
 
-    Map<String, String> options =
-        uriInfo
-            .getQueryParameters()
-            .entrySet()
-            .stream()
-            .collect(toMap(Entry::getKey, it -> it.getValue().get(0)));
-
-    RegisteredProject project = projectManager.create(projectConfig, options);
-    ProjectConfigDto asDto = asDto(project);
-    ProjectConfigDto injectedLinks = injectProjectLinks(asDto);
-
-    eventService.publish(new ProjectCreatedEvent(project.getPath()));
-
-    return injectedLinks;
+    return projectServiceApi.createProject(uriInfo, projectConfig);
   }
 
   @POST
@@ -262,24 +172,7 @@ public class ProjectService extends Service {
       throws ConflictException, ForbiddenException, ServerException, NotFoundException, IOException,
           UnauthorizedException, BadRequestException {
 
-    Set<RegisteredProject> registeredProjects =
-        projectManager.doImport(
-            new HashSet<>(projectConfigs), rewrite, jsonRpcImportConsumer(clientId));
-
-    Set<ProjectConfigDto> result =
-        registeredProjects
-            .stream()
-            .map(ProjectDtoConverter::asDto)
-            .map(this::injectProjectLinks)
-            .collect(toSet());
-
-    registeredProjects
-        .stream()
-        .map(RegisteredProject::getPath)
-        .map(ProjectCreatedEvent::new)
-        .forEach(eventService::publish);
-
-    return new ArrayList<>(result);
+    return projectServiceApi.createBatchProjects(projectConfigs, rewrite, clientId);
   }
 
   @PUT
@@ -300,12 +193,8 @@ public class ProjectService extends Service {
       ProjectConfigDto projectConfigDto)
       throws NotFoundException, ConflictException, ForbiddenException, ServerException, IOException,
           BadRequestException {
-    if (wsPath != null) {
-      projectConfigDto.setPath(fsPaths.absolutize(wsPath));
-    }
 
-    RegisteredProject updated = projectManager.update(projectConfigDto);
-    return asDto(updated);
+    return projectServiceApi.updateProject(wsPath, projectConfigDto);
   }
 
   @DELETE
@@ -324,15 +213,8 @@ public class ProjectService extends Service {
   })
   public void delete(@ApiParam("Path to a resource to be deleted") @PathParam("path") String wsPath)
       throws NotFoundException, ForbiddenException, ConflictException, ServerException {
-    wsPath = fsPaths.absolutize(wsPath);
 
-    if (fsManager.isFile(wsPath)) {
-      fsManager.deleteFile(wsPath);
-    } else if (projectManager.isRegistered(wsPath)) {
-      projectManager.delete(wsPath);
-    } else {
-      fsManager.deleteDirectory(wsPath);
-    }
+    projectServiceApi.delete(wsPath);
   }
 
   @GET
@@ -354,22 +236,8 @@ public class ProjectService extends Service {
       @ApiParam(value = "Project Type ID to estimate against", required = true) @QueryParam("type")
           String projectType)
       throws NotFoundException, ForbiddenException, ServerException, ConflictException {
-    wsPath = fsPaths.absolutize(wsPath);
 
-    ProjectTypeResolution resolution = projectManager.qualify(wsPath, projectType);
-
-    Map<String, List<String>> attributes =
-        resolution
-            .getProvidedAttributes()
-            .entrySet()
-            .stream()
-            .collect(toMap(Entry::getKey, it -> it.getValue().getList()));
-
-    return DtoFactory.newDto(SourceEstimation.class)
-        .withType(projectType)
-        .withMatched(resolution.matched())
-        .withResolution(resolution.getResolution())
-        .withAttributes(attributes);
+    return projectServiceApi.estimateProject(wsPath, projectType);
   }
 
   @GET
@@ -379,27 +247,8 @@ public class ProjectService extends Service {
       @ApiParam(value = "Path to requested project", required = true) @PathParam("path")
           String wsPath)
       throws NotFoundException, ForbiddenException, ServerException, ConflictException {
-    wsPath = fsPaths.absolutize(wsPath);
 
-    return projectManager
-        .qualify(wsPath)
-        .stream()
-        .filter(ProjectTypeResolution::matched)
-        .map(
-            resolution -> {
-              Map<String, List<String>> attributes =
-                  resolution
-                      .getProvidedAttributes()
-                      .entrySet()
-                      .stream()
-                      .collect(toMap(Entry::getKey, it -> it.getValue().getList()));
-
-              return newDto(SourceEstimation.class)
-                  .withType(resolution.getType())
-                  .withMatched(resolution.matched())
-                  .withAttributes(attributes);
-            })
-        .collect(toList());
+    return projectServiceApi.resolveSources(wsPath);
   }
 
   @POST
@@ -429,9 +278,7 @@ public class ProjectService extends Service {
       throws ConflictException, ForbiddenException, UnauthorizedException, IOException,
           ServerException, NotFoundException, BadRequestException {
 
-    wsPath = fsPaths.absolutize(wsPath);
-
-    projectManager.doImport(wsPath, sourceStorage, force, jsonRpcImportConsumer(clientId));
+    projectServiceApi.importProject(wsPath, force, clientId, sourceStorage);
   }
 
   @POST
@@ -456,32 +303,8 @@ public class ProjectService extends Service {
       @ApiParam(value = "New file name", required = true) @QueryParam("name") String fileName,
       InputStream content)
       throws NotFoundException, ConflictException, ForbiddenException, ServerException {
-    parentWsPath = fsPaths.absolutize(parentWsPath);
-    String wsPath = fsPaths.resolve(parentWsPath, fileName);
 
-    fsManager.createFile(wsPath, content);
-    String project =
-        projectManager
-            .getClosest(wsPath)
-            .orElseThrow(() -> new NotFoundException("Can't find parent project for file"))
-            .getName();
-
-    eventService.publish(
-        new ProjectItemModifiedEvent(
-            ProjectItemModifiedEvent.EventType.CREATED, project, wsPath, false));
-
-    URI location =
-        getServiceContext()
-            .getServiceUriBuilder()
-            .clone()
-            .path(getClass(), "getFile")
-            .build(new String[] {wsPath.substring(1)}, false);
-
-    ItemReference asDto = fsDtoConverter.asDto(wsPath);
-    ItemReference asDtoWithVcsStatus = vcsStatusInjector.injectVcsStatus(asDto);
-    ItemReference asDtoWtihVcsStatusAndLinks = injectFileLinks(asDtoWithVcsStatus);
-
-    return Response.created(location).entity(asDtoWtihVcsStatusAndLinks).build();
+    return projectServiceApi.createFile(parentWsPath, fileName, content);
   }
 
   @POST
@@ -499,29 +322,8 @@ public class ProjectService extends Service {
       @ApiParam(value = "Path to a new folder destination", required = true) @PathParam("path")
           String wsPath)
       throws ConflictException, ForbiddenException, ServerException, NotFoundException {
-    wsPath = fsPaths.absolutize(wsPath);
-    fsManager.createDirectory(wsPath);
 
-    final URI location =
-        getServiceContext()
-            .getServiceUriBuilder()
-            .clone()
-            .path(getClass(), "getChildren")
-            .build(new String[] {wsPath.substring(1)}, false);
-
-    String project =
-        projectManager
-            .getClosest(wsPath)
-            .orElseThrow(() -> new NotFoundException("Can't find parent project"))
-            .getName();
-
-    eventService.publish(
-        new ProjectItemModifiedEvent(
-            ProjectItemModifiedEvent.EventType.CREATED, project, wsPath, true));
-
-    return Response.created(location)
-        .entity(injectFolderLinks(fsDtoConverter.asDto(wsPath)))
-        .build();
+    return projectServiceApi.createFolder(wsPath);
   }
 
   @POST
@@ -541,11 +343,8 @@ public class ProjectService extends Service {
           String parentWsPath,
       Iterator<FileItem> formData)
       throws NotFoundException, ConflictException, ForbiddenException, ServerException {
-    parentWsPath = fsPaths.absolutize(parentWsPath);
 
-    fsManager.createFile(parentWsPath, formData);
-
-    return Response.ok("", MediaType.TEXT_HTML).build();
+    return projectServiceApi.uploadFile(parentWsPath, formData);
   }
 
   @POST
@@ -569,11 +368,8 @@ public class ProjectService extends Service {
       @ApiParam(value = "Path in the project", required = true) @PathParam("path") String wsPath,
       Iterator<FileItem> formData)
       throws ServerException, ConflictException, ForbiddenException, NotFoundException {
-    wsPath = fsPaths.absolutize(wsPath);
 
-    fsManager.createDirectory(wsPath, formData);
-
-    return Response.ok("", MediaType.TEXT_HTML).build();
+    return projectServiceApi.uploadFolderFromZip(wsPath, formData);
   }
 
   @ApiOperation(value = "Get file content", notes = "Get file content by its name")
@@ -589,13 +385,8 @@ public class ProjectService extends Service {
       @ApiParam(value = "Path to a file", required = true) @PathParam("path") String wsPath)
       throws IOException, NotFoundException, ForbiddenException, ServerException,
           ConflictException {
-    wsPath = fsPaths.absolutize(wsPath);
 
-    InputStream inputStream = fsManager.readFileAsInputStream(wsPath);
-    String name = wsPath.substring(wsPath.lastIndexOf(separator));
-    String type = getTIKA().detect(name);
-
-    return Response.ok().entity(inputStream).type(type).build();
+    return projectServiceApi.getFile(wsPath);
   }
 
   @PUT
@@ -612,21 +403,8 @@ public class ProjectService extends Service {
       @ApiParam(value = "Full path to a file", required = true) @PathParam("path") String wsPath,
       InputStream content)
       throws NotFoundException, ForbiddenException, ServerException, ConflictException {
-    wsPath = fsPaths.absolutize(wsPath);
 
-    fsManager.updateFile(wsPath, content);
-
-    String project =
-        projectManager
-            .getClosest(wsPath)
-            .orElseThrow(() -> new NotFoundException("Can't find parent project for file"))
-            .getName();
-
-    eventService.publish(
-        new ProjectItemModifiedEvent(
-            ProjectItemModifiedEvent.EventType.UPDATED, project, wsPath, false));
-
-    return Response.ok().build();
+    return projectServiceApi.updateFile(wsPath, content);
   }
 
   @POST
@@ -649,56 +427,8 @@ public class ProjectService extends Service {
           String newParentWsPath,
       CopyOptions copyOptions)
       throws NotFoundException, ForbiddenException, ConflictException, ServerException {
-    String srcWsPath = fsPaths.absolutize(wsPath);
-    newParentWsPath = fsPaths.absolutize(newParentWsPath);
-    String name = getNameValue(copyOptions, wsPath);
-    boolean overwrite = getOverwriteValue(copyOptions);
 
-    String dstWsPath = fsPaths.resolve(newParentWsPath, name);
-
-    boolean isProject = projectManager.isRegistered(srcWsPath);
-    boolean isDirectory = fsManager.existsAsDirectory(srcWsPath);
-    boolean isFile = fsManager.existsAsFile(srcWsPath);
-
-    if (isProject) {
-      projectManager.copy(srcWsPath, dstWsPath, overwrite);
-    } else if (isDirectory) {
-      if (overwrite) {
-        fsManager.copyDirectoryQuietly(srcWsPath, dstWsPath);
-      } else {
-        fsManager.copyDirectory(srcWsPath, dstWsPath);
-      }
-    } else {
-      if (overwrite) {
-        fsManager.copyFileQuietly(srcWsPath, dstWsPath);
-      } else {
-        fsManager.copyFile(srcWsPath, dstWsPath);
-      }
-    }
-
-    URI location =
-        getServiceContext()
-            .getServiceUriBuilder()
-            .path(getClass(), isFile ? "getFile" : "getChildren")
-            .build(new String[] {dstWsPath.substring(1)}, false);
-
-    return Response.created(location).build();
-  }
-
-  private String getNameValue(CopyOptions copyOptions, String wsPath) {
-    if (copyOptions != null && copyOptions.getName() != null) {
-      return copyOptions.getName();
-    } else {
-      return fsPaths.getName(wsPath);
-    }
-  }
-
-  private boolean getOverwriteValue(CopyOptions copyOptions) {
-    if (copyOptions != null && copyOptions.getOverWrite() != null) {
-      return copyOptions.getOverWrite();
-    } else {
-      return false;
-    }
+    return projectServiceApi.copy(wsPath, newParentWsPath, copyOptions);
   }
 
   @POST
@@ -720,49 +450,8 @@ public class ProjectService extends Service {
       @ApiParam("Path to a new location") @QueryParam("to") String newParentWsPath,
       MoveOptions moveOptions)
       throws NotFoundException, ForbiddenException, ConflictException, ServerException {
-    wsPath = fsPaths.absolutize(wsPath);
-    newParentWsPath = fsPaths.absolutize(newParentWsPath);
-    String name = fsPaths.getName(wsPath);
 
-    boolean overwrite = false;
-    if (moveOptions != null) {
-      if (moveOptions.getOverWrite() != null) {
-        overwrite = moveOptions.getOverWrite();
-      }
-      if (moveOptions.getName() != null) {
-        name = moveOptions.getName();
-      }
-    }
-
-    String dstWsPath = fsPaths.resolve(newParentWsPath, name);
-
-    boolean isProject = projectManager.isRegistered(wsPath);
-    boolean isDirectory = fsManager.existsAsDirectory(wsPath);
-    boolean isFile = fsManager.existsAsFile(wsPath);
-
-    if (isProject) {
-      projectManager.move(wsPath, dstWsPath, overwrite);
-    } else if (isDirectory) {
-      if (overwrite) {
-        fsManager.moveDirectoryQuietly(wsPath, dstWsPath);
-      } else {
-        fsManager.moveDirectory(wsPath, dstWsPath);
-      }
-    } else {
-      if (overwrite) {
-        fsManager.moveFileQuietly(wsPath, dstWsPath);
-      } else {
-        fsManager.moveFile(wsPath, dstWsPath);
-      }
-    }
-
-    final URI location =
-        getServiceContext()
-            .getServiceUriBuilder()
-            .path(getClass(), isFile ? "getFile" : "getChildren")
-            .build(new String[] {dstWsPath.substring(1)}, false);
-
-    return Response.created(location).build();
+    return projectServiceApi.move(wsPath, newParentWsPath, moveOptions);
   }
 
   @POST
@@ -789,11 +478,8 @@ public class ProjectService extends Service {
       Iterator<FileItem> formData)
       throws ServerException, ConflictException, ForbiddenException, NotFoundException,
           BadRequestException {
-    wsPath = fsPaths.absolutize(wsPath);
 
-    fsManager.createDirectory(wsPath, formData);
-
-    return resolveSources(wsPath);
+    return projectServiceApi.uploadProjectFromZip(wsPath, force, formData);
   }
 
   @POST
@@ -812,18 +498,8 @@ public class ProjectService extends Service {
       InputStream zip,
       @DefaultValue("false") @QueryParam("skipFirstLevel") Boolean skipFirstLevel)
       throws NotFoundException, ConflictException, ForbiddenException, ServerException {
-    wsPath = fsPaths.absolutize(wsPath);
 
-    fsManager.unzipDirectory(wsPath, zip, skipFirstLevel);
-
-    eventService.publish(new ProjectCreatedEvent(wsPath));
-
-    return Response.created(
-            getServiceContext()
-                .getServiceUriBuilder()
-                .path(getClass(), "getChildren")
-                .build(new String[] {wsPath.substring(1)}, false))
-        .build();
+    return projectServiceApi.importZip(wsPath, zip, skipFirstLevel);
   }
 
   @GET
@@ -842,11 +518,8 @@ public class ProjectService extends Service {
   public InputStream exportZip(
       @ApiParam(value = "Path to resource to be exported") @PathParam("path") String wsPath)
       throws NotFoundException, ForbiddenException, ServerException, ConflictException {
-    wsPath = fsPaths.absolutize(wsPath);
 
-    return fsManager.existsAsFile(wsPath)
-        ? fsManager.zipFileToInputStream(wsPath)
-        : fsManager.zipDirectoryToInputStream(wsPath);
+    return projectServiceApi.exportZip(wsPath);
   }
 
   @GET
@@ -855,18 +528,8 @@ public class ProjectService extends Service {
   public Response exportFile(
       @ApiParam(value = "Path to resource to be imported") @PathParam("path") String wsPath)
       throws NotFoundException, ForbiddenException, ServerException, ConflictException {
-    wsPath = fsPaths.absolutize(wsPath);
 
-    InputStream inputStream = fsManager.readFileAsInputStream(wsPath);
-    long length = fsManager.length(wsPath);
-    long lastModified = fsManager.lastModified(wsPath);
-    String name = fsPaths.getName(wsPath);
-
-    return Response.ok(inputStream, getTIKA().detect(name))
-        .lastModified(new Date(lastModified))
-        .header(HttpHeaders.CONTENT_LENGTH, Long.toString(length))
-        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + name + '"')
-        .build();
+    return projectServiceApi.exportFile(wsPath);
   }
 
   @GET
@@ -887,18 +550,8 @@ public class ProjectService extends Service {
   public List<ItemReference> getChildren(
       @ApiParam(value = "Path to a project", required = true) @PathParam("parent") String wsPath)
       throws NotFoundException, ForbiddenException, ServerException, IOException {
-    wsPath = fsPaths.absolutize(wsPath);
 
-    Set<String> wsPaths = fsManager.getAllChildrenWsPaths(wsPath);
-    Set<ItemReference> itemReferences = fsDtoConverter.asDto(wsPaths);
-
-    List<ItemReference> result =
-        itemReferences
-            .stream()
-            .map(it -> "file".equals(it.getType()) ? injectFileLinks(it) : injectFolderLinks(it))
-            .collect(Collectors.toList());
-
-    return vcsStatusInjector.injectVcsStatus(result);
+    return projectServiceApi.getChildren(wsPath);
   }
 
   @GET
@@ -935,13 +588,8 @@ public class ProjectService extends Service {
           @QueryParam("includeFiles")
           boolean includeFiles)
       throws NotFoundException, ForbiddenException, ServerException {
-    wsPath = fsPaths.absolutize(wsPath);
 
-    ItemReference asDto = fsDtoConverter.asDto(wsPath);
-    ItemReference asLinkedDto = injectFolderLinks(asDto);
-    return newDto(TreeElement.class)
-        .withNode(asLinkedDto)
-        .withChildren(getTreeRecursively(wsPath, depth, includeFiles));
+    return projectServiceApi.getTree(wsPath, depth, includeFiles);
   }
 
   @GET
@@ -959,12 +607,8 @@ public class ProjectService extends Service {
           @PathParam("path")
           String wsPath)
       throws NotFoundException, ForbiddenException, ServerException {
-    wsPath = fsPaths.absolutize(wsPath);
 
-    ItemReference asDto = fsDtoConverter.asDto(wsPath);
-    return fsManager.isFile(wsPath)
-        ? injectFileLinks(vcsStatusInjector.injectVcsStatus(asDto))
-        : injectFolderLinks(asDto);
+    return projectServiceApi.getItem(wsPath);
   }
 
   @GET
@@ -997,150 +641,7 @@ public class ProjectService extends Service {
           int maxItems,
       @ApiParam(value = "Skip count") @QueryParam("skipCount") int skipCount)
       throws NotFoundException, ForbiddenException, ConflictException, ServerException {
-    if (skipCount < 0) {
-      throw new ConflictException(String.format("Invalid 'skipCount' parameter: %d.", skipCount));
-    }
-    wsPath = fsPaths.absolutize(wsPath);
 
-    QueryExpression expr =
-        new QueryExpression()
-            .setPath(wsPath)
-            .setName(name)
-            .setText(text)
-            .setMaxItems(maxItems)
-            .setSkipCount(skipCount)
-            .setIncludePositions(true);
-
-    SearchResult result = searcher.search(expr);
-    List<SearchResultEntry> searchResultEntries = result.getResults();
-    return DtoFactory.newDto(ProjectSearchResponseDto.class)
-        .withTotalHits(result.getTotalHits())
-        .withItemReferences(prepareResults(searchResultEntries));
-  }
-
-  /**
-   * Prepare result for client, add additional information like line number and line content where
-   * found given text
-   */
-  private List<SearchResultDto> prepareResults(List<SearchResultEntry> searchResultEntries)
-      throws ServerException, NotFoundException {
-    List<SearchResultDto> results = new ArrayList<>(searchResultEntries.size());
-    for (SearchResultEntry searchResultEntry : searchResultEntries) {
-      String path = searchResultEntry.getFilePath();
-      if (fsManager.existsAsFile(path)) {
-        ItemReference asDto = fsDtoConverter.asDto(path);
-        ItemReference itemReference = injectFileLinks(asDto);
-        List<LuceneSearcher.OffsetData> datas = searchResultEntry.getData();
-        List<SearchOccurrenceDto> searchOccurrences = new ArrayList<>(datas.size());
-        for (LuceneSearcher.OffsetData data : datas) {
-          SearchOccurrenceDto searchOccurrenceDto =
-              DtoFactory.getInstance()
-                  .createDto(SearchOccurrenceDto.class)
-                  .withPhrase(data.phrase)
-                  .withScore(data.score)
-                  .withStartOffset(data.startOffset)
-                  .withEndOffset(data.endOffset)
-                  .withLineNumber(data.lineNum)
-                  .withLineContent(data.line);
-          searchOccurrences.add(searchOccurrenceDto);
-        }
-        SearchResultDto searchResultDto = DtoFactory.getInstance().createDto(SearchResultDto.class);
-        results.add(
-            searchResultDto
-                .withItemReference(itemReference)
-                .withSearchOccurrences(searchOccurrences));
-      }
-    }
-    return results;
-  }
-
-  @Inject
-  private void configureProjectSearchRequestHandler(
-      RequestHandlerConfigurator requestHandlerConfigurator) {
-    requestHandlerConfigurator
-        .newConfiguration()
-        .methodName("project/search")
-        .paramsAsDto(ProjectSearchRequestDto.class)
-        .resultAsDto(ProjectSearchResponseDto.class)
-        .withFunction(this::search);
-  }
-
-  public ProjectSearchResponseDto search(ProjectSearchRequestDto request) {
-    String path = request.getPath();
-    String name = request.getName();
-    String text = request.getText();
-    int maxItems = request.getMaxItems();
-    int skipCount = request.getSkipCount();
-
-    try {
-      return search(path, name, text, maxItems, skipCount);
-    } catch (ServerException | ConflictException | NotFoundException | ForbiddenException e) {
-      throw new JsonRpcException(-27000, e.getMessage());
-    }
-  }
-
-  private BiConsumer<String, String> jsonRpcImportConsumer(String clientId) {
-    return (projectName, message) -> {
-      ImportProgressRecordDto progressRecord =
-          newDto(ImportProgressRecordDto.class).withProjectName(projectName).withLine(message);
-
-      transmitter
-          .newRequest()
-          // TODO will be fixed after we start properly distinguish server side endpoints
-          .endpointId(clientId + "<-:->ws-agent-websocket-endpoint")
-          .methodName(EVENT_IMPORT_OUTPUT_PROGRESS)
-          .paramsAsDto(progressRecord)
-          .sendAndSkipResult();
-    };
-  }
-
-  private List<TreeElement> getTreeRecursively(String wsPath, int depth, boolean includeFiles)
-      throws ServerException, NotFoundException {
-    if (depth == 0) {
-      return null;
-    }
-
-    Set<String> childrenWsPaths =
-        includeFiles
-            ? fsManager.getAllChildrenWsPaths(wsPath)
-            : fsManager.getDirectoryWsPaths(wsPath);
-
-    List<TreeElement> nodes = new ArrayList<>(childrenWsPaths.size());
-    for (String childWsPath : childrenWsPaths) {
-      ItemReference asDto = fsDtoConverter.asDto(childWsPath);
-      ItemReference asLinkedDto =
-          fsManager.isDirectory(childWsPath) ? injectFolderLinks(asDto) : injectFileLinks(asDto);
-      TreeElement treeElement = newDto(TreeElement.class).withNode(asLinkedDto);
-      nodes.add(treeElement);
-
-      if (fsManager.isDirectory(childWsPath)) {
-        List<TreeElement> treeElements = getTreeRecursively(childWsPath, depth - 1, includeFiles);
-        if (treeElements != null) {
-          treeElement.setChildren(treeElements);
-        }
-      }
-    }
-
-    return vcsStatusInjector.injectVcsStatusTreeElements(nodes);
-  }
-
-  private ItemReference injectFileLinks(ItemReference itemReference) {
-    return linksInjector.injectFileLinks(itemReference, getServiceContext());
-  }
-
-  private ItemReference injectFolderLinks(ItemReference itemReference) {
-    return linksInjector.injectFolderLinks(itemReference, getServiceContext());
-  }
-
-  private ProjectConfigDto injectProjectLinks(ProjectConfigDto projectConfig) {
-    return linksInjector.injectProjectLinks(projectConfig, getServiceContext());
-  }
-
-  /** Lazy init of Tika. */
-  private synchronized Tika getTIKA() {
-    if (TIKA == null) {
-      TIKA = new Tika();
-    }
-    return TIKA;
+    return projectServiceApi.search(wsPath, name, text, maxItems, skipCount);
   }
 }

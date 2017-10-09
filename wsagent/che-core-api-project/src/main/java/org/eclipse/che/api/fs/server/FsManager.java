@@ -10,218 +10,150 @@
  */
 package org.eclipse.che.api.fs.server;
 
-import static java.util.Collections.unmodifiableSet;
-
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
-import org.apache.commons.fileupload.FileItem;
+import java.util.stream.Collectors;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 
 public interface FsManager {
 
-  void createFile(String wsPath) throws NotFoundException, ConflictException, ServerException;
-
-  void createFile(String wsPath, InputStream content)
+  void createFile(String wsPath, boolean overwrite, boolean withParents)
       throws NotFoundException, ConflictException, ServerException;
 
-  void createFile(String wsPath, String content)
+  void createDir(String wsPath, boolean overwrite, boolean withParents)
       throws NotFoundException, ConflictException, ServerException;
 
-  void createFile(String wsPath, byte[] content)
-      throws NotFoundException, ConflictException, ServerException;
+  InputStream read(String wsPath) throws NotFoundException, ConflictException, ServerException;
 
-  void createFile(String parentWsPath, Iterator<FileItem> content)
-      throws NotFoundException, ConflictException, ServerException;
+  InputStream zip(String wsPath) throws NotFoundException, ConflictException, ServerException;
 
-  boolean createFileQuietly(String wsPath);
-
-  boolean createFileQuietly(String wsPath, InputStream content);
-
-  boolean createFileQuietly(String wsPath, String content);
-
-  boolean createFileQuietly(String wsPath, byte[] content);
-
-  boolean createFileQuietly(String parentWsPath, Iterator<FileItem> content);
-
-  InputStream readFileAsInputStream(String wsPath)
+  void unzip(
+      String wsPath, InputStream packed, boolean overwrite, boolean withParents, boolean skipRoot)
       throws NotFoundException, ServerException, ConflictException;
 
-  String readFileAsString(String wsPath)
-      throws NotFoundException, ServerException, ConflictException;
-
-  byte[] readFileAsByteArray(String wsPath)
-      throws NotFoundException, ServerException, ConflictException;
-
-  Optional<InputStream> readFileAsInputStreamQuietly(String wsPath);
-
-  Optional<String> readFileAsStringQuietly(String wsPath);
-
-  Optional<byte[]> readFileAsByteArrayQuietly(String wsPath);
-
-  InputStream zipFileToInputStream(String wsPath)
-      throws NotFoundException, ServerException, ConflictException;
-
-  String zipFileToString(String wsPath)
-      throws NotFoundException, ServerException, ConflictException;
-
-  byte[] zipFileToByteArray(String wsPath)
-      throws NotFoundException, ServerException, ConflictException;
-
-  Optional<InputStream> zipFileToInputStreamQuietly(String wsPath);
-
-  Optional<String> zipFileToStringQuietly(String wsPath);
-
-  Optional<byte[]> zipFileToByteArrayQuietly(String wsPath);
-
-  InputStream tarFileToInputStream(String wsPath)
-      throws NotFoundException, ServerException, ConflictException;
-
-  String tarFileToString(String wsPath)
-      throws NotFoundException, ServerException, ConflictException;
-
-  byte[] tarFileToByteArray(String wsPath)
-      throws NotFoundException, ServerException, ConflictException;
-
-  Optional<InputStream> tarFileToInputStreamQuietly(String wsPath);
-
-  Optional<String> tarFileToStringQuietly(String wsPath);
-
-  Optional<byte[]> tarFileToByteArrayQuietly(String wsPath);
-
-  void updateFile(String wsPath, BiConsumer<InputStream, OutputStream> updater)
+  void update(String wsPath, BiConsumer<InputStream, OutputStream> updater)
       throws NotFoundException, ConflictException, ServerException;
 
-  void updateFile(String wsPath, InputStream content)
+  void update(String wsPath, InputStream content)
       throws NotFoundException, ConflictException, ServerException;
 
-  void updateFile(String wsPath, String content)
+  void delete(String wsPath, boolean quietly)
       throws NotFoundException, ConflictException, ServerException;
 
-  void updateFile(String wsPath, byte[] content)
+  void copy(String srcWsPath, String dstWsPath, boolean overwrite, boolean withParents)
       throws NotFoundException, ConflictException, ServerException;
 
-  boolean updateFileQuietly(String wsPath, InputStream content);
-
-  boolean updateFileQuietly(String wsPath, String content);
-
-  boolean updateFileQuietly(String wsPath, byte[] content);
-
-  void deleteFile(String wsPath) throws NotFoundException, ServerException;
-
-  boolean deleteFileQuietly(String wsPath);
-
-  void copyFile(String srcWsPath, String dstWsPath)
+  void move(String srcWsPath, String dstWsPath, boolean overwrite, boolean withParents)
       throws NotFoundException, ConflictException, ServerException;
-
-  boolean copyFileQuietly(String srcWsPath, String dstWsPath);
-
-  void moveFile(String srcWsPath, String dstWsPath)
-      throws NotFoundException, ConflictException, ServerException;
-
-  boolean moveFileQuietly(String srcWsPath, String dstWsPath);
-
-  void createDirectory(String wsPath) throws NotFoundException, ConflictException, ServerException;
-
-  boolean createDirectoryQuietly(String wsPath);
-
-  void createDirectory(String wsPath, Iterator<FileItem> formData)
-      throws NotFoundException, ConflictException, ServerException;
-
-  boolean createDirectoryQuietly(String wsPath, Iterator<FileItem> formData);
-
-  InputStream zipDirectoryToInputStream(String wsPath)
-      throws NotFoundException, ServerException, ConflictException;
-
-  String zipDirectoryToString(String wsPath)
-      throws NotFoundException, ServerException, ConflictException;
-
-  byte[] zipDirectoryToByteArray(String wsPath)
-      throws NotFoundException, ServerException, ConflictException;
-
-  Optional<InputStream> zipDirectoryToInputStreamQuietly(String wsPath)
-      throws NotFoundException, ServerException;
-
-  Optional<String> zipDirectoryToStringQuietly(String wsPath)
-      throws NotFoundException, ServerException;
-
-  Optional<byte[]> zipDirectoryToByteArrayQuietly(String wsPath)
-      throws NotFoundException, ServerException;
-
-  void unzipDirectory(String wsPath, InputStream content)
-      throws NotFoundException, ConflictException, ServerException;
-
-  void unzipDirectory(String wsPath, InputStream content, boolean skipRoot)
-      throws NotFoundException, ConflictException, ServerException;
-
-  boolean unzipDirectoryQuietly(String wsPath, InputStream content);
-
-  boolean unzipDirectoryQuietly(String wsPath, InputStream content, boolean skipRoot);
-
-  void deleteDirectory(String wsPath) throws NotFoundException, ServerException;
-
-  boolean deleteDirectoryQuietly(String wsPath);
-
-  void copyDirectory(String srcWsPath, String dstWsPath)
-      throws NotFoundException, ConflictException, ServerException;
-
-  boolean copyDirectoryQuietly(String srcWsPath, String dstWsPath);
-
-  void moveDirectory(String srcWsPath, String dstWsPath)
-      throws NotFoundException, ConflictException, ServerException;
-
-  boolean moveDirectoryQuietly(String srcWsPath, String dstWsPath);
 
   Set<String> getFileNames(String wsPath);
 
+  Set<String> getDirNames(String wsPath);
+
   Set<String> getFileWsPaths(String wsPath);
 
-  Set<String> getDirectoryNames(String wsPath);
+  Set<String> getDirWsPaths(String wsPath);
 
-  Set<String> getDirectoryWsPaths(String wsPath);
+  Set<String> getAllChildrenNames(String wsPath);
 
-  default Set<String> getAllChildren(String wsPath) {
-    Set<String> files = new HashSet<>(getFileNames(wsPath));
-    files.addAll(getDirectoryNames(wsPath));
-    return unmodifiableSet(files);
-  }
+  Set<String> getAllChildrenWsPaths(String wsPath);
 
-  default Set<String> getAllChildrenWsPaths(String wsPath) {
-    Set<String> files = new HashSet<>(getFileWsPaths(wsPath));
-    files.addAll(getDirectoryWsPaths(wsPath));
-    return unmodifiableSet(files);
-  }
-
-  boolean isDirectory(String wsPath);
+  boolean isDir(String wsPath);
 
   boolean isFile(String wsPath);
 
-  boolean isRoot(String wsPath);
-
   boolean exists(String wsPath);
 
-  default boolean existsAsFile(String wsPath) {
-    return exists(wsPath) && isFile(wsPath);
-  }
+  boolean existsAsFile(String wsPath);
 
-  default boolean existsAsDirectory(String wsPath) {
-    return exists(wsPath) && isDirectory(wsPath);
-  }
+  boolean existsAsDir(String wsPath);
 
   long lastModified(String wsPath);
 
   long length(String wsPath);
 
-  File toIoFile(String wsPath) throws NotFoundException;
+  File toIoFile(String wsPath);
 
-  Optional<File> toIoFileQuietly(String wsPath);
+  default void createFile(String wsPath)
+      throws NotFoundException, ConflictException, ServerException {
+    createFile(wsPath, true, true);
+  }
 
-  File toIoFileQuietlyOrNull(String wsPath);
+  default void createFile(
+      String wsPath, InputStream content, boolean overwrite, boolean withParents)
+      throws NotFoundException, ConflictException, ServerException {
+    createFile(wsPath, overwrite, withParents);
+    update(wsPath, content);
+  }
+
+  default void createFile(String wsPath, String content, boolean overwrite, boolean withParents)
+      throws NotFoundException, ConflictException, ServerException {
+    createFile(wsPath, overwrite, withParents);
+    update(wsPath, content);
+  }
+
+  default void createFile(String wsPath, InputStream content)
+      throws NotFoundException, ConflictException, ServerException {
+    createFile(wsPath, true, true);
+    update(wsPath, content);
+  }
+
+  default void createFile(String wsPath, String content)
+      throws NotFoundException, ConflictException, ServerException {
+    createFile(wsPath, true, true);
+    update(wsPath, content);
+  }
+
+  default void createDir(String wsPath)
+      throws NotFoundException, ConflictException, ServerException {
+    createDir(wsPath, true, true);
+  }
+
+  default String readAsString(String wsPath)
+      throws NotFoundException, ConflictException, ServerException {
+    try (InputStream inputStream = read(wsPath)) {
+      InputStreamReader isr = new InputStreamReader(inputStream);
+      BufferedReader br = new BufferedReader(isr);
+      return br.lines().collect(Collectors.joining("\n"));
+    } catch (IOException e) {
+      throw new ServerException(e);
+    }
+  }
+
+  default void update(String wsPath, String content)
+      throws NotFoundException, ConflictException, ServerException {
+    try (InputStream inputStream = new ByteArrayInputStream(content.getBytes())) {
+      update(wsPath, inputStream);
+    } catch (IOException e) {
+      throw new ServerException(e);
+    }
+  }
+
+  default void delete(String wsPath) throws NotFoundException, ConflictException, ServerException {
+    delete(wsPath, true);
+  }
+
+  default void copy(String srcWsPath, String dstWsPath)
+      throws NotFoundException, ConflictException, ServerException {
+    copy(srcWsPath, dstWsPath, true, true);
+  }
+
+  default void move(String srcWsPath, String dstWsPath)
+      throws NotFoundException, ConflictException, ServerException {
+    move(srcWsPath, dstWsPath, true, true);
+  }
+
+  default void unzip(String wsPath, InputStream packed, boolean skipRoot)
+      throws NotFoundException, ServerException, ConflictException {
+    unzip(wsPath, packed, true, true, skipRoot);
+  }
 }

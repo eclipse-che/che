@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.api.languageserver.registry;
 
+import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -25,7 +27,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.PreDestroy;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.fs.server.FsPaths;
+import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
@@ -54,7 +56,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
 
   private final Provider<ProjectManager> projectManagerProvider;
   private final ServerInitializer initializer;
-  private final FsPaths fsPaths;
+  private final PathTransformer pathTransformer;
   private EventService eventService;
   private CheLanguageClientFactory clientFactory;
 
@@ -66,14 +68,14 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
       ServerInitializer initializer,
       EventService eventService,
       CheLanguageClientFactory clientFactory,
-      FsPaths fsPaths) {
+      PathTransformer pathTransformer) {
     this.languages = new ArrayList<>(languages);
     this.launchers = new ArrayList<>(languageServerLaunchers);
     this.projectManagerProvider = projectManagerProvider;
     this.initializer = initializer;
     this.eventService = eventService;
     this.clientFactory = clientFactory;
-    this.fsPaths = fsPaths;
+    this.pathTransformer = pathTransformer;
     this.launchedServers = new HashMap<>();
     this.initializedServers = new HashMap<>();
   }
@@ -213,7 +215,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
       throw new LanguageServerException("Project not found for " + filePath);
     }
 
-    String wsPath = fsPaths.absolutize(LanguageServiceUtils.removePrefixUri(filePath));
+    String wsPath = absolutize(LanguageServiceUtils.removePrefixUri(filePath));
     RegisteredProject project =
         projectManagerProvider
             .get()

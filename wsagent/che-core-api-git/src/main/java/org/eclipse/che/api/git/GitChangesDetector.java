@@ -31,16 +31,12 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.FsPaths;
-import org.eclipse.che.api.watcher.server.FileWatcherManager;
+import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.git.shared.FileChangedEventDto;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.impl.RegisteredProject;
-import org.eclipse.che.api.project.shared.dto.event.GitChangeEventDto;
 import org.eclipse.che.api.watcher.server.FileWatcherManager;
-import org.eclipse.che.api.project.server.ProjectManager;
 import org.slf4j.Logger;
 
 /**
@@ -58,9 +54,8 @@ public class GitChangesDetector {
 
   private final RequestTransmitter transmitter;
   private final FileWatcherManager manager;
-  private final FsManager fsManager;
   private final ProjectManager projectManager;
-  private final FsPaths fsPaths;
+  private final PathTransformer pathTransformer;
   private final GitConnectionFactory gitConnectionFactory;
 
   private final Set<String> endpointIds = newConcurrentHashSet();
@@ -71,15 +66,13 @@ public class GitChangesDetector {
   public GitChangesDetector(
       RequestTransmitter transmitter,
       FileWatcherManager manager,
-      FsManager fsManager,
       ProjectManager projectManager,
-      FsPaths fsPaths,
+      PathTransformer pathTransformer,
       GitConnectionFactory gitConnectionFactory) {
     this.transmitter = transmitter;
     this.manager = manager;
-    this.fsManager = fsManager;
     this.projectManager = projectManager;
-    this.fsPaths = fsPaths;
+    this.pathTransformer = pathTransformer;
     this.gitConnectionFactory = gitConnectionFactory;
   }
 
@@ -127,26 +120,29 @@ public class GitChangesDetector {
   private Consumer<String> transmitConsumer(String wsPath) {
     return id -> {
       try {
+        String normalizedPath = wsPath.startsWith("/") ? wsPath.substring(1) : wsPath;
+        String itemPath = normalizedPath.substring(normalizedPath.indexOf("/") + 1);
+
         RegisteredProject project =
             projectManager
                 .getClosest(wsPath)
                 .orElseThrow(() -> new NotFoundException("Can't find project"));
 
         String projectWsPath = project.getPath();
-        Path projectFsPath = fsPaths.toFsPath(projectWsPath);
+        Path projectFsPath = pathTransformer.transform(projectWsPath);
         String stringifiedProjectFsPath = projectFsPath.toString();
         Status status =
             gitConnectionFactory
                 .getConnection(projectWsPath)
                 .status(singletonList(stringifiedProjectFsPath));
-        GitChangeEventDto.Type type;
+        FileChangedEventDto.Status fileStatus;
         if (status.getAdded().contains(stringifiedProjectFsPath)) {
-          type = ADDED;
+          fileStatus = ADDED;
         } else if (status.getUntracked().contains(stringifiedProjectFsPath)) {
-          type = UNTRACKED;
+          fileStatus = UNTRACKED;
         } else if (status.getModified().contains(stringifiedProjectFsPath)
             || status.getChanged().contains(stringifiedProjectFsPath)) {
-          type = MODIFIED;
+          fileStatus = MODIFIED;
         } else {
           fileStatus = NOT_MODIFIED;
         }
@@ -160,7 +156,9 @@ public class GitChangesDetector {
                     .withPath(stringifiedProjectFsPath)
                     .withStatus(fileStatus)
                     .withEditedRegions(
-                        gitConnectionFactory.getConnection(projectPath).getEditedRegions(itemPath)))
+                        gitConnectionFactory
+                            .getConnection(stringifiedProjectFsPath)
+                            .getEditedRegions(itemPath)))
             .sendAndSkipResult();
       } catch (NotFoundException | ServerException e) {
         String errorMessage = e.getMessage();

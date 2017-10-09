@@ -29,12 +29,10 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.api.fs.server.FsPaths;
-import org.eclipse.che.api.watcher.server.FileWatcherManager;
+import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.git.shared.EditedRegion;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.git.shared.StatusChangedEventDto;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.api.watcher.server.FileWatcherManager;
@@ -57,7 +55,7 @@ public class GitStatusChangedDetector {
 
   private final RequestTransmitter transmitter;
   private final FileWatcherManager manager;
-  private final FsPaths fsPaths;
+  private final PathTransformer pathTransformer;
   private final ProjectManager projectManager;
   private final GitConnectionFactory gitConnectionFactory;
 
@@ -70,12 +68,12 @@ public class GitStatusChangedDetector {
   public GitStatusChangedDetector(
       RequestTransmitter transmitter,
       FileWatcherManager manager,
-      FsPaths fsPaths,
+      PathTransformer pathTransformer,
       ProjectManager projectManager,
       GitConnectionFactory gitConnectionFactory) {
     this.transmitter = transmitter;
     this.manager = manager;
-    this.fsPaths = fsPaths;
+    this.pathTransformer = pathTransformer;
     this.projectManager = projectManager;
     this.gitConnectionFactory = gitConnectionFactory;
   }
@@ -94,10 +92,10 @@ public class GitStatusChangedDetector {
   public void startWatchers() {
     indexId =
         manager.registerByMatcher(
-            indexMatcher(), fsEventConsumer(), EMPTY_CONSUMER, EMPTY_CONSUMER);
+            indexMatcher(), fsEventConsumer(), modifyConsumer(), deleteConsumer());
     origHeadId =
         manager.registerByMatcher(
-            OrigHeadMatcher(), fsEventConsumer(), fsEventConsumer(), EMPTY_CONSUMER);
+            origHeadMatcher(), fsEventConsumer(), fsEventConsumer(), deleteConsumer());
   }
 
   @PreDestroy
@@ -106,7 +104,7 @@ public class GitStatusChangedDetector {
     manager.unRegisterByMatcher(origHeadId);
   }
 
-  private PathMatcher OrigHeadMatcher() {
+  private PathMatcher origHeadMatcher() {
     return it ->
         !isDirectory(it)
             && ORIG_HEAD_FILE.equals(it.getFileName().toString())
@@ -144,7 +142,7 @@ public class GitStatusChangedDetector {
                 .getClosest(wsPath)
                 .orElseThrow(() -> new NotFoundException("Can't find a project"));
 
-        String projectFsPath = fsPaths.toFsPath(project.getPath()).toString();
+        String projectFsPath = pathTransformer.transform(project.getPath()).toString();
         GitConnection connection = gitConnectionFactory.getConnection(projectFsPath);
         Status status = connection.status(emptyList());
         Status statusDto = newDto(Status.class);

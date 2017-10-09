@@ -10,12 +10,14 @@
  */
 package org.eclipse.che.plugin.java.server.projecttype;
 
+import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
+
 import com.google.inject.Inject;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.fs.server.FsPaths;
+import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -30,7 +32,8 @@ import org.eclipse.jdt.core.JavaCore;
  * #initializeClasspath(IJavaProject)} Sample of classpath configuration: <br>
  *
  * <pre>
- *     IClasspathEntry jreContainer = JavaCore.newContainerEntry(new Path(JREContainerInitializer.JRE_CONTAINER));
+ *     IClasspathEntry jreContainer = JavaCore.newContainerEntry(new
+ * Path(JREContainerInitializer.JRE_CONTAINER));
  *     javaProject.setRawClasspath(new IClasspathEntry[]{jreContainer}, null);
  * </pre>
  *
@@ -42,19 +45,18 @@ public abstract class AbstractJavaInitHandler implements ProjectInitHandler {
 
   private ResourcesPlugin plugin;
 
-  private FsPaths fsPaths;
+  private PathTransformer pathTransformer;
 
   @Inject
-  void init(ResourcesPlugin plugin, FsPaths fsPaths) {
+  void init(ResourcesPlugin plugin, PathTransformer pathTransformer) {
     this.plugin = plugin;
-    this.fsPaths = fsPaths;
+    this.pathTransformer = pathTransformer;
   }
 
   @Override
   public final void onProjectInitialized(String wsPath)
       throws ServerException, ForbiddenException, ConflictException, NotFoundException {
-    IProject project =
-        ResourcesPlugin.getWorkspace().getRoot().getProject(fsPaths.absolutize(wsPath));
+    IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(absolutize(wsPath));
     IJavaProject javaProject = JavaCore.create(project);
     initializeClasspath(javaProject);
   }
