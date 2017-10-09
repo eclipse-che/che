@@ -105,8 +105,15 @@ public class JavaLanguageServerLauncher extends LanguageServerLauncherTemplate
     LanguageServerDescription description =
         new LanguageServerDescription(
             "org.eclipse.che.plugin.java.languageserver",
-            Arrays.asList("javaSource", "javaClass", "pom"),
-            Collections.emptyList());
+            Arrays.asList("javaSource"),
+            Collections.emptyList(),
+            Arrays.asList(
+                "glob:**/*.java",
+                "glob:**/pom.xml",
+                "glob:**/*.gradle",
+                "glob:**/.project",
+                "glob:**/.classpath",
+                "glob:**/settings/*.prefs"));
     return description;
   }
 
