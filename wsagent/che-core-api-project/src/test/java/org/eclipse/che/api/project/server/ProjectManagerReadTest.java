@@ -12,6 +12,7 @@ package org.eclipse.che.api.project.server;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
@@ -78,6 +79,7 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
         new ProjectManager(
             vfsProvider,
             projectTypeRegistry,
+            mock(WorkspaceSyncCommunication.class),
             projectRegistry,
             projectHandlerRegistry,
             null,

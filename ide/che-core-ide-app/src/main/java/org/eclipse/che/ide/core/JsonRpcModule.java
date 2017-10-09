@@ -55,5 +55,7 @@ public class JsonRpcModule extends AbstractGinModule {
 
     bind(RequestProcessor.class).to(ClientSideRequestProcessor.class);
     bind(TimeoutActionRunner.class).to(ClientSideTimeoutActionRunner.class);
+
+    bind(ServerSubscriptionBroadcaster.class).asEagerSingleton();
   }
 }

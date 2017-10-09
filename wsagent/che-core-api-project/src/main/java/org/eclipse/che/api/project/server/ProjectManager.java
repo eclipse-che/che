@@ -77,6 +77,7 @@ public class ProjectManager {
 
   private final VirtualFileSystem vfs;
   private final ProjectTypeRegistry projectTypeRegistry;
+  private final WorkspaceSyncCommunication workspaceSyncCommunication;
   private final ProjectRegistry projectRegistry;
   private final ProjectHandlerRegistry handlers;
   private final ProjectImporterRegistry importers;
@@ -92,6 +93,7 @@ public class ProjectManager {
   public ProjectManager(
       VirtualFileSystemProvider vfsProvider,
       ProjectTypeRegistry projectTypeRegistry,
+      WorkspaceSyncCommunication workspaceSyncCommunication,
       ProjectRegistry projectRegistry,
       ProjectHandlerRegistry handlers,
       ProjectImporterRegistry importers,
@@ -102,6 +104,7 @@ public class ProjectManager {
       throws ServerException {
     this.vfs = vfsProvider.getVirtualFileSystem();
     this.projectTypeRegistry = projectTypeRegistry;
+    this.workspaceSyncCommunication = workspaceSyncCommunication;
     this.projectRegistry = projectRegistry;
     this.handlers = handlers;
     this.importers = importers;
@@ -131,7 +134,7 @@ public class ProjectManager {
             projectPath -> {
               try {
                 projectRegistry.removeProjects(projectPath);
-                workspaceProjectsHolder.sync(projectRegistry);
+                workspaceProjectsHolder.sync(projectRegistry, workspaceSyncCommunication);
               } catch (ServerException e) {
                 LOG.error("Could not remove or synchronize  project: {}", projectPath);
               }
@@ -293,7 +296,7 @@ public class ProjectManager {
 
     final RegisteredProject project =
         projectRegistry.putProject(projectConfig, projectFolder, true, false);
-    workspaceProjectsHolder.sync(projectRegistry);
+    workspaceProjectsHolder.sync(projectRegistry, workspaceSyncCommunication);
     projectRegistry.fireInitHandlers(project);
 
     return project;
@@ -464,7 +467,7 @@ public class ProjectManager {
 
     final RegisteredProject project =
         projectRegistry.putProject(newConfig, baseFolder, true, false);
-    workspaceProjectsHolder.sync(projectRegistry);
+    workspaceProjectsHolder.sync(projectRegistry, workspaceSyncCommunication);
 
     projectRegistry.fireInitHandlers(project);
 
@@ -547,7 +550,7 @@ public class ProjectManager {
               registeredProject, asFolder(registeredProject.getPath()), true, false);
         }
         RegisteredProject rp = projectRegistry.putProject(project, folder, true, false);
-        workspaceProjectsHolder.sync(projectRegistry);
+        workspaceProjectsHolder.sync(projectRegistry, workspaceSyncCommunication);
         return rp;
       }
     }
@@ -558,7 +561,7 @@ public class ProjectManager {
             folder,
             true,
             false);
-    workspaceProjectsHolder.sync(projectRegistry);
+    workspaceProjectsHolder.sync(projectRegistry, workspaceSyncCommunication);
     return rp;
   }
 
@@ -637,7 +640,7 @@ public class ProjectManager {
     // delete child projects
     projectRegistry.removeProjects(apath);
 
-    workspaceProjectsHolder.sync(projectRegistry);
+    workspaceProjectsHolder.sync(projectRegistry, workspaceSyncCommunication);
   }
 
   /**

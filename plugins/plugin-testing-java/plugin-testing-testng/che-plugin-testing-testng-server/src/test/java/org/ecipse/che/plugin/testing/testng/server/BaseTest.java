@@ -10,6 +10,8 @@
  */
 package org.ecipse.che.plugin.testing.testng.server;
 
+import static org.mockito.Mockito.mock;
+
 import java.io.File;
 import java.nio.file.PathMatcher;
 import java.util.ArrayList;
@@ -24,6 +26,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.WorkspaceProjectsSyncer;
+import org.eclipse.che.api.project.server.WorkspaceSyncCommunication;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
@@ -134,6 +137,7 @@ public abstract class BaseTest {
         new ProjectManager(
             vfsProvider,
             projectTypeRegistry,
+            mock(WorkspaceSyncCommunication.class),
             projectRegistry,
             projectHandlerRegistry,
             importerRegistry,
