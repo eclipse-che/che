@@ -50,6 +50,7 @@ import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.ExtendedComp
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.ExtendedCompletionListDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.ExtendedLocationDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.HoverDto;
+import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.RenameResultDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.SignatureHelpDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.SymbolInformationDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.TextEditDto;
@@ -924,7 +925,7 @@ public class TextDocumentService {
     }
     return Collections.emptyList();
   }
-  
+
   private String getFileContent(FileContentParameters params) {
     InitializedLanguageServer server =
         languageServerRegistry.getServer(params.getLanguagesServerId());
