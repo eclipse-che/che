@@ -402,7 +402,6 @@ cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     grep -v -e "tls:" -e "insecureEdgeTerminationPolicy: Redirect" -e "termination: edge" | \
     if [ "${CHE_KEYCLOAK_DISABLED}" == "true" ]; then sed "s/    keycloak-disabled: \"false\"/    keycloak-disabled: \"true\"/" ; else cat -; fi | \
     if [ "${CHE_DEBUGGING_ENABLED}" == "true" ]; then sed "s/    remote-debugging-enabled: \"false\"/    remote-debugging-enabled: \"true\"/"; else cat -; fi | \
-    sed "$MULTI_USER_REPLACEMENT_STRING" | \
     sed "$MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING" | \
     append_after_match "env:" "${MULTI_USER_REPLACEMENT_STRING}" | \
     oc apply --force=true -f -
@@ -424,7 +423,6 @@ cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     sed "s/          imagePullPolicy:.*/          imagePullPolicy: \"${IMAGE_PULL_POLICY}\"/" | \
     if [ "${CHE_KEYCLOAK_DISABLED}" == "true" ]; then sed "s/    keycloak-disabled: \"false\"/    keycloak-disabled: \"true\"/" ; else cat -; fi | \
     if [ "${CHE_DEBUGGING_ENABLED}" == "true" ]; then sed "s/    remote-debugging-enabled: \"false\"/    remote-debugging-enabled: \"true\"/"; else cat -; fi | \
-    sed "$MULTI_USER_REPLACEMENT_STRING" | \
     sed "$MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING" | \
     append_after_match "env:" "${MULTI_USER_REPLACEMENT_STRING}" | \
     oc apply --force=true -f -
@@ -444,7 +442,6 @@ else
     if [ "${ENABLE_SSL}" == "false" ]; then grep -v -e "tls:" -e "insecureEdgeTerminationPolicy: Redirect" -e "termination: edge" ; else cat -; fi | \
     if [ "${ENABLE_SSL}" == "false" ]; then sed "s/    che.docker.server_evaluation_strategy.custom.external.protocol: https/    che.docker.server_evaluation_strategy.custom.external.protocol: http/" ; else cat -; fi | \
     if [ "${K8S_VERSION_PRIOR_TO_1_6}" == "true" ]; then sed "s/    che-openshift-precreate-subpaths: \"false\"/    che-openshift-precreate-subpaths: \"true\"/"  ; else cat -; fi | \
-    sed "$MULTI_USER_REPLACEMENT_STRING" | \
     sed "$MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING" | \
     append_after_match "env:" "${MULTI_USER_REPLACEMENT_STRING}" | \
     oc apply --force=true -f -
