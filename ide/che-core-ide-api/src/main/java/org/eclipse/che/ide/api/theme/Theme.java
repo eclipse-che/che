@@ -1550,6 +1550,12 @@ public interface Theme {
 
   String vcsStatusUntrackedColor();
 
+  String vcsChangeMarkerInsertionColor();
+
+  String vcsChangeMarkerModificationColor();
+
+  String vcsChangeMarkerDeletionColor();
+
   String editorPreferenceCategoryBackgroundColor();
 
   /**

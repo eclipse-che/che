@@ -8,33 +8,31 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.git.shared.event;
+package org.eclipse.che.api.git.shared;
 
 import java.util.List;
 import java.util.Map;
-import org.eclipse.che.api.git.shared.EditedRegion;
-import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
- * Event for indicating that Git commit operation is executed.
+ * Dto object that contains information about git index changed event.
  *
- * @author Igor Vinokur.
+ * @author Igor Vinokur
  */
 @DTO
-public interface GitCommitEvent extends GitEvent {
+public interface StatusChangedEventDto {
 
-  /** Returns Git status */
+  /** Status of the repository. */
   Status getStatus();
 
   void setStatus(Status status);
 
-  GitCommitEvent withStatus(Status status);
+  StatusChangedEventDto withStatus(Status status);
 
   /** Map of modified files and their edited regions. */
   Map<String, List<EditedRegion>> getModifiedFiles();
 
   void setModifiedFiles(Map<String, List<EditedRegion>> modifiedFiles);
 
-  GitCommitEvent withModifiedFiles(Map<String, List<EditedRegion>> modifiedFiles);
+  StatusChangedEventDto withModifiedFiles(Map<String, List<EditedRegion>> modifiedFiles);
 }

@@ -16,8 +16,8 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUC
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import org.eclipse.che.api.git.shared.Status;
-import org.eclipse.che.api.project.shared.dto.event.GitChangeEventDto;
+import org.eclipse.che.api.git.shared.FileChangedEventDto;
+import org.eclipse.che.api.git.shared.StatusChangedEventDto;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto.Type;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -52,41 +52,41 @@ public class GitCheckoutNotifier implements GitEventsSubscriber {
   }
 
   @Override
-  public void onFileUnderGitChanged(String endpointId, GitChangeEventDto dto) {}
+  public void onFileUnderGitChanged(String endpointId, FileChangedEventDto dto) {
+  }
 
   @Override
-  public void onGitStatusChanged(String endpointId, Status status) {}
+  public void onGitStatusChanged(String endpointId, StatusChangedEventDto statusChangedEventDto) {
+  }
 
   @Override
-  public void onGitCheckout(String endpointId, GitCheckoutEventDto dto) {
-    final Type type = dto.getType();
-    final String name = dto.getName();
+  public void onGitCheckout(String endpointId, GitCheckoutEventDto gitCheckoutEventDto) {
+    final Type type = gitCheckoutEventDto.getType();
+    final String name = gitCheckoutEventDto.getName();
 
     switch (type) {
-      case BRANCH:
-        {
-          Log.debug(getClass(), "Received git branch checkout event: " + name);
+      case BRANCH: {
+        Log.debug(getClass(), "Received git branch checkout event: " + name);
 
-          final NotificationManager notificationManager = notificationManagerProvider.get();
-          if (notificationManager != null) {
-            notificationManager.notify(
-                "Git operation", "Branch '" + name + "' is checked out", SUCCESS, EMERGE_MODE);
-          }
-
-          break;
+        final NotificationManager notificationManager = notificationManagerProvider.get();
+        if (notificationManager != null) {
+          notificationManager.notify(
+              "Git operation", "Branch '" + name + "' is checked out", SUCCESS, EMERGE_MODE);
         }
-      case REVISION:
-        {
-          Log.debug(getClass(), "Received git revision checkout event: " + name);
 
-          final NotificationManager notificationManager = notificationManagerProvider.get();
-          if (notificationManager != null) {
-            notificationManager.notify(
-                "Git operation", "Revision '" + name + "' is checked out", SUCCESS, EMERGE_MODE);
-          }
+        break;
+      }
+      case REVISION: {
+        Log.debug(getClass(), "Received git revision checkout event: " + name);
 
-          break;
+        final NotificationManager notificationManager = notificationManagerProvider.get();
+        if (notificationManager != null) {
+          notificationManager.notify(
+              "Git operation", "Revision '" + name + "' is checked out", SUCCESS, EMERGE_MODE);
         }
+
+        break;
+      }
     }
 
     //Update project attributes from server.

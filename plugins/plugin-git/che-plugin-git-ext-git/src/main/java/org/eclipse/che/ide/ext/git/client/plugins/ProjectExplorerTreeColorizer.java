@@ -18,8 +18,9 @@ import static org.eclipse.che.ide.api.vcs.VcsStatus.UNTRACKED;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import org.eclipse.che.api.git.shared.FileChangedEventDto;
 import org.eclipse.che.api.git.shared.Status;
-import org.eclipse.che.api.project.shared.dto.event.GitChangeEventDto;
+import org.eclipse.che.api.git.shared.StatusChangedEventDto;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -52,7 +53,7 @@ public class ProjectExplorerTreeColorizer implements GitEventsSubscriber {
   }
 
   @Override
-  public void onFileUnderGitChanged(String endpointId, GitChangeEventDto dto) {
+  public void onFileUnderGitChanged(String endpointId, FileChangedEventDto dto) {
     Tree tree = projectExplorerPresenterProvider.get().getTree();
     tree.getNodeStorage()
         .getAll()
@@ -69,14 +70,15 @@ public class ProjectExplorerTreeColorizer implements GitEventsSubscriber {
               ((ResourceNode) node)
                   .getData()
                   .asFile()
-                  .setVcsStatus(VcsStatus.from(dto.getType().toString()));
+                  .setVcsStatus(VcsStatus.from(dto.getStatus().toString()));
               tree.refresh(node);
             });
   }
 
   @Override
-  public void onGitStatusChanged(String endpointId, Status status) {
+  public void onGitStatusChanged(String endpointId, StatusChangedEventDto statusChangedEventDto) {
     Tree tree = projectExplorerPresenterProvider.get().getTree();
+    Status status = statusChangedEventDto.getStatus();
     tree.getNodeStorage()
         .getAll()
         .stream()

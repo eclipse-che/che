@@ -15,8 +15,9 @@ import com.google.inject.Singleton;
 import java.util.HashSet;
 import java.util.Set;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.git.shared.FileChangedEventDto;
 import org.eclipse.che.api.git.shared.Status;
-import org.eclipse.che.api.project.shared.dto.event.GitChangeEventDto;
+import org.eclipse.che.api.git.shared.StatusChangedEventDto;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
 
 /**
@@ -29,7 +30,7 @@ import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
 public class GitEventsHandler implements GitEventSubscribable {
 
   private static final String EVENT_GIT_FILE_CHANGED = "event/git-change";
-  private static final String EVENT_GIT_STATUS_CHANGED = "event/git/indexChanged";
+  private static final String EVENT_GIT_STATUS_CHANGED = "event/git/statusChanged";
   private static final String EVENT_GIT_CHECKOUT = "event/git-checkout";
 
   private final Set<GitEventsSubscriber> subscribers = new HashSet<>();
@@ -43,14 +44,14 @@ public class GitEventsHandler implements GitEventSubscribable {
     configurator
         .newConfiguration()
         .methodName(EVENT_GIT_FILE_CHANGED)
-        .paramsAsDto(GitChangeEventDto.class)
+        .paramsAsDto(FileChangedEventDto.class)
         .noResult()
         .withBiConsumer(this::onFileChangedHandler);
 
     configurator
         .newConfiguration()
         .methodName(EVENT_GIT_STATUS_CHANGED)
-        .paramsAsDto(Status.class)
+        .paramsAsDto(StatusChangedEventDto.class)
         .noResult()
         .withBiConsumer(this::onStatusChangedHandler);
 
@@ -62,15 +63,15 @@ public class GitEventsHandler implements GitEventSubscribable {
         .withBiConsumer(this::onCheckoutHandler);
   }
 
-  private void onFileChangedHandler(String endpointId, GitChangeEventDto gitChangeEventDto) {
+  private void onFileChangedHandler(String endpointId, FileChangedEventDto fileChangedEventDto) {
     for (GitEventsSubscriber subscriber : subscribers) {
-      subscriber.onFileUnderGitChanged(endpointId, gitChangeEventDto);
+      subscriber.onFileUnderGitChanged(endpointId, fileChangedEventDto);
     }
   }
 
-  private void onStatusChangedHandler(String endpointId, Status status) {
+  private void onStatusChangedHandler(String endpointId, StatusChangedEventDto statusChangedEventDto) {
     for (GitEventsSubscriber subscriber : subscribers) {
-      subscriber.onGitStatusChanged(endpointId, status);
+      subscriber.onGitStatusChanged(endpointId, statusChangedEventDto);
     }
   }
 

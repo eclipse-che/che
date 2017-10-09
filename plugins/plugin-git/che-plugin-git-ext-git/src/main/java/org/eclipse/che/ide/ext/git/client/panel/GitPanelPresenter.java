@@ -19,8 +19,8 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-import org.eclipse.che.api.git.shared.Status;
-import org.eclipse.che.api.project.shared.dto.event.GitChangeEventDto;
+import org.eclipse.che.api.git.shared.FileChangedEventDto;
+import org.eclipse.che.api.git.shared.StatusChangedEventDto;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
@@ -163,14 +163,15 @@ public class GitPanelPresenter extends BasePresenter
     }
   }
 
+  // TODO handle git events
   @Override
-  public void onFileUnderGitChanged(String endpointId, GitChangeEventDto dto) {
-    Log.info(getClass(), "FILE_UNDER_GIT: " + dto.getType() + ':' + dto.getPath());
+  public void onFileUnderGitChanged(String endpointId, FileChangedEventDto dto) {
+    Log.info(getClass(), "FILE_UNDER_GIT: " + dto.getStatus() + ':' + dto.getPath());
   }
 
   @Override
-  public void onGitStatusChanged(String endpointId, Status status) {
-    Log.info(getClass(), "STATUS_CHANGED: " + status);
+  public void onGitStatusChanged(String endpointId, StatusChangedEventDto dto) {
+    Log.info(getClass(), "STATUS_CHANGED: " + dto.getStatus());
   }
 
   @Override

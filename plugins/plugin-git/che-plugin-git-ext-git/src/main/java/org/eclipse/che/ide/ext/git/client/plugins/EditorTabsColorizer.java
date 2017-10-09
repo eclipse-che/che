@@ -17,12 +17,15 @@ import static org.eclipse.che.ide.api.vcs.VcsStatus.UNTRACKED;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import org.eclipse.che.api.git.shared.FileChangedEventDto;
 import org.eclipse.che.api.git.shared.Status;
-import org.eclipse.che.api.project.shared.dto.event.GitChangeEventDto;
+import org.eclipse.che.api.git.shared.StatusChangedEventDto;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.parts.EditorMultiPartStack;
 import org.eclipse.che.ide.api.parts.EditorTab;
+import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.api.vcs.HasVcsChangeMarkerRender;
 import org.eclipse.che.ide.api.vcs.VcsStatus;
 import org.eclipse.che.ide.ext.git.client.GitEventSubscribable;
 import org.eclipse.che.ide.ext.git.client.GitEventsSubscriber;
@@ -50,17 +53,21 @@ public class EditorTabsColorizer implements GitEventsSubscriber {
   }
 
   @Override
-  public void onFileUnderGitChanged(String endpointId, GitChangeEventDto dto) {
+  public void onFileUnderGitChanged(String endpointId, FileChangedEventDto dto) {
     editorAgentProvider
         .get()
         .getOpenedEditors()
         .stream()
         .filter(
             editor ->
-                editor.getEditorInput().getFile().getLocation().equals(Path.valueOf(dto.getPath())))
+                editor.getEditorInput().getFile().getLocation().equals(Path.valueOf(dto.getPath()))
+                    && editor instanceof HasVcsChangeMarkerRender)
         .forEach(
             editor -> {
-              VcsStatus vcsStatus = VcsStatus.from(dto.getType().toString());
+              VcsStatus vcsStatus = VcsStatus.from(dto.getStatus().toString());
+              // set vcs status to editor file
+              ((File) editor.getEditorInput().getFile())
+                  .setVcsStatus(VcsStatus.from(dto.getStatus().toString()));
               EditorTab tab = multiPartStackProvider.get().getTabByPart(editor);
               if (vcsStatus != null) {
                 tab.setTitleColor(vcsStatus.getColor());
@@ -69,10 +76,13 @@ public class EditorTabsColorizer implements GitEventsSubscriber {
   }
 
   @Override
-  public void onGitStatusChanged(String endpointId, Status status) {
+  public void onGitStatusChanged(String endpointId, StatusChangedEventDto statusChangedEventDto) {
+    Status status = statusChangedEventDto.getStatus();
     editorAgentProvider
         .get()
         .getOpenedEditors()
+        .stream()
+        .filter(editor -> editor instanceof HasVcsChangeMarkerRender)
         .forEach(
             editor -> {
               EditorTab tab = multiPartStackProvider.get().getTabByPart(editor);
@@ -91,5 +101,6 @@ public class EditorTabsColorizer implements GitEventsSubscriber {
   }
 
   @Override
-  public void onGitCheckout(String endpointId, GitCheckoutEventDto dto) {}
+  public void onGitCheckout(String endpointId, GitCheckoutEventDto dto) {
+  }
 }

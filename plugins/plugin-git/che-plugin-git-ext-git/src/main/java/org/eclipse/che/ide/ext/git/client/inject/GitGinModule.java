@@ -17,8 +17,12 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistrar;
+import org.eclipse.che.ide.ext.git.client.GitChangeMarker;
 import org.eclipse.che.ide.ext.git.client.GitEventSubscribable;
 import org.eclipse.che.ide.ext.git.client.GitEventsHandler;
+import org.eclipse.che.ide.api.vcs.VcsChangeMarkerRender;
+import org.eclipse.che.ide.api.vcs.VcsChangeMarkerRenderFactory;
+import org.eclipse.che.ide.ext.git.client.GitChangeMarkerRender;
 import org.eclipse.che.ide.ext.git.client.add.AddToIndexView;
 import org.eclipse.che.ide.ext.git.client.add.AddToIndexViewImpl;
 import org.eclipse.che.ide.ext.git.client.branch.BranchView;
@@ -81,6 +85,11 @@ public class GitGinModule extends AbstractGinModule {
         .addBinding()
         .to(CommitterPreferencePresenter.class);
 
+    install(
+        new GinFactoryModuleBuilder()
+            .implement(VcsChangeMarkerRender.class, GitChangeMarkerRender.class)
+            .build(VcsChangeMarkerRenderFactory.class));
+
     bind(AddToIndexView.class).to(AddToIndexViewImpl.class).in(Singleton.class);
     bind(ResetToCommitView.class).to(ResetToCommitViewImpl.class).in(Singleton.class);
     bind(RevertCommitView.class).to(RevertCommitViewImpl.class).in(Singleton.class);
@@ -111,5 +120,6 @@ public class GitGinModule extends AbstractGinModule {
 
     bind(ProjectExplorerTreeColorizer.class).asEagerSingleton();
     bind(EditorTabsColorizer.class).asEagerSingleton();
+    bind(GitChangeMarker.class).asEagerSingleton();
   }
 }

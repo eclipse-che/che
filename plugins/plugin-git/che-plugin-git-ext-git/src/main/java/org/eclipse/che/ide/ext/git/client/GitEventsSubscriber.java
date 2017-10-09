@@ -10,8 +10,8 @@
  */
 package org.eclipse.che.ide.ext.git.client;
 
-import org.eclipse.che.api.git.shared.Status;
-import org.eclipse.che.api.project.shared.dto.event.GitChangeEventDto;
+import org.eclipse.che.api.git.shared.FileChangedEventDto;
+import org.eclipse.che.api.git.shared.StatusChangedEventDto;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
 
 /**
@@ -22,10 +22,10 @@ import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
 public interface GitEventsSubscriber {
 
   /** Invoked when a file which is added to git was changed */
-  void onFileUnderGitChanged(String endpointId, GitChangeEventDto dto);
+  void onFileUnderGitChanged(String endpointId, FileChangedEventDto dto);
 
   /** Invoked when git status of project was changed */
-  void onGitStatusChanged(String endpointId, Status status);
+  void onGitStatusChanged(String endpointId, StatusChangedEventDto dto);
 
   /** Invoked when git checkout was performed */
   void onGitCheckout(String endpointId, GitCheckoutEventDto dto);
