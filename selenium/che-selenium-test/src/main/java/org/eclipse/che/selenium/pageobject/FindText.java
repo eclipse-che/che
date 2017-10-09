@@ -65,6 +65,9 @@ public class FindText {
     String HIDE_FIND_PANEL =
         "//div[@id='gwt-debug-find-info-panel']//div[text()='Find']/following::div[3]";
     String OCCURRENCE = "//span[@debugfilepath = '%s']";
+    String PREVIOUS_BUTTON = "gwt-debug-previous-button";
+    String NEXT_BUTTON = "gwt-debug-next-button";
+    String RESULTS = "gwt-debug-search-result-label";
   }
 
   @FindBy(id = Locators.WHOLE_WORD_CHECKLBOX_INP)
@@ -463,5 +466,17 @@ public class FindText {
     loader.waitOnClosed();
     actionsFactory.createAction(seleniumWebDriver).sendKeys(command).perform();
     loader.waitOnClosed();
+  }
+
+  public void clickOnPreviousButton() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOfElementLocated(By.id(Locators.PREVIOUS_BUTTON)))
+        .click();
+  }
+
+  public void clickOnNextButton() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOfElementLocated(By.id(Locators.NEXT_BUTTON)))
+        .click();
   }
 }
