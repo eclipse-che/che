@@ -26,6 +26,20 @@ public interface Gutter {
   /**
    * Adds a gutter item.
    *
+   * @param lineStart the first line of the item
+   * @param lineEnd the last line of the item
+   * @param gutterId the gutter identifier
+   * @param element the (DOM) element to add
+   */
+  default void addGutterItem(int lineStart, int lineEnd, String gutterId, Element element) {
+    for (int i = lineStart; i <= lineEnd; i++) {
+      addGutterItem(i, gutterId, element);
+    }
+  }
+
+  /**
+   * Adds a gutter item.
+   *
    * @param line the line for the item
    * @param gutterId the gutter identifier
    * @param element the (DOM) element to add
