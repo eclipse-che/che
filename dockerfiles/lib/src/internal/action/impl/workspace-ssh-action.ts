@@ -49,7 +49,7 @@ export class WorkspaceSshAction {
     workspace : Workspace;
     constructor(args:Array<string>) {
         this.args = ArgumentProcessor.inject(this, args);
-        this.authData = AuthData.parse(this.url, this.username, this.password);
+        this.authData = new AuthData(this.url, this.username, this.password);
         // disable printing info
         this.authData.printInfo = false;
         Log.disablePrefix();
@@ -70,8 +70,6 @@ export class WorkspaceSshAction {
         return this.authData.login().then(() => {
 
             let foundWorkspaceDTO : org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
-
-            let foundConfigMachineDTO;
 
             // then, search workspace
             return this.workspace.searchWorkspace(this.workspaceName).then((workspaceDto) => {
@@ -114,12 +112,12 @@ export class WorkspaceSshAction {
                 let address: Array<string> = runtime.getServers().get("22/tcp").getProperties().getInternalAddress().split(":");
                 let ip:string = address[0];
                 let port:string = address[1];
-                var spawn = require('child_process').spawn;
+                let spawn = require('child_process').spawn;
 
                 let username:string = user + "@" + ip;
                 let cmd : string = "$(cat >>/tmp/ssh.key <<EOF\n" +  sshPairDto.getPrivateKey() + "\nEOF\n) && chmod 600 /tmp/ssh.key && ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no " + username + " -p " + port + " -i" + " /tmp/ssh.key";
                 Log.getLogger().debug('command is', cmd);
-                var p = spawn("docker", ["run", "-ti", "codenvy/alpine_jdk8", "bash", "-c" , cmd], {
+                let p = spawn("docker", ["run", "-ti", "codenvy/alpine_jdk8", "bash", "-c", cmd], {
                     stdio: 'inherit'
                 });
 

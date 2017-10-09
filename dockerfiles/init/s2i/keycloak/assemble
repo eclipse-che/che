@@ -1,0 +1,43 @@
+#!/bin/bash
+# Copyright (c) 2012-2017 Red Hat, Inc
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+
+set -e
+
+if [ "${CHE_SERVER_URL}" == "" ]; then
+    echo "the 'CHE_SERVER_URL' environment variable should be set to the external URL that gives access to CHE"
+    exit 1
+fi
+
+echo "Current directory: $(pwd)"
+
+echo "Directory contents of /tmp/src:"
+ls -a /tmp/src
+echo ""
+
+echo "Directory contents of /tmp/src/themes:"
+ls -al /tmp/src/themes
+echo ""
+
+echo "Directory contents of /tmp/s2i:"
+ls -a /tmp/scripts
+echo ""
+
+echo "Adding the Che Keycloak theme files in the following directory: $(pwd)/keycloak/themes/che ..."
+
+cp -Rv /tmp/src/themes/che/ $(pwd)/keycloak/themes/
+chmod -R 755 $(pwd)/keycloak/themes/che
+
+echo ""
+echo "Adding the Che configuration to import into directory: $(pwd)/keycloak/realms ..."
+mkdir -p $(pwd)/keycloak/realms
+
+cat /tmp/src/realms/che-realm.json.erb | sed -e "s@<%= scope\.lookupvar('che::che_server_url') %>@${CHE_SERVER_URL}@" \
+> $(pwd)/keycloak/realms/che-realm.json && \
+cp -v /tmp/src/realms/che-users-0.json.erb $(pwd)/keycloak/realms/che-users-0.json && \
+cp -v /tmp/src/realms/master-realm.json.erb $(pwd)/keycloak/realms/master-realm.json && \
+cp -v /tmp/src/realms/master-users-0.json.erb $(pwd)/keycloak/realms/master-users-0.json

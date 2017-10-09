@@ -19,7 +19,6 @@ import com.google.inject.MembersInjector;
 import com.google.inject.Provider;
 import com.google.inject.name.Names;
 import java.lang.reflect.Field;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
 
 /**
@@ -50,7 +49,7 @@ public class TestWorkspaceInjector<T> implements MembersInjector<T> {
     try {
       TestUser testUser =
           isNullOrEmpty(injectTestWorkspace.user())
-              ? injector.getInstance(DefaultTestUser.class)
+              ? injector.getInstance(TestUser.class)
               : findInjectedUser(instance, injectTestWorkspace.user());
 
       int memoryGb =

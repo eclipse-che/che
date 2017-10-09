@@ -10,6 +10,8 @@ set -e
 set -u
 
 IMAGE_ALIASES=${IMAGE_ALIASES:-}
+ERROR=${ERROR:-}
+DIR=${DIR:-}
 
 skip_tests() {
   if [ $SKIP_TESTS = "true" ]; then
@@ -74,7 +76,9 @@ init() {
 }
 
 build() {
-  DIR=$(cd "$(dirname "$0")"; pwd)
+  if [ -z $DIR ]; then
+      DIR=$(cd "$(dirname "$0")"; pwd)
+  fi
   printf "${BOLD}Building Docker Image ${IMAGE_NAME} from $DIR directory with tag $TAG${NC}\n"
   # Replace macros in Dockerfiles
   cat ${DIR}/Dockerfile | sed s/\$\{BUILD_ORGANIZATION\}/${ORGANIZATION}/ | sed s/\$\{BUILD_PREFIX\}/${PREFIX}/ | sed s/\$\{BUILD_TAG\}/${TAG}/ > ${DIR}/.Dockerfile

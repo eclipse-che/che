@@ -14,10 +14,10 @@ init --name:cli "$@"
 IMAGE_ALIASES="${ORGANIZATION}/${PREFIX}"
 
 if [[ ! -f "${base_dir}/version/$TAG/images" ]]; then
-	mkdir -p ${base_dir}/version/$TAG/
+    mkdir -p ${base_dir}/version/$TAG/
+    cat ${base_dir}/images.template | sed s/\$\{BUILD_ORGANIZATION\}/${ORGANIZATION}/ | sed s/\$\{BUILD_PREFIX\}/${PREFIX}/ | sed s/\$\{BUILD_TAG\}/${TAG}/ > ${base_dir}/version/$TAG/images
 fi
 
-cat ${base_dir}/images.template | sed s/\$\{BUILD_ORGANIZATION\}/${ORGANIZATION}/ | sed s/\$\{BUILD_PREFIX\}/${PREFIX}/ | sed s/\$\{BUILD_TAG\}/${TAG}/ > ${base_dir}/version/$TAG/images
 
 build
 

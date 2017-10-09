@@ -18,11 +18,32 @@ import org.eclipse.lsp4j.TextDocumentIdentifier;
  * @author Kaloyan Raev
  */
 public class LatestCompletionResult {
+  public static final LatestCompletionResult NO_RESULT =
+      new LatestCompletionResult(null, 0, null, null);
 
   private TextDocumentIdentifier documentId;
   private int offset;
   private String word;
   private ExtendedCompletionList completionList;
+
+  /**
+   * Construct a new LatestCompletionResult
+   *
+   * @param documentId a text document identifier
+   * @param offset an offset position in the document
+   * @param word the word at the current position in the document
+   * @param completionList a completion list
+   */
+  public LatestCompletionResult(
+      TextDocumentIdentifier documentId,
+      int offset,
+      String word,
+      ExtendedCompletionList completionList) {
+    this.documentId = documentId;
+    this.offset = offset;
+    this.word = word;
+    this.completionList = completionList;
+  }
 
   /**
    * Returns the identifier of document used to compute the latest completion result.
@@ -89,27 +110,9 @@ public class LatestCompletionResult {
   public boolean isGoodFor(TextDocumentIdentifier documentId, int offset, String word) {
     return completionList != null
         && !completionList.isInComplete()
+        && this.documentId != null
         && this.documentId.getUri().equals(documentId.getUri())
         && word.startsWith(this.word)
         && offset - this.offset == word.length() - this.word.length();
-  }
-
-  /**
-   * Updates the latest completion result.
-   *
-   * @param documentId a text document identifier
-   * @param offset an offset position in the document
-   * @param word the word at the current position in the document
-   * @param completionList a completion list
-   */
-  public void update(
-      TextDocumentIdentifier documentId,
-      int offset,
-      String word,
-      ExtendedCompletionList completionList) {
-    this.documentId = documentId;
-    this.offset = offset;
-    this.word = word;
-    this.completionList = completionList;
   }
 }
