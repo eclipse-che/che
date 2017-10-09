@@ -127,39 +127,27 @@ public class LanguageServerExtension {
       final LanguageServerRegistry lsRegistry) {
     eventBus.addHandler(
         FileEvent.TYPE,
-        new FileEvent.FileEventHandler() {
-
-          @Override
-          public void onFileOperation(final FileEvent event) {
-            Path location = event.getFile().getLocation();
-            if (lsRegistry.getLanguageDescription(event.getFile()) == null) {
-              return;
-            }
-            final TextDocumentIdentifier documentId =
-                dtoFactory.createDto(TextDocumentIdentifier.class);
-            documentId.setUri(location.toString());
-            switch (event.getOperationType()) {
-              case OPEN:
-                onOpen(event, dtoFactory, serviceClient, lsRegistry);
-                break;
-              case CLOSE:
-                onClose(documentId, dtoFactory, serviceClient);
-                break;
-              case SAVE:
-                onSave(documentId, dtoFactory, serviceClient);
-                break;
-            }
+        event -> {
+          Path location = event.getFile().getLocation();
+          if (lsRegistry.getLanguageDescription(event.getFile()) == null) {
+            return;
           }
-          //            onOpen(event.getEditor(), event.getFile(), dtoFactory, serviceClient,
-          // fileTypeRegister);
+          final TextDocumentIdentifier documentId =
+              dtoFactory.createDto(TextDocumentIdentifier.class);
+          documentId.setUri(location.toString());
+          switch (event.getOperationType()) {
+            case OPEN:
+              onOpen(event, dtoFactory, serviceClient, lsRegistry);
+              break;
+            case CLOSE:
+              onClose(documentId, dtoFactory, serviceClient);
+              break;
+            case SAVE:
+              onSave(documentId, dtoFactory, serviceClient);
+              break;
+          }
         });
   }
-
-  //    private boolean checkIsLSExist(Path location, LanguageServerFileTypeRegister
-  // fileTypeRegister){
-  //        return !(location.getFileExtension() == null ||
-  // !fileTypeRegister.hasLSForExtension(location.getFileExtension()));
-  //    }
 
   private void onSave(
       TextDocumentIdentifier documentId,

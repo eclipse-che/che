@@ -90,7 +90,7 @@ public class ChangeNode extends AbstractPresentationNode implements HasAction {
     String matchedLine = change.getTextEdit().getLineText();
     int startOffset = change.getTextEdit().getInLineStart();
     int endOffset = change.getTextEdit().getInLineEnd();
-    if (matchedLine != null /*&& matchInLine != null*/) {
+    if (matchedLine != null) {
       String startLine = matchedLine.substring(0, startOffset);
       textElement.appendChild(Elements.createTextNode(startLine));
       SpanElement highlightElement =
@@ -104,7 +104,6 @@ public class ChangeNode extends AbstractPresentationNode implements HasAction {
     }
     spanElement.appendChild(textElement);
 
-    //    presentation.setPresentableIcon(resources.searchMatch());
     presentation.setUserElement((Element) spanElement);
   }
 
