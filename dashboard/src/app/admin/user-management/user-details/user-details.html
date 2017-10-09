@@ -4,9 +4,12 @@
 </che-toolbar>
 
 <md-content md-scroll-y flex md-theme="default">
-  <md-tabs md-dynamic-height md-stretch-tabs="auto"
+  <md-tabs md-dynamic-height
+           md-disable-animation
+           md-stretch-tabs="auto"
            md-selected="adminUserDetailsController.selectedTabIndex"
-           md-center-tabs="">
+           md-center-tabs="false"
+           md-no-ink-bar>
 
     <!-- User Profile Tab -->
     <md-tab md-on-select="adminUserDetailsController.onSelectTab(adminUserDetailsController.tab.Profile);">

@@ -58,6 +58,7 @@ public class LimitsCheckingWorkspaceManagerTest {
   @Mock private ResourceUsageManager resourceUsageManager;
 
 /*  @Test
+  @Test
   public void shouldUseRamOfSpecifiedEnvironmentOnCheckingAvailabilityOfRamResource()
       throws Exception {
     //given

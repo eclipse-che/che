@@ -32,6 +32,7 @@ import org.eclipse.che.api.git.shared.CheckoutRequest;
 import org.eclipse.che.api.git.shared.CloneRequest;
 import org.eclipse.che.api.git.shared.CommitRequest;
 import org.eclipse.che.api.git.shared.DiffType;
+import org.eclipse.che.api.git.shared.EditedRegion;
 import org.eclipse.che.api.git.shared.FetchRequest;
 import org.eclipse.che.api.git.shared.LogResponse;
 import org.eclipse.che.api.git.shared.MergeRequest;
@@ -76,6 +77,7 @@ public class GitServiceClientImpl implements GitServiceClient {
   private static final String COMMIT = "/git/commit";
   private static final String CONFIG = "/git/config";
   private static final String DIFF = "/git/diff";
+  private static final String EDITS = "/git/edits";
   private static final String FETCH = "/git/fetch";
   private static final String INIT = "/git/init";
   private static final String LOG = "/git/log";
@@ -438,6 +440,20 @@ public class GitServiceClientImpl implements GitServiceClient {
       boolean cached) {
     return diff(project, files, type, noRenames, renameLimit, commitA, null, cached)
         .send(new StringUnmarshaller());
+  }
+
+  @Override
+  public Promise<List<EditedRegion>> getEditedRegions(Path project, Path filePath) {
+    String url =
+        getWsAgentBaseUrl()
+            + EDITS
+            + "?projectPath="
+            + encodePath(project)
+            + "&filePath="
+            + encodePath(filePath);
+    return asyncRequestFactory
+        .createGetRequest(url)
+        .send(dtoUnmarshallerFactory.newListUnmarshaller(EditedRegion.class));
   }
 
   private AsyncRequest diff(

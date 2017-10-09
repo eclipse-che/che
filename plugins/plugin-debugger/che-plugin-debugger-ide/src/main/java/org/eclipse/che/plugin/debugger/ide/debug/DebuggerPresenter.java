@@ -245,8 +245,9 @@ public class DebuggerPresenter extends BasePresenter
       promise
           .then(
               stackFrameDump -> {
-                if (threadId == view.getSelectedThreadId()
-                    && frameIndex == view.getSelectedFrameIndex()) {
+                if ((threadId == view.getSelectedThreadId()
+                        && frameIndex == view.getSelectedFrameIndex())
+                    || view.getSelectedThreadId() == -1) {
 
                   variables = new LinkedList<>();
                   variables.addAll(stackFrameDump.getFields());

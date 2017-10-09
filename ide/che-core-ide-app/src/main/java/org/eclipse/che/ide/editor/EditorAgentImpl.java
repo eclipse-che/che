@@ -345,6 +345,8 @@ public class EditorAgentImpl
             removeFromOpeningFilesList(file.getLocation(), editorPartStack);
 
             openEditorCallback.onEditorOpened(editor);
+
+            eventBus.fireEvent(new EditorOpenedEvent(file, editor));
           }
 
           @Override
@@ -381,7 +383,6 @@ public class EditorAgentImpl
             }
 
             eventBus.fireEvent(FileEvent.createFileOpenedEvent(file));
-            eventBus.fireEvent(new EditorOpenedEvent(file, editor));
           }
         });
   }
@@ -742,6 +743,8 @@ public class EditorAgentImpl
 
                   promiseCallback.onSuccess(null);
                   openEditorCallback.onEditorOpened(editor);
+
+                  eventBus.fireEvent(new EditorOpenedEvent(file, editor));
                 }
 
                 @Override

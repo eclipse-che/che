@@ -12,14 +12,16 @@
 
 <md-content md-scroll-y flex md-theme="default"
             ng-if="organizationDetailsController.organization">
-  <md-tabs md-dynamic-height md-stretch-tabs="auto"
+  <md-tabs md-dynamic-height
+           md-disable-animation
+           md-stretch-tabs="auto"
            md-selected="organizationDetailsController.selectedTabIndex"
+           md-center-tabs="false"
            md-no-ink-bar>
 
     <!-- Settings Tab -->
     <md-tab md-on-select="organizationDetailsController.onSelectTab(organizationDetailsController.tab.Settings);">
       <md-tab-label>
-        <md-icon md-font-icon="material-design icon-ic_settings_24px" class="che-tab-label-icon"></md-icon>
         <span class="che-tab-label-title">Settings</span>
       </md-tab-label>
       <md-tab-body>
@@ -160,7 +162,6 @@
     <!-- Members Tab -->
     <md-tab md-on-select="organizationDetailsController.onSelectTab(organizationDetailsController.tab.Members);">
       <md-tab-label>
-        <md-icon md-font-icon="fa-group" class="fa che-tab-label-icon"></md-icon>
         <span class="che-tab-label-title">Members</span>
       </md-tab-label>
       <md-tab-body>
@@ -175,7 +176,6 @@
     <!-- Sub Organizations Tab -->
     <md-tab md-on-select="organizationDetailsController.onSelectTab(organizationDetailsController.tab.Organization);">
       <md-tab-label>
-        <md-icon md-font-icon="md-font fa fa-sitemap material-icons" class="che-tab-label-icon"></md-icon>
         <span class="che-tab-label-title">Sub-Organizations</span>
       </md-tab-label>
       <md-tab-body>

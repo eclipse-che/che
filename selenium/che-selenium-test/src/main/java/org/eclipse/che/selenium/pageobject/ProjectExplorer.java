@@ -266,6 +266,46 @@ public class ProjectExplorer {
         .until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(locator)));
   }
 
+  public void waitYellowNode(String path) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(
+                    String.format(
+                        "//div[@id='gwt-debug-projectTree']//div[@path='/%s']/descendant::div[@style='%s']",
+                        path, "color: #e0b91d;"))));
+  }
+
+  public void waitGreenNode(String path) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(
+                    String.format(
+                        "//div[@id='gwt-debug-projectTree']//div[@path='/%s']/descendant::div[@style='%s']",
+                        path, "color: #72ad42;"))));
+  }
+
+  public void waitBlueNode(String path) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(
+                    String.format(
+                        "//div[@id='gwt-debug-projectTree']//div[@path='/%s']/descendant::div[@style='%s']",
+                        path, "color: #3193d4;"))));
+  }
+
+  public void waitDefaultColorNode(String path) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(
+                    String.format(
+                        "//div[@id='gwt-debug-projectTree']//div[@path='/%s']/descendant::div[@style='%s']",
+                        path, "opacity:1;"))));
+  }
+
   /**
    * wait item in project explorer tree area Note! Items must not repeat (for example: in a project
    * can be some folder. Into each folder can be a file with same name. This method will be track
