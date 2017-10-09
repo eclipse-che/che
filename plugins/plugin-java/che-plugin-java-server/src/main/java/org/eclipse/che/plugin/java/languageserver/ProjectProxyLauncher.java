@@ -35,6 +35,9 @@ public class ProjectProxyLauncher implements LanguageServerLauncher, ServerIniti
   private InitializeResult initResult;
   private Object launchLock = new Object();
   private int state = State.INIT;
+  private int launchedCount = 0;
+  private int shutDownCount = 0;
+  private int exitCount = 0;
 
   public ProjectProxyLauncher(JavaLanguageServerLauncher wrapped) {
     this.wrappedLauncher = wrapped;
@@ -72,6 +75,7 @@ public class ProjectProxyLauncher implements LanguageServerLauncher, ServerIniti
         state = State.LAUNCHING;
         launchLock.notifyAll();
       }
+      launchedCount++;
     }
     if (mustLaunch) {
       try {
@@ -230,6 +234,26 @@ public class ProjectProxyLauncher implements LanguageServerLauncher, ServerIniti
       synchronized (launchLock) {
         state = State.POST_INITIALIZED;
         launchLock.notifyAll();
+      }
+    }
+  }
+
+  public CompletableFuture<Object> shutdown() {
+    synchronized (launchLock) {
+      if (shutDownCount == launchedCount - 1) {
+        shutDownCount++;
+        return languageServer.shutdown();
+      } else {
+        return CompletableFuture.completedFuture(null);
+      }
+    }
+  }
+
+  public void exit() {
+    synchronized (launchLock) {
+      if (exitCount == launchedCount - 1) {
+        exitCount++;
+        languageServer.exit();
       }
     }
   }
