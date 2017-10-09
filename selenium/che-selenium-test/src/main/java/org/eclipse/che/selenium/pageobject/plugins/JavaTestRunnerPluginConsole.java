@@ -16,7 +16,6 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRA
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.pageobject.Consoles;
@@ -37,34 +36,30 @@ public class JavaTestRunnerPluginConsole extends Consoles {
       "//div[contains(@id,'gwt-uid')]//div[text()='%s']";
   private static final String TEST_OUTPUT_XPATH =
       "//div[@focused]//div[@id='gwt-debug-commandConsoleLines']//pre";
-  private static final String METHODS_MARKED_AS_PASSED =
-      "//div[contains(@id,'gwt-uid')]//div[@style='color: green;']";
-  private static final String METHODS_MARKED_AS_FAILED =
-      "//div[contains(@id,'gwt-uid')]//div[@style='color: red;']";
-  private static final String METHODS_MARKED_AS_IGNORED =
-      "//div[contains(@id,'gwt-uid')]//div[@style='text-decoration: line-through; color: yellow;']";
-
+  private static final String METHODS_MARKED_AS_PASSED = "gwt-debug-test-state-passed";
+  private static final String METHODS_MARKED_AS_FAILED = "gwt-debug-test-state-failed";
+  private static final String METHODS_MARKED_AS_IGNORED = "gwt-debug-test-state-ignore";
   private static final String TEST_RESULT_NAVIGATION_TREE = "gwt-debug-test-tree-navigation-panel";
 
   @FindAll({@FindBy(xpath = TEST_OUTPUT_XPATH)})
   private List<WebElement> testOutput;
 
-  @FindBy(xpath = METHODS_MARKED_AS_PASSED)
+  @FindBy(id = METHODS_MARKED_AS_PASSED)
   private WebElement passedMethod;
 
-  @FindBy(xpath = METHODS_MARKED_AS_IGNORED)
+  @FindBy(id = METHODS_MARKED_AS_IGNORED)
   private WebElement ignoredMethod;
 
-  @FindBy(xpath = METHODS_MARKED_AS_FAILED)
+  @FindBy(id = METHODS_MARKED_AS_FAILED)
   private WebElement failedMethod;
 
-  @FindAll({@FindBy(xpath = METHODS_MARKED_AS_FAILED)})
+  @FindAll({@FindBy(id = METHODS_MARKED_AS_FAILED)})
   private List<WebElement> failedMethods;
 
-  @FindAll({@FindBy(xpath = METHODS_MARKED_AS_PASSED)})
+  @FindAll({@FindBy(id = METHODS_MARKED_AS_PASSED)})
   private List<WebElement> passedMethods;
 
-  @FindAll({@FindBy(xpath = METHODS_MARKED_AS_IGNORED)})
+  @FindAll({@FindBy(id = METHODS_MARKED_AS_IGNORED)})
   private List<WebElement> ignoredMethods;
 
   @FindBy(id = TEST_RESULT_NAVIGATION_TREE)
@@ -98,7 +93,8 @@ public class JavaTestRunnerPluginConsole extends Consoles {
    */
   public void waitMethodMarkedAsFailed(String nameOfFailedMethods) {
     new WebDriverWait(seleniumWebDriver, MINIMUM_SEC)
-        .until(ExpectedConditions.textToBePresentInElement(failedMethod, nameOfFailedMethods));
+        .until(ExpectedConditions.presenceOfElementLocated(By.id(METHODS_MARKED_AS_FAILED)))
+        .findElement(By.xpath(String.format("//div[text()='%s']", nameOfFailedMethods)));
   }
 
   /**
@@ -108,7 +104,8 @@ public class JavaTestRunnerPluginConsole extends Consoles {
    */
   public void waitMethodMarkedAsIgnored(String nameOfFailedMethods) {
     new WebDriverWait(seleniumWebDriver, MINIMUM_SEC)
-        .until(ExpectedConditions.textToBePresentInElement(ignoredMethod, nameOfFailedMethods));
+        .until(ExpectedConditions.presenceOfElementLocated(By.id(METHODS_MARKED_AS_IGNORED)))
+        .findElement(By.xpath(String.format("//div[text()='%s']", nameOfFailedMethods)));
   }
 
   /**
@@ -118,7 +115,8 @@ public class JavaTestRunnerPluginConsole extends Consoles {
    */
   public void waitMethodMarkedAsPassed(String nameOfFailedMethods) {
     new WebDriverWait(seleniumWebDriver, MINIMUM_SEC)
-        .until(ExpectedConditions.textToBePresentInElement(passedMethod, nameOfFailedMethods));
+        .until(ExpectedConditions.presenceOfElementLocated(By.id(METHODS_MARKED_AS_PASSED)))
+        .findElement(By.xpath(String.format("//div[text()='%s']", nameOfFailedMethods)));
   }
 
   /**
@@ -144,43 +142,21 @@ public class JavaTestRunnerPluginConsole extends Consoles {
     List<String> definedMethods = null;
     switch (methodState) {
       case PASSED:
-        definedMethods = getAllMetodsWithDefinedStatus(passedMethods);
+        definedMethods = getNamesOfMethodsWithDefinedStatus(METHODS_MARKED_AS_PASSED);
         break;
       case FAILED:
-        definedMethods = getAllMetodsWithDefinedStatus(failedMethods);
+        definedMethods = getNamesOfMethodsWithDefinedStatus(METHODS_MARKED_AS_FAILED);
         break;
       case IGNORED:
-        definedMethods = getAllMetodsWithDefinedStatus(ignoredMethods);
+        definedMethods = getNamesOfMethodsWithDefinedStatus(METHODS_MARKED_AS_IGNORED);
         break;
     }
     return definedMethods;
   }
 
-  /**
-   * Get all defined methods from result tree and return as list WebElements.
-   *
-   * @param methodState the enumeration with defined status
-   * @return List WebElements with defined status
-   */
-  public List<WebElement> getAllMethodsMarkedDefinedStatus(JunitMethodsState methodState) {
-    List<WebElement> definedMethods = null;
-    switch (methodState) {
-      case PASSED:
-        definedMethods = passedMethods;
-        break;
-      case FAILED:
-        definedMethods = failedMethods;
-        break;
-      case IGNORED:
-        definedMethods = ignoredMethods;
-        break;
-    }
-    return definedMethods;
-  }
-
-  private List<String> getAllMetodsWithDefinedStatus(List<WebElement> definedMethod) {
+  private List<String> getNamesOfMethodsWithDefinedStatus(String definedMethod) {
     return new WebDriverWait(seleniumWebDriver, MINIMUM_SEC)
-        .until(ExpectedConditions.visibilityOfAllElements(definedMethod))
+        .until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.id(definedMethod)))
         .stream()
         .map(WebElement::getText)
         .collect(Collectors.toList());
@@ -212,17 +188,39 @@ public class JavaTestRunnerPluginConsole extends Consoles {
   }
 
   /**
-   * Click on faled, passed or ignored method on the result tree.
+   * Click on failed, passed or ignored method of the result tree. If in the result tree will be
+   * methods with the same statuses and names - will be selected first method in the DOM methods
+   * with the same statuses and names - will be selected first method in the DOM
    *
    * @param nameOfMethod
-   * @param state
+   * @param methodState
    */
-  public void selectMethodWithDefinedStatus(JunitMethodsState state, String nameOfMethod) {
-    getAllMethodsMarkedDefinedStatus(state)
-        .stream()
-        .filter(webElement -> Objects.equals(webElement.getText(), nameOfMethod))
-        .findFirst()
-        .get()
-        .click();
+  public void selectMethodWithDefinedStatus(JunitMethodsState methodState, String nameOfMethod) {
+    WebDriverWait wait = new WebDriverWait(seleniumWebDriver, MINIMUM_SEC);
+    switch (methodState) {
+      case PASSED:
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id(METHODS_MARKED_AS_PASSED)))
+            .findElement(
+                By.xpath(
+                    String.format("//div[@style='color: green;' and text()='%s']", nameOfMethod)))
+            .click();
+        break;
+      case FAILED:
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id(METHODS_MARKED_AS_FAILED)))
+            .findElement(
+                By.xpath(
+                    String.format("//div[@style='color: red;' and text()='%s']", nameOfMethod)))
+            .click();
+        break;
+      case IGNORED:
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id(METHODS_MARKED_AS_IGNORED)))
+            .findElement(
+                By.xpath(
+                    String.format(
+                        "//div[@style[contains(.,'color: yellow')] and text()='%s']",
+                        nameOfMethod)))
+            .click();
+        break;
+    }
   }
 }

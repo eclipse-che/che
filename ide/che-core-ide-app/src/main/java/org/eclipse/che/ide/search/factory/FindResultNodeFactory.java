@@ -10,10 +10,8 @@
  */
 package org.eclipse.che.ide.search.factory;
 
-import java.util.List;
 import org.eclipse.che.api.project.shared.SearchOccurrence;
-import org.eclipse.che.ide.api.resources.SearchResult;
-import org.eclipse.che.ide.search.presentation.FindResultGroupNode;
+import org.eclipse.che.ide.api.resources.SearchItemReference;
 import org.eclipse.che.ide.search.presentation.FoundItemNode;
 import org.eclipse.che.ide.search.presentation.FoundOccurrenceNode;
 
@@ -24,15 +22,20 @@ import org.eclipse.che.ide.search.presentation.FoundOccurrenceNode;
  */
 public interface FindResultNodeFactory {
   /**
-   * Create new instance of {@link FindResultGroupNode}.
+   * Create new instance of {@link FoundItemNode}.
    *
-   * @param result list of files with occurrences
+   * @param searchItemReference the result of the search operation
    * @param request requested text to search
-   * @return new instance of {@link FindResultGroupNode}
+   * @return new instance of {@link FoundItemNode}
    */
-  FindResultGroupNode newResultNode(List<SearchResult> result, String request);
+  FoundItemNode newFoundItemNode(SearchItemReference searchItemReference, String request);
 
-  FoundItemNode newFoundItemNode(SearchResult searchResult, String request);
-
+  /**
+   * Create new instance of {@link FoundOccurrenceNode}.
+   *
+   * @param searchOccurrence linforamtion about occurrence
+   * @param itemPath path to the file resource
+   * @return new instance of {@link FoundOccurrenceNode}
+   */
   FoundOccurrenceNode newFoundOccurrenceNode(SearchOccurrence searchOccurrence, String itemPath);
 }

@@ -9,6 +9,8 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
+
 function sayHello($name) {
-    return "Hello, " + $name;
+    return "Hello, $name";
 }
+?>

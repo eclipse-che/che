@@ -15,14 +15,14 @@
     position: absolute;
     top: 0;
     left: -16px;
-    right: -5px;
+    right: -13px;
     height: 15px;
 }
 
 .breakpoint:after {
     content: "";
     position: absolute;
-    right: -12px;
+    right: -19px;
     z-index: 1;
     width: 0;
     height: 0;

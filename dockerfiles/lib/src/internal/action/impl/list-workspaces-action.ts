@@ -14,7 +14,6 @@ import {ArgumentProcessor} from "../../../spi/decorator/argument-processor";
 import {Workspace} from "../../../api/wsmaster/workspace/workspace";
 import {AuthData} from "../../../api/wsmaster/auth/auth-data";
 import {Parameter} from "../../../spi/decorator/parameter";
-import {CreateWorkspaceConfig} from "../../../api/wsmaster/workspace/workspace";
 import {Log} from "../../../spi/log/log";
 import {DefaultAsciiArray} from "../../../spi/ascii/default-ascii-array";
 import {AsciiArray} from "../../../spi/ascii/ascii-array";
@@ -51,7 +50,7 @@ export class ListWorkspacesAction {
     constructor(args:Array<string>) {
         ArgumentProcessor.inject(this, args);
 
-        this.authData = AuthData.parse(this.url, this.username, this.password);
+        this.authData = new AuthData(this.url, this.username, this.password);
         this.workspace = new Workspace(this.authData);
     }
 
@@ -60,15 +59,12 @@ export class ListWorkspacesAction {
         return this.authData.login().then(() => {
             return this.workspace.getWorkspaces()
                 .then((workspaceDtos:Array<org.eclipse.che.api.workspace.shared.dto.WorkspaceDto>) => {
-
                     // Create Ascii array
-                    let rows : Array<Array<string>> = new Array<Array<string>>();
+                    let rows : Array<Array<string>> = [];
                     workspaceDtos.forEach((workspaceDto : any) => {
                         rows.push([workspaceDto.getConfig().getName(), workspaceDto.getId(), workspaceDto.getStatus()]);
                     });
-
                     let asciiArray : AsciiArray  = new DefaultAsciiArray().withRows(rows).withFormatter(this.formatterMode).withTitles("name", "id", "status").withShowTitles(!this.formatSkipTitles).withFormatColumns(this.formatColumns);
-
                     Log.getLogger().direct(asciiArray.toAscii());
 
                 });

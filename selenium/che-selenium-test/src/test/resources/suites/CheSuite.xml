@@ -12,9 +12,9 @@
 -->
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 <suite name="Eclipse Che selenium tests"
-  verbose="10"
-  parallel="classes"
-  thread-count="4">
+       verbose="10"
+       parallel="classes"
+       thread-count="4">
 
     <test name="all">
         <classes>
@@ -85,7 +85,6 @@
             <class name="org.eclipse.che.selenium.debugger.NodeJsDebugTest">
                 <methods>
                     <exclude name="debugNodeJsTest"/>
-                    <exclude name="checkCleanStoragedAfterEndDebugSession"/>
                 </methods>
             </class>
             <class name="org.eclipse.che.selenium.debugger.PhpProjectDebuggingTest"/>
@@ -205,6 +204,8 @@
             <class name="org.eclipse.che.selenium.git.CheckoutToRemoteBranchWhichAlreadyHasLinkedLocalBranchTest"/>
             <class name="org.eclipse.che.selenium.git.CommitFilesByMultiSelectTest"/>
             <class name="org.eclipse.che.selenium.git.CommitFilesTest"/>
+            <class name="org.eclipse.che.selenium.git.GitColorsTest"/>
+            <class name="org.eclipse.che.selenium.git.GitChangeMarkersTest"/>
             <class name="org.eclipse.che.selenium.git.CreateAndDeleteLocalBranchTest">
                 <methods>
                     <exclude name="createNewLocalBranchTest"/>

@@ -8,8 +8,6 @@
 # Contributors:
 #   Marian Labuda - Initial Implementation
 
-set -e
-
 BATS_BASE_DIR=$(cd "$(dirname "$0")"/..; pwd)
 . "${BATS_BASE_DIR}"/build.include
 BATS_BASE_DIR=$(get_mount_path "${BATS_BASE_DIR}")

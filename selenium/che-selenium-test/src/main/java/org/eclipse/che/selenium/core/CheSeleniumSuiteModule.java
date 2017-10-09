@@ -10,10 +10,11 @@
  */
 package org.eclipse.che.selenium.core;
 
+import static java.lang.Boolean.parseBoolean;
 import static org.eclipse.che.selenium.core.utils.PlatformUtils.isMac;
+import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.DEFAULT;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.name.Names;
@@ -22,10 +23,9 @@ import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.action.GenericActionsFactory;
 import org.eclipse.che.selenium.core.action.MacOSActionsFactory;
-import org.eclipse.che.selenium.core.client.CheTestAuthServiceClient;
-import org.eclipse.che.selenium.core.client.CheTestMachineServiceClient;
-import org.eclipse.che.selenium.core.client.TestAuthServiceClient;
-import org.eclipse.che.selenium.core.client.TestMachineServiceClient;
+import org.eclipse.che.selenium.core.client.CheTestUserServiceClient;
+import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
+import org.eclipse.che.selenium.core.client.TestUserServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClientFactory;
 import org.eclipse.che.selenium.core.configuration.SeleniumTestConfiguration;
 import org.eclipse.che.selenium.core.configuration.TestConfiguration;
@@ -43,22 +43,20 @@ import org.eclipse.che.selenium.core.provider.TestSvnPasswordProvider;
 import org.eclipse.che.selenium.core.provider.TestSvnRepo1Provider;
 import org.eclipse.che.selenium.core.provider.TestSvnRepo2Provider;
 import org.eclipse.che.selenium.core.provider.TestSvnUsernameProvider;
-import org.eclipse.che.selenium.core.requestfactory.TestDefaultUserHttpJsonRequestFactory;
+import org.eclipse.che.selenium.core.requestfactory.CheTestDefaultUserHttpJsonRequestFactory;
+import org.eclipse.che.selenium.core.requestfactory.TestCheAdminHttpJsonRequestFactory;
+import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactoryCreator;
-import org.eclipse.che.selenium.core.user.AdminTestUser;
-import org.eclipse.che.selenium.core.user.CheAdminTestUser;
+import org.eclipse.che.selenium.core.user.CheDefaultTestUser;
 import org.eclipse.che.selenium.core.user.CheTestUserNamespaceResolver;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.user.TestUserFactory;
-import org.eclipse.che.selenium.core.user.TestUserImpl;
 import org.eclipse.che.selenium.core.user.TestUserNamespaceResolver;
 import org.eclipse.che.selenium.core.workspace.CheTestWorkspaceUrlResolver;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceProviderImpl;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceUrlResolver;
-import org.eclipse.che.selenium.core.workspace.WorkspaceTemplate;
 
 /**
  * Guice module per suite.
@@ -66,6 +64,8 @@ import org.eclipse.che.selenium.core.workspace.WorkspaceTemplate;
  * @author Anatolii Bazko
  */
 public class CheSeleniumSuiteModule extends AbstractModule {
+
+  private static final String CHE_MULTIUSER_VARIABLE = "CHE_MULTIUSER";
 
   @Override
   public void configure() {
@@ -78,48 +78,54 @@ public class CheSeleniumSuiteModule extends AbstractModule {
     bind(TestSvnUsernameProvider.class).to(CheTestSvnUsernameProvider.class);
     bind(TestSvnRepo1Provider.class).to(CheTestSvnRepo1Provider.class);
     bind(TestSvnRepo2Provider.class).to(CheTestSvnRepo2Provider.class);
-    bind(TestWorkspaceUrlResolver.class).to(CheTestWorkspaceUrlResolver.class);
-    bind(TestUserNamespaceResolver.class).to(CheTestUserNamespaceResolver.class);
+
+    bind(TestUser.class).to(CheDefaultTestUser.class);
+
+    bind(TestUserServiceClient.class).to(CheTestUserServiceClient.class);
+
+    bind(HttpJsonRequestFactory.class).to(TestUserHttpJsonRequestFactory.class);
+    bind(TestUserHttpJsonRequestFactory.class).to(CheTestDefaultUserHttpJsonRequestFactory.class);
+
     bind(TestApiEndpointUrlProvider.class).to(CheTestApiEndpointUrlProvider.class);
     bind(TestIdeUrlProvider.class).to(CheTestIdeUrlProvider.class);
     bind(TestDashboardUrlProvider.class).to(CheTestDashboardUrlProvider.class);
 
-    bind(HttpJsonRequestFactory.class).to(TestDefaultUserHttpJsonRequestFactory.class);
-    install(new FactoryModuleBuilder().build(TestUserHttpJsonRequestFactoryCreator.class));
-
-    bind(TestAuthServiceClient.class).to(CheTestAuthServiceClient.class);
-    bind(TestMachineServiceClient.class).to(CheTestMachineServiceClient.class);
-
-    bind(TestUser.class).to(TestUserImpl.class);
     bind(TestWorkspaceProvider.class).to(TestWorkspaceProviderImpl.class).asEagerSingleton();
+    bind(TestWorkspaceUrlResolver.class).to(CheTestWorkspaceUrlResolver.class);
+    bind(TestUserNamespaceResolver.class).to(CheTestUserNamespaceResolver.class);
 
+    install(new FactoryModuleBuilder().build(TestUserHttpJsonRequestFactoryCreator.class));
     install(new FactoryModuleBuilder().build(TestWorkspaceServiceClientFactory.class));
+    install(new FactoryModuleBuilder().build(TestUserFactory.class));
 
-    install(
-        new FactoryModuleBuilder()
-            .implement(TestUser.class, TestUserImpl.class)
-            .build(TestUserFactory.class));
-
-    bind(AdminTestUser.class).to(CheAdminTestUser.class);
+    if (parseBoolean(System.getenv(CHE_MULTIUSER_VARIABLE))) {
+      install(new CheSeleniumMultiUserModule());
+    } else {
+      install(new CheSeleniumSingleUserModule());
+    }
   }
 
   @Provides
   public TestWorkspace getWorkspace(
-      TestWorkspaceProvider testWorkspaceProvider,
-      Provider<DefaultTestUser> defaultUserProvider,
+      TestWorkspaceProvider workspaceProvider,
+      TestUser testUser,
       @Named("workspace.default_memory_gb") int defaultMemoryGb)
       throws Exception {
-
-    TestWorkspace workspace =
-        testWorkspaceProvider.createWorkspace(
-            defaultUserProvider.get(), defaultMemoryGb, WorkspaceTemplate.DEFAULT);
-    workspace.await();
-
-    return workspace;
+    TestWorkspace ws = workspaceProvider.createWorkspace(testUser, defaultMemoryGb, DEFAULT);
+    ws.await();
+    return ws;
   }
 
   @Provides
   public ActionsFactory getActionFactory() {
     return isMac() ? new MacOSActionsFactory() : new GenericActionsFactory();
+  }
+
+  @Provides
+  @Named("admin")
+  public TestOrganizationServiceClient getAdminOrganizationServiceClient(
+      TestApiEndpointUrlProvider apiEndpointUrlProvider,
+      TestCheAdminHttpJsonRequestFactory requestFactory) {
+    return new TestOrganizationServiceClient(apiEndpointUrlProvider, requestFactory);
   }
 }

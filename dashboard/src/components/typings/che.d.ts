@@ -22,6 +22,156 @@ declare namespace che {
     currentPage: string;
   }
 
+  export namespace api {
+
+    export interface ICheResourcesDistribution {
+      distributeResources(organizationId: string, resources: Array<any>): ng.IPromise<any>;
+      updateTotalResources(organizationId: string, resources: Array<any>): ng.IPromise<any>;
+      fetchOrganizationResources(organizationId: string): ng.IPromise<any>;
+      getOrganizationResources(organizationId: string): any;
+      fetchTotalOrganizationResources(organizationId: string): ng.IPromise<any>;
+      getTotalOrganizationResources(organizationId: string): any;
+      fetchUsedOrganizationResources(organizationId: string): ng.IPromise<any>;
+      getUsedOrganizationResources(organizationId: string): any;
+      fetchAvailableOrganizationResources(organizationId: string): ng.IPromise<any>;
+      getAvailableOrganizationResources(organizationId: string): any;
+      getOrganizationTotalResourceByType(organizationId: string, type: che.resource.resourceLimits): any;
+      getOrganizationAvailableResourceByType(organizationId: string, type: che.resource.resourceLimits): any;
+      getOrganizationResourceByType(organizationId: string, type: che.resource.resourceLimits): any;
+      setOrganizationResourceLimitByType(resources: any, type: che.resource.resourceLimits, value: string): any;
+    }
+
+    export interface ICheOrganization {
+      fetchOrganizationByName(name: string): ng.IPromise<any>;
+      fetchSubOrganizationsById(id: string): ng.IPromise<any>;
+      fetchOrganizations(maxItems?: number): ng.IPromise<any>;
+      fetchOrganizationPageObjects(pageKey?: string): ng.IPromise<any>;
+      getPageInfo(): IPageInfo;
+      fetchUserOrganizations(userId: string, maxItems?: number): ng.IPromise<any>;
+      fetchUserOrganizationPageObjects(userId: string, pageKey: string): ng.IPromise<any>;
+      getUserOrganizations(userId: string): Array<any>;
+      getUserOrganizationPageInfo(userId: string): IPageInfo;
+      getUserOrganizationRequestData(userId: string): IRequestData;
+      getOrganizations(): Array<any>;
+      fetchOrganizationById(id: string): ng.IPromise<any>;
+      getOrganizationById(id: string): IOrganization;
+      getOrganizationByName(name: string): IOrganization;
+      createOrganization(name: string, parentId?: string): ng.IPromise<any>;
+      deleteOrganization(id: string): ng.IPromise<any>;
+      updateOrganization(organization: IOrganization): ng.IPromise<any>;
+      getRolesFromActions(actions: Array<string>): Array<IRole>;
+      getActionsFromRoles(roles: Array<IRole>): Array<string>;
+    }
+
+    interface ISystemPermissions {
+      actions: Array<string>;
+    }
+
+    export interface IChePermissions {
+      storePermissions(data: any): ng.IPromise<any>;
+      fetchOrganizationPermissions(organizationId: string): ng.IPromise<any>;
+      getOrganizationPermissions(organizationId: string): any;
+      removeOrganizationPermissions(organizationId: string, userId: string): ng.IPromise<any>;
+      fetchWorkspacePermissions(workspaceId: string): ng.IPromise<any>;
+      getWorkspacePermissions(workspaceId: string): any;
+      removeWorkspacePermissions(workspaceId: string, userId: string): ng.IPromise<any>;
+      fetchSystemPermissions(): ng.IPromise<any>;
+      getSystemPermissions(): ISystemPermissions;
+      getUserServices(): IUserServices;
+      getPermissionsServicePath(): string;
+    }
+
+    export interface ICheTeam {
+      fetchTeams(): ng.IPromise<any>;
+      processTeams(organizations: Array<IOrganization>, user: any): void;
+      processOrganizationInfoRetriever(organizations: Array<IOrganization>): void;
+      getPersonalAccount(): any;
+      getTeams(): Array<any>;
+      fetchTeamById(id: string): ng.IPromise<any>;
+      fetchTeamByName(name: string): ng.IPromise<any>;
+      getTeamByName(name: string): any;
+      getTeamById(id: string): any;
+      createTeam(name: string): ng.IPromise<any>;
+      deleteTeam(id: string): ng.IPromise<any>;
+      updateTeam(team: any): ng.IPromise<any>;
+      getRolesFromActions(actions: Array<string>): Array<any>;
+      getActionsFromRoles(roles: Array<any>): Array<string>;
+      getTeamDisplayName(team: any): string;
+    }
+
+    export interface ICheTeamEventsManager {
+      subscribeTeamNotifications(teamId: string): void;
+      fetchUser(): void;
+      subscribeTeamMemberNotifications(): void;
+      unSubscribeTeamNotifications(teamId: string): void;
+      addRenameHandler(handler: Function): void;
+      removeRenameHandler(handler: Function): void;
+      addDeleteHandler(handler: Function): void;
+      removeDeleteHandler(handler: Function): void;
+      addNewTeamHandler(handler: Function): void;
+      processRenameTeam(info: any): void;
+      processAddedToTeam(info: any): void;
+      processDeleteTeam(info: any): void;
+      processDeleteMember(info: any): void;
+      isCurrentUser(name: string): boolean;
+    }
+
+    export interface ICheInvite {
+      inviteToTeam(teamId: string, email: string, actions: Array<string>): ng.IPromise<any>;
+      fetchTeamInvitations(teamId: string): ng.IPromise<any>;
+      getTeamInvitations(teamId: string): Array<any>;
+      deleteTeamInvitation(teamId: string, email: string);
+    }
+
+  }
+
+  export namespace resource {
+
+    export type resourceLimits = string;
+    export interface ICheResourceLimits {
+      RAM: resourceLimits;
+      WORKSPACE: resourceLimits;
+      RUNTIME: resourceLimits;
+      TIMEOUT: resourceLimits;
+    }
+
+    export type organizationActions = string;
+    export interface ICheOrganizationActions {
+      UPDATE: organizationActions;
+      DELETE: organizationActions;
+      SET_PERMISSIONS: organizationActions;
+      MANAGE_RESOURCES: organizationActions;
+      CREATE_WORKSPACES: organizationActions;
+      MANAGE_WORKSPACES: organizationActions;
+      MANAGE_SUB_ORGANIZATION: organizationActions;
+    }
+
+    export interface ICheOrganizationRoles {
+      MEMBER: IRole;
+      ADMIN: IRole;
+      getRoles(): Array<string>;
+      getValues(): Array<IRole>;
+    }
+
+    export interface ICheTeamRoles {
+      TEAM_MEMBER: any;
+      TEAM_ADMIN: any;
+      getValues(): any[];
+    }
+
+  }
+
+  export namespace service {
+
+    export interface IResourcesService {
+      getResourceLimits(): che.resource.ICheResourceLimits;
+      getOrganizationActions(): che.resource.ICheOrganizationActions;
+      getOrganizationRoles(): che.resource.ICheOrganizationRoles;
+      getTeamRoles(): che.resource.ICheTeamRoles;
+    }
+
+  }
+
   export namespace route {
 
     export interface IRouteParamsService extends ng.route.IRouteParamsService {
@@ -66,6 +216,14 @@ declare namespace che {
       removeHelper(id: string): void;
     }
 
+  }
+
+  export interface IUserServices {
+    hasUserService: boolean;
+    hasUserProfileService: boolean;
+    hasAdminUserService: boolean;
+    hasInstallationManagerService: boolean;
+    hasLicenseService: boolean;
   }
 
   export interface IRegisterService {
@@ -319,5 +477,55 @@ declare namespace che {
   interface IPageInfo {
     countPages: number;
     currentPageNumber: number;
+  }
+
+  export interface IPermissions {
+    actions: Array<string>;
+    domainId: string;
+    instanceId: string;
+    userId: string;
+  }
+
+  export interface IRole {
+    actions: Array<string>;
+    description: string;
+    title: string;
+    name: string;
+  }
+
+  export interface IOrganization {
+    id: string;
+    links: Array<ILink>;
+    name: string;
+    parent?: string;
+    qualifiedName: string;
+  }
+
+  export interface ITeam extends IOrganization { }
+
+  export interface ILink {
+    href: string;
+    method: string;
+    parameters: Array<any>;
+    produces: string;
+    rel: string;
+  }
+
+  export interface IResource {
+    type: string;
+    amount: number;
+    unit: string;
+  }
+
+  export interface IMember extends che.IProfile {
+    id: string;
+    roles?: Array<IRole>;
+    /**
+     * Role name
+     */
+    role?: string;
+    permissions?: IPermissions;
+    name?: string;
+    isPending?: boolean;
   }
 }

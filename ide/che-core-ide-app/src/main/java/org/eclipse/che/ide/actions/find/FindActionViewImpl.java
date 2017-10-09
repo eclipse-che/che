@@ -17,7 +17,7 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -266,41 +266,47 @@ public class FindActionViewImpl extends PopupPanel implements FindActionView {
         event.stopPropagation();
         event.preventDefault();
         list.getSelectionModel().selectPrevious();
-        return;
+        break;
 
       case KeyCodes.KEY_DOWN:
         event.stopPropagation();
         event.preventDefault();
         list.getSelectionModel().selectNext();
-        return;
+        break;
 
       case KeyCodes.KEY_PAGEUP:
         event.stopPropagation();
         event.preventDefault();
         list.getSelectionModel().selectPreviousPage();
-        return;
+        break;
 
       case KeyCodes.KEY_PAGEDOWN:
         event.stopPropagation();
         event.preventDefault();
         list.getSelectionModel().selectNextPage();
-        return;
+        break;
 
       case KeyCodes.KEY_ENTER:
         event.stopPropagation();
         event.preventDefault();
         delegate.onActionSelected(list.getSelectionModel().getSelectedItem());
-        return;
+        break;
 
       case KeyCodes.KEY_ESCAPE:
         event.stopPropagation();
         event.preventDefault();
         hide();
-        return;
+        break;
+      default:
+        //here we need some delay to be sure that input box initiated with given value
+        //in manually testing hard to reproduce this problem but it reproduced with selenium tests
+        new Timer() {
+          @Override
+          public void run() {
+            delegate.nameChanged(nameField.getText(), includeNonMenu.getValue());
+          }
+        }.schedule(300);
+        break;
     }
-
-    Scheduler.get()
-        .scheduleDeferred(
-            (Command) () -> delegate.nameChanged(nameField.getText(), includeNonMenu.getValue()));
   }
 }

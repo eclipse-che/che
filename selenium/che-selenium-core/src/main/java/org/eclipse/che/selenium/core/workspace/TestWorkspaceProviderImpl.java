@@ -12,6 +12,7 @@ package org.eclipse.che.selenium.core.workspace;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -27,7 +28,6 @@ import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClientFactory;
 import org.eclipse.che.selenium.core.configuration.ConfigurationException;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +44,7 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
   private final int poolSize;
   private final ArrayBlockingQueue<TestWorkspace> testWorkspaceQueue;
   private final ScheduledExecutorService executor;
-  private final DefaultTestUser defaultUser;
+  private final TestUser defaultUser;
   private final int defaultMemoryGb;
   private final TestWorkspaceServiceClient testWorkspaceServiceClient;
   private final TestWorkspaceServiceClientFactory testWorkspaceServiceClientFactory;
@@ -53,10 +53,10 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
   public TestWorkspaceProviderImpl(
       @Named("sys.threads") int threads,
       @Named("workspace.default_memory_gb") int defaultMemoryGb,
-      DefaultTestUser defaultUser,
+      Provider<TestUser> defaultUser,
       TestWorkspaceServiceClient testWorkspaceServiceClient,
       TestWorkspaceServiceClientFactory testWorkspaceServiceClientFactory) {
-    this.defaultUser = defaultUser;
+    this.defaultUser = defaultUser.get();
     this.defaultMemoryGb = defaultMemoryGb;
     this.testWorkspaceServiceClient = testWorkspaceServiceClient;
     this.testWorkspaceServiceClientFactory = testWorkspaceServiceClientFactory;
@@ -89,7 +89,7 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
         owner,
         memoryGB,
         template,
-        testWorkspaceServiceClientFactory.create(owner.getAuthToken()));
+        testWorkspaceServiceClientFactory.create(owner.getEmail(), owner.getPassword()));
   }
 
   private boolean hasDefaultValues(TestUser testUser, int memoryGB, String template) {
