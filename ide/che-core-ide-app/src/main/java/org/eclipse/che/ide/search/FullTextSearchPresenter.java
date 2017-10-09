@@ -12,15 +12,11 @@ package org.eclipse.che.ide.search;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
-import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.List;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.project.QueryExpression;
 import org.eclipse.che.ide.api.resources.Container;
-import org.eclipse.che.ide.api.resources.SearchResult;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.search.presentation.FindResultPresenter;
 
@@ -33,6 +29,8 @@ import org.eclipse.che.ide.search.presentation.FindResultPresenter;
  */
 @Singleton
 public class FullTextSearchPresenter implements FullTextSearchView.ActionDelegate {
+  public static final int SEARCH_RESULT_ITEMS = 30;
+
   private static final String URL_ENCODED_BACKSLASH = "%5C";
   private static final String AND_OPERATOR = "AND";
 
@@ -71,26 +69,23 @@ public class FullTextSearchPresenter implements FullTextSearchView.ActionDelegat
         .getWorkspaceRoot()
         .getContainer(startPoint)
         .then(
-            new Operation<Optional<Container>>() {
-              @Override
-              public void apply(Optional<Container> optionalContainer) throws OperationException {
-                if (!optionalContainer.isPresent()) {
-                  view.showErrorMessage("Path '" + startPoint + "' doesn't exists");
-                  return;
-                }
-
-                final Container container = optionalContainer.get();
-                container
-                    .search(view.getFileMask(), prepareQuery(text))
-                    .then(
-                        new Operation<List<SearchResult>>() {
-                          @Override
-                          public void apply(List<SearchResult> result) throws OperationException {
-                            view.close();
-                            findResultPresenter.handleResponse(result, text);
-                          }
-                        });
+            optionalContainer -> {
+              if (!optionalContainer.isPresent()) {
+                view.showErrorMessage("Path '" + startPoint + "' doesn't exists");
+                return;
               }
+
+              final Container container = optionalContainer.get();
+              QueryExpression queryExpression =
+                  container.createSearchQueryExpression(view.getFileMask(), prepareQuery(text));
+              queryExpression.setMaxItems(SEARCH_RESULT_ITEMS);
+              container
+                  .search(queryExpression)
+                  .then(
+                      result -> {
+                        view.close();
+                        findResultPresenter.handleResponse(result, queryExpression, text);
+                      });
             });
   }
 

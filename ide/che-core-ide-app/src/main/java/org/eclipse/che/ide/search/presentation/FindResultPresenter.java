@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.search.presentation;
 
 import static org.eclipse.che.ide.api.resources.ResourceDelta.REMOVED;
+import static org.eclipse.che.ide.search.FullTextSearchPresenter.SEARCH_RESULT_ITEMS;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -23,11 +24,14 @@ import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
+import org.eclipse.che.ide.api.project.QueryExpression;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent.ResourceChangedHandler;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
+import org.eclipse.che.ide.api.resources.SearchItemReference;
 import org.eclipse.che.ide.api.resources.SearchResult;
 import org.eclipse.che.ide.api.selection.Selection;
+import org.eclipse.che.ide.project.ProjectServiceClient;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.data.Node;
@@ -43,18 +47,25 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 public class FindResultPresenter extends BasePresenter
     implements FindResultView.ActionDelegate, ResourceChangedHandler {
   private final WorkspaceAgent workspaceAgent;
+  private ProjectServiceClient projectServiceClient;
   private final CoreLocalizationConstant localizationConstant;
   private final Resources resources;
   private final FindResultView view;
 
+  private int skipCount = 0;
+  private QueryExpression queryExpression;
+  private String requestedString;
+
   @Inject
   public FindResultPresenter(
       WorkspaceAgent workspaceAgent,
+      ProjectServiceClient projectServiceClient,
       CoreLocalizationConstant localizationConstant,
       Resources resources,
       FindResultView view,
       EventBus eventBus) {
     this.workspaceAgent = workspaceAgent;
+    this.projectServiceClient = projectServiceClient;
     this.localizationConstant = localizationConstant;
     this.resources = resources;
     this.view = view;
@@ -92,18 +103,64 @@ public class FindResultPresenter extends BasePresenter
   /**
    * Activate Find results part and showing all occurrences.
    *
-   * @param resources list of files which contains requested text
+   * @param result search result of requested text
    * @param request requested text
    */
-  public void handleResponse(List<SearchResult> resources, String request) {
+  public void handleResponse(SearchResult result, QueryExpression queryExpression, String request) {
+    this.queryExpression = queryExpression;
+    this.requestedString = request;
     workspaceAgent.openPart(this, PartStackType.INFORMATION);
     workspaceAgent.setActivePart(this);
-    view.showResults(resources, request);
+
+    view.setPreviousBtnActive(false);
+    view.setNextBtnActive(result.getItemReferences().size() == SEARCH_RESULT_ITEMS);
+    view.showResults(result, request);
   }
 
   @Override
   public void onSelectionChanged(List<Node> selection) {
     setSelection(new Selection<>(selection));
+  }
+
+  @Override
+  public void onNextButtonClicked() {
+    queryExpression.setSkipCount(skipCount + SEARCH_RESULT_ITEMS);
+    projectServiceClient
+        .search(queryExpression)
+        .then(
+            result -> {
+              List<SearchItemReference> itemReferences = result.getItemReferences();
+              skipCount += itemReferences.size();
+              view.setPreviousBtnActive(true);
+              if (itemReferences.isEmpty()) {
+                view.setNextBtnActive(false);
+                return;
+              }
+              if (itemReferences.size() % SEARCH_RESULT_ITEMS == 0) {
+                view.setNextBtnActive(true);
+              } else {
+                skipCount += SEARCH_RESULT_ITEMS;
+                view.setNextBtnActive(false);
+              }
+              view.showResults(result, requestedString);
+            });
+  }
+
+  @Override
+  public void onPreviousButtonClicked() {
+    skipCount -= skipCount % SEARCH_RESULT_ITEMS + SEARCH_RESULT_ITEMS;
+    queryExpression.setSkipCount(skipCount);
+    projectServiceClient
+        .search(queryExpression)
+        .then(
+            result -> {
+              List<SearchItemReference> itemReferences = result.getItemReferences();
+              view.setNextBtnActive(true);
+              boolean hasPreviousResults =
+                  itemReferences.size() % SEARCH_RESULT_ITEMS == 0 && skipCount != 0;
+              view.setPreviousBtnActive(hasPreviousResults);
+              view.showResults(result, requestedString);
+            });
   }
 
   @Override

@@ -11,6 +11,7 @@
 'use strict';
 import {CheAPI} from '../../components/api/che-api.factory';
 import {CheKeycloak} from '../../components/api/che-keycloak.factory';
+import {CheService} from '../../components/api/che-service.factory';
 
 export class CheNavBarController {
   private menuItemUrl = {
@@ -53,6 +54,8 @@ export class CheNavBarController {
   private hasPersonalAccount: boolean;
   private organizations: Array<che.IOrganization>;
   private cheKeycloak: CheKeycloak;
+  private cheService: CheService;
+  private isPermissionServiceAvailable: boolean;
 
   /**
    * Default constructor
@@ -65,7 +68,8 @@ export class CheNavBarController {
               cheAPI: CheAPI,
               $window: ng.IWindowService,
               chePermissions: che.api.IChePermissions,
-              cheKeycloak: CheKeycloak) {
+              cheKeycloak: CheKeycloak,
+              cheService: CheService) {
     this.$mdSidenav = $mdSidenav;
     this.$scope = $scope;
     this.$location = $location;
@@ -74,6 +78,7 @@ export class CheNavBarController {
     this.$window = $window;
     this.chePermissions = chePermissions;
     this.cheKeycloak = cheKeycloak;
+    this.cheService = cheService;
 
     this.profile = cheAPI.getProfile().getProfile();
 
@@ -88,13 +93,31 @@ export class CheNavBarController {
     cheAPI.getWorkspace().fetchWorkspaces();
     cheAPI.getFactory().fetchFactories();
 
-    if (this.chePermissions.getSystemPermissions()) {
-      this.updateData();
-    } else {
-      this.chePermissions.fetchSystemPermissions().finally(() => {
-        this.updateData();
-      });
-    }
+    this.isPermissionServiceAvailable = false;
+    this.resolvePermissionServiceAvailability().then((isAvailable: boolean) => {
+      this.isPermissionServiceAvailable = isAvailable;
+
+      if (isAvailable) {
+        if (this.chePermissions.getSystemPermissions()) {
+          this.updateData();
+        } else {
+          this.chePermissions.fetchSystemPermissions().finally(() => {
+            this.updateData();
+          });
+        }
+      }
+    });
+  }
+
+  /**
+   * Resolves promise with <code>true</code> if Permissions service is available.
+   *
+   * @returns {ng.IPromise<boolean>}
+   */
+  resolvePermissionServiceAvailability(): ng.IPromise<boolean> {
+    return this.cheService.fetchServices().then(() => {
+      return this.cheService.isServiceAvailable(this.chePermissions.getPermissionsServicePath());
+    });
   }
 
   /**

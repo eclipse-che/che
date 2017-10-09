@@ -11,6 +11,7 @@
 package org.eclipse.che.api.deploy;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.name.Names;
 import javax.sql.DataSource;
 import org.eclipse.che.api.user.server.TokenValidator;
 import org.eclipse.che.inject.DynaModule;
@@ -45,5 +46,20 @@ public class CheWsMasterModule extends AbstractModule {
     install(new org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule());
 
     bind(org.eclipse.che.api.user.server.CheUserCreator.class);
+
+    bindConstant()
+        .annotatedWith(Names.named("machine.terminal_agent.run_command"))
+        .to(
+            "$HOME/che/terminal/che-websocket-terminal "
+                + "-addr :4411 "
+                + "-cmd ${SHELL_INTERPRETER} "
+                + "-enable-activity-tracking");
+    bindConstant()
+        .annotatedWith(Names.named("machine.exec_agent.run_command"))
+        .to(
+            "$HOME/che/exec-agent/che-exec-agent "
+                + "-addr :4412 "
+                + "-cmd ${SHELL_INTERPRETER} "
+                + "-logs-dir $HOME/che/exec-agent/logs");
   }
 }

@@ -21,6 +21,7 @@ import org.eclipse.che.commons.annotation.Nullable;
  * @author Alexander Garagatyi
  */
 public class EmailBean {
+
   private String from;
   private String to;
   private String replyTo;
@@ -28,6 +29,36 @@ public class EmailBean {
   private String body;
   private String subject;
   private List<Attachment> attachments;
+
+  public EmailBean() {}
+
+  public EmailBean(EmailBean email) {
+    this(
+        email.getFrom(),
+        email.getTo(),
+        email.getReplyTo(),
+        email.getMimeType(),
+        email.getBody(),
+        email.getSubject(),
+        email.getAttachments());
+  }
+
+  public EmailBean(
+      String from,
+      String to,
+      String replyTo,
+      String mimeType,
+      String body,
+      String subject,
+      List<Attachment> attachments) {
+    this.from = from;
+    this.to = to;
+    this.replyTo = replyTo;
+    this.mimeType = mimeType;
+    this.body = body;
+    this.subject = subject;
+    this.attachments = attachments;
+  }
 
   public String getFrom() {
     return from;
@@ -123,8 +154,12 @@ public class EmailBean {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof EmailBean)) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof EmailBean)) {
+      return false;
+    }
     EmailBean emailBean = (EmailBean) o;
     return Objects.equals(getFrom(), emailBean.getFrom())
         && Objects.equals(getTo(), emailBean.getTo())

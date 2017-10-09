@@ -86,7 +86,7 @@ public class GitStatusBar {
   }
 
   /** wait expected message into the IDE git status bar */
-  public void waitMesageIntoGitInfoPAnel(final String message) {
+  public void waitMessageInGitTab(final String message) {
     waitGitStatusBarInfoPanel();
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until((ExpectedCondition<Boolean>) webDriver -> getTextStatus().contains(message));

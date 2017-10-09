@@ -6,7 +6,9 @@
 # http://www.eclipse.org/legal/epl-v10.html
 #
 
-COMMAND_DIR=$(dirname "$0") 
+set -e
+
+COMMAND_DIR=$(dirname "$0")
 
 "$COMMAND_DIR"/deploy_postgres_only.sh
 "$COMMAND_DIR"/wait_until_postgres_is_available.sh
@@ -29,5 +31,5 @@ spec:
     name: latest
     importPolicy:
       scheduled: true
-      
+
 EOF

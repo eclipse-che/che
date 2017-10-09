@@ -28,6 +28,7 @@ import org.eclipse.che.api.project.shared.dto.CopyOptions;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.project.shared.dto.MoveOptions;
 import org.eclipse.che.api.project.shared.dto.NewProjectConfigDto;
+import org.eclipse.che.api.project.shared.dto.ProjectSearchResponseDto;
 import org.eclipse.che.api.project.shared.dto.SearchResultDto;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.project.shared.dto.TreeElement;
@@ -37,6 +38,8 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.project.QueryExpression;
+import org.eclipse.che.ide.api.resources.SearchItemReference;
 import org.eclipse.che.ide.api.resources.SearchResult;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
@@ -169,7 +172,7 @@ public class ProjectServiceClient {
    * @see ItemReference
    * @since 4.4.0
    */
-  public Promise<List<SearchResult>> search(QueryExpression expression) {
+  public Promise<SearchResult> search(QueryExpression expression) {
     Path prjPath = isNullOrEmpty(expression.getPath()) ? Path.ROOT : new Path(expression.getPath());
     final String url = getBaseUrl() + SEARCH + encodePath(prjPath.addLeadingSeparator());
 
@@ -193,17 +196,21 @@ public class ProjectServiceClient {
         .createGetRequest(url + queryParameters.toString().replaceFirst("&", "?"))
         .header(ACCEPT, APPLICATION_JSON)
         .loader(loaderFactory.newLoader("Searching..."))
-        .send(unmarshaller.newListUnmarshaller(SearchResultDto.class))
+        .send(unmarshaller.newUnmarshaller(ProjectSearchResponseDto.class))
         .then(
-            (Function<List<SearchResultDto>, List<SearchResult>>)
-                searchResultDtos -> {
-                  if (searchResultDtos.isEmpty()) {
-                    return Collections.emptyList();
+            (Function<ProjectSearchResponseDto, SearchResult>)
+                searchResultDto -> {
+                  List<SearchResultDto> itemReferences = searchResultDto.getItemReferences();
+                  if (itemReferences == null || itemReferences.isEmpty()) {
+                    return new SearchResult(
+                        Collections.emptyList(), searchResultDto.getTotalHits());
                   }
-                  return searchResultDtos
-                      .stream()
-                      .map(SearchResult::new)
-                      .collect(Collectors.toList());
+                  return new SearchResult(
+                      itemReferences
+                          .stream()
+                          .map(SearchItemReference::new)
+                          .collect(Collectors.toList()),
+                      searchResultDto.getTotalHits());
                 });
   }
 

@@ -52,6 +52,7 @@ public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
 
   private String authServerUrl;
   private String realm;
+  private long allowedClockSkewSec;
   private PublicKey publicKey = null;
   private RequestTokenExtractor tokenExtractor;
 
@@ -59,9 +60,11 @@ public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
   public KeycloakAuthenticationFilter(
       @Named(KeycloakConstants.AUTH_SERVER_URL_SETTING) String authServerUrl,
       @Named(KeycloakConstants.REALM_SETTING) String realm,
+      @Named(KeycloakConstants.ALLOWED_CLOCK_SKEW_SEC) long allowedClockSkewSec,
       RequestTokenExtractor tokenExtractor) {
     this.authServerUrl = authServerUrl;
     this.realm = realm;
+    this.allowedClockSkewSec = allowedClockSkewSec;
     this.tokenExtractor = tokenExtractor;
   }
 
@@ -85,7 +88,11 @@ public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
 
     Jws<Claims> jwt;
     try {
-      jwt = Jwts.parser().setSigningKey(getJwtPublicKey(false)).parseClaimsJws(token);
+      jwt =
+          Jwts.parser()
+              .setAllowedClockSkewSeconds(allowedClockSkewSec)
+              .setSigningKey(getJwtPublicKey(false))
+              .parseClaimsJws(token);
       LOG.debug("JWT = ", jwt);
       //OK, we can trust this JWT
     } catch (SignatureException
@@ -96,7 +103,11 @@ public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
       LOG.error("Failed verifying the JWT token", e);
       try {
         LOG.info("Retrying after updating the public key", e);
-        jwt = Jwts.parser().setSigningKey(getJwtPublicKey(true)).parseClaimsJws(token);
+        jwt =
+            Jwts.parser()
+                .setAllowedClockSkewSeconds(allowedClockSkewSec)
+                .setSigningKey(getJwtPublicKey(true))
+                .parseClaimsJws(token);
         LOG.debug("JWT = ", jwt);
         //OK, we can trust this JWT
       } catch (SignatureException

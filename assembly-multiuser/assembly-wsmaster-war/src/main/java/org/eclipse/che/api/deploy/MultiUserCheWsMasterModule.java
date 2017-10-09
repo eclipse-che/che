@@ -11,6 +11,7 @@
 package org.eclipse.che.api.deploy;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.name.Names;
 import javax.sql.DataSource;
 import org.eclipse.che.api.user.server.jpa.JpaPreferenceDao;
 import org.eclipse.che.api.user.server.jpa.JpaUserDao;
@@ -18,6 +19,8 @@ import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.hc.ServerCheckerFactoryImpl;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.mail.template.ST.STTemplateProcessorImpl;
+import org.eclipse.che.mail.template.TemplateProcessor;
 import org.eclipse.che.multiuser.api.permission.server.AdminPermissionInitializer;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 import org.eclipse.che.multiuser.api.permission.server.PermissionCheckerImpl;
@@ -40,6 +43,8 @@ public class MultiUserCheWsMasterModule extends AbstractModule {
     bind(ServerCheckerFactoryImpl.class).to(AuthServerCheckerFactoryImpl.class);
     bind(InstallerConfigProvisioner.class).to(MultiuserInstallerConfigProvisioner.class);
     install(new OpenShiftInfraModule());
+
+    bind(TemplateProcessor.class).to(STTemplateProcessorImpl.class);
 
     bind(DataSource.class).toProvider(org.eclipse.che.core.db.JndiDataSourceProvider.class);
     install(new org.eclipse.che.multiuser.api.permission.server.jpa.SystemPermissionsJpaModule());
@@ -75,5 +80,22 @@ public class MultiUserCheWsMasterModule extends AbstractModule {
     bind(UserDao.class).to(JpaUserDao.class);
     bind(PreferenceDao.class).to(JpaPreferenceDao.class);
     bind(PermissionChecker.class).to(PermissionCheckerImpl.class);
+
+    bindConstant()
+        .annotatedWith(Names.named("machine.terminal_agent.run_command"))
+        .to(
+            "$HOME/che/terminal/che-websocket-terminal "
+                + "-addr :4411 "
+                + "-cmd ${SHELL_INTERPRETER} "
+                + "-enable-auth "
+                + "-enable-activity-tracking");
+    bindConstant()
+        .annotatedWith(Names.named("machine.exec_agent.run_command"))
+        .to(
+            "$HOME/che/exec-agent/che-exec-agent "
+                + "-addr :4412 "
+                + "-cmd ${SHELL_INTERPRETER} "
+                + "-enable-auth "
+                + "-logs-dir $HOME/che/exec-agent/logs");
   }
 }

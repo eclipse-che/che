@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.project;
+package org.eclipse.che.ide.api.project;
 
 /** @author Artem Zatsarynnyi */
 public class QueryExpression {

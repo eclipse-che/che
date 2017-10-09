@@ -20,8 +20,11 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.Arrays;
+import java.util.List;
 import javax.annotation.PreDestroy;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.entrance.Entrance;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
 import org.eclipse.che.selenium.core.user.TestUser;
@@ -43,6 +46,7 @@ public class Dashboard {
 
   private final TestIdeUrlProvider testIdeUrlProvider;
   private final TestDashboardUrlProvider testDashboardUrlProvider;
+  private final Entrance entrance;
   private final LoginPage loginPage;
 
   @Inject
@@ -51,11 +55,13 @@ public class Dashboard {
       TestUser defaultUser,
       TestIdeUrlProvider testIdeUrlProvider,
       TestDashboardUrlProvider testDashboardUrlProvider,
+      Entrance entrance,
       LoginPage loginPage) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.defaultUser = defaultUser;
     this.testIdeUrlProvider = testIdeUrlProvider;
     this.testDashboardUrlProvider = testDashboardUrlProvider;
+    this.entrance = entrance;
     this.loginPage = loginPage;
     PageFactory.initElements(seleniumWebDriver, this);
   }
@@ -194,9 +200,25 @@ public class Dashboard {
   /** Open dashboard as default uses */
   public void open() {
     seleniumWebDriver.get(testDashboardUrlProvider.get().toString());
+    entrance.login(defaultUser);
+  }
+
+  /** Open dashboard with provided username and password */
+  public void open(String userName, String userPassword) {
+    seleniumWebDriver.get(testDashboardUrlProvider.get().toString());
     if (loginPage.isOpened()) {
-      loginPage.login(defaultUser.getName(), defaultUser.getPassword());
+      loginPage.login(userName, userPassword);
     }
+  }
+
+  public void logout() {
+    String apiEndpoint = testDashboardUrlProvider.get().toString();
+    List<String> api = Arrays.asList(apiEndpoint.split(":"));
+    String logoutApiEndpoint = api.get(0) + ":" + api.get(1);
+    String logoutURL = logoutApiEndpoint + ":5050/auth/realms/che/protocol/openid-connect/logout";
+    String redirectURL = logoutApiEndpoint + ":8080/dashboard/#/workspaces";
+
+    seleniumWebDriver.navigate().to(logoutURL + "?redirect_uri=" + redirectURL);
   }
 
   public WebDriver driver() {

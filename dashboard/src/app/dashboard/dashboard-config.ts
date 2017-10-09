@@ -28,7 +28,7 @@ export class DashboardConfig {
     register.directive('dashboardPanel', DashboardPanel);
 
     // config routes
-    register.app.config(($routeProvider: ng.route.IRouteProvider) => {
+    register.app.config(($routeProvider: che.route.IRouteProvider) => {
       $routeProvider.accessWhen('/', {
         title: 'Dashboard',
         templateUrl: 'app/dashboard/dashboard.html',
@@ -43,8 +43,6 @@ export class DashboardConfig {
                 $location.path('/create-workspace');
               }
             });
-
-            return cheService.fetchServices();
           }]
         }
       });

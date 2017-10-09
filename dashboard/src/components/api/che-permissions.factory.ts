@@ -201,6 +201,14 @@ export class ChePermissions implements che.api.IChePermissions {
     return this.userServices;
   }
 
+  /**
+   * Gets the factory service path.
+   * @returns {string}
+   */
+  getPermissionsServicePath(): string {
+    return 'permissions';
+  }
+
   private updateUserServices(systemPermissions: che.api.ISystemPermissions): void {
     let isManageUsers: boolean = systemPermissions && systemPermissions.actions.includes('manageUsers');
     let isManageSystem: boolean = systemPermissions && systemPermissions.actions.includes('manageSystem');

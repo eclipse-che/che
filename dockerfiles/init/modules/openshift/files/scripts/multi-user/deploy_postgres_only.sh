@@ -6,7 +6,9 @@
 # http://www.eclipse.org/legal/epl-v10.html
 #
 
-COMMAND_DIR=$(dirname "$0") 
+set -e
+
+COMMAND_DIR=$(dirname "$0")
 
 oc create -f "$COMMAND_DIR"/che-init-image-stream.yaml
 
@@ -61,7 +63,7 @@ spec:
     name: latest
     importPolicy:
       scheduled: true
-      
+
 EOF
 
 oc start-build che-init-image-stream-build

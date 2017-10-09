@@ -29,7 +29,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
-public class CheckMainFeatureForCharpLanguageTest {
+public class CheckMainFeatureForCSharpLanguageTest {
 
   private final String PROJECT_NAME = NameGenerator.generate("AspProject", 4);
 

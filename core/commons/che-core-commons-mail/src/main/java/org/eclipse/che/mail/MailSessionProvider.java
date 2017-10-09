@@ -21,20 +21,23 @@ import javax.mail.Authenticator;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import org.eclipse.che.inject.ConfigurationProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Provider of {@link Session} */
 @Singleton
 public class MailSessionProvider implements Provider<Session> {
+  private static final Logger LOG = LoggerFactory.getLogger(MailSessionProvider.class);
 
   private final Session session;
+
   /**
-   * Configuration can be injected from container with help of {@lin ConfigurationProperties} class.
-   * In this case all properties that starts with 'che.mail.' will be used to create {@link
+   * Configuration can be injected from container with help of {@link ConfigurationProperties}
+   * class. In this case all properties that starts with 'che.mail.' will be used to create {@link
    * Session}. First 4 letters 'che.' from property names will be removed.
    */
   @Inject
   public MailSessionProvider(ConfigurationProperties configurationProperties) {
-
     this(
         configurationProperties
             .getProperties("che.mail.*")
@@ -70,6 +73,7 @@ public class MailSessionProvider implements Provider<Session> {
         this.session = Session.getInstance(props);
       }
     } else {
+      LOG.warn("Mail server is not configured. Sending of emails won't work.");
       this.session = null;
     }
   }
@@ -77,7 +81,7 @@ public class MailSessionProvider implements Provider<Session> {
   @Override
   public Session get() {
     if (session == null) {
-      throw new RuntimeException("SMTP is not configured");
+      throw new RuntimeException("Mail server is not configured");
     }
     return session;
   }

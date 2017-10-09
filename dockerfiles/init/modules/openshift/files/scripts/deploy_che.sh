@@ -21,6 +21,23 @@
 
 set -e
 
+# ----------------
+# helper functions
+# ----------------
+
+# append_after_match allows to append content after matching line
+# this is needed to append content of yaml files
+# first arg is mathing string, second string to insert after match
+append_after_match() {
+    while IFS= read -r line
+    do
+      printf '%s\n' "$line"
+      if [[ "$line" == *"$1"* ]];then
+          printf '%s\n' "$2"
+      fi
+    done < /dev/stdin
+}
+
 # --------------
 # Print Che logo 
 # --------------
@@ -95,6 +112,10 @@ DEFAULT_CHE_IMAGE_TAG="spi"
 CHE_IMAGE_TAG=${CHE_IMAGE_TAG:-${DEFAULT_CHE_IMAGE_TAG}}
 DEFAULT_CHE_LOG_LEVEL="INFO"
 CHE_LOG_LEVEL=${CHE_LOG_LEVEL:-${DEFAULT_CHE_LOG_LEVEL}}
+DEFAULT_ENABLE_SSL="true"
+ENABLE_SSL=${ENABLE_SSL:-${DEFAULT_ENABLE_SSL}}
+DEFAULT_K8S_VERSION_PRIOR_TO_1_6="true"
+K8S_VERSION_PRIOR_TO_1_6=${K8S_VERSION_PRIOR_TO_1_6:-${DEFAULT_K8S_VERSION_PRIOR_TO_1_6}}
 
 # Keycloak production endpoints are used by default
 DEFAULT_KEYCLOAK_OSO_ENDPOINT="https://sso.openshift.io/auth/realms/fabric8/broker/openshift-v3/token"
@@ -110,16 +131,20 @@ OPENSHIFT_FLAVOR=${OPENSHIFT_FLAVOR:-${DEFAULT_OPENSHIFT_FLAVOR}}
 # TODO move this env variable as a config map in the deployment config
 # as soon as the 'che-multiuser' branch is merged to master
 CHE_WORKSPACE_LOGS="/data/logs/machine/logs" \
+CHE_HOST="${OPENSHIFT_NAMESPACE_URL}"
 
 if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
-  # ---------------------------
-  # Set minishift configuration
-  # ---------------------------
-  echo -n "[CHE] Checking if minishift is running..."
-  minishift status | grep -q "Running" ||(echo "Minishift is not running. Aborting"; exit 1)
-  echo "done!"
+  if [ -z "${MINISHIFT_IP}" ]; then
+    # ---------------------------
+    # Set minishift configuration
+    # ---------------------------
+    echo -n "[CHE] Checking if minishift is running..."
+    minishift status | grep -q "Running" ||(echo "Minishift is not running. Aborting"; exit 1)
+    echo "done!"
+    MINISHIFT_IP="$(minishift ip)"
+  fi
 
-  DEFAULT_OPENSHIFT_ENDPOINT="https://$(minishift ip):8443/"
+  DEFAULT_OPENSHIFT_ENDPOINT="https://${MINISHIFT_IP}:8443/"
   OPENSHIFT_ENDPOINT=${OPENSHIFT_ENDPOINT:-${DEFAULT_OPENSHIFT_ENDPOINT}}
   DEFAULT_OPENSHIFT_USERNAME="developer"
   OPENSHIFT_USERNAME=${OPENSHIFT_USERNAME:-${DEFAULT_OPENSHIFT_USERNAME}}
@@ -127,13 +152,17 @@ if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
   OPENSHIFT_PASSWORD=${OPENSHIFT_PASSWORD:-${DEFAULT_OPENSHIFT_PASSWORD}}
   DEFAULT_CHE_OPENSHIFT_PROJECT="eclipse-che"
   CHE_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT:-${DEFAULT_CHE_OPENSHIFT_PROJECT}}
-  DEFAULT_OPENSHIFT_NAMESPACE_URL="${CHE_OPENSHIFT_PROJECT}.$(minishift ip).nip.io"
+  DEFAULT_OPENSHIFT_NAMESPACE_URL="${CHE_OPENSHIFT_PROJECT}.${MINISHIFT_IP}.nip.io"
   OPENSHIFT_NAMESPACE_URL=${OPENSHIFT_NAMESPACE_URL:-${DEFAULT_OPENSHIFT_NAMESPACE_URL}}
   CHE_KEYCLOAK_DISABLED=${CHE_KEYCLOAK_DISABLED:-${DEFAULT_CHE_KEYCLOAK_DISABLED}}
   DEFAULT_CHE_DEBUGGING_ENABLED="true"
   CHE_DEBUGGING_ENABLED=${CHE_DEBUGGING_ENABLED:-${DEFAULT_CHE_DEBUGGING_ENABLED}}
+  DEFAULT_OC_SKIP_TLS="true"
+  OC_SKIP_TLS=${OC_SKIP_TLS:-${DEFAULT_OC_SKIP_TLS}}
   DEFAULT_CHE_APPLY_RESOURCE_QUOTAS="false"
   CHE_APPLY_RESOURCE_QUOTAS=${CHE_APPLY_RESOURCE_QUOTAS:-${DEFAULT_CHE_APPLY_RESOURCE_QUOTAS}}
+  DEFAULT_IMAGE_PULL_POLICY="IfNotPresent"
+  IMAGE_PULL_POLICY=${IMAGE_PULL_POLICY:-${DEFAULT_IMAGE_PULL_POLICY}}
 
 elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
   # ----------------------
@@ -151,6 +180,8 @@ elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
   CHE_KEYCLOAK_DISABLED=${CHE_KEYCLOAK_DISABLED:-${DEFAULT_CHE_KEYCLOAK_DISABLED}}
   DEFAULT_CHE_DEBUGGING_ENABLED="false"
   CHE_DEBUGGING_ENABLED=${CHE_DEBUGGING_ENABLED:-${DEFAULT_CHE_DEBUGGING_ENABLED}}
+  DEFAULT_OC_SKIP_TLS="false"
+  OC_SKIP_TLS=${OC_SKIP_TLS:-${DEFAULT_OC_SKIP_TLS}}
 
 elif [ "${OPENSHIFT_FLAVOR}" == "ocp" ]; then
   # ----------------------
@@ -161,6 +192,8 @@ elif [ "${OPENSHIFT_FLAVOR}" == "ocp" ]; then
   CHE_KEYCLOAK_DISABLED=${CHE_KEYCLOAK_DISABLED:-${DEFAULT_CHE_KEYCLOAK_DISABLED}}
   DEFAULT_CHE_DEBUGGING_ENABLED="false"
   CHE_DEBUGGING_ENABLED=${CHE_DEBUGGING_ENABLED:-${DEFAULT_CHE_DEBUGGING_ENABLED}}
+  DEFAULT_OC_SKIP_TLS="false"
+  OC_SKIP_TLS=${OC_SKIP_TLS:-${DEFAULT_OC_SKIP_TLS}}
 
 fi
 
@@ -180,10 +213,10 @@ if [ -z "${OPENSHIFT_NAMESPACE_URL+x}" ]; then echo "[CHE] **ERROR**Env var OPEN
 # -----------------------------------
 echo -n "[CHE] Logging on using OpenShift endpoint \"${OPENSHIFT_ENDPOINT}\"..."
 if [ -z "${OPENSHIFT_TOKEN+x}" ]; then
-  oc login "${OPENSHIFT_ENDPOINT}" --insecure-skip-tls-verify=false -u "${OPENSHIFT_USERNAME}" -p "${OPENSHIFT_PASSWORD}" > /dev/null
+  oc login "${OPENSHIFT_ENDPOINT}" --insecure-skip-tls-verify="${OC_SKIP_TLS}" -u "${OPENSHIFT_USERNAME}" -p "${OPENSHIFT_PASSWORD}" > /dev/null
   OPENSHIFT_TOKEN=$(oc whoami -t)
 else
-  oc login "${OPENSHIFT_ENDPOINT}" --insecure-skip-tls-verify=false --token="${OPENSHIFT_TOKEN}"  > /dev/null
+  oc login "${OPENSHIFT_ENDPOINT}" --insecure-skip-tls-verify="${OC_SKIP_TLS}" --token="${OPENSHIFT_TOKEN}"  > /dev/null
 fi
 echo "done!"
 
@@ -325,15 +358,16 @@ CHE_IMAGE="${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}"
 # e.g. docker.io/rhchestage => docker.io\/rhchestage
 CHE_IMAGE_SANITIZED=$(echo "${CHE_IMAGE}" | sed 's/\//\\\//g')
 
-MULTI_USER_REPLACEMENT_STRING="s+- env:+- env:\\n\
-          - name: \"CHE_WORKSPACE_LOGS\"\\n\
-            value: \"${CHE_WORKSPACE_LOGS}\"\\n\
-          - name: \"CHE_KEYCLOAK_AUTH__SERVER__URL\"\\n\
-            value: \"${CHE_KEYCLOAK_AUTH__SERVER__URL}\"\\n\
-          - name: \"CHE_KEYCLOAK_REALM\"\\n\
-            value: \"${CHE_KEYCLOAK_REALM}\"\\n\
-          - name: \"CHE_KEYCLOAK_CLIENT__ID\"\\n\
-            value: \"${CHE_KEYCLOAK_CLIENT__ID}\"+"
+MULTI_USER_REPLACEMENT_STRING="          - name: \"CHE_WORKSPACE_LOGS\"
+            value: \"${CHE_WORKSPACE_LOGS}\"
+          - name: \"CHE_KEYCLOAK_AUTH__SERVER__URL\"
+            value: \"${CHE_KEYCLOAK_AUTH__SERVER__URL}\"
+          - name: \"CHE_KEYCLOAK_REALM\"
+            value: \"${CHE_KEYCLOAK_REALM}\"
+          - name: \"CHE_KEYCLOAK_CLIENT__ID\"
+            value: \"${CHE_KEYCLOAK_CLIENT__ID}\"
+          - name: \"CHE_HOST\"
+            value: \"${CHE_HOST}\""
 
 # TODO When merging the multi-user work to master, this replacement string should
 # be replaced by the corresponding change in the fabric8 deployment descriptor
@@ -348,6 +382,7 @@ if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
 cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     if [ ! -z "${OPENSHIFT_NAMESPACE_URL+x}" ]; then sed "s/    hostname-http:.*/    hostname-http: ${OPENSHIFT_NAMESPACE_URL}/" ; else cat -; fi | \
     sed "s/          image:.*/          image: \"${CHE_IMAGE_SANITIZED}\"/" | \
+    sed "s/          imagePullPolicy:.*/          imagePullPolicy: \"${IMAGE_PULL_POLICY}\"/" | \
     sed "s/    workspaces-memory-limit: 2300Mi/    workspaces-memory-limit: 1300Mi/" | \
     sed "s/    workspaces-memory-request: 1500Mi/    workspaces-memory-request: 500Mi/" | \
     sed "s/    che-openshift-secure-routes: \"true\"/    che-openshift-secure-routes: \"false\"/" | \
@@ -355,6 +390,7 @@ cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     sed "s/    che.docker.server_evaluation_strategy.custom.external.protocol: https/    che.docker.server_evaluation_strategy.custom.external.protocol: http/" | \
     sed "s/    che-openshift-precreate-subpaths: \"false\"/    che-openshift-precreate-subpaths: \"true\"/" | \
     sed "s/    che.predefined.stacks.reload_on_start: \"true\"/    che.predefined.stacks.reload_on_start: \"false\"/" | \
+    sed "s/    remote-debugging-enabled: \"false\"/    remote-debugging-enabled: \"${CHE_DEBUGGING_ENABLED}\"/" | \
     sed "s|    keycloak-oso-endpoint:.*|    keycloak-oso-endpoint: ${KEYCLOAK_OSO_ENDPOINT}|" | \
     sed "s|    keycloak-github-endpoint:.*|    keycloak-github-endpoint: ${KEYCLOAK_GITHUB_ENDPOINT}|" | \
     sed "s/    CHE_INFRA_OPENSHIFT_TLS__ENABLED: \"true\"/    CHE_INFRA_OPENSHIFT_TLS__ENABLED: \"false\"/" | \
@@ -368,6 +404,7 @@ cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     if [ "${CHE_DEBUGGING_ENABLED}" == "true" ]; then sed "s/    remote-debugging-enabled: \"false\"/    remote-debugging-enabled: \"true\"/"; else cat -; fi | \
     sed "$MULTI_USER_REPLACEMENT_STRING" | \
     sed "$MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING" | \
+    append_after_match "env:" "${MULTI_USER_REPLACEMENT_STRING}" | \
     oc apply --force=true -f -
 elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
   echo "[CHE] Deploying Che on OSIO (image ${CHE_IMAGE})"
@@ -384,23 +421,32 @@ cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     sed "s|    CHE_HOST: \${DEFAULT_OPENSHIFT_NAMESPACE_URL}|    CHE_HOST: che-${DEFAULT_OPENSHIFT_NAMESPACE_URL}|" | \
     sed "s|    CHE_API: http://\${DEFAULT_OPENSHIFT_NAMESPACE_URL}/wsmaster/api|    CHE_API: https://che-${DEFAULT_OPENSHIFT_NAMESPACE_URL}/wsmaster/api|" | \
     sed "s/          image:.*/          image: \"${CHE_IMAGE_SANITIZED}\"/" | \
+    sed "s/          imagePullPolicy:.*/          imagePullPolicy: \"${IMAGE_PULL_POLICY}\"/" | \
     if [ "${CHE_KEYCLOAK_DISABLED}" == "true" ]; then sed "s/    keycloak-disabled: \"false\"/    keycloak-disabled: \"true\"/" ; else cat -; fi | \
     if [ "${CHE_DEBUGGING_ENABLED}" == "true" ]; then sed "s/    remote-debugging-enabled: \"false\"/    remote-debugging-enabled: \"true\"/"; else cat -; fi | \
     sed "$MULTI_USER_REPLACEMENT_STRING" | \
     sed "$MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING" | \
+    append_after_match "env:" "${MULTI_USER_REPLACEMENT_STRING}" | \
     oc apply --force=true -f -
 else
   echo "[CHE] Deploying Che on OpenShift Container Platform (image ${CHE_IMAGE})"
   curl -sSL http://central.maven.org/maven2/io/fabric8/tenant/apps/che/"${OSIO_VERSION}"/che-"${OSIO_VERSION}"-openshift.yml | \
     if [ ! -z "${OPENSHIFT_NAMESPACE_URL+x}" ]; then sed "s/    hostname-http:.*/    hostname-http: ${OPENSHIFT_NAMESPACE_URL}/" ; else cat -; fi | \
     sed "s/          image:.*/          image: \"${CHE_IMAGE_SANITIZED}\"/" | \
+    sed "s/          imagePullPolicy:.*/          imagePullPolicy: \"${IMAGE_PULL_POLICY}\"/" | \
     sed "s|    keycloak-oso-endpoint:.*|    keycloak-oso-endpoint: ${KEYCLOAK_OSO_ENDPOINT}|" | \
     sed "s|    keycloak-github-endpoint:.*|    keycloak-github-endpoint: ${KEYCLOAK_GITHUB_ENDPOINT}|" | \
     sed "s/    keycloak-disabled:.*/    keycloak-disabled: \"${CHE_KEYCLOAK_DISABLED}\"/" | \
     if [ "${CHE_LOG_LEVEL}" == "DEBUG" ]; then sed "s/    log-level: \"INFO\"/    log-level: \"DEBUG\"/" ; else cat -; fi | \
     if [ "${CHE_DEBUGGING_ENABLED}" == "true" ]; then sed "s/    remote-debugging-enabled: \"false\"/    remote-debugging-enabled: \"true\"/"; else cat -; fi | \
+    if [ "${ENABLE_SSL}" == "false" ]; then sed "s/    che-openshift-secure-routes: \"true\"/    che-openshift-secure-routes: \"false\"/" ; else cat -; fi | \
+    if [ "${ENABLE_SSL}" == "false" ]; then sed "s/    che-secure-external-urls: \"true\"/    che-secure-external-urls: \"false\"/" ; else cat -; fi | \
+    if [ "${ENABLE_SSL}" == "false" ]; then grep -v -e "tls:" -e "insecureEdgeTerminationPolicy: Redirect" -e "termination: edge" ; else cat -; fi | \
+    if [ "${ENABLE_SSL}" == "false" ]; then sed "s/    che.docker.server_evaluation_strategy.custom.external.protocol: https/    che.docker.server_evaluation_strategy.custom.external.protocol: http/" ; else cat -; fi | \
+    if [ "${K8S_VERSION_PRIOR_TO_1_6}" == "true" ]; then sed "s/    che-openshift-precreate-subpaths: \"false\"/    che-openshift-precreate-subpaths: \"true\"/"  ; else cat -; fi | \
     sed "$MULTI_USER_REPLACEMENT_STRING" | \
     sed "$MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING" | \
+    append_after_match "env:" "${MULTI_USER_REPLACEMENT_STRING}" | \
     oc apply --force=true -f -
 fi
 echo
@@ -423,7 +469,7 @@ if [ "${CHE_DEBUGGING_ENABLED}" == "true" ]; then
   echo -n "[CHE] Creating an OS route to debug Che wsmaster..."
   oc expose dc che --name=che-debug --target-port=http-debug --port=8000 --type=NodePort
   NodePort=$(oc get service che-debug -o jsonpath='{.spec.ports[0].nodePort}')
-  echo "[CHE] Remote wsmaster debugging URL: $(minishift ip):${NodePort}"
+  echo "[CHE] Remote wsmaster debugging URL: ${MINISHIFT_IP}:${NodePort}"
 fi
 
 che_route=$(oc get route che -o jsonpath='{.spec.host}')

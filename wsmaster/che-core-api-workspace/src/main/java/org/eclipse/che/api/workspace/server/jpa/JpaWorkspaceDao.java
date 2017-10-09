@@ -33,10 +33,10 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
-import org.eclipse.che.api.workspace.server.event.WorkspaceRemovedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
+import org.eclipse.che.api.workspace.shared.event.WorkspaceRemovedEvent;
 import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 import org.eclipse.che.core.db.jpa.DuplicateKeyException;
 

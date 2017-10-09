@@ -404,7 +404,7 @@ export class ShareWorkspaceController {
         users: this.users
       },
       parent: parentEl,
-      templateUrl: 'app/workspace/share-workspace/add-members/add-members.html'
+      templateUrl: 'app/workspaces/share-workspace/add-members/add-members.html'
     });
   }
 
