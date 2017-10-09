@@ -24,6 +24,7 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.jsonrpc.JsonRpcInitializer;
 import org.eclipse.che.ide.util.loging.Log;
+import org.eclipse.che.security.oauth.SecurityTokenProvider;
 
 /** Initializes json rpc connection to workspace master */
 @Singleton
@@ -31,15 +32,18 @@ public class WorkspaceMasterJsonRpcInitializer {
   private final JsonRpcInitializer initializer;
   private final AppContext appContext;
   private final RequestTransmitter requestTransmitter;
+  private final SecurityTokenProvider securityTokenProvider;
 
   @Inject
   public WorkspaceMasterJsonRpcInitializer(
       JsonRpcInitializer initializer,
       AppContext appContext,
-      RequestTransmitter requestTransmitter) {
+      RequestTransmitter requestTransmitter,
+      SecurityTokenProvider securityTokenProvider) {
     this.initializer = initializer;
     this.appContext = appContext;
     this.requestTransmitter = requestTransmitter;
+    this.securityTokenProvider = securityTokenProvider;
     internalInitialize();
   }
 
@@ -69,19 +73,31 @@ public class WorkspaceMasterJsonRpcInitializer {
   }
 
   private void internalInitialize() {
-    String protocol = "https:".equals(getProtocol()) ? "wss://" : "ws://";
-    String host = getHost();
-    String context = getWebsocketContext();
-    String url = protocol + host + context;
-    String separator = url.contains("?") ? "&" : "?";
-    String queryParams =
-        appContext.getApplicationWebsocketId().map(id -> separator + "clientId=" + id).orElse("");
-    Set<Runnable> initActions =
-        appContext.getApplicationWebsocketId().isPresent()
-            ? emptySet()
-            : singleton(this::processWsId);
+    securityTokenProvider
+        .getSecurityToken()
+        .then(
+            token -> {
+              String protocol = "https:".equals(getProtocol()) ? "wss://" : "ws://";
+              String host = getHost();
+              String context = getWebsocketContext();
+              String url = protocol + host + context;
+              char separator = url.contains("?") ? '&' : '?';
+              String queryParams =
+                  separator
+                      + "token="
+                      + token
+                      + appContext
+                          .getApplicationWebsocketId()
+                          .map(id -> "&clientId=" + id)
+                          .orElse("");
+              Set<Runnable> initActions =
+                  appContext.getApplicationWebsocketId().isPresent()
+                      ? emptySet()
+                      : singleton(WorkspaceMasterJsonRpcInitializer.this::processWsId);
 
-    initializer.initialize("ws-master", singletonMap("url", url + queryParams), initActions);
+              initializer.initialize(
+                  "ws-master", singletonMap("url", url + queryParams), initActions);
+            });
   }
 
   private void processWsId() {

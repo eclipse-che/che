@@ -11,10 +11,9 @@
       Red Hat, Inc. - initial API and implementation
 
 -->
-<Context allowCasualMultipartParsing="true">
-    <Valve className="org.apache.catalina.valves.rewrite.RewriteValve"/>
+<Context allowCasualMultipartParsing="true" sessionCookiePath="/api">
 
-    <ResourceLink global="che"
-                  name="jdbc/che"
-                  type="javax.sql.DataSource"/>
+    <Resource name="jdbc/che" auth="Container"
+              type="javax.sql.DataSource"
+              factory="org.eclipse.che.core.db.h2.H2SQLJndiDataSourceFactory"/>
 </Context>

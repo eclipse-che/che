@@ -21,7 +21,7 @@ import {CheWebsocket} from './che-websocket.factory';
 import {CheProfile} from './che-profile.factory';
 import {ChePreferences} from './che-preferences.factory';
 import {CheService} from './che-service.factory';
-import {CheHttpBackendProviderFactory} from './test/che-http-backend-provider.factory'
+import {CheHttpBackendProviderFactory} from './test/che-http-backend-provider.factory';
 import {CheFactoryTemplate} from './che-factory-template.factory';
 import {CheHttpBackendFactory} from './test/che-http-backend.factory';
 import {CheAPIBuilder} from './builder/che-api-builder.factory';
@@ -34,6 +34,13 @@ import {CheNamespaceRegistry} from './namespace/che-namespace-registry.factory';
 import {CheUser} from './che-user.factory';
 import {ChePageObject} from './paging-resource/page-object.factory';
 import {CheJsonRpcApi} from './json-rpc/che-json-rpc-api.factory';
+import {CheKeycloak} from './che-keycloak.factory';
+import {CheOrganization} from './che-organizations.factory';
+import {ChePermissions} from './che-permissions.factory';
+import {CheResourcesDistribution} from './che-resources-distribution.factory';
+import {CheTeam} from './che-team.factory';
+import {CheTeamEventsManager} from './che-team-events-manager.factory';
+import {CheInvite} from './che-invite.factory';
 
 export class ApiConfig {
 
@@ -62,5 +69,12 @@ export class ApiConfig {
     register.factory('cheUser', CheUser);
     register.factory('chePageObject', ChePageObject);
     register.factory('cheJsonRpcApi', CheJsonRpcApi);
+    register.factory('cheKeycloak', CheKeycloak);
+    register.factory('cheOrganization', CheOrganization);
+    register.factory('chePermissions', ChePermissions);
+    register.factory('cheResourcesDistribution', CheResourcesDistribution);
+    register.factory('cheTeam', CheTeam);
+    register.factory('cheTeamEventsManager', CheTeamEventsManager);
+    register.factory('cheInvite', CheInvite);
   }
 }

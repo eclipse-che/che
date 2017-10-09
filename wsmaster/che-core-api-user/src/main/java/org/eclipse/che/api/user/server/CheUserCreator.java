@@ -36,6 +36,7 @@ public class CheUserCreator {
   @Inject private AccountManager accountManager;
 
   @SuppressWarnings("unused")
+  @Inject
   private DBInitializer initializer;
 
   @PostConstruct

@@ -12,25 +12,34 @@ package org.eclipse.che.plugin.languageserver.ide.editor.codeassist;
 
 import static org.eclipse.che.ide.api.theme.Style.theme;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
+import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.editor.codeassist.Completion;
 import org.eclipse.che.ide.api.editor.codeassist.CompletionProposal;
 import org.eclipse.che.ide.api.editor.document.Document;
+import org.eclipse.che.ide.api.editor.link.HasLinkedMode;
+import org.eclipse.che.ide.api.editor.link.LinkedModel;
 import org.eclipse.che.ide.api.editor.text.LinearRange;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.filters.Match;
+import org.eclipse.che.ide.util.Pair;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
+import org.eclipse.che.plugin.languageserver.ide.editor.codeassist.snippet.SnippetResolver;
+import org.eclipse.che.plugin.languageserver.ide.editor.quickassist.ApplyWorkspaceEditAction;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.lsp4j.CompletionItem;
+import org.eclipse.lsp4j.InsertTextFormat;
+import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.TextEdit;
@@ -50,8 +59,10 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
   private final int offset;
   private ExtendedCompletionItem completionItem;
   private boolean resolved;
+  private HasLinkedMode editor;
 
   CompletionItemBasedCompletionProposal(
+      HasLinkedMode editor,
       ExtendedCompletionItem completionItem,
       String currentWord,
       TextDocumentServiceClient documentServiceClient,
@@ -60,6 +71,7 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
       ServerCapabilities serverCapabilities,
       List<Match> highlights,
       int offset) {
+    this.editor = editor;
     this.completionItem = completionItem;
     this.currentWord = currentWord;
     this.documentServiceClient = documentServiceClient;
@@ -165,10 +177,11 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
           .then(
               completionItem -> {
                 callback.onCompletion(
-                    new CompletionImpl(completionItem.getItem(), currentWord, offset));
+                    new CompletionImpl(editor, completionItem.getItem(), currentWord, offset));
               });
     } else {
-      callback.onCompletion(new CompletionImpl(completionItem.getItem(), currentWord, offset));
+      callback.onCompletion(
+          new CompletionImpl(editor, completionItem.getItem(), currentWord, offset));
     }
   }
 
@@ -183,14 +196,17 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
     return documentServiceClient.resolveCompletionItem(completionItem);
   }
 
-  private static class CompletionImpl implements Completion {
-
+  @VisibleForTesting
+  static class CompletionImpl implements Completion {
     private CompletionItem completionItem;
     private String currentWord;
-    private String insertedText;
     private int offset;
+    private LinearRange lastSelection;
+    private HasLinkedMode editor;
 
-    public CompletionImpl(CompletionItem completionItem, String currentWord, int offset) {
+    public CompletionImpl(
+        HasLinkedMode editor, CompletionItem completionItem, String currentWord, int offset) {
+      this.editor = editor;
       this.completionItem = completionItem;
       this.currentWord = currentWord;
       this.offset = offset;
@@ -198,44 +214,98 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
 
     @Override
     public void apply(Document document) {
+      List<TextEdit> edits = new ArrayList<>();
+      TextPosition cursorPosition = document.getCursorPosition();
       if (completionItem.getTextEdit() != null) {
-        Range range = completionItem.getTextEdit().getRange();
-        int startOffset =
-            document.getIndexFromPosition(
-                new TextPosition(range.getStart().getLine(), range.getStart().getCharacter()));
-        int endOffset =
-            offset
-                + document.getIndexFromPosition(
-                    new TextPosition(range.getEnd().getLine(), range.getEnd().getCharacter()));
-        document.replace(
-            startOffset, endOffset - startOffset, completionItem.getTextEdit().getNewText());
+        edits.add(adjustForOffset(completionItem.getTextEdit(), cursorPosition, offset));
+      } else if (completionItem.getInsertText() == null) {
+        edits.add(
+            new TextEdit(
+                newRange(
+                    cursorPosition.getLine(),
+                    cursorPosition.getCharacter() - currentWord.length(),
+                    cursorPosition.getLine(),
+                    cursorPosition.getCharacter()),
+                completionItem.getLabel()));
       } else {
-        int currentWordLength = currentWord.length();
-        int cursorOffset = document.getCursorOffset();
-        if (completionItem.getInsertText() == null) {
-          document.replace(
-              cursorOffset - currentWordLength, currentWordLength, completionItem.getLabel());
-          insertedText = completionItem.getLabel();
+        edits.add(
+            new TextEdit(
+                newRange(
+                    cursorPosition.getLine(),
+                    cursorPosition.getCharacter() - offset,
+                    cursorPosition.getLine(),
+                    cursorPosition.getCharacter()),
+                completionItem.getInsertText()));
+      }
+      if (completionItem.getAdditionalTextEdits() != null) {
+        completionItem
+            .getAdditionalTextEdits()
+            .forEach(e -> edits.add(adjustForOffset(e, cursorPosition, offset)));
+      }
+      TextEdit firstEdit = edits.get(0);
+      if (completionItem.getInsertTextFormat() == InsertTextFormat.Snippet) {
+        Position startPos = firstEdit.getRange().getStart();
+        TextPosition startTextPosition =
+            new TextPosition(startPos.getLine(), startPos.getCharacter());
+        int startOffset = document.getIndexFromPosition(startTextPosition);
+        Pair<String, LinkedModel> resolved =
+            new SnippetResolver(new DocumentVariableResolver(document, startTextPosition))
+                .resolve(firstEdit.getNewText(), editor, startOffset);
+        firstEdit.setNewText(resolved.first);
+        ApplyWorkspaceEditAction.applyTextEdits(document, edits);
+        if (resolved.second != null) {
+          editor.getLinkedMode().enterLinkedMode(resolved.second);
+          lastSelection = null;
         } else {
-          document.replace(cursorOffset - offset, offset, completionItem.getInsertText());
-          insertedText = completionItem.getInsertText();
+          lastSelection = computeLastSelection(document, firstEdit);
         }
+      } else {
+        ApplyWorkspaceEditAction.applyTextEdits(document, edits);
+        lastSelection = computeLastSelection(document, firstEdit);
       }
     }
 
-    @Override
-    public LinearRange getSelection(Document document) {
-      final TextEdit textEdit = completionItem.getTextEdit();
-      if (textEdit == null) {
-        return LinearRange.createWithStart(document.getCursorOffset() + insertedText.length())
-            .andLength(0);
-      }
+    private LinearRange computeLastSelection(Document document, TextEdit textEdit) {
       Range range = textEdit.getRange();
       TextPosition textPosition =
           new TextPosition(range.getStart().getLine(), range.getStart().getCharacter());
       int startOffset =
           document.getIndexFromPosition(textPosition) + textEdit.getNewText().length();
       return LinearRange.createWithStart(startOffset).andLength(0);
+    }
+
+    private Range newRange(int startLine, int startChar, int endLine, int endChar) {
+      return new Range(new Position(startLine, startChar), new Position(endLine, endChar));
+    }
+
+    private TextEdit adjustForOffset(TextEdit textEdit, TextPosition pos, int delta) {
+      Range range = textEdit.getRange();
+      int originalStart = pos.getCharacter() - delta;
+      if (range.getStart().getLine() != pos.getLine()
+          || textEdit.getRange().getEnd().getCharacter() < originalStart) {
+        return textEdit;
+      } else if (originalStart < range.getStart().getCharacter()) {
+        return new TextEdit(
+            newRange(
+                range.getStart().getLine(),
+                range.getStart().getCharacter() + delta,
+                range.getEnd().getLine(),
+                range.getEnd().getCharacter() + delta),
+            textEdit.getNewText());
+      } else {
+        return new TextEdit(
+            newRange(
+                range.getStart().getLine(),
+                range.getStart().getCharacter(),
+                range.getEnd().getLine(),
+                range.getEnd().getCharacter() + delta),
+            textEdit.getNewText());
+      }
+    }
+
+    @Override
+    public LinearRange getSelection(Document document) {
+      return lastSelection;
     }
   }
 }

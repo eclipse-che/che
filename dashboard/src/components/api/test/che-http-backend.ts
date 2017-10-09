@@ -38,7 +38,10 @@ export class CheHttpBackend {
   private pageMaxItem: number;
   private pageSkipCount: number;
 
-
+  private teamsMap: Map<string, che.ITeam>;
+  private organizationsMap: Map<string, che.IOrganization>;
+  private permissionsMap: Map<string, Array<che.IPermissions>>;
+  private resourcesMap: Map<string, Map<string, any>>;
 
   private   isAutoSnapshot: boolean = false;
   private   isAutoRestore: boolean = false;
@@ -59,7 +62,13 @@ export class CheHttpBackend {
     this.workspaceAgentMap = new Map();
     this.stacks = [];
 
-    this.defaultUser = {
+    this.teamsMap = new Map();
+    this.organizationsMap = new Map();
+    this.permissionsMap = new Map();
+    this.resourcesMap = new Map();
+
+
+    this.defaultUser = <che.IUser>{
       id: '',
       aliases: [],
       name: '',
@@ -82,6 +91,9 @@ export class CheHttpBackend {
    */
   setup(): void {
     this.httpBackend.when('OPTIONS', '/api/').respond({});
+    this.httpBackend.when('GET', '/api/').respond(200, {rootResources: []});
+
+    this.httpBackend.when('GET', '/api/keycloak/settings').respond(404);
 
     // add the remote call
     let workspaceReturn = [];
@@ -539,5 +551,129 @@ export class CheHttpBackend {
     this.userEmailMap.set(user.email, user);
   }
 
+  /**
+   * Setup Backend for teams
+   */
+  teamsBackendSetup() {
+    let allTeams = [];
 
+    let teamsKeys = this.teamsMap.keys();
+    for (let key of teamsKeys) {
+      let team = this.teamsMap.get(key);
+      this.httpBackend.when('GET', '/api/organization/' + team.id).respond(team);
+      this.httpBackend.when('DELETE', '/api/organization/' + team.id).respond(() => {
+        return [200, {success: true, errors: []}];
+      });
+      allTeams.push(team);
+    }
+
+    this.httpBackend.when('GET', /\/api\/organization(\?.*$)?/).respond(allTeams);
+  }
+
+  /**
+   * Add the given team to teamsMap
+   * @param {che.ITeam} team
+   */
+  addTeamById(team: che.ITeam) {
+    this.teamsMap.set(team.id, team);
+  }
+
+  /**
+   * Setup Backend for organizations
+   */
+  organizationsBackendSetup(): void {
+    const allOrganizations = [];
+
+    const organizationKeys = this.organizationsMap.keys();
+    for (let key of organizationKeys) {
+      const organization = this.organizationsMap.get(key);
+      this.httpBackend.when('GET', '/api/organization/' + organization.id).respond(organization);
+      this.httpBackend.when('GET', '/api/organization/find?name=' + encodeURIComponent(organization.qualifiedName)).respond(organization);
+      this.httpBackend.when('DELETE', '/api/organization/' + organization.id).respond(() => {
+        return [200, {success: true, errors: []}];
+      });
+      allOrganizations.push(organization);
+    }
+    this.httpBackend.when('GET', /^\/api\/organization\/find\?name=.*$/).respond(404, {}, {message: 'Organization is not found.'});
+    this.httpBackend.when('GET', /\/api\/organization(\?.*$)?/).respond(allOrganizations);
+  }
+
+  /**
+   * Add the given organization to organizationsMap
+   *
+   * @param {che.IOrganization} organization the organization
+   */
+  addOrganizationById(organization: che.IOrganization): void {
+    this.organizationsMap.set(organization.id, organization);
+  }
+
+  /**
+   * Setup Backend for permissions.
+   */
+  permissionsBackendSetup(): void {
+    const keys = this.permissionsMap.keys();
+    for (let domainInstanceKey of keys) {
+      const permissionsList = this.permissionsMap.get(domainInstanceKey);
+      const {domainId, instanceId} = permissionsList[0];
+
+      this.httpBackend.when('GET', `/api/permissions/${domainId}/all?instance=${instanceId}`).respond(permissionsList);
+    }
+  }
+
+  /**
+   * Add permission to a permissions map
+   *
+   * @param {che.IPermissions} permissions
+   */
+  addPermissions(permissions: che.IPermissions): void {
+    let domainInstanceKey = permissions.domainId + '|' + permissions.instanceId;
+
+    if (this.permissionsMap.has(domainInstanceKey)) {
+      this.permissionsMap.get(domainInstanceKey).push(permissions);
+    } else {
+      this.permissionsMap.set(domainInstanceKey, [permissions]);
+    }
+  }
+
+  /**
+   * Setup Backend for resources.
+   */
+  resourcesBackendSetup(): void {
+    const keys = this.resourcesMap.keys();
+    for (let organizationId of keys) {
+      const organizationResourcesMap = this.resourcesMap.get(organizationId);
+
+      // distributed
+      if (organizationResourcesMap.has('distributed')) {
+        const resources = organizationResourcesMap.get('distributed');
+        this.httpBackend.when('GET', `/api/organization/resource/${organizationId}/cap`).respond(resources);
+      }
+
+      // total
+      if (organizationResourcesMap.has('total')) {
+        const resources = organizationResourcesMap.get('total');
+        this.httpBackend.when('GET', `/api/resource/${organizationId}`).respond(resources);
+      }
+    }
+  }
+
+  /**
+   * Add resource to a resources map
+   *
+   * @param {string} organizationId organization ID
+   * @param {string} scope total, used or available
+   * @param {any} resource
+   */
+  addResource(organizationId: string, scope: string, resource: any): void {
+    if (!this.resourcesMap.has(organizationId)) {
+      this.resourcesMap.set(organizationId, new Map());
+    }
+
+    const organizationResourcesMap = this.resourcesMap.get(organizationId);
+    if (organizationResourcesMap.has(scope)) {
+      organizationResourcesMap.get(scope).push(resource);
+    } else {
+      organizationResourcesMap.set(scope, [resource]);
+    }
+  }
 }

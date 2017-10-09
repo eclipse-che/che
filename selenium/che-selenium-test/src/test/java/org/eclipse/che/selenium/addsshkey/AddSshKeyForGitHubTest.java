@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
@@ -27,7 +27,7 @@ import org.testng.annotations.Test;
 /** @author Kuznetsov Mihail */
 public class AddSshKeyForGitHubTest {
 
-  @Inject private DefaultTestUser defaultUser;
+  @Inject private TestUser defaultUser;
   @Inject private TestWorkspace testWorkspace;
   @Inject private Ide ide;
   @Inject private Loader loader;
