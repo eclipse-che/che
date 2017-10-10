@@ -40,6 +40,7 @@ import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceList;
 import io.fabric8.kubernetes.api.model.ServicePort;
+import io.fabric8.kubernetes.api.model.ServiceSpec;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
@@ -57,6 +58,10 @@ import io.fabric8.openshift.api.model.DoneableDeploymentConfig;
 import io.fabric8.openshift.api.model.Image;
 import io.fabric8.openshift.api.model.ImageStream;
 import io.fabric8.openshift.api.model.ImageStreamTag;
+import io.fabric8.openshift.api.model.Route;
+import io.fabric8.openshift.api.model.RouteList;
+import io.fabric8.openshift.api.model.RouteSpec;
+import io.fabric8.openshift.api.model.RouteTargetReference;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftConfig;
@@ -228,6 +233,8 @@ public class OpenShiftConnector extends DockerConnector {
   private final OpenShiftDeploymentCleaner openShiftDeploymentCleaner;
   private final WorkspacesRoutingSuffixProvider cheWorkspacesRoutingSuffixProvider;
   private final OpenshiftWorkspaceEnvironmentProvider openshiftWorkspaceEnvironmentProvider;
+  private String apiEndpoint;
+  private Boolean apiEndpointRetrieved = false;
 
   @Inject
   public OpenShiftConnector(
@@ -286,6 +293,64 @@ public class OpenShiftConnector extends DockerConnector {
         });
     LOG.info(
         "openshiftWorkspaceEnvironmentProvider = {}", openshiftUserAccountProvider.getClass());
+  }
+
+  private String retrieveApiEndpoint() {
+    try (OpenShiftClient oc = new DefaultOpenShiftClient()) {
+        Service cheService =
+            oc.services()
+                .inNamespace(openShiftCheProjectName)
+                .withName(OPENSHIFT_CHE_SERVER_SERVICE_NAME)
+                .get();
+        if (cheService != null) {
+          if (openshiftWorkspaceEnvironmentProvider.areWorkspacesExternal()) {
+            RouteList routes = oc.routes().inNamespace(openShiftCheProjectName).list();
+            for (Route route : routes.getItems()) {
+              RouteSpec spec = route.getSpec();
+              RouteTargetReference target = spec.getTo();
+              if (target != null
+                  && "Service".equalsIgnoreCase(target.getKind())
+                  && OPENSHIFT_CHE_SERVER_SERVICE_NAME.equals(target.getName())) {
+                String host = spec.getHost();
+                String protocol = spec.getTls() != null ? "https://" : "http://";
+                return protocol + host + "/wsmaster/api";
+              }
+            }
+          } else {
+            ServiceSpec spec = cheService.getSpec();
+            String host = spec.getClusterIP();
+            String protocol = "http://";
+            String port = "";
+            List<ServicePort> ports = spec.getPorts();
+            if (!ports.isEmpty()) {
+              port = ":" + ports.get(0).getPort();
+            }
+            return protocol + host + port + "/wsmaster/api";
+          }
+        }
+      }
+    return null;
+  }
+
+  /**
+   * Gets the API endpoint URL to be used if the `che.workspace.che_server_endpoint` property is
+   * null.
+   *
+   * @return .
+   * @throws IOException when a problem occurs with docker api calls
+   */
+  @Override
+  @Nullable
+  public String getApiEndpoint() {
+      synchronized (apiEndpointRetrieved) {
+          if (!apiEndpointRetrieved) {
+              apiEndpointRetrieved = true;
+              apiEndpoint = retrieveApiEndpoint();
+              LOG.debug("apiEndpoint = {}", apiEndpoint);
+          }
+      }
+      
+    return apiEndpoint;
   }
 
   @Override
