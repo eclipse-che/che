@@ -19,8 +19,8 @@ import javax.inject.Inject;
 /** A mechanism for handling subscription from the client and registered its endpointId. */
 @Singleton
 public class ClientSubscriptionHandler {
-  public static final String CHE_CLIENT_INITIALIZE_METHOD_NAME = "cheClient/initialize";
-  public static final String CHE_CLIENT_EXPIRE_METHOD_NAME = "cheClient/expire";
+  public static final String CLIENT_SUBSCRIBE_METHOD_NAME = "client/subscribe";
+  public static final String CLIENT_UNSUBSCRIBE_METHOD_NAME = "client/unsubscribe";
 
   private final Set<String> endpointIds = newConcurrentHashSet();
 
@@ -28,14 +28,14 @@ public class ClientSubscriptionHandler {
   private void configureHandlers(RequestHandlerConfigurator configurator) {
     configurator
         .newConfiguration()
-        .methodName(CHE_CLIENT_INITIALIZE_METHOD_NAME)
+        .methodName(CLIENT_SUBSCRIBE_METHOD_NAME)
         .noParams()
         .noResult()
         .withConsumer(endpointIds::add);
 
     configurator
         .newConfiguration()
-        .methodName(CHE_CLIENT_EXPIRE_METHOD_NAME)
+        .methodName(CLIENT_UNSUBSCRIBE_METHOD_NAME)
         .noParams()
         .noResult()
         .withConsumer(endpointIds::remove);

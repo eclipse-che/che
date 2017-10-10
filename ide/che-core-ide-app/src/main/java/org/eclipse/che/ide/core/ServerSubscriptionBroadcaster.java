@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.ide.core;
 
-import static org.eclipse.che.api.core.jsonrpc.commons.ClientSubscriptionHandler.CHE_CLIENT_INITIALIZE_METHOD_NAME;
+import static org.eclipse.che.api.core.jsonrpc.commons.ClientSubscriptionHandler.CLIENT_SUBSCRIBE_METHOD_NAME;
 import static org.eclipse.che.ide.projectimport.ProjectImportNotificationSubscriber.WS_AGENT_ENDPOINT;
 
 import com.google.inject.Inject;
@@ -31,7 +31,7 @@ public class ServerSubscriptionBroadcaster {
     requestTransmitter
         .newRequest()
         .endpointId(WS_AGENT_ENDPOINT)
-        .methodName(CHE_CLIENT_INITIALIZE_METHOD_NAME)
+        .methodName(CLIENT_SUBSCRIBE_METHOD_NAME)
         .noParams()
         .sendAndSkipResult();
 
