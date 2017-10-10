@@ -85,6 +85,7 @@ items:
     CHE_INFRA_OPENSHIFT_USERNAME: null
     CHE_INFRA_OPENSHIFT_PASSWORD: null
     CHE_INFRA_OPENSHIFT_TRUST__CERTS: null
+     CHE_INFRA_OPENSHIFT_OAUTH__TOKEN: ""
     CHE_INFRA_OPENSHIFT_TLS__ENABLED: "true"
     CHE_INFRA_OPENSHIFT_PROJECT: null
     CHE_INFRA_OPENSHIFT_MACHINE__START__TIMEOUT__MIN: "5"
@@ -188,6 +189,11 @@ items:
             valueFrom:
               configMapKeyRef:
                 key: CHE_INFRA_OPENSHIFT_PASSWORD
+                name: che
+          - name: CHE_INFRA_OPENSHIFT_OAUTH__TOKEN
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_OPENSHIFT_OAUTH__TOKEN
                 name: che
           - name: CHE_INFRA_OPENSHIFT_TRUST__CERTS
             valueFrom:
