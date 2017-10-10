@@ -30,21 +30,15 @@ public class GwtCheCommandType implements CommandType {
 
   public static final String CODE_SERVER_FQN = "com.google.gwt.dev.codeserver.CodeServer";
   public static final String COMMAND_TEMPLATE =
-      "java -classpath $CHE_CLASSPATH "
-          + CODE_SERVER_FQN
-          + " $GWT_MODULE -noincremental -noprecompile";
+      "mvn -Psdm -pl :assembly-ide-war -am clean gwt:codeserver";
 
   private static final String ID = "gwt_sdm_che";
-  private static final String IDE_GWT_MODULE = "org.eclipse.che.ide.IDE";
-
-  private final PluginsResources resources;
 
   private final List<CommandPage> pages;
 
   @Inject
   public GwtCheCommandType(
       PluginsResources resources, GwtCheCommandPagePresenter page, IconRegistry iconRegistry) {
-    this.resources = resources;
     pages = new LinkedList<>();
     pages.add(page);
 
@@ -73,10 +67,7 @@ public class GwtCheCommandType implements CommandType {
 
   @Override
   public String getCommandLineTemplate() {
-    return COMMAND_TEMPLATE
-            .replace("$GWT_MODULE", IDE_GWT_MODULE)
-            .replace("$CHE_CLASSPATH", '"' + resources.cheClassPath().getText() + '"')
-        + " -bindAddress 0.0.0.0";
+    return COMMAND_TEMPLATE;
   }
 
   @Override
