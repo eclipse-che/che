@@ -143,16 +143,28 @@ public class DynaModuleScanner {
             directory, maxDepth, (path, basicFileAttributes) -> path.toString().endsWith(".jar"));
     matches.forEach(
         file -> {
-          try (JarFile jarFile = new JarFile(file.toFile())) {
-            scanJar(jarFile);
-          } catch (IOException e) {
-            throw new IllegalStateException("Unable to scan the file", e);
+          boolean skip =
+              skipResources.stream().anyMatch(pattern -> file.toString().matches(pattern));
+          if (skip) {
+            LOGGER.debug("skipping jar file {} inside directory {}", file.toFile(), directory);
+          } else {
+            try (JarFile jarFile = new JarFile(file.toFile())) {
+              scanJar(jarFile);
+            } catch (IOException e) {
+              throw new IllegalStateException("Unable to scan the file", e);
+            }
           }
         });
   }
 
   /** scan the given .class file */
   protected void scanFile(Path file) throws IOException {
+    boolean skip = skipResources.stream().anyMatch(pattern -> file.toString().matches(pattern));
+    if (skip) {
+      LOGGER.debug("skipping file {}", file);
+      return;
+    }
+
     if (Files.isRegularFile(file)) {
       try (InputStream is = new FileInputStream(file.toFile())) {
         scanInputStream(is);
@@ -167,7 +179,13 @@ public class DynaModuleScanner {
     while (enumEntries.hasMoreElements()) {
       JarEntry jarEntry = enumEntries.nextElement();
       if (jarEntry.getName().endsWith(".class")) {
-        scanInputStream(jarFile.getInputStream(jarEntry));
+        boolean skip =
+            skipResources.stream().anyMatch(pattern -> jarEntry.getName().matches(pattern));
+        if (skip) {
+          LOGGER.debug("skipping jar entry from jarFile {}", jarFile);
+        } else {
+          scanInputStream(jarFile.getInputStream(jarEntry));
+        }
       }
     }
   }
