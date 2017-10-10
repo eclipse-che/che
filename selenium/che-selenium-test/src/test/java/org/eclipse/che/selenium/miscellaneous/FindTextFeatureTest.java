@@ -128,6 +128,12 @@ public class FindTextFeatureTest {
               + "(2 occurrences of 'String' found)",
           PROJECT_NAME);
 
+  private static final String PR_6_PATH_1 = "/web-java-petclinic/pom.xml";
+  private static final String PR_6_PATH_2 =
+      "/web-java-petclinic/src/main/resources/spring/mvc-view-config.xml";
+  private static final String PR_6_PATH_3 =
+      "/web-java-petclinic/src/test/java/org/springframework/samples/petclinic/web/VisitsViewTests.java";
+
   private static final String PR_6_EXPECTED_TEXT_1 =
       "62:    <webjars-bootstrap.version>2.3.0</webjars-bootstrap.version>";
   private static final String PR_6_EXPECTED_TEXT_2 =
@@ -227,6 +233,7 @@ public class FindTextFeatureTest {
     findText.sendCommandByKeyboardInFindInfoPanel(Keys.ENTER.toString());
     editor.waitActiveTabFileName(fileNameCreatedFromAPI);
     Assert.assertEquals(editor.getPositionOfLine(), 1);
+    editor.closeAllTabsByContextMenu();
   }
 
   @Test
@@ -398,18 +405,13 @@ public class FindTextFeatureTest {
     String resultsOnThirdPage =
         "10 occurrences found in 3 files (per page results) for 'Str'. Total file count - 63";
 
-    String filePathForFirstPage = "/web-java-petclinic/pom.xml";
-    String filePathForSecondPage =
-        "/web-java-petclinic/src/main/resources/spring/mvc-view-config.xml";
-    String filePathForThirdPage =
-        "/web-java-petclinic/src/test/java/org/springframework/samples/petclinic/web/VisitsViewTests.java";
-
     menu.runCommand(
         TestMenuCommandsConstants.Workspace.WORKSPACE,
         TestMenuCommandsConstants.Workspace.CREATE_PROJECT);
     wizard.selectProjectAndCreate(SamplesName.WEB_JAVA_PETCLINIC, "web-java-petclinic");
     notificationsPopupPanel.waitProgressPopupPanelClose();
     projectExplorer.selectItem("web-java-petclinic");
+    projectExplorer.openItemByPath("web-java-petclinic");
     findText.launchFindFormByKeyboard();
     findText.waitFindTextMainFormIsOpen();
     findText.typeTextIntoFindField("Str");
@@ -419,34 +421,34 @@ public class FindTextFeatureTest {
 
     //check results, open a file and check cursor position
     Assert.assertEquals(findText.getResults(), resultsOnFirstPage);
-    findText.openFileNodeByDoubleClick(filePathForFirstPage);
+    findText.openFileNodeByDoubleClick(PR_6_PATH_1);
     findText.waitExpectedTextInFindInfoPanel(PR_6_EXPECTED_TEXT_1);
-    findText.selectItemInFindInfoPanelByDoubleClick(filePathForFirstPage, PR_6_EXPECTED_TEXT_1);
+    findText.selectItemInFindInfoPanelByDoubleClick(PR_6_PATH_1, PR_6_EXPECTED_TEXT_1);
     editor.waitActiveEditor();
     editor.waitActiveTabFileName("spring-petclinic");
     Assert.assertEquals(editor.getPositionOfLine(), 62);
 
     //check that the previous page button is disabled on the first page and click on the next page button
     Assert.assertFalse(findText.checkPreviousPageButtonIsEnabled());
-    findText.clickOnNextButton();
+    findText.clickOnNextPageButton();
 
     //check results on second page and the previous page button is enabled
     Assert.assertEquals(findText.getResults(), resultsOnSecondPage);
     Assert.assertTrue(findText.checkPreviousPageButtonIsEnabled());
-    findText.openFileNodeByDoubleClick(filePathForSecondPage);
+    findText.openFileNodeByDoubleClick(PR_6_PATH_2);
     findText.waitExpectedTextInFindInfoPanel(PR_6_EXPECTED_TEXT_2);
-    findText.clickOnNextButton();
+    findText.clickOnNextPageButton();
 
     //check results on third page and that the next page button is disabled
     Assert.assertEquals(findText.getResults(), resultsOnThirdPage);
     Assert.assertFalse(findText.checkNextPageButtonIsEnabled());
-    findText.openFileNodeByDoubleClick(filePathForThirdPage);
+    findText.openFileNodeByDoubleClick(PR_6_PATH_3);
     findText.waitExpectedTextInFindInfoPanel(PR_6_EXPECTED_TEXT_3);
-    findText.clickOnPreviousButton();
+    findText.clickOnPreviousPageButton();
 
     Assert.assertEquals(findText.getResults(), resultsOnSecondPage);
     Assert.assertTrue(findText.checkNextPageButtonIsEnabled());
-    findText.clickOnPreviousButton();
+    findText.clickOnPreviousPageButton();
 
     Assert.assertEquals(findText.getResults(), resultsOnFirstPage);
     Assert.assertFalse(findText.checkPreviousPageButtonIsEnabled());
