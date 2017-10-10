@@ -36,9 +36,9 @@
                 <artifactId>che-core-dynamodule-maven-plugin</artifactId>
                 <configuration>
                     <localRepository>${localRepository}</localRepository>
-                    <skipJars>
-                        <skipJar>value1</skipJar>
-                    </skipJars>
+                    <skipResources>
+                        <skipResource>value1</skipResource>
+                    </skipResources>
                     <project implementation="org.eclipse.che.plugin.dynamodule.stub.DynaModuleListGeneratorMojoProjectStub"/>
                 </configuration>
                 <extensions>true</extensions>

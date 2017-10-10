@@ -137,6 +137,7 @@ public class DynaModuleListGeneratorMojoTest {
         (DynaModuleListGeneratorMojo) this.rule.lookupMojo("build", pom);
     configure(mojo, projectCopy);
     this.rule.setVariableValueToObject(mojo, "scanWarDependencies", true);
+    this.rule.setVariableValueToObject(mojo, "scanJarInWarDependencies", true);
     mojo.execute();
     List<String> findClasses =
         mojo.getDynaModuleListGenerator().getDynaModuleScanner().getDynaModuleClasses();
@@ -147,6 +148,15 @@ public class DynaModuleListGeneratorMojoTest {
                 .collect(toList())
                 .size()
             > 2);
+
+    // this dependency is inside the wsagent-core file.
+    assertTrue(
+        findClasses
+                .stream()
+                .filter(className -> className.contains("org.eclipse.che.wsagent.server."))
+                .collect(toList())
+                .size()
+            >= 2);
   }
 
   private static class CustomClassLoader extends ClassLoader {

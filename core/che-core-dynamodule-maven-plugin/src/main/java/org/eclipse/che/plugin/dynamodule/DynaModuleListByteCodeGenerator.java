@@ -23,6 +23,7 @@ import static org.objectweb.asm.Opcodes.NEW;
 import static org.objectweb.asm.Opcodes.POP;
 import static org.objectweb.asm.Opcodes.RETURN;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -50,14 +51,20 @@ public class DynaModuleListByteCodeGenerator {
   /** Name of the class to generate */
   private String className = "DynaModuleList";
 
-  /** Patter for excluding some files. */
-  private String[] additionalSkipJars;
+  /** Pattern for excluding some files. */
+  private String[] additionalSkipResources;
 
   /** Bytecode generated that is corresponding to the generated class. */
   private byte[] classToGenerate;
 
   /** Instance of the scanner */
   private DynaModuleScanner dynaModuleScanner;
+
+  /** Directory used to unpack war files */
+  private File unpackedDirectory;
+
+  /** Scan jar in war files. */
+  private boolean scanJarInWarDependencies;
 
   /** Setup a new generator */
   public DynaModuleListByteCodeGenerator() {
@@ -69,7 +76,9 @@ public class DynaModuleListByteCodeGenerator {
    * class that will provide all these modules
    */
   protected void init() {
-    dynaModuleScanner.setAdditionalSkipJars(additionalSkipJars);
+    dynaModuleScanner.setAdditionalSkipResources(additionalSkipResources);
+    dynaModuleScanner.setUnpackedDirectory(unpackedDirectory);
+    dynaModuleScanner.setScanJarInWarDependencies(scanJarInWarDependencies);
 
     urls.forEach(
         url -> {
@@ -162,11 +171,19 @@ public class DynaModuleListByteCodeGenerator {
     return this.classToGenerate;
   }
 
-  public void setSkipJars(String[] additionalSkipJars) {
-    this.additionalSkipJars = additionalSkipJars;
+  public void setSkipResources(String[] additionalSkipResources) {
+    this.additionalSkipResources = additionalSkipResources;
   }
 
   protected DynaModuleScanner getDynaModuleScanner() {
     return dynaModuleScanner;
+  }
+
+  public void setUnpackedDirectory(File unpackedDirectory) {
+    this.unpackedDirectory = unpackedDirectory;
+  }
+
+  public void setScanJarInWarDependencies(boolean scanJarInWarDependencies) {
+    this.scanJarInWarDependencies = scanJarInWarDependencies;
   }
 }

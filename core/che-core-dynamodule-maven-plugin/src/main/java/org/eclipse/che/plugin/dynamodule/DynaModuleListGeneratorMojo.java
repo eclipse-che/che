@@ -63,10 +63,13 @@ public class DynaModuleListGeneratorMojo extends AbstractMojo {
   private File targetDirectory;
 
   /** List pattern of files to be excluded during the scan. */
-  @Parameter private String[] skipJars;
+  @Parameter private String[] skipResources;
 
   /** Directory used to generate the code */
   private File generatedDirectory;
+
+  /** Directory used to unpack war files */
+  private File unpackedDirectory;
 
   /** Local Repository. */
   @Parameter(defaultValue = "${localRepository}", readonly = true, required = true)
@@ -80,6 +83,10 @@ public class DynaModuleListGeneratorMojo extends AbstractMojo {
 
   /** Scan war dependencies */
   @Parameter private boolean scanWarDependencies;
+
+  /** Scan .jar files in war dependencies */
+  @Parameter(defaultValue = "true")
+  private boolean scanJarInWarDependencies;
 
   private DynaModuleListByteCodeGenerator dynaModuleListGenerator;
 
@@ -98,15 +105,24 @@ public class DynaModuleListGeneratorMojo extends AbstractMojo {
   public void execute() throws MojoExecutionException, MojoFailureException {
     long start = System.currentTimeMillis();
     generatedDirectory = new File(targetDirectory, "generated-sources/dynamodules");
+    unpackedDirectory = new File(targetDirectory, "unpacked-dynamodule");
     if (!generatedDirectory.exists() && !generatedDirectory.mkdirs()) {
       throw new MojoExecutionException(
           "Unable to create a directory for writing Guice DynaModule file '"
               + generatedDirectory
               + "'.");
     }
+    if (!unpackedDirectory.exists() && !unpackedDirectory.mkdirs()) {
+      throw new MojoExecutionException(
+          "Unable to create a directory for writing Guice unpacked files '"
+              + unpackedDirectory
+              + "'.");
+    }
 
     dynaModuleListGenerator = new DynaModuleListByteCodeGenerator();
-    dynaModuleListGenerator.setSkipJars(skipJars);
+    dynaModuleListGenerator.setSkipResources(skipResources);
+    dynaModuleListGenerator.setUnpackedDirectory(unpackedDirectory);
+    dynaModuleListGenerator.setScanJarInWarDependencies(scanJarInWarDependencies);
 
     String className = LOWER_HYPHEN.to(UPPER_CAMEL, project.getArtifactId().replace(".", "-"));
 

@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.plugin.dynamodule.scanner;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Stream;
+import org.eclipse.che.commons.lang.ZipUtils;
 import org.objectweb.asm.ClassReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,26 +46,31 @@ public class DynaModuleScanner {
   /** List of the classes that are containing DynaModules. */
   private List<String> matchingClasses = new ArrayList();
 
-  private final List<String> skipJars = new ArrayList<>();
+  private final List<String> skipResources = new ArrayList<>();
 
-  private String[] additionalSkipJars;
+  /** Directory used to unpack war files */
+  private File unpackedDirectory;
+
+  /** Scan jars in war. */
+  private boolean scanJarInWarDependencies;
 
   public DynaModuleScanner() {
 
     // skipping this dependencies
-    this.skipJars.add(".*com/google/gwt/gwt-.*/.*/gwt-.*.jar");
-    this.skipJars.add(".*com/google/inject/guice.*/.*/guice.*.jar");
-    this.skipJars.add(".*org/testng/testng/.*/testng-.*.jar");
-    this.skipJars.add(".*org/apache/lucene/lucene-.*/.*/lucene-.*.jar");
-    this.skipJars.add(".*com/google/guava/guava/.*/guava-.*.jar");
-    this.skipJars.add(
+    this.skipResources.add(".*com/google/gwt/gwt-.*/.*/gwt-.*.jar");
+    this.skipResources.add(".*com/google/inject/guice.*/.*/guice.*.jar");
+    this.skipResources.add(".*org/testng/testng/.*/testng-.*.jar");
+    this.skipResources.add(".*org/apache/lucene/lucene-.*/.*/lucene-.*.jar");
+    this.skipResources.add(".*com/google/guava/guava/.*/guava-.*.jar");
+    this.skipResources.add(
         ".*org/eclipse/che/lib/org-eclipse-jdt-core-repack/.*/org-eclipse-jdt-core-repack-.*.jar");
-    this.skipJars.add(".*org/eclipse/che/plugin/org.eclipse.jdt.ui/.*/org.eclipse.jdt.ui-.*.jar");
-    this.skipJars.add(".*org/eclipse/lsp4j/org.eclipse.lsp4j/.*/org.eclipse.lsp4j-.*.jar");
-    this.skipJars.add(".*org/eclipse/tycho/org.eclipse.osgi/.*/org.eclipse.osgi-.*.jar");
-    this.skipJars.add(".*com/fasterxml/jackson/core/.*.jar");
-    this.skipJars.add(".*org/eclipse/xtend/.*.jar");
-    this.skipJars.add(".*org/eclipse/search/.*.jar");
+    this.skipResources.add(
+        ".*org/eclipse/che/plugin/org.eclipse.jdt.ui/.*/org.eclipse.jdt.ui-.*.jar");
+    this.skipResources.add(".*org/eclipse/lsp4j/org.eclipse.lsp4j/.*/org.eclipse.lsp4j-.*.jar");
+    this.skipResources.add(".*org/eclipse/tycho/org.eclipse.osgi/.*/org.eclipse.osgi-.*.jar");
+    this.skipResources.add(".*com/fasterxml/jackson/core/.*.jar");
+    this.skipResources.add(".*org/eclipse/xtend/.*.jar");
+    this.skipResources.add(".*org/eclipse/search/.*.jar");
   }
 
   /**
@@ -75,7 +82,7 @@ public class DynaModuleScanner {
    */
   public void scan(URL url) throws URISyntaxException, IOException {
 
-    boolean skip = skipJars.stream().anyMatch(pattern -> url.toString().matches(pattern));
+    boolean skip = skipResources.stream().anyMatch(pattern -> url.toString().matches(pattern));
     if (skip) {
       LOGGER.debug("skipping URL {}", url);
       return;
@@ -101,8 +108,12 @@ public class DynaModuleScanner {
       scanDirectory(path);
     } else {
       if (path.toString().endsWith(".jar") || path.toString().endsWith(".war")) {
-        try (JarFile jarFile = new JarFile(path.toFile())) {
-          scanJar(jarFile);
+        if (scanJarInWarDependencies && path.toString().endsWith(".war")) {
+          scanDeepWar(path);
+        } else {
+          try (JarFile jarFile = new JarFile(path.toFile())) {
+            scanJar(jarFile);
+          }
         }
       } else if (path.toString().endsWith(".class")) {
         scanFile(path);
@@ -122,6 +133,18 @@ public class DynaModuleScanner {
         file -> {
           try {
             scanFile(file);
+          } catch (IOException e) {
+            throw new IllegalStateException("Unable to scan the file", e);
+          }
+        });
+
+    matches =
+        java.nio.file.Files.find(
+            directory, maxDepth, (path, basicFileAttributes) -> path.toString().endsWith(".jar"));
+    matches.forEach(
+        file -> {
+          try (JarFile jarFile = new JarFile(file.toFile())) {
+            scanJar(jarFile);
           } catch (IOException e) {
             throw new IllegalStateException("Unable to scan the file", e);
           }
@@ -149,6 +172,18 @@ public class DynaModuleScanner {
     }
   }
 
+  protected void scanDeepWar(final Path warPath) throws IOException {
+
+    // name
+    File file = warPath.toFile();
+    File unpackedFile = new File(this.unpackedDirectory, file.getName());
+    // unpack the war
+    ZipUtils.unzip(file, unpackedFile);
+
+    // now scan the directory
+    scanDirectory(unpackedFile.toPath());
+  }
+
   /** scan the given inputstream */
   protected void scanInputStream(InputStream inputStream) throws IOException {
     FindDynaModuleVisitor findDynaModuleVisitor = new FindDynaModuleVisitor();
@@ -167,10 +202,18 @@ public class DynaModuleScanner {
     return matchingClasses;
   }
 
-  public void setAdditionalSkipJars(String[] additionalSkipJars) {
-    if (additionalSkipJars != null && additionalSkipJars.length > 0) {
-      this.skipJars.addAll(Arrays.asList(additionalSkipJars));
+  public void setAdditionalSkipResources(String[] additionalSkipResources) {
+    if (additionalSkipResources != null && additionalSkipResources.length > 0) {
+      this.skipResources.addAll(Arrays.asList(additionalSkipResources));
     }
+  }
+
+  public void setUnpackedDirectory(File unpackedDirectory) {
+    this.unpackedDirectory = unpackedDirectory;
+  }
+
+  public void setScanJarInWarDependencies(boolean scanJarInWarDependencies) {
+    this.scanJarInWarDependencies = scanJarInWarDependencies;
   }
 
   public static class UrlTime implements Comparable<UrlTime> {

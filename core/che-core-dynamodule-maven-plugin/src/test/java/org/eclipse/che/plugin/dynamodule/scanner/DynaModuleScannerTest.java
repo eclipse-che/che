@@ -44,8 +44,32 @@ public class DynaModuleScannerTest {
     dynaModuleScanner.scan(testUrl);
     verify(dynaModuleScanner).performScan(testUrl);
 
-    dynaModuleScanner.setAdditionalSkipJars(new String[] {".*I-want-to-exclude-this.jar"});
+    dynaModuleScanner.setAdditionalSkipResources(new String[] {".*I-want-to-exclude-this.jar"});
     URL testExcludedUrl = new URL("file:///my-file-I-want-to-exclude-this.jar");
+    dynaModuleScanner.scan(testExcludedUrl);
+    verify(dynaModuleScanner, never()).performScan(testExcludedUrl);
+  }
+
+  /**
+   * First, check that a file is scanned and then check that if a file is excluded, it is not
+   * scanned.
+   *
+   * @throws Exception
+   */
+  @Test
+  public void checkSkipClass() throws Exception {
+    DynaModuleScanner dynaModuleScanner = new DynaModuleScanner();
+    dynaModuleScanner = Mockito.spy(dynaModuleScanner);
+
+    doNothing().when(dynaModuleScanner).performScan(any(URL.class));
+
+    // first check that URL is scanned
+    URL testUrl = new URL("file:///my-file.class");
+    dynaModuleScanner.scan(testUrl);
+    verify(dynaModuleScanner).performScan(testUrl);
+
+    dynaModuleScanner.setAdditionalSkipResources(new String[] {".*I-want-to-exclude-this.class"});
+    URL testExcludedUrl = new URL("file:///my-file-I-want-to-exclude-this.class");
     dynaModuleScanner.scan(testExcludedUrl);
     verify(dynaModuleScanner, never()).performScan(testExcludedUrl);
   }
