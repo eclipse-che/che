@@ -67,6 +67,8 @@ public class OpenShiftPvcHelper {
   private final String jobImage;
   private final String jobMemoryLimit;
 
+  @Inject private OpenshiftWorkspaceEnvironmentProvider openshiftUserAccountProvider;
+
   protected enum Command {
     REMOVE,
     MAKE
@@ -174,7 +176,8 @@ public class OpenShiftPvcHelper {
             .endSpec()
             .build();
 
-    try (OpenShiftClient openShiftClient = new DefaultOpenShiftClient()) {
+    try (OpenShiftClient openShiftClient =
+        new DefaultOpenShiftClient(openshiftUserAccountProvider.getWorkspacesOpenshiftConfig())) {
       openShiftClient.pods().inNamespace(projectNamespace).create(podSpec);
       boolean completed = false;
       while (!completed) {
