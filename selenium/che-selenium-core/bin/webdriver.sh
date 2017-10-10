@@ -503,7 +503,7 @@ fetchFailedTestsNumber() {
 
 detectLatestResultsUrl() {
     local job=$(curl -s ${BASE_ACTUAL_RESULTS_URL} | tr '\n' ' ' | sed 's/.*Last build (#\([0-9]\+\)).*/\1/')
-    echo ${BASE_ACTUAL_RESULTS_URL}${job}"/"
+    echo ${BASE_ACTUAL_RESULTS_URL}${job}"/testReport/"
 }
 
 # Fetches list of failed tests and failed configurations.
@@ -516,16 +516,14 @@ fetchActualResults() {
     if [[ ! ${job} =~ ^[0-9]+$ ]]; then
         ACTUAL_RESULTS_URL=$(detectLatestResultsUrl)
     else
-        ACTUAL_RESULTS_URL=${BASE_ACTUAL_RESULTS_URL}${job}"/"
+        ACTUAL_RESULTS_URL=${BASE_ACTUAL_RESULTS_URL}${job}"/testReport/"
     fi
 
-    # get list of failed tests from CI server
-    local actualResults=($(curl -s ${ACTUAL_RESULTS_URL} | \
+    # get list of failed tests from CI server, remove duplicates from it and sort
+    ACTUAL_RESULTS=$(echo $( curl -s ${ACTUAL_RESULTS_URL} | \
                            tr '>' '\n' | tr '<' '\n' | tr '"' '\n'  | \
-                           grep -A9999999 "Test Result" | \
-                           grep [a-z][a-z0-9_]*[.][a-z] | grep -v http | grep -v junit ))
-
-    ACTUAL_RESULTS=$(echo ${actualResults[*]} | tr ' ' '\n' | sort | uniq)
+                           grep --extended-regexp "^[a-z_$][a-z0-9_$.]*\.[A-Z_$][a-zA-Z0-9_$]*\.[a-z_$][a-zA-Z0-9_$]*$" | \
+                           tr ' ' '\n' | sort | uniq ))
 }
 
 findRegressions() {
