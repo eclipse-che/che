@@ -52,7 +52,7 @@ public class GitCheckoutNotifier implements GitEventsSubscriber {
   }
 
   @Override
-  public void onFileUnderGitChanged(String endpointId, FileChangedEventDto dto) {}
+  public void onFileChanged(String endpointId, FileChangedEventDto dto) {}
 
   @Override
   public void onGitStatusChanged(String endpointId, StatusChangedEventDto statusChangedEventDto) {}

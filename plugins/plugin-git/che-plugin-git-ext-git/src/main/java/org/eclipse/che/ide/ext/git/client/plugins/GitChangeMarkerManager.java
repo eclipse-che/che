@@ -75,7 +75,7 @@ public class GitChangeMarkerManager implements GitEventsSubscriber {
   }
 
   @Override
-  public void onFileUnderGitChanged(String endpointId, FileChangedEventDto dto) {
+  public void onFileChanged(String endpointId, FileChangedEventDto dto) {
     editorAgentProvider
         .get()
         .getOpenedEditors()

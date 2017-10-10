@@ -21,9 +21,10 @@ import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
  */
 public interface GitEventsSubscriber {
 
-  /** Invoked when a file which is added to git was changed */
-  void onFileUnderGitChanged(String endpointId, FileChangedEventDto dto);
+  /** Invoked when a project file was changed */
+  void onFileChanged(String endpointId, FileChangedEventDto dto);
 
+  // TODO change method name or behaviour. It is not git status actually.
   /** Invoked when git status of project was changed */
   void onGitStatusChanged(String endpointId, StatusChangedEventDto dto);
 

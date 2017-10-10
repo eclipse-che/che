@@ -53,7 +53,7 @@ public class ProjectExplorerTreeColorizer implements GitEventsSubscriber {
   }
 
   @Override
-  public void onFileUnderGitChanged(String endpointId, FileChangedEventDto dto) {
+  public void onFileChanged(String endpointId, FileChangedEventDto dto) {
     Tree tree = projectExplorerPresenterProvider.get().getTree();
     tree.getNodeStorage()
         .getAll()

@@ -64,7 +64,7 @@ public class GitEventsHandler implements GitEventSubscribable {
 
   private void onFileChangedHandler(String endpointId, FileChangedEventDto fileChangedEventDto) {
     for (GitEventsSubscriber subscriber : subscribers) {
-      subscriber.onFileUnderGitChanged(endpointId, fileChangedEventDto);
+      subscriber.onFileChanged(endpointId, fileChangedEventDto);
     }
   }
 

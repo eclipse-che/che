@@ -36,6 +36,8 @@ import org.eclipse.che.ide.ext.git.client.GitEventsSubscriber;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
+import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
+import org.eclipse.che.ide.ext.git.client.compare.MutableAlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelPresenter;
 import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGResource;
@@ -60,6 +62,7 @@ public class GitPanelPresenter extends BasePresenter
   private final GitLocalizationConstant locale;
 
   private Project currentProject;
+  private MutableAlteredFiles alteredFiles;
 
   @Inject
   public GitPanelPresenter(
@@ -84,7 +87,8 @@ public class GitPanelPresenter extends BasePresenter
     this.view.setDelegate(this);
     this.view.setChangesPanelView(this.changesPanelPresenter.getView());
 
-    this.currentProject = null; // no selection in project explorer
+    this.currentProject = appContext.getRootProject();
+    this.alteredFiles = new MutableAlteredFiles(currentProject);
 
     if (partStack == null || !partStack.containsPart(this)) {
       workspaceAgent.openPart(this, PartStackType.NAVIGATION);
@@ -94,27 +98,36 @@ public class GitPanelPresenter extends BasePresenter
     subscribeToGitEvents.addSubscriber(this);
   }
 
-  /** Invoked each time when panel is activated. */
-  private void update() {
+  /**
+   * Invoked each time when panel is activated.
+   */
+  private void onGitPanelOpen() {
+    // Update file list according to project explorer selection
     Project selectedProject = appContext.getRootProject();
-    // TODO handle no project, selectedProject == null
-    if (selectedProject != currentProject) {
-      currentProject = selectedProject;
 
-      service
-          .diff(currentProject.getLocation(), null, NAME_STATUS, false, 0, REVISION, false)
-          .then(
-              diff -> {
-                updateChangedFiles(new AlteredFiles(currentProject, diff));
-              })
-          .catchError(
-              arg -> {
-                notificationManager.notify(locale.diffFailed(), FAIL, NOT_EMERGE_MODE);
-              });
+    if (selectedProject == null) {
+      updateChangedFiles(null);
+      return;
+    } else if (selectedProject != currentProject) {
+      currentProject = selectedProject;
+      reloadChangedFilesList();
     }
   }
 
-  // TODO invoke from file watcher subscriber or on open panel
+  private void reloadChangedFilesList() {
+    service
+        .diff(currentProject.getLocation(), null, NAME_STATUS, false, 0, REVISION, false)
+        .then(
+            diff -> {
+              alteredFiles = new MutableAlteredFiles(currentProject, diff);
+              updateChangedFiles(alteredFiles);
+            })
+        .catchError(
+            arg -> {
+              notificationManager.notify(locale.diffFailed(), FAIL, NOT_EMERGE_MODE);
+            });
+  }
+
   private void updateChangedFiles(AlteredFiles alteredFiles) {
     changesPanelPresenter.show(alteredFiles);
   }
@@ -159,23 +172,46 @@ public class GitPanelPresenter extends BasePresenter
   @Override
   public void onActivePartChanged(ActivePartChangedEvent event) {
     if (event.getActivePart() != null && event.getActivePart() instanceof GitPanelPresenter) {
-      update();
+      onGitPanelOpen();
     }
   }
 
-  // TODO handle git events
   @Override
-  public void onFileUnderGitChanged(String endpointId, FileChangedEventDto dto) {
-    Log.info(getClass(), "FILE_UNDER_GIT: " + dto.getStatus() + ':' + dto.getPath());
+  public void onFileChanged(String endpointId, FileChangedEventDto dto) {
+    switch (dto.getStatus()) {
+      case ADDED:
+        // do nothing
+        break;
+      case MODIFIED:
+        if (alteredFiles.addFile(removeProjectName(dto.getPath()), Status.MODIFIED)) {
+          updateChangedFiles(alteredFiles);
+        }
+        break;
+      case UNTRACKED:
+        // do nothing
+        break;
+      case NOT_MODIFIED:
+        if (alteredFiles.removeFile(removeProjectName(dto.getPath()))) {
+          updateChangedFiles(alteredFiles);
+        }
+        break;
+    }
   }
 
   @Override
   public void onGitStatusChanged(String endpointId, StatusChangedEventDto dto) {
-    Log.info(getClass(), "STATUS_CHANGED: " + dto.getStatus());
+    reloadChangedFilesList();
   }
 
   @Override
   public void onGitCheckout(String endpointId, GitCheckoutEventDto dto) {
-    Log.info(getClass(), "CHECKOUT: " + dto.getName());
+    reloadChangedFilesList();
+  }
+
+  /**
+   * Removes first segment from given path.
+   */
+  private String removeProjectName(String path) {
+    return path.substring(path.indexOf('/', 1) + 1);
   }
 }
