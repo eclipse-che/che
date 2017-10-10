@@ -67,8 +67,7 @@ public class GitChangeMarkersTest {
     askDialog.clickOkBtn();
     askDialog.waitFormToClose();
     git.waitGitStatusBarWithMess(GIT_INITIALIZED_SUCCESS);
-    //    TODO Adapt to spi branch
-    //    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(GIT_INITIALIZED_SUCCESS);
 
     // perform init commit
