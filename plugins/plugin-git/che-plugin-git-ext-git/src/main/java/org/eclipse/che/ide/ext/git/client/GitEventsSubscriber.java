@@ -25,6 +25,11 @@ public interface GitEventsSubscriber {
   void onFileChanged(String endpointId, FileChangedEventDto dto);
 
   // TODO change method name or behaviour. It is not git status actually.
+  // For example, this even won't be fired when:
+  // - edit just committed file
+  // - redo changes to committed state
+  // - delete a committed file
+  // And maybe some others
   /** Invoked when git status of project was changed */
   void onGitStatusChanged(String endpointId, StatusChangedEventDto dto);
 
