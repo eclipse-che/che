@@ -15,6 +15,7 @@ import com.google.inject.Singleton;
 import java.util.List;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
@@ -30,12 +31,16 @@ class WorkspaceCommandManagerDelegate {
 
   private final WorkspaceServiceClient workspaceServiceClient;
   private final AppContext appContext;
+  private PromiseProvider promiseProvider;
 
   @Inject
   WorkspaceCommandManagerDelegate(
-      WorkspaceServiceClient workspaceServiceClient, AppContext appContext) {
+      WorkspaceServiceClient workspaceServiceClient,
+      AppContext appContext,
+      PromiseProvider promiseProvider) {
     this.workspaceServiceClient = workspaceServiceClient;
     this.appContext = appContext;
+    this.promiseProvider = promiseProvider;
   }
 
   /** Returns commands which are stored in the current workspace. */
@@ -44,6 +49,17 @@ class WorkspaceCommandManagerDelegate {
     final WorkspaceConfigImpl workspaceConfig = workspace.getConfig();
 
     return workspaceConfig.getCommands();
+  }
+
+  /** Updates the commands. */
+  Promise<List<CommandImpl>> fetchCommands() {
+    return workspaceServiceClient
+        .getWorkspace(appContext.getWorkspaceId())
+        .thenPromise(
+            workspace -> {
+              updateWorkspace().apply(workspace);
+              return promiseProvider.resolve(getCommands());
+            });
   }
 
   /**
