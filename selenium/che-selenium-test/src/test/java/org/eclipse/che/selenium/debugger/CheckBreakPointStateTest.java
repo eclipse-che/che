@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
@@ -30,10 +31,8 @@ import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
 public class CheckBreakPointStateTest {
-  private static final String PROJECT_NAME =
-      NameGenerator.generate(CheckBreakPointStateTest.class.getSimpleName(), 3);
-  private static final String PROJECT_NAME_2 =
-      NameGenerator.generate(CheckBreakPointStateTest.class.getSimpleName(), 2);
+  private static final String PROJECT_NAME = NameGenerator.generate("project", 3);
+  private static final String PROJECT_NAME_2 = NameGenerator.generate("project", 3);
   private static final String PATH_PREFFIX = "/src/main/java/org/eclipse/qa/examples/";
   private static final String PATH_TO_PROJECT_WITH_ONE_CLASS = PROJECT_NAME + PATH_PREFFIX;
   private static final String PATH_TO_PROJECT_WITH_TWO_CLASSES = PROJECT_NAME_2 + PATH_PREFFIX;
@@ -48,6 +47,7 @@ public class CheckBreakPointStateTest {
   @Inject private Loader loader;
   @Inject private AskDialog askDialog;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -61,6 +61,9 @@ public class CheckBreakPointStateTest {
         ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME_2, ProjectTemplates.MAVEN_SPRING);
 
     ide.open(ws);
+    projectExplorer.waitItem(PROJECT_NAME);
+    projectExplorer.waitItem(PROJECT_NAME_2);
+    projectExplorer.quickExpandWithJavaScript();
   }
 
   @Test
@@ -71,8 +74,6 @@ public class CheckBreakPointStateTest {
     String expectedBreakpointsForGreetingClass =
         "AppController.java:29\n" + "AppController.java:30\n" + "AppController.java:31";
 
-    projectExplorer.waitItem(PROJECT_NAME_2);
-    projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PATH_TO_PROJECT_WITH_TWO_CLASSES + "AdditonalClass.java");
     editor.waitActiveEditor();
     editor.setInactiveBreakpoint(7);
@@ -119,6 +120,6 @@ public class CheckBreakPointStateTest {
     askDialog.confirmAndWaitClosed();
     projectExplorer.waitDisappearItemByPath(PROJECT_NAME);
     debugPanel.waitBreakPointsPanelIsEmpty();
-    ide.driver().navigate().refresh();
+    seleniumWebDriver.navigate().refresh();
   }
 }
