@@ -79,7 +79,7 @@ public class TraefikCreateContainerInterceptorTest {
   protected void setup() throws Exception {
 
     this.customServerEvaluationStrategy =
-        new CustomServerEvaluationStrategy("10.0.0.1", "127.0.0.1", TEMPLATE, "http", "8080");
+        new CustomServerEvaluationStrategy("10.0.0.1", "127.0.0.1", TEMPLATE, "http", "8080", null);
     when(serverEvaluationStrategyProvider.get()).thenReturn(customServerEvaluationStrategy);
     traefikCreateContainerInterceptor.setServerEvaluationStrategyProvider(
         serverEvaluationStrategyProvider);
