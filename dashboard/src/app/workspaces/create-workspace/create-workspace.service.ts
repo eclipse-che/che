@@ -65,12 +65,16 @@ export class CreateWorkspaceSvc {
    * Confirmation dialog service.
    */
   private confirmDialogService: ConfirmDialogService;
+  /**
+   * Document service.
+   */
+  private $document: ng.IDocumentService;
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($location: ng.ILocationService, $log: ng.ILogService, $q: ng.IQService, cheWorkspace: CheWorkspace, namespaceSelectorSvc: NamespaceSelectorSvc, stackSelectorSvc: StackSelectorSvc, projectSourceSelectorService: ProjectSourceSelectorService, cheNotification: CheNotification, confirmDialogService: ConfirmDialogService) {
+  constructor($location: ng.ILocationService, $log: ng.ILogService, $q: ng.IQService, cheWorkspace: CheWorkspace, namespaceSelectorSvc: NamespaceSelectorSvc, stackSelectorSvc: StackSelectorSvc, projectSourceSelectorService: ProjectSourceSelectorService, cheNotification: CheNotification, confirmDialogService: ConfirmDialogService, $document: ng.IDocumentService) {
     this.$location = $location;
     this.$log = $log;
     this.$q = $q;
@@ -80,6 +84,7 @@ export class CreateWorkspaceSvc {
     this.projectSourceSelectorService = projectSourceSelectorService;
     this.cheNotification = cheNotification;
     this.confirmDialogService = confirmDialogService;
+    this.$document = $document;
 
     this.workspacesByNamespace = {};
   }
@@ -173,9 +178,6 @@ export class CreateWorkspaceSvc {
           return this.cheWorkspace.fetchWorkspaceDetails(workspace.id);
         }).then(() => {
           return this.addProjectCommands(workspace.id, projectTemplates);
-        }).then(() => {
-          let IDE = this.getIDE();
-          IDE.CommandManager.refresh();
         });
       }, (error: any) => {
         let errorMessage = 'Creation workspace failed.';
@@ -263,6 +265,10 @@ export class CreateWorkspaceSvc {
     }, accumulatorPromise);
 
     return accumulatorPromise.then(() => {
+      const IDE = this.getIDE();
+      if (IDE && IDE.CommandManager && angular.isFunction(IDE.CommandManager.refresh)) {
+        IDE.CommandManager.refresh();
+      }
       if (failedProjects.length) {
         return this.$q.reject(failedProjects);
       }
@@ -311,7 +317,7 @@ export class CreateWorkspaceSvc {
   }
 
   private getIDE(): any {
-    return (window.frames[0] as any).IDE;
+    return (this.$document.find('#ide-application-iframe') as any).contentWindow.IDE;
   }
 
 }
