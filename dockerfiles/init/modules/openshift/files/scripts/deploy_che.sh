@@ -117,6 +117,10 @@ ENABLE_SSL=${ENABLE_SSL:-${DEFAULT_ENABLE_SSL}}
 DEFAULT_K8S_VERSION_PRIOR_TO_1_6="true"
 K8S_VERSION_PRIOR_TO_1_6=${K8S_VERSION_PRIOR_TO_1_6:-${DEFAULT_K8S_VERSION_PRIOR_TO_1_6}}
 
+CHE_FABRIC8_MULTITENANT=${CHE_FABRIC8_MULTITENANT:-false}
+CHE_FABRIC8_USER__SERVICE_ENDPOINT=${CHE_FABRIC8_USER__SERVICE_ENDPOINT:-"https://api.openshift.io/api/user/services"}
+CHE_FABRIC8_WORKSPACES_ROUTING__SUFFIX=${CHE_FABRIC8_WORKSPACES_ROUTING__SUFFIX:-"8a09.starter-us-east-2.openshiftapps.com"}
+
 # Keycloak production endpoints are used by default
 DEFAULT_KEYCLOAK_OSO_ENDPOINT="https://sso.openshift.io/auth/realms/fabric8/broker/openshift-v3/token"
 KEYCLOAK_OSO_ENDPOINT=${KEYCLOAK_OSO_ENDPOINT:-${DEFAULT_KEYCLOAK_OSO_ENDPOINT}}
@@ -358,7 +362,15 @@ CHE_IMAGE="${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}"
 # e.g. docker.io/rhchestage => docker.io\/rhchestage
 CHE_IMAGE_SANITIZED=$(echo "${CHE_IMAGE}" | sed 's/\//\\\//g')
 
-MULTI_USER_REPLACEMENT_STRING="          - name: \"CHE_WORKSPACE_LOGS\"
+MULTI_USER_REPLACEMENT_STRING="          - name: \"CHE_FABRIC8_MULTITENANT\"\\n\
+            value: \"${CHE_FABRIC8_MULTITENANT}\"\\n\
+          - name: \"CHE_FABRIC8_USER__SERVICE_ENDPOINT\"\\n\
+            value: \"${CHE_FABRIC8_USER__SERVICE_ENDPOINT}\"\\n\
+          - name: \"CHE_FABRIC8_WORKSPACES_ROUTING__SUFFIX\"
+            value: \"${CHE_FABRIC8_WORKSPACES_ROUTING__SUFFIX}\"
+          - name: \"CHE_WORKSPACE_CHE__SERVER__ENDPOINT\"
+            value: \"\"
+          - name: \"CHE_WORKSPACE_LOGS\"
             value: \"${CHE_WORKSPACE_LOGS}\"
           - name: \"CHE_KEYCLOAK_AUTH__SERVER__URL\"
             value: \"${CHE_KEYCLOAK_AUTH__SERVER__URL}\"
@@ -385,6 +397,7 @@ if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
     sed "s/    che-openshift-secure-routes: \"true\"/    che-openshift-secure-routes: \"false\"/" | \
     sed "s/    che-secure-external-urls: \"true\"/    che-secure-external-urls: \"false\"/" | \
     sed "s/    che.docker.server_evaluation_strategy.custom.external.protocol: https/    che.docker.server_evaluation_strategy.custom.external.protocol: http/" | \
+    sed "s/    che.docker.server_evaluation_strategy.custom.template: \"<serverName>-<if(isDevMachine)><workspaceIdWithoutPrefix><else><machineName><endif>-<externalAddress>\"/    che.docker.server_evaluation_strategy.custom.template: \"<serverName>-<if(isDevMachine)><workspaceIdWithoutPrefix><else><machineName><endif>-<if(workspacesRoutingSuffix)><user>-che.<workspacesRoutingSuffix><else><externalAddress><endif>\"/" | \
     sed "s/    che-openshift-precreate-subpaths: \"false\"/    che-openshift-precreate-subpaths: \"true\"/" | \
     sed "s/    che.predefined.stacks.reload_on_start: \"true\"/    che.predefined.stacks.reload_on_start: \"false\"/" | \
     sed "s/    remote-debugging-enabled: \"false\"/    remote-debugging-enabled: \"${CHE_DEBUGGING_ENABLED}\"/" | \
@@ -406,6 +419,7 @@ elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
     if [ "${CHE_KEYCLOAK_DISABLED}" == "true" ]; then sed "s/    keycloak-disabled: \"false\"/    keycloak-disabled: \"true\"/" ; else cat -; fi | \
     sed "$MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING" | \
     append_after_match "env:" "${MULTI_USER_REPLACEMENT_STRING}" | \
+    sed "s/    che.docker.server_evaluation_strategy.custom.template: \"<serverName>-<if(isDevMachine)><workspaceIdWithoutPrefix><else><machineName><endif>-<externalAddress>\"/    che.docker.server_evaluation_strategy.custom.template: \"<serverName>-<if(isDevMachine)><workspaceIdWithoutPrefix><else><machineName><endif>-<if(workspacesRoutingSuffix)><user>-che.<workspacesRoutingSuffix><else><externalAddress><endif>\"/" | \
     oc apply --force=true -f -
 else
   echo "[CHE] Deploying Che on OpenShift Container Platform (image ${CHE_IMAGE})"
@@ -424,6 +438,7 @@ else
     if [ "${K8S_VERSION_PRIOR_TO_1_6}" == "true" ]; then sed "s/    che-openshift-precreate-subpaths: \"false\"/    che-openshift-precreate-subpaths: \"true\"/"  ; else cat -; fi | \
     sed "$MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING" | \
     append_after_match "env:" "${MULTI_USER_REPLACEMENT_STRING}" | \
+    sed "s/    che.docker.server_evaluation_strategy.custom.template: <serverName>-<if(isDevMachine)><workspaceIdWithoutPrefix><else><machineName><endif>-<externalAddress>/    che.docker.server_evaluation_strategy.custom.template: <serverName>-<if(isDevMachine)><workspaceIdWithoutPrefix><else><machineName><endif>-<if(workspacesRoutingSuffix)><user>-che.<workspacesRoutingSuffix><else><externalAddress><endif>/" | \
     oc apply --force=true -f -
 fi
 echo
