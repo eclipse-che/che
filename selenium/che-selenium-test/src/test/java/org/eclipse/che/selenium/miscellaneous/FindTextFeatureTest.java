@@ -389,11 +389,42 @@ public class FindTextFeatureTest {
         TestMenuCommandsConstants.Workspace.CREATE_PROJECT);
     wizard.selectProjectAndCreate(SamplesName.WEB_JAVA_PETCLINIC, "web-java-petclinic");
     notificationsPopupPanel.waitProgressPopupPanelClose();
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.selectItem("web-java-petclinic");
     findText.launchFindFormByKeyboard();
     findText.waitFindTextMainFormIsOpen();
-    findText.typeTextIntoFindField("String");
-    findText.waitTextIntoFindField("String");
+    findText.typeTextIntoFindField("Str");
+    findText.waitTextIntoFindField("Str");
+    findText.clickOnSearchButtonMainForm();
+    findText.waitFindInfoPanelIsOpen();
+
+    Assert.assertEquals(
+        findText.getResults(),
+        "125 occurrences found in 30 files (per page results) for 'Str'. Total file count - 63");
+    Assert.assertFalse(findText.checkPreviousPageButtonIsEnabled());
+    findText.clickOnNextButton();
+
+    Assert.assertEquals(
+        findText.getResults(),
+        "178 occurrences found in 30 files (per page results) for 'Str'. Total file count - 63");
+    Assert.assertTrue(findText.checkPreviousPageButtonIsEnabled());
+    findText.clickOnNextButton();
+
+    Assert.assertEquals(
+        findText.getResults(),
+        "10 occurrences found in 3 files (per page results) for 'Str'. Total file count - 63");
+    Assert.assertFalse(findText.checkNextPageButtonIsEnabled());
+    findText.clickOnPreviousButton();
+
+    Assert.assertEquals(
+        findText.getResults(),
+        "178 occurrences found in 30 files (per page results) for 'Str'. Total file count - 63");
+    Assert.assertTrue(findText.checkNextPageButtonIsEnabled());
+    findText.clickOnPreviousButton();
+
+    Assert.assertEquals(
+        findText.getResults(),
+        "125 occurrences found in 30 files (per page results) for 'Str'. Total file count - 63");
+    Assert.assertFalse(findText.checkPreviousPageButtonIsEnabled());
   }
 
   private void createFileFromAPI(String path, String fileName, String content) throws Exception {

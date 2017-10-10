@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
 import com.google.common.base.Predicate;
@@ -65,8 +66,10 @@ public class FindText {
     String HIDE_FIND_PANEL =
         "//div[@id='gwt-debug-find-info-panel']//div[text()='Find']/following::div[3]";
     String OCCURRENCE = "//span[@debugfilepath = '%s']";
+
     String PREVIOUS_BUTTON = "gwt-debug-previous-button";
-    String NEXT_BUTTON = "gwt-debug-next-button";
+    //    String NEXT_BUTTON = "gwt-debug-next-button";
+    String NEXT_BUTTON = "//button[@id='gwt-debug-previous-button'][2]";
     String RESULTS = "gwt-debug-search-result-label";
   }
 
@@ -106,7 +109,7 @@ public class FindText {
 
   /** wait the 'Find Text' main form is closed */
   public void waitFindTextMainFormIsClosed() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.MAIN_FORM)));
   }
 
@@ -476,7 +479,22 @@ public class FindText {
 
   public void clickOnNextButton() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.id(Locators.NEXT_BUTTON)))
+        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.NEXT_BUTTON)))
         .click();
+  }
+
+  public String getResults() {
+    loader.waitOnClosed();
+    return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOfElementLocated(By.id(Locators.RESULTS)))
+        .getText();
+  }
+
+  public Boolean checkNextPageButtonIsEnabled() {
+    return seleniumWebDriver.findElement(By.xpath(Locators.NEXT_BUTTON)).isEnabled();
+  }
+
+  public Boolean checkPreviousPageButtonIsEnabled() {
+    return seleniumWebDriver.findElement(By.id(Locators.PREVIOUS_BUTTON)).isEnabled();
   }
 }
