@@ -36,7 +36,10 @@
                 class="navbar-icon"
                 title="{{navbarRecentWorkspacesController.getWorkspaceStatus(workspace.id)}}"></workspace-status-indicator>
               <span title="{{navbarRecentWorkspacesController.getWorkspaceName(workspace.id)}}"
-                    ng-class="{'recent-workspaces-stopped-workspace': navbarRecentWorkspacesController.getWorkspaceStatus(workspace.id) === 'STOPPED'}">{{navbarRecentWorkspacesController.getWorkspaceName(workspace.id)}}</span>
+                    class="recent-workspace-name-container"
+                    ng-class="{'recent-workspaces-stopped-workspace': navbarRecentWorkspacesController.getWorkspaceStatus(workspace.id) === 'STOPPED'}">
+                <span che-clip-the-middle>{{navbarRecentWorkspacesController.getWorkspaceName(workspace.id)}}</span>
+              </span>
             </div>
           </md-button>
         </navbar-dropdown-menu>
