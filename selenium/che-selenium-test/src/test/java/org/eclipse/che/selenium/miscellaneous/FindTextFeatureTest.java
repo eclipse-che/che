@@ -128,6 +128,13 @@ public class FindTextFeatureTest {
               + "(2 occurrences of 'String' found)",
           PROJECT_NAME);
 
+  private static final String PR_6_EXPECTED_TEXT_1 =
+      "62:    <webjars-bootstrap.version>2.3.0</webjars-bootstrap.version>";
+  private static final String PR_6_EXPECTED_TEXT_2 =
+      "36:    <!-- Simple strategy: only path extension is taken into account -->";
+  private static final String PR_6_EXPECTED_TEXT_3 =
+      "19:   import static org.hamcrest.Matchers.containsString;";
+
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
@@ -154,7 +161,7 @@ public class FindTextFeatureTest {
     ide.open(workspace);
   }
 
-  //  @Test
+  @Test
   public void checkFindTextForm() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.selectItem(PROJECT_NAME);
@@ -170,7 +177,7 @@ public class FindTextFeatureTest {
     findText.closeFindTextFormByEscape();
   }
 
-  //  @Test
+  @Test
   public void checkRecentlyCreatedFiles() throws Exception {
     String content = "FindTextFeatureTest";
     String fileNameCreatedFromAPI = "readme.api";
@@ -222,7 +229,7 @@ public class FindTextFeatureTest {
     Assert.assertEquals(editor.getPositionOfLine(), 1);
   }
 
-  //  @Test
+  @Test
   public void checkFindTextBasic() {
     String pathToQuessNumFile =
         format("/%s/my-webapp/src/main/webapp/WEB-INF/jsp/guess_num.jsp", PROJECT_NAME);
@@ -293,7 +300,7 @@ public class FindTextFeatureTest {
     editor.closeAllTabsByContextMenu();
   }
 
-  //  @Test
+  @Test
   public void checkFindWholeWordOnly() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.selectItem(PROJECT_NAME);
@@ -318,7 +325,7 @@ public class FindTextFeatureTest {
     findText.waitExpectedTextInFindInfoPanel("No results found for\n'uess'\n");
   }
 
-  //  @Test
+  @Test
   public void checkFindIntoSelectedPath() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.selectItem(PROJECT_NAME);
@@ -352,7 +359,7 @@ public class FindTextFeatureTest {
     findText.waitExpectedTextInFindInfoPanel(asList(PR_4_EXPECTED_TEXT_2.split("\n")));
   }
 
-  //  @Test
+  @Test
   public void checkFindByFileMask() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.selectItem(PROJECT_NAME);
@@ -383,7 +390,20 @@ public class FindTextFeatureTest {
   }
 
   @Test
-  public void checkTextResultPagination() {
+  public void checkTextResultsPagination() {
+    String resultsOnFirstPage =
+        "125 occurrences found in 30 files (per page results) for 'Str'. Total file count - 63";
+    String resultsOnSecondPage =
+        "178 occurrences found in 30 files (per page results) for 'Str'. Total file count - 63";
+    String resultsOnThirdPage =
+        "10 occurrences found in 3 files (per page results) for 'Str'. Total file count - 63";
+
+    String filePathForFirstPage = "/web-java-petclinic/pom.xml";
+    String filePathForSecondPage =
+        "/web-java-petclinic/src/main/resources/spring/mvc-view-config.xml";
+    String filePathForThirdPage =
+        "/web-java-petclinic/src/test/java/org/springframework/samples/petclinic/web/VisitsViewTests.java";
+
     menu.runCommand(
         TestMenuCommandsConstants.Workspace.WORKSPACE,
         TestMenuCommandsConstants.Workspace.CREATE_PROJECT);
@@ -397,34 +417,41 @@ public class FindTextFeatureTest {
     findText.clickOnSearchButtonMainForm();
     findText.waitFindInfoPanelIsOpen();
 
-    Assert.assertEquals(
-        findText.getResults(),
-        "125 occurrences found in 30 files (per page results) for 'Str'. Total file count - 63");
+    //check results, open a file and check cursor position
+    Assert.assertEquals(findText.getResults(), resultsOnFirstPage);
+    findText.openFileNodeByDoubleClick(filePathForFirstPage);
+    findText.waitExpectedTextInFindInfoPanel(PR_6_EXPECTED_TEXT_1);
+    findText.selectItemInFindInfoPanelByDoubleClick(filePathForFirstPage, PR_6_EXPECTED_TEXT_1);
+    editor.waitActiveEditor();
+    editor.waitActiveTabFileName("spring-petclinic");
+    Assert.assertEquals(editor.getPositionOfLine(), 62);
+
+    //check that the previous page button is disabled on the first page and click on the next page button
     Assert.assertFalse(findText.checkPreviousPageButtonIsEnabled());
     findText.clickOnNextButton();
 
-    Assert.assertEquals(
-        findText.getResults(),
-        "178 occurrences found in 30 files (per page results) for 'Str'. Total file count - 63");
+    //check results on second page and the previous page button is enabled
+    Assert.assertEquals(findText.getResults(), resultsOnSecondPage);
     Assert.assertTrue(findText.checkPreviousPageButtonIsEnabled());
+    findText.openFileNodeByDoubleClick(filePathForSecondPage);
+    findText.waitExpectedTextInFindInfoPanel(PR_6_EXPECTED_TEXT_2);
     findText.clickOnNextButton();
 
-    Assert.assertEquals(
-        findText.getResults(),
-        "10 occurrences found in 3 files (per page results) for 'Str'. Total file count - 63");
+    //check results on third page and that the next page button is disabled
+    Assert.assertEquals(findText.getResults(), resultsOnThirdPage);
     Assert.assertFalse(findText.checkNextPageButtonIsEnabled());
+    findText.openFileNodeByDoubleClick(filePathForThirdPage);
+    findText.waitExpectedTextInFindInfoPanel(PR_6_EXPECTED_TEXT_3);
     findText.clickOnPreviousButton();
 
-    Assert.assertEquals(
-        findText.getResults(),
-        "178 occurrences found in 30 files (per page results) for 'Str'. Total file count - 63");
+    Assert.assertEquals(findText.getResults(), resultsOnSecondPage);
     Assert.assertTrue(findText.checkNextPageButtonIsEnabled());
     findText.clickOnPreviousButton();
 
-    Assert.assertEquals(
-        findText.getResults(),
-        "125 occurrences found in 30 files (per page results) for 'Str'. Total file count - 63");
+    Assert.assertEquals(findText.getResults(), resultsOnFirstPage);
     Assert.assertFalse(findText.checkPreviousPageButtonIsEnabled());
+
+    editor.closeAllTabsByContextMenu();
   }
 
   private void createFileFromAPI(String path, String fileName, String content) throws Exception {

@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
 import com.google.common.base.Predicate;
@@ -70,7 +70,8 @@ public class FindText {
     String PREVIOUS_BUTTON = "gwt-debug-previous-button";
     //    String NEXT_BUTTON = "gwt-debug-next-button";
     String NEXT_BUTTON = "//button[@id='gwt-debug-previous-button'][2]";
-    String RESULTS = "gwt-debug-search-result-label";
+    String SEARCH_RESULTS = "gwt-debug-search-result-label";
+    String FILE_NODE = "//span[@id='%s']";
   }
 
   @FindBy(id = Locators.WHOLE_WORD_CHECKLBOX_INP)
@@ -109,8 +110,9 @@ public class FindText {
 
   /** wait the 'Find Text' main form is closed */
   public void waitFindTextMainFormIsClosed() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
         .until(ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.MAIN_FORM)));
+    loader.waitOnClosed();
   }
 
   /** close main form by pressing 'Ctrl' key */
@@ -486,7 +488,7 @@ public class FindText {
   public String getResults() {
     loader.waitOnClosed();
     return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.id(Locators.RESULTS)))
+        .until(ExpectedConditions.visibilityOfElementLocated(By.id(Locators.SEARCH_RESULTS)))
         .getText();
   }
 
@@ -496,5 +498,14 @@ public class FindText {
 
   public Boolean checkPreviousPageButtonIsEnabled() {
     return seleniumWebDriver.findElement(By.id(Locators.PREVIOUS_BUTTON)).isEnabled();
+  }
+
+  public void openFileNodeByDoubleClick(String pathToFile) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(String.format(Locators.FILE_NODE, pathToFile))))
+        .click();
+    actionsFactory.createAction(seleniumWebDriver).doubleClick().perform();
   }
 }
