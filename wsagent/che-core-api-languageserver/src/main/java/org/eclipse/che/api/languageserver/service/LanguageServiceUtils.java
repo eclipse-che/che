@@ -12,6 +12,8 @@ package org.eclipse.che.api.languageserver.service;
 
 /** Language service service utilities */
 public class LanguageServiceUtils {
+
+  private static final String PROJECTS = "/projects";
   private static final String FILE_PROJECTS = "file:///projects";
 
   public static String prefixURI(String relativePath) {
@@ -32,5 +34,13 @@ public class LanguageServiceUtils {
 
   public static boolean isProjectUri(String path) {
     return path.startsWith(FILE_PROJECTS);
+  }
+
+  public static boolean isStartWithProject(String path) {
+    return path.startsWith(PROJECTS);
+  }
+
+  public static String prefixProject(String path) {
+    return path.startsWith(PROJECTS) ? path : PROJECTS + path;
   }
 }

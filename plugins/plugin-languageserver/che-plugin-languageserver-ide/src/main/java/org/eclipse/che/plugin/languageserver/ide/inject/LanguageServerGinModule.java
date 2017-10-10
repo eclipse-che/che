@@ -24,6 +24,7 @@ import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerReconcileS
 import org.eclipse.che.plugin.languageserver.ide.editor.quickassist.LanguageServerQuickAssistProcessorFactory;
 import org.eclipse.che.plugin.languageserver.ide.editor.signature.LanguageServerSignatureHelpFactory;
 import org.eclipse.che.plugin.languageserver.ide.location.OpenLocationPresenterFactory;
+import org.eclipse.che.plugin.languageserver.ide.rename.node.RenameNodeFactory;
 import org.eclipse.che.plugin.languageserver.ide.service.PublishDiagnosticsReceiver;
 import org.eclipse.che.plugin.languageserver.ide.service.ShowMessageJsonRpcReceiver;
 
@@ -41,6 +42,7 @@ public class LanguageServerGinModule extends AbstractGinModule {
     install(new GinFactoryModuleBuilder().build(LanguageServerQuickAssistProcessorFactory.class));
     install(new GinFactoryModuleBuilder().build(LanguageServerReconcileStrategyFactory.class));
     install(new GinFactoryModuleBuilder().build(LanguageServerSignatureHelpFactory.class));
+    install(new GinFactoryModuleBuilder().build(RenameNodeFactory.class));
 
     GinMapBinder<String, WsAgentComponent> wsAgentComponentsBinder =
         GinMapBinder.newMapBinder(binder(), String.class, WsAgentComponent.class);
