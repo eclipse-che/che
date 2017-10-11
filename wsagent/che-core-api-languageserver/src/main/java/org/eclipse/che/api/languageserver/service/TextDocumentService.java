@@ -16,6 +16,7 @@ import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.pr
 import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.removePrefixUri;
 import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.removeUriScheme;
 
+import com.google.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -33,10 +34,8 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
@@ -96,8 +95,6 @@ import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.inject.Singleton;
 
 /**
  * Json RPC API for the textDoc
