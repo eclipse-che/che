@@ -111,7 +111,9 @@ public class JpaAccountDao implements AccountDao {
 
   @Transactional
   protected void doCreate(AccountImpl account) {
-    managerProvider.get().persist(account);
+    final EntityManager manager = managerProvider.get();
+    manager.persist(account);
+    manager.flush();
   }
 
   @Transactional

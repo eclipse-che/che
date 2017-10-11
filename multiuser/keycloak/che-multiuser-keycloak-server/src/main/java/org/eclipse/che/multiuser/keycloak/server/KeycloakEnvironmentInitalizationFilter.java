@@ -11,6 +11,7 @@
 package org.eclipse.che.multiuser.keycloak.server;
 
 import static java.util.Collections.emptyList;
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwt;
@@ -103,10 +104,17 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
     try {
       return userManager.getById(id);
     } catch (NotFoundException e) {
+      final UserImpl cheUser = new UserImpl(id, email, username, generate("", 12), emptyList());
       try {
-        final UserImpl cheUser = new UserImpl(id, email, username, "secret", emptyList());
         return userManager.create(cheUser, false);
-      } catch (ServerException | ConflictException ex) {
+      } catch (ConflictException ex) {
+        try {
+          cheUser.setName(generate(cheUser.getName(), 4));
+          return userManager.create(cheUser, false);
+        } catch (ServerException | ConflictException e1) {
+          throw new ServletException("Unable to create new user", e1);
+        }
+      } catch (ServerException ex) {
         throw new ServletException("Unable to create new user", ex);
       }
     } catch (ServerException e) {

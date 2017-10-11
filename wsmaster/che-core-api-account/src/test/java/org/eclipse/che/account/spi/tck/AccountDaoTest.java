@@ -96,6 +96,14 @@ public class AccountDaoTest {
     accountDao.update(account);
   }
 
+  @Test(expectedExceptions = ConflictException.class)
+  public void shouldThrowConflictExceptionWhenCreatingAccountWithExistingName() throws Exception {
+    AccountImpl account = accounts[0];
+    account.setName(accounts[1].getName());
+
+    accountDao.create(account);
+  }
+
   @Test(expectedExceptions = NotFoundException.class)
   public void shouldThrowNotFoundExceptionWhenUpdatingNonExistingAccount() throws Exception {
     AccountImpl account = accounts[0];
