@@ -11,7 +11,7 @@
 'use strict';
 
 export interface IProjectSourceSelectorScope extends ng.IScope {
-  updateWidget(activeButtonId: string): void;
+  updateWidget: (activeButtonId: string, scrollWidgetInView: boolean) => void;
 }
 
 /**
@@ -42,8 +42,8 @@ export class ProjectSourceSelector implements ng.IDirective {
     this.$timeout = $timeout;
   }
 
-link($scope: IProjectSourceSelectorScope, $element: ng.IAugmentedJQuery): void {
-    $scope.updateWidget = (activeButtonId: string) => {
+  link($scope: IProjectSourceSelectorScope, $element: ng.IAugmentedJQuery): void {
+    $scope.updateWidget = (activeButtonId: string, scrollToBottom: boolean) => {
       this.$timeout(() => {
         const popover = $element.find('.project-source-selector-popover'),
               arrow = popover.find('.arrow'),
@@ -54,7 +54,7 @@ link($scope: IProjectSourceSelectorScope, $element: ng.IAugmentedJQuery): void {
           return;
         }
         const widgetHeight = $element.height();
-        let top = selectButton.position().top + (selectButton.height() / 2);
+        const top = selectButton.position().top + (selectButton.height() / 2);
 
         const popoverHeight = popover.height();
         if (popoverHeight < top) {
@@ -69,6 +69,16 @@ link($scope: IProjectSourceSelectorScope, $element: ng.IAugmentedJQuery): void {
           popover.attr('style', 'top: 0px;');
           arrow.attr('style', `top: ${top}px;`);
         }
+
+        if (scrollToBottom === false) {
+          return;
+        }
+
+        // scroll to bottom of the page
+        // to make 'Create' button visible
+        const mdContent = $element.closest('md-content'),
+              mdContentHeight = mdContent.height();
+        mdContent.scrollTop(mdContentHeight);
       });
     };
   }

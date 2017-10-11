@@ -52,6 +52,11 @@ export class ProjectSourceSelectorController {
    * ID of active button.
    */
   private activeButtonId: string;
+  /**
+   * <code>true</code> if content has to be scrolled to bottom.
+   * @type {boolean}
+   */
+  private scrollToBottom: boolean = true;
 
   /**
    * Default constructor that is using resource injection
@@ -142,7 +147,8 @@ export class ProjectSourceSelectorController {
     this.activeActionType = actionType;
     this.selectedProjectTemplate = angular.copy(template);
 
-    this.$scope.updateWidget(this.activeButtonId);
+    this.$scope.updateWidget(this.activeButtonId, this.scrollToBottom);
+    this.scrollToBottom = false;
   }
 
   /**
