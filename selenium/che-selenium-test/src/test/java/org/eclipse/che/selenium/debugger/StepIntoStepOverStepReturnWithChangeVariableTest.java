@@ -120,7 +120,7 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
         TestMenuCommandsConstants.Run.RUN_MENU,
         TestMenuCommandsConstants.Run.DEBUG,
         TestMenuCommandsConstants.Run.DEBUG + "/" + PROJECT);
-    editor.waitAcitveBreakpoint(34);
+    editor.waitActiveBreakpoint(34);
     String appUrl =
         workspaceServiceClient
                 .getServerFromDevMachineBySymbolicName(ws.getId(), "8080/tcp")
@@ -130,7 +130,7 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
     String requestMess = "6";
     CompletableFuture<String> instToRequestThread =
         debugUtils.gotoDebugAppAndSendRequest(appUrl, requestMess);
-    editor.waitAcitveBreakpoint(34);
+    editor.waitActiveBreakpoint(34);
     debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_OVER);
     debugPanel.waitDebugHighlightedText("AdditonalClass.check();");
     debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_INTO);
@@ -160,7 +160,7 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
         .switchTo()
         .activeElement()
         .sendKeys(Keys.SHIFT.toString() + Keys.F9.toString());
-    editor.waitAcitveBreakpoint(26);
+    editor.waitActiveBreakpoint(26);
   }
 
   private void buildProjectAndOpenMainClass() {

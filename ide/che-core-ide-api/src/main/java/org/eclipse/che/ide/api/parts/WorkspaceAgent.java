@@ -22,13 +22,6 @@ import org.eclipse.che.ide.api.extension.SDK;
 @SDK(title = "ide.api.ui.workspace")
 public interface WorkspaceAgent {
 
-  /**
-   * Activate given part
-   *
-   * @param part
-   */
-  void setActivePart(PartPresenter part);
-
   void setActivePart(@NotNull PartPresenter part, PartStackType type);
 
   /**
@@ -69,4 +62,18 @@ public interface WorkspaceAgent {
    * @return the part stack found, else null
    */
   PartStack getPartStack(PartStackType type);
+
+  /**
+   * Get current active part
+   *
+   * @return the active part
+   */
+  PartPresenter getActivePart();
+
+  /**
+   * Activate given part
+   *
+   * @param part
+   */
+  void setActivePart(PartPresenter part);
 }

@@ -34,6 +34,7 @@ import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.reference.FqnProvider;
 import org.eclipse.che.ide.api.selection.SelectionAgent;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
+import org.eclipse.che.ide.api.vcs.VcsChangeMarkerRenderFactory;
 import org.eclipse.che.ide.clipboard.ClipboardModule;
 import org.eclipse.che.ide.command.CommandApiModule;
 import org.eclipse.che.ide.command.execute.JsonRpcExecAgentCommandManager;
@@ -126,6 +127,8 @@ public class CoreGinModule extends AbstractGinModule {
     bind(DynaProvider.class).to(DynaProviderImpl.class);
 
     GinMapBinder.newMapBinder(binder(), String.class, FqnProvider.class);
+
+    GinMapBinder.newMapBinder(binder(), String.class, VcsChangeMarkerRenderFactory.class);
 
     bind(EventBus.class).to(SimpleEventBus.class).in(Singleton.class);
 

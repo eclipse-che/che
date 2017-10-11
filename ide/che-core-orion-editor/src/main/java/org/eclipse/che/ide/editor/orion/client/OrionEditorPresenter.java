@@ -46,7 +46,6 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.actions.LinkWithEditorAction;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -103,6 +102,7 @@ import org.eclipse.che.ide.api.editor.quickfix.QuickAssistantFactory;
 import org.eclipse.che.ide.api.editor.signature.SignatureHelp;
 import org.eclipse.che.ide.api.editor.signature.SignatureHelpProvider;
 import org.eclipse.che.ide.api.editor.text.LinearRange;
+import org.eclipse.che.ide.api.editor.text.Position;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.text.TextRange;
 import org.eclipse.che.ide.api.editor.texteditor.CanWrapLines;
@@ -180,7 +180,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
   private final BreakpointManager breakpointManager;
   private final PreferencesManager preferencesManager;
   private final BreakpointRendererFactory breakpointRendererFactory;
-  private final VcsChangeMarkerRenderFactory vcsChangeMarkerRenderFactory;
+  private final Map<String, VcsChangeMarkerRenderFactory> vcsChangeMarkerRenderFactoryMap;
   private final DialogFactory dialogFactory;
   private final DocumentStorage documentStorage;
   private final EditorMultiPartStackPresenter editorMultiPartStackPresenter;
@@ -197,9 +197,9 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
   private final SignatureHelpView signatureHelpView;
   private final EditorContextMenu contextMenu;
   private final AutoSaveMode autoSaveMode;
-  private final PromiseProvider promises;
   private final ClientServerEventService clientServerEventService;
   private final EditorFileStatusNotificationOperation editorFileStatusNotificationOperation;
+  private final WordDetectionUtil wordDetectionUtil;
 
   private final AnnotationRendering rendering = new AnnotationRendering();
   private HasKeyBindings keyBindingsManager;
@@ -229,7 +229,6 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
       final BreakpointManager breakpointManager,
       final PreferencesManager preferencesManager,
       final BreakpointRendererFactory breakpointRendererFactory,
-      final VcsChangeMarkerRenderFactory vcsChangeMarkerRenderFactory,
       final DialogFactory dialogFactory,
       final DocumentStorage documentStorage,
       final EditorMultiPartStackPresenter editorMultiPartStackPresenter,
@@ -246,15 +245,16 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
       final SignatureHelpView signatureHelpView,
       final EditorContextMenu contextMenu,
       final AutoSaveMode autoSaveMode,
-      final PromiseProvider promises,
       final ClientServerEventService clientServerEventService,
-      final EditorFileStatusNotificationOperation editorFileStatusNotificationOperation) {
+      final EditorFileStatusNotificationOperation editorFileStatusNotificationOperation,
+      final WordDetectionUtil wordDetectionUtil,
+      final Map<String, VcsChangeMarkerRenderFactory> vcsChangeMarkerRenderFactoryMap) {
     this.codeAssistantFactory = codeAssistantFactory;
     this.deletedFilesController = deletedFilesController;
     this.breakpointManager = breakpointManager;
     this.preferencesManager = preferencesManager;
     this.breakpointRendererFactory = breakpointRendererFactory;
-    this.vcsChangeMarkerRenderFactory = vcsChangeMarkerRenderFactory;
+    this.vcsChangeMarkerRenderFactoryMap = vcsChangeMarkerRenderFactoryMap;
     this.dialogFactory = dialogFactory;
     this.documentStorage = documentStorage;
     this.editorMultiPartStackPresenter = editorMultiPartStackPresenter;
@@ -271,9 +271,9 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
     this.signatureHelpView = signatureHelpView;
     this.contextMenu = contextMenu;
     this.autoSaveMode = autoSaveMode;
-    this.promises = promises;
     this.clientServerEventService = clientServerEventService;
     this.editorFileStatusNotificationOperation = editorFileStatusNotificationOperation;
+    this.wordDetectionUtil = wordDetectionUtil;
 
     keyBindingsManager = new TemporaryKeyBindingsManager();
 
@@ -807,6 +807,11 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
   }
 
   @Override
+  public Position getWordAtOffset(int offset) {
+    return wordDetectionUtil.getWordAtOffset(getDocument(), offset);
+  }
+
+  @Override
   public void addKeybinding(KeyBinding keyBinding) {
     // the actual HasKeyBindings object can change, so use indirection
     getHasKeybindings().addKeyBinding(keyBinding);
@@ -1206,8 +1211,13 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
                       new OrionVcsChangeMarkersRuler(
                           orionExtRulerOverlay, editorWidget.getEditor());
 
-                  this.vcsChangeMarkerRender =
-                      vcsChangeMarkerRenderFactory.create(orionVcsChangeMarkersRuler);
+                  String vcsName = appContext.getRootProject().getAttribute("vcs.provider.name");
+                  VcsChangeMarkerRenderFactory vcsChangeMarkerRenderFactory =
+                      vcsChangeMarkerRenderFactoryMap.get(vcsName);
+                  if (vcsChangeMarkerRenderFactory != null) {
+                    this.vcsChangeMarkerRender =
+                        vcsChangeMarkerRenderFactory.create(orionVcsChangeMarkersRuler);
+                  }
                   resolve.apply(null);
                 }));
   }

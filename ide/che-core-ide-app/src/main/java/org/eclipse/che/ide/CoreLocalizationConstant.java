@@ -258,6 +258,9 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("uploadFolderFromZip.openZipFieldTitle")
   String uploadFolderFromZipOpenZipFieldTitle();
 
+  @Key("projectExplorer.linkWithEditor.tooltip")
+  String projectExplorerLinkWithEditorTooltip();
+
   @Key("projectExplorer.button.title")
   String projectExplorerButtonTitle();
 

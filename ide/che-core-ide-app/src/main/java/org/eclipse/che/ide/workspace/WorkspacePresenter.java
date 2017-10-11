@@ -157,6 +157,11 @@ public class WorkspacePresenter
   }
 
   @Override
+  public PartPresenter getActivePart() {
+    return activePerspective.getActivePart();
+  }
+
+  @Override
   public JsonObject getState() {
     JsonObject state = Json.createObject();
     JsonObject perspectivesJs = Json.createObject();

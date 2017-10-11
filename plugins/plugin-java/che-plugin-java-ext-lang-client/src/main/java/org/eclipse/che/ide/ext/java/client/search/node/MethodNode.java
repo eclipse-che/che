@@ -28,6 +28,7 @@ import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
 import org.eclipse.che.ide.ext.java.shared.dto.model.Method;
 import org.eclipse.che.ide.ext.java.shared.dto.search.Match;
 import org.eclipse.che.ide.ui.smartTree.data.Node;
+import org.eclipse.che.ide.ui.smartTree.presentation.AbstractPresentationNode;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 import org.vectomatic.dom.svg.ui.SVGResource;
 

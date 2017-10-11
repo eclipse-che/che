@@ -76,5 +76,7 @@ public class ProjectApiModule extends AbstractGinModule {
             .build(ImportProjectNotificationSubscriberFactory.class));
 
     bind(ProjectImportNotificationSubscriber.class).asEagerSingleton();
+
+    bind(WorkspaceProjectsSyncer.class).asEagerSingleton();
   }
 }

@@ -35,7 +35,8 @@ public class OrionBreakpointRuler implements Gutter {
   private final OrionEditorOverlay editorOverlay;
   private final OrionAnnotationModelOverlay annotationModel;
 
-  private OrionTextModelOverlay.EventHandler<ModelChangedEventOverlay> modelChangingEventHandler;
+  private OrionTextModelOverlay.EventHandler<ModelChangedEventOverlay> afterChangedEventHandler;
+  private OrionTextModelOverlay.EventHandler<ModelChangedEventOverlay> beforeChangedEventHandler;
 
   public OrionBreakpointRuler(OrionExtRulerOverlay rulerOverlay, OrionEditorOverlay editorOverlay) {
     this.orionExtRulerOverlay = rulerOverlay;
@@ -64,24 +65,38 @@ public class OrionBreakpointRuler implements Gutter {
     }
 
     addGutterItem(line, gutterId, element);
-    if (modelChangingEventHandler == null) {
-      modelChangingEventHandler =
-          new OrionTextModelOverlay.EventHandler<ModelChangedEventOverlay>() {
-            @Override
-            public void onEvent(ModelChangedEventOverlay parameter) {
-              int linesAdded = parameter.addedLineCount();
-              int linesRemoved = parameter.removedLineCount();
-              int fromLine = editorOverlay.getModel().getLineAtOffset(parameter.start());
-              String line = editorOverlay.getModel().getLine(fromLine);
+    if (beforeChangedEventHandler == null) {
+      beforeChangedEventHandler =
+          parameter -> {
+            int linesAdded = parameter.addedLineCount();
+            int linesRemoved = parameter.removedLineCount();
+            int fromLine = editorOverlay.getModel().getLineAtOffset(parameter.start());
 
-              if (linesAdded > 0 || linesRemoved > 0 || line.trim().isEmpty()) {
-                removeAnnotations(getAnnotationsFrom(fromLine));
-                lineCallback.onLineNumberingChange(fromLine, linesRemoved, linesAdded);
+            if (linesAdded > 0 || linesRemoved > 0) {
+              for (int i = fromLine; i < fromLine + Math.abs(linesAdded - linesRemoved); i++) {
+                removeAnnotations(getAnnotations(i));
               }
             }
           };
 
-      this.editorOverlay.getModel().addEventListener("Changed", modelChangingEventHandler, false);
+      this.editorOverlay.getModel().addEventListener("Changing", beforeChangedEventHandler, false);
+    }
+
+    if (afterChangedEventHandler == null) {
+      afterChangedEventHandler =
+          parameter -> {
+            int linesAdded = parameter.addedLineCount();
+            int linesRemoved = parameter.removedLineCount();
+            int fromLine = editorOverlay.getModel().getLineAtOffset(parameter.start());
+
+            if (linesAdded > 0
+                || linesRemoved > 0
+                || editorOverlay.getModel().getLine(fromLine).isEmpty()) {
+              lineCallback.onLineNumberingChange(fromLine, linesRemoved, linesAdded);
+            }
+          };
+
+      this.editorOverlay.getModel().addEventListener("Changed", afterChangedEventHandler, false);
     }
   }
 
@@ -147,8 +162,6 @@ public class OrionBreakpointRuler implements Gutter {
 
   private OrionAnnotationOverlay toAnnotation(Element element, int line) {
     int lineStart = editorOverlay.getModel().getLineStart(line);
-    int lineEnd = editorOverlay.getModel().getLineEnd(line);
-
     OrionAnnotationOverlay annotation = OrionAnnotationOverlay.create();
 
     OrionStyleOverlay styleOverlay = OrionStyleOverlay.create();
@@ -157,20 +170,14 @@ public class OrionBreakpointRuler implements Gutter {
     annotation.setStyle(styleOverlay);
     annotation.setType(CHE_BREAKPOINT);
     annotation.setStart(lineStart);
-    annotation.setEnd(lineEnd);
+    annotation.setEnd(lineStart);
 
     return annotation;
   }
 
   private OrionAnnotationOverlay[] getAnnotations(int line) {
     int lineStart = editorOverlay.getModel().getLineStart(line);
-    int lineEnd = editorOverlay.getModel().getLineEnd(line);
-    return doGetAnnotations(lineStart, lineEnd);
-  }
-
-  private OrionAnnotationOverlay[] getAnnotationsFrom(int fromLine) {
-    int lineStart = editorOverlay.getModel().getLineStart(fromLine);
-    return doGetAnnotations(lineStart, Integer.MAX_VALUE);
+    return doGetAnnotations(lineStart, lineStart);
   }
 
   private OrionAnnotationOverlay[] getAllAnnotations() {

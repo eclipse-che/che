@@ -308,6 +308,11 @@ public abstract class AbstractPerspective
   }
 
   @Override
+  public PartPresenter getActivePart() {
+    return activePart;
+  }
+
+  @Override
   public JsonObject getState() {
     JsonObject state = Json.createObject();
     JsonObject partStacks = Json.createObject();

@@ -169,7 +169,7 @@ public class RenameRefactoringAction extends AbstractPerspectiveAction
     if (editorInFocus) {
       final EditorPartPresenter editorPart = editorAgent.getActiveEditor();
       if (editorPart == null || !(editorPart instanceof TextEditor)) {
-        event.getPresentation().setEnabled(false);
+        event.getPresentation().setEnabledAndVisible(false);
         return;
       }
 
@@ -179,22 +179,22 @@ public class RenameRefactoringAction extends AbstractPerspectiveAction
         final Optional<Project> project = ((File) file).getRelatedProject();
 
         if (!project.isPresent()) {
-          event.getPresentation().setEnabled(false);
+          event.getPresentation().setEnabledAndVisible(false);
           return;
         }
 
         event
             .getPresentation()
-            .setEnabled(JavaUtil.isJavaProject(project.get()) && isJavaFile(file));
+            .setEnabledAndVisible(JavaUtil.isJavaProject(project.get()) && isJavaFile(file));
       } else {
-        event.getPresentation().setEnabled(isJavaFile(file));
+        event.getPresentation().setEnabledAndVisible(isJavaFile(file));
       }
 
     } else {
       final Resource[] resources = appContext.getResources();
 
       if (resources == null || resources.length > 1) {
-        event.getPresentation().setEnabled(false);
+        event.getPresentation().setEnabledAndVisible(false);
         return;
       }
 
@@ -203,7 +203,7 @@ public class RenameRefactoringAction extends AbstractPerspectiveAction
       final Optional<Project> project = resource.getRelatedProject();
 
       if (!project.isPresent()) {
-        event.getPresentation().setEnabled(false);
+        event.getPresentation().setEnabledAndVisible(false);
         return;
       }
 
@@ -212,14 +212,14 @@ public class RenameRefactoringAction extends AbstractPerspectiveAction
       if (resource.getResourceType() == FILE) {
         event
             .getPresentation()
-            .setEnabled(
+            .setEnabledAndVisible(
                 JavaUtil.isJavaProject(project.get())
                     && srcFolder.isPresent()
                     && isJavaFile((File) resource));
       } else if (resource instanceof Container) {
         event
             .getPresentation()
-            .setEnabled(JavaUtil.isJavaProject(project.get()) && srcFolder.isPresent());
+            .setEnabledAndVisible(JavaUtil.isJavaProject(project.get()) && srcFolder.isPresent());
       }
     }
   }

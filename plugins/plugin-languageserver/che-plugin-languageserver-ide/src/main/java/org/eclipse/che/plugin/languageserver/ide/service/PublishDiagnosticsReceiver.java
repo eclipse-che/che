@@ -12,9 +12,9 @@ package org.eclipse.che.plugin.languageserver.ide.service;
 
 import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedPublishDiagnosticsParams;
@@ -23,6 +23,18 @@ import org.eclipse.che.plugin.languageserver.ide.editor.PublishDiagnosticsProces
 /** Subscribes and receives JSON-RPC messages related to 'textDocument/publishDiagnostics' events */
 @Singleton
 public class PublishDiagnosticsReceiver {
+
+  private final RequestTransmitter transmitter;
+
+  @Inject
+  public PublishDiagnosticsReceiver(RequestTransmitter transmitter) {
+    this.transmitter = transmitter;
+  }
+
+  public void subscribe() {
+    subscribe(transmitter);
+  }
+
   @Inject
   private void configureReceiver(
       Provider<PublishDiagnosticsProcessor> provider, RequestHandlerConfigurator configurator) {
@@ -34,7 +46,6 @@ public class PublishDiagnosticsReceiver {
         .withConsumer(params -> provider.get().processDiagnostics(params));
   }
 
-  @Inject
   private void subscribe(RequestTransmitter transmitter) {
     transmitter
         .newRequest()

@@ -441,6 +441,10 @@ a {
 
 }
 
+div[name="linkWithEditor"][activated="true"]  i {
+    color: blueIconColor;
+}
+
 .gwt-PopupPanel {
     color: mainFontColor;
     border: 1px solid tabBorderColor;

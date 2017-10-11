@@ -25,6 +25,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentI
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -1161,7 +1162,7 @@ public class CodenvyEditor {
     seleniumWebDriver
         .findElement(By.xpath(String.format(Locators.DEBUGGER_PREFIX_XPATH, position)))
         .click();
-    waitAcitveBreakpoint(position);
+    waitActiveBreakpoint(position);
   }
 
   public void setBreakpoint(int position) {
@@ -1177,10 +1178,30 @@ public class CodenvyEditor {
    *
    * @param position the position in the codenvy - editor
    */
-  public void waitAcitveBreakpoint(int position) {
+  public void waitActiveBreakpoint(int position) {
     redrawDriverWait.until(
         visibilityOfElementLocated(
             By.xpath(String.format(Locators.DEBUGGER_BREAK_POINT_ACTIVE, position))));
+  }
+
+  public void waitInactiveBreakpoint(int position) {
+    redrawDriverWait.until(
+        visibilityOfElementLocated(
+            By.xpath(String.format(Locators.DEBUGGER_BREAK_POINT_INACTIVE, position))));
+  }
+
+  public void waitBreakpointRemoved(int position) {
+    try {
+      waitInactiveBreakpoint(position);
+      fail("Breakpoint should be removed at " + position);
+    } catch (Exception e) {
+    }
+
+    try {
+      waitActiveBreakpoint(position);
+      fail("Breakpoint should be removed at " + position);
+    } catch (Exception e) {
+    }
   }
 
   /** wait while editor will be empty */
