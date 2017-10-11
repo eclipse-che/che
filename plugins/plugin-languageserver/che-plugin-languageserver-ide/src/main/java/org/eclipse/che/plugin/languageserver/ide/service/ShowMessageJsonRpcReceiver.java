@@ -12,9 +12,9 @@ package org.eclipse.che.plugin.languageserver.ide.service;
 
 import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.plugin.languageserver.ide.window.ShowMessageProcessor;
@@ -25,6 +25,19 @@ import org.eclipse.lsp4j.ShowMessageRequestParams;
 /** Subscribes and receives JSON-RPC messages related to 'window/showMessage' events */
 @Singleton
 public class ShowMessageJsonRpcReceiver {
+
+  private final RequestTransmitter transmitter;
+
+  @Inject
+  public ShowMessageJsonRpcReceiver(RequestTransmitter transmitter) {
+    this.transmitter = transmitter;
+  }
+
+  public void subscribe() {
+    subscribe(transmitter);
+    subscribeShowMessageRequest(transmitter);
+  }
+
   @Inject
   private void configureReceiver(
       Provider<ShowMessageProcessor> provider, RequestHandlerConfigurator configurator) {
@@ -36,7 +49,6 @@ public class ShowMessageJsonRpcReceiver {
         .withConsumer(params -> provider.get().processNotification(params));
   }
 
-  @Inject
   private void subscribe(RequestTransmitter transmitter) {
     transmitter
         .newRequest()
@@ -57,7 +69,6 @@ public class ShowMessageJsonRpcReceiver {
         .withPromise(params -> provider.get().processNotificationRequest(params));
   }
 
-  @Inject
   private void subscribeShowMessageRequest(RequestTransmitter transmitter) {
     transmitter
         .newRequest()

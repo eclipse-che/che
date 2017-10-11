@@ -26,9 +26,12 @@ public abstract class WorkspaceProjectsSyncer {
    * Synchronizes Project Config state on Agent and Master
    *
    * @param projectRegistry project registry
+   * @param workspaceSyncCommunication events sender about workspace synchronization to the client
    * @throws ServerException
    */
-  public final void sync(ProjectRegistry projectRegistry) throws ServerException {
+  public final void sync(
+      ProjectRegistry projectRegistry, WorkspaceSyncCommunication workspaceSyncCommunication)
+      throws ServerException {
 
     List<? extends ProjectConfig> remote = getProjects();
 
@@ -69,6 +72,7 @@ public abstract class WorkspaceProjectsSyncer {
         project.setSync();
       }
     }
+    workspaceSyncCommunication.synchronizeWorkspace();
   }
 
   /**

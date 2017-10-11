@@ -631,11 +631,24 @@ public class Tree extends FocusWidget
   }
 
   /**
-   * Scroll focus element into specific node.
+   * Scroll focus element into specific node and set focus on the tree. Use {@link
+   * #scrollIntoView(Node, boolean)} when setting focus is not required.
    *
    * @param node node to scroll
    */
   public void scrollIntoView(Node node) {
+    scrollIntoView(node, true);
+  }
+
+  /**
+   * Scroll focus element into specific node. Set focus on the tree when {@code isFocusRequired} is
+   * {@code true}. Does not perform any operations with focus when {@code isFocusRequired} is {@code
+   * false}
+   *
+   * @param node node to scroll
+   * @param isFocusRequired whether tree should take focus after scroll
+   */
+  public void scrollIntoView(Node node, boolean isFocusRequired) {
     checkNotNull(node, NULL_NODE_MSG);
     NodeDescriptor descriptor = getNodeDescriptor(node);
     if (descriptor == null) {
@@ -648,7 +661,10 @@ public class Tree extends FocusWidget
     container.scrollIntoView();
     focusEl.getStyle().setLeft((nodeStorage.getDepth(node) - 1) * 16, Style.Unit.PX);
     focusEl.getStyle().setTop(container.getOffsetTop(), Style.Unit.PX);
-    setFocus(true);
+
+    if (isFocusRequired) {
+      setFocus(true);
+    }
   }
 
   @Override

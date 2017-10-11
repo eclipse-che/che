@@ -59,6 +59,7 @@ public class TreeResourceRevealer {
   private Tree tree;
 
   private Node[] toSelect = null;
+  private boolean isFocusRequired = true;
 
   private DelayedTask selectTask =
       new DelayedTask() {
@@ -69,10 +70,11 @@ public class TreeResourceRevealer {
 
             if (copy.length == 1) {
               tree.getSelectionModel().select(copy[0], false);
-              tree.scrollIntoView(copy[0]);
+              tree.scrollIntoView(copy[0], isFocusRequired);
             }
 
             toSelect = null;
+            isFocusRequired = true;
           }
         }
       };
@@ -93,7 +95,10 @@ public class TreeResourceRevealer {
                 new Function<Void, Promise<Void>>() {
                   @Override
                   public Promise<Void> apply(Void ignored) throws FunctionException {
-                    return reveal(event.getLocation())
+                    return reveal(
+                            event.getLocation(),
+                            event.isSelectionRequired(),
+                            event.isFocusRequired())
                         .catchError(
                             new Function<PromiseError, Void>() {
                               @Override
@@ -125,7 +130,19 @@ public class TreeResourceRevealer {
    * @return promise object with found node or promise error if node wasn't found
    */
   public Promise<Node> reveal(final Path path, final boolean select) {
+    return reveal(path, select, select);
+  }
 
+  /**
+   * Search node in the project explorer tree by storable path.
+   *
+   * @param path path to node
+   * @param select select node after reveal
+   * @param isFocusRequired whether tree should take focus after reveal
+   * @return promise object with found node or promise error if node wasn't found
+   */
+  public Promise<Node> reveal(
+      final Path path, final boolean select, final boolean isFocusRequired) {
     return queue.thenPromise(
         new Function<Void, Promise<Node>>() {
           @Override
@@ -134,14 +151,18 @@ public class TreeResourceRevealer {
                 new RequestCall<Node>() {
                   @Override
                   public void makeCall(AsyncCallback<Node> callback) {
-                    reveal(path, select, callback);
+                    reveal(path, select, isFocusRequired, callback);
                   }
                 });
           }
         });
   }
 
-  protected void reveal(final Path path, final boolean select, final AsyncCallback<Node> callback) {
+  protected void reveal(
+      final Path path,
+      final boolean select,
+      final boolean isFocusRequired,
+      final AsyncCallback<Node> callback) {
     if (path == null) {
       callback.onFailure(new IllegalArgumentException("Invalid search path"));
     }
@@ -169,7 +190,7 @@ public class TreeResourceRevealer {
                   return false;
                 }
 
-                expandToPath(root, path, select)
+                expandToPath(root, path, select, isFocusRequired)
                     .then(
                         new Operation<ResourceNode>() {
                           @Override
@@ -192,12 +213,15 @@ public class TreeResourceRevealer {
   }
 
   private Promise<ResourceNode> expandToPath(
-      final ResourceNode root, final Path path, final boolean select) {
+      final ResourceNode root,
+      final Path path,
+      final boolean select,
+      final boolean isFocusRequired) {
     return createFromAsyncRequest(
         new RequestCall<ResourceNode>() {
           @Override
           public void makeCall(final AsyncCallback<ResourceNode> callback) {
-            expand(root, path, select, callback);
+            expand(root, path, select, isFocusRequired, callback);
           }
         });
   }
@@ -206,10 +230,13 @@ public class TreeResourceRevealer {
       final ResourceNode parent,
       final Path segment,
       final boolean select,
+      final boolean isFocusRequired,
       final AsyncCallback<ResourceNode> callback) {
 
     if (parent.getData().getLocation().equals(segment)) {
       if (select) {
+        this.isFocusRequired = isFocusRequired;
+
         if (toSelect == null) {
           toSelect = new Node[] {parent};
         } else {
@@ -247,7 +274,7 @@ public class TreeResourceRevealer {
                     for (Node child : children) {
                       if (child instanceof ResourceNode
                           && ((ResourceNode) child).getData().getLocation().isPrefixOf(segment)) {
-                        expand((ResourceNode) child, segment, select, callback);
+                        expand((ResourceNode) child, segment, select, isFocusRequired, callback);
                         return;
                       }
                     }

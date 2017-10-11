@@ -1,5 +1,5 @@
 <div style="${msg("mailBannerStyle")}">
     <a href="${msg("eclipseCheMainSiteLink")}">
-        <img src="${msg("eclipseCheLogoLink")}" style="height: 32px;" alt=" " />
+        <img src="${msg("eclipseCheLogoLink")}" height="32" alt=" " />
     </a>
 </div>

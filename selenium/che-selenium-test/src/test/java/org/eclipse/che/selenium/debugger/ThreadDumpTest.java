@@ -143,6 +143,6 @@ public class ThreadDumpTest {
 
     menu.runCommand(RUN_MENU, DEBUG, DEBUG + "/" + PROJECT);
     notificationPopup.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
-    editor.waitAcitveBreakpoint(19);
+    editor.waitActiveBreakpoint(19);
   }
 }

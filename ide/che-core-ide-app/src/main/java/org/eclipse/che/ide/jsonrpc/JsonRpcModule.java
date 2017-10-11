@@ -20,6 +20,7 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestProcessor;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.jsonrpc.commons.TimeoutActionRunner;
+import org.eclipse.che.ide.core.ServerSubscriptionBroadcaster;
 
 /** GIN module for configuring JSON-RPC protocol implementation components. */
 public class JsonRpcModule extends AbstractGinModule {
@@ -42,5 +43,7 @@ public class JsonRpcModule extends AbstractGinModule {
 
     bind(RequestProcessor.class).to(ClientSideRequestProcessor.class);
     bind(TimeoutActionRunner.class).to(ClientSideTimeoutActionRunner.class);
+
+    bind(ServerSubscriptionBroadcaster.class).asEagerSingleton();
   }
 }

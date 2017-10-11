@@ -294,19 +294,22 @@ public class BreakpointManagerImpl
       final List<Breakpoint> toAdd = new ArrayList<>();
 
       for (final Breakpoint breakpoint : fileBreakpoints) {
-        final int lineNumber = breakpoint.getLocation().getLineNumber();
+        final int lineNumber = breakpoint.getLocation().getLineNumber() - 1;
 
-        // before any change
-        if (firstLine > lineNumber) {
+        // line removed
+        if (firstLine <= lineNumber && lineNumber < firstLine + linesRemoved) {
+          toRemove.add(breakpoint);
           continue;
         }
 
-        // in the middle
-        if (firstLine + Math.abs(delta) > lineNumber && lineNumber >= firstLine) {
+        // line modified
+        if (firstLine <= lineNumber && lineNumber < firstLine + linesAdded) {
           toRemove.add(breakpoint);
-          toAdd.add(breakpoint);
+          continue;
+        }
 
-        } else {
+        // line shifted
+        if (lineNumber >= firstLine + Math.abs(delta)) {
           Location currentLocation = breakpoint.getLocation();
           Location newLocation =
               new LocationImpl(

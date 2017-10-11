@@ -44,6 +44,7 @@ import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.smartTree.TreeStyles;
 import org.eclipse.che.ide.ui.smartTree.data.HasAction;
 import org.eclipse.che.ide.ui.smartTree.data.Node;
+import org.eclipse.che.ide.ui.smartTree.presentation.AbstractPresentationNode;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 import org.eclipse.che.ide.util.dom.Elements;
 
