@@ -42,7 +42,7 @@ public class JavaModule extends AbstractModule {
     LanguageDescription javaClass = new LanguageDescription();
     javaClass.setFileExtensions(asList("class"));
     javaClass.setLanguageId(JAVA_CLASS);
-    javaClass.setMimeType("text/x-java-class");
+    javaClass.setMimeType("text/x-java-source");
     Multibinder.newSetBinder(binder(), LanguageDescription.class)
         .addBinding()
         .toInstance(javaClass);
