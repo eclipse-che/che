@@ -35,6 +35,7 @@ import org.eclipse.che.api.git.params.RmParams;
 import org.eclipse.che.api.git.params.TagCreateParams;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.BranchListMode;
+import org.eclipse.che.api.git.shared.EditedRegion;
 import org.eclipse.che.api.git.shared.GitUser;
 import org.eclipse.che.api.git.shared.MergeResult;
 import org.eclipse.che.api.git.shared.PullResponse;
@@ -42,6 +43,7 @@ import org.eclipse.che.api.git.shared.PushResponse;
 import org.eclipse.che.api.git.shared.RebaseResponse;
 import org.eclipse.che.api.git.shared.Remote;
 import org.eclipse.che.api.git.shared.RemoteReference;
+import org.eclipse.che.api.git.shared.RevertResult;
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.api.git.shared.ShowFileContentResponse;
 import org.eclipse.che.api.git.shared.Status;
@@ -167,6 +169,15 @@ public interface GitConnection extends Closeable {
    * @see DiffParams
    */
   DiffPage diff(DiffParams params) throws GitException;
+
+  /**
+   * Get list of edited regions (insertions, modifications, removals) of the file.
+   *
+   * @param file path of the file
+   * @return list of {@link EditedRegion} objects that contain type and range of the editing
+   * @throws GitException if any error occurs
+   */
+  List<EditedRegion> getEditedRegions(String file) throws GitException;
 
   /**
    * Show content of the file from specified revision or branch.
@@ -389,4 +400,12 @@ public interface GitConnection extends Closeable {
    * @throws GitException if any exception occurs
    */
   String getCurrentBranch() throws GitException;
+
+  /**
+   * Revert the specified commit
+   *
+   * @param commit the commit to revert
+   * @throws GitException if any error occurs
+   */
+  RevertResult revert(String commit) throws GitException;
 }

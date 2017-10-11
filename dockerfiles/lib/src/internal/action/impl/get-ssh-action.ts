@@ -17,6 +17,7 @@ import {Workspace} from "../../../api/wsmaster/workspace/workspace";
 import {ArgumentProcessor} from "../../../spi/decorator/argument-processor";
 import {Log} from "../../../spi/log/log";
 import {Ssh} from "../../../api/wsmaster/ssh/ssh";
+
 /**
  * This class is handling the retrieval of default private ssh key of a workspace, login name and port to use
  * @author Florent Benoit
@@ -47,7 +48,7 @@ export class GetSshDataAction {
     workspace : Workspace;
     constructor(args:Array<string>) {
         this.args = ArgumentProcessor.inject(this, args);
-        this.authData = AuthData.parse(this.url, this.username, this.password);
+        this.authData = new AuthData(this.url, this.username, this.password);
         // disable printing info
         this.authData.printInfo = false;
         Log.disablePrefix();
@@ -76,7 +77,7 @@ export class GetSshDataAction {
 
                 foundWorkspaceDTO = workspaceDto;
 
-            }).then((workspaceDto) => {
+            }).then(() => {
 
                 // need to get ssh key for the workspace
                 let ssh:Ssh = new Ssh(this.authData);

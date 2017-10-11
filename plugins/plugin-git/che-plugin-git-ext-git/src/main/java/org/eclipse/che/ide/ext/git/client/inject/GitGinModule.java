@@ -12,11 +12,14 @@ package org.eclipse.che.ide.ext.git.client.inject;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
+import com.google.gwt.inject.client.multibindings.GinMapBinder;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistrar;
+import org.eclipse.che.ide.api.vcs.VcsChangeMarkerRenderFactory;
+import org.eclipse.che.ide.ext.git.client.GitChangeMarkerRendererFactory;
 import org.eclipse.che.ide.ext.git.client.GitChangesHandler;
 import org.eclipse.che.ide.ext.git.client.GitCheckoutHandler;
 import org.eclipse.che.ide.ext.git.client.add.AddToIndexView;
@@ -60,6 +63,8 @@ import org.eclipse.che.ide.ext.git.client.reset.commit.ResetToCommitView;
 import org.eclipse.che.ide.ext.git.client.reset.commit.ResetToCommitViewImpl;
 import org.eclipse.che.ide.ext.git.client.reset.files.ResetFilesView;
 import org.eclipse.che.ide.ext.git.client.reset.files.ResetFilesViewImpl;
+import org.eclipse.che.ide.ext.git.client.revert.RevertCommitView;
+import org.eclipse.che.ide.ext.git.client.revert.RevertCommitViewImpl;
 
 /** @author Andrey Plotnikov */
 @ExtensionGinModule
@@ -75,8 +80,15 @@ public class GitGinModule extends AbstractGinModule {
         .addBinding()
         .to(CommitterPreferencePresenter.class);
 
+    GinMapBinder<String, VcsChangeMarkerRenderFactory> vcsChangeMarkerRenderFactoryMapBinder =
+        GinMapBinder.newMapBinder(binder(), String.class, VcsChangeMarkerRenderFactory.class);
+    vcsChangeMarkerRenderFactoryMapBinder
+        .addBinding("git")
+        .to(GitChangeMarkerRendererFactory.class);
+
     bind(AddToIndexView.class).to(AddToIndexViewImpl.class).in(Singleton.class);
     bind(ResetToCommitView.class).to(ResetToCommitViewImpl.class).in(Singleton.class);
+    bind(RevertCommitView.class).to(RevertCommitViewImpl.class).in(Singleton.class);
     bind(RemoveFromIndexView.class).to(RemoveFromIndexViewImpl.class).in(Singleton.class);
     bind(RevisionListView.class).to(RevisionListViewImpl.class).in(Singleton.class);
     bind(CommitView.class).to(CommitViewImpl.class).in(Singleton.class);

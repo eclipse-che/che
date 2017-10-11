@@ -41,18 +41,7 @@ getRecommendedThreadCount() {
 }
 
 detectDockerInterfaceIp() {
-    local interfaces=("docker"
-                      "docker0")
-
-    for interface in ${interfaces[@]}; do
-        ifconfig ${interface} >/dev/null 2>&1
-        if [[ $? == 0 ]]; then
-            echo $(/sbin/ifconfig ${interface} | grep 'inet ' |  awk '{print $2}' | sed -e "s#addr:##")
-            return 0
-        fi
-    done
-
-    return 1
+    docker run --rm --net host eclipse/che-ip:nightly
 }
 
 ####################################################################################
@@ -209,6 +198,7 @@ defineTestsScope() {
         if [[ "$var" =~ --test=.* ]]; then
             TESTS_SCOPE="-Dit.test="$(echo "$var" | sed -e "s/--test=//g")
             TEST_INCLUSION=${TEST_INCLUSION_SINGLE_TEST}
+            THREADS=1
 
         elif [[ "$var" =~ --suite=.* ]]; then
             TESTS_SCOPE="-DrunSuite=src/test/resources/suites/"$(echo "$var" | sed -e "s/--suite=//g")
@@ -513,7 +503,7 @@ fetchFailedTestsNumber() {
 
 detectLatestResultsUrl() {
     local job=$(curl -s ${BASE_ACTUAL_RESULTS_URL} | tr '\n' ' ' | sed 's/.*Last build (#\([0-9]\+\)).*/\1/')
-    echo ${BASE_ACTUAL_RESULTS_URL}${job}"/"
+    echo ${BASE_ACTUAL_RESULTS_URL}${job}"/testReport/"
 }
 
 # Fetches list of failed tests and failed configurations.
@@ -526,22 +516,14 @@ fetchActualResults() {
     if [[ ! ${job} =~ ^[0-9]+$ ]]; then
         ACTUAL_RESULTS_URL=$(detectLatestResultsUrl)
     else
-        ACTUAL_RESULTS_URL=${BASE_ACTUAL_RESULTS_URL}${job}"/"
+        ACTUAL_RESULTS_URL=${BASE_ACTUAL_RESULTS_URL}${job}"/testReport/"
     fi
 
-    # from 'Failed Tests:' to 'Skipped Tests:'
-    local actualResults=($(curl -s ${ACTUAL_RESULTS_URL} | \
+    # get list of failed tests from CI server, remove duplicates from it and sort
+    ACTUAL_RESULTS=$(echo $( curl -s ${ACTUAL_RESULTS_URL} | \
                            tr '>' '\n' | tr '<' '\n' | tr '"' '\n'  | \
-                           grep -A9999999 "Failed Tests:" | grep -B9999999 "Skipped Tests:" | \
-                           grep [a-z][a-z0-9_]*[.][a-z] | grep -v http | grep -v junit ))
-
-    # from 'Failed Configurations:' to 'Skipped Configurations:'
-    actualResults+=($(curl -s ${ACTUAL_RESULTS_URL} | \
-                     tr '>' '\n' | tr '<' '\n' | tr '"' '\n'  | \
-                     grep -A9999999 "Failed Configurations:" | grep -B9999999 "Skipped Configurations:" | \
-                     grep [a-z][a-z0-9_]*[.][a-z] | grep -v http | grep -v junit))
-
-    ACTUAL_RESULTS=$(echo ${actualResults[*]} | tr ' ' '\n' | sort | uniq)
+                           grep --extended-regexp "^[a-z_$][a-z0-9_$.]*\.[A-Z_$][a-zA-Z0-9_$]*\.[a-z_$][a-zA-Z0-9_$]*$" | \
+                           tr ' ' '\n' | sort | uniq ))
 }
 
 findRegressions() {
@@ -908,10 +890,13 @@ else
 fi
 
 analyseTestsResults $@
-generateFailSafeReport
-printProposals $@
-storeTestReport
-printElapsedTime
+
+if [[ ${COMPARE_WITH_CI} == false ]]; then
+    generateFailSafeReport
+    printProposals $@
+    storeTestReport
+    printElapsedTime
+fi
 
 if [[ ${TESTS_SCOPE} =~ -DrunSuite ]] \
       && [[ $(fetchFailedTestsNumber) == 0 ]] \

@@ -12,10 +12,17 @@
 -->
 <div class="left-sidebar-container">
   <md-toolbar class="flex-shrink-none">
-    <md-progress-linear md-mode="indeterminate" ng-hide="navbarCtrl.profile && navbarCtrl.profile.userId"></md-progress-linear>
-    <div ng-show="navbarCtrl.profile && navbarCtrl.profile.userId">
-      <section class="navbar-top-logo logo-color-white" layout="column" layout-align="center left" ng-include="branding.logoText">
-      </section>
+    <md-progress-linear md-mode="indeterminate" ng-hide="navbarController.profile && navbarController.profile.userId"></md-progress-linear>
+    <div ng-show="navbarController.profile && navbarController.profile.userId"
+         layout="column" flex>
+
+      <div flex="none"
+           layout="row" layout-align="start center">
+        <section class="navbar-top-logo logo-color-white" layout="column" layout-align="center left" ng-include="branding.logoText">
+        </section>
+        <div flex></div>
+        <navbar-notification></navbar-notification>
+      </div>
 
       <md-divider md-theme="factory-theme"></md-divider>
 
@@ -23,7 +30,7 @@
         <section class="left-sidebar-menu" layout="column" layout-align="center center">
           <md-list layout="column">
             <md-list-item flex class="navbar-subsection-item">
-              <md-button nav-bar-selected flex che-reload-href href="{{navbarCtrl.menuItemUrl.dashboard}}" layout-align="left"
+              <md-button nav-bar-selected flex che-reload-href href="{{navbarController.menuItemUrl.dashboard}}" layout-align="left"
                          target="_self">
                 <div class="navbar-item" layout="row" layout-align="start center">
                   <md-icon md-font-icon="navbar-icon chefont cheico-dashboard" aria-label="Dashboard"></md-icon>
@@ -32,17 +39,17 @@
               </md-button>
             </md-list-item>
             <md-list-item flex class="navbar-subsection-item">
-              <md-button nav-bar-selected flex che-reload-href href="{{navbarCtrl.menuItemUrl.workspaces}}" layout-align="left">
+              <md-button nav-bar-selected flex che-reload-href href="{{navbarController.menuItemUrl.workspaces}}" layout-align="left">
                 <div class="navbar-item" layout="row" layout-align="start center">
                   <md-icon md-font-icon="navbar-icon chefont cheico-workspace"></md-icon>
                   <span>Workspaces</span>
-                  <span class="navbar-number" ng-show="navbarCtrl.getWorkspacesNumber()">&nbsp;({{navbarCtrl.getWorkspacesNumber()}})</span>
+                  <span class="navbar-number" ng-show="navbarController.getWorkspacesNumber()">&nbsp;({{navbarController.getWorkspacesNumber()}})</span>
                 </div>
               </md-button>
             </md-list-item>
             <md-list-item flex class="navbar-subsection-item">
               <md-button nav-bar-selected flex che-reload-href
-                         href="{{navbarCtrl.menuItemUrl.stacks}}" layout-align="left">
+                         href="{{navbarController.menuItemUrl.stacks}}" layout-align="left">
                 <div class="navbar-item" layout="row" layout-align="start center">
                   <md-icon md-font-icon="navbar-icon material-design icon-ic_inbox_24px"></md-icon>
                   <span>Stacks</span>
@@ -51,20 +58,65 @@
             </md-list-item>
             <md-list-item flex class="navbar-subsection-item">
               <md-button nav-bar-selected flex che-reload-href
-                         href="{{navbarCtrl.menuItemUrl.factories}}" layout-align="left">
+                         href="{{navbarController.menuItemUrl.factories}}" layout-align="left">
                 <div class="navbar-item" layout="row" layout-align="start center">
                   <md-icon md-font-icon="navbar-icon chefont cheico-factory"></md-icon>
                   <span>Factories</span>
-                  <span class="navbar-number" ng-show="navbarCtrl.getFactoriesNumber()">&nbsp;({{navbarCtrl.getFactoriesNumber()}})</span>
+                  <span class="navbar-number" ng-show="navbarController.getFactoriesNumber()">&nbsp;({{navbarController.getFactoriesNumber()}})</span>
                 </div>
               </md-button>
             </md-list-item>
             <md-list-item flex class="navbar-subsection-item">
               <md-button nav-bar-selected flex che-reload-href
-                         href="{{navbarCtrl.menuItemUrl.administration}}" layout-align="left">
+                         href="{{navbarController.menuItemUrl.administration}}" layout-align="left">
                 <div class="navbar-item" layout="row" layout-align="start center">
                   <md-icon md-font-icon="navbar-icon material-design icon-ic_settings_24px"></md-icon>
                   <span>Administration</span>
+                </div>
+              </md-button>
+            </md-list-item>
+            <md-list-item flex class="navbar-subsection-item" ng-if="navbarController.isPermissionServiceAvailable && !navbarController.userServices.hasInstallationManagerService && !navbarController.hasPersonalAccount">
+              <md-button nav-bar-selected flex che-reload-href
+                         href="{{navbarController.menuItemUrl.organizations}}" layout-align="left">
+                <div class="navbar-item" layout="row" layout-align="start center">
+                  <md-icon md-font-icon="fa navbar-icon fa-sitemap"></md-icon>
+                  <span>Organizations</span>
+                  <span class="navbar-number" ng-show="navbarController.getOrganizationsNumber()">&nbsp;({{navbarController.getOrganizationsNumber()}})</span>
+                </div>
+              </md-button>
+            </md-list-item>
+          </md-list>
+        </section>
+      </div>
+
+      <div class="admin-navbar-menu"
+           ng-if="navbarController.userServices.hasInstallationManagerService || navbarController.userServices.hasAdminUserService">
+        <section class="left-sidebar-menu" layout="column" layout-align="start start">
+
+          <div class="navbar-section navbar-section-title"
+               flex layout="row" layout-align="start start">
+            <span>Administration</span>
+          </div>
+          <md-list layout="column">
+            <md-list-item flex class="navbar-subsection-item"
+                          ng-if="navbarController.userServices.hasAdminUserService">
+              <md-button nav-bar-selected flex che-reload-href
+                         href="{{navbarController.menuItemUrl.usermanagement}}"
+                         layout-align="left">
+                <div class="navbar-item" layout="row" layout-align="start center">
+                  <i class="fa fa-user fa-lg navbar-icon"></i>
+                  <span>Users</span>
+                </div>
+              </md-button>
+            </md-list-item>
+            <md-list-item flex class="navbar-subsection-item"
+                          ng-if="navbarController.userServices.hasInstallationManagerService">
+              <md-button nav-bar-selected flex che-reload-href
+                         href="{{navbarController.menuItemUrl.organizations}}" layout-align="left">
+                <div class="navbar-item" layout="row" layout-align="start center">
+                  <md-icon md-font-icon="fa navbar-icon fa-sitemap"></md-icon>
+                  <span>Organizations</span>
+                  <span class="navbar-number" ng-show="navbarController.getRootOrganizationsNumber()">&nbsp;({{navbarController.getRootOrganizationsNumber()}})</span>
                 </div>
               </md-button>
             </md-list-item>
@@ -73,6 +125,34 @@
       </div>
 
       <navbar-recent-workspaces></navbar-recent-workspaces>
+
+      <navbar-teams flex layout="column" layout-aling="start strength"></navbar-teams>
+
+      <div class="admin-navbar-menu"
+           layout="column" layout-align="end stretch" flex>
+        <section class="left-sidebar-menu navbar-account-section"
+                 ng-if="navbarController.isPermissionServiceAvailable">
+          <md-list layout="column" flex>
+
+            <md-list-item class="navbar-subsection-item">
+              <navbar-dropdown-menu flex
+                                    navbar-dropdown-items="navbarController.accountItems"
+                                    navbar-dropdown-offset="15 -45">
+                <md-button ng-href="" layout-align="left">
+                  <div class="navbar-item navbar-identity" layout="row" layout-align="start center">
+
+                    <i class="navbar-icon" flex="none">
+                      <img class="developers-face" gravatar-src="navbarController.profile.email"/>
+                    </i>
+                    <span flex style="text-align: left;">{{navbarController.getUserName()}}</span>
+                    <i class="fa fa-angle-up navbar-icon" aria-hidden="true"></i>
+                  </div>
+                </md-button>
+              </navbar-dropdown-menu>
+            </md-list-item>
+          </md-list>
+        </section>
+      </div>
 
     </div>
   </md-toolbar>

@@ -33,6 +33,7 @@ import javax.ws.rs.core.UriInfo;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.rest.annotations.Required;
 import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.params.AddParams;
 import org.eclipse.che.api.git.params.CheckoutParams;
@@ -59,6 +60,7 @@ import org.eclipse.che.api.git.shared.Commiters;
 import org.eclipse.che.api.git.shared.ConfigRequest;
 import org.eclipse.che.api.git.shared.Constants;
 import org.eclipse.che.api.git.shared.DiffType;
+import org.eclipse.che.api.git.shared.EditedRegion;
 import org.eclipse.che.api.git.shared.FetchRequest;
 import org.eclipse.che.api.git.shared.MergeRequest;
 import org.eclipse.che.api.git.shared.MergeResult;
@@ -74,6 +76,8 @@ import org.eclipse.che.api.git.shared.RemoteAddRequest;
 import org.eclipse.che.api.git.shared.RemoteUpdateRequest;
 import org.eclipse.che.api.git.shared.RepoInfo;
 import org.eclipse.che.api.git.shared.ResetRequest;
+import org.eclipse.che.api.git.shared.RevertRequest;
+import org.eclipse.che.api.git.shared.RevertResult;
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.api.git.shared.ShowFileContentResponse;
 import org.eclipse.che.api.git.shared.Status;
@@ -247,6 +251,17 @@ public class GitService {
               .withCommitA(commitA)
               .withCommitB(commitB)
               .withCached(cached));
+    }
+  }
+
+  @GET
+  @Path("edits")
+  @Produces(MediaType.APPLICATION_JSON)
+  public List<EditedRegion> getEditedRegions(@Required @QueryParam("filePath") String file)
+      throws ApiException {
+    requiredNotNull(file, "File path");
+    try (GitConnection gitConnection = getGitConnection()) {
+      return gitConnection.getEditedRegions(file);
     }
   }
 
@@ -440,6 +455,15 @@ public class GitService {
     }
   }
 
+  @POST
+  @Path("revert")
+  @Consumes(MediaType.APPLICATION_JSON)
+  public RevertResult revert(RevertRequest request) throws ApiException {
+    try (GitConnection gitConnection = getGitConnection()) {
+      return gitConnection.revert(request.getCommit());
+    }
+  }
+
   @GET
   @Path("status")
   @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
@@ -561,5 +585,18 @@ public class GitService {
 
   private GitConnection getGitConnection() throws ApiException {
     return gitConnectionFactory.getConnection(getAbsoluteProjectPath(projectPath));
+  }
+
+  /**
+   * Checks object reference is not {@code null}
+   *
+   * @param object object reference to check
+   * @param subject used as subject of exception message "{subject} required"
+   * @throws BadRequestException when object reference is {@code null}
+   */
+  private void requiredNotNull(Object object, String subject) throws BadRequestException {
+    if (object == null) {
+      throw new BadRequestException(subject + " required");
+    }
   }
 }

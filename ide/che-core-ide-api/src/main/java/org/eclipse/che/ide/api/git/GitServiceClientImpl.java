@@ -32,6 +32,7 @@ import org.eclipse.che.api.git.shared.CheckoutRequest;
 import org.eclipse.che.api.git.shared.CloneRequest;
 import org.eclipse.che.api.git.shared.CommitRequest;
 import org.eclipse.che.api.git.shared.DiffType;
+import org.eclipse.che.api.git.shared.EditedRegion;
 import org.eclipse.che.api.git.shared.FetchRequest;
 import org.eclipse.che.api.git.shared.LogResponse;
 import org.eclipse.che.api.git.shared.MergeRequest;
@@ -43,6 +44,8 @@ import org.eclipse.che.api.git.shared.PushResponse;
 import org.eclipse.che.api.git.shared.Remote;
 import org.eclipse.che.api.git.shared.RemoteAddRequest;
 import org.eclipse.che.api.git.shared.ResetRequest;
+import org.eclipse.che.api.git.shared.RevertRequest;
+import org.eclipse.che.api.git.shared.RevertResult;
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.api.git.shared.ShowFileContentResponse;
 import org.eclipse.che.api.git.shared.Status;
@@ -74,6 +77,7 @@ public class GitServiceClientImpl implements GitServiceClient {
   private static final String COMMIT = "/git/commit";
   private static final String CONFIG = "/git/config";
   private static final String DIFF = "/git/diff";
+  private static final String EDITS = "/git/edits";
   private static final String FETCH = "/git/fetch";
   private static final String INIT = "/git/init";
   private static final String LOG = "/git/log";
@@ -86,6 +90,7 @@ public class GitServiceClientImpl implements GitServiceClient {
   private static final String REMOVE = "/git/remove";
   private static final String RESET = "/git/reset";
   private static final String REPOSITORY = "/git/repository";
+  private static final String REVERT = "/git/revert";
 
   /** Loader to be displayed. */
   private final AsyncRequestLoader loader;
@@ -437,6 +442,20 @@ public class GitServiceClientImpl implements GitServiceClient {
         .send(new StringUnmarshaller());
   }
 
+  @Override
+  public Promise<List<EditedRegion>> getEditedRegions(Path project, Path filePath) {
+    String url =
+        getWsAgentBaseUrl()
+            + EDITS
+            + "?projectPath="
+            + encodePath(project)
+            + "&filePath="
+            + encodePath(filePath);
+    return asyncRequestFactory
+        .createGetRequest(url)
+        .send(dtoUnmarshallerFactory.newListUnmarshaller(EditedRegion.class));
+  }
+
   private AsyncRequest diff(
       Path project,
       List<String> fileFilter,
@@ -505,5 +524,15 @@ public class GitServiceClientImpl implements GitServiceClient {
 
   private String getWsAgentBaseUrl() {
     return appContext.getDevMachine().getWsAgentBaseUrl();
+  }
+
+  @Override
+  public Promise<RevertResult> revert(Path project, String commit) {
+    RevertRequest revertRequest = dtoFactory.createDto(RevertRequest.class).withCommit(commit);
+    String url = getWsAgentBaseUrl() + REVERT + "?projectPath=" + project;
+    return asyncRequestFactory
+        .createPostRequest(url, revertRequest)
+        .loader(loader)
+        .send(dtoUnmarshallerFactory.newUnmarshaller(RevertResult.class));
   }
 }

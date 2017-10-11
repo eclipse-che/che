@@ -192,7 +192,7 @@ export class CheInput implements ng.IDirective {
       }
     });
 
-    const ngChange = 'ng-change';
+    const ngChange = 'ngChange';
     if (!attrs.$attr[ngChange]) {
       return;
     }

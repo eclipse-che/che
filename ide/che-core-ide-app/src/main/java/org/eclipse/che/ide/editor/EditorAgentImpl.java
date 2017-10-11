@@ -13,8 +13,11 @@ package org.eclipse.che.ide.editor;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.Boolean.parseBoolean;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.parts.PartStackType.EDITING;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -25,8 +28,10 @@ import elemental.json.JsonObject;
 import elemental.util.ArrayOf;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -60,6 +65,7 @@ import org.eclipse.che.ide.api.event.WindowActionEvent;
 import org.eclipse.che.ide.api.event.WindowActionHandler;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.EditorMultiPartStack;
 import org.eclipse.che.ide.api.parts.EditorMultiPartStackState;
 import org.eclipse.che.ide.api.parts.EditorPartStack;
@@ -76,6 +82,7 @@ import org.eclipse.che.ide.part.editor.multipart.EditorMultiPartStackPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
+import org.eclipse.che.ide.util.loging.Log;
 
 /**
  * Default implementation of {@link EditorAgent}.
@@ -101,10 +108,12 @@ public class EditorAgentImpl
   private final EditorMultiPartStack editorMultiPartStack;
 
   private final List<EditorPartPresenter> openedEditors;
+  private final Map<EditorPartStack, Set<Path>> openingEditorsPathsToStacks;
   private final Map<EditorPartPresenter, String> openedEditorsToProviders;
   private final EditorContentSynchronizer editorContentSynchronizer;
   private final PromiseProvider promiseProvider;
   private final ResourceProvider resourceProvider;
+  private final NotificationManager notificationManager;
   private List<EditorPartPresenter> dirtyEditors;
   private EditorPartPresenter activeEditor;
   private PartPresenter activePart;
@@ -120,7 +129,8 @@ public class EditorAgentImpl
       EditorMultiPartStackPresenter editorMultiPartStack,
       EditorContentSynchronizer editorContentSynchronizer,
       PromiseProvider promiseProvider,
-      ResourceProvider resourceProvider) {
+      ResourceProvider resourceProvider,
+      NotificationManager notificationManager) {
     this.eventBus = eventBus;
     this.fileTypeRegistry = fileTypeRegistry;
     this.preferencesManager = preferencesManager;
@@ -131,7 +141,9 @@ public class EditorAgentImpl
     this.editorContentSynchronizer = editorContentSynchronizer;
     this.promiseProvider = promiseProvider;
     this.resourceProvider = resourceProvider;
+    this.notificationManager = notificationManager;
     this.openedEditors = newArrayList();
+    this.openingEditorsPathsToStacks = new HashMap<>();
     this.openedEditorsToProviders = new HashMap<>();
 
     eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
@@ -167,7 +179,7 @@ public class EditorAgentImpl
         preferencesManager.getValue(LinkWithEditorAction.LINK_WITH_EDITOR);
     if (parseBoolean(isLinkedWithEditor)) {
       final VirtualFile file = activeEditor.getEditorInput().getFile();
-      eventBus.fireEvent(new RevealResourceEvent(file.getLocation()));
+      eventBus.fireEvent(new RevealResourceEvent(file.getLocation(), true, false));
     }
   }
 
@@ -190,12 +202,37 @@ public class EditorAgentImpl
 
   @Override
   public void openEditor(@NotNull final VirtualFile file) {
-    doOpen(file, new OpenEditorCallbackImpl(), null);
+    openEditor(file, new OpenEditorCallbackImpl());
   }
 
   @Override
   public void openEditor(@NotNull VirtualFile file, Constraints constraints) {
-    doOpen(file, new OpenEditorCallbackImpl(), constraints);
+    if (constraints == null) {
+      openEditor(file);
+      return;
+    }
+
+    EditorPartStack relativeEditorPartStack =
+        editorMultiPartStack.getPartStackByTabId(constraints.relativeId);
+    if (relativeEditorPartStack == null) {
+      String errorMessage =
+          coreLocalizationConstant.canNotOpenFileInSplitMode(file.getLocation().toString());
+      notificationManager.notify(errorMessage, FAIL, EMERGE_MODE);
+      Log.error(getClass(), errorMessage + ": relative part stack is not found");
+      return;
+    }
+
+    EditorPartStack editorPartStackConsumer =
+        editorMultiPartStack.split(relativeEditorPartStack, constraints, -1);
+    if (editorPartStackConsumer == null) {
+      String errorMessage =
+          coreLocalizationConstant.canNotOpenFileInSplitMode(file.getLocation().toString());
+      notificationManager.notify(errorMessage, FAIL, EMERGE_MODE);
+      Log.error(getClass(), errorMessage + ": split part stack is not found");
+      return;
+    }
+
+    doOpen(file, editorPartStackConsumer, new OpenEditorCallbackImpl());
   }
 
   @Override
@@ -248,20 +285,30 @@ public class EditorAgentImpl
 
   @Override
   public void openEditor(@NotNull VirtualFile file, @NotNull OpenEditorCallback callback) {
-    doOpen(file, callback, null);
+    Path path = file.getLocation();
+    EditorPartStack activeEditorPartStack = editorMultiPartStack.getActivePartStack();
+    if (activeEditorPartStack != null) {
+      PartPresenter openedPart = activeEditorPartStack.getPartByPath(path);
+      if (openedPart != null) {
+        editorMultiPartStack.setActivePart(openedPart);
+        callback.onEditorActivated((EditorPartPresenter) openedPart);
+        return;
+      }
+
+      if (isFileOpening(path, activeEditorPartStack)) {
+        return;
+      }
+    } else {
+      activeEditorPartStack = editorMultiPartStack.createRootPartStack();
+    }
+
+    doOpen(file, activeEditorPartStack, callback);
   }
 
   private void doOpen(
-      final VirtualFile file, final OpenEditorCallback callback, final Constraints constraints) {
-    EditorPartStack activePartStack = editorMultiPartStack.getActivePartStack();
-    if (constraints == null && activePartStack != null) {
-      PartPresenter partPresenter = activePartStack.getPartByPath(file.getLocation());
-      if (partPresenter != null) {
-        workspaceAgent.setActivePart(partPresenter, EDITING);
-        callback.onEditorActivated((EditorPartPresenter) partPresenter);
-        return;
-      }
-    }
+      VirtualFile file, EditorPartStack editorPartStackConsumer, OpenEditorCallback callback) {
+
+    addToOpeningFilesList(file.getLocation(), editorPartStackConsumer);
 
     final FileType fileType = fileTypeRegistry.getFileTypeByFile(file);
     final EditorProvider editorProvider = editorRegistry.getEditor(fileType);
@@ -270,40 +317,49 @@ public class EditorAgentImpl
       Promise<EditorPartPresenter> promise = provider.createEditor(file);
       if (promise != null) {
         promise.then(
-            new Operation<EditorPartPresenter>() {
-              @Override
-              public void apply(EditorPartPresenter arg) throws OperationException {
-                initEditor(file, callback, fileType, arg, constraints, editorProvider);
-              }
+            editor -> {
+              initEditor(file, callback, fileType, editor, editorPartStackConsumer, editorProvider);
             });
         return;
       }
     }
 
     final EditorPartPresenter editor = editorProvider.getEditor();
-    initEditor(file, callback, fileType, editor, constraints, editorProvider);
+    initEditor(file, callback, fileType, editor, editorPartStackConsumer, editorProvider);
   }
 
   private void initEditor(
-      final VirtualFile file,
-      final OpenEditorCallback openEditorCallback,
+      VirtualFile file,
+      OpenEditorCallback openEditorCallback,
       FileType fileType,
-      final EditorPartPresenter editor,
-      final Constraints constraints,
+      EditorPartPresenter editor,
+      EditorPartStack editorPartStack,
       EditorProvider editorProvider) {
     OpenEditorCallback initializeCallback =
         new OpenEditorCallbackImpl() {
           @Override
           public void onEditorOpened(EditorPartPresenter editor) {
-            workspaceAgent.openPart(editor, EDITING, constraints);
-            workspaceAgent.setActivePart(editor);
+            editorPartStack.addPart(editor);
+            editorMultiPartStack.setActivePart(editor);
+
+            openedEditors.add(editor);
+            removeFromOpeningFilesList(file.getLocation(), editorPartStack);
 
             openEditorCallback.onEditorOpened(editor);
+
+            eventBus.fireEvent(new EditorOpenedEvent(file, editor));
           }
 
           @Override
           public void onInitializationFailed() {
             openEditorCallback.onInitializationFailed();
+
+            removeFromOpeningFilesList(file.getLocation(), editorPartStack);
+
+            if (!openingEditorsPathsToStacks.containsKey(editorPartStack)
+                && editorPartStack.getParts().isEmpty()) {
+              editorMultiPartStack.removePartStack(editorPartStack);
+            }
           }
         };
 
@@ -313,7 +369,6 @@ public class EditorAgentImpl
 
   private void finalizeInit(
       VirtualFile file, EditorPartPresenter editor, EditorProvider editorProvider) {
-    openedEditors.add(editor);
     openedEditorsToProviders.put(editor, editorProvider.getId());
 
     editor.addCloseHandler(this);
@@ -329,9 +384,32 @@ public class EditorAgentImpl
             }
 
             eventBus.fireEvent(FileEvent.createFileOpenedEvent(file));
-            eventBus.fireEvent(new EditorOpenedEvent(file, editor));
           }
         });
+  }
+
+  private boolean isFileOpening(Path path, EditorPartStack editorPartStack) {
+    Set<Path> openingFiles = openingEditorsPathsToStacks.get(editorPartStack);
+    return openingFiles != null && openingFiles.contains(path);
+  }
+
+  private void addToOpeningFilesList(Path path, EditorPartStack editorPartStack) {
+    if (editorPartStack == null) {
+      return;
+    }
+
+    Set<Path> openingFiles =
+        openingEditorsPathsToStacks.computeIfAbsent(editorPartStack, k -> new HashSet<>());
+    openingFiles.add(path);
+  }
+
+  private void removeFromOpeningFilesList(Path path, EditorPartStack editorPartStack) {
+    if (editorPartStack == null || !openingEditorsPathsToStacks.containsKey(editorPartStack)) {
+      return;
+    }
+
+    Set<Path> openingFiles = openingEditorsPathsToStacks.get(editorPartStack);
+    openingFiles.remove(path);
   }
 
   @Override
@@ -480,9 +558,13 @@ public class EditorAgentImpl
   public Promise<Void> loadState(@NotNull final JsonObject state) {
     if (state.hasKey("FILES")) {
       JsonObject files = state.getObject("FILES");
-      EditorPartStack partStack = editorMultiPartStack.createRootPartStack();
+      EditorPartStack editorPartStackConsumer = editorMultiPartStack.getActivePartStack();
+      if (editorPartStackConsumer == null) {
+        editorPartStackConsumer = editorMultiPartStack.createRootPartStack();
+      }
+
       final Map<EditorPartPresenter, EditorPartStack> activeEditors = new HashMap<>();
-      List<Promise<Void>> restore = restore(files, partStack, activeEditors);
+      List<Promise<Void>> restore = restore(files, editorPartStackConsumer, activeEditors);
       Promise<ArrayOf<?>> promise =
           promiseProvider.all2(restore.toArray(new Promise[restore.size()]));
       promise.then(
@@ -558,9 +640,16 @@ public class EditorAgentImpl
         new AsyncPromiseHelper.RequestCall<Void>() {
           @Override
           public void makeCall(final AsyncCallback<Void> callback) {
-            String path = file.getString("PATH");
+            String location = file.getString("PATH");
+            Path path = Path.valueOf(location);
+            if (isFileOpening(path, editorPartStack)) {
+              callback.onSuccess(null);
+              return;
+            }
+
+            addToOpeningFilesList(path, editorPartStack);
             resourceProvider
-                .getResource(path)
+                .getResource(location)
                 .then(
                     new Operation<java.util.Optional<VirtualFile>>() {
                       @Override
@@ -650,8 +739,14 @@ public class EditorAgentImpl
                 public void onEditorOpened(EditorPartPresenter editor) {
                   editorPartStack.addPart(editor);
 
+                  openedEditors.add(editor);
+                  removeFromOpeningFilesList(file.getLocation(), editorPartStack);
+
                   promiseCallback.onSuccess(null);
                   openEditorCallback.onEditorOpened(editor);
+                  openEditorCallback.onEditorActivated(editor);
+
+                  eventBus.fireEvent(new EditorOpenedEvent(file, editor));
                 }
 
                 @Override
@@ -659,6 +754,12 @@ public class EditorAgentImpl
                   promiseCallback.onFailure(
                       new Exception("Can not initialize editor for " + file.getLocation()));
                   openEditorCallback.onInitializationFailed();
+                  removeFromOpeningFilesList(file.getLocation(), editorPartStack);
+
+                  if (!openingEditorsPathsToStacks.containsKey(editorPartStack)
+                      && editorPartStack.getParts().isEmpty()) {
+                    editorMultiPartStack.removePartStack(editorPartStack);
+                  }
                 }
               };
 
@@ -745,7 +846,7 @@ public class EditorAgentImpl
     @Override
     public void onEditorActivated(EditorPartPresenter editor) {
       if (editor instanceof TextEditor) {
-        ((TextEditor) editor).setTopLine(topLine);
+        Scheduler.get().scheduleDeferred(() -> ((TextEditor) editor).setTopLine(topLine));
       }
     }
   }

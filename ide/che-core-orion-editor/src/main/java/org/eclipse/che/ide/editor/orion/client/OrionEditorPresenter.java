@@ -35,6 +35,7 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.validation.constraints.NotNull;
@@ -44,6 +45,7 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.actions.LinkWithEditorAction;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
@@ -98,6 +100,7 @@ import org.eclipse.che.ide.api.editor.quickfix.QuickAssistantFactory;
 import org.eclipse.che.ide.api.editor.signature.SignatureHelp;
 import org.eclipse.che.ide.api.editor.signature.SignatureHelpProvider;
 import org.eclipse.che.ide.api.editor.text.LinearRange;
+import org.eclipse.che.ide.api.editor.text.Position;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.text.TextRange;
 import org.eclipse.che.ide.api.editor.texteditor.CanWrapLines;
@@ -131,9 +134,15 @@ import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.selection.Selection;
+import org.eclipse.che.ide.api.vcs.HasVcsChangeMarkerRender;
+import org.eclipse.che.ide.api.vcs.VcsChangeMarkerRender;
+import org.eclipse.che.ide.api.vcs.VcsChangeMarkerRenderFactory;
+import org.eclipse.che.ide.editor.orion.client.jso.OrionExtRulerOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelDataOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelGroupOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelOverlay;
+import org.eclipse.che.ide.editor.orion.client.jso.OrionStyleOverlay;
+import org.eclipse.che.ide.editor.orion.client.jso.OrionTextViewOverlay;
 import org.eclipse.che.ide.editor.orion.client.menu.EditorContextMenu;
 import org.eclipse.che.ide.editor.orion.client.signature.SignatureHelpView;
 import org.eclipse.che.ide.part.editor.multipart.EditorMultiPartStackPresenter;
@@ -148,6 +157,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
     implements TextEditor,
         UndoableEditor,
         HasBreakpointRenderer,
+        HasVcsChangeMarkerRender,
         HasReadOnlyProperty,
         HandlesTextOperations,
         EditorWithAutoSave,
@@ -169,6 +179,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
   private final BreakpointManager breakpointManager;
   private final PreferencesManager preferencesManager;
   private final BreakpointRendererFactory breakpointRendererFactory;
+  private final Map<String, VcsChangeMarkerRenderFactory> vcsChangeMarkerRenderFactoryMap;
   private final DialogFactory dialogFactory;
   private final DocumentStorage documentStorage;
   private final EditorMultiPartStackPresenter editorMultiPartStackPresenter;
@@ -187,6 +198,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
   private final AutoSaveMode autoSaveMode;
   private final ClientServerEventService clientServerEventService;
   private final EditorFileStatusNotificationOperation editorFileStatusNotificationOperation;
+  private final WordDetectionUtil wordDetectionUtil;
 
   private final AnnotationRendering rendering = new AnnotationRendering();
   private HasKeyBindings keyBindingsManager;
@@ -206,6 +218,8 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
   private TextPosition cursorPosition;
   private HandlerRegistration resourceChangeHandler;
   private OrionEditorInit editorInit;
+
+  private VcsChangeMarkerRender vcsChangeMarkerRender;
 
   @Inject
   public OrionEditorPresenter(
@@ -231,12 +245,15 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
       final EditorContextMenu contextMenu,
       final AutoSaveMode autoSaveMode,
       final ClientServerEventService clientServerEventService,
-      final EditorFileStatusNotificationOperation editorFileStatusNotificationOperation) {
+      final EditorFileStatusNotificationOperation editorFileStatusNotificationOperation,
+      final WordDetectionUtil wordDetectionUtil,
+      final Map<String, VcsChangeMarkerRenderFactory> vcsChangeMarkerRenderFactoryMap) {
     this.codeAssistantFactory = codeAssistantFactory;
     this.deletedFilesController = deletedFilesController;
     this.breakpointManager = breakpointManager;
     this.preferencesManager = preferencesManager;
     this.breakpointRendererFactory = breakpointRendererFactory;
+    this.vcsChangeMarkerRenderFactoryMap = vcsChangeMarkerRenderFactoryMap;
     this.dialogFactory = dialogFactory;
     this.documentStorage = documentStorage;
     this.editorMultiPartStackPresenter = editorMultiPartStackPresenter;
@@ -255,6 +272,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
     this.autoSaveMode = autoSaveMode;
     this.clientServerEventService = clientServerEventService;
     this.editorFileStatusNotificationOperation = editorFileStatusNotificationOperation;
+    this.wordDetectionUtil = wordDetectionUtil;
 
     keyBindingsManager = new TemporaryKeyBindingsManager();
 
@@ -705,6 +723,11 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
   }
 
   @Override
+  public VcsChangeMarkerRender getVcsChangeMarkersRender() {
+    return this.vcsChangeMarkerRender;
+  }
+
+  @Override
   public Document getDocument() {
     return this.document;
   }
@@ -780,6 +803,11 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
       this.updateActions = new ArrayList<>();
     }
     this.updateActions.add(action);
+  }
+
+  @Override
+  public Position getWordAtOffset(int offset) {
+    return wordDetectionUtil.getWordAtOffset(getDocument(), offset);
   }
 
   @Override
@@ -1123,7 +1151,11 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
               setupFileContentUpdateHandler();
 
               isInitialized = true;
-              openEditorCallback.onEditorOpened(OrionEditorPresenter.this);
+              initializeChangeMarkersRender()
+                  .then(
+                      arg -> {
+                        openEditorCallback.onEditorOpened(OrionEditorPresenter.this);
+                      });
             }
           });
 
@@ -1147,6 +1179,46 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
                             updateDirtyState(true);
                           }));
     }
+  }
+
+  private Promise<Void> initializeChangeMarkersRender() {
+    OrionTextViewOverlay textView = editorWidget.getTextView();
+    List<OrionExtRulerOverlay> rulers = Arrays.asList(textView.getRulers());
+
+    OrionStyleOverlay style = OrionStyleOverlay.create();
+    style.setStyleClass("ruler vcs");
+
+    return Promises.create(
+        (resolve, reject) ->
+            OrionExtRulerOverlay.create(
+                editorWidget.getEditor().getAnnotationModel(),
+                style,
+                OrionExtRulerOverlay.RulerLocation.LEFT.getLocation(),
+                OrionExtRulerOverlay.RulerOverview.PAGE.getOverview(),
+                orionExtRulerOverlay -> {
+                  int rulerPosition;
+                  for (rulerPosition = 0; rulerPosition < rulers.size() - 1; rulerPosition++) {
+                    String rulerStyleClass = rulers.get(rulerPosition).getStyle().getStyleClass();
+
+                    if ("ruler lines".equals(rulerStyleClass)) {
+                      break;
+                    }
+                  }
+
+                  textView.addRuler(orionExtRulerOverlay, rulerPosition + 1);
+                  OrionVcsChangeMarkersRuler orionVcsChangeMarkersRuler =
+                      new OrionVcsChangeMarkersRuler(
+                          orionExtRulerOverlay, editorWidget.getEditor());
+
+                  String vcsName = appContext.getRootProject().getAttribute("vcs.provider.name");
+                  VcsChangeMarkerRenderFactory vcsChangeMarkerRenderFactory =
+                      vcsChangeMarkerRenderFactoryMap.get(vcsName);
+                  if (vcsChangeMarkerRenderFactory != null) {
+                    this.vcsChangeMarkerRender =
+                        vcsChangeMarkerRenderFactory.create(orionVcsChangeMarkersRuler);
+                  }
+                  resolve.apply(null);
+                }));
   }
 
   @Override

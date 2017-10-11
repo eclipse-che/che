@@ -28,7 +28,7 @@ export class CheWebsocket {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor ($websocket, $location, $interval : ng.IIntervalService, proxySettings : string, userDashboardConfig) {
+  constructor ($websocket, $location, $interval : ng.IIntervalService, proxySettings : string, userDashboardConfig, keycloakAuth: any) {
 
     this.$websocket = $websocket;
     this.$interval = $interval;
@@ -50,7 +50,8 @@ export class CheWebsocket {
 
       wsUrl = wsProtocol + '://' + $location.host() + ':' + $location.port() + '/api/ws';
     }
-    this.wsBaseUrl = wsUrl;
+    let keycloakToken = keycloakAuth.isPresent ? '?token=' + keycloakAuth.keycloak.token : '';
+    this.wsBaseUrl = wsUrl + keycloakToken;
     this.bus = null;
     this.remoteBus = null;
   }

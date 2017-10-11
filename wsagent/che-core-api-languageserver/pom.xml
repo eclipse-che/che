@@ -86,6 +86,10 @@
             <artifactId>org.eclipse.lsp4j.jsonrpc</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.text</groupId>
+            <artifactId>org.eclipse.text</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>

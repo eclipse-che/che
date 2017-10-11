@@ -10,15 +10,24 @@
  */
 package org.eclipse.che.api.languageserver.service;
 
+import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.isStartWithProject;
+import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.prefixProject;
 import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.prefixURI;
 import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.removePrefixUri;
+import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.removeUriScheme;
 
 import com.google.inject.Singleton;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -40,12 +49,20 @@ import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.ExtendedComp
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.ExtendedCompletionListDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.HoverDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.LocationDto;
+import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.RenameResultDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.SignatureHelpDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.SymbolInformationDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.TextEditDto;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
+import org.eclipse.che.api.languageserver.shared.model.ExtendedTextDocumentEdit;
+import org.eclipse.che.api.languageserver.shared.model.ExtendedTextEdit;
+import org.eclipse.che.api.languageserver.shared.model.ExtendedWorkspaceEdit;
+import org.eclipse.che.api.languageserver.shared.model.RenameResult;
 import org.eclipse.che.api.languageserver.util.LSOperation;
 import org.eclipse.che.api.languageserver.util.OperationUtil;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.lsp4j.CodeActionParams;
 import org.eclipse.lsp4j.Command;
 import org.eclipse.lsp4j.CompletionItem;
@@ -62,10 +79,15 @@ import org.eclipse.lsp4j.DocumentSymbolParams;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.ReferenceParams;
+import org.eclipse.lsp4j.RenameParams;
 import org.eclipse.lsp4j.SignatureHelp;
 import org.eclipse.lsp4j.SymbolInformation;
+import org.eclipse.lsp4j.TextDocumentEdit;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextDocumentPositionParams;
+import org.eclipse.lsp4j.TextEdit;
+import org.eclipse.lsp4j.VersionedTextDocumentIdentifier;
+import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -133,6 +155,8 @@ public class TextDocumentService {
         TextDocumentPositionParams.class,
         SignatureHelpDto.class,
         this::signatureHelp);
+
+    dtoToDto("rename", RenameParams.class, RenameResultDto.class, this::rename);
 
     dtoToNothing("didChange", DidChangeTextDocumentParams.class, this::didChange);
     dtoToNothing("didClose", DidCloseTextDocumentParams.class, this::didClose);
@@ -774,6 +798,115 @@ public class TextDocumentService {
     } catch (LanguageServerException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }
+  }
+
+  private RenameResultDto rename(RenameParams renameParams) {
+    String uri = prefixURI(renameParams.getTextDocument().getUri());
+    renameParams.getTextDocument().setUri(uri);
+    Map<String, ExtendedWorkspaceEdit> edits = new ConcurrentHashMap<>();
+    try {
+      List<InitializedLanguageServer> servers =
+          languageServerRegistry
+              .getApplicableLanguageServers(uri)
+              .stream()
+              .flatMap(Collection::stream)
+              .collect(Collectors.toList());
+      LSOperation<InitializedLanguageServer, WorkspaceEdit> op =
+          new LSOperation<InitializedLanguageServer, WorkspaceEdit>() {
+            @Override
+            public boolean canDo(InitializedLanguageServer server) {
+              Boolean renameProvider =
+                  server.getInitializeResult().getCapabilities().getRenameProvider();
+              return renameProvider != null && renameProvider;
+            }
+
+            @Override
+            public CompletableFuture<WorkspaceEdit> start(InitializedLanguageServer element) {
+              return element.getServer().getTextDocumentService().rename(renameParams);
+            }
+
+            @Override
+            public boolean handleResult(InitializedLanguageServer element, WorkspaceEdit result) {
+
+              addRenameResult(edits, element.getLauncher().getDescription().getId(), result);
+              return true;
+            }
+          };
+      OperationUtil.doInParallel(servers, op, TimeUnit.SECONDS.toMillis(30));
+    } catch (LanguageServerException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
+    return new RenameResultDto(new RenameResult(edits));
+  }
+
+  private void addRenameResult(
+      Map<String, ExtendedWorkspaceEdit> map, String id, WorkspaceEdit workspaceEdit) {
+
+    ExtendedWorkspaceEdit result = new ExtendedWorkspaceEdit();
+    List<ExtendedTextDocumentEdit> edits = new ArrayList<>();
+    if (workspaceEdit.getDocumentChanges() != null) {
+      for (TextDocumentEdit documentEdit : workspaceEdit.getDocumentChanges()) {
+        ExtendedTextDocumentEdit edit = new ExtendedTextDocumentEdit();
+        edit.setTextDocument(documentEdit.getTextDocument());
+        edit.getTextDocument().setUri(removePrefixUri(edit.getTextDocument().getUri()));
+        edit.setEdits(
+            convertToExtendedEdit(
+                documentEdit.getEdits(), removeUriScheme(documentEdit.getTextDocument().getUri())));
+        edits.add(edit);
+      }
+    } else if (workspaceEdit.getChanges() != null) {
+      for (Entry<String, List<TextEdit>> entry : workspaceEdit.getChanges().entrySet()) {
+        ExtendedTextDocumentEdit edit = new ExtendedTextDocumentEdit();
+        VersionedTextDocumentIdentifier documentIdentifier = new VersionedTextDocumentIdentifier();
+        documentIdentifier.setVersion(-1);
+        documentIdentifier.setUri(removePrefixUri(entry.getKey()));
+        edit.setTextDocument(documentIdentifier);
+        edit.setEdits(convertToExtendedEdit(entry.getValue(), removeUriScheme(entry.getKey())));
+        edits.add(edit);
+      }
+    }
+
+    if (!edits.isEmpty()) {
+      result.setDocumentChanges(edits);
+      map.put(id, result);
+    }
+  }
+
+  private List<ExtendedTextEdit> convertToExtendedEdit(List<TextEdit> edits, String filePath) {
+    try {
+      // for some reason C# LS sends ws related path,
+      if (!isStartWithProject(filePath)) {
+        filePath = prefixProject(filePath);
+      }
+      String fileContent =
+          com.google.common.io.Files.toString(new File(filePath), Charset.defaultCharset());
+      Document document = new Document(fileContent);
+      return edits
+          .stream()
+          .map(
+              textEdit -> {
+                ExtendedTextEdit result = new ExtendedTextEdit();
+                result.setRange(textEdit.getRange());
+                result.setNewText(textEdit.getNewText());
+                try {
+                  IRegion lineInformation =
+                      document.getLineInformation(textEdit.getRange().getStart().getLine());
+                  String lineText =
+                      document.get(lineInformation.getOffset(), lineInformation.getLength());
+                  result.setLineText(lineText);
+                  result.setInLineStart(textEdit.getRange().getStart().getCharacter());
+                  result.setInLineEnd(textEdit.getRange().getEnd().getCharacter());
+                } catch (BadLocationException e) {
+                  LOG.error("Can't read file line", e);
+                }
+
+                return result;
+              })
+          .collect(Collectors.toList());
+    } catch (IOException e) {
+      LOG.error("Can't read file", e);
+    }
+    return Collections.emptyList();
   }
 
   private <P> void dtoToNothing(String name, Class<P> pClass, Consumer<P> consumer) {

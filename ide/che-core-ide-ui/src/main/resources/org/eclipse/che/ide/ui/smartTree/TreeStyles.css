@@ -8,6 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
+@external .selected;
 @eval projectExplorerJointContainerFill org.eclipse.che.ide.api.theme.Style.theme.projectExplorerJointContainerFill();
 @eval projectExplorerJointContainerShadow org.eclipse.che.ide.api.theme.Style.theme.projectExplorerJointContainerShadow();
 @eval projectExplorerPresentableTextShadow org.eclipse.che.ide.api.theme.Style.theme.projectExplorerPresentableTextShadow();

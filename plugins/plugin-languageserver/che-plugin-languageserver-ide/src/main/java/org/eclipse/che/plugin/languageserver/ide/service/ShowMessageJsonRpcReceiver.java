@@ -10,11 +10,14 @@
  */
 package org.eclipse.che.plugin.languageserver.ide.service;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.plugin.languageserver.ide.window.ShowMessageProcessor;
 import org.eclipse.che.plugin.languageserver.ide.window.ShowMessageRequestProcessor;
 import org.eclipse.lsp4j.MessageActionItem;
@@ -23,6 +26,23 @@ import org.eclipse.lsp4j.ShowMessageRequestParams;
 /** Subscribes and receives JSON-RPC messages related to 'window/showMessage' events */
 @Singleton
 public class ShowMessageJsonRpcReceiver {
+
+  @Inject
+  public ShowMessageJsonRpcReceiver(RequestTransmitter transmitter, EventBus eventBus) {
+    eventBus.addHandler(
+        WsAgentStateEvent.TYPE,
+        new WsAgentStateHandler() {
+          @Override
+          public void onWsAgentStarted(WsAgentStateEvent event) {
+            subscribe(transmitter);
+            subscribeShowMessageRequest(transmitter);
+          }
+
+          @Override
+          public void onWsAgentStopped(WsAgentStateEvent event) {}
+        });
+  }
+
   @Inject
   private void configureReceiver(
       Provider<ShowMessageProcessor> provider, RequestHandlerConfigurator configurator) {
@@ -34,7 +54,6 @@ public class ShowMessageJsonRpcReceiver {
         .withConsumer(params -> provider.get().processNotification(params));
   }
 
-  @Inject
   private void subscribe(RequestTransmitter transmitter) {
     transmitter
         .newRequest()
@@ -55,7 +74,6 @@ public class ShowMessageJsonRpcReceiver {
         .withPromise(params -> provider.get().processNotificationRequest(params));
   }
 
-  @Inject
   private void subscribeShowMessageRequest(RequestTransmitter transmitter) {
     transmitter
         .newRequest()

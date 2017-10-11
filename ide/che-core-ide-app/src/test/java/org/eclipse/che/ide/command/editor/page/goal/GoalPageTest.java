@@ -17,6 +17,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -91,6 +92,44 @@ public class GoalPageTest {
     page.onGoalChanged("test");
 
     verify(dirtyStateListener, times(2)).onDirtyStateChanged();
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  public void shouldSetDefaultGoalIfInitialIsNull() throws Exception {
+    reset(goalRegistry);
+    reset(view);
+
+    String defaultGoalId = "Common";
+    CommandGoal defaultGoal = mock(CommandGoal.class);
+    when(goalRegistry.getDefaultGoal()).thenReturn(defaultGoal);
+    when(defaultGoal.getId()).thenReturn(defaultGoalId);
+    when(editedCommand.getGoal()).thenReturn(null);
+
+    page.initialize();
+
+    verify(goalRegistry).getAllGoals();
+    verify(view).setAvailableGoals(anySet());
+    verify(view).setGoal(defaultGoalId);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  public void shouldSetDefaultGoalIfInitialIsEmpty() throws Exception {
+    reset(goalRegistry);
+    reset(view);
+
+    String defaultGoalId = "Common";
+    CommandGoal defaultGoal = mock(CommandGoal.class);
+    when(goalRegistry.getDefaultGoal()).thenReturn(defaultGoal);
+    when(defaultGoal.getId()).thenReturn(defaultGoalId);
+    when(editedCommand.getGoal()).thenReturn("");
+
+    page.initialize();
+
+    verify(goalRegistry).getAllGoals();
+    verify(view).setAvailableGoals(anySet());
+    verify(view).setGoal(defaultGoalId);
   }
 
   @Test

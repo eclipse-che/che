@@ -18,6 +18,7 @@ import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionList;
+import org.eclipse.che.api.languageserver.shared.model.RenameResult;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
@@ -36,6 +37,7 @@ import org.eclipse.lsp4j.DocumentSymbolParams;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.ReferenceParams;
+import org.eclipse.lsp4j.RenameParams;
 import org.eclipse.lsp4j.SignatureHelp;
 import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.TextDocumentPositionParams;
@@ -208,6 +210,15 @@ public class TextDocumentServiceClient {
   public Promise<List<DocumentHighlight>> documentHighlight(TextDocumentPositionParams params) {
     return transmitDtoAndReceiveDtoList(
         params, "textDocument/documentHighlight", DocumentHighlight.class);
+  }
+  /**
+   * GWT client implementation of {@link TextDocumentService#rename(RenameParams)}
+   *
+   * @param params
+   * @return a {@link Promise} of a rename result object which contains all workspace edits.
+   */
+  public Promise<RenameResult> rename(RenameParams params) {
+    return transmitDtoAndReceiveDto(params, "textDocument/rename", RenameResult.class);
   }
 
   public Promise<List<Command>> codeAction(CodeActionParams params) {

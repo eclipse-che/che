@@ -58,9 +58,10 @@ public class TestProjectServiceClient {
     InputStream in = getClass().getResourceAsStream("/templates/project/" + template);
     String json = IoUtil.readAndCloseQuietly(in);
 
-    String url = getWsAgentUrl(workspaceId);
     ProjectConfigDto project = getInstance().createDtoFromJson(json, ProjectConfigDto.class);
+    project.setName(projectName);
 
+    String url = getWsAgentUrl(workspaceId);
     requestFactory
         .fromUrl(url + "/" + projectName)
         .usePutMethod()

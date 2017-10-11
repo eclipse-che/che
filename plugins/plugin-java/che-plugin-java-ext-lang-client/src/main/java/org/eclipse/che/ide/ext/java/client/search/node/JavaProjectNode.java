@@ -26,6 +26,7 @@ import org.eclipse.che.ide.ext.java.shared.dto.model.PackageFragment;
 import org.eclipse.che.ide.ext.java.shared.dto.model.PackageFragmentRoot;
 import org.eclipse.che.ide.ext.java.shared.dto.search.Match;
 import org.eclipse.che.ide.project.shared.NodesResources;
+import org.eclipse.che.ide.ui.smartTree.presentation.AbstractPresentationNode;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 
 /** @author Evgen Vidolob */

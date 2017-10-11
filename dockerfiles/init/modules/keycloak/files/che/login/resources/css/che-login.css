@@ -1,0 +1,253 @@
+
+@import url('https://fonts.googleapis.com/css?family=Roboto');
+
+body {
+    background-color: #1b2b57;
+    color: #4a90e2;
+    font-family: 'Roboto';
+    font-size: 14px;
+}
+
+a {
+    color: #fff;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+div#kc-content {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    width: 400px;
+    margin-left: -225px;
+}
+
+div#kc-form {
+    float: left;
+    width: 400px;
+}
+
+div#kc-form label {
+    display: block;
+    font-family: 'Roboto';
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+div#info-area {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    margin-top: 40px;
+    background-color: rgba(0, 0, 0, 0.4);
+    padding: 20px;
+    width: 100%;
+}
+
+div#info-area p {
+    margin-right: 30px;
+    display: inline;
+    text-shadow: none;
+}
+
+input {
+    font-family: 'Roboto';
+}
+
+input[type=text], input[type=password] {
+    width: 375px;
+    height: 46px;
+    margin: 0 0 10px 0;
+    border-radius: 5px;
+    padding-left: 21px;
+    color: #fff;
+    background: #2d407d;
+    font-size: 16px;
+    font-size: 18px;
+    vertical-align: middle;
+    border: none;
+}
+
+input[type=text]:focus, input[type=password]:focus {
+    background: #3f55ae;
+    outline: none;
+}
+
+input[type=submit] {
+    border: none;
+    width: 180px;
+    height: 40px;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    background: #44a73b;
+    cursor: pointer;
+
+    padding: 10px;
+    margin-top: 20px;
+    margin-right: 10px;
+    margin-bottom: 25px;
+}
+
+input[type=submit]:hover {
+    background-color: #398842;
+}
+
+div#kc-form-options div {
+    display: inline-block;
+    margin-right: 20px;
+    font-size: 12px;
+}
+
+div#kc-form-options a {
+    font-size: 14px;
+    font-family: 'Roboto';
+}
+
+div#kc-form-options div label {
+    font-size: 14px;
+}
+
+div#kc-feedback {
+    box-shadow: 0px 0px 6px rgba(0,0,0,0.5);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+}
+
+.kc-feedback-text {
+    color: #fff;
+    font-size: 18px;
+    text-align: left;
+    display: block;
+    margin-bottom: 25px;
+    padding: 15px;
+}
+
+div#kc-feedback-wrapper {
+    padding: 1em;
+}
+
+div.feedback-success {
+    background-color: rgba(155,155,255,0.1);
+}
+
+div.feedback-warning {
+    background-color: rgba(255,175,0,0.1);
+}
+
+div.feedback-error {
+    background-color: rgba(255,0,0,0.1);
+}
+
+.alert {
+    border-radius: 5px;
+}
+
+.alert-success {
+    background-color: #44a73b;
+}
+
+.alert-warning {
+    background-color: #8c9837;
+}
+
+.alert-error {
+    background-color: #d7342d;
+}
+
+
+div#kc-error-message {
+    color: #fff;
+    background-color: #d7342d;
+    border-radius: 5px;
+    text-align: center;
+    display: inline-block;
+    font-size: 16px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+div#kc-header {
+    display: none;
+}
+
+div#kc-registration {
+    font-size: 20px;
+    margin-bottom: 20px;
+}
+
+div#social-login {
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+    float: right;
+    width: 150px;
+    padding: 20px 0 200px 40px;
+}
+
+div.social-login span {
+    display: none;
+}
+
+div#kc-social-providers ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+div#kc-social-providers ul li {
+    margin-bottom: 20px;
+}
+
+div#kc-social-providers ul li span {
+    display: inline;
+    width: 100px;
+}
+
+a.zocial {
+    border: none;
+    padding-top: 0.2em;
+    padding-bottom: 0.2em;
+}
+
+#zocial-image-github {
+    width: 48px;
+    height: 48px;
+    background-size: cover;
+    background-image: url("../img/logo-github@3x.png");
+}
+
+#zocial-image-github:hover {
+    background-image: url("../img/logo-github-hover@3x.png");
+}
+
+#logo-banner {
+    color: #fff;
+    font-weight: bold;
+    font-size: 36px;
+    display: inline-block;
+    margin-bottom: 25px;
+}
+
+#logo-banner #che-logo {
+    width: 64px;
+    height: 64px;
+    vertical-align: middle;
+}
+
+#logo-banner span {
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 10px;
+}
+
+.kc-form-title {
+    font-family: 'Roboto';
+    font-size: 20px;
+    margin-bottom: 10px;
+}

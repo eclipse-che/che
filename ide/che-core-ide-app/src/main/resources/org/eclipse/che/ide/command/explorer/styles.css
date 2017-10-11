@@ -50,22 +50,26 @@
     overflow: hidden;
 }
 
-div.commandNode[selected] {
+div.commandNode[selected],
+div.commandNode[class~=selected] {
     background: categorySelectElementBackgroundColor;
     color: categorySelectElementColor;
 }
 
-div.commandNode[selected] .commandNodeButtonsPanel {
+div.commandNode[selected] .commandNodeButtonsPanel,
+div.commandNode[class~=selected] .commandNodeButtonsPanel {
     display: inline;
 }
 
-div.commandNode[selected] .commandNodeButtonsPanel svg {
+div.commandNode[selected] .commandNodeButtonsPanel svg,
+div.commandNode[class~=selected] .commandNodeButtonsPanel svg {
     opacity: 1;
     fill: categoryElementButtonColor;
     stroke: categoryElementButtonColor;
 }
 
-div.commandNode[selected] .commandNodeButtonsPanel span:hover > svg {
+div.commandNode[selected] .commandNodeButtonsPanel span:hover > svg,
+div.commandNode[class~=selected] .commandNodeButtonsPanel span:hover > svg {
     fill: categoryElementButtonHoverColor;
     stroke: categoryElementButtonHoverColor;
 }

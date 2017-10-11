@@ -113,7 +113,6 @@ public final class KubernetesStringUtils {
             .replaceAll("che_.*", "")
             .replaceAll("_", "");
 
-    name = "che-ws-" + name;
     return getNormalizedString(name);
   }
 

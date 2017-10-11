@@ -16,12 +16,14 @@ import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.BranchListMode;
 import org.eclipse.che.api.git.shared.CheckoutRequest;
 import org.eclipse.che.api.git.shared.DiffType;
+import org.eclipse.che.api.git.shared.EditedRegion;
 import org.eclipse.che.api.git.shared.LogResponse;
 import org.eclipse.che.api.git.shared.MergeResult;
 import org.eclipse.che.api.git.shared.PullResponse;
 import org.eclipse.che.api.git.shared.PushResponse;
 import org.eclipse.che.api.git.shared.Remote;
 import org.eclipse.che.api.git.shared.ResetRequest.ResetType;
+import org.eclipse.che.api.git.shared.RevertResult;
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.api.git.shared.ShowFileContentResponse;
 import org.eclipse.che.api.git.shared.Status;
@@ -286,6 +288,14 @@ public interface GitServiceClient {
       boolean cached);
 
   /**
+   * Get list of edited regions (insertions, modifications, removals) of the file.
+   *
+   * @param project project (root of GIT repository)
+   * @param filePath path to the file
+   */
+  Promise<List<EditedRegion>> getEditedRegions(Path project, Path filePath);
+
+  /**
    * Get the file content from specified revision or branch.
    *
    * @param project project configuration of root GIT repository
@@ -366,4 +376,12 @@ public interface GitServiceClient {
    * @return the promise with success status
    */
   Promise<Void> deleteRepository(Path project);
+
+  /**
+   * Revert the specified commit
+   *
+   * @param project project (root of GIT repository)
+   * @param commit commit to revert
+   */
+  Promise<RevertResult> revert(Path project, String commit);
 }

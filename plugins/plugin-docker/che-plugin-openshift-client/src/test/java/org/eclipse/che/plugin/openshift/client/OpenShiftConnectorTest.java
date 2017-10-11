@@ -17,6 +17,7 @@ import static org.testng.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Set;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.plugin.docker.client.DockerApiVersionPathPrefixProvider;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
@@ -116,5 +117,19 @@ public class OpenShiftConnectorTest {
     Map<String, String> map = openShiftConnector.getLabels(containerConfig, imageConfig);
     assertNotNull(map);
     assertEquals(map.size(), 0);
+  }
+
+  /** Check that we return empty ports if no export ports and not a NPE */
+  @Test
+  public void checkWithNoExposedPorts() {
+    ContainerConfig containerConfig = Mockito.mock(ContainerConfig.class);
+    when(containerConfig.getExposedPorts()).thenReturn(null);
+
+    ImageConfig imageConfig = Mockito.mock(ImageConfig.class);
+    when(imageConfig.getExposedPorts()).thenReturn(null);
+
+    Set<String> mapPorts = openShiftConnector.getExposedPorts(containerConfig, imageConfig);
+    assertNotNull(mapPorts);
+    assertEquals(mapPorts.size(), 0);
   }
 }

@@ -14,20 +14,17 @@
  * Defines a directive for displaying iframe for displaying the IDE.
  * @author Florent Benoit
  */
-class IdeIframe {
+class IdeIframe  implements ng.IDirective {
+  restrict: string;
+  templateUrl: string;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
   constructor () {
-    this.restrict='E';
+    this.restrict = 'E';
     this.templateUrl = 'app/ide/ide-iframe/ide-iframe.html';
-
-
-    this.controller = 'IdeIFrameCtrl';
-    this.controllerAs = 'ideIFrameCtrl';
-    this.bindToController = true;
   }
 
 }
