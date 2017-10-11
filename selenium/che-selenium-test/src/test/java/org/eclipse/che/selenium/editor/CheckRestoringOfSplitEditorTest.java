@@ -127,6 +127,7 @@ public class CheckRestoringOfSplitEditorTest {
     editor.runActionForTabFromContextMenu(CodenvyEditor.TabAction.SPIT_HORISONTALLY);
     editor.selectTabByIndexEditorWindowAndOpenMenu(0, nameOfTabJavaClass);
     editor.runActionForTabFromContextMenu(CodenvyEditor.TabAction.SPLIT_VERTICALLY);
+    loader.waitOnClosed();
     editor.selectTabByIndexEditorWindow(1, nameOfTabJavaClass);
     projectExplorer.openItemByPath(PROJECT_NAME + "/" + nameReadmeFile);
     editor.selectTabByIndexEditorWindow(2, nameOfTabJavaClass);
