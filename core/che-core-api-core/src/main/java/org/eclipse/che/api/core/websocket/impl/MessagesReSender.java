@@ -18,6 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.websocket.Session;
+import org.eclipse.che.commons.schedule.ScheduleDelay;
 import org.eclipse.che.commons.schedule.ScheduleRate;
 
 /**
@@ -42,7 +43,7 @@ public class MessagesReSender {
     this.registry = registry;
   }
 
-  @ScheduleRate(period = 60)
+  @ScheduleDelay(initialDelay = 60, delay = 60)
   void cleanStaleMessages() {
     long currentTimeMillis = System.currentTimeMillis();
 
