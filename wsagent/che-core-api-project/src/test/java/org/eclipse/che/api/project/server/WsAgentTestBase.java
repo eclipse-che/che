@@ -34,7 +34,6 @@ import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
-import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
@@ -62,8 +61,6 @@ public class WsAgentTestBase {
   protected WorkspaceSyncCommunication workspaceSyncCommunication;
 
   protected FileWatcherNotificationHandler fileWatcherNotificationHandler;
-
-  protected FileTreeWatcher fileTreeWatcher;
 
   protected ProjectTypeRegistry projectTypeRegistry;
 
@@ -116,7 +113,6 @@ public class WsAgentTestBase {
     this.importerRegistry = new ProjectImporterRegistry(new HashSet<>());
 
     fileWatcherNotificationHandler = new DefaultFileWatcherNotificationHandler(vfsProvider);
-    fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
     fileWatcherManager = mock(FileWatcherManager.class);
     workspaceSyncCommunication = mock(WorkspaceSyncCommunication.class);
     TestWorkspaceHolder wsHolder = new TestWorkspaceHolder();
@@ -130,7 +126,6 @@ public class WsAgentTestBase {
             projectHandlerRegistry,
             importerRegistry,
             fileWatcherNotificationHandler,
-            fileTreeWatcher,
             wsHolder,
             fileWatcherManager);
     pm.initWatcher();
