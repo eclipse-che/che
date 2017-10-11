@@ -93,7 +93,7 @@ describe('CheSvn', function () {
     cheBackend.setup();
 
     workspace.fetchWorkspaceDetails(workspaceId);
-    httpBackend.expectGET('/api/workspace/' + workspaceId);
+    httpBackend.expectGET('/wsmaster/api/workspace/' + workspaceId);
 
     // flush command
     httpBackend.flush();

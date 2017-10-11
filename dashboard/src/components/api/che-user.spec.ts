@@ -83,7 +83,7 @@ describe('CheUser', () => {
       factory.fetchUser(true);
 
       // expecting GETs
-      httpBackend.expectGET('/api/user');
+      httpBackend.expectGET('/wsmaster/api/user');
 
       // flush command
       httpBackend.flush();
@@ -118,7 +118,7 @@ describe('CheUser', () => {
       factory.fetchUserId(userId);
 
       // expecting GETs
-      httpBackend.expectGET('/api/user/' + userId);
+      httpBackend.expectGET('/wsmaster/api/user/' + userId);
 
       // flush command
       httpBackend.flush();
@@ -153,7 +153,7 @@ describe('CheUser', () => {
       factory.fetchUserByAlias(email);
 
       // expecting GETs
-      httpBackend.expectGET('/api/user/find?email=' + email);
+      httpBackend.expectGET('/wsmaster/api/user/find?email=' + email);
 
       // flush command
       httpBackend.flush();
@@ -181,7 +181,7 @@ describe('CheUser', () => {
       factory.setPassword(testPassword);
 
       // expecting a POST
-      httpBackend.expectPOST('/api/user/password', 'password=' + testPassword);
+      httpBackend.expectPOST('/wsmaster/api/user/password', 'password=' + testPassword);
 
       // flush command
       httpBackend.flush();
@@ -205,7 +205,7 @@ describe('CheUser', () => {
       factory.createUser(user.name, user.email, user.password);
 
       // expecting a POST
-      httpBackend.expectPOST('/api/user', user);
+      httpBackend.expectPOST('/wsmaster/api/user', user);
 
       // flush command
       httpBackend.flush();

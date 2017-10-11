@@ -52,30 +52,30 @@ export class CheUser {
     this.$cookies = $cookies;
 
     // remote call
-    this.remoteUserAPI = <IUsersResource<any>> this.$resource('/api/user', {}, {
-      findByID: {method: 'GET', url: '/api/user/:userId'},
-      findByAlias: {method: 'GET', url: '/api/user/find?email=:alias'},
-      findByName: {method: 'GET', url: '/api/user/find?name=:name'},
+    this.remoteUserAPI = <IUsersResource<any>> this.$resource('/wsmaster/api/user', {}, {
+      findByID: {method: 'GET', url: '/wsmaster/api/user/:userId'},
+      findByAlias: {method: 'GET', url: '/wsmaster/api/user/find?email=:alias'},
+      findByName: {method: 'GET', url: '/wsmaster/api/user/find?name=:name'},
       setPassword: {
-        method: 'POST', url: '/api/user/password', isArray: false,
+        method: 'POST', url: '/wsmaster/api/user/password', isArray: false,
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
         }
       },
-      createUser: {method: 'POST', url: '/api/user'},
+      createUser: {method: 'POST', url: '/wsmaster/api/user'},
       getUsers: {
         method: 'GET',
-        url: '/api/admin/user?maxItems=:maxItems&skipCount=:skipCount',
+        url: '/wsmaster/api/admin/user?maxItems=:maxItems&skipCount=:skipCount',
         isArray: false,
         responseType: 'json',
         transformResponse: (data: any, headersGetter: any) => {
           return this._getPageFromResponse(data, headersGetter('link'));
         }
       },
-      removeUserById: {method: 'DELETE', url: '/api/user/:userId'}
+      removeUserById: {method: 'DELETE', url: '/wsmaster/api/user/:userId'}
     });
 
-    this.logoutAPI = this.$resource('/api/auth/logout', {});
+    this.logoutAPI = this.$resource('/wsmaster/api/auth/logout', {});
 
     // users by ID
     this.userIdMap = new Map();

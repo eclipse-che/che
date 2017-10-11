@@ -40,7 +40,7 @@ export class CheProjectTemplate {
     this.templates = [];
 
     // remote call
-    this.remoteProjectTemplateAPI = <ng.resource.IResourceClass<any>> this.$resource('/api/project-template/all');
+    this.remoteProjectTemplateAPI = <ng.resource.IResourceClass<any>> this.$resource('/wsmaster/api/project-template/all');
   }
 
 

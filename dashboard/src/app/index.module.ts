@@ -93,7 +93,7 @@ const keycloakAuth = {
 initModule.constant('keycloakAuth', keycloakAuth);
 
 const promise = new Promise((resolve: IResolveFn<any>, reject: IRejectFn<any>) => {
-  angular.element.get('/api/keycloak/settings').then(resolve, reject);
+  angular.element.get('/wsmaster/api/keycloak/settings').then(resolve, reject);
 });
 promise.then((keycloakSettings: any) => {
   keycloakAuth.config = buildKeycloakConfig(keycloakSettings);

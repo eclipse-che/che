@@ -50,10 +50,10 @@ export class CheInvite implements che.api.ICheInvite {
 
     this.teamInvitations = new Map();
 
-    this.remoteInviteAPI = <IInviteResource<any>>this.$resource('/api/invite', {}, {
-      invite: {method: 'POST', url: '/api/invite'},
-      getInvited: {method: 'GET', url: '/api/invite/:domain?instance=:instance', isArray: true},
-      remove: {method: 'DELETE', url: '/api/invite/:domain?instance=:instance&email=:email'}
+    this.remoteInviteAPI = <IInviteResource<any>>this.$resource('/wsmaster/api/invite', {}, {
+      invite: {method: 'POST', url: '/wsmaster/api/invite'},
+      getInvited: {method: 'GET', url: '/wsmaster/api/invite/:domain?instance=:instance', isArray: true},
+      remove: {method: 'DELETE', url: '/wsmaster/api/invite/:domain?instance=:instance&email=:email'}
     });
   }
 

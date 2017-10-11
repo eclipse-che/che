@@ -92,7 +92,7 @@ describe('CheWorkspace', () => {
         expect(listener.getWorkspaces().length).toEqual(0);
 
         // expecting a GET
-        httpBackend.expectGET('/api/workspace');
+        httpBackend.expectGET('/wsmaster/api/workspace');
 
         // providing request
         // add workspaces on Http backend

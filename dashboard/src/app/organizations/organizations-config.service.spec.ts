@@ -171,7 +171,7 @@ describe('OrganizationsConfig >', () => {
       $rootScope.$digest();
 
       // make response for organizations list fail
-      $httpBackend.expect('GET', /\/api\/organization(\?.*$)?/).respond(500, [], {message: 'response failed'});
+      $httpBackend.expect('GET', /\/wsmaster\/api\/organization(\?.*$)?/).respond(500, [], {message: 'response failed'});
 
       const service = $injector.invoke(resolveBlock);
 
@@ -290,7 +290,7 @@ describe('OrganizationsConfig >', () => {
       $rootScope.$digest();
 
       // make response for organizations list fail
-      $httpBackend.expect('GET', /\/api\/organization(\?.*$)?/).respond(500, [], {message: 'response failed'});
+      $httpBackend.expect('GET', /\/wsmaster\/api\/organization(\?.*$)?/).respond(500, [], {message: 'response failed'});
 
       const service = $injector.invoke(resolveBlock);
 
@@ -382,7 +382,7 @@ describe('OrganizationsConfig >', () => {
       $rootScope.$digest();
 
       // make response for organizations list fail
-      $httpBackend.expect('GET', /\/api\/organization(\?.*$)?/).respond(500, [], {message: 'response failed'});
+      $httpBackend.expect('GET', /\/wsmaster\/api\/organization(\?.*$)?/).respond(500, [], {message: 'response failed'});
 
       const service = $injector.invoke(resolveBlock);
 

@@ -52,7 +52,7 @@ describe('WorkspaceStatusButton >', () => {
 
     httpBackend = cheHttpBackend.getHttpBackend();
     httpBackend.whenGET(/.*/).respond(200, '');
-    httpBackend.when('OPTIONS', '/api/').respond({});
+    httpBackend.when('OPTIONS', '/wsmaster/api/').respond({});
 
     $rootScope.model = {
       onStopWorkspace: angular.noop,

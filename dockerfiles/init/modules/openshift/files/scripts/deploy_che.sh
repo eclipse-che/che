@@ -378,7 +378,7 @@ MULTI_USER_REPLACEMENT_STRING="          - name: \"CHE_WORKSPACE_LOGS\"
 
 # TODO When merging the multi-user work to master, this replacement string should
 # be replaced by the corresponding change in the fabric8 deployment descriptor
-MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING="s|            path: /api/system/state|            path: /api|"
+MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING="s|            path: /wsmaster/api/system/state|            path: /wsmaster/api|"
 
 echo
 if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then

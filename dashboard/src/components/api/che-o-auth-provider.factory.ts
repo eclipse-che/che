@@ -30,7 +30,7 @@ export class CheOAuthProvider {
       return this.providersPromise;
     }
 
-    let promise = this.$http.get('/api/oauth/');
+    let promise = this.$http.get('/wsmaster/api/oauth/');
     this.providersPromise = promise.then((providers) => {
       providers.data.forEach((provider) => {
         this.providersByName.set(provider.name, provider);

@@ -26,7 +26,7 @@ export class CheRemoteRecipe {
 
     // remote call
     this.remoteRecipesAPI = this.$resource('',{}, {
-      create: {method: 'POST', url: authData.url + '/api/recipe?token=' + authData.token},
+      create: {method: 'POST', url: authData.url + '/wsmaster/api/recipe?token=' + authData.token},
     });
 
   }

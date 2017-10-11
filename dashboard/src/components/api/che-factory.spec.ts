@@ -94,12 +94,12 @@ describe('CheFactory', () => {
       factory.fetchFactories(maxItem);
 
       // expecting GETs
-      httpBackend.expectGET('/api/user');
+      httpBackend.expectGET('/wsmaster/api/user');
 
-      httpBackend.expectGET('/api/factory/find?creator.userId=' + testUser.id + '&maxItems=' + maxItem + '&skipCount=' + skipCount);
-      httpBackend.expectGET('/api/factory/' + testFactory1.id);
-      httpBackend.expectGET('/api/factory/' + testFactory2.id);
-      httpBackend.expectGET('/api/factory/' + testFactory3.id);
+      httpBackend.expectGET('/wsmaster/api/factory/find?creator.userId=' + testUser.id + '&maxItems=' + maxItem + '&skipCount=' + skipCount);
+      httpBackend.expectGET('/wsmaster/api/factory/' + testFactory1.id);
+      httpBackend.expectGET('/wsmaster/api/factory/' + testFactory2.id);
+      httpBackend.expectGET('/wsmaster/api/factory/' + testFactory3.id);
 
       // flush command
       httpBackend.flush();
@@ -143,7 +143,7 @@ describe('CheFactory', () => {
       factory.fetchFactoryById(testFactory.id);
 
       // expecting GETs
-      httpBackend.expectGET('/api/factory/' + testFactory.id);
+      httpBackend.expectGET('/wsmaster/api/factory/' + testFactory.id);
 
       // flush command
       httpBackend.flush();
@@ -176,7 +176,7 @@ describe('CheFactory', () => {
       factory.deleteFactoryById(testFactory.id);
 
       // expecting GETs
-      httpBackend.expectDELETE('/api/factory/' + testFactory.id);
+      httpBackend.expectDELETE('/wsmaster/api/factory/' + testFactory.id);
 
       // flush command
       httpBackend.flush();
@@ -191,11 +191,11 @@ describe('CheFactory', () => {
       let testFactory2 = apiBuilder.getFactoryBuilder().withId('testId2').withName('testName2').withCreatorEmail('testEmail2').build();
       let factories = [testFactory1, testFactory2];
 
-      let test_link_1 = '/api/factory/find?creator.userId=testUserId&skipCount=0&maxItems=5';
+      let test_link_1 = '/wsmaster/api/factory/find?creator.userId=testUserId&skipCount=0&maxItems=5';
       let test_rel_1 = 'first';
-      let test_link_2 = '/api/factory/find?creator.userId=testUserId&skipCount=20&maxItems=5';
+      let test_link_2 = '/wsmaster/api/factory/find?creator.userId=testUserId&skipCount=20&maxItems=5';
       let test_rel_2 = 'last';
-      let test_link_3 = '/api/factory/find?creator.userId=testUserId&skipCount=5&maxItems=5';
+      let test_link_3 = '/wsmaster/api/factory/find?creator.userId=testUserId&skipCount=5&maxItems=5';
       let test_rel_3 = 'next';
 
       let headersLink = '\<' + test_link_1 + '\>' + '; rel="' + test_rel_1 + '",' +
@@ -223,7 +223,7 @@ describe('CheFactory', () => {
   it('Gets maxItems and skipCount from link params', () => {
       let skipCount = 20;
       let maxItems = 5;
-      let test_link = '/api/factory/find?creator.userId=testUserId&skipCount=' + skipCount + '&maxItems=' + maxItems;
+      let test_link = '/wsmaster/api/factory/find?creator.userId=testUserId&skipCount=' + skipCount + '&maxItems=' + maxItems;
 
       cheBackend.factoriesBackendSetup();
 

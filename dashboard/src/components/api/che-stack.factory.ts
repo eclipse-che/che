@@ -50,12 +50,12 @@ export class CheStack {
     this.usedStackNames = [];
 
     // remote call
-    this.remoteStackAPI = <IRemoteStackAPI<any>>this.$resource('/api/stack', {}, {
-      getStacks: {method: 'GET', url: '/api/stack?maxItems=50', isArray: true}, //TODO 50 items is temp solution while paging is not added
-      getStack: {method: 'GET', url: '/api/stack/:stackId'},
-      updateStack: {method: 'PUT', url: '/api/stack/:stackId'},
-      createStack: {method: 'POST', url: '/api/stack'},
-      deleteStack: {method: 'DELETE', url: '/api/stack/:stackId'}
+    this.remoteStackAPI = <IRemoteStackAPI<any>>this.$resource('/wsmaster/api/stack', {}, {
+      getStacks: {method: 'GET', url: '/wsmaster/api/stack?maxItems=50', isArray: true}, //TODO 50 items is temp solution while paging is not added
+      getStack: {method: 'GET', url: '/wsmaster/api/stack/:stackId'},
+      updateStack: {method: 'PUT', url: '/wsmaster/api/stack/:stackId'},
+      createStack: {method: 'POST', url: '/wsmaster/api/stack'},
+      deleteStack: {method: 'DELETE', url: '/wsmaster/api/stack/:stackId'}
     });
   }
 

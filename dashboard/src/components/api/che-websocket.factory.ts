@@ -38,7 +38,7 @@ export class CheWebsocket {
 
     if (inDevMode) {
       // it handle then http and https
-      wsUrl = proxySettings.replace('http', 'ws') + '/api/ws';
+      wsUrl = proxySettings.replace('http', 'ws') + '/wsmaster/api/ws';
     } else {
 
       var wsProtocol;
@@ -48,7 +48,7 @@ export class CheWebsocket {
         wsProtocol = 'wss';
       }
 
-      wsUrl = wsProtocol + '://' + $location.host() + ':' + $location.port() + '/api/ws';
+      wsUrl = wsProtocol + '://' + $location.host() + ':' + $location.port() + '/wsmaster/api/ws';
     }
     let keycloakToken = keycloakAuth.isPresent ? '?token=' + keycloakAuth.keycloak.token : '';
     this.wsBaseUrl = wsUrl + keycloakToken;

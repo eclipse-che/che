@@ -25,7 +25,7 @@ export class CheRemoteLogin {
     this.$resource = $resource;
     this.url = url;
     this.remoteAuthAPI = this.$resource('', {}, {
-      auth: {method: 'POST', url: url + '/api/auth/login'}
+      auth: {method: 'POST', url: url + '/wsmaster/api/auth/login'}
     });
   }
 

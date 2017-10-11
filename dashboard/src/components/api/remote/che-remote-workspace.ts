@@ -42,10 +42,10 @@ export class CheRemoteWorkspace {
 
     // remote call
     this.remoteWorkspaceAPI = <IRemoteWorkspaceResource<any>>this.$resource('', {}, {
-        getDetails: {method: 'GET', url: authData.url + '/api/workspace/:workspaceId?token=' + authData.token},
-        getMachineToken: {method: 'GET', url: authData.url + '/api/machine/token/:workspaceId?token=' + authData.token},
-        create: {method: 'POST', url: authData.url + '/api/workspace?token=' + authData.token},
-        startWorkspace: {method: 'POST', url : authData.url + '/api/workspace/:workspaceId/runtime?environment=:envName&token=' + authData.token}
+        getDetails: {method: 'GET', url: authData.url + '/wsmaster/api/workspace/:workspaceId?token=' + authData.token},
+        getMachineToken: {method: 'GET', url: authData.url + '/wsmaster/api/machine/token/:workspaceId?token=' + authData.token},
+        create: {method: 'POST', url: authData.url + '/wsmaster/api/workspace?token=' + authData.token},
+        startWorkspace: {method: 'POST', url : authData.url + '/wsmaster/api/workspace/:workspaceId/runtime?environment=:envName&token=' + authData.token}
       }
     );
   }

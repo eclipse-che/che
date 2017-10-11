@@ -214,7 +214,7 @@ export class ImportGithubProjectController {
       + this.$location.port()
       + (this.$browser as any).baseHref()
       + 'gitHubCallback.html';
-    this.githubPopup.open('/api/oauth/authenticate'
+    this.githubPopup.open('/wsmaster/api/oauth/authenticate'
       + '?oauth_provider=github'
       + '&scope=' + ['user', 'repo', 'write:public_key'].join(',')
       + '&userId=' + this.importGithubProjectService.getCurrentUserId()

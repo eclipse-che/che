@@ -31,7 +31,7 @@ export class ChePreferences {
     this.$http = $http;
 
     // remote call
-    this.remotePreferencesAPI = this.$resource('/api/preferences', {}, {});
+    this.remotePreferencesAPI = this.$resource('/wsmaster/api/preferences', {}, {});
 
     //registry array
     this.registries = [];
@@ -68,7 +68,7 @@ export class ChePreferences {
     // delete method doesn't send body when it is defined in $resources
     // that's why direct $http call is used.
     this.$http({
-      url: '/api/preferences',
+      url: '/wsmaster/api/preferences',
       method: 'DELETE',
       headers: {'Content-Type': 'application/json;charset=utf-8'},
       data: properties
