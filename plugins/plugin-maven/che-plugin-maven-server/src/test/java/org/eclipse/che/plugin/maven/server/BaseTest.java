@@ -34,6 +34,7 @@ import org.eclipse.che.api.project.server.ProjectCreatedEvent;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.WorkspaceProjectsSyncer;
+import org.eclipse.che.api.project.server.WorkspaceSyncCommunication;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
@@ -154,6 +155,7 @@ public abstract class BaseTest {
         new ProjectManager(
             vfsProvider,
             projectTypeRegistry,
+            mock(WorkspaceSyncCommunication.class),
             projectRegistry,
             projectHandlerRegistry,
             importerRegistry,

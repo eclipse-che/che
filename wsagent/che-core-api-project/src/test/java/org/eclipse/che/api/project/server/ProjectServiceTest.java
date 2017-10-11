@@ -257,6 +257,7 @@ public class ProjectServiceTest {
         new ProjectManager(
             vfsProvider,
             ptRegistry,
+            mock(WorkspaceSyncCommunication.class),
             projectRegistry,
             phRegistry,
             importerRegistry,

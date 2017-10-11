@@ -58,6 +58,8 @@ public class RevealResourceEvent extends GwtEvent<RevealResourceEvent.RevealReso
   }
 
   private Path location;
+  private boolean isSelectionRequired = true;
+  private boolean isFocusRequired = true;
 
   public RevealResourceEvent(Resource resource) {
     this.location = checkNotNull(resource, "Resource should not be a null").getLocation();
@@ -68,6 +70,20 @@ public class RevealResourceEvent extends GwtEvent<RevealResourceEvent.RevealReso
   }
 
   /**
+   * Creates new event to reveal given resource.
+   *
+   * @param location the resource path which should be revealed
+   * @param isSelectionRequired whether corresponding node should be selected after reveal
+   * @param isFocusRequired whether corresponding node should be focused after reveal
+   */
+  public RevealResourceEvent(
+      Path location, boolean isSelectionRequired, final boolean isFocusRequired) {
+    this.location = checkNotNull(location, "Path should not be a null");
+    this.isSelectionRequired = isSelectionRequired;
+    this.isFocusRequired = isFocusRequired;
+  }
+
+  /**
    * Returns the resource path which should be revealed.
    *
    * @return the resource path
@@ -75,6 +91,26 @@ public class RevealResourceEvent extends GwtEvent<RevealResourceEvent.RevealReso
    */
   public Path getLocation() {
     return location;
+  }
+
+  /**
+   * Returns whether corresponding node should be selected after reveal
+   *
+   * @return {@code true} if corresponding node should be selected after reveal or {@code false}
+   *     otherwise
+   */
+  public boolean isSelectionRequired() {
+    return isSelectionRequired;
+  }
+
+  /**
+   * Returns whether corresponding node should be focused after reveal
+   *
+   * @return {@code true} if corresponding node should be focused after reveal or {@code false}
+   *     otherwise
+   */
+  public boolean isFocusRequired() {
+    return isFocusRequired;
   }
 
   /** {@inheritDoc} */

@@ -24,12 +24,7 @@ public class EnvironmentContext {
 
   /** ThreadLocal keeper for EnvironmentContext. */
   private static ThreadLocal<EnvironmentContext> current =
-      new ThreadLocal<EnvironmentContext>() {
-        @Override
-        protected EnvironmentContext initialValue() {
-          return new EnvironmentContext();
-        }
-      };
+      ThreadLocal.withInitial(EnvironmentContext::new);
 
   static {
     ThreadLocalPropagateContext.addThreadLocal(current);

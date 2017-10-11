@@ -30,7 +30,7 @@ export class CheNavBar {
     this.replace = false;
     this.templateUrl = 'app/navbar/navbar.html';
     this.controller = 'CheNavBarController';
-    this.controllerAs = 'navbarCtrl';
+    this.controllerAs = 'navbarController';
   }
 
 }

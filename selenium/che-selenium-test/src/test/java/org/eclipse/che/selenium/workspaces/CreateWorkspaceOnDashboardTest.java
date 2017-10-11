@@ -16,7 +16,7 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestStacksConstants;
 import org.eclipse.che.selenium.core.constant.TestWorkspaceConstants;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
@@ -34,7 +34,7 @@ public class CreateWorkspaceOnDashboardTest {
 
   @Inject private NavigationBar navigationBar;
   @Inject private CreateWorkspace createWorkspace;
-  @Inject private DefaultTestUser defaultTestUser;
+  @Inject private TestUser defaultTestUser;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Loader loader;
   @Inject private MachineTerminal terminal;

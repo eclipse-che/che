@@ -39,9 +39,9 @@ export class CreateStartWorkspaceAction {
     workspace: Workspace;
 
     constructor(args:Array<string>) {
-        let updatedArgs = ArgumentProcessor.inject(this, args);
+        ArgumentProcessor.inject(this, args);
 
-        this.authData = AuthData.parse(this.url, this.username, this.password);
+        this.authData = new AuthData(this.url, this.username, this.password);
         this.workspace = new Workspace(this.authData);
     }
 
@@ -58,14 +58,13 @@ export class CreateStartWorkspaceAction {
                     Log.getLogger().info('Starting workspace runtime');
                     return this.workspace.startWorkspace(workspaceDto.getId(), !this.isQuiet);
                 }).then((workspaceDto) => {
-                    var ideUrl: string;
+                    let ideUrl: string;
                     workspaceDto.getLinks().forEach((link) => {
                         if ('ide url' === link.getRel()) {
                             ideUrl = link.getHref();
+                            Log.getLogger().info(ideUrl);
                         }
                     });
-
-                    Log.getLogger().info(ideUrl);
                 });
 
         });

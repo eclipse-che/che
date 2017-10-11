@@ -23,6 +23,7 @@ import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.security.oauth.JsOAuthWindow;
 import org.eclipse.che.security.oauth.OAuthCallback;
 import org.eclipse.che.security.oauth.OAuthStatus;
+import org.eclipse.che.security.oauth.SecurityTokenProvider;
 
 /**
  * Default implementation of authenticator, used when no provider-specific one is present.
@@ -34,13 +35,18 @@ public class DefaultOAuthAuthenticatorImpl implements OAuth2Authenticator, OAuth
 
   private final DialogFactory dialogFactory;
   private final CoreLocalizationConstant localizationConstant;
+  private final SecurityTokenProvider provider;
   private String authenticationUrl;
 
   @Inject
   public DefaultOAuthAuthenticatorImpl(
-      DialogFactory dialogFactory, CoreLocalizationConstant localizationConstant) {
+      DialogFactory dialogFactory,
+      CoreLocalizationConstant localizationConstant,
+      SecurityTokenProvider provider) {
+
     this.dialogFactory = dialogFactory;
     this.localizationConstant = localizationConstant;
+    this.provider = provider;
   }
 
   @Override
@@ -96,7 +102,7 @@ public class DefaultOAuthAuthenticatorImpl implements OAuth2Authenticator, OAuth
 
   private void showAuthWindow() {
     JsOAuthWindow authWindow;
-    authWindow = new JsOAuthWindow(authenticationUrl, "error.url", 500, 980, this);
+    authWindow = new JsOAuthWindow(authenticationUrl, "error.url", 500, 980, this, provider);
     authWindow.loginWithOAuth();
   }
 }

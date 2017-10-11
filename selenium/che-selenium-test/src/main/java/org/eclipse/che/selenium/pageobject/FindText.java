@@ -12,6 +12,7 @@ package org.eclipse.che.selenium.pageobject;
 
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
+import com.google.common.base.Predicate;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
@@ -385,6 +386,25 @@ public class FindText {
   public void waitExpectedTextInFindInfoPanel(String expText) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until((WebDriver driver) -> getTextFromFindInfoPanel().contains(expText));
+  }
+
+  /**
+   * wait expected text in the 'Find' info panel
+   *
+   * @param expText list of expected values
+   */
+  public void waitExpectedTextInFindInfoPanel(List<String> expText) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            (Predicate<WebDriver>)
+                input ->
+                    expText
+                        .stream()
+                        .allMatch(
+                            t -> {
+                              String textFromFindInfoPanel = getTextFromFindInfoPanel();
+                              return textFromFindInfoPanel.contains(t);
+                            }));
   }
 
   /**

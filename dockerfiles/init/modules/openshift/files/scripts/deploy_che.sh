@@ -21,6 +21,23 @@
 
 set -e
 
+# ----------------
+# helper functions
+# ----------------
+
+# append_after_match allows to append content after matching line
+# this is needed to append content of yaml files
+# first arg is mathing string, second string to insert after match
+append_after_match() {
+    while IFS= read -r line
+    do
+      printf '%s\n' "$line"
+      if [[ "$line" == *"$1"* ]];then
+          printf '%s\n' "$2"
+      fi
+    done < /dev/stdin
+}
+
 # --------------
 # Print Che logo 
 # --------------
@@ -76,9 +93,20 @@ done
 # Set configuration common to both minishift and openshift
 # --------------------------------------------------------
 
+CHE_MULTI_USER=${CHE_MULTI_USER:-"false"}
 DEFAULT_COMMAND="deploy"
 COMMAND=${COMMAND:-${DEFAULT_COMMAND}}
-DEFAULT_CHE_IMAGE_REPO="docker.io/eclipse/che-server"
+
+if [ "${CHE_MULTI_USER}" == "true" ]; then
+  DEFAULT_CHE_KEYCLOAK_DISABLED="false"
+  CHE_DEDICATED_KEYCLOAK=${CHE_DEDICATED_KEYCLOAK:-"true"}
+  DEFAULT_CHE_IMAGE_REPO="docker.io/eclipse/che-server-multiuser"
+else
+  DEFAULT_CHE_KEYCLOAK_DISABLED="true"
+  CHE_DEDICATED_KEYCLOAK="false"
+  DEFAULT_CHE_IMAGE_REPO="docker.io/eclipse/che-server"
+fi
+
 CHE_IMAGE_REPO=${CHE_IMAGE_REPO:-${DEFAULT_CHE_IMAGE_REPO}}
 DEFAULT_CHE_IMAGE_TAG="nightly"
 CHE_IMAGE_TAG=${CHE_IMAGE_TAG:-${DEFAULT_CHE_IMAGE_TAG}}
@@ -100,6 +128,10 @@ KEYCLOAK_GITHUB_ENDPOINT=${KEYCLOAK_GITHUB_ENDPOINT:-${DEFAULT_KEYCLOAK_GITHUB_E
 DEFAULT_OPENSHIFT_FLAVOR=minishift
 OPENSHIFT_FLAVOR=${OPENSHIFT_FLAVOR:-${DEFAULT_OPENSHIFT_FLAVOR}}
 
+# TODO move this env variable as a config map in the deployment config
+# as soon as the 'che-multiuser' branch is merged to master
+CHE_WORKSPACE_LOGS="/data/logs/machine/logs" \
+CHE_HOST="${OPENSHIFT_NAMESPACE_URL}"
 
 if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
   if [ -z "${MINISHIFT_IP}" ]; then
@@ -122,7 +154,6 @@ if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
   CHE_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT:-${DEFAULT_CHE_OPENSHIFT_PROJECT}}
   DEFAULT_OPENSHIFT_NAMESPACE_URL="${CHE_OPENSHIFT_PROJECT}.${MINISHIFT_IP}.nip.io"
   OPENSHIFT_NAMESPACE_URL=${OPENSHIFT_NAMESPACE_URL:-${DEFAULT_OPENSHIFT_NAMESPACE_URL}}
-  DEFAULT_CHE_KEYCLOAK_DISABLED="true"
   CHE_KEYCLOAK_DISABLED=${CHE_KEYCLOAK_DISABLED:-${DEFAULT_CHE_KEYCLOAK_DISABLED}}
   DEFAULT_CHE_DEBUGGING_ENABLED="true"
   CHE_DEBUGGING_ENABLED=${CHE_DEBUGGING_ENABLED:-${DEFAULT_CHE_DEBUGGING_ENABLED}}
@@ -158,7 +189,6 @@ elif [ "${OPENSHIFT_FLAVOR}" == "ocp" ]; then
   # ----------------------
   DEFAULT_CHE_OPENSHIFT_PROJECT="eclipse-che"
   CHE_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT:-${DEFAULT_CHE_OPENSHIFT_PROJECT}}
-  DEFAULT_CHE_KEYCLOAK_DISABLED="true"
   CHE_KEYCLOAK_DISABLED=${CHE_KEYCLOAK_DISABLED:-${DEFAULT_CHE_KEYCLOAK_DISABLED}}
   DEFAULT_CHE_DEBUGGING_ENABLED="false"
   CHE_DEBUGGING_ENABLED=${CHE_DEBUGGING_ENABLED:-${DEFAULT_CHE_DEBUGGING_ENABLED}}
@@ -233,6 +263,54 @@ elif [ "${COMMAND}" != "deploy" ]; then
 fi
 
 # -------------------------------------------------------------
+# Deploying secondary servers
+# for postgres and optionally Keycloak
+# -------------------------------------------------------------
+
+COMMAND_DIR=$(dirname "$0")
+
+if [ "${CHE_MULTI_USER}" == "true" ]; then
+    if [ "${CHE_DEDICATED_KEYCLOAK}" == "true" ]; then
+        "${COMMAND_DIR}"/multi-user/deploy_postgres_and_keycloak.sh
+    else
+        "${COMMAND_DIR}"/multi-user/deploy_postgres_only.sh
+    fi
+
+    "${COMMAND_DIR}"/multi-user/wait_until_postgres_is_available.sh
+fi
+
+# -------------------------------------------------------------
+# Setting Keycloak-related environment variables
+# Done here since the Openshift project should be available
+# TODO Maybe this should go into a config map, but I don't know
+# How we would manage the retrieval of the Keycloak route
+# external URL.
+# -------------------------------------------------------------
+
+if [ "${CHE_DEDICATED_KEYCLOAK}" == "true" ]; then
+  CHE_KEYCLOAK_SERVER_ROUTE=$(oc get route keycloak -o jsonpath='{.spec.host}' || echo "")
+  if [ "${CHE_KEYCLOAK_SERVER_ROUTE}" == "" ]; then
+    echo "[CHE] **ERROR**: The dedicated Keycloak server should be deployed and visible through a route before starting the Che server"
+    exit 1
+  fi
+
+  CHE_POSTRES_SERVICE=$(oc get service postgres || echo "")
+  if [ "${CHE_POSTRES_SERVICE}" == "" ]; then
+    echo "[CHE] **ERROR**: The dedicated Postgres server should be started in Openshift project ${CHE_OPENSHIFT_PROJECT} before starting the Che server"
+    exit 1
+  fi
+
+  CHE_KEYCLOAK_AUTH__SERVER__URL=${CHE_KEYCLOAK_AUTH__SERVER__URL:-"http://${CHE_KEYCLOAK_SERVER_ROUTE}/auth"}
+  CHE_KEYCLOAK_REALM=${CHE_KEYCLOAK_REALM:-"che"}
+  CHE_KEYCLOAK_CLIENT__ID=${CHE_KEYCLOAK_CLIENT__ID:-"che-public"}
+else
+  CHE_KEYCLOAK_AUTH__SERVER__URL=${CHE_KEYCLOAK_AUTH__SERVER__URL:-"https://sso.openshift.io/auth"}
+  CHE_KEYCLOAK_REALM=${CHE_KEYCLOAK_REALM:-"fabric8"}
+  CHE_KEYCLOAK_CLIENT__ID=${CHE_KEYCLOAK_CLIENT__ID:-"openshiftio-public"}
+fi
+
+
+# -------------------------------------------------------------
 # Verify that Che ServiceAccount has admin rights at project level
 # -------------------------------------------------------------
 ## TODO we should create Che SA if it doesn't exist
@@ -280,6 +358,21 @@ CHE_IMAGE="${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}"
 # e.g. docker.io/rhchestage => docker.io\/rhchestage
 CHE_IMAGE_SANITIZED=$(echo "${CHE_IMAGE}" | sed 's/\//\\\//g')
 
+MULTI_USER_REPLACEMENT_STRING="          - name: \"CHE_WORKSPACE_LOGS\"
+            value: \"${CHE_WORKSPACE_LOGS}\"
+          - name: \"CHE_KEYCLOAK_AUTH__SERVER__URL\"
+            value: \"${CHE_KEYCLOAK_AUTH__SERVER__URL}\"
+          - name: \"CHE_KEYCLOAK_REALM\"
+            value: \"${CHE_KEYCLOAK_REALM}\"
+          - name: \"CHE_KEYCLOAK_CLIENT__ID\"
+            value: \"${CHE_KEYCLOAK_CLIENT__ID}\"
+          - name: \"CHE_HOST\"
+            value: \"${CHE_HOST}\""
+
+# TODO When merging the multi-user work to master, this replacement string should
+# be replaced by the corresponding change in the fabric8 deployment descriptor
+MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING="s|            path: /api/system/state|            path: /api|"
+
 echo
 if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
   echo "[CHE] Deploying Che on minishift (image ${CHE_IMAGE})"
@@ -299,6 +392,8 @@ if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
     sed "s|    keycloak-github-endpoint:.*|    keycloak-github-endpoint: ${KEYCLOAK_GITHUB_ENDPOINT}|" | \
     grep -v -e "tls:" -e "insecureEdgeTerminationPolicy: Redirect" -e "termination: edge" | \
     if [ "${CHE_KEYCLOAK_DISABLED}" == "true" ]; then sed "s/    keycloak-disabled: \"false\"/    keycloak-disabled: \"true\"/" ; else cat -; fi | \
+    sed "$MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING" | \
+    append_after_match "env:" "${MULTI_USER_REPLACEMENT_STRING}" | \
     oc apply --force=true -f -
 elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
   echo "[CHE] Deploying Che on OSIO (image ${CHE_IMAGE})"
@@ -309,6 +404,8 @@ elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
     sed "s/          image:.*/          image: \"${CHE_IMAGE_SANITIZED}\"/" | \
     sed "s/          imagePullPolicy:.*/          imagePullPolicy: \"${IMAGE_PULL_POLICY}\"/" | \
     if [ "${CHE_KEYCLOAK_DISABLED}" == "true" ]; then sed "s/    keycloak-disabled: \"false\"/    keycloak-disabled: \"true\"/" ; else cat -; fi | \
+    sed "$MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING" | \
+    append_after_match "env:" "${MULTI_USER_REPLACEMENT_STRING}" | \
     oc apply --force=true -f -
 else
   echo "[CHE] Deploying Che on OpenShift Container Platform (image ${CHE_IMAGE})"
@@ -325,9 +422,15 @@ else
     if [ "${ENABLE_SSL}" == "false" ]; then grep -v -e "tls:" -e "insecureEdgeTerminationPolicy: Redirect" -e "termination: edge" ; else cat -; fi | \
     if [ "${ENABLE_SSL}" == "false" ]; then sed "s/    che.docker.server_evaluation_strategy.custom.external.protocol: https/    che.docker.server_evaluation_strategy.custom.external.protocol: http/" ; else cat -; fi | \
     if [ "${K8S_VERSION_PRIOR_TO_1_6}" == "true" ]; then sed "s/    che-openshift-precreate-subpaths: \"false\"/    che-openshift-precreate-subpaths: \"true\"/"  ; else cat -; fi | \
+    sed "$MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING" | \
+    append_after_match "env:" "${MULTI_USER_REPLACEMENT_STRING}" | \
     oc apply --force=true -f -
 fi
 echo
+
+if [ "${CHE_DEDICATED_KEYCLOAK}" == "true" ]; then
+  ${COMMAND_DIR}/multi-user/configure_and_start_keycloak.sh
+fi
 
 # --------------------------------
 # Setup debugging routes if needed

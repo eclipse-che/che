@@ -59,6 +59,8 @@ public class WsAgentTestBase {
 
   protected ProjectRegistry projectRegistry;
 
+  protected WorkspaceSyncCommunication workspaceSyncCommunication;
+
   protected FileWatcherNotificationHandler fileWatcherNotificationHandler;
 
   protected FileTreeWatcher fileTreeWatcher;
@@ -116,12 +118,14 @@ public class WsAgentTestBase {
     fileWatcherNotificationHandler = new DefaultFileWatcherNotificationHandler(vfsProvider);
     fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
     fileWatcherManager = mock(FileWatcherManager.class);
+    workspaceSyncCommunication = mock(WorkspaceSyncCommunication.class);
     TestWorkspaceHolder wsHolder = new TestWorkspaceHolder();
 
     pm =
         new ProjectManager(
             vfsProvider,
             projectTypeRegistry,
+            workspaceSyncCommunication,
             projectRegistry,
             projectHandlerRegistry,
             importerRegistry,

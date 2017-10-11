@@ -131,7 +131,7 @@ public class ChangeVariableWithEvaluatingTest {
             + workspaceServiceClient.getServerAddressByPort(ws.getId(), 8080)
             + "/spring/guess";
     String requestMess = "11";
-    editor.waitAcitveBreakpoint(34);
+    editor.waitActiveBreakpoint(34);
     CompletableFuture<String> instToRequestThread =
         debuggerUtils.gotoDebugAppAndSendRequest(appUrl, requestMess);
     debugPanel.openDebugPanel();

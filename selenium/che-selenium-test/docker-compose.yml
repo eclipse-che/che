@@ -6,7 +6,6 @@ services:
     ports:
       - 4444:4444
     environment:
-      - GRID_MAX_SESSION=1
       - GRID_TIMEOUT=900
       - GRID_BROWSER_TIMEOUT=900
       - JAVA_OPTS=-Xms512m -Xmx1024m -Djava.security.egd=file:/dev/./urandom
@@ -28,6 +27,8 @@ services:
       - HUB_PORT_4444_TCP_ADDR=selenium_hub
       - HUB_PORT_4444_TCP_PORT=4444
       - DBUS_SESSION_BUS_ADDRESS=/dev/null
+      - NODE_MAX_INSTANCES=5
+      - NODE_MAX_SESSION=5
     ports:
       - 5900
       - 5555

@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.actions;
 
 import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -24,7 +25,10 @@ import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.parts.PartPresenter;
+import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.project.ProjectServiceClient;
 import org.eclipse.che.ide.api.resources.RenamingSupport;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -54,6 +58,9 @@ public class RenameItemActionTest {
   @Mock private ActionEvent event;
   @Mock private Presentation presentation;
 
+  @Mock private WorkspaceAgent workspaceAgent;
+  @Mock private PartPresenter partPresenter;
+
   private Resource[] selectedResources = new Resource[1];
   private Set<RenamingSupport> renamingSupport = new HashSet<>();
 
@@ -63,6 +70,7 @@ public class RenameItemActionTest {
 
     when(appContext.getResources()).thenReturn(selectedResources);
     when(event.getPresentation()).thenReturn(presentation);
+    when(workspaceAgent.getActivePart()).thenReturn(partPresenter);
   }
 
   @Test
@@ -102,7 +110,8 @@ public class RenameItemActionTest {
             editorAgent,
             notificationManager,
             dialogFactory,
-            appContext);
+            appContext,
+            workspaceAgent);
     action.updateInPerspective(event);
 
     verify(presentation).setVisible(true);
@@ -122,10 +131,20 @@ public class RenameItemActionTest {
             editorAgent,
             notificationManager,
             dialogFactory,
-            appContext);
+            appContext,
+            workspaceAgent);
     action.updateInPerspective(event);
 
     verify(presentation).setVisible(true);
     verify(presentation).setEnabled(true);
+  }
+
+  @Test
+  public void actionShouldBeDisabledIfEditorActive() {
+    when(workspaceAgent.getActivePart()).thenReturn(mock(EditorPartPresenter.class));
+
+    action.updateInPerspective(event);
+
+    verify(presentation).setEnabledAndVisible(false);
   }
 }

@@ -9,8 +9,6 @@
 #   Florent Benoit - Initial Implementation
 #
 
-set -e
-
 # Name of the image to use to run the tests
 BASE_DIR=$(cd "$(dirname "$0")"/..; pwd)
 . $BASE_DIR/build.include

@@ -113,4 +113,11 @@ public interface Perspective extends StateComponent {
    * @param container container in which need expose view
    */
   void go(@NotNull AcceptsOneWidget container);
+
+  /**
+   * Get current active part
+   *
+   * @return the active part
+   */
+  PartPresenter getActivePart();
 }

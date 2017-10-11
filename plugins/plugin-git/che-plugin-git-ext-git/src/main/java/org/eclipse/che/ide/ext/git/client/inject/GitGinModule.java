@@ -12,11 +12,14 @@ package org.eclipse.che.ide.ext.git.client.inject;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
+import com.google.gwt.inject.client.multibindings.GinMapBinder;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistrar;
+import org.eclipse.che.ide.api.vcs.VcsChangeMarkerRenderFactory;
+import org.eclipse.che.ide.ext.git.client.GitChangeMarkerRendererFactory;
 import org.eclipse.che.ide.ext.git.client.GitChangesHandler;
 import org.eclipse.che.ide.ext.git.client.GitCheckoutHandler;
 import org.eclipse.che.ide.ext.git.client.add.AddToIndexView;
@@ -76,6 +79,12 @@ public class GitGinModule extends AbstractGinModule {
     GinMultibinder.newSetBinder(binder(), PreferencePagePresenter.class)
         .addBinding()
         .to(CommitterPreferencePresenter.class);
+
+    GinMapBinder<String, VcsChangeMarkerRenderFactory> vcsChangeMarkerRenderFactoryMapBinder =
+        GinMapBinder.newMapBinder(binder(), String.class, VcsChangeMarkerRenderFactory.class);
+    vcsChangeMarkerRenderFactoryMapBinder
+        .addBinding("git")
+        .to(GitChangeMarkerRendererFactory.class);
 
     bind(AddToIndexView.class).to(AddToIndexViewImpl.class).in(Singleton.class);
     bind(ResetToCommitView.class).to(ResetToCommitViewImpl.class).in(Singleton.class);

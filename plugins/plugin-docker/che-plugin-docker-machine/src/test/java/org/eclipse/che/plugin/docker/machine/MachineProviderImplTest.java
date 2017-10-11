@@ -1973,7 +1973,6 @@ public class MachineProviderImplTest {
           .readContainerLogsInSeparateThread(
               anyString(), anyString(),
               anyString(), any(LineConsumer.class));
-
       return provider;
     }
   }

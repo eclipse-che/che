@@ -13,6 +13,8 @@ package org.eclipse.che.api.git;
 import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -25,13 +27,14 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.git.shared.EditedRegion;
 import org.eclipse.che.api.git.shared.Status;
+import org.eclipse.che.api.git.shared.StatusChangedEventDto;
 import org.eclipse.che.api.git.shared.event.GitCheckoutEvent;
 import org.eclipse.che.api.git.shared.event.GitCommitEvent;
 import org.eclipse.che.api.git.shared.event.GitEvent;
 import org.eclipse.che.api.git.shared.event.GitRepositoryDeletedEvent;
 import org.eclipse.che.api.git.shared.event.GitRepositoryInitializedEvent;
-import org.eclipse.che.api.git.shared.event.GitResetEvent;
 
 @Singleton
 public class GitJsonRpcMessenger implements EventSubscriber<GitEvent> {
@@ -63,10 +66,9 @@ public class GitJsonRpcMessenger implements EventSubscriber<GitEvent> {
     if (event instanceof GitCheckoutEvent) {
       handleCheckoutEvent((GitCheckoutEvent) event);
     } else if (event instanceof GitCommitEvent
-        || event instanceof GitResetEvent
         || event instanceof GitRepositoryInitializedEvent
         || event instanceof GitRepositoryDeletedEvent) {
-      handleIndexChangedEvent(event);
+      handleStatusChangedEvent(event);
     }
   }
 
@@ -86,22 +88,24 @@ public class GitJsonRpcMessenger implements EventSubscriber<GitEvent> {
                     .sendAndSkipResult());
   }
 
-  private void handleIndexChangedEvent(GitEvent event) {
+  private void handleStatusChangedEvent(GitEvent event) {
     Status status = newDto(Status.class);
+    Map<String, List<EditedRegion>> modifiedFiles = new HashMap<>();
     if (event instanceof GitCommitEvent) {
       status = ((GitCommitEvent) event).getStatus();
-    } else if (event instanceof GitResetEvent) {
-      status = ((GitResetEvent) event).getStatus();
+      modifiedFiles = ((GitCommitEvent) event).getModifiedFiles();
     } else if (event instanceof GitRepositoryInitializedEvent) {
       status = ((GitRepositoryInitializedEvent) event).getStatus();
     }
 
+    StatusChangedEventDto statusChangeEventDto =
+        newDto(StatusChangedEventDto.class).withStatus(status).withModifiedFiles(modifiedFiles);
     for (String endpointId : endpointIds) {
       transmitter
           .newRequest()
           .endpointId(endpointId)
-          .methodName("event/git/indexChanged")
-          .paramsAsDto(status)
+          .methodName("event/git/statusChanged")
+          .paramsAsDto(statusChangeEventDto)
           .sendAndSkipResult();
     }
   }

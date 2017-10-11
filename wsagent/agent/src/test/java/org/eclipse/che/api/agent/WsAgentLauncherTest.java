@@ -11,20 +11,20 @@
 package org.eclipse.che.api.agent;
 
 import static org.eclipse.che.api.workspace.shared.Constants.WS_AGENT_PROCESS_NAME;
+import static org.mockito.Matchers.any;
 
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.Collections;
+import org.eclipse.che.api.agent.server.WsAgentHealthChecker;
 import org.eclipse.che.api.agent.server.WsAgentPingRequestFactory;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.Command;
+import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
-import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
-import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.api.environment.server.MachineProcessManager;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
@@ -34,6 +34,7 @@ import org.eclipse.che.api.machine.server.model.impl.ServerPropertiesImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceNode;
 import org.eclipse.che.api.machine.shared.Constants;
+import org.eclipse.che.api.workspace.shared.dto.WsAgentHealthStateDto;
 import org.eclipse.che.commons.test.mockito.answer.SelfReturningAnswer;
 import org.mockito.Matchers;
 import org.mockito.Mock;
@@ -62,12 +63,12 @@ public class WsAgentLauncherTest {
   private static final String WS_AGENT_TIMED_OUT_MESSAGE = "timeout error message";
 
   @Mock private MachineProcessManager machineProcessManager;
-  @Mock private HttpJsonRequestFactory requestFactory;
   @Mock private Instance machine;
-  @Mock private HttpJsonResponse pingResponse;
   @Mock private MachineRuntimeInfoImpl machineRuntime;
+  @Mock private WsAgentHealthChecker wsAgentHealthChecker;
   @Mock private WsAgentPingRequestFactory wsAgentPingRequestFactory;
   @Mock private Agent agent;
+  @Mock private WsAgentHealthStateDto pingResponse;
 
   private HttpJsonRequest pingRequest;
   private WsAgentLauncher wsAgentLauncher;
@@ -77,6 +78,7 @@ public class WsAgentLauncherTest {
     wsAgentLauncher =
         new WsAgentLauncher(
             () -> machineProcessManager,
+            wsAgentHealthChecker,
             wsAgentPingRequestFactory,
             null,
             WS_AGENT_MAX_START_TIME_MS,
@@ -91,10 +93,9 @@ public class WsAgentLauncherTest {
     Mockito.doReturn(Collections.<String, Server>singletonMap(WS_AGENT_PORT, SERVER))
         .when(machineRuntime)
         .getServers();
-    Mockito.when(requestFactory.fromUrl(Matchers.anyString())).thenReturn(pingRequest);
     Mockito.when(wsAgentPingRequestFactory.createRequest(machine)).thenReturn(pingRequest);
-    Mockito.when(pingRequest.request()).thenReturn(pingResponse);
-    Mockito.when(pingResponse.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
+    Mockito.when(wsAgentHealthChecker.check(machine)).thenReturn(pingResponse);
+    Mockito.when(pingResponse.getCode()).thenReturn(200);
   }
 
   @Test
@@ -117,26 +118,26 @@ public class WsAgentLauncherTest {
   public void shouldPingWsAgentAfterStart() throws Exception {
     wsAgentLauncher.launch(machine, agent);
 
-    Mockito.verify(pingRequest).request();
-    Mockito.verify(pingResponse).getResponseCode();
+    Mockito.verify(wsAgentHealthChecker).check(any(Machine.class));
+    Mockito.verify(pingResponse).getCode();
   }
 
   @Test
   public void shouldPingWsAgentMultipleTimesAfterStartIfPingFailsWithException() throws Exception {
-    Mockito.when(pingRequest.request())
-        .thenThrow(new ServerException(""), new BadRequestException(""), new IOException())
+    Mockito.when(wsAgentHealthChecker.check(any(Machine.class)))
+        .thenThrow(new ServerException(""))
         .thenReturn(pingResponse);
 
     wsAgentLauncher.launch(machine, agent);
 
-    Mockito.verify(pingRequest, Mockito.times(4)).request();
-    Mockito.verify(pingResponse).getResponseCode();
+    Mockito.verify(wsAgentHealthChecker, Mockito.times(2)).check(any(Machine.class));
+    Mockito.verify(pingResponse).getCode();
   }
 
   @Test
   public void shouldPingWsAgentMultipleTimesAfterStartIfPingReturnsNotOKResponseCode()
       throws Exception {
-    Mockito.when(pingResponse.getResponseCode())
+    Mockito.when(pingResponse.getCode())
         .thenReturn(
             HttpURLConnection.HTTP_CREATED,
             HttpURLConnection.HTTP_NO_CONTENT,
@@ -144,18 +145,20 @@ public class WsAgentLauncherTest {
 
     wsAgentLauncher.launch(machine, agent);
 
-    Mockito.verify(pingRequest, Mockito.times(3)).request();
-    Mockito.verify(pingResponse, Mockito.times(3)).getResponseCode();
+    Mockito.verify(wsAgentHealthChecker, Mockito.times(3)).check(any(Machine.class));
+    Mockito.verify(pingResponse, Mockito.times(3)).getCode();
   }
 
   @Test
   public void shouldNotPingWsAgentAfterFirstSuccessfulPing() throws Exception {
-    Mockito.when(pingRequest.request()).thenThrow(new ServerException("")).thenReturn(pingResponse);
+    Mockito.when(wsAgentHealthChecker.check(any(Machine.class)))
+        .thenThrow(new ServerException(""))
+        .thenReturn(pingResponse);
 
     wsAgentLauncher.launch(machine, agent);
 
-    Mockito.verify(pingRequest, Mockito.times(2)).request();
-    Mockito.verify(pingResponse).getResponseCode();
+    Mockito.verify(wsAgentHealthChecker, Mockito.times(2)).check(any(Machine.class));
+    Mockito.verify(pingResponse).getCode();
   }
 
   @Test(
@@ -168,18 +171,14 @@ public class WsAgentLauncherTest {
             machineProcessManager.exec(
                 Matchers.anyString(),
                 Matchers.anyString(),
-                Matchers.any(Command.class),
+                any(Command.class),
                 Matchers.anyString()))
         .thenThrow(new NotFoundException("Test exception"));
 
     wsAgentLauncher.launch(machine, agent);
 
     Mockito.verify(machineProcessManager)
-        .exec(
-            Matchers.anyString(),
-            Matchers.anyString(),
-            Matchers.any(Command.class),
-            Matchers.anyString());
+        .exec(Matchers.anyString(), Matchers.anyString(), any(Command.class), Matchers.anyString());
   }
 
   @Test(
@@ -192,18 +191,14 @@ public class WsAgentLauncherTest {
             machineProcessManager.exec(
                 Matchers.anyString(),
                 Matchers.anyString(),
-                Matchers.any(Command.class),
+                any(Command.class),
                 Matchers.anyString()))
         .thenThrow(new MachineException("Test exception"));
 
     wsAgentLauncher.launch(machine, agent);
 
     Mockito.verify(machineProcessManager)
-        .exec(
-            Matchers.anyString(),
-            Matchers.anyString(),
-            Matchers.any(Command.class),
-            Matchers.anyString());
+        .exec(Matchers.anyString(), Matchers.anyString(), any(Command.class), Matchers.anyString());
   }
 
   @Test(
@@ -216,18 +211,14 @@ public class WsAgentLauncherTest {
             machineProcessManager.exec(
                 Matchers.anyString(),
                 Matchers.anyString(),
-                Matchers.any(Command.class),
+                any(Command.class),
                 Matchers.anyString()))
         .thenThrow(new BadRequestException("Test exception"));
 
     wsAgentLauncher.launch(machine, agent);
 
     Mockito.verify(machineProcessManager)
-        .exec(
-            Matchers.anyString(),
-            Matchers.anyString(),
-            Matchers.any(Command.class),
-            Matchers.anyString());
+        .exec(Matchers.anyString(), Matchers.anyString(), any(Command.class), Matchers.anyString());
   }
 
   @Test(
@@ -235,7 +226,7 @@ public class WsAgentLauncherTest {
     expectedExceptionsMessageRegExp = WS_AGENT_TIMED_OUT_MESSAGE
   )
   public void shouldThrowMachineExceptionIfPingsWereUnsuccessfulTooLong() throws Exception {
-    Mockito.when(pingRequest.request()).thenThrow(new ServerException(""));
+    Mockito.when(wsAgentHealthChecker.check(any(Machine.class))).thenThrow(new ServerException(""));
 
     wsAgentLauncher.launch(machine, agent);
   }

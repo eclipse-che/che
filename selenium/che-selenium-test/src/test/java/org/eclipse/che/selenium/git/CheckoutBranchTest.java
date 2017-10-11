@@ -20,7 +20,7 @@ import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestGitConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
@@ -75,7 +75,7 @@ public class CheckoutBranchTest {
 
   @Inject private TestWorkspace ws;
   @Inject private Ide ide;
-  @Inject private DefaultTestUser user;
+  @Inject private TestUser user;
 
   @Inject
   @Named("github.username")

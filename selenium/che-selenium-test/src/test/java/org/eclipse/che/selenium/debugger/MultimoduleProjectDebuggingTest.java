@@ -123,7 +123,7 @@ public class MultimoduleProjectDebuggingTest {
         TestMenuCommandsConstants.Run.DEBUG,
         getXpathForDebugConfigurationMenuItem());
     notificationPopup.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
-    editor.waitAcitveBreakpoint(19);
+    editor.waitActiveBreakpoint(19);
     debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_INTO);
 
     // then
@@ -154,7 +154,7 @@ public class MultimoduleProjectDebuggingTest {
         getXpathForDebugConfigurationMenuItem());
     // then
     notificationPopup.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
-    editor.waitAcitveBreakpoint(18);
+    editor.waitActiveBreakpoint(18);
     debugPanel.waitTextInVariablesPanel("title=\"java\"");
     debugPanel.waitTextInVariablesPanel("author=\"oracle\"");
   }
@@ -171,7 +171,7 @@ public class MultimoduleProjectDebuggingTest {
         getXpathForDebugConfigurationMenuItem());
     // then
     notificationPopup.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
-    editor.waitAcitveBreakpoint(23);
+    editor.waitActiveBreakpoint(23);
     debugPanel.waitTextInVariablesPanel("author=\"google\"");
     debugPanel.waitTextInVariablesPanel("title=\"go\"");
   }
@@ -189,7 +189,7 @@ public class MultimoduleProjectDebuggingTest {
         getXpathForDebugConfigurationMenuItem());
     // then
     notificationPopup.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
-    editor.waitAcitveBreakpoint(41);
+    editor.waitActiveBreakpoint(41);
     debugPanel.waitTextInVariablesPanel("author=\"google\"");
     debugPanel.waitTextInVariablesPanel("title=\"go\"");
   }
@@ -205,7 +205,7 @@ public class MultimoduleProjectDebuggingTest {
         getXpathForDebugConfigurationMenuItem());
     // then
     notificationPopup.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
-    editor.waitAcitveBreakpoint(30);
+    editor.waitActiveBreakpoint(30);
     debugPanel.waitTextInVariablesPanel("o=instance of multimodule.model.BookImpl");
   }
 
@@ -221,7 +221,7 @@ public class MultimoduleProjectDebuggingTest {
         getXpathForDebugConfigurationMenuItem());
     // then
     notificationPopup.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
-    editor.waitAcitveBreakpoint(43);
+    editor.waitActiveBreakpoint(43);
     debugPanel.waitTextInVariablesPanel("book=instance of multimodule.model.BookImpl");
   }
 
