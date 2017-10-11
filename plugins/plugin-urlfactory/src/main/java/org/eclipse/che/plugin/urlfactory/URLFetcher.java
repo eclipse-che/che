@@ -19,6 +19,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
@@ -40,6 +42,9 @@ public class URLFetcher {
   /** Maximum size of allowed data. (30KB) */
   protected static final long MAXIMUM_READ_BYTES = 30 * 1000;
 
+  /** The Compiled REGEX PATTERN that can be used for http|https git urls */
+  final Pattern GIT_HTTP_URL_PATTERN = Pattern.compile("(^http[s]?://.*)(.git$)");
+
   /**
    * Fetch the url provided and return its content To prevent DOS attack, limit the amount of the
    * collected data
@@ -50,7 +55,7 @@ public class URLFetcher {
   public String fetch(@NotNull final String url) {
     requireNonNull(url, "url parameter can't be null");
     try {
-      return fetch(new URL(url).openConnection());
+      return fetch(new URL(sanitized(url)).openConnection());
     } catch (IOException e) {
       // we shouldn't fetch if check is done before
       LOG.debug("Invalid URL", e);
@@ -88,5 +93,23 @@ public class URLFetcher {
    */
   protected long getLimit() {
     return MAXIMUM_READ_BYTES;
+  }
+
+  /**
+   * Simple method to sanitize the Git urls like &quot;https://github.com/demo.git&quot; or
+   * &quot;http://myowngit.example.com/demo.git&quot;
+   *
+   * @param url - the String format of the url
+   * @return if the url ends with .git will return the url without .git otherwise return the url as
+   *     it is
+   */
+  String sanitized(String url) {
+    if (url != null) {
+      final Matcher matcher = GIT_HTTP_URL_PATTERN.matcher(url);
+      if (matcher.find()) {
+        return matcher.group(1);
+      }
+    }
+    return url;
   }
 }
