@@ -131,7 +131,9 @@
     font-family: "DejaVu Sans Mono", alternativeFontFamily;
     font-size: 11px;
     color: editorGutterLineNumberColor;
-    line-height: 15px;
+    line-height: 13px;
+    border: 1px solid editorGutterLineNumberBackgroundColor;
+    box-sizing: border-box;
 }
 
 .orionCodenvy .rulerZoomWindow {
