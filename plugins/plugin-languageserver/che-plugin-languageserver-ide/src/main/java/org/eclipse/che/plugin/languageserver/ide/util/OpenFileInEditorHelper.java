@@ -1,21 +1,18 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2012-2017 Red Hat, Inc. All rights reserved. This program and the accompanying
+ * materials are made available under the terms of the Eclipse Public License v1.0 which accompanies
+ * this distribution, and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Red Hat, Inc. - initial API and implementation
+ * Contributors: Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.plugin.languageserver.ide.util;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.api.promises.client.Function;
+import org.eclipse.che.ide.DelayedTask;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
@@ -101,14 +98,13 @@ public class OpenFileInEditorHelper {
 
   private void fileOpened(final EditorPartPresenter editor, final TextRange selectionRange) {
     if (editor instanceof TextEditor && selectionRange != null) {
-      Scheduler.get()
-          .scheduleDeferred(
-              new Scheduler.ScheduledCommand() {
-                @Override
-                public void execute() {
-                  ((TextEditor) editor).getDocument().setSelectedRange(selectionRange, true);
-                }
-              });
+      new DelayedTask() {
+        @Override
+        public void onExecute() {
+          ((TextEditor) editor).getDocument().setSelectedRange(selectionRange, true);
+          editor.activate(); // force set focus to the editor
+        }
+      }.delay(100);
     }
   }
 }
