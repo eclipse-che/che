@@ -66,6 +66,16 @@ public class URLFetcherTest {
     assertNull(result);
   }
 
+  /** Check Sanitizing of Git URL works */
+  @Test
+  public void checkDotGitRemovedFromURL() {
+    String result = URLFetcher.sanitized("https://github.com/acme/demo.git");
+    assertEquals("https://github.com/acme/demo", result);
+
+    result = URLFetcher.sanitized("http://github.com/acme/demo.git");
+    assertEquals("http://github.com/acme/demo", result);
+  }
+
   /** Check that when url doesn't exist */
   @Test
   public void checkMissingContent() {
