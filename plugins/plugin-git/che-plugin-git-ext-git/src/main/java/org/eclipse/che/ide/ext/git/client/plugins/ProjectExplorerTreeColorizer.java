@@ -37,6 +37,7 @@ import org.eclipse.che.ide.ui.smartTree.Tree;
  * Responsible for colorize project explorer items depending on their git status.
  *
  * @author Igor Vinokur
+ * @author Mykola Morhun
  */
 @Singleton
 public class ProjectExplorerTreeColorizer implements GitEventsSubscriber {

@@ -26,10 +26,10 @@ public class GitPanelAction extends Action {
 
   @Override
   public void actionPerformed(ActionEvent e) {
-    if (gitPanelPresenter.isGitPanelOpened()) {
-      gitPanelPresenter.hideGitPanel();
+    if (gitPanelPresenter.isOpened()) {
+      gitPanelPresenter.hide();
     } else {
-      gitPanelPresenter.showGitPanel();
+      gitPanelPresenter.show();
     }
   }
 }

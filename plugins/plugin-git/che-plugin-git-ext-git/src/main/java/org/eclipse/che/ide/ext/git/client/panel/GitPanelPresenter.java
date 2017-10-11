@@ -18,13 +18,10 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.git.shared.FileChangedEventDto;
 import org.eclipse.che.api.git.shared.StatusChangedEventDto;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
-import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.PartStackType;
@@ -48,7 +45,7 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  */
 @Singleton
 public class GitPanelPresenter extends BasePresenter
-    implements GitPanelView.ActionDelegate, ActivePartChangedHandler, GitEventsSubscriber {
+    implements GitPanelView.ActionDelegate, GitEventsSubscriber {
 
   private static final String REVISION = "HEAD";
 
@@ -70,7 +67,6 @@ public class GitPanelPresenter extends BasePresenter
       ChangesPanelPresenter changesPanelPresenter,
       WorkspaceAgent workspaceAgent,
       AppContext appContext,
-      EventBus eventBus,
       GitEventSubscribable subscribeToGitEvents,
       NotificationManager notificationManager,
       GitResources gitResources,
@@ -92,15 +88,13 @@ public class GitPanelPresenter extends BasePresenter
     if (partStack == null || !partStack.containsPart(this)) {
       workspaceAgent.openPart(this, PartStackType.NAVIGATION);
     }
-    eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
 
     subscribeToGitEvents.addSubscriber(this);
   }
 
-  /**
-   * Invoked each time when panel is activated.
-   */
-  private void onGitPanelOpen() {
+  /** Invoked each time when panel is activated. */
+  @Override
+  public void onOpen() {
     // Update file list according to project explorer selection
     Project selectedProject = appContext.getRootProject();
 
@@ -156,23 +150,16 @@ public class GitPanelPresenter extends BasePresenter
     container.setWidget(view);
   }
 
-  public void showGitPanel() {
+  public void show() {
     onActivate();
   }
 
-  public void hideGitPanel() {
+  public void hide() {
     partStack.minimize();
   }
 
-  public boolean isGitPanelOpened() {
+  public boolean isOpened() {
     return partStack.getActivePart() == this;
-  }
-
-  @Override
-  public void onActivePartChanged(ActivePartChangedEvent event) {
-    if (event.getActivePart() != null && event.getActivePart() instanceof GitPanelPresenter) {
-      onGitPanelOpen();
-    }
   }
 
   @Override
@@ -207,9 +194,7 @@ public class GitPanelPresenter extends BasePresenter
     reloadChangedFilesList();
   }
 
-  /**
-   * Removes first segment from given path.
-   */
+  /** Removes first segment from given path. */
   private String removeProjectName(String path) {
     return path.substring(path.indexOf('/', 1) + 1);
   }

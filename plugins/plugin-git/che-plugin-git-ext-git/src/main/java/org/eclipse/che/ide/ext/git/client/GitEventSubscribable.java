@@ -10,9 +10,7 @@
  */
 package org.eclipse.che.ide.ext.git.client;
 
-/**
- * Defines client side git events listener, which notifies about them its subscribers.
- */
+/** Defines client side git events listener, which notifies about them its subscribers. */
 public interface GitEventSubscribable {
 
   void addSubscriber(GitEventsSubscriber subscriber);

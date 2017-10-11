@@ -14,8 +14,7 @@ import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
 
 /**
- * Describes changed in any way project files.
- * Supports adding and removing items dynamically.
+ * Describes changed in any way project files. Supports adding and removing items dynamically.
  *
  * @author Mykola Morhun
  */
@@ -41,8 +40,7 @@ public class MutableAlteredFiles extends AlteredFiles {
   }
 
   /**
-   * Adds a file to altered file list.
-   * If given file is already exists
+   * Adds a file to altered file list. If given file is already exists
    *
    * @param file full path to file and its name relatively to project root
    * @param status git status of the file
@@ -68,5 +66,4 @@ public class MutableAlteredFiles extends AlteredFiles {
     alteredFilesStatuses.remove(file);
     return alteredFilesList.remove(file);
   }
-
 }
