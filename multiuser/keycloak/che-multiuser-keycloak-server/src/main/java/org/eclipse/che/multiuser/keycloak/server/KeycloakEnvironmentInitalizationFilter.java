@@ -80,15 +80,21 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
         throw new ServletException("Cannot detect or instantiate user.");
       }
       Claims claims = (Claims) jwtToken.getBody();
-      User user =
-          getOrCreateUser(
-              claims.getSubject(),
-              claims.get("email", String.class),
-              claims.get("preferred_username", String.class));
-      subject =
-          new AuthorizedSubject(
-              new SubjectImpl(user.getName(), user.getId(), token, false), permissionChecker);
-      session.setAttribute("che_subject", subject);
+
+      try {
+        User user =
+            getOrCreateUser(
+                claims.getSubject(),
+                claims.get("email", String.class),
+                claims.get("preferred_username", String.class));
+        subject =
+            new AuthorizedSubject(
+                new SubjectImpl(user.getName(), user.getId(), token, false), permissionChecker);
+        session.setAttribute("che_subject", subject);
+      } catch (ServerException | ConflictException e) {
+        throw new ServletException(
+            "Unable to identify user " + claims.getSubject() + " in Che database", e);
+      }
     }
 
     try {
@@ -99,7 +105,8 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
     }
   }
 
-  private User getOrCreateUser(String id, String email, String username) throws ServletException {
+  private User getOrCreateUser(String id, String email, String username)
+      throws ServerException, ConflictException {
     try {
       return userManager.getById(id);
     } catch (NotFoundException e) {
@@ -108,18 +115,10 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
         try {
           return userManager.create(cheUser, false);
         } catch (ConflictException ex) {
-          try {
-            cheUser.setName(generate(cheUser.getName(), 4));
-            return userManager.create(cheUser, false);
-          } catch (ServerException | ConflictException e1) {
-            throw new ServletException("Unable to create new user", e1);
-          }
-        } catch (ServerException ex) {
-          throw new ServletException("Unable to create new user", ex);
+          cheUser.setName(generate(cheUser.getName(), 4));
+          return userManager.create(cheUser, false);
         }
       }
-    } catch (ServerException e) {
-      throw new ServletException("Unable to get user", e);
     }
   }
 
