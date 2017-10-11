@@ -106,35 +106,31 @@ public class AutocompleteCommandsEditorTest {
     commandsEditor.setFocusIntoTypeCommandsEditor(PREVIEW_URL_EDITOR);
     commandsEditor.setCursorToLine(1);
     commandsEditor.deleteAllContent();
-    commandsEditor.typeTextIntoEditor("port.80");
+    commandsEditor.typeTextIntoEditor("server.80");
     commandsEditor.launchAutocompleteAndWaitContainer();
     String[] autocompleteItems = {
-      "${server.port.8000/tcp}",
-      "${server.port.8000}",
-      "${server.port.8080/tcp}",
-      "${server.port.8080}"
+      "${server.8000/tcp}", "${server.8080/tcp}",
     };
     for (String autocompleteItem : autocompleteItems) {
       commandsEditor.waitTextIntoAutocompleteContainer(autocompleteItem);
     }
     commandsEditor.selectAutocompleteProposal("80/tcp}");
-    commandsEditor.waitTextIntoDescriptionMacrosForm(
-        "Returns external address of the server running on port 8080/tcp");
+    commandsEditor.waitTextIntoDescriptionMacrosForm("Returns address of the 8080/tcp server");
     commandsEditor.closeAutocomplete();
     commandsEditor.waitActiveEditor();
     commandsEditor.deleteAllContent();
-    commandsEditor.typeTextIntoEditor("80.host");
+    commandsEditor.typeTextIntoEditor("80/tcp");
     commandsEditor.launchAutocompleteAndWaitContainer();
-    commandsEditor.selectItemIntoAutocompleteAndPasteByDoubleClick("${server.80");
-    commandsEditor.waitTextIntoEditor("${server.8080.hostname}");
+    commandsEditor.selectItemIntoAutocompleteAndPasteByDoubleClick("${server.8080/");
+    commandsEditor.waitTextIntoEditor("80/${server.8080/tcp}");
     commandsEditor.typeTextIntoEditor(Keys.ENTER.toString());
     commandsEditor.waitActiveEditor();
-    commandsEditor.typeTextIntoEditor("8080.pro");
+    commandsEditor.typeTextIntoEditor("8080");
     commandsEditor.launchAutocomplete();
-    commandsEditor.waitTextIntoEditor("${server.8080.protocol}");
+    commandsEditor.waitTextIntoEditor("${server.8080/tcp}");
     commandsEditor.clickOnRunButton();
     consoles.waitExpectedTextIntoConsole(BUILD_SUCCESS);
-    consoles.waitExpectedTextIntoPreviewUrl("tomcat8 http");
+    consoles.waitExpectedTextIntoPreviewUrl("80/tcp://172.17.0.1:");
   }
 
   @Test(priority = 3)

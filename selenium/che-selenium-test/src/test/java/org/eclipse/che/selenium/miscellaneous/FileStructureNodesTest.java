@@ -26,7 +26,10 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-/** @author Aleksandr Shmaraev on 12.12.15 */
+/**
+ * @author Aleksandr Shmaraev
+ * @author Serhii Skoryk
+ */
 public class FileStructureNodesTest {
   private static final String PROJECT_NAME = NameGenerator.generate("FileStructureNodes", 4);
   private static final String JAVA_FILE_NAME = "Company";
@@ -141,6 +144,7 @@ public class FileStructureNodesTest {
     fileStructure.selectItemInFileStructureByDoubleClick(JAVA_FILE_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_CLASS);
     fileStructure.selectItemInFileStructureByDoubleClick(JAVA_FILE_NAME);
+
     //try-catch was added because test fails while trying to open node by double click action
     //issue: https://github.com/eclipse/che/issues/6499
     try {
@@ -164,6 +168,7 @@ public class FileStructureNodesTest {
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
     fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_CLASS);
+    fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);
     fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);

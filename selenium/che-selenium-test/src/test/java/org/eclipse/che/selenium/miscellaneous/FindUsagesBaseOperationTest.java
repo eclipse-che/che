@@ -19,6 +19,7 @@ import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.FindUsages;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
@@ -69,6 +70,7 @@ public class FindUsagesBaseOperationTest {
   @Inject private Menu menu;
   @Inject private Loader loader;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Events events;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -96,9 +98,9 @@ public class FindUsagesBaseOperationTest {
         TestMenuCommandsConstants.Assistant.FIND_USAGES);
     loader.waitOnClosed();
     findUsages.waitFindUsagesPanelIsOpen();
-    findUsages.clickFindUsagesTab();
+    events.clickEventLogBtn();
     findUsages.waitFindUsegesPanelIsClosed();
-    findUsages.clickFindUsagesTab();
+    findUsages.clickFindUsagesIcon();
     findUsages.waitFindUsagesPanelIsOpen();
     findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT);
     findUsages.waitSelectedElementInFindUsagesPanel("numGuessByUser");
@@ -123,10 +125,12 @@ public class FindUsagesBaseOperationTest {
     findUsages.selectNodeInFindUsagesByDoubleClick(
         "handleRequest(HttpServletRequest, HttpServletResponse)");
     findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT_1);
-    findUsages.selectNodeInFindUsagesByDoubleClick("AppController");
-    findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
     findUsages.clickOnIconNodeInFindUsagesPanel("AppController");
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
+    findUsages.selectNodeInFindUsagesByDoubleClick("AppController");
+    findUsages.clickOnIconNodeInFindUsagesPanel("AppController");
+    findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
+
     //try-catch was added because test fails while trying to open node by click action
     //issue: https://github.com/eclipse/che/issues/6499
     try {
