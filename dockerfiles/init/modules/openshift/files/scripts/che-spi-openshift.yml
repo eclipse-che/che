@@ -81,12 +81,13 @@ items:
     name: che
   data:
     CHE_INFRASTRUCTURE_ACTIVE: openshift
-    CHE_INFRA_OPENSHIFT_MASTER__URL: null
-    CHE_INFRA_OPENSHIFT_USERNAME: null
-    CHE_INFRA_OPENSHIFT_PASSWORD: null
-    CHE_INFRA_OPENSHIFT_TRUST__CERTS: null
+    CHE_INFRA_OPENSHIFT_MASTER__URL: ""
+    CHE_INFRA_OPENSHIFT_USERNAME: ""
+    CHE_INFRA_OPENSHIFT_PASSWORD: ""
+    CHE_INFRA_OPENSHIFT_OAUTH__TOKEN: ""
+    CHE_INFRA_OPENSHIFT_TRUST__CERTS: "false"
     CHE_INFRA_OPENSHIFT_TLS__ENABLED: "true"
-    CHE_INFRA_OPENSHIFT_PROJECT: null
+    CHE_INFRA_OPENSHIFT_PROJECT: ""
     CHE_INFRA_OPENSHIFT_MACHINE__START__TIMEOUT__MIN: "5"
     CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL: http://${DEFAULT_OPENSHIFT_NAMESPACE_URL}/agent-binaries/linux_amd64/bootstrapper/bootstrapper
     CHE_API: http://${DEFAULT_OPENSHIFT_NAMESPACE_URL}/wsmaster/api
@@ -188,6 +189,11 @@ items:
             valueFrom:
               configMapKeyRef:
                 key: CHE_INFRA_OPENSHIFT_PASSWORD
+                name: che
+          - name: CHE_INFRA_OPENSHIFT_OAUTH__TOKEN
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_OPENSHIFT_OAUTH__TOKEN
                 name: che
           - name: CHE_INFRA_OPENSHIFT_TRUST__CERTS
             valueFrom:

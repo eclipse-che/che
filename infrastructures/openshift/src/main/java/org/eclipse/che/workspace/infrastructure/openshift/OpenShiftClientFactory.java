@@ -29,6 +29,7 @@ public class OpenShiftClientFactory {
       @Nullable @Named("che.infra.openshift.master_url") String masterUrl,
       @Nullable @Named("che.infra.openshift.username") String username,
       @Nullable @Named("che.infra.openshift.password") String password,
+      @Nullable @Named("che.infra.openshift.oauth_token") String oauthToken,
       @Nullable @Named("che.infra.openshift.trust_certs") Boolean doTrustCerts) {
     OpenShiftConfigBuilder configBuilder = new OpenShiftConfigBuilder();
     if (!isNullOrEmpty(masterUrl)) {
@@ -41,6 +42,10 @@ public class OpenShiftClientFactory {
 
     if (!isNullOrEmpty(password)) {
       configBuilder.withPassword(password);
+    }
+
+    if (!isNullOrEmpty(oauthToken)) {
+      configBuilder.withOauthToken(oauthToken);
     }
 
     if (doTrustCerts != null) {
