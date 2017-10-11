@@ -107,7 +107,7 @@ export class CreateProjectGithubController {
       + this.$location.port()
       + this.$browser.baseHref()
       + 'gitHubCallback.html';
-    return this.githubPopup.open('/api/oauth/authenticate'
+    return this.githubPopup.open('/wsmaster/api/oauth/authenticate'
       + '?oauth_provider=github'
       + '&scope=' + ['user', 'repo', 'write:public_key'].join(',')
       + '&userId=' + this.currentUserId
@@ -125,12 +125,12 @@ export class CreateProjectGithubController {
   }
 
   getAndStoreRemoteToken()  {
-    return this.$http({method: 'GET', url: '/api/oauth/token?oauth_provider=github'}).then( (result) => {
+    return this.$http({method: 'GET', url: '/wsmaster/api/oauth/token?oauth_provider=github'}).then( (result) => {
       if (!result.data) {
         return false;
       }
       this.gitHubTokenStore.setToken(result.data.token);
-      this.$http({method: 'POST', url: '/api/github/ssh/generate'});
+      this.$http({method: 'POST', url: '/wsmaster/api/github/ssh/generate'});
       this.askLoad();
       return true;
     });

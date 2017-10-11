@@ -43,7 +43,7 @@ describe('CheMultiTransclude >', () => {
     httpBackend = cheHttpBackend.getHttpBackend();
     // avoid tracking requests from branding controller
     httpBackend.whenGET(/.*/).respond(200, '');
-    httpBackend.when('OPTIONS', '/api/').respond({});
+    httpBackend.when('OPTIONS', '/wsmaster/api/').respond({});
   }));
 
   afterEach(() => {

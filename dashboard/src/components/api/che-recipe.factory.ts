@@ -33,9 +33,9 @@ export class CheRecipe {
     this.recipes = [];
 
     // remote call
-    this.remoteRecipesAPI = this.$resource('/api/recipe',{}, {
-      create: {method: 'POST', url: '/api/recipe'},
-      getRecipes: {method: 'GET', url: '/api/recipe/list', isArray: true}});
+    this.remoteRecipesAPI = this.$resource('/wsmaster/api/recipe',{}, {
+      create: {method: 'POST', url: '/wsmaster/api/recipe'},
+      getRecipes: {method: 'GET', url: '/wsmaster/api/recipe/list', isArray: true}});
 
 
   }

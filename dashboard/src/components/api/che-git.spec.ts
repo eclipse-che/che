@@ -86,7 +86,7 @@ describe('CheGit', function () {
     cheBackend.setup();
 
     workspace.fetchWorkspaceDetails(workspaceId);
-    httpBackend.expectGET('/api/workspace/' + workspaceId);
+    httpBackend.expectGET('/wsmaster/api/workspace/' + workspaceId);
 
 
     // flush command
@@ -153,7 +153,7 @@ describe('CheGit', function () {
     cheBackend.setup();
 
     workspace.fetchWorkspaceDetails(workspaceId);
-    httpBackend.expectGET('/api/workspace/' + workspaceId);
+    httpBackend.expectGET('/wsmaster/api/workspace/' + workspaceId);
 
     // flush command
     httpBackend.flush();
@@ -177,6 +177,5 @@ describe('CheGit', function () {
     // check
     expect(remoteArray.join()).toEqual(urlArray.join());
   });
-
 
 });

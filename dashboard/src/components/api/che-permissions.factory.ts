@@ -71,11 +71,11 @@ export class ChePermissions implements che.api.IChePermissions {
       hasInstallationManagerService: false
     };
 
-    this.remotePermissionsAPI = <IPermissionsResource<any>>this.$resource('/api/permissions', {}, {
-      store: {method: 'POST', url: '/api/permissions'},
-      remove: {method: 'DELETE', url: '/api/permissions/:domain?instance=:instance&user=:user'},
-      getSystemPermissions: {method: 'GET', url: '/api/permissions/system'},
-      getPermissionsByInstance: {method: 'GET', url: '/api/permissions/:domain/all?instance=:instance', isArray: true}
+    this.remotePermissionsAPI = <IPermissionsResource<any>>this.$resource('/wsmaster/api/permissions', {}, {
+      store: {method: 'POST', url: '/wsmaster/api/permissions'},
+      remove: {method: 'DELETE', url: '/wsmaster/api/permissions/:domain?instance=:instance&user=:user'},
+      getSystemPermissions: {method: 'GET', url: '/wsmaster/api/permissions/system'},
+      getPermissionsByInstance: {method: 'GET', url: '/wsmaster/api/permissions/:domain/all?instance=:instance', isArray: true}
     });
   }
 

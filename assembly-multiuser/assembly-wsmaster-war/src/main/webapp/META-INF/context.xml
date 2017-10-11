@@ -11,7 +11,7 @@
       Red Hat, Inc. - initial API and implementation
 
 -->
-<Context allowCasualMultipartParsing="true" sessionCookiePath="/api">
+<Context allowCasualMultipartParsing="true">
 
     <Resource name="jdbc/che" auth="Container"
               type="javax.sql.DataSource"

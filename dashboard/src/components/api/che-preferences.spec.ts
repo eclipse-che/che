@@ -80,7 +80,7 @@ describe('ChePreferences', function () {
       factory.fetchPreferences();
 
       // expecting GETs
-      httpBackend.expectGET('/api/preferences');
+      httpBackend.expectGET('/wsmaster/api/preferences');
 
       // flush command
       httpBackend.flush();
@@ -120,7 +120,7 @@ describe('ChePreferences', function () {
       factory.addRegistry(registryUrl, userName, userPassword);
 
       // expecting POST
-      httpBackend.expectPOST('/api/preferences');
+      httpBackend.expectPOST('/wsmaster/api/preferences');
 
       // flush command
       httpBackend.flush();
@@ -154,7 +154,7 @@ describe('ChePreferences', function () {
       factory.updatePreferences(newPreferences);
 
       // expecting POST
-      httpBackend.expectPOST('/api/preferences');
+      httpBackend.expectPOST('/wsmaster/api/preferences');
 
       // flush command
       httpBackend.flush();
@@ -182,7 +182,7 @@ describe('ChePreferences', function () {
       factory.removePreferences(['pref1']);
 
       // expecting POST
-      httpBackend.expectDELETE('/api/preferences');
+      httpBackend.expectDELETE('/wsmaster/api/preferences');
 
       // flush command
       httpBackend.flush();

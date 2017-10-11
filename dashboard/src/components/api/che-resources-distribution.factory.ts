@@ -76,13 +76,13 @@ export class CheResourcesDistribution implements che.api.ICheResourcesDistributi
     this.organizationUsedResources = new Map();
     this.organizationAvailableResources = new Map();
 
-    this.remoteResourcesAPI = <IResourcesResource<any>>this.$resource('/api/organization/resource', {}, {
-      distribute: {method: 'POST', url: '/api/organization/resource/:organizationId/cap'},
-      getResources: {method: 'GET', url: '/api/organization/resource/:organizationId/cap', isArray: true},
-      getTotalResources: {method: 'GET', url: '/api/resource/:organizationId', isArray: true},
-      getUsedResources: {method: 'GET', url: '/api/resource/:organizationId/used', isArray: true},
-      getAvailableResources: {method: 'GET', url: '/api/resource/:organizationId/available', isArray: true},
-      updateFreeResources: {method: 'POST', url: '/api/resource/free'}
+    this.remoteResourcesAPI = <IResourcesResource<any>>this.$resource('/wsmaster/api/organization/resource', {}, {
+      distribute: {method: 'POST', url: '/wsmaster/api/organization/resource/:organizationId/cap'},
+      getResources: {method: 'GET', url: '/wsmaster/api/organization/resource/:organizationId/cap', isArray: true},
+      getTotalResources: {method: 'GET', url: '/wsmaster/api/resource/:organizationId', isArray: true},
+      getUsedResources: {method: 'GET', url: '/wsmaster/api/resource/:organizationId/used', isArray: true},
+      getAvailableResources: {method: 'GET', url: '/wsmaster/api/resource/:organizationId/available', isArray: true},
+      updateFreeResources: {method: 'POST', url: '/wsmaster/api/resource/free'}
     });
   }
 

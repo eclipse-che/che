@@ -32,7 +32,7 @@ describe('custom-validator', () => {
     httpBackend = cheHttpBackend.getHttpBackend();
     // avoid tracking requests from branding controller
     httpBackend.whenGET(/.*/).respond(200, '');
-    httpBackend.when('OPTIONS', '/api/').respond({});
+    httpBackend.when('OPTIONS', '/wsmaster/api/').respond({});
 
     $scope.validateFn = (value) => {
       return value % 2 === 0;

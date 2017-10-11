@@ -19,7 +19,7 @@ interface IOrganizationsResource<T> extends ng.resource.IResourceClass<T> {
   fetchSubOrganizations(data: { id: string }): ng.resource.IResource<T>;
 }
 
-const MAIN_URL = '/api/organization';
+const MAIN_URL = '/wsmaster/api/organization';
 
 /**
  * This class is handling the interactions with Organization management API.

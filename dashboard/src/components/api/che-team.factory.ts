@@ -86,8 +86,8 @@ export class CheTeam implements che.api.ICheTeam {
     this.cheOrganization = cheOrganization;
     this.cheResourcesDistribution = cheResourcesDistribution;
 
-    this.remoteTeamAPI = <ITeamsResource<any>>$resource('/api/organization', {}, {
-      findTeam: {method: 'GET', url: '/api/organization/find?name=:teamName'}
+    this.remoteTeamAPI = <ITeamsResource<any>>$resource('/wsmaster/api/organization', {}, {
+      findTeam: {method: 'GET', url: '/wsmaster/api/organization/find?name=:teamName'}
     });
 
     this.fetchTeamsDefer = this.$q.defer();

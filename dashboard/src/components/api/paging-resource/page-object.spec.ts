@@ -56,7 +56,7 @@ describe('PageObject >', () => {
 
     const maxItems = 15;
     const countObjects = 50;
-    const url = '/api/object';
+    const url = '/wsmaster/api/object';
 
     pageObjectResource = factory.createPageObjectResource(url);
     pageObjectMock = new PageObjectMock(pageObjectResource, maxItems, countObjects);

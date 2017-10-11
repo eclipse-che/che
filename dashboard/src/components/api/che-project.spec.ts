@@ -90,7 +90,7 @@ describe('CheProject', function () {
 
       // fetch runtime
       workspace.fetchWorkspaceDetails(testProjectDetails.workspaceId);
-      httpBackend.expectGET('/api/workspace/' + testProjectDetails.workspaceId);
+      httpBackend.expectGET('/wsmaster/api/workspace/' + testProjectDetails.workspaceId);
 
       // flush command
       httpBackend.flush();

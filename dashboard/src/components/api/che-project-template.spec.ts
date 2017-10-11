@@ -109,7 +109,7 @@ describe('CheProjectTemplate', function(){
       factory.fetchTemplates();
 
       // expecting a GET
-      httpBackend.expectGET('/api/project-template/all');
+      httpBackend.expectGET('/wsmaster/api/project-template/all');
 
       // flush command
       httpBackend.flush();

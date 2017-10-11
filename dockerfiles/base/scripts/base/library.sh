@@ -26,7 +26,7 @@ convert_posix_to_windows() {
 }
 
 get_boot_url() {
-  echo "$CHE_HOST:$CHE_PORT/api/"
+  echo "$CHE_HOST:$CHE_PORT/wsmaster/api/"
 }
 
 get_display_url() {

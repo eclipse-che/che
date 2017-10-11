@@ -69,14 +69,14 @@ export class CheFactory {
     this.factoryPagesMap = new Map();
     this.pageInfo = {};
 
-    this.remoteFactoryAPI = <IFactoriesResource<any>>this.$resource('/api/factory/:factoryId', {factoryId: '@id'}, {
-      updateFactory: {method: 'PUT', url: '/api/factory/:factoryId'},
-      getFactoryContentFromWorkspace: {method: 'GET', url: '/api/factory/workspace/:workspaceId'},
-      getFactoryParameters: {method: 'POST', url: '/api/factory/resolver/'},
-      createFactoryByContent: {method: 'POST', url: '/api/factory'},
+    this.remoteFactoryAPI = <IFactoriesResource<any>>this.$resource('/wsmaster/api/factory/:factoryId', {factoryId: '@id'}, {
+      updateFactory: {method: 'PUT', url: '/wsmaster/api/factory/:factoryId'},
+      getFactoryContentFromWorkspace: {method: 'GET', url: '/wsmaster/api/factory/workspace/:workspaceId'},
+      getFactoryParameters: {method: 'POST', url: '/wsmaster/api/factory/resolver/'},
+      createFactoryByContent: {method: 'POST', url: '/wsmaster/api/factory'},
       getFactories: {
         method: 'GET',
-        url: '/api/factory/find?creator.userId=:userId&maxItems=:maxItems&skipCount=:skipCount',
+        url: '/wsmaster/api/factory/find?creator.userId=:userId&maxItems=:maxItems&skipCount=:skipCount',
         isArray: false,
         responseType: 'json',
         transformResponse: (data: any, headersGetter: Function) => {
@@ -85,7 +85,7 @@ export class CheFactory {
       },
       getFactoryByName: {
         method: 'GET',
-        url: '/api/factory/find?creator.userId=:userId&name=:factoryName',
+        url: '/wsmaster/api/factory/find?creator.userId=:userId&name=:factoryName',
         isArray: true
       }
     });
@@ -100,7 +100,7 @@ export class CheFactory {
         return {factories: data};
       }
       this.pageInfo.currentPageNumber = this.pageInfo.currentPageNumber ? this.pageInfo.currentPageNumber : 1;
-      let link = '/api/factory/find?creator.userId=' + user.id + '&maxItems=' + this.itemsPerPage;
+      let link = '/wsmaster/api/factory/find?creator.userId=' + user.id + '&maxItems=' + this.itemsPerPage;
       links.set('first', link + '&skipCount=0');
       if (data && data.length > 0) {
         links.set('next', link + '&skipCount=' + this.pageInfo.currentPageNumber * this.itemsPerPage);

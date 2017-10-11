@@ -117,19 +117,19 @@ export class CheWorkspace {
     this.statusDefers = {};
 
     // remote call
-    this.remoteWorkspaceAPI = <ICHELicenseResource<any>>this.$resource('/api/workspace', {}, {
+    this.remoteWorkspaceAPI = <ICHELicenseResource<any>>this.$resource('/wsmaster/api/workspace', {}, {
         // having 2 methods for creation to ensure namespace parameter won't be send at all if value is null or undefined
-        create: {method: 'POST', url: '/api/workspace'},
-        createWithNamespace: {method: 'POST', url: '/api/workspace?namespace=:namespace'},
-        deleteWorkspace: {method: 'DELETE', url: '/api/workspace/:workspaceId'},
-        updateWorkspace: {method: 'PUT', url: '/api/workspace/:workspaceId'},
-        addProject: {method: 'POST', url: '/api/workspace/:workspaceId/project'},
-        deleteProject: {method: 'DELETE', url: '/api/workspace/:workspaceId/project/:path'},
-        stopWorkspace: {method: 'DELETE', url: '/api/workspace/:workspaceId/runtime?create-snapshot=:createSnapshot'},
-        startWorkspace: {method: 'POST', url: '/api/workspace/:workspaceId/runtime?environment=:envName'},
-        startTemporaryWorkspace: {method: 'POST', url: '/api/workspace/runtime?temporary=true'},
-        addCommand: {method: 'POST', url: '/api/workspace/:workspaceId/command'},
-        getSettings: {method: 'GET', url: '/api/workspace/settings'}
+        create: {method: 'POST', url: '/wsmaster/api/workspace'},
+        createWithNamespace: {method: 'POST', url: '/wsmaster/api/workspace?namespace=:namespace'},
+        deleteWorkspace: {method: 'DELETE', url: '/wsmaster/api/workspace/:workspaceId'},
+        updateWorkspace: {method: 'PUT', url: '/wsmaster/api/workspace/:workspaceId'},
+        addProject: {method: 'POST', url: '/wsmaster/api/workspace/:workspaceId/project'},
+        deleteProject: {method: 'DELETE', url: '/wsmaster/api/workspace/:workspaceId/project/:path'},
+        stopWorkspace: {method: 'DELETE', url: '/wsmaster/api/workspace/:workspaceId/runtime?create-snapshot=:createSnapshot'},
+        startWorkspace: {method: 'POST', url: '/wsmaster/api/workspace/:workspaceId/runtime?environment=:envName'},
+        startTemporaryWorkspace: {method: 'POST', url: '/wsmaster/api/workspace/runtime?temporary=true'},
+        addCommand: {method: 'POST', url: '/wsmaster/api/workspace/:workspaceId/command'},
+        getSettings: {method: 'GET', url: '/wsmaster/api/workspace/settings'}
       }
     );
 
@@ -260,7 +260,7 @@ export class CheWorkspace {
    * @param namespace namespace
    */
   fetchWorkspacesByNamespace(namespace: string): ng.IPromise<any> {
-    let promise = this.$http.get('/api/workspace/namespace/' + namespace);
+    let promise = this.$http.get('/wsmaster/api/workspace/namespace/' + namespace);
     let resultPromise = promise.then((response: { data: che.IWorkspace[] }) => {
       const workspaces = this.getWorkspacesByNamespace(namespace);
 
@@ -346,7 +346,7 @@ export class CheWorkspace {
       return this.workspaceDetailsByKeyPromise.get(workspaceKey);
     }
     const defer = this.$q.defer();
-    const promise: ng.IHttpPromise<any> = this.$http.get('/api/workspace/' + workspaceKey);
+    const promise: ng.IHttpPromise<any> = this.$http.get('/wsmaster/api/workspace/' + workspaceKey);
     this.workspaceDetailsByKeyPromise.set(workspaceKey, promise);
 
     promise.then((response: ng.IHttpPromiseCallbackArg<che.IWorkspace>) => {

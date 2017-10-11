@@ -60,7 +60,7 @@ const DEFAULT_DOCS_WORKSPACE = '/docs/getting-started/intro/index.html';
 const DEFAULT_WORKSPACE_PRIORITY_STACKS = ['Java', 'Java-MySQL', 'Blank'];
 const DEFAULT_WORKSPACE_DEFAULT_STACK = 'java-mysql';
 const DEFAULT_WORKSPACE_CREATION_LINK = '#/create-workspace';
-const DEFAULT_WEBSOCKET_CONTEXT = '/api/websocket';
+const DEFAULT_WEBSOCKET_CONTEXT = '/wsmaster/api/websocket';
 
 /**
  * This class is handling the branding data in Che.

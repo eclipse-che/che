@@ -51,7 +51,7 @@ export class CheService {
       return this.servicesPromise;
     }
 
-    let promise = this.$http.get('/api/');
+    let promise = this.$http.get('/wsmaster/api/');
     this.servicesPromise = promise.then((response: any) => {
       this.services = [];
       response.data.rootResources.forEach((service: any) => {
@@ -82,7 +82,7 @@ export class CheService {
    * @returns {IHttpPromise<any>}
    */
   fetchServicesInfo(): ng.IPromise<any> {
-    let promise = this.$http({'method': 'OPTIONS', 'url': '/api/'});
+    let promise = this.$http({'method': 'OPTIONS', 'url': '/wsmaster/api/'});
     let infoPromise = promise.then((response: any) => {
       this.servicesInfo = response.data;
     });

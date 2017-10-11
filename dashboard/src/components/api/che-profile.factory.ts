@@ -51,10 +51,10 @@ export class CheProfile {
     this.$http = $http;
 
     // remote call
-    this.remoteProfileAPI = <IProfileResource<che.IProfile>>this.$resource('/api/profile', {}, {
-      getById: {method: 'GET', url: '/api/profile/:userId'},
-      setAttributes: {method: 'PUT', url: '/api/profile/attributes'},
-      setAttributesById: {method: 'PUT', url: '/api/profile/:userId/attributes'}
+    this.remoteProfileAPI = <IProfileResource<che.IProfile>>this.$resource('/wsmaster/api/profile', {}, {
+      getById: {method: 'GET', url: '/wsmaster/api/profile/:userId'},
+      setAttributes: {method: 'PUT', url: '/wsmaster/api/profile/attributes'},
+      setAttributesById: {method: 'PUT', url: '/wsmaster/api/profile/:userId/attributes'}
     });
 
     this.profileIdMap = new Map();

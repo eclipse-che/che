@@ -196,12 +196,12 @@ export class ImportGithubProjectService implements IEditingProgress {
    * @return {IPromise<any>}
    */
   getAndStoreRemoteToken(): ng.IPromise<any> {
-    return this.$http({method: 'GET', url: '/api/oauth/token?oauth_provider=github'}).then( (result: any) => {
+    return this.$http({method: 'GET', url: '/wsmaster/api/oauth/token?oauth_provider=github'}).then( (result: any) => {
       if (!result.data) {
         return false;
       }
       this.gitHubTokenStore.setToken(result.data.token);
-      this.$http({method: 'POST', url: '/api/github/ssh/generate'});
+      this.$http({method: 'POST', url: '/wsmaster/api/github/ssh/generate'});
       this.askLoad();
       return true;
     });

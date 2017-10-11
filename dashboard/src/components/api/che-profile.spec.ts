@@ -74,7 +74,7 @@ describe('CheProfile', () => {
 
       factory.fetchProfile();
 
-      httpBackend.expectGET('/api/profile');
+      httpBackend.expectGET('/wsmaster/api/profile');
 
       httpBackend.flush();
 
@@ -99,7 +99,7 @@ describe('CheProfile', () => {
 
       factory.setAttributes(testProfile.atributes);
 
-      httpBackend.expectPUT('/api/profile/attributes');
+      httpBackend.expectPUT('/wsmaster/api/profile/attributes');
 
       httpBackend.flush();
     }
@@ -118,7 +118,7 @@ describe('CheProfile', () => {
 
       factory.setAttributes(testProfile.attributes, testProfile.userId);
 
-      httpBackend.expectPUT(`/api/profile/${testProfile.id}/attributes`);
+      httpBackend.expectPUT(`/wsmaster/api/profile/${testProfile.id}/attributes`);
 
       httpBackend.flush();
 

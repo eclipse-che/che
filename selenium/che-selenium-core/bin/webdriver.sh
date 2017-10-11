@@ -66,7 +66,7 @@ initVariables() {
     [[ -z ${CALLER+x} ]] && { CALLER=$(basename $0); }
     [[ -z ${CUR_DIR+x} ]] && { CUR_DIR=$(cd "$(dirname "$0")"; pwd); }
 
-    [[ -z ${API_SUFFIX+x} ]] && { API_SUFFIX="/api/"; }
+    [[ -z ${API_SUFFIX+x} ]] && { API_SUFFIX="/wsmaster/api/"; }
     [[ -z ${BASE_ACTUAL_RESULTS_URL+x} ]] && { BASE_ACTUAL_RESULTS_URL="https://ci.codenvycorp.com/view/qa/job/che-integration-tests/"; }
 
     MODE="grid"
