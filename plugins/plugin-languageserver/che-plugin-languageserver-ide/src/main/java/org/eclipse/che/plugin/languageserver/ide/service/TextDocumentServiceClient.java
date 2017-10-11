@@ -16,7 +16,6 @@ import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOI
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
-
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcError;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
@@ -48,9 +47,6 @@ import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.TextDocumentPositionParams;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.services.TextDocumentService;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 @Singleton
 public class TextDocumentServiceClient {
