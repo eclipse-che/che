@@ -30,7 +30,7 @@ import org.eclipse.che.ide.ext.git.client.action.CompareWithLatestAction;
 import org.eclipse.che.ide.ext.git.client.action.CompareWithRevisionAction;
 import org.eclipse.che.ide.ext.git.client.action.DeleteRepositoryAction;
 import org.eclipse.che.ide.ext.git.client.action.FetchAction;
-import org.eclipse.che.ide.ext.git.client.action.GitPanelAction;
+import org.eclipse.che.ide.ext.git.client.action.ToggleGitPanelAction;
 import org.eclipse.che.ide.ext.git.client.action.HistoryAction;
 import org.eclipse.che.ide.ext.git.client.action.InitRepositoryAction;
 import org.eclipse.che.ide.ext.git.client.action.NextDiffAction;
@@ -97,7 +97,7 @@ public class GitExtension {
       CompareWithRevisionAction compareWithRevisionAction,
       NextDiffAction nextDiffAction,
       PreviousDiffAction previousDiffAction,
-      GitPanelAction gitPanelAction,
+      ToggleGitPanelAction gitPanelAction,
       KeyBindingAgent keyBinding) {
 
     resources.gitCSS().ensureInjected();

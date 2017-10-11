@@ -39,7 +39,7 @@ import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelPrese
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
- * Presenter for the left-side Git panel.
+ * Presenter for the Git panel.
  *
  * @author Mykola Morhun
  */

@@ -10,8 +10,6 @@
  */
 package org.eclipse.che.ide.ext.git.client.compare.changeslist;
 
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -28,22 +26,16 @@ import org.eclipse.che.ide.ui.window.Window;
  */
 @Singleton
 public class ChangesListViewImpl extends Window implements ChangesListView {
-  interface ChangesListViewImplUiBinder extends UiBinder<Widget, ChangesListViewImpl> {}
-
   private final GitLocalizationConstant locale;
-
-  @UiField FlowPanel changesPanel;
 
   private ActionDelegate delegate;
   private Button btnCompare;
 
   @Inject
-  protected ChangesListViewImpl(
-      ChangesListViewImpl.ChangesListViewImplUiBinder uiBinder, GitLocalizationConstant locale) {
+  protected ChangesListViewImpl(GitLocalizationConstant locale) {
     this.locale = locale;
     this.setTitle(locale.changeListTitle());
 
-    setWidget(uiBinder.createAndBindUi(this));
     createButtons();
   }
 
@@ -69,8 +61,11 @@ public class ChangesListViewImpl extends Window implements ChangesListView {
 
   @Override
   public void setChangesPanelView(ChangesPanelView changesPanelView) {
-    changesPanel.clear();
-    changesPanel.add(changesPanelView);
+    FlowPanel flowPanel = new FlowPanel();
+    flowPanel.setWidth("600px");
+    flowPanel.setHeight("345px");
+    flowPanel.add((Widget) changesPanelView);
+    this.setWidget(flowPanel);
   }
 
   private void createButtons() {

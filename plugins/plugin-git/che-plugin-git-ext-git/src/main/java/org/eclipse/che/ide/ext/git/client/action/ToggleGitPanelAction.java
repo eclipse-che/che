@@ -16,11 +16,11 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.ext.git.client.panel.GitPanelPresenter;
 
 /** @author Mykola Morhun */
-public class GitPanelAction extends Action {
+public class ToggleGitPanelAction extends Action {
   private final GitPanelPresenter gitPanelPresenter;
 
   @Inject
-  public GitPanelAction(GitPanelPresenter gitPanelPresenter) {
+  public ToggleGitPanelAction(GitPanelPresenter gitPanelPresenter) {
     this.gitPanelPresenter = gitPanelPresenter;
   }
 
