@@ -98,8 +98,8 @@ public class AccountDaoTest {
 
   @Test(expectedExceptions = ConflictException.class)
   public void shouldThrowConflictExceptionWhenCreatingAccountWithExistingName() throws Exception {
-    AccountImpl account = accounts[0];
-    account.setName(accounts[1].getName());
+    AccountImpl account =
+        new AccountImpl(NameGenerator.generate("account", 5), accounts[0].getName(), "test");
 
     accountDao.create(account);
   }

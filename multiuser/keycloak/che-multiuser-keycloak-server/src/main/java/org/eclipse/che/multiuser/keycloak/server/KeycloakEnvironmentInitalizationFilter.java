@@ -99,23 +99,24 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
     }
   }
 
-  private synchronized User getOrCreateUser(String id, String email, String username)
-      throws ServletException {
+  private User getOrCreateUser(String id, String email, String username) throws ServletException {
     try {
       return userManager.getById(id);
     } catch (NotFoundException e) {
-      final UserImpl cheUser = new UserImpl(id, email, username, generate("", 12), emptyList());
-      try {
-        return userManager.create(cheUser, false);
-      } catch (ConflictException ex) {
+      synchronized (this) {
+        final UserImpl cheUser = new UserImpl(id, email, username, generate("", 12), emptyList());
         try {
-          cheUser.setName(generate(cheUser.getName(), 4));
           return userManager.create(cheUser, false);
-        } catch (ServerException | ConflictException e1) {
-          throw new ServletException("Unable to create new user", e1);
+        } catch (ConflictException ex) {
+          try {
+            cheUser.setName(generate(cheUser.getName(), 4));
+            return userManager.create(cheUser, false);
+          } catch (ServerException | ConflictException e1) {
+            throw new ServletException("Unable to create new user", e1);
+          }
+        } catch (ServerException ex) {
+          throw new ServletException("Unable to create new user", ex);
         }
-      } catch (ServerException ex) {
-        throw new ServletException("Unable to create new user", ex);
       }
     } catch (ServerException e) {
       throw new ServletException("Unable to get user", e);
