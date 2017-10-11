@@ -17,19 +17,17 @@ import static org.slf4j.LoggerFactory.getLogger;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.Pod;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.installer.shared.model.Installer;
 import org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
-import org.eclipse.che.workspace.infrastructure.openshift.ServerExposer;
+import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.ConfigurationProvisioner;
 import org.slf4j.Logger;
@@ -51,14 +49,18 @@ import org.slf4j.Logger;
  * @author Sergii Leshchenko
  */
 public class InstallerConfigProvisioner implements ConfigurationProvisioner {
+
   private static final Logger LOG = getLogger(InstallerConfigProvisioner.class);
 
   private static final String ENVIRONMENT_PROPERTY = "environment";
 
+  private final MachineTokenProvider machineTokenProvider;
   private final String cheServerEndpoint;
 
   @Inject
-  public InstallerConfigProvisioner(@Named("che.api") String cheServerEndpoint) {
+  public InstallerConfigProvisioner(
+      MachineTokenProvider machineTokenProvider, @Named("che.api") String cheServerEndpoint) {
+    this.machineTokenProvider = machineTokenProvider;
     this.cheServerEndpoint = cheServerEndpoint;
   }
 
@@ -84,6 +86,11 @@ public class InstallerConfigProvisioner implements ConfigurationProvisioner {
 
         // CHE_API is used by installers for agent binary downloading
         putEnv(container.getEnv(), "CHE_API", cheServerEndpoint);
+
+        putEnv(
+            container.getEnv(),
+            "USER_TOKEN",
+            machineTokenProvider.getToken(identity.getWorkspaceId()));
 
         // TODO incorrect place for env variable addition. workspace ID is needed for wsagent server, not installer
         // WORKSPACE_ID is required only by workspace agent

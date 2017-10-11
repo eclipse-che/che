@@ -11,9 +11,11 @@
 package org.eclipse.che.api.deploy;
 
 import com.google.inject.AbstractModule;
+import org.eclipse.che.api.workspace.server.MachineTokenProvider;
 import org.eclipse.che.commons.auth.token.ChainedTokenExtractor;
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.multiuser.machine.authentication.server.MachineTokenProviderImpl;
 
 /**
  * Machine authentication bindings.
@@ -32,5 +34,7 @@ public class MachineAuthModule extends AbstractModule {
     bind(org.eclipse.che.multiuser.machine.authentication.server.MachineTokenRegistry.class);
     bind(org.eclipse.che.multiuser.machine.authentication.server.MachineSessionInvalidator.class);
     bind(RequestTokenExtractor.class).to(ChainedTokenExtractor.class);
+
+    bind(MachineTokenProvider.class).to(MachineTokenProviderImpl.class);
   }
 }
