@@ -13,10 +13,10 @@ package org.eclipse.che.plugin.languageserver.ide.util;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.api.promises.client.Function;
+import org.eclipse.che.ide.DelayedTask;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
@@ -102,14 +102,13 @@ public class OpenFileInEditorHelper {
 
   private void fileOpened(final EditorPartPresenter editor, final TextRange selectionRange) {
     if (editor instanceof TextEditor && selectionRange != null) {
-      Scheduler.get()
-          .scheduleDeferred(
-              new Scheduler.ScheduledCommand() {
-                @Override
-                public void execute() {
-                  ((TextEditor) editor).getDocument().setSelectedRange(selectionRange, true);
-                }
-              });
+      new DelayedTask() {
+        @Override
+        public void onExecute() {
+          ((TextEditor) editor).getDocument().setSelectedRange(selectionRange, true);
+          editor.activate(); // force set focus to the editor
+        }
+      }.delay(100);
     }
   }
 }
