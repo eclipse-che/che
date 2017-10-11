@@ -19,7 +19,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.websocket.Session;
 import org.eclipse.che.commons.schedule.ScheduleDelay;
-import org.eclipse.che.commons.schedule.ScheduleRate;
 
 /**
  * Instance is responsible for re-sending messages that were not sent during the period when WEB
