@@ -10,11 +10,10 @@
  */
 package org.eclipse.che.api.core.websocket.impl;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import com.google.common.collect.EvictingQueue;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -35,7 +34,7 @@ public class MessagesReSender {
 
   private final WebSocketSessionRegistry registry;
 
-  private final Map<String, List<DelayedMessage>> delayedMessageRegistry =
+  private final Map<String, Queue<DelayedMessage>> delayedMessageRegistry =
       new ConcurrentHashMap<>();
 
   @Inject
@@ -51,38 +50,36 @@ public class MessagesReSender {
         .values()
         .forEach(it -> it.removeIf(m -> currentTimeMillis - m.timeMillis > 60_000));
 
-    delayedMessageRegistry.values().removeIf(List::isEmpty);
+    delayedMessageRegistry.values().removeIf(Queue::isEmpty);
   }
 
   public void add(String endpointId, String message) {
-    List<DelayedMessage> delayedMessages =
-        delayedMessageRegistry.computeIfAbsent(endpointId, k -> new LinkedList<>());
 
-    if (delayedMessages.size() <= MAX_MESSAGES) {
-      delayedMessages.add(new DelayedMessage(message));
-    }
+    delayedMessageRegistry
+        .computeIfAbsent(endpointId, k -> EvictingQueue.create(MAX_MESSAGES))
+        .offer(new DelayedMessage(message));
   }
 
   public void resend(String endpointId) {
-    final List<DelayedMessage> delayedMessages = delayedMessageRegistry.remove(endpointId);
+    Queue<DelayedMessage> delayedMessages = delayedMessageRegistry.remove(endpointId);
 
     if (delayedMessages == null || delayedMessages.isEmpty()) {
       return;
     }
 
-    final Optional<Session> sessionOptional = registry.get(endpointId);
+    Optional<Session> sessionOptional = registry.get(endpointId);
 
     if (!sessionOptional.isPresent()) {
       return;
     }
 
-    final Session session = sessionOptional.get();
+    Queue<DelayedMessage> backingQueue = EvictingQueue.create(delayedMessages.size());
+    while (!delayedMessages.isEmpty()) {
+      backingQueue.offer(delayedMessages.poll());
+    }
 
-    final List<DelayedMessage> backing = new ArrayList<>(delayedMessages);
-    delayedMessages.clear();
-
-    for (DelayedMessage delayedMessage : backing) {
-
+    Session session = sessionOptional.get();
+    for (DelayedMessage delayedMessage : backingQueue) {
       if (session.isOpen()) {
         session.getAsyncRemote().sendText(delayedMessage.message);
       } else {
@@ -90,7 +87,9 @@ public class MessagesReSender {
       }
     }
 
-    delayedMessageRegistry.put(endpointId, delayedMessages);
+    if (!delayedMessages.isEmpty()) {
+      delayedMessageRegistry.put(endpointId, delayedMessages);
+    }
   }
 
   private static class DelayedMessage {
