@@ -11,11 +11,11 @@
 package org.eclipse.che.api.core.websocket.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.websocket.Session;
@@ -35,7 +35,8 @@ public class MessagesReSender {
 
   private final WebSocketSessionRegistry registry;
 
-  private final Map<String, List<DelayedMessage>> delayedMessageRegistry = new HashMap<>();
+  private final Map<String, List<DelayedMessage>> delayedMessageRegistry =
+      new ConcurrentHashMap<>();
 
   @Inject
   public MessagesReSender(WebSocketSessionRegistry registry) {
