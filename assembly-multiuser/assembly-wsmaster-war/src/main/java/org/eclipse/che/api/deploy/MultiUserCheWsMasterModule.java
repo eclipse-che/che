@@ -32,8 +32,6 @@ import org.eclipse.che.multiuser.resource.api.ResourceModule;
 import org.eclipse.che.security.PBKDF2PasswordEncryptor;
 import org.eclipse.che.security.PasswordEncryptor;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfraModule;
-import org.eclipse.che.workspace.infrastructure.openshift.provision.installer.InstallerConfigProvisioner;
-import org.eclipse.che.workspace.infrastructure.openshift.provision.installer.MultiuserInstallerConfigProvisioner;
 
 @DynaModule
 public class MultiUserCheWsMasterModule extends AbstractModule {
@@ -41,7 +39,6 @@ public class MultiUserCheWsMasterModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(ServerCheckerFactoryImpl.class).to(AuthServerCheckerFactoryImpl.class);
-    bind(InstallerConfigProvisioner.class).to(MultiuserInstallerConfigProvisioner.class);
     install(new OpenShiftInfraModule());
 
     bind(TemplateProcessor.class).to(STTemplateProcessorImpl.class);
