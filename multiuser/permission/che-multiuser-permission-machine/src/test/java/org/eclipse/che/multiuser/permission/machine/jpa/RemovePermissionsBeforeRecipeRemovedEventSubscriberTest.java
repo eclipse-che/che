@@ -21,7 +21,7 @@ import javax.persistence.EntityManager;
 import org.eclipse.che.api.recipe.JpaRecipeDao;
 import org.eclipse.che.api.recipe.OldRecipeImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
-import org.eclipse.che.commons.test.db.H2TestHelper;
+import org.eclipse.che.commons.test.db.H2JpaCleaner;
 import org.eclipse.che.multiuser.permission.machine.jpa.JpaRecipePermissionsDao.RemovePermissionsBeforeRecipeRemovedEventSubscriber;
 import org.eclipse.che.multiuser.permission.machine.recipe.RecipePermissionsImpl;
 import org.testng.annotations.AfterClass;
@@ -36,6 +36,7 @@ import org.testng.annotations.Test;
  * @author Sergii Leschenko
  */
 public class RemovePermissionsBeforeRecipeRemovedEventSubscriberTest {
+  private H2JpaCleaner h2JpaCleaner;
   private EntityManager manager;
   private JpaRecipeDao recipeDao;
   private JpaRecipePermissionsDao recipePermissionsDao;
@@ -75,6 +76,8 @@ public class RemovePermissionsBeforeRecipeRemovedEventSubscriberTest {
 
     subscriber = injector.getInstance(RemovePermissionsBeforeRecipeRemovedEventSubscriber.class);
     subscriber.subscribe();
+
+    h2JpaCleaner = injector.getInstance(H2JpaCleaner.class);
   }
 
   @BeforeMethod
@@ -109,8 +112,7 @@ public class RemovePermissionsBeforeRecipeRemovedEventSubscriberTest {
   @AfterClass
   public void shutdown() throws Exception {
     subscriber.unsubscribe();
-    manager.getEntityManagerFactory().close();
-    H2TestHelper.shutdownDefault();
+    h2JpaCleaner.clean();
   }
 
   @Test

@@ -20,7 +20,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import org.eclipse.che.api.recipe.OldRecipeImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
-import org.eclipse.che.commons.test.db.H2TestHelper;
+import org.eclipse.che.commons.test.db.H2JpaCleaner;
 import org.eclipse.che.multiuser.permission.machine.recipe.RecipePermissionsImpl;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
@@ -30,6 +30,7 @@ import org.testng.annotations.Test;
 
 /** @author Max Shaposhnik */
 public class JpaRecipePermissionsDaoTest {
+  private H2JpaCleaner h2JpaCleaner;
   private EntityManager manager;
   private JpaRecipePermissionsDao dao;
 
@@ -62,6 +63,7 @@ public class JpaRecipePermissionsDaoTest {
     Injector injector = Guice.createInjector(new JpaTestModule(), new MultiuserMachineJpaModule());
     manager = injector.getInstance(EntityManager.class);
     dao = injector.getInstance(JpaRecipePermissionsDao.class);
+    h2JpaCleaner = injector.getInstance(H2JpaCleaner.class);
   }
 
   @BeforeMethod
@@ -105,8 +107,7 @@ public class JpaRecipePermissionsDaoTest {
 
   @AfterClass
   public void shutdown() throws Exception {
-    manager.getEntityManagerFactory().close();
-    H2TestHelper.shutdownDefault();
+    h2JpaCleaner.clean();
   }
 
   @Test

@@ -10,8 +10,6 @@
  */
 package org.eclipse.che.multiuser.permission.workspace.server.spi.jpa;
 
-import static org.eclipse.che.commons.test.db.H2TestHelper.inMemoryDefault;
-
 import com.google.inject.TypeLiteral;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.recipe.OldRecipeImpl;
@@ -105,8 +103,8 @@ public class JpaTckModule extends TckModule {
         .toInstance(new JpaTckRepository<>(WorkspaceImpl.class));
 
     bind(SchemaInitializer.class)
-        .toInstance(new FlywaySchemaInitializer(inMemoryDefault(), "che-schema"));
+        .toInstance(new FlywaySchemaInitializer(server.getDataSource(), "che-schema"));
     bind(DBInitializer.class).asEagerSingleton();
-    bind(TckResourcesCleaner.class).to(H2JpaCleaner.class);
+    bind(TckResourcesCleaner.class).toInstance(new H2JpaCleaner(server));
   }
 }
