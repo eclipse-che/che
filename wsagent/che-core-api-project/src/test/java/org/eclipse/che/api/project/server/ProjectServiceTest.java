@@ -99,7 +99,6 @@ import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.vfs.Path;
 import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
-import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
@@ -250,9 +249,6 @@ public class ProjectServiceTest {
 
     FileWatcherNotificationHandler fileWatcherNotificationHandler =
         new DefaultFileWatcherNotificationHandler(vfsProvider);
-    FileTreeWatcher fileTreeWatcher =
-        new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
-
     pm =
         new ProjectManager(
             vfsProvider,
@@ -262,7 +258,6 @@ public class ProjectServiceTest {
             phRegistry,
             importerRegistry,
             fileWatcherNotificationHandler,
-            fileTreeWatcher,
             workspaceHolder,
             fileWatcherManager);
     pm.initWatcher();
