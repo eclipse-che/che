@@ -30,7 +30,6 @@ import org.eclipse.che.ide.ext.git.client.action.CompareWithLatestAction;
 import org.eclipse.che.ide.ext.git.client.action.CompareWithRevisionAction;
 import org.eclipse.che.ide.ext.git.client.action.DeleteRepositoryAction;
 import org.eclipse.che.ide.ext.git.client.action.FetchAction;
-import org.eclipse.che.ide.ext.git.client.action.ToggleGitPanelAction;
 import org.eclipse.che.ide.ext.git.client.action.HistoryAction;
 import org.eclipse.che.ide.ext.git.client.action.InitRepositoryAction;
 import org.eclipse.che.ide.ext.git.client.action.NextDiffAction;
@@ -45,6 +44,7 @@ import org.eclipse.che.ide.ext.git.client.action.ShowBranchesAction;
 import org.eclipse.che.ide.ext.git.client.action.ShowMergeAction;
 import org.eclipse.che.ide.ext.git.client.action.ShowRemoteAction;
 import org.eclipse.che.ide.ext.git.client.action.ShowStatusAction;
+import org.eclipse.che.ide.ext.git.client.action.ToggleGitPanelAction;
 
 /**
  * Extension add Git support to the IDE Application.
