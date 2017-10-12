@@ -16,9 +16,9 @@ import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.FAI
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.STOPPED;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
@@ -101,7 +101,7 @@ public class DockerInternalRuntimeTest {
     when(internalMachineCfg2.getInstallers()).thenReturn(singletonList(newInstaller(2)));
     environment.setContainers(ImmutableMap.of(DEV_MACHINE, config1, DB_MACHINE, config2));
 
-    doNothing().when(networks).createNetwork(anyString());
+    doNothing().when(networks).createNetwork(nullable(String.class));
     when(runtimeContext.getIdentity()).thenReturn(IDENTITY);
     when(runtimeContext.getDockerEnvironment()).thenReturn(environment);
     final LinkedList<String> orderedContainers = new LinkedList<>();
@@ -114,7 +114,7 @@ public class DockerInternalRuntimeTest {
         .thenReturn(
             ImmutableMap.of(DEV_MACHINE, internalMachineCfg1, DB_MACHINE, internalMachineCfg2));
     ServersCheckerFactory serversCheckerFactory = mock(ServersCheckerFactory.class);
-    when(serversCheckerFactory.create(any(), anyString(), any()))
+    when(serversCheckerFactory.create(any(), nullable(String.class), any()))
         .thenReturn(mock(ServersChecker.class));
     dockerRuntime =
         new DockerInternalRuntime(
@@ -136,7 +136,8 @@ public class DockerInternalRuntimeTest {
     mockContainerStart();
     dockerRuntime.start(emptyMap());
 
-    verify(starter, times(2)).startContainer(anyString(), anyString(), any(), any(), any());
+    verify(starter, times(2))
+        .startContainer(nullable(String.class), nullable(String.class), any(), any(), any());
     verify(eventService, times(4)).publish(any(MachineStatusEvent.class));
     verifyEventsOrder(
         newEvent(DEV_MACHINE, STARTING, null),
@@ -154,7 +155,8 @@ public class DockerInternalRuntimeTest {
     try {
       dockerRuntime.start(emptyMap());
     } catch (InfrastructureException ex) {
-      verify(starter, times(1)).startContainer(anyString(), anyString(), any(), any(), any());
+      verify(starter, times(1))
+          .startContainer(nullable(String.class), nullable(String.class), any(), any(), any());
       verify(eventService, times(2)).publish(any(MachineStatusEvent.class));
       verifyEventsOrder(newEvent(DEV_MACHINE, STARTING, null), newEvent(DEV_MACHINE, FAILED, msg));
       throw ex;
@@ -168,7 +170,8 @@ public class DockerInternalRuntimeTest {
     try {
       dockerRuntime.start(emptyMap());
     } catch (InfrastructureException ex) {
-      verify(starter, times(1)).startContainer(anyString(), anyString(), any(), any(), any());
+      verify(starter, times(1))
+          .startContainer(nullable(String.class), nullable(String.class), any(), any(), any());
       verify(bootstrapper, times(1)).bootstrap();
       verify(eventService, times(3)).publish(any(MachineStatusEvent.class));
       verifyEventsOrder(
@@ -181,12 +184,15 @@ public class DockerInternalRuntimeTest {
 
   @Test(expectedExceptions = RuntimeStartInterruptedException.class)
   public void throwsInterruptionExceptionWhenNetworkCreationInterrupted() throws Exception {
-    doThrow(RuntimeStartInterruptedException.class).when(networks).createNetwork(anyString());
+    doThrow(RuntimeStartInterruptedException.class)
+        .when(networks)
+        .createNetwork(nullable(String.class));
 
     try {
       dockerRuntime.start(emptyMap());
     } catch (InfrastructureException ex) {
-      verify(starter, never()).startContainer(anyString(), anyString(), any(), any(), any());
+      verify(starter, never())
+          .startContainer(nullable(String.class), nullable(String.class), any(), any(), any());
       throw ex;
     }
   }
@@ -199,7 +205,8 @@ public class DockerInternalRuntimeTest {
     try {
       dockerRuntime.start(emptyMap());
     } catch (InfrastructureException ex) {
-      verify(starter, times(1)).startContainer(anyString(), anyString(), any(), any(), any());
+      verify(starter, times(1))
+          .startContainer(nullable(String.class), nullable(String.class), any(), any(), any());
       throw ex;
     }
   }
@@ -216,8 +223,8 @@ public class DockerInternalRuntimeTest {
             })
         .when(starter)
         .startContainer(
-            anyString(),
-            anyString(),
+            nullable(String.class),
+            nullable(String.class),
             any(DockerContainerConfig.class),
             any(RuntimeIdentity.class),
             any(AbnormalMachineStopHandler.class));
@@ -225,7 +232,8 @@ public class DockerInternalRuntimeTest {
     try {
       dockerRuntime.start(emptyMap());
     } catch (InfrastructureException ex) {
-      verify(starter, times(1)).startContainer(anyString(), anyString(), any(), any(), any());
+      verify(starter, times(1))
+          .startContainer(nullable(String.class), nullable(String.class), any(), any(), any());
       throw ex;
     }
   }
@@ -260,42 +268,42 @@ public class DockerInternalRuntimeTest {
 
   private void mockContainerStart() throws InfrastructureException {
     when(starter.startContainer(
-            anyString(),
-            anyString(),
-            any(DockerContainerConfig.class),
-            any(RuntimeIdentity.class),
-            any(AbnormalMachineStopHandler.class)))
+            nullable(String.class),
+            nullable(String.class),
+            nullable(DockerContainerConfig.class),
+            nullable(RuntimeIdentity.class),
+            nullable(AbnormalMachineStopHandler.class)))
         .thenReturn(mock(DockerMachine.class));
   }
 
   private void mockContainerStartFailed(InfrastructureException exception)
       throws InfrastructureException {
     when(starter.startContainer(
-            anyString(),
-            anyString(),
-            any(DockerContainerConfig.class),
-            any(RuntimeIdentity.class),
-            any(AbnormalMachineStopHandler.class)))
+            nullable(String.class),
+            nullable(String.class),
+            nullable(DockerContainerConfig.class),
+            nullable(RuntimeIdentity.class),
+            nullable(AbnormalMachineStopHandler.class)))
         .thenThrow(exception);
   }
 
   private void mockInstallersBootstrap() throws Exception {
     final DockerBootstrapper bootstrapper = mock(DockerBootstrapper.class);
     when(bootstrapperFactory.create(
-            anyString(),
-            any(RuntimeIdentity.class),
-            anyListOf(InstallerImpl.class),
-            any(DockerMachine.class)))
+            nullable(String.class),
+            nullable(RuntimeIdentity.class),
+            anyList(),
+            nullable(DockerMachine.class)))
         .thenReturn(bootstrapper);
     doNothing().when(bootstrapper).bootstrap();
   }
 
   private void mockInstallersBootstrapFailed(InfrastructureException exception) throws Exception {
     when(bootstrapperFactory.create(
-            anyString(),
-            any(RuntimeIdentity.class),
-            anyListOf(InstallerImpl.class),
-            any(DockerMachine.class)))
+            nullable(String.class),
+            nullable(RuntimeIdentity.class),
+            anyList(),
+            nullable(DockerMachine.class)))
         .thenReturn(bootstrapper);
     doThrow(exception).when(bootstrapper).bootstrap();
   }

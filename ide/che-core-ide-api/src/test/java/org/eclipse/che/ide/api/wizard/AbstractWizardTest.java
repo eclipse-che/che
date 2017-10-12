@@ -22,7 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Testing {@link AbstractWizard}.
@@ -128,11 +128,9 @@ public class AbstractWizardTest {
   public void testCanCompleteWhenSomePageIsNotCompleted() throws Exception {
     when(page1.isCompleted()).thenReturn(true);
     when(page2.isCompleted()).thenReturn(false);
-    when(page3.isCompleted()).thenReturn(true);
 
     wizard.addPage(page1);
     wizard.addPage(page2);
-    wizard.addPage(page3);
 
     assertEquals(false, wizard.canComplete());
   }
@@ -189,16 +187,12 @@ public class AbstractWizardTest {
   /** In case the wizard has got 3 skipped pages and 1 not skipped page. */
   private void prepareTestCase1() {
     when(page1.canSkip()).thenReturn(false);
-    when(page1.isCompleted()).thenReturn(true);
 
     when(page2.canSkip()).thenReturn(false);
-    when(page2.isCompleted()).thenReturn(true);
 
     when(page3.canSkip()).thenReturn(true);
-    when(page3.isCompleted()).thenReturn(true);
 
     when(page4.canSkip()).thenReturn(false);
-    when(page4.isCompleted()).thenReturn(true);
 
     wizard.addPage(page1);
     wizard.addPage(page2);
@@ -250,16 +244,12 @@ public class AbstractWizardTest {
   /** In case the wizard has got 2 not skipped pages and 2 skipped page. */
   private void prepareTestCase2() {
     when(page1.canSkip()).thenReturn(false);
-    when(page1.isCompleted()).thenReturn(true);
 
     when(page2.canSkip()).thenReturn(false);
-    when(page2.isCompleted()).thenReturn(true);
 
     when(page3.canSkip()).thenReturn(true);
-    when(page3.isCompleted()).thenReturn(true);
 
     when(page4.canSkip()).thenReturn(true);
-    when(page4.isCompleted()).thenReturn(true);
 
     wizard.addPage(page1);
     wizard.addPage(page2);

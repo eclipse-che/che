@@ -25,6 +25,7 @@ import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import com.google.inject.spi.ConstructorBinding;
 import java.lang.reflect.Method;
+import javax.persistence.EntityManagerFactory;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.WorkspaceSharedPool;
@@ -63,6 +64,7 @@ public class MachineTokenInterceptorTest {
             //Bind manager and his dep-s. To bind interceptor, guice must create intercepted class by himself.
             bind(WorkspaceDao.class).toInstance(mock(WorkspaceDao.class));
             bind(EventService.class).toInstance(mock(EventService.class));
+            bind(EntityManagerFactory.class).toInstance(mock(EntityManagerFactory.class));
             bind(DBInitializer.class).toInstance(mock(DBInitializer.class));
             bind(WorkspaceSharedPool.class)
                 .toInstance(new WorkspaceSharedPool("cached", null, null));

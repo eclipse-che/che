@@ -74,7 +74,7 @@
             <scope>test</scope>
             <exclusions>
                 <exclusion>
-                    <artifactId>mockito-all</artifactId>
+                    <artifactId>mockito-core</artifactId>
                     <groupId>org.mockito</groupId>
                 </exclusion>
             </exclusions>

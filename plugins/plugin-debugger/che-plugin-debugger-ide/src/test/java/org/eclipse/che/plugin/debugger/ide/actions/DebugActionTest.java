@@ -18,7 +18,6 @@ import com.google.common.base.Optional;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
-import org.eclipse.che.ide.api.debug.DebugConfigurationType;
 import org.eclipse.che.ide.api.debug.DebugConfigurationsManager;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
@@ -52,13 +51,9 @@ public class DebugActionTest {
   @Test
   public void actionShouldBePerformed() {
     DebugConfiguration debugConfiguration = mock(DebugConfiguration.class);
-    when(debugConfiguration.getType()).thenReturn(mock(DebugConfigurationType.class));
-    when(debugConfiguration.getHost()).thenReturn("localhost");
-    when(debugConfiguration.getPort()).thenReturn(8000);
     Map<String, String> connectionProperties = new HashMap<>();
     connectionProperties.put("prop1", "val1");
     connectionProperties.put("prop2", "val2");
-    when(debugConfiguration.getConnectionProperties()).thenReturn(connectionProperties);
     Optional configurationOptional = mock(Optional.class);
     when(configurationOptional.isPresent()).thenReturn(Boolean.TRUE);
     when(configurationOptional.get()).thenReturn(debugConfiguration);

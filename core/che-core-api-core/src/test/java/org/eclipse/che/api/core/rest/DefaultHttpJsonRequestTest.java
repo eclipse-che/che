@@ -13,9 +13,8 @@ package org.eclipse.che.api.core.rest;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.core.util.LinksHelper.createLink;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -98,8 +97,13 @@ public class DefaultHttpJsonRequestTest {
     final DefaultHttpJsonRequest request = spy(new DefaultHttpJsonRequest(link));
     doReturn(new DefaultHttpJsonResponse("", 200))
         .when(request)
-        .doRequest(anyInt(), anyString(), anyString(), anyObject(), any(), anyString());
-
+        .doRequest(
+            anyInt(),
+            anyString(),
+            anyString(),
+            nullable(Object.class),
+            nullable(List.class),
+            nullable(String.class));
     request.request();
 
     verify(request).doRequest(0, DEFAULT_URL, "POST", null, null, null);
@@ -365,6 +369,12 @@ public class DefaultHttpJsonRequestTest {
   private void prepareResponse(String response) throws Exception {
     doReturn(new DefaultHttpJsonResponse(response, 200))
         .when(request)
-        .doRequest(anyInt(), anyString(), anyString(), anyObject(), any(), anyString());
+        .doRequest(
+            anyInt(),
+            anyString(),
+            anyString(),
+            nullable(Object.class),
+            nullable(List.class),
+            nullable(String.class));
   }
 }
