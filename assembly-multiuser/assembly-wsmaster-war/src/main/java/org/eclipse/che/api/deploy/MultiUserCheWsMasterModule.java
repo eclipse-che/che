@@ -18,6 +18,8 @@ import org.eclipse.che.api.user.server.jpa.JpaUserDao;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.hc.ServerCheckerFactoryImpl;
+import org.eclipse.che.commons.auth.token.ChainedTokenExtractor;
+import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.mail.template.ST.STTemplateProcessorImpl;
 import org.eclipse.che.mail.template.TemplateProcessor;
@@ -25,7 +27,7 @@ import org.eclipse.che.multiuser.api.permission.server.AdminPermissionInitialize
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 import org.eclipse.che.multiuser.api.permission.server.PermissionCheckerImpl;
 import org.eclipse.che.multiuser.keycloak.server.deploy.KeycloakModule;
-import org.eclipse.che.multiuser.machine.authentication.server.AuthServerCheckerFactoryImpl;
+import org.eclipse.che.multiuser.machine.authentication.server.MachineAuthModule;
 import org.eclipse.che.multiuser.organization.api.OrganizationApiModule;
 import org.eclipse.che.multiuser.organization.api.OrganizationJpaModule;
 import org.eclipse.che.multiuser.resource.api.ResourceModule;
@@ -71,6 +73,9 @@ public class MultiUserCheWsMasterModule extends AbstractModule {
     install(new OrganizationJpaModule());
 
     install(new KeycloakModule());
+
+    install(new MachineAuthModule());
+    bind(RequestTokenExtractor.class).to(ChainedTokenExtractor.class);
 
     //User and profile - use profile from keycloak and other stuff is JPA
     bind(PasswordEncryptor.class).to(PBKDF2PasswordEncryptor.class);
