@@ -41,9 +41,8 @@ import org.stringtemplate.v4.ST;
  * @see ServerEvaluationStrategy
  */
 public abstract class BaseServerEvaluationStrategy extends ServerEvaluationStrategy {
-    private static final Logger LOG =
-        LoggerFactory.getLogger(BaseServerEvaluationStrategy.class);
-                                
+  private static final Logger LOG = LoggerFactory.getLogger(BaseServerEvaluationStrategy.class);
+
   /** Regexp to extract port (under the form 22/tcp or 4401/tcp, etc.) from label references */
   public static final String LABEL_CHE_SERVER_REF_KEY = "^che:server:(.*):ref$";
 
@@ -402,18 +401,18 @@ public abstract class BaseServerEvaluationStrategy extends ServerEvaluationStrat
       globalPropertiesMap.put(IS_DEV_MACHINE_MACRO, getIsDevMachine());
       EnvironmentContext context = EnvironmentContext.getCurrent();
       if (context != null) {
-          String user = context.getSubject().getUserName();
-          if(user != null) {
-              LOG.debug("Setting 'user' macro to : {}", user);
-              globalPropertiesMap.put("user", user);
-          }
+        String user = context.getSubject().getUserName();
+        if (user != null) {
+          LOG.debug("Setting 'user' macro to : {}", user);
+          globalPropertiesMap.put("user", user);
+        }
       }
       String cheWorkspacesRoutingSuffix =
           cheWorkspacesRoutingSuffixProvider == null
               ? null
               : cheWorkspacesRoutingSuffixProvider.get();
       if (cheWorkspacesRoutingSuffix != null) {
-          LOG.debug("Setting 'workspacesRoutingSuffix' macro to : {}", cheWorkspacesRoutingSuffix);
+        LOG.debug("Setting 'workspacesRoutingSuffix' macro to : {}", cheWorkspacesRoutingSuffix);
         globalPropertiesMap.put("workspacesRoutingSuffix", cheWorkspacesRoutingSuffix);
       }
     }
