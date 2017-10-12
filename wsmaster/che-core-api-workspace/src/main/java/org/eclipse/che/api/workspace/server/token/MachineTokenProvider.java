@@ -11,7 +11,7 @@
 package org.eclipse.che.api.workspace.server.token;
 
 /**
- * Provides machine token that should be used for access to workspace master from machine.
+ * Provides machine token that should be used for accessing workspace master from a machine.
  *
  * @author Sergii Leshchenko
  */

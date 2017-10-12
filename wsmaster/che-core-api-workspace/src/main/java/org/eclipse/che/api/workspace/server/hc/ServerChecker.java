@@ -10,8 +10,6 @@
  */
 package org.eclipse.che.api.workspace.server.hc;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CompletableFuture;
@@ -19,7 +17,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.slf4j.Logger;
 
 /**
  * Checks availability of a server.
@@ -27,8 +24,6 @@ import org.slf4j.Logger;
  * @author Alexander Garagatyi
  */
 public abstract class ServerChecker {
-  private static final Logger LOG = getLogger(ServerChecker.class);
-
   private final String machineName;
   private final String serverRef;
   private final long period;

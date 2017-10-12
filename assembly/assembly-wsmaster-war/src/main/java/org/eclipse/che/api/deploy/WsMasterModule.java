@@ -15,6 +15,7 @@ import static org.eclipse.che.inject.Matchers.names;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
+import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
@@ -38,8 +39,7 @@ import org.eclipse.che.api.system.server.SystemModule;
 import org.eclipse.che.api.workspace.server.adapter.StackMessageBodyAdapter;
 import org.eclipse.che.api.workspace.server.adapter.WorkspaceConfigMessageBodyAdapter;
 import org.eclipse.che.api.workspace.server.adapter.WorkspaceMessageBodyAdapter;
-import org.eclipse.che.api.workspace.server.hc.ServerCheckerFactory;
-import org.eclipse.che.api.workspace.server.hc.ServerCheckerFactoryImpl;
+import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
 import org.eclipse.che.api.workspace.server.stack.StackLoader;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.inject.DynaModule;
@@ -99,6 +99,8 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.api.workspace.server.stack.StackService.class);
     bind(org.eclipse.che.api.workspace.server.TemporaryWorkspaceRemover.class);
     bind(org.eclipse.che.api.workspace.server.WorkspaceService.class);
+    install(new FactoryModuleBuilder().build(ServersCheckerFactory.class));
+
     bind(org.eclipse.che.api.workspace.server.bootstrap.InstallerService.class);
     bind(org.eclipse.che.api.workspace.server.event.WorkspaceMessenger.class).asEagerSingleton();
     bind(org.eclipse.che.api.workspace.server.event.WorkspaceJsonRpcMessenger.class)
@@ -161,8 +163,6 @@ public class WsMasterModule extends AbstractModule {
     // FIXME: spi
     //        bind(org.eclipse.che.api.agent.server.filters.AddExecInstallerInWorkspaceFilter.class);
     //        bind(org.eclipse.che.api.agent.server.filters.AddExecInstallerInStackFilter.class);
-
-    bind(ServerCheckerFactory.class).to(ServerCheckerFactoryImpl.class);
 
     bind(org.eclipse.che.api.user.server.AppStatesPreferenceCleaner.class);
   }

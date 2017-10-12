@@ -13,8 +13,8 @@ package org.eclipse.che.api.workspace.server.token;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 
 /**
- * An exception thrown by {@link MachineTokenProvider} when an error occurred during token fetching
- * operation execution.
+ * An exception should be thrown by {@link MachineTokenProvider}
+ * when an error occurred during token fetching.
  *
  * @author Sergii Leshchenko
  */

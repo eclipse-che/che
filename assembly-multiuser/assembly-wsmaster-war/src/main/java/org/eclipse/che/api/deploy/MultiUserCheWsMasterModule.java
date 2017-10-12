@@ -17,7 +17,6 @@ import org.eclipse.che.api.user.server.jpa.JpaPreferenceDao;
 import org.eclipse.che.api.user.server.jpa.JpaUserDao;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
-import org.eclipse.che.api.workspace.server.hc.ServerCheckerFactoryImpl;
 import org.eclipse.che.commons.auth.token.ChainedTokenExtractor;
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.inject.DynaModule;
@@ -40,7 +39,6 @@ public class MultiUserCheWsMasterModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    bind(ServerCheckerFactoryImpl.class).to(AuthServerCheckerFactoryImpl.class);
     install(new OpenShiftInfraModule());
 
     bind(TemplateProcessor.class).to(STTemplateProcessorImpl.class);
