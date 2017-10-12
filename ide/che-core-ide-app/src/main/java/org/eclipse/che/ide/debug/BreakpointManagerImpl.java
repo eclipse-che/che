@@ -220,6 +220,9 @@ public class BreakpointManagerImpl
     }
   }
 
+  @Override
+  public void update(Breakpoint breakpoint) {}
+
   private void deleteBreakpoints(String parentPath) {
     List<Breakpoint> breakpoints2delete =
         breakpointStorage

@@ -189,7 +189,8 @@ public class BreakpointStorageImpl implements BreakpointStorage {
             .withTarget(location.getTarget())
             .withLineNumber(location.getLineNumber())
             .withExternalResourceId(location.getExternalResourceId())
-            .withExternalResource(location.isExternalResource());
+            .withExternalResource(location.isExternalResource())
+            .withResourceProjectPath(location.getResourceProjectPath());
 
     return dtoFactory
         .createDto(BreakpointDto.class)

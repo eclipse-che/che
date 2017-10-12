@@ -11,6 +11,8 @@
 package org.eclipse.che.plugin.debugger.ide.debug;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ContextMenuEvent;
+import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -160,7 +162,6 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
           @Override
           public void onKeyboard(@NotNull KeyboardEvent event) {}
         });
-
     this.variablesPanel.add(variables);
     minimizeButton.ensureDebugId("debugger-minimizeBut");
   }
@@ -297,7 +298,10 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
             breakpoints.getSelectionModel().setSelectedItem(itemData);
           }
 
-          public void onListItemDoubleClicked(Element listItemBase, Breakpoint itemData) {}
+          @Override
+          public void onListItemContextMenu(int clientX, int clientY, Breakpoint itemData) {
+            delegate.onBreakpointContextMenu(clientX, clientY, itemData);
+          }
         };
 
     return SimpleList.create(
@@ -317,8 +321,6 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
             frames.getSelectionModel().setSelectedItem(itemData);
             delegate.onSelectedFrame(frames.getSelectionModel().getSelectedIndex());
           }
-
-          public void onListItemDoubleClicked(Element listItemBase, StackFrameDump itemData) {}
         };
 
     return SimpleList.create(

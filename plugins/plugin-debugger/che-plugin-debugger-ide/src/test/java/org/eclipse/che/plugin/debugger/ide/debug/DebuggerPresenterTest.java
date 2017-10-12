@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.plugin.debugger.ide.debug;
 
+import com.google.inject.Provider;
+
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 import static org.mockito.Matchers.any;
@@ -32,17 +34,22 @@ import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
+import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
+import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
+import org.eclipse.che.ide.ui.toolbar.PresentationFactory;
 import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
 import org.eclipse.che.plugin.debugger.ide.BaseTest;
 import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
 import org.eclipse.che.plugin.debugger.ide.DebuggerResources;
+import org.eclipse.che.plugin.debugger.ide.debug.breakpoint.BreakpointActionGroup;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -68,6 +75,11 @@ public class DebuggerPresenterTest extends BaseTest {
   @Mock private DebuggerManager debuggerManager;
   @Mock private WorkspaceAgent workspaceAgent;
   @Mock private DebuggerResourceHandlerFactory debuggerResourceHandlerFactory;
+  @Mock private ActionManager actionManager;
+  @Mock private KeyBindingAgent keyBindingAgent;
+  @Mock private Provider<PerspectiveManager> perspectiveManager;
+  @Mock private PresentationFactory presentationFactory;
+  @Mock private BreakpointActionGroup breakpointActionGroup;
 
   @Mock private Debugger debugger;
   @Mock private MutableVariable selectedVariable;
@@ -95,15 +107,16 @@ public class DebuggerPresenterTest extends BaseTest {
     presenter =
         spy(
             new DebuggerPresenter(
-                view,
-                constant,
-                breakpointManager,
-                notificationManager,
-                debuggerResources,
-                debuggerToolbar,
-                debuggerManager,
-                workspaceAgent,
-                debuggerResourceHandlerFactory));
+                    view,
+                    constant,
+                    breakpointManager,
+                    notificationManager,
+                    debuggerResources,
+                    debuggerToolbar,
+                    debuggerManager,
+                    workspaceAgent,
+                    debuggerResourceHandlerFactory,
+                    breakpointContextMenu));
 
     Mockito.reset(view);
     when(view.getSelectedThreadId()).thenReturn(THREAD_ID);
