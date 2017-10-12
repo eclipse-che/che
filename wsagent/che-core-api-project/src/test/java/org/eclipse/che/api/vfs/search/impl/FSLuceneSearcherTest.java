@@ -33,7 +33,6 @@ import org.eclipse.che.api.vfs.search.QueryExpression;
 import org.eclipse.che.api.vfs.search.SearchResult;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.mockito.ArgumentMatcher;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -388,12 +387,6 @@ public class FSLuceneSearcherTest {
   }
 
   private static VirtualFile withName(String name) {
-    return argThat(
-        new ArgumentMatcher<VirtualFile>() {
-          @Override
-          public boolean matches(Object argument) {
-            return name.equals(((VirtualFile) argument).getName());
-          }
-        });
+    return argThat(argument -> name.equals((argument).getName()));
   }
 }

@@ -12,7 +12,7 @@ package org.eclipse.che.plugin.nodejsdbg.ide.configuration;
 
 import static org.eclipse.che.plugin.nodejsdbg.ide.NodeJsDebugger.ConnectionProperties.SCRIPT;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -52,9 +52,6 @@ public class NodeJsDebuggerConfigurationPagePresenterTest {
 
   @Before
   public void setUp() {
-    when(configuration.getHost()).thenReturn(HOST);
-    when(configuration.getPort()).thenReturn(PORT);
-
     pagePresenter.resetFrom(configuration);
   }
 
@@ -72,7 +69,7 @@ public class NodeJsDebuggerConfigurationPagePresenterTest {
 
     verify(container).setWidget(eq(pageView));
     verify(configuration, atLeastOnce()).getConnectionProperties();
-    verify(pageView).setScriptPath(anyString());
+    verify(pageView).setScriptPath(nullable(String.class));
   }
 
   @Test

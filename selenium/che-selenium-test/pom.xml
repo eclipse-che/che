@@ -203,7 +203,7 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.mockito</groupId>
-                                    <artifactId>mockito-all</artifactId>
+                                    <artifactId>mockito-core</artifactId>
                                     <version>${org.mockito.version}</version>
                                     <type>jar</type>
                                 </artifactItem>

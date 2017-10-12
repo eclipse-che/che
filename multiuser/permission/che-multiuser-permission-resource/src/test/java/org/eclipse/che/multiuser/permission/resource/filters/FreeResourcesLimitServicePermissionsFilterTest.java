@@ -14,9 +14,9 @@ import static com.jayway.restassured.RestAssured.given;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -74,7 +74,9 @@ public class FreeResourcesLimitServicePermissionsFilterTest {
   public void setUp() throws Exception {
     filter = new FreeResourcesLimitServicePermissionsFilter();
 
-    when(subject.hasPermission(anyString(), anyString(), anyString())).thenReturn(true);
+    when(subject.hasPermission(
+            nullable(String.class), nullable(String.class), nullable(String.class)))
+        .thenReturn(true);
   }
 
   @Test
@@ -176,7 +178,9 @@ public class FreeResourcesLimitServicePermissionsFilterTest {
   @Test(dataProvider = "coveredPaths")
   public void shouldReturn403WhenUserDoesNotHaveRequiredPermission(String path, String method)
       throws Exception {
-    when(subject.hasPermission(anyString(), anyString(), anyString())).thenReturn(false);
+    when(subject.hasPermission(
+            nullable(String.class), nullable(String.class), nullable(String.class)))
+        .thenReturn(false);
 
     Response response =
         request(

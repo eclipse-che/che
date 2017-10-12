@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.github.ide.importer.page;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
@@ -126,8 +127,8 @@ public class GithubImporterPagePresenterTest {
                 locale));
     doReturn(Collections.singletonList(gitHubUser))
         .when(presenter)
-        .toOrgList(any(JsArrayMixed.class));
-    doReturn(Collections.emptyList()).when(presenter).toRepoList(any(JsArrayMixed.class));
+        .toOrgList(nullable(JsArrayMixed.class));
+    doReturn(Collections.emptyList()).when(presenter).toRepoList(nullable(JsArrayMixed.class));
     presenter.setUpdateDelegate(updateDelegate);
     presenter.init(dataObject);
   }
@@ -163,7 +164,7 @@ public class GithubImporterPagePresenterTest {
               }
             })
         .when(presenter)
-        .doRequest(any(Promise.class), any(Promise.class), any(Promise.class));
+        .doRequest(nullable(Promise.class), nullable(Promise.class), nullable(Promise.class));
     when(view.getAccountName()).thenReturn("AccountName");
 
     presenter.onLoadRepoClicked();
@@ -193,7 +194,7 @@ public class GithubImporterPagePresenterTest {
               }
             })
         .when(presenter)
-        .doRequest(any(Promise.class), any(Promise.class), any(Promise.class));
+        .doRequest(nullable(Promise.class), nullable(Promise.class), nullable(Promise.class));
 
     presenter.onLoadRepoClicked();
 
@@ -510,7 +511,7 @@ public class GithubImporterPagePresenterTest {
               }
             })
         .when(presenter)
-        .doRequest(any(Promise.class), any(Promise.class), any(Promise.class));
+        .doRequest(nullable(Promise.class), nullable(Promise.class), nullable(Promise.class));
     doReturn(exception).when(promiseError).getCause();
 
     presenter.onLoadRepoClicked();
@@ -550,7 +551,7 @@ public class GithubImporterPagePresenterTest {
               }
             })
         .when(presenter)
-        .doRequest(any(Promise.class), any(Promise.class), any(Promise.class));
+        .doRequest(nullable(Promise.class), nullable(Promise.class), nullable(Promise.class));
     final Throwable exception = mock(UnauthorizedException.class);
     String userId = "userId";
     CurrentUser user = mock(CurrentUser.class);

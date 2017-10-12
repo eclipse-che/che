@@ -18,6 +18,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
@@ -146,10 +147,9 @@ public class EditorPartStackPresenterTest {
     when(partPresenter3.getEditorInput()).thenReturn(editorInput3);
     when(editorInput3.getFile()).thenReturn(file3);
 
-    when(presentationFactory.getPresentation((Action) anyObject())).thenReturn(presentation);
+    when(presentationFactory.getPresentation(nullable(Action.class))).thenReturn(presentation);
 
-    when(eventBus.addHandler((Event.Type<Object>) anyObject(), anyObject()))
-        .thenReturn(handlerRegistration);
+    when(eventBus.addHandler(any(), any())).thenReturn(handlerRegistration);
 
     when(actionManager.getAction(EditorActions.SPLIT_HORIZONTALLY))
         .thenReturn(splitHorizontallyAction);
@@ -159,15 +159,15 @@ public class EditorPartStackPresenterTest {
     when(closeAllTabsPaneAction.getTemplatePresentation()).thenReturn(presentation);
     when(splitHorizontallyAction.getTemplatePresentation()).thenReturn(presentation);
     when(splitVerticallyAction.getTemplatePresentation()).thenReturn(presentation);
-    when(editorPaneMenuItemFactory.createMenuItem((Action) anyObject()))
+    when(editorPaneMenuItemFactory.createMenuItem((Action) any()))
         .thenReturn(editorPaneActionMenuItem);
-    when(editorPaneMenuItemFactory.createMenuItem((TabItem) anyObject()))
+    when(editorPaneMenuItemFactory.createMenuItem((TabItem) any()))
         .thenReturn(editorPaneTabMenuItem);
 
     Container container = mock(Container.class);
     Promise promise = mock(Promise.class);
     when(appContext.getWorkspaceRoot()).thenReturn(container);
-    when(container.getFile(any(Path.class))).thenReturn(promise);
+    when(container.getFile(nullable(Path.class))).thenReturn(promise);
 
     when(appContext.getDevMachine()).thenReturn(mock(DevMachine.class));
 
@@ -437,6 +437,6 @@ public class EditorPartStackPresenterTest {
 
     presenter.paneMenuTabItemHandler.onCloseButtonClicked(editorPaneTabMenuItem);
 
-    verify(editorAgent).closeEditor(any(EditorPartPresenter.class));
+    verify(editorAgent).closeEditor(nullable(EditorPartPresenter.class));
   }
 }

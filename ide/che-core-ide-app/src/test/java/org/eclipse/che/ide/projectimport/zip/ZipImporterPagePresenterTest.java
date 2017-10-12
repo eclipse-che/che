@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.ide.projectimport.zip;
 
-import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -67,10 +67,10 @@ public class ZipImporterPagePresenterTest {
     presenter.go(container);
 
     verify(container).setWidget(eq(view));
-    verify(view).setProjectName(anyString());
-    verify(view).setProjectDescription(anyString());
-    verify(view).setProjectUrl(anyString());
-    verify(view).setSkipFirstLevel(anyBoolean());
+    verify(view).setProjectName(nullable(String.class));
+    verify(view).setProjectDescription(nullable(String.class));
+    verify(view).setProjectUrl(nullable(String.class));
+    verify(view).setSkipFirstLevel(nullable(Boolean.class));
     verify(view).setInputsEnableState(eq(true));
     verify(view).focusInUrlInput();
   }
@@ -82,7 +82,7 @@ public class ZipImporterPagePresenterTest {
 
     presenter.projectUrlChanged(INCORRECT_URL);
 
-    verify(view).showUrlError(anyString());
+    verify(view).showUrlError(nullable(String.class));
     verify(delegate).updateControls();
   }
 
