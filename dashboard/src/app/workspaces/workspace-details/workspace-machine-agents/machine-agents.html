@@ -37,16 +37,17 @@
                   <md-switch ng-model="agentItem.isEnabled"
                              ng-disabled="machineAgentsController.isLocked(agentItem.id)"
                              ng-change="machineAgentsController.updateAgent(agentItem)"
-                             aria-label="Machine agent">
+                             aria-label="Machine agent"
+                             agent-switch="{{agentItem.name}}">
                   </md-switch>
                 </div>
                 <!-- Name -->
                 <div flex="30">
-                  <span class="che-list-item-name">{{agentItem.name}}</span>
+                  <span class="che-list-item-name" agent-name="{{agentItem.name}}">{{agentItem.name}}</span>
                 </div>
                 <!-- Description -->
                 <div flex="60">
-                  <span class="che-list-item-secondary">{{agentItem.description}}</span>
+                  <span class="che-list-item-secondary" agent-description="{{agentItem.description}}">{{agentItem.description}}</span>
                 </div>
               </div>
             </div>
