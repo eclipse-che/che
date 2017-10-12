@@ -53,6 +53,9 @@ public interface GitResources extends ClientBundle {
   @Source({"changeMarkers.css", "org/eclipse/che/ide/api/ui/style.css"})
   Css changeMarkersCSS();
 
+  @Source("panel/git.svg")
+  SVGResource git();
+
   @Source("push/arrow.svg")
   SVGResource arrow();
 

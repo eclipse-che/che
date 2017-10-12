@@ -44,6 +44,7 @@ import org.eclipse.che.ide.ext.git.client.action.ShowBranchesAction;
 import org.eclipse.che.ide.ext.git.client.action.ShowMergeAction;
 import org.eclipse.che.ide.ext.git.client.action.ShowRemoteAction;
 import org.eclipse.che.ide.ext.git.client.action.ShowStatusAction;
+import org.eclipse.che.ide.ext.git.client.action.ToggleGitPanelAction;
 
 /**
  * Extension add Git support to the IDE Application.
@@ -66,6 +67,8 @@ public class GitExtension {
 
   public static final String NEXT_DIFF_ACTION_ID = "nextDiff";
   public static final String PREV_DIFF_ACTION_ID = "prevDiff";
+
+  public static final String GIT_PANEL_ACTION_ID = "gitPanel";
 
   @Inject
   public GitExtension(
@@ -94,6 +97,7 @@ public class GitExtension {
       CompareWithRevisionAction compareWithRevisionAction,
       NextDiffAction nextDiffAction,
       PreviousDiffAction previousDiffAction,
+      ToggleGitPanelAction gitPanelAction,
       KeyBindingAgent keyBinding) {
 
     resources.gitCSS().ensureInjected();
@@ -197,6 +201,8 @@ public class GitExtension {
     actionManager.registerAction(NEXT_DIFF_ACTION_ID, nextDiffAction);
     actionManager.registerAction(PREV_DIFF_ACTION_ID, previousDiffAction);
 
+    actionManager.registerAction(GIT_PANEL_ACTION_ID, gitPanelAction);
+
     keyBinding
         .getGlobal()
         .addKey(new KeyBuilder().action().alt().charCode('d').build(), GIT_COMPARE_WITH_LATEST);
@@ -219,5 +225,9 @@ public class GitExtension {
     keyBinding
         .getGlobal()
         .addKey(new KeyBuilder().alt().charCode(',').build(), PREV_DIFF_ACTION_ID);
+
+    keyBinding
+        .getGlobal()
+        .addKey(new KeyBuilder().alt().charCode('g').build(), GIT_PANEL_ACTION_ID);
   }
 }
