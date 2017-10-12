@@ -274,7 +274,6 @@ public class LimitsCheckingWorkspaceManagerTest {
               null,
               null,
               null,
-              null,
               maxRamPerEnv,
               environmentRamCalculator,
               resourceUsageManager,
