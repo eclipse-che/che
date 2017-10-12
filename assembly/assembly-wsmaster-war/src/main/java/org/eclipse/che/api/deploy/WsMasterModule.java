@@ -207,8 +207,6 @@ public class WsMasterModule extends AbstractModule {
     final MessageBodyAdapterInterceptor interceptor = new MessageBodyAdapterInterceptor();
     requestInjection(interceptor);
     bindInterceptor(subclassesOf(CheJsonProvider.class), names("readFrom"), interceptor);
-    bind(org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner.class)
-        .to(org.eclipse.che.plugin.docker.machine.cleaner.LocalWorkspaceFilesCleaner.class);
     bind(org.eclipse.che.api.environment.server.InfrastructureProvisioner.class)
         .to(org.eclipse.che.plugin.docker.machine.local.LocalCheInfrastructureProvisioner.class);
 
@@ -218,7 +216,6 @@ public class WsMasterModule extends AbstractModule {
         .asEagerSingleton();
 
     install(new org.eclipse.che.plugin.docker.machine.dns.DnsResolversModule());
-    install(new org.eclipse.che.plugin.traefik.TraefikDockerModule());
 
     bind(org.eclipse.che.api.agent.server.filters.AddExecAgentInWorkspaceFilter.class);
     bind(org.eclipse.che.api.agent.server.filters.AddExecAgentInStackFilter.class);
