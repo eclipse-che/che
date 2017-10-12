@@ -43,7 +43,7 @@ public class URLFetcher {
   protected static final long MAXIMUM_READ_BYTES = 30 * 1000;
 
   /** The Compiled REGEX PATTERN that can be used for http|https git urls */
-  final Pattern GIT_HTTP_URL_PATTERN = Pattern.compile("(^http[s]?://.*)(.git$)");
+  final Pattern GIT_HTTP_URL_PATTERN = Pattern.compile("(?<sanitized>^http[s]?://.*)\\.git$");
 
   /**
    * Fetch the url provided and return its content To prevent DOS attack, limit the amount of the
@@ -107,7 +107,7 @@ public class URLFetcher {
     if (url != null) {
       final Matcher matcher = GIT_HTTP_URL_PATTERN.matcher(url);
       if (matcher.find()) {
-        return matcher.group(1);
+        return matcher.group("sanitized");
       }
     }
     return url;
