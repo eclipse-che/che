@@ -165,22 +165,18 @@ public class GitPanelPresenter extends BasePresenter
   @Override
   public void onFileChanged(String endpointId, FileChangedEventDto dto) {
     switch (dto.getStatus()) {
-      case ADDED:
-        // do nothing
-        break;
       case MODIFIED:
         if (alteredFiles.addFile(removeProjectName(dto.getPath()), Status.MODIFIED)) {
           updateChangedFiles(alteredFiles);
         }
-        break;
-      case UNTRACKED:
-        // do nothing
         break;
       case NOT_MODIFIED:
         if (alteredFiles.removeFile(removeProjectName(dto.getPath()))) {
           updateChangedFiles(alteredFiles);
         }
         break;
+      default:
+        // do nothing
     }
   }
 
