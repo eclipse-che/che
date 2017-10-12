@@ -10,10 +10,13 @@
  */
 package org.eclipse.che.plugin.debugger.ide.debug.breakpoint;
 
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
+import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
+import org.eclipse.che.ide.api.debug.BreakpointManager;
 
 /** @author Anatolii Bazko */
 @Singleton
@@ -21,14 +24,20 @@ public class BreakpointConfigurationPresenter
     implements BreakpointConfigurationView.ActionDelegate {
 
   private final BreakpointConfigurationView view;
+  private final BreakpointManager breakpointManager;
+
+  private Breakpoint breakpoint;
 
   @Inject
-  public BreakpointConfigurationPresenter(BreakpointConfigurationView view) {
+  public BreakpointConfigurationPresenter(
+      BreakpointConfigurationView view, BreakpointManager breakpointManager) {
     this.view = view;
+    this.breakpointManager = breakpointManager;
     this.view.setDelegate(this);
   }
 
   public void showDialog(Breakpoint breakpoint) {
+    this.breakpoint = breakpoint;
     view.setBreakpoint(breakpoint);
     view.showDialog();
   }
@@ -36,5 +45,17 @@ public class BreakpointConfigurationPresenter
   @Override
   public void onApplyClicked() {
     view.close();
+
+    BreakpointImpl updatedBreakpoint =
+        new BreakpointImpl(
+            this.breakpoint.getLocation(),
+            this.breakpoint.isEnabled(),
+            Strings.isNullOrEmpty(view.getBreakpointCondition())
+                ? null
+                : view.getBreakpointCondition());
+
+    if (!updatedBreakpoint.equals(breakpoint)) {
+      breakpointManager.update(updatedBreakpoint);
+    }
   }
 }

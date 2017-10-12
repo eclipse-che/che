@@ -409,7 +409,7 @@ public class DebuggerTest extends BaseTest {
     when(breakpointDto.withLocation(locationDto)).thenReturn(breakpointDto);
     when(breakpointDto.withEnabled(true)).thenReturn(breakpointDto);
 
-    debugger.addBreakpoint(virtualFile, breakpointDto);
+    debugger.addBreakpoint(breakpointDto);
 
     verify(service).addBreakpoint(SESSION_ID, breakpointDto);
     verify(promiseVoid).then(operationVoidCaptor.capture());
@@ -427,7 +427,7 @@ public class DebuggerTest extends BaseTest {
     doReturn(promiseVoid).when(service).deleteBreakpoint(SESSION_ID, locationDto);
     doReturn(promiseVoid).when(promiseVoid).then((Operation<Void>) any());
 
-    debugger.deleteBreakpoint(file, breakpointDto);
+    debugger.deleteBreakpoint(breakpointDto);
 
     verify(promiseVoid).then(operationVoidCaptor.capture());
     operationVoidCaptor.getValue().apply(null);
@@ -442,7 +442,7 @@ public class DebuggerTest extends BaseTest {
   @Test
   public void testDeleteBreakpointWithoutConnection() throws Exception {
     debugger.setDebugSession(null);
-    debugger.deleteBreakpoint(file, breakpointDto);
+    debugger.deleteBreakpoint(breakpointDto);
 
     verify(service, never()).deleteBreakpoint(any(), any());
   }

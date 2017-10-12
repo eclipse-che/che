@@ -12,7 +12,6 @@ package org.eclipse.che.plugin.debugger.ide.debug.breakpoint;
 
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.ide.api.mvp.View;
-import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
 
 /**
  * Provides methods which allow to change view representation of breakpoint configuration window.
@@ -32,4 +31,6 @@ public interface BreakpointConfigurationView
   void close();
 
   void setBreakpoint(Breakpoint breakpoint);
+
+  String getBreakpointCondition();
 }

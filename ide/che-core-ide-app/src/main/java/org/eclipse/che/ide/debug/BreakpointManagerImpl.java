@@ -136,7 +136,7 @@ public class BreakpointManagerImpl
 
     Debugger debugger = debuggerManager.getActiveDebugger();
     if (debugger != null) {
-      debugger.deleteBreakpoint(activeFile, breakpoint);
+      debugger.deleteBreakpoint(breakpoint);
     }
   }
 
@@ -159,7 +159,7 @@ public class BreakpointManagerImpl
 
     Debugger debugger = debuggerManager.getActiveDebugger();
     if (debugger != null) {
-      debugger.addBreakpoint(file, breakpoint);
+      debugger.addBreakpoint(breakpoint);
     }
   }
 
@@ -221,7 +221,15 @@ public class BreakpointManagerImpl
   }
 
   @Override
-  public void update(Breakpoint breakpoint) {}
+  public void update(Breakpoint breakpoint) {
+    breakpointStorage.update(breakpoint);
+
+    Debugger debugger = debuggerManager.getActiveDebugger();
+    if (debugger != null) {
+      debugger.deleteBreakpoint(breakpoint);
+      debugger.addBreakpoint(breakpoint);
+    }
+  }
 
   private void deleteBreakpoints(String parentPath) {
     List<Breakpoint> breakpoints2delete =

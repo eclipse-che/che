@@ -15,6 +15,8 @@ import static org.eclipse.che.ide.api.editor.gutter.Gutters.BREAKPOINTS_GUTTER;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import elemental.dom.Element;
+
+import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.ide.api.debug.BreakpointRenderer;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.gutter.Gutter;
@@ -42,7 +44,9 @@ public class BreakpointRendererImpl implements BreakpointRenderer {
   private Document document;
 
   private Element activeBreakpointMark;
+  private Element activeConditionBreakpointMark;
   private Element inactiveBreakpointMark;
+  private Element inactiveConditionBreakpointMark;
 
   @AssistedInject
   public BreakpointRendererImpl(
@@ -123,7 +127,11 @@ public class BreakpointRendererImpl implements BreakpointRenderer {
   private void initBreakpointMarks() {
     BreakpointResources.Css css = breakpointResources.getCss();
     activeBreakpointMark = Elements.createDivElement(css.breakpoint(), css.active());
+    activeConditionBreakpointMark =
+        Elements.createDivElement(css.breakpoint(), css.active(), css.condition());
     inactiveBreakpointMark = Elements.createDivElement(css.breakpoint(), css.inactive());
+    inactiveConditionBreakpointMark =
+        Elements.createDivElement(css.breakpoint(), css.active(), css.condition());
   }
 
   @Override

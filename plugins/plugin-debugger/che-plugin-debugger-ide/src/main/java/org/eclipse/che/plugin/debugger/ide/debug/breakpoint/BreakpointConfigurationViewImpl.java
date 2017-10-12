@@ -40,7 +40,6 @@ public class BreakpointConfigurationViewImpl extends Window implements Breakpoin
   @UiField TextArea breakpointCondition;
 
   private final Button applyButton;
-  private final DebuggerLocalizationConstant locale;
 
   private ActionDelegate delegate;
 
@@ -48,7 +47,6 @@ public class BreakpointConfigurationViewImpl extends Window implements Breakpoin
   public BreakpointConfigurationViewImpl(DebuggerLocalizationConstant locale) {
     Widget widget = uiBinder.createAndBindUi(this);
 
-    this.locale = locale;
     this.setWidget(widget);
     this.setTitle(locale.breakpointConfigurationTitle());
 
@@ -90,5 +88,10 @@ public class BreakpointConfigurationViewImpl extends Window implements Breakpoin
     if (breakpoint.getCondition() != null) {
       breakpointCondition.setText(breakpoint.getCondition());
     }
+  }
+
+  @Override
+  public String getBreakpointCondition() {
+    return breakpointCondition.getText();
   }
 }

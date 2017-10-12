@@ -357,7 +357,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   }
 
   @Override
-  public void addBreakpoint(final VirtualFile file, final Breakpoint breakpoint) {
+  public void addBreakpoint(final Breakpoint breakpoint) {
     if (isConnected()) {
       Location location = breakpoint.getLocation();
 
@@ -385,7 +385,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   }
 
   @Override
-  public void deleteBreakpoint(final VirtualFile file, final Breakpoint breakpoint) {
+  public void deleteBreakpoint(final Breakpoint breakpoint) {
     if (!isConnected()) {
       return;
     }
