@@ -34,7 +34,7 @@ import org.eclipse.che.ide.ui.UILocalizationConstant;
  */
 public class InputDialogFooter implements IsWidget {
 
-  private static final Resources resources = GWT.create(Resources.class);
+  protected static final Resources resources = GWT.create(Resources.class);
   /** The UI binder instance. */
   private static ConfirmWindowFooterUiBinder uiBinder =
       GWT.create(ConfirmWindowFooterUiBinder.class);
@@ -42,10 +42,10 @@ public class InputDialogFooter implements IsWidget {
   @UiField(provided = true)
   UILocalizationConstant messages;
 
-  @UiField Button okButton;
-  @UiField Button cancelButton;
+  @UiField protected Button okButton;
+  @UiField protected Button cancelButton;
 
-  HTMLPanel rootPanel;
+  protected HTMLPanel rootPanel;
 
   /** The action delegate. */
   private ActionDelegate actionDelegate;

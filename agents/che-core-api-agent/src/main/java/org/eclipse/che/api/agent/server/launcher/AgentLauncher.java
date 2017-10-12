@@ -31,6 +31,12 @@ public interface AgentLauncher {
   String getMachineType();
 
   /**
+   * @return true if machine bootstrap should be interrupted when agent fail to launch, false
+   *     otherwise
+   */
+  boolean shouldBlockMachineStartOnError();
+
+  /**
    * Executes agents scripts over target machine. The machine should be started.
    *
    * @see Agent#getScript()

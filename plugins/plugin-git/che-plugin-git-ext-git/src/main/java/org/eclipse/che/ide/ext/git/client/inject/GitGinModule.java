@@ -12,15 +12,16 @@ package org.eclipse.che.ide.ext.git.client.inject;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
+import com.google.gwt.inject.client.multibindings.GinMapBinder;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistrar;
-import org.eclipse.che.ide.api.vcs.VcsChangeMarkerRender;
 import org.eclipse.che.ide.api.vcs.VcsChangeMarkerRenderFactory;
 import org.eclipse.che.ide.ext.git.client.GitEventSubscribable;
 import org.eclipse.che.ide.ext.git.client.GitEventsHandler;
+import org.eclipse.che.ide.ext.git.client.GitChangeMarkerRendererFactory;
 import org.eclipse.che.ide.ext.git.client.add.AddToIndexView;
 import org.eclipse.che.ide.ext.git.client.add.AddToIndexViewImpl;
 import org.eclipse.che.ide.ext.git.client.branch.BranchView;
@@ -51,7 +52,6 @@ import org.eclipse.che.ide.ext.git.client.panel.GitPanelView;
 import org.eclipse.che.ide.ext.git.client.panel.GitPanelViewImpl;
 import org.eclipse.che.ide.ext.git.client.plugins.EditorTabsColorizer;
 import org.eclipse.che.ide.ext.git.client.plugins.GitChangeMarkerManager;
-import org.eclipse.che.ide.ext.git.client.plugins.GitChangeMarkerRender;
 import org.eclipse.che.ide.ext.git.client.plugins.ProjectExplorerTreeColorizer;
 import org.eclipse.che.ide.ext.git.client.preference.CommitterPreferencePresenter;
 import org.eclipse.che.ide.ext.git.client.pull.PullView;
@@ -85,10 +85,11 @@ public class GitGinModule extends AbstractGinModule {
         .addBinding()
         .to(CommitterPreferencePresenter.class);
 
-    install(
-        new GinFactoryModuleBuilder()
-            .implement(VcsChangeMarkerRender.class, GitChangeMarkerRender.class)
-            .build(VcsChangeMarkerRenderFactory.class));
+    GinMapBinder<String, VcsChangeMarkerRenderFactory> vcsChangeMarkerRenderFactoryMapBinder =
+        GinMapBinder.newMapBinder(binder(), String.class, VcsChangeMarkerRenderFactory.class);
+    vcsChangeMarkerRenderFactoryMapBinder
+        .addBinding("git")
+        .to(GitChangeMarkerRendererFactory.class);
 
     bind(AddToIndexView.class).to(AddToIndexViewImpl.class).in(Singleton.class);
     bind(ResetToCommitView.class).to(ResetToCommitViewImpl.class).in(Singleton.class);

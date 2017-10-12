@@ -184,9 +184,10 @@ public class CommandsExplorer {
   }
 
   public void cloneCommandByName(String commandName) {
+    loader.waitOnClosed();
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
-            ExpectedConditions.visibilityOfElementLocated(
+            ExpectedConditions.elementToBeClickable(
                 By.xpath(
                     "//div[@id='command_"
                         + commandName

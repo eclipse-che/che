@@ -21,6 +21,11 @@ set_sudo_command() {
     if is_current_user_sudoer && ! is_current_user_root; then SUDO="sudo -E"; else unset SUDO; fi
 }
 
+if ! is_current_user_root && ! is_current_user_sudoer; then
+  (>&2 echo "Current user is not a sudoer and cannot start SSH daemon. SSH service won't be available for this workspace")
+  exit 1
+fi
+
 set_sudo_command
 unset PACKAGES
 

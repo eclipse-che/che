@@ -85,6 +85,11 @@ public class WsAgentLauncher implements AgentLauncher {
   }
 
   @Override
+  public boolean shouldBlockMachineStartOnError() {
+    return true;
+  }
+
+  @Override
   public void launch(Instance machine, Agent agent) throws ServerException {
     final String wsAgentPingUrl;
     try {

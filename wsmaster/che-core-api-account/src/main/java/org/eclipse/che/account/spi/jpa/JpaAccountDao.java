@@ -14,7 +14,6 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 import com.google.inject.persist.Transactional;
-import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
@@ -111,7 +110,9 @@ public class JpaAccountDao implements AccountDao {
 
   @Transactional
   protected void doCreate(AccountImpl account) {
-    managerProvider.get().persist(account);
+    final EntityManager manager = managerProvider.get();
+    manager.persist(account);
+    manager.flush();
   }
 
   @Transactional
@@ -127,10 +128,12 @@ public class JpaAccountDao implements AccountDao {
   }
 
   @Transactional
-  protected Optional<AccountImpl> doRemove(String id) {
+  protected void doRemove(String id) {
     final EntityManager manager = managerProvider.get();
-    final Optional<AccountImpl> account = Optional.ofNullable(manager.find(AccountImpl.class, id));
-    account.ifPresent(manager::remove);
-    return account;
+    AccountImpl account = manager.find(AccountImpl.class, id);
+    if (account != null) {
+      manager.remove(account);
+      manager.flush();
+    }
   }
 }
