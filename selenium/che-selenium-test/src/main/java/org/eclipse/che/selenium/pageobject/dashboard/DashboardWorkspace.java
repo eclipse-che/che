@@ -116,7 +116,7 @@ public class DashboardWorkspace {
     String RUN_WORKSPACE_BTN = "//button/span[text()='Run']";
     String STOP_WORKSPACE_BTN = "//button/span[contains(text(),'Stop')]";
     String DELETE_WORKSPACE_BTN = "//button/span[text()='Delete']";
-    String STATE_WORKSPACE = "//span[contains(@class, '%s')]";
+    String STATE_WORKSPACE = "//div[contains(@class, 'workspace-status')]/span[text()='%s']";
     String WORKSPACE_TITLE = "//div[contains(@class,'toolbar-info')]/span[text()='%s']";
     String DELETE_BTN_DIALOG_WIND =
         "//button[@ng-click='cheConfirmDialogController.hide()']//span[text()='Delete']";
@@ -917,6 +917,7 @@ public class DashboardWorkspace {
   }
 
   public void switchAgentState(String agentName) {
+    loader.waitOnClosed();
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(

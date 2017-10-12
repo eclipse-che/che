@@ -222,7 +222,6 @@ public class WorkspaceDetailsTest {
     clickOnSaveButton();
 
     //check that project exists(workspace will restart)
-    dashboardWorkspace.checkStateOfWorkspace(DashboardWorkspace.StateWorkspace.RUNNING);
     dashboardWorkspace.checkStateOfWorkspace(DashboardWorkspace.StateWorkspace.STOPPED);
     dashboardProject.waitProjectIsPresent(Template.WEB_JAVA_PETCLINIC.value());
 
@@ -252,6 +251,7 @@ public class WorkspaceDetailsTest {
     agents.put("Terminal", true);
     agents.put("TypeScript language server", false);
     agents.put("Workspace API", true);
+    agents.put("Yaml language server", false);
 
     variables.put("MYSQL_DATABASE", "petclinic");
     variables.put("MYSQL_PASSWORD", "password");
