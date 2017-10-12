@@ -23,7 +23,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -95,21 +94,18 @@ public class WorkspaceManagerTest {
   @Mock private WorkspaceDao workspaceDao;
   @Mock private WorkspaceRuntimes runtimes;
   @Mock private AccountManager accountManager;
-  @Mock private WorkspaceSharedPool sharedPool;
   @Mock private EventService eventService;
   @Mock private WorkspaceValidator validator;
   @Mock private RuntimeInfrastructure infrastructure;
 
   @Captor private ArgumentCaptor<WorkspaceImpl> workspaceCaptor;
-  @Captor private ArgumentCaptor<Runnable> taskCaptor;
 
   private WorkspaceManager workspaceManager;
 
   @BeforeMethod
   public void setUp() throws Exception {
     workspaceManager =
-        new WorkspaceManager(
-            workspaceDao, runtimes, eventService, accountManager, validator, sharedPool);
+        new WorkspaceManager(workspaceDao, runtimes, eventService, accountManager, validator);
     when(accountManager.getByName(NAMESPACE_1))
         .thenReturn(new AccountImpl("accountId", NAMESPACE_1, "test"));
     when(accountManager.getByName(NAMESPACE_2))
@@ -429,24 +425,13 @@ public class WorkspaceManagerTest {
   public void stopsWorkspace() throws Exception {
     final WorkspaceImpl workspace = createAndMockWorkspace(createConfig(), NAMESPACE_1);
     mockRuntime(workspace, RUNNING);
+    mockAnyWorkspaceStop();
 
     workspaceManager.stopWorkspace(workspace.getId(), emptyMap());
 
-    captureRunAsyncCallsAndRunSynchronously();
-    verify(runtimes).stop(workspace.getId(), emptyMap());
+    verify(runtimes).stopAsync(workspace, emptyMap());
     verify(workspaceDao).update(workspaceCaptor.capture());
     assertNotNull(workspaceCaptor.getValue().getAttributes().get(UPDATED_ATTRIBUTE_NAME));
-  }
-
-  @Test(
-    expectedExceptions = ConflictException.class,
-    expectedExceptionsMessageRegExp =
-        "Could not stop the workspace " + "'.*' because its status is 'STOPPED'."
-  )
-  public void throwsConflictExceptionWhenStoppingWorkspaceWithoutRuntime() throws Exception {
-    final WorkspaceImpl workspace = createAndMockWorkspace();
-
-    workspaceManager.stopWorkspace(workspace.getId(), emptyMap());
   }
 
   @Test
@@ -454,11 +439,11 @@ public class WorkspaceManagerTest {
     final WorkspaceImpl workspace = createAndMockWorkspace();
     workspace.setTemporary(true);
     mockRuntime(workspace, RUNNING);
+    mockAnyWorkspaceStop();
 
     workspaceManager.stopWorkspace(workspace.getId(), emptyMap());
 
-    captureRunAsyncCallsAndRunSynchronously();
-    verify(runtimes).stop(workspace.getId(), emptyMap());
+    verify(runtimes).stopAsync(workspace, emptyMap());
     verify(workspaceDao).remove(workspace.getId());
   }
 
@@ -469,10 +454,10 @@ public class WorkspaceManagerTest {
     mockRuntime(workspace, RUNNING);
     doThrow(new ConflictException("runtime stop failed"))
         .when(runtimes)
-        .stop(workspace.getId(), emptyMap());
+        .stopAsync(workspace, emptyMap());
+    mockAnyWorkspaceStop();
 
     workspaceManager.stopWorkspace(workspace.getId(), emptyMap());
-    captureRunAsyncCallsAndRunSynchronously();
     verify(workspaceDao).remove(workspace.getId());
   }
 
@@ -486,13 +471,6 @@ public class WorkspaceManagerTest {
     workspaceManager.startWorkspace(workspaceConfig, workspace.getNamespace(), true, emptyMap());
 
     verify(workspaceDao, times(1)).remove(anyString());
-  }
-
-  private void captureRunAsyncCallsAndRunSynchronously() {
-    verify(sharedPool, atLeastOnce()).runAsync(taskCaptor.capture());
-    for (Runnable runnable : taskCaptor.getAllValues()) {
-      runnable.run();
-    }
   }
 
   private void mockRuntimeStatus(WorkspaceImpl workspace, WorkspaceStatus status) {
@@ -560,6 +538,11 @@ public class WorkspaceManagerTest {
   private void mockAnyWorkspaceStart() throws Exception {
     CompletableFuture<Void> cmpFuture = CompletableFuture.completedFuture(null);
     when(runtimes.startAsync(any(), anyString(), any())).thenReturn(cmpFuture);
+  }
+
+  private void mockAnyWorkspaceStop() throws Exception {
+    CompletableFuture<Void> cmpFuture = CompletableFuture.completedFuture(null);
+    when(runtimes.stopAsync(any(), any())).thenReturn(cmpFuture);
   }
 
   private void mockAnyWorkspaceStartFailed(Exception cause) throws Exception {

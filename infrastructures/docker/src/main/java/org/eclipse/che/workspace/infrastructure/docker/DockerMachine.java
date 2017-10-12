@@ -154,8 +154,7 @@ public class DockerMachine implements Machine {
     try {
       docker.removeImage(RemoveImageParams.create(image).withForce(false));
     } catch (IOException e) {
-      // TODO make log level warning if we ignoring it or remove ignoring phrase
-      LOG.error("IOException during destroy(). Ignoring.", e);
+      LOG.warn("IOException during destroy(). Ignoring.", e);
     }
   }
 

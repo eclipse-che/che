@@ -10,12 +10,14 @@
  */
 package org.eclipse.che.api.workspace.server;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
+import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOPPED_BY;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
@@ -63,8 +65,6 @@ import org.eclipse.che.core.db.DBInitializer;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-// TODO: spi: deal with exceptions
 
 /**
  * Defines an internal API for managing {@link RuntimeImpl} instances.
@@ -167,15 +167,13 @@ public class WorkspaceRuntimes {
    * Starts all machines from specified workspace environment, creates workspace runtime instance
    * based on that environment.
    *
-   * <p>
-   *
    * <p>During the start of the workspace its runtime is visible with {@link
    * WorkspaceStatus#STARTING} status.
    *
    * @param workspace workspace which environment should be started
    * @param envName the name of the environment to start
    * @param options whether machines should be recovered(true) or not(false)
-   * @return the workspace runtime instance with machines set.
+   * @return completable future of start execution.
    * @throws ConflictException when workspace is already running
    * @throws ConflictException when start is interrupted
    * @throws NotFoundException when any not found exception occurs during environment start
@@ -237,32 +235,18 @@ public class WorkspaceRuntimes {
         throw new ConflictException(
             "Could not start workspace '" + workspaceId + "' because it is not in 'STOPPED' state");
       }
-      eventService.publish(
-          DtoFactory.newDto(WorkspaceStatusEvent.class)
-              .withWorkspaceId(workspaceId)
-              .withStatus(STARTING)
-              .withPrevStatus(STOPPED));
+      LOG.info(
+          "Starting workspace '{}/{}' with id '{}' by user '{}'",
+          workspace.getNamespace(),
+          workspace.getConfig().getName(),
+          workspace.getId(),
+          sessionUserNameOr("undefined"));
+
+      publishWorkspaceStatusEvent(workspaceId, STARTING, STOPPED, null);
+
       return CompletableFuture.runAsync(
-          ThreadLocalPropagateContext.wrap(
-              () -> {
-                try {
-                  runtime.start(options);
-                  runtimes.replace(workspaceId, new RuntimeState(runtime, RUNNING));
-                  eventService.publish(
-                      DtoFactory.newDto(WorkspaceStatusEvent.class)
-                          .withWorkspaceId(workspaceId)
-                          .withStatus(RUNNING)
-                          .withPrevStatus(STARTING));
-                } catch (InfrastructureException e) {
-                  runtimes.remove(workspaceId);
-                  if (!(e instanceof RuntimeStartInterruptedException)) {
-                    publishWorkspaceStoppedEvent(workspaceId, STARTING, e.getMessage());
-                  }
-                  throw new RuntimeException(e);
-                }
-              }),
+          ThreadLocalPropagateContext.wrap(new StartRuntimeTask(workspace, options, runtime)),
           sharedPool.getExecutor());
-      //TODO made complete rework of exceptions.
     } catch (ValidationException e) {
       LOG.error(e.getLocalizedMessage(), e);
       throw new ConflictException(e.getLocalizedMessage());
@@ -272,23 +256,73 @@ public class WorkspaceRuntimes {
     }
   }
 
+  private class StartRuntimeTask implements Runnable {
+    private final Workspace workspace;
+    private final Map<String, String> options;
+    private final InternalRuntime runtime;
+
+    public StartRuntimeTask(
+        Workspace workspace, Map<String, String> options, InternalRuntime runtime) {
+      this.workspace = workspace;
+      this.options = options;
+      this.runtime = runtime;
+    }
+
+    @Override
+    public void run() {
+      String workspaceId = workspace.getId();
+      try {
+        runtime.start(options);
+        runtimes.replace(workspaceId, new RuntimeState(runtime, RUNNING));
+
+        LOG.info(
+            "Workspace '{}:{}' with id '{}' started by user '{}'",
+            workspace.getNamespace(),
+            workspace.getConfig().getName(),
+            workspaceId,
+            sessionUserNameOr("undefined"));
+        publishWorkspaceStatusEvent(workspaceId, RUNNING, STARTING, null);
+      } catch (InfrastructureException e) {
+        runtimes.remove(workspaceId);
+        String failureCause = "failed";
+        if (e instanceof RuntimeStartInterruptedException) {
+          failureCause = "interrupted";
+        }
+        LOG.info(
+            "Workspace '{}:{}' with id '{}' start {}",
+            workspace.getNamespace(),
+            workspace.getConfig().getName(),
+            workspaceId,
+            failureCause);
+        // InfrastructureException is supposed to be an exception that can't be solved
+        // by Che admin, so should not be logged (but not InternalInfrastructureException).
+        // It will prevent bothering the admin when user made a mistake in WS configuration.
+        if (e instanceof InternalInfrastructureException) {
+          LOG.error(e.getLocalizedMessage(), e);
+        }
+        publishWorkspaceStatusEvent(workspaceId, STOPPED, STARTING, e.getMessage());
+        throw new RuntimeException(e);
+      }
+    }
+  }
+
   /**
-   * Stops running workspace runtime.
-   *
-   * <p>
+   * Stops running workspace runtime asynchronously.
    *
    * <p>Stops environment in an implementation specific way. During the stop of the workspace its
    * runtime is accessible with {@link WorkspaceStatus#STOPPING stopping} status. Workspace may be
-   * stopped only if its status is {@link WorkspaceStatus#RUNNING}.
+   * stopped only if its status is {@link WorkspaceStatus#RUNNING} or {@link
+   * WorkspaceStatus#STARTING}.
    *
-   * @param workspaceId identifier of workspace which should be stopped
+   * @param workspace workspace which runtime should be stopped
    * @throws NotFoundException when workspace with specified identifier does not have runtime
    * @throws ConflictException when running workspace status is different from {@link
-   *     WorkspaceStatus#RUNNING}
+   *     WorkspaceStatus#RUNNING} or {@link WorkspaceStatus#STARTING}
    * @see WorkspaceStatus#STOPPING
    */
-  public void stop(String workspaceId, Map<String, String> options)
+  public CompletableFuture<Void> stopAsync(Workspace workspace, Map<String, String> options)
       throws NotFoundException, ConflictException {
+    String workspaceId = workspace.getId();
     RuntimeState state = runtimes.get(workspaceId);
     if (state == null) {
       throw new NotFoundException("Workspace with id '" + workspaceId + "' is not running.");
@@ -305,25 +339,74 @@ public class WorkspaceRuntimes {
       throw new ConflictException(
           format("Could not stop workspace '%s' because its state is '%s'", workspaceId, status));
     }
-    eventService.publish(
-        DtoFactory.newDto(WorkspaceStatusEvent.class)
-            .withWorkspaceId(workspaceId)
-            .withPrevStatus(state.status)
-            .withStatus(STOPPING));
+    String stoppedBy =
+        firstNonNull(
+            sessionUserNameOr(workspace.getAttributes().get(WORKSPACE_STOPPED_BY)), "undefined");
+    LOG.info(
+        "Workspace '{}/{}' with id '{}' is being stopped by user '{}'",
+        workspace.getNamespace(),
+        workspace.getConfig().getName(),
+        workspace.getId(),
+        stoppedBy);
+    publishWorkspaceStatusEvent(workspaceId, STOPPING, state.status, null);
 
-    try {
-      state.runtime.stop(options);
+    return CompletableFuture.runAsync(
+        ThreadLocalPropagateContext.wrap(new StopRuntimeTask(workspace, options, stoppedBy, state)),
+        sharedPool.getExecutor());
+  }
 
-      // remove before firing an event to have consistency between state and the event
-      runtimes.remove(workspaceId);
-      publishWorkspaceStoppedEvent(workspaceId, STOPPING, null);
-    } catch (InfrastructureException e) {
-      // remove before firing an event to have consistency between state and the event
-      runtimes.remove(workspaceId);
-      publishWorkspaceStoppedEvent(
-          workspaceId,
-          STOPPING,
-          "Error occurs on workspace runtime stop. Error: " + e.getMessage());
+  private class StopRuntimeTask implements Runnable {
+    private final Workspace workspace;
+    private final Map<String, String> options;
+    private final String stoppedBy;
+    private final RuntimeState state;
+
+    public StopRuntimeTask(
+        Workspace workspace, Map<String, String> options, String stoppedBy, RuntimeState state) {
+      this.workspace = workspace;
+      this.options = options;
+      this.stoppedBy = stoppedBy;
+      this.state = state;
+    }
+
+    @Override
+    public void run() {
+      String workspaceId = workspace.getId();
+      try {
+        state.runtime.stop(options);
+
+        // remove before firing an event to have consistency between state and the event
+        runtimes.remove(workspaceId);
+        LOG.info(
+            "Workspace '{}/{}' with id '{}' stopped by user '{}'",
+            workspace.getNamespace(),
+            workspace.getConfig().getName(),
+            workspaceId,
+            stoppedBy);
+        publishWorkspaceStatusEvent(workspaceId, STOPPED, STOPPING, null);
+      } catch (InfrastructureException e) {
+        // remove before firing an event to have consistency between state and the event
+        runtimes.remove(workspaceId);
+        LOG.info(
+            "Error occurs on workspace '{}/{}' with id '{}' stopped by user '{}'. Error: {}",
+            workspace.getNamespace(),
+            workspace.getConfig().getName(),
+            workspaceId,
+            stoppedBy,
+            e);
+        publishWorkspaceStatusEvent(
+            workspaceId,
+            STOPPED,
+            STOPPING,
+            "Error occurs on workspace runtime stop. Error: " + e.getMessage());
+        // InfrastructureException is supposed to be an exception that can't be solved
+        // by Che admin, so should not be logged (but not InternalInfrastructureException).
+        // It will prevent bothering the admin when user made a mistake in WS configuration.
+        if (e instanceof InternalInfrastructureException) {
+          LOG.error(e.getLocalizedMessage(), e);
+        }
+        throw new RuntimeException(e);
+      }
     }
   }
 
@@ -350,8 +433,9 @@ public class WorkspaceRuntimes {
         LOG.warn("Not recoverable infrastructure: '{}'", infra.getName());
       } catch (InternalInfrastructureException x) {
         LOG.error(
-            "An error occurred while attempted to recover runtimes using infrastructure '{}'. Reason: '{}'",
-            infra.getName(),
+            format(
+                "An error occurred while attempted to recover runtimes using infrastructure '%s'",
+                infra.getName()),
             x);
       } catch (ServerException | InfrastructureException x) {
         LOG.error(
@@ -419,14 +503,14 @@ public class WorkspaceRuntimes {
     eventService.subscribe(new CleanupRuntimeOnAbnormalRuntimeStop());
   }
 
-  private void publishWorkspaceStoppedEvent(
-      String workspaceId, WorkspaceStatus previous, String errorMsg) {
+  private void publishWorkspaceStatusEvent(
+      String workspaceId, WorkspaceStatus status, WorkspaceStatus previous, String errorMsg) {
     eventService.publish(
         DtoFactory.newDto(WorkspaceStatusEvent.class)
             .withWorkspaceId(workspaceId)
             .withPrevStatus(previous)
             .withError(errorMsg)
-            .withStatus(STOPPED));
+            .withStatus(status));
   }
 
   private static EnvironmentImpl copyEnv(Workspace workspace, String envName) {
@@ -484,18 +568,25 @@ public class WorkspaceRuntimes {
     return Optional.of(state.runtime.getContext());
   }
 
+  private String sessionUserNameOr(String nameIfNoUser) {
+    final Subject subject = EnvironmentContext.getCurrent().getSubject();
+    if (!subject.isAnonymous()) {
+      return subject.getUserName();
+    }
+    return nameIfNoUser;
+  }
+
   private class CleanupRuntimeOnAbnormalRuntimeStop implements EventSubscriber<RuntimeStatusEvent> {
     @Override
     public void onEvent(RuntimeStatusEvent event) {
       if (event.isFailed()) {
         RuntimeState state = runtimes.remove(event.getIdentity().getWorkspaceId());
         if (state != null) {
-          eventService.publish(
-              DtoFactory.newDto(WorkspaceStatusEvent.class)
-                  .withWorkspaceId(state.runtime.getContext().getIdentity().getWorkspaceId())
-                  .withPrevStatus(RUNNING)
-                  .withStatus(STOPPED)
-                  .withError("Error occurs on workspace runtime stop. Error: " + event.getError()));
+          publishWorkspaceStatusEvent(
+              state.runtime.getContext().getIdentity().getWorkspaceId(),
+              STOPPED,
+              RUNNING,
+              "Error occurs on workspace runtime stop. Error: " + event.getError());
         }
       }
     }
