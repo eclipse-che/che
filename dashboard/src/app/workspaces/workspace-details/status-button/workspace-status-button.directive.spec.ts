@@ -9,6 +9,8 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 import {CheHttpBackend} from '../../../../components/api/test/che-http-backend';
+import {WorkspaceStatus} from '../../../../components/api/workspace/che-workspace.factory';
+
 interface ITestScope extends ng.IRootScopeService {
   model: {
     workspaceStatus?: string;
@@ -17,17 +19,10 @@ interface ITestScope extends ng.IRootScopeService {
   };
 }
 
-const STARTING = 'STARTING';
-const RUNNING = 'RUNNING';
-const SNAPSHOTTING = 'SNAPSHOTTING';
-const STOPPING = 'STOPPING';
-const STOPPED = 'STOPPED';
-const STOP_WITH_SNAPSHOT = 'Stop with snapshot';
-const STOP_WITHOUT_SNAPSHOT = 'Stop without snapshot';
-
 /**
  * Test of the WorkspaceStatusButton directive.
  * @author Oleksii Orel
+ * @author Oleksii Kurinnyi
  */
 describe('WorkspaceStatusButton >', () => {
 
@@ -65,193 +60,140 @@ describe('WorkspaceStatusButton >', () => {
     $timeout.verifyNoPendingTasks();
   });
 
-  function getCompiledElement(workspaceStatus?: string): ng.IRootElementService {
-    $rootScope.model.workspaceStatus = workspaceStatus ? workspaceStatus : STOPPED;
+  function getCompiledElement(status: WorkspaceStatus): ng.IAugmentedJQuery {
+    $rootScope.model.workspaceStatus = WorkspaceStatus[status];
 
     const element = $compile(angular.element(
       `<workspace-status-button workspace-status="model.workspaceStatus"
                                 on-run-workspace="model.onRunWorkspace()"
-                                on-stop-workspace="model.onStopWorkspace(isCreateSnapshot)"></workspace-status-button>`
+                                on-stop-workspace="model.onStopWorkspace()"></workspace-status-button>`
     ))($rootScope);
     $rootScope.$digest();
 
     return element;
   }
 
-  describe('initially STOPPED > ', () => {
-    let jqstatusButton: JQuery;
+  describe('initially STOPPED >', () => {
+    let jqRunButton: ng.IAugmentedJQuery;
+    let jqStopButton: ng.IAugmentedJQuery;
 
     beforeEach(() => {
-      const jqElement = getCompiledElement();
-      jqstatusButton = jqElement.find('#split-button button');
+      const jqElement = getCompiledElement(WorkspaceStatus.STOPPED);
+      jqRunButton = jqElement.find('#runButton button');
+      jqStopButton = jqElement.find('#stopButton button');
     });
 
     it('should have "Run" button enabled', () => {
       // timeout should be flashed
       $timeout.flush();
 
-      expect(jqstatusButton).toBeTruthy();
-      expect(jqstatusButton.attr('disabled')).toBeFalsy();
-      expect($rootScope.model.workspaceStatus).toEqual(STOPPED);
-      expect(jqstatusButton.html()).toContain('Run');
+      expect(jqRunButton.get(0)).toBeTruthy();
+      expect(jqRunButton.attr('disabled')).toBeFalsy();
+
+      expect(jqStopButton.get(0)).toBeFalsy();
     });
 
-    it('should call the runWorkspace callback', () => {
+    it('should call the runWorkspace callback on "Run" button is clicked', () => {
       spyOn($rootScope.model, 'onRunWorkspace');
 
       // click Run button
-      jqstatusButton.click();
+      jqRunButton.click();
       $rootScope.$digest();
 
       // timeout should be flashed to get callback called and content visible
       $timeout.flush();
 
-      expect($rootScope.model.workspaceStatus).toEqual(STOPPED);
       expect($rootScope.model.onRunWorkspace).toHaveBeenCalled();
     });
   });
 
-  describe('initially STOPPING > ', () => {
-    let jqstatusButton: JQuery;
+  describe('initially STOPPING >', () => {
+    let jqRunButton: ng.IAugmentedJQuery;
+    let jqStopButton: ng.IAugmentedJQuery;
 
     beforeEach(() => {
-      const jqElement = getCompiledElement(STOPPING);
-      jqstatusButton = jqElement.find('#split-button button');
+      const jqElement = getCompiledElement(WorkspaceStatus.STOPPING);
+      jqRunButton = jqElement.find('#runButton button');
+      jqStopButton = jqElement.find('#stopButton button');
     });
 
     it('should have "Stop" button disabled', () => {
       // timeout should be flashed
       $timeout.flush();
 
-      expect(jqstatusButton).toBeTruthy();
-      expect(jqstatusButton.attr('disabled')).toBeTruthy();
-      expect($rootScope.model.workspaceStatus).toEqual(STOPPING);
-      expect(jqstatusButton.html()).toContain('Stop');
+      expect(jqRunButton.get(0)).toBeFalsy();
+
+      expect(jqStopButton.get(0)).toBeTruthy();
+      expect(jqStopButton.attr('disabled')).toBeTruthy();
     });
   });
 
-  describe('initially SNAPSHOTTING > ', () => {
-    let jqstatusButton: JQuery;
+  describe('initially STARTING >', () => {
+    let jqRunButton: ng.IAugmentedJQuery;
+    let jqStopButton: ng.IAugmentedJQuery;
 
     beforeEach(() => {
-      const jqElement = getCompiledElement(SNAPSHOTTING);
-      jqstatusButton = jqElement.find('#split-button button');
-    });
-
-    it('should have "Stop" button disabled', () => {
-      // timeout should be flashed
-      $timeout.flush();
-
-      expect(jqstatusButton).toBeTruthy();
-      expect(jqstatusButton.attr('disabled')).toBeTruthy();
-      expect($rootScope.model.workspaceStatus).toEqual(SNAPSHOTTING);
-      expect(jqstatusButton.html()).toContain('Stop');
-    });
-  });
-
-  describe('initially STARTING > ', () => {
-    let jqstatusButton: JQuery;
-
-    beforeEach(() => {
-      const jqElement = getCompiledElement(STARTING);
-      jqstatusButton = jqElement.find('#split-button button');
+      const jqElement = getCompiledElement(WorkspaceStatus.STARTING);
+      jqRunButton = jqElement.find('#runButton button');
+      jqStopButton = jqElement.find('#stopButton button');
     });
 
     it('should have "Stop" button enabled', () => {
       // timeout should be flashed
       $timeout.flush();
 
-      expect(jqstatusButton).toBeTruthy();
-      expect(jqstatusButton.attr('disabled')).toBeFalsy();
-      expect($rootScope.model.workspaceStatus).toEqual(STARTING);
-      expect(jqstatusButton.html()).toContain('Stop');
+      expect(jqRunButton.get(0)).toBeFalsy();
+
+      expect(jqStopButton.get(0)).toBeTruthy();
+      expect(jqStopButton.attr('disabled')).toBeFalsy();
     });
 
-    it('should call the stopWorkspace callback without snapshot', () => {
+    it('should call the stopWorkspace callback on "Stop" button is clicked', () => {
       spyOn($rootScope.model, 'onStopWorkspace');
 
       // click Stop button
-      jqstatusButton.click();
+      jqStopButton.click();
       $rootScope.$digest();
 
       // timeout should be flashed to get callback called and content visible
       $timeout.flush();
 
-      expect($rootScope.model.workspaceStatus).toEqual(STARTING);
-      expect($rootScope.model.onStopWorkspace).toHaveBeenCalledWith(false);
+      expect($rootScope.model.onStopWorkspace).toHaveBeenCalled();
     });
   });
 
-  describe('initially RUNNING > ', () => {
-    let jqstatusButton: JQuery,
-      jqDropDownButton: JQuery,
-      jqMenuItems: JQuery;
+  describe('initially RUNNING >', () => {
+    let jqRunButton: ng.IAugmentedJQuery;
+    let jqStopButton: ng.IAugmentedJQuery;
 
     beforeEach(() => {
-      const jqElement = getCompiledElement(RUNNING);
-      jqstatusButton = jqElement.find('#split-button button');
-      jqDropDownButton = jqElement.find('che-button-default.drop-down');
-      jqMenuItems = jqElement.find('ul.area-drop-down li');
-
-      // need to investigate this extra click
-      jqstatusButton.click();
-      $rootScope.$digest();
+      const jqElement = getCompiledElement(WorkspaceStatus.RUNNING);
+      jqRunButton = jqElement.find('#runButton button');
+      jqStopButton = jqElement.find('#stopButton button');
     });
 
     it('should have "Stop" button enabled', () => {
       // timeout should be flashed
       $timeout.flush();
 
-      expect(jqstatusButton).toBeTruthy();
-      expect(jqstatusButton.attr('disabled')).toBeFalsy();
-      expect($rootScope.model.workspaceStatus).toEqual(RUNNING);
-      expect(jqstatusButton.html()).toContain('Stop');
+      expect(jqRunButton.get(0)).toBeFalsy();
+
+      expect(jqStopButton.get(0)).toBeTruthy();
+      expect(jqStopButton.attr('disabled')).toBeFalsy();
     });
 
-    it('should open dropDown after click on button', () => {
-      // open popup menu
-      jqDropDownButton.click();
-      $rootScope.$digest();
-
-      // timeout should be flashed to get callback called and content visible
-      $timeout.flush();
-
-      expect($rootScope.model.workspaceStatus).toEqual(RUNNING);
-      expect(jqDropDownButton.attr('aria-expanded')).toEqual('true');
-    });
-
-    it('should call the stopWorkspace callback with snapshot', () => {
-      // open popup menu
-      jqDropDownButton.click();
-      $rootScope.$digest();
+    it('should call the stopWorkspace callback on "Stop" button is clicked', () => {
       spyOn($rootScope.model, 'onStopWorkspace');
 
-      // click Stop With Snapshot button
-      jqMenuItems.find(`span:contains(${STOP_WITH_SNAPSHOT})`).mousedown();
+      jqStopButton.click();
 
       $rootScope.$digest();
       // timeout should be flashed to get callback called and content visible
       $timeout.flush();
 
-      expect($rootScope.model.workspaceStatus).toEqual(RUNNING);
-      expect($rootScope.model.onStopWorkspace).toHaveBeenCalledWith(true);
+      expect($rootScope.model.onStopWorkspace).toHaveBeenCalled();
     });
 
-    it('should call the stopWorkspace callback without snapshot', () => {
-      // open popup menu
-      jqDropDownButton.click();
-      $rootScope.$digest();
-      spyOn($rootScope.model, 'onStopWorkspace');
-
-      // click Stop Without Snapshot button
-      jqMenuItems.find(`span:contains(${STOP_WITHOUT_SNAPSHOT})`).mousedown();
-
-      $rootScope.$digest();
-      // timeout should be flashed to get callback called and content visible
-      $timeout.flush();
-
-      expect($rootScope.model.workspaceStatus).toEqual(RUNNING);
-      expect($rootScope.model.onStopWorkspace).toHaveBeenCalledWith(false);
-    });
   });
+
 });

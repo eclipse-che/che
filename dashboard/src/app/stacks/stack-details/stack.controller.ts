@@ -479,7 +479,7 @@ export class StackController {
    */
   closeStackTestPopup(): void {
     if (this.tmpWorkspaceId) {
-      this.cheWorkspace.stopWorkspace(this.tmpWorkspaceId, false);
+      this.cheWorkspace.stopWorkspace(this.tmpWorkspaceId);
       this.tmpWorkspaceId = '';
     }
     this.cheUIElementsInjectorService.deleteElementById(STACK_TEST_POPUP_ID);

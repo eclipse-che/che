@@ -6,7 +6,7 @@
   </div>
   <div flex layout="row" layout-align="end center">
     <workspace-status-button workspace-status="workspaceDetailsController.getWorkspaceStatus()"
-                             on-stop-workspace="workspaceDetailsController.stopWorkspace(isCreateSnapshot)"
+                             on-stop-workspace="workspaceDetailsController.stopWorkspace()"
                              on-run-workspace="workspaceDetailsController.runWorkspace()"></workspace-status-button>
     <che-button-default ng-if="workspaceDetailsController.editMode === false"
                         che-button-title="Open"
