@@ -48,7 +48,7 @@ public class YamlExtensionManagerViewImpl extends Composite implements YamlExten
   @UiField Button addUrl;
 
   @UiField(provided = true)
-  CellTable<YamlPreference> YamlPreferenceCellTable;
+  CellTable<YamlPreference> yamlPreferenceCellTable;
 
   @UiField Label headerUiMsg;
 
@@ -58,9 +58,9 @@ public class YamlExtensionManagerViewImpl extends Composite implements YamlExten
 
   @Inject
   protected YamlExtensionManagerViewImpl(CellTableResources res, YamlLocalizationConstant local) {
+    this.local = local;
     initYamlExtensionTable(res);
     initWidget(uiBinder.createAndBindUi(this));
-    this.local = local;
   }
 
   /**
@@ -70,7 +70,7 @@ public class YamlExtensionManagerViewImpl extends Composite implements YamlExten
    */
   private void initYamlExtensionTable(final CellTable.Resources res) {
 
-    YamlPreferenceCellTable = new CellTable<YamlPreference>(20, res);
+    yamlPreferenceCellTable = new CellTable<YamlPreference>(20, res);
     Column<YamlPreference, String> urlColumn =
         new Column<YamlPreference, String>(new EditTextCell()) {
           @Override
@@ -157,22 +157,22 @@ public class YamlExtensionManagerViewImpl extends Composite implements YamlExten
           }
         });
 
-    YamlPreferenceCellTable.addColumn(urlColumn, local.urlColumnHeader());
-    YamlPreferenceCellTable.addColumn(globColumn, local.globColumnHeader());
-    YamlPreferenceCellTable.addColumn(deletePreferenceColumn, local.deleteColumnHeader());
-    YamlPreferenceCellTable.setWidth("100%", true);
-    YamlPreferenceCellTable.setColumnWidth(urlColumn, 45, Style.Unit.PCT);
-    YamlPreferenceCellTable.setColumnWidth(globColumn, 30, Style.Unit.PCT);
-    YamlPreferenceCellTable.setColumnWidth(deletePreferenceColumn, 25, Style.Unit.PCT);
+    yamlPreferenceCellTable.addColumn(urlColumn, local.urlColumnHeader());
+    yamlPreferenceCellTable.addColumn(globColumn, local.globColumnHeader());
+    yamlPreferenceCellTable.addColumn(deletePreferenceColumn, local.deleteColumnHeader());
+    yamlPreferenceCellTable.setWidth("100%", true);
+    yamlPreferenceCellTable.setColumnWidth(urlColumn, 45, Style.Unit.PCT);
+    yamlPreferenceCellTable.setColumnWidth(globColumn, 30, Style.Unit.PCT);
+    yamlPreferenceCellTable.setColumnWidth(deletePreferenceColumn, 25, Style.Unit.PCT);
 
     // don't show loading indicator
-    YamlPreferenceCellTable.setLoadingIndicator(null);
+    yamlPreferenceCellTable.setLoadingIndicator(null);
   }
 
   /** {@inheritDoc} */
   @Override
   public void setPairs(@NotNull List<YamlPreference> pairs) {
-    this.YamlPreferenceCellTable.setRowData(pairs);
+    this.yamlPreferenceCellTable.setRowData(pairs);
   }
 
   /** {@inheritDoc} */
