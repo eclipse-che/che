@@ -240,7 +240,7 @@ export class ListWorkspacesCtrl {
 
         // stop workspace if it's status is RUNNING
         if (workspace.status === 'RUNNING') {
-          this.cheWorkspace.stopWorkspace(workspaceId, false);
+          this.cheWorkspace.stopWorkspace(workspaceId);
         }
 
         // delete stopped workspace

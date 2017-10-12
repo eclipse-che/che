@@ -239,11 +239,11 @@ export class WorkspaceDetailsService {
         const status = this.getWorkspaceStatus(newWorkspace.id);
 
         if (WorkspaceStatus[status] === WorkspaceStatus.STARTING || WorkspaceStatus[status] === WorkspaceStatus.RUNNING) {
-          this.stopWorkspace(newWorkspace.id, false);
+          this.stopWorkspace(newWorkspace.id);
           return this.cheWorkspace.fetchStatusChange(newWorkspace.id, WorkspaceStatus[WorkspaceStatus.STOPPED]);
         }
 
-        if (WorkspaceStatus[status] === WorkspaceStatus.STOPPING || WorkspaceStatus[status] === WorkspaceStatus.SNAPSHOTTING) {
+        if (WorkspaceStatus[status] === WorkspaceStatus.STOPPING) {
           return this.cheWorkspace.fetchStatusChange(newWorkspace.id, WorkspaceStatus[WorkspaceStatus.STOPPED]);
         }
 
@@ -300,11 +300,11 @@ export class WorkspaceDetailsService {
           const status = this.getWorkspaceStatus(newWorkspace.id);
 
           if (WorkspaceStatus[status] === WorkspaceStatus.STARTING || WorkspaceStatus[status] === WorkspaceStatus.RUNNING) {
-            this.stopWorkspace(newWorkspace.id, false);
+            this.stopWorkspace(newWorkspace.id);
             return this.cheWorkspace.fetchStatusChange(newWorkspace.id, WorkspaceStatus[WorkspaceStatus.STOPPED]);
           }
 
-          if (WorkspaceStatus[status] === WorkspaceStatus.STOPPING || WorkspaceStatus[status] === WorkspaceStatus.SNAPSHOTTING) {
+          if (WorkspaceStatus[status] === WorkspaceStatus.STOPPING) {
             return this.cheWorkspace.fetchStatusChange(newWorkspace.id, WorkspaceStatus[WorkspaceStatus.STOPPED]);
           }
         }
@@ -367,31 +367,15 @@ export class WorkspaceDetailsService {
    * Stops the workspace.
    *
    * @param {string} workspaceId
-   * @param {boolean} isCreateSnapshot
    * @return {angular.IPromise<any>}
    */
-  stopWorkspace(workspaceId: string, isCreateSnapshot?: boolean): ng.IPromise<any> {
-    if (this.getWorkspaceStatus(workspaceId) === 'STARTING') {
-      isCreateSnapshot = false;
-    } else if (angular.isUndefined(isCreateSnapshot)) {
-      isCreateSnapshot = this.getAutoSnapshot();
-    }
-
-    return this.cheWorkspace.stopWorkspace(workspaceId, isCreateSnapshot).catch((error: any) => {
+  stopWorkspace(workspaceId: string): ng.IPromise<any> {
+    return this.cheWorkspace.stopWorkspace(workspaceId).catch((error: any) => {
       this.cheNotification.showError('Stop workspace failed.', error);
       this.$log.error(error);
 
       return this.$q.reject(error);
     });
-  }
-
-  /**
-   * Returns the value of workspace auto-snapshot property.
-   *
-   * @returns {boolean} workspace auto-snapshot property value
-   */
-  getAutoSnapshot(): boolean {
-    return this.cheWorkspace.getAutoSnapshotSettings();
   }
 
 }

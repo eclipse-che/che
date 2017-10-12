@@ -13,24 +13,15 @@ import {CheWorkspace, WorkspaceStatus} from '../../../../components/api/workspac
 
 interface IWorkspaceStatusButtonScope extends ng.IScope {
   isDisabled: boolean;
-  isStarting: boolean;
-  isStopButton: boolean;
-  isAutoSnapshot: boolean;
+  showStopButton: boolean;
   workspaceStatus: string;
-  dropDownSelectPos: number;
-  dropDownItems: Array<string>;
-  onRunWorkspace: Function;
-  changeWorkspaceStatus: Function;
-  onSelect: (dropDownItem: number) => void;
-  onStopWorkspace: (data: { isCreateSnapshot: boolean }) => void;
+  onRunWorkspace: () => void;
+  onStopWorkspace: () => void;
 }
 
 const STARTING = WorkspaceStatus[WorkspaceStatus.STARTING];
 const RUNNING = WorkspaceStatus[WorkspaceStatus.RUNNING];
 const STOPPING = WorkspaceStatus[WorkspaceStatus.STOPPING];
-const SNAPSHOTTING = WorkspaceStatus[WorkspaceStatus.SNAPSHOTTING];
-const STOP_WITH_SNAPSHOT = 'Stop with snapshot';
-const STOP_WITHOUT_SNAPSHOT = 'Stop without snapshot';
 
 /**
  * @ngdoc directive
@@ -75,36 +66,17 @@ export class CheWorkspaceStatusButton {
    * Keep reference to the model controller
    */
   link($scope: IWorkspaceStatusButtonScope) {
-    const runStatuses = [STARTING, RUNNING, STOPPING, SNAPSHOTTING];
-    $scope.dropDownItems = [STOP_WITH_SNAPSHOT, STOP_WITHOUT_SNAPSHOT];
-
-    const preselectItem = $scope.dropDownItems.indexOf(this.cheWorkspace.getAutoSnapshotSettings() ? STOP_WITH_SNAPSHOT : STOP_WITHOUT_SNAPSHOT);
-    $scope.dropDownSelectPos = preselectItem > 0 ? preselectItem : 0;
+    const runStatuses = [STARTING, RUNNING, STOPPING];
 
     const updateButton = (workspaceStatus: string) => {
       if (!workspaceStatus) {
-        $scope.isStopButton = false;
+        $scope.showStopButton = false;
       } else {
-        $scope.isStopButton = runStatuses.indexOf(workspaceStatus) !== -1;
+        $scope.showStopButton = runStatuses.indexOf(workspaceStatus) !== -1;
       }
-      $scope.isDisabled = [STOPPING, SNAPSHOTTING].indexOf(workspaceStatus) !== -1;
-      $scope.isStarting = workspaceStatus === STARTING;
+      $scope.isDisabled = [STOPPING].indexOf(workspaceStatus) !== -1;
     };
     updateButton($scope.workspaceStatus);
-
-    $scope.onSelect = (dropDownItem: number) => {
-      $scope.dropDownSelectPos = dropDownItem;
-      $scope.onStopWorkspace({isCreateSnapshot: $scope.dropDownItems.indexOf(STOP_WITH_SNAPSHOT) === dropDownItem});
-    };
-
-    $scope.changeWorkspaceStatus = () => {
-      if ($scope.isStopButton) {
-        const isCreateSnapshot = !$scope.isStarting ? $scope.dropDownItems.indexOf(STOP_WITH_SNAPSHOT) === preselectItem : false;
-        $scope.onStopWorkspace({isCreateSnapshot: isCreateSnapshot});
-      } else {
-        $scope.onRunWorkspace();
-      }
-    };
 
     const watcher = $scope.$watch(() => {
       return $scope.workspaceStatus;

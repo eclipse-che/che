@@ -43,7 +43,6 @@ export enum WorkspaceStatus {
   PAUSED,
   STARTING,
   STOPPING,
-  SNAPSHOTTING,
   ERROR
 }
 
@@ -125,7 +124,7 @@ export class CheWorkspace {
         updateWorkspace: {method: 'PUT', url: '/api/workspace/:workspaceId'},
         addProject: {method: 'POST', url: '/api/workspace/:workspaceId/project'},
         deleteProject: {method: 'DELETE', url: '/api/workspace/:workspaceId/project/:path'},
-        stopWorkspace: {method: 'DELETE', url: '/api/workspace/:workspaceId/runtime?create-snapshot=:createSnapshot'},
+        stopWorkspace: {method: 'DELETE', url: '/api/workspace/:workspaceId/runtime'},
         startWorkspace: {method: 'POST', url: '/api/workspace/:workspaceId/runtime?environment=:envName'},
         startTemporaryWorkspace: {method: 'POST', url: '/api/workspace/runtime?temporary=true'},
         addCommand: {method: 'POST', url: '/api/workspace/:workspaceId/command'},
@@ -527,11 +526,9 @@ export class CheWorkspace {
    * @param workspaceId {string}
    * @returns {ng.IPromise<any>} promise
    */
-  stopWorkspace(workspaceId: string, createSnapshot: boolean): ng.IPromise<any> {
-    createSnapshot = createSnapshot === undefined ? this.getAutoSnapshotSettings() : createSnapshot;
+  stopWorkspace(workspaceId: string): ng.IPromise<any> {
     return this.remoteWorkspaceAPI.stopWorkspace({
-      workspaceId: workspaceId,
-      createSnapshot: createSnapshot
+      workspaceId: workspaceId
     }, {}).$promise;
   }
 
@@ -685,15 +682,6 @@ export class CheWorkspace {
    */
   getWorkspaceSettings(): any {
     return this.workspaceSettings;
-  }
-
-  /**
-   * Returns the value of autosnapshot system property.
-   *
-   * @returns {boolean} 'che.workspace.auto_snapshot' property value
-   */
-  getAutoSnapshotSettings(): boolean {
-    return this.workspaceSettings ? this.workspaceSettings['che.workspace.auto_snapshot'] === 'true' : true;
   }
 
   getJsonRpcApiLocation(): string {
