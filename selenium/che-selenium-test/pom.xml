@@ -175,7 +175,7 @@
                                 </property>
                                 <property>
                                     <name>listener</name>
-                                    <value>org.eclipse.che.selenium.core.CheSeleniumTesHandler</value>
+                                    <value>org.eclipse.che.selenium.core.CheSeleniumTestHandler</value>
                                 </property>
                             </properties>
                         </configuration>

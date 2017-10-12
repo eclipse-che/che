@@ -10,10 +10,10 @@
  */
 package org.eclipse.che.selenium.core.pageobject;
 
+import static java.lang.String.format;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.constant.TestBrowser;
+import org.slf4j.LoggerFactory;
 
 /**
  * Injects fields annotated with {@link InjectPageObject}. All page objects with the same {@link
@@ -33,8 +34,7 @@ import org.eclipse.che.selenium.core.constant.TestBrowser;
  *
  * @author Anatolii Bazko
  */
-@Singleton
-public class PageObjectsInjector {
+public abstract class PageObjectsInjector {
 
   @Inject
   @Named("sys.browser")
@@ -52,37 +52,55 @@ public class PageObjectsInjector {
   @Named("sys.driver.version")
   private String webDriverVersion;
 
-  @Inject private Provider<Injector> injector;
-
-  public void injectMembers(Object testInstance) throws Exception {
+  public void injectMembers(Object testInstance, Injector injector) throws Exception {
     Map<Integer, Set<Field>> toInject = collectFieldsToInject(testInstance);
 
     for (Integer poIndex : toInject.keySet()) {
       Map<Class<?>, Object> container = new HashMap<>();
-      container.put(
-          SeleniumWebDriver.class,
-          new SeleniumWebDriver(browser, webDriverPort, gridMode, webDriverVersion));
+      SeleniumWebDriver seleniumWebDriver =
+          new SeleniumWebDriver(browser, webDriverPort, gridMode, webDriverVersion);
+
+      container.put(SeleniumWebDriver.class, seleniumWebDriver);
+      container.putAll(getDependenciesWithWebdriver(seleniumWebDriver));
 
       for (Field f : toInject.get(poIndex)) {
-        injectField(f, testInstance, container);
+        LoggerFactory.getLogger(this.getClass())
+            .info("Inject field {} into test {}.", f, testInstance);
+
+        try {
+          injectField(f, testInstance, container, injector);
+        } catch (Exception e) {
+          LoggerFactory.getLogger(this.getClass())
+              .error(
+                  format(
+                      "Error of injection member '%s' into test '%s'. %s",
+                      f, testInstance, e.getMessage()),
+                  e);
+          throw e;
+        }
       }
     }
   }
 
-  private void injectField(Field field, Object instance, Map<Class<?>, Object> container)
+  public abstract Map<Class<?>, Object> getDependenciesWithWebdriver(
+      SeleniumWebDriver seleniumWebDriver);
+
+  private void injectField(
+      Field field, Object instance, Map<Class<?>, Object> container, Injector injector)
       throws Exception {
-    Object object = instantiate(field.getType(), container);
+    Object object = instantiate(field.getType(), container, injector);
     field.setAccessible(true);
     field.set(instance, object);
   }
 
-  private Object instantiate(Class<?> type, Map<Class<?>, Object> container) throws Exception {
+  private Object instantiate(Class<?> type, Map<Class<?>, Object> container, Injector injector)
+      throws Exception {
     Object obj;
 
     Optional<Constructor<?>> constructor = findConstructor(type);
     if (!constructor.isPresent()) {
       // interface? get instance from a guice container
-      obj = injector.get().getInstance(type);
+      obj = injector.getInstance(type);
 
     } else {
       Class<?>[] parameterTypes = constructor.get().getParameterTypes();
@@ -91,7 +109,7 @@ public class PageObjectsInjector {
       for (int i = 0; i < parameterTypes.length; i++) {
         Object pt = container.get(parameterTypes[i]);
         if (pt == null) {
-          pt = instantiate(parameterTypes[i], container);
+          pt = instantiate(parameterTypes[i], container, injector);
         }
         params[i] = pt;
       }
