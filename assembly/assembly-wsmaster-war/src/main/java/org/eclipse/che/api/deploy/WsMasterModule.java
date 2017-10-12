@@ -12,6 +12,7 @@ package org.eclipse.che.api.deploy;
 
 import static com.google.inject.matcher.Matchers.subclassesOf;
 import static org.eclipse.che.inject.Matchers.names;
+import static org.eclipse.che.plugin.docker.machine.WsAgentLogDirSetterEnvVariableProvider.LOGS_DIR_SETTER_VARIABLE;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.MapBinder;
@@ -48,6 +49,7 @@ import org.eclipse.che.api.workspace.server.stack.StackLoader;
 import org.eclipse.che.api.workspace.server.stack.StackMessageBodyAdapter;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.plugin.docker.machine.WsAgentLogDirSetterEnvVariableProvider;
 import org.eclipse.che.plugin.github.factory.resolver.GithubFactoryParametersResolver;
 import org.flywaydb.core.internal.util.PlaceholderReplacer;
 
@@ -170,7 +172,9 @@ public class WsMasterModule extends AbstractModule {
 
     bindConstant()
         .annotatedWith(Names.named("machine.ws_agent.run_command"))
-        .to("export JPDA_ADDRESS=\"4403\" && ~/che/ws-agent/bin/catalina.sh jpda run");
+        .to("eval \"$" + LOGS_DIR_SETTER_VARIABLE + "\""
+            + " && export JPDA_ADDRESS=\"4403\""
+            + " && ~/che/ws-agent/bin/catalina.sh jpda run");
 
     bind(org.eclipse.che.api.deploy.WsMasterAnalyticsAddresser.class);
 
