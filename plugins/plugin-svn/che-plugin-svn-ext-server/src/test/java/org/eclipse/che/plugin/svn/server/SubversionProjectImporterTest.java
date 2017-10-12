@@ -80,9 +80,6 @@ public class SubversionProjectImporterTest {
     VirtualFileSystem virtualFileSystem = TestUtils.createVirtualFileSystem();
     root = virtualFileSystem.getRoot();
 
-    // Create the test user
-    TestUtils.createTestUser(userProfileDao);
-
     // Create the Subversion repository
     repoRoot = TestUtils.createGreekTreeRepository();
 

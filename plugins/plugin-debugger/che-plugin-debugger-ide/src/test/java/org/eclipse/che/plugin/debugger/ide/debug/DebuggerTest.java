@@ -15,6 +15,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
@@ -79,6 +80,7 @@ import org.eclipse.che.ide.util.storage.LocalStorage;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 import org.eclipse.che.plugin.debugger.ide.BaseTest;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -87,6 +89,8 @@ import org.mockito.Mock;
 import org.mockito.MockSettings;
 import org.mockito.MockitoAnnotations;
 import org.mockito.internal.creation.MockSettingsImpl;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 /**
  * Testing {@link AbstractDebugger} functionality.
@@ -97,6 +101,8 @@ import org.mockito.internal.creation.MockSettingsImpl;
  */
 @RunWith(GwtMockitoTestRunner.class)
 public class DebuggerTest extends BaseTest {
+  @Rule public MockitoRule mrule = MockitoJUnit.rule().silent();
+
   private static final String DEBUG_INFO = "debug_info";
   private static final String SESSION_ID = "debugger_id";
   private static final long THREAD_ID = 1;
@@ -479,7 +485,7 @@ public class DebuggerTest extends BaseTest {
 
     SimpleValueDto simpleValueDto = mock(SimpleValueDto.class);
     doReturn(simpleValueDto).when(dtoFactory).createDto(SimpleValueDto.class);
-    doReturn(simpleValueDto).when(simpleValueDto).withString(anyString());
+    doReturn(simpleValueDto).when(simpleValueDto).withString(nullable(String.class));
 
     SimpleValue simpleValue = mock(SimpleValue.class);
     doReturn(simpleValue).when(variable).getValue();

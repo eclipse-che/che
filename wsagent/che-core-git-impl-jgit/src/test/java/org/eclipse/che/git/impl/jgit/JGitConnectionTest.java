@@ -12,6 +12,7 @@
 package org.eclipse.che.git.impl.jgit;
 
 import static java.util.Collections.singletonList;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
@@ -277,7 +278,11 @@ public class JGitConnectionTest {
     when(repository.getConfig()).thenReturn(mock(StoredConfig.class));
     doReturn(cloneCommand)
         .when(jGitConnection)
-        .executeRemoteCommand(anyString(), anyObject(), anyString(), anyString());
+        .executeRemoteCommand(
+            nullable(String.class),
+            nullable(TransportCommand.class),
+            nullable(String.class),
+            nullable(String.class));
 
     //when
     jGitConnection.clone(CloneParams.create("url").withWorkingDir("fakePath"));

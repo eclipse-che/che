@@ -33,7 +33,6 @@ import org.eclipse.che.api.vfs.search.SearchResult;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentMatcher;
 
 public class MemoryLuceneSearcherTest {
   private static final String[] TEST_CONTENT = {
@@ -303,12 +302,6 @@ public class MemoryLuceneSearcherTest {
   }
 
   private static VirtualFile withName(String name) {
-    return argThat(
-        new ArgumentMatcher<VirtualFile>() {
-          @Override
-          public boolean matches(Object argument) {
-            return name.equals(((VirtualFile) argument).getName());
-          }
-        });
+    return argThat(argument -> name.equals((argument).getName()));
   }
 }

@@ -21,10 +21,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -32,6 +29,7 @@ import static org.testng.Assert.assertEquals;
 import com.google.common.collect.ImmutableMap;
 import com.jayway.restassured.response.Response;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
@@ -71,9 +69,13 @@ public class AddExecAgentInWorkspaceFilterTest {
   @BeforeMethod
   public void setUp() throws Exception {
     when(workspaceService.create(
-            any(WorkspaceConfigDto.class), anyListOf(String.class), anyBoolean(), anyString()))
+            nullable(WorkspaceConfigDto.class),
+            nullable(List.class),
+            nullable(Boolean.class),
+            nullable(String.class)))
         .thenReturn(javax.ws.rs.core.Response.status(201).build());
-    when(workspaceService.startFromConfig(any(WorkspaceConfigDto.class), anyBoolean(), anyString()))
+    when(workspaceService.startFromConfig(
+            nullable(WorkspaceConfigDto.class), nullable(Boolean.class), nullable(String.class)))
         .thenReturn(newDto(WorkspaceDto.class));
   }
 
@@ -92,7 +94,11 @@ public class AddExecAgentInWorkspaceFilterTest {
 
     assertEquals(response.getStatusCode(), 201);
     verify(workspaceService)
-        .create(workspaceConfigCaptor.capture(), any(), anyBoolean(), anyString());
+        .create(
+            workspaceConfigCaptor.capture(),
+            nullable(List.class),
+            nullable(Boolean.class),
+            nullable(String.class));
     Map<String, EnvironmentDto> actualEnv = workspaceConfigCaptor.getValue().getEnvironments();
     assertEquals(actualEnv, expectedEnv);
   }
@@ -112,7 +118,8 @@ public class AddExecAgentInWorkspaceFilterTest {
 
     assertEquals(response.getStatusCode(), 200);
     verify(workspaceService)
-        .startFromConfig(workspaceConfigCaptor.capture(), anyBoolean(), anyString());
+        .startFromConfig(
+            workspaceConfigCaptor.capture(), nullable(Boolean.class), nullable(String.class));
     Map<String, EnvironmentDto> actualEnv = workspaceConfigCaptor.getValue().getEnvironments();
     assertEquals(actualEnv, expectedEnv);
   }

@@ -10,11 +10,11 @@
  */
 package org.eclipse.che.api.agent.server.launcher;
 
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -62,8 +62,9 @@ public class AbstractAgentLauncherTest {
     when(agent.getScript()).thenReturn("script content");
     doReturn(process)
         .when(launcher)
-        .start(any(Instance.class), any(Agent.class), any(LineConsumer.class));
-    when(agentChecker.isLaunched(any(Agent.class), any(InstanceProcess.class), any(Instance.class)))
+        .start(nullable(Instance.class), nullable(Agent.class), nullable(LineConsumer.class));
+    when(agentChecker.isLaunched(
+            nullable(Agent.class), nullable(InstanceProcess.class), nullable(Instance.class)))
         .thenReturn(true);
     when(machine.getNode()).thenReturn(mock(InstanceNode.class));
   }
@@ -135,7 +136,7 @@ public class AbstractAgentLauncherTest {
     launcher = spy(new TestAgentLauncher(200, 100, agentChecker));
     doReturn(process)
         .when(launcher)
-        .start(any(Instance.class), any(Agent.class), any(LineConsumer.class));
+        .start(nullable(Instance.class), nullable(Agent.class), nullable(LineConsumer.class));
     when(agentChecker.isLaunched(any(Agent.class), any(InstanceProcess.class), any(Instance.class)))
         .thenReturn(false)
         .thenReturn(false)
@@ -158,7 +159,7 @@ public class AbstractAgentLauncherTest {
     launcher = spy(new TestAgentLauncher(200, 10, agentChecker));
     doReturn(process)
         .when(launcher)
-        .start(any(Instance.class), any(Agent.class), any(LineConsumer.class));
+        .start(nullable(Instance.class), nullable(Agent.class), nullable(LineConsumer.class));
     // record time of each check of agent state
     ArrayList<Long> checkTimestamps = new ArrayList<>(5);
     Answer<Boolean> recordTimestampAndReturnFalse =
@@ -253,8 +254,9 @@ public class AbstractAgentLauncherTest {
     String agentScript = "testAgentScript";
     when(agent.getId()).thenReturn(agentId);
     when(agent.getScript()).thenReturn(agentScript);
-    when(launcher.start(any(Instance.class), any(Agent.class), any(LineConsumer.class)))
-        .thenCallRealMethod();
+    doCallRealMethod()
+        .when(launcher)
+        .start(nullable(Instance.class), nullable(Agent.class), nullable(LineConsumer.class));
 
     // when
     launcher.launch(machine, agent);
@@ -275,7 +277,7 @@ public class AbstractAgentLauncherTest {
 
     doReturn(process)
         .when(launcher)
-        .start(any(Instance.class), any(Agent.class), any(LineConsumer.class));
+        .start(nullable(Instance.class), nullable(Agent.class), nullable(LineConsumer.class));
 
     // when
     try {
@@ -283,7 +285,9 @@ public class AbstractAgentLauncherTest {
       fail("Should throw AgentStartException");
     } catch (AgentStartException e) {
       // then
-      verify(launcher).logAsErrorAgentStartLogs(anyObject(), anyString(), anyString());
+      verify(launcher)
+          .logAsErrorAgentStartLogs(
+              nullable(Instance.class), nullable(String.class), nullable(String.class));
       // rethrow exception to verify message
       throw e;
     }
@@ -297,15 +301,17 @@ public class AbstractAgentLauncherTest {
     // given
     doThrow(new MachineException("An error on agent start"))
         .when(launcher)
-        .start(any(Instance.class), any(Agent.class), any(LineConsumer.class));
+        .start(nullable(Instance.class), nullable(Agent.class), nullable(LineConsumer.class));
 
     // when
     try {
       launcher.launch(machine, agent);
       fail("Should throw ServerException");
+      verify(launcher)
+          .logAsErrorAgentStartLogs(
+              nullable(Instance.class), nullable(String.class), nullable(String.class));
     } catch (ServerException e) {
       // then
-      verify(launcher).logAsErrorAgentStartLogs(anyObject(), anyString(), anyString());
       // rethrow exception to verify message
       throw e;
     }
@@ -324,7 +330,7 @@ public class AbstractAgentLauncherTest {
 
     doReturn(process)
         .when(launcher)
-        .start(any(Instance.class), any(Agent.class), any(LineConsumer.class));
+        .start(nullable(Instance.class), nullable(Agent.class), nullable(LineConsumer.class));
     doThrow(new MachineException("An error on process kill")).when(process).kill();
 
     // when
@@ -333,7 +339,9 @@ public class AbstractAgentLauncherTest {
       fail("Should throw ServerException");
     } catch (ServerException e) {
       // then
-      verify(launcher).logAsErrorAgentStartLogs(anyObject(), anyString(), anyString());
+      verify(launcher)
+          .logAsErrorAgentStartLogs(
+              nullable(Instance.class), nullable(String.class), nullable(String.class));
       // rethrow exception to verify message
       throw e;
     }

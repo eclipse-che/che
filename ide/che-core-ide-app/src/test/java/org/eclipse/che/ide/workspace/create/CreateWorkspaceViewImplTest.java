@@ -14,7 +14,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -73,7 +73,7 @@ public class CreateWorkspaceViewImplTest {
 
   @Test
   public void nameShouldBeSet() {
-    verify(view.wsName).setText(anyString());
+    verify(view.wsName).setText(nullable(String.class));
     verify(locale).createWsDefaultName();
   }
 

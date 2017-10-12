@@ -13,6 +13,8 @@ package org.eclipse.che.plugin.docker.client;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
@@ -191,7 +193,7 @@ public class DockerConnectorTest {
   @BeforeMethod
   public void setup() throws IOException, URISyntaxException {
     dockerConnection = mock(DockerConnection.class, new SelfReturningAnswer());
-    when(dockerConnectionFactory.openConnection(any(URI.class))).thenReturn(dockerConnection);
+    when(dockerConnectionFactory.openConnection(nullable(URI.class))).thenReturn(dockerConnection);
     when(dockerConnection.request()).thenReturn(dockerResponse);
     when(dockerConnectorConfiguration.getAuthConfigs()).thenReturn(initialAuthConfig);
     when(dockerResponse.getStatus()).thenReturn(RESPONSE_SUCCESS_CODE);
@@ -221,7 +223,7 @@ public class DockerConnectorTest {
 
     SystemInfo returnedSystemInfo = dockerConnector.getSystemInfo();
 
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_GET);
     verify(dockerConnection).path("/info");
     verify(dockerConnection).request();
@@ -275,7 +277,7 @@ public class DockerConnectorTest {
 
     Version returnedVersion = dockerConnector.getVersion();
 
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_GET);
     verify(dockerConnection).path("/version");
     verify(dockerConnection).request();
@@ -310,7 +312,7 @@ public class DockerConnectorTest {
 
     List<Image> returnedImages = dockerConnector.listImages(listImagesParams);
 
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_GET);
     verify(dockerConnection).path("/images/json");
     verify(dockerConnection).request();
@@ -366,7 +368,7 @@ public class DockerConnectorTest {
 
     List<ContainerListEntry> containers = dockerConnector.listContainers(listContainersParams);
 
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_GET);
     verify(dockerConnection).path("/containers/json");
     verify(dockerConnection).query("all", 1);
@@ -462,7 +464,7 @@ public class DockerConnectorTest {
 
     ImageInfo returnedImageInfo = dockerConnector.inspectImage(inspectImageParams);
 
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_GET);
     verify(dockerConnection).path("/images/" + inspectImageParams.getImage() + "/json");
     verify(dockerConnection).request();
@@ -508,7 +510,7 @@ public class DockerConnectorTest {
 
     dockerConnector.stopContainer(stopContainerParams);
 
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_POST);
     verify(dockerConnection).path("/containers/" + stopContainerParams.getContainer() + "/stop");
     verify(dockerConnection).request();
@@ -551,7 +553,7 @@ public class DockerConnectorTest {
 
     dockerConnector.killContainer(killContainerParams);
 
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_POST);
     verify(dockerConnection).path("/containers/" + killContainerParams.getContainer() + "/kill");
     verify(dockerConnection).request();
@@ -581,7 +583,7 @@ public class DockerConnectorTest {
 
     dockerConnector.removeContainer(removeContainerParams);
 
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_DELETE);
     verify(dockerConnection).path("/containers/" + removeContainerParams.getContainer());
     verify(dockerConnection).request();
@@ -630,7 +632,7 @@ public class DockerConnectorTest {
 
     int returnedExitCode = dockerConnector.waitContainer(waitContainerParams);
 
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_POST);
     verify(dockerConnection).path("/containers/" + waitContainerParams.getContainer() + "/wait");
     verify(dockerConnection).request();
@@ -683,7 +685,7 @@ public class DockerConnectorTest {
 
     ContainerInfo returnedContainerInfo = dockerConnector.inspectContainer(inspectContainerParams);
 
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_GET);
     verify(dockerConnection).path("/containers/" + inspectContainerParams.getContainer() + "/json");
     verify(dockerConnection).request();
@@ -732,7 +734,7 @@ public class DockerConnectorTest {
 
     dockerConnector.attachContainer(attachContainerParams, logMessageProcessor);
 
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_POST);
     verify(dockerConnection)
         .path("/containers/" + attachContainerParams.getContainer() + "/attach");
@@ -766,7 +768,7 @@ public class DockerConnectorTest {
 
     dockerConnector.getContainerLogs(getContainerLogsParams, logMessageProcessor);
 
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_GET);
     verify(dockerConnection).path("/containers/" + getContainerLogsParams.getContainer() + "/logs");
     verify(dockerConnection).query("stdout", 1);
@@ -819,7 +821,7 @@ public class DockerConnectorTest {
 
     Exec returnedExec = dockerConnector.createExec(createExecParams);
 
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_POST);
     verify(dockerConnection).path("/containers/" + createExecParams.getContainer() + "/exec");
     verify(dockerConnection).header("Content-Type", MediaType.APPLICATION_JSON);
@@ -855,7 +857,7 @@ public class DockerConnectorTest {
 
     dockerConnector.startExec(startExecParams, logMessageProcessor);
 
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_POST);
     verify(dockerConnection).path("/exec/" + startExecParams.getExecId() + "/start");
     verify(dockerConnection).header("Content-Type", MediaType.APPLICATION_JSON);
@@ -923,7 +925,7 @@ public class DockerConnectorTest {
 
     ExecInfo returnedExecInfo = dockerConnector.getExecInfo(getExecInfoParams);
 
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_GET);
     verify(dockerConnection).path("/exec/" + getExecInfoParams.getExecId() + "/json");
     verify(dockerConnection).request();
@@ -960,7 +962,7 @@ public class DockerConnectorTest {
 
     ContainerProcesses returnedContainerProcesses = dockerConnector.top(topParams);
 
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_GET);
     verify(dockerConnection).path("/containers/" + topParams.getContainer() + "/top");
     verify(dockerConnection).request();
@@ -982,7 +984,7 @@ public class DockerConnectorTest {
 
     ContainerProcesses returnedContainerProcesses = dockerConnector.top(topParams);
 
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_GET);
     verify(dockerConnection).path("/containers/" + topParams.getContainer() + "/top");
     verify(dockerConnection).query(eq("ps_args"), anyString());
@@ -1020,7 +1022,7 @@ public class DockerConnectorTest {
     String response =
         CharStreams.toString(new InputStreamReader(dockerConnector.getResource(getResourceParams)));
 
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_GET);
     verify(dockerConnection).path("/containers/" + getResourceParams.getContainer() + "/archive");
     verify(dockerConnection).query(eq("path"), eq(PATH_TO_FILE));
@@ -1059,12 +1061,12 @@ public class DockerConnectorTest {
 
     dockerConnector.putResource(putResourceParams);
 
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_PUT);
     verify(dockerConnection).path("/containers/" + putResourceParams.getContainer() + "/archive");
     verify(dockerConnection).query(eq("path"), eq(PATH_TO_FILE));
     verify(dockerConnection).header("Content-Type", ExtMediaType.APPLICATION_X_TAR);
-    verify(dockerConnection).header(eq("Content-Length"), anyInt());
+    verify(dockerConnection).header(eq("Content-Length"), anyLong());
     verify(dockerConnection).entity(any(InputStream.class));
     verify(dockerConnection).request();
     verify(dockerResponse).getStatus();
@@ -1098,7 +1100,7 @@ public class DockerConnectorTest {
 
     dockerConnector.getEvents(getEventsParams, eventMessageProcessor);
 
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_GET);
     verify(dockerConnection).path("/events");
     verify(dockerConnection).request();
@@ -1142,16 +1144,16 @@ public class DockerConnectorTest {
 
     String returnedImageId = dockerConnector.buildImage(buildImageParams, progressMonitor);
 
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_POST);
     verify(dockerConnection).path("/build");
 
     verify(dockerConnection).header("Content-Type", "application/x-compressed-tar");
-    verify(dockerConnection).header(eq("Content-Length"), anyInt());
+    verify(dockerConnection).header(eq("Content-Length"), anyLong());
     verify(dockerConnection).entity(any(InputStream.class));
     verify(dockerConnection, never()).header(eq("remote"), anyString());
 
-    verify(dockerConnection).header(eq("X-Registry-Config"), any(byte[].class));
+    verify(dockerConnection).header(eq("X-Registry-Config"), nullable(byte[].class));
     verify(dockerConnection).request();
     verify(dockerResponse).getStatus();
     verify(dockerResponse).getInputStream();
@@ -1181,7 +1183,7 @@ public class DockerConnectorTest {
 
     String returnedImageId = dockerConnector.buildImage(buildImageParams, progressMonitor);
 
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_POST);
     verify(dockerConnection).path("/build");
 
@@ -1190,7 +1192,7 @@ public class DockerConnectorTest {
     verify(dockerConnection, never()).header(eq("Content-Length"), anyInt());
     verify(dockerConnection, never()).entity(any(InputStream.class));
 
-    verify(dockerConnection).header(eq("X-Registry-Config"), any(byte[].class));
+    verify(dockerConnection).header(eq("X-Registry-Config"), nullable(byte[].class));
     verify(dockerConnection).request();
     verify(dockerResponse).getStatus();
     verify(dockerResponse).getInputStream();
@@ -1250,15 +1252,17 @@ public class DockerConnectorTest {
 
     String returnedImageId = dockerConnector.buildImage(buildImageParams, progressMonitor);
 
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_POST);
     verify(dockerConnection).path("/build");
 
     verify(dockerConnection).header("Content-Type", "application/x-compressed-tar");
-    verify(dockerConnection).header(eq("Content-Length"), anyInt());
+    verify(dockerConnection).header(eq("Content-Length"), anyLong());
     verify(dockerConnection).entity(any(InputStream.class));
+    verify(dockerConnection, never()).header(eq("remote"), anyString());
 
-    verify(dockerConnection).header(eq("X-Registry-Config"), any(byte[].class));
+    verify(dockerConnection).header(eq("X-Registry-Config"), nullable(byte[].class));
+
     verify(dockerConnection).request();
     verify(dockerResponse).getStatus();
     verify(dockerResponse).getInputStream();
@@ -1347,7 +1351,7 @@ public class DockerConnectorTest {
 
     dockerConnector.removeImage(removeImageParams);
 
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_DELETE);
     verify(dockerConnection).path("/images/" + removeImageParams.getImage());
     verify(dockerConnection).request();
@@ -1375,7 +1379,7 @@ public class DockerConnectorTest {
 
     dockerConnector.tag(tagParams);
 
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_POST);
     verify(dockerConnection).path("/images/" + tagParams.getImage() + "/tag");
     verify(dockerConnection).query("repo", tagParams.getRepository());
@@ -1409,10 +1413,10 @@ public class DockerConnectorTest {
 
     dockerConnector.push(pushParams, progressMonitor);
 
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_POST);
     verify(dockerConnection).path("/images/" + pushParams.getRepository() + "/push");
-    verify(dockerConnection).header(eq("X-Registry-Auth"), any(AuthConfig.class));
+    verify(dockerConnection).header(eq("X-Registry-Auth"), nullable(AuthConfig.class));
     verify(dockerConnection).request();
     verify(dockerResponse).getStatus();
     verify(dockerResponse).getInputStream();
@@ -1430,11 +1434,11 @@ public class DockerConnectorTest {
 
     dockerConnector.push(pushParams, progressMonitor);
 
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_POST);
     verify(dockerConnection)
         .path("/images/" + pushParams.getRegistry() + '/' + pushParams.getRepository() + "/push");
-    verify(dockerConnection).header(eq("X-Registry-Auth"), any(AuthConfig.class));
+    verify(dockerConnection).header(eq("X-Registry-Auth"), nullable(AuthConfig.class));
     verify(dockerConnection).request();
     verify(dockerResponse).getStatus();
     verify(dockerResponse).getInputStream();
@@ -1538,7 +1542,7 @@ public class DockerConnectorTest {
 
     String returnedImage = dockerConnector.commit(commitParams);
 
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_POST);
     verify(dockerConnection).path("/commit");
     verify(dockerConnection).query("container", commitParams.getContainer());
@@ -1573,11 +1577,11 @@ public class DockerConnectorTest {
 
     dockerConnector.pull(pullParams, progressMonitor);
 
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_POST);
     verify(dockerConnection).path("/images/create");
     verify(dockerConnection).query("fromImage", pullParams.getImage());
-    verify(dockerConnection).header(eq("X-Registry-Auth"), any(AuthConfig.class));
+    verify(dockerConnection).header(eq("X-Registry-Auth"), nullable(AuthConfig.class));
     verify(dockerConnection).request();
     verify(dockerResponse).getStatus();
     verify(dockerResponse).getInputStream();
@@ -1592,12 +1596,12 @@ public class DockerConnectorTest {
 
     dockerConnector.pull(pullParams, progressMonitor);
 
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_POST);
     verify(dockerConnection).path("/images/create");
     verify(dockerConnection)
         .query("fromImage", pullParams.getRegistry() + '/' + pullParams.getImage());
-    verify(dockerConnection).header(eq("X-Registry-Auth"), any(AuthConfig.class));
+    verify(dockerConnection).header(eq("X-Registry-Auth"), nullable(AuthConfig.class));
     verify(dockerConnection).request();
     verify(dockerResponse).getStatus();
     verify(dockerResponse).getInputStream();
@@ -1633,7 +1637,7 @@ public class DockerConnectorTest {
     ContainerCreated returnedContainerCreated =
         dockerConnector.createContainer(createContainerParams);
 
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_POST);
     verify(dockerConnection).path("/containers/create");
     verify(dockerConnection).header("Content-Type", MediaType.APPLICATION_JSON);
@@ -1668,7 +1672,7 @@ public class DockerConnectorTest {
 
     dockerConnector.startContainer(startContainerParams);
 
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_POST);
     verify(dockerConnection).path("/containers/" + startContainerParams.getContainer() + "/start");
     verify(dockerConnection).request();
@@ -1874,7 +1878,7 @@ public class DockerConnectorTest {
 
     // then
     assertEquals(actual, originNetworks);
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_GET);
     verify(dockerConnection).path("/networks");
     verify(dockerConnection).query(eq("filters"), anyObject());
@@ -1925,7 +1929,7 @@ public class DockerConnectorTest {
 
     // then
     assertEquals(actual, originNetwork);
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_GET);
     verify(dockerConnection).path("/networks/" + originNetwork.getId());
     verify(dockerConnection).request();
@@ -1963,7 +1967,7 @@ public class DockerConnectorTest {
 
     // then
     assertEquals(networkCreated, originNetworkCreated);
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_POST);
     verify(dockerConnection).path("/networks/create");
     verify(dockerConnection).header("Content-Type", MediaType.APPLICATION_JSON);
@@ -2023,7 +2027,7 @@ public class DockerConnectorTest {
     dockerConnector.connectContainerToNetwork(connectToNetworkParams);
 
     // then
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_POST);
     verify(dockerConnection).path("/networks/" + netId + "/connect");
     verify(dockerConnection).header("Content-Type", MediaType.APPLICATION_JSON);
@@ -2085,7 +2089,7 @@ public class DockerConnectorTest {
     dockerConnector.disconnectContainerFromNetwork(disconnectFromNetworkParams);
 
     // then
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_POST);
     verify(dockerConnection).path("/networks/" + netId + "/disconnect");
     verify(dockerConnection).header("Content-Type", MediaType.APPLICATION_JSON);
@@ -2140,7 +2144,7 @@ public class DockerConnectorTest {
     dockerConnector.removeNetwork(removeNetworkParams);
 
     // then
-    verify(dockerConnectionFactory).openConnection(any(URI.class));
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_DELETE);
     verify(dockerConnection).path("/networks/" + netId);
     verify(dockerConnection).request();
