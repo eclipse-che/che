@@ -13,7 +13,6 @@ package org.eclipse.che.multiuser.integration.jpa.cascaderemoval;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.commons.test.db.H2TestHelper.inMemoryDefault;
 import static org.eclipse.che.multiuser.api.permission.server.AbstractPermissionsDomain.SET_PERMISSIONS;
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createAccount;
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createFactory;
@@ -85,8 +84,7 @@ import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.subject.SubjectImpl;
-import org.eclipse.che.commons.test.db.H2JpaCleaner;
-import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
+import org.eclipse.che.commons.test.db.H2DBTestServer;
 import org.eclipse.che.core.db.DBInitializer;
 import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 import org.eclipse.che.core.db.cascade.event.CascadeEvent;
@@ -222,12 +220,12 @@ public class JpaEntitiesCascadeRemovalTest {
             new AbstractModule() {
               @Override
               protected void configure() {
+                H2DBTestServer server = H2DBTestServer.startDefault();
                 install(new JpaPersistModule("main"));
                 bind(EventService.class).in(Singleton.class);
                 bind(SchemaInitializer.class)
-                    .toInstance(new FlywaySchemaInitializer(inMemoryDefault(), "che-schema"));
+                    .toInstance(new FlywaySchemaInitializer(server.getDataSource(), "che-schema"));
                 bind(DBInitializer.class).asEagerSingleton();
-                bind(TckResourcesCleaner.class).to(H2JpaCleaner.class);
                 install(new InitModule(PostConstruct.class));
                 install(new UserJpaModule());
                 install(new AccountModule());

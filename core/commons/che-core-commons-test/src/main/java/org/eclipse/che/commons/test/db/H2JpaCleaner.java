@@ -33,12 +33,6 @@ public class H2JpaCleaner extends JpaCleaner {
     this.dataSource = dataSource;
   }
 
-  /** @deprecated use {@link H2JpaCleaner(H2DBTestServer)} instead. */
-  @Deprecated
-  public H2JpaCleaner() {
-    this(H2TestHelper.inMemoryDefault());
-  }
-
   @Override
   public void clean() {
     super.clean();

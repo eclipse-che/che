@@ -20,7 +20,6 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import org.eclipse.che.api.recipe.OldRecipeImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
-import org.eclipse.che.commons.test.db.H2TestHelper;
 import org.eclipse.che.multiuser.permission.machine.recipe.RecipePermissionsImpl;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
@@ -106,7 +105,6 @@ public class JpaRecipePermissionsDaoTest {
   @AfterClass
   public void shutdown() throws Exception {
     manager.getEntityManagerFactory().close();
-    H2TestHelper.shutdownDefault();
   }
 
   @Test

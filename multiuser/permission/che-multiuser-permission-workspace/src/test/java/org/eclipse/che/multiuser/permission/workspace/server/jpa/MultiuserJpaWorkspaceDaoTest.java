@@ -22,7 +22,6 @@ import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.commons.test.db.H2TestHelper;
 import org.eclipse.che.multiuser.permission.workspace.server.model.impl.WorkerImpl;
 import org.eclipse.che.multiuser.permission.workspace.server.spi.jpa.MultiuserJpaWorkspaceDao;
 import org.testng.annotations.AfterClass;
@@ -122,7 +121,6 @@ public class MultiuserJpaWorkspaceDaoTest {
   @AfterClass
   public void shutdown() throws Exception {
     manager.getEntityManagerFactory().close();
-    H2TestHelper.shutdownDefault();
   }
 
   @Test

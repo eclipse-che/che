@@ -11,24 +11,16 @@
 package org.eclipse.che.multiuser.permission.workspace.server.jpa;
 
 import static java.util.Arrays.asList;
-import static org.eclipse.che.commons.test.db.H2TestHelper.inMemoryDefault;
 import static org.testng.Assert.assertTrue;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.TypeLiteral;
-import com.google.inject.persist.jpa.JpaPersistModule;
 import java.util.List;
 import javax.persistence.EntityManager;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.event.BeforeStackRemovedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
-import org.eclipse.che.commons.test.db.H2TestHelper;
-import org.eclipse.che.core.db.DBInitializer;
-import org.eclipse.che.core.db.schema.SchemaInitializer;
-import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
 import org.eclipse.che.multiuser.api.permission.server.AbstractPermissionsDomain;
 import org.eclipse.che.multiuser.permission.workspace.server.spi.jpa.JpaStackPermissionsDao;
 import org.eclipse.che.multiuser.permission.workspace.server.stack.StackPermissionsImpl;
@@ -123,7 +115,6 @@ public class JpaStackPermissionsDaoTest {
   @AfterClass
   public void shutdown() throws Exception {
     manager.getEntityManagerFactory().close();
-    H2TestHelper.shutdownDefault();
   }
 
   @Test
@@ -168,18 +159,6 @@ public class JpaStackPermissionsDaoTest {
     Page<StackPermissionsImpl> byInstance =
         dao.getByInstance(publicPermission.getInstanceId(), 30, 0);
     assertTrue(byInstance.getItems().stream().filter(p -> "*".equals(p.getUserId())).count() == 0);
-  }
-
-  private class TestModule extends AbstractModule {
-    @Override
-    protected void configure() {
-      install(new JpaPersistModule("main"));
-      bind(SchemaInitializer.class)
-          .toInstance(new FlywaySchemaInitializer(inMemoryDefault(), "che-schema"));
-      bind(DBInitializer.class).asEagerSingleton();
-      bind(new TypeLiteral<AbstractPermissionsDomain<StackPermissionsImpl>>() {})
-          .to(TestDomain.class);
-    }
   }
 
   public static class TestDomain extends AbstractPermissionsDomain<StackPermissionsImpl> {

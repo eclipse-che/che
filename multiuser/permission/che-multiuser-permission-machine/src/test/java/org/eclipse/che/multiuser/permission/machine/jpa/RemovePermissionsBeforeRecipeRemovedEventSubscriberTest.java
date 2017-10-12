@@ -21,7 +21,6 @@ import javax.persistence.EntityManager;
 import org.eclipse.che.api.recipe.JpaRecipeDao;
 import org.eclipse.che.api.recipe.OldRecipeImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
-import org.eclipse.che.commons.test.db.H2TestHelper;
 import org.eclipse.che.multiuser.permission.machine.jpa.JpaRecipePermissionsDao.RemovePermissionsBeforeRecipeRemovedEventSubscriber;
 import org.eclipse.che.multiuser.permission.machine.recipe.RecipePermissionsImpl;
 import org.testng.annotations.AfterClass;
@@ -110,7 +109,6 @@ public class RemovePermissionsBeforeRecipeRemovedEventSubscriberTest {
   public void shutdown() throws Exception {
     subscriber.unsubscribe();
     manager.getEntityManagerFactory().close();
-    H2TestHelper.shutdownDefault();
   }
 
   @Test

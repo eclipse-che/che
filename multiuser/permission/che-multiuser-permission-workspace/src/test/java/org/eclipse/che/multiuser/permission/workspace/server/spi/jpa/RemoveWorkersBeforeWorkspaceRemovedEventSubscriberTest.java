@@ -23,7 +23,6 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.commons.test.db.H2TestHelper;
 import org.eclipse.che.multiuser.permission.workspace.server.model.impl.WorkerImpl;
 import org.eclipse.che.multiuser.permission.workspace.server.spi.jpa.JpaWorkerDao.RemoveWorkersBeforeWorkspaceRemovedEventSubscriber;
 import org.testng.annotations.AfterClass;
@@ -119,7 +118,6 @@ public class RemoveWorkersBeforeWorkspaceRemovedEventSubscriberTest {
   public void shutdown() throws Exception {
     subscriber.unsubscribe();
     manager.getEntityManagerFactory().close();
-    H2TestHelper.shutdownDefault();
   }
 
   @Test
