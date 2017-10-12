@@ -127,7 +127,7 @@ public class BreakpointManagerImpl
 
     BreakpointRenderer renderer = getBreakpointRendererForFile(activeFile.getLocation().toString());
     if (renderer != null) {
-      renderer.removeBreakpointMark(breakpoint.getLocation().getLineNumber() - 1);
+      renderer.removeMark(breakpoint.getLocation().getLineNumber() - 1);
     }
 
     for (BreakpointManagerObserver observer : observers) {
@@ -149,8 +149,7 @@ public class BreakpointManagerImpl
     final BreakpointRenderer renderer = getBreakpointRendererForFile(file.getLocation().toString());
 
     if (renderer != null) {
-      renderer.addBreakpointMark(
-          breakpoint.getLocation().getLineNumber() - 1, BreakpointManagerImpl.this::onLineChange);
+      renderer.setMark(breakpoint, false, BreakpointManagerImpl.this::onLineChange);
     }
 
     for (BreakpointManagerObserver observer : observers) {
@@ -204,7 +203,7 @@ public class BreakpointManagerImpl
               BreakpointRenderer renderer =
                   getBreakpointRendererForFile(breakpoint.getLocation().getTarget());
               if (renderer != null) {
-                renderer.removeBreakpointMark(breakpoint.getLocation().getLineNumber() - 1);
+                renderer.removeMark(breakpoint.getLocation().getLineNumber() - 1);
               }
             });
 
@@ -223,6 +222,12 @@ public class BreakpointManagerImpl
   @Override
   public void update(Breakpoint breakpoint) {
     breakpointStorage.update(breakpoint);
+
+    BreakpointRenderer renderer =
+        getBreakpointRendererForFile(breakpoint.getLocation().getTarget());
+    if (renderer != null) {
+      renderer.setMark(breakpoint, false, BreakpointManagerImpl.this::onLineChange);
+    }
 
     Debugger debugger = debuggerManager.getActiveDebugger();
     if (debugger != null) {
@@ -245,7 +250,7 @@ public class BreakpointManagerImpl
       BreakpointRenderer renderer =
           getBreakpointRendererForFile(breakpoint.getLocation().getTarget());
       if (renderer != null) {
-        renderer.removeBreakpointMark(breakpoint.getLocation().getLineNumber() - 1);
+        renderer.removeMark(breakpoint.getLocation().getLineNumber() - 1);
       }
 
       for (BreakpointManagerObserver observer : observers) {
@@ -438,9 +443,7 @@ public class BreakpointManagerImpl
           .getByPath(filePath)
           .forEach(
               breakpoint ->
-                  renderer.addBreakpointMark(
-                      breakpoint.getLocation().getLineNumber() - 1,
-                      BreakpointManagerImpl.this::onLineChange));
+                  renderer.setMark(breakpoint, false, BreakpointManagerImpl.this::onLineChange));
 
       Debugger debugger = debuggerManager.getActiveDebugger();
       if (debugger != null) {
@@ -449,8 +452,7 @@ public class BreakpointManagerImpl
             .then(
                 breakpoints -> {
                   for (Breakpoint breakpoint : breakpoints) {
-                    renderer.setBreakpointActive(
-                        breakpoint.getLocation().getLineNumber() - 1, true);
+                    renderer.setMark(breakpoint, true, BreakpointManagerImpl.this::onLineChange);
                   }
                 });
       }
@@ -478,7 +480,7 @@ public class BreakpointManagerImpl
               BreakpointRenderer renderer =
                   getBreakpointRendererForFile(breakpoint.getLocation().getTarget());
               if (renderer != null) {
-                renderer.setBreakpointActive(breakpoint.getLocation().getLineNumber() - 1, false);
+                renderer.setMark(breakpoint, false, BreakpointManagerImpl.this::onLineChange);
               }
             });
 
@@ -497,7 +499,7 @@ public class BreakpointManagerImpl
               BreakpointRenderer renderer =
                   getBreakpointRendererForFile(breakpoint.getLocation().getTarget());
               if (renderer != null) {
-                renderer.setBreakpointActive(breakpoint.getLocation().getLineNumber() - 1, true);
+                renderer.setMark(breakpoint, true, BreakpointManagerImpl.this::onLineChange);
               }
             });
   }

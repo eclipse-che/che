@@ -87,6 +87,8 @@ public class BreakpointConfigurationViewImpl extends Window implements Breakpoin
 
     if (breakpoint.getCondition() != null) {
       breakpointCondition.setText(breakpoint.getCondition());
+    } else {
+      breakpointCondition.setText("");
     }
   }
 

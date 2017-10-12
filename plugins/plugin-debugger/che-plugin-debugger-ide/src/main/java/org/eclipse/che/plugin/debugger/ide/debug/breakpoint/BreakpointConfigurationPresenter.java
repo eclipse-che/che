@@ -46,16 +46,10 @@ public class BreakpointConfigurationPresenter
   public void onApplyClicked() {
     view.close();
 
-    BreakpointImpl updatedBreakpoint =
-        new BreakpointImpl(
-            this.breakpoint.getLocation(),
-            this.breakpoint.isEnabled(),
-            Strings.isNullOrEmpty(view.getBreakpointCondition())
-                ? null
-                : view.getBreakpointCondition());
-
-    if (!updatedBreakpoint.equals(breakpoint)) {
-      breakpointManager.update(updatedBreakpoint);
-    }
+    breakpoint.setCondition(
+        Strings.isNullOrEmpty(view.getBreakpointCondition())
+            ? null
+            : view.getBreakpointCondition());
+    breakpointManager.update(breakpoint);
   }
 }
