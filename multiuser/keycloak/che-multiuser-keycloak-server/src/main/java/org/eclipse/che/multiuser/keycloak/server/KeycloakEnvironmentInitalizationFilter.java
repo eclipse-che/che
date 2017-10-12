@@ -17,6 +17,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwt;
 import java.io.IOException;
 import java.security.Principal;
+import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.FilterChain;
@@ -107,18 +108,29 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
 
   private User getOrCreateUser(String id, String email, String username)
       throws ServerException, ConflictException {
-    try {
-      return userManager.getById(id);
-    } catch (NotFoundException e) {
+    Optional<User> user = getUser(id);
+    if (!user.isPresent()) {
       synchronized (this) {
-        final UserImpl cheUser = new UserImpl(id, email, username, generate("", 12), emptyList());
-        try {
-          return userManager.create(cheUser, false);
-        } catch (ConflictException ex) {
-          cheUser.setName(generate(cheUser.getName(), 4));
-          return userManager.create(cheUser, false);
+        user = getUser(id);
+        if (!user.isPresent()) {
+          final UserImpl cheUser = new UserImpl(id, email, username, generate("", 12), emptyList());
+          try {
+            return userManager.create(cheUser, false);
+          } catch (ConflictException ex) {
+            cheUser.setName(generate(cheUser.getName(), 4));
+            return userManager.create(cheUser, false);
+          }
         }
       }
+    }
+    return user.get();
+  }
+
+  private Optional<User> getUser(String id) throws ServerException {
+    try {
+      return Optional.of(userManager.getById(id));
+    } catch (NotFoundException e) {
+      return Optional.empty();
     }
   }
 
