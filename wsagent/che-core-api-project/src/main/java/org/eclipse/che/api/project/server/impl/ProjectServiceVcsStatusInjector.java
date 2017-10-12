@@ -37,17 +37,14 @@ import org.eclipse.che.api.project.shared.dto.TreeElement;
 public class ProjectServiceVcsStatusInjector {
 
   private final ProjectManager projectManager;
-  private final PathTransformer pathTransformer;
   private final Set<VcsStatusProvider> vcsStatusProviders;
 
   @Inject
   public ProjectServiceVcsStatusInjector(
       ProjectManager projectManager,
-      Set<VcsStatusProvider> vcsStatusProviders,
-      PathTransformer pathTransformer) {
+      Set<VcsStatusProvider> vcsStatusProviders) {
     this.projectManager = projectManager;
     this.vcsStatusProviders = vcsStatusProviders;
-    this.pathTransformer = pathTransformer;
   }
 
   /**

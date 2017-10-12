@@ -13,7 +13,7 @@ package org.eclipse.che.api.project.server.impl;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.io.File.separator;
 import static java.util.stream.Collectors.toSet;
-import static org.eclipse.che.api.fs.server.WsPathUtils.getParentWsPath;
+import static org.eclipse.che.api.fs.server.WsPathUtils.parentOf;
 import static org.eclipse.che.api.fs.server.WsPathUtils.isRoot;
 
 import java.io.IOException;
@@ -140,7 +140,7 @@ public class ProjectImportManager {
           throw new BadRequestException("Path is not defined.");
         }
 
-        String projectParentWsPath = getParentWsPath(projectWsPath);
+        String projectParentWsPath = parentOf(projectWsPath);
         if (!isRoot(projectParentWsPath) || !fsManager.existsAsDir(projectParentWsPath)) {
           throw new NotFoundException("The parent '" + projectParentWsPath + "' does not exist.");
         }
@@ -259,7 +259,7 @@ public class ProjectImportManager {
           NotFoundException {
     String type = sourceStorage.getType();
 
-    String parentWsPath = getParentWsPath(wsPath);
+    String parentWsPath = parentOf(wsPath);
     if (!fsManager.existsAsDir(parentWsPath)) {
       throw new NotFoundException("Project parent does not exist: " + parentWsPath);
     }

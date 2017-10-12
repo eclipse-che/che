@@ -11,7 +11,7 @@
 package org.eclipse.che.api.project.server.impl;
 
 import static java.io.File.separator;
-import static org.eclipse.che.api.fs.server.WsPathUtils.getParentWsPath;
+import static org.eclipse.che.api.fs.server.WsPathUtils.parentOf;
 import static org.eclipse.che.api.fs.server.WsPathUtils.isRoot;
 
 import java.util.List;
@@ -96,8 +96,8 @@ public class ValidatingProjectManager implements ProjectManager {
         throw new BadRequestException("Path is not defined.");
       }
 
-      String parentWsPath = getParentWsPath(wsPath);
-      if (!isRoot(parentWsPath) || !fsManager.existsAsDir(parentWsPath)) {
+      String parentWsPath = parentOf(wsPath);
+      if (!fsManager.existsAsDir(parentWsPath)) {
         throw new NotFoundException("Parent does not exist: " + parentWsPath);
       }
 
@@ -123,8 +123,8 @@ public class ValidatingProjectManager implements ProjectManager {
       throw new BadRequestException("Path is not defined.");
     }
 
-    String parentWsPath = getParentWsPath(wsPath);
-    if (!isRoot(parentWsPath) || !fsManager.existsAsDir(parentWsPath)) {
+    String parentWsPath = parentOf(wsPath);
+    if (!fsManager.existsAsDir(parentWsPath)) {
       throw new NotFoundException("Parent does not exist: " + parentWsPath);
     }
 
@@ -200,7 +200,7 @@ public class ValidatingProjectManager implements ProjectManager {
       throw new NotFoundException("Project directory does not exist or is a file: " + srcWsPath);
     }
 
-    String parentWsPath = dstWsPath.substring(0, dstWsPath.lastIndexOf(separator));
+    String parentWsPath = parentOf(dstWsPath);
     if (!fsManager.existsAsDir(parentWsPath)) {
       throw new NotFoundException(
           "Destination parent does not exist or is a file: " + parentWsPath);
@@ -228,7 +228,7 @@ public class ValidatingProjectManager implements ProjectManager {
       throw new NotFoundException("Project directory does not exist or is a file: " + srcWsPath);
     }
 
-    String dstParentWsPath = getParentWsPath(dstWsPath);
+    String dstParentWsPath = parentOf(dstWsPath);
     if (!fsManager.existsAsDir(dstParentWsPath)) {
       throw new NotFoundException(
           "Destination parent directory does not exist or is a file: " + dstParentWsPath);

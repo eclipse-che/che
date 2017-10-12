@@ -31,61 +31,37 @@ import org.eclipse.che.api.workspace.shared.ProjectProblemImpl;
 /** @author gazarenkov */
 public class ProjectTypes {
 
-  private final String projectPath;
   private final ProjectTypeRegistry projectTypeRegistry;
   private final ProjectTypeResolver projectTypeResolver;
   private final Map<String, ProjectTypeDef> mixins;
   private final Map<String, ProjectTypeDef> all;
   private final Map<String, Attribute> attributeDefs;
-  private final List<ProjectProblem> problems;
   private ProjectTypeDef primary;
 
   @AssistedInject
   public ProjectTypes(
-      @Assisted("projectPath") String projectPath,
       @Assisted("type") String type,
       @Assisted("mixinTypes") List<String> mixinTypes,
       ProjectTypeRegistry projectTypeRegistry,
-      ProjectTypeResolver projectTypeResolver,
-      @Assisted("problems") List<ProjectProblem> problems) {
+      ProjectTypeResolver projectTypeResolver) {
     this.projectTypeResolver = projectTypeResolver;
     mixins = new HashMap<>();
     all = new HashMap<>();
     attributeDefs = new HashMap<>();
-    this.problems = problems != null ? problems : newArrayList();
 
     this.projectTypeRegistry = projectTypeRegistry;
-    this.projectPath = projectPath;
 
     ProjectTypeDef tmpPrimary;
     if (type == null) {
-      this.problems.add(
-          new ProjectProblemImpl(
-              PROJECT_TYPE_IS_NOT_REGISTERED,
-              "No primary type defined for " + projectPath + " Base Project Type assigned."));
       tmpPrimary = ProjectTypeRegistry.BASE_TYPE;
     } else {
       try {
         tmpPrimary = projectTypeRegistry.getProjectType(type);
       } catch (NotFoundException e) {
-        this.problems.add(
-            new ProjectProblemImpl(
-                PROJECT_TYPE_IS_NOT_REGISTERED,
-                "Primary type "
-                    + type
-                    + " defined for "
-                    + projectPath
-                    + " is not registered. Base Project Type assigned."));
         tmpPrimary = ProjectTypeRegistry.BASE_TYPE;
       }
 
       if (!tmpPrimary.isPrimaryable()) {
-        this.problems.add(
-            new ProjectProblemImpl(
-                PROJECT_TYPE_IS_NOT_REGISTERED,
-                "Project type "
-                    + tmpPrimary.getId()
-                    + " is not allowable to be primary type. Base Project Type assigned."));
         tmpPrimary = ProjectTypeRegistry.BASE_TYPE;
       }
     }
@@ -112,20 +88,10 @@ public class ProjectTypes {
       try {
         mixin = projectTypeRegistry.getProjectType(mixinFromConfig);
       } catch (NotFoundException e) {
-        this.problems.add(
-            new ProjectProblemImpl(
-                PROJECT_TYPE_IS_NOT_REGISTERED,
-                "Project type " + mixinFromConfig + " is not registered. Skipped."));
         continue;
       }
 
       if (!mixin.isMixable()) {
-        this.problems.add(
-            new ProjectProblemImpl(
-                PROJECT_TYPE_IS_NOT_REGISTERED,
-                "Project type "
-                    + mixin
-                    + " is not allowable to be mixin. It not mixable. Skipped."));
         continue;
       }
 
@@ -138,13 +104,6 @@ public class ProjectTypes {
         final String attrName = attr.getName();
         final Attribute attribute = attributeDefs.get(attrName);
         if (attribute != null && !attribute.getProjectType().equals(attr.getProjectType())) {
-          this.problems.add(
-              new ProjectProblemImpl(
-                  ATTRIBUTE_NAME_PROBLEM,
-                  format(
-                      "Attribute name conflict. Duplicated attributes detected for %s. "
-                          + "Attribute %s declared in %s already declared in %s. Skipped.",
-                      projectPath, attrName, mixin.getId(), attribute.getProjectType())));
           continue;
         }
 
@@ -225,13 +184,6 @@ public class ProjectTypes {
           // If attr from mixin is going to be added but we already have some attribute with the same name,
           // check whether it's the same attribute that comes from the common parent PT, e.g. from Base PT.
           if (attribute != null && !attribute.getProjectType().equals(attr.getProjectType())) {
-            problems.add(
-                new ProjectProblemImpl(
-                    ATTRIBUTE_NAME_PROBLEM,
-                    format(
-                        "Attribute name conflict. Duplicated attributes detected for %s. "
-                            + "Attribute %s declared in %s already declared in %s. Skipped.",
-                        projectPath, attrName, pt.getId(), attribute.getProjectType())));
             continue;
           }
 

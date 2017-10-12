@@ -21,9 +21,9 @@ import java.util.stream.Collectors;
 import org.apache.commons.fileupload.FileItem;
 import org.eclipse.che.api.core.ServerException;
 
-public class FileItemUtils {
+class FileItemUtils {
 
-  public static FileItemParsed parseFile(Iterator<FileItem> iterator) throws ServerException {
+  static FileItemParsed parseFile(Iterator<FileItem> iterator) throws ServerException {
     List<FileItem> fileItems = new LinkedList<>();
     iterator.forEachRemaining(fileItems::add);
 
@@ -86,7 +86,7 @@ public class FileItemUtils {
     };
   }
 
-  public static FileItemParsed parseDir(Iterator<FileItem> iterator) throws ServerException {
+  static FileItemParsed parseDir(Iterator<FileItem> iterator) throws ServerException {
     List<FileItem> fileItems = new LinkedList<>();
     iterator.forEachRemaining(fileItems::add);
 

@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.api.fs.server.impl;
 
-import static org.eclipse.che.api.fs.server.WsPathUtils.getParentWsPath;
+import static org.eclipse.che.api.fs.server.WsPathUtils.parentOf;
 
 import java.io.File;
 import java.io.InputStream;
@@ -51,7 +51,7 @@ public class ValidatingFsManager implements FsManager {
       throw new ConflictException("Can't create file, item already exists: " + wsPath);
     }
 
-    String parentWsPath = getParentWsPath(wsPath);
+    String parentWsPath = parentOf(wsPath);
     Path parentFsPath = pathTransformer.transform(parentWsPath);
     boolean parentExists = fsOperations.exists(parentFsPath);
     if (!withParents && !parentExists) {
@@ -69,7 +69,7 @@ public class ValidatingFsManager implements FsManager {
       throw new ConflictException("Can't create directory, item already exists: " + wsPath);
     }
 
-    String parentWsPath = getParentWsPath(wsPath);
+    String parentWsPath = parentOf(wsPath);
     Path parentFsPath = pathTransformer.transform(parentWsPath);
     boolean parentExists = fsOperations.exists(parentFsPath);
     if (!withParents && !parentExists) {
@@ -136,7 +136,7 @@ public class ValidatingFsManager implements FsManager {
       throw new ConflictException("Can't copy item, it already exists: " + dstWsPath);
     }
 
-    String dstParentWsPath = getParentWsPath(dstWsPath);
+    String dstParentWsPath = parentOf(dstWsPath);
     Path dstParentFsPath = pathTransformer.transform(dstParentWsPath);
     boolean dstParentExists = fsOperations.exists(dstParentFsPath);
     if (!withParents && !dstParentExists) {
@@ -161,7 +161,7 @@ public class ValidatingFsManager implements FsManager {
       throw new ConflictException("Can't move item, it already exists: " + dstWsPath);
     }
 
-    String dstParentWsPath = getParentWsPath(dstWsPath);
+    String dstParentWsPath = parentOf(dstWsPath);
     Path dstParentFsPath = pathTransformer.transform(dstParentWsPath);
     boolean dstParentExists = fsOperations.exists(dstParentFsPath);
     if (!withParents && !dstParentExists) {

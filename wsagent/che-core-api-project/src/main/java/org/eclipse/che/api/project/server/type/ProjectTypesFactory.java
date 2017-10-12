@@ -12,13 +12,9 @@ package org.eclipse.che.api.project.server.type;
 
 import com.google.inject.assistedinject.Assisted;
 import java.util.List;
-import org.eclipse.che.api.core.model.project.ProjectProblem;
 
 public interface ProjectTypesFactory {
 
-  ProjectTypes create(
-      @Assisted("projectPath") String projectPath,
-      @Assisted("type") String type,
-      @Assisted("mixinTypes") List<String> mixinTypes,
-      @Assisted("problems") List<ProjectProblem> problems);
+  ProjectTypes create(@Assisted("type") String type,
+      @Assisted("mixinTypes") List<String> mixinTypes);
 }

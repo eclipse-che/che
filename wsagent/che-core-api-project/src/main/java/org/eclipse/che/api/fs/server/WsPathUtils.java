@@ -24,7 +24,7 @@ public interface WsPathUtils {
     return wsPath.substring(wsPath.lastIndexOf(SEPARATOR) + 1);
   }
 
-  static String getParentWsPath(String wsPath) {
+  static String parentOf(String wsPath) {
     String parentWsPath = wsPath.substring(0, wsPath.lastIndexOf(SEPARATOR));
     return parentWsPath.isEmpty() ? ROOT : parentWsPath;
   }

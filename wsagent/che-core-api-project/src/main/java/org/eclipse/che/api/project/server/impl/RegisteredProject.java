@@ -103,9 +103,7 @@ public class RegisteredProject implements ProjectConfig {
     }
 
     // 1. init project types
-    this.types =
-        projectTypesFactory.create(
-            this.config.getPath(), this.config.getType(), this.config.getMixins(), problems);
+    this.types = projectTypesFactory.create(this.config.getType(), this.config.getMixins());
 
     // 2. init transient (implicit, like git) project types.
     types.addTransient(folder);
@@ -179,58 +177,74 @@ public class RegisteredProject implements ProjectConfig {
     }
   }
 
-  /** @return primary project type */
+  /**
+   * @return primary project type
+   */
   public ProjectTypeDef getProjectType() {
     return types.getPrimary();
   }
 
-  /** @return mixin project types */
+  /**
+   * @return mixin project types
+   */
   public Map<String, ProjectTypeDef> getMixinTypes() {
     return types.getMixins();
   }
 
-  /** @return all project types (primary + mixins, convenient method) */
+  /**
+   * @return all project types (primary + mixins, convenient method)
+   */
   public Map<String, ProjectTypeDef> getTypes() {
     return types.getAll();
   }
 
-  /** @return attributes as name / Value Map */
+  /**
+   * @return attributes as name / Value Map
+   */
   public Map<String, Value> getAttributeEntries() {
     return attributes;
   }
 
   /**
    * @return whether this project is synchronized with Workspace storage On the other words this
-   *     project is not updated
+   * project is not updated
    */
   public boolean isSynced() {
     return !this.updated;
   }
 
-  /** should be called after synchronization with Workspace storage */
+  /**
+   * should be called after synchronization with Workspace storage
+   */
   public void setSync() {
     this.updated = false;
   }
 
   /**
    * @return whether this project is detected using Project Type resolver If so it should not be
-   *     persisted to Workspace storage
+   * persisted to Workspace storage
    */
   public boolean isDetected() {
     return detected;
   }
 
-  /** @return root folder or null */
+  /**
+   * @return root folder or null
+   */
   public String getBaseFolder() {
     return folder;
   }
 
-  /** @return problems in case if root or config is null (project is not synced) */
+  /**
+   * @return problems in case if root or config is null (project is not synced)
+   */
   public List<ProjectProblem> getProblems() {
     return problems;
   }
 
-  /** @return list of Problems as a String */
+  /**
+   * @return list of Problems as a String
+   */
   public String getProblemsStr() {
     StringBuilder builder = new StringBuilder();
     int i = 0;
@@ -240,7 +254,9 @@ public class RegisteredProject implements ProjectConfig {
     return builder.toString();
   }
 
-  /** @return non provided attributes, those attributes can be persisted to Workspace storage */
+  /**
+   * @return non provided attributes, those attributes can be persisted to Workspace storage
+   */
   public Map<String, List<String>> getPersistableAttributes() {
     Map<String, List<String>> attrs = new HashMap<>();
     for (HashMap.Entry<String, Value> entry : getAttributeEntries().entrySet()) {

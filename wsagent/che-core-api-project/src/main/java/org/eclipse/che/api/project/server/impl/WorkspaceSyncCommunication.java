@@ -8,16 +8,19 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.project.server;
+package org.eclipse.che.api.project.server.impl;
 
 import com.google.inject.Singleton;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.jsonrpc.commons.ClientSubscriptionHandler;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 
-/** Sends event about workspace updating using JSON RPC to the all subscribed clients. */
+/**
+ * Sends event about workspace updating using JSON RPC to the all subscribed clients.
+ */
 @Singleton
 public class WorkspaceSyncCommunication {
+
   private static final String WORKSPACE_SYNCHRONIZE_METHOD_NAME = "workspace/synchronize";
 
   private RequestTransmitter transmitter;
@@ -30,8 +33,10 @@ public class WorkspaceSyncCommunication {
     this.clientSubscriptionHandler = clientSubscriptionHandler;
   }
 
-  /** Sends workspace updating event */
-  public void synchronizeWorkspace() {
+  /**
+   * Sends workspace updating event
+   */
+  void synchronizeWorkspace() {
     clientSubscriptionHandler
         .getEndpointIds()
         .forEach(

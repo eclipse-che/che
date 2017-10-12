@@ -10,31 +10,55 @@
  */
 package org.eclipse.che.api.project.server.impl.handlers;
 
+import static java.util.Collections.emptyMap;
+import static org.eclipse.che.api.fs.server.WsPathUtils.resolve;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
+
+import com.google.common.io.Files;
+import java.io.File;
+import java.io.InputStream;
+import org.eclipse.che.api.fs.server.FsManager;
+import org.eclipse.che.api.project.server.impl.CreateBaseProjectTypeHandler;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-/** @author Vitalii Parfonov */
+/**
+ * @author Vitalii Parfonov
+ */
+@Listeners(MockitoTestNGListener.class)
 public class CreateBaseProjectTypeHandlerTest {
+
+  @Mock
+  private FsManager fsManager;
+  @InjectMocks
+  private CreateBaseProjectTypeHandler createBaseProjectTypeHandler;
+
+  private File root;
+
+  @BeforeMethod
+  public void createTemporaryRootDirectory() throws Exception {
+    root = Files.createTempDir();
+  }
+
+  @AfterMethod
+  public void deleteOnExitTemporaryRootDirectory() throws Exception {
+    root.deleteOnExit();
+  }
 
   @Test
   public void testCreateProject() throws Exception {
-    //    Path path = Path.of("test");
-    //    VirtualFileSystemProvider virtualFileSystemProvider = mock(VirtualFileSystemProvider.class);
-    //    VirtualFileSystem virtualFileSystem = mock(VirtualFileSystem.class);
-    //
-    //    VirtualFile base = mock(VirtualFile.class);
-    //    when(base.isRoot()).thenReturn(false);
-    //
-    //    VirtualFile root = mock(VirtualFile.class);
-    //    when(root.isRoot()).thenReturn(true);
-    //    when(root.createFolder(anyString())).thenReturn(base);
-    //    when(virtualFileSystem.getRoot()).thenReturn(root);
-    //
-    //    when(virtualFileSystemProvider.getVirtualFileSystem()).thenReturn(virtualFileSystem);
-    //    when(virtualFileSystem.getRoot()).thenReturn(root);
-    //
-    //    CreateBaseProjectTypeHandler createBaseProjectTypeHandler =
-    //        new CreateBaseProjectTypeHandler(virtualFileSystemProvider);
-    //    createBaseProjectTypeHandler.onCreateProject(path, null, null);
-    //    verify(root).createFolder("test");
+    String projectWsPath = root.toPath().toAbsolutePath().toString();
+    String readmeWsPath = resolve(projectWsPath, "README");
+    createBaseProjectTypeHandler.onCreateProject(projectWsPath, emptyMap(), emptyMap());
+
+    verify(fsManager).createDir(projectWsPath, true, true);
+    verify(fsManager).createFile(eq(readmeWsPath), any(InputStream.class));
   }
 }
