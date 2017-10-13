@@ -17,6 +17,7 @@ import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.eclipse.che.plugin.openshift.client.exception.OpenShiftException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +37,8 @@ public class OpenShiftRouteCreator {
       final String serviceName,
       final String deploymentName,
       final String routeId,
-      final boolean enableTls) {
+      final boolean enableTls)
+      throws OpenShiftException {
 
     if (openShiftNamespaceExternalAddress == null) {
       throw new IllegalArgumentException(

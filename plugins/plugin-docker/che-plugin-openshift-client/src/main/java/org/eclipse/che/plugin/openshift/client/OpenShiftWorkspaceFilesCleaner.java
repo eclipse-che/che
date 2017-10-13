@@ -27,6 +27,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner;
 import org.eclipse.che.api.workspace.server.event.ServerIdleEvent;
+import org.eclipse.che.plugin.openshift.client.exception.OpenShiftException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +65,11 @@ public class OpenShiftWorkspaceFilesCleaner implements WorkspaceFilesCleaner {
         new EventSubscriber<ServerIdleEvent>() {
           @Override
           public void onEvent(ServerIdleEvent event) {
-            deleteWorkspacesInQueue(event);
+            try {
+              deleteWorkspacesInQueue(event);
+            } catch (OpenShiftException e) {
+              LOG.warn("Error while deleting the workspaces", e);
+            }
           }
         });
   }
@@ -79,7 +84,7 @@ public class OpenShiftWorkspaceFilesCleaner implements WorkspaceFilesCleaner {
     deleteQueue.add(workspaceName);
   }
 
-  private void deleteWorkspacesInQueue(ServerIdleEvent event) {
+  private void deleteWorkspacesInQueue(ServerIdleEvent event) throws OpenShiftException {
     List<String> deleteQueueCopy = new ArrayList<>(deleteQueue);
     String[] dirsToDelete = deleteQueueCopy.toArray(new String[deleteQueueCopy.size()]);
 
