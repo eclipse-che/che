@@ -34,8 +34,8 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil;
-import org.eclipse.che.api.workspace.server.hc.ServerCheckerFactory;
-import org.eclipse.che.api.workspace.server.hc.ServersReadinessChecker;
+import org.eclipse.che.api.workspace.server.hc.ServersChecker;
+import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
 import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
@@ -78,7 +78,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
   private final DockerRegistryClient dockerRegistryClient;
   private final EventService eventService;
   private final DockerBootstrapperFactory bootstrapperFactory;
-  private final ServerCheckerFactory serverCheckerFactory;
+  private final ServersCheckerFactory serverCheckerFactory;
   private final MachineLoggersFactory loggers;
 
   /**
@@ -95,7 +95,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
       DockerRegistryClient dockerRegistryClient,
       EventService eventService,
       DockerBootstrapperFactory bootstrapperFactory,
-      ServerCheckerFactory serverCheckerFactory,
+      ServersCheckerFactory serverCheckerFactory,
       MachineLoggersFactory loggers) {
     this(
         context,
@@ -126,7 +126,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
       DockerRegistryClient dockerRegistryClient,
       EventService eventService,
       DockerBootstrapperFactory bootstrapperFactory,
-      ServerCheckerFactory serverCheckerFactory,
+      ServersCheckerFactory serverCheckerFactory,
       MachineLoggersFactory loggers,
       DockerMachineCreator machineCreator,
       DockerMachineStopDetector stopDetector)
@@ -164,7 +164,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
       DockerRegistryClient dockerRegistryClient,
       EventService eventService,
       DockerBootstrapperFactory bootstrapperFactory,
-      ServerCheckerFactory serverCheckerFactory,
+      ServersCheckerFactory serverCheckerFactory,
       MachineLoggersFactory loggers) {
     super(context, urlRewriter, running);
     this.networks = networks;
@@ -287,9 +287,8 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         startSynchronizer.getMachines().entrySet()) {
       String name = entry.getKey();
       DockerMachine machine = entry.getValue();
-      ServersReadinessChecker checker =
-          new ServersReadinessChecker(
-              getContext().getIdentity(), name, machine.getServers(), serverCheckerFactory);
+      ServersChecker checker =
+          serverCheckerFactory.create(getContext().getIdentity(), name, machine.getServers());
       checker.checkOnce(new ServerReadinessHandler(name));
     }
   }
@@ -320,9 +319,8 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     }
 
     checkInterruption();
-    ServersReadinessChecker readinessChecker =
-        new ServersReadinessChecker(
-            getContext().getIdentity(), name, machine.getServers(), serverCheckerFactory);
+    ServersChecker readinessChecker =
+        serverCheckerFactory.create(getContext().getIdentity(), name, machine.getServers());
     readinessChecker.startAsync(new ServerReadinessHandler(name));
     readinessChecker.await();
   }

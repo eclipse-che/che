@@ -18,6 +18,7 @@ import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.STA
 import static org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesProvisioner.CHE_ORIGINAL_NAME_LABEL;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -59,7 +60,8 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.URLRewriter;
-import org.eclipse.che.api.workspace.server.hc.ServerCheckerFactory;
+import org.eclipse.che.api.workspace.server.hc.ServersChecker;
+import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
@@ -110,7 +112,8 @@ public class OpenShiftInternalRuntimeTest {
 
   @Mock private OpenShiftRuntimeContext context;
   @Mock private EventService eventService;
-  @Mock private ServerCheckerFactory serverCheckerFactory;
+  @Mock private ServersCheckerFactory serverCheckerFactory;
+  @Mock private ServersChecker serversChecker;
   @Mock private OpenShiftBootstrapperFactory bootstrapperFactory;
   @Mock private OpenShiftEnvironment osEnv;
   @Mock private OpenShiftProject project;
@@ -138,6 +141,7 @@ public class OpenShiftInternalRuntimeTest {
             serverCheckerFactory,
             13);
     when(context.getOpenShiftEnvironment()).thenReturn(osEnv);
+    when(serverCheckerFactory.create(any(), anyString(), any())).thenReturn(serversChecker);
     when(context.getIdentity()).thenReturn(IDENTITY);
     doNothing().when(project).cleanUp();
     doReturn(ImmutableMap.of(PVC_NAME, mockPvc())).when(osEnv).getPersistentVolumeClaims();
@@ -178,6 +182,9 @@ public class OpenShiftInternalRuntimeTest {
         newEvent(M2_NAME, STARTING),
         newEvent(M1_NAME, RUNNING),
         newEvent(M2_NAME, RUNNING));
+    verify(serverCheckerFactory).create(IDENTITY, M1_NAME, emptyMap());
+    verify(serverCheckerFactory).create(IDENTITY, M2_NAME, emptyMap());
+    verify(serversChecker, times(2)).startAsync(any());
   }
 
   @Test(expectedExceptions = InfrastructureException.class)

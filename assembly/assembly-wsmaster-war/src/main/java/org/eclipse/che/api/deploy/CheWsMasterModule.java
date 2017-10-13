@@ -14,6 +14,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 import javax.sql.DataSource;
 import org.eclipse.che.api.user.server.TokenValidator;
+import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.workspace.infrastructure.docker.DockerInfraModule;
 import org.eclipse.che.workspace.infrastructure.docker.local.LocalDockerModule;
@@ -38,6 +39,7 @@ public class CheWsMasterModule extends AbstractModule {
     }
 
     bind(TokenValidator.class).to(org.eclipse.che.api.local.DummyTokenValidator.class);
+    bind(MachineTokenProvider.class).to(MachineTokenProvider.EmptyMachineTokenProvider.class);
 
     bind(org.eclipse.che.api.workspace.server.stack.StackLoader.class);
     bind(DataSource.class).toProvider(org.eclipse.che.core.db.h2.H2DataSourceProvider.class);

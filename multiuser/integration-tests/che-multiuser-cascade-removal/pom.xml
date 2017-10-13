@@ -91,10 +91,6 @@
             <artifactId>che-multiuser-permission-workspace</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.persistence</groupId>
-            <artifactId>javax.persistence</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.google.inject.extensions</groupId>
             <artifactId>guice-persist</artifactId>
             <scope>provided</scope>

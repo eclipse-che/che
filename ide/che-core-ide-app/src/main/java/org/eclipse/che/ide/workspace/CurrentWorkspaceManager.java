@@ -70,12 +70,12 @@ class CurrentWorkspaceManager {
   }
 
   /** Start the current workspace with a default environment. */
-  Promise<Void> startWorkspace(boolean restoreFromSnapshot) {
+  Promise<Void> startWorkspace() {
     WorkspaceImpl workspace = appContext.getWorkspace();
     String defEnvName = workspace.getConfig().getDefaultEnv();
 
     return workspaceServiceClient
-        .startById(workspace.getId(), defEnvName, restoreFromSnapshot)
+        .startById(workspace.getId(), defEnvName)
         .then(
             ws -> {
               ((AppContextImpl) appContext).setWorkspace(ws);
@@ -108,7 +108,7 @@ class CurrentWorkspaceManager {
           .then(
               settings -> {
                 if (parseBoolean(settings.getOrDefault(CHE_WORKSPACE_AUTO_START, "true"))) {
-                  startWorkspace(false);
+                  startWorkspace();
                 }
               });
     }
