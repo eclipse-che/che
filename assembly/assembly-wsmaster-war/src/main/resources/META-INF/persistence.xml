@@ -36,7 +36,6 @@
         <class>org.eclipse.che.api.workspace.server.model.impl.CommandImpl</class>
         <class>org.eclipse.che.workspace.infrastructure.docker.snapshot.MachineSourceImpl</class>
         <class>org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotImpl</class>
-        <class>org.eclipse.che.api.recipe.OldRecipeImpl</class>
 
         <class>org.eclipse.che.api.factory.server.model.impl.FactoryImpl</class>
         <class>org.eclipse.che.api.factory.server.model.impl.OnAppClosedImpl</class>
