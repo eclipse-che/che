@@ -259,6 +259,7 @@ public class Refactor {
    * @param name is name of destination
    */
   public void clickOnExpandIconTree(String name) {
+    loader.waitOnClosed();
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
@@ -272,6 +273,7 @@ public class Refactor {
    * @param name is name of destination
    */
   public void chooseDestinationForItem(String name) {
+    loader.waitOnClosed();
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
