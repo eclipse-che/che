@@ -138,6 +138,7 @@ public class WorkspaceDetailsTest {
         (name, value) -> {
           Assert.assertEquals(dashboardWorkspace.getAgentState(name), value);
           dashboardWorkspace.switchAgentState(name);
+          loader.waitOnClosed();
         });
     clickOnSaveButton();
 
@@ -145,6 +146,7 @@ public class WorkspaceDetailsTest {
     agents.forEach(
         (name, value) -> {
           dashboardWorkspace.switchAgentState(name);
+          loader.waitOnClosed();
         });
     clickOnSaveButton();
     agents.forEach(
@@ -222,7 +224,6 @@ public class WorkspaceDetailsTest {
     clickOnSaveButton();
 
     //check that project exists(workspace will restart)
-    dashboardWorkspace.checkStateOfWorkspace(DashboardWorkspace.StateWorkspace.STOPPED);
     dashboardProject.waitProjectIsPresent(Template.WEB_JAVA_PETCLINIC.value());
 
     //start the workspace and check that the new project exists

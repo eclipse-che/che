@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.pageobject.dashboard;
 
 import static java.lang.String.format;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
@@ -116,7 +117,7 @@ public class DashboardWorkspace {
     String RUN_WORKSPACE_BTN = "//button/span[text()='Run']";
     String STOP_WORKSPACE_BTN = "//button/span[contains(text(),'Stop')]";
     String DELETE_WORKSPACE_BTN = "//button/span[text()='Delete']";
-    String STATE_WORKSPACE = "//div[contains(@class, 'workspace-status')]/span[text()='%s']";
+    String WORKSPACE_STATE = "debug-id-workspace-status";
     String WORKSPACE_TITLE = "//div[contains(@class,'toolbar-info')]/span[text()='%s']";
     String DELETE_BTN_DIALOG_WIND =
         "//button[@ng-click='cheConfirmDialogController.hide()']//span[text()='Delete']";
@@ -194,10 +195,10 @@ public class DashboardWorkspace {
   }
 
   public enum StateWorkspace {
-    STOPPED("stopped"),
-    STARTING("starting"),
-    RUNNING("running"),
-    STOPPING("stopping");
+    STOPPED("Stopped"),
+    STARTING("Starting"),
+    RUNNING("Running"),
+    STOPPING("Stopping");
 
     private final String status;
 
@@ -282,6 +283,9 @@ public class DashboardWorkspace {
 
   @FindBy(xpath = Locators.WS_TIMEOUT_MESSAGE)
   WebElement wsTimeotMessage;
+
+  @FindBy(id = Locators.WORKSPACE_STATE)
+  WebElement workspaceState;
 
   public void waitToolbarTitleName(String titleName) {
     new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.LOADER_TIMEOUT_SEC)
@@ -468,10 +472,10 @@ public class DashboardWorkspace {
    * @param stateWorkspace expected state of workspace
    */
   public void checkStateOfWorkspace(StateWorkspace stateWorkspace) {
-    new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
         .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(format(Locators.STATE_WORKSPACE, stateWorkspace.getStatus()))));
+            ExpectedConditions.textToBePresentInElement(
+                workspaceState, stateWorkspace.getStatus()));
   }
 
   /** click on 'RUN' button in 'Workspace Information' */
@@ -517,7 +521,7 @@ public class DashboardWorkspace {
 
   /** wait the workspace is not present on dashboard */
   public void waitWorkspaceIsNotPresent(String nameWorkspace) {
-    new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
         .until(
             ExpectedConditions.invisibilityOfElementLocated(
                 By.xpath(format(Locators.WORKSPACE_ITEM_NAME, nameWorkspace))));
@@ -917,7 +921,6 @@ public class DashboardWorkspace {
   }
 
   public void switchAgentState(String agentName) {
-    loader.waitOnClosed();
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
