@@ -32,6 +32,12 @@ var (
 	// PushLogsEndpoint where to push logs.
 	PushLogsEndpoint string
 
+	// AuthEnabled whether authentication is needed
+	AuthEnabled bool
+
+	// Token to access wsmaster API
+	Token string
+
 	// RuntimeID the id of workspace runtime this machine belongs to.
 	RuntimeID    booter.RuntimeID
 	runtimeIDRaw string
@@ -71,6 +77,12 @@ func init() {
 		"push-logs-endpoint",
 		"",
 		"WebSocket endpoint where to push logs",
+	)
+	flag.BoolVar(
+		&AuthEnabled,
+		"enable-auth",
+		false,
+		"Whether authenication on workspace master is needed",
 	)
 	flag.StringVar(
 		&runtimeIDRaw,
@@ -124,6 +136,11 @@ func Parse() {
 		log.Fatal("Push logs endpoint protocol must be either ws or wss")
 	}
 
+	// auth-enabled - fetch USER_TOKEN
+	if AuthEnabled {
+		Token = os.Getenv("USER_TOKEN")
+	}
+
 	// runtime-id
 	if len(runtimeIDRaw) == 0 {
 		log.Fatal("Runtime ID required(set it with -runtime-id argument)")
@@ -152,6 +169,7 @@ func Print() {
 	log.Print("Bootstrapper configuration")
 	log.Printf("  Push endpoint: %s", PushStatusesEndpoint)
 	log.Printf("  Push logs endpoint: %s", PushLogsEndpoint)
+	log.Printf("  Auth enabled: %t", AuthEnabled)
 	log.Print("  Runtime ID:")
 	log.Printf("    Workspace: %s", RuntimeID.Workspace)
 	log.Printf("    Environment: %s", RuntimeID.Environment)
