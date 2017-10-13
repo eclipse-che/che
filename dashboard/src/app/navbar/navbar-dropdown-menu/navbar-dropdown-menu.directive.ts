@@ -16,33 +16,48 @@
  * @description This class is handling the directive to show the dropdown menu in the navbar
  * @author Oleksii Kurinnyi
  */
-export class NavbarDropdownMenu {
+export class NavbarDropdownMenu implements ng.IDirective {
+  /**
+   * Timeout service.
+   */
+  $timeout: ng.ITimeoutService;
+  /**
+   * Wrapper for the browser's <code>document</code> object.
+   */
+  $document: ng.IDocumentService;
+  /**
+   * Root scope service.
+   */
+  $rootScope: ng.IRootScopeService;
+
+  restrict: string = 'E';
+  bindToController: boolean = true;
+  templateUrl: string = 'app/navbar/navbar-dropdown-menu/navbar-dropdown-menu.html';
+  controller: string = 'NavbarDropdownMenuController';
+  controllerAs: string = 'navbarDropdownMenuController';
+
+  transclude = true;
+
+  // scope values
+  scope: {
+    [paramName: string]: string;
+  } = {
+    dropdownItems: '=navbarDropdownItems',
+    isDisabled: '=?navbarDropdownDisabled',
+    externalCssClass: '@?navbarDropdownExternalClass',
+    offset: '@?navbarDropdownOffset'
+  };
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($timeout, $document, $rootScope) {
+  constructor($timeout: ng.ITimeoutService,
+              $document: ng.IDocumentService,
+              $rootScope: ng.IRootScopeService) {
     this.$timeout = $timeout;
     this.$document = $document;
     this.$rootScope = $rootScope;
-
-
-    this.restrict = 'E';
-    this.bindToController = true;
-    this.templateUrl = 'app/navbar/navbar-dropdown-menu/navbar-dropdown-menu.html';
-    this.controller = 'NavbarDropdownMenuController';
-    this.controllerAs = 'navbarDropdownMenuController';
-
-    this.transclude = true;
-
-    // scope values
-    this.scope = {
-      dropdownItems: '=navbarDropdownItems',
-      isDisabled: '=?navbarDropdownDisabled',
-      externalCssClass: '@?navbarDropdownExternalClass',
-      offset: '@?navbarDropdownOffset'
-    };
   }
 
   compile($element, attrs) {

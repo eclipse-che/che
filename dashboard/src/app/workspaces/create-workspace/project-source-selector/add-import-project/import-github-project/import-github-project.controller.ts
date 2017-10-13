@@ -108,12 +108,19 @@ export class ImportGithubProjectController {
    * The list of selected repositories.
    */
   private selectedRepositories: Array<IGithubRepository>;
+  /**
+   * Keycloak auth service.
+   */
+  private keycloakAuth: any;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor ($q: ng.IQService, $mdDialog: ng.material.IDialogService, $location: ng.ILocationService, $browser: ng.IBrowserService, $scope: ng.IScope, githubPopup: any, cheBranding: CheBranding, githubOrganizationNameResolver: any, importGithubProjectService: ImportGithubProjectService, cheListHelperFactory: che.widget.ICheListHelperFactory, addImportProjectService: AddImportProjectService) {
+  constructor ($q: ng.IQService, $mdDialog: ng.material.IDialogService, $location: ng.ILocationService,
+               $browser: ng.IBrowserService, $scope: ng.IScope, githubPopup: any, cheBranding: CheBranding,
+               githubOrganizationNameResolver: any, importGithubProjectService: ImportGithubProjectService,
+               cheListHelperFactory: che.widget.ICheListHelperFactory, addImportProjectService: AddImportProjectService, keycloakAuth: any) {
     this.$q = $q;
     this.$mdDialog = $mdDialog;
     this.$location = $location;
@@ -123,6 +130,7 @@ export class ImportGithubProjectController {
     this.githubOrganizationNameResolver = githubOrganizationNameResolver;
     this.resolveOrganizationName = this.githubOrganizationNameResolver.resolve;
     this.addImportProjectService = addImportProjectService;
+    this.keycloakAuth = keycloakAuth;
 
     this.importGithubProjectService = importGithubProjectService;
     this.productName = cheBranding.getName();
@@ -209,6 +217,24 @@ export class ImportGithubProjectController {
       return;
     }
 
+    if (this.keycloakAuth.isPresent) {
+      this.keycloakAuth.keycloak.updateToken(5).success(() => {
+        let token = '&token=' + this.keycloakAuth.keycloak.token;
+        this.openGithubPopup(token);
+      }).error(() => {
+        this.keycloakAuth.keycloak.login();
+      });
+    } else {
+      this.openGithubPopup('');
+    }
+  }
+
+  /**
+   * Opens Github popup.
+   *
+   * @param {string} token
+   */
+  openGithubPopup(token: string): void {
     const redirectUrl = this.$location.protocol() + '://'
       + this.$location.host() + ':'
       + this.$location.port()
@@ -218,6 +244,7 @@ export class ImportGithubProjectController {
       + '?oauth_provider=github'
       + '&scope=' + ['user', 'repo', 'write:public_key'].join(',')
       + '&userId=' + this.importGithubProjectService.getCurrentUserId()
+      + token
       + '&redirect_after_login='
       + redirectUrl,
       {

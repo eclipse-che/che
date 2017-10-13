@@ -31,7 +31,6 @@ import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
 import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
-import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
@@ -91,8 +90,6 @@ public class ProjectApiUtils {
     ProjectImporterRegistry importerRegistry = new ProjectImporterRegistry(new HashSet<>());
     FileWatcherNotificationHandler fileWatcherNotificationHandler =
         new DefaultFileWatcherNotificationHandler(vfsProvider);
-    FileTreeWatcher fileTreeWatcher =
-        new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
     ProjectManager projectManager =
         new ProjectManager(
             vfsProvider,
@@ -102,7 +99,6 @@ public class ProjectApiUtils {
             projectHandlerRegistry,
             importerRegistry,
             fileWatcherNotificationHandler,
-            fileTreeWatcher,
             workspaceHolder,
             mock(FileWatcherManager.class));
 
@@ -121,6 +117,7 @@ public class ProjectApiUtils {
   }
 
   private static class TestWorkspaceHolder extends WorkspaceProjectsSyncer {
+
     private List<ProjectConfigDto> projects;
 
     TestWorkspaceHolder(List<ProjectConfigDto> projects) {

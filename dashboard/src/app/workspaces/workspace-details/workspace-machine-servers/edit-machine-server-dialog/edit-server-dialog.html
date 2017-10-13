@@ -5,6 +5,7 @@
       <!-- Reference -->
       <che-input-box che-label-name="Reference"
                      che-form="editServerForm"
+                     id="server-reference-input"
                      che-name="reference"
                      che-place-holder="Server reference"
                      ng-model="editMachineServerDialogController.reference"
@@ -25,6 +26,7 @@
       <che-input-box che-label-name="Port"
                      che-form="editServerForm"
                      che-name="port"
+                     id="server-port-input"
                      che-place-holder="Port number"
                      ng-model="editMachineServerDialogController.port"
                      type="number"
@@ -41,6 +43,7 @@
       <che-input-box che-label-name="Protocol"
                      che-form="editServerForm"
                      che-name="protocol"
+                     id="server-protocol-input"
                      che-place-holder="Protocol"
                      ng-model="editMachineServerDialogController.protocol"
                      type="type"
@@ -51,6 +54,7 @@
       </che-input-box>
       <div layout="row" layout-align="end end">
         <che-button-primary che-button-title="{{editMachineServerDialogController.toEdit ? 'Update' : 'Add'}}"
+                            id="{{editEnvVariableDialogController.toEdit ? 'Update' : 'Add'}}"
                             ng-disabled="editServerForm.$invalid"
                             ng-click="editMachineServerDialogController.saveServer()"></che-button-primary>
         <che-button-notice che-button-title="Close"

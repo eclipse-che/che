@@ -10,7 +10,11 @@
  */
 package org.eclipse.che.api.project.shared.dto.event;
 
-/** @author andrew00x */
+/**
+ * todo(vzhukovskyi): need to move this enumeration outside from dto package
+ *
+ * @author andrew00x
+ */
 public enum FileWatcherEventType {
   CREATED,
   DELETED,

@@ -29,6 +29,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.rest.DefaultHttpJsonRequestFactory;
 import org.eclipse.che.commons.lang.IoUtil;
@@ -42,6 +43,7 @@ import org.slf4j.LoggerFactory;
  * @author Mykhailo Kuznietsov
  * @author Anton Korneta
  */
+@Singleton
 public class KeycloakTestAuthServiceClient implements TestAuthServiceClient {
 
   private static final Logger LOG = LoggerFactory.getLogger(KeycloakTestAuthServiceClient.class);
@@ -78,11 +80,15 @@ public class KeycloakTestAuthServiceClient implements TestAuthServiceClient {
     final KeycloakToken token = tokens.get(username);
     if (token != null) {
       final long now = now().atZone(systemDefault()).toEpochSecond();
-      if (token.getDetails().getExpiresAt() - now < MIN_TOKEN_LIFETIME_SEC) {
-        final KeycloakToken refreshed = refreshRequest(token);
-        tokens.replace(username, refreshed);
+      if (token.getAccessDetails().getExpiresAt() - now < MIN_TOKEN_LIFETIME_SEC) {
+        if (!(token.getRefreshDetails().getExpiresAt() - now < MIN_TOKEN_LIFETIME_SEC)) {
+          final KeycloakToken refreshed = refreshRequest(token);
+          tokens.replace(username, refreshed);
+          return refreshed.getAccessToken();
+        }
+      } else {
+        return token.getAccessToken();
       }
-      return token.getAccessToken();
     }
     final KeycloakToken newToken = loginRequest(username, password);
     tokens.put(username, newToken);
@@ -151,9 +157,13 @@ public class KeycloakTestAuthServiceClient implements TestAuthServiceClient {
       final BufferedReader response =
           new BufferedReader(new InputStreamReader(http.getInputStream(), UTF_8));
       token = gson.fromJson(response, KeycloakToken.class);
-      token.setDetails(
+      token.setAccessDetails(
           gson.fromJson(
               new String(base64().decode(token.getAccessToken().split("\\.")[1]), UTF_8),
+              TokenDetails.class));
+      token.setRefreshDetails(
+          gson.fromJson(
+              new String(base64().decode(token.getRefreshToken().split("\\.")[1]), UTF_8),
               TokenDetails.class));
     } catch (IOException | JsonSyntaxException ex) {
       LOG.error(ex.getMessage(), ex);
