@@ -96,6 +96,25 @@ public class EditorGroupSynchronizationImpl
   }
 
   @Override
+  public void onEditorDirtyStateChanged(EditorPartPresenter changedEditor) {
+    boolean hasEditorsToSync = synchronizedEditors.keySet().size() > 1;
+    if (!hasEditorsToSync || groupLeaderEditor == null || groupLeaderEditor != changedEditor) {
+      //we sync 'dirty' state of editors when content of an ACTIVE editor has saved
+      return;
+    }
+
+    synchronizedEditors
+        .keySet()
+        .forEach(
+            editor -> {
+              if (editor != groupLeaderEditor && editor instanceof TextEditor) {
+                ((TextEditor) editor).getEditorWidget().markClean();
+                ((TextEditor) editor).updateDirtyState(false);
+              }
+            });
+  }
+
+  @Override
   public void removeEditor(EditorPartPresenter editor) {
     HandlerRegistration handlerRegistration = synchronizedEditors.remove(editor);
     if (handlerRegistration != null) {
