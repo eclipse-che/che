@@ -59,31 +59,32 @@ public class AdminOrganizationTest {
 
   @Inject
   @Named("admin")
-  private TestOrganizationServiceClient organizationServiceClient;
+  private TestOrganizationServiceClient testOrganizationServiceClient;
 
   @Inject private TestUser testUser;
   @Inject private AdminTestUser adminTestUser;
 
   @BeforeClass
   public void setUp() throws Exception {
-    rootOrganization = organizationServiceClient.create(NameGenerator.generate("organization", 5));
+    rootOrganization =
+        testOrganizationServiceClient.create(NameGenerator.generate("organization", 5));
     parentOrganization =
-        organizationServiceClient.create(NameGenerator.generate("organization", 5));
+        testOrganizationServiceClient.create(NameGenerator.generate("organization", 5));
     childOrganization =
-        organizationServiceClient.create(
+        testOrganizationServiceClient.create(
             NameGenerator.generate("organization", 5), parentOrganization.getId());
 
-    organizationServiceClient.addAdmin(parentOrganization.getId(), testUser.getId());
-    organizationServiceClient.addMember(childOrganization.getId(), testUser.getId());
+    testOrganizationServiceClient.addAdmin(parentOrganization.getId(), testUser.getId());
+    testOrganizationServiceClient.addMember(childOrganization.getId(), testUser.getId());
 
     dashboard.open(testUser.getName(), testUser.getPassword());
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    organizationServiceClient.deleteById(childOrganization.getId());
-    organizationServiceClient.deleteById(parentOrganization.getId());
-    organizationServiceClient.deleteById(rootOrganization.getId());
+    testOrganizationServiceClient.deleteById(childOrganization.getId());
+    testOrganizationServiceClient.deleteById(parentOrganization.getId());
+    testOrganizationServiceClient.deleteById(rootOrganization.getId());
   }
 
   @Test(priority = 1)
