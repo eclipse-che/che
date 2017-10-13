@@ -18,7 +18,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -43,7 +42,6 @@ class StartWorkspaceNotification {
   private final Provider<CurrentWorkspaceManager> currentWorkspaceManagerProvider;
 
   @UiField Button button;
-  @UiField CheckBox restore;
 
   @Inject
   StartWorkspaceNotification(
@@ -84,7 +82,7 @@ class StartWorkspaceNotification {
   void startClicked(ClickEvent e) {
     hide();
 
-    currentWorkspaceManagerProvider.get().startWorkspace(restore.getValue());
+    currentWorkspaceManagerProvider.get().startWorkspace();
   }
 
   interface StartWorkspaceNotificationUiBinder

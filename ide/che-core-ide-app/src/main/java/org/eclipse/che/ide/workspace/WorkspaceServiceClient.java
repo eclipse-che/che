@@ -18,11 +18,9 @@ import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
 import com.google.gwt.http.client.URL;
 import com.google.inject.Inject;
 import java.util.Map;
-import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.CommandDto;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
@@ -57,36 +55,14 @@ public class WorkspaceServiceClient {
   }
 
   /**
-   * Creates new workspace.
-   *
-   * @param newWorkspace the configuration to create the new workspace
-   * @param account the account id related to this operation
-   * @return a promise that resolves to the {@link WorkspaceImpl}, or rejects with an error
-   */
-  @Deprecated
-  public Promise<WorkspaceImpl> create(
-      final WorkspaceConfigDto newWorkspace, final String accountId) {
-    String url = baseHttpUrl;
-    if (accountId != null) {
-      url += "?account=" + accountId;
-    }
-    return asyncRequestFactory
-        .createPostRequest(url, newWorkspace)
-        .header(ACCEPT, APPLICATION_JSON)
-        .header(CONTENT_TYPE, APPLICATION_JSON)
-        .loader(loaderFactory.newLoader("Creating workspace..."))
-        .send(dtoUnmarshallerFactory.newUnmarshaller(WorkspaceDto.class))
-        .then((Function<WorkspaceDto, WorkspaceImpl>) WorkspaceImpl::new);
-  }
-
-  /**
    * Gets users workspace by key.
    *
    * @param key composite key can be just workspace ID or in the namespace/workspace_name form
    * @return a promise that resolves to the {@link WorkspaceImpl}, or rejects with an error
    */
-  public Promise<WorkspaceImpl> getWorkspace(final String key) {
+  public Promise<WorkspaceImpl> getWorkspace(String key) {
     final String url = baseHttpUrl + '/' + key;
+
     return asyncRequestFactory
         .createGetRequest(url)
         .header(ACCEPT, APPLICATION_JSON)
@@ -95,22 +71,13 @@ public class WorkspaceServiceClient {
         .then((Function<WorkspaceDto, WorkspaceImpl>) WorkspaceImpl::new);
   }
 
-  /**
-   * Gets workspace by namespace and name
-   *
-   * @param namespace namespace
-   * @param workspaceName workspace name
-   * @return a promise that resolves to the {@link WorkspaceImpl}, or rejects with an error
-   */
-  public Promise<WorkspaceImpl> getWorkspace(
-      @NotNull final String namespace, @NotNull final String workspaceName) {
-    final String url = baseHttpUrl + '/' + namespace + "/" + workspaceName;
+  /** Get workspace related server configuration values defined in che.properties */
+  Promise<Map<String, String>> getSettings() {
     return asyncRequestFactory
-        .createGetRequest(url)
+        .createGetRequest(baseHttpUrl + "/settings")
         .header(ACCEPT, APPLICATION_JSON)
-        .loader(loaderFactory.newLoader("Getting info about workspace..."))
-        .send(dtoUnmarshallerFactory.newUnmarshaller(WorkspaceDto.class))
-        .then((Function<WorkspaceDto, WorkspaceImpl>) WorkspaceImpl::new);
+        .header(CONTENT_TYPE, APPLICATION_JSON)
+        .send(new StringMapUnmarshaller());
   }
 
   /**
@@ -118,20 +85,11 @@ public class WorkspaceServiceClient {
    *
    * @param id workspace ID
    * @param envName the name of the workspace environment that should be used for start
-   * @param restore if <code>true</code> workspace will be restored from snapshot if snapshot
-   *     exists, if <code>false</code> workspace will not be restored from snapshot even if
-   *     auto-restore is enabled and snapshot exists
    * @return a promise that resolves to the {@link WorkspaceImpl}, or rejects with an error
    */
-  public Promise<WorkspaceImpl> startById(
-      @NotNull final String id, final String envName, final Boolean restore) {
-    String url = baseHttpUrl + "/" + id + "/runtime";
-    if (restore != null) {
-      url += "?restore=" + restore;
-    }
-    if (envName != null) {
-      url += (url.contains("?") ? '&' : '?') + "environment=" + envName;
-    }
+  Promise<WorkspaceImpl> startById(String id, String envName) {
+    String url = baseHttpUrl + "/" + id + "/runtime" + "?environment=" + envName;
+
     return asyncRequestFactory
         .createPostRequest(url, null)
         .header(ACCEPT, APPLICATION_JSON)
@@ -148,24 +106,8 @@ public class WorkspaceServiceClient {
    * @return a promise that will resolve when the workspace has been stopped, or rejects with an
    *     error
    */
-  public Promise<Void> stop(String wsId) {
+  Promise<Void> stop(String wsId) {
     final String url = baseHttpUrl + "/" + wsId + "/runtime";
-    return asyncRequestFactory
-        .createDeleteRequest(url)
-        .loader(loaderFactory.newLoader("Stopping workspace..."))
-        .send();
-  }
-
-  /**
-   * Stops currently run runtime with ability to create snapshot.
-   *
-   * @param wsId workspace ID
-   * @param createSnapshot create snapshot during the stop operation
-   * @return a promise that will resolve when the workspace has been stopped, or rejects with an
-   *     error
-   */
-  public Promise<Void> stop(String wsId, boolean createSnapshot) {
-    final String url = baseHttpUrl + "/" + wsId + "/runtime?create-snapshot=" + createSnapshot;
 
     return asyncRequestFactory
         .createDeleteRequest(url)
@@ -180,7 +122,7 @@ public class WorkspaceServiceClient {
    * @param newCommand the new workspace command
    * @return a promise that resolves to the {@link WorkspaceImpl}, or rejects with an error
    */
-  public Promise<WorkspaceImpl> addCommand(final String wsId, final CommandImpl newCommand) {
+  public Promise<WorkspaceImpl> addCommand(String wsId, CommandImpl newCommand) {
     final String url = baseHttpUrl + '/' + wsId + "/command";
 
     final CommandDto commandDto =
@@ -206,7 +148,7 @@ public class WorkspaceServiceClient {
    * @return a promise that resolves to the {@link WorkspaceImpl}, or rejects with an error
    */
   public Promise<WorkspaceImpl> updateCommand(
-      final String wsId, final String commandName, final CommandImpl commandUpdate) {
+      String wsId, String commandName, CommandImpl commandUpdate) {
     final String url = baseHttpUrl + '/' + wsId + "/command/" + URL.encodePathSegment(commandName);
 
     final CommandDto commandDto =
@@ -233,20 +175,12 @@ public class WorkspaceServiceClient {
    * @param commandName the name of the command to remove
    * @return a promise that will resolve when the command has been stopped, or rejects with an error
    */
-  public Promise<Void> deleteCommand(final String wsId, final String commandName) {
+  public Promise<Void> deleteCommand(String wsId, String commandName) {
     final String url = baseHttpUrl + '/' + wsId + "/command/" + URL.encodePathSegment(commandName);
+
     return asyncRequestFactory
         .createDeleteRequest(url)
         .loader(loaderFactory.newLoader("Deleting command..."))
         .send();
-  }
-
-  /** Get workspace related server configuration values defined in che.properties */
-  public Promise<Map<String, String>> getSettings() {
-    return asyncRequestFactory
-        .createGetRequest(baseHttpUrl + "/settings")
-        .header(ACCEPT, APPLICATION_JSON)
-        .header(CONTENT_TYPE, APPLICATION_JSON)
-        .send(new StringMapUnmarshaller());
   }
 }
