@@ -55,7 +55,6 @@ import org.eclipse.che.api.vfs.Path;
 import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.api.vfs.VirtualFileSystem;
 import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
-import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationListener;
 import org.eclipse.che.api.vfs.search.Searcher;
@@ -77,10 +76,10 @@ public class ProjectManager {
 
   private final VirtualFileSystem vfs;
   private final ProjectTypeRegistry projectTypeRegistry;
+  private final WorkspaceSyncCommunication workspaceSyncCommunication;
   private final ProjectRegistry projectRegistry;
   private final ProjectHandlerRegistry handlers;
   private final ProjectImporterRegistry importers;
-  private final FileTreeWatcher fileWatcher;
   private final FileWatcherNotificationHandler fileWatchNotifier;
   private final ExecutorService executor;
   private final WorkspaceProjectsSyncer workspaceProjectsHolder;
@@ -92,21 +91,21 @@ public class ProjectManager {
   public ProjectManager(
       VirtualFileSystemProvider vfsProvider,
       ProjectTypeRegistry projectTypeRegistry,
+      WorkspaceSyncCommunication workspaceSyncCommunication,
       ProjectRegistry projectRegistry,
       ProjectHandlerRegistry handlers,
       ProjectImporterRegistry importers,
       FileWatcherNotificationHandler fileWatcherNotificationHandler,
-      FileTreeWatcher fileTreeWatcher,
       WorkspaceProjectsSyncer workspaceProjectsHolder,
       FileWatcherManager fileWatcherManager)
       throws ServerException {
     this.vfs = vfsProvider.getVirtualFileSystem();
     this.projectTypeRegistry = projectTypeRegistry;
+    this.workspaceSyncCommunication = workspaceSyncCommunication;
     this.projectRegistry = projectRegistry;
     this.handlers = handlers;
     this.importers = importers;
     this.fileWatchNotifier = fileWatcherNotificationHandler;
-    this.fileWatcher = fileTreeWatcher;
     this.workspaceProjectsHolder = workspaceProjectsHolder;
     this.fileWatcherManager = fileWatcherManager;
 
@@ -131,7 +130,7 @@ public class ProjectManager {
             projectPath -> {
               try {
                 projectRegistry.removeProjects(projectPath);
-                workspaceProjectsHolder.sync(projectRegistry);
+                workspaceProjectsHolder.sync(projectRegistry, workspaceSyncCommunication);
               } catch (ServerException e) {
                 LOG.error("Could not remove or synchronize  project: {}", projectPath);
               }
@@ -161,12 +160,6 @@ public class ProjectManager {
           }
         };
     fileWatchNotifier.addNotificationListener(defaultListener);
-    try {
-      fileWatcher.startup();
-    } catch (IOException e) {
-      LOG.error(e.getMessage(), e);
-      fileWatchNotifier.removeNotificationListener(defaultListener);
-    }
   }
 
   @PreDestroy
@@ -195,13 +188,9 @@ public class ProjectManager {
     fileWatchNotifier.removeNotificationListener(listener);
   }
 
-  public void addWatchExcludeMatcher(PathMatcher matcher) {
-    fileWatcher.addExcludeMatcher(matcher);
-  }
+  public void addWatchExcludeMatcher(PathMatcher matcher) {}
 
-  public void removeWatchExcludeMatcher(PathMatcher matcher) {
-    fileWatcher.removeExcludeMatcher(matcher);
-  }
+  public void removeWatchExcludeMatcher(PathMatcher matcher) {}
 
   /**
    * @return all the projects
@@ -293,7 +282,7 @@ public class ProjectManager {
 
     final RegisteredProject project =
         projectRegistry.putProject(projectConfig, projectFolder, true, false);
-    workspaceProjectsHolder.sync(projectRegistry);
+    workspaceProjectsHolder.sync(projectRegistry, workspaceSyncCommunication);
     projectRegistry.fireInitHandlers(project);
 
     return project;
@@ -464,7 +453,7 @@ public class ProjectManager {
 
     final RegisteredProject project =
         projectRegistry.putProject(newConfig, baseFolder, true, false);
-    workspaceProjectsHolder.sync(projectRegistry);
+    workspaceProjectsHolder.sync(projectRegistry, workspaceSyncCommunication);
 
     projectRegistry.fireInitHandlers(project);
 
@@ -547,7 +536,7 @@ public class ProjectManager {
               registeredProject, asFolder(registeredProject.getPath()), true, false);
         }
         RegisteredProject rp = projectRegistry.putProject(project, folder, true, false);
-        workspaceProjectsHolder.sync(projectRegistry);
+        workspaceProjectsHolder.sync(projectRegistry, workspaceSyncCommunication);
         return rp;
       }
     }
@@ -558,7 +547,7 @@ public class ProjectManager {
             folder,
             true,
             false);
-    workspaceProjectsHolder.sync(projectRegistry);
+    workspaceProjectsHolder.sync(projectRegistry, workspaceSyncCommunication);
     return rp;
   }
 
@@ -637,7 +626,7 @@ public class ProjectManager {
     // delete child projects
     projectRegistry.removeProjects(apath);
 
-    workspaceProjectsHolder.sync(projectRegistry);
+    workspaceProjectsHolder.sync(projectRegistry, workspaceSyncCommunication);
   }
 
   /**

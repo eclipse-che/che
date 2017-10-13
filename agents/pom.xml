@@ -38,5 +38,6 @@
         <module>ls-typescript</module>
         <module>ls-csharp</module>
         <module>test-ls</module>
+        <module>ls-yaml</module>
     </modules>
 </project>

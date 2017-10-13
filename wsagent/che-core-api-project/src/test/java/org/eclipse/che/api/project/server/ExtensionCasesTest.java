@@ -11,6 +11,7 @@
 package org.eclipse.che.api.project.server;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -66,11 +67,11 @@ public class ExtensionCasesTest extends WsAgentTestBase {
         new ProjectManager(
             vfsProvider,
             projectTypeRegistry,
+            mock(WorkspaceSyncCommunication.class),
             projectRegistry,
             projectHandlerRegistry,
             null,
             fileWatcherNotificationHandler,
-            fileTreeWatcher,
             workspaceHolder,
             fileWatcherManager);
     pm.initWatcher();

@@ -11,11 +11,13 @@
 package org.eclipse.che.multiuser.keycloak.server;
 
 import static java.util.Collections.emptyList;
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwt;
 import java.io.IOException;
 import java.security.Principal;
+import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.FilterChain;
@@ -79,15 +81,21 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
         throw new ServletException("Cannot detect or instantiate user.");
       }
       Claims claims = (Claims) jwtToken.getBody();
-      User user =
-          getOrCreateUser(
-              claims.getSubject(),
-              claims.get("email", String.class),
-              claims.get("preferred_username", String.class));
-      subject =
-          new AuthorizedSubject(
-              new SubjectImpl(user.getName(), user.getId(), token, false), permissionChecker);
-      session.setAttribute("che_subject", subject);
+
+      try {
+        User user =
+            getOrCreateUser(
+                claims.getSubject(),
+                claims.get("email", String.class),
+                claims.get("preferred_username", String.class));
+        subject =
+            new AuthorizedSubject(
+                new SubjectImpl(user.getName(), user.getId(), token, false), permissionChecker);
+        session.setAttribute("che_subject", subject);
+      } catch (ServerException | ConflictException e) {
+        throw new ServletException(
+            "Unable to identify user " + claims.getSubject() + " in Che database", e);
+      }
     }
 
     try {
@@ -98,19 +106,31 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
     }
   }
 
-  private synchronized User getOrCreateUser(String id, String email, String username)
-      throws ServletException {
-    try {
-      return userManager.getById(id);
-    } catch (NotFoundException e) {
-      try {
-        final UserImpl cheUser = new UserImpl(id, email, username, "secret", emptyList());
-        return userManager.create(cheUser, false);
-      } catch (ServerException | ConflictException ex) {
-        throw new ServletException("Unable to create new user", ex);
+  private User getOrCreateUser(String id, String email, String username)
+      throws ServerException, ConflictException {
+    Optional<User> user = getUser(id);
+    if (!user.isPresent()) {
+      synchronized (this) {
+        user = getUser(id);
+        if (!user.isPresent()) {
+          final UserImpl cheUser = new UserImpl(id, email, username, generate("", 12), emptyList());
+          try {
+            return userManager.create(cheUser, false);
+          } catch (ConflictException ex) {
+            cheUser.setName(generate(cheUser.getName(), 4));
+            return userManager.create(cheUser, false);
+          }
+        }
       }
-    } catch (ServerException e) {
-      throw new ServletException("Unable to get user", e);
+    }
+    return user.get();
+  }
+
+  private Optional<User> getUser(String id) throws ServerException {
+    try {
+      return Optional.of(userManager.getById(id));
+    } catch (NotFoundException e) {
+      return Optional.empty();
     }
   }
 

@@ -10,10 +10,11 @@
  */
 package org.eclipse.che.api.project.shared.dto.event;
 
+import org.eclipse.che.api.project.shared.FileChange;
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
-public interface ProjectTreeStateUpdateDto {
+public interface ProjectTreeStateUpdateDto extends FileChange {
   String getPath();
 
   ProjectTreeStateUpdateDto withPath(String path);

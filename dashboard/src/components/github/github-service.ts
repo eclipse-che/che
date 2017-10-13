@@ -82,7 +82,7 @@ export class GitHubService {
               } catch (error) {
               }
 
-              if (popupWindow.closed) {
+              if (popupWindow && popupWindow.closed) {
                 $interval.cancel(polling);
                 deferred.reject({data: 'Authorization Failed'});
               }

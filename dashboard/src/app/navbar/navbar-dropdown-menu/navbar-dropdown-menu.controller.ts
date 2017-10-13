@@ -16,12 +16,19 @@
  * @author Oleksii Kurinnyi
  */
 export class NavbarDropdownMenuController {
+  /**
+   * Reference to the browser's <code>window</code> object.
+   */
+  $window: ng.IWindowService;
+
+  offset: string;
+  isDisabled: boolean;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($window) {
+  constructor($window: ng.IWindowService) {
     this.$window = $window;
 
     this.offset = angular.isUndefined(this.offset) ? '0 0' : this.offset;
@@ -34,7 +41,7 @@ export class NavbarDropdownMenuController {
    *
    * @param item {Object} the dropdown-menu item which was clicked on
    */
-  process(item) {
+  process(item: any): void {
     if (item.url) {
       this.redirect(item.url);
       return;
@@ -45,7 +52,7 @@ export class NavbarDropdownMenuController {
     }
   }
 
-  redirect(newPath) {
+  redirect(newPath: string): void {
     if (!newPath || this.isDisabled) {
       return;
     }

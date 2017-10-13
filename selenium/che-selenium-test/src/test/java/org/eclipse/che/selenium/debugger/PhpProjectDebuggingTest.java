@@ -138,7 +138,7 @@ public class PhpProjectDebuggingTest {
 
     // then
     editor.waitTabFileWithSavedStatus("lib.php");
-    editor.waitAcitveBreakpoint(14);
+    editor.waitActiveBreakpoint(14);
     debugPanel.waitDebugHighlightedText("return \"Hello, $name\"");
     debugPanel.waitTextInVariablesPanel("$name=\"man\"");
 
@@ -183,7 +183,7 @@ public class PhpProjectDebuggingTest {
 
     // then
     editor.waitTabFileWithSavedStatus("lib.php");
-    editor.waitAcitveBreakpoint(14);
+    editor.waitActiveBreakpoint(14);
     debugPanel.waitDebugHighlightedText("return \"Hello, $name\"");
     debugPanel.waitTextInVariablesPanel("$name=\"man\"");
 

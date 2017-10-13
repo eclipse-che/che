@@ -76,5 +76,7 @@ public class ProjectApiModule extends AbstractGinModule {
     bind(PreSelectedProjectTypeManager.class)
         .to(PreSelectedProjectTypeManagerImpl.class)
         .in(Singleton.class);
+
+    bind(WorkspaceProjectsSyncer.class).asEagerSingleton();
   }
 }
