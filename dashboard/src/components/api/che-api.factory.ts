@@ -17,8 +17,6 @@ import {CheFactoryTemplate} from './che-factory-template.factory';
 import {ChePreferences} from './che-preferences.factory';
 import {CheProjectTemplate} from './che-project-template.factory';
 import {CheService} from './che-service.factory';
-import {CheRecipe} from './che-recipe.factory';
-import {CheRecipeTemplate} from './che-recipe-template.factory';
 import {CheStack} from './che-stack.factory';
 import {CheOAuthProvider} from './che-o-auth-provider.factory';
 import {CheAgent} from './che-agent.factory';
@@ -55,8 +53,8 @@ export class CheAPI {
    */
   constructor(cheWorkspace: CheWorkspace, cheFactory: CheFactory, cheFactoryTemplate: CheFactoryTemplate, cheProfile: CheProfile,
               chePreferences: ChePreferences, cheProjectTemplate: CheProjectTemplate, cheService: CheService,
-              cheRecipe: CheRecipe, cheRecipeTemplate: CheRecipeTemplate, cheStack: CheStack, cheOAuthProvider: CheOAuthProvider,
-              cheAgent: CheAgent, cheSsh: CheSsh, cheUser: CheUser, chePermissions: che.api.IChePermissions, cheOrganization: che.api.ICheOrganization) {
+              cheStack: CheStack, cheOAuthProvider: CheOAuthProvider, cheAgent: CheAgent, cheSsh: CheSsh,
+              cheUser: CheUser, chePermissions: che.api.IChePermissions, cheOrganization: che.api.ICheOrganization) {
     this.cheWorkspace = cheWorkspace;
     this.cheProfile = cheProfile;
     this.cheFactory = cheFactory;
@@ -121,22 +119,6 @@ export class CheAPI {
    */
   getService(): CheService {
     return this.cheService;
-  }
-
-  /**
-   * The Che Recipe API
-   * @returns {CheRecipe}
-   */
-  getRecipe(): CheRecipe {
-    return this.cheRecipe;
-  }
-
-  /**
-   * The Che Recipe Template API
-   * @returns {CheRecipeTemplate}
-   */
-  getRecipeTemplate(): CheRecipeTemplate {
-    return this.cheRecipeTemplate;
   }
 
   /**

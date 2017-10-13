@@ -24,7 +24,6 @@
     <name>Che Multiuser :: Permissions Parent</name>
     <modules>
         <module>che-multiuser-permission-user</module>
-        <module>che-multiuser-permission-machine</module>
         <module>che-multiuser-permission-workspace</module>
         <module>che-multiuser-permission-factory</module>
         <module>che-multiuser-permission-system</module>

@@ -29,8 +29,6 @@ import org.eclipse.che.api.installer.server.jpa.JpaInstallerDao;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.installer.server.model.impl.InstallerServerConfigImpl;
 import org.eclipse.che.api.installer.server.spi.InstallerDao;
-import org.eclipse.che.api.recipe.JpaRecipeDao;
-import org.eclipse.che.api.recipe.RecipeDao;
 import org.eclipse.che.api.ssh.server.jpa.JpaSshDao;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.ssh.server.spi.SshDao;
@@ -149,7 +147,6 @@ public class PostgreSqlTckModule extends TckModule {
     bind(PasswordEncryptor.class).to(SHA512PasswordEncryptor.class);
 
     // machine
-    bind(RecipeDao.class).to(JpaRecipeDao.class);
     bind(new TypeLiteral<TckRepository<RecipeImpl>>() {})
         .toInstance(new JpaTckRepository<>(RecipeImpl.class));
     bind(new TypeLiteral<TckRepository<Workspace>>() {})
