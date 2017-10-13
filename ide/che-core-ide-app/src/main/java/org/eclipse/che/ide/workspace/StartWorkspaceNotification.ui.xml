@@ -37,33 +37,10 @@
             line-height: 18px;
             float: left;
         }
-
-        .check {
-            width: 100%;
-            height: 20px;
-            position: absolute;
-            left: 0px;
-            top: 25px;
-        }
-
-        .checkbox {
-            position: absolute;
-            left: 0px;
-            top: 5px;
-            transform: scale(0.85) translateX(-10px);
-        }
-
-        .checkbox label {
-            color: popupLoaderTextColor;
-        }
-
     </ui:style>
 
     <g:FlowPanel addStyleNames="{style.main}">
         <g:Button ui:field="button" addStyleNames="{res.windowCss.button} {res.windowCss.primaryButton} {style.button}" text="{locale.startWsButton}"></g:Button>
-        <g:FlowPanel styleName="{style.check}">
-            <g:CheckBox ui:field="restore" checked="true" addStyleNames="{style.checkbox}" text="{locale.restoreWorkspaceFromSnapshot}"></g:CheckBox>
-        </g:FlowPanel>
     </g:FlowPanel>
 
 </ui:UiBinder>
