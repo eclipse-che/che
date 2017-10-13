@@ -98,6 +98,7 @@ public class OpenShiftBootstrapper extends AbstractBootstrapper {
             + outputWebsocketEndpoint
             + " -server-check-period "
             + Integer.toString(serverCheckPeriodSeconds)
+            + " -enable-auth"
             + " -installer-timeout "
             + Integer.toString(installerTimeoutSeconds)
             + " -file "
@@ -106,14 +107,14 @@ public class OpenShiftBootstrapper extends AbstractBootstrapper {
   }
 
   private void injectBootstrapper() throws InfrastructureException {
-    LOG.info("Creating folder for bootstrapper");
+    LOG.debug("Creating folder for bootstrapper");
     openShiftMachine.exec("mkdir", "-p", BOOTSTRAPPER_DIR);
-    LOG.info("Downloading bootstrapper binary");
+    LOG.debug("Downloading bootstrapper binary");
     openShiftMachine.exec(
         "curl", "-o", BOOTSTRAPPER_DIR + BOOTSTRAPPER_FILE, bootstrapperBinaryUrl);
     openShiftMachine.exec("chmod", "+x", BOOTSTRAPPER_DIR + BOOTSTRAPPER_FILE);
 
-    LOG.info("Creating bootstrapper config file");
+    LOG.debug("Creating bootstrapper config file");
     openShiftMachine.exec(
         "sh",
         "-c",
