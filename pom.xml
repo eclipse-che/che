@@ -784,7 +784,7 @@
             <dependency>
                 <groupId>org.eclipse.che.multiuser</groupId>
                 <artifactId>che-multiuser-personal-account</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.multiuser</groupId>

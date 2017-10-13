@@ -8,15 +8,18 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.project.shared.dto.event;
+package org.eclipse.che.api.project.shared;
+
+import org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType;
 
 /**
- * todo(vzhukovskyi): need to move this enumeration outside from dto package
+ * Entity which describes change occurred to the specific path.
  *
- * @author andrew00x
+ * @author Vlad Zhukovskyi
+ * @since 5.19.0
  */
-public enum FileWatcherEventType {
-  CREATED,
-  DELETED,
-  MODIFIED
+public interface FileChange {
+  String getPath();
+
+  FileWatcherEventType getType();
 }

@@ -15,7 +15,7 @@ COMMAND_DIR=$(dirname "$0")
 
 oc create -f "$COMMAND_DIR"/keycloak/
 
-IMAGE_KEYCLOACK=${IMAGE_KEYCLOACK:-"jboss/keycloak-openshift:3.3.0.CR2-2"}
+IMAGE_KEYCLOACK=${IMAGE_KEYCLOACK:-"jboss/keycloak-openshift:3.3.0.CR2-3"}
 
 oc create -f - <<-EOF
 

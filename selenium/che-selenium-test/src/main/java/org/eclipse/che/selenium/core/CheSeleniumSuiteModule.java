@@ -23,10 +23,7 @@ import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.action.GenericActionsFactory;
 import org.eclipse.che.selenium.core.action.MacOSActionsFactory;
-import org.eclipse.che.selenium.core.client.CheTestUserServiceClient;
-import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
-import org.eclipse.che.selenium.core.client.TestUserServiceClient;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClientFactory;
+import org.eclipse.che.selenium.core.client.*;
 import org.eclipse.che.selenium.core.configuration.SeleniumTestConfiguration;
 import org.eclipse.che.selenium.core.configuration.TestConfiguration;
 import org.eclipse.che.selenium.core.provider.CheTestApiEndpointUrlProvider;
@@ -117,15 +114,15 @@ public class CheSeleniumSuiteModule extends AbstractModule {
   }
 
   @Provides
-  public ActionsFactory getActionFactory() {
-    return isMac() ? new MacOSActionsFactory() : new GenericActionsFactory();
-  }
-
-  @Provides
   @Named("admin")
   public TestOrganizationServiceClient getAdminOrganizationServiceClient(
       TestApiEndpointUrlProvider apiEndpointUrlProvider,
       TestCheAdminHttpJsonRequestFactory requestFactory) {
-    return new TestOrganizationServiceClient(apiEndpointUrlProvider, requestFactory);
+    return new CheTestTestOrganizationServiceClientImpl(apiEndpointUrlProvider, requestFactory);
+  }
+
+  @Provides
+  public ActionsFactory getActionFactory() {
+    return isMac() ? new MacOSActionsFactory() : new GenericActionsFactory();
   }
 }

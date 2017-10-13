@@ -43,7 +43,7 @@
       <che-list class="machine-servers-list" flex
                 ng-if="machineServersController.serversList && machineServersController.serversList.length > 0">
         <div class="machine-servers-item"
-             ng-repeat="server in machineServersController.serversList | orderBy:['-userScope', machineServersController.serversOrderBy]">
+             ng-repeat="server in machineServersController.serversList | orderBy:['-userScope', machineServersController.serversOrderBy]" id="server-name-{{server.reference | lowercase}}">
           <che-list-item flex>
             <div flex="100"
                  layout="row"
@@ -61,17 +61,17 @@
                 <!-- Reference -->
                 <div flex="15"
                      class="che-list-item-name">
-                  <span class="che-hover">{{server.reference | lowercase}}</span>
+                  <span class="che-hover" server-reference="{{server.reference | lowercase}}">{{server.reference | lowercase}}</span>
                 </div>
                 <!-- Port -->
                 <div flex="10"
                      class="che-list-item-name">
-                  <span class="che-hover">{{server.port}}</span>
+                  <span class="che-hover" server-port="{{server.port}}">{{server.port}}</span>
                 </div>
                 <!-- Protocol -->
                 <div flex="15"
                      class="che-list-item-name">
-                  <span class="che-hover">{{server.protocol}}</span>
+                  <span class="che-hover" server-protocol="{{server.protocol}}">{{server.protocol}}</span>
                 </div>
                 <!-- Address -->
                 <div flex="50"
@@ -94,11 +94,11 @@
                 <div flex="10" layout="column" layout-align="center end" class="machine-servers-actions">
                   <div flex layout="row">
                     <div ng-if="server.userScope"
-                         ng-click="machineServersController.showEditDialog(server.reference)">
+                         ng-click="machineServersController.showEditDialog(server.reference)" edit-server="{{server.reference | lowercase}}">
                       <span class="fa fa-pencil"></span>
                     </div>
                     <div ng-if="server.userScope"
-                         ng-click="machineServersController.deleteServer(server.reference)">
+                         ng-click="machineServersController.deleteServer(server.reference)" delete-server="{{server.reference | lowercase}}">
                       <span class="fa fa-trash-o"></span>
                     </div>
                   </div>
