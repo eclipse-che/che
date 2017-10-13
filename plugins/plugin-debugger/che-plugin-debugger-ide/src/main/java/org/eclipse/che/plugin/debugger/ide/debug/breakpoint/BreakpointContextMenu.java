@@ -10,10 +10,11 @@
  */
 package org.eclipse.che.plugin.debugger.ide.debug.breakpoint;
 
+import static org.eclipse.che.plugin.debugger.ide.DebuggerExtension.BREAKPOINT;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
-
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionManager;
@@ -22,8 +23,6 @@ import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.menu.ContextMenu;
 import org.eclipse.che.plugin.debugger.ide.DebuggerExtension;
-
-import static org.eclipse.che.plugin.debugger.ide.DebuggerExtension.BREAKPOINT;
 
 /** @author Anatolii Bazko */
 public class BreakpointContextMenu extends ContextMenu {

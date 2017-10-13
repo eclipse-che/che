@@ -12,7 +12,6 @@ package org.eclipse.che.plugin.debugger.ide.debug.breakpoint;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 

@@ -16,7 +16,6 @@ import static org.eclipse.che.ide.api.constraints.Constraints.LAST;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.constraints.Anchor;
@@ -26,8 +25,6 @@ import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
 import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
-import org.eclipse.che.plugin.debugger.ide.debug.breakpoint.BreakpointActionGroup;
-import org.eclipse.che.plugin.debugger.ide.debug.breakpoint.BreakpointConfigurationAction;
 import org.eclipse.che.plugin.debugger.ide.actions.ChangeVariableValueAction;
 import org.eclipse.che.plugin.debugger.ide.actions.DebugAction;
 import org.eclipse.che.plugin.debugger.ide.actions.DeleteAllBreakpointsAction;
@@ -42,6 +39,8 @@ import org.eclipse.che.plugin.debugger.ide.actions.StepOverAction;
 import org.eclipse.che.plugin.debugger.ide.actions.SuspendAction;
 import org.eclipse.che.plugin.debugger.ide.configuration.DebugConfigurationsGroup;
 import org.eclipse.che.plugin.debugger.ide.debug.DebuggerPresenter;
+import org.eclipse.che.plugin.debugger.ide.debug.breakpoint.BreakpointActionGroup;
+import org.eclipse.che.plugin.debugger.ide.debug.breakpoint.BreakpointConfigurationAction;
 
 /**
  * Extension allows debug applications.

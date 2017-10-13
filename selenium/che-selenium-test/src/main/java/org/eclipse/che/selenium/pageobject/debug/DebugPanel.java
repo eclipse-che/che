@@ -19,6 +19,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsExplorer;
@@ -41,26 +42,34 @@ public class DebugPanel {
 
   private static final Logger LOG = LoggerFactory.getLogger(DebugPanel.class);
 
-  @Inject private SeleniumWebDriver seleniumWebDriver;
-  @Inject private Loader loader;
-  @Inject private CodenvyEditor editor;
-  @Inject private CommandsExplorer commandsExplorer;
+  public static final String BREAKPOINT_SETTINGS_CONTEXT_MENU =
+      "gwt-debug-contextMenu/breakpointSettings";
+
+  private SeleniumWebDriver seleniumWebDriver;
+  private Loader loader;
+  private CodenvyEditor editor;
+  private CommandsExplorer commandsExplorer;
+  private ActionsFactory actionsFactory;
 
   @Inject
   public DebugPanel(
       SeleniumWebDriver seleniumWebDriver,
       Loader loader,
       CodenvyEditor editor,
-      CommandsExplorer commandsExplorer) {
+      CommandsExplorer commandsExplorer,
+      ActionsFactory actionsFactory) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
     this.editor = editor;
     this.commandsExplorer = commandsExplorer;
+    this.actionsFactory = actionsFactory;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
   private interface Locators {
     String DEBUGGER_BREAKPOINTS_PANEL_ID = "gwt-debug-debugger-breakpointsPanel";
+    String DEBUGGER_BREAKPOINTS_PANEL_ITEM =
+        "//div[@id='gwt-debug-debugger-breakpointsPanel']//td[text()='%s']";
     String DEBUGGER_PANEL_TAB = "gwt-debug-partButton-Debug";
     String FRAMES_LIST_ID = "gwt-debug-debugger-frames-list";
     String THREADS_LIST_ID = "gwt-debug-debugger-threads-list";
@@ -88,7 +97,7 @@ public class DebugPanel {
   }
 
   @FindBy(id = Locators.DEBUGGER_BREAKPOINTS_PANEL_ID)
-  WebElement debuggerBreakPointPanel;
+  WebElement breakpointPanel;
 
   @FindBy(id = Locators.DEBUGGER_PANEL_TAB)
   WebElement debuggerTab;
@@ -126,17 +135,21 @@ public class DebugPanel {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
             (WebDriver webDriver) -> {
-              return debuggerBreakPointPanel.getText().contains(content);
+              return breakpointPanel.getText().contains(content);
             });
   }
 
-  /** Wait disappearance any breakpoints from debugger breakpoints panel */
   public void waitBreakPointsPanelIsEmpty() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             (WebDriver webDriver) -> {
-              return debuggerBreakPointPanel.getText().isEmpty();
+              return breakpointPanel.getText().isEmpty();
             });
+  }
+
+  public void waitBreakpointsPanelNotEmpty() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until((WebDriver webDriver) -> !breakpointPanel.getText().isEmpty());
   }
 
   /** Wait while the Variables panel appears */
@@ -449,5 +462,36 @@ public class DebugPanel {
                 By.xpath("//*[contains(text(),'\"" + threadName + "\"@')]")))
         .click();
     threads.click();
+  }
+
+  public void makeBreakpointConditional(String fileName, int lineNumber, String condition) {
+    waitBreakpointsPanelNotEmpty();
+
+    WebElement breakpointElement =
+        seleniumWebDriver.findElement(
+            By.xpath(
+                String.format(
+                    Locators.DEBUGGER_BREAKPOINTS_PANEL_ITEM, fileName + ":" + lineNumber)));
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .contextClick(breakpointElement)
+        .build()
+        .perform();
+
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(By.id(BREAKPOINT_SETTINGS_CONTEXT_MENU)))
+        .click();
+
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(By.id("gwt-debug-breakpoint-condition")))
+        .sendKeys(condition);
+
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.id("debugger-breakpoint-configuration-apply-btn")))
+        .click();
   }
 }

@@ -52,7 +52,6 @@ import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective;
 import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
 import org.eclipse.che.plugin.debugger.ide.DebuggerResources;
-import org.eclipse.che.plugin.debugger.ide.debug.breakpoint.BreakpointContextMenu;
 import org.eclipse.che.plugin.debugger.ide.debug.breakpoint.BreakpointContextMenuFactory;
 import org.vectomatic.dom.svg.ui.SVGResource;
 

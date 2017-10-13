@@ -16,12 +16,10 @@ import com.google.common.base.Strings;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import elemental.dom.Element;
-
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.ide.api.debug.BreakpointRenderer;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.gutter.Gutter;
-import org.eclipse.che.ide.api.editor.gutter.Gutter.LineNumberingChangeCallback;
 import org.eclipse.che.ide.api.editor.texteditor.EditorResources;
 import org.eclipse.che.ide.api.editor.texteditor.LineStyler;
 import org.eclipse.che.ide.util.dom.Elements;
@@ -79,6 +77,10 @@ public class BreakpointRendererImpl implements BreakpointRenderer {
           active
               ? (condition ? activeConditionBreakpointMark : activeBreakpointMark)
               : (condition ? inactiveConditionBreakpointMark : inactiveBreakpointMark);
+      if (condition) {
+        newElement.setTitle("Condition: " + breakpoint.getCondition());
+      }
+
       Element existedElement = hasGutter.getGutterItem(lineNumber, BREAKPOINTS_GUTTER);
 
       if (existedElement != null) {

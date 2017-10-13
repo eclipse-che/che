@@ -457,7 +457,8 @@ public class SimpleList<M> extends UiComponent<SimpleList.View> implements IsWid
                 }
 
                 ListItem<M> listItem = ListItem.cast(listItemElem);
-                eventDelegate.onListItemContextMenu(mouseEvt.getClientX(), mouseEvt.getClientY(), listItem.getData());
+                eventDelegate.onListItemContextMenu(
+                    mouseEvt.getClientX(), mouseEvt.getClientY(), listItem.getData());
               }
             },
             false);

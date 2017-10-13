@@ -16,7 +16,6 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.debug.DebugConfigurationsManager;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
-import org.eclipse.che.ide.part.editor.EditorTabContextMenuFactory;
 import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
 import org.eclipse.che.plugin.debugger.ide.configuration.DebugConfigurationAction;
 import org.eclipse.che.plugin.debugger.ide.configuration.DebugConfigurationActionFactory;
