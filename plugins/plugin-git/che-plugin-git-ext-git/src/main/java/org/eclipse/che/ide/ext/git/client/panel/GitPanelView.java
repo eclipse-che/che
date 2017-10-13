@@ -17,8 +17,37 @@ import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelView;
 /** @author Mykola Morhun */
 public interface GitPanelView extends View<GitPanelView.ActionDelegate> {
 
+  /**
+   * Adds new repository into the repositories list.
+   *
+   * @param repository new repository
+   */
+  void addRepository(String repository);
+
+  /**
+   * Removes given repository from panel.
+   *
+   * @param repository name of repository to remove from panel
+   */
+  void removeRepository(String repository);
+
+  /**
+   * Updates label with changes number of the specified repository.
+   *
+   * @param repository name of repository
+   * @param changes number of changed files in the git repository
+   */
+  void updateRepositoryChanges(String repository, int changes);
+
   /** Embed changed files panel ui */
   void setChangesPanelView(ChangesPanelView changesPanelView);
 
-  interface ActionDelegate extends BaseActionDelegate {}
+  interface ActionDelegate extends BaseActionDelegate {
+
+    /**
+     * Invoked each time when user changes selection in repositories list.
+     * Returns null if no selected items.
+     */
+    void onRepositorySelectionChanged(String selectedRepository);
+  }
 }

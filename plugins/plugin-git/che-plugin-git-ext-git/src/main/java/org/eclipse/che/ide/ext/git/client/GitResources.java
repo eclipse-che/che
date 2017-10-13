@@ -56,6 +56,9 @@ public interface GitResources extends ClientBundle {
   @Source("panel/git.svg")
   SVGResource git();
 
+  @Source("panel/repository.svg")
+  SVGResource repository();
+
   @Source("push/arrow.svg")
   SVGResource arrow();
 

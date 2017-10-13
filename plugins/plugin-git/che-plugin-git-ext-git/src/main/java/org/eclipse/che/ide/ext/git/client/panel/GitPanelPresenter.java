@@ -18,6 +18,8 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.HashMap;
+import java.util.Map;
 import org.eclipse.che.api.git.shared.FileChangedEventDto;
 import org.eclipse.che.api.git.shared.StatusChangedEventDto;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
@@ -36,6 +38,7 @@ import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
 import org.eclipse.che.ide.ext.git.client.compare.MutableAlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelPresenter;
+import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
@@ -54,11 +57,13 @@ public class GitPanelPresenter extends BasePresenter
   private final ChangesPanelPresenter changesPanelPresenter;
   private final AppContext appContext;
   private final NotificationManager notificationManager;
+  private final GitEventSubscribable subscribeToGitEvents;
   private final GitResources gitResources;
   private final GitLocalizationConstant locale;
 
-  private Project currentProject;
-  private MutableAlteredFiles alteredFiles;
+  private boolean initialized;
+  private Map<String, MutableAlteredFiles> changes;
+  private String selectedProjectName;
 
   @Inject
   public GitPanelPresenter(
@@ -75,6 +80,7 @@ public class GitPanelPresenter extends BasePresenter
     this.service = service;
     this.changesPanelPresenter = changesPanelPresenter;
     this.appContext = appContext;
+    this.subscribeToGitEvents = subscribeToGitEvents;
     this.notificationManager = notificationManager;
     this.gitResources = gitResources;
     this.locale = locale;
@@ -82,43 +88,46 @@ public class GitPanelPresenter extends BasePresenter
     this.view.setDelegate(this);
     this.view.setChangesPanelView(this.changesPanelPresenter.getView());
 
-    this.currentProject = appContext.getRootProject();
-    this.alteredFiles = new MutableAlteredFiles(currentProject);
-
     if (partStack == null || !partStack.containsPart(this)) {
       workspaceAgent.openPart(this, PartStackType.NAVIGATION);
     }
 
-    subscribeToGitEvents.addSubscriber(this);
+    this.initialized = false;
   }
 
   /** Invoked each time when panel is activated. */
   @Override
   public void onOpen() {
-    // Update file list according to project explorer selection
-    Project selectedProject = appContext.getRootProject();
+    if (!initialized) {
+      loadPanelData();
+      subscribeToGitEvents.addSubscriber(this);
 
-    if (selectedProject == null) {
-      updateChangedFiles(null);
-      return;
-    } else if (selectedProject != currentProject) {
-      currentProject = selectedProject;
-      reloadChangedFilesList();
+      initialized = true;
     }
   }
 
-  private void reloadChangedFilesList() {
-    service
-        .diff(currentProject.getLocation(), null, NAME_STATUS, false, 0, REVISION, false)
-        .then(
-            diff -> {
-              alteredFiles = new MutableAlteredFiles(currentProject, diff);
-              updateChangedFiles(alteredFiles);
-            })
-        .catchError(
-            arg -> {
-              notificationManager.notify(locale.diffFailed(), FAIL, NOT_EMERGE_MODE);
-            });
+  /**
+   * Queries from server all data needed to initialize the panel.
+   */
+  private void loadPanelData() {
+    this.changes = new HashMap<>();
+
+    for (Project project : appContext.getProjects()) {
+      String projectName = project.getLocation().toString().substring(1);
+      view.addRepository(projectName);
+      service
+          .diff(project.getLocation(), null, NAME_STATUS, false, 0, REVISION, false)
+          .then(
+              diff -> {
+                MutableAlteredFiles alteredFiles = new MutableAlteredFiles(project, diff);
+                changes.put(projectName, alteredFiles);
+                view.updateRepositoryChanges(projectName, alteredFiles.getFilesQuantity());
+              })
+          .catchError(
+              arg -> {
+                notificationManager.notify(locale.diffFailed(), FAIL, NOT_EMERGE_MODE);
+              });
+    }
   }
 
   private void updateChangedFiles(AlteredFiles alteredFiles) {
@@ -164,15 +173,28 @@ public class GitPanelPresenter extends BasePresenter
 
   @Override
   public void onFileChanged(String endpointId, FileChangedEventDto dto) {
+    String projectName = extractProjectName(dto.getPath());
+    MutableAlteredFiles alteredFiles = changes.get(projectName);
+    if (alteredFiles == null) { // TODO delete debug code.
+      Log.error(getClass(), "Project '" + projectName + "' should be registered in the git panel.");
+      return;
+    }
+
     switch (dto.getStatus()) {
       case MODIFIED:
         if (alteredFiles.addFile(removeProjectName(dto.getPath()), Status.MODIFIED)) {
-          updateChangedFiles(alteredFiles);
+          view.updateRepositoryChanges(projectName, alteredFiles.getFilesQuantity());
+          if (projectName.equals(selectedProjectName)) {
+            updateChangedFiles(alteredFiles);
+          }
         }
         break;
       case NOT_MODIFIED:
         if (alteredFiles.removeFile(removeProjectName(dto.getPath()))) {
-          updateChangedFiles(alteredFiles);
+          view.updateRepositoryChanges(projectName, alteredFiles.getFilesQuantity());
+          if (projectName.equals(selectedProjectName)) {
+            updateChangedFiles(alteredFiles);
+          }
         }
         break;
       default:
@@ -182,16 +204,27 @@ public class GitPanelPresenter extends BasePresenter
 
   @Override
   public void onGitStatusChanged(String endpointId, StatusChangedEventDto dto) {
-    reloadChangedFilesList();
+    // TODO handle project name
   }
 
   @Override
   public void onGitCheckout(String endpointId, GitCheckoutEventDto dto) {
-    reloadChangedFilesList();
+    // TODO handle project name
   }
 
   /** Removes first segment from given path. */
   private String removeProjectName(String path) {
     return path.substring(path.indexOf('/', 1) + 1);
+  }
+
+  /** Returns name of project in which given file is located. */
+  private String extractProjectName(String path) {
+    return path.substring(1, path.indexOf('/', 1));
+  }
+
+  @Override
+  public void onRepositorySelectionChanged(String selectedProjectName) {
+    this.selectedProjectName = selectedProjectName;
+    updateChangedFiles(changes.get(selectedProjectName));
   }
 }

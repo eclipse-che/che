@@ -11,12 +11,22 @@
 
 -->
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
-<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-  xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+<ui:UiBinder
+  xmlns:ui='urn:ui:com.google.gwt.uibinder'
+  xmlns:g='urn:import:com.google.gwt.user.client.ui'
+  xmlns:svg="urn:import:org.vectomatic.dom.svg.ui">
+  <ui:with field='gitResources' type='org.eclipse.che.ide.ext.git.client.GitResources'/>
   <ui:with field='locale' type='org.eclipse.che.ide.ext.git.client.GitLocalizationConstant'/>
-  <ui:with field='res' type='org.eclipse.che.ide.ext.git.client.GitResources'/>
+
   <g:DockLayoutPanel>
     <g:center>
+      <g:FlowPanel>
+        <g:FlowPanel>
+          <svg:SVGImage resource="{gitResources.repository}"/>
+          <g:Label text="{locale.repositories}"/>
+        </g:FlowPanel>
+        <g:LayoutPanel ui:field="repositoriesPanel" debugId="git-panel-repositories"/>
+      </g:FlowPanel>
       <g:FlowPanel ui:field="changesPanel"/>
     </g:center>
   </g:DockLayoutPanel>
