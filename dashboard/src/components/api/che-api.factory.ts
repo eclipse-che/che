@@ -37,8 +37,6 @@ export class CheAPI {
   private cheFactory: CheFactory;
   private cheFactoryTemplate: CheFactoryTemplate;
   private cheService: CheService;
-  private cheRecipe: CheRecipe;
-  private cheRecipeTemplate: CheRecipeTemplate;
   private cheStack: CheStack;
   private cheOAuthProvider: CheOAuthProvider;
   private cheAgent: CheAgent;
@@ -62,8 +60,6 @@ export class CheAPI {
     this.chePreferences = chePreferences;
     this.cheProjectTemplate = cheProjectTemplate;
     this.cheService = cheService;
-    this.cheRecipe = cheRecipe;
-    this.cheRecipeTemplate = cheRecipeTemplate;
     this.cheStack = cheStack;
     this.cheOAuthProvider = cheOAuthProvider;
     this.cheAgent = cheAgent;
