@@ -10,147 +10,31 @@
  */
 package org.eclipse.che.selenium.core.client;
 
-import static java.lang.String.format;
-import static java.util.Arrays.asList;
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import java.util.List;
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.multiuser.api.permission.shared.dto.PermissionsDto;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
-import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+/** @author Ihor Okhrimenko */
+public interface TestOrganizationServiceClient {
 
-/** This util is handling the requests to Organization API. */
-@Singleton
-public class TestOrganizationServiceClient {
-  private static final Logger LOG = LoggerFactory.getLogger(TestOrganizationServiceClient.class);
+  List<OrganizationDto> getAll() throws Exception;
 
-  private final String apiEndpoint;
-  private final HttpJsonRequestFactory requestFactory;
+  List<OrganizationDto> getAll(@Nullable String parent) throws Exception;
 
-  @Inject
-  public TestOrganizationServiceClient(
-      TestApiEndpointUrlProvider apiEndpointUrlProvider, HttpJsonRequestFactory requestFactory) {
-    this.apiEndpoint = apiEndpointUrlProvider.get().toString();
-    this.requestFactory = requestFactory;
-  }
+  OrganizationDto create(String name, String parentId) throws Exception;
 
-  public List<OrganizationDto> getAll() throws Exception {
-    return getAll(null);
-  }
+  OrganizationDto create(String name) throws Exception;
 
-  public List<OrganizationDto> getAll(@Nullable String parent) throws Exception {
-    List<OrganizationDto> organizations =
-        requestFactory.fromUrl(getApiUrl()).request().asList(OrganizationDto.class);
+  void deleteById(String id) throws Exception;
 
-    if (parent == null) {
-      organizations.removeIf(o -> o.getParent() != null);
-    }
+  void deleteByName(String name) throws Exception;
 
-    return organizations;
-  }
+  void deleteAll(String user) throws Exception;
 
-  private String getApiUrl() {
-    return apiEndpoint + "organization/";
-  }
+  OrganizationDto get(String organizationName) throws Exception;
 
-  public OrganizationDto create(String name, String parentId) throws Exception {
-    OrganizationDto data = newDto(OrganizationDto.class).withName(name).withParent(parentId);
+  void addMember(String organizationId, String userId) throws Exception;
 
-    OrganizationDto organizationDto =
-        requestFactory
-            .fromUrl(getApiUrl())
-            .setBody(data)
-            .usePostMethod()
-            .request()
-            .asDto(OrganizationDto.class);
+  void addAdmin(String organizationId, String userId) throws Exception;
 
-    LOG.debug(
-        "Organization with name='{}', id='{}' and parent's id='{}' created",
-        name,
-        organizationDto.getId(),
-        parentId);
-
-    return organizationDto;
-  }
-
-  public OrganizationDto create(String name) throws Exception {
-    return create(name, null);
-  }
-
-  public void deleteById(String id) throws Exception {
-    String apiUrl = format("%s%s", getApiUrl(), id);
-
-    try {
-      requestFactory.fromUrl(apiUrl).useDeleteMethod().request();
-    } catch (NotFoundException e) {
-      // ignore if there is no organization of certain id
-    }
-
-    LOG.debug("Organization with id='{}' removed", id);
-  }
-
-  public void deleteByName(String name) throws Exception {
-    OrganizationDto organization = get(name);
-
-    if (organization != null) {
-      deleteById(organization.getId());
-    }
-  }
-
-  public void deleteAll(String user) throws Exception {
-    getAll(user)
-        .stream()
-        .filter(organization -> organization.getParent() != null)
-        .forEach(
-            organization -> {
-              try {
-                deleteById(organization.getId());
-              } catch (Exception e) {
-                throw new RuntimeException(e.getMessage(), e);
-              }
-            });
-  }
-
-  public OrganizationDto get(String organizationName) throws Exception {
-    String apiUrl = format("%sfind?name=%s", getApiUrl(), organizationName);
-    return requestFactory.fromUrl(apiUrl).request().asDto(OrganizationDto.class);
-  }
-
-  public void addMember(String organizationId, String userId) throws Exception {
-    addMember(organizationId, userId, asList("createWorkspaces"));
-  }
-
-  public void addAdmin(String organizationId, String userId) throws Exception {
-    addMember(
-        organizationId,
-        userId,
-        asList(
-            "update",
-            "setPermissions",
-            "manageResources",
-            "manageWorkspaces",
-            "createWorkspaces",
-            "delete",
-            "manageSuborganizations"));
-  }
-
-  public void addMember(String organizationId, String userId, List<String> actions)
-      throws Exception {
-    String apiUrl = apiEndpoint + "permissions";
-    PermissionsDto data =
-        newDto(PermissionsDto.class)
-            .withDomainId("organization")
-            .withInstanceId(organizationId)
-            .withUserId(userId)
-            .withActions(actions);
-
-    requestFactory.fromUrl(apiUrl).setBody(data).usePostMethod().request();
-  }
+  void addMember(String organizationId, String userId, List<String> actions) throws Exception;
 }
