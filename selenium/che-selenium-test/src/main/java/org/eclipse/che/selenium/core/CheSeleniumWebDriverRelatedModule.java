@@ -13,13 +13,9 @@ package org.eclipse.che.selenium.core;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import javax.inject.Named;
-import org.eclipse.che.selenium.core.client.CheTestTestOrganizationServiceClientImpl;
-import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.entrance.CookieEntrance;
 import org.eclipse.che.selenium.core.entrance.Entrance;
 import org.eclipse.che.selenium.core.entrance.LoginPageEntrance;
-import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
-import org.eclipse.che.selenium.core.requestfactory.TestCheAdminHttpJsonRequestFactory;
 import org.eclipse.che.selenium.pageobject.site.CheLoginPage;
 import org.eclipse.che.selenium.pageobject.site.LoginPage;
 
@@ -48,13 +44,5 @@ public class CheSeleniumWebDriverRelatedModule extends AbstractModule {
     } else {
       return new CookieEntrance(seleniumWebDriver);
     }
-  }
-
-  @Provides
-  @Named("admin")
-  public TestOrganizationServiceClient getAdminOrganizationServiceClient(
-      TestApiEndpointUrlProvider apiEndpointUrlProvider,
-      TestCheAdminHttpJsonRequestFactory requestFactory) {
-    return new CheTestTestOrganizationServiceClientImpl(apiEndpointUrlProvider, requestFactory);
   }
 }

@@ -41,6 +41,7 @@ import org.eclipse.che.selenium.core.provider.TestSvnRepo1Provider;
 import org.eclipse.che.selenium.core.provider.TestSvnRepo2Provider;
 import org.eclipse.che.selenium.core.provider.TestSvnUsernameProvider;
 import org.eclipse.che.selenium.core.requestfactory.CheTestDefaultUserHttpJsonRequestFactory;
+import org.eclipse.che.selenium.core.requestfactory.TestCheAdminHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactoryCreator;
 import org.eclipse.che.selenium.core.user.CheDefaultTestUser;
@@ -110,6 +111,14 @@ public class CheSeleniumSuiteModule extends AbstractModule {
     TestWorkspace ws = workspaceProvider.createWorkspace(testUser, defaultMemoryGb, DEFAULT);
     ws.await();
     return ws;
+  }
+
+  @Provides
+  @Named("admin")
+  public TestOrganizationServiceClient getAdminOrganizationServiceClient(
+      TestApiEndpointUrlProvider apiEndpointUrlProvider,
+      TestCheAdminHttpJsonRequestFactory requestFactory) {
+    return new CheTestTestOrganizationServiceClientImpl(apiEndpointUrlProvider, requestFactory);
   }
 
   @Provides
