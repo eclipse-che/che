@@ -24,6 +24,36 @@ describe('Simple dockerfile parser >', () => {
     parser = new DockerfileParser();
   });
 
+  describe('parsing comments >', () => {
+
+    it('should parse commented line', () => {
+      const dockerfile = `# commented line
+FROM codenvy/ubuntu_jdk8`;
+
+      const result = parser.parse(dockerfile);
+
+      const expectedResult = [{
+        comment: '# commented line'
+      }, {
+        instruction: 'FROM',
+        argument: 'codenvy/ubuntu_jdk8'
+      }];
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('should throw an error if there no dockerfile instructions found', () => {
+      const dockerfile = `# commented line`;
+
+      const parseFn = function() {
+        parser.parse(dockerfile);
+      };
+
+      expect(parseFn).toThrowError();
+    });
+
+  });
+
   describe('parsing directives >', () => {
 
     it(`should know 'escape' directive`, () => {
