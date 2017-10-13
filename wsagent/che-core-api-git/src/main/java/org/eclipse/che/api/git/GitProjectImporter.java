@@ -13,7 +13,7 @@ package org.eclipse.che.api.git;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.api.core.ErrorCodes.FAILED_CHECKOUT;
 import static org.eclipse.che.api.core.ErrorCodes.FAILED_CHECKOUT_WITH_START_POINT;
-import static org.eclipse.che.api.fs.server.WsPathUtils.getName;
+import static org.eclipse.che.api.fs.server.WsPathUtils.nameOf;
 import static org.eclipse.che.api.git.GitBasicAuthenticationCredentialsProvider.clearCredentials;
 import static org.eclipse.che.api.git.GitBasicAuthenticationCredentialsProvider.setCurrentCredentials;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_ALL;
@@ -168,7 +168,7 @@ public class GitProjectImporter implements ProjectImporter {
       // Get path to local file. Git works with local filesystem only.
       final String localPath = pathTransformer.transform(dst).toString();
       final String location = src.getLocation();
-      final String projectName = getName(dst);
+      final String projectName = nameOf(dst);
 
       // Converting steps
       // 1. Clone to temporary folder on same device with /projects

@@ -44,15 +44,15 @@ public class MediaTypesExcludeMatcher implements PathMatcher {
   private final Set<MediaType> excludedMediaTypes;
   private final Set<String> excludedTypes;
 
-  private final FsManager fileSystemManager;
+  private final FsManager fsManager;
   private final PathTransformer pathTransformer;
 
   @Inject
-  public MediaTypesExcludeMatcher(FsManager fileSystemManager, PathTransformer pathTransformer) {
+  public MediaTypesExcludeMatcher(FsManager fsManager, PathTransformer pathTransformer) {
     this.pathTransformer = pathTransformer;
     this.excludedMediaTypes = newHashSet(MediaType.APPLICATION_ZIP, MediaType.OCTET_STREAM);
     this.excludedTypes = newHashSet("video", "audio", "image");
-    this.fileSystemManager = fileSystemManager;
+    this.fsManager = fsManager;
   }
 
   @Override
@@ -60,7 +60,7 @@ public class MediaTypesExcludeMatcher implements PathMatcher {
     String wsPath = pathTransformer.transform(fsPath);
 
     MediaType mimeType;
-    try (InputStream content = fileSystemManager.read(wsPath)) {
+    try (InputStream content = fsManager.read(wsPath)) {
       mimeType = new TikaConfig().getDetector().detect(content, new Metadata());
     } catch (TikaException
         | IOException
@@ -69,7 +69,7 @@ public class MediaTypesExcludeMatcher implements PathMatcher {
         | ConflictException e0) {
       try {
         // https://issues.apache.org/jira/browse/TIKA-2395
-        byte[] content = fileSystemManager.readAsString(wsPath).getBytes();
+        byte[] content = fsManager.readAsString(wsPath).getBytes();
         ByteArrayInputStream bais = new ByteArrayInputStream(content);
         mimeType = new TikaConfig().getDetector().detect(bais, new Metadata());
       } catch (TikaException

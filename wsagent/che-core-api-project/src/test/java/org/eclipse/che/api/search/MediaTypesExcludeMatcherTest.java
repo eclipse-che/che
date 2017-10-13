@@ -10,41 +10,70 @@
  */
 package org.eclipse.che.api.search;
 
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import org.junit.runner.RunWith;
+import static org.apache.commons.io.IOUtils.toInputStream;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.when;
 
-/** @author Valeriy Svydenko */
-@RunWith(DataProviderRunner.class)
+import java.nio.file.Path;
+import org.eclipse.che.api.fs.server.FsManager;
+import org.eclipse.che.api.fs.server.PathTransformer;
+import org.eclipse.che.api.search.server.excludes.MediaTypesExcludeMatcher;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
+
+/**
+ * @author Valeriy Svydenko
+ */
+@Listeners(MockitoTestNGListener.class)
 public class MediaTypesExcludeMatcherTest {
-  //
-  //  @DataProvider
-  //  public static Object[][] testData() throws Exception {
-  //    return new Object[][] {
-  //      {virtualFileWithContent("to be or not to be".getBytes()), false},
-  //      {virtualFileWithContent("<html><head></head></html>".getBytes()), false},
-  //      {virtualFileWithContent("<a><b/></a>".getBytes()), false},
-  //      {virtualFileWithContent("public class SomeClass {}".getBytes()), false},
-  //      {virtualFileWithContent(new byte[10]), true}
-  //    };
-  //  }
-  //
-  //  private static VirtualFile virtualFileWithContent(byte[] content) throws Exception {
-  //    VirtualFile virtualFile = mock(VirtualFile.class);
-  //    when(virtualFile.getContent()).thenReturn(new ByteArrayInputStream(content));
-  //    return virtualFile;
-  //  }
-  //
-  //  private MediaTypesExcludeMatcher mediaTypesExcludeMatcher;
-  //
-  //  @Before
-  //  public void setUp() throws Exception {
-  //    mediaTypesExcludeMatcher = new MediaTypesExcludeMatcher();
-  //  }
-  //
-  //  @UseDataProvider("testData")
-  //  @Test
-  //  public void testFilesShouldAccepted(VirtualFile virtualFile, boolean expectedResult)
-  //      throws Exception {
-  //    assertEquals(expectedResult, mediaTypesExcludeMatcher.accept(virtualFile));
-  //  }
+
+  @Mock
+  private FsManager fsManager;
+  @Mock
+  private PathTransformer pathTransformer;
+  @InjectMocks
+  private MediaTypesExcludeMatcher mediaTypesExcludeMatcher;
+
+  @Mock
+  private Path path;
+
+  @Test
+  public void shouldMatchEmptyFile() throws Exception {
+    when(fsManager.read(anyString())).thenReturn(toInputStream(""));
+
+    assertTrue(mediaTypesExcludeMatcher.matches(path));
+  }
+
+  @Test
+  public void shouldNotMatchTextFile() throws Exception {
+    when(fsManager.read(anyString())).thenReturn(toInputStream("to be or not to be"));
+
+    assertFalse(mediaTypesExcludeMatcher.matches(path));
+  }
+
+  @Test
+  public void shouldNotMatchHtmlFile() throws Exception {
+    when(fsManager.read(anyString())).thenReturn(toInputStream("<html><head></head></html>"));
+
+    assertFalse(mediaTypesExcludeMatcher.matches(path));
+  }
+
+  @Test
+  public void shouldNotMatchJavaFile() throws Exception {
+    when(fsManager.read(anyString())).thenReturn(toInputStream("public class SomeClass {}"));
+
+    assertFalse(mediaTypesExcludeMatcher.matches(path));
+  }
+
+  @Test
+  public void shouldNotMatchMarkUpFile() throws Exception {
+    when(fsManager.read(anyString())).thenReturn(toInputStream("<a><b/></a>"));
+
+    assertFalse(mediaTypesExcludeMatcher.matches(path));
+  }
 }

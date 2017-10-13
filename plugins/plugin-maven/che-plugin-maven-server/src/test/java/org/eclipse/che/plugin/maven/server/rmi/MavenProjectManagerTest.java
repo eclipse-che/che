@@ -44,10 +44,10 @@ import org.testng.annotations.Test;
 
 /** @author Evgen Vidolob */
 @Listeners(value = {MockitoTestNGListener.class})
-public class MavenExecutiveProjectManagerTest {
+public class MavenProjectManagerTest {
 
   private final String mavenServerPath =
-      MavenExecutiveProjectManagerTest.class.getResource("/maven-server").getPath();
+      MavenProjectManagerTest.class.getResource("/maven-server").getPath();
 
   private MavenServerManager manager = new MavenServerManager(mavenServerPath);
 
@@ -92,7 +92,7 @@ public class MavenExecutiveProjectManagerTest {
     when(pom.getLocation())
         .thenReturn(
             new Path(
-                MavenExecutiveProjectManagerTest.class
+                MavenProjectManagerTest.class
                     .getResource("/FirstProject/pom.xml")
                     .getFile()));
     when(pom.getFullPath()).thenReturn(new Path("/FirstProject/pom.xml"));
@@ -114,7 +114,7 @@ public class MavenExecutiveProjectManagerTest {
     when(pom.getLocation())
         .thenReturn(
             new Path(
-                MavenExecutiveProjectManagerTest.class
+                MavenProjectManagerTest.class
                     .getResource("/multi-module-with-profiles/pom.xml")
                     .getFile()));
     when(pom.getFullPath()).thenReturn(new Path("/multi-module-with-profiles/pom.xml"));
@@ -137,7 +137,7 @@ public class MavenExecutiveProjectManagerTest {
     when(pom.getLocation())
         .thenReturn(
             new Path(
-                MavenExecutiveProjectManagerTest.class
+                MavenProjectManagerTest.class
                     .getResource("/BadProject/pom.xml")
                     .getFile()));
     when(pom.getFullPath()).thenReturn(new Path("/BadProject/pom.xml"));
@@ -161,7 +161,7 @@ public class MavenExecutiveProjectManagerTest {
     when(pom.getLocation())
         .thenReturn(
             new Path(
-                MavenExecutiveProjectManagerTest.class
+                MavenProjectManagerTest.class
                     .getResource("/FirstProject/pom.xml")
                     .getFile()));
     when(pom.getFullPath()).thenReturn(new Path("/FirstProject/pom.xml"));
@@ -189,7 +189,7 @@ public class MavenExecutiveProjectManagerTest {
     when(pom.getLocation())
         .thenReturn(
             new Path(
-                MavenExecutiveProjectManagerTest.class
+                MavenProjectManagerTest.class
                     .getResource("/multimoduleProject/pom.xml")
                     .getFile()));
     when(pom.getFullPath()).thenReturn(new Path("/multimoduleProject/pom.xml"));
@@ -207,13 +207,13 @@ public class MavenExecutiveProjectManagerTest {
     when(testPom.getLocation())
         .thenReturn(
             new Path(
-                MavenExecutiveProjectManagerTest.class
+                MavenProjectManagerTest.class
                     .getResource("/multimoduleProject/test/pom.xml")
                     .getFile()));
     when(subPom.getLocation())
         .thenReturn(
             new Path(
-                MavenExecutiveProjectManagerTest.class
+                MavenProjectManagerTest.class
                     .getResource("/multimoduleProject/subModule/pom.xml")
                     .getFile()));
     when(workspaceRoot.getProject("/multimoduleProject/test")).thenReturn(testProject);

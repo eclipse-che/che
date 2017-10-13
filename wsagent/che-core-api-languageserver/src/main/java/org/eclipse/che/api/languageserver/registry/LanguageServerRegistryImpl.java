@@ -12,9 +12,6 @@ package org.eclipse.che.api.languageserver.registry;
 
 import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -26,6 +23,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
@@ -56,7 +56,6 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
 
   private final Provider<ProjectManager> projectManagerProvider;
   private final ServerInitializer initializer;
-  private final PathTransformer pathTransformer;
   private EventService eventService;
   private CheLanguageClientFactory clientFactory;
 
@@ -67,15 +66,13 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
       Provider<ProjectManager> projectManagerProvider,
       ServerInitializer initializer,
       EventService eventService,
-      CheLanguageClientFactory clientFactory,
-      PathTransformer pathTransformer) {
+      CheLanguageClientFactory clientFactory) {
     this.languages = new ArrayList<>(languages);
     this.launchers = new ArrayList<>(languageServerLaunchers);
     this.projectManagerProvider = projectManagerProvider;
     this.initializer = initializer;
     this.eventService = eventService;
     this.clientFactory = clientFactory;
-    this.pathTransformer = pathTransformer;
     this.launchedServers = new HashMap<>();
     this.initializedServers = new HashMap<>();
   }

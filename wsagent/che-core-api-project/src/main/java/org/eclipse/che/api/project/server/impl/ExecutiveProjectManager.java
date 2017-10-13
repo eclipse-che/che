@@ -13,7 +13,7 @@ package org.eclipse.che.api.project.server.impl;
 import static java.io.File.separator;
 import static java.util.Collections.emptyMap;
 import static java.util.Optional.empty;
-import static org.eclipse.che.api.fs.server.WsPathUtils.getName;
+import static org.eclipse.che.api.fs.server.WsPathUtils.nameOf;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -333,7 +333,7 @@ public class ExecutiveProjectManager implements ProjectManager {
     RegisteredProject oldProjectConfig =
         projectConfigRegistry.remove(srcWsPath).orElseThrow(IllegalStateException::new);
 
-    String dstName = getName(dstWsPath);
+    String dstName = nameOf(dstWsPath);
     NewProjectConfig newProjectConfig =
         new NewProjectConfigImpl(
             dstWsPath,

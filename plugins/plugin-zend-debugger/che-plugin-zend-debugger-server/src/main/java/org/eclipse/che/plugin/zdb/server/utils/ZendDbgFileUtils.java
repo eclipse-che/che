@@ -33,7 +33,7 @@ public class ZendDbgFileUtils {
    *
    * @return local file absolute path
    */
-  public String findAbsolutePath(String vfsPath) {
-    return pathTransformer.transform(vfsPath).toString();
+  public String findAbsolutePath(String wsPath) {
+    return pathTransformer.transform(wsPath).toString();
   }
 }

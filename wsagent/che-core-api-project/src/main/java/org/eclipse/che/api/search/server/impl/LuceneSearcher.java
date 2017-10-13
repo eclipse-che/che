@@ -14,7 +14,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.nio.file.Files.newBufferedReader;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.eclipse.che.api.fs.server.WsPathUtils.getName;
+import static org.eclipse.che.api.fs.server.WsPathUtils.nameOf;
 import static org.eclipse.che.commons.lang.IoUtil.deleteRecursive;
 
 import com.google.common.io.CharStreams;
@@ -465,7 +465,7 @@ public class LuceneSearcher implements Searcher {
   }
 
   private Document createDocument(String wsPath, Reader reader) throws ServerException {
-    String name = getName(wsPath);
+    String name = nameOf(wsPath);
     Document doc = new Document();
     doc.add(new StringField(PATH_FIELD, wsPath, Field.Store.YES));
     doc.add(new TextField(NAME_FIELD, name, Field.Store.YES));

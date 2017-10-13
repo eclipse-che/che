@@ -15,7 +15,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
-import static org.eclipse.che.api.fs.server.WsPathUtils.getName;
+import static org.eclipse.che.api.fs.server.WsPathUtils.nameOf;
 import static org.eclipse.che.api.fs.server.WsPathUtils.resolve;
 import static org.eclipse.che.api.project.server.impl.FileItemUtils.parseDir;
 import static org.eclipse.che.api.project.server.impl.FileItemUtils.parseFile;
@@ -405,7 +405,7 @@ public class ProjectServiceApi {
     if (copyOptions != null && copyOptions.getName() != null) {
       return copyOptions.getName();
     } else {
-      return getName(wsPath);
+      return nameOf(wsPath);
     }
   }
 
@@ -445,7 +445,7 @@ public class ProjectServiceApi {
     if (moveOptions != null && moveOptions.getName() != null) {
       return moveOptions.getName();
     } else {
-      return getName(wsPath);
+      return nameOf(wsPath);
     }
   }
 
@@ -500,7 +500,7 @@ public class ProjectServiceApi {
     InputStream inputStream = fsManager.read(wsPath);
     long length = fsManager.length(wsPath);
     long lastModified = fsManager.lastModified(wsPath);
-    String name = getName(wsPath);
+    String name = nameOf(wsPath);
 
     return Response.ok(inputStream, getTIKA().detect(name))
         .lastModified(new Date(lastModified))

@@ -10,8 +10,27 @@
  */
 package org.eclipse.che.plugin.java.server.projecttype;
 
+import static java.nio.file.Files.createFile;
+import static java.nio.file.Files.createTempDirectory;
+import static java.util.Collections.singletonList;
+import static org.eclipse.che.ide.ext.java.shared.Constants.CONTAINS_JAVA_FILES;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
+import org.eclipse.che.api.fs.server.PathTransformer;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
 
 /**
  * Test for the Project Type provider
@@ -20,112 +39,93 @@ import org.testng.annotations.Listeners;
  */
 @Listeners(value = {MockitoTestNGListener.class})
 public class JavaValueProviderFactoryTest {
-  //
-  //  @Mock private FolderEntry rootProjectFolder;
-  //
-  //  /** In this case we have a folder with a java file, so it should find a java file */
-  //  @Test
-  //  public void checkFoundJavaFilesInCurrentFolder() throws Throwable {
-  //
-  //    // we return a file entry that is a java file
-  //    FileEntry fileEntry = mock(FileEntry.class);
-  //    when(fileEntry.getName()).thenReturn("helloworld.java");
-  //    when(rootProjectFolder.getChildFiles()).thenReturn(Collections.singletonList(fileEntry));
-  //    ValueProvider javaPropertiesValueProvider =
-  //        new JavaValueProviderFactory().newInstance(rootProjectFolder);
-  //    List<String> hasJavaFiles = javaPropertiesValueProvider.getValues(CONTAINS_JAVA_FILES);
-  //    assertNotNull(hasJavaFiles);
-  //    assertEquals(hasJavaFiles, Collections.singletonList("true"));
-  //  }
-  //
-  //  /** In this case we have a folder with a javascript file, so it shouldn't find any java files */
-  //  @Test
-  //  public void checkNotFoundJavaFilesInCurrentFolder() throws Throwable {
-  //
-  //    // we return a file entry that is a javascript file
-  //    FileEntry fileEntry = mock(FileEntry.class);
-  //    when(fileEntry.getName()).thenReturn("helloworld.js");
-  //    when(rootProjectFolder.getChildFiles()).thenReturn(Collections.singletonList(fileEntry));
-  //    ValueProvider javaPropertiesValueProvider =
-  //        new JavaValueProviderFactory().newInstance(rootProjectFolder);
-  //    try {
-  //      javaPropertiesValueProvider.getValues(CONTAINS_JAVA_FILES);
-  //    } catch (ValueStorageException e) {
-  //      assertEquals(e.getMessage(), "There are no Java files inside the project");
-  //    }
-  //  }
-  //
-  //  /**
-  //   * In this case we have a folder with a javascript file, but some sub folders contains java files
-  //   */
-  //  @Test
-  //  public void checkFoundJavaButNotInRootFolder() throws Throwable {
-  //
-  //    // we return a file entry that is a javascript file
-  //    FileEntry fileEntry = mock(FileEntry.class);
-  //    when(fileEntry.getName()).thenReturn("helloworld.js");
-  //    when(rootProjectFolder.getChildFiles()).thenReturn(Collections.singletonList(fileEntry));
-  //
-  //    FileEntry javaFileEntry = mock(FileEntry.class);
-  //    when(javaFileEntry.getName()).thenReturn("helloworld.java");
-  //
-  //    FolderEntry subFolder = mock(FolderEntry.class);
-  //    when(subFolder.getChildFiles()).thenReturn(Collections.singletonList(javaFileEntry));
-  //    when(rootProjectFolder.getChildFolders()).thenReturn(Collections.singletonList(subFolder));
-  //
-  //    ValueProvider javaPropertiesValueProvider =
-  //        new JavaValueProviderFactory().newInstance(rootProjectFolder);
-  //    List<String> hasJavaFiles = javaPropertiesValueProvider.getValues(CONTAINS_JAVA_FILES);
-  //    assertNotNull(hasJavaFiles);
-  //    assertEquals(hasJavaFiles, Collections.singletonList("true"));
-  //  }
-  //
-  //  /** In this case we have java file in a very deep folder */
-  //  @Test
-  //  public void checkFoundJavaDeepFolder() throws Throwable {
-  //
-  //    // we return a file entry that is a javascript file
-  //    FileEntry fileEntry = mock(FileEntry.class);
-  //    when(fileEntry.getName()).thenReturn("helloworld.js");
-  //    when(rootProjectFolder.getChildFiles()).thenReturn(Collections.singletonList(fileEntry));
-  //
-  //    FolderEntry subFolder = mock(FolderEntry.class);
-  //    when(subFolder.getChildFiles()).thenReturn(Collections.emptyList());
-  //    when(rootProjectFolder.getChildFolders()).thenReturn(Collections.singletonList(subFolder));
-  //
-  //    FileEntry javaFileEntry = mock(FileEntry.class);
-  //    when(javaFileEntry.getName()).thenReturn("helloworld.java");
-  //    FolderEntry subSubFolder = mock(FolderEntry.class);
-  //    when(subSubFolder.getChildFiles()).thenReturn(Collections.singletonList(javaFileEntry));
-  //    when(subFolder.getChildFolders()).thenReturn(Collections.singletonList(subSubFolder));
-  //
-  //    ValueProvider javaPropertiesValueProvider =
-  //        new JavaValueProviderFactory().newInstance(rootProjectFolder);
-  //    List<String> hasJavaFiles = javaPropertiesValueProvider.getValues(CONTAINS_JAVA_FILES);
-  //    assertNotNull(hasJavaFiles);
-  //    assertEquals(hasJavaFiles, Collections.singletonList("true"));
-  //  }
-  //
-  //  /** In this case we have an exception while trying to search in sub folders */
-  //  @Test(expectedExceptions = ValueStorageException.class)
-  //  public void checkWithErrorInSubfolder() throws Throwable {
-  //
-  //    // we return a file entry that is a javascript file
-  //    FileEntry fileEntry = mock(FileEntry.class);
-  //    when(fileEntry.getName()).thenReturn("helloworld.js");
-  //    when(rootProjectFolder.getChildFiles()).thenReturn(Collections.singletonList(fileEntry));
-  //
-  //    FileEntry javaFileEntry = mock(FileEntry.class);
-  //    when(javaFileEntry.getName())
-  //        .thenThrow(new IllegalStateException("unable to get name of this file"));
-  //
-  //    FolderEntry subFolder = mock(FolderEntry.class);
-  //    when(subFolder.getChildFiles()).thenReturn(Collections.singletonList(javaFileEntry));
-  //    when(rootProjectFolder.getChildFolders()).thenReturn(Collections.singletonList(subFolder));
-  //
-  //    ValueProvider javaPropertiesValueProvider =
-  //        new JavaValueProviderFactory().newInstance(rootProjectFolder);
-  //    javaPropertiesValueProvider.getValues(CONTAINS_JAVA_FILES);
-  //    org.testng.Assert.fail("We should have exception reported");
-  //  }
+
+  private static final String SIMPLE_NAME = JavaValueProviderFactoryTest.class.getSimpleName();
+
+  private static final String HELLOWORLD_JAVA = "helloworld.java";
+  private static final String PROJECT_PATH = "/project/path";
+  private static final String HELLOWORLD_JS = "helloworld.js";
+  @Mock
+  private PathTransformer pathTransformer;
+  @InjectMocks
+  private JavaValueProviderFactory javaValueProviderFactory;
+
+  @Mock
+  private ProjectConfig projectConfig;
+
+
+  private File projectDirectory;
+  private File subDirectory;
+  private File file;
+
+  @BeforeMethod
+  public void createTemporaryDirectory() throws Exception {
+    projectDirectory = createTempDirectory(SIMPLE_NAME).toFile();
+  }
+
+  @BeforeMethod
+  public void setUp() throws Exception {
+    when(projectConfig.getPath()).thenReturn(PROJECT_PATH);
+    when(pathTransformer.transform(PROJECT_PATH)).thenReturn(projectDirectory.toPath());
+  }
+
+  @AfterMethod
+  public void cleanCreateFilesAndDirectories() throws Exception {
+    projectDirectory.deleteOnExit();
+
+    if (subDirectory != null) {
+      subDirectory.deleteOnExit();
+    }
+
+    if (file != null) {
+      file.deleteOnExit();
+    }
+  }
+
+  /**
+   * In this case we have a folder with a java file, so it should find a java file
+   */
+  @Test
+  public void checkFoundJavaFilesInCurrentFolder() throws Exception {
+    file = createFile(projectDirectory.toPath().resolve(HELLOWORLD_JAVA)).toFile();
+
+    List<String> hasJavaFiles = javaValueProviderFactory.newInstance(projectConfig)
+        .getValues(CONTAINS_JAVA_FILES);
+
+    assertNotNull(hasJavaFiles);
+    assertEquals(hasJavaFiles, singletonList("true"));
+  }
+
+  /**
+   * In this case we have a folder with a javascript file, so it shouldn't find any java files
+   */
+  @Test
+  public void checkNotFoundJavaFilesInCurrentFolder() throws Exception {
+    file = createFile(projectDirectory.toPath().resolve(HELLOWORLD_JS)).toFile();
+
+    List<String> hasJavaFiles = javaValueProviderFactory.newInstance(projectConfig)
+        .getValues(CONTAINS_JAVA_FILES);
+
+    assertNotNull(hasJavaFiles);
+    assertEquals(hasJavaFiles, singletonList("false"));
+  }
+
+  /**
+   * In this case we have a folder with a javascript file, but some sub folders contains java files
+   */
+  @Test
+  public void checkFoundJavaButNotInRootFolder() throws Throwable {
+    Path projectDirectoryPath = projectDirectory.toPath();
+    Path subDirectoryPath = projectDirectoryPath.resolve("subDirectory");
+
+    subDirectory = Files.createDirectory(subDirectoryPath).toFile();
+
+    file = createFile(subDirectory.toPath().resolve(HELLOWORLD_JAVA)).toFile();
+
+    List<String> hasJavaFiles = javaValueProviderFactory.newInstance(projectConfig)
+        .getValues(CONTAINS_JAVA_FILES);
+
+    assertNotNull(hasJavaFiles);
+    assertEquals(hasJavaFiles, singletonList("true"));
+  }
 }

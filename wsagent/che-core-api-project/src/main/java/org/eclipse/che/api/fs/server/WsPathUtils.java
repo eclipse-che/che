@@ -20,7 +20,7 @@ public interface WsPathUtils {
     return ROOT.equals(wsPath);
   }
 
-  static String getName(String wsPath) {
+  static String nameOf(String wsPath) {
     return wsPath.substring(wsPath.lastIndexOf(SEPARATOR) + 1);
   }
 

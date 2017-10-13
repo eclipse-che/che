@@ -13,9 +13,6 @@ package org.eclipse.che.plugin.maven.server.core;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ID;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -23,6 +20,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
@@ -62,7 +62,7 @@ public class MavenWorkspace {
   private static final Logger LOG = LoggerFactory.getLogger(MavenWorkspace.class);
 
   private final MavenProjectManager manager;
-  private final Provider<ProjectManager> projectRegistryProvider;
+  private final Provider<ProjectManager> projectManagerProvider;
   private final ClasspathManager classpathManager;
 
   private MavenTaskExecutor resolveExecutor;
@@ -75,11 +75,11 @@ public class MavenWorkspace {
       MavenProjectManager manager,
       MavenProgressNotifier notifier,
       MavenExecutorService executorService,
-      Provider<ProjectManager> projectRegistryProvider,
+      Provider<ProjectManager> projectManagerProvider,
       ClasspathManager classpathManager,
       EventService eventService,
       EclipseWorkspaceProvider workspaceProvider) {
-    this.projectRegistryProvider = projectRegistryProvider;
+    this.projectManagerProvider = projectManagerProvider;
     this.classpathManager = classpathManager;
     this.manager = manager;
     resolveExecutor = new MavenTaskExecutor(executorService, notifier);
@@ -145,7 +145,7 @@ public class MavenWorkspace {
         project -> {
           try {
             String path = project.getProject().getFullPath().toOSString();
-            projectRegistryProvider.get().setType(path, MAVEN_ID, false);
+            projectManagerProvider.get().setType(path, MAVEN_ID, false);
           } catch (ConflictException
               | ServerException
               | NotFoundException
@@ -161,7 +161,7 @@ public class MavenWorkspace {
     removed.forEach(
         project -> {
           try {
-            projectRegistryProvider
+            projectManagerProvider
                 .get()
                 .removeType(project.getProject().getFullPath().toOSString(), MAVEN_ID);
           } catch (ServerException
@@ -240,7 +240,7 @@ public class MavenWorkspace {
 
       IPath projectPath = project.getProject().getFullPath();
       RegisteredProject registeredProject =
-          projectRegistryProvider
+          projectManagerProvider
               .get()
               .get(projectPath.toOSString())
               .orElseThrow(
