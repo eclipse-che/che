@@ -205,7 +205,7 @@ public abstract class SeleniumTestHandler
     Injector classInjector = injector.createChildInjector(childModules);
     classInjector.injectMembers(testInstance);
 
-    pageObjectsInjector.injectMembers(testInstance);
+    pageObjectsInjector.injectMembers(testInstance, classInjector);
   }
 
   /** Is invoked when test or configuration is finished. */
