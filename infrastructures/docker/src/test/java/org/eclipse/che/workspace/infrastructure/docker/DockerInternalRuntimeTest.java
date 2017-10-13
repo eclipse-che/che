@@ -41,7 +41,8 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.workspace.server.DtoConverter;
-import org.eclipse.che.api.workspace.server.hc.ServerCheckerFactory;
+import org.eclipse.che.api.workspace.server.hc.ServersChecker;
+import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
@@ -112,6 +113,9 @@ public class DockerInternalRuntimeTest {
     when(internalEnvironment.getMachines())
         .thenReturn(
             ImmutableMap.of(DEV_MACHINE, internalMachineCfg1, DB_MACHINE, internalMachineCfg2));
+    ServersCheckerFactory serversCheckerFactory = mock(ServersCheckerFactory.class);
+    when(serversCheckerFactory.create(any(), anyString(), any()))
+        .thenReturn(mock(ServersChecker.class));
     dockerRuntime =
         new DockerInternalRuntime(
             runtimeContext,
@@ -122,7 +126,7 @@ public class DockerInternalRuntimeTest {
             mock(DockerRegistryClient.class),
             eventService,
             bootstrapperFactory,
-            mock(ServerCheckerFactory.class),
+            serversCheckerFactory,
             mock(MachineLoggersFactory.class));
   }
 

@@ -10,18 +10,17 @@
  */
 package org.eclipse.che.api.workspace.server.hc;
 
-import java.net.URL;
-import java.util.Timer;
+import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.core.model.workspace.runtime.Server;
 
 /**
- * Creates {@link HttpConnectionServerChecker} for server readiness checking.
+ * Creates {@link ServersChecker} for server readiness checking.
  *
  * @author Alexander Garagatyi
+ * @author Sergii Leshchenko
  */
-public interface ServerCheckerFactory {
-  HttpConnectionServerChecker httpChecker(
-      URL url, RuntimeIdentity runtimeIdentity, String machineName, String serverRef, Timer timer)
-      throws InfrastructureException;
+public interface ServersCheckerFactory {
+  ServersChecker create(
+      RuntimeIdentity runtimeIdentity, String machineName, Map<String, ? extends Server> servers);
 }

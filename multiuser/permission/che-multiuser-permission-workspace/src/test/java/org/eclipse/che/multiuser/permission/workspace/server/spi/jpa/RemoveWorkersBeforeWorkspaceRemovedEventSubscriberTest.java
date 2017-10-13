@@ -23,7 +23,7 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.commons.test.db.H2TestHelper;
+import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
 import org.eclipse.che.multiuser.permission.workspace.server.model.impl.WorkerImpl;
 import org.eclipse.che.multiuser.permission.workspace.server.spi.jpa.JpaWorkerDao.RemoveWorkersBeforeWorkspaceRemovedEventSubscriber;
 import org.testng.annotations.AfterClass;
@@ -38,6 +38,7 @@ import org.testng.annotations.Test;
  * @author Sergii Leschenko
  */
 public class RemoveWorkersBeforeWorkspaceRemovedEventSubscriberTest {
+  private TckResourcesCleaner tckResourcesCleaner;
   private EntityManager manager;
   private JpaWorkerDao workerDao;
   private JpaWorkspaceDao workspaceDao;
@@ -76,6 +77,7 @@ public class RemoveWorkersBeforeWorkspaceRemovedEventSubscriberTest {
     workspaceDao = injector.getInstance(JpaWorkspaceDao.class);
     subscriber = injector.getInstance(RemoveWorkersBeforeWorkspaceRemovedEventSubscriber.class);
     subscriber.subscribe();
+    tckResourcesCleaner = injector.getInstance(TckResourcesCleaner.class);
   }
 
   @BeforeMethod
@@ -118,8 +120,7 @@ public class RemoveWorkersBeforeWorkspaceRemovedEventSubscriberTest {
   @AfterClass
   public void shutdown() throws Exception {
     subscriber.unsubscribe();
-    manager.getEntityManagerFactory().close();
-    H2TestHelper.shutdownDefault();
+    tckResourcesCleaner.clean();
   }
 
   @Test

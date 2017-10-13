@@ -22,7 +22,7 @@ import org.eclipse.che.api.recipe.OldRecipeImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.jpa.JpaStackDao;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
-import org.eclipse.che.commons.test.db.H2TestHelper;
+import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
 import org.eclipse.che.multiuser.api.permission.server.AbstractPermissionsDomain;
 import org.eclipse.che.multiuser.permission.machine.recipe.RecipePermissionsImpl;
 import org.eclipse.che.multiuser.permission.workspace.server.spi.jpa.JpaStackPermissionsDao.RemovePermissionsBeforeStackRemovedEventSubscriber;
@@ -39,6 +39,7 @@ import org.testng.annotations.Test;
  * @author Sergii Leschenko
  */
 public class RemovePermissionsBeforeStackRemovedEventSubscriberTest {
+  private TckResourcesCleaner tckResourcesCleaner;
   private EntityManager manager;
   private JpaStackDao stackDao;
   private JpaStackPermissionsDao stackPermissionsDao;
@@ -67,6 +68,7 @@ public class RemovePermissionsBeforeStackRemovedEventSubscriberTest {
     manager = injector.getInstance(EntityManager.class);
     stackDao = injector.getInstance(JpaStackDao.class);
     stackPermissionsDao = injector.getInstance(JpaStackPermissionsDao.class);
+    tckResourcesCleaner = injector.getInstance(TckResourcesCleaner.class);
 
     subscriber = injector.getInstance(RemovePermissionsBeforeStackRemovedEventSubscriber.class);
     subscriber.subscribe();
@@ -104,8 +106,7 @@ public class RemovePermissionsBeforeStackRemovedEventSubscriberTest {
   @AfterClass
   public void shutdown() throws Exception {
     subscriber.unsubscribe();
-    manager.getEntityManagerFactory().close();
-    H2TestHelper.shutdownDefault();
+    tckResourcesCleaner.clean();
   }
 
   @Test

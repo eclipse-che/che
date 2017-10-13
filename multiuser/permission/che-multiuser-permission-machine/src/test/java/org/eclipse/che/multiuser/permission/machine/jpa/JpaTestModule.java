@@ -17,7 +17,6 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.commons.test.db.H2DBTestServer;
 import org.eclipse.che.commons.test.db.H2JpaCleaner;
 import org.eclipse.che.commons.test.db.PersistTestModuleBuilder;
-import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
 import org.eclipse.che.core.db.DBInitializer;
 import org.eclipse.che.core.db.h2.jpa.eclipselink.H2ExceptionHandler;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
@@ -50,7 +49,7 @@ public class JpaTestModule extends AbstractModule {
     bind(DBInitializer.class).asEagerSingleton();
     bind(SchemaInitializer.class)
         .toInstance(new FlywaySchemaInitializer(server.getDataSource(), "che-schema"));
-    bind(TckResourcesCleaner.class).toInstance(new H2JpaCleaner(server));
+    bind(H2JpaCleaner.class).toInstance(new H2JpaCleaner(server));
     bind(DBInitializer.class).asEagerSingleton();
   }
 }

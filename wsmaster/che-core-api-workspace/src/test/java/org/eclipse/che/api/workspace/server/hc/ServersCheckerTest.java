@@ -13,6 +13,7 @@ package org.eclipse.che.api.workspace.server.hc;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -21,17 +22,20 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.fail;
 
 import com.google.common.collect.ImmutableMap;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Timer;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.AfterMethod;
@@ -41,27 +45,39 @@ import org.testng.annotations.Test;
 
 /** @author Alexander Garagatyi */
 @Listeners(MockitoTestNGListener.class)
-public class ServersReadinessCheckerTest {
+public class ServersCheckerTest {
+
   private static final String MACHINE_NAME = "mach1";
+  private static final String MACHINE_TOKEN = "machineToken";
+  private static final String WORKSPACE_ID = "ws123";
 
   @Mock private Consumer<String> readinessHandler;
-  @Mock private ServerCheckerFactory factory;
+  @Mock private MachineTokenProvider machineTokenProvider;
   @Mock private HttpConnectionServerChecker connectionChecker;
   @Mock private RuntimeIdentity runtimeIdentity;
+  private Map<String, ServerImpl> servers;
 
   private CompletableFuture<String> compFuture;
-  private ServersReadinessChecker checker;
+  private ServersChecker checker;
 
   @BeforeMethod
   public void setUp() throws Exception {
+    servers = new HashMap<>();
+    servers.putAll(
+        ImmutableMap.of(
+            "wsagent/http", new ServerImpl("http://localhost"),
+            "exec-agent/http", new ServerImpl("http://localhost"),
+            "terminal", new ServerImpl("http://localhost")));
+
     compFuture = new CompletableFuture<>();
 
-    when(factory.httpChecker(any(URL.class), any(), anyString(), anyString(), any(Timer.class)))
-        .thenReturn(connectionChecker);
     when(connectionChecker.getReportCompFuture()).thenReturn(compFuture);
 
-    checker =
-        new ServersReadinessChecker(runtimeIdentity, MACHINE_NAME, getDefaultServers(), factory);
+    when(runtimeIdentity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
+
+    checker = spy(new ServersChecker(runtimeIdentity, MACHINE_NAME, servers, machineTokenProvider));
+    when(checker.doCreateChecker(any(URL.class), anyString())).thenReturn(connectionChecker);
+    when(machineTokenProvider.getToken(anyString())).thenReturn(MACHINE_TOKEN);
   }
 
   @AfterMethod(timeOut = 1000)
@@ -70,6 +86,21 @@ public class ServersReadinessCheckerTest {
       checker.await();
     } catch (Exception ignored) {
     }
+  }
+
+  @Test(timeOut = 1000)
+  public void shouldUseMachineTokenWhenConstructionUrlToCheck() throws Exception {
+    servers.clear();
+    servers.put("wsagent/http", new ServerImpl("http://localhost"));
+
+    checker.startAsync(readinessHandler);
+    connectionChecker.getReportCompFuture().complete("wsagent/http");
+
+    verify(machineTokenProvider).getToken(WORKSPACE_ID);
+    ArgumentCaptor<URL> urlCaptor = ArgumentCaptor.forClass(URL.class);
+    verify(checker).doCreateChecker(urlCaptor.capture(), eq("wsagent/http"));
+    URL urlToCheck = urlCaptor.getValue();
+    assertNotEquals(urlToCheck.getQuery().indexOf("token=" + MACHINE_TOKEN), -1);
   }
 
   @Test(timeOut = 1000)
@@ -100,11 +131,11 @@ public class ServersReadinessCheckerTest {
 
   @Test(timeOut = 1000)
   public void shouldNotCheckNotHardcodedServers() throws Exception {
-    Map<String, ServerImpl> servers =
+    servers.clear();
+    servers.putAll(
         ImmutableMap.of(
             "wsagent/http", new ServerImpl("http://localhost"),
-            "not-hardcoded", new ServerImpl("http://localhost"));
-    checker = new ServersReadinessChecker(runtimeIdentity, MACHINE_NAME, servers, factory);
+            "not-hardcoded", new ServerImpl("http://localhost")));
 
     checker.startAsync(readinessHandler);
     connectionChecker.getReportCompFuture().complete("test_ref");
@@ -148,12 +179,5 @@ public class ServersReadinessCheckerTest {
     doThrow(new InfrastructureException("oops!")).when(connectionChecker).checkOnce(anyObject());
 
     checker.checkOnce(ref -> {});
-  }
-
-  Map<String, ServerImpl> getDefaultServers() {
-    return ImmutableMap.of(
-        "wsagent/http", new ServerImpl("http://localhost"),
-        "exec-agent/http", new ServerImpl("http://localhost"),
-        "terminal", new ServerImpl("http://localhost"));
   }
 }

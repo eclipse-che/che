@@ -10,7 +10,9 @@
  */
 package org.eclipse.che.api.workspace.server.hc;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.assistedinject.Assisted;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -22,18 +24,20 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
+import javax.inject.Inject;
 import javax.ws.rs.core.UriBuilder;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
+import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
 
 /**
  * Checks readiness of servers of a machine.
  *
  * @author Alexander Garagatyi
  */
-public class ServersReadinessChecker {
+public class ServersChecker {
   // workaround to set correct paths for servers readiness checks
   // TODO replace with checks set in server config
   private static final Map<String, String> LIVENESS_CHECKS_PATHS =
@@ -44,7 +48,7 @@ public class ServersReadinessChecker {
   private final RuntimeIdentity runtimeIdentity;
   private final String machineName;
   private final Map<String, ? extends Server> servers;
-  private final ServerCheckerFactory serverCheckerFactory;
+  private final MachineTokenProvider machineTokenProvider;
 
   private Timer timer;
   private long resultTimeoutSeconds;
@@ -56,16 +60,17 @@ public class ServersReadinessChecker {
    * @param machineName name of machine whose servers will be checked by this method
    * @param servers map of servers in a machine
    */
-  public ServersReadinessChecker(
-      RuntimeIdentity runtimeIdentity,
-      String machineName,
-      Map<String, ? extends Server> servers,
-      ServerCheckerFactory serverCheckerFactory) {
+  @Inject
+  public ServersChecker(
+      @Assisted RuntimeIdentity runtimeIdentity,
+      @Assisted String machineName,
+      @Assisted Map<String, ? extends Server> servers,
+      MachineTokenProvider machineTokenProvider) {
     this.runtimeIdentity = runtimeIdentity;
     this.machineName = machineName;
     this.servers = servers;
-    this.serverCheckerFactory = serverCheckerFactory;
-    this.timer = new Timer("ServerReadinessChecker", true);
+    this.timer = new Timer("ServersChecker", true);
+    this.machineTokenProvider = machineTokenProvider;
   }
 
   /**
@@ -77,7 +82,7 @@ public class ServersReadinessChecker {
    * @throws InfrastructureException if check of a server failed due to an error
    */
   public void startAsync(Consumer<String> serverReadinessHandler) throws InfrastructureException {
-    timer = new Timer("ServerReadinessChecker", true);
+    timer = new Timer("ServersChecker", true);
     List<ServerChecker> serverCheckers = getServerCheckers();
     // should be completed with an exception if a server considered unavailable
     CompletableFuture<Void> firstNonAvailable = new CompletableFuture<>();
@@ -172,6 +177,7 @@ public class ServersReadinessChecker {
       url =
           UriBuilder.fromUri(server.getUrl().replaceFirst("^ws", "http"))
               .replacePath(livenessCheckPath)
+              .queryParam("token", machineTokenProvider.getToken(runtimeIdentity.getWorkspaceId()))
               .build()
               .toURL();
     } catch (MalformedURLException e) {
@@ -179,6 +185,19 @@ public class ServersReadinessChecker {
           "Server " + serverRef + " URL is invalid. Error: " + e.getMessage(), e);
     }
 
-    return serverCheckerFactory.httpChecker(url, runtimeIdentity, machineName, serverRef, timer);
+    return doCreateChecker(url, serverRef);
+  }
+
+  @VisibleForTesting
+  ServerChecker doCreateChecker(URL url, String serverRef) {
+    // TODO add readiness endpoint to terminal and remove this
+    // workaround needed because terminal server doesn't have endpoint to check it readiness
+    if ("terminal".equals(serverRef)) {
+      return new TerminalHttpConnectionServerChecker(
+          url, machineName, serverRef, 3, 180, TimeUnit.SECONDS, timer);
+    }
+    // TODO do not hardcode timeouts, use server conf instead
+    return new HttpConnectionServerChecker(
+        url, machineName, serverRef, 3, 180, TimeUnit.SECONDS, timer);
   }
 }
