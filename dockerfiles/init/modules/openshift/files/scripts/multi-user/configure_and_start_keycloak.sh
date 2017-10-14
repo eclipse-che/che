@@ -8,7 +8,7 @@
 
 set -e
 
-# append_after_match allows to append content after matching line
+# append_before_match allows to append content before matching line
 # this is needed to append content of yaml files
 # first arg is mathing string, second string to insert before match
 append_before_match() {
