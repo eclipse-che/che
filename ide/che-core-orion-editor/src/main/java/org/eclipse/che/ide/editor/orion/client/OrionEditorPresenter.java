@@ -126,6 +126,7 @@ import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
@@ -1211,7 +1212,15 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
                       new OrionVcsChangeMarkersRuler(
                           orionExtRulerOverlay, editorWidget.getEditor());
 
-                  String vcsName = appContext.getRootProject().getAttribute("vcs.provider.name");
+                  VirtualFile file = input.getFile();
+                  Project project =
+                      file instanceof Resource ? ((Resource) file).getProject() : null;
+                  if (project == null) {
+                    resolve.apply(null);
+                    return;
+                  }
+
+                  String vcsName = project.getAttribute("vcs.provider.name");
                   VcsChangeMarkerRenderFactory vcsChangeMarkerRenderFactory =
                       vcsChangeMarkerRenderFactoryMap.get(vcsName);
                   if (vcsChangeMarkerRenderFactory != null) {

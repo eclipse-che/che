@@ -99,7 +99,7 @@ public class DashboardWorkspace {
         "//div[contains(@class,'che-toolbar')]//span[contains(text(),'%s')]";
     String WORKSPACES_LIST = "//ng-transclude[@class='che-list-content']";
     String WORKSPACE_ITEM_NAME =
-        "//div[contains(@class, 'che-list-item-name')]/span[contains(text(),'%s')]";
+        "//div[contains(@class, 'workspace-name-clip')]//div[contains(@data-str, '%s')]";
     String EXPORT_WORKSPACE_BTN =
         "//button[contains(@class, 'che-button')]/span[text()='Export as a file']";
     String DOWNLOAD_WORKSPACE_BTN = "//che-button-default[@che-button-title='download']";
@@ -116,7 +116,7 @@ public class DashboardWorkspace {
     String RUN_WORKSPACE_BTN = "//button/span[text()='Run']";
     String STOP_WORKSPACE_BTN = "//button/span[contains(text(),'Stop')]";
     String DELETE_WORKSPACE_BTN = "//button/span[text()='Delete']";
-    String STATE_WORKSPACE = "//span[contains(@class, '%s')]";
+    String STATE_WORKSPACE = "//div[contains(@class, 'workspace-status')]/span[text()='%s']";
     String WORKSPACE_TITLE = "//div[contains(@class,'toolbar-info')]/span[text()='%s']";
     String DELETE_BTN_DIALOG_WIND =
         "//button[@ng-click='cheConfirmDialogController.hide()']//span[text()='Delete']";

@@ -9,7 +9,10 @@
 set -e
 
 if [ "${CHE_SERVER_URL}" == "" ]; then
-    echo "the 'CHE_SERVER_URL' environment variable should be set to the external URL that gives access to CHE"
+    echo "The 'CHE_SERVER_URL' environment variable should be set to the external URL that gives access to CHE"
+    echo "However the build is expected to fail a first time just after deployment,"
+    echo "since the expected variable is added after deployment in a second step."
+    echo "As soon as the variable is added to the build configuration, a second build should start and succeed."
     exit 1
 fi
 

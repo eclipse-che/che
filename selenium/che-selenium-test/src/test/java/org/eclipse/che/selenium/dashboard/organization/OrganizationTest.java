@@ -47,7 +47,7 @@ public class OrganizationTest {
 
   @Inject
   @Named("admin")
-  private TestOrganizationServiceClient organizationServiceClient;
+  private TestOrganizationServiceClient testOrganizationServiceClient;
 
   @Inject private Dashboard dashboard;
   @Inject private TestUser testUser1;
@@ -60,15 +60,15 @@ public class OrganizationTest {
     String firstName = generate("F", 7);
     String lastName = generate("L", 7);
 
-    dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
+    dashboard.open();
     orgName = generate("orgX", 6);
 
-    organization = organizationServiceClient.create(orgName);
+    organization = testOrganizationServiceClient.create(orgName);
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    organizationServiceClient.deleteById(organization.getId());
+    testOrganizationServiceClient.deleteById(organization.getId());
   }
 
   @Test

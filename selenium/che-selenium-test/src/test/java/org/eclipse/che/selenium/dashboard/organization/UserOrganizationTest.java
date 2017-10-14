@@ -10,16 +10,7 @@
  */
 package org.eclipse.che.selenium.dashboard.organization;
 
-import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
-import static org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.ACTIONS;
-import static org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.AVAILABLE_RAM;
-import static org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.MEMBERS;
-import static org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.NAME;
-import static org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.SUB_ORGANIZATIONS;
-import static org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.TOTAL_RAM;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -27,9 +18,8 @@ import java.util.ArrayList;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
-import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
-import org.eclipse.che.selenium.pageobject.dashboard.CheMultiuserAdminDashboard;
+import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage;
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationPage;
@@ -40,12 +30,12 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
- * Test validates organization views for admin of the sub-organization.
+ * Test validates organization views for simple user.
  *
  * @author Ann Shumilova
  */
-public class AdminOfSubOrganizationTest {
-  private static final Logger LOG = LoggerFactory.getLogger(AdminOfSubOrganizationTest.class);
+public class UserOrganizationTest {
+  private static final Logger LOG = LoggerFactory.getLogger(UserOrganizationTest.class);
 
   private OrganizationDto parentOrganization;
   private OrganizationDto childOrganization;
@@ -53,14 +43,13 @@ public class AdminOfSubOrganizationTest {
   @Inject private OrganizationListPage organizationListPage;
   @Inject private OrganizationPage organizationPage;
   @Inject private NavigationBar navigationBar;
-  @Inject private CheMultiuserAdminDashboard dashboard;
+  @Inject private Dashboard dashboard;
 
   @Inject
   @Named("admin")
   private TestOrganizationServiceClient testOrganizationServiceClient;
 
   @Inject private TestUser testUser;
-  @Inject private AdminTestUser adminTestUser;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -71,7 +60,7 @@ public class AdminOfSubOrganizationTest {
             NameGenerator.generate("organization", 5), parentOrganization.getId());
 
     testOrganizationServiceClient.addMember(parentOrganization.getId(), testUser.getId());
-    testOrganizationServiceClient.addAdmin(childOrganization.getId(), testUser.getId());
+    testOrganizationServiceClient.addMember(childOrganization.getId(), testUser.getId());
 
     dashboard.open(testUser.getName(), testUser.getPassword());
   }
@@ -86,31 +75,39 @@ public class AdminOfSubOrganizationTest {
   public void testOrganizationListComponents() {
     navigationBar.waitNavigationBar();
     int organizationsCount = 2;
-    navigationBar.clickOnMenu(ORGANIZATIONS);
+    navigationBar.clickOnMenu(NavigationBar.MenuItem.ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
 
     assertEquals(
-        navigationBar.getMenuCounterValue(ORGANIZATIONS), String.valueOf(organizationsCount));
+        navigationBar.getMenuCounterValue(NavigationBar.MenuItem.ORGANIZATIONS),
+        String.valueOf(organizationsCount));
     assertEquals(organizationListPage.getOrganizationsToolbarTitle(), "Organizations");
     assertEquals(
-        navigationBar.getMenuCounterValue(ORGANIZATIONS), String.valueOf(organizationsCount));
-
+        navigationBar.getMenuCounterValue(NavigationBar.MenuItem.ORGANIZATIONS),
+        String.valueOf(organizationsCount));
     assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount);
     assertFalse(organizationListPage.isAddOrganizationButtonVisible());
     assertTrue(organizationListPage.isSearchInputVisible());
     //Check all headers are present:
     ArrayList<String> headers = organizationListPage.getOrganizationListHeaders();
-    assertTrue(headers.contains(NAME.getTitle()));
-    assertTrue(headers.contains(MEMBERS.getTitle()));
-    assertTrue(headers.contains(TOTAL_RAM.getTitle()));
-    assertTrue(headers.contains(AVAILABLE_RAM.getTitle()));
-    assertTrue(headers.contains(SUB_ORGANIZATIONS.getTitle()));
-    assertTrue(headers.contains(ACTIONS.getTitle()));
+    assertTrue(headers.contains(OrganizationListPage.OrganizationListHeader.NAME.getTitle()));
+    assertTrue(headers.contains(OrganizationListPage.OrganizationListHeader.MEMBERS.getTitle()));
+    assertTrue(headers.contains(OrganizationListPage.OrganizationListHeader.TOTAL_RAM.getTitle()));
+    assertTrue(
+        headers.contains(OrganizationListPage.OrganizationListHeader.AVAILABLE_RAM.getTitle()));
+    assertTrue(
+        headers.contains(OrganizationListPage.OrganizationListHeader.SUB_ORGANIZATIONS.getTitle()));
+    assertTrue(headers.contains(OrganizationListPage.OrganizationListHeader.ACTIONS.getTitle()));
 
     assertTrue(
-        organizationListPage.getValues(NAME).contains(parentOrganization.getQualifiedName()));
-    assertTrue(organizationListPage.getValues(NAME).contains(childOrganization.getQualifiedName()));
+        organizationListPage
+            .getValues(OrganizationListPage.OrganizationListHeader.NAME)
+            .contains(parentOrganization.getQualifiedName()));
+    assertTrue(
+        organizationListPage
+            .getValues(OrganizationListPage.OrganizationListHeader.NAME)
+            .contains(childOrganization.getQualifiedName()));
   }
 
   @Test(priority = 2)
@@ -133,7 +130,10 @@ public class AdminOfSubOrganizationTest {
     organizationListPage.waitForOrganizationsList();
     assertFalse(organizationListPage.isAddOrganizationButtonVisible());
     assertFalse(organizationListPage.isAddSubOrganizationButtonVisible());
-    assertTrue(organizationListPage.getValues(NAME).contains(childOrganization.getQualifiedName()));
+    assertTrue(
+        organizationListPage
+            .getValues(OrganizationListPage.OrganizationListHeader.NAME)
+            .contains(childOrganization.getQualifiedName()));
 
     organizationPage.clickBackButton();
     organizationListPage.waitForOrganizationsList();
@@ -142,27 +142,27 @@ public class AdminOfSubOrganizationTest {
 
   @Test(priority = 3)
   public void testChildOrganization() {
-    navigationBar.clickOnMenu(ORGANIZATIONS);
+    navigationBar.clickOnMenu(NavigationBar.MenuItem.ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
     organizationListPage.clickOnOrganization(childOrganization.getQualifiedName());
 
-    organizationPage.waitOrganizationTitle(childOrganization.getQualifiedName());
-    assertFalse(organizationPage.isOrganizationNameReadonly());
+    organizationPage.waitOrganizationName(childOrganization.getQualifiedName());
+    assertTrue(organizationPage.isOrganizationNameReadonly());
     assertTrue(organizationPage.isWorkspaceCapReadonly());
     assertTrue(organizationPage.isRunningCapReadonly());
     assertTrue(organizationPage.isRAMCapReadonly());
     assertTrue(organizationPage.isWorkspaceCapReadonly());
-    assertTrue(organizationPage.isDeleteButtonVisible());
+    assertFalse(organizationPage.isDeleteButtonVisible());
 
     organizationPage.clickMembersTab();
     organizationPage.waitMembersList();
-    assertTrue(organizationPage.isAddMemberButtonVisible());
+    assertFalse(organizationPage.isAddMemberButtonVisible());
 
     organizationPage.clickSubOrganizationsTab();
     organizationListPage.waitForSubOrganizationsEmptyList();
     assertFalse(organizationListPage.isAddOrganizationButtonVisible());
-    assertTrue(organizationListPage.isAddSubOrganizationButtonVisible());
+    assertFalse(organizationListPage.isAddSubOrganizationButtonVisible());
 
     organizationPage.clickBackButton();
     organizationPage.waitOrganizationName(parentOrganization.getName());
