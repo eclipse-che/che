@@ -14,10 +14,10 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -107,7 +107,7 @@ public class ServersCheckerTest {
   public void shouldNotifyReadinessHandlerAboutEachServerReadiness() throws Exception {
     checker.startAsync(readinessHandler);
 
-    verify(readinessHandler, timeout(500).never()).accept(anyString());
+    verify(readinessHandler, after(500).never()).accept(anyString());
 
     connectionChecker.getReportCompFuture().complete("test_ref");
 
