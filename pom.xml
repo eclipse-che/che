@@ -33,7 +33,6 @@
         <module>infrastructures</module>
         <module>plugins</module>
         <module>ide/che-ide-core</module>
-        <module>samples</module>
         <module>dashboard</module>
         <module>assembly</module>
         <module>assembly-multiuser</module>
