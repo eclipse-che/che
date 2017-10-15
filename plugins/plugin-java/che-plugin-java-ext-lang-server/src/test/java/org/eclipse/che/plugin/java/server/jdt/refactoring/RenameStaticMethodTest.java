@@ -27,6 +27,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class RenameStaticMethodTest extends RefactoringTest {
@@ -299,6 +300,8 @@ public class RenameStaticMethodTest extends RefactoringTest {
         "invalid renaming in C", getFileContents(getOutputTestFileName("C")), cuA.getSource());
   }
 
+  @Test
+  @Ignore
   public void testStaticImport3() throws Exception {
     if (BUG_83332_SPLIT_SINGLE_IMPORT) {
       printTestDisabledMessage("BUG_83332_SPLIT_SINGLE_IMPORT");
@@ -312,6 +315,8 @@ public class RenameStaticMethodTest extends RefactoringTest {
     helper2();
   }
 
+  @Test
+  @Ignore
   public void testStaticImport5() throws Exception {
     if (BUG_83332_SPLIT_SINGLE_IMPORT) {
       printTestDisabledMessage("BUG_83332_SPLIT_SINGLE_IMPORT");

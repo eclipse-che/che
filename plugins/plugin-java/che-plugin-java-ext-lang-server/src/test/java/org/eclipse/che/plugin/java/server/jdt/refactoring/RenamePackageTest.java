@@ -969,7 +969,8 @@ public class RenamePackageTest extends RefactoringTest {
   //		ZipInputStream zis= new ZipInputStream(new BufferedInputStream(new FileInputStream(junitSrcArchive)));
   //		ZipTools.compareWithZipped(src, zis, JavaProjectHelper.JUNIT_SRC_ENCODING);
   //	}
-
+  @Test
+  @Ignore
   public void testFail1() throws Exception {
     printTestDisabledMessage("needs revisiting");
     //helper1(new String[]{"r.p1"}, new String[][]{{"A"}}, "r");
@@ -995,24 +996,32 @@ public class RenamePackageTest extends RefactoringTest {
     helper1();
   }
 
+  @Test
+  @Ignore
   public void testFail7() throws Exception {
     //printTestDisabledMessage("1GK90H4: ITPJCORE:WIN2000 - search: missing package reference");
     printTestDisabledMessage("corner case - name obscuring");
     //		helper1(new String[]{"r", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
   }
 
+  @Test
+  @Ignore
   public void testFail8() throws Exception {
     printTestDisabledMessage("corner case - name obscuring");
     //		helper1(new String[]{"r", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
   }
 
   //native method used r.A as a parameter
+  @Test
+  @Ignore
   public void testFail9() throws Exception {
     printTestDisabledMessage(
         "corner case - qualified name used  as a parameter of a native method");
     //helper1(new String[]{"r", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
   }
 
+  @Test
+  @Ignore
   public void testFail10() throws Exception {
     helper1(new String[] {"r.p1", "r"}, new String[][] {{"A"}, {"A"}}, "r");
   }
