@@ -12,6 +12,7 @@ package org.eclipse.che.multiuser.organization.api.notification;
 
 import static java.util.Arrays.*;
 import static java.util.Collections.emptyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -123,7 +124,7 @@ public class OrganizationNotificationEmailSenderTest {
     MemberImpl member2 = new MemberImpl("user2", "org123", ImmutableList.of());
     doReturn(new Page<Member>(asList(member1, member2), 0, 2, 2))
         .when(organizationManager)
-        .getMembers(anyString(), anyInt(), anyInt());
+        .getMembers(anyString(), anyInt(), anyLong());
 
     when(userManager.getById("user1"))
         .thenReturn(new UserImpl("user1", "email1", null, null, emptyList()));
@@ -156,7 +157,7 @@ public class OrganizationNotificationEmailSenderTest {
     MemberImpl member2 = new MemberImpl("user2", "org123", emptyList());
     doReturn(new Page<Member>(asList(member1, member2), 0, 2, 2))
         .when(organizationManager)
-        .getMembers(anyString(), anyInt(), anyInt());
+        .getMembers(anyString(), anyInt(), anyLong());
 
     when(userManager.getById("user1")).thenThrow(new NotFoundException(""));
     when(userManager.getById("user2"))

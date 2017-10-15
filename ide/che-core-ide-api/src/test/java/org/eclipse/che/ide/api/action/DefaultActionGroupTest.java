@@ -362,7 +362,6 @@ public class DefaultActionGroupTest {
     when(actionManager.getId(eq(secondAction))).thenReturn("secondAction");
 
     defaultActionGroup.add(thirdAction, new Constraints(AFTER, "fourthAction"));
-    when(actionManager.getId(eq(thirdAction))).thenReturn("thirdAction");
 
     // verify order
     Action[] result = defaultActionGroup.getChildren(mock(ActionEvent.class));
@@ -371,7 +370,6 @@ public class DefaultActionGroupTest {
 
     // add other actions
     defaultActionGroup.add(fourthAction);
-    when(actionManager.getId(eq(thirdAction))).thenReturn("thirdAction");
 
     defaultActionGroup.add(fifthAction, Constraints.FIRST);
     when(actionManager.getId(eq(fifthAction))).thenReturn("fifthAction");

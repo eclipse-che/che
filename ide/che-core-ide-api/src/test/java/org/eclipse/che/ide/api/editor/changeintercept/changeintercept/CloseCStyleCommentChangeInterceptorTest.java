@@ -82,9 +82,7 @@ public class CloseCStyleCommentChangeInterceptorTest {
 
   @Test
   public void testStartNotEmptyLine() {
-    doReturn("whatever").when(document).getLineContent(0);
     doReturn("s/*").when(document).getLineContent(1);
-    doReturn(" *").when(document).getLineContent(2);
     final TextChange input =
         new TextChange.Builder()
             .from(new TextPosition(1, 3))
@@ -173,8 +171,6 @@ public class CloseCStyleCommentChangeInterceptorTest {
 
   @Test
   public void testPasteWholeCommentStart() {
-    doReturn("/**").when(document).getLineContent(0);
-    doReturn(" *").when(document).getLineContent(1);
     final TextChange input =
         new TextChange.Builder()
             .from(new TextPosition(0, 0))
@@ -187,8 +183,6 @@ public class CloseCStyleCommentChangeInterceptorTest {
 
   @Test
   public void testCloseComment() {
-    doReturn("/**").when(document).getLineContent(0);
-    doReturn(" *").when(document).getLineContent(1);
     final TextChange input =
         new TextChange.Builder()
             .from(new TextPosition(0, 0))

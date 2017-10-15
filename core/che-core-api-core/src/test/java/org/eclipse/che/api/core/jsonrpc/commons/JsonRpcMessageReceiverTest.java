@@ -19,6 +19,7 @@ import static org.mockito.Mockito.when;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -75,6 +76,8 @@ public class JsonRpcMessageReceiverTest {
     when(jsonRpcQualifier.isJsonRpcResponse(MESSAGE)).thenReturn(true);
     when(jsonRpcQualifier.isJsonRpcRequest(MESSAGE)).thenReturn(false);
     when(jsonRpcUnmarshaller.unmarshalArray(any())).thenReturn(singletonList(MESSAGE));
+    JsonRpcResponse jsonRpcResponse = Mockito.mock(JsonRpcResponse.class);
+    when(jsonRpcUnmarshaller.unmarshalResponse(any())).thenReturn(jsonRpcResponse);
 
     jsonRpcMessageReceiver.receive(ENDPOINT_ID, MESSAGE);
 

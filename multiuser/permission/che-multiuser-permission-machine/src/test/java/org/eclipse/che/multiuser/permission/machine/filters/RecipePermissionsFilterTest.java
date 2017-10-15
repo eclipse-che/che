@@ -17,9 +17,9 @@ import static org.eclipse.che.multiuser.permission.machine.recipe.RecipeDomain.U
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -31,6 +31,7 @@ import static org.testng.Assert.assertEquals;
 import com.jayway.restassured.response.Response;
 import com.jayway.restassured.specification.RequestSpecification;
 import java.lang.reflect.Method;
+import java.util.List;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
@@ -188,7 +189,7 @@ public class RecipePermissionsFilterTest {
             .get(SECURE_PATH + "/recipe");
 
     assertEquals(response.getStatusCode(), 200);
-    verify(service).searchRecipes(anyListOf(String.class), anyString(), anyInt(), anyInt());
+    verify(service).searchRecipes(nullable(List.class), nullable(String.class), anyInt(), anyInt());
     verifyZeroInteractions(subject);
   }
 
