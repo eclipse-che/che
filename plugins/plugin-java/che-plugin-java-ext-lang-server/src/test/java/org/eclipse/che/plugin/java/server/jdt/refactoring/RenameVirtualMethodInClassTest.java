@@ -30,6 +30,7 @@ import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class RenameVirtualMethodInClassTest extends RefactoringTest {
@@ -581,6 +582,8 @@ public class RenameVirtualMethodInClassTest extends RefactoringTest {
     helper2();
   }
 
+  @Test
+  @Ignore
   public void test34() throws Exception {
     printTestDisabledMessage("test for bug#18553");
     //		helper2_0("A", "foo", new String[0], true, true);
