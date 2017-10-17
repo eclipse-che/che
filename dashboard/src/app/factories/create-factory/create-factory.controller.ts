@@ -23,7 +23,7 @@ export class CreateFactoryCtrl {
   private $log: ng.ILogService;
   private cheAPI: CheAPI;
   private cheNotification: CheNotification;
-  private lodash: _.LoDashStatic;
+  private lodash: any;
   private $filter: ng.IFilterService;
   private $document: ng.IDocumentService;
   private isLoading: boolean;
@@ -43,7 +43,7 @@ export class CreateFactoryCtrl {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($location: ng.ILocationService, cheAPI: CheAPI, $log: ng.ILogService, cheNotification: CheNotification, $scope: ng.IScope, $filter: ng.IFilterService, lodash: _.LoDashStatic, $document: ng.IDocumentService) {
+  constructor($location: ng.ILocationService, cheAPI: CheAPI, $log: ng.ILogService, cheNotification: CheNotification, $scope: ng.IScope, $filter: ng.IFilterService, lodash: any, $document: ng.IDocumentService) {
     this.$location = $location;
     this.cheAPI = cheAPI;
     this.$log = $log;
