@@ -48,8 +48,6 @@ import org.eclipse.che.api.workspace.shared.dto.stack.StackDto;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackSourceDto;
 import org.eclipse.che.api.workspace.shared.stack.Stack;
 import org.eclipse.che.api.workspace.shared.stack.StackSource;
-import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.dto.server.DtoFactory;
 
 /**
@@ -61,7 +59,6 @@ public final class DtoConverter {
 
   /** Converts {@link Workspace} to {@link WorkspaceDto}. */
   public static WorkspaceDto asDto(Workspace workspace) {
-    Subject subject = EnvironmentContext.getCurrent().getSubject();
     WorkspaceDto workspaceDto =
         newDto(WorkspaceDto.class)
             .withId(workspace.getId())
@@ -73,7 +70,6 @@ public final class DtoConverter {
 
     if (workspace.getRuntime() != null) {
       RuntimeDto runtime = asDto(workspace.getRuntime());
-      runtime.setUserToken(subject.getToken());
       workspaceDto.setRuntime(runtime);
     }
 

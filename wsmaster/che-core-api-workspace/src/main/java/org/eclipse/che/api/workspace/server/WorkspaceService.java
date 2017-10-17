@@ -39,9 +39,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
@@ -54,10 +52,13 @@ import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.token.MachineTokenException;
+import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
 import org.eclipse.che.api.workspace.shared.dto.CommandDto;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.RecipeDto;
+import org.eclipse.che.api.workspace.shared.dto.RuntimeDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -73,25 +74,20 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 public class WorkspaceService extends Service {
 
   private final WorkspaceManager workspaceManager;
+  private final MachineTokenProvider machineTokenProvider;
   private final WorkspaceLinksGenerator linksGenerator;
   private final String apiEndpoint;
-  //    private final boolean                       cheWorkspaceAutoSnapshot;
-  //    private final boolean                       cheWorkspaceAutoRestore;
-  @Context private SecurityContext securityContext;
 
   @Inject
   public WorkspaceService(
       @Named("che.api") String apiEndpoint,
       WorkspaceManager workspaceManager,
-      WorkspaceLinksGenerator linksGenerator
-      //                            @Named(CHE_WORKSPACE_AUTO_SNAPSHOT) boolean cheWorkspaceAutoSnapshot,
-      //                            @Named(CHE_WORKSPACE_AUTO_RESTORE) boolean cheWorkspaceAutoRestore
-      ) {
+      MachineTokenProvider machineTokenProvider,
+      WorkspaceLinksGenerator linksGenerator) {
     this.apiEndpoint = apiEndpoint;
     this.workspaceManager = workspaceManager;
+    this.machineTokenProvider = machineTokenProvider;
     this.linksGenerator = linksGenerator;
-    //        this.cheWorkspaceAutoSnapshot = cheWorkspaceAutoSnapshot;
-    //        this.cheWorkspaceAutoRestore = cheWorkspaceAutoRestore;
   }
 
   @POST
@@ -158,7 +154,7 @@ public class WorkspaceService extends Service {
     if (startAfterCreate) {
       workspaceManager.startWorkspace(workspace.getId(), null, new HashMap<>());
     }
-    return Response.status(201).entity(asDtoWithLinks(workspace)).build();
+    return Response.status(201).entity(asDtoWithLinksAndToken(workspace)).build();
   }
 
   @GET
@@ -191,7 +187,7 @@ public class WorkspaceService extends Service {
           String key)
       throws NotFoundException, ServerException, ForbiddenException, BadRequestException {
     validateKey(key);
-    return asDtoWithLinks(workspaceManager.getWorkspace(key));
+    return asDtoWithLinksAndToken(workspaceManager.getWorkspace(key));
   }
 
   @GET
@@ -278,7 +274,7 @@ public class WorkspaceService extends Service {
           ConflictException {
     requiredNotNull(update, "Workspace configuration");
     relativizeRecipeLinks(update.getConfig());
-    return doUpdate(id, update);
+    return asDtoWithLinksAndToken(doUpdate(id, update));
   }
 
   @DELETE
@@ -331,7 +327,7 @@ public class WorkspaceService extends Service {
 
     Map<String, String> options = new HashMap<>();
     if (restore != null) options.put("restore", restore.toString());
-    return asDtoWithLinks(workspaceManager.startWorkspace(workspaceId, envName, options));
+    return asDtoWithLinksAndToken(workspaceManager.startWorkspace(workspaceId, envName, options));
   }
 
   @POST
@@ -380,7 +376,7 @@ public class WorkspaceService extends Service {
     try {
       Workspace workspace =
           workspaceManager.startWorkspace(config, namespace, isTemporary, new HashMap<>());
-      return asDtoWithLinks(workspace);
+      return asDtoWithLinksAndToken(workspace);
     } catch (ValidationException x) {
       throw new BadRequestException(x.getMessage());
     }
@@ -436,7 +432,7 @@ public class WorkspaceService extends Service {
     requiredNotNull(newCommand, "Command");
     WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
     workspace.getConfig().getCommands().add(new CommandImpl(newCommand));
-    return doUpdate(id, workspace);
+    return asDtoWithLinksAndToken(doUpdate(id, workspace));
   }
 
   @PUT
@@ -469,7 +465,7 @@ public class WorkspaceService extends Service {
           format("Workspace '%s' doesn't contain command '%s'", id, cmdName));
     }
     commands.add(new CommandImpl(update));
-    return doUpdate(id, workspace);
+    return asDtoWithLinksAndToken(doUpdate(id, workspace));
   }
 
   @DELETE
@@ -526,7 +522,7 @@ public class WorkspaceService extends Service {
     relativizeRecipeLinks(newEnvironment);
     WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
     workspace.getConfig().getEnvironments().put(envName, new EnvironmentImpl(newEnvironment));
-    return doUpdate(id, workspace);
+    return asDtoWithLinksAndToken(doUpdate(id, workspace));
   }
 
   @PUT
@@ -559,7 +555,7 @@ public class WorkspaceService extends Service {
       throw new NotFoundException(
           format("Workspace '%s' doesn't contain environment '%s'", id, envName));
     }
-    return doUpdate(id, workspace);
+    return asDtoWithLinksAndToken(doUpdate(id, workspace));
   }
 
   @DELETE
@@ -609,7 +605,7 @@ public class WorkspaceService extends Service {
     requiredNotNull(newProject, "New project config");
     final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
     workspace.getConfig().getProjects().add(new ProjectConfigImpl(newProject));
-    return doUpdate(id, workspace);
+    return asDtoWithLinksAndToken(doUpdate(id, workspace));
   }
 
   @PUT
@@ -642,7 +638,7 @@ public class WorkspaceService extends Service {
           format("Workspace '%s' doesn't contain project with path '%s'", id, normalizedPath));
     }
     projects.add(new ProjectConfigImpl(update));
-    return doUpdate(id, workspace);
+    return asDtoWithLinksAndToken(doUpdate(id, workspace));
   }
 
   @DELETE
@@ -679,8 +675,6 @@ public class WorkspaceService extends Service {
   @ApiResponses({@ApiResponse(code = 200, message = "The response contains server settings")})
   public Map<String, String> getSettings() {
     return new HashMap<>();
-    //        return ImmutableMap.of(CHE_WORKSPACE_AUTO_SNAPSHOT, Boolean.toString(cheWorkspaceAutoSnapshot),
-    //                               CHE_WORKSPACE_AUTO_RESTORE, Boolean.toString(cheWorkspaceAutoRestore));
   }
 
   private static Map<String, String> parseAttrs(List<String> attributes)
@@ -782,10 +776,10 @@ public class WorkspaceService extends Service {
     }
   }
 
-  private WorkspaceDto doUpdate(String id, Workspace update)
+  private Workspace doUpdate(String id, Workspace update)
       throws BadRequestException, ConflictException, NotFoundException, ServerException {
     try {
-      return asDtoWithLinks(workspaceManager.updateWorkspace(id, update));
+      return workspaceManager.updateWorkspace(id, update);
     } catch (ValidationException x) {
       throw new BadRequestException(x.getMessage());
     }
@@ -798,7 +792,18 @@ public class WorkspaceService extends Service {
     return workspaces;
   }
 
-  private WorkspaceDto asDtoWithLinks(Workspace workspace) throws ServerException {
-    return asDto(workspace).withLinks(linksGenerator.genLinks(workspace));
+  private WorkspaceDto asDtoWithLinksAndToken(Workspace workspace) throws ServerException {
+    WorkspaceDto workspaceDto = asDto(workspace).withLinks(linksGenerator.genLinks(workspace));
+
+    RuntimeDto runtimeDto = workspaceDto.getRuntime();
+    if (runtimeDto != null) {
+      try {
+        runtimeDto.setUserToken(machineTokenProvider.getToken(workspace.getId()));
+      } catch (MachineTokenException e) {
+        throw new ServerException(e.getMessage(), e);
+      }
+    }
+
+    return workspaceDto;
   }
 }

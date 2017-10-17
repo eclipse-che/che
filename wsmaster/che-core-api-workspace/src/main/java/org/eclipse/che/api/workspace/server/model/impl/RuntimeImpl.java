@@ -26,16 +26,14 @@ import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 public class RuntimeImpl implements Runtime {
 
   private final String activeEnv;
-  private String owner;
-  private String userToken;
-  private Map<String, ? extends Machine> machines;
+  private final String owner;
+  private final Map<String, ? extends Machine> machines;
   private List<WarningImpl> warnings;
 
   public RuntimeImpl(String activeEnv, Map<String, ? extends Machine> machines, String owner) {
     this.activeEnv = activeEnv;
     this.machines = machines;
     this.owner = owner;
-    //        this.userToken = userToken;
   }
 
   public RuntimeImpl(Runtime runtime) {
@@ -47,7 +45,6 @@ public class RuntimeImpl implements Runtime {
             .stream()
             .collect(Collectors.toMap(Map.Entry::getKey, e -> new MachineImpl(e.getValue())));
     this.owner = runtime.getOwner();
-    //        this.userToken = null;
     this.warnings =
         runtime.getWarnings().stream().map(WarningImpl::new).collect(Collectors.toList());
   }
@@ -70,14 +67,6 @@ public class RuntimeImpl implements Runtime {
     return warnings;
   }
 
-  public String getUserToken() {
-    return userToken;
-  }
-
-  public void setUserToken(String userToken) {
-    this.userToken = userToken;
-  }
-
   @Override
   public Map<String, ? extends Machine> getMachines() {
     return machines;
@@ -89,19 +78,14 @@ public class RuntimeImpl implements Runtime {
     if (!(o instanceof RuntimeImpl)) return false;
     RuntimeImpl that = (RuntimeImpl) o;
     return Objects.equals(activeEnv, that.activeEnv)
-        &&
-        //               Objects.equals(rootFolder, that.rootFolder) &&
-        //               Objects.equals(devMachine, that.devMachine) &&
-        Objects.equals(machines, that.machines);
+        && Objects.equals(machines, that.machines)
+        && Objects.equals(owner, that.owner)
+        && Objects.equals(warnings, that.warnings);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(
-        activeEnv,
-        //                            rootFolder,
-        //                            devMachine,
-        machines);
+    return Objects.hash(activeEnv, machines, owner, warnings);
   }
 
   @Override
@@ -110,11 +94,13 @@ public class RuntimeImpl implements Runtime {
         + "activeEnv='"
         + activeEnv
         + '\''
-        +
-        //               ", rootFolder='" + rootFolder + '\'' +
-        //               ", devMachine=" + devMachine +
-        ", machines="
+        + ", owner='"
+        + owner
+        + '\''
+        + ", machines="
         + machines
+        + ", warnings="
+        + warnings
         + '}';
   }
 }
