@@ -12,6 +12,7 @@ package org.eclipse.che.ide.projectimport.wizard;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -101,14 +102,15 @@ public class ProjectImportOutputJsonRpcNotifierTest {
   @Test
   public void testShouldUnSubscribeFromDisplayingNotification() throws Exception {
     //given
-    when(constant.importProjectMessageSuccess(anyString())).thenReturn("message");
+    when(constant.importProjectMessageSuccess(nullable(String.class))).thenReturn("message");
     final StatusNotification statusNotification = mock(StatusNotification.class);
-    when(notificationManager.notify(anyString(), any(Status.class), any(DisplayMode.class)))
+    when(notificationManager.notify(
+            nullable(String.class), nullable(Status.class), nullable(DisplayMode.class)))
         .thenReturn(statusNotification);
     final MethodNameConfigurator methodNameConfigurator = mock(MethodNameConfigurator.class);
     when(configurator.newConfiguration()).thenReturn(methodNameConfigurator);
     final ParamsConfigurator paramsConfigurator = mock(ParamsConfigurator.class);
-    when(methodNameConfigurator.methodName(anyString())).thenReturn(paramsConfigurator);
+    when(methodNameConfigurator.methodName(nullable(String.class))).thenReturn(paramsConfigurator);
     final ResultConfiguratorFromOne resultConfiguratorFromOne =
         mock(ResultConfiguratorFromOne.class);
     when(paramsConfigurator.paramsAsDto(any())).thenReturn(resultConfiguratorFromOne);
@@ -132,12 +134,13 @@ public class ProjectImportOutputJsonRpcNotifierTest {
 
     //given
     final StatusNotification statusNotification = mock(StatusNotification.class);
-    when(notificationManager.notify(anyString(), any(Status.class), any(DisplayMode.class)))
+    when(notificationManager.notify(
+            nullable(String.class), nullable(Status.class), nullable(DisplayMode.class)))
         .thenReturn(statusNotification);
     final MethodNameConfigurator methodNameConfigurator = mock(MethodNameConfigurator.class);
     when(configurator.newConfiguration()).thenReturn(methodNameConfigurator);
     final ParamsConfigurator paramsConfigurator = mock(ParamsConfigurator.class);
-    when(methodNameConfigurator.methodName(anyString())).thenReturn(paramsConfigurator);
+    when(methodNameConfigurator.methodName(nullable(String.class))).thenReturn(paramsConfigurator);
     final ResultConfiguratorFromOne resultConfiguratorFromOne =
         mock(ResultConfiguratorFromOne.class);
     when(paramsConfigurator.paramsAsDto(any())).thenReturn(resultConfiguratorFromOne);

@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-core-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>5.19.0-SNAPSHOT</version>
+        <version>5.20.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-api-core</artifactId>
     <packaging>jar</packaging>
@@ -87,6 +87,10 @@
             <artifactId>che-core-commons-lang</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-schedule</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.everrest</groupId>
             <artifactId>everrest-core</artifactId>
         </dependency>
@@ -146,11 +150,6 @@
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-library</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

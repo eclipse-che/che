@@ -81,12 +81,8 @@ public class AdminPermissionInitializerTest {
     verify(permissionsManager)
         .storePermission(
             argThat(
-                new ArgumentMatcher<SystemPermissionsImpl>() {
-                  @Override
-                  public boolean matches(Object argument) {
-                    return ((SystemPermissionsImpl) argument).getUserId().equals(NAME);
-                  }
-                }));
+                (ArgumentMatcher<SystemPermissionsImpl>)
+                    argument -> argument.getUserId().equals(NAME)));
   }
 
   @Test
@@ -112,12 +108,9 @@ public class AdminPermissionInitializerTest {
     verify(permissionsManager)
         .storePermission(
             argThat(
-                new ArgumentMatcher<SystemPermissionsImpl>() {
-                  @Override
-                  public boolean matches(Object argument) {
-                    return ((SystemPermissionsImpl) argument).getUserId().equals(adminUser.getId());
-                  }
-                }));
+                (ArgumentMatcher<SystemPermissionsImpl>)
+                    argument ->
+                        ((SystemPermissionsImpl) argument).getUserId().equals(adminUser.getId())));
   }
 
   @Test

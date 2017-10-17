@@ -40,4 +40,9 @@ public class SshAgentLauncher extends AbstractAgentLauncher {
   public String getAgentId() {
     return "org.eclipse.che.ssh";
   }
+
+  @Override
+  public boolean shouldBlockMachineStartOnError() {
+    return false;
+  }
 }

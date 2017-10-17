@@ -13,6 +13,7 @@ package org.eclipse.che.multiuser.api.permission.server;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.multiuser.api.permission.server.AbstractPermissionsDomain.SET_PERMISSIONS;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -131,7 +132,7 @@ public class PermissionsManagerTest {
     doReturn(new Page<>(singletonList(foreignPermissions), 0, 1, 2))
         .doReturn(new Page<>(singletonList(ownPermissions), 1, 1, 2))
         .when(permissionsDao)
-        .getByInstance(anyString(), anyInt(), anyInt());
+        .getByInstance(nullable(String.class), nullable(Integer.class), nullable(Long.class));
 
     permissionsManager.storePermission(
         new TestPermissionsImpl("user", "test", "test123", singletonList("delete")));
@@ -150,7 +151,7 @@ public class PermissionsManagerTest {
     doReturn(new Page<>(singletonList(ownPermissions), 0, 30, 31))
         .doReturn(new Page<>(singletonList(foreignPermissions), 1, 30, 31))
         .when(permissionsDao)
-        .getByInstance(anyString(), anyInt(), anyInt());
+        .getByInstance(nullable(String.class), nullable(Integer.class), nullable(Long.class));
 
     permissionsManager.storePermission(
         new TestPermissionsImpl("user", "test", "test123", singletonList("delete")));
@@ -193,7 +194,7 @@ public class PermissionsManagerTest {
     doReturn(new Page<>(singletonList(firstPermissions), 0, 1, 2))
         .doReturn(new Page<>(singletonList(secondPermissions), 1, 1, 2))
         .when(permissionsDao)
-        .getByInstance(anyString(), anyInt(), anyInt());
+        .getByInstance(nullable(String.class), nullable(Integer.class), nullable(Long.class));
 
     permissionsManager.remove("user", "test", "test123");
   }
@@ -228,7 +229,7 @@ public class PermissionsManagerTest {
 
     doReturn(new Page<>(asList(firstPermissions, secondPermissions), 1, 2, 4))
         .when(permissionsDao)
-        .getByInstance(anyString(), anyInt(), anyInt());
+        .getByInstance(nullable(String.class), nullable(Integer.class), nullable(Long.class));
 
     final Page<AbstractPermissions> permissionsPage =
         permissionsManager.getByInstance("test", "test123", 2, 1);

@@ -133,7 +133,7 @@ export class DockerfileParser {
     const uniqueDirectives: string[] = [];
     let counter = 1000;
     let lookingForDirectives = true;
-    let firstInstruction = true;
+    let firstInstructionFound = false;
 
     // set default parsing directive
     this.updateDirectives('escape', this.directiveValues.escape[0]);
@@ -198,10 +198,10 @@ export class DockerfileParser {
       if (this.instructionRE.test(recipeContent)) {
         const [fullMatch, instruction, argument] = this.instructionRE.exec(recipeContent);
 
-        if (firstInstruction && !this.fromRE.test(instruction)) {
+        if (!firstInstructionFound && !this.fromRE.test(instruction)) {
           throw new TypeError('Dockerfile should start with \'FROM\' instruction.');
         }
-        firstInstruction = false;
+        firstInstructionFound = true;
 
         // parse argument
         let results: IRecipeLine[] = this.parseArgument(instruction, argument);
@@ -218,6 +218,11 @@ export class DockerfileParser {
       // got weird line
       const [line, ] = this.splitBySymbolAtIndex(recipeContent, this.getSplitIndex(recipeContent, '\n'));
       throw new TypeError(`Cannot parse recipe from line: ${line}`);
+    }
+
+    // check if recipe contains any dockerfile instruction
+    if (!firstInstructionFound) {
+      throw new TypeError(`Cannot find any dockerfile instruction.`);
     }
 
     return instructions;

@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.statepersistance;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
@@ -143,7 +143,7 @@ public class AppStateManagerTest {
     workspace.put("component1", comp1);
     comp1.put("key1", "value1");
 
-    when(promiseProvider.resolve(any(Void.class))).thenReturn(sequentialRestore);
+    when(promiseProvider.resolve(nullable(Void.class))).thenReturn(sequentialRestore);
 
     appStateManager.restoreWorkspaceState(WS_ID);
 

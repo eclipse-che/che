@@ -102,7 +102,14 @@ public abstract class AbstractAgentLauncher implements AgentLauncher {
               "Fail launching agent '%s' in '%s' workspace due to timeout",
               agent.getName(), machine.getWorkspaceId()));
 
-      process.kill();
+      if (this.shouldBlockMachineStartOnError()) {
+        LOG.info("Stopping workspace {}", machine.getWorkspaceId());
+        process.kill();
+      } else {
+        LOG.info(
+            "Continuing workspace bootstrap even if agent {} failed to start.", agent.getName());
+        return;
+      }
     } catch (MachineException e) {
       logAsErrorAgentStartLogs(machine, agent.getName(), agentLogger.getText());
       throw new ServerException(e.getServiceError());
@@ -171,5 +178,10 @@ public abstract class AbstractAgentLauncher implements AgentLauncher {
           machine.getId(),
           machine.getNode().getHost());
     }
+  }
+
+  @Override
+  public boolean shouldBlockMachineStartOnError() {
+    return true;
   }
 }

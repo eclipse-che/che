@@ -53,12 +53,6 @@
                     <exclude name="renameNameWorkspaceTest"/>
                 </methods>
             </class>
-            <class name="org.eclipse.che.selenium.dashboard.stacks.CheckCodeigniterStackTest"/>
-            <class name="org.eclipse.che.selenium.dashboard.stacks.CheckExpressStackTest"/>
-            <class name="org.eclipse.che.selenium.dashboard.stacks.CheckLaravelStackTest"/>
-            <class name="org.eclipse.che.selenium.dashboard.stacks.CheckRailsStackTest"/>
-            <class name="org.eclipse.che.selenium.dashboard.stacks.CheckSwiftStackTest"/>
-            <class name="org.eclipse.che.selenium.dashboard.stacks.CheckSymfonyStackTest"/>
             <class name="org.eclipse.che.selenium.debugger.ChangeVariableWithEvaluatingTest"/>
             <class name="org.eclipse.che.selenium.debugger.CheckBreakPointStateTest"/>
             <class name="org.eclipse.che.selenium.debugger.CppProjectDebuggingTest">

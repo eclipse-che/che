@@ -10,6 +10,8 @@
  */
 package org.ecipse.che.plugin.testing.testng.server;
 
+import static org.mockito.Mockito.mock;
+
 import java.io.File;
 import java.nio.file.PathMatcher;
 import java.util.ArrayList;
@@ -24,12 +26,12 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.WorkspaceProjectsSyncer;
+import org.eclipse.che.api.project.server.WorkspaceSyncCommunication;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
 import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
-import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
@@ -66,7 +68,6 @@ public abstract class BaseTest {
   protected LocalVirtualFileSystemProvider vfsProvider;
   protected ProjectRegistry projectRegistry;
   protected FileWatcherNotificationHandler fileWatcherNotificationHandler;
-  protected FileTreeWatcher fileTreeWatcher;
   protected ProjectTypeRegistry projectTypeRegistry;
   protected ProjectHandlerRegistry projectHandlerRegistry;
   protected ProjectImporterRegistry importerRegistry;
@@ -128,17 +129,16 @@ public abstract class BaseTest {
     importerRegistry = new ProjectImporterRegistry(new HashSet<>());
 
     fileWatcherNotificationHandler = new DefaultFileWatcherNotificationHandler(vfsProvider);
-    fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
 
     pm =
         new ProjectManager(
             vfsProvider,
             projectTypeRegistry,
+            mock(WorkspaceSyncCommunication.class),
             projectRegistry,
             projectHandlerRegistry,
             importerRegistry,
             fileWatcherNotificationHandler,
-            fileTreeWatcher,
             new TestWorkspaceHolder(new ArrayList<>()),
             Mockito.mock(FileWatcherManager.class));
 

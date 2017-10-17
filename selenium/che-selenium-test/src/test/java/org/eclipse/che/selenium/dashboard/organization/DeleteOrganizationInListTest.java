@@ -52,7 +52,7 @@ public class DeleteOrganizationInListTest {
 
   @Inject
   @Named("admin")
-  private TestOrganizationServiceClient organizationServiceClient;
+  private TestOrganizationServiceClient testOrganizationServiceClient;
 
   @Inject private AdminTestUser adminTestUser;
 
@@ -61,13 +61,13 @@ public class DeleteOrganizationInListTest {
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
 
     String organizationName = NameGenerator.generate("organization", 5);
-    organization = organizationServiceClient.create(organizationName);
-    organizations = organizationServiceClient.getAll();
+    organization = testOrganizationServiceClient.create(organizationName);
+    organizations = testOrganizationServiceClient.getAll();
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    organizationServiceClient.deleteById(organization.getId());
+    testOrganizationServiceClient.deleteById(organization.getId());
   }
 
   @Test

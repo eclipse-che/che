@@ -41,7 +41,6 @@ import org.eclipse.che.multiuser.resource.api.exception.NoEnoughResourcesExcepti
 import org.eclipse.che.multiuser.resource.api.usage.ResourceUsageManager;
 import org.eclipse.che.multiuser.resource.model.Resource;
 import org.eclipse.che.multiuser.resource.spi.impl.ResourceImpl;
-import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -244,12 +243,6 @@ public class OrganizationalAccountAvailableResourcesProviderTest {
     doReturn(singletonList(availableResource))
         .when(availableResourcesProvider)
         .getAvailableOrganizationResources(
-            argThat(
-                new ArgumentMatcher<Organization>() {
-                  @Override
-                  public boolean matches(Object argument) {
-                    return organizationId.equals(((Organization) argument).getId());
-                  }
-                }));
+            argThat(argument -> organizationId.equals(((Organization) argument).getId())));
   }
 }

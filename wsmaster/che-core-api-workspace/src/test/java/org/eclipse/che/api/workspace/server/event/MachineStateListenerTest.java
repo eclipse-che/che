@@ -12,6 +12,7 @@ package org.eclipse.che.api.workspace.server.event;
 
 import static org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent.EventType.DESTROYED;
 import static org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent.EventType.RUNNING;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -62,7 +63,7 @@ public class MachineStateListenerTest {
   public void workspaceShouldNotBeStoppedWhenItIsNotRunning() throws Exception {
     when(event.isDev()).thenReturn(true);
     when(event.getEventType()).thenReturn(DESTROYED);
-    when(workspaceManager.getWorkspace(anyString())).thenReturn(workspace);
+    when(workspaceManager.getWorkspace(nullable(String.class))).thenReturn(workspace);
     when(workspace.getStatus()).thenReturn(WorkspaceStatus.STOPPED);
 
     listener.onEvent(event);
@@ -74,11 +75,11 @@ public class MachineStateListenerTest {
   public void workspaceShouldBeStopped() throws Exception {
     when(event.isDev()).thenReturn(true);
     when(event.getEventType()).thenReturn(DESTROYED);
-    when(workspaceManager.getWorkspace(anyString())).thenReturn(workspace);
+    when(workspaceManager.getWorkspace(nullable(String.class))).thenReturn(workspace);
     when(workspace.getStatus()).thenReturn(WorkspaceStatus.RUNNING);
 
     listener.onEvent(event);
 
-    verify(workspaceManager).stopWorkspace(anyString());
+    verify(workspaceManager).stopWorkspace(nullable(String.class));
   }
 }

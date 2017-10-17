@@ -12,7 +12,7 @@ package org.eclipse.che.ide.ext.java.client.editor;
 
 import static org.eclipse.che.ide.project.ResolvingProjectStateHolder.ResolvingProjectState.IN_PROGRESS;
 import static org.eclipse.che.ide.project.ResolvingProjectStateHolder.ResolvingProjectState.RESOLVED;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -89,22 +89,21 @@ public class JavaReconcilerStrategyTest {
 
     when(editor.getEditorInput()).thenReturn(editorInput);
     when(editorInput.getFile()).thenReturn(file);
-    when(file.getName()).thenReturn(FILE_NAME);
     when(file.getProject()).thenReturn(project);
     when(file.getLocation()).thenReturn(Path.valueOf(FILE_PATH));
 
     when(project.getPath()).thenReturn(PROJECT_PATH);
-    when(file.getParentWithMarker(any())).thenReturn(srcFolder);
+    when(file.getParentWithMarker(nullable(String.class))).thenReturn(srcFolder);
     when(srcFolder.isPresent()).thenReturn(true);
     when(srcFolder.get()).thenReturn(startPoint);
     when(startPoint.getLocation()).thenReturn(Path.valueOf("some/path"));
 
-    when(resolvingProjectStateHolderRegistry.getResolvingProjectStateHolder(anyString()))
+    when(resolvingProjectStateHolderRegistry.getResolvingProjectStateHolder(nullable(String.class)))
         .thenReturn(resolvingProjectStateHolder);
     when(localizationConstant.codeAssistErrorMessageResolvingProject()).thenReturn("error");
 
     when(client.reconcile(anyString(), anyString())).thenReturn(reconcileResultPromise);
-    when(reconcileResultPromise.onSuccess(Matchers.<Consumer<ReconcileResult>>anyObject()))
+    when(reconcileResultPromise.onSuccess(Matchers.<Consumer<ReconcileResult>>any()))
         .thenReturn(reconcileResultPromise);
 
     javaReconcilerStrategy.setDocument(mock(Document.class));

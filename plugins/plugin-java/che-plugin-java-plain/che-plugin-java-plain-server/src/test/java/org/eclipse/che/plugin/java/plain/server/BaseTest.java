@@ -29,11 +29,11 @@ import org.eclipse.che.api.project.server.ProjectCreatedEvent;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.WorkspaceProjectsSyncer;
+import org.eclipse.che.api.project.server.WorkspaceSyncCommunication;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
 import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
-import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
@@ -54,6 +54,7 @@ import org.testng.annotations.BeforeClass;
 
 /** @author Valeriy Svydenko */
 public abstract class BaseTest {
+
   private static final String wsPath = BaseTest.class.getResource("/projects").getFile();
   private static final String INDEX_PATH = "target/fs_index";
 
@@ -69,7 +70,9 @@ public abstract class BaseTest {
 
     TestWorkspaceHolder workspaceHolder = new TestWorkspaceHolder();
 
-    if (root == null) root = new File(wsPath);
+    if (root == null) {
+      root = new File(wsPath);
+    }
 
     if (root.exists()) {
       IoUtil.deleteRecursive(root);
@@ -108,18 +111,15 @@ public abstract class BaseTest {
     ProjectImporterRegistry importerRegistry = new ProjectImporterRegistry(new HashSet<>());
     FileWatcherNotificationHandler fileWatcherNotificationHandler =
         new DefaultFileWatcherNotificationHandler(vfsProvider);
-    FileTreeWatcher fileTreeWatcher =
-        new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
-
     projectManager =
         new ProjectManager(
             vfsProvider,
             projectTypeRegistry,
+            mock(WorkspaceSyncCommunication.class),
             projectRegistry,
             projectHandlerRegistry,
             importerRegistry,
             fileWatcherNotificationHandler,
-            fileTreeWatcher,
             new TestWorkspaceHolder(new ArrayList<>()),
             mock(FileWatcherManager.class));
 

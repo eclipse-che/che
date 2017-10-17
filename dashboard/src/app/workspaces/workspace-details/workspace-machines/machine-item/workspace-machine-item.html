@@ -18,11 +18,11 @@
       <div flex layout="row" layout-align="start center" class="machine-items-area">
         <!-- Name -->
         <div flex="30" layout="column" layout-align="center start">
-          <span class="che-list-item-name workspace-machine-item-item-name">{{machine.name}}</span>
+          <span class="che-list-item-name workspace-machine-item-item-name" machine-name="{{machine.name}}">{{machine.name}}</span>
         </div>
         <!-- Image -->
         <div flex="30" layout="column" layout-align="center start">
-          <span class="che-list-item-secondary workspace-machine-item-secondary-color">{{machine.image}}</span>
+          <span class="che-list-item-secondary workspace-machine-item-secondary-color" machine-image="{{machine.image}}">{{machine.image}}</span>
         </div>
         <!-- Is Dev -->
         <div flex="10" layout="column" layout-align="center start">
@@ -51,7 +51,7 @@
         <!-- Actions -->
         <div flex="10" layout="column" layout-align="center end" class="machine-actions">
           <div flex layout="row">
-            <div ng-click="editMachine({name: machine.name, event: $event})">
+            <div ng-click="editMachine({name: machine.name, event: $event})" edit-machine="{{machine.name}}">
               <span class="fa fa-pencil"
                     uib-tooltip="Edit"
                     tooltip-append-to-body="true"></span>
@@ -68,7 +68,7 @@
                     uib-tooltip="Settings"
                     tooltip-append-to-body="true"></span>
             </div>
-            <div ng-click="deleteMachine({name: machine.name, event: $event})">
+            <div ng-click="deleteMachine({name: machine.name, event: $event})" delete-machine="{{machine.name}}">
               <span class="fa fa-trash-o"
                     uib-tooltip="Delete"
                     tooltip-append-to-body="true"></span>
