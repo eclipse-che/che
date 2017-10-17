@@ -22,7 +22,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.VcsStatusProvider;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
@@ -41,8 +40,7 @@ public class ProjectServiceVcsStatusInjector {
 
   @Inject
   public ProjectServiceVcsStatusInjector(
-      ProjectManager projectManager,
-      Set<VcsStatusProvider> vcsStatusProviders) {
+      ProjectManager projectManager, Set<VcsStatusProvider> vcsStatusProviders) {
     this.projectManager = projectManager;
     this.vcsStatusProviders = vcsStatusProviders;
   }

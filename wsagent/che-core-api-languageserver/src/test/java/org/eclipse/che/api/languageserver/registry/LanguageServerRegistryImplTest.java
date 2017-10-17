@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.api.languageserver.registry;
 
-import static java.nio.file.Files.createTempDirectory;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -21,11 +20,9 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 import javax.inject.Provider;
-import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
@@ -44,9 +41,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-/**
- * @author Anatoliy Bazko
- */
+/** @author Anatoliy Bazko */
 @Listeners(MockitoTestNGListener.class)
 public class LanguageServerRegistryImplTest {
 
@@ -54,22 +49,14 @@ public class LanguageServerRegistryImplTest {
   private static final String FILE_PATH = "/projects/1/test.txt";
   private static final String PROJECT_PATH = "file:///projects/1";
 
-  @Mock
-  private ServerInitializer initializer;
-  @Mock
-  private LanguageServerLauncher languageServerLauncher;
-  @Mock
-  private LanguageDescription languageDescription;
-  @Mock
-  private LanguageServer languageServer;
-  @Mock
-  private Provider<ProjectManager> pmp;
-  @Mock
-  private ProjectManager pm;
-  @Mock
-  private CheLanguageClientFactory clientFactory;
-  @Mock
-  private CheLanguageClient languageClient;
+  @Mock private ServerInitializer initializer;
+  @Mock private LanguageServerLauncher languageServerLauncher;
+  @Mock private LanguageDescription languageDescription;
+  @Mock private LanguageServer languageServer;
+  @Mock private Provider<ProjectManager> pmp;
+  @Mock private ProjectManager pm;
+  @Mock private CheLanguageClientFactory clientFactory;
+  @Mock private CheLanguageClient languageClient;
 
   private LanguageServerRegistryImpl registry;
   private LanguageServerDescription serverDescription;
@@ -108,8 +95,7 @@ public class LanguageServerRegistryImplTest {
                 pmp,
                 initializer,
                 null,
-                clientFactory
-            ) {
+                clientFactory) {
               @Override
               protected String extractProjectPath(String filePath) throws LanguageServerException {
                 return PROJECT_PATH;
@@ -117,9 +103,8 @@ public class LanguageServerRegistryImplTest {
             });
 
     when(initializer.initialize(
-        any(LanguageServerLauncher.class), any(LanguageClient.class), anyString()))
-        .thenAnswer(
-            invocation -> completedFuture(Pair.of(languageServer, initializeResult)));
+            any(LanguageServerLauncher.class), any(LanguageClient.class), anyString()))
+        .thenAnswer(invocation -> completedFuture(Pair.of(languageServer, initializeResult)));
   }
 
   @Test

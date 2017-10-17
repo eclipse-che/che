@@ -10,11 +10,6 @@
  */
 package org.eclipse.che.api.project.server.type;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static java.lang.String.format;
-import static org.eclipse.che.api.core.ErrorCodes.ATTRIBUTE_NAME_PROBLEM;
-import static org.eclipse.che.api.core.ErrorCodes.PROJECT_TYPE_IS_NOT_REGISTERED;
-
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import java.util.ArrayList;
@@ -24,9 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.model.project.ProjectProblem;
 import org.eclipse.che.api.core.model.project.type.Attribute;
-import org.eclipse.che.api.workspace.shared.ProjectProblemImpl;
 
 /** @author gazarenkov */
 public class ProjectTypes {

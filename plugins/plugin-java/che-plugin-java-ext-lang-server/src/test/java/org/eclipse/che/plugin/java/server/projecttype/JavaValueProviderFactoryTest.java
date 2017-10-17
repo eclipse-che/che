@@ -45,14 +45,10 @@ public class JavaValueProviderFactoryTest {
   private static final String HELLOWORLD_JAVA = "helloworld.java";
   private static final String PROJECT_PATH = "/project/path";
   private static final String HELLOWORLD_JS = "helloworld.js";
-  @Mock
-  private PathTransformer pathTransformer;
-  @InjectMocks
-  private JavaValueProviderFactory javaValueProviderFactory;
+  @Mock private PathTransformer pathTransformer;
+  @InjectMocks private JavaValueProviderFactory javaValueProviderFactory;
 
-  @Mock
-  private ProjectConfig projectConfig;
-
+  @Mock private ProjectConfig projectConfig;
 
   private File projectDirectory;
   private File subDirectory;
@@ -82,29 +78,25 @@ public class JavaValueProviderFactoryTest {
     }
   }
 
-  /**
-   * In this case we have a folder with a java file, so it should find a java file
-   */
+  /** In this case we have a folder with a java file, so it should find a java file */
   @Test
   public void checkFoundJavaFilesInCurrentFolder() throws Exception {
     file = createFile(projectDirectory.toPath().resolve(HELLOWORLD_JAVA)).toFile();
 
-    List<String> hasJavaFiles = javaValueProviderFactory.newInstance(projectConfig)
-        .getValues(CONTAINS_JAVA_FILES);
+    List<String> hasJavaFiles =
+        javaValueProviderFactory.newInstance(projectConfig).getValues(CONTAINS_JAVA_FILES);
 
     assertNotNull(hasJavaFiles);
     assertEquals(hasJavaFiles, singletonList("true"));
   }
 
-  /**
-   * In this case we have a folder with a javascript file, so it shouldn't find any java files
-   */
+  /** In this case we have a folder with a javascript file, so it shouldn't find any java files */
   @Test
   public void checkNotFoundJavaFilesInCurrentFolder() throws Exception {
     file = createFile(projectDirectory.toPath().resolve(HELLOWORLD_JS)).toFile();
 
-    List<String> hasJavaFiles = javaValueProviderFactory.newInstance(projectConfig)
-        .getValues(CONTAINS_JAVA_FILES);
+    List<String> hasJavaFiles =
+        javaValueProviderFactory.newInstance(projectConfig).getValues(CONTAINS_JAVA_FILES);
 
     assertNotNull(hasJavaFiles);
     assertEquals(hasJavaFiles, singletonList("false"));
@@ -122,8 +114,8 @@ public class JavaValueProviderFactoryTest {
 
     file = createFile(subDirectory.toPath().resolve(HELLOWORLD_JAVA)).toFile();
 
-    List<String> hasJavaFiles = javaValueProviderFactory.newInstance(projectConfig)
-        .getValues(CONTAINS_JAVA_FILES);
+    List<String> hasJavaFiles =
+        javaValueProviderFactory.newInstance(projectConfig).getValues(CONTAINS_JAVA_FILES);
 
     assertNotNull(hasJavaFiles);
     assertEquals(hasJavaFiles, singletonList("true"));

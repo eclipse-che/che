@@ -27,7 +27,6 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;

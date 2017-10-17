@@ -10,9 +10,7 @@
  */
 package org.eclipse.che.api.project.server.impl;
 
-import static java.io.File.separator;
 import static org.eclipse.che.api.fs.server.WsPathUtils.parentOf;
-import static org.eclipse.che.api.fs.server.WsPathUtils.isRoot;
 
 import java.util.List;
 import java.util.Map;

@@ -56,19 +56,13 @@ public class JavaValueProviderFactory implements ValueProviderFactory {
     return new JavaValueProvider(pathTransformer.transform(projectConfig.getPath()));
   }
 
-  static private class JavaValueProvider extends ReadonlyValueProvider {
+  private static class JavaValueProvider extends ReadonlyValueProvider {
 
-    /**
-     * The root folder of this project.
-     */
+    /** The root folder of this project. */
     private final Path projectFsPath;
-    /**
-     * If true, it means that there are some java files in this folder or in its children.
-     */
+    /** If true, it means that there are some java files in this folder or in its children. */
     private boolean containsJavaFiles;
-    /**
-     * Try to perform the check on java files only once with lazy check.
-     */
+    /** Try to perform the check on java files only once with lazy check. */
     private boolean initialized = false;
 
     JavaValueProvider(Path projectFsPath) {
@@ -102,7 +96,6 @@ public class JavaValueProviderFactory implements ValueProviderFactory {
       } catch (IOException e) {
         throw new IllegalStateException("Unable to get files from from: " + projectFsPath, e);
       }
-
     }
 
     /**
@@ -115,8 +108,8 @@ public class JavaValueProviderFactory implements ValueProviderFactory {
         this.containsJavaFiles = hasJavaFilesInFolder();
       } catch (IllegalStateException e) {
         throw new ValueStorageException(
-            String.format("Unable to get files from ''%s'' because of %s", projectFsPath,
-                e.getMessage()));
+            String.format(
+                "Unable to get files from ''%s'' because of %s", projectFsPath, e.getMessage()));
       }
       this.initialized = true;
     }

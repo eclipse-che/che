@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2012-2017 Red Hat, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.api.project.server.impl;
 
 import static java.util.Collections.singleton;
@@ -18,9 +28,7 @@ import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-/**
- * Test cases for {@link SynchronizingProjectManager}
- */
+/** Test cases for {@link SynchronizingProjectManager} */
 @Listeners(MockitoTestNGListener.class)
 public class SynchronizingProjectManagerTest {
 
@@ -29,28 +37,17 @@ public class SynchronizingProjectManagerTest {
   private static final String SRC_WS_PATH = "/src/ws/path";
   private static final String DST_WS_PATH = "/dst/ws/path";
 
-  @Mock
-  private ExecutiveProjectManager executiveProjectManager;
-  @Mock
-  private ProjectSynchronizer projectSynchronizer;
-  @InjectMocks
-  private SynchronizingProjectManager synchronizingProjectManager;
+  @Mock private ExecutiveProjectManager executiveProjectManager;
+  @Mock private ProjectSynchronizer projectSynchronizer;
+  @InjectMocks private SynchronizingProjectManager synchronizingProjectManager;
 
-
-  @Mock
-  private Map<ProjectConfig, Map<String, String>> projectConfigs;
-  @Mock
-  private ProjectConfig projectConfig;
-  @Mock
-  private RegisteredProject registeredProject;
-  @Mock
-  private NewProjectConfig newProjectConfig;
-  @Mock
-  private Map<String, String> projectOptions;
-  @Mock
-  private BiConsumer<String, String> consumer;
-  @Mock
-  private SourceStorage sourceStorage;
+  @Mock private Map<ProjectConfig, Map<String, String>> projectConfigs;
+  @Mock private ProjectConfig projectConfig;
+  @Mock private RegisteredProject registeredProject;
+  @Mock private NewProjectConfig newProjectConfig;
+  @Mock private Map<String, String> projectOptions;
+  @Mock private BiConsumer<String, String> consumer;
+  @Mock private SourceStorage sourceStorage;
 
   @Test
   public void shouldCallIsRegistered() throws Exception {
@@ -126,7 +123,8 @@ public class SynchronizingProjectManagerTest {
 
   @Test(expectedExceptions = ServerException.class)
   public void shouldCallSynchronizeAfterCreate() throws Exception {
-    doThrow(new ServerException("")).when(executiveProjectManager)
+    doThrow(new ServerException(""))
+        .when(executiveProjectManager)
         .create(projectConfig, projectOptions);
 
     synchronizingProjectManager.create(projectConfig, projectOptions);
@@ -143,7 +141,8 @@ public class SynchronizingProjectManagerTest {
 
   @Test(expectedExceptions = ServerException.class)
   public void shouldCallSynchronizeAfterUpdateAll() throws Exception {
-    doThrow(new ServerException("")).when(executiveProjectManager)
+    doThrow(new ServerException(""))
+        .when(executiveProjectManager)
         .updateAll(singleton(projectConfig));
 
     synchronizingProjectManager.updateAll(singleton(projectConfig));
@@ -224,7 +223,8 @@ public class SynchronizingProjectManagerTest {
 
   @Test(expectedExceptions = ServerException.class)
   public void shouldCallSynchronizeAfterCopy() throws Exception {
-    doThrow(new ServerException("")).when(executiveProjectManager)
+    doThrow(new ServerException(""))
+        .when(executiveProjectManager)
         .copy(SRC_WS_PATH, DST_WS_PATH, false);
 
     synchronizingProjectManager.copy(SRC_WS_PATH, DST_WS_PATH, false);
@@ -241,7 +241,8 @@ public class SynchronizingProjectManagerTest {
 
   @Test(expectedExceptions = ServerException.class)
   public void shouldCallSynchronizeAfterMove() throws Exception {
-    doThrow(new ServerException("")).when(executiveProjectManager)
+    doThrow(new ServerException(""))
+        .when(executiveProjectManager)
         .move(SRC_WS_PATH, DST_WS_PATH, false);
 
     synchronizingProjectManager.move(SRC_WS_PATH, DST_WS_PATH, false);
@@ -258,7 +259,8 @@ public class SynchronizingProjectManagerTest {
 
   @Test(expectedExceptions = ServerException.class)
   public void shouldCallSynchronizeAfterSetType() throws Exception {
-    doThrow(new ServerException("")).when(executiveProjectManager)
+    doThrow(new ServerException(""))
+        .when(executiveProjectManager)
         .setType(WS_PATH, PROJECT_TYPE, true);
 
     synchronizingProjectManager.setType(WS_PATH, PROJECT_TYPE, true);
@@ -275,7 +277,8 @@ public class SynchronizingProjectManagerTest {
 
   @Test(expectedExceptions = ServerException.class)
   public void shouldCallSynchronizeAfterRemoveType() throws Exception {
-    doThrow(new ServerException("")).when(executiveProjectManager)
+    doThrow(new ServerException(""))
+        .when(executiveProjectManager)
         .removeType(WS_PATH, PROJECT_TYPE);
 
     synchronizingProjectManager.removeType(WS_PATH, PROJECT_TYPE);

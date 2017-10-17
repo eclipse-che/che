@@ -163,7 +163,6 @@ public class ProjectServiceClient {
     if (url.contains("?")) {
       url += "&clientId=" + appContext.getApplicationId().orElse("");
     } else {
-
       url += "?clientId=" + appContext.getApplicationId().orElse("");
     }
 
@@ -271,7 +270,6 @@ public class ProjectServiceClient {
     if (url.contains("?")) {
       url += "&clientId=" + appContext.getApplicationId().orElse("");
     } else {
-
       url += "?clientId=" + appContext.getApplicationId().orElse("");
     }
 

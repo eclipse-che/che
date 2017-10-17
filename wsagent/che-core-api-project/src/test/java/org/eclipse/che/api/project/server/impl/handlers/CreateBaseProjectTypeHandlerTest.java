@@ -29,16 +29,12 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-/**
- * @author Vitalii Parfonov
- */
+/** @author Vitalii Parfonov */
 @Listeners(MockitoTestNGListener.class)
 public class CreateBaseProjectTypeHandlerTest {
 
-  @Mock
-  private FsManager fsManager;
-  @InjectMocks
-  private CreateBaseProjectTypeHandler createBaseProjectTypeHandler;
+  @Mock private FsManager fsManager;
+  @InjectMocks private CreateBaseProjectTypeHandler createBaseProjectTypeHandler;
 
   private File root;
 

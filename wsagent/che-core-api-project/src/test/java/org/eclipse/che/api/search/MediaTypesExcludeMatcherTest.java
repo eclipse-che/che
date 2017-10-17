@@ -26,21 +26,15 @@ import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-/**
- * @author Valeriy Svydenko
- */
+/** @author Valeriy Svydenko */
 @Listeners(MockitoTestNGListener.class)
 public class MediaTypesExcludeMatcherTest {
 
-  @Mock
-  private FsManager fsManager;
-  @Mock
-  private PathTransformer pathTransformer;
-  @InjectMocks
-  private MediaTypesExcludeMatcher mediaTypesExcludeMatcher;
+  @Mock private FsManager fsManager;
+  @Mock private PathTransformer pathTransformer;
+  @InjectMocks private MediaTypesExcludeMatcher mediaTypesExcludeMatcher;
 
-  @Mock
-  private Path path;
+  @Mock private Path path;
 
   @Test
   public void shouldMatchEmptyFile() throws Exception {

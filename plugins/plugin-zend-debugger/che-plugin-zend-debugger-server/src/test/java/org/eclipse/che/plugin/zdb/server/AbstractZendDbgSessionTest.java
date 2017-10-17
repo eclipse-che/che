@@ -16,7 +16,6 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-import com.sun.corba.se.spi.orbutil.fsm.FSM;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -87,29 +86,27 @@ public abstract class AbstractZendDbgSessionTest {
     assertEquals(bpActivatedEvent.getBreakpoint(), breakpoint);
   }
 
-  protected void triggerSession(String dbgFile, ZendDbgSettings dbgSettings, FsManager fsManager) throws Exception {
+  protected void triggerSession(String dbgFile, ZendDbgSettings dbgSettings, FsManager fsManager)
+      throws Exception {
     triggerSession(dbgFile, dbgSettings, Collections.emptyList(), fsManager);
   }
 
   protected void triggerSession(
-      String dbgFile, ZendDbgSettings dbgSettings, List<Breakpoint> dbgBreakpoints,
+      String dbgFile,
+      ZendDbgSettings dbgSettings,
+      List<Breakpoint> dbgBreakpoints,
       FsManager fsManager)
       throws Exception {
     ZendDbgLocationHandler dbgLocationMapper = mock(ZendDbgLocationHandler.class);
     // No need to convert between VFS and DBG for test purposes
     when(dbgLocationMapper.convertToVFS(anyObject())).then(returnsFirstArg());
     when(dbgLocationMapper.convertToDBG(anyObject())).then(returnsFirstArg());
-    debugger =
-        new ZendDebugger(
-            dbgSettings,
-            dbgLocationMapper,
-            dbgEvents::add,
-            fsManager);
+    debugger = new ZendDebugger(dbgSettings, dbgLocationMapper, dbgEvents::add, fsManager);
     debugger.start(new StartActionImpl(dbgBreakpoints));
     dbgEngineProcess =
         Runtime.getRuntime()
             .exec(
                 "php " + dbgFile,
-                new String[]{dbgSettings.isUseSsslEncryption() ? QUERY_SSL : QUERY_NO_SSL});
+                new String[] {dbgSettings.isUseSsslEncryption() ? QUERY_SSL : QUERY_NO_SSL});
   }
 }

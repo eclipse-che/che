@@ -11,7 +11,6 @@
 package org.eclipse.che.api.project.server;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -20,8 +19,6 @@ import java.util.Iterator;
 import java.util.List;
 import javax.ws.rs.core.UriInfo;
 import org.apache.commons.fileupload.FileItem;
-import org.eclipse.che.api.core.rest.Service;
-import org.eclipse.che.api.core.rest.ServiceContext;
 import org.eclipse.che.api.project.server.impl.ProjectServiceApi;
 import org.eclipse.che.api.project.server.impl.ProjectServiceApiFactory;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
@@ -32,15 +29,12 @@ import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-/**
- * Tests for {@link ProjectService}
- */
+/** Tests for {@link ProjectService} */
 @Listeners(MockitoTestNGListener.class)
 public class ProjectServiceTest {
 
@@ -62,36 +56,27 @@ public class ProjectServiceTest {
   private static final boolean FORCE = false;
   private static final boolean REWRITE = false;
 
-  @Mock
-  private ProjectServiceApiFactory projectServiceApiFactory;
-  @InjectMocks
-  private ProjectService projectService;
+  @Mock private ProjectServiceApiFactory projectServiceApiFactory;
+  @InjectMocks private ProjectService projectService;
 
-  @Mock
-  private ProjectServiceApi projectServiceApi;
+  @Mock private ProjectServiceApi projectServiceApi;
 
   @Mock(answer = Answers.RETURNS_DEEP_STUBS)
   private UriInfo uriInfo;
-  @Mock
-  private ProjectConfigDto projectConfigDto;
-  @Mock
-  private List<NewProjectConfigDto> newProjectConfigDtos;
-  @Mock
-  private SourceStorageDto sourceStorageDto;
-  @Mock
-  private InputStream inputStream;
-  @Mock
-  private Iterator<FileItem> fileItemIterator;
-  @Mock
-  private CopyOptions copyOptions;
-  @Mock
-  private MoveOptions moveOptions;
+
+  @Mock private ProjectConfigDto projectConfigDto;
+  @Mock private List<NewProjectConfigDto> newProjectConfigDtos;
+  @Mock private SourceStorageDto sourceStorageDto;
+  @Mock private InputStream inputStream;
+  @Mock private Iterator<FileItem> fileItemIterator;
+  @Mock private CopyOptions copyOptions;
+  @Mock private MoveOptions moveOptions;
 
   @BeforeMethod
   public void setUp() throws Exception {
     when(projectServiceApiFactory.create(any())).thenReturn(projectServiceApi);
 
-    projectService.createProjectServiceApi(uriInfo);
+    projectService.uriInfo = uriInfo;
   }
 
   @Test

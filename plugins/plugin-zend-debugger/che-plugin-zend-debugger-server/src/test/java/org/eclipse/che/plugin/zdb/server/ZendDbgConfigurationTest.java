@@ -38,8 +38,8 @@ public class ZendDbgConfigurationTest {
   }
 
   @Test(
-      groups = {"zendDbg"},
-      dependsOnGroups = {"checkPHP"}
+    groups = {"zendDbg"},
+    dependsOnGroups = {"checkPHP"}
   )
   public void testGetInfo() throws Exception {
     DebuggerInfo info = debugger.getInfo();

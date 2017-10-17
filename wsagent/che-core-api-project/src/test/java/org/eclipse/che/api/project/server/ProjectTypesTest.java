@@ -44,22 +44,15 @@ public class ProjectTypesTest {
 
   private static final String NOT_PERSISTED_MIXIN_ID = "notPersistedMixinId";
   private static final String NOT_PERSISTED_MIXIN_NAME = "notPersistedMixinName";
-  private static final String NOT_PERSISTED_MIXIN_ATTRIBUTE_NAME =
-      "notPersistedMixinAttributeName";
+  private static final String NOT_PERSISTED_MIXIN_ATTRIBUTE_NAME = "notPersistedMixinAttributeName";
   private static final String NOT_PERSISTED_MIXIN_ATTRIBUTE_ID =
       NOT_PERSISTED_MIXIN_ID + ":" + NOT_PERSISTED_MIXIN_ATTRIBUTE_NAME;
 
-
-  @Mock
-  private ProjectTypeDef primaryType;
-  @Mock
-  private ProjectTypeDef persistedMixin;
-  @Mock
-  private ProjectTypeDef notPersistedMixin;
-  @Mock
-  private ProjectTypeRegistry registry;
-  @Mock
-  private ProjectTypeResolver resolver;
+  @Mock private ProjectTypeDef primaryType;
+  @Mock private ProjectTypeDef persistedMixin;
+  @Mock private ProjectTypeDef notPersistedMixin;
+  @Mock private ProjectTypeRegistry registry;
+  @Mock private ProjectTypeResolver resolver;
 
   @BeforeMethod
   public void configurePrimaryType() throws Exception {

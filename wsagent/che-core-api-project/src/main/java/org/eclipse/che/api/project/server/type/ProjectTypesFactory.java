@@ -15,6 +15,6 @@ import java.util.List;
 
 public interface ProjectTypesFactory {
 
-  ProjectTypes create(@Assisted("type") String type,
-      @Assisted("mixinTypes") List<String> mixinTypes);
+  ProjectTypes create(
+      @Assisted("type") String type, @Assisted("mixinTypes") List<String> mixinTypes);
 }

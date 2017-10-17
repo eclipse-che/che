@@ -187,7 +187,7 @@ public class ResourcesPlugin {
   public ResourcesPlugin(
       @Named("che.jdt.workspace.index.dir") String indexPath,
       @Named("che.user.workspaces.storage") String workspacePath,
-      Provider<ProjectManager> projectManager,
+      Provider<ProjectManager> projectManagerProvider,
       Provider<PathTransformer> pathTransformerProvider,
       Provider<FsManager> fsManagerProvider) {
     ResourcesPlugin.indexPath = indexPath;
@@ -195,7 +195,8 @@ public class ResourcesPlugin {
     pluginId = "cheWsPlugin";
     EFS.setWsPath(workspacePath);
     workspace =
-        new Workspace(workspacePath, projectManager, pathTransformerProvider, fsManagerProvider);
+        new Workspace(
+            workspacePath, projectManagerProvider, pathTransformerProvider, fsManagerProvider);
   }
 
   public static String getPathToWorkspace() {

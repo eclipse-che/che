@@ -33,31 +33,21 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-/**
- * @author Valeriy Svydenko
- */
+/** @author Valeriy Svydenko */
 @Listeners(value = {MockitoTestNGListener.class})
 public class PlainJavaValueProviderFactoryTest {
 
   public static final String PROJECT_PATH = "/project/path";
-  @InjectMocks
-  PlainJavaValueProviderFactory plainJavaValueProviderFactory;
-  @Mock
-  Map<String, List<String>> attributes;
-  @Mock
-  private Provider<ProjectConfigRegistry> projectRegistryProvider;
-  @Mock
-  private ProjectConfigRegistry projectConfigRegistry;
-  @Mock
-  private RegisteredProject registeredProject;
-  @Mock
-  private ProjectConfig projectConfig;
-  @Captor
-  private ArgumentCaptor<List<String>> captor;
+  @InjectMocks PlainJavaValueProviderFactory plainJavaValueProviderFactory;
+  @Mock Map<String, List<String>> attributes;
+  @Mock private Provider<ProjectConfigRegistry> projectRegistryProvider;
+  @Mock private ProjectConfigRegistry projectConfigRegistry;
+  @Mock private RegisteredProject registeredProject;
+  @Mock private ProjectConfig projectConfig;
+  @Captor private ArgumentCaptor<List<String>> captor;
 
   @BeforeMethod
-  public void setUp() throws Exception {
-  }
+  public void setUp() throws Exception {}
 
   @Test
   public void attributeShouldBeSet() throws Exception {

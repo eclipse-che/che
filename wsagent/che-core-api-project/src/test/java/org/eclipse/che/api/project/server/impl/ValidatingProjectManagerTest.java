@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2012-2017 Red Hat, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.api.project.server.impl;
 
 import static java.util.Collections.singleton;
@@ -23,11 +33,8 @@ import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-/**
- * Test cases for {@link ValidatingProjectManager}
- */
+/** Test cases for {@link ValidatingProjectManager} */
 @Listeners(MockitoTestNGListener.class)
-
 public class ValidatingProjectManagerTest {
 
   private static final String WS_PATH = "/ws/path";
@@ -35,29 +42,18 @@ public class ValidatingProjectManagerTest {
   private static final String SRC_WS_PATH = "/src/ws/path";
   private static final String DST_WS_PATH = "/dst/ws/path";
 
-  @Mock
-  private SynchronizingProjectManager synchronizingProjectManager;
-  @Mock
-  private FsManager fsManager;
-  @Mock
-  private ProjectConfigRegistry projectConfigRegistry;
-  @InjectMocks
-  private ValidatingProjectManager validatingProjectManager;
+  @Mock private SynchronizingProjectManager synchronizingProjectManager;
+  @Mock private FsManager fsManager;
+  @Mock private ProjectConfigRegistry projectConfigRegistry;
+  @InjectMocks private ValidatingProjectManager validatingProjectManager;
 
-  @Mock
-  private Map<ProjectConfig, Map<String, String>> projectConfigs;
-  @Mock
-  private ProjectConfig projectConfig;
-  @Mock
-  private RegisteredProject registeredProject;
-  @Mock
-  private NewProjectConfig newProjectConfig;
-  @Mock
-  private Map<String, String> projectOptions;
-  @Mock
-  private BiConsumer<String, String> consumer;
-  @Mock
-  private SourceStorage sourceStorage;
+  @Mock private Map<ProjectConfig, Map<String, String>> projectConfigs;
+  @Mock private ProjectConfig projectConfig;
+  @Mock private RegisteredProject registeredProject;
+  @Mock private NewProjectConfig newProjectConfig;
+  @Mock private Map<String, String> projectOptions;
+  @Mock private BiConsumer<String, String> consumer;
+  @Mock private SourceStorage sourceStorage;
 
   @Test
   public void shouldCallIsRegistered() throws Exception {
@@ -317,8 +313,7 @@ public class ValidatingProjectManagerTest {
   }
 
   @Test(expectedExceptions = NotFoundException.class)
-  public void shouldThrowNotFoundExceptionForCopyWhenProjectIsNotRegistered()
-      throws Exception {
+  public void shouldThrowNotFoundExceptionForCopyWhenProjectIsNotRegistered() throws Exception {
     when(fsManager.existsAsDir(SRC_WS_PATH)).thenReturn(true);
     when(fsManager.existsAsDir(parentOf(DST_WS_PATH))).thenReturn(true);
     when(fsManager.exists(DST_WS_PATH)).thenReturn(false);
@@ -377,8 +372,7 @@ public class ValidatingProjectManagerTest {
   }
 
   @Test(expectedExceptions = NotFoundException.class)
-  public void shouldThrowNotFoundExceptionForMoveWhenProjectIsNotRegistered()
-      throws Exception {
+  public void shouldThrowNotFoundExceptionForMoveWhenProjectIsNotRegistered() throws Exception {
     when(projectConfigRegistry.isRegistered(SRC_WS_PATH)).thenReturn(false);
 
     validatingProjectManager.move(SRC_WS_PATH, DST_WS_PATH, false);
