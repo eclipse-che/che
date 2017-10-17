@@ -130,10 +130,6 @@ public class GitPanelPresenter extends BasePresenter
     }
   }
 
-  private void updateChangedFiles(AlteredFiles alteredFiles) {
-    changesPanelPresenter.show(alteredFiles);
-  }
-
   @Override
   public String getTitle() {
     return locale.panelTitle();
@@ -175,10 +171,6 @@ public class GitPanelPresenter extends BasePresenter
   public void onFileChanged(String endpointId, FileChangedEventDto dto) {
     String projectName = extractProjectName(dto.getPath());
     MutableAlteredFiles alteredFiles = changes.get(projectName);
-    if (alteredFiles == null) { // TODO delete debug code.
-      Log.error(getClass(), "Project '" + projectName + "' should be registered in the git panel.");
-      return;
-    }
 
     switch (dto.getStatus()) {
       case MODIFIED:
@@ -225,6 +217,19 @@ public class GitPanelPresenter extends BasePresenter
   @Override
   public void onRepositorySelectionChanged(String selectedProjectName) {
     this.selectedProjectName = selectedProjectName;
-    updateChangedFiles(changes.get(selectedProjectName));
+    if (selectedProjectName == null) {
+      updateChangedFiles(new MutableAlteredFiles(null));
+      return;
+    }
+
+    AlteredFiles alteredFilesToShow = changes.get(selectedProjectName);
+    if (alteredFilesToShow == null) {
+      alteredFilesToShow = new MutableAlteredFiles(null);
+    }
+    updateChangedFiles(alteredFilesToShow);
+  }
+
+  private void updateChangedFiles(AlteredFiles alteredFiles) {
+    changesPanelPresenter.show(alteredFiles);
   }
 }

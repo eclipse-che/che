@@ -15,11 +15,9 @@ import static com.google.common.collect.Iterables.getFirst;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.LayoutPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.Comparator;
 import javax.inject.Inject;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
@@ -30,25 +28,28 @@ import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelView;
 import org.eclipse.che.ide.ext.git.client.panel.GitPanelView.ActionDelegate;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
+import org.eclipse.che.ide.ui.smartTree.NodeStorage.StoreSortInfo;
 import org.eclipse.che.ide.ui.smartTree.SelectionModel;
+import org.eclipse.che.ide.ui.smartTree.SortDir;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 
-/** @author Mykola Morhun */
+/**
+ * @author Mykola Morhun
+ */
 public class GitPanelViewImpl extends BaseView<ActionDelegate> implements GitPanelView {
   interface GitPanelViewImplUiBinder extends UiBinder<Widget, GitPanelViewImpl> {}
 
-  @UiField FlowPanel changesPanel;
-  @UiField LayoutPanel repositoriesPanel;
+  @UiField
+  FlowPanel changesPanel;
+  @UiField
+  SimplePanel repositoriesPanel;
 
   @UiField(provided = true)
   final GitResources gitResources;
   @UiField(provided = true)
   final GitLocalizationConstant locale;
 
-  Tree repositoriesList;
-
-  private TreeSet<String> repositories;
-  private Map<String, Integer> numberOfChanges;
+  private Tree repositoriesList;
 
   @Inject
   public GitPanelViewImpl(
@@ -61,9 +62,6 @@ public class GitPanelViewImpl extends BaseView<ActionDelegate> implements GitPan
     this.gitResources = gitResources;
     this.locale = locale;
 
-    this.repositories = new TreeSet<>();
-    this.numberOfChanges = new HashMap<>();
-
     setContentWidget(uiBinder.createAndBindUi(this));
 
     createRepositoriesList();
@@ -73,6 +71,8 @@ public class GitPanelViewImpl extends BaseView<ActionDelegate> implements GitPan
     NodeStorage nodeStorage = new NodeStorage();
     NodeLoader nodeLoader = new NodeLoader();
     repositoriesList = new Tree(nodeStorage, nodeLoader);
+    repositoriesList.getNodeStorage().addSortInfo(
+        new StoreSortInfo(Comparator.comparing(Node::getName), SortDir.ASC));
     SelectionModel selectionModel = repositoriesList.getSelectionModel();
     selectionModel.setSelectionMode(SelectionModel.Mode.SINGLE);
     selectionModel.addSelectionChangedHandler(event -> {
@@ -83,7 +83,7 @@ public class GitPanelViewImpl extends BaseView<ActionDelegate> implements GitPan
         delegate.onRepositorySelectionChanged(node.getName());
       }
     });
-    this.changesPanel.add(repositoriesList);
+    this.repositoriesPanel.add(repositoriesList);
   }
 
   @Override
@@ -93,28 +93,30 @@ public class GitPanelViewImpl extends BaseView<ActionDelegate> implements GitPan
 
   @Override
   public void addRepository(String repository) {
-    // TODO save selection
-    repositories.add(repository);
-    numberOfChanges.put(repository, 0);
-    updateRepositoriesList();
+    repositoriesList.getNodeStorage().add(new RepositoryNode(repository, 0));
   }
 
   @Override
   public void removeRepository(String repository) {
-    // TODO save selection
-    repositories.remove(repository);
-    numberOfChanges.remove(repository);
-    updateRepositoriesList();
+    repositoriesList.getNodeStorage().remove(findNode(repository));
   }
 
   @Override
   public void updateRepositoryChanges(String repository, int changes) {
-    numberOfChanges.put(repository, changes);
+    RepositoryNode node = findNode(repository);
+    if (node != null) {
+      node.setChanges(changes);
+      repositoriesList.refresh(node);
+
+    }
   }
 
-  private void updateRepositoriesList() {
-    repositoriesList.clear();
-    NodeStorage nodeStorage = repositoriesList.getNodeStorage();
-    repositories.forEach(repository -> nodeStorage.add(new RepositoryNode(repository)));
+  private RepositoryNode findNode(String repositoryName) {
+    for (Node node : repositoriesList.getNodeStorage().getAll()) {
+      if (repositoryName.equals(node.getName())) {
+        return (RepositoryNode) node;
+      }
+    }
+    return null;
   }
 }

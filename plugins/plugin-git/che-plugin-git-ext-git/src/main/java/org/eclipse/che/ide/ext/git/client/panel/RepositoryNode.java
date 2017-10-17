@@ -1,7 +1,9 @@
 package org.eclipse.che.ide.ext.git.client.panel;
 
+import java.util.Collections;
 import java.util.List;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.data.tree.AbstractTreeNode;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ui.smartTree.presentation.HasPresentation;
@@ -13,20 +15,39 @@ import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
  * @author Mykola Morhun
  */
 public class RepositoryNode extends AbstractTreeNode implements HasPresentation {
-
   private NodePresentation nodePresentation;
 
   private final String repository;
-  private int changedFiles;
+  private int changes;
 
-  public RepositoryNode(String repository) {
+  /**
+   * Creates new repository entry.
+   *
+   * @param repository repository name
+   * @param changes number of changed file in the repository
+   */
+  public RepositoryNode(String repository, int changes) {
     this.repository = repository;
-    this.changedFiles = 0;
+    this.changes = changes;
+  }
+
+  public String getRepository() {
+    return repository;
+  }
+
+  public int getChanges() {
+    return changes;
+  }
+
+  public void setChanges(int changes) {
+    this.changes = changes;
   }
 
   @Override
   public void updatePresentation(NodePresentation presentation) {
-    presentation.setPresentableText(repository + " : " + changedFiles);
+    presentation.setPresentableText(repository);
+    presentation.setInfoText(String.valueOf(changes));
+    presentation.setInfoTextCss("color: blue; text-align: right; background-color: yellow;"); // TODO use resources
   }
 
   @Override
@@ -56,6 +77,6 @@ public class RepositoryNode extends AbstractTreeNode implements HasPresentation 
   @Override
   protected Promise<List<Node>> getChildrenImpl() {
     // no children are supported
-    return null;
+    return Promises.resolve(Collections.<Node>emptyList()); // TODO do not use deprecated
   }
 }
