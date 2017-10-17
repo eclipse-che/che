@@ -414,7 +414,7 @@ public class DebuggerTest extends BaseTest {
     when(breakpointDto.getLocation().getLineNumber()).thenReturn(LINE_NUMBER);
     when(breakpointDto.withLocation(locationDto)).thenReturn(breakpointDto);
     when(breakpointDto.withEnabled(true)).thenReturn(breakpointDto);
-    when(breakpointDto.withCondition(anyString())).thenReturn(breakpointDto);
+    when(breakpointDto.withCondition(any())).thenReturn(breakpointDto);
 
     debugger.addBreakpoint(breakpointDto);
 
