@@ -64,8 +64,6 @@ import org.eclipse.che.multiuser.organization.spi.impl.OrganizationImpl;
 import org.eclipse.che.multiuser.organization.spi.jpa.JpaMemberDao;
 import org.eclipse.che.multiuser.organization.spi.jpa.JpaOrganizationDao;
 import org.eclipse.che.multiuser.organization.spi.jpa.JpaOrganizationDistributedResourcesDao;
-import org.eclipse.che.multiuser.permission.machine.jpa.JpaRecipePermissionsDao;
-import org.eclipse.che.multiuser.permission.machine.recipe.RecipePermissionsImpl;
 import org.eclipse.che.multiuser.permission.workspace.server.model.impl.WorkerImpl;
 import org.eclipse.che.multiuser.permission.workspace.server.spi.WorkerDao;
 import org.eclipse.che.multiuser.permission.workspace.server.spi.jpa.JpaStackPermissionsDao;
@@ -134,8 +132,6 @@ public class MultiuserPostgresqlTckModule extends TckModule {
         .toInstance(new JpaTckRepository<>(WorkerImpl.class));
 
     //api permission
-    bind(new TypeLiteral<TckRepository<RecipePermissionsImpl>>() {})
-        .toInstance(new JpaTckRepository<>(RecipePermissionsImpl.class));
     bind(new TypeLiteral<TckRepository<StackPermissionsImpl>>() {})
         .toInstance(new JpaTckRepository<>(StackPermissionsImpl.class));
     bind(new TypeLiteral<TckRepository<SystemPermissionsImpl>>() {})
@@ -143,8 +139,6 @@ public class MultiuserPostgresqlTckModule extends TckModule {
 
     bind(new TypeLiteral<PermissionsDao<StackPermissionsImpl>>() {})
         .to(JpaStackPermissionsDao.class);
-    bind(new TypeLiteral<PermissionsDao<RecipePermissionsImpl>>() {})
-        .to(JpaRecipePermissionsDao.class);
     bind(new TypeLiteral<PermissionsDao<SystemPermissionsImpl>>() {})
         .to(JpaSystemPermissionsDao.class);
 
