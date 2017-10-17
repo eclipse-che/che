@@ -12,9 +12,9 @@ package org.eclipse.che.plugin.debugger.ide.debug;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -44,11 +44,14 @@ import org.eclipse.che.plugin.debugger.ide.BaseTest;
 import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
 import org.eclipse.che.plugin.debugger.ide.DebuggerResources;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 /**
  * Testing {@link DebuggerPresenter} functionality.
@@ -56,6 +59,9 @@ import org.mockito.Mockito;
  * @author Dmytro Nochevnov
  */
 public class DebuggerPresenterTest extends BaseTest {
+
+  @Rule public MockitoRule mrule = MockitoJUnit.rule().silent();
+
   private static final long THREAD_ID = 1;
   private static final int FRAME_INDEX = 0;
 
@@ -89,7 +95,6 @@ public class DebuggerPresenterTest extends BaseTest {
   @Before
   public void setup() {
     when(debuggerManager.getActiveDebugger()).thenReturn(debugger);
-    when(debugger.isSuspended()).thenReturn(true);
     doReturn(true).when(debugger).isSuspended();
 
     presenter =
@@ -108,8 +113,6 @@ public class DebuggerPresenterTest extends BaseTest {
     Mockito.reset(view);
     when(view.getSelectedThreadId()).thenReturn(THREAD_ID);
     when(view.getSelectedFrameIndex()).thenReturn(FRAME_INDEX);
-
-    doNothing().when(presenter).showDebuggerPanel();
   }
 
   @Test
@@ -164,7 +167,7 @@ public class DebuggerPresenterTest extends BaseTest {
     operationThreadDumpCaptor.getValue().apply(threadDump);
     verify(presenter).updateStackFrameDump(THREAD_ID);
     verify(presenter).updateVariables(THREAD_ID, 0);
-    verify(view).setThreadDump(eq(threadDump), anyInt());
+    verify(view).setThreadDump(eq(threadDump), anyLong());
   }
 
   @Test
@@ -187,9 +190,9 @@ public class DebuggerPresenterTest extends BaseTest {
     doReturn(promiseVoid).when(promiseVoid).then((Operation<Void>) any());
     doNothing().when(presenter).showDebuggerPanel();
     when(notificationManager.notify(
-            anyString(),
-            any(StatusNotification.Status.class),
-            any(StatusNotification.DisplayMode.class)))
+            nullable(String.class),
+            nullable(StatusNotification.Status.class),
+            nullable(StatusNotification.DisplayMode.class)))
         .thenReturn(mock(StatusNotification.class));
 
     presenter.onDebuggerAttached(debuggerDescriptor, promiseVoid);

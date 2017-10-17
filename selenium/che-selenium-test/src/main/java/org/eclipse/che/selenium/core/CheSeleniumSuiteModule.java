@@ -23,12 +23,10 @@ import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.action.GenericActionsFactory;
 import org.eclipse.che.selenium.core.action.MacOSActionsFactory;
-import org.eclipse.che.selenium.core.client.CheTestUserServiceClient;
-import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
-import org.eclipse.che.selenium.core.client.TestUserServiceClient;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClientFactory;
+import org.eclipse.che.selenium.core.client.*;
 import org.eclipse.che.selenium.core.configuration.SeleniumTestConfiguration;
 import org.eclipse.che.selenium.core.configuration.TestConfiguration;
+import org.eclipse.che.selenium.core.pageobject.PageObjectsInjector;
 import org.eclipse.che.selenium.core.provider.CheTestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.CheTestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.provider.CheTestIdeUrlProvider;
@@ -57,6 +55,7 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceProviderImpl;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceUrlResolver;
+import org.eclipse.che.selenium.pageobject.PageObjectsInjectorImpl;
 
 /**
  * Guice module per suite.
@@ -98,6 +97,8 @@ public class CheSeleniumSuiteModule extends AbstractModule {
     install(new FactoryModuleBuilder().build(TestWorkspaceServiceClientFactory.class));
     install(new FactoryModuleBuilder().build(TestUserFactory.class));
 
+    bind(PageObjectsInjector.class).to(PageObjectsInjectorImpl.class);
+
     if (parseBoolean(System.getenv(CHE_MULTIUSER_VARIABLE))) {
       install(new CheSeleniumMultiUserModule());
     } else {
@@ -117,15 +118,15 @@ public class CheSeleniumSuiteModule extends AbstractModule {
   }
 
   @Provides
-  public ActionsFactory getActionFactory() {
-    return isMac() ? new MacOSActionsFactory() : new GenericActionsFactory();
-  }
-
-  @Provides
   @Named("admin")
   public TestOrganizationServiceClient getAdminOrganizationServiceClient(
       TestApiEndpointUrlProvider apiEndpointUrlProvider,
       TestCheAdminHttpJsonRequestFactory requestFactory) {
-    return new TestOrganizationServiceClient(apiEndpointUrlProvider, requestFactory);
+    return new CheTestTestOrganizationServiceClientImpl(apiEndpointUrlProvider, requestFactory);
+  }
+
+  @Provides
+  public ActionsFactory getActionFactory() {
+    return isMac() ? new MacOSActionsFactory() : new GenericActionsFactory();
   }
 }

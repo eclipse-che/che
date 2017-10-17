@@ -19,11 +19,10 @@ import static org.eclipse.che.multiuser.permission.workspace.server.stack.StackD
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -40,6 +39,7 @@ import com.jayway.restassured.response.Response;
 import com.jayway.restassured.specification.RequestSpecification;
 import java.lang.reflect.Method;
 import java.util.Collections;
+import java.util.List;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
@@ -172,7 +172,7 @@ public class StackPermissionsFilterTest {
             .get(SECURE_PATH + "/stack");
 
     assertEquals(response.getStatusCode(), 200);
-    verify(service).searchStacks(anyListOf(String.class), anyInt(), anyInt());
+    verify(service).searchStacks(nullable(List.class), anyInt(), anyInt());
     verifyZeroInteractions(subject);
   }
 
@@ -263,7 +263,9 @@ public class StackPermissionsFilterTest {
   @Test(dataProvider = "coveredPaths")
   public void shouldThrowForbiddenExceptionWhenUserDoesNotHavePermissionsForPerformOperation(
       String path, String method, String action) throws Exception {
-    when(subject.hasPermission(anyString(), anyString(), anyString())).thenReturn(false);
+    when(subject.hasPermission(
+            nullable(String.class), nullable(String.class), nullable(String.class)))
+        .thenReturn(false);
 
     Response response =
         request(
@@ -281,10 +283,12 @@ public class StackPermissionsFilterTest {
   @Test(dataProvider = "coveredPaths")
   public void shouldAllowToAdminPerformAnyActionWithPredefinedStack(
       String path, String method, String action) throws Exception {
-    when(subject.hasPermission(eq(DOMAIN_ID), anyString(), anyString())).thenReturn(false);
-    when(subject.hasPermission(eq(SystemDomain.DOMAIN_ID), anyString(), anyString()))
+    when(subject.hasPermission(eq(DOMAIN_ID), nullable(String.class), nullable(String.class)))
+        .thenReturn(false);
+    when(subject.hasPermission(
+            eq(SystemDomain.DOMAIN_ID), nullable(String.class), nullable(String.class)))
         .thenReturn(true);
-    doReturn(true).when(permissionsFilter).isStackPredefined(anyString());
+    doReturn(true).when(permissionsFilter).isStackPredefined(nullable(String.class));
 
     Response response =
         request(
@@ -301,10 +305,12 @@ public class StackPermissionsFilterTest {
   @Test(dataProvider = "coveredPaths")
   public void shouldNotAllowToAdminPerformAnyActionWithNonPredefinedStack(
       String path, String method, String action) throws Exception {
-    when(subject.hasPermission(eq(DOMAIN_ID), anyString(), anyString())).thenReturn(false);
-    when(subject.hasPermission(eq(SystemDomain.DOMAIN_ID), anyString(), anyString()))
+    when(subject.hasPermission(eq(DOMAIN_ID), nullable(String.class), nullable(String.class)))
+        .thenReturn(false);
+    when(subject.hasPermission(
+            eq(SystemDomain.DOMAIN_ID), nullable(String.class), nullable(String.class)))
         .thenReturn(true);
-    doReturn(false).when(permissionsFilter).isStackPredefined(anyString());
+    doReturn(false).when(permissionsFilter).isStackPredefined(nullable(String.class));
 
     Response response =
         request(
@@ -337,7 +343,8 @@ public class StackPermissionsFilterTest {
     final Page<AbstractPermissions> permissionsPage = mock(Page.class);
     when(permissionsPage.getItems()).thenReturn(Collections.singletonList(stackPermission));
 
-    when(permissionsManager.getByInstance(anyString(), anyString(), anyInt(), anyInt()))
+    when(permissionsManager.getByInstance(
+            nullable(String.class), nullable(String.class), anyInt(), anyLong()))
         .thenReturn(permissionsPage);
 
     assertTrue(permissionsFilter.isStackPredefined("stack123"));
@@ -351,7 +358,8 @@ public class StackPermissionsFilterTest {
     final Page<AbstractPermissions> permissionsPage = mock(Page.class);
     when(permissionsPage.getItems()).thenReturn(Collections.singletonList(stackPermission));
 
-    when(permissionsManager.getByInstance(anyString(), anyString(), anyInt(), anyInt()))
+    when(permissionsManager.getByInstance(
+            nullable(String.class), nullable(String.class), anyInt(), anyLong()))
         .thenReturn(permissionsPage);
 
     assertFalse(permissionsFilter.isStackPredefined("stack123"));
@@ -381,7 +389,8 @@ public class StackPermissionsFilterTest {
         .when(permissionsFilter)
         .getNextPermissionsPage(stackId, permissionsPage1);
     doReturn(null).when(permissionsFilter).getNextPermissionsPage(stackId, permissionsPage2);
-    when(permissionsManager.getByInstance(anyString(), anyString(), anyInt(), anyInt()))
+    when(permissionsManager.getByInstance(
+            nullable(String.class), nullable(String.class), anyInt(), anyLong()))
         .thenReturn(permissionsPage1);
 
     assertTrue(permissionsFilter.isStackPredefined(stackId));

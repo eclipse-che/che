@@ -52,7 +52,7 @@ public class BulkOrganizationDeletionTest {
 
   @Inject
   @Named("admin")
-  private TestOrganizationServiceClient organizationServiceClient;
+  private TestOrganizationServiceClient testOrganizationServiceClient;
 
   @Inject private AdminTestUser adminTestUser;
 
@@ -63,15 +63,15 @@ public class BulkOrganizationDeletionTest {
     String organizationName1 = NameGenerator.generate("organization", 5);
     String organizationName2 = NameGenerator.generate("organization", 5);
 
-    organization1 = organizationServiceClient.create(organizationName1);
-    organization2 = organizationServiceClient.create(organizationName2);
-    organizations = organizationServiceClient.getAll();
+    organization1 = testOrganizationServiceClient.create(organizationName1);
+    organization2 = testOrganizationServiceClient.create(organizationName2);
+    organizations = testOrganizationServiceClient.getAll();
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    organizationServiceClient.deleteById(organization1.getId());
-    organizationServiceClient.deleteById(organization2.getId());
+    testOrganizationServiceClient.deleteById(organization1.getId());
+    testOrganizationServiceClient.deleteById(organization2.getId());
   }
 
   @Test

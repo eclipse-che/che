@@ -13,15 +13,10 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
-             xmlns:svgui='urn:import:org.vectomatic.dom.svg.ui'
              xmlns:p1='urn:import:com.google.gwt.user.cellview.client'>
     <ui:with field='locale'
              type='org.eclipse.che.plugin.yaml.ide.YamlLocalizationConstant'/>
     <ui:style>
-
-        .alignRight {
-        float: right;
-        }
 
         .alignLeft {
         float: left;
@@ -29,16 +24,6 @@
 
         .emptyBorder {
         margin: 6px;
-        }
-
-        .space {
-        margin-left: 5px;
-        }
-
-        .button-layout {
-        min-width: 20px;
-        height: 20px;
-        padding: 0 3px;
         }
 
         .button-layout svg {
@@ -68,7 +53,7 @@
         <g:center>
             <g:ScrollPanel addStyleNames="{style.emptyBorder}">
                 <g:SimplePanel>
-                    <p1:CellTable width="100%" ui:field="YamlPreferenceCellTable" focus="false"
+                    <p1:CellTable width="100%" ui:field="yamlPreferenceCellTable" focus="false"
                                   debugId="preferences-cellTable-keys"/>
                 </g:SimplePanel>
             </g:ScrollPanel>
