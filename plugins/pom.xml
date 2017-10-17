@@ -28,7 +28,6 @@
         <module>plugin-activity</module>
         <module>plugin-product-info</module>
         <module>plugin-help</module>
-        <module>plugin-docker</module>
         <module>plugin-web</module>
         <module>plugin-machine</module>
         <module>plugin-debugger</module>

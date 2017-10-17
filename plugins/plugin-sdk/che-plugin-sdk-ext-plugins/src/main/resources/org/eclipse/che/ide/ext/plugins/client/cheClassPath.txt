@@ -87,9 +87,6 @@
 /projects/che-core/ide/che-core-ide-jseditor/target/requirejs-2.1.15:\
 /projects/che-core/che-core-vfs-impl/src/main/java:\
 /projects/che-core/che-core-vfs-impl/src/main/resources:\
-/projects/che-plugins/plugin-docker/che-plugin-docker-client/src/main/java:\
-/projects/che-plugins/plugin-docker/che-plugin-docker-client/src/main/resources:\
-/projects/che-plugins/plugin-docker/che-plugin-docker-client/target/generated-sources/dto:\
 /projects/che-plugins/plugin-dashboard/che-plugin-ext-dashboard/src/main/java:\
 /projects/che-plugins/plugin-dashboard/che-plugin-ext-dashboard/src/main/resources:\
 /projects/che-plugins/plugin-git/che-plugin-git-ext-git/src/main/java:\
@@ -222,7 +219,6 @@
 /projects/che-core/ide/che-core-ide-jseditor/target/classes:\
 /projects/che-core/che-core-vfs-impl/target/classes:\
 /home/user/.m2/repository/commons-codec/commons-codec/1.10/commons-codec-1.10.jar:\
-/projects/che-plugins/plugin-docker/che-plugin-docker-client/target/classes:\
 /home/user/.m2/repository/org/bouncycastle/bcpkix-jdk15on/1.51/bcpkix-jdk15on-1.51.jar:\
 /home/user/.m2/repository/org/bouncycastle/bcprov-jdk15on/1.51/bcprov-jdk15on-1.51.jar:\
 /projects/che-plugins/plugin-dashboard/che-plugin-ext-dashboard/target/classes:\
