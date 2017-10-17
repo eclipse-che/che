@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
 import com.google.common.base.Predicate;
@@ -103,6 +105,7 @@ public class FindText {
 
   /** wait the 'Find Text' main form is closed */
   public void waitFindTextMainFormIsClosed() {
+    loader.waitOnClosed();
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.MAIN_FORM)));
   }
@@ -440,9 +443,18 @@ public class FindText {
     }
   }
 
+  public void openNodeInFindInfoPanelByDoubleClick(String fileName) {
+    WebElement webElement =
+        new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+            .until(
+                ExpectedConditions.visibilityOfElementLocated(
+                    By.xpath(String.format(Locators.OCCURRENCE, fileName))));
+    actionsFactory.createAction(seleniumWebDriver).doubleClick(webElement).perform();
+  }
+
   public void selectItemInFindInfoPanelByDoubleClick(String fileName, String textToFind) {
     List<WebElement> webElementList =
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
             .until(
                 ExpectedConditions.visibilityOfAllElementsLocatedBy(
                     By.xpath(String.format(Locators.OCCURRENCE, fileName))));
