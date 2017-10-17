@@ -9,5 +9,6 @@
 --   Codenvy, S.A. - initial API and implementation
 --
 
-DROP TABLE recipe;
 DROP TABLE recipe_tags;
+DROP TABLE recipe;
+
