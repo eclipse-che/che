@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.api.workspace.server.hc;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
@@ -52,7 +52,7 @@ public class HttpConnectionServerCheckerTest {
             new HttpConnectionServerChecker(
                 SERVER_URL, MACHINE_NAME, SERVER_REF, 1, 10, TimeUnit.SECONDS, timer));
 
-    doReturn(conn).when(checker).createConnection(any(URL.class));
+    doReturn(conn).when(checker).createConnection(nullable(URL.class));
     when(conn.getResponseCode()).thenReturn(200);
   }
 
@@ -114,7 +114,7 @@ public class HttpConnectionServerCheckerTest {
 
   @Test
   public void shouldRejectAvailabilityInCaseOfExceptionOnConnectionOpening() throws Exception {
-    when(checker.createConnection(any(URL.class))).thenThrow(new IOException());
+    when(checker.createConnection(nullable(URL.class))).thenThrow(new IOException());
     assertFalse(checker.isAvailable());
   }
 

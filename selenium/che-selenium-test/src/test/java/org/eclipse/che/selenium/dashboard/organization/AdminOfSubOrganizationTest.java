@@ -57,7 +57,7 @@ public class AdminOfSubOrganizationTest {
 
   @Inject
   @Named("admin")
-  private TestOrganizationServiceClient organizationServiceClient;
+  private TestOrganizationServiceClient testOrganizationServiceClient;
 
   @Inject private TestUser testUser;
   @Inject private AdminTestUser adminTestUser;
@@ -65,21 +65,21 @@ public class AdminOfSubOrganizationTest {
   @BeforeClass
   public void setUp() throws Exception {
     parentOrganization =
-        organizationServiceClient.create(NameGenerator.generate("organization", 5));
+        testOrganizationServiceClient.create(NameGenerator.generate("organization", 5));
     childOrganization =
-        organizationServiceClient.create(
+        testOrganizationServiceClient.create(
             NameGenerator.generate("organization", 5), parentOrganization.getId());
 
-    organizationServiceClient.addMember(parentOrganization.getId(), testUser.getId());
-    organizationServiceClient.addAdmin(childOrganization.getId(), testUser.getId());
+    testOrganizationServiceClient.addMember(parentOrganization.getId(), testUser.getId());
+    testOrganizationServiceClient.addAdmin(childOrganization.getId(), testUser.getId());
 
     dashboard.open(testUser.getName(), testUser.getPassword());
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    organizationServiceClient.deleteById(childOrganization.getId());
-    organizationServiceClient.deleteById(parentOrganization.getId());
+    testOrganizationServiceClient.deleteById(childOrganization.getId());
+    testOrganizationServiceClient.deleteById(parentOrganization.getId());
   }
 
   @Test(priority = 1)

@@ -10,8 +10,8 @@
  */
 package org.eclipse.che.ide.actions;
 
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -53,7 +53,7 @@ public class RunCommandActionTest {
 
   @Before
   public void setUp() throws Exception {
-    when(commandManager.getCommand(anyString())).thenReturn(Optional.of(command));
+    when(commandManager.getCommand(nullable(String.class))).thenReturn(Optional.of(command));
   }
 
   @Test
@@ -61,7 +61,7 @@ public class RunCommandActionTest {
     when(event.getParameters()).thenReturn(Collections.singletonMap("otherParam", "MCI"));
     action.actionPerformed(event);
 
-    verify(commandExecutor, never()).executeCommand(any(CommandImpl.class), anyString());
+    verify(commandExecutor, never()).executeCommand(any(CommandImpl.class), nullable(String.class));
   }
 
   @Test
@@ -75,6 +75,6 @@ public class RunCommandActionTest {
 
     action.actionPerformed(event);
 
-    verify(commandExecutor).executeCommand(eq(command), anyString());
+    verify(commandExecutor).executeCommand(eq(command), nullable(String.class));
   }
 }

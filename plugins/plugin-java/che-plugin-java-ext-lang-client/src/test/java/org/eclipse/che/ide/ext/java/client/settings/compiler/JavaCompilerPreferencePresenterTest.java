@@ -32,6 +32,7 @@ import static org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarning
 import static org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarningsOptions.USAGE_OF_RAW_TYPE;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -224,7 +225,7 @@ public class JavaCompilerPreferencePresenterTest {
     operationCaptor.getValue().apply(getAllProperties());
 
     verify(propertyFactory, times(18)).create(Matchers.<ErrorWarningsOptions>anyObject());
-    verify(widget, times(18)).selectPropertyValue(anyString());
+    verify(widget, times(18)).selectPropertyValue(nullable(String.class));
     verify(widget, times(18)).setDelegate(presenter);
     verify(view, times(18)).addProperty(widget);
   }
@@ -244,6 +245,6 @@ public class JavaCompilerPreferencePresenterTest {
     errorOperationCaptor.getValue().apply(promiseError);
 
     verify(preferencesManager).loadPreferences();
-    verify(notificationManager).notify(anyString(), eq(FAIL), eq(FLOAT_MODE));
+    verify(notificationManager).notify(nullable(String.class), eq(FAIL), eq(FLOAT_MODE));
   }
 }

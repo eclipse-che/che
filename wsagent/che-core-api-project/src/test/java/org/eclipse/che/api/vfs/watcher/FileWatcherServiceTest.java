@@ -17,6 +17,7 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 import static org.apache.commons.io.FileUtils.write;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -138,7 +139,7 @@ public class FileWatcherServiceTest {
   public void shouldNotWatchUnRegisteredFolderForFileCreation() throws Exception {
     Path path = rootFolder.newFile(FILE_NAME).toPath();
 
-    verify(handler, timeout(TIMEOUT_VALUE).never()).handle(path, ENTRY_CREATE);
+    verify(handler, after(TIMEOUT_VALUE).never()).handle(path, ENTRY_CREATE);
   }
 
   @Test
@@ -169,14 +170,14 @@ public class FileWatcherServiceTest {
 
     boolean deleted = file.delete();
     assertTrue(deleted);
-    verify(handler, timeout(TIMEOUT_VALUE).never()).handle(path, ENTRY_DELETE);
+    verify(handler, after(TIMEOUT_VALUE).never()).handle(path, ENTRY_DELETE);
   }
 
   @Test
   public void shouldNotWatchUnRegisteredFolderForDirectoryCreation() throws Exception {
     Path path = rootFolder.newFolder(FOLDER_NAME).toPath();
 
-    verify(handler, timeout(TIMEOUT_VALUE).never()).handle(path, ENTRY_CREATE);
+    verify(handler, after(TIMEOUT_VALUE).never()).handle(path, ENTRY_CREATE);
   }
 
   @Test
@@ -190,7 +191,7 @@ public class FileWatcherServiceTest {
     service.unRegister(rootFolder.getRoot().toPath());
 
     write(file, "");
-    verify(handler, timeout(TIMEOUT_VALUE).never()).handle(path, ENTRY_MODIFY);
+    verify(handler, after(TIMEOUT_VALUE).never()).handle(path, ENTRY_MODIFY);
   }
 
   @Test
@@ -205,7 +206,7 @@ public class FileWatcherServiceTest {
 
     boolean deleted = file.delete();
     assertTrue(deleted);
-    verify(handler, timeout(TIMEOUT_VALUE).never()).handle(path, ENTRY_DELETE);
+    verify(handler, after(TIMEOUT_VALUE).never()).handle(path, ENTRY_DELETE);
   }
 
   @Test
@@ -234,7 +235,7 @@ public class FileWatcherServiceTest {
 
     Path path = rootFolder.newFile(FILE_NAME).toPath();
 
-    verify(handler, timeout(TIMEOUT_VALUE).never()).handle(path, ENTRY_CREATE);
+    verify(handler, after(TIMEOUT_VALUE).never()).handle(path, ENTRY_CREATE);
   }
 
   @Test
@@ -248,6 +249,6 @@ public class FileWatcherServiceTest {
     service.unRegister(rootFolder.getRoot().toPath());
 
     createDirectory(path.resolve(FILE_NAME));
-    verify(handler, timeout(TIMEOUT_VALUE).never()).handle(path, ENTRY_MODIFY);
+    verify(handler, after(TIMEOUT_VALUE).never()).handle(path, ENTRY_MODIFY);
   }
 }

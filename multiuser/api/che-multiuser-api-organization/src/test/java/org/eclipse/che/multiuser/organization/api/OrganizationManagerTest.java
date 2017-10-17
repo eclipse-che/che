@@ -249,7 +249,7 @@ public class OrganizationManagerTest {
     doReturn(new Page<>(singletonList(member1), 0, 1, 2))
         .doReturn(new Page<>(singletonList(member2), 1, 1, 2))
         .when(memberDao)
-        .getMembers(anyString(), anyInt(), anyInt());
+        .getMembers(anyString(), anyInt(), anyLong());
 
     manager.removeMembers("org1");
 
@@ -266,7 +266,7 @@ public class OrganizationManagerTest {
     doReturn(new Page<>(singletonList(subOrg1), 0, 1, 2))
         .doReturn(new Page<>(singletonList(subOrg2), 1, 1, 2))
         .when(organizationDao)
-        .getByParent(anyString(), anyInt(), anyInt());
+        .getByParent(anyString(), anyInt(), anyLong());
 
     manager.removeSuborganizations("org1");
 
@@ -326,7 +326,7 @@ public class OrganizationManagerTest {
   @Test
   public void shouldGetOrganizationsByParent() throws Exception {
     final OrganizationImpl toFetch = new OrganizationImpl("org321", "toFetchOrg", "org123");
-    when(organizationDao.getByParent(eq("org123"), anyInt(), anyInt()))
+    when(organizationDao.getByParent(eq("org123"), anyInt(), anyLong()))
         .thenReturn(new Page<>(singletonList(toFetch), 0, 1, 1));
 
     final Page<? extends Organization> organizations = manager.getByParent("org123", 30, 0);
@@ -339,7 +339,7 @@ public class OrganizationManagerTest {
   @Test
   public void shouldGetSuborganizations() throws Exception {
     final OrganizationImpl toFetch = new OrganizationImpl("org321", "parent/toFetchOrg", "org123");
-    when(organizationDao.getSuborganizations(eq("parent"), anyInt(), anyInt()))
+    when(organizationDao.getSuborganizations(eq("parent"), anyInt(), anyLong()))
         .thenReturn(new Page<>(singletonList(toFetch), 0, 1, 1));
 
     final Page<? extends Organization> organizations = manager.getSuborganizations("parent", 30, 0);
@@ -362,7 +362,7 @@ public class OrganizationManagerTest {
   @Test
   public void shouldGetOrganizationsByMember() throws Exception {
     final OrganizationImpl toFetch = new OrganizationImpl("org123", "toFetchOrg", "org321");
-    when(memberDao.getOrganizations(eq("org123"), anyInt(), anyInt()))
+    when(memberDao.getOrganizations(eq("org123"), anyInt(), anyLong()))
         .thenReturn(new Page<>(singletonList(toFetch), 0, 1, 1));
 
     final Page<? extends Organization> organizations = manager.getByMember("org123", 30, 0);

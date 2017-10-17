@@ -6,8 +6,6 @@
 # http://www.eclipse.org/legal/epl-v10.html
 #
 
-set -e
-
 COMMAND_DIR=$(dirname "$0")
 
 oc create -f "$COMMAND_DIR"/che-init-image-stream.yaml

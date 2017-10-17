@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-multiuser-api</artifactId>
         <groupId>org.eclipse.che.multiuser</groupId>
-        <version>5.19.0-SNAPSHOT</version>
+        <version>5.20.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-multiuser-api-organization</artifactId>
     <packaging>jar</packaging>
@@ -223,7 +223,7 @@
             <plugin>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-dto-maven-plugin</artifactId>
-                <version>${che.version}</version>
+                <version>${project.version}</version>
                 <executions>
                     <execution>
                         <phase>process-sources</phase>

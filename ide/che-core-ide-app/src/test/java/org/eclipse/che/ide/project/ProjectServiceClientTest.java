@@ -17,10 +17,12 @@ import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
 import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
 import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -58,6 +60,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.Mock;
 
@@ -112,9 +115,9 @@ public class ProjectServiceClientTest {
 
     when(loaderFactory.newLoader(any())).thenReturn(messageLoader);
     when(asyncRequest.loader(messageLoader)).thenReturn(asyncRequest);
-    when(asyncRequest.data(any())).thenReturn(asyncRequest);
+    when(asyncRequest.data(any(String.class))).thenReturn(asyncRequest);
     when(asyncRequest.send(unmarshallableItemRef)).thenReturn(itemRefPromise);
-    when(asyncRequest.header(any(), any())).thenReturn(asyncRequest);
+    when(asyncRequest.header(any(String.class), any(String.class))).thenReturn(asyncRequest);
     when(unmarshaller.newUnmarshaller(ItemReference.class)).thenReturn(unmarshallableItemRef);
     when(unmarshaller.newListUnmarshaller(ProjectConfigDto.class))
         .thenReturn(unmarshallablePrjsConf);
@@ -127,13 +130,38 @@ public class ProjectServiceClientTest {
     when(unmarshaller.newUnmarshaller(TreeElement.class)).thenReturn(unmarshallableTreeElem);
     when(unmarshaller.newUnmarshaller(ProjectConfigDto.class)).thenReturn(unmarshallablePrjConf);
 
-    when(requestFactory.createGetRequest(anyString())).thenReturn(asyncRequest);
-    when(requestFactory.createPostRequest(anyString(), any(MimeType.class)))
+    when(requestFactory.createGetRequest(any(String.class))).thenReturn(asyncRequest);
+    when(requestFactory.createRequest(
+            any(RequestBuilder.Method.class),
+            any(String.class),
+            any(SourceStorageDto.class),
+            any(Boolean.class)))
         .thenReturn(asyncRequest);
     when(requestFactory.createRequest(
-            any(RequestBuilder.Method.class), anyString(), any(), anyBoolean()))
+            any(RequestBuilder.Method.class), any(String.class), anyList(), any(Boolean.class)))
         .thenReturn(asyncRequest);
-    when(requestFactory.createPostRequest(anyString(), any())).thenReturn(asyncRequest);
+    when(requestFactory.createRequest(
+            any(RequestBuilder.Method.class), any(String.class), any(), any(Boolean.class)))
+        .thenReturn(asyncRequest);
+    when(requestFactory.createPostRequest(any(String.class), anyList())).thenReturn(asyncRequest);
+    when(requestFactory.createPostRequest(any(String.class), any())).thenReturn(asyncRequest);
+    when(requestFactory.createPostRequest(
+            any(String.class), ArgumentMatchers.<List<NewProjectConfigDto>>any()))
+        .thenReturn(asyncRequest);
+    when(requestFactory.createPostRequest(any(String.class), nullable(MimeType.class)))
+        .thenReturn(asyncRequest);
+    when(requestFactory.createPostRequest(any(String.class), nullable(SourceStorageDto.class)))
+        .thenReturn(asyncRequest);
+    when(requestFactory.createPostRequest(any(String.class), nullable(CopyOptions.class)))
+        .thenReturn(asyncRequest);
+    when(requestFactory.createPostRequest(any(String.class), nullable(MoveOptions.class)))
+        .thenReturn(asyncRequest);
+    when(requestFactory.createRequest(
+            any(RequestBuilder.Method.class),
+            any(String.class),
+            any(CopyOptions.class),
+            any(Boolean.class)))
+        .thenReturn(asyncRequest);
   }
 
   @Test
