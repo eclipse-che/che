@@ -58,16 +58,21 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
 
   private static final String PROJECT_TREE_WIDGET_ID = "projectTree";
 
+  private LoadingModeWidget loadingModeWidget;
+
   @Inject
   public ProjectExplorerViewImpl(
       final ContextMenu contextMenu,
       final CoreLocalizationConstant coreLocalizationConstant,
       final Set<NodeInterceptor> nodeInterceptorSet,
       final SkipHiddenNodesInterceptor skipHiddenNodesInterceptor,
-      final EmptyTreePanel emptyTreePanel) {
+      final EmptyTreePanel emptyTreePanel,
+      final LoadingModeWidget loadingModeWidget) {
     this.skipHiddenNodesInterceptor = skipHiddenNodesInterceptor;
 
     setTitle(coreLocalizationConstant.projectExplorerTitleBarText());
+
+    this.loadingModeWidget = loadingModeWidget;
 
     NodeStorage nodeStorage = new NodeStorage();
 
@@ -263,6 +268,19 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
         }
       }
       return element;
+    }
+  }
+
+  @Override
+  public void setLoadingMode(boolean loadingMode) {
+    if (loadingMode) {
+      if (!loadingModeWidget.getElement().hasParentElement()) {
+        getElement().appendChild(loadingModeWidget.getElement());
+      }
+    } else {
+      if (loadingModeWidget.getElement().hasParentElement()) {
+        getElement().removeChild(loadingModeWidget.getElement());
+      }
     }
   }
 }

@@ -127,6 +127,7 @@
 
 /*Editor*/
 @eval editorPanelBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.editorPanelBackgroundColor();
+@eval editorTabsBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.editorTabsBackgroundColor();
 @eval editorBackgroundColor org.eclipse.che.ide.api.theme.Style.getEditorBackgroundColor();
 @eval editorCurrentLineColor org.eclipse.che.ide.api.theme.Style.getEditorCurrentLineColor();
 @eval editorDefaultFontColor org.eclipse.che.ide.api.theme.Style.getEditorDefaultFontColor();

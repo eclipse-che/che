@@ -458,6 +458,11 @@ public class DarkTheme implements Theme {
   }
 
   @Override
+  public String editorTabsBackgroundColor() {
+    return "#1e2331";
+  }
+
+  @Override
   public String editorPanelBorderColor() {
     return getEditorBackgroundColor();
   }

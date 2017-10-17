@@ -55,4 +55,11 @@ public interface EditorMultiPartStackView extends IsWidget {
 
   /** @return the editor multi part stack state */
   EditorMultiPartStackState getState();
+
+  /**
+   * Sets loading mode for editor area.
+   *
+   * @param loadingMode <b>true</b> turns on loading mode
+   */
+  void setLoadingMode(boolean loadingMode);
 }

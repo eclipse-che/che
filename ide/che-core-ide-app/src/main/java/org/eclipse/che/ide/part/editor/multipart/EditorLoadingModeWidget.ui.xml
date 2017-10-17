@@ -1,0 +1,79 @@
+<!--
+
+    Copyright (c) 2012-2017 Red Hat, Inc.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+    <ui:style>
+        @eval lineColor org.eclipse.che.ide.api.theme.Style.theme.iconColor();
+        @eval fontColor org.eclipse.che.ide.api.theme.Style.getMainFontColor();
+        @eval logoFill org.eclipse.che.ide.api.theme.Style.getLogoFill();
+
+        .panel {
+            position: absolute;
+            left: 0px;
+            top: 0px;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #1e2331;
+            z-index: 100;
+        }
+
+        .row {
+            position: relative;
+            width: 100%;
+            height: 23px;
+            box-sizing: border-box;
+            border-top: 1px solid transparent;
+            overflow: hidden;
+            animation-name: fadeIn;
+            animation-duration: 0.2s;
+            animation-fill-mode: both;
+        }
+
+        .first {
+            margin-top: 4px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .text {
+            position: absolute;
+            border-radius: 2px;
+            height: 6px;
+            left: 13px;
+            right: 10px;
+            top: 8px;
+            background-color: #333846;
+        }
+    </ui:style>
+
+    <g:HTMLPanel styleName="{style.panel}">
+        <div class="{style.row} {style.first}" style="animation-delay: 0.00s;"><div class="{style.text}" /></div>
+        <div class="{style.row}" style="animation-delay: 0.05s;" ><div class="{style.text}" /></div>
+        <div class="{style.row}" style="animation-delay: 0.10s;"><div class="{style.text}" /></div>
+        <div class="{style.row}" style="animation-delay: 0.15s;" ><div class="{style.text}" /></div>
+        <div class="{style.row}" style="animation-delay: 0.20s;"><div class="{style.text}" /></div>
+        <div class="{style.row}" style="animation-delay: 0.25s;"><div class="{style.text}" /></div>
+        <div class="{style.row}" style="animation-delay: 0.30s;"><div class="{style.text}" /></div>
+    </g:HTMLPanel>
+
+</ui:UiBinder>

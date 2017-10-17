@@ -435,6 +435,11 @@ public class LightTheme implements Theme {
   }
 
   @Override
+  public String editorTabsBackgroundColor() {
+    return "#D6D6D9";
+  }
+
+  @Override
   public String editorPanelBorderColor() {
     return tabBorderColor();
   }

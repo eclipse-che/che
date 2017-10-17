@@ -39,12 +39,17 @@ public class EditorMultiPartStackViewImpl extends ResizeComposite
 
   private SplitEditorPartView rootView;
 
+  private EditorLoadingModeWidget editorLoadingModeWidget;
+
   @Inject
   public EditorMultiPartStackViewImpl(
-      SplitEditorPartViewFactory splitEditorPartViewFactory, EmptyEditorsPanel emptyEditorsPanel) {
+      SplitEditorPartViewFactory splitEditorPartViewFactory,
+      EmptyEditorsPanel emptyEditorsPanel,
+      EditorLoadingModeWidget editorLoadingModeWidget) {
     this.splitEditorPartViewFactory = splitEditorPartViewFactory;
     this.emptyEditorsPanel = emptyEditorsPanel;
     this.splitEditorParts = HashBiMap.create();
+    this.editorLoadingModeWidget = editorLoadingModeWidget;
 
     contentPanel = new LayoutPanel();
     contentPanel.setSize("100%", "100%");
@@ -113,5 +118,18 @@ public class EditorMultiPartStackViewImpl extends ResizeComposite
     Style style = getElement().getParentElement().getStyle();
     style.setHeight(100, PCT);
     style.setWidth(100, PCT);
+  }
+
+  @Override
+  public void setLoadingMode(boolean loadingMode) {
+    if (loadingMode) {
+      if (!editorLoadingModeWidget.getElement().hasParentElement()) {
+        getElement().appendChild(editorLoadingModeWidget.getElement());
+      }
+    } else {
+      if (editorLoadingModeWidget.getElement().hasParentElement()) {
+        getElement().removeChild(editorLoadingModeWidget.getElement());
+      }
+    }
   }
 }

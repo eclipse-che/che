@@ -90,5 +90,12 @@ public interface ProjectExplorerView extends View<ProjectExplorerView.ActionDele
 
   Tree getTree();
 
+  /**
+   * Sets loading mode for project explorer area.
+   *
+   * @param loadingMode <b>true</b> turns on loading mode
+   */
+  void setLoadingMode(boolean loadingMode);
+
   interface ActionDelegate extends BaseActionDelegate {}
 }

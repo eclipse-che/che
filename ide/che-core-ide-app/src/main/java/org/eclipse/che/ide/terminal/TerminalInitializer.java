@@ -14,7 +14,6 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -27,6 +26,7 @@ import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppingEvent;
 import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 import org.eclipse.che.lib.terminal.client.TerminalResources;
 import org.eclipse.che.requirejs.RequireJsLoader;
@@ -51,6 +51,7 @@ public class TerminalInitializer {
     eventBus.addHandler(WorkspaceStartingEvent.TYPE, event -> maximizeTerminal());
     eventBus.addHandler(WorkspaceRunningEvent.TYPE, event -> restoreTerminal());
     eventBus.addHandler(WorkspaceStoppedEvent.TYPE, event -> maximizeTerminal());
+    eventBus.addHandler(WorkspaceStoppingEvent.TYPE, event -> maximizeTerminal());
 
     eventBus.addHandler(
         BasicIDEInitializedEvent.TYPE,
@@ -85,14 +86,14 @@ public class TerminalInitializer {
 
   /** Maximizes terminal. */
   private void maximizeTerminal() {
-    Scheduler.get()
-        .scheduleDeferred(
-            () -> {
-              Perspective perspective = perspectiveManager.getActivePerspective();
-              if (perspective != null) {
-                perspective.maximizeBottomPartStack();
-              }
-            });
+    //    Scheduler.get()
+    //        .scheduleDeferred(
+    //            () -> {
+    //              Perspective perspective = perspectiveManager.getActivePerspective();
+    //              if (perspective != null) {
+    //                perspective.maximizeBottomPartStack();
+    //              }
+    //            });
   }
 
   /** Restores terminal to its default size. */
