@@ -96,6 +96,9 @@ done
 DEFAULT_COMMAND="deploy"
 COMMAND=${COMMAND:-${DEFAULT_COMMAND}}
 
+export CHE_EPHEMERAL=${CHE_EPHEMERAL:-false}
+CHE_USE_ACME_CERTIFICATE=${CHE_USE_ACME_CERTIFICATE:-false}
+
 CHE_FABRIC8_MULTITENANT=${CHE_FABRIC8_MULTITENANT:-false}
 CHE_FABRIC8_USER__SERVICE_ENDPOINT=${CHE_FABRIC8_USER__SERVICE_ENDPOINT:-"https://api.openshift.io/api/user/services"}
 CHE_FABRIC8_WORKSPACES_ROUTING__SUFFIX=${CHE_FABRIC8_WORKSPACES_ROUTING__SUFFIX:-"8a09.starter-us-east-2.openshiftapps.com"}
@@ -472,6 +475,18 @@ else
     oc apply --force=true -f -
 fi
 echo
+
+if [ "${CHE_EPHEMERAL}" == "true" ]; then
+  oc volume dc/che --remove --confirm
+  oc delete pvc/claim-che-workspace
+  oc delete pvc/che-data-volume
+elif [ "${CHE_FABRIC8_MULTITENANT}" == "true" ]; then
+  oc delete pvc/claim-che-workspace
+fi
+
+if [ "${CHE_USE_ACME_CERTIFICATE}" == "true" ]; then
+  oc annotate route/che kubernetes.io/tls-acme=true
+fi
 
 if [ "${CHE_DEDICATED_KEYCLOAK}" == "true" ]; then
   ${COMMAND_DIR}/multi-user/configure_and_start_keycloak.sh
