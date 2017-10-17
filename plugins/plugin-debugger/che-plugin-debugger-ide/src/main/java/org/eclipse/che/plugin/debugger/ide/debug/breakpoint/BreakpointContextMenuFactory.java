@@ -13,9 +13,9 @@ package org.eclipse.che.plugin.debugger.ide.debug.breakpoint;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 
 /**
- * Editor tab context menu factory.
+ * Breakpoint context menu factory.
  *
- * @author Vlad Zhukovskiy
+ * @author Anatolii Bazko
  */
 public interface BreakpointContextMenuFactory {
 
