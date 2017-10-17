@@ -452,7 +452,9 @@ public class BreakpointManagerImpl
             .then(
                 breakpoints -> {
                   for (Breakpoint breakpoint : breakpoints) {
-                    renderer.setMark(breakpoint, true, BreakpointManagerImpl.this::onLineChange);
+                    if (breakpoint.getLocation().getTarget().equals(filePath)) {
+                      renderer.setMark(breakpoint, true, BreakpointManagerImpl.this::onLineChange);
+                    }
                   }
                 });
       }

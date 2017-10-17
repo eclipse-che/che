@@ -68,6 +68,7 @@ public class BreakpointConfigurationViewImpl extends Window implements Breakpoin
   @Override
   public void showDialog() {
     this.show();
+    breakpointCondition.setFocus(true);
   }
 
   @Override
