@@ -72,8 +72,11 @@ public class WsAgentPingRequestFactory {
     }
     String wsAgentPingUrl = wsAgentServer.getUrl();
     if (isNullOrEmpty(wsAgentPingUrl)) {
-      LOG.error(WS_AGENT_URL_IS_NULL_OR_EMPTY_ERROR);
-      throw new ServerException(WS_AGENT_URL_IS_NULL_OR_EMPTY_ERROR);
+      wsAgentPingUrl = wsAgentServer.getProperties().getInternalUrl();
+      if (isNullOrEmpty(wsAgentPingUrl)) {
+        LOG.error(WS_AGENT_URL_IS_NULL_OR_EMPTY_ERROR);
+        throw new ServerException(WS_AGENT_URL_IS_NULL_OR_EMPTY_ERROR);
+      }
     }
     // since everrest mapped on the slash in case of it absence
     // we will always obtain not found response
