@@ -9,5 +9,6 @@
 --   Red Hat, Inc. - initial API and implementation
 --
 
-DROP TABLE che_recipe_permissions;
 DROP TABLE che_recipe_permissions_actions;
+DROP TABLE che_recipe_permissions;
+
