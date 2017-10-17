@@ -527,7 +527,6 @@
                 </methods>
             </class>
             <class name="org.eclipse.che.selenium.workspaces.ProjectStateAfterWorkspaceRestartTest"/>
-            <class name="org.eclipse.che.selenium.workspaces.SnapshotTest"/>
             <class name="org.eclipse.che.selenium.workspaces.WorkingWithJavaMySqlStackTest"/>
             <class name="org.eclipse.che.selenium.workspaces.WorkingWithNodeWsTest">
                 <methods>
