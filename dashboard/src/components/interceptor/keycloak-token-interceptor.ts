@@ -12,6 +12,8 @@
 
 import {HttpInterceptorBase} from './interceptor-base';
 
+const GITHUB_API = 'api.github.com';
+
 /**
  * @author Oleksii Kurinnyi
  */
@@ -40,6 +42,11 @@ export class KeycloakTokenInterceptor extends HttpInterceptorBase {
     if (this.keycloak && config.url.indexOf(this.keycloakConfig.url) > -1) {
       return config;
     }
+
+    if (config.url.indexOf(GITHUB_API) > -1) {
+      return config;
+    }
+
     if (this.keycloak && this.keycloak.token) {
       let deferred = this.$q.defer();
       this.keycloak.updateToken(5).success(() => {
