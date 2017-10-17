@@ -165,15 +165,6 @@ public interface GitHubRepository {
   void setCloneUrl(String cloneUrl);
 
   /**
-   * Get SVN URL.
-   *
-   * @return {@link String} SVN URL
-   */
-  String getSvnUrl();
-
-  void setSvnUrl(String svnUrl);
-
-  /**
    * Get the number of opened issues.
    *
    * @return {@link Integer} number of opened issues
