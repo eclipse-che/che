@@ -23,7 +23,11 @@
       "config" : { }
     } ],
     "disableableCredentialTypes" : [ "password" ],
+    <% if scope.lookupvar('keycloak::che_keycloak_admin_require_update_password') == 'true' -%>
     "requiredActions" : [ "UPDATE_PASSWORD" ],
+    <% else -%>
+    "requiredActions" : [ ],
+    <% end -%>
     "groups" : [ ]
   } ]
 }
