@@ -37,22 +37,18 @@ import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
 public class CheckRestoringOfSplitEditorTest {
-  private String nameJavaClass = "AppController.java";
-  private String nameReadmeFile = "README.md";
-  private String namePomFile = "pom.xml";
+  private String nameOfJavaClass = "AppController.java";
+  private String nameOfReadmeFile = "README.md";
   private String nameOfTabPomFile = "qa-spring-sample";
   private String nameOfTabJavaClass = "AppController";
   private final String PROJECT_NAME =
       NameGenerator.generate(CheckRestoringOfSplitEditorTest.class.getSimpleName(), 4);
   private final String PATH_TO_JAVA_FILE =
-      PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/" + nameJavaClass;
+      PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/" + nameOfJavaClass;
   private Pair<Integer, Integer> cursorPositionForJavaFile = new Pair<>(12, 1);
   private Pair<Integer, Integer> cursorPositionForReadMeFile = new Pair<>(1, 10);
   private Pair<Integer, Integer> cursorPositionForPomFile = new Pair<>(31, 1);
-
-  private String expectedTextFromFile = "";
-  private String splitter = "----split_line---";
-  private List<String> expectedText;
+  private List<String> expectedTextFromEditor;
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
@@ -66,12 +62,13 @@ public class CheckRestoringOfSplitEditorTest {
 
   @BeforeClass
   public void prepare() throws Exception {
+    String splitter = "----split_line---";
     URL resources =
         CheckRestoringOfSplitEditorTest.class.getResource("split-editor-restore-exp-text.txt");
-    expectedText = Files.readAllLines(Paths.get(resources.toURI()), Charset.forName("UTF8"));
-    expectedTextFromFile = Joiner.on("\n").join(expectedText);
-
-    expectedText = Arrays.asList(expectedTextFromFile.split(splitter));
+    expectedTextFromEditor =
+        Files.readAllLines(Paths.get(resources.toURI()), Charset.forName("UTF8"));
+    String expectedTextFromFile = Joiner.on("\n").join(expectedTextFromEditor);
+    expectedTextFromEditor = Arrays.asList(expectedTextFromFile.split(splitter));
     URL resource = getClass().getResource("/projects/default-spring-project");
     testProjectServiceClient.importProject(
         workspace.getId(),
@@ -95,14 +92,14 @@ public class CheckRestoringOfSplitEditorTest {
 
     seleniumWebDriver.navigate().refresh();
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.waitItemInVisibleArea(nameJavaClass);
+    projectExplorer.waitItemInVisibleArea(nameOfJavaClass);
     notificationsPopupPanel.waitPopUpPanelsIsClosed();
     checkSplitdEditorAfterRefreshing(
-        1, nameOfTabJavaClass, expectedText.get(0), cursorPositionForJavaFile);
+        1, nameOfTabJavaClass, expectedTextFromEditor.get(0), cursorPositionForJavaFile);
     checkSplitdEditorAfterRefreshing(
-        2, nameReadmeFile, expectedText.get(1).trim(), cursorPositionForReadMeFile);
+        2, nameOfReadmeFile, expectedTextFromEditor.get(1).trim(), cursorPositionForReadMeFile);
     checkSplitdEditorAfterRefreshing(
-        3, nameOfTabPomFile, expectedText.get(2).trim(), cursorPositionForPomFile);
+        3, nameOfTabPomFile, expectedTextFromEditor.get(2).trim(), cursorPositionForPomFile);
   }
 
   private void checkSplitdEditorAfterRefreshing(
@@ -120,6 +117,7 @@ public class CheckRestoringOfSplitEditorTest {
   }
 
   private void splitEditorAndOpenFiles() {
+    String namePomFile = "pom.xml";
     projectExplorer.openItemByPath(PATH_TO_JAVA_FILE);
     loader.waitOnClosed();
     editor.waitActiveEditor();
@@ -129,7 +127,7 @@ public class CheckRestoringOfSplitEditorTest {
     editor.runActionForTabFromContextMenu(CodenvyEditor.TabAction.SPLIT_VERTICALLY);
     loader.waitOnClosed();
     editor.selectTabByIndexEditorWindow(1, nameOfTabJavaClass);
-    projectExplorer.openItemByPath(PROJECT_NAME + "/" + nameReadmeFile);
+    projectExplorer.openItemByPath(PROJECT_NAME + "/" + nameOfReadmeFile);
     editor.selectTabByIndexEditorWindow(2, nameOfTabJavaClass);
     projectExplorer.openItemByPath(PROJECT_NAME + "/" + namePomFile);
   }
@@ -138,7 +136,7 @@ public class CheckRestoringOfSplitEditorTest {
     editor.selectTabByIndexEditorWindow(0, nameOfTabJavaClass);
     editor.setCursorToDefinedLineAndChar(
         cursorPositionForJavaFile.first, cursorPositionForJavaFile.second);
-    editor.selectTabByName(nameReadmeFile);
+    editor.selectTabByName(nameOfReadmeFile);
     editor.setCursorToDefinedLineAndChar(
         cursorPositionForReadMeFile.first, cursorPositionForReadMeFile.second);
     editor.selectTabByName(nameOfTabPomFile);
