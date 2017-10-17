@@ -16,6 +16,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -52,9 +53,10 @@ public class BreakpointConfigurationViewImpl extends Window implements Breakpoin
     applyButton =
         createButton(
             locale.viewBreakpointConfigurationApplyButton(),
-            "debugger-breakpoint-configuration-apply-btn",
+            UIObject.DEBUG_ID_PREFIX + "apply-btn",
             clickEvent -> delegate.onApplyClicked());
 
+    ensureDebugId("breakpoint-configuration-window");
     addButtonToFooter(applyButton);
   }
 

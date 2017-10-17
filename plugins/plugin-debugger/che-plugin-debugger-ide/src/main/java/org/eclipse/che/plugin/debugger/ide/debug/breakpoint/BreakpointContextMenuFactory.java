@@ -18,8 +18,9 @@ import org.eclipse.che.api.debug.shared.model.Breakpoint;
  * @author Vlad Zhukovskiy
  */
 public interface BreakpointContextMenuFactory {
+
   /**
-   * Creates new context menu for a given breakpoing.
+   * Creates new context menu for a given breakpoint.
    *
    * @param breakpoint the breakpoint
    * @return new context menu

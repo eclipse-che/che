@@ -33,7 +33,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Anatolii Bazko */
-public class BreakpointsByConditionTest {
+public class BreakpointConditionTest {
 
   private JavaDebugger debugger;
   private BlockingQueue<DebuggerEvent> events;

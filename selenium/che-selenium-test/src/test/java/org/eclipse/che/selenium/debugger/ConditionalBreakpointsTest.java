@@ -10,8 +10,11 @@
  */
 package org.eclipse.che.selenium.debugger;
 
-import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.MAVEN;
-import static org.eclipse.che.selenium.core.project.ProjectTemplates.CONSOLE_JAVA_SIMPLE;
+import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.CUSTOM;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Run.EDIT_DEBUG_CONFIGURATION;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Run.RUN_MENU;
+import static org.eclipse.che.selenium.core.project.ProjectTemplates.PLAIN_JAVA;
+import static org.eclipse.che.selenium.pageobject.debug.DebugPanel.DebuggerButtonsPanel.RESUME_BTN_ID;
 
 import com.google.inject.Inject;
 import java.nio.file.Paths;
@@ -55,17 +58,15 @@ public class ConditionalBreakpointsTest {
   public void setUp() throws Exception {
     testProjectServiceClient.importProject(
         ws.getId(),
-        Paths.get(
-            getClass().getResource("/projects/plugins/DebuggerPlugin/java-multimodule").toURI()),
+        Paths.get(getClass().getResource("/projects/plugins/DebuggerPlugin/hello-world").toURI()),
         PROJECT,
-        CONSOLE_JAVA_SIMPLE);
+        PLAIN_JAVA);
 
     testCommandServiceClient.createCommand(
-        "mvn -f ${current.project.path} clean install &&"
-            + " java -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y"
-            + " -classpath ${current.project.path}/app/target/classes/:${current.project.path}/model/target/classes multimodule.App",
+        "cd ${current.project.path}/src/ && javac -g HelloWorld.java &&"
+            + " java -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y HelloWorld",
         "debug",
-        MAVEN,
+        CUSTOM,
         ws.getId());
 
     ide.open(ws);
@@ -73,15 +74,29 @@ public class ConditionalBreakpointsTest {
     projectExplorer.quickExpandWithJavaScript();
     debugPanel.openDebugPanel();
 
-    projectExplorer.openItemByPath(PROJECT + "/app/src/main/java/multimodule/App.java");
+    projectExplorer.openItemByPath(PROJECT + "/src/HelloWorld.java");
   }
 
   @Test
   public void shouldAddConditionalBreakpoint() throws Exception {
-    editor.setBreakpoint(20);
-    editor.waitInactiveBreakpoint(20);
-    debugPanel.makeBreakpointConditional("App.java", 20, "book1.getTitle().equals(\"java\")");
-    editor.waitConditionalBreakpoint(20, false);
+    editor.setBreakpoint(14);
+    editor.setBreakpoint(15);
+    editor.waitInactiveBreakpoint(15);
+    debugPanel.makeBreakpointConditional("HelloWorld.java", 15, "i == 3");
+    editor.waitConditionalBreakpoint(15, false);
+
+    projectExplorer.selectItem(PROJECT);
+
+    startDebug();
+
+    editor.waitConditionalBreakpoint(15, true);
+    debugPanel.clickOnButton(RESUME_BTN_ID);
+    debugPanel.waitTextInVariablesPanel("i=3");
+  }
+
+  private void startDebug() {
+    menu.runCommand(RUN_MENU, EDIT_DEBUG_CONFIGURATION);
+    debugConfig.createConfig(PROJECT);
 
     commandsPalette.openCommandPalette();
     commandsPalette.startCommandByDoubleClick("debug");
@@ -92,7 +107,5 @@ public class ConditionalBreakpointsTest {
         TestMenuCommandsConstants.Run.DEBUG,
         debugConfig.getXpathToІRunDebugCommand(PROJECT));
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
-
-    editor.waitConditionalBreakpoint(20, true);
   }
 }
