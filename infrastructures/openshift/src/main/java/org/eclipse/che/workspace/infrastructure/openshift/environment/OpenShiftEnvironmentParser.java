@@ -162,7 +162,7 @@ public class OpenShiftEnvironmentParser {
         if (machineConfig != null && !machineConfig.getServers().isEmpty()) {
           ServerExposer serverExposer =
               new ServerExposer(machineName, containerConfig, openShiftEnvironment);
-          serverExposer.expose("servers", machineConfig.getServers());
+          serverExposer.expose(machineConfig.getServers());
         }
       }
     }

@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift;
 
-import com.google.inject.assistedinject.Assisted;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
@@ -19,8 +18,8 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftE
 /** @author Sergii Leshchenko */
 public interface OpenShiftRuntimeContextFactory {
   OpenShiftRuntimeContext create(
-      @Assisted InternalEnvironment environment,
-      @Assisted OpenShiftEnvironment openShiftEnvironment,
-      @Assisted RuntimeIdentity identity,
-      @Assisted RuntimeInfrastructure infrastructure);
+      InternalEnvironment environment,
+      OpenShiftEnvironment openShiftEnvironment,
+      RuntimeIdentity identity,
+      RuntimeInfrastructure infrastructure);
 }
