@@ -96,6 +96,7 @@ unset DEBUG_OPTIONS
 unset MAVEN_OPTIONS
 unset TMP_SUITE_PATH
 unset ORIGIN_TESTS_SCOPE
+unset WORKSPACE_POOL_SIZE
 
 cleanUpEnvironment() {
     if [[ ${MODE} == "grid" ]]; then
@@ -144,6 +145,7 @@ checkParameters() {
         elif [[ "$var" =~ -P.* ]]; then :
         elif [[ "$var" == "--help" ]]; then :
         elif [[ "$var" == "--compare-with-ci" ]]; then :
+        elif [[ "$var" =~ --workspace-pool-size=[0-9]+$ ]]; then :
         elif [[ "$var" =~ ^[0-9]+$ ]] && [[ $@ =~ --compare-with-ci[[:space:]]$var ]]; then :
         else
             printHelp
@@ -176,6 +178,9 @@ applyCustomOptions() {
 
         elif [[ "$var" =~ --threads=.* ]]; then
             THREADS=$(echo "$var" | sed -e "s/--threads=//g")
+
+        elif [[ "$var" =~ --workspace-pool-size=.* ]]; then
+            WORKSPACE_POOL_SIZE=$(echo "$var" | sed -e "s/--workspace-pool-size=//g")
 
         elif [[ "$var" == "--rerun" ]]; then
             RERUN=true
@@ -383,6 +388,9 @@ Modes (defines environment to run tests):
         --threads=<THREADS>             Number of tests that will be run simultaneously. It also means the very same number of
                                         Web browsers will be opened on the developer machine.
                                         Default value is in range [2,5] and depends on available RAM.
+                                        
+        --workspace-pool-size=<SIZE>    Size of test workspace pool.
+                                        Default value is 0, that means that test workspaces are created on demand;
 
 
     grid (default)                      All tests will be run in parallel on several docker containers.
@@ -629,7 +637,8 @@ printProposals() {
                           sed -e "s/--suite=[^ ]*//g " | \
                           sed -e "s/--test*=[^ ]*//g " | \
                           sed -e "s/--compare-with-ci\W*[0-9]*//g" | \
-                          sed -e "s/--threads=[0-9]*//g")
+                          sed -e "s/--threads=[0-9]*//g" | \
+                          sed -e "s/--workspace-pool-size=[0-9]*//g")
 
     local regressions=$(findRegressions)
     local total=$(echo ${regressions[@]} | wc -w)
@@ -684,6 +693,7 @@ runTests() {
                 -Ddriver.version=${WEBDRIVER_VERSION} \
                 -Dbrowser=${BROWSER} \
                 -Dthreads=${THREADS} \
+                -Dworkspace_pool_size=${WORKSPACE_POOL_SIZE} \
                 ${DEBUG_OPTIONS} \
                 ${GRID_OPTIONS} \
                 ${MAVEN_OPTIONS}

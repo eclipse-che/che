@@ -27,7 +27,6 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClientFactory;
-import org.eclipse.che.selenium.core.configuration.ConfigurationException;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,46 +40,25 @@ import org.slf4j.LoggerFactory;
 public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
   private static final Logger LOG = LoggerFactory.getLogger(TestWorkspaceProviderImpl.class);
 
-  private final int poolSize;
-  private final ArrayBlockingQueue<TestWorkspace> testWorkspaceQueue;
-  private final ScheduledExecutorService executor;
-  private final TestUser defaultUser;
-  private final int defaultMemoryGb;
-  private final TestWorkspaceServiceClient testWorkspaceServiceClient;
-  private final TestWorkspaceServiceClientFactory testWorkspaceServiceClientFactory;
+  @Inject(optional = true)
+  @Named("sys.workspace_pool_size")
+  private int poolSize;
 
   @Inject
-  public TestWorkspaceProviderImpl(
-      @Named("sys.threads") int threads,
-      @Named("workspace.default_memory_gb") int defaultMemoryGb,
-      Provider<TestUser> defaultUser,
-      TestWorkspaceServiceClient testWorkspaceServiceClient,
-      TestWorkspaceServiceClientFactory testWorkspaceServiceClientFactory) {
-    this.defaultUser = defaultUser.get();
-    this.defaultMemoryGb = defaultMemoryGb;
-    this.testWorkspaceServiceClient = testWorkspaceServiceClient;
-    this.testWorkspaceServiceClientFactory = testWorkspaceServiceClientFactory;
+  @Named("workspace.default_memory_gb")
+  private int defaultMemoryGb;
 
-    if (threads == 0) {
-      throw new ConfigurationException("Threads number is 0");
-    }
+  @Inject private Provider<TestUser> defaultUser;
+  @Inject private TestWorkspaceServiceClient testWorkspaceServiceClient;
+  @Inject private TestWorkspaceServiceClientFactory testWorkspaceServiceClientFactory;
 
-    this.poolSize = (threads - 1) / 2 + 1;
-    this.testWorkspaceQueue = new ArrayBlockingQueue<>(poolSize);
-
-    this.executor =
-        Executors.newSingleThreadScheduledExecutor(
-            new ThreadFactoryBuilder()
-                .setNameFormat("WorkspaceInitializer-%d")
-                .setDaemon(true)
-                .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
-                .build());
-  }
+  private ArrayBlockingQueue<TestWorkspace> testWorkspaceQueue;
+  private ScheduledExecutorService executor;
 
   @Override
   public TestWorkspace createWorkspace(TestUser owner, int memoryGB, String template)
       throws Exception {
-    if (hasDefaultValues(owner, memoryGB, template)) {
+    if (poolSize > 0 && hasDefaultValues(owner, memoryGB, template)) {
       return doGetWorkspaceFromPool();
     }
 
@@ -95,7 +73,7 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
   private boolean hasDefaultValues(TestUser testUser, int memoryGB, String template) {
     return memoryGB == defaultMemoryGb
         && WorkspaceTemplate.DEFAULT.equals(template)
-        && testUser.getEmail().equals(defaultUser.getEmail());
+        && testUser.getEmail().equals(defaultUser.get().getEmail());
   }
 
   private TestWorkspace doGetWorkspaceFromPool() throws Exception {
@@ -119,6 +97,10 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
 
   @Override
   public void shutdown() {
+    if (poolSize == 0) {
+      return;
+    }
+
     boolean isInterrupted = false;
 
     if (!executor.isShutdown()) {
@@ -164,20 +146,32 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
   }
 
   @Inject
-  public void initializePool(final TestWorkspaceServiceClient workspaceServiceClient) {
-    LOG.info("Initialize workspace pool with {} entries.", poolSize);
+  public void initializePool() {
+    if (poolSize == 0) {
+      return;
+    }
 
-    this.executor.scheduleWithFixedDelay(
+    LOG.info("Initialize workspace pool with {} entries.", poolSize);
+    testWorkspaceQueue = new ArrayBlockingQueue<>(poolSize);
+    executor =
+        Executors.newSingleThreadScheduledExecutor(
+            new ThreadFactoryBuilder()
+                .setNameFormat("WorkspaceInitializer-%d")
+                .setDaemon(true)
+                .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
+                .build());
+
+    executor.scheduleWithFixedDelay(
         () -> {
           while (testWorkspaceQueue.remainingCapacity() != 0) {
             String name = generateName();
             TestWorkspace testWorkspace =
                 new TestWorkspaceImpl(
                     name,
-                    defaultUser,
+                    defaultUser.get(),
                     defaultMemoryGb,
                     WorkspaceTemplate.DEFAULT,
-                    workspaceServiceClient);
+                    testWorkspaceServiceClient);
 
             try {
               if (!testWorkspaceQueue.offer(testWorkspace)) {

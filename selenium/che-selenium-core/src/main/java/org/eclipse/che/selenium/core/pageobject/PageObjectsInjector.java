@@ -71,7 +71,7 @@ public abstract class PageObjectsInjector {
           injectField(f, testInstance, container, injector);
         } catch (Exception e) {
           throw new RuntimeException(
-              format("Error of injection member '%s' into test '%s'. %s", f, testInstance), e);
+              format("Error of injection member '%s' into test '%s'.", f, testInstance), e);
         }
       }
     }
