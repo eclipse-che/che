@@ -14,10 +14,12 @@ import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
 import org.eclipse.che.selenium.core.entrance.Entrance;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Anatolii Bazko */
 public class TestFactory {
@@ -48,10 +50,10 @@ public class TestFactory {
 
   /** Adds authentication token into the browser and opens factory url. */
   public void authenticateAndOpen(SeleniumWebDriver driver) throws Exception {
-    driver.get(dashboardUrl.get().toString());
-
+    String dashboardUrlPath = dashboardUrl.get().toString();
+    driver.get(dashboardUrlPath);
     entrance.login(owner);
-
+    waitUntilTextPresentInUrl(driver, dashboardUrlPath + "#/");
     driver.get(factoryUrl);
   }
 
@@ -74,5 +76,10 @@ public class TestFactory {
 
   private boolean isNamedFactory() {
     return factoryDto.getName() != null;
+  }
+
+  private void waitUntilTextPresentInUrl(SeleniumWebDriver driver, String textInUrl) {
+    new WebDriverWait(driver, TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC)
+        .until((WebDriver webdriver) -> webdriver.getCurrentUrl().contains(textInUrl));
   }
 }
