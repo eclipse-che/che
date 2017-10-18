@@ -135,11 +135,6 @@
         <!-- Provide Che Agent binaries (like workspace agent, terminal) -->
         <Context docBase="${che.home}/lib" path="/agent-binaries" />
 
-        <Context docBase="wsmaster.war" path="/api">
-          <Resource name="jdbc/che" auth="Container"
-            type="javax.sql.DataSource"
-            factory="org.eclipse.che.core.db.h2.H2SQLJndiDataSourceFactory"/>
-        </Context>
         <!-- SingleSignOn valve, share authentication between web applications
              Documentation at: /docs/config/valve.html -->
         <!--

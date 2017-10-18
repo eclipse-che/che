@@ -33,6 +33,6 @@ public class CheTestApiEndpointUrlProvider implements TestApiEndpointUrlProvider
 
   @Override
   public URL get() {
-    return UrlUtil.url(protocol, host, port, "/wsmaster/api/");
+    return UrlUtil.url(protocol, host, port, "/api/");
   }
 }

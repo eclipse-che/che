@@ -26,7 +26,7 @@ public class KubernetesEnvVarTest {
     String[] envVariables = {
       "CHE_LOCAL_CONF_DIR=/mnt/che/conf",
       "USER_TOKEN=dummy_token",
-      "CHE_API_ENDPOINT=http://172.17.0.4:8080/wsmaster/api",
+      "CHE_API_ENDPOINT=http://172.17.0.4:8080/api",
       "JAVA_OPTS=-Xms256m -Xmx2048m -Djava.security.egd=file:/dev/./urandom",
       "CHE_WORKSPACE_ID=workspaceID",
       "CHE_PROJECTS_ROOT=/projects",
