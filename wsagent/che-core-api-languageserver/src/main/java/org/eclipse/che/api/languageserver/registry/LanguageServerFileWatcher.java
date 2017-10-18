@@ -18,6 +18,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.PathMatcher;
 import java.util.Collections;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Function;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -69,17 +70,25 @@ public class LanguageServerFileWatcher {
       ServerCapabilities capabilities,
       String projectPath) {
     LanguageServerDescription description = launcher.getDescription();
-    FileSystem fileSystem = FileSystems.getDefault();
-    for (String pattern : description.getFileWatchPatterns()) {
-      PathMatcher matcher = fileSystem.getPathMatcher(pattern);
-      int watcherId =
-          watcherManager.registerByMatcher(
-              matcher,
-              s -> send(server, s, FileChangeType.Created),
-              s -> send(server, s, FileChangeType.Changed),
-              s -> send(server, s, FileChangeType.Deleted));
+    description
+        .getFileWatchPatterns()
+        .stream()
+        .map(patternToMatcher())
+        .forEach(
+            matcher -> {
+              int watcherId =
+                  watcherManager.registerByMatcher(
+                      matcher,
+                      s -> send(server, s, FileChangeType.Created),
+                      s -> send(server, s, FileChangeType.Changed),
+                      s -> send(server, s, FileChangeType.Deleted));
 
-      watcherIds.add(watcherId);
-    }
+              watcherIds.add(watcherId);
+            });
+  }
+
+  public static Function<String, PathMatcher> patternToMatcher() {
+    FileSystem fileSystem = FileSystems.getDefault();
+    return (fileWatchPattern) -> fileSystem.getPathMatcher(fileWatchPattern);
   }
 }
