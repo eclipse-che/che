@@ -90,10 +90,12 @@ public class LanguageServerEditorProvider implements AsyncEditorProvider, Editor
               }
 
               final TextEditor editor = editorBuilder.buildEditor();
+              if (capabilities == null) {
+                // create an editor with no capabilities
+                capabilities = new ServerCapabilities();
+              }
               TextEditorConfiguration configuration =
-                  capabilities == null
-                      ? new DefaultTextEditorConfiguration()
-                      : editorConfigurationFactory.build(editor, capabilities);
+                  editorConfigurationFactory.build(editor, capabilities);
               editor.initialize(configuration);
               return editor;
             }
