@@ -48,11 +48,14 @@ public class LanguageServerReconcileStrategy implements ReconcilingStrategy {
 
     Either<TextDocumentSyncKind, TextDocumentSyncOptions> sync =
         serverCapabilities.getTextDocumentSync();
-    TextDocumentSyncKind documentSync;
-    if (sync.isLeft()) {
-      documentSync = sync.getLeft();
-    } else {
-      documentSync = sync.getRight().getChange();
+    TextDocumentSyncKind documentSync = null;
+    // sync may be null
+    if (sync != null) {
+      if (sync.isLeft()) {
+        documentSync = sync.getLeft();
+      } else {
+        documentSync = sync.getRight().getChange();
+      }
     }
 
     synchronize = synchronizeFactory.getSynchronize(documentSync);
