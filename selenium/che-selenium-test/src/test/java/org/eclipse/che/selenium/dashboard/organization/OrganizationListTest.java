@@ -42,7 +42,7 @@ public class OrganizationListTest {
 
   @Inject
   @Named("admin")
-  private TestOrganizationServiceClient organizationServiceClient;
+  private TestOrganizationServiceClient testOrganizationServiceClient;
 
   @Inject private AdminTestUser adminTestUser;
 
@@ -51,13 +51,13 @@ public class OrganizationListTest {
   @BeforeClass
   public void setUp() throws Exception {
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
-    organization = organizationServiceClient.create(NameGenerator.generate("organization", 5));
-    organizations = organizationServiceClient.getAll();
+    organization = testOrganizationServiceClient.create(NameGenerator.generate("organization", 5));
+    organizations = testOrganizationServiceClient.getAll();
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    organizationServiceClient.deleteById(organization.getId());
+    testOrganizationServiceClient.deleteById(organization.getId());
   }
 
   @Test

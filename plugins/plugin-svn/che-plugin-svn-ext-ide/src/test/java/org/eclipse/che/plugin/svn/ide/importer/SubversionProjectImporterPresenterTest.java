@@ -10,8 +10,8 @@
  */
 package org.eclipse.che.plugin.svn.ide.importer;
 
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -52,7 +52,6 @@ public class SubversionProjectImporterPresenterTest {
    */
   @Before
   public void setUp() throws Exception {
-    when(sourceStorage.getParameters()).thenReturn(parameters);
     when(dataObject.getSource()).thenReturn(sourceStorage);
     when(view.getProjectRelativePath()).thenReturn("");
 
@@ -69,8 +68,6 @@ public class SubversionProjectImporterPresenterTest {
   @Test
   public void testEmptyProjectName() throws Exception {
     final String projectName = "";
-
-    when(view.getProjectName()).thenReturn(projectName);
 
     presenter.onProjectNameChanged(projectName);
 
@@ -89,8 +86,6 @@ public class SubversionProjectImporterPresenterTest {
   public void testInvalidProjectName() throws Exception {
     final String projectName = "+subversion+";
 
-    when(view.getProjectName()).thenReturn(projectName);
-
     presenter.onProjectNameChanged(projectName);
 
     verify(dataObject).setName(eq(projectName));
@@ -107,8 +102,6 @@ public class SubversionProjectImporterPresenterTest {
   @Test
   public void testValidProjectName() throws Exception {
     final String projectName = "subversion";
-
-    when(view.getProjectName()).thenReturn(projectName);
 
     presenter.onProjectNameChanged(projectName);
 
@@ -165,8 +158,6 @@ public class SubversionProjectImporterPresenterTest {
   public void testProjectDescription() throws Exception {
     final String description = "Some description.";
 
-    when(view.getProjectDescription()).thenReturn(description);
-
     presenter.onProjectDescriptionChanged(description);
 
     verify(dataObject).setDescription(eq(description));
@@ -183,14 +174,12 @@ public class SubversionProjectImporterPresenterTest {
     final AcceptsOneWidget container = mock(AcceptsOneWidget.class);
     final ProjectImporterDescriptor projectImporter = mock(ProjectImporterDescriptor.class);
 
-    when(projectImporter.getDescription()).thenReturn(importerDescription);
-
     presenter.go(container);
 
     verify(container).setWidget(eq(view));
-    verify(view).setProjectName(anyString());
-    verify(view).setProjectDescription(anyString());
-    verify(view).setProjectUrl(anyString());
+    verify(view).setProjectName(nullable(String.class));
+    verify(view).setProjectDescription(nullable(String.class));
+    verify(view).setProjectUrl(nullable(String.class));
     verify(view).setInputsEnableState(eq(true));
   }
 }

@@ -39,7 +39,6 @@ import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
 import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
-import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
@@ -60,6 +59,7 @@ import org.testng.annotations.Test;
 /** Test for the java formatter service. */
 @Listeners(value = {MockitoTestNGListener.class})
 public class JavaFormatterServiceTest {
+
   private static final String FORMATTER_CONTENT =
       "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
           + "<profiles version=\"13\">\n"
@@ -109,8 +109,6 @@ public class JavaFormatterServiceTest {
     ProjectImporterRegistry importerRegistry = new ProjectImporterRegistry(new HashSet<>());
     FileWatcherNotificationHandler fileWatcherNotificationHandler =
         new DefaultFileWatcherNotificationHandler(vfsProvider);
-    FileTreeWatcher fileTreeWatcher =
-        new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
     projectManager =
         new ProjectManager(
             vfsProvider,
@@ -120,7 +118,6 @@ public class JavaFormatterServiceTest {
             projectHandlerRegistry,
             importerRegistry,
             fileWatcherNotificationHandler,
-            fileTreeWatcher,
             workspaceHolder,
             mock(FileWatcherManager.class));
 
@@ -243,6 +240,7 @@ public class JavaFormatterServiceTest {
   }
 
   private static class TestWorkspaceHolder extends WorkspaceProjectsSyncer {
+
     private List<ProjectConfigDto> projects;
 
     TestWorkspaceHolder() {

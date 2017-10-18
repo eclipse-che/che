@@ -32,6 +32,8 @@ import org.eclipse.che.commons.test.mockito.answer.WaitingAnswer;
 import org.mockito.Mock;
 import org.mockito.exceptions.base.MockitoException;
 import org.mockito.internal.invocation.InvocationMatcher;
+import org.mockito.internal.verification.VerificationModeFactory;
+import org.mockito.internal.verification.api.VerificationData;
 import org.mockito.invocation.Invocation;
 import org.mockito.testng.MockitoTestNGListener;
 import org.mockito.verification.VerificationMode;
@@ -260,8 +262,10 @@ public class ConcurrentCompositeLineConsumerTest {
    * verify(someMock, last()).someMethod();
    * </code></pre>
    */
-  private static VerificationMode last() {
-    return (verificationData) -> {
+  public static class Last implements VerificationMode {
+    public Last() {}
+
+    public void verify(VerificationData verificationData) {
       List<Invocation> invocations = verificationData.getAllInvocations();
       InvocationMatcher invocationMatcher = verificationData.getWanted();
 
@@ -276,6 +280,14 @@ public class ConcurrentCompositeLineConsumerTest {
       if (!invocationMatcher.matches(invocation)) {
         throw new MockitoException("\nWanted but not invoked:\n" + invocationMatcher);
       }
-    };
+    }
+
+    public VerificationMode description(String description) {
+      return VerificationModeFactory.description(this, description);
+    }
+  }
+
+  public static VerificationMode last() {
+    return new Last();
   }
 }

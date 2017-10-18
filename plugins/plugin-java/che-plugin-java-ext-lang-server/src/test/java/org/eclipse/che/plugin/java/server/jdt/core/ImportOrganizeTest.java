@@ -38,6 +38,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class ImportOrganizeTest extends CoreTests {
@@ -2167,6 +2168,8 @@ public class ImportOrganizeTest extends CoreTests {
     assertEqualString(cu.getSource(), buf.toString());
   }
 
+  @Test
+  @Ignore
   public void testStaticImports_bug159424() throws Exception {
     IPackageFragmentRoot sourceFolder = JavaProjectHelper.addSourceContainer(fJProject1, "src");
 

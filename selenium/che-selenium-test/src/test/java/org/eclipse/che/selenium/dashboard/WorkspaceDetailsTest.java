@@ -21,6 +21,7 @@ import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestStacksConstants;
 import org.eclipse.che.selenium.core.constant.TestWorkspaceConstants;
 import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
@@ -138,7 +139,7 @@ public class WorkspaceDetailsTest {
         (name, value) -> {
           Assert.assertEquals(dashboardWorkspace.getAgentState(name), value);
           dashboardWorkspace.switchAgentState(name);
-          loader.waitOnClosed();
+          WaitUtils.sleepQuietly(1);
         });
     clickOnSaveButton();
 

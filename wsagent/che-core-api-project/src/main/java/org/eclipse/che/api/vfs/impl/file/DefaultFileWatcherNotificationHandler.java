@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public class DefaultFileWatcherNotificationHandler implements FileWatcherNotificationHandler {
+
   private static final Logger LOG =
       LoggerFactory.getLogger(DefaultFileWatcherNotificationHandler.class);
 
@@ -93,6 +94,7 @@ public class DefaultFileWatcherNotificationHandler implements FileWatcherNotific
   }
 
   private static class DeletedLocalVirtualFile extends LocalVirtualFile {
+
     private final boolean isDir;
 
     DeletedLocalVirtualFile(

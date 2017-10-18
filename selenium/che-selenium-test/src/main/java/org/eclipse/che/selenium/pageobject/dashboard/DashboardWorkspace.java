@@ -53,44 +53,6 @@ public class DashboardWorkspace {
     String CONFIG = "Config";
     String SSH = "Ssh";
     String SHARE = "Share";
-    String STACK_LIBRARY = "Stack library";
-    String STACK_IMPORT = "Stack import";
-    String STACK_AUTHORING = "Stack authoring";
-  }
-
-  // names of ready-to-go stacks
-  public interface ReadyGoToStacks {
-    String JAVA = "java-default";
-    String NODE = "node-default";
-    String JAVA_MYSQL = "java-mysql";
-  }
-
-  public interface RecipeTypeBtn {
-    String COMPOSE = "compose";
-    String DOCKERFILE = "dockerfile";
-    String MACHINES_WARNING_MSG =
-        "The environment should contain exactly one dev machine. "
-            + "Switch on Dev property to have terminal, SSH and IDE tooling injected to the machine.";
-  }
-
-  public enum StackLibrary {
-    BITNAMI_CODEIGNITER("Bitnami Codeigniter"),
-    BITNAMI_SYMFONY("Bitnami Symfony"),
-    BITNAMI_PLAY_FOR_JAVA("Bitnami Play for Java"),
-    BITNAMI_RAILS("Bitnami Rails"),
-    BITNAMI_EXPRESS("Bitnami Express"),
-    BITNAMI_LARAVEL("Bitnami Laravel"),
-    BITNAMI_SWIFT("Bitnami Swift");
-
-    private String name;
-
-    StackLibrary(String name) {
-      this.name = name;
-    }
-
-    public String getName() {
-      return name;
-    }
   }
 
   private interface Locators {
@@ -100,7 +62,7 @@ public class DashboardWorkspace {
         "//div[contains(@class,'che-toolbar')]//span[contains(text(),'%s')]";
     String WORKSPACES_LIST = "//ng-transclude[@class='che-list-content']";
     String WORKSPACE_ITEM_NAME =
-        "//div[contains(@class, 'che-list-item-name')]/span[contains(text(),'%s')]";
+        "//div[contains(@class, 'workspace-name-clip')]//div[contains(@data-str, '%s')]";
     String EXPORT_WORKSPACE_BTN =
         "//button[contains(@class, 'che-button')]/span[text()='Export as a file']";
     String DOWNLOAD_WORKSPACE_BTN = "//che-button-default[@che-button-title='download']";
@@ -117,7 +79,7 @@ public class DashboardWorkspace {
     String RUN_WORKSPACE_BTN = "//button/span[text()='Run']";
     String STOP_WORKSPACE_BTN = "//button/span[contains(text(),'Stop')]";
     String DELETE_WORKSPACE_BTN = "//button/span[text()='Delete']";
-    String WORKSPACE_STATE = "debug-id-workspace-status";
+    String WORKSPACE_STATE = "workspace-status";
     String WORKSPACE_TITLE = "//div[contains(@class,'toolbar-info')]/span[text()='%s']";
     String DELETE_BTN_DIALOG_WIND =
         "//button[@ng-click='cheConfirmDialogController.hide()']//span[text()='Delete']";
@@ -351,27 +313,6 @@ public class DashboardWorkspace {
         .click();
   }
 
-  public void clickOnImportWorkspaceBtn() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(importWsRadioBtn))
-        .click();
-  }
-
-  public void selectRecipeType(String recipeType) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(format(Locators.RECIPE_TYPE_BUTTON, recipeType))))
-        .click();
-  }
-
-  /** set the focus into 'recipe-editor' form in the 'Stack authoring' */
-  public void clickIntoWorkspaceRecipeEditor() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.RECIPE_EDITOR)))
-        .click();
-  }
-
   /**
    * wait the warning message when there is two or more machines
    *
@@ -402,12 +343,6 @@ public class DashboardWorkspace {
         .until(ExpectedConditions.visibilityOf(recipeUrlField));
   }
 
-  public void typeCustomRecipeUrl(String nameOfWs) {
-    waitCustomRecipeUrlField();
-    recipeUrlField.clear();
-    recipeUrlField.sendKeys(nameOfWs);
-  }
-
   /** wait 'Open in IDE' btn on All workspaces page' */
   public void waitOpenInIdeWsEBtn() {
     new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
@@ -420,19 +355,6 @@ public class DashboardWorkspace {
     waitOpenInIdeWsEBtn();
     new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
         .until(ExpectedConditions.elementToBeClickable(openInIdeWsBtn))
-        .click();
-  }
-
-  /**
-   * select defined stack from 'READY-TO-GO STACKS' tab
-   *
-   * @param stackName name of stack from 'READY-TO-GO STACKS'
-   */
-  public void selectReadyToGoStack(String stackName) {
-    new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(format(Locators.STACK_NAME_XPATH, stackName))))
         .click();
   }
 
@@ -525,28 +447,6 @@ public class DashboardWorkspace {
         .until(
             ExpectedConditions.invisibilityOfElementLocated(
                 By.xpath(format(Locators.WORKSPACE_ITEM_NAME, nameWorkspace))));
-  }
-
-  /** Select 'Create new workspace from stack' on the 'New Workspace' page */
-  public void selectCreateNewWorkspaceFromStack() {
-    loader.waitOnClosed();
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.CREATE_WS_FROM_STACK)))
-        .click();
-  }
-
-  /**
-   * Select stack library by name
-   *
-   * @param stackLibrary name of stack
-   */
-  public void selectStackLibrary(StackLibrary stackLibrary) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(format(Locators.STACK_LIBRARY_ITEM, stackLibrary.getName()))))
-        .click();
   }
 
   public void clickOnSaveBtn() {
@@ -642,20 +542,6 @@ public class DashboardWorkspace {
                 By.xpath(format(Locators.DEVELOPER_SHARE_ITEM, email))));
   }
 
-  /** Select 'Runtime' tab in workspace menu */
-  public void selectRuntimeTab() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.RUNTIME_TAB)))
-        .click();
-  }
-
-  /** Expand 'DEV-MACHINE' settings on the 'Runtime' tab */
-  public void expandDevMachineSettings() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.DEV_MACHINE)))
-        .click();
-  }
-
   /**
    * Select tab into workspace menu
    *
@@ -672,16 +558,6 @@ public class DashboardWorkspace {
 
   public void clickNewProjectButtonOnDashboard() throws Exception {
     dashboard.clickOnNewProjectLinkOnDashboard();
-  }
-
-  public void createNewWorkspaceFromStackLibrary(
-      StackLibrary stackLibrary, String workspaceName, String projectName) {
-    selectCreateNewWorkspaceFromStack();
-    selectTabInWorspaceMenu(DashboardWorkspace.TabNames.STACK_LIBRARY);
-    selectStackLibrary(stackLibrary);
-    enterNameWorkspace(workspaceName);
-    dashboardProject.selectTemplateProject(projectName);
-    dashboardProject.clickOnCreateProject();
   }
 
   public String getWsTimeoutMessage() {

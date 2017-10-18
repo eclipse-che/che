@@ -21,6 +21,7 @@ import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
+import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
@@ -37,6 +38,7 @@ public class Eclipse0120Test {
   @Inject private ProjectExplorer projectExplorer;
   @Inject private CodenvyEditor editor;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Loader loader;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -51,6 +53,7 @@ public class Eclipse0120Test {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
+    loader.waitOnClosed();
     projectExplorer.openItemByPath(PROJECT_NAME + PATH_TO_PACKAGE_PREFIX + "Test.java");
     editor.waitActiveEditor();
     editor.waitMarkerInPosition(WARNING_MARKER, 16);

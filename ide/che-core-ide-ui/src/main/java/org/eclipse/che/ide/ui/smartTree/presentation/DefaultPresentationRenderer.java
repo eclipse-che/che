@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.ide.ui.smartTree.presentation;
 
+import static com.google.common.base.Strings.nullToEmpty;
+
 import com.google.common.base.Strings;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
@@ -28,14 +30,55 @@ public class DefaultPresentationRenderer<N extends Node> extends AbstractPresent
 
   @Override
   public Element render(N node, String domID, Tree.Joint joint, int depth) {
-    NodePresentation presentation;
-    if (node instanceof HasPresentation) {
-      presentation = ((HasPresentation) node).getPresentation(false);
-    } else {
-      presentation = new NodePresentation();
-      presentation.setPresentableText(node.getName());
-    }
 
+    if (node instanceof HasNewPresentation) {
+      NewNodePresentation presentation = ((HasNewPresentation) node).getPresentation();
+
+      return renderNewPresentation(presentation, domID, joint, depth);
+    } else if (node instanceof HasPresentation) {
+      NodePresentation presentation = ((HasPresentation) node).getPresentation(false);
+
+      return renderGenericPresentation(presentation, domID, joint, depth);
+    } else {
+      NodePresentation presentation = new NodePresentation();
+      presentation.setPresentableText(node.getName());
+
+      return renderGenericPresentation(presentation, domID, joint, depth);
+    }
+  }
+
+  Element renderNewPresentation(
+      NewNodePresentation presentation, String domID, Tree.Joint joint, int depth) {
+    Element rootContainer = getRootContainer(domID);
+    Element nodeContainer = getNodeContainer();
+    setIndentLevel(nodeContainer, depth);
+    Element jointContainer = getJointContainer(joint);
+    Element iconContainer = getIconContainer(presentation.getIcon());
+    Element userElement = getUserElement(presentation.getUserElement());
+    Element presentableTextContainer =
+        getPresentableTextContainer(
+            createStyledTextElement(presentation.getNodeText(), presentation.getNodeTextStyle()));
+    Element infoTextContainer =
+        getInfoTextContainer(
+            createStyledTextElement(
+                presentation.getNodeInfoText(), presentation.getNodeInfoTextStyle()));
+    Element descendantsContainer = getDescendantsContainer();
+
+    nodeContainer.appendChild(jointContainer);
+    nodeContainer.appendChild(iconContainer);
+    nodeContainer.appendChild(
+        userElement == null ? Document.get().createSpanElement() : userElement);
+    nodeContainer.appendChild(presentableTextContainer);
+    nodeContainer.appendChild(infoTextContainer);
+
+    rootContainer.appendChild(nodeContainer);
+    rootContainer.appendChild(descendantsContainer);
+
+    return rootContainer;
+  }
+
+  Element renderGenericPresentation(
+      NodePresentation presentation, String domID, Tree.Joint joint, int depth) {
     Element rootContainer = getRootContainer(domID);
 
     Element nodeContainer = getNodeContainer();
@@ -68,10 +111,24 @@ public class DefaultPresentationRenderer<N extends Node> extends AbstractPresent
     return rootContainer;
   }
 
+  private Element createStyledTextElement(String content, StyleConfigurator styleConfigurator) {
+    DivElement textElement = Document.get().createDivElement();
+
+    textElement.setInnerText(nullToEmpty(content));
+
+    if (styleConfigurator != null) {
+      styleConfigurator
+          .getCssConfiguration()
+          .forEach((p, v) -> textElement.getStyle().setProperty(p, v));
+    }
+
+    return textElement;
+  }
+
   private Element createPresentableTextElement(NodePresentation presentation) {
     DivElement textElement = Document.get().createDivElement();
 
-    textElement.setInnerText(Strings.nullToEmpty(presentation.getPresentableText()));
+    textElement.setInnerText(nullToEmpty(presentation.getPresentableText()));
     textElement.setAttribute("style", presentation.getPresentableTextCss());
 
     //TODO support text colorization

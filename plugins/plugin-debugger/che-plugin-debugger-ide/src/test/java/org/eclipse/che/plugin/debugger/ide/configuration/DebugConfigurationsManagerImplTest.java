@@ -10,9 +10,9 @@
  */
 package org.eclipse.che.plugin.debugger.ide.configuration;
 
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyMap;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -62,7 +62,8 @@ public class DebugConfigurationsManagerImplTest extends TestCase {
   @Test
   public void testShouldNotApplyConfigurationIfActiveDebuggerExists() throws Exception {
     when(debuggerManager.getActiveDebugger()).thenReturn(mock(Debugger.class));
-    when(dialogFactory.createMessageDialog(anyString(), anyString(), (ConfirmCallback) isNull()))
+    when(dialogFactory.createMessageDialog(
+            nullable(String.class), nullable(String.class), (ConfirmCallback) isNull()))
         .thenReturn(mock(MessageDialog.class));
 
     debugConfigurationsManager.apply(debugConfiguration);

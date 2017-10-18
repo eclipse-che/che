@@ -14,6 +14,7 @@ import static com.jayway.restassured.RestAssured.given;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -42,6 +43,7 @@ import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -224,7 +226,7 @@ public class WorkspacePermissionsFilterTest {
             .get(SECURE_PATH + "/workspace");
 
     assertEquals(response.getStatusCode(), 200);
-    verify(workspaceService).getWorkspaces(any(), anyInt(), anyString());
+    verify(workspaceService).getWorkspaces(any(), anyInt(), nullable(String.class));
     verify(permissionsFilter, never()).checkAccountPermissions(anyString(), any());
     verifyZeroInteractions(subject);
   }
@@ -284,7 +286,8 @@ public class WorkspacePermissionsFilterTest {
             .post(SECURE_PATH + "/workspace/{id}/runtime");
 
     assertEquals(response.getStatusCode(), 204);
-    verify(workspaceService).startById(eq("workspace123"), anyString(), any());
+    verify(workspaceService)
+        .startById(eq("workspace123"), nullable(String.class), nullable(Boolean.class));
     verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("run"));
   }
 
@@ -507,7 +510,8 @@ public class WorkspacePermissionsFilterTest {
             .post(SECURE_PATH + "/workspace/{id}/environment");
 
     assertEquals(response.getStatusCode(), 204);
-    verify(workspaceService).addEnvironment(eq("workspace123"), any(), anyString());
+    verify(workspaceService)
+        .addEnvironment(eq("workspace123"), nullable(EnvironmentDto.class), nullable(String.class));
     verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("configure"));
   }
 

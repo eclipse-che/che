@@ -32,7 +32,6 @@ import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
 import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
-import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
@@ -69,7 +68,6 @@ public abstract class BaseTest {
   protected LocalVirtualFileSystemProvider vfsProvider;
   protected ProjectRegistry projectRegistry;
   protected FileWatcherNotificationHandler fileWatcherNotificationHandler;
-  protected FileTreeWatcher fileTreeWatcher;
   protected ProjectTypeRegistry projectTypeRegistry;
   protected ProjectHandlerRegistry projectHandlerRegistry;
   protected ProjectImporterRegistry importerRegistry;
@@ -131,7 +129,6 @@ public abstract class BaseTest {
     importerRegistry = new ProjectImporterRegistry(new HashSet<>());
 
     fileWatcherNotificationHandler = new DefaultFileWatcherNotificationHandler(vfsProvider);
-    fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
 
     pm =
         new ProjectManager(
@@ -142,7 +139,6 @@ public abstract class BaseTest {
             projectHandlerRegistry,
             importerRegistry,
             fileWatcherNotificationHandler,
-            fileTreeWatcher,
             new TestWorkspaceHolder(new ArrayList<>()),
             Mockito.mock(FileWatcherManager.class));
 

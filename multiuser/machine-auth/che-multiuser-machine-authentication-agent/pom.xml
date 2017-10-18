@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-multiuser-machine-auth</artifactId>
         <groupId>org.eclipse.che.multiuser</groupId>
-        <version>5.19.0-SNAPSHOT</version>
+        <version>5.20.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-multiuser-machine-authentication-agent</artifactId>
     <name>Che Multiuser :: Machine Authentication Agent</name>
@@ -35,6 +35,10 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>

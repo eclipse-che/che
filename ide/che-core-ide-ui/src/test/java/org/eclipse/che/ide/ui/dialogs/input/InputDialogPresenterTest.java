@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.ide.ui.dialogs.input;
 
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -74,7 +75,7 @@ public class InputDialogPresenterTest extends BaseTest {
 
     verify(view).closeDialog();
     verify(view).getValue();
-    verify(inputCallback).accepted(anyString());
+    verify(inputCallback).accepted(nullable(String.class));
   }
 
   @Test
@@ -153,7 +154,7 @@ public class InputDialogPresenterTest extends BaseTest {
 
     verify(view, never()).showErrorHint(anyString());
     verify(view).closeDialog();
-    verify(inputCallback).accepted(anyString());
+    verify(inputCallback).accepted(nullable(String.class));
   }
 
   @Test

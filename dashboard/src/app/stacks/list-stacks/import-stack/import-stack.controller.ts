@@ -137,7 +137,7 @@ export class ImportStackController {
     }
 
     // docker file format detection
-    if (content.match(/^FROM\s+\w+/m)) {
+    if (!this.recipeFormat || content.match(/^FROM\s+\w+/m)) {
       this.recipeFormat = DOCKERFILE;
       this.editorOptions.mode = 'text/x-dockerfile';
     }

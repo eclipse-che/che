@@ -16,6 +16,7 @@ import static java.util.stream.Collectors.toList;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -260,7 +261,7 @@ public class OrganizationServiceTest {
 
     doReturn(new Page<>(singletonList(toFetch), 0, 1, 1))
         .when(orgManager)
-        .getByParent(anyString(), anyInt(), anyInt());
+        .getByParent(anyString(), anyInt(), anyLong());
 
     final Response response =
         given()
