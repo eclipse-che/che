@@ -1818,6 +1818,7 @@ public class MachineProviderImplTest {
     private Set<Set<String>> extraHosts;
     private boolean doForcePullImage;
     private boolean privilegedMode;
+    private String[] hostSecurityOpt;
     private int pidsLimit;
     private Set<String> devMachineEnvVars;
     private Set<String> allMachineEnvVars;
@@ -1953,6 +1954,7 @@ public class MachineProviderImplTest {
                   allMachineVolumes,
                   doForcePullImage,
                   privilegedMode,
+                  hostSecurityOpt,
                   pidsLimit,
                   devMachineEnvVars,
                   allMachineEnvVars,
