@@ -8,18 +8,15 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.debug.shared.model;
+package org.eclipse;
 
-/** @author Anatoliy Bazko */
-public interface Breakpoint {
-  /** The location of the breakpoint. */
-  Location getLocation();
+/** @author Anatolii Bazko */
+public class BreakpointsByConditionTest {
 
-  /** Indicates if it is enabled or not. */
-  boolean isEnabled();
-
-  /** The condition. */
-  String getCondition();
-
-  void setCondition(String condition);
+  public static void main(String[] args) {
+    int k = 0;
+    for (int i = 0; i < 10; i++) {
+      k = i;
+    }
+  }
 }

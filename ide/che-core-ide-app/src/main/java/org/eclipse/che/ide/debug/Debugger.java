@@ -39,18 +39,16 @@ public interface Debugger extends DebuggerObservable {
   /**
    * Adds new breakpoint.
    *
-   * @param file the file where breakpoint will be added
    * @param breakpoint the breakpoint to add
    */
-  void addBreakpoint(VirtualFile file, Breakpoint breakpoint);
+  void addBreakpoint(Breakpoint breakpoint);
 
   /**
    * Deletes the given breakpoint on server.
    *
-   * @param file the file where breakpoint will be removed from
    * @param breakpoint the breakpoint to delete
    */
-  void deleteBreakpoint(VirtualFile file, Breakpoint breakpoint);
+  void deleteBreakpoint(Breakpoint breakpoint);
 
   /** Deletes all breakpoints. */
   void deleteAllBreakpoints();
