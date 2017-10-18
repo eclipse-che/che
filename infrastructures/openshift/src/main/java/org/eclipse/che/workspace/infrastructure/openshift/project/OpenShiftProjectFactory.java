@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.project;
 
-import static com.google.common.base.MoreObjects.firstNonNull;
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -41,7 +41,7 @@ public class OpenShiftProjectFactory {
 
   public OpenShiftProject create(RuntimeIdentity identity) throws InfrastructureException {
     final String workspaceId = identity.getWorkspaceId();
-    final String projectName = firstNonNull(this.projectName, workspaceId);
+    final String projectName = isNullOrEmpty(this.projectName) ? workspaceId : this.projectName;
     return new OpenShiftProject(clientFactory, projectName, workspaceId);
   }
 }

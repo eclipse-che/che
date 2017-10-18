@@ -12,12 +12,12 @@ package org.eclipse.che.plugin.traefik;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
-import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
-import org.eclipse.che.plugin.docker.client.json.ExposedPort;
-import org.eclipse.che.plugin.docker.client.json.ImageConfig;
-import org.eclipse.che.plugin.docker.client.json.ImageInfo;
-import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
-import org.eclipse.che.plugin.docker.client.params.InspectImageParams;
+import org.eclipse.che.infrastructure.docker.client.json.ContainerConfig;
+import org.eclipse.che.infrastructure.docker.client.json.ExposedPort;
+import org.eclipse.che.infrastructure.docker.client.json.ImageConfig;
+import org.eclipse.che.infrastructure.docker.client.json.ImageInfo;
+import org.eclipse.che.infrastructure.docker.client.params.CreateContainerParams;
+import org.eclipse.che.infrastructure.docker.client.params.InspectImageParams;
 import org.eclipse.che.plugin.docker.machine.CustomServerEvaluationStrategy;
 import org.eclipse.che.plugin.docker.machine.DefaultServerEvaluationStrategy;
 import org.eclipse.che.plugin.docker.machine.ServerEvaluationStrategyProvider;
