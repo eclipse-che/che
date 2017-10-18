@@ -13,7 +13,6 @@ package org.eclipse.che.plugin.docker.client;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
-
 import org.eclipse.che.commons.annotation.Nullable;
 
 /**
@@ -28,7 +27,6 @@ import org.eclipse.che.commons.annotation.Nullable;
  *
  * @author David Festal
  */
-
 @Singleton
 public class WorkspacesRoutingSuffixProvider implements Provider<String> {
   @Inject
