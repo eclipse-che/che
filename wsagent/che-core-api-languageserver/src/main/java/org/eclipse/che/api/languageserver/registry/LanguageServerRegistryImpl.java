@@ -14,6 +14,10 @@ import static javax.ws.rs.core.UriBuilder.fromUri;
 import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
 import static org.eclipse.che.api.languageserver.registry.LanguageRecognizer.UNIDENTIFIED;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -122,7 +126,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
       return null;
     }
     long thread = Thread.currentThread().getId();
-    List<LanguageServerLauncher> requiredToLaunch = findLaunchers(projectPath, fileUri);
+    List<LanguageServerLauncher> requiredToLaunch = findLaunchersToLaunch(projectPath, fileUri);
     LOG.info("required to launch for thread " + thread + ": " + requiredToLaunch);
     // launchers is the set of things we need to have initialized
 
@@ -201,7 +205,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
     return getCapabilities(fileUri);
   }
 
-  List<LanguageServerLauncher> findLaunchers(String projectPath, String fileUri) {
+  List<LanguageServerLauncher> findLaunchersToLaunch(String projectPath, String fileUri) {
     String wsPath = absolutize(LanguageServiceUtils.removePrefixUri(fileUri));
     LanguageDescription language = languageRecognizer.recognizeByPath(wsPath);
     if (language == null) {
@@ -219,12 +223,29 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
     for (LanguageServerLauncher launcher : combinedLaunchers) {
       if (launcher.isAbleToLaunch()) {
         int score = matchScore(launcher.getDescription(), fileUri, language.getLanguageId());
-        if (score > 0) {
+        if (score > 0 || matchesWatchPatterns(launcher, fileUri)) {
           result.add(launcher);
         }
       }
     }
     return result;
+  }
+
+  private boolean matchesWatchPatterns(LanguageServerLauncher launcher, String fileUri) {
+    // we need to launch servers that are interested in didChangeWatchedFiles notifications.
+    try {
+      URI uri = new URI(fileUri);
+      Path path = FileSystems.getDefault().getPath(uri.getPath());
+      return launcher
+          .getDescription()
+          .getFileWatchPatterns()
+          .stream()
+          .map(LanguageServerFileWatcher.patternToMatcher())
+          .anyMatch(matcher -> matcher.matches(path));
+    } catch (URISyntaxException e) {
+      LOG.error("Could not parse URI", e);
+    }
+    return false;
   }
 
   @Override
@@ -307,7 +328,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
         .collect(Collectors.toList());
   }
 
-  private int matchScore(LanguageServerDescription desc, String path, String languageId) {
+  private int matchScore(LanguageServerDescription desc, String fileUri, String languageId) {
     int match = matchLanguageId(desc, languageId);
     if (match == 10) {
       return 10;
@@ -320,16 +341,16 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
           return 10;
         }
       }
-      if (filter.getScheme() != null && path.startsWith(filter.getScheme() + ":")) {
+      if (filter.getScheme() != null && fileUri.startsWith(filter.getScheme() + ":")) {
         return 10;
       }
       String pattern = filter.getPathRegex();
       if (pattern != null) {
-        if (pattern.equals(path)) {
+        if (pattern.equals(fileUri)) {
           return 10;
         }
         Pattern regex = Pattern.compile(pattern);
-        if (regex.matcher(path).matches()) {
+        if (regex.matcher(fileUri).matches()) {
           match = Math.max(match, 5);
         }
       }
