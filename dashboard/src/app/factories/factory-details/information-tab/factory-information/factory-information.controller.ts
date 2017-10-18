@@ -24,7 +24,7 @@ export class FactoryInformationController {
   private $location: ng.ILocationService;
   private $log: ng.ILogService;
   private $timeout: ng.ITimeoutService;
-  private lodash: _.LoDashStatic;
+  private lodash: any;
   private $filter: ng.IFilterService;
 
   private timeoutPromise: ng.IPromise<any>;
@@ -40,13 +40,14 @@ export class FactoryInformationController {
   private workspaceName: string;
   private stackId: string;
   private workspaceConfig: any;
+  private origName: string;
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
   constructor($scope: ng.IScope, cheAPI: CheAPI, cheNotification: CheNotification, $location: ng.ILocationService, $log: ng.ILogService,
-              $timeout: ng.ITimeoutService, lodash: _.LoDashStatic, $filter: ng.IFilterService, $q: ng.IQService, confirmDialogService: any) {
+              $timeout: ng.ITimeoutService, lodash: any, $filter: ng.IFilterService, $q: ng.IQService, confirmDialogService: any) {
     this.cheAPI = cheAPI;
     this.cheNotification = cheNotification;
     this.$location = $location;
@@ -93,6 +94,7 @@ export class FactoryInformationController {
     this.environmentName = this.factory.workspace.defaultEnv;
 
     this.copyOriginFactory = angular.copy(this.factory);
+    this.origName = this.factory.name;
     if (this.copyOriginFactory.links) {
       delete this.copyOriginFactory.links;
     }
@@ -100,7 +102,7 @@ export class FactoryInformationController {
     let factoryContent = this.$filter('json')(this.copyOriginFactory);
     if (factoryContent !== this.factoryContent) {
       if (!this.factoryContent) {
-        this.editorLoadedPromise.then((instance) => {
+        this.editorLoadedPromise.then((instance: any) => {
           this.$timeout(() => {
             instance.refresh();
           }, 500);
@@ -139,12 +141,29 @@ export class FactoryInformationController {
   }
 
   /**
-   * Update factory data.
+   * Update factory name.
+   *
+   * @param {string} name new factory name.
+   * @raram {ng.IFormController} form
    */
-  updateFactory(): void {
+  updateName(name: string, form: ng.IFormController): void {
+    if (form.$invalid) {
+      return;
+    }
+
+    this.copyOriginFactory.name = name;
+
+    this.updateFactory(form);
+  }
+
+  /**
+   * Update factory data.
+   * @param {ng.IFormController} form
+   */
+  updateFactory(form: ng.IFormController): void {
     this.factoryContent = this.$filter('json')(this.copyOriginFactory);
 
-    if (this.factoryInformationForm.$invalid || !this.isFactoryChanged()) {
+    if (form.$invalid || !this.isFactoryChanged()) {
       return;
     }
 

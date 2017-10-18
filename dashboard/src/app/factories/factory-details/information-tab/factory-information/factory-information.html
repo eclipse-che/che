@@ -16,16 +16,16 @@
     <div layout="column" class="factory-information-input">
       <ng-form name="factoryInformationForm">
         <che-input che-form="factoryInformationForm"
-                   ng-init="factoryInformationController.factoryInformationForm = factoryInformationForm"
                    che-name="name"
                    che-place-holder="Name of the factory"
                    aria-label="Name of the factory"
                    ng-model="factoryInformationController.copyOriginFactory.name"
-                   ng-change="factoryInformationController.updateFactory()"
+                   ng-change="factoryInformationController.updateName($value, factoryInformationForm)"
                    ng-trim
                    ng-minlength="3"
                    ng-maxlength="20"
-                   ng-pattern="/^[ A-Za-z0-9_\-\.]+$/">
+                   ng-pattern="/^[ A-Za-z0-9_\-\.]+$/"
+                   unique-factory-name="factoryInformationController.origName">
           <div ng-message="required">A name is required.</div>
           <div ng-message="pattern">Factory name may contain digits, latin letters, spaces, _ , . , - and should start
             only
@@ -33,6 +33,7 @@
           </div>
           <div ng-message="minlength">The name has to be more than 3 characters long.</div>
           <div ng-message="maxlength">The name has to be less than 20 characters long.</div>
+          <div ng-message="uniqueFactoryName">This factory name is already used.</div>
         </che-input>
       </ng-form>
     </div>
@@ -94,7 +95,7 @@
                      che-place-holder="Name of the workspace"
                      aria-label="Name of the workspace"
                      ng-model="factoryInformationController.copyOriginFactory.workspace.name"
-                     ng-change="factoryInformationController.updateFactory()"
+                     ng-change="factoryInformationController.updateFactory(factoryInformationForm)"
                      required
                      ng-minlength="3"
                      ng-maxlength="20"
@@ -123,7 +124,7 @@
                 <span ng-if="factoryInformationController.getObjectKeys(environmentValue.machines).length > 1">MACHINE: {{machineKey}}</span>
                 <che-workspace-ram-allocation-slider
                         ng-model="machineValue.attributes.memoryLimitBytes"
-                        che-on-change="factoryInformationController.updateFactory()"></che-workspace-ram-allocation-slider>
+                        che-on-change="factoryInformationController.updateFactory(factoryInformationForm)"></che-workspace-ram-allocation-slider>
               </div>
             </div>
           </div>
@@ -136,7 +137,7 @@
   <che-label-container che-label-name="Configure Commands"
                        che-label-description="Commands are processes that are invoked by users from a dropdown in the IDE.">
     <cdvy-factory-command cdvy-factory-object="factoryInformationController.copyOriginFactory"
-                          cdvy-on-change="factoryInformationController.updateFactory()"></cdvy-factory-command>
+                          cdvy-on-change="factoryInformationController.updateFactory(factoryInformationForm)"></cdvy-factory-command>
   </che-label-container>
 
   <!-- Configure actions -->
@@ -151,7 +152,7 @@
     <cdvy-factory-action-box cdvy-lifecycle="onProjectsLoaded"
                              cdvy-callback-controller="factoryInformationController"
                              cdvy-factory-object="factoryInformationController.copyOriginFactory"
-                             cdvy-on-change="factoryInformationController.updateFactory()"></cdvy-factory-action-box>
+                             cdvy-on-change="factoryInformationController.updateFactory(factoryInformationForm)"></cdvy-factory-action-box>
   </che-label-container>
 
   <!-- Configuration -->
