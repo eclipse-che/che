@@ -25,7 +25,6 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentI
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -194,6 +193,8 @@ public class CodenvyEditor {
         "//div[@class='breakpoint inactive' and text()='%d']";
     public static final String DEBUGGER_BREAK_POINT_ACTIVE =
         "//div[@class='breakpoint active' and text()='%d']";
+    public static final String DEBUGGER_BREAKPOINT_CONDITION =
+        "//div[@class='breakpoint %s condition' and text()='%d']";
     public static final String JAVA_DOC_POPUP = "//div[@class='gwt-PopupPanel']//iframe";
     public static final String AUTOCOMPLETE_PROPOSAL_JAVA_DOC_POPUP =
         "//div//iframe[contains(@src, 'api/java/code-assist/compute/info?')]";
@@ -1190,18 +1191,14 @@ public class CodenvyEditor {
             By.xpath(String.format(Locators.DEBUGGER_BREAK_POINT_INACTIVE, position))));
   }
 
-  public void waitBreakpointRemoved(int position) {
-    try {
-      waitInactiveBreakpoint(position);
-      fail("Breakpoint should be removed at " + position);
-    } catch (Exception e) {
-    }
-
-    try {
-      waitActiveBreakpoint(position);
-      fail("Breakpoint should be removed at " + position);
-    } catch (Exception e) {
-    }
+  public void waitConditionalBreakpoint(int lineNumber, boolean active) {
+    redrawDriverWait.until(
+        visibilityOfElementLocated(
+            By.xpath(
+                String.format(
+                    Locators.DEBUGGER_BREAKPOINT_CONDITION,
+                    active ? "active" : "inactive",
+                    lineNumber))));
   }
 
   /** wait while editor will be empty */

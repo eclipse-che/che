@@ -26,7 +26,6 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -79,12 +78,12 @@ public class GdbDebugger extends AbstractDebugger {
   }
 
   @Override
-  public void addBreakpoint(final VirtualFile file, final Breakpoint breakpoint) {
+  public void addBreakpoint(final Breakpoint breakpoint) {
     if (isConnected() && !isSuspended()) {
       notificationManager.notify(locale.messageSuspendToActivateBreakpoints(), FAIL, FLOAT_MODE);
     }
 
-    super.addBreakpoint(file, breakpoint);
+    super.addBreakpoint(breakpoint);
   }
 
   @Override

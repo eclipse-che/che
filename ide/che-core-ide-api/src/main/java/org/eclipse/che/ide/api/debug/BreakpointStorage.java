@@ -49,6 +49,13 @@ public interface BreakpointStorage {
    */
   void deleteAll(List<Breakpoint> breakpoints);
 
+  /**
+   * Updates breakpoint.
+   *
+   * @param breakpoint
+   */
+  void update(Breakpoint breakpoint);
+
   /** Clears storage. */
   void clear();
 
