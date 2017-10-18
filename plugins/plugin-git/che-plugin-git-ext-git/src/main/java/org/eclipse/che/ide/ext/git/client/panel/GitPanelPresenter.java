@@ -38,6 +38,7 @@ import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
 import org.eclipse.che.ide.ext.git.client.compare.MutableAlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelPresenter;
+import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
@@ -198,7 +199,7 @@ public class GitPanelPresenter extends BasePresenter
 
   @Override
   public void onGitCheckout(String endpointId, GitCheckoutEventDto dto) {
-    // TODO handle project name
+    // TODO update current branch in the panel
   }
 
   /** Removes first segment from given path. */
