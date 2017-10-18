@@ -33,32 +33,33 @@ import org.eclipse.che.ide.ui.smartTree.SelectionModel;
 import org.eclipse.che.ide.ui.smartTree.SortDir;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 
-/**
- * @author Mykola Morhun
- */
+/** @author Mykola Morhun */
 public class GitPanelViewImpl extends BaseView<ActionDelegate> implements GitPanelView {
   interface GitPanelViewImplUiBinder extends UiBinder<Widget, GitPanelViewImpl> {}
 
-  @UiField
-  FlowPanel changesPanel;
-  @UiField
-  SimplePanel repositoriesPanel;
+  @UiField FlowPanel changesPanel;
+  @UiField SimplePanel repositoriesPanel;
 
   @UiField(provided = true)
   final GitResources gitResources;
+
   @UiField(provided = true)
   final GitLocalizationConstant locale;
+
+  private final RepositoryNodeFactory repositoryNodeFactory;
 
   private Tree repositoriesList;
 
   @Inject
   public GitPanelViewImpl(
       GitPanelViewImplUiBinder uiBinder,
+      RepositoryNodeFactory repositoryNodeFactory,
       PartStackUIResources resources,
       GitResources gitResources,
       GitLocalizationConstant locale) {
     super(resources);
 
+    this.repositoryNodeFactory = repositoryNodeFactory;
     this.gitResources = gitResources;
     this.locale = locale;
 
@@ -71,18 +72,20 @@ public class GitPanelViewImpl extends BaseView<ActionDelegate> implements GitPan
     NodeStorage nodeStorage = new NodeStorage();
     NodeLoader nodeLoader = new NodeLoader();
     repositoriesList = new Tree(nodeStorage, nodeLoader);
-    repositoriesList.getNodeStorage().addSortInfo(
-        new StoreSortInfo(Comparator.comparing(Node::getName), SortDir.ASC));
+    repositoriesList
+        .getNodeStorage()
+        .addSortInfo(new StoreSortInfo(Comparator.comparing(Node::getName), SortDir.ASC));
     SelectionModel selectionModel = repositoriesList.getSelectionModel();
     selectionModel.setSelectionMode(SelectionModel.Mode.SINGLE);
-    selectionModel.addSelectionChangedHandler(event -> {
-      Node node = getFirst(event.getSelection(), null);
-      if (node == null) {
-        delegate.onRepositorySelectionChanged(null);
-      } else {
-        delegate.onRepositorySelectionChanged(node.getName());
-      }
-    });
+    selectionModel.addSelectionChangedHandler(
+        event -> {
+          Node node = getFirst(event.getSelection(), null);
+          if (node == null) {
+            delegate.onRepositorySelectionChanged(null);
+          } else {
+            delegate.onRepositorySelectionChanged(node.getName());
+          }
+        });
     this.repositoriesPanel.add(repositoriesList);
   }
 
@@ -93,7 +96,7 @@ public class GitPanelViewImpl extends BaseView<ActionDelegate> implements GitPan
 
   @Override
   public void addRepository(String repository) {
-    repositoriesList.getNodeStorage().add(new RepositoryNode(repository, 0));
+    repositoriesList.getNodeStorage().add(repositoryNodeFactory.newRepositoryNode(repository, 0));
   }
 
   @Override
@@ -107,7 +110,6 @@ public class GitPanelViewImpl extends BaseView<ActionDelegate> implements GitPan
     if (node != null) {
       node.setChanges(changes);
       repositoriesList.refresh(node);
-
     }
   }
 

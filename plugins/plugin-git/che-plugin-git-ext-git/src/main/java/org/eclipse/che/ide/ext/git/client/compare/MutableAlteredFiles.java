@@ -40,8 +40,7 @@ public class MutableAlteredFiles extends AlteredFiles {
   }
 
   /**
-   * Adds a file to altered file list.
-   * If given file is already exists does nothing.
+   * Adds a file to altered file list. If given file is already exists does nothing.
    *
    * @param file full path to file and its name relatively to project root
    * @param status git status of the file
@@ -58,8 +57,7 @@ public class MutableAlteredFiles extends AlteredFiles {
   }
 
   /**
-   * Removes given file from the altered files list.
-   * If given file isn't present does nothing.
+   * Removes given file from the altered files list. If given file isn't present does nothing.
    *
    * @param file full path to file and its name relatively to project root
    * @return true if the file was deleted and false otherwise

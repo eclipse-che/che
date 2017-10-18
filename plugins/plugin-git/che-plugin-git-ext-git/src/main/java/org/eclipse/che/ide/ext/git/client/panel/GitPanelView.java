@@ -45,8 +45,8 @@ public interface GitPanelView extends View<GitPanelView.ActionDelegate> {
   interface ActionDelegate extends BaseActionDelegate {
 
     /**
-     * Invoked each time when user changes selection in repositories list.
-     * Returns null if no selected items.
+     * Invoked each time when user changes selection in repositories list. Returns null if no
+     * selected items.
      */
     void onRepositorySelectionChanged(String selectedRepository);
   }

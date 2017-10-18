@@ -33,6 +33,17 @@ public interface GitResources extends ClientBundle {
     String spacing();
   }
 
+  interface GitPanelCss extends CssResource {
+    @ClassName("git-panel-full-height")
+    String fullHeight();
+
+    @ClassName("git-panel-panel-upper-indent")
+    String topIndent();
+
+    @ClassName("git-panel-repository-changes-label")
+    String repositoryChangesLabel();
+  }
+
   interface Css extends CssResource {
     String insertion();
 
@@ -50,11 +61,17 @@ public interface GitResources extends ClientBundle {
   @Source({"git.css", "org/eclipse/che/ide/api/ui/style.css"})
   GitCSS gitCSS();
 
+  @Source("panel/gitPanel.css")
+  GitPanelCss gitPanelCss();
+
   @Source({"changeMarkers.css", "org/eclipse/che/ide/api/ui/style.css"})
   Css changeMarkersCSS();
 
   @Source("panel/git.svg")
   SVGResource git();
+
+  @Source("panel/git-logo.svg")
+  SVGResource gitLogo();
 
   @Source("panel/repository.svg")
   SVGResource repository();

@@ -101,6 +101,7 @@ public class GitExtension {
       KeyBindingAgent keyBinding) {
 
     resources.gitCSS().ensureInjected();
+    resources.gitPanelCss().ensureInjected();
 
     DefaultActionGroup mainMenu = (DefaultActionGroup) actionManager.getAction(GROUP_MAIN_MENU);
 

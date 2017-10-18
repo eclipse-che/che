@@ -18,15 +18,15 @@
   <ui:with field='gitResources' type='org.eclipse.che.ide.ext.git.client.GitResources'/>
   <ui:with field='locale' type='org.eclipse.che.ide.ext.git.client.GitLocalizationConstant'/>
 
-  <g:VerticalPanel width="100%">
-    <g:FlowPanel>
+  <g:FlowPanel>
+    <g:FlowPanel addStyleNames="{gitResources.gitPanelCss.topIndent}">
       <g:HorizontalPanel>
-        <svg:SVGImage resource="{gitResources.repository}" height="16px" />
+        <svg:SVGImage resource="{gitResources.repository}" height="16px"/>
         <g:Label text="{locale.repositories}"/>
       </g:HorizontalPanel>
-      <g:SimplePanel ui:field="repositoriesPanel" debugId="git-panel-repositories" width="100%"/>
+      <g:SimplePanel ui:field="repositoriesPanel" debugId="git-panel-repositories"/>
     </g:FlowPanel>
-    <g:FlowPanel ui:field="changesPanel" debugId="git-panel-changedFiles"/>
-  </g:VerticalPanel>
+    <g:FlowPanel ui:field="changesPanel" debugId="git-panel-changedFiles" addStyleNames="{gitResources.gitPanelCss.topIndent} {gitResources.gitPanelCss.fullHeight}"/>
+  </g:FlowPanel>
 
 </ui:UiBinder>
