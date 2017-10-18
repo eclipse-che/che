@@ -22,6 +22,7 @@ interface ICheInputAttrs extends ng.IAttributes {
   cheReadonly: string;
   cheDisabled: string;
   cheWidth: string;
+  ngChange: string;
 }
 
 /**
@@ -53,12 +54,11 @@ export class CheInput implements ng.IDirective {
       placeHolder: '@chePlaceHolder',
       pattern: '@chePattern',
       myForm: '=cheForm',
-      isChanged: '&ngChange',
+      isChanged: '&?ngChange',
       readonly: '=cheReadonly',
       disabled: '=cheDisabled'
     };
   }
-
 
   /**
    * Template for the current toolbar
@@ -85,6 +85,9 @@ export class CheInput implements ng.IDirective {
     if (attrs.cheDisabled) {
       template = template + ' ng-disabled="disabled"';
     }
+    if (attrs.ngChange) {
+      template = template + ' ng-change="isChanged({$value: valueModel})" ';
+    }
     template = template + ' ng-trim="false" ng-model="valueModel" >'
       + '<md-icon class="fa fa-pencil che-input-icon che-input-icon-xs"></md-icon>'
       + '<!-- display error messages for the form -->'
@@ -106,6 +109,9 @@ export class CheInput implements ng.IDirective {
     }
     if (attrs.cheDisabled) {
       template = template + ' ng-disabled="disabled"';
+    }
+    if (attrs.ngChange) {
+      template = template + ' ng-change="isChanged({$value: valueModel})" ';
     }
     template = template + '><md-icon class="fa fa-pencil che-input-icon"></md-icon>';
     if (attrs.cheWidth === 'auto') {
@@ -190,18 +196,6 @@ export class CheInput implements ng.IDirective {
       } else {
         element.removeClass(desktopPristineClass);
       }
-    });
-
-    const ngChange = 'ngChange';
-    if (!attrs.$attr[ngChange]) {
-      return;
-    }
-
-    // for ngChange attribute only
-    $scope.$watch(() => {
-      return $scope.valueModel;
-    }, () => {
-      $scope.isChanged();
     });
   }
 }

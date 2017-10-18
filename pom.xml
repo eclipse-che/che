@@ -33,7 +33,6 @@
         <module>infrastructures</module>
         <module>plugins</module>
         <module>ide/che-ide-core</module>
-        <module>samples</module>
         <module>dashboard</module>
         <module>assembly</module>
         <module>assembly-multiuser</module>
@@ -1194,21 +1193,6 @@
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-ssh-key-server</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-plugin-svn-ext-ide</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-plugin-svn-ext-server</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-plugin-svn-ext-shared</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>

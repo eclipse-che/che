@@ -18,18 +18,20 @@ import {UniqueStackNameValidator} from './unique-stack-name-validator.directive'
 import {CityNameValidator} from './city-name-validator.directive';
 import {CustomAsyncValidator} from './custom-async-validator.directive';
 import {UniqueTeamNameValidator} from './unique-team-name-validator.directive';
+import {UniqueFactoryNameValidator} from './unique-factory-name-validator.directive';
 
 export class ValidatorConfig {
 
   constructor(register: che.IRegisterService) {
 
-    register.directive('gitUrl', GitUrlValidator)
-      .directive('cityNameValidator', CityNameValidator)
-      .directive('uniqueProjectName', UniqueProjectNameValidator)
-      .directive('uniqueWorkspaceName', UniqueWorkspaceNameValidator)
-      .directive('customValidator', CustomValidator)
-      .directive('customAsyncValidator', CustomAsyncValidator)
-      .directive('uniqueStackName', UniqueStackNameValidator)
-      .directive('uniqueTeamName', UniqueTeamNameValidator);
+    register.directive('gitUrl', GitUrlValidator);
+    register.directive('cityNameValidator', CityNameValidator);
+    register.directive('uniqueProjectName', UniqueProjectNameValidator);
+    register.directive('uniqueWorkspaceName', UniqueWorkspaceNameValidator);
+    register.directive('customValidator', CustomValidator);
+    register.directive('customAsyncValidator', CustomAsyncValidator);
+    register.directive('uniqueStackName', UniqueStackNameValidator);
+    register.directive('uniqueTeamName', UniqueTeamNameValidator);
+    register.directive('uniqueFactoryName', UniqueFactoryNameValidator);
   }
 }

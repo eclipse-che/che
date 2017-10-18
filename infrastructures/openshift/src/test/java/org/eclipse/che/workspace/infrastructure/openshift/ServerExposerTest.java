@@ -11,6 +11,8 @@
 package org.eclipse.che.workspace.infrastructure.openshift;
 
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.workspace.infrastructure.openshift.ServerExposer.SERVER_PREFIX;
+import static org.eclipse.che.workspace.infrastructure.openshift.ServerExposer.SERVER_UNIQUE_PART_SIZE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -26,7 +28,9 @@ import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.openshift.api.model.Route;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
@@ -40,7 +44,8 @@ import org.testng.annotations.Test;
  */
 public class ServerExposerTest {
 
-  private static final String SERVER_PREFIX = "server";
+  private static final Pattern SERVER_PREFIX_REGEX =
+      Pattern.compile('^' + SERVER_PREFIX + "[A-z0-9]{" + SERVER_UNIQUE_PART_SIZE + "}-pod-main$");
 
   private ServerExposer serverExposer;
   private OpenShiftEnvironment openShiftEnvironment;
@@ -72,7 +77,7 @@ public class ServerExposerTest {
         ImmutableMap.of("http-server", httpServerConfig);
 
     //when
-    serverExposer.expose(SERVER_PREFIX, serversToExpose);
+    serverExposer.expose(serversToExpose);
 
     //then
     assertThatServerIsExposed("http-server", "tcp", 8080, httpServerConfig);
@@ -90,7 +95,7 @@ public class ServerExposerTest {
             "ws-server", wsServerConfig);
 
     //when
-    serverExposer.expose(SERVER_PREFIX, serversToExpose);
+    serverExposer.expose(serversToExpose);
 
     //then
     assertEquals(openShiftEnvironment.getServices().size(), 1);
@@ -111,7 +116,7 @@ public class ServerExposerTest {
             "ws-server", wsServerConfig);
 
     //when
-    serverExposer.expose(SERVER_PREFIX, serversToExpose);
+    serverExposer.expose(serversToExpose);
 
     //then
     assertEquals(openShiftEnvironment.getServices().size(), 1);
@@ -129,7 +134,7 @@ public class ServerExposerTest {
         ImmutableMap.of("http-server", httpServerConfig);
 
     //when
-    serverExposer.expose(SERVER_PREFIX, serversToExpose);
+    serverExposer.expose(serversToExpose);
 
     //then
     assertEquals(openShiftEnvironment.getServices().size(), 1);
@@ -152,7 +157,7 @@ public class ServerExposerTest {
                 .build()));
 
     //when
-    serverExposer.expose(SERVER_PREFIX, serversToExpose);
+    serverExposer.expose(serversToExpose);
 
     //then
     assertThatServerIsExposed("http-server", "tcp", 8080, httpServerConfig);
@@ -173,7 +178,7 @@ public class ServerExposerTest {
                     .build())));
 
     //when
-    serverExposer.expose(SERVER_PREFIX, serversToExpose);
+    serverExposer.expose(serversToExpose);
 
     //then
     assertEquals(container.getPorts().size(), 2);
@@ -183,7 +188,7 @@ public class ServerExposerTest {
   }
 
   private void assertThatServerIsExposed(
-      String serverName, String portProtocol, Integer port, ServerConfigImpl expected) {
+      String serverNameRegex, String portProtocol, Integer port, ServerConfigImpl expected) {
     //then
     assertTrue(
         container
@@ -194,7 +199,14 @@ public class ServerExposerTest {
                     p.getContainerPort().equals(port)
                         && p.getProtocol().equals(portProtocol.toUpperCase())));
     //ensure that service is created
-    Service service = openShiftEnvironment.getServices().get(SERVER_PREFIX + "-pod-main");
+
+    Service service = null;
+    for (Entry<String, Service> entry : openShiftEnvironment.getServices().entrySet()) {
+      if (SERVER_PREFIX_REGEX.matcher(entry.getKey()).matches()) {
+        service = entry.getValue();
+        break;
+      }
+    }
     assertNotNull(service);
 
     //ensure that required service port is exposed
@@ -212,14 +224,15 @@ public class ServerExposerTest {
     assertEquals(servicePort.getName(), SERVER_PREFIX + "-" + port);
 
     //ensure that required route is created
-    Route route = openShiftEnvironment.getRoutes().get(SERVER_PREFIX + "-pod-main-server-" + port);
+    Route route =
+        openShiftEnvironment.getRoutes().get(service.getMetadata().getName() + "-server-" + port);
     assertEquals(route.getSpec().getTo().getName(), service.getMetadata().getName());
     assertEquals(route.getSpec().getPort().getTargetPort().getStrVal(), servicePort.getName());
 
     RoutesAnnotations.Deserializer routeDeserializer =
         RoutesAnnotations.newDeserializer(route.getMetadata().getAnnotations());
     Map<String, ServerConfigImpl> servers = routeDeserializer.servers();
-    ServerConfig serverConfig = servers.get(serverName);
+    ServerConfig serverConfig = servers.get(serverNameRegex);
     assertEquals(serverConfig, expected);
   }
 }

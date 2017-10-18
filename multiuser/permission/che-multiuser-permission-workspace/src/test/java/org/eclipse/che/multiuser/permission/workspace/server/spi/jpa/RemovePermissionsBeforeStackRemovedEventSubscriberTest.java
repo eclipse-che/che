@@ -18,13 +18,11 @@ import com.google.inject.Injector;
 import java.util.List;
 import java.util.stream.Stream;
 import javax.persistence.EntityManager;
-import org.eclipse.che.api.recipe.OldRecipeImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.jpa.JpaStackDao;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
 import org.eclipse.che.multiuser.api.permission.server.AbstractPermissionsDomain;
-import org.eclipse.che.multiuser.permission.machine.recipe.RecipePermissionsImpl;
 import org.eclipse.che.multiuser.permission.workspace.server.spi.jpa.JpaStackPermissionsDao.RemovePermissionsBeforeStackRemovedEventSubscriber;
 import org.eclipse.che.multiuser.permission.workspace.server.stack.StackPermissionsImpl;
 import org.testng.annotations.AfterClass;
@@ -86,16 +84,6 @@ public class RemovePermissionsBeforeStackRemovedEventSubscriberTest {
   @AfterMethod
   public void cleanup() {
     manager.getTransaction().begin();
-    manager
-        .createQuery(
-            "SELECT recipePermissions FROM RecipePermissions recipePermissions",
-            RecipePermissionsImpl.class)
-        .getResultList()
-        .forEach(manager::remove);
-    manager
-        .createQuery("SELECT recipe FROM OldRecipe recipe", OldRecipeImpl.class)
-        .getResultList()
-        .forEach(manager::remove);
     manager
         .createQuery("SELECT usr FROM Usr usr", UserImpl.class)
         .getResultList()

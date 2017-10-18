@@ -30,10 +30,6 @@ import org.eclipse.che.api.factory.server.FactoryParametersResolver;
 import org.eclipse.che.api.installer.server.InstallerModule;
 import org.eclipse.che.api.installer.server.impl.InstallersProvider;
 import org.eclipse.che.api.installer.shared.model.Installer;
-import org.eclipse.che.api.recipe.JpaRecipeDao;
-import org.eclipse.che.api.recipe.RecipeDao;
-import org.eclipse.che.api.recipe.RecipeLoader;
-import org.eclipse.che.api.recipe.RecipeService;
 import org.eclipse.che.api.system.server.ServiceTermination;
 import org.eclipse.che.api.system.server.SystemModule;
 import org.eclipse.che.api.workspace.server.adapter.StackMessageBodyAdapter;
@@ -55,7 +51,6 @@ public class WsMasterModule extends AbstractModule {
     install(new com.google.inject.persist.jpa.JpaPersistModule("main"));
     install(new org.eclipse.che.account.api.AccountModule());
     install(new org.eclipse.che.api.ssh.server.jpa.SshJpaModule());
-    bind(RecipeDao.class).to(JpaRecipeDao.class);
     install(new org.eclipse.che.api.core.jsonrpc.impl.JsonRpcModule());
     install(new org.eclipse.che.api.core.websocket.impl.WebSocketModule());
 
@@ -86,7 +81,6 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.api.project.server.template.ProjectTemplateRegistry.class);
     bind(org.eclipse.che.api.project.server.template.ProjectTemplateService.class);
     bind(org.eclipse.che.api.ssh.server.SshService.class);
-    bind(RecipeService.class);
     bind(org.eclipse.che.api.user.server.UserService.class);
     bind(org.eclipse.che.api.user.server.ProfileService.class);
     bind(org.eclipse.che.api.user.server.PreferencesService.class);
@@ -125,12 +119,6 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.security.oauth.shared.OAuthTokenProvider.class)
         .to(org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider.class);
     bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
-
-    bind(org.eclipse.che.api.recipe.RecipeLoader.class);
-    Multibinder.newSetBinder(
-            binder(), String.class, Names.named(RecipeLoader.CHE_PREDEFINED_RECIPES))
-        .addBinding()
-        .toInstance("predefined-recipes.json");
 
     // installers
     install(new InstallerModule());

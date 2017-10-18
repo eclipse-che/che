@@ -136,22 +136,6 @@ public class FileStructurePresenterTest {
   }
 
   @Test
-  public void binaryClassShouldBeOpenedIfMemberIsBinary() throws Exception {
-    when(member.isBinary()).thenReturn(true);
-    when(nodePromise.then(Matchers.<Operation<Node>>anyObject())).thenReturn(nodePromise);
-
-    presenter.show(editor);
-  }
-
-  @Test
-  public void selectMemberIfItIsNotBinary() throws Exception {
-    when(member.isBinary()).thenReturn(false);
-    when(nodePromise.then(Matchers.<Function<Node, Node>>anyObject())).thenReturn(nodePromise);
-
-    presenter.show(editor);
-  }
-
-  @Test
   public void cursorShouldBeReturnedInPreviousPositionAfterDialogClosingByEscapeButton() {
     presenter.show(editor);
 

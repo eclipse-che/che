@@ -100,6 +100,7 @@ public class DockerBootstrapper extends AbstractBootstrapper {
             + installerWebsocketEndpoint
             + " -push-logs-endpoint "
             + outputWebsocketEndpoint
+            + " -enable-auth"
             + " -server-check-period "
             + serverCheckPeriodSeconds
             + " -installer-timeout "

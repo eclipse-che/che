@@ -12,6 +12,7 @@ package org.eclipse.che.workspace.infrastructure.openshift;
 
 import static java.lang.Integer.parseInt;
 import static java.util.stream.Collectors.toMap;
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_POD_NAME_LABEL;
 
 import io.fabric8.kubernetes.api.model.Container;
@@ -92,6 +93,9 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftE
  */
 public class ServerExposer {
 
+  public static final int SERVER_UNIQUE_PART_SIZE = 8;
+  public static final String SERVER_PREFIX = "server";
+
   private final String machineName;
   private final Container container;
   private final OpenShiftEnvironment openShiftEnvironment;
@@ -106,20 +110,20 @@ public class ServerExposer {
   /**
    * Exposes specified servers.
    *
-   * @param namePrefix name prefix that will be used for generated objects
    * @param servers servers to expose
    */
-  public void expose(String namePrefix, Map<String, ? extends ServerConfig> servers) {
+  public void expose(Map<String, ? extends ServerConfig> servers) {
     Map<String, ServicePort> portToServicePort = exposePort(servers.values());
 
     Service service =
         new ServiceBuilder()
-            .withName(namePrefix + '-' + machineName)
+            .withName(generate(SERVER_PREFIX, SERVER_UNIQUE_PART_SIZE) + '-' + machineName)
             .withSelectorEntry(CHE_POD_NAME_LABEL, machineName.split("/")[0])
             .withPorts(new ArrayList<>(portToServicePort.values()))
             .build();
 
-    openShiftEnvironment.getServices().put(service.getMetadata().getName(), service);
+    String serviceName = service.getMetadata().getName();
+    openShiftEnvironment.getServices().put(serviceName, service);
 
     for (ServicePort servicePort : portToServicePort.values()) {
       int port = servicePort.getTargetPort().getIntVal();
@@ -132,10 +136,10 @@ public class ServerExposer {
 
       Route route =
           new RouteBuilder()
-              .withName(namePrefix + '-' + machineName + '-' + servicePort.getName())
+              .withName(serviceName + '-' + servicePort.getName())
               .withTargetPort(servicePort.getName())
               .withServers(routesServers)
-              .withTo(service.getMetadata().getName())
+              .withTo(serviceName)
               .build();
       openShiftEnvironment.getRoutes().put(route.getMetadata().getName(), route);
     }
