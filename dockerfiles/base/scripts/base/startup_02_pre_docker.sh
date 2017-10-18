@@ -358,7 +358,7 @@ init_check_docker_networking() {
      info "Proxy: HTTP_PROXY=${HTTP_PROXY}, HTTPS_PROXY=${HTTPS_PROXY}, NO_PROXY=${NO_PROXY}"
      if [[ ${NO_PROXY} = "" ]]; then
      warning "Potential networking issue discovered!"
-     warning "We have identified that http and https proxies set are but no_proxy is not. This may cause fatal errors. Set no_proxy for your Docker daemon!"
+     warning "We have identified that http and https proxies are set but no_proxy is not. This may cause fatal networking errors. Set no_proxy for your Docker daemon!"
      fi
   fi
 
