@@ -10,17 +10,14 @@
  */
 package org.eclipse.che.api.deploy;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.name.Names;
-
 import static org.eclipse.che.plugin.docker.machine.ExecAgentLogDirSetterEnvVariableProvider.LOGS_DIR_SETTER_VARIABLE;
 import static org.eclipse.che.plugin.docker.machine.ExecAgentLogDirSetterEnvVariableProvider.LOGS_DIR_VARIABLE;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.name.Names;
 import javax.sql.DataSource;
 import org.eclipse.che.api.user.server.TokenValidator;
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.plugin.docker.machine.ExecAgentLogDirSetterEnvVariableProvider;
-import org.eclipse.che.plugin.docker.machine.WsAgentLogDirSetterEnvVariableProvider;
 
 /**
  * Single-user version Che specific bindings
@@ -61,6 +58,10 @@ public class CheWsMasterModule extends AbstractModule {
             "$HOME/che/exec-agent/che-exec-agent "
                 + "-addr :4412 "
                 + "-cmd ${SHELL_INTERPRETER} "
-                + "-logs-dir $(eval \"$" + LOGS_DIR_SETTER_VARIABLE + "\"; echo \"$" + LOGS_DIR_VARIABLE + "\")");
+                + "-logs-dir $(eval \"$"
+                + LOGS_DIR_SETTER_VARIABLE
+                + "\"; echo \"$"
+                + LOGS_DIR_VARIABLE
+                + "\")");
   }
 }

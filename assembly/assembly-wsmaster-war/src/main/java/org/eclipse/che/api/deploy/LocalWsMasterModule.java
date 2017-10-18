@@ -10,9 +10,8 @@
  */
 package org.eclipse.che.api.deploy;
 
-import org.eclipse.che.inject.DynaModule;
-
 import com.google.inject.AbstractModule;
+import org.eclipse.che.inject.DynaModule;
 
 /** @author David Festal */
 @DynaModule
