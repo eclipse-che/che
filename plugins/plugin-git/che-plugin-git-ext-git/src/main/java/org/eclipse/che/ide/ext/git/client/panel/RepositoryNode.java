@@ -66,6 +66,8 @@ public class RepositoryNode extends AbstractTreeNode implements HasPresentation 
           Elements.createSpanElement(gitResources.gitPanelCss().repositoryChangesLabel());
       spanElement.setInnerText(CHANGES_PREFIX + changes);
       presentation.setUserElement((Element) spanElement);
+    } else {
+      presentation.setUserElement(null); // remove label from node
     }
   }
 
