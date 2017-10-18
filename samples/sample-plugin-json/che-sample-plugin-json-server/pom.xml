@@ -50,17 +50,4 @@
             <artifactId>che-sample-plugin-json-shared</artifactId>
         </dependency>
     </dependencies>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <configuration>
-                    <usedDependencies>
-                        <param>org.eclipse.che.sample:che-sample-plugin-json-shared</param>
-                    </usedDependencies>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>
