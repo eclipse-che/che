@@ -158,11 +158,13 @@ public class CommandsPalette {
    * @param commandName name of the command
    */
   public void startCommandByDoubleClick(String commandName) {
-    actions
-        .doubleClick(
-            seleniumWebDriver.findElement(By.xpath(String.format(Locators.COMMANDS, commandName))))
-        .build()
-        .perform();
+    String locatorToCurrentCommand = String.format(Locators.COMMANDS, commandName);
+    WebElement currentCommand =
+        redrawUiElementTimeout.until(
+            ExpectedConditions.visibilityOfElementLocated(By.xpath(locatorToCurrentCommand)));
+    actions.doubleClick(currentCommand).perform();
+    redrawUiElementTimeout.until(
+        ExpectedConditions.invisibilityOfElementLocated(By.xpath(locatorToCurrentCommand)));
   }
 
   /**
@@ -171,8 +173,17 @@ public class CommandsPalette {
    * @param commandName name of the command
    */
   public void startCommandByEnterKey(String commandName) {
-    seleniumWebDriver.findElement(By.xpath(String.format(Locators.COMMANDS, commandName))).click();
-    actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.ENTER.toString()).perform();
+    String locatorToCurrentCommand = String.format(Locators.COMMANDS, commandName);
+    WebElement currentCommand =
+        redrawUiElementTimeout.until(
+            ExpectedConditions.visibilityOfElementLocated(By.xpath(locatorToCurrentCommand)));
+    seleniumWebDriver.findElement(By.xpath(locatorToCurrentCommand)).click();
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .sendKeys(currentCommand, Keys.ENTER.toString())
+        .perform();
+    redrawUiElementTimeout.until(
+        ExpectedConditions.invisibilityOfElementLocated(By.xpath(locatorToCurrentCommand)));
   }
 
   /**

@@ -85,18 +85,20 @@ public class Menu {
    * @param idCommandName
    */
   public void runAndWaitCommand(final String idTopMenuCommand, final String idCommandName) {
-    (new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC))
-        .until(
-            new ExpectedCondition<Boolean>() {
-              @Override
-              public Boolean apply(WebDriver driver) {
-                driver.findElement(By.id(idTopMenuCommand)).click();
-                return driver.findElement(By.id(idCommandName)).isDisplayed();
-              }
-            });
+    WebDriverWait waitOfMenusRedrawing =
+        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+
+    waitOfMenusRedrawing.until(
+        new ExpectedCondition<Boolean>() {
+          @Override
+          public Boolean apply(WebDriver driver) {
+            driver.findElement(By.id(idTopMenuCommand)).click();
+            return driver.findElement(By.id(idCommandName)).isDisplayed();
+          }
+        });
     seleniumWebDriver.findElement(By.id(idCommandName)).click();
-    (new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC))
-        .until(ExpectedConditions.invisibilityOfElementLocated(By.id(idCommandName)));
+    waitOfMenusRedrawing.until(
+        ExpectedConditions.invisibilityOfElementLocated(By.id(idCommandName)));
   }
 
   /**
@@ -106,29 +108,33 @@ public class Menu {
    * @param idCommandName
    */
   public void runCommand(final String idTopMenuCommand, final String idCommandName) {
+    WebDriverWait redrawMenuItemsWait =
+        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     loader.waitOnClosed();
     try {
-      new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+      redrawMenuItemsWait
           .until(ExpectedConditions.visibilityOfElementLocated(By.id(idTopMenuCommand)))
           .click();
 
     } catch (WebDriverException ex) {
       LOG.error(ex.getLocalizedMessage(), ex);
       WaitUtils.sleepQuietly(REDRAW_UI_ELEMENTS_TIMEOUT_SEC, TimeUnit.MILLISECONDS);
-      new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+      redrawMenuItemsWait
           .until(ExpectedConditions.visibilityOfElementLocated(By.id(idTopMenuCommand)))
           .click();
     }
     try {
-      new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+      redrawMenuItemsWait
           .until(ExpectedConditions.visibilityOfElementLocated(By.id(idCommandName)))
           .click();
     } catch (TimeoutException e) {
       seleniumWebDriver.findElement(By.id(idTopMenuCommand)).click();
-      new WebDriverWait(seleniumWebDriver, MINIMUM_SEC)
+      redrawMenuItemsWait
           .until(ExpectedConditions.visibilityOfElementLocated(By.id(idCommandName)))
           .click();
     }
+    redrawMenuItemsWait.until(
+        ExpectedConditions.invisibilityOfElementLocated(By.id(idCommandName)));
   }
 
   /**
@@ -141,30 +147,33 @@ public class Menu {
   public void runCommand(String idTopMenuCommand, String idCommandName, String idSubCommandName) {
     loader.waitOnClosed();
     clickOnCommand(idTopMenuCommand);
+    WebDriverWait redrawMenuItemsWait =
+        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     try {
-      new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
-          .until(ExpectedConditions.visibilityOfElementLocated(By.id(idCommandName)));
+      redrawMenuItemsWait.until(
+          ExpectedConditions.visibilityOfElementLocated(By.id(idCommandName)));
     } catch (TimeoutException e) {
       LOG.error(e.getLocalizedMessage(), e);
       clickOnCommand(idTopMenuCommand);
     }
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.elementToBeClickable(By.id(idCommandName)));
+    redrawMenuItemsWait.until(ExpectedConditions.elementToBeClickable(By.id(idCommandName)));
     actionsFactory
         .createAction(seleniumWebDriver)
         .moveToElement(seleniumWebDriver.findElement(By.id(idCommandName)))
         .perform();
     //if element If the element is not drawn in time, in the catch block call submenu again
     try {
-      new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-          .until(ExpectedConditions.visibilityOfElementLocated(By.id(idSubCommandName)));
+      redrawMenuItemsWait.until(
+          ExpectedConditions.visibilityOfElementLocated(By.id(idSubCommandName)));
     } catch (TimeoutException e) {
       WaitUtils.sleepQuietly(1);
       seleniumWebDriver.findElement(By.id(idCommandName)).click();
-      new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-          .until(ExpectedConditions.visibilityOfElementLocated(By.id(idSubCommandName)));
+      redrawMenuItemsWait.until(
+          ExpectedConditions.visibilityOfElementLocated(By.id(idSubCommandName)));
     }
     seleniumWebDriver.findElement(By.id(idSubCommandName)).click();
+    redrawMenuItemsWait.until(
+        ExpectedConditions.invisibilityOfElementLocated(By.id(idCommandName)));
   }
 
   /**
@@ -176,33 +185,36 @@ public class Menu {
    */
   public void runCommandByXpath(
       String idTopMenuCommand, String idCommandName, String xpathSubCommandName) {
+    WebDriverWait waitOfMenusRedrawing =
+        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     loader.waitOnClosed();
     clickOnCommand(idTopMenuCommand);
     try {
-      new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
-          .until(ExpectedConditions.visibilityOfElementLocated(By.id(idCommandName)));
+      waitOfMenusRedrawing.until(
+          ExpectedConditions.visibilityOfElementLocated(By.id(idCommandName)));
     } catch (TimeoutException e) {
       LOG.error(e.getLocalizedMessage(), e);
       clickOnCommand(idTopMenuCommand);
     }
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.elementToBeClickable(By.id(idCommandName)));
+    waitOfMenusRedrawing.until(ExpectedConditions.elementToBeClickable(By.id(idCommandName)));
     actionsFactory
         .createAction(seleniumWebDriver)
         .moveToElement(seleniumWebDriver.findElement(By.id(idCommandName)))
         .perform();
     //if element If the element is not drawn in time, in the catch block call submenu again
     try {
-      new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-          .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpathSubCommandName)));
+      waitOfMenusRedrawing.until(
+          ExpectedConditions.visibilityOfElementLocated(By.xpath(xpathSubCommandName)));
     } catch (TimeoutException e) {
       LOG.error(e.getLocalizedMessage(), e);
       WaitUtils.sleepQuietly(MINIMUM_SEC);
       seleniumWebDriver.findElement(By.id(idCommandName)).click();
-      new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-          .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpathSubCommandName)));
+      waitOfMenusRedrawing.until(
+          ExpectedConditions.visibilityOfElementLocated(By.xpath(xpathSubCommandName)));
     }
     seleniumWebDriver.findElement(By.xpath(xpathSubCommandName)).click();
+    waitOfMenusRedrawing.until(
+        ExpectedConditions.invisibilityOfElementLocated(By.id(idCommandName)));
   }
 
   /**
