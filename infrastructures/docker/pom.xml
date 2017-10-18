@@ -29,17 +29,5 @@
     </modules>
     <properties>
         <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
-        <gwt.test.skip>true</gwt.test.skip>
     </properties>
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.eclipse.che.core</groupId>
-                    <artifactId>che-core-api-dto-maven-plugin</artifactId>
-                    <version>${project.version}</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-    </build>
 </project>

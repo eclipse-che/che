@@ -14,9 +14,11 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.fabric8.openshift.client.OpenShiftClient;
+import javax.inject.Named;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.shared.event.WorkspaceRemovedEvent;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 
 /**
@@ -28,15 +30,21 @@ import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory
 public class RemoveProjectOnWorkspaceRemove implements EventSubscriber<WorkspaceRemovedEvent> {
 
   private final OpenShiftClientFactory clientFactory;
+  private final String projectName;
 
   @Inject
-  public RemoveProjectOnWorkspaceRemove(OpenShiftClientFactory clientFactory) {
+  public RemoveProjectOnWorkspaceRemove(
+      @Nullable @Named("che.infra.openshift.project") String projectName,
+      OpenShiftClientFactory clientFactory) {
+    this.projectName = projectName;
     this.clientFactory = clientFactory;
   }
 
   @Inject
   public void subscribe(EventService eventService) {
-    eventService.subscribe(this);
+    if (projectName == null) {
+      eventService.subscribe(this);
+    }
   }
 
   @Override

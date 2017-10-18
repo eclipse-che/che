@@ -105,6 +105,7 @@ public class FindText {
 
   /** wait the 'Find Text' main form is closed */
   public void waitFindTextMainFormIsClosed() {
+    loader.waitOnClosed();
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.MAIN_FORM)));
   }

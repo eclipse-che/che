@@ -47,6 +47,7 @@ import org.eclipse.che.api.workspace.shared.dto.event.RuntimeStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.ServerStatusEvent;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.bootstrapper.OpenShiftBootstrapperFactory;
+import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,13 +72,13 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
 
   @Inject
   public OpenShiftInternalRuntime(
-      @Assisted OpenShiftRuntimeContext context,
-      @Assisted OpenShiftProject project,
+      @Named("che.infra.openshift.machine_start_timeout_min") int machineStartTimeoutMin,
       URLRewriter.NoOpURLRewriter urlRewriter,
       EventService eventService,
       OpenShiftBootstrapperFactory bootstrapperFactory,
       ServersCheckerFactory serverCheckerFactory,
-      @Named("che.infra.openshift.machine_start_timeout_min") int machineStartTimeoutMin) {
+      @Assisted OpenShiftRuntimeContext context,
+      @Assisted OpenShiftProject project) {
     super(context, urlRewriter, false);
     this.eventService = eventService;
     this.bootstrapperFactory = bootstrapperFactory;
@@ -90,16 +91,16 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
   @Override
   protected void internalStart(Map<String, String> startOptions) throws InfrastructureException {
     try {
-
-      prepareOpenShiftPVCs(getContext().getOpenShiftEnvironment().getPersistentVolumeClaims());
+      final OpenShiftEnvironment osEnv = getContext().getOpenShiftEnvironment();
+      prepareOpenShiftPVCs(osEnv.getPersistentVolumeClaims());
 
       List<Service> createdServices = new ArrayList<>();
-      for (Service service : getContext().getOpenShiftEnvironment().getServices().values()) {
+      for (Service service : osEnv.getServices().values()) {
         createdServices.add(project.services().create(service));
       }
 
       List<Route> createdRoutes = new ArrayList<>();
-      for (Route route : getContext().getOpenShiftEnvironment().getRoutes().values()) {
+      for (Route route : osEnv.getRoutes().values()) {
         createdRoutes.add(project.routes().create(route));
       }
 
