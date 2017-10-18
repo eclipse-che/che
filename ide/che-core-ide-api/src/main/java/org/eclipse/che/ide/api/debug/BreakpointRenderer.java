@@ -17,13 +17,29 @@ import org.eclipse.che.ide.api.resources.VirtualFile;
 public interface BreakpointRenderer {
 
   /**
-   * Adds a breakpoint mark of the given breakpoint.
+   * Adds inactive breakpoint mark in the given line.
+   *
+   * @param lineNumber the line where the breakpoint is set
+   */
+  void addBreakpointMark(int lineNumber);
+
+  /**
+   * Adds inactive breakpoint mark in the given line.
+   *
+   * @param lineNumber the line where the breakpoint is set
+   * @param action to line numbering changes
+   */
+  void addBreakpointMark(int lineNumber, LineChangeAction action);
+
+  /**
+   * Adds a breakpoint mark of the given breakpoint. If the mark exists then it will be changed
+   * depending on {@code active} state and {@link Breakpoint#getCondition()}.
    *
    * @param breakpoint the given breakpoint
    * @param active indicates if breakpoint is active or isn't
    * @param action to line numbering changes
    */
-  void setMark(Breakpoint breakpoint, boolean active, LineChangeAction action);
+  default void setBreakpointMark(Breakpoint breakpoint, boolean active, LineChangeAction action) {}
 
   /**
    * Removes the breakpoint mark in the gutter on the given line. Does nothing if there is no
@@ -31,10 +47,17 @@ public interface BreakpointRenderer {
    *
    * @param lineNumber the line where the breakpoint is set
    */
-  void removeMark(int lineNumber);
+  void removeBreakpointMark(int lineNumber);
 
   /** Removes all breakpoint marks. */
-  void removeAllMarks();
+  void clearBreakpointMarks();
+
+  /**
+   * Adds {@code active} breakpoint mark in the given line.
+   *
+   * @param lineNumber the line where the breakpoint is set
+   */
+  void setBreakpointActive(int lineNumber, boolean active);
 
   /**
    * Changes appearance of the line to active/inactive.
