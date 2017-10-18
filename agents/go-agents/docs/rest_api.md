@@ -210,7 +210,7 @@ be republished to the channel. This method may be useful in the reconnect proces
 _DELETE /process/{pid}/events/{channel}_
 
 - `pid` - the id of the process to unsubscribe from
-- `channel` - the id of the webscoket channel which currenly subscribed
+- `channel` - the id of the websocket channel which currenly subscribed
 to the process events
 
 #### Response
