@@ -316,4 +316,8 @@ public class SeleniumWebDriver
     new WebDriverWait(this, timeout)
         .until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(By.id("ide-application-iframe")));
   }
+
+  public WebDriverWait wait(int timeOutInSeconds) {
+    return new WebDriverWait(this, timeOutInSeconds);
+  }
 }

@@ -27,6 +27,9 @@ public interface BreakpointResources extends ClientBundle {
     /** Returns the CSS class name for inactive breakpoint mark */
     String inactive();
 
+    /** Returns the CSS class name for condition breakpoint mark */
+    String condition();
+
     String breakpoint();
   }
 }

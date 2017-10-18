@@ -84,23 +84,29 @@ public class BreakpointStorageImpl implements BreakpointStorage {
 
   @Override
   public void delete(final Breakpoint breakpoint) {
-    breakpoints.removeIf(
-        b ->
-            b.getLocation().getLineNumber() == breakpoint.getLocation().getLineNumber()
-                && b.getLocation().getTarget().equals(breakpoint.getLocation().getTarget()));
+    breakpoints.removeIf(b -> isSameBreakpointLocation(breakpoint, b));
     preserve();
   }
 
   @Override
   public void deleteAll(final List<Breakpoint> breakpoints) {
     for (Breakpoint breakpoint : breakpoints) {
-      breakpoints.removeIf(
-          b ->
-              b.getLocation().getLineNumber() == breakpoint.getLocation().getLineNumber()
-                  && b.getLocation().getTarget().equals(breakpoint.getLocation().getTarget()));
+      breakpoints.removeIf(b -> isSameBreakpointLocation(breakpoint, b));
     }
 
     preserve();
+  }
+
+  @Override
+  public void update(Breakpoint breakpoint) {
+    breakpoints.removeIf(b -> isSameBreakpointLocation(breakpoint, b));
+    breakpoints.add(breakpoint);
+    preserve();
+  }
+
+  private boolean isSameBreakpointLocation(Breakpoint b1, Breakpoint b2) {
+    return b2.getLocation().getLineNumber() == b1.getLocation().getLineNumber()
+        && b2.getLocation().getTarget().equals(b1.getLocation().getTarget());
   }
 
   @Override
@@ -189,7 +195,8 @@ public class BreakpointStorageImpl implements BreakpointStorage {
             .withTarget(location.getTarget())
             .withLineNumber(location.getLineNumber())
             .withExternalResourceId(location.getExternalResourceId())
-            .withExternalResource(location.isExternalResource());
+            .withExternalResource(location.isExternalResource())
+            .withResourceProjectPath(location.getResourceProjectPath());
 
     return dtoFactory
         .createDto(BreakpointDto.class)

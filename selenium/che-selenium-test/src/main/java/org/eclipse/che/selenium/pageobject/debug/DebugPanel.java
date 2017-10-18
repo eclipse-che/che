@@ -10,15 +10,20 @@
  */
 package org.eclipse.che.selenium.pageobject.debug;
 
+import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MINIMUM_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.openqa.selenium.By.id;
+import static org.openqa.selenium.By.xpath;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.common.base.Function;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsExplorer;
@@ -41,26 +46,28 @@ public class DebugPanel {
 
   private static final Logger LOG = LoggerFactory.getLogger(DebugPanel.class);
 
-  @Inject private SeleniumWebDriver seleniumWebDriver;
-  @Inject private Loader loader;
-  @Inject private CodenvyEditor editor;
-  @Inject private CommandsExplorer commandsExplorer;
+  private SeleniumWebDriver seleniumWebDriver;
+  private Loader loader;
+  private CodenvyEditor editor;
+  private CommandsExplorer commandsExplorer;
+  private ActionsFactory actionsFactory;
 
   @Inject
   public DebugPanel(
       SeleniumWebDriver seleniumWebDriver,
       Loader loader,
       CodenvyEditor editor,
-      CommandsExplorer commandsExplorer) {
+      CommandsExplorer commandsExplorer,
+      ActionsFactory actionsFactory) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
     this.editor = editor;
     this.commandsExplorer = commandsExplorer;
+    this.actionsFactory = actionsFactory;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
   private interface Locators {
-    String DEBUGGER_BREAKPOINTS_PANEL_ID = "gwt-debug-debugger-breakpointsPanel";
     String DEBUGGER_PANEL_TAB = "gwt-debug-partButton-Debug";
     String FRAMES_LIST_ID = "gwt-debug-debugger-frames-list";
     String THREADS_LIST_ID = "gwt-debug-debugger-threads-list";
@@ -87,8 +94,21 @@ public class DebugPanel {
     String EVALUATE_EXPRESSIONS = "gwt-debug-ActionButton/evaluateExpression-true";
   }
 
-  @FindBy(id = Locators.DEBUGGER_BREAKPOINTS_PANEL_ID)
-  WebElement debuggerBreakPointPanel;
+  private interface BreakpointsPanel {
+    String ID = "gwt-debug-debugger-breakpointsPanel";
+    String BREAKPOINT_ITEM = "//div[@id='gwt-debug-debugger-breakpointsPanel']//td[text()='%s']";
+    String CONTEXT_MENU = "gwt-debug-contextMenu/breakpointSettings";
+  }
+
+  private interface BreakpointConfigurationWindow {
+    String BREAKPOINT_CONDITION_TEXT =
+        "//div[@id='gwt-debug-breakpoint-configuration-window']//textarea[@id='gwt-debug-breakpoint-condition-text']";
+    String APPLY_BTN =
+        "//div[@id='gwt-debug-breakpoint-configuration-window']//button[@id='gwt-debug-apply-btn']";
+  }
+
+  @FindBy(id = BreakpointsPanel.ID)
+  WebElement breakpointPanel;
 
   @FindBy(id = Locators.DEBUGGER_PANEL_TAB)
   WebElement debuggerTab;
@@ -126,16 +146,15 @@ public class DebugPanel {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
             (WebDriver webDriver) -> {
-              return debuggerBreakPointPanel.getText().contains(content);
+              return breakpointPanel.getText().contains(content);
             });
   }
 
-  /** Wait disappearance any breakpoints from debugger breakpoints panel */
   public void waitBreakPointsPanelIsEmpty() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             (WebDriver webDriver) -> {
-              return debuggerBreakPointPanel.getText().isEmpty();
+              return breakpointPanel.getText().isEmpty();
             });
   }
 
@@ -163,10 +182,10 @@ public class DebugPanel {
   public void selectVarInVariablePanel(String variable) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(String.format(Locators.VARIABLE_PANEL_SELECT_VAL, variable))));
+            visibilityOfElementLocated(
+                xpath(format(Locators.VARIABLE_PANEL_SELECT_VAL, variable))));
     seleniumWebDriver
-        .findElement(By.xpath(String.format(Locators.VARIABLE_PANEL_SELECT_VAL, variable)))
+        .findElement(xpath(format(Locators.VARIABLE_PANEL_SELECT_VAL, variable)))
         .click();
   }
 
@@ -178,8 +197,8 @@ public class DebugPanel {
   public void clickOnButton(String buttonIdLocator) {
     loader.waitOnClosed();
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.id(buttonIdLocator)));
-    seleniumWebDriver.findElement(By.id(buttonIdLocator)).click();
+        .until(visibilityOfElementLocated(id(buttonIdLocator)));
+    seleniumWebDriver.findElement(id(buttonIdLocator)).click();
     loader.waitOnClosed();
   }
 
@@ -194,7 +213,7 @@ public class DebugPanel {
     new WebDriverWait(seleniumWebDriver, 20)
         .until(
             ExpectedConditions.invisibilityOfElementLocated(
-                By.xpath(LocatorsChangeVariable.TEXTAREA)));
+                xpath(LocatorsChangeVariable.TEXTAREA)));
   }
 
   /**
@@ -229,10 +248,10 @@ public class DebugPanel {
     String exprFieldLocator =
         "//div[text()='Enter an expression:']/parent::div/following-sibling::div/input";
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(exprFieldLocator)))
+        .until(visibilityOfElementLocated(xpath(exprFieldLocator)))
         .clear();
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(exprFieldLocator)))
+        .until(visibilityOfElementLocated(xpath(exprFieldLocator)))
         .sendKeys(expression);
   }
 
@@ -248,7 +267,7 @@ public class DebugPanel {
             (ExpectedCondition<Boolean>)
                 webDriver -> {
                   return seleniumWebDriver
-                      .findElement(By.xpath(locator))
+                      .findElement(xpath(locator))
                       .getAttribute("value")
                       .equals(expVal);
                 });
@@ -258,7 +277,7 @@ public class DebugPanel {
   public void clickEvaluateBtn() {
     String locator = "//button[text()='Evaluate']";
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)))
+        .until(visibilityOfElementLocated(xpath(locator)))
         .click();
   }
 
@@ -266,10 +285,10 @@ public class DebugPanel {
   public void clickCloseEvaluateBtn() {
     String locator = "//button[text()='Evaluate']/preceding-sibling::button";
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)))
+        .until(visibilityOfElementLocated(xpath(locator)))
         .click();
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(locator)));
+        .until(ExpectedConditions.invisibilityOfElementLocated(xpath(locator)));
   }
 
   /**
@@ -281,7 +300,7 @@ public class DebugPanel {
 
     try {
       return seleniumWebDriver
-          .findElement(By.id(DebuggerButtonsPanel.REMOVE_ALL_BREAKPOINTS))
+          .findElement(id(DebuggerButtonsPanel.REMOVE_ALL_BREAKPOINTS))
           .isDisplayed();
     } catch (Exception ex) {
       return false;
@@ -301,7 +320,7 @@ public class DebugPanel {
         new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
             .until(
                 ExpectedConditions.presenceOfAllElementsLocatedBy(
-                    By.xpath(locatorWithHiglightedText)));
+                    xpath(locatorWithHiglightedText)));
     for (WebElement hilightedElement : hilightedElements) {
       highLightedText.append(hilightedElement.getText());
     }
@@ -322,7 +341,7 @@ public class DebugPanel {
     editor.waitActiveEditor();
     List<WebElement> editorLines =
         seleniumWebDriver.findElements(
-            By.xpath(
+            xpath(
                 "//div[@id='gwt-debug-editorPartStack-contentPanel']//div[@active]//div[@class='textviewContent' and @contenteditable='true']/div"));
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
@@ -415,9 +434,7 @@ public class DebugPanel {
     waitFramesListPanelReady();
 
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath("//td[text()='" + getFrames()[frameIndex] + "']")))
+        .until(visibilityOfElementLocated(xpath("//td[text()='" + getFrames()[frameIndex] + "']")))
         .click();
   }
 
@@ -444,10 +461,39 @@ public class DebugPanel {
 
     threads.click();
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath("//*[contains(text(),'\"" + threadName + "\"@')]")))
+        .until(visibilityOfElementLocated(xpath("//*[contains(text(),'\"" + threadName + "\"@')]")))
         .click();
     threads.click();
+  }
+
+  public void makeBreakpointConditional(String fileName, int lineNumber, String condition) {
+    String breakpointItem = format(BreakpointsPanel.BREAKPOINT_ITEM, fileName + ":" + lineNumber);
+
+    seleniumWebDriver
+        .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(xpath(breakpointItem)));
+
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .contextClick(seleniumWebDriver.findElement(xpath(breakpointItem)))
+        .build()
+        .perform();
+
+    seleniumWebDriver
+        .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(id(BreakpointsPanel.CONTEXT_MENU)))
+        .click();
+
+    seleniumWebDriver
+        .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            visibilityOfElementLocated(
+                xpath(BreakpointConfigurationWindow.BREAKPOINT_CONDITION_TEXT)))
+        .sendKeys(condition);
+
+    seleniumWebDriver
+        .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(xpath(BreakpointConfigurationWindow.APPLY_BTN)))
+        .click();
   }
 }

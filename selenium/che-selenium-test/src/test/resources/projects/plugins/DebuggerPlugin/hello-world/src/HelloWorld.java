@@ -8,18 +8,11 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.debug.shared.model;
+public class HelloWorld {
 
-/** @author Anatoliy Bazko */
-public interface Breakpoint {
-  /** The location of the breakpoint. */
-  Location getLocation();
-
-  /** Indicates if it is enabled or not. */
-  boolean isEnabled();
-
-  /** The condition. */
-  String getCondition();
-
-  void setCondition(String condition);
+    public static void main(String[] arg) {
+        for (int i = 0; i < 10; i++) {
+            System.out.println(i);
+        }
+    }
 }
