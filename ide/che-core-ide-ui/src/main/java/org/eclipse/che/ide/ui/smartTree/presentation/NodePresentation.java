@@ -18,7 +18,9 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  * Node presentation.
  *
  * @author Vlad Zhukovskiy
+ * @deprecated use {@link NewNodePresentation} instead
  */
+@Deprecated
 public class NodePresentation {
   private String presentableText;
   private String presentableTextCss;
