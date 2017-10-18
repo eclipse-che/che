@@ -37,14 +37,14 @@ import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
 public class CheckRestoringOfSplitEditorTest {
-  private String nameOfJavaClass = "AppController.java";
-  private String nameOfReadmeFile = "README.md";
-  private String nameOfTabPomFile = "qa-spring-sample";
-  private String nameOfTabJavaClass = "AppController";
+  private String javaClassName = "AppController.java";
+  private String readmeFileName = "README.md";
+  private String pomFileTab = "qa-spring-sample";
+  private String javaClassTab = "AppController";
   private final String PROJECT_NAME =
       NameGenerator.generate(CheckRestoringOfSplitEditorTest.class.getSimpleName(), 4);
   private final String PATH_TO_JAVA_FILE =
-      PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/" + nameOfJavaClass;
+      PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/" + javaClassName;
   private Pair<Integer, Integer> cursorPositionForJavaFile = new Pair<>(12, 1);
   private Pair<Integer, Integer> cursorPositionForReadMeFile = new Pair<>(1, 10);
   private Pair<Integer, Integer> cursorPositionForPomFile = new Pair<>(31, 1);
@@ -92,14 +92,14 @@ public class CheckRestoringOfSplitEditorTest {
 
     seleniumWebDriver.navigate().refresh();
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.waitItemInVisibleArea(nameOfJavaClass);
+    projectExplorer.waitItemInVisibleArea(javaClassName);
     notificationsPopupPanel.waitPopUpPanelsIsClosed();
     checkSplitdEditorAfterRefreshing(
-        1, nameOfTabJavaClass, expectedTextFromEditor.get(0), cursorPositionForJavaFile);
+        1, javaClassTab, expectedTextFromEditor.get(0), cursorPositionForJavaFile);
     checkSplitdEditorAfterRefreshing(
-        2, nameOfReadmeFile, expectedTextFromEditor.get(1).trim(), cursorPositionForReadMeFile);
+        2, readmeFileName, expectedTextFromEditor.get(1).trim(), cursorPositionForReadMeFile);
     checkSplitdEditorAfterRefreshing(
-        3, nameOfTabPomFile, expectedTextFromEditor.get(2).trim(), cursorPositionForPomFile);
+        3, pomFileTab, expectedTextFromEditor.get(2).trim(), cursorPositionForPomFile);
   }
 
   private void checkSplitdEditorAfterRefreshing(
@@ -121,25 +121,25 @@ public class CheckRestoringOfSplitEditorTest {
     projectExplorer.openItemByPath(PATH_TO_JAVA_FILE);
     loader.waitOnClosed();
     editor.waitActiveEditor();
-    editor.openContextMenuForTabByName(nameOfTabJavaClass);
+    editor.openContextMenuForTabByName(javaClassTab);
     editor.runActionForTabFromContextMenu(CodenvyEditor.TabAction.SPIT_HORISONTALLY);
-    editor.selectTabByIndexEditorWindowAndOpenMenu(0, nameOfTabJavaClass);
+    editor.selectTabByIndexEditorWindowAndOpenMenu(0, javaClassTab);
     editor.runActionForTabFromContextMenu(CodenvyEditor.TabAction.SPLIT_VERTICALLY);
     loader.waitOnClosed();
-    editor.selectTabByIndexEditorWindow(1, nameOfTabJavaClass);
-    projectExplorer.openItemByPath(PROJECT_NAME + "/" + nameOfReadmeFile);
-    editor.selectTabByIndexEditorWindow(2, nameOfTabJavaClass);
+    editor.selectTabByIndexEditorWindow(1, javaClassTab);
+    projectExplorer.openItemByPath(PROJECT_NAME + "/" + readmeFileName);
+    editor.selectTabByIndexEditorWindow(2, javaClassTab);
     projectExplorer.openItemByPath(PROJECT_NAME + "/" + namePomFile);
   }
 
   private void setPositionsForSplittedEditor() {
-    editor.selectTabByIndexEditorWindow(0, nameOfTabJavaClass);
+    editor.selectTabByIndexEditorWindow(0, javaClassTab);
     editor.setCursorToDefinedLineAndChar(
         cursorPositionForJavaFile.first, cursorPositionForJavaFile.second);
-    editor.selectTabByName(nameOfReadmeFile);
+    editor.selectTabByName(readmeFileName);
     editor.setCursorToDefinedLineAndChar(
         cursorPositionForReadMeFile.first, cursorPositionForReadMeFile.second);
-    editor.selectTabByName(nameOfTabPomFile);
+    editor.selectTabByName(pomFileTab);
     editor.setCursorToDefinedLineAndChar(
         cursorPositionForPomFile.first, cursorPositionForPomFile.second);
   }
