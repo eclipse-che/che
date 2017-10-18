@@ -63,7 +63,8 @@ public class CheLoginPage implements LoginPage {
 
   public void waitOnClose() {
     webDriverWait.until(
-        ExpectedConditions.invisibilityOfAllElements(ImmutableList.of(loginButton)));
+        ExpectedConditions.invisibilityOfAllElements(
+            ImmutableList.of(loginButton, passwordInput, usernameInput)));
   }
 
   public boolean isOpened() {
