@@ -44,7 +44,7 @@ public class CheLoginPage implements LoginPage {
     PageFactory.initElements(seleniumWebDriver, this);
 
     webDriverWait =
-        new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+        new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC);
   }
 
   public void login(String username, String password) {
