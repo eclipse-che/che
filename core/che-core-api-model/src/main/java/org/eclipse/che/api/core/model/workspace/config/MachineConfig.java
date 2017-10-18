@@ -31,6 +31,9 @@ public interface MachineConfig {
   /** Returns mapping of references to configurations of servers deployed into machine. */
   Map<String, ? extends ServerConfig> getServers();
 
+  /** Returns environment variables of machine. */
+  Map<String, String> getEnv();
+
   /** Returns attributes of resources of machine. */
   Map<String, String> getAttributes();
 }
