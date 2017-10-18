@@ -1,18 +1,19 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2012-2017 Red Hat, Inc. All rights reserved. This program and the accompanying
+ * materials are made available under the terms of the Eclipse Public License v1.0 which accompanies
+ * this distribution, and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Red Hat, Inc. - initial API and implementation
+ * Contributors: Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.api.languageserver.registry;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -75,9 +76,9 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
     this.initializedServers = new HashMap<>();
   }
 
-  private LanguageDescription findLanguage(String path) {
+  private LanguageDescription findLanguage(String fileUri) {
     for (LanguageDescription language : languages) {
-      if (matchesFilenames(language, path) || matchesExtensions(language, path)) {
+      if (matchesFilenames(language, fileUri) || matchesExtensions(language, fileUri)) {
         return language;
       }
     }
@@ -110,7 +111,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
       return null;
     }
     long thread = Thread.currentThread().getId();
-    List<LanguageServerLauncher> requiredToLaunch = findLaunchers(projectPath, fileUri);
+    List<LanguageServerLauncher> requiredToLaunch = findLaunchersToLaunch(projectPath, fileUri);
     LOG.info("required to launch for thread " + thread + ": " + requiredToLaunch);
     // launchers is the set of things we need to have initialized
 
@@ -189,7 +190,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
     return getCapabilities(fileUri);
   }
 
-  List<LanguageServerLauncher> findLaunchers(String projectPath, String fileUri) {
+  private List<LanguageServerLauncher> findLaunchersToLaunch(String projectPath, String fileUri) {
     LanguageDescription language = findLanguage(fileUri);
     if (language == null) {
       return Collections.emptyList();
@@ -198,12 +199,29 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
     for (LanguageServerLauncher launcher : launchers) {
       if (launcher.isAbleToLaunch()) {
         int score = matchScore(launcher.getDescription(), fileUri, language.getLanguageId());
-        if (score > 0) {
+        if (score > 0 || matchesWatchPatterns(launcher, fileUri)) {
           result.add(launcher);
         }
       }
     }
     return result;
+  }
+
+  private boolean matchesWatchPatterns(LanguageServerLauncher launcher, String fileUri) {
+    // we need to launch servers that are interested in didChangeWatchedFiles notifications.
+    try {
+      URI uri = new URI(fileUri);
+      Path path = FileSystems.getDefault().getPath(uri.getPath());
+      return launcher
+          .getDescription()
+          .getFileWatchPatterns()
+          .stream()
+          .map(LanguageServerFileWatcher.patternToMatcher())
+          .anyMatch(matcher -> matcher.matches(path));
+    } catch (URISyntaxException e) {
+      LOG.error("Could not parse URI", e);
+    }
+    return false;
   }
 
   @Override
@@ -276,7 +294,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
         .collect(Collectors.toList());
   }
 
-  private int matchScore(LanguageServerDescription desc, String path, String languageId) {
+  private int matchScore(LanguageServerDescription desc, String fileUri, String languageId) {
     int match = matchLanguageId(desc, languageId);
     if (match == 10) {
       return 10;
@@ -289,16 +307,16 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
           return 10;
         }
       }
-      if (filter.getScheme() != null && path.startsWith(filter.getScheme() + ":")) {
+      if (filter.getScheme() != null && fileUri.startsWith(filter.getScheme() + ":")) {
         return 10;
       }
       String pattern = filter.getPathRegex();
       if (pattern != null) {
-        if (pattern.equals(path)) {
+        if (pattern.equals(fileUri)) {
           return 10;
         }
         Pattern regex = Pattern.compile(pattern);
-        if (regex.matcher(path).matches()) {
+        if (regex.matcher(fileUri).matches()) {
           match = Math.max(match, 5);
         }
       }
