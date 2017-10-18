@@ -10,20 +10,21 @@
  */
 package org.eclipse.che.ide.api.debug;
 
+import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 
 /** Component that handles breakpoints display. */
 public interface BreakpointRenderer {
 
   /**
-   * Add a breakpoint mark in the gutter on the given line.
+   * Adds inactive breakpoint mark in the given line.
    *
    * @param lineNumber the line where the breakpoint is set
    */
   void addBreakpointMark(int lineNumber);
 
   /**
-   * Add a breakpoint mark in the gutter on the given line.
+   * Adds inactive breakpoint mark in the given line.
    *
    * @param lineNumber the line where the breakpoint is set
    * @param action to line numbering changes
@@ -31,8 +32,18 @@ public interface BreakpointRenderer {
   void addBreakpointMark(int lineNumber, LineChangeAction action);
 
   /**
-   * Removes the breakpoint mark in the gutter on the given line.<br>
-   * Does nothing if there is no breakpoint on this line.
+   * Adds a breakpoint mark of the given breakpoint. If the mark exists then it will be changed
+   * depending on {@code active} state and {@link Breakpoint#getCondition()}.
+   *
+   * @param breakpoint the given breakpoint
+   * @param active indicates if breakpoint is active or isn't
+   * @param action to line numbering changes
+   */
+  default void setBreakpointMark(Breakpoint breakpoint, boolean active, LineChangeAction action) {}
+
+  /**
+   * Removes the breakpoint mark in the gutter on the given line. Does nothing if there is no
+   * breakpoint on this line.
    *
    * @param lineNumber the line where the breakpoint is set
    */
@@ -42,8 +53,7 @@ public interface BreakpointRenderer {
   void clearBreakpointMarks();
 
   /**
-   * Changes appearance of the breakpoint on the line to active/inactive.<br>
-   * Does nothing if there is no breakpoint of this line.
+   * Adds {@code active} breakpoint mark in the given line.
    *
    * @param lineNumber the line where the breakpoint is set
    */

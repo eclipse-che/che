@@ -533,6 +533,17 @@ export class CheFactory {
   }
 
   /**
+   * Get the factory by factoryName and userId
+   * @param factoryName {string} the factory name
+   * @param userId {string} the user ID
+   * @returns factory {che.IFactory}
+   */
+  getFactoryByName(factoryName: string, userId: string): che.IFactory {
+    const key = `${userId}:${factoryName}`;
+    return this.factoriesByName.get(key);
+  }
+
+  /**
    * Set the factory
    * @param factory {che.IFactory}
    * @returns {ng.IPromise<any>} the promise
