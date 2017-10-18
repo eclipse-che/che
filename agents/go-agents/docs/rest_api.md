@@ -191,7 +191,7 @@ The result of the request _GET /process?all=true_
 _POST /process/{pid}/events/{channel}_
 
 - `pid` - the id of the process to subscribe to
-- `channel` - the id of the webscoket channel which is subscriber
+- `channel` - the id of the websocket channel which is subscriber
 - `types`(optional) - the types of the events separated by comma e.g. `?types=stderr,stdout`
 -  `after`(optional) - process logs which appeared after given time will
 be republished to the channel. This method may be useful in the reconnect process
