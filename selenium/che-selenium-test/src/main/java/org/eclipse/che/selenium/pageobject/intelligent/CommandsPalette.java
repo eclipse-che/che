@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.pageobject.intelligent;
 
+import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
@@ -143,13 +144,13 @@ public class CommandsPalette {
   public void commandIsExists(String commandName) {
     redrawUiElementTimeout.until(
         ExpectedConditions.visibilityOfElementLocated(
-            By.xpath(String.format(Locators.COMMANDS, commandName))));
+            By.xpath(format(Locators.COMMANDS, commandName))));
   }
 
   public void commandIsNotExists(String commandName) {
     redrawUiElementTimeout.until(
         ExpectedConditions.invisibilityOfElementLocated(
-            By.xpath(String.format(Locators.COMMANDS, commandName))));
+            By.xpath(format(Locators.COMMANDS, commandName))));
   }
 
   /**
@@ -158,7 +159,7 @@ public class CommandsPalette {
    * @param commandName name of the command
    */
   public void startCommandByDoubleClick(String commandName) {
-    String locatorToCurrentCommand = String.format(Locators.COMMANDS, commandName);
+    String locatorToCurrentCommand = format(Locators.COMMANDS, commandName);
     WebElement currentCommand =
         redrawUiElementTimeout.until(
             ExpectedConditions.visibilityOfElementLocated(By.xpath(locatorToCurrentCommand)));
@@ -173,7 +174,7 @@ public class CommandsPalette {
    * @param commandName name of the command
    */
   public void startCommandByEnterKey(String commandName) {
-    String locatorToCurrentCommand = String.format(Locators.COMMANDS, commandName);
+    String locatorToCurrentCommand = format(Locators.COMMANDS, commandName);
     WebElement currentCommand =
         redrawUiElementTimeout.until(
             ExpectedConditions.visibilityOfElementLocated(By.xpath(locatorToCurrentCommand)));
