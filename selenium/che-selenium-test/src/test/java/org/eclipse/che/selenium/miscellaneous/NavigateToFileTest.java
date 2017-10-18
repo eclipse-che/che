@@ -17,11 +17,14 @@ import java.util.Arrays;
 import java.util.List;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.constant.TestGitConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -29,6 +32,7 @@ import org.eclipse.che.selenium.pageobject.NavigateToFile;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.openqa.selenium.Keys;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -67,6 +71,7 @@ public class NavigateToFileTest {
       Arrays.asList(
           "classpath (/NavigateFile_2/.che)", "classpath (/NavigateFile/.che)",
           "createdFrom.con (/NavigateFile_2)", "createdFrom.api (/NavigateFile)");
+  private static final String FILE_H_SYMBOL = "HEAD (/NavigateFile/.git)";
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
@@ -78,6 +83,9 @@ public class NavigateToFileTest {
   @Inject private Menu menu;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private org.eclipse.che.selenium.pageobject.git.Git git;
+  @Inject private AskDialog askDialog;
+  @Inject private Events events;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -97,7 +105,33 @@ public class NavigateToFileTest {
   }
 
   @Test
-  public void checkFunctionNavigateFile() {
+  public void checkNavigateToFileFunctionWithFilesFromHiddenProjects() {
+    projectExplorer.waitProjectExplorer();
+    projectExplorer.waitItem(PROJECT_NAME);
+    projectExplorer.openItemByPath(PROJECT_NAME);
+    menu.runCommand(
+        TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.INITIALIZE_REPOSITORY);
+    askDialog.acceptDialogWithText(
+        "Do you want to initialize the local repository " + PROJECT_NAME + "?");
+    loader.waitOnClosed();
+    git.waitGitStatusBarWithMess(TestGitConstants.GIT_INITIALIZED_SUCCESS);
+
+    //check that HEAD file from .git folder is not appear in list
+    menu.runCommand(
+        TestMenuCommandsConstants.Assistant.ASSISTANT,
+        TestMenuCommandsConstants.Assistant.NAVIGATE_TO_FILE);
+    navigateToFile.waitFormToOpen();
+    loader.waitOnClosed();
+    navigateToFile.typeSymbolInFileNameField("h");
+    loader.waitOnClosed();
+    navigateToFile.waitFileNamePopUp();
+    Assert.assertFalse(navigateToFile.waitListOfFilesNames(FILE_H_SYMBOL));
+    navigateToFile.closeNavigateToFileForm();
+    navigateToFile.waitFormToClose();
+  }
+
+  @Test
+  public void checkNavigateToFileFunction() {
     // Open the project one and check function 'Navigate To File'
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
@@ -139,10 +173,19 @@ public class NavigateToFileTest {
     selectFileFromNavigateLaunchByKeyboard("R", FILE_README + PATH_2_TO_README_FILE);
     editor.waitTabIsPresent("README.md");
     editor.waitActiveEditor();
+
+    // Check that form is closed by pressing ESC button
+    loader.waitOnClosed();
+    menu.runCommand(
+        TestMenuCommandsConstants.Assistant.ASSISTANT,
+        TestMenuCommandsConstants.Assistant.NAVIGATE_TO_FILE);
+    navigateToFile.waitFormToOpen();
+    navigateToFile.closeNavigateToFileForm();
+    navigateToFile.waitFormToClose();
   }
 
   @Test
-  public void checkNavigateFileFunctionWithJustCreatedFiles() throws Exception {
+  public void checkNavigateToFileFunctionWithJustCreatedFiles() throws Exception {
     String content = "NavigateToFileTest";
 
     projectExplorer.waitProjectExplorer();

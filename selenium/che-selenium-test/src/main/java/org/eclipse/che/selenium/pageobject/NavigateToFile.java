@@ -124,8 +124,8 @@ public class NavigateToFile {
    *
    * @param text a text that should be into list
    */
-  public void waitListOfFilesNames(final String text) {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+  public Boolean waitListOfFilesNames(final String text) {
+    return new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until((ExpectedCondition<Boolean>) webDriver -> suggestionPanel.getText().contains(text));
   }
 
