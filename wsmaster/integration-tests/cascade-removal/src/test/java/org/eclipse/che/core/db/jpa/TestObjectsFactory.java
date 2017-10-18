@@ -118,6 +118,7 @@ public final class TestObjectsFactory {
     newMachine.setServers(ImmutableMap.of("ref1", serverConf1, "ref2", serverConf2));
     newMachine.setInstallers(ImmutableList.of("agent5", "agent4"));
     newMachine.setAttributes(singletonMap("att1", "val"));
+    newMachine.setEnv(singletonMap("CHE_ENV", "value"));
 
     final EnvironmentImpl newEnv = new EnvironmentImpl();
     newEnv.setMachines(ImmutableMap.of("new-machine", newMachine));

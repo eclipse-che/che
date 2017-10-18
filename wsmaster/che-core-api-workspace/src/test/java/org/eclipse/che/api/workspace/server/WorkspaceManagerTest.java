@@ -556,6 +556,7 @@ public class WorkspaceManagerTest {
         new MachineConfigImpl(
             singletonList("org.eclipse.che.ws-agent"),
             null,
+            singletonMap("CHE_ENV", "value"),
             singletonMap("memoryLimitBytes", "10000"));
     EnvironmentImpl environment =
         new EnvironmentImpl(

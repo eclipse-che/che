@@ -58,6 +58,15 @@ public class MachineConfigImpl implements MachineConfig {
   @Column(name = "attributes")
   private Map<String, String> attributes;
 
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(
+    name = "externalmachine_env",
+    joinColumns = @JoinColumn(name = "externalmachine_id")
+  )
+  @MapKeyColumn(name = "env_key")
+  @Column(name = "env_value")
+  private Map<String, String> env;
+
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
   @JoinColumn(name = "servers_id")
   @MapKeyColumn(name = "servers_key")
@@ -68,6 +77,7 @@ public class MachineConfigImpl implements MachineConfig {
   public MachineConfigImpl(
       List<String> installers,
       Map<String, ? extends ServerConfig> servers,
+      Map<String, String> env,
       Map<String, String> attributes) {
     if (installers != null) {
       this.installers = new ArrayList<>(installers);
@@ -81,13 +91,16 @@ public class MachineConfigImpl implements MachineConfig {
                   Collectors.toMap(
                       Map.Entry::getKey, entry -> new ServerConfigImpl(entry.getValue())));
     }
+    if (env != null) {
+      this.env = new HashMap<>(env);
+    }
     if (attributes != null) {
       this.attributes = new HashMap<>(attributes);
     }
   }
 
   public MachineConfigImpl(MachineConfig machine) {
-    this(machine.getInstallers(), machine.getServers(), machine.getAttributes());
+    this(machine.getInstallers(), machine.getServers(), machine.getEnv(), machine.getAttributes());
   }
 
   @Override
@@ -125,6 +138,23 @@ public class MachineConfigImpl implements MachineConfig {
   }
 
   @Override
+  public Map<String, String> getEnv() {
+    if (env == null) {
+      env = new HashMap<>();
+    }
+    return env;
+  }
+
+  public void setEnv(Map<String, String> env) {
+    this.env = env;
+  }
+
+  public MachineConfigImpl withEnv(Map<String, String> env) {
+    this.env = env;
+    return this;
+  }
+
+  @Override
   public Map<String, String> getAttributes() {
     if (attributes == null) {
       attributes = new HashMap<>();
@@ -152,6 +182,7 @@ public class MachineConfigImpl implements MachineConfig {
     final MachineConfigImpl that = (MachineConfigImpl) obj;
     return Objects.equals(id, that.id)
         && getInstallers().equals(that.getInstallers())
+        && getEnv().equals(that.getEnv())
         && getAttributes().equals(that.getAttributes())
         && getServers().equals(that.getServers());
   }
@@ -161,6 +192,7 @@ public class MachineConfigImpl implements MachineConfig {
     int hash = 7;
     hash = 31 * hash + Objects.hashCode(id);
     hash = 31 * hash + getInstallers().hashCode();
+    hash = 31 * hash + getEnv().hashCode();
     hash = 31 * hash + getAttributes().hashCode();
     hash = 31 * hash + getServers().hashCode();
     return hash;
@@ -173,6 +205,8 @@ public class MachineConfigImpl implements MachineConfig {
         + id
         + ", installers="
         + installers
+        + ", env="
+        + env
         + ", attributes="
         + attributes
         + ", servers="

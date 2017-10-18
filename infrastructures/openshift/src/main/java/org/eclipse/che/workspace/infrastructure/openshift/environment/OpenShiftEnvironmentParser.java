@@ -14,6 +14,7 @@ import static java.lang.String.format;
 import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_POD_NAME_LABEL;
 
 import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
@@ -26,7 +27,9 @@ import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.client.OpenShiftClient;
 import java.io.ByteArrayInputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
@@ -163,6 +166,10 @@ public class OpenShiftEnvironmentParser {
           ServerExposer serverExposer =
               new ServerExposer(machineName, containerConfig, openShiftEnvironment);
           serverExposer.expose(machineConfig.getServers());
+
+          for (Entry<String, String> envEntry : machineConfig.getEnv().entrySet()) {
+            putEnv(containerConfig.getEnv(), envEntry.getKey(), envEntry.getValue());
+          }
         }
       }
     }
@@ -200,5 +207,10 @@ public class OpenShiftEnvironmentParser {
     if (object == null) {
       throw new ValidationException(errorMessage);
     }
+  }
+
+  private void putEnv(List<EnvVar> envs, String key, String value) {
+    envs.removeIf(env -> key.equals(env.getName()));
+    envs.add(new EnvVar(key, value, null));
   }
 }
