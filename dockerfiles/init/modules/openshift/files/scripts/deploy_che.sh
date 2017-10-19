@@ -117,7 +117,7 @@ if [ "${CHE_MULTI_USER}" == "true" ]; then
   
   if [ "${CHE_FABRIC8_MULTITENANT}" == "true" ]; then
     CHE_DEDICATED_KEYCLOAK="false"
-    DEFAULT_CHE_IMAGE_REPO="docker.io/rhchestage/che-server"
+    DEFAULT_CHE_IMAGE_REPO="docker.io/rhchestage/che-server-multiuser"
     DEFAULT_CHE_IMAGE_TAG="nightly-fabric8"
   else
     CHE_DEDICATED_KEYCLOAK=${CHE_DEDICATED_KEYCLOAK:-"true"}
