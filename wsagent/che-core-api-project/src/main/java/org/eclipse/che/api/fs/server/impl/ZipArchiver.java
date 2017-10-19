@@ -73,21 +73,28 @@ class ZipArchiver {
       try (ZipInputStream zis = new ZipInputStream(content)) {
         ZipEntry zipEntry = zis.getNextEntry();
 
+        String prefixToSkip = null;
         if (zipEntry.isDirectory() && skipRoot) {
+          prefixToSkip = zipEntry.getName();
           zipEntry = zis.getNextEntry();
         }
 
         while (zipEntry != null) {
-          String name = zipEntry.getName();
+          String name =
+              prefixToSkip != null
+                  ? zipEntry.getName().replaceFirst(prefixToSkip, "")
+                  : zipEntry.getName();
           Path path = fsPath.resolve(name);
 
-          Files.createDirectories(path.getParent());
           if (overwrite) {
             Files.deleteIfExists(path);
           }
-
-          try (FileOutputStream fos = new FileOutputStream(path.toFile())) {
-            IOUtils.copy(zis, fos);
+          if (zipEntry.isDirectory()) {
+            Files.createDirectory(path);
+          } else {
+            try (FileOutputStream fos = new FileOutputStream(path.toFile())) {
+              IOUtils.copy(zis, fos);
+            }
           }
 
           zipEntry = zis.getNextEntry();

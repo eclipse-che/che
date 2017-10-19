@@ -23,6 +23,7 @@ import org.eclipse.che.api.search.server.excludes.MediaTypesExcludeMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -35,6 +36,14 @@ public class MediaTypesExcludeMatcherTest {
   @InjectMocks private MediaTypesExcludeMatcher mediaTypesExcludeMatcher;
 
   @Mock private Path path;
+
+  @BeforeMethod
+  public void setUp() throws Exception {
+    String WS_PATH = "/ws/path";
+
+    when(pathTransformer.transform(path)).thenReturn(WS_PATH);
+    when(pathTransformer.transform(WS_PATH)).thenReturn(path);
+  }
 
   @Test
   public void shouldMatchEmptyFile() throws Exception {
