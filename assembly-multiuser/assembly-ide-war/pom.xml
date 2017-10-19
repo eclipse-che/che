@@ -44,6 +44,11 @@
             <groupId>org.eclipse.che.multiuser</groupId>
             <artifactId>che-multiuser-machine-authentication-ide</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-dev</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -144,45 +149,22 @@
                     <outputDirectory>${generated.sources.directory}</outputDirectory>
                 </configuration>
             </plugin>
-            <!-- GWT Maven Plugin -->
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
+                <groupId>net.ltgt.gwt.maven</groupId>
                 <artifactId>gwt-maven-plugin</artifactId>
                 <executions>
                     <execution>
                         <goals>
                             <goal>compile</goal>
-                            <!--<goal>test</goal> -->
                         </goals>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.google.gwt</groupId>
-                        <artifactId>gwt-codeserver</artifactId>
-                        <version>${com.google.gwt.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>com.google.gwt</groupId>
-                        <artifactId>gwt-dev</artifactId>
-                        <version>${com.google.gwt.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>com.google.gwt</groupId>
-                        <artifactId>gwt-user</artifactId>
-                        <version>${com.google.gwt.version}</version>
-                    </dependency>
-                </dependencies>
                 <configuration>
-                    <gwtSdkFirstInClasspath>true</gwtSdkFirstInClasspath>
-                    <extraJvmArgs>${gwt.compiler.extraJvmArgs}</extraJvmArgs>
-                    <modules>
-                        <module>org.eclipse.che.ide.IDE</module>
-                    </modules>
-                    <!-- don' remove it we will use it then need to found 
-                        bug in compiled JS -->
-                    <!--style>DETAILED</style -->
-                    <logLevel>${gwt.compiler.logLevel}</logLevel>
+                    <moduleName>org.eclipse.che.ide.IDE</moduleName>
+                    <jvmArgs>
+                        <arg>${gwt.compiler.jvmArgs.Xss}</arg>
+                        <arg>${gwt.compiler.jvmArgs.Xmx}</arg>
+                    </jvmArgs>
                 </configuration>
             </plugin>
             <plugin>
