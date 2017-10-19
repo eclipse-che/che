@@ -11,6 +11,7 @@
 package org.eclipse.che.plugin.testing.junit.ide.action;
 
 import com.google.inject.Inject;
+import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
@@ -20,8 +21,8 @@ import org.eclipse.che.plugin.testing.ide.action.TestAction;
 public class JUnitTestActionGroup implements TestAction {
   public static final String TEST_ACTION_RUN = "TestJUnitActionRun";
   public static final String TEST_ACTION_DEBUG = "TestJUnitActionDebug";
-  private final BaseAction runTestAction;
-  private final BaseAction debugTestAction;
+  private final Action runTestAction;
+  private final Action debugTestAction;
 
   @Inject
   public JUnitTestActionGroup(
