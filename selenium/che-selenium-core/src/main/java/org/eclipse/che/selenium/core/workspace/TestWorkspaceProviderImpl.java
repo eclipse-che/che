@@ -39,21 +39,40 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
   private static final Logger LOG = LoggerFactory.getLogger(TestWorkspaceProviderImpl.class);
+  private static final String AUTO = "auto";
 
-  @Inject(optional = true)
-  @Named("sys.workspace_pool_size")
-  private int poolSize;
-
-  @Inject
-  @Named("workspace.default_memory_gb")
-  private int defaultMemoryGb;
-
-  @Inject private Provider<TestUser> defaultUser;
-  @Inject private TestWorkspaceServiceClient testWorkspaceServiceClient;
-  @Inject private TestWorkspaceServiceClientFactory testWorkspaceServiceClientFactory;
+  private final int poolSize;
+  private final int defaultMemoryGb;
+  private final Provider<TestUser> defaultUser;
+  private final TestWorkspaceServiceClient testWorkspaceServiceClient;
+  private final TestWorkspaceServiceClientFactory testWorkspaceServiceClientFactory;
 
   private ArrayBlockingQueue<TestWorkspace> testWorkspaceQueue;
   private ScheduledExecutorService executor;
+
+  @Inject
+  public TestWorkspaceProviderImpl(
+      @Named("sys.workspace_pool_size") String poolSize,
+      @Named("workspace.default_memory_gb") int defaultMemoryGb,
+      @Named("sys.threads") int threads,
+      Provider<TestUser> defaultUser,
+      TestWorkspaceServiceClient testWorkspaceServiceClient,
+      TestWorkspaceServiceClientFactory testWorkspaceServiceClientFactory) {
+    this.defaultMemoryGb = defaultMemoryGb;
+    this.defaultUser = defaultUser;
+    this.testWorkspaceServiceClient = testWorkspaceServiceClient;
+    this.testWorkspaceServiceClientFactory = testWorkspaceServiceClientFactory;
+
+    if (poolSize.equals(AUTO)) {
+      this.poolSize = (threads - 1) / 2 + 1;
+    } else {
+      this.poolSize = Integer.parseInt(poolSize);
+    }
+
+    if (this.poolSize > 0) {
+      initializePool();
+    }
+  }
 
   @Override
   public TestWorkspace createWorkspace(TestUser owner, int memoryGB, String template)
@@ -97,12 +116,11 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
 
   @Override
   public void shutdown() {
-    if (poolSize == 0) {
+    if (executor == null) {
       return;
     }
 
     boolean isInterrupted = false;
-
     if (!executor.isShutdown()) {
       executor.shutdown();
       try {
@@ -122,7 +140,6 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
       }
       LOG.info("Workspace threads pool is terminated");
     }
-
     LOG.info("Destroy remained workspaces: {}.", extractWorkspaceInfo());
     testWorkspaceQueue.forEach(TestWorkspace::delete);
 
@@ -145,12 +162,7 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
         .collect(Collectors.toList());
   }
 
-  @Inject
-  public void initializePool() {
-    if (poolSize == 0) {
-      return;
-    }
-
+  private void initializePool() {
     LOG.info("Initialize workspace pool with {} entries.", poolSize);
     testWorkspaceQueue = new ArrayBlockingQueue<>(poolSize);
     executor =
