@@ -89,7 +89,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
   /** Tells whether this class is in debug mode. */
   private static final boolean DEBUG =
       "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jdt.ui/debug/ResultCollector"));
-  //$NON-NLS-1$//$NON-NLS-2$
+  // $NON-NLS-1$//$NON-NLS-2$
 
   /** Triggers for method proposals without parameters. Do not modify. */
   protected static final char[] METHOD_TRIGGERS = new char[] {';', ',', '.', '\t', '[', ' '};
@@ -255,7 +255,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
               JavaPlugin.getPluginId(),
               IStatus.OK,
               "Exception when processing proposal for: " + String.valueOf(proposal.getCompletion()),
-              e)); //$NON-NLS-1$
+              e)); // $NON-NLS-1$
     }
 
     if (DEBUG) fUITime += System.currentTimeMillis() - start;
@@ -311,8 +311,8 @@ public class CompletionProposalCollector extends CompletionRequestor {
   public void endReporting() {
     if (DEBUG) {
       long total = System.currentTimeMillis() - fStartTime;
-      System.err.println("Core Collector (core):\t" + (total - fUITime)); //$NON-NLS-1$
-      System.err.println("Core Collector (ui):\t" + fUITime); //$NON-NLS-1$
+      System.err.println("Core Collector (core):\t" + (total - fUITime)); // $NON-NLS-1$
+      System.err.println("Core Collector (ui):\t" + fUITime); // $NON-NLS-1$
     }
   }
 
@@ -326,7 +326,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
    */
   public String getErrorMessage() {
     if (fLastProblem != null) return fLastProblem.getMessage();
-    return ""; //$NON-NLS-1$
+    return ""; // $NON-NLS-1$
   }
 
   /**
@@ -598,7 +598,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
         char[] declaration = proposal.getDeclarationSignature();
         // special methods may not have a declaring type: methods defined on arrays etc.
         // Currently known: class literals don't have a declaring type - use Object
-        if (declaration == null) return "java.lang.Object".toCharArray(); //$NON-NLS-1$
+        if (declaration == null) return "java.lang.Object".toCharArray(); // $NON-NLS-1$
         return Signature.toCharArray(declaration);
       case CompletionProposal.PACKAGE_REF:
         return proposal.getDeclarationSignature();
@@ -625,7 +625,8 @@ public class CompletionProposalCollector extends CompletionRequestor {
       //			if (getContext().isExtended()) {
       //				enclosingElement= getContext().getEnclosingElement();
       //			} else if (fCompilationUnit != null) {
-      // kept for backward compatibility: CU is not reconciled at this moment, information is missing (bug 70005)
+      // kept for backward compatibility: CU is not reconciled at this moment, information is
+      // missing (bug 70005)
       enclosingElement = fCompilationUnit.getElementAt(proposal.getCompletionLocation() + 1);
       //			}
       if (enclosingElement == null) return;
@@ -754,7 +755,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
     String completion = String.valueOf(proposal.getCompletion());
     completion =
         CodeFormatterUtil.format(
-            CodeFormatter.K_EXPRESSION, completion, 0, "\n", fJavaProject); //$NON-NLS-1$
+            CodeFormatter.K_EXPRESSION, completion, 0, "\n", fJavaProject); // $NON-NLS-1$
     int start = proposal.getReplaceStart();
     int length = getLength(proposal);
     StyledString label = fLabelProvider.createStyledLabel(proposal);
@@ -789,7 +790,8 @@ public class CompletionProposalCollector extends CompletionRequestor {
     //		Image image= getImage(fLabelProvider.createImageDescriptor(proposal));
     //		int relevance= computeRelevance(proposal);
     //
-    //		JavaCompletionProposal javaProposal= new JavaCompletionProposal(completion, start, length, image, label, relevance);
+    //		JavaCompletionProposal javaProposal= new JavaCompletionProposal(completion, start, length,
+    // image, label, relevance);
     //		if (fJavaProject != null)
     //			javaProposal.setProposalInfo(new FieldProposalInfo(fJavaProject, proposal));
     //

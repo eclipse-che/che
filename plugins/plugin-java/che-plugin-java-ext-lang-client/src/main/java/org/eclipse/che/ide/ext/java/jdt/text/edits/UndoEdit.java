@@ -38,7 +38,7 @@ public final class UndoEdit extends TextEdit {
    */
   void internalAdd(TextEdit child) throws MalformedTreeException {
     throw new MalformedTreeException(
-        null, this, "Cannot add children to an undo edit"); //$NON-NLS-1$
+        null, this, "Cannot add children to an undo edit"); // $NON-NLS-1$
   }
 
   /*
@@ -46,7 +46,7 @@ public final class UndoEdit extends TextEdit {
    */
   void aboutToBeAdded(TextEdit parent) {
     throw new MalformedTreeException(
-        parent, this, "Cannot add an undo edit to another edit"); //$NON-NLS-1$
+        parent, this, "Cannot add an undo edit to another edit"); // $NON-NLS-1$
   }
 
   UndoEdit dispatchPerformEdits(TextEditProcessor processor) throws BadLocationException {

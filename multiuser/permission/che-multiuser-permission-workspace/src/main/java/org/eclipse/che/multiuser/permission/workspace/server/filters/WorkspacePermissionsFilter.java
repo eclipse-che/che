@@ -83,7 +83,7 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
     switch (methodName) {
       case "getSettings":
       case "getWorkspaces":
-        //methods accessible to every user
+        // methods accessible to every user
         return;
 
       case "getByNamespace":
@@ -176,9 +176,10 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
     final WorkspaceImpl workspace = workspaceManager.getWorkspace(key);
     try {
       checkAccountPermissions(workspace.getNamespace(), AccountOperation.MANAGE_WORKSPACES);
-      // user is authorized to perform any operation if workspace belongs to account where he has the corresponding permissions
+      // user is authorized to perform any operation if workspace belongs to account where he has
+      // the corresponding permissions
     } catch (ForbiddenException e) {
-      //check permissions on workspace level
+      // check permissions on workspace level
       if (!currentSubject.hasPermission(DOMAIN_ID, workspace.getId(), action)) {
         throw new ForbiddenException(
             "The user does not have permission to "

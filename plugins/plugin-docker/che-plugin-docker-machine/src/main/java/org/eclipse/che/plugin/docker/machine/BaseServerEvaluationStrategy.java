@@ -350,7 +350,8 @@ public abstract class BaseServerEvaluationStrategy extends ServerEvaluationStrat
     /** Compute port mapping with server ref name */
     protected void initPortMapping() {
       // ok, so now we have a map of labels and a map of exposed ports
-      // need to extract the name of the ref (if defined in a label) or then pickup default name "Server-<port>-<protocol>"
+      // need to extract the name of the ref (if defined in a label) or then pickup default name
+      // "Server-<port>-<protocol>"
       Pattern pattern = Pattern.compile(LABEL_CHE_SERVER_REF_KEY);
       Map<String, String> portsToKnownRefName =
           labels

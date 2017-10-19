@@ -1662,7 +1662,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
   @Test
   public void testUpdatePrecondition07() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=349782
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=349782
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test;\n");
@@ -1912,7 +1912,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
   @Test
   public void testBodyPrecondition344674_1() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test;\n");
@@ -1931,7 +1931,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
   @Test
   public void testBodyPrecondition344674_2() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test;\n");
@@ -1950,7 +1950,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
   @Test
   public void testBodyPrecondition344674_3() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test;\n");
@@ -1969,7 +1969,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
   @Test
   public void testBodyPrecondition344674_4() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test;\n");
@@ -1995,7 +1995,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
   @Test
   public void testBodyPrecondition344674_5() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test;\n");
@@ -2021,7 +2021,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
   @Test
   public void testBodyPrecondition344674_6() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test;\n");
@@ -2047,7 +2047,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
   @Test
   public void testBodyPrecondition344674_7() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test;\n");
@@ -2073,7 +2073,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
   @Test
   public void testBodyPrecondition344674_8() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test;\n");
@@ -2099,7 +2099,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
   @Test
   public void testBodyPrecondition344674_9() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test;\n");

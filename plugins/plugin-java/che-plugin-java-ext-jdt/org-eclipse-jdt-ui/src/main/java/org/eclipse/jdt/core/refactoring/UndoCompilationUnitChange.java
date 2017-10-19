@@ -60,7 +60,7 @@ import org.eclipse.text.edits.UndoEdit;
 
   /** {@inheritDoc} */
   public Change perform(IProgressMonitor pm) throws CoreException {
-    pm.beginTask("", 2); //$NON-NLS-1$
+    pm.beginTask("", 2); // $NON-NLS-1$
     fCUnit.becomeWorkingCopy(new SubProgressMonitor(pm, 1));
     try {
       return super.perform(new SubProgressMonitor(pm, 1));

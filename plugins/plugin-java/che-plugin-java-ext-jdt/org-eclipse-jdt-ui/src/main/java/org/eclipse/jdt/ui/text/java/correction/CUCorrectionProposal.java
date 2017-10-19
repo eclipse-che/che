@@ -60,7 +60,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal {
       String name, ICompilationUnit cu, TextChange change, int relevance, Image image) {
     super(name, change, relevance, image);
     if (cu == null) {
-      throw new IllegalArgumentException("Compilation unit must not be null"); //$NON-NLS-1$
+      throw new IllegalArgumentException("Compilation unit must not be null"); // $NON-NLS-1$
     }
     fCompilationUnit = cu;
   }
@@ -160,13 +160,15 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal {
       }
       performChange(/*part, */ document);
     } catch (CoreException e) {
-      //			ExceptionHandler.handle(e, CorrectionMessages.CUCorrectionProposal_error_title, CorrectionMessages.CUCorrectionProposal_error_message);
+      //			ExceptionHandler.handle(e, CorrectionMessages.CUCorrectionProposal_error_title,
+      // CorrectionMessages.CUCorrectionProposal_error_message);
       JavaPlugin.log(e);
     }
   }
 
   private boolean performValidateEdit(ICompilationUnit unit) {
-    //		IStatus status= Resources.makeCommittable(unit.getResource(), JavaPlugin.getActiveWorkbenchShell());
+    //		IStatus status= Resources.makeCommittable(unit.getResource(),
+    // JavaPlugin.getActiveWorkbenchShell());
     //		if (!status.isOK()) {
     //			String label= CorrectionMessages.CUCorrectionProposal_error_title;
     //			String message= CorrectionMessages.CUCorrectionProposal_error_message;

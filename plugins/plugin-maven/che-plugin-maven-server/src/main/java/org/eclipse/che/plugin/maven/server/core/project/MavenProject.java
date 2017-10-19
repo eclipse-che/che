@@ -108,12 +108,12 @@ public class MavenProject {
   }
 
   public String getSourceLevel() {
-    //todo
+    // todo
     throw new UnsupportedOperationException();
   }
 
   public String getTargetLevel() {
-    //todo
+    // todo
     throw new UnsupportedOperationException();
   }
 
@@ -163,7 +163,7 @@ public class MavenProject {
                         MavenProblemType.DEPENDENCY))
             .collect(Collectors.toList()));
 
-    //TODO add unresolved plugins and extensions
+    // TODO add unresolved plugins and extensions
     return result;
   }
 
@@ -308,7 +308,7 @@ public class MavenProject {
   private MavenProjectModifications setInfo(Info newInfo) {
     MavenProjectModifications modifications = info.generateChanges(newInfo);
     info = newInfo;
-    info.problemsCache = null; //info has been changed, so we must to clean cache
+    info.problemsCache = null; // info has been changed, so we must to clean cache
     return modifications;
   }
 

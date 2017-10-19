@@ -139,7 +139,8 @@ public class ParticipantExtensionPoint {
 
   private void init() {
     //		IExtensionRegistry registry= Platform.getExtensionRegistry();
-    //		IConfigurationElement[] ces= new IConfigurationElement[0];//registry.getConfigurationElementsFor(fPluginId, fParticipantID);
+    //		IConfigurationElement[] ces= new
+    // IConfigurationElement[0];//registry.getConfigurationElementsFor(fPluginId, fParticipantID);
     Set<Class<? extends RefactoringParticipant>> ces =
         CheRefactoringParticipantsRegistry.getParticipantsFor(fParticipantID);
     fParticipants = new ArrayList(ces.size());
@@ -161,15 +162,15 @@ public class ParticipantExtensionPoint {
     }
   }
 
-  //---- Helper methods ------------------------------------------------------------------
+  // ---- Helper methods ------------------------------------------------------------------
 
   private static EvaluationContext createEvaluationContext(
       RefactoringProcessor processor, Object element, String[] affectedNatures) {
     EvaluationContext result = new EvaluationContext(null, element);
     result.setAllowPluginActivation(true);
-    result.addVariable("element", element); //$NON-NLS-1$
-    result.addVariable("affectedNatures", Arrays.asList(affectedNatures)); //$NON-NLS-1$
-    result.addVariable("processorIdentifier", processor.getIdentifier()); //$NON-NLS-1$
+    result.addVariable("element", element); // $NON-NLS-1$
+    result.addVariable("affectedNatures", Arrays.asList(affectedNatures)); // $NON-NLS-1$
+    result.addVariable("processorIdentifier", processor.getIdentifier()); // $NON-NLS-1$
     return result;
   }
 }

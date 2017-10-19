@@ -83,7 +83,7 @@ public class EditorPartStackPresenterTest {
 
   private static final String SOME_TEXT = "someText";
 
-  //constructor mocks
+  // constructor mocks
   @Mock private EditorPartStackView view;
   @Mock private AppContext appContext;
   @Mock private PartMenu partMenu;
@@ -100,7 +100,7 @@ public class EditorPartStackPresenterTest {
   @Mock private EditorPaneMenuItemFactory editorPaneMenuItemFactory;
   @Mock private EditorAgent editorAgent;
 
-  //additional mocks
+  // additional mocks
   @Mock private SplitHorizontallyAction splitHorizontallyAction;
   @Mock private SplitVerticallyAction splitVerticallyAction;
   @Mock private Presentation presentation;

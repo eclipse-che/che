@@ -46,7 +46,8 @@ public class DelegateFieldCreator extends DelegateCreator {
     if (getNewElementName() == null) setNewElementName(fOldFieldFragment.getName().getIdentifier());
 
     setInsertBefore(
-        false); // delegate must be inserted after the original field that is referenced in the initializer
+        false); // delegate must be inserted after the original field that is referenced in the
+    // initializer
   }
 
   @Override

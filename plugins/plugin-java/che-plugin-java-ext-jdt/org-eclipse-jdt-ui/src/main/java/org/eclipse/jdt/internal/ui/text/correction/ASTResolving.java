@@ -54,12 +54,12 @@ public class ASTResolving {
         if (op == InfixExpression.Operator.CONDITIONAL_AND
             || op == InfixExpression.Operator.CONDITIONAL_OR) {
           // boolean operation
-          return infix.getAST().resolveWellKnownType("boolean"); //$NON-NLS-1$
+          return infix.getAST().resolveWellKnownType("boolean"); // $NON-NLS-1$
         } else if (op == InfixExpression.Operator.LEFT_SHIFT
             || op == InfixExpression.Operator.RIGHT_SHIFT_UNSIGNED
             || op == InfixExpression.Operator.RIGHT_SHIFT_SIGNED) {
           // asymmetric operation
-          return infix.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
+          return infix.getAST().resolveWellKnownType("int"); // $NON-NLS-1$
         }
         if (node.equals(infix.getLeftOperand())) {
           //	xx operation expression
@@ -75,7 +75,7 @@ public class ASTResolving {
           }
         }
         if (op != InfixExpression.Operator.EQUALS && op != InfixExpression.Operator.NOT_EQUALS) {
-          return infix.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
+          return infix.getAST().resolveWellKnownType("int"); // $NON-NLS-1$
         }
         break;
       case ASTNode.INSTANCEOF_EXPRESSION:
@@ -134,17 +134,17 @@ public class ASTResolving {
         return guessBindingForReference(parent);
       case ASTNode.ARRAY_ACCESS:
         if (((ArrayAccess) parent).getIndex().equals(node)) {
-          return parent.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
+          return parent.getAST().resolveWellKnownType("int"); // $NON-NLS-1$
         } else {
           ITypeBinding parentBinding = getPossibleReferenceBinding(parent);
           if (parentBinding == null) {
-            parentBinding = parent.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+            parentBinding = parent.getAST().resolveWellKnownType("java.lang.Object"); // $NON-NLS-1$
           }
           return parentBinding.createArrayType(1);
         }
       case ASTNode.ARRAY_CREATION:
         if (((ArrayCreation) parent).dimensions().contains(node)) {
-          return parent.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
+          return parent.getAST().resolveWellKnownType("int"); // $NON-NLS-1$
         }
         break;
       case ASTNode.ARRAY_INITIALIZER:
@@ -179,29 +179,29 @@ public class ASTResolving {
       case ASTNode.CONDITIONAL_EXPRESSION:
         ConditionalExpression expression = (ConditionalExpression) parent;
         if (node.equals(expression.getExpression())) {
-          return parent.getAST().resolveWellKnownType("boolean"); //$NON-NLS-1$
+          return parent.getAST().resolveWellKnownType("boolean"); // $NON-NLS-1$
         }
         if (node.equals(expression.getElseExpression())) {
           return expression.getThenExpression().resolveTypeBinding();
         }
         return expression.getElseExpression().resolveTypeBinding();
       case ASTNode.POSTFIX_EXPRESSION:
-        return parent.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
+        return parent.getAST().resolveWellKnownType("int"); // $NON-NLS-1$
       case ASTNode.PREFIX_EXPRESSION:
         if (((PrefixExpression) parent).getOperator() == PrefixExpression.Operator.NOT) {
-          return parent.getAST().resolveWellKnownType("boolean"); //$NON-NLS-1$
+          return parent.getAST().resolveWellKnownType("boolean"); // $NON-NLS-1$
         }
-        return parent.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
+        return parent.getAST().resolveWellKnownType("int"); // $NON-NLS-1$
       case ASTNode.IF_STATEMENT:
       case ASTNode.WHILE_STATEMENT:
       case ASTNode.DO_STATEMENT:
         if (node instanceof Expression) {
-          return parent.getAST().resolveWellKnownType("boolean"); //$NON-NLS-1$
+          return parent.getAST().resolveWellKnownType("boolean"); // $NON-NLS-1$
         }
         break;
       case ASTNode.SWITCH_STATEMENT:
         if (((SwitchStatement) parent).getExpression().equals(node)) {
-          return parent.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
+          return parent.getAST().resolveWellKnownType("int"); // $NON-NLS-1$
         }
         break;
       case ASTNode.RETURN_STATEMENT:
@@ -221,7 +221,7 @@ public class ASTResolving {
         return ((CastExpression) parent).getType().resolveBinding();
       case ASTNode.THROW_STATEMENT:
       case ASTNode.CATCH_CLAUSE:
-        return parent.getAST().resolveWellKnownType("java.lang.Exception"); //$NON-NLS-1$
+        return parent.getAST().resolveWellKnownType("java.lang.Exception"); // $NON-NLS-1$
       case ASTNode.FIELD_ACCESS:
         if (node.equals(((FieldAccess) parent).getName())) {
           return getPossibleReferenceBinding(parent);
@@ -242,13 +242,13 @@ public class ASTResolving {
         break;
       case ASTNode.ASSERT_STATEMENT:
         if (node.getLocationInParent() == AssertStatement.EXPRESSION_PROPERTY) {
-          return parent.getAST().resolveWellKnownType("boolean"); //$NON-NLS-1$
+          return parent.getAST().resolveWellKnownType("boolean"); // $NON-NLS-1$
         }
-        return parent.getAST().resolveWellKnownType("java.lang.String"); //$NON-NLS-1$
+        return parent.getAST().resolveWellKnownType("java.lang.String"); // $NON-NLS-1$
       case ASTNode.SINGLE_MEMBER_ANNOTATION:
         {
           IMethodBinding annotMember =
-              findAnnotationMember((Annotation) parent, "value"); //$NON-NLS-1$
+              findAnnotationMember((Annotation) parent, "value"); // $NON-NLS-1$
           if (annotMember != null) {
             return annotMember.getReturnType();
           }
@@ -507,7 +507,7 @@ public class ASTResolving {
 
     // test if selector is a object method
     ITypeBinding binding =
-        searchRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+        searchRoot.getAST().resolveWellKnownType("java.lang.Object"); // $NON-NLS-1$
     IMethodBinding[] objectMethods = binding.getDeclaredMethods();
     for (int i = 0; i < objectMethods.length; i++) {
       IMethodBinding meth = objectMethods[i];
@@ -996,12 +996,13 @@ public class ASTResolving {
     ArrayList<ITypeBinding> res = new ArrayList<ITypeBinding>();
     res.add(type);
     if (type.isArray()) {
-      res.add(ast.resolveWellKnownType("java.lang.Object")); //$NON-NLS-1$
-      // The following two types are not available in some j2me implementations, see https://bugs.eclipse.org/bugs/show_bug
+      res.add(ast.resolveWellKnownType("java.lang.Object")); // $NON-NLS-1$
+      // The following two types are not available in some j2me implementations, see
+      // https://bugs.eclipse.org/bugs/show_bug
       // .cgi?id=288060 :
-      ITypeBinding serializable = ast.resolveWellKnownType("java.io.Serializable"); //$NON-NLS-1$
+      ITypeBinding serializable = ast.resolveWellKnownType("java.io.Serializable"); // $NON-NLS-1$
       if (serializable != null) res.add(serializable);
-      ITypeBinding cloneable = ast.resolveWellKnownType("java.lang.Cloneable"); //$NON-NLS-1$
+      ITypeBinding cloneable = ast.resolveWellKnownType("java.lang.Cloneable"); // $NON-NLS-1$
       if (cloneable != null) res.add(cloneable);
     } else if (type.isPrimitive()) {
       Code code = PrimitiveType.toCode(type.getName());
@@ -1180,7 +1181,7 @@ public class ASTResolving {
       }
       if (isVarArgs && i == params.length - 1) {
         buf.append(getTypeSignature(params[i].getElementType()));
-        buf.append("..."); //$NON-NLS-1$
+        buf.append("..."); // $NON-NLS-1$
       } else {
         buf.append(getTypeSignature(params[i]));
       }

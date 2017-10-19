@@ -137,7 +137,7 @@ public class FileUndoState extends AbstractResourceUndoState {
       return;
     }
     IFile fileHandle = (IFile) resource;
-    monitor.beginTask("", 200); //$NON-NLS-1$
+    monitor.beginTask("", 200); // $NON-NLS-1$
     monitor.setTaskName(RefactoringCoreMessages.FileDescription_NewFileProgress);
     try {
       if (monitor.isCanceled()) {

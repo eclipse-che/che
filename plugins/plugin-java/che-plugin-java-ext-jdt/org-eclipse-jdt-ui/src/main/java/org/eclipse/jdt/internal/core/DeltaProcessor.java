@@ -80,11 +80,11 @@ public class DeltaProcessor {
   private static final int IGNORE = 0;
   private static final int SOURCE = 1;
   private static final int BINARY = 2;
-  private static final String EXTERNAL_JAR_ADDED = "external jar added"; //$NON-NLS-1$
-  private static final String EXTERNAL_JAR_CHANGED = "external jar changed"; //$NON-NLS-1$
-  private static final String EXTERNAL_JAR_REMOVED = "external jar removed"; //$NON-NLS-1$
-  private static final String EXTERNAL_JAR_UNCHANGED = "external jar unchanged"; //$NON-NLS-1$
-  private static final String INTERNAL_JAR_IGNORE = "internal jar ignore"; //$NON-NLS-1$
+  private static final String EXTERNAL_JAR_ADDED = "external jar added"; // $NON-NLS-1$
+  private static final String EXTERNAL_JAR_CHANGED = "external jar changed"; // $NON-NLS-1$
+  private static final String EXTERNAL_JAR_REMOVED = "external jar removed"; // $NON-NLS-1$
+  private static final String EXTERNAL_JAR_UNCHANGED = "external jar unchanged"; // $NON-NLS-1$
+  private static final String INTERNAL_JAR_IGNORE = "internal jar ignore"; // $NON-NLS-1$
   private static final int NON_JAVA_RESOURCE = -1;
   public static boolean DEBUG = false;
   public static boolean VERBOSE = false;
@@ -217,7 +217,8 @@ public class DeltaProcessor {
         if (roots[i].equals(child)) {
           return;
         }
-        // If we start seeing root's classpath entry different from the child's entry, then the child can't
+        // If we start seeing root's classpath entry different from the child's entry, then the
+        // child can't
         // be present further down the roots array.
         if (!((IPackageFragmentRoot) roots[i])
             .getResolvedClasspathEntry()
@@ -275,7 +276,8 @@ public class DeltaProcessor {
     //						if (JavaProject.hasJavaNature(project)) {
     //							addToParentInfo(javaProject);
     //							readRawClasspath(javaProject);
-    //							// ensure project references are updated (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=121569)
+    //							// ensure project references are updated (see
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=121569)
     //							checkProjectReferenceChange(project, javaProject);
     //							// and external folders as well
     //							checkExternalFolderChange(project, javaProject);
@@ -308,7 +310,8 @@ public class DeltaProcessor {
     //									// java project doesn't exist: ignore
     //								}
     //								removeFromParentInfo(javaProject);
-    //								this.manager.removePerProjectInfo(javaProject, false /* don't remove index files and timestamp info of
+    //								this.manager.removePerProjectInfo(javaProject, false /* don't remove index files and
+    // timestamp info of
     //								external jar */);
     //								this.manager.containerRemove(javaProject);
     //							}
@@ -326,14 +329,17 @@ public class DeltaProcessor {
     //								if (isJavaProject) {
     //									addToParentInfo(javaProject);
     //									readRawClasspath(javaProject);
-    //									// ensure project references are updated (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=172666)
+    //									// ensure project references are updated (see
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=172666)
     //									checkProjectReferenceChange(project, javaProject);
     //									// and external folders as well
     //									checkExternalFolderChange(project, javaProject);
     //								} else {
-    //									// remove classpath cache so that initializeRoots() will not consider the project has a classpath
+    //									// remove classpath cache so that initializeRoots() will not consider the project has
+    // a classpath
     //									this.manager
-    //											.removePerProjectInfo(javaProject, true /* remove external jar files indexes and timestamps
+    //											.removePerProjectInfo(javaProject, true /* remove external jar files indexes and
+    // timestamps
     //											*/);
     //									// remove container cache for this project
     //									this.manager.containerRemove(javaProject);
@@ -366,8 +372,10 @@ public class DeltaProcessor {
     //					case IResourceDelta.REMOVED:
     //						this.manager.forceBatchInitializations(false/*not initAfterLoad*/);
     //
-    //						// remove classpath cache so that initializeRoots() will not consider the project has a classpath
-    //						this.manager.removePerProjectInfo(javaProject, true /* remove external jar files indexes and timestamps*/);
+    //						// remove classpath cache so that initializeRoots() will not consider the project has a
+    // classpath
+    //						this.manager.removePerProjectInfo(javaProject, true /* remove external jar files indexes
+    // and timestamps*/);
     //						// remove container cache for this project
     //						this.manager.containerRemove(javaProject);
     //
@@ -377,7 +385,8 @@ public class DeltaProcessor {
     //
     //				break;
     //			case IResource.FOLDER:
-    //				if (delta.getKind() == IResourceDelta.CHANGED) { // look for .jar file change to update classpath
+    //				if (delta.getKind() == IResourceDelta.CHANGED) { // look for .jar file change to update
+    // classpath
     //					children = delta.getAffectedChildren();
     //				}
     //				break;
@@ -393,7 +402,8 @@ public class DeltaProcessor {
     //							int flags = delta.getFlags();
     //							if ((flags & IResourceDelta.CONTENT) == 0  // only consider content change
     //								&& (flags & IResourceDelta.ENCODING) == 0 // and encoding change
-    //								&& (flags & IResourceDelta.MOVED_FROM) == 0) {// and also move and overide scenario (see http://dev
+    //								&& (flags & IResourceDelta.MOVED_FROM) == 0) {// and also move and overide scenario
+    // (see http://dev
     // .eclipse.org/bugs/show_bug.cgi?id=21420)
     //								break;
     //							}
@@ -403,14 +413,16 @@ public class DeltaProcessor {
     //							javaProject = (JavaProject)JavaCore.create(file.getProject());
     //
     //							// force to (re)read the .classpath file
-    //							// in case of removal (IResourceDelta.REMOVED) this will reset the classpath to its default and create the
+    //							// in case of removal (IResourceDelta.REMOVED) this will reset the classpath to its
+    // default and create the
     // right delta
     //							// (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=211290)
     //							readRawClasspath(javaProject);
     //							break;
     //					}
     //					this.state.rootsAreStale = true;
-    //				} else if ((rootInfo = rootInfo(file.getFullPath(), kind)) != null && rootInfo.entryKind == IClasspathEntry.CPE_LIBRARY) {
+    //				} else if ((rootInfo = rootInfo(file.getFullPath(), kind)) != null && rootInfo.entryKind
+    // == IClasspathEntry.CPE_LIBRARY) {
     //					javaProject = (JavaProject)JavaCore.create(file.getProject());
     //					javaProject.resetResolvedClasspath();
     //					this.state.rootsAreStale = true;
@@ -427,19 +439,22 @@ public class DeltaProcessor {
 
   private void checkExternalFolderChange(IProject project, JavaProject javaProject) {
     //		ClasspathChange change = this.state.getClasspathChange(project);
-    //		this.state.addExternalFolderChange(javaProject, change == null ? null : change.oldResolvedClasspath);
+    //		this.state.addExternalFolderChange(javaProject, change == null ? null :
+    // change.oldResolvedClasspath);
   }
 
   private void checkProjectReferenceChange(IProject project, JavaProject javaProject) {
     //		ClasspathChange change = this.state.getClasspathChange(project);
-    //		this.state.addProjectReferenceChange(javaProject, change == null ? null : change.oldResolvedClasspath);
+    //		this.state.addProjectReferenceChange(javaProject, change == null ? null :
+    // change.oldResolvedClasspath);
   }
 
   private void readRawClasspath(JavaProject javaProject) {
     //		// force to (re)read the .classpath file
     //		try {
     //			PerProjectInfo perProjectInfo = javaProject.getPerProjectInfo();
-    //			if (!perProjectInfo.writtingRawClasspath) // to avoid deadlock, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=221680
+    //			if (!perProjectInfo.writtingRawClasspath) // to avoid deadlock, see
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=221680
     //				perProjectInfo.readAndCacheClasspath(javaProject);
     //		} catch (JavaModelException e) {
     //			if (VERBOSE) {
@@ -511,7 +526,8 @@ public class DeltaProcessor {
     }
     if (isPrimaryWorkingCopy) {
       // filter out changes to primary compilation unit in working copy mode
-      // just report a change to the resource (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=59500)
+      // just report a change to the resource (see
+      // https://bugs.eclipse.org/bugs/show_bug.cgi?id=59500)
       currentDelta().changed(element, IJavaElementDelta.F_PRIMARY_RESOURCE);
     } else {
       close(element);
@@ -682,7 +698,8 @@ public class DeltaProcessor {
     //				this.state.addForRefresh(elementsScope[i]);
     //				if (element.getElementType() == IJavaElement.JAVA_MODEL) {
     //					// ensure external working copies' projects' caches are reset
-    //					HashSet projects = JavaModelManager.getJavaModelManager().getExternalWorkingCopyProjects();
+    //					HashSet projects =
+    // JavaModelManager.getJavaModelManager().getExternalWorkingCopyProjects();
     //					if (projects != null) {
     //						hasExternalWorkingCopyProject = true;
     //						Iterator iterator = projects.iterator();
@@ -694,7 +711,8 @@ public class DeltaProcessor {
     //				}
     //			}
     //			HashSet elementsToRefresh = this.state.removeExternalElementsToRefresh();
-    //			boolean hasDelta = elementsToRefresh != null && createExternalArchiveDelta(elementsToRefresh, monitor);
+    //			boolean hasDelta = elementsToRefresh != null &&
+    // createExternalArchiveDelta(elementsToRefresh, monitor);
     //			if (hasDelta){
     //				IJavaElementDelta[] projectDeltas = this.currentDelta.getAffectedChildren();
     //				final int length = projectDeltas.length;
@@ -738,7 +756,8 @@ public class DeltaProcessor {
     //
     //									// touch to force a build of this project
     //									if (JavaBuilder.DEBUG)
-    //										System.out.println("Touching project " + project.getName() + " due to external jar file change");
+    //										System.out.println("Touching project " + project.getName() + " due to external jar
+    // file change");
     // $NON-NLS-1$ //$NON-NLS-2$
     //									project.touch(progressMonitor);
     //								}
@@ -777,7 +796,7 @@ public class DeltaProcessor {
         System.out.println(
             "Touching project "
                 + project.getName()
-                + " due to external jar file change"); //$NON-NLS-1$ //$NON-NLS-2$
+                + " due to external jar file change"); // $NON-NLS-1$ //$NON-NLS-2$
       project.touch(monitor);
     }
   }
@@ -822,7 +841,8 @@ public class DeltaProcessor {
           //					Iterator projectNames = this.state.getOldJavaProjecNames().iterator();
           //					while (projectNames.hasNext()) {
           //						String projectName = (String) projectNames.next();
-          //						IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+          //						IProject project =
+          // ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
           //						if (!JavaProject.hasJavaNature(project)) {
           //							// project is not accessible or has lost its Java nature
           //							continue;
@@ -876,7 +896,8 @@ public class DeltaProcessor {
     //					String status = (String)externalArchivesStatus.get(entryPath);
     //					if (status == null){
     //
-    //						// Clear the external file state for this path, since this method is responsible for updating it.
+    //						// Clear the external file state for this path, since this method is responsible for
+    // updating it.
     //						this.manager.clearExternalFileState(entryPath);
     //
     //						// compute shared status
@@ -911,12 +932,15 @@ public class DeltaProcessor {
     //									// first remove the index so that it is forced to be re-indexed
     //									this.manager.indexManager.removeIndex(entryPath);
     //									// then index the jar
-    //									this.manager.indexManager.indexLibrary(entryPath, project.getProject(), ((ClasspathEntry)entries[j])
+    //									this.manager.indexManager.indexLibrary(entryPath, project.getProject(),
+    // ((ClasspathEntry)entries[j])
     // .getLibraryIndexLocation(), true);
     //								} else {
     //									URL indexLocation = ((ClasspathEntry)entries[j]).getLibraryIndexLocation();
-    //									if (indexLocation != null) { // force reindexing, this could be faster rather than maintaining the list
-    //										this.manager.indexManager.indexLibrary(entryPath, project.getProject(), indexLocation);
+    //									if (indexLocation != null) { // force reindexing, this could be faster rather than
+    // maintaining the list
+    //										this.manager.indexManager.indexLibrary(entryPath, project.getProject(),
+    // indexLocation);
     //									}
     //									externalArchivesStatus.put(entryPath, EXTERNAL_JAR_UNCHANGED);
     //								}
@@ -928,7 +952,8 @@ public class DeltaProcessor {
     //									this.state.getExternalLibTimeStamps().put(entryPath, new Long(newTimeStamp));
     //									// index the new jar
     //									this.manager.indexManager.removeIndex(entryPath);
-    //									this.manager.indexManager.indexLibrary(entryPath, project.getProject(), ((ClasspathEntry)entries[j])
+    //									this.manager.indexManager.indexLibrary(entryPath, project.getProject(),
+    // ((ClasspathEntry)entries[j])
     // .getLibraryIndexLocation());
     //								}
     //							}
@@ -940,30 +965,38 @@ public class DeltaProcessor {
     //					status = (String)externalArchivesStatus.get(entryPath);
     //					if (status != null){
     //						if (status == EXTERNAL_JAR_ADDED){
-    //							PackageFragmentRoot root = (PackageFragmentRoot) javaProject.getPackageFragmentRoot(entryPath.toString());
+    //							PackageFragmentRoot root = (PackageFragmentRoot)
+    // javaProject.getPackageFragmentRoot(entryPath.toString());
     //							if (VERBOSE){
-    //								System.out.println("- External JAR ADDED, affecting root: "+root.getElementName()); //$NON-NLS-1$
+    //								System.out.println("- External JAR ADDED, affecting root: "+root.getElementName());
+    // //$NON-NLS-1$
     //							}
     //							elementAdded(root, null, null);
     //							deltaContainsModifiedJar = true;
-    //							this.state.addClasspathValidation(javaProject); // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=185733
+    //							this.state.addClasspathValidation(javaProject); // see
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=185733
     //							hasDelta = true;
     //						} else if (status == EXTERNAL_JAR_CHANGED) {
-    //							PackageFragmentRoot root = (PackageFragmentRoot) javaProject.getPackageFragmentRoot(entryPath.toString());
+    //							PackageFragmentRoot root = (PackageFragmentRoot)
+    // javaProject.getPackageFragmentRoot(entryPath.toString());
     //							if (VERBOSE){
-    //								System.out.println("- External JAR CHANGED, affecting root: "+root.getElementName()); //$NON-NLS-1$
+    //								System.out.println("- External JAR CHANGED, affecting root: "+root.getElementName());
+    // //$NON-NLS-1$
     //							}
     //							contentChanged(root);
     //							deltaContainsModifiedJar = true;
     //							hasDelta = true;
     //						} else if (status == EXTERNAL_JAR_REMOVED) {
-    //							PackageFragmentRoot root = (PackageFragmentRoot) javaProject.getPackageFragmentRoot(entryPath.toString());
+    //							PackageFragmentRoot root = (PackageFragmentRoot)
+    // javaProject.getPackageFragmentRoot(entryPath.toString());
     //							if (VERBOSE){
-    //								System.out.println("- External JAR REMOVED, affecting root: "+root.getElementName()); //$NON-NLS-1$
+    //								System.out.println("- External JAR REMOVED, affecting root: "+root.getElementName());
+    // //$NON-NLS-1$
     //							}
     //							elementRemoved(root, null, null);
     //							deltaContainsModifiedJar = true;
-    //							this.state.addClasspathValidation(javaProject); // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=185733
+    //							this.state.addClasspathValidation(javaProject); // see
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=185733
     //							hasDelta = true;
     //						}
     //					}
@@ -1067,7 +1100,8 @@ public class DeltaProcessor {
           // 2. open project P
           // 3. add folder f in P's pkg fragment root
           // When the resource delta comes in, only the addition of P is notified,
-          // but the pkg fragment root of project P is already opened, thus its children are not recomputed
+          // but the pkg fragment root of project P is already opened, thus its children are not
+          // recomputed
           // and it appears to contain only the default package.
           close(element);
 
@@ -1083,7 +1117,8 @@ public class DeltaProcessor {
         // regular element addition
         if (isPrimaryWorkingCopy(element, elementType)) {
           // filter out changes to primary compilation unit in working copy mode
-          // just report a change to the resource (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=59500)
+          // just report a change to the resource (see
+          // https://bugs.eclipse.org/bugs/show_bug.cgi?id=59500)
           currentDelta().changed(element, IJavaElementDelta.F_PRIMARY_RESOURCE);
         } else {
           addToParentInfo(element);
@@ -1125,7 +1160,8 @@ public class DeltaProcessor {
                 element.getParent().getElementType(),
                 movedFromInfo);
 
-        // reset current element as it might be inside a nested root (popUntilPrefixOf() may use the outer root)
+        // reset current element as it might be inside a nested root (popUntilPrefixOf() may use the
+        // outer root)
         this.currentElement = null;
 
         // create the moved from element
@@ -1176,7 +1212,8 @@ public class DeltaProcessor {
       // regular element removal
       if (isPrimaryWorkingCopy(element, elementType)) {
         // filter out changes to primary compilation unit in working copy mode
-        // just report a change to the resource (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=59500)
+        // just report a change to the resource (see
+        // https://bugs.eclipse.org/bugs/show_bug.cgi?id=59500)
         currentDelta().changed(element, IJavaElementDelta.F_PRIMARY_RESOURCE);
       } else {
         close(element);
@@ -1212,7 +1249,8 @@ public class DeltaProcessor {
           elementType(
               movedToRes, IResourceDelta.ADDED, element.getParent().getElementType(), movedToInfo);
 
-      // reset current element as it might be inside a nested root (popUntilPrefixOf() may use the outer root)
+      // reset current element as it might be inside a nested root (popUntilPrefixOf() may use the
+      // outer root)
       this.currentElement = null;
 
       // create the moved To element
@@ -1235,9 +1273,10 @@ public class DeltaProcessor {
         break;
       case IJavaElement.JAVA_PROJECT:
         this.state.updateRoots(element.getPath(), delta, this);
-        //TODO: this is quick fix for https://jira.codenvycorp.com/browse/IDEX-4221
-        //we do it because we need clear cache for deleted project but we don't know how do it right way
-        //so we clean all cache totally
+        // TODO: this is quick fix for https://jira.codenvycorp.com/browse/IDEX-4221
+        // we do it because we need clear cache for deleted project but we don't know how do it
+        // right way
+        // so we clean all cache totally
         this.state.roots.clear();
         // remember that the project's cache must be reset
         this.projectCachesToReset.add(element);
@@ -1266,7 +1305,8 @@ public class DeltaProcessor {
   private int elementType(IResource res, int kind, int parentType, RootInfo rootInfo) {
     switch (parentType) {
       case IJavaElement.JAVA_MODEL:
-        // case of a movedTo or movedFrom project (other cases are handled in processResourceDelta(...)
+        // case of a movedTo or movedFrom project (other cases are handled in
+        // processResourceDelta(...)
         return IJavaElement.JAVA_PROJECT;
 
       case NON_JAVA_RESOURCE:
@@ -1297,7 +1337,8 @@ public class DeltaProcessor {
           if (parentType == NON_JAVA_RESOURCE
               && !Util.isExcluded(
                   res.getParent(), rootInfo.inclusionPatterns, rootInfo.exclusionPatterns)) {
-            // parent is a non-Java resource because it doesn't have a valid package name (see https://bugs.eclipse
+            // parent is a non-Java resource because it doesn't have a valid package name (see
+            // https://bugs.eclipse
             // .org/bugs/show_bug.cgi?id=130982)
             return NON_JAVA_RESOURCE;
           }
@@ -1393,7 +1434,7 @@ public class DeltaProcessor {
 
     if (DEBUG) {
       System.out.println(
-          "-----------------------------------------------------------------------------------------------------------------------"); //$NON-NLS-1$
+          "-----------------------------------------------------------------------------------------------------------------------"); // $NON-NLS-1$
     }
 
     IJavaElementDelta deltaToNotify;
@@ -1416,8 +1457,10 @@ public class DeltaProcessor {
 
     // Notification
 
-    // Important: if any listener reacts to notification by updating the listeners list or mask, these lists will
-    // be duplicated, so it is necessary to remember original lists in a variable (since field values may change under us)
+    // Important: if any listener reacts to notification by updating the listeners list or mask,
+    // these lists will
+    // be duplicated, so it is necessary to remember original lists in a variable (since field
+    // values may change under us)
     IElementChangedListener[] listeners;
     int[] listenerMask;
     int listenerCount;
@@ -1445,14 +1488,17 @@ public class DeltaProcessor {
     // post change deltas
     if (DEBUG) {
       System.out.println(
-          "FIRING POST_CHANGE Delta [" + Thread.currentThread() + "]:"); //$NON-NLS-1$//$NON-NLS-2$
-      System.out.println(deltaToNotify == null ? "<NONE>" : deltaToNotify.toString()); //$NON-NLS-1$
+          "FIRING POST_CHANGE Delta [" + Thread.currentThread() + "]:"); // $NON-NLS-1$//$NON-NLS-2$
+      System.out.println(
+          deltaToNotify == null ? "<NONE>" : deltaToNotify.toString()); // $NON-NLS-1$
     }
     if (deltaToNotify != null) {
-      // flush now so as to keep listener reactions to post their own deltas for subsequent iteration
+      // flush now so as to keep listener reactions to post their own deltas for subsequent
+      // iteration
       flush();
 
-      //			// mark the operation stack has not modifying resources since resource deltas are being fired
+      //			// mark the operation stack has not modifying resources since resource deltas are being
+      // fired
       //			JavaModelOperation.setAttribute(JavaModelOperation.HAS_MODIFIED_RESOURCE_ATTR, null);
 
       notifyListeners(
@@ -1468,11 +1514,13 @@ public class DeltaProcessor {
       System.out.println(
           "FIRING POST_RECONCILE Delta ["
               + Thread.currentThread()
-              + "]:"); //$NON-NLS-1$//$NON-NLS-2$
-      System.out.println(deltaToNotify == null ? "<NONE>" : deltaToNotify.toString()); //$NON-NLS-1$
+              + "]:"); // $NON-NLS-1$//$NON-NLS-2$
+      System.out.println(
+          deltaToNotify == null ? "<NONE>" : deltaToNotify.toString()); // $NON-NLS-1$
     }
     if (deltaToNotify != null) {
-      // flush now so as to keep listener reactions to post their own deltas for subsequent iteration
+      // flush now so as to keep listener reactions to post their own deltas for subsequent
+      // iteration
       this.reconcileDeltas = new HashMap();
 
       notifyListeners(
@@ -1489,8 +1537,8 @@ public class DeltaProcessor {
    * in particular it will not consider SYNC or MARKER only deltas.
    */
   private boolean isAffectedBy(IResourceDelta rootDelta) {
-    //if (rootDelta == null) System.out.println("NULL DELTA");
-    //long start = System.currentTimeMillis();
+    // if (rootDelta == null) System.out.println("NULL DELTA");
+    // long start = System.currentTimeMillis();
     if (rootDelta != null) {
       // use local exception to quickly escape from delta traversal
       class FoundRelevantDeltaException extends RuntimeException {
@@ -1509,8 +1557,10 @@ public class DeltaProcessor {
                     throw new FoundRelevantDeltaException();
                   case IResourceDelta.CHANGED:
                     // if any flag is set but SYNC or MARKER, this delta should be considered
-                    //												 if (delta.getAffectedChildren().length == 0 // only check leaf delta nodes
-                    //													 && (delta.getFlags() & ~(IResourceDelta.SYNC | IResourceDelta.MARKERS)) != 0) {
+                    //												 if (delta.getAffectedChildren().length == 0 // only check leaf
+                    // delta nodes
+                    //													 && (delta.getFlags() & ~(IResourceDelta.SYNC |
+                    // IResourceDelta.MARKERS)) != 0) {
                     throw new FoundRelevantDeltaException();
                     //												 }
                 }
@@ -1519,12 +1569,12 @@ public class DeltaProcessor {
             },
             IContainer.INCLUDE_HIDDEN);
       } catch (FoundRelevantDeltaException e) {
-        //System.out.println("RELEVANT DELTA detected in: "+ (System.currentTimeMillis() - start));
+        // System.out.println("RELEVANT DELTA detected in: "+ (System.currentTimeMillis() - start));
         return true;
       } catch (CoreException e) { // ignore delta if not able to traverse
       }
     }
-    //System.out.println("IGNORE SYNC DELTA took: "+ (System.currentTimeMillis() - start));
+    // System.out.println("IGNORE SYNC DELTA took: "+ (System.currentTimeMillis() - start));
     return false;
   }
 
@@ -1563,11 +1613,13 @@ public class DeltaProcessor {
               //							if (sourceLevel == null) {
               //								// Get java project to use its source and compliance levels
               //								javaProject = rootInfo == null ?
-              //									(JavaProject)createElement(res.getProject(), IJavaElement.JAVA_PROJECT, null) :
+              //									(JavaProject)createElement(res.getProject(), IJavaElement.JAVA_PROJECT,
+              // null) :
               //									rootInfo.project;
               //								if (javaProject != null) {
               //									sourceLevel = javaProject.getOption(JavaCore.COMPILER_SOURCE, true);
-              //									complianceLevel = javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+              //									complianceLevel = javaProject.getOption(JavaCore.COMPILER_COMPLIANCE,
+              // true);
               //								}
               //							}
               if (Util.isValidClassFileName(res.getName(), sourceLevel, complianceLevel)) {
@@ -1596,7 +1648,7 @@ public class DeltaProcessor {
               + deltas.size()
               + " DELTAS ["
               + Thread.currentThread()
-              + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+              + "]"); // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     }
 
     Iterator iterator = deltas.iterator();
@@ -1644,22 +1696,24 @@ public class DeltaProcessor {
         long start = -1;
         if (VERBOSE) {
           System.out.print(
-              "Listener #" + (i + 1) + "=" + listener.toString()); //$NON-NLS-1$//$NON-NLS-2$
+              "Listener #" + (i + 1) + "=" + listener.toString()); // $NON-NLS-1$//$NON-NLS-2$
           start = System.currentTimeMillis();
         }
-        // wrap callbacks with Safe runnable for subsequent listeners to be called when some are causing grief
+        // wrap callbacks with Safe runnable for subsequent listeners to be called when some are
+        // causing grief
         SafeRunner.run(
             new ISafeRunnable() {
               public void handleException(Throwable exception) {
                 Util.log(
                     exception,
-                    "Exception occurred in listener of Java element change notification"); //$NON-NLS-1$
+                    "Exception occurred in listener of Java element change notification"); // $NON-NLS-1$
               }
 
               public void run() throws Exception {
                 PerformanceStats stats = null;
                 if (PERF) {
-                  //							stats = PerformanceStats.getStats(JavaModelManager.DELTA_LISTENER_PERF, listener);
+                  //							stats = PerformanceStats.getStats(JavaModelManager.DELTA_LISTENER_PERF,
+                  // listener);
                   //							stats.startRun();
                 }
                 listener.elementChanged(extraEvent);
@@ -1670,7 +1724,7 @@ public class DeltaProcessor {
             });
         if (VERBOSE) {
           System.out.println(
-              " -> " + (System.currentTimeMillis() - start) + "ms"); //$NON-NLS-1$ //$NON-NLS-2$
+              " -> " + (System.currentTimeMillis() - start) + "ms"); // $NON-NLS-1$ //$NON-NLS-2$
         }
       }
     }
@@ -1681,13 +1735,14 @@ public class DeltaProcessor {
       final IElementChangedListener listener = listeners[i];
       if (!(listener instanceof TypeHierarchy)) continue;
 
-      // wrap callbacks with Safe runnable for subsequent listeners to be called when some are causing grief
+      // wrap callbacks with Safe runnable for subsequent listeners to be called when some are
+      // causing grief
       SafeRunner.run(
           new ISafeRunnable() {
             public void handleException(Throwable exception) {
               Util.log(
                   exception,
-                  "Exception occurred in listener of Java element change notification"); //$NON-NLS-1$
+                  "Exception occurred in listener of Java element change notification"); // $NON-NLS-1$
             }
 
             public void run() throws Exception {
@@ -1728,21 +1783,24 @@ public class DeltaProcessor {
     //					PackageFragmentRoot projectRoot =
     //						(PackageFragmentRoot) project.getPackageFragmentRoot(project.getProject());
     //					if (projectRoot.isOpen()) {
-    //						((org.eclipse.jdt.internal.core.PackageFragmentRootInfo) projectRoot.getElementInfo()).setNonJavaResources(null);
+    //						((org.eclipse.jdt.internal.core.PackageFragmentRootInfo)
+    // projectRoot.getElementInfo()).setNonJavaResources(null);
     //					}
     //					break;
     //				case IJavaElement.PACKAGE_FRAGMENT :
     //					 ((org.eclipse.jdt.internal.core.PackageFragmentInfo) info).setNonJavaResources(null);
     //					break;
     //				case IJavaElement.PACKAGE_FRAGMENT_ROOT :
-    //					 ((org.eclipse.jdt.internal.core.PackageFragmentRootInfo) info).setNonJavaResources(null);
+    //					 ((org.eclipse.jdt.internal.core.PackageFragmentRootInfo)
+    // info).setNonJavaResources(null);
     //			}
     //		}
     //
     //		JavaElementDelta current = currentDelta();
     //		JavaElementDelta elementDelta = current.find(element);
     //		if (elementDelta == null) {
-    //			// don't use find after creating the delta as it can be null (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=63434)
+    //			// don't use find after creating the delta as it can be null (see
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=63434)
     //			elementDelta = current.changed(element, IJavaElementDelta.F_CONTENT);
     //		}
     //		if (!ExternalFoldersManager.isInternalPathForExternalFolder(delta.getFullPath()))
@@ -1802,7 +1860,8 @@ public class DeltaProcessor {
     //						outputs[outputCount] = output;
     //						// check case of src==bin
     //						if (entryPath.equals(output)) {
-    //							traverseModes[outputCount++] = (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) ? SOURCE : BINARY;
+    //							traverseModes[outputCount++] = (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) ?
+    // SOURCE : BINARY;
     //						} else {
     //							traverseModes[outputCount++] = IGNORE;
     //						}
@@ -1810,7 +1869,8 @@ public class DeltaProcessor {
     //
     //					// check case of src==bin
     //					if (entryPath.equals(projectOutput)) {
-    //						traverseModes[0] = (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) ? SOURCE : BINARY;
+    //						traverseModes[0] = (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) ? SOURCE :
+    // BINARY;
     //					}
     //				}
     //				return new OutputsInfo(outputs, traverseModes, outputCount);
@@ -1872,7 +1932,9 @@ public class DeltaProcessor {
       this.currentElement = null;
 
       // get the workspace delta, and start processing there.
-      //			IResourceDelta[] deltas = (IResourceDelta[])changes.getAffectedChildren(IResourceDelta.ADDED | IResourceDelta.REMOVED |
+      //			IResourceDelta[] deltas =
+      // (IResourceDelta[])changes.getAffectedChildren(IResourceDelta.ADDED | IResourceDelta.REMOVED
+      // |
       // IResourceDelta.CHANGED, IContainer.INCLUDE_HIDDEN);
       //			for (int i = 0; i < deltas.length; i++) {
       //				IResourceDelta delta = deltas[i];
@@ -1901,7 +1963,8 @@ public class DeltaProcessor {
       updateCurrentDeltaAndIndex(changes, IJavaElement.COMPILATION_UNIT, null);
       //
       //				if (elementType == NON_JAVA_RESOURCE
-      //						|| (wasJavaProject != isJavaProject && (delta.getKind()) == IResourceDelta.CHANGED)) { // project has changed
+      //						|| (wasJavaProject != isJavaProject && (delta.getKind()) == IResourceDelta.CHANGED)) {
+      // // project has changed
       // nature (description or open/closed)
       //					try {
       //						// add child as non java resource
@@ -2048,7 +2111,8 @@ public class DeltaProcessor {
               //								Iterator changes = classpathChanges.values().iterator();
               //								while (changes.hasNext()) {
               //									ClasspathChange change = (ClasspathChange) changes.next();
-              //									int result = change.generateDelta(javaDelta, false/*don't add classpath change*/);
+              //									int result = change.generateDelta(javaDelta, false/*don't add classpath
+              // change*/);
               //									if ((result & ClasspathChange.HAS_DELTA) != 0) {
               //										hasDelta = true;
               //
@@ -2059,13 +2123,16 @@ public class DeltaProcessor {
               //										this.state.addClasspathValidation(change.project);
               //									}
               //									if ((result & ClasspathChange.HAS_PROJECT_CHANGE) != 0) {
-              //										this.state.addProjectReferenceChange(change.project, change.oldResolvedClasspath);
+              //										this.state.addProjectReferenceChange(change.project,
+              // change.oldResolvedClasspath);
               //									}
               //									if ((result & ClasspathChange.HAS_LIBRARY_CHANGE) != 0) {
-              //										this.state.addExternalFolderChange(change.project, change.oldResolvedClasspath);
+              //										this.state.addExternalFolderChange(change.project,
+              // change.oldResolvedClasspath);
               //									}
               //								}
-              //								// process late coming external elements to refresh (see https://bugs.eclipse.org/bugs/show_bug
+              //								// process late coming external elements to refresh (see
+              // https://bugs.eclipse.org/bugs/show_bug
               // .cgi?id=212769 )
               //								elementsToRefresh = this.state.removeExternalElementsToRefresh();
               //								if (elementsToRefresh != null) {
@@ -2101,7 +2168,8 @@ public class DeltaProcessor {
         return;
 
       case IResourceChangeEvent.PRE_BUILD:
-        //				// force initialization of roots before builders run to avoid deadlock in another thread
+        //				// force initialization of roots before builders run to avoid deadlock in another
+        // thread
         //				// (note this is no-op if already initialized)
         //				// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=241751
         //				this.state.initializeRoots(false/*not initiAfterLoad*/);
@@ -2114,7 +2182,8 @@ public class DeltaProcessor {
         //				if (folderChanges != null) {
         //				    for (int i = 0, length = folderChanges.length; i < length; i++) {
         //				        try {
-        //					        folderChanges[i].updateExternalFoldersIfNecessary(false/*do not refresh since we are not in the thread that
+        //					        folderChanges[i].updateExternalFoldersIfNecessary(false/*do not refresh since
+        // we are not in the thread that
         // added the external folder to the classpath*/, null);
         //				        } catch (JavaModelException e) {
         //				        	if (!e.isDoesNotExist())
@@ -2133,7 +2202,8 @@ public class DeltaProcessor {
         //				}
         //
         //				// update project references if necessary
-        //			    ProjectReferenceChange[] projectRefChanges = this.state.removeProjectReferenceChanges();
+        //			    ProjectReferenceChange[] projectRefChanges =
+        // this.state.removeProjectReferenceChanges();
         //				if (projectRefChanges != null) {
         //				    for (int i = 0, length = projectRefChanges.length; i < length; i++) {
         //				        try {
@@ -2147,7 +2217,8 @@ public class DeltaProcessor {
         //				}
         //
         //				if (needCycleValidation || projectRefChanges != null) {
-        //					// update all cycle markers since the project references changes may have affected cycles
+        //					// update all cycle markers since the project references changes may have affected
+        // cycles
         //					try {
         //						JavaProject.validateCycles(null);
         //					} catch (JavaModelException e) {
@@ -2164,16 +2235,22 @@ public class DeltaProcessor {
         //						projects = new IProject[] {(IProject) source};
         //					} else {
         //						Util.log(new Exception(),
-        //								 "Expected to see a workspace or project on the PRE_BUILD resource change but was: " + source.toString());
+        //								 "Expected to see a workspace or project on the PRE_BUILD resource change but was:
+        // " + source.toString());
         // $NON-NLS-1$
         //					}
         //					if (projects != null) {
-        //						// If we are about to do a build and a Java project's first builder is not the Java builder,
-        //						// then it is possible that one of the earlier builders will build a jar file that is on that
-        //						// project's classpath. If we see that, then to be safe we must flush the caching of the
+        //						// If we are about to do a build and a Java project's first builder is not the Java
+        // builder,
+        //						// then it is possible that one of the earlier builders will build a jar file that
+        // is on that
+        //						// project's classpath. If we see that, then to be safe we must flush the caching of
+        // the
         //						// JavaModelManager's external file state.
-        //						// A possible further optimization for this situation where earlier builders can affect the
-        //						// Java builder would be to add a new classpath element attribute that identifies whether
+        //						// A possible further optimization for this situation where earlier builders can
+        // affect the
+        //						// Java builder would be to add a new classpath element attribute that identifies
+        // whether
         //						// or not a library jar is "stable" and needs to be flushed.
         //						for (int i = 0; i < projects.length; i++) {
         //							try {
@@ -2186,7 +2263,8 @@ public class DeltaProcessor {
         //									}
         //								}
         //							} catch (CoreException exception) {
-        //				        		Util.log(exception, "Exception while checking builder configuration ordering"); //$NON-NLS-1$
+        //				        		Util.log(exception, "Exception while checking builder configuration
+        // ordering"); //$NON-NLS-1$
         //							}
         //						 }
         //					}
@@ -2375,7 +2453,8 @@ public class DeltaProcessor {
           while (iterator.hasNext()) {
             originalChildRootInfo = (RootInfo) iterator.next();
             this.currentElement =
-                null; // ensure that 2 roots refering to the same resource don't share the current element (see
+                null; // ensure that 2 roots refering to the same resource don't share the current
+            // element (see
             // https://bugs.eclipse.org/bugs/show_bug.cgi?id=210746 )
             traverseDelta(
                 child,
@@ -2432,7 +2511,8 @@ public class DeltaProcessor {
     //							// project opened or closed
     //							if (isJavaProject) {
     //								JavaProject javaProject = (JavaProject)JavaCore.create(project);
-    //								this.state.addClasspathValidation(javaProject); // in case .classpath got modified while closed
+    //								this.state.addClasspathValidation(javaProject); // in case .classpath got modified
+    // while closed
     //							}
     //							affectedProjects.add(project.getFullPath());
     //						} else if ((delta.getFlags() & IResourceDelta.DESCRIPTION) != 0) {
@@ -2458,7 +2538,8 @@ public class DeltaProcessor {
     //				// https://bugs.eclipse.org/bugs/show_bug.cgi?id=229042
     //				// Mark a validation if a library with package fragment root in the project has changed
     //				if (fileName.equals(JavaProject.CLASSPATH_FILENAME)
-    //						|| ((rootInfo = rootInfo(file.getFullPath(), delta.getKind())) != null && rootInfo.entryKind == IClasspathEntry
+    //						|| ((rootInfo = rootInfo(file.getFullPath(), delta.getKind())) != null &&
+    // rootInfo.entryKind == IClasspathEntry
     // .CPE_LIBRARY)) {
     //					JavaProject javaProject = (JavaProject)JavaCore.create(file.getProject());
     //					this.state.addClasspathValidation(javaProject);
@@ -2512,10 +2593,12 @@ public class DeltaProcessor {
         //				if (deltaRes.getType() == IResource.PROJECT){
         //					// reset the corresponding project built state, since cannot reuse if added back
         //					if (JavaBuilder.DEBUG)
-        //						System.out.println("Clearing last state for removed project : " + deltaRes); //$NON-NLS-1$
+        //						System.out.println("Clearing last state for removed project : " + deltaRes);
+        // //$NON-NLS-1$
         //					this.manager.setLastBuiltState((IProject)deltaRes, null /*no state*/);
         //
-        //					// clean up previous session containers (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=89850)
+        //					// clean up previous session containers (see
+        // https://bugs.eclipse.org/bugs/show_bug.cgi?id=89850)
         //					this.manager.previousSessionContainers.remove(element);
         //				}
         return elementType == IJavaElement.PACKAGE_FRAGMENT;
@@ -2589,7 +2672,8 @@ public class DeltaProcessor {
           //						if (wasJavaProject != isJavaProject) {
           //							// project's nature has been added or removed
           //							element = createElement(res, elementType, rootInfo);
-          //							if (element == null) return false; // note its resources are still visible as roots to other projects
+          //							if (element == null) return false; // note its resources are still visible as
+          // roots to other projects
           //							if (isJavaProject) {
           //								elementAdded(element, delta, rootInfo);
           //								this.manager.indexManager.indexAll(res);
@@ -2599,7 +2683,8 @@ public class DeltaProcessor {
           //								this.manager.indexManager.removeIndexFamily(res.getFullPath());
           //								// reset the corresponding project built state, since cannot reuse if added back
           //								if (JavaBuilder.DEBUG)
-          //									System.out.println("Clearing last state for project loosing Java nature: " + res); //$NON-NLS-1$
+          //									System.out.println("Clearing last state for project loosing Java nature: " +
+          // res); //$NON-NLS-1$
           //								this.manager.setLastBuiltState(res, null /*no state*/);
           //							}
           //							return false; // when a project's nature is added/removed don't process children
@@ -2626,7 +2711,8 @@ public class DeltaProcessor {
             indexManager.removeIndexFamily(element.getJavaProject().getProject().getFullPath());
             // NB: Discarding index jobs belonging to this project was done during PRE_DELETE
             break;
-            // NB: Update of index if project is opened, closed, or its java nature is added or removed
+            // NB: Update of index if project is opened, closed, or its java nature is added or
+            // removed
             //     is done in updateCurrentDeltaAndIndex
         }
         break;
@@ -2710,7 +2796,8 @@ public class DeltaProcessor {
         //				IFile file = (IFile) delta.getResource();
         //				IJavaProject project = element.getJavaProject();
         //				PackageFragmentRoot root = element.getPackageFragmentRoot();
-        //				IPath binaryFolderPath = root.isExternal() && !root.isArchive() ? root.resource().getFullPath() : root.getPath();
+        //				IPath binaryFolderPath = root.isExternal() && !root.isArchive() ?
+        // root.resource().getFullPath() : root.getPath();
         //				// if the class file is part of the binary output, it has been created by
         //				// the java builder -> ignore
         //				try {
@@ -2731,7 +2818,8 @@ public class DeltaProcessor {
         //						indexManager.addBinary(file, binaryFolderPath);
         //						break;
         //					case IResourceDelta.REMOVED :
-        //						String containerRelativePath = Util.relativePath(file.getFullPath(), binaryFolderPath.segmentCount());
+        //						String containerRelativePath = Util.relativePath(file.getFullPath(),
+        // binaryFolderPath.segmentCount());
         //						indexManager.remove(containerRelativePath, binaryFolderPath);
         //						break;
         //				}
@@ -2748,14 +2836,16 @@ public class DeltaProcessor {
           case IResourceDelta.ADDED:
             indexManager.addSource(
                 file, element.getJavaProject().getPath(), getSourceElementParser(element));
-            // Clean file from secondary types cache but do not update indexing secondary type cache as it will be updated through indexing itself
+            // Clean file from secondary types cache but do not update indexing secondary type cache
+            // as it will be updated through indexing itself
             this.manager.secondaryTypesRemoving(file, false);
             break;
           case IResourceDelta.REMOVED:
             indexManager.remove(
                 Util.relativePath(file.getFullPath(), 1 /*remove project segment*/),
                 element.getJavaProject().getPath());
-            // Clean file from secondary types cache and update indexing secondary type cache as indexing cannot remove secondary types from cache
+            // Clean file from secondary types cache and update indexing secondary type cache as
+            // indexing cannot remove secondary types from cache
             this.manager.secondaryTypesRemoving(file, true);
             break;
         }
@@ -2783,7 +2873,8 @@ public class DeltaProcessor {
   //				JavaProject javaProject = (JavaProject)JavaCore.create(project);
   //				try {
   //					IPath projectPath = project.getFullPath();
-  //					IClasspathEntry[] classpath = javaProject.getResolvedClasspath(); // allowed to reuse model cache
+  //					IClasspathEntry[] classpath = javaProject.getResolvedClasspath(); // allowed to reuse model
+  // cache
   //					for (int j = 0, cpLength = classpath.length; j < cpLength; j++) {
   //						IClasspathEntry entry = classpath[j];
   //						switch (entry.getEntryKind()) {
@@ -2859,24 +2950,24 @@ public class DeltaProcessor {
     }
 
     public String toString() {
-      if (this.paths == null) return "<none>"; //$NON-NLS-1$
+      if (this.paths == null) return "<none>"; // $NON-NLS-1$
       StringBuffer buffer = new StringBuffer();
       for (int i = 0; i < this.outputCount; i++) {
-        buffer.append("path="); //$NON-NLS-1$
+        buffer.append("path="); // $NON-NLS-1$
         buffer.append(this.paths[i].toString());
-        buffer.append("\n->traverse="); //$NON-NLS-1$
+        buffer.append("\n->traverse="); // $NON-NLS-1$
         switch (this.traverseModes[i]) {
           case BINARY:
-            buffer.append("BINARY"); //$NON-NLS-1$
+            buffer.append("BINARY"); // $NON-NLS-1$
             break;
           case IGNORE:
-            buffer.append("IGNORE"); //$NON-NLS-1$
+            buffer.append("IGNORE"); // $NON-NLS-1$
             break;
           case SOURCE:
-            buffer.append("SOURCE"); //$NON-NLS-1$
+            buffer.append("SOURCE"); // $NON-NLS-1$
             break;
           default:
-            buffer.append("<unknown>"); //$NON-NLS-1$
+            buffer.append("<unknown>"); // $NON-NLS-1$
         }
         if (i + 1 < this.outputCount) {
           buffer.append('\n');
@@ -2942,37 +3033,37 @@ public class DeltaProcessor {
     }
 
     public String toString() {
-      StringBuffer buffer = new StringBuffer("project="); //$NON-NLS-1$
+      StringBuffer buffer = new StringBuffer("project="); // $NON-NLS-1$
       if (this.project == null) {
-        buffer.append("null"); //$NON-NLS-1$
+        buffer.append("null"); // $NON-NLS-1$
       } else {
         buffer.append(this.project.getElementName());
       }
-      buffer.append("\npath="); //$NON-NLS-1$
+      buffer.append("\npath="); // $NON-NLS-1$
       if (this.rootPath == null) {
-        buffer.append("null"); //$NON-NLS-1$
+        buffer.append("null"); // $NON-NLS-1$
       } else {
         buffer.append(this.rootPath.toString());
       }
-      buffer.append("\nincluding="); //$NON-NLS-1$
+      buffer.append("\nincluding="); // $NON-NLS-1$
       if (this.inclusionPatterns == null) {
-        buffer.append("null"); //$NON-NLS-1$
+        buffer.append("null"); // $NON-NLS-1$
       } else {
         for (int i = 0, length = this.inclusionPatterns.length; i < length; i++) {
           buffer.append(new String(this.inclusionPatterns[i]));
           if (i < length - 1) {
-            buffer.append("|"); //$NON-NLS-1$
+            buffer.append("|"); // $NON-NLS-1$
           }
         }
       }
-      buffer.append("\nexcluding="); //$NON-NLS-1$
+      buffer.append("\nexcluding="); // $NON-NLS-1$
       if (this.exclusionPatterns == null) {
-        buffer.append("null"); //$NON-NLS-1$
+        buffer.append("null"); // $NON-NLS-1$
       } else {
         for (int i = 0, length = this.exclusionPatterns.length; i < length; i++) {
           buffer.append(new String(this.exclusionPatterns[i]));
           if (i < length - 1) {
-            buffer.append("|"); //$NON-NLS-1$
+            buffer.append("|"); // $NON-NLS-1$
           }
         }
       }

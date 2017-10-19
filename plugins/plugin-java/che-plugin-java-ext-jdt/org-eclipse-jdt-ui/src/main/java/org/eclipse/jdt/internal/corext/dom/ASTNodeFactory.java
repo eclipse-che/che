@@ -48,14 +48,14 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
  */
 public class ASTNodeFactory {
 
-  private static final String STATEMENT_HEADER = "class __X__ { void __x__() { "; //$NON-NLS-1$
-  private static final String STATEMENT_FOOTER = "}}"; //$NON-NLS-1$
+  private static final String STATEMENT_HEADER = "class __X__ { void __x__() { "; // $NON-NLS-1$
+  private static final String STATEMENT_FOOTER = "}}"; // $NON-NLS-1$
 
-  private static final String TYPE_HEADER = "class __X__ { abstract "; //$NON-NLS-1$
-  private static final String TYPE_FOOTER = " __f__(); }}"; //$NON-NLS-1$
+  private static final String TYPE_HEADER = "class __X__ { abstract "; // $NON-NLS-1$
+  private static final String TYPE_FOOTER = " __f__(); }}"; // $NON-NLS-1$
 
-  private static final String TYPEPARAM_HEADER = "class __X__ { abstract <"; //$NON-NLS-1$
-  private static final String TYPEPARAM_FOOTER = "> void __f__(); }}"; //$NON-NLS-1$
+  private static final String TYPEPARAM_HEADER = "class __X__ { abstract <"; // $NON-NLS-1$
+  private static final String TYPEPARAM_FOOTER = "> void __f__(); }}"; // $NON-NLS-1$
 
   private static class PositionClearer extends GenericVisitor {
 
@@ -243,7 +243,7 @@ public class ASTNodeFactory {
       }
     }
     // fall-back
-    return ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
+    return ast.newSimpleType(ast.newSimpleName("Object")); // $NON-NLS-1$
   }
 
   /**
@@ -276,7 +276,7 @@ public class ASTNodeFactory {
       }
     }
     // fall-back
-    return ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
+    return ast.newSimpleType(ast.newSimpleName("Object")); // $NON-NLS-1$
   }
 
   /**
@@ -297,7 +297,7 @@ public class ASTNodeFactory {
       } else if (primitiveType.getPrimitiveTypeCode() == PrimitiveType.VOID) {
         return null;
       } else {
-        return ast.newNumberLiteral("0"); //$NON-NLS-1$
+        return ast.newNumberLiteral("0"); // $NON-NLS-1$
       }
     }
     return ast.newNullLiteral();
@@ -315,12 +315,12 @@ public class ASTNodeFactory {
   public static Expression newDefaultExpression(AST ast, ITypeBinding type) {
     if (type.isPrimitive()) {
       String name = type.getName();
-      if ("boolean".equals(name)) { //$NON-NLS-1$
+      if ("boolean".equals(name)) { // $NON-NLS-1$
         return ast.newBooleanLiteral(false);
-      } else if ("void".equals(name)) { //$NON-NLS-1$
+      } else if ("void".equals(name)) { // $NON-NLS-1$
         return null;
       } else {
-        return ast.newNumberLiteral("0"); //$NON-NLS-1$
+        return ast.newNumberLiteral("0"); // $NON-NLS-1$
       }
     }
     return ast.newNullLiteral();

@@ -208,6 +208,6 @@ public class JavaCompilerPreferencePresenter extends AbstractPreferencePagePrese
 
   @Override
   public void onWsAgentStopped(WsAgentStateEvent event) {
-    //do nothing
+    // do nothing
   }
 }

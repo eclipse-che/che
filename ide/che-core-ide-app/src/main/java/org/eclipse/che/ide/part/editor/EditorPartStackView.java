@@ -172,7 +172,7 @@ public class EditorPartStackView extends ResizeComposite
       selectTab(contents.getLast());
     }
 
-    //this hack need to force redraw dom element to apply correct styles
+    // this hack need to force redraw dom element to apply correct styles
     tabsPanel.getElement().getStyle().setDisplay(NONE);
     tabsPanel.getElement().getOffsetHeight();
     tabsPanel.getElement().getStyle().setDisplay(BLOCK);

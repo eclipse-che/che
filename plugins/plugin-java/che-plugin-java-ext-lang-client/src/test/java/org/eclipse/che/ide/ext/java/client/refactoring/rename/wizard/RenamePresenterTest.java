@@ -84,7 +84,7 @@ public class RenamePresenterTest {
   private static final String SESSION_ID = "sessionId";
   private static final String TEXT = "text.text";
 
-  //variables for constructor
+  // variables for constructor
   @Mock private RenameView view;
   @Mock private SimilarNamesConfigurationPresenter similarNamesConfigurationPresenter;
   @Mock private JavaLocalizationConstant locale;

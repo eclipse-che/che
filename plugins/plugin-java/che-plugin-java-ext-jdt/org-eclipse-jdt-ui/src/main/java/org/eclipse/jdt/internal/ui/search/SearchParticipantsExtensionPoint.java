@@ -24,14 +24,16 @@ public class SearchParticipantsExtensionPoint {
   private static SearchParticipantsExtensionPoint fgInstance;
 
   //	public boolean hasAnyParticipants() {
-  //		return Platform.getExtensionRegistry().getConfigurationElementsFor(JavaSearchPage.PARTICIPANT_EXTENSION_POINT).length > 0;
+  //		return
+  // Platform.getExtensionRegistry().getConfigurationElementsFor(JavaSearchPage.PARTICIPANT_EXTENSION_POINT).length > 0;
   //	}
 
   //	private synchronized Set<SearchParticipantDescriptor> getAllParticipants() {
   //		if (fActiveParticipants != null)
   //			return fActiveParticipants;
   //		IConfigurationElement[] allParticipants =
-  //				Platform.getExtensionRegistry().getConfigurationElementsFor(JavaSearchPage.PARTICIPANT_EXTENSION_POINT);
+  //
+  //	Platform.getExtensionRegistry().getConfigurationElementsFor(JavaSearchPage.PARTICIPANT_EXTENSION_POINT);
   //		fActiveParticipants = new HashSet<SearchParticipantDescriptor>(allParticipants.length);
   //		for (int i = 0; i < allParticipants.length; i++) {
   //			SearchParticipantDescriptor descriptor = new SearchParticipantDescriptor(allParticipants[i]);
@@ -45,7 +47,8 @@ public class SearchParticipantsExtensionPoint {
   //		return fActiveParticipants;
   //	}
   //
-  //	private void collectParticipants(Set<SearchParticipantRecord> participants, IProject[] projects) {
+  //	private void collectParticipants(Set<SearchParticipantRecord> participants, IProject[]
+  // projects) {
   //		Iterator<SearchParticipantDescriptor> activeParticipants = getAllParticipants().iterator();
   //		Set<String> seenParticipants = new HashSet<String>();
   //		while (activeParticipants.hasNext()) {

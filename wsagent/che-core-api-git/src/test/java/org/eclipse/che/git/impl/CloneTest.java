@@ -58,16 +58,16 @@ public class CloneTest {
   )
   public void testSimpleClone(GitConnectionFactory connectionFactory)
       throws ServerException, IOException, UnauthorizedException, URISyntaxException {
-    //given
+    // given
     GitConnection remoteConnection =
         connectToGitRepositoryWithContent(connectionFactory, remoteRepo);
     GitConnection localConnection = connectionFactory.getConnection(localRepo.getAbsolutePath());
     int filesBefore = localRepo.listFiles().length;
 
-    //when
+    // when
     localConnection.clone(CloneParams.create(remoteConnection.getWorkingDir().getAbsolutePath()));
 
-    //then
+    // then
     int filesAfter = localRepo.listFiles().length;
     assertEquals(filesAfter, filesBefore + 2);
   }
@@ -78,7 +78,7 @@ public class CloneTest {
   )
   public void testLineConsumerOutputWhenCloning(GitConnectionFactory connectionFactory)
       throws ServerException, IOException, UnauthorizedException, URISyntaxException {
-    //given
+    // given
     GitConnection remoteConnection =
         connectToGitRepositoryWithContent(connectionFactory, remoteRepo);
     GitConnection localConnection = connectionFactory.getConnection(localRepo.getAbsolutePath());
@@ -88,10 +88,10 @@ public class CloneTest {
     when(lineConsumerFactory.newLineConsumer()).thenReturn(lineConsumer);
     localConnection.setOutputLineConsumerFactory(lineConsumerFactory);
 
-    //when
+    // when
     localConnection.clone(CloneParams.create(remoteConnection.getWorkingDir().getAbsolutePath()));
 
-    //then
+    // then
     verify(lineConsumer, atLeastOnce()).writeLine(anyString());
   }
 }

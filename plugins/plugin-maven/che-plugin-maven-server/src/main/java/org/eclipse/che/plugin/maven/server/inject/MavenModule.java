@@ -50,7 +50,7 @@ public class MavenModule extends AbstractModule {
         .addBinding()
         .to(MavenValueProviderFactory.class);
 
-    //bind maven project type only if maven installed on dev machine
+    // bind maven project type only if maven installed on dev machine
     if (System.getenv("M2_HOME") != null) {
       newSetBinder(binder(), ProjectTypeDef.class).addBinding().to(MavenProjectType.class);
     }

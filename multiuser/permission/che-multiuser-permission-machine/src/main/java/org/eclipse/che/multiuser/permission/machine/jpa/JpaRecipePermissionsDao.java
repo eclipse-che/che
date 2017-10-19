@@ -173,7 +173,8 @@ public class JpaRecipePermissionsDao extends AbstractJpaPermissionsDao<RecipePer
         throws ServerException, NotFoundException {
       Page<RecipePermissionsImpl> recipePermissionsPage;
       do {
-        // skip count always equals to 0 because elements will be shifted after removing previous items
+        // skip count always equals to 0 because elements will be shifted after removing previous
+        // items
         recipePermissionsPage = dao.getByInstance(recipeId, pageSize, 0);
         for (RecipePermissionsImpl permissions : recipePermissionsPage.getItems()) {
           dao.remove(permissions.getUserId(), permissions.getInstanceId());

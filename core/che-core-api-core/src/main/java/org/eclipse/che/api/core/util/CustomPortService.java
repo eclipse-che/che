@@ -138,9 +138,11 @@ public class CustomPortService {
   }
 
   private int doAcquire(int min, int max) {
-    // Use this for getting ports for web applications but unfortunately get issue with browser cache.
+    // Use this for getting ports for web applications but unfortunately get issue with browser
+    // cache.
     // If different applications reuse the same port sometimes user can see previous application.
-    // Make number of port in 'more random' way instead of checking from min to max until find free port.
+    // Make number of port in 'more random' way instead of checking from min to max until find free
+    // port.
     final int m = min + rnd.nextInt((max - min) + 1);
     final boolean ev = (m % 2) == 0;
     int port;

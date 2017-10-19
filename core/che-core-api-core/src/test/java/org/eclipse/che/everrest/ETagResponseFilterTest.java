@@ -96,7 +96,7 @@ public class ETagResponseFilterTest {
    */
   @BeforeMethod
   public void before() throws Exception {
-    //set up launcher
+    // set up launcher
     final ResourceBinderImpl resources = new ResourceBinderImpl();
     resources.addResource(MyJaxRSService.class, null);
     final DependencySupplierImpl dependencies = new DependencySupplierImpl();

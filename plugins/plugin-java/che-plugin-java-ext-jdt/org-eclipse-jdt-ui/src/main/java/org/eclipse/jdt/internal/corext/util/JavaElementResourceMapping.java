@@ -84,7 +84,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
     return false;
   }
 
-  //---- the factory code ---------------------------------------------------------------
+  // ---- the factory code ---------------------------------------------------------------
 
   private static final class JavaModelResourceMapping extends JavaElementResourceMapping {
     private final IJavaModel fJavaModel;
@@ -221,8 +221,8 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 
     if (container != null) {
       res.add(new ResourceTraversal(new IResource[] {container}, IResource.DEPTH_ONE, 0));
-      if (pack
-          .exists()) { // folder may not exist any more, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=269167
+      if (pack.exists()) { // folder may not exist any more, see
+        // https://bugs.eclipse.org/bugs/show_bug.cgi?id=269167
         Object[] nonJavaResources = pack.getNonJavaResources();
         for (int i = 0; i < nonJavaResources.length; i++) {
           Object resource = nonJavaResources[i];
@@ -436,13 +436,15 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
   //		List<IPackageFragment> toProcess = new ArrayList<IPackageFragment>(fragments.length);
   //		for (int i = 0; i < fragments.length; i++) {
   //			// only add if not part of an archive
-  //			IPackageFragmentRoot root = (IPackageFragmentRoot)fragments[i].getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+  //			IPackageFragmentRoot root =
+  // (IPackageFragmentRoot)fragments[i].getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
   //			if (!root.isArchive() && !root.isExternal()) {
   //				toProcess.add(fragments[i]);
   //			}
   //		}
   //		if (toProcess.size() == 0)
   //			return null;
-  //		return new LogicalPackageResourceMapping(toProcess.toArray(new IPackageFragment[toProcess.size()]));
+  //		return new LogicalPackageResourceMapping(toProcess.toArray(new
+  // IPackageFragment[toProcess.size()]));
   //	}
 }

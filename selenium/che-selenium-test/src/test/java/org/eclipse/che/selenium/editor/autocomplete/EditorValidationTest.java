@@ -70,7 +70,7 @@ public class EditorValidationTest {
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
     editor.waitActiveEditor();
-    //validation warnings
+    // validation warnings
     editor.waitAllMarkersDisappear(ERROR_MARKER);
     editor.setCursorToLine(28);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -84,14 +84,14 @@ public class EditorValidationTest {
     editor.waitTextIntoAnnotationAssist("The value of the local variable n is not used");
 
     // TODO the proposition code assist does not still work by click
-    //ide.getEditor().clickOnWarningMarkerInPosition(21);
+    // ide.getEditor().clickOnWarningMarkerInPosition(21);
     editor.launchPropositionAssistPanel();
     editor.waitTextIntoFixErrorProposition("Remove 'l', keep assignments with side effects");
     editor.waitTextIntoFixErrorProposition("Remove 'l' and all assignments");
     editor.typeTextIntoEditor(Keys.ESCAPE.toString());
     editor.waitErrorPropositionPanelClosed();
 
-    //validation errors
+    // validation errors
     editor.setCursorToLine(30);
     editor.waitActiveEditor();
     editor.typeTextIntoEditor(TEXT_FOR_ERROR);
@@ -104,7 +104,7 @@ public class EditorValidationTest {
     loader.waitOnClosed();
 
     // TODO the proposition code assist does not still work by click
-    //ide.getEditor().clickOnErrorMarkerInPosition(22);
+    // ide.getEditor().clickOnErrorMarkerInPosition(22);
     editor.typeTextIntoEditor(Keys.HOME.toString());
     editor.launchPropositionAssistPanel();
     editor.waitTextIntoFixErrorProposition("Add cast to 'int'");

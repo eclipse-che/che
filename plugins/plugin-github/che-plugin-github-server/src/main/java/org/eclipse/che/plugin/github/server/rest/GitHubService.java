@@ -119,12 +119,12 @@ public class GitHubService {
       throws ApiException {
     GitHub gitHub = gitHubFactory.connect();
     try {
-      //First, try to retrieve organization repositories:
+      // First, try to retrieve organization repositories:
       return gitHubDTOFactory.createRepositoriesList(
           gitHub.getOrganization(account).listRepositories());
     } catch (IOException ioException) {
       LOG.error("Get list repositories by account fail", ioException);
-      //If account is not organization, then try by user name:
+      // If account is not organization, then try by user name:
       try {
         return gitHubDTOFactory.createRepositoriesList(gitHub.getUser(account).listRepositories());
       } catch (IOException exception) {

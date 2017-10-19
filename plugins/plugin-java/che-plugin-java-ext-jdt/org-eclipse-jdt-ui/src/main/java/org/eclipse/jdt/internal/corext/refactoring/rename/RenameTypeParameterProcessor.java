@@ -153,11 +153,11 @@ public class RenameTypeParameterProcessor extends JavaRenameProcessor
     }
   }
 
-  private static final String ATTRIBUTE_PARAMETER = "parameter"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_PARAMETER = "parameter"; // $NON-NLS-1$
 
   /** The identifier of this processor */
   public static final String IDENTIFIER =
-      "org.eclipse.jdt.ui.renameTypeParameterProcessor"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.renameTypeParameterProcessor"; // $NON-NLS-1$
 
   /** The change object */
   private Change fChange = null;
@@ -211,7 +211,7 @@ public class RenameTypeParameterProcessor extends JavaRenameProcessor
     Assert.isNotNull(context);
     RefactoringStatus status = new RefactoringStatus();
     try {
-      monitor.beginTask("", 5); //$NON-NLS-1$
+      monitor.beginTask("", 5); // $NON-NLS-1$
       monitor.setTaskName(RefactoringCoreMessages.RenameTypeParameterRefactoring_checking);
       status.merge(Checks.checkIfCuBroken(fTypeParameter.getDeclaringMember()));
       monitor.worked(1);
@@ -267,7 +267,7 @@ public class RenameTypeParameterProcessor extends JavaRenameProcessor
                 .RenameTypeParameterRefactoring_method_type_parameter_already_defined);
     } else {
       JavaPlugin.logErrorMessage(
-          "Unexpected sub-type of IMember: " + member.getClass().getName()); //$NON-NLS-1$
+          "Unexpected sub-type of IMember: " + member.getClass().getName()); // $NON-NLS-1$
       Assert.isTrue(false);
     }
     return result;
@@ -343,7 +343,7 @@ public class RenameTypeParameterProcessor extends JavaRenameProcessor
         declaration = ASTNodeSearchUtil.getAbstractTypeDeclarationNode((IType) member, root);
       } else {
         JavaPlugin.logErrorMessage(
-            "Unexpected sub-type of IMember: " + member.getClass().getName()); //$NON-NLS-1$
+            "Unexpected sub-type of IMember: " + member.getClass().getName()); // $NON-NLS-1$
         Assert.isTrue(false);
       }
       monitor.worked(1);
@@ -386,7 +386,7 @@ public class RenameTypeParameterProcessor extends JavaRenameProcessor
       return method.getTypeParameter(getNewElementName());
     } else {
       JavaPlugin.logErrorMessage(
-          "Unexpected sub-type of IMember: " + member.getClass().getName()); //$NON-NLS-1$
+          "Unexpected sub-type of IMember: " + member.getClass().getName()); // $NON-NLS-1$
       Assert.isTrue(false);
     }
     return null;
@@ -403,7 +403,7 @@ public class RenameTypeParameterProcessor extends JavaRenameProcessor
 
   private RefactoringStatus initialize(JavaRefactoringArguments extended) {
     String parameter = extended.getAttribute(ATTRIBUTE_PARAMETER);
-    if (parameter == null || "".equals(parameter)) //$NON-NLS-1$
+    if (parameter == null || "".equals(parameter)) // $NON-NLS-1$
     return RefactoringStatus.createFatalErrorStatus(
           Messages.format(
               RefactoringCoreMessages.InitializableRefactoring_argument_not_exist,
@@ -435,7 +435,7 @@ public class RenameTypeParameterProcessor extends JavaRenameProcessor
               RefactoringCoreMessages.InitializableRefactoring_argument_not_exist,
               JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
     String name = extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
-    if (name != null && !"".equals(name)) //$NON-NLS-1$
+    if (name != null && !"".equals(name)) // $NON-NLS-1$
     setNewElementName(name);
     else
       return RefactoringStatus.createFatalErrorStatus(

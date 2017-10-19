@@ -105,12 +105,12 @@ public class LocalFile extends FileStore {
     if (destFile instanceof LocalFile) {
       File source = file;
       File destination = ((LocalFile) destFile).file;
-      //handle case variants on a case-insensitive OS, or copying between
-      //two equivalent files in an environment that supports symbolic links.
-      //in these nothing needs to be copied (and doing so would likely lose data)
+      // handle case variants on a case-insensitive OS, or copying between
+      // two equivalent files in an environment that supports symbolic links.
+      // in these nothing needs to be copied (and doing so would likely lose data)
       try {
         if (source.getCanonicalFile().equals(destination.getCanonicalFile())) {
-          //nothing to do
+          // nothing to do
           return;
         }
       } catch (IOException e) {
@@ -118,7 +118,7 @@ public class LocalFile extends FileStore {
         Policy.error(EFS.ERROR_READ, message, e);
       }
     }
-    //fall through to super implementation
+    // fall through to super implementation
     super.copy(destFile, options, monitor);
   }
 
@@ -139,8 +139,8 @@ public class LocalFile extends FileStore {
 
   public boolean equals(Object obj) {
     if (!(obj instanceof LocalFile)) return false;
-    //Mac oddity: file.equals returns false when case is different even when
-    //file system is not case sensitive (Radar bug 3190672)
+    // Mac oddity: file.equals returns false when case is different even when
+    // file system is not case sensitive (Radar bug 3190672)
     LocalFile otherFile = (LocalFile) obj;
     //		if (LocalFileSystem.MACOSX)
     //			return filePath.toLowerCase().equals(otherFile.filePath.toLowerCase());
@@ -158,11 +158,11 @@ public class LocalFile extends FileStore {
     //			}
     //			return info;
     //		}
-    //in-lined non-native implementation
+    // in-lined non-native implementation
     FileInfo info = new FileInfo(file.getName());
     final long lastModified = file.lastModified();
     if (lastModified <= 0) {
-      //if the file doesn't exist, all other attributes should be default values
+      // if the file doesn't exist, all other attributes should be default values
       info.setExists(false);
       return info;
     }
@@ -216,7 +216,7 @@ public class LocalFile extends FileStore {
    */
   private boolean internalDelete(
       File target, String pathToDelete, MultiStatus status, IProgressMonitor monitor) {
-    //first try to delete - this should succeed for files and symbolic links to directories
+    // first try to delete - this should succeed for files and symbolic links to directories
     if (monitor.isCanceled()) {
       throw new OperationCanceledException();
     }
@@ -231,7 +231,7 @@ public class LocalFile extends FileStore {
         if (monitor.isCanceled()) {
           throw new OperationCanceledException();
         }
-        //optimized creation of child path object
+        // optimized creation of child path object
         StringBuffer childBuffer = new StringBuffer(parentLength + list[i].length() + 1);
         childBuffer.append(pathToDelete);
         childBuffer.append(File.separatorChar);
@@ -252,7 +252,7 @@ public class LocalFile extends FileStore {
         return false;
       }
     }
-    //if we got this far, we failed
+    // if we got this far, we failed
     String message = null;
     if (fetchInfo().getAttribute(EFS.ATTRIBUTE_READ_ONLY))
       message = NLS.bind(Messages.couldnotDeleteReadOnly, target.getAbsolutePath());
@@ -267,7 +267,7 @@ public class LocalFile extends FileStore {
     String thatPath = ((LocalFile) other).filePath;
     int thisLength = thisPath.length();
     int thatLength = thatPath.length();
-    //if equal then not a parent
+    // if equal then not a parent
     if (thisLength >= thatLength) return false;
     //		if (getFileSystem().isCaseSensitive()) {
     if (thatPath.indexOf(thisPath) != 0) return false;
@@ -275,14 +275,14 @@ public class LocalFile extends FileStore {
     //			if (thatPath.toLowerCase().indexOf(thisPath.toLowerCase()) != 0)
     //				return false;
     //		}
-    //The common portion must end with a separator character for this to be a parent of that
+    // The common portion must end with a separator character for this to be a parent of that
     return thisPath.charAt(thisLength - 1) == File.separatorChar
         || thatPath.charAt(thisLength) == File.separatorChar;
   }
 
   public IFileStore mkdir(int options, IProgressMonitor monitor) throws CoreException {
     boolean shallow = (options & EFS.SHALLOW) != 0;
-    //must be a directory
+    // must be a directory
     if (shallow) file.mkdir();
     else file.mkdirs();
     if (!file.isDirectory()) {
@@ -306,9 +306,9 @@ public class LocalFile extends FileStore {
     monitor = Policy.monitorFor(monitor);
     try {
       monitor.beginTask(NLS.bind(Messages.moving, source.getAbsolutePath()), 10);
-      //this flag captures case renaming on a case-insensitive OS, or moving
-      //two equivalent files in an environment that supports symbolic links.
-      //in these cases we NEVER want to delete anything
+      // this flag captures case renaming on a case-insensitive OS, or moving
+      // two equivalent files in an environment that supports symbolic links.
+      // in these cases we NEVER want to delete anything
       boolean sourceEqualsDest = false;
       try {
         sourceEqualsDest = source.getCanonicalFile().equals(destination.getCanonicalFile());
@@ -342,7 +342,7 @@ public class LocalFile extends FileStore {
                     Messages.failedMove, source.getAbsolutePath(), destination.getAbsolutePath());
             Policy.error(EFS.ERROR_WRITE, message);
           }
-          //the move was successful
+          // the move was successful
           monitor.worked(10);
           return;
         }
@@ -362,7 +362,7 @@ public class LocalFile extends FileStore {
   public InputStream openInputStream(int options, IProgressMonitor monitor) throws CoreException {
     monitor = Policy.monitorFor(monitor);
     try {
-      monitor.beginTask("", 1); //$NON-NLS-1$
+      monitor.beginTask("", 1); // $NON-NLS-1$
       return new FileInputStream(file);
     } catch (FileNotFoundException e) {
       String message;
@@ -379,7 +379,7 @@ public class LocalFile extends FileStore {
   public OutputStream openOutputStream(int options, IProgressMonitor monitor) throws CoreException {
     monitor = Policy.monitorFor(monitor);
     try {
-      monitor.beginTask("", 1); //$NON-NLS-1$
+      monitor.beginTask("", 1); // $NON-NLS-1$
       return new FileOutputStream(file, (options & EFS.APPEND) != 0);
     } catch (FileNotFoundException e) {
       checkReadOnlyParent(file, e);
@@ -400,7 +400,7 @@ public class LocalFile extends FileStore {
       //			if (LocalFileNativesManager.isUsingNatives())
       //				success &= LocalFileNativesManager.putFileInfo(filePath, info, options);
     }
-    //native does not currently set last modified
+    // native does not currently set last modified
     if ((options & EFS.SET_LAST_MODIFIED) != 0)
       success &= file.setLastModified(info.getLastModified());
     if (!success && !file.exists())

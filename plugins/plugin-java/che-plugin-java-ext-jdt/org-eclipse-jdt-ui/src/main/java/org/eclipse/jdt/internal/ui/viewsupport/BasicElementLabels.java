@@ -26,11 +26,11 @@ public class BasicElementLabels {
 
   // TextProcessor delimiters
   private static final String CODE_DELIMITERS =
-      TextProcessor.getDefaultDelimiters() + "<>()?,{}+-*!%=^|&;[]~"; //$NON-NLS-1$
+      TextProcessor.getDefaultDelimiters() + "<>()?,{}+-*!%=^|&;[]~"; // $NON-NLS-1$
   private static final String FILE_PATTERN_DELIMITERS =
-      TextProcessor.getDefaultDelimiters() + "*.?"; //$NON-NLS-1$
+      TextProcessor.getDefaultDelimiters() + "*.?"; // $NON-NLS-1$
   private static final String URL_DELIMITERS =
-      TextProcessor.getDefaultDelimiters() + ":@?-"; //$NON-NLS-1$
+      TextProcessor.getDefaultDelimiters() + ":@?-"; // $NON-NLS-1$
 
   /**
    * Returns the label of a path.

@@ -50,7 +50,8 @@ public class JavaElementImageProvider {
 
   {
     //		ISharedImages images = JavaPlugin.getDefault().getWorkbench().getSharedImages();
-    //		DESC_OBJ_PROJECT_CLOSED = images.getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT_CLOSED);
+    //		DESC_OBJ_PROJECT_CLOSED =
+    // images.getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT_CLOSED);
     //		DESC_OBJ_PROJECT = images.getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT);
   }
 
@@ -143,14 +144,16 @@ public class JavaElementImageProvider {
   }
 
   //	/**
-  //	 * Returns an image descriptor for a IAdaptable. The descriptor includes overlays, if specified (only error ticks apply).
+  //	 * Returns an image descriptor for a IAdaptable. The descriptor includes overlays, if specified
+  // (only error ticks apply).
   //	 * Returns <code>null</code> if no image could be found.
   //	 * @param adaptable the adaptable
   //	 * @param flags the image flags
   //	 * @return returns the image descriptor
   //	 */
   //	public ImageDescriptor getWorkbenchImageDescriptor(IAdaptable adaptable, int flags) {
-  //		IWorkbenchAdapter wbAdapter= (IWorkbenchAdapter) adaptable.getAdapter(IWorkbenchAdapter.class);
+  //		IWorkbenchAdapter wbAdapter= (IWorkbenchAdapter)
+  // adaptable.getAdapter(IWorkbenchAdapter.class);
   //		if (wbAdapter == null) {
   //			return null;
   //		}
@@ -271,7 +274,8 @@ public class JavaElementImageProvider {
           IJavaProject jp = (IJavaProject) element;
           if (jp.getProject().isOpen()) {
             //						IProject project= jp.getProject();
-            //						IWorkbenchAdapter adapter= (IWorkbenchAdapter)project.getAdapter(IWorkbenchAdapter.class);
+            //						IWorkbenchAdapter adapter=
+            // (IWorkbenchAdapter)project.getAdapter(IWorkbenchAdapter.class);
             //						if (adapter != null) {
             //							ImageDescriptor result= adapter.getImageDescriptor(project);
             //							if (result != null)
@@ -293,8 +297,10 @@ public class JavaElementImageProvider {
         default:
           // ignore. Must be a new, yet unknown Java element
           //					// give an advanced IWorkbenchAdapter the chance
-          //					IWorkbenchAdapter wbAdapter= (IWorkbenchAdapter) element.getAdapter(IWorkbenchAdapter.class);
-          //					if (wbAdapter != null && !(wbAdapter instanceof JavaWorkbenchAdapter)) { // avoid recursion
+          //					IWorkbenchAdapter wbAdapter= (IWorkbenchAdapter)
+          // element.getAdapter(IWorkbenchAdapter.class);
+          //					if (wbAdapter != null && !(wbAdapter instanceof JavaWorkbenchAdapter)) { // avoid
+          // recursion
           //						ImageDescriptor imageDescriptor= wbAdapter.getImageDescriptor(element);
           //						if (imageDescriptor != null) {
           //							return imageDescriptor;

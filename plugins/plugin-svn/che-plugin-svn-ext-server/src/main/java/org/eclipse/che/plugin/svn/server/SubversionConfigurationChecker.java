@@ -128,11 +128,11 @@ public class SubversionConfigurationChecker {
       }
     }
 
-    if (miscellanySectionIndex == -1) { //if this section doesn't exist
+    if (miscellanySectionIndex == -1) { // if this section doesn't exist
       subversionConfigContent.add("[miscellany]");
       subversionConfigContent.add("global-ignores = " + getDefaultExcludes());
     } else if (globalIgnoresIndex
-        == -1) { //in case if misc section exists but config parameter isn't
+        == -1) { // in case if misc section exists but config parameter isn't
       subversionConfigContent.add(
           miscellanySectionIndex, "global-ignores = " + getDefaultExcludes());
     } else {

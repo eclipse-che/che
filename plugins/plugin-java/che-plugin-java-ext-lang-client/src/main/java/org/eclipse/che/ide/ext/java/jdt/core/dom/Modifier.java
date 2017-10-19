@@ -51,11 +51,11 @@ public final class Modifier /*extends ASTNode implements IExtendedModifier*/ {
 
     /** "abstract" modifier with flag value {@link Modifier#ABSTRACT}. */
     public static final ModifierKeyword ABSTRACT_KEYWORD =
-        new ModifierKeyword("abstract", ABSTRACT); //$NON-NLS-1$
+        new ModifierKeyword("abstract", ABSTRACT); // $NON-NLS-1$
 
     /** "final" modifier with flag value {@link Modifier#FINAL}. */
     public static final ModifierKeyword FINAL_KEYWORD =
-        new ModifierKeyword("final", FINAL); //$NON-NLS-1$
+        new ModifierKeyword("final", FINAL); // $NON-NLS-1$
 
     /**
      * Map from token to operator (key type: <code>String</code>; value type: <code>Operator</code>
@@ -65,39 +65,39 @@ public final class Modifier /*extends ASTNode implements IExtendedModifier*/ {
 
     /** "native" modifier with flag value {@link Modifier#NATIVE}. */
     public static final ModifierKeyword NATIVE_KEYWORD =
-        new ModifierKeyword("native", NATIVE); //$NON-NLS-1$
+        new ModifierKeyword("native", NATIVE); // $NON-NLS-1$
 
     /** "private" modifier with flag value {@link Modifier#PRIVATE}. */
     public static final ModifierKeyword PRIVATE_KEYWORD =
-        new ModifierKeyword("private", PRIVATE); //$NON-NLS-1$
+        new ModifierKeyword("private", PRIVATE); // $NON-NLS-1$
 
     /** "protected" modifier with flag value {@link Modifier#PROTECTED}. */
     public static final ModifierKeyword PROTECTED_KEYWORD =
-        new ModifierKeyword("protected", PROTECTED); //$NON-NLS-1$
+        new ModifierKeyword("protected", PROTECTED); // $NON-NLS-1$
 
     /** "public" modifier with flag value {@link Modifier#PUBLIC}. */
     public static final ModifierKeyword PUBLIC_KEYWORD =
-        new ModifierKeyword("public", PUBLIC); //$NON-NLS-1$
+        new ModifierKeyword("public", PUBLIC); // $NON-NLS-1$
 
     /** "static" modifier with flag value {@link Modifier#STATIC}. */
     public static final ModifierKeyword STATIC_KEYWORD =
-        new ModifierKeyword("static", STATIC); //$NON-NLS-1$
+        new ModifierKeyword("static", STATIC); // $NON-NLS-1$
 
     /** "strictfp" modifier with flag value {@link Modifier#STRICTFP}. */
     public static final ModifierKeyword STRICTFP_KEYWORD =
-        new ModifierKeyword("strictfp", STRICTFP); //$NON-NLS-1$
+        new ModifierKeyword("strictfp", STRICTFP); // $NON-NLS-1$
 
     /** "synchronized" modifier with flag value {@link Modifier#SYNCHRONIZED}. */
     public static final ModifierKeyword SYNCHRONIZED_KEYWORD =
-        new ModifierKeyword("synchronized", SYNCHRONIZED); //$NON-NLS-1$
+        new ModifierKeyword("synchronized", SYNCHRONIZED); // $NON-NLS-1$
 
     /** "transient" modifier with flag value {@link Modifier#TRANSIENT}. */
     public static final ModifierKeyword TRANSIENT_KEYWORD =
-        new ModifierKeyword("transient", TRANSIENT); //$NON-NLS-1$
+        new ModifierKeyword("transient", TRANSIENT); // $NON-NLS-1$
 
     /** "volatile" modifier with flag value {@link Modifier#VOLATILE}. */
     public static final ModifierKeyword VOLATILE_KEYWORD =
-        new ModifierKeyword("volatile", VOLATILE); //$NON-NLS-1$
+        new ModifierKeyword("volatile", VOLATILE); // $NON-NLS-1$
 
     static {
       KEYWORDS = new HashMap(20);
@@ -212,13 +212,17 @@ public final class Modifier /*extends ASTNode implements IExtendedModifier*/ {
   public static final int FINAL = 0x0010;
 
   //    /**
-  //     * The "keyword" structural property of this node type (type: {@link Modifier.ModifierKeyword}).
+  //     * The "keyword" structural property of this node type (type: {@link
+  // Modifier.ModifierKeyword}).
   //     *
   //     * @since 3.0
   //     */
-  //    public static final SimplePropertyDescriptor KEYWORD_PROPERTY = new SimplePropertyDescriptor(Modifier.class,
-  //                                                                                                 "keyword", Modifier.ModifierKeyword.class,
-  //                                                                                                 MANDATORY); //$NON-NLS-1$
+  //    public static final SimplePropertyDescriptor KEYWORD_PROPERTY = new
+  // SimplePropertyDescriptor(Modifier.class,
+  //
+  // "keyword", Modifier.ModifierKeyword.class,
+  //
+  // MANDATORY); //$NON-NLS-1$
 
   /**
    * "native" modifier constant (bit mask). Applicable only to methods.
@@ -241,7 +245,8 @@ public final class Modifier /*extends ASTNode implements IExtendedModifier*/ {
    */
   public static final int PRIVATE = 0x0002;
 
-  //    /** A list of property descriptors (element type: {@link StructuralPropertyDescriptor}), or null if uninitialized. */
+  //    /** A list of property descriptors (element type: {@link StructuralPropertyDescriptor}), or
+  // null if uninitialized. */
   //    private static final List PROPERTY_DESCRIPTORS;
 
   /**
@@ -442,11 +447,13 @@ public final class Modifier /*extends ASTNode implements IExtendedModifier*/ {
   }
 
   //    /**
-  //     * Returns a list of structural property descriptors for this node type. Clients must not modify the result.
+  //     * Returns a list of structural property descriptors for this node type. Clients must not
+  // modify the result.
   //     *
   //     * @param apiLevel
   //     *         the API level; one of the <code>AST.JLS*</code> constants
-  //     * @return a list of property descriptors (element type: {@link StructuralPropertyDescriptor})
+  //     * @return a list of property descriptors (element type: {@link
+  // StructuralPropertyDescriptor})
   //     * @since 3.0
   //     */
   //    public static List propertyDescriptors(int apiLevel) {
@@ -461,7 +468,8 @@ public final class Modifier /*extends ASTNode implements IExtendedModifier*/ {
   private ModifierKeyword modifierKeyword = ModifierKeyword.PUBLIC_KEYWORD;
 
   //    /**
-  //     * Creates a new unparented modifier node owned by the given AST. By default, the node has unspecified (but legal) modifier.
+  //     * Creates a new unparented modifier node owned by the given AST. By default, the node has
+  // unspecified (but legal) modifier.
   //     * <p>
   //     * N.B. This constructor is package-private.
   //     * </p>
@@ -514,7 +522,8 @@ public final class Modifier /*extends ASTNode implements IExtendedModifier*/ {
   //    }
   //
   //    /* (omit javadoc for this method) Method declared on ASTNode. */
-  //    final Object internalGetSetObjectProperty(SimplePropertyDescriptor property, boolean get, Object value) {
+  //    final Object internalGetSetObjectProperty(SimplePropertyDescriptor property, boolean get,
+  // Object value) {
   //        if (property == KEYWORD_PROPERTY) {
   //            if (get) {
   //                return getKeyword();

@@ -229,7 +229,7 @@ public abstract class BaseTest {
     folder.createFile("pom.xml", getPomContent(pomContent).getBytes());
     projectRegistry.setProjectType(folder.getPath().toString(), MAVEN_ID, false);
 
-    //inform DeltaProcessingStat about new project
+    // inform DeltaProcessingStat about new project
     JavaModelManager.getJavaModelManager()
         .deltaState
         .resourceChanged(

@@ -69,8 +69,8 @@ public class JavaSearchScope extends AbstractJavaSearchScope {
   private JavaSearchScope(int size) {
     initialize(size);
 
-    //disabled for now as this could be expensive
-    //JavaModelManager.getJavaModelManager().rememberScope(this);
+    // disabled for now as this could be expensive
+    // JavaModelManager.getJavaModelManager().rememberScope(this);
   }
 
   private void addEnclosingProjectOrJar(IPath path) {
@@ -168,7 +168,7 @@ public class JavaSearchScope extends AbstractJavaSearchScope {
                       "",
                       pathToString,
                       false /*not a package*/,
-                      access); //$NON-NLS-1$
+                      access); // $NON-NLS-1$
                   addEnclosingProjectOrJar(entry.getPath());
                 }
               }
@@ -200,7 +200,7 @@ public class JavaSearchScope extends AbstractJavaSearchScope {
                     "",
                     pathToString,
                     false /*not a package*/,
-                    access); //$NON-NLS-1$
+                    access); // $NON-NLS-1$
                 addEnclosingProjectOrJar(entry.getPath());
               }
               break;
@@ -212,7 +212,8 @@ public class JavaSearchScope extends AbstractJavaSearchScope {
             if (pathToAdd == null || pathToAdd.equals(path)) {
               JavaProject referencedProject = (JavaProject) model.getJavaProject(path.toOSString());
               if (!projectsToBeAdded.contains(
-                  referencedProject)) { // do not recurse if depending project was used to create the scope
+                  referencedProject)) { // do not recurse if depending project was used to create
+                // the scope
                 add(
                     referencedProject,
                     null,
@@ -275,7 +276,7 @@ public class JavaSearchScope extends AbstractJavaSearchScope {
               Util.relativePath(rootResource.getFullPath(), containerPath.segmentCount());
           add(projectPath, relativePath, containerPathToString, false /*not a package*/, null);
         } else {
-          add(projectPath, "", containerPathToString, false /*not a package*/, null); //$NON-NLS-1$
+          add(projectPath, "", containerPathToString, false /*not a package*/, null); // $NON-NLS-1$
         }
         break;
       case IJavaElement.PACKAGE_FRAGMENT:
@@ -483,7 +484,8 @@ public class JavaSearchScope extends AbstractJavaSearchScope {
     } else {
       // if looking at a package, this scope encloses the given path
       // if the given path is a direct child of the folder
-      // or if the given path path is the folder path (see bug 13919 Declaration for package not found if scope is not project)
+      // or if the given path path is the folder path (see bug 13919 Declaration for package not
+      // found if scope is not project)
       if (path.startsWith(enclosingPath)
           && ((enclosingPath.length() == path.lastIndexOf('/'))
               || (enclosingPath.length() == path.length()))) {
@@ -701,20 +703,20 @@ public class JavaSearchScope extends AbstractJavaSearchScope {
   }
 
   public String toString() {
-    StringBuffer result = new StringBuffer("JavaSearchScope on "); //$NON-NLS-1$
+    StringBuffer result = new StringBuffer("JavaSearchScope on "); // $NON-NLS-1$
     if (this.elements != null) {
-      result.append("["); //$NON-NLS-1$
+      result.append("["); // $NON-NLS-1$
       for (int i = 0, length = this.elements.size(); i < length; i++) {
         JavaElement element = (JavaElement) this.elements.get(i);
-        result.append("\n\t"); //$NON-NLS-1$
+        result.append("\n\t"); // $NON-NLS-1$
         result.append(element.toStringWithAncestors());
       }
-      result.append("\n]"); //$NON-NLS-1$
+      result.append("\n]"); // $NON-NLS-1$
     } else {
       if (this.pathsCount == 0) {
-        result.append("[empty scope]"); //$NON-NLS-1$
+        result.append("[empty scope]"); // $NON-NLS-1$
       } else {
-        result.append("["); //$NON-NLS-1$
+        result.append("["); // $NON-NLS-1$
         String[] paths = new String[this.relativePaths.length];
         int index = 0;
         for (int i = 0; i < this.relativePaths.length; i++) {
@@ -737,10 +739,10 @@ public class JavaSearchScope extends AbstractJavaSearchScope {
         System.arraycopy(paths, 0, paths = new String[index], 0, index);
         Util.sort(paths);
         for (int i = 0; i < index; i++) {
-          result.append("\n\t"); //$NON-NLS-1$
+          result.append("\n\t"); // $NON-NLS-1$
           result.append(paths[i]);
         }
-        result.append("\n]"); //$NON-NLS-1$
+        result.append("\n]"); // $NON-NLS-1$
       }
     }
     return result.toString();

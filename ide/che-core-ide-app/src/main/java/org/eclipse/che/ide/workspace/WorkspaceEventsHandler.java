@@ -102,7 +102,8 @@ public class WorkspaceEventsHandler implements WorkspaceStatusChangedEvent.Handl
   }
 
   private void onWorkspaceStarting(final String workspaceId) {
-    // TODO timer is a workaround. Is needed because for some reason after receiving of event workspace starting
+    // TODO timer is a workaround. Is needed because for some reason after receiving of event
+    // workspace starting
     // get workspace event should contain runtime but it doesn't
     new Timer() {
       @Override

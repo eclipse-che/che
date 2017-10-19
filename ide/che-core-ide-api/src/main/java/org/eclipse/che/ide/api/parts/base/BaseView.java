@@ -83,7 +83,7 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite
     toolBar.getElement().setAttribute("role", "toolbar");
     toolBar.addDomHandler(
         event -> {
-          //activate last focused element if user clicked on part header
+          // activate last focused element if user clicked on part header
           if (lastFocused != null) {
             lastFocused.setFocus(true);
           }
@@ -91,14 +91,14 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite
         MouseUpEvent.getType());
     container.addNorth(toolBar, 23);
 
-    //this hack used for adding box shadow effect to toolbar
+    // this hack used for adding box shadow effect to toolbar
     toolBar.getElement().getParentElement().getStyle().setOverflow(Style.Overflow.VISIBLE);
 
     toolbarHeader = new DockLayoutPanel(Style.Unit.PX);
     toolbarHeader.getElement().setAttribute("role", "toolbar-header");
     toolBar.addNorth(toolbarHeader, 22);
 
-    //padding 2 pixels from the right
+    // padding 2 pixels from the right
     toolbarHeader.addEast(new FlowPanel(), 2);
 
     titleLabel = new Label();
@@ -109,7 +109,7 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite
     addMinimizeButton();
     addMenuButton();
 
-    //handle double clicking on the toolbar header
+    // handle double clicking on the toolbar header
     toolbarHeader.addDomHandler(event -> onToggleMaximize(), DoubleClickEvent.getType());
   }
 

@@ -39,7 +39,7 @@ public class ResourceChangeDescriptionFactory implements IResourceChangeDescript
    */
   private ProposedResourceDelta buildDeleteDelta(
       ProposedResourceDelta parentDelta, IResource resource) {
-    //start with the existing delta for this resource, if any, to preserve other flags
+    // start with the existing delta for this resource, if any, to preserve other flags
     ProposedResourceDelta delta = parentDelta.getChild(resource.getName());
     if (delta == null) {
       delta = new ProposedResourceDelta(resource);
@@ -47,7 +47,7 @@ public class ResourceChangeDescriptionFactory implements IResourceChangeDescript
     }
     delta.setKind(IResourceDelta.REMOVED);
     if (resource.getType() == IResource.FILE) return delta;
-    //recurse to build deletion deltas for children
+    // recurse to build deletion deltas for children
     try {
       IResource[] members = ((IContainer) resource).members();
       int childCount = members.length;
@@ -56,7 +56,7 @@ public class ResourceChangeDescriptionFactory implements IResourceChangeDescript
         for (int i = 0; i < childCount; i++) childDeltas[i] = buildDeleteDelta(delta, members[i]);
       }
     } catch (CoreException e) {
-      //don't need to create deletion deltas for children of inaccessible resources
+      // don't need to create deletion deltas for children of inaccessible resources
     }
     return delta;
   }
@@ -67,7 +67,7 @@ public class ResourceChangeDescriptionFactory implements IResourceChangeDescript
   public void change(IFile file) {
     ProposedResourceDelta delta = getDelta(file);
     if (delta.getKind() == 0) delta.setKind(IResourceDelta.CHANGED);
-    //the CONTENT flag only applies to the changed and moved from cases
+    // the CONTENT flag only applies to the changed and moved from cases
     if (delta.getKind() == IResourceDelta.CHANGED
         || (delta.getFlags() & IResourceDelta.MOVED_FROM) != 0
         || (delta.getFlags() & IResourceDelta.COPIED_FROM) != 0)
@@ -102,7 +102,7 @@ public class ResourceChangeDescriptionFactory implements IResourceChangeDescript
    */
   public void delete(IResource resource) {
     if (resource.getType() == IResource.ROOT) {
-      //the root itself cannot be deleted, so create deletions for each project
+      // the root itself cannot be deleted, so create deletions for each project
       IProject[] projects = ((IWorkspaceRoot) resource).getProjects(IContainer.INCLUDE_HIDDEN);
       for (int i = 0; i < projects.length; i++) buildDeleteDelta(root, projects[i]);
     } else {
@@ -114,7 +114,7 @@ public class ResourceChangeDescriptionFactory implements IResourceChangeDescript
     Policy.log(
         e.getStatus().getSeverity(),
         "An internal error occurred while accumulating a change description.",
-        e); //$NON-NLS-1$
+        e); // $NON-NLS-1$
   }
 
   /* (non-Javadoc)
@@ -260,7 +260,7 @@ public class ResourceChangeDescriptionFactory implements IResourceChangeDescript
     final IPath sourcePrefix = resource.getFullPath();
     final IPath destinationPrefix = destination;
     try {
-      //build delta for the entire sub-tree if available
+      // build delta for the entire sub-tree if available
       if (resource.isAccessible()) {
         resource.accept(
             new IResourceVisitor() {
@@ -269,7 +269,7 @@ public class ResourceChangeDescriptionFactory implements IResourceChangeDescript
               }
             });
       } else {
-        //just build a delta for the single resource
+        // just build a delta for the single resource
         moveOrCopy(resource, sourcePrefix, destination, move);
       }
     } catch (CoreException e) {

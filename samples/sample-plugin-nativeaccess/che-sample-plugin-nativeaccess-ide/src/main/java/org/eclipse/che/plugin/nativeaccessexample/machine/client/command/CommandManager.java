@@ -66,7 +66,7 @@ public class CommandManager {
         new Consumer<ProcessStartResponseDto>() {
           @Override
           public void accept(ProcessStartResponseDto arg) {
-            //Do nothing in this example
+            // Do nothing in this example
           }
         });
   }

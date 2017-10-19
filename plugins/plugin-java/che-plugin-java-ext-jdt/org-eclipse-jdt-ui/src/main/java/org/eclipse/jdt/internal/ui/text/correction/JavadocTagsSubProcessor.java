@@ -196,15 +196,15 @@ public class JavadocTagsSubProcessor {
         insertTag(tagsRewriter, newTag, getPreviousExceptionNames(exceptions, missingNode));
       } else {
         Assert.isTrue(
-            false, "AddMissingJavadocTagProposal: unexpected node location"); //$NON-NLS-1$
+            false, "AddMissingJavadocTagProposal: unexpected node location"); // $NON-NLS-1$
         return;
       }
 
       TextElement textElement = ast.newTextElement();
-      textElement.setText(""); //$NON-NLS-1$
+      textElement.setText(""); // $NON-NLS-1$
       newTag.fragments().add(textElement);
 
-      addLinkedPosition(rewrite.track(textElement), false, "comment_start"); //$NON-NLS-1$
+      addLinkedPosition(rewrite.track(textElement), false, "comment_start"); // $NON-NLS-1$
 
       if (bodyDecl.getJavadoc() == null) {
         // otherwise the linked position spans over a line delimiter
@@ -257,7 +257,7 @@ public class JavadocTagsSubProcessor {
           TextElement text = ast.newTextElement();
           text.setText(name);
           newTag.fragments().add(text);
-          insertTabStop(rewriter, newTag.fragments(), "typeParam" + i); //$NON-NLS-1$
+          insertTabStop(rewriter, newTag.fragments(), "typeParam" + i); // $NON-NLS-1$
           insertTag(tagsRewriter, newTag, getPreviousTypeParamNames(typeParams, decl));
         }
         typeParamNames.add(name);
@@ -270,7 +270,7 @@ public class JavadocTagsSubProcessor {
           TagElement newTag = ast.newTagElement();
           newTag.setTagName(TagElement.TAG_PARAM);
           newTag.fragments().add(ast.newSimpleName(name));
-          insertTabStop(rewriter, newTag.fragments(), "methParam" + i); //$NON-NLS-1$
+          insertTabStop(rewriter, newTag.fragments(), "methParam" + i); // $NON-NLS-1$
           Set<String> sameKindLeadingNames = getPreviousParamNames(params, decl);
           sameKindLeadingNames.addAll(typeParamNames);
           insertTag(tagsRewriter, newTag, sameKindLeadingNames);
@@ -283,7 +283,7 @@ public class JavadocTagsSubProcessor {
           if (findTag(javadoc, TagElement.TAG_RETURN, null) == null) {
             TagElement newTag = ast.newTagElement();
             newTag.setTagName(TagElement.TAG_RETURN);
-            insertTabStop(rewriter, newTag.fragments(), "return"); //$NON-NLS-1$
+            insertTabStop(rewriter, newTag.fragments(), "return"); // $NON-NLS-1$
             insertTag(tagsRewriter, newTag, null);
           }
         }
@@ -300,7 +300,7 @@ public class JavadocTagsSubProcessor {
             TextElement excNode = ast.newTextElement();
             excNode.setText(ASTNodes.getQualifiedTypeName(exception));
             newTag.fragments().add(excNode);
-            insertTabStop(rewriter, newTag.fragments(), "exception" + i); //$NON-NLS-1$
+            insertTabStop(rewriter, newTag.fragments(), "exception" + i); // $NON-NLS-1$
             insertTag(tagsRewriter, newTag, getPreviousExceptionNames(thrownExceptions, exception));
           }
         }
@@ -322,7 +322,7 @@ public class JavadocTagsSubProcessor {
           TextElement text = ast.newTextElement();
           text.setText(name);
           newTag.fragments().add(text);
-          insertTabStop(rewriter, newTag.fragments(), "typeParam" + i); //$NON-NLS-1$
+          insertTabStop(rewriter, newTag.fragments(), "typeParam" + i); // $NON-NLS-1$
           insertTag(tagsRewriter, newTag, getPreviousTypeParamNames(typeParams, decl));
         }
       }
@@ -330,7 +330,7 @@ public class JavadocTagsSubProcessor {
 
     private void insertTabStop(ASTRewrite rewriter, List<ASTNode> fragments, String linkedName) {
       TextElement textElement = rewriter.getAST().newTextElement();
-      textElement.setText(""); //$NON-NLS-1$
+      textElement.setText(""); // $NON-NLS-1$
       fragments.add(textElement);
       addLinkedPosition(rewriter.track(textElement), false, linkedName);
     }
@@ -507,7 +507,7 @@ public class JavadocTagsSubProcessor {
                 string));
       }
     } else if (declaration instanceof FieldDeclaration) {
-      String comment = "/**\n *\n */\n"; //$NON-NLS-1$
+      String comment = "/**\n *\n */\n"; // $NON-NLS-1$
       List<VariableDeclarationFragment> fragments = ((FieldDeclaration) declaration).fragments();
       if (fragments != null && fragments.size() > 0) {
         VariableDeclaration decl = fragments.get(0);
@@ -675,8 +675,8 @@ public class JavadocTagsSubProcessor {
     return false;
   }
 
-  private static String[]
-      TAG_ORDER = { // see http://www.oracle.com/technetwork/java/javase/documentation/index-137868.html#orderoftags
+  private static String[] TAG_ORDER = { // see
+    // http://www.oracle.com/technetwork/java/javase/documentation/index-137868.html#orderoftags
     TagElement.TAG_AUTHOR,
     TagElement.TAG_VERSION,
     TagElement.TAG_PARAM,
@@ -708,12 +708,12 @@ public class JavadocTagsSubProcessor {
         return ASTNodes.getSimpleNameIdentifier((Name) first);
       } else if (first instanceof TextElement && TagElement.TAG_PARAM.equals(curr.getTagName())) {
         String text = ((TextElement) first).getText();
-        if ("<".equals(text) && fragments.size() >= 3) { //$NON-NLS-1$
+        if ("<".equals(text) && fragments.size() >= 3) { // $NON-NLS-1$
           Object second = fragments.get(1);
           Object third = fragments.get(2);
           if (second instanceof Name
               && third instanceof TextElement
-              && ">".equals(((TextElement) third).getText())) { //$NON-NLS-1$
+              && ">".equals(((TextElement) third).getText())) { // $NON-NLS-1$
             return '<' + ASTNodes.getSimpleNameIdentifier((Name) second) + '>';
           }
         } else if (text.startsWith(String.valueOf('<'))
@@ -742,7 +742,7 @@ public class JavadocTagsSubProcessor {
     Image image =
         JavaPluginImages.get(
             JavaPluginImages
-                .IMG_TOOL_DELETE); //JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+                .IMG_TOOL_DELETE); // JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
     proposals.add(
         new ASTRewriteCorrectionProposal(
             label, context.getCompilationUnit(), rewrite, IProposalRelevance.REMOVE_TAG, image));

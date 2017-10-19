@@ -1072,17 +1072,17 @@ public final class RefactoringAvailabilityTester {
   }
 
   public static boolean isRenameProhibited(final IMethod method) throws CoreException {
-    if (method.getElementName().equals("toString") //$NON-NLS-1$
+    if (method.getElementName().equals("toString") // $NON-NLS-1$
         && (method.getNumberOfParameters() == 0)
-        && (method.getReturnType().equals("Ljava.lang.String;") //$NON-NLS-1$
-            || method.getReturnType().equals("QString;") //$NON-NLS-1$
-            || method.getReturnType().equals("Qjava.lang.String;"))) //$NON-NLS-1$
+        && (method.getReturnType().equals("Ljava.lang.String;") // $NON-NLS-1$
+            || method.getReturnType().equals("QString;") // $NON-NLS-1$
+            || method.getReturnType().equals("Qjava.lang.String;"))) // $NON-NLS-1$
     return true;
     else return false;
   }
 
   public static boolean isRenameProhibited(final IType type) {
-    return type.getPackageFragment().getElementName().equals("java.lang"); //$NON-NLS-1$
+    return type.getPackageFragment().getElementName().equals("java.lang"); // $NON-NLS-1$
   }
 
   public static boolean isRenameVirtualMethodAvailable(final IMethod method) throws CoreException {
@@ -1206,13 +1206,13 @@ public final class RefactoringAvailabilityTester {
   public static boolean isIntroduceParameterObjectAvailable(IStructuredSelection selection)
       throws JavaModelException {
     return isChangeSignatureAvailable(
-        selection); //TODO test selected element for more than 1 parameter?
+        selection); // TODO test selected element for more than 1 parameter?
   }
 
   public static boolean isIntroduceParameterObjectAvailable(JavaTextSelection selection)
       throws JavaModelException {
     return isChangeSignatureAvailable(
-        selection); //TODO test selected element for more than 1 parameter?
+        selection); // TODO test selected element for more than 1 parameter?
   }
 
   public static boolean isExtractClassAvailable(IType type) throws JavaModelException {

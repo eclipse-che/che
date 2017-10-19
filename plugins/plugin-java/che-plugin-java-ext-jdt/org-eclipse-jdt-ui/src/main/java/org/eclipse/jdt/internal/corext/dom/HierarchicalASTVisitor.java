@@ -51,9 +51,9 @@ import org.eclipse.jdt.core.dom.*;
  *
  */
 public abstract class HierarchicalASTVisitor extends ASTVisitor {
-  //TODO: check callers for handling of comments
+  // TODO: check callers for handling of comments
 
-  //---- Begin ASTNode Hierarchy -------------------------------------
+  // ---- Begin ASTNode Hierarchy -------------------------------------
 
   /**
    * Visits the given AST node.
@@ -89,7 +89,7 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
     endVisit((ASTNode) node);
   }
 
-  //---- Begin BodyDeclaration Hierarchy ---------------------------
+  // ---- Begin BodyDeclaration Hierarchy ---------------------------
   public boolean visit(BodyDeclaration node) {
     return visit((ASTNode) node);
   }
@@ -98,7 +98,7 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
     endVisit((ASTNode) node);
   }
 
-  //---- Begin AbstractTypeDeclaration Hierarchy ---------------------------
+  // ---- Begin AbstractTypeDeclaration Hierarchy ---------------------------
   public boolean visit(AbstractTypeDeclaration node) {
     return visit((BodyDeclaration) node);
   }
@@ -137,7 +137,7 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
     endVisit((AbstractTypeDeclaration) node);
   }
 
-  //---- End AbstractTypeDeclaration Hierarchy ---------------------------
+  // ---- End AbstractTypeDeclaration Hierarchy ---------------------------
 
   @Override
   public boolean visit(AnnotationTypeMemberDeclaration node) {
@@ -189,7 +189,7 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
     endVisit((BodyDeclaration) node);
   }
 
-  //---- End BodyDeclaration Hierarchy -----------------------------
+  // ---- End BodyDeclaration Hierarchy -----------------------------
 
   @Override
   public boolean visit(CatchClause node) {
@@ -201,7 +201,7 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
     endVisit((ASTNode) node);
   }
 
-  //---- Begin Comment Hierarchy ----------------------------------
+  // ---- Begin Comment Hierarchy ----------------------------------
   public boolean visit(Comment node) {
     return visit((ASTNode) node);
   }
@@ -240,7 +240,7 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
     endVisit((Comment) node);
   }
 
-  //---- End Comment Hierarchy -----------------------------
+  // ---- End Comment Hierarchy -----------------------------
 
   @Override
   public boolean visit(CompilationUnit node) {
@@ -262,7 +262,7 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
     endVisit((ASTNode) node);
   }
 
-  //---- Begin Expression Hierarchy ----------------------------------
+  // ---- Begin Expression Hierarchy ----------------------------------
   public boolean visit(Expression node) {
     return visit((ASTNode) node);
   }
@@ -271,7 +271,7 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
     endVisit((ASTNode) node);
   }
 
-  //---- Begin Annotation Hierarchy ----------------------------------
+  // ---- Begin Annotation Hierarchy ----------------------------------
   public boolean visit(Annotation node) {
     return visit((Expression) node);
   }
@@ -310,7 +310,7 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
     endVisit((Annotation) node);
   }
 
-  //---- End Annotation Hierarchy -----------------------------
+  // ---- End Annotation Hierarchy -----------------------------
 
   @Override
   public boolean visit(ArrayAccess node) {
@@ -452,7 +452,7 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
     endVisit((Expression) node);
   }
 
-  //---- Begin MethodReference Hierarchy ----------------------------------
+  // ---- Begin MethodReference Hierarchy ----------------------------------
   public boolean visit(MethodReference node) {
     return visit((Expression) node);
   }
@@ -501,9 +501,9 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
     endVisit((MethodReference) node);
   }
 
-  //---- End MethodReference Hierarchy ------------------------------------
+  // ---- End MethodReference Hierarchy ------------------------------------
 
-  //---- Begin Name Hierarchy ----------------------------------
+  // ---- Begin Name Hierarchy ----------------------------------
   public boolean visit(Name node) {
     return visit((Expression) node);
   }
@@ -532,7 +532,7 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
     endVisit((Name) node);
   }
 
-  //---- End Name Hierarchy ------------------------------------
+  // ---- End Name Hierarchy ------------------------------------
 
   @Override
   public boolean visit(NullLiteral node) {
@@ -644,7 +644,7 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
     endVisit((Expression) node);
   }
 
-  //---- End Expression Hierarchy ----------------------------------
+  // ---- End Expression Hierarchy ----------------------------------
 
   @Override
   public boolean visit(ImportDeclaration node) {
@@ -716,7 +716,7 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
     endVisit((ASTNode) node);
   }
 
-  //---- Begin Statement Hierarchy ---------------------------------
+  // ---- Begin Statement Hierarchy ---------------------------------
   public boolean visit(Statement node) {
     return visit((ASTNode) node);
   }
@@ -945,7 +945,7 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
     endVisit((Statement) node);
   }
 
-  //---- End Statement Hierarchy ----------------------------------
+  // ---- End Statement Hierarchy ----------------------------------
 
   @Override
   public boolean visit(TagElement node) {
@@ -967,7 +967,7 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
     endVisit((ASTNode) node);
   }
 
-  //---- Begin Type Hierarchy --------------------------------------
+  // ---- Begin Type Hierarchy --------------------------------------
   public boolean visit(Type node) {
     return visit((ASTNode) node);
   }
@@ -976,7 +976,7 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
     endVisit((ASTNode) node);
   }
 
-  //---- Begin Annotatable Type Hierarchy --------------------------------------
+  // ---- Begin Annotatable Type Hierarchy --------------------------------------
   public boolean visit(AnnotatableType node) {
     return visit((Type) node);
   }
@@ -1034,7 +1034,7 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
   public void endVisit(WildcardType node) {
     endVisit((AnnotatableType) node);
   }
-  //---- End Annotatable Type Hierarchy --------------------------------------
+  // ---- End Annotatable Type Hierarchy --------------------------------------
 
   @Override
   public boolean visit(ArrayType node) {
@@ -1076,7 +1076,7 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
     endVisit((Type) node);
   }
 
-  //---- End Type Hierarchy ----------------------------------------
+  // ---- End Type Hierarchy ----------------------------------------
 
   @Override
   public boolean visit(TypeParameter node) {
@@ -1088,7 +1088,7 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
     endVisit((ASTNode) node);
   }
 
-  //---- Begin VariableDeclaration Hierarchy ---------------------------
+  // ---- Begin VariableDeclaration Hierarchy ---------------------------
   public boolean visit(VariableDeclaration node) {
     return visit((ASTNode) node);
   }
@@ -1117,6 +1117,6 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
     endVisit((VariableDeclaration) node);
   }
 
-  //---- End VariableDeclaration Hierarchy -----------------------------
-  //---- End ASTNode Hierarchy -----------------------------------------
+  // ---- End VariableDeclaration Hierarchy -----------------------------
+  // ---- End ASTNode Hierarchy -----------------------------------------
 }

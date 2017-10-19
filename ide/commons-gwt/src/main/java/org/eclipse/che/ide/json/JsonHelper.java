@@ -45,7 +45,8 @@ public class JsonHelper {
       for (String key : jsonObj.keySet()) {
         JSONValue jsonValue = jsonObj.get(key);
         JSONString jsonString = jsonValue.isString();
-        // if the json value is a string, set the unescaped value, else set the json representation of the value
+        // if the json value is a string, set the unescaped value, else set the json representation
+        // of the value
         String stringValue = (jsonString == null) ? jsonValue.toString() : jsonString.stringValue();
         map.put(key, stringValue);
       }
@@ -75,16 +76,16 @@ public class JsonHelper {
     return map;
   }
 
-  //TODO: find a way to avoid those util methods here.
+  // TODO: find a way to avoid those util methods here.
 
   /** Returns message or result of it parse if the message is json. */
   public static String parseJsonMessage(String parsedMessage) {
     try {
-      //parsed message
+      // parsed message
       JSONValue message = JSONParser.parseStrict(parsedMessage).isObject().get("message");
       return message.isString().stringValue();
     } catch (Exception e) {
-      //not found json in message
+      // not found json in message
       return parsedMessage;
     }
   }
@@ -92,11 +93,11 @@ public class JsonHelper {
   /** Returns message or result of it parse if the message is json. */
   public static Map<String, String> parseErrorAttributes(String parsedMessage) {
     try {
-      //parsed message
+      // parsed message
       JSONValue message = JSONParser.parseStrict(parsedMessage).isObject().get("attributes");
       return toMap(message.isObject().toString());
     } catch (Exception e) {
-      //not found json in message
+      // not found json in message
       return Collections.emptyMap();
     }
   }
@@ -104,11 +105,11 @@ public class JsonHelper {
   /** Returns message or result of it parse if the message is json. */
   public static int parseErrorCode(String parsedMessage) {
     try {
-      //parsed message
+      // parsed message
       JSONValue message = JSONParser.parseStrict(parsedMessage).isObject().get("errorCode");
       return new Double(message.isNumber().doubleValue()).intValue();
     } catch (Exception e) {
-      //not found json in message
+      // not found json in message
       return -1;
     }
   }

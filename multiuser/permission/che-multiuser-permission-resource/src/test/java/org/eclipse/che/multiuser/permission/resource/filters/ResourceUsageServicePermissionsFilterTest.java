@@ -90,14 +90,14 @@ public class ResourceUsageServicePermissionsFilterTest {
 
   @Test
   public void shouldTestThatAllPublicMethodsAreCoveredByPermissionsFilter() throws Exception {
-    //given
+    // given
     final List<String> collect =
         Stream.of(ResourceUsageService.class.getDeclaredMethods())
             .filter(method -> Modifier.isPublic(method.getModifiers()))
             .map(Method::getName)
             .collect(Collectors.toList());
 
-    //then
+    // then
     assertEquals(collect.size(), 3);
     assertTrue(collect.contains(ResourceUsageServicePermissionsFilter.GET_TOTAL_RESOURCES_METHOD));
     assertTrue(

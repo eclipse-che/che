@@ -169,7 +169,7 @@ class ProjectImpl extends ContainerImpl implements Project {
   /** {@inheritDoc} */
   @Override
   public boolean isTypeOf(String type) {
-    return getType().equals(type); //TODO implement better mechanism for type detection
+    return getType().equals(type); // TODO implement better mechanism for type detection
   }
 
   /** {@inheritDoc} */

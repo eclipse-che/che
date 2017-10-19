@@ -135,14 +135,14 @@ public class JpaRecipePermissionsDaoTest {
 
   @Test
   public void shouldStoreRecipePublicPermission() throws Exception {
-    //given
+    // given
     final RecipePermissionsImpl publicPermission =
         new RecipePermissionsImpl("*", "recipe1", asList("read", "use", "run"));
 
-    //when
+    // when
     dao.store(publicPermission);
 
-    //then
+    // then
     assertTrue(
         dao.getByInstance(publicPermission.getInstanceId(), 3, 0)
             .getItems()

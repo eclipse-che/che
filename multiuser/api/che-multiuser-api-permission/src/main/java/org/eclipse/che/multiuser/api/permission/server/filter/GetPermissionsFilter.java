@@ -61,7 +61,7 @@ public class GetPermissionsFilter extends CheMethodInvokerFilter {
       final String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
       try {
         permissionsManager.get(userId, domain, instance);
-        //user should have ability to see another users' permissions if he has any permission there
+        // user should have ability to see another users' permissions if he has any permission there
       } catch (NotFoundException e) {
         throw new ForbiddenException("User is not authorized to perform this operation");
       }

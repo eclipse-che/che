@@ -157,7 +157,7 @@ public class FileStructureByKeyboardTest {
     fileStructure.selectItemInFileStructure(JAVA_FILE_NAME);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
     fileStructure.moveDownToItemInFileStructure("TEN");
-    //TODO add code scroll up later
+    // TODO add code scroll up later
   }
 
   public void expandTReeProjectAndOpenClass(String fileName) {

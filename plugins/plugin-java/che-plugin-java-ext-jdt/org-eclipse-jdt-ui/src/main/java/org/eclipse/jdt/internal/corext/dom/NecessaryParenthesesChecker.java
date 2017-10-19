@@ -70,7 +70,8 @@ public class NecessaryParenthesesChecker {
   private static boolean locationNeedsParentheses(StructuralPropertyDescriptor locationInParent) {
     if (locationInParent instanceof ChildListPropertyDescriptor
         && locationInParent != InfixExpression.EXTENDED_OPERANDS_PROPERTY) {
-      // e.g. argument lists of MethodInvocation, ClassInstanceCreation, dimensions of ArrayCreation ...
+      // e.g. argument lists of MethodInvocation, ClassInstanceCreation, dimensions of ArrayCreation
+      // ...
       return false;
     }
     if (locationInParent == VariableDeclarationFragment.INITIALIZER_PROPERTY
@@ -106,8 +107,7 @@ public class NecessaryParenthesesChecker {
     if (binding != current) return false;
 
     for (Iterator<Expression> iterator = expression.extendedOperands().iterator();
-        iterator.hasNext();
-        ) {
+        iterator.hasNext(); ) {
       Expression operand = iterator.next();
       current = operand.resolveTypeBinding();
       if (binding != current) return false;
@@ -130,7 +130,7 @@ public class NecessaryParenthesesChecker {
   private static boolean isStringType(ITypeBinding binding) {
     if (binding == null) return false;
 
-    return "java.lang.String".equals(binding.getQualifiedName()); //$NON-NLS-1$
+    return "java.lang.String".equals(binding.getQualifiedName()); // $NON-NLS-1$
   }
 
   /*
@@ -165,7 +165,7 @@ public class NecessaryParenthesesChecker {
         || "byte".equals(name)
         || "char".equals(name)
         || "short"
-            .equals(name); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+            .equals(name); // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
   }
 
   private static boolean needsParenthesesInInfixExpression(
@@ -189,12 +189,12 @@ public class NecessaryParenthesesChecker {
         isAllOperandsHaveSameType(parentInfix, leftOperandType, rightOperandType);
 
     if (locationInParent == InfixExpression.LEFT_OPERAND_PROPERTY) {
-      //we have (expr op expr) op expr
-      //infix expressions are evaluated from left to right -> parentheses not needed
+      // we have (expr op expr) op expr
+      // infix expressions are evaluated from left to right -> parentheses not needed
       return false;
     } else if (isAssociative(parentInfixOperator, parentInfixExprType, isAllOperandsHaveSameType)) {
-      //we have parent op (expr op expr) and op is associative
-      //left op (right) == (right) op left == right op left
+      // we have parent op (expr op expr) and op is associative
+      // left op (right) == (right) op left == right op left
       if (expression instanceof InfixExpression) {
         InfixExpression infixExpression = (InfixExpression) expression;
         Operator operator = infixExpression.getOperator();
@@ -209,7 +209,7 @@ public class NecessaryParenthesesChecker {
             return !isStringType(infixExpression.getLeftOperand().resolveTypeBinding())
                 && !isStringType(leftOperandType);
           }
-          //"" + (1 + 2), "" + (1 - 2) etc
+          // "" + (1 + 2), "" + (1 - 2) etc
           return true;
         }
 
@@ -374,14 +374,14 @@ public class NecessaryParenthesesChecker {
       int parentPrecedence = OperatorPrecedence.getExpressionPrecedence(parentExpression);
 
       if (expressionPrecedence > parentPrecedence)
-        //(opEx) opParent and opEx binds more -> parentheses not needed
+        // (opEx) opParent and opEx binds more -> parentheses not needed
         return false;
 
       if (expressionPrecedence < parentPrecedence)
-        //(opEx) opParent and opEx binds less -> parentheses needed
+        // (opEx) opParent and opEx binds less -> parentheses needed
         return true;
 
-      //(opEx) opParent binds equal
+      // (opEx) opParent binds equal
 
       if (parentExpression instanceof InfixExpression) {
         return needsParenthesesInInfixExpression(

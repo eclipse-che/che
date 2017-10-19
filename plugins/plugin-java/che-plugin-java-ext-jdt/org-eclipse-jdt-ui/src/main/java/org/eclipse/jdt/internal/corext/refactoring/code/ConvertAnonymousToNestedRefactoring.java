@@ -107,14 +107,14 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 
-  private static final String ATTRIBUTE_VISIBILITY = "visibility"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_FINAL = "final"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_STATIC = "static"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_VISIBILITY = "visibility"; // $NON-NLS-1$
+  private static final String ATTRIBUTE_FINAL = "final"; // $NON-NLS-1$
+  private static final String ATTRIBUTE_STATIC = "static"; // $NON-NLS-1$
 
-  private static final String KEY_TYPE_NAME = "type_name"; //$NON-NLS-1$
-  private static final String KEY_PARAM_NAME_EXT = "param_name_ext"; //$NON-NLS-1$
-  private static final String KEY_PARAM_NAME_CONST = "param_name_const"; //$NON-NLS-1$
-  private static final String KEY_FIELD_NAME_EXT = "field_name_ext"; //$NON-NLS-1$
+  private static final String KEY_TYPE_NAME = "type_name"; // $NON-NLS-1$
+  private static final String KEY_PARAM_NAME_EXT = "param_name_ext"; // $NON-NLS-1$
+  private static final String KEY_PARAM_NAME_CONST = "param_name_const"; // $NON-NLS-1$
+  private static final String KEY_FIELD_NAME_EXT = "field_name_ext"; // $NON-NLS-1$
 
   public static class TypeVariableFinder extends ASTVisitor {
 
@@ -156,7 +156,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
   private int fVisibility; /* see Modifier */
   private boolean fDeclareFinal = true;
   private boolean fDeclareStatic;
-  private String fClassName = ""; //$NON-NLS-1$
+  private String fClassName = ""; // $NON-NLS-1$
 
   private CompilationUnit fCompilationUnitNode;
   private AnonymousClassDeclaration fAnonymousInnerClassNode;
@@ -512,8 +512,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         ITypeBinding binding = null;
         TypeParameter parameter = null;
         for (final Iterator<TypeParameter> iterator = declaration.typeParameters().iterator();
-            iterator.hasNext();
-            ) {
+            iterator.hasNext(); ) {
           parameter = iterator.next();
           binding = parameter.resolveBinding();
           if (binding != null) parameters.add(binding);
@@ -815,8 +814,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 
     for (Iterator<BodyDeclaration> iterator =
             fAnonymousInnerClassNode.bodyDeclarations().iterator();
-        iterator.hasNext();
-        ) {
+        iterator.hasNext(); ) {
       BodyDeclaration body = iterator.next();
 
       for (int i = 0; i < bindings.length; i++) {
@@ -850,8 +848,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
       List<VariableDeclarationFragment> fieldsToInitializeInConstructor =
           getFieldsToInitializeInConstructor();
       for (Iterator<VariableDeclarationFragment> iter = fieldsToInitializeInConstructor.iterator();
-          iter.hasNext();
-          ) {
+          iter.hasNext(); ) {
         VariableDeclarationFragment fragment = iter.next();
         Expression initializer = fragment.getInitializer();
         Expression replacement =
@@ -1094,14 +1091,12 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
   private List<VariableDeclarationFragment> getFieldsToInitializeInConstructor() {
     List<VariableDeclarationFragment> result = new ArrayList<VariableDeclarationFragment>(0);
     for (Iterator<BodyDeclaration> iter = fAnonymousInnerClassNode.bodyDeclarations().iterator();
-        iter.hasNext();
-        ) {
+        iter.hasNext(); ) {
       Object element = iter.next();
       if (element instanceof FieldDeclaration) {
         List<VariableDeclarationFragment> fragments = ((FieldDeclaration) element).fragments();
         for (Iterator<VariableDeclarationFragment> fragmentIter = fragments.iterator();
-            fragmentIter.hasNext();
-            ) {
+            fragmentIter.hasNext(); ) {
           VariableDeclarationFragment fragment = fragmentIter.next();
           if (isToBeInitializerInConstructor(fragment, result)) result.add(fragment);
         }
@@ -1137,7 +1132,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
   }
 
   private IMethodBinding getSuperConstructorBinding() {
-    //workaround for missing java core functionality - finding a
+    // workaround for missing java core functionality - finding a
     // super constructor for an anonymous class creation
     IMethodBinding anonConstr =
         ((ClassInstanceCreation) fAnonymousInnerClassNode.getParent()).resolveConstructorBinding();
@@ -1149,7 +1144,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
       if (superMethod.isConstructor() && parameterTypesMatch(superMethod, anonConstr))
         return superMethod;
     }
-    Assert.isTrue(false); //there's no way - it must be there
+    Assert.isTrue(false); // there's no way - it must be there
     return null;
   }
 
@@ -1192,7 +1187,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     Type newType =
         (Type)
             ASTNode.copySubtree(fAnonymousInnerClassNode.getAST(), classInstanceCreation.getType());
-    if (binding.getSuperclass().getQualifiedName().equals("java.lang.Object")) { //$NON-NLS-1$
+    if (binding.getSuperclass().getQualifiedName().equals("java.lang.Object")) { // $NON-NLS-1$
       Assert.isTrue(binding.getInterfaces().length <= 1);
       if (binding.getInterfaces().length == 0) return;
       declaration.superInterfaceTypes().add(0, newType);
@@ -1283,7 +1278,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
               RefactoringCoreMessages.InitializableRefactoring_argument_not_exist,
               JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
     final String name = arguments.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
-    if (name != null && !"".equals(name)) //$NON-NLS-1$
+    if (name != null && !"".equals(name)) // $NON-NLS-1$
     fClassName = name;
     else
       return RefactoringStatus.createFatalErrorStatus(
@@ -1291,7 +1286,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
               RefactoringCoreMessages.InitializableRefactoring_argument_not_exist,
               JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
     final String visibility = arguments.getAttribute(ATTRIBUTE_VISIBILITY);
-    if (visibility != null && !"".equals(visibility)) { //$NON-NLS-1$
+    if (visibility != null && !"".equals(visibility)) { // $NON-NLS-1$
       int flag = 0;
       try {
         flag = Integer.parseInt(visibility);

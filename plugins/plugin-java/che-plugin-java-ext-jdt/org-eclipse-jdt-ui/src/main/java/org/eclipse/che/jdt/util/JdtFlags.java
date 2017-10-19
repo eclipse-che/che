@@ -45,10 +45,10 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 public class JdtFlags {
   private JdtFlags() {}
 
-  public static final String VISIBILITY_STRING_PRIVATE = "private"; //$NON-NLS-1$
-  public static final String VISIBILITY_STRING_PACKAGE = ""; //$NON-NLS-1$
-  public static final String VISIBILITY_STRING_PROTECTED = "protected"; //$NON-NLS-1$
-  public static final String VISIBILITY_STRING_PUBLIC = "public"; //$NON-NLS-1$
+  public static final String VISIBILITY_STRING_PRIVATE = "private"; // $NON-NLS-1$
+  public static final String VISIBILITY_STRING_PACKAGE = ""; // $NON-NLS-1$
+  public static final String VISIBILITY_STRING_PROTECTED = "protected"; // $NON-NLS-1$
+  public static final String VISIBILITY_STRING_PUBLIC = "public"; // $NON-NLS-1$
 
   public static final int VISIBILITY_CODE_INVALID = -1;
 
@@ -117,7 +117,8 @@ public class JdtFlags {
 
   private static boolean isEnumTypeFinal(IMember member) throws JavaModelException {
     if (!(isEnum(member) && member.getElementType() == IJavaElement.TYPE)) return false;
-    // An enum type is implicitly final unless it contains at least one enum constant that has a class body.
+    // An enum type is implicitly final unless it contains at least one enum constant that has a
+    // class body.
     IJavaElement[] children = member.getChildren();
     for (IJavaElement child : children) {
       if (isEnumConstant((IMember) child) && ((IField) child).getChildren().length != 0) {

@@ -90,47 +90,47 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 
     if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS)
         && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS)) {
-      buf.append("if (obj == null) {\n"); //$NON-NLS-1$
-      buf.append("    throw new IllegalArgumentException();\n"); //$NON-NLS-1$
-      buf.append("}\n"); //$NON-NLS-1$
+      buf.append("if (obj == null) {\n"); // $NON-NLS-1$
+      buf.append("    throw new IllegalArgumentException();\n"); // $NON-NLS-1$
+      buf.append("}\n"); // $NON-NLS-1$
 
-      buf.append("if (ids.length > 0) {\n"); //$NON-NLS-1$
-      buf.append("    System.out.println(ids[0]);\n"); //$NON-NLS-1$
-      buf.append("} else {\n"); //$NON-NLS-1$
-      buf.append("    return;\n"); //$NON-NLS-1$
-      buf.append("}\n"); //$NON-NLS-1$
+      buf.append("if (ids.length > 0) {\n"); // $NON-NLS-1$
+      buf.append("    System.out.println(ids[0]);\n"); // $NON-NLS-1$
+      buf.append("} else {\n"); // $NON-NLS-1$
+      buf.append("    return;\n"); // $NON-NLS-1$
+      buf.append("}\n"); // $NON-NLS-1$
     } else if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS)
         && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER)) {
-      buf.append("if (obj == null)\n"); //$NON-NLS-1$
-      buf.append("    throw new IllegalArgumentException();\n"); //$NON-NLS-1$
-      buf.append("\n"); //$NON-NLS-1$
+      buf.append("if (obj == null)\n"); // $NON-NLS-1$
+      buf.append("    throw new IllegalArgumentException();\n"); // $NON-NLS-1$
+      buf.append("\n"); // $NON-NLS-1$
 
-      buf.append("if (ids.length > 0)\n"); //$NON-NLS-1$
-      buf.append("    System.out.println(ids[0]);\n"); //$NON-NLS-1$
-      buf.append("else\n"); //$NON-NLS-1$
-      buf.append("    return;\n"); //$NON-NLS-1$
-      buf.append("\n"); //$NON-NLS-1$
+      buf.append("if (ids.length > 0)\n"); // $NON-NLS-1$
+      buf.append("    System.out.println(ids[0]);\n"); // $NON-NLS-1$
+      buf.append("else\n"); // $NON-NLS-1$
+      buf.append("    return;\n"); // $NON-NLS-1$
+      buf.append("\n"); // $NON-NLS-1$
     } else if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS)
         && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW)) {
-      buf.append("if (obj == null)\n"); //$NON-NLS-1$
-      buf.append("    throw new IllegalArgumentException();\n"); //$NON-NLS-1$
-      buf.append("\n"); //$NON-NLS-1$
+      buf.append("if (obj == null)\n"); // $NON-NLS-1$
+      buf.append("    throw new IllegalArgumentException();\n"); // $NON-NLS-1$
+      buf.append("\n"); // $NON-NLS-1$
 
-      buf.append("if (ids.length > 0) {\n"); //$NON-NLS-1$
-      buf.append("    System.out.println(ids[0]);\n"); //$NON-NLS-1$
-      buf.append("} else \n"); //$NON-NLS-1$
-      buf.append("    return;\n"); //$NON-NLS-1$
-      buf.append("\n"); //$NON-NLS-1$
+      buf.append("if (ids.length > 0) {\n"); // $NON-NLS-1$
+      buf.append("    System.out.println(ids[0]);\n"); // $NON-NLS-1$
+      buf.append("} else \n"); // $NON-NLS-1$
+      buf.append("    return;\n"); // $NON-NLS-1$
+      buf.append("\n"); // $NON-NLS-1$
     } else {
-      buf.append("if (obj == null) {\n"); //$NON-NLS-1$
-      buf.append("    throw new IllegalArgumentException();\n"); //$NON-NLS-1$
-      buf.append("}\n"); //$NON-NLS-1$
+      buf.append("if (obj == null) {\n"); // $NON-NLS-1$
+      buf.append("    throw new IllegalArgumentException();\n"); // $NON-NLS-1$
+      buf.append("}\n"); // $NON-NLS-1$
 
-      buf.append("if (ids.length > 0) {\n"); //$NON-NLS-1$
-      buf.append("    System.out.println(ids[0]);\n"); //$NON-NLS-1$
-      buf.append("} else \n"); //$NON-NLS-1$
-      buf.append("    return;\n"); //$NON-NLS-1$
-      buf.append("\n"); //$NON-NLS-1$
+      buf.append("if (ids.length > 0) {\n"); // $NON-NLS-1$
+      buf.append("    System.out.println(ids[0]);\n"); // $NON-NLS-1$
+      buf.append("} else \n"); // $NON-NLS-1$
+      buf.append("    return;\n"); // $NON-NLS-1$
+      buf.append("\n"); // $NON-NLS-1$
     }
 
     return buf.toString();

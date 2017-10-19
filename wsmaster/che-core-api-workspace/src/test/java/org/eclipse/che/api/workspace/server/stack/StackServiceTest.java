@@ -253,14 +253,18 @@ public class StackServiceTest {
 
   //    @Test
   //    public void shouldThrowBadRequestExceptionOnCreateStackWithEmptyName() {
-  //        StackComponentDto stackComponentDto = newDto(StackComponentDto.class).withName("Java").withVersion("1.8.45");
-  //        StackSourceDto stackSourceDto = newDto(StackSourceDto.class).withType("image").withOrigin("codenvy/ubuntu_jdk8");
+  //        StackComponentDto stackComponentDto =
+  // newDto(StackComponentDto.class).withName("Java").withVersion("1.8.45");
+  //        StackSourceDto stackSourceDto =
+  // newDto(StackSourceDto.class).withType("image").withOrigin("codenvy/ubuntu_jdk8");
   //        StackDto stackDto = newDto(StackDto.class).withId(USER_ID)
   //                                                  .withDescription("")
-  //                                                  .withScope("Simple java stack for generation java projects")
+  //                                                  .withScope("Simple java stack for generation
+  // java projects")
   //                                                  .withTags(asList("java", "maven"))
   //                                                  .withCreator("che")
-  //                                                  .withComponents(singletonList(stackComponentDto))
+  //
+  // .withComponents(singletonList(stackComponentDto))
   //                                                  .withSource(stackSourceDto);
   //
   //        Response response = given().auth()
@@ -271,7 +275,8 @@ public class StackServiceTest {
   //                                   .post(SECURE_PATH + "/stack");
   //
   //        assertEquals(response.getStatusCode(), 400);
-  //        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), "Stack name required");
+  //        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), "Stack name
+  // required");
   //    }
 
   /** Get stack by id */

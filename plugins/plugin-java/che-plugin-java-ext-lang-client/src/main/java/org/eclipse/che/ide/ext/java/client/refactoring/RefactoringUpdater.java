@@ -127,7 +127,7 @@ public class RefactoringUpdater {
       deltas[index] = delta;
     }
 
-    //here we need to remove file for file that moved or renamed JDT lib sent it to
+    // here we need to remove file for file that moved or renamed JDT lib sent it to
     for (int i = 0; i < deltas.length; i++) {
       if (pathChanged.contains(deltas[i].getToPath().toString())) {
         pathChanged.remove(deltas[i].getToPath().toString());

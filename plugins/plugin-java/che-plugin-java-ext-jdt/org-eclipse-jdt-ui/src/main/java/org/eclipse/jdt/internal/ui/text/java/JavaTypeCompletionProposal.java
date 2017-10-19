@@ -171,7 +171,7 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
   private boolean allowAddingImports() {
     //		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
     //		return preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_ADDIMPORT);
-    //todo
+    // todo
     return true;
   }
 

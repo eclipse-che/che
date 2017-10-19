@@ -107,7 +107,7 @@ public class PreferencesViewImpl extends Window implements PreferencesView {
     this.setTitle("Preferences");
     this.setWidget(widget);
 
-    //create list of preferences
+    // create list of preferences
     TableElement tableElement = Elements.createTableElement();
     tableElement.setAttribute("style", "width: 100%");
     list = new CategoriesList(resources);

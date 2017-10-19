@@ -525,7 +525,7 @@ public class DocumentAdapter implements IBuffer, IDocumentListener, ITextEditCap
 
     if (contents == null) {
 
-      if (oldLength != 0) fSetCmd.set(""); //$NON-NLS-1$
+      if (oldLength != 0) fSetCmd.set(""); // $NON-NLS-1$
 
     } else {
 
@@ -572,7 +572,7 @@ public class DocumentAdapter implements IBuffer, IDocumentListener, ITextEditCap
         if (curr != null && !fLegalLineDelimiters.contains(curr)) {
           StringBuffer buf =
               new StringBuffer(
-                  "WARNING: javaeditor.DocumentAdapter added new line delimiter to code: "); //$NON-NLS-1$
+                  "WARNING: javaeditor.DocumentAdapter added new line delimiter to code: "); // $NON-NLS-1$
           for (int k = 0; k < curr.length(); k++) {
             if (k > 0) buf.append(' ');
             buf.append((int) curr.charAt(k));

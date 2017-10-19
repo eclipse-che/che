@@ -59,13 +59,13 @@ public class InferTypeArgumentsTCModel {
 
   protected static final boolean DEBUG =
       Boolean.valueOf(Platform.getDebugOption("org.eclipse.jdt.ui/debug/TypeConstraints"))
-          .booleanValue(); //$NON-NLS-1$
+          .booleanValue(); // $NON-NLS-1$
 
   private static final String INDEXED_COLLECTION_ELEMENTS =
-      "IndexedCollectionElements"; //$NON-NLS-1$
-  private static final String ARRAY_ELEMENT = "ArrayElement"; //$NON-NLS-1$
-  private static final String USED_IN = "UsedIn"; //$NON-NLS-1$
-  private static final String METHOD_RECEIVER = "MethodReceiver"; //$NON-NLS-1$
+      "IndexedCollectionElements"; // $NON-NLS-1$
+  private static final String ARRAY_ELEMENT = "ArrayElement"; // $NON-NLS-1$
+  private static final String USED_IN = "UsedIn"; // $NON-NLS-1$
+  private static final String METHOD_RECEIVER = "MethodReceiver"; // $NON-NLS-1$
   private static final Map<String, CollectionElementVariable2>
       EMPTY_COLLECTION_ELEMENT_VARIABLES_MAP = Collections.emptyMap();
 
@@ -157,8 +157,7 @@ public class InferTypeArgumentsTCModel {
 
   private void pruneUnusedCuScopedCvs() {
     for (Iterator<ConstraintVariable2> iter = fCuScopedConstraintVariables.iterator();
-        iter.hasNext();
-        ) {
+        iter.hasNext(); ) {
       ConstraintVariable2 cv = iter.next();
       pruneCvIfUnused(cv);
     }
@@ -176,8 +175,7 @@ public class InferTypeArgumentsTCModel {
 
     Map<String, CollectionElementVariable2> elementVariables = getElementVariables(cv);
     for (Iterator<CollectionElementVariable2> iter = elementVariables.values().iterator();
-        iter.hasNext();
-        ) {
+        iter.hasNext(); ) {
       CollectionElementVariable2 elementVariable = iter.next();
       if (!pruneCvIfUnused(elementVariable)) return false;
     }
@@ -361,7 +359,7 @@ public class InferTypeArgumentsTCModel {
       if (fStoreToString)
         storedCv.setData(
             ConstraintVariable2.TO_STRING,
-            "IndependentType(" + type.getPrettySignature() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+            "IndependentType(" + type.getPrettySignature() + ")"); // $NON-NLS-1$ //$NON-NLS-2$
     }
     return storedCv;
   }
@@ -383,7 +381,7 @@ public class InferTypeArgumentsTCModel {
       if (fStoreToString)
         storedCv.setData(
             ConstraintVariable2.TO_STRING,
-            "ParameterizedType(" + type.getPrettySignature() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+            "ParameterizedType(" + type.getPrettySignature() + ")"); // $NON-NLS-1$ //$NON-NLS-2$
     }
     return storedCv;
   }
@@ -403,7 +401,7 @@ public class InferTypeArgumentsTCModel {
       if (fStoreToString)
         storedCv.setData(
             ConstraintVariable2.TO_STRING,
-            "ArrayType(" + type.getPrettySignature() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+            "ArrayType(" + type.getPrettySignature() + ")"); // $NON-NLS-1$ //$NON-NLS-2$
     }
     return storedCv;
   }
@@ -429,7 +427,7 @@ public class InferTypeArgumentsTCModel {
                 + parameterIndex
                 + ","
                 + Bindings.asString(methodBinding)
-                + ")]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                + ")]"); // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     }
     return storedCv;
   }
@@ -465,7 +463,7 @@ public class InferTypeArgumentsTCModel {
       if (fStoreToString)
         storedCv.setData(
             ConstraintVariable2.TO_STRING,
-            "[ReturnType(" + Bindings.asString(methodBinding) + ")]"); //$NON-NLS-1$ //$NON-NLS-2$
+            "[ReturnType(" + Bindings.asString(methodBinding) + ")]"); // $NON-NLS-1$ //$NON-NLS-2$
     }
     return storedCv;
   }
@@ -562,7 +560,7 @@ public class InferTypeArgumentsTCModel {
     arrayElementCv = (ArrayElementVariable2) storedCv(arrayElementCv);
     setArrayElementVariable(constraintVariable2, arrayElementCv);
 
-    makeArrayElementVariable(arrayElementCv); //recursive
+    makeArrayElementVariable(arrayElementCv); // recursive
   }
 
   public void makeElementVariables(ConstraintVariable2 expressionCv, TType type) {
@@ -573,7 +571,7 @@ public class InferTypeArgumentsTCModel {
         TypeVariable typeVariable = (TypeVariable) typeParameters[i];
         makeElementVariable(expressionCv, typeVariable, i);
         if (typeVariable.getBounds().length != 0) {
-          //TODO: create subtype constraints for bounds
+          // TODO: create subtype constraints for bounds
         }
       }
     }
@@ -740,19 +738,24 @@ public class InferTypeArgumentsTCModel {
           createEqualsConstraint(referenceTypeArgumentCv, referenceTypeParametersCv);
         } else if (referenceTypeArgument.isWildcardType()) {
           ConstraintVariable2 referenceTypeArgumentCv =
-              makeImmutableTypeVariable(fTypeEnvironment.VOID); //block it for now (bug 106174)
+              makeImmutableTypeVariable(fTypeEnvironment.VOID); // block it for now (bug 106174)
           CollectionElementVariable2 referenceTypeParametersCv =
               getElementVariable(referenceCv, referenceTypeParameter);
           createEqualsConstraint(referenceTypeArgumentCv, referenceTypeParametersCv);
 
           //					WildcardType wildcardType= (WildcardType) referenceTypeArgument;
           //					if (wildcardType.isUnboundWildcardType()) {
-          //						ConstraintVariable2 referenceTypeArgumentCv= makeImmutableTypeVariable(wildcardType);
-          //						CollectionElementVariable2 referenceTypeParametersCv= getElementVariable(referenceCv, referenceTypeParameter);
+          //						ConstraintVariable2 referenceTypeArgumentCv=
+          // makeImmutableTypeVariable(wildcardType);
+          //						CollectionElementVariable2 referenceTypeParametersCv=
+          // getElementVariable(referenceCv, referenceTypeParameter);
           //						createEqualsConstraint(referenceTypeArgumentCv, referenceTypeParametersCv);
-          //					} else if (wildcardType.isSuperWildcardType() && wildcardType.getBound().isTypeVariable()) {
-          //						ConstraintVariable2 referenceTypeArgumentBoundCv= getElementTypeCv(wildcardType.getBound(), expressionCv, methodTypeVariables);
-          //						CollectionElementVariable2 referenceTypeParametersCv= getElementVariable(referenceCv, referenceTypeParameter);
+          //					} else if (wildcardType.isSuperWildcardType() &&
+          // wildcardType.getBound().isTypeVariable()) {
+          //						ConstraintVariable2 referenceTypeArgumentBoundCv=
+          // getElementTypeCv(wildcardType.getBound(), expressionCv, methodTypeVariables);
+          //						CollectionElementVariable2 referenceTypeParametersCv=
+          // getElementVariable(referenceCv, referenceTypeParameter);
           //						//TODO: need *strict* subtype constraint?
           //						createSubtypeConstraint(referenceTypeParametersCv, referenceTypeArgumentBoundCv);
           //					}
@@ -761,12 +764,14 @@ public class InferTypeArgumentsTCModel {
           //				} else if (referenceTypeArgument.isParameterizedType()) {
           //					//TODO: nested containers
           //					ParameterizedType parameterizedType= (ParameterizedType) referenceTypeArgument;
-          //					ParameterizedTypeVariable2 parameterizedTypeCv= makeParameterizedTypeVariable(parameterizedType.getTypeDeclaration());
-          //					CollectionElementVariable2 referenceTypeParametersCv= getElementVariable(referenceCv, referenceTypeParameter);
+          //					ParameterizedTypeVariable2 parameterizedTypeCv=
+          // makeParameterizedTypeVariable(parameterizedType.getTypeDeclaration());
+          //					CollectionElementVariable2 referenceTypeParametersCv=
+          // getElementVariable(referenceCv, referenceTypeParameter);
           //					createEqualsConstraint(parameterizedTypeCv, referenceTypeParametersCv);
           //					createElementEqualsConstraints(parameterizedTypeCv, referenceTypeParametersCv);
         } else {
-          //TODO
+          // TODO
         }
       }
 
@@ -862,8 +867,7 @@ public class InferTypeArgumentsTCModel {
     Map<String, CollectionElementVariable2> rightElements = getElementVariables(initializerCv);
     for (Iterator<Entry<String, CollectionElementVariable2>> leftIter =
             leftElements.entrySet().iterator();
-        leftIter.hasNext();
-        ) {
+        leftIter.hasNext(); ) {
       Entry<String, CollectionElementVariable2> leftEntry = leftIter.next();
       String leftTypeVariableKey = leftEntry.getKey();
       CollectionElementVariable2 rightElementVariable = rightElements.get(leftTypeVariableKey);

@@ -72,7 +72,7 @@ public class WsMasterModule extends AbstractModule {
     bind(PlaceholderReplacer.class)
         .toProvider(org.eclipse.che.core.db.schema.impl.flyway.PlaceholderReplacerProvider.class);
 
-    //factory
+    // factory
     bind(FactoryAcceptValidator.class)
         .to(org.eclipse.che.api.factory.server.impl.FactoryAcceptValidatorImpl.class);
     bind(FactoryCreateValidator.class)

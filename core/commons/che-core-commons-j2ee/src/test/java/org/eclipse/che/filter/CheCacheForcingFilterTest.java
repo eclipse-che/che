@@ -59,7 +59,7 @@ public class CheCacheForcingFilterTest {
   public void shouldSetForceCacheHeaders(String uri) throws Exception {
     when(request.getRequestURI()).thenReturn(uri);
 
-    //when
+    // when
     filter.doFilter(request, response, chain);
 
     verify(response).setDateHeader(eq("Date"), anyLong());
@@ -72,7 +72,7 @@ public class CheCacheForcingFilterTest {
   public void shouldBypassForceCacheHeaders(String uri) throws Exception {
     when(request.getRequestURI()).thenReturn(uri);
 
-    //when
+    // when
     filter.doFilter(request, response, chain);
 
     verify(response, never()).setHeader(eq("Cache-control"), anyString());

@@ -14,7 +14,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 
 public abstract class ConstraintVariable2 {
 
-  public static final String TO_STRING = "toString"; //$NON-NLS-1$
+  public static final String TO_STRING = "toString"; // $NON-NLS-1$
 
   private Object[] fDatas;
 
@@ -106,6 +106,6 @@ public abstract class ConstraintVariable2 {
     int dot = name.lastIndexOf('.');
     return name.substring(dot + 1) + ": " + fType != null
         ? fType.getPrettySignature()
-        : "<NONE>"; //$NON-NLS-1$ //$NON-NLS-2$
+        : "<NONE>"; // $NON-NLS-1$ //$NON-NLS-2$
   }
 }

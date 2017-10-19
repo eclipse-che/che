@@ -20,6 +20,7 @@ import org.eclipse.che.ide.api.editor.text.Position;
 import org.eclipse.che.ide.api.editor.text.TypedPosition;
 import org.eclipse.che.ide.runtime.Assert;
 import org.eclipse.che.ide.util.loging.Log;
+
 /** Implementation for {@link DocumentPositionMap}. */
 public class DocumentPositionMapImpl implements DocumentPositionMap {
 

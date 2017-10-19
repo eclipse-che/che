@@ -51,7 +51,8 @@ public class ModelProviderManager {
   protected void lazyInitialize() {
     if (descriptors != null) return;
     //		IExtensionPoint point =
-    //				Platform.getExtensionRegistry().getExtensionPoint(ResourcesPlugin.PI_RESOURCES, ResourcesPlugin.PT_MODEL_PROVIDERS);
+    //				Platform.getExtensionRegistry().getExtensionPoint(ResourcesPlugin.PI_RESOURCES,
+    // ResourcesPlugin.PT_MODEL_PROVIDERS);
     //		IExtension[] extensions = point.getExtensions();
     //		descriptors = new HashMap<String, IModelProviderDescriptor>(extensions.length * 2 + 1);
     //		for (int i = 0, imax = extensions.length; i < imax; i++) {

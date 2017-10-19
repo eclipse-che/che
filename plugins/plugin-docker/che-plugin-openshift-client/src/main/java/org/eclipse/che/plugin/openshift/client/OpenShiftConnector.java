@@ -663,7 +663,8 @@ public class OpenShiftConnector extends DockerConnector {
             "Failed to get the ID of the container running in the OpenShift pod");
       }
     } catch (IOException | KubernetesClientException e) {
-      // Make sure we clean up deployment and service in case of an error -- otherwise Che can end up
+      // Make sure we clean up deployment and service in case of an error -- otherwise Che can end
+      // up
       // in an inconsistent state.
       LOG.info("Error while creating Pod, removing deployment");
       LOG.info(e.getMessage());
@@ -1181,7 +1182,8 @@ public class OpenShiftConnector extends DockerConnector {
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
       } catch (IOException e) {
-        // The kubernetes client throws an exception (Pipe not connected) when pod doesn't contain any logs.
+        // The kubernetes client throws an exception (Pipe not connected) when pod doesn't contain
+        // any logs.
         // We can ignore it.
       } finally {
         openShiftClient.close();
@@ -1499,9 +1501,11 @@ public class OpenShiftConnector extends DockerConnector {
    * @return
    */
   private ImageInfo getImageInfoFromTag(ImageStreamTag imageStreamTag) {
-    // The DockerImageConfig string here is the JSON that would be returned by a docker inspect image,
+    // The DockerImageConfig string here is the JSON that would be returned by a docker inspect
+    // image,
     // except that the capitalization is inconsistent, breaking deserialization. Top level elements
-    // are lowercased with underscores, while nested elements conform to FieldNamingPolicy.UPPER_CAMEL_CASE.
+    // are lowercased with underscores, while nested elements conform to
+    // FieldNamingPolicy.UPPER_CAMEL_CASE.
     // We're only converting the config fields for brevity; this means that other fields are null.
     Image tagImage = imageStreamTag.getImage();
     String dockerImageConfig = tagImage.getDockerImageConfig();

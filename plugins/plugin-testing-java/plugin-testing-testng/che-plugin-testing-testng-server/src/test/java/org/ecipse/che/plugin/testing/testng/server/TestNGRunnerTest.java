@@ -73,7 +73,7 @@ public class TestNGRunnerTest extends BaseTest {
     testsFolder.createFile("TestNGTest.java", b.toString().getBytes());
     projectRegistry.setProjectType(folder.getPath().toString(), "java", false);
 
-    //inform DeltaProcessingStat about new project
+    // inform DeltaProcessingStat about new project
     JavaModelManager.getJavaModelManager()
         .deltaState
         .resourceChanged(new ResourceChangedEvent(root, new ProjectCreatedEvent("", "/Test")));

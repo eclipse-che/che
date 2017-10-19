@@ -140,13 +140,13 @@ public class CommitViewImpl extends Window implements CommitView {
           /** {@inheritDoc} */
           @Override
           public void onListItemClicked(Element listItemBase, StatusItem itemData) {
-            //stub
+            // stub
           }
 
           /** {@inheritDoc} */
           @Override
           public void onListItemDoubleClicked(Element listItemBase, StatusItem itemData) {
-            //stub
+            // stub
           }
         };
 
@@ -281,7 +281,7 @@ public class CommitViewImpl extends Window implements CommitView {
       final String[] pathElements = item.getPath().split("/");
 
       final StringBuilder sb = new StringBuilder();
-      //append file name
+      // append file name
       sb.append("<span style=\"color:")
           .append(getChangedItemColor(item))
           .append("\">")
@@ -292,7 +292,7 @@ public class CommitViewImpl extends Window implements CommitView {
                   .asString())
           .append("</span>");
 
-      //append path
+      // append path
       if (pathElements.length > 1) {
         String rawPath =
             item.getPath()
@@ -349,13 +349,13 @@ public class CommitViewImpl extends Window implements CommitView {
             /** {@inheritDoc} */
             @Override
             public void onDrag(MouseEvent event) {
-              //stub
+              // stub
             }
 
             /** {@inheritDoc} */
             @Override
             public void onDragRelease(MouseEvent event) {
-              //stub
+              // stub
             }
           });
 

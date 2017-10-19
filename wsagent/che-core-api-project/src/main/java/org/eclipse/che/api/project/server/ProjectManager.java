@@ -339,7 +339,7 @@ public class ProjectManager {
         RegisteredProject registeredProject;
         final String pathToProject = projectConfig.getPath();
 
-        //creating project(by config or by importing source code)
+        // creating project(by config or by importing source code)
         try {
           final SourceStorage sourceStorage = projectConfig.getSource();
           if (sourceStorage != null && !isNullOrEmpty(sourceStorage.getLocation())) {
@@ -354,13 +354,13 @@ public class ProjectManager {
             continue;
           }
         } catch (Exception e) {
-          if (!isVirtualFileExist(pathToProject)) { //project folder is absent
+          if (!isVirtualFileExist(pathToProject)) { // project folder is absent
             rollbackCreatingBatchProjects(projects);
             throw e;
           }
         }
 
-        //update project
+        // update project
         if (isVirtualFileExist(pathToProject)) {
           try {
             registeredProject = updateProject(projectConfig);
@@ -528,7 +528,8 @@ public class ProjectManager {
     final String name = folder.getPath().getName();
     for (ProjectConfig project : workspaceProjectsHolder.getProjects()) {
       if (normalizePath.equals(project.getPath())) {
-        // TODO Needed for factory project importing with keepDir. It needs to find more appropriate solution
+        // TODO Needed for factory project importing with keepDir. It needs to find more appropriate
+        // solution
         List<String> innerProjects = projectRegistry.getProjects(normalizePath);
         for (String innerProject : innerProjects) {
           RegisteredProject registeredProject = projectRegistry.getProject(innerProject);

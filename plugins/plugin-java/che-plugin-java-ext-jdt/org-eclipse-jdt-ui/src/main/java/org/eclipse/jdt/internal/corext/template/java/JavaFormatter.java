@@ -43,8 +43,8 @@ import org.eclipse.text.edits.TextEdit;
 /** A template editor using the Java formatter to format a template buffer. */
 public class JavaFormatter {
 
-  private static final String COMMENT_START = "/*-"; //$NON-NLS-1$
-  private static final String COMMENT_END = "*/"; //$NON-NLS-1$
+  private static final String COMMENT_START = "/*-"; // $NON-NLS-1$
+  private static final String COMMENT_END = "*/"; // $NON-NLS-1$
 
   /** The line delimiter to use if code formatter is not used. */
   private final String fLineDelimiter;
@@ -61,7 +61,7 @@ public class JavaFormatter {
    * occur. Whitespace variables are also tracked.
    */
   private static final class VariableTracker {
-    private static final String CATEGORY = "__template_variables"; //$NON-NLS-1$
+    private static final String CATEGORY = "__template_variables"; // $NON-NLS-1$
     private Document fDocument;
     private final TemplateBuffer fBuffer;
     private List<TypedPosition> fPositions;
@@ -308,7 +308,7 @@ public class JavaFormatter {
     int i = 0;
     while ((i != document.getLength()) && Character.isWhitespace(document.getChar(i))) i++;
 
-    document.replace(0, i, ""); //$NON-NLS-1$
+    document.replace(0, i, ""); // $NON-NLS-1$
   }
 
   private boolean isReplacedAreaEmpty(TemplateContext context) {
@@ -320,14 +320,15 @@ public class JavaFormatter {
         try {
           IDocument document = dtc.getDocument();
           int lineOffset = document.getLineInformationOfOffset(dtc.getStart()).getOffset();
-          //only if we are at the beginning of the line
+          // only if we are at the beginning of the line
           if (lineOffset != dtc.getStart()) return false;
 
-          //Does the selection only contain whitespace characters?
+          // Does the selection only contain whitespace characters?
           if (document.get(dtc.getStart(), dtc.getEnd() - dtc.getStart()).trim().length() == 0)
             return true;
         } catch (BadLocationException x) {
-          // ignore - this may happen when the document was modified after the initial invocation, and the
+          // ignore - this may happen when the document was modified after the initial invocation,
+          // and the
           // context does not track the changes properly - don't trim in that case
           return true;
         }

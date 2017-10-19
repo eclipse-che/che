@@ -124,7 +124,7 @@ public final class NewElement extends QName {
         builder.append(' ').append(attribute.asString());
       }
     }
-    //if it is void element such as <tag attr="value"/>
+    // if it is void element such as <tag attr="value"/>
     if (isVoid()) {
       return builder.append('/').append('>').toString();
     }

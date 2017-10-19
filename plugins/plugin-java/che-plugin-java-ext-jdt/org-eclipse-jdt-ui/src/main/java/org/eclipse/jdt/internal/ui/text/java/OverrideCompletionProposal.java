@@ -77,7 +77,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal
 
     StringBuffer buffer = new StringBuffer();
     buffer.append(completionProposal);
-    buffer.append(" {};"); //$NON-NLS-1$
+    buffer.append(" {};"); // $NON-NLS-1$
 
     setReplacementString(buffer.toString());
   }
@@ -163,7 +163,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal
             Bindings.findMethodInType(
                 node.getAST().resolveWellKnownType("java.lang.Object"),
                 fMethodName,
-                fParamTypes); //$NON-NLS-1$
+                fParamTypes); // $NON-NLS-1$
       }
       if (methodToOverride != null) {
         CodeGenerationSettings settings =
@@ -224,7 +224,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal
           settings.tabWidth,
           settings.indentWidth);
     } catch (BadLocationException e) {
-      return ""; //$NON-NLS-1$
+      return ""; // $NON-NLS-1$
     }
   }
 

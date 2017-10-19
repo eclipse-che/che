@@ -88,26 +88,26 @@ public class ParentChecker {
    */
   private Object getCommonJarResourceParent() {
     Assert.isNotNull(fJarResources);
-    Assert.isTrue(fJarResources.length > 0); //safe - checked before
+    Assert.isTrue(fJarResources.length > 0); // safe - checked before
     return fJarResources[0].getParent();
   }
 
   private IJavaElement getCommonJavaElementParent() {
     Assert.isNotNull(fJavaElements);
-    Assert.isTrue(fJavaElements.length > 0); //safe - checked before
+    Assert.isTrue(fJavaElements.length > 0); // safe - checked before
     return fJavaElements[0].getParent();
   }
 
   private IResource getCommonResourceParent() {
     Assert.isNotNull(fResources);
-    Assert.isTrue(fResources.length > 0); //safe - checked before
+    Assert.isTrue(fResources.length > 0); // safe - checked before
     return fResources[0].getParent();
   }
 
   private boolean javaElementsHaveCommonParent() {
     if (fJavaElements.length == 0) return true;
     IJavaElement firstParent = fJavaElements[0].getParent();
-    Assert.isNotNull(firstParent); //this should never happen
+    Assert.isNotNull(firstParent); // this should never happen
     for (int i = 1; i < fJavaElements.length; i++) {
       if (!firstParent.equals(fJavaElements[i].getParent())) return false;
     }

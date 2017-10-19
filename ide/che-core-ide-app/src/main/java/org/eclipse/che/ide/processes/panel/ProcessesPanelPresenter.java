@@ -887,7 +887,7 @@ public class ProcessesPanelPresenter extends BasePresenter
       return existedMachineNode;
     }
 
-    //we need to keep old machine node children
+    // we need to keep old machine node children
     ArrayList<ProcessTreeNode> children = new ArrayList<>();
 
     // remove existed node

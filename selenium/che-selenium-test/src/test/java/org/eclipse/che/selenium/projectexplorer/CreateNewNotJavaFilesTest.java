@@ -87,13 +87,13 @@ public class CreateNewNotJavaFilesTest {
     projectExplorer.waitItem(PROJECT_NAME);
     notificationsPopupPanel.waitProgressPopupPanelClose();
 
-    //go to folder for creation files
+    // go to folder for creation files
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
     editor.closeFileByNameWithSaving("AppController");
     loader.waitOnClosed();
 
-    //create new file
+    // create new file
     createNewFile(PATH_TO_FILES, NEW_FILE_NAME, TestMenuCommandsConstants.Project.New.FILE, "");
     checkDefaultTextInCodeMirrorEditorForFile(DEFAULT_TEXT_FOR_NEW_FILE_NAME, NEW_FILE_NAME);
     editor.closeFileByNameWithSaving(NEW_FILE_NAME);
@@ -105,33 +105,33 @@ public class CreateNewNotJavaFilesTest {
     editor.typeTextIntoEditor("Hello, World!");
     checkDefaultTextInCodeMirrorEditorForFile("Hello, World!", TEST_FILE_NAME);
 
-    //create new xml file
+    // create new xml file
     createNewFile(
         PATH_TO_FILES, NEW_XML_FILE, TestMenuCommandsConstants.Project.New.XML_FILE, ".xml");
     checkDefaultTextInCodeMirrorEditorForFile(DEFAULT_TEXT_FOR_NEW_XML_FILE, NEW_XML_FILE + ".xml");
     editor.closeFileByNameWithSaving(NEW_XML_FILE + ".xml");
 
-    //create new less file
+    // create new less file
     createNewFile(
         PATH_TO_FILES, NEW_LESS_FILE, TestMenuCommandsConstants.Project.New.LESS_FILE, ".less");
     checkDefaultTextInCodeMirrorEditorForFile(
         DEFAULT_TEXT_FOR_NEW_LESS_FILE, NEW_LESS_FILE + ".less");
     editor.closeFileByNameWithSaving(NEW_LESS_FILE + ".less");
 
-    //create new css file
+    // create new css file
     createNewFile(
         PATH_TO_FILES, NEW_CSS_FILE, TestMenuCommandsConstants.Project.New.CSS_FILE, ".css");
     checkDefaultTextInCodeMirrorEditorForFile(DEFAULT_TEXT_FOR_NEW_CSS_FILE, NEW_CSS_FILE + ".css");
     editor.closeFileByNameWithSaving(NEW_CSS_FILE + ".css");
 
-    //create new html file
+    // create new html file
     createNewFile(
         PATH_TO_FILES, NEW_HTML_FILE, TestMenuCommandsConstants.Project.New.HTML_FILE, ".html");
     checkDefaultTextInCodeMirrorEditorForFile(
         DEFAULT_TEXT_FOR_NEW_HTML_FILE, NEW_HTML_FILE + ".html");
     editor.closeFileByNameWithSaving(NEW_HTML_FILE + ".html");
 
-    //create new js file
+    // create new js file
     createNewFile(
         PATH_TO_FILES, NEW_JS_FILE, TestMenuCommandsConstants.Project.New.JAVASCRIPT_FILE, ".js");
     checkDefaultTextInCodeMirrorEditorForFile(DEFAULT_TEXT_FOR_NEW_JS_FILE, NEW_JS_FILE + ".js");

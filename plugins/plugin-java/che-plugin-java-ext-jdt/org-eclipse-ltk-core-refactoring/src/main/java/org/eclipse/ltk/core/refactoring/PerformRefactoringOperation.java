@@ -107,7 +107,7 @@ public class PerformRefactoringOperation implements IWorkspaceRunnable {
   public void run(IProgressMonitor monitor) throws CoreException {
     try {
       if (monitor == null) monitor = new NullProgressMonitor();
-      monitor.beginTask("", 10); //$NON-NLS-1$
+      monitor.beginTask("", 10); // $NON-NLS-1$
       final CreateChangeOperation create =
           new CreateChangeOperation(
               new CheckConditionsOperation(fRefactoring, fStyle), RefactoringStatus.FATAL);

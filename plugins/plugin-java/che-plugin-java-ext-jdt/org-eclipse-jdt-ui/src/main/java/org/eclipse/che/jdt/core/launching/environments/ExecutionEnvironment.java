@@ -40,20 +40,23 @@ public class ExecutionEnvironment implements IExecutionEnvironment {
   //	private IVMInstallChangedListener fListener = new IVMInstallChangedListener() {
   //
   //		/* (non-Javadoc)
-  //		 * @see org.eclipse.jdt.launching.IVMInstallChangedListener#defaultVMInstallChanged(org.eclipse.jdt.launching.IVMInstall, org
+  //		 * @see
+  // org.eclipse.jdt.launching.IVMInstallChangedListener#defaultVMInstallChanged(org.eclipse.jdt.launching.IVMInstall, org
   //		 * .eclipse.jdt.launching.IVMInstall)
   //		 */
   //		public void defaultVMInstallChanged(IVMInstall previous, IVMInstall current) {
   //		}
   //
   //		/* (non-Javadoc)
-  //		 * @see org.eclipse.jdt.launching.IVMInstallChangedListener#vmAdded(org.eclipse.jdt.launching.IVMInstall)
+  //		 * @see
+  // org.eclipse.jdt.launching.IVMInstallChangedListener#vmAdded(org.eclipse.jdt.launching.IVMInstall)
   //		 */
   //		public void vmAdded(IVMInstall newVm) {
   //		}
   //
   //		/* (non-Javadoc)
-  //		 * @see org.eclipse.jdt.launching.IVMInstallChangedListener#vmChanged(org.eclipse.jdt.launching.PropertyChangeEvent)
+  //		 * @see
+  // org.eclipse.jdt.launching.IVMInstallChangedListener#vmChanged(org.eclipse.jdt.launching.PropertyChangeEvent)
   //		 */
   //		public void vmChanged(PropertyChangeEvent event) {
   //			if (event.getSource() != null) {
@@ -63,7 +66,8 @@ public class ExecutionEnvironment implements IExecutionEnvironment {
   //		}
   //
   //		/* (non-Javadoc)
-  //		 * @see org.eclipse.jdt.launching.IVMInstallChangedListener#vmRemoved(org.eclipse.jdt.launching.IVMInstall)
+  //		 * @see
+  // org.eclipse.jdt.launching.IVMInstallChangedListener#vmRemoved(org.eclipse.jdt.launching.IVMInstall)
   //		 */
   //		public void vmRemoved(IVMInstall removedVm) {
   //			fParticipantMap.remove(removedVm);
@@ -121,11 +125,11 @@ public class ExecutionEnvironment implements IExecutionEnvironment {
       new HashMap<IVMInstallType, IAccessRule[][]>();
 
   /** Wild card pattern matching all files */
-  private static final IPath ALL_PATTERN = new Path("**/*"); //$NON-NLS-1$
+  private static final IPath ALL_PATTERN = new Path("**/*"); // $NON-NLS-1$
 
   /** Prefix of compiler settings in properties file */
   private static final String COMPILER_SETTING_PREFIX =
-      JavaCore.PLUGIN_ID + ".compiler"; //$NON-NLS-1$
+      JavaCore.PLUGIN_ID + ".compiler"; // $NON-NLS-1$
 
   private String id = "JavaSE-1.8";
 
@@ -174,7 +178,8 @@ public class ExecutionEnvironment implements IExecutionEnvironment {
   //	}
   //
   //	/* (non-Javadoc)
-  //	 * @see org.eclipse.jdt.launching.environments.IExecutionEnvironment#isStrictlyCompatible(org.eclipse.jdt.launching.IVMInstall)
+  //	 * @see
+  // org.eclipse.jdt.launching.environments.IExecutionEnvironment#isStrictlyCompatible(org.eclipse.jdt.launching.IVMInstall)
   //	 */
   //	public boolean isStrictlyCompatible(IVMInstall vm) {
   //		init();
@@ -190,12 +195,14 @@ public class ExecutionEnvironment implements IExecutionEnvironment {
   //	}
   //
   //	/* (non-Javadoc)
-  //	 * @see org.eclipse.jdt.launching.environments.IExecutionEnvironment#setDefaultVM(org.eclipse.jdt.launching.IVMInstall)
+  //	 * @see
+  // org.eclipse.jdt.launching.environments.IExecutionEnvironment#setDefaultVM(org.eclipse.jdt.launching.IVMInstall)
   //	 */
   //	public void setDefaultVM(IVMInstall vm) {
   //		init();
   //		if (vm != null && !fCompatibleVMs.contains(vm)) {
-  //			throw new IllegalArgumentException(NLS.bind(EnvironmentMessages.EnvironmentsManager_0, new String[]{getId()}));
+  //			throw new IllegalArgumentException(NLS.bind(EnvironmentMessages.EnvironmentsManager_0, new
+  // String[]{getId()}));
   //		}
   //		if (vm != null && vm.equals(fDefault)) {
   //			return;
@@ -416,7 +423,7 @@ public class ExecutionEnvironment implements IExecutionEnvironment {
    * @return properties or <code>null</code> if none
    */
   private Properties getJavaProfileProperties() {
-    URL profileURL = getClass().getResource("/" + id + ".profile"); //bundle.getEntry(path);
+    URL profileURL = getClass().getResource("/" + id + ".profile"); // bundle.getEntry(path);
     if (profileURL != null) {
       InputStream is = null;
       try {
@@ -452,7 +459,8 @@ public class ExecutionEnvironment implements IExecutionEnvironment {
     //			if (subsets != null) {
     //				String[] ids = subsets.split(","); //$NON-NLS-1$
     //				for (int i = 0; i < ids.length; i++) {
-    //					IExecutionEnvironment sub = JavaRuntime.getExecutionEnvironmentsManager().getEnvironment(ids[i].trim());
+    //					IExecutionEnvironment sub =
+    // JavaRuntime.getExecutionEnvironmentsManager().getEnvironment(ids[i].trim());
     //					if (sub != null && !sub.getId().equals(getId())) {
     //						subenv.add(sub);
     //					}

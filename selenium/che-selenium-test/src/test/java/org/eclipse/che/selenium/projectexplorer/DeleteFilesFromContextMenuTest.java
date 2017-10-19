@@ -94,32 +94,32 @@ public class DeleteFilesFromContextMenuTest {
     editor.waitActiveEditor();
     loader.waitOnClosed();
 
-    //delete java class file
+    // delete java class file
     deleteFromContextMenu(DELETE_TEXT_FOR_JAVA_CLASS, PATH_TO_JAVA_CLASS);
 
-    //delete jsp file
+    // delete jsp file
     deleteFromContextMenu(DELETE_TEXT_FOR_JSP, PATH_TO_JSP);
 
-    //delete css file
+    // delete css file
     deleteFromContextMenu(DELETE_TEXT_FOR_CSS, PATH_TO_CSS);
 
-    //delete xml file
+    // delete xml file
     deleteFromContextMenu(DELETE_TEXT_FOR_XML, PATH_TO_XML);
 
-    //delete less file
+    // delete less file
     deleteFromContextMenu(DELETE_TEXT_FOR_LESS, PATH_TO_LESS);
 
-    //delete html file
+    // delete html file
     deleteFromContextMenu(DELETE_TEXT_FOR_HTML, PATH_TO_HTML);
     checkDeletion(PATH_TO_HTML);
 
-    //delete js file
+    // delete js file
     deleteFromContextMenu(DELETE_TEXT_FOR_JS, PATH_TO_JAVASCRIPT);
 
-    //delete simple file
+    // delete simple file
     deleteFromContextMenu(DELETE_TEXT_FOR_SIMPLE_FILE, PATH_TO_SIMPLE_FILE);
 
-    //delete sql file
+    // delete sql file
     deleteFromContextMenu(DELETE_TEXT_FOR_SQL, PATH_TO_SQL);
   }
 

@@ -140,7 +140,7 @@ public class SubversionProjectImporterTest {
     final String projectName = NameGenerator.generate("project-", 3);
     final VirtualFile virtualFile =
         root.createFolder(
-            projectName); //root.getChild(org.eclipse.che.api.vfs.Path.of(projectName));
+            projectName); // root.getChild(org.eclipse.che.api.vfs.Path.of(projectName));
     FolderEntry projectFolder = new FolderEntry(virtualFile);
     try {
       String fakeUrl = Paths.get(repoRoot.getAbsolutePath()).toUri() + "fake";

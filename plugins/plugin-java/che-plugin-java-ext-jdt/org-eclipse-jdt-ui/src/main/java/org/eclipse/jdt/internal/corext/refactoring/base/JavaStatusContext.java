@@ -125,7 +125,7 @@ public abstract class JavaStatusContext extends RefactoringStatusContext {
 
     @Override
     public String toString() {
-      return getSourceRange() + " in " + super.toString(); //$NON-NLS-1$
+      return getSourceRange() + " in " + super.toString(); // $NON-NLS-1$
     }
   }
 
@@ -161,7 +161,7 @@ public abstract class JavaStatusContext extends RefactoringStatusContext {
 
     @Override
     public String toString() {
-      return getSourceRange() + " in " + super.toString(); //$NON-NLS-1$
+      return getSourceRange() + " in " + super.toString(); // $NON-NLS-1$
     }
   }
 

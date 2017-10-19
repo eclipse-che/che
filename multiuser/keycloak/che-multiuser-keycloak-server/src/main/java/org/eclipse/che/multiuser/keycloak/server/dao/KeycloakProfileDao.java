@@ -53,7 +53,7 @@ public class KeycloakProfileDao implements ProfileDao {
 
   @Override
   public void create(ProfileImpl profile) throws ServerException, ConflictException {
-    //this method intentionally left blank
+    // this method intentionally left blank
   }
 
   @Override
@@ -100,7 +100,7 @@ public class KeycloakProfileDao implements ProfileDao {
       profileAttributes.put("lastName", familyName);
     }
 
-    //profile should be accessible from user object
+    // profile should be accessible from user object
     keycloakUserAttributes.remove("email");
 
     profileAttributes.putAll(keycloakUserAttributes);

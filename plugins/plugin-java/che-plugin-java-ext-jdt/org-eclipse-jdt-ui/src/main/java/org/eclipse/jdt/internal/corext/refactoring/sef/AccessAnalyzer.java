@@ -176,7 +176,7 @@ class AccessAnalyzer extends ASTVisitor {
       fRewriter.replace(
           node,
           fRewriter.createStringPlaceholder(
-              fGetter + "()", ASTNode.METHOD_INVOCATION), //$NON-NLS-1$
+              fGetter + "()", ASTNode.METHOD_INVOCATION), // $NON-NLS-1$
           createGroupDescription(READ_ACCESS));
     }
     return true;
@@ -246,7 +246,7 @@ class AccessAnalyzer extends ASTVisitor {
     String fieldName = fFieldBinding.getName();
     String typeName = type.getQualifiedName();
     if (fRemoveStaticImport) {
-      fImportRewriter.removeStaticImport(typeName + "." + fieldName); //$NON-NLS-1$
+      fImportRewriter.removeStaticImport(typeName + "." + fieldName); // $NON-NLS-1$
     }
     if (fReferencingGetter) {
       fImportRewriter.addStaticImport(typeName, fGetter, false);
@@ -312,18 +312,18 @@ class AccessAnalyzer extends ASTVisitor {
       invocation.setExpression((Expression) fRewriter.createCopyTarget(receiver));
     InfixExpression argument = ast.newInfixExpression();
     invocation.arguments().add(argument);
-    if ("++".equals(operator)) { //$NON-NLS-1$
+    if ("++".equals(operator)) { // $NON-NLS-1$
       argument.setOperator(InfixExpression.Operator.PLUS);
-    } else if ("--".equals(operator)) { //$NON-NLS-1$
+    } else if ("--".equals(operator)) { // $NON-NLS-1$
       argument.setOperator(InfixExpression.Operator.MINUS);
     } else {
-      Assert.isTrue(false, "Should not happen"); //$NON-NLS-1$
+      Assert.isTrue(false, "Should not happen"); // $NON-NLS-1$
     }
     MethodInvocation getter = ast.newMethodInvocation();
     getter.setName(ast.newSimpleName(fGetter));
     if (receiver != null) getter.setExpression((Expression) fRewriter.createCopyTarget(receiver));
     argument.setLeftOperand(getter);
-    argument.setRightOperand(ast.newNumberLiteral("1")); //$NON-NLS-1$
+    argument.setRightOperand(ast.newNumberLiteral("1")); // $NON-NLS-1$
 
     fReferencingGetter = true;
     fReferencingSetter = true;

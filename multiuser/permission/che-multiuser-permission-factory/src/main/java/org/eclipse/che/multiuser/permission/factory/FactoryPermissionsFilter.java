@@ -45,7 +45,7 @@ public class FactoryPermissionsFilter extends CheMethodInvokerFilter {
           break;
         }
       default:
-        //public methods
+        // public methods
         return;
     }
     currentSubject.checkPermission(WorkspaceDomain.DOMAIN_ID, workspaceId, action);

@@ -213,7 +213,8 @@ public final class DomUtils {
    * can not be scrolled anymore.
    */
   public static void preventExcessiveScrollingPropagation(final Element container) {
-    // The MOUSEWHEEL does not exist on FF, so in FF the common browser behavior won't be canceled and the parent container will be scrolled.
+    // The MOUSEWHEEL does not exist on FF, so in FF the common browser behavior won't be canceled
+    // and the parent container will be scrolled.
     container.addEventListener(
         Event.MOUSEWHEEL,
         new EventListener() {

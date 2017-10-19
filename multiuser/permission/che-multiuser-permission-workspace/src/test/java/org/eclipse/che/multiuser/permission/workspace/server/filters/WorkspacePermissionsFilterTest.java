@@ -603,7 +603,7 @@ public class WorkspacePermissionsFilterTest {
                 .when(),
             SECURE_PATH + path,
             method);
-    //Successful 2xx
+    // Successful 2xx
     assertEquals(response.getStatusCode() / 100, 2);
   }
 

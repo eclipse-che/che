@@ -50,7 +50,8 @@ public class MembersOrderPreferenceCache /*implements IPropertyChangeListener*/ 
   //	public void install(IPreferenceStore store) {
   //		fPreferenceStore= store;
   //		store.addPropertyChangeListener(this);
-  //		fSortByVisibility= store.getBoolean(PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER);
+  //		fSortByVisibility=
+  // store.getBoolean(PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER);
   //	}
   //
   //	public void dispose() {
@@ -72,7 +73,8 @@ public class MembersOrderPreferenceCache /*implements IPropertyChangeListener*/ 
   //		} else if (PreferenceConstants.APPEARANCE_VISIBILITY_SORT_ORDER.equals(property)) {
   //			fVisibilityOffsets= null;
   //		} else if (PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER.equals(property)) {
-  //			fSortByVisibility= fPreferenceStore.getBoolean(PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER);
+  //			fSortByVisibility=
+  // fPreferenceStore.getBoolean(PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER);
   //		}
   //	}
   //
@@ -96,27 +98,27 @@ public class MembersOrderPreferenceCache /*implements IPropertyChangeListener*/ 
   }
 
   private boolean fillCategoryOffsetsFromPreferenceString(String str, int[] offsets) {
-    StringTokenizer tokenizer = new StringTokenizer(str, ","); //$NON-NLS-1$
+    StringTokenizer tokenizer = new StringTokenizer(str, ","); // $NON-NLS-1$
     int i = 0;
     offsets[ENUM_CONSTANTS_INDEX] = i++; // enum constants always on top
 
     while (tokenizer.hasMoreTokens()) {
       String token = tokenizer.nextToken().trim();
-      if ("T".equals(token)) { //$NON-NLS-1$
+      if ("T".equals(token)) { // $NON-NLS-1$
         offsets[TYPE_INDEX] = i++;
-      } else if ("M".equals(token)) { //$NON-NLS-1$
+      } else if ("M".equals(token)) { // $NON-NLS-1$
         offsets[METHOD_INDEX] = i++;
-      } else if ("F".equals(token)) { //$NON-NLS-1$
+      } else if ("F".equals(token)) { // $NON-NLS-1$
         offsets[FIELDS_INDEX] = i++;
-      } else if ("I".equals(token)) { //$NON-NLS-1$
+      } else if ("I".equals(token)) { // $NON-NLS-1$
         offsets[INIT_INDEX] = i++;
-      } else if ("SF".equals(token)) { //$NON-NLS-1$
+      } else if ("SF".equals(token)) { // $NON-NLS-1$
         offsets[STATIC_FIELDS_INDEX] = i++;
-      } else if ("SI".equals(token)) { //$NON-NLS-1$
+      } else if ("SI".equals(token)) { // $NON-NLS-1$
         offsets[STATIC_INIT_INDEX] = i++;
-      } else if ("SM".equals(token)) { //$NON-NLS-1$
+      } else if ("SM".equals(token)) { // $NON-NLS-1$
         offsets[STATIC_METHODS_INDEX] = i++;
-      } else if ("C".equals(token)) { //$NON-NLS-1$
+      } else if ("C".equals(token)) { // $NON-NLS-1$
         offsets[CONSTRUCTORS_INDEX] = i++;
       }
     }
@@ -156,17 +158,17 @@ public class MembersOrderPreferenceCache /*implements IPropertyChangeListener*/ 
   }
 
   private boolean fillVisibilityOffsetsFromPreferenceString(String str, int[] offsets) {
-    StringTokenizer tokenizer = new StringTokenizer(str, ","); //$NON-NLS-1$
+    StringTokenizer tokenizer = new StringTokenizer(str, ","); // $NON-NLS-1$
     int i = 0;
     while (tokenizer.hasMoreTokens()) {
       String token = tokenizer.nextToken().trim();
-      if ("B".equals(token)) { //$NON-NLS-1$
+      if ("B".equals(token)) { // $NON-NLS-1$
         offsets[PUBLIC_INDEX] = i++;
-      } else if ("V".equals(token)) { //$NON-NLS-1$
+      } else if ("V".equals(token)) { // $NON-NLS-1$
         offsets[PRIVATE_INDEX] = i++;
-      } else if ("R".equals(token)) { //$NON-NLS-1$
+      } else if ("R".equals(token)) { // $NON-NLS-1$
         offsets[PROTECTED_INDEX] = i++;
-      } else if ("D".equals(token)) { //$NON-NLS-1$
+      } else if ("D".equals(token)) { // $NON-NLS-1$
         offsets[DEFAULT_INDEX] = i++;
       }
     }

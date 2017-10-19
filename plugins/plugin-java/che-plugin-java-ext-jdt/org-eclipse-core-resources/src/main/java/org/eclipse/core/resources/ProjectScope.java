@@ -39,7 +39,7 @@ public final class ProjectScope implements IScopeContext {
    * String constant (value of <code>"project"</code>) used for the scope name for this preference
    * scope.
    */
-  public static final String SCOPE = "project"; //$NON-NLS-1$
+  public static final String SCOPE = "project"; // $NON-NLS-1$
 
   private static ConcurrentHashMap<String, IEclipsePreferences> cache = new ConcurrentHashMap<>();
 

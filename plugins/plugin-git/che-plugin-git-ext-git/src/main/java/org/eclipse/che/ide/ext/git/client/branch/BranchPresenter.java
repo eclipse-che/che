@@ -134,7 +134,8 @@ public class BranchPresenter implements BranchView.ActionDelegate {
         .catchError(
             error -> {
               handleError(error.getCause(), BRANCH_RENAME_COMMAND_NAME);
-              getBranches(); //rename of remote branch occurs in three stages, so needs update list of branches on view
+              getBranches(); // rename of remote branch occurs in three stages, so needs update list
+              // of branches on view
             });
   }
 
