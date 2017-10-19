@@ -324,7 +324,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
                 problem.getOffset() + problem.getLength(),
                 problem.getOffset(),
                 "\n\r",
-                context.getCompilationUnit()); //$NON-NLS-1$
+                context.getCompilationUnit()); // $NON-NLS-1$
         proposals.add(
             new ReplaceCorrectionProposal(
                 quoteLabel,
@@ -332,7 +332,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
                 pos,
                 0,
                 "\"",
-                IProposalRelevance.ADD_QUOTE)); //$NON-NLS-1$
+                IProposalRelevance.ADD_QUOTE)); // $NON-NLS-1$
         break;
       case IProblem.UnusedImport:
       case IProblem.DuplicateImport:
@@ -665,7 +665,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
       case IProblem.DiamondNotBelow17:
         TypeArgumentMismatchSubProcessor.getInferDiamondArgumentsProposal(
             context, problem, proposals);
-        //$FALL-THROUGH$
+        // $FALL-THROUGH$
       case IProblem.AutoManagedResourceNotBelow17:
       case IProblem.MultiCatchNotBelow17:
       case IProblem.PolymorphicMethodNotBelow17:
@@ -722,7 +722,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
       case IProblem.UnsafeRawMethodInvocation:
         LocalCorrectionsSubProcessor.addDeprecatedFieldsToMethodsProposals(
             context, problem, proposals);
-        //$FALL-THROUGH$
+        // $FALL-THROUGH$
       case IProblem.UnsafeElementTypeConversion:
         LocalCorrectionsSubProcessor.addTypePrametersToRawTypeReference(
             context, problem, proposals);
@@ -790,7 +790,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
       case IProblem.RequiredNonNullButProvidedUnknown:
         NullAnnotationsCorrectionProcessor.addExtractCheckedLocalProposal(
             context, problem, proposals);
-        //$FALL-THROUGH$
+        // $FALL-THROUGH$
       case IProblem.RequiredNonNullButProvidedNull:
       case IProblem.RequiredNonNullButProvidedPotentialNull:
       case IProblem.ParameterLackingNonNullAnnotation:

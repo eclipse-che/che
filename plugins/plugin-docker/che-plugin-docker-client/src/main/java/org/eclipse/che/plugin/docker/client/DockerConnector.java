@@ -127,7 +127,8 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class DockerConnector {
   private static final Logger LOG = LoggerFactory.getLogger(DockerConnector.class);
-  // Docker uses uppercase in first letter in names of json objects, e.g. {"Id":"123"} instead of {"id":"123"}
+  // Docker uses uppercase in first letter in names of json objects, e.g. {"Id":"123"} instead of
+  // {"id":"123"}
   protected static final Gson GSON =
       new GsonBuilder()
           .disableHtmlEscaping()
@@ -604,7 +605,9 @@ public class DockerConnector {
       if (status == NOT_FOUND.getStatusCode()) {
         throw new ExecNotFoundException(readAndCloseQuietly(response.getInputStream()));
       }
-      // According to last doc (https://docs.docker.com/reference/api/docker_remote_api_v1.15/#exec-start) status must be 201 but
+      // According to last doc
+      // (https://docs.docker.com/reference/api/docker_remote_api_v1.15/#exec-start) status must be
+      // 201 but
       // in fact docker API returns 200 or 204 status.
       if (status / 100 != 2) {
         throw getDockerException(response);
@@ -722,7 +725,8 @@ public class DockerConnector {
     long length;
     try (InputStream sourceData = params.getSourceStream()) {
       // TODO according to http spec http://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.4,
-      // it is possible to send request without specifying content length if chunked encoding header is set
+      // it is possible to send request without specifying content length if chunked encoding header
+      // is set
       // Investigate is it possible to write the stream to request directly
 
       // we save stream to file, because we have to know its length
@@ -880,7 +884,8 @@ public class DockerConnector {
         // Current unix socket implementation of DockerConnection doesn't react to interruption.
         // So to be able to close unix socket connection and free resources we use main thread.
         // In case of any exception main thread cancels future and close connection.
-        // If Docker connection implementation supports interrupting it will stop streaming on interruption,
+        // If Docker connection implementation supports interrupting it will stop streaming on
+        // interruption,
         // if not it will be stopped by closure of unix socket
         Future<String> imageIdFuture =
             executor.submit(
@@ -1008,7 +1013,8 @@ public class DockerConnector {
         // Current unix socket implementation of DockerConnection doesn't react to interruption.
         // So to be able to close unix socket connection and free resources we use main thread.
         // In case of any exception main thread cancels future and close connection.
-        // If Docker connection implementation supports interrupting it will stop streaming on interruption,
+        // If Docker connection implementation supports interrupting it will stop streaming on
+        // interruption,
         // if not it will be stopped by closure of unix socket
         Future<String> digestFuture =
             executor.submit(
@@ -1024,7 +1030,9 @@ public class DockerConnector {
                     // Here we find string with digest which has following format:
                     // <tag>: digest: <digest> size: <size>
                     // for example:
-                    // latest: digest: sha256:9a70e6222ded459fde37c56af23887467c512628eb8e78c901f3390e49a800a0 size: 62189
+                    // latest: digest:
+                    // sha256:9a70e6222ded459fde37c56af23887467c512628eb8e78c901f3390e49a800a0 size:
+                    // 62189
                     if (status != null && status.startsWith(digestPrefix)) {
                       return status.substring(
                           digestPrefix.length(), status.indexOf(" ", digestPrefix.length()));
@@ -1130,7 +1138,8 @@ public class DockerConnector {
         // Current unix socket implementation of DockerConnection doesn't react to interruption.
         // So to be able to close unix socket connection and free resources we use main thread.
         // In case of any exception main thread cancels future and close connection.
-        // If Docker connection implementation supports interrupting it will stop streaming on interruption,
+        // If Docker connection implementation supports interrupting it will stop streaming on
+        // interruption,
         // if not it will be stopped by closure of unix socket
         Future<Object> pullFuture =
             executor.submit(

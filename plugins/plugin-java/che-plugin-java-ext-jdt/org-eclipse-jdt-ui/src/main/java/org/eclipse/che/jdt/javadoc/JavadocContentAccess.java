@@ -109,7 +109,7 @@ public class JavadocContentAccess {
     } catch (IOException e) {
       return false;
     }
-    return new String(content).trim().equals("{@inheritDoc}"); //$NON-NLS-1$
+    return new String(content).trim().equals("{@inheritDoc}"); // $NON-NLS-1$
   }
 
   /**
@@ -168,7 +168,7 @@ public class JavadocContentAccess {
 
   private static Reader findDocInHierarchy(
       IMethod method, boolean isHTML, boolean useAttachedJavadoc) throws JavaModelException {
-    //todo
+    // todo
     //		/*
     //		 * Catch ExternalJavaProject in which case
     //		 * no hierarchy can be built.

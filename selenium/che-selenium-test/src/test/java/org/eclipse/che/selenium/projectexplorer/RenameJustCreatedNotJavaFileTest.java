@@ -76,7 +76,7 @@ public class RenameJustCreatedNotJavaFileTest {
     editor.waitActiveEditor();
     editor.waitTabIsPresent("newFile.jsp");
 
-    //rename file
+    // rename file
     renameFile(PATH_TO_FILE);
   }
 

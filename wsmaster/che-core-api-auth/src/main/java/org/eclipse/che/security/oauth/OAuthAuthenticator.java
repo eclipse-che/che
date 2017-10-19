@@ -118,7 +118,8 @@ public abstract class OAuthAuthenticator {
     this.flow = flow;
     this.redirectUrisMap = new HashMap<>(redirectUris.size());
     for (String uri : redirectUris) {
-      // Redirect URI may be in form urn:ietf:wg:oauth:2.0:oob os use java.net.URI instead of java.net.URL
+      // Redirect URI may be in form urn:ietf:wg:oauth:2.0:oob os use java.net.URI instead of
+      // java.net.URL
       this.redirectUrisMap.put(
           Pattern.compile("([a-z0-9\\-]+\\.)?" + URI.create(uri).getHost()), uri);
     }

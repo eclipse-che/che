@@ -83,6 +83,6 @@ public final class Point /*implements SerializableCompatibility*/ {
    */
   @Override
   public String toString() {
-    return "Point {" + x + ", " + y + "}"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+    return "Point {" + x + ", " + y + "}"; // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
   }
 }

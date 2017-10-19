@@ -531,8 +531,7 @@ class SourceAnalyzer {
     FlowInfo info = flowAnalyzer.perform(getStatements());
 
     for (Iterator<SingleVariableDeclaration> iter = fDeclaration.parameters().iterator();
-        iter.hasNext();
-        ) {
+        iter.hasNext(); ) {
       SingleVariableDeclaration element = iter.next();
       IVariableBinding binding = element.resolveBinding();
       ParameterData data = (ParameterData) element.getProperty(ParameterData.PROPERTY);

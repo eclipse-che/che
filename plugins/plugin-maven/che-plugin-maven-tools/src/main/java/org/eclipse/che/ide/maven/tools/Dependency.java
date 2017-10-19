@@ -178,7 +178,7 @@ public class Dependency {
   public Dependency addExclusion(Exclusion exclusion) {
     requireNonNull(exclusion, "Required not null exclusion");
     exclusions().add(exclusion);
-    //add exclusion to xml tree
+    // add exclusion to xml tree
     if (!isNew()) {
       if (dependencyElement.hasSingleChild("exclusions")) {
         dependencyElement.getSingleChild("exclusions").appendChild(exclusion.asXMLElement());
@@ -202,7 +202,7 @@ public class Dependency {
   public Dependency removeExclusion(Exclusion exclusion) {
     requireNonNull(exclusion, "Required not null exclusion");
     exclusions().remove(exclusion);
-    //remove dependency from xml
+    // remove dependency from xml
     if (!isNew() && exclusions.isEmpty()) {
       dependencyElement.removeChild("exclusions");
       exclusion.exclusionElement = null;
@@ -482,7 +482,7 @@ public class Dependency {
     for (Exclusion exclusion : exclusions()) {
       exclusion.remove();
     }
-    //use addExclusion to add and associate each new exclusion with element
+    // use addExclusion to add and associate each new exclusion with element
     this.exclusions = new ArrayList<>(exclusions.size());
     for (Exclusion exclusion : exclusions) {
       addExclusion(exclusion);

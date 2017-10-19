@@ -123,7 +123,7 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent implements Wor
         new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
-            //todo not implement yet
+            // todo not implement yet
           }
 
           @Override

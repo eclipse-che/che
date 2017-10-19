@@ -319,7 +319,8 @@ public class CustomServerEvaluationStrategyTest {
   }
 
   /** Check offline mode with external ip */
-  //@Test(expectedExceptions = UnsupportedOperationException.class, expectedExceptionsMessageRegExp = "Unable to find the IP for the address .*")
+  // @Test(expectedExceptions = UnsupportedOperationException.class, expectedExceptionsMessageRegExp
+  // = "Unable to find the IP for the address .*")
   public void testOfflineInvalidExternal() throws Throwable {
     Set<String> exposedPorts = new HashSet<>();
     exposedPorts.add("22/tcp");

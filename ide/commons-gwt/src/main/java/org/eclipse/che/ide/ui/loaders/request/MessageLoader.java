@@ -33,7 +33,7 @@ public class MessageLoader implements AsyncRequestLoader {
   public static final String MESSAGE_DBG_ID = "loader-message";
   public static final String GLASS_DBG_ID = "glass-panel";
   public static final String LOADER_DBG_ID = "loader-panel";
-  public static final int SHOW_DELAY = 500; //500ms
+  public static final int SHOW_DELAY = 500; // 500ms
 
   private boolean showing = false;
 
@@ -41,7 +41,7 @@ public class MessageLoader implements AsyncRequestLoader {
   private final FlowPanel glass = new FlowPanel();
   private final FlowPanel loader = new FlowPanel();
 
-  //show loader if it works more than 0.5 second
+  // show loader if it works more than 0.5 second
   private final DelayedTask showLoader =
       new DelayedTask() {
         @Override

@@ -65,7 +65,7 @@ public class OpenShiftConnectorTest {
   @BeforeMethod
   private void setup() {
 
-    //When
+    // When
     openShiftConnector =
         new OpenShiftConnector(
             openshiftUserAccountProvider,
@@ -95,7 +95,7 @@ public class OpenShiftConnectorTest {
   @Test
   public void shouldGetWorkspaceIDWhenAValidOneIsProvidedInCreateContainerParams()
       throws IOException {
-    //Given
+    // Given
     String expectedWorkspaceID = "abcd1234";
     ContainerConfig containerConfig = mock(ContainerConfig.class);
     CreateContainerParams createContainerParams = CreateContainerParams.create(containerConfig);
@@ -104,7 +104,7 @@ public class OpenShiftConnectorTest {
 
     String workspaceID = openShiftConnector.getCheWorkspaceId(createContainerParams);
 
-    //Then
+    // Then
     assertEquals(workspaceID, expectedWorkspaceID);
   }
 

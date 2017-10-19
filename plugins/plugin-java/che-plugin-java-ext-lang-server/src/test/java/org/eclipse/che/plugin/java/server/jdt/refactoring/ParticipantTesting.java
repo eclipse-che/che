@@ -41,7 +41,8 @@ public class ParticipantTesting {
     CheRefactoringParticipantsRegistry.registerParticipant(
         "deleteParticipants", TestDeleteParticipantSingle.class);
 
-    //        CheRefactoringParticipantsRegistry.registerParticipant("copyParticipants", TestCopyParticipantSingle.class);
+    //        CheRefactoringParticipantsRegistry.registerParticipant("copyParticipants",
+    // TestCopyParticipantSingle.class);
 
   }
 

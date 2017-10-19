@@ -53,7 +53,7 @@ public abstract class RefactoringProcessor extends PlatformObject {
    * @since 3.1
    */
   /* package */ void setRefactoring(ProcessorBasedRefactoring refactoring) {
-    Assert.isTrue(fRefactoring == null, "The refactoring can only be set once"); //$NON-NLS-1$
+    Assert.isTrue(fRefactoring == null, "The refactoring can only be set once"); // $NON-NLS-1$
     Assert.isNotNull(refactoring);
     fRefactoring = refactoring;
   }

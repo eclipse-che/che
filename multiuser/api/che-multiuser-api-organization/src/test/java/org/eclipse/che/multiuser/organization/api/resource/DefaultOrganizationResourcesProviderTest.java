@@ -52,28 +52,28 @@ public class DefaultOrganizationResourcesProviderTest {
 
   @Test
   public void shouldNotProvideDefaultResourcesForSuborganization() throws Exception {
-    //given
+    // given
     when(organization.getParent()).thenReturn("parentId");
 
-    //when
+    // when
     final List<ResourceImpl> defaultResources =
         organizationResourcesProvider.getResources("organization123");
 
-    //then
+    // then
     verify(organizationManager).getById("organization123");
     assertTrue(defaultResources.isEmpty());
   }
 
   @Test
   public void shouldProvideDefaultResourcesForRootOrganization() throws Exception {
-    //given
+    // given
     when(organization.getParent()).thenReturn(null);
 
-    //when
+    // when
     final List<ResourceImpl> defaultResources =
         organizationResourcesProvider.getResources("organization123");
 
-    //then
+    // then
     verify(organizationManager).getById("organization123");
     assertEquals(defaultResources.size(), 4);
     assertTrue(

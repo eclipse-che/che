@@ -62,13 +62,13 @@ public class ClosingSeveralOpenFilesTest {
     notificationsPopupPanel.waitProgressPopupPanelClose();
     consoles.closeProcessesArea();
     projectExplorer.quickExpandWithJavaScript();
-    //step 1 expand and build first module
+    // step 1 expand and build first module
 
     projectExplorer.openItemByPath(PATH_FOR_EXPAND_FIRST_MODULE + "/AppController.java");
     loader.waitOnClosed();
     loader.waitOnClosed();
 
-    //step 2 expand and build second module
+    // step 2 expand and build second module
     projectExplorer.openItemByPath(PATH_FOR_EXPAND_SECOND_MODULE + "/cssFile.css");
     projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
     projectExplorer.openItemByPath(PROJECT_NAME + "/README.md");

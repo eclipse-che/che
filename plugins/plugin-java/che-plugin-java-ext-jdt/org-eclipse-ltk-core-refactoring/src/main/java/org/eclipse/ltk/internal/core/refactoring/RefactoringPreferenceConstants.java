@@ -18,7 +18,7 @@ public final class RefactoringPreferenceConstants {
 
   /** The shared refactoring history preference */
   public static final String PREFERENCE_SHARED_REFACTORING_HISTORY =
-      "org.eclipse.ltk.core.refactoring.enable.project.refactoring.history"; //$NON-NLS-1$
+      "org.eclipse.ltk.core.refactoring.enable.project.refactoring.history"; // $NON-NLS-1$
 
   private RefactoringPreferenceConstants() {
     // Not for instantiation

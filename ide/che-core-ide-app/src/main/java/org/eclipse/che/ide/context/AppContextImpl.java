@@ -159,8 +159,8 @@ public class AppContextImpl
         runtime = new ActiveRuntime(workspace.getRuntime());
       }
 
-      //in some cases IDE doesn't save preferences on window close
-      //so try to save if window lost focus
+      // in some cases IDE doesn't save preferences on window close
+      // so try to save if window lost focus
       appStateEventRemover =
           Elements.getWindow()
               .addEventListener(
@@ -233,7 +233,7 @@ public class AppContextImpl
   @Override
   public void initResourceManager(final Callback<ResourceManager, Exception> callback) {
     if (runtime.getDevMachine() == null) {
-      //should never happened, but anyway
+      // should never happened, but anyway
       callback.onFailure(new NullPointerException("Dev machine is not initialized"));
     }
 

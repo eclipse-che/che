@@ -35,27 +35,27 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
  */
 public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 
-  private static final String CREATE_GETTER_SETTER = "createGetterSetter"; //$NON-NLS-1$
+  private static final String CREATE_GETTER_SETTER = "createGetterSetter"; // $NON-NLS-1$
 
-  private static final String PACKAGE_NAME = "packageName"; //$NON-NLS-1$
+  private static final String PACKAGE_NAME = "packageName"; // $NON-NLS-1$
 
-  private static final String CLASS_NAME = "className"; //$NON-NLS-1$
+  private static final String CLASS_NAME = "className"; // $NON-NLS-1$
 
-  private static final String FIELD_NAME = "fieldName"; //$NON-NLS-1$
+  private static final String FIELD_NAME = "fieldName"; // $NON-NLS-1$
 
-  private static final String CREATE_TOP_LEVEL = "createTopLevel"; //$NON-NLS-1$
+  private static final String CREATE_TOP_LEVEL = "createTopLevel"; // $NON-NLS-1$
 
-  private static final String NEW_FIELD_COUNT = "newFieldCount"; //$NON-NLS-1$
+  private static final String NEW_FIELD_COUNT = "newFieldCount"; // $NON-NLS-1$
 
-  private static final String CREATE_FIELD_COUNT = "createFieldCount"; //$NON-NLS-1$
+  private static final String CREATE_FIELD_COUNT = "createFieldCount"; // $NON-NLS-1$
 
-  private static final String CREATE_FIELD = "createField"; //$NON-NLS-1$
+  private static final String CREATE_FIELD = "createField"; // $NON-NLS-1$
 
-  private static final String NEW_FIELD_NAME = "newFieldName"; //$NON-NLS-1$
+  private static final String NEW_FIELD_NAME = "newFieldName"; // $NON-NLS-1$
 
-  private static final String OLD_FIELD_NAME = "oldFieldName"; //$NON-NLS-1$
+  private static final String OLD_FIELD_NAME = "oldFieldName"; // $NON-NLS-1$
 
-  private static final String OLD_FIELD_COUNT = "oldFieldCount"; //$NON-NLS-1$
+  private static final String OLD_FIELD_COUNT = "oldFieldCount"; // $NON-NLS-1$
 
   /**
    * Instances of {@link ExtractClassDescriptor.Field} describe which fields will be moved to the
@@ -126,7 +126,7 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
           + " new name:"
           + fNewFieldName
           + " create field:"
-          + fCreateField; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+          + fCreateField; // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     }
 
     /**
@@ -225,7 +225,7 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
   public void setFields(Field[] fields) throws IllegalArgumentException {
     for (int i = 0; i < fields.length; i++) {
       Field field = fields[i];
-      if (field == null) throw new IllegalArgumentException("Field can not be null"); //$NON-NLS-1$
+      if (field == null) throw new IllegalArgumentException("Field can not be null"); // $NON-NLS-1$
     }
     fFields = fields;
   }
@@ -405,7 +405,7 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
    */
   public RefactoringStatus validateDescriptor() {
     RefactoringStatus status = super.validateDescriptor();
-    if (getType() == null) status.addFatalError("The type may not be null"); //$NON-NLS-1$
+    if (getType() == null) status.addFatalError("The type may not be null"); // $NON-NLS-1$
     return status;
   }
 }

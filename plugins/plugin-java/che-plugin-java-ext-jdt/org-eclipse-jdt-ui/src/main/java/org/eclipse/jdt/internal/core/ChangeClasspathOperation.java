@@ -39,7 +39,8 @@ public abstract class ChangeClasspathOperation extends JavaModelOperation {
    */
   protected void classpathChanged(ClasspathChange change, boolean refreshExternalFolder)
       throws JavaModelException {
-    // reset the project's caches early since some clients rely on the project's caches being up-to-date when run inside an IWorkspaceRunnable
+    // reset the project's caches early since some clients rely on the project's caches being
+    // up-to-date when run inside an IWorkspaceRunnable
     // (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=212769#c5 )
     JavaProject project = change.project;
     project.resetCaches();
@@ -59,7 +60,8 @@ public abstract class ChangeClasspathOperation extends JavaModelOperation {
           .updateProjectReferencesIfNecessary();
       //
       // and ensure that external folders are updated as well
-      //new ExternalFolderChange(project, change.oldResolvedClasspath).updateExternalFoldersIfNecessary(refreshExternalFolder, null);
+      // new ExternalFolderChange(project,
+      // change.oldResolvedClasspath).updateExternalFoldersIfNecessary(refreshExternalFolder, null);
 
     } else {
       DeltaProcessingState state = JavaModelManager.getDeltaState();

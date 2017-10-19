@@ -87,18 +87,18 @@ public class PatternConstructor {
 
       if (ch == '*' && !escaped) {
         if (quoting) {
-          out.append("\\E"); //$NON-NLS-1$
+          out.append("\\E"); // $NON-NLS-1$
           quoting = false;
         }
-        out.append(".*"); //$NON-NLS-1$
+        out.append(".*"); // $NON-NLS-1$
         escaped = false;
         continue;
       } else if (ch == '?' && !escaped) {
         if (quoting) {
-          out.append("\\E"); //$NON-NLS-1$
+          out.append("\\E"); // $NON-NLS-1$
           quoting = false;
         }
-        out.append("."); //$NON-NLS-1$
+        out.append("."); // $NON-NLS-1$
         escaped = false;
         continue;
       } else if (ch == '\\' && !escaped) {
@@ -108,22 +108,22 @@ public class PatternConstructor {
       } else if (ch == '\\' && escaped) {
         escaped = false;
         if (quoting) {
-          out.append("\\E"); //$NON-NLS-1$
+          out.append("\\E"); // $NON-NLS-1$
           quoting = false;
         }
-        out.append("\\\\"); //$NON-NLS-1$
+        out.append("\\\\"); // $NON-NLS-1$
         continue;
       }
 
       if (!quoting) {
-        out.append("\\Q"); //$NON-NLS-1$
+        out.append("\\Q"); // $NON-NLS-1$
         quoting = true;
       }
       if (escaped && ch != '*' && ch != '?' && ch != '\\') out.append('\\');
       out.append(ch);
       escaped = ch == '\\';
     }
-    if (quoting) out.append("\\E"); //$NON-NLS-1$
+    if (quoting) out.append("\\E"); // $NON-NLS-1$
 
     return out;
   }

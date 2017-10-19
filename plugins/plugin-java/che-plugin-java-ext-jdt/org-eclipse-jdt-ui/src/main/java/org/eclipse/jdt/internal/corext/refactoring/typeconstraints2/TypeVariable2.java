@@ -42,7 +42,7 @@ public final class TypeVariable2 extends ConstraintVariable2 implements ITypeCon
    */
   @Override
   public boolean equals(Object other) {
-    //TODO: unique per construction?  //return this == other;
+    // TODO: unique per construction?  //return this == other;
     if (this == other) return true;
     if (other.getClass() != TypeVariable2.class) return false;
 
@@ -66,6 +66,6 @@ public final class TypeVariable2 extends ConstraintVariable2 implements ITypeCon
         + fRange.getSourceRange().getOffset()
         + '+'
         + fRange.getSourceRange().getLength()
-        + ']'; //$NON-NLS-1$
+        + ']'; // $NON-NLS-1$
   }
 }

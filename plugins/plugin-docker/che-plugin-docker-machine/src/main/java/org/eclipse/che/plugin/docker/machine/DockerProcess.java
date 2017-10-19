@@ -95,7 +95,8 @@ public class DockerProcess extends AbstractMachineProcess implements InstancePro
       throw new ConflictException("Process already started.");
     }
     started = true;
-    // Trap is invoked when bash session ends. Here we kill all sub-processes of shell and remove pid-file.
+    // Trap is invoked when bash session ends. Here we kill all sub-processes of shell and remove
+    // pid-file.
     final String trap =
         format(
             "trap '[ -z \"$(jobs -p)\" ] || kill $(jobs -p); [ -e %1$s ] && rm %1$s' EXIT",

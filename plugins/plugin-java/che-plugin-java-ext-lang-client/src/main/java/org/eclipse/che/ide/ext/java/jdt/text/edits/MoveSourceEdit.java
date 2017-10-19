@@ -114,7 +114,7 @@ public final class MoveSourceEdit extends TextEdit {
     // The source content can be null if the edit wasn't executed
     // due to an exclusion list of the text edit processor. Return
     // the empty string which can be moved without any harm.
-    if (fSourceContent == null) return ""; //$NON-NLS-1$
+    if (fSourceContent == null) return ""; // $NON-NLS-1$
     return fSourceContent;
   }
 
@@ -181,10 +181,11 @@ public final class MoveSourceEdit extends TextEdit {
   void performConsistencyCheck(TextEditProcessor processor, Document document)
       throws MalformedTreeException {
     if (fTarget == null)
-      throw new MalformedTreeException(getParent(), this, "No target edit provided."); //$NON-NLS-1$
+      throw new MalformedTreeException(
+          getParent(), this, "No target edit provided."); // $NON-NLS-1$
     if (fTarget.getSourceEdit() != this)
       throw new MalformedTreeException(
-          getParent(), this, "Target edit has different source edit."); //$NON-NLS-1$
+          getParent(), this, "Target edit has different source edit."); // $NON-NLS-1$
     /*
      * Causes AST rewrite to fail if (getRoot() != fTarget.getRoot()) throw new MalformedTreeException(getParent(), this,
      * TextEditMessages.getString("MoveSourceEdit.different_tree")); //$NON-NLS-1$
@@ -238,7 +239,7 @@ public final class MoveSourceEdit extends TextEdit {
   // ---- document updating ----------------------------------------------------------------
 
   int performDocumentUpdating(Document document) throws BadLocationException {
-    document.replace(getOffset(), getLength(), ""); //$NON-NLS-1$
+    document.replace(getOffset(), getLength(), ""); // $NON-NLS-1$
     fDelta = -getLength();
     return fDelta;
   }
@@ -366,7 +367,7 @@ public final class MoveSourceEdit extends TextEdit {
   private static ReplaceEdit[] splitIntersectRight(ReplaceEdit edit, Region intersect) {
     ReplaceEdit[] result = new ReplaceEdit[2];
     // this is the actual delete. We use replace to only deal with one type
-    result[0] = new ReplaceEdit(intersect.getOffset(), intersect.getLength(), ""); //$NON-NLS-1$
+    result[0] = new ReplaceEdit(intersect.getOffset(), intersect.getLength(), ""); // $NON-NLS-1$
     result[1] =
         new ReplaceEdit(edit.getOffset(), intersect.getOffset() - edit.getOffset(), edit.getText());
     return result;
@@ -379,7 +380,7 @@ public final class MoveSourceEdit extends TextEdit {
         new ReplaceEdit( // this is the actual delete. We use replace to only deal with one type
             intersect.getOffset() + intersect.getLength(),
             edit.getLength() - intersect.getLength(),
-            ""); //$NON-NLS-1$
+            ""); // $NON-NLS-1$
     return result;
   }
 

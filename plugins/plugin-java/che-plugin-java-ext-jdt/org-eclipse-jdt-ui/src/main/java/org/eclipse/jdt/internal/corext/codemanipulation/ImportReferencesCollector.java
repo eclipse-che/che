@@ -493,11 +493,11 @@ public class ImportReferencesCollector extends GenericVisitor {
     if (tagName != null && !list.isEmpty()) {
       Object first = list.get(0);
       if (first instanceof Name) {
-        if ("@throws".equals(tagName) || "@exception".equals(tagName)) { //$NON-NLS-1$//$NON-NLS-2$
+        if ("@throws".equals(tagName) || "@exception".equals(tagName)) { // $NON-NLS-1$//$NON-NLS-2$
           typeRefFound((Name) first);
         } else if ("@see".equals(tagName)
             || "@link".equals(tagName)
-            || "@linkplain".equals(tagName)) { //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+            || "@linkplain".equals(tagName)) { // $NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
           Name name = (Name) first;
           possibleTypeRefFound(name);
         }

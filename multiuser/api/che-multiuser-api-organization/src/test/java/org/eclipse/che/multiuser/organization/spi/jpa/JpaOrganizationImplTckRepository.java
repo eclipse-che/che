@@ -44,7 +44,7 @@ public class JpaOrganizationImplTckRepository extends JpaTckRepository<Organizat
   public void createAll(Collection<? extends OrganizationImpl> entities)
       throws TckRepositoryException {
     super.createAll(entities);
-    //It's important to save organization to remove them in the reverse order
+    // It's important to save organization to remove them in the reverse order
     createdOrganizations.addAll(entities);
   }
 
@@ -67,7 +67,7 @@ public class JpaOrganizationImplTckRepository extends JpaTckRepository<Organizat
                   .getSingleResult();
           manager.remove(organizationToRemove);
         } catch (NoResultException ignored) {
-          //it is already removed
+          // it is already removed
         }
       }
       createdOrganizations.clear();
@@ -82,7 +82,7 @@ public class JpaOrganizationImplTckRepository extends JpaTckRepository<Organizat
       uow.end();
     }
 
-    //remove all objects that was created in tests
+    // remove all objects that was created in tests
     super.removeAll();
   }
 }

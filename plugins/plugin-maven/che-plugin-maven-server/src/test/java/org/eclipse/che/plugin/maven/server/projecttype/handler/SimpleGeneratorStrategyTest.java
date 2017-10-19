@@ -146,14 +146,17 @@ public class SimpleGeneratorStrategyTest {
     //                                       API_ENDPOINT,
     //                                       httpJsonRequestFactory);
 
-    //        HttpJsonRequest httpJsonRequest = mock(HttpJsonRequest.class, new SelfReturningAnswer());
+    //        HttpJsonRequest httpJsonRequest = mock(HttpJsonRequest.class, new
+    // SelfReturningAnswer());
     //        when(httpJsonRequestFactory.fromLink(eq(DtoFactory.newDto(Link.class)
     //                                                          .withMethod("PUT")
-    //                                                          .withHref(API_ENDPOINT + "/workspace/" + workspace + "/project"))))
+    //                                                          .withHref(API_ENDPOINT +
+    // "/workspace/" + workspace + "/project"))))
     //                .thenReturn(httpJsonRequest);
     //        when(httpJsonRequestFactory.fromLink(eq(DtoFactory.newDto(Link.class)
     //                                                          .withMethod("GET")
-    //                                                          .withHref(API_ENDPOINT + "/workspace/" + workspace))))
+    //                                                          .withHref(API_ENDPOINT +
+    // "/workspace/" + workspace))))
     //                .thenReturn(httpJsonRequest);
     //        when(httpJsonRequest.request()).thenReturn(httpJsonResponse);
     when(httpJsonResponse.asDto(WorkspaceDto.class)).thenReturn(usersWorkspaceMock);

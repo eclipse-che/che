@@ -104,7 +104,7 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
     public void setCreateField(boolean createField) {
       if (fIndex == PARAMETER_OBJECT_IDX)
         throw new IllegalArgumentException(
-            "You can not set create field for the parameter object"); //$NON-NLS-1$
+            "You can not set create field for the parameter object"); // $NON-NLS-1$
       fCreateField = createField;
     }
 
@@ -120,34 +120,34 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
     public void setFieldName(String fieldName) {
       if (fIndex == PARAMETER_OBJECT_IDX)
         throw new IllegalArgumentException(
-            "You can not set the field name of the parameter object"); //$NON-NLS-1$
+            "You can not set the field name of the parameter object"); // $NON-NLS-1$
       fFieldName = fieldName;
     }
   }
 
-  private static final String PARAMETER_COUNT = "PARAMETER_COUNT"; //$NON-NLS-1$
+  private static final String PARAMETER_COUNT = "PARAMETER_COUNT"; // $NON-NLS-1$
 
-  private static final String PARAMETER_IDX = "PARAMETER_IDX"; //$NON-NLS-1$
+  private static final String PARAMETER_IDX = "PARAMETER_IDX"; // $NON-NLS-1$
 
-  private static final String PARAMETER_CREATE_FIELD = "PARAMETER_CREATE_FIELD"; //$NON-NLS-1$
+  private static final String PARAMETER_CREATE_FIELD = "PARAMETER_CREATE_FIELD"; // $NON-NLS-1$
 
-  private static final String PARAMETER_FIELD_NAME = "PARAMETER_FIELD_NAME"; //$NON-NLS-1$
+  private static final String PARAMETER_FIELD_NAME = "PARAMETER_FIELD_NAME"; // $NON-NLS-1$
 
-  private static final String CLASS_NAME = "class_name"; //$NON-NLS-1$
+  private static final String CLASS_NAME = "class_name"; // $NON-NLS-1$
 
-  private static final String DELEGATE = "delegate"; //$NON-NLS-1$
+  private static final String DELEGATE = "delegate"; // $NON-NLS-1$
 
-  private static final String DEPRECATE_DELEGATE = "deprecate_delegate"; //$NON-NLS-1$
+  private static final String DEPRECATE_DELEGATE = "deprecate_delegate"; // $NON-NLS-1$
 
-  private static final String GETTERS = "getters"; //$NON-NLS-1$
+  private static final String GETTERS = "getters"; // $NON-NLS-1$
 
-  private static final String PACKAGE_NAME = "package_name"; //$NON-NLS-1$
+  private static final String PACKAGE_NAME = "package_name"; // $NON-NLS-1$
 
-  private static final String PARAMETER_NAME = "parameter_name"; //$NON-NLS-1$
+  private static final String PARAMETER_NAME = "parameter_name"; // $NON-NLS-1$
 
-  private static final String SETTERS = "setters"; //$NON-NLS-1$
+  private static final String SETTERS = "setters"; // $NON-NLS-1$
 
-  private static final String TOP_LEVEL = "top_level"; //$NON-NLS-1$
+  private static final String TOP_LEVEL = "top_level"; // $NON-NLS-1$
 
   /** The parameter index of the special parameter object. The value is "-1". */
   public static final int PARAMETER_OBJECT_IDX = -1;
@@ -465,10 +465,11 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
    */
   public void setMethod(IMethod method) {
     if (method == null)
-      throw new IllegalArgumentException("The method must not be null"); //$NON-NLS-1$
-    if (!method.exists()) throw new IllegalArgumentException("The method must exist"); //$NON-NLS-1$
+      throw new IllegalArgumentException("The method must not be null"); // $NON-NLS-1$
+    if (!method.exists())
+      throw new IllegalArgumentException("The method must exist"); // $NON-NLS-1$
     if (method.getJavaProject() == null)
-      throw new IllegalArgumentException("The method has to be in a Java project"); //$NON-NLS-1$
+      throw new IllegalArgumentException("The method has to be in a Java project"); // $NON-NLS-1$
     fMethod = method;
   }
 
@@ -534,12 +535,12 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
     RefactoringStatus result = super.validateDescriptor();
     if (!result.isOK()) return result;
     if (fMethod == null) {
-      result.addFatalError("The method must not be null"); //$NON-NLS-1$
+      result.addFatalError("The method must not be null"); // $NON-NLS-1$
       return result;
     }
     IJavaProject javaProject = fMethod.getJavaProject();
     if (javaProject == null) {
-      result.addFatalError("Can not derive Java project from method"); //$NON-NLS-1$
+      result.addFatalError("Can not derive Java project from method"); // $NON-NLS-1$
       return result;
     }
     String sourceLevel = javaProject.getOption(JavaCore.COMPILER_SOURCE, true);
@@ -547,7 +548,7 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
     if (fParameters != null) {
       if (fParameters.length - 1 != fMethod.getNumberOfParameters()) {
         result.addFatalError(
-            "The number of parameters does not match the number of parameters of the method"); //$NON-NLS-1$
+            "The number of parameters does not match the number of parameters of the method"); // $NON-NLS-1$
       }
       boolean hasParameterObject = false;
       for (int i = 0; i < fParameters.length; i++) {
@@ -559,7 +560,7 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
                 "The parameter "
                     + parameter.getIndex()
                     + " is marked for field creation but does not have a field"
-                    + " name"); //$NON-NLS-1$ //$NON-NLS-2$
+                    + " name"); // $NON-NLS-1$ //$NON-NLS-2$
           else {
             result.merge(
                 RefactoringStatus.create(
@@ -568,7 +569,7 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
         }
         if (parameter == PARAMETER_OBJECT) {
           if (hasParameterObject)
-            result.addError("Can not have more than one parameter object"); //$NON-NLS-1$
+            result.addError("Can not have more than one parameter object"); // $NON-NLS-1$
           else hasParameterObject = true;
         }
       }
@@ -583,7 +584,7 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
           RefactoringStatus.create(
               JavaConventions.validateIdentifier(fParameterName, sourceLevel, complianceLevel)));
     }
-    if (fPackageName != null && !"".equals(fPackageName)) { //$NON-NLS-1$
+    if (fPackageName != null && !"".equals(fPackageName)) { // $NON-NLS-1$
       result.merge(
           RefactoringStatus.create(
               JavaConventions.validatePackageName(fPackageName, sourceLevel, complianceLevel)));

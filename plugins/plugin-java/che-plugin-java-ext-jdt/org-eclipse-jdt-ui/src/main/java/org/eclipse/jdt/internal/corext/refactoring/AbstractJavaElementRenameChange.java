@@ -36,8 +36,8 @@ public abstract class AbstractJavaElementRenameChange extends ResourceChange {
 
   protected AbstractJavaElementRenameChange(
       IPath resourcePath, String oldName, String newName, long stampToRestore) {
-    Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
-    Assert.isNotNull(oldName, "old name"); //$NON-NLS-1$
+    Assert.isNotNull(newName, "new name"); // $NON-NLS-1$
+    Assert.isNotNull(oldName, "old name"); // $NON-NLS-1$
     fResourcePath = resourcePath;
     fOldName = oldName;
     fNewName = newName;

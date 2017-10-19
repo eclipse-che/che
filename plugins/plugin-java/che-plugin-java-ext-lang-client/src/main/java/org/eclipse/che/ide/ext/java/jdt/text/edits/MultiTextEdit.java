@@ -115,7 +115,8 @@ public class MultiTextEdit extends TextEdit {
 
   /* @see TextEdit#copy */
   protected TextEdit doCopy() {
-    //Assert.isTrue(MultiTextEdit.class == getClass(), "Subclasses must reimplement copy0"); //$NON-NLS-1$
+    // Assert.isTrue(MultiTextEdit.class == getClass(), "Subclasses must reimplement copy0");
+    // //$NON-NLS-1$
     return new MultiTextEdit(this);
   }
 
@@ -183,6 +184,6 @@ public class MultiTextEdit extends TextEdit {
    */
   void internalToString(StringBuffer buffer, int indent) {
     super.internalToString(buffer, indent);
-    if (!fDefined) buffer.append(" [undefined]"); //$NON-NLS-1$
+    if (!fDefined) buffer.append(" [undefined]"); // $NON-NLS-1$
   }
 }

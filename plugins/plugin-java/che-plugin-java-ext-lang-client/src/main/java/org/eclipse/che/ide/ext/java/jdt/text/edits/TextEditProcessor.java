@@ -167,13 +167,13 @@ public class TextEditProcessor {
     fRoot.traverseConsistencyCheck(this, fDocument, fSourceEdits);
     if (fRoot.getExclusiveEnd() > fDocument.getLength())
       throw new MalformedTreeException(
-          null, fRoot, "End position lies outside document range"); //$NON-NLS-1$
+          null, fRoot, "End position lies outside document range"); // $NON-NLS-1$
   }
 
   void checkIntegrityUndo() {
     if (fRoot.getExclusiveEnd() > fDocument.getLength())
       throw new MalformedTreeException(
-          null, fRoot, "End position lies outside document range"); //$NON-NLS-1$
+          null, fRoot, "End position lies outside document range"); // $NON-NLS-1$
   }
 
   // ---- execution --------------------------------------------------------------------

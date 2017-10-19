@@ -29,7 +29,7 @@ public class TypeSetUnion extends TypeSet {
   public boolean isUniverse() {
     if (fLHS.isUniverse() || fRHS.isUniverse()) return true;
     if (fLHS.isSingleton() && fRHS.isSingleton()) return false;
-    throw new IllegalStateException("unimplemented"); //$NON-NLS-1$
+    throw new IllegalStateException("unimplemented"); // $NON-NLS-1$
   }
 
   /* (non-Javadoc)
@@ -93,7 +93,7 @@ public class TypeSetUnion extends TypeSet {
    */
   @Override
   public TypeSet upperBound() {
-    throw new IllegalStateException("unimplemented"); //$NON-NLS-1$
+    throw new IllegalStateException("unimplemented"); // $NON-NLS-1$
   }
 
   /* (non-Javadoc)
@@ -101,7 +101,7 @@ public class TypeSetUnion extends TypeSet {
    */
   @Override
   public TypeSet lowerBound() {
-    throw new IllegalStateException("unimplemented"); //$NON-NLS-1$
+    throw new IllegalStateException("unimplemented"); // $NON-NLS-1$
   }
 
   /* (non-Javadoc)
@@ -109,7 +109,7 @@ public class TypeSetUnion extends TypeSet {
    */
   @Override
   public Iterator<TType> iterator() {
-    throw new IllegalStateException("unimplemented"); //$NON-NLS-1$
+    throw new IllegalStateException("unimplemented"); // $NON-NLS-1$
   }
   /* (non-Javadoc)
    * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#isSingleton()
@@ -170,6 +170,6 @@ public class TypeSetUnion extends TypeSet {
         + fLHS
         + ","
         + fRHS
-        + ")>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+        + ")>"; // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
   }
 }

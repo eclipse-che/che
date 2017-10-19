@@ -65,7 +65,7 @@ public class ResourceTraversal {
       try {
         if (resources[i].exists()) resources[i].accept(visitor, depth, flags);
       } catch (CoreException e) {
-        //ignore failure in the case of concurrent deletion
+        // ignore failure in the case of concurrent deletion
         if (e.getStatus().getCode() != IResourceStatus.RESOURCE_NOT_FOUND) throw e;
       }
   }

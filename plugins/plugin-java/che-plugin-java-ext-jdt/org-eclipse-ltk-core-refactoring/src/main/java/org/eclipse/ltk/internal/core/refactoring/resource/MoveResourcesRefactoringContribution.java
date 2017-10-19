@@ -24,7 +24,7 @@ import org.eclipse.ltk.core.refactoring.resource.MoveResourcesDescriptor;
 public final class MoveResourcesRefactoringContribution extends RefactoringContribution {
 
   /** Key used for the number of resource to be moved */
-  private static final String ATTRIBUTE_NUMBER_OF_RESOURCES = "resources"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_NUMBER_OF_RESOURCES = "resources"; // $NON-NLS-1$
 
   /**
    * Key prefix used for the path of the resources to be moved.
@@ -32,13 +32,13 @@ public final class MoveResourcesRefactoringContribution extends RefactoringContr
    * <p>The element arguments are simply distinguished by appending a number to the argument name,
    * e.g. element1. The indices of this argument are one-based.
    */
-  private static final String ATTRIBUTE_ELEMENT = "element"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_ELEMENT = "element"; // $NON-NLS-1$
 
   /** Key used for the new resource name */
-  private static final String ATTRIBUTE_DESTINATION = "destination"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_DESTINATION = "destination"; // $NON-NLS-1$
 
   /** Key used for the 'update references' property */
-  private static final String ATTRIBUTE_UPDATE_REFERENCES = "updateReferences"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_UPDATE_REFERENCES = "updateReferences"; // $NON-NLS-1$
 
   /* (non-Javadoc)
    * @see org.eclipse.ltk.core.refactoring.RefactoringContribution#retrieveArgumentMap(org.eclipse.ltk.core.refactoring.RefactoringDescriptor)
@@ -62,7 +62,7 @@ public final class MoveResourcesRefactoringContribution extends RefactoringContr
           ATTRIBUTE_DESTINATION, ResourceProcessors.resourcePathToHandle(project, destinationPath));
       map.put(
           ATTRIBUTE_UPDATE_REFERENCES,
-          moveDescriptor.isUpdateReferences() ? "true" : "false"); //$NON-NLS-1$//$NON-NLS-2$
+          moveDescriptor.isUpdateReferences() ? "true" : "false"); // $NON-NLS-1$//$NON-NLS-2$
       return map;
     }
     return null;
@@ -84,7 +84,7 @@ public final class MoveResourcesRefactoringContribution extends RefactoringContr
       int numResources = Integer.parseInt((String) arguments.get(ATTRIBUTE_NUMBER_OF_RESOURCES));
       if (numResources < 0 || numResources > 100000) {
         throw new IllegalArgumentException(
-            "Can not restore MoveResourceDescriptor from map, number of moved elements invalid"); //$NON-NLS-1$
+            "Can not restore MoveResourceDescriptor from map, number of moved elements invalid"); // $NON-NLS-1$
       }
 
       IPath[] resourcePaths = new IPath[numResources];
@@ -92,7 +92,7 @@ public final class MoveResourcesRefactoringContribution extends RefactoringContr
         String resource = (String) arguments.get(ATTRIBUTE_ELEMENT + String.valueOf(i + 1));
         if (resource == null) {
           throw new IllegalArgumentException(
-              "Can not restore MoveResourceDescriptor from map, resource missing"); //$NON-NLS-1$
+              "Can not restore MoveResourceDescriptor from map, resource missing"); // $NON-NLS-1$
         }
         resourcePaths[i] = ResourceProcessors.handleToResourcePath(project, resource);
       }
@@ -100,12 +100,12 @@ public final class MoveResourcesRefactoringContribution extends RefactoringContr
       String destination = (String) arguments.get(ATTRIBUTE_DESTINATION);
       if (destination == null) {
         throw new IllegalArgumentException(
-            "Can not restore MoveResourceDescriptor from map, destination missing"); //$NON-NLS-1$
+            "Can not restore MoveResourceDescriptor from map, destination missing"); // $NON-NLS-1$
       }
       IPath destPath = ResourceProcessors.handleToResourcePath(project, destination);
 
       boolean updateReferences =
-          "true".equals(arguments.get(ATTRIBUTE_UPDATE_REFERENCES)); //$NON-NLS-1$
+          "true".equals(arguments.get(ATTRIBUTE_UPDATE_REFERENCES)); // $NON-NLS-1$
 
       MoveResourcesDescriptor descriptor = new MoveResourcesDescriptor();
       descriptor.setProject(project);
@@ -119,7 +119,7 @@ public final class MoveResourcesRefactoringContribution extends RefactoringContr
 
     } catch (NumberFormatException e) {
       throw new IllegalArgumentException(
-          "Can not restore MoveResourceDescriptor from map"); //$NON-NLS-1$
+          "Can not restore MoveResourceDescriptor from map"); // $NON-NLS-1$
     }
   }
 }

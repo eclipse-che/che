@@ -51,7 +51,7 @@ public class StackDomainSetPermissionsChecker implements SetPermissionsChecker {
     final Set<String> unsupportedPublicActions = new HashSet<>(permissions.getActions());
     unsupportedPublicActions.remove(READ);
 
-    //public search is supported only for admins
+    // public search is supported only for admins
     if (EnvironmentContext.getCurrent()
         .getSubject()
         .hasPermission(DOMAIN_ID, null, MANAGE_SYSTEM_ACTION)) {

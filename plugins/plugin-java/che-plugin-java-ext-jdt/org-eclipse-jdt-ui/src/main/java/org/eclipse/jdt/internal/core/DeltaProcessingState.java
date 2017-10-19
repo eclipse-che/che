@@ -148,7 +148,8 @@ public class DeltaProcessingState implements IResourceChangeListener {
     for (int i = 0; i < this.elementChangedListenerCount; i++) {
       if (this.elementChangedListeners[i] == listener) {
 
-        // only clone the masks, since we could be in the middle of notifications and one listener decide to change
+        // only clone the masks, since we could be in the middle of notifications and one listener
+        // decide to change
         // any event mask of another listeners (yet not notified).
         int cloneLength = this.elementChangedListenerMasks.length;
         System.arraycopy(
@@ -161,7 +162,8 @@ public class DeltaProcessingState implements IResourceChangeListener {
         return;
       }
     }
-    // may need to grow, no need to clone, since iterators will have cached original arrays and max boundary and we only add to the end.
+    // may need to grow, no need to clone, since iterators will have cached original arrays and max
+    // boundary and we only add to the end.
     int length;
     if ((length = this.elementChangedListeners.length) == this.elementChangedListenerCount) {
       System.arraycopy(
@@ -200,7 +202,8 @@ public class DeltaProcessingState implements IResourceChangeListener {
         return;
       }
     }
-    // may need to grow, no need to clone, since iterators will have cached original arrays and max boundary and we only add to the end.
+    // may need to grow, no need to clone, since iterators will have cached original arrays and max
+    // boundary and we only add to the end.
     int length;
     if ((length = this.preResourceChangeListeners.length) == this.preResourceChangeListenerCount) {
       System.arraycopy(
@@ -304,7 +307,8 @@ public class DeltaProcessingState implements IResourceChangeListener {
       Thread currentThread = Thread.currentThread();
       boolean addedCurrentThread = false;
       try {
-        // if reentering initialization (through a container initializer for example) no need to compute roots again
+        // if reentering initialization (through a container initializer for example) no need to
+        // compute roots again
         // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=47213
         if (!this.initializingThreads.add(currentThread)) return;
         addedCurrentThread = true;
@@ -365,7 +369,8 @@ public class DeltaProcessingState implements IResourceChangeListener {
       try {
         //				if (usePreviousSession) {
         //					PerProjectInfo perProjectInfo = project.getPerProjectInfo();
-        //					project.resolveClasspath(perProjectInfo, true/*use previous session values*/, false/*don't add classpath change*/);
+        //					project.resolveClasspath(perProjectInfo, true/*use previous session values*/,
+        // false/*don't add classpath change*/);
         //					classpath = perProjectInfo.resolvedClasspath;
         //				} else {
         classpath = project.getResolvedClasspath();
@@ -485,7 +490,8 @@ public class DeltaProcessingState implements IResourceChangeListener {
 
       if (this.elementChangedListeners[i] == listener) {
 
-        // need to clone defensively since we might be in the middle of listener notifications (#fire)
+        // need to clone defensively since we might be in the middle of listener notifications
+        // (#fire)
         int length = this.elementChangedListeners.length;
         IElementChangedListener[] newListeners = new IElementChangedListener[length];
         System.arraycopy(this.elementChangedListeners, 0, newListeners, 0, i);
@@ -499,7 +505,8 @@ public class DeltaProcessingState implements IResourceChangeListener {
           System.arraycopy(this.elementChangedListenerMasks, i + 1, newMasks, i, trailingLength);
         }
 
-        // update manager listener state (#fire need to iterate over original listeners through a local variable to hold onto
+        // update manager listener state (#fire need to iterate over original listeners through a
+        // local variable to hold onto
         // the original ones)
         this.elementChangedListeners = newListeners;
         this.elementChangedListenerMasks = newMasks;
@@ -515,7 +522,8 @@ public class DeltaProcessingState implements IResourceChangeListener {
 
       if (this.preResourceChangeListeners[i] == listener) {
 
-        // need to clone defensively since we might be in the middle of listener notifications (#fire)
+        // need to clone defensively since we might be in the middle of listener notifications
+        // (#fire)
         int length = this.preResourceChangeListeners.length;
         IResourceChangeListener[] newListeners = new IResourceChangeListener[length];
         int[] newEventMasks = new int[length];
@@ -530,7 +538,8 @@ public class DeltaProcessingState implements IResourceChangeListener {
               this.preResourceChangeEventMasks, i + 1, newEventMasks, i, trailingLength);
         }
 
-        // update manager listener state (#fire need to iterate over original listeners through a local variable to hold onto
+        // update manager listener state (#fire need to iterate over original listeners through a
+        // local variable to hold onto
         // the original ones)
         this.preResourceChangeListeners = newListeners;
         this.preResourceChangeEventMasks = newEventMasks;
@@ -542,7 +551,8 @@ public class DeltaProcessingState implements IResourceChangeListener {
 
   public void resourceChanged(final IResourceChangeEvent event) {
     for (int i = 0; i < this.preResourceChangeListenerCount; i++) {
-      // wrap callbacks with Safe runnable for subsequent listeners to be called when some are causing grief
+      // wrap callbacks with Safe runnable for subsequent listeners to be called when some are
+      // causing grief
       final IResourceChangeListener listener = this.preResourceChangeListeners[i];
       if ((this.preResourceChangeEventMasks[i] & event.getType()) != 0)
         SafeRunner.run(
@@ -550,7 +560,7 @@ public class DeltaProcessingState implements IResourceChangeListener {
               public void handleException(Throwable exception) {
                 Util.log(
                     exception,
-                    "Exception occurred in listener of pre Java resource change notification"); //$NON-NLS-1$
+                    "Exception occurred in listener of pre Java resource change notification"); // $NON-NLS-1$
               }
 
               public void run() throws Exception {
@@ -587,7 +597,7 @@ public class DeltaProcessingState implements IResourceChangeListener {
         }
       } catch (IOException e) {
         if (timestampsFile.exists())
-          Util.log(e, "Unable to read external time stamps"); //$NON-NLS-1$
+          Util.log(e, "Unable to read external time stamps"); // $NON-NLS-1$
       } finally {
         if (in != null) {
           try {
@@ -638,7 +648,7 @@ public class DeltaProcessingState implements IResourceChangeListener {
     return JavaCore.getPlugin()
         .getStateLocation()
         .append("externalLibsTimeStamps")
-        .toFile(); //$NON-NLS-1$
+        .toFile(); // $NON-NLS-1$
   }
 
   public void saveExternalLibTimeStamps() throws CoreException {
@@ -678,7 +688,7 @@ public class DeltaProcessingState implements IResourceChangeListener {
               JavaCore.PLUGIN_ID,
               IStatus.ERROR,
               "Problems while saving timestamps",
-              e); //$NON-NLS-1$
+              e); // $NON-NLS-1$
       throw new CoreException(status);
     } finally {
       if (out != null) {
@@ -737,8 +747,8 @@ public class DeltaProcessingState implements IResourceChangeListener {
                 || !rootInfo
                     .project
                     .getPath()
-                    .isPrefixOf(
-                        path)) { // only consider folder roots that are not included in the container
+                    .isPrefixOf(path)) { // only consider folder roots that are not included in the
+              // container
               deltaProcessor.updateCurrentDeltaAndIndex(
                   rootDelta, IJavaElement.PACKAGE_FRAGMENT_ROOT, rootInfo);
             }

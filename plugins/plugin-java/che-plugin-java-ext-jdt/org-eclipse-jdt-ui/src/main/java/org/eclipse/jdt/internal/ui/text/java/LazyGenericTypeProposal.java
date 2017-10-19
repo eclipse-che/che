@@ -114,7 +114,7 @@ public class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposal
         StringBuffer buf = new StringBuffer();
         for (int i = 0; i < proposals.length; i++) {
           buf.append(proposals[i].getDisplayName());
-          if (i < proposals.length - 1) buf.append(", "); //$NON-NLS-1$
+          if (i < proposals.length - 1) buf.append(", "); // $NON-NLS-1$
         }
         return Strings.markJavaElementLabelLTR(buf.toString());
 
@@ -214,7 +214,7 @@ public class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposal
 
           if (canUseDiamond()) {
             buffer = new StringBuffer(getReplacementString());
-            buffer.append("<>"); //$NON-NLS-1$
+            buffer.append("<>"); // $NON-NLS-1$
           } else
             buffer =
                 createParameterList(typeArgumentProposals, offsets, lengths, onlyAppendArguments);
@@ -380,20 +380,20 @@ public class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposal
     String[] bounds = parameter.getBounds();
     String elementName = parameter.getElementName();
     String displayName = computeTypeParameterDisplayName(parameter, bounds);
-    if (bounds.length == 1 && !"java.lang.Object".equals(bounds[0])) //$NON-NLS-1$
+    if (bounds.length == 1 && !"java.lang.Object".equals(bounds[0])) // $NON-NLS-1$
     return new TypeArgumentProposal(Signature.getSimpleName(bounds[0]), true, displayName);
     else return new TypeArgumentProposal(elementName, true, displayName);
   }
 
   private String computeTypeParameterDisplayName(ITypeParameter parameter, String[] bounds) {
     if (bounds.length == 0
-        || bounds.length == 1 && "java.lang.Object".equals(bounds[0])) //$NON-NLS-1$
+        || bounds.length == 1 && "java.lang.Object".equals(bounds[0])) // $NON-NLS-1$
     return parameter.getElementName();
     StringBuffer buf = new StringBuffer(parameter.getElementName());
-    buf.append(" extends "); //$NON-NLS-1$
+    buf.append(" extends "); // $NON-NLS-1$
     for (int i = 0; i < bounds.length; i++) {
       buf.append(Signature.getSimpleName(bounds[i]));
-      if (i < bounds.length - 1) buf.append(" & "); //$NON-NLS-1$
+      if (i < bounds.length - 1) buf.append(" & "); // $NON-NLS-1$
     }
     return buf.toString();
   }
@@ -424,8 +424,9 @@ public class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposal
     if (binding.isWildcardType()) {
 
       if (binding.isUpperbound()) {
-        // replace the wildcard ? with the type parameter name to get "E extends Bound" instead of "? extends Bound"
-        String contextName = name.replaceFirst("\\?", parameter.getElementName()); //$NON-NLS-1$
+        // replace the wildcard ? with the type parameter name to get "E extends Bound" instead of
+        // "? extends Bound"
+        String contextName = name.replaceFirst("\\?", parameter.getElementName()); // $NON-NLS-1$
         // upper bound - the upper bound is the bound itself
         return new TypeArgumentProposal(binding.getBound().getName(), true, contextName);
       }
@@ -552,7 +553,7 @@ public class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposal
                 JavaPlugin.getPluginId(),
                 IStatus.OK,
                 "Illegal hierarchy",
-                null))); //$NON-NLS-1$
+                null))); // $NON-NLS-1$
   }
 
   /**
@@ -762,13 +763,17 @@ public class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposal
         //				model.addLinkingListener(new ILinkedModeListener() {
         //					public void left(LinkedModeModel environment, int flags) {
         //						try {
-        //							if (getTextViewer().getSelectedRange().y > 1 || flags != ILinkedModeListener.EXTERNAL_MODIFICATION)
+        //							if (getTextViewer().getSelectedRange().y > 1 || flags !=
+        // ILinkedModeListener.EXTERNAL_MODIFICATION)
         //								return;
-        //							((IDocumentExtension) document).registerPostNotificationReplace(null, new IDocumentExtension.IReplace() {
+        //							((IDocumentExtension) document).registerPostNotificationReplace(null, new
+        // IDocumentExtension.IReplace() {
         //								public void perform(IDocument d, IDocumentListener owner) {
         //									try {
-        //										if ((firstBracketPosition.length == 0 || firstBracketPosition.isDeleted) && !secondBracketPosition.isDeleted) {
-        //											d.replace(firstBracketPosition.offset, secondBracketPosition.offset - firstBracketPosition.offset, ""); //$NON-NLS-1$
+        //										if ((firstBracketPosition.length == 0 || firstBracketPosition.isDeleted) &&
+        // !secondBracketPosition.isDeleted) {
+        //											d.replace(firstBracketPosition.offset, secondBracketPosition.offset -
+        // firstBracketPosition.offset, ""); //$NON-NLS-1$
         //										}
         //									} catch (BadLocationException e) {
         //										JavaPlugin.log(e);
@@ -791,12 +796,13 @@ public class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposal
 
       //			LinkedModeUI ui= new EditorLinkedModeUI(model, getTextViewer());
       //			ui.setExitPolicy(new ExitPolicy(withParentheses ? ')' : '>', document));
-      //			ui.setExitPosition(getTextViewer(), replacementOffset + replacementString.length(), 0, Integer.MAX_VALUE);
+      //			ui.setExitPosition(getTextViewer(), replacementOffset + replacementString.length(), 0,
+      // Integer.MAX_VALUE);
       //			ui.setDoContextInfo(true);
       //			ui.enter();
 
       fSelectedRegion =
-          new Region(replacementOffset + replacementString.length(), 0); //ui.getSelectedRegion();
+          new Region(replacementOffset + replacementString.length(), 0); // ui.getSelectedRegion();
 
     } catch (BadLocationException e) {
       JavaPlugin.log(e);

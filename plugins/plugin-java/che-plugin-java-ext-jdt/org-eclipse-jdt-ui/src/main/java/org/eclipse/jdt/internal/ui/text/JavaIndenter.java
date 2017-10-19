@@ -783,7 +783,7 @@ public final class JavaIndenter {
             if (next != Symbols.TokenCOLON) {
               break;
             }
-            //$FALL-THROUGH$
+            // $FALL-THROUGH$
           case Symbols.TokenCASE:
             if (isFirstTokenOnLine) matchCase = true;
             break;
@@ -970,7 +970,8 @@ public final class JavaIndenter {
     fPosition = offset;
 
     // forward cases
-    // an unindentation happens sometimes if the next token is special, namely on braces, parens and case labels
+    // an unindentation happens sometimes if the next token is special, namely on braces, parens and
+    // case labels
     // align braces, but handle the case where we align with the method declaration start instead of
     // the opening brace.
     if (matchBrace) {
@@ -1013,7 +1014,8 @@ public final class JavaIndenter {
       }
     }
 
-    // the only reliable way to get case labels aligned (due to many different styles of using braces in a block)
+    // the only reliable way to get case labels aligned (due to many different styles of using
+    // braces in a block)
     // is to go for another case statement, or the scope opening brace
     if (matchCase) {
       return matchCaseAlignment();
@@ -1037,7 +1039,8 @@ public final class JavaIndenter {
       case Symbols.TokenSEMICOLON:
         // this is the 90% case: after a statement block
         // the end of the previous statement / block previous.end
-        // search to the end of the statement / block before the previous; the token just after that is previous.start
+        // search to the end of the statement / block before the previous; the token just after that
+        // is previous.start
         pos = fPosition;
         if (isSemicolonPartOfForStatement()) {
           fIndent = fPrefs.prefContinuationIndent;
@@ -1157,8 +1160,10 @@ public final class JavaIndenter {
         // indent by list-indent
       default:
         // inside whatever we don't know about: similar to the list case:
-        // if we are inside a continued expression, then either align with a previous line that has indentation
-        // or indent from the expression start line (either a scope introducer or the start of the expr).
+        // if we are inside a continued expression, then either align with a previous line that has
+        // indentation
+        // or indent from the expression start line (either a scope introducer or the start of the
+        // expr).
         return skipToPreviousListItemOrListStart();
     }
   }
@@ -1217,7 +1222,7 @@ public final class JavaIndenter {
    */
   private int handleEqual() {
     try {
-      //If this line is itself continuation of the previous then do nothing
+      // If this line is itself continuation of the previous then do nothing
       IRegion line = fDocument.getLineInformationOfOffset(fPosition);
       int nonWS =
           fScanner.findNonWhitespaceBackward(line.getOffset(), JavaHeuristicScanner.UNBOUND);
@@ -1338,7 +1343,8 @@ public final class JavaIndenter {
       switch (fToken) {
           // scope introduction through: LPAREN, LBRACE, LBRACKET
           // search stop on SEMICOLON, RBRACE, COLON, EOF
-          // -> the next token is the start of the statement (i.e. previousPos when backward scanning)
+          // -> the next token is the start of the statement (i.e. previousPos when backward
+          // scanning)
         case Symbols.TokenLPAREN:
         case Symbols.TokenLBRACE:
         case Symbols.TokenLBRACKET:
@@ -1367,7 +1373,7 @@ public final class JavaIndenter {
           // scopes: skip them
         case Symbols.TokenRPAREN:
           if (isInBlock) mayBeMethodBody = READ_PARENS;
-          //$FALL-THROUGH$
+          // $FALL-THROUGH$
         case Symbols.TokenRBRACKET:
         case Symbols.TokenGREATERTHAN:
           pos = fPreviousPos;
@@ -1591,7 +1597,7 @@ public final class JavaIndenter {
               return false;
             }
             if (isGenericStarter) break;
-            //$FALL-THROUGH$
+            // $FALL-THROUGH$
           case Symbols.TokenQUESTIONMARK:
           case Symbols.TokenGREATERTHAN:
             if (skipScope(Symbols.TokenLESSTHAN, Symbols.TokenGREATERTHAN)) return true;
@@ -1820,7 +1826,7 @@ public final class JavaIndenter {
     switch (fToken) {
       case Symbols.TokenRBRACE:
         skipScope();
-        //$FALL-THROUGH$
+        // $FALL-THROUGH$
       case Symbols.TokenSEMICOLON:
         skipToStatementStart(false, false);
         return fToken == Symbols.TokenDO;

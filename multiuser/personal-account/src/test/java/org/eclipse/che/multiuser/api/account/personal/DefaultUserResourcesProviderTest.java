@@ -38,19 +38,19 @@ public class DefaultUserResourcesProviderTest {
 
   @Test
   public void shouldReturnPersonalAccountType() throws Exception {
-    //when
+    // when
     final String accountType = resourcesProvider.getAccountType();
 
-    //then
+    // then
     assertEquals(accountType, UserManager.PERSONAL_ACCOUNT);
   }
 
   @Test
   public void shouldProvideDefaultRamResourceForUser() throws Exception {
-    //when
+    // when
     final List<ResourceImpl> defaultResources = resourcesProvider.getResources("user123");
 
-    //then
+    // then
     assertEquals(defaultResources.size(), 4);
     assertTrue(
         defaultResources.contains(

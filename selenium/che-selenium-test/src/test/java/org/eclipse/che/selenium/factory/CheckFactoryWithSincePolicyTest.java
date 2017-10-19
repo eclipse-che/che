@@ -71,7 +71,7 @@ public class CheckFactoryWithSincePolicyTest {
     dashboard.open();
     testFactory.open(ide.driver());
 
-    //driver.get(factoryUrl);
+    // driver.get(factoryUrl);
     new WebDriverWait(ide.driver(), PREPARING_WS_TIMEOUT_SEC)
         .until(ExpectedConditions.alertIsPresent());
     assertTrue(

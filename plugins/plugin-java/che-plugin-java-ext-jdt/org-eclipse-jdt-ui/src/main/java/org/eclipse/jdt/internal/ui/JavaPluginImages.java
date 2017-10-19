@@ -84,8 +84,9 @@ public class JavaPluginImages {
       new ImageDescriptor("classfolderWSRC");
   public static final ImageDescriptor DESC_OBJS_PACKFRAG_ROOT =
       new ImageDescriptor("packageFragmentRoot");
-  public static final ImageDescriptor DESC_OBJS_CUNIT = new ImageDescriptor("cunit"); //*.java file
-  public static final ImageDescriptor DESC_OBJS_CFILE = new ImageDescriptor("cfile"); //*.class file
+  public static final ImageDescriptor DESC_OBJS_CUNIT = new ImageDescriptor("cunit"); // *.java file
+  public static final ImageDescriptor DESC_OBJS_CFILE =
+      new ImageDescriptor("cfile"); // *.class file
   public static final ImageDescriptor DESC_OBJS_JAVA_MODEL = new ImageDescriptor("javaModel");
   public static final ImageDescriptor DESC_OBJS_TYPEVARIABLE = new ImageDescriptor("typevariable");
   public static final ImageDescriptor DESC_OBJS_UNKNOWN = new ImageDescriptor("unknown");

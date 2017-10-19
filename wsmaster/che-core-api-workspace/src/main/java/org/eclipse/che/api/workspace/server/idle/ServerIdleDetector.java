@@ -27,6 +27,7 @@ import org.eclipse.che.api.workspace.server.event.ServerIdleEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 /**
  * Notifies about idling the che server Fires {@link ServerIdleEvent} if no workspace is run for
  * <b>che.openshift.server.inactive.stop.timeout.ms</b> milliseconds

@@ -47,7 +47,7 @@ import org.eclipse.text.edits.TextEditGroup;
  * with <code>setBindingRecovery(true)</code>.
  */
 public class CompilationUnitRewrite {
-  //TODO: add RefactoringStatus fStatus;?
+  // TODO: add RefactoringStatus fStatus;?
   private ICompilationUnit fCu;
   private List<TextEditGroup> fTextEditGroups = new ArrayList<TextEditGroup>();
 
@@ -259,7 +259,8 @@ public class CompilationUnitRewrite {
       }
 
       if (needsAstRewrite) {
-        // clean up garbage from earlier calls to ASTRewrite#rewriteAST(..), see https://bugs.eclipse.org/bugs/show_bug.cgi?id=408334#c2
+        // clean up garbage from earlier calls to ASTRewrite#rewriteAST(..), see
+        // https://bugs.eclipse.org/bugs/show_bug.cgi?id=408334#c2
         clearGroupDescriptionEdits();
         TextEdit rewriteEdit;
         if (fRememberContent != null) {

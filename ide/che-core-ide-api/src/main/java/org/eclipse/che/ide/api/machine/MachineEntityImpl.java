@@ -125,7 +125,7 @@ public class MachineEntityImpl implements MachineEntity {
         return link.getHref();
       }
     }
-    //should not be
+    // should not be
     final String message =
         "Reference "
             + Constants.TERMINAL_REFERENCE
@@ -142,7 +142,7 @@ public class MachineEntityImpl implements MachineEntity {
         return link.getHref();
       }
     }
-    //should not be
+    // should not be
     final String message =
         "Reference "
             + Constants.EXEC_AGENT_REFERENCE

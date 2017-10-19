@@ -41,7 +41,7 @@ import org.mockito.Mock;
 @RunWith(GwtMockitoTestRunner.class)
 public class ProjectPerspectiveTest {
 
-  //constructor mocks
+  // constructor mocks
   @Mock private PerspectiveViewImpl view;
   @Mock private PartStackViewFactory partViewFactory;
   @Mock private WorkBenchControllerFactory controllerFactory;
@@ -49,7 +49,7 @@ public class ProjectPerspectiveTest {
   @Mock private EventBus eventBus;
   @Mock private EditorMultiPartStackPresenter editorMultiPartStackPresenter;
 
-  //additional mocks
+  // additional mocks
   @Mock private FlowPanel panel;
   @Mock private SplitLayoutPanel layoutPanel;
   @Mock private SimplePanel simplePanel;

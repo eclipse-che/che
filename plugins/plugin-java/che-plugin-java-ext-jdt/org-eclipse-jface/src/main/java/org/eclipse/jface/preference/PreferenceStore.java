@@ -333,7 +333,7 @@ public class PreferenceStore extends EventManager implements IPreferenceStore {
    */
   public void load() throws IOException {
     if (filename == null) {
-      throw new IOException("File name not specified"); //$NON-NLS-1$
+      throw new IOException("File name not specified"); // $NON-NLS-1$
     }
     FileInputStream in = new FileInputStream(filename);
     load(in);

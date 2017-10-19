@@ -53,7 +53,7 @@ public class BasicElementLabels {
     } else {
       label = path.makeRelative().toString();
     }
-    return markLTR(label, "/\\:."); //$NON-NLS-1$
+    return markLTR(label, "/\\:."); // $NON-NLS-1$
   }
 
   /**
@@ -63,7 +63,7 @@ public class BasicElementLabels {
    * @return the label of the pattern.
    */
   public static String getFilePattern(String name) {
-    return markLTR(name, "*.?/\\:."); //$NON-NLS-1$
+    return markLTR(name, "*.?/\\:."); // $NON-NLS-1$
   }
 
   /**
@@ -73,7 +73,7 @@ public class BasicElementLabels {
    * @return the label of the URL.
    */
   public static String getURLPart(String name) {
-    return markLTR(name, ":@?-#/\\:."); //$NON-NLS-1$
+    return markLTR(name, ":@?-#/\\:."); // $NON-NLS-1$
   }
 
   /**
@@ -83,7 +83,7 @@ public class BasicElementLabels {
    * @return the label of the resource name.
    */
   public static String getResourceName(IResource resource) {
-    return markLTR(resource.getName(), ":."); //$NON-NLS-1$
+    return markLTR(resource.getName(), ":."); // $NON-NLS-1$
   }
 
   /**
@@ -93,7 +93,7 @@ public class BasicElementLabels {
    * @return the label of the resource name.
    */
   public static String getResourceName(String resourceName) {
-    return markLTR(resourceName, ":."); //$NON-NLS-1$
+    return markLTR(resourceName, ":."); // $NON-NLS-1$
   }
 
   /**
@@ -103,6 +103,6 @@ public class BasicElementLabels {
    * @return the version label
    */
   public static String getVersionName(String name) {
-    return markLTR(name, ":."); //$NON-NLS-1$
+    return markLTR(name, ":."); // $NON-NLS-1$
   }
 }

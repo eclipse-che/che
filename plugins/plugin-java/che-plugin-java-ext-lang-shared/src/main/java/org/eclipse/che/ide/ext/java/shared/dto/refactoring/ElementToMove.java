@@ -29,7 +29,7 @@ public interface ElementToMove {
   void setPath(String path);
 
   /** @return true if this element is package and false if compilation unit */
-  //TODO due limitation in DTO generator we can't name method 'isPackage'
+  // TODO due limitation in DTO generator we can't name method 'isPackage'
   boolean isPack();
 
   void setPack(boolean pack);

@@ -170,7 +170,8 @@ public class TraefikCreateContainerInterceptorTest {
 
     traefikCreateContainerInterceptor.invoke(methodInvocation);
 
-    // Check we didn't do any interaction on method invocation if strategy is another one, only proceed
+    // Check we didn't do any interaction on method invocation if strategy is another one, only
+    // proceed
     verify(methodInvocation).proceed();
     verify(methodInvocation, never()).getThis();
   }

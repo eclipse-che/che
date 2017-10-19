@@ -43,16 +43,17 @@ public final class CleanUpRequirements {
       Map<String, String> compilerOptions) {
     Assert.isLegal(
         !requiresFreshAST || requiresAST,
-        "Must not request fresh AST if no AST is required"); //$NON-NLS-1$
+        "Must not request fresh AST if no AST is required"); // $NON-NLS-1$
     Assert.isLegal(
         compilerOptions == null || requiresAST,
-        "Must not provide options if no AST is required"); //$NON-NLS-1$
+        "Must not provide options if no AST is required"); // $NON-NLS-1$
     fRequiresAST = requiresAST;
     fRequiresFreshAST = requiresFreshAST;
     fRequiresChangedRegions = requiresChangedRegions;
 
     fCompilerOptions = compilerOptions;
-    // Make sure that compile warnings are not suppressed since some clean ups work on reported warnings
+    // Make sure that compile warnings are not suppressed since some clean ups work on reported
+    // warnings
     if (fCompilerOptions != null)
       fCompilerOptions.put(JavaCore.COMPILER_PB_SUPPRESS_WARNINGS, JavaCore.DISABLED);
   }

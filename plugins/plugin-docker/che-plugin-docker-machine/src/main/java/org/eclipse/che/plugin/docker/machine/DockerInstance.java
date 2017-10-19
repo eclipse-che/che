@@ -217,7 +217,7 @@ public class DockerInstance extends AbstractInstance {
 
       final String fullRepo = pushParams.getFullRepo();
       commitContainer(fullRepo, LATEST_TAG);
-      //TODO fix this workaround. Docker image is not visible after commit when using swarm
+      // TODO fix this workaround. Docker image is not visible after commit when using swarm
       Thread.sleep(2000);
       final ProgressLineFormatterImpl lineFormatter = new ProgressLineFormatterImpl();
       final String digest =

@@ -31,13 +31,13 @@ public class EFS {
    * The unique identifier constant (value "<code>org.eclipse.core.filesystem</code>") of the Core
    * file system plug-in.
    */
-  public static final String PI_FILE_SYSTEM = "org.eclipse.core.filesystem"; //$NON-NLS-1$
+  public static final String PI_FILE_SYSTEM = "org.eclipse.core.filesystem"; // $NON-NLS-1$
 
   /**
    * The simple identifier constant (value "<code>filesystems</code>") of the extension point of the
    * Core file system plug-in where plug-ins declare file system implementations.
    */
-  public static final String PT_FILE_SYSTEMS = "filesystems"; //$NON-NLS-1$
+  public static final String PT_FILE_SYSTEMS = "filesystems"; // $NON-NLS-1$
 
   /**
    * A constant known to be zero (0), used in operations which take bit flags to indicate that "no
@@ -299,14 +299,14 @@ public class EFS {
    *
    * @see EFS#getLocalFileSystem()
    */
-  public static final String SCHEME_FILE = "file"; //$NON-NLS-1$
+  public static final String SCHEME_FILE = "file"; // $NON-NLS-1$
 
   /**
    * Scheme constant (value "null") indicating the null file system scheme.
    *
    * @see EFS#getNullFileSystem()
    */
-  public static final String SCHEME_NULL = "null"; //$NON-NLS-1$
+  public static final String SCHEME_NULL = "null"; // $NON-NLS-1$
 
   /*
    * Status code definitions

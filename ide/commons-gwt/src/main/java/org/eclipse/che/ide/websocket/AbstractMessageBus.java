@@ -194,13 +194,14 @@ abstract class AbstractMessageBus implements MessageBus {
 
     // http code 202 is "Accepted": The request has been accepted for processing,
     // but the processing has not been completed.
-    // At this point, we ignore this code, since the request might or might not eventually be acted upon,
+    // At this point, we ignore this code, since the request might or might not eventually be acted
+    // upon,
     // as it might be disallowed when processing actually takes place.
     if (message.getResponseCode() == 202) {
       return;
     }
 
-    //TODO Should be revised to remove
+    // TODO Should be revised to remove
     List<Pair> headers = message.getHeaders().toList();
     if (headers != null) {
       for (Pair header : headers) {
@@ -237,7 +238,7 @@ abstract class AbstractMessageBus implements MessageBus {
     List<MessageHandler> subscribersSet = channelToSubscribersMap.get(channel);
     if (subscribersSet != null) {
       for (MessageHandler handler : subscribersSet) {
-        //TODO this is nasty, need refactor this
+        // TODO this is nasty, need refactor this
         if (handler instanceof SubscriptionHandler) {
           ((SubscriptionHandler) handler).onMessage(message);
         } else {

@@ -43,7 +43,7 @@ public class SurroundWithTryCatchAnalyzer extends SurroundWithAnalyzer {
         fExceptions =
             new ITypeBinding[] {
               node.getAST().resolveWellKnownType("java.lang.Exception")
-            }; //$NON-NLS-1$
+            }; // $NON-NLS-1$
       }
     }
   }

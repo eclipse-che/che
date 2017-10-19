@@ -133,7 +133,7 @@ public class SshService extends Service {
           publicKey = item.getString();
           break;
         default:
-          //do nothing
+          // do nothing
       }
     }
 

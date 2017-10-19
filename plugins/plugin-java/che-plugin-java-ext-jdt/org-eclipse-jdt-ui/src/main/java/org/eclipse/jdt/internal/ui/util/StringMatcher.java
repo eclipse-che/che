@@ -19,7 +19,7 @@ public class StringMatcher {
   protected boolean fIgnoreCase;
   protected boolean fHasLeadingStar;
   protected boolean fHasTrailingStar;
-  protected String fSegments[]; //the given pattern is split into * separated segments
+  protected String fSegments[]; // the given pattern is split into * separated segments
 
   /* boundary value beyond which we don't need to search in the text */
   protected int fBound = 0;
@@ -27,8 +27,8 @@ public class StringMatcher {
   protected static final char fSingleWildCard = '\u0000';
 
   public static class Position {
-    int start; //inclusive
-    int end; //exclusive
+    int start; // inclusive
+    int end; // exclusive
 
     public Position(int start, int end) {
       this.start = start;
@@ -104,7 +104,7 @@ public class StringMatcher {
     }
 
     int segCount = fSegments.length;
-    if (segCount == 0) //pattern contains only '*'(s)
+    if (segCount == 0) // pattern contains only '*'(s)
     return new Position(start, end);
 
     int curPos = start;
@@ -211,9 +211,9 @@ public class StringMatcher {
   }
   /** Parses the given pattern into segments seperated by wildcard '*' characters. */
   private void parseWildCards() {
-    if (fPattern.startsWith("*")) //$NON-NLS-1$
+    if (fPattern.startsWith("*")) // $NON-NLS-1$
     fHasLeadingStar = true;
-    if (fPattern.endsWith("*")) { //$NON-NLS-1$
+    if (fPattern.endsWith("*")) { // $NON-NLS-1$
       /* make sure it's not an escaped wildcard */
       if (fLength > 1 && fPattern.charAt(fLength - 2) != '\\') {
         fHasTrailingStar = true;
@@ -274,7 +274,7 @@ public class StringMatcher {
    * @param end the stopping point of search, exclusive
    * @return the starting index in the text of the pattern , or -1 if not found
    */
-  protected int posIn(String text, int start, int end) { //no wild card in pattern
+  protected int posIn(String text, int start, int end) { // no wild card in pattern
     int max = end - fLength;
 
     if (!fIgnoreCase) {

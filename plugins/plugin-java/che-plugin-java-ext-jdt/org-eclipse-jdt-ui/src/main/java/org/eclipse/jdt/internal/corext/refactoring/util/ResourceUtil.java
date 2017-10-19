@@ -36,7 +36,7 @@ public class ResourceUtil {
     else return null;
   }
 
-  //----- other ------------------------------
+  // ----- other ------------------------------
 
   public static IResource getResource(Object o) {
     if (o instanceof IResource) return (IResource) o;

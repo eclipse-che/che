@@ -53,7 +53,7 @@ public class RecipePermissionsFilter extends CheMethodInvokerFilter {
         action = READ;
 
         if (currentSubject.hasPermission(DOMAIN_ID, recipeId, SEARCH)) {
-          //allow to read recipe if user has 'search' permission
+          // allow to read recipe if user has 'search' permission
           return;
         }
         break;
@@ -71,7 +71,7 @@ public class RecipePermissionsFilter extends CheMethodInvokerFilter {
 
       case "createRecipe":
       case "searchRecipes":
-        //available for all
+        // available for all
         return;
       default:
         throw new ForbiddenException("The user does not have permission to perform this operation");

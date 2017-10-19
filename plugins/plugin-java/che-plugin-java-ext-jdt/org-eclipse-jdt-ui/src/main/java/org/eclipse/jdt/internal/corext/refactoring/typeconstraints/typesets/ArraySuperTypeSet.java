@@ -206,6 +206,6 @@ public class ArraySuperTypeSet extends ArrayTypeSet {
         + fID
         + ": array-super("
         + fElemTypeSet
-        + ")}"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        + ")}"; // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
   }
 }

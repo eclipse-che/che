@@ -101,7 +101,7 @@ public class JavaWordFinder {
         }
         return new Region(offset, 0);
       } else if (start == offset) {
-        return new Region(start, end - start); //XXX: probably unused...
+        return new Region(start, end - start); // XXX: probably unused...
       } else {
         return new Region(start + 1, end - start - 1);
       }

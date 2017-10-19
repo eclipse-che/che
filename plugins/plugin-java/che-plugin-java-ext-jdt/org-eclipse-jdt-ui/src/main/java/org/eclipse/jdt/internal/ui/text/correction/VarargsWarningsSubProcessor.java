@@ -74,12 +74,12 @@ public class VarargsWarningsSubProcessor {
       MarkerAnnotation annotation = ast.newMarkerAnnotation();
       String importString =
           createImportRewrite((CompilationUnit) fMethodDeclaration.getRoot())
-              .addImport("java.lang.SafeVarargs"); //$NON-NLS-1$
+              .addImport("java.lang.SafeVarargs"); // $NON-NLS-1$
       annotation.setTypeName(ast.newName(importString));
       listRewrite.insertFirst(annotation, null);
 
       // set up linked mode
-      addLinkedPosition(rewrite.track(annotation), true, "annotation"); //$NON-NLS-1$
+      addLinkedPosition(rewrite.track(annotation), true, "annotation"); // $NON-NLS-1$
 
       return rewrite;
     }
@@ -167,7 +167,7 @@ public class VarargsWarningsSubProcessor {
       ASTNode node = iterator.next();
       if (node instanceof MarkerAnnotation) {
         annotation = (MarkerAnnotation) node;
-        if ("SafeVarargs".equals(annotation.resolveAnnotationBinding().getName())) { //$NON-NLS-1$
+        if ("SafeVarargs".equals(annotation.resolveAnnotationBinding().getName())) { // $NON-NLS-1$
           break;
         }
       }
@@ -182,7 +182,7 @@ public class VarargsWarningsSubProcessor {
     Image image =
         JavaPluginImages.get(
             JavaPluginImages
-                .IMG_TOOL_DELETE); //JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+                .IMG_TOOL_DELETE); // JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
     ASTRewriteCorrectionProposal proposal =
         new ASTRewriteCorrectionProposal(
             label,

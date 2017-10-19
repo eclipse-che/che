@@ -1040,7 +1040,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
   @Test
   public void testAddParenthesesForExpression7() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=338675
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=338675
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test1;\n");
@@ -1061,7 +1061,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
   @Test
   public void testAddParenthesesForExpression8() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=338675
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=338675
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test1;\n");
@@ -1154,7 +1154,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
   @Test
   public void testInverseIfCondition3() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=75109
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=75109
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test1;\n");
@@ -1195,7 +1195,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
   @Test
   public void testInverseIfCondition4() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=74580
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=74580
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test1;\n");
@@ -1240,7 +1240,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
   @Test
   public void testInverseIfCondition5() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=74580
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=74580
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test1;\n");
@@ -1282,7 +1282,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
   @Test
   public void testInverseIfCondition_bug119251() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=119251
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=119251
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test;\n");
@@ -1323,7 +1323,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
   @Test
   public void testInverseIfCondition6() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=119251
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=119251
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test;\n");
@@ -1364,7 +1364,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
   @Test
   public void testInverseIfConditionUnboxing() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=297645
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=297645
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test;\n");
@@ -1439,7 +1439,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
   @Test
   public void testInverseIfCondition_bug117960() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=117960
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=117960
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test;\n");
@@ -1478,7 +1478,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
   @Test
   public void testInverseIfCondition_bug388074() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=388074
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=388074
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test1;\n");
@@ -1517,7 +1517,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
   @Test
   public void testInverseConditionalStatement1() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=74746
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=74746
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test1;\n");
@@ -1548,7 +1548,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
   @Test
   public void testInverseConditionalStatement2() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=74746
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=74746
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test1;\n");
@@ -1579,7 +1579,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
   @Test
   public void testInnerAndOuterIfConditions1() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=74746
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=74746
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test1;\n");
@@ -1740,7 +1740,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
   @Test
   public void testExchangeOperands1() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=74746
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=74746
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test1;\n");
@@ -2082,7 +2082,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
   @Test
   public void testAssignAndCast1() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=75066
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=75066
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test1;\n");
@@ -2117,7 +2117,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
   @Test
   public void testAssignAndCast2() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=75066
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=75066
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test1;\n");
@@ -2672,7 +2672,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
   @Test
   public void testReplaceReturnConditionWithIf4() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=112443
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=112443
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test1;\n");
@@ -3347,7 +3347,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
   @Test
   public void testInverseCondition1() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=334876
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=334876
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test1;\n");
@@ -4169,7 +4169,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
   @Test
   public void testConvertSwitchToIfBug252040_1() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=252040
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=252040
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test1;\n");
@@ -4224,7 +4224,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
   @Test
   public void testConvertSwitchToIfBug252040_2() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=252040
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=252040
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test1;\n");
@@ -4876,7 +4876,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
   @Test
   public void testConvertIfToSwitchBug392847() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=392847
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=392847
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test1;\n");

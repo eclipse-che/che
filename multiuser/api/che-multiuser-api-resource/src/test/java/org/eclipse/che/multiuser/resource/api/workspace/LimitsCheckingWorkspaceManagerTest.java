@@ -60,7 +60,7 @@ public class LimitsCheckingWorkspaceManagerTest {
   @Test
   public void shouldUseRamOfSpecifiedEnvironmentOnCheckingAvailabilityOfRamResource()
       throws Exception {
-    //given
+    // given
     LimitsCheckingWorkspaceManager manager =
         managerBuilder()
             .setResourceUsageManager(resourceUsageManager)
@@ -72,10 +72,10 @@ public class LimitsCheckingWorkspaceManagerTest {
     WorkspaceConfig config = createConfig("3gb");
     String envToStart = config.getDefaultEnv();
 
-    //when
+    // when
     manager.checkRamResourcesAvailability(ACCOUNT_ID, NAMESPACE, config, envToStart);
 
-    //then
+    // then
     verify(environmentRamCalculator).calculate(config.getEnvironments().get(envToStart));
     verify(resourceUsageManager)
         .checkResourcesAvailability(
@@ -86,7 +86,7 @@ public class LimitsCheckingWorkspaceManagerTest {
   @Test
   public void shouldUseRamOfDefaultEnvironmentOnCheckingAvailabilityOfRamResourceWhen()
       throws Exception {
-    //given
+    // given
     LimitsCheckingWorkspaceManager manager =
         managerBuilder()
             .setResourceUsageManager(resourceUsageManager)
@@ -97,10 +97,10 @@ public class LimitsCheckingWorkspaceManagerTest {
 
     WorkspaceConfig config = createConfig("3gb");
 
-    //when
+    // when
     manager.checkRamResourcesAvailability(ACCOUNT_ID, NAMESPACE, config, null);
 
-    //then
+    // then
     verify(environmentRamCalculator)
         .calculate(config.getEnvironments().get(config.getDefaultEnv()));
     verify(resourceUsageManager)
@@ -129,7 +129,7 @@ public class LimitsCheckingWorkspaceManagerTest {
         .when(resourceUsageManager)
         .getUsedResources(any());
 
-    //given
+    // given
     LimitsCheckingWorkspaceManager manager =
         managerBuilder()
             .setResourceUsageManager(resourceUsageManager)
@@ -140,21 +140,21 @@ public class LimitsCheckingWorkspaceManagerTest {
 
     WorkspaceConfig config = createConfig("3gb");
 
-    //when
+    // when
     manager.checkRamResourcesAvailability(ACCOUNT_ID, NAMESPACE, config, null);
   }
 
   @Test
   public void shouldNotThrowLimitExceedExceptionIfAccountHasEnoughAvailableWorkspaceResource()
       throws Exception {
-    //given
+    // given
     LimitsCheckingWorkspaceManager manager =
         managerBuilder().setResourceUsageManager(resourceUsageManager).build();
 
-    //when
+    // when
     manager.checkWorkspaceResourceAvailability(ACCOUNT_ID);
 
-    //then
+    // then
     verify(resourceUsageManager)
         .checkResourcesAvailability(
             ACCOUNT_ID,
@@ -168,7 +168,7 @@ public class LimitsCheckingWorkspaceManagerTest {
   )
   public void shouldThrowLimitExceedExceptionIfAccountDoesNotHaveEnoughAvailableWorkspaceResource()
       throws Exception {
-    //given
+    // given
     doThrow(new NoEnoughResourcesException(emptyList(), emptyList(), emptyList()))
         .when(resourceUsageManager)
         .checkResourcesAvailability(any(), any());
@@ -180,21 +180,21 @@ public class LimitsCheckingWorkspaceManagerTest {
     LimitsCheckingWorkspaceManager manager =
         managerBuilder().setResourceUsageManager(resourceUsageManager).build();
 
-    //when
+    // when
     manager.checkWorkspaceResourceAvailability(ACCOUNT_ID);
   }
 
   @Test
   public void shouldNotThrowLimitExceedExceptionIfAccountHasEnoughAvailableRuntimeResource()
       throws Exception {
-    //given
+    // given
     LimitsCheckingWorkspaceManager manager =
         managerBuilder().setResourceUsageManager(resourceUsageManager).build();
 
-    //when
+    // when
     manager.checkRuntimeResourceAvailability(ACCOUNT_ID);
 
-    //then
+    // then
     verify(resourceUsageManager)
         .checkResourcesAvailability(
             ACCOUNT_ID,
@@ -207,7 +207,7 @@ public class LimitsCheckingWorkspaceManagerTest {
   )
   public void shouldThrowLimitExceedExceptionIfAccountDoesNotHaveEnoughAvailableRuntimeResource()
       throws Exception {
-    //given
+    // given
     doThrow(new NoEnoughResourcesException(emptyList(), emptyList(), emptyList()))
         .when(resourceUsageManager)
         .checkResourcesAvailability(any(), any());
@@ -217,7 +217,7 @@ public class LimitsCheckingWorkspaceManagerTest {
     LimitsCheckingWorkspaceManager manager =
         managerBuilder().setResourceUsageManager(resourceUsageManager).build();
 
-    //when
+    // when
     manager.checkRuntimeResourceAvailability(ACCOUNT_ID);
   }
 

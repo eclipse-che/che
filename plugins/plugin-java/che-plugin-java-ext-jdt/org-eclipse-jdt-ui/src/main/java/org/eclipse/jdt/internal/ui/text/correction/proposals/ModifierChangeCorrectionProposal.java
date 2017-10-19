@@ -70,7 +70,7 @@ public class ModifierChangeCorrectionProposal extends LinkedCorrectionProposal {
     if (boundNode != null) {
       declNode = boundNode; // is same CU
     } else {
-      //setSelectionDescription(selectionDescription);
+      // setSelectionDescription(selectionDescription);
       CompilationUnit newRoot = ASTResolving.createQuickFixAST(getCompilationUnit(), null);
       declNode = newRoot.findDeclaringNode(fBinding.getKey());
     }
@@ -121,7 +121,7 @@ public class ModifierChangeCorrectionProposal extends LinkedCorrectionProposal {
             // add body
             ICompilationUnit unit = getCompilationUnit();
             String delimiter = unit.findRecommendedLineSeparator();
-            String bodyStatement = ""; //$NON-NLS-1$
+            String bodyStatement = ""; // $NON-NLS-1$
 
             Block body = ast.newBlock();
             rewrite.set(methodDecl, MethodDeclaration.BODY_PROPERTY, body, null);
@@ -160,7 +160,7 @@ public class ModifierChangeCorrectionProposal extends LinkedCorrectionProposal {
           listRewrite.setModifiers(fIncludedModifiers, fExcludedModifiers, null);
 
       LinkedProposalPositionGroup positionGroup =
-          new LinkedProposalPositionGroup("group"); //$NON-NLS-1$
+          new LinkedProposalPositionGroup("group"); // $NON-NLS-1$
       positionGroup.addPosition(trackedDeclNode);
       getLinkedProposalModel().addPositionGroup(positionGroup);
 

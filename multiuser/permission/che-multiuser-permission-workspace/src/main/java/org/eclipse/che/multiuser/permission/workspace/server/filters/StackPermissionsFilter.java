@@ -69,7 +69,7 @@ public class StackPermissionsFilter extends CheMethodInvokerFilter {
         action = READ;
 
         if (currentSubject.hasPermission(DOMAIN_ID, stackId, SEARCH)) {
-          //allow to read stack if user has 'search' permission
+          // allow to read stack if user has 'search' permission
           return;
         }
         break;
@@ -92,7 +92,7 @@ public class StackPermissionsFilter extends CheMethodInvokerFilter {
 
       case "createStack":
       case "searchStacks":
-        //available for all
+        // available for all
         return;
       default:
         throw new ForbiddenException("The user does not have permission to perform this operation");

@@ -52,7 +52,7 @@ import org.eclipse.che.providers.DynaProvider;
  *
  * @author Dmitry Shnurenko
  */
-//TODO need rewrite this, remove direct dependency on PerspectiveViewImpl and other GWT Widgets
+// TODO need rewrite this, remove direct dependency on PerspectiveViewImpl and other GWT Widgets
 public abstract class AbstractPerspective
     implements Presenter,
         Perspective,
@@ -466,7 +466,7 @@ public abstract class AbstractPerspective
       }
     }
 
-    //hide part stack if it has no parts
+    // hide part stack if it has no parts
     if (partStack.getParts().isEmpty()) {
       controller.setHidden(true);
       return;

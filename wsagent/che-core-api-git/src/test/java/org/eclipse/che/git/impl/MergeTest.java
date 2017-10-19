@@ -55,12 +55,12 @@ public class MergeTest {
     dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
   )
   public void testMergeNoChanges(GitConnectionFactory connectionFactory) throws Exception {
-    //given
+    // given
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
     connection.branchCreate(branchName, null);
-    //when
+    // when
     MergeResult mergeResult = connection.merge(branchName);
-    //then
+    // then
     assertEquals(mergeResult.getMergeStatus(), MergeResult.MergeStatus.ALREADY_UP_TO_DATE);
   }
 
@@ -69,7 +69,7 @@ public class MergeTest {
     dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
   )
   public void testMerge(GitConnectionFactory connectionFactory) throws Exception {
-    //given
+    // given
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
     connection.checkout(CheckoutParams.create(branchName).withCreateNew(true));
     File file = addFile(connection, "t-merge", "aaa\n");
@@ -77,9 +77,9 @@ public class MergeTest {
     connection.add(AddParams.create(new ArrayList<>(singletonList("."))));
     connection.commit(CommitParams.create("add file in new branch"));
     connection.checkout(CheckoutParams.create("master"));
-    //when
+    // when
     MergeResult mergeResult = connection.merge(branchName);
-    //then
+    // then
     assertEquals(mergeResult.getMergeStatus(), MergeResult.MergeStatus.FAST_FORWARD);
     assertTrue(file.exists());
     assertEquals(Files.toString(file, Charsets.UTF_8), "aaa\n");
@@ -93,7 +93,7 @@ public class MergeTest {
     dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
   )
   public void testMergeConflict(GitConnectionFactory connectionFactory) throws Exception {
-    //given
+    // given
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
     connection.checkout(CheckoutParams.create(branchName).withCreateNew(true));
     addFile(connection, "t-merge-conflict", "aaa\n");
@@ -104,9 +104,9 @@ public class MergeTest {
     addFile(connection, "t-merge-conflict", "bbb\n");
     connection.add(AddParams.create(new ArrayList<>(singletonList("."))));
     connection.commit(CommitParams.create("add file in new branch"));
-    //when
+    // when
     MergeResult mergeResult = connection.merge(branchName);
-    //then
+    // then
     List<String> conflicts = mergeResult.getConflicts();
     assertEquals(conflicts.size(), 1);
     assertEquals(conflicts.get(0), "t-merge-conflict");
@@ -125,20 +125,26 @@ public class MergeTest {
   }
 
   //        TODO Uncomment as soon as IDEX-1776 is fixed
-  //    @Test(dataProvider = "GitConnectionFactory", dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
-  //    public void testFailed(GitConnectionFactory connectionFactory) throws GitException, IOException {
+  //    @Test(dataProvider = "GitConnectionFactory", dataProviderClass =
+  // org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
+  //    public void testFailed(GitConnectionFactory connectionFactory) throws GitException,
+  // IOException {
   //        //given
-  //        GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
+  //        GitConnection connection = connectToGitRepositoryWithContent(connectionFactory,
+  // repository);
   //
-  //        connection.checkout(newDto(CheckoutRequest.class).withName(branchName).withCreateNew(true));
+  //
+  // connection.checkout(newDto(CheckoutRequest.class).withName(branchName).withCreateNew(true));
   //        addFile(connection, "t-merge-failed", "aaa\n");
-  //        connection.add(newDto(AddRequest.class).withFilepattern(new ArrayList<>(Arrays.asList("."))));
+  //        connection.add(newDto(AddRequest.class).withFilepattern(new
+  // ArrayList<>(Arrays.asList("."))));
   //        connection.commit(newDto(CommitRequest.class).withMessage("add file in new branch"));
   //
   //        connection.checkout(newDto(CheckoutRequest.class).withName("master"));
   //        addFile(connection, "t-merge-failed", "bbb\n");
   //        //when
-  //        MergeResult mergeResult = connection.merge(newDto(MergeRequest.class).withCommit(branchName));
+  //        MergeResult mergeResult =
+  // connection.merge(newDto(MergeRequest.class).withCommit(branchName));
   //        //then
   //        assertEquals(mergeResult.getMergeStatus(), MergeResult.MergeStatus.FAILED);
   //        assertEquals(mergeResult.getFailed().size(), 1);

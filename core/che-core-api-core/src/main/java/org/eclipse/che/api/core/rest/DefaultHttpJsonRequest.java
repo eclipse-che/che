@@ -189,7 +189,7 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
     final boolean hasQueryParams = parameters != null && !parameters.isEmpty();
     if (hasQueryParams || authToken != null) {
       final UriBuilder ub = UriBuilder.fromUri(url);
-      //remove sensitive information from url.
+      // remove sensitive information from url.
       ub.replaceQueryParam("token", EMPTY_ARRAY);
 
       if (hasQueryParams) {
@@ -204,7 +204,7 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
     conn.setReadTimeout(timeout > 0 ? timeout : 60000);
     try {
       conn.setRequestMethod(method);
-      //drop a hint for server side that we want to receive application/json
+      // drop a hint for server side that we want to receive application/json
       conn.addRequestProperty(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
       if (!isNullOrEmpty(authorizationHeaderValue)) {
         conn.setRequestProperty(HttpHeaders.AUTHORIZATION, authorizationHeaderValue);
@@ -215,8 +215,8 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
         conn.addRequestProperty(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
         conn.setDoOutput(true);
 
-        if (HttpMethod.DELETE.equals(
-            method)) { //to avoid jdk bug described here http://bugs.java.com/view_bug.do?bug_id=7157360
+        if (HttpMethod.DELETE.equals(method)) { // to avoid jdk bug described here
+          // http://bugs.java.com/view_bug.do?bug_id=7157360
           conn.setRequestMethod(HttpMethod.POST);
           conn.setRequestProperty("X-HTTP-Method-Override", HttpMethod.DELETE);
         }

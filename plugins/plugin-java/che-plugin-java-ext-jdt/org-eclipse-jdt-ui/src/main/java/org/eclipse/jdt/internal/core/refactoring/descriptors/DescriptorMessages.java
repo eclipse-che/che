@@ -14,7 +14,7 @@ import org.eclipse.osgi.util.NLS;
 public class DescriptorMessages extends NLS {
 
   private static final String BUNDLE_NAME =
-      "org.eclipse.jdt.internal.core.refactoring.descriptors.DescriptorMessages"; //$NON-NLS-1$
+      "org.eclipse.jdt.internal.core.refactoring.descriptors.DescriptorMessages"; // $NON-NLS-1$
 
   public static String JavaRefactoringDescriptor_no_description;
 

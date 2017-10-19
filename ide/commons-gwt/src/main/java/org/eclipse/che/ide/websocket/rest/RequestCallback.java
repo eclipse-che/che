@@ -30,7 +30,8 @@ import org.eclipse.che.ide.websocket.rest.exceptions.UnauthorizedException;
 public abstract class RequestCallback<T> {
 
   // http code 207 is "Multi-Status"
-  // IE misinterpreting HTTP status code 204 as 1223 (http://www.mail-archive.com/jquery-en@googlegroups.com/msg13093.html)
+  // IE misinterpreting HTTP status code 204 as 1223
+  // (http://www.mail-archive.com/jquery-en@googlegroups.com/msg13093.html)
   private static final int[] DEFAULT_SUCCESS_CODES = {
     Response.SC_OK, Response.SC_CREATED, Response.SC_NO_CONTENT, 207, 1223
   };

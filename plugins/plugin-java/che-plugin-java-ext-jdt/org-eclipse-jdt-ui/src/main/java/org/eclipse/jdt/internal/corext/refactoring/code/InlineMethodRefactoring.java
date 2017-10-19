@@ -85,8 +85,8 @@ import org.eclipse.text.edits.TextEditGroup;
  */
 public class InlineMethodRefactoring extends Refactoring {
 
-  private static final String ATTRIBUTE_MODE = "mode"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_DELETE = "delete"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_MODE = "mode"; // $NON-NLS-1$
+  private static final String ATTRIBUTE_DELETE = "delete"; // $NON-NLS-1$
 
   public static class Mode {
     private Mode() {}
@@ -259,7 +259,7 @@ public class InlineMethodRefactoring extends Refactoring {
 
   @Override
   public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
-    pm.beginTask("", 20); //$NON-NLS-1$
+    pm.beginTask("", 20); // $NON-NLS-1$
     fChangeManager = new TextChangeManager();
     RefactoringStatus result = new RefactoringStatus();
     fSourceProvider.initialize();
@@ -289,7 +289,7 @@ public class InlineMethodRefactoring extends Refactoring {
             filesToBeModified, new SubProgressMonitor(pm, 1)));
     checkOverridden(result, new SubProgressMonitor(pm, 4));
     IProgressMonitor sub = new SubProgressMonitor(pm, 15);
-    sub.beginTask("", units.length * 3); //$NON-NLS-1$
+    sub.beginTask("", units.length * 3); // $NON-NLS-1$
     for (int c = 0; c < units.length; c++) {
       ICompilationUnit unit = units[c];
       sub.subTask(
@@ -429,7 +429,7 @@ public class InlineMethodRefactoring extends Refactoring {
         JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION,
         new Integer(fSelectionStart).toString()
             + " "
-            + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+            + new Integer(fSelectionLength).toString()); // $NON-NLS-1$
     arguments.put(ATTRIBUTE_DELETE, Boolean.valueOf(fDeleteSource).toString());
     arguments.put(ATTRIBUTE_MODE, new Integer(fCurrentMode == Mode.INLINE_ALL ? 1 : 0).toString());
     return new DynamicValidationRefactoringChange(
@@ -506,7 +506,7 @@ public class InlineMethodRefactoring extends Refactoring {
 
   private void checkOverridden(RefactoringStatus status, IProgressMonitor pm)
       throws JavaModelException {
-    pm.beginTask("", 9); //$NON-NLS-1$
+    pm.beginTask("", 9); // $NON-NLS-1$
     pm.setTaskName(RefactoringCoreMessages.InlineMethodRefactoring_checking_overridden);
     MethodDeclaration decl = fSourceProvider.getDeclaration();
     IMethod method = (IMethod) decl.resolveBinding().getJavaElement();
@@ -521,7 +521,7 @@ public class InlineMethodRefactoring extends Refactoring {
         status, method, hierarchy.getAllSuperclasses(type), new SubProgressMonitor(pm, 1));
     checkSuperInterfaces(
         status, method, hierarchy.getAllSuperInterfaces(type), new SubProgressMonitor(pm, 1));
-    pm.setTaskName(""); //$NON-NLS-1$
+    pm.setTaskName(""); // $NON-NLS-1$
   }
 
   private void checkSubTypes(
@@ -556,7 +556,7 @@ public class InlineMethodRefactoring extends Refactoring {
 
   private void checkTypes(
       RefactoringStatus result, IMethod method, IType[] types, String key, IProgressMonitor pm) {
-    pm.beginTask("", types.length); //$NON-NLS-1$
+    pm.beginTask("", types.length); // $NON-NLS-1$
     for (int i = 0; i < types.length; i++) {
       pm.worked(1);
       IMethod[] overridden = types[i].findMethods(method);

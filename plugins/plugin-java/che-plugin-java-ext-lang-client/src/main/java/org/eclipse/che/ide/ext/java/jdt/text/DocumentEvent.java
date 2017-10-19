@@ -28,7 +28,7 @@ public class DocumentEvent {
   public int fLength;
 
   /** Text inserted into the document */
-  public String fText = ""; //$NON-NLS-1$
+  public String fText = ""; // $NON-NLS-1$
 
   /**
    * The modification stamp of the document when firing this event.
@@ -121,15 +121,15 @@ public class DocumentEvent {
    */
   public String toString() {
     StringBuffer buffer = new StringBuffer();
-    buffer.append("offset: "); //$NON-NLS-1$
+    buffer.append("offset: "); // $NON-NLS-1$
     buffer.append(fOffset);
-    buffer.append(", length: "); //$NON-NLS-1$
+    buffer.append(", length: "); // $NON-NLS-1$
     buffer.append(fLength);
-    buffer.append(", timestamp: "); //$NON-NLS-1$
+    buffer.append(", timestamp: "); // $NON-NLS-1$
     buffer.append(fModificationStamp);
-    buffer.append("\ntext:>"); //$NON-NLS-1$
+    buffer.append("\ntext:>"); // $NON-NLS-1$
     buffer.append(fText);
-    buffer.append("<\n"); //$NON-NLS-1$
+    buffer.append("<\n"); // $NON-NLS-1$
     return buffer.toString();
   }
 }

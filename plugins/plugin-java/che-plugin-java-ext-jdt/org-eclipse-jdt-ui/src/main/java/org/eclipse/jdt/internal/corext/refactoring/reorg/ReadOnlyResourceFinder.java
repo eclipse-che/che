@@ -78,7 +78,7 @@ class ReadOnlyResourceFinder {
       case IJavaElement.CLASS_FILE:
       case IJavaElement.COMPILATION_UNIT:
         IResource resource = ReorgUtils.getResource(javaElement);
-        //if this assert fails, it means that a precondition is missing
+        // if this assert fails, it means that a precondition is missing
         Assert.isTrue(resource instanceof IFile);
         return (Resources.isReadOnly(resource));
       case IJavaElement.PACKAGE_FRAGMENT:
@@ -116,7 +116,7 @@ class ReadOnlyResourceFinder {
       case IJavaElement.TYPE:
         return false;
       default:
-        Assert.isTrue(false); //not handled here
+        Assert.isTrue(false); // not handled here
         return false;
     }
   }
@@ -131,9 +131,9 @@ class ReadOnlyResourceFinder {
 
   private static boolean hasReadOnlyResourcesAndSubResources(IResource resource)
       throws CoreException {
-    if (resource
-        .isLinked()) //we don't want to count these because we never actually delete linked resources
-    return false;
+    if (resource.isLinked()) // we don't want to count these because we never actually delete linked
+      // resources
+      return false;
     if (Resources.isReadOnly(resource)) return true;
     if (resource instanceof IContainer)
       return hasReadOnlyResourcesAndSubResources(((IContainer) resource).members());

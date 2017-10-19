@@ -39,7 +39,7 @@ public class FileInfo implements IFileInfo {
   private long length = EFS.NONE;
 
   /** The file name. */
-  private String name = ""; //$NON-NLS-1$
+  private String name = ""; // $NON-NLS-1$
 
   /** The target file name if this is a symbolic link */
   private String linkTarget = null;
@@ -77,7 +77,7 @@ public class FileInfo implements IFileInfo {
     try {
       return super.clone();
     } catch (CloneNotSupportedException e) {
-      //we know this object is cloneable
+      // we know this object is cloneable
       return null;
     }
   }

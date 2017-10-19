@@ -97,8 +97,7 @@ public class DefaultServicesStartStrategy {
     while (!dependencies.isEmpty()) {
       int previousSize = dependencies.size();
       for (Iterator<Map.Entry<String, Set<String>>> it = dependencies.entrySet().iterator();
-          it.hasNext();
-          ) {
+          it.hasNext(); ) {
         // process not yet processed machines only
         Map.Entry<String, Set<String>> serviceEntry = it.next();
         String service = serviceEntry.getKey();
@@ -117,7 +116,7 @@ public class DefaultServicesStartStrategy {
                     .stream()
                     .max((o1, o2) -> weights.get(o1).compareTo(weights.get(o2)));
             // optional can't be empty because size of the list is checked above
-            //noinspection OptionalGetWithoutIsPresent
+            // noinspection OptionalGetWithoutIsPresent
             weights.put(service, weights.get(maxWeight.get()) + 1);
             it.remove();
           }

@@ -21,7 +21,7 @@ public final class CollectionElementVariable2 extends ConstraintVariable2 {
   private final String fTypeVariableKey;
   private final int fDeclarationTypeVariableIndex;
 
-  //TODO: make a 'TypedCollectionElementVariable extends TypeConstraintVariable2'
+  // TODO: make a 'TypedCollectionElementVariable extends TypeConstraintVariable2'
   // iff Collection reference already has type parameter in source
   /**
    * @param parentCv the parent constraint variable
@@ -87,6 +87,6 @@ public final class CollectionElementVariable2 extends ConstraintVariable2 {
         + fParentCv.toString()
         + ", "
         + fTypeVariableKey
-        + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        + "]"; // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
   }
 }

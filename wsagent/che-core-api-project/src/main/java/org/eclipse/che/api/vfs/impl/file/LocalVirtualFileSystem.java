@@ -383,8 +383,10 @@ public class LocalVirtualFileSystem implements VirtualFileSystem {
 
   private void doCopy(LocalVirtualFile from, LocalVirtualFile to) throws ServerException {
     try {
-      // First copy metadata (properties) for source. If we do in this way and fail cause to any i/o or other error client
-      // will see error and may try to copy again. But if we successfully copy tree (or single file) and then fail to copy
+      // First copy metadata (properties) for source. If we do in this way and fail cause to any i/o
+      // or other error client
+      // will see error and may try to copy again. But if we successfully copy tree (or single file)
+      // and then fail to copy
       // metadata client may not try to copy again because copy destination already exists.
 
       final File fromMetadataFile = getMetadataIoFile(from.getPath());

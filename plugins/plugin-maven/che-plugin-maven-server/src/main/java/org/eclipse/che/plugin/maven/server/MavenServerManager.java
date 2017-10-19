@@ -97,7 +97,7 @@ public class MavenServerManager extends RmiObjectWrapper<MavenRemoteServer> {
       @Override
       protected MavenServer create() throws RemoteException {
         MavenSettings mavenSettings = new MavenSettings();
-        //TODO add more user settings
+        // TODO add more user settings
         mavenSettings.setMavenHome(new File(System.getenv("M2_HOME")));
         mavenSettings.setUserSettings(
             new File(System.getProperty("user.home"), ".m2/settings.xml"));
@@ -198,7 +198,7 @@ public class MavenServerManager extends RmiObjectWrapper<MavenRemoteServer> {
     parameters.setJavaExecutable(System.getProperties().getProperty("java.home") + "/bin/java");
     parameters.setWorkingDirectory(System.getProperty("java.io.tmpdir"));
     parameters.setMainClassName(MAVEN_SERVER_MAIN);
-    //TODO read and set MAVEN_OPTS system properties
+    // TODO read and set MAVEN_OPTS system properties
 
     List<String> classPath = new ArrayList<>();
     addDirToClasspath(classPath, new File(mavenServerPath));
@@ -262,7 +262,7 @@ public class MavenServerManager extends RmiObjectWrapper<MavenRemoteServer> {
     @Override
     public void artifactDownloaded(File file, String relativePath) throws RemoteException {
       System.out.println("On download - " + relativePath);
-      //todo notify browser about that
+      // todo notify browser about that
     }
   }
 }

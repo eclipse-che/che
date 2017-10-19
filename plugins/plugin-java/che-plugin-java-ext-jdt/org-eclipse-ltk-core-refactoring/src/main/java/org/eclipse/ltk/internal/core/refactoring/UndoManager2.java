@@ -275,7 +275,7 @@ public class UndoManager2 implements IUndoManager {
     }
   }
 
-  //---- event firing methods -------------------------------------------------
+  // ---- event firing methods -------------------------------------------------
 
   private void fireAboutToPerformChange(final Change change) {
     if (fListeners == null) return;
@@ -349,7 +349,7 @@ public class UndoManager2 implements IUndoManager {
     }
   }
 
-  //---- testing methods ---------------------------------------------
+  // ---- testing methods ---------------------------------------------
 
   public boolean testHasNumberOfUndos(int number) {
     return fOperationHistory.getUndoHistory(RefactoringCorePlugin.getUndoContext()).length

@@ -45,7 +45,7 @@ public class URIUtil {
   public static URI toURI(IPath path) {
     if (path == null) return null;
     if (path.isAbsolute()) return toURI(path.toFile().getAbsolutePath(), true);
-    //Must use the relativize method to properly construct a relative URI
+    // Must use the relativize method to properly construct a relative URI
     URI base = toURI(Path.ROOT.setDevice(path.getDevice()));
     return base.relativize(toURI(path.makeAbsolute()));
   }
@@ -68,12 +68,12 @@ public class URIUtil {
     if (File.separatorChar != '/') pathString = pathString.replace(File.separatorChar, '/');
     final int length = pathString.length();
     StringBuffer pathBuf = new StringBuffer(length + 1);
-    //mark if path is relative
+    // mark if path is relative
     if (length > 0 && (pathString.charAt(0) != '/') && forceAbsolute) {
       pathBuf.append('/');
     }
-    //additional double-slash for UNC paths to distinguish from host separator
-    if (pathString.startsWith("//")) //$NON-NLS-1$
+    // additional double-slash for UNC paths to distinguish from host separator
+    if (pathString.startsWith("//")) // $NON-NLS-1$
     pathBuf.append('/').append('/');
     pathBuf.append(pathString);
     try {
@@ -83,7 +83,7 @@ public class URIUtil {
       }
       return new URI(scheme, null, pathBuf.toString(), null);
     } catch (URISyntaxException e) {
-      //try java.io implementation
+      // try java.io implementation
       return new File(pathString).toURI();
     }
   }

@@ -155,7 +155,8 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 
   @Override
   protected boolean createReturnFlowInfo(ReturnStatement node) {
-    // Make sure that the whole return statement is located after the selection. There can be cases like
+    // Make sure that the whole return statement is located after the selection. There can be cases
+    // like
     // return i + [x + 10] * 10; In this case we must not create a return info node.
     return node.getStartPosition() >= fSelection.getInclusiveEnd();
   }

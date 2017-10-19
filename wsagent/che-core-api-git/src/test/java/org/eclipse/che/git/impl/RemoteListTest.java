@@ -54,19 +54,19 @@ public class RemoteListTest {
   )
   public void testRemoteList(GitConnectionFactory connectionFactory)
       throws ServerException, URISyntaxException, UnauthorizedException, IOException {
-    //given
+    // given
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
     GitConnection connection2 = connectionFactory.getConnection(remoteRepo.getAbsolutePath());
     connection2.clone(
         CloneParams.create(connection.getWorkingDir().getAbsolutePath())
             .withWorkingDir(connection2.getWorkingDir().getAbsolutePath()));
     assertEquals(connection2.remoteList(null, false).size(), 1);
-    //create new remote
+    // create new remote
     connection2.remoteAdd(RemoteAddParams.create("newremote", "newremote.url"));
     assertEquals(connection2.remoteList(null, false).size(), 2);
-    //when
+    // when
     List<Remote> one = connection2.remoteList("newremote", false);
-    //then
+    // then
     assertEquals(one.get(0).getUrl(), "newremote.url");
     assertEquals(one.size(), 1);
   }

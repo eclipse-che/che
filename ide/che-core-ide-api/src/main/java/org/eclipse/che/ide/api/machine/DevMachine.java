@@ -34,7 +34,7 @@ public class DevMachine extends MachineEntityImpl {
         return link.getHref();
       }
     }
-    //should not be
+    // should not be
     final String message =
         "Reference "
             + Constants.WSAGENT_WEBSOCKET_REFERENCE
@@ -56,7 +56,7 @@ public class DevMachine extends MachineEntityImpl {
       }
       return url;
     } else {
-      //should not be
+      // should not be
       String message =
           "Reference " + Constants.WSAGENT_REFERENCE + " not found in DevMachine description";
       Log.error(getClass(), message);

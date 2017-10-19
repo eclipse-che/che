@@ -164,7 +164,7 @@ class AssociativeInfixExpressionFragment extends ASTFragment implements IExpress
    */
   private static List<List<Expression>> getMatchingContiguousNodeSubsequences(
       List<Expression> source, List<Expression> toMatch) {
-    //naive implementation:
+    // naive implementation:
 
     List<List<Expression>> subsequences = new ArrayList<List<Expression>>();
 
@@ -285,7 +285,7 @@ class AssociativeInfixExpressionFragment extends ASTFragment implements IExpress
     System.arraycopy(a2, 0, union, a1.length, a2.length);
     return union;
 
-    //TODO: this would be a REAL union...:
+    // TODO: this would be a REAL union...:
     //		ArrayList union= new ArrayList();
     //		for (int i= 0; i < a1.length; i++) {
     //			union.add(a1[i]);

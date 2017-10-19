@@ -32,7 +32,7 @@ public class ASTProvider {
   public static final boolean SHARED_AST_STATEMENT_RECOVERY = true;
   public static final boolean SHARED_BINDING_RECOVERY = true;
   private static final Logger LOG = LoggerFactory.getLogger(ASTProvider.class);
-  private static final String DEBUG_PREFIX = "ASTProvider > "; //$NON-NLS-1$
+  private static final String DEBUG_PREFIX = "ASTProvider > "; // $NON-NLS-1$
   private Object fReconcileLock = new Object();
   private CompilationUnit fAST;
   /**
@@ -67,7 +67,7 @@ public class ASTProvider {
    * @return a string used for debugging
    */
   private String toString(ITypeRoot javaElement) {
-    if (javaElement == null) return "null"; //$NON-NLS-1$
+    if (javaElement == null) return "null"; // $NON-NLS-1$
     else return javaElement.getElementName();
   }
 
@@ -78,15 +78,15 @@ public class ASTProvider {
    * @return a string used for debugging
    */
   private String toString(CompilationUnit ast) {
-    if (ast == null) return "null"; //$NON-NLS-1$
+    if (ast == null) return "null"; // $NON-NLS-1$
 
     List<AbstractTypeDeclaration> types = ast.types();
     if (types != null && types.size() > 0)
       return types.get(0).getName().getIdentifier()
           + "("
           + ast.hashCode()
-          + ")"; //$NON-NLS-1$//$NON-NLS-2$
-    else return "AST without any type"; //$NON-NLS-1$
+          + ")"; // $NON-NLS-1$//$NON-NLS-2$
+    else return "AST without any type"; // $NON-NLS-1$
   }
 
   /**
@@ -123,10 +123,10 @@ public class ASTProvider {
                         + " - "
                         + DEBUG_PREFIX
                         + "creating AST for: "
-                        + input.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
+                        + input.getElementName()); // $NON-NLS-1$ //$NON-NLS-2$
               root[0] = (CompilationUnit) parser.createAST(progressMonitor);
 
-              //mark as unmodifiable
+              // mark as unmodifiable
               ASTNodes.setFlagsToAST(root[0], ASTNode.PROTECT);
             } catch (OperationCanceledException ex) {
               return;
@@ -162,13 +162,13 @@ public class ASTProvider {
       SharedASTProvider.WAIT_FLAG waitFlag,
       IProgressMonitor progressMonitor) {
     if (input == null || waitFlag == null)
-      throw new IllegalArgumentException("input or wait flag are null"); //$NON-NLS-1$
+      throw new IllegalArgumentException("input or wait flag are null"); // $NON-NLS-1$
 
     if (progressMonitor != null && progressMonitor.isCanceled()) return null;
 
     boolean isActiveElement;
     synchronized (this) {
-      isActiveElement = false; //input.equals(fActiveJavaElement);
+      isActiveElement = false; // input.equals(fActiveJavaElement);
       if (isActiveElement) {
         if (fAST != null) {
           if (DEBUG)
@@ -179,7 +179,7 @@ public class ASTProvider {
                     + "returning cached AST:"
                     + toString(fAST)
                     + " for: "
-                    + input.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                    + input.getElementName()); // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
           return fAST;
         }
@@ -190,7 +190,7 @@ public class ASTProvider {
                     + " - "
                     + DEBUG_PREFIX
                     + "returning null (WAIT_NO) for: "
-                    + input.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
+                    + input.getElementName()); // $NON-NLS-1$ //$NON-NLS-2$
 
           return null;
         }
@@ -217,9 +217,11 @@ public class ASTProvider {
       //                synchronized (fWaitLock) {
       //                    if (isReconciling(input)) {
       //                        if (DEBUG)
-      //                            System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "waiting for AST for: " + input.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
+      //                            System.out.println(getThreadName() + " - " + DEBUG_PREFIX +
+      // "waiting for AST for: " + input.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
 
-      //                        fWaitLock.wait(30000); // XXX: The 30 seconds timeout is an attempt to at least avoid a deadlock. See https://bugs.eclipse.org/366048#c21
+      //                        fWaitLock.wait(30000); // XXX: The 30 seconds timeout is an attempt
+      // to at least avoid a deadlock. See https://bugs.eclipse.org/366048#c21
       //                    }
       //                }
 
@@ -227,7 +229,9 @@ public class ASTProvider {
       //                synchronized (this) {
       //                    if (activeElement == fActiveJavaElement && fAST != null) {
       //                        if (DEBUG)
-      //                            System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "...got AST: " + toString(fAST) + " for: " + input.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+      //                            System.out.println(getThreadName() + " - " + DEBUG_PREFIX +
+      // "...got AST: " + toString(fAST) + " for: " + input.getElementName()); //$NON-NLS-1$
+      // //$NON-NLS-2$ //$NON-NLS-3$
       //
       //                        return fAST;
       //                    }
@@ -248,7 +252,7 @@ public class ASTProvider {
                   + DEBUG_PREFIX
                   + "Ignore created AST for: "
                   + input.getElementName()
-                  + " - operation has been cancelled"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                  + " - operation has been cancelled"); // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
       }
     } finally {
       if (isActiveElement) {
@@ -261,7 +265,7 @@ public class ASTProvider {
                     + DEBUG_PREFIX
                     + "Ignore created AST for "
                     + input.getElementName()
-                    + " - AST from reconciler is newer"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                    + " - AST from reconciler is newer"); // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
           reconciled(fAST, input, null);
           return fAST;
         } else reconciled(ast, input, null);
@@ -282,14 +286,16 @@ public class ASTProvider {
    */
   void reconciled(CompilationUnit ast, ITypeRoot javaElement, IProgressMonitor progressMonitor) {
     //        if (DEBUG)
-    //            System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "reconciled: " + toString(javaElement) + ", AST: " + toString(ast)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+    //            System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "reconciled: " +
+    // toString(javaElement) + ", AST: " + toString(ast)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     //
     //        synchronized (fReconcileLock) {
     //            fIsReconciling= false;
     //            if (javaElement == null || !javaElement.equals(fReconcilingJavaElement)) {
     //
     //                if (DEBUG)
-    //                    System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "  ignoring AST of out-dated editor"); //$NON-NLS-1$ //$NON-NLS-2$
+    //                    System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "  ignoring
+    // AST of out-dated editor"); //$NON-NLS-1$ //$NON-NLS-2$
     //
     //                // Signal - threads might wait for wrong element
     //                synchronized (fWaitLock) {

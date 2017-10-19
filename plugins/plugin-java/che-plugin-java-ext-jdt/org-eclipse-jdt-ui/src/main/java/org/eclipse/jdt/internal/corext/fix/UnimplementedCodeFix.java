@@ -64,7 +64,8 @@ public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
           .getListRewrite(fTypeDeclaration, TypeDeclaration.MODIFIERS2_PROPERTY)
           .insertLast(newModifier, textEditGroup);
 
-      LinkedProposalPositionGroup group = new LinkedProposalPositionGroup("modifier"); //$NON-NLS-1$
+      LinkedProposalPositionGroup group =
+          new LinkedProposalPositionGroup("modifier"); // $NON-NLS-1$
       group.addPosition(rewrite.track(newModifier), !linkedProposalPositions.hasLinkedPositions());
       linkedProposalPositions.addPositionGroup(group);
     }
@@ -133,11 +134,14 @@ public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
                   (ICompilationUnit) root.getJavaElement()) {
                 @Override
                 public Change perform(IProgressMonitor pm) throws CoreException {
-                  //							Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-                  //							String dialogTitle= CorrectionMessages.UnimplementedMethodsCorrectionProposal_description;
+                  //							Shell shell=
+                  // PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+                  //							String dialogTitle=
+                  // CorrectionMessages.UnimplementedMethodsCorrectionProposal_description;
                   //							IStatus status= getStatus();
-                  //							ErrorDialog.openError(shell, dialogTitle, CorrectionMessages.UnimplementedCodeFix_DependenciesErrorMessage, status);
-                  //TODO
+                  //							ErrorDialog.openError(shell, dialogTitle,
+                  // CorrectionMessages.UnimplementedCodeFix_DependenciesErrorMessage, status);
+                  // TODO
                   return new NullChange();
                 }
               };
