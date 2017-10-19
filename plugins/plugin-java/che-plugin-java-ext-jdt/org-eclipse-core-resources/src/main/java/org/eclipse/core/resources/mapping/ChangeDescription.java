@@ -123,7 +123,8 @@ public class ChangeDescription {
     switch (delta.getKind()) {
       case IResourceDelta.ADDED:
         handleAdded(delta);
-        return true; // Need to traverse children to look  for moves or other changes under added roots
+        return true; // Need to traverse children to look  for moves or other changes under added
+        // roots
       case IResourceDelta.REMOVED:
         handleRemoved(delta);
         // No need to look for further changes under a remove (such as moves).

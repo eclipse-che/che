@@ -42,7 +42,7 @@ public class SpeedSearch {
 
     public SearchPopUp() {
       getElement().setId(ID);
-      setVisible(false); //by default
+      setVisible(false); // by default
       this.searchLabel = new Label(INITIAL_SEARCH_TEXT);
 
       add(searchLabel);
@@ -67,35 +67,38 @@ public class SpeedSearch {
 
         @Override
         public void onUp(NativeEvent evt) {
-          //check if we have found nodes that matches search pattern and navigate to previous node by pressing Up key
+          // check if we have found nodes that matches search pattern and navigate to previous node
+          // by pressing Up key
         }
 
         @Override
         public void onDown(NativeEvent evt) {
-          //check if we have found nodes that matches search pattern and navigate to previous node by pressing Down key
+          // check if we have found nodes that matches search pattern and navigate to previous node
+          // by pressing Down key
         }
 
         @Override
         public void onEnd(NativeEvent evt) {
-          //iterate to last found node
+          // iterate to last found node
         }
 
         @Override
         public void onHome(NativeEvent evt) {
-          //iterate to first found node
+          // iterate to first found node
         }
 
         @Override
         public void onEsc(NativeEvent evt) {
           removeSearchPopUpFromTree();
-          //clear search pattern and restore tree to normal mode
+          // clear search pattern and restore tree to normal mode
         }
 
         @Override
         public void onEnter(NativeEvent evt) {
           removeSearchPopUpFromTree();
-          //handle enter key, for leaf node we should check whether node is implemented by HasAction interface
-          //and fire action performed, otherwise for non-leaf node we should expand/collapse node
+          // handle enter key, for leaf node we should check whether node is implemented by
+          // HasAction interface
+          // and fire action performed, otherwise for non-leaf node we should expand/collapse node
         }
 
         @Override
@@ -108,7 +111,8 @@ public class SpeedSearch {
             searchRequest.append(sChar);
             update();
           }
-          //gather key press and try to search through visible nodes to find nodes that matches search pattern
+          // gather key press and try to search through visible nodes to find nodes that matches
+          // search pattern
         }
       };
 
@@ -118,7 +122,7 @@ public class SpeedSearch {
 
     keyNav.bind(tree);
 
-    this.searchDelay = 100; //100ms
+    this.searchDelay = 100; // 100ms
     this.searchRequest = new StringBuilder();
     initSearchPopUp();
   }

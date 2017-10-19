@@ -50,8 +50,10 @@ public class SnapshotDaoTest {
   //        snapshots = new SnapshotImpl[SNAPSHOTS_SIZE];
   //        for (int i = 0; i < SNAPSHOTS_SIZE; i++) {
   //            snapshots[i] = createSnapshot("snapshot-" + i,
-  //                                          workspaces[i / 3].getId(), // 3 snapshot share the same workspace id
-  //                                          "environment-" + i / 2, // 2 snapshots share the same env name
+  //                                          workspaces[i / 3].getId(), // 3 snapshot share the
+  // same workspace id
+  //                                          "environment-" + i / 2, // 2 snapshots share the same
+  // env name
   //                                          "machine-" + i);
   //        }
   //
@@ -94,12 +96,15 @@ public class SnapshotDaoTest {
   //    }
   //
   //    @Test(expectedExceptions = NotFoundException.class, dataProvider = "missingSnapshots")
-  //    public void shouldThrowNotFoundExceptionWhenSnapshotMissing(String wsId, String envName, String machineName) throws Exception {
+  //    public void shouldThrowNotFoundExceptionWhenSnapshotMissing(String wsId, String envName,
+  // String machineName) throws Exception {
   //        snapshotDao.getSnapshot(wsId, envName, machineName);
   //    }
   //
-  //    @Test(expectedExceptions = NullPointerException.class, dataProvider = "nullParameterVariations")
-  //    public void shouldThrowNpeWhenAnyOfGetSnapshotParametersIsNull(String wsId, String envName, String machineName) throws Exception {
+  //    @Test(expectedExceptions = NullPointerException.class, dataProvider =
+  // "nullParameterVariations")
+  //    public void shouldThrowNpeWhenAnyOfGetSnapshotParametersIsNull(String wsId, String envName,
+  // String machineName) throws Exception {
   //        snapshotDao.getSnapshot(wsId, envName, machineName);
   //    }
   //
@@ -109,7 +114,8 @@ public class SnapshotDaoTest {
   //
   //        final List<SnapshotImpl> found = snapshotDao.findSnapshots(snapshot.getWorkspaceId());
   //
-  //        assertEquals(new HashSet<>(found), new HashSet<>(asList(snapshots[0], snapshots[1], snapshots[2])));
+  //        assertEquals(new HashSet<>(found), new HashSet<>(asList(snapshots[0], snapshots[1],
+  // snapshots[2])));
   //    }
   //
   //    @Test(expectedExceptions = NullPointerException.class)
@@ -126,7 +132,8 @@ public class SnapshotDaoTest {
   //
   //        snapshotDao.saveSnapshot(newSnapshot);
   //
-  //        assertEquals(snapshotDao.getSnapshot(newSnapshot.getId()), new SnapshotImpl(newSnapshot));
+  //        assertEquals(snapshotDao.getSnapshot(newSnapshot.getId()), new
+  // SnapshotImpl(newSnapshot));
   //    }
   //
   //    @Test(expectedExceptions = SnapshotException.class)
@@ -140,7 +147,8 @@ public class SnapshotDaoTest {
   //    }
   //
   //    @Test(expectedExceptions = SnapshotException.class)
-  //    public void shouldNotSaveSnapshotForMachineIfSnapshotForSuchMachineAlreadyExists() throws Exception {
+  //    public void shouldNotSaveSnapshotForMachineIfSnapshotForSuchMachineAlreadyExists() throws
+  // Exception {
   //        final SnapshotImpl snapshot = snapshots[0];
   //        snapshot.setId("new-id");
   //
@@ -183,12 +191,16 @@ public class SnapshotDaoTest {
   //                                                        snapshots[0].getEnvName(),
   //                                                        snapshots[0].getMachineName());
   //
-  //        final List<SnapshotImpl> replaced = snapshotDao.replaceSnapshots(newSnapshot.getWorkspaceId(),
-  //                                                                         newSnapshot.getEnvName(),
-  //                                                                         singletonList(newSnapshot));
+  //        final List<SnapshotImpl> replaced =
+  // snapshotDao.replaceSnapshots(newSnapshot.getWorkspaceId(),
+  //
+  // newSnapshot.getEnvName(),
+  //
+  // singletonList(newSnapshot));
   //
   //        assertEquals(new HashSet<>(replaced), Sets.newHashSet(snapshots[0], snapshots[1]));
-  //        final HashSet<SnapshotImpl> actual = new HashSet<>(snapshotDao.findSnapshots(this.snapshots[0].getWorkspaceId()));
+  //        final HashSet<SnapshotImpl> actual = new
+  // HashSet<>(snapshotDao.findSnapshots(this.snapshots[0].getWorkspaceId()));
   //        final HashSet<SnapshotImpl> expected = Sets.newHashSet(newSnapshot, this.snapshots[2]);
   //        assertEquals(actual, expected);
   //    }

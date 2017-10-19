@@ -68,13 +68,13 @@ import org.eclipse.che.ide.api.editor.text.TypedRegion;
 public interface Document {
 
   /** The identifier of the default position category. */
-  static final String DEFAULT_CATEGORY = "__dflt_position_category"; //$NON-NLS-1$
+  static final String DEFAULT_CATEGORY = "__dflt_position_category"; // $NON-NLS-1$
 
   /** The identifier of the default partition content type. */
-  static final String DEFAULT_CONTENT_TYPE = "__dftl_partition_content_type"; //$NON-NLS-1$
+  static final String DEFAULT_CONTENT_TYPE = "__dftl_partition_content_type"; // $NON-NLS-1$
 
   /** The identifier of the default partitioning. */
-  static final String DEFAULT_PARTITIONING = "__dftl_partitioning"; //$NON-NLS-1$
+  static final String DEFAULT_PARTITIONING = "__dftl_partitioning"; // $NON-NLS-1$
 
   /** The unknown modification stamp. */
   long UNKNOWN_MODIFICATION_STAMP = -1;

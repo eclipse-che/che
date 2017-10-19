@@ -103,7 +103,7 @@ public class AdminOrganizationTest {
     assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount);
     assertFalse(organizationListPage.isAddOrganizationButtonVisible());
     assertTrue(organizationListPage.isSearchInputVisible());
-    //Check all headers are present:
+    // Check all headers are present:
     ArrayList<String> headers = organizationListPage.getOrganizationListHeaders();
     assertTrue(headers.contains(NAME.getTitle()));
     assertTrue(headers.contains(MEMBERS.getTitle()));

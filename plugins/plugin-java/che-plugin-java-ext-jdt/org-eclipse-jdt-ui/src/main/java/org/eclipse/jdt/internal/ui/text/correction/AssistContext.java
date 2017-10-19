@@ -53,7 +53,8 @@ public class AssistContext extends TextInvocationContext implements IInvocationC
   //	/*
   //	 * @since 3.5
   //	 */
-  //	public AssistContext(ICompilationUnit cu, ISourceViewer sourceViewer, int offset, int length, SharedASTProvider.WAIT_FLAG waitFlag) {
+  //	public AssistContext(ICompilationUnit cu, ISourceViewer sourceViewer, int offset, int length,
+  // SharedASTProvider.WAIT_FLAG waitFlag) {
   //		this(cu, sourceViewer, /*null,*/ offset, length, waitFlag);
   //	}
 

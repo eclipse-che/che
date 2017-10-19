@@ -194,7 +194,7 @@ public class FindSymbolAction extends AbstractPerspectiveAction
         }
       }
     }
-    //TODO add sorting
+    // TODO add sorting
     return result;
   }
 

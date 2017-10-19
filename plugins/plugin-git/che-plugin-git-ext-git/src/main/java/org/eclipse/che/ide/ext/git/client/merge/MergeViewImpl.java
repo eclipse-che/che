@@ -96,22 +96,22 @@ public class MergeViewImpl extends Window implements MergeView {
 
           @Override
           public void onNodeClosed(TreeNodeElement<Reference> node) {
-            //do nothing
+            // do nothing
           }
 
           @Override
           public void onNodeContextMenu(int mouseX, int mouseY, TreeNodeElement<Reference> node) {
-            //do nothing
+            // do nothing
           }
 
           @Override
           public void onNodeDragStart(TreeNodeElement<Reference> node, MouseEvent event) {
-            //do nothing
+            // do nothing
           }
 
           @Override
           public void onNodeDragDrop(TreeNodeElement<Reference> node, MouseEvent event) {
-            //do nothing
+            // do nothing
           }
 
           @Override
@@ -126,17 +126,17 @@ public class MergeViewImpl extends Window implements MergeView {
 
           @Override
           public void onRootContextMenu(int mouseX, int mouseY) {
-            //do nothing
+            // do nothing
           }
 
           @Override
           public void onRootDragDrop(MouseEvent event) {
-            //do nothing
+            // do nothing
           }
 
           @Override
           public void onKeyboard(KeyboardEvent event) {
-            //do nothing
+            // do nothing
           }
         });
     this.referencesPanel.add(references.asWidget());

@@ -23,7 +23,7 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
-//import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+// import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 public class DynamicValidationStateChange extends CompositeChange
     implements WorkspaceTracker.Listener {

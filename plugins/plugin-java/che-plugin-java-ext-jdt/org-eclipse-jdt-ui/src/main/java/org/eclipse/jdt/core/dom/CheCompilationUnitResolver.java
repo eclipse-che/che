@@ -160,12 +160,12 @@ public class CheCompilationUnitResolver extends CompilationUnitResolver {
             Thread.currentThread()
                 + " TIME SPENT in NameLoopkup#seekTypesInSourcePackage: "
                 + cancelableNameEnvironment.nameLookup.timeSpentInSeekTypesInSourcePackage
-                + "ms"); //$NON-NLS-1$ //$NON-NLS-2$
+                + "ms"); // $NON-NLS-1$ //$NON-NLS-2$
         System.out.println(
             Thread.currentThread()
                 + " TIME SPENT in NameLoopkup#seekTypesInBinaryPackage: "
                 + cancelableNameEnvironment.nameLookup.timeSpentInSeekTypesInBinaryPackage
-                + "ms"); //$NON-NLS-1$ //$NON-NLS-2$
+                + "ms"); // $NON-NLS-1$ //$NON-NLS-2$
       }
       return unit;
     } finally {
@@ -304,7 +304,8 @@ public class CheCompilationUnitResolver extends CompilationUnitResolver {
       org.eclipse.jdt.internal.compiler.lookup.PackageBinding packageBinding,
       AccessRestriction accessRestriction) {
     // Need to reparse the entire source of the compilation unit so as to get source positions
-    // (case of processing a source that was not known by beginToCompile (e.g. when asking to createBinding))
+    // (case of processing a source that was not known by beginToCompile (e.g. when asking to
+    // createBinding))
     SourceTypeElementInfo sourceType = (SourceTypeElementInfo) sourceTypes[0];
     accept(
         (org.eclipse.jdt.internal.compiler.env.ICompilationUnit)

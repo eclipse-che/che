@@ -77,8 +77,8 @@ import org.eclipse.text.edits.TextEditGroup;
  */
 public class SurroundWithTryCatchRefactoring extends Refactoring {
 
-  public static final String GROUP_EXC_TYPE = "exc_type"; //$NON-NLS-1$
-  public static final String GROUP_EXC_NAME = "exc_name"; //$NON-NLS-1$
+  public static final String GROUP_EXC_TYPE = "exc_type"; // $NON-NLS-1$
+  public static final String GROUP_EXC_NAME = "exc_name"; // $NON-NLS-1$
 
   private Selection fSelection;
   private SurroundWithTryCatchAnalyzer fAnalyzer;
@@ -189,7 +189,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
    */
   @Override
   public Change createChange(IProgressMonitor pm) throws CoreException {
-    final String NN = ""; //$NON-NLS-1$
+    final String NN = ""; // $NON-NLS-1$
     if (pm == null) pm = new NullProgressMonitor();
     pm.beginTask(NN, 2);
     try {
@@ -293,7 +293,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
       fLinkedProposalModel
           .getPositionGroup(GROUP_EXC_NAME + 0, true)
           .addPosition(fRewriter.track(decl.getName()), false);
-      Statement st = getCatchBody("Exception", name, lineDelimiter); //$NON-NLS-1$
+      Statement st = getCatchBody("Exception", name, lineDelimiter); // $NON-NLS-1$
       if (st != null) {
         catchClause.getBody().statements().add(st);
       }
@@ -345,8 +345,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
         if (!fragments.isEmpty()) {
           List<ExpressionStatement> newExpressionStatements = new ArrayList<ExpressionStatement>();
           for (Iterator<VariableDeclarationFragment> iter = fragments.iterator();
-              iter.hasNext();
-              ) {
+              iter.hasNext(); ) {
             VariableDeclarationFragment fragment = iter.next();
             Expression initializer = fragment.getInitializer();
             if (initializer != null) {
@@ -412,12 +411,10 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
     filteredExceptions.addAll(Arrays.asList(exceptions));
 
     for (Iterator<ITypeBinding> subtypeIterator = filteredExceptions.iterator();
-        subtypeIterator.hasNext();
-        ) {
+        subtypeIterator.hasNext(); ) {
       ITypeBinding iTypeBinding = subtypeIterator.next();
       for (Iterator<ITypeBinding> supertypeIterator = filteredExceptions.iterator();
-          supertypeIterator.hasNext();
-          ) {
+          supertypeIterator.hasNext(); ) {
         ITypeBinding superTypeBinding = supertypeIterator.next();
         if (!iTypeBinding.equals(superTypeBinding)
             && iTypeBinding.isSubTypeCompatible(superTypeBinding)) {

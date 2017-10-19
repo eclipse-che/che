@@ -59,7 +59,7 @@ public class DefaultAccessRuleParticipant implements IAccessRuleParticipant {
         packageRules[packages.length] =
             JavaCore.newAccessRule(
                 new Path("**/*"), IAccessRule.K_NON_ACCESSIBLE | IAccessRule.IGNORE_IF_BETTER);
-        //$NON-NLS-1$
+        // $NON-NLS-1$
       } else {
         packageRules = new IAccessRule[0];
       }
@@ -77,11 +77,11 @@ public class DefaultAccessRuleParticipant implements IAccessRuleParticipant {
     if (profile != null) {
       String packages = profile.getProperty(Constants.FRAMEWORK_SYSTEMPACKAGES);
       if (packages != null) {
-        StringTokenizer tokenizer = new StringTokenizer(packages, ","); //$NON-NLS-1$
+        StringTokenizer tokenizer = new StringTokenizer(packages, ","); // $NON-NLS-1$
         String[] result = new String[tokenizer.countTokens() + 1];
-        result[0] = "java.**"; //$NON-NLS-1$
+        result[0] = "java.**"; // $NON-NLS-1$
         for (int i = 1; i < result.length; i++) {
-          result[i] = tokenizer.nextToken().trim() + ".*"; //$NON-NLS-1$
+          result[i] = tokenizer.nextToken().trim() + ".*"; // $NON-NLS-1$
         }
         return result;
       }

@@ -19,7 +19,7 @@ import org.eclipse.che.plugin.testing.phpunit.server.PHPUnitMessageParser;
  */
 public class PHPUnitTestWarning extends AbstractPHPUnitTestEvent {
 
-  private String code = ""; //$NON-NLS-1$
+  private String code = ""; // $NON-NLS-1$
 
   public PHPUnitTestWarning(final Map<?, ?> warning, final AbstractPHPUnitElement parent) {
     super(warning, parent);

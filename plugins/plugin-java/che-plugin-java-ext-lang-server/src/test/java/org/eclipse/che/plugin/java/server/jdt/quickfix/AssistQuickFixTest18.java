@@ -287,7 +287,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 
   @Test
   public void testConvertToLambda5() throws Exception {
-    //Quick assist should not be offered in 1.7 mode
+    // Quick assist should not be offered in 1.7 mode
     JavaProjectHelper.set17CompilerOptions(fJProject1);
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     try {

@@ -16,7 +16,7 @@ import org.eclipse.osgi.util.NLS;
 public final class CodeGenerationMessages extends NLS {
 
   private static final String BUNDLE_NAME =
-      "org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationMessages"; //$NON-NLS-1$
+      "org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationMessages"; // $NON-NLS-1$
 
   private CodeGenerationMessages() {
     // Do not instantiate

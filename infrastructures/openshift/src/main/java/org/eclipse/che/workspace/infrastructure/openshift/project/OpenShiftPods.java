@@ -266,7 +266,7 @@ public class OpenShiftPods {
    */
   public void delete() throws InfrastructureException {
     try (OpenShiftClient client = clientFactory.create()) {
-      //pods are removed with some delay related to stopping of containers. It is need to wait them
+      // pods are removed with some delay related to stopping of containers. It is need to wait them
       List<Pod> pods =
           client
               .pods()

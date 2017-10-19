@@ -41,7 +41,8 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 
   private static final String[] PRIM_TYPES = {
     "boolean", "byte", "char", "short", "int", "long", "float", "double"
-  }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
+  }; // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+  // //$NON-NLS-7$ //$NON-NLS-8$
 
   private int fKind;
   private String fName;
@@ -168,7 +169,7 @@ public class SimilarElementsRequestor extends CompletionRequestor {
       }
     }
     if (isKind(VOIDTYPE)) {
-      String voidType = "void"; //$NON-NLS-1$
+      String voidType = "void"; // $NON-NLS-1$
       if (NameMatcher.isSimilarName(fName, voidType)) {
         addResult(new SimilarElement(PRIMITIVETYPES, voidType, 50));
       }
@@ -224,7 +225,7 @@ public class SimilarElementsRequestor extends CompletionRequestor {
     if (type == null) return new String[0];
 
     if (packName.length() > 0) {
-      dummyCU.append("package ").append(packName).append(';'); //$NON-NLS-1$
+      dummyCU.append("package ").append(packName).append(';'); // $NON-NLS-1$
     }
     dummyCU
         .append("public class ")
@@ -232,7 +233,7 @@ public class SimilarElementsRequestor extends CompletionRequestor {
         .append("{\n static {\n")
         .append(elementName); // static initializer  //$NON-NLS-1$//$NON-NLS-2$
     int offset = dummyCU.length();
-    dummyCU.append("\n}\n }"); //$NON-NLS-1$
+    dummyCU.append("\n}\n }"); // $NON-NLS-1$
 
     ICompilationUnit newCU = null;
     try {

@@ -52,7 +52,7 @@ public class CodeTemplateContext extends TemplateContext {
       if (var instanceof CodeTemplateContextType.CodeTemplateVariableResolver) {
         Assert.isNotNull(
             getVariable(var.getType()),
-            "Variable " + var.getType() + "not defined"); //$NON-NLS-1$ //$NON-NLS-2$
+            "Variable " + var.getType() + "not defined"); // $NON-NLS-1$ //$NON-NLS-2$
       }
     }
 

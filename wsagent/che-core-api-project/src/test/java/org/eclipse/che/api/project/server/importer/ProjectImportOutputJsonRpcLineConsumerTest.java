@@ -49,7 +49,7 @@ public class ProjectImportOutputJsonRpcLineConsumerTest {
 
   @Test
   public void testShouldSendOutputLineThroughJsonRpcToEndpoint() throws Exception {
-    //given
+    // given
     when(registrar.getRegisteredEndpoints()).thenReturn(Collections.singleton("endpointId"));
 
     final EndpointIdConfigurator endpointIdConfigurator = mock(EndpointIdConfigurator.class);
@@ -64,10 +64,10 @@ public class ProjectImportOutputJsonRpcLineConsumerTest {
     final SendConfiguratorFromOne sendConfiguratorFromOne = mock(SendConfiguratorFromOne.class);
     when(paramsConfigurator.paramsAsDto(any())).thenReturn(sendConfiguratorFromOne);
 
-    //when
+    // when
     consumer.sendOutputLine("message");
 
-    //then
+    // then
     verify(sendConfiguratorFromOne).sendAndSkipResult();
   }
 }

@@ -28,7 +28,7 @@ public abstract class ConstraintVariable {
   }
 
   public String toResolvedString() {
-    if (fTypeBinding == null) return "<NULL BINDING>"; //$NON-NLS-1$
+    if (fTypeBinding == null) return "<NULL BINDING>"; // $NON-NLS-1$
     return Bindings.asString(fTypeBinding);
   }
 
@@ -41,7 +41,7 @@ public abstract class ConstraintVariable {
   }
 
   /** @return the type binding or <code>null</code> */
-  //TODO: rename to getTypeBinding()
+  // TODO: rename to getTypeBinding()
   public ITypeBinding getBinding() {
     return fTypeBinding;
   }

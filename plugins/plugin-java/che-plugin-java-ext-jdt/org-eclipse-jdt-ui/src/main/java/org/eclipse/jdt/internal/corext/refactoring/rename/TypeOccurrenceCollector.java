@@ -44,22 +44,22 @@ public class TypeOccurrenceCollector extends CuCollectingSearchRequestor {
     int start = match.getOffset();
     int length = match.getLength();
 
-    //unqualified:
+    // unqualified:
     String matchText = unit.getBuffer().getText(start, length);
     if (fOldName.equals(matchText)) {
       return match;
     }
 
-    //(partially) qualified:
+    // (partially) qualified:
     if (fOldQualifiedName.endsWith(matchText)) {
-      //e.g. rename B and p.A.B ends with match A.B
+      // e.g. rename B and p.A.B ends with match A.B
       int simpleNameLenght = fOldName.length();
       match.setOffset(start + length - simpleNameLenght);
       match.setLength(simpleNameLenght);
       return match;
     }
 
-    //Not a standard reference -- use scanner to find last identifier token:
+    // Not a standard reference -- use scanner to find last identifier token:
     IScanner scanner = getScanner(unit);
     scanner.setSource(matchText.toCharArray());
     int simpleNameStart = -1;
@@ -74,7 +74,7 @@ public class TypeOccurrenceCollector extends CuCollectingSearchRequestor {
         token = scanner.getNextToken();
       }
     } catch (InvalidInputException e) {
-      //ignore
+      // ignore
     }
     if (simpleNameStart != -1) {
       match.setOffset(start + simpleNameStart);

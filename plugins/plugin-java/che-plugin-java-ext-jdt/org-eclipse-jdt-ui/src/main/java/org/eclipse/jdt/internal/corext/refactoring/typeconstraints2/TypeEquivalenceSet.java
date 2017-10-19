@@ -75,7 +75,7 @@ public class TypeEquivalenceSet {
     StringBuffer result = new StringBuffer();
     if (fVariables.length > 0) result.append(fVariables[0].toString());
     for (int i = 1; i < fVariables.length; i++) {
-      result.append(" =^= \n"); //$NON-NLS-1$
+      result.append(" =^= \n"); // $NON-NLS-1$
       result.append(fVariables[i].toString());
     }
     return result.toString();

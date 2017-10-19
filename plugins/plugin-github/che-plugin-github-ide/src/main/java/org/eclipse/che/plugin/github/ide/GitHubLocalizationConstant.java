@@ -39,7 +39,7 @@ public interface GitHubLocalizationConstant extends Messages {
   @Key("import.github.account")
   String importFromGithubAccount();
 
-  //Authorization
+  // Authorization
   @Key("authorization.dialog.title")
   String authorizationDialogTitle();
 
@@ -64,7 +64,7 @@ public interface GitHubLocalizationConstant extends Messages {
   @Key("samplesListGrid.column.description")
   String samplesListDescriptionColumn();
 
-  //GithubImporterPage
+  // GithubImporterPage
   @Key("view.import.githubImporterPage.projectUrl")
   String githubImporterPageProjectUrl();
 

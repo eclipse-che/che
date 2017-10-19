@@ -87,7 +87,7 @@ public class SourceMapper extends ReferenceInfoAdapter
    * Specifies the location of the package fragment root within the zip (empty specifies the default
    * root). <code>null</code> is not a valid root path.
    */
-  protected String rootPath = ""; //$NON-NLS-1$
+  protected String rootPath = ""; // $NON-NLS-1$
   /**
    * Table that maps a binary method to its parameter names. Keys are the method handles, entries
    * are <code>char[][]</code>.
@@ -155,7 +155,7 @@ public class SourceMapper extends ReferenceInfoAdapter
     this.areRootPathsComputed = false;
     this.options = options;
     this.encoding = encoding;
-    this.defaultEncoding = "UTF-8"; //ResourcesPlugin.getWorkspace().getRoot().getDefaultCharset();
+    this.defaultEncoding = "UTF-8"; // ResourcesPlugin.getWorkspace().getRoot().getDefaultCharset();
     if (rootPath != null) {
       this.rootPaths = new ArrayList();
       this.rootPaths.add(rootPath);
@@ -210,17 +210,17 @@ public class SourceMapper extends ReferenceInfoAdapter
 
   /** @see org.eclipse.jdt.internal.compiler.ISourceElementRequestor */
   public void acceptLineSeparatorPositions(int[] positions) {
-    //do nothing
+    // do nothing
   }
 
   /** @see org.eclipse.jdt.internal.compiler.ISourceElementRequestor */
   public void acceptPackage(ImportReference importReference) {
-    //do nothing
+    // do nothing
   }
 
   /** @see org.eclipse.jdt.internal.compiler.ISourceElementRequestor */
   public void acceptProblem(CategorizedProblem problem) {
-    //do nothing
+    // do nothing
   }
 
   private void addCategories(IJavaElement element, char[][] elementCategories) {
@@ -283,7 +283,7 @@ public class SourceMapper extends ReferenceInfoAdapter
               start = j = matchingEnd + 2;
               break;
             }
-            //$FALL-THROUGH$
+            // $FALL-THROUGH$
           case Signature.C_NAME_END:
             if (dot > start) {
               if (simpleTypeSig == null)
@@ -331,21 +331,22 @@ public class SourceMapper extends ReferenceInfoAdapter
     final HashSet tempRoots = new HashSet();
     long time = 0;
     if (VERBOSE) {
-      System.out.println("compute all root paths for " + root.getElementName()); //$NON-NLS-1$
+      System.out.println("compute all root paths for " + root.getElementName()); // $NON-NLS-1$
       time = System.currentTimeMillis();
     }
     final HashSet firstLevelPackageNames = new HashSet();
     boolean containsADefaultPackage = false;
     boolean containsJavaSource =
         !pkgFragmentRootPath.equals(
-            this
-                .sourcePath); // used to optimize zip file reading only if source path and root path are equals, otherwise
+            this.sourcePath); // used to optimize zip file reading only if source path and root path
+    // are equals, otherwise
     // assume that attachment contains Java source
 
     String sourceLevel = null;
     String complianceLevel = null;
     if (root.isArchive()) {
-      //			org.eclipse.jdt.internal.core.JavaModelManager manager = org.eclipse.jdt.internal.core.JavaModelManager.getJavaModelManager();
+      //			org.eclipse.jdt.internal.core.JavaModelManager manager =
+      // org.eclipse.jdt.internal.core.JavaModelManager.getJavaModelManager();
       ZipFile zip = null;
       try {
         zip =
@@ -366,7 +367,8 @@ public class SourceMapper extends ReferenceInfoAdapter
                     complianceLevel = project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
                   }
                   IStatus status = Status.OK_STATUS; // JavaConventions
-                  //											.validatePackageName(firstLevelPackageName, sourceLevel, complianceLevel);
+                  //											.validatePackageName(firstLevelPackageName, sourceLevel,
+                  // complianceLevel);
                   if (status.isOK() || status.getSeverity() == IStatus.WARNING) {
                     firstLevelPackageNames.add(firstLevelPackageName);
                   }
@@ -418,12 +420,14 @@ public class SourceMapper extends ReferenceInfoAdapter
       	}
       }*/
 
-    if (containsJavaSource) { // no need to read source attachment if it contains no Java source (see https://bugs.eclipse
+    if (containsJavaSource) { // no need to read source attachment if it contains no Java source
+      // (see https://bugs.eclipse
       // .org/bugs/show_bug.cgi?id=190840 )
       //			Object target = JavaModel.getTarget(this.sourcePath, true);
       //			if (target instanceof IContainer) {
       //				IContainer folder = (IContainer)target;
-      //				computeRootPath(folder, firstLevelPackageNames, containsADefaultPackage, tempRoots, folder.getFullPath().segmentCount()
+      //				computeRootPath(folder, firstLevelPackageNames, containsADefaultPackage, tempRoots,
+      // folder.getFullPath().segmentCount()
       // /*if external folder, this is the linked folder path*/);
       //			} else {
       org.eclipse.jdt.internal.core.JavaModelManager manager =
@@ -441,7 +445,8 @@ public class SourceMapper extends ReferenceInfoAdapter
               for (int i = 0, max = path.segmentCount() - 1; i < max; i++) {
                 if (firstLevelPackageNames.contains(path.segment(i))) {
                   tempRoots.add(path.uptoSegment(i));
-                  // don't break here as this path could contain other first level package names (see https://bugs
+                  // don't break here as this path could contain other first level package names
+                  // (see https://bugs
                   // .eclipse.org/bugs/show_bug.cgi?id=74014)
                 }
                 if (i == max - 1 && containsADefaultPackage) {
@@ -449,7 +454,7 @@ public class SourceMapper extends ReferenceInfoAdapter
                 }
               }
             } else if (containsADefaultPackage) {
-              tempRoots.add(new Path("")); //$NON-NLS-1$
+              tempRoots.add(new Path("")); // $NON-NLS-1$
             }
           }
         }
@@ -491,12 +496,12 @@ public class SourceMapper extends ReferenceInfoAdapter
     this.areRootPathsComputed = true;
     if (VERBOSE) {
       System.out.println(
-          "Spent " + (System.currentTimeMillis() - time) + "ms"); //$NON-NLS-1$ //$NON-NLS-2$
-      System.out.println("Found " + size + " root paths"); //$NON-NLS-1$ //$NON-NLS-2$
+          "Spent " + (System.currentTimeMillis() - time) + "ms"); // $NON-NLS-1$ //$NON-NLS-2$
+      System.out.println("Found " + size + " root paths"); // $NON-NLS-1$ //$NON-NLS-2$
       int i = 0;
       for (Iterator iterator = this.rootPaths.iterator(); iterator.hasNext(); ) {
         System.out.println(
-            "root[" + i + "]=" + ((String) iterator.next())); //$NON-NLS-1$ //$NON-NLS-2$
+            "root[" + i + "]=" + ((String) iterator.next())); // $NON-NLS-1$ //$NON-NLS-2$
         i++;
       }
     }
@@ -680,7 +685,7 @@ public class SourceMapper extends ReferenceInfoAdapter
 
   /** @see org.eclipse.jdt.internal.compiler.ISourceElementRequestor */
   public void enterInitializer(int declarationSourceStart, int modifiers) {
-    //do nothing
+    // do nothing
   }
 
   /** @see org.eclipse.jdt.internal.compiler.ISourceElementRequestor */
@@ -796,7 +801,7 @@ public class SourceMapper extends ReferenceInfoAdapter
 
   /** @see org.eclipse.jdt.internal.compiler.ISourceElementRequestor */
   public void exitCompilationUnit(int declarationEnd) {
-    //do nothing
+    // do nothing
   }
 
   /** @see org.eclipse.jdt.internal.compiler.ISourceElementRequestor */
@@ -910,7 +915,7 @@ public class SourceMapper extends ReferenceInfoAdapter
           "spent "
               + (System.currentTimeMillis() - time)
               + "ms for "
-              + type.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
+              + type.getElementName()); // $NON-NLS-1$ //$NON-NLS-2$
     }
     return source;
   }
@@ -918,7 +923,7 @@ public class SourceMapper extends ReferenceInfoAdapter
   private char[] getSourceForRootPath(String currentRootPath, String name) {
     String newFullName;
     if (!currentRootPath.equals(IPackageFragmentRoot.DEFAULT_PACKAGEROOT_PATH)) {
-      if (currentRootPath.endsWith("/")) { //$NON-NLS-1$
+      if (currentRootPath.endsWith("/")) { // $NON-NLS-1$
         newFullName = currentRootPath + name;
       } else {
         newFullName = currentRootPath + '/' + name;
@@ -937,15 +942,19 @@ public class SourceMapper extends ReferenceInfoAdapter
     //			IResource res = ((IContainer)target).findMember(fullName);
     //			if (res instanceof IFile) {
     //				try {
-    //					// Order of preference: charSet supplied, this.encoding or this.defaultEncoding in that order
+    //					// Order of preference: charSet supplied, this.encoding or this.defaultEncoding in that
+    // order
     //					try {
-    //						// Use the implicit encoding only when the source attachment's encoding hasn't been explicitly set.
+    //						// Use the implicit encoding only when the source attachment's encoding hasn't been
+    // explicitly set.
     //						charSet = ((IFile) res).getCharset(this.encoding == null);
     //					} catch (CoreException e) {
     //						// Ignore
     //					}
-    //					source = org.eclipse.jdt.internal.core.util.Util.getResourceContentsAsCharArray((IFile) res,
-    //									charSet == null ? (this.encoding == null ? this.defaultEncoding : this.encoding) : charSet);
+    //					source = org.eclipse.jdt.internal.core.util.Util.getResourceContentsAsCharArray((IFile)
+    // res,
+    //									charSet == null ? (this.encoding == null ? this.defaultEncoding : this.encoding) :
+    // charSet);
     //				} catch (JavaModelException e) {
     //					// Ignore
     //				}
@@ -1349,7 +1358,8 @@ public class SourceMapper extends ReferenceInfoAdapter
     try {
       byte[] bytes = org.eclipse.jdt.internal.compiler.util.Util.getZipEntryByteContent(entry, zip);
       if (bytes != null) {
-        // Order of preference: charSet supplied, this.encoding or this.defaultEncoding in that order
+        // Order of preference: charSet supplied, this.encoding or this.defaultEncoding in that
+        // order
         return org.eclipse.jdt.internal.compiler.util.Util.bytesToChar(
             bytes,
             charSet == null

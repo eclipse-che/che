@@ -51,7 +51,7 @@ class MethodOccurenceCollector extends CuCollectingSearchRequestor {
     int length = match.getLength();
     String matchText = unit.getBuffer().getText(start, length);
 
-    //direct match:
+    // direct match:
     if (fName.equals(matchText)) {
       collectMatch(match);
       return;
@@ -65,7 +65,8 @@ class MethodOccurenceCollector extends CuCollectingSearchRequestor {
       return;
     }
 
-    //Not a standard reference -- use scanner to find last identifier token before left parenthesis:
+    // Not a standard reference -- use scanner to find last identifier token before left
+    // parenthesis:
     IScanner scanner = getScanner(unit);
     scanner.setSource(matchText.toCharArray());
     int simpleNameStart = -1;
@@ -83,7 +84,7 @@ class MethodOccurenceCollector extends CuCollectingSearchRequestor {
         token = scanner.getNextToken();
       }
     } catch (InvalidInputException e) {
-      //ignore
+      // ignore
     }
     if (simpleNameStart != -1) {
       match.setOffset(start + simpleNameStart);

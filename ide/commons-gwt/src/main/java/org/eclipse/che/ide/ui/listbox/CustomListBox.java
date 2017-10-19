@@ -93,7 +93,7 @@ public class CustomListBox extends FocusWidget implements HasChangeHandlers {
         new MouseDownHandler() {
           @Override
           public void onMouseDown(MouseDownEvent event) {
-            //Update isActive state. It actually when we lose onBlur event in the parent widget.
+            // Update isActive state. It actually when we lose onBlur event in the parent widget.
             isActive = isActive(getElement());
             if (!isActive) {
               optionsPanel.setVisible(true);
@@ -125,7 +125,7 @@ public class CustomListBox extends FocusWidget implements HasChangeHandlers {
             for (int pos = 0; pos < selectionElements.getLength(); pos++) {
               InputElement inputElement = (InputElement) selectionElements.getItem(pos);
               if (inputElement.isChecked()) {
-                //update currentItemLabel
+                // update currentItemLabel
                 currentItemLabel.setInnerText(getItemText(pos));
                 selectedIndex = pos;
                 break;
@@ -280,22 +280,22 @@ public class CustomListBox extends FocusWidget implements HasChangeHandlers {
    * @param value the item's value.
    */
   public void insertItem(String item, String value) {
-    //create new widget
+    // create new widget
     final RadioButton radioButton = new RadioButton(optionsGroupName, item);
-    //remove the default gwt-RadioButton style
+    // remove the default gwt-RadioButton style
     radioButton.removeStyleName("gwt-RadioButton");
-    //set value
+    // set value
     final InputElement inputElement =
         (InputElement) radioButton.getElement().getElementsByTagName("input").getItem(0);
     inputElement.removeAttribute("tabindex");
     inputElement.setAttribute("value", value);
-    //set default state
+    // set default state
     if (defaultSelectedIndex > -1
         && optionsPanel.getElement().getChildCount() == defaultSelectedIndex) {
       inputElement.setChecked(true);
       currentItemLabel.setInnerText(item);
     }
-    //add to widget
+    // add to widget
     optionsPanel.add(radioButton);
   }
 
@@ -401,7 +401,7 @@ public class CustomListBox extends FocusWidget implements HasChangeHandlers {
       return;
     }
 
-    //set default index if not added options yet
+    // set default index if not added options yet
     if (index >= getItemCount()) {
       defaultSelectedIndex = index;
       return;

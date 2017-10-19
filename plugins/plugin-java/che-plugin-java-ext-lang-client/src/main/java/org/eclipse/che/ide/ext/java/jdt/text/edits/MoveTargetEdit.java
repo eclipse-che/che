@@ -78,7 +78,7 @@ public final class MoveTargetEdit extends TextEdit {
       while (parent != null) {
         if (parent == fSource)
           throw new MalformedTreeException(
-              parent, this, "Source edit must not be the parent of the target."); //$NON-NLS-1$
+              parent, this, "Source edit must not be the parent of the target."); // $NON-NLS-1$
         parent = parent.getParent();
       }
     }
@@ -118,10 +118,11 @@ public final class MoveTargetEdit extends TextEdit {
   void performConsistencyCheck(TextEditProcessor processor, Document document)
       throws MalformedTreeException {
     if (fSource == null)
-      throw new MalformedTreeException(getParent(), this, "No source edit provided."); //$NON-NLS-1$
+      throw new MalformedTreeException(
+          getParent(), this, "No source edit provided."); // $NON-NLS-1$
     if (fSource.getTargetEdit() != this)
       throw new MalformedTreeException(
-          getParent(), this, "Source edit has different target edit."); //$NON-NLS-1$
+          getParent(), this, "Source edit has different target edit."); // $NON-NLS-1$
   }
 
   // ---- document updating ----------------------------------------------------------------

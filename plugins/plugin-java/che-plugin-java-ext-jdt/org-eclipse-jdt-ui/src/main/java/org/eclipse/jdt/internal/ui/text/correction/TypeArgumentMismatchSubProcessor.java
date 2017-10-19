@@ -25,7 +25,8 @@ import org.eclipse.swt.graphics.Image;
 
 public class TypeArgumentMismatchSubProcessor {
 
-  //	public static void getTypeParameterMismatchProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+  //	public static void getTypeParameterMismatchProposals(IInvocationContext context,
+  // IProblemLocation problem, Collection proposals) {
   //	CompilationUnit astRoot= context.getASTRoot();
   //	ASTNode selectedNode= problem.getCoveredNode(astRoot);
   //	if (!(selectedNode instanceof SimpleName)) {

@@ -151,7 +151,7 @@ public class ServerInitializerImpl implements ServerInitializer {
     if (CLIENT_CAPABILITIES == null) {
       CLIENT_CAPABILITIES = new ClientCapabilities();
       WorkspaceClientCapabilities workspace = new WorkspaceClientCapabilities();
-      workspace.setApplyEdit(false); //Change when support added
+      workspace.setApplyEdit(false); // Change when support added
       workspace.setDidChangeConfiguration(new DidChangeConfigurationCapabilities());
       workspace.setDidChangeWatchedFiles(new DidChangeWatchedFilesCapabilities());
       workspace.setExecuteCommand(new ExecuteCommandCapabilities());

@@ -197,7 +197,7 @@ public class RenamePrivateFieldTest extends RefactoringTest {
     helper2(true);
   }
 
-  //--------- tests ----------
+  // --------- tests ----------
   @Test
   public void testFail0() throws Exception {
     helper1();
@@ -282,38 +282,38 @@ public class RenamePrivateFieldTest extends RefactoringTest {
 
   @Test
   public void test5() throws Exception {
-    //regression test for 9895
+    // regression test for 9895
     helper2("fMe", "fYou", true, false, true, false, true, false);
   }
 
   @Test
   public void test6() throws Exception {
-    //regression test for 9895 - opposite case
+    // regression test for 9895 - opposite case
     helper2("fMe", "fYou", true, false, false, true, false, true);
   }
 
   @Test
   public void test7() throws Exception {
-    //regression test for 21292
+    // regression test for 21292
     helper2("fBig", "fSmall", true, false, true, true, true, true);
   }
 
   @Test
   public void test8() throws Exception {
-    //regression test for 26769
+    // regression test for 26769
     helper2("f", "g", true, false, true, false, true, false);
   }
 
   @Test
   public void test9() throws Exception {
-    //regression test for 30906
+    // regression test for 30906
     helper2("fBig", "fSmall", true, false, true, true, true, true);
   }
 
   @Test
   @Ignore
   public void test10() throws Exception {
-    //regression test for 81084
+    // regression test for 81084
     if (BUG_81084) {
       printTestDisabledMessage("BUG_81084");
       return;
@@ -333,7 +333,7 @@ public class RenamePrivateFieldTest extends RefactoringTest {
 
   @Test
   public void testUnicode01() throws Exception {
-    //regression test for 180331
+    // regression test for 180331
     helper2("field", "feel", true, false, true, true, true, true);
   }
 }

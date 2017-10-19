@@ -219,7 +219,8 @@ public class SystemInfo {
           if (line != null) {
             final String[] strings = line.split("\\s+");
             long mem = Long.parseLong(strings[1]);
-            // never saw something different than 'kB', but man page says: "unit of measurement (e.g., "kB")"
+            // never saw something different than 'kB', but man page says: "unit of measurement
+            // (e.g., "kB")"
             if (strings.length > 2) {
               final String unit = strings[2].toLowerCase();
               if (unit.equals("kb")) {

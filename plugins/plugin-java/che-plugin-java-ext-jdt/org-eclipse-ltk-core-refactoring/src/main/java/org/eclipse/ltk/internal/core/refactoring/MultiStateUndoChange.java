@@ -139,7 +139,7 @@ public class MultiStateUndoChange extends Change {
   /** {@inheritDoc} */
   public void initializeValidationData(IProgressMonitor pm) {
     if (pm == null) pm = new NullProgressMonitor();
-    pm.beginTask("", 1); //$NON-NLS-1$
+    pm.beginTask("", 1); // $NON-NLS-1$
     try {
       fValidationState = BufferValidationState.create(fFile);
     } finally {
@@ -150,14 +150,14 @@ public class MultiStateUndoChange extends Change {
   /** {@inheritDoc} */
   public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
     if (pm == null) pm = new NullProgressMonitor();
-    pm.beginTask("", 1); //$NON-NLS-1$
+    pm.beginTask("", 1); // $NON-NLS-1$
     try {
       if (fValidationState == null)
         throw new CoreException(
             new Status(
                 IStatus.ERROR,
                 RefactoringCorePlugin.getPluginId(),
-                "MultiStateUndoChange has not been initialialized")); //$NON-NLS-1$
+                "MultiStateUndoChange has not been initialialized")); // $NON-NLS-1$
 
       ITextFileBuffer buffer =
           FileBuffers.getTextFileBufferManager()
@@ -180,7 +180,7 @@ public class MultiStateUndoChange extends Change {
       return new NullChange();
     if (pm == null) pm = new NullProgressMonitor();
     ITextFileBufferManager manager = FileBuffers.getTextFileBufferManager();
-    pm.beginTask("", 2); //$NON-NLS-1$
+    pm.beginTask("", 2); // $NON-NLS-1$
     ITextFileBuffer buffer = null;
     try {
       manager.connect(fFile.getFullPath(), LocationKind.IFILE, new SubProgressMonitor(pm, 1));

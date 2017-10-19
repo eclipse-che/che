@@ -157,7 +157,7 @@ public class LanguageServerAnnotationModel extends AnnotationModelImpl
     // //TODO configure this
     decorations.put(DiagnosticAnnotation.ERROR_ANNOTATION_TYPE, lsCss.overviewMarkError());
     decorations.put(DiagnosticAnnotation.WARNING_ANNOTATION_TYPE, lsCss.overviewMarkWarning());
-    //TODO add differed styles for info and hint type
+    // TODO add differed styles for info and hint type
     decorations.put(DiagnosticAnnotation.INFO_ANNOTATION_TYPE, lsCss.overviewMarkTask());
     decorations.put(DiagnosticAnnotation.HINT_ANNOTATION_TYPE, lsCss.overviewMarkTask());
     return decorations;
@@ -169,7 +169,7 @@ public class LanguageServerAnnotationModel extends AnnotationModelImpl
     if (annotationType == null) {
       return "orion.annotation.error";
     }
-    //TODO we need better integration with Orion annotation system
+    // TODO we need better integration with Orion annotation system
     switch (annotationType) {
       case DiagnosticAnnotation.WARNING_ANNOTATION_TYPE:
         return "orion.annotation.warning";

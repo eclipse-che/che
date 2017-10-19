@@ -36,7 +36,7 @@ public class SubTypesSet extends TypeSet {
    */
   @Override
   public TypeSet makeClone() {
-    return this; //new SubTypesSet(fUpperBounds.makeClone());
+    return this; // new SubTypesSet(fUpperBounds.makeClone());
   }
 
   /* (non-Javadoc)
@@ -172,8 +172,7 @@ public class SubTypesSet extends TypeSet {
       // Scan the "upper frontier", i.e. the upper bound set, and see whether
       // 't' is a subtype of any of those.
       for (Iterator<TType> ubIter = fUpperBounds /*.upperBound() */.iterator();
-          ubIter.hasNext();
-          ) {
+          ubIter.hasNext(); ) {
         TType ub = ubIter.next();
 
         if (TTypes.canAssignTo(t, ub)) {
@@ -251,7 +250,7 @@ public class SubTypesSet extends TypeSet {
         + fID
         + ": subTypes("
         + fUpperBounds
-        + ")>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        + ")>"; // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
   }
 
   /* (non-Javadoc)
@@ -303,8 +302,8 @@ public class SubTypesSet extends TypeSet {
           ArrayType at = (ArrayType) ub;
           int numDims = at.getDimensions();
           for (Iterator<TType> elemSubIter = TTypes.getAllSubTypesIterator(at.getElementType());
-              elemSubIter.hasNext();
-              ) fEnumCache.add(TTypes.createArrayType(elemSubIter.next(), numDims));
+              elemSubIter.hasNext(); )
+            fEnumCache.add(TTypes.createArrayType(elemSubIter.next(), numDims));
         } else {
           for (Iterator<TType> iterator = TTypes.getAllSubTypesIterator(ub); iterator.hasNext(); ) {
             fEnumCache.fMembers.add(iterator.next());

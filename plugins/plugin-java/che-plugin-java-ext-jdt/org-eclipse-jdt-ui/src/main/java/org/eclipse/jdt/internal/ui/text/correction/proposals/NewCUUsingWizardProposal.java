@@ -62,7 +62,7 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 
   public NewCUUsingWizardProposal(
       ICompilationUnit cu, Name node, int typeKind, IJavaElement typeContainer, int severity) {
-    super("", null, severity, null); //$NON-NLS-1$
+    super("", null, severity, null); // $NON-NLS-1$
 
     fCompilationUnit = cu;
     fNode = node;
@@ -205,7 +205,7 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
         }
         break;
       default:
-        throw new IllegalArgumentException("Unknown type kind"); //$NON-NLS-1$
+        throw new IllegalArgumentException("Unknown type kind"); // $NON-NLS-1$
     }
     fShowDialog = true;
   }
@@ -228,7 +228,7 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
           buf.append(typeArgBaseName);
         } else {
           for (int i = 0; i < nTypeArgs; i++) {
-            if (i != 0) buf.append(", "); //$NON-NLS-1$
+            if (i != 0) buf.append(", "); // $NON-NLS-1$
             buf.append(typeArgBaseName).append(i + 1);
           }
         }
@@ -252,9 +252,11 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
     //			WizardDialog dialog= new WizardDialog(shell, wizard);
     //
     //			PixelConverter converter= new PixelConverter(JFaceResources.getDialogFont());
-    //			dialog.setMinimumPageSize(converter.convertWidthInCharsToPixels(70), converter.convertHeightInCharsToPixels(20));
+    //			dialog.setMinimumPageSize(converter.convertWidthInCharsToPixels(70),
+    // converter.convertHeightInCharsToPixels(20));
     //			dialog.create();
-    //			dialog.getShell().setText(CorrectionMessages.NewCUCompletionUsingWizardProposal_dialogtitle);
+    //
+    //	dialog.getShell().setText(CorrectionMessages.NewCUCompletionUsingWizardProposal_dialogtitle);
     //
     //			if (dialog.open() == Window.OK) {
     //				createdType= (IType) wizard.getCreatedElement();
@@ -382,14 +384,14 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
     switch (parent.getNodeType()) {
       case ASTNode.METHOD_DECLARATION:
         if (node.getLocationInParent() == MethodDeclaration.THROWN_EXCEPTION_TYPES_PROPERTY) {
-          return ast.resolveWellKnownType("java.lang.Exception"); //$NON-NLS-1$
+          return ast.resolveWellKnownType("java.lang.Exception"); // $NON-NLS-1$
         }
         break;
       case ASTNode.THROW_STATEMENT:
-        return ast.resolveWellKnownType("java.lang.Exception"); //$NON-NLS-1$
+        return ast.resolveWellKnownType("java.lang.Exception"); // $NON-NLS-1$
       case ASTNode.SINGLE_VARIABLE_DECLARATION:
         if (parent.getLocationInParent() == CatchClause.EXCEPTION_PROPERTY) {
-          return ast.resolveWellKnownType("java.lang.Exception"); //$NON-NLS-1$
+          return ast.resolveWellKnownType("java.lang.Exception"); // $NON-NLS-1$
         }
         break;
       case ASTNode.VARIABLE_DECLARATION_STATEMENT:
@@ -426,31 +428,31 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
         buf.append(CorrectionMessages.NewCUCompletionUsingWizardProposal_createannotation_info);
         break;
     }
-    buf.append("<br>"); //$NON-NLS-1$
-    buf.append("<br>"); //$NON-NLS-1$
+    buf.append("<br>"); // $NON-NLS-1$
+    buf.append("<br>"); // $NON-NLS-1$
     if (fTypeContainer instanceof IType) {
       buf.append(CorrectionMessages.NewCUCompletionUsingWizardProposal_tooltip_enclosingtype);
     } else {
       buf.append(CorrectionMessages.NewCUCompletionUsingWizardProposal_tooltip_package);
     }
-    buf.append(" <b>"); //$NON-NLS-1$
+    buf.append(" <b>"); // $NON-NLS-1$
     buf.append(
         JavaElementLabels.getElementLabel(fTypeContainer, JavaElementLabels.T_FULLY_QUALIFIED));
-    buf.append("</b><br>"); //$NON-NLS-1$
-    buf.append("public "); //$NON-NLS-1$
+    buf.append("</b><br>"); // $NON-NLS-1$
+    buf.append("public "); // $NON-NLS-1$
 
     switch (fTypeKind) {
       case K_CLASS:
-        buf.append("class <b>"); //$NON-NLS-1$
+        buf.append("class <b>"); // $NON-NLS-1$
         break;
       case K_INTERFACE:
-        buf.append("interface <b>"); //$NON-NLS-1$
+        buf.append("interface <b>"); // $NON-NLS-1$
         break;
       case K_ENUM:
-        buf.append("enum <b>"); //$NON-NLS-1$
+        buf.append("enum <b>"); // $NON-NLS-1$
         break;
       case K_ANNOTATION:
-        buf.append("@interface <b>"); //$NON-NLS-1$
+        buf.append("@interface <b>"); // $NON-NLS-1$
         break;
     }
     nameToHTML(fTypeNameWithParameters, buf);
@@ -459,7 +461,7 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
     if (superclass != null) {
       if (superclass.isClass()) {
         if (fTypeKind == K_CLASS) {
-          buf.append("</b> extends <b>"); //$NON-NLS-1$
+          buf.append("</b> extends <b>"); // $NON-NLS-1$
           nameToHTML(
               BindingLabelProvider.getBindingLabel(
                   superclass, BindingLabelProvider.DEFAULT_TEXTFLAGS),
@@ -467,9 +469,9 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
         }
       } else {
         if (fTypeKind == K_INTERFACE) {
-          buf.append("</b> extends <b>"); //$NON-NLS-1$
+          buf.append("</b> extends <b>"); // $NON-NLS-1$
         } else {
-          buf.append("</b> implements <b>"); //$NON-NLS-1$
+          buf.append("</b> implements <b>"); // $NON-NLS-1$
         }
         nameToHTML(
             BindingLabelProvider.getBindingLabel(
@@ -477,7 +479,7 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
             buf);
       }
     }
-    buf.append("</b> {<br>}<br>"); //$NON-NLS-1$
+    buf.append("</b> {<br>}<br>"); // $NON-NLS-1$
     return buf.toString();
   }
 
@@ -485,9 +487,9 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
     for (int i = 0; i < name.length(); i++) {
       char ch = name.charAt(i);
       if (ch == '>') {
-        buf.append("&gt;"); //$NON-NLS-1$
+        buf.append("&gt;"); // $NON-NLS-1$
       } else if (ch == '<') {
-        buf.append("&lt;"); //$NON-NLS-1$
+        buf.append("&lt;"); // $NON-NLS-1$
       } else {
         buf.append(ch);
       }

@@ -51,10 +51,10 @@ import org.testng.annotations.Test;
  */
 @Listeners({EverrestJetty.class, MockitoTestNGListener.class})
 public class OrganizationResourcesDistributionServiceTest {
-  @SuppressWarnings("unused") //is declared for deploying by everrest-assured
+  @SuppressWarnings("unused") // is declared for deploying by everrest-assured
   private ApiExceptionMapper mapper;
 
-  @SuppressWarnings("unused") //is declared for deploying by everrest-assured
+  @SuppressWarnings("unused") // is declared for deploying by everrest-assured
   private CheJsonProvider jsonProvider = new CheJsonProvider(new HashSet<>());
 
   @Mock private OrganizationResourcesDistributor organizationResourcesManager;

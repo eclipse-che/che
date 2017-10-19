@@ -131,8 +131,8 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
       }
     }
 
-    if (qualifier.equals("java.lang")) { //$NON-NLS-1$
-      //No explicit import statement required
+    if (qualifier.equals("java.lang")) { // $NON-NLS-1$
+      // No explicit import statement required
       ITypeRoot typeRoot = fCompilationUnit.getTypeRoot();
       if (typeRoot != null) {
         IPackageFragment packageFragment = (IPackageFragment) typeRoot.getParent();

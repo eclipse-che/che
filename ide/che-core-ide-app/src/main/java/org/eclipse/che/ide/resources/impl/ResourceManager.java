@@ -291,7 +291,7 @@ public final class ResourceManager {
               side there is outdated information about sub-projects, so
               we need to get updated project list. */
 
-              //dispose outdated resource
+              // dispose outdated resource
               final Optional<Resource> outdatedResource = store.getResource(path);
 
               checkState(outdatedResource.isPresent(), "Outdated resource wasn't found");
@@ -421,7 +421,7 @@ public final class ResourceManager {
                           ps.getProjects()
                               .thenPromise(
                                   updatedConfiguration -> {
-                                    //cache new configs
+                                    // cache new configs
                                     cachedConfigs =
                                         updatedConfiguration.toArray(
                                             new ProjectConfigDto[updatedConfiguration.size()]);
@@ -562,7 +562,7 @@ public final class ResourceManager {
                   .thenPromise(
                       success -> {
                         store.dispose(
-                            source.getLocation(), !source.isFile()); //TODO: need to be tested
+                            source.getLocation(), !source.isFile()); // TODO: need to be tested
 
                         return ps.move(
                                 source.getLocation(),
@@ -580,7 +580,7 @@ public final class ResourceManager {
                                                   clientServerEventService
                                                       .sendFileTrackingResumeEvent();
 
-                                                  //cache new configs
+                                                  // cache new configs
                                                   cachedConfigs =
                                                       updatedConfigs.toArray(
                                                           new ProjectConfigDto
@@ -769,8 +769,8 @@ public final class ResourceManager {
                 class Visitor implements ResourceVisitor {
                   Resource[] resources;
 
-                  private int size = 0; //size of total items
-                  private int incStep = 50; //step to increase resource array
+                  private int size = 0; // size of total items
+                  private int incStep = 50; // step to increase resource array
 
                   private Visitor() {
                     this.resources = NO_RESOURCES;
@@ -783,7 +783,7 @@ public final class ResourceManager {
                     }
 
                     if (size
-                        > resources.length - 1) { //check load factor and increase resource array
+                        > resources.length - 1) { // check load factor and increase resource array
                       resources = copyOf(resources, resources.length + incStep);
                     }
 

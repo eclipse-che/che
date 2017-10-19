@@ -51,9 +51,9 @@ public abstract class AbstractBootstrapper {
     this.bootstrapperStatusListener =
         event -> {
           BootstrapperStatus status = event.getStatus();
-          //skip starting status event
+          // skip starting status event
           if (status.equals(BootstrapperStatus.DONE) || status.equals(BootstrapperStatus.FAILED)) {
-            //check bootstrapper belongs to current runtime and machine
+            // check bootstrapper belongs to current runtime and machine
             RuntimeIdentityDto runtimeId = event.getRuntimeId();
             if (event.getMachineName().equals(machineName)
                 && runtimeIdentity.getEnvName().equals(runtimeId.getEnvName())
@@ -84,7 +84,7 @@ public abstract class AbstractBootstrapper {
     try {
       doBootstrapAsync(installerEndpoint, outputEndpoint);
 
-      //waiting for DONE or FAILED bootstrapper status event
+      // waiting for DONE or FAILED bootstrapper status event
       BootstrapperStatusEvent resultEvent =
           finishEventFuture.get(bootstrappingTimeoutMinutes, TimeUnit.MINUTES);
       if (resultEvent.getStatus().equals(BootstrapperStatus.FAILED)) {

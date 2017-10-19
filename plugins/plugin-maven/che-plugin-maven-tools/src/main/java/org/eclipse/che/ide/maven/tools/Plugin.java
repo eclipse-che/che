@@ -260,11 +260,11 @@ public class Plugin {
 
     if (pluginElement.hasSingleChild("configuration")) {
       final Element confElement = pluginElement.getSingleChild("configuration");
-      //remove all configuration properties from element
+      // remove all configuration properties from element
       for (Element property : confElement.getChildren()) {
         property.remove();
       }
-      //append each new property to "configuration" element
+      // append each new property to "configuration" element
       for (Map.Entry<String, String> property : configuration.entrySet()) {
         confElement.appendChild(createElement(property.getKey(), property.getValue()));
       }
@@ -273,7 +273,7 @@ public class Plugin {
       for (Map.Entry<String, String> entry : configuration.entrySet()) {
         newConfiguration.appendChild(createElement(entry.getKey(), entry.getValue()));
       }
-      //insert new configuration to xml
+      // insert new configuration to xml
       pluginElement.appendChild(newConfiguration);
     }
   }

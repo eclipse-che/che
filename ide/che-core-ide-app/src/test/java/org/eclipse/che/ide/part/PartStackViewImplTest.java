@@ -49,7 +49,7 @@ public class PartStackViewImplTest {
 
   @Mock FlowPanel tabsPanel;
 
-  //additional mocks
+  // additional mocks
   @Mock private MouseDownEvent event;
   @Mock private ContextMenuEvent contextMenuEvent;
 

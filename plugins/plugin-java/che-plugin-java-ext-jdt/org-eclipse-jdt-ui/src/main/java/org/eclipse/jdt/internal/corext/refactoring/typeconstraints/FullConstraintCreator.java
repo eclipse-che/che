@@ -173,7 +173,7 @@ public class FullConstraintCreator extends ConstraintCreator {
             nameVariable, fConstraintVariableFactory.makeTypeVariable(exception.getType()));
 
     ITypeBinding throwable =
-        node.getAST().resolveWellKnownType("java.lang.Throwable"); //$NON-NLS-1$
+        node.getAST().resolveWellKnownType("java.lang.Throwable"); // $NON-NLS-1$
     ITypeConstraint[] catchBound =
         fTypeConstraintFactory.createSubtypeConstraint(
             nameVariable, fConstraintVariableFactory.makeRawBindingVariable(throwable));
@@ -400,7 +400,7 @@ public class FullConstraintCreator extends ConstraintCreator {
     if (nameBinding instanceof IVariableBinding) {
       IVariableBinding vb = (IVariableBinding) nameBinding;
       if (vb.isField()) return createConstraintsForAccessToField(vb, qualifier, qualifiedName);
-    } //TODO other bindings
+    } // TODO other bindings
     return new ITypeConstraint[0];
   }
 
@@ -496,7 +496,8 @@ public class FullConstraintCreator extends ConstraintCreator {
     ConstraintVariable declaringType =
         fConstraintVariableFactory.makeRawBindingVariable(
             expression
-                .resolveTypeBinding()); //TODO fix this - can't use Decl(M) because 'this' can live outside of methods
+                .resolveTypeBinding()); // TODO fix this - can't use Decl(M) because 'this' can live
+    // outside of methods
     return fTypeConstraintFactory.createDefinesConstraint(thisExpression, declaringType);
   }
 
@@ -535,12 +536,12 @@ public class FullConstraintCreator extends ConstraintCreator {
     ConstraintVariable nameVariable =
         fConstraintVariableFactory.makeExpressionOrTypeVariable(node.getExpression(), getContext());
     ITypeBinding throwable =
-        node.getAST().resolveWellKnownType("java.lang.Throwable"); //$NON-NLS-1$
+        node.getAST().resolveWellKnownType("java.lang.Throwable"); // $NON-NLS-1$
     return fTypeConstraintFactory.createSubtypeConstraint(
         nameVariable, fConstraintVariableFactory.makeRawBindingVariable(throwable));
   }
 
-  //--------- private helpers ----------------//
+  // --------- private helpers ----------------//
 
   private Collection<ITypeConstraint> getConstraintsForFieldDeclaringTypes(FieldDeclaration fd) {
     Collection<ITypeConstraint> result = new ArrayList<ITypeConstraint>(fd.fragments().size());
@@ -621,7 +622,7 @@ public class FullConstraintCreator extends ConstraintCreator {
     for (Iterator<ITypeBinding> iter = declaringSupertypes.iterator(); iter.hasNext(); ) {
       ITypeBinding superType = iter.next();
       IMethodBinding overriddenMethod = findMethod(overridingMethod, superType);
-      Assert.isNotNull(overriddenMethod); //because we asked for declaring types
+      Assert.isNotNull(overriddenMethod); // because we asked for declaring types
       if (Bindings.equals(overridingMethod, overriddenMethod)) continue;
       ITypeConstraint[] returnTypeConstraint =
           fTypeConstraintFactory.createEqualsConstraint(
@@ -691,16 +692,21 @@ public class FullConstraintCreator extends ConstraintCreator {
 
       // a) there is exactly one remaining argument -> be careful as it may be a direct array param
 
-      // This is currently not used by Generalize Type Declaration as it does not support array types:
+      // This is currently not used by Generalize Type Declaration as it does not support array
+      // types:
       //			if (i == nArgs - 1) {
       //				Expression argument= (Expression) arguments.get(i);
       //				if (TypeRules.canAssign(parameterTypes[nParams - 1], argument.resolveTypeBinding())) {
-      //					ConstraintVariable parameterTypeVariable= fConstraintVariableFactory.makeParameterTypeVariable(methodBinding, nParams - 1);
-      //					ConstraintVariable expressionVariable= fConstraintVariableFactory.makeExpressionOrTypeVariable(argument, getContext());
-      //					ITypeConstraint[] argConstraint= fTypeConstraintFactory.createSubtypeConstraint(expressionVariable, parameterTypeVariable);
+      //					ConstraintVariable parameterTypeVariable=
+      // fConstraintVariableFactory.makeParameterTypeVariable(methodBinding, nParams - 1);
+      //					ConstraintVariable expressionVariable=
+      // fConstraintVariableFactory.makeExpressionOrTypeVariable(argument, getContext());
+      //					ITypeConstraint[] argConstraint=
+      // fTypeConstraintFactory.createSubtypeConstraint(expressionVariable, parameterTypeVariable);
       //					result.addAll(Arrays.asList(argConstraint));
       //					directArray= true;
-      //					//XXX there should be a constraint that logically ORs the direct array and element type constraints
+      //					//XXX there should be a constraint that logically ORs the direct array and element type
+      // constraints
       //				}
       //			}
 
@@ -759,7 +765,7 @@ public class FullConstraintCreator extends ConstraintCreator {
         return ASTNodes.getElementType(type);
       }
     }
-    Assert.isTrue(false); //array initializers are allowed in only 2 places
+    Assert.isTrue(false); // array initializers are allowed in only 2 places
     return null;
   }
 
@@ -815,7 +821,7 @@ public class FullConstraintCreator extends ConstraintCreator {
     return result;
   }
 
-  //--- RootDef ----//
+  // --- RootDef ----//
   protected static IMethodBinding[] getRootDefs(IMethodBinding methodBinding) {
     Set<ITypeBinding> declaringSuperTypes = getDeclaringSuperTypes(methodBinding);
     Set<IMethodBinding> result = new LinkedHashSet<IMethodBinding>();
@@ -856,7 +862,8 @@ public class FullConstraintCreator extends ConstraintCreator {
     if (allSuperTypes.isEmpty())
       allSuperTypes.add(
           methodBinding
-              .getDeclaringClass()); //TODO: Why only iff empty? The declaring class is not a supertype ...
+              .getDeclaringClass()); // TODO: Why only iff empty? The declaring class is not a
+    // supertype ...
     Set<ITypeBinding> result = new HashSet<ITypeBinding>();
     for (Iterator<ITypeBinding> iter = allSuperTypes.iterator(); iter.hasNext(); ) {
       ITypeBinding type = iter.next();

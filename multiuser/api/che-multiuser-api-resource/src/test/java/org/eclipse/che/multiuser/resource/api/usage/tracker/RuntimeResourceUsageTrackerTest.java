@@ -100,7 +100,7 @@ public class RuntimeResourceUsageTrackerTest {
     Resource usedRuntimes = usedRuntimesOpt.get();
     assertEquals(usedRuntimes.getType(), RuntimeResourceType.ID);
     assertEquals(
-        usedRuntimes.getAmount(), WorkspaceStatus.values().length - 1); //except stopped workspaces
+        usedRuntimes.getAmount(), WorkspaceStatus.values().length - 1); // except stopped workspaces
     assertEquals(usedRuntimes.getUnit(), RuntimeResourceType.UNIT);
     verify(accountManager).getById(eq("account123"));
     verify(workspaceManager).getByNamespace(eq("testAccount"), eq(false));

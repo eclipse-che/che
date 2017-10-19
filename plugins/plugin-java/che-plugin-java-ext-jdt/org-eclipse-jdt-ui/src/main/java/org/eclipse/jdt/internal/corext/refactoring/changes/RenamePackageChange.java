@@ -54,7 +54,7 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
         IResource.NULL_STAMP,
         null,
         renameSubpackages);
-    Assert.isTrue(!pack.isReadOnly(), "package must not be read only"); //$NON-NLS-1$
+    Assert.isTrue(!pack.isReadOnly(), "package must not be read only"); // $NON-NLS-1$
   }
 
   private RenamePackageChange(
@@ -144,7 +144,7 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
             }
           });
       int count = allPackages.length;
-      pm.beginTask("", count); //$NON-NLS-1$
+      pm.beginTask("", count); // $NON-NLS-1$
       // When renaming to subpackage (a -> a.b), do it inside-out:
       boolean insideOut = getNewName().startsWith(getOldName());
       try {
@@ -185,7 +185,7 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 
   @Override
   public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
-    pm.beginTask("", 2); //$NON-NLS-1$
+    pm.beginTask("", 2); // $NON-NLS-1$
     RefactoringStatus result;
     try {
       result = new RefactoringStatus();
@@ -199,7 +199,7 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
         if (fRenameSubpackages) {
           IPackageFragment[] allPackages = JavaElementUtil.getPackageAndSubpackages(pack);
           SubProgressMonitor subPm = new SubProgressMonitor(pm, 1);
-          subPm.beginTask("", allPackages.length); //$NON-NLS-1$
+          subPm.beginTask("", allPackages.length); // $NON-NLS-1$
           for (int i = 0; i < allPackages.length; i++) {
             // don't check for read-only since we don't go through
             // validate edit.
@@ -220,7 +220,7 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
   private void isValid(RefactoringStatus result, IPackageFragment pack, IProgressMonitor pm)
       throws JavaModelException {
     ICompilationUnit[] units = pack.getCompilationUnits();
-    pm.beginTask("", units.length); //$NON-NLS-1$
+    pm.beginTask("", units.length); // $NON-NLS-1$
     for (int i = 0; i < units.length; i++) {
       pm.subTask(
           Messages.format(
@@ -236,8 +236,8 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
   private void renamePackage(
       IPackageFragment pack, IProgressMonitor pm, IPath newPath, String newName)
       throws JavaModelException, CoreException {
-    if (!pack.exists())
-      return; // happens if empty parent with single subpackage is renamed, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=199045
+    if (!pack.exists()) return; // happens if empty parent with single subpackage is renamed, see
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=199045
     pack.rename(newName, false, pm);
     if (fCompilationUnitStamps != null) {
       IPackageFragment newPack =

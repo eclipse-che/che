@@ -13,15 +13,15 @@ import org.w3c.dom.Element;
 
 public class QualifiedTypeNameHistory extends History {
 
-  private static final String NODE_ROOT = "qualifiedTypeNameHistroy"; //$NON-NLS-1$
-  private static final String NODE_TYPE_INFO = "fullyQualifiedTypeName"; //$NON-NLS-1$
-  private static final String NODE_NAME = "name"; //$NON-NLS-1$
+  private static final String NODE_ROOT = "qualifiedTypeNameHistroy"; // $NON-NLS-1$
+  private static final String NODE_TYPE_INFO = "fullyQualifiedTypeName"; // $NON-NLS-1$
+  private static final String NODE_NAME = "name"; // $NON-NLS-1$
 
   private static QualifiedTypeNameHistory fgInstance;
 
   public static QualifiedTypeNameHistory getDefault() {
     if (fgInstance == null)
-      fgInstance = new QualifiedTypeNameHistory("QualifiedTypeNameHistory.xml"); //$NON-NLS-1$
+      fgInstance = new QualifiedTypeNameHistory("QualifiedTypeNameHistory.xml"); // $NON-NLS-1$
 
     return fgInstance;
   }

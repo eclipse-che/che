@@ -130,7 +130,8 @@ public class TextEditChangeNode extends InternalTextEditChangeNode {
     TextEditBasedChange change = getTextEditBasedChange();
     if (change instanceof MultiStateTextFileChange) {
       return new ChildNode
-          [0]; // no edit preview & edit disabling possible in the MultiStateTextFileChange (edits must be applied in sequence)
+          [0]; // no edit preview & edit disabling possible in the MultiStateTextFileChange (edits
+      // must be applied in sequence)
     }
     TextEditBasedChangeGroup[] groups = getSortedChangeGroups(change);
     ChildNode[] result = new ChildNode[groups.length];

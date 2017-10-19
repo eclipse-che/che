@@ -222,7 +222,8 @@ public class CheckoutBranchTest {
     editor.closeFileByNameWithSaving("script.js");
     editor.waitWhileFileIsClosed("script.js");
 
-    // Checkout in main branch, change files in master branch (this creates conflict) and check message with conflict
+    // Checkout in main branch, change files in master branch (this creates conflict) and check
+    // message with conflict
     switchOnMasterBranch();
     projectExplorer.waitProjectExplorer();
     loader.waitOnClosed();

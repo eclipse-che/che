@@ -72,12 +72,12 @@ public class CheckTreeStructureAfterCloseTest {
     loader.waitOnClosed();
     editor.waitActiveEditor();
 
-    //close project explorer
+    // close project explorer
     projectExplorer.openItemByPath(PROJECT_NAME);
-    //open project explorer
+    // open project explorer
     projectExplorer.openItemByPath(PROJECT_NAME);
 
-    //check tree structure project explorer
+    // check tree structure project explorer
     projectExplorer.waitItem(PATH_TO_POM_XML_FILE);
     projectExplorer.waitItem(PATH_TO_SRC_FOLDER);
   }

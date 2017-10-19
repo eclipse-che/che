@@ -122,12 +122,12 @@ public class UploadFilePresenter implements UploadFileView.ActionDelegate {
 
                         @Override
                         public void onDoubleClick(Notification notification) {
-                          //stub
+                          // stub
                         }
 
                         @Override
                         public void onClose(Notification notification) {
-                          //stub
+                          // stub
                         }
                       };
 
@@ -143,9 +143,10 @@ public class UploadFilePresenter implements UploadFileView.ActionDelegate {
               }
             });
 
-    //TODO this should process editor agent
+    // TODO this should process editor agent
     //        if (view.isOverwriteFileSelected()) {
-    //            String path = ((HasStorablePath)getResourceBasedNode()).getStorablePath() + "/" + view.getFileName();
+    //            String path = ((HasStorablePath)getResourceBasedNode()).getStorablePath() + "/" +
+    // view.getFileName();
     //            eventBus.fireEvent(new FileContentUpdateEvent(path));
     //        }
   }

@@ -131,8 +131,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
       ICompilationUnit cu = impStructure.getCompilationUnit();
 
       fImplicitImports = new HashSet<String>(3);
-      fImplicitImports.add(""); //$NON-NLS-1$
-      fImplicitImports.add("java.lang"); //$NON-NLS-1$
+      fImplicitImports.add(""); // $NON-NLS-1$
+      fImplicitImports.add("java.lang"); // $NON-NLS-1$
       fImplicitImports.add(cu.getParent().getElementName());
 
       fAnalyzer = new ScopeAnalyzer(root);
@@ -265,8 +265,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
         ArrayList<TypeNameMatch[]> openChoices = new ArrayList<TypeNameMatch[]>(nUnresolved);
         ArrayList<SourceRange> sourceRanges = new ArrayList<SourceRange>(nUnresolved);
         for (Iterator<UnresolvedTypeData> iter = fUnresolvedTypes.values().iterator();
-            iter.hasNext();
-            ) {
+            iter.hasNext(); ) {
           UnresolvedTypeData data = iter.next();
           TypeNameMatch[] openChoice = processTypeInfo(data.foundInfos);
           if (openChoice != null) {
@@ -534,7 +533,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
     content = oldDemandImports.toArray();
     for (int i = 0; i < content.length; i++) {
       String importName = (String) content[i];
-      if (importsAdded.remove(importName + ".*")) //$NON-NLS-1$
+      if (importsAdded.remove(importName + ".*")) // $NON-NLS-1$
       oldDemandImports.remove(importName);
     }
     fNumberOfImportsAdded = importsAdded.size();

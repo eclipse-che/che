@@ -14,7 +14,7 @@ package org.eclipse.che.selenium.core.constant;
 public final class TestIntelligentCommandsConstants {
 
   private TestIntelligentCommandsConstants() {
-    //this prevents class instance creation
+    // this prevents class instance creation
     throw new AssertionError();
   }
 

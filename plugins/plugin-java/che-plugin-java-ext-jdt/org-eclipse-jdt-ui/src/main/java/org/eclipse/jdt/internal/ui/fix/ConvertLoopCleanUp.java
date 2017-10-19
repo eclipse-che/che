@@ -74,15 +74,15 @@ public class ConvertLoopCleanUp extends AbstractCleanUp {
     StringBuffer buf = new StringBuffer();
 
     if (isEnabled(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED)) {
-      buf.append("for (int element : ids) {\n"); //$NON-NLS-1$
-      buf.append("    double value= element / 2; \n"); //$NON-NLS-1$
-      buf.append("    System.out.println(value);\n"); //$NON-NLS-1$
-      buf.append("}\n"); //$NON-NLS-1$
+      buf.append("for (int element : ids) {\n"); // $NON-NLS-1$
+      buf.append("    double value= element / 2; \n"); // $NON-NLS-1$
+      buf.append("    System.out.println(value);\n"); // $NON-NLS-1$
+      buf.append("}\n"); // $NON-NLS-1$
     } else {
-      buf.append("for (int i = 0; i < ids.length; i++) {\n"); //$NON-NLS-1$
-      buf.append("    double value= ids[i] / 2; \n"); //$NON-NLS-1$
-      buf.append("    System.out.println(value);\n"); //$NON-NLS-1$
-      buf.append("}\n"); //$NON-NLS-1$
+      buf.append("for (int i = 0; i < ids.length; i++) {\n"); // $NON-NLS-1$
+      buf.append("    double value= ids[i] / 2; \n"); // $NON-NLS-1$
+      buf.append("    System.out.println(value);\n"); // $NON-NLS-1$
+      buf.append("}\n"); // $NON-NLS-1$
     }
 
     return buf.toString();

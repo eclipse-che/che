@@ -84,14 +84,14 @@ public class AccountLicenseServicePermissionsFilterTest {
 
   @Test
   public void shouldTestThatAllPublicMethodsAreCoveredByPermissionsFilter() throws Exception {
-    //given
+    // given
     final List<String> collect =
         Stream.of(AccountLicenseService.class.getDeclaredMethods())
             .filter(method -> Modifier.isPublic(method.getModifiers()))
             .map(Method::getName)
             .collect(Collectors.toList());
 
-    //then
+    // then
     assertEquals(collect.size(), 1);
     assertTrue(collect.contains(LicenseServicePermissionsFilter.GET_LICENSE_METHOD));
   }

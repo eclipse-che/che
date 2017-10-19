@@ -48,13 +48,13 @@ public class InitTest {
       throws GitException, URISyntaxException, IOException {
     GitConnection connection = getTestUserConnection(connectionFactory, repository);
 
-    //check git is not initialized
+    // check git is not initialized
     assertFalse(new File(repository, ".git").exists());
 
-    //when
+    // when
     connection.init(false);
 
-    //then
+    // then
     assertTrue(new File(repository, ".git").exists());
   }
 }

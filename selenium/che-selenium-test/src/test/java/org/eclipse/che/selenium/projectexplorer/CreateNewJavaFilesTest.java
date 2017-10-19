@@ -75,17 +75,17 @@ public class CreateNewJavaFilesTest {
     projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
     loader.waitOnClosed();
 
-    //create new class
+    // create new class
     createNewFileFromMenuFile(NEW_CLASS, AskForValueDialog.JavaFiles.CLASS, ".java");
 
     checkDefaultTextInEditorForFile(DEFAULT_TEXT_FOR_NEW_CLASS, NEW_CLASS);
 
-    //create new interface
+    // create new interface
     createNewFileFromMenuFile(NEW_INTERFACE, AskForValueDialog.JavaFiles.INTERFACE, ".java");
 
     checkDefaultTextInEditorForFile(DEFAULT_TEXT_FOR_NEW_INTERFACE, NEW_INTERFACE);
 
-    //create new enum
+    // create new enum
     createNewFileFromMenuFile(NEW_ENUM, AskForValueDialog.JavaFiles.ENUM, ".java");
 
     checkDefaultTextInEditorForFile(DEFAULT_TEXT_FOR_NEW_ENUM, NEW_ENUM);

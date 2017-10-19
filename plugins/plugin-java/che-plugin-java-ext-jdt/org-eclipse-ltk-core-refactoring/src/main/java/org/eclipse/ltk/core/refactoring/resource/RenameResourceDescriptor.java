@@ -46,7 +46,7 @@ public final class RenameResourceDescriptor extends RefactoringDescriptor {
    * <p>Clients may safely cast the obtained refactoring descriptor to {@link
    * RenameResourceDescriptor}.
    */
-  public static final String ID = "org.eclipse.ltk.core.refactoring.rename.resource"; //$NON-NLS-1$
+  public static final String ID = "org.eclipse.ltk.core.refactoring.rename.resource"; // $NON-NLS-1$
 
   /** The name attribute */
   private String fNewName;
@@ -82,7 +82,7 @@ public final class RenameResourceDescriptor extends RefactoringDescriptor {
    */
   public void setNewName(final String name) {
     Assert.isNotNull(name);
-    Assert.isLegal(!"".equals(name), "Name must not be empty"); //$NON-NLS-1$//$NON-NLS-2$
+    Assert.isLegal(!"".equals(name), "Name must not be empty"); // $NON-NLS-1$//$NON-NLS-2$
     fNewName = name;
   }
 

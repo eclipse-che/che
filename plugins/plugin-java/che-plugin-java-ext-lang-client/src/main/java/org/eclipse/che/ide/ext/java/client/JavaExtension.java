@@ -153,7 +153,7 @@ public class JavaExtension {
     assistantGroup.add(
         findUsagesAction, new Constraints(Anchor.BEFORE, GROUP_ASSISTANT_REFACTORING));
 
-    //Configure Build Path action group
+    // Configure Build Path action group
     actionManager.registerAction("markDirectoryAsSourceGroup", markDirectoryAsGroup);
     actionManager.registerAction("markDirectoryAsSource", markDirAsSourceAction);
     actionManager.registerAction("unmarkDirectoryAsSource", unmarkDirAsSourceAction);

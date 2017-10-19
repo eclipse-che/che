@@ -255,7 +255,7 @@ public class ASTNodes {
       else if (parent instanceof FieldDeclaration) return ((FieldDeclaration) parent).getType();
       else if (parent instanceof LambdaExpression) return null;
     }
-    Assert.isTrue(false, "Unknown VariableDeclaration"); //$NON-NLS-1$
+    Assert.isTrue(false, "Unknown VariableDeclaration"); // $NON-NLS-1$
     return null;
   }
 
@@ -407,7 +407,7 @@ public class ASTNodes {
           @Override
           public void endVisit(ArrayType node) {
             for (int i = 0; i < node.dimensions().size(); i++) {
-              buffer.append("[]"); //$NON-NLS-1$
+              buffer.append("[]"); // $NON-NLS-1$
             }
           }
         };
@@ -458,7 +458,7 @@ public class ASTNodes {
           @Override
           public void endVisit(ArrayType node) {
             for (int i = 0; i < node.dimensions().size(); i++) {
-              buffer.append("[]"); //$NON-NLS-1$
+              buffer.append("[]"); // $NON-NLS-1$
             }
           }
         };
@@ -493,7 +493,7 @@ public class ASTNodes {
     if (operator.equals(Assignment.Operator.RIGHT_SHIFT_UNSIGNED_ASSIGN))
       return InfixExpression.Operator.RIGHT_SHIFT_UNSIGNED;
 
-    Assert.isTrue(false, "Cannot convert assignment operator"); //$NON-NLS-1$
+    Assert.isTrue(false, "Cannot convert assignment operator"); // $NON-NLS-1$
     return null;
   }
 
@@ -1290,13 +1290,16 @@ public class ASTNodes {
   }
 
   //    /**
-  //     * Returns the topmost ancestor of <code>node</code> that is a {@link org.eclipse.jdt.core.dom.Type} (but not a {@link org.eclipse
+  //     * Returns the topmost ancestor of <code>node</code> that is a {@link
+  // org.eclipse.jdt.core.dom.Type} (but not a {@link org.eclipse
   // .jdt.core.dom.UnionType}).
   //     * <p>
-  //     * <b>Note:</b> The returned node often resolves to a different binding than the given <code>node</code>!
+  //     * <b>Note:</b> The returned node often resolves to a different binding than the given
+  // <code>node</code>!
   //     *
   //     * @param node the starting node, can be <code>null</code>
-  //     * @return the topmost type or <code>null</code> if the node is not a descendant of a type node
+  //     * @return the topmost type or <code>null</code> if the node is not a descendant of a type
+  // node
   //     * @see #getNormalizedNode(org.eclipse.jdt.core.dom.ASTNode)
   //     */
   //    public static Type getTopMostType(ASTNode node) {
@@ -1305,7 +1308,8 @@ public class ASTNodes {
   //               || node instanceof Name
   //               || node instanceof Annotation || node instanceof MemberValuePair
   //               ||
-  //               node instanceof Expression) { // Expression could maybe be reduced to expression node types that can appear in an
+  //               node instanceof Expression) { // Expression could maybe be reduced to expression
+  // node types that can appear in an
   // annotation
   //            result = node;
   //            node = node.getParent();
@@ -1340,7 +1344,7 @@ public class ASTNodes {
     if (name.isQualifiedName()) {
       return ((QualifiedName) name).getQualifier().getFullyQualifiedName();
     }
-    return ""; //$NON-NLS-1$
+    return ""; // $NON-NLS-1$
   }
 
   public static String getSimpleNameIdentifier(Name name) {

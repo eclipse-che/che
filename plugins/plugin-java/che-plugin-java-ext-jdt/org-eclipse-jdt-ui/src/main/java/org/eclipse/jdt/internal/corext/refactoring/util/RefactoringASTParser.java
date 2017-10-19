@@ -172,8 +172,8 @@ public class RefactoringASTParser {
         options.put(key, JavaCore.IGNORE);
       }
     }
-    options.put(JavaCore.COMPILER_PB_MAX_PER_UNIT, "0"); //$NON-NLS-1$
-    options.put(JavaCore.COMPILER_TASK_TAGS, ""); //$NON-NLS-1$
+    options.put(JavaCore.COMPILER_PB_MAX_PER_UNIT, "0"); // $NON-NLS-1$
+    options.put(JavaCore.COMPILER_TASK_TAGS, ""); // $NON-NLS-1$
     return options;
   }
 }

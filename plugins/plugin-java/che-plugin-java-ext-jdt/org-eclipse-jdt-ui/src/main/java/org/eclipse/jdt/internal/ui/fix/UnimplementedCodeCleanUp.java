@@ -33,7 +33,7 @@ import org.eclipse.jface.text.templates.TemplateException;
 public class UnimplementedCodeCleanUp extends AbstractMultiFix {
 
   public static final String MAKE_TYPE_ABSTRACT =
-      "cleanup.make_type_abstract_if_missing_method"; //$NON-NLS-1$
+      "cleanup.make_type_abstract_if_missing_method"; // $NON-NLS-1$
 
   public UnimplementedCodeCleanUp() {
     super();
@@ -63,23 +63,23 @@ public class UnimplementedCodeCleanUp extends AbstractMultiFix {
     StringBuffer buf = new StringBuffer();
 
     if (isEnabled(MAKE_TYPE_ABSTRACT)) {
-      buf.append("public abstract class Face implements IFace {\n"); //$NON-NLS-1$
+      buf.append("public abstract class Face implements IFace {\n"); // $NON-NLS-1$
     } else {
-      buf.append("public class Face implements IFace {\n"); //$NON-NLS-1$
+      buf.append("public class Face implements IFace {\n"); // $NON-NLS-1$
     }
     if (isEnabled(CleanUpConstants.ADD_MISSING_METHODES)) {
       boolean createComments =
           Boolean.valueOf(
                   PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_ADD_COMMENTS, null))
               .booleanValue();
-      if (createComments) buf.append(indent(getOverridingMethodComment(), "    ")); //$NON-NLS-1$
+      if (createComments) buf.append(indent(getOverridingMethodComment(), "    ")); // $NON-NLS-1$
 
-      buf.append("    @Override\n"); //$NON-NLS-1$
-      buf.append("    public void method() {\n"); //$NON-NLS-1$
-      buf.append(indent(getMethodBody(), "        ")); //$NON-NLS-1$
-      buf.append("    }\n"); //$NON-NLS-1$
+      buf.append("    @Override\n"); // $NON-NLS-1$
+      buf.append("    public void method() {\n"); // $NON-NLS-1$
+      buf.append(indent(getMethodBody(), "        ")); // $NON-NLS-1$
+      buf.append("    }\n"); // $NON-NLS-1$
     }
-    buf.append("}\n"); //$NON-NLS-1$
+    buf.append("}\n"); // $NON-NLS-1$
 
     return buf.toString();
   }
@@ -169,19 +169,19 @@ public class UnimplementedCodeCleanUp extends AbstractMultiFix {
     String templateName = CodeTemplateContextType.OVERRIDECOMMENT_ID;
 
     Template template = getCodeTemplate(templateName);
-    if (template == null) return ""; //$NON-NLS-1$
+    if (template == null) return ""; // $NON-NLS-1$
 
     CodeTemplateContext context =
-        new CodeTemplateContext(template.getContextTypeId(), null, "\n"); //$NON-NLS-1$
+        new CodeTemplateContext(template.getContextTypeId(), null, "\n"); // $NON-NLS-1$
 
-    context.setVariable(CodeTemplateContextType.FILENAME, "Face.java"); //$NON-NLS-1$
-    context.setVariable(CodeTemplateContextType.PACKAGENAME, "test"); //$NON-NLS-1$
-    context.setVariable(CodeTemplateContextType.PROJECTNAME, "TestProject"); //$NON-NLS-1$
-    context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, "Face"); //$NON-NLS-1$
-    context.setVariable(CodeTemplateContextType.ENCLOSING_METHOD, "method"); //$NON-NLS-1$
-    context.setVariable(CodeTemplateContextType.RETURN_TYPE, "void"); //$NON-NLS-1$
+    context.setVariable(CodeTemplateContextType.FILENAME, "Face.java"); // $NON-NLS-1$
+    context.setVariable(CodeTemplateContextType.PACKAGENAME, "test"); // $NON-NLS-1$
+    context.setVariable(CodeTemplateContextType.PROJECTNAME, "TestProject"); // $NON-NLS-1$
+    context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, "Face"); // $NON-NLS-1$
+    context.setVariable(CodeTemplateContextType.ENCLOSING_METHOD, "method"); // $NON-NLS-1$
+    context.setVariable(CodeTemplateContextType.RETURN_TYPE, "void"); // $NON-NLS-1$
     context.setVariable(
-        CodeTemplateContextType.SEE_TO_OVERRIDDEN_TAG, "test.IFace#foo()"); //$NON-NLS-1$
+        CodeTemplateContextType.SEE_TO_OVERRIDDEN_TAG, "test.IFace#foo()"); // $NON-NLS-1$
 
     return evaluateTemplate(template, context);
   }
@@ -189,13 +189,13 @@ public class UnimplementedCodeCleanUp extends AbstractMultiFix {
   private String getMethodBody() {
     String templateName = CodeTemplateContextType.METHODSTUB_ID;
     Template template = getCodeTemplate(templateName);
-    if (template == null) return ""; //$NON-NLS-1$
+    if (template == null) return ""; // $NON-NLS-1$
 
     CodeTemplateContext context =
-        new CodeTemplateContext(template.getContextTypeId(), null, "\n"); //$NON-NLS-1$
-    context.setVariable(CodeTemplateContextType.ENCLOSING_METHOD, "method"); //$NON-NLS-1$
-    context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, "Face"); //$NON-NLS-1$
-    context.setVariable(CodeTemplateContextType.BODY_STATEMENT, ""); //$NON-NLS-1$
+        new CodeTemplateContext(template.getContextTypeId(), null, "\n"); // $NON-NLS-1$
+    context.setVariable(CodeTemplateContextType.ENCLOSING_METHOD, "method"); // $NON-NLS-1$
+    context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, "Face"); // $NON-NLS-1$
+    context.setVariable(CodeTemplateContextType.BODY_STATEMENT, ""); // $NON-NLS-1$
     return evaluateTemplate(template, context);
   }
 
@@ -209,12 +209,12 @@ public class UnimplementedCodeCleanUp extends AbstractMultiFix {
       buffer = context.evaluate(template);
     } catch (BadLocationException e) {
       JavaPlugin.log(e);
-      return ""; //$NON-NLS-1$
+      return ""; // $NON-NLS-1$
     } catch (TemplateException e) {
       JavaPlugin.log(e);
-      return ""; //$NON-NLS-1$
+      return ""; // $NON-NLS-1$
     }
-    if (buffer == null) return ""; //$NON-NLS-1$
+    if (buffer == null) return ""; // $NON-NLS-1$
 
     return buffer.getString();
   }
@@ -229,7 +229,7 @@ public class UnimplementedCodeCleanUp extends AbstractMultiFix {
       buf.append(codeArray[i]);
       if (codeArray[i] == '\n') buf.append(indent);
     }
-    buf.append("\n"); //$NON-NLS-1$
+    buf.append("\n"); // $NON-NLS-1$
 
     return buf.toString();
   }

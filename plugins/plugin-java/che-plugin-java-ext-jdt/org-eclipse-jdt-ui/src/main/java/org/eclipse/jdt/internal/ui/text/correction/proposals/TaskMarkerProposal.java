@@ -34,7 +34,7 @@ public class TaskMarkerProposal extends CUCorrectionProposal {
   private IProblemLocation fLocation;
 
   public TaskMarkerProposal(ICompilationUnit cu, IProblemLocation location, int relevance) {
-    super("", cu, relevance, null); //$NON-NLS-1$
+    super("", cu, relevance, null); // $NON-NLS-1$
     fLocation = location;
 
     setDisplayName(CorrectionMessages.TaskMarkerProposal_description);
@@ -52,10 +52,10 @@ public class TaskMarkerProposal extends CUCorrectionProposal {
     try {
       Position pos = getUpdatedPosition(document);
       if (pos != null) {
-        rootEdit.addChild(new ReplaceEdit(pos.getOffset(), pos.getLength(), "")); //$NON-NLS-1$
+        rootEdit.addChild(new ReplaceEdit(pos.getOffset(), pos.getLength(), "")); // $NON-NLS-1$
       } else {
         rootEdit.addChild(
-            new ReplaceEdit(fLocation.getOffset(), fLocation.getLength(), "")); //$NON-NLS-1$
+            new ReplaceEdit(fLocation.getOffset(), fLocation.getLength(), "")); // $NON-NLS-1$
       }
     } catch (BadLocationException e) {
       throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));

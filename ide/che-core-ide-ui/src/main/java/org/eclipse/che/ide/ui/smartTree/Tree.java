@@ -775,7 +775,7 @@ public class Tree extends FocusWidget
       if (isAttached()) {
         moveFocus(getContainer(null));
       }
-      getEmptyStatus().paint(); //draw empty label
+      getEmptyStatus().paint(); // draw empty label
     }
   }
 
@@ -862,7 +862,7 @@ public class Tree extends FocusWidget
       return;
     }
 
-    ((HasPresentation) node).getPresentation(true); //update presentation
+    ((HasPresentation) node).getPresentation(true); // update presentation
     Element el =
         getPresentationRenderer()
             .render(
@@ -1027,7 +1027,7 @@ public class Tree extends FocusWidget
 
                 for (int i = vr[0]; i <= vr[1]; i++) {
                   if (goInto.isActive()) {
-                    //constraint node indention
+                    // constraint node indention
                     int goIntoDirDepth = nodeStorage.getDepth(goInto.getLastUsed());
                     int currentNodeDepth = nodeStorage.getDepth(visible.get(i));
 
@@ -1160,7 +1160,8 @@ public class Tree extends FocusWidget
                 return;
               }
 
-              if (nodeDescriptor.isLoading()) { //node may have been already requested for expanding
+              if (nodeDescriptor
+                  .isLoading()) { // node may have been already requested for expanding
                 return;
               }
 
@@ -1192,7 +1193,7 @@ public class Tree extends FocusWidget
                   nodeDescriptor.setChildrenRendered(true);
                 }
 
-                //direct expand on the view
+                // direct expand on the view
                 view.expand(nodeDescriptor);
 
                 update();
@@ -1343,10 +1344,10 @@ public class Tree extends FocusWidget
     focusEl.getStyle().setTop(0, Style.Unit.PX);
     focusEl.getStyle().setPosition(Style.Position.ABSOLUTE);
 
-    //subscribe for Event.FOCUSEVENTS
+    // subscribe for Event.FOCUSEVENTS
     int bits =
         DOM.getEventsSunk(
-            (Element) focusEl.cast()); //do not remove redundant cast, GWT tests will fail
+            (Element) focusEl.cast()); // do not remove redundant cast, GWT tests will fail
     DOM.sinkEvents((Element) focusEl.cast(), bits | Event.FOCUSEVENTS);
   }
 
@@ -1448,7 +1449,7 @@ public class Tree extends FocusWidget
     }
   }
 
-  @SuppressWarnings("unused") //temporary no need to use event parameter
+  @SuppressWarnings("unused") // temporary no need to use event parameter
   private void onClear(StoreClearEvent event) {
     clear();
   }
@@ -1490,7 +1491,7 @@ public class Tree extends FocusWidget
     }
   }
 
-  @SuppressWarnings("unused") //temporary no need to use event parameter
+  @SuppressWarnings("unused") // temporary no need to use event parameter
   private void onSort(StoreSortEvent se) {
     redraw(null);
   }

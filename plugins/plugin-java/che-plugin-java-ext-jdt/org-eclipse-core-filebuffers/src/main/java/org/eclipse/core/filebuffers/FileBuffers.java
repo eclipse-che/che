@@ -45,7 +45,7 @@ public final class FileBuffers {
    * @since 3.3.
    */
   public static final String PLUGIN_ID =
-      "org.eclipse.core.filebuffers"; //FileBuffersPlugin.PLUGIN_ID;
+      "org.eclipse.core.filebuffers"; // FileBuffersPlugin.PLUGIN_ID;
 
   /**
    * Returns the text file buffer manager. May return <code>null</code> if the file buffers plug-in

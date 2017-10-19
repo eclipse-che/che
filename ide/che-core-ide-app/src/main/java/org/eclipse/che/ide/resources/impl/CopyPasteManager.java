@@ -132,26 +132,26 @@ class CopyPasteManager implements ResourceChangedHandler {
   }
 
   private Promise<Void> moveResource(final Resource resource, final Path destination) {
-    //simple move without overwriting
+    // simple move without overwriting
     return resource
         .move(destination)
         .thenPromise((Function<Resource, Promise<Void>>) ignored -> promises.resolve(null))
         .catchErrorPromise(
             error -> {
 
-              //resource may already exists
+              // resource may already exists
               if (error.getMessage().contains("exists")) {
 
-                //create dialog with overwriting option
+                // create dialog with overwriting option
                 return createFromAsyncRequest(
                     (RequestCall<Void>)
                         callback -> {
 
-                          //handle overwrite operation
+                          // handle overwrite operation
                           final ConfirmCallback overwrite =
                               () -> {
 
-                                //copy with overwriting
+                                // copy with overwriting
                                 resource
                                     .move(destination, true)
                                     .then(
@@ -164,10 +164,10 @@ class CopyPasteManager implements ResourceChangedHandler {
                                         });
                               };
 
-                          //skip this resource
+                          // skip this resource
                           final ConfirmCallback skip = () -> callback.onSuccess(null);
 
-                          //change destination name
+                          // change destination name
                           final ConfirmCallback rename =
                               () ->
                                   dialogFactory
@@ -201,7 +201,7 @@ class CopyPasteManager implements ResourceChangedHandler {
                         });
 
               } else {
-                //notify user about failed copying
+                // notify user about failed copying
                 notificationManager.notify(
                     "Error moving resource", error.getMessage(), FAIL, FLOAT_MODE);
 
@@ -211,26 +211,26 @@ class CopyPasteManager implements ResourceChangedHandler {
   }
 
   private Promise<Void> copyResource(final Resource resource, final Path destination) {
-    //simple copy without overwriting
+    // simple copy without overwriting
     return resource
         .copy(destination)
         .thenPromise((Function<Resource, Promise<Void>>) resource1 -> promises.resolve(null))
         .catchErrorPromise(
             error -> {
 
-              //resource may already exists
+              // resource may already exists
               if (error.getMessage().contains("exists")) {
 
-                //create dialog with overwriting option
+                // create dialog with overwriting option
                 return createFromAsyncRequest(
                     (RequestCall<Void>)
                         callback -> {
 
-                          //handle overwrite operation
+                          // handle overwrite operation
                           final ConfirmCallback overwrite =
                               () -> {
 
-                                //copy with overwriting
+                                // copy with overwriting
                                 resource
                                     .copy(destination, true)
                                     .then(
@@ -243,10 +243,10 @@ class CopyPasteManager implements ResourceChangedHandler {
                                         });
                               };
 
-                          //skip this resource
+                          // skip this resource
                           final ConfirmCallback skip = () -> callback.onSuccess(null);
 
-                          //change destination name
+                          // change destination name
                           final ConfirmCallback rename =
                               () ->
                                   dialogFactory
@@ -279,7 +279,7 @@ class CopyPasteManager implements ResourceChangedHandler {
                               .show();
                         });
               } else {
-                //notify user about failed copying
+                // notify user about failed copying
                 notificationManager.notify(
                     "Error copying resource", error.getMessage(), FAIL, FLOAT_MODE);
 
@@ -292,7 +292,7 @@ class CopyPasteManager implements ResourceChangedHandler {
   public void onResourceChanged(ResourceChangedEvent event) {
     final ResourceDelta delta = event.getDelta();
 
-    //delta should be removed and resources is not null
+    // delta should be removed and resources is not null
     if (delta.getKind() != REMOVED || resources == null) {
       return;
     }

@@ -49,16 +49,16 @@ public class RemoteDeleteTest {
       throws GitException, IOException {
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     connection.remoteAdd(RemoteAddParams.create("origin", "host.com:username/Repo.git"));
-    //now it is 1 remote
+    // now it is 1 remote
     assertEquals(connection.remoteList(null, false).size(), 1);
-    //try delete not existing remote
+    // try delete not existing remote
     try {
       connection.remoteDelete("donotexists");
       fail("should be exception");
     } catch (GitException ignored) {
     }
     connection.remoteDelete("origin");
-    //now it is 0 remotes
+    // now it is 0 remotes
     assertEquals(connection.remoteList(null, false).size(), 0);
   }
 }

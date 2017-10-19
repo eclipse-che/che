@@ -91,8 +91,8 @@ import org.eclipse.text.edits.ReplaceEdit;
 public abstract class RenameMethodProcessor extends JavaRenameProcessor
     implements IReferenceUpdating, IDelegateUpdating {
 
-  private static final String ATTRIBUTE_DELEGATE = "delegate"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_DEPRECATE = "deprecate"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_DELEGATE = "delegate"; // $NON-NLS-1$
+  private static final String ATTRIBUTE_DEPRECATE = "deprecate"; // $NON-NLS-1$
 
   private SearchResultGroup[] fOccurrences;
   private boolean fUpdateReferences;
@@ -201,14 +201,14 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor
     return RefactoringSaveHelper.SAVE_REFACTORING;
   }
 
-  //---- INameUpdating -------------------------------------
+  // ---- INameUpdating -------------------------------------
 
   public final String getCurrentElementName() {
     return fMethod.getElementName();
   }
 
   public final RefactoringStatus checkNewElementName(String newName) {
-    Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
+    Assert.isNotNull(newName, "new name"); // $NON-NLS-1$
 
     RefactoringStatus status =
         Checks.checkName(newName, JavaConventionsUtil.validateMethodName(newName, fMethod));
@@ -271,7 +271,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor
     return fMethodsToRename;
   }
 
-  //---- IReferenceUpdating -----------------------------------
+  // ---- IReferenceUpdating -----------------------------------
 
   public final void setUpdateReferences(boolean update) {
     fUpdateReferences = update;
@@ -281,7 +281,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor
     return fUpdateReferences;
   }
 
-  //------------------- IDelegateUpdating ----------------------
+  // ------------------- IDelegateUpdating ----------------------
 
   public boolean canEnableDelegateUpdating() {
     return true;
@@ -303,7 +303,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor
     fDelegateDeprecation = deprecate;
   }
 
-  //----------- preconditions ------------------
+  // ----------- preconditions ------------------
 
   @Override
   public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
@@ -328,7 +328,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor
       IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
     try {
       RefactoringStatus result = new RefactoringStatus();
-      pm.beginTask("", 9); //$NON-NLS-1$
+      pm.beginTask("", 9); // $NON-NLS-1$
       // TODO workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=40367
       if (!Checks.isAvailable(fMethod)) {
         result.addFatalError(
@@ -353,32 +353,32 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor
         IType[] outerTypes =
             searchForOuterTypesOfReferences(newNameMethods, new SubProgressMonitor(pm, 1));
         if (outerTypes.length > 0) {
-          //There exists a reference to a clashing method, where the reference is in a nested type.
-          //That nested type could be a type in a ripple method's hierarchy, which could
-          //cause the reference to bind to the new ripple method instead of to
-          //its old binding (a method of an enclosing scope).
-          //-> Getting *more* references than before -> Semantics not preserved.
-          //Examples: RenameVirtualMethodInClassTests#testFail39() and #testFail41()
-          //TODO: could pass declaringTypes to the RippleMethodFinder and check whether
-          //a hierarchy contains one of outerTypes (or an outer type of an outerType, recursively).
+          // There exists a reference to a clashing method, where the reference is in a nested type.
+          // That nested type could be a type in a ripple method's hierarchy, which could
+          // cause the reference to bind to the new ripple method instead of to
+          // its old binding (a method of an enclosing scope).
+          // -> Getting *more* references than before -> Semantics not preserved.
+          // Examples: RenameVirtualMethodInClassTests#testFail39() and #testFail41()
+          // TODO: could pass declaringTypes to the RippleMethodFinder and check whether
+          // a hierarchy contains one of outerTypes (or an outer type of an outerType, recursively).
           mustAnalyzeShadowing = true;
 
         } else {
           boolean hasOldRefsInInnerTypes = true;
-          //TODO: to implement this optimization:
-          //- move search for references to before this check.
-          //- collect references in inner types.
-          //- for each reference, check for all supertypes and their enclosing types
-          //(recursively), whether they declare a rippleMethod
+          // TODO: to implement this optimization:
+          // - move search for references to before this check.
+          // - collect references in inner types.
+          // - for each reference, check for all supertypes and their enclosing types
+          // (recursively), whether they declare a rippleMethod
           if (hasOldRefsInInnerTypes) {
-            //There exists a reference to a ripple method in a nested type
-            //of a type in the hierarchy of any ripple method.
-            //When that reference is renamed, and one of the supertypes of the
-            //nested type declared a method matching the new name, then
-            //the renamed reference will bind to the method in its supertype,
-            //since inherited methods bind stronger than methods from enclosing scopes.
-            //Getting *less* references than before -> Semantics not preserved.
-            //Examples: RenamePrivateMethodTests#testFail2(), RenamePrivateMethodTests#testFail5()
+            // There exists a reference to a ripple method in a nested type
+            // of a type in the hierarchy of any ripple method.
+            // When that reference is renamed, and one of the supertypes of the
+            // nested type declared a method matching the new name, then
+            // the renamed reference will bind to the method in its supertype,
+            // since inherited methods bind stronger than methods from enclosing scopes.
+            // Getting *less* references than before -> Semantics not preserved.
+            // Examples: RenamePrivateMethodTests#testFail2(), RenamePrivateMethodTests#testFail5()
             mustAnalyzeShadowing = true;
           } else {
             mustAnalyzeShadowing = false;
@@ -403,7 +403,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor
 
       if (fUpdateReferences) result.merge(checkRelatedMethods());
 
-      result.merge(analyzeCompilationUnits()); //removes CUs with syntax errors
+      result.merge(analyzeCompilationUnits()); // removes CUs with syntax errors
       pm.worked(1);
 
       if (result.hasFatalError()) return result;
@@ -456,11 +456,12 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor
             Object method = match.getElement();
             if (method
                 instanceof
-                IMethod) // check for bug 90138: [refactoring] [rename] Renaming method throws internal exception
-            results.add((IMethod) method);
+                IMethod) // check for bug 90138: [refactoring] [rename] Renaming method throws
+              // internal exception
+              results.add((IMethod) method);
             else
               JavaPlugin.logErrorMessage(
-                  "Unexpected element in search match: " + match.toString()); //$NON-NLS-1$
+                  "Unexpected element in search match: " + match.toString()); // $NON-NLS-1$
           }
         };
     new SearchEngine()
@@ -487,7 +488,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor
   protected final IJavaSearchScope createRefactoringScope() throws CoreException {
     return createRefactoringScope(fMethod);
   }
-  //TODO: shouldn't scope take all ripple methods into account?
+  // TODO: shouldn't scope take all ripple methods into account?
   protected static final IJavaSearchScope createRefactoringScope(IMethod method)
       throws CoreException {
     return RefactoringScopeFactory.create(method, true, false);
@@ -561,12 +562,12 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor
     return result;
   }
 
-  //-------
+  // -------
 
   private RefactoringStatus analyzeRenameChanges(IProgressMonitor pm) throws CoreException {
     ICompilationUnit[] newDeclarationWCs = null;
     try {
-      pm.beginTask("", 4); //$NON-NLS-1$
+      pm.beginTask("", 4); // $NON-NLS-1$
       RefactoringStatus result = new RefactoringStatus();
       ICompilationUnit[] declarationCUs = getDeclarationCUs();
       newDeclarationWCs =
@@ -597,7 +598,8 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor
         wcNewMethods[i] = getMethodInWorkingCopy(method, getNewElementName(), typeWc);
       }
 
-      //			SearchResultGroup[] newOccurrences= findNewOccurrences(newMethods, newDeclarationWCs, new SubProgressMonitor(pm, 3));
+      //			SearchResultGroup[] newOccurrences= findNewOccurrences(newMethods, newDeclarationWCs, new
+      // SubProgressMonitor(pm, 3));
       SearchResultGroup[] newOccurrences =
           batchFindNewOccurrences(
               wcNewMethods, wcOldMethods, newDeclarationWCs, new SubProgressMonitor(pm, 3), result);
@@ -616,12 +618,14 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor
     }
   }
 
-  //Lower memory footprint than batchFindNewOccurrences. Not used because it is too slow.
-  //Final solution is maybe to do searches in chunks of ~ 50 CUs.
-  //	private SearchResultGroup[] findNewOccurrences(IMethod[] newMethods, ICompilationUnit[] newDeclarationWCs, IProgressMonitor pm) throws CoreException {
+  // Lower memory footprint than batchFindNewOccurrences. Not used because it is too slow.
+  // Final solution is maybe to do searches in chunks of ~ 50 CUs.
+  //	private SearchResultGroup[] findNewOccurrences(IMethod[] newMethods, ICompilationUnit[]
+  // newDeclarationWCs, IProgressMonitor pm) throws CoreException {
   //		pm.beginTask("", fOccurrences.length * 2); //$NON-NLS-1$
   //
-  //		SearchPattern refsPattern= RefactoringSearchEngine.createOrPattern(newMethods, IJavaSearchConstants.REFERENCES);
+  //		SearchPattern refsPattern= RefactoringSearchEngine.createOrPattern(newMethods,
+  // IJavaSearchConstants.REFERENCES);
   //		SearchParticipant[] searchParticipants= SearchUtils.getDefaultSearchParticipants();
   //		IJavaSearchScope scope= RefactoringScopeFactory.create(newMethods);
   //		MethodOccurenceCollector requestor= new MethodOccurenceCollector(getNewElementName());
@@ -635,16 +639,19 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor
   //			try {
   //				ICompilationUnit wc= RenameAnalyzeUtil.findWorkingCopyForCu(newDeclarationWCs, originalCu);
   //				if (wc == null) {
-  //					newWc= RenameAnalyzeUtil.createNewWorkingCopy(originalCu, fChangeManager, fWorkingCopyOwner,
+  //					newWc= RenameAnalyzeUtil.createNewWorkingCopy(originalCu, fChangeManager,
+  // fWorkingCopyOwner,
   //							new SubProgressMonitor(pm, 1));
   //				}
-  //				searchEngine.search(refsPattern, searchParticipants, scope,	requestor, new SubProgressMonitor(pm, 1));
+  //				searchEngine.search(refsPattern, searchParticipants, scope,	requestor, new
+  // SubProgressMonitor(pm, 1));
   //			} finally {
   //				if (newWc != null)
   //					newWc.discardWorkingCopy();
   //			}
   //		}
-  //		SearchResultGroup[] newResults= RefactoringSearchEngine.groupByResource(requestor.getResults());
+  //		SearchResultGroup[] newResults=
+  // RefactoringSearchEngine.groupByResource(requestor.getResults());
   //		pm.done();
   //		return newResults;
   //	}
@@ -656,7 +663,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor
       IProgressMonitor pm,
       RefactoringStatus status)
       throws CoreException {
-    pm.beginTask("", 2); //$NON-NLS-1$
+    pm.beginTask("", 2); // $NON-NLS-1$
 
     SearchPattern refsPattern =
         RefactoringSearchEngine.createOrPattern(wcNewMethods, IJavaSearchConstants.REFERENCES);
@@ -729,7 +736,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor
     return typeWc.getMethod(elementName, paramTypeSignatures);
   }
 
-  //-------
+  // -------
   private static IMethod[] classesDeclareMethodName(
       ITypeHierarchy hier, List<IType> classes, IMethod method, String newName)
       throws CoreException {
@@ -857,7 +864,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor
   protected void addOccurrences(
       TextChangeManager manager, IProgressMonitor pm, RefactoringStatus status)
       throws CoreException /*thrown in subtype*/ {
-    pm.beginTask("", fOccurrences.length); //$NON-NLS-1$
+    pm.beginTask("", fOccurrences.length); // $NON-NLS-1$
     for (int i = 0; i < fOccurrences.length; i++) {
       ICompilationUnit cu = fOccurrences[i].getCompilationUnit();
       if (cu == null) continue;
@@ -990,7 +997,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor
               RefactoringCoreMessages.InitializableRefactoring_argument_not_exist,
               JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
     final String name = extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
-    if (name != null && !"".equals(name)) //$NON-NLS-1$
+    if (name != null && !"".equals(name)) // $NON-NLS-1$
     setNewElementName(name);
     else
       return RefactoringStatus.createFatalErrorStatus(

@@ -60,7 +60,7 @@ public class FileOpenedAfterCreationTest {
 
   @Test
   public void fileOpenedSuccessTest() throws Exception {
-    //open .html file, get text from there and compare with expected text
+    // open .html file, get text from there and compare with expected text
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     notificationsPopupPanel.waitProgressPopupPanelClose();
@@ -76,7 +76,7 @@ public class FileOpenedAfterCreationTest {
     askForValueDialog.clickOkBtn();
     askForValueDialog.waitFormToClose();
 
-    //open .java file, get text from there and compare with expected text
+    // open .java file, get text from there and compare with expected text
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     loader.waitOnClosed();

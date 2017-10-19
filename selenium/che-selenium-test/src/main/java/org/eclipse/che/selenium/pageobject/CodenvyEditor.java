@@ -454,7 +454,8 @@ public class CodenvyEditor {
   }
 
   /** returns focus in the end of current line (in active tab) */
-  //TODO in some cases (for example if we do step into in debug mode and opens editor after that, focus will be lost). But this problem should be fixed. After the we can remove this method
+  // TODO in some cases (for example if we do step into in debug mode and opens editor after that,
+  // focus will be lost). But this problem should be fixed. After the we can remove this method
   public void returnFocusInCurrentLine() {
     List<WebElement> lines =
         seleniumWebDriver.findElements(By.xpath(Locators.ACTIVE_LINE_HIGHLIGHT));
@@ -1068,7 +1069,7 @@ public class CodenvyEditor {
     loader.waitOnClosed();
   }
 
-  //TODO this will be able to after adding feature 'Go to line' and 'Delete line'
+  // TODO this will be able to after adding feature 'Go to line' and 'Delete line'
   public void selectLineAndDelete(int numberOfLine) {
     Actions action = actionsFactory.createAction(seleniumWebDriver);
     setCursorToLine(numberOfLine);
@@ -1080,7 +1081,7 @@ public class CodenvyEditor {
     loader.waitOnClosed();
   }
 
-  //TODO this will be able to after adding feature 'Go to line' and 'Delete line'
+  // TODO this will be able to after adding feature 'Go to line' and 'Delete line'
   public void selectLineAndDelete() {
     Actions action = actionsFactory.createAction(seleniumWebDriver);
     typeTextIntoEditor(Keys.HOME.toString());
@@ -1689,7 +1690,8 @@ public class CodenvyEditor {
       }
       stringBuilder.deleteCharAt(stringBuilder.length() - 1);
     }
-    // If an editor do not attached to the DOM (we will have state element exception). We wait attaching 2 second and try to read text again.
+    // If an editor do not attached to the DOM (we will have state element exception). We wait
+    // attaching 2 second and try to read text again.
     catch (WebDriverException ex) {
       WaitUtils.sleepQuietly(2);
       stringBuilder.setLength(0);

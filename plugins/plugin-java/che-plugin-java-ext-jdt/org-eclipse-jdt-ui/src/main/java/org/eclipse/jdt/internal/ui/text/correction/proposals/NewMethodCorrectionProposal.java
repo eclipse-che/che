@@ -49,12 +49,13 @@ import org.eclipse.swt.graphics.Image;
 
 public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposal {
 
-  private static final String KEY_NAME = "name"; //$NON-NLS-1$
-  private static final String KEY_TYPE = "type"; //$NON-NLS-1$
+  private static final String KEY_NAME = "name"; // $NON-NLS-1$
+  private static final String KEY_TYPE = "type"; // $NON-NLS-1$
 
   private List<Expression> fArguments;
 
-  //	invocationNode is MethodInvocation, ConstructorInvocation, SuperConstructorInvocation, ClassInstanceCreation, SuperMethodInvocation
+  //	invocationNode is MethodInvocation, ConstructorInvocation, SuperConstructorInvocation,
+  // ClassInstanceCreation, SuperMethodInvocation
   public NewMethodCorrectionProposal(
       String label,
       ICompilationUnit targetCU,
@@ -214,7 +215,7 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
         } else {
           newTypeNode = ASTResolving.guessTypeForReference(ast, node);
           if (newTypeNode == null) {
-            newTypeNode = ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
+            newTypeNode = ast.newSimpleType(ast.newSimpleName("Object")); // $NON-NLS-1$
           }
         }
       }
@@ -249,12 +250,12 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
       SingleVariableDeclaration param = ast.newSingleVariableDeclaration();
 
       // argument type
-      String argTypeKey = "arg_type_" + i; //$NON-NLS-1$
+      String argTypeKey = "arg_type_" + i; // $NON-NLS-1$
       Type type = evaluateParameterType(ast, elem, argTypeKey, context);
       param.setType(type);
 
       // argument name
-      String argNameKey = "arg_name_" + i; //$NON-NLS-1$
+      String argNameKey = "arg_name_" + i; // $NON-NLS-1$
       String name = evaluateParameterName(takenNames, elem, type, argNameKey);
       param.setName(ast.newSimpleName(name));
 
@@ -278,7 +279,7 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
       }
       return getImportRewrite().addImport(binding, ast, context);
     }
-    return ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
+    return ast.newSimpleType(ast.newSimpleName("Object")); // $NON-NLS-1$
   }
 
   private String evaluateParameterName(

@@ -188,7 +188,7 @@ public class JavaCompletionProposal implements CompletionProposal, CompletionPro
     @Override
     public LinearRange getSelection(final Document document) {
       if (region == null) {
-        //keep cursor location
+        // keep cursor location
         return LinearRange.createWithStart(cursorOffset).andLength(0);
       } else {
         return LinearRange.createWithStart(region.getOffset()).andLength(region.getLength());

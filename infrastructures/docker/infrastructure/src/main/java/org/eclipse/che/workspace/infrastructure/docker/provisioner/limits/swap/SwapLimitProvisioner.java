@@ -34,7 +34,8 @@ public class SwapLimitProvisioner implements ContainerSystemSettingsProvisioner 
     //  1   enable swap with size equal to current memory size
     //
     //  according to docker docs field  memorySwap should be equal to memory+swap
-    //  we calculate this field as memorySwap=memory * (1 + multiplier) so we just add 1 to multiplier
+    //  we calculate this field as memorySwap=memory * (1 + multiplier) so we just add 1 to
+    // multiplier
     this.memorySwapMultiplier = memorySwapMultiplier == -1 ? -1 : memorySwapMultiplier + 1;
   }
 

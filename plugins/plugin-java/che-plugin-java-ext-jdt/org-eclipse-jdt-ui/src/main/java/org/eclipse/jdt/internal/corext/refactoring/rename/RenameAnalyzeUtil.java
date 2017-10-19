@@ -68,7 +68,7 @@ class RenameAnalyzeUtil {
   private static class ProblemNodeFinder {
 
     private ProblemNodeFinder() {
-      //static
+      // static
     }
 
     public static SimpleName[] getProblemNodes(
@@ -99,7 +99,7 @@ class RenameAnalyzeUtil {
         return fProblemNodes.toArray(new SimpleName[fProblemNodes.size()]);
       }
 
-      //----- visit methods
+      // ----- visit methods
 
       @Override
       public boolean visit(SimpleName node) {
@@ -141,7 +141,7 @@ class RenameAnalyzeUtil {
   }
 
   private RenameAnalyzeUtil() {
-    //no instance
+    // no instance
   }
 
   static RefactoringStatus analyzeRenameChanges(
@@ -179,7 +179,7 @@ class RenameAnalyzeUtil {
       WorkingCopyOwner owner,
       SubProgressMonitor pm)
       throws CoreException {
-    pm.beginTask("", compilationUnitsToModify.length); //$NON-NLS-1$
+    pm.beginTask("", compilationUnitsToModify.length); // $NON-NLS-1$
     ICompilationUnit[] newWorkingCopies = new ICompilationUnit[compilationUnitsToModify.length];
     for (int i = 0; i < compilationUnitsToModify.length; i++) {
       ICompilationUnit cu = compilationUnitsToModify[i];
@@ -247,10 +247,10 @@ class RenameAnalyzeUtil {
     return null;
   }
 
-  //--- find missing changes in BOTH directions
+  // --- find missing changes in BOTH directions
 
-  //TODO: Currently filters out declarations (MethodDeclarationMatch, FieldDeclarationMatch).
-  //Long term solution: only pass reference search results in.
+  // TODO: Currently filters out declarations (MethodDeclarationMatch, FieldDeclarationMatch).
+  // Long term solution: only pass reference search results in.
   static RefactoringStatus analyzeRenameChanges2(
       TextChangeManager manager,
       SearchResultGroup[] oldReferences,
@@ -284,8 +284,7 @@ class RenameAnalyzeUtil {
 
     for (Iterator<Entry<ICompilationUnit, SearchMatch[]>> iter =
             cuToNewResults.entrySet().iterator();
-        iter.hasNext();
-        ) {
+        iter.hasNext(); ) {
       Entry<ICompilationUnit, SearchMatch[]> entry = iter.next();
       ICompilationUnit cu = entry.getKey();
       SearchMatch[] newSearchMatches = entry.getValue();
@@ -332,7 +331,7 @@ class RenameAnalyzeUtil {
     for (int i = 0; i < oldMatches.length; i++) {
       SearchMatch oldMatch = oldMatches[i];
       Integer updatedOffset = oldToUpdatedOffsets.get(new Integer(oldMatch.getOffset()));
-      if (updatedOffset == null) updatedOffset = new Integer(-1); //match not updated
+      if (updatedOffset == null) updatedOffset = new Integer(-1); // match not updated
       updatedOffsets.put(updatedOffset, oldMatch);
     }
     return updatedOffsets;
@@ -360,11 +359,11 @@ class RenameAnalyzeUtil {
 
   private static void addReferenceShadowedError(
       ICompilationUnit cu, SearchMatch newMatch, String newElementName, RefactoringStatus result) {
-    //Found a new match with no corresponding old match.
-    //-> The new match is a reference which was pointing to another element,
-    //but that other element has been shadowed
+    // Found a new match with no corresponding old match.
+    // -> The new match is a reference which was pointing to another element,
+    // but that other element has been shadowed
 
-    //TODO: should not have to filter declarations:
+    // TODO: should not have to filter declarations:
     if (newMatch instanceof MethodDeclarationMatch || newMatch instanceof FieldDeclarationMatch)
       return;
     ISourceRange range = getOldSourceRange(newMatch);
@@ -398,7 +397,7 @@ class RenameAnalyzeUtil {
       ICompilationUnit cu, SearchMatch oldMatch, RefactoringStatus result) {
     // Old match not found in new matches -> reference has been shadowed
 
-    //TODO: should not have to filter declarations:
+    // TODO: should not have to filter declarations:
     if (oldMatch instanceof MethodDeclarationMatch || oldMatch instanceof FieldDeclarationMatch)
       return;
     ISourceRange range = new SourceRange(oldMatch.getOffset(), oldMatch.getLength());

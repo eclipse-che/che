@@ -19,7 +19,8 @@ public class ChangePreviewViewerDescriptor /*extends AbstractDescriptor*/ {
 
   //	private static final String EXT_ID= "changePreviewViewers"; //$NON-NLS-1$
 
-  //	private static DescriptorManager fgDescriptions= new DescriptorManager(EXT_ID, "change") { //$NON-NLS-1$
+  //	private static DescriptorManager fgDescriptions= new DescriptorManager(EXT_ID, "change") {
+  // //$NON-NLS-1$
   //		protected AbstractDescriptor createDescriptor(IConfigurationElement element) {
   //			return new ChangePreviewViewerDescriptor(element);
   //		}

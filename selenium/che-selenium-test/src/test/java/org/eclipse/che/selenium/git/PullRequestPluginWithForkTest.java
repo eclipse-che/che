@@ -128,7 +128,7 @@ public class PullRequestPluginWithForkTest {
     explorer.openItemByPath(PROJECT_NAME);
     explorer.openItemByPath(PROJECT_NAME + "/README.md");
 
-    //change content
+    // change content
     editor.waitActiveEditor();
     editor.deleteAllContent();
     editor.setCursorToDefinedLineAndChar(1, 1);
@@ -137,7 +137,7 @@ public class PullRequestPluginWithForkTest {
     pullRequestPanel.enterComment(comment);
     pullRequestPanel.enterTitle(title);
 
-    //commit change and create pull request
+    // commit change and create pull request
     pullRequestPanel.clickCreatePRBtn();
     pullRequestPanel.clickOkCommitBtn();
     pullRequestPanel.waitStatusOk(Status.FORK_CREATED);

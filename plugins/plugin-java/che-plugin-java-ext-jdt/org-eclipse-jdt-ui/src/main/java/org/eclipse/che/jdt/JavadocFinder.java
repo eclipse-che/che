@@ -96,7 +96,8 @@ public class JavadocFinder {
   private static IBinding resolveBinding(ASTNode node) {
     if (node instanceof SimpleName) {
       SimpleName simpleName = (SimpleName) node;
-      // workaround for https://bugs.eclipse.org/62605 (constructor name resolves to type, not method)
+      // workaround for https://bugs.eclipse.org/62605 (constructor name resolves to type, not
+      // method)
       ASTNode normalized = ASTNodes.getNormalizedNode(simpleName);
       if (normalized.getLocationInParent() == ClassInstanceCreation.TYPE_PROPERTY) {
         ClassInstanceCreation cic = (ClassInstanceCreation) normalized.getParent();
@@ -134,8 +135,8 @@ public class JavadocFinder {
 
   private static String getImageURL(IJavaElement element) {
     String imageName = null;
-    //todo
-    URL imageUrl = null; //JavaPlugin.getDefault().getImagesOnFSRegistry().getImageURL(element);
+    // todo
+    URL imageUrl = null; // JavaPlugin.getDefault().getImagesOnFSRegistry().getImageURL(element);
     if (imageUrl != null) {
       imageName = imageUrl.toExternalForm();
     }
@@ -186,14 +187,14 @@ public class JavadocFinder {
     boolean hasContents = false;
     if (element instanceof IPackageFragment || element instanceof IMember) {
       HTMLPrinter.addSmallHeader(buffer, getInfoText(element, element.getTypeRoot(), true));
-      buffer.append("<br>"); //$NON-NLS-1$
+      buffer.append("<br>"); // $NON-NLS-1$
       addAnnotations(buffer, element, element.getTypeRoot(), null);
       Reader reader = null;
       try {
         String content =
             element instanceof IMember
                 ? JavadocContentAccess2.getHTMLContent(element, true, baseHref)
-                : null; //JavadocContentAccess2.getHTMLContent((IPackageFragment)element);
+                : null; // JavadocContentAccess2.getHTMLContent((IPackageFragment)element);
         IPackageFragmentRoot root =
             (IPackageFragmentRoot) element.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
         if (content != null) {
@@ -257,7 +258,8 @@ public class JavadocFinder {
 
     //		if (element.getElementType() == IJavaElement.METHOD) {
     //			IMethod method= (IMethod)element;
-    //			//TODO: add default value for annotation type members, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=249016
+    //			//TODO: add default value for annotation type members, see
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=249016
     //		}
 
     return getImageAndLabel(element, allowImage, label.toString());
@@ -318,20 +320,22 @@ public class JavadocFinder {
       if (element instanceof IAnnotatable) {
         String annotationString = getAnnotations(element, editorInputElement, hoverRegion);
         if (annotationString != null) {
-          buf.append("<div style='margin-bottom: 5px;'>"); //$NON-NLS-1$
+          buf.append("<div style='margin-bottom: 5px;'>"); // $NON-NLS-1$
           buf.append(annotationString);
-          buf.append("</div>"); //$NON-NLS-1$
+          buf.append("</div>"); // $NON-NLS-1$
         }
       } else if (element instanceof IPackageFragment) {
         //                IPackageFragment pack= (IPackageFragment) element;
-        //                ICompilationUnit cu= pack.getCompilationUnit(JavaModelUtil.PACKAGE_INFO_JAVA);
+        //                ICompilationUnit cu=
+        // pack.getCompilationUnit(JavaModelUtil.PACKAGE_INFO_JAVA);
         //                if (cu.exists()) {
         //                    IPackageDeclaration[] packDecls= cu.getPackageDeclarations();
         //                    if (packDecls.length > 0) {
         //                        addAnnotations(buf, packDecls[0], null, null);
         //                    }
         //                } else {
-        //                    IClassFile classFile= pack.getClassFile(JavaModelUtil.PACKAGE_INFO_CLASS);
+        //                    IClassFile classFile=
+        // pack.getClassFile(JavaModelUtil.PACKAGE_INFO_CLASS);
         //                    if (classFile.exists()) {
         //                        addAnnotations(buf, classFile.getType(), null, null);
         //                    }
@@ -339,10 +343,10 @@ public class JavadocFinder {
       }
     } catch (JavaModelException e) {
       // no annotations this time...
-      buf.append("<br>"); //$NON-NLS-1$
+      buf.append("<br>"); // $NON-NLS-1$
     } catch (URISyntaxException e) {
       // no annotations this time...
-      buf.append("<br>"); //$NON-NLS-1$
+      buf.append("<br>"); // $NON-NLS-1$
     }
   }
 
@@ -356,11 +360,11 @@ public class JavadocFinder {
     }
 
     IBinding binding = null;
-    //TODO
-    ASTNode node = null; //getHoveredASTNode(editorInputElement, hoverRegion);
+    // TODO
+    ASTNode node = null; // getHoveredASTNode(editorInputElement, hoverRegion);
 
     if (node == null) {
-      //todo use ast ported parser,that uses our java model
+      // todo use ast ported parser,that uses our java model
       //            ASTParser p = ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
       //            p.setProject(element.getJavaProject());
       //            p.setBindingsRecovery(true);
@@ -381,9 +385,9 @@ public class JavadocFinder {
 
     StringBuffer buf = new StringBuffer();
     for (int i = 0; i < annotations.length; i++) {
-      //TODO: skip annotations that don't have an @Documented annotation?
+      // TODO: skip annotations that don't have an @Documented annotation?
       addAnnotation(buf, element, annotations[i]);
-      buf.append("<br>"); //$NON-NLS-1$
+      buf.append("<br>"); // $NON-NLS-1$
     }
 
     return buf.toString();
@@ -420,7 +424,8 @@ public class JavadocFinder {
 
   private void addValue(StringBuffer buf, IJavaElement element, Object value)
       throws URISyntaxException {
-    // Note: To be bug-compatible with Javadoc from Java 5/6/7, we currently don't escape HTML tags in String-valued annotations.
+    // Note: To be bug-compatible with Javadoc from Java 5/6/7, we currently don't escape HTML tags
+    // in String-valued annotations.
     if (value instanceof ITypeBinding) {
       ITypeBinding typeBinding = (ITypeBinding) value;
       IJavaElement type = typeBinding.getJavaElement();
@@ -431,7 +436,7 @@ public class JavadocFinder {
         String name = type.getElementName();
         addLink(buf, uri, name);
       }
-      buf.append(".class"); //$NON-NLS-1$
+      buf.append(".class"); // $NON-NLS-1$
 
     } else if (value instanceof IVariableBinding) { // only enum constants
       IVariableBinding variableBinding = (IVariableBinding) value;
@@ -473,37 +478,44 @@ public class JavadocFinder {
     int labelLeft = 20;
     int labelTop = 2;
 
-    buf.append("<div style='word-wrap: break-word; position: relative; "); //$NON-NLS-1$
+    buf.append("<div style='word-wrap: break-word; position: relative; "); // $NON-NLS-1$
 
     String imageSrcPath = allowImage ? getImageURL(element) : null;
     if (imageSrcPath != null) {
-      buf.append("margin-left: ").append(labelLeft).append("px; "); //$NON-NLS-1$ //$NON-NLS-2$
-      buf.append("padding-top: ").append(labelTop).append("px; "); //$NON-NLS-1$ //$NON-NLS-2$
+      buf.append("margin-left: ").append(labelLeft).append("px; "); // $NON-NLS-1$ //$NON-NLS-2$
+      buf.append("padding-top: ").append(labelTop).append("px; "); // $NON-NLS-1$ //$NON-NLS-2$
     }
 
-    buf.append("'>"); //$NON-NLS-1$
+    buf.append("'>"); // $NON-NLS-1$
     if (imageSrcPath != null) {
       if (element != null) {
         try {
           String uri = JavaElementLinks.createURI(baseHref, element);
-          buf.append("<a href='").append(uri).append("'>"); //$NON-NLS-1$//$NON-NLS-2$
+          buf.append("<a href='").append(uri).append("'>"); // $NON-NLS-1$//$NON-NLS-2$
         } catch (URISyntaxException e) {
           element = null; // no link
         }
       }
-      StringBuffer imageStyle = new StringBuffer("border:none; position: absolute; "); //$NON-NLS-1$
-      imageStyle.append("width: ").append(imageWidth).append("px; "); //$NON-NLS-1$ //$NON-NLS-2$
-      imageStyle.append("height: ").append(imageHeight).append("px; "); //$NON-NLS-1$ //$NON-NLS-2$
-      imageStyle.append("left: ").append(-labelLeft - 1).append("px; "); //$NON-NLS-1$ //$NON-NLS-2$
+      StringBuffer imageStyle =
+          new StringBuffer("border:none; position: absolute; "); // $NON-NLS-1$
+      imageStyle.append("width: ").append(imageWidth).append("px; "); // $NON-NLS-1$ //$NON-NLS-2$
+      imageStyle.append("height: ").append(imageHeight).append("px; "); // $NON-NLS-1$ //$NON-NLS-2$
+      imageStyle
+          .append("left: ")
+          .append(-labelLeft - 1)
+          .append("px; "); // $NON-NLS-1$ //$NON-NLS-2$
 
-      //            // hack for broken transparent PNG support in IE 6, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=223900 :
+      //            // hack for broken transparent PNG support in IE 6, see
+      // https://bugs.eclipse.org/bugs/show_bug.cgi?id=223900 :
       //            buf.append("<!--[if lte IE 6]><![if gte IE 5.5]>\n"); //$NON-NLS-1$
       String tooltip =
           element == null
               ? ""
-              : "alt='" + "Open Declaration" + "' "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-      //            buf.append("<span ").append(tooltip).append("style=\"").append(imageStyle). //$NON-NLS-1$ //$NON-NLS-2$
-      //                    append("filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='").append(imageSrcPath).append("')
+              : "alt='" + "Open Declaration" + "' "; // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+      //            buf.append("<span ").append(tooltip).append("style=\"").append(imageStyle).
+      // //$NON-NLS-1$ //$NON-NLS-2$
+      //
+      // append("filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='").append(imageSrcPath).append("')
       // \"></span>\n"); //$NON-NLS-1$ //$NON-NLS-2$
       //            buf.append("<![endif]><![endif]-->\n"); //$NON-NLS-1$
       //
@@ -514,20 +526,22 @@ public class JavadocFinder {
           .append(imageStyle)
           .append("' src='")
           .append(imageSrcPath)
-          .append("'/>\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+          .append("'/>\n"); // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
       //            buf.append("<!--<![endif]-->\n"); //$NON-NLS-1$
       //            buf.append("<!--[if gte IE 7]>\n"); //$NON-NLS-1$
-      //            buf.append("<img ").append(tooltip).append("style='").append(imageStyle).append("' src='").append(imageSrcPath).append
+      //            buf.append("<img
+      // ").append(tooltip).append("style='").append(imageStyle).append("'
+      // src='").append(imageSrcPath).append
       // ("'/>\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
       //            buf.append("<![endif]-->\n"); //$NON-NLS-1$
       if (element != null) {
-        buf.append("</a>"); //$NON-NLS-1$
+        buf.append("</a>"); // $NON-NLS-1$
       }
     }
 
     buf.append(label);
 
-    buf.append("</div>"); //$NON-NLS-1$
+    buf.append("</div>"); // $NON-NLS-1$
     return buf.toString();
   }
 }

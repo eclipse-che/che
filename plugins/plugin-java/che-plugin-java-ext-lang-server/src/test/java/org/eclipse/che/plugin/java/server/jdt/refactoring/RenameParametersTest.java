@@ -64,7 +64,7 @@ public class RenameParametersTest extends RefactoringTest {
     return fileName + getSimpleTestFileName(canRename, input);
   }
 
-  //------------
+  // ------------
   protected ICompilationUnit createCUfromTestFile(
       IPackageFragment pack, boolean canRename, boolean input) throws Exception {
     return createCU(
@@ -82,9 +82,9 @@ public class RenameParametersTest extends RefactoringTest {
         RefactoringAvailabilityTester.isChangeSignatureAvailable(method));
     ChangeSignatureProcessor processor = new ChangeSignatureProcessor(method);
     Refactoring ref = new ProcessorBasedRefactoring(processor);
-    //ref.setUpdateReferences(updateReferences);
-    //ref.setNewParameterNames(newNames);
-    //ref.setNewNames(createRenamings(method, newNames));
+    // ref.setUpdateReferences(updateReferences);
+    // ref.setNewParameterNames(newNames);
+    // ref.setNewNames(createRenamings(method, newNames));
     modifyInfos(processor.getParameterInfos(), newNames);
 
     RefactoringStatus result = performRefactoring(ref);
@@ -104,7 +104,7 @@ public class RenameParametersTest extends RefactoringTest {
 
   private void helper2(String[] newNames, String[] signature) throws Exception {
     IType classA = getType(createCUfromTestFile(getPackageP(), false, false), "A");
-    //DebugUtils.dump("classA" + classA);
+    // DebugUtils.dump("classA" + classA);
     IMethod method = classA.getMethod("m", signature);
     Assert.assertTrue(
         "refactoring not available",
@@ -261,10 +261,10 @@ public class RenameParametersTest extends RefactoringTest {
   @Ignore
   public void test26() throws Exception {
     printTestDisabledMessage("revisit in the context of anonymous types in type hierarchies");
-    //helper1(new String[]{"j"}, new String[]{"I"});
+    // helper1(new String[]{"j"}, new String[]{"I"});
   }
 
-  //removed - see testFail21
+  // removed - see testFail21
   //	public void test27() throws Exception{
   //		helper1(new String[]{"j"}, new String[]{"I"});
   //	}
