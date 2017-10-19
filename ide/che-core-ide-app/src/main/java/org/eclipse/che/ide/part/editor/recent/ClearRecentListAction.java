@@ -35,9 +35,7 @@ public class ClearRecentListAction extends AbstractPerspectiveAction {
     super(
         singletonList(PROJECT_PERSPECTIVE_ID),
         locale.openRecentFileClearTitle(),
-        locale.openRecentFileClearDescription(),
-        null,
-        null);
+        locale.openRecentFileClearDescription());
 
     this.recentFileList = recentFileList;
   }

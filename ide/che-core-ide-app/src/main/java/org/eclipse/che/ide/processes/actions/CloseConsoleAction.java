@@ -41,7 +41,6 @@ public class CloseConsoleAction extends AbstractPerspectiveAction {
         singletonList(PROJECT_PERSPECTIVE_ID),
         locale.closeControlTitle(),
         locale.closeControlDescription(),
-        null,
         partStackUIResources.closeIcon());
     this.processesPanelPresenter = processesPanelPresenter;
   }

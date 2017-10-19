@@ -48,7 +48,7 @@ public class FindDefinitionAction extends AbstractPerspectiveAction {
       OpenLocationPresenterFactory presenterFactory,
       TextDocumentServiceClient client,
       DtoBuildHelper dtoBuildHelper) {
-    super(singletonList(PROJECT_PERSPECTIVE_ID), "Find Definition", "Find Definition", null, null);
+    super(singletonList(PROJECT_PERSPECTIVE_ID), "Find Definition", "Find Definition");
     this.editorAgent = editorAgent;
     this.client = client;
     this.dtoBuildHelper = dtoBuildHelper;

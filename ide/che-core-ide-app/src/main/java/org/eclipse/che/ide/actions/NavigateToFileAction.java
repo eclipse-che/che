@@ -44,7 +44,6 @@ public class NavigateToFileAction extends AbstractPerspectiveAction {
         singletonList(PROJECT_PERSPECTIVE_ID),
         localizationConstant.actionNavigateToFileText(),
         localizationConstant.actionNavigateToFileDescription(),
-        null,
         resources.navigateToFile());
     this.navigateToFilePresenterProvider = navigateToFilePresenterProvider;
   }

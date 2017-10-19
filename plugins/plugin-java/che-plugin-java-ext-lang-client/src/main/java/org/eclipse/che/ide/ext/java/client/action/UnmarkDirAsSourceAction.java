@@ -62,7 +62,6 @@ public class UnmarkDirAsSourceAction extends AbstractPerspectiveAction {
         singletonList(PROJECT_PERSPECTIVE_ID),
         locale.unmarkDirectoryAsSourceAction(),
         locale.unmarkDirectoryAsSourceDescription(),
-        null,
         javaResources.sourceFolder());
 
     this.appContext = appContext;

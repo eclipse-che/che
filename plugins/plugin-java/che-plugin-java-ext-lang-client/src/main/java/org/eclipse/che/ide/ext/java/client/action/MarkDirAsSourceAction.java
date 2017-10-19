@@ -62,7 +62,6 @@ public class MarkDirAsSourceAction extends AbstractPerspectiveAction {
         singletonList(PROJECT_PERSPECTIVE_ID),
         locale.markDirectoryAsSourceAction(),
         locale.markDirectoryAsSourceDescription(),
-        null,
         javaResources.sourceFolder());
 
     this.appContext = appContext;

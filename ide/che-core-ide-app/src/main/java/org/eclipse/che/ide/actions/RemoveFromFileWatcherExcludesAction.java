@@ -52,9 +52,7 @@ public class RemoveFromFileWatcherExcludesAction extends AbstractPerspectiveActi
     super(
         singletonList(PROJECT_PERSPECTIVE_ID),
         locale.removeFromFileWatcherExludesName(),
-        locale.removeFromFileWatcherExludesDescription(),
-        null,
-        null);
+        locale.removeFromFileWatcherExludesDescription());
     this.appContext = appContext;
     this.notificationManager = notificationManager;
     this.fileWatcherExcludesOperation = fileWatcherExcludesOperation;

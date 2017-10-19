@@ -43,9 +43,7 @@ public class PreviewHTMLAction extends AbstractPerspectiveAction {
     super(
         singletonList(PROJECT_PERSPECTIVE_ID),
         localizationConstants.previewHTMLActionTitle(),
-        localizationConstants.previewHTMLActionDescription(),
-        null,
-        null);
+        localizationConstants.previewHTMLActionDescription());
     this.wsAgentURLModifier = wsAgentURLModifier;
     this.appContext = appContext;
   }

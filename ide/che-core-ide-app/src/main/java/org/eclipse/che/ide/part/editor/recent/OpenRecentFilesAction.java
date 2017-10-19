@@ -35,9 +35,7 @@ public class OpenRecentFilesAction extends AbstractPerspectiveAction {
     super(
         singletonList(PROJECT_PERSPECTIVE_ID),
         locale.openRecentFileTitle(),
-        locale.openRecentFileDescription(),
-        null,
-        null);
+        locale.openRecentFileDescription());
     this.recentFileList = recentFileList;
   }
 

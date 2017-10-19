@@ -52,7 +52,6 @@ public class ProjectConfigurationAction extends AbstractPerspectiveAction {
         singletonList(PROJECT_PERSPECTIVE_ID),
         localization.actionProjectConfigurationTitle(),
         localization.actionProjectConfigurationDescription(),
-        null,
         resources.projectConfiguration());
     this.appContext = appContext;
     this.projectWizard = projectWizard;

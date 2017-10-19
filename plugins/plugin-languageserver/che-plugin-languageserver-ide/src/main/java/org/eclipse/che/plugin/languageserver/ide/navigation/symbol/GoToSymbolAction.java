@@ -85,9 +85,7 @@ public class GoToSymbolAction extends AbstractPerspectiveAction
     super(
         singletonList(PROJECT_PERSPECTIVE_ID),
         localization.goToSymbolActionDescription(),
-        localization.goToSymbolActionTitle(),
-        null,
-        null);
+        localization.goToSymbolActionTitle());
     this.presenter = presenter;
     this.localization = localization;
     this.client = client;

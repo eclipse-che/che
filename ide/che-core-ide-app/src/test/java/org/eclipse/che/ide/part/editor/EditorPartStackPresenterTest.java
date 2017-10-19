@@ -40,6 +40,7 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.actions.EditorActions;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionManager;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.AbstractEditorPresenter;
@@ -147,7 +148,7 @@ public class EditorPartStackPresenterTest {
     when(partPresenter3.getEditorInput()).thenReturn(editorInput3);
     when(editorInput3.getFile()).thenReturn(file3);
 
-    when(presentationFactory.getPresentation(nullable(Action.class))).thenReturn(presentation);
+    when(presentationFactory.getPresentation(nullable(BaseAction.class))).thenReturn(presentation);
 
     when(eventBus.addHandler(any(), any())).thenReturn(handlerRegistration);
 
@@ -197,7 +198,7 @@ public class EditorPartStackPresenterTest {
   public void constructorShouldBeVerified() {
     verify(view, times(2)).setDelegate(presenter);
     verify(view).addPaneMenuButton(editorPaneMenu);
-    verify(editorPaneMenuItemFactory, times(4)).createMenuItem(Matchers.<Action>anyObject());
+    verify(editorPaneMenuItemFactory, times(4)).createMenuItem(Matchers.<BaseAction>anyObject());
     verify(editorPaneMenu).addItem(Matchers.<PaneMenuActionItemWidget>anyObject(), eq(true));
     verify(editorPaneMenu, times(3)).addItem(Matchers.<PaneMenuActionItemWidget>anyObject());
   }
@@ -418,7 +419,7 @@ public class EditorPartStackPresenterTest {
 
   @Test
   public void onActionClickedTest() {
-    Action action = mock(Action.class);
+    Action action = mock(BaseAction.class);
     when(editorPaneActionMenuItem.getData()).thenReturn(action);
     presenter.addPart(partPresenter1);
     presenter.setActivePart(partPresenter1);

@@ -41,7 +41,6 @@ public class ChangeVariableValueAction extends AbstractPerspectiveAction {
         Collections.singletonList(PROJECT_PERSPECTIVE_ID),
         locale.changeVariableValue(),
         locale.changeVariableValueDescription(),
-        null,
         resources.changeVariableValue());
     this.changeValuePresenter = changeValuePresenter;
     this.debuggerPresenter = debuggerPresenter;

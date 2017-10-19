@@ -13,13 +13,13 @@ package org.eclipse.che.ide.factory.json;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.factory.FactoryResources;
 
 /** @author Sergii Leschenko */
 @Singleton
-public class ImportFromConfigAction extends Action {
+public class ImportFromConfigAction extends BaseAction {
 
   private final ImportFromConfigPresenter presenter;
 
@@ -31,7 +31,6 @@ public class ImportFromConfigAction extends Action {
     super(
         locale.importFromConfigurationName(),
         locale.importFromConfigurationDescription(),
-        null,
         resources.importConfig());
     this.presenter = presenter;
   }

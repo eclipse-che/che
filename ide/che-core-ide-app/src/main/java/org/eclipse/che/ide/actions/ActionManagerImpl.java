@@ -216,8 +216,7 @@ public class ActionManagerImpl implements ActionManager {
     final Action action;
     if (actionId != null && (action = getAction(actionId)) != null) {
       final Presentation presentation = presentationFactory.getPresentation(action);
-      final ActionEvent actionEvent =
-          new ActionEvent(presentation, this, managerProvider.get(), parameters);
+      final ActionEvent actionEvent = new ActionEvent(presentation, this, parameters);
 
       action.update(actionEvent);
 

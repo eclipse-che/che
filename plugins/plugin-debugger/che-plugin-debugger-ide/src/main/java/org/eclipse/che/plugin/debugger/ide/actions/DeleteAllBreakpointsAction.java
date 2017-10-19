@@ -38,7 +38,6 @@ public class DeleteAllBreakpointsAction extends AbstractPerspectiveAction {
         Collections.singletonList(PROJECT_PERSPECTIVE_ID),
         locale.deleteAllBreakpoints(),
         locale.deleteAllBreakpointsDescription(),
-        null,
         resources.deleteAllBreakpoints());
     this.breakpointManager = breakpointManager;
   }

@@ -43,7 +43,6 @@ public class StopProcessAction extends AbstractPerspectiveAction {
         singletonList(PROJECT_PERSPECTIVE_ID),
         locale.stopControlTitle(),
         locale.stopControlDescription(),
-        null,
         machineResources.stopIcon());
     this.processesPanelPresenter = processesPanelPresenter;
   }

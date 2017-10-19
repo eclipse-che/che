@@ -43,7 +43,6 @@ public class DebugAction extends AbstractPerspectiveAction {
         Collections.singletonList(PROJECT_PERSPECTIVE_ID),
         localizationConstants.debugActionTitle(),
         localizationConstants.debugActionDescription(),
-        null,
         resources.debug());
     this.localizationConstants = localizationConstants;
     this.configurationsManager = debugConfigurationsManager;

@@ -11,8 +11,8 @@
 package org.eclipse.che.plugin.debugger.ide.actions;
 
 import com.google.inject.Inject;
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
 import org.eclipse.che.plugin.debugger.ide.debug.DebuggerPresenter;
 
@@ -21,14 +21,14 @@ import org.eclipse.che.plugin.debugger.ide.debug.DebuggerPresenter;
  *
  * @author Mykola Morhun
  */
-public class ShowHideDebuggerPanelAction extends Action {
+public class ShowHideDebuggerPanelAction extends BaseAction {
 
   private final DebuggerPresenter debuggerPresenter;
 
   @Inject
   public ShowHideDebuggerPanelAction(
       DebuggerPresenter debuggerPresenter, DebuggerLocalizationConstant locale) {
-    super(locale.showHideDebuggerPanel(), locale.showHideDebuggerPanelDescription(), null, null);
+    super(locale.showHideDebuggerPanel(), locale.showHideDebuggerPanelDescription());
 
     this.debuggerPresenter = debuggerPresenter;
   }
