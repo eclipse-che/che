@@ -62,7 +62,6 @@ mkdir -p ${CHE_DIR}
 if is_current_user_sudoer; then
     ${SUDO} mkdir -p /projects
     ${SUDO} sh -c "chown -R $(id -u -n) /projects"
-    find /projects -type d -exec ${SUDO} chmod 755 {} \;
 fi
 
 INSTALL_JDK=false
@@ -222,7 +221,7 @@ elif echo ${LINUX_TYPE} | grep -qi "CentOS"; then
          ln -s /usr/lib/jvm/java-1.8.0-openjdk $JAVA_HOME
      fi
 
-# Red Hat Enterprise Linux 6 
+# Red Hat Enterprise Linux 6
 ############################
 elif echo ${LINUX_TYPE} | grep -qi "Red Hat"; then
     if [ ${INSTALL_JDK} = true ]; then
