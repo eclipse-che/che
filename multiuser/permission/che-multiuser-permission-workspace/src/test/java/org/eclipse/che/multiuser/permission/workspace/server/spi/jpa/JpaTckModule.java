@@ -41,7 +41,6 @@ import org.eclipse.che.multiuser.permission.workspace.server.spi.WorkerDao;
 import org.eclipse.che.multiuser.permission.workspace.server.spi.tck.StackPermissionsDaoTest;
 import org.eclipse.che.multiuser.permission.workspace.server.spi.tck.WorkerDaoTest;
 import org.eclipse.che.multiuser.permission.workspace.server.stack.StackPermissionsImpl;
-import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotImpl;
 import org.h2.Driver;
 
 /** @author Yevhenii Voevodin */
@@ -68,7 +67,6 @@ public class JpaTckModule extends TckModule {
                 ServerConfigImpl.class,
                 StackImpl.class,
                 CommandImpl.class,
-                SnapshotImpl.class,
                 RecipeImpl.class)
             .addEntityClass(
                 "org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")
