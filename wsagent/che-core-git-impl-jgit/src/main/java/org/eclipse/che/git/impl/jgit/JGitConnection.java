@@ -755,6 +755,7 @@ class JGitConnection implements GitConnection {
       }
       eventService.publish(
           newDto(GitCommitEvent.class)
+              .withProjectName(repository.getWorkTree().getName())
               .withStatus(status(emptyList()))
               .withModifiedFiles(modifiedFiles));
 
@@ -953,7 +954,9 @@ class JGitConnection implements GitConnection {
     try {
       repository.create(isBare);
       eventService.publish(
-          newDto(GitRepositoryInitializedEvent.class).withStatus(status(emptyList())));
+          newDto(GitRepositoryInitializedEvent.class)
+              .withStatus(status(emptyList()))
+              .withProjectName(repository.getWorkTree().getName()));
     } catch (IOException exception) {
       if (removeIfFailed) {
         deleteRepositoryFolder();

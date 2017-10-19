@@ -27,4 +27,11 @@ public interface GitRepositoryInitializedEvent extends GitEvent {
   void setStatus(Status status);
 
   GitRepositoryInitializedEvent withStatus(Status status);
+
+  @Override
+  String getProjectName();
+
+  void setProjectName(String projectName);
+
+  GitRepositoryInitializedEvent withProjectName(String projectName);
 }

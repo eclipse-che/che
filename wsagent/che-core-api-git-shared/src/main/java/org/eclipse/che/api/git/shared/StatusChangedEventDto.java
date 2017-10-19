@@ -22,6 +22,13 @@ import org.eclipse.che.dto.shared.DTO;
 @DTO
 public interface StatusChangedEventDto {
 
+  /** Name of project in which git status was changed. */
+  String getProjectName();
+
+  void setProjectName(String projectName);
+
+  StatusChangedEventDto withProjectName(String projectName);
+
   /** Status of the repository. */
   Status getStatus();
 

@@ -306,7 +306,8 @@ public class GitService {
     final FolderEntry gitFolder = project.getBaseFolder().getChildFolder(".git");
     gitFolder.getVirtualFile().delete();
     projectRegistry.removeProjectType(projectPath, GitProjectType.TYPE_ID);
-    eventService.publish(newDto(GitRepositoryDeletedEvent.class));
+    eventService.publish(
+        newDto(GitRepositoryDeletedEvent.class).withProjectName(project.getName()));
   }
 
   @GET
