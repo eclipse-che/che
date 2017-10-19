@@ -13,7 +13,6 @@ package org.eclipse.che.plugin.testing.junit.ide.action;
 import com.google.inject.Inject;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionManager;
-import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.plugin.testing.ide.action.TestAction;
 
