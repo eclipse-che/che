@@ -21,6 +21,7 @@ import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestStacksConstants;
 import org.eclipse.che.selenium.core.constant.TestWorkspaceConstants;
 import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
@@ -138,6 +139,7 @@ public class WorkspaceDetailsTest {
         (name, value) -> {
           Assert.assertEquals(dashboardWorkspace.getAgentState(name), value);
           dashboardWorkspace.switchAgentState(name);
+          WaitUtils.sleepQuietly(1);
         });
     clickOnSaveButton();
 
@@ -145,6 +147,7 @@ public class WorkspaceDetailsTest {
     agents.forEach(
         (name, value) -> {
           dashboardWorkspace.switchAgentState(name);
+          loader.waitOnClosed();
         });
     clickOnSaveButton();
     agents.forEach(
@@ -222,8 +225,6 @@ public class WorkspaceDetailsTest {
     clickOnSaveButton();
 
     //check that project exists(workspace will restart)
-    dashboardWorkspace.checkStateOfWorkspace(DashboardWorkspace.StateWorkspace.RUNNING);
-    dashboardWorkspace.checkStateOfWorkspace(DashboardWorkspace.StateWorkspace.STOPPED);
     dashboardProject.waitProjectIsPresent(Template.WEB_JAVA_PETCLINIC.value());
 
     //start the workspace and check that the new project exists
@@ -252,6 +253,7 @@ public class WorkspaceDetailsTest {
     agents.put("Terminal", true);
     agents.put("TypeScript language server", false);
     agents.put("Workspace API", true);
+    agents.put("Yaml language server", false);
 
     variables.put("MYSQL_DATABASE", "petclinic");
     variables.put("MYSQL_PASSWORD", "password");
