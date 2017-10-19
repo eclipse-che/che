@@ -25,8 +25,12 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
+import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.plugin.docker.client.WorkspacesRoutingSuffixProvider;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.PortBinding;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stringtemplate.v4.ST;
 
 /**
@@ -37,6 +41,7 @@ import org.stringtemplate.v4.ST;
  * @see ServerEvaluationStrategy
  */
 public abstract class BaseServerEvaluationStrategy extends ServerEvaluationStrategy {
+  private static final Logger LOG = LoggerFactory.getLogger(BaseServerEvaluationStrategy.class);
 
   /** Regexp to extract port (under the form 22/tcp or 4401/tcp, etc.) from label references */
   public static final String LABEL_CHE_SERVER_REF_KEY = "^che:server:(.*):ref$";
@@ -61,6 +66,9 @@ public abstract class BaseServerEvaluationStrategy extends ServerEvaluationStrat
 
   /** Used to store the address set by property {@code che.docker.ip.external}. if applicable. */
   protected String cheDockerIpExternal;
+
+  /** Used to store the provider of the `workspacesRoutingSuffix` template variable. */
+  protected WorkspacesRoutingSuffixProvider cheWorkspacesRoutingSuffixProvider;
 
   /** The current port of che. */
   private final String chePort;
@@ -104,12 +112,33 @@ public abstract class BaseServerEvaluationStrategy extends ServerEvaluationStrat
       String cheDockerCustomExternalProtocol,
       String chePort,
       boolean localDockerMode) {
+    this(
+        cheDockerIp,
+        cheDockerIpExternal,
+        chePort,
+        cheDockerCustomExternalTemplate,
+        cheDockerCustomExternalProtocol,
+        localDockerMode,
+        null);
+  }
+
+  /** Constructor to be called by derived strategies */
+  public BaseServerEvaluationStrategy(
+      String cheDockerIp,
+      String cheDockerIpExternal,
+      String cheDockerCustomExternalTemplate,
+      String cheDockerCustomExternalProtocol,
+      String chePort,
+      boolean localDockerMode,
+      WorkspacesRoutingSuffixProvider cheWorkspacesRoutingSuffixProvider) {
     this.cheDockerIp = cheDockerIp;
     this.cheDockerIpExternal = cheDockerIpExternal;
     this.chePort = chePort;
     this.cheDockerCustomExternalTemplate = cheDockerCustomExternalTemplate;
     this.cheDockerCustomExternalProtocol = cheDockerCustomExternalProtocol;
     this.localDockerMode = localDockerMode;
+    this.cheWorkspacesRoutingSuffixProvider = cheWorkspacesRoutingSuffixProvider;
+    LOG.info("cheWorkspacesRoutingSuffixProvider = {}", cheWorkspacesRoutingSuffixProvider);
   }
 
   @Override
@@ -370,6 +399,22 @@ public abstract class BaseServerEvaluationStrategy extends ServerEvaluationStrat
       globalPropertiesMap.put("wildcardXipDomain", getWildcardXipDomain(externalAddress));
       globalPropertiesMap.put("chePort", chePort);
       globalPropertiesMap.put(IS_DEV_MACHINE_MACRO, getIsDevMachine());
+      EnvironmentContext context = EnvironmentContext.getCurrent();
+      if (context != null) {
+        String user = context.getSubject().getUserName();
+        if (user != null) {
+          LOG.debug("Setting 'user' macro to : {}", user);
+          globalPropertiesMap.put("user", user);
+        }
+      }
+      String cheWorkspacesRoutingSuffix =
+          cheWorkspacesRoutingSuffixProvider == null
+              ? null
+              : cheWorkspacesRoutingSuffixProvider.get();
+      if (cheWorkspacesRoutingSuffix != null) {
+        LOG.debug("Setting 'workspacesRoutingSuffix' macro to : {}", cheWorkspacesRoutingSuffix);
+        globalPropertiesMap.put("workspacesRoutingSuffix", cheWorkspacesRoutingSuffix);
+      }
     }
 
     /** Rendering */

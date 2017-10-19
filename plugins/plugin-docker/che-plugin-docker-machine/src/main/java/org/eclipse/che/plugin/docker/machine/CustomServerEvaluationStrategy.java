@@ -13,6 +13,7 @@ package org.eclipse.che.plugin.docker.machine;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.plugin.docker.client.WorkspacesRoutingSuffixProvider;
 
 /**
  * Represents a server evaluation strategy for the configuration where the strategy can be
@@ -31,13 +32,15 @@ public class CustomServerEvaluationStrategy extends BaseServerEvaluationStrategy
           String cheDockerCustomExternalTemplate,
       @Nullable @Named("che.docker.server_evaluation_strategy.custom.external.protocol")
           String cheDockerCustomExternalProtocol,
-      @Named("che.port") String chePort) {
+      @Named("che.port") String chePort,
+      WorkspacesRoutingSuffixProvider cheWorkspacesRoutingSuffixProvider) {
     super(
         cheDockerIp,
         cheDockerIpExternal,
         cheDockerCustomExternalTemplate,
         cheDockerCustomExternalProtocol,
         chePort,
-        false);
+        false,
+        cheWorkspacesRoutingSuffixProvider);
   }
 }

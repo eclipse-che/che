@@ -10,6 +10,9 @@
  */
 package org.eclipse.che.api.deploy;
 
+import static org.eclipse.che.plugin.docker.machine.ExecAgentLogDirSetterEnvVariableProvider.LOGS_DIR_SETTER_VARIABLE;
+import static org.eclipse.che.plugin.docker.machine.ExecAgentLogDirSetterEnvVariableProvider.LOGS_DIR_VARIABLE;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 import javax.sql.DataSource;
@@ -87,6 +90,10 @@ public class MultiUserCheWsMasterModule extends AbstractModule {
                 + "-addr :4412 "
                 + "-cmd ${SHELL_INTERPRETER} "
                 + "-enable-auth "
-                + "-logs-dir $HOME/che/exec-agent/logs");
+                + "-logs-dir $(eval \"$"
+                + LOGS_DIR_SETTER_VARIABLE
+                + "\"; echo \"$"
+                + LOGS_DIR_VARIABLE
+                + "\")");
   }
 }

@@ -12,6 +12,7 @@ package org.eclipse.che.api.deploy;
 
 import static com.google.inject.matcher.Matchers.subclassesOf;
 import static org.eclipse.che.inject.Matchers.names;
+import static org.eclipse.che.plugin.docker.machine.WsAgentLogDirSetterEnvVariableProvider.LOGS_DIR_SETTER_VARIABLE;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.MapBinder;
@@ -170,7 +171,12 @@ public class WsMasterModule extends AbstractModule {
 
     bindConstant()
         .annotatedWith(Names.named("machine.ws_agent.run_command"))
-        .to("export JPDA_ADDRESS=\"4403\" && ~/che/ws-agent/bin/catalina.sh jpda run");
+        .to(
+            "eval \"$"
+                + LOGS_DIR_SETTER_VARIABLE
+                + "\""
+                + " && export JPDA_ADDRESS=\"4403\""
+                + " && ~/che/ws-agent/bin/catalina.sh jpda run");
 
     bind(org.eclipse.che.api.deploy.WsMasterAnalyticsAddresser.class);
 
@@ -203,8 +209,6 @@ public class WsMasterModule extends AbstractModule {
     final MessageBodyAdapterInterceptor interceptor = new MessageBodyAdapterInterceptor();
     requestInjection(interceptor);
     bindInterceptor(subclassesOf(CheJsonProvider.class), names("readFrom"), interceptor);
-    bind(org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner.class)
-        .to(org.eclipse.che.plugin.docker.machine.cleaner.LocalWorkspaceFilesCleaner.class);
     bind(org.eclipse.che.api.environment.server.InfrastructureProvisioner.class)
         .to(org.eclipse.che.plugin.docker.machine.local.LocalCheInfrastructureProvisioner.class);
 
@@ -214,7 +218,6 @@ public class WsMasterModule extends AbstractModule {
         .asEagerSingleton();
 
     install(new org.eclipse.che.plugin.docker.machine.dns.DnsResolversModule());
-    install(new org.eclipse.che.plugin.traefik.TraefikDockerModule());
 
     bind(org.eclipse.che.api.agent.server.filters.AddExecAgentInWorkspaceFilter.class);
     bind(org.eclipse.che.api.agent.server.filters.AddExecAgentInStackFilter.class);

@@ -161,6 +161,19 @@ public class DockerConnector {
   }
 
   /**
+   * Gets the API endpoint URL to be used if the `che.workspace.che_server_endpoint` property is
+   * null.
+   *
+   * @return The default API endpoint URL for this connector which is null because docker connector
+   *     uses the default value added in 'che.properties'.
+   * @throws IOException when a problem occurs with docker api calls
+   */
+  @Nullable
+  public String getApiEndpoint() {
+    return null;
+  }
+
+  /**
    * Gets system-wide information.
    *
    * @return system-wide information

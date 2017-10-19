@@ -14,6 +14,7 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceList;
 import io.fabric8.kubernetes.api.model.extensions.Deployment;
 import io.fabric8.kubernetes.api.model.extensions.ReplicaSet;
+import io.fabric8.kubernetes.client.Config;
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.api.model.RouteList;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
@@ -28,9 +29,9 @@ public final class KubernetesResourceUtil {
 
   private KubernetesResourceUtil() {}
 
-  public static Deployment getDeploymentByName(String deploymentName, String namespace)
-      throws IOException {
-    try (OpenShiftClient openShiftClient = new DefaultOpenShiftClient()) {
+  public static Deployment getDeploymentByName(
+      String deploymentName, String namespace, final Config config) throws IOException {
+    try (OpenShiftClient openShiftClient = new DefaultOpenShiftClient(config)) {
       Deployment deployment =
           openShiftClient
               .extensions()
@@ -46,8 +47,11 @@ public final class KubernetesResourceUtil {
   }
 
   public static Service getServiceBySelector(
-      final String selectorKey, final String selectorValue, final String namespace) {
-    try (OpenShiftClient openShiftClient = new DefaultOpenShiftClient()) {
+      final String selectorKey,
+      final String selectorValue,
+      final String namespace,
+      final Config config) {
+    try (OpenShiftClient openShiftClient = new DefaultOpenShiftClient(config)) {
       ServiceList svcs = openShiftClient.services().inNamespace(namespace).list();
 
       Service svc =
@@ -66,8 +70,9 @@ public final class KubernetesResourceUtil {
   }
 
   public static List<Route> getRoutesByLabel(
-      final String labelKey, final String labelValue, final String namespace) throws IOException {
-    try (OpenShiftClient openShiftClient = new DefaultOpenShiftClient()) {
+      final String labelKey, final String labelValue, final String namespace, final Config config)
+      throws IOException {
+    try (OpenShiftClient openShiftClient = new DefaultOpenShiftClient(config)) {
       RouteList routeList =
           openShiftClient.routes().inNamespace(namespace).withLabel(labelKey, labelValue).list();
 
@@ -84,8 +89,8 @@ public final class KubernetesResourceUtil {
   }
 
   public static List<ReplicaSet> getReplicaSetByLabel(
-      final String key, final String value, final String namespace) {
-    try (OpenShiftClient openShiftClient = new DefaultOpenShiftClient()) {
+      final String key, final String value, final String namespace, final Config config) {
+    try (OpenShiftClient openShiftClient = new DefaultOpenShiftClient(config)) {
       List<ReplicaSet> replicaSets =
           openShiftClient
               .extensions()

@@ -133,7 +133,7 @@ public class CustomServerEvaluationStrategyTest {
   public void testWorkspaceIdRule() throws Throwable {
     this.customServerEvaluationStrategy =
         new CustomServerEvaluationStrategy(
-            "10.0.0.1", "192.168.1.1", "<workspaceId>", "http", "8080");
+            "10.0.0.1", "192.168.1.1", "<workspaceId>", "http", "8080", null);
 
     Map<String, String> portMapping =
         this.customServerEvaluationStrategy.getExternalAddressesAndPorts(
@@ -148,7 +148,7 @@ public class CustomServerEvaluationStrategyTest {
   public void testWorkspaceIdWithoutPrefixRule() throws Throwable {
     this.customServerEvaluationStrategy =
         new CustomServerEvaluationStrategy(
-            "10.0.0.1", "192.168.1.1", "<workspaceIdWithoutPrefix>", "http", "8080");
+            "10.0.0.1", "192.168.1.1", "<workspaceIdWithoutPrefix>", "http", "8080", null);
 
     Map<String, String> portMapping =
         this.customServerEvaluationStrategy.getExternalAddressesAndPorts(
@@ -167,7 +167,8 @@ public class CustomServerEvaluationStrategyTest {
             "192.168.1.1",
             "<if(isDevMachine)><workspaceId><else><machineName><endif>",
             "http",
-            "8080");
+            "8080",
+            null);
 
     Map<String, String> portMapping =
         this.customServerEvaluationStrategy.getExternalAddressesAndPorts(
@@ -190,7 +191,8 @@ public class CustomServerEvaluationStrategyTest {
             "192.168.1.1",
             "<if(isDevMachine)><workspaceId><else><machineName><endif>",
             "http",
-            "8080");
+            "8080",
+            null);
 
     Map<String, String> portMapping =
         this.customServerEvaluationStrategy.getExternalAddressesAndPorts(
@@ -205,7 +207,7 @@ public class CustomServerEvaluationStrategyTest {
   public void testMachineNameRule() throws Throwable {
     this.customServerEvaluationStrategy =
         new CustomServerEvaluationStrategy(
-            "10.0.0.1", "192.168.1.1", "<machineName>", "http", "8080");
+            "10.0.0.1", "192.168.1.1", "<machineName>", "http", "8080", null);
 
     Map<String, String> portMapping =
         this.customServerEvaluationStrategy.getExternalAddressesAndPorts(
@@ -221,7 +223,7 @@ public class CustomServerEvaluationStrategyTest {
     HashMap<String, ServerConfImpl> serverConfs = new HashMap<>();
     this.customServerEvaluationStrategy =
         new CustomServerEvaluationStrategy(
-            "10.0.0.1", "192.168.1.1", "<workspaceId>", "https", "8080");
+            "10.0.0.1", "192.168.1.1", "<workspaceId>", "https", "8080", null);
     Map<String, ServerImpl> portMapping =
         this.customServerEvaluationStrategy.getServers(containerInfo, "localhost", serverConfs);
 
@@ -241,7 +243,7 @@ public class CustomServerEvaluationStrategyTest {
 
     this.customServerEvaluationStrategy =
         new CustomServerEvaluationStrategy(
-            "127.0.0.1", null, "<externalAddress>-<workspaceId>", "https", "8080");
+            "127.0.0.1", null, "<externalAddress>-<workspaceId>", "https", "8080", null);
 
     Map<String, ServerImpl> portMapping =
         this.customServerEvaluationStrategy.getServers(containerInfo, "localhost", serverConfs);
@@ -263,7 +265,7 @@ public class CustomServerEvaluationStrategyTest {
     HashMap<String, ServerConfImpl> serverConfs = new HashMap<>();
     this.customServerEvaluationStrategy =
         new CustomServerEvaluationStrategy(
-            "127.0.0.1", null, "<externalAddress>-<workspaceId>", "https", "8080");
+            "127.0.0.1", null, "<externalAddress>-<workspaceId>", "https", "8080", null);
     Map<String, ServerImpl> portMapping =
         this.customServerEvaluationStrategy.getServers(containerInfo, "127.0.0.1", serverConfs);
     Assert.assertTrue(portMapping.containsKey("4401/tcp"));
@@ -288,7 +290,7 @@ public class CustomServerEvaluationStrategyTest {
         Arrays.asList(WORKSPACE_ID_PROPERTY, MACHINE_NAME_PROPERTY, IS_DEV_MACHINE_PROPERTY_TRUE);
     this.customServerEvaluationStrategy =
         new CustomServerEvaluationStrategy(
-            "127.0.0.1", null, "<externalAddress>-<workspaceId>", "https", "8080");
+            "127.0.0.1", null, "<externalAddress>-<workspaceId>", "https", "8080", null);
     CustomServerEvaluationStrategy.RenderingEvaluation renderingEvaluation =
         this.customServerEvaluationStrategy.getOfflineRenderingEvaluation(
             containerLabels, exposedPorts, env.stream().toArray(String[]::new));
@@ -308,7 +310,7 @@ public class CustomServerEvaluationStrategyTest {
         Arrays.asList(WORKSPACE_ID_PROPERTY, MACHINE_NAME_PROPERTY, IS_DEV_MACHINE_PROPERTY_TRUE);
     this.customServerEvaluationStrategy =
         new CustomServerEvaluationStrategy(
-            "127.0.0.1", "127.0.0.1", "<externalAddress>-<workspaceId>", "https", "8080");
+            "127.0.0.1", "127.0.0.1", "<externalAddress>-<workspaceId>", "https", "8080", null);
     CustomServerEvaluationStrategy.RenderingEvaluation renderingEvaluation =
         this.customServerEvaluationStrategy.getOfflineRenderingEvaluation(
             containerLabels, exposedPorts, env.stream().toArray(String[]::new));
@@ -328,7 +330,12 @@ public class CustomServerEvaluationStrategyTest {
         Arrays.asList(WORKSPACE_ID_PROPERTY, MACHINE_NAME_PROPERTY, IS_DEV_MACHINE_PROPERTY_TRUE);
     this.customServerEvaluationStrategy =
         new CustomServerEvaluationStrategy(
-            "127.0.0.1", "300.300.300.300", "<externalAddress>-<workspaceId>", "https", "8080");
+            "127.0.0.1",
+            "300.300.300.300",
+            "<externalAddress>-<workspaceId>",
+            "https",
+            "8080",
+            null);
     CustomServerEvaluationStrategy.RenderingEvaluation renderingEvaluation =
         this.customServerEvaluationStrategy.getOfflineRenderingEvaluation(
             containerLabels, exposedPorts, env.stream().toArray(String[]::new));

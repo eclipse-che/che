@@ -41,7 +41,6 @@ public class DockerMachineModule extends AbstractModule {
         Multibinder.newSetBinder(
                 binder(), String.class, Names.named("machine.docker.dev_machine.machine_env"))
             .permitDuplicates();
-    @SuppressWarnings("unused")
     Multibinder<String> allMachinesEnvVars =
         Multibinder.newSetBinder(binder(), String.class, Names.named("machine.docker.machine_env"))
             .permitDuplicates();
@@ -82,6 +81,16 @@ public class DockerMachineModule extends AbstractModule {
         MapBinder.newMapBinder(binder(), String.class, TypeSpecificEnvironmentParser.class);
     envParserMapBinder.addBinding("dockerfile").to(DockerfileEnvironmentParser.class);
     envParserMapBinder.addBinding("dockerimage").to(DockerImageEnvironmentParser.class);
+
+    allMachinesEnvVars
+        .addBinding()
+        .toProvider(
+            org.eclipse.che.plugin.docker.machine.WsAgentLogDirSetterEnvVariableProvider.class);
+
+    allMachinesEnvVars
+        .addBinding()
+        .toProvider(
+            org.eclipse.che.plugin.docker.machine.ExecAgentLogDirSetterEnvVariableProvider.class);
 
     allMachinesEnvVars
         .addBinding()
