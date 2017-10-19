@@ -48,9 +48,7 @@ public class DownloadResourceAction extends AbstractPerspectiveAction {
     super(
         singletonList(PROJECT_PERSPECTIVE_ID),
         locale.downloadItemName(),
-        locale.downloadItemDescription(),
-        null,
-        null);
+        locale.downloadItemDescription());
     this.appContext = appContext;
     this.downloadContainer = downloadContainer;
     this.urlModifier = urlModifier;

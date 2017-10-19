@@ -45,7 +45,6 @@ public class ShowRuntimeInfoAction extends AbstractPerspectiveAction {
         singletonList(PROJECT_PERSPECTIVE_ID),
         locale.showInfoActionTitle(),
         locale.showInfoActionDescription(),
-        null,
         resources.remote());
     this.processesPanelPresenter = processesPanelPresenter;
   }

@@ -40,7 +40,7 @@ public class EditFileAction extends AbstractPerspectiveAction {
 
   @Inject
   public EditFileAction(AppContext appContext, Resources resources, EditorAgent editorAgent) {
-    super(singletonList(PROJECT_PERSPECTIVE_ID), "Edit file", null, null, resources.defaultFile());
+    super(singletonList(PROJECT_PERSPECTIVE_ID), "Edit file", null, resources.defaultFile());
     this.appContext = appContext;
     this.editorAgent = editorAgent;
   }

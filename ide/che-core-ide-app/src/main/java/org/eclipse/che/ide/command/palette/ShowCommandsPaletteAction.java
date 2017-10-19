@@ -12,8 +12,8 @@ package org.eclipse.che.ide.command.palette;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.action.BaseAction;
 
 /**
  * Action for opening Commands Palette.
@@ -21,13 +21,13 @@ import org.eclipse.che.ide.api.action.ActionEvent;
  * @author Artem Zatsarynnyi
  */
 @Singleton
-public class ShowCommandsPaletteAction extends Action {
+public class ShowCommandsPaletteAction extends BaseAction {
 
   private final CommandsPalettePresenter presenter;
 
   @Inject
   public ShowCommandsPaletteAction(PaletteMessages messages, CommandsPalettePresenter presenter) {
-    super(messages.actionShowPaletteTitle(), messages.actionShowPaletteDescription(), null, null);
+    super(messages.actionShowPaletteTitle(), messages.actionShowPaletteDescription());
 
     this.presenter = presenter;
   }

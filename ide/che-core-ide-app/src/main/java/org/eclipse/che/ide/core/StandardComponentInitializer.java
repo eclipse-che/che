@@ -90,9 +90,9 @@ import org.eclipse.che.ide.actions.common.HidePartAction;
 import org.eclipse.che.ide.actions.common.MaximizePartAction;
 import org.eclipse.che.ide.actions.common.RestorePartAction;
 import org.eclipse.che.ide.actions.find.FindActionAction;
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.action.IdeActions;
 import org.eclipse.che.ide.api.constraints.Constraints;
@@ -144,6 +144,7 @@ import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
 import org.eclipse.che.ide.workspace.StopWorkspaceAction;
 import org.eclipse.che.ide.xml.NewXmlFileAction;
+import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
@@ -477,7 +478,9 @@ public class StandardComponentInitializer {
 
     DefaultActionGroup newGroup = new DefaultActionGroup("New", true, actionManager);
     newGroup.getTemplatePresentation().setDescription("Create...");
-    newGroup.getTemplatePresentation().setSVGResource(resources.newResource());
+    newGroup
+        .getTemplatePresentation()
+        .setImageElement(new SVGImage(resources.newResource()).getElement());
     actionManager.registerAction(GROUP_FILE_NEW, newGroup);
     projectGroup.add(newGroup);
 
@@ -492,7 +495,9 @@ public class StandardComponentInitializer {
     newGroup.addSeparator();
 
     actionManager.registerAction("newXmlFile", newXmlFileAction);
-    newXmlFileAction.getTemplatePresentation().setSVGResource(xmlFile.getImage());
+    newXmlFileAction
+        .getTemplatePresentation()
+        .setImageElement(new SVGImage(xmlFile.getImage()).getElement());
     newGroup.addAction(newXmlFileAction);
 
     actionManager.registerAction("uploadFile", uploadFileAction);
@@ -824,8 +829,8 @@ public class StandardComponentInitializer {
           (DefaultActionGroup) actionManager.getAction(GROUP_MAIN_MENU);
       mainMenu.add(windowMenu);
       for (Perspective perspective : perspectives.values()) {
-        final Action action =
-            new Action(perspective.getPerspectiveName()) {
+        final BaseAction action =
+            new BaseAction(perspective.getPerspectiveName()) {
               @Override
               public void actionPerformed(ActionEvent e) {
                 perspectiveManager.setPerspectiveId(perspective.getPerspectiveId());

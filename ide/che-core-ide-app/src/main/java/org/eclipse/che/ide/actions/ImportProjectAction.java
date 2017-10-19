@@ -42,7 +42,6 @@ public class ImportProjectAction extends AbstractPerspectiveAction {
         singletonList(PROJECT_PERSPECTIVE_ID),
         locale.importProjectFromLocationName(),
         locale.importProjectFromLocationDescription(),
-        null,
         resources.importProjectFromLocation());
     this.presenter = presenter;
   }

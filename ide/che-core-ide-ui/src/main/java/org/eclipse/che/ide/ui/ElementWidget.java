@@ -8,16 +8,19 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.debugger.ide.configuration;
+package org.eclipse.che.ide.ui;
 
-import org.eclipse.che.ide.api.action.BaseAction;
-import org.eclipse.che.ide.api.debug.DebugConfiguration;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
- * Factory for creating instances of {@link DebugConfigurationAction}.
+ * Simple wrapper to create GWT Widget from DOM Elemen
  *
- * @author Artem Zatsarynnyi
+ * @author Evgen Vidolob
  */
-public interface DebugConfigurationActionFactory {
-  BaseAction createAction(DebugConfiguration configuration);
+public class ElementWidget extends Widget {
+
+  public ElementWidget(Element element) {
+    setElement(element);
+  }
 }

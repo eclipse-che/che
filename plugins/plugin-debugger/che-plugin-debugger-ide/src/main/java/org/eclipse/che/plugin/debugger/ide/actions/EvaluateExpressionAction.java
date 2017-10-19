@@ -44,7 +44,6 @@ public class EvaluateExpressionAction extends AbstractPerspectiveAction {
         Collections.singletonList(PROJECT_PERSPECTIVE_ID),
         locale.evaluateExpression(),
         locale.evaluateExpressionDescription(),
-        null,
         resources.evaluateExpression());
     this.debuggerManager = debuggerManager;
     this.evaluateExpressionPresenter = evaluateExpressionPresenter;

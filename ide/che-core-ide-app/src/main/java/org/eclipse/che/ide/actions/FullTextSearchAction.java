@@ -49,7 +49,6 @@ public class FullTextSearchAction extends AbstractPerspectiveAction {
         singletonList(PROJECT_PERSPECTIVE_ID),
         locale.actionFullTextSearch(),
         locale.actionFullTextSearchDescription(),
-        null,
         resources.find());
     this.presenter = presenter;
     this.appContext = appContext;

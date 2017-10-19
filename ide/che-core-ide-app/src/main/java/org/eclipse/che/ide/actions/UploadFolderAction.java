@@ -49,7 +49,6 @@ public class UploadFolderAction extends AbstractPerspectiveAction {
         singletonList(PROJECT_PERSPECTIVE_ID),
         locale.uploadFolderFromZipName(),
         locale.uploadFolderFromZipDescription(),
-        null,
         resources.uploadFile());
     this.presenter = presenter;
     this.appContext = appContext;

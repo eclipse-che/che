@@ -15,13 +15,13 @@ package org.eclipse.che.ide.api.action;
  *
  * @author Evgen Vidolob
  */
-public class Separator extends Action {
+public class Separator extends BaseAction {
   private static final Separator ourInstance = new Separator();
 
   private String myText;
 
   public Separator() {
-    //It is necessary because otherwise we have some problems with myText==null after compiling GWT
+    // It is necessary because otherwise we have some problems with myText==null after compiling GWT
     this(null);
   }
 

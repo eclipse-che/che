@@ -26,8 +26,8 @@ import org.eclipse.che.api.promises.client.callback.CallbackPromiseHelper.Call;
 import org.eclipse.che.api.promises.client.js.JsPromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.api.action.PromisableAction;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -44,7 +44,7 @@ import org.eclipse.che.ide.util.loging.Log;
  * @author Vlad Zhukovskyi
  */
 @Singleton
-public class OpenFileAction extends Action implements PromisableAction {
+public class OpenFileAction extends BaseAction implements PromisableAction {
 
   /** ID of the parameter to specify file path to open. */
   public static final String FILE_PARAM_ID = "file";

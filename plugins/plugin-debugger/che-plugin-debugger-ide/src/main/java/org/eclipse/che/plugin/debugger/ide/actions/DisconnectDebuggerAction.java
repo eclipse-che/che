@@ -38,7 +38,6 @@ public class DisconnectDebuggerAction extends AbstractPerspectiveAction {
         Collections.singletonList(PROJECT_PERSPECTIVE_ID),
         locale.disconnectDebugger(),
         locale.disconnectDebuggerDescription(),
-        null,
         resources.disconnectDebugger());
     this.debuggerManager = debuggerManager;
   }

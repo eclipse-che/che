@@ -53,7 +53,6 @@ public class ShowHiddenFilesAction extends AbstractPerspectiveAction implements 
         singletonList(PROJECT_PERSPECTIVE_ID),
         localizationConstant.actionShowHiddenFilesTitle(),
         localizationConstant.actionShowHiddenFilesDescription(),
-        null,
         resources.showHiddenFiles());
     this.appContext = appContext;
     this.projectExplorerPresenter = projectExplorerPresenter;

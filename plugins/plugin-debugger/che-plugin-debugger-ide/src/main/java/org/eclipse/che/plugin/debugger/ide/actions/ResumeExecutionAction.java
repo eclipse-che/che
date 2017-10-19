@@ -39,7 +39,6 @@ public class ResumeExecutionAction extends AbstractPerspectiveAction {
         Collections.singletonList(PROJECT_PERSPECTIVE_ID),
         locale.resumeExecution(),
         locale.resumeExecutionDescription(),
-        null,
         resources.resumeExecution());
     this.debuggerManager = debuggerManager;
   }

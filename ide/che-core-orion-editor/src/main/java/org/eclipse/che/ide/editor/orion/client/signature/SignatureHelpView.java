@@ -28,6 +28,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.editor.signature.ParameterInfo;
 import org.eclipse.che.ide.api.editor.signature.SignatureHelp;
 import org.eclipse.che.ide.api.editor.signature.SignatureInfo;
+import org.eclipse.che.ide.ui.ElementWidget;
 import org.eclipse.che.ide.util.Pair;
 import org.eclipse.che.ide.util.dom.Elements;
 

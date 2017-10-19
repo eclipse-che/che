@@ -14,7 +14,6 @@ import java.util.List;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.Presentation;
-import org.eclipse.che.ide.api.parts.PerspectiveManager;
 
 /**
  * An extension of {@link ActionEvent} to pass command paramenters as a list of Objects to the
@@ -27,11 +26,8 @@ public class QuickassistActionEvent extends ActionEvent {
   private List<Object> arguments;
 
   public QuickassistActionEvent(
-      Presentation presentation,
-      ActionManager actionManager,
-      PerspectiveManager perspectiveManager,
-      List<Object> arguments) {
-    super(presentation, actionManager, perspectiveManager);
+      Presentation presentation, ActionManager actionManager, List<Object> arguments) {
+    super(presentation, actionManager);
     this.arguments = arguments;
   }
 

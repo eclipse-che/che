@@ -39,7 +39,6 @@ public class StepOverAction extends AbstractPerspectiveAction {
         Collections.singletonList(PROJECT_PERSPECTIVE_ID),
         locale.stepOver(),
         locale.stepOverDescription(),
-        null,
         resources.stepOver());
     this.debuggerManager = debuggerManager;
   }

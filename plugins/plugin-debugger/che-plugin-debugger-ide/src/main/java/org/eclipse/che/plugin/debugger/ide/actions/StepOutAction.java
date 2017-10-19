@@ -39,7 +39,6 @@ public class StepOutAction extends AbstractPerspectiveAction {
         Collections.singletonList(PROJECT_PERSPECTIVE_ID),
         locale.stepOut(),
         locale.stepOutDescription(),
-        null,
         resources.stepOut());
     this.debuggerManager = debuggerManager;
   }
