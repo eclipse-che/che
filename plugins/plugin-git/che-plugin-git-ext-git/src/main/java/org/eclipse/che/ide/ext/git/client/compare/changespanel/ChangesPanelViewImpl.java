@@ -202,7 +202,7 @@ public class ChangesPanelViewImpl extends Composite implements ChangesPanelView 
     Map<String, Node> preparedNodes = new HashMap<>();
     for (int i = getMaxNestedLevel(allFiles); i > 0; i--) {
 
-      //Collect child files of all folders of current nesting level
+      // Collect child files of all folders of current nesting level
       Map<String, List<Node>> currentChildNodes = new HashMap<>();
       for (String file : allFiles) {
         Path pathName = Path.valueOf(file);
@@ -220,7 +220,7 @@ public class ChangesPanelViewImpl extends Composite implements ChangesPanelView 
         }
       }
 
-      //Map child files to related folders of current nesting level or just create a common folder
+      // Map child files to related folders of current nesting level or just create a common folder
       for (String path : allFolders) {
         nodePaths.add(Path.valueOf(path));
         if (!(Path.valueOf(path).segmentCount() == i - 1)) {
@@ -235,7 +235,7 @@ public class ChangesPanelViewImpl extends Composite implements ChangesPanelView 
         preparedNodes.put(path, folder);
       }
 
-      //Take all child folders and nest them to related parent folders of current nesting level
+      // Take all child folders and nest them to related parent folders of current nesting level
       List<String> currentPaths = new ArrayList<>(preparedNodes.keySet());
       for (String parentPath : currentPaths) {
         List<Node> nodesToNest = new ArrayList<>();

@@ -167,7 +167,7 @@ public class JavaFormatterService {
         return formatterFileEntry.getVirtualFile().toIoFile();
       }
     } catch (ServerException e) {
-      //do nothing
+      // do nothing
     }
     return null;
   }

@@ -403,23 +403,23 @@ public class SelectionModel
 
   private void onKeyEnd(NativeEvent evt) {
     evt.preventDefault();
-    //TODO implement this feature
+    // TODO implement this feature
   }
 
   private void onKeyHome(NativeEvent evt) {
     evt.preventDefault();
 
-    //TODO implement this feature
+    // TODO implement this feature
   }
 
   private void onKeyPageDown(NativeEvent evt) {
     evt.preventDefault();
-    //TODO implement this feature
+    // TODO implement this feature
   }
 
   private void onKeyPageUp(NativeEvent evt) {
     evt.preventDefault();
-    //TODO implement this feature
+    // TODO implement this feature
   }
 
   protected void onMouseClick(ClickEvent ce) {
@@ -748,7 +748,7 @@ public class SelectionModel
   }
 
   protected void onLastFocusedChange(Node oldFocused, Node newFocused) {
-    //temporary stub
+    // temporary stub
   }
 
   public Mode getSelectionMode() {
@@ -764,7 +764,7 @@ public class SelectionModel
   }
 
   protected void onAdd(List<? extends Node> models) {
-    //temporary stub
+    // temporary stub
   }
 
   protected void onClear(StoreClearEvent event) {
@@ -776,7 +776,7 @@ public class SelectionModel
   }
 
   protected void onRecordChange(StoreRecordChangeEvent event) {
-    //temporary stub
+    // temporary stub
   }
 
   protected Node getLastFocused() {

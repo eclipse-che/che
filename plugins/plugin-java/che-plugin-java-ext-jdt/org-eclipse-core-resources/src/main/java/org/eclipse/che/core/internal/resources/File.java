@@ -189,7 +189,8 @@ public class File extends Resource implements IFile {
     if (content == null) content = new ByteArrayInputStream(new byte[0]);
     workspace.write(this, content, updateFlags, append, monitor);
 
-    //        workspace.getAliasManager().updateAliases(this, getStore(), IResource.DEPTH_ZERO, monitor);
+    //        workspace.getAliasManager().updateAliases(this, getStore(), IResource.DEPTH_ZERO,
+    // monitor);
   }
 
   @Override

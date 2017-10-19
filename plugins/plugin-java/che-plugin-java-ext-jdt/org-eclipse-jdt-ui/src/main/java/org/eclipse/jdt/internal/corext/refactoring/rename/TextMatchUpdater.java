@@ -49,7 +49,7 @@ class TextMatchUpdater {
   private static final GroupCategorySet TEXTUAL_MATCHES =
       new GroupCategorySet(
           new GroupCategory(
-              "org.eclipse.jdt.internal.corext.textualMatches", //$NON-NLS-1$
+              "org.eclipse.jdt.internal.corext.textualMatches", // $NON-NLS-1$
               RefactoringCoreMessages.TextMatchUpdater_textualMatches_name,
               RefactoringCoreMessages.TextMatchUpdater_textualMatches_description));
 
@@ -120,7 +120,7 @@ class TextMatchUpdater {
     try {
       IProject[] projectsInScope = getProjectsInScope();
 
-      pm.beginTask("", projectsInScope.length); //$NON-NLS-1$
+      pm.beginTask("", projectsInScope.length); // $NON-NLS-1$
 
       for (int i = 0; i < projectsInScope.length; i++) {
         if (pm.isCanceled()) throw new OperationCanceledException();
@@ -177,7 +177,7 @@ class TextMatchUpdater {
 
   private void addCuTextMatches(ICompilationUnit cu) throws JavaModelException {
     fScanner.scan(cu);
-    Set<TextMatch> matches = fScanner.getMatches(); //Set of TextMatch
+    Set<TextMatch> matches = fScanner.getMatches(); // Set of TextMatch
     if (matches.size() == 0) return;
 
     removeReferences(cu, matches);
@@ -196,7 +196,7 @@ class TextMatchUpdater {
   private void removeReferences(Set<TextMatch> matches, SearchResultGroup group) {
     SearchMatch[] searchResults = group.getSearchResults();
     for (int r = 0; r < searchResults.length; r++) {
-      //int start= searchResults[r].getStart(); // doesn't work for pack.ReferencedType
+      // int start= searchResults[r].getStart(); // doesn't work for pack.ReferencedType
       int unqualifiedStart =
           searchResults[r].getOffset() + searchResults[r].getLength() - fCurrentNameLength;
       for (Iterator<TextMatch> iter = matches.iterator(); iter.hasNext(); ) {

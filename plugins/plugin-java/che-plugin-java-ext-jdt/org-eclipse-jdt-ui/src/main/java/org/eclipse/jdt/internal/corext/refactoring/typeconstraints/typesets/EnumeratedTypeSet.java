@@ -217,7 +217,7 @@ public class EnumeratedTypeSet extends TypeSet {
    */
   public boolean add(TType t) {
     // Doesn't make sense to do here what other methods do (copy-and-modify)
-    Assert.isTrue(!isUniverse(), "Someone's trying to expand the universe!"); //$NON-NLS-1$
+    Assert.isTrue(!isUniverse(), "Someone's trying to expand the universe!"); // $NON-NLS-1$
     return fMembers.add(t);
   }
 
@@ -340,8 +340,7 @@ public class EnumeratedTypeSet extends TypeSet {
         ArrayType at = (ArrayType) t;
         int numDims = at.getDimensions();
         for (Iterator<TType> subIter = TTypes.getAllSubTypesIterator(at.getElementType());
-            subIter.hasNext();
-            ) {
+            subIter.hasNext(); ) {
           result.fMembers.remove(TTypes.createArrayType(subIter.next(), numDims));
         }
       } else {
@@ -381,8 +380,7 @@ public class EnumeratedTypeSet extends TypeSet {
         ArrayType at = (ArrayType) t;
         int numDims = at.getDimensions();
         for (Iterator<TType> superIter = TTypes.getAllSuperTypesIterator(at.getElementType());
-            superIter.hasNext();
-            ) {
+            superIter.hasNext(); ) {
           result.fMembers.remove(TTypes.createArrayType(superIter.next(), numDims));
         }
       } else {
@@ -447,8 +445,8 @@ public class EnumeratedTypeSet extends TypeSet {
   @Override
   public String toString() {
     StringBuffer b = new StringBuffer();
-    b.append("{" + fID + ":"); //$NON-NLS-1$ //$NON-NLS-2$
-    if (isUniverse()) b.append(" <universe>"); //$NON-NLS-1$
+    b.append("{" + fID + ":"); // $NON-NLS-1$ //$NON-NLS-2$
+    if (isUniverse()) b.append(" <universe>"); // $NON-NLS-1$
     else {
       int count = 0;
       Iterator<TType> iter;
@@ -457,9 +455,9 @@ public class EnumeratedTypeSet extends TypeSet {
         b.append(' ').append(type.getPrettySignature());
         if (iter.hasNext()) b.append(',');
       }
-      if (iter.hasNext()) b.append(" ..."); //$NON-NLS-1$
+      if (iter.hasNext()) b.append(" ..."); // $NON-NLS-1$
     }
-    b.append(" }"); //$NON-NLS-1$
+    b.append(" }"); // $NON-NLS-1$
     return b.toString();
   }
 

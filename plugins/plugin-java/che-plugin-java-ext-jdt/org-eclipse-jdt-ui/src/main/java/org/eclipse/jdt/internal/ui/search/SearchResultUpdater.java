@@ -42,14 +42,14 @@ public class SearchResultUpdater implements IElementChangedListener, IQueryListe
   }
 
   public void elementChanged(ElementChangedEvent event) {
-    //long t0= System.currentTimeMillis();
+    // long t0= System.currentTimeMillis();
     IJavaElementDelta delta = event.getDelta();
     Set<IAdaptable> removedElements = new HashSet<IAdaptable>();
     Set<IAdaptable> potentiallyRemovedElements = new HashSet<IAdaptable>();
     collectRemoved(potentiallyRemovedElements, removedElements, delta);
     if (removedElements.size() > 0) handleRemoved(removedElements);
     if (potentiallyRemovedElements.size() > 0) handleRemoved(potentiallyRemovedElements);
-    //System.out.println(this+"handled delta in: "+(System.currentTimeMillis()-t0));
+    // System.out.println(this+"handled delta in: "+(System.currentTimeMillis()-t0));
   }
 
   private void handleRemoved(Set<IAdaptable> removedElements) {
@@ -59,7 +59,7 @@ public class SearchResultUpdater implements IElementChangedListener, IQueryListe
         if (elements[i] instanceof IJavaElement) {
           IJavaElement je = (IJavaElement) elements[i];
           if (!je.exists()) {
-            //System.out.println("removing: "+je+" in "+fResult.getUserData());
+            // System.out.println("removing: "+je+" in "+fResult.getUserData());
             Match[] matches = fResult.getMatches(elements[i]);
             for (int j = 0; j < matches.length; j++) {
               fResult.removeMatch(matches[j]);
@@ -68,7 +68,7 @@ public class SearchResultUpdater implements IElementChangedListener, IQueryListe
         } else if (elements[i] instanceof IResource) {
           IResource resource = (IResource) elements[i];
           if (!resource.exists()) {
-            //System.out.println("removing: "+resource+" in "+fResult.getUserData());
+            // System.out.println("removing: "+resource+" in "+fResult.getUserData());
             Match[] matches = fResult.getMatches(elements[i]);
             for (int j = 0; j < matches.length; j++) {
               fResult.removeMatch(matches[j]);

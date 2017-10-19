@@ -159,7 +159,7 @@ public final class ArrayType extends TType {
   protected String getPlainPrettySignature() {
     StringBuffer result = new StringBuffer(fElementType.getPlainPrettySignature());
     for (int i = 0; i < fDimensions; i++) {
-      result.append("[]"); //$NON-NLS-1$
+      result.append("[]"); // $NON-NLS-1$
     }
     return result.toString();
   }
@@ -168,7 +168,7 @@ public final class ArrayType extends TType {
   public String getName() {
     StringBuffer result = new StringBuffer(fElementType.getName());
     for (int i = 0; i < fDimensions; i++) {
-      result.append("[]"); //$NON-NLS-1$
+      result.append("[]"); // $NON-NLS-1$
     }
     return result.toString();
   }

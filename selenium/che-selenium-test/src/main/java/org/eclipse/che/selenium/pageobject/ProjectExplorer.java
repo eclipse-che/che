@@ -438,7 +438,8 @@ public class ProjectExplorer {
       item.click();
       actionsFactory.createAction(seleniumWebDriver).doubleClick(item).perform();
     }
-    //sometimes an element in the project explorer may be is not attached to the DOM. We should refresh all items.
+    // sometimes an element in the project explorer may be is not attached to the DOM. We should
+    // refresh all items.
     catch (StaleElementReferenceException ex) {
       LOG.error(ex.getLocalizedMessage(), ex);
       clickOnRefreshTreeButton();

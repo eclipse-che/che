@@ -48,7 +48,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
     super.apply(document, trigger, offset);
     if (needsLinkedMode()) {
       //			setUpLinkedMode(document, ')');
-    } else if (!fProposal.isConstructor() && getReplacementString().endsWith(";")) { //$NON-NLS-1$
+    } else if (!fProposal.isConstructor() && getReplacementString().endsWith(";")) { // $NON-NLS-1$
       //			setUpLinkedMode(document, ';');
     }
   }
@@ -187,7 +187,8 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 
       if (prefs.afterOpeningParen) buffer.append(SPACE);
 
-      // don't add the trailing space, but let the user type it in himself - typing the closing paren will exit
+      // don't add the trailing space, but let the user type it in himself - typing the closing
+      // paren will exit
       //			if (prefs.beforeClosingParen)
       //				buffer.append(SPACE);
     } else {
@@ -294,11 +295,11 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
     }
 
     if (isInJavadoc()) {
-      int idx = word.indexOf("{@link "); //$NON-NLS-1$
+      int idx = word.indexOf("{@link "); // $NON-NLS-1$
       if (idx == 0) {
         word = word.substring(7);
       } else {
-        idx = word.indexOf("{@value "); //$NON-NLS-1$
+        idx = word.indexOf("{@value "); // $NON-NLS-1$
         if (idx == 0) {
           word = word.substring(8);
         }
@@ -334,7 +335,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
       if (length > 0) return document.get(replacementOffset, length);
     } catch (BadLocationException x) {
     }
-    return ""; //$NON-NLS-1$
+    return ""; // $NON-NLS-1$
   }
 
   /*

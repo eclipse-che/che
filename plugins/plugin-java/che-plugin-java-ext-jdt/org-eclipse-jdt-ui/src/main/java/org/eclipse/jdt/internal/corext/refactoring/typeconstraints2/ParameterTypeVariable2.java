@@ -73,6 +73,6 @@ public final class ParameterTypeVariable2 extends ConstraintVariable2
     String toString = (String) getData(TO_STRING);
     return toString == null
         ? "[Parameter(" + fParameterIndex + "," + fKey + ")]"
-        : toString; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+        : toString; // $NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
   }
 }

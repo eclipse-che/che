@@ -28,7 +28,7 @@ public interface IRefactoringProcessorIds {
    * registered for the <code>IMethod</code> whose signature is changed.
    */
   public static String CHANGE_METHOD_SIGNATURE_PROCESSOR =
-      "org.eclipse.jdt.ui.changeMethodSignatureRefactoring"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.changeMethodSignatureRefactoring"; // $NON-NLS-1$
 
   /**
    * Processor ID of the Introduce Parameter Object processor (value <code>
@@ -38,5 +38,5 @@ public interface IRefactoringProcessorIds {
    * registered for the <code>IMethod</code> whose signature is changed.
    */
   public static String INTRODUCE_PARAMETER_OBJECT_PROCESSOR =
-      "org.eclipse.jdt.ui.introduceParameterObjectRefactoring"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.introduceParameterObjectRefactoring"; // $NON-NLS-1$
 }

@@ -180,73 +180,73 @@ public class CodeStyleCleanUp extends AbstractMultiFix {
   public String getPreview() {
     StringBuffer buf = new StringBuffer();
 
-    buf.append("private int value;\n"); //$NON-NLS-1$
-    buf.append("public int get() {\n"); //$NON-NLS-1$
+    buf.append("private int value;\n"); // $NON-NLS-1$
+    buf.append("public int get() {\n"); // $NON-NLS-1$
     if (isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS)
         && isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS)) {
-      buf.append("    return this.value + this.value;\n"); //$NON-NLS-1$
+      buf.append("    return this.value + this.value;\n"); // $NON-NLS-1$
     } else if (isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS)
         && isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_IF_NECESSARY)) {
-      buf.append("    return value + value;\n"); //$NON-NLS-1$
+      buf.append("    return value + value;\n"); // $NON-NLS-1$
     } else {
-      buf.append("    return this.value + value;\n"); //$NON-NLS-1$
+      buf.append("    return this.value + value;\n"); // $NON-NLS-1$
     }
-    buf.append("}\n"); //$NON-NLS-1$
-    buf.append("\n"); //$NON-NLS-1$
-    buf.append("public int getZero() {\n"); //$NON-NLS-1$
+    buf.append("}\n"); // $NON-NLS-1$
+    buf.append("\n"); // $NON-NLS-1$
+    buf.append("public int getZero() {\n"); // $NON-NLS-1$
     if (isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS)
         && isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_ALWAYS)) {
-      buf.append("    return this.get() - this.get();\n"); //$NON-NLS-1$
+      buf.append("    return this.get() - this.get();\n"); // $NON-NLS-1$
     } else if (isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS)
         && isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_IF_NECESSARY)) {
-      buf.append("    return get() - get();\n"); //$NON-NLS-1$
+      buf.append("    return get() - get();\n"); // $NON-NLS-1$
     } else {
-      buf.append("    return this.get() - get();\n"); //$NON-NLS-1$
+      buf.append("    return this.get() - get();\n"); // $NON-NLS-1$
     }
-    buf.append("}\n"); //$NON-NLS-1$
-    buf.append("\n"); //$NON-NLS-1$
-    buf.append("class E {\n"); //$NON-NLS-1$
-    buf.append("    public static int NUMBER;\n"); //$NON-NLS-1$
-    buf.append("    public static void set(int i) {\n"); //$NON-NLS-1$
+    buf.append("}\n"); // $NON-NLS-1$
+    buf.append("\n"); // $NON-NLS-1$
+    buf.append("class E {\n"); // $NON-NLS-1$
+    buf.append("    public static int NUMBER;\n"); // $NON-NLS-1$
+    buf.append("    public static void set(int i) {\n"); // $NON-NLS-1$
     if (isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS)
         && isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD)) {
-      buf.append("        E.NUMBER= i;\n"); //$NON-NLS-1$
+      buf.append("        E.NUMBER= i;\n"); // $NON-NLS-1$
     } else {
-      buf.append("        NUMBER= i;\n"); //$NON-NLS-1$
+      buf.append("        NUMBER= i;\n"); // $NON-NLS-1$
     }
-    buf.append("    }\n"); //$NON-NLS-1$
-    buf.append("\n"); //$NON-NLS-1$
-    buf.append("    public void reset() {\n"); //$NON-NLS-1$
+    buf.append("    }\n"); // $NON-NLS-1$
+    buf.append("\n"); // $NON-NLS-1$
+    buf.append("    public void reset() {\n"); // $NON-NLS-1$
     if (isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS)
         && isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_METHOD)) {
-      buf.append("        E.set(0);\n"); //$NON-NLS-1$
+      buf.append("        E.set(0);\n"); // $NON-NLS-1$
     } else {
-      buf.append("        set(0);\n"); //$NON-NLS-1$
+      buf.append("        set(0);\n"); // $NON-NLS-1$
     }
-    buf.append("    }\n"); //$NON-NLS-1$
-    buf.append("}\n"); //$NON-NLS-1$
-    buf.append("\n"); //$NON-NLS-1$
-    buf.append("class ESub extends E {\n"); //$NON-NLS-1$
-    buf.append("    public void reset() {\n"); //$NON-NLS-1$
+    buf.append("    }\n"); // $NON-NLS-1$
+    buf.append("}\n"); // $NON-NLS-1$
+    buf.append("\n"); // $NON-NLS-1$
+    buf.append("class ESub extends E {\n"); // $NON-NLS-1$
+    buf.append("    public void reset() {\n"); // $NON-NLS-1$
     if (isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS)
         && isEnabled(
             CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS)) {
-      buf.append("        E.NUMBER= 0;\n"); //$NON-NLS-1$
+      buf.append("        E.NUMBER= 0;\n"); // $NON-NLS-1$
     } else {
-      buf.append("        ESub.NUMBER= 0;\n"); //$NON-NLS-1$
+      buf.append("        ESub.NUMBER= 0;\n"); // $NON-NLS-1$
     }
-    buf.append("    }\n"); //$NON-NLS-1$
-    buf.append("}\n"); //$NON-NLS-1$
-    buf.append("\n"); //$NON-NLS-1$
-    buf.append("public void dec() {\n"); //$NON-NLS-1$
+    buf.append("    }\n"); // $NON-NLS-1$
+    buf.append("}\n"); // $NON-NLS-1$
+    buf.append("\n"); // $NON-NLS-1$
+    buf.append("public void dec() {\n"); // $NON-NLS-1$
     if (isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS)
         && isEnabled(
             CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS)) {
-      buf.append("    E.NUMBER--;\n"); //$NON-NLS-1$
+      buf.append("    E.NUMBER--;\n"); // $NON-NLS-1$
     } else {
-      buf.append("    (new E()).NUMBER--;\n"); //$NON-NLS-1$
+      buf.append("    (new E()).NUMBER--;\n"); // $NON-NLS-1$
     }
-    buf.append("}\n"); //$NON-NLS-1$
+    buf.append("}\n"); // $NON-NLS-1$
 
     return buf.toString();
   }

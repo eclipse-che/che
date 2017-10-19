@@ -99,7 +99,7 @@ public class EditorPartStackPresenter extends PartStackPresenter
   private final Map<EditorPaneMenuItem, TabItem> items;
   private final AddEditorTabMenuFactory addEditorTabMenuFactory;
 
-  //this list need to save order of added parts
+  // this list need to save order of added parts
   private final LinkedList<EditorPartPresenter> partsOrder;
   private final LinkedList<EditorPartPresenter> closedParts;
 
@@ -530,7 +530,7 @@ public class EditorPartStackPresenter extends PartStackPresenter
 
       if (tab != null) {
         final VirtualFile virtualFile = ((EditorTab) tab).getFile();
-        //pass into action file property and editor tab
+        // pass into action file property and editor tab
         presentation.putClientProperty(CURRENT_TAB_PROP, tab);
         presentation.putClientProperty(CURRENT_FILE_PROP, virtualFile);
       }

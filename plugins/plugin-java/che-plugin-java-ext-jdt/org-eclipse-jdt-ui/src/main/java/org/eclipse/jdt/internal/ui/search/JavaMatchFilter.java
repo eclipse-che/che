@@ -55,7 +55,7 @@ abstract class JavaMatchFilter extends MatchFilter {
     return false;
   }
 
-  private static final String SETTINGS_LAST_USED_FILTERS = "filters_last_used"; //$NON-NLS-1$
+  private static final String SETTINGS_LAST_USED_FILTERS = "filters_last_used"; // $NON-NLS-1$
 
   public static MatchFilter[] getLastUsedFilters() {
     String string = JavaPlugin.getDefault().getDialogSettings().get(SETTINGS_LAST_USED_FILTERS);
@@ -181,7 +181,7 @@ class PotentialFilter extends JavaMatchFilter {
 
   @Override
   public String getID() {
-    return "filter_potential"; //$NON-NLS-1$
+    return "filter_potential"; // $NON-NLS-1$
   }
 }
 
@@ -229,7 +229,7 @@ class ImportFilter extends JavaMatchFilter {
 
   @Override
   public String getID() {
-    return "filter_imports"; //$NON-NLS-1$
+    return "filter_imports"; // $NON-NLS-1$
   }
 }
 
@@ -272,7 +272,7 @@ class WriteFilter extends VariableFilter {
 
   @Override
   public String getID() {
-    return "filter_writes"; //$NON-NLS-1$
+    return "filter_writes"; // $NON-NLS-1$
   }
 }
 
@@ -299,7 +299,7 @@ class ReadFilter extends VariableFilter {
 
   @Override
   public String getID() {
-    return "filter_reads"; //$NON-NLS-1$
+    return "filter_reads"; // $NON-NLS-1$
   }
 }
 
@@ -331,7 +331,7 @@ class JavadocFilter extends JavaMatchFilter {
 
   @Override
   public String getID() {
-    return "filter_javadoc"; //$NON-NLS-1$
+    return "filter_javadoc"; // $NON-NLS-1$
   }
 }
 
@@ -375,7 +375,7 @@ class PolymorphicFilter extends JavaMatchFilter {
 
   @Override
   public String getID() {
-    return "filter_polymorphic"; //$NON-NLS-1$
+    return "filter_polymorphic"; // $NON-NLS-1$
   }
 }
 
@@ -437,7 +437,7 @@ class ErasureMatchFilter extends GenericTypeFilter {
 
   @Override
   public String getID() {
-    return "filter_erasure"; //$NON-NLS-1$
+    return "filter_erasure"; // $NON-NLS-1$
   }
 }
 
@@ -464,7 +464,7 @@ class InexactMatchFilter extends GenericTypeFilter {
 
   @Override
   public String getID() {
-    return "filter_inexact"; //$NON-NLS-1$
+    return "filter_inexact"; // $NON-NLS-1$
   }
 }
 
@@ -506,7 +506,7 @@ class NonPublicFilter extends ModifierFilter {
 
   @Override
   public String getID() {
-    return "filter_non_public"; //$NON-NLS-1$
+    return "filter_non_public"; // $NON-NLS-1$
   }
 }
 
@@ -541,7 +541,7 @@ class StaticFilter extends ModifierFilter {
 
   @Override
   public String getID() {
-    return "filter_static"; //$NON-NLS-1$
+    return "filter_static"; // $NON-NLS-1$
   }
 }
 
@@ -576,7 +576,7 @@ class NonStaticFilter extends ModifierFilter {
 
   @Override
   public String getID() {
-    return "filter_non_static"; //$NON-NLS-1$
+    return "filter_non_static"; // $NON-NLS-1$
   }
 }
 
@@ -611,7 +611,7 @@ class DeprecatedFilter extends ModifierFilter {
 
   @Override
   public String getID() {
-    return "filter_deprecated"; //$NON-NLS-1$
+    return "filter_deprecated"; // $NON-NLS-1$
   }
 }
 
@@ -646,6 +646,6 @@ class NonDeprecatedFilter extends ModifierFilter {
 
   @Override
   public String getID() {
-    return "filter_non_deprecated"; //$NON-NLS-1$
+    return "filter_non_deprecated"; // $NON-NLS-1$
   }
 }

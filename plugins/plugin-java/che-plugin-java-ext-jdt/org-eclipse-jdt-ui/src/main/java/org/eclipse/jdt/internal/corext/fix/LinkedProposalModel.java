@@ -22,7 +22,7 @@ public class LinkedProposalModel {
 
   public void addPositionGroup(LinkedProposalPositionGroup positionGroup) {
     if (positionGroup == null) {
-      throw new IllegalArgumentException("positionGroup must not be null"); //$NON-NLS-1$
+      throw new IllegalArgumentException("positionGroup must not be null"); // $NON-NLS-1$
     }
 
     if (fPositionGroups == null) {

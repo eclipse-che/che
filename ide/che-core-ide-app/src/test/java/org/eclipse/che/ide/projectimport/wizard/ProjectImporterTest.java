@@ -40,13 +40,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectImporterTest {
 
-  //constructors mocks
+  // constructors mocks
   @Mock private CoreLocalizationConstant localizationConstant;
   @Mock private ImportProjectNotificationSubscriberFactory subscriberFactory;
   @Mock private AppContext appContext;
   @Mock private ProjectResolver resolver;
 
-  //additional mocks
+  // additional mocks
   @Mock private ProjectNotificationSubscriber subscriber;
   @Mock private MutableProjectConfig projectConfig;
   @Mock private MutableProjectConfig.MutableSourceStorage source;

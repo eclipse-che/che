@@ -24,7 +24,7 @@ import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProje
 /** @author Sergii Leshchenko */
 public class OpenShiftMachine implements Machine {
   private static final String OPENSHIFT_POD_STATUS_RUNNING = "Running";
-  //TODO Make timeout configurable
+  // TODO Make timeout configurable
   private static final int EXEC_TIMEOUT_MIN = 5;
 
   private final String machineName;

@@ -144,7 +144,7 @@ public class TextFileChange extends TextChange {
   public void initializeValidationData(IProgressMonitor monitor) {
     if (monitor == null) monitor = new NullProgressMonitor();
     try {
-      monitor.beginTask("", 1); //$NON-NLS-1$
+      monitor.beginTask("", 1); // $NON-NLS-1$
       fValidationState = BufferValidationState.create(fFile);
     } finally {
       monitor.done();
@@ -155,13 +155,13 @@ public class TextFileChange extends TextChange {
   public RefactoringStatus isValid(IProgressMonitor monitor) throws CoreException {
     if (monitor == null) monitor = new NullProgressMonitor();
     try {
-      monitor.beginTask("", 1); //$NON-NLS-1$
+      monitor.beginTask("", 1); // $NON-NLS-1$
       if (fValidationState == null)
         throw new CoreException(
             new Status(
                 IStatus.ERROR,
                 RefactoringCorePlugin.getPluginId(),
-                "TextFileChange has not been initialialized")); //$NON-NLS-1$
+                "TextFileChange has not been initialialized")); // $NON-NLS-1$
 
       boolean needsSaving = needsSaving();
       RefactoringStatus result = fValidationState.isValid(needsSaving);

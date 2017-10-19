@@ -127,7 +127,7 @@ public class ResetFilesPresenter implements ResetFilesView.ActionDelegate {
                 return;
               }
 
-              //Mark selected items to reset from index
+              // Mark selected items to reset from index
               Resource[] resources = appContext.getResources();
               if (resources != null) {
                 for (Resource selectedItem : resources) {

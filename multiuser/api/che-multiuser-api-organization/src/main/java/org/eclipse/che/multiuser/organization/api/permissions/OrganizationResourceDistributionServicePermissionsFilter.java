@@ -55,12 +55,12 @@ public class OrganizationResourceDistributionServicePermissionsFilter
     switch (methodName) {
       case GET_RESOURCES_CAP_METHOD:
         if (superPrivilegesChecker.hasSuperPrivileges()) {
-          //user is able to see information about all organizations
+          // user is able to see information about all organizations
           return;
         }
         // fall through
       case CAP_RESOURCES_METHOD:
-        //we should check permissions on parent organization level
+        // we should check permissions on parent organization level
         Organization organization = organizationManager.getById((String) arguments[0]);
         organizationId = organization.getParent();
         if (organizationId == null) {
@@ -74,7 +74,7 @@ public class OrganizationResourceDistributionServicePermissionsFilter
         // get organization to ensure that organization exists
         organizationManager.getById(organizationId);
         if (superPrivilegesChecker.hasSuperPrivileges()) {
-          //user is able to see information about all organizations
+          // user is able to see information about all organizations
           return;
         }
         break;

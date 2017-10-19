@@ -168,7 +168,7 @@ public class WorkspacePresenter
     state.put("perspectives", perspectivesJs);
     Map<String, Perspective> perspectives = perspectiveManagerProvider.get().getPerspectives();
     for (Map.Entry<String, Perspective> entry : perspectives.entrySet()) {
-      //store only default perspective
+      // store only default perspective
       if (entry.getKey().equals(defaultPerspectiveId)) {
         perspectivesJs.put(entry.getKey(), entry.getValue().getState());
       }

@@ -92,7 +92,8 @@ public class InstallerConfigProvisioner implements ConfigurationProvisioner {
             "USER_TOKEN",
             machineTokenProvider.getToken(identity.getWorkspaceId()));
 
-        // TODO incorrect place for env variable addition. workspace ID is needed for wsagent server, not installer
+        // TODO incorrect place for env variable addition. workspace ID is needed for wsagent
+        // server, not installer
         // WORKSPACE_ID is required only by workspace agent
         if (devMachineName.equals(machineName)) {
           putEnv(container.getEnv(), "CHE_WORKSPACE_ID", identity.getWorkspaceId());

@@ -134,7 +134,7 @@ public final class CreateCopyOfCompilationUnitChange extends CreateTextFileChang
 
   public CreateCopyOfCompilationUnitChange(
       IPath path, String source, ICompilationUnit oldCu, INewNameQuery nameQuery) {
-    super(path, source, null, "java"); //$NON-NLS-1$
+    super(path, source, null, "java"); // $NON-NLS-1$
     fOldCu = oldCu;
     fNameQuery = nameQuery;
     setEncoding(oldCu);
@@ -152,7 +152,7 @@ public final class CreateCopyOfCompilationUnitChange extends CreateTextFileChang
   @Override
   protected IFile getOldFile(IProgressMonitor monitor) throws OperationCanceledException {
     try {
-      monitor.beginTask("", 12); //$NON-NLS-1$
+      monitor.beginTask("", 12); // $NON-NLS-1$
       String oldSource = super.getSource();
       IPath oldPath = super.getPath();
       String newTypeName = fNameQuery.getNewName();

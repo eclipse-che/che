@@ -104,7 +104,7 @@ class ConstantChecks {
 
     private boolean visitName(Name name) {
       fResult &= checkName(name);
-      return false; //Do not descend further
+      return false; // Do not descend further
     }
 
     private boolean checkName(Name name) {
@@ -196,7 +196,7 @@ class ConstantChecks {
         return false; // e.g. a NameQualifiedType's qualifier, which can be a package binding
       }
 
-      //Descend deeper:
+      // Descend deeper:
       return true;
     }
   }

@@ -82,8 +82,7 @@ public class InOutFlowAnalyzer extends FlowAnalyzer {
     super.endVisit(node);
     FlowInfo info = accessFlowInfo(node);
     for (Iterator<SingleVariableDeclaration> iter = node.parameters().iterator();
-        iter.hasNext();
-        ) {
+        iter.hasNext(); ) {
       clearAccessMode(info, iter.next());
     }
   }

@@ -77,7 +77,7 @@ public class ModifierRewrite {
             declNode, AnnotationTypeMemberDeclaration.MODIFIERS2_PROPERTY);
       default:
         throw new IllegalArgumentException(
-            "node has no modifiers: " + declNode.getClass().getName()); //$NON-NLS-1$
+            "node has no modifiers: " + declNode.getClass().getName()); // $NON-NLS-1$
     }
   }
 
@@ -141,7 +141,7 @@ public class ModifierRewrite {
       for (Iterator<IExtendedModifier> iterator = originalList.iterator(); iterator.hasNext(); ) {
         ASTNode modifier = (ASTNode) iterator.next();
         ASTNode copy = fModifierRewrite.getASTRewrite().createCopyTarget(modifier);
-        if (copy != null) { //paranoia check (only left here because we're in RC1)
+        if (copy != null) { // paranoia check (only left here because we're in RC1)
           fModifierRewrite.insertLast(copy, editGroup);
         }
       }
@@ -149,7 +149,7 @@ public class ModifierRewrite {
       ASTNode copy =
           modifierList.createCopyTarget(
               (ASTNode) originalList.get(0), (ASTNode) originalList.get(originalList.size() - 1));
-      if (copy != null) { //paranoia check (only left here because we're in RC1)
+      if (copy != null) { // paranoia check (only left here because we're in RC1)
         fModifierRewrite.insertLast(copy, editGroup);
       }
     }

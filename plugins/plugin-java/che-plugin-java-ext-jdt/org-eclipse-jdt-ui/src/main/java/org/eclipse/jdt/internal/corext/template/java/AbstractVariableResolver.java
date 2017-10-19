@@ -74,8 +74,8 @@ public abstract class AbstractVariableResolver extends TemplateVariableResolver 
         }
         fVariables = variables.toArray(new Variable[variables.size()]);
 
-        //set to default type, a template which references to the type
-        //of _the_ parameter will not correctly work anyway
+        // set to default type, a template which references to the type
+        // of _the_ parameter will not correctly work anyway
         jv.setParamType(fDefaultType);
       }
 

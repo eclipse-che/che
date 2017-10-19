@@ -90,7 +90,7 @@ public abstract class Refactoring extends PlatformObject {
    */
   public abstract String getName();
 
-  //---- Conditions ------------------------------------------------------------
+  // ---- Conditions ------------------------------------------------------------
 
   /**
    * Returns the tick provider used for progress reporting for this refactoring.
@@ -136,7 +136,7 @@ public abstract class Refactoring extends PlatformObject {
   public RefactoringStatus checkAllConditions(IProgressMonitor pm)
       throws CoreException, OperationCanceledException {
     RefactoringTickProvider refactoringTickProvider = getRefactoringTickProvider();
-    pm.beginTask("", refactoringTickProvider.getCheckAllConditionsTicks()); //$NON-NLS-1$
+    pm.beginTask("", refactoringTickProvider.getCheckAllConditionsTicks()); // $NON-NLS-1$
     RefactoringStatus result = new RefactoringStatus();
     result.merge(
         checkInitialConditions(
@@ -196,7 +196,7 @@ public abstract class Refactoring extends PlatformObject {
   public abstract RefactoringStatus checkFinalConditions(IProgressMonitor pm)
       throws CoreException, OperationCanceledException;
 
-  //---- change creation ------------------------------------------------------
+  // ---- change creation ------------------------------------------------------
 
   /**
    * Creates a {@link Change} object that performs the actual workspace transformation.

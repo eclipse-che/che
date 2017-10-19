@@ -260,7 +260,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
           return null;
         }
       } else {
-        containerName = ""; //$NON-NLS-1$
+        containerName = ""; // $NON-NLS-1$
         name = simpleName;
         qualifierStart = simpleNameStart;
       }
@@ -334,7 +334,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
                   }
                 }
                 return new ReplaceEdit(
-                    qualifierStart, simpleNameStart - qualifierStart, ""); //$NON-NLS-1$
+                    qualifierStart, simpleNameStart - qualifierStart, ""); // $NON-NLS-1$
               }
             }
           }
@@ -389,7 +389,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
                 IStatus.ERROR, CodeGenerationMessages.AddImportsOperation_error_importclash, null);
         return null;
       } else if (res == ImportRewriteContext.RES_NAME_FOUND) {
-        return new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, ""); //$NON-NLS-1$
+        return new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, ""); // $NON-NLS-1$
       }
     }
     IJavaSearchScope searchScope =
@@ -425,7 +425,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
             ? null
             : new ContextSensitiveImportRewriteContext(root, simpleNameStart, importRewrite);
     importRewrite.addImport(chosen.getFullyQualifiedName(), context);
-    return new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, ""); //$NON-NLS-1$
+    return new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, ""); // $NON-NLS-1$
   }
 
   private boolean isTypeDeclarationSubTypeCompatible(

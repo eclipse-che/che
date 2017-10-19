@@ -53,7 +53,7 @@ public class PartStackPresenterTest {
   private static final String SOME_TEXT = "someText";
   private static final double PART_SIZE = 170;
 
-  //constructor mocks
+  // constructor mocks
   @Mock private EventBus eventBus;
   @Mock private PartMenu partMenu;
   @Mock private WorkBenchPartController workBenchPartController;
@@ -63,7 +63,7 @@ public class PartStackPresenterTest {
   @Mock private PartStackView view;
   @Mock private PropertyListener propertyListener;
 
-  //additional mocks
+  // additional mocks
   @Mock private AcceptsOneWidget container;
   @Mock private PartPresenter partPresenter;
   @Mock private Constraints constraints;

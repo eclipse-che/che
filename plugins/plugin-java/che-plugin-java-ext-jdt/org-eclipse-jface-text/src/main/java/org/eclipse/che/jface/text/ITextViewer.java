@@ -149,19 +149,23 @@ public interface ITextViewer {
   ////	 *            valid argument.
   ////	 * @param contentType the type for which the strategy is registered
   ////	 * @deprecated since 3.1, use
-  ////	 *             {@link ITextViewerExtension2#prependAutoEditStrategy(IAutoEditStrategy, String)} and
-  ////	 *             {@link ITextViewerExtension2#removeAutoEditStrategy(IAutoEditStrategy, String)} instead
+  ////	 *             {@link ITextViewerExtension2#prependAutoEditStrategy(IAutoEditStrategy,
+  // String)} and
+  ////	 *             {@link ITextViewerExtension2#removeAutoEditStrategy(IAutoEditStrategy,
+  // String)} instead
   ////	 */
   ////	void setAutoIndentStrategy(IAutoIndentStrategy strategy, String contentType);
   //
   //	/**
   //	 * Sets this viewer's text hover for the given content type.
   //	 * <p>
-  //	 * This method has been replaced by {@link ITextViewerExtension2#setTextHover(ITextHover, String, int)}.
+  //	 * This method has been replaced by {@link ITextViewerExtension2#setTextHover(ITextHover,
+  // String, int)}.
   //	 * It is now equivalent to
   //	 * <pre>
   //	 *    ITextViewerExtension2 extension= (ITextViewerExtension2) document;
-  //	 *    extension.setTextHover(textViewerHover, contentType, ITextViewerExtension2#DEFAULT_HOVER_STATE_MASK);
+  //	 *    extension.setTextHover(textViewerHover, contentType,
+  // ITextViewerExtension2#DEFAULT_HOVER_STATE_MASK);
   //	 * </pre>
   //	 *
   //	 *

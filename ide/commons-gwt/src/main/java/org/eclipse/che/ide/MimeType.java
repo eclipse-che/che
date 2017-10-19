@@ -19,8 +19,6 @@
 
 package org.eclipse.che.ide;
 
-import java.lang.String;
-
 /**
  * An abstraction for a media type. Instances are immutable.
  *
@@ -84,7 +82,7 @@ public interface MimeType {
    * PROPFIND response which returns "application/x-jaxrs groovy
    */
   String GROOVY_SERVICE =
-      "application/x-jaxrs+groovy"; //"script/groovy"; //application/x-jaxrs+groovy
+      "application/x-jaxrs+groovy"; // "script/groovy"; //application/x-jaxrs+groovy
 
   /** "application/x-groovy" */
   String APPLICATION_GROOVY = "application/x-groovy";

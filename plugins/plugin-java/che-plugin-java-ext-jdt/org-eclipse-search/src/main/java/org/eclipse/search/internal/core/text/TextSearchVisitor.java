@@ -213,7 +213,8 @@ public class TextSearchVisitor {
   //			IFile file= ((IFileEditorInput) input).getFile();
   //			if (!result.containsKey(file)) { // take the first editor found
   //				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
-  //				ITextFileBuffer textFileBuffer= bufferManager.getTextFileBuffer(file.getFullPath(), LocationKind.IFILE);
+  //				ITextFileBuffer textFileBuffer= bufferManager.getTextFileBuffer(file.getFullPath(),
+  // LocationKind.IFILE);
   //				if (textFileBuffer != null) {
   //					// file buffer has precedence
   //					result.put(file, textFileBuffer.getDocument());
@@ -368,7 +369,7 @@ public class TextSearchVisitor {
     try {
       return file.getCharset();
     } catch (CoreException e) {
-      return "unknown"; //$NON-NLS-1$
+      return "unknown"; // $NON-NLS-1$
     }
   }
 }

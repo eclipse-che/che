@@ -56,7 +56,7 @@ public class OpenLocationViewImpl extends BaseView<OpenLocationView.ActionDelega
   @Override
   public void setLocations(List<Location> locations) {
     tree.getNodeStorage().clear();
-    //TODO workaround, tree has bug with adding list of nodes
+    // TODO workaround, tree has bug with adding list of nodes
     for (Location location : locations) {
       tree.getNodeStorage().add(new LocationNode(location));
     }

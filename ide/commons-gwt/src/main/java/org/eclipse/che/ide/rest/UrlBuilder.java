@@ -43,7 +43,7 @@ public class UrlBuilder extends com.google.gwt.http.client.UrlBuilder {
       }
     }
     setPath(o.get("path").isString().stringValue());
-    //fill query parameters
+    // fill query parameters
     JSONObject query = o.get("queryKey").isObject();
     for (String key : query.keySet()) {
       setParameter(key, query.get(key).isString().stringValue());

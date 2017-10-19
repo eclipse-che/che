@@ -278,7 +278,8 @@ public class JavaDebugger implements EventsHandler, Debugger {
     // start listening for the load of the type
     if (!classPrepareRequests.containsKey(className)) {
       ClassPrepareRequest request = getEventManager().createClassPrepareRequest();
-      // set class filter in order to reduce the amount of event traffic sent from the target VM to the debugger VM
+      // set class filter in order to reduce the amount of event traffic sent from the target VM to
+      // the debugger VM
       request.addClassFilter(className);
       request.enable();
       classPrepareRequests.put(className, request);
@@ -303,7 +304,8 @@ public class JavaDebugger implements EventsHandler, Debugger {
     List<Breakpoint> breakPoints = new ArrayList<>(breakpointRequests.size());
     for (BreakpointRequest breakpointRequest : breakpointRequests) {
       com.sun.jdi.Location location = breakpointRequest.location();
-      // Breakpoint always enabled at the moment. Managing states of breakpoint is not supported for now.
+      // Breakpoint always enabled at the moment. Managing states of breakpoint is not supported for
+      // now.
       breakPoints.add(
           newDto(BreakpointDto.class)
               .withEnabled(true)
@@ -583,7 +585,8 @@ public class JavaDebugger implements EventsHandler, Debugger {
       }
     }
 
-    // Left target JVM in suspended state if result of evaluation of expression is boolean value and true
+    // Left target JVM in suspended state if result of evaluation of expression is boolean value and
+    // true
     // or if condition expression is not set.
     return !hitBreakpoint;
   }

@@ -196,7 +196,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
         return arg;
       }
     }
-    return getRoot().getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+    return getRoot().getAST().resolveWellKnownType("java.lang.Object"); // $NON-NLS-1$
   }
 
   /** {@inheritDoc} */
@@ -279,7 +279,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
               final IMethodBinding binding = node.resolveMethodBinding();
               if (binding != null
                   && (binding.getName().equals("next")
-                      || binding.getName().equals("nextElement"))) { //$NON-NLS-1$ //$NON-NLS-2$
+                      || binding.getName().equals("nextElement"))) { // $NON-NLS-1$ //$NON-NLS-2$
 
                 final Expression expression = node.getExpression();
                 if (expression instanceof Name) {
@@ -323,8 +323,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
     fEnhancedForLoop.setExpression(getExpression(astRewrite));
 
     for (Iterator<Expression> iterator = getForStatement().initializers().iterator();
-        iterator.hasNext();
-        ) {
+        iterator.hasNext(); ) {
       ASTNode node = iterator.next();
       if (node instanceof VariableDeclarationExpression) {
         VariableDeclarationExpression variableDeclarationExpression =
@@ -336,8 +335,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
     }
 
     for (Iterator<Expression> iterator = getForStatement().updaters().iterator();
-        iterator.hasNext();
-        ) {
+        iterator.hasNext(); ) {
       ASTNode node = iterator.next();
       remover.registerRemovedNode(node);
     }
@@ -373,15 +371,14 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
       }
 
       for (final Iterator<Expression> outer = getForStatement().initializers().iterator();
-          outer.hasNext();
-          ) {
+          outer.hasNext(); ) {
         final Expression initializer = outer.next();
         if (initializer instanceof VariableDeclarationExpression) {
           final VariableDeclarationExpression declaration =
               (VariableDeclarationExpression) initializer;
           List<VariableDeclarationFragment> fragments = declaration.fragments();
           if (fragments.size() != 1) {
-            return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
+            return new StatusInfo(IStatus.ERROR, ""); // $NON-NLS-1$
           } else {
             final VariableDeclarationFragment fragment = fragments.get(0);
             fragment.accept(
@@ -396,13 +393,13 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
                         final String qualified = type.getQualifiedName();
                         if (qualified.startsWith("java.util.Enumeration<")
                             || qualified.startsWith(
-                                "java.util.Iterator<")) { //$NON-NLS-1$ //$NON-NLS-2$
+                                "java.util.Iterator<")) { // $NON-NLS-1$ //$NON-NLS-2$
                           final Expression qualifier = node.getExpression();
                           if (qualifier != null) {
                             final ITypeBinding resolved = qualifier.resolveTypeBinding();
                             if (resolved != null) {
                               final ITypeBinding iterable =
-                                  getSuperType(resolved, "java.lang.Iterable"); //$NON-NLS-1$
+                                  getSuperType(resolved, "java.lang.Iterable"); // $NON-NLS-1$
                               if (iterable != null) {
                                 fExpression = qualifier;
                                 fIterable = resolved;
@@ -412,7 +409,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
                             final ITypeBinding declaring = binding.getDeclaringClass();
                             if (declaring != null) {
                               final ITypeBinding superBinding =
-                                  getSuperType(declaring, "java.lang.Iterable"); //$NON-NLS-1$
+                                  getSuperType(declaring, "java.lang.Iterable"); // $NON-NLS-1$
                               if (superBinding != null) {
                                 fIterable = superBinding;
                                 fThis = true;
@@ -432,10 +429,10 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
                       final ITypeBinding type = binding.getType();
                       if (type != null) {
                         ITypeBinding iterator =
-                            getSuperType(type, "java.util.Iterator"); //$NON-NLS-1$
+                            getSuperType(type, "java.util.Iterator"); // $NON-NLS-1$
                         if (iterator != null) fIteratorVariable = binding;
                         else {
-                          iterator = getSuperType(type, "java.util.Enumeration"); //$NON-NLS-1$
+                          iterator = getSuperType(type, "java.util.Enumeration"); // $NON-NLS-1$
                           if (iterator != null) fIteratorVariable = binding;
                         }
                       }
@@ -466,7 +463,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
                     MethodInvocation invocation = (MethodInvocation) node.getParent();
                     String name = invocation.getName().getIdentifier();
                     if (name.equals("next")
-                        || name.equals("nextElement")) { //$NON-NLS-1$ //$NON-NLS-2$
+                        || name.equals("nextElement")) { // $NON-NLS-1$ //$NON-NLS-2$
                       nextInvocationCount[0]++;
 
                       Expression left = null;
@@ -575,11 +572,11 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 
     String qualifiedName = declaringClass.getQualifiedName();
     String methodName = invoc.getName().getIdentifier();
-    if (qualifiedName.startsWith("java.util.Enumeration")) { //$NON-NLS-1$
-      if (!methodName.equals("hasMoreElements")) //$NON-NLS-1$
+    if (qualifiedName.startsWith("java.util.Enumeration")) { // $NON-NLS-1$
+      if (!methodName.equals("hasMoreElements")) // $NON-NLS-1$
       return SEMANTIC_CHANGE_WARNING_STATUS;
-    } else if (qualifiedName.startsWith("java.util.Iterator")) { //$NON-NLS-1$
-      if (!methodName.equals("hasNext")) //$NON-NLS-1$
+    } else if (qualifiedName.startsWith("java.util.Iterator")) { // $NON-NLS-1$
+      if (!methodName.equals("hasNext")) // $NON-NLS-1$
       return SEMANTIC_CHANGE_WARNING_STATUS;
       return checkIteratorCondition();
     } else {
@@ -609,7 +606,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 
     MethodInvocation methodInvocation = (MethodInvocation) initializer;
     String methodName = methodInvocation.getName().getIdentifier();
-    if (!"iterator".equals(methodName) || methodInvocation.arguments().size() != 0) //$NON-NLS-1$
+    if (!"iterator".equals(methodName) || methodInvocation.arguments().size() != 0) // $NON-NLS-1$
     return SEMANTIC_CHANGE_WARNING_STATUS;
 
     return StatusInfo.OK_STATUS;

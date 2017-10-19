@@ -70,7 +70,7 @@ public class AnnotationModelImpl implements AnnotationModel {
       addPosition(position);
     } catch (BadLocationException ignore) {
       Log.error(getClass(), "BadLocation for " + annotation);
-      //ignore invalid location
+      // ignore invalid location
     }
     getAnnotationModelEvent().annotationAdded(annotation);
     if (fireEvent) {
@@ -156,7 +156,8 @@ public class AnnotationModelImpl implements AnnotationModel {
       return new AnnotationsIterator(positions, this.positions);
 
     } catch (BadPositionCategoryException e) {
-      // can happen if e.g. the document doesn't contain such a category, or when removed in a different thread
+      // can happen if e.g. the document doesn't contain such a category, or when removed in a
+      // different thread
       return Collections.<Annotation>emptyList().iterator();
     }
   }

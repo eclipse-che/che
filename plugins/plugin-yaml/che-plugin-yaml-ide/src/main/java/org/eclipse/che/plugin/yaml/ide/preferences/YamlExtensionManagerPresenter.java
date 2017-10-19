@@ -104,7 +104,7 @@ public class YamlExtensionManagerPresenter extends AbstractPreferencePagePresent
     return new CancelCallback() {
       @Override
       public void cancelled() {
-        //for now do nothing but it need for tests
+        // for now do nothing but it need for tests
       }
     };
   }

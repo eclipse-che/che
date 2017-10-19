@@ -100,7 +100,7 @@ public class LanguageServerReconcileStrategy implements ReconcilingStrategy {
   }
 
   public void doReconcile() {
-    //TODO use DocumentHighlight to add additional highlight for file
+    // TODO use DocumentHighlight to add additional highlight for file
   }
 
   @Override

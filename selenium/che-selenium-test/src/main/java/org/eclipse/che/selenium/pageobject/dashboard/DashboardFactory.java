@@ -179,13 +179,13 @@ public class DashboardFactory {
    * @param wsNama
    */
   public void selectWorkspaceForCreation(String wsNama) {
-    //delay for animation page
+    // delay for animation page
     WaitUtils.sleepQuietly(1, TimeUnit.SECONDS);
     String locator = String.format(Locators.WORKSPACE_ITEM_XPATH, wsNama);
     new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)))
         .click();
-    //delay for redraw and setting selection
+    // delay for redraw and setting selection
     WaitUtils.sleepQuietly(1, TimeUnit.SECONDS);
   }
 

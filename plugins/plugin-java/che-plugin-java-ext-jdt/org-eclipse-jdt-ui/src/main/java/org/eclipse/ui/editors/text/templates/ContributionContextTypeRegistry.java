@@ -46,19 +46,19 @@ public class ContributionContextTypeRegistry extends ContextTypeRegistry {
 
   /* extension point string literals */
   private static final String TEMPLATES_EXTENSION_POINT =
-      "org.eclipse.ui.editors.templates"; //$NON-NLS-1$
+      "org.eclipse.ui.editors.templates"; // $NON-NLS-1$
 
-  private static final String CONTEXT_TYPE = "contextType"; //$NON-NLS-1$
-  private static final String ID = "id"; //$NON-NLS-1$
-  private static final String NAME = "name"; //$NON-NLS-1$
-  private static final String CLASS = "class"; //$NON-NLS-1$
+  private static final String CONTEXT_TYPE = "contextType"; // $NON-NLS-1$
+  private static final String ID = "id"; // $NON-NLS-1$
+  private static final String NAME = "name"; // $NON-NLS-1$
+  private static final String CLASS = "class"; // $NON-NLS-1$
 
-  private static final String RESOLVER = "resolver"; //$NON-NLS-1$
-  private static final String CONTEXT_TYPE_ID = "contextTypeId"; //$NON-NLS-1$
-  private static final String DESCRIPTION = "description"; //$NON-NLS-1$
-  private static final String TYPE = "type"; //$NON-NLS-1$
-  private static final String REGISTRY = "contextTypeRegistry"; //$NON-NLS-1$
-  private static final String REGISTRY_ID = "registryId"; //$NON-NLS-1$
+  private static final String RESOLVER = "resolver"; // $NON-NLS-1$
+  private static final String CONTEXT_TYPE_ID = "contextTypeId"; // $NON-NLS-1$
+  private static final String DESCRIPTION = "description"; // $NON-NLS-1$
+  private static final String TYPE = "type"; // $NON-NLS-1$
+  private static final String REGISTRY = "contextTypeRegistry"; // $NON-NLS-1$
+  private static final String REGISTRY_ID = "registryId"; // $NON-NLS-1$
 
   /**
    * Creates a new context type registry and registers all context types contributed for the given
@@ -301,7 +301,7 @@ public class ContributionContextTypeRegistry extends ContextTypeRegistry {
               "org.eclipse.ui.editors",
               IStatus.OK,
               "extension does not implement " + TemplateContextType.class.getName(),
-              e)); //$NON-NLS-1$
+              e)); // $NON-NLS-1$
     }
   }
 
@@ -316,7 +316,7 @@ public class ContributionContextTypeRegistry extends ContextTypeRegistry {
         resolver.setType(type);
 
         String desc = element.getAttribute(DESCRIPTION);
-        resolver.setDescription(desc == null ? "" : desc); //$NON-NLS-1$
+        resolver.setDescription(desc == null ? "" : desc); // $NON-NLS-1$
 
         return resolver;
       }
@@ -327,7 +327,7 @@ public class ContributionContextTypeRegistry extends ContextTypeRegistry {
               "org.eclipse.ui.editors",
               IStatus.OK,
               "extension does not implement " + TemplateVariableResolver.class.getName(),
-              e)); //$NON-NLS-1$
+              e)); // $NON-NLS-1$
     }
 
     return null;

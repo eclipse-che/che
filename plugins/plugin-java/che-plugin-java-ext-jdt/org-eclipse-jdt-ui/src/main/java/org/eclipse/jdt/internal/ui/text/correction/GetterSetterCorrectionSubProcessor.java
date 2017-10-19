@@ -58,7 +58,7 @@ import org.eclipse.swt.graphics.Image;
 public class GetterSetterCorrectionSubProcessor {
 
   public static final String SELF_ENCAPSULATE_FIELD_ID =
-      "org.eclipse.jdt.ui.correction.encapsulateField.assist"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.correction.encapsulateField.assist"; // $NON-NLS-1$
 
   private static class ProposalParameter {
     public final boolean useSuper;
@@ -114,7 +114,7 @@ public class GetterSetterCorrectionSubProcessor {
           new SelfEncapsulateFieldRefactoring(fField);
       refactoring.setVisibility(Flags.AccPublic);
       refactoring.setConsiderVisibility(
-          false); //private field references are just searched in local file
+          false); // private field references are just searched in local file
       refactoring.checkInitialConditions(new NullProgressMonitor());
       refactoring.checkFinalConditions(new NullProgressMonitor());
       Change createdChange = refactoring.createChange(new NullProgressMonitor());
@@ -154,11 +154,12 @@ public class GetterSetterCorrectionSubProcessor {
             new SelfEncapsulateFieldRefactoring(fField);
         refactoring.setVisibility(Flags.AccPublic);
         refactoring.setConsiderVisibility(
-            false); //private field references are just searched in local file
+            false); // private field references are just searched in local file
         //				if (fNoDialog) {
         //					IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
         //					final RefactoringExecutionHelper helper =
-        //							new RefactoringExecutionHelper(refactoring, RefactoringStatus.ERROR, RefactoringSaveHelper.SAVE_REFACTORING,
+        //							new RefactoringExecutionHelper(refactoring, RefactoringStatus.ERROR,
+        // RefactoringSaveHelper.SAVE_REFACTORING,
         //														   JavaPlugin.getActiveWorkbenchShell(), window);
         //					if (Display.getCurrent() != null) {
         //						try {
@@ -182,13 +183,16 @@ public class GetterSetterCorrectionSubProcessor {
         //						});
         //					}
         //				} else {
-        //					new RefactoringStarter().activate(new SelfEncapsulateFieldWizard(refactoring), JavaPlugin.getActiveWorkbenchShell(),
+        //					new RefactoringStarter().activate(new SelfEncapsulateFieldWizard(refactoring),
+        // JavaPlugin.getActiveWorkbenchShell(),
         //													  "",
         //													  RefactoringSaveHelper.SAVE_REFACTORING); //$NON-NLS-1$
         //				}
       } catch (JavaModelException e) {
-        //				ExceptionHandler.handle(e, CorrectionMessages.GetterSetterCorrectionSubProcessor_encapsulate_field_error_title,
-        //										CorrectionMessages.GetterSetterCorrectionSubProcessor_encapsulate_field_error_message);
+        //				ExceptionHandler.handle(e,
+        // CorrectionMessages.GetterSetterCorrectionSubProcessor_encapsulate_field_error_title,
+        //
+        //	CorrectionMessages.GetterSetterCorrectionSubProcessor_encapsulate_field_error_message);
       }
     }
   }
@@ -377,7 +381,7 @@ public class GetterSetterCorrectionSubProcessor {
         && (Modifier.isStatic(method.getModifiers())
             == Modifier.isStatic(context.variableBinding.getModifiers()))) {
       Expression assignedValue = getAssignedValue(context);
-      if (assignedValue == null) return null; //we don't know how to handle those cases.
+      if (assignedValue == null) return null; // we don't know how to handle those cases.
       Expression mi = createMethodInvocation(context, method, assignedValue);
       context.astRewrite.replace(context.accessNode.getParent(), mi, null);
 
@@ -391,7 +395,7 @@ public class GetterSetterCorrectionSubProcessor {
               label, context.compilationUnit, context.astRewrite, relevance, image);
       return proposal;
     } else {
-      //TODO
+      // TODO
       //			IJavaElement element= context.variableBinding.getJavaElement();
       //			if (element instanceof IField) {
       //				IField field= (IField) element;
@@ -409,11 +413,11 @@ public class GetterSetterCorrectionSubProcessor {
   private static boolean isBoolean(ProposalParameter context) {
     AST ast = context.astRewrite.getAST();
     boolean isBoolean =
-        ast.resolveWellKnownType("boolean") == context.variableBinding.getType(); //$NON-NLS-1$
+        ast.resolveWellKnownType("boolean") == context.variableBinding.getType(); // $NON-NLS-1$
     if (!isBoolean)
       isBoolean =
           ast.resolveWellKnownType("java.lang.Boolean")
-              == context.variableBinding.getType(); //$NON-NLS-1$
+              == context.variableBinding.getType(); // $NON-NLS-1$
     return isBoolean;
   }
 
@@ -424,7 +428,7 @@ public class GetterSetterCorrectionSubProcessor {
     IMethodBinding getter = findGetter(context);
     Expression getterExpression = null;
     if (getter != null) {
-      getterExpression = astRewrite.getAST().newSimpleName("placeholder"); //$NON-NLS-1$
+      getterExpression = astRewrite.getAST().newSimpleName("placeholder"); // $NON-NLS-1$
     }
     ITypeBinding type = context.variableBinding.getType();
     boolean is50OrHigher = JavaModelUtil.is50OrHigher(javaProject);

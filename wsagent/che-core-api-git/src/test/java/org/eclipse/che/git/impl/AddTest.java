@@ -60,15 +60,15 @@ public class AddTest {
   )
   public void testSimpleAdd(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     addFile(connection, "testAdd", org.eclipse.che.git.impl.GitTestUtil.CONTENT);
 
-    //when
+    // when
     connection.add(AddParams.create(AddRequest.DEFAULT_PATTERN));
 
-    //then
-    //check added files
+    // then
+    // check added files
     List<String> files = connection.listFiles(LsFilesParams.create());
     assertEquals(files.size(), 1);
     assertTrue(files.contains("testAdd"));
@@ -80,25 +80,25 @@ public class AddTest {
   )
   public void testAddUpdate(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     addFile(connection, "README.txt", CONTENT);
     connection.add(AddParams.create(ImmutableList.of("README.txt")));
     connection.commit(CommitParams.create("Initial add"));
 
-    //when
-    //modify README.txt
+    // when
+    // modify README.txt
     addFile(connection, "README.txt", "SOME NEW CONTENT");
     List<String> listFiles = connection.listFiles(LsFilesParams.create().withModified(true));
-    //then
-    //modified but not added to stage
+    // then
+    // modified but not added to stage
     assertTrue(listFiles.contains("README.txt"));
 
-    //when
+    // when
     connection.add(AddParams.create(AddRequest.DEFAULT_PATTERN).withUpdate(true));
-    //then
+    // then
     listFiles = connection.listFiles(LsFilesParams.create().withStaged(true));
-    //added to stage
+    // added to stage
     assertEquals(listFiles.size(), 1);
     assertTrue(listFiles.get(0).contains("README.txt"));
   }

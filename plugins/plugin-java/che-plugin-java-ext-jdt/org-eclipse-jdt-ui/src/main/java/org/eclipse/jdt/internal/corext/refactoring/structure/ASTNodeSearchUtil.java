@@ -57,7 +57,7 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 public class ASTNodeSearchUtil {
 
   private ASTNodeSearchUtil() {
-    //no instance
+    // no instance
   }
 
   public static ASTNode[] getAstNodes(SearchMatch[] searchResults, CompilationUnit cuNode) {
@@ -80,7 +80,7 @@ public class ASTNodeSearchUtil {
     SelectionAnalyzer analyzer =
         new SelectionAnalyzer(Selection.createFromStartLength(start, length), true);
     cuNode.accept(analyzer);
-    //XXX workaround for jdt core feature 23527
+    // XXX workaround for jdt core feature 23527
     ASTNode node = analyzer.getFirstSelectedNode();
     if (node == null && analyzer.getLastCoveringNode() instanceof SuperConstructorInvocation)
       node = analyzer.getLastCoveringNode().getParent();
@@ -200,8 +200,8 @@ public class ASTNodeSearchUtil {
     else return getAbstractTypeDeclarationNode(iType, cuNode).bodyDeclarations();
   }
 
-  //returns an array because of the import container, which does not represent 1 node but many
-  //for fields, it returns the whole declaration node
+  // returns an array because of the import container, which does not represent 1 node but many
+  // for fields, it returns the whole declaration node
   public static ASTNode[] getDeclarationNodes(IJavaElement element, CompilationUnit cuNode)
       throws JavaModelException {
     switch (element.getElementType()) {

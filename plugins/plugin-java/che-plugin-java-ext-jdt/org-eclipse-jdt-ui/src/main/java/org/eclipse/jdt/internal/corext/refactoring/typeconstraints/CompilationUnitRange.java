@@ -41,7 +41,7 @@ public final class CompilationUnitRange {
     return fSourceRange;
   }
 
-  //rootNode must be the ast root for fCompilationUnit
+  // rootNode must be the ast root for fCompilationUnit
   public ASTNode getNode(CompilationUnit rootNode) {
     NodeFinder finder =
         new NodeFinder(rootNode, fSourceRange.getOffset(), fSourceRange.getLength());
@@ -59,7 +59,7 @@ public final class CompilationUnitRange {
         + fSourceRange.toString()
         + " in "
         + fCompilationUnit.getElementName()
-        + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        + ")"; // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
   }
 
   @Override

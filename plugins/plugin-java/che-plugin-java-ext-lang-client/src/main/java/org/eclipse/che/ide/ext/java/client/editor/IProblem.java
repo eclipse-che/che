@@ -463,7 +463,7 @@ public interface IProblem {
   int InvalidBreak = Internal + 172;
   int InvalidContinue = Internal + 173;
   int UndefinedLabel = Internal + 174;
-  //synchronized
+  // synchronized
   int InvalidTypeToSynchronized = Internal + 175;
   int InvalidNullToSynchronized = Internal + 176;
   // throw
@@ -506,7 +506,7 @@ public interface IProblem {
   /** @since 3.2 */
   int FallthroughCase = Internal + 194;
 
-  //inherited name hides enclosing name (sort of ambiguous)
+  // inherited name hides enclosing name (sort of ambiguous)
   int InheritedMethodHidesEnclosingName = MethodRelated + 195;
   int InheritedFieldHidesEnclosingName = FieldRelated + 196;
   int InheritedTypeHidesEnclosingName = TypeRelated + 197;
@@ -870,7 +870,7 @@ public interface IProblem {
   int CodeSnippetMissingMethod = Internal + 421;
   int CannotUseSuperInCodeSnippet = Internal + 422;
 
-  //constant pool
+  // constant pool
   int TooManyConstantsInConstantPool = Internal + 430;
   /** @since 2.1 */
   int TooManyBytesForStringConstant = Internal + 431;
@@ -1741,8 +1741,8 @@ public interface IProblem {
   int IllegalDefaultModifierSpecification = MethodRelated + 1058;
 
   /** @since 3.10 */
-  int GenericInferenceError =
-      1100; // FIXME: This is just a stop-gap measure, be more specific via https://bugs.eclipse.org/404675
+  int GenericInferenceError = 1100; // FIXME: This is just a stop-gap measure, be more specific via
+  // https://bugs.eclipse.org/404675
 
   /** @since 3.10 */
   int LambdaShapeComputationError = 1101;

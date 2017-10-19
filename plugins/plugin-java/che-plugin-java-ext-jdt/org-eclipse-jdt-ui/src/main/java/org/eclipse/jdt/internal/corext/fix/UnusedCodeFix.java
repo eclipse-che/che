@@ -249,7 +249,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
             return FixMessages.UnusedCodeFix_RemoveUnusedVariabl_description;
           }
         default:
-          return ""; //$NON-NLS-1$
+          return ""; // $NON-NLS-1$
       }
     }
 
@@ -342,7 +342,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
             rewrite.remove(frag, group);
             return;
           }
-          //multiple declarations in one line
+          // multiple declarations in one line
           ASTNode declaration = parent.getParent();
           if (declaration instanceof FieldDeclaration) {
             rewrite.remove(frag, group);
@@ -355,7 +355,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
             return;
           }
           if (declaration instanceof VariableDeclarationExpression) {
-            //keep constructors and method invocations
+            // keep constructors and method invocations
             if (!sideEffectInitializer) {
               rewrite.remove(frag, group);
             }
@@ -556,8 +556,10 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
           }
         }
 
-        // downChild is the innermost CastExpression's expression, stripped of a necessary surrounding ParenthesizedExpression
-        // Move either downChild (if it doesn't need parentheses), or a parenthesized version if necessary
+        // downChild is the innermost CastExpression's expression, stripped of a necessary
+        // surrounding ParenthesizedExpression
+        // Move either downChild (if it doesn't need parentheses), or a parenthesized version if
+        // necessary
 
         replaceCast(castExpression, downChild, rewrite, group);
       }
@@ -867,7 +869,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
           return Messages.format(FixMessages.UnusedCodeFix_RemoveFieldOrLocal_description, name);
         }
       default:
-        return ""; //$NON-NLS-1$
+        return ""; // $NON-NLS-1$
     }
   }
 

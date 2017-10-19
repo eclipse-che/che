@@ -154,7 +154,8 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
       } else {
         IBinding qualifierType = node.getQualifier().resolveBinding();
         if (qualifierType instanceof ITypeBinding && ((ITypeBinding) qualifierType).isInterface()) {
-          throw new AbortSearchException(); // JLS8: new overloaded meaning of 'interface'.super.'method'(..)
+          throw new AbortSearchException(); // JLS8: new overloaded meaning of
+          // 'interface'.super.'method'(..)
         }
       }
       return true; // references to outer scopes are harmless
@@ -247,8 +248,10 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
             }
           }
         }
-        //TODO: Bug 421479: [1.8][clean up][quick assist] convert anonymous to lambda must consider lost scope of interface
-        //				lambdaBody.accept(new InterfaceAccessQualifier(rewrite, classInstanceCreation.getType().resolveBinding())); //TODO: maybe
+        // TODO: Bug 421479: [1.8][clean up][quick assist] convert anonymous to lambda must consider
+        // lost scope of interface
+        //				lambdaBody.accept(new InterfaceAccessQualifier(rewrite,
+        // classInstanceCreation.getType().resolveBinding())); //TODO: maybe
         // need a separate ASTRewrite and string placeholder
 
         lambdaExpression.setBody(rewrite.createCopyTarget(lambdaBody));
@@ -470,7 +473,8 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
   }
 
   public static IProposableFix createConvertToAnonymousClassCreationsFix(LambdaExpression lambda) {
-    // offer the quick assist at pre 1.8 levels as well to get rid of the compilation error (TODO: offer this as a quick fix in that
+    // offer the quick assist at pre 1.8 levels as well to get rid of the compilation error (TODO:
+    // offer this as a quick fix in that
     // case)
 
     if (lambda.resolveTypeBinding() == null

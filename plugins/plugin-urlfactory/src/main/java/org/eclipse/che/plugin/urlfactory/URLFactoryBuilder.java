@@ -98,17 +98,21 @@ public class URLFactoryBuilder {
     //        if (dockerFileLocation != null && URLChecker.exists(dockerFileLocation)) {
     //            recipeDto = newDto(EnvironmentRecipeDto.class).withLocation(dockerFileLocation)
     //                                                          .withType("dockerfile")
-    //                                                          .withContentType("text/x-dockerfile");
+    //
+    // .withContentType("text/x-dockerfile");
     //        } else {
     //            recipeDto = newDto(EnvironmentRecipeDto.class).withLocation(DEFAULT_DOCKER_IMAGE)
     //                                                          .withType("dockerimage");
     //        }
-    //        ExtendedMachineDto machine = newDto(ExtendedMachineDto.class).withInstallers(singletonList("org.eclipse.che.ws-agent"))
-    //                                                                     .withAttributes(singletonMap("memoryLimitBytes", MEMORY_LIMIT_BYTES));
+    //        ExtendedMachineDto machine =
+    // newDto(ExtendedMachineDto.class).withInstallers(singletonList("org.eclipse.che.ws-agent"))
+    //
+    // .withAttributes(singletonMap("memoryLimitBytes", MEMORY_LIMIT_BYTES));
     //
     //        // setup environment
     //        EnvironmentDto environmentDto = newDto(EnvironmentDto.class).withRecipe(recipeDto)
-    //                                                                    .withMachines(singletonMap(MACHINE_NAME, machine));
+    //
+    // .withMachines(singletonMap(MACHINE_NAME, machine));
 
     // workspace configuration using the environment
     return newDto(WorkspaceConfigDto.class)

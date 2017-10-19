@@ -155,7 +155,7 @@ public abstract class BaseTest {
     projectRegistry.setProjectType(
         parent.getPath().toString(), PlainJavaProjectConstants.JAVAC_PROJECT_ID, false);
 
-    //inform DeltaProcessingStat about new project
+    // inform DeltaProcessingStat about new project
     JavaModelManager.getJavaModelManager()
         .deltaState
         .resourceChanged(

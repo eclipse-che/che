@@ -89,7 +89,7 @@ public final class LoggedCreateTargetQueries implements ICreateTargetQueries {
 
     /** {@inheritDoc} */
     public String getNewButtonLabel() {
-      return "unused"; //$NON-NLS-1$
+      return "unused"; // $NON-NLS-1$
     }
   }
 

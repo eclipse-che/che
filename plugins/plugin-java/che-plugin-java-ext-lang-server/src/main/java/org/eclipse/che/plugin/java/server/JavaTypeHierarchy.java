@@ -70,11 +70,11 @@ public class JavaTypeHierarchy {
     implementationDescriptor.setImplementations(implementations);
 
     switch (element.getElementType()) {
-      case 7: //type
+      case 7: // type
         findSubTypes(element, implementations);
         implementationDescriptor.setMemberName(element.getElementName());
         break;
-      case 9: //method
+      case 9: // method
         findTypesWithSubMethods(element, implementations);
         implementationDescriptor.setMemberName(element.getElementName());
         break;

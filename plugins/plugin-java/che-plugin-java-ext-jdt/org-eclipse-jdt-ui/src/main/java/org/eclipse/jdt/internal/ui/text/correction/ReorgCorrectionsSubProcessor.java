@@ -146,7 +146,7 @@ public class ReorgCorrectionsSubProcessor {
 
     // move to package
     IPackageDeclaration[] packDecls = cu.getPackageDeclarations();
-    String newPackName = packDecls.length > 0 ? packDecls[0].getElementName() : ""; //$NON-NLS-1$
+    String newPackName = packDecls.length > 0 ? packDecls[0].getElementName() : ""; // $NON-NLS-1$
 
     IPackageFragmentRoot root = JavaModelUtil.getPackageFragmentRoot(cu);
     IPackageFragment newPack = root.getPackageFragment(newPackName);
@@ -236,7 +236,8 @@ public class ReorgCorrectionsSubProcessor {
   //
   //		private TextEdit fResultingEdit;
   //
-  //		public ClasspathFixCorrectionProposal(ICompilationUnit cu, int offset, int length, String missingType) {
+  //		public ClasspathFixCorrectionProposal(ICompilationUnit cu, int offset, int length, String
+  // missingType) {
   //			super(CorrectionMessages.ReorgCorrectionsSubProcessor_project_seup_fix_description, cu, -10,
   //				  JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
   //			fOffset = offset;
@@ -252,13 +253,16 @@ public class ReorgCorrectionsSubProcessor {
   //			}
   //			Shell shell = JavaPlugin.getActiveWorkbenchShell();
   //			if (ClasspathFixSelectionDialog
-  //					.openClasspathFixSelectionDialog(shell, getCompilationUnit().getJavaProject(), fMissingType, context)) {
+  //					.openClasspathFixSelectionDialog(shell, getCompilationUnit().getJavaProject(),
+  // fMissingType, context)) {
   //				if (fMissingType.indexOf('.') == -1) {
   //					try {
   //						IChooseImportQuery query = AddImportOnSelectionAction.newDialogQuery(shell);
-  //						AddImportsOperation op = new AddImportsOperation(getCompilationUnit(), fOffset, fLength, query, false, false);
+  //						AddImportsOperation op = new AddImportsOperation(getCompilationUnit(), fOffset, fLength,
+  // query, false, false);
   //						IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
-  //						progressService.runInUI(context, new WorkbenchRunnableAdapter(op, op.getScheduleRule()), op.getScheduleRule());
+  //						progressService.runInUI(context, new WorkbenchRunnableAdapter(op, op.getScheduleRule()),
+  // op.getScheduleRule());
   //						fResultingEdit = op.getResultingEdit();
   //						super.apply(document);
   //					} catch (InvocationTargetException e) {
@@ -289,7 +293,8 @@ public class ReorgCorrectionsSubProcessor {
       IProblemLocation problem,
       String missingType,
       Collection<ICommandAccess> proposals) {
-    //		proposals.add(new ClasspathFixCorrectionProposal(context.getCompilationUnit(), problem.getOffset(), problem.getLength(),
+    //		proposals.add(new ClasspathFixCorrectionProposal(context.getCompilationUnit(),
+    // problem.getOffset(), problem.getLength(),
     //														 missingType));
   }
 
@@ -322,7 +327,7 @@ public class ReorgCorrectionsSubProcessor {
 
     String name = ASTNodes.asString(importDeclaration.getName());
     if (importDeclaration.isOnDemand()) {
-      name = JavaModelUtil.concatenateName(name, "*"); //$NON-NLS-1$
+      name = JavaModelUtil.concatenateName(name, "*"); // $NON-NLS-1$
     }
     addProjectSetupFixProposal(context, problem, name, proposals);
   }
@@ -331,7 +336,8 @@ public class ReorgCorrectionsSubProcessor {
   //		private final IProject fProject;
   //		private final IBinding fReferencedType;
   //
-  //		private OpenBuildPathCorrectionProposal(IProject project, String label, int relevance, IBinding referencedType) {
+  //		private OpenBuildPathCorrectionProposal(IProject project, String label, int relevance,
+  // IBinding referencedType) {
   //			super(label, null, relevance, null);
   //			fProject = project;
   //			fReferencedType = referencedType;
@@ -344,7 +350,8 @@ public class ReorgCorrectionsSubProcessor {
   //			if (fReferencedType != null) {
   //				IJavaElement elem = fReferencedType.getJavaElement();
   //				if (elem != null) {
-  //					IPackageFragmentRoot root = (IPackageFragmentRoot)elem.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+  //					IPackageFragmentRoot root =
+  // (IPackageFragmentRoot)elem.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
   //					if (root != null) {
   //						try {
   //							IClasspathEntry entry = root.getRawClasspathEntry();
@@ -362,23 +369,27 @@ public class ReorgCorrectionsSubProcessor {
   //				}
   //			}
   //			PreferencesUtil
-  //					.createPropertyDialogOn(JavaPlugin.getActiveWorkbenchShell(), fProject, BuildPathsPropertyPage.PROP_ID, null, data)
+  //					.createPropertyDialogOn(JavaPlugin.getActiveWorkbenchShell(), fProject,
+  // BuildPathsPropertyPage.PROP_ID, null, data)
   //					.open();
   //		}
   //
   //		/*
-  //		 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension5#getAdditionalProposalInfo(org.eclipse.core.runtime
+  //		 * @see
+  // org.eclipse.jface.text.contentassist.ICompletionProposalExtension5#getAdditionalProposalInfo(org.eclipse.core.runtime
   //		 * .IProgressMonitor)
   //		 * @since 3.5
   //		 */
   //		@Override
   //		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
-  //			return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_configure_buildpath_description,
+  //			return
+  // Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_configure_buildpath_description,
   //								   BasicElementLabels.getResourceName(fProject));
   //		}
   //	}
 
-  //	private static final class ChangeToRequiredCompilerCompliance extends ChangeCorrectionProposal implements IWorkspaceRunnable {
+  //	private static final class ChangeToRequiredCompilerCompliance extends ChangeCorrectionProposal
+  // implements IWorkspaceRunnable {
   //
   //		private final IJavaProject fProject;
   //		private final boolean      fChangeOnWorkspace;
@@ -387,7 +398,8 @@ public class ReorgCorrectionsSubProcessor {
   //		private Job     fUpdateJob;
   //		private boolean fRequiredJREFound;
   //
-  //		public ChangeToRequiredCompilerCompliance(String name, IJavaProject project, boolean changeOnWorkspace, String requiredVersion,
+  //		public ChangeToRequiredCompilerCompliance(String name, IJavaProject project, boolean
+  // changeOnWorkspace, String requiredVersion,
   //												  int relevance) {
   //			super(name, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
   //			fProject = project;
@@ -399,7 +411,8 @@ public class ReorgCorrectionsSubProcessor {
   //
   //		private boolean isRequiredOrGreaterVMInstall(IVMInstall install) {
   //			if (install instanceof IVMInstall2) {
-  //				String compliance = JavaModelUtil.getCompilerCompliance((IVMInstall2)install, JavaCore.VERSION_1_3);
+  //				String compliance = JavaModelUtil.getCompilerCompliance((IVMInstall2)install,
+  // JavaCore.VERSION_1_3);
   //				return !JavaModelUtil.isVersionLessThan(compliance, fRequiredVersion);
   //			}
   //			return false;
@@ -407,7 +420,8 @@ public class ReorgCorrectionsSubProcessor {
   //
   //		private String getVMInstallCompliance(IVMInstall install) {
   //			if (install instanceof IVMInstall2) {
-  //				String compliance = JavaModelUtil.getCompilerCompliance((IVMInstall2)install, JavaCore.VERSION_1_3);
+  //				String compliance = JavaModelUtil.getCompilerCompliance((IVMInstall2)install,
+  // JavaCore.VERSION_1_3);
   //				return compliance;
   //			}
   //			return JavaCore.VERSION_1_1;
@@ -458,7 +472,8 @@ public class ReorgCorrectionsSubProcessor {
   //					fRequiredJREFound = vmInstall != null;
   //					if (vmInstall != null) {
   //						IVMInstall install = JavaRuntime.getVMInstall(fProject); // can be null
-  //						monitor.beginTask(CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_operation, 4);
+  //						monitor.beginTask(CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_operation,
+  // 4);
   //						IVMInstall defaultVM = JavaRuntime.getDefaultVMInstall(); // can be null
   //						if (defaultVM != null && !defaultVM.equals(install)) {
   //							IPath newPath = new Path(JavaRuntime.JRE_CONTAINER);
@@ -525,18 +540,21 @@ public class ReorgCorrectionsSubProcessor {
   //			return bestEE;
   //		}
   //
-  //		private boolean updateClasspath(IPath newPath, IProgressMonitor monitor) throws JavaModelException {
+  //		private boolean updateClasspath(IPath newPath, IProgressMonitor monitor) throws
+  // JavaModelException {
   //			boolean updated = false;
   //
   //			IClasspathEntry[] classpath = fProject.getRawClasspath();
   //			IPath jreContainerPath = new Path(JavaRuntime.JRE_CONTAINER);
   //			for (int i = 0; i < classpath.length; i++) {
   //				IClasspathEntry curr = classpath[i];
-  //				if (curr.getEntryKind() == IClasspathEntry.CPE_CONTAINER && curr.getPath().matchingFirstSegments(jreContainerPath) > 0) {
+  //				if (curr.getEntryKind() == IClasspathEntry.CPE_CONTAINER &&
+  // curr.getPath().matchingFirstSegments(jreContainerPath) > 0) {
   //					if (!newPath.equals(curr.getPath())) {
   //						updated = true;
   //						classpath[i] =
-  //								JavaCore.newContainerEntry(newPath, curr.getAccessRules(), curr.getExtraAttributes(), curr.isExported());
+  //								JavaCore.newContainerEntry(newPath, curr.getAccessRules(), curr.getExtraAttributes(),
+  // curr.isExported());
   //					}
   //				}
   //			}
@@ -554,11 +572,13 @@ public class ReorgCorrectionsSubProcessor {
   //			StringBuffer message = new StringBuffer();
   //			if (fChangeOnWorkspace) {
   //				message.append(
-  //						Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_required_compliance_changeworkspace_description,
+  //
+  //	Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_required_compliance_changeworkspace_description,
   //										fRequiredVersion));
   //			} else {
   //				message.append(
-  //						Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_required_compliance_changeproject_description,
+  //
+  //	Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_required_compliance_changeproject_description,
   //										fRequiredVersion));
   //			}
   //
@@ -570,11 +590,13 @@ public class ReorgCorrectionsSubProcessor {
   //						IVMInstall defaultVM = JavaRuntime.getDefaultVMInstall(); // can be null
   //						if (defaultVM != null && !defaultVM.equals(install)) {
   //							message.append(
-  //									CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_changeProjectJREToDefault_description);
+  //
+  //	CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_changeProjectJREToDefault_description);
   //						}
   //						if (defaultVM == null || !isRequiredOrGreaterVMInstall(defaultVM)) {
   //							message.append(Messages.format(
-  //									CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_changeWorkspaceJRE_description,
+  //
+  //	CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_changeWorkspaceJRE_description,
   //									vmInstall.getName()));
   //						}
   //					}
@@ -583,7 +605,8 @@ public class ReorgCorrectionsSubProcessor {
   //					if (bestEE != null) {
   //						if (install == null || !isEEOnClasspath(bestEE)) {
   //							message.append(Messages.format(
-  //									CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_changeProjectJRE_description,
+  //
+  //	CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_changeProjectJRE_description,
   //									bestEE.getId()));
   //						}
   //					}
@@ -638,9 +661,11 @@ public class ReorgCorrectionsSubProcessor {
   //
   //			if (!fRequiredJREFound) {
   //				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(),
-  //											  Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_no_required_jre_title,
+  //
+  // Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_no_required_jre_title,
   //															  fRequiredVersion),
-  //											  Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_no_required_jre_message,
+  //
+  // Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_no_required_jre_message,
   //															  fRequiredVersion));
   //			}
   //		}
@@ -662,14 +687,18 @@ public class ReorgCorrectionsSubProcessor {
     //		IJavaProject project = context.getCompilationUnit().getJavaProject();
     //
     //		String label1 =
-    //				Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_change_project_compliance_description, requiredVersion);
-    //		proposals.add(new ChangeToRequiredCompilerCompliance(label1, project, false, requiredVersion,
+    //
+    //	Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_change_project_compliance_description, requiredVersion);
+    //		proposals.add(new ChangeToRequiredCompilerCompliance(label1, project, false,
+    // requiredVersion,
     //															 IProposalRelevance.CHANGE_PROJECT_COMPLIANCE));
     //
     //		if (project.getOption(JavaCore.COMPILER_COMPLIANCE, false) == null) {
-    //			String label2 = Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_change_workspace_compliance_description,
+    //			String label2 =
+    // Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_change_workspace_compliance_description,
     //											requiredVersion);
-    //			proposals.add(new ChangeToRequiredCompilerCompliance(label2, project, true, requiredVersion,
+    //			proposals.add(new ChangeToRequiredCompilerCompliance(label2, project, true,
+    // requiredVersion,
     //																 IProposalRelevance.CHANGE_WORKSPACE_COMPLIANCE));
     //		}
   }
@@ -686,7 +715,8 @@ public class ReorgCorrectionsSubProcessor {
     //		IProject project = context.getCompilationUnit().getJavaProject().getProject();
     //		String label = CorrectionMessages.ReorgCorrectionsSubProcessor_configure_buildpath_label;
     //		OpenBuildPathCorrectionProposal proposal =
-    //				new OpenBuildPathCorrectionProposal(project, label, IProposalRelevance.CONFIGURE_BUILD_PATH, null);
+    //				new OpenBuildPathCorrectionProposal(project, label,
+    // IProposalRelevance.CONFIGURE_BUILD_PATH, null);
     //		proposals.add(proposal);
   }
 
@@ -703,7 +733,8 @@ public class ReorgCorrectionsSubProcessor {
     //			IProject project = context.getCompilationUnit().getJavaProject().getProject();
     //			String label = CorrectionMessages.ReorgCorrectionsSubProcessor_accessrules_description;
     //			OpenBuildPathCorrectionProposal proposal =
-    //					new OpenBuildPathCorrectionProposal(project, label, IProposalRelevance.CONFIGURE_ACCESS_RULES, referencedElement);
+    //					new OpenBuildPathCorrectionProposal(project, label,
+    // IProposalRelevance.CONFIGURE_ACCESS_RULES, referencedElement);
     //			proposals.add(proposal);
     //		}
   }

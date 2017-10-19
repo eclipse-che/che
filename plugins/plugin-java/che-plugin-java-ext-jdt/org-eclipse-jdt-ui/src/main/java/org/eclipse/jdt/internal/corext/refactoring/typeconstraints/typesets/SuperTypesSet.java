@@ -40,7 +40,7 @@ public class SuperTypesSet extends TypeSet {
    */
   @Override
   public TypeSet makeClone() {
-    return this; //new SuperTypesSet(fLowerBounds.makeClone(), getTypeSetEnvironment());
+    return this; // new SuperTypesSet(fLowerBounds.makeClone(), getTypeSetEnvironment());
   }
 
   /* (non-Javadoc)
@@ -165,9 +165,9 @@ public class SuperTypesSet extends TypeSet {
     if (fEnumCache != null) return fEnumCache.containsAll(s);
 
     if (!isUniverse()
-        && s
-            .isUniverse()) // this is more general than just SuperTypesSet; probably belongs in TypeSet
-    return false;
+        && s.isUniverse()) // this is more general than just SuperTypesSet; probably belongs in
+      // TypeSet
+      return false;
     if (equals(s)) return true;
     if (fLowerBounds.containsAll(s)) return true;
 
@@ -244,7 +244,7 @@ public class SuperTypesSet extends TypeSet {
         + fID
         + ": superTypes("
         + fLowerBounds
-        + ")>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        + ")>"; // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
   }
 
   /* (non-Javadoc)
@@ -297,8 +297,8 @@ public class SuperTypesSet extends TypeSet {
           ArrayType at = (ArrayType) lb;
           int numDims = at.getDimensions();
           for (Iterator<TType> elemSuperIter = TTypes.getAllSuperTypesIterator(at.getElementType());
-              elemSuperIter.hasNext();
-              ) fEnumCache.add(TTypes.createArrayType(elemSuperIter.next(), numDims));
+              elemSuperIter.hasNext(); )
+            fEnumCache.add(TTypes.createArrayType(elemSuperIter.next(), numDims));
           anyLBIsIntfOrArray = true;
         } else {
           for (Iterator<TType> iterator = TTypes.getAllSuperTypesIterator(lb); iterator.hasNext(); )
@@ -307,7 +307,7 @@ public class SuperTypesSet extends TypeSet {
         fEnumCache.add(lb);
       }
       if (anyLBIsIntfOrArray) fEnumCache.add(getJavaLangObject());
-      //fEnumCache.initComplete();
+      // fEnumCache.initComplete();
     }
     return fEnumCache;
   }

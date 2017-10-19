@@ -507,7 +507,7 @@ public final class RefactoringSearchEngine2 {
     Assert.isNotNull(fPattern);
     if (monitor == null) monitor = new NullProgressMonitor();
     try {
-      monitor.beginTask("", 1); //$NON-NLS-1$
+      monitor.beginTask("", 1); // $NON-NLS-1$
       monitor.setTaskName(RefactoringCoreMessages.RefactoringSearchEngine_searching_occurrences);
       try {
         SearchEngine engine = null;
@@ -539,7 +539,7 @@ public final class RefactoringSearchEngine2 {
     Assert.isNotNull(element);
     if (monitor == null) monitor = new NullProgressMonitor();
     try {
-      monitor.beginTask("", 1); //$NON-NLS-1$
+      monitor.beginTask("", 1); // $NON-NLS-1$
       monitor.setTaskName(
           RefactoringCoreMessages.RefactoringSearchEngine_searching_referenced_fields);
       try {
@@ -570,7 +570,7 @@ public final class RefactoringSearchEngine2 {
     Assert.isNotNull(element);
     if (monitor == null) monitor = new NullProgressMonitor();
     try {
-      monitor.beginTask("", 1); //$NON-NLS-1$
+      monitor.beginTask("", 1); // $NON-NLS-1$
       monitor.setTaskName(
           RefactoringCoreMessages.RefactoringSearchEngine_searching_referenced_methods);
       try {
@@ -601,7 +601,7 @@ public final class RefactoringSearchEngine2 {
     Assert.isNotNull(element);
     if (monitor == null) monitor = new NullProgressMonitor();
     try {
-      monitor.beginTask("", 1); //$NON-NLS-1$
+      monitor.beginTask("", 1); // $NON-NLS-1$
       monitor.setTaskName(
           RefactoringCoreMessages.RefactoringSearchEngine_searching_referenced_types);
       try {

@@ -48,7 +48,7 @@ public class ImplementInterfaceProposal extends LinkedCorrectionProposal {
         targetCU,
         null,
         relevance,
-        JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)); //$NON-NLS-1$
+        JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)); // $NON-NLS-1$
 
     Assert.isTrue(binding != null && Bindings.isDeclarationBinding(binding));
 
@@ -88,7 +88,7 @@ public class ImplementInterfaceProposal extends LinkedCorrectionProposal {
       listRewrite.insertLast(newInterface, null);
 
       // set up linked mode
-      final String KEY_TYPE = "type"; //$NON-NLS-1$
+      final String KEY_TYPE = "type"; // $NON-NLS-1$
       addLinkedPosition(rewrite.track(newInterface), true, KEY_TYPE);
       return rewrite;
     }

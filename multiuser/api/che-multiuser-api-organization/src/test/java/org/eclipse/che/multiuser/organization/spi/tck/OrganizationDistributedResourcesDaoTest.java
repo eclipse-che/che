@@ -80,71 +80,71 @@ public class OrganizationDistributedResourcesDaoTest {
 
   @Test
   public void shouldCreateDistributedResourcesWhenStoringNotExistentOne() throws Exception {
-    //given
+    // given
     OrganizationDistributedResourcesImpl toStore = distributedResources[0];
     distributedResourcesDao.remove(toStore.getOrganizationId());
 
-    //when
+    // when
     distributedResourcesDao.store(toStore);
 
-    //then
+    // then
     assertEquals(distributedResourcesDao.get(toStore.getOrganizationId()), copy(toStore));
   }
 
   @Test
   public void shouldUpdateDistributedResourcesWhenStoringExistentOne() throws Exception {
-    //given
+    // given
     OrganizationDistributedResourcesImpl toStore =
         new OrganizationDistributedResourcesImpl(
             distributedResources[0].getOrganizationId(),
             singletonList(new ResourceImpl(TEST_RESOURCE_TYPE, 1000, "unit")));
 
-    //when
+    // when
     distributedResourcesDao.store(toStore);
 
-    //then
+    // then
     assertEquals(distributedResourcesDao.get(toStore.getOrganizationId()), copy(toStore));
   }
 
   @Test(expectedExceptions = NullPointerException.class)
   public void shouldThrowNpeWhenStoringNullableDistributedResources() throws Exception {
-    //when
+    // when
     distributedResourcesDao.store(null);
   }
 
   @Test
   public void shouldGetDistributedResourcesForSpecifiedOrganizationId() throws Exception {
-    //given
+    // given
     OrganizationDistributedResourcesImpl stored = distributedResources[0];
 
-    //when
+    // when
     OrganizationDistributedResourcesImpl fetched =
         distributedResourcesDao.get(stored.getOrganizationId());
 
-    //then
+    // then
     assertEquals(fetched, copy(stored));
   }
 
   @Test(expectedExceptions = NotFoundException.class)
   public void shouldThrowNotFoundExceptionWhenGettingNonExistingDistributedResources()
       throws Exception {
-    //when
+    // when
     distributedResourcesDao.get("account123");
   }
 
   @Test(expectedExceptions = NullPointerException.class)
   public void shouldThrowNpeWhenGettingDistributedResourcesByNullOrganizationId() throws Exception {
-    //when
+    // when
     distributedResourcesDao.get(null);
   }
 
   @Test
   public void shouldGetDistributedResourcesByParent() throws Exception {
-    //when
+    // when
     final Page<OrganizationDistributedResourcesImpl> children =
         distributedResourcesDao.getByParent(parentOrganization.getId(), 1, 1);
 
-    //then
+    // then
     assertEquals(children.getTotalItemsCount(), 3);
     assertEquals(children.getItemsCount(), 1);
     assertTrue(
@@ -155,25 +155,25 @@ public class OrganizationDistributedResourcesDaoTest {
 
   @Test(expectedExceptions = NullPointerException.class)
   public void shouldThrowNpeWhenGettingDistributedResourcesByNullParentId() throws Exception {
-    //when
+    // when
     distributedResourcesDao.getByParent(null, 1, 1);
   }
 
   @Test(expectedExceptions = NotFoundException.class)
   public void shouldRemoveDistributedResources() throws Exception {
-    //given
+    // given
     OrganizationDistributedResourcesImpl distributedResource = distributedResources[0];
 
-    //when
+    // when
     distributedResourcesDao.remove(distributedResource.getOrganizationId());
 
-    //then
+    // then
     distributedResourcesDao.get(distributedResource.getOrganizationId());
   }
 
   @Test(expectedExceptions = NullPointerException.class)
   public void shouldThrowNpeWhenRemovingDistributedResourcesByNullId() throws Exception {
-    //when
+    // when
     distributedResourcesDao.remove(null);
   }
 

@@ -41,11 +41,11 @@ public class TypeRules {
     if (definedType.isTopLevel()) {
       if (definedType.isClass()) {
         return "Object".equals(definedType.getName())
-            && "java.lang".equals(definedType.getPackage().getName()); //$NON-NLS-1$//$NON-NLS-2$
+            && "java.lang".equals(definedType.getPackage().getName()); // $NON-NLS-1$//$NON-NLS-2$
       } else {
         String qualifiedName = definedType.getQualifiedName();
         return "java.io.Serializable".equals(qualifiedName)
-            || "java.lang.Cloneable".equals(qualifiedName); //$NON-NLS-1$ //$NON-NLS-2$
+            || "java.lang.Cloneable".equals(qualifiedName); // $NON-NLS-1$ //$NON-NLS-2$
       }
     }
     return false;
@@ -55,7 +55,7 @@ public class TypeRules {
     return definedType.isTopLevel()
         && definedType.isClass()
         && "Object".equals(definedType.getName())
-        && "java.lang".equals(definedType.getPackage().getName()); //$NON-NLS-1$//$NON-NLS-2$
+        && "java.lang".equals(definedType.getPackage().getName()); // $NON-NLS-1$//$NON-NLS-2$
   }
 
   /**
@@ -67,7 +67,7 @@ public class TypeRules {
    *     unnecessary, but not invalid).
    */
   public static boolean canCast(ITypeBinding castType, ITypeBinding bindingToCast) {
-    //see bug 80715
+    // see bug 80715
 
     String voidName = PrimitiveType.VOID.toString();
 
@@ -86,7 +86,8 @@ public class TypeRules {
     if (bindingToCast.isArray()) {
       if (!castType.isArray()) {
         return isArrayCompatible(
-            castType); // can not cast an arraytype to a non array type (except to Object, Serializable...)
+            castType); // can not cast an arraytype to a non array type (except to Object,
+        // Serializable...)
       }
 
       int toCastDim = bindingToCast.getDimensions();

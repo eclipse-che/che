@@ -70,7 +70,7 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
         targetCU,
         null,
         relevance,
-        JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)); //$NON-NLS-1$
+        JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)); // $NON-NLS-1$
 
     Assert.isTrue(
         binding != null
@@ -153,7 +153,7 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
             returnTag.setTagName(TagElement.TAG_RETURN);
             TextElement commentStart = ast.newTextElement();
             returnTag.fragments().add(commentStart);
-            addLinkedPosition(rewrite.track(commentStart), false, "comment_start"); //$NON-NLS-1$
+            addLinkedPosition(rewrite.track(commentStart), false, "comment_start"); // $NON-NLS-1$
 
             ListRewrite tagsRewriter = rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
             JavadocTagsSubProcessor.insertTag(tagsRewriter, returnTag, null);
@@ -224,7 +224,7 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
       }
 
       // set up linked mode
-      final String KEY_TYPE = "type"; //$NON-NLS-1$
+      final String KEY_TYPE = "type"; // $NON-NLS-1$
       addLinkedPosition(rewrite.track(type), true, KEY_TYPE);
       if (fTypeProposals != null) {
         for (int i = 0; i < fTypeProposals.length; i++) {

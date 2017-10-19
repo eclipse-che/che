@@ -88,31 +88,31 @@ public class LambdaExpressionsCleanUp extends AbstractCleanUp {
     boolean secondLambda = !(convert && useAnonymous);
 
     if (firstLambda) {
-      buf.append("IntConsumer c = i -> {\n"); //$NON-NLS-1$
-      buf.append("    System.out.println(i);\n"); //$NON-NLS-1$
-      buf.append("};\n"); //$NON-NLS-1$
-      buf.append("\n"); //$NON-NLS-1$
-      buf.append("\n"); //$NON-NLS-1$
+      buf.append("IntConsumer c = i -> {\n"); // $NON-NLS-1$
+      buf.append("    System.out.println(i);\n"); // $NON-NLS-1$
+      buf.append("};\n"); // $NON-NLS-1$
+      buf.append("\n"); // $NON-NLS-1$
+      buf.append("\n"); // $NON-NLS-1$
     } else {
-      buf.append("IntConsumer c = new IntConsumer() {\n"); //$NON-NLS-1$
-      buf.append("    @Override public void accept(int value) {\n"); //$NON-NLS-1$
-      buf.append("        System.out.println(i);\n"); //$NON-NLS-1$
-      buf.append("    }\n"); //$NON-NLS-1$
-      buf.append("};\n"); //$NON-NLS-1$
+      buf.append("IntConsumer c = new IntConsumer() {\n"); // $NON-NLS-1$
+      buf.append("    @Override public void accept(int value) {\n"); // $NON-NLS-1$
+      buf.append("        System.out.println(i);\n"); // $NON-NLS-1$
+      buf.append("    }\n"); // $NON-NLS-1$
+      buf.append("};\n"); // $NON-NLS-1$
     }
 
     if (secondLambda) {
-      buf.append("Runnable r = () -> { /* do something */ };\n"); //$NON-NLS-1$
-      buf.append("\n"); //$NON-NLS-1$
-      buf.append("\n"); //$NON-NLS-1$
-      buf.append("\n"); //$NON-NLS-1$
-      buf.append("\n"); //$NON-NLS-1$
+      buf.append("Runnable r = () -> { /* do something */ };\n"); // $NON-NLS-1$
+      buf.append("\n"); // $NON-NLS-1$
+      buf.append("\n"); // $NON-NLS-1$
+      buf.append("\n"); // $NON-NLS-1$
+      buf.append("\n"); // $NON-NLS-1$
     } else {
-      buf.append("Runnable r = new Runnable() {\n"); //$NON-NLS-1$
-      buf.append("    @Override public void run() {\n"); //$NON-NLS-1$
-      buf.append("        //do something\n"); //$NON-NLS-1$
-      buf.append("    }\n"); //$NON-NLS-1$
-      buf.append("};\n"); //$NON-NLS-1$
+      buf.append("Runnable r = new Runnable() {\n"); // $NON-NLS-1$
+      buf.append("    @Override public void run() {\n"); // $NON-NLS-1$
+      buf.append("        //do something\n"); // $NON-NLS-1$
+      buf.append("    }\n"); // $NON-NLS-1$
+      buf.append("};\n"); // $NON-NLS-1$
     }
     return buf.toString();
   }

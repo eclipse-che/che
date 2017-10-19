@@ -53,11 +53,11 @@ public class LsRemoteTest {
 
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
 
-    //when
+    // when
     Set<RemoteReference> remoteReferenceSet =
         new HashSet<>(connection.lsRemote("https://github.com/codenvy/everrest.git"));
 
-    //then
+    // then
     assertTrue(
         remoteReferenceSet.contains(
             newDto(RemoteReference.class)

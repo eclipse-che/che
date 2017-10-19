@@ -39,7 +39,7 @@ public class JavaElementLabelComposer {
   /*
    * Package name compression
    */
-  private static String fgPkgNamePattern = ""; //$NON-NLS-1$
+  private static String fgPkgNamePattern = ""; // $NON-NLS-1$
 
   //	public static class FlexibleStyledString extends FlexibleBuffer {
   //		private final StyledString fStyledString;
@@ -82,7 +82,7 @@ public class JavaElementLabelComposer {
   /*
    * Package name abbreviation
    */
-  private static String fgPkgNameAbbreviationPattern = ""; //$NON-NLS-1$
+  private static String fgPkgNameAbbreviationPattern = ""; // $NON-NLS-1$
   private static PackageNameAbbreviation[] fgPkgNameAbbreviation;
   protected final FlexibleBuffer fBuffer;
 
@@ -108,7 +108,7 @@ public class JavaElementLabelComposer {
   }
 
   public static PackageNameAbbreviation[] parseAbbreviationPattern(String pattern) {
-    String[] parts = pattern.split("\\s*(?:\r\n?|\n)\\s*"); //$NON-NLS-1$
+    String[] parts = pattern.split("\\s*(?:\r\n?|\n)\\s*"); // $NON-NLS-1$
 
     ArrayList<PackageNameAbbreviation> result = new ArrayList<PackageNameAbbreviation>();
 
@@ -117,14 +117,14 @@ public class JavaElementLabelComposer {
 
       if (part.length() == 0) continue;
 
-      String[] parts2 = part.split("\\s*=\\s*", 2); //$NON-NLS-1$
+      String[] parts2 = part.split("\\s*=\\s*", 2); // $NON-NLS-1$
 
       if (parts2.length != 2) return null;
 
       String prefix = parts2[0].trim();
       String abbr = parts2[1].trim();
 
-      if (prefix.startsWith("#")) //$NON-NLS-1$
+      if (prefix.startsWith("#")) // $NON-NLS-1$
       continue;
 
       PackageNameAbbreviation pkgAbbr = new PackageNameAbbreviation(prefix, abbr);
@@ -342,7 +342,9 @@ public class JavaElementLabelComposer {
                 types = typesWithoutSyntheticParams;
               } else {
                 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=101029
-                // JavaPlugin.logErrorMessage("JavaElementLabels: Number of param types(" + nParams + ") != number of names(" + names.length + "): " + method.getElementName());   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+                // JavaPlugin.logErrorMessage("JavaElementLabels: Number of param types(" + nParams
+                // + ") != number of names(" + names.length + "): " + method.getElementName());
+                // //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
                 names = null; // no names rendered
               }
             }
@@ -401,7 +403,7 @@ public class JavaElementLabelComposer {
           types = method.exists() ? method.getExceptionTypes() : new String[0];
         }
         if (types.length > 0) {
-          fBuffer.append(" throws "); //$NON-NLS-1$
+          fBuffer.append(" throws "); // $NON-NLS-1$
           for (int i = 0; i < types.length; i++) {
             if (i > 0) {
               fBuffer.append(JavaElementLabels.COMMA_STRING);
@@ -503,7 +505,8 @@ public class JavaElementLabelComposer {
 
   private void appendAnnotationValue(
       IAnnotation annotation, Object value, int valueKind, long flags) throws JavaModelException {
-    // Note: To be bug-compatible with Javadoc from Java 5/6/7, we currently don't escape HTML tags in String-valued annotations.
+    // Note: To be bug-compatible with Javadoc from Java 5/6/7, we currently don't escape HTML tags
+    // in String-valued annotations.
     if (value instanceof Object[]) {
       fBuffer.append('{');
       Object[] values = (Object[]) value;
@@ -518,7 +521,7 @@ public class JavaElementLabelComposer {
         case IMemberValuePair.K_CLASS:
           appendTypeSignatureLabel(
               annotation, Signature.createTypeSignature((String) value, false), flags);
-          fBuffer.append(".class"); //$NON-NLS-1$
+          fBuffer.append(".class"); // $NON-NLS-1$
           break;
         case IMemberValuePair.K_QUALIFIED_NAME:
           String name = (String) value;
@@ -531,8 +534,9 @@ public class JavaElementLabelComposer {
             fBuffer.append(getMemberName(annotation, type, field));
             break;
           }
-          //				case IMemberValuePair.K_SIMPLE_NAME: // can't implement, since parent type is not known
-          //$FALL-THROUGH$
+          //				case IMemberValuePair.K_SIMPLE_NAME: // can't implement, since parent type is not
+          // known
+          // $FALL-THROUGH$
         case IMemberValuePair.K_ANNOTATION:
           appendAnnotationLabel((IAnnotation) value, flags);
           break;
@@ -731,11 +735,11 @@ public class JavaElementLabelComposer {
     if (typeParameter.exists()) {
       String[] bounds = typeParameter.getBoundsSignatures();
       if (bounds.length > 0
-          && !(bounds.length == 1 && "Ljava.lang.Object;".equals(bounds[0]))) { //$NON-NLS-1$
-        fBuffer.append(" extends "); //$NON-NLS-1$
+          && !(bounds.length == 1 && "Ljava.lang.Object;".equals(bounds[0]))) { // $NON-NLS-1$
+        fBuffer.append(" extends "); // $NON-NLS-1$
         for (int j = 0; j < bounds.length; j++) {
           if (j > 0) {
-            fBuffer.append(" & "); //$NON-NLS-1$
+            fBuffer.append(" & "); // $NON-NLS-1$
           }
           appendTypeSignatureLabel(typeParameter, bounds[j], flags);
         }
@@ -797,14 +801,14 @@ public class JavaElementLabelComposer {
         break;
       case Signature.WILDCARD_TYPE_SIGNATURE:
         char ch = typeSig.charAt(0);
-        if (ch == Signature.C_STAR) { //workaround for bug 85713
+        if (ch == Signature.C_STAR) { // workaround for bug 85713
           fBuffer.append('?');
         } else {
           if (ch == Signature.C_EXTENDS) {
-            fBuffer.append("? extends "); //$NON-NLS-1$
+            fBuffer.append("? extends "); // $NON-NLS-1$
             appendTypeSignatureLabel(enclosingElement, typeSig.substring(1), flags);
           } else if (ch == Signature.C_SUPER) {
-            fBuffer.append("? super "); //$NON-NLS-1$
+            fBuffer.append("? super "); // $NON-NLS-1$
             appendTypeSignatureLabel(enclosingElement, typeSig.substring(1), flags);
           }
         }
@@ -864,7 +868,7 @@ public class JavaElementLabelComposer {
       IJavaElement enclosingElement, String[] typeArgsSig, long flags) {
     for (int i = 0; i < typeArgsSig.length; i++) {
       if (i > 0) {
-        fBuffer.append(" | "); //$NON-NLS-1$
+        fBuffer.append(" | "); // $NON-NLS-1$
       }
       appendTypeSignatureLabel(enclosingElement, typeArgsSig[i], flags);
     }
@@ -895,7 +899,7 @@ public class JavaElementLabelComposer {
    * @return the string for rendering '<code>&lt;</code>'
    */
   protected String getLT() {
-    return "<"; //$NON-NLS-1$
+    return "<"; // $NON-NLS-1$
   }
 
   /**
@@ -904,7 +908,7 @@ public class JavaElementLabelComposer {
    * @return the string for rendering '<code>&gt;</code>'
    */
   protected String getGT() {
-    return ">"; //$NON-NLS-1$
+    return ">"; // $NON-NLS-1$
   }
 
   /**
@@ -943,14 +947,14 @@ public class JavaElementLabelComposer {
     String typeName;
     boolean isAnonymous = false;
     if (type.isLambda()) {
-      typeName = "() -> {...}"; //$NON-NLS-1$
+      typeName = "() -> {...}"; // $NON-NLS-1$
       try {
         String[] superInterfaceSignatures = type.getSuperInterfaceTypeSignatures();
         if (superInterfaceSignatures.length > 0) {
           typeName = typeName + ' ' + getSimpleTypeName(type, superInterfaceSignatures[0]);
         }
       } catch (JavaModelException e) {
-        //ignore
+        // ignore
       }
 
     } else {
@@ -976,7 +980,7 @@ public class JavaElementLabelComposer {
             typeName = MessageFormat.format("new {0}() '{'...}", supertypeName);
           }
         } catch (JavaModelException e) {
-          //ignore
+          // ignore
           typeName = "new Anonymous";
         }
       }
@@ -1017,11 +1021,12 @@ public class JavaElementLabelComposer {
       fBuffer.append(JavaElementLabels.CONCAT_STRING);
       IType declaringType = type.getDeclaringType();
       if (declaringType == null && type.isBinary() && isAnonymous) {
-        // workaround for Bug 87165: [model] IType#getDeclaringType() does not work for anonymous binary type
+        // workaround for Bug 87165: [model] IType#getDeclaringType() does not work for anonymous
+        // binary type
         String tqn = type.getTypeQualifiedName();
         int lastDollar = tqn.lastIndexOf('$');
         if (lastDollar != 1) {
-          String declaringTypeCF = tqn.substring(0, lastDollar) + ".class"; //$NON-NLS-1$
+          String declaringTypeCF = tqn.substring(0, lastDollar) + ".class"; // $NON-NLS-1$
           declaringType = type.getPackageFragment().getClassFile(declaringTypeCF).getType();
           try {
             ISourceRange typeSourceRange = type.getSourceRange();
@@ -1304,7 +1309,7 @@ public class JavaElementLabelComposer {
 
   private void refreshPackageNamePattern() {
     String pattern = getPkgNamePatternForPackagesView();
-    final String EMPTY_STRING = ""; //$NON-NLS-1$
+    final String EMPTY_STRING = ""; // $NON-NLS-1$
     if (pattern.equals(fgPkgNamePattern)) return;
     else if (pattern.length() == 0) {
       fgPkgNamePattern = EMPTY_STRING;
@@ -1403,7 +1408,8 @@ public class JavaElementLabelComposer {
   //				if (classpathEntry != null) {
   //					IClasspathEntry referencingEntry= classpathEntry.getReferencingEntry();
   //					if (referencingEntry != null) {
-  //						fBuffer.append(Messages.format(JavaUIMessages.JavaElementLabels_onClassPathOf, new Object[] { Name.CLASS_PATH.toString(), referencingEntry.getPath().lastSegment() }));
+  //						fBuffer.append(Messages.format(JavaUIMessages.JavaElementLabels_onClassPathOf, new
+  // Object[] { Name.CLASS_PATH.toString(), referencingEntry.getPath().lastSegment() }));
   //					}
   //				}
   //				if (getFlag(flags, JavaElementLabels.COLORIZE)) {
@@ -1425,7 +1431,8 @@ public class JavaElementLabelComposer {
   //		} else {
   //			fBuffer.append(root.getElementName());
   //			int offset= fBuffer.length();
-  //			boolean referencedPostQualified= getFlag(flags, JavaElementLabels.REFERENCED_ROOT_POST_QUALIFIED);
+  //			boolean referencedPostQualified= getFlag(flags,
+  // JavaElementLabels.REFERENCED_ROOT_POST_QUALIFIED);
   //			if (referencedPostQualified && isReferenced(root)) {
   //				fBuffer.append(JavaElementLabels.CONCAT_STRING);
   //				fBuffer.append(resource.getParent().getFullPath().makeRelative().toString());
@@ -1435,9 +1442,11 @@ public class JavaElementLabelComposer {
   //			}
   //			if (referencedPostQualified) {
   //				try {
-  //					IClasspathEntry referencingEntry= JavaModelUtil.getClasspathEntry(root).getReferencingEntry();
+  //					IClasspathEntry referencingEntry=
+  // JavaModelUtil.getClasspathEntry(root).getReferencingEntry();
   //					if (referencingEntry != null) {
-  //						fBuffer.append(Messages.format(JavaUIMessages.JavaElementLabels_onClassPathOf, new Object[] { Name.CLASS_PATH.toString(), referencingEntry.getPath().lastSegment() }));
+  //						fBuffer.append(Messages.format(JavaUIMessages.JavaElementLabels_onClassPathOf, new
+  // Object[] { Name.CLASS_PATH.toString(), referencingEntry.getPath().lastSegment() }));
   //					}
   //				} catch (JavaModelException e) {
   //					// ignore
@@ -1457,7 +1466,8 @@ public class JavaElementLabelComposer {
   //		}
   //
   //		boolean rootQualified= getFlag(flags, JavaElementLabels.ROOT_QUALIFIED);
-  //		boolean referencedQualified= getFlag(flags, JavaElementLabels.REFERENCED_ROOT_POST_QUALIFIED) && isReferenced(root);
+  //		boolean referencedQualified= getFlag(flags, JavaElementLabels.REFERENCED_ROOT_POST_QUALIFIED)
+  // && isReferenced(root);
   //		if (rootQualified) {
   //			fBuffer.append(root.getPath().makeRelative().toString());
   //		} else {
@@ -1493,7 +1503,7 @@ public class JavaElementLabelComposer {
     fgPkgNameAbbreviationPattern = pattern;
 
     if (pattern == null || pattern.length() == 0) {
-      fgPkgNameAbbreviationPattern = ""; //$NON-NLS-1$
+      fgPkgNameAbbreviationPattern = ""; // $NON-NLS-1$
       fgPkgNameAbbreviation = null;
       return;
     }
@@ -1529,7 +1539,8 @@ public class JavaElementLabelComposer {
     //		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
     //		if (!store.getBoolean(PreferenceConstants.APPEARANCE_ABBREVIATE_PACKAGE_NAMES))
     //			return ""; //$NON-NLS-1$
-    //		return store.getString(PreferenceConstants.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW);
+    //		return
+    // store.getString(PreferenceConstants.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW);
     return "";
   }
 

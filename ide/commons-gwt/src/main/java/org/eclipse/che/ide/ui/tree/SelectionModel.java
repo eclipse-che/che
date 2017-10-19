@@ -15,7 +15,7 @@ import java.util.List;
 import org.eclipse.che.ide.collections.ListHelper;
 import org.eclipse.che.ide.util.input.SignalEvent;
 
-//import com.google.collide.client.util.logging.Log;
+// import com.google.collide.client.util.logging.Log;
 
 /*
  * TODO : Since we have breadcrumbs and will soon have tabs, we don't

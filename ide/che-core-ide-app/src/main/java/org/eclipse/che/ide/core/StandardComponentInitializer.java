@@ -401,7 +401,7 @@ public class StandardComponentInitializer {
 
   @Inject private ProjectConfigSynchronized projectConfigSynchronized;
 
-  @Inject private TreeResourceRevealer treeResourceRevealer; //just to work with it
+  @Inject private TreeResourceRevealer treeResourceRevealer; // just to work with it
 
   @Inject private TerminalInitializer terminalInitializer;
 
@@ -601,7 +601,7 @@ public class StandardComponentInitializer {
     actionManager.registerAction(NAVIGATE_TO_FILE, navigateToFileAction);
     assistantGroup.add(navigateToFileAction);
 
-    //Compose Profile menu
+    // Compose Profile menu
     DefaultActionGroup profileGroup = (DefaultActionGroup) actionManager.getAction(GROUP_PROFILE);
     actionManager.registerAction("showPreferences", showPreferencesAction);
 
@@ -713,7 +713,7 @@ public class StandardComponentInitializer {
     consolesTreeContextMenu.add(stopProcessAction);
     consolesTreeContextMenu.add(closeConsoleAction);
 
-    //Editor context menu group
+    // Editor context menu group
     DefaultActionGroup editorTabContextMenu =
         (DefaultActionGroup) actionManager.getAction(GROUP_EDITOR_TAB_CONTEXT_MENU);
     editorTabContextMenu.add(closeAction);
@@ -821,7 +821,7 @@ public class StandardComponentInitializer {
 
     final Map<String, Perspective> perspectives = perspectiveManager.getPerspectives();
     if (perspectives.size()
-        > 1) { //if registered perspectives will be more then 2 Main Menu -> Window
+        > 1) { // if registered perspectives will be more then 2 Main Menu -> Window
       // will appears and contains all of them as sub-menu
       final DefaultActionGroup windowMenu = new DefaultActionGroup("Window", true, actionManager);
       actionManager.registerAction("Window", windowMenu);

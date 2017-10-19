@@ -51,16 +51,16 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class TemplateReaderWriter {
 
-  private static final String TEMPLATE_ROOT = "templates"; //$NON-NLS-1$
-  private static final String TEMPLATE_ELEMENT = "template"; //$NON-NLS-1$
-  private static final String NAME_ATTRIBUTE = "name"; //$NON-NLS-1$
-  private static final String ID_ATTRIBUTE = "id"; //$NON-NLS-1$
-  private static final String DESCRIPTION_ATTRIBUTE = "description"; //$NON-NLS-1$
-  private static final String CONTEXT_ATTRIBUTE = "context"; //$NON-NLS-1$
-  private static final String ENABLED_ATTRIBUTE = "enabled"; //$NON-NLS-1$
-  private static final String DELETED_ATTRIBUTE = "deleted"; //$NON-NLS-1$
+  private static final String TEMPLATE_ROOT = "templates"; // $NON-NLS-1$
+  private static final String TEMPLATE_ELEMENT = "template"; // $NON-NLS-1$
+  private static final String NAME_ATTRIBUTE = "name"; // $NON-NLS-1$
+  private static final String ID_ATTRIBUTE = "id"; // $NON-NLS-1$
+  private static final String DESCRIPTION_ATTRIBUTE = "description"; // $NON-NLS-1$
+  private static final String CONTEXT_ATTRIBUTE = "context"; // $NON-NLS-1$
+  private static final String ENABLED_ATTRIBUTE = "enabled"; // $NON-NLS-1$
+  private static final String DELETED_ATTRIBUTE = "deleted"; // $NON-NLS-1$
   /** @since 3.1 */
-  private static final String AUTO_INSERTABLE_ATTRIBUTE = "autoinsert"; //$NON-NLS-1$
+  private static final String AUTO_INSERTABLE_ATTRIBUTE = "autoinsert"; // $NON-NLS-1$
 
   /** Create a new instance. */
   public TemplateReaderWriter() {}
@@ -154,7 +154,7 @@ public class TemplateReaderWriter {
         if (id != null && ids.contains(id))
           throw new IOException(
               TemplatePersistenceMessages.getString(
-                  "TemplateReaderWriter.duplicate.id")); //$NON-NLS-1$
+                  "TemplateReaderWriter.duplicate.id")); // $NON-NLS-1$
 
         if (singleId != null && !singleId.equals(id)) continue;
 
@@ -163,7 +163,7 @@ public class TemplateReaderWriter {
         String name = getStringValue(attributes, NAME_ATTRIBUTE);
         name = translateString(name, bundle);
 
-        String description = getStringValue(attributes, DESCRIPTION_ATTRIBUTE, ""); //$NON-NLS-1$
+        String description = getStringValue(attributes, DESCRIPTION_ATTRIBUTE, ""); // $NON-NLS-1$
         description = translateString(description, bundle);
 
         String context = getStringValue(attributes, CONTEXT_ATTRIBUTE);
@@ -171,7 +171,7 @@ public class TemplateReaderWriter {
         if (name == null || context == null)
           throw new IOException(
               TemplatePersistenceMessages.getString(
-                  "TemplateReaderWriter.error.missing_attribute")); //$NON-NLS-1$
+                  "TemplateReaderWriter.error.missing_attribute")); // $NON-NLS-1$
 
         boolean enabled = getBooleanValue(attributes, ENABLED_ATTRIBUTE, true);
         boolean autoInsertable = getBooleanValue(attributes, AUTO_INSERTABLE_ATTRIBUTE, true);
@@ -201,7 +201,7 @@ public class TemplateReaderWriter {
       Assert.isTrue(false);
     } catch (SAXException e) {
       throw (IOException)
-          new IOException("Could not read template file").initCause(e); //$NON-NLS-1$
+          new IOException("Could not read template file").initCause(e); // $NON-NLS-1$
     }
 
     return null; // dummy
@@ -301,8 +301,8 @@ public class TemplateReaderWriter {
       }
 
       Transformer transformer = TransformerFactory.newInstance().newTransformer();
-      transformer.setOutputProperty(OutputKeys.METHOD, "xml"); //$NON-NLS-1$
-      transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8"); //$NON-NLS-1$
+      transformer.setOutputProperty(OutputKeys.METHOD, "xml"); // $NON-NLS-1$
+      transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8"); // $NON-NLS-1$
       DOMSource source = new DOMSource(document);
 
       transformer.transform(source, result);
@@ -330,7 +330,7 @@ public class TemplateReaderWriter {
         throw new IOException(
             "Character reference \"&#"
                 + Integer.toString(ch)
-                + "\" is an invalid XML character."); //$NON-NLS-1$ //$NON-NLS-2$
+                + "\" is an invalid XML character."); // $NON-NLS-1$ //$NON-NLS-2$
     }
     return string;
   }
@@ -344,7 +344,7 @@ public class TemplateReaderWriter {
     else
       throw new SAXException(
           TemplatePersistenceMessages.getString(
-              "TemplateReaderWriter.error.illegal_boolean_attribute")); //$NON-NLS-1$
+              "TemplateReaderWriter.error.illegal_boolean_attribute")); // $NON-NLS-1$
   }
 
   private String getStringValue(NamedNodeMap attributes, String name) throws SAXException {
@@ -352,7 +352,7 @@ public class TemplateReaderWriter {
     if (val == null)
       throw new SAXException(
           TemplatePersistenceMessages.getString(
-              "TemplateReaderWriter.error.missing_attribute")); //$NON-NLS-1$
+              "TemplateReaderWriter.error.missing_attribute")); // $NON-NLS-1$
     return val;
   }
 

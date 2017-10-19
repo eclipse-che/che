@@ -70,7 +70,7 @@ public class ReconcileTest extends BaseTest {
             null,
             editorWorkingCopyManager);
     this.workingCopy =
-        project.findType("p1.X").getCompilationUnit(); //.getWorkingCopy(this.wcOwner, null);
+        project.findType("p1.X").getCompilationUnit(); // .getWorkingCopy(this.wcOwner, null);
   }
 
   @Test

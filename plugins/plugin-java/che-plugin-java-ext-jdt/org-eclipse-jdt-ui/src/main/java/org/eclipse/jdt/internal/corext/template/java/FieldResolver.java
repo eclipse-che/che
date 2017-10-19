@@ -21,7 +21,7 @@ public class FieldResolver extends AbstractVariableResolver {
 
   /** Default constructor for instantiation by the extension point. */
   public FieldResolver() {
-    this("java.lang.Object"); //$NON-NLS-1$
+    this("java.lang.Object"); // $NON-NLS-1$
   }
 
   FieldResolver(String defaultType) {

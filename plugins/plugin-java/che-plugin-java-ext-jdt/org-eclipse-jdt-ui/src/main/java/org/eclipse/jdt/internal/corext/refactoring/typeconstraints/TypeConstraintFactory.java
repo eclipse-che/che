@@ -121,12 +121,12 @@ public class TypeConstraintFactory implements ITypeConstraintFactory {
    */
   public CompositeOrTypeConstraint createCompositeOrTypeConstraint(ITypeConstraint[] constraints) {
     ConstraintVariable left = ((SimpleTypeConstraint) constraints[0]).getLeft();
-    String bounds = ""; //$NON-NLS-1$
+    String bounds = ""; // $NON-NLS-1$
     for (int i = 0; i < constraints.length; i++) {
       ConstraintVariable right = ((SimpleTypeConstraint) constraints[i]).getRight();
       ITypeBinding binding = right.getBinding();
       String typeName = binding.getQualifiedName();
-      bounds = bounds + typeName + ","; //$NON-NLS-1$
+      bounds = bounds + typeName + ","; // $NON-NLS-1$
     }
 
     if (fOrConstraints.containsKey(left)) {
@@ -161,6 +161,6 @@ public class TypeConstraintFactory implements ITypeConstraintFactory {
             + fNrRetrieved
             + " retrieved, "
             + fNrFiltered
-            + " filtered"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+            + " filtered"); // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
   }
 }

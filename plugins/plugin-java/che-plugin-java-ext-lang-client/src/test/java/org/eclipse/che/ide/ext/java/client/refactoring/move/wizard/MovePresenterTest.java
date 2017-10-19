@@ -92,7 +92,7 @@ public class MovePresenterTest {
   @Mock private NotificationManager notificationManager;
   @Mock private EditorAgent editorAgent;
 
-  //local params
+  // local params
   @Mock private RefactorInfo refactorInfo;
   @Mock private File file;
   @Mock private Container srcFolder;

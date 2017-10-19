@@ -200,7 +200,8 @@ public class EnvironmentParserTest {
   @DataProvider(name = "environmentWithServersProvider")
   public static Object[][] environmentWithServersProvider() {
     // Format of result array:
-    // [ [InternalMachineConfig object, expected exposes list, parsed representation of environment], ... ]
+    // [ [InternalMachineConfig object, expected exposes list, parsed representation of
+    // environment], ... ]
     List<List<Object>> data = new ArrayList<>();
 
     // no exposes, servers -> no exposes

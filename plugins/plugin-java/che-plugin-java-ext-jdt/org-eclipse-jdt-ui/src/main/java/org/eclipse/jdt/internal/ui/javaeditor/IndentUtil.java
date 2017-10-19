@@ -28,7 +28,7 @@ import org.eclipse.jface.text.TextUtilities;
  */
 public final class IndentUtil {
 
-  private static final String SLASHES = "//"; //$NON-NLS-1$
+  private static final String SLASHES = "//"; // $NON-NLS-1$
 
   /**
    * The result of an indentation operation. The result may be passed to subsequent calls to {@link
@@ -300,7 +300,7 @@ public final class IndentUtil {
     }
 
     // don't count the space before javadoc like, asterix-style comment lines
-    if (to > from && to < endOffset - 1 && document.get(to - 1, 2).equals(" *")) { //$NON-NLS-1$
+    if (to > from && to < endOffset - 1 && document.get(to - 1, 2).equals(" *")) { // $NON-NLS-1$
       String type =
           TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, to, true);
       if (type.equals(IJavaPartitions.JAVA_DOC)
@@ -402,7 +402,8 @@ public final class IndentUtil {
     int length = end - offset;
     String currentIndent = document.get(offset, length);
 
-    // memorize the fact that a line is a single line comment (but not at column 0) and should be treated like code
+    // memorize the fact that a line is a single line comment (but not at column 0) and should be
+    // treated like code
     // as opposed to commented out code, which should keep its slashes at column 0
     if (length > 0) {
       ITypedRegion partition =

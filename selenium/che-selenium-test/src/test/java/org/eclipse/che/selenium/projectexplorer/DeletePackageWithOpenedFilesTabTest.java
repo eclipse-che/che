@@ -60,7 +60,7 @@ public class DeletePackageWithOpenedFilesTabTest {
   @Test
   public void deletePackageTest() throws Exception {
     projectExplorer.waitItem(PROJECT_NAME);
-    //active tab is first tab
+    // active tab is first tab
 
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(
@@ -80,7 +80,7 @@ public class DeletePackageWithOpenedFilesTabTest {
     projectExplorer.waitRemoveItemsByPath(PATH_TO_PACKAGE1 + "/sqlFile.sql");
     projectExplorer.waitRemoveItemsByPath(PATH_TO_PACKAGE1 + "/another");
 
-    //active tab is middle tab
+    // active tab is middle tab
     projectExplorer.openItemByPath(PATH_TO_WEB_APP + "/index.jsp");
     editor.waitActiveEditor();
     openFile("spring-servlet.xml");
@@ -99,7 +99,7 @@ public class DeletePackageWithOpenedFilesTabTest {
     projectExplorer.waitRemoveItemsByPath(PATH_TO_PACKAGE2 + "/guess_num.jsp");
     projectExplorer.waitRemoveItemsByPath(PATH_TO_PACKAGE2 + "/htmlFile.html");
 
-    //active tab is last tab
+    // active tab is last tab
     openJavaFile(PATH_TO_PACKAGE3 + "/Test1.java", "Test1");
     openJavaFile(PATH_TO_PACKAGE3 + "/Test2.java", "Test2");
     openJavaFile(PATH_TO_PACKAGE3 + "/Test3.java", "Test3");

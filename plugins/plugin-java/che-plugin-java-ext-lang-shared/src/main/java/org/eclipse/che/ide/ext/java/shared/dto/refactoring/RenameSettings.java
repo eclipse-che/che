@@ -20,7 +20,7 @@ import org.eclipse.che.dto.shared.DTO;
 @DTO
 public interface RenameSettings extends RefactoringSession {
 
-  //IDelegateUpdating
+  // IDelegateUpdating
   /**
    * If refactoring object is capable of creating appropriate delegates for the refactored elements.
    * This value used to set whether to create delegates.
@@ -37,7 +37,7 @@ public interface RenameSettings extends RefactoringSession {
 
   void setDeprecateDelegates(boolean delegates);
 
-  //IQualifiedNameUpdating
+  // IQualifiedNameUpdating
 
   /**
    * If this refactoring object is capable of updating qualified names in non Java files. then this
@@ -52,7 +52,7 @@ public interface RenameSettings extends RefactoringSession {
 
   void setFilePatterns(String patterns);
 
-  //ISubpackagesUpdating
+  // ISubpackagesUpdating
 
   /**
    * Informs the refactoring object whether subpackages should be updated. This value used to set
@@ -64,7 +64,7 @@ public interface RenameSettings extends RefactoringSession {
 
   void setUpdateSubpackages(boolean update);
 
-  //IReferenceUpdating
+  // IReferenceUpdating
 
   /**
    * Informs the refactoring object whether references should be updated. * @return <code>true
@@ -74,7 +74,7 @@ public interface RenameSettings extends RefactoringSession {
 
   void setUpdateReferences(boolean update);
 
-  //ISimilarDeclarationUpdating
+  // ISimilarDeclarationUpdating
 
   /**
    * If this refactoring object is capable of updating similar declarations of the renamed element,
@@ -96,7 +96,7 @@ public interface RenameSettings extends RefactoringSession {
    */
   void setMachStrategy(int strategy);
 
-  //ITextUpdating
+  // ITextUpdating
 
   /**
    * This method is used to inform the refactoring object whether references in regular (non

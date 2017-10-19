@@ -24,10 +24,10 @@ public class ParticipantDescriptor {
   private IConfigurationElement fConfigurationElement;
   private boolean fEnabled;
 
-  private static final String ID = "id"; //$NON-NLS-1$
-  private static final String NAME = "name"; //$NON-NLS-1$
-  private static final String CLASS = "class"; //$NON-NLS-1$
-  private static final String PROCESS_ON_CANCEL = "processOnCancel"; //$NON-NLS-1$
+  private static final String ID = "id"; // $NON-NLS-1$
+  private static final String NAME = "name"; // $NON-NLS-1$
+  private static final String CLASS = "class"; // $NON-NLS-1$
+  private static final String PROCESS_ON_CANCEL = "processOnCancel"; // $NON-NLS-1$
   private Class<? extends RefactoringParticipant> participant;
 
   public ParticipantDescriptor(IConfigurationElement element) {
@@ -55,12 +55,14 @@ public class ParticipantDescriptor {
     //		}
     //		if (fConfigurationElement.getAttribute(NAME) == null) {
     //			return new Status(IStatus.ERROR, RefactoringCorePlugin.getPluginId(), IStatus.ERROR,
-    //				Messages.format( RefactoringCoreMessages.ParticipantDescriptor_error_name_missing, getId()),
+    //				Messages.format( RefactoringCoreMessages.ParticipantDescriptor_error_name_missing,
+    // getId()),
     //				null);
     //		}
     //		if (fConfigurationElement.getAttribute(CLASS) == null) {
     //			return new Status(IStatus.ERROR, RefactoringCorePlugin.getPluginId(), IStatus.ERROR,
-    //				Messages.format( RefactoringCoreMessages.ParticipantDescriptor_error_class_missing, getId()),
+    //				Messages.format( RefactoringCoreMessages.ParticipantDescriptor_error_class_missing,
+    // getId()),
     //				null);
     //		}
     return Status.OK_STATUS;
@@ -69,7 +71,8 @@ public class ParticipantDescriptor {
   public boolean matches(
       IEvaluationContext context, IParticipantDescriptorFilter filter, RefactoringStatus status)
       throws CoreException {
-    //		IConfigurationElement[] elements= fConfigurationElement.getChildren(ExpressionTagNames.ENABLEMENT);
+    //		IConfigurationElement[] elements=
+    // fConfigurationElement.getChildren(ExpressionTagNames.ENABLEMENT);
     //		if (elements.length == 0)
     //			return false;
     //		Assert.isTrue(elements.length == 1);
@@ -119,11 +122,11 @@ public class ParticipantDescriptor {
     return "name= "
         + getName()
         + (isEnabled() ? " (enabled)" : " (disabled)")
-        + //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        + // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         "\nid= "
         + getId()
-        + //$NON-NLS-1$
+        + // $NON-NLS-1$
         "\nclass= "
-        + fConfigurationElement.getAttribute(CLASS); //$NON-NLS-1$
+        + fConfigurationElement.getAttribute(CLASS); // $NON-NLS-1$
   }
 }

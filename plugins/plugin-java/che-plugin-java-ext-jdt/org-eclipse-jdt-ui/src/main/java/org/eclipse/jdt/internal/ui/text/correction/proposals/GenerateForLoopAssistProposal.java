@@ -96,7 +96,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
         cu,
         null,
         IProposalRelevance.GENERATE_FOR_LOOP,
-        JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)); //$NON-NLS-1$
+        JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)); // $NON-NLS-1$
     fCurrentNode = currentNode;
     fCurrentExpression = currentExpression;
     fLoopTypeToGenerate = loopTypeToGenerate;
@@ -197,11 +197,11 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
     ITypeBinding loopOverType = extractElementType(ast);
 
     SimpleName loopVariableName =
-        resolveLinkedVariableNameWithProposals(rewrite, "iterator", null, true); //$NON-NLS-1$
+        resolveLinkedVariableNameWithProposals(rewrite, "iterator", null, true); // $NON-NLS-1$
     loopStatement.initializers().add(getIteratorBasedForInitializer(rewrite, loopVariableName));
 
     MethodInvocation loopExpression = ast.newMethodInvocation();
-    loopExpression.setName(ast.newSimpleName("hasNext")); //$NON-NLS-1$
+    loopExpression.setName(ast.newSimpleName("hasNext")); // $NON-NLS-1$
     SimpleName expressionName = ast.newSimpleName(loopVariableName.getIdentifier());
     addLinkedPosition(
         rewrite.track(expressionName), LinkedPositionGroup.NO_STOP, expressionName.getIdentifier());
@@ -235,7 +235,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
     AST ast = rewrite.getAST();
     IMethodBinding iteratorMethodBinding =
         Bindings.findMethodInHierarchy(
-            fExpressionType, "iterator", new ITypeBinding[] {}); //$NON-NLS-1$
+            fExpressionType, "iterator", new ITypeBinding[] {}); // $NON-NLS-1$
     // initializing fragment
     VariableDeclarationFragment varDeclarationFragment = ast.newVariableDeclarationFragment();
     varDeclarationFragment.setName(loopVariableName);
@@ -292,7 +292,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 
     // right hand side
     MethodInvocation invokeIteratorNextExpression = ast.newMethodInvocation();
-    invokeIteratorNextExpression.setName(ast.newSimpleName("next")); //$NON-NLS-1$
+    invokeIteratorNextExpression.setName(ast.newSimpleName("next")); // $NON-NLS-1$
     SimpleName currentElementName = ast.newSimpleName(loopVariableName.getIdentifier());
     addLinkedPosition(
         rewrite.track(currentElementName),
@@ -317,13 +317,13 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 
     ForStatement loopStatement = ast.newForStatement();
     SimpleName loopVariableName =
-        resolveLinkedVariableNameWithProposals(rewrite, "int", null, true); //$NON-NLS-1$
+        resolveLinkedVariableNameWithProposals(rewrite, "int", null, true); // $NON-NLS-1$
     loopStatement.initializers().add(getForInitializer(ast, loopVariableName));
 
     FieldAccess getArrayLengthExpression = ast.newFieldAccess();
     getArrayLengthExpression.setExpression(
         (Expression) rewrite.createCopyTarget(fCurrentExpression));
-    getArrayLengthExpression.setName(ast.newSimpleName("length")); //$NON-NLS-1$
+    getArrayLengthExpression.setName(ast.newSimpleName("length")); // $NON-NLS-1$
 
     loopStatement.setExpression(
         getLinkedInfixExpression(
@@ -476,11 +476,11 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 
     ForStatement loopStatement = ast.newForStatement();
     SimpleName loopVariableName =
-        resolveLinkedVariableNameWithProposals(rewrite, "int", null, true); //$NON-NLS-1$
+        resolveLinkedVariableNameWithProposals(rewrite, "int", null, true); // $NON-NLS-1$
     loopStatement.initializers().add(getForInitializer(ast, loopVariableName));
 
     MethodInvocation listSizeExpression = ast.newMethodInvocation();
-    listSizeExpression.setName(ast.newSimpleName("size")); //$NON-NLS-1$
+    listSizeExpression.setName(ast.newSimpleName("size")); // $NON-NLS-1$
     Expression listExpression = (Expression) rewrite.createCopyTarget(fCurrentExpression);
     listSizeExpression.setExpression(listExpression);
 
@@ -540,7 +540,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 
     // right hand side
     MethodInvocation invokeGetExpression = ast.newMethodInvocation();
-    invokeGetExpression.setName(ast.newSimpleName("get")); //$NON-NLS-1$
+    invokeGetExpression.setName(ast.newSimpleName("get")); // $NON-NLS-1$
     SimpleName indexVariableName = ast.newSimpleName(loopVariableName.getIdentifier());
     addLinkedPosition(
         rewrite.track(indexVariableName),
@@ -591,7 +591,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
    */
   private Statement createBlankLineStatementWithCursorPosition(ASTRewrite rewrite) {
     Statement blankLineStatement =
-        (Statement) rewrite.createStringPlaceholder("", ASTNode.EMPTY_STATEMENT); //$NON-NLS-1$
+        (Statement) rewrite.createStringPlaceholder("", ASTNode.EMPTY_STATEMENT); // $NON-NLS-1$
     setEndPosition(rewrite.track(blankLineStatement));
     return blankLineStatement;
   }
@@ -641,10 +641,10 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
     // extract elements type directly out of the bindings
     IMethodBinding iteratorMethodBinding =
         Bindings.findMethodInHierarchy(
-            fExpressionType, "iterator", new ITypeBinding[] {}); //$NON-NLS-1$
+            fExpressionType, "iterator", new ITypeBinding[] {}); // $NON-NLS-1$
     IMethodBinding iteratorNextMethodBinding =
         Bindings.findMethodInHierarchy(
-            iteratorMethodBinding.getReturnType(), "next", new ITypeBinding[] {}); //$NON-NLS-1$
+            iteratorMethodBinding.getReturnType(), "next", new ITypeBinding[] {}); // $NON-NLS-1$
 
     ITypeBinding currentElementBinding = iteratorNextMethodBinding.getReturnType();
 

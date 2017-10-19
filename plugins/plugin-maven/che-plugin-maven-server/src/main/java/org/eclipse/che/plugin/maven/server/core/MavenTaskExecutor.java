@@ -37,7 +37,7 @@ public class MavenTaskExecutor {
 
   public void submitTask(MavenProjectTask task) {
     synchronized (queue) {
-      //if no running tasks, start immediately
+      // if no running tasks, start immediately
       if (!isWorking) {
         isWorking = true;
         runTask(task);
@@ -80,7 +80,7 @@ public class MavenTaskExecutor {
         task.perform();
       } catch (Throwable throwable) {
         LOG.error(throwable.getMessage(), throwable);
-        //TODO need to notify user some how
+        // TODO need to notify user some how
       }
 
       synchronized (queue) {

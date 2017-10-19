@@ -154,7 +154,7 @@ public class WorkspaceManagerTest {
     final WorkspaceImpl workspace = createAndMockWorkspace();
     mockStart(workspace);
     mockRuntime(workspace, STARTING);
-    //createAndMockRuntime(workspace, WorkspaceStatus.STARTING);
+    // createAndMockRuntime(workspace, WorkspaceStatus.STARTING);
     final WorkspaceImpl result =
         workspaceManager.startWorkspace(
             workspace.getId(), workspace.getConfig().getDefaultEnv(), emptyMap());

@@ -52,7 +52,7 @@ public class MultiUserCheWsMasterModule extends AbstractModule {
         new org.eclipse.che.multiuser.permission.workspace.server.jpa
             .MultiuserWorkspaceJpaModule());
 
-    //Permission filters
+    // Permission filters
     bind(org.eclipse.che.multiuser.permission.system.SystemServicePermissionsFilter.class);
     bind(org.eclipse.che.multiuser.permission.user.UserProfileServicePermissionsFilter.class);
     bind(org.eclipse.che.multiuser.permission.user.UserServicePermissionsFilter.class);
@@ -75,7 +75,7 @@ public class MultiUserCheWsMasterModule extends AbstractModule {
     install(new MachineAuthModule());
     bind(RequestTokenExtractor.class).to(ChainedTokenExtractor.class);
 
-    //User and profile - use profile from keycloak and other stuff is JPA
+    // User and profile - use profile from keycloak and other stuff is JPA
     bind(PasswordEncryptor.class).to(PBKDF2PasswordEncryptor.class);
     bind(UserDao.class).to(JpaUserDao.class);
     bind(PreferenceDao.class).to(JpaPreferenceDao.class);

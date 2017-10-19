@@ -79,7 +79,8 @@ public class SourcesFromBytecodeGenerator {
 
       builder.append(" extends ");
       if (type.getSuperclassTypeSignature() != null) {
-        //                appendTypeSignatureLabel(type, type.getSuperclassTypeSignature(), flags, builder);
+        //                appendTypeSignatureLabel(type, type.getSuperclassTypeSignature(), flags,
+        // builder);
         builder.append(Signature.toString(type.getSuperclassTypeSignature()));
       } else {
         builder.append(type.getSuperclassName());
@@ -185,7 +186,8 @@ public class SourcesFromBytecodeGenerator {
             resolvedSig != null ? Signature.getReturnType(resolvedSig) : method.getReturnType();
         appendTypeSignatureLabel(method, returnTypeSig, 0, builder);
         builder.append(' ');
-        //                builder.append(Signature.toCharArray(method.getReturnType().toCharArray())).append(' ');
+        //
+        // builder.append(Signature.toCharArray(method.getReturnType().toCharArray())).append(' ');
       }
       builder.append(method.getElementName());
       builder.append('(');
@@ -268,7 +270,8 @@ public class SourcesFromBytecodeGenerator {
   private void appendAnnotationValue(
       IAnnotation annotation, Object value, int valueKind, long flags, StringBuilder builder)
       throws JavaModelException {
-    // Note: To be bug-compatible with Javadoc from Java 5/6/7, we currently don't escape HTML tags in String-valued annotations.
+    // Note: To be bug-compatible with Javadoc from Java 5/6/7, we currently don't escape HTML tags
+    // in String-valued annotations.
     if (value instanceof Object[]) {
       builder.append('{');
       Object[] values = (Object[]) value;
@@ -283,7 +286,7 @@ public class SourcesFromBytecodeGenerator {
         case IMemberValuePair.K_CLASS:
           appendTypeSignatureLabel(
               annotation, Signature.createTypeSignature((String) value, false), flags, builder);
-          builder.append(".class"); //$NON-NLS-1$
+          builder.append(".class"); // $NON-NLS-1$
           break;
         case IMemberValuePair.K_QUALIFIED_NAME:
           String name = (String) value;
@@ -297,8 +300,9 @@ public class SourcesFromBytecodeGenerator {
             builder.append(getMemberName(annotation, type, field));
             break;
           }
-          //				case IMemberValuePair.K_SIMPLE_NAME: // can't implement, since parent type is not known
-          //$FALL-THROUGH$
+          //				case IMemberValuePair.K_SIMPLE_NAME: // can't implement, since parent type is not
+          // known
+          // $FALL-THROUGH$
         case IMemberValuePair.K_ANNOTATION:
           appendAnnotationLabel((IAnnotation) value, flags, builder);
           break;
@@ -336,11 +340,11 @@ public class SourcesFromBytecodeGenerator {
     if (typeParameter.exists()) {
       String[] bounds = typeParameter.getBoundsSignatures();
       if (bounds.length > 0
-          && !(bounds.length == 1 && "Ljava.lang.Object;".equals(bounds[0]))) { //$NON-NLS-1$
-        builder.append(" extends "); //$NON-NLS-1$
+          && !(bounds.length == 1 && "Ljava.lang.Object;".equals(bounds[0]))) { // $NON-NLS-1$
+        builder.append(" extends "); // $NON-NLS-1$
         for (int j = 0; j < bounds.length; j++) {
           if (j > 0) {
-            builder.append(" & "); //$NON-NLS-1$
+            builder.append(" & "); // $NON-NLS-1$
           }
           appendTypeSignatureLabel(typeParameter, bounds[j], flags, builder);
         }
@@ -428,14 +432,14 @@ public class SourcesFromBytecodeGenerator {
         break;
       case Signature.WILDCARD_TYPE_SIGNATURE:
         char ch = typeSig.charAt(0);
-        if (ch == Signature.C_STAR) { //workaround for bug 85713
+        if (ch == Signature.C_STAR) { // workaround for bug 85713
           builder.append('?');
         } else {
           if (ch == Signature.C_EXTENDS) {
-            builder.append("? extends "); //$NON-NLS-1$
+            builder.append("? extends "); // $NON-NLS-1$
             appendTypeSignatureLabel(enclosingElement, typeSig.substring(1), flags, builder);
           } else if (ch == Signature.C_SUPER) {
-            builder.append("? super "); //$NON-NLS-1$
+            builder.append("? super "); // $NON-NLS-1$
             appendTypeSignatureLabel(enclosingElement, typeSig.substring(1), flags, builder);
           }
         }
@@ -456,7 +460,7 @@ public class SourcesFromBytecodeGenerator {
       IJavaElement enclosingElement, String[] typeArgsSig, long flags, StringBuilder builder) {
     for (int i = 0; i < typeArgsSig.length; i++) {
       if (i > 0) {
-        builder.append(" | "); //$NON-NLS-1$
+        builder.append(" | "); // $NON-NLS-1$
       }
       appendTypeSignatureLabel(enclosingElement, typeArgsSig[i], flags, builder);
     }
@@ -480,7 +484,7 @@ public class SourcesFromBytecodeGenerator {
    * @return the string for rendering '<code>&lt;</code>'
    */
   protected String getLT() {
-    return "<"; //$NON-NLS-1$
+    return "<"; // $NON-NLS-1$
   }
 
   /**
@@ -489,7 +493,7 @@ public class SourcesFromBytecodeGenerator {
    * @return the string for rendering '<code>&gt;</code>'
    */
   protected String getGT() {
-    return ">"; //$NON-NLS-1$
+    return ">"; // $NON-NLS-1$
   }
 
   private String getJavaType(IType type) throws JavaModelException {
@@ -513,7 +517,7 @@ public class SourcesFromBytecodeGenerator {
 
   private String getModifiers(int flags, int typeFlags) {
     StringBuilder modifiers = new StringBuilder();
-    //package private modifier has no string representation
+    // package private modifier has no string representation
 
     if (Flags.isPublic(flags)) {
       modifiers.append("public ");

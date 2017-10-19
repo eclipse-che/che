@@ -44,7 +44,7 @@ public final class JDTRefactoringDescriptorComment {
 
   /** The line delimiter */
   private static final String LINE_DELIMITER =
-      System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+      System.getProperty("line.separator", "\n"); // $NON-NLS-1$ //$NON-NLS-2$
 
   /**
    * Creates a composite setting.
@@ -58,7 +58,7 @@ public final class JDTRefactoringDescriptorComment {
     Assert.isNotNull(settings);
     final StringBuffer buffer = new StringBuffer(128);
     for (int index = 0; index < settings.length; index++) {
-      if (settings[index] != null && !"".equals(settings[index])) { //$NON-NLS-1$
+      if (settings[index] != null && !"".equals(settings[index])) { // $NON-NLS-1$
         buffer.append(LINE_DELIMITER);
         buffer.append(ELEMENT_DELIMITER);
         buffer.append(settings[index]);
@@ -107,7 +107,7 @@ public final class JDTRefactoringDescriptorComment {
   public void addSetting(final int index, final String setting) {
     Assert.isTrue(index >= 0);
     Assert.isNotNull(setting);
-    Assert.isTrue(!"".equals(setting)); //$NON-NLS-1$
+    Assert.isTrue(!"".equals(setting)); // $NON-NLS-1$
     fSettings.add(index, setting);
   }
 
@@ -117,7 +117,7 @@ public final class JDTRefactoringDescriptorComment {
    * @param setting the setting to add, or <code>null</code> for no setting
    */
   public void addSetting(final String setting) {
-    if (setting != null && !"".equals(setting)) //$NON-NLS-1$
+    if (setting != null && !"".equals(setting)) // $NON-NLS-1$
     fSettings.add(setting);
   }
 
@@ -129,7 +129,7 @@ public final class JDTRefactoringDescriptorComment {
   public String asString() {
     final StringBuffer buffer = new StringBuffer(256);
     buffer.append(fHeader);
-    if (fProject != null && !"".equals(fProject)) { //$NON-NLS-1$
+    if (fProject != null && !"".equals(fProject)) { // $NON-NLS-1$
       buffer.append(LINE_DELIMITER);
       buffer.append(
           Messages.format(
@@ -291,7 +291,7 @@ public final class JDTRefactoringDescriptorComment {
       final IQualifiedNameUpdating updating = (IQualifiedNameUpdating) object;
       if (updating.canEnableQualifiedNameUpdating() && updating.getUpdateQualifiedNames()) {
         final String patterns = updating.getFilePatterns();
-        if (patterns != null && !"".equals(patterns)) //$NON-NLS-1$
+        if (patterns != null && !"".equals(patterns)) // $NON-NLS-1$
         fSettings.add(
               Messages.format(
                   RefactoringCoreMessages.JavaRefactoringDescriptor_qualified_names_pattern,

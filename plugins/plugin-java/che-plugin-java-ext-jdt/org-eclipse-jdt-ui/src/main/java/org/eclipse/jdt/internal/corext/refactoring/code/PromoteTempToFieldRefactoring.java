@@ -97,10 +97,10 @@ import org.eclipse.text.edits.TextEdit;
 
 public class PromoteTempToFieldRefactoring extends Refactoring {
 
-  private static final String ATTRIBUTE_STATIC = "static"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_FINAL = "final"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_VISIBILITY = "visibility"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_INITIALIZE = "initialize"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_STATIC = "static"; // $NON-NLS-1$
+  private static final String ATTRIBUTE_FINAL = "final"; // $NON-NLS-1$
+  private static final String ATTRIBUTE_VISIBILITY = "visibility"; // $NON-NLS-1$
+  private static final String ATTRIBUTE_INITIALIZE = "initialize"; // $NON-NLS-1$
 
   private int fSelectionStart;
   private int fSelectionLength;
@@ -110,22 +110,22 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
   public static final int INITIALIZE_IN_METHOD = 1;
   public static final int INITIALIZE_IN_CONSTRUCTOR = 2;
 
-  private static final String LINKED_NAME = "name"; //$NON-NLS-1$
+  private static final String LINKED_NAME = "name"; // $NON-NLS-1$
 
-  //------ settings ---------//
+  // ------ settings ---------//
   private String fFieldName;
   private int fVisibility; /*see Modifier*/
   private boolean fDeclareStatic;
   private boolean fDeclareFinal;
   private int fInitializeIn; /*see INITIALIZE_IN_* constraints */
 
-  //------ fields used for computations ---------//
+  // ------ fields used for computations ---------//
   private CompilationUnit fCompilationUnitNode;
   private VariableDeclaration fTempDeclarationNode;
-  //------ analysis ---------//
+  // ------ analysis ---------//
   private boolean fInitializerUsesLocalTypes;
   private boolean fTempTypeUsesClassTypeVariables;
-  //------ scripting --------//
+  // ------ scripting --------//
   private boolean fSelfInitializing = false;
   private LinkedProposalModel fLinkedProposalModel;
 
@@ -144,7 +144,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     fSelectionLength = selectionLength;
     fCu = unit;
 
-    fFieldName = ""; //$NON-NLS-1$
+    fFieldName = ""; // $NON-NLS-1$
     fVisibility = Modifier.PRIVATE;
     fDeclareStatic = false;
     fDeclareFinal = false;
@@ -175,7 +175,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     fSelectionStart = declaration.getStartPosition();
     fSelectionLength = declaration.getLength();
 
-    fFieldName = ""; //$NON-NLS-1$
+    fFieldName = ""; // $NON-NLS-1$
     fVisibility = Modifier.PRIVATE;
     fDeclareStatic = false;
     fDeclareFinal = false;
@@ -389,8 +389,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
       List<String> result = new ArrayList<String>(fields.length);
       for (int i = 0; i < fields.length; i++) {
         for (Iterator<VariableDeclarationFragment> iter = fields[i].fragments().iterator();
-            iter.hasNext();
-            ) {
+            iter.hasNext(); ) {
           VariableDeclarationFragment field = iter.next();
           result.add(field.getName().getIdentifier());
         }
@@ -530,7 +529,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
       for (int j = 0; j < fragments.length; j++) {
         VariableDeclarationFragment fragment = fragments[j];
         if (fFieldName.equals(fragment.getName().getIdentifier())) {
-          //cannot conflict with more than 1 name
+          // cannot conflict with more than 1 name
           RefactoringStatusContext context = JavaStatusContext.create(fCu, fragment);
           return RefactoringStatus.createFatalErrorStatus(
               RefactoringCoreMessages.PromoteTempToFieldRefactoring_Name_conflict_with_field,
@@ -557,7 +556,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
    */
   @Override
   public Change createChange(IProgressMonitor pm) throws CoreException {
-    pm.beginTask("", 1); //$NON-NLS-1$
+    pm.beginTask("", 1); // $NON-NLS-1$
     try {
       if (fFieldName.length() == 0) {
         fFieldName = getInitialFieldName();
@@ -755,7 +754,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
         break;
     }
     String visibility = JdtFlags.getVisibilityString(fVisibility);
-    if ("".equals(visibility)) //$NON-NLS-1$
+    if ("".equals(visibility)) // $NON-NLS-1$
     visibility = RefactoringCoreMessages.PromoteTempToFieldRefactoring_default_visibility;
     comment.addSetting(
         Messages.format(
@@ -782,7 +781,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
         JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION,
         new Integer(fSelectionStart).toString()
             + " "
-            + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+            + new Integer(fSelectionLength).toString()); // $NON-NLS-1$
     arguments.put(ATTRIBUTE_STATIC, Boolean.valueOf(fDeclareStatic).toString());
     arguments.put(ATTRIBUTE_FINAL, Boolean.valueOf(fDeclareFinal).toString());
     arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
@@ -1038,7 +1037,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
               RefactoringCoreMessages.InitializableRefactoring_argument_not_exist,
               JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
     final String visibility = arguments.getAttribute(ATTRIBUTE_VISIBILITY);
-    if (visibility != null && !"".equals(visibility)) { //$NON-NLS-1$
+    if (visibility != null && !"".equals(visibility)) { // $NON-NLS-1$
       int flag = 0;
       try {
         flag = Integer.parseInt(visibility);
@@ -1051,7 +1050,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
       fVisibility = flag;
     }
     final String initialize = arguments.getAttribute(ATTRIBUTE_INITIALIZE);
-    if (initialize != null && !"".equals(initialize)) { //$NON-NLS-1$
+    if (initialize != null && !"".equals(initialize)) { // $NON-NLS-1$
       int value = 0;
       try {
         value = Integer.parseInt(initialize);
@@ -1064,7 +1063,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
       fInitializeIn = value;
     }
     final String name = arguments.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
-    if (name != null && !"".equals(name)) //$NON-NLS-1$
+    if (name != null && !"".equals(name)) // $NON-NLS-1$
     fFieldName = name;
     else
       return RefactoringStatus.createFatalErrorStatus(

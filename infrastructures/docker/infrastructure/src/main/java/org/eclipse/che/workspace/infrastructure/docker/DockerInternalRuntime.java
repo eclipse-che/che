@@ -456,7 +456,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
       SnapshotImpl snapshot =
           SnapshotImpl.builder()
               .generateId()
-              .setType("docker") //TODO: do we need that at all?
+              .setType("docker") // TODO: do we need that at all?
               .setWorkspaceId(identity.getWorkspaceId())
               .setDescription(identity.getEnvName())
               .setDev(devMachineName.equals(dockerMachineEntry.getKey()))

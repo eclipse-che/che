@@ -197,7 +197,8 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
     return fTypeVariables;
   }
 
-  //---- Activation checking ---------------------------------------------------------------------------
+  // ---- Activation checking
+  // ---------------------------------------------------------------------------
 
   boolean isValidDestination(ASTNode node) {
     boolean isInterface = node instanceof TypeDeclaration && ((TypeDeclaration) node).isInterface();
@@ -311,7 +312,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
           }
         } else {
           fReturnType = ast.newPrimitiveType(PrimitiveType.VOID);
-          fReturnTypeBinding = ast.resolveWellKnownType("void"); //$NON-NLS-1$
+          fReturnTypeBinding = ast.resolveWellKnownType("void"); // $NON-NLS-1$
           getStatus()
               .addError(
                   RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_determine_return_type,
@@ -332,11 +333,11 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
         break;
       default:
         fReturnType = ast.newPrimitiveType(PrimitiveType.VOID);
-        fReturnTypeBinding = ast.resolveWellKnownType("void"); //$NON-NLS-1$
+        fReturnTypeBinding = ast.resolveWellKnownType("void"); // $NON-NLS-1$
     }
     if (fReturnType == null) {
       fReturnType = ast.newPrimitiveType(PrimitiveType.VOID);
-      fReturnTypeBinding = ast.resolveWellKnownType("void"); //$NON-NLS-1$
+      fReturnTypeBinding = ast.resolveWellKnownType("void"); // $NON-NLS-1$
     }
   }
 
@@ -357,7 +358,8 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
     }
   }
 
-  //---- Input checking -----------------------------------------------------------------------------------
+  // ---- Input checking
+  // -----------------------------------------------------------------------------------
 
   public void checkInput(RefactoringStatus status, String methodName, ASTNode destination) {
     ITypeBinding[] arguments = getArgumentTypes();
@@ -455,7 +457,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
                 continueMatchesLoopProblem[0] =
                     Messages.format(
                         RefactoringCoreMessages.ExtractMethodAnalyzer_branch_break_mismatch,
-                        new Object[] {("break " + label.getIdentifier())}); //$NON-NLS-1$
+                        new Object[] {("break " + label.getIdentifier())}); // $NON-NLS-1$
               }
               return false;
             }
@@ -476,7 +478,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
                   continueMatchesLoopProblem[0] =
                       Messages.format(
                           RefactoringCoreMessages.ExtractMethodAnalyzer_branch_continue_mismatch,
-                          new Object[] {"continue " + label.getIdentifier()}); //$NON-NLS-1$
+                          new Object[] {"continue " + label.getIdentifier()}); // $NON-NLS-1$
                 }
               }
             }
@@ -529,7 +531,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
     if (fEnclosingBodyDeclaration
         .getAST()
         .resolveWellKnownType("void")
-        .equals(binding)) //$NON-NLS-1$
+        .equals(binding)) // $NON-NLS-1$
     return true;
     return false;
   }
@@ -731,11 +733,13 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
     return result;
   }
 
-  //---- Change creation ----------------------------------------------------------------------------------
+  // ---- Change creation
+  // ----------------------------------------------------------------------------------
 
   public void aboutToCreateChange() {}
 
-  //---- Exceptions -----------------------------------------------------------------------------------------
+  // ---- Exceptions
+  // -----------------------------------------------------------------------------------------
 
   public ITypeBinding[] getExceptions(boolean includeRuntimeExceptions) {
     if (includeRuntimeExceptions) return fAllExceptions;
@@ -752,7 +756,8 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
     fAllExceptions = ExceptionAnalyzer.perform(getSelectedNodes());
   }
 
-  //---- Special visitor methods ---------------------------------------------------------------------------
+  // ---- Special visitor methods
+  // ---------------------------------------------------------------------------
 
   @Override
   protected void handleNextSelectedNode(ASTNode node) {

@@ -185,7 +185,8 @@ public class ProjectServiceClient {
     }
     if (expression.getMaxItems() == 0) {
       expression.setMaxItems(
-          100); //for avoiding block client by huge response until search not support pagination will limit result here
+          100); // for avoiding block client by huge response until search not support pagination
+      // will limit result here
     }
     queryParameters.append("&maxItems=").append(expression.getMaxItems());
     if (expression.getSkipCount() != 0) {

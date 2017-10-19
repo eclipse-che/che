@@ -52,25 +52,25 @@ public class RemoteOAuthTokenProviderTest {
 
   @Test
   public void shouldReturnToken() throws Exception {
-    //given
+    // given
     OAuthToken expected = DtoFactory.newDto(OAuthToken.class).withScope("scope").withToken("token");
     when(httpJsonResponse.asDto(any(Class.class))).thenReturn(expected);
     when(httpJsonRequest.request()).thenReturn(httpJsonResponse);
-    //when
+    // when
     OAuthToken actual = tokenProvider.getToken("google", "id");
-    //then
+    // then
     assertEquals(actual, expected);
   }
 
   @Test
   public void shouldConstructCorrectUrl() throws Exception {
-    //given
+    // given
     OAuthToken expected = DtoFactory.newDto(OAuthToken.class).withScope("scope").withToken("token");
     when(httpJsonResponse.asDto(any(Class.class))).thenReturn(expected);
     when(httpJsonRequest.request()).thenReturn(httpJsonResponse);
-    //when
+    // when
     tokenProvider.getToken("google", "id");
-    //then
+    // then
     ArgumentCaptor<Link> argumentCaptor = ArgumentCaptor.forClass(Link.class);
     verify(httpJsonRequestFactory).fromLink(argumentCaptor.capture());
     Link link = argumentCaptor.getValue();
@@ -81,36 +81,36 @@ public class RemoteOAuthTokenProviderTest {
 
   @Test
   public void shouldReturnNollForNotExistedProvider() throws Exception {
-    //given
+    // given
     when(httpJsonRequest.request()).thenReturn(httpJsonResponse);
-    //when
-    //then
+    // when
+    // then
     Assert.assertNull(tokenProvider.getToken("smoogle", "id"));
   }
 
   @Test
   public void shouldReturnNullOnNotFoundException() throws Exception {
-    //given
+    // given
     when(httpJsonRequest.request()).thenThrow(NotFoundException.class);
-    //when
-    //then
+    // when
+    // then
     Assert.assertNull(tokenProvider.getToken("google", "id"));
   }
 
   @Test
   public void shouldReturnNullOnIfUserIsEmpty() throws Exception {
-    //given
-    //when
-    //then
+    // given
+    // when
+    // then
     Assert.assertNull(tokenProvider.getToken("google", ""));
   }
 
   @Test(expectedExceptions = IOException.class)
   public void shouldThrowIoExceptionOnIoException() throws Exception {
-    //given
+    // given
     when(httpJsonRequest.request()).thenThrow(IOException.class);
-    //when
-    //then
+    // when
+    // then
     Assert.assertNull(tokenProvider.getToken("google", "id"));
   }
 }

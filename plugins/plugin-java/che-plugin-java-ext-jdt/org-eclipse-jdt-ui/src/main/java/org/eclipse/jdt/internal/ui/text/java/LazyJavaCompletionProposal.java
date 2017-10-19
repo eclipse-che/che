@@ -31,11 +31,11 @@ import org.eclipse.swt.graphics.Point;
 
 public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 
-  protected static final String LPAREN = "("; //$NON-NLS-1$
-  protected static final String RPAREN = ")"; //$NON-NLS-1$
-  protected static final String COMMA = ","; //$NON-NLS-1$
-  protected static final String SPACE = " "; //$NON-NLS-1$
-  protected static final String SEMICOLON = ";"; //$NON-NLS-1$
+  protected static final String LPAREN = "("; // $NON-NLS-1$
+  protected static final String RPAREN = ")"; // $NON-NLS-1$
+  protected static final String COMMA = ","; // $NON-NLS-1$
+  protected static final String SPACE = " "; // $NON-NLS-1$
+  protected static final String SEMICOLON = ";"; // $NON-NLS-1$
 
   protected static final class FormatterPrefs {
     /* Methods & constructors */

@@ -89,7 +89,7 @@ public class FullTextSearchPresenter implements FullTextSearchView.ActionDelegat
             });
   }
 
-  //todo move this to the core part of resource manager
+  // todo move this to the core part of resource manager
   private String prepareQuery(String text) {
     StringBuilder sb = new StringBuilder();
     for (char character : text.toCharArray()) {

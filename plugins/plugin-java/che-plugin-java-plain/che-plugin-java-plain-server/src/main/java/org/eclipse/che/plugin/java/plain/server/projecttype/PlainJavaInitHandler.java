@@ -61,11 +61,11 @@ public class PlainJavaInitHandler extends AbstractJavaInitHandler {
       throw new ServerException(e);
     }
 
-    //default classpath
+    // default classpath
     IClasspathEntry[] defaultClasspath =
         new IClasspathEntry[] {JavaCore.newSourceEntry(javaProject.getPath())};
     if (!Arrays.equals(defaultClasspath, projectClasspath)) {
-      //classpath is already initialized
+      // classpath is already initialized
       return;
     }
 

@@ -37,7 +37,7 @@ import org.eclipse.text.edits.TextEdit;
 public class RefactoringAnalyzeUtil {
 
   private RefactoringAnalyzeUtil() {
-    //no instances
+    // no instances
   }
 
   public static IRegion[] getNewRanges(TextEdit[] edits, TextChange change) {

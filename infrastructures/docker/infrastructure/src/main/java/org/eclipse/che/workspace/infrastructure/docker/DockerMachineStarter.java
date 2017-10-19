@@ -175,7 +175,8 @@ public class DockerMachineStarter {
       MachineLoggersFactory machineLogger,
       DockerMachineCreator machineCreator) {
     this.machineCreator = machineCreator;
-    // TODO spi should we move all configuration stuff into infrastructure provisioner and left logic of container start here only
+    // TODO spi should we move all configuration stuff into infrastructure provisioner and left
+    // logic of container start here only
     this.docker = docker;
     this.dockerCredentials = dockerCredentials;
     this.dockerInstanceStopDetector = dockerMachineStopDetector;
@@ -492,8 +493,10 @@ public class DockerMachineStarter {
   // We can detect
   //  - when no command/entrypoint is set
   //  - when most common shell interpreters are used and require additional arguments
-  //  - when most common shell interpreters are used and they require interactive mode which we don't support
-  // When we identify such situation we change CMD/entrypoint in such a way that it runs "tail -f /dev/null".
+  //  - when most common shell interpreters are used and they require interactive mode which we
+  // don't support
+  // When we identify such situation we change CMD/entrypoint in such a way that it runs "tail -f
+  // /dev/null".
   // This command does nothing and lasts until workspace is stopped.
   // Images such as "ubuntu" or "openjdk" fits this situation.
   protected void setNonExitingContainerCommandIfNeeded(ContainerConfig containerConfig)

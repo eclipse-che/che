@@ -22,17 +22,22 @@ public class WorkspaceRuntimeIntegrationTest {
   //    @BeforeMethod
   //    public void setUp() throws Exception {
   //        CheEnvironmentEngine environmentEngine = new CheEnvironmentEngine(snapshotDao,
-  //                                                                          machineInstanceProviders,
+  //
+  // machineInstanceProviders,
   //                                                                          "/tmp",
   //                                                                          2000,
   //                                                                          eventService,
   //                                                                          environmentParser,
-  //                                                                          new DefaultServicesStartStrategy(),
+  //                                                                          new
+  // DefaultServicesStartStrategy(),
   //                                                                          instanceProvider,
-  //                                                                          infrastructureProvisioner,
-  //                                                                          "http://localhost:8080/api",
+  //
+  // infrastructureProvisioner,
+  //
+  // "http://localhost:8080/api",
   //                                                                          recipeDownloader,
-  //                                                                          containerNameGenerator,
+  //
+  // containerNameGenerator,
   //                                                                          agentRegistry);
   //
   ////        runtimes = new WorkspaceRuntimes(eventService,
@@ -44,9 +49,11 @@ public class WorkspaceRuntimeIntegrationTest {
   ////                                         sharedPool);
   //
   //        executor = Executors.newFixedThreadPool(
-  //                1, new ThreadFactoryBuilder().setNameFormat(this.getClass().toString() + "-%d").build());
+  //                1, new ThreadFactoryBuilder().setNameFormat(this.getClass().toString() +
+  // "-%d").build());
   //
-  //        EnvironmentContext.getCurrent().setSubject(new SubjectImpl("name", "id", "token", false));
+  //        EnvironmentContext.getCurrent().setSubject(new SubjectImpl("name", "id", "token",
+  // false));
   //    }
   //
   //    @AfterMethod
@@ -58,8 +65,10 @@ public class WorkspaceRuntimeIntegrationTest {
   //
   //    // Check for https://github.com/codenvy/codenvy/issues/593
   //    @Test(expectedExceptions = NotFoundException.class,
-  //          expectedExceptionsMessageRegExp = "Workspace with id '" + WORKSPACE_ID + "' is not running.")
-  //    public void environmentEngineShouldDestroyAllMachinesBeforeRemovalOfEnvironmentRecord() throws Exception {
+  //          expectedExceptionsMessageRegExp = "Workspace with id '" + WORKSPACE_ID + "' is not
+  // running.")
+  //    public void environmentEngineShouldDestroyAllMachinesBeforeRemovalOfEnvironmentRecord()
+  // throws Exception {
   //        // given
   //        EnvironmentDto environment = newDto(EnvironmentDto.class);
   //        environment.withMachines(singletonMap("service1", newDto(ExtendedMachineDto.class)
@@ -80,7 +89,8 @@ public class WorkspaceRuntimeIntegrationTest {
   //        when(instance.getConfig()).thenReturn(machineConfig);
   //
   //        CheServicesEnvironmentImpl internalRuntimeConfig = new CheServicesEnvironmentImpl();
-  //        internalRuntimeConfig.getServices().put("service1", new CheServiceImpl().withId("machineId"));
+  //        internalRuntimeConfig.getServices().put("service1", new
+  // CheServiceImpl().withId("machineId"));
   //
   //        when(environmentParser.parse(any(Environment.class))).thenReturn(internalRuntimeConfig);
   //        when(instanceProvider.startService(anyString(),

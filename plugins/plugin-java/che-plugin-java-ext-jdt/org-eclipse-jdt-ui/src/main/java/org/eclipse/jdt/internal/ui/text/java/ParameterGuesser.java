@@ -99,7 +99,7 @@ public class ParameterGuesser {
       buffer.append(qualifiedTypeName);
       buffer.append(' ');
       buffer.append(name);
-      buffer.append(" ("); //$NON-NLS-1$
+      buffer.append(" ("); // $NON-NLS-1$
       buffer.append(variableType);
       buffer.append(')');
 
@@ -159,7 +159,7 @@ public class ParameterGuesser {
                 false,
                 res.size(),
                 new char[] {'.'},
-                desc)); //$NON-NLS-1$
+                desc)); // $NON-NLS-1$
       }
     }
 
@@ -174,7 +174,7 @@ public class ParameterGuesser {
               false,
               res.size(),
               NO_TRIGGERS,
-              null)); //$NON-NLS-1$
+              null)); // $NON-NLS-1$
     } else {
       String typeName = primitiveTypeCode.toString();
       boolean isAutoboxing = !typeName.equals(expectedType);
@@ -188,7 +188,7 @@ public class ParameterGuesser {
                 isAutoboxing,
                 res.size(),
                 NO_TRIGGERS,
-                null)); //$NON-NLS-1$
+                null)); // $NON-NLS-1$
         res.add(
             new Variable(
                 typeName,
@@ -197,7 +197,7 @@ public class ParameterGuesser {
                 isAutoboxing,
                 res.size(),
                 NO_TRIGGERS,
-                null)); //$NON-NLS-1$
+                null)); // $NON-NLS-1$
       } else {
         // add 0
         res.add(
@@ -208,7 +208,7 @@ public class ParameterGuesser {
                 isAutoboxing,
                 res.size(),
                 NO_TRIGGERS,
-                null)); //$NON-NLS-1$
+                null)); // $NON-NLS-1$
       }
     }
     return res;
@@ -260,7 +260,7 @@ public class ParameterGuesser {
             } else {
               typeSignature = method.getReturnType();
             }
-            elementName = elementName + "()"; //$NON-NLS-1$
+            elementName = elementName + "()"; // $NON-NLS-1$
           } else {
             return null;
           }
@@ -302,31 +302,31 @@ public class ParameterGuesser {
     if (fEnclosingElement != null
         && JavaModelUtil.is50OrHigher(fEnclosingElement.getJavaProject())) {
       if (code == PrimitiveType.SHORT) {
-        if ("java.lang.Short".equals(type)) { //$NON-NLS-1$
+        if ("java.lang.Short".equals(type)) { // $NON-NLS-1$
           return code;
         }
       } else if (code == PrimitiveType.INT) {
-        if ("java.lang.Integer".equals(type)) { //$NON-NLS-1$
+        if ("java.lang.Integer".equals(type)) { // $NON-NLS-1$
           return code;
         }
       } else if (code == PrimitiveType.LONG) {
-        if ("java.lang.Long".equals(type)) { //$NON-NLS-1$
+        if ("java.lang.Long".equals(type)) { // $NON-NLS-1$
           return code;
         }
       } else if (code == PrimitiveType.FLOAT) {
-        if ("java.lang.Float".equals(type)) { //$NON-NLS-1$
+        if ("java.lang.Float".equals(type)) { // $NON-NLS-1$
           return code;
         }
       } else if (code == PrimitiveType.DOUBLE) {
-        if ("java.lang.Double".equals(type)) { //$NON-NLS-1$
+        if ("java.lang.Double".equals(type)) { // $NON-NLS-1$
           return code;
         }
       } else if (code == PrimitiveType.CHAR) {
-        if ("java.lang.Character".equals(type)) { //$NON-NLS-1$
+        if ("java.lang.Character".equals(type)) { // $NON-NLS-1$
           return code;
         }
       } else if (code == PrimitiveType.BYTE) {
-        if ("java.lang.Byte".equals(type)) { //$NON-NLS-1$
+        if ("java.lang.Byte".equals(type)) { // $NON-NLS-1$
           return code;
         }
       }
@@ -340,7 +340,7 @@ public class ParameterGuesser {
       return method.getNumberOfParameters() == 0
           && !Signature.SIG_VOID.equals(method.getReturnType())
           && (methodName.startsWith("get")
-              || methodName.startsWith("is")); //$NON-NLS-1$//$NON-NLS-2$
+              || methodName.startsWith("is")); // $NON-NLS-1$//$NON-NLS-2$
     } catch (JavaModelException e) {
       return false;
     }
@@ -503,7 +503,7 @@ public class ParameterGuesser {
     int minLength = shorter.length();
 
     StringBuffer pattern = new StringBuffer(shorter.length() + 2);
-    String longestCommonSubstring = ""; //$NON-NLS-1$
+    String longestCommonSubstring = ""; // $NON-NLS-1$
 
     for (int i = 0; i < minLength; i++) {
       for (int j = i + 1; j <= minLength; j++) {

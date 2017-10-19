@@ -411,7 +411,7 @@ public class JavaBreakIterator extends BreakIterator {
       fIterator.setText(newText);
       first();
     } else {
-      throw new UnsupportedOperationException("CharacterIterator not supported"); //$NON-NLS-1$
+      throw new UnsupportedOperationException("CharacterIterator not supported"); // $NON-NLS-1$
     }
   }
 }

@@ -66,8 +66,8 @@ public class RamResourceUsageTracker implements ResourceUsageTracker {
     long currentlyUsedRamMB = 0;
     for (WorkspaceImpl activeWorkspace : activeWorkspaces) {
       if (WorkspaceStatus.STARTING.equals(activeWorkspace.getStatus())) {
-        //starting workspace may not have all machine in runtime
-        //it is need to calculate ram from environment config
+        // starting workspace may not have all machine in runtime
+        // it is need to calculate ram from environment config
         EnvironmentImpl activeEnvironmentConfig =
             activeWorkspace
                 .getConfig()

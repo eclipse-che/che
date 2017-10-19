@@ -195,9 +195,10 @@ public class AutocompleteProposalJavaDocTest {
     editor.closeAutocomplete();
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitActiveTabFileName(
-        "Logger"); // there should be class "Logger" opened in decompiled view with "Download sources" link at the top.
-    editor
-        .clickOnDownloadSourcesLink(); // there should be "Download sources" link displayed in at the top of editor. Download they.
+        "Logger"); // there should be class "Logger" opened in decompiled view with "Download
+    // sources" link at the top.
+    editor.clickOnDownloadSourcesLink(); // there should be "Download sources" link displayed in at
+    // the top of editor. Download they.
 
     editor.selectTabByName(APP_CLASS_NAME);
     loader.waitOnClosed();

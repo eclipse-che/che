@@ -335,7 +335,8 @@ public class CommandManagerImpl implements CommandManager {
                     .then(
                         (Function<CommandImpl, CommandImpl>)
                             updatedCommand -> {
-                              // listeners should be notified after returning from #updateCommand method
+                              // listeners should be notified after returning from #updateCommand
+                              // method
                               // so let's postpone notification
                               Scheduler.get()
                                   .scheduleDeferred(

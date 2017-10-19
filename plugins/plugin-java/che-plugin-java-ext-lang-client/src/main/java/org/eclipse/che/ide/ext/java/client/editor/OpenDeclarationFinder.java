@@ -134,7 +134,7 @@ public class OpenDeclarationFinder {
           ((TextEditor) editor)
               .getDocument()
               .setSelectedRange(LinearRange.createWithStart(offset).andLength(0), true);
-          editor.activate(); //force set focus to the editor
+          editor.activate(); // force set focus to the editor
         }
       }
     }.delay(1);

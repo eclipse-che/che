@@ -51,7 +51,7 @@ public class StringFix implements IProposableFix {
       throws CoreException {
     TextEdit addEdit = null;
     ICompilationUnit cu = (ICompilationUnit) compilationUnit.getJavaElement();
-    //TODO NLS
+    // TODO NLS
     //		if (addNLSTag) {
     //			addEdit = NLSUtil.createNLSEdit(cu, problem.getOffset());
     //		}
@@ -116,7 +116,8 @@ public class StringFix implements IProposableFix {
       throws CoreException, JavaModelException {
     ICompilationUnit cu = (ICompilationUnit) compilationUnit.getJavaElement();
     if (!cu.isStructureKnown())
-      return null; //[clean up] 'Remove unnecessary $NLS-TAGS$' removes necessary ones in case of syntax errors: https://bugs.eclipse.org/bugs/show_bug.cgi?id=285814 :
+      return null; // [clean up] 'Remove unnecessary $NLS-TAGS$' removes necessary ones in case of
+    // syntax errors: https://bugs.eclipse.org/bugs/show_bug.cgi?id=285814 :
 
     List<CategorizedTextEditGroup> result = new ArrayList<CategorizedTextEditGroup>();
 
@@ -148,8 +149,8 @@ public class StringFix implements IProposableFix {
         positions[i] = problem.getOffset();
         i++;
       }
-      //TODO nls
-      TextEdit[] edits = null; //NLSUtil.createNLSEdits(cu, positions);
+      // TODO nls
+      TextEdit[] edits = null; // NLSUtil.createNLSEdits(cu, positions);
       if (edits != null) {
         for (int j = 0; j < edits.length; j++) {
           String label = FixMessages.StringFix_AddNonNls_description;
@@ -162,7 +163,7 @@ public class StringFix implements IProposableFix {
     if (result.isEmpty()) return null;
 
     return new StringFix(
-        "", compilationUnit, result.toArray(new TextEditGroup[result.size()])); //$NON-NLS-1$
+        "", compilationUnit, result.toArray(new TextEditGroup[result.size()])); // $NON-NLS-1$
   }
 
   private static ReplaceEdit getReplace(
@@ -183,14 +184,14 @@ public class StringFix implements IProposableFix {
       } else if (ch == '/') {
         next++;
         if (next == buffer.getLength() || buffer.getChar(next) != '/') {
-          replaceString = "//"; //$NON-NLS-1$
+          replaceString = "//"; // $NON-NLS-1$
         } else {
           length = next - offset - 1;
         }
         hasMoreInComment = true;
         break;
       } else {
-        replaceString = "//"; //$NON-NLS-1$
+        replaceString = "//"; // $NON-NLS-1$
         hasMoreInComment = true;
         break;
       }

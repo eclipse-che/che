@@ -77,7 +77,7 @@ public class JavaDebuggerUtils {
       throw new DebuggerException("Type with fully qualified name: " + fqn + " was not found");
     }
 
-    IType type = types.get(0); //TODO we need handle few result! It's temporary solution.
+    IType type = types.get(0); // TODO we need handle few result! It's temporary solution.
     String typeProjectPath = type.getJavaProject().getPath().toOSString();
     if (type.isBinary()) {
       IClassFile classFile = type.getClassFile();
@@ -112,11 +112,11 @@ public class JavaDebuggerUtils {
   }
 
   private String extractOuterClassFqn(String fqn) {
-    //handle fqn in case nested classes
+    // handle fqn in case nested classes
     if (fqn.contains("$")) {
       return fqn.substring(0, fqn.indexOf("$"));
     }
-    //handle fqn in case lambda expressions
+    // handle fqn in case lambda expressions
     if (fqn.contains("$$")) {
       return fqn.substring(0, fqn.indexOf("$$"));
     }

@@ -70,7 +70,7 @@ public class InstallerConfigProvisionerTest {
 
   @Test
   public void provisionWithEnvsFromInstallersAttributes() throws Exception {
-    //given
+    // given
     final Pod pod = new PodBuilder().setName("test").setContainers("machine").build();
     OpenShiftEnvironment osEnvironment =
         OpenShiftEnvironment.builder()
@@ -91,10 +91,10 @@ public class InstallerConfigProvisionerTest {
 
     InternalEnvironment environment = createEnvironment(machines);
 
-    //when
+    // when
     installerConfigProvisioner.provision(environment, osEnvironment, runtimeIdentity);
 
-    //then
+    // then
     Container container = pod.getSpec().getContainers().get(0);
     List<EnvVar> envs = container.getEnv();
     verifyContainsEnv(envs, "INSTALLER1", "localhost");
@@ -103,7 +103,7 @@ public class InstallerConfigProvisionerTest {
 
   @Test
   public void provisionWithAgentsRequiredEnvs() throws Exception {
-    //given
+    // given
     when(machineTokenProvider.getToken(WORKSPACE_ID)).thenReturn("superToken");
 
     final Pod podWithAgent = new PodBuilder().setName("pod1").setContainers("wsagent").build();
@@ -133,10 +133,10 @@ public class InstallerConfigProvisionerTest {
 
     InternalEnvironment environment = createEnvironment(machines);
 
-    //when
+    // when
     installerConfigProvisioner.provision(environment, osEnvironment, runtimeIdentity);
 
-    //then
+    // then
     Container container = podWithAgent.getSpec().getContainers().get(0);
     List<EnvVar> envs = container.getEnv();
     verifyContainsEnv(envs, "CHE_API", CHE_SERVER_ENDPOINT);

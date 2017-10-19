@@ -84,7 +84,7 @@ public class DynaProviderGenerator {
 
     Set<Class<?>> classes = reflection.getTypesAnnotatedWith(DynaObject.class);
     for (Class clazz : classes) {
-      //accept only classes
+      // accept only classes
       if (clazz.isEnum() || clazz.isInterface() || clazz.isAnnotation()) {
         continue;
       }

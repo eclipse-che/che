@@ -54,7 +54,7 @@ public class CommandsPaletteTest {
 
   @Test
   public void commandPaletteTest() {
-    //Create a java spring project
+    // Create a java spring project
     projectExplorer.waitProjectExplorer();
     menu.runCommand(
         TestMenuCommandsConstants.Workspace.WORKSPACE,
@@ -62,27 +62,27 @@ public class CommandsPaletteTest {
     wizard.selectProjectAndCreate(Wizard.SamplesName.WEB_JAVA_SPRING, PROJECT_NAME);
     notificationsPopupPanel.waitProgressPopupPanelClose();
 
-    //Open and close COP by hot keys
+    // Open and close COP by hot keys
     cop.openCommandPaletteByHotKeys();
     cop.closeCommandPalette();
 
-    //Start a command by Enter key
+    // Start a command by Enter key
     cop.openCommandPalette();
     cop.startCommandByEnterKey(PROJECT_NAME + ": build");
     consoles.waitExpectedTextIntoConsole(TestBuildConstants.BUILD_SUCCESS, 120);
 
-    //Start a command by double click
+    // Start a command by double click
     cop.openCommandPalette();
     cop.startCommandByDoubleClick(PROJECT_NAME + ": debug");
     consoles.waitExpectedTextIntoConsole("Server startup in", 120);
 
-    //Start commands from list after search
+    // Start commands from list after search
     cop.openCommandPalette();
     cop.searchAndStartCommand("tomcat");
     cop.startCommandByDoubleClick(PROJECT_NAME + ": stop");
     consoles.waitTabNameProcessIsPresent(PROJECT_NAME + ": stop tomcat");
 
-    //Select commands from keyboard navigation (arrow buttons and "Enter" button)
+    // Select commands from keyboard navigation (arrow buttons and "Enter" button)
     cop.openCommandPalette();
     cop.moveAndStartCommand(CommandsPalette.MoveTypes.DOWN, 3);
     consoles.waitTabNameProcessIsPresent(PROJECT_NAME + ": run tomcat");

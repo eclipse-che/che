@@ -102,7 +102,7 @@ public class DockerMachineStopDetector {
   private void detectContainersEvents() {
     executorService.execute(
         () -> {
-          //noinspection InfiniteLoopStatement
+          // noinspection InfiniteLoopStatement
           while (true) {
             try {
               dockerConnector.getEvents(
@@ -123,7 +123,8 @@ public class DockerMachineStopDetector {
     public void process(Event message) {
       if (message.getType() != null && !"container".equals(message.getType())) {
         // this check is added because of bug in the docker swarm which do not filter events
-        // in case of new response format of 'get events' we should skip all not filtered by swarm event types
+        // in case of new response format of 'get events' we should skip all not filtered by swarm
+        // event types
         return;
       }
 

@@ -132,8 +132,8 @@ import org.eclipse.text.edits.TextEditGroup;
 /** Extract Local Variable (from selected expression inside method or initializer). */
 public class ExtractTempRefactoring extends Refactoring {
 
-  private static final String ATTRIBUTE_REPLACE = "replace"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_FINAL = "final"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_REPLACE = "replace"; // $NON-NLS-1$
+  private static final String ATTRIBUTE_FINAL = "final"; // $NON-NLS-1$
 
   private static final class ForStatementChecker extends ASTVisitor {
 
@@ -201,8 +201,7 @@ public class ExtractTempRefactoring extends Refactoring {
       VariableDeclarationExpression variableDeclarations) {
     List<IVariableBinding> forInitializerVariables = new ArrayList<IVariableBinding>(1);
     for (Iterator<VariableDeclarationFragment> iter = variableDeclarations.fragments().iterator();
-        iter.hasNext();
-        ) {
+        iter.hasNext(); ) {
       VariableDeclarationFragment fragment = iter.next();
       IVariableBinding binding = fragment.resolveBinding();
       if (binding != null) forInitializerVariables.add(binding);
@@ -335,8 +334,8 @@ public class ExtractTempRefactoring extends Refactoring {
 
   private LinkedProposalModel fLinkedProposalModel;
 
-  private static final String KEY_NAME = "name"; //$NON-NLS-1$
-  private static final String KEY_TYPE = "type"; //$NON-NLS-1$
+  private static final String KEY_NAME = "name"; // $NON-NLS-1$
+  private static final String KEY_TYPE = "type"; // $NON-NLS-1$
 
   /**
    * Creates a new extract temp refactoring
@@ -355,7 +354,7 @@ public class ExtractTempRefactoring extends Refactoring {
 
     fReplaceAllOccurrences = true; // default
     fDeclareFinal = false; // default
-    fTempName = ""; //$NON-NLS-1$
+    fTempName = ""; // $NON-NLS-1$
 
     fLinkedProposalModel = null;
     fCheckResultForCompileProblems = true;
@@ -373,7 +372,7 @@ public class ExtractTempRefactoring extends Refactoring {
 
     fReplaceAllOccurrences = true; // default
     fDeclareFinal = false; // default
-    fTempName = ""; //$NON-NLS-1$
+    fTempName = ""; // $NON-NLS-1$
 
     fLinkedProposalModel = null;
     fCheckResultForCompileProblems = true;
@@ -395,7 +394,7 @@ public class ExtractTempRefactoring extends Refactoring {
 
   private void addReplaceExpressionWithTemp() throws JavaModelException {
     IASTFragment[] fragmentsToReplace = retainOnlyReplacableMatches(getMatchingFragments());
-    //TODO: should not have to prune duplicates here...
+    // TODO: should not have to prune duplicates here...
     ASTRewrite rewrite = fCURewrite.getASTRewrite();
     HashSet<IASTFragment> seen = new HashSet<IASTFragment>();
     for (int i = 0; i < fragmentsToReplace.length; i++) {
@@ -578,7 +577,7 @@ public class ExtractTempRefactoring extends Refactoring {
         JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION,
         new Integer(fSelectionStart).toString()
             + " "
-            + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+            + new Integer(fSelectionLength).toString()); // $NON-NLS-1$
     arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplaceAllOccurrences).toString());
     arguments.put(ATTRIBUTE_FINAL, Boolean.valueOf(fDeclareFinal).toString());
     return descriptor;
@@ -620,7 +619,7 @@ public class ExtractTempRefactoring extends Refactoring {
   @Override
   public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
     try {
-      pm.beginTask("", 6); //$NON-NLS-1$
+      pm.beginTask("", 6); // $NON-NLS-1$
 
       RefactoringStatus result =
           Checks.validateModifiesFiles(
@@ -658,7 +657,7 @@ public class ExtractTempRefactoring extends Refactoring {
 
   private RefactoringStatus checkSelection(IProgressMonitor pm) throws JavaModelException {
     try {
-      pm.beginTask("", 8); //$NON-NLS-1$
+      pm.beginTask("", 8); // $NON-NLS-1$
 
       IExpressionFragment selectedExpression = getSelectedExpression();
 
@@ -971,7 +970,7 @@ public class ExtractTempRefactoring extends Refactoring {
             new ContextSensitiveImportRewriteContext(expression, importRewrite);
         resultingType = importRewrite.addImport(typeBinding, ast, context);
       } else {
-        resultingType = ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
+        resultingType = ast.newSimpleType(ast.newSimpleName("Object")); // $NON-NLS-1$
       }
     }
     if (fLinkedProposalModel != null) {
@@ -1126,7 +1125,7 @@ public class ExtractTempRefactoring extends Refactoring {
               RefactoringCoreMessages.InitializableRefactoring_argument_not_exist,
               JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
     final String name = arguments.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
-    if (name != null && !"".equals(name)) //$NON-NLS-1$
+    if (name != null && !"".equals(name)) // $NON-NLS-1$
     fTempName = name;
     else
       return RefactoringStatus.createFatalErrorStatus(
