@@ -390,6 +390,27 @@ public class MachineProviderImplTest {
     assertTrue(argumentCaptor.getValue().getContainerConfig().getHostConfig().isPrivileged());
   }
 
+  @Test(dataProvider = "securityOptTestProvider")
+  public void shouldSetSecurityOptOnContainerCreation(String[] securityOpt) throws Exception {
+    provider = new MachineProviderBuilder().setSecurityOpt(securityOpt).build();
+
+    createInstanceFromRecipe();
+
+    ArgumentCaptor<CreateContainerParams> argumentCaptor =
+        ArgumentCaptor.forClass(CreateContainerParams.class);
+    verify(dockerConnector).createContainer(argumentCaptor.capture());
+    assertEqualsNoOrder(
+        argumentCaptor.getValue().getContainerConfig().getHostConfig().getSecurityOpt(),
+        securityOpt);
+  }
+
+  @DataProvider(name = "securityOptTestProvider")
+  public static Object[][] securityOptTestProvider() {
+    return new Object[][] {
+      {new String[] {}}, {new String[] {"seccomp:unconfined"}}, {null},
+    };
+  }
+
   @Test
   public void shouldBeAbleToCreateContainerWithCpuSet() throws Exception {
     provider = new MachineProviderBuilder().setCpuSet("0-3").build();
@@ -1818,7 +1839,7 @@ public class MachineProviderImplTest {
     private Set<Set<String>> extraHosts;
     private boolean doForcePullImage;
     private boolean privilegedMode;
-    private String[] hostSecurityOpt;
+    private String[] securityOpt;
     private int pidsLimit;
     private Set<String> devMachineEnvVars;
     private Set<String> allMachineEnvVars;
@@ -1837,6 +1858,7 @@ public class MachineProviderImplTest {
       allMachineEnvVars = emptySet();
       snapshotUseRegistry = SNAPSHOT_USE_REGISTRY;
       privilegedMode = false;
+      //securityOpt = {"seccomp:unconfined"};
       doForcePullImage = false;
       additionalNetworks = emptySet();
       devMachineServers = emptySet();
@@ -1923,6 +1945,11 @@ public class MachineProviderImplTest {
       return this;
     }
 
+    public MachineProviderBuilder setSecurityOpt(String[] securityOpt) {
+      this.securityOpt = securityOpt;
+      return this;
+    }
+
     public MachineProviderBuilder setCpuPeriod(long cpuPeriod) {
       this.cpuPeriod = cpuPeriod;
       return this;
@@ -1954,7 +1981,7 @@ public class MachineProviderImplTest {
                   allMachineVolumes,
                   doForcePullImage,
                   privilegedMode,
-                  hostSecurityOpt,
+                  securityOpt,
                   pidsLimit,
                   devMachineEnvVars,
                   allMachineEnvVars,

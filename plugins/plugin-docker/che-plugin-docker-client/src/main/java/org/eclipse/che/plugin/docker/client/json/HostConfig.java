@@ -21,7 +21,7 @@ public class HostConfig {
   private LxcConfParam[] lxcConf;
   private boolean publishAllPorts;
   private boolean privileged;
-  private String[] hostSecurityOpt;
+  private String[] securityOpt;
   private String[] dns;
   private String[] dnsSearch;
   private String[] extraHosts;
@@ -73,16 +73,16 @@ public class HostConfig {
     this.privileged = privileged;
   }
 
-  public String[] getHostSecurityOpt() {
-    return hostSecurityOpt;
+  public String[] getSecurityOpt() {
+    return securityOpt;
   }
 
-  public void setHostSecurityOpt(String[] hostSecurityOpt) {
-    this.hostSecurityOpt = hostSecurityOpt;
+  public void setSecurityOpt(String[] securityOpt) {
+    this.securityOpt = securityOpt;
   }
 
-  public HostConfig withHostSecurityOpt(String[] hostSecurityOpt) {
-    this.hostSecurityOpt = hostSecurityOpt;
+  public HostConfig withSecurityOpt(String[] securityOpt) {
+    this.securityOpt = securityOpt;
     return this;
   }
 
@@ -516,7 +516,7 @@ public class HostConfig {
         + ", ulimits="
         + Arrays.toString(ulimits)
         + ", SecurityOpt="
-        + Arrays.toString(hostSecurityOpt)
+        + Arrays.toString(securityOpt)
         + ", portBindings="
         + portBindings
         + ", memorySwappiness="

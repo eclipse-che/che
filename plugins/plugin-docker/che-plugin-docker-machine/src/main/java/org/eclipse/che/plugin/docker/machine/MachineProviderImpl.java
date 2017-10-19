@@ -153,7 +153,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
   private final JsonRpcEndpointToMachineNameHolder jsonRpcEndpointToMachineNameHolder;
   private final boolean doForcePullImage;
   private final boolean privilegedMode;
-  private final String[] hostSecurityOpt;
+  private final String[] securityOpt;
   private final int pidsLimit;
   private final DockerMachineFactory dockerMachineFactory;
   private final List<String> devMachinePortsToExpose;
@@ -189,7 +189,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
       @Named("machine.docker.machine_volumes") Set<String> allMachinesSystemVolumes,
       @Named("che.docker.always_pull_image") boolean doForcePullImage,
       @Named("che.docker.privileged") boolean privilegedMode,
-      @Named("che.docker.host.securityopt") String[] hostSecurityOpt,
+      @Named("che.docker.securityopt") String[] securityOpt,
       @Named("che.docker.pids_limit") int pidsLimit,
       @Named("machine.docker.dev_machine.machine_env") Set<String> devMachineEnvVariables,
       @Named("machine.docker.machine_env") Set<String> allMachinesEnvVariables,
@@ -213,7 +213,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     this.transmitter = transmitter;
     this.doForcePullImage = doForcePullImage;
     this.privilegedMode = privilegedMode;
-    this.hostSecurityOpt = hostSecurityOpt;
+    this.securityOpt = securityOpt;
     this.snapshotUseRegistry = snapshotUseRegistry;
     // use-cases:
     //  -1  enable unlimited swap
@@ -604,6 +604,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                 .stream()
                 .collect(toMap(Function.identity(), value -> new PortBinding[0])))
         .withVolumesFrom(toArrayIfNotNull(service.getVolumesFrom()));
+    //.withSecurityOpt(securityOpt);
 
     ContainerConfig config = new ContainerConfig();
     config
@@ -656,7 +657,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         .withPidsLimit(pidsLimit)
         .withExtraHosts(allMachinesExtraHosts)
         .withPrivileged(privilegedMode)
-        .withHostSecurityOpt(hostSecurityOpt)
+        .withSecurityOpt(securityOpt)
         .withPublishAllPorts(true)
         .withDns(dnsResolvers);
     // CPU limits
