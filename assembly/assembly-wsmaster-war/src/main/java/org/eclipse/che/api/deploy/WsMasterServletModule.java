@@ -13,6 +13,7 @@ package org.eclipse.che.api.deploy;
 import com.google.inject.servlet.ServletModule;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 import javax.inject.Singleton;
 import org.apache.catalina.filters.CorsFilter;
 import org.eclipse.che.inject.DynaModule;
@@ -44,7 +45,9 @@ public class WsMasterServletModule extends ServletModule {
 
     filter("/*").through(CorsFilter.class, corsFilterParams);
 
-    serveRegex("^/api((?!(/(ws|eventbus)($|/.*)))/.*)").with(GuiceEverrestServlet.class);
+    Pattern.compile("^(?!(/($|/.*)))/.*");
+
+    serveRegex("^(?!(/($|/.*)))/.*").with(GuiceEverrestServlet.class);
     install(new org.eclipse.che.swagger.deploy.BasicSwaggerConfigurationModule());
   }
 }

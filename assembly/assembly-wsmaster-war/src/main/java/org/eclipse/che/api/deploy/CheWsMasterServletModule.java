@@ -23,7 +23,7 @@ public class CheWsMasterServletModule extends ServletModule {
 
   @Override
   protected void configureServlets() {
-    filter("/api/*")
+    filter("/*")
         .through(org.eclipse.che.api.local.filters.EnvironmentInitializationFilter.class);
   }
 }
