@@ -40,7 +40,6 @@ public class EditConfigurationsAction extends AbstractPerspectiveAction {
         Collections.singletonList(PROJECT_PERSPECTIVE_ID),
         localizationConstant.editDebugConfigurationsActionTitle(),
         localizationConstant.editDebugConfigurationsActionDescription(),
-        null,
         resources.editCommands());
     this.editCommandsPresenter = editDebugConfigurationsPresenter;
   }

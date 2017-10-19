@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-agent-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>5.20.0-SNAPSHOT</version>
+        <version>6.0.0-M1-SNAPSHOT</version>
     </parent>
     <artifactId>wsagent</artifactId>
     <name>Workspace Agent</name>
@@ -38,6 +38,10 @@
             <artifactId>che-core-api-core</artifactId>
         </dependency -->
         <!-- dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-machine-shared</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-model</artifactId>
         </dependency -->

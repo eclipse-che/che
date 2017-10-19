@@ -41,7 +41,6 @@ public class UndoAction extends AbstractPerspectiveAction {
         Arrays.asList(PROJECT_PERSPECTIVE_ID),
         localization.undoName(),
         localization.undoDescription(),
-        null,
         resources.undo());
     this.editorAgent = editorAgent;
   }

@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.ui.multisplitpanel.menu;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -20,8 +21,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import org.eclipse.che.ide.api.action.Action;
-import org.vectomatic.dom.svg.ui.SVGImage;
-import org.vectomatic.dom.svg.ui.SVGResource;
+import org.eclipse.che.ide.ui.ElementWidget;
 
 /**
  * Implementation of {@link MenuItem} that represents {@link Action}.
@@ -43,9 +43,9 @@ public class MenuItemActionWidget extends Composite implements MenuItem<Action> 
     initWidget(UI_BINDER.createAndBindUi(this));
     this.action = action;
 
-    final SVGResource actionIcon = action.getTemplatePresentation().getSVGResource();
+    final Element actionIcon = action.getTemplatePresentation().getImageElement();
     if (actionIcon != null) {
-      iconPanel.add(new SVGImage(actionIcon));
+      iconPanel.add(new ElementWidget(actionIcon));
     }
 
     title.setText(action.getTemplatePresentation().getText());

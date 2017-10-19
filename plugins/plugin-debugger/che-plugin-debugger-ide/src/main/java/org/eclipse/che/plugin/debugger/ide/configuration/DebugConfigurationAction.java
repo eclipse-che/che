@@ -40,9 +40,7 @@ public class DebugConfigurationAction extends AbstractPerspectiveAction {
     super(
         Collections.singletonList(PROJECT_PERSPECTIVE_ID),
         configuration.getName(),
-        localizationConstants.debugConfigurationActionDescription(),
-        null,
-        null);
+        localizationConstants.debugConfigurationActionDescription());
     configurationsManager = debugConfigurationsManager;
     this.configuration = configuration;
   }

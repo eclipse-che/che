@@ -21,23 +21,25 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 
 /**
- * Defines an internal API for managing {@link Project} instance and objects inside it.
+ * Defines an internal API for managing subset of objects inside {@link Project} instance.
  *
  * @author Sergii Leshchenko
  */
 public class OpenShiftProject {
+
+  public static final String CHE_WORKSPACE_ID_LABEL = "CHE_WORKSPACE_ID";
+
   private final OpenShiftPods pods;
   private final OpenShiftServices services;
   private final OpenShiftRoutes routes;
   private final OpenShiftPersistentVolumeClaims pvcs;
 
-  public OpenShiftProject(String name, OpenShiftClientFactory clientFactory)
+  public OpenShiftProject(OpenShiftClientFactory clientFactory, String name, String workspaceId)
       throws InfrastructureException {
-    this.pods = new OpenShiftPods(name, clientFactory);
-    this.services = new OpenShiftServices(name, clientFactory);
-    this.routes = new OpenShiftRoutes(name, clientFactory);
+    this.pods = new OpenShiftPods(name, workspaceId, clientFactory);
+    this.services = new OpenShiftServices(name, workspaceId, clientFactory);
+    this.routes = new OpenShiftRoutes(name, workspaceId, clientFactory);
     this.pvcs = new OpenShiftPersistentVolumeClaims(name, clientFactory);
-
     try (OpenShiftClient client = clientFactory.create()) {
       if (get(name, client) == null) {
         create(name, client);

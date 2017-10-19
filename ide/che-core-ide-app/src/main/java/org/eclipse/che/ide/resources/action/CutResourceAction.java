@@ -57,7 +57,6 @@ public class CutResourceAction extends AbstractPerspectiveAction {
         singletonList(PROJECT_PERSPECTIVE_ID),
         localization.cutItemsActionText(),
         localization.cutItemsActionDescription(),
-        null,
         resources.cut());
     this.clipboardManager = clipboardManager;
     this.appContext = appContext;

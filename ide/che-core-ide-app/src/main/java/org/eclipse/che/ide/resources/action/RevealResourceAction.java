@@ -45,7 +45,7 @@ public class RevealResourceAction extends AbstractPerspectiveAction {
 
   @Inject
   public RevealResourceAction(AppContext appContext, EventBus eventBus) {
-    super(singletonList(PROJECT_PERSPECTIVE_ID), "Reveal Resource", null, null, null);
+    super(singletonList(PROJECT_PERSPECTIVE_ID), "Reveal Resource");
     this.appContext = appContext;
     this.eventBus = eventBus;
   }

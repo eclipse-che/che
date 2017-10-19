@@ -46,7 +46,6 @@ public class NewTerminalAction extends AbstractPerspectiveAction
         Collections.singletonList(PROJECT_PERSPECTIVE_ID),
         locale.newTerminal(),
         locale.newTerminalDescription(),
-        null,
         machineResources.addTerminalIcon());
 
     this.processesPanelPresenter = processesPanelPresenter;

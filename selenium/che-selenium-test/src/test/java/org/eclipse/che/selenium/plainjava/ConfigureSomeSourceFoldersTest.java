@@ -31,6 +31,7 @@ import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
+import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsExplorer;
@@ -56,6 +57,7 @@ public class ConfigureSomeSourceFoldersTest {
   @Inject private CommandsEditor commandsEditor;
   @Inject private Consoles consoles;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private NotificationsPopupPanel notificationsPopupPanel;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -116,6 +118,8 @@ public class ConfigureSomeSourceFoldersTest {
     commandsExplorer.chooseCommandTypeInContextMenu(JAVA_TYPE);
     commandsExplorer.checkCommandIsPresentInGoal(RUN_GOAL, JAVA_NAME);
     commandsEditor.waitTabFileWithSavedStatus(JAVA_NAME);
+    notificationsPopupPanel.waitProgressPopupPanelClose(
+        20); //TODO it is a workaround: https://github.com/eclipse/che/issues/6734, delete after resolve
     commandsEditor.clickOnRunButton();
   }
 }

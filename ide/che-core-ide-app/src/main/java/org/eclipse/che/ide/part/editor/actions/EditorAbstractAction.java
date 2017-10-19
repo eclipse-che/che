@@ -43,7 +43,7 @@ public abstract class EditorAbstractAction extends AbstractPerspectiveAction {
       SVGResource icon,
       EditorAgent editorAgent,
       EventBus eventBus) {
-    super(singletonList(PROJECT_PERSPECTIVE_ID), tooltip, description, null, icon);
+    super(singletonList(PROJECT_PERSPECTIVE_ID), tooltip, description, icon);
     this.eventBus = eventBus;
     this.editorAgent = editorAgent;
   }

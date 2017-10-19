@@ -39,9 +39,7 @@ public class SignatureHelpAction extends AbstractPerspectiveAction {
     super(
         singletonList(PROJECT_PERSPECTIVE_ID),
         constant.signatureName(),
-        constant.signatureDescription(),
-        null,
-        null);
+        constant.signatureDescription());
     this.editorAgent = editorAgent;
   }
 

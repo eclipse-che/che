@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.pageobject.intelligent;
 
+import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
@@ -143,13 +144,13 @@ public class CommandsPalette {
   public void commandIsExists(String commandName) {
     redrawUiElementTimeout.until(
         ExpectedConditions.visibilityOfElementLocated(
-            By.xpath(String.format(Locators.COMMANDS, commandName))));
+            By.xpath(format(Locators.COMMANDS, commandName))));
   }
 
   public void commandIsNotExists(String commandName) {
     redrawUiElementTimeout.until(
         ExpectedConditions.invisibilityOfElementLocated(
-            By.xpath(String.format(Locators.COMMANDS, commandName))));
+            By.xpath(format(Locators.COMMANDS, commandName))));
   }
 
   /**
@@ -158,11 +159,13 @@ public class CommandsPalette {
    * @param commandName name of the command
    */
   public void startCommandByDoubleClick(String commandName) {
-    actions
-        .doubleClick(
-            seleniumWebDriver.findElement(By.xpath(String.format(Locators.COMMANDS, commandName))))
-        .build()
-        .perform();
+    String locatorToCurrentCommand = format(Locators.COMMANDS, commandName);
+    WebElement currentCommand =
+        redrawUiElementTimeout.until(
+            ExpectedConditions.visibilityOfElementLocated(By.xpath(locatorToCurrentCommand)));
+    actions.doubleClick(currentCommand).perform();
+    redrawUiElementTimeout.until(
+        ExpectedConditions.invisibilityOfElementLocated(By.xpath(locatorToCurrentCommand)));
   }
 
   /**
@@ -171,8 +174,17 @@ public class CommandsPalette {
    * @param commandName name of the command
    */
   public void startCommandByEnterKey(String commandName) {
-    seleniumWebDriver.findElement(By.xpath(String.format(Locators.COMMANDS, commandName))).click();
-    actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.ENTER.toString()).perform();
+    String locatorToCurrentCommand = format(Locators.COMMANDS, commandName);
+    WebElement currentCommand =
+        redrawUiElementTimeout.until(
+            ExpectedConditions.visibilityOfElementLocated(By.xpath(locatorToCurrentCommand)));
+    seleniumWebDriver.findElement(By.xpath(locatorToCurrentCommand)).click();
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .sendKeys(currentCommand, Keys.ENTER.toString())
+        .perform();
+    redrawUiElementTimeout.until(
+        ExpectedConditions.invisibilityOfElementLocated(By.xpath(locatorToCurrentCommand)));
   }
 
   /**

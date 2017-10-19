@@ -60,7 +60,6 @@ public class ReimportMavenDependenciesAction extends AbstractPerspectiveAction {
         Collections.singletonList(PROJECT_PERSPECTIVE_ID),
         constant.actionReimportDependenciesTitle(),
         constant.actionReimportDependenciesDescription(),
-        null,
         resources.refresh());
     this.appContext = appContext;
     this.notificationManager = notificationManager;

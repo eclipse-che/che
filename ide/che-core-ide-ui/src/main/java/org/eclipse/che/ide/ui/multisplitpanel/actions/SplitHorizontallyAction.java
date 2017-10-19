@@ -10,8 +10,8 @@
  */
 package org.eclipse.che.ide.ui.multisplitpanel.actions;
 
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
 
 /**
@@ -19,12 +19,12 @@ import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
  *
  * @author Artem Zatsarynnyi
  */
-public class SplitHorizontallyAction extends Action {
+public class SplitHorizontallyAction extends BaseAction {
 
   private final SubPanel subPanel;
 
   public SplitHorizontallyAction(SubPanel subPanel) {
-    super("Split Pane In Two Rows", "Split Pane In Two Rows", null, null);
+    super("Split Pane In Two Rows", "Split Pane In Two Rows");
     this.subPanel = subPanel;
   }
 

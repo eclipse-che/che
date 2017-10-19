@@ -12,7 +12,6 @@ package org.eclipse.che.multiuser.permission.workspace.server.spi.jpa;
 
 import com.google.inject.TypeLiteral;
 import org.eclipse.che.account.spi.AccountImpl;
-import org.eclipse.che.api.recipe.OldRecipeImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
@@ -37,13 +36,11 @@ import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
 import org.eclipse.che.multiuser.api.permission.server.AbstractPermissionsDomain;
 import org.eclipse.che.multiuser.api.permission.server.spi.PermissionsDao;
-import org.eclipse.che.multiuser.permission.machine.recipe.RecipePermissionsImpl;
 import org.eclipse.che.multiuser.permission.workspace.server.model.impl.WorkerImpl;
 import org.eclipse.che.multiuser.permission.workspace.server.spi.WorkerDao;
 import org.eclipse.che.multiuser.permission.workspace.server.spi.tck.StackPermissionsDaoTest;
 import org.eclipse.che.multiuser.permission.workspace.server.spi.tck.WorkerDaoTest;
 import org.eclipse.che.multiuser.permission.workspace.server.stack.StackPermissionsImpl;
-import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotImpl;
 import org.h2.Driver;
 
 /** @author Yevhenii Voevodin */
@@ -63,8 +60,6 @@ public class JpaTckModule extends TckModule {
                 WorkspaceConfigImpl.class,
                 ProjectConfigImpl.class,
                 EnvironmentImpl.class,
-                OldRecipeImpl.class,
-                RecipePermissionsImpl.class,
                 StackPermissionsImpl.class,
                 WorkerImpl.class,
                 MachineConfigImpl.class,
@@ -72,7 +67,6 @@ public class JpaTckModule extends TckModule {
                 ServerConfigImpl.class,
                 StackImpl.class,
                 CommandImpl.class,
-                SnapshotImpl.class,
                 RecipeImpl.class)
             .addEntityClass(
                 "org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")

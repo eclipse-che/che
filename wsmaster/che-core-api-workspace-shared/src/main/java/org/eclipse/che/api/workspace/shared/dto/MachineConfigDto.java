@@ -39,6 +39,14 @@ public interface MachineConfigDto extends MachineConfig {
 
   @Override
   @FactoryParameter(obligation = OPTIONAL)
+  Map<String, String> getEnv();
+
+  void setEnv(Map<String, String> env);
+
+  MachineConfigDto withEnv(Map<String, String> env);
+
+  @Override
+  @FactoryParameter(obligation = OPTIONAL)
   Map<String, String> getAttributes();
 
   void setAttributes(Map<String, String> attributes);

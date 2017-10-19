@@ -11,6 +11,8 @@
 package org.eclipse.che.workspace.infrastructure.openshift.project;
 
 import static java.util.concurrent.CompletableFuture.allOf;
+import static org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftObjectUtil.putLabel;
+import static org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject.CHE_WORKSPACE_ID_LABEL;
 
 import io.fabric8.kubernetes.api.model.DoneablePod;
 import io.fabric8.kubernetes.api.model.Pod;
@@ -52,10 +54,12 @@ public class OpenShiftPods {
   private final String namespace;
   private final OpenShiftClientFactory clientFactory;
   private final ConcurrentLinkedQueue<PodActionHandler> handlers;
+  private final String workspaceId;
   private Watch watch;
 
-  OpenShiftPods(String namespace, OpenShiftClientFactory clientFactory) {
+  OpenShiftPods(String namespace, String workspaceId, OpenShiftClientFactory clientFactory) {
     this.namespace = namespace;
+    this.workspaceId = workspaceId;
     this.clientFactory = clientFactory;
     this.handlers = new ConcurrentLinkedQueue<>();
   }
@@ -68,6 +72,7 @@ public class OpenShiftPods {
    * @throws InfrastructureException when any exception occurs
    */
   public Pod create(Pod pod) throws InfrastructureException {
+    putLabel(pod, CHE_WORKSPACE_ID_LABEL, workspaceId);
     try (OpenShiftClient client = clientFactory.create()) {
       return client.pods().inNamespace(namespace).create(pod);
     } catch (KubernetesClientException e) {
@@ -82,7 +87,12 @@ public class OpenShiftPods {
    */
   public List<Pod> get() throws InfrastructureException {
     try (OpenShiftClient client = clientFactory.create()) {
-      return client.pods().inNamespace(namespace).list().getItems();
+      return client
+          .pods()
+          .inNamespace(namespace)
+          .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)
+          .list()
+          .getItems();
     } catch (KubernetesClientException e) {
       throw new InfrastructureException(e.getMessage(), e);
     }
@@ -185,7 +195,12 @@ public class OpenShiftPods {
             public void onClose(KubernetesClientException ignored) {}
           };
       try (OpenShiftClient client = clientFactory.create()) {
-        watch = client.pods().inNamespace(namespace).watch(watcher);
+        watch =
+            client
+                .pods()
+                .inNamespace(namespace)
+                .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)
+                .watch(watcher);
       } catch (KubernetesClientException ex) {
         throw new InfrastructureException(ex.getMessage());
       }
@@ -252,7 +267,13 @@ public class OpenShiftPods {
   public void delete() throws InfrastructureException {
     try (OpenShiftClient client = clientFactory.create()) {
       //pods are removed with some delay related to stopping of containers. It is need to wait them
-      List<Pod> pods = client.pods().inNamespace(namespace).list().getItems();
+      List<Pod> pods =
+          client
+              .pods()
+              .inNamespace(namespace)
+              .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)
+              .list()
+              .getItems();
       List<CompletableFuture> deleteFutures = new ArrayList<>();
       for (Pod pod : pods) {
         PodResource<Pod, DoneablePod> podResource =

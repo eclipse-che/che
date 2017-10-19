@@ -50,7 +50,6 @@ public class DownloadProjectAction extends AbstractPerspectiveAction {
         singletonList(PROJECT_PERSPECTIVE_ID),
         locale.downloadProjectAsZipName(),
         locale.downloadProjectAsZipDescription(),
-        null,
         resources.downloadZip());
     this.appContext = appContext;
     this.downloadContainer = downloadContainer;

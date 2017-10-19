@@ -57,9 +57,7 @@ public class PreviewImageAction extends AbstractPerspectiveAction {
     super(
         singletonList(PROJECT_PERSPECTIVE_ID),
         constant.actionPreviewImageTitle(),
-        constant.actionPreviewImageDescription(),
-        null,
-        null);
+        constant.actionPreviewImageDescription());
     this.wsAgentURLModifier = wsAgentURLModifier;
     this.appContext = appContext;
 

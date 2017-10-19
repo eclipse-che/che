@@ -34,7 +34,6 @@
         <class>org.eclipse.che.api.workspace.server.model.impl.CommandImpl</class>
         <class>org.eclipse.che.workspace.infrastructure.docker.snapshot.MachineSourceImpl</class>
         <class>org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotImpl</class>
-        <class>org.eclipse.che.api.recipe.OldRecipeImpl</class>
 
         <class>org.eclipse.che.api.factory.server.model.impl.FactoryImpl</class>
         <class>org.eclipse.che.api.factory.server.model.impl.OnAppClosedImpl</class>
@@ -52,7 +51,6 @@
         <class>org.eclipse.che.multiuser.api.permission.server.model.impl.AbstractPermissions</class>
         <class>org.eclipse.che.multiuser.permission.workspace.server.model.impl.WorkerImpl</class>
         <class>org.eclipse.che.multiuser.permission.workspace.server.stack.StackPermissionsImpl</class>
-        <class>org.eclipse.che.multiuser.permission.machine.recipe.RecipePermissionsImpl</class>
         <class>org.eclipse.che.api.ssh.server.model.impl.SshPairImpl</class>
 
         <class>org.eclipse.che.multiuser.organization.spi.impl.OrganizationImpl</class>

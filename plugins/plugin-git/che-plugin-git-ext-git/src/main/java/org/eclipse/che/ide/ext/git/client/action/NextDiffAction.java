@@ -12,13 +12,13 @@ package org.eclipse.che.ide.ext.git.client.action;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
 
 /** @author Mykola Morhun */
 @Singleton
-public class NextDiffAction extends Action {
+public class NextDiffAction extends BaseAction {
 
   private final ComparePresenter comparePresenter;
 

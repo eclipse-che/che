@@ -45,9 +45,7 @@ public class ProjectClasspathAction extends AbstractPerspectiveAction {
     super(
         Collections.singletonList(PROJECT_PERSPECTIVE_ID),
         localization.projectClasspathTitle(),
-        localization.projectClasspathDescriptions(),
-        null,
-        null);
+        localization.projectClasspathDescriptions());
     this.projectClasspathPresenter = projectClasspathPresenter;
     this.appContext = appContext;
   }

@@ -35,14 +35,27 @@ public class InternalMachineConfig {
   private final List<InstallerImpl> installers;
   // set of servers including ones configured by installers
   private final Map<String, ServerConfig> servers;
+  private final Map<String, String> env;
   private final Map<String, String> attributes;
 
   InternalMachineConfig(MachineConfig originalConfig, InstallerRegistry installerRegistry)
       throws InfrastructureException {
-    this.installers = new ArrayList<>();
-    this.servers = new HashMap<>(originalConfig.getServers());
-    this.attributes = new HashMap<>(originalConfig.getAttributes());
+    this.servers = new HashMap<>();
+    if (originalConfig.getServers() != null) {
+      this.servers.putAll(originalConfig.getServers());
+    }
 
+    this.env = new HashMap<>();
+    if (originalConfig.getEnv() != null) {
+      this.env.putAll(originalConfig.getEnv());
+    }
+
+    this.attributes = new HashMap<>();
+    if (originalConfig.getAttributes() != null) {
+      this.attributes.putAll(originalConfig.getAttributes());
+    }
+
+    this.installers = new ArrayList<>();
     initInstallers(originalConfig.getInstallers(), installerRegistry);
   }
 
@@ -58,6 +71,11 @@ public class InternalMachineConfig {
   /** Returns unmodifiable list of installers configs of the machine. */
   public List<InstallerImpl> getInstallers() {
     return Collections.unmodifiableList(installers);
+  }
+
+  /** Returns unmodifiable map of machine environment variables. */
+  public Map<String, String> getEnv() {
+    return Collections.unmodifiableMap(env);
   }
 
   /** Returns unmodifiable map of machine attributes. */

@@ -37,8 +37,6 @@ public class SuspendAction extends AbstractPerspectiveAction {
         Collections.singletonList(PROJECT_PERSPECTIVE_ID),
         locale.suspend(),
         locale.suspendDescription(),
-        null,
-        null,
         FontAwesome.PAUSE);
     this.debuggerManager = debuggerManager;
   }

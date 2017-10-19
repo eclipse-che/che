@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>5.20.0-SNAPSHOT</version>
+        <version>6.0.0-M1-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-wsmaster-war</artifactId>
     <packaging>war</packaging>
@@ -75,14 +75,6 @@
         <dependency>
             <groupId>org.eclipse.che</groupId>
             <artifactId>git-credentials-agent</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che</groupId>
-            <artifactId>infrastructure-docker</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che</groupId>
-            <artifactId>infrastructure-openshift</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che</groupId>
@@ -197,6 +189,18 @@
             <artifactId>wsmaster-local</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.infrastructure</groupId>
+            <artifactId>infrastructure-openshift</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.infrastructure.docker</groupId>
+            <artifactId>docker-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.infrastructure.docker</groupId>
+            <artifactId>infrastructure-docker</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.che.lib</groupId>
             <artifactId>che-swagger-module</artifactId>
         </dependency>
@@ -204,15 +208,6 @@
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-activity-wsmaster</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-docker-client</artifactId>
-        </dependency>
-        <!--FIXME: spi-->
-        <!--<dependency>-->
-        <!--<groupId>org.eclipse.che.plugin</groupId>-->
-        <!--<artifactId>che-plugin-docker-compose</artifactId>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-github-factory-resolver</artifactId>
@@ -224,23 +219,6 @@
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-github-shared</artifactId>
-        </dependency>
-        <!--FIXME: spi-->
-        <!--<dependency>-->
-        <!--<groupId>org.eclipse.che.plugin</groupId>-->
-        <!--<artifactId>che-plugin-machine-ext-server</artifactId>-->
-        <!--</dependency>-->
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-maven-wsmaster</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-openshift-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-traefik-docker</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>

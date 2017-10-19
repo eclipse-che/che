@@ -21,12 +21,14 @@ import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 public class MachineConfigImpl implements MachineConfig {
 
   private List<String> installers;
+  private Map<String, String> env;
   private Map<String, String> attributes;
   private Map<String, ServerConfigImpl> servers;
 
   public MachineConfigImpl(
       List<String> installers,
       Map<String, ? extends ServerConfig> servers,
+      Map<String, String> env,
       Map<String, String> attributes) {
     if (installers != null) {
       this.installers = new ArrayList<>(installers);
@@ -40,13 +42,16 @@ public class MachineConfigImpl implements MachineConfig {
                   Collectors.toMap(
                       Map.Entry::getKey, entry -> new ServerConfigImpl(entry.getValue())));
     }
+    if (env != null) {
+      this.env = new HashMap<>(env);
+    }
     if (attributes != null) {
       this.attributes = new HashMap<>(attributes);
     }
   }
 
   public MachineConfigImpl(MachineConfig machine) {
-    this(machine.getInstallers(), machine.getServers(), machine.getAttributes());
+    this(machine.getInstallers(), machine.getServers(), machine.getEnv(), machine.getAttributes());
   }
 
   @Override
@@ -63,6 +68,14 @@ public class MachineConfigImpl implements MachineConfig {
       servers = new HashMap<>();
     }
     return servers;
+  }
+
+  @Override
+  public Map<String, String> getEnv() {
+    if (env == null) {
+      env = new HashMap<>();
+    }
+    return env;
   }
 
   @Override
@@ -83,6 +96,7 @@ public class MachineConfigImpl implements MachineConfig {
     }
     final MachineConfigImpl that = (MachineConfigImpl) obj;
     return getInstallers().equals(that.getInstallers())
+        && getEnv().equals(that.getEnv())
         && getAttributes().equals(that.getAttributes())
         && getServers().equals(that.getServers());
   }
@@ -91,6 +105,7 @@ public class MachineConfigImpl implements MachineConfig {
   public int hashCode() {
     int hash = 7;
     hash = 31 * hash + getInstallers().hashCode();
+    hash = 31 * hash + getEnv().hashCode();
     hash = 31 * hash + getAttributes().hashCode();
     hash = 31 * hash + getServers().hashCode();
     return hash;
@@ -101,6 +116,8 @@ public class MachineConfigImpl implements MachineConfig {
     return "MachineConfigImpl{"
         + "installers="
         + installers
+        + ", env="
+        + env
         + ", attributes="
         + attributes
         + ", servers="

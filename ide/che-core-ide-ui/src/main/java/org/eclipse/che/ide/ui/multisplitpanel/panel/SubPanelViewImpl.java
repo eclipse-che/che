@@ -35,6 +35,7 @@ import java.util.Map;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.api.action.Action;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
 import org.eclipse.che.ide.ui.multisplitpanel.WidgetToShow;
 import org.eclipse.che.ide.ui.multisplitpanel.actions.ClosePaneAction;
@@ -335,7 +336,7 @@ public class SubPanelViewImpl extends Composite
         activateWidget(widget);
         delegate.onWidgetFocused(widget.getWidget());
       }
-    } else if (data instanceof Action) {
+    } else if (data instanceof BaseAction) {
       ((Action) data).actionPerformed(null);
     }
   }

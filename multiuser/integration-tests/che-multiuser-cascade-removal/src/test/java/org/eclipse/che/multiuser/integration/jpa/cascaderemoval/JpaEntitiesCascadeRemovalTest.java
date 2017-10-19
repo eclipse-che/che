@@ -19,7 +19,6 @@ import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjec
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createFreeResourcesLimit;
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createPreferences;
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createProfile;
-import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createRecipe;
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createSshPair;
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createStack;
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createUser;
@@ -59,9 +58,6 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.factory.server.jpa.FactoryJpaModule;
 import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
 import org.eclipse.che.api.factory.server.spi.FactoryDao;
-import org.eclipse.che.api.recipe.JpaRecipeDao;
-import org.eclipse.che.api.recipe.OldRecipeImpl;
-import org.eclipse.che.api.recipe.RecipeDao;
 import org.eclipse.che.api.ssh.server.jpa.SshJpaModule;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.ssh.server.spi.SshDao;
@@ -101,10 +97,6 @@ import org.eclipse.che.multiuser.organization.shared.model.Organization;
 import org.eclipse.che.multiuser.organization.spi.MemberDao;
 import org.eclipse.che.multiuser.organization.spi.impl.MemberImpl;
 import org.eclipse.che.multiuser.organization.spi.impl.OrganizationImpl;
-import org.eclipse.che.multiuser.permission.machine.jpa.JpaRecipePermissionsDao;
-import org.eclipse.che.multiuser.permission.machine.jpa.MultiuserMachineJpaModule;
-import org.eclipse.che.multiuser.permission.machine.recipe.RecipeDomain;
-import org.eclipse.che.multiuser.permission.machine.recipe.RecipePermissionsImpl;
 import org.eclipse.che.multiuser.permission.workspace.server.jpa.MultiuserWorkspaceJpaModule;
 import org.eclipse.che.multiuser.permission.workspace.server.jpa.listener.RemoveStackOnLastUserRemovedEventSubscriber;
 import org.eclipse.che.multiuser.permission.workspace.server.spi.WorkerDao;
@@ -145,10 +137,8 @@ public class JpaEntitiesCascadeRemovalTest {
   private WorkspaceDao workspaceDao;
   private SshDao sshDao;
   private FactoryDao factoryDao;
-  private RecipeDao recipeDao;
   private StackDao stackDao;
   private WorkerDao workerDao;
-  private JpaRecipePermissionsDao recipePermissionsDao;
   private JpaStackPermissionsDao stackPermissionsDao;
   private FreeResourcesLimitDao freeResourcesLimitDao;
   private OrganizationManager organizationManager;
@@ -190,11 +180,6 @@ public class JpaEntitiesCascadeRemovalTest {
 
   private FactoryImpl factory2;
 
-  /** Recipe depend on user via permissions */
-  private OldRecipeImpl recipe1;
-
-  private OldRecipeImpl recipe2;
-
   /** Stack depend on user via permissions */
   private StackImpl stack1;
 
@@ -233,11 +218,9 @@ public class JpaEntitiesCascadeRemovalTest {
                 install(new UserJpaModule());
                 install(new AccountModule());
                 install(new SshJpaModule());
-                install(new MultiuserMachineJpaModule());
                 install(new FactoryJpaModule());
                 install(new OrganizationJpaModule());
                 install(new MultiuserWorkspaceJpaModule());
-                bind(RecipeDao.class).to(JpaRecipeDao.class);
 
                 bind(FreeResourcesLimitDao.class).to(JpaFreeResourcesLimitDao.class);
                 bind(RemoveFreeResourcesLimitSubscriber.class).asEagerSingleton();
@@ -292,7 +275,6 @@ public class JpaEntitiesCascadeRemovalTest {
     workspaceDao = injector.getInstance(WorkspaceDao.class);
     factoryDao = injector.getInstance(FactoryDao.class);
     stackDao = injector.getInstance(StackDao.class);
-    recipeDao = injector.getInstance(RecipeDao.class);
     workerDao = injector.getInstance(WorkerDao.class);
     freeResourcesLimitDao = injector.getInstance(FreeResourcesLimitDao.class);
     organizationManager = injector.getInstance(OrganizationManager.class);
@@ -303,9 +285,7 @@ public class JpaEntitiesCascadeRemovalTest {
         new TypeLiteral<Set<PermissionsDao<? extends AbstractPermissions>>>() {};
     Key<Set<PermissionsDao<? extends AbstractPermissions>>> key = Key.get(lit);
     for (PermissionsDao<? extends AbstractPermissions> dao : injector.getInstance(key)) {
-      if (dao.getDomain().getId().equals(RecipeDomain.DOMAIN_ID)) {
-        recipePermissionsDao = (JpaRecipePermissionsDao) dao;
-      } else if (dao.getDomain().getId().equals(StackDomain.DOMAIN_ID)) {
+      if (dao.getDomain().getId().equals(StackDomain.DOMAIN_ID)) {
         stackPermissionsDao = (JpaStackPermissionsDao) dao;
       }
     }
@@ -341,12 +321,9 @@ public class JpaEntitiesCascadeRemovalTest {
     assertTrue(workspaceDao.getByNamespace(user2.getId()).isEmpty());
     assertEquals(workerDao.getWorkers(workspace3.getId(), 1, 0).getTotalItemsCount(), 0);
     // Check stack and recipes are removed
-    assertNull(notFoundToNull(() -> recipeDao.getById(recipe1.getId())));
-    assertNull(notFoundToNull(() -> recipeDao.getById(recipe2.getId())));
     assertNull(notFoundToNull(() -> stackDao.getById(stack1.getId())));
     assertNull(notFoundToNull(() -> stackDao.getById(stack2.getId())));
     // Permissions are removed
-    assertTrue(recipePermissionsDao.getByUser(user2.getId()).isEmpty());
     assertTrue(stackPermissionsDao.getByUser(user2.getId()).isEmpty());
     // Non-removed user permissions and stack are present
     assertNotNull(notFoundToNull(() -> stackDao.getById(stack3.getId())));
@@ -394,10 +371,7 @@ public class JpaEntitiesCascadeRemovalTest {
 
     // Check all the data rolled back
     assertNotNull(userDao.getById(user2.getId()));
-    assertFalse(recipePermissionsDao.getByUser(user2.getId()).isEmpty());
-    assertNotNull(notFoundToNull(() -> recipeDao.getById(recipe1.getId())));
     assertFalse(stackPermissionsDao.getByUser(user2.getId()).isEmpty());
-    assertNotNull(notFoundToNull(() -> recipeDao.getById(recipe2.getId())));
     assertNotNull(notFoundToNull(() -> stackDao.getById(stack1.getId())));
     assertNotNull(notFoundToNull(() -> stackDao.getById(stack2.getId())));
     assertNotNull(notFoundToNull(() -> freeResourcesLimitDao.get(account.getId())));
@@ -438,9 +412,6 @@ public class JpaEntitiesCascadeRemovalTest {
     factoryDao.create(factory1 = createFactory("factory1", user.getId()));
     factoryDao.create(factory2 = createFactory("factory2", user.getId()));
 
-    recipeDao.create(recipe1 = createRecipe("recipe1"));
-    recipeDao.create(recipe2 = createRecipe("recipe2"));
-
     stackDao.create(stack1 = createStack("stack1", "st1"));
     stackDao.create(stack2 = createStack("stack2", "st2"));
     stackDao.create(stack3 = createStack("stack3", "st3"));
@@ -460,13 +431,6 @@ public class JpaEntitiesCascadeRemovalTest {
     stackPermissionsDao.store(
         new StackPermissionsImpl(
             user3.getId(), stack3.getId(), asList(SET_PERMISSIONS, "read", "write", "execute")));
-
-    recipePermissionsDao.store(
-        new RecipePermissionsImpl(
-            user2.getId(), recipe1.getId(), asList(SET_PERMISSIONS, "read", "write")));
-    recipePermissionsDao.store(
-        new RecipePermissionsImpl(
-            user2.getId(), recipe2.getId(), asList(SET_PERMISSIONS, "read", "execute")));
 
     //creator will have all permissions for newly created organization
     prepareCreator(user.getId());
@@ -517,12 +481,6 @@ public class JpaEntitiesCascadeRemovalTest {
     stackPermissionsDao.remove(user2.getId(), stack2.getId());
     stackPermissionsDao.remove(user2.getId(), stack3.getId());
     stackPermissionsDao.remove(user3.getId(), stack3.getId());
-
-    recipePermissionsDao.remove(user2.getId(), recipe1.getId());
-    recipePermissionsDao.remove(user2.getId(), recipe2.getId());
-
-    recipeDao.remove(recipe1.getId());
-    recipeDao.remove(recipe2.getId());
 
     stackDao.remove(stack1.getId());
     stackDao.remove(stack2.getId());

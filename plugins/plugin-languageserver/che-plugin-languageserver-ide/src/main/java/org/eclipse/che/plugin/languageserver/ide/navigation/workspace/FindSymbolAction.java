@@ -85,9 +85,7 @@ public class FindSymbolAction extends AbstractPerspectiveAction
     super(
         singletonList(PROJECT_PERSPECTIVE_ID),
         localization.findSymbolActionTitle(),
-        localization.findSymbolActionTitle(),
-        null,
-        null);
+        localization.findSymbolActionTitle());
     this.editorHelper = editorHelper;
     this.presenter = presenter;
     this.workspaceServiceClient = workspaceServiceClient;

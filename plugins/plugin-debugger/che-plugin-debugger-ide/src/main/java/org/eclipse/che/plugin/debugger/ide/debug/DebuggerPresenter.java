@@ -17,6 +17,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -51,6 +52,7 @@ import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
 import org.eclipse.che.plugin.debugger.ide.DebuggerResources;
+import org.eclipse.che.plugin.debugger.ide.debug.breakpoint.BreakpointContextMenuFactory;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
@@ -77,6 +79,7 @@ public class DebuggerPresenter extends BasePresenter
   private final DebuggerManager debuggerManager;
   private final WorkspaceAgent workspaceAgent;
   private final DebuggerResourceHandlerFactory resourceHandlerManager;
+  private final BreakpointContextMenuFactory breakpointContextMenuFactory;
 
   private List<Variable> variables;
   private List<? extends ThreadState> threadDump;
@@ -93,7 +96,8 @@ public class DebuggerPresenter extends BasePresenter
       final @DebuggerToolbar ToolbarPresenter debuggerToolbar,
       final DebuggerManager debuggerManager,
       final WorkspaceAgent workspaceAgent,
-      final DebuggerResourceHandlerFactory resourceHandlerManager) {
+      final DebuggerResourceHandlerFactory resourceHandlerManager,
+      final BreakpointContextMenuFactory breakpointContextMenuFactory) {
     this.view = view;
     this.debuggerResources = debuggerResources;
     this.debuggerToolbar = debuggerToolbar;
@@ -104,6 +108,7 @@ public class DebuggerPresenter extends BasePresenter
     this.view.setTitle(TITLE);
     this.constant = constant;
     this.breakpointManager = breakpointManager;
+    this.breakpointContextMenuFactory = breakpointContextMenuFactory;
 
     this.notificationManager = notificationManager;
     this.addRule(ProjectPerspective.PROJECT_PERSPECTIVE_ID);
@@ -416,5 +421,12 @@ public class DebuggerPresenter extends BasePresenter
 
   public boolean isDebuggerPanelOpened() {
     return partStack.getActivePart() == this;
+  }
+
+  @Override
+  public void onBreakpointContextMenu(int clientX, int clientY, Breakpoint breakpoint) {
+    Scheduler.get()
+        .scheduleDeferred(
+            () -> breakpointContextMenuFactory.newContextMenu(breakpoint).show(clientX, clientY));
   }
 }

@@ -77,7 +77,6 @@ public class RenameItemAction extends AbstractPerspectiveAction {
         singletonList(PROJECT_PERSPECTIVE_ID),
         localization.renameItemActionText(),
         localization.renameItemActionDescription(),
-        null,
         resources.rename());
     this.localization = localization;
     this.renamingSupport = renamingSupport;

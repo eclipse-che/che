@@ -12,13 +12,14 @@ package org.eclipse.che.ide.debug;
 
 import static org.eclipse.che.ide.api.editor.gutter.Gutters.BREAKPOINTS_GUTTER;
 
+import com.google.common.base.Strings;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import elemental.dom.Element;
+import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.ide.api.debug.BreakpointRenderer;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.gutter.Gutter;
-import org.eclipse.che.ide.api.editor.gutter.Gutter.LineNumberingChangeCallback;
 import org.eclipse.che.ide.api.editor.texteditor.EditorResources;
 import org.eclipse.che.ide.api.editor.texteditor.LineStyler;
 import org.eclipse.che.ide.util.dom.Elements;
@@ -42,7 +43,9 @@ public class BreakpointRendererImpl implements BreakpointRenderer {
   private Document document;
 
   private Element activeBreakpointMark;
+  private Element activeConditionBreakpointMark;
   private Element inactiveBreakpointMark;
+  private Element inactiveConditionBreakpointMark;
 
   @AssistedInject
   public BreakpointRendererImpl(
@@ -63,26 +66,57 @@ public class BreakpointRendererImpl implements BreakpointRenderer {
   }
 
   @Override
-  public void addBreakpointMark(final int lineNumber) {
+  public void addBreakpointMark(int lineNumber) {
+    addBreakpointMark(lineNumber, (file, firstLine, linesAdded, linesRemoved) -> {});
+  }
+
+  @Override
+  public void addBreakpointMark(int lineNumber, LineChangeAction action) {
     if (hasGutter != null) {
-      this.hasGutter.addGutterItem(lineNumber, BREAKPOINTS_GUTTER, inactiveBreakpointMark);
+      Element newElement = inactiveBreakpointMark;
+
+      Element existedElement = hasGutter.getGutterItem(lineNumber, BREAKPOINTS_GUTTER);
+      if (existedElement != null) {
+        hasGutter.setGutterItem(lineNumber, BREAKPOINTS_GUTTER, newElement);
+      } else {
+        hasGutter.addGutterItem(
+            lineNumber,
+            BREAKPOINTS_GUTTER,
+            newElement,
+            (fromLine, linesRemoved, linesAdded) ->
+                action.onLineChange(document.getFile(), fromLine, linesAdded, linesRemoved));
+      }
     }
   }
 
   @Override
-  public void addBreakpointMark(final int lineNumber, final LineChangeAction action) {
+  public void setBreakpointMark(
+      final Breakpoint breakpoint, final boolean active, final LineChangeAction action) {
+
     if (hasGutter != null) {
-      this.hasGutter.addGutterItem(
-          lineNumber,
-          BREAKPOINTS_GUTTER,
-          inactiveBreakpointMark,
-          new LineNumberingChangeCallback() {
-            @Override
-            public void onLineNumberingChange(
-                final int fromLine, final int linesRemoved, final int linesAdded) {
-              action.onLineChange(document.getFile(), fromLine, linesAdded, linesRemoved);
-            }
-          });
+      int lineNumber = breakpoint.getLocation().getLineNumber() - 1;
+      boolean hasCondition = !Strings.isNullOrEmpty(breakpoint.getCondition());
+
+      Element newElement =
+          active
+              ? (hasCondition ? activeConditionBreakpointMark : activeBreakpointMark)
+              : (hasCondition ? inactiveConditionBreakpointMark : inactiveBreakpointMark);
+      if (hasCondition) {
+        newElement.setTitle("Condition: " + breakpoint.getCondition());
+      }
+
+      Element existedElement = hasGutter.getGutterItem(lineNumber, BREAKPOINTS_GUTTER);
+
+      if (existedElement != null) {
+        hasGutter.setGutterItem(lineNumber, BREAKPOINTS_GUTTER, newElement);
+      } else {
+        hasGutter.addGutterItem(
+            lineNumber,
+            BREAKPOINTS_GUTTER,
+            newElement,
+            (fromLine, linesRemoved, linesAdded) ->
+                action.onLineChange(document.getFile(), fromLine, linesAdded, linesRemoved));
+      }
     }
   }
 
@@ -101,12 +135,11 @@ public class BreakpointRendererImpl implements BreakpointRenderer {
   }
 
   @Override
-  public void setBreakpointActive(final int lineNumber, final boolean active) {
+  public void setBreakpointActive(int lineNumber, boolean active) {
     if (hasGutter != null) {
-      final Element mark = this.hasGutter.getGutterItem(lineNumber, BREAKPOINTS_GUTTER);
-      if (mark != null) {
-        Element element = active ? activeBreakpointMark : inactiveBreakpointMark;
-        this.hasGutter.setGutterItem(lineNumber, BREAKPOINTS_GUTTER, element);
+      Element existedElement = hasGutter.getGutterItem(lineNumber, BREAKPOINTS_GUTTER);
+      if (existedElement != null) {
+        hasGutter.setGutterItem(lineNumber, BREAKPOINTS_GUTTER, activeBreakpointMark);
       }
     }
   }
@@ -123,7 +156,11 @@ public class BreakpointRendererImpl implements BreakpointRenderer {
   private void initBreakpointMarks() {
     BreakpointResources.Css css = breakpointResources.getCss();
     activeBreakpointMark = Elements.createDivElement(css.breakpoint(), css.active());
+    activeConditionBreakpointMark =
+        Elements.createDivElement(css.breakpoint(), css.active(), css.condition());
     inactiveBreakpointMark = Elements.createDivElement(css.breakpoint(), css.inactive());
+    inactiveConditionBreakpointMark =
+        Elements.createDivElement(css.breakpoint(), css.inactive(), css.condition());
   }
 
   @Override

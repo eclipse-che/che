@@ -66,7 +66,6 @@ public class DeleteResourceAction extends AbstractPerspectiveAction implements P
         singletonList(PROJECT_PERSPECTIVE_ID),
         localization.deleteItemActionText(),
         localization.deleteItemActionDescription(),
-        null,
         resources.delete());
     this.deleteResourceManager = deleteResourceManager;
     this.appContext = appContext;

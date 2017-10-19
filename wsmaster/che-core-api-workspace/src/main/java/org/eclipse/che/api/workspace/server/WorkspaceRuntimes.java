@@ -189,9 +189,9 @@ public class WorkspaceRuntimes {
     final String workspaceId = workspace.getId();
 
     requireNonNull(environment, "Environment should not be null " + workspaceId);
-    requireNonNull(environment.getRecipe(), "OldRecipe should not be null " + workspaceId);
+    requireNonNull(environment.getRecipe(), "Recipe should not be null " + workspaceId);
     requireNonNull(
-        environment.getRecipe().getType(), "OldRecipe type should not be null " + workspaceId);
+        environment.getRecipe().getType(), "Recipe type should not be null " + workspaceId);
 
     RuntimeInfrastructure infra = infraByRecipe.get(environment.getRecipe().getType());
     if (infra == null) {

@@ -41,9 +41,7 @@ public class ConvertFolderToProjectAction extends AbstractPerspectiveAction {
     super(
         singletonList(PROJECT_PERSPECTIVE_ID),
         locale.actionConvertFolderToProject(),
-        locale.actionConvertFolderToProjectDescription(),
-        null,
-        null);
+        locale.actionConvertFolderToProjectDescription());
     this.appContext = appContext;
     this.projectConfigWizard = projectConfigWizard;
   }

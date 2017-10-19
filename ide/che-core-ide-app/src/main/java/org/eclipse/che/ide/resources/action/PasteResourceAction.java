@@ -56,7 +56,6 @@ public class PasteResourceAction extends AbstractPerspectiveAction {
         singletonList(PROJECT_PERSPECTIVE_ID),
         localization.pasteItemsActionText(),
         localization.pasteItemsActionDescription(),
-        null,
         resources.paste());
     this.clipboardManager = clipboardManager;
     this.appContext = appContext;

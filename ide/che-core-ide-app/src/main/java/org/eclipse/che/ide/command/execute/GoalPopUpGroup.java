@@ -48,7 +48,7 @@ class GoalPopUpGroup extends DefaultActionGroup {
     // set icon
     final SVGResource commandTypeIcon = getCommandGoalIcon();
     if (commandTypeIcon != null) {
-      getTemplatePresentation().setSVGResource(commandTypeIcon);
+      getTemplatePresentation().setImageElement(new SVGImage(commandTypeIcon).getElement());
     }
   }
 

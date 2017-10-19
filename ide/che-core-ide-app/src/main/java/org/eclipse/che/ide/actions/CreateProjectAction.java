@@ -38,7 +38,6 @@ public class CreateProjectAction extends AbstractPerspectiveAction {
         singletonList(PROJECT_PERSPECTIVE_ID),
         "Create Project...",
         "Create new project",
-        null,
         resources.newProject());
     this.wizard = wizard;
   }

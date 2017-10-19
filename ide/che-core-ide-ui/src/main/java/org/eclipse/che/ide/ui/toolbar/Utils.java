@@ -20,7 +20,6 @@ import org.eclipse.che.ide.api.action.ActionGroup;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.action.Separator;
-import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.util.loging.Log;
 
 /**
@@ -36,16 +35,14 @@ public class Utils {
    * @param group action group
    * @param presentationFactory presentation factory
    * @param actionManager action manager
-   * @param perspectiveManager perspective manager
    * @return list of visible action group
    */
   public static List<VisibleActionGroup> renderActionGroup(
       @NotNull ActionGroup group,
       PresentationFactory presentationFactory,
-      ActionManager actionManager,
-      PerspectiveManager perspectiveManager) {
+      ActionManager actionManager) {
     Presentation presentation = presentationFactory.getPresentation(group);
-    ActionEvent event = new ActionEvent(presentation, actionManager, perspectiveManager);
+    ActionEvent event = new ActionEvent(presentation, actionManager);
 
     if (!presentation.isVisible()) { // don't process invisible groups
       return null;
@@ -62,7 +59,7 @@ public class Utils {
       }
 
       presentation = presentationFactory.getPresentation(child);
-      child.update(new ActionEvent(presentation, actionManager, perspectiveManager));
+      child.update(new ActionEvent(presentation, actionManager));
 
       if (!presentation.isVisible()) { // don't create invisible items in the menu
         continue;
@@ -73,8 +70,7 @@ public class Utils {
         if (actionGroup.isPopup()) { // popup menu has its own presentation
           if (actionGroup.disableIfNoVisibleChildren()) {
             final boolean visibleChildren =
-                hasVisibleChildren(
-                    actionGroup, presentationFactory, actionManager, perspectiveManager);
+                hasVisibleChildren(actionGroup, presentationFactory, actionManager);
             if (actionGroup.hideIfNoVisibleChildren() && !visibleChildren) {
               continue;
             }
@@ -83,8 +79,7 @@ public class Utils {
           currentActionList.add(child);
         } else {
           List<VisibleActionGroup> newVisibleActionGroupList =
-              renderActionGroup(
-                  (ActionGroup) child, presentationFactory, actionManager, perspectiveManager);
+              renderActionGroup((ActionGroup) child, presentationFactory, actionManager);
           currentVisibleActionGroupList.addAll(newVisibleActionGroupList);
         }
       } else if (child instanceof Separator) {
@@ -108,16 +103,11 @@ public class Utils {
    * @param group action group
    * @param factory presentation factory
    * @param actionManager action manager
-   * @param perspectiveManager perspective manager
    * @return boolean
    */
   public static boolean hasVisibleChildren(
-      ActionGroup group,
-      PresentationFactory factory,
-      ActionManager actionManager,
-      PerspectiveManager perspectiveManager) {
-    ActionEvent event =
-        new ActionEvent(factory.getPresentation(group), actionManager, perspectiveManager);
+      ActionGroup group, PresentationFactory factory, ActionManager actionManager) {
+    ActionEvent event = new ActionEvent(factory.getPresentation(group), actionManager);
     for (Action anAction : group.getChildren(event)) {
       if (anAction == null) {
         Log.error(
@@ -130,7 +120,7 @@ public class Utils {
       }
 
       final Presentation presentation = factory.getPresentation(anAction);
-      anAction.update(new ActionEvent(presentation, actionManager, perspectiveManager));
+      anAction.update(new ActionEvent(presentation, actionManager));
       if (anAction instanceof ActionGroup) {
         ActionGroup childGroup = (ActionGroup) anAction;
 
@@ -141,7 +131,7 @@ public class Utils {
           }
         }
 
-        if (hasVisibleChildren(childGroup, factory, actionManager, perspectiveManager)) {
+        if (hasVisibleChildren(childGroup, factory, actionManager)) {
           return true;
         }
       } else if (presentation.isVisible()) {

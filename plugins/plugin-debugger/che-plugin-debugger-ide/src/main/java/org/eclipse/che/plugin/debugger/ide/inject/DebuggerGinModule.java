@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.debugger.ide.inject;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.inject.Singleton;
-import org.eclipse.che.ide.api.action.Action;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.api.debug.DebugConfigurationsManager;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
@@ -25,6 +25,9 @@ import org.eclipse.che.plugin.debugger.ide.configuration.EditDebugConfigurations
 import org.eclipse.che.plugin.debugger.ide.debug.DebuggerToolbar;
 import org.eclipse.che.plugin.debugger.ide.debug.DebuggerView;
 import org.eclipse.che.plugin.debugger.ide.debug.DebuggerViewImpl;
+import org.eclipse.che.plugin.debugger.ide.debug.breakpoint.BreakpointConfigurationView;
+import org.eclipse.che.plugin.debugger.ide.debug.breakpoint.BreakpointConfigurationViewImpl;
+import org.eclipse.che.plugin.debugger.ide.debug.breakpoint.BreakpointContextMenuFactory;
 import org.eclipse.che.plugin.debugger.ide.debug.changevalue.ChangeValueView;
 import org.eclipse.che.plugin.debugger.ide.debug.changevalue.ChangeValueViewImpl;
 import org.eclipse.che.plugin.debugger.ide.debug.expression.EvaluateExpressionView;
@@ -44,6 +47,7 @@ public class DebuggerGinModule extends AbstractGinModule {
     bind(DebuggerView.class).to(DebuggerViewImpl.class).in(Singleton.class);
     bind(EvaluateExpressionView.class).to(EvaluateExpressionViewImpl.class).in(Singleton.class);
     bind(ChangeValueView.class).to(ChangeValueViewImpl.class).in(Singleton.class);
+    bind(BreakpointConfigurationView.class).to(BreakpointConfigurationViewImpl.class);
     bind(EditDebugConfigurationsView.class)
         .to(EditDebugConfigurationsViewImpl.class)
         .in(Singleton.class);
@@ -53,12 +57,14 @@ public class DebuggerGinModule extends AbstractGinModule {
         .in(Singleton.class);
     install(
         new GinFactoryModuleBuilder()
-            .implement(Action.class, DebugConfigurationAction.class)
+            .implement(BaseAction.class, DebugConfigurationAction.class)
             .build(DebugConfigurationActionFactory.class));
 
     bind(ToolbarPresenter.class)
         .annotatedWith(DebuggerToolbar.class)
         .to(ToolbarPresenter.class)
         .in(Singleton.class);
+
+    install(new GinFactoryModuleBuilder().build(BreakpointContextMenuFactory.class));
   }
 }
