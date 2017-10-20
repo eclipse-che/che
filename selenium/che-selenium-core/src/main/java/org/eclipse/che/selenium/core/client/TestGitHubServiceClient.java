@@ -20,6 +20,7 @@ import com.google.inject.Singleton;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.xml.bind.DatatypeConverter;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
@@ -202,5 +203,25 @@ public class TestGitHubServiceClient {
     byte[] nameAndPass = (username + ":" + password).getBytes("UTF-8");
     String base64 = DatatypeConverter.printBase64Binary(nameAndPass);
     return "Basic " + base64;
+  }
+
+  public String getUserPublicEmail(String username, String password) throws Exception {
+    String url = "https://api.github.com/user/public_emails";
+    HttpJsonResponse response =
+        requestFactory
+            .fromUrl(url)
+            .useGetMethod()
+            .setAuthorizationHeader(createBasicAuthHeader(username, password))
+            .request();
+
+    @SuppressWarnings("unchecked")
+    List<Map<String, String>> properties =
+        response.as(List.class, new TypeToken<List<Map<String, String>>>() {}.getType());
+
+    return properties
+        .stream()
+        .filter(map -> map.containsKey("email"))
+        .map(map -> map.get("email"))
+        .collect(Collectors.joining());
   }
 }
