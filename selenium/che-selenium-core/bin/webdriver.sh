@@ -78,6 +78,7 @@ initVariables() {
     WEBDRIVER_PORT="9515"
     NODE_CHROME_DEBUG_SUFFIX=
     THREADS=$(getRecommendedThreadCount)
+    WORKSPACE_POOL_SIZE=0
 
     ACTUAL_RESULTS=()
     COMPARE_WITH_CI=false
@@ -142,6 +143,7 @@ checkParameters() {
         elif [[ "$var" =~ -P.* ]]; then :
         elif [[ "$var" == "--help" ]]; then :
         elif [[ "$var" == "--compare-with-ci" ]]; then :
+        elif [[ "$var" =~ ^--workspace-pool-size=(auto|[0-9]+)$ ]]; then :
         elif [[ "$var" =~ ^[0-9]+$ ]] && [[ $@ =~ --compare-with-ci[[:space:]]$var ]]; then :
         else
             printHelp
@@ -177,6 +179,9 @@ applyCustomOptions() {
 
         elif [[ "$var" =~ --threads=.* ]]; then
             THREADS=$(echo "$var" | sed -e "s/--threads=//g")
+
+        elif [[ "$var" =~ --workspace-pool-size=.* ]]; then
+            WORKSPACE_POOL_SIZE=$(echo "$var" | sed -e "s/--workspace-pool-size=//g")
 
         elif [[ "$var" == "--rerun" ]]; then
             RERUN=true
@@ -379,20 +384,25 @@ Modes (defines environment to run tests):
     local                               All tests will be run in a Web browser on the developer machine.
                                         Recommended if test visualization is needed and for debugging purpose.
 
-        Options that go with 'local' mode:
-        --web-driver-version=<VERSION>  To use the specific version of the WebDriver, be default the latest will be used: "${WEBDRIVER_VERSION}"
-        --web-driver-port=<PORT>        To run WebDriver on the specific port, by default: "${WEBDRIVER_PORT}"
-        --threads=<THREADS>             Number of tests that will be run simultaneously. It also means the very same number of
+    Options that go with 'local' mode:
+    --web-driver-version=<VERSION>      To use the specific version of the WebDriver, be default the latest will be used: "${WEBDRIVER_VERSION}"
+    --web-driver-port=<PORT>            To run WebDriver on the specific port, by default: "${WEBDRIVER_PORT}"
+    --threads=<THREADS>                 Number of tests that will be run simultaneously. It also means the very same number of
                                         Web browsers will be opened on the developer machine.
                                         Default value is in range [2,5] and depends on available RAM.
+    --workspace-pool-size=[<SIZE>|auto] Size of test workspace pool.
+                                        Default value is 0, that means that test workspaces are created on demand.
 
 
     grid (default)                      All tests will be run in parallel on several docker containers.
                                         One container per thread. Recommended to run test suite.
 
-        Options that go with 'grid' mode:
-            --threads=<THREADS>         Number of tests that will be run simultaneously.
+    Options that go with 'grid' mode:
+    --threads=<THREADS>                 Number of tests that will be run simultaneously.
                                         Default value is in range [2,5] and depends on available RAM.
+    --workspace-pool-size=[<SIZE>|auto] Size of test workspace pool.
+                                        Default value is 0, that means that test workspaces are created on demand.
+
 
 Define tests scope:
     --all-tests                         Run all tests within the suite despite of <exclude>/<include> sections in the test suite.
@@ -444,15 +454,16 @@ printRunOptions() {
     echo "[TEST] Tests inclusion     : "${!TEST_INCLUSION_MSG}
     echo "[TEST] Rerun failing tests : "${RERUN}
     echo "[TEST] ==================================================="
-    echo "[TEST] Product Protocol : "${PRODUCT_PROTOCOL}
-    echo "[TEST] Product Host     : "${PRODUCT_HOST}
-    echo "[TEST] Product Port     : "${PRODUCT_PORT}
-    echo "[TEST] Tests            : "${TESTS_SCOPE}
-    echo "[TEST] Threads          : "${THREADS}
-    echo "[TEST] Web browser      : "${BROWSER}
-    echo "[TEST] Web driver ver   : "${WEBDRIVER_VERSION}
-    echo "[TEST] Web driver port  : "${WEBDRIVER_PORT}
-    echo "[TEST] Additional opts  : "${GRID_OPTIONS}" "${DEBUG_OPTIONS}" "${MAVEN_OPTIONS}
+    echo "[TEST] Product Protocol    : "${PRODUCT_PROTOCOL}
+    echo "[TEST] Product Host        : "${PRODUCT_HOST}
+    echo "[TEST] Product Port        : "${PRODUCT_PORT}
+    echo "[TEST] Tests               : "${TESTS_SCOPE}
+    echo "[TEST] Threads             : "${THREADS}
+    echo "[TEST] Workspace pool size : "${WORKSPACE_POOL_SIZE}
+    echo "[TEST] Web browser         : "${BROWSER}
+    echo "[TEST] Web driver ver      : "${WEBDRIVER_VERSION}
+    echo "[TEST] Web driver port     : "${WEBDRIVER_PORT}
+    echo "[TEST] Additional opts     : "${GRID_OPTIONS}" "${DEBUG_OPTIONS}" "${MAVEN_OPTIONS}
     echo "[TEST] ==================================================="
 }
 
@@ -632,7 +643,8 @@ printProposals() {
                           sed -e "s/--suite=[^ ]*//g " | \
                           sed -e "s/--test*=[^ ]*//g " | \
                           sed -e "s/--compare-with-ci\W*[0-9]*//g" | \
-                          sed -e "s/--threads=[0-9]*//g")
+                          sed -e "s/--threads=[0-9]*//g" | \
+                          sed -e "s/--workspace-pool-size=auto|[0-9]*//g")
 
     local regressions=$(findRegressions)
     local total=$(echo ${regressions[@]} | wc -w)
@@ -680,14 +692,15 @@ runTests() {
 
     mvn clean verify -Pselenium-test \
                 ${TESTS_SCOPE} \
-                -Dhost=${PRODUCT_HOST} \
+                -Dche.host=${PRODUCT_HOST} \
                 -Dche.port=${PRODUCT_PORT} \
-                -Dprotocol=${PRODUCT_PROTOCOL} \
+                -Dche.protocol=${PRODUCT_PROTOCOL} \
                 -Ddocker.interface.ip=$(detectDockerInterfaceIp) \
                 -Ddriver.port=${WEBDRIVER_PORT} \
                 -Ddriver.version=${WEBDRIVER_VERSION} \
                 -Dbrowser=${BROWSER} \
-                -Dthreads=${THREADS} \
+                -Dche.threads=${THREADS} \
+                -Dche.workspace_pool_size=${WORKSPACE_POOL_SIZE} \
                 ${DEBUG_OPTIONS} \
                 ${GRID_OPTIONS} \
                 ${MAVEN_OPTIONS}

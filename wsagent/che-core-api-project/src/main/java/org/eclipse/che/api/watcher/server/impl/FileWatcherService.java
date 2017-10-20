@@ -191,9 +191,11 @@ public class FileWatcherService {
     } else {
       try {
         LOG.debug("Starting watching directory '{}'", dir);
-        WatchKey watchKey = dir.register(service, eventKinds, eventModifiers);
-        keys.put(watchKey, dir);
-        registrations.put(dir, 1);
+        synchronized (keys) {
+          WatchKey watchKey = dir.register(service, eventKinds, eventModifiers);
+          keys.put(watchKey, dir);
+          registrations.put(dir, 1);
+        }
       } catch (IOException e) {
         LOG.error("Can't register dir {} in file watch service", dir, e);
       }
@@ -275,7 +277,17 @@ public class FileWatcherService {
     while (running.get()) {
       try {
         WatchKey watchKey = service.take();
-        Path dir = keys.get(watchKey);
+        Path dir;
+        synchronized (keys) {
+          dir = keys.get(watchKey);
+        }
+
+        if (dir == null) {
+          resetAndRemove(watchKey, dir);
+
+          LOG.debug("Reported directory is not registered - skipping.");
+          continue;
+        }
 
         List<WatchEvent<?>> watchEvents = watchKey.pollEvents();
 

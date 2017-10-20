@@ -12,6 +12,7 @@ package org.eclipse.che.ide.editor.synchronization;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
@@ -38,6 +39,7 @@ import org.eclipse.che.ide.api.editor.document.DocumentStorage;
 import org.eclipse.che.ide.api.editor.document.DocumentStorage.DocumentCallback;
 import org.eclipse.che.ide.api.editor.events.DocumentChangedEvent;
 import org.eclipse.che.ide.api.editor.events.FileContentUpdateEvent;
+import org.eclipse.che.ide.api.editor.texteditor.EditorWidget;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
@@ -72,6 +74,9 @@ public class EditorGroupSynchronizationImplTest {
   @Mock private DocumentChangedEvent documentChangeEvent;
   @Mock private FileContentUpdateEvent fileContentUpdateEvent;
   @Mock private EditorInput editorInput;
+  @Mock private EditorWidget activeEditorWidget;
+  @Mock private EditorWidget editor_1_Widget;
+  @Mock private EditorWidget editor_2_Widget;
   @Captor private ArgumentCaptor<DocumentCallback> documentCallbackCaptor;
 
   private EditorPartPresenter activeEditor;
@@ -107,6 +112,10 @@ public class EditorGroupSynchronizationImplTest {
     when(((TextEditor) activeEditor).getDocument()).thenReturn(document);
     when(((TextEditor) openedEditor1).getDocument()).thenReturn(document);
     when(((TextEditor) openedEditor2).getDocument()).thenReturn(document);
+
+    when(((TextEditor) activeEditor).getEditorWidget()).thenReturn(activeEditorWidget);
+    when(((TextEditor) openedEditor1).getEditorWidget()).thenReturn(editor_1_Widget);
+    when(((TextEditor) openedEditor2).getEditorWidget()).thenReturn(editor_2_Widget);
 
     when(document.getContents()).thenReturn(FILE_CONTENT);
     when(openedEditor1.getEditorInput()).thenReturn(editorInput);
@@ -166,6 +175,50 @@ public class EditorGroupSynchronizationImplTest {
     documentCallbackCaptor.getValue().onDocumentReceived(FILE_NEW_CONTENT);
 
     verify(notificationManager).notify(anyString(), anyString(), eq(SUCCESS), eq(NOT_EMERGE_MODE));
+  }
+
+  @Test
+  public void shouldUpdateDirtyStateForEditors() {
+    addEditorsToGroup();
+
+    editorGroupSynchronization.onEditorDirtyStateChanged(activeEditor);
+
+    verify(editor_1_Widget).markClean();
+    verify(editor_2_Widget).markClean();
+    verify((TextEditor) openedEditor1).updateDirtyState(false);
+    verify((TextEditor) openedEditor2).updateDirtyState(false);
+    // we should not update 'dirty' state for the ACTIVE editor
+    verify(activeEditorWidget, never()).markClean();
+    verify((TextEditor) activeEditor, never()).updateDirtyState(false);
+  }
+
+  @Test
+  public void shouldSkipUpdatingDirtyStateWhenNotActiveEditorWasSaved() {
+    addEditorsToGroup();
+
+    editorGroupSynchronization.onEditorDirtyStateChanged(openedEditor1);
+
+    // we sync 'dirty' state of editors when content of an ACTIVE editor is saved
+    verify(editor_1_Widget, never()).markClean();
+    verify(editor_2_Widget, never()).markClean();
+    verify(activeEditorWidget, never()).markClean();
+    verify((TextEditor) openedEditor1, never()).updateDirtyState(anyBoolean());
+    verify((TextEditor) openedEditor2, never()).updateDirtyState(anyBoolean());
+    verify((TextEditor) activeEditor, never()).updateDirtyState(anyBoolean());
+  }
+
+  @Test
+  public void shouldSkipUpdatingDirtyStateWhenHasNotEditorsToSync() {
+    editorGroupSynchronization.addEditor(activeEditor);
+
+    editorGroupSynchronization.onEditorDirtyStateChanged(activeEditor);
+
+    verify(editor_1_Widget, never()).markClean();
+    verify(editor_2_Widget, never()).markClean();
+    verify(activeEditorWidget, never()).markClean();
+    verify((TextEditor) openedEditor1, never()).updateDirtyState(anyBoolean());
+    verify((TextEditor) openedEditor2, never()).updateDirtyState(anyBoolean());
+    verify((TextEditor) activeEditor, never()).updateDirtyState(anyBoolean());
   }
 
   @Test
