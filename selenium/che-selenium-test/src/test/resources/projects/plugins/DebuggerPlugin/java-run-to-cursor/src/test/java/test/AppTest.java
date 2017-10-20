@@ -8,16 +8,14 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.debug.shared.model;
+package test;
 
-/** @author Anatoliy Bazko */
-public interface Breakpoint {
-  /** The location of the breakpoint. */
-  Location getLocation();
+/**
+ * Unit test for simple App.
+ */
+public class AppTest {
 
-  /** Conditions of the breakpoint. */
-  Conditions getConditions();
-
-  /** Indicates if it is enabled or not. */
-  boolean isEnabled();
+    public void testApp()
+    {
+    }
 }

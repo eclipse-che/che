@@ -19,8 +19,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
+import org.eclipse.che.api.debug.shared.model.Conditions;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
+import org.eclipse.che.api.debug.shared.model.impl.ConditionsImpl;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.plugin.nodejsdbg.server.NodeJsDebugProcess;
 import org.eclipse.che.plugin.nodejsdbg.server.NodeJsDebugger;
@@ -110,8 +112,9 @@ public class NodeJsDebugCommandsLibrary {
       }
 
       Location newLocation = new LocationImpl(newTarget, location.getLineNumber());
+      Conditions newConditions = new ConditionsImpl(breakpoint.getConditions().getHitCondition(), 0);
       Breakpoint newBreakpoint =
-          new BreakpointImpl(newLocation, breakpoint.isEnabled(), breakpoint.getCondition());
+          new BreakpointImpl(newLocation, newConditions, breakpoint.isEnabled());
       breakpoints.set(i, newBreakpoint);
     }
 

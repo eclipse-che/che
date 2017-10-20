@@ -81,6 +81,9 @@ public interface Debugger extends DebuggerObservable {
   /** Resumes application. */
   void resume();
 
+  /** Runs application to specified location. */
+  void runToLocation(int lineNumber, String source);
+
   /** Suspends application. */
   void suspend();
 

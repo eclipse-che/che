@@ -20,6 +20,7 @@ import org.eclipse.che.api.debug.shared.dto.StackFrameDumpDto;
 import org.eclipse.che.api.debug.shared.dto.ThreadStateDto;
 import org.eclipse.che.api.debug.shared.dto.VariableDto;
 import org.eclipse.che.api.debug.shared.dto.action.ResumeActionDto;
+import org.eclipse.che.api.debug.shared.dto.action.RunToLocationActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StartActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepIntoActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepOutActionDto;
@@ -127,6 +128,13 @@ public interface DebuggerServiceClient {
    * @param id debug session id
    */
   Promise<Void> resume(String id, ResumeActionDto action);
+
+  /**
+   * Runs application to specified location.
+   *
+   * @param id debug session id
+   */
+  Promise<Void> runToLocation(String id, RunToLocationActionDto action);
 
   /**
    * Returns a value of the variable inside the specific frame.

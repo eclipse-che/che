@@ -54,6 +54,9 @@ public interface DebuggerLocalizationConstant extends com.google.gwt.i18n.client
   @Key("stepOut")
   String stepOut();
 
+  @Key("runToCursor")
+  String runToCursor();
+
   @Key("suspend")
   String suspend();
 
@@ -90,6 +93,9 @@ public interface DebuggerLocalizationConstant extends com.google.gwt.i18n.client
 
   @Key("stepOutDescription")
   String stepOutDescription();
+
+  @Key("runToCursorDescription")
+  String runToCursorDescription();
 
   @Key("suspendDescription")
   String suspendDescription();

@@ -16,6 +16,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import java.util.List;
 import java.util.Objects;
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
+import org.eclipse.che.api.debug.shared.dto.ConditionsDto;
 import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
 import org.eclipse.che.api.debug.shared.dto.DebuggerInfoDto;
 import org.eclipse.che.api.debug.shared.dto.FieldDto;
@@ -71,7 +72,10 @@ public final class DtoConverter {
 
   public static BreakpointDto asDto(Breakpoint breakpoint) {
     return newDto(BreakpointDto.class)
-        .withCondition(breakpoint.getCondition())
+        .withConditions(
+            newDto(ConditionsDto.class)
+                .withHitCondition(breakpoint.getConditions().getHitCondition())
+                .withHitCount(breakpoint.getConditions().getHitCount()))
         .withEnabled(breakpoint.isEnabled())
         .withLocation(asDto(breakpoint.getLocation()));
   }

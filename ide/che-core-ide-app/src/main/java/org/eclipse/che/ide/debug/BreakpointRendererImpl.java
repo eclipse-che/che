@@ -95,14 +95,14 @@ public class BreakpointRendererImpl implements BreakpointRenderer {
 
     if (hasGutter != null) {
       int lineNumber = breakpoint.getLocation().getLineNumber() - 1;
-      boolean hasCondition = !Strings.isNullOrEmpty(breakpoint.getCondition());
+      boolean hasCondition = !Strings.isNullOrEmpty(breakpoint.getConditions().getHitCondition());
 
       Element newElement =
           active
               ? (hasCondition ? activeConditionBreakpointMark : activeBreakpointMark)
               : (hasCondition ? inactiveConditionBreakpointMark : inactiveBreakpointMark);
       if (hasCondition) {
-        newElement.setTitle("Condition: " + breakpoint.getCondition());
+        newElement.setTitle("Condition: " + breakpoint.getConditions().getHitCondition());
       }
 
       Element existedElement = hasGutter.getGutterItem(lineNumber, BREAKPOINTS_GUTTER);

@@ -15,6 +15,7 @@
 <suite name="Java Debugger Tests" verbose="10">
     <test name="all">
         <classes>
+            <class name="org.eclipse.che.plugin.jdb.server.RunToLocationTest"/>
             <class name="org.eclipse.che.plugin.jdb.server.BreakpointsTest"/>
             <class name="org.eclipse.che.plugin.jdb.server.BreakpointConditionTest"/>
             <class name="org.eclipse.che.plugin.jdb.server.ThreadDumpTest1"/>

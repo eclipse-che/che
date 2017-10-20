@@ -47,6 +47,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
+import org.eclipse.che.api.debug.shared.dto.ConditionsDto;
 import org.eclipse.che.api.debug.shared.dto.action.ResumeActionDto;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
@@ -58,13 +59,13 @@ import org.eclipse.che.api.debug.shared.model.ThreadStatus;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.action.ResumeAction;
+import org.eclipse.che.api.debug.shared.model.action.RunToLocationAction;
 import org.eclipse.che.api.debug.shared.model.action.StartAction;
 import org.eclipse.che.api.debug.shared.model.action.StepIntoAction;
 import org.eclipse.che.api.debug.shared.model.action.StepOutAction;
 import org.eclipse.che.api.debug.shared.model.action.StepOverAction;
-import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
-import org.eclipse.che.api.debug.shared.model.impl.DebuggerInfoImpl;
-import org.eclipse.che.api.debug.shared.model.impl.ThreadStateImpl;
+import org.eclipse.che.api.debug.shared.model.impl.*;
+import org.eclipse.che.api.debug.shared.model.impl.ConditionsImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.BreakpointActivatedEventImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.DisconnectEventImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.SuspendEventImpl;
@@ -203,6 +204,35 @@ public class JavaDebugger implements EventsHandler, Debugger {
   }
 
   @Override
+  public void runToLocation(RunToLocationAction action) throws DebuggerException {
+    lock.lock();
+    BreakpointImpl breakpoint =
+        new BreakpointImpl(
+            new LocationImpl(action.getTarget(), action.getLineNumber()),
+            new ConditionsImpl(null, -1),
+            false);
+
+    try {
+      addBreakpoint(breakpoint);
+    } catch (DebuggerException e) {
+      if (!"Class not loaded".equals(e.getMessage())) {
+        throw e;
+      }
+    }
+
+    try {
+      invalidateCurrentThread();
+
+      vm.resume();
+      LOG.debug("Resume VM");
+    } catch (VMCannotBeModifiedException e) {
+      throw new DebuggerException(e.getMessage(), e);
+    } finally {
+      lock.unlock();
+    }
+  }
+
+  @Override
   public void disconnect() throws DebuggerException {
     vm.dispose();
     LOG.debug("Close connection to {}:{}", host, port);
@@ -249,12 +279,13 @@ public class JavaDebugger implements EventsHandler, Debugger {
     try {
       EventRequest breakPointRequest = requestManager.createBreakpointRequest(location);
       breakPointRequest.setSuspendPolicy(EventRequest.SUSPEND_ALL);
-      String expression = breakpoint.getCondition();
+      String expression = breakpoint.getConditions().getHitCondition();
       if (!(expression == null || expression.isEmpty())) {
         ExpressionParser parser = ExpressionParser.newInstance(expression);
         breakPointRequest.putProperty(
             "org.eclipse.che.ide.java.debug.condition.expression.parser", parser);
       }
+      breakPointRequest.putProperty("hit_count", breakpoint.getConditions().getHitCount());
       breakPointRequest.setEnabled(true);
     } catch (NativeMethodException | IllegalThreadStateException | InvalidRequestStateException e) {
       throw new DebuggerException(e.getMessage(), e);
@@ -262,7 +293,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
 
     debuggerCallback.onEvent(
         new BreakpointActivatedEventImpl(
-            new BreakpointImpl(breakpoint.getLocation(), true, breakpoint.getCondition())));
+            new BreakpointImpl(breakpoint.getLocation(), breakpoint.getConditions(), true)));
 
     LOG.debug("Add breakpoint: {}", location);
   }
@@ -309,6 +340,9 @@ public class JavaDebugger implements EventsHandler, Debugger {
       breakPoints.add(
           newDto(BreakpointDto.class)
               .withEnabled(true)
+              .withConditions(
+                  newDto(ConditionsDto.class)
+                      .withHitCount((Integer) breakpointRequest.getProperty("hit_count")))
               .withLocation(asDto(new JdbLocation(location))));
     }
     breakPoints.sort(BREAKPOINT_COMPARATOR);
@@ -343,6 +377,13 @@ public class JavaDebugger implements EventsHandler, Debugger {
     lock.lock();
     try {
       invalidateCurrentThread();
+
+      for (Breakpoint breakpoint : getAllBreakpoints()) {
+        if (breakpoint.getConditions().getHitCount() == -1) {
+          deleteBreakpoint(breakpoint.getLocation());
+        }
+      }
+
       vm.resume();
       LOG.debug("Resume VM");
     } catch (VMCannotBeModifiedException e) {
@@ -560,11 +601,11 @@ public class JavaDebugger implements EventsHandler, Debugger {
       throws DebuggerException {
     setCurrentThread(event.thread());
     boolean hitBreakpoint;
+    EventRequest request = event.request();
     ExpressionParser parser =
         (ExpressionParser)
-            event
-                .request()
-                .getProperty("org.eclipse.che.ide.java.debug.condition.expression.parser");
+            request.getProperty("org.eclipse.che.ide.java.debug.condition.expression.parser");
+    Integer hitCount = (Integer) request.getProperty("hit_count");
     if (parser != null) {
       com.sun.jdi.Value result = evaluate(parser, event.thread().uniqueID(), 0);
       hitBreakpoint =
@@ -580,6 +621,12 @@ public class JavaDebugger implements EventsHandler, Debugger {
         Location location = new JdbLocation(event.thread().frame(0));
 
         debuggerCallback.onEvent(new SuspendEventImpl(location));
+
+        if (hitCount != null && hitCount > 1) {
+          event.request().putProperty("hit_count", hitCount - 1);
+        } else if (hitCount != null && hitCount == 1) {
+          deleteBreakpoint(location);
+        }
       } catch (IncompatibleThreadStateException e) {
         return true;
       }

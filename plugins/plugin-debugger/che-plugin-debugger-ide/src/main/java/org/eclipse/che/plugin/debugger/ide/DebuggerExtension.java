@@ -32,6 +32,7 @@ import org.eclipse.che.plugin.debugger.ide.actions.DisconnectDebuggerAction;
 import org.eclipse.che.plugin.debugger.ide.actions.EditConfigurationsAction;
 import org.eclipse.che.plugin.debugger.ide.actions.EvaluateExpressionAction;
 import org.eclipse.che.plugin.debugger.ide.actions.ResumeExecutionAction;
+import org.eclipse.che.plugin.debugger.ide.actions.RunToCursorAction;
 import org.eclipse.che.plugin.debugger.ide.actions.ShowHideDebuggerPanelAction;
 import org.eclipse.che.plugin.debugger.ide.actions.StepIntoAction;
 import org.eclipse.che.plugin.debugger.ide.actions.StepOutAction;
@@ -62,6 +63,7 @@ public class DebuggerExtension {
   public static final String STEP_OVER_ID = "stepOver";
   public static final String STEP_OUT_ID = "stepOut";
   public static final String RESUME_EXECUTION_ID = "resumeExecution";
+  public static final String RUN_TO_LOCATION_ID = "runToCursor";
   public static final String SUSPEND_EXECUTION_ID = "suspendExecution";
   public static final String EVALUATE_EXPRESSION_ID = "evaluateExpression";
   public static final String CHANGE_VARIABLE_VALUE_ID = "changeVariableValue";
@@ -81,6 +83,7 @@ public class DebuggerExtension {
       StepIntoAction stepIntoAction,
       StepOverAction stepOverAction,
       StepOutAction stepOutAction,
+      RunToCursorAction runToCursorAction,
       ResumeExecutionAction resumeExecutionAction,
       SuspendAction suspendAction,
       EvaluateExpressionAction evaluateExpressionAction,
@@ -104,6 +107,7 @@ public class DebuggerExtension {
     actionManager.registerAction(STEP_INTO_ID, stepIntoAction);
     actionManager.registerAction(STEP_OVER_ID, stepOverAction);
     actionManager.registerAction(STEP_OUT_ID, stepOutAction);
+    actionManager.registerAction(RUN_TO_LOCATION_ID, runToCursorAction);
     actionManager.registerAction(RESUME_EXECUTION_ID, resumeExecutionAction);
     actionManager.registerAction(SUSPEND_EXECUTION_ID, suspendAction);
     actionManager.registerAction(EVALUATE_EXPRESSION_ID, evaluateExpressionAction);
@@ -131,6 +135,7 @@ public class DebuggerExtension {
     runMenu.add(stepIntoAction, LAST);
     runMenu.add(stepOverAction, LAST);
     runMenu.add(stepOutAction, LAST);
+    runMenu.add(runToCursorAction, LAST);
     runMenu.add(resumeExecutionAction, LAST);
     runMenu.add(suspendAction, new Constraints(Anchor.BEFORE, RESUME_EXECUTION_ID));
     runMenu.addSeparator();
@@ -143,6 +148,7 @@ public class DebuggerExtension {
     debuggerToolbarActionGroup.add(stepIntoAction);
     debuggerToolbarActionGroup.add(stepOverAction);
     debuggerToolbarActionGroup.add(stepOutAction);
+    debuggerToolbarActionGroup.add(runToCursorAction);
     debuggerToolbarActionGroup.add(disconnectDebuggerAction);
     debuggerToolbarActionGroup.add(deleteAllBreakpointsAction);
     debuggerToolbarActionGroup.add(changeVariableValueAction);

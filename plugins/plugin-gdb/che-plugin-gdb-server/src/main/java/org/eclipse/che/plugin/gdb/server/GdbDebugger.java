@@ -27,6 +27,7 @@ import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.action.ResumeAction;
+import org.eclipse.che.api.debug.shared.model.action.RunToLocationAction;
 import org.eclipse.che.api.debug.shared.model.action.StartAction;
 import org.eclipse.che.api.debug.shared.model.action.StepIntoAction;
 import org.eclipse.che.api.debug.shared.model.action.StepOutAction;
@@ -344,6 +345,9 @@ public class GdbDebugger implements Debugger {
       throw new DebuggerException("Step out error. " + e.getMessage(), e);
     }
   }
+
+  @Override
+  public void runToLocation(RunToLocationAction action) throws DebuggerException {}
 
   @Override
   public void resume(ResumeAction action) throws DebuggerException {

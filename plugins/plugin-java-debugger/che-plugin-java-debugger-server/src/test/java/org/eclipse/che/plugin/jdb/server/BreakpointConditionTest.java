@@ -25,6 +25,7 @@ import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
 import org.eclipse.che.api.debug.shared.model.event.DisconnectEvent;
 import org.eclipse.che.api.debug.shared.model.event.SuspendEvent;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
+import org.eclipse.che.api.debug.shared.model.impl.ConditionsImpl;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.ResumeActionImpl;
 import org.eclipse.che.plugin.jdb.server.util.ProjectApiUtils;
@@ -77,8 +78,8 @@ public class BreakpointConditionTest {
                 "/test",
                 null,
                 -1),
-            true,
-            "i==5");
+            new ConditionsImpl("i==5", 0),
+            true);
 
     debugger.addBreakpoint(breakpoint);
 

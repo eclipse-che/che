@@ -8,16 +8,14 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.debug.shared.model;
+package org.eclipse.che.api.debug.shared.model.action;
 
-/** @author Anatoliy Bazko */
-public interface Breakpoint {
-  /** The location of the breakpoint. */
-  Location getLocation();
+/** @author Igor Vinokur */
+public interface RunToLocationAction extends Action {
 
-  /** Conditions of the breakpoint. */
-  Conditions getConditions();
+  /** Returns target file path */
+  String getTarget();
 
-  /** Indicates if it is enabled or not. */
-  boolean isEnabled();
+  /** Returns specified line number */
+  int getLineNumber();
 }
