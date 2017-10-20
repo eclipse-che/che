@@ -25,7 +25,6 @@ import org.eclipse.che.ide.ui.smartTree.data.settings.SettingsProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 
 /**

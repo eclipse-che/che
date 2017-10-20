@@ -25,7 +25,6 @@ import org.eclipse.che.ide.ext.java.client.settings.property.PropertyWidget.Acti
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 
 /** @author Dmitry Shnurenko */
