@@ -99,7 +99,7 @@ public class EditorGroupSynchronizationImpl
   public void onEditorDirtyStateChanged(EditorPartPresenter changedEditor) {
     boolean hasEditorsToSync = synchronizedEditors.keySet().size() > 1;
     if (!hasEditorsToSync || groupLeaderEditor == null || groupLeaderEditor != changedEditor) {
-      //we sync 'dirty' state of editors when content of an ACTIVE editor has saved
+      // we sync 'dirty' state of editors when content of an ACTIVE editor has saved
       return;
     }
 

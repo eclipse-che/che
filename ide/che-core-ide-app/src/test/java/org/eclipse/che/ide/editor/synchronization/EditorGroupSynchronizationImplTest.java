@@ -187,7 +187,7 @@ public class EditorGroupSynchronizationImplTest {
     verify(editor_2_Widget).markClean();
     verify((TextEditor) openedEditor1).updateDirtyState(false);
     verify((TextEditor) openedEditor2).updateDirtyState(false);
-    //we should not update 'dirty' state for the ACTIVE editor
+    // we should not update 'dirty' state for the ACTIVE editor
     verify(activeEditorWidget, never()).markClean();
     verify((TextEditor) activeEditor, never()).updateDirtyState(false);
   }
@@ -198,7 +198,7 @@ public class EditorGroupSynchronizationImplTest {
 
     editorGroupSynchronization.onEditorDirtyStateChanged(openedEditor1);
 
-    //we sync 'dirty' state of editors when content of an ACTIVE editor was saved
+    // we sync 'dirty' state of editors when content of an ACTIVE editor was saved
     verify(editor_1_Widget, never()).markClean();
     verify(editor_2_Widget, never()).markClean();
     verify(activeEditorWidget, never()).markClean();

@@ -194,7 +194,7 @@ public class EditorContentSynchronizerImplTest {
   }
 
   @Test
-  //we sync 'dirty' state of editors only for case when content of an active editor HAS SAVED
+  // we sync 'dirty' state of editors only for case when content of an active editor HAS SAVED
   public void shouldSkipEditorDirtyStateChangedEventWhenEditorIsDirty() {
     when(activeEditor.isDirty()).thenReturn(true);
     EditorPartPresenter openedEditor1 = mock(EditorPartPresenter.class);

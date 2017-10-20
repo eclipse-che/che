@@ -102,7 +102,7 @@ public class EditorContentSynchronizerImpl
   public void onEditorDirtyStateChanged(EditorDirtyStateChangedEvent event) {
     EditorPartPresenter changedEditor = event.getEditor();
     if (changedEditor == null || changedEditor.isDirty()) {
-      //we sync 'dirty' state of editors only for case when content of an active editor HAS SAVED
+      // we sync 'dirty' state of editors only for case when content of an active editor HAS SAVED
       return;
     }
 
