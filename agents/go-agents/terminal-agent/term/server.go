@@ -41,7 +41,7 @@ var (
 		Items: []rest.Route{
 			{
 				Method:     "GET",
-				Name:       "Connect to pty(webscoket)",
+				Name:       "Connect to pty(websocket)",
 				Path:       "/pty",
 				HandleFunc: ConnectToPtyHF,
 			},
