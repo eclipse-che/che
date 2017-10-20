@@ -700,7 +700,7 @@ runTests() {
                 -Ddriver.version=${WEBDRIVER_VERSION} \
                 -Dbrowser=${BROWSER} \
                 -Dche.threads=${THREADS} \
-                -Dche.workspace__pool__size=${WORKSPACE_POOL_SIZE} \
+                -Dche.workspace_pool_size=${WORKSPACE_POOL_SIZE} \
                 ${DEBUG_OPTIONS} \
                 ${GRID_OPTIONS} \
                 ${MAVEN_OPTIONS}
