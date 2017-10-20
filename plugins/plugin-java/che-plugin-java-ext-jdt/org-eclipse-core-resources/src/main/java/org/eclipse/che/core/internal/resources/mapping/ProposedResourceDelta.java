@@ -80,7 +80,7 @@ public final class ProposedResourceDelta extends PlatformObject implements IReso
    * @param flags The flags to add
    */
   protected void addFlags(int flags) {
-    //make sure the provided flags don't influence the kind
+    // make sure the provided flags don't influence the kind
     this.status |= (flags & ~KIND_MASK);
   }
 
@@ -91,7 +91,7 @@ public final class ProposedResourceDelta extends PlatformObject implements IReso
     int segmentCount = path.segmentCount();
     if (segmentCount == 0) return this;
 
-    //iterate over the path and find matching child delta
+    // iterate over the path and find matching child delta
     ProposedResourceDelta current = this;
     for (int i = 0; i < segmentCount; i++) {
       current = current.children.get(path.segment(i));
@@ -208,6 +208,6 @@ public final class ProposedResourceDelta extends PlatformObject implements IReso
   /** For debugging purposes only. */
   @Override
   public String toString() {
-    return "ProposedDelta(" + resource + ')'; //$NON-NLS-1$
+    return "ProposedDelta(" + resource + ')'; // $NON-NLS-1$
   }
 }

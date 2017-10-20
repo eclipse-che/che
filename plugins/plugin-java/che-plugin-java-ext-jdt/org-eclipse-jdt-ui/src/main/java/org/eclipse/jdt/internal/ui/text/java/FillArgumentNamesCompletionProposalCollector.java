@@ -37,7 +37,7 @@ public final class FillArgumentNamesCompletionProposalCollector
     setInvocationContext(context);
     //		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
     fIsGuessArguments =
-        true; //preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS);
+        true; // preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS);
     //		if (preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES)) {
     setRequireExtendedContext(true);
     //		}
@@ -91,7 +91,8 @@ public final class FillArgumentNamesCompletionProposalCollector
     if (!shouldProposeGenerics(project)) return super.createJavaCompletionProposal(typeProposal);
 
     char[] completion = typeProposal.getCompletion();
-    // don't add parameters for import-completions nor for proposals with an empty completion (e.g. inside the type argument list)
+    // don't add parameters for import-completions nor for proposals with an empty completion (e.g.
+    // inside the type argument list)
     if (completion.length > 0
         && (completion[completion.length - 1] == ';' || completion[completion.length - 1] == '.'))
       return super.createJavaCompletionProposal(typeProposal);

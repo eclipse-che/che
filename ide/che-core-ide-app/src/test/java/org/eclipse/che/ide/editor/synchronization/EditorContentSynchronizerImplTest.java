@@ -48,11 +48,11 @@ public class EditorContentSynchronizerImplTest {
   private static final String FILE_NAME = "someFile";
   private static final String FILE_PATH = FOLDER_PATH + FILE_NAME;
 
-  //constructor mocks
+  // constructor mocks
   @Mock private EventBus eventBus;
   @Mock private Provider<EditorGroupSynchronization> editorGroupSyncProvider;
 
-  //additional mocks
+  // additional mocks
   @Mock private EditorInput editorInput;
   @Mock private VirtualFile virtualFile;
   @Mock private EditorGroupSynchronization editorGroupSynchronization;

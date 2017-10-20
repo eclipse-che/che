@@ -34,8 +34,8 @@ import org.eclipse.swt.graphics.Image;
 
 public class NewAnnotationMemberProposal extends LinkedCorrectionProposal {
 
-  private static final String KEY_NAME = "name"; //$NON-NLS-1$
-  private static final String KEY_TYPE = "type"; //$NON-NLS-1$
+  private static final String KEY_NAME = "name"; // $NON-NLS-1$
+  private static final String KEY_TYPE = "type"; // $NON-NLS-1$
 
   private final ASTNode fInvocationNode;
   private final ITypeBinding fSenderBinding;
@@ -121,7 +121,7 @@ public class NewAnnotationMemberProposal extends LinkedCorrectionProposal {
       newTypeNode = getImportRewrite().addImport(binding, ast, importRewriteContext);
     }
     if (newTypeNode == null) {
-      newTypeNode = ast.newSimpleType(ast.newSimpleName("String")); //$NON-NLS-1$
+      newTypeNode = ast.newSimpleType(ast.newSimpleName("String")); // $NON-NLS-1$
     }
     addLinkedPosition(rewrite.track(newTypeNode), false, KEY_TYPE);
     return newTypeNode;
@@ -147,7 +147,7 @@ public class NewAnnotationMemberProposal extends LinkedCorrectionProposal {
         addLinkedPosition(rewrite.track(fInvocationNode), true, KEY_NAME);
       }
     } else {
-      name = "value"; //$NON-NLS-1$
+      name = "value"; // $NON-NLS-1$
     }
 
     SimpleName newNameNode = ast.newSimpleName(name);

@@ -20,4 +20,6 @@ public interface Breakpoint {
 
   /** The condition. */
   String getCondition();
+
+  void setCondition(String condition);
 }

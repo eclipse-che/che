@@ -42,7 +42,7 @@ public class WsAgentModule extends AbstractModule {
     install(new org.eclipse.che.api.core.websocket.impl.WebSocketModule());
   }
 
-  //it's need for WSocketEventBusClient and in the future will be replaced with the property
+  // it's need for WSocketEventBusClient and in the future will be replaced with the property
   @Named("notification.client.event_subscriptions")
   @Provides
   @SuppressWarnings("unchecked")
@@ -50,7 +50,8 @@ public class WsAgentModule extends AbstractModule {
     return new Pair[] {Pair.of(eventBusURL, "")};
   }
 
-  //it's need for EventOriginClientPropagationPolicy and in the future will be replaced with the property
+  // it's need for EventOriginClientPropagationPolicy and in the future will be replaced with the
+  // property
   @Named("notification.client.propagate_events")
   @Provides
   @SuppressWarnings("unchecked")

@@ -70,7 +70,7 @@ public class ASTBatchParser {
 
     if (monitor == null) monitor = new NullProgressMonitor();
 
-    monitor.beginTask("", compilationUnits.length); //$NON-NLS-1$
+    monitor.beginTask("", compilationUnits.length); // $NON-NLS-1$
     try {
 
       ICompilationUnit[][] splited = splitByProject(compilationUnits);

@@ -48,7 +48,7 @@ public class CheRefactoringContributions {
     refactoringContributions.put(
         "org.eclipse.jdt.ui.rename.type",
         "org.eclipse.jdt.internal.corext.refactoring.scripting.RenameTypeRefactoringContribution");
-    //TODO :
+    // TODO :
     /*
       <contribution
           class="org.eclipse.jdt.internal.corext.refactoring.scripting.ChangeMethodSignatureRefactoringContribution"

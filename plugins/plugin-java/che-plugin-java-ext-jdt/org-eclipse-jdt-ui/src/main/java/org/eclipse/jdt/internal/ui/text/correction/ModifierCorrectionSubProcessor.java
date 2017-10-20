@@ -166,7 +166,7 @@ public class ModifierCorrectionSubProcessor {
       }
       bindingDecl = methodDecl.getMethodDeclaration();
       typeBinding = methodDecl.getDeclaringClass();
-      name = BasicElementLabels.getJavaElementName(methodDecl.getName() + "()"); //$NON-NLS-1$
+      name = BasicElementLabels.getJavaElementName(methodDecl.getName() + "()"); // $NON-NLS-1$
     } else if (binding instanceof IVariableBinding) {
       IVariableBinding varDecl = (IVariableBinding) binding;
       typeBinding = varDecl.getDeclaringClass();
@@ -238,7 +238,7 @@ public class ModifierCorrectionSubProcessor {
           excludedModifiers = Modifier.FINAL;
           break;
         default:
-          throw new IllegalArgumentException("not supported"); //$NON-NLS-1$
+          throw new IllegalArgumentException("not supported"); // $NON-NLS-1$
       }
       ICompilationUnit targetCU =
           isLocalVar
@@ -322,7 +322,7 @@ public class ModifierCorrectionSubProcessor {
               cu, context.getASTRoot(), overriddenDecl.getDeclaringClass());
 
       if (overriddenMethodCU != null) {
-        //target method and compilation unit for the quick fix
+        // target method and compilation unit for the quick fix
         IMethodBinding targetMethod = overriddenDecl;
         ICompilationUnit targetCU = overriddenMethodCU;
 
@@ -332,7 +332,8 @@ public class ModifierCorrectionSubProcessor {
         switch (kind) {
           case TO_VISIBLE:
             if (JdtFlags.isPrivate(method)) {
-              // Propose to increase the visibility of this method, because decreasing to private is not possible.
+              // Propose to increase the visibility of this method, because decreasing to private is
+              // not possible.
               targetMethod = method;
               targetCU = cu;
 
@@ -391,7 +392,7 @@ public class ModifierCorrectionSubProcessor {
             includedModifiers = 0;
             break;
           default:
-            Assert.isTrue(false, "not supported"); //$NON-NLS-1$
+            Assert.isTrue(false, "not supported"); // $NON-NLS-1$
             return;
         }
         Image image = JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -574,7 +575,7 @@ public class ModifierCorrectionSubProcessor {
                   | Modifier.STRICTFP);
           break;
         default:
-          Assert.isTrue(false, "not supported"); //$NON-NLS-1$
+          Assert.isTrue(false, "not supported"); // $NON-NLS-1$
           return;
       }
 
@@ -671,11 +672,11 @@ public class ModifierCorrectionSubProcessor {
 
   private static String getVisibilityString(int code) {
     if (Modifier.isPublic(code)) {
-      return "public"; //$NON-NLS-1$
+      return "public"; // $NON-NLS-1$
     } else if (Modifier.isProtected(code)) {
-      return "protected"; //$NON-NLS-1$
+      return "protected"; // $NON-NLS-1$
     } else if (Modifier.isPrivate(code)) {
-      return "private"; //$NON-NLS-1$
+      return "private"; // $NON-NLS-1$
     }
     return CorrectionMessages.ModifierCorrectionSubProcessor_default;
   }
@@ -1115,7 +1116,7 @@ public class ModifierCorrectionSubProcessor {
     ASTRewrite rewrite = ASTRewrite.create(ast);
     if (is50OrHigher) {
       Annotation annot = ast.newMarkerAnnotation();
-      annot.setTypeName(ast.newName("Deprecated")); //$NON-NLS-1$
+      annot.setTypeName(ast.newName("Deprecated")); // $NON-NLS-1$
       rewrite
           .getListRewrite(methodDecl, methodDecl.getModifiersProperty())
           .insertFirst(annot, null);
@@ -1151,7 +1152,7 @@ public class ModifierCorrectionSubProcessor {
       return;
     }
     MethodDeclaration methodDecl = (MethodDeclaration) selectedNode;
-    Annotation annot = findAnnotation("java.lang.Override", methodDecl.modifiers()); //$NON-NLS-1$
+    Annotation annot = findAnnotation("java.lang.Override", methodDecl.modifiers()); // $NON-NLS-1$
     if (annot != null) {
       ASTRewrite rewrite = ASTRewrite.create(annot.getAST());
       rewrite.remove(annot, null);
@@ -1216,7 +1217,7 @@ public class ModifierCorrectionSubProcessor {
     }
   }
 
-  private static final String KEY_MODIFIER = "modifier"; //$NON-NLS-1$
+  private static final String KEY_MODIFIER = "modifier"; // $NON-NLS-1$
 
   private static class ModifierLinkedModeProposal extends LinkedProposalPositionGroup.Proposal {
 

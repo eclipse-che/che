@@ -178,7 +178,7 @@ public class SubversionExtension {
     actionManager.registerAction("SvnCleanup", cleanupAction);
     addCommandGroup.add(cleanupAction);
 
-    //context menu
+    // context menu
     DefaultActionGroup contextGroup = new DefaultActionGroup("Subversion", true, actionManager);
     contextGroup.getTemplatePresentation().setDescription("Subversion operation...");
 

@@ -31,7 +31,8 @@ public abstract class AbstractJavaSearchResult extends AbstractTextSearchResult
   public AbstractJavaSearchResult() {}
 
   //	/* (non-Javadoc)
-  //	 * @see org.eclipse.search.ui.text.IEditorMatchAdapter#computeContainedMatches(org.eclipse.search.ui.text.AbstractTextSearchResult, org.eclipse.ui.IEditorPart)
+  //	 * @see
+  // org.eclipse.search.ui.text.IEditorMatchAdapter#computeContainedMatches(org.eclipse.search.ui.text.AbstractTextSearchResult, org.eclipse.ui.IEditorPart)
   //	 */
   //	public Match[] computeContainedMatches(AbstractTextSearchResult result, IEditorPart editor) {
   //		return computeContainedMatches(editor.getEditorInput());
@@ -110,13 +111,15 @@ public abstract class AbstractJavaSearchResult extends AbstractTextSearchResult
   }
 
   //	/* (non-Javadoc)
-  //	 * @see org.eclipse.search.ui.text.IEditorMatchAdapter#isShownInEditor(org.eclipse.search.ui.text.Match, org.eclipse.ui.IEditorPart)
+  //	 * @see
+  // org.eclipse.search.ui.text.IEditorMatchAdapter#isShownInEditor(org.eclipse.search.ui.text.Match, org.eclipse.ui.IEditorPart)
   //	 */
   //	public boolean isShownInEditor(Match match, IEditorPart editor) {
   //		Object element= match.getElement();
   //		if (element instanceof IJavaElement) {
   //			element= ((IJavaElement) element).getOpenable(); // class file or compilation unit
-  //			return element != null && element.equals(editor.getEditorInput().getAdapter(IJavaElement.class));
+  //			return element != null &&
+  // element.equals(editor.getEditorInput().getAdapter(IJavaElement.class));
   //		} else if (element instanceof IFile) {
   //			return element.equals(editor.getEditorInput().getAdapter(IFile.class));
   //		}

@@ -132,11 +132,11 @@ import org.eclipse.text.edits.TextEditGroup;
 /** Extracts a method in a compilation unit based on a text selection range. */
 public class ExtractMethodRefactoring extends Refactoring {
 
-  private static final String ATTRIBUTE_VISIBILITY = "visibility"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_DESTINATION = "destination"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_COMMENTS = "comments"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_REPLACE = "replace"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_EXCEPTIONS = "exceptions"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_VISIBILITY = "visibility"; // $NON-NLS-1$
+  private static final String ATTRIBUTE_DESTINATION = "destination"; // $NON-NLS-1$
+  private static final String ATTRIBUTE_COMMENTS = "comments"; // $NON-NLS-1$
+  private static final String ATTRIBUTE_REPLACE = "replace"; // $NON-NLS-1$
+  private static final String ATTRIBUTE_EXCEPTIONS = "exceptions"; // $NON-NLS-1$
 
   private ICompilationUnit fCUnit;
   private CompilationUnit fRoot;
@@ -161,10 +161,10 @@ public class ExtractMethodRefactoring extends Refactoring {
   private ASTNode[] fDestinations;
   private LinkedProposalModel fLinkedProposalModel;
 
-  private static final String EMPTY = ""; //$NON-NLS-1$
+  private static final String EMPTY = ""; // $NON-NLS-1$
 
-  private static final String KEY_TYPE = "type"; //$NON-NLS-1$
-  private static final String KEY_NAME = "name"; //$NON-NLS-1$
+  private static final String KEY_TYPE = "type"; // $NON-NLS-1$
+  private static final String KEY_NAME = "name"; // $NON-NLS-1$
 
   private static class UsedNamesCollector extends ASTVisitor {
     private Set<String> result = new HashSet<String>();
@@ -252,7 +252,7 @@ public class ExtractMethodRefactoring extends Refactoring {
   public ExtractMethodRefactoring(ICompilationUnit unit, int selectionStart, int selectionLength) {
     fCUnit = unit;
     fRoot = null;
-    fMethodName = "extracted"; //$NON-NLS-1$
+    fMethodName = "extracted"; // $NON-NLS-1$
     fSelectionStart = selectionStart;
     fSelectionLength = selectionLength;
     fVisibility = -1;
@@ -297,7 +297,7 @@ public class ExtractMethodRefactoring extends Refactoring {
   @Override
   public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
     RefactoringStatus result = new RefactoringStatus();
-    pm.beginTask("", 100); //$NON-NLS-1$
+    pm.beginTask("", 100); // $NON-NLS-1$
 
     if (fSelectionStart < 0 || fSelectionLength == 0) return mergeTextSelectionStatus(result);
 
@@ -500,7 +500,7 @@ public class ExtractMethodRefactoring extends Refactoring {
   @Override
   public Change createChange(IProgressMonitor pm) throws CoreException {
     if (fMethodName == null) return null;
-    pm.beginTask("", 2); //$NON-NLS-1$
+    pm.beginTask("", 2); // $NON-NLS-1$
     try {
       fAnalyzer.aboutToCreateChange();
       BodyDeclaration declaration = fAnalyzer.getEnclosingBodyDeclaration();
@@ -722,7 +722,7 @@ public class ExtractMethodRefactoring extends Refactoring {
             RefactoringCoreMessages.ExtractMethodRefactoring_destination_pattern,
             BindingLabelProvider.getBindingLabel(type, JavaElementLabels.ALL_FULLY_QUALIFIED)));
     String visibility = JdtFlags.getVisibilityString(fVisibility);
-    if ("".equals(visibility)) //$NON-NLS-1$
+    if ("".equals(visibility)) // $NON-NLS-1$
     visibility = RefactoringCoreMessages.ExtractMethodRefactoring_default_visibility;
     comment.addSetting(
         Messages.format(
@@ -745,7 +745,7 @@ public class ExtractMethodRefactoring extends Refactoring {
         JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION,
         new Integer(fSelectionStart).toString()
             + " "
-            + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+            + new Integer(fSelectionLength).toString()); // $NON-NLS-1$
     arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
     arguments.put(ATTRIBUTE_DESTINATION, new Integer(fDestinationIndex).toString());
     arguments.put(ATTRIBUTE_EXCEPTIONS, Boolean.valueOf(fThrowRuntimeExceptions).toString());
@@ -811,7 +811,7 @@ public class ExtractMethodRefactoring extends Refactoring {
         && ((TypeDeclaration) fDestination).isInterface();
   }
 
-  //---- Helper methods ------------------------------------------------------------------------
+  // ---- Helper methods ------------------------------------------------------------------------
 
   private void initializeParameterInfos() {
     IVariableBinding[] arguments = fAnalyzer.getArguments();
@@ -900,7 +900,7 @@ public class ExtractMethodRefactoring extends Refactoring {
     else return type;
   }
 
-  //---- Code generation -----------------------------------------------------------------------
+  // ---- Code generation -----------------------------------------------------------------------
 
   private ASTNode[] createCallNodes(SnippetFinder.Match duplicate, int modifiers) {
     List<ASTNode> result = new ArrayList<ASTNode>(2);
@@ -1106,7 +1106,7 @@ public class ExtractMethodRefactoring extends Refactoring {
       parameter.setName(fAST.newSimpleName(typeVariables[i].getName()));
       ITypeBinding[] bounds = typeVariables[i].getTypeBounds();
       for (int j = 0; j < bounds.length; j++)
-        if (!"java.lang.Object".equals(bounds[j].getQualifiedName())) //$NON-NLS-1$
+        if (!"java.lang.Object".equals(bounds[j].getQualifiedName())) // $NON-NLS-1$
         parameter.typeBounds().add(fImportRewriter.addImport(bounds[j], fAST));
       typeParameters.add(parameter);
     }
@@ -1226,7 +1226,7 @@ public class ExtractMethodRefactoring extends Refactoring {
       // if we have an expression then only one node is selected.
       ITypeBinding binding = fAnalyzer.getExpressionBinding();
       if (binding != null
-          && (!binding.isPrimitive() || !"void".equals(binding.getName()))) { //$NON-NLS-1$
+          && (!binding.isPrimitive() || !"void".equals(binding.getName()))) { // $NON-NLS-1$
         ReturnStatement rs = fAST.newReturnStatement();
         rs.setExpression(
             (Expression)

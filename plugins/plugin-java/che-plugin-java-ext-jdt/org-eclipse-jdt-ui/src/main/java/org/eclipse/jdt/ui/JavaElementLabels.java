@@ -291,24 +291,24 @@ public class JavaElementLabels {
 
   /** User-readable string for separating post qualified names (e.g. " - "). */
   public static final String CONCAT_STRING =
-      " - "; //JavaUIMessages.JavaElementLabels_concat_string;
+      " - "; // JavaUIMessages.JavaElementLabels_concat_string;
   /** User-readable string for separating list items (e.g. ", "). */
-  public static final String COMMA_STRING = ", "; //JavaUIMessages.JavaElementLabels_comma_string;
+  public static final String COMMA_STRING = ", "; // JavaUIMessages.JavaElementLabels_comma_string;
   /** User-readable string for separating the return type (e.g. " : "). */
   public static final String DECL_STRING =
-      " : "; //JavaUIMessages.JavaElementLabels_declseparator_string;
+      " : "; // JavaUIMessages.JavaElementLabels_declseparator_string;
   /**
    * User-readable string for concatenating categories (e.g. " ").
    *
    * @since 3.5
    */
   public static final String CATEGORY_SEPARATOR_STRING =
-      " "; //JavaUIMessages.JavaElementLabels_category_separator_string;
+      " "; // JavaUIMessages.JavaElementLabels_category_separator_string;
   /** User-readable string for ellipsis ("..."). */
-  public static final String ELLIPSIS_STRING = "..."; //$NON-NLS-1$
+  public static final String ELLIPSIS_STRING = "..."; // $NON-NLS-1$
   /** User-readable string for the default package name (e.g. "(default package)"). */
   public static final String DEFAULT_PACKAGE =
-      "(default package)"; //JavaUIMessages.JavaElementLabels_default_package;
+      "(default package)"; // JavaUIMessages.JavaElementLabels_default_package;
 
   //	private static final Styler DECORATIONS_STYLE = StyledString.DECORATIONS_STYLER;
 
@@ -343,12 +343,13 @@ public class JavaElementLabels {
       //			return BasicElementLabels.getResourceName(((IStorage)obj).getName());
       //
       //		} else if (obj instanceof IAdaptable) {
-      //			IWorkbenchAdapter wbadapter = (IWorkbenchAdapter)((IAdaptable)obj).getAdapter(IWorkbenchAdapter.class);
+      //			IWorkbenchAdapter wbadapter =
+      // (IWorkbenchAdapter)((IAdaptable)obj).getAdapter(IWorkbenchAdapter.class);
       //			if (wbadapter != null) {
       //				return Strings.markLTR(wbadapter.getLabel(obj));
       //			}
     }
-    return ""; //$NON-NLS-1$
+    return ""; // $NON-NLS-1$
   }
 
   /**
@@ -371,13 +372,15 @@ public class JavaElementLabels {
 
       //		} else if (obj instanceof ClassPathContainer) {
       //			ClassPathContainer container= (ClassPathContainer) obj;
-      //			return getStyledContainerEntryLabel(container.getClasspathEntry().getPath(), container.getJavaProject());
+      //			return getStyledContainerEntryLabel(container.getClasspathEntry().getPath(),
+      // container.getJavaProject());
       //
       //		} else if (obj instanceof IStorage) {
       //			return getStyledStorageLabel((IStorage) obj);
       //
       //		} else if (obj instanceof IAdaptable) {
-      //			IWorkbenchAdapter wbadapter= (IWorkbenchAdapter) ((IAdaptable)obj).getAdapter(IWorkbenchAdapter.class);
+      //			IWorkbenchAdapter wbadapter= (IWorkbenchAdapter)
+      // ((IAdaptable)obj).getAdapter(IWorkbenchAdapter.class);
       //			if (wbadapter != null) {
       //				return Strings.markLTR(new StyledString(wbadapter.getLabel(obj)));
       //			}
@@ -777,7 +780,8 @@ public class JavaElementLabels {
       }
       if (description != null) {
         StyledString str = new StyledString(description);
-        //				if (containerPath.segmentCount() > 0 && JavaRuntime.JRE_CONTAINER.equals(containerPath.segment(0))) {
+        //				if (containerPath.segmentCount() > 0 &&
+        // JavaRuntime.JRE_CONTAINER.equals(containerPath.segment(0))) {
         //					int index= description.indexOf('[');
         //					if (index != -1) {
         //						str.setStyle(index, description.length() - index, DECORATIONS_STYLE);

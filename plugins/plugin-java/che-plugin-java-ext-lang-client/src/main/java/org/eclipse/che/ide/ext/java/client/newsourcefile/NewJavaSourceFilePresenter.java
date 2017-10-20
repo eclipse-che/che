@@ -66,7 +66,7 @@ public class NewJavaSourceFilePresenter implements NewJavaSourceFileView.ActionD
 
   public void showDialog(Container parent) {
     this.parent = parent;
-    view.setTypes(sourceFileTypes); //todo why we need this there?
+    view.setTypes(sourceFileTypes); // todo why we need this there?
     view.showDialog();
   }
 

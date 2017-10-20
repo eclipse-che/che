@@ -87,17 +87,17 @@ public class OrganizationalAccountAvailableResourcesProviderTest {
 
   @Test
   public void shouldReturnAvailableResourcesForRootOrganization() throws Exception {
-    //given
+    // given
     ResourceImpl availableResource = new ResourceImpl("test", 5000, "unit");
     doReturn(singletonList(availableResource))
         .when(availableResourcesProvider)
         .getAvailableOrganizationResources(any());
 
-    //when
+    // when
     List<? extends Resource> availableResources =
         availableResourcesProvider.getAvailableResources(ROOT_ORG_ID);
 
-    //then
+    // then
     assertEquals(availableResources.size(), 1);
     assertEquals(availableResources.get(0), availableResource);
     verify(availableResourcesProvider).getAvailableResources(ROOT_ORG_ID);
@@ -105,7 +105,7 @@ public class OrganizationalAccountAvailableResourcesProviderTest {
 
   @Test
   public void shouldReturnAvailableResourcesForSuborganization() throws Exception {
-    //given
+    // given
     ResourceImpl parentAvailableResource = new ResourceImpl("test", 3000, "unit");
     prepareAvailableResource(ROOT_ORG_ID, parentAvailableResource);
     ResourceImpl suborgAvailableResource = new ResourceImpl("test", 5000, "unit");
@@ -115,11 +115,11 @@ public class OrganizationalAccountAvailableResourcesProviderTest {
         .intersection(anyList(), anyList());
     doReturn(singletonList(parentAvailableResource)).when(resourceAggregator).min(anyList());
 
-    //when
+    // when
     List<? extends Resource> availableResources =
         availableResourcesProvider.getAvailableResources(SUBORG_ID);
 
-    //then
+    // then
     assertEquals(availableResources.size(), 1);
     assertEquals(availableResources.get(0), parentAvailableResource);
     verify(availableResourcesProvider).getAvailableOrganizationResources(rootOrganization);
@@ -133,7 +133,7 @@ public class OrganizationalAccountAvailableResourcesProviderTest {
   @Test
   public void shouldReturnAvailableResourcesAsTotalMinusUsedByItselfAndItsSuborganizations()
       throws Exception {
-    //given
+    // given
     ResourceImpl totalResource = new ResourceImpl("test", 9000, "unit");
     doReturn(singletonList(totalResource))
         .when(resourceUsageManager)
@@ -153,11 +153,11 @@ public class OrganizationalAccountAvailableResourcesProviderTest {
         .when(resourceAggregator)
         .deduct(anyList(), anyList());
 
-    //when
+    // when
     List<? extends Resource> availableResources =
         availableResourcesProvider.getAvailableOrganizationResources(rootOrganization);
 
-    //then
+    // then
     assertEquals(availableResources.size(), 1);
     assertEquals(availableResources.get(0), availableResource);
     verify(resourceUsageManager).getTotalResources(ROOT_ORG_ID);
@@ -171,7 +171,7 @@ public class OrganizationalAccountAvailableResourcesProviderTest {
 
   @Test
   public void shouldReturnExcessiveResourcesWhenUsedResourceAreGreaterThanTotal() throws Exception {
-    //given
+    // given
     ResourceImpl totalResource = new ResourceImpl("test", 9000, "unit");
     ResourceImpl excessiveTotalResource = new ResourceImpl("test1", 1000, "unit");
     doReturn(asList(totalResource, excessiveTotalResource))
@@ -192,11 +192,11 @@ public class OrganizationalAccountAvailableResourcesProviderTest {
         .when(resourceAggregator)
         .excess(anyList(), anyList());
 
-    //when
+    // when
     List<? extends Resource> availableResources =
         availableResourcesProvider.getAvailableOrganizationResources(rootOrganization);
 
-    //then
+    // then
     assertEquals(availableResources.size(), 1);
     assertEquals(availableResources.get(0), excessiveTotalResource);
     verify(resourceUsageManager).getTotalResources(ROOT_ORG_ID);
@@ -210,7 +210,7 @@ public class OrganizationalAccountAvailableResourcesProviderTest {
 
   @Test
   public void shouldCalculateUsedResourceBySuborganizations() throws Exception {
-    //given
+    // given
     doReturn(new Page<>(singletonList(suborganization), 0, 1, 2))
         .doReturn(new Page<>(singletonList(subsuborganization), 1, 1, 2))
         .when(organizationManager)
@@ -224,11 +224,11 @@ public class OrganizationalAccountAvailableResourcesProviderTest {
         .when(resourceUsageManager)
         .getUsedResources(SUBSUBORG_ID);
 
-    //when
+    // when
     List<? extends Resource> usedResources =
         availableResourcesProvider.getUsedResourcesBySuborganizations(ROOT_ORG_NAME);
 
-    //then
+    // then
     assertEquals(usedResources.size(), 2);
     assertTrue(usedResources.contains(usedBySuborgResource));
     assertTrue(usedResources.contains(usedBySubsuborgResource));

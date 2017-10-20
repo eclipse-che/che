@@ -51,6 +51,6 @@ public class MessageDialogPresenter implements MessageDialogView.ActionDelegate 
 
   @Override
   public void onEnterClicked() {
-    //ignore
+    // ignore
   }
 }

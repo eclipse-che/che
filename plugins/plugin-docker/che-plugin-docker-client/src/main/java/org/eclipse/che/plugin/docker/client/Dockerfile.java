@@ -26,7 +26,8 @@ public class Dockerfile {
   static final Pattern TEMPLATE_DEFAULT_PATTERN = Pattern.compile("(.*):-(.*)");
   // Docker file templates may contains following constructions:
   // parameter[= > < >= <= !=]condition?expression1:expression2
-  // Parameter is replaced with expression1 if value of parameter is matched to condition and replaced with expression2 otherwise
+  // Parameter is replaced with expression1 if value of parameter is matched to condition and
+  // replaced with expression2 otherwise
   static final Pattern TEMPLATE_CONDITIONAL_PATTERN =
       Pattern.compile("([^><=!\\s]+)([><=!]+)?(.*)?\\?(.*)?:(.*)?");
 

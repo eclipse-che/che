@@ -54,15 +54,15 @@ public class GetCommitersTest {
       throws GitException, IOException {
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
 
-    //given
+    // given
     addFile(connection, "newfile", "newfile content");
     connection.add(AddParams.create(singletonList(".")));
     connection.commit(CommitParams.create("test commit"));
 
-    //when
+    // when
     List<GitUser> committers = connection.getCommiters();
 
-    //then
+    // then
     assertEquals(committers.size(), 1);
     assertEquals(committers.get(0), getTestGitUser());
   }

@@ -41,7 +41,8 @@ public class MachineSourceAdapter
       MachineSource machineSource, Type type, JsonSerializationContext context) {
     final JsonObject jsonObject = new JsonObject();
 
-    // we can't rely on MachineSourceImpl as custom InstanceProvider can build their own implementation
+    // we can't rely on MachineSourceImpl as custom InstanceProvider can build their own
+    // implementation
     jsonObject.addProperty("content", machineSource.getContent());
     jsonObject.addProperty("location", machineSource.getLocation());
     jsonObject.addProperty("type", machineSource.getType());

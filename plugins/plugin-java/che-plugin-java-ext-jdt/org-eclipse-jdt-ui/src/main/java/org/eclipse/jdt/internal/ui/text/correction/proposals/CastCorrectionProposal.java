@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 public class CastCorrectionProposal extends LinkedCorrectionProposal {
 
-  public static final String ADD_CAST_ID = "org.eclipse.jdt.ui.correction.addCast"; //$NON-NLS-1$
+  public static final String ADD_CAST_ID = "org.eclipse.jdt.ui.correction.addCast"; // $NON-NLS-1$
 
   private final Expression fNodeToCast;
   private final ITypeBinding fCastType;
@@ -100,16 +100,16 @@ public class CastCorrectionProposal extends LinkedCorrectionProposal {
           ITypeBinding first = getCastFavorite(bindings, fNodeToCast.resolveTypeBinding());
 
           Type newTypeNode = importRewrite.addImport(first, ast, context);
-          addLinkedPosition(rewrite.track(newTypeNode), true, "casttype"); //$NON-NLS-1$
+          addLinkedPosition(rewrite.track(newTypeNode), true, "casttype"); // $NON-NLS-1$
           for (int i = 0; i < bindings.length; i++) {
-            addLinkedPositionProposal("casttype", bindings[i]); //$NON-NLS-1$
+            addLinkedPositionProposal("casttype", bindings[i]); // $NON-NLS-1$
           }
           return newTypeNode;
         }
       }
     }
-    Type newCastType = ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
-    addLinkedPosition(rewrite.track(newCastType), true, "casttype"); //$NON-NLS-1$
+    Type newCastType = ast.newSimpleType(ast.newSimpleName("Object")); // $NON-NLS-1$
+    addLinkedPosition(rewrite.track(newCastType), true, "casttype"); // $NON-NLS-1$
     return newCastType;
   }
 

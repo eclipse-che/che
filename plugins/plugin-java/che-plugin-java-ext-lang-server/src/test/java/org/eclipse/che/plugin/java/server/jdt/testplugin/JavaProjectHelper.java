@@ -160,17 +160,20 @@ public class JavaProjectHelper {
   //	 * @throws InvocationTargetException
   //	 * @since 3.1
   //	 */
-  //	public static IJavaProject createJavaProjectWithJUnitSource(String projectName, String srcContainerName, String outputFolderName)
+  //	public static IJavaProject createJavaProjectWithJUnitSource(String projectName, String
+  // srcContainerName, String outputFolderName)
   // throws CoreException, IOException, InvocationTargetException {
   //		IJavaProject project= createJavaProject(projectName, outputFolderName);
   //
-  //		IPackageFragmentRoot jdk= JavaProjectHelper.addVariableRTJar(project, "JRE_LIB_TEST", null, null);//$NON-NLS-1$
+  //		IPackageFragmentRoot jdk= JavaProjectHelper.addVariableRTJar(project, "JRE_LIB_TEST", null,
+  // null);//$NON-NLS-1$
   //		TestCase.assertNotNull(jdk);
   //
   //		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JUNIT_SRC_381);
   //		TestCase.assertTrue(junitSrcArchive != null && junitSrcArchive.exists());
   //
-  //		JavaProjectHelper.addSourceContainerWithImport(project, srcContainerName, junitSrcArchive, JUNIT_SRC_ENCODING);
+  //		JavaProjectHelper.addSourceContainerWithImport(project, srcContainerName, junitSrcArchive,
+  // JUNIT_SRC_ENCODING);
   //
   //		return project;
   //	}
@@ -443,7 +446,8 @@ public class JavaProjectHelper {
             null,
             SearchPattern.R_EXACT_MATCH,
             "XXXXXXXXX"
-                .toCharArray(), // make sure we search a concrete name. This is faster according to Kent
+                .toCharArray(), // make sure we search a concrete name. This is faster according to
+            // Kent
             SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE,
             IJavaSearchConstants.CLASS,
             searchScope,
@@ -719,11 +723,13 @@ public class JavaProjectHelper {
   //	 * @throws CoreException
   //	 * @throws InvocationTargetException
   //	 */
-  //	public static IPackageFragmentRoot addClassFolderWithImport(IJavaProject jproject, String containerName, IPath sourceAttachPath, IPath
+  //	public static IPackageFragmentRoot addClassFolderWithImport(IJavaProject jproject, String
+  // containerName, IPath sourceAttachPath, IPath
   // sourceAttachRoot, File zipFile) throws IOException, CoreException, InvocationTargetException {
   //		ZipFile file= new ZipFile(zipFile);
   //		try {
-  //			IPackageFragmentRoot root= addClassFolder(jproject, containerName, sourceAttachPath, sourceAttachRoot);
+  //			IPackageFragmentRoot root= addClassFolder(jproject, containerName, sourceAttachPath,
+  // sourceAttachRoot);
   //			importFilesFromZip(file, root.getPath(), null);
   //			return root;
   //		} finally {
@@ -789,7 +795,8 @@ public class JavaProjectHelper {
   //	 * @return The added package fragment root
   //	 * @throws JavaModelException
   //	 */
-  //	public static IPackageFragmentRoot addVariableEntry(IJavaProject jproject, IPath path, IPath sourceAttachPath, IPath sourceAttachRoot)
+  //	public static IPackageFragmentRoot addVariableEntry(IJavaProject jproject, IPath path, IPath
+  // sourceAttachPath, IPath sourceAttachRoot)
   // throws JavaModelException {
   //		IClasspathEntry cpe= JavaCore.newVariableEntry(path, sourceAttachPath, sourceAttachRoot);
   //		addToClasspath(jproject, cpe);
@@ -800,7 +807,8 @@ public class JavaProjectHelper {
   //		return null;
   //	}
   //
-  //	public static IPackageFragmentRoot addVariableRTJar13(IJavaProject jproject, String libVarName, String srcVarName, String
+  //	public static IPackageFragmentRoot addVariableRTJar13(IJavaProject jproject, String libVarName,
+  // String srcVarName, String
   // srcrootVarName) throws CoreException {
   //		return addVariableRTJar(jproject, RT_STUBS_13, libVarName, srcVarName, srcrootVarName);
   //	}
@@ -814,11 +822,13 @@ public class JavaProjectHelper {
   //	 * @param jproject the project to add the variable RT JAR
   //	 * @param libVarName Name of the variable for the library
   //	 * @param srcVarName Name of the variable for the source attachment. Can be <code>null</code>.
-  //	 * @param srcrootVarName name of the variable for the source attachment root. Can be <code>null</code>.
+  //	 * @param srcrootVarName name of the variable for the source attachment root. Can be
+  // <code>null</code>.
   //	 * @return the new package fragment root
   //	 * @throws CoreException Creation failed
   //	 */
-  //	public static IPackageFragmentRoot addVariableRTJar(IJavaProject jproject, String libVarName, String srcVarName, String
+  //	public static IPackageFragmentRoot addVariableRTJar(IJavaProject jproject, String libVarName,
+  // String srcVarName, String
   // srcrootVarName) throws CoreException {
   //		return addVariableRTJar(jproject, RT_STUBS_15, libVarName, srcVarName, srcrootVarName);
   //	}
@@ -832,11 +842,13 @@ public class JavaProjectHelper {
   //	 * @param rtStubsPath path to an rt.jar
   //	 * @param libVarName name of the variable for the library
   //	 * @param srcVarName Name of the variable for the source attachment. Can be <code>null</code>.
-  //	 * @param srcrootVarName Name of the variable for the source attachment root. Can be <code>null</code>.
+  //	 * @param srcrootVarName Name of the variable for the source attachment root. Can be
+  // <code>null</code>.
   //	 * @return the new package fragment root
   //	 * @throws CoreException Creation failed
   //	 */
-  //	private static IPackageFragmentRoot addVariableRTJar(IJavaProject jproject, IPath rtStubsPath, String libVarName, String srcVarName,
+  //	private static IPackageFragmentRoot addVariableRTJar(IJavaProject jproject, IPath rtStubsPath,
+  // String libVarName, String srcVarName,
   // String srcrootVarName) throws CoreException {
   //		IPath[] rtJarPaths= findRtJar(rtStubsPath);
   //		IPath libVarPath= new Path(libVarName);
@@ -943,7 +955,8 @@ public class JavaProjectHelper {
   }
 
   //	/**
-  //	 * Imports resources from <code>bundleSourcePath</code> inside <code>bundle</code> into <code>importTarget</code>.
+  //	 * Imports resources from <code>bundleSourcePath</code> inside <code>bundle</code> into
+  // <code>importTarget</code>.
   //	 *
   //	 * @param importTarget the parent container
   //	 * @param bundle the bundle
@@ -952,7 +965,8 @@ public class JavaProjectHelper {
   //	 * @throws CoreException import failed
   //	 * @throws IOException import failed
   //	 */
-  //	public static void importResources(IContainer importTarget, Bundle bundle, String bundleSourcePath) throws CoreException, IOException {
+  //	public static void importResources(IContainer importTarget, Bundle bundle, String
+  // bundleSourcePath) throws CoreException, IOException {
   //		Enumeration entryPaths= bundle.getEntryPaths(bundleSourcePath);
   //		while (entryPaths.hasMoreElements()) {
   //			String path= (String) entryPaths.nextElement();

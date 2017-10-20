@@ -171,7 +171,7 @@ public class ProjectServiceClientImplTest {
 
     client.getTree(Path.EMPTY, 1, true);
 
-    verify(asyncRequest, never()).loader(any(AsyncRequestLoader.class)); //see CHE-3467
+    verify(asyncRequest, never()).loader(any(AsyncRequestLoader.class)); // see CHE-3467
   }
 
   @Test

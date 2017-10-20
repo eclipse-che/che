@@ -216,8 +216,10 @@ public class ProjectTypes {
         for (Attribute attr : pt.getAttributes()) {
           final String attrName = attr.getName();
           final Attribute attribute = attributeDefs.get(attr.getName());
-          // If attr from mixin is going to be added but we already have some attribute with the same name,
-          // check whether it's the same attribute that comes from the common parent PT, e.g. from Base PT.
+          // If attr from mixin is going to be added but we already have some attribute with the
+          // same name,
+          // check whether it's the same attribute that comes from the common parent PT, e.g. from
+          // Base PT.
           if (attribute != null && !attribute.getProjectType().equals(attr.getProjectType())) {
             problems.add(
                 new ProjectProblemImpl(

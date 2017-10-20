@@ -65,18 +65,18 @@ public class ResourceAggregatorTest {
 
   @Test
   public void shouldTestResourcesAggregationByTypes() throws Exception {
-    //given
+    // given
     final ResourceImpl aResource = new ResourceImpl(A_RESOURCE_TYPE, 123, "unit");
     final ResourceImpl bResource = new ResourceImpl(B_RESOURCE_TYPE, 123, "unit");
     final ResourceImpl anotherBResource = new ResourceImpl(B_RESOURCE_TYPE, 321, "unit");
     final ResourceImpl aggregatedBResources = new ResourceImpl(B_RESOURCE_TYPE, 444, "unit");
     when(bResourceType.aggregate(any(), any())).thenReturn(aggregatedBResources);
 
-    //when
+    // when
     final Map<String, Resource> aggregatedResources =
         resourceAggregator.aggregateByType(asList(aResource, bResource, anotherBResource));
 
-    //then
+    // then
     verify(bResourceType).aggregate(eq(bResource), eq(anotherBResource));
     verify(aResourceType, never()).aggregate(any(), any());
 
@@ -91,18 +91,18 @@ public class ResourceAggregatorTest {
 
   @Test
   public void shouldTestResourcesDeduction() throws Exception {
-    //given
+    // given
     final ResourceImpl aResource = new ResourceImpl(A_RESOURCE_TYPE, 123, "unit");
     final ResourceImpl bResource = new ResourceImpl(B_RESOURCE_TYPE, 123, "unit");
     final ResourceImpl anotherBResource = new ResourceImpl(B_RESOURCE_TYPE, 321, "unit");
     final ResourceImpl aggregatedBResources = new ResourceImpl(A_RESOURCE_TYPE, 444, "unit");
     when(bResourceType.deduct(any(), any())).thenReturn(aggregatedBResources);
 
-    //when
+    // when
     final List<? extends Resource> deductedResources =
         resourceAggregator.deduct(asList(aResource, bResource), singletonList(anotherBResource));
 
-    //then
+    // then
     verify(bResourceType).deduct(eq(bResource), eq(anotherBResource));
     verify(aResourceType, never()).deduct(any(), any());
 
@@ -114,7 +114,7 @@ public class ResourceAggregatorTest {
   @Test(expectedExceptions = NoEnoughResourcesException.class)
   public void shouldThrowConflictExceptionWhenTotalResourcesDoNotHaveEnoughAmountToDeduct()
       throws Exception {
-    //given
+    // given
     final ResourceImpl aResource = new ResourceImpl(A_RESOURCE_TYPE, 111, "unit");
     final ResourceImpl anotherAResource = new ResourceImpl(A_RESOURCE_TYPE, 333, "unit");
     when(aResourceType.deduct(any(), any()))
@@ -124,42 +124,42 @@ public class ResourceAggregatorTest {
                 singletonList(anotherAResource),
                 singletonList(new ResourceImpl(A_RESOURCE_TYPE, 222, "unit"))));
 
-    //when
+    // when
     resourceAggregator.deduct(singletonList(aResource), singletonList(anotherAResource));
   }
 
   @Test(expectedExceptions = NoEnoughResourcesException.class)
   public void shouldThrowConflictExceptionWhenTotalResourcesDoNotContainsRequiredResourcesAtAll()
       throws Exception {
-    //given
+    // given
     final ResourceImpl aResource = new ResourceImpl(A_RESOURCE_TYPE, 123, "unit");
     final ResourceImpl bResource = new ResourceImpl(B_RESOURCE_TYPE, 321, "unit");
 
-    //when
+    // when
     resourceAggregator.deduct(singletonList(aResource), singletonList(bResource));
   }
 
   @Test(expectedExceptions = IllegalArgumentException.class)
   public void shouldThrowIllegalArgumentExceptionWhenTryingToAggregateNotSupportedResource()
       throws Exception {
-    //given
+    // given
     final ResourceImpl dResource = mock(ResourceImpl.class);
     when(dResource.getType()).thenReturn("resourceD");
 
-    //when
+    // when
     resourceAggregator.aggregateByType(singletonList(dResource));
   }
 
   @Test(expectedExceptions = IllegalArgumentException.class)
   public void shouldThrowIllegalArgumentExceptionWhenTryingToAggregateNotSupportedResources()
       throws Exception {
-    //given
+    // given
     final ResourceImpl dResource = mock(ResourceImpl.class);
     final ResourceImpl anotherDResource = mock(ResourceImpl.class);
     when(dResource.getType()).thenReturn("resourceD");
     when(anotherDResource.getType()).thenReturn("resourceD");
 
-    //when
+    // when
     resourceAggregator.aggregateByType(asList(dResource, anotherDResource));
   }
 
@@ -167,11 +167,11 @@ public class ResourceAggregatorTest {
   public void
       shouldThrowIllegalArgumentExceptionWhenTotalResourcesListContainsNotSupportedResourceOnResourcesDeduction()
           throws Exception {
-    //given
+    // given
     final ResourceImpl dResource = mock(ResourceImpl.class);
     when(dResource.getType()).thenReturn("resourceD");
 
-    //when
+    // when
     resourceAggregator.deduct(emptyList(), singletonList(dResource));
   }
 
@@ -179,28 +179,28 @@ public class ResourceAggregatorTest {
   public void
       shouldThrowIllegalArgumentExceptionWhenResourcesToDeductListContainsNotSupportedResourceOnResourcesDeduction()
           throws Exception {
-    //given
+    // given
     final ResourceImpl dResource = mock(ResourceImpl.class);
     when(dResource.getType()).thenReturn("resourceD");
 
-    //when
+    // when
     resourceAggregator.deduct(singletonList(dResource), emptyList());
   }
 
   @Test
   public void shouldReturnResourceAsExcessiveWhenDeductedAmountGreaterThan0() throws Exception {
-    //given
+    // given
     final ResourceImpl sourceAResource = new ResourceImpl(A_RESOURCE_TYPE, 5, "unit");
     final ResourceImpl toCompareAResource = new ResourceImpl(A_RESOURCE_TYPE, 3, "unit");
     final ResourceImpl excessiveAResource = new ResourceImpl(A_RESOURCE_TYPE, 2, "unit");
     when(aResourceType.deduct(any(), any())).thenReturn(excessiveAResource);
 
-    //when
+    // when
     List<? extends Resource> excess =
         resourceAggregator.excess(
             singletonList(sourceAResource), singletonList(toCompareAResource));
 
-    //then
+    // then
     assertEquals(excess.size(), 1);
     assertTrue(excess.contains(excessiveAResource));
     verify(aResourceType).deduct(sourceAResource, toCompareAResource);
@@ -210,14 +210,14 @@ public class ResourceAggregatorTest {
   public void
       shouldReturnResourceAsExcessiveWhenToSourceListContainsResourceButToCompareListDoesNotContainItAtAll()
           throws Exception {
-    //given
+    // given
     final ResourceImpl sourceAResource = new ResourceImpl(A_RESOURCE_TYPE, 5, "unit");
 
-    //when
+    // when
     List<? extends Resource> excess =
         resourceAggregator.excess(singletonList(sourceAResource), emptyList());
 
-    //then
+    // then
     assertEquals(excess.size(), 1);
     assertTrue(excess.contains(sourceAResource));
   }
@@ -226,31 +226,31 @@ public class ResourceAggregatorTest {
   public void
       shouldNotReturnResourceAsExcessiveWhenToCompareListContainsResourceButSourceDoesNotContainItAtAll()
           throws Exception {
-    //given
+    // given
     final ResourceImpl toCompareAResource = new ResourceImpl(A_RESOURCE_TYPE, 5, "unit");
 
-    //when
+    // when
     List<? extends Resource> excess =
         resourceAggregator.excess(emptyList(), singletonList(toCompareAResource));
 
-    //then
+    // then
     assertTrue(excess.isEmpty());
   }
 
   @Test
   public void shouldNotReturnResourceAsExcessiveWhenResourcesHaveTheSameAmount() throws Exception {
-    //given
+    // given
     final ResourceImpl sourceAResource = new ResourceImpl(A_RESOURCE_TYPE, 5, "unit");
     final ResourceImpl toCompareAResource = new ResourceImpl(A_RESOURCE_TYPE, 5, "unit");
     final ResourceImpl deductedAResource = new ResourceImpl(A_RESOURCE_TYPE, 0, "unit");
     when(aResourceType.deduct(any(), any())).thenReturn(deductedAResource);
 
-    //when
+    // when
     List<? extends Resource> excess =
         resourceAggregator.excess(
             singletonList(sourceAResource), singletonList(toCompareAResource));
 
-    //then
+    // then
     assertTrue(excess.isEmpty());
     verify(aResourceType, never()).deduct(any(), any());
   }
@@ -258,19 +258,19 @@ public class ResourceAggregatorTest {
   @Test
   public void shouldNotReturnResourceAsExcessiveWhenToCompareResourceIsGreaterThanSource()
       throws Exception {
-    //given
+    // given
     final ResourceImpl sourceAResource = new ResourceImpl(A_RESOURCE_TYPE, 5, "unit");
     final ResourceImpl toCompareAResource = new ResourceImpl(A_RESOURCE_TYPE, 10, "unit");
     doThrow(new NoEnoughResourcesException(emptyList(), emptyList(), emptyList()))
         .when(aResourceType)
         .deduct(any(), any());
 
-    //when
+    // when
     List<? extends Resource> excess =
         resourceAggregator.excess(
             singletonList(sourceAResource), singletonList(toCompareAResource));
 
-    //then
+    // then
     assertTrue(excess.isEmpty());
     verify(aResourceType).deduct(sourceAResource, toCompareAResource);
   }
@@ -282,7 +282,7 @@ public class ResourceAggregatorTest {
     final ResourceImpl dResource = mock(ResourceImpl.class);
     when(dResource.getType()).thenReturn("resourceD");
 
-    //when
+    // when
     resourceAggregator.excess(singletonList(dResource), emptyList());
   }
 
@@ -293,24 +293,24 @@ public class ResourceAggregatorTest {
     final ResourceImpl dResource = mock(ResourceImpl.class);
     when(dResource.getType()).thenReturn("resourceD");
 
-    //when
+    // when
     resourceAggregator.excess(emptyList(), singletonList(dResource));
   }
 
   @Test
   public void shouldReturnIntersectionOfTwoResourcesLists() throws Exception {
-    //given
+    // given
     final ResourceImpl aResource = new ResourceImpl(A_RESOURCE_TYPE, 123, "unit");
     final ResourceImpl bResource = new ResourceImpl(B_RESOURCE_TYPE, 123, "unit");
     final ResourceImpl anotherBResource = new ResourceImpl(B_RESOURCE_TYPE, 321, "unit");
     final ResourceImpl cResource = new ResourceImpl(C_RESOURCE_TYPE, 321, "unit");
 
-    //when
+    // when
     List<? extends Resource> intersection =
         resourceAggregator.intersection(
             asList(aResource, bResource), asList(anotherBResource, cResource));
 
-    //then
+    // then
     assertEquals(intersection.size(), 2);
     assertTrue(intersection.contains(bResource));
     assertTrue(intersection.contains(anotherBResource));
@@ -323,7 +323,7 @@ public class ResourceAggregatorTest {
     final ResourceImpl dResource = mock(ResourceImpl.class);
     when(dResource.getType()).thenReturn("resourceD");
 
-    //when
+    // when
     resourceAggregator.intersection(singletonList(dResource), emptyList());
   }
 
@@ -334,23 +334,23 @@ public class ResourceAggregatorTest {
     final ResourceImpl dResource = mock(ResourceImpl.class);
     when(dResource.getType()).thenReturn("resourceD");
 
-    //when
+    // when
     resourceAggregator.intersection(emptyList(), singletonList(dResource));
   }
 
   @Test
   public void shouldReturnMinResources() throws Exception {
-    //given
+    // given
     final ResourceImpl aResource = new ResourceImpl(A_RESOURCE_TYPE, 100, "unit");
     final ResourceImpl bResource = new ResourceImpl(B_RESOURCE_TYPE, 1000, "unit");
     final ResourceImpl minBResource = new ResourceImpl(B_RESOURCE_TYPE, 500, "unit");
     final ResourceImpl anotherBResource = new ResourceImpl(B_RESOURCE_TYPE, 2000, "unit");
 
-    //when
+    // when
     List<? extends Resource> min =
         resourceAggregator.min(asList(aResource, bResource, minBResource, anotherBResource));
 
-    //then
+    // then
     assertEquals(min.size(), 2);
     assertTrue(min.contains(aResource));
     assertTrue(min.contains(minBResource));
@@ -358,17 +358,17 @@ public class ResourceAggregatorTest {
 
   @Test
   public void shouldReturnMinResourcesWhenTheyContainsMinusOneValue() throws Exception {
-    //given
+    // given
     final ResourceImpl aResource = new ResourceImpl(A_RESOURCE_TYPE, -1, "unit");
     final ResourceImpl bResource = new ResourceImpl(B_RESOURCE_TYPE, -1, "unit");
     final ResourceImpl minAResource = new ResourceImpl(A_RESOURCE_TYPE, 250, "unit");
     final ResourceImpl minBResource = new ResourceImpl(B_RESOURCE_TYPE, 500, "unit");
 
-    //when
+    // when
     List<? extends Resource> min =
         resourceAggregator.min(asList(aResource, minAResource, minBResource, bResource));
 
-    //then
+    // then
     assertEquals(min.size(), 2);
     assertTrue(min.contains(minAResource));
     assertTrue(min.contains(minBResource));
@@ -381,7 +381,7 @@ public class ResourceAggregatorTest {
     final ResourceImpl dResource = mock(ResourceImpl.class);
     when(dResource.getType()).thenReturn("resourceD");
 
-    //when
+    // when
     resourceAggregator.min(singletonList(dResource));
   }
 }

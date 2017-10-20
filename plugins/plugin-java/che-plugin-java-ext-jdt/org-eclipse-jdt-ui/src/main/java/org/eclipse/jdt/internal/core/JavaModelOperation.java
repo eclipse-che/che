@@ -47,7 +47,7 @@ import org.eclipse.text.edits.TextEdit;
 /** Defines behavior common to all Java Model operations */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class JavaModelOperation implements IWorkspaceRunnable, IProgressMonitor {
-  public static final String HAS_MODIFIED_RESOURCE_ATTR = "hasModifiedResource"; //$NON-NLS-1$
+  public static final String HAS_MODIFIED_RESOURCE_ATTR = "hasModifiedResource"; // $NON-NLS-1$
   public static final String TRUE = JavaModelManager.TRUE;
   /*
    * Constants controlling the insertion mode of an action.
@@ -77,7 +77,7 @@ public abstract class JavaModelOperation implements IWorkspaceRunnable, IProgres
    */
   protected IPostAction[] actions;
   protected int actionsStart = 0;
-  //public static final String FALSE = "false";
+  // public static final String FALSE = "false";
   protected int actionsEnd = -1;
   /*
    * A HashMap of attributes that can be used by operations
@@ -309,7 +309,8 @@ public abstract class JavaModelOperation implements IWorkspaceRunnable, IProgres
           getSubProgressMonitor(1));
       setAttribute(HAS_MODIFIED_RESOURCE_ATTR, TRUE);
       while (resource instanceof IFolder) {
-        // deleting a package: delete the parent if it is empty (e.g. deleting x.y where folder x doesn't have resources but y)
+        // deleting a package: delete the parent if it is empty (e.g. deleting x.y where folder x
+        // doesn't have resources but y)
         // without deleting the package fragment root
         resource = resource.getParent();
         if (!resource.equals(rootResource) && resource.members().length == 0) {
@@ -643,16 +644,16 @@ public abstract class JavaModelOperation implements IWorkspaceRunnable, IProgres
           "("
               + Thread.currentThread()
               + ") [JavaModelOperation.postAction(IPostAction, int)] Posting action "
-              + action.getID()); //$NON-NLS-1$ //$NON-NLS-2$
+              + action.getID()); // $NON-NLS-1$ //$NON-NLS-2$
       switch (insertionMode) {
         case REMOVEALL_APPEND:
-          System.out.println(" (REMOVEALL_APPEND)"); //$NON-NLS-1$
+          System.out.println(" (REMOVEALL_APPEND)"); // $NON-NLS-1$
           break;
         case KEEP_EXISTING:
-          System.out.println(" (KEEP_EXISTING)"); //$NON-NLS-1$
+          System.out.println(" (KEEP_EXISTING)"); // $NON-NLS-1$
           break;
         case APPEND:
-          System.out.println(" (APPEND)"); //$NON-NLS-1$
+          System.out.println(" (APPEND)"); // $NON-NLS-1$
           break;
       }
     }
@@ -717,7 +718,7 @@ public abstract class JavaModelOperation implements IWorkspaceRunnable, IProgres
           "("
               + Thread.currentThread()
               + ") [JavaModelOperation.removeAllPostAction(String)] Removing actions "
-              + actionID); //$NON-NLS-1$ //$NON-NLS-2$
+              + actionID); // $NON-NLS-1$ //$NON-NLS-2$
     }
 
     JavaModelOperation topLevelOp = (JavaModelOperation) getCurrentOperationStack().get(0);
@@ -769,7 +770,8 @@ public abstract class JavaModelOperation implements IWorkspaceRunnable, IProgres
           deltaProcessor.updateJavaModel((IJavaElementDelta) deltaProcessor.javaModelDeltas.get(i));
         }
 
-        // close the parents of the created elements and reset their project's cache (in case we are in an
+        // close the parents of the created elements and reset their project's cache (in case we are
+        // in an
         // IWorkspaceRunnable and the clients wants to use the created element's parent)
         // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=83646
         for (int i = 0, length = this.resultElements.length; i < length; i++) {
@@ -777,7 +779,8 @@ public abstract class JavaModelOperation implements IWorkspaceRunnable, IProgres
           Openable openable = (Openable) element.getOpenable();
           if (!(openable instanceof CompilationUnit)
               || !((CompilationUnit) openable)
-                  .isWorkingCopy()) { // a working copy must remain a child of its parent even after a move
+                  .isWorkingCopy()) { // a working copy must remain a child of its parent even after
+            // a move
             ((JavaElement) openable.getParent()).close();
           }
           switch (element.getElementType()) {
@@ -821,9 +824,11 @@ public abstract class JavaModelOperation implements IWorkspaceRunnable, IProgres
       } else {
         // Use IWorkspace.run(...) to ensure that resource changes are batched
         // Note that if the tree is locked, this will throw a CoreException, but this is ok
-        // as this operation is modifying the tree (not read-only) and a CoreException will be thrown anyway.
-        //				ResourcesPlugin.getWorkspace().run(this, getSchedulingRule(), IWorkspace.AVOID_UPDATE, monitor);
-        //todo use ResourcesPlugin.getWorkspace().run
+        // as this operation is modifying the tree (not read-only) and a CoreException will be
+        // thrown anyway.
+        //				ResourcesPlugin.getWorkspace().run(this, getSchedulingRule(), IWorkspace.AVOID_UPDATE,
+        // monitor);
+        // todo use ResourcesPlugin.getWorkspace().run
         run(monitor);
       }
     } catch (CoreException ce) {
@@ -849,7 +854,7 @@ public abstract class JavaModelOperation implements IWorkspaceRunnable, IProgres
             "("
                 + Thread.currentThread()
                 + ") [JavaModelOperation.runPostActions()] Running action "
-                + postAction.getID()); //$NON-NLS-1$ //$NON-NLS-2$
+                + postAction.getID()); // $NON-NLS-1$ //$NON-NLS-2$
       }
       postAction.run();
     }

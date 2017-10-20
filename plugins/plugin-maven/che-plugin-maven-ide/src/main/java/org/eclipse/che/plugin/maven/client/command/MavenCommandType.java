@@ -82,7 +82,7 @@ public class MavenCommandType implements CommandType {
 
   @Override
   public String getPreviewUrlTemplate() {
-    //TODO: hardcode http after switching WS Master to https
+    // TODO: hardcode http after switching WS Master to https
     return "http://"
         + ServerAddressMacroRegistrar.MACRO_NAME_TEMPLATE.replace("%", DEF_PORT)
         + "/"

@@ -70,28 +70,28 @@ public class OrganizationNotificationEmailSenderTest {
 
   @Test
   public void shouldSelfSubscribe() {
-    //when
+    // when
     emailSender.subscribe(eventService);
 
-    //then
+    // then
     verify(eventService).subscribe(emailSender);
   }
 
   @Test
   public void shouldSendNotificationAboutMembershipAdding() throws Exception {
-    //given
+    // given
     EmailBean email = mock(EmailBean.class, new SelfReturningAnswer());
 
     when(emails.memberAdded(anyString(), anyString(), anyString(), anyString())).thenReturn(email);
 
-    //when
+    // when
     emailSender.onEvent(
         new MemberAddedEvent(
             "admin",
             new UserImpl("id", "email", null),
             new OrganizationImpl("id", "/parent/name", "parent")));
 
-    //then
+    // then
     verify(emails).memberAdded("name", DASHBOARD_ENDPOINT, "/parent/name", "admin");
     verify(email).withTo("email");
     verify(mailSender).sendAsync(email);
@@ -99,19 +99,19 @@ public class OrganizationNotificationEmailSenderTest {
 
   @Test
   public void shouldSendNotificationAboutMembershipRemoving() throws Exception {
-    //given
+    // given
     EmailBean email = mock(EmailBean.class, new SelfReturningAnswer());
 
     when(emails.memberRemoved(anyString(), anyString())).thenReturn(email);
 
-    //when
+    // when
     emailSender.onEvent(
         new MemberRemovedEvent(
             "admin",
             new UserImpl("id", "email", null),
             new OrganizationImpl("id", "/parent/name", "parent")));
 
-    //then
+    // then
     verify(emails).memberRemoved("name", "admin");
     verify(email).withTo("email");
     verify(mailSender).sendAsync(email);
@@ -119,7 +119,7 @@ public class OrganizationNotificationEmailSenderTest {
 
   @Test
   public void shouldSendNotificationAboutOrganizationRenaming() throws Exception {
-    //given
+    // given
     MemberImpl member1 = new MemberImpl("user1", "org123", ImmutableList.of());
     MemberImpl member2 = new MemberImpl("user2", "org123", ImmutableList.of());
     doReturn(new Page<Member>(asList(member1, member2), 0, 2, 2))
@@ -134,7 +134,7 @@ public class OrganizationNotificationEmailSenderTest {
     EmailBean email = new EmailBean().withBody("Org Remaned Notification");
     when(emails.organizationRenamed(anyString(), anyString())).thenReturn(email);
 
-    //when
+    // when
     emailSender.onEvent(
         new OrganizationRenamedEvent(
             "admin",
@@ -142,7 +142,7 @@ public class OrganizationNotificationEmailSenderTest {
             "newName",
             new OrganizationImpl("org123", "/parent/newName", "parent")));
 
-    //then
+    // then
     verify(emails).organizationRenamed("oldName", "newName");
     verify(mailSender).sendAsync(new EmailBean(email).withTo("email1"));
     verify(mailSender).sendAsync(new EmailBean(email).withTo("email2"));
@@ -152,7 +152,7 @@ public class OrganizationNotificationEmailSenderTest {
   public void
       shouldDoNotBreakSendingOfNotificationAboutOrganizationRenamingWhenUnableToRetrieveAUser()
           throws Exception {
-    //given
+    // given
     MemberImpl member1 = new MemberImpl("user1", "org123", emptyList());
     MemberImpl member2 = new MemberImpl("user2", "org123", emptyList());
     doReturn(new Page<Member>(asList(member1, member2), 0, 2, 2))
@@ -166,7 +166,7 @@ public class OrganizationNotificationEmailSenderTest {
     EmailBean email = new EmailBean().withBody("Org Renamed Notification");
     when(emails.organizationRenamed(anyString(), anyString())).thenReturn(email);
 
-    //when
+    // when
     emailSender.onEvent(
         new OrganizationRenamedEvent(
             "admin",
@@ -174,14 +174,14 @@ public class OrganizationNotificationEmailSenderTest {
             "newName",
             new OrganizationImpl("org123", "/parent/newName", "parent")));
 
-    //then
+    // then
     verify(emails).organizationRenamed("oldName", "newName");
     verify(mailSender).sendAsync(new EmailBean(email).withTo("email2"));
   }
 
   @Test
   public void shouldSendNotificationAboutOrganizationRemoving() throws Exception {
-    //given
+    // given
     MemberImpl member1 = new MemberImpl("user1", "org123", emptyList());
     MemberImpl member2 = new MemberImpl("user2", "org123", emptyList());
 
@@ -193,12 +193,12 @@ public class OrganizationNotificationEmailSenderTest {
     EmailBean email = new EmailBean().withBody("Org Removed Notification");
     when(emails.organizationRemoved(anyString())).thenReturn(email);
 
-    //when
+    // when
     emailSender.onEvent(
         new OrganizationRemovedEvent(
             "admin", new OrganizationImpl("id", "/parent/q", "parent"), asList(member1, member2)));
 
-    //then
+    // then
     verify(emails).organizationRemoved("q");
     verify(mailSender).sendAsync(new EmailBean(email).withTo("email1"));
     verify(mailSender).sendAsync(new EmailBean(email).withTo("email2"));
@@ -208,7 +208,7 @@ public class OrganizationNotificationEmailSenderTest {
   public void
       shouldDoNotBreakSendingOfNotificationAboutOrganizationRemovingWhenUnableToRetrieveAUser()
           throws Exception {
-    //given
+    // given
     MemberImpl member1 = new MemberImpl("user1", "org123", emptyList());
     MemberImpl member2 = new MemberImpl("user2", "org123", emptyList());
 
@@ -219,12 +219,12 @@ public class OrganizationNotificationEmailSenderTest {
     EmailBean email = new EmailBean().withBody("Org Removed Notification");
     when(emails.organizationRemoved(anyString())).thenReturn(email);
 
-    //when
+    // when
     emailSender.onEvent(
         new OrganizationRemovedEvent(
             "admin", new OrganizationImpl("id", "/parent/q", "parent"), asList(member1, member2)));
 
-    //then
+    // then
     verify(emails).organizationRemoved("q");
     verify(mailSender).sendAsync(new EmailBean(email).withTo("email2"));
   }

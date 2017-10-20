@@ -40,37 +40,37 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor {
 
   /** The delegate attribute */
-  private static final String ATTRIBUTE_DELEGATE = "delegate"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_DELEGATE = "delegate"; // $NON-NLS-1$
 
   /** The deprecate attribute */
-  private static final String ATTRIBUTE_DEPRECATE = "deprecate"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_DEPRECATE = "deprecate"; // $NON-NLS-1$
 
   /** The hierarchical attribute */
-  private static final String ATTRIBUTE_HIERARCHICAL = "hierarchical"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_HIERARCHICAL = "hierarchical"; // $NON-NLS-1$
 
   /** The match strategy attribute */
-  private static final String ATTRIBUTE_MATCH_STRATEGY = "matchStrategy"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_MATCH_STRATEGY = "matchStrategy"; // $NON-NLS-1$
 
   /** The parameter attribute */
-  private static final String ATTRIBUTE_PARAMETER = "parameter"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_PARAMETER = "parameter"; // $NON-NLS-1$
 
   /** The patterns attribute */
-  private static final String ATTRIBUTE_PATTERNS = "patterns"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_PATTERNS = "patterns"; // $NON-NLS-1$
 
   /** The qualified attribute */
-  private static final String ATTRIBUTE_QUALIFIED = "qualified"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_QUALIFIED = "qualified"; // $NON-NLS-1$
 
   /** The rename getter attribute */
-  private static final String ATTRIBUTE_RENAME_GETTER = "getter"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_RENAME_GETTER = "getter"; // $NON-NLS-1$
 
   /** The rename setter attribute */
-  private static final String ATTRIBUTE_RENAME_SETTER = "setter"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_RENAME_SETTER = "setter"; // $NON-NLS-1$
 
   /** The similar declarations attribute */
-  private static final String ATTRIBUTE_SIMILAR_DECLARATIONS = "similarDeclarations"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_SIMILAR_DECLARATIONS = "similarDeclarations"; // $NON-NLS-1$
 
   /** The textual matches attribute */
-  private static final String ATTRIBUTE_TEXTUAL_MATCHES = "textual"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_TEXTUAL_MATCHES = "textual"; // $NON-NLS-1$
 
   /**
    * Similar declaration updating strategy which finds exact names and embedded names as well
@@ -144,7 +144,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
    */
   public RenameJavaElementDescriptor(final String id) {
     super(id);
-    Assert.isLegal(checkId(id), "Refactoring id is not a rename refactoring id"); //$NON-NLS-1$
+    Assert.isLegal(checkId(id), "Refactoring id is not a rename refactoring id"); // $NON-NLS-1$
   }
 
   /**
@@ -166,7 +166,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
   public RenameJavaElementDescriptor(
       String id, String project, String description, String comment, Map arguments, int flags) {
     super(id, project, description, comment, arguments, flags);
-    Assert.isLegal(checkId(id), "Refactoring id is not a rename refactoring id"); //$NON-NLS-1$
+    Assert.isLegal(checkId(id), "Refactoring id is not a rename refactoring id"); // $NON-NLS-1$
     fName = JavaRefactoringDescriptorUtil.getString(fArguments, ATTRIBUTE_NAME);
     if (getID().equals(IJavaRefactorings.RENAME_TYPE_PARAMETER)) {
       fJavaElement =
@@ -365,7 +365,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
    */
   public void setFileNamePatterns(final String patterns) {
     Assert.isNotNull(patterns);
-    Assert.isLegal(!"".equals(patterns), "Pattern must not be empty"); //$NON-NLS-1$ //$NON-NLS-2$
+    Assert.isLegal(!"".equals(patterns), "Pattern must not be empty"); // $NON-NLS-1$ //$NON-NLS-2$
     fPatterns = patterns;
   }
 
@@ -408,7 +408,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
   public void setMatchStrategy(final int strategy) {
     Assert.isLegal(
         strategy == STRATEGY_EXACT || strategy == STRATEGY_EMBEDDED || strategy == STRATEGY_SUFFIX,
-        "Wrong match strategy argument"); //$NON-NLS-1$
+        "Wrong match strategy argument"); // $NON-NLS-1$
     fMatchStrategy = strategy;
   }
 
@@ -419,7 +419,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
    */
   public void setNewName(final String name) {
     Assert.isNotNull(name);
-    Assert.isLegal(!"".equals(name), "Name must not be empty"); //$NON-NLS-1$//$NON-NLS-2$
+    Assert.isLegal(!"".equals(name), "Name must not be empty"); // $NON-NLS-1$//$NON-NLS-2$
     fName = name;
   }
 
@@ -534,7 +534,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
   /** {@inheritDoc} */
   public RefactoringStatus validateDescriptor() {
     RefactoringStatus status = super.validateDescriptor();
-    if (fName == null || "".equals(fName)) //$NON-NLS-1$
+    if (fName == null || "".equals(fName)) // $NON-NLS-1$
     status.merge(
           RefactoringStatus.createFatalErrorStatus(
               DescriptorMessages.RenameResourceDescriptor_no_new_name));

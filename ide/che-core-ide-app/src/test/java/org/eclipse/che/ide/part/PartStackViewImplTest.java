@@ -58,7 +58,7 @@ public class PartStackViewImplTest {
   @Mock DeckLayoutPanel contentPanel;
   @Mock FlowPanel tabsPanel;
 
-  //additional mocks
+  // additional mocks
   @Mock private MouseDownEvent event;
   @Mock private ContextMenuEvent contextMenuEvent;
   @Mock private ActionDelegate delegate;

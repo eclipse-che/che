@@ -56,21 +56,21 @@ public class JavaModelUtil {
    *
    * @since 3.8
    */
-  public static final String PACKAGE_INFO_JAVA = "package-info.java"; //$NON-NLS-1$
+  public static final String PACKAGE_INFO_JAVA = "package-info.java"; // $NON-NLS-1$
 
   /**
    * The name of the package-info.class file.
    *
    * @since 3.9
    */
-  public static final String PACKAGE_INFO_CLASS = "package-info.class"; //$NON-NLS-1$
+  public static final String PACKAGE_INFO_CLASS = "package-info.class"; // $NON-NLS-1$
 
   /**
    * The name of the package.html file.
    *
    * @since 3.9
    */
-  public static final String PACKAGE_HTML = "package.html"; //$NON-NLS-1$
+  public static final String PACKAGE_HTML = "package.html"; // $NON-NLS-1$
 
   /**
    * Only use this suffix for creating new .java files. In general, use one of the three
@@ -84,7 +84,7 @@ public class JavaModelUtil {
    * @see JavaCore#removeJavaLikeExtension(String)
    * @see #getRenamedCUName(ICompilationUnit, String)
    */
-  public static final String DEFAULT_CU_SUFFIX = ".java"; //$NON-NLS-1$
+  public static final String DEFAULT_CU_SUFFIX = ".java"; // $NON-NLS-1$
 
   /**
    * @param type the type to test
@@ -125,7 +125,7 @@ public class JavaModelUtil {
     int arrayCount = Signature.getArrayCount(refTypeSig);
     char type = refTypeSig.charAt(arrayCount);
     if (type == Signature.C_UNRESOLVED) {
-      String name = ""; //$NON-NLS-1$
+      String name = ""; // $NON-NLS-1$
       int bracket = refTypeSig.indexOf(Signature.C_GENERIC_START, arrayCount + 1);
       if (bracket > 0) name = refTypeSig.substring(arrayCount + 1, bracket);
       else {
@@ -203,7 +203,7 @@ public class JavaModelUtil {
   public static boolean isPolymorphicSignature(IMethod method) {
     return method
         .getAnnotation("java.lang.invoke.MethodHandle$PolymorphicSignature")
-        .exists(); //$NON-NLS-1$
+        .exists(); // $NON-NLS-1$
   }
 
   public static boolean is18OrHigher(String compliance) {
@@ -320,7 +320,7 @@ public class JavaModelUtil {
   }
 
   public static boolean isImplicitImport(String qualifier, ICompilationUnit cu) {
-    if ("java.lang".equals(qualifier)) { //$NON-NLS-1$
+    if ("java.lang".equals(qualifier)) { // $NON-NLS-1$
       return true;
     }
     String packageName = cu.getParent().getElementName();
@@ -434,8 +434,8 @@ public class JavaModelUtil {
     switch (rawEntryKind) {
       case IClasspathEntry.CPE_LIBRARY:
       case IClasspathEntry.CPE_VARIABLE:
-      case IClasspathEntry
-          .CPE_CONTAINER: // should not happen, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=305037
+      case IClasspathEntry.CPE_CONTAINER: // should not happen, see
+        // https://bugs.eclipse.org/bugs/show_bug.cgi?id=305037
         if (root.isArchive() && root.getKind() == IPackageFragmentRoot.K_BINARY) {
           IClasspathEntry resolvedEntry = root.getResolvedClasspathEntry();
           if (resolvedEntry.getReferencingEntry() != null) return resolvedEntry;
@@ -486,7 +486,8 @@ public class JavaModelUtil {
       throws JavaModelException {
     int type = member.getElementType();
     if (type == IJavaElement.INITIALIZER
-        || (type == IJavaElement.METHOD && member.getElementName().startsWith("<"))) { //$NON-NLS-1$
+        || (type == IJavaElement.METHOD
+            && member.getElementName().startsWith("<"))) { // $NON-NLS-1$
       return false;
     }
 
@@ -684,7 +685,8 @@ public class JavaModelUtil {
 
     int type = member.getElementType();
     if (type == IJavaElement.INITIALIZER
-        || (type == IJavaElement.METHOD && member.getElementName().startsWith("<"))) { //$NON-NLS-1$
+        || (type == IJavaElement.METHOD
+            && member.getElementName().startsWith("<"))) { // $NON-NLS-1$
       return false;
     }
 

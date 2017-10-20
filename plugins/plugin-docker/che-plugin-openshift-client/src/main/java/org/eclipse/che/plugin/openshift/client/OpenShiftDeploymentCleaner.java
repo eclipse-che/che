@@ -19,6 +19,7 @@ import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 import java.io.IOException;
 import java.util.List;
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.plugin.openshift.client.exception.OpenShiftException;
 import org.eclipse.che.plugin.openshift.client.kubernetes.KubernetesResourceUtil;
@@ -31,6 +32,8 @@ public class OpenShiftDeploymentCleaner {
   private static final int OPENSHIFT_POD_DELETION_TIMEOUT = 120;
   private static final int OPENSHIFT_WAIT_POD_DELAY = 1000;
 
+  @Inject private OpenshiftWorkspaceEnvironmentProvider openshiftUserAccountProvider;
+
   public void cleanDeploymentResources(final String deploymentName, final String namespace)
       throws IOException {
     cleanUpWorkspaceResources(deploymentName, namespace);
@@ -39,18 +42,30 @@ public class OpenShiftDeploymentCleaner {
 
   private void cleanUpWorkspaceResources(final String deploymentName, final String namespace)
       throws IOException {
-    Deployment deployment = KubernetesResourceUtil.getDeploymentByName(deploymentName, namespace);
+    Deployment deployment =
+        KubernetesResourceUtil.getDeploymentByName(
+            deploymentName, namespace, openshiftUserAccountProvider.getWorkspacesOpenshiftConfig());
     Service service =
         KubernetesResourceUtil.getServiceBySelector(
-            OpenShiftConnector.OPENSHIFT_DEPLOYMENT_LABEL, deploymentName, namespace);
+            OpenShiftConnector.OPENSHIFT_DEPLOYMENT_LABEL,
+            deploymentName,
+            namespace,
+            openshiftUserAccountProvider.getWorkspacesOpenshiftConfig());
     List<Route> routes =
         KubernetesResourceUtil.getRoutesByLabel(
-            OpenShiftConnector.OPENSHIFT_DEPLOYMENT_LABEL, deploymentName, namespace);
+            OpenShiftConnector.OPENSHIFT_DEPLOYMENT_LABEL,
+            deploymentName,
+            namespace,
+            openshiftUserAccountProvider.getWorkspacesOpenshiftConfig());
     List<ReplicaSet> replicaSets =
         KubernetesResourceUtil.getReplicaSetByLabel(
-            OpenShiftConnector.OPENSHIFT_DEPLOYMENT_LABEL, deploymentName, namespace);
+            OpenShiftConnector.OPENSHIFT_DEPLOYMENT_LABEL,
+            deploymentName,
+            namespace,
+            openshiftUserAccountProvider.getWorkspacesOpenshiftConfig());
 
-    try (OpenShiftClient openShiftClient = new DefaultOpenShiftClient()) {
+    try (OpenShiftClient openShiftClient =
+        new DefaultOpenShiftClient(openshiftUserAccountProvider.getWorkspacesOpenshiftConfig())) {
       if (routes != null) {
         for (Route route : routes) {
           LOG.info("Removing OpenShift Route {}", route.getMetadata().getName());
@@ -77,7 +92,8 @@ public class OpenShiftDeploymentCleaner {
 
   private void waitUntilWorkspacePodIsDeleted(final String deploymentName, final String namespace)
       throws OpenShiftException {
-    try (OpenShiftClient client = new DefaultOpenShiftClient()) {
+    try (OpenShiftClient client =
+        new DefaultOpenShiftClient(openshiftUserAccountProvider.getWorkspacesOpenshiftConfig())) {
       for (int waitCount = 0; waitCount < OPENSHIFT_POD_DELETION_TIMEOUT; waitCount++) {
         List<Pod> pods =
             client

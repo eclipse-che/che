@@ -21,7 +21,7 @@ public class EnvironmentContextTest {
 
   @Test
   public void shouldBeAbleToSetEnvContextInSameThread() {
-    //given
+    // given
     EnvironmentContext expected = EnvironmentContext.getCurrent();
     expected.setSubject(new SubjectImpl("user", "id", "token", false));
 
@@ -35,14 +35,14 @@ public class EnvironmentContextTest {
 
   @Test
   public void shouldReturnAnonymousSubjectWhenThereIsNoSubject() {
-    //given
+    // given
     EnvironmentContext expected = EnvironmentContext.getCurrent();
     expected.setSubject(null);
 
-    //when
+    // when
     Subject actualSubject = EnvironmentContext.getCurrent().getSubject();
 
-    //then
+    // then
     assertEquals(actualSubject.getUserName(), Subject.ANONYMOUS.getUserName());
     assertEquals(actualSubject.getUserId(), Subject.ANONYMOUS.getUserId());
     assertEquals(actualSubject.getToken(), Subject.ANONYMOUS.getToken());
@@ -52,7 +52,7 @@ public class EnvironmentContextTest {
 
   @Test(enabled = false)
   public void shouldNotBeAbleToSeeContextInOtherThread() {
-    //given
+    // given
     final EnvironmentContext expected = EnvironmentContext.getCurrent();
     expected.setSubject(new SubjectImpl("user", "id", "token", false));
 

@@ -22,7 +22,7 @@ public final class RefactoringCoreMessages extends NLS {
   public static String ASTData_update_imports;
 
   private static final String BUNDLE_NAME =
-      "org.eclipse.jdt.internal.corext.refactoring.refactoring"; //$NON-NLS-1$
+      "org.eclipse.jdt.internal.corext.refactoring.refactoring"; // $NON-NLS-1$
 
   public static String CallInliner_cast_analysis_error;
 

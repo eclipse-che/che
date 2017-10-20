@@ -35,7 +35,7 @@ public class StaticImportResolver extends TemplateVariableResolver {
   @Override
   public void resolve(TemplateVariable variable, TemplateContext context) {
     variable.setUnambiguous(true);
-    variable.setValue(""); //$NON-NLS-1$
+    variable.setValue(""); // $NON-NLS-1$
 
     if (context instanceof JavaContext) {
       JavaContext jc = (JavaContext) context;

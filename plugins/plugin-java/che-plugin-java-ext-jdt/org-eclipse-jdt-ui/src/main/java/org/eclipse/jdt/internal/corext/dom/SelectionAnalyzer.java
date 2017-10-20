@@ -78,7 +78,7 @@ public class SelectionAnalyzer extends GenericVisitor {
     return fSelection;
   }
 
-  //--- node management ---------------------------------------------------------
+  // --- node management ---------------------------------------------------------
 
   @Override
   protected boolean visitNode(ASTNode node) {

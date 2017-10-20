@@ -51,7 +51,7 @@ abstract class EditorPropertyBaseWidget extends Composite implements EditorPrope
 
   @Override
   public void setValue(JSONValue value) {
-    //do nothing
+    // do nothing
   }
 
   interface PropertyWidgetImplUiBinder extends UiBinder<Widget, EditorPropertyBaseWidget> {}

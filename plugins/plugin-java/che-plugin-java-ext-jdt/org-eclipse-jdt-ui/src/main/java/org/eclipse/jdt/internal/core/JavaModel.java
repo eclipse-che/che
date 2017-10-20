@@ -110,10 +110,13 @@ public class JavaModel extends Openable implements IJavaModel {
       boolean force,
       IProgressMonitor monitor)
       throws JavaModelException {
-    //	if (elements != null && elements.length > 0 && elements[0] != null && elements[0].getElementType() < IJavaElement.TYPE) {
-    //		runOperation(new CopyResourceElementsOperation(elements, containers, force), elements, siblings, renamings, monitor);
+    //	if (elements != null && elements.length > 0 && elements[0] != null &&
+    // elements[0].getElementType() < IJavaElement.TYPE) {
+    //		runOperation(new CopyResourceElementsOperation(elements, containers, force), elements,
+    // siblings, renamings, monitor);
     //	} else {
-    //		runOperation(new CopyElementsOperation(elements, containers, force), elements, siblings, renamings, monitor);
+    //		runOperation(new CopyElementsOperation(elements, containers, force), elements, siblings,
+    // renamings, monitor);
     //	}
     throw new UnsupportedOperationException();
   }
@@ -167,7 +170,7 @@ public class JavaModel extends Openable implements IJavaModel {
    * Returns the <code>char</code> that marks the start of this handles contribution to a memento.
    */
   protected char getHandleMementoDelimiter() {
-    Assert.isTrue(false, "Should not be called"); //$NON-NLS-1$
+    Assert.isTrue(false, "Should not be called"); // $NON-NLS-1$
     return 0;
   }
   /** @see org.eclipse.jdt.core.IJavaModel */
@@ -333,9 +336,9 @@ public class JavaModel extends Openable implements IJavaModel {
   /** @private Debugging purposes */
   protected void toStringInfo(int tab, StringBuffer buffer, Object info, boolean showResolvedInfo) {
     buffer.append(tabString(tab));
-    buffer.append("Java Model"); //$NON-NLS-1$
+    buffer.append("Java Model"); // $NON-NLS-1$
     if (info == null) {
-      buffer.append(" (not open)"); //$NON-NLS-1$
+      buffer.append(" (not open)"); // $NON-NLS-1$
     }
   }
 
@@ -431,7 +434,8 @@ public class JavaModel extends Openable implements IJavaModel {
     //		return true;
     //	}
     //	if (JavaModelManager.ZIP_ACCESS_VERBOSE) {
-    //		System.out.println("(" + Thread.currentThread() + ") [JavaModel.isExternalFile(...)] Checking existence of " + path.toString()); //$NON-NLS-1$ //$NON-NLS-2$
+    //		System.out.println("(" + Thread.currentThread() + ") [JavaModel.isExternalFile(...)]
+    // Checking existence of " + path.toString()); //$NON-NLS-1$ //$NON-NLS-2$
     //	}
     //	boolean isFile = path.toFile().isFile();
     //	if (isFile) {

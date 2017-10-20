@@ -33,7 +33,7 @@ public class SymbolKindHelper {
   @Inject
   public SymbolKindHelper(LanguageServerResources resources) {
     this.resources = resources;
-    //TODO Replace markWarning() image with proper images
+    // TODO Replace markWarning() image with proper images
     iconMap.put(SymbolKind.Method, resources.methodItem());
     iconMap.put(SymbolKind.Function, resources.textItem());
     iconMap.put(SymbolKind.Constructor, resources.textItem());

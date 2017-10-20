@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class FileBuffersPlugin /*extends Plugin*/ {
   private static final Logger LOG = LoggerFactory.getLogger(FileBuffersPlugin.class);
-  public static final String PLUGIN_ID = "org.eclipse.core.filebuffers"; //$NON-NLS-1$
+  public static final String PLUGIN_ID = "org.eclipse.core.filebuffers"; // $NON-NLS-1$
 
   /** The shared plug-in instance */
   private static FileBuffersPlugin fgPlugin;

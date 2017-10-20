@@ -58,6 +58,6 @@ public class TypedRegionImpl extends RegionImpl implements TypedRegion {
    */
   @Override
   public String toString() {
-    return fType + " - " + super.toString(); //$NON-NLS-1$
+    return fType + " - " + super.toString(); // $NON-NLS-1$
   }
 }

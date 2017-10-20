@@ -29,7 +29,7 @@ import org.testng.annotations.Test;
 
 public class ProjectTypesTest extends BaseProjectTypeTest {
 
-  //@Test(expectedExceptions = NotFoundException.class)
+  // @Test(expectedExceptions = NotFoundException.class)
   public void testGetMixinsShouldReturnNotFoundException() throws Exception {
     final String notFoundMixin = generate("notFoundMixin-", 5);
     Set<ProjectTypeDef> pts = new HashSet<>();
@@ -51,7 +51,7 @@ public class ProjectTypesTest extends BaseProjectTypeTest {
     assertEquals(problems.get(0).getCode(), 12);
   }
 
-  //@Test(expectedExceptions = ProjectTypeConstraintException.class)
+  // @Test(expectedExceptions = ProjectTypeConstraintException.class)
   public void testGetMixinsShouldReturnProjectTypeConstraintException() throws Exception {
     String otherPrimaryId = generate("projectType-", 3);
     Set<ProjectTypeDef> pts = new HashSet<>();

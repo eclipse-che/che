@@ -14,11 +14,11 @@ import org.eclipse.jdt.core.BindingKey;
 public final class StandardType extends HierarchyType {
 
   private static final String OBJECT_KEY =
-      BindingKey.createTypeBindingKey("java.lang.Object"); //$NON-NLS-1$
+      BindingKey.createTypeBindingKey("java.lang.Object"); // $NON-NLS-1$
   private static final String CLONEABLE_KEY =
-      BindingKey.createTypeBindingKey("java.lang.Cloneable"); //$NON-NLS-1$
+      BindingKey.createTypeBindingKey("java.lang.Cloneable"); // $NON-NLS-1$
   private static final String SERIALIZABLE_KEY =
-      BindingKey.createTypeBindingKey("java.io.Serializable"); //$NON-NLS-1$
+      BindingKey.createTypeBindingKey("java.io.Serializable"); // $NON-NLS-1$
 
   protected StandardType(TypeEnvironment environment) {
     super(environment);

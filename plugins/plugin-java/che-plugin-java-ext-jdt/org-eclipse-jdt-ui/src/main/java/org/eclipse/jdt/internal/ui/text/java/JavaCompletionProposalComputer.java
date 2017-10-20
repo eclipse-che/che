@@ -240,16 +240,22 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
       if (selection.y > 0) collector.setReplacementLength(selection.y);
       unit.codeComplete(offset, collector, fTimeoutProgressMonitor);
     } catch (OperationCanceledException x) {
-      //			IBindingService bindingSvc= (IBindingService)PlatformUI.getWorkbench().getAdapter(IBindingService.class);
-      //			String keyBinding= bindingSvc.getBestActiveBindingFormattedFor(IWorkbenchCommandConstants.EDIT_CONTENT_ASSIST);
-      //			fErrorMessage= Messages.format(JavaTextMessages.CompletionProcessor_error_javaCompletion_took_too_long_message, keyBinding);
+      //			IBindingService bindingSvc=
+      // (IBindingService)PlatformUI.getWorkbench().getAdapter(IBindingService.class);
+      //			String keyBinding=
+      // bindingSvc.getBestActiveBindingFormattedFor(IWorkbenchCommandConstants.EDIT_CONTENT_ASSIST);
+      //			fErrorMessage=
+      // Messages.format(JavaTextMessages.CompletionProcessor_error_javaCompletion_took_too_long_message, keyBinding);
       JavaPlugin.log(x);
     } catch (JavaModelException x) {
       //			Shell shell= viewer.getTextWidget().getShell();
       //			if (x.isDoesNotExist() && !unit.getJavaProject().isOnClasspath(unit))
-      //				MessageDialog.openInformation(shell, JavaTextMessages.CompletionProcessor_error_notOnBuildPath_title, JavaTextMessages.CompletionProcessor_error_notOnBuildPath_message);
+      //				MessageDialog.openInformation(shell,
+      // JavaTextMessages.CompletionProcessor_error_notOnBuildPath_title,
+      // JavaTextMessages.CompletionProcessor_error_notOnBuildPath_message);
       //			else
-      //				ErrorDialog.openError(shell, JavaTextMessages.CompletionProcessor_error_accessing_title, JavaTextMessages.CompletionProcessor_error_accessing_message, x.getStatus());
+      //				ErrorDialog.openError(shell, JavaTextMessages.CompletionProcessor_error_accessing_title,
+      // JavaTextMessages.CompletionProcessor_error_accessing_message, x.getStatus());
       JavaPlugin.log(x);
     }
 
@@ -315,8 +321,9 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
    * @since 3.3
    */
   private String[] getFavoriteStaticMembers() {
-    //todo
-    //		String serializedFavorites= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS);
+    // todo
+    //		String serializedFavorites=
+    // PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS);
     //		if (serializedFavorites != null && serializedFavorites.length() > 0)
     //			return serializedFavorites.split(";"); //$NON-NLS-1$
 
@@ -331,7 +338,8 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
    */
   protected CompletionProposalCollector createCollector(
       JavaContentAssistInvocationContext context) {
-    //		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES))
+    //		if
+    // (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES))
     return new FillArgumentNamesCompletionProposalCollector(context);
     //		else
     //			return new CompletionProposalCollector(context.getCompilationUnit(), true);

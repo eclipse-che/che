@@ -30,8 +30,8 @@ public class CompletionImageProvider {
   @Inject
   public CompletionImageProvider(LanguageServerResources resources) {
     this.resources = resources;
-    //TODO add missed icons
-    //no icon for keyword kind
+    // TODO add missed icons
+    // no icon for keyword kind
     imageMap.put(CompletionItemKind.Text, resources.textItem());
     imageMap.put(CompletionItemKind.Method, resources.methodItem());
     //        imageMap.put(CompletionItemKind.KIND_FUNCTION, );

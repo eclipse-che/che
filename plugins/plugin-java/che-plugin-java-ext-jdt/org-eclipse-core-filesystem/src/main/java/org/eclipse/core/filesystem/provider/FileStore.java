@@ -173,7 +173,7 @@ public abstract class FileStore /* extends PlatformObject*/ implements IFileStor
         children = childStores(EFS.NONE, null);
         opWork += children.length;
       }
-      monitor.beginTask("", opWork); //$NON-NLS-1$
+      monitor.beginTask("", opWork); // $NON-NLS-1$
       monitor.subTask(NLS.bind(Messages.copying, toString()));
       // create directory
       destination.mkdir(EFS.NONE, Policy.subMonitorFor(monitor, 1));
@@ -229,7 +229,7 @@ public abstract class FileStore /* extends PlatformObject*/ implements IFileStor
       } catch (CoreException e) {
         Policy.safeClose(in);
         Policy.safeClose(out);
-        //if we failed to write, try to cleanup the half written file
+        // if we failed to write, try to cleanup the half written file
         if (!destination.fetchInfo(0, null).exists()) destination.delete(EFS.NONE, null);
         throw e;
       }
@@ -278,7 +278,7 @@ public abstract class FileStore /* extends PlatformObject*/ implements IFileStor
     try {
       return fetchInfo(EFS.NONE, null);
     } catch (CoreException e) {
-      //there was an error contacting the file system, so treat it as non-existent file
+      // there was an error contacting the file system, so treat it as non-existent file
       FileInfo result = new FileInfo(getName());
       result.setExists(false);
       return result;
@@ -312,9 +312,9 @@ public abstract class FileStore /* extends PlatformObject*/ implements IFileStor
     String segment = null;
     for (int i = 0, imax = path.segmentCount(); i < imax; i++) {
       segment = path.segment(i);
-      if (segment.equals(".")) //$NON-NLS-1$
+      if (segment.equals(".")) // $NON-NLS-1$
       continue;
-      else if (segment.equals("..") && result.getParent() != null) //$NON-NLS-1$
+      else if (segment.equals("..") && result.getParent() != null) // $NON-NLS-1$
       result = result.getParent();
       else result = result.getChild(segment);
     }
@@ -388,7 +388,7 @@ public abstract class FileStore /* extends PlatformObject*/ implements IFileStor
    */
   public IFileStore mkdir(int options, IProgressMonitor monitor) throws CoreException {
     Policy.error(EFS.ERROR_WRITE, NLS.bind(Messages.noImplWrite, toString()));
-    return null; //can't get here
+    return null; // can't get here
   }
 
   /**
@@ -404,7 +404,7 @@ public abstract class FileStore /* extends PlatformObject*/ implements IFileStor
       copy(destination, options & EFS.OVERWRITE, Policy.subMonitorFor(monitor, 70));
       delete(EFS.NONE, Policy.subMonitorFor(monitor, 30));
     } catch (CoreException e) {
-      //throw new error to indicate failure occurred during a move
+      // throw new error to indicate failure occurred during a move
       String message = NLS.bind(Messages.couldNotMove, toString());
       Policy.error(EFS.ERROR_WRITE, message, e);
     } finally {
@@ -435,7 +435,7 @@ public abstract class FileStore /* extends PlatformObject*/ implements IFileStor
    */
   public OutputStream openOutputStream(int options, IProgressMonitor monitor) throws CoreException {
     Policy.error(EFS.ERROR_WRITE, NLS.bind(Messages.noImplWrite, toString()));
-    return null; //can't get here
+    return null; // can't get here
   }
 
   /**

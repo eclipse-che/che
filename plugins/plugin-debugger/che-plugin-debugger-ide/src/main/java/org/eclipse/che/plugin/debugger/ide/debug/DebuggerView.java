@@ -50,6 +50,9 @@ public interface DebuggerView extends View<DebuggerView.ActionDelegate> {
      * @param frameIndex the frame index inside a thread
      */
     void onSelectedFrame(int frameIndex);
+
+    /** Breakpoint context menu is invoked. */
+    void onBreakpointContextMenu(int clientX, int clientY, Breakpoint breakpoint);
   }
 
   /**

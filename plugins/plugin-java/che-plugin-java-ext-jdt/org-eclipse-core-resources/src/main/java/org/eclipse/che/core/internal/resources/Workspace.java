@@ -78,7 +78,7 @@ import org.slf4j.LoggerFactory;
 public class Workspace implements IWorkspace {
   public static final boolean caseSensitive =
       new java.io.File("a").compareTo(new java.io.File("A")) != 0;
-  //$NON-NLS-1$ //$NON-NLS-2$
+  // $NON-NLS-1$ //$NON-NLS-2$
   private static final Logger LOG = LoggerFactory.getLogger(Workspace.class);
   protected final IWorkspaceRoot defaultRoot = new WorkspaceRoot(Path.ROOT, this);
   /**
@@ -121,7 +121,7 @@ public class Workspace implements IWorkspace {
   }
 
   public static WorkspaceDescription defaultWorkspaceDescription() {
-    return new WorkspaceDescription("Workspace"); //$NON-NLS-1$
+    return new WorkspaceDescription("Workspace"); // $NON-NLS-1$
   }
 
   private static boolean deleteDirectory(java.io.File directory) {
@@ -149,13 +149,15 @@ public class Workspace implements IWorkspace {
     switch (type) {
       case IResource.FOLDER:
         if (path.segmentCount() < ICoreConstants.MINIMUM_FOLDER_SEGMENT_LENGTH) {
-          message = "Path must include project and resource name: " + path.toString(); //$NON-NLS-1$
+          message =
+              "Path must include project and resource name: " + path.toString(); // $NON-NLS-1$
           Assert.isLegal(false, message);
         }
         return new Folder(path.makeAbsolute(), this);
       case IResource.FILE:
         if (path.segmentCount() < ICoreConstants.MINIMUM_FILE_SEGMENT_LENGTH) {
-          message = "Path must include project and resource name: " + path.toString(); //$NON-NLS-1$
+          message =
+              "Path must include project and resource name: " + path.toString(); // $NON-NLS-1$
           Assert.isLegal(false, message);
         }
         return new File(path.makeAbsolute(), this);
@@ -171,14 +173,14 @@ public class Workspace implements IWorkspace {
 
   @Override
   public void addResourceChangeListener(IResourceChangeListener listener) {
-    //TODO
+    // TODO
     //        throw new UnsupportedOperationException();
   }
 
   @Override
   public void addResourceChangeListener(IResourceChangeListener listener, int eventMask) {
     //        throw new UnsupportedOperationException();
-    //TODO
+    // TODO
   }
 
   @Override
@@ -350,8 +352,8 @@ public class Workspace implements IWorkspace {
 
   @Override
   public IResourceRuleFactory getRuleFactory() {
-    //note that the rule factory is created lazily because it
-    //requires loading the teamHook extension
+    // note that the rule factory is created lazily because it
+    // requires loading the teamHook extension
     if (ruleFactory == null) ruleFactory = new Rules(this);
     return ruleFactory;
   }
@@ -368,7 +370,7 @@ public class Workspace implements IWorkspace {
 
   @Override
   public boolean isTreeLocked() {
-    //todo
+    // todo
     return false;
   }
 
@@ -408,7 +410,7 @@ public class Workspace implements IWorkspace {
   @Override
   public void removeResourceChangeListener(IResourceChangeListener listener) {
     //        throw new UnsupportedOperationException();
-    //TODO
+    // TODO
   }
 
   @Override
@@ -431,16 +433,18 @@ public class Workspace implements IWorkspace {
   public void prepareOperation(ISchedulingRule rule, IProgressMonitor monitor)
       throws CoreException {
     try {
-      //make sure autobuild is not running if it conflicts with this operation
+      // make sure autobuild is not running if it conflicts with this operation
       ISchedulingRule buildRule = getRuleFactory().buildRule();
-      //            if (rule != null && buildRule != null && (rule.isConflicting(buildRule) || buildRule.isConflicting(rule)))
+      //            if (rule != null && buildRule != null && (rule.isConflicting(buildRule) ||
+      // buildRule.isConflicting(rule)))
       //                buildManager.interrupt();
     } finally {
       getWorkManager().checkIn(rule, monitor);
     }
     //        if (!isOpen()) {
     //            String message = Messages.resources_workspaceClosed;
-    //            throw new ResourceException(IResourceStatus.OPERATION_FAILED, null, message, null);
+    //            throw new ResourceException(IResourceStatus.OPERATION_FAILED, null, message,
+    // null);
     //        }
   }
 
@@ -463,7 +467,7 @@ public class Workspace implements IWorkspace {
       throws CoreException {
     monitor = Policy.monitorFor(monitor);
     try {
-      monitor.beginTask("", Policy.totalWork); //$NON-NLS-1$
+      monitor.beginTask("", Policy.totalWork); // $NON-NLS-1$
       int depth = -1;
       boolean avoidNotification = (options & IWorkspace.AVOID_UPDATE) != 0;
       try {
@@ -493,7 +497,7 @@ public class Workspace implements IWorkspace {
     WorkManager workManager = getWorkManager();
     workManager.incrementNestedOperations();
     if (!workManager.isBalanced())
-      Assert.isTrue(false, "Operation was not prepared."); //$NON-NLS-1$
+      Assert.isTrue(false, "Operation was not prepared."); // $NON-NLS-1$
     //        if (workManager.getPreparedOperationDepth() > 1) {
     //            if (createNewTree && tree.isImmutable())
     //                newWorkingTree();
@@ -513,7 +517,7 @@ public class Workspace implements IWorkspace {
   public void endOperation(ISchedulingRule rule, boolean build, IProgressMonitor monitor)
       throws CoreException {
     WorkManager workManager = getWorkManager();
-    //don't do any end operation work if we failed to check in
+    // don't do any end operation work if we failed to check in
     if (workManager.checkInFailed(rule)) return;
     // This is done in a try finally to ensure that we always decrement the operation count
     // and release the workspace lock.  This must be done at the end because snapshot
@@ -535,17 +539,18 @@ public class Workspace implements IWorkspace {
         // check for a programming error on using beginOperation/endOperation
         Assert.isTrue(
             workManager.getPreparedOperationDepth() > 0,
-            "Mismatched begin/endOperation"); //$NON-NLS-1$
+            "Mismatched begin/endOperation"); // $NON-NLS-1$
 
         // At this time we need to re-balance the nested operations. It is necessary because
         // build() and snapshot() should not fail if they are called.
         workManager.rebalanceNestedOperations();
 
-        //find out if any operation has potentially modified the tree
+        // find out if any operation has potentially modified the tree
         //                hasTreeChanges = workManager.shouldBuild();
-        //double check if the tree has actually changed
+        // double check if the tree has actually changed
         //                if (hasTreeChanges)
-        //                    hasTreeChanges = operationTree != null && ElementTree.hasChanges(tree, operationTree, ResourceComparator
+        //                    hasTreeChanges = operationTree != null && ElementTree.hasChanges(tree,
+        // operationTree, ResourceComparator
         // .getBuildComparator(), true);
         //                broadcastPostChange();
         //                // Request a snapshot if we are sufficiently out of date.
@@ -873,7 +878,7 @@ public class Workspace implements IWorkspace {
 
   public TeamHook getTeamHook() {
     // default to use Core's implementation
-    //create anonymous subclass because TeamHook is abstract
+    // create anonymous subclass because TeamHook is abstract
     if (teamHook == null)
       teamHook =
           new TeamHook() {

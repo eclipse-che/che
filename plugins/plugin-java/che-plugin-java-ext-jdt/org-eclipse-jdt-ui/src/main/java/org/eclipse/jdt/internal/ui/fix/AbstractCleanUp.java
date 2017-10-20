@@ -51,7 +51,7 @@ public abstract class AbstractCleanUp implements ICleanUp {
 
   /** @return code snippet complying to current options */
   public String getPreview() {
-    return ""; //$NON-NLS-1$
+    return ""; // $NON-NLS-1$
   }
 
   /*

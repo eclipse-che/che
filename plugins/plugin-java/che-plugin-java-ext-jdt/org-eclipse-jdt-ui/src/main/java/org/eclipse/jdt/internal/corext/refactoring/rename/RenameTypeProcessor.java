@@ -122,11 +122,11 @@ public class RenameTypeProcessor extends JavaRenameProcessor
         IResourceMapper,
         IJavaElementMapper {
 
-  private static final String ATTRIBUTE_QUALIFIED = "qualified"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_TEXTUAL_MATCHES = "textual"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_PATTERNS = "patterns"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_SIMILAR_DECLARATIONS = "similarDeclarations"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_MATCHING_STRATEGY = "matchStrategy"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_QUALIFIED = "qualified"; // $NON-NLS-1$
+  private static final String ATTRIBUTE_TEXTUAL_MATCHES = "textual"; // $NON-NLS-1$
+  private static final String ATTRIBUTE_PATTERNS = "patterns"; // $NON-NLS-1$
+  private static final String ATTRIBUTE_SIMILAR_DECLARATIONS = "similarDeclarations"; // $NON-NLS-1$
+  private static final String ATTRIBUTE_MATCHING_STRATEGY = "matchStrategy"; // $NON-NLS-1$
 
   private static final GroupCategorySet CATEGORY_TYPE_RENAME =
       new GroupCategorySet(
@@ -134,28 +134,28 @@ public class RenameTypeProcessor extends JavaRenameProcessor
               "org.eclipse.jdt.internal.corext.refactoring.rename.renameType.type",
               RefactoringCoreMessages.RenameTypeProcessor_changeCategory_type,
               RefactoringCoreMessages
-                  .RenameTypeProcessor_changeCategory_type_description)); //$NON-NLS-1$
+                  .RenameTypeProcessor_changeCategory_type_description)); // $NON-NLS-1$
   private static final GroupCategorySet CATEGORY_METHOD_RENAME =
       new GroupCategorySet(
           new GroupCategory(
               "org.eclipse.jdt.internal.corext.refactoring.rename.renameType.method",
               RefactoringCoreMessages.RenameTypeProcessor_changeCategory_method,
               RefactoringCoreMessages
-                  .RenameTypeProcessor_changeCategory_method_description)); //$NON-NLS-1$
+                  .RenameTypeProcessor_changeCategory_method_description)); // $NON-NLS-1$
   private static final GroupCategorySet CATEGORY_FIELD_RENAME =
       new GroupCategorySet(
           new GroupCategory(
               "org.eclipse.jdt.internal.corext.refactoring.rename.renameType.field",
               RefactoringCoreMessages.RenameTypeProcessor_changeCategory_fields,
               RefactoringCoreMessages
-                  .RenameTypeProcessor_changeCategory_fields_description)); //$NON-NLS-1$
+                  .RenameTypeProcessor_changeCategory_fields_description)); // $NON-NLS-1$
   private static final GroupCategorySet CATEGORY_LOCAL_RENAME =
       new GroupCategorySet(
           new GroupCategory(
               "org.eclipse.jdt.internal.corext.refactoring.rename.renameType.local",
               RefactoringCoreMessages.RenameTypeProcessor_changeCategory_local_variables,
               RefactoringCoreMessages
-                  .RenameTypeProcessor_changeCategory_local_variables_description)); //$NON-NLS-1$
+                  .RenameTypeProcessor_changeCategory_local_variables_description)); // $NON-NLS-1$
 
   private IType fType;
   private SearchResultGroup[] fReferences;
@@ -194,8 +194,8 @@ public class RenameTypeProcessor extends JavaRenameProcessor
       for (int i = 0; i < params.length; i++) {
         IConfigurationElement param = params[i];
         if ("handlesSimilarDeclarations".equals(param.getAttribute(NAME))
-            && //$NON-NLS-1$
-            "false".equals(param.getAttribute(VALUE))) { //$NON-NLS-1$
+            && // $NON-NLS-1$
+            "false".equals(param.getAttribute(VALUE))) { // $NON-NLS-1$
           return false;
         }
       }
@@ -222,7 +222,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor
   public RenameTypeProcessor(IType type) {
     fType = type;
     if (type != null) setNewElementName(type.getElementName());
-    fUpdateReferences = true; //default is yes
+    fUpdateReferences = true; // default is yes
     fUpdateTextualMatches = false;
     fUpdateSimilarElements = false; // default is no
     fRenamingStrategy = RenamingNameSuggestor.STRATEGY_EXACT;
@@ -290,7 +290,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor
     return Checks.isTopLevel(fType) && JavaCore.removeJavaLikeExtension(cuName).equals(typeName);
   }
 
-  //---- IRenameProcessor ----------------------------------------------
+  // ---- IRenameProcessor ----------------------------------------------
 
   public String getCurrentElementName() {
     return fType.getElementName();
@@ -301,7 +301,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor
   }
 
   public RefactoringStatus checkNewElementName(String newName) {
-    Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
+    Assert.isNotNull(newName, "new name"); // $NON-NLS-1$
     RefactoringStatus result = Checks.checkTypeName(newName, fType);
     if (Checks.isAlreadyNamed(fType, newName))
       result.addFatalError(RefactoringCoreMessages.RenameTypeRefactoring_choose_another_name);
@@ -327,7 +327,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor
     }
   }
 
-  //---- JavaRenameProcessor -------------------------------------------
+  // ---- JavaRenameProcessor -------------------------------------------
 
   protected RenameArguments createRenameArguments() {
     return new RenameTypeArguments(
@@ -357,7 +357,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor
     return RefactoringSaveHelper.SAVE_REFACTORING;
   }
 
-  //---- ITextUpdating -------------------------------------------------
+  // ---- ITextUpdating -------------------------------------------------
 
   public boolean canEnableTextUpdating() {
     return true;
@@ -371,7 +371,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor
     fUpdateTextualMatches = update;
   }
 
-  //---- IReferenceUpdating --------------------------------------
+  // ---- IReferenceUpdating --------------------------------------
 
   public void setUpdateReferences(boolean update) {
     fUpdateReferences = update;
@@ -381,7 +381,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor
     return fUpdateReferences;
   }
 
-  //---- IQualifiedNameUpdating ----------------------------------
+  // ---- IQualifiedNameUpdating ----------------------------------
 
   public boolean canEnableQualifiedNameUpdating() {
     return !fType.getPackageFragment().isDefaultPackage() && !(fType.getParent() instanceof IType);
@@ -410,7 +410,9 @@ public class RenameTypeProcessor extends JavaRenameProcessor
 
     //		IProduct product= Platform.getProduct();
     //		if (product != null) {
-    //			String property= product.getProperty("org.eclipse.jdt.ui.refactoring.handlesSimilarDeclarations"); //$NON-NLS-1$
+    //			String property=
+    // product.getProperty("org.eclipse.jdt.ui.refactoring.handlesSimilarDeclarations");
+    // //$NON-NLS-1$
     //			if ("false".equalsIgnoreCase(property)) //$NON-NLS-1$
     //				return false;
     //		}
@@ -489,8 +491,8 @@ public class RenameTypeProcessor extends JavaRenameProcessor
   @Override
   protected RefactoringStatus doCheckFinalConditions(
       IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
-    Assert.isNotNull(fType, "type"); //$NON-NLS-1$
-    Assert.isNotNull(getNewElementName(), "newName"); //$NON-NLS-1$
+    Assert.isNotNull(fType, "type"); // $NON-NLS-1$
+    Assert.isNotNull(getNewElementName(), "newName"); // $NON-NLS-1$
     RefactoringStatus result = new RefactoringStatus();
 
     int referenceSearchTicks = fUpdateReferences || fUpdateSimilarElements ? 15 : 0;
@@ -507,7 +509,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor
               + affectedCusTicks
               + similarElementTicks
               + createChangeTicks
-              + qualifiedNamesTicks); //$NON-NLS-1$
+              + qualifiedNamesTicks); // $NON-NLS-1$
       pm.setTaskName(RefactoringCoreMessages.RenameTypeRefactoring_checking);
 
       fChangeManager = new TextChangeManager(true);
@@ -657,7 +659,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor
 
       final String unQualifiedTypeName = fType.getElementName();
 
-      monitor.beginTask("", fReferences.length); //$NON-NLS-1$
+      monitor.beginTask("", fReferences.length); // $NON-NLS-1$
 
       if (getUpdateSimilarDeclarations()) {
 
@@ -739,8 +741,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor
       }
 
       for (Iterator<IJavaElement> iter = fPreloadedElementToName.keySet().iterator();
-          iter.hasNext();
-          ) {
+          iter.hasNext(); ) {
         IJavaElement element = iter.next();
         fPreloadedElementToSelection.put(element, Boolean.TRUE);
       }
@@ -797,12 +798,12 @@ public class RenameTypeProcessor extends JavaRenameProcessor
     IStatus status = c.getWorkspace().validateName(getNewElementName(), IResource.FILE);
     if (status.getSeverity() == IStatus.ERROR)
       return RefactoringStatus.createWarningStatus(
-          status.getMessage() + ". " + notRename); //$NON-NLS-1$
+          status.getMessage() + ". " + notRename); // $NON-NLS-1$
 
     status = c.getWorkspace().validatePath(createNewPath(getNewElementName()), IResource.FILE);
     if (status.getSeverity() == IStatus.ERROR)
       return RefactoringStatus.createWarningStatus(
-          status.getMessage() + ". " + notRename); //$NON-NLS-1$
+          status.getMessage() + ". " + notRename); // $NON-NLS-1$
 
     return new RefactoringStatus();
   }
@@ -903,7 +904,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor
   private static IImportDeclaration getImportedType(ICompilationUnit cu, String typeName)
       throws CoreException {
     IImportDeclaration[] imports = cu.getImports();
-    String dotTypeName = "." + typeName; //$NON-NLS-1$
+    String dotTypeName = "." + typeName; // $NON-NLS-1$
     for (int i = 0; i < imports.length; i++) {
       if (imports[i].getElementName().endsWith(dotTypeName)) return imports[i];
     }
@@ -931,7 +932,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor
 
   private RefactoringStatus checkTypesInCompilationUnit() {
     RefactoringStatus result = new RefactoringStatus();
-    if (!Checks.isTopLevel(fType)) { //the other case checked in checkTypesInPackage
+    if (!Checks.isTopLevel(fType)) { // the other case checked in checkTypesInPackage
       IType siblingType = fType.getDeclaringType().getType(getNewElementName());
       if (siblingType.exists()) {
         String msg =
@@ -1010,7 +1011,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor
   private void analyzeImportedTypes(IType[] types, RefactoringStatus result, IImportDeclaration imp)
       throws CoreException {
     for (int i = 0; i < types.length; i++) {
-      //could this be a problem (same package imports)?
+      // could this be a problem (same package imports)?
       if (JdtFlags.isPublic(types[i]) && types[i].getElementName().equals(getNewElementName())) {
         String msg =
             Messages.format(
@@ -1038,7 +1039,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor
 
   private void analyzeImportDeclaration(IImportDeclaration imp, RefactoringStatus result)
       throws CoreException {
-    if (!imp.isOnDemand()) return; //analyzed earlier
+    if (!imp.isOnDemand()) return; // analyzed earlier
 
     IJavaElement imported = convertFromImportDeclaration(imp);
     if (imported == null) return;
@@ -1049,7 +1050,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor
         analyzeImportedTypes(cus[i].getTypes(), result, imp);
       }
     } else {
-      //cast safe: see JavaModelUtility.convertFromImportDeclaration
+      // cast safe: see JavaModelUtility.convertFromImportDeclaration
       analyzeImportedTypes(((IType) imported).getTypes(), result, imp);
     }
   }
@@ -1063,7 +1064,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor
 
     result.merge(Checks.checkCompileErrorsInAffectedFiles(fReferences, fType.getResource()));
 
-    pm.beginTask("", fReferences.length); //$NON-NLS-1$
+    pm.beginTask("", fReferences.length); // $NON-NLS-1$
     result.merge(checkConflictingTypes(pm));
     return result;
   }
@@ -1182,7 +1183,9 @@ public class RenameTypeProcessor extends JavaRenameProcessor
       descriptor.setUpdateQualifiedNames(fUpdateQualifiedNames);
       descriptor.setUpdateTextualOccurrences(fUpdateTextualMatches);
       descriptor.setUpdateReferences(fUpdateReferences);
-      if (fUpdateQualifiedNames && fFilePatterns != null && !"".equals(fFilePatterns)) //$NON-NLS-1$
+      if (fUpdateQualifiedNames
+          && fFilePatterns != null
+          && !"".equals(fFilePatterns)) // $NON-NLS-1$
       descriptor.setFileNamePatterns(fFilePatterns);
       descriptor.setUpdateSimilarDeclarations(fUpdateSimilarElements);
       descriptor.setMatchStrategy(fRenamingStrategy);
@@ -1245,7 +1248,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor
 
   private void createChanges(IProgressMonitor pm) throws CoreException {
     try {
-      pm.beginTask("", 12); //$NON-NLS-1$
+      pm.beginTask("", 12); // $NON-NLS-1$
       pm.setTaskName(RefactoringCoreMessages.RenameTypeProcessor_creating_changes);
 
       if (fUpdateReferences) addReferenceUpdates(fChangeManager, new SubProgressMonitor(pm, 3));
@@ -1317,7 +1320,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor
   }
 
   private void addReferenceUpdates(TextChangeManager manager, IProgressMonitor pm) {
-    pm.beginTask("", fReferences.length); //$NON-NLS-1$
+    pm.beginTask("", fReferences.length); // $NON-NLS-1$
     for (int i = 0; i < fReferences.length; i++) {
       ICompilationUnit cu = fReferences[i].getCompilationUnit();
       if (cu == null) continue;
@@ -1343,7 +1346,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor
     QualifiedNameFinder.process(
         fQualifiedNameSearchResult,
         fType.getFullyQualifiedName(),
-        fragment.getElementName() + "." + getNewElementName(), //$NON-NLS-1$
+        fragment.getElementName() + "." + getNewElementName(), // $NON-NLS-1$
         fFilePatterns,
         fType.getJavaProject().getProject(),
         pm);
@@ -1364,7 +1367,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor
               RefactoringCoreMessages.InitializableRefactoring_argument_not_exist,
               JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
     final String name = extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
-    if (name != null && !"".equals(name)) //$NON-NLS-1$
+    if (name != null && !"".equals(name)) // $NON-NLS-1$
     setNewElementName(name);
     else
       return RefactoringStatus.createFatalErrorStatus(
@@ -1372,7 +1375,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor
               RefactoringCoreMessages.InitializableRefactoring_argument_not_exist,
               JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
     final String patterns = extended.getAttribute(ATTRIBUTE_PATTERNS);
-    if (patterns != null && !"".equals(patterns)) //$NON-NLS-1$
+    if (patterns != null && !"".equals(patterns)) // $NON-NLS-1$
     fFilePatterns = patterns;
     final String references =
         extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES);
@@ -1454,14 +1457,13 @@ public class RenameTypeProcessor extends JavaRenameProcessor
     int current = 0;
     final int max = fPreloadedElementToName.size();
 
-    progressMonitor.beginTask("", max * 3); //$NON-NLS-1$
+    progressMonitor.beginTask("", max * 3); // $NON-NLS-1$
     progressMonitor.setTaskName(
         RefactoringCoreMessages
             .RenameTypeProcessor_checking_similarly_named_declarations_refactoring_conditions);
 
     for (Iterator<IJavaElement> iter = fPreloadedElementToName.keySet().iterator();
-        iter.hasNext();
-        ) {
+        iter.hasNext(); ) {
 
       final IJavaElement element = iter.next();
 
@@ -1614,7 +1616,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor
               textChange,
               "",
               analyzePackage.fOccurenceEdits[i],
-              GroupCategorySet.NONE); //$NON-NLS-1$
+              GroupCategorySet.NONE); // $NON-NLS-1$
         }
         current++;
       }
@@ -1656,8 +1658,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor
   private RefactoringStatus checkForConflictingRename(IMethod[] methods, String newName) {
     RefactoringStatus status = new RefactoringStatus();
     for (Iterator<IJavaElement> iter = fFinalSimilarElementToName.keySet().iterator();
-        iter.hasNext();
-        ) {
+        iter.hasNext(); ) {
       IJavaElement element = iter.next();
       if (element instanceof IMethod) {
         IMethod alreadyRegisteredMethod = (IMethod) element;
@@ -1721,8 +1722,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor
   private RefactoringStatus checkForConflictingRename(IField currentField, String newName) {
     RefactoringStatus status = new RefactoringStatus();
     for (Iterator<IJavaElement> iter = fFinalSimilarElementToName.keySet().iterator();
-        iter.hasNext();
-        ) {
+        iter.hasNext(); ) {
       IJavaElement element = iter.next();
       if (element instanceof IField) {
         IField alreadyRegisteredField = (IField) element;
@@ -1905,8 +1905,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor
     final List<String> forbiddenSimpleNames = new ArrayList<String>();
 
     for (Iterator<IJavaElement> iter = fFinalSimilarElementToName.keySet().iterator();
-        iter.hasNext();
-        ) {
+        iter.hasNext(); ) {
       final IJavaElement element = iter.next();
       if (element instanceof IField) {
 
@@ -1921,8 +1920,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor
     }
 
     for (Iterator<IJavaElement> iter = fFinalSimilarElementToName.keySet().iterator();
-        iter.hasNext();
-        ) {
+        iter.hasNext(); ) {
       final IJavaElement element = iter.next();
       if (element instanceof IField) {
         final IField field = (IField) element;
@@ -1967,8 +1965,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor
   public void resetSelectedSimilarElements() {
     Assert.isNotNull(fPreloadedElementToName);
     for (Iterator<IJavaElement> iter = fPreloadedElementToNameDefault.keySet().iterator();
-        iter.hasNext();
-        ) {
+        iter.hasNext(); ) {
       final IJavaElement element = iter.next();
       fPreloadedElementToName.put(element, fPreloadedElementToNameDefault.get(element));
       fPreloadedElementToSelection.put(element, Boolean.TRUE);

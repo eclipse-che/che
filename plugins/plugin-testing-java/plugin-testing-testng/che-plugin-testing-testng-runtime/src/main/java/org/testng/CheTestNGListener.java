@@ -218,7 +218,7 @@ public class CheTestNGListener {
     params.put("name", testMethodName);
     if (throwable != null) {
       String failMessage = throwable.getMessage();
-      //TODO add message replacement with 'Expected[] but Found[]'
+      // TODO add message replacement with 'Expected[] but Found[]'
       String stackTrace = getStackTrace(throwable);
       params.put("message", failMessage);
       params.put("details", stackTrace);
@@ -249,7 +249,8 @@ public class CheTestNGListener {
     Throwable throwable = result.getThrowable();
     if (throwable != null) {
       throwable
-          .printStackTrace(); //we catch all std.out in wsaget JVM and attach output to the output console
+          .printStackTrace(); // we catch all std.out in wsaget JVM and attach output to the output
+      // console
     }
     onTestSuccess(result);
   }

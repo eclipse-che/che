@@ -113,7 +113,7 @@ public class MoveCompilationUnitChange extends CompilationUnitReorgChange {
       IPackageFragmentRoot root, IPackageFragment destination, IProgressMonitor pm)
       throws JavaModelException {
     String packageName = destination.getElementName();
-    String[] split = packageName.split("\\."); //$NON-NLS-1$
+    String[] split = packageName.split("\\."); // $NON-NLS-1$
 
     ArrayList<IPackageFragment> created = new ArrayList<IPackageFragment>();
 
@@ -130,7 +130,7 @@ public class MoveCompilationUnitChange extends CompilationUnitReorgChange {
         return created.toArray(new IPackageFragment[created.size()]);
       }
 
-      name.append("."); //$NON-NLS-1$
+      name.append("."); // $NON-NLS-1$
       name.append(split[i + 1]);
     }
 

@@ -21,7 +21,7 @@ public class Separator extends Action {
   private String myText;
 
   public Separator() {
-    //It is necessary because otherwise we have some problems with myText==null after compiling GWT
+    // It is necessary because otherwise we have some problems with myText==null after compiling GWT
     this(null);
   }
 

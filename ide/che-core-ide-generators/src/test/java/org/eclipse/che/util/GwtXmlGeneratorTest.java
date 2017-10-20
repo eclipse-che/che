@@ -51,7 +51,7 @@ public class GwtXmlGeneratorTest {
 
   @Test
   public void shouldFindGwtXmlModules() {
-    //given
+    // given
     Set<String> excludePackages = Collections.emptySet();
     Set<String> includePackages = Collections.emptySet();
     GwtXmlModuleSearcher searcher =
@@ -61,15 +61,15 @@ public class GwtXmlGeneratorTest {
             ImmutableSet.of(
                 GwtXmlGeneratorTest.class.getProtectionDomain().getCodeSource().getLocation()));
 
-    //when
+    // when
     Set<String> actual = searcher.getGwtModulesFromClassPath();
-    //then
+    // then
     assertFalse(actual.isEmpty());
   }
 
   @Test
   public void shouldBeAbleToIncludeOnlyGwtModuleFrom() {
-    //given
+    // given
     Set<String> excludePackages = Collections.emptySet();
     Set<String> includePackages = ImmutableSet.of("elemental");
     GwtXmlModuleSearcher searcher =
@@ -79,9 +79,9 @@ public class GwtXmlGeneratorTest {
             ImmutableSet.of(
                 GwtXmlGeneratorTest.class.getProtectionDomain().getCodeSource().getLocation()));
 
-    //when
+    // when
     Set<String> actual = searcher.getGwtModulesFromClassPath();
-    //then
+    // then
     assertFalse(actual.isEmpty());
     assertEquals(actual.size(), 3);
 
@@ -92,7 +92,7 @@ public class GwtXmlGeneratorTest {
 
   @Test
   public void shouldBeAbleToExcludeGwtModuleFrom() {
-    //given
+    // given
     Set<String> excludePackages = ImmutableSet.of("elemental");
     Set<String> includePackages = Collections.emptySet();
     GwtXmlModuleSearcher searcher =
@@ -101,9 +101,9 @@ public class GwtXmlGeneratorTest {
             includePackages,
             ImmutableSet.of(
                 GwtXmlGeneratorTest.class.getProtectionDomain().getCodeSource().getLocation()));
-    //when
+    // when
     Set<String> actual = searcher.getGwtModulesFromClassPath();
-    //then
+    // then
     assertFalse(actual.isEmpty());
     assertFalse(actual.contains("elemental/Json.gwt.xml"));
     assertFalse(actual.contains("elemental/Collections.gwt.xml"));
@@ -112,13 +112,13 @@ public class GwtXmlGeneratorTest {
 
   @Test
   public void shouldGenerateGwtXml() throws IOException {
-    //given
+    // given
     Set<String> gwtModule = ImmutableSet.of("org/mydomain/Printer.gwt.xml");
     GwtXmlGeneratorConfig gwtXmlGeneratorConfig = new GwtXmlGeneratorConfig(gwtModule, testRoot);
     GwtXmlGenerator gwtXmlGenerator = new GwtXmlGenerator(gwtXmlGeneratorConfig);
-    //when
+    // when
     File actual = gwtXmlGenerator.generateGwtXml();
-    //then
+    // then
     XMLTree tree = XMLTree.from(actual);
 
     List<Element> inherits = tree.getElements("/module/inherits");
@@ -134,7 +134,7 @@ public class GwtXmlGeneratorTest {
 
   @Test
   public void shouldBeAbleToSetStylesheet() throws IOException {
-    //given
+    // given
     Set<String> gwtModule = ImmutableSet.of("org/mydomain/Printer.gwt.xml");
     GwtXmlGeneratorConfig gwtXmlGeneratorConfig =
         new GwtXmlGeneratorConfig(
@@ -145,9 +145,9 @@ public class GwtXmlGeneratorTest {
             "MyStylesheet.css",
             false);
     GwtXmlGenerator gwtXmlGenerator = new GwtXmlGenerator(gwtXmlGeneratorConfig);
-    //when
+    // when
     File actual = gwtXmlGenerator.generateGwtXml();
-    //then
+    // then
     XMLTree tree = XMLTree.from(actual);
 
     assertEquals(
@@ -157,7 +157,7 @@ public class GwtXmlGeneratorTest {
 
   @Test
   public void shouldBeAbleToDisableLogging() throws IOException {
-    //given
+    // given
     Set<String> gwtModule = ImmutableSet.of("org/mydomain/Printer.gwt.xml");
     GwtXmlGeneratorConfig gwtXmlGeneratorConfig =
         new GwtXmlGeneratorConfig(
@@ -168,9 +168,9 @@ public class GwtXmlGeneratorTest {
             DEFAULT_STYLE_SHEET,
             false);
     GwtXmlGenerator gwtXmlGenerator = new GwtXmlGenerator(gwtXmlGeneratorConfig);
-    //when
+    // when
     File actual = gwtXmlGenerator.generateGwtXml();
-    //then
+    // then
     XMLTree tree = XMLTree.from(actual);
     assertNotExists(tree, "/module/inherits[@name='com.google.gwt.logging.Logging']");
     assertNotExists(tree, "/module/set-property[@name='gwt.logging.consoleHandler']");
@@ -180,7 +180,7 @@ public class GwtXmlGeneratorTest {
 
   @Test
   public void shouldBeAbleToEnableLogging() throws IOException {
-    //given
+    // given
     Set<String> gwtModule = ImmutableSet.of("org/mydomain/Printer.gwt.xml");
     GwtXmlGeneratorConfig gwtXmlGeneratorConfig =
         new GwtXmlGeneratorConfig(
@@ -191,9 +191,9 @@ public class GwtXmlGeneratorTest {
             DEFAULT_STYLE_SHEET,
             true);
     GwtXmlGenerator gwtXmlGenerator = new GwtXmlGenerator(gwtXmlGeneratorConfig);
-    //when
+    // when
     File actual = gwtXmlGenerator.generateGwtXml();
-    //then
+    // then
     XMLTree tree = XMLTree.from(actual);
     assertExists(tree, "/module/inherits[@name='com.google.gwt.logging.Logging']");
 
@@ -216,7 +216,7 @@ public class GwtXmlGeneratorTest {
 
   @Test
   public void shouldFindModulesAndGenerate() throws IOException {
-    //given
+    // given
     String[] args =
         new String[] {
           "--rootDir=" + testRoot,
@@ -225,9 +225,9 @@ public class GwtXmlGeneratorTest {
           "--includePackages=org.eclipse.che.api.core"
         };
     GwtXmlGenerator.main(args);
-    //when
+    // when
     File actual = new File(testRoot, "com/myorg/My.gwt.xml");
-    //then
+    // then
     XMLTree tree = XMLTree.from(actual);
     List<Element> inherits = tree.getElements("/module/inherits");
     assertEquals(inherits.size(), 3);

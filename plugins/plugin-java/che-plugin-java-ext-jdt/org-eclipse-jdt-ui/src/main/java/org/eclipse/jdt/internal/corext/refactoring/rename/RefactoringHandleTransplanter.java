@@ -210,7 +210,7 @@ public class RefactoringHandleTransplanter {
 
   private IMember resolveTypeInMember(final IMember newParent, IType oldChild) {
     // Local type or anonymous type. Only local types can be renamed.
-    String newName = ""; //$NON-NLS-1$
+    String newName = ""; // $NON-NLS-1$
     if (oldChild.getElementName().length() != 0) newName = resolveTypeName(oldChild);
     return newParent.getType(newName, oldChild.getOccurrenceCount());
   }

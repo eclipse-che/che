@@ -68,7 +68,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 /** @author Dmitry Shnurenko */
 @RunWith(MockitoJUnitRunner.class)
 public class CreateWorkspacePresenterTest {
-  //constructor mocks
+  // constructor mocks
   @Mock private CreateWorkspaceView view;
   @Mock private DtoFactory dtoFactory;
   @Mock private WorkspaceServiceClient workspaceClient;
@@ -77,7 +77,7 @@ public class CreateWorkspacePresenterTest {
   @Mock private RecipeServiceClient recipeServiceClient;
   @Mock private BrowserAddress browserAddress;
 
-  //additional mocks
+  // additional mocks
   @Mock private Callback<Component, Exception> componentCallback;
   @Mock private HidePopupCallBack popupCallBack;
   @Mock private Promise<List<RecipeDescriptor>> recipesPromise;
@@ -86,7 +86,7 @@ public class CreateWorkspacePresenterTest {
   @Mock private DefaultWorkspaceComponent workspaceComponent;
   @Mock private MachineLimitsDto limitsDto;
 
-  //DTOs
+  // DTOs
   private MachineConfigDto machineConfigDto;
   private WorkspaceConfigDto workspaceConfigDto;
   @Mock private MachineDto machineDto;
@@ -327,7 +327,7 @@ public class CreateWorkspacePresenterTest {
     verify(userWsPromise).catchError(errorOperation.capture());
     errorOperation.getValue().apply(promiseError);
 
-    //noinspection ThrowableResultOfMethodCallIgnored
+    // noinspection ThrowableResultOfMethodCallIgnored
     verify(promiseError).getCause();
     verify(componentCallback).onFailure(Matchers.<Exception>anyObject());
   }

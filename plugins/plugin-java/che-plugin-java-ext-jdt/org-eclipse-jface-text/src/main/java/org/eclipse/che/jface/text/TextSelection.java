@@ -28,8 +28,9 @@ public class TextSelection implements ITextSelection {
    * @since 3.5
    */
   private static final boolean ASSERT_INVLID_SELECTION_NULL = false;
-  //			"true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jface.text/assert/TextSelection/validConstructorArguments"));
-  //$NON-NLS-1$ //$NON-NLS-2$
+  //
+  //	"true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jface.text/assert/TextSelection/validConstructorArguments"));
+  // $NON-NLS-1$ //$NON-NLS-2$
 
   /** Internal empty text selection */
   private static final ITextSelection NULL = new TextSelection();

@@ -42,7 +42,7 @@ import org.mockito.Mock;
 @RunWith(GwtMockitoTestRunner.class)
 public class CreateWorkspaceViewImplTest {
 
-  //constructor mocks
+  // constructor mocks
   @Mock private CoreLocalizationConstant locale;
 
   @Mock(answer = RETURNS_DEEP_STUBS)
@@ -52,7 +52,7 @@ public class CreateWorkspaceViewImplTest {
   @Mock private WorkspaceWidgetFactory tagFactory;
   @Mock private PopupPanel popupPanel;
 
-  //additional mocks
+  // additional mocks
   @Mock private RecipeDescriptor descriptor;
   @Mock private RecipeWidget tag;
   @Mock private ActionDelegate delegate;

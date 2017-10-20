@@ -105,7 +105,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
   public RemoveDeclarationCorrectionProposal(ICompilationUnit cu, SimpleName name, int relevance) {
     super(
         "", cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_TOOL_DELETE)
-        /*JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE)*/ ); //$NON-NLS-1$
+        /*JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE)*/ ); // $NON-NLS-1$
     fName = name;
   }
 
@@ -185,7 +185,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
         removeParamTag(rewrite, (SingleVariableDeclaration) declaringNode);
       }
     } else {
-      throw new IllegalArgumentException("Unexpected binding"); //$NON-NLS-1$
+      throw new IllegalArgumentException("Unexpected binding"); // $NON-NLS-1$
     }
     return rewrite;
   }

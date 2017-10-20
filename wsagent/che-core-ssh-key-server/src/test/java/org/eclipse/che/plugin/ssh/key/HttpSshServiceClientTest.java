@@ -59,13 +59,13 @@ public class HttpSshServiceClientTest {
 
   @Test
   public void shouldMakeGeneratePairRequest() throws Exception {
-    //given
+    // given
     GenerateSshPairRequest sshPairRequest = mock(GenerateSshPairRequest.class);
 
-    //when
+    // when
     client.generatePair(sshPairRequest);
 
-    //then
+    // then
     String url = fromUri(SSH_SERVICE_URL).path(SshService.class, "generatePair").build().toString();
     verify(requestFactory).fromUrl(eq(url));
     verify(jsonRequest).usePostMethod();
@@ -76,13 +76,13 @@ public class HttpSshServiceClientTest {
 
   @Test
   public void shouldMakeCreatePairRequest() throws Exception {
-    //given
+    // given
     SshPairDto sshPairDto = mock(SshPairDto.class);
 
-    //when
+    // when
     client.createPair(sshPairDto);
 
-    //then
+    // then
     String url =
         fromUri(SSH_SERVICE_URL)
             .path(SshService.class.getMethod("createPair", SshPairDto.class))
@@ -97,10 +97,10 @@ public class HttpSshServiceClientTest {
 
   @Test
   public void shouldMakeGetPairRequest() throws Exception {
-    //when
+    // when
     client.getPair(SSH_KEY_SERVICE, SSH_KEY_NAME);
 
-    //then
+    // then
     String url =
         fromUri(SSH_SERVICE_URL)
             .path(SshService.class, "getPair")
@@ -115,10 +115,10 @@ public class HttpSshServiceClientTest {
 
   @Test
   public void shouldMakeRemovePairRequest() throws Exception {
-    //when
+    // when
     client.removePair(SSH_KEY_SERVICE, SSH_KEY_NAME);
 
-    //then
+    // then
     String url =
         fromUri(SSH_SERVICE_URL)
             .path(SshService.class, "removePair")

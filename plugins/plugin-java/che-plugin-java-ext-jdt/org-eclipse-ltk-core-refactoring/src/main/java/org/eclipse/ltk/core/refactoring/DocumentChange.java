@@ -65,7 +65,7 @@ public class DocumentChange extends TextChange {
 
   /** {@inheritDoc} */
   public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
-    pm.beginTask("", 1); //$NON-NLS-1$
+    pm.beginTask("", 1); // $NON-NLS-1$
     RefactoringStatus result = TextChanges.isValid(fDocument, fLength);
     pm.worked(1);
     return result;
@@ -83,7 +83,7 @@ public class DocumentChange extends TextChange {
 
   /** {@inheritDoc} */
   protected void releaseDocument(IDocument document, IProgressMonitor pm) throws CoreException {
-    //do nothing
+    // do nothing
   }
 
   /*

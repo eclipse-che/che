@@ -89,7 +89,7 @@ public class XMLTreeUtilTest {
 
   @Test
   public void shouldBeAbleToGetElementOpenTagLength() {
-    //<test>test</test>
+    // <test>test</test>
     final NewElement newElement = NewElement.createElement("test", "test");
 
     assertEquals(openTagLength(newElement), 6);
@@ -97,7 +97,7 @@ public class XMLTreeUtilTest {
 
   @Test
   public void shouldBeAbleToGetElementCloseTagLength() {
-    //<test>test</test>
+    // <test>test</test>
     final NewElement newElement = NewElement.createElement("test", "test");
 
     assertEquals(closeTagLength(newElement), 7);

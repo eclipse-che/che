@@ -56,7 +56,7 @@ public class MavenProjectManager {
 
   private final List<MavenProjectListener> listeners = new CopyOnWriteArrayList<>();
 
-  //project that does not have parent project in our workspace
+  // project that does not have parent project in our workspace
   private final List<MavenProject> rootProjects;
 
   private final MavenWrapperManager wrapperManager;
@@ -179,7 +179,7 @@ public class MavenProjectManager {
       UpdateState state,
       Deque<MavenProject> stack) {
     if (stack.contains(mavenProject)) {
-      return; //recursion
+      return; // recursion
     }
 
     stack.addFirst(mavenProject);
@@ -201,7 +201,7 @@ public class MavenProjectManager {
       writeLock.unlock();
     }
     MavenProjectModifications modifications = new MavenProjectModifications();
-    //re read maven project meta info from pom.xml
+    // re read maven project meta info from pom.xml
     modifications = modifications.addChanges(mavenProject.read(serverManager));
 
     writeLock.lock();
@@ -243,7 +243,7 @@ public class MavenProjectManager {
       } else {
         MavenProject parent = findParentProject(project);
         if (parent != null && parent != mavenProject) {
-          //TODO add log
+          // TODO add log
           continue;
         }
       }

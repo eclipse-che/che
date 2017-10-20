@@ -115,7 +115,12 @@ public class LocalDockerCustomServerEvaluationStrategyTest {
     // given
     strategy =
         new LocalDockerCustomServerEvaluationStrategy(
-                null, null, CHE_DOCKER_SERVER_EVALUATION_STRATEGY_CUSTOM_TEMPLATE, "http", null)
+                null,
+                null,
+                CHE_DOCKER_SERVER_EVALUATION_STRATEGY_CUSTOM_TEMPLATE,
+                "http",
+                null,
+                null)
             .withThrowOnUnknownHost(false);
 
     final Map<String, ServerImpl> expectedServers =

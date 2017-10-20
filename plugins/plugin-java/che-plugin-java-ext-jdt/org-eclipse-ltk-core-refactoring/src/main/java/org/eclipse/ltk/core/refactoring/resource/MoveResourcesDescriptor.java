@@ -51,7 +51,7 @@ public final class MoveResourcesDescriptor extends RefactoringDescriptor {
    * <p>Clients may safely cast the obtained refactoring descriptor to {@link
    * MoveResourcesDescriptor}.
    */
-  public static final String ID = "org.eclipse.ltk.core.refactoring.move.resources"; //$NON-NLS-1$
+  public static final String ID = "org.eclipse.ltk.core.refactoring.move.resources"; // $NON-NLS-1$
 
   /** The destination */
   private IPath fDestinationPath;

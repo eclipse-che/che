@@ -330,9 +330,9 @@ public class Elements {
     final Object o = element.getClassName();
     final String currentClassName;
 
-    //don't remove this checking, some times we can catch NPE if we work with OMSVGSVGElement,
-    //because getClassName on this class returns SVGAnimatedString, with stored classes, so
-    //we need to check additionally type of input element
+    // don't remove this checking, some times we can catch NPE if we work with OMSVGSVGElement,
+    // because getClassName on this class returns SVGAnimatedString, with stored classes, so
+    // we need to check additionally type of input element
     if (o instanceof SVGAnimatedString) {
       currentClassName = ((SVGAnimatedString) o).getBaseVal();
     } else {

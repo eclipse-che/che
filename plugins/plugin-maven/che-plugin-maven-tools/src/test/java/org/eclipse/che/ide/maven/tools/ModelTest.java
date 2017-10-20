@@ -38,7 +38,7 @@ public class ModelTest {
 
   @BeforeMethod
   private void resetLineSeparator() {
-    //needed for xml tree to write content with \n line separator
+    // needed for xml tree to write content with \n line separator
     System.setProperty("line.separator", "\n");
   }
 

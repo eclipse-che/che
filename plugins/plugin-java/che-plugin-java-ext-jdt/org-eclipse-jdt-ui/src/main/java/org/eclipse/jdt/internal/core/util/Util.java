@@ -98,18 +98,18 @@ import org.slf4j.LoggerFactory;
 public class Util {
   private static final Logger LOG = LoggerFactory.getLogger(Util.class);
   private static final char ARGUMENTS_DELIMITER = '#';
-  private static final String EMPTY_ARGUMENT = "   "; //$NON-NLS-1$
-  private static final char[] BOOLEAN = "boolean".toCharArray(); //$NON-NLS-1$
-  private static final char[] BYTE = "byte".toCharArray(); //$NON-NLS-1$
-  private static final char[] CHAR = "char".toCharArray(); //$NON-NLS-1$
-  private static final char[] DOUBLE = "double".toCharArray(); //$NON-NLS-1$
-  private static final char[] FLOAT = "float".toCharArray(); //$NON-NLS-1$
-  private static final char[] INT = "int".toCharArray(); //$NON-NLS-1$
-  private static final char[] LONG = "long".toCharArray(); //$NON-NLS-1$
-  private static final char[] SHORT = "short".toCharArray(); //$NON-NLS-1$
-  private static final char[] VOID = "void".toCharArray(); //$NON-NLS-1$
+  private static final String EMPTY_ARGUMENT = "   "; // $NON-NLS-1$
+  private static final char[] BOOLEAN = "boolean".toCharArray(); // $NON-NLS-1$
+  private static final char[] BYTE = "byte".toCharArray(); // $NON-NLS-1$
+  private static final char[] CHAR = "char".toCharArray(); // $NON-NLS-1$
+  private static final char[] DOUBLE = "double".toCharArray(); // $NON-NLS-1$
+  private static final char[] FLOAT = "float".toCharArray(); // $NON-NLS-1$
+  private static final char[] INT = "int".toCharArray(); // $NON-NLS-1$
+  private static final char[] LONG = "long".toCharArray(); // $NON-NLS-1$
+  private static final char[] SHORT = "short".toCharArray(); // $NON-NLS-1$
+  private static final char[] VOID = "void".toCharArray(); // $NON-NLS-1$
   private static char[][] JAVA_LIKE_EXTENSIONS;
-  private static final String TASK_PRIORITIES_PROBLEM = "TASK_PRIORITIES_PB"; //$NON-NLS-1$
+  private static final String TASK_PRIORITIES_PROBLEM = "TASK_PRIORITIES_PB"; // $NON-NLS-1$
   private static List fgRepeatedMessages = new ArrayList(5);
 
   private Util() {
@@ -222,7 +222,8 @@ public class Util {
   public static boolean isReadOnly(IResource resource) {
     //        if (isReadOnlySupported()) {
     //            ResourceAttributes resourceAttributes = resource.getResourceAttributes();
-    //            if (resourceAttributes == null) return false; // not supported on this platform for this resource
+    //            if (resourceAttributes == null) return false; // not supported on this platform
+    // for this resource
     //            return resourceAttributes.isReadOnly();
     //        }
     return false;
@@ -631,9 +632,9 @@ public class Util {
         nextChar = i < length - 1 ? text[i + 1] : ' ';
         switch (currentChar) {
           case '\n':
-            return "\n"; //$NON-NLS-1$
+            return "\n"; // $NON-NLS-1$
           case '\r':
-            return nextChar == '\n' ? "\r\n" : "\r"; //$NON-NLS-1$ //$NON-NLS-2$
+            return nextChar == '\n' ? "\r\n" : "\r"; // $NON-NLS-1$ //$NON-NLS-2$
         }
       }
     }
@@ -880,7 +881,8 @@ public class Util {
   }
 
   //    /*
-  //     * Appends to the given buffer the fully qualified name (as it appears in the source) of the given type
+  //     * Appends to the given buffer the fully qualified name (as it appears in the source) of the
+  // given type
   //     */
   //    private static void getFullyQualifiedName(Type type, StringBuffer buffer) {
   //        switch (type.getNodeType()) {
@@ -1649,7 +1651,7 @@ public class Util {
     // Resize signatures array
     char[][] typeSignatures = new char[signaturesCount + 1][];
     typeSignatures[0] = source;
-    for (int i = 1, j = signaturesCount - 1; i <= signaturesCount; i++, j--) //NOSONAR
+    for (int i = 1, j = signaturesCount - 1; i <= signaturesCount; i++, j--) // NOSONAR
     {
       typeSignatures[i] = signatures[j];
     }
@@ -2257,7 +2259,8 @@ public class Util {
   public static char[] getResourceContentsAsCharArray(IFile file, String encoding)
       throws JavaModelException {
     // Get file length
-    // workaround https://bugs.eclipse.org/bugs/show_bug.cgi?id=130736 by using java.io.File if possible
+    // workaround https://bugs.eclipse.org/bugs/show_bug.cgi?id=130736 by using java.io.File if
+    // possible
     IPath location = file.getLocation();
     long length = 0;
     //        if (location == null) {
@@ -2265,11 +2268,13 @@ public class Util {
     //            try {
     //                URI locationURI = file.getLocationURI();
     //                if (locationURI == null)
-    //                    throw new CoreException(new Status(IStatus.ERROR, JavaCore.PLUGIN_ID, Messages
+    //                    throw new CoreException(new Status(IStatus.ERROR, JavaCore.PLUGIN_ID,
+    // Messages
     //                            .bind(Messages.file_notFound, file.getFullPath().toString())));
     //                length = EFS.getStore(locationURI).fetchInfo().getLength();
     //            } catch (CoreException e) {
-    //                throw new JavaModelException(e, IJavaModelStatusConstants.ELEMENT_DOES_NOT_EXIST);
+    //                throw new JavaModelException(e,
+    // IJavaModelStatusConstants.ELEMENT_DOES_NOT_EXIST);
     //            }
     //        } else {
     ////            // local file
@@ -2333,11 +2338,13 @@ public class Util {
    * Returns the source attachment property for this package fragment root's path
    */
   public static String getSourceAttachmentProperty(IPath path) throws JavaModelException {
-    //        Map rootPathToAttachments = JavaModelManager.getJavaModelManager().rootPathToAttachments;
+    //        Map rootPathToAttachments =
+    // JavaModelManager.getJavaModelManager().rootPathToAttachments;
     //        String property = (String) rootPathToAttachments.get(path);
     //        if (property == null) {
     //            try {
-    //                property = ResourcesPlugin.getWorkspace().getRoot().getPersistentProperty(getSourceAttachmentPropertyName(path));
+    //                property =
+    // ResourcesPlugin.getWorkspace().getRoot().getPersistentProperty(getSourceAttachmentPropertyName(path));
     //                if (property == null) {
     //                    rootPathToAttachments.put(path, PackageFragmentRoot.NO_SOURCE_ATTACHMENT);
     //                    return null;
@@ -2359,8 +2366,9 @@ public class Util {
     if (pkgEnd == -1) pkgEnd = CharOperation.lastIndexOf(File.separatorChar, fileName);
     if (jarSeparator != -1
         && pkgEnd
-            < jarSeparator) // if in a jar and no slash, it is a default package -> pkgEnd should be equal to jarSeparator
-    pkgEnd = jarSeparator;
+            < jarSeparator) // if in a jar and no slash, it is a default package -> pkgEnd should be
+      // equal to jarSeparator
+      pkgEnd = jarSeparator;
     if (pkgEnd == -1) return null;
     IPackageFragment pkg = getPackageFragment(fileName, pkgEnd, jarSeparator);
     if (pkg == null) return null;
@@ -2418,9 +2426,9 @@ public class Util {
         int pkgEnd = CharOperation.lastIndexOf('/', fileName); // pkgEnd is exclusive
         if (pkgEnd == -1) pkgEnd = CharOperation.lastIndexOf(File.separatorChar, fileName);
         if (jarSeparator != -1
-            && pkgEnd
-                < jarSeparator) // if in a jar and no slash, it is a default package -> pkgEnd should be equal to jarSeparator
-        pkgEnd = jarSeparator;
+            && pkgEnd < jarSeparator) // if in a jar and no slash, it is a default package -> pkgEnd
+          // should be equal to jarSeparator
+          pkgEnd = jarSeparator;
         if (pkgEnd == -1) return null;
         IPackageFragment pkg = getPackageFragment(fileName, pkgEnd, jarSeparator);
         char[] constantPoolName = referenceBinding.constantPoolName();
@@ -2438,7 +2446,8 @@ public class Util {
       }
       ICompilationUnit cu = getCompilationUnit(fileName, workingCopyOwner);
       if (cu == null) return null;
-      // must use getElementAt(...) as there is no back pointer to the defining method (scope is null after resolution has ended)
+      // must use getElementAt(...) as there is no back pointer to the defining method (scope is
+      // null after resolution has ended)
       try {
         int sourceStart =
             ((org.eclipse.jdt.internal.compiler.lookup.LocalTypeBinding) referenceBinding)
@@ -2551,7 +2560,8 @@ public class Util {
           original.isConstructor() ? declaringType.getElementName() : new String(original.selector);
       boolean isBinary = declaringType.isBinary();
       ReferenceBinding enclosingType = original.declaringClass.enclosingType();
-      // Static inner types' constructors don't get receivers (https://bugs.eclipse.org/bugs/show_bug.cgi?id=388137)
+      // Static inner types' constructors don't get receivers
+      // (https://bugs.eclipse.org/bugs/show_bug.cgi?id=388137)
       boolean isInnerBinaryTypeConstructor =
           isBinary
               && original.isConstructor()
@@ -2674,7 +2684,7 @@ public class Util {
    */
   public static void logRepeatedMessage(String key, Exception e) {
     if (key == null) {
-      throw new IllegalArgumentException("key cannot be null"); //$NON-NLS-1$
+      throw new IllegalArgumentException("key cannot be null"); // $NON-NLS-1$
     }
     if (fgRepeatedMessages.contains(key)) {
       return;
@@ -2685,7 +2695,7 @@ public class Util {
 
   public static void logRepeatedMessage(String key, int statusErrorID, String message) {
     if (key == null) {
-      throw new IllegalArgumentException("key cannot be null"); //$NON-NLS-1$
+      throw new IllegalArgumentException("key cannot be null"); // $NON-NLS-1$
     }
     if (fgRepeatedMessages.contains(key)) {
       return;
@@ -2711,7 +2721,7 @@ public class Util {
       }
       pkgName.append(segment);
       if (j < pkgPath.segmentCount() - 1) {
-        pkgName.append("."); //$NON-NLS-1$
+        pkgName.append("."); // $NON-NLS-1$
       }
     }
     return pkgName.toString();
@@ -2758,7 +2768,7 @@ public class Util {
         org.eclipse.jdt.internal.core.util.Util.logRepeatedMessage(
             TASK_PRIORITIES_PROBLEM,
             IStatus.ERROR,
-            "Inconsistent values for taskTags (not null) and task priorities (null)"); //$NON-NLS-1$
+            "Inconsistent values for taskTags (not null) and task priorities (null)"); // $NON-NLS-1$
         defaultOptionsMap.remove(JavaCore.COMPILER_TASK_TAGS);
       }
       return;
@@ -2766,7 +2776,7 @@ public class Util {
       org.eclipse.jdt.internal.core.util.Util.logRepeatedMessage(
           TASK_PRIORITIES_PROBLEM,
           IStatus.ERROR,
-          "Inconsistent values for taskTags (null) and task priorities (not null)"); //$NON-NLS-1$
+          "Inconsistent values for taskTags (null) and task priorities (not null)"); // $NON-NLS-1$
       defaultOptionsMap.remove(JavaCore.COMPILER_TASK_PRIORITIES);
       return;
     }
@@ -2776,7 +2786,7 @@ public class Util {
       org.eclipse.jdt.internal.core.util.Util.logRepeatedMessage(
           TASK_PRIORITIES_PROBLEM,
           IStatus.ERROR,
-          "Inconsistent values for taskTags and task priorities : length is different"); //$NON-NLS-1$
+          "Inconsistent values for taskTags and task priorities : length is different"); // $NON-NLS-1$
       if (taskTagsLength > taskPrioritiesLength) {
         System.arraycopy(
             taskTags, 0, (taskTags = new char[taskPrioritiesLength][]), 0, taskPrioritiesLength);
@@ -2812,14 +2822,16 @@ public class Util {
     //            IScopeContext[] scopeContext;
     //            if (project != null) {
     //                scopeContext= new IScopeContext[] { new ProjectScope(project.getProject()) };
-    //                lineSeparator= Platform.getPreferencesService().getString(Platform.PI_RUNTIME, Platform.PREF_LINE_SEPARATOR, null, scopeContext);
+    //                lineSeparator= Platform.getPreferencesService().getString(Platform.PI_RUNTIME,
+    // Platform.PREF_LINE_SEPARATOR, null, scopeContext);
     //                if (lineSeparator != null)
     //                    return lineSeparator;
     //            }
     //
     //            // line delimiter in workspace preference
     //            scopeContext= new IScopeContext[] { InstanceScope.INSTANCE };
-    //            lineSeparator = Platform.getPreferencesService().getString(Platform.PI_RUNTIME, Platform.PREF_LINE_SEPARATOR, null, scopeContext);
+    //            lineSeparator = Platform.getPreferencesService().getString(Platform.PI_RUNTIME,
+    // Platform.PREF_LINE_SEPARATOR, null, scopeContext);
     //            if (lineSeparator != null)
     //                return lineSeparator;
     //        }
@@ -2856,7 +2868,7 @@ public class Util {
       for (int i1 = skipSegmentCount; i1 < max; i1++) {
         length += segments[i1].length();
       }
-      //add the separator lengths
+      // add the separator lengths
       length += max - skipSegmentCount - 1;
     }
     if (hasTrailingSeparator) length++;
@@ -2865,14 +2877,14 @@ public class Util {
     int offset = 0;
     int len = segments.length - 1;
     if (len >= skipSegmentCount) {
-      //append all but the last segment, with separators
+      // append all but the last segment, with separators
       for (int i = skipSegmentCount; i < len; i++) {
         int size = segments[i].length();
         segments[i].getChars(0, size, result, offset);
         offset += size;
         result[offset++] = '/';
       }
-      //append the last segment
+      // append the last segment
       int size = segments[len].length();
       segments[len].getChars(0, size, result, offset);
       offset += size;
@@ -2975,7 +2987,8 @@ public class Util {
   public static void setReadOnly(IResource resource, boolean readOnly) {
     //        if (isReadOnlySupported()) {
     //            ResourceAttributes resourceAttributes = resource.getResourceAttributes();
-    //            if (resourceAttributes == null) return; // not supported on this platform for this resource
+    //            if (resourceAttributes == null) return; // not supported on this platform for this
+    // resource
     //            resourceAttributes.setReadOnly(readOnly);
     //            try {
     //                resource.setResourceAttributes(resourceAttributes);
@@ -2990,7 +3003,7 @@ public class Util {
     do {
       int end = log.indexOf('\n', start);
       printStream.print(Thread.currentThread());
-      printStream.print(" "); //$NON-NLS-1$
+      printStream.print(" "); // $NON-NLS-1$
       printStream.print(log.substring(start, end == -1 ? log.length() : end + 1));
       start = end + 1;
     } while (start != 0);

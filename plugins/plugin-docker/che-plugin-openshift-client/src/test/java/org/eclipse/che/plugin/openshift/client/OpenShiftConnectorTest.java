@@ -49,6 +49,7 @@ public class OpenShiftConnectorTest {
   private static final boolean SECURE_ROUTES = false;
   private static final boolean CREATE_WORKSPACE_DIRS = true;
 
+  @Mock private OpenshiftWorkspaceEnvironmentProvider openshiftUserAccountProvider;
   @Mock private DockerConnectorConfiguration dockerConnectorConfiguration;
   @Mock private DockerConnectionFactory dockerConnectionFactory;
   @Mock private DockerRegistryAuthResolver authManager;
@@ -64,9 +65,10 @@ public class OpenShiftConnectorTest {
   @BeforeMethod
   private void setup() {
 
-    //When
+    // When
     openShiftConnector =
         new OpenShiftConnector(
+            openshiftUserAccountProvider,
             dockerConnectorConfiguration,
             dockerConnectionFactory,
             authManager,
@@ -76,6 +78,7 @@ public class OpenShiftConnectorTest {
             openShiftDeploymentCleaner,
             eventService,
             CHE_DEFAULT_SERVER_EXTERNAL_ADDRESS,
+            null,
             CHE_DEFAULT_OPENSHIFT_PROJECT_NAME,
             OPENSHIFT_LIVENESS_PROBE_DELAY,
             OPENSHIFT_LIVENESS_PROBE_TIMEOUT,
@@ -92,7 +95,7 @@ public class OpenShiftConnectorTest {
   @Test
   public void shouldGetWorkspaceIDWhenAValidOneIsProvidedInCreateContainerParams()
       throws IOException {
-    //Given
+    // Given
     String expectedWorkspaceID = "abcd1234";
     ContainerConfig containerConfig = mock(ContainerConfig.class);
     CreateContainerParams createContainerParams = CreateContainerParams.create(containerConfig);
@@ -101,7 +104,7 @@ public class OpenShiftConnectorTest {
 
     String workspaceID = openShiftConnector.getCheWorkspaceId(createContainerParams);
 
-    //Then
+    // Then
     assertEquals(workspaceID, expectedWorkspaceID);
   }
 

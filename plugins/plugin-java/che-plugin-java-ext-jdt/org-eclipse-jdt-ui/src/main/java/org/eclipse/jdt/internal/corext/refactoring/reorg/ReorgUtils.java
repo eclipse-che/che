@@ -49,7 +49,7 @@ import org.eclipse.ui.IWorkingSet;
 
 public class ReorgUtils {
 
-  //workaround for bug 18311
+  // workaround for bug 18311
   private static final ISourceRange fgUnknownRange = new SourceRange(-1, 0);
 
   private ReorgUtils() {}
@@ -279,7 +279,7 @@ public class ReorgUtils {
   public static IJavaElement[] union(IJavaElement[] set1, IJavaElement[] set2) {
     List<IJavaElement> union =
         new ArrayList<IJavaElement>(
-            set1.length + set2.length); //use lists to avoid sequence problems
+            set1.length + set2.length); // use lists to avoid sequence problems
     addAll(set1, union);
     addAll(set2, union);
     return union.toArray(new IJavaElement[union.size()]);
@@ -287,7 +287,7 @@ public class ReorgUtils {
 
   public static IResource[] union(IResource[] set1, IResource[] set2) {
     List<IResource> union =
-        new ArrayList<IResource>(set1.length + set2.length); //use lists to avoid sequence problems
+        new ArrayList<IResource>(set1.length + set2.length); // use lists to avoid sequence problems
     addAll(ReorgUtils.getNotNulls(set1), union);
     addAll(ReorgUtils.getNotNulls(set2), union);
     return union.toArray(new IResource[union.size()]);
@@ -319,7 +319,7 @@ public class ReorgUtils {
     return result.toArray(new IFile[result.size()]);
   }
 
-  //the result can be cast down to the requested type array
+  // the result can be cast down to the requested type array
   public static Set<IResource> getResourcesOfType(IResource[] resources, int typeMask) {
     Set<IResource> result = new HashSet<IResource>(resources.length);
     for (int i = 0; i < resources.length; i++) {
@@ -328,8 +328,8 @@ public class ReorgUtils {
     return result;
   }
 
-  //the result can be cast down to the requested type array
-  //type is _not_ a mask
+  // the result can be cast down to the requested type array
+  // type is _not_ a mask
   public static List<?> getElementsOfType(IJavaElement[] javaElements, int type) {
     List<IJavaElement> result = new ArrayList<IJavaElement>(javaElements.length);
     for (int i = 0; i < javaElements.length; i++) {
@@ -346,7 +346,7 @@ public class ReorgUtils {
     return false;
   }
 
-  //type is _not_ a mask
+  // type is _not_ a mask
   public static boolean hasElementsNotOfType(IJavaElement[] javaElements, int type) {
     for (int i = 0; i < javaElements.length; i++) {
       IJavaElement element = javaElements[i];
@@ -355,7 +355,7 @@ public class ReorgUtils {
     return false;
   }
 
-  //type is _not_ a mask
+  // type is _not_ a mask
   public static boolean hasElementsOfType(IJavaElement[] javaElements, int type) {
     for (int i = 0; i < javaElements.length; i++) {
       IJavaElement element = javaElements[i];
@@ -393,7 +393,7 @@ public class ReorgUtils {
   }
 
   private static boolean isOfType(IJavaElement element, int type) {
-    return element.getElementType() == type; //this is _not_ a mask
+    return element.getElementType() == type; // this is _not_ a mask
   }
 
   private static boolean isOfType(IResource resource, int type) {
@@ -454,7 +454,7 @@ public class ReorgUtils {
     if (javaElement instanceof IPackageFragmentRoot) {
       return isPackageFragmentRootCorrespondingToProject((IPackageFragmentRoot) javaElement);
     } else if (javaElement instanceof IJavaProject) {
-      return true; //XXX ???
+      return true; // XXX ???
     } else return false;
   }
 

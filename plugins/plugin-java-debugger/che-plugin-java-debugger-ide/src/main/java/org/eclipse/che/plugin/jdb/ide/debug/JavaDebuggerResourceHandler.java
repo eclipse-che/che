@@ -88,11 +88,11 @@ public class JavaDebuggerResourceHandler extends DefaultDebuggerResourceHandler 
   }
 
   private String extractOuterClassFqn(String fqn) {
-    //handle fqn in case of nested classes
+    // handle fqn in case of nested classes
     if (fqn.contains("$")) {
       return fqn.substring(0, fqn.indexOf("$"));
     }
-    //handle fqn in case lambda expressions
+    // handle fqn in case lambda expressions
     if (fqn.contains("$$")) {
       return fqn.substring(0, fqn.indexOf("$$"));
     }

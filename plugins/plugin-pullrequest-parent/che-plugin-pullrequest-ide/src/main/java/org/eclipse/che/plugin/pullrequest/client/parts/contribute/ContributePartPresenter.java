@@ -471,8 +471,7 @@ public class ContributePartPresenter extends BasePresenter
 
   private void updateView(final Context context, final List<ViewUpdate> updates) {
     for (Iterator<ViewUpdate> it = updates.iterator();
-        it.hasNext() && isCurrentContext(context);
-        ) {
+        it.hasNext() && isCurrentContext(context); ) {
       it.next().update(view, context);
     }
   }

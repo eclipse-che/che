@@ -211,7 +211,8 @@ public class QuickFixResolver {
       case IProblem.SafeVarargsOnNonFinalInstanceMethod:
         return true;
       default:
-        //                return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(problemId);
+        //                return
+        // SuppressWarningsSubProcessor.hasSuppressWarningsProposal(problemId);
         return true;
     }
   }

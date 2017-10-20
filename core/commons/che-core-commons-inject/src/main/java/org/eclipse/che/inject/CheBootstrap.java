@@ -131,7 +131,8 @@ public class CheBootstrap extends EverrestGuiceContextListener {
 
   @Override
   protected List<Module> getModules() {
-    // based on logic that getServletModule() is called BEFORE getModules() in the EverrestGuiceContextListener
+    // based on logic that getServletModule() is called BEFORE getModules() in the
+    // EverrestGuiceContextListener
     modules.add(new InitModule(PostConstruct.class));
     modules.add(new DestroyModule(PreDestroy.class, LOG_HANDLER));
     modules.add(new URIConverter());

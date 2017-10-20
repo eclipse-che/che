@@ -117,10 +117,10 @@ public class RecipePermissionsDaoTest {
 
   @Test
   public void shouldReturnsSupportedDomainsIds() {
-    //given
+    // given
     AbstractPermissionsDomain<RecipePermissionsImpl> recipeDomain = new TestDomain();
 
-    //then
+    // then
     assertEquals(dao.getDomain(), recipeDomain);
   }
 

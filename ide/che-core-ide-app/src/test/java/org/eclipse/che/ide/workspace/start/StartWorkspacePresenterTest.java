@@ -43,14 +43,14 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class StartWorkspacePresenterTest {
 
-  //constructor mocks
+  // constructor mocks
   @Mock private StartWorkspaceView view;
   @Mock private Provider<WorkspaceComponent> wsComponentProvider;
   @Mock private WorkspaceWidgetFactory widgetFactory;
   @Mock private CreateWorkspacePresenter createWorkspacePresenter;
   @Mock private BrowserAddress browserAddress;
 
-  //additional mocks
+  // additional mocks
   @Mock private WorkspaceDto workspaceDto;
   @Mock private WorkspaceConfigDto workspaceConfigDto;
   @Mock private WorkspaceWidget widget;

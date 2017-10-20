@@ -111,7 +111,7 @@ public abstract class InternalLanguageElementNode extends TextEditChangeNode.Chi
         } else if (node instanceof InternalLanguageElementNode) {
           other = ((InternalLanguageElementNode) node).getGroupCategorySet();
         } else {
-          Assert.isTrue(false, "Shouldn't happen"); //$NON-NLS-1$
+          Assert.isTrue(false, "Shouldn't happen"); // $NON-NLS-1$
         }
         fGroupCategories = GroupCategorySet.union(fGroupCategories, other);
       }

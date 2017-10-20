@@ -264,7 +264,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 
   @Test
   public void testConvertToMultiCatch6() throws Exception {
-    //Quick assist should not be offered in 1.5 mode
+    // Quick assist should not be offered in 1.5 mode
     JavaProjectHelper.set15CompilerOptions(fJProject1);
     try {
       IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
@@ -500,7 +500,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 
   @Test
   public void testUnrollMultiCatch6() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=350285#c12
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=350285#c12
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test1;\n");

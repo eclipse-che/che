@@ -30,22 +30,22 @@ public interface IFilterMatcherDescriptor {
    * An argument filter type constant (value "filter"), denoting that this filter takes another
    * filter as argument.
    */
-  public static final String ARGUMENT_TYPE_FILTER_MATCHER = "filterMatcher"; //$NON-NLS-1$
+  public static final String ARGUMENT_TYPE_FILTER_MATCHER = "filterMatcher"; // $NON-NLS-1$
   /**
    * An argument filter type constant (value "filters"), denoting that this filter takes an array of
    * other filters as argument.
    */
-  public static final String ARGUMENT_TYPE_FILTER_MATCHERS = "filterMatchers"; //$NON-NLS-1$
+  public static final String ARGUMENT_TYPE_FILTER_MATCHERS = "filterMatchers"; // $NON-NLS-1$
   /**
    * An argument filter type constant (value "none"), denoting that this filter does not take any
    * arguments.
    */
-  public static final String ARGUMENT_TYPE_NONE = "none"; //$NON-NLS-1$
+  public static final String ARGUMENT_TYPE_NONE = "none"; // $NON-NLS-1$
   /**
    * An argument filter type constant (value "string"), denoting that this filter takes a string
    * argument
    */
-  public static final String ARGUMENT_TYPE_STRING = "string"; //$NON-NLS-1$
+  public static final String ARGUMENT_TYPE_STRING = "string"; // $NON-NLS-1$
 
   /**
    * Returns the argument type expected by this filter. The result will be one of the

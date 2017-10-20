@@ -247,7 +247,7 @@ public final class JavaHeuristicScanner implements Symbols {
    * @since 3.2
    */
   private ITypedRegion fCachedPartition =
-      new TypedRegion(-1, 0, "__no_partition_at_all"); //$NON-NLS-1$
+      new TypedRegion(-1, 0, "__no_partition_at_all"); // $NON-NLS-1$
 
   /* preset stop conditions */
   private final StopCondition fNonWSDefaultPart = new NonWhitespaceDefaultPartition();
@@ -444,61 +444,61 @@ public final class JavaHeuristicScanner implements Symbols {
 
     switch (s.length()) {
       case 2:
-        if ("if".equals(s)) //$NON-NLS-1$
+        if ("if".equals(s)) // $NON-NLS-1$
         return TokenIF;
-        if ("do".equals(s)) //$NON-NLS-1$
+        if ("do".equals(s)) // $NON-NLS-1$
         return TokenDO;
         break;
       case 3:
-        if ("for".equals(s)) //$NON-NLS-1$
+        if ("for".equals(s)) // $NON-NLS-1$
         return TokenFOR;
-        if ("try".equals(s)) //$NON-NLS-1$
+        if ("try".equals(s)) // $NON-NLS-1$
         return TokenTRY;
-        if ("new".equals(s)) //$NON-NLS-1$
+        if ("new".equals(s)) // $NON-NLS-1$
         return TokenNEW;
         break;
       case 4:
-        if ("case".equals(s)) //$NON-NLS-1$
+        if ("case".equals(s)) // $NON-NLS-1$
         return TokenCASE;
-        if ("else".equals(s)) //$NON-NLS-1$
+        if ("else".equals(s)) // $NON-NLS-1$
         return TokenELSE;
-        if ("enum".equals(s)) //$NON-NLS-1$
+        if ("enum".equals(s)) // $NON-NLS-1$
         return TokenENUM;
-        if ("goto".equals(s)) //$NON-NLS-1$
+        if ("goto".equals(s)) // $NON-NLS-1$
         return TokenGOTO;
         break;
       case 5:
-        if ("break".equals(s)) //$NON-NLS-1$
+        if ("break".equals(s)) // $NON-NLS-1$
         return TokenBREAK;
-        if ("catch".equals(s)) //$NON-NLS-1$
+        if ("catch".equals(s)) // $NON-NLS-1$
         return TokenCATCH;
-        if ("class".equals(s)) //$NON-NLS-1$
+        if ("class".equals(s)) // $NON-NLS-1$
         return TokenCLASS;
-        if ("while".equals(s)) //$NON-NLS-1$
+        if ("while".equals(s)) // $NON-NLS-1$
         return TokenWHILE;
         break;
       case 6:
-        if ("return".equals(s)) //$NON-NLS-1$
+        if ("return".equals(s)) // $NON-NLS-1$
         return TokenRETURN;
-        if ("static".equals(s)) //$NON-NLS-1$
+        if ("static".equals(s)) // $NON-NLS-1$
         return TokenSTATIC;
-        if ("switch".equals(s)) //$NON-NLS-1$
+        if ("switch".equals(s)) // $NON-NLS-1$
         return TokenSWITCH;
-        if ("throws".equals(s)) //$NON-NLS-1$
+        if ("throws".equals(s)) // $NON-NLS-1$
         return TokenTHROWS;
         break;
       case 7:
-        if ("default".equals(s)) //$NON-NLS-1$
+        if ("default".equals(s)) // $NON-NLS-1$
         return TokenDEFAULT;
-        if ("finally".equals(s)) //$NON-NLS-1$
+        if ("finally".equals(s)) // $NON-NLS-1$
         return TokenFINALLY;
         break;
       case 9:
-        if ("interface".equals(s)) //$NON-NLS-1$
+        if ("interface".equals(s)) // $NON-NLS-1$
         return TokenINTERFACE;
         break;
       case 12:
-        if ("synchronized".equals(s)) //$NON-NLS-1$
+        if ("synchronized".equals(s)) // $NON-NLS-1$
         return TokenSYNCHRONIZED;
         break;
     }
@@ -853,7 +853,7 @@ public final class JavaHeuristicScanner implements Symbols {
       try {
         fCachedPartition = TextUtilities.getPartition(fDocument, fPartitioning, position, false);
       } catch (BadLocationException e) {
-        fCachedPartition = new TypedRegion(position, 0, "__no_partition_at_all"); //$NON-NLS-1$
+        fCachedPartition = new TypedRegion(position, 0, "__no_partition_at_all"); // $NON-NLS-1$
       }
     }
 

@@ -52,13 +52,13 @@ public class MachineStatusHandlerTest {
   private static final String MACHINE_ID = "machineId";
   private static final String WORKSPACE_ID = "workspaceId";
 
-  //constructor mocks
+  // constructor mocks
   @Mock private NotificationManager notificationManager;
   @Mock private CoreLocalizationConstant locale;
   @Mock private WorkspaceServiceClient workspaceServiceClient;
   @Mock private AppContext appContext;
 
-  //additional mocks
+  // additional mocks
   @Mock private MachineDto machineDto;
   @Mock private MachineEntity machine;
   @Mock private MachineStateEvent.Handler handler;

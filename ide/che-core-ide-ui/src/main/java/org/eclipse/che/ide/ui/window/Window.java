@@ -167,7 +167,7 @@ public abstract class Window implements IsWidget {
     button.addStyleName(resources.windowCss().button());
     addButtonAlignment(button, alignment);
     button.addClickHandler(clickHandler);
-    //set default tab index
+    // set default tab index
     button.setTabIndex(0);
     return button;
   }
@@ -181,7 +181,7 @@ public abstract class Window implements IsWidget {
     Button button = createButton(title, debugId, clickHandler);
     button.addStyleName(resources.windowCss().primaryButton());
     addButtonAlignment(button, alignment);
-    //set default tab index
+    // set default tab index
     button.setTabIndex(0);
     return button;
   }
@@ -224,7 +224,7 @@ public abstract class Window implements IsWidget {
 
     if (isShowing) {
       setFocusOn(
-          selectAndFocusElement); //the window is displayed but focus for the element may be lost
+          selectAndFocusElement); // the window is displayed but focus for the element may be lost
       return;
     }
 

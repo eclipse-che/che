@@ -75,7 +75,8 @@ public class IndexAllProject extends IndexRequest {
           IClasspathEntry entry = entries[i];
           if (entry.getEntryKind() == IClasspathEntry.CPE_LIBRARY
               && entry.getPath().equals(projectPath)) {
-            // the project is also a library folder (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=89815)
+            // the project is also a library folder (see
+            // https://bugs.eclipse.org/bugs/show_bug.cgi?id=89815)
             // ensure a job exists to index it as a binary folder
             this.manager.indexLibrary(
                 projectPath, this.project, ((ClasspathEntry) entry).getLibraryIndexLocation());
@@ -83,7 +84,8 @@ public class IndexAllProject extends IndexRequest {
           }
         }
 
-        // nothing to index but want to save an empty index file so its not 'rebuilt' when part of a search request
+        // nothing to index but want to save an empty index file so its not 'rebuilt' when part of a
+        // search request
         Index index =
             this.manager.getIndexForUpdate(
                 this.containerPath, true, /*reuse index file*/ true /*create if none*/);
@@ -110,8 +112,8 @@ public class IndexAllProject extends IndexRequest {
       String[] paths = index.queryDocumentNames(""); // all file names //$NON-NLS-1$
       int max = paths == null ? 0 : paths.length;
       final SimpleLookupTable indexedFileNames = new SimpleLookupTable(max == 0 ? 33 : max + 11);
-      final String OK = "OK"; //$NON-NLS-1$
-      final String DELETED = "DELETED"; //$NON-NLS-1$
+      final String OK = "OK"; // $NON-NLS-1$
+      final String DELETED = "DELETED"; // $NON-NLS-1$
       if (paths != null) {
         for (int i = 0; i < max; i++) indexedFileNames.put(paths[i], DELETED);
       }
@@ -125,7 +127,8 @@ public class IndexAllProject extends IndexRequest {
         IResource sourceFolder = root.findMember(entry.getPath());
         if (sourceFolder != null) {
 
-          // collect output locations if source is project (see http://bugs.eclipse.org/bugs/show_bug.cgi?id=32041)
+          // collect output locations if source is project (see
+          // http://bugs.eclipse.org/bugs/show_bug.cgi?id=32041)
           final HashSet outputs = new HashSet();
           if (sourceFolder.getType() == IResource.PROJECT) {
             // Do not create marker while getting output location (see bug 41859)
@@ -241,7 +244,7 @@ public class IndexAllProject extends IndexRequest {
       if (JobManager.VERBOSE) {
         Util.verbose(
             "-> failed to index " + this.project + " because of the following exception:",
-            System.err); //$NON-NLS-1$ //$NON-NLS-2$
+            System.err); // $NON-NLS-1$ //$NON-NLS-2$
         e.printStackTrace();
       }
       this.manager.removeIndex(this.containerPath);
@@ -250,7 +253,7 @@ public class IndexAllProject extends IndexRequest {
       if (JobManager.VERBOSE) {
         Util.verbose(
             "-> failed to index " + this.project + " because of the following exception:",
-            System.err); //$NON-NLS-1$ //$NON-NLS-2$
+            System.err); // $NON-NLS-1$ //$NON-NLS-2$
         e.printStackTrace();
       }
       this.manager.removeIndex(this.containerPath);
@@ -270,6 +273,6 @@ public class IndexAllProject extends IndexRequest {
   }
 
   public String toString() {
-    return "indexing project " + this.project.getFullPath(); //$NON-NLS-1$
+    return "indexing project " + this.project.getFullPath(); // $NON-NLS-1$
   }
 }

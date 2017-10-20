@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.core.client;
 import java.util.List;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
+
 /** @author Ihor Okhrimenko */
 public interface TestOrganizationServiceClient {
 

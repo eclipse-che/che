@@ -92,7 +92,7 @@ public class UploadFolderFromZipPresenter implements UploadFolderFromZipView.Act
               }
             });
 
-    //TODO this should process editor agent
+    // TODO this should process editor agent
     //        if (view.isOverwriteFileSelected()) {
     //            updateOpenedEditors();
     //        }

@@ -188,7 +188,7 @@ public class CompositeChange extends Change {
    * <p>Client are allowed to extend this method.
    */
   public void initializeValidationData(IProgressMonitor pm) {
-    pm.beginTask("", fChanges.size()); //$NON-NLS-1$
+    pm.beginTask("", fChanges.size()); // $NON-NLS-1$
     for (Iterator iter = fChanges.iterator(); iter.hasNext(); ) {
       Change change = (Change) iter.next();
       change.initializeValidationData(new SubProgressMonitor(pm, 1));
@@ -208,7 +208,7 @@ public class CompositeChange extends Change {
    */
   public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
     RefactoringStatus result = new RefactoringStatus();
-    pm.beginTask("", fChanges.size()); //$NON-NLS-1$
+    pm.beginTask("", fChanges.size()); // $NON-NLS-1$
     for (Iterator iter = fChanges.iterator(); iter.hasNext() && !result.hasFatalError(); ) {
       Change change = (Change) iter.next();
       if (change.isEnabled()) result.merge(change.isValid(new SubProgressMonitor(pm, 1)));
@@ -233,7 +233,7 @@ public class CompositeChange extends Change {
   public Change perform(IProgressMonitor pm) throws CoreException {
     fUndoUntilException = null;
     List undos = new ArrayList(fChanges.size());
-    pm.beginTask("", fChanges.size()); //$NON-NLS-1$
+    pm.beginTask("", fChanges.size()); // $NON-NLS-1$
     pm.setTaskName(RefactoringCoreMessages.CompositeChange_performingChangesTask_name);
     Change change = null;
     boolean canceled = false;
@@ -448,9 +448,9 @@ public class CompositeChange extends Change {
   public String toString() {
     StringBuffer buff = new StringBuffer();
     buff.append(getName());
-    buff.append("\n"); //$NON-NLS-1$
+    buff.append("\n"); // $NON-NLS-1$
     for (Iterator iter = fChanges.iterator(); iter.hasNext(); ) {
-      buff.append("<").append(iter.next().toString()).append("/>\n"); //$NON-NLS-2$ //$NON-NLS-1$
+      buff.append("<").append(iter.next().toString()).append("/>\n"); // $NON-NLS-2$ //$NON-NLS-1$
     }
     return buff.toString();
   }

@@ -25,7 +25,8 @@ public interface ICompletionProposalExtension3 {
   //	/**
   //	 * Returns the information control creator of this completion proposal.
   //	 *
-  //	 * @return the information control creator, or <code>null</code> if no custom control creator is available
+  //	 * @return the information control creator, or <code>null</code> if no custom control creator
+  // is available
   //	 */
   //	IInformationControlCreator getInformationControlCreator();
 

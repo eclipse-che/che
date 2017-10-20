@@ -277,7 +277,7 @@ public class EditDebugConfigurationsViewImpl extends Window implements EditDebug
   }
 
   private void resetFilter() {
-    filterInputField.setText(""); //reset filter
+    filterInputField.setText(""); // reset filter
     filterTextValue = "";
   }
 
@@ -397,7 +397,7 @@ public class EditDebugConfigurationsViewImpl extends Window implements EditDebug
         new BlurHandler() {
           @Override
           public void onBlur(BlurEvent blurEvent) {
-            //set default focus
+            // set default focus
             selectText(filterInputField.getElement());
           }
         },

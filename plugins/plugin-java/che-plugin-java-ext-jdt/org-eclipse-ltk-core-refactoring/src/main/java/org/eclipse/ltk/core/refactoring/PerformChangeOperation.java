@@ -178,8 +178,8 @@ public class PerformChangeOperation implements IWorkspaceRunnable {
     try {
       fChangeExecuted = false;
       if (createChange()) {
-        pm.beginTask("", 4); //$NON-NLS-1$
-        pm.subTask(""); //$NON-NLS-1$
+        pm.beginTask("", 4); // $NON-NLS-1$
+        pm.subTask(""); // $NON-NLS-1$
         fCreateChangeOperation.run(new SubProgressMonitor(pm, 3));
         // Check for cancellation before executing the change, since canceling
         // during change execution is not supported
@@ -214,7 +214,7 @@ public class PerformChangeOperation implements IWorkspaceRunnable {
           public void run(IProgressMonitor monitor) throws CoreException {
             boolean undoInitialized = false;
             try {
-              monitor.beginTask("", 10); //$NON-NLS-1$
+              monitor.beginTask("", 10); // $NON-NLS-1$
               fValidationStatus = fChange.isValid(new SubProgressMonitor(monitor, 1));
               if (fValidationStatus.hasFatalError()) return;
               boolean aboutToPerformChangeCalled = false;

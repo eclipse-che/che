@@ -173,7 +173,8 @@ public class CodeFormatterUtil {
       } catch (BadLocationException e) {
         JavaPlugin.log(e); // bug in the formatter
         Assert.isTrue(
-            false, "Formatter created edits with wrong positions: " + e.getMessage()); //$NON-NLS-1$
+            false,
+            "Formatter created edits with wrong positions: " + e.getMessage()); // $NON-NLS-1$
       }
       return document.get();
     }
@@ -215,7 +216,7 @@ public class CodeFormatterUtil {
               + ", length: "
               + length
               + ", string size: "
-              + source.length()); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+              + source.length()); // $NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
     }
     return ToolFactory.createCodeFormatter(options)
         .format(kind, source, offset, length, indentationLevel, lineSeparator);
@@ -286,7 +287,7 @@ public class CodeFormatterUtil {
               + ", length: "
               + length
               + ", string size: "
-              + source.length()); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+              + source.length()); // $NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
     }
     return ToolFactory.createCodeFormatter(options, ToolFactory.M_FORMAT_EXISTING)
         .format(kind, source, offset, length, indentationLevel, lineSeparator);
@@ -385,13 +386,13 @@ public class CodeFormatterUtil {
       String lineSeparator,
       Map<String, String> options) {
     int code;
-    String prefix = ""; //$NON-NLS-1$
-    String suffix = ""; //$NON-NLS-1$
+    String prefix = ""; // $NON-NLS-1$
+    String suffix = ""; // $NON-NLS-1$
     if (node instanceof Statement) {
       code = CodeFormatter.K_STATEMENTS;
       if (node.getNodeType() == ASTNode.SWITCH_CASE) {
-        prefix = "switch(1) {"; //$NON-NLS-1$
-        suffix = "}"; //$NON-NLS-1$
+        prefix = "switch(1) {"; // $NON-NLS-1$
+        suffix = "}"; // $NON-NLS-1$
         code = CodeFormatter.K_STATEMENTS;
       }
     } else if (node instanceof Expression
@@ -406,12 +407,12 @@ public class CodeFormatterUtil {
         case ASTNode.PRIMITIVE_TYPE:
         case ASTNode.QUALIFIED_TYPE:
         case ASTNode.SIMPLE_TYPE:
-          suffix = " x;"; //$NON-NLS-1$
+          suffix = " x;"; // $NON-NLS-1$
           code = CodeFormatter.K_CLASS_BODY_DECLARATIONS;
           break;
         case ASTNode.WILDCARD_TYPE:
-          prefix = "A<"; //$NON-NLS-1$
-          suffix = "> x;"; //$NON-NLS-1$
+          prefix = "A<"; // $NON-NLS-1$
+          suffix = "> x;"; // $NON-NLS-1$
           code = CodeFormatter.K_CLASS_BODY_DECLARATIONS;
           break;
         case ASTNode.COMPILATION_UNIT:
@@ -419,44 +420,44 @@ public class CodeFormatterUtil {
           break;
         case ASTNode.VARIABLE_DECLARATION_EXPRESSION:
         case ASTNode.SINGLE_VARIABLE_DECLARATION:
-          suffix = ";"; //$NON-NLS-1$
+          suffix = ";"; // $NON-NLS-1$
           code = CodeFormatter.K_STATEMENTS;
           break;
         case ASTNode.VARIABLE_DECLARATION_FRAGMENT:
-          prefix = "A "; //$NON-NLS-1$
-          suffix = ";"; //$NON-NLS-1$
+          prefix = "A "; // $NON-NLS-1$
+          suffix = ";"; // $NON-NLS-1$
           code = CodeFormatter.K_STATEMENTS;
           break;
         case ASTNode.PACKAGE_DECLARATION:
         case ASTNode.IMPORT_DECLARATION:
-          suffix = "\nclass A {}"; //$NON-NLS-1$
+          suffix = "\nclass A {}"; // $NON-NLS-1$
           code = CodeFormatter.K_COMPILATION_UNIT;
           break;
         case ASTNode.JAVADOC:
-          suffix = "void foo();"; //$NON-NLS-1$
+          suffix = "void foo();"; // $NON-NLS-1$
           code = CodeFormatter.K_CLASS_BODY_DECLARATIONS;
           break;
         case ASTNode.CATCH_CLAUSE:
-          prefix = "try {}"; //$NON-NLS-1$
+          prefix = "try {}"; // $NON-NLS-1$
           code = CodeFormatter.K_STATEMENTS;
           break;
         case ASTNode.ANONYMOUS_CLASS_DECLARATION:
-          prefix = "new A()"; //$NON-NLS-1$
-          suffix = ";"; //$NON-NLS-1$
+          prefix = "new A()"; // $NON-NLS-1$
+          suffix = ";"; // $NON-NLS-1$
           code = CodeFormatter.K_STATEMENTS;
           break;
         case ASTNode.MEMBER_VALUE_PAIR:
-          prefix = "@Author("; //$NON-NLS-1$
-          suffix = ") class x {}"; //$NON-NLS-1$
+          prefix = "@Author("; // $NON-NLS-1$
+          suffix = ") class x {}"; // $NON-NLS-1$
           code = CodeFormatter.K_COMPILATION_UNIT;
           break;
         case ASTNode.MODIFIER:
-          suffix = " class x {}"; //$NON-NLS-1$
+          suffix = " class x {}"; // $NON-NLS-1$
           code = CodeFormatter.K_COMPILATION_UNIT;
           break;
         case ASTNode.TYPE_PARAMETER:
-          prefix = "class X<"; //$NON-NLS-1$
-          suffix = "> {}"; //$NON-NLS-1$
+          prefix = "class X<"; // $NON-NLS-1$
+          suffix = "> {}"; // $NON-NLS-1$
           code = CodeFormatter.K_COMPILATION_UNIT;
           break;
         case ASTNode.MEMBER_REF:
@@ -467,7 +468,8 @@ public class CodeFormatterUtil {
           // Javadoc formatting not yet supported:
           return null;
         default:
-          //Assert.isTrue(false, "Node type not covered: " + node.getClass().getName()); //$NON-NLS-1$
+          // Assert.isTrue(false, "Node type not covered: " + node.getClass().getName());
+          // //$NON-NLS-1$
           return null;
       }
     }
