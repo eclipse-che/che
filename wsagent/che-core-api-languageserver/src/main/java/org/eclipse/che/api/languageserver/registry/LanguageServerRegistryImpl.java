@@ -5,8 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Red Hat, Inc. - initial API and implementation
+ * Contributors: Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.api.languageserver.registry;
 
