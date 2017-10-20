@@ -87,7 +87,15 @@ get_image_manifest() {
 
   # Load images from file
   BOOTSTRAP_IMAGE_LIST=$(cat ${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}/images/images-bootstrap)
-  IMAGE_LIST=$(cat /version/$1/images)
+  if [ -z "${CHE_SINGLE_PORT:-}" ]; then
+    IMAGE_LIST=$(cat /version/$1/images | sed '/IMAGE_TRAEFIK/d')
+        if [ -z "${CHE_MULTIUSER:-}" ]; then
+            IMAGE_LIST=$(echo "${IMAGE_LIST}" | sed '/IMAGE_KEYCLOAK/d; /IMAGE_POSTGRES/d; /IMAGE_CHE_MULTI_*/d')
+        else
+            IMAGE_LIST=$(echo "${IMAGE_LIST}" | sed '/IMAGE_CHE/d')
+        fi
+    else IMAGE_LIST=$(cat /version/$1/images)
+  fi
   UTILITY_IMAGE_LIST=$(cat ${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}/images/images-utilities)
 
   # set variables
