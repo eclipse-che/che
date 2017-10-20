@@ -102,11 +102,13 @@ public class OrganizeImportsPresenterTest {
 
     when(clientServerEventService.sendFileTrackingSuspendEvent())
         .thenReturn(fileTrackingSuspendEventPromise);
-    when(fileTrackingSuspendEventPromise.then(Matchers.<Operation<Boolean>>anyObject()))
+    when(fileTrackingSuspendEventPromise.then(
+            org.mockito.ArgumentMatchers.<Operation<Boolean>>anyObject()))
         .thenReturn(fileTrackingSuspendEventPromise);
 
     when(javaCodeAssistClient.organizeImports(anyString(), anyString())).thenReturn(importsPromise);
-    when(importsPromise.then(Matchers.<Operation<OrganizeImportResult>>anyObject()))
+    when(importsPromise.then(
+            org.mockito.ArgumentMatchers.<Operation<OrganizeImportResult>>anyObject()))
         .thenReturn(importsPromise);
 
     presenter =
@@ -230,10 +232,12 @@ public class OrganizeImportsPresenterTest {
   public void focusShouldBeSetAfterApplyingConflicts() throws Exception {
     when(view.getSelectedImport()).thenReturn("import1");
     when(dtoFactory.createDto(ConflictImportDTO.class)).thenReturn(conflict1);
-    when(conflict1.withTypeMatches(Matchers.<List<String>>anyObject())).thenReturn(conflict1);
+    when(conflict1.withTypeMatches(org.mockito.ArgumentMatchers.<List<String>>anyObject()))
+        .thenReturn(conflict1);
     when(javaCodeAssistClient.applyChosenImports(anyString(), anyString(), any()))
         .thenReturn(resolveConflictsPromise);
-    when(resolveConflictsPromise.then(Matchers.<Operation<List<Change>>>anyObject()))
+    when(resolveConflictsPromise.then(
+            org.mockito.ArgumentMatchers.<Operation<List<Change>>>anyObject()))
         .thenReturn(resolveConflictsPromise);
 
     showOrganizeImportsWindow();

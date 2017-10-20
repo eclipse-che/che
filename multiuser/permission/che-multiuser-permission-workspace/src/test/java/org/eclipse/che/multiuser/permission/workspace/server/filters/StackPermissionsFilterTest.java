@@ -123,7 +123,7 @@ public class StackPermissionsFilterTest {
 
     assertEquals(response.getStatusCode(), 204);
     verify(service).getStack("stack123");
-    verify(subject).hasPermission(eq("stack"), eq("stack123"), Matchers.eq(READ));
+    verify(subject).hasPermission(eq("stack"), eq("stack123"), eq(READ));
   }
 
   @Test
@@ -140,7 +140,7 @@ public class StackPermissionsFilterTest {
 
     assertEquals(response.getStatusCode(), 204);
     verify(service).updateStack(any(), eq("stack123"));
-    verify(subject).hasPermission(eq("stack"), eq("stack123"), Matchers.eq(UPDATE));
+    verify(subject).hasPermission(eq("stack"), eq("stack123"), eq(UPDATE));
   }
 
   @Test
@@ -157,7 +157,7 @@ public class StackPermissionsFilterTest {
 
     assertEquals(response.getStatusCode(), 204);
     verify(service).removeStack(eq("stack123"));
-    verify(subject).hasPermission(eq("stack"), eq("stack123"), Matchers.eq(DELETE));
+    verify(subject).hasPermission(eq("stack"), eq("stack123"), eq(DELETE));
   }
 
   @Test
@@ -189,7 +189,7 @@ public class StackPermissionsFilterTest {
 
     assertEquals(response.getStatusCode(), 204);
     verify(service).getIcon(eq("stack123"));
-    verify(subject).hasPermission(eq("stack"), eq("stack123"), Matchers.eq(READ));
+    verify(subject).hasPermission(eq("stack"), eq("stack123"), eq(READ));
   }
 
   @Test
@@ -207,7 +207,7 @@ public class StackPermissionsFilterTest {
 
     assertEquals(response.getStatusCode(), 204);
     verify(service).uploadIcon(any(), eq("stack123"));
-    verify(subject).hasPermission(eq("stack"), eq("stack123"), Matchers.eq(UPDATE));
+    verify(subject).hasPermission(eq("stack"), eq("stack123"), eq(UPDATE));
   }
 
   @Test
@@ -244,7 +244,7 @@ public class StackPermissionsFilterTest {
 
     assertEquals(response.getStatusCode(), 204);
     verify(service).removeIcon(eq("stack123"));
-    verify(subject).hasPermission(eq("stack"), eq("stack123"), Matchers.eq(UPDATE));
+    verify(subject).hasPermission(eq("stack"), eq("stack123"), eq(UPDATE));
   }
 
   @Test(
@@ -297,8 +297,7 @@ public class StackPermissionsFilterTest {
 
     assertEquals(response.getStatusCode() / 100, 2);
     verify(subject)
-        .hasPermission(
-            eq(SystemDomain.DOMAIN_ID), eq(null), Matchers.eq(SystemDomain.MANAGE_SYSTEM_ACTION));
+        .hasPermission(eq(SystemDomain.DOMAIN_ID), eq(null), eq(SystemDomain.MANAGE_SYSTEM_ACTION));
   }
 
   @Test(dataProvider = "coveredPaths")
@@ -319,8 +318,7 @@ public class StackPermissionsFilterTest {
 
     assertEquals(response.getStatusCode(), 403);
     verify(subject)
-        .hasPermission(
-            eq(SystemDomain.DOMAIN_ID), eq(null), Matchers.eq(SystemDomain.MANAGE_SYSTEM_ACTION));
+        .hasPermission(eq(SystemDomain.DOMAIN_ID), eq(null), eq(SystemDomain.MANAGE_SYSTEM_ACTION));
   }
 
   @DataProvider(name = "coveredPaths")

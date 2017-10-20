@@ -159,9 +159,11 @@ public class MovePresenterTest {
 
     when(refactorService.setMoveSettings(moveSettings)).thenReturn(moveSettingsPromise);
     when(moveSettingsPromise.thenPromise(
-            Matchers.<Function<Void, Promise<ChangeCreationResult>>>anyObject()))
+            org.mockito.ArgumentMatchers
+                .<Function<Void, Promise<ChangeCreationResult>>>anyObject()))
         .thenReturn(changeCreationResultPromise);
-    when(changeCreationResultPromise.then(Matchers.<Operation<ChangeCreationResult>>anyObject()))
+    when(changeCreationResultPromise.then(
+            org.mockito.ArgumentMatchers.<Operation<ChangeCreationResult>>anyObject()))
         .thenReturn(changeCreationResultPromise);
 
     presenter =

@@ -307,7 +307,8 @@ public class DockerConnectorTest {
 
     doReturn(images)
         .when(dockerConnector)
-        .parseResponseStreamAndClose(eq(inputStream), Matchers.<TypeToken<List<Image>>>any());
+        .parseResponseStreamAndClose(
+            eq(inputStream), org.mockito.ArgumentMatchers.<TypeToken<List<Image>>>any());
 
     List<Image> returnedImages = dockerConnector.listImages(listImagesParams);
 
@@ -329,7 +330,8 @@ public class DockerConnectorTest {
 
     doReturn(images)
         .when(dockerConnector)
-        .parseResponseStreamAndClose(eq(inputStream), Matchers.<TypeToken<List<Image>>>any());
+        .parseResponseStreamAndClose(
+            eq(inputStream), org.mockito.ArgumentMatchers.<TypeToken<List<Image>>>any());
 
     List<Image> returnedImages = dockerConnector.listImages();
 
@@ -363,7 +365,8 @@ public class DockerConnectorTest {
     doReturn(expectedListContainers)
         .when(dockerConnector)
         .parseResponseStreamAndClose(
-            eq(inputStream), Matchers.<TypeToken<List<ContainerListEntry>>>any());
+            eq(inputStream),
+            org.mockito.ArgumentMatchers.<TypeToken<List<ContainerListEntry>>>any());
 
     List<ContainerListEntry> containers = dockerConnector.listContainers(listContainersParams);
 
@@ -377,7 +380,8 @@ public class DockerConnectorTest {
     verify(dockerResponse).getInputStream();
     verify(dockerConnector)
         .parseResponseStreamAndClose(
-            eq(inputStream), Matchers.<TypeToken<List<ContainerListEntry>>>any());
+            eq(inputStream),
+            org.mockito.ArgumentMatchers.<TypeToken<List<ContainerListEntry>>>any());
 
     assertEquals(containers, expectedListContainers);
   }
@@ -393,7 +397,8 @@ public class DockerConnectorTest {
     doReturn(expectedListContainers)
         .when(dockerConnector)
         .parseResponseStreamAndClose(
-            eq(inputStream), Matchers.<TypeToken<List<ContainerListEntry>>>any());
+            eq(inputStream),
+            org.mockito.ArgumentMatchers.<TypeToken<List<ContainerListEntry>>>any());
 
     List<ContainerListEntry> containers = dockerConnector.listContainers(listContainersParams);
 

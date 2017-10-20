@@ -98,8 +98,10 @@ public class FileStructurePresenterTest {
     when(relatedProject.getLocation()).thenReturn(Path.valueOf("/project"));
     when(javaNavigationService.getCompilationUnit(any(Path.class), anyString(), anyBoolean()))
         .thenReturn(promise);
-    when(promise.then(Matchers.<Operation<CompilationUnit>>anyObject())).thenReturn(promise);
-    when(promise.catchError(Matchers.<Operation<PromiseError>>anyObject())).thenReturn(promise);
+    when(promise.then(org.mockito.ArgumentMatchers.<Operation<CompilationUnit>>anyObject()))
+        .thenReturn(promise);
+    when(promise.catchError(org.mockito.ArgumentMatchers.<Operation<PromiseError>>anyObject()))
+        .thenReturn(promise);
     when(loaderFactory.newLoader()).thenReturn(loader);
 
     presenter =
@@ -142,6 +144,7 @@ public class FileStructurePresenterTest {
 
     verify(editor).setFocus();
     verify(editor).getDocument();
-    verify(document).setSelectedRange(Matchers.<LinearRange>anyObject(), eq(true));
+    verify(document)
+        .setSelectedRange(org.mockito.ArgumentMatchers.<LinearRange>anyObject(), eq(true));
   }
 }

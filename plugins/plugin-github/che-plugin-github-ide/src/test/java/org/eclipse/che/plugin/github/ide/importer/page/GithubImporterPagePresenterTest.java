@@ -173,9 +173,9 @@ public class GithubImporterPagePresenterTest {
     verify(view).setInputsEnableState(eq(false));
     verify(view).setLoaderVisibility(eq(false));
     verify(view).setInputsEnableState(eq(true));
-    verify(view).setAccountNames(Matchers.<Set>anyObject());
+    verify(view).setAccountNames(org.mockito.ArgumentMatchers.<Set>anyObject());
     verify(view, times(2)).showGithubPanel();
-    verify(view).setRepositories(Matchers.<List<ProjectData>>anyObject());
+    verify(view).setRepositories(org.mockito.ArgumentMatchers.<List<ProjectData>>anyObject());
     verify(view).reset();
   }
 
@@ -204,7 +204,8 @@ public class GithubImporterPagePresenterTest {
     verify(view).setInputsEnableState(eq(true));
     verify(view, never()).setAccountNames((Set<String>) anyObject());
     verify(view, never()).showGithubPanel();
-    verify(view, never()).setRepositories(Matchers.<List<ProjectData>>anyObject());
+    verify(view, never())
+        .setRepositories(org.mockito.ArgumentMatchers.<List<ProjectData>>anyObject());
   }
 
   @Test
@@ -523,7 +524,8 @@ public class GithubImporterPagePresenterTest {
     verify(view, times(2)).setInputsEnableState(eq(true));
     verify(view, never()).setAccountNames((Set<String>) anyObject());
     verify(view, never()).showGithubPanel();
-    verify(view, never()).setRepositories(Matchers.<List<ProjectData>>anyObject());
+    verify(view, never())
+        .setRepositories(org.mockito.ArgumentMatchers.<List<ProjectData>>anyObject());
   }
 
   @Test

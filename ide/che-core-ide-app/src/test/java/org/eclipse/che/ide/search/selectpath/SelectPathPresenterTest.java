@@ -46,7 +46,7 @@ public class SelectPathPresenterTest {
   public void windowShouldBeShown() throws Exception {
     when(appContext.getProjects()).thenReturn(new Project[0]);
     selectPathPresenter.show(searcher);
-    verify(view).setStructure(Matchers.<List<Node>>any());
+    verify(view).setStructure(org.mockito.ArgumentMatchers.<List<Node>>any());
     verify(view).show();
   }
 

@@ -80,7 +80,7 @@ public class CommandsPalettePresenterTest {
 
     verify(view).show();
     verify(commandManager).getCommands();
-    verify(view).setCommands(Matchers.any());
+    verify(view).setCommands(org.mockito.ArgumentMatchers.any());
   }
 
   @Test

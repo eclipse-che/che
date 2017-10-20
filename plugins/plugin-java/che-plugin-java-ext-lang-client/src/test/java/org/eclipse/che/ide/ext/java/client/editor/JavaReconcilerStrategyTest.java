@@ -102,7 +102,8 @@ public class JavaReconcilerStrategyTest {
     when(localizationConstant.codeAssistErrorMessageResolvingProject()).thenReturn("error");
 
     when(client.reconcile(anyString(), anyString())).thenReturn(reconcileResultPromise);
-    when(reconcileResultPromise.onSuccess(Matchers.<Consumer<ReconcileResult>>any()))
+    when(reconcileResultPromise.onSuccess(
+            org.mockito.ArgumentMatchers.<Consumer<ReconcileResult>>any()))
         .thenReturn(reconcileResultPromise);
 
     javaReconcilerStrategy.setDocument(mock(Document.class));

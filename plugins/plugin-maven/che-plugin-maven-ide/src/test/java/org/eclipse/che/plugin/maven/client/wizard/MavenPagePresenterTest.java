@@ -80,7 +80,8 @@ public class MavenPagePresenterTest {
     when(workspaceRoot.getContainer(TEXT)).thenReturn(containerPromise);
     when(workspaceRoot.estimate(MavenAttributes.MAVEN_ID)).thenReturn(sourceEstimationPromise);
 
-    when(containerPromise.then(Matchers.<Operation<Optional<Container>>>anyObject()))
+    when(containerPromise.then(
+            org.mockito.ArgumentMatchers.<Operation<Optional<Container>>>anyObject()))
         .thenReturn(containerPromise);
   }
 
@@ -100,9 +101,11 @@ public class MavenPagePresenterTest {
     when(localization.mavenPageErrorDialogTitle()).thenReturn(dialogTitle);
     when(dialogFactory.createMessageDialog(anyString(), anyString(), anyObject()))
         .thenReturn(messageDialog);
-    when(sourceEstimationPromise.then(Matchers.<Operation<SourceEstimation>>anyObject()))
+    when(sourceEstimationPromise.then(
+            org.mockito.ArgumentMatchers.<Operation<SourceEstimation>>anyObject()))
         .thenReturn(sourceEstimationPromise);
-    when(sourceEstimationPromise.catchError(Matchers.<Operation<PromiseError>>anyObject()))
+    when(sourceEstimationPromise.catchError(
+            org.mockito.ArgumentMatchers.<Operation<PromiseError>>anyObject()))
         .thenReturn(sourceEstimationPromise);
 
     mavenPagePresenter.init(projectConfig);

@@ -232,7 +232,8 @@ public class EditorGroupSynchronizationImplTest {
 
     verify(documentEventBus)
         .addHandler(
-            Matchers.<DocumentChangedEvent.Type>anyObject(), eq(editorGroupSynchronization));
+            org.mockito.ArgumentMatchers.<DocumentChangedEvent.Type>anyObject(),
+            eq(editorGroupSynchronization));
   }
 
   @Test
@@ -249,7 +250,8 @@ public class EditorGroupSynchronizationImplTest {
     verify(document).replace(anyInt(), anyInt(), anyString());
     verify(documentEventBus)
         .addHandler(
-            Matchers.<DocumentChangedEvent.Type>anyObject(), eq(editorGroupSynchronization));
+            org.mockito.ArgumentMatchers.<DocumentChangedEvent.Type>anyObject(),
+            eq(editorGroupSynchronization));
   }
 
   @Test
