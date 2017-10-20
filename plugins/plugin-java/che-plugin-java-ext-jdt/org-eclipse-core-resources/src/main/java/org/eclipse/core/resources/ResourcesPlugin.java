@@ -32,7 +32,7 @@ public class ResourcesPlugin {
    * Unique identifier constant (value <code>"org.eclipse.core.resources"</code>) for the standard
    * Resources plug-in.
    */
-  public static final String PI_RESOURCES = "org.eclipse.core.resources"; //$NON-NLS-1$
+  public static final String PI_RESOURCES = "org.eclipse.core.resources"; // $NON-NLS-1$
   /**
    * Name of a preference for configuring whether the workspace performs auto- refresh. Auto-refresh
    * installs a file-system listener, or performs periodic file-system polling to actively discover
@@ -40,7 +40,7 @@ public class ResourcesPlugin {
    *
    * @since 3.0
    */
-  public static final String PREF_AUTO_REFRESH = "refresh.enabled"; //$NON-NLS-1$
+  public static final String PREF_AUTO_REFRESH = "refresh.enabled"; // $NON-NLS-1$
   /**
    * Name of a preference for configuring whether out-of-sync resources are automatically
    * asynchronously refreshed, when discovered to be out-of-sync by the workspace.
@@ -56,7 +56,7 @@ public class ResourcesPlugin {
    * @since 3.7
    */
   public static final String PREF_LIGHTWEIGHT_AUTO_REFRESH =
-      "refresh.lightweight.enabled"; //$NON-NLS-1$
+      "refresh.lightweight.enabled"; // $NON-NLS-1$
   /**
    * Name of a preference indicating the encoding to use when reading text files in the workspace.
    * The value is a string, and may be the default empty string, indicating that the file system
@@ -71,7 +71,7 @@ public class ResourcesPlugin {
    * @see #getEncoding()
    * @see java.io.UnsupportedEncodingException
    */
-  public static final String PREF_ENCODING = "encoding"; //$NON-NLS-1$
+  public static final String PREF_ENCODING = "encoding"; // $NON-NLS-1$
 
   private static final Logger LOG = LoggerFactory.getLogger(ResourcesPlugin.class);
   /**
@@ -79,8 +79,7 @@ public class ResourcesPlugin {
    *
    * @since 2.1
    */
-  private static final String PREF_DESCRIPTION_PREFIX = "description."; //$NON-NLS-1$
-
+  private static final String PREF_DESCRIPTION_PREFIX = "description."; // $NON-NLS-1$
 
   /**
    * Name of a preference for configuring whether the workspace performs auto- builds.
@@ -149,8 +148,7 @@ public class ResourcesPlugin {
    * @since 2.1
    */
   public static final String PREF_SNAPSHOT_INTERVAL =
-      PREF_DESCRIPTION_PREFIX + "snapshotinterval"; //$NON-NLS-1$
-
+      PREF_DESCRIPTION_PREFIX + "snapshotinterval"; // $NON-NLS-1$
 
   /**
    * Name of a preference for turning off support for linked resources. When this preference is set
@@ -176,8 +174,7 @@ public class ResourcesPlugin {
    * @since 2.1
    */
   public static final String PREF_DEFAULT_BUILD_ORDER =
-      PREF_DESCRIPTION_PREFIX + "defaultbuildorder"; //$NON-NLS-1$
-
+      PREF_DESCRIPTION_PREFIX + "defaultbuildorder"; // $NON-NLS-1$
 
   /**
    * The workspace managed by the single instance of this plug-in runtime class, or <code>null

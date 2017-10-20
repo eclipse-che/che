@@ -15,21 +15,18 @@ import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import javax.inject.Provider;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
-import org.eclipse.che.api.project.server.impl.ProjectConfigRegistry;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -37,17 +34,10 @@ import org.testng.annotations.Test;
 @Listeners(value = {MockitoTestNGListener.class})
 public class PlainJavaValueProviderFactoryTest {
 
-  public static final String PROJECT_PATH = "/project/path";
-  @InjectMocks PlainJavaValueProviderFactory plainJavaValueProviderFactory;
-  @Mock Map<String, List<String>> attributes;
-  @Mock private Provider<ProjectConfigRegistry> projectRegistryProvider;
-  @Mock private ProjectConfigRegistry projectConfigRegistry;
-  @Mock private RegisteredProject registeredProject;
+  @InjectMocks private PlainJavaValueProviderFactory plainJavaValueProviderFactory;
+  @Mock private Map<String, List<String>> attributes;
   @Mock private ProjectConfig projectConfig;
   @Captor private ArgumentCaptor<List<String>> captor;
-
-  @BeforeMethod
-  public void setUp() throws Exception {}
 
   @Test
   public void attributeShouldBeSet() throws Exception {
@@ -72,7 +62,7 @@ public class PlainJavaValueProviderFactoryTest {
 
     verify(attributes).put(eq(SOURCE_FOLDER), captor.capture());
 
-    assertTrue(captor.getValue().size() == 3);
+    assertEquals(captor.getValue().size(), 3);
     assertTrue(captor.getValue().containsAll(Arrays.asList("src1", "src2", "src3")));
   }
 }

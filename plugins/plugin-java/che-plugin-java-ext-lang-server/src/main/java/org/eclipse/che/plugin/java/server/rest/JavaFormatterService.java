@@ -163,6 +163,6 @@ public class JavaFormatterService {
 
   private File getFormatterFromRootFolder(String formatterPath) {
 
-        return fsManager.toIoFile(absolutize(formatterPath));
+    return fsManager.toIoFile(absolutize(formatterPath));
   }
 }

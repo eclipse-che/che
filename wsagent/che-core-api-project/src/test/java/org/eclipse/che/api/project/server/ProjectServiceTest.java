@@ -174,7 +174,7 @@ public class ProjectServiceTest {
   public void shouldCallGetFile() throws Exception {
     projectService.getFile(WS_PATH);
 
-        verify(projectServiceApi).getFile(WS_PATH);
+    verify(projectServiceApi).getFile(WS_PATH);
   }
 
   @Test
@@ -251,6 +251,6 @@ public class ProjectServiceTest {
   public void shouldCallSearch() throws Exception {
     projectService.search(WS_PATH, NAME, TEXT, MAX_ITEMS, SKIP_COUNT);
 
-  verify(projectServiceApi).search(WS_PATH, NAME, TEXT, MAX_ITEMS, SKIP_COUNT);
+    verify(projectServiceApi).search(WS_PATH, NAME, TEXT, MAX_ITEMS, SKIP_COUNT);
   }
 }
