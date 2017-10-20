@@ -692,15 +692,15 @@ runTests() {
 
     mvn clean verify -Pselenium-test \
                 ${TESTS_SCOPE} \
-                -Dhost=${PRODUCT_HOST} \
+                -Dche.host=${PRODUCT_HOST} \
                 -Dche.port=${PRODUCT_PORT} \
-                -Dprotocol=${PRODUCT_PROTOCOL} \
+                -Dche.protocol=${PRODUCT_PROTOCOL} \
                 -Ddocker.interface.ip=$(detectDockerInterfaceIp) \
                 -Ddriver.port=${WEBDRIVER_PORT} \
                 -Ddriver.version=${WEBDRIVER_VERSION} \
                 -Dbrowser=${BROWSER} \
-                -Dthreads=${THREADS} \
-                -Dworkspace_pool_size=${WORKSPACE_POOL_SIZE} \
+                -Dche.threads=${THREADS} \
+                -Dche.workspace.pool.size=${WORKSPACE_POOL_SIZE} \
                 ${DEBUG_OPTIONS} \
                 ${GRID_OPTIONS} \
                 ${MAVEN_OPTIONS}
