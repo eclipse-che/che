@@ -24,6 +24,7 @@ import java.nio.file.Files;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
+import java.util.Set;
 import org.apache.maven.plugin.testing.MojoRule;
 import org.apache.maven.plugin.testing.resources.TestResources;
 import org.eclipse.che.inject.ModuleFinder;
@@ -139,7 +140,7 @@ public class DynaModuleListGeneratorMojoTest {
     this.rule.setVariableValueToObject(mojo, "scanWarDependencies", true);
     this.rule.setVariableValueToObject(mojo, "scanJarInWarDependencies", true);
     mojo.execute();
-    List<String> findClasses =
+    Set<String> findClasses =
         mojo.getDynaModuleListGenerator().getDynaModuleScanner().getDynaModuleClasses();
     assertTrue(
         findClasses

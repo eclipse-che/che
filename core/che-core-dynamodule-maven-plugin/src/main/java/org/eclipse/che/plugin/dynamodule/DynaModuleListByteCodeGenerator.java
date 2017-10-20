@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collection;
-import java.util.List;
+import java.util.Set;
 import org.eclipse.che.inject.ModuleFinder;
 import org.eclipse.che.plugin.dynamodule.scanner.DynaModuleScanner;
 import org.objectweb.asm.ClassWriter;
@@ -101,7 +101,7 @@ public class DynaModuleListByteCodeGenerator {
     this.urls = urls;
   }
 
-  protected void generateClass(List<String> guiceModules) {
+  protected void generateClass(Set<String> guiceModules) {
     ClassWriter cw = new ClassWriter(COMPUTE_FRAMES);
     MethodVisitor methodVisitor;
 

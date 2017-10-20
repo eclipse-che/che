@@ -23,7 +23,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Stream;
@@ -44,7 +46,7 @@ public class DynaModuleScanner {
   private List<UrlTime> times = new ArrayList<>();
 
   /** List of the classes that are containing DynaModules. */
-  private List<String> matchingClasses = new ArrayList();
+  private Set<String> matchingClasses = new HashSet<>();
 
   private final List<String> skipResources = new ArrayList<>();
 
@@ -216,7 +218,7 @@ public class DynaModuleScanner {
    *
    * @return the list of stringified name of classes
    */
-  public List<String> getDynaModuleClasses() {
+  public Set<String> getDynaModuleClasses() {
     return matchingClasses;
   }
 
