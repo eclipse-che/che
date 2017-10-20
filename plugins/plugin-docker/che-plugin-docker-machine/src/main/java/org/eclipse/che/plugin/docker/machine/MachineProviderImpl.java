@@ -604,7 +604,6 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                 .stream()
                 .collect(toMap(Function.identity(), value -> new PortBinding[0])))
         .withVolumesFrom(toArrayIfNotNull(service.getVolumesFrom()));
-    //.withSecurityOpt(securityOpt);
 
     ContainerConfig config = new ContainerConfig();
     config

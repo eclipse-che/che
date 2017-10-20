@@ -1858,7 +1858,6 @@ public class MachineProviderImplTest {
       allMachineEnvVars = emptySet();
       snapshotUseRegistry = SNAPSHOT_USE_REGISTRY;
       privilegedMode = false;
-      //securityOpt = {"seccomp:unconfined"};
       doForcePullImage = false;
       additionalNetworks = emptySet();
       devMachineServers = emptySet();
