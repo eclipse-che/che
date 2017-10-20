@@ -18,7 +18,6 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.mockito.Matchers;
 
 /**
  * Mockito mock provider for Che Promise objects.

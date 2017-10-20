@@ -14,8 +14,8 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMod
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.RETURNS_DEFAULTS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -49,7 +49,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;

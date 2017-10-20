@@ -11,7 +11,7 @@
 package org.eclipse.che.api.agent;
 
 import static org.eclipse.che.api.workspace.shared.Constants.WS_AGENT_PROCESS_NAME;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 
 import java.net.HttpURLConnection;
 import java.util.Collections;
@@ -36,7 +36,6 @@ import org.eclipse.che.api.machine.server.spi.InstanceNode;
 import org.eclipse.che.api.machine.shared.Constants;
 import org.eclipse.che.api.workspace.shared.dto.WsAgentHealthStateDto;
 import org.eclipse.che.commons.test.mockito.answer.SelfReturningAnswer;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.testng.MockitoTestNGListener;

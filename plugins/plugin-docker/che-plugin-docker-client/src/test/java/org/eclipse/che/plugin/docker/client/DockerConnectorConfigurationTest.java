@@ -15,7 +15,7 @@ import static org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration.
 import static org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration.DEFAULT_DOCKER_MACHINE_DOCKER_HOST_IP;
 import static org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration.DEFAULT_LINUX_DOCKER_HOST_IP;
 import static org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration.DEFAULT_LINUX_INTERFACE_NAME;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;

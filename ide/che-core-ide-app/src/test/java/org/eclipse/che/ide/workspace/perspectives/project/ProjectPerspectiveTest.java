@@ -34,7 +34,6 @@ import org.eclipse.che.providers.DynaProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 
 /** @author Dmitry Shnurenko */

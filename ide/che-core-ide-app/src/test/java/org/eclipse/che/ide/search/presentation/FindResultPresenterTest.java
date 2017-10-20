@@ -13,8 +13,8 @@ package org.eclipse.che.ide.search.presentation;
 import static java.util.Collections.emptyList;
 import static org.eclipse.che.ide.search.FullTextSearchPresenter.SEARCH_RESULT_ITEMS;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -41,7 +41,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 
 /**

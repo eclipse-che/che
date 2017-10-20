@@ -13,7 +13,7 @@ package org.eclipse.che.ide.api.action;
 import static org.eclipse.che.ide.api.constraints.Anchor.AFTER;
 import static org.eclipse.che.ide.api.constraints.Anchor.BEFORE;
 import static org.fest.assertions.Assertions.assertThat;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -25,7 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /** @author Mihail Kuznyetsov. */
 @RunWith(MockitoJUnitRunner.class)
