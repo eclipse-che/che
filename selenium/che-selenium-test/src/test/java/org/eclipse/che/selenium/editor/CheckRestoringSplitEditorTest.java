@@ -36,13 +36,12 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
-public class CheckRestoringOfSplitEditorTest {
+public class CheckRestoringSplitEditorTest {
   private String javaClassName = "AppController.java";
   private String readmeFileName = "README.md";
   private String pomFileTab = "qa-spring-sample";
   private String javaClassTab = "AppController";
-  private final String PROJECT_NAME =
-      NameGenerator.generate(CheckRestoringOfSplitEditorTest.class.getSimpleName(), 4);
+  private final String PROJECT_NAME = NameGenerator.generate("project", 4);;
   private final String PATH_TO_JAVA_FILE =
       PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/" + javaClassName;
   private Pair<Integer, Integer> cursorPositionForJavaFile = new Pair<>(12, 1);
@@ -64,7 +63,7 @@ public class CheckRestoringOfSplitEditorTest {
   public void prepare() throws Exception {
     String splitter = "----split_line---";
     URL resources =
-        CheckRestoringOfSplitEditorTest.class.getResource("split-editor-restore-exp-text.txt");
+        CheckRestoringSplitEditorTest.class.getResource("split-editor-restore-exp-text.txt");
     expectedTextFromEditor =
         Files.readAllLines(Paths.get(resources.toURI()), Charset.forName("UTF8"));
     String expectedTextFromFile = Joiner.on("\n").join(expectedTextFromEditor);
