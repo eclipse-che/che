@@ -92,13 +92,36 @@ public class StackLoaderTest {
   }
 
   @Test
-  public void predefinedStackWithValidJsonShouldBeCreated2() throws Exception {
+  public void doNotThrowExceptionWhenUpdateFailed() throws Exception {
     doThrow(new ServerException("Internal server error")).when(stackDao).update(any());
 
     stackLoader.start();
 
     verify(stackDao, times(5)).update(any());
+    verify(stackDao, never()).create(any());
+  }
+
+  @Test
+  public void doNotThrowExceptionWhenCreationFailed() throws Exception {
+    doThrow(new NotFoundException("Not found")).when(stackDao).update(any());
+    doThrow(new ServerException("Internal server error")).when(stackDao).create(any());
+
+    stackLoader.start();
+
+    verify(stackDao, times(5)).update(any());
     verify(stackDao, times(5)).create(any());
+  }
+
+  @Test
+  public void testOverrideStacksWithoutImages() throws Exception {
+    final Map<String, String> map = new HashMap<>();
+    map.put("stacks.json", null);
+    stackLoader = new StackLoader(true, map, stackDao, dbInitializer);
+
+    stackLoader.start();
+
+    verify(stackDao, times(5)).update(any());
+    verify(stackDao, never()).create(any());
   }
 
   @Test
