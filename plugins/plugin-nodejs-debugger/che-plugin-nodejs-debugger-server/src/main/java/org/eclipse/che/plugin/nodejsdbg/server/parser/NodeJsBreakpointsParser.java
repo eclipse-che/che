@@ -78,8 +78,9 @@ public class NodeJsBreakpointsParser
           }
 
           Location location = new LocationImpl(targetType + ":" + target, lineNumber + 1);
-          BreakpointConfiguration breakpointConfiguration = new BreakpointConfigurationImpl(hitCondition, 0);
-          Breakpoint breakpoint = new BreakpointImpl(location, breakpointConfiguration,isEnabled);
+          BreakpointConfiguration breakpointConfiguration =
+              new BreakpointConfigurationImpl(hitCondition, 0);
+          Breakpoint breakpoint = new BreakpointImpl(location, breakpointConfiguration, isEnabled);
           breakpoints.add(breakpoint);
         } catch (Exception e) {
           LOG.error("Failed to parse breakpoint: " + item.toString(), e);

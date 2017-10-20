@@ -112,7 +112,8 @@ public class NodeJsDebugCommandsLibrary {
       }
 
       Location newLocation = new LocationImpl(newTarget, location.getLineNumber());
-      BreakpointConfiguration newBreakpointConfiguration = new BreakpointConfigurationImpl(breakpoint.getBreakpointConfiguration());
+      BreakpointConfiguration newBreakpointConfiguration =
+          new BreakpointConfigurationImpl(breakpoint.getBreakpointConfiguration());
       Breakpoint newBreakpoint =
           new BreakpointImpl(newLocation, newBreakpointConfiguration, breakpoint.isEnabled());
       breakpoints.set(i, newBreakpoint);

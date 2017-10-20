@@ -20,7 +20,8 @@ public class BreakpointImpl implements Breakpoint {
   private BreakpointConfiguration breakpointConfiguration;
   private boolean enabled;
 
-  public BreakpointImpl(Location location, BreakpointConfiguration breakpointConfiguration, boolean enabled) {
+  public BreakpointImpl(
+      Location location, BreakpointConfiguration breakpointConfiguration, boolean enabled) {
     this.location = location;
     this.breakpointConfiguration = breakpointConfiguration;
     this.enabled = enabled;
@@ -54,14 +55,17 @@ public class BreakpointImpl implements Breakpoint {
 
     if (enabled != that.enabled) return false;
     if (location != null ? !location.equals(that.location) : that.location != null) return false;
-    return !(breakpointConfiguration != null ? !breakpointConfiguration.equals(that.breakpointConfiguration) : that.breakpointConfiguration != null);
+    return !(breakpointConfiguration != null
+        ? !breakpointConfiguration.equals(that.breakpointConfiguration)
+        : that.breakpointConfiguration != null);
   }
 
   @Override
   public int hashCode() {
     int result = location != null ? location.hashCode() : 0;
     result = 31 * result + (enabled ? 1 : 0);
-    result = 31 * result + (breakpointConfiguration != null ? breakpointConfiguration.hashCode() : 0);
+    result =
+        31 * result + (breakpointConfiguration != null ? breakpointConfiguration.hashCode() : 0);
     return result;
   }
 }

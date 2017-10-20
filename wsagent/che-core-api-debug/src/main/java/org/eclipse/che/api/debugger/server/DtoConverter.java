@@ -15,8 +15,8 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 import java.util.List;
 import java.util.Objects;
-import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.BreakpointConfigurationDto;
+import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
 import org.eclipse.che.api.debug.shared.dto.DebuggerInfoDto;
 import org.eclipse.che.api.debug.shared.dto.FieldDto;

@@ -12,6 +12,7 @@
 
 
 javac -g org/eclipse/RunToLocationTest.java
+javac -g org/eclipse/BreakpointHitCountTest.java
 javac -g org/eclipse/ThreadDumpTest1.java
 javac -g org/eclipse/ThreadDumpTest2.java
 javac -g org/eclipse/StackFrameDumpTest1.java
@@ -24,6 +25,7 @@ javac -g org/eclipse/BreakpointsByConditionTest.java
 DEBUG_OPT="-Xdebug -Xrunjdwp:transport=dt_socket,address=8001,server=y,suspend=y"
 
 java ${DEBUG_OPT} org.eclipse.RunToLocationTest
+java ${DEBUG_OPT} org.eclipse.BreakpointHitCountTest
 java ${DEBUG_OPT} org.eclipse.BreakpointsTest
 java ${DEBUG_OPT} org.eclipse.BreakpointsByConditionTest
 java ${DEBUG_OPT} org.eclipse.ThreadDumpTest1

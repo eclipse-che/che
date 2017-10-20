@@ -97,7 +97,9 @@ public class BreakpointRendererImpl implements BreakpointRenderer {
     if (hasGutter != null) {
       BreakpointConfiguration breakpointConfiguration = breakpoint.getBreakpointConfiguration();
       int lineNumber = breakpoint.getLocation().getLineNumber() - 1;
-      boolean hasCondition = !Strings.isNullOrEmpty(breakpointConfiguration.getCondition()) || breakpointConfiguration.getHitCount() != 0;
+      boolean hasCondition =
+          !Strings.isNullOrEmpty(breakpointConfiguration.getCondition())
+              || breakpointConfiguration.getHitCount() != 0;
 
       Element newElement =
           active

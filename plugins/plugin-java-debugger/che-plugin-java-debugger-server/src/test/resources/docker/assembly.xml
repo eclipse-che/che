@@ -42,6 +42,10 @@
             <outputDirectory>./org/eclipse</outputDirectory>
         </file>
         <file>
+            <source>${project.build.testOutputDirectory}/workspace/test/src/org/eclipse/BreakpointHitCountTest.java</source>
+            <outputDirectory>./org/eclipse</outputDirectory>
+        </file>
+        <file>
             <source>${project.build.testOutputDirectory}/workspace/test/src/org/eclipse/RunToLocationTest.java</source>
             <outputDirectory>./org/eclipse</outputDirectory>
         </file>
