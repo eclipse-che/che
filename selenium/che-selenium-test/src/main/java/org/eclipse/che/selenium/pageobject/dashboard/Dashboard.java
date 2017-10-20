@@ -20,8 +20,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.Arrays;
-import java.util.List;
+import java.net.URL;
 import javax.annotation.PreDestroy;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.entrance.Entrance;
@@ -212,11 +211,10 @@ public class Dashboard {
   }
 
   public void logout() {
-    String apiEndpoint = testDashboardUrlProvider.get().toString();
-    List<String> api = Arrays.asList(apiEndpoint.split(":"));
-    String logoutApiEndpoint = api.get(0) + ":" + api.get(1);
+    URL apiEndpoint = testDashboardUrlProvider.get();
+    String logoutApiEndpoint = apiEndpoint.getProtocol() + "://" + apiEndpoint.getHost();
     String logoutURL = logoutApiEndpoint + ":5050/auth/realms/che/protocol/openid-connect/logout";
-    String redirectURL = logoutApiEndpoint + ":8080/dashboard/#/workspaces";
+    String redirectURL = apiEndpoint + "#/workspaces";
 
     seleniumWebDriver.navigate().to(logoutURL + "?redirect_uri=" + redirectURL);
   }

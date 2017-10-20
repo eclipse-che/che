@@ -49,6 +49,7 @@ Options:
     --http                              Use 'http' protocol to connect to product
     --https                             Use 'https' protocol to connect to product
     --host=<PRODUCT_HOST>               Set host where product is deployed
+    --port=<PRODUCT_PORT>               Set port where product is deployed
     --multiuser                         Run tests of Multi User Che
 
 Modes (defines environment to run tests):

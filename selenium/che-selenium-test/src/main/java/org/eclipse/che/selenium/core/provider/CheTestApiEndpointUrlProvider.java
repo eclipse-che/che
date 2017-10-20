@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.core.provider;
 
+import static java.lang.Integer.valueOf;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.net.MalformedURLException;
@@ -27,10 +29,14 @@ public class CheTestApiEndpointUrlProvider implements TestApiEndpointUrlProvider
   @Named("sys.host")
   private String host;
 
+  @Inject
+  @Named("sys.port")
+  private String port;
+
   @Override
   public URL get() {
     try {
-      return new URL(protocol, host, 8080, "/wsmaster/api/");
+      return new URL(protocol, host, valueOf(port), "/wsmaster/api/");
     } catch (MalformedURLException e) {
       throw new RuntimeException(e.getMessage(), e);
     }
