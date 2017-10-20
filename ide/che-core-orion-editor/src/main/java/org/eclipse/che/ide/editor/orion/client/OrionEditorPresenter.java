@@ -437,7 +437,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
   }
 
   @Override
-  protected void updateDirtyState(boolean dirty) {
+  public void updateDirtyState(boolean dirty) {
     if (isReadOnly()) {
       dirtyState = false;
       return;

@@ -186,4 +186,12 @@ public interface TextEditor extends EditorPartPresenter {
    */
   @Nullable
   Position getWordAtOffset(int offset);
+
+  /**
+   * Update 'dirty' state of editor when state of editor content has changed
+   *
+   * @param dirty {@code true} when editor content has modified and {@code false} when editor
+   *     content has saved
+   */
+  void updateDirtyState(boolean dirty);
 }
