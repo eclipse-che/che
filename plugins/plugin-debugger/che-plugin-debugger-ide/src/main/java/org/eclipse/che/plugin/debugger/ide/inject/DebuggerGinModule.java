@@ -25,6 +25,9 @@ import org.eclipse.che.plugin.debugger.ide.configuration.EditDebugConfigurations
 import org.eclipse.che.plugin.debugger.ide.debug.DebuggerToolbar;
 import org.eclipse.che.plugin.debugger.ide.debug.DebuggerView;
 import org.eclipse.che.plugin.debugger.ide.debug.DebuggerViewImpl;
+import org.eclipse.che.plugin.debugger.ide.debug.breakpoint.BreakpointConfigurationView;
+import org.eclipse.che.plugin.debugger.ide.debug.breakpoint.BreakpointConfigurationViewImpl;
+import org.eclipse.che.plugin.debugger.ide.debug.breakpoint.BreakpointContextMenuFactory;
 import org.eclipse.che.plugin.debugger.ide.debug.changevalue.ChangeValueView;
 import org.eclipse.che.plugin.debugger.ide.debug.changevalue.ChangeValueViewImpl;
 import org.eclipse.che.plugin.debugger.ide.debug.expression.EvaluateExpressionView;
@@ -44,6 +47,7 @@ public class DebuggerGinModule extends AbstractGinModule {
     bind(DebuggerView.class).to(DebuggerViewImpl.class).in(Singleton.class);
     bind(EvaluateExpressionView.class).to(EvaluateExpressionViewImpl.class).in(Singleton.class);
     bind(ChangeValueView.class).to(ChangeValueViewImpl.class).in(Singleton.class);
+    bind(BreakpointConfigurationView.class).to(BreakpointConfigurationViewImpl.class);
     bind(EditDebugConfigurationsView.class)
         .to(EditDebugConfigurationsViewImpl.class)
         .in(Singleton.class);
@@ -60,5 +64,7 @@ public class DebuggerGinModule extends AbstractGinModule {
         .annotatedWith(DebuggerToolbar.class)
         .to(ToolbarPresenter.class)
         .in(Singleton.class);
+
+    install(new GinFactoryModuleBuilder().build(BreakpointContextMenuFactory.class));
   }
 }

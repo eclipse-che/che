@@ -16,6 +16,7 @@ import static org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDom
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -69,7 +70,7 @@ public class FactoryPermissionsFilterTest {
             .get(SECURE_PATH + "/factory/workspace/workspace123");
 
     assertEquals(response.getStatusCode(), 204);
-    verify(service).getFactoryJson(eq("workspace123"), anyString());
+    verify(service).getFactoryJson(eq("workspace123"), nullable(String.class));
     verify(subject).checkPermission(DOMAIN_ID, "workspace123", READ);
   }
 

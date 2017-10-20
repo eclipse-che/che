@@ -32,7 +32,7 @@ public class JavadocUtil {
     // static-only
   }
 
-  //TODO: is a copy of ChangeSignatureRefactoring.DeclarationUpdate#createParamTag(..)
+  // TODO: is a copy of ChangeSignatureRefactoring.DeclarationUpdate#createParamTag(..)
   public static TagElement createParamTag(String parameterName, AST ast, IJavaProject javaProject) {
     TagElement paramNode = ast.newTagElement();
     paramNode.setTagName(TagElement.TAG_PARAM);
@@ -42,7 +42,7 @@ public class JavadocUtil {
 
     TextElement textElement = ast.newTextElement();
     String text = StubUtility.getTodoTaskTag(javaProject);
-    if (text != null) textElement.setText(text); //TODO: use template with {@todo} ...
+    if (text != null) textElement.setText(text); // TODO: use template with {@todo} ...
     paramNode.fragments().add(textElement);
 
     return paramNode;
@@ -88,8 +88,7 @@ public class JavadocUtil {
         astRewrite.getListRewrite(methodDeclaration.getJavadoc(), Javadoc.TAGS_PROPERTY);
     HashSet<String> leadingNames = new HashSet<String>();
     for (Iterator<SingleVariableDeclaration> iter = methodDeclaration.parameters().iterator();
-        iter.hasNext();
-        ) {
+        iter.hasNext(); ) {
       SingleVariableDeclaration curr = iter.next();
       leadingNames.add(curr.getName().getIdentifier());
     }

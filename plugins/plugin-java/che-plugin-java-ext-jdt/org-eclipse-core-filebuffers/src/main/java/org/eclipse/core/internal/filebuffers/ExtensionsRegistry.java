@@ -75,7 +75,7 @@ public class ExtensionsRegistry {
     }
   }
 
-  protected static final String WILDCARD = "*"; //$NON-NLS-1$
+  protected static final String WILDCARD = "*"; // $NON-NLS-1$
 
   /**
    * The mapping between file attributes and configuration elements describing document factories.
@@ -111,15 +111,24 @@ public class ExtensionsRegistry {
    * plug-in registry.
    */
   public ExtensionsRegistry() {
-    //		initialize("documentCreation", "contentTypeId", true,  fFactoryDescriptors); //$NON-NLS-1$ //$NON-NLS-2$
-    //		initialize("documentCreation", "fileNames", false, fFactoryDescriptors); //$NON-NLS-1$ //$NON-NLS-2$
-    //		initialize("documentCreation", "extensions",  false, fFactoryDescriptors); //$NON-NLS-1$ //$NON-NLS-2$
-    //		initialize("documentSetup", "contentTypeId", true, fSetupParticipantDescriptors); //$NON-NLS-1$ //$NON-NLS-2$
-    //		initialize("documentSetup", "fileNames", false, fSetupParticipantDescriptors); //$NON-NLS-1$ //$NON-NLS-2$
-    //		initialize("documentSetup", "extensions", false, fSetupParticipantDescriptors); //$NON-NLS-1$ //$NON-NLS-2$
-    //		initialize("annotationModelCreation", "contentTypeId", true, fAnnotationModelFactoryDescriptors); //$NON-NLS-1$ //$NON-NLS-2$
-    //		initialize("annotationModelCreation", "fileNames", false, fAnnotationModelFactoryDescriptors); //$NON-NLS-1$ //$NON-NLS-2$
-    //		initialize("annotationModelCreation", "extensions", false, fAnnotationModelFactoryDescriptors); //$NON-NLS-1$ //$NON-NLS-2$
+    //		initialize("documentCreation", "contentTypeId", true,  fFactoryDescriptors); //$NON-NLS-1$
+    // //$NON-NLS-2$
+    //		initialize("documentCreation", "fileNames", false, fFactoryDescriptors); //$NON-NLS-1$
+    // //$NON-NLS-2$
+    //		initialize("documentCreation", "extensions",  false, fFactoryDescriptors); //$NON-NLS-1$
+    // //$NON-NLS-2$
+    //		initialize("documentSetup", "contentTypeId", true, fSetupParticipantDescriptors);
+    // //$NON-NLS-1$ //$NON-NLS-2$
+    //		initialize("documentSetup", "fileNames", false, fSetupParticipantDescriptors); //$NON-NLS-1$
+    // //$NON-NLS-2$
+    //		initialize("documentSetup", "extensions", false, fSetupParticipantDescriptors);
+    // //$NON-NLS-1$ //$NON-NLS-2$
+    //		initialize("annotationModelCreation", "contentTypeId", true,
+    // fAnnotationModelFactoryDescriptors); //$NON-NLS-1$ //$NON-NLS-2$
+    //		initialize("annotationModelCreation", "fileNames", false,
+    // fAnnotationModelFactoryDescriptors); //$NON-NLS-1$ //$NON-NLS-2$
+    //		initialize("annotationModelCreation", "extensions", false,
+    // fAnnotationModelFactoryDescriptors); //$NON-NLS-1$ //$NON-NLS-2$
 
   }
 
@@ -135,7 +144,7 @@ public class ExtensionsRegistry {
   private void read(String attributeName, IConfigurationElement element, Map map) {
     String value = element.getAttribute(attributeName);
     if (value != null) {
-      StringTokenizer tokenizer = new StringTokenizer(value, ","); //$NON-NLS-1$
+      StringTokenizer tokenizer = new StringTokenizer(value, ","); // $NON-NLS-1$
       while (tokenizer.hasMoreTokens()) {
         String token = tokenizer.nextToken().trim();
 
@@ -150,8 +159,10 @@ public class ExtensionsRegistry {
   }
 
   //	/**
-  //	 * Reads the value from the given configuration element for the given attribute name and remembers
-  //	 * the configuration element in the given map under the individual content type of the attribute value.
+  //	 * Reads the value from the given configuration element for the given attribute name and
+  // remembers
+  //	 * the configuration element in the given map under the individual content type of the
+  // attribute value.
   //	 *
   //	 * @param attributeName the name of the attribute
   //	 * @param element the configuration element
@@ -163,7 +174,8 @@ public class ExtensionsRegistry {
   //			IContentType contentType= fContentTypeManager.getContentType(value);
   //			if (contentType == null) {
   //				log(new Status(IStatus.ERROR, FileBuffersPlugin.PLUGIN_ID, IStatus.OK, NLSUtility
-  //						.format(FileBuffersMessages.ExtensionsRegistry_error_contentTypeDoesNotExist, value), null));
+  //						.format(FileBuffersMessages.ExtensionsRegistry_error_contentTypeDoesNotExist, value),
+  // null));
   //				return;
   //			}
   //			ContentTypeAdapter adapter= new ContentTypeAdapter(contentType);
@@ -196,12 +208,16 @@ public class ExtensionsRegistry {
   //	 * @param isContentTypeId the child element is a content type id
   //	 * @param descriptors the map to be filled
   //	 */
-  //	private void initialize(String extensionPointName, String childElementName, boolean isContentTypeId, Map descriptors) {
+  //	private void initialize(String extensionPointName, String childElementName, boolean
+  // isContentTypeId, Map descriptors) {
   //
-  //		IExtensionPoint extensionPoint= Platform.getExtensionRegistry().getExtensionPoint(FileBuffersPlugin.PLUGIN_ID, extensionPointName);
+  //		IExtensionPoint extensionPoint=
+  // Platform.getExtensionRegistry().getExtensionPoint(FileBuffersPlugin.PLUGIN_ID,
+  // extensionPointName);
   //		if (extensionPoint == null) {
   //			log(new Status(IStatus.ERROR, FileBuffersPlugin.PLUGIN_ID, 0, NLSUtility
-  //					.format(FileBuffersMessages.ExtensionsRegistry_error_extensionPointNotFound, extensionPointName), null));
+  //					.format(FileBuffersMessages.ExtensionsRegistry_error_extensionPointNotFound,
+  // extensionPointName), null));
   //			return;
   //		}
   //
@@ -229,7 +245,7 @@ public class ExtensionsRegistry {
     if (extension != null) return extension;
 
     try {
-      extension = entry.createExecutableExtension("class"); //$NON-NLS-1$
+      extension = entry.createExecutableExtension("class"); // $NON-NLS-1$
     } catch (CoreException x) {
       log(x.getStatus());
     }
@@ -394,7 +410,8 @@ public class ExtensionsRegistry {
   //
   //		if (set != null) {
   //			IConfigurationElement entry= selectConfigurationElement(set);
-  //			return (IAnnotationModelFactory) getExtension(entry, fAnnotationModelFactories, IAnnotationModelFactory.class);
+  //			return (IAnnotationModelFactory) getExtension(entry, fAnnotationModelFactories,
+  // IAnnotationModelFactory.class);
   //		}
   //		return null;
   //	}
@@ -428,7 +445,8 @@ public class ExtensionsRegistry {
   //		Set set= (Set) fAnnotationModelFactoryDescriptors.get(extension);
   //		if (set != null) {
   //			IConfigurationElement entry= selectConfigurationElement(set);
-  //			return (IAnnotationModelFactory) getExtension(entry, fAnnotationModelFactories, IAnnotationModelFactory.class);
+  //			return (IAnnotationModelFactory) getExtension(entry, fAnnotationModelFactories,
+  // IAnnotationModelFactory.class);
   //		}
   //		return null;
   //	}
@@ -478,8 +496,10 @@ public class ExtensionsRegistry {
   //	 * @since 3.3
   //	 * @deprecated As of 3.5
   //	 */
-  //	public org.eclipse.core.filebuffers.IDocumentFactory getDocumentFactory(IPath location, LocationKind locationKind) {
-  //		org.eclipse.core.filebuffers.IDocumentFactory factory= getDocumentFactory(findContentTypes(location, locationKind));
+  //	public org.eclipse.core.filebuffers.IDocumentFactory getDocumentFactory(IPath location,
+  // LocationKind locationKind) {
+  //		org.eclipse.core.filebuffers.IDocumentFactory factory=
+  // getDocumentFactory(findContentTypes(location, locationKind));
   //		if (factory == null)
   //			factory= getDocumentFactory(location.lastSegment());
   //		if (factory == null)
@@ -497,7 +517,8 @@ public class ExtensionsRegistry {
   //	 * @return the sharable set of document setup participants
   //	 * @since 3.3
   //	 */
-  //	public IDocumentSetupParticipant[] getDocumentSetupParticipants(IPath location, LocationKind locationKind) {
+  //	public IDocumentSetupParticipant[] getDocumentSetupParticipants(IPath location, LocationKind
+  // locationKind) {
   //		Set participants= new HashSet();
   //
   //		List p= getDocumentSetupParticipants(findContentTypes(location, locationKind));
@@ -529,8 +550,10 @@ public class ExtensionsRegistry {
   //	 * @return the sharable annotation model factory
   //	 * @since 3.3
   //	 */
-  //	public IAnnotationModelFactory getAnnotationModelFactory(IPath location, LocationKind locationKind) {
-  //		IAnnotationModelFactory factory= getAnnotationModelFactory(findContentTypes(location, locationKind));
+  //	public IAnnotationModelFactory getAnnotationModelFactory(IPath location, LocationKind
+  // locationKind) {
+  //		IAnnotationModelFactory factory= getAnnotationModelFactory(findContentTypes(location,
+  // locationKind));
   //		if (factory == null)
   //			factory= getAnnotationModelFactory(location.lastSegment());
   //		if (factory == null)

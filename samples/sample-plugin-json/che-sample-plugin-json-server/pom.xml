@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-sample-plugin-json-parent</artifactId>
         <groupId>org.eclipse.che.sample</groupId>
-        <version>5.19.0-SNAPSHOT</version>
+        <version>5.20.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-sample-plugin-json-server</artifactId>
     <name>Che Sample :: Plugin JSON :: Server</name>
@@ -50,17 +50,4 @@
             <artifactId>che-sample-plugin-json-shared</artifactId>
         </dependency>
     </dependencies>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <configuration>
-                    <usedDependencies>
-                        <param>org.eclipse.che.sample:che-sample-plugin-json-shared</param>
-                    </usedDependencies>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>

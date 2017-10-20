@@ -61,7 +61,7 @@ public class PushTest {
   )
   public void testSimplePush(GitConnectionFactory connectionFactory)
       throws IOException, ServerException, URISyntaxException, UnauthorizedException {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     GitConnection remoteConnection = connectionFactory.getConnection(remoteRepo.getAbsolutePath());
     remoteConnection.clone(
@@ -70,15 +70,15 @@ public class PushTest {
     addFile(remoteConnection, "newfile", "content");
     remoteConnection.add(AddParams.create(singletonList(".")));
     remoteConnection.commit(CommitParams.create("Fake commit"));
-    //when
+    // when
     remoteConnection.push(
         PushParams.create("origin")
             .withRefSpec(singletonList("refs/heads/master:refs/heads/test"))
             .withTimeout(-1));
-    //then
-    //check branches in origin repository
+    // then
+    // check branches in origin repository
     assertEquals(connection.branchList(null).size(), 1);
-    //checkout test branch
+    // checkout test branch
     connection.checkout(CheckoutParams.create("test"));
     assertTrue(new File(connection.getWorkingDir(), "newfile").exists());
   }
@@ -89,21 +89,21 @@ public class PushTest {
   )
   public void testPushRemote(GitConnectionFactory connectionFactory)
       throws GitException, IOException, URISyntaxException, UnauthorizedException {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     GitConnection remoteConnection =
         connectToInitializedGitRepository(connectionFactory, remoteRepo);
     addFile(connection, "README", "README");
     connection.add(AddParams.create(singletonList(".")));
     connection.commit(CommitParams.create("Init commit."));
-    //make push
+    // make push
     int branchesBefore = remoteConnection.branchList(null).size();
-    //when
+    // when
     connection.push(
         PushParams.create(remoteRepo.getAbsolutePath())
             .withRefSpec(singletonList("refs/heads/master:refs/heads/test"))
             .withTimeout(-1));
-    //then
+    // then
     int branchesAfter = remoteConnection.branchList(null).size();
     assertEquals(branchesAfter - 1, branchesBefore);
   }
@@ -118,10 +118,10 @@ public class PushTest {
   )
   public void testWhenThereAreNoAnyRemotes(GitConnectionFactory connectionFactory)
       throws Exception {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
 
-    //when
+    // when
     connection.push(PushParams.create(null));
   }
 
@@ -132,7 +132,7 @@ public class PushTest {
   public void testPushWhenLocalRepositoryIsNotSynchronisedWithRemote(
       GitConnectionFactory connectionFactory)
       throws IOException, ServerException, URISyntaxException, UnauthorizedException {
-    //given
+    // given
     GitConnection remoteConnection =
         connectToGitRepositoryWithContent(connectionFactory, repository);
     GitConnection localConnection = connectionFactory.getConnection(remoteRepo.getAbsolutePath());
@@ -141,7 +141,7 @@ public class PushTest {
     remoteConnection.add(AddParams.create(singletonList(".")));
     remoteConnection.commit(CommitParams.create("Fake commit"));
 
-    //when
+    // when
     String errorMessage = "";
     try {
       localConnection.push(PushParams.create("origin").withTimeout(-1));
@@ -149,7 +149,7 @@ public class PushTest {
       errorMessage = exception.getMessage();
     }
 
-    //then
+    // then
     assertTrue(errorMessage.contains("master -> master"));
     assertTrue(errorMessage.contains(remoteConnection.getWorkingDir().getAbsolutePath()));
   }
@@ -160,20 +160,20 @@ public class PushTest {
   )
   public void testPushWhenLocalRepositoryIsUpToDate(GitConnectionFactory connectionFactory)
       throws IOException, ServerException, URISyntaxException, UnauthorizedException {
-    //given
+    // given
     GitConnection remoteConnection =
         connectToGitRepositoryWithContent(connectionFactory, repository);
     GitConnection localConnection = connectionFactory.getConnection(remoteRepo.getAbsolutePath());
     localConnection.clone(CloneParams.create(remoteConnection.getWorkingDir().getAbsolutePath()));
 
-    //when
+    // when
     PushResponse pushResponse =
         localConnection.push(
             PushParams.create("origin")
                 .withRefSpec(singletonList("refs/heads/master:refs/heads/master"))
                 .withTimeout(-1));
 
-    //then
+    // then
     assertEquals(pushResponse.getCommandOutput(), "Everything up-to-date");
   }
 }

@@ -56,29 +56,29 @@ public class JavaPlugin {
    * "org.eclipse.jdt.ui.CompilationUnitEditor"</code>).
    */
   public static final String ID_CU_EDITOR =
-      "org.eclipse.jdt.ui.CompilationUnitEditor"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.CompilationUnitEditor"; // $NON-NLS-1$
   /** The id of the Java plug-in (value <code>"org.eclipse.jdt.ui"</code>). */
-  public static final String ID_PLUGIN = "org.eclipse.jdt.ui"; //$NON-NLS-1$
+  public static final String ID_PLUGIN = "org.eclipse.jdt.ui"; // $NON-NLS-1$
 
   public static final String CODEASSIST_LRU_HISTORY =
-      "/content_assist_lru_history.xml"; //$NON-NLS-1$
+      "/content_assist_lru_history.xml"; // $NON-NLS-1$
 
   /** The name of the dialog settings file (value <code>"dialog_settings.xml"</code>). */
-  private static final String FN_DIALOG_SETTINGS = "dialog_settings.xml"; //$NON-NLS-1$
+  private static final String FN_DIALOG_SETTINGS = "dialog_settings.xml"; // $NON-NLS-1$
   /**
    * The key to store customized code templates.
    *
    * @since 3.0
    */
   private static final String CODE_TEMPLATES_KEY =
-      "org.eclipse.jdt.ui.text.custom_code_templates"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.text.custom_code_templates"; // $NON-NLS-1$
   /**
    * The key to store customized templates.
    *
    * @since 3.0
    */
   private static final String TEMPLATES_KEY =
-      "org.eclipse.jdt.ui.text.custom_templates"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.text.custom_templates"; // $NON-NLS-1$
 
   private static final Logger LOG = LoggerFactory.getLogger(JavaPlugin.class);
   private static JavaPlugin fgJavaPlugin;
@@ -292,7 +292,8 @@ public class JavaPlugin {
           new ContributionTemplateStore(
               getCodeTemplateContextRegistry(), /*store,*/ CODE_TEMPLATES_KEY);
       //            else {
-      //                fCodeTemplateStore= new CompatibilityTemplateStore(getCodeTemplateContextRegistry(), store, CODE_TEMPLATES_KEY,
+      //                fCodeTemplateStore= new
+      // CompatibilityTemplateStore(getCodeTemplateContextRegistry(), store, CODE_TEMPLATES_KEY,
       // getOldCodeTemplateStoreInstance());
       //                store.setValue(CODE_TEMPLATES_MIGRATION_KEY, true);
       //            }
@@ -328,7 +329,8 @@ public class JavaPlugin {
       fTemplateStore =
           new ContributionTemplateStore(getTemplateContextRegistry(), /*store, */ TEMPLATES_KEY);
       //            else {
-      //                fTemplateStore= new CompatibilityTemplateStore(getTemplateContextRegistry(), store, TEMPLATES_KEY,
+      //                fTemplateStore= new CompatibilityTemplateStore(getTemplateContextRegistry(),
+      // store, TEMPLATES_KEY,
       // getOldTemplateStoreInstance());
       //                store.setValue(TEMPLATES_MIGRATION_KEY, true);
       //            }
@@ -426,7 +428,7 @@ public class JavaPlugin {
    * <p>This framework method may be overridden, although this is typically unnecessary.
    */
   protected void loadDialogSettings() {
-    dialogSettings = new DialogSettings("Workbench"); //$NON-NLS-1$
+    dialogSettings = new DialogSettings("Workbench"); // $NON-NLS-1$
 
     // bug 69387: The instance area should not be created (in the call to
     // #getStateLocation) if -data @none or -data @noDefault was used
@@ -440,7 +442,7 @@ public class JavaPlugin {
         dialogSettings.load(readWritePath);
       } catch (IOException e) {
         // load failed so ensure we have an empty settings
-        dialogSettings = new DialogSettings("Workbench"); //$NON-NLS-1$
+        dialogSettings = new DialogSettings("Workbench"); // $NON-NLS-1$
       }
 
       //                return;

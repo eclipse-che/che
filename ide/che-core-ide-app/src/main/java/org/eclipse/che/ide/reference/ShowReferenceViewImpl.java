@@ -93,6 +93,6 @@ final class ShowReferenceViewImpl extends Window implements ShowReferenceView {
 
   @Override
   public void setDelegate(ActionDelegate delegate) {
-    //to do nothing
+    // to do nothing
   }
 }

@@ -78,7 +78,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
       @Named("che.workspace.auto_restore") boolean defaultAutoRestore,
       SnapshotDao snapshotDao,
       WorkspaceSharedPool sharedPool,
-      //own injects
+      // own injects
       @Named("che.limits.workspace.env.ram") String maxRamPerEnv,
       EnvironmentRamCalculator environmentRamCalculator,
       ResourceUsageManager resourceUsageManager,

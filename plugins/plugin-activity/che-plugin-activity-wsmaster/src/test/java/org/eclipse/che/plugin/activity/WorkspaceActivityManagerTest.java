@@ -38,7 +38,7 @@ import org.testng.annotations.Test;
 @Listeners(value = MockitoTestNGListener.class)
 /** Tests for {@link WorkspaceActivityNotifier} */
 public class WorkspaceActivityManagerTest {
-  private static final long EXPIRE_PERIOD_MS = 60_000L; //1 minute
+  private static final long EXPIRE_PERIOD_MS = 60_000L; // 1 minute
 
   @Mock private AccountManager accountManager;
 

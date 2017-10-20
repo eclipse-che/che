@@ -95,8 +95,7 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 
     List<VariableDeclarationExpression> resources = node.resources();
     for (Iterator<VariableDeclarationExpression> iterator = resources.iterator();
-        iterator.hasNext();
-        ) {
+        iterator.hasNext(); ) {
       iterator.next().accept(this);
     }
 
@@ -127,7 +126,7 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
       if (resourceTypeBinding != null) {
         IMethodBinding methodBinding =
             Bindings.findMethodInHierarchy(
-                resourceTypeBinding, "close", new ITypeBinding[0]); //$NON-NLS-1$
+                resourceTypeBinding, "close", new ITypeBinding[0]); // $NON-NLS-1$
         if (methodBinding != null) {
           addExceptions(methodBinding.getExceptionTypes(), node.getAST());
         }
@@ -170,8 +169,7 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
     if (catchTypeBinding == null) return;
     for (Iterator<ITypeBinding> exceptions =
             new ArrayList<ITypeBinding>(fCurrentExceptions).iterator();
-        exceptions.hasNext();
-        ) {
+        exceptions.hasNext(); ) {
       ITypeBinding throwTypeBinding = exceptions.next();
       if (catches(catchTypeBinding, throwTypeBinding)) fCurrentExceptions.remove(throwTypeBinding);
     }

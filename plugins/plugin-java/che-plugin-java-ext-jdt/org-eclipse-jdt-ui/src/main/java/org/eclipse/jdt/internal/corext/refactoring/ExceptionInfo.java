@@ -42,7 +42,7 @@ public class ExceptionInfo {
   }
 
   public void markAsDeleted() {
-    Assert.isTrue(!isAdded()); //added exception infos should be simply removed from the list
+    Assert.isTrue(!isAdded()); // added exception infos should be simply removed from the list
     fKind = DELETED;
   }
 
@@ -88,15 +88,15 @@ public class ExceptionInfo {
     switch (fKind) {
       case OLD:
         result.append("OLD: ");
-        break; //$NON-NLS-1$
+        break; // $NON-NLS-1$
       case ADDED:
         result.append("ADDED: ");
-        break; //$NON-NLS-1$
+        break; // $NON-NLS-1$
       case DELETED:
         result.append("DELETED: ");
-        break; //$NON-NLS-1$
+        break; // $NON-NLS-1$
     }
-    if (fElement == null) result.append("null"); //$NON-NLS-1$
+    if (fElement == null) result.append("null"); // $NON-NLS-1$
     else result.append(fElement.toString());
     return result.toString();
   }

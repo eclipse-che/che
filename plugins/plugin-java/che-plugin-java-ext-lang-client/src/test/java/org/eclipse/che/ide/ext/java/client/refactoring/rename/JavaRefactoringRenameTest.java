@@ -18,6 +18,7 @@ import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringSta
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.OK;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.WARNING;
 import static org.junit.Assert.assertFalse;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyList;
@@ -96,7 +97,7 @@ public class JavaRefactoringRenameTest {
   private static final String SESSION_ID = "some session id";
   private static final int CURSOR_OFFSET = 10;
 
-  //variables for constructor
+  // variables for constructor
   @Mock private RenamePresenter renamePresenter;
   @Mock private JavaLocalizationConstant locale;
   @Mock private DialogFactory dialogFactory;
@@ -219,8 +220,6 @@ public class JavaRefactoringRenameTest {
 
   @Test
   public void renameRefactoringShouldBeAppliedSuccessAndShowWizard() throws OperationException {
-    when(result.getSeverity()).thenReturn(OK);
-
     refactoringRename.refactor(textEditor);
     refactoringRename.refactor(textEditor);
 
@@ -235,7 +234,6 @@ public class JavaRefactoringRenameTest {
     PromiseError arg = Mockito.mock(PromiseError.class);
     MessageDialog dialog = Mockito.mock(MessageDialog.class);
 
-    when(result.getSeverity()).thenReturn(OK);
     when(locale.renameRename()).thenReturn("renameTitle");
     when(locale.renameOperationUnavailable()).thenReturn("renameBody");
     when(dialogFactory.createMessageDialog(anyString(), anyString(), anyObject()))
@@ -269,12 +267,12 @@ public class JavaRefactoringRenameTest {
     when(result.getSeverity()).thenReturn(ERROR);
 
     when(dialogFactory.createConfirmDialog(
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            Matchers.<ConfirmCallback>anyObject(),
-            Matchers.<CancelCallback>anyObject()))
+            nullable(String.class),
+            nullable(String.class),
+            nullable(String.class),
+            nullable(String.class),
+            nullable(ConfirmCallback.class),
+            nullable(CancelCallback.class)))
         .thenReturn(confirmDialog);
 
     refactoringRename.refactor(textEditor);
@@ -300,10 +298,10 @@ public class JavaRefactoringRenameTest {
     verify(locale).buttonCancel();
     verify(dialogFactory)
         .createConfirmDialog(
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
+            nullable(String.class),
+            nullable(String.class),
+            nullable(String.class),
+            nullable(String.class),
             Matchers.<ConfirmCallback>anyObject(),
             Matchers.<CancelCallback>anyObject());
     verify(confirmDialog).show();
@@ -315,12 +313,12 @@ public class JavaRefactoringRenameTest {
 
     when(result.getSeverity()).thenReturn(WARNING);
     when(dialogFactory.createConfirmDialog(
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            Matchers.<ConfirmCallback>anyObject(),
-            Matchers.<CancelCallback>anyObject()))
+            nullable(String.class),
+            nullable(String.class),
+            nullable(String.class),
+            nullable(String.class),
+            nullable(ConfirmCallback.class),
+            nullable(CancelCallback.class)))
         .thenReturn(confirmDialog);
 
     refactoringRename.refactor(textEditor);
@@ -346,10 +344,10 @@ public class JavaRefactoringRenameTest {
     verify(locale).buttonCancel();
     verify(dialogFactory)
         .createConfirmDialog(
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
+            nullable(String.class),
+            nullable(String.class),
+            nullable(String.class),
+            nullable(String.class),
             Matchers.<ConfirmCallback>anyObject(),
             Matchers.<CancelCallback>anyObject());
     verify(confirmDialog).show();
@@ -388,7 +386,7 @@ public class JavaRefactoringRenameTest {
   @Test
   public void shouldUndoRenameRefactoringWhenUserEnterNewNameButEscapeRename()
       throws OperationException {
-    //use case: user hit Refactoring -> Rename action, type a new name and press escape button
+    // use case: user hit Refactoring -> Rename action, type a new name and press escape button
 
     refactoringRename.refactor(textEditor);
 
@@ -414,7 +412,8 @@ public class JavaRefactoringRenameTest {
   @Test
   public void shouldDoNotApplyUndoOperationWhenUserNotEnterNewNameAndEscapeRename()
       throws OperationException {
-    //use case: user hit Refactoring -> Rename action, DO NOT type a new name and press escape button
+    // use case: user hit Refactoring -> Rename action, DO NOT type a new name and press escape
+    // button
 
     refactoringRename.refactor(textEditor);
 

@@ -17,7 +17,9 @@ import javax.validation.constraints.NotNull;
  * node icon, presentable text, info text, etc.
  *
  * @author Vlad Zhukovskiy
+ * @deprecated use {@link HasNewPresentation} instead
  */
+@Deprecated
 public interface HasPresentation {
   /**
    * Method called during node rendering.

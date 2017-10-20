@@ -58,7 +58,7 @@ public class RefactoringContext {
    */
   public void dispose() {
     if (fRefactoring == null)
-      throw new IllegalStateException("dispose() called more than once."); //$NON-NLS-1$
+      throw new IllegalStateException("dispose() called more than once."); // $NON-NLS-1$
     fRefactoring = null;
   }
 }

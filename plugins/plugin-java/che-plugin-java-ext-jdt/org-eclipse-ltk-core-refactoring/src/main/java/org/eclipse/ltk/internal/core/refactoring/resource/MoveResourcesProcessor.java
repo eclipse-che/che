@@ -62,7 +62,7 @@ public class MoveResourcesProcessor extends MoveProcessor {
    */
   public MoveResourcesProcessor(IResource[] resourcesToMove) {
     if (resourcesToMove == null) {
-      throw new IllegalArgumentException("resources must not be null"); //$NON-NLS-1$
+      throw new IllegalArgumentException("resources must not be null"); // $NON-NLS-1$
     }
 
     fResourcesToMove = resourcesToMove;
@@ -123,7 +123,7 @@ public class MoveResourcesProcessor extends MoveProcessor {
    */
   public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context)
       throws CoreException {
-    pm.beginTask("", 1); //$NON-NLS-1$
+    pm.beginTask("", 1); // $NON-NLS-1$
     try {
       RefactoringStatus status = validateDestination(fDestination);
       if (status.hasFatalError()) {
@@ -161,7 +161,7 @@ public class MoveResourcesProcessor extends MoveProcessor {
    * @return returns the resulting status of the validation
    */
   public RefactoringStatus validateDestination(IContainer destination) {
-    Assert.isNotNull(destination, "container is null"); //$NON-NLS-1$
+    Assert.isNotNull(destination, "container is null"); // $NON-NLS-1$
     if (destination instanceof IWorkspaceRoot)
       return RefactoringStatus.createFatalErrorStatus(
           RefactoringCoreMessages.MoveResourceProcessor_error_invalid_destination);
@@ -216,7 +216,7 @@ public class MoveResourcesProcessor extends MoveProcessor {
     } else {
       StringBuffer buf = new StringBuffer();
       for (int i = 0; i < fResourcesToMove.length; i++) {
-        if (i > 0) buf.append(", "); //$NON-NLS-1$
+        if (i > 0) buf.append(", "); // $NON-NLS-1$
         buf.append(fResourcesToMove[i].getName());
       }
       descriptor.setComment(
@@ -238,7 +238,7 @@ public class MoveResourcesProcessor extends MoveProcessor {
    * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#createChange(org.eclipse.core.runtime.IProgressMonitor)
    */
   public Change createChange(IProgressMonitor pm) throws CoreException {
-    pm.beginTask("", fResourcesToMove.length); //$NON-NLS-1$
+    pm.beginTask("", fResourcesToMove.length); // $NON-NLS-1$
     try {
       CompositeChange compositeChange = new CompositeChange(getMoveDescription());
       compositeChange.markAsSynthetic();
@@ -266,7 +266,7 @@ public class MoveResourcesProcessor extends MoveProcessor {
    * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getIdentifier()
    */
   public String getIdentifier() {
-    return "org.eclipse.ltk.core.refactoring.moveResourcesProcessor"; //$NON-NLS-1$
+    return "org.eclipse.ltk.core.refactoring.moveResourcesProcessor"; // $NON-NLS-1$
   }
 
   /* (non-Javadoc)

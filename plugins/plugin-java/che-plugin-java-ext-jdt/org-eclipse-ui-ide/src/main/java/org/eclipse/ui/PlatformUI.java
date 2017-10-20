@@ -12,5 +12,5 @@ package org.eclipse.ui;
 /** @author Evgen Vidolob */
 public class PlatformUI {
   /** Identifies the workbench plug-in. */
-  public static final String PLUGIN_ID = "org.eclipse.ui"; //$NON-NLS-1$
+  public static final String PLUGIN_ID = "org.eclipse.ui"; // $NON-NLS-1$
 }

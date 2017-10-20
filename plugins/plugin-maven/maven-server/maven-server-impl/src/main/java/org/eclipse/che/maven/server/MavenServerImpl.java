@@ -156,8 +156,8 @@ public class MavenServerImpl extends MavenRmiObject implements MavenServer {
           }
         };
 
-    //maven 3.2.2 has org.apache.maven.cli.MavenCli$CliRequest class
-    //but maven 3.3.3 has org.apache.maven.cli.CliRequest so try to support both classes
+    // maven 3.2.2 has org.apache.maven.cli.MavenCli$CliRequest class
+    // but maven 3.3.3 has org.apache.maven.cli.CliRequest so try to support both classes
     Class<?> cliRequestClass;
     SettingsBuilder settingsBuilder = null;
     try {
@@ -376,7 +376,7 @@ public class MavenServerImpl extends MavenRmiObject implements MavenServer {
               new DefaultPathTranslator());
       interpolator.initialize();
 
-      Properties props = new Properties(); //MavenServerUtil.collectSystemProperties();
+      Properties props = new Properties(); // MavenServerUtil.collectSystemProperties();
       ProjectBuilderConfiguration config =
           new DefaultProjectBuilderConfiguration().setExecutionProperties(props);
       config.setBuildStartTime(new Date());
@@ -602,7 +602,7 @@ public class MavenServerImpl extends MavenRmiObject implements MavenServer {
       return MavenModelUtil.convertArtifact(
           RepositoryUtils.toArtifact(artifactResult.getArtifact()), localRepository);
     } catch (ArtifactResolutionException ignored) {
-      //we need ignore exception, it's some times has class that client doesn't has
+      // we need ignore exception, it's some times has class that client doesn't has
       // .printStackTrace() may be solution, but it will spam wsagent logs
     }
     return MavenModelUtil.convertArtifact(artifact, localRepository);

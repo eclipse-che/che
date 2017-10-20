@@ -35,7 +35,7 @@ public class GenericVisitor extends ASTVisitor {
     super(visitJavadocTags);
   }
 
-  //---- Hooks for subclasses -------------------------------------------------
+  // ---- Hooks for subclasses -------------------------------------------------
 
   /**
    * Visits the given type-specific AST node.

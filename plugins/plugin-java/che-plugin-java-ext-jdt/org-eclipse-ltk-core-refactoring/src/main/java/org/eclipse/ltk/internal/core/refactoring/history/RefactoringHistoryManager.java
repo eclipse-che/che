@@ -90,7 +90,7 @@ public final class RefactoringHistoryManager {
 
   /** The calendar instance */
   private static final Calendar fgCalendar =
-      Calendar.getInstance(TimeZone.getTimeZone("GMT+00:00")); //$NON-NLS-1$
+      Calendar.getInstance(TimeZone.getTimeZone("GMT+00:00")); // $NON-NLS-1$
 
   /**
    * Checks whether the argument map is well-formed.
@@ -638,7 +638,7 @@ public final class RefactoringHistoryManager {
 
     /* constants */
     private static final String XML_VERSION =
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"; //$NON-NLS-1$
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"; // $NON-NLS-1$
 
     /**
      * Creates a new DOM writer on the given output writer.
@@ -690,26 +690,26 @@ public final class RefactoringHistoryManager {
 
     private void startTag(Element element, boolean hasChildren) {
       StringBuffer sb = new StringBuffer();
-      sb.append("<"); //$NON-NLS-1$
+      sb.append("<"); // $NON-NLS-1$
       sb.append(element.getTagName());
       NamedNodeMap attributes = element.getAttributes();
       for (int i = 0; i < attributes.getLength(); i++) {
         Attr attribute = (Attr) attributes.item(i);
-        sb.append(" "); //$NON-NLS-1$
+        sb.append(" "); // $NON-NLS-1$
         sb.append(attribute.getName());
-        sb.append("=\""); //$NON-NLS-1$
+        sb.append("=\""); // $NON-NLS-1$
         sb.append(getEscaped(String.valueOf(attribute.getValue())));
-        sb.append("\""); //$NON-NLS-1$
+        sb.append("\""); // $NON-NLS-1$
       }
-      sb.append(hasChildren ? ">" : "/>"); //$NON-NLS-1$ //$NON-NLS-2$
+      sb.append(hasChildren ? ">" : "/>"); // $NON-NLS-1$ //$NON-NLS-2$
       print(sb.toString());
     }
 
     private void endTag(Element element) {
       StringBuffer sb = new StringBuffer();
-      sb.append("</"); //$NON-NLS-1$
+      sb.append("</"); // $NON-NLS-1$
       sb.append(element.getNodeName());
-      sb.append(">"); //$NON-NLS-1$
+      sb.append(">"); // $NON-NLS-1$
       print(sb.toString());
     }
 
@@ -740,21 +740,21 @@ public final class RefactoringHistoryManager {
       // (fixes bug 93720)
       switch (c) {
         case '<':
-          return "lt"; //$NON-NLS-1$
+          return "lt"; // $NON-NLS-1$
         case '>':
-          return "gt"; //$NON-NLS-1$
+          return "gt"; // $NON-NLS-1$
         case '"':
-          return "quot"; //$NON-NLS-1$
+          return "quot"; // $NON-NLS-1$
         case '\'':
-          return "apos"; //$NON-NLS-1$
+          return "apos"; // $NON-NLS-1$
         case '&':
-          return "amp"; //$NON-NLS-1$
+          return "amp"; // $NON-NLS-1$
         case '\r':
-          return "#x0D"; //$NON-NLS-1$
+          return "#x0D"; // $NON-NLS-1$
         case '\n':
-          return "#x0A"; //$NON-NLS-1$
+          return "#x0A"; // $NON-NLS-1$
         case '\u0009':
-          return "#x09"; //$NON-NLS-1$
+          return "#x09"; // $NON-NLS-1$
       }
       return null;
     }
@@ -793,8 +793,7 @@ public final class RefactoringHistoryManager {
             if (arguments != null) {
               checkArgumentMap(arguments);
               for (final Iterator iterator = arguments.entrySet().iterator();
-                  iterator.hasNext();
-                  ) {
+                  iterator.hasNext(); ) {
                 final Map.Entry entry = (Entry) iterator.next();
                 transformer.createArgument((String) entry.getKey(), (String) entry.getValue());
               }
@@ -813,7 +812,7 @@ public final class RefactoringHistoryManager {
 
   private static void writeNode(final OutputStream stream, Document document) {
     OutputStreamWriter outputStreamWriter =
-        new OutputStreamWriter(stream, Charset.forName("UTF-8")); //$NON-NLS-1$
+        new OutputStreamWriter(stream, Charset.forName("UTF-8")); // $NON-NLS-1$
     DOMWriter writer = new DOMWriter(outputStreamWriter);
     writer.printDocument(document);
     writer.flush();
@@ -845,7 +844,7 @@ public final class RefactoringHistoryManager {
    */
   RefactoringHistoryManager(final IFileStore store, final String name) {
     Assert.isNotNull(store);
-    Assert.isTrue(name == null || !"".equals(name)); //$NON-NLS-1$
+    Assert.isTrue(name == null || !"".equals(name)); // $NON-NLS-1$
     fHistoryStore = store;
     fProjectName = name;
   }

@@ -111,7 +111,8 @@ public class WsAgentStateController
   @Override
   public void onOpen() {
     messageBus.removeOnOpenHandler(this);
-    //need to make sure ready state equals 1 (OPEN) in same situations after opening it still equals 0 (CONNECTING)
+    // need to make sure ready state equals 1 (OPEN) in same situations after opening it still
+    // equals 0 (CONNECTING)
     new Timer() {
       @Override
       public void run() {
@@ -141,7 +142,8 @@ public class WsAgentStateController
 
   /** Goto checking HTTP connection via getting all registered REST Services */
   private void checkHttpConnection() {
-    //here we add trailing slash because {@link org.eclipse.che.api.core.rest.ApiInfoService} mapped in this way
+    // here we add trailing slash because {@link org.eclipse.che.api.core.rest.ApiInfoService}
+    // mapped in this way
     String url = devMachine.getWsAgentBaseUrl() + '/';
     asyncRequestFactory
         .createGetRequest(url)

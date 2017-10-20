@@ -96,24 +96,24 @@ public class MachineProcessManagerTest {
 
   @Test
   public void shouldCloseProcessLoggerIfExecIsSuccess() throws Exception {
-    //when
+    // when
     manager.exec(WORKSPACE_ID, MACHINE_ID, command, "outputChannel");
     waitForExecutorIsCompletedTask();
 
-    //then
+    // then
     verify(logConsumer).close();
   }
 
   @Test
   public void shouldCloseProcessLoggerIfExecFails() throws Exception {
-    //given
+    // given
     doThrow(Exception.class).when(instanceProcess).start();
 
-    //when
+    // when
     manager.exec(WORKSPACE_ID, MACHINE_ID, command, "outputChannel");
     waitForExecutorIsCompletedTask();
 
-    //then
+    // then
     verify(logConsumer).close();
   }
 

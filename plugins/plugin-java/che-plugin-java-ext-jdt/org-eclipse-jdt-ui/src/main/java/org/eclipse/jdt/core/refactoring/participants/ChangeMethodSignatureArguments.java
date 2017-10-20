@@ -104,7 +104,7 @@ public class ChangeMethodSignatureArguments extends RefactoringArguments {
           + ", oldIndex: "
           + fOldIndex
           + ", defaultValue: "
-          + fDefaultValue; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+          + fDefaultValue; // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
     }
   }
 
@@ -154,7 +154,7 @@ public class ChangeMethodSignatureArguments extends RefactoringArguments {
      * @see java.lang.Object#toString()
      */
     public String toString() {
-      return "type: " + fType + ", oldIndex: " + fOldIndex; //$NON-NLS-1$ //$NON-NLS-2$
+      return "type: " + fType + ", oldIndex: " + fOldIndex; // $NON-NLS-1$ //$NON-NLS-2$
     }
   }
 
@@ -256,22 +256,22 @@ public class ChangeMethodSignatureArguments extends RefactoringArguments {
 
   /** {@inheritDoc} */
   public String toString() {
-    StringBuffer buf = new StringBuffer("change signature to "); //$NON-NLS-1$
-    buf.append("\n\tvisibility: ").append(Flags.toString(fNewVisibility)); //$NON-NLS-1$
-    buf.append("\n\treturn type sig: ").append(fNewReturnType); //$NON-NLS-1$
-    buf.append("\n\tnew name: ").append(fNewName); //$NON-NLS-1$
-    buf.append("\n\tkeep original: ").append(fKeepOriginal); //$NON-NLS-1$
+    StringBuffer buf = new StringBuffer("change signature to "); // $NON-NLS-1$
+    buf.append("\n\tvisibility: ").append(Flags.toString(fNewVisibility)); // $NON-NLS-1$
+    buf.append("\n\treturn type sig: ").append(fNewReturnType); // $NON-NLS-1$
+    buf.append("\n\tnew name: ").append(fNewName); // $NON-NLS-1$
+    buf.append("\n\tkeep original: ").append(fKeepOriginal); // $NON-NLS-1$
     for (int i = 0; i < fNewParameters.length; i++) {
       buf.append("\n\tparameter ")
           .append(i)
           .append(": ")
-          .append(fNewParameters[i]); //$NON-NLS-1$ //$NON-NLS-2$
+          .append(fNewParameters[i]); // $NON-NLS-1$ //$NON-NLS-2$
     }
     for (int i = 0; i < fThrownExceptions.length; i++) {
       buf.append("\n\texception ")
           .append(i)
           .append(": ")
-          .append(fThrownExceptions[i]); //$NON-NLS-1$ //$NON-NLS-2$
+          .append(fThrownExceptions[i]); // $NON-NLS-1$ //$NON-NLS-2$
     }
     return buf.toString();
   }

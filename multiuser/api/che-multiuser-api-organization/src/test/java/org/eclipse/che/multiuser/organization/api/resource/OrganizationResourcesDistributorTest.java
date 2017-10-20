@@ -85,10 +85,10 @@ public class OrganizationResourcesDistributorTest {
   public void shouldCapResources() throws Exception {
     List<ResourceImpl> toCap = singletonList(createTestResource(1000));
 
-    //when
+    // when
     manager.capResources(ORG_ID, toCap);
 
-    //then
+    // then
     verify(manager).checkResourcesAvailability(ORG_ID, toCap);
     verify(distributedResourcesDao).store(new OrganizationDistributedResourcesImpl(ORG_ID, toCap));
     verify(resourcesLocks).lock(ORG_ID);
@@ -101,10 +101,10 @@ public class OrganizationResourcesDistributorTest {
     ResourceImpl toReset = new ResourceImpl("test2", -1, "init");
     List<ResourceImpl> resourcesToCap = asList(toCap, toReset);
 
-    //when
+    // when
     manager.capResources(ORG_ID, resourcesToCap);
 
-    //then
+    // then
     verify(manager).checkResourcesAvailability(ORG_ID, singletonList(toCap));
     verify(distributedResourcesDao)
         .store(new OrganizationDistributedResourcesImpl(ORG_ID, singletonList(toCap)));
@@ -114,10 +114,10 @@ public class OrganizationResourcesDistributorTest {
 
   @Test
   public void shouldRemoveResourcesCapWhenInvokeCapWithEmptyList() throws Exception {
-    //when
+    // when
     manager.capResources(ORG_ID, Collections.emptyList());
 
-    //then
+    // then
     verify(manager, never()).checkResourcesAvailability(anyString(), any());
     verify(distributedResourcesDao).remove(ORG_ID);
     verify(resourcesLocks).lock(ORG_ID);
@@ -129,36 +129,36 @@ public class OrganizationResourcesDistributorTest {
     expectedExceptionsMessageRegExp = "It is not allowed to cap resources for root organization."
   )
   public void shouldThrowConflictExceptionOnCappingResourcesForRootOrganization() throws Exception {
-    //when
+    // when
     manager.capResources(PARENT_ORG_ID, Collections.emptyList());
   }
 
   @Test(expectedExceptions = NullPointerException.class)
   public void shouldThrowNpeOnDistributionResourcesWithNullOrganizationId() throws Exception {
-    //when
+    // when
     manager.capResources(null, emptyList());
   }
 
   @Test(expectedExceptions = NullPointerException.class)
   public void shouldThrowNpeOnDistributionNullResourcesList() throws Exception {
-    //when
+    // when
     manager.capResources(ORG_ID, null);
   }
 
   @Test
   public void shouldGetDistributedResources() throws Exception {
-    //given
+    // given
     final OrganizationDistributedResourcesImpl distributedResources =
         createDistributedResources(1000);
     doReturn(new Page<>(singletonList(distributedResources), 0, 10, 1))
         .when(distributedResourcesDao)
         .getByParent(anyString(), anyInt(), anyLong());
 
-    //when
+    // when
     final Page<? extends OrganizationDistributedResources> fetchedDistributedResources =
         manager.getByParent(ORG_ID, 10, 0);
 
-    //then
+    // then
     assertEquals(fetchedDistributedResources.getTotalItemsCount(), 1);
     assertEquals(fetchedDistributedResources.getItems().get(0), distributedResources);
     verify(distributedResourcesDao).getByParent(ORG_ID, 10, 0);
@@ -166,35 +166,35 @@ public class OrganizationResourcesDistributorTest {
 
   @Test(expectedExceptions = NullPointerException.class)
   public void shouldThrowNpeOnGettingDistributedResourcesByNullOrganizationId() throws Exception {
-    //when
+    // when
     manager.getByParent(null, 10, 10);
   }
 
   @Test
   public void shouldGetResourcesCap() throws Exception {
-    //given
+    // given
     final OrganizationDistributedResourcesImpl distributedResources =
         createDistributedResources(1000);
     when(distributedResourcesDao.get(anyString())).thenReturn(distributedResources);
 
-    //when
+    // when
     final List<? extends Resource> fetchedDistributedResources = manager.getResourcesCaps(ORG_ID);
 
-    //then
+    // then
     assertEquals(fetchedDistributedResources, distributedResources.getResourcesCap());
     verify(distributedResourcesDao).get(ORG_ID);
   }
 
   @Test(expectedExceptions = NullPointerException.class)
   public void shouldThrowNpeOnGettingResourcesCapByNullOrganizationId() throws Exception {
-    //when
+    // when
     manager.getResourcesCaps(null);
   }
 
   @Test
   public void shouldResourceAvailabilityCappingResourcesWhenResourceCapIsLessThanUsedOne()
       throws Exception {
-    //given
+    // given
     doCallRealMethod().when(manager).checkResourcesAvailability(anyString(), any());
 
     ResourceImpl used = createTestResource(500);
@@ -203,10 +203,10 @@ public class OrganizationResourcesDistributorTest {
     ResourceImpl toCap = createTestResource(700);
     doReturn(createTestResource(200)).when(resourceAggregator).deduct((Resource) any(), any());
 
-    //when
+    // when
     manager.checkResourcesAvailability(ORG_ID, singletonList(toCap));
 
-    //then
+    // then
     verify(usageManager).getUsedResources(ORG_ID);
     verify(resourceAggregator).deduct(toCap, used);
   }
@@ -217,7 +217,7 @@ public class OrganizationResourcesDistributorTest {
   )
   public void shouldResourceAvailabilityCappingResourcesWhenResourceCapIsGreaterThanUsedOne()
       throws Exception {
-    //given
+    // given
     doCallRealMethod().when(manager).checkResourcesAvailability(anyString(), any());
     doReturn("Denied.").when(manager).getMessage(anyString());
 
@@ -229,10 +229,10 @@ public class OrganizationResourcesDistributorTest {
         .when(resourceAggregator)
         .deduct((Resource) any(), any());
 
-    //when
+    // when
     manager.checkResourcesAvailability(ORG_ID, singletonList(toCap));
 
-    //then
+    // then
     verify(usageManager).getUsedResources(ORG_ID);
     verify(resourceAggregator).deduct(toCap, used);
   }

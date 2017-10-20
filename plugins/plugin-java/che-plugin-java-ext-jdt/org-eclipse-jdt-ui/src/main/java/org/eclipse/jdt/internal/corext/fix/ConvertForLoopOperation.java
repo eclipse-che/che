@@ -59,9 +59,9 @@ import org.eclipse.text.edits.TextEditGroup;
 
 public class ConvertForLoopOperation extends ConvertLoopOperation {
 
-  private static final String LENGTH_QUERY = "length"; //$NON-NLS-1$
-  private static final String LITERAL_0 = "0"; //$NON-NLS-1$
-  private static final String LITERAL_1 = "1"; //$NON-NLS-1$
+  private static final String LENGTH_QUERY = "length"; // $NON-NLS-1$
+  private static final String LITERAL_0 = "0"; // $NON-NLS-1$
+  private static final String LITERAL_1 = "1"; // $NON-NLS-1$
 
   private static final class InvalidBodyError extends Error {
     private static final long serialVersionUID = 1L;

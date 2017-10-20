@@ -65,7 +65,7 @@ public class InheritClassTest {
 
   @Test
   public void autoCompleteClassInTheSamePackage() {
-    //create java class in the same package with GreetingController.java
+    // create java class in the same package with GreetingController.java
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     notificationsPopupPanel.waitProgressPopupPanelClose();
@@ -74,7 +74,7 @@ public class InheritClassTest {
     loader.waitOnClosed();
     projectExplorer.openItemByPath(COMMON_PACKAGE + "/AppController.java");
 
-    //create java class in the different package with GreetingController.java
+    // create java class in the different package with GreetingController.java
     projectExplorer.waitProjectExplorer();
     projectExplorer.selectItem(COMMON_PACKAGE);
     menu.runCommand(

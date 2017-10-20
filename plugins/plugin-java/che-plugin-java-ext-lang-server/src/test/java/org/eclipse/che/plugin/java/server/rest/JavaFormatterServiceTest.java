@@ -187,7 +187,7 @@ public class JavaFormatterServiceTest {
     assertTrue(javaFile.exists());
     String javaContent = Files.toString(javaFile, Charsets.UTF_8);
 
-    //Formatter adds 3 empty line before package declaration
+    // Formatter adds 3 empty line before package declaration
     service.updateProjectFormatter("/FormatterTest", FORMATTER_CONTENT);
 
     List<Change> formatChanges = service.getFormatChanges("/FormatterTest", 0, 56, javaContent);
@@ -200,7 +200,7 @@ public class JavaFormatterServiceTest {
     assertTrue(javaFile.exists());
     String javaContent = Files.toString(javaFile, Charsets.UTF_8);
 
-    //Formatter adds 5 empty line before package declaration
+    // Formatter adds 5 empty line before package declaration
     service.updateRootFormatter(UPDATED_FORMATTER_CONTENT);
 
     List<Change> formatChanges = service.getFormatChanges("/FormatterTest", 0, 56, javaContent);

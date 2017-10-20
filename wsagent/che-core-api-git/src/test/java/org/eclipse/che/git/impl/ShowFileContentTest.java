@@ -53,15 +53,15 @@ public class ShowFileContentTest {
   )
   public void testShowFileContentFromHead(GitConnectionFactory connectionFactory)
       throws IOException, ServerException, URISyntaxException, UnauthorizedException {
-    //given
-    //create new repository
+    // given
+    // create new repository
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     addFile(connection, "newFile", "new file content");
     connection.add(AddParams.create(singletonList(".")));
     connection.commit(CommitParams.create("Test commit"));
-    //when
+    // when
     final ShowFileContentResponse response = connection.showFileContent("newFile", "HEAD");
-    //then
+    // then
     assertEquals("new file content", response.getContent());
   }
 
@@ -71,16 +71,16 @@ public class ShowFileContentTest {
   )
   public void testShowFileContentFromBranch(GitConnectionFactory connectionFactory)
       throws IOException, ServerException, URISyntaxException, UnauthorizedException {
-    //given
-    //create new repository
+    // given
+    // create new repository
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     addFile(connection, "newFile", "new file content");
     connection.add(AddParams.create(singletonList(".")));
     connection.commit(CommitParams.create("Test commit"));
     connection.branchCreate("new-branch", null);
-    //when
+    // when
     final ShowFileContentResponse response = connection.showFileContent("newFile", "new-branch");
-    //then
+    // then
     assertEquals("new file content", response.getContent());
   }
 
@@ -92,13 +92,13 @@ public class ShowFileContentTest {
   )
   public void testShowContentOfNotExistFile(GitConnectionFactory connectionFactory)
       throws Exception {
-    //given
-    //create new repository
+    // given
+    // create new repository
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     addFile(connection, "newfile", "new file content");
     connection.add(AddParams.create(singletonList(".")));
     connection.commit(CommitParams.create("Test commit"));
-    //when
+    // when
     connection.showFileContent("dummyFile", "HEAD");
   }
 }

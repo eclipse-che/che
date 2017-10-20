@@ -167,14 +167,15 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
       if (Modifier.isStatic(varbinding.getModifiers())) {
         if (fFindUnqualifiedStaticAccesses) {
           Initializer initializer = (Initializer) ASTNodes.getParent(node, Initializer.class);
-          //Do not qualify assignments to static final fields in static initializers (would result in compile error)
+          // Do not qualify assignments to static final fields in static initializers (would result
+          // in compile error)
           StructuralPropertyDescriptor parentDescription = node.getLocationInParent();
           if (initializer != null
               && Modifier.isStatic(initializer.getModifiers())
               && Modifier.isFinal(varbinding.getModifiers())
               && parentDescription == Assignment.LEFT_HAND_SIDE_PROPERTY) return;
 
-          //Do not qualify static fields if defined inside an anonymous class
+          // Do not qualify static fields if defined inside an anonymous class
           if (declaringClass.isAnonymous()) return;
 
           fResult.add(new AddStaticQualifierOperation(declaringClass, node));
@@ -193,7 +194,7 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
       ITypeBinding declaringClass = binding.getDeclaringClass();
       if (Modifier.isStatic(binding.getModifiers())) {
         if (fFindUnqualifiedStaticMethodAccesses) {
-          //Do not qualify static fields if defined inside an anonymous class
+          // Do not qualify static fields if defined inside an anonymous class
           if (declaringClass.isAnonymous()) return;
 
           fResult.add(new AddStaticQualifierOperation(declaringClass, node));
@@ -253,17 +254,19 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 
         ITypeBinding variablesDeclaringClass = nameBinding.getDeclaringClass();
         if (outerClass != variablesDeclaringClass)
-          //be conservative: We have a reference to a field of an outer type, and this type inherited
-          //the field. It's possible that the inner type inherits the same field. We must not remove
-          //the qualifier in this case.
+          // be conservative: We have a reference to a field of an outer type, and this type
+          // inherited
+          // the field. It's possible that the inner type inherits the same field. We must not
+          // remove
+          // the qualifier in this case.
           return true;
 
         ITypeBinding enclosingTypeBinding = Bindings.getBindingOfParentType(node);
         if (enclosingTypeBinding == null
             || Bindings.isSuperType(variablesDeclaringClass, enclosingTypeBinding))
-          //We have a reference to a field of an outer type, and this type inherited
-          //the field. The inner type inherits the same field. We must not remove
-          //the qualifier in this case.
+          // We have a reference to a field of an outer type, and this type inherited
+          // the field. The inner type inherits the same field. We must not remove
+          // the qualifier in this case.
           return true;
       }
 
@@ -365,9 +368,9 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
       String nameLabel = BasicElementLabels.getJavaElementName(fName.getIdentifier());
       String qualifierLabel;
       if (fQualifier == null) {
-        qualifierLabel = "this"; //$NON-NLS-1$
+        qualifierLabel = "this"; // $NON-NLS-1$
       } else {
-        qualifierLabel = BasicElementLabels.getJavaElementName(fQualifier + ".this"); //$NON-NLS-1$
+        qualifierLabel = BasicElementLabels.getJavaElementName(fQualifier + ".this"); // $NON-NLS-1$
       }
 
       return Messages.format(
@@ -697,8 +700,7 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
           Expression qualifier = op.fQualifier;
           if (!(qualifier instanceof MethodInvocation) || !isMethodArgument(qualifier)) {
             for (Iterator<CompilationUnitRewriteOperation> it = result.iterator();
-                it.hasNext();
-                ) { // see bug 346230
+                it.hasNext(); ) { // see bug 346230
               CompilationUnitRewriteOperation oper = it.next();
               if (oper instanceof CodeStyleFix.AddThisQualifierOperation
                   && ((CodeStyleFix.AddThisQualifierOperation) oper).fName.equals(qualifier)) {
@@ -844,14 +846,14 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
       if (currType == null) return null;
 
       if (currType.isAnonymous())
-        //If we access a field of a super class of an anonymous class
-        //then we can only qualify with 'this' but not with outer.this
-        //see bug 115277
+        // If we access a field of a super class of an anonymous class
+        // then we can only qualify with 'this' but not with outer.this
+        // see bug 115277
         return null;
 
       return imports.addImport(currType);
     } else {
-      return ""; //$NON-NLS-1$
+      return ""; // $NON-NLS-1$
     }
   }
 

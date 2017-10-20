@@ -108,17 +108,17 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal
   private String createDummyType(String name) throws JavaModelException {
     StringBuffer buffer = new StringBuffer();
 
-    buffer.append("abstract class "); //$NON-NLS-1$
+    buffer.append("abstract class "); // $NON-NLS-1$
     buffer.append(name);
-    if (fSuperType.isInterface()) buffer.append(" implements "); //$NON-NLS-1$
-    else buffer.append(" extends "); //$NON-NLS-1$
+    if (fSuperType.isInterface()) buffer.append(" implements "); // $NON-NLS-1$
+    else buffer.append(" extends "); // $NON-NLS-1$
 
     if (fDeclarationSignature != null) buffer.append(Signature.toString(fDeclarationSignature));
     else buffer.append(fSuperType.getFullyQualifiedParameterizedName());
-    buffer.append(" {"); //$NON-NLS-1$
+    buffer.append(" {"); // $NON-NLS-1$
     buffer.append(
         "\n"); // Using newline is ok since source is used in dummy compilation unit //$NON-NLS-1$
-    buffer.append("}"); //$NON-NLS-1$
+    buffer.append("}"); // $NON-NLS-1$
     return buffer.toString();
   }
 
@@ -127,7 +127,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal
 
     ICompilationUnit workingCopy = null;
     try {
-      String name = "Type" + System.currentTimeMillis(); //$NON-NLS-1$
+      String name = "Type" + System.currentTimeMillis(); // $NON-NLS-1$
       workingCopy = fCompilationUnit.getPrimary().getWorkingCopy(null);
 
       ISourceRange range = fSuperType.getSourceRange();
@@ -153,7 +153,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal
          * The two empty lines are added because the trackedDeclaration uses the covered range
          * and hence would also included comments that directly follow the dummy class.
          */
-        workingCopyContents.insert(insertPosition, dummyClassContent + "\n\n"); //$NON-NLS-1$
+        workingCopyContents.insert(insertPosition, dummyClassContent + "\n\n"); // $NON-NLS-1$
       }
 
       workingCopy.getBuffer().setContents(workingCopyContents.toString());
@@ -202,7 +202,8 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal
       }
 
       if (type != null) {
-        //				OverrideMethodDialog dialog= new OverrideMethodDialog(JavaPlugin.getActiveWorkbenchShell(), null, type, true);
+        //				OverrideMethodDialog dialog= new
+        // OverrideMethodDialog(JavaPlugin.getActiveWorkbenchShell(), null, type, true);
         //				dialog.setGenerateComment(false);
         //				dialog.setElementPositionEnabled(false);
         //				if (dialog.open() == Window.OK) {
@@ -220,7 +221,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal
         //					setReplacementLength(0);
         //					return null;
         //				}
-        //TODO window
+        // TODO window
         throw new UnsupportedOperationException();
       } else {
         settings.createComments = false;
@@ -346,7 +347,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal
       if (length > 0) return document.get(replacementOffset, length);
     } catch (BadLocationException x) {
     }
-    return ""; //$NON-NLS-1$
+    return ""; // $NON-NLS-1$
   }
 
   /*
@@ -388,10 +389,10 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal
         coreProposal.getKind() == CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION;
 
     boolean replacementStringEndsWithParentheses =
-        isAnonymousConstructorInvoc || getReplacementString().endsWith(")"); //$NON-NLS-1$
+        isAnonymousConstructorInvoc || getReplacementString().endsWith(")"); // $NON-NLS-1$
 
     // construct replacement text: an expression to be formatted
-    StringBuffer buf = new StringBuffer("new A("); //$NON-NLS-1$
+    StringBuffer buf = new StringBuffer("new A("); // $NON-NLS-1$
     if (!replacementStringEndsWithParentheses || isAnonymousConstructorInvoc) buf.append(')');
     buf.append(newBody);
 
@@ -493,7 +494,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal
       // https://bugs.eclipse.org/bugs/show_bug.cgi?id=94654
       if (hasParameters()
           && (getReplacementString().endsWith(")")
-              || getReplacementString().length() == 0)) { //$NON-NLS-1$
+              || getReplacementString().length() == 0)) { // $NON-NLS-1$
         ProposalContextInformation contextInformation = new ProposalContextInformation(proposal);
         fContextInformationPosition = getReplacementOffset() + getCursorPosition();
         if (fContextInformationPosition != 0 && proposal.getCompletion().length == 0)

@@ -366,7 +366,7 @@ public final class Element {
     if (!newText.equals(getText())) {
       removeTextNodes();
       delegate.appendChild(document().createTextNode(newText));
-      //let tree do dirty job
+      // let tree do dirty job
       xmlTree.updateText(this);
     }
     return this;
@@ -450,12 +450,12 @@ public final class Element {
         element.remove();
       }
     }
-    //let tree do dirty job
+    // let tree do dirty job
     xmlTree.removeElement(this);
-    //remove self from document
+    // remove self from document
     delegate.getParentNode().removeChild(delegate);
-    //if references to 'this' element exist
-    //we should disallow ability to use delegate
+    // if references to 'this' element exist
+    // we should disallow ability to use delegate
     delegate = null;
   }
 
@@ -505,7 +505,7 @@ public final class Element {
   public Element setAttribute(NewAttribute newAttribute) {
     checkNotRemoved();
     requireNonNull(newAttribute, "Required not null new attribute");
-    //if tree already contains element replace value
+    // if tree already contains element replace value
     if (hasAttribute(newAttribute.getName())) {
       final Attribute attr = getAttribute(newAttribute.getName());
       attr.setValue(newAttribute.getValue());
@@ -517,7 +517,7 @@ public final class Element {
     } else {
       delegate.setAttributeNode(createAttrNode(newAttribute));
     }
-    //let tree do dirty job
+    // let tree do dirty job
     xmlTree.insertAttribute(newAttribute, this);
     return this;
   }
@@ -613,9 +613,9 @@ public final class Element {
     }
     final Node newNode = createNode(newElement);
     final Element element = createElement(newNode);
-    //append new node into document
+    // append new node into document
     delegate.appendChild(newNode);
-    //let tree do dirty job
+    // let tree do dirty job
     xmlTree.appendChild(newElement, element, this);
     return this;
   }
@@ -635,15 +635,15 @@ public final class Element {
     requireNonNull(newElement, "Required not null new element");
     final Node newNode = createNode(newElement);
     final Element element = createElement(newNode);
-    //if element has next sibling append child to parent
-    //else insert before next sibling
+    // if element has next sibling append child to parent
+    // else insert before next sibling
     final Node nextNode = nextElementNode(delegate);
     if (nextNode != null) {
       delegate.getParentNode().insertBefore(newNode, nextNode);
     } else {
       delegate.getParentNode().appendChild(newNode);
     }
-    //let tree do dirty job
+    // let tree do dirty job
     xmlTree.insertAfter(newElement, element, this);
     return this;
   }
@@ -661,9 +661,9 @@ public final class Element {
     checkNotRemoved();
     notPermittedOnRootElement();
     requireNonNull(newElement, "Required not null new element");
-    //if element has previous sibling insert new element after it
-    //inserting before this element to let existing comments
-    //or whatever over referenced element
+    // if element has previous sibling insert new element after it
+    // inserting before this element to let existing comments
+    // or whatever over referenced element
     if (previousElementNode(delegate) != null) {
       getPreviousSibling().insertAfter(newElement);
       return this;
@@ -671,7 +671,7 @@ public final class Element {
     final Node newNode = createNode(newElement);
     final Element element = createElement(newNode);
     delegate.getParentNode().insertBefore(newNode, delegate);
-    //let tree do dirty job
+    // let tree do dirty job
     xmlTree.insertAfterParent(newElement, element, getParent());
     return this;
   }
@@ -733,11 +733,11 @@ public final class Element {
     if (attribute.getPrefix().equals(XMLNS_ATTRIBUTE)) {
       final Attr attr = document().createAttributeNS(XMLNS_ATTRIBUTE_NS_URI, attribute.getName());
       attr.setValue(attribute.getValue());
-      //save uri
+      // save uri
       xmlTree.putNamespace(attribute.getLocalName(), attribute.getValue());
       return attr;
     } else {
-      //retrieve namespace
+      // retrieve namespace
       final String uri = xmlTree.getNamespaceUri(attribute.getPrefix());
       final Attr attr = document().createAttributeNS(uri, attribute.getName());
       attr.setValue(attribute.getValue());
@@ -798,11 +798,11 @@ public final class Element {
       newNode = document().createElement(newElement.getLocalName());
     }
     newNode.setTextContent(newElement.getText());
-    //creating all related children
+    // creating all related children
     for (NewElement child : newElement.getChildren()) {
       newNode.appendChild(createNode(child));
     }
-    //creating all related attributes
+    // creating all related attributes
     for (NewAttribute attribute : newElement.getAttributes()) {
       if (attribute.hasPrefix()) {
         newNode.setAttributeNodeNS(createAttrNSNode(attribute));

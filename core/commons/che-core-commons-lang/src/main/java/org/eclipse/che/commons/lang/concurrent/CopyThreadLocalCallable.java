@@ -18,7 +18,8 @@ class CopyThreadLocalCallable<T> implements Callable<T> {
   private final ThreadLocalPropagateContext.ThreadLocalState threadLocalState;
 
   CopyThreadLocalCallable(Callable<? extends T> wrapped) {
-    // Called from main thread. Copy the current values of all the ThreadLocal variables which registered in ThreadLocalPropagateContext.
+    // Called from main thread. Copy the current values of all the ThreadLocal variables which
+    // registered in ThreadLocalPropagateContext.
     this.wrapped = wrapped;
     this.threadLocalState = ThreadLocalPropagateContext.currentThreadState();
   }

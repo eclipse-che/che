@@ -109,7 +109,7 @@ public class CreateMachineWidget {
             .until(ExpectedConditions.visibilityOf(findByNAmeField));
     if (withClearing) {
       currentElem.clear();
-      //for server side
+      // for server side
       WaitUtils.sleepQuietly(1);
       currentElem.sendKeys(tagName);
     } else {

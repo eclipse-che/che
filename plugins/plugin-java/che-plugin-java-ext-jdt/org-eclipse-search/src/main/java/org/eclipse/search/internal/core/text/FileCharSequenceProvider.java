@@ -95,10 +95,10 @@ public class FileCharSequenceProvider {
      */
     public char charAt(int index) {
       if (index < 0) {
-        throw new IndexOutOfBoundsException("index must be larger than 0"); //$NON-NLS-1$
+        throw new IndexOutOfBoundsException("index must be larger than 0"); // $NON-NLS-1$
       }
       if (index >= fSequenceLength) {
-        throw new IndexOutOfBoundsException("index must be smaller than length"); //$NON-NLS-1$
+        throw new IndexOutOfBoundsException("index must be smaller than length"); // $NON-NLS-1$
       }
       return fParent.charAt(fSequenceOffset + index);
     }
@@ -108,14 +108,14 @@ public class FileCharSequenceProvider {
      */
     public CharSequence subSequence(int start, int end) {
       if (end < start) {
-        throw new IndexOutOfBoundsException("end cannot be smaller than start"); //$NON-NLS-1$
+        throw new IndexOutOfBoundsException("end cannot be smaller than start"); // $NON-NLS-1$
       }
       if (start < 0) {
-        throw new IndexOutOfBoundsException("start must be larger than 0"); //$NON-NLS-1$
+        throw new IndexOutOfBoundsException("start must be larger than 0"); // $NON-NLS-1$
       }
       if (end > fSequenceLength) {
         throw new IndexOutOfBoundsException(
-            "end must be smaller or equal than length"); //$NON-NLS-1$
+            "end must be smaller or equal than length"); // $NON-NLS-1$
       }
       return fParent.subSequence(fSequenceOffset + start, fSequenceOffset + end);
     }
@@ -232,7 +232,7 @@ public class FileCharSequenceProvider {
 
   private final class FileCharSequence implements CharSequence {
 
-    private static final String CHARSET_UTF_8 = "UTF-8"; //$NON-NLS-1$
+    private static final String CHARSET_UTF_8 = "UTF-8"; // $NON-NLS-1$
 
     private Reader fReader;
     private int fReaderPos;
@@ -398,16 +398,16 @@ public class FileCharSequenceProvider {
       }
 
       if (index < 0) {
-        throw new IndexOutOfBoundsException("index must be larger than 0"); //$NON-NLS-1$
+        throw new IndexOutOfBoundsException("index must be larger than 0"); // $NON-NLS-1$
       }
       if (fLength != null && index >= fLength.intValue()) {
-        throw new IndexOutOfBoundsException("index must be smaller than length"); //$NON-NLS-1$
+        throw new IndexOutOfBoundsException("index must be smaller than length"); // $NON-NLS-1$
       }
 
       try {
         final Buffer buffer = getBuffer(index);
         if (buffer == null) {
-          throw new IndexOutOfBoundsException("index must be smaller than length"); //$NON-NLS-1$
+          throw new IndexOutOfBoundsException("index must be smaller than length"); // $NON-NLS-1$
         }
         if (buffer != fMostCurrentBuffer) {
           // move to first
@@ -430,7 +430,7 @@ public class FileCharSequenceProvider {
       int endPos = start + length;
 
       if (fLength != null && endPos > fLength.intValue()) {
-        throw new IndexOutOfBoundsException("end must be smaller than length"); //$NON-NLS-1$
+        throw new IndexOutOfBoundsException("end must be smaller than length"); // $NON-NLS-1$
       }
 
       StringBuffer res = new StringBuffer(length);
@@ -453,13 +453,13 @@ public class FileCharSequenceProvider {
      */
     public CharSequence subSequence(int start, int end) {
       if (end < start) {
-        throw new IndexOutOfBoundsException("end cannot be smaller than start"); //$NON-NLS-1$
+        throw new IndexOutOfBoundsException("end cannot be smaller than start"); // $NON-NLS-1$
       }
       if (start < 0) {
-        throw new IndexOutOfBoundsException("start must be larger than 0"); //$NON-NLS-1$
+        throw new IndexOutOfBoundsException("start must be larger than 0"); // $NON-NLS-1$
       }
       if (fLength != null && end > fLength.intValue()) {
-        throw new IndexOutOfBoundsException("end must be smaller than length"); //$NON-NLS-1$
+        throw new IndexOutOfBoundsException("end must be smaller than length"); // $NON-NLS-1$
       }
       return new CharSubSequence(this, start, end - start);
     }

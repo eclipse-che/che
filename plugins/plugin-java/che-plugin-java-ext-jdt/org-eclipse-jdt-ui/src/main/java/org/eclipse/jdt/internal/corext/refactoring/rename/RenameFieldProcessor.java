@@ -92,11 +92,11 @@ import org.eclipse.text.edits.TextEdit;
 public class RenameFieldProcessor extends JavaRenameProcessor
     implements IReferenceUpdating, ITextUpdating, IDelegateUpdating {
 
-  protected static final String ATTRIBUTE_TEXTUAL_MATCHES = "textual"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_RENAME_GETTER = "getter"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_RENAME_SETTER = "setter"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_DELEGATE = "delegate"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_DEPRECATE = "deprecate"; //$NON-NLS-1$
+  protected static final String ATTRIBUTE_TEXTUAL_MATCHES = "textual"; // $NON-NLS-1$
+  private static final String ATTRIBUTE_RENAME_GETTER = "getter"; // $NON-NLS-1$
+  private static final String ATTRIBUTE_RENAME_SETTER = "setter"; // $NON-NLS-1$
+  private static final String ATTRIBUTE_DELEGATE = "delegate"; // $NON-NLS-1$
+  private static final String ATTRIBUTE_DEPRECATE = "deprecate"; // $NON-NLS-1$
 
   protected IField fField;
   private SearchResultGroup[] fReferences;
@@ -213,7 +213,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor
     return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
   }
 
-  //---- IRenameProcessor -------------------------------------
+  // ---- IRenameProcessor -------------------------------------
 
   public final String getCurrentElementName() {
     return fField.getElementName();
@@ -224,7 +224,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor
   }
 
   public RefactoringStatus checkNewElementName(String newName) throws CoreException {
-    Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
+    Assert.isNotNull(newName, "new name"); // $NON-NLS-1$
     RefactoringStatus result = Checks.checkFieldName(newName, fField);
 
     if (isInstanceField(fField) && (!Checks.startsWithLowerCase(newName)))
@@ -270,7 +270,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor
     return fField.getDeclaringType().getField(getNewElementName());
   }
 
-  //---- ITextUpdating2 ---------------------------------------------
+  // ---- ITextUpdating2 ---------------------------------------------
 
   public boolean canEnableTextUpdating() {
     return true;
@@ -284,7 +284,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor
     fUpdateTextualMatches = update;
   }
 
-  //---- IReferenceUpdating -----------------------------------
+  // ---- IReferenceUpdating -----------------------------------
 
   public void setUpdateReferences(boolean update) {
     fUpdateReferences = update;
@@ -294,7 +294,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor
     return fUpdateReferences;
   }
 
-  //-- getter/setter --------------------------------------------------
+  // -- getter/setter --------------------------------------------------
 
   /**
    * @return Error message or <code>null</code> if getter can be renamed.
@@ -302,10 +302,10 @@ public class RenameFieldProcessor extends JavaRenameProcessor
    */
   public String canEnableGetterRenaming() throws CoreException {
     if (fField.getDeclaringType().isInterface())
-      return getGetter() == null ? "" : null; //$NON-NLS-1$
+      return getGetter() == null ? "" : null; // $NON-NLS-1$
 
     IMethod getter = getGetter();
-    if (getter == null) return ""; //$NON-NLS-1$
+    if (getter == null) return ""; // $NON-NLS-1$
     final NullProgressMonitor monitor = new NullProgressMonitor();
     if (MethodChecks.isVirtual(getter)) {
       final ITypeHierarchy hierarchy = getter.getDeclaringType().newTypeHierarchy(monitor);
@@ -322,10 +322,10 @@ public class RenameFieldProcessor extends JavaRenameProcessor
    */
   public String canEnableSetterRenaming() throws CoreException {
     if (fField.getDeclaringType().isInterface())
-      return getSetter() == null ? "" : null; //$NON-NLS-1$
+      return getSetter() == null ? "" : null; // $NON-NLS-1$
 
     IMethod setter = getSetter();
-    if (setter == null) return ""; //$NON-NLS-1$
+    if (setter == null) return ""; // $NON-NLS-1$
     final NullProgressMonitor monitor = new NullProgressMonitor();
     if (MethodChecks.isVirtual(setter)) {
       final ITypeHierarchy hierarchy = setter.getDeclaringType().newTypeHierarchy(monitor);
@@ -375,7 +375,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor
           fField.getFlags(),
           JavaModelUtil.isBoolean(fField),
           null);
-    //bug 30906 describes why we need to look for other alternatives here
+    // bug 30906 describes why we need to look for other alternatives here
     return GetterSetterUtil.getGetterName(
         fField.getJavaProject(), getNewElementName(), fField.getFlags(), false, null);
   }
@@ -453,7 +453,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor
   protected RefactoringStatus doCheckFinalConditions(
       IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
     try {
-      pm.beginTask("", 18); //$NON-NLS-1$
+      pm.beginTask("", 18); // $NON-NLS-1$
       pm.setTaskName(RefactoringCoreMessages.RenameFieldRefactoring_checking);
       RefactoringStatus result = new RefactoringStatus();
       result.merge(Checks.checkIfCuBroken(fField));
@@ -504,7 +504,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor
     }
   }
 
-  //----------
+  // ----------
   private RefactoringStatus checkAccessor(
       IProgressMonitor pm, IMethod existingAccessor, String newAccessorName) throws CoreException {
     RefactoringStatus result = new RefactoringStatus();
@@ -853,7 +853,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor
   }
 
   private void addReferenceUpdates(IProgressMonitor pm) {
-    pm.beginTask("", fReferences.length); //$NON-NLS-1$
+    pm.beginTask("", fReferences.length); // $NON-NLS-1$
     String editName = RefactoringCoreMessages.RenameFieldRefactoring_Update_field_reference;
     for (int i = 0; i < fReferences.length; i++) {
       ICompilationUnit cu = fReferences[i].getCompilationUnit();
@@ -926,14 +926,14 @@ public class RenameFieldProcessor extends JavaRenameProcessor
     TextMatchUpdater.perform(pm, createRefactoringScope(), this, fChangeManager, fReferences);
   }
 
-  //----------------
+  // ----------------
   private RefactoringStatus analyzeRenameChanges(IProgressMonitor pm) throws CoreException {
     ICompilationUnit[] newWorkingCopies = null;
     WorkingCopyOwner newWCOwner = new WorkingCopyOwner() {
           /* must subclass */
         };
     try {
-      pm.beginTask("", 2); //$NON-NLS-1$
+      pm.beginTask("", 2); // $NON-NLS-1$
       RefactoringStatus result = new RefactoringStatus();
       SearchResultGroup[] oldReferences = fReferences;
 
@@ -978,7 +978,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor
       WorkingCopyOwner owner,
       ICompilationUnit[] newWorkingCopies)
       throws CoreException {
-    pm.beginTask("", 2); //$NON-NLS-1$
+    pm.beginTask("", 2); // $NON-NLS-1$
     ICompilationUnit declaringCuWorkingCopy =
         RenameAnalyzeUtil.findWorkingCopyForCu(newWorkingCopies, fField.getCompilationUnit());
     if (declaringCuWorkingCopy == null) return new SearchResultGroup[0];
@@ -1032,7 +1032,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor
               RefactoringCoreMessages.InitializableRefactoring_argument_not_exist,
               JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
     final String name = extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
-    if (name != null && !"".equals(name)) //$NON-NLS-1$
+    if (name != null && !"".equals(name)) // $NON-NLS-1$
     setNewElementName(name);
     else
       return RefactoringStatus.createFatalErrorStatus(

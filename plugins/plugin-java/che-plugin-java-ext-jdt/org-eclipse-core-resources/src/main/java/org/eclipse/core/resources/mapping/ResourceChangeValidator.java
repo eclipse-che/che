@@ -116,7 +116,7 @@ public final class ResourceChangeValidator {
         Policy.log(
             e.getStatus().getSeverity(),
             NLS.bind("Could not instantiate provider {0}", descriptor.getId()),
-            e); //$NON-NLS-1$
+            e); // $NON-NLS-1$
       }
     }
     return result.toArray(new ModelProvider[result.size()]);
@@ -137,7 +137,7 @@ public final class ResourceChangeValidator {
     } catch (CoreException e) {
       // Shouldn't happen since the ProposedResourceDelta accept doesn't throw an
       // exception and our visitor doesn't either
-      Policy.log(IStatus.ERROR, "Internal error", e); //$NON-NLS-1$
+      Policy.log(IStatus.ERROR, "Internal error", e); // $NON-NLS-1$
     }
     return changeDescription.getRootResources();
   }

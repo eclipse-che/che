@@ -18,6 +18,7 @@ package org.eclipse.che.plugin.maven.server.core.reconcile;
  * <p>Contributors: Red Hat, Inc. - initial API and implementation
  * *****************************************************************************
  */
+
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.nio.charset.Charset.defaultCharset;

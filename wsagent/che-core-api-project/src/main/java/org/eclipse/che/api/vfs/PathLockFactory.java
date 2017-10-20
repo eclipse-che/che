@@ -109,11 +109,11 @@ public final class PathLockFactory {
       node = node.prev;
     }
     notifyAll();
-    //System.err.printf(">>>>> release: %s : %d%n", path, permits);
+    // System.err.printf(">>>>> release: %s : %d%n", path, permits);
   }
 
   private boolean tryAcquire(Path path, int permits) {
-    //System.err.printf(">>>>> acquire: %s : %d%n", path, permits);
+    // System.err.printf(">>>>> acquire: %s : %d%n", path, permits);
     Node node = tail.prev;
     final Thread current = Thread.currentThread();
     while (node != null) {
@@ -140,7 +140,8 @@ public final class PathLockFactory {
         // 1. Parent of the path we try to lock already locked
         // 2. Child of the path we try to lock already locked
         // Need to check is such lock obtained by current thread or not.
-        // If such lock obtained by other thread stop here immediately there is no reasons to continue.
+        // If such lock obtained by other thread stop here immediately there is no reasons to
+        // continue.
         if (node.threadId != current.getId()) {
           return false;
         }

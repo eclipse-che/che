@@ -182,13 +182,15 @@ public class TemplateStore {
     //		ArrayList custom= new ArrayList();
     //		for (Iterator it= fTemplates.iterator(); it.hasNext();) {
     //			TemplatePersistenceData data= (TemplatePersistenceData) it.next();
-    //			if (data.isCustom() && !(data.isUserAdded() && data.isDeleted())) // don't save deleted user-added templates
+    //			if (data.isCustom() && !(data.isUserAdded() && data.isDeleted())) // don't save deleted
+    // user-added templates
     //				custom.add(data);
     //		}
     //
     //		StringWriter output= new StringWriter();
     //		TemplateReaderWriter writer= new TemplateReaderWriter();
-    //		writer.save((TemplatePersistenceData[]) custom.toArray(new TemplatePersistenceData[custom.size()]), output);
+    //		writer.save((TemplatePersistenceData[]) custom.toArray(new
+    // TemplatePersistenceData[custom.size()]), output);
     //
     //		fIgnorePreferenceStoreChanges= true;
     //		try {

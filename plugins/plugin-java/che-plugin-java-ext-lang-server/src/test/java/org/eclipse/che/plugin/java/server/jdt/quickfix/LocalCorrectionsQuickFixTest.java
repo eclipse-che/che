@@ -1196,7 +1196,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
   @Test
   public void testUncaughtException5() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=31554
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=31554
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test1;\n");
@@ -1767,7 +1767,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
   @Test
   public void testUncaughtExceptionOnSuper5() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=349051
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=349051
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test1;\n");
@@ -1824,7 +1824,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
   @Test
   public void testUncaughtExceptionOnSuper6() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=349051
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=349051
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test1;\n");
@@ -3162,7 +3162,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
   @Test
   public void testUnimplementedMethodsWithAnnotations2() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=387940
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=387940
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test;\n");
@@ -3248,7 +3248,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
   @Test
   public void testUnimplementedMethodsWithSubsignature() throws Exception {
-    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=272657 , https://bugs.eclipse.org/bugs/show_bug.cgi?id=424509#c6
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=272657 ,
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=424509#c6
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test;\n");
@@ -3294,7 +3295,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
   @Test
   public void testUnimplementedMethodsWithSubsignature2() throws Exception {
-    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=272657 , https://bugs.eclipse.org/bugs/show_bug.cgi?id=424509#c6
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=272657 ,
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=424509#c6
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test;\n");
@@ -3336,7 +3338,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
   @Test
   public void testUnimplementedMethodsWithSubsignature3() throws Exception {
-    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=272657 , https://bugs.eclipse.org/bugs/show_bug.cgi?id=424509#c6
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=272657 ,
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=424509#c6
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test;\n");
@@ -8666,7 +8669,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
     assertExpectedExistInProposals(proposals, expected);
   }
 
-  //Disabled depends on bug Bug 124626 Infer Type Arguments infers ? instaed of more precise type
+  // Disabled depends on bug Bug 124626 Infer Type Arguments infers ? instaed of more precise type
   //	public void testTypeParametersToRawTypeReference03() throws Exception {
   //		Hashtable options= JavaCore.getOptions();
   //		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
@@ -9669,7 +9672,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
   @Test
   public void testMissingEnumConstantsInCase3() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=372840
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=372840
     Hashtable options = JavaCore.getOptions();
     options.put(JavaCore.COMPILER_PB_INCOMPLETE_ENUM_SWITCH, JavaCore.WARNING);
     options.put(JavaCore.COMPILER_PB_SWITCH_MISSING_DEFAULT_CASE, JavaCore.WARNING);
@@ -9733,7 +9736,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
   @Test
   public void testMissingEnumConstantsInCase4() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=379086
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=379086
     Hashtable options = JavaCore.getOptions();
     options.put(JavaCore.COMPILER_PB_INCOMPLETE_ENUM_SWITCH, JavaCore.WARNING);
     options.put(JavaCore.COMPILER_PB_SUPPRESS_WARNINGS, JavaCore.DISABLED);

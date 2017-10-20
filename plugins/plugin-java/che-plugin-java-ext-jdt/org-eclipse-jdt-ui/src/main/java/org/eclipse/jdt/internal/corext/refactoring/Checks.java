@@ -167,8 +167,8 @@ public class Checks {
    *     name.
    */
   public static RefactoringStatus checkTypeName(String name, IJavaElement context) {
-    //fix for: 1GF5Z0Z: ITPJUI:WINNT - assertion failed after renameType refactoring
-    if (name.indexOf(".") != -1) //$NON-NLS-1$
+    // fix for: 1GF5Z0Z: ITPJUI:WINNT - assertion failed after renameType refactoring
+    if (name.indexOf(".") != -1) // $NON-NLS-1$
     return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.Checks_no_dot);
     else return checkName(name, JavaConventionsUtil.validateJavaTypeName(name, context));
   }
@@ -219,10 +219,10 @@ public class Checks {
 
   public static boolean startsWithLowerCase(String s) {
     if (s == null) return false;
-    else if ("".equals(s)) //$NON-NLS-1$
+    else if ("".equals(s)) // $NON-NLS-1$
     return false;
     else
-      //workaround for JDK bug (see 26529)
+      // workaround for JDK bug (see 26529)
       return s.charAt(0) == Character.toLowerCase(s.charAt(0));
   }
 
@@ -254,7 +254,7 @@ public class Checks {
     return name.equals(element.getElementName());
   }
 
-  //-------------- main and native method checks ------------------
+  // -------------- main and native method checks ------------------
   public static RefactoringStatus checkForMainAndNativeMethods(ICompilationUnit cu)
       throws JavaModelException {
     return checkForMainAndNativeMethods(cu.getTypes());
@@ -288,7 +288,7 @@ public class Checks {
         String msg =
             Messages.format(
                 RefactoringCoreMessages.Checks_method_native,
-                new String[] {typeName, methodName, "UnsatisfiedLinkError"}); //$NON-NLS-1$
+                new String[] {typeName, methodName, "UnsatisfiedLinkError"}); // $NON-NLS-1$
         result.addEntry(
             RefactoringStatus.ERROR,
             msg,
@@ -313,7 +313,7 @@ public class Checks {
     return result;
   }
 
-  //---- New method name checking -------------------------------------------------------------
+  // ---- New method name checking -------------------------------------------------------------
 
   /**
    * Checks if the new method is already used in the given type.
@@ -410,7 +410,7 @@ public class Checks {
     return result;
   }
 
-  //---- Selection checks --------------------------------------------------------------------
+  // ---- Selection checks --------------------------------------------------------------------
 
   public static boolean isExtractableExpression(ASTNode[] selectedNodes, ASTNode coveringNode) {
     ASTNode node = coveringNode;
@@ -462,7 +462,7 @@ public class Checks {
    */
   public static RefactoringStatus checkName(String name, IStatus status) {
     RefactoringStatus result = new RefactoringStatus();
-    if ("".equals(name)) //$NON-NLS-1$
+    if ("".equals(name)) // $NON-NLS-1$
     return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.Checks_Choose_name);
 
     if (status.isOK()) return result;
@@ -474,7 +474,7 @@ public class Checks {
         return RefactoringStatus.createWarningStatus(status.getMessage());
       case IStatus.INFO:
         return RefactoringStatus.createInfoStatus(status.getMessage());
-      default: //no nothing
+      default: // no nothing
         return new RefactoringStatus();
     }
   }
@@ -601,7 +601,7 @@ public class Checks {
     return false;
   }
 
-  //---------------------
+  // ---------------------
 
   public static RefactoringStatus checkIfCuBroken(IMember member) throws JavaModelException {
     ICompilationUnit cu =
@@ -632,14 +632,15 @@ public class Checks {
       IResource resource = grouped[i].getResource();
       IJavaElement element = JavaCore.create(resource);
       if (!(element instanceof ICompilationUnit)) continue;
-      //XXX this is a workaround 	for a jcore feature that shows errors in cus only when you get the original element
+      // XXX this is a workaround 	for a jcore feature that shows errors in cus only when you get
+      // the original element
       ICompilationUnit cu = (ICompilationUnit) JavaCore.create(resource);
       if (!cu.isStructureKnown()) {
         status.addError(
             Messages.format(
                 RefactoringCoreMessages.Checks_cannot_be_parsed,
                 BasicElementLabels.getPathLabel(cu.getPath(), false)));
-        continue; //removed, go to the next one
+        continue; // removed, go to the next one
       }
       result.add(grouped[i]);
     }
@@ -696,7 +697,7 @@ public class Checks {
     }
   }
 
-  //------
+  // ------
   public static boolean isReadOnly(Object element) throws JavaModelException {
     if (element instanceof IResource) return isReadOnly((IResource) element);
 
@@ -706,7 +707,7 @@ public class Checks {
       return isReadOnly(((IJavaElement) element).getResource());
     }
 
-    Assert.isTrue(false, "not expected to get here"); //$NON-NLS-1$
+    Assert.isTrue(false, "not expected to get here"); // $NON-NLS-1$
     return false;
   }
 
@@ -741,7 +742,7 @@ public class Checks {
     return !definingProject.equals(occurringProject);
   }
 
-  //-------- validateEdit checks ----
+  // -------- validateEdit checks ----
 
   public static RefactoringStatus validateModifiesFiles(IFile[] filesToModify, Object context) {
     RefactoringStatus result = new RefactoringStatus();
@@ -890,7 +891,7 @@ public class Checks {
       if (!iType.isClass()) return false;
       IType[] superTypes = iType.newSupertypeHierarchy(pm).getAllSupertypes(iType);
       for (int i = 0; i < superTypes.length; i++) {
-        if ("java.lang.Throwable".equals(superTypes[i].getFullyQualifiedName())) //$NON-NLS-1$
+        if ("java.lang.Throwable".equals(superTypes[i].getFullyQualifiedName())) // $NON-NLS-1$
         return true;
       }
       return false;
@@ -920,7 +921,7 @@ public class Checks {
       tb = ASTResolving.guessBindingForReference(e);
     }
     if (tb == null) return NOT_RVALUE_MISC;
-    else if (tb.getName().equals("void")) //$NON-NLS-1$
+    else if (tb.getName().equals("void")) // $NON-NLS-1$
     return NOT_RVALUE_VOID;
 
     return guessingRequired ? IS_RVALUE_GUESSED : IS_RVALUE;

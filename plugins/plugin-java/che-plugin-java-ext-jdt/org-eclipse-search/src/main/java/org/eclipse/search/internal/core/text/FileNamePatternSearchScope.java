@@ -39,7 +39,7 @@ public class FileNamePatternSearchScope extends TextSearchScope {
   }
 
   private static final boolean IS_CASE_SENSITIVE_FILESYSTEM =
-      !new File("Temp").equals(new File("temp")); //$NON-NLS-1$ //$NON-NLS-2$
+      !new File("Temp").equals(new File("temp")); // $NON-NLS-1$ //$NON-NLS-2$
 
   private final String fDescription;
   private final IResource[] fRootElements;
@@ -80,7 +80,8 @@ public class FileNamePatternSearchScope extends TextSearchScope {
    */
   public boolean contains(IResourceProxy proxy) {
     if (!fVisitDerived && proxy.isDerived()) {
-      return false; // all resources in a derived folder are considered to be derived, see bug 103576
+      return false; // all resources in a derived folder are considered to be derived, see bug
+      // 103576
     }
 
     if (proxy.getType() == IResource.FILE) {
@@ -101,7 +102,7 @@ public class FileNamePatternSearchScope extends TextSearchScope {
   }
 
   public void setFileNamePattern(Pattern pattern) {
-    fFileNameMatcher = pattern.matcher(""); //$NON-NLS-1$
+    fFileNameMatcher = pattern.matcher(""); // $NON-NLS-1$
   }
 
   public Pattern getFileNamePattern() {
@@ -121,13 +122,13 @@ public class FileNamePatternSearchScope extends TextSearchScope {
     if (fFileNameMatcher == null) {
       Pattern pattern;
       if (fFileNamePatterns.isEmpty()) {
-        pattern = Pattern.compile(".*"); //$NON-NLS-1$
+        pattern = Pattern.compile(".*"); // $NON-NLS-1$
       } else {
         String[] patternStrings =
             (String[]) fFileNamePatterns.toArray(new String[fFileNamePatterns.size()]);
         pattern = PatternConstructor.createPattern(patternStrings, IS_CASE_SENSITIVE_FILESYSTEM);
       }
-      fFileNameMatcher = pattern.matcher(""); //$NON-NLS-1$
+      fFileNameMatcher = pattern.matcher(""); // $NON-NLS-1$
     }
     return fFileNameMatcher;
   }
@@ -153,7 +154,7 @@ public class FileNamePatternSearchScope extends TextSearchScope {
     StringBuffer buf = new StringBuffer();
     for (int i = 0; i < ext.length; i++) {
       if (i > 0) {
-        buf.append(", "); //$NON-NLS-1$
+        buf.append(", "); // $NON-NLS-1$
       }
       buf.append(ext[i]);
     }

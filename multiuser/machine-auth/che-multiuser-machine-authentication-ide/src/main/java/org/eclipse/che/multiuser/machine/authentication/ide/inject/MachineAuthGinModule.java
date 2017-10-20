@@ -24,7 +24,7 @@ public class MachineAuthGinModule extends AbstractGinModule {
 
   @Override
   protected void configure() {
-    //bind(AsyncRequestFactory.class).to(MachineAsyncRequestFactory.class);
+    // bind(AsyncRequestFactory.class).to(MachineAsyncRequestFactory.class);
     bind(MachineTokenServiceClient.class)
         .to(MachineTokenServiceClientImpl.class)
         .in(Singleton.class);

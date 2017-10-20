@@ -79,9 +79,11 @@ public class Variable extends AbstractAttribute {
   //     * @return
   //     * @throws ValueStorageException
   //     */
-  //    public final AttributeValue getValue(FolderEntry projectFolder) throws ValueStorageException {
+  //    public final AttributeValue getValue(FolderEntry projectFolder) throws ValueStorageException
+  // {
   //        if (valueProviderFactory != null) {
-  //            return new AttributeValue(valueProviderFactory.newInstance(projectFolder).getValues(getName()));
+  //            return new
+  // AttributeValue(valueProviderFactory.newInstance(projectFolder).getValues(getName()));
   //        } else {
   //            return value;
   //        }

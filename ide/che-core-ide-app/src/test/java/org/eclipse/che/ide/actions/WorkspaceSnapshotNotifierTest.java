@@ -11,9 +11,7 @@
 package org.eclipse.che.ide.actions;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -61,7 +59,9 @@ public class WorkspaceSnapshotNotifierTest {
   @Before
   public void setup() throws Exception {
     when(notificationManager.notify(
-            anyString(), any(StatusNotification.Status.class), (DisplayMode) anyObject()))
+            nullable(String.class),
+            nullable(StatusNotification.Status.class),
+            nullable(DisplayMode.class)))
         .thenReturn(notification);
     when(notification.getStatus()).thenReturn(StatusNotification.Status.PROGRESS);
   }
@@ -71,7 +71,7 @@ public class WorkspaceSnapshotNotifierTest {
     snapshotCreator.creationStarted();
 
     verify(notificationManager)
-        .notify(anyString(), eq(StatusNotification.Status.PROGRESS), eq(FLOAT_MODE));
+        .notify(nullable(String.class), eq(StatusNotification.Status.PROGRESS), eq(FLOAT_MODE));
   }
 
   @Test

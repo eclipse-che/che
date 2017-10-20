@@ -49,7 +49,8 @@ public class DeleteResourcesDescriptor extends RefactoringDescriptor {
    * <p>Clients may safely cast the obtained refactoring descriptor to {@link
    * DeleteResourcesDescriptor}.
    */
-  public static final String ID = "org.eclipse.ltk.core.refactoring.delete.resources"; //$NON-NLS-1$
+  public static final String ID =
+      "org.eclipse.ltk.core.refactoring.delete.resources"; // $NON-NLS-1$
 
   private IPath[] fResourcePaths;
   private boolean fDeleteContents;

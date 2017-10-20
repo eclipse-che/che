@@ -82,7 +82,8 @@ public class ResourcesLocks {
   }
 
   public Unlocker lock(String... accountIds) throws NotFoundException, ServerException {
-    // TODO It should be implemented for making possible lock resources by two or more accounts in case of resources redistribution
+    // TODO It should be implemented for making possible lock resources by two or more accounts in
+    // case of resources redistribution
     throw new UnsupportedOperationException("Not implemented.");
   }
 }

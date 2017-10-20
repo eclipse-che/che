@@ -59,10 +59,10 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOperationsFix {
 
   /** Name of the serializable class */
-  private static final String SERIALIZABLE_NAME = "java.io.Serializable"; //$NON-NLS-1$
+  private static final String SERIALIZABLE_NAME = "java.io.Serializable"; // $NON-NLS-1$
 
   /** The name of the serial version field */
-  private static final String NAME_FIELD = "serialVersionUID"; //$NON-NLS-1$
+  private static final String NAME_FIELD = "serialVersionUID"; // $NON-NLS-1$
 
   private interface ISerialVersionFixContext {
     public RefactoringStatus initialize(IProgressMonitor monitor) throws CoreException;
@@ -87,15 +87,16 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 
       RefactoringStatus result;
       try {
-        monitor.beginTask("", 10); //$NON-NLS-1$
+        monitor.beginTask("", 10); // $NON-NLS-1$
 
         IType[] types =
             findTypesWithMissingUID(
                 fProject, fCompilationUnits, new SubProgressMonitor(monitor, 1));
         if (types.length == 0) return new RefactoringStatus();
 
-        //TODO disable build
-        //				fProject.getProject().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, new SubProgressMonitor(monitor, 60));
+        // TODO disable build
+        //				fProject.getProject().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, new
+        // SubProgressMonitor(monitor, 60));
         if (monitor.isCanceled()) throw new OperationCanceledException();
 
         result = new RefactoringStatus();
@@ -107,8 +108,8 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
           if (curr instanceof ITypeBinding) {
             ITypeBinding typeBinding = (ITypeBinding) curr;
             //						try {
-            Long id =
-                0L; //SerialVersionHashOperation.calculateSerialVersionId(typeBinding, new SubProgressMonitor(monitor, 1));
+            Long id = 0L; // SerialVersionHashOperation.calculateSerialVersionId(typeBinding, new
+            // SubProgressMonitor(monitor, 1));
             if (id != null) {
               setSerialVersionId(typeBinding, id);
             } else {
@@ -118,12 +119,16 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
                       BasicElementLabels.getJavaElementName(typeBinding.getName())));
             }
             //						} catch (IOException e) {
-            //							result.addWarning(Messages.format(FixMessages.PotentialProgrammingProblemsFix_calculatingUIDFailed_exception,
-            //															  new String[]{BasicElementLabels.getJavaElementName(typeBinding.getName()),
+            //
+            //	result.addWarning(Messages.format(FixMessages.PotentialProgrammingProblemsFix_calculatingUIDFailed_exception,
+            //															  new
+            // String[]{BasicElementLabels.getJavaElementName(typeBinding.getName()),
             //																		   e.getLocalizedMessage()}), JavaStatusContext.create(types[i]));
             //						} catch (CoreException e) {
-            //							result.addWarning(Messages.format(FixMessages.PotentialProgrammingProblemsFix_calculatingUIDFailed_exception,
-            //															  new String[]{BasicElementLabels.getJavaElementName(typeBinding.getName()),
+            //
+            //	result.addWarning(Messages.format(FixMessages.PotentialProgrammingProblemsFix_calculatingUIDFailed_exception,
+            //															  new
+            // String[]{BasicElementLabels.getJavaElementName(typeBinding.getName()),
             //																		   e.getLocalizedMessage()}), JavaStatusContext.create(types[i]));
             //						}
           }
@@ -147,15 +152,15 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
         IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor)
         throws CoreException {
       try {
-        monitor.beginTask("", compilationUnits.length); //$NON-NLS-1$
+        monitor.beginTask("", compilationUnits.length); // $NON-NLS-1$
 
         IType serializable = project.findType(SERIALIZABLE_NAME);
 
         List<IType> types = new ArrayList<IType>();
 
         if (compilationUnits.length > 500) {
-          //500 is a guess. Building the type hierarchy on serializable is very expensive
-          //depending on how many subtypes exit in the project.
+          // 500 is a guess. Building the type hierarchy on serializable is very expensive
+          // depending on how many subtypes exit in the project.
 
           HashSet<ICompilationUnit> cus = new HashSet<ICompilationUnit>();
           for (int i = 0; i < compilationUnits.length; i++) {
@@ -289,9 +294,12 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
             compilationUnit,
             new CompilationUnitRewriteOperation[] {defop});
 
-    //		SerialVersionHashOperation hashop= new SerialVersionHashOperation(unit, new ASTNode[] {declaringNode});
+    //		SerialVersionHashOperation hashop= new SerialVersionHashOperation(unit, new ASTNode[]
+    // {declaringNode});
     //		IProposableFix
-    //				fix2= new PotentialProgrammingProblemsFix(FixMessages.Java50Fix_SerialVersion_hash_description, compilationUnit, new CompilationUnitRewriteOperation[] {hashop});
+    //				fix2= new
+    // PotentialProgrammingProblemsFix(FixMessages.Java50Fix_SerialVersion_hash_description,
+    // compilationUnit, new CompilationUnitRewriteOperation[] {hashop});
 
     return new IProposableFix[] {fix1 /*, fix2*/};
   }

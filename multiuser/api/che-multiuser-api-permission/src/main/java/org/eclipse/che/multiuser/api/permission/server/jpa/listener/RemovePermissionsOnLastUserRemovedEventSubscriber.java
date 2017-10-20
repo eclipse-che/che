@@ -55,7 +55,8 @@ public abstract class RemovePermissionsOnLastUserRemovedEventSubscriber<
   public void onCascadeEvent(BeforeUserRemovedEvent event) throws Exception {
     for (AbstractPermissions permissions : storage.getByUser(event.getUser().getId())) {
       // This method can potentially be source of race conditions,
-      // e.g. when performing search by permissions, another thread can add/or remove another setPermission,
+      // e.g. when performing search by permissions, another thread can add/or remove another
+      // setPermission,
       // so appropriate domain object (stack or recipe) will not be deleted, or vice versa,
       // deleted when it's not required anymore.
       // As a result, a solitary objects may be present in the DB.

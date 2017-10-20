@@ -61,6 +61,6 @@ public class RegionImpl implements Region {
   /* @see java.lang.Object#toString() */
   @Override
   public String toString() {
-    return "offset: " + fOffset + ", length: " + fLength; //$NON-NLS-1$ //$NON-NLS-2$;
+    return "offset: " + fOffset + ", length: " + fLength; // $NON-NLS-1$ //$NON-NLS-2$;
   }
 }

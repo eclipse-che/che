@@ -149,7 +149,8 @@ public class SshMachineInstance {
     }
 
     // session destroying stops all processes
-    // todo kill all processes started by code, we should get parent pid of session and kill all children
+    // todo kill all processes started by code, we should get parent pid of session and kill all
+    // children
     sshClient.stop();
   }
 

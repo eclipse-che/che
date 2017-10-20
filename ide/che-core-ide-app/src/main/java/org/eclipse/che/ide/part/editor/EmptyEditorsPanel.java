@@ -118,8 +118,9 @@ public class EmptyEditorsPanel extends Composite
     factoryActions.put(
         navigateToFileAction.getTemplatePresentation().getText(), navigateToFileAction);
 
-    //Sometimes initialization of Create/Import Project actions are completed after the Empty editor page is rendered.
-    //In this case we need to wait when actions will be initialized.
+    // Sometimes initialization of Create/Import Project actions are completed after the Empty
+    // editor page is rendered.
+    // In this case we need to wait when actions will be initialized.
     Timer hoverToRenderTimer =
         new Timer() {
           @Override

@@ -121,7 +121,7 @@ public class EmptyTypeSet extends TypeSet {
   public Iterator<TType> iterator() {
     return new Iterator<TType>() {
       public void remove() {
-        //do nothing
+        // do nothing
       }
 
       public boolean hasNext() {
@@ -152,7 +152,7 @@ public class EmptyTypeSet extends TypeSet {
 
   @Override
   public String toString() {
-    return "{ }"; //$NON-NLS-1$
+    return "{ }"; // $NON-NLS-1$
   }
 
   /* (non-Javadoc)

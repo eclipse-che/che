@@ -133,8 +133,10 @@ public class RefactoringScopeFactory {
               new IJavaElement[] {member.getCompilationUnit()});
         else return SearchEngine.createJavaSearchScope(new IJavaElement[] {member});
       }
-      // Removed code that does some optimizations regarding package visible members. The problem is that
-      // there can be a package fragment with the same name in a different source folder or project. So we
+      // Removed code that does some optimizations regarding package visible members. The problem is
+      // that
+      // there can be a package fragment with the same name in a different source folder or project.
+      // So we
       // have to treat package visible members like public or protected members.
     }
 

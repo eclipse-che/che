@@ -287,7 +287,8 @@ public interface IProposalRelevance {
 
   public static final int ADD_PARENTHESES_FOR_EXPRESSION = -10;
 
-  //Be careful while tweaking these values because WordCorrectionProposal uses -distance (between the words) as relevance.
+  // Be careful while tweaking these values because WordCorrectionProposal uses -distance (between
+  // the words) as relevance.
   public static final int DISABLE_SPELL_CHECKING = Integer.MIN_VALUE + 1;
   public static final int WORD_IGNORE = Integer.MIN_VALUE + 1;
   public static final int ADD_WORD = Integer.MIN_VALUE;

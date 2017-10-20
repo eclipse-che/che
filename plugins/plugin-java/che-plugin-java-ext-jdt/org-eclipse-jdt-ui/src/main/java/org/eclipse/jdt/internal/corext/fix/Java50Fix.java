@@ -66,8 +66,8 @@ import org.eclipse.text.edits.TextEditGroup;
  */
 public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 
-  private static final String OVERRIDE = "Override"; //$NON-NLS-1$
-  private static final String DEPRECATED = "Deprecated"; //$NON-NLS-1$
+  private static final String OVERRIDE = "Override"; // $NON-NLS-1$
+  private static final String DEPRECATED = "Deprecated"; // $NON-NLS-1$
 
   private static class AnnotationRewriteOperation extends CompilationUnitRewriteOperation {
     private final BodyDeclaration fBodyDeclaration;
@@ -120,7 +120,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 
       InferTypeArgumentsConstraintsSolver solver = new InferTypeArgumentsConstraintsSolver(model);
       InferTypeArgumentsUpdate update = solver.solveConstraints(new NullProgressMonitor());
-      solver = null; //free caches
+      solver = null; // free caches
 
       ParameterizedType[] nodes =
           InferTypeArgumentsRefactoring.inferArguments(fTypes, update, model, cuRewrite);
@@ -133,7 +133,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
         int j = 0;
         for (Iterator<Type> iter = args.iterator(); iter.hasNext(); ) {
           LinkedProposalPositionGroup group =
-              new LinkedProposalPositionGroup("G" + i + "_" + j); //$NON-NLS-1$ //$NON-NLS-2$
+              new LinkedProposalPositionGroup("G" + i + "_" + j); // $NON-NLS-1$ //$NON-NLS-2$
           Type argType = iter.next();
           if (!positionGroups.hasLinkedPositions()) {
             group.addPosition(astRewrite.track(argType), true);

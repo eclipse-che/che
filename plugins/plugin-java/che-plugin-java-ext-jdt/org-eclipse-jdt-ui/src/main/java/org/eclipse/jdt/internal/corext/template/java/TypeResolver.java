@@ -27,7 +27,7 @@ public class TypeResolver extends TemplateVariableResolver {
 
   /** Default ctor for instantiation by the extension point. */
   public TypeResolver() {
-    this("java.lang.Object"); //$NON-NLS-1$
+    this("java.lang.Object"); // $NON-NLS-1$
   }
 
   TypeResolver(String defaultType) {

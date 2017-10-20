@@ -54,7 +54,7 @@ public class FastPartitioner
   /**
    * The position category this partitioner uses to store the document's partitioning information.
    */
-  private static final String CONTENT_TYPES_CATEGORY = "__content_types_category"; //$NON-NLS-1$
+  private static final String CONTENT_TYPES_CATEGORY = "__content_types_category"; // $NON-NLS-1$
   /** The partitioner's scanner */
   protected final IPartitionTokenScanner fScanner;
   /** The legal content types of this partitioner */
@@ -90,7 +90,7 @@ public class FastPartitioner
           .equalsIgnoreCase(
               Platform.getDebugOption(
                   "org.eclipse.jface.text/debug/FastPartitioner/PositionCache"));
-  //$NON-NLS-1$//$NON-NLS-2$;
+  // $NON-NLS-1$//$NON-NLS-2$;
 
   /**
    * Creates a new partitioner that uses the given scanner and may return partitions of the given
@@ -759,16 +759,16 @@ public class FastPartitioner
               "FastPartitioner.getPositions(): cached position is not up to date: from document: "
                   + toString(positions[i])
                   + " in cache: "
-                  + toString(fCachedPositions[i])); //$NON-NLS-1$ //$NON-NLS-2$
+                  + toString(fCachedPositions[i])); // $NON-NLS-1$ //$NON-NLS-2$
       }
       for (int i = len; i < positions.length; i++)
         System.err.println(
             "FastPartitioner.getPositions(): new position in document: "
-                + toString(positions[i])); //$NON-NLS-1$
+                + toString(positions[i])); // $NON-NLS-1$
       for (int i = len; i < fCachedPositions.length; i++)
         System.err.println(
             "FastPartitioner.getPositions(): stale position in cache: "
-                + toString(fCachedPositions[i])); //$NON-NLS-1$
+                + toString(fCachedPositions[i])); // $NON-NLS-1$
     }
     return fCachedPositions;
   }
@@ -784,6 +784,6 @@ public class FastPartitioner
         + position.getOffset()
         + "+"
         + position.getLength()
-        + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        + "]"; // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
   }
 }

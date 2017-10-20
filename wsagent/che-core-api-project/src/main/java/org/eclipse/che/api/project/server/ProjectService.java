@@ -218,7 +218,7 @@ public class ProjectService extends Service {
     eventService.publish(new ProjectCreatedEvent(workspace, project.getPath()));
 
     // TODO this throws NPE
-    //logProjectCreatedEvent(configDto.getName(), configDto.getProjectType());
+    // logProjectCreatedEvent(configDto.getName(), configDto.getProjectType());
 
     return injectProjectLinks(configDto);
   }
@@ -727,7 +727,8 @@ public class ProjectService extends Service {
       Iterator<FileItem> formData)
       throws ServerException, IOException, ConflictException, ForbiddenException, NotFoundException,
           BadRequestException {
-    // Not all importers uses virtual file system API. In this case virtual file system API doesn't get events and isn't able to set
+    // Not all importers uses virtual file system API. In this case virtual file system API doesn't
+    // get events and isn't able to set
     final FolderEntry baseProjectFolder = (FolderEntry) getVirtualFile(path, force);
 
     int stripNumber = 0;

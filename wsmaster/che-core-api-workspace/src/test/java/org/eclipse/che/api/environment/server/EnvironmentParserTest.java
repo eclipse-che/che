@@ -251,7 +251,8 @@ public class EnvironmentParserTest {
   @DataProvider(name = "environmentWithServersProvider")
   public static Object[][] environmentWithServersProvider() {
     // Format of result array:
-    // [ [environment object, expected che services environment object, @Nullable compose representation of environment], ... ]
+    // [ [environment object, expected che services environment object, @Nullable compose
+    // representation of environment], ... ]
     List<List<Object>> data = new ArrayList<>();
 
     data.add(getEntryForDockerfileEnv(emptyMap(), emptyList(), emptyMap()));
@@ -762,12 +763,12 @@ public class EnvironmentParserTest {
   }
 
   private static Map<String, String> splitOnPairsAsMap(String... args) {
-    //noinspection unchecked
+    // noinspection unchecked
     return (Map<String, String>) splitOnPairsAsMap((Object[]) args);
   }
 
   private static Map<String, ServerConf2Impl> serversMap(Object... args) {
-    //noinspection unchecked
+    // noinspection unchecked
     return (Map<String, ServerConf2Impl>) splitOnPairsAsMap(args);
   }
 

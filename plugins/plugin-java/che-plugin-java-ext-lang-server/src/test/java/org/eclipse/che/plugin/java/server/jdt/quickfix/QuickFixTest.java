@@ -433,7 +433,8 @@ public class QuickFixTest extends BaseTest {
     return res;
   }
 
-  //	private static String getSEFPreviewContent(SelfEncapsulateFieldProposal sefp) throws CoreException {
+  //	private static String getSEFPreviewContent(SelfEncapsulateFieldProposal sefp) throws
+  // CoreException {
   //		ICompilationUnit compilationUnit= sefp.getField().getCompilationUnit();
   //		TextFileChange change= sefp.getChange((IFile) compilationUnit.getResource());
   //		if (change != null) {

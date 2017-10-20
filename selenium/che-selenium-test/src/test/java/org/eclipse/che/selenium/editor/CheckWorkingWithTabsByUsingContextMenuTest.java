@@ -65,7 +65,7 @@ public class CheckWorkingWithTabsByUsingContextMenuTest {
     projectExplorer.quickExpandWithJavaScript();
     loader.waitOnClosed();
 
-    //close all tab by using context menu
+    // close all tab by using context menu
     openTabsInEditor();
     editor.openContextMenuForTabByName(NAME_TO_JAVA_CLASS);
     editor.runActionForTabFromContextMenu(CodenvyEditor.TabAction.CLOSE_ALL);
@@ -74,7 +74,7 @@ public class CheckWorkingWithTabsByUsingContextMenuTest {
     editor.waitTabIsNotPresent(NAME_TO_XML);
     editor.waitTabIsNotPresent(NAME_TO_HTML);
 
-    //close one tab by using context menu
+    // close one tab by using context menu
     openTabsInEditor();
     editor.openContextMenuForTabByName(NAME_TO_JAVA_CLASS);
     editor.runActionForTabFromContextMenu(CodenvyEditor.TabAction.CLOSE);
@@ -84,7 +84,7 @@ public class CheckWorkingWithTabsByUsingContextMenuTest {
     editor.waitTabIsPresent(NAME_TO_HTML);
     editor.closeAllTabs();
 
-    //close other tabs by using context menu
+    // close other tabs by using context menu
     openTabsInEditor();
     editor.openContextMenuForTabByName(NAME_TO_JAVA_CLASS);
     editor.runActionForTabFromContextMenu(CodenvyEditor.TabAction.CLOSE_OTHER);
@@ -94,7 +94,7 @@ public class CheckWorkingWithTabsByUsingContextMenuTest {
     editor.waitTabIsNotPresent(NAME_TO_HTML);
     editor.closeAllTabs();
 
-    //close other tabs by using context menu
+    // close other tabs by using context menu
     openTabsInEditor();
     editor.openContextMenuForTabByName(NAME_TO_JAVA_CLASS);
     editor.runActionForTabFromContextMenu(CodenvyEditor.TabAction.CLOSE_OTHER);
@@ -104,7 +104,7 @@ public class CheckWorkingWithTabsByUsingContextMenuTest {
     editor.waitTabIsNotPresent(NAME_TO_HTML);
     editor.closeAllTabs();
 
-    //pin and close all tabs without pinned by using context menu
+    // pin and close all tabs without pinned by using context menu
     openTabsInEditor();
     editor.openContextMenuForTabByName(NAME_TO_JAVA_CLASS);
     editor.runActionForTabFromContextMenu(CodenvyEditor.TabAction.PIN_UNPIN_TAB);
@@ -118,7 +118,7 @@ public class CheckWorkingWithTabsByUsingContextMenuTest {
     editor.waitTabIsNotPresent(NAME_TO_HTML);
     editor.closeAllTabs();
 
-    //reopen closed tab by using context menu
+    // reopen closed tab by using context menu
     openTabsInEditor();
     editor.openContextMenuForTabByName(NAME_TO_JAVA_CLASS);
     editor.runActionForTabFromContextMenu(CodenvyEditor.TabAction.CLOSE);

@@ -162,7 +162,7 @@ public class JavaTestFinder {
         }
         if (importDeclaration.isOnDemand()
             && testAnnotation.startsWith(
-                elementName.substring(0, elementName.length() - 3))) { //remove .*
+                elementName.substring(0, elementName.length() - 3))) { // remove .*
           return true;
         }
       }
@@ -229,7 +229,7 @@ public class JavaTestFinder {
   private IRegion getRegion(IJavaElement element) {
     IRegion result = JavaCore.newRegion();
     if (element.getElementType() == IJavaElement.JAVA_PROJECT) {
-      //for projects only add the contained source folders
+      // for projects only add the contained source folders
       try {
         IPackageFragmentRoot[] packageFragmentRoots =
             ((IJavaProject) element).getPackageFragmentRoots();

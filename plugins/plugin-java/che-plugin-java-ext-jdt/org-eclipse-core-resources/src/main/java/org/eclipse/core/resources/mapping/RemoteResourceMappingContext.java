@@ -94,8 +94,8 @@ public abstract class RemoteResourceMappingContext extends ResourceMappingContex
    */
   public IResource[] fetchBaseMembers(IContainer container, IProgressMonitor monitor)
       throws CoreException {
-    //default implementation does nothing
-    //thwart compiler warning
+    // default implementation does nothing
+    // thwart compiler warning
     return null;
   }
 
@@ -174,8 +174,8 @@ public abstract class RemoteResourceMappingContext extends ResourceMappingContex
    */
   public IResource[] fetchRemoteMembers(IContainer container, IProgressMonitor monitor)
       throws CoreException {
-    //default implementation does nothing
-    //thwart compiler warning
+    // default implementation does nothing
+    // thwart compiler warning
     return null;
   }
 

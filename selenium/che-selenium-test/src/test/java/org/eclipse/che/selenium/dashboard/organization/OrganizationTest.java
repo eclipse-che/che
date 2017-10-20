@@ -47,7 +47,7 @@ public class OrganizationTest {
 
   @Inject
   @Named("admin")
-  private TestOrganizationServiceClient organizationServiceClient;
+  private TestOrganizationServiceClient testOrganizationServiceClient;
 
   @Inject private Dashboard dashboard;
   @Inject private TestUser testUser1;
@@ -60,15 +60,15 @@ public class OrganizationTest {
     String firstName = generate("F", 7);
     String lastName = generate("L", 7);
 
-    dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
+    dashboard.open();
     orgName = generate("orgX", 6);
 
-    organization = organizationServiceClient.create(orgName);
+    organization = testOrganizationServiceClient.create(orgName);
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    organizationServiceClient.deleteById(organization.getId());
+    testOrganizationServiceClient.deleteById(organization.getId());
   }
 
   @Test
@@ -80,7 +80,7 @@ public class OrganizationTest {
     organizationListPage.clickOnOrganization(organization.getQualifiedName());
     organizationPage.waitOrganizationName(orgName);
 
-    //Add members to a members list ad 'Admin'
+    // Add members to a members list ad 'Admin'
     loader.waitOnClosed();
     organizationPage.clickMembersTab();
     for (String email : emailsList) {
@@ -92,7 +92,7 @@ public class OrganizationTest {
       organizationPage.checkMemberExistsInMembersList(email);
     }
 
-    //Search members from the members list
+    // Search members from the members list
     for (String email : emailsList) {
       organizationPage.clearSearchField();
       String memberName = organizationPage.getMembersNameByEmail(email);
@@ -101,7 +101,7 @@ public class OrganizationTest {
     }
     organizationPage.clearSearchField();
 
-    //Change the members role to 'Members'
+    // Change the members role to 'Members'
     for (String email : emailsList) {
       loader.waitOnClosed();
       addMember.clickEditPermissionsButton(email);
@@ -109,13 +109,13 @@ public class OrganizationTest {
       addMember.clickSaveButton();
     }
 
-    //Delete the members from the members list
+    // Delete the members from the members list
     for (String email : emailsList) {
       organizationPage.deleteMember(email);
     }
   }
 
-  //@Test(priority = 1)
+  // @Test(priority = 1)
   public void addOrganizationWithMembers() {
     String name = generate("orgY", 4);
     navigationBar.waitNavigationBar();

@@ -48,8 +48,8 @@ public class RefactoringCorrectionProposal extends LinkedCorrectionProposal {
     if (fRefactoringStatus.hasFatalError()) {
       TextFileChange dummyChange =
           new TextFileChange(
-              "fatal error", (IFile) getCompilationUnit().getResource()); //$NON-NLS-1$
-      dummyChange.setEdit(new InsertEdit(0, "")); //$NON-NLS-1$
+              "fatal error", (IFile) getCompilationUnit().getResource()); // $NON-NLS-1$
+      dummyChange.setEdit(new InsertEdit(0, "")); // $NON-NLS-1$
       return dummyChange;
     }
     return (TextChange) fRefactoring.createChange(new NullProgressMonitor());

@@ -27,14 +27,14 @@ public final class LocationKind {
    * @see IFileBufferManager#connectFileStore(org.eclipse.core.filesystem.IFileStore,
    *     org.eclipse.core.runtime.IProgressMonitor)
    */
-  public static final LocationKind LOCATION = new LocationKind("location"); //$NON-NLS-1$
+  public static final LocationKind LOCATION = new LocationKind("location"); // $NON-NLS-1$
 
   /**
    * The corresponding argument is the full path of an {@link org.eclipse.core.resources.IFile}.
    *
    * @see org.eclipse.core.resources.IFile#getFullPath()
    */
-  public static final LocationKind IFILE = new LocationKind("IFile"); //$NON-NLS-1$
+  public static final LocationKind IFILE = new LocationKind("IFile"); // $NON-NLS-1$
 
   /**
    * Tells to normalize the corresponding argument according to {@link
@@ -46,7 +46,7 @@ public final class LocationKind {
    * @see IFileBufferManager#connectFileStore(org.eclipse.core.filesystem.IFileStore,
    *     org.eclipse.core.runtime.IProgressMonitor)
    */
-  public static final LocationKind NORMALIZE = new LocationKind("normalize"); //$NON-NLS-1$
+  public static final LocationKind NORMALIZE = new LocationKind("normalize"); // $NON-NLS-1$
 
   private final String fName;
 

@@ -86,7 +86,7 @@ public class MethodNode extends AbstractPresentationNode {
 
   @Override
   public void updatePresentation(@NotNull NodePresentation presentation) {
-    //TODO set proper icon
+    // TODO set proper icon
     presentation.setPresentableText(method.getLabel());
     int flags = method.getFlags();
     SVGResource icon;

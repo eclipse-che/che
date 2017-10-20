@@ -41,13 +41,13 @@ public class JavaDocContextType extends CompilationUnitContextType {
     protected String resolve(TemplateContext context) {
       String selection =
           context.getVariable(org.eclipse.jface.text.templates.GlobalTemplateVariables.SELECTION);
-      if (selection == null) return ""; //$NON-NLS-1$
+      if (selection == null) return ""; // $NON-NLS-1$
       return selection;
     }
   }
 
   /** The id under which this context type is registered */
-  public static final String ID = "javadoc"; //$NON-NLS-1$
+  public static final String ID = "javadoc"; // $NON-NLS-1$
 
   /** Creates a java context type. */
   public JavaDocContextType() {

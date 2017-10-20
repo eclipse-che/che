@@ -50,18 +50,18 @@ public class PatternConstructor {
       throws PatternSyntaxException {
     if (isRegex) {
       pattern = substituteLinebreak(pattern);
-      Assert.isTrue(!isWholeWord, "isWholeWord unsupported together with isRegex"); //$NON-NLS-1$
+      Assert.isTrue(!isWholeWord, "isWholeWord unsupported together with isRegex"); // $NON-NLS-1$
     } else {
       int len = pattern.length();
       StringBuffer buffer = new StringBuffer(len + 10);
       // don't add a word boundary if the search text does not start with
       // a word char. (this works around a user input error).
       if (isWholeWord && len > 0 && isWordChar(pattern.charAt(0))) {
-        buffer.append("\\b"); //$NON-NLS-1$
+        buffer.append("\\b"); // $NON-NLS-1$
       }
       appendAsRegEx(isStringMatcher, pattern, buffer);
       if (isWholeWord && len > 0 && isWordChar(pattern.charAt(len - 1))) {
-        buffer.append("\\b"); //$NON-NLS-1$
+        buffer.append("\\b"); // $NON-NLS-1$
       }
       pattern = buffer.toString();
     }
@@ -123,7 +123,7 @@ public class PatternConstructor {
                 String msg = SearchMessages.PatternConstructor_error_line_delim_position;
                 throw new PatternSyntaxException(msg, findString, i);
               }
-              buf.append("(?>\\r\\n?|\\n)"); //$NON-NLS-1$
+              buf.append("(?>\\r\\n?|\\n)"); // $NON-NLS-1$
               i++;
 
             } else {
@@ -184,7 +184,7 @@ public class PatternConstructor {
           if (isStringMatcher && !isEscaped) {
             isEscaped = true;
           } else {
-            buffer.append("\\\\"); //$NON-NLS-1$
+            buffer.append("\\\\"); // $NON-NLS-1$
             isEscaped = false;
           }
           break;
@@ -201,7 +201,7 @@ public class PatternConstructor {
         case '+':
         case '|':
           if (isEscaped) {
-            buffer.append("\\\\"); //$NON-NLS-1$
+            buffer.append("\\\\"); // $NON-NLS-1$
             isEscaped = false;
           }
           buffer.append('\\');
@@ -218,7 +218,7 @@ public class PatternConstructor {
           break;
         case '*':
           if (isStringMatcher && !isEscaped) {
-            buffer.append(".*"); //$NON-NLS-1$
+            buffer.append(".*"); // $NON-NLS-1$
           } else {
             buffer.append('\\');
             buffer.append(c);
@@ -227,7 +227,7 @@ public class PatternConstructor {
           break;
         default:
           if (isEscaped) {
-            buffer.append("\\\\"); //$NON-NLS-1$
+            buffer.append("\\\\"); // $NON-NLS-1$
             isEscaped = false;
           }
           buffer.append(c);
@@ -235,7 +235,7 @@ public class PatternConstructor {
       }
     }
     if (isEscaped) {
-      buffer.append("\\\\"); //$NON-NLS-1$
+      buffer.append("\\\\"); // $NON-NLS-1$
       isEscaped = false;
     }
     return buffer;
@@ -321,7 +321,7 @@ public class PatternConstructor {
             char ch1 = replaceText.charAt(i + 1);
             char ch2 = replaceText.charAt(i + 2);
             if (ch1 == '0' && '0' <= ch2 && ch2 <= '9') {
-              buf.append("0\\"); //$NON-NLS-1$
+              buf.append("0\\"); // $NON-NLS-1$
               i++; // consume the 0
             }
           }
@@ -371,7 +371,7 @@ public class PatternConstructor {
         case 'e':
           buf.append('\u001B');
           break;
-        case 'R': //see http://www.unicode.org/unicode/reports/tr18/#Line_Boundaries
+        case 'R': // see http://www.unicode.org/unicode/reports/tr18/#Line_Boundaries
           buf.append(fLineDelim);
           break;
           /*

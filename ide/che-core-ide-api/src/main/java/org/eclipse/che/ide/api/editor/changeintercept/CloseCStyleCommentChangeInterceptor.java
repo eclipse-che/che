@@ -24,7 +24,8 @@ public final class CloseCStyleCommentChangeInterceptor implements TextChangeInte
     // either must be on the first line or be just after a line break (regexp)
     if (matchResult != null) {
       final String line = document.getLineContent(change.getFrom().getLine());
-      // matches a line containing only whitespaces followed by either /** or /* and then optionally whitespaces again
+      // matches a line containing only whitespaces followed by either /** or /* and then optionally
+      // whitespaces again
       if (!line.matches("^\\s*\\/\\*\\*?\\s*$")) {
         return null;
       }

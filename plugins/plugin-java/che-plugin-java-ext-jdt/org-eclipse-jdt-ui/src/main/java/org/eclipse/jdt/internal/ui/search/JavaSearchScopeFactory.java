@@ -69,7 +69,8 @@ public class JavaSearchScopeFactory {
   //		Shell shell = JavaPlugin.getActiveWorkbenchShell();
   //		if (shell == null)
   //			return null;
-  //		IWorkingSetSelectionDialog dialog = PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSetSelectionDialog(shell, true);
+  //		IWorkingSetSelectionDialog dialog =
+  // PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSetSelectionDialog(shell, true);
   //		if (dialog.open() != Window.OK) {
   //			throw new InterruptedException();
   //		}
@@ -155,11 +156,13 @@ public class JavaSearchScopeFactory {
         new IJavaElement[] {project}, getSearchFlags(includeMask));
   }
 
-  //	public IJavaSearchScope createJavaProjectSearchScope(IEditorInput editorInput, boolean includeJRE) {
+  //	public IJavaSearchScope createJavaProjectSearchScope(IEditorInput editorInput, boolean
+  // includeJRE) {
   //		return createJavaProjectSearchScope(editorInput, includeJRE ? ALL : NO_JRE);
   //	}
   //
-  //	public IJavaSearchScope createJavaProjectSearchScope(IEditorInput editorInput, int includeMask) {
+  //	public IJavaSearchScope createJavaProjectSearchScope(IEditorInput editorInput, int includeMask)
+  // {
   //		IJavaElement elem= JavaUI.getEditorInputJavaElement(editorInput);
   //		if (elem != null) {
   //			IJavaProject project= elem.getJavaProject();
@@ -301,17 +304,22 @@ public class JavaSearchScopeFactory {
   //			return SearchMessages.JavaSearchScopeFactory_undefined_workingsets;
   //		}
   //		if (workingSets.length == 1) {
-  //			String label= includeJRE ? SearchMessages.SingleWorkingSetScope : SearchMessages.SingleWorkingSetScopeNoJRE;
+  //			String label= includeJRE ? SearchMessages.SingleWorkingSetScope :
+  // SearchMessages.SingleWorkingSetScopeNoJRE;
   //			return Messages.format(label, BasicElementLabels.getWorkingSetLabel(workingSets[0]));
   //		}
   //		Arrays.sort(workingSets, new WorkingSetComparator());
   //		if (workingSets.length == 2) {
-  //			String label= includeJRE ? SearchMessages.DoubleWorkingSetScope : SearchMessages.DoubleWorkingSetScopeNoJRE;
-  //			return Messages.format(label, new String[]{BasicElementLabels.getWorkingSetLabel(workingSets[0]),
+  //			String label= includeJRE ? SearchMessages.DoubleWorkingSetScope :
+  // SearchMessages.DoubleWorkingSetScopeNoJRE;
+  //			return Messages.format(label, new
+  // String[]{BasicElementLabels.getWorkingSetLabel(workingSets[0]),
   //													   BasicElementLabels.getWorkingSetLabel(workingSets[1])});
   //		}
-  //		String label= includeJRE ? SearchMessages.WorkingSetsScope : SearchMessages.WorkingSetsScopeNoJRE;
-  //		return Messages.format(label, new String[]{BasicElementLabels.getWorkingSetLabel(workingSets[0]),
+  //		String label= includeJRE ? SearchMessages.WorkingSetsScope :
+  // SearchMessages.WorkingSetsScopeNoJRE;
+  //		return Messages.format(label, new
+  // String[]{BasicElementLabels.getWorkingSetLabel(workingSets[0]),
   //												   BasicElementLabels.getWorkingSetLabel(workingSets[1])});
   //	}
 

@@ -41,7 +41,7 @@ public class HttpPermissionCheckerImpl implements PermissionChecker {
   @Inject
   public HttpPermissionCheckerImpl(
       @Named("che.api") String apiEndpoint, HttpJsonRequestFactory requestFactory) {
-    //TODO mb make configurable size of cache and expiration time
+    // TODO mb make configurable size of cache and expiration time
     this.permissionsCache =
         CacheBuilder.newBuilder()
             .maximumSize(1000)
@@ -65,7 +65,7 @@ public class HttpPermissionCheckerImpl implements PermissionChecker {
                               .asDto(PermissionsDto.class);
                       return new HashSet<>(usersPermissions.getActions());
                     } catch (NotFoundException e) {
-                      //user doesn't have permissions
+                      // user doesn't have permissions
                       return new HashSet<>();
                     }
                   }

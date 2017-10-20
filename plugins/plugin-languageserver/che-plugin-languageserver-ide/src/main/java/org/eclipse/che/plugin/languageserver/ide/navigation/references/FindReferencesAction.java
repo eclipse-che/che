@@ -79,7 +79,7 @@ public class FindReferencesAction extends AbstractPerspectiveAction {
   public void actionPerformed(ActionEvent e) {
     EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
 
-    //TODO replace this
+    // TODO replace this
     if (!(activeEditor instanceof TextEditor)) {
       return;
     }

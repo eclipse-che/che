@@ -276,11 +276,11 @@ public class MultiVariableGuess {
   public void addDependency(MultiVariable master, MultiVariable slave) {
     // check for cycles and multi-slaves
     if (fBackwardDeps.containsKey(slave))
-      throw new IllegalArgumentException("slave can only serve one master"); //$NON-NLS-1$
+      throw new IllegalArgumentException("slave can only serve one master"); // $NON-NLS-1$
     Object parent = master;
     while (parent != null) {
       parent = fBackwardDeps.get(parent);
-      if (parent == slave) throw new IllegalArgumentException("cycle detected"); //$NON-NLS-1$
+      if (parent == slave) throw new IllegalArgumentException("cycle detected"); // $NON-NLS-1$
     }
 
     Set<MultiVariable> slaves = fDependencies.get(master);

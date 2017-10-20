@@ -44,7 +44,7 @@ public final class ExpressionVariable extends ConstraintVariable {
    */
   @Override
   public String toString() {
-    return "[" + fSource + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+    return "[" + fSource + "]"; // $NON-NLS-1$ //$NON-NLS-2$
   }
 
   public CompilationUnitRange getCompilationUnitRange() {
@@ -64,7 +64,7 @@ public final class ExpressionVariable extends ConstraintVariable {
     if (expression instanceof ParenthesizedExpression)
       return resolveBinding(((ParenthesizedExpression) expression).getExpression());
     else if (expression instanceof Assignment)
-      return resolveBinding(((Assignment) expression).getLeftHandSide()); //TODO ???
+      return resolveBinding(((Assignment) expression).getLeftHandSide()); // TODO ???
     else if (expression instanceof MethodInvocation)
       return ((MethodInvocation) expression).resolveMethodBinding();
     else if (expression instanceof SuperMethodInvocation)

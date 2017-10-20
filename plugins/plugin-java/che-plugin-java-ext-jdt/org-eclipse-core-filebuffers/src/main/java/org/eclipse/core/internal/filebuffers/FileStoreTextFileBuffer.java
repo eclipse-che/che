@@ -83,7 +83,7 @@ public class FileStoreTextFileBuffer extends FileStoreFileBuffer implements ITex
           FileBuffersMessages.FileBuffer_status_error,
           null);
   /** Constant denoting UTF-8 encoding. */
-  private static final String CHARSET_UTF_8 = "UTF-8"; //$NON-NLS-1$
+  private static final String CHARSET_UTF_8 = "UTF-8"; // $NON-NLS-1$
 
   /**
    * Constant denoting an empty set of properties
@@ -137,7 +137,8 @@ public class FileStoreTextFileBuffer extends FileStoreFileBuffer implements ITex
   public IAnnotationModel getAnnotationModel() {
     //		synchronized (fAnnotationModelCreationLock) {
     //			if (fAnnotationModel == null && !isDisconnected()) {
-    //				fAnnotationModel = fManager.createAnnotationModel(getLocationOrName(), LocationKind.LOCATION);
+    //				fAnnotationModel = fManager.createAnnotationModel(getLocationOrName(),
+    // LocationKind.LOCATION);
     //				if (fAnnotationModel != null)
     //					fAnnotationModel.connect(fDocument);
     //			}
@@ -198,7 +199,7 @@ public class FileStoreTextFileBuffer extends FileStoreFileBuffer implements ITex
         if (monitor != null) monitor.worked(1);
       }
     } catch (IOException ex) {
-      String message = (ex.getMessage() != null ? ex.getMessage() : ""); //$NON-NLS-1$
+      String message = (ex.getMessage() != null ? ex.getMessage() : ""); // $NON-NLS-1$
       IStatus s = new Status(IStatus.ERROR, FileBuffersPlugin.PLUGIN_ID, IStatus.OK, message, ex);
       throw new CoreException(s);
     } finally {
@@ -258,7 +259,8 @@ public class FileStoreTextFileBuffer extends FileStoreFileBuffer implements ITex
       if (info.exists()) fSynchronizationStamp = fFileStore.fetchInfo().getLastModified();
 
       //			if (fAnnotationModel instanceof IPersistableAnnotationModel) {
-      //				IPersistableAnnotationModel persistableModel = (IPersistableAnnotationModel)fAnnotationModel;
+      //				IPersistableAnnotationModel persistableModel =
+      // (IPersistableAnnotationModel)fAnnotationModel;
       //				try {
       //					persistableModel.revert(fDocument);
       //				} catch (CoreException x) {
@@ -376,7 +378,8 @@ public class FileStoreTextFileBuffer extends FileStoreFileBuffer implements ITex
       QualifiedName[] options =
           new QualifiedName[] {IContentDescription.CHARSET, IContentDescription.BYTE_ORDER_MARK};
       IContentDescription description =
-          null; //Platform.getContentTypeManager().getDescriptionFor(stream, fFileStore.getName(), options);
+          null; // Platform.getContentTypeManager().getDescriptionFor(stream, fFileStore.getName(),
+      // options);
       if (description != null) {
         fHasBOM = description.getProperty(IContentDescription.BYTE_ORDER_MARK) != null;
         if (fEncoding == null) fEncoding = description.getCharset();
@@ -410,7 +413,8 @@ public class FileStoreTextFileBuffer extends FileStoreFileBuffer implements ITex
   protected void commitFileBufferContent(IProgressMonitor monitor, boolean overwrite)
       throws CoreException {
     //		if (!isSynchronized() && !overwrite)
-    //			throw new CoreException(new Status(IStatus.WARNING, FileBuffersPlugin.PLUGIN_ID, IResourceStatus.OUT_OF_SYNC_LOCAL, FileBuffersMessages.FileBuffer_error_outOfSync, null));
+    //			throw new CoreException(new Status(IStatus.WARNING, FileBuffersPlugin.PLUGIN_ID,
+    // IResourceStatus.OUT_OF_SYNC_LOCAL, FileBuffersMessages.FileBuffer_error_outOfSync, null));
 
     String encoding = computeEncoding();
 
@@ -488,7 +492,8 @@ public class FileStoreTextFileBuffer extends FileStoreFileBuffer implements ITex
       fSynchronizationStamp = fFileStore.fetchInfo().getLastModified();
 
       //			if (fAnnotationModel instanceof IPersistableAnnotationModel) {
-      //				IPersistableAnnotationModel persistableModel= (IPersistableAnnotationModel) fAnnotationModel;
+      //				IPersistableAnnotationModel persistableModel= (IPersistableAnnotationModel)
+      // fAnnotationModel;
       //				persistableModel.commit(fDocument);
       //			}
 
@@ -533,8 +538,10 @@ public class FileStoreTextFileBuffer extends FileStoreFileBuffer implements ITex
     //		// Probe content
     //		Reader reader= new DocumentReader(fDocument);
     //		try {
-    //			QualifiedName[] options= new QualifiedName[] { IContentDescription.CHARSET, IContentDescription.BYTE_ORDER_MARK };
-    //			IContentDescription description= Platform.getContentTypeManager().getDescriptionFor(reader, fFileStore.getName(), options);
+    //			QualifiedName[] options= new QualifiedName[] { IContentDescription.CHARSET,
+    // IContentDescription.BYTE_ORDER_MARK };
+    //			IContentDescription description= Platform.getContentTypeManager().getDescriptionFor(reader,
+    // fFileStore.getName(), options);
     //			if (description != null) {
     //				String encoding= description.getCharset();
     //				if (encoding != null)
@@ -607,7 +614,7 @@ public class FileStoreTextFileBuffer extends FileStoreFileBuffer implements ITex
       document.set(buffer.toString());
 
     } catch (IOException x) {
-      String msg = x.getMessage() == null ? "" : x.getMessage(); //$NON-NLS-1$
+      String msg = x.getMessage() == null ? "" : x.getMessage(); // $NON-NLS-1$
       IStatus s = new Status(IStatus.ERROR, FileBuffersPlugin.PLUGIN_ID, IStatus.OK, msg, x);
       throw new CoreException(s);
     } finally {

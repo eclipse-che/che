@@ -231,7 +231,8 @@ public class HandleFactory {
               && !(expression.descriptor
                   instanceof
                   ProblemMethodBinding)) { // chain in lambda element only if resolved properly.
-            //newElement = new org.eclipse.jdt.internal.core.SourceLambdaExpression((JavaElement) parentElement, expression).getMethod();
+            // newElement = new org.eclipse.jdt.internal.core.SourceLambdaExpression((JavaElement)
+            // parentElement, expression).getMethod();
             newElement =
                 LambdaFactory.createLambdaExpression((JavaElement) parentElement, expression)
                     .getMethod();
@@ -316,7 +317,8 @@ public class HandleFactory {
       }
     }
 
-    // walk projects in the scope and find the first one that has the given jar path in its classpath
+    // walk projects in the scope and find the first one that has the given jar path in its
+    // classpath
     IJavaProject[] projects;
     if (scope != null) {
       if (scope instanceof AbstractJavaSearchScope) {
@@ -372,7 +374,8 @@ public class HandleFactory {
           }
         }
       } catch (JavaModelException e) {
-        // JavaModelException from getResolvedClasspath - a problem occurred while accessing project: nothing we can do, ignore
+        // JavaModelException from getResolvedClasspath - a problem occurred while accessing
+        // project: nothing we can do, ignore
       }
     }
     return null;
@@ -401,8 +404,10 @@ public class HandleFactory {
           }
         }
       } catch (CoreException e) {
-        // CoreException from hasNature - should not happen since we check that the project is accessible
-        // JavaModelException from getPackageFragmentRoots - a problem occured while accessing project: nothing we can do, ignore
+        // CoreException from hasNature - should not happen since we check that the project is
+        // accessible
+        // JavaModelException from getPackageFragmentRoots - a problem occured while accessing
+        // project: nothing we can do, ignore
       }
     }
     return null;

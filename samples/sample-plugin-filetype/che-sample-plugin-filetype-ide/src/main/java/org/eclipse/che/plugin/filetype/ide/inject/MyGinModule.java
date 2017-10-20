@@ -28,7 +28,7 @@ public class MyGinModule extends AbstractGinModule {
 
   @Override
   protected void configure() {
-    //Nothing to do here, yet
+    // Nothing to do here, yet
   }
 
   @Provides

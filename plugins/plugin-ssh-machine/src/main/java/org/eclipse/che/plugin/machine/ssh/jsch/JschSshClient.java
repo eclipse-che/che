@@ -99,10 +99,10 @@ public class JschSshClient implements SshClient {
     }
   }
 
-  //todo add method to read env vars by client
+  // todo add method to read env vars by client
   // ChannelExec execAndGetCode = (ChannelExec)session.openChannel("execAndGetCode");
   // execAndGetCode.setCommand("env");
-  //envVars.entrySet()
+  // envVars.entrySet()
   //    .stream()
   //    .forEach(envVariableEntry -> execAndGetCode.setEnv(envVariableEntry.getKey(),
   //            envVariableEntry.getValue()));

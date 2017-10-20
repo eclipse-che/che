@@ -46,7 +46,8 @@ import org.eclipse.jdt.internal.core.search.matching.MethodPattern;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class IndexSelector {
 
-  //TODO: Bug 386113: "Search references" and "Type hierarchy" show inconsistent results with "External Plug-in Libraries" project
+  // TODO: Bug 386113: "Search references" and "Type hierarchy" show inconsistent results with
+  // "External Plug-in Libraries" project
   public static final int PROJECT_CAN_SEE_FOCUS = 0;
   public static final int PROJECT_SOURCE_CAN_NOT_SEE_FOCUS = 1;
   public static final int PROJECT_CAN_NOT_SEE_FOCUS = 2;
@@ -134,7 +135,8 @@ public class IndexSelector {
         if (entry.getEntryKind() == IClasspathEntry.CPE_PROJECT
             && entry.getPath().equals(focusPath)) {
           if (focusQualifiedNames
-              != null) { // builder state is usable, hence use it to try to reduce project which can see the focus...
+              != null) { // builder state is usable, hence use it to try to reduce project which can
+            // see the focus...
             State projectState =
                 (State)
                     JavaModelManager.getJavaModelManager()
@@ -230,7 +232,8 @@ public class IndexSelector {
       try {
         // See whether the state builder might be used to reduce the number of index locations
 
-        // find the projects from projectsAndJars that see the focus then walk those projects looking for the jars from projectsAndJars
+        // find the projects from projectsAndJars that see the focus then walk those projects
+        // looking for the jars from projectsAndJars
         int length = projectsAndJars.length;
         JavaProject[] projectsCanSeeFocus = new JavaProject[length];
         SimpleSet visitedProjects = new SimpleSet(length);
@@ -278,7 +281,8 @@ public class IndexSelector {
             }
           }
         }
-        // jar files can be included in the search scope without including one of the projects that references them, so scan all projects that have not been visited
+        // jar files can be included in the search scope without including one of the projects that
+        // references them, so scan all projects that have not been visited
         if (externalLibsToCheck.elementSize > 0) {
           IJavaProject[] allProjects = model.getJavaProjects();
           for (int i = 0, l = allProjects.length;

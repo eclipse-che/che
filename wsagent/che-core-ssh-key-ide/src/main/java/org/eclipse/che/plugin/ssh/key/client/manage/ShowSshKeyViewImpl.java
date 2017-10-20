@@ -86,6 +86,6 @@ public final class ShowSshKeyViewImpl extends Window implements ShowSshKeyView {
 
   @Override
   public void setDelegate(ActionDelegate delegate) {
-    //to do nothing
+    // to do nothing
   }
 }

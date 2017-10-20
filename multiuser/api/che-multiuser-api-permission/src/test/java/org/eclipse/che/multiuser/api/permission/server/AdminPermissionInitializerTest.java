@@ -71,62 +71,55 @@ public class AdminPermissionInitializerTest {
 
   @Test
   public void shouldAddSystemPermissionsOnPostUserPersistedEvent() throws Exception {
-    //given
+    // given
     when(userManager.getByName(eq(NAME))).thenReturn(user);
     initializer.init();
-    //when
+    // when
     initializer.onEvent(
         new PostUserPersistedEvent(new UserImpl(NAME, EMAIL, NAME, PASSWORD, emptyList())));
-    //then
+    // then
     verify(permissionsManager)
         .storePermission(
             argThat(
-                new ArgumentMatcher<SystemPermissionsImpl>() {
-                  @Override
-                  public boolean matches(Object argument) {
-                    return ((SystemPermissionsImpl) argument).getUserId().equals(NAME);
-                  }
-                }));
+                (ArgumentMatcher<SystemPermissionsImpl>)
+                    argument -> argument.getUserId().equals(NAME)));
   }
 
   @Test
   public void shouldNotAddSystemPermissionsOnPostUserPersistedEvent() throws Exception {
-    //given
+    // given
     when(userManager.getByName(anyString())).thenThrow(NotFoundException.class);
     initializer.init();
-    //when
+    // when
     initializer.onEvent(
         new PostUserPersistedEvent(
             new UserImpl(NAME + "1", EMAIL + "2", NAME + "3", PASSWORD, emptyList())));
-    //then
+    // then
     verifyNoMoreInteractions(permissionsManager);
   }
 
   @Test
   public void shouldAddSystemPermissionsForExistedAdmin() throws Exception {
-    //given
+    // given
     when(userManager.getByName(eq(NAME))).thenReturn(adminUser);
-    //when
+    // when
     initializer.init();
-    //then
+    // then
     verify(permissionsManager)
         .storePermission(
             argThat(
-                new ArgumentMatcher<SystemPermissionsImpl>() {
-                  @Override
-                  public boolean matches(Object argument) {
-                    return ((SystemPermissionsImpl) argument).getUserId().equals(adminUser.getId());
-                  }
-                }));
+                (ArgumentMatcher<SystemPermissionsImpl>)
+                    argument ->
+                        ((SystemPermissionsImpl) argument).getUserId().equals(adminUser.getId())));
   }
 
   @Test
   public void shouldNotAddSystemPermissionsIfAdminNotExists() throws Exception {
-    //given
+    // given
     when(userManager.getByName(anyString())).thenThrow(NotFoundException.class);
-    //when
+    // when
     initializer.init();
-    //then
+    // then
     verifyNoMoreInteractions(permissionsManager);
   }
 }

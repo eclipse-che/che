@@ -58,19 +58,19 @@ public class CommitTest {
   )
   public void testSimpleCommit(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
-    //add new File
+    // add new File
     addFile(connection, "DONTREADME", "secret");
-    //add changes
+    // add changes
     connection.add(AddParams.create(AddRequest.DEFAULT_PATTERN));
 
-    //when
+    // when
     CommitParams commitParams =
         CommitParams.create("Commit message").withAmend(false).withAll(false);
     Revision revision = connection.commit(commitParams);
 
-    //then
+    // then
     assertEquals(revision.getMessage(), commitParams.getMessage());
   }
 
@@ -80,17 +80,17 @@ public class CommitTest {
   )
   public void testCommitWithAddAll(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     addFile(connection, "README.txt", CONTENT);
     connection.add(AddParams.create(ImmutableList.of("README.txt")));
     connection.commit(CommitParams.create("Initial addd"));
 
-    //when
-    //change existing README
+    // when
+    // change existing README
     addFile(connection, "README.txt", "not secret");
 
-    //then
+    // then
     CommitParams commitParams =
         CommitParams.create("Other commit message").withAmend(false).withAll(true);
     Revision revision = connection.commit(commitParams);
@@ -103,19 +103,19 @@ public class CommitTest {
   )
   public void testAmendCommit(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     addFile(connection, "README.txt", CONTENT);
     connection.add(AddParams.create(ImmutableList.of("README.txt")));
     connection.commit(CommitParams.create("Initial addd"));
     int beforeCommitsCount = connection.log(LogParams.create()).getCommits().size();
 
-    //when
-    //change existing README
+    // when
+    // change existing README
     addFile(connection, "README.txt", "some new content");
     CommitParams commitParams = CommitParams.create("Amend commit").withAmend(true).withAll(true);
 
-    //then
+    // then
     Revision revision = connection.commit(commitParams);
     int afterCommitsCount = connection.log(LogParams.create()).getCommits().size();
     assertEquals(revision.getMessage(), commitParams.getMessage());
@@ -128,18 +128,18 @@ public class CommitTest {
   )
   public void testChangeMessageOfLastCommit(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
     addFile(connection, "NewFile.txt", CONTENT);
     connection.add(AddParams.create(ImmutableList.of("NewFile.txt")));
     connection.commit(CommitParams.create("First commit"));
     int beforeCommitsCount = connection.log(LogParams.create()).getCommits().size();
 
-    //when
+    // when
     CommitParams commitParams = CommitParams.create("Changed message").withAmend(true);
     connection.commit(commitParams);
 
-    //then
+    // then
     int afterCommitsCount = connection.log(LogParams.create()).getCommits().size();
     assertEquals(beforeCommitsCount, afterCommitsCount);
     assertEquals(
@@ -153,21 +153,21 @@ public class CommitTest {
   )
   public void testChangeMessageOfLastCommitWithSpecifiedPath(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
     addFile(connection, "NewFile.txt", CONTENT);
     connection.add(AddParams.create(ImmutableList.of("NewFile.txt")));
     connection.commit(CommitParams.create("First commit"));
     int beforeCommitsCount = connection.log(LogParams.create()).getCommits().size();
 
-    //when
+    // when
     CommitParams commitParams =
         CommitParams.create("Changed message")
             .withFiles(singletonList("NewFile.txt"))
             .withAmend(true);
     connection.commit(commitParams);
 
-    //then
+    // then
     int afterCommitsCount = connection.log(LogParams.create()).getCommits().size();
     assertEquals(beforeCommitsCount, afterCommitsCount);
     assertEquals(
@@ -181,16 +181,16 @@ public class CommitTest {
   )
   public void testCommitSeparateFiles(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
     addFile(connection, "File1.txt", CONTENT);
     addFile(connection, "File2.txt", CONTENT);
     connection.add(AddParams.create(asList("File1.txt", "File2.txt")));
 
-    //when
+    // when
     connection.commit(CommitParams.create("commit").withFiles(singletonList("File1.txt")));
 
-    //then
+    // then
     assertTrue(connection.status(emptyList()).getAdded().contains("File2.txt"));
     assertTrue(connection.status(emptyList()).getAdded().size() == 1);
   }
@@ -203,19 +203,19 @@ public class CommitTest {
   )
   public void testCommitWithNotStagedChanges(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
-    //Prepare unstaged deletion
+    // Prepare unstaged deletion
     addFile(connection, "FileToDelete.txt", "content");
     connection.add(AddParams.create(ImmutableList.of("FileToDelete.txt")));
     connection.commit(CommitParams.create("File to delete"));
     new File(connection.getWorkingDir().getAbsolutePath(), "FileToDelete.txt").delete();
-    //Prepare unstaged new file
+    // Prepare unstaged new file
     addFile(connection, "newFile", "content");
-    //Prepare unstaged editing
+    // Prepare unstaged editing
     write(new File(connection.getWorkingDir(), "README.txt").toPath(), "new content".getBytes());
 
-    //when
+    // when
     connection.commit(CommitParams.create("test commit"));
   }
 
@@ -227,10 +227,10 @@ public class CommitTest {
   )
   public void testCommitWithCleanIndex(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
 
-    //when
+    // when
     connection.commit(CommitParams.create("test commit"));
   }
 }

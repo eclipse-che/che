@@ -98,7 +98,8 @@ public class ReconcileWorkingCopyOperation extends JavaModelOperation {
       // make working copy consistent if needed and compute AST if needed
       makeConsistent(workingCopy);
 
-      // notify reconcile participants only if working copy was not consistent or if forcing problem detection
+      // notify reconcile participants only if working copy was not consistent or if forcing problem
+      // detection
       // (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=177319)
       if (!wasConsistent
           || ((this.reconcileFlags & ICompilationUnit.FORCE_PROBLEM_DETECTION) != 0)) {
@@ -146,7 +147,7 @@ public class ReconcileWorkingCopyOperation extends JavaModelOperation {
           CategorizedProblem problem = categorizedProblems[i];
           if (JavaModelManager.VERBOSE) {
             System.out.println(
-                "PROBLEM FOUND while reconciling : " + problem.getMessage()); //$NON-NLS-1$
+                "PROBLEM FOUND while reconciling : " + problem.getMessage()); // $NON-NLS-1$
           }
           if (this.progressMonitor != null && this.progressMonitor.isCanceled()) break;
           problemRequestor.acceptProblem(problem);
@@ -239,7 +240,8 @@ public class ReconcileWorkingCopyOperation extends JavaModelOperation {
       }
     } catch (JavaModelException e) {
       if (JavaProject.hasJavaNature(workingCopy.getJavaProject().getProject())) throw e;
-      // else JavaProject has lost its nature (or most likely was closed/deleted) while reconciling -> ignore
+      // else JavaProject has lost its nature (or most likely was closed/deleted) while reconciling
+      // -> ignore
       // (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=100919)
     } finally {
       JavaModelManager.getJavaModelManager().abortOnMissingSource.set(null);
@@ -252,7 +254,8 @@ public class ReconcileWorkingCopyOperation extends JavaModelOperation {
 
   private void notifyParticipants(final CompilationUnit workingCopy) {
     //		IJavaProject javaProject = getWorkingCopy().getJavaProject();
-    //		CompilationParticipant[] participants = manager.compilationParticipants.getCompilationParticipants
+    //		CompilationParticipant[] participants =
+    // manager.compilationParticipants.getCompilationParticipants
     //                (javaProject);
     //		if (participants == null) return;
     //
@@ -266,11 +269,14 @@ public class ReconcileWorkingCopyOperation extends JavaModelOperation {
     //                    } else if (exception instanceof OperationCanceledException)
     //                        throw (OperationCanceledException)exception;
     //                    else if (exception instanceof UnsupportedOperationException) {
-    //                        // might want to disable participant as it tried to modify the buffer of the working copy being reconciled
+    //                        // might want to disable participant as it tried to modify the buffer
+    // of the working copy being reconciled
     //                        Util.log(exception,
-    //                                 "Reconcile participant attempted to modify the buffer of the working copy being reconciled"); //$NON-NLS-1$
+    //                                 "Reconcile participant attempted to modify the buffer of the
+    // working copy being reconciled"); //$NON-NLS-1$
     //                    } else
-    //                        Util.log(exception, "Exception occurred in reconcile participant"); //$NON-NLS-1$
+    //                        Util.log(exception, "Exception occurred in reconcile participant");
+    // //$NON-NLS-1$
     //                }
     //
     //                public void run() throws Exception {
@@ -288,7 +294,7 @@ public class ReconcileWorkingCopyOperation extends JavaModelOperation {
     CompilationUnit workingCopy = getWorkingCopy();
     if (!workingCopy.isWorkingCopy()) {
       return new JavaModelStatus(
-          IJavaModelStatusConstants.ELEMENT_DOES_NOT_EXIST, workingCopy); //was destroyed
+          IJavaModelStatusConstants.ELEMENT_DOES_NOT_EXIST, workingCopy); // was destroyed
     }
     return status;
   }

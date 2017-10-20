@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
+import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 
 /**
  * Add env variable to docker dev-machine with url of Che API
@@ -27,11 +28,17 @@ public class ApiEndpointEnvVariableProvider implements Provider<String> {
   @Named("che.workspace.che_server_endpoint")
   private String apiEndpoint;
 
+  @Inject private DockerConnectorProvider dockerConnectorProvider;
+
   @Override
   public String get() {
-    String apiEndpointEnvVar = System.getenv(DockerInstanceRuntimeInfo.API_ENDPOINT_URL_VARIABLE);
-    if (Strings.isNullOrEmpty(apiEndpoint) && !Strings.isNullOrEmpty(apiEndpointEnvVar)) {
-      apiEndpoint = apiEndpointEnvVar;
+    if (Strings.isNullOrEmpty(apiEndpoint)) {
+      String apiEndpointEnvVar = System.getenv(DockerInstanceRuntimeInfo.API_ENDPOINT_URL_VARIABLE);
+      if (!Strings.isNullOrEmpty(apiEndpointEnvVar)) {
+        apiEndpoint = apiEndpointEnvVar;
+      } else {
+        apiEndpoint = dockerConnectorProvider.get().getApiEndpoint();
+      }
     }
     return DockerInstanceRuntimeInfo.API_ENDPOINT_URL_VARIABLE + '=' + apiEndpoint;
   }

@@ -151,7 +151,7 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor
     return RefactoringSaveHelper.SAVE_REFACTORING;
   }
 
-  //---- IRenameProcessor -------------------------------------
+  // ---- IRenameProcessor -------------------------------------
 
   public String getCurrentElementName() {
     return getSimpleCUName();
@@ -163,7 +163,7 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor
   }
 
   public RefactoringStatus checkNewElementName(String newName) throws CoreException {
-    Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
+    Assert.isNotNull(newName, "new name"); // $NON-NLS-1$
     String typeName = removeFileNameExtension(newName);
     RefactoringStatus result = Checks.checkCompilationUnitName(newName, fCu);
     if (fWillRenameType) result.merge(fRenameTypeProcessor.checkNewElementName(typeName));
@@ -185,7 +185,7 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor
     return pack.getCompilationUnit(getNewElementName());
   }
 
-  //---- ITextUpdating ---------------------------------------------
+  // ---- ITextUpdating ---------------------------------------------
 
   public boolean canEnableTextUpdating() {
     if (fRenameTypeProcessor == null) return false;
@@ -201,7 +201,7 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor
     if (fRenameTypeProcessor != null) fRenameTypeProcessor.setUpdateTextualMatches(update);
   }
 
-  //---- IReferenceUpdating -----------------------------------
+  // ---- IReferenceUpdating -----------------------------------
 
   public void setUpdateReferences(boolean update) {
     if (fRenameTypeProcessor != null) fRenameTypeProcessor.setUpdateReferences(update);
@@ -212,7 +212,7 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor
     return fRenameTypeProcessor.getUpdateReferences();
   }
 
-  //---- IQualifiedNameUpdating -------------------------------
+  // ---- IQualifiedNameUpdating -------------------------------
 
   public boolean canEnableQualifiedNameUpdating() {
     if (fRenameTypeProcessor == null) return false;
@@ -293,8 +293,8 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor
       return new RefactoringStatus();
     }
 
-    //for a test case what it's needed, see bug 24248
-    //(the type might be gone from the editor by now)
+    // for a test case what it's needed, see bug 24248
+    // (the type might be gone from the editor by now)
     if (fWillRenameType
         && fRenameTypeProcessor != null
         && !fRenameTypeProcessor.getType().exists()) {
@@ -342,7 +342,7 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor
   }
 
   private void computeRenameTypeRefactoring() throws CoreException {
-    if (getSimpleCUName().indexOf(".") != -1) { //$NON-NLS-1$
+    if (getSimpleCUName().indexOf(".") != -1) { // $NON-NLS-1$
       fRenameTypeProcessor = null;
       fWillRenameType = false;
       return;
@@ -380,9 +380,9 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor
    * @return main type name
    */
   private static String removeFileNameExtension(String fileName) {
-    if (fileName.lastIndexOf(".") == -1) //$NON-NLS-1$
+    if (fileName.lastIndexOf(".") == -1) // $NON-NLS-1$
     return fileName;
-    return fileName.substring(0, fileName.lastIndexOf(".")); //$NON-NLS-1$
+    return fileName.substring(0, fileName.lastIndexOf(".")); // $NON-NLS-1$
   }
 
   @Override

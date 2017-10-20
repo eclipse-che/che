@@ -51,7 +51,7 @@ public class InferTypeArgumentsConstraintsSolver {
     public static TTypeComparator INSTANCE = new TTypeComparator();
   }
 
-  private static final String CHOSEN_TYPE = "chosenType"; //$NON-NLS-1$
+  private static final String CHOSEN_TYPE = "chosenType"; // $NON-NLS-1$
 
   private final InferTypeArgumentsTCModel fTCModel;
   private TypeSetEnvironment fTypeSetEnvironment;
@@ -70,7 +70,7 @@ public class InferTypeArgumentsConstraintsSolver {
   }
 
   public InferTypeArgumentsUpdate solveConstraints(IProgressMonitor pm) {
-    pm.beginTask("", 2); //$NON-NLS-1$
+    pm.beginTask("", 2); // $NON-NLS-1$
     fUpdate = new InferTypeArgumentsUpdate();
 
     ConstraintVariable2[] allConstraintVariables = fTCModel.getAllConstraintVariables();
@@ -89,7 +89,8 @@ public class InferTypeArgumentsConstraintsSolver {
         newAllConstraintVariables.toArray(
             new ConstraintVariable2[newAllConstraintVariables.size()]);
 
-    //loop over all TypeEquivalenceSets and unify the elements from the fElemStructureEnv with the existing TypeEquivalenceSets
+    // loop over all TypeEquivalenceSets and unify the elements from the fElemStructureEnv with the
+    // existing TypeEquivalenceSets
     HashSet<TypeEquivalenceSet> allTypeEquivalenceSets = new HashSet<TypeEquivalenceSet>();
     for (int i = 0; i < allConstraintVariables.length; i++) {
       TypeEquivalenceSet typeEquivalenceSet = allConstraintVariables[i].getTypeEquivalenceSet();
@@ -124,8 +125,9 @@ public class InferTypeArgumentsConstraintsSolver {
   private void initializeTypeEstimates(ConstraintVariable2[] allConstraintVariables) {
     for (int i = 0; i < allConstraintVariables.length; i++) {
       ConstraintVariable2 cv = allConstraintVariables[i];
-      //TODO: not necessary for types that are not used in a TypeConstraint but only as type in CollectionElementVariable
-      //TODO: handle nested element variables; see ParametricStructureComputer.createAndInitVars()
+      // TODO: not necessary for types that are not used in a TypeConstraint but only as type in
+      // CollectionElementVariable
+      // TODO: handle nested element variables; see ParametricStructureComputer.createAndInitVars()
       TypeEquivalenceSet set = cv.getTypeEquivalenceSet();
       if (set == null) {
         set = new TypeEquivalenceSet(cv);
@@ -138,7 +140,7 @@ public class InferTypeArgumentsConstraintsSolver {
           typeEstimate = fTypeSetEnvironment.getUniverseTypeSet();
           for (int j = 0;
               j < cvs.length;
-              j++) //TODO: optimize: just try to find an immutable CV; if not found, use Universe
+              j++) // TODO: optimize: just try to find an immutable CV; if not found, use Universe
           typeEstimate = typeEstimate.intersectedWith(createInitialEstimate(cvs[j]));
           set.setTypeEstimate(typeEstimate);
         }
@@ -149,7 +151,8 @@ public class InferTypeArgumentsConstraintsSolver {
   private TypeSet createInitialEstimate(ConstraintVariable2 cv) {
     // TODO: check assumption: only immutable CVs have a type
     //		ParametricStructure parametricStructure= fElemStructureEnv.elemStructure(cv);
-    //		if (parametricStructure != null && parametricStructure != ParametricStructureComputer.ParametricStructure.NONE) {
+    //		if (parametricStructure != null && parametricStructure !=
+    // ParametricStructureComputer.ParametricStructure.NONE) {
     //			return SubTypesOfSingleton.create(parametricStructure.getBase());
     //		}
 
@@ -159,7 +162,7 @@ public class InferTypeArgumentsConstraintsSolver {
 
     } else if (cv instanceof IndependentTypeVariable2) {
       return fTypeSetEnvironment.getUniverseTypeSet();
-      //TODO: solve problem with recursive bounds
+      // TODO: solve problem with recursive bounds
       //			TypeVariable tv= (TypeVariable) type;
       //			TType[] bounds= tv.getBounds();
       //			TypeSet result= SubTypesOfSingleton.create(bounds[0].getErasure());
@@ -185,7 +188,7 @@ public class InferTypeArgumentsConstraintsSolver {
   }
 
   private void runSolver(SubProgressMonitor pm) {
-    pm.beginTask("", fWorkList.size() * 3); //$NON-NLS-1$
+    pm.beginTask("", fWorkList.size() * 3); // $NON-NLS-1$
     while (!fWorkList.isEmpty()) {
       // Get a variable whose type estimate has changed
       ConstraintVariable2 cv = fWorkList.removeFirst();
@@ -210,7 +213,7 @@ public class InferTypeArgumentsConstraintsSolver {
       ITypeConstraint2 tc = iter.next();
 
       maintainSimpleConstraint(tc);
-      //TODO: prune tcs which cannot cause further changes
+      // TODO: prune tcs which cannot cause further changes
       // Maybe these should be pruned after a special first loop over all ConstraintVariables,
       // Since this can only happen once for every CV in the work list.
       //				if (isConstantConstraint(stc))
@@ -238,7 +241,9 @@ public class InferTypeArgumentsConstraintsSolver {
       TypeSet xsection = leftEstimate.intersectedWith(rhsSubTypes);
 
       //			if (xsection.isEmpty()) // too bad, but this can happen
-      //				throw new IllegalStateException("Type estimate set is now empty for LHS in " + left + " <= " + right + "; estimates were " + leftEstimate + " <= " + rightEstimate); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+      //				throw new IllegalStateException("Type estimate set is now empty for LHS in " + left + "
+      // <= " + right + "; estimates were " + leftEstimate + " <= " + rightEstimate); //$NON-NLS-1$
+      // //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 
       leftSet.setTypeEstimate(xsection);
       fWorkList.addAll(Arrays.asList(leftSet.getContributingVariables()));
@@ -247,7 +252,9 @@ public class InferTypeArgumentsConstraintsSolver {
       TypeSet xsection = rightEstimate.intersectedWith(lhsSuperTypes);
 
       //			if (xsection.isEmpty())
-      //				throw new IllegalStateException("Type estimate set is now empty for RHS in " + left + " <= " + right + "; estimates were " + leftEstimate + " <= " + rightEstimate); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+      //				throw new IllegalStateException("Type estimate set is now empty for RHS in " + left + "
+      // <= " + right + "; estimates were " + leftEstimate + " <= " + rightEstimate); //$NON-NLS-1$
+      // //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 
       rightSet.setTypeEstimate(xsection);
       fWorkList.addAll(Arrays.asList(rightSet.getContributingVariables()));
@@ -255,16 +262,17 @@ public class InferTypeArgumentsConstraintsSolver {
   }
 
   private void chooseTypes(ConstraintVariable2[] allConstraintVariables, SubProgressMonitor pm) {
-    pm.beginTask("", allConstraintVariables.length); //$NON-NLS-1$
+    pm.beginTask("", allConstraintVariables.length); // $NON-NLS-1$
     for (int i = 0; i < allConstraintVariables.length; i++) {
       ConstraintVariable2 cv = allConstraintVariables[i];
 
       TypeEquivalenceSet set = cv.getTypeEquivalenceSet();
       if (set == null)
-        continue; //TODO: should not happen iff all unused constraint variables got pruned
-      //TODO: should calculate only once per EquivalenceRepresentative; can throw away estimate TypeSet afterwards
+        continue; // TODO: should not happen iff all unused constraint variables got pruned
+      // TODO: should calculate only once per EquivalenceRepresentative; can throw away estimate
+      // TypeSet afterwards
       TType type =
-          chooseSingleType((TypeSet) cv.getTypeEstimate()); //TODO: is null for Universe TypeSet
+          chooseSingleType((TypeSet) cv.getTypeEstimate()); // TODO: is null for Universe TypeSet
       setChosenType(cv, type);
 
       if (cv instanceof CollectionElementVariable2) {
@@ -399,7 +407,7 @@ public class InferTypeArgumentsConstraintsSolver {
     TType type = (TType) cv.getData(CHOSEN_TYPE);
     if (type != null) return type;
     TypeEquivalenceSet set = cv.getTypeEquivalenceSet();
-    if (set == null) { //TODO: should not have to set this here. Clean up when caching chosen type
+    if (set == null) { // TODO: should not have to set this here. Clean up when caching chosen type
       return null;
       //			// no representative == no restriction
       //			set= new TypeEquivalenceSet(cv);
