@@ -60,6 +60,7 @@ import org.eclipse.che.api.core.rest.ServiceContext;
 import org.eclipse.che.api.fs.server.FsDtoConverter;
 import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.ProjectService;
 import org.eclipse.che.api.project.server.notification.ProjectCreatedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
@@ -478,8 +479,9 @@ public class ProjectServiceApi {
 
     return Response.created(
             serviceContext
-                .getServiceUriBuilder()
-                .path(getClass(), "getChildren")
+                .getBaseUriBuilder()
+                .clone()
+                .path(ProjectService.class, "getChildren")
                 .build(new String[] {wsPath.substring(1)}, false))
         .build();
   }
