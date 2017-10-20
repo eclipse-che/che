@@ -58,7 +58,7 @@ public class CheCacheDisablingFilterTest {
   public void shouldSetDisablingCacheHeaders(String uri) throws Exception {
     when(request.getRequestURI()).thenReturn(uri);
 
-    //when
+    // when
     filter.doFilter(request, response, chain);
 
     verify(response).setDateHeader(eq("Date"), anyLong());
@@ -71,7 +71,7 @@ public class CheCacheDisablingFilterTest {
   public void shouldBypassDisablingCacheHeaders(String uri) throws Exception {
     when(request.getRequestURI()).thenReturn(uri);
 
-    //when
+    // when
     filter.doFilter(request, response, chain);
 
     verify(response, never()).setHeader(eq("Cache-control"), anyString());

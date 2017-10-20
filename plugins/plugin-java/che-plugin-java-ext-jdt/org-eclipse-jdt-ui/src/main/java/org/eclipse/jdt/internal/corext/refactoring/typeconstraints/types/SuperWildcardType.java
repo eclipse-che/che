@@ -83,11 +83,11 @@ public final class SuperWildcardType extends WildcardType {
 
   @Override
   public String getName() {
-    return internalGetName("super"); //$NON-NLS-1$
+    return internalGetName("super"); // $NON-NLS-1$
   }
 
   @Override
   protected String getPlainPrettySignature() {
-    return internalGetPrettySignature("super"); //$NON-NLS-1$
+    return internalGetPrettySignature("super"); // $NON-NLS-1$
   }
 }

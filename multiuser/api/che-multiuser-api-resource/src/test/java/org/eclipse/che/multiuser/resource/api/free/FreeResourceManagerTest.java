@@ -46,7 +46,7 @@ public class FreeResourceManagerTest {
 
   @Test
   public void shouldStoreFreeResourcesLimit() throws Exception {
-    //given
+    // given
     ResourceImpl resource = new ResourceImpl(TEST_RESOURCE_TYPE, 1, "unit");
     FreeResourcesLimitImpl resourcesLimitImpl =
         new FreeResourcesLimitImpl("account123", singletonList(resource));
@@ -61,10 +61,10 @@ public class FreeResourceManagerTest {
             .withAccountId("account123")
             .withResources(singletonList(resourceDto));
 
-    //when
+    // when
     FreeResourcesLimit storedLimit = manager.store(freeResourcesLimitDto);
 
-    //then
+    // then
     assertEquals(storedLimit, resourcesLimitImpl);
     verify(freeResourcesLimitDao).store(resourcesLimitImpl);
   }
@@ -74,23 +74,23 @@ public class FreeResourceManagerTest {
     expectedExceptionsMessageRegExp = "Required non-null free resources limit"
   )
   public void shouldThrowNpeOnStoringNullableFreeResourcesLimit() throws Exception {
-    //when
+    // when
     manager.store(null);
   }
 
   @Test
   public void shouldReturnFreeResourcesLimitForSpecifiedAccount() throws Exception {
-    //given
+    // given
     ResourceImpl resource = new ResourceImpl(TEST_RESOURCE_TYPE, 1, "unit");
     FreeResourcesLimitImpl resourcesLimitImpl =
         new FreeResourcesLimitImpl("account123", singletonList(resource));
 
     when(freeResourcesLimitDao.get(any())).thenReturn(resourcesLimitImpl);
 
-    //when
+    // when
     FreeResourcesLimit fetchedLimit = manager.get("account123");
 
-    //then
+    // then
     assertEquals(fetchedLimit, resourcesLimitImpl);
     verify(freeResourcesLimitDao).get("account123");
   }
@@ -100,16 +100,16 @@ public class FreeResourceManagerTest {
     expectedExceptionsMessageRegExp = "Required non-null account id"
   )
   public void shouldThrowNpeOnGettingFreeResourcesLimitByNullableAccountId() throws Exception {
-    //when
+    // when
     manager.get(null);
   }
 
   @Test
   public void shouldRemoveFreeResourcesLimitForSpecifiedAccount() throws Exception {
-    //when
+    // when
     manager.remove("account123");
 
-    //then
+    // then
     verify(freeResourcesLimitDao).remove("account123");
   }
 
@@ -118,13 +118,13 @@ public class FreeResourceManagerTest {
     expectedExceptionsMessageRegExp = "Required non-null account id"
   )
   public void shouldThrowNpeOnRemovingFreeResourcesLimitByNullableAccountId() throws Exception {
-    //when
+    // when
     manager.remove(null);
   }
 
   @Test
   public void shouldReturnFreeResourcesLimits() throws Exception {
-    //given
+    // given
     ResourceImpl resource = new ResourceImpl(TEST_RESOURCE_TYPE, 1, "unit");
     FreeResourcesLimitImpl resourcesLimitImpl =
         new FreeResourcesLimitImpl("account123", singletonList(resource));
@@ -132,10 +132,10 @@ public class FreeResourceManagerTest {
     when(freeResourcesLimitDao.getAll(anyInt(), anyInt()))
         .thenReturn(new Page<>(singletonList(resourcesLimitImpl), 5, 1, 9));
 
-    //when
+    // when
     Page<? extends FreeResourcesLimit> fetchedLimits = manager.getAll(1, 5);
 
-    //then
+    // then
     assertEquals(fetchedLimits.getTotalItemsCount(), 9);
     assertEquals(fetchedLimits.getSize(), 1);
     assertEquals(fetchedLimits.getItems().get(0), resourcesLimitImpl);

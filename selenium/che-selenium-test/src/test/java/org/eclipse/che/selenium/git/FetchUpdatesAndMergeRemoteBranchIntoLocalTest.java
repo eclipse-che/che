@@ -171,7 +171,8 @@ public class FetchUpdatesAndMergeRemoteBranchIntoLocalTest {
     events.clickEventLogBtn();
     events.waitExpectedMessage(PUSH_MSG);
 
-    // Open second project and fetch changes from master remote branch of test remote repository to master local branch.
+    // Open second project and fetch changes from master remote branch of test remote repository to
+    // master local branch.
     projectExplorer.openItemByPath(PROJECT_1);
     loader.waitOnClosed();
     projectExplorer.selectItem(PROJECT_2);
@@ -203,7 +204,7 @@ public class FetchUpdatesAndMergeRemoteBranchIntoLocalTest {
     events.clickEventLogBtn();
     events.waitExpectedMessage(MERGE_MESSAGE_1);
     events.waitExpectedMessage(MERGE_MESSAGE_2);
-    editor.closeAllTabs(); //TODO clarify the behaviour of the 'git merge'
+    editor.closeAllTabs(); // TODO clarify the behaviour of the 'git merge'
 
     // Checking merging
     consoles.closeProcessesArea();

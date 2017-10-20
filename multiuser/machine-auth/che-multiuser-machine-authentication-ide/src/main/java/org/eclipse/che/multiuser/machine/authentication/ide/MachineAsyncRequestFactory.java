@@ -112,7 +112,7 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory
   protected boolean isWsAgentRequest(String url) {
     if (appContext.getWorkspace() == null
         || !RUNNING.equals(appContext.getWorkspace().getStatus())) {
-      return false; //ws-agent not started
+      return false; // ws-agent not started
     }
     return url.contains(nullToEmpty(appContext.getWsAgentServerApiEndpoint()));
   }

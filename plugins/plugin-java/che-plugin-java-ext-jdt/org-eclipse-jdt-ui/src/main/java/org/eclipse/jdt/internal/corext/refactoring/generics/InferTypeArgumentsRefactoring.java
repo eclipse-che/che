@@ -87,10 +87,10 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class InferTypeArgumentsRefactoring extends Refactoring {
 
-  private static final String ATTRIBUTE_CLONE = "clone"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_LEAVE = "leave"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_CLONE = "clone"; // $NON-NLS-1$
+  private static final String ATTRIBUTE_LEAVE = "leave"; // $NON-NLS-1$
 
-  private static final String REWRITTEN = "InferTypeArgumentsRefactoring.rewritten"; //$NON-NLS-1$
+  private static final String REWRITTEN = "InferTypeArgumentsRefactoring.rewritten"; // $NON-NLS-1$
 
   private TextChangeManager fChangeManager;
   private IJavaElement[] fElements;
@@ -158,7 +158,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
       throws CoreException, OperationCanceledException {
     HashMap<IJavaProject, ArrayList<IJavaElement>> projectsToElements =
         getJavaElementsPerProject(fElements);
-    pm.beginTask("", projectsToElements.size() + 2); //$NON-NLS-1$
+    pm.beginTask("", projectsToElements.size() + 2); // $NON-NLS-1$
     final RefactoringStatus result = new RefactoringStatus();
     try {
       fTCModel = new InferTypeArgumentsTCModel();
@@ -167,8 +167,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 
       for (Iterator<Entry<IJavaProject, ArrayList<IJavaElement>>> iter =
               projectsToElements.entrySet().iterator();
-          iter.hasNext();
-          ) {
+          iter.hasNext(); ) {
         Entry<IJavaProject, ArrayList<IJavaElement>> entry = iter.next();
         IJavaProject project = entry.getKey();
         ArrayList<IJavaElement> javaElementsList = entry.getValue();
@@ -180,7 +179,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
         int batchSize = 150;
         int batches = ((cus.size() - 1) / batchSize) + 1;
         SubProgressMonitor projectMonitor = new SubProgressMonitor(pm, 1);
-        projectMonitor.beginTask("", batches); //$NON-NLS-1$
+        projectMonitor.beginTask("", batches); // $NON-NLS-1$
         projectMonitor.setTaskName(RefactoringCoreMessages.InferTypeArgumentsRefactoring_building);
         for (int i = 0; i < batches; i++) {
           List<ICompilationUnit> batch =
@@ -256,7 +255,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 
                 @Override
                 public void acceptBinding(String bindingKey, IBinding binding) {
-                  //do nothing
+                  // do nothing
                 }
               },
               batchMonitor);
@@ -268,7 +267,8 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 
       //			Display.getDefault().syncExec(new Runnable() {
       //				public void run() {
-      //					MessageDialog.openInformation(Display.getCurrent().getActiveShell(), "Debugging...", "after constraint gen");
+      //					MessageDialog.openInformation(Display.getCurrent().getActiveShell(), "Debugging...",
+      // "after constraint gen");
       //				}
       //			});
 
@@ -276,7 +276,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
       InferTypeArgumentsConstraintsSolver solver =
           new InferTypeArgumentsConstraintsSolver(fTCModel);
       InferTypeArgumentsUpdate updates = solver.solveConstraints(new SubProgressMonitor(pm, 1));
-      solver = null; //free caches
+      solver = null; // free caches
 
       fChangeManager = new TextChangeManager();
       rewriteDeclarations(updates, new SubProgressMonitor(pm, 1));
@@ -344,7 +344,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
     HashMap<ICompilationUnit, CuUpdate> updates = update.getUpdates();
 
     Set<Entry<ICompilationUnit, CuUpdate>> entrySet = updates.entrySet();
-    pm.beginTask("", entrySet.size()); //$NON-NLS-1$
+    pm.beginTask("", entrySet.size()); // $NON-NLS-1$
     pm.setTaskName(RefactoringCoreMessages.InferTypeArgumentsRefactoring_creatingChanges);
     for (Iterator<Entry<ICompilationUnit, CuUpdate>> iter = entrySet.iterator(); iter.hasNext(); ) {
       if (pm.isCanceled()) throw new OperationCanceledException();
@@ -359,15 +359,13 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
       CuUpdate cuUpdate = entry.getValue();
 
       for (Iterator<CollectionElementVariable2> cvIter = cuUpdate.getDeclarations().iterator();
-          cvIter.hasNext();
-          ) {
+          cvIter.hasNext(); ) {
         ConstraintVariable2 cv = cvIter.next();
         rewriteConstraintVariable(cv, rewrite, fTCModel, fLeaveUnconstrainedRaw, null);
       }
 
       for (Iterator<CastVariable2> castsIter = cuUpdate.getCastsToRemove().iterator();
-          castsIter.hasNext();
-          ) {
+          castsIter.hasNext(); ) {
         CastVariable2 castCv = castsIter.next();
         rewriteCastVariable(castCv, rewrite, fTCModel);
       }
@@ -398,8 +396,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
       CuUpdate cuUpdate = entry.getValue();
 
       for (Iterator<CollectionElementVariable2> cvIter = cuUpdate.getDeclarations().iterator();
-          cvIter.hasNext();
-          ) {
+          cvIter.hasNext(); ) {
         ConstraintVariable2 cv = cvIter.next();
         ParameterizedType newNode = rewriteConstraintVariable(cv, rewrite, model, false, types);
         if (newNode != null) result.add(newNode);
@@ -421,7 +418,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
         TypeVariable2 typeCv = (TypeVariable2) parentElement;
         return rewriteTypeVariable(typeCv, rewrite, tCModel, leaveUnconstraindRaw, types);
       } else {
-        //only rewrite type variables
+        // only rewrite type variables
       }
     }
     return null;
@@ -439,7 +436,8 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 
       if (types != null && !has(types, originalType)) return null;
 
-      // Must rewrite all type arguments in one batch. Do the rewrite when the first one is encountered; skip the others.
+      // Must rewrite all type arguments in one batch. Do the rewrite when the first one is
+      // encountered; skip the others.
       Object rewritten = originalType.getProperty(REWRITTEN);
       if (rewritten == REWRITTEN) return null;
       originalType.setProperty(REWRITTEN, REWRITTEN);
@@ -464,7 +462,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
               rewrite.createGroupDescription(
                   RefactoringCoreMessages.InferTypeArgumentsRefactoring_addTypeArguments));
       return newType;
-    } else { //TODO: other node types?
+    } else { // TODO: other node types?
       return null;
     }
   }
@@ -516,7 +514,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
                 nestedTypeArgumentCvs,
                 rewrite,
                 tCModel,
-                leaveUnconstraindRaw); //recursion
+                leaveUnconstraindRaw); // recursion
         if (nestedTypeArguments != null) {
           ParameterizedType parameterizedType = rewrite.getAST().newParameterizedType(typeArgument);
           for (int j = 0; j < nestedTypeArguments.length; j++)
@@ -532,7 +530,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
           if (unboundedWildcardAllowed(baseType)) {
             typeArgument = rewrite.getAST().newWildcardType();
           } else {
-            String object = rewrite.getImportRewrite().addImport("java.lang.Object"); //$NON-NLS-1$
+            String object = rewrite.getImportRewrite().addImport("java.lang.Object"); // $NON-NLS-1$
             typeArgument =
                 (Type) rewrite.getASTRewrite().createStringPlaceholder(object, ASTNode.SIMPLE_TYPE);
           }
@@ -540,8 +538,10 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
         //				ASTNode baseTypeParent= baseType.getParent();
         //				if (baseTypeParent instanceof ClassInstanceCreation) {
         //					//No ? allowed. Take java.lang.Object.
-        //					typeArgument= rewrite.getAST().newSimpleType(rewrite.getAST().newName(rewrite.getImportRewrite().addImport("java.lang.Object"))); //$NON-NLS-1$
-        //				} else if (baseTypeParent instanceof ArrayCreation || baseTypeParent instanceof InstanceofExpression) {
+        //					typeArgument=
+        // rewrite.getAST().newSimpleType(rewrite.getAST().newName(rewrite.getImportRewrite().addImport("java.lang.Object"))); //$NON-NLS-1$
+        //				} else if (baseTypeParent instanceof ArrayCreation || baseTypeParent instanceof
+        // InstanceofExpression) {
         //					//Only ? allowed.
         //					typeArgument= rewrite.getAST().newWildcardType();
         //				} else {
@@ -560,8 +560,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
     ArrayList<CollectionElementVariable2> typeArgumentCvs =
         new ArrayList<CollectionElementVariable2>();
     for (Iterator<CollectionElementVariable2> iter = elementCvs.values().iterator();
-        iter.hasNext();
-        ) {
+        iter.hasNext(); ) {
       CollectionElementVariable2 elementCv = iter.next();
       int index = elementCv.getDeclarationTypeVariableIndex();
       if (index != CollectionElementVariable2.NOT_DECLARED_TYPE_VARIABLE_INDEX) {
@@ -590,7 +589,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
   private static ASTNode rewriteCastVariable(
       CastVariable2 castCv,
       CompilationUnitRewrite rewrite,
-      InferTypeArgumentsTCModel tCModel) { //, List positionGroups) {
+      InferTypeArgumentsTCModel tCModel) { // , List positionGroups) {
     ASTNode node = castCv.getRange().getNode(rewrite.getRoot());
 
     ConstraintVariable2 expressionVariable = castCv.getExpressionVariable();
@@ -639,7 +638,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
    */
   @Override
   public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
-    pm.beginTask("", 1); //$NON-NLS-1$
+    pm.beginTask("", 1); // $NON-NLS-1$
     try {
       DynamicValidationStateChange result =
           new DynamicValidationStateChange(

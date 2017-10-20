@@ -35,7 +35,7 @@ public final class SignalKeyLogic {
   /** For webkit + IE I think also all browsers on windows? */
   public static final int IME_CODE = 229;
 
-  //TODO(danilatos): Use int map
+  // TODO(danilatos): Use int map
   private static final Set<Integer> NAVIGATION_KEYS = new HashSet<>();
 
   static {
@@ -159,7 +159,7 @@ public final class SignalKeyLogic {
         boolean isActuallyCtrlInput = false;
         if (isIME) {
           if (typeInt == Event.ONKEYDOWN) {
-            //Don't actually react to press key with keyCode==229
+            // Don't actually react to press key with keyCode==229
             result.type = null;
             return;
           } else {

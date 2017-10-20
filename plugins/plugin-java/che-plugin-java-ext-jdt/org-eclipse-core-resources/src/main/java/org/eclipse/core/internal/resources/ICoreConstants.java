@@ -22,10 +22,10 @@ public interface ICoreConstants {
   // Standard resource properties
   /** map of builders to their last built state. */
   public static final QualifiedName K_BUILD_LIST =
-      new QualifiedName(ResourcesPlugin.PI_RESOURCES, "BuildMap"); //$NON-NLS-1$
+      new QualifiedName(ResourcesPlugin.PI_RESOURCES, "BuildMap"); // $NON-NLS-1$
 
   /** Command line argument indicating a workspace refresh on startup is requested. */
-  public static final String REFRESH_ON_STARTUP = "-refresh"; //$NON-NLS-1$
+  public static final String REFRESH_ON_STARTUP = "-refresh"; // $NON-NLS-1$
 
   // resource info constants
   static final long I_NULL_SYNC_INFO = -1;
@@ -104,14 +104,14 @@ public interface ICoreConstants {
    * used. This version identifier is used to handle preference migration when old preferences are
    * loaded.
    */
-  public static final String PREF_VERSION_KEY = "version"; //$NON-NLS-1$
+  public static final String PREF_VERSION_KEY = "version"; // $NON-NLS-1$
 
   /**
    * A private preference stored in a preference node to indicate the preference version that is
    * used. This version identifier is used to handle preference migration when old preferences are
    * loaded.
    */
-  public static final String PREF_VERSION = "1"; //$NON-NLS-1$
+  public static final String PREF_VERSION = "1"; // $NON-NLS-1$
 
   // Internal status codes
   // Information Only [00-24]

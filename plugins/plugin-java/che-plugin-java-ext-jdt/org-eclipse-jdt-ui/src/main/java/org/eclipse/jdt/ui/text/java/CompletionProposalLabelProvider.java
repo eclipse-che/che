@@ -183,12 +183,12 @@ public class CompletionProposalLabelProvider {
       buf.append(displayName);
       int pos;
       do {
-        pos = buf.indexOf("? extends "); //$NON-NLS-1$
+        pos = buf.indexOf("? extends "); // $NON-NLS-1$
         if (pos >= 0) {
-          buf.replace(pos, pos + 10, "+"); //$NON-NLS-1$
+          buf.replace(pos, pos + 10, "+"); // $NON-NLS-1$
         } else {
-          pos = buf.indexOf("? super "); //$NON-NLS-1$
-          if (pos >= 0) buf.replace(pos, pos + 8, "-"); //$NON-NLS-1$
+          pos = buf.indexOf("? super "); // $NON-NLS-1$
+          if (pos >= 0) buf.replace(pos, pos + 8, "-"); // $NON-NLS-1$
         }
       } while (pos >= 0);
       return buf.toString().toCharArray();
@@ -360,7 +360,7 @@ public class CompletionProposalLabelProvider {
     char[] declaringTypeSignature = methodProposal.getDeclarationSignature();
     // special methods may not have a declaring type: methods defined on arrays etc.
     // TODO remove when bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=84690 gets fixed
-    if (declaringTypeSignature == null) return "java.lang.Object"; //$NON-NLS-1$
+    if (declaringTypeSignature == null) return "java.lang.Object"; // $NON-NLS-1$
     return SignatureUtil.stripSignatureToFQN(String.valueOf(declaringTypeSignature));
   }
 
@@ -416,7 +416,7 @@ public class CompletionProposalLabelProvider {
     // enclosing types as qualification
     int qIndex = findSimpleNameStart(fullName);
 
-    StyledString buf = new StyledString("{@link "); //$NON-NLS-1$
+    StyledString buf = new StyledString("{@link "); // $NON-NLS-1$
     buf.append(new String(fullName, qIndex, fullName.length - qIndex));
     buf.append('}');
     if (qIndex > 0) {
@@ -517,7 +517,7 @@ public class CompletionProposalLabelProvider {
     buffer.append('(');
     appendUnboundedParameterList(buffer, proposal);
     buffer.append(')');
-    buffer.append("  "); //$NON-NLS-1$
+    buffer.append("  "); // $NON-NLS-1$
     buffer.append(JavaTextMessages.ResultCollector_anonymous_type);
 
     if (proposal.getRequiredProposals() != null) {

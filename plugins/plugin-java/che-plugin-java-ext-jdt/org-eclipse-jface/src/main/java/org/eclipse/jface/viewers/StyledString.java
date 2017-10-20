@@ -118,7 +118,7 @@ public class StyledString {
   public StyledString insert(char ch, int offset) throws StringIndexOutOfBoundsException {
     if (offset < 0 || offset > builder.length()) {
       throw new StringIndexOutOfBoundsException(
-          "Invalid offset (" + offset + ")"); //$NON-NLS-1$//$NON-NLS-2$
+          "Invalid offset (" + offset + ")"); // $NON-NLS-1$//$NON-NLS-2$
     }
     //        if (hasRuns()) {
     //            int runIndex = findRun(offset);

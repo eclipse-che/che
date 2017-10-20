@@ -20,7 +20,7 @@ import java.rmi.RemoteException;
  * @author Evgen Vidolob
  */
 public interface MavenTerminal extends Remote {
-  //copied from org.codehaus.plexus.logging.Logger
+  // copied from org.codehaus.plexus.logging.Logger
   int LEVEL_DEBUG = 0;
   int LEVEL_INFO = 1;
   int LEVEL_WARN = 2;

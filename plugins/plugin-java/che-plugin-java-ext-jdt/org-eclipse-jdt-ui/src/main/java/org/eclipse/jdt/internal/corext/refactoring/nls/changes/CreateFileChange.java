@@ -49,8 +49,8 @@ public class CreateFileChange extends ResourceChange {
   }
 
   public CreateFileChange(IPath path, String source, String encoding, long stampToRestore) {
-    Assert.isNotNull(path, "path"); //$NON-NLS-1$
-    Assert.isNotNull(source, "source"); //$NON-NLS-1$
+    Assert.isNotNull(path, "path"); // $NON-NLS-1$
+    Assert.isNotNull(source, "source"); // $NON-NLS-1$
     fPath = path;
     fSource = source;
     fEncoding = encoding;
@@ -72,7 +72,7 @@ public class CreateFileChange extends ResourceChange {
   */
 
   protected void setEncoding(String encoding, boolean explicit) {
-    Assert.isNotNull(encoding, "encoding"); //$NON-NLS-1$
+    Assert.isNotNull(encoding, "encoding"); // $NON-NLS-1$
     fEncoding = encoding;
     fExplicitEncoding = explicit;
   }
@@ -178,7 +178,7 @@ public class CreateFileChange extends ResourceChange {
   }
 
   protected IFile getOldFile(IProgressMonitor pm) throws OperationCanceledException {
-    pm.beginTask("", 1); //$NON-NLS-1$
+    pm.beginTask("", 1); // $NON-NLS-1$
     try {
       return ResourcesPlugin.getWorkspace().getRoot().getFile(fPath);
     } finally {

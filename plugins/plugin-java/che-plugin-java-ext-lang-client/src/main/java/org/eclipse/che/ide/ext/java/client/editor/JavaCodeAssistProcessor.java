@@ -87,7 +87,7 @@ public class JavaCodeAssistProcessor implements CodeAssistProcessor {
     svgs.put("template", resources.template());
     svgs.put("javadoc", resources.javadoc());
     svgs.put("annotation", resources.annotationItem());
-    //todo create images for annotations
+    // todo create images for annotations
     svgs.put("privateAnnotation", resources.annotationItem());
     svgs.put("protectedAnnotation", resources.annotationItem());
     svgs.put("defaultAnnotation", resources.annotationItem());

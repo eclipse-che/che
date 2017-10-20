@@ -146,37 +146,37 @@ public class UnusedCodeCleanUp extends AbstractMultiFix {
 
     if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS)) {
     } else {
-      buf.append("import pack.Bar;\n"); //$NON-NLS-1$
+      buf.append("import pack.Bar;\n"); // $NON-NLS-1$
     }
-    buf.append("class Example {\n"); //$NON-NLS-1$
+    buf.append("class Example {\n"); // $NON-NLS-1$
     if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS)
         && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES)) {
     } else {
-      buf.append("    private class Sub {}\n"); //$NON-NLS-1$
+      buf.append("    private class Sub {}\n"); // $NON-NLS-1$
     }
-    buf.append("    public Example(boolean b) {}\n"); //$NON-NLS-1$
+    buf.append("    public Example(boolean b) {}\n"); // $NON-NLS-1$
     if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS)
         && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_CONSTRUCTORS)) {
     } else {
-      buf.append("    private Example() {}\n"); //$NON-NLS-1$
+      buf.append("    private Example() {}\n"); // $NON-NLS-1$
     }
     if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS)
         && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS)) {
     } else {
-      buf.append("    private int fField;\n"); //$NON-NLS-1$
+      buf.append("    private int fField;\n"); // $NON-NLS-1$
     }
     if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS)
         && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_METHODS)) {
     } else {
-      buf.append("    private void foo() {}\n"); //$NON-NLS-1$
+      buf.append("    private void foo() {}\n"); // $NON-NLS-1$
     }
-    buf.append("    public void bar() {\n"); //$NON-NLS-1$
+    buf.append("    public void bar() {\n"); // $NON-NLS-1$
     if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES)) {
     } else {
-      buf.append("        int i= 10;\n"); //$NON-NLS-1$
+      buf.append("        int i= 10;\n"); // $NON-NLS-1$
     }
-    buf.append("    }\n"); //$NON-NLS-1$
-    buf.append("}\n"); //$NON-NLS-1$
+    buf.append("    }\n"); // $NON-NLS-1$
+    buf.append("}\n"); // $NON-NLS-1$
 
     return buf.toString();
   }

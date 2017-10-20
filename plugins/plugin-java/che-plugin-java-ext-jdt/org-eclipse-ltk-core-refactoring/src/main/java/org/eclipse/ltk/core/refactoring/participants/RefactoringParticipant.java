@@ -235,7 +235,7 @@ public abstract class RefactoringParticipant extends PlatformObject {
     return getProcessor().getRefactoring().getTextChange(element);
   }
 
-  //---- helper method ----------------------------------------------------
+  // ---- helper method ----------------------------------------------------
 
   /* package */ void setDescriptor(ParticipantDescriptor descriptor) {
     Assert.isNotNull(descriptor);

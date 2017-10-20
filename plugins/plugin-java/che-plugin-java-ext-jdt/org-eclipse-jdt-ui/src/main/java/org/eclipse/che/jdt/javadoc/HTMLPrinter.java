@@ -23,7 +23,7 @@ public class HTMLPrinter {
   private static final String UNIT; // See https://bugs.eclipse.org/bugs/show_bug.cgi?id=155993
 
   static {
-    UNIT = "px"; ///Util.isMac() ? "px" : "pt";   //$NON-NLS-1$//$NON-NLS-2$
+    UNIT = "px"; // /Util.isMac() ? "px" : "pt";   //$NON-NLS-1$//$NON-NLS-2$
   }
 
   private static Color BG_COLOR_RGB =
@@ -97,10 +97,10 @@ public class HTMLPrinter {
    * @see #addPreFormatted(StringBuffer, String) for rendering with an {@link HTML2TextReader}
    */
   public static String convertToHTMLContent(String content) {
-    content = replace(content, '&', "&amp;"); //$NON-NLS-1$
-    content = replace(content, '"', "&quot;"); //$NON-NLS-1$
-    content = replace(content, '<', "&lt;"); //$NON-NLS-1$
-    return replace(content, '>', "&gt;"); //$NON-NLS-1$
+    content = replace(content, '&', "&amp;"); // $NON-NLS-1$
+    content = replace(content, '"', "&quot;"); // $NON-NLS-1$
+    content = replace(content, '<', "&lt;"); // $NON-NLS-1$
+    return replace(content, '>', "&gt;"); // $NON-NLS-1$
   }
 
   /**
@@ -117,11 +117,11 @@ public class HTMLPrinter {
    * @since 3.7
    */
   public static String convertToHTMLContentWithWhitespace(String content) {
-    content = replace(content, '&', "&amp;"); //$NON-NLS-1$
-    content = replace(content, '"', "&quot;"); //$NON-NLS-1$
-    content = replace(content, '<', "&lt;"); //$NON-NLS-1$
-    content = replace(content, '>', "&gt;"); //$NON-NLS-1$
-    return "<span style='white-space:pre'>" + content + "</span>"; //$NON-NLS-1$ //$NON-NLS-2$
+    content = replace(content, '&', "&amp;"); // $NON-NLS-1$
+    content = replace(content, '"', "&quot;"); // $NON-NLS-1$
+    content = replace(content, '<', "&lt;"); // $NON-NLS-1$
+    content = replace(content, '>', "&gt;"); // $NON-NLS-1$
+    return "<span style='white-space:pre'>" + content + "</span>"; // $NON-NLS-1$ //$NON-NLS-2$
   }
 
   public static String read(Reader rd) {
@@ -149,7 +149,7 @@ public class HTMLPrinter {
 
     StringBuffer pageProlog = new StringBuffer(300);
 
-    pageProlog.append("<html>"); //$NON-NLS-1$
+    pageProlog.append("<html>"); // $NON-NLS-1$
 
     appendStyleSheet(pageProlog, styleSheet);
 
@@ -159,9 +159,9 @@ public class HTMLPrinter {
   }
 
   private static void appendColors(StringBuffer pageProlog, Color fgRGB, Color bgRGB) {
-    pageProlog.append("<body text=\""); //$NON-NLS-1$
+    pageProlog.append("<body text=\""); // $NON-NLS-1$
     appendColor(pageProlog, fgRGB);
-    pageProlog.append("\">"); //$NON-NLS-1$
+    pageProlog.append("\">"); // $NON-NLS-1$
   }
 
   private static void appendColor(StringBuffer buffer, Color rgb) {
@@ -216,9 +216,9 @@ public class HTMLPrinter {
     //		appendColor(bg, BG_COLOR_RGB);
     //		styleSheet= styleSheet.replaceAll("InfoBackground", bg.toString()); //$NON-NLS-1$
 
-    buffer.append("<head><style CHARSET=\"UTF-8\" TYPE=\"text/css\">"); //$NON-NLS-1$
+    buffer.append("<head><style CHARSET=\"UTF-8\" TYPE=\"text/css\">"); // $NON-NLS-1$
     buffer.append(styleSheet);
-    buffer.append("</style></head>"); //$NON-NLS-1$
+    buffer.append("</style></head>"); // $NON-NLS-1$
   }
   //
   //	private static void appendStyleSheetURL(StringBuffer buffer, URL styleSheetURL) {
@@ -236,7 +236,7 @@ public class HTMLPrinter {
   //
   public static void insertPageProlog(StringBuffer buffer, int position) {
     StringBuffer pageProlog = new StringBuffer(60);
-    pageProlog.append("<html>"); //$NON-NLS-1$
+    pageProlog.append("<html>"); // $NON-NLS-1$
     appendColors(pageProlog, FG_COLOR_RGB, BG_COLOR_RGB);
     buffer.insert(position, pageProlog.toString());
   }
@@ -258,36 +258,36 @@ public class HTMLPrinter {
   }
 
   public static void addPageEpilog(StringBuffer buffer) {
-    buffer.append("</body></html>"); //$NON-NLS-1$
+    buffer.append("</body></html>"); // $NON-NLS-1$
   }
 
   public static void startBulletList(StringBuffer buffer) {
-    buffer.append("<ul>"); //$NON-NLS-1$
+    buffer.append("<ul>"); // $NON-NLS-1$
   }
 
   public static void endBulletList(StringBuffer buffer) {
-    buffer.append("</ul>"); //$NON-NLS-1$
+    buffer.append("</ul>"); // $NON-NLS-1$
   }
 
   public static void addBullet(StringBuffer buffer, String bullet) {
     if (bullet != null) {
-      buffer.append("<li>"); //$NON-NLS-1$
+      buffer.append("<li>"); // $NON-NLS-1$
       buffer.append(bullet);
-      buffer.append("</li>"); //$NON-NLS-1$
+      buffer.append("</li>"); // $NON-NLS-1$
     }
   }
 
   public static void addSmallHeader(StringBuffer buffer, String header) {
     if (header != null) {
-      buffer.append("<h5>"); //$NON-NLS-1$
+      buffer.append("<h5>"); // $NON-NLS-1$
       buffer.append(header);
-      buffer.append("</h5>"); //$NON-NLS-1$
+      buffer.append("</h5>"); // $NON-NLS-1$
     }
   }
 
   public static void addParagraph(StringBuffer buffer, String paragraph) {
     if (paragraph != null) {
-      buffer.append("<p>"); //$NON-NLS-1$
+      buffer.append("<p>"); // $NON-NLS-1$
       buffer.append(paragraph);
     }
   }
@@ -344,12 +344,17 @@ public class HTMLPrinter {
   //		String size= Integer.toString(fontData.getHeight()) + UNIT;
   //		String family= "'" + fontData.getName() + "',sans-serif"; //$NON-NLS-1$ //$NON-NLS-2$
   //
-  //		styles= styles.replaceFirst("(html\\s*\\{.*(?:\\s|;)font-size:\\s*)\\d+pt(\\;?.*\\})", "$1" + size + "$2"); //$NON-NLS-1$
+  //		styles= styles.replaceFirst("(html\\s*\\{.*(?:\\s|;)font-size:\\s*)\\d+pt(\\;?.*\\})", "$1" +
+  // size + "$2"); //$NON-NLS-1$
   // $NON-NLS-2$ //$NON-NLS-3$
-  //		styles= styles.replaceFirst("(html\\s*\\{.*(?:\\s|;)font-weight:\\s*)\\w+(\\;?.*\\})", "$1" + (bold ? "bold" : "normal") + "$2");
+  //		styles= styles.replaceFirst("(html\\s*\\{.*(?:\\s|;)font-weight:\\s*)\\w+(\\;?.*\\})", "$1" +
+  // (bold ? "bold" : "normal") + "$2");
   // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-  //		styles= styles.replaceFirst("(html\\s*\\{.*(?:\\s|;)font-style:\\s*)\\w+(\\;?.*\\})", "$1" + (italic ? "italic" : "normal") + "$2"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-  //		styles= styles.replaceFirst("(html\\s*\\{.*(?:\\s|;)font-family:\\s*).+?(;.*\\})", "$1" + family + "$2"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+  //		styles= styles.replaceFirst("(html\\s*\\{.*(?:\\s|;)font-style:\\s*)\\w+(\\;?.*\\})", "$1" +
+  // (italic ? "italic" : "normal") + "$2"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+  // //$NON-NLS-5$
+  //		styles= styles.replaceFirst("(html\\s*\\{.*(?:\\s|;)font-family:\\s*).+?(;.*\\})", "$1" +
+  // family + "$2"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
   //		return styles;
   //	}
 }

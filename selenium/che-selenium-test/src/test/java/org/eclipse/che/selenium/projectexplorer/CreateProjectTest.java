@@ -51,7 +51,7 @@ public class CreateProjectTest {
   public void openProjectWizard() throws Exception {
     projectExplorer.waitProjectExplorer();
     loader.waitOnClosed();
-    //create project with help context menu in the list of projects
+    // create project with help context menu in the list of projects
     createProject(PROJECT_NAMES.get(0), Wizard.PackagingMavenType.NOT_SPECIFIED);
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAMES.get(0));

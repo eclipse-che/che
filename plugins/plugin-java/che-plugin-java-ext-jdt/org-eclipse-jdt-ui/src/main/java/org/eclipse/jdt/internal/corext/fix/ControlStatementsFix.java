@@ -240,7 +240,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
       return satisfiesPrecondition(controlStatement, childDescriptor, false, false);
     }
 
-    //Can the block around child with childDescriptor of controlStatement be removed?
+    // Can the block around child with childDescriptor of controlStatement be removed?
     private static boolean satisfiesPrecondition(
         Statement controlStatement,
         ChildPropertyDescriptor childDescriptor,
@@ -269,19 +269,20 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
         //   ;
 
         if (((IfStatement) controlStatement).getThenStatement() != child)
-          return true; //can always remove blocks in else part
+          return true; // can always remove blocks in else part
 
         IfStatement ifStatement = (IfStatement) controlStatement;
-        if (ifStatement.getElseStatement() == null) return true; //can always remove if no else part
+        if (ifStatement.getElseStatement() == null)
+          return true; // can always remove if no else part
 
         return !hasUnblockedIf((Statement) singleStatement, onlyReturnAndThrows, cleanUpCheck);
       } else {
-        //if (true)
+        // if (true)
         // while (true) {
         //  if (false)
         //   ;
         // }
-        //else
+        // else
         // ;
         if (!hasUnblockedIf((Statement) singleStatement, onlyReturnAndThrows, cleanUpCheck))
           return true;
@@ -294,7 +295,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
             body = ((IfStatement) parent).getThenStatement();
             if (body == currentChild
                 && ((IfStatement) parent).getElseStatement()
-                    != null) //->currentChild is an unblocked then part
+                    != null) // ->currentChild is an unblocked then part
             return false;
           } else if (parent instanceof WhileStatement) {
             body = ((WhileStatement) parent).getBody();
@@ -307,7 +308,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
           } else {
             return true;
           }
-          if (body != currentChild) //->parents child is a block
+          if (body != currentChild) // ->parents child is a block
           return true;
 
           currentChild = parent;

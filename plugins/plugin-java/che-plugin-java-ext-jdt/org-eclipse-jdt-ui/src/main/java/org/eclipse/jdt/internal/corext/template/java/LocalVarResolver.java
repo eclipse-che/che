@@ -21,7 +21,7 @@ public class LocalVarResolver extends AbstractVariableResolver {
 
   /** Default ctor for instantiation by the extension point. */
   public LocalVarResolver() {
-    this("java.lang.Object"); //$NON-NLS-1$
+    this("java.lang.Object"); // $NON-NLS-1$
   }
 
   LocalVarResolver(String defaultType) {

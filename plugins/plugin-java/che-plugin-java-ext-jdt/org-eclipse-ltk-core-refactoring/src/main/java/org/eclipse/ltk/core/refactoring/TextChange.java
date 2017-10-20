@@ -74,7 +74,7 @@ public abstract class TextChange extends TextEditBasedChange {
     super(name);
   }
 
-  //---- Edit management -----------------------------------------------
+  // ---- Edit management -----------------------------------------------
 
   /**
    * Sets the root text edit that should be applied to the document represented by this text change.
@@ -82,7 +82,7 @@ public abstract class TextChange extends TextEditBasedChange {
    * @param edit the root text edit. The root text edit can only be set once.
    */
   public void setEdit(TextEdit edit) {
-    Assert.isTrue(fEdit == null, "Root edit can only be set once"); //$NON-NLS-1$
+    Assert.isTrue(fEdit == null, "Root edit can only be set once"); // $NON-NLS-1$
     Assert.isTrue(edit != null);
     fEdit = edit;
   }
@@ -115,7 +115,7 @@ public abstract class TextChange extends TextEditBasedChange {
    * @param group the text edit change group to add
    */
   public void addTextEditChangeGroup(TextEditChangeGroup group) {
-    Assert.isTrue(fEdit != null, "Can only add a description if a root edit exists"); //$NON-NLS-1$
+    Assert.isTrue(fEdit != null, "Can only add a description if a root edit exists"); // $NON-NLS-1$
     addChangeGroup(group);
   }
 
@@ -140,11 +140,11 @@ public abstract class TextChange extends TextEditBasedChange {
    * @since 3.1
    */
   public void addEdit(TextEdit edit) throws MalformedTreeException {
-    Assert.isTrue(fEdit != null, "root must exist to add an edit"); //$NON-NLS-1$
+    Assert.isTrue(fEdit != null, "root must exist to add an edit"); // $NON-NLS-1$
     fEdit.addChild(edit);
   }
 
-  //---- Document management -----------------------------------------------
+  // ---- Document management -----------------------------------------------
 
   /**
    * Acquires a reference to the document to be changed by this text change. A document acquired by
@@ -196,7 +196,7 @@ public abstract class TextChange extends TextEditBasedChange {
 
   /** {@inheritDoc} */
   public Change perform(IProgressMonitor pm) throws CoreException {
-    pm.beginTask("", 3); //$NON-NLS-1$
+    pm.beginTask("", 3); // $NON-NLS-1$
     IDocument document = null;
 
     try {
@@ -251,7 +251,7 @@ public abstract class TextChange extends TextEditBasedChange {
     }
   }
 
-  //---- Method to access the current content of the text change ---------
+  // ---- Method to access the current content of the text change ---------
 
   /**
    * Returns the document this text change is associated to. The document returned is computed at
@@ -269,7 +269,7 @@ public abstract class TextChange extends TextEditBasedChange {
   public IDocument getCurrentDocument(IProgressMonitor pm) throws CoreException {
     if (pm == null) pm = new NullProgressMonitor();
     IDocument result = null;
-    pm.beginTask("", 2); //$NON-NLS-1$
+    pm.beginTask("", 2); // $NON-NLS-1$
     try {
       result = acquireDocument(new SubProgressMonitor(pm, 1));
     } finally {
@@ -295,7 +295,7 @@ public abstract class TextChange extends TextEditBasedChange {
     return getContent(document, region, expandRegionToFullLine, surroundingLines);
   }
 
-  //---- Method to access the preview content of the text change ---------
+  // ---- Method to access the preview content of the text change ---------
 
   /**
    * Returns the edit that got executed during preview generation instead of the given original. The
@@ -443,9 +443,10 @@ public abstract class TextChange extends TextEditBasedChange {
         region.getOffset() <= currentRegion.getOffset()
             && currentRegion.getOffset() + currentRegion.getLength()
                 <= region.getOffset() + region.getLength());
-    // Make sure that all edits in the change groups are rooted under the edit the text change stand for.
+    // Make sure that all edits in the change groups are rooted under the edit the text change stand
+    // for.
     TextEdit root = getEdit();
-    Assert.isNotNull(root, "No root edit"); //$NON-NLS-1$
+    Assert.isNotNull(root, "No root edit"); // $NON-NLS-1$
     for (int c = 0; c < changeGroups.length; c++) {
       TextEditBasedChangeGroup group = changeGroups[c];
       TextEdit[] edits = group.getTextEdits();
@@ -470,7 +471,7 @@ public abstract class TextChange extends TextEditBasedChange {
         surroundingLines);
   }
 
-  //---- private helper methods --------------------------------------------------
+  // ---- private helper methods --------------------------------------------------
 
   private PreviewAndRegion getPreviewDocument(
       TextEditBasedChangeGroup[] changes, IProgressMonitor pm) throws CoreException {

@@ -51,41 +51,41 @@ public class TestGeneratorUtils {
 
   @Test
   public void shouldParseRootDir() {
-    //given
+    // given
     String[] args = new String[] {"--rootDir=/tmp/dir"};
-    //when
+    // when
     File actual = GeneratorUtils.getRootFolder(args);
-    //then
+    // then
     assertEquals(actual.getAbsolutePath(), "/tmp/dir");
   }
 
   @Test
   public void shouldReturnCurrentDirIfNotSet() {
-    //given
+    // given
     String[] args = new String[] {};
-    //when
+    // when
     File actual = GeneratorUtils.getRootFolder(args);
-    //then
+    // then
     assertEquals(actual.getPath(), ".");
   }
 
   @Test
   public void shouldReturnCurrentPathIfTooManyArguments() {
-    //given
+    // given
     String[] args = new String[] {"--rootDir=/tmp/dir", "--par2=val2"};
-    //when
+    // when
     File actual = GeneratorUtils.getRootFolder(args);
-    //then
+    // then
     assertEquals(actual.getPath(), ".");
   }
 
   @Test
   public void shouldBeAbleToParseSingleArgument() {
-    //given
+    // given
     String[] args = new String[] {"--rootDir=/tmp/dir"};
-    //when
+    // when
     Map<String, Set<String>> actual = GeneratorUtils.parseArgs(args);
-    //then
+    // then
     assertEquals(actual.size(), 1);
     Set<String> values = actual.get("rootDir");
     assertEquals(values.size(), 1);
@@ -94,11 +94,11 @@ public class TestGeneratorUtils {
 
   @Test
   public void shouldBeAbleToParseTwoArgument() {
-    //given
+    // given
     String[] args = new String[] {"--rootDir=/tmp/dir", "--par2=val2"};
-    //when
+    // when
     Map<String, Set<String>> actual = GeneratorUtils.parseArgs(args);
-    //then
+    // then
     assertEquals(actual.size(), 2);
     Set<String> values = actual.get("rootDir");
     assertEquals(values.size(), 1);
@@ -107,21 +107,21 @@ public class TestGeneratorUtils {
 
   @Test
   public void shouldBeAbleToParseEmptyArgument() {
-    //given
+    // given
     String[] args = new String[] {};
-    //when
+    // when
     Map<String, Set<String>> actual = GeneratorUtils.parseArgs(args);
-    //then
+    // then
     assertEquals(actual.size(), 0);
   }
 
   @Test
   public void shouldBeAbleToParseMultipleVales() {
-    //given
+    // given
     String[] args = new String[] {"--rootDir=/tmp/dir", "--rootDir=/tmp/dir2", "--par2=val2"};
-    //when
+    // when
     Map<String, Set<String>> actual = GeneratorUtils.parseArgs(args);
-    //then
+    // then
     assertEquals(actual.size(), 2);
     Set<String> values = actual.get("rootDir");
     assertEquals(values.size(), 2);

@@ -70,7 +70,8 @@ public class JavaManipulationPlugin /*extends Plugin */ {
   //			logErrorMessage(message);
   //			return;
   //		}
-  //		MultiStatus multi= new MultiStatus(getPluginId(), IStatusConstants.INTERNAL_ERROR, message, null);
+  //		MultiStatus multi= new MultiStatus(getPluginId(), IStatusConstants.INTERNAL_ERROR, message,
+  // null);
   //		multi.add(status);
   //		log(multi);
   //	}

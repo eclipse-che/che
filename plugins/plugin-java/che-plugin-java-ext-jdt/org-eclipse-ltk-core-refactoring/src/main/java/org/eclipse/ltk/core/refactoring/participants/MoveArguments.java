@@ -62,10 +62,10 @@ public class MoveArguments extends RefactoringArguments {
    * @since 3.2
    */
   public String toString() {
-    return "move to " //$NON-NLS-1$
+    return "move to " // $NON-NLS-1$
         + (fUpdateReferences
             ? "(update references) "
-            : "(don't update references) ") //$NON-NLS-1$//$NON-NLS-2$
+            : "(don't update references) ") // $NON-NLS-1$//$NON-NLS-2$
         + fDestination.toString();
   }
 }

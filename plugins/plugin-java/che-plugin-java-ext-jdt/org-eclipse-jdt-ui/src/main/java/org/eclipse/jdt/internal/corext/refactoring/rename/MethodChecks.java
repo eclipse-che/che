@@ -33,7 +33,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 
 public class MethodChecks {
 
-  //no instances
+  // no instances
   private MethodChecks() {}
 
   /**
@@ -120,7 +120,7 @@ public class MethodChecks {
     IProgressMonitor subMonitor = new SubProgressMonitor(monitor, 1);
     try {
       IType[] classes = hierarchy.getAllClasses();
-      subMonitor.beginTask("", classes.length); //$NON-NLS-1$
+      subMonitor.beginTask("", classes.length); // $NON-NLS-1$
       for (int i = 0; i < classes.length; i++) {
         final IType clazz = classes[i];
         IType[] superinterfaces = null;

@@ -77,14 +77,14 @@ public interface IMarker extends IAdaptable {
    *
    * @see #getType()
    */
-  public static final String MARKER = ResourcesPlugin.PI_RESOURCES + ".marker"; //$NON-NLS-1$
+  public static final String MARKER = ResourcesPlugin.PI_RESOURCES + ".marker"; // $NON-NLS-1$
 
   /**
    * Task marker type.
    *
    * @see #getType()
    */
-  public static final String TASK = ResourcesPlugin.PI_RESOURCES + ".taskmarker"; //$NON-NLS-1$
+  public static final String TASK = ResourcesPlugin.PI_RESOURCES + ".taskmarker"; // $NON-NLS-1$
 
   /**
    * Problem marker type.
@@ -92,21 +92,21 @@ public interface IMarker extends IAdaptable {
    * @see #getType()
    */
   public static final String PROBLEM =
-      ResourcesPlugin.PI_RESOURCES + ".problemmarker"; //$NON-NLS-1$
+      ResourcesPlugin.PI_RESOURCES + ".problemmarker"; // $NON-NLS-1$
 
   /**
    * Text marker type.
    *
    * @see #getType()
    */
-  public static final String TEXT = ResourcesPlugin.PI_RESOURCES + ".textmarker"; //$NON-NLS-1$
+  public static final String TEXT = ResourcesPlugin.PI_RESOURCES + ".textmarker"; // $NON-NLS-1$
 
   /**
    * Bookmark marker type.
    *
    * @see #getType()
    */
-  public static final String BOOKMARK = ResourcesPlugin.PI_RESOURCES + ".bookmark"; //$NON-NLS-1$
+  public static final String BOOKMARK = ResourcesPlugin.PI_RESOURCES + ".bookmark"; // $NON-NLS-1$
 
   /*====================================================================
    * Marker attributes:
@@ -121,7 +121,7 @@ public interface IMarker extends IAdaptable {
    * @see #SEVERITY_INFO
    * @see #getAttribute(String, int)
    */
-  public static final String SEVERITY = "severity"; //$NON-NLS-1$
+  public static final String SEVERITY = "severity"; // $NON-NLS-1$
 
   /**
    * Message marker attribute. A localized string describing the nature of the marker (e.g., a name
@@ -130,7 +130,7 @@ public interface IMarker extends IAdaptable {
    *
    * @see #getAttribute(String, String)
    */
-  public static final String MESSAGE = "message"; //$NON-NLS-1$
+  public static final String MESSAGE = "message"; // $NON-NLS-1$
 
   /**
    * Location marker attribute. The location is a human-readable (localized) string which can be
@@ -139,7 +139,7 @@ public interface IMarker extends IAdaptable {
    *
    * @see #getAttribute(String, String)
    */
-  public static final String LOCATION = "location"; //$NON-NLS-1$
+  public static final String LOCATION = "location"; // $NON-NLS-1$
 
   /**
    * Priority marker attribute. A number from the set of high, normal and low priorities defined by
@@ -150,7 +150,7 @@ public interface IMarker extends IAdaptable {
    * @see #PRIORITY_LOW
    * @see #getAttribute(String, int)
    */
-  public static final String PRIORITY = "priority"; //$NON-NLS-1$
+  public static final String PRIORITY = "priority"; // $NON-NLS-1$
 
   /**
    * Done marker attribute. A boolean value indicating whether the marker (e.g., a task) is
@@ -158,7 +158,7 @@ public interface IMarker extends IAdaptable {
    *
    * @see #getAttribute(String, String)
    */
-  public static final String DONE = "done"; //$NON-NLS-1$
+  public static final String DONE = "done"; // $NON-NLS-1$
 
   /**
    * Character start marker attribute. An integer value indicating where a text marker starts. This
@@ -166,7 +166,7 @@ public interface IMarker extends IAdaptable {
    *
    * @see #getAttribute(String, String)
    */
-  public static final String CHAR_START = "charStart"; //$NON-NLS-1$
+  public static final String CHAR_START = "charStart"; // $NON-NLS-1$
 
   /**
    * Character end marker attribute. An integer value indicating where a text marker ends. This
@@ -174,7 +174,7 @@ public interface IMarker extends IAdaptable {
    *
    * @see #getAttribute(String, String)
    */
-  public static final String CHAR_END = "charEnd"; //$NON-NLS-1$
+  public static final String CHAR_END = "charEnd"; // $NON-NLS-1$
 
   /**
    * Line number marker attribute. An integer value indicating the line number for a text marker.
@@ -182,7 +182,7 @@ public interface IMarker extends IAdaptable {
    *
    * @see #getAttribute(String, String)
    */
-  public static final String LINE_NUMBER = "lineNumber"; //$NON-NLS-1$
+  public static final String LINE_NUMBER = "lineNumber"; // $NON-NLS-1$
 
   /**
    * Transient marker attribute. A boolean value indicating whether the marker (e. g., a task) is
@@ -191,7 +191,7 @@ public interface IMarker extends IAdaptable {
    * @see #getAttribute(String, String)
    * @since 2.1
    */
-  public static final String TRANSIENT = "transient"; //$NON-NLS-1$
+  public static final String TRANSIENT = "transient"; // $NON-NLS-1$
 
   /**
    * User editable marker attribute. A boolean value indicating whether a user should be able to
@@ -203,7 +203,7 @@ public interface IMarker extends IAdaptable {
    * @see #getAttribute(String, String)
    * @since 2.1
    */
-  public static final String USER_EDITABLE = "userEditable"; //$NON-NLS-1$
+  public static final String USER_EDITABLE = "userEditable"; // $NON-NLS-1$
 
   /**
    * Source id attribute. A string attribute that can be used by tools that generate markers to
@@ -215,7 +215,7 @@ public interface IMarker extends IAdaptable {
    * @see #getAttribute(String, String)
    * @since 3.3
    */
-  public static final String SOURCE_ID = "sourceId"; //$NON-NLS-1$
+  public static final String SOURCE_ID = "sourceId"; // $NON-NLS-1$
 
   /*====================================================================
    * Marker attributes values:

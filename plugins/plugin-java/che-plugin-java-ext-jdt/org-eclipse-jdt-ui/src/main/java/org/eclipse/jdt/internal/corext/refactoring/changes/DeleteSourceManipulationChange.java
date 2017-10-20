@@ -93,7 +93,7 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
     // we will end up showing ghost compilation units in the package explorer
     // since the primary working copy still exists.
     if (element instanceof ICompilationUnit) {
-      pm.beginTask("", 2); //$NON-NLS-1$
+      pm.beginTask("", 2); // $NON-NLS-1$
       ICompilationUnit unit = (ICompilationUnit) element;
       saveCUnitIfNeeded(unit, new SubProgressMonitor(pm, 1));
 
@@ -105,7 +105,7 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 
     } else if (element instanceof IPackageFragment) {
       ICompilationUnit[] units = ((IPackageFragment) element).getCompilationUnits();
-      pm.beginTask("", units.length + 1); //$NON-NLS-1$
+      pm.beginTask("", units.length + 1); // $NON-NLS-1$
       for (int i = 0; i < units.length; i++) {
         // fix https://bugs.eclipse.org/bugs/show_bug.cgi?id=66835
         saveCUnitIfNeeded(units[i], new SubProgressMonitor(pm, 1));
@@ -115,7 +115,7 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 
     } else {
       element.delete(false, pm);
-      return null; //should not happen
+      return null; // should not happen
     }
   }
 
@@ -124,7 +124,7 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
   }
 
   private static IJavaElement getJavaElement(ISourceManipulation sm) {
-    //all known ISourceManipulations are IJavaElements
+    // all known ISourceManipulations are IJavaElements
     return (IJavaElement) sm;
   }
 

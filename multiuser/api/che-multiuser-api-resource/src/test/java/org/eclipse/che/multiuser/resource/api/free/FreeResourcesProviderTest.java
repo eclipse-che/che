@@ -67,14 +67,14 @@ public class FreeResourcesProviderTest {
 
   @Test
   public void shouldProvideDefaultResourcesIfThereAreProviderForThisAccountType() throws Exception {
-    //given
+    // given
     when(accountManager.getById(any())).thenReturn(account);
     when(freeResourcesLimitManager.get(any())).thenThrow(new NotFoundException("not found"));
 
-    //when
+    // when
     List<ProvidedResources> result = provider.getResources("user123");
 
-    //then
+    // then
     assertEquals(result.size(), 1);
     ProvidedResources providedResources = result.get(0);
     assertEquals(
@@ -91,7 +91,7 @@ public class FreeResourcesProviderTest {
 
   @Test
   public void shouldRewriteDefaultResourcesWithFreeResourcesLimitIfItExists() throws Exception {
-    //given
+    // given
     when(accountManager.getById(any())).thenReturn(account);
     when(freeResourcesLimitManager.get(any()))
         .thenReturn(
@@ -99,10 +99,10 @@ public class FreeResourcesProviderTest {
                 "user123",
                 singletonList(new ResourceImpl(TEST_RESOURCE_TYPE, 12345, TEST_RESOURCE_UNIT))));
 
-    //when
+    // when
     List<ProvidedResources> result = provider.getResources("user123");
 
-    //then
+    // then
     assertEquals(result.size(), 1);
     ProvidedResources providedResources = result.get(0);
     assertEquals(
@@ -120,16 +120,16 @@ public class FreeResourcesProviderTest {
   @Test
   public void shouldNotProvideDefaultResourcesForAccountThatDoesNotHaveDefaultResourcesProvider()
       throws Exception {
-    //given
+    // given
     when(account.getType()).thenReturn("anotherTestType");
     when(accountManager.getById(any())).thenReturn(account);
     when(freeResourcesLimitManager.get(any())).thenThrow(new NotFoundException("not found"));
     doThrow(new NotFoundException("not found")).when(freeResourcesLimitManager).get(any());
 
-    //when
+    // when
     List<ProvidedResources> result = provider.getResources("account123");
 
-    //then
+    // then
     assertTrue(result.isEmpty());
   }
 
@@ -137,21 +137,21 @@ public class FreeResourcesProviderTest {
   public void
       shouldNotProvideDefaultResourcesForAccountIfDefaultResourcesProviderProvidesEmptyList()
           throws Exception {
-    //given
+    // given
     when(accountManager.getById(any())).thenReturn(account);
     when(defaultResourcesProvider.getResources(any())).thenReturn(emptyList());
     doThrow(new NotFoundException("not found")).when(freeResourcesLimitManager).get(any());
 
-    //when
+    // when
     List<ProvidedResources> result = provider.getResources("user123");
 
-    //then
+    // then
     assertTrue(result.isEmpty());
   }
 
   @Test
   public void shouldProvideResourcesFromFreeResourcesLimitIfItExists() throws Exception {
-    //given
+    // given
     when(account.getType()).thenReturn("anotherTestType");
     when(accountManager.getById(any())).thenReturn(account);
     when(freeResourcesLimitManager.get(any()))
@@ -160,10 +160,10 @@ public class FreeResourcesProviderTest {
                 "account123",
                 singletonList(new ResourceImpl(TEST_RESOURCE_TYPE, 12345, TEST_RESOURCE_UNIT))));
 
-    //when
+    // when
     List<ProvidedResources> result = provider.getResources("account123");
 
-    //then
+    // then
     assertEquals(result.size(), 1);
     ProvidedResources providedResources = result.get(0);
     assertEquals(

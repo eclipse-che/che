@@ -72,7 +72,7 @@ public interface IJavaRefactorings {
    * ChangeMethodSignatureDescriptor}.
    */
   public static final String CHANGE_METHOD_SIGNATURE =
-      "org.eclipse.jdt.ui.change.method.signature"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.change.method.signature"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Convert Anonymous To Nested' refactoring (value: <code>
@@ -82,7 +82,7 @@ public interface IJavaRefactorings {
    * ConvertAnonymousDescriptor}.
    */
   public static final String CONVERT_ANONYMOUS =
-      "org.eclipse.jdt.ui.convert.anonymous"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.convert.anonymous"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Convert Local Variable to Field' refactoring (value: <code>
@@ -92,7 +92,7 @@ public interface IJavaRefactorings {
    * ConvertLocalVariableDescriptor}.
    */
   public static final String CONVERT_LOCAL_VARIABLE =
-      "org.eclipse.jdt.ui.promote.temp"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.promote.temp"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Convert Member Type to Top Level' refactoring (value: <code>
@@ -101,21 +101,21 @@ public interface IJavaRefactorings {
    * <p>Clients may safely cast the obtained refactoring descriptor to {@link
    * ConvertMemberTypeDescriptor}.
    */
-  public static final String CONVERT_MEMBER_TYPE = "org.eclipse.jdt.ui.move.inner"; //$NON-NLS-1$
+  public static final String CONVERT_MEMBER_TYPE = "org.eclipse.jdt.ui.move.inner"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Copy' refactoring (value: <code>org.eclipse.jdt.ui.copy</code>).
    *
    * <p>Clients may safely cast the obtained refactoring descriptor to {@link CopyDescriptor}.
    */
-  public static final String COPY = "org.eclipse.jdt.ui.copy"; //$NON-NLS-1$
+  public static final String COPY = "org.eclipse.jdt.ui.copy"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Delete' refactoring (value: <code>org.eclipse.jdt.ui.delete</code>).
    *
    * <p>Clients may safely cast the obtained refactoring descriptor to {@link DeleteDescriptor}.
    */
-  public static final String DELETE = "org.eclipse.jdt.ui.delete"; //$NON-NLS-1$
+  public static final String DELETE = "org.eclipse.jdt.ui.delete"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Encapsulate Field' refactoring (value: <code>
@@ -125,7 +125,7 @@ public interface IJavaRefactorings {
    * EncapsulateFieldDescriptor}.
    */
   public static final String ENCAPSULATE_FIELD =
-      "org.eclipse.jdt.ui.self.encapsulate"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.self.encapsulate"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Extract Class' refactoring (value: <code>
@@ -136,7 +136,7 @@ public interface IJavaRefactorings {
    *
    * @since 1.2
    */
-  public static final String EXTRACT_CLASS = "org.eclipse.jdt.ui.extract.class"; //$NON-NLS-1$
+  public static final String EXTRACT_CLASS = "org.eclipse.jdt.ui.extract.class"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Extract Constant' refactoring (value: <code>
@@ -145,7 +145,8 @@ public interface IJavaRefactorings {
    * <p>Clients may safely cast the obtained refactoring descriptor to {@link
    * ExtractConstantDescriptor}.
    */
-  public static final String EXTRACT_CONSTANT = "org.eclipse.jdt.ui.extract.constant"; //$NON-NLS-1$
+  public static final String EXTRACT_CONSTANT =
+      "org.eclipse.jdt.ui.extract.constant"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Extract Interface' refactoring (value: <code>
@@ -155,7 +156,7 @@ public interface IJavaRefactorings {
    * ExtractInterfaceDescriptor}.
    */
   public static final String EXTRACT_INTERFACE =
-      "org.eclipse.jdt.ui.extract.interface"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.extract.interface"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Extract Local Variable' refactoring (value: <code>
@@ -165,7 +166,7 @@ public interface IJavaRefactorings {
    * ExtractLocalDescriptor}.
    */
   public static final String EXTRACT_LOCAL_VARIABLE =
-      "org.eclipse.jdt.ui.extract.temp"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.extract.temp"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Extract Method' refactoring (value: <code>
@@ -174,7 +175,7 @@ public interface IJavaRefactorings {
    * <p>Clients may safely cast the obtained refactoring descriptor to {@link
    * ExtractMethodDescriptor}.
    */
-  public static final String EXTRACT_METHOD = "org.eclipse.jdt.ui.extract.method"; //$NON-NLS-1$
+  public static final String EXTRACT_METHOD = "org.eclipse.jdt.ui.extract.method"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Extract Superclass' refactoring (value: <code>
@@ -184,7 +185,7 @@ public interface IJavaRefactorings {
    * ExtractSuperclassDescriptor}.
    */
   public static final String EXTRACT_SUPERCLASS =
-      "org.eclipse.jdt.ui.extract.superclass"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.extract.superclass"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Generalize Declared Type' refactoring (value: <code>
@@ -193,7 +194,7 @@ public interface IJavaRefactorings {
    * <p>Clients may safely cast the obtained refactoring descriptor to {@link
    * GeneralizeTypeDescriptor}.
    */
-  public static final String GENERALIZE_TYPE = "org.eclipse.jdt.ui.change.type"; //$NON-NLS-1$
+  public static final String GENERALIZE_TYPE = "org.eclipse.jdt.ui.change.type"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Infer Type Arguments' refactoring (value: <code>
@@ -203,7 +204,7 @@ public interface IJavaRefactorings {
    * InferTypeArgumentsDescriptor}.
    */
   public static final String INFER_TYPE_ARGUMENTS =
-      "org.eclipse.jdt.ui.infer.typearguments"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.infer.typearguments"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Inline Constant' refactoring (value: <code>
@@ -212,7 +213,7 @@ public interface IJavaRefactorings {
    * <p>Clients may safely cast the obtained refactoring descriptor to {@link
    * InlineConstantDescriptor}.
    */
-  public static final String INLINE_CONSTANT = "org.eclipse.jdt.ui.inline.constant"; //$NON-NLS-1$
+  public static final String INLINE_CONSTANT = "org.eclipse.jdt.ui.inline.constant"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Inline Local Variable' refactoring (value: <code>
@@ -221,7 +222,8 @@ public interface IJavaRefactorings {
    * <p>Clients may safely cast the obtained refactoring descriptor to {@link
    * InlineLocalVariableDescriptor}.
    */
-  public static final String INLINE_LOCAL_VARIABLE = "org.eclipse.jdt.ui.inline.temp"; //$NON-NLS-1$
+  public static final String INLINE_LOCAL_VARIABLE =
+      "org.eclipse.jdt.ui.inline.temp"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Inline Method' refactoring (value: <code>
@@ -230,7 +232,7 @@ public interface IJavaRefactorings {
    * <p>Clients may safely cast the obtained refactoring descriptor to {@link
    * InlineMethodDescriptor}.
    */
-  public static final String INLINE_METHOD = "org.eclipse.jdt.ui.inline.method"; //$NON-NLS-1$
+  public static final String INLINE_METHOD = "org.eclipse.jdt.ui.inline.method"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Introduce Factory' refactoring (value: <code>
@@ -240,7 +242,7 @@ public interface IJavaRefactorings {
    * IntroduceFactoryDescriptor}.
    */
   public static final String INTRODUCE_FACTORY =
-      "org.eclipse.jdt.ui.introduce.factory"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.introduce.factory"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Introduce Indirection' refactoring (value: <code>
@@ -250,7 +252,7 @@ public interface IJavaRefactorings {
    * IntroduceIndirectionDescriptor}.
    */
   public static final String INTRODUCE_INDIRECTION =
-      "org.eclipse.jdt.ui.introduce.indirection"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.introduce.indirection"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Introduce Parameter' refactoring (value: <code>
@@ -260,7 +262,7 @@ public interface IJavaRefactorings {
    * IntroduceParameterDescriptor}.
    */
   public static final String INTRODUCE_PARAMETER =
-      "org.eclipse.jdt.ui.introduce.parameter"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.introduce.parameter"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Introduce Parameter Object' refactoring (value: <code>
@@ -272,14 +274,14 @@ public interface IJavaRefactorings {
    * @since 1.2
    */
   public static final String INTRODUCE_PARAMETER_OBJECT =
-      "org.eclipse.jdt.ui.introduce.parameter.object"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.introduce.parameter.object"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Move' refactoring (value: <code>org.eclipse.jdt.ui.move</code>).
    *
    * <p>Clients may safely cast the obtained refactoring descriptor to {@link MoveDescriptor}.
    */
-  public static final String MOVE = "org.eclipse.jdt.ui.move"; //$NON-NLS-1$
+  public static final String MOVE = "org.eclipse.jdt.ui.move"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Move Method' refactoring (value: <code>org.eclipse.jdt.ui.move.method
@@ -287,7 +289,7 @@ public interface IJavaRefactorings {
    *
    * <p>Clients may safely cast the obtained refactoring descriptor to {@link MoveMethodDescriptor}.
    */
-  public static final String MOVE_METHOD = "org.eclipse.jdt.ui.move.method"; //$NON-NLS-1$
+  public static final String MOVE_METHOD = "org.eclipse.jdt.ui.move.method"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Move Static Members' refactoring (value: <code>
@@ -296,14 +298,14 @@ public interface IJavaRefactorings {
    * <p>Clients may safely cast the obtained refactoring descriptor to {@link
    * MoveStaticMembersDescriptor}.
    */
-  public static final String MOVE_STATIC_MEMBERS = "org.eclipse.jdt.ui.move.static"; //$NON-NLS-1$
+  public static final String MOVE_STATIC_MEMBERS = "org.eclipse.jdt.ui.move.static"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Pull Up' refactoring (value: <code>org.eclipse.jdt.ui.pull.up</code>).
    *
    * <p>Clients may safely cast the obtained refactoring descriptor to {@link PullUpDescriptor}.
    */
-  public static final String PULL_UP = "org.eclipse.jdt.ui.pull.up"; //$NON-NLS-1$
+  public static final String PULL_UP = "org.eclipse.jdt.ui.pull.up"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Push Down' refactoring (value: <code>org.eclipse.jdt.ui.push.down</code>
@@ -311,7 +313,7 @@ public interface IJavaRefactorings {
    *
    * <p>Clients may safely cast the obtained refactoring descriptor to {@link PushDownDescriptor}.
    */
-  public static final String PUSH_DOWN = "org.eclipse.jdt.ui.push.down"; //$NON-NLS-1$
+  public static final String PUSH_DOWN = "org.eclipse.jdt.ui.push.down"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Rename Compilation Unit' refactoring (value: <code>
@@ -321,7 +323,7 @@ public interface IJavaRefactorings {
    * RenameJavaElementDescriptor}.
    */
   public static final String RENAME_COMPILATION_UNIT =
-      "org.eclipse.jdt.ui.rename.compilationunit"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.rename.compilationunit"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Rename Enum Constant' refactoring (value: <code>
@@ -331,7 +333,7 @@ public interface IJavaRefactorings {
    * RenameJavaElementDescriptor}.
    */
   public static final String RENAME_ENUM_CONSTANT =
-      "org.eclipse.jdt.ui.rename.enum.constant"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.rename.enum.constant"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Rename Field' refactoring (value: <code>org.eclipse.jdt.ui.rename.field
@@ -340,7 +342,7 @@ public interface IJavaRefactorings {
    * <p>Clients may safely cast the obtained refactoring descriptor to {@link
    * RenameJavaElementDescriptor}.
    */
-  public static final String RENAME_FIELD = "org.eclipse.jdt.ui.rename.field"; //$NON-NLS-1$
+  public static final String RENAME_FIELD = "org.eclipse.jdt.ui.rename.field"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Rename Java Project' refactoring (value: <code>
@@ -350,7 +352,7 @@ public interface IJavaRefactorings {
    * RenameJavaElementDescriptor}.
    */
   public static final String RENAME_JAVA_PROJECT =
-      "org.eclipse.jdt.ui.rename.java.project"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.rename.java.project"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Rename Local Variable' refactoring (value: <code>
@@ -360,7 +362,7 @@ public interface IJavaRefactorings {
    * RenameJavaElementDescriptor}.
    */
   public static final String RENAME_LOCAL_VARIABLE =
-      "org.eclipse.jdt.ui.rename.local.variable"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.rename.local.variable"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Rename Method' refactoring (value: <code>
@@ -369,7 +371,7 @@ public interface IJavaRefactorings {
    * <p>Clients may safely cast the obtained refactoring descriptor to {@link
    * RenameJavaElementDescriptor}.
    */
-  public static final String RENAME_METHOD = "org.eclipse.jdt.ui.rename.method"; //$NON-NLS-1$
+  public static final String RENAME_METHOD = "org.eclipse.jdt.ui.rename.method"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Rename Package' refactoring (value: <code>
@@ -378,7 +380,7 @@ public interface IJavaRefactorings {
    * <p>Clients may safely cast the obtained refactoring descriptor to {@link
    * RenameJavaElementDescriptor}.
    */
-  public static final String RENAME_PACKAGE = "org.eclipse.jdt.ui.rename.package"; //$NON-NLS-1$
+  public static final String RENAME_PACKAGE = "org.eclipse.jdt.ui.rename.package"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Rename Resource' refactoring (value: <code>
@@ -390,7 +392,7 @@ public interface IJavaRefactorings {
    * @deprecated Since 1.2. Use {@link
    *     org.eclipse.ltk.core.refactoring.resource.RenameResourceDescriptor#ID} instead.
    */
-  public static final String RENAME_RESOURCE = "org.eclipse.jdt.ui.rename.resource"; //$NON-NLS-1$
+  public static final String RENAME_RESOURCE = "org.eclipse.jdt.ui.rename.resource"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Rename Source Folder' refactoring (value: <code>
@@ -400,7 +402,7 @@ public interface IJavaRefactorings {
    * RenameJavaElementDescriptor}.
    */
   public static final String RENAME_SOURCE_FOLDER =
-      "org.eclipse.jdt.ui.rename.source.folder"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.rename.source.folder"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Rename Type' refactoring (value: <code>org.eclipse.jdt.ui.rename.type
@@ -409,7 +411,7 @@ public interface IJavaRefactorings {
    * <p>Clients may safely cast the obtained refactoring descriptor to {@link
    * RenameJavaElementDescriptor}.
    */
-  public static final String RENAME_TYPE = "org.eclipse.jdt.ui.rename.type"; //$NON-NLS-1$
+  public static final String RENAME_TYPE = "org.eclipse.jdt.ui.rename.type"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Rename Type Parameter' refactoring (value: <code>
@@ -419,7 +421,7 @@ public interface IJavaRefactorings {
    * RenameJavaElementDescriptor}.
    */
   public static final String RENAME_TYPE_PARAMETER =
-      "org.eclipse.jdt.ui.rename.type.parameter"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.rename.type.parameter"; // $NON-NLS-1$
 
   /**
    * Refactoring id of the 'Use Supertype Where Possible' refactoring (value: <code>
@@ -428,5 +430,5 @@ public interface IJavaRefactorings {
    * <p>Clients may safely cast the obtained refactoring descriptor to {@link
    * UseSupertypeDescriptor}.
    */
-  public static final String USE_SUPER_TYPE = "org.eclipse.jdt.ui.use.supertype"; //$NON-NLS-1$
+  public static final String USE_SUPER_TYPE = "org.eclipse.jdt.ui.use.supertype"; // $NON-NLS-1$
 }

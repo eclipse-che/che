@@ -75,7 +75,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
       EventService eventService,
       AccountManager accountManager,
       WorkspaceValidator workspaceValidator,
-      //own injects
+      // own injects
       @Named("che.limits.workspace.env.ram") String maxRamPerEnv,
       EnvironmentRamCalculator environmentRamCalculator,
       ResourceUsageManager resourceUsageManager,

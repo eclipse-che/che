@@ -49,7 +49,7 @@ public final class RefactoringHistorySerializer implements IRefactoringHistoryLi
                 EFS.getLocalFileSystem()
                     .getStore(RefactoringCorePlugin.getDefault().getStateLocation())
                     .getChild(RefactoringHistoryService.NAME_HISTORY_FOLDER);
-            if (name != null && !"".equals(name)) { //$NON-NLS-1$
+            if (name != null && !"".equals(name)) { // $NON-NLS-1$
               final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
               if (project.isAccessible()) {
                 if (RefactoringHistoryService.hasSharedRefactoringHistory(project)) {

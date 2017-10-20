@@ -101,9 +101,9 @@ public final class RefactoringSessionReader extends DefaultHandler {
 
     try {
 
-      reader.setFeature("http://xml.org/sax/features/validation", false); //$NON-NLS-1$
+      reader.setFeature("http://xml.org/sax/features/validation", false); // $NON-NLS-1$
       reader.setFeature(
-          "http://apache.org/xml/features/nonvalidating/load-external-dtd", false); //$NON-NLS-1$
+          "http://apache.org/xml/features/nonvalidating/load-external-dtd", false); // $NON-NLS-1$
 
     } catch (SAXNotRecognizedException exception) {
       // Do nothing
@@ -123,7 +123,7 @@ public final class RefactoringSessionReader extends DefaultHandler {
   public RefactoringSessionDescriptor readSession(final InputSource source) throws CoreException {
     fSessionFound = false;
     try {
-      source.setSystemId("/"); //$NON-NLS-1$
+      source.setSystemId("/"); // $NON-NLS-1$
       createParser(SAXParserFactory.newInstance()).parse(source, this);
       if (!fSessionFound)
         throw new CoreException(
@@ -134,7 +134,7 @@ public final class RefactoringSessionReader extends DefaultHandler {
                 RefactoringCoreMessages.RefactoringSessionReader_no_session,
                 null));
       if (fRefactoringDescriptors != null) {
-        if (fVersion == null || "".equals(fVersion)) //$NON-NLS-1$
+        if (fVersion == null || "".equals(fVersion)) // $NON-NLS-1$
         throw new CoreException(
               new Status(
                   IStatus.ERROR,
@@ -208,11 +208,11 @@ public final class RefactoringSessionReader extends DefaultHandler {
     if (IRefactoringSerializationConstants.ELEMENT_REFACTORING.equals(qualifiedName)) {
       final int length = attributes.getLength();
       final Map map = new HashMap(length);
-      String id = ""; //$NON-NLS-1$
-      String stamp = ""; //$NON-NLS-1$
-      String description = ""; //$NON-NLS-1$
+      String id = ""; // $NON-NLS-1$
+      String stamp = ""; // $NON-NLS-1$
+      String description = ""; // $NON-NLS-1$
       String comment = null;
-      String flags = "0"; //$NON-NLS-1$
+      String flags = "0"; // $NON-NLS-1$
       String project = null;
       for (int index = 0; index < length; index++) {
         final String name = attributes.getQName(index);
@@ -226,11 +226,11 @@ public final class RefactoringSessionReader extends DefaultHandler {
         } else if (IRefactoringSerializationConstants.ATTRIBUTE_FLAGS.equals(name)) {
           flags = value;
         } else if (IRefactoringSerializationConstants.ATTRIBUTE_COMMENT.equals(name)) {
-          if (!"".equals(value)) //$NON-NLS-1$
+          if (!"".equals(value)) // $NON-NLS-1$
           comment = value;
         } else if (IRefactoringSerializationConstants.ATTRIBUTE_PROJECT.equals(name)) {
           project = value;
-        } else if (!"".equals(name)) { //$NON-NLS-1$
+        } else if (!"".equals(name)) { // $NON-NLS-1$
           map.put(name, value);
         }
       }
@@ -275,7 +275,7 @@ public final class RefactoringSessionReader extends DefaultHandler {
       fSessionFound = true;
       final String version =
           attributes.getValue(IRefactoringSerializationConstants.ATTRIBUTE_VERSION);
-      if (version != null && !"".equals(version)) //$NON-NLS-1$
+      if (version != null && !"".equals(version)) // $NON-NLS-1$
       fVersion = version;
       fComment = attributes.getValue(IRefactoringSerializationConstants.ATTRIBUTE_COMMENT);
     }

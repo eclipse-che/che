@@ -102,7 +102,7 @@ public class FileNotExistIntoEditorAfterDeleteTest {
     notificationsPopupPanel.waitProgressPopupPanelClose();
     consoles.closeProcessesArea();
 
-    //open .java file, get text from there and compare with expected text
+    // open .java file, get text from there and compare with expected text
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
     loader.waitOnClosed();
@@ -121,7 +121,7 @@ public class FileNotExistIntoEditorAfterDeleteTest {
 
     editor.waitWhileFileIsClosed("AppController.java");
 
-    //open .jsp file, get text from there and compare with expected text
+    // open .jsp file, get text from there and compare with expected text
     projectExplorer.waitProjectExplorer();
     projectExplorer.openItemByVisibleNameInExplorer("index.jsp");
 

@@ -365,10 +365,11 @@ public class FactoryService extends Service {
   private static void excludeProjectsWithoutLocation(
       WorkspaceImpl usersWorkspace, String projectPath) throws BadRequestException {
     final boolean notEmptyPath = projectPath != null;
-    //Condition for sifting valid project in user's workspace
+    // Condition for sifting valid project in user's workspace
     Predicate<ProjectConfig> predicate =
         projectConfig -> {
-          // if project is a sub project (it's path contains another project) , then location can be null
+          // if project is a sub project (it's path contains another project) , then location can be
+          // null
           final boolean isSubProject = projectConfig.getPath().indexOf('/', 1) != -1;
           final boolean hasNotEmptySource =
               projectConfig.getSource() != null

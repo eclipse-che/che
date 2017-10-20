@@ -125,14 +125,14 @@ public class PullRequestPluginTest {
 
   @Test(priority = 0)
   public void switchingBetweenProjects() {
-    //import first project
+    // import first project
     explorer.waitProjectExplorer();
     menu.runCommand(TestMenuCommandsConstants.Workspace.WORKSPACE, IMPORT_PROJECT);
     String firstProjectUrl =
         "https://github.com/" + gitHubUsername + "/pull-request-plugin-test.git";
     importWidget.waitAndTypeImporterAsGitInfo(firstProjectUrl, FIRST_PROJECT_NAME);
     configureTypeOfProject();
-    //import second project
+    // import second project
     explorer.waitProjectExplorer();
     menu.runCommand(TestMenuCommandsConstants.Workspace.WORKSPACE, IMPORT_PROJECT);
     String secondProjectUrl = "https://github.com/" + gitHubUsername + "/Spring_Project.git";
@@ -159,13 +159,13 @@ public class PullRequestPluginTest {
     explorer.openItemByPath(FIRST_PROJECT_NAME);
     explorer.openItemByPath(FIRST_PROJECT_NAME + "/README.md");
 
-    //change content
+    // change content
     editor.waitActiveEditor();
     editor.deleteAllContent();
     editor.setCursorToDefinedLineAndChar(1, 1);
     editor.typeTextIntoEditor("Time: " + TIME);
 
-    //create branch
+    // create branch
     pullRequestPanel.waitOpenPanel();
     pullRequestPanel.selectBranch(CREATE_BRANCH);
     valueDialog.waitFormToOpen();
@@ -175,7 +175,7 @@ public class PullRequestPluginTest {
     pullRequestPanel.enterComment(COMMENT);
     pullRequestPanel.enterTitle(TITLE);
 
-    //commit change and create pull request
+    // commit change and create pull request
     pullRequestPanel.clickCreatePRBtn();
     pullRequestPanel.clickOkCommitBtn();
     pullRequestPanel.waitStatusOk(BRANCH_PUSHED_ON_YOUR_ORIGIN);

@@ -115,7 +115,7 @@ public class CommandsPalette {
     loader.waitOnClosed();
   }
 
-  //TODO Get a commands list from the CommandsPalette
+  // TODO Get a commands list from the CommandsPalette
   private ArrayList commandsList() {
     ArrayList list = new ArrayList();
     list = (ArrayList) seleniumWebDriver.findElements(By.xpath(Locators.COMMANDS_LIST));

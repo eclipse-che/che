@@ -27,6 +27,7 @@ import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
+
 /**
  * Refresh current selected container.
  *

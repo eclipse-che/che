@@ -78,6 +78,6 @@ public class RenameTypeArguments extends RenameArguments {
     return super.toString()
         + (updateSimilarDeclarations
             ? " (update derived elements)"
-            : " (don't update derived elements)"); //$NON-NLS-1$//$NON-NLS-2$
+            : " (don't update derived elements)"); // $NON-NLS-1$//$NON-NLS-2$
   }
 }

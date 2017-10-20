@@ -34,7 +34,8 @@ public class Java18ProjectTestSetup extends ProjectTestSetup {
   }
 
   //	public static String getJdtAnnotations20Path() throws IOException {
-  //		Bundle[] annotationsBundles= JavaPlugin.getDefault().getBundles("org.eclipse.jdt.annotation", "2.0.0"); //$NON-NLS-1$
+  //		Bundle[] annotationsBundles= JavaPlugin.getDefault().getBundles("org.eclipse.jdt.annotation",
+  // "2.0.0"); //$NON-NLS-1$
   //		File bundleFile= FileLocator.getBundleFile(annotationsBundles[0]);
   //		String path= bundleFile.getPath();
   //		if (bundleFile.isDirectory()) {

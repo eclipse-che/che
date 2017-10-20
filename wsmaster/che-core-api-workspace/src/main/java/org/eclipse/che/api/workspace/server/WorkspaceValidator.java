@@ -91,7 +91,7 @@ public class WorkspaceValidator {
       }
     }
 
-    //commands
+    // commands
     for (Command command : config.getCommands()) {
       check(
           !isNullOrEmpty(command.getName()),
@@ -104,8 +104,8 @@ public class WorkspaceValidator {
           config.getName());
     }
 
-    //projects
-    //TODO
+    // projects
+    // TODO
   }
 
   /**
@@ -117,7 +117,7 @@ public class WorkspaceValidator {
    */
   public void validateAttributes(Map<String, String> attributes) throws ValidationException {
     for (String attributeName : attributes.keySet()) {
-      //attribute name should not be empty and should not start with codenvy
+      // attribute name should not be empty and should not start with codenvy
       check(
           attributeName != null
               && !attributeName.trim().isEmpty()

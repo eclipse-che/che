@@ -79,6 +79,6 @@ public final class InsertEdit extends TextEdit {
    */
   void internalToString(StringBuffer buffer, int indent) {
     super.internalToString(buffer, indent);
-    buffer.append(" <<").append(fText); //$NON-NLS-1$
+    buffer.append(" <<").append(fText); // $NON-NLS-1$
   }
 }

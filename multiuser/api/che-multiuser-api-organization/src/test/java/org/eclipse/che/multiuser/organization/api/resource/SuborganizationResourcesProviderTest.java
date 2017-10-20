@@ -74,29 +74,29 @@ public class SuborganizationResourcesProviderTest {
 
   @Test
   public void shouldNotProvideResourcesForNonOrganizationalAccounts() throws Exception {
-    //given
+    // given
     when(account.getType()).thenReturn("test");
 
-    //when
+    // when
     final List<ProvidedResources> providedResources =
         suborganizationResourcesProvider.getResources("account123");
 
-    //then
+    // then
     assertTrue(providedResources.isEmpty());
     verify(accountManager).getById("account123");
   }
 
   @Test
   public void shouldNotProvideResourcesForRootOrganizationalAccount() throws Exception {
-    //given
+    // given
     when(account.getType()).thenReturn(OrganizationImpl.ORGANIZATIONAL_ACCOUNT);
     when(organization.getParent()).thenReturn(null);
 
-    //when
+    // when
     final List<ProvidedResources> providedResources =
         suborganizationResourcesProvider.getResources("organization123");
 
-    //then
+    // then
     assertTrue(providedResources.isEmpty());
     verify(accountManager).getById("organization123");
     verify(organizationManager).getById("organization123");
@@ -104,7 +104,7 @@ public class SuborganizationResourcesProviderTest {
 
   @Test
   public void shouldProvideResourcesForSuborganizationalAccount() throws Exception {
-    //given
+    // given
     when(account.getType()).thenReturn(OrganizationImpl.ORGANIZATIONAL_ACCOUNT);
     when(organization.getParent()).thenReturn("parentOrg");
     final ResourceImpl parentNotCapedResource = new ResourceImpl("test", 1234, "unit");
@@ -120,11 +120,11 @@ public class SuborganizationResourcesProviderTest {
         .when(resourcesDistributor)
         .getResourcesCaps(any());
 
-    //when
+    // when
     final List<ProvidedResources> providedResources =
         suborganizationResourcesProvider.getResources("organization123");
 
-    //then
+    // then
     assertEquals(providedResources.size(), 1);
     assertEquals(
         providedResources.get(0),
@@ -144,17 +144,17 @@ public class SuborganizationResourcesProviderTest {
   @Test
   public void shouldNotProvideResourcesForOrganizationalAccountIfItDoesNotHaveDistributedResources()
       throws Exception {
-    //given
+    // given
     when(account.getType()).thenReturn(OrganizationImpl.ORGANIZATIONAL_ACCOUNT);
     when(organization.getParent()).thenReturn("parentOrg");
     doReturn(emptyList()).when(resourcesDistributor).getResourcesCaps(any());
     doReturn(emptyList()).when(resourceUsageManager).getAvailableResources(anyString());
 
-    //when
+    // when
     final List<ProvidedResources> providedResources =
         suborganizationResourcesProvider.getResources("organization123");
 
-    //then
+    // then
     assertTrue(providedResources.isEmpty());
     verify(accountManager).getById("organization123");
     verify(organizationManager).getById("organization123");

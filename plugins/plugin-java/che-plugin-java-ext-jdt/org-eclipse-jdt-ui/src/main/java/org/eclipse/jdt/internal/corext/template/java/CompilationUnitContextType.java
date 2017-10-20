@@ -35,7 +35,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
       super(
           "return_type",
           JavaTemplateMessages
-              .CompilationUnitContextType_variable_description_return_type); //$NON-NLS-1$
+              .CompilationUnitContextType_variable_description_return_type); // $NON-NLS-1$
     }
 
     @Override
@@ -56,7 +56,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
     public File() {
       super(
           "file",
-          JavaTemplateMessages.CompilationUnitContextType_variable_description_file); //$NON-NLS-1$
+          JavaTemplateMessages.CompilationUnitContextType_variable_description_file); // $NON-NLS-1$
     }
 
     @Override
@@ -80,7 +80,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
       super(
           "primary_type_name",
           JavaTemplateMessages
-              .CompilationUnitContextType_variable_description_primary_type_name); //$NON-NLS-1$
+              .CompilationUnitContextType_variable_description_primary_type_name); // $NON-NLS-1$
     }
 
     @Override
@@ -129,7 +129,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
       super(
           "enclosing_method",
           JavaTemplateMessages.CompilationUnitContextType_variable_description_enclosing_method,
-          IJavaElement.METHOD); //$NON-NLS-1$
+          IJavaElement.METHOD); // $NON-NLS-1$
     }
   }
 
@@ -138,7 +138,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
       super(
           "enclosing_type",
           JavaTemplateMessages.CompilationUnitContextType_variable_description_enclosing_type,
-          IJavaElement.TYPE); //$NON-NLS-1$
+          IJavaElement.TYPE); // $NON-NLS-1$
     }
   }
   /*
@@ -153,7 +153,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
       super(
           "enclosing_package",
           JavaTemplateMessages.CompilationUnitContextType_variable_description_enclosing_package,
-          IJavaElement.PACKAGE_FRAGMENT); //$NON-NLS-1$
+          IJavaElement.PACKAGE_FRAGMENT); // $NON-NLS-1$
     }
   }
 
@@ -162,7 +162,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
       super(
           "enclosing_project",
           JavaTemplateMessages.CompilationUnitContextType_variable_description_enclosing_project,
-          IJavaElement.JAVA_PROJECT); //$NON-NLS-1$
+          IJavaElement.JAVA_PROJECT); // $NON-NLS-1$
     }
   }
   /*
@@ -181,7 +181,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
       super(
           "enclosing_method_arguments",
           JavaTemplateMessages
-              .CompilationUnitContextType_variable_description_enclosing_method_arguments); //$NON-NLS-1$
+              .CompilationUnitContextType_variable_description_enclosing_method_arguments); // $NON-NLS-1$
     }
 
     @Override
@@ -197,7 +197,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
         StringBuffer buffer = new StringBuffer();
 
         for (int i = 0; i < arguments.length; i++) {
-          if (i > 0) buffer.append(", "); //$NON-NLS-1$
+          if (i > 0) buffer.append(", "); // $NON-NLS-1$
           buffer.append(arguments[i]);
         }
 
@@ -242,7 +242,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
     protected String resolve(TemplateContext context) {
       String selection =
           context.getVariable(org.eclipse.jface.text.templates.GlobalTemplateVariables.SELECTION);
-      if (selection == null) return ""; //$NON-NLS-1$
+      if (selection == null) return ""; // $NON-NLS-1$
       return selection;
     }
   }

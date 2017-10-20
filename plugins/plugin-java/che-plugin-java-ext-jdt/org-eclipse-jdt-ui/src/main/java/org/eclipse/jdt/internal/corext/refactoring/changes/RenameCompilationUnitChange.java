@@ -26,7 +26,7 @@ public final class RenameCompilationUnitChange extends AbstractJavaElementRename
 
   public RenameCompilationUnitChange(ICompilationUnit unit, String newName) {
     this(unit.getResource().getFullPath(), unit.getElementName(), newName, IResource.NULL_STAMP);
-    Assert.isTrue(!unit.isReadOnly(), "compilation unit must not be read-only"); //$NON-NLS-1$
+    Assert.isTrue(!unit.isReadOnly(), "compilation unit must not be read-only"); // $NON-NLS-1$
   }
 
   private RenameCompilationUnitChange(

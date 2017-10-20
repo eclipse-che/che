@@ -55,23 +55,23 @@ public class RevertTest {
     dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
   )
   public void testRevertCommit(GitConnectionFactory connectionFactory) throws Exception {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
-    //first commit
+    // first commit
     File file = addFile(connection, "test-revert", "blabla\n");
     connection.add(AddParams.create(AddRequest.DEFAULT_PATTERN));
     connection.commit(CommitParams.create("add test-revert file"));
-    //second commit
+    // second commit
     try (PrintWriter pw = new PrintWriter(file)) {
       pw.append("one more bla\n");
     }
     connection.add(AddParams.create(AddRequest.DEFAULT_PATTERN));
     Revision revision = connection.commit(CommitParams.create("add one more bla\n"));
 
-    //when
+    // when
     RevertResult result = connection.revert(revision.getId());
 
-    //then
+    // then
     assertFalse(result.getNewHead().isEmpty());
     assertTrue(result.getConflicts().isEmpty());
     assertEquals(result.getRevertedCommits().get(0), revision.getId());
@@ -84,27 +84,27 @@ public class RevertTest {
   )
   public void testConflictsIfDirtyWorkTree(GitConnectionFactory connectionFactory)
       throws Exception {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
-    //first commit
+    // first commit
     File file = addFile(connection, "test-revert", "blabla\n");
     connection.add(AddParams.create(AddRequest.DEFAULT_PATTERN));
     connection.commit(CommitParams.create("add test-revert file"));
-    //second commit
+    // second commit
     try (PrintWriter pw = new PrintWriter(file)) {
       pw.append("one more bla\n");
     }
     connection.add(AddParams.create(AddRequest.DEFAULT_PATTERN));
     Revision revision = connection.commit(CommitParams.create("add one more bla"));
-    //fill the file with new content
+    // fill the file with new content
     try (PrintWriter pw = new PrintWriter(file)) {
       pw.append("add smth one the same line");
     }
 
-    //when
+    // when
     RevertResult result = connection.revert(revision.getId());
 
-    //then
+    // then
     assertNull(result.getNewHead());
     assertTrue(result.getRevertedCommits().isEmpty());
 
@@ -118,28 +118,28 @@ public class RevertTest {
     dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
   )
   public void testConflictsIfDirtyIndex(GitConnectionFactory connectionFactory) throws Exception {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
-    //first commit
+    // first commit
     File file = addFile(connection, "test-revert", "blabla\n");
     connection.add(AddParams.create(AddRequest.DEFAULT_PATTERN));
     connection.commit(CommitParams.create("add test-revert file"));
-    //second commit
+    // second commit
     try (PrintWriter pw = new PrintWriter(file)) {
       pw.append("one more bla\n");
     }
     connection.add(AddParams.create(AddRequest.DEFAULT_PATTERN));
     Revision revision = connection.commit(CommitParams.create("add one more bla"));
-    //dirty index
+    // dirty index
     try (PrintWriter pw = new PrintWriter(file)) {
       pw.append("add smth one the same line");
     }
     connection.add(AddParams.create(AddRequest.DEFAULT_PATTERN));
 
-    //when
+    // when
     RevertResult result = connection.revert(revision.getId());
 
-    //then
+    // then
     assertNull(result.getNewHead());
     assertTrue(result.getRevertedCommits().isEmpty());
 
@@ -154,30 +154,30 @@ public class RevertTest {
   )
   public void testConflictsIfSameLineWasChangedInLaterCommits(
       GitConnectionFactory connectionFactory) throws Exception {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
-    //first commit
+    // first commit
     File file = addFile(connection, "test-revert", "blabla\n");
     connection.add(AddParams.create(AddRequest.DEFAULT_PATTERN));
     connection.commit(CommitParams.create("add test-revert file"));
-    //second commit
+    // second commit
     try (PrintWriter pw = new PrintWriter(file)) {
       pw.append("one more bla\n");
     }
     connection.add(AddParams.create(AddRequest.DEFAULT_PATTERN));
     Revision revision = connection.commit(CommitParams.create("add one more bla"));
-    //third commit changing the same line
+    // third commit changing the same line
     try (PrintWriter pw = new PrintWriter(file)) {
       pw.append("add smth one the same line");
     }
     connection.add(AddParams.create(AddRequest.DEFAULT_PATTERN));
     connection.commit(CommitParams.create("change the same line"));
 
-    //when
-    //revert second commit
+    // when
+    // revert second commit
     RevertResult result = connection.revert(revision.getId());
 
-    //then
+    // then
     assertNull(result.getNewHead());
     assertTrue(result.getRevertedCommits().isEmpty());
 
@@ -195,12 +195,12 @@ public class RevertTest {
   )
   public void testExceptionOnRevertFirstCommit(GitConnectionFactory connectionFactory)
       throws Exception {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     addFile(connection, "test-revert", "blabla\n");
     connection.add(AddParams.create(AddRequest.DEFAULT_PATTERN));
     Revision revision = connection.commit(CommitParams.create("add test-revert file"));
-    //when
+    // when
     connection.revert(revision.getId());
   }
 }

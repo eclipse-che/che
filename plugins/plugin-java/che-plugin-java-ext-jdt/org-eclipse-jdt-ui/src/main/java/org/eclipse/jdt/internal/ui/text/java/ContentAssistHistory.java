@@ -66,12 +66,12 @@ public final class ContentAssistHistory {
    */
   private static final class ReaderWriter {
 
-    private static final String NODE_ROOT = "history"; //$NON-NLS-1$
-    private static final String NODE_LHS = "lhs"; //$NON-NLS-1$
-    private static final String NODE_RHS = "rhs"; //$NON-NLS-1$
-    private static final String ATTRIBUTE_NAME = "name"; //$NON-NLS-1$
-    private static final String ATTRIBUTE_MAX_LHS = "maxLHS"; //$NON-NLS-1$
-    private static final String ATTRIBUTE_MAX_RHS = "maxRHS"; //$NON-NLS-1$
+    private static final String NODE_ROOT = "history"; // $NON-NLS-1$
+    private static final String NODE_LHS = "lhs"; // $NON-NLS-1$
+    private static final String NODE_RHS = "rhs"; // $NON-NLS-1$
+    private static final String ATTRIBUTE_NAME = "name"; // $NON-NLS-1$
+    private static final String ATTRIBUTE_MAX_LHS = "maxLHS"; // $NON-NLS-1$
+    private static final String ATTRIBUTE_MAX_RHS = "maxRHS"; // $NON-NLS-1$
 
     public void store(ContentAssistHistory history, StreamResult result) throws CoreException {
       try {
@@ -85,8 +85,7 @@ public final class ContentAssistHistory {
         document.appendChild(rootElement);
 
         for (Iterator<String> leftHandSides = history.fLHSCache.keySet().iterator();
-            leftHandSides.hasNext();
-            ) {
+            leftHandSides.hasNext(); ) {
           String lhs = leftHandSides.next();
           Element lhsElement = document.createElement(NODE_LHS);
           lhsElement.setAttribute(ATTRIBUTE_NAME, lhs);
@@ -102,9 +101,9 @@ public final class ContentAssistHistory {
         }
 
         Transformer transformer = TransformerFactory.newInstance().newTransformer();
-        transformer.setOutputProperty(OutputKeys.METHOD, "xml"); //$NON-NLS-1$
-        transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8"); //$NON-NLS-1$
-        transformer.setOutputProperty(OutputKeys.INDENT, "no"); //$NON-NLS-1$
+        transformer.setOutputProperty(OutputKeys.METHOD, "xml"); // $NON-NLS-1$
+        transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8"); // $NON-NLS-1$
+        transformer.setOutputProperty(OutputKeys.INDENT, "no"); // $NON-NLS-1$
         DOMSource source = new DOMSource(document);
 
         transformer.transform(source, result);
@@ -317,10 +316,10 @@ public final class ContentAssistHistory {
 
   static {
     Set<String> uncacheable = new HashSet<String>();
-    uncacheable.add("java.lang.Object"); //$NON-NLS-1$
-    uncacheable.add("java.lang.Comparable"); //$NON-NLS-1$
-    uncacheable.add("java.io.Serializable"); //$NON-NLS-1$
-    uncacheable.add("java.io.Externalizable"); //$NON-NLS-1$
+    uncacheable.add("java.lang.Object"); // $NON-NLS-1$
+    uncacheable.add("java.lang.Comparable"); // $NON-NLS-1$
+    uncacheable.add("java.io.Serializable"); // $NON-NLS-1$
+    uncacheable.add("java.io.Externalizable"); // $NON-NLS-1$
     UNCACHEABLE = Collections.unmodifiableSet(uncacheable);
   }
 
@@ -411,8 +410,7 @@ public final class ContentAssistHistory {
     HashMap<String, RHSHistory> map =
         new HashMap<String, RHSHistory>((int) (fLHSCache.size() / 0.75));
     for (Iterator<Entry<String, MRUSet<String>>> it = fLHSCache.entrySet().iterator();
-        it.hasNext();
-        ) {
+        it.hasNext(); ) {
       Entry<String, MRUSet<String>> entry = it.next();
       String lhs = entry.getKey();
       map.put(lhs, getHistory(lhs));

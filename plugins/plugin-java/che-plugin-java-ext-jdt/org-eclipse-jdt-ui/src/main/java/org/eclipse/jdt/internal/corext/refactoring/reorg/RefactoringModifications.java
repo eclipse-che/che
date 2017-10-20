@@ -90,7 +90,7 @@ public abstract class RefactoringModifications {
   protected IFile getClasspathFile(IResource resource) {
     IProject project = resource.getProject();
     if (project == null) return null;
-    IResource result = project.findMember(".classpath"); //$NON-NLS-1$
+    IResource result = project.findMember(".classpath"); // $NON-NLS-1$
     if (result instanceof IFile) return (IFile) result;
     return null;
   }

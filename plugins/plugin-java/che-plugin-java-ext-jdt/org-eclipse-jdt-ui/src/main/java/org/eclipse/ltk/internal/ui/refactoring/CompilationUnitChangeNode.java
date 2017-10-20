@@ -83,7 +83,8 @@ public class CompilationUnitChangeNode extends TextEditChangeNode {
     TextEditBasedChange change = getTextEditBasedChange();
     if (change instanceof MultiStateTextFileChange) {
       return new ChildNode
-          [0]; // no edit preview & edit disabling possible in the MultiStateTextFileChange (edits must be applied
+          [0]; // no edit preview & edit disabling possible in the MultiStateTextFileChange (edits
+      // must be applied
       // in sequence)
     }
 

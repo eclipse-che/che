@@ -115,7 +115,7 @@ public class RecentFileStore implements RecentFileList {
       return false;
     }
 
-    //initial precondition
+    // initial precondition
     if (recentStorage.size() == MAX_FILES_IN_STACK) {
       remove(recentStorage.getLast());
     }
@@ -125,7 +125,7 @@ public class RecentFileStore implements RecentFileList {
     recentStorage.addFirst(item);
     openRecentFilesPresenter.setRecentFiles(getAll());
 
-    //register recent item action
+    // register recent item action
     RecentFileAction action = recentFileActionFactory.newRecentFileAction(item);
     fileToAction.add(Pair.of(item, action));
     actionManager.registerAction(action.getId(), action);
@@ -144,7 +144,7 @@ public class RecentFileStore implements RecentFileList {
     recentStorage.remove(item);
     openRecentFilesPresenter.setRecentFiles(getAll());
 
-    //with one cycle de-register action and remove it from recent group
+    // with one cycle de-register action and remove it from recent group
     Iterator<Pair<File, RecentFileAction>> iterator = fileToAction.iterator();
     while (iterator.hasNext()) {
       Pair<File, RecentFileAction> pair = iterator.next();
@@ -181,7 +181,7 @@ public class RecentFileStore implements RecentFileList {
     openRecentFilesPresenter.clearRecentFiles();
     recentStorage.clear();
 
-    //de-register all previously registered actions
+    // de-register all previously registered actions
     for (Pair<File, RecentFileAction> pair : fileToAction) {
       actionManager.unregisterAction(pair.getSecond().getId());
       recentGroup.remove(pair.getSecond());

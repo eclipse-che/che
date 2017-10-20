@@ -32,7 +32,8 @@ public final class StreamPump implements Runnable {
   }
 
   public synchronized void stop() {
-    // Not clear do we need close original stream, but since it was wrapped by BufferedReader close it anyway.
+    // Not clear do we need close original stream, but since it was wrapped by BufferedReader close
+    // it anyway.
     try {
       bufferedReader.close();
     } catch (IOException ignored) {

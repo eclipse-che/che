@@ -76,7 +76,7 @@ public class ArchetypeGenerationStrategy implements GeneratorStrategy {
     String archetypeRepository = null;
     Map<String, String> archetypeProperties = new HashMap<>();
     options.remove(
-        "type"); //TODO: remove prop 'type' now it use only for detecting generation strategy
+        "type"); // TODO: remove prop 'type' now it use only for detecting generation strategy
     for (Entry<String, String> entry : options.entrySet()) {
       switch (entry.getKey()) {
         case "archetypeGroupId":

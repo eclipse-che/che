@@ -25,19 +25,19 @@ public class SystemInfo {
   public static final String DRIVER_STATE_METADATA_SPACE_USED = "Metadata Space Used";
 
   // Fields are sorted in alphabetical order to eas comparison with docker docs and output
-  //Architecture
-  //BridgeNfIptables
-  //BridgeNfIp6tables
-  //ClusterAdvertise
-  //ClusterStore
+  // Architecture
+  // BridgeNfIptables
+  // BridgeNfIp6tables
+  // ClusterAdvertise
+  // ClusterStore
   private int containers;
-  //ContainersPaused
-  //ContainersRunning
-  //ContainersStopped
-  //CPUSet
-  //CpuCfsPeriod
-  //CpuCfsQuota
-  //CPUShares
+  // ContainersPaused
+  // ContainersRunning
+  // ContainersStopped
+  // CPUSet
+  // CpuCfsPeriod
+  // CpuCfsQuota
+  // CPUShares
   private boolean debug;
   private String dockerRootDir;
   private String driver;
@@ -64,7 +64,7 @@ public class SystemInfo {
   // So seems two-dimensional array is simplest solution for model.
   private String[][] driverStatus;
   private String executionDriver;
-  //ExperimentalBuild
+  // ExperimentalBuild
   private String httpProxy;
   private String httpsProxy;
   private String iD;
@@ -73,11 +73,11 @@ public class SystemInfo {
   private String indexServerAddress;
   private String initPath;
   private String initSha1;
-  //KernelMemory
+  // KernelMemory
   private String kernelVersion;
   private String[] labels;
-  //LoggingDriver
-  //CgroupDriver
+  // LoggingDriver
+  // CgroupDriver
   private long memTotal;
   private boolean memoryLimit;
   private int nCPU;
@@ -86,12 +86,12 @@ public class SystemInfo {
   private int nGoroutines;
   private String name;
   private String noProxy;
-  //OomKillDisable
+  // OomKillDisable
   private String operatingSystem;
-  //OSType
-  //Plugins
-  //RegistryConfig
-  //ServerVersion
+  // OSType
+  // Plugins
+  // RegistryConfig
+  // ServerVersion
   private boolean swapLimit;
   private String systemTime;
   // data was moved here from driver status in recent docker-swarm versions
@@ -99,7 +99,8 @@ public class SystemInfo {
 
   // ---------------------------------------------------------------------------
   // Methods for access DriverStatus information in comfortable way.
-  // Getters don't have "get" prefixes to avoid mixing with methods for accessing info provided by docker API in json format.
+  // Getters don't have "get" prefixes to avoid mixing with methods for accessing info provided by
+  // docker API in json format.
   public String statusField(String fieldName) {
     if (driverStatus == null) {
       return null;

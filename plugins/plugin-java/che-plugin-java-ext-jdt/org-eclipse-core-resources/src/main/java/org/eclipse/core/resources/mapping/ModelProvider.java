@@ -40,7 +40,7 @@ public abstract class ModelProvider extends PlatformObject {
 
   /** The model provider id of the Resources model. */
   public static final String RESOURCE_MODEL_PROVIDER_ID =
-      "org.eclipse.core.resources.modelProvider"; //$NON-NLS-1$
+      "org.eclipse.core.resources.modelProvider"; // $NON-NLS-1$
 
   private IModelProviderDescriptor descriptor;
 
@@ -203,7 +203,7 @@ public abstract class ModelProvider extends PlatformObject {
       ResourceMapping[] mappings, ResourceMappingContext context, IProgressMonitor monitor)
       throws CoreException {
     try {
-      monitor.beginTask("", 100 * mappings.length); //$NON-NLS-1$
+      monitor.beginTask("", 100 * mappings.length); // $NON-NLS-1$
       List<ResourceTraversal> traversals = new ArrayList<ResourceTraversal>();
       for (int i = 0; i < mappings.length; i++) {
         ResourceMapping mapping = mappings[i];

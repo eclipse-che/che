@@ -23,7 +23,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 /** Grab bag of utility methods for the file system plugin */
 public class Policy {
-  public static final String PI_FILE_SYSTEM = "org.eclipse.core.filesystem"; //$NON-NLS-1$
+  public static final String PI_FILE_SYSTEM = "org.eclipse.core.filesystem"; // $NON-NLS-1$
 
   public static void checkCanceled(IProgressMonitor monitor) {
     if (monitor.isCanceled()) throw new OperationCanceledException();
@@ -36,9 +36,9 @@ public class Policy {
   public static void debug(String message) {
     StringBuffer buffer = new StringBuffer();
     buffer.append(new Date(System.currentTimeMillis()));
-    buffer.append(" - ["); //$NON-NLS-1$
+    buffer.append(" - ["); // $NON-NLS-1$
     buffer.append(Thread.currentThread().getName());
-    buffer.append("] "); //$NON-NLS-1$
+    buffer.append("] "); // $NON-NLS-1$
     buffer.append(message);
     System.out.println(buffer.toString());
   }
@@ -53,7 +53,7 @@ public class Policy {
   }
 
   public static void log(int severity, String message, Throwable t) {
-    if (message == null) message = ""; //$NON-NLS-1$
+    if (message == null) message = ""; // $NON-NLS-1$
     RuntimeLog.log(new Status(severity, PI_FILE_SYSTEM, 1, message, t));
   }
 
@@ -66,7 +66,7 @@ public class Policy {
     try {
       if (in != null) in.close();
     } catch (IOException e) {
-      //ignore
+      // ignore
     }
   }
 
@@ -75,7 +75,7 @@ public class Policy {
     try {
       if (out != null) out.close();
     } catch (IOException e) {
-      //ignore
+      // ignore
     }
   }
 

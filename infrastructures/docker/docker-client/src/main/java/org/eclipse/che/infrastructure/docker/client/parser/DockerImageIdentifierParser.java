@@ -25,7 +25,8 @@ import org.eclipse.che.infrastructure.docker.client.DockerFileException;
  */
 public class DockerImageIdentifierParser {
 
-  // Validation rules are taken from https://github.com/docker/distribution/blob/master/reference/regexp.go
+  // Validation rules are taken from
+  // https://github.com/docker/distribution/blob/master/reference/regexp.go
   private static final String HOSTNAME_COMPONENT =
       "(?:[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9])";
   private static final String REGISTRY =

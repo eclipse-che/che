@@ -53,7 +53,7 @@ public class DefaultAvailableResourcesProviderTest {
 
   @Test
   public void shouldReturnAvailableResourcesWhenNotAllTotalResourcesAreUsed() throws Exception {
-    //given
+    // given
     List<ResourceImpl> totalResources = singletonList(new ResourceImpl("test", 5000, "unit"));
     doReturn(totalResources).when(resourceUsageManager).getTotalResources(anyString());
     List<ResourceImpl> usedResources = singletonList(new ResourceImpl("test", 2000, "unit"));
@@ -63,11 +63,11 @@ public class DefaultAvailableResourcesProviderTest {
         .when(resourceAggregator)
         .deduct(anyList(), anyList());
 
-    //when
+    // when
     List<? extends Resource> availableResources =
         defaultAvailableResourcesProvider.getAvailableResources("account123");
 
-    //then
+    // then
     assertEquals(availableResources.size(), 1);
     assertEquals(availableResources.get(0), availableResource);
     verify(resourceUsageManager).getTotalResources("account123");
@@ -79,7 +79,7 @@ public class DefaultAvailableResourcesProviderTest {
   @Test
   public void shouldReturnExcessiveResourcesWhenNotOneResourceIsUsedButNotPresentInTotal()
       throws Exception {
-    //given
+    // given
     List<ResourceImpl> totalResources = singletonList(new ResourceImpl("test", 5000, "unit"));
     doReturn(totalResources).when(resourceUsageManager).getTotalResources(anyString());
     List<ResourceImpl> usedResources =
@@ -93,11 +93,11 @@ public class DefaultAvailableResourcesProviderTest {
         .when(resourceAggregator)
         .excess(anyList(), anyList());
 
-    //when
+    // when
     List<? extends Resource> availableResources =
         defaultAvailableResourcesProvider.getAvailableResources("account123");
 
-    //then
+    // then
     assertEquals(availableResources.size(), 1);
     assertEquals(availableResources.get(0), excessiveResource);
     verify(resourceUsageManager).getTotalResources("account123");

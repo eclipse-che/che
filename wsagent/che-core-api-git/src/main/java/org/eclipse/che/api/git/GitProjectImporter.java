@@ -110,7 +110,8 @@ public class GitProjectImporter implements ProjectImporter {
       String branch = null;
       String startPoint = null;
       // For factory or probably for our projects templates:
-      // If git repository contains more than one project need clone all repository but after cloning keep just
+      // If git repository contains more than one project need clone all repository but after
+      // cloning keep just
       // sub-project that is specified in parameter "keepDir".
       String keepDir = null;
       // For factory and for our projects templates:
@@ -134,8 +135,8 @@ public class GitProjectImporter implements ProjectImporter {
         if (parameters.containsKey("recursive")) {
           recursiveEnabled = true;
         }
-        //convertToTopLevelProject feature is working only if we don't need any git information
-        //and when we are working in git sparse checkout mode.
+        // convertToTopLevelProject feature is working only if we don't need any git information
+        // and when we are working in git sparse checkout mode.
         if (!keepVcs
             && !isNullOrEmpty(keepDir)
             && parameters.containsKey("convertToTopLevelProject")) {

@@ -130,7 +130,7 @@ public class MavenModelReader {
   private Pair<ModelReadingResult, Pair<List<String>, List<String>>> readModel(
       File pom, MavenServerManager serverManager) {
     ModelReadingResult readingResult = doRead(pom);
-    //TODO resolve parent pom
+    // TODO resolve parent pom
 
     ProfileApplicationResult applied =
         serverManager.applyProfiles(

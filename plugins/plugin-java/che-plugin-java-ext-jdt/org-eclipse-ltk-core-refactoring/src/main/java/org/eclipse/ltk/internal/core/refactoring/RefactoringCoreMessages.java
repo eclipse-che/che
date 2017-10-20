@@ -22,7 +22,7 @@ public final class RefactoringCoreMessages extends NLS {
   public static String BufferValidationState_no_character_encoding;
 
   private static final String BUNDLE_NAME =
-      "org.eclipse.ltk.internal.core.refactoring.RefactoringCoreMessages"; //$NON-NLS-1$
+      "org.eclipse.ltk.internal.core.refactoring.RefactoringCoreMessages"; // $NON-NLS-1$
 
   public static String Changes_validateEdit;
 

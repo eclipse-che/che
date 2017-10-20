@@ -38,6 +38,6 @@ public class CheInvokedMethodListener implements IInvokedMethodListener {
 
   @Override
   public void afterInvocation(IInvokedMethod method, ITestResult testResult) {
-    //ignore
+    // ignore
   }
 }

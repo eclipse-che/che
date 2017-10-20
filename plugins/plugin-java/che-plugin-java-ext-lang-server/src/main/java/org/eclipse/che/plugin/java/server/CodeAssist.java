@@ -89,7 +89,7 @@ public class CodeAssist {
   private final Cache<String, CodeAssistContext> cache;
 
   public CodeAssist() {
-    //todo configure expire time
+    // todo configure expire time
     cache =
         CacheBuilder.newBuilder()
             .expireAfterWrite(15, TimeUnit.MINUTES)
@@ -291,8 +291,8 @@ public class CodeAssist {
     TextEdit edit = operation.createTextEdit(monitor);
     OrganizeImportResult result = DtoFactory.newDto(OrganizeImportResult.class);
     TypeNameMatch[][] choices = operation.getChoices();
-    //Apply organize import declarations if operation doesn't have conflicts (choices.length == 0)
-    //or all conflicts were resolved (!chosen.isEmpty())
+    // Apply organize import declarations if operation doesn't have conflicts (choices.length == 0)
+    // or all conflicts were resolved (!chosen.isEmpty())
     if ((chosen != null && !chosen.isEmpty()) || choices == null || choices.length == 0) {
       IBuffer buffer = compilationUnit.getBuffer();
       IDocument document = new Document(buffer.getContents());
@@ -365,7 +365,7 @@ public class CodeAssist {
         try {
           cUnit.discardWorkingCopy();
         } catch (JavaModelException e) {
-          //ignore
+          // ignore
         }
         try {
           FileBuffers.getTextFileBufferManager()

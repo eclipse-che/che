@@ -125,7 +125,7 @@ class View extends Composite {
    * @param showing true if showing, false if not.
    */
   protected void setShowing(boolean showing) {
-    //set for each focusable widget blur handler to have ability to store last focused element
+    // set for each focusable widget blur handler to have ability to store last focused element
     for (FocusWidget focusWidget : UIUtil.getFocusableChildren(content)) {
       focusWidget.addBlurHandler(blurHandler);
     }

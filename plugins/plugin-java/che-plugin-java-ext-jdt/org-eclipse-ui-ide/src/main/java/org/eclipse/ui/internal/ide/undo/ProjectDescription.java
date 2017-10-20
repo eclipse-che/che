@@ -87,7 +87,7 @@ public class ProjectDescription extends ContainerDescription {
       return;
     }
     IProject projectHandle = (IProject) resource;
-    monitor.beginTask("", 200); //$NON-NLS-1$
+    monitor.beginTask("", 200); // $NON-NLS-1$
     monitor.setTaskName(UndoMessages.FolderDescription_NewFolderProgress);
     if (projectDescription == null) {
       projectHandle.create(new SubProgressMonitor(monitor, 100));

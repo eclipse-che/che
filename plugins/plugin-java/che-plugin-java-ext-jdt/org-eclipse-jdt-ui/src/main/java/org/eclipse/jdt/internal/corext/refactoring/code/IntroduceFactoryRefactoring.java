@@ -120,7 +120,7 @@ import org.eclipse.text.edits.TextEditGroup;
  */
 public class IntroduceFactoryRefactoring extends Refactoring {
 
-  private static final String ATTRIBUTE_PROTECT = "protect"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_PROTECT = "protect"; // $NON-NLS-1$
 
   /**
    * The handle for the compilation unit holding the selection that was passed into this
@@ -339,7 +339,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
       pm.worked(1);
 
       if (fNewMethodName == null)
-        return setNewMethodName("create" + fCtorBinding.getName()); //$NON-NLS-1$
+        return setNewMethodName("create" + fCtorBinding.getName()); // $NON-NLS-1$
       else return new RefactoringStatus();
     } finally {
       pm.done();
@@ -402,12 +402,12 @@ public class IntroduceFactoryRefactoring extends Refactoring {
       // Can't find an IMethod for this method, so build a string pattern instead
       StringBuffer buf = new StringBuffer();
 
-      buf.append(methodBinding.getDeclaringClass().getQualifiedName()).append("("); //$NON-NLS-1$
+      buf.append(methodBinding.getDeclaringClass().getQualifiedName()).append("("); // $NON-NLS-1$
       for (int i = 0; i < fArgTypes.length; i++) {
-        if (i != 0) buf.append(","); //$NON-NLS-1$
+        if (i != 0) buf.append(","); // $NON-NLS-1$
         buf.append(fArgTypes[i].getQualifiedName());
       }
-      buf.append(")"); //$NON-NLS-1$
+      buf.append(")"); // $NON-NLS-1$
       return SearchPattern.createPattern(
           buf.toString(),
           IJavaSearchConstants.CONSTRUCTOR,
@@ -584,7 +584,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
     }
 
     // Have no way of getting the formal argument names; just fake it.
-    for (int i = 0; i < numArgs; i++) names[i] = "arg" + (i + 1); //$NON-NLS-1$
+    for (int i = 0; i < numArgs; i++) names[i] = "arg" + (i + 1); // $NON-NLS-1$
 
     return names;
   }
@@ -1116,7 +1116,8 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
     if (node instanceof ClassInstanceCreation) {
       if (((ClassInstanceCreation) node).getAnonymousClassDeclaration() != null) {
-        // Cannot replace anonymous inner class, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=250660
+        // Cannot replace anonymous inner class, see
+        // https://bugs.eclipse.org/bugs/show_bug.cgi?id=250660
         fConstructorVisibility = Modifier.PROTECTED;
         return null;
       }
@@ -1193,7 +1194,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
                         node.getClass().getName() + "('" + node.toString() + "')"),
                     BasicElementLabels.getFileName(unitHandle)
                   }),
-              //$NON-NLS-1$ //$NON-NLS-2$
+              // $NON-NLS-1$ //$NON-NLS-2$
               null));
   }
 
@@ -1293,7 +1294,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
           JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION,
           new Integer(fSelectionStart).toString()
               + " "
-              + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+              + new Integer(fSelectionLength).toString()); // $NON-NLS-1$
       arguments.put(ATTRIBUTE_PROTECT, Boolean.valueOf(fProtectConstructor).toString());
       final DynamicValidationStateChange result =
           new DynamicValidationRefactoringChange(
@@ -1562,7 +1563,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
               RefactoringCoreMessages.InitializableRefactoring_argument_not_exist,
               JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
     final String name = arguments.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
-    if (name != null && !"".equals(name)) //$NON-NLS-1$
+    if (name != null && !"".equals(name)) // $NON-NLS-1$
     fNewMethodName = name;
     else
       return RefactoringStatus.createFatalErrorStatus(

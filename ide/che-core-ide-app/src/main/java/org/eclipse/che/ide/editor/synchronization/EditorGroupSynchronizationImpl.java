@@ -74,7 +74,7 @@ public class EditorGroupSynchronizationImpl
     EditorPartPresenter groupMember = synchronizedEditors.keySet().iterator().next();
     if ((groupMember instanceof EditorWithAutoSave)
         && !((EditorWithAutoSave) groupMember).isAutoSaveEnabled()) {
-      //group can contains unsaved content - we need update content for the editor
+      // group can contains unsaved content - we need update content for the editor
       Document editorDocument = documentHandle.getDocument();
       Document groupMemberDocument = getDocumentHandleFor(groupMember).getDocument();
 
@@ -93,6 +93,25 @@ public class EditorGroupSynchronizationImpl
   public void onActiveEditorChanged(@NotNull EditorPartPresenter activeEditor) {
     groupLeaderEditor = activeEditor;
     resolveAutoSave();
+  }
+
+  @Override
+  public void onEditorDirtyStateChanged(EditorPartPresenter changedEditor) {
+    boolean hasEditorsToSync = synchronizedEditors.keySet().size() > 1;
+    if (!hasEditorsToSync || groupLeaderEditor == null || groupLeaderEditor != changedEditor) {
+      // we sync 'dirty' state of editors when content of an ACTIVE editor is saved
+      return;
+    }
+
+    synchronizedEditors
+        .keySet()
+        .forEach(
+            editor -> {
+              if (editor != groupLeaderEditor && editor instanceof TextEditor) {
+                ((TextEditor) editor).getEditorWidget().markClean();
+                ((TextEditor) editor).updateDirtyState(false);
+              }
+            });
   }
 
   @Override

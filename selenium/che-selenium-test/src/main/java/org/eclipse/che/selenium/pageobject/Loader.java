@@ -49,7 +49,7 @@ public class Loader {
 
   /** Waits for Loader to hide. */
   public void waitOnClosed() {
-    //in this pace pause, because loader can appear not at once
+    // in this pace pause, because loader can appear not at once
     WaitUtils.sleepQuietly(1);
     new WebDriverWait(seleniumWebDriver, UPDATING_PROJECT_TIMEOUT_SEC)
         .until(ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.LOADER_ID)));

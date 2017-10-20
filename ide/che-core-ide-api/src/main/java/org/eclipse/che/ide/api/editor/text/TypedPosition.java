@@ -79,6 +79,6 @@ public class TypedPosition extends Position {
    */
   @Override
   public String toString() {
-    return fType + " - " + super.toString(); //$NON-NLS-1$
+    return fType + " - " + super.toString(); // $NON-NLS-1$
   }
 }

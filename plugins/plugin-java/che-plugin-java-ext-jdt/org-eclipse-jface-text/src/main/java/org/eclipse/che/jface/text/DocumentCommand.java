@@ -286,7 +286,8 @@ public class DocumentCommand {
   //	 */
   //	boolean fillEvent(VerifyEvent event, IRegion modelRange) {
   //		event.text= text;
-  //		event.doit= (offset == modelRange.getOffset() && length == modelRange.getLength() && doit && caretOffset == -1);
+  //		event.doit= (offset == modelRange.getOffset() && length == modelRange.getLength() && doit &&
+  // caretOffset == -1);
   //		return event.doit;
   //	}
 
@@ -404,8 +405,7 @@ public class DocumentCommand {
 
       final Command originalCommand = new Command(offset, length, text, owner);
       for (final Iterator iterator = new CommandIterator(fCommands, originalCommand, false);
-          iterator.hasNext();
-          ) ((Command) iterator.next()).execute(document);
+          iterator.hasNext(); ) ((Command) iterator.next()).execute(document);
 
     } catch (BadLocationException e) {
       // ignore

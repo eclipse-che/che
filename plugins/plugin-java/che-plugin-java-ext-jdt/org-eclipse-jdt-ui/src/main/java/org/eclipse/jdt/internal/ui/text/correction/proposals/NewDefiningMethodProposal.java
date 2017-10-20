@@ -88,7 +88,7 @@ public class NewDefiningMethodProposal extends AbstractMethodCorrectionProposal 
 
       params.add(newParam);
 
-      String groupId = "arg_name_" + i; //$NON-NLS-1$
+      String groupId = "arg_name_" + i; // $NON-NLS-1$
       addLinkedPosition(rewrite.track(newParam.getName()), false, groupId);
 
       for (int k = 0; k < proposedNames.length; k++) {
@@ -149,7 +149,7 @@ public class NewDefiningMethodProposal extends AbstractMethodCorrectionProposal 
       Type newType = importRewrite.addImport(bindings[i], ast);
       exceptions.add(newType);
 
-      addLinkedPosition(rewrite.track(newType), false, "exc_type_" + i); //$NON-NLS-1$
+      addLinkedPosition(rewrite.track(newType), false, "exc_type_" + i); // $NON-NLS-1$
     }
   }
 

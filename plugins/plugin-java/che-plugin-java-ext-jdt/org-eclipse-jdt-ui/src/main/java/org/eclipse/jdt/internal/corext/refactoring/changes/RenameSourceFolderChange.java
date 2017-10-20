@@ -81,9 +81,9 @@ public final class RenameSourceFolderChange extends AbstractJavaElementRenameCha
 
   public RenameSourceFolderChange(IPackageFragmentRoot sourceFolder, String newName) {
     this(sourceFolder.getPath(), sourceFolder.getElementName(), newName, IResource.NULL_STAMP);
-    Assert.isTrue(!sourceFolder.isReadOnly(), "should not be read only"); //$NON-NLS-1$
-    Assert.isTrue(!sourceFolder.isArchive(), "should not be an archive"); //$NON-NLS-1$
-    Assert.isTrue(!sourceFolder.isExternal(), "should not be an external folder"); //$NON-NLS-1$
+    Assert.isTrue(!sourceFolder.isReadOnly(), "should not be read only"); // $NON-NLS-1$
+    Assert.isTrue(!sourceFolder.isArchive(), "should not be an archive"); // $NON-NLS-1$
+    Assert.isTrue(!sourceFolder.isExternal(), "should not be an external folder"); // $NON-NLS-1$
     setValidationMethod(VALIDATE_NOT_DIRTY);
   }
 

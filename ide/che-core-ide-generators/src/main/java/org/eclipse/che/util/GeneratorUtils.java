@@ -70,8 +70,8 @@ public class GeneratorUtils {
         rootDirPath = args[0].substring(ROOT_DIR_PARAMETER.length());
       } else {
         System.err.print(
-            "Wrong usage. There is only one allowed argument : " + ROOT_DIR_PARAMETER); //NOSONAR
-        System.exit(1); //NOSONAR
+            "Wrong usage. There is only one allowed argument : " + ROOT_DIR_PARAMETER); // NOSONAR
+        System.exit(1); // NOSONAR
       }
     }
     return new File(rootDirPath);

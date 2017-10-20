@@ -62,7 +62,7 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
    */
   @Override
   public String canEnableGetterRenaming() throws CoreException {
-    return ""; //$NON-NLS-1$
+    return ""; // $NON-NLS-1$
   }
 
   /*
@@ -70,7 +70,7 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
    */
   @Override
   public String canEnableSetterRenaming() throws CoreException {
-    return ""; //$NON-NLS-1$
+    return ""; // $NON-NLS-1$
   }
 
   /*
@@ -164,7 +164,7 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
               RefactoringCoreMessages.InitializableRefactoring_argument_not_exist,
               JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
     final String name = extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
-    if (name != null && !"".equals(name)) //$NON-NLS-1$
+    if (name != null && !"".equals(name)) // $NON-NLS-1$
     setNewElementName(name);
     else
       return RefactoringStatus.createFatalErrorStatus(

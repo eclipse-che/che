@@ -74,9 +74,9 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
   public static final int CONST_FIELD = 4;
   public static final int ENUM_CONST = 5;
 
-  private static final String KEY_NAME = "name"; //$NON-NLS-1$
-  private static final String KEY_TYPE = "type"; //$NON-NLS-1$
-  private static final String KEY_INITIALIZER = "initializer"; //$NON-NLS-1$
+  private static final String KEY_NAME = "name"; // $NON-NLS-1$
+  private static final String KEY_TYPE = "type"; // $NON-NLS-1$
+  private static final String KEY_INITIALIZER = "initializer"; // $NON-NLS-1$
 
   private final int fVariableKind;
   private final SimpleName fOriginalNode;
@@ -117,7 +117,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
         return doAddEnumConst(cu);
       default:
         throw new IllegalArgumentException(
-            "Unsupported variable kind: " + fVariableKind); //$NON-NLS-1$
+            "Unsupported variable kind: " + fVariableKind); // $NON-NLS-1$
     }
   }
 
@@ -152,8 +152,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
       if (javadoc != null) {
         HashSet<String> leadingNames = new HashSet<String>();
         for (Iterator<SingleVariableDeclaration> iter = methodDeclaration.parameters().iterator();
-            iter.hasNext();
-            ) {
+            iter.hasNext(); ) {
           SingleVariableDeclaration curr = iter.next();
           leadingNames.add(curr.getName().getIdentifier());
         }
@@ -166,7 +165,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
         newTagElement.fragments().add(commentStart);
 
         addLinkedPosition(rewrite.track(newTagRef), false, KEY_NAME);
-        addLinkedPosition(rewrite.track(commentStart), false, "comment_start"); //$NON-NLS-1$
+        addLinkedPosition(rewrite.track(commentStart), false, "comment_start"); // $NON-NLS-1$
 
         ListRewrite tagsRewriter = rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
         JavadocTagsSubProcessor.insertTag(tagsRewriter, newTagElement, leadingNames);
@@ -304,7 +303,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
           elementBinding = typeBinding.getElementType();
         } else {
           ITypeBinding iterable =
-              Bindings.findTypeInHierarchy(typeBinding, "java.lang.Iterable"); //$NON-NLS-1$
+              Bindings.findTypeInHierarchy(typeBinding, "java.lang.Iterable"); // $NON-NLS-1$
           if (iterable != null) {
             ITypeBinding[] typeArguments = iterable.getTypeArguments();
             if (typeArguments.length == 1) {
@@ -318,7 +317,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
       if (elementBinding != null) {
         type = imports.addImport(elementBinding, ast, importRewriteContext);
       } else {
-        type = ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
+        type = ast.newSimpleType(ast.newSimpleName("Object")); // $NON-NLS-1$
       }
 
       rewrite.set(parameter, SingleVariableDeclaration.TYPE_PROPERTY, type, null);
@@ -384,7 +383,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
   }
 
   private ASTNode getDominantNode(SimpleName[] names) {
-    ASTNode dominator = names[0]; //ASTResolving.findParentStatement(names[0]);
+    ASTNode dominator = names[0]; // ASTResolving.findParentStatement(names[0]);
     for (int i = 1; i < names.length; i++) {
       ASTNode curr = names[i]; // ASTResolving.findParentStatement(names[i]);
       if (curr != dominator) {
@@ -520,7 +519,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
         binding = ASTResolving.normalizeWildcardType(binding, isVariableAssigned(), ast);
         if (binding == null) {
           // only null binding applies
-          binding = ast.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+          binding = ast.resolveWellKnownType("java.lang.Object"); // $NON-NLS-1$
         }
       }
 
@@ -538,9 +537,9 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
       return type;
     }
     if (fVariableKind == CONST_FIELD) {
-      return ast.newSimpleType(ast.newSimpleName("String")); //$NON-NLS-1$
+      return ast.newSimpleType(ast.newSimpleName("String")); // $NON-NLS-1$
     }
-    return ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
+    return ast.newSimpleType(ast.newSimpleName("Object")); // $NON-NLS-1$
   }
 
   private boolean isVariableAssigned() {

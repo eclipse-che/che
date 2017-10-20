@@ -364,7 +364,8 @@ public class RenameTypeTest extends RefactoringTest {
     project.setOption(JavaCore.CODEASSIST_ARGUMENT_SUFFIXES, suffixes);
   }
 
-  // </------------------------------------ Similarly named elements --------------------------------->
+  // </------------------------------------ Similarly named elements
+  // --------------------------------->
 
   @org.junit.Test
   public void testIllegalInnerClass() throws Exception {
@@ -1113,8 +1114,8 @@ public class RenameTypeTest extends RefactoringTest {
 
   @Test
   public void test20() throws Exception {
-    //printTestDisabledMessage("failb because of bug#9479");
-    //if (true)
+    // printTestDisabledMessage("failb because of bug#9479");
+    // if (true)
     //	return;
     IPackageFragment packageA = getRoot().createPackageFragment("A", true, null);
 
@@ -1276,7 +1277,7 @@ public class RenameTypeTest extends RefactoringTest {
 
   @Test
   public void test40() throws Exception {
-    //printTestDisabledMessage("search engine bug");
+    // printTestDisabledMessage("search engine bug");
     helper2("A", "B");
   }
 
@@ -1366,7 +1367,7 @@ public class RenameTypeTest extends RefactoringTest {
 
   @Test
   public void test52() throws Exception {
-    //printTestDisabledMessage("1GJY2XN: ITPJUI:WIN2000 - rename type: error when with reference");
+    // printTestDisabledMessage("1GJY2XN: ITPJUI:WIN2000 - rename type: error when with reference");
     helper2("A", "B");
   }
 
@@ -1377,13 +1378,15 @@ public class RenameTypeTest extends RefactoringTest {
 
   @Test
   public void test54() throws Exception {
-    //printTestDisabledMessage("waiting for: 1GKAQJS: ITPJCORE:WIN2000 - search: incorrect results for nested types");
+    // printTestDisabledMessage("waiting for: 1GKAQJS: ITPJCORE:WIN2000 - search: incorrect results
+    // for nested types");
     helperWithTextual("A", "X", "XYZ", "A", true, false);
   }
 
   @Test
   public void test55() throws Exception {
-    //printTestDisabledMessage("waiting for: 1GKAQJS: ITPJCORE:WIN2000 - search: incorrect results for nested types");
+    // printTestDisabledMessage("waiting for: 1GKAQJS: ITPJCORE:WIN2000 - search: incorrect results
+    // for nested types");
     helperWithTextual("A", "X", "XYZ", "A", false, false);
   }
 
@@ -1394,7 +1397,7 @@ public class RenameTypeTest extends RefactoringTest {
 
   @Test
   public void test58() throws Exception {
-    //printTestDisabledMessage("bug#16751");
+    // printTestDisabledMessage("bug#16751");
     helper2("A", "B");
   }
 
@@ -1488,7 +1491,7 @@ public class RenameTypeTest extends RefactoringTest {
 
   @Test
   public void test66() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=365380
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=365380
     helperWithTextual("B", "A", "B", "B", true, true);
   }
 
@@ -1520,7 +1523,7 @@ public class RenameTypeTest extends RefactoringTest {
   @Test
   public void testUnicode01() throws Exception {
     helper2("B", "C");
-    //TODO: test undo!
+    // TODO: test undo!
   }
 
   @Test
@@ -1680,7 +1683,7 @@ public class RenameTypeTest extends RefactoringTest {
 
   @Test
   public void testSimilarElements04() throws Exception {
-    //Additional field with exactly the same name and getters and setters in another class
+    // Additional field with exactly the same name and getters and setters in another class
     getClassFromTestFile(getPackageP(), "SomeOtherClass");
     helper3("SomeClass", "SomeClass2", true, false, true);
     checkResultInClass("SomeOtherClass");
@@ -1688,8 +1691,8 @@ public class RenameTypeTest extends RefactoringTest {
 
   @Test
   public void testSimilarElements05() throws Exception {
-    //qualified name updating
-    //includes textual updating
+    // qualified name updating
+    // includes textual updating
     String content = getFileContents(getTestPath() + "testSimilarElements05/in/test.html");
     IProject project = getPackageP().getJavaProject().getProject();
     IFile file = project.getFile("test.html");
@@ -1711,8 +1714,8 @@ public class RenameTypeTest extends RefactoringTest {
 
   @Test
   public void testSimilarElements06() throws Exception {
-    //Additional field with exactly the same name and getters and setters in another class
-    //includes textual updating
+    // Additional field with exactly the same name and getters and setters in another class
+    // includes textual updating
     // printTestDisabledMessage("potential matches in comments issue (bug 111891)");
     getClassFromTestFile(getPackageP(), "SomeNearlyIdenticalClass");
     helper3("SomeClass", "SomeOtherClass", true, true, true);
@@ -1721,21 +1724,21 @@ public class RenameTypeTest extends RefactoringTest {
 
   @Test
   public void testSimilarElements07() throws Exception {
-    //Test 4 fields in one file, different suffixes/prefixes, incl. 2x setters/getters
-    //includes textual updating
+    // Test 4 fields in one file, different suffixes/prefixes, incl. 2x setters/getters
+    // includes textual updating
     helper3("SomeClass", "SomeDiffClass", true, true, true);
   }
 
   @Test
   public void testSimilarElements08() throws Exception {
-    //Interface renaming fun, this time without textual
+    // Interface renaming fun, this time without textual
     helper3("ISomeIf", "ISomeIf2", true, false, true);
   }
 
   @Test
   public void testSimilarElements09() throws Exception {
-    //Some inner types
-    //includes textual updating
+    // Some inner types
+    // includes textual updating
     getClassFromTestFile(getPackageP(), "SomeOtherClass");
     helper3_inner(
         "SomeClass", "SomeInnerClass", "SomeClass", "SomeNewInnerClass", true, true, true, null);
@@ -1744,7 +1747,7 @@ public class RenameTypeTest extends RefactoringTest {
 
   @Test
   public void testSimilarElements10() throws Exception {
-    //Two static fields
+    // Two static fields
     getClassFromTestFile(getPackageP(), "SomeOtherClass");
     helper3("SomeClass", "SomeClass2", true, false, true, null);
     checkResultInClass("SomeOtherClass");
@@ -1752,8 +1755,8 @@ public class RenameTypeTest extends RefactoringTest {
 
   @Test
   public void testSimilarElements11() throws Exception {
-    //Assure participants get notified of normal stuff (type rename
-    //and resource changes) AND similarly named elements.
+    // Assure participants get notified of normal stuff (type rename
+    // and resource changes) AND similarly named elements.
     ParticipantTesting.reset();
     ICompilationUnit cu = createCUfromTestFile(getPackageP(), "SomeClass");
     IType someClass = getType(cu, "SomeClass");

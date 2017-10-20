@@ -141,8 +141,8 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
     }
     return new NullAnnotationsFix(
         operation.getMessage(),
-        operation
-            .getCompilationUnit(), // note that this uses the findings from createAddAnnotationOperation(..)
+        operation.getCompilationUnit(), // note that this uses the findings from
+        // createAddAnnotationOperation(..)
         new NullAnnotationsRewriteOperations.SignatureAnnotationRewriteOperation[] {operation});
   }
 
@@ -220,7 +220,8 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
           break;
           // all others propose to add @Nullable
       }
-      // when performing multiple changes we can only modify the one CU that the CleanUp infrastructure provides to the operation.
+      // when performing multiple changes we can only modify the one CU that the CleanUp
+      // infrastructure provides to the operation.
       SignatureAnnotationRewriteOperation fix =
           NullAnnotationsRewriteOperations.createAddAnnotationOperation(
               compilationUnit,
@@ -264,12 +265,15 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
   }
 
   //	private static boolean isMissingNullAnnotationProblem(int id) {
-  //		return id == IProblem.RequiredNonNullButProvidedNull || id == IProblem.RequiredNonNullButProvidedPotentialNull || id == IProblem.IllegalReturnNullityRedefinition
+  //		return id == IProblem.RequiredNonNullButProvidedNull || id ==
+  // IProblem.RequiredNonNullButProvidedPotentialNull || id ==
+  // IProblem.IllegalReturnNullityRedefinition
   //				|| mayIndicateParameterNullcheck(id);
   //	}
   //
   //	private static boolean mayIndicateParameterNullcheck(int problemId) {
-  //		return problemId == IProblem.NonNullLocalVariableComparisonYieldsFalse || problemId == IProblem.RedundantNullCheckOnNonNullLocalVariable;
+  //		return problemId == IProblem.NonNullLocalVariableComparisonYieldsFalse || problemId ==
+  // IProblem.RedundantNullCheckOnNonNullLocalVariable;
   //	}
 
   /**

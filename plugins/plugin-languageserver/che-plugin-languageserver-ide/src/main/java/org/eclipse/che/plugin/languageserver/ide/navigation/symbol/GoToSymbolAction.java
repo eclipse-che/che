@@ -169,7 +169,7 @@ public class GoToSymbolAction extends AbstractPerspectiveAction
             new TextRange(
                 new TextPosition(range.getStart().getLine(), range.getStart().getCharacter()),
                 new TextPosition(range.getEnd().getLine(), range.getEnd().getCharacter()));
-        //TODO add icons
+        // TODO add icons
         result.add(
             new SymbolEntry(
                 label,

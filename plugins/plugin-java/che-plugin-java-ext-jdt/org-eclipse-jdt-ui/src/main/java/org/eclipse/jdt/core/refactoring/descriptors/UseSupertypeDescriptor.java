@@ -34,7 +34,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 public final class UseSupertypeDescriptor extends JavaRefactoringDescriptor {
 
   /** The instanceof attribute */
-  private static final String ATTRIBUTE_INSTANCEOF = "instanceof"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_INSTANCEOF = "instanceof"; // $NON-NLS-1$
 
   /** The instanceof attribute */
   private boolean fInstanceof = false;

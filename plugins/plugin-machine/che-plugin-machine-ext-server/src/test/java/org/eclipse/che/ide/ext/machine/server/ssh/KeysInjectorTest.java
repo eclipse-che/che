@@ -96,7 +96,8 @@ public class KeysInjectorTest {
   //
   //    @Test
   //    public void shouldNotDoAnythingIfEventTypeDoesNotEqualToRunning() {
-  //        subscriber.onEvent(newDto(MachineStatusEvent.class).withEventType(MachineStatusEvent.EventType.DESTROYING));
+  //
+  // subscriber.onEvent(newDto(MachineStatusEvent.class).withEventType(MachineStatusEvent.EventType.DESTROYING));
   //
   //        verifyZeroInteractions(docker, environmentEngine, sshManager);
   //    }
@@ -105,7 +106,8 @@ public class KeysInjectorTest {
   //    public void shouldNotInjectSshKeysWhenThereAreNotAnyPair() throws Exception {
   //        when(sshManager.getPairs(anyString(), anyString())).thenReturn(Collections.emptyList());
   //
-  //        subscriber.onEvent(newDto(MachineStatusEvent.class).withEventType(MachineStatusEvent.EventType.RUNNING)
+  //
+  // subscriber.onEvent(newDto(MachineStatusEvent.class).withEventType(MachineStatusEvent.EventType.RUNNING)
   //                                                           .withMachineId(MACHINE_ID)
   //                                                           .withWorkspaceId(WORKSPACE_ID));
   //
@@ -118,9 +120,11 @@ public class KeysInjectorTest {
   //    @Test
   //    public void shouldNotInjectSshKeysWhenThereAreNotAnyPairWithPublicKey() throws Exception {
   //        when(sshManager.getPairs(anyString(), anyString()))
-  //                .thenReturn(Collections.singletonList(new SshPairImpl(OWNER, "machine", "myPair", null, null)));
+  //                .thenReturn(Collections.singletonList(new SshPairImpl(OWNER, "machine",
+  // "myPair", null, null)));
   //
-  //        subscriber.onEvent(newDto(MachineStatusEvent.class).withEventType(MachineStatusEvent.EventType.RUNNING)
+  //
+  // subscriber.onEvent(newDto(MachineStatusEvent.class).withEventType(MachineStatusEvent.EventType.RUNNING)
   //                                                           .withMachineId(MACHINE_ID)
   //                                                           .withWorkspaceId(WORKSPACE_ID));
   //
@@ -133,10 +137,13 @@ public class KeysInjectorTest {
   //    @Test
   //    public void shouldInjectSshKeysWhenThereAreAnyPairWithNotNullPublicKey() throws Exception {
   //        when(sshManager.getPairs(anyString(), anyString()))
-  //                .thenReturn(Arrays.asList(new SshPairImpl(OWNER, "machine", "myPair", "publicKey1", null),
-  //                                          new SshPairImpl(OWNER, "machine", "myPair", "publicKey2", null)));
+  //                .thenReturn(Arrays.asList(new SshPairImpl(OWNER, "machine", "myPair",
+  // "publicKey1", null),
+  //                                          new SshPairImpl(OWNER, "machine", "myPair",
+  // "publicKey2", null)));
   //
-  //        subscriber.onEvent(newDto(MachineStatusEvent.class).withEventType(MachineStatusEvent.EventType.RUNNING)
+  //
+  // subscriber.onEvent(newDto(MachineStatusEvent.class).withEventType(MachineStatusEvent.EventType.RUNNING)
   //                                                           .withMachineId(MACHINE_ID)
   //                                                           .withWorkspaceId(WORKSPACE_ID));
   //
@@ -144,11 +151,15 @@ public class KeysInjectorTest {
   //        verify(sshManager).getPairs(eq(OWNER), eq("machine"));
   //        verify(sshManager).getPair(eq(OWNER), eq("workspace"), eq(WORKSPACE_ID));
   //
-  //        ArgumentCaptor<CreateExecParams> argumentCaptor = ArgumentCaptor.forClass(CreateExecParams.class);
+  //        ArgumentCaptor<CreateExecParams> argumentCaptor =
+  // ArgumentCaptor.forClass(CreateExecParams.class);
   //        verify(docker).createExec(argumentCaptor.capture());
-  //        assertEquals(argumentCaptor.getValue().getCmd(), new String[] {"/bin/bash", "-c", "mkdir ~/.ssh/ -p" +
-  //                                                                                          "&& echo 'publicKey1' >> ~/.ssh/authorized_keys" +
-  //                                                                                          "&& echo 'publicKey2' >> ~/.ssh/authorized_keys"});
+  //        assertEquals(argumentCaptor.getValue().getCmd(), new String[] {"/bin/bash", "-c", "mkdir
+  // ~/.ssh/ -p" +
+  //                                                                                          "&&
+  // echo 'publicKey1' >> ~/.ssh/authorized_keys" +
+  //                                                                                          "&&
+  // echo 'publicKey2' >> ~/.ssh/authorized_keys"});
   //        verify(docker).startExec(eq(StartExecParams.create(EXEC_ID)), anyObject());
   //        verifyZeroInteractions(docker, environmentEngine, sshManager);
   //    }
@@ -165,10 +176,12 @@ public class KeysInjectorTest {
   //
   //        // workspace keypair
   //        when(sshManager.getPair(anyString(), eq("workspace"), anyString()))
-  //                .thenReturn(new SshPairImpl(OWNER, "workspace", WORKSPACE_ID, "publicKeyWorkspace", null));
+  //                .thenReturn(new SshPairImpl(OWNER, "workspace", WORKSPACE_ID,
+  // "publicKeyWorkspace", null));
   //
   //
-  //        subscriber.onEvent(newDto(MachineStatusEvent.class).withEventType(MachineStatusEvent.EventType.RUNNING)
+  //
+  // subscriber.onEvent(newDto(MachineStatusEvent.class).withEventType(MachineStatusEvent.EventType.RUNNING)
   //                                                           .withMachineId(MACHINE_ID)
   //                                                           .withWorkspaceId(WORKSPACE_ID));
   //
@@ -177,30 +190,38 @@ public class KeysInjectorTest {
   //        verify(sshManager).getPairs(eq(OWNER), eq("machine"));
   //        verify(sshManager).getPair(eq(OWNER), eq("workspace"), eq(WORKSPACE_ID));
   //
-  //        ArgumentCaptor<CreateExecParams> argumentCaptor = ArgumentCaptor.forClass(CreateExecParams.class);
+  //        ArgumentCaptor<CreateExecParams> argumentCaptor =
+  // ArgumentCaptor.forClass(CreateExecParams.class);
   //        verify(docker).createExec(argumentCaptor.capture());
-  //        assertEquals(argumentCaptor.getValue().getCmd(), new String[] {"/bin/bash", "-c", "mkdir ~/.ssh/ -p" +
-  //                                                                                          "&& echo 'publicKeyWorkspace' >> ~/.ssh/authorized_keys"});
+  //        assertEquals(argumentCaptor.getValue().getCmd(), new String[] {"/bin/bash", "-c", "mkdir
+  // ~/.ssh/ -p" +
+  //                                                                                          "&&
+  // echo 'publicKeyWorkspace' >> ~/.ssh/authorized_keys"});
   //        verify(docker).startExec(eq(StartExecParams.create(EXEC_ID)), anyObject());
   //        verifyZeroInteractions(docker, environmentEngine, sshManager);
   //    }
   //
   //    /**
-  //     * Validate the usecase: There is a workspace sshkeypair (without public key) but there is a machine keypair
-  //     * Expect that only the machine keypair is injected (as workspace keypair has no public key).
+  //     * Validate the usecase: There is a workspace sshkeypair (without public key) but there is a
+  // machine keypair
+  //     * Expect that only the machine keypair is injected (as workspace keypair has no public
+  // key).
   //     */
   //    @Test
-  //    public void shouldInjectSshKeysWhenThereIsNoPublicWorkspaceKeyButMachineKeys() throws Exception {
+  //    public void shouldInjectSshKeysWhenThereIsNoPublicWorkspaceKeyButMachineKeys() throws
+  // Exception {
   //        // no machine key pairs
   //        when(sshManager.getPairs(anyString(), eq("machine")))
-  //                .thenReturn(Arrays.asList(new SshPairImpl(OWNER, "machine", "myPair", "publicKey1", null)));
+  //                .thenReturn(Arrays.asList(new SshPairImpl(OWNER, "machine", "myPair",
+  // "publicKey1", null)));
   //
   //        // workspace keypair without public key
   //        when(sshManager.getPair(anyString(), eq("workspace"), anyString()))
   //                .thenReturn(new SshPairImpl(OWNER, "workspace", WORKSPACE_ID, null, null));
   //
   //
-  //        subscriber.onEvent(newDto(MachineStatusEvent.class).withEventType(MachineStatusEvent.EventType.RUNNING)
+  //
+  // subscriber.onEvent(newDto(MachineStatusEvent.class).withEventType(MachineStatusEvent.EventType.RUNNING)
   //                                                           .withMachineId(MACHINE_ID)
   //                                                           .withWorkspaceId(WORKSPACE_ID));
   //
@@ -209,10 +230,13 @@ public class KeysInjectorTest {
   //        verify(sshManager).getPairs(eq(OWNER), eq("machine"));
   //        verify(sshManager).getPair(eq(OWNER), eq("workspace"), eq(WORKSPACE_ID));
   //
-  //        ArgumentCaptor<CreateExecParams> argumentCaptor = ArgumentCaptor.forClass(CreateExecParams.class);
+  //        ArgumentCaptor<CreateExecParams> argumentCaptor =
+  // ArgumentCaptor.forClass(CreateExecParams.class);
   //        verify(docker).createExec(argumentCaptor.capture());
-  //        assertEquals(argumentCaptor.getValue().getCmd(), new String[] {"/bin/bash", "-c", "mkdir ~/.ssh/ -p" +
-  //                                                                                          "&& echo 'publicKey1' >> ~/.ssh/authorized_keys"});
+  //        assertEquals(argumentCaptor.getValue().getCmd(), new String[] {"/bin/bash", "-c", "mkdir
+  // ~/.ssh/ -p" +
+  //                                                                                          "&&
+  // echo 'publicKey1' >> ~/.ssh/authorized_keys"});
   //        verify(docker).startExec(eq(StartExecParams.create(EXEC_ID)), anyObject());
   //        verifyZeroInteractions(docker, environmentEngine, sshManager);
   //    }
@@ -232,7 +256,8 @@ public class KeysInjectorTest {
   //                .thenThrow(NotFoundException.class);
   //
   //
-  //        subscriber.onEvent(newDto(MachineStatusEvent.class).withEventType(MachineStatusEvent.EventType.RUNNING)
+  //
+  // subscriber.onEvent(newDto(MachineStatusEvent.class).withEventType(MachineStatusEvent.EventType.RUNNING)
   //                                                           .withMachineId(MACHINE_ID)
   //                                                           .withWorkspaceId(WORKSPACE_ID));
   //
@@ -245,17 +270,21 @@ public class KeysInjectorTest {
   //    }
   //
   //    @Test
-  //    public void shouldSendMessageInMachineLoggerWhenSomeErrorOcursOnKeysInjection() throws Exception {
+  //    public void shouldSendMessageInMachineLoggerWhenSomeErrorOcursOnKeysInjection() throws
+  // Exception {
   //        when(sshManager.getPairs(anyString(), anyString()))
-  //                .thenReturn(Collections.singletonList(new SshPairImpl(OWNER, "machine", "myPair", "publicKey1", null)));
+  //                .thenReturn(Collections.singletonList(new SshPairImpl(OWNER, "machine",
+  // "myPair", "publicKey1", null)));
   //        when(logMessage.getType()).thenReturn(LogMessage.Type.STDERR);
   //        when(logMessage.getContent()).thenReturn("FAILED");
   //
-  //        subscriber.onEvent(newDto(MachineStatusEvent.class).withEventType(MachineStatusEvent.EventType.RUNNING)
+  //
+  // subscriber.onEvent(newDto(MachineStatusEvent.class).withEventType(MachineStatusEvent.EventType.RUNNING)
   //                                                           .withMachineId(MACHINE_ID)
   //                                                           .withWorkspaceId(WORKSPACE_ID));
   //
-  //        verify(docker).startExec(eq(StartExecParams.create(EXEC_ID)), messageProcessorCaptor.capture());
+  //        verify(docker).startExec(eq(StartExecParams.create(EXEC_ID)),
+  // messageProcessorCaptor.capture());
   //        final MessageProcessor<LogMessage> value = messageProcessorCaptor.getValue();
   //        value.process(logMessage);
   //

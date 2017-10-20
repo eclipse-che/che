@@ -199,7 +199,8 @@ public class SubTypesOfSingleton extends TypeSet {
     //			//
     //			// If the upper bound is an array type, return the set of array types
     //			// { Array(subType(elementTypeOf(fUpperBound))) }
-    //			private Set/*<TType>*/ subTypes= sTypeHierarchy.getAllSubtypes(getElementTypeOf(fUpperBound));
+    //			private Set/*<TType>*/ subTypes=
+    // sTypeHierarchy.getAllSubtypes(getElementTypeOf(fUpperBound));
     //			private Iterator/*<TType>*/ subTypeIter= subTypes.iterator();
     //			private int nDims= getDimsOf(fUpperBound);
     //			private int idx=-1;
@@ -284,6 +285,6 @@ public class SubTypesOfSingleton extends TypeSet {
         + fID
         + ": subTypes("
         + fUpperBound.getPrettySignature()
-        + ")>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        + ")>"; // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
   }
 }

@@ -362,7 +362,7 @@ public class NotificationManagerImpl extends BasePresenter
   @Override
   public void onNotificationStatusChanged(StatusNotification notification) {
     if (notification.getDisplayMode().equals(EMERGE_MODE)) {
-      nPopupStack.remove(notification); //to avoid displaying of notification a few times
+      nPopupStack.remove(notification); // to avoid displaying of notification a few times
       nPopupStack.push(notification);
     }
   }

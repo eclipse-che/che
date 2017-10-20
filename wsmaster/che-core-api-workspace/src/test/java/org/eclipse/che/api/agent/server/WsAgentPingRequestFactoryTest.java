@@ -16,8 +16,10 @@ import org.testng.annotations.Listeners;
 @Listeners(value = {MockitoTestNGListener.class})
 public class WsAgentPingRequestFactoryTest {
   //    private final static int    WS_AGENT_PING_CONNECTION_TIMEOUT_MS = 20;
-  //    private final static String WS_AGENT_URL_IS_NOT_VALID           = "URL of Workspace Agent is null or empty.";
-  //    private static final String WS_AGENT_SERVER_NOT_FOUND_ERROR     = "Workspace agent server not found in dev machine.";
+  //    private final static String WS_AGENT_URL_IS_NOT_VALID           = "URL of Workspace Agent is
+  // null or empty.";
+  //    private static final String WS_AGENT_SERVER_NOT_FOUND_ERROR     = "Workspace agent server
+  // not found in dev machine.";
   //    private final static String WS_AGENT_SERVER_URL                 = "ws_agent";
   //
   //    @Mock
@@ -39,7 +41,8 @@ public class WsAgentPingRequestFactoryTest {
   //
   //    @BeforeMethod
   //    public void setUp() throws Exception {
-  //        factory = new WsAgentPingRequestFactory(httpJsonRequestFactory, WS_AGENT_PING_CONNECTION_TIMEOUT_MS);
+  //        factory = new WsAgentPingRequestFactory(httpJsonRequestFactory,
+  // WS_AGENT_PING_CONNECTION_TIMEOUT_MS);
   //
   //        servers.put(WS_AGENT_SERVER_URL, server);
   //        servers.put(WS_AGENT_PORT, server);
@@ -53,21 +56,24 @@ public class WsAgentPingRequestFactoryTest {
   //    }
   //
   //
-  //    @Test(expectedExceptions = ServerException.class, expectedExceptionsMessageRegExp = WS_AGENT_SERVER_NOT_FOUND_ERROR)
+  //    @Test(expectedExceptions = ServerException.class, expectedExceptionsMessageRegExp =
+  // WS_AGENT_SERVER_NOT_FOUND_ERROR)
   //    public void throwsServerExceptionWhenWsAgentIsNull() throws Exception {
   //        servers.clear();
   //
   //        factory.createRequest(devMachine);
   //    }
   //
-  //    @Test(expectedExceptions = ServerException.class, expectedExceptionsMessageRegExp = WS_AGENT_URL_IS_NOT_VALID)
+  //    @Test(expectedExceptions = ServerException.class, expectedExceptionsMessageRegExp =
+  // WS_AGENT_URL_IS_NOT_VALID)
   //    public void throwsServerExceptionWhenWsServerUrlIsNull() throws Exception {
   //        when(serverProperties.getInternalUrl()).thenReturn(null);
   //
   //        factory.createRequest(devMachine);
   //    }
   //
-  //    @Test(expectedExceptions = ServerException.class, expectedExceptionsMessageRegExp = WS_AGENT_URL_IS_NOT_VALID)
+  //    @Test(expectedExceptions = ServerException.class, expectedExceptionsMessageRegExp =
+  // WS_AGENT_URL_IS_NOT_VALID)
   //    public void throwsServerExceptionWhenWsServerUrlIsEmpty() throws Exception {
   //        when(serverProperties.getInternalUrl()).thenReturn("");
   //

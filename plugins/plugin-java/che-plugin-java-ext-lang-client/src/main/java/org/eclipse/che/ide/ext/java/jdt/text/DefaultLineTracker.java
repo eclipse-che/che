@@ -24,7 +24,7 @@ public class DefaultLineTracker extends AbstractLineTracker {
   /** The predefined delimiters of this tracker */
   public static final String[] DELIMITERS = {
     "\r", "\n", "\r\n"
-  }; //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-2$
+  }; // $NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-2$
 
   /** A predefined delimiter information which is always reused as return value */
   private DelimiterInfo fDelimiterInfo = new DelimiterInfo();

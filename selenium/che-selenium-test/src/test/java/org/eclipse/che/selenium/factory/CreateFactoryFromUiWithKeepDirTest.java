@@ -106,7 +106,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
     wizard.selectSample(Wizard.TypeProject.MAVEN);
     wizard.clickSaveButton();
 
-    //TODO sometimes after importing project doest not open to keep folder. Need investigate later
+    // TODO sometimes after importing project doest not open to keep folder. Need investigate later
     try {
       projectExplorer.openItemByPath(PROJECT_NAME + "/" + KEEPED_DIR);
     } catch (Exception e) {

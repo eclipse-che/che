@@ -20,7 +20,7 @@ public final class CreateCompilationUnitChange extends CreateTextFileChange {
   private final ICompilationUnit fUnit;
 
   public CreateCompilationUnitChange(ICompilationUnit unit, String source, String encoding) {
-    super(unit.getResource().getFullPath(), source, encoding, "java"); //$NON-NLS-1$
+    super(unit.getResource().getFullPath(), source, encoding, "java"); // $NON-NLS-1$
     fUnit = unit;
   }
 

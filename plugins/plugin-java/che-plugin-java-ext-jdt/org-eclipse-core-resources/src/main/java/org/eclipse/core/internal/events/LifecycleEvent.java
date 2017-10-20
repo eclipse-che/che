@@ -17,7 +17,7 @@ import org.eclipse.core.resources.IResource;
  * so no listener is allowed to keep references to the event after the notification is finished.
  */
 public class LifecycleEvent {
-  //constants for kinds of internal workspace lifecycle events
+  // constants for kinds of internal workspace lifecycle events
   public static final int PRE_PROJECT_CLOSE = 0x01;
   public static final int POST_PROJECT_CHANGE = 0x02;
   public static final int PRE_PROJECT_COPY = 0x04;

@@ -35,10 +35,10 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 public final class MoveStaticMembersDescriptor extends JavaRefactoringDescriptor {
 
   /** The delegate attribute */
-  private static final String ATTRIBUTE_DELEGATE = "delegate"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_DELEGATE = "delegate"; // $NON-NLS-1$
 
   /** The deprecate attribute */
-  private static final String ATTRIBUTE_DEPRECATE = "deprecate"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_DEPRECATE = "deprecate"; // $NON-NLS-1$
 
   /** The delegate attribute */
   private boolean fDelegate = false;
