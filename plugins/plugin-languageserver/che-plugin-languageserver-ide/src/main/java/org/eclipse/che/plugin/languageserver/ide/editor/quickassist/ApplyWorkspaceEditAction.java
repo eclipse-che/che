@@ -13,6 +13,7 @@ package org.eclipse.che.plugin.languageserver.ide.editor.quickassist;
 
 import com.google.inject.Inject;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +56,7 @@ import org.eclipse.lsp4j.WorkspaceEdit;
 @Singleton
 public class ApplyWorkspaceEditAction extends BaseAction {
   private static final Comparator<TextEdit> COMPARATOR =
-      RangeComparator.transform(new RangeComparator().reversed(), TextEdit::getRange);
+      RangeComparator.transform(new RangeComparator(), TextEdit::getRange);
 
   private EditorAgent editorAgent;
   private DtoFactory dtoFactory;
@@ -202,20 +203,17 @@ public class ApplyWorkspaceEditAction extends BaseAction {
   }
 
   public static void applyTextEdits(Document document, List<TextEdit> edits) {
-    edits
-        .stream()
-        .sorted(COMPARATOR)
-        .forEach(
-            e -> {
-              Range r = e.getRange();
-              Position start = r.getStart();
-              Position end = r.getEnd();
-              document.replace(
-                  start.getLine(),
-                  start.getCharacter(),
-                  end.getLine(),
-                  end.getCharacter(),
-                  e.getNewText());
-            });
+    edits = new ArrayList<>(edits);
+    Collections.sort(edits, COMPARATOR);
+    // jdt.ls sends text edits in reverse order of application
+    // see https://github.com/eclipse/eclipse.jdt.ls/issues/398
+    for (int i = edits.size() - 1; i >= 0; i--) {
+      TextEdit e = edits.get(i);
+      Range r = e.getRange();
+      Position start = r.getStart();
+      Position end = r.getEnd();
+      document.replace(
+          start.getLine(), start.getCharacter(), end.getLine(), end.getCharacter(), e.getNewText());
+    }
   }
 }

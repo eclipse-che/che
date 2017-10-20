@@ -246,32 +246,53 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
       TextEdit firstEdit = edits.get(0);
       if (completionItem.getInsertTextFormat() == InsertTextFormat.Snippet) {
         Position startPos = firstEdit.getRange().getStart();
-        TextPosition startTextPosition =
-            new TextPosition(startPos.getLine(), startPos.getCharacter());
+        TextPosition startTextPosition = toTextPosition(startPos);
         int startOffset = document.getIndexFromPosition(startTextPosition);
         Pair<String, LinkedModel> resolved =
             new SnippetResolver(new DocumentVariableResolver(document, startTextPosition))
                 .resolve(firstEdit.getNewText(), editor, startOffset);
         firstEdit.setNewText(resolved.first);
-        ApplyWorkspaceEditAction.applyTextEdits(document, edits);
         if (resolved.second != null) {
+          ApplyWorkspaceEditAction.applyTextEdits(document, edits);
           editor.getLinkedMode().enterLinkedMode(resolved.second);
           lastSelection = null;
         } else {
-          lastSelection = computeLastSelection(document, firstEdit);
+          lastSelection = computeLastSelection(document, firstEdit, edits);
+          ApplyWorkspaceEditAction.applyTextEdits(document, edits);
         }
       } else {
+        lastSelection = computeLastSelection(document, firstEdit, edits);
         ApplyWorkspaceEditAction.applyTextEdits(document, edits);
-        lastSelection = computeLastSelection(document, firstEdit);
       }
     }
 
-    private LinearRange computeLastSelection(Document document, TextEdit textEdit) {
-      Range range = textEdit.getRange();
+    private TextPosition toTextPosition(Position startPos) {
+      return new TextPosition(startPos.getLine(), startPos.getCharacter());
+    }
+
+    private int offsetForEdit(Document document, TextEdit edit, TextPosition p) {
+      Position editStart = edit.getRange().getStart();
+      if (editStart.getLine() < p.getLine()
+          || (editStart.getLine() == p.getLine() && editStart.getCharacter() < p.getCharacter())) {
+        int startIndex = document.getIndexFromPosition(toTextPosition(editStart));
+        int endIndex = document.getIndexFromPosition(toTextPosition(edit.getRange().getEnd()));
+        int deleted = endIndex - startIndex;
+        return edit.getNewText().length() - deleted;
+      } else {
+        return 0;
+      }
+    }
+
+    private LinearRange computeLastSelection(
+        Document document, TextEdit mainEdit, List<TextEdit> allEdits) {
+      Range range = mainEdit.getRange();
       TextPosition textPosition =
           new TextPosition(range.getStart().getLine(), range.getStart().getCharacter());
       int startOffset =
-          document.getIndexFromPosition(textPosition) + textEdit.getNewText().length();
+          document.getIndexFromPosition(textPosition) + mainEdit.getNewText().length();
+      for (TextEdit textEdit : allEdits) {
+        startOffset += offsetForEdit(document, textEdit, textPosition);
+      }
       return LinearRange.createWithStart(startOffset).andLength(0);
     }
 
