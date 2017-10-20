@@ -105,32 +105,6 @@ public class NavigateToFileTest {
   }
 
   @Test
-  public void checkNavigateToFileFunctionWithFilesFromHiddenProjects() {
-    projectExplorer.waitProjectExplorer();
-    projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.openItemByPath(PROJECT_NAME);
-    menu.runCommand(
-        TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.INITIALIZE_REPOSITORY);
-    askDialog.acceptDialogWithText(
-        "Do you want to initialize the local repository " + PROJECT_NAME + "?");
-    loader.waitOnClosed();
-    git.waitGitStatusBarWithMess(TestGitConstants.GIT_INITIALIZED_SUCCESS);
-
-    //check that HEAD file from .git folder is not appear in list
-    menu.runCommand(
-        TestMenuCommandsConstants.Assistant.ASSISTANT,
-        TestMenuCommandsConstants.Assistant.NAVIGATE_TO_FILE);
-    navigateToFile.waitFormToOpen();
-    loader.waitOnClosed();
-    navigateToFile.typeSymbolInFileNameField("h");
-    loader.waitOnClosed();
-    navigateToFile.waitFileNamePopUp();
-    Assert.assertFalse(navigateToFile.waitListOfFilesNames(FILE_H_SYMBOL));
-    navigateToFile.closeNavigateToFileForm();
-    navigateToFile.waitFormToClose();
-  }
-
-  @Test
   public void checkNavigateToFileFunction() {
     // Open the project one and check function 'Navigate To File'
     projectExplorer.waitProjectExplorer();
@@ -175,7 +149,6 @@ public class NavigateToFileTest {
     editor.waitActiveEditor();
 
     // Check that form is closed by pressing ESC button
-    loader.waitOnClosed();
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.NAVIGATE_TO_FILE);
@@ -203,6 +176,32 @@ public class NavigateToFileTest {
     editor.waitTabIsPresent(FILE_CREATED_FROM_CONSOLE);
     editor.waitActiveEditor();
     editor.closeFileByNameWithSaving(FILE_CREATED_FROM_CONSOLE);
+  }
+
+  @Test
+  public void checkNavigateToFileFunctionWithFilesFromHiddenFolders() {
+    projectExplorer.waitProjectExplorer();
+    projectExplorer.waitItem(PROJECT_NAME);
+    projectExplorer.openItemByPath(PROJECT_NAME);
+    menu.runCommand(
+        TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.INITIALIZE_REPOSITORY);
+    askDialog.acceptDialogWithText(
+        "Do you want to initialize the local repository " + PROJECT_NAME + "?");
+    loader.waitOnClosed();
+    git.waitGitStatusBarWithMess(TestGitConstants.GIT_INITIALIZED_SUCCESS);
+
+    // check that HEAD file from .git folder is not appear in list of found files
+    menu.runCommand(
+        TestMenuCommandsConstants.Assistant.ASSISTANT,
+        TestMenuCommandsConstants.Assistant.NAVIGATE_TO_FILE);
+    navigateToFile.waitFormToOpen();
+    loader.waitOnClosed();
+    navigateToFile.typeSymbolInFileNameField("h");
+    loader.waitOnClosed();
+    navigateToFile.waitFileNamePopUp();
+    Assert.assertFalse(navigateToFile.waitListOfFilesNames(FILE_H_SYMBOL));
+    navigateToFile.closeNavigateToFileForm();
+    navigateToFile.waitFormToClose();
   }
 
   private void selectFileFromNavigate(String symbol, String pathName, List<String> files) {
