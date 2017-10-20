@@ -238,6 +238,14 @@ public class ValidatingFsManagerTest {
   }
 
   @Test
+  public void shouldNotThrowConflictExceptionOnUnzip() throws Exception {
+    when(fsOperations.exists(FS_PATH)).thenReturn(false);
+    when(fsOperations.isDir(FS_PATH)).thenReturn(false);
+
+    validatingFsManager.unzip(WS_PATH, INPUT_STREAM, false, true, false);
+  }
+
+  @Test
   public void shouldCallSuspendingFsManagerOnUpdateWithContent() throws Exception {
     when(fsOperations.exists(FS_PATH)).thenReturn(true);
     when(fsOperations.isFile(FS_PATH)).thenReturn(true);

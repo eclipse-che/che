@@ -102,7 +102,7 @@ public class ValidatingFsManager implements FsManager {
     }
 
     boolean isDirectory = fsOperations.isDir(fsPath);
-    if (!isDirectory) {
+    if (exists && !isDirectory) {
       throw new ConflictException("Can't unzip item, parent is not directory: " + wsPath);
     }
 
