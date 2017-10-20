@@ -105,7 +105,8 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
     DockerEnvironment dockerEnvironment = dockerEnvironmentParser.parse(environment);
     dockerEnvironmentValidator.validate(environment, dockerEnvironment);
 
-    // modify environment with everything needed to use docker machines on particular (cloud) infrastructure
+    // modify environment with everything needed to use docker machines on particular (cloud)
+    // infrastructure
     infrastructureProvisioner.provision(environment, dockerEnvironment, identity);
     // check that containers start order can be resolved
     // NOTE: it should be performed before environmentNormalizer.normalize because normalization

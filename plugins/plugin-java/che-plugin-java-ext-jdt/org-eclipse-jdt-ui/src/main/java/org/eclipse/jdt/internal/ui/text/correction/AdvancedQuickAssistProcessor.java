@@ -114,7 +114,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
       ArrayList<ASTNode> coveredNodes = getFullyCoveredNodes(context, coveringNode);
       ArrayList<ICommandAccess> resultingCollections = new ArrayList<ICommandAccess>();
 
-      //quick assists that show up also if there is an error/warning
+      // quick assists that show up also if there is an error/warning
       getReplaceConditionalWithIfElseProposals(context, coveringNode, resultingCollections);
 
       if (QuickAssistProcessor.noErrorsAtLocation(locations)) {
@@ -177,7 +177,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
       if (!(ifStatement
           .getAST()
           .resolveWellKnownType("void")
-          .equals(lambdaMethodBinding.getReturnType()))) { //$NON-NLS-1$
+          .equals(lambdaMethodBinding.getReturnType()))) { // $NON-NLS-1$
         return false;
       }
     } else {
@@ -522,8 +522,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
       ifParentBlock.statements().add(newIf);
       for (Iterator<Statement> iter =
               getUnwrappedStatements(ifStatement.getThenStatement()).iterator();
-          iter.hasNext();
-          ) {
+          iter.hasNext(); ) {
         Statement statement = iter.next();
         ifParentBlock.statements().add(rewrite.createMoveTarget(statement));
       }
@@ -542,8 +541,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
       // add statements from 'then' to the end of block
       for (Iterator<Statement> iter =
               getUnwrappedStatements(ifStatement.getThenStatement()).iterator();
-          iter.hasNext();
-          ) {
+          iter.hasNext(); ) {
         Statement statement = iter.next();
         listRewriter.insertLast(rewrite.createMoveTarget(statement), null);
       }
@@ -764,8 +762,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
   private static boolean isBoolean(Expression expression) {
     ITypeBinding typeBinding = expression.resolveTypeBinding();
     AST ast = expression.getAST();
-    return typeBinding == ast.resolveWellKnownType("boolean") //$NON-NLS-1$
-        || typeBinding == ast.resolveWellKnownType("java.lang.Boolean"); //$NON-NLS-1$
+    return typeBinding == ast.resolveWellKnownType("boolean") // $NON-NLS-1$
+        || typeBinding == ast.resolveWellKnownType("java.lang.Boolean"); // $NON-NLS-1$
   }
 
   private static Expression getInversedInfixExpression(
@@ -1330,7 +1328,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
       IfStatement ifStatement = (IfStatement) iter.next();
       if (listRewriter == null) {
         Block sourceBlock = (Block) ifStatement.getParent();
-        //int insertIndex = sourceBlock.statements().indexOf(ifStatement);
+        // int insertIndex = sourceBlock.statements().indexOf(ifStatement);
         listRewriter =
             rewrite.getListRewrite(
                 sourceBlock, (ChildListPropertyDescriptor) ifStatement.getLocationInParent());
@@ -1626,8 +1624,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
               rewrite, rightExpression, infixExpression.getRightOperand(), false, operator);
     }
     for (Iterator<Expression> iter = currentExpression.extendedOperands().iterator();
-        iter.hasNext();
-        ) {
+        iter.hasNext(); ) {
       Expression extendedOperand = iter.next();
       if (extendedOperand.getStartPosition() <= context.getSelectionOffset()) {
         leftExpression = combineOperands(rewrite, leftExpression, extendedOperand, false, operator);
@@ -1698,11 +1695,11 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
       return;
     }
     if (!(expression instanceof InfixExpression)) {
-      throw new IllegalArgumentException("Cannot break up non-infix expression"); //$NON-NLS-1$
+      throw new IllegalArgumentException("Cannot break up non-infix expression"); // $NON-NLS-1$
     }
     InfixExpression infixExpression = (InfixExpression) expression;
     if (infixExpression.getOperator() != operator) {
-      throw new IllegalArgumentException("Incompatible operator"); //$NON-NLS-1$
+      throw new IllegalArgumentException("Incompatible operator"); // $NON-NLS-1$
     }
     breakInfixOperationAtOperation(
         rewrite,
@@ -1848,8 +1845,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
       return true;
     }
 
-    final String KEY_NAME = "name"; //$NON-NLS-1$
-    final String KEY_TYPE = "type"; //$NON-NLS-1$
+    final String KEY_NAME = "name"; // $NON-NLS-1$
+    final String KEY_TYPE = "type"; // $NON-NLS-1$
     //
     AST ast = expression.getAST();
     ASTRewrite rewrite = ASTRewrite.create(ast);
@@ -2067,7 +2064,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
             rewrite,
             IProposalRelevance.PICK_SELECTED_STRING,
             image);
-    proposal.addLinkedPosition(rewrite.track(centerLiteral), true, "CENTER_STRING"); //$NON-NLS-1$
+    proposal.addLinkedPosition(rewrite.track(centerLiteral), true, "CENTER_STRING"); // $NON-NLS-1$
     resultingCollections.add(proposal);
     return true;
   }
@@ -2424,7 +2421,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
     // create proposal
     String label = CorrectionMessages.AdvancedQuickAssistProcessor_inverseBooleanVariable;
     Image image = JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-    final String KEY_NAME = "name"; //$NON-NLS-1$
+    final String KEY_NAME = "name"; // $NON-NLS-1$
     final LinkedCorrectionProposal proposal =
         new LinkedCorrectionProposal(
             label,
@@ -2436,7 +2433,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
     final String oldIdentifier = coveringName.getIdentifier();
     final String notString =
         Messages.format(
-            CorrectionMessages.AdvancedQuickAssistProcessor_negatedVariableName, ""); //$NON-NLS-1$
+            CorrectionMessages.AdvancedQuickAssistProcessor_negatedVariableName, ""); // $NON-NLS-1$
     final String newIdentifier;
     if (oldIdentifier.startsWith(notString)) {
       int notLength = notString.length();
@@ -2500,7 +2497,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
               }
             };
         Expression inversedExpression = getInversedExpression(rewrite, expression, provider);
-        // if any name was not renamed during expression inverting, we can not already rename it, so fail to create assist
+        // if any name was not renamed during expression inverting, we can not already rename it, so
+        // fail to create assist
         for (Iterator<SimpleName> iter = overlapNames.iterator(); iter.hasNext(); ) {
           Object o = iter.next();
           if (!renamedNames.contains(o)) {
@@ -2815,7 +2813,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
     ITypeBinding expressionType = switchStatement.getExpression().resolveTypeBinding();
     boolean isStringsInSwitch =
         expressionType != null
-            && "java.lang.String".equals(expressionType.getQualifiedName()); //$NON-NLS-1$
+            && "java.lang.String".equals(expressionType.getQualifiedName()); // $NON-NLS-1$
 
     if (!isStringsInSwitch && preserveNPE) return false;
 
@@ -2962,7 +2960,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 
     // add correction proposal
     String source =
-        ASTNodes.asString(switchExpression).replaceAll("\r\n?|\n", " "); //$NON-NLS-1$ //$NON-NLS-2$
+        ASTNodes.asString(switchExpression)
+            .replaceAll("\r\n?|\n", " "); // $NON-NLS-1$ //$NON-NLS-2$
     String label =
         preserveNPE
             ? Messages.format(
@@ -2994,7 +2993,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 
     if (isStringsInSwitch) {
       MethodInvocation methodInvocation = ast.newMethodInvocation();
-      methodInvocation.setName(ast.newSimpleName("equals")); //$NON-NLS-1$
+      methodInvocation.setName(ast.newSimpleName("equals")); // $NON-NLS-1$
       if (preserveNPE) {
         methodInvocation.setExpression(
             (Expression)
@@ -3115,7 +3114,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
           if (currentExpression instanceof MethodInvocation) {
             isMethodInvocationCase = true;
             if (!(((MethodInvocation) currentExpression).getName().getIdentifier())
-                .equals("equals")) //$NON-NLS-1$
+                .equals("equals")) // $NON-NLS-1$
             return false;
 
             MethodInvocation invocation = (MethodInvocation) currentExpression;
@@ -3123,7 +3122,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
             if (leftOperand == null) return false;
             ITypeBinding leftBinding = leftOperand.resolveTypeBinding();
             if (leftBinding != null) {
-              if (leftBinding.getQualifiedName().equals("java.lang.String")) { //$NON-NLS-1$
+              if (leftBinding.getQualifiedName().equals("java.lang.String")) { // $NON-NLS-1$
                 if (!JavaModelUtil.is17OrHigher(context.getCompilationUnit().getJavaProject()))
                   return false;
               } else if (!leftBinding.isEnum()) {
@@ -3136,7 +3135,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
             rightOperand = arguments.get(0);
             ITypeBinding rightBinding = leftOperand.resolveTypeBinding();
             if (rightBinding != null) {
-              if (rightBinding.getQualifiedName().equals("java.lang.String")) { //$NON-NLS-1$
+              if (rightBinding.getQualifiedName().equals("java.lang.String")) { // $NON-NLS-1$
                 if (!JavaModelUtil.is17OrHigher(context.getCompilationUnit().getJavaProject()))
                   return false;
               } else if (!rightBinding.isEnum()) {
@@ -3156,8 +3155,9 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
             if (operator.equals(InfixExpression.Operator.EQUALS)) {
               ITypeBinding typeBinding = leftOperand.resolveTypeBinding();
               if (typeBinding != null
-                  && typeBinding.getQualifiedName().equals("java.lang.String")) { //$NON-NLS-1$
-                return false; // don't propose quick assist when == is used to compare strings, since switch will use equals()
+                  && typeBinding.getQualifiedName().equals("java.lang.String")) { // $NON-NLS-1$
+                return false; // don't propose quick assist when == is used to compare strings,
+                // since switch will use equals()
               }
             } else if (operator.equals(InfixExpression.Operator.CONDITIONAL_OR)) {
               currentExpression = leftOperand;
@@ -3214,7 +3214,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 
       Statement thenStatement;
       if (currentIf == null) {
-        thenStatement = currentStatement; //currentStatement has the default else block
+        thenStatement = currentStatement; // currentStatement has the default else block
         defaultStatement = currentStatement;
       } else {
         thenStatement = currentIf.getThenStatement();
@@ -3228,8 +3228,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
       if (thenStatement instanceof Block) {
         Statement statement = null;
         for (Iterator<Statement> iter = ((Block) thenStatement).statements().iterator();
-            iter.hasNext();
-            ) {
+            iter.hasNext(); ) {
           statement = iter.next();
           switchStatement.statements().add(rewrite.createCopyTarget(statement));
         }
@@ -3278,8 +3277,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
         } else if (defaultStatement instanceof Block) {
           Block block = ast.newBlock();
           for (Iterator<Statement> iter = ((Block) defaultStatement).statements().iterator();
-              iter.hasNext();
-              ) {
+              iter.hasNext(); ) {
             block.statements().add(rewrite.createCopyTarget(iter.next()));
           }
           newIfStatement.setThenStatement(block);
@@ -3294,7 +3292,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 
         String source =
             ASTNodes.asString(switchExpression)
-                .replaceAll("\r\n?|\n", " "); //$NON-NLS-1$ //$NON-NLS-2$
+                .replaceAll("\r\n?|\n", " "); // $NON-NLS-1$ //$NON-NLS-2$
         String label =
             Messages.format(
                 CorrectionMessages.AdvancedQuickAssistProcessor_convertIfElseToSwitch_handleNullArg,

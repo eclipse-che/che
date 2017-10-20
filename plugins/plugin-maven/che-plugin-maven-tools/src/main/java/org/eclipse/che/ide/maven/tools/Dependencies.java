@@ -144,11 +144,11 @@ public class Dependencies {
   }
 
   private void setDependencies(Collection<? extends Dependency> newDependencies) {
-    //removing all dependencies from xml tree
+    // removing all dependencies from xml tree
     for (Dependency dependency : dependencies) {
       dependency.remove();
     }
-    //add and associate each new dependency with element in tree
+    // add and associate each new dependency with element in tree
     dependencies = new ArrayList<>(newDependencies.size());
     for (Dependency newDependency : newDependencies) {
       add(newDependency);

@@ -37,8 +37,8 @@ final class DefaultRefactoringDescriptorProxy extends RefactoringDescriptorProxy
    */
   public DefaultRefactoringDescriptorProxy(
       final String description, final String project, final long stamp) {
-    Assert.isTrue(project == null || !"".equals(project)); //$NON-NLS-1$
-    Assert.isTrue(description != null && !"".equals(description)); //$NON-NLS-1$
+    Assert.isTrue(project == null || !"".equals(project)); // $NON-NLS-1$
+    Assert.isTrue(description != null && !"".equals(description)); // $NON-NLS-1$
     fDescription = description.intern();
     fProject = project != null ? project.intern() : null;
     fTimeStamp = stamp;
@@ -65,13 +65,13 @@ final class DefaultRefactoringDescriptorProxy extends RefactoringDescriptorProxy
     final StringBuffer buffer = new StringBuffer(128);
 
     buffer.append(getClass().getName());
-    buffer.append("[stamp="); //$NON-NLS-1$
+    buffer.append("[stamp="); // $NON-NLS-1$
     buffer.append(fTimeStamp);
-    buffer.append(",project="); //$NON-NLS-1$
+    buffer.append(",project="); // $NON-NLS-1$
     buffer.append(fProject);
-    buffer.append(",description="); //$NON-NLS-1$
+    buffer.append(",description="); // $NON-NLS-1$
     buffer.append(fDescription);
-    buffer.append("]"); //$NON-NLS-1$
+    buffer.append("]"); // $NON-NLS-1$
 
     return buffer.toString();
   }

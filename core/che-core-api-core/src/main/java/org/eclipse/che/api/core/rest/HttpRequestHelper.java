@@ -60,7 +60,7 @@ public class HttpRequestHelper {
     final String authToken = EnvironmentContext.getCurrent().getSubject().getToken();
     if ((parameters != null && parameters.length > 0) || authToken != null) {
       final UriBuilder ub = UriBuilder.fromUri(url);
-      //remove sensitive information from url.
+      // remove sensitive information from url.
       ub.replaceQueryParam("token", null);
 
       if (parameters != null && parameters.length > 0) {
@@ -75,17 +75,18 @@ public class HttpRequestHelper {
     conn.setReadTimeout(timeout > 0 ? timeout : 60000);
     try {
       conn.setRequestMethod(method);
-      //drop a hint for server side that we want to receive application/json
+      // drop a hint for server side that we want to receive application/json
       //            conn.addRequestProperty(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
       if (authToken != null) {
         conn.setRequestProperty(HttpHeaders.AUTHORIZATION, authToken);
       }
       if (body != null) {
-        //                conn.addRequestProperty(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        //                conn.addRequestProperty(HttpHeaders.CONTENT_TYPE,
+        // MediaType.APPLICATION_JSON);
         conn.setDoOutput(true);
 
-        if (HttpMethod.DELETE.equals(
-            method)) { //to avoid jdk bug described here http://bugs.java.com/view_bug.do?bug_id=7157360
+        if (HttpMethod.DELETE.equals(method)) { // to avoid jdk bug described here
+          // http://bugs.java.com/view_bug.do?bug_id=7157360
           conn.setRequestMethod(HttpMethod.POST);
           conn.setRequestProperty("X-HTTP-Method-Override", HttpMethod.DELETE);
         }
@@ -133,7 +134,8 @@ public class HttpRequestHelper {
 
       //            final String contentType = conn.getContentType();
 
-      //            if (!(contentType == null || contentType.startsWith(MediaType.APPLICATION_JSON))) {
+      //            if (!(contentType == null ||
+      // contentType.startsWith(MediaType.APPLICATION_JSON))) {
       //                throw new IOException(conn.getResponseMessage());
       //            }
 

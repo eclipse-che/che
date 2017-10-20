@@ -120,10 +120,10 @@ public class OpenDeclarationTest {
     editor.setCursorToDefinedLineAndChar(30, 12);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("ModelAndView");
-    //editor.waitTextIntoEditor(expectedTextBeforeDownloadSources);
+    // editor.waitTextIntoEditor(expectedTextBeforeDownloadSources);
     editor.clickOnDownloadSourcesLink();
     loader.waitOnClosed();
-    //editor.waitTextIntoEditor(expectedTextAfterDownloadSources);
+    // editor.waitTextIntoEditor(expectedTextAfterDownloadSources);
 
     editor.closeFileByNameWithSaving("ModelAndView");
 
@@ -136,7 +136,7 @@ public class OpenDeclarationTest {
     editor.waitSpecifiedValueForLineAndChar(44, 14);
     editor.closeFileByNameWithSaving("ModelAndView");
 
-    //Check go to method
+    // Check go to method
     editor.selectTabByName("AppController");
     editor.setCursorToDefinedLineAndChar(43, 16);
     editor.typeTextIntoEditor(Keys.F4.toString());
@@ -144,7 +144,7 @@ public class OpenDeclarationTest {
     editor.waitTextElementsActiveLine("addObject");
     editor.waitSpecifiedValueForLineAndChar(226, 22);
 
-    //Check go to inner method
+    // Check go to inner method
     editor.setCursorToDefinedLineAndChar(227, 9);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("ModelAndView");

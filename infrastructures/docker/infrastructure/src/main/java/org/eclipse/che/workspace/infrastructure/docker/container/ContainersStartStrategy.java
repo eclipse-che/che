@@ -98,8 +98,7 @@ public class ContainersStartStrategy {
     while (!dependencies.isEmpty()) {
       int previousSize = dependencies.size();
       for (Iterator<Map.Entry<String, Set<String>>> it = dependencies.entrySet().iterator();
-          it.hasNext();
-          ) {
+          it.hasNext(); ) {
         // process not yet processed machines only
         Map.Entry<String, Set<String>> containerEntry = it.next();
         String container = containerEntry.getKey();
@@ -116,7 +115,7 @@ public class ContainersStartStrategy {
             Optional<String> maxWeight =
                 containerDependencies.stream().max(Comparator.comparing(weights::get));
             // optional can't be empty because size of the list is checked above
-            //noinspection OptionalGetWithoutIsPresent
+            // noinspection OptionalGetWithoutIsPresent
             weights.put(container, weights.get(maxWeight.get()) + 1);
             it.remove();
           }

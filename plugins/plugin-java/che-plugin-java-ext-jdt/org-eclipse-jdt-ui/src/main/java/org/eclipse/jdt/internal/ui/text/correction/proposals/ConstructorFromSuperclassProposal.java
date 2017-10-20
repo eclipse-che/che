@@ -53,7 +53,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
       TypeDeclaration typeNode,
       IMethodBinding superConstructor,
       int relevance) {
-    super("", cu, null, relevance, null); //$NON-NLS-1$
+    super("", cu, null, relevance, null); // $NON-NLS-1$
     fTypeNode = typeNode;
     fSuperConstructor = superConstructor;
   }
@@ -64,10 +64,11 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
   @Override
   public Image getImage() {
     //		return JavaPlugin.getImageDescriptorRegistry().get(
-    //				new JavaElementImageDescriptor(JavaPluginImages.DESC_MISC_PUBLIC, JavaElementImageDescriptor.CONSTRUCTOR,
+    //				new JavaElementImageDescriptor(JavaPluginImages.DESC_MISC_PUBLIC,
+    // JavaElementImageDescriptor.CONSTRUCTOR,
     //											   JavaElementImageProvider.SMALL_SIZE)
     //														  );
-    //TODO add icon for constructor
+    // TODO add icon for constructor
     return JavaPluginImages.get(JavaPluginImages.DESC_MISC_PUBLIC);
   }
 
@@ -129,8 +130,8 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
     for (int i = 0; i < parameters.size(); i++) {
       SingleVariableDeclaration curr = parameters.get(i);
       String name = curr.getName().getIdentifier();
-      addLinkedPosition(rewrite.track(curr.getType()), false, "arg_type_" + name); //$NON-NLS-1$
-      addLinkedPosition(rewrite.track(curr.getName()), false, "arg_name_" + name); //$NON-NLS-1$
+      addLinkedPosition(rewrite.track(curr.getType()), false, "arg_type_" + name); // $NON-NLS-1$
+      addLinkedPosition(rewrite.track(curr.getName()), false, "arg_name_" + name); // $NON-NLS-1$
     }
   }
 
@@ -189,7 +190,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
         Name argument = ast.newSimpleName(paramNames[i]);
         arguments.add(argument);
         addLinkedPosition(
-            rewrite.track(argument), false, "arg_name_" + paramNames[i]); //$NON-NLS-1$
+            rewrite.track(argument), false, "arg_name_" + paramNames[i]); // $NON-NLS-1$
       }
     }
 
@@ -201,7 +202,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
                 0,
                 String.valueOf('\n'),
                 getCompilationUnit().getJavaProject().getOptions(true));
-    //$NON-NLS-1$
+    // $NON-NLS-1$
     String placeHolder =
         CodeGeneration.getMethodBodyContent(
             getCompilationUnit(), name, name, true, bodyStatement, String.valueOf('\n'));
@@ -245,7 +246,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
     Name enclosing = ast.newSimpleName(firstName);
     invocation.setExpression(enclosing);
 
-    String key = "arg_name_" + firstName; //$NON-NLS-1$
+    String key = "arg_name_" + firstName; // $NON-NLS-1$
     addLinkedPosition(rewrite.track(enclosing), false, key);
     for (int i = 0; i < enclosingArgNames.length; i++) {
       addLinkedPositionProposal(key, enclosingArgNames[i], null); // alternative names

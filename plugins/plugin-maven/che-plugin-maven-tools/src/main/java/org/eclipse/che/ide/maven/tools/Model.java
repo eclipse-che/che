@@ -321,11 +321,11 @@ public final class Model {
    * @param profiles new profiles
    */
   public Model setProfiles(Collection<? extends Profile> profiles) {
-    //remove existing profiles
+    // remove existing profiles
     for (Profile profile : profiles()) {
       profile.remove();
     }
-    //add profiles if necessary
+    // add profiles if necessary
     if (profiles != null && !profiles.isEmpty()) {
       for (Profile profile : profiles) {
         addProfile(profile);
@@ -357,7 +357,7 @@ public final class Model {
   public Model addPluginRepository(Repository pluginRepository) {
     requireNonNull(pluginRepository, "Required not null plugin repository");
     pluginRepositories().add(pluginRepository);
-    //add plugin repository to xml
+    // add plugin repository to xml
     if (root.hasSingleChild("pluginRepositories")) {
       root.getSingleChild("pluginRepositories").appendChild(pluginRepository.asXMLElement());
       pluginRepository.element = root.getLastChild();
@@ -378,11 +378,11 @@ public final class Model {
    * @param pluginRepositories new plugin repositories
    */
   public Model setPluginRepositories(Collection<? extends Repository> pluginRepositories) {
-    //remove existing plugin repositories
+    // remove existing plugin repositories
     for (Repository pluginRepository : pluginRepositories()) {
       pluginRepository.remove();
     }
-    //add plugin repositories if necessary
+    // add plugin repositories if necessary
     if (pluginRepositories != null && !pluginRepositories.isEmpty()) {
       for (Repository pluginRepository : pluginRepositories) {
         addPluginRepository(pluginRepository);
@@ -402,7 +402,7 @@ public final class Model {
   public Model addRepository(Repository repository) {
     requireNonNull(repository, "Required not null repository");
     repositories().add(repository);
-    //add repository to xml
+    // add repository to xml
     if (root.hasSingleChild("repositories")) {
       root.getSingleChild("repositories").appendChild(repository.asXMLElement());
       repository.element = root.getLastChild();
@@ -423,7 +423,7 @@ public final class Model {
   public Model addProfile(Profile profile) {
     requireNonNull(profile, "Required not null profile");
     profiles().add(profile);
-    //add profile to xml
+    // add profile to xml
     if (root.hasSingleChild("profiles")) {
       root.getSingleChild("profiles").appendChild(profile.asXMLElement());
       profile.element = root.getLastChild();
@@ -444,11 +444,11 @@ public final class Model {
    * @param repositories new plugin repositories
    */
   public Model setRepositories(Collection<? extends Repository> repositories) {
-    //remove existing repositories
+    // remove existing repositories
     for (Repository repository : repositories()) {
       repository.remove();
     }
-    //add repositories if necessary
+    // add repositories if necessary
     if (repositories != null && !repositories.isEmpty()) {
       for (Repository repository : repositories) {
         addRepository(repository);
@@ -482,7 +482,7 @@ public final class Model {
   public Model addModule(String newModule) {
     requireNonNull(newModule, "Required not null module");
     modules().add(newModule);
-    //add module to xml tree
+    // add module to xml tree
     if (root.hasSingleChild("modules")) {
       root.getSingleChild("modules").appendChild(createElement("module", newModule));
     } else {
@@ -557,10 +557,10 @@ public final class Model {
     if (build == null) {
       root.removeChild("build");
     } else if (root.hasSingleChild("build")) {
-      //replace build
+      // replace build
       build.buildElement = root.getSingleChild("build").replaceWith(build.asXMLElement());
     } else {
-      //add build
+      // add build
       root.appendChild(this.build.asXMLElement());
       build.buildElement = root.getSingleChild("build");
     }
@@ -582,10 +582,10 @@ public final class Model {
     if (parent == null) {
       root.removeChild("parent");
     } else if (root.hasSingleChild("parent")) {
-      //replace parent
+      // replace parent
       parent.parentElement = root.getSingleChild("parent").replaceWith(parent.asXMLElement());
     } else {
-      //add parent
+      // add parent
       root.insertChild(this.parent.asXMLElement(), after("modelVersion").or(inTheBegin()));
       parent.parentElement = root.getSingleChild("parent");
     }
@@ -961,8 +961,8 @@ public final class Model {
 
   private void setProperties0(Map<String, String> properties) {
     this.properties = new HashMap<>(properties);
-    //if properties element exists we should replace it children
-    //with new set of properties, otherwise create element for it
+    // if properties element exists we should replace it children
+    // with new set of properties, otherwise create element for it
     if (root.hasSingleChild("properties")) {
       final Element propertiesElement = root.getSingleChild("properties");
       for (Element property : propertiesElement.getChildren()) {
@@ -976,7 +976,7 @@ public final class Model {
       for (Map.Entry<String, String> property : properties.entrySet()) {
         newProperties.appendChild(createElement(property.getKey(), property.getValue()));
       }
-      //insert new properties to xml
+      // insert new properties to xml
       root.insertChild(
           newProperties,
           beforeAnyOf("dependencyManagement", "dependencies", "build").or(inTheEnd()));
@@ -990,15 +990,15 @@ public final class Model {
 
   private void setModules0(Collection<String> modules) {
     this.modules = new ArrayList<>(modules);
-    //if modules element exists we should replace it children
-    //with new set of modules, otherwise create element for it
+    // if modules element exists we should replace it children
+    // with new set of modules, otherwise create element for it
     if (root.hasSingleChild("modules")) {
       final Element modulesElement = root.getSingleChild("modules");
-      //remove all modules
+      // remove all modules
       for (Element module : modulesElement.getChildren()) {
         module.remove();
       }
-      //append each new module to "modules" element
+      // append each new module to "modules" element
       for (String module : modules) {
         modulesElement.appendChild(createElement("module", module));
       }

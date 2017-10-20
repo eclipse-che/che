@@ -124,7 +124,8 @@ public class MinimapAnnotationRenderer
       Log.warn(MinimapAnnotationRenderer.class, "No position for annotation " + annotation);
       return;
     }
-    //        final TextPosition textPosition = this.document.getPositionFromIndex(position.getOffset());
+    //        final TextPosition textPosition =
+    // this.document.getPositionFromIndex(position.getOffset());
     //        final int line = textPosition.getLine();
 
     final String style = decorations.get(annotation.getType());

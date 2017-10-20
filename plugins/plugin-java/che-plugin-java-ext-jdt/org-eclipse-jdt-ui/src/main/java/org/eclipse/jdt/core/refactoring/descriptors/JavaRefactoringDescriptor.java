@@ -50,7 +50,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
    * <p>The element arguments are simply distinguished by appending a number to the argument name,
    * e.g. element1. The indices of this argument are one-based.
    */
-  protected static final String ATTRIBUTE_ELEMENT = "element"; //$NON-NLS-1$
+  protected static final String ATTRIBUTE_ELEMENT = "element"; // $NON-NLS-1$
 
   /**
    * Predefined argument called <code>input</code>.
@@ -60,7 +60,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
    * possible to uniquely identify the input element using the value of this argument in conjunction
    * with the values of the other user-defined attributes.
    */
-  protected static final String ATTRIBUTE_INPUT = "input"; //$NON-NLS-1$
+  protected static final String ATTRIBUTE_INPUT = "input"; // $NON-NLS-1$
 
   /**
    * Predefined argument called <code>name</code>.
@@ -68,7 +68,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
    * <p>This argument should be used to name the element being refactored. The value of this
    * argument may be shown in the user interface.
    */
-  protected static final String ATTRIBUTE_NAME = "name"; //$NON-NLS-1$
+  protected static final String ATTRIBUTE_NAME = "name"; // $NON-NLS-1$
 
   /**
    * Predefined argument called <code>references</code>.
@@ -77,7 +77,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
    * should be updated as well. The value of this argument is either <code>"true"</code> or <code>
    * "false"</code>.
    */
-  protected static final String ATTRIBUTE_REFERENCES = "references"; //$NON-NLS-1$
+  protected static final String ATTRIBUTE_REFERENCES = "references"; // $NON-NLS-1$
 
   /**
    * Predefined argument called <code>selection</code>.
@@ -85,10 +85,10 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
    * <p>This argument should be used to describe user input selections within a text file. The value
    * of this argument has the format "offset length".
    */
-  protected static final String ATTRIBUTE_SELECTION = "selection"; //$NON-NLS-1$
+  protected static final String ATTRIBUTE_SELECTION = "selection"; // $NON-NLS-1$
 
   /** The version attribute */
-  protected static final String ATTRIBUTE_VERSION = "version"; //$NON-NLS-1$
+  protected static final String ATTRIBUTE_VERSION = "version"; // $NON-NLS-1$
 
   /**
    * Constant describing the jar migration flag (value: <code>65536</code>).
@@ -126,7 +126,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
   public static final int JAR_SOURCE_ATTACHMENT = 1 << 18;
 
   /** The version value <code>1.0</code> */
-  protected static final String VALUE_VERSION_1_0 = "1.0"; //$NON-NLS-1$
+  protected static final String VALUE_VERSION_1_0 = "1.0"; // $NON-NLS-1$
 
   /**
    * Converts the specified element to an input handle.
@@ -297,7 +297,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
     if (status.hasFatalError())
       throw new RuntimeException(
           "Validation returns a fatal error status",
-          new CoreException(status.getEntryWithHighestSeverity().toStatus())); //$NON-NLS-1$
+          new CoreException(status.getEntryWithHighestSeverity().toStatus())); // $NON-NLS-1$
   }
 
   /**
@@ -375,7 +375,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
   public RefactoringStatus validateDescriptor() {
     RefactoringStatus status = new RefactoringStatus();
     String description = getDescription();
-    if (description == null || "".equals(description)) //$NON-NLS-1$
+    if (description == null || "".equals(description)) // $NON-NLS-1$
     status.merge(
           RefactoringStatus.createFatalErrorStatus(
               DescriptorMessages.JavaRefactoringDescriptor_no_description));

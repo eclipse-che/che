@@ -129,9 +129,9 @@ public class RenamingNameSuggestor {
   public static final int STRATEGY_EMBEDDED = 2;
   public static final int STRATEGY_SUFFIX = 3;
 
-  private static final String PLURAL_S = "s"; //$NON-NLS-1$
-  private static final String PLURAL_IES = "ies"; //$NON-NLS-1$
-  private static final String SINGULAR_Y = "y"; //$NON-NLS-1$
+  private static final String PLURAL_S = "s"; // $NON-NLS-1$
+  private static final String PLURAL_IES = "ies"; // $NON-NLS-1$
+  private static final String SINGULAR_Y = "y"; // $NON-NLS-1$
 
   private int fStrategy;
   private String[] fFieldPrefixes;
@@ -514,7 +514,7 @@ public class RenamingNameSuggestor {
   }
 
   private String findLongestPrefix(String name, String[] prefixes) {
-    String usedPrefix = ""; //$NON-NLS-1$
+    String usedPrefix = ""; // $NON-NLS-1$
     int bestLen = 0;
     for (int i = 0; i < prefixes.length; i++) {
       if (name.startsWith(prefixes[i])) {
@@ -528,7 +528,7 @@ public class RenamingNameSuggestor {
   }
 
   private String findLongestSuffix(String name, String[] suffixes) {
-    String usedPrefix = ""; //$NON-NLS-1$
+    String usedPrefix = ""; // $NON-NLS-1$
     int bestLen = 0;
     for (int i = 0; i < suffixes.length; i++) {
       if (name.endsWith(suffixes[i])) {
@@ -585,6 +585,6 @@ public class RenamingNameSuggestor {
 
   private String[] readCommaSeparatedPreference(IJavaProject project, String option) {
     String list = project.getOption(option, true);
-    return list == null ? new String[0] : list.split(","); //$NON-NLS-1$
+    return list == null ? new String[0] : list.split(","); // $NON-NLS-1$
   }
 }

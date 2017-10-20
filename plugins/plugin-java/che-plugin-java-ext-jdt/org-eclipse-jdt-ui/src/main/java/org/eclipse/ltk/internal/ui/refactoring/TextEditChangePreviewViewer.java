@@ -54,7 +54,8 @@ public class TextEditChangePreviewViewer implements IChangePreviewViewer {
   //			fCompareConfiguration.setLeftEditable(false);
   //			fCompareConfiguration.setLeftLabel(RefactoringUIMessages.ComparePreviewer_original_source);
   //			fCompareConfiguration.setRightEditable(false);
-  //			fCompareConfiguration.setRightLabel(RefactoringUIMessages.ComparePreviewer_refactored_source);
+  //
+  //	fCompareConfiguration.setRightLabel(RefactoringUIMessages.ComparePreviewer_refactored_source);
   //			addDisposeListener(new DisposeListener() {
   //				public void widgetDisposed(DisposeEvent e) {
   //					if (fImage != null && !fImage.isDisposed())
@@ -73,7 +74,8 @@ public class TextEditChangePreviewViewer implements IChangePreviewViewer {
   //		}
   //
   //		protected Viewer getViewer(Viewer oldViewer, Object input) {
-  //			return CompareUI.findContentViewer(oldViewer, (ICompareInput)input, this, fCompareConfiguration);
+  //			return CompareUI.findContentViewer(oldViewer, (ICompareInput)input, this,
+  // fCompareConfiguration);
   //		}
   //
   //		public void setText(String text) {
@@ -97,7 +99,8 @@ public class TextEditChangePreviewViewer implements IChangePreviewViewer {
   //		}
   //	}
   //
-  //	private static class CompareElement implements ITypedElement, IEncodedStreamContentAccessor, IResourceProvider {
+  //	private static class CompareElement implements ITypedElement, IEncodedStreamContentAccessor,
+  // IResourceProvider {
   //		// we use an encoding that preserves Unicode across the stream
   //		private static final String ENCODING = "UTF-8";    //$NON-NLS-1$
   //		private String    fContent;
@@ -175,8 +178,10 @@ public class TextEditChangePreviewViewer implements IChangePreviewViewer {
         if (extended.group != null && extended.surroundingLines >= 0) {
           TextEditBasedChangeGroup group = extended.group;
           TextEditBasedChange editChange = group.getTextEditChange();
-          //					setInput(editChange, editChange.getCurrentContent(group.getRegion(), true, 2, new NullProgressMonitor()),
-          //							 editChange.getPreviewContent(new TextEditBasedChangeGroup[]{group}, group.getRegion(), true, 2,
+          //					setInput(editChange, editChange.getCurrentContent(group.getRegion(), true, 2, new
+          // NullProgressMonitor()),
+          //							 editChange.getPreviewContent(new TextEditBasedChangeGroup[]{group},
+          // group.getRegion(), true, 2,
           //														  new NullProgressMonitor()),
           //							 editChange.getTextType());
           ChangePreview preview = DtoFactory.newDto(ChangePreview.class);
@@ -199,8 +204,10 @@ public class TextEditChangePreviewViewer implements IChangePreviewViewer {
           //					if (extended.groupCategory != null) {
           //
           //					}
-          //					setInput(editChange, editChange.getCurrentContent(extended.range, true, 0, new NullProgressMonitor()),
-          //							 editChange.getPreviewContent(groups, extended.range, true, 0, new NullProgressMonitor()),
+          //					setInput(editChange, editChange.getCurrentContent(extended.range, true, 0, new
+          // NullProgressMonitor()),
+          //							 editChange.getPreviewContent(groups, extended.range, true, 0, new
+          // NullProgressMonitor()),
           //							 editChange.getTextType());
           ChangePreview preview = DtoFactory.newDto(ChangePreview.class);
           preview.setFileName(getFileName(editChange));
@@ -253,7 +260,8 @@ public class TextEditChangePreviewViewer implements IChangePreviewViewer {
   //		IResource resource = null;
   //		if (element instanceof IAdaptable) {
   //			IAdaptable adaptable = (IAdaptable)element;
-  //			IWorkbenchAdapter workbenchAdapter = (IWorkbenchAdapter)adaptable.getAdapter(IWorkbenchAdapter.class);
+  //			IWorkbenchAdapter workbenchAdapter =
+  // (IWorkbenchAdapter)adaptable.getAdapter(IWorkbenchAdapter.class);
   //			if (workbenchAdapter != null) {
   //				fViewer.setLabel(workbenchAdapter.getLabel(element));
   //				fViewer.setImageDescriptor(workbenchAdapter.getImageDescriptor(element));

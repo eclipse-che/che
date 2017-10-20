@@ -109,7 +109,7 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
     super(parent);
     this.project = project;
 
-    //create
+    // create
     if (project.exists()) {
       IFolder folder = project.getFolder(INNER_DIR);
       if (!folder.exists()) {
@@ -405,7 +405,7 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
       throws JavaModelException {
 
     try {
-      if (newRawClasspath == null) //are we already with the default classpath
+      if (newRawClasspath == null) // are we already with the default classpath
       newRawClasspath = defaultClasspath();
 
       SetClasspathOperation op =
@@ -582,7 +582,8 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
                 new JavaModelStatus(
                     IJavaModelStatusConstants.CP_VARIABLE_PATH_UNBOUND, this, rawEntry.getPath());
           } else {
-            // If the entry is already present in the rawReversetMap, it means the entry and the chained libraries
+            // If the entry is already present in the rawReversetMap, it means the entry and the
+            // chained libraries
             // have already been processed. So, skip it.
             if (resolveChainedLibraries
                 && resolvedEntry.getEntryKind() == IClasspathEntry.CPE_LIBRARY
@@ -593,7 +594,8 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
               for (int j = 0, length2 = extraEntries.length; j < length2; j++) {
                 if (!rawLibrariesPath.contains(extraEntries[j].getPath())) {
                   // https://bugs.eclipse.org/bugs/show_bug.cgi?id=305037
-                  // referenced entries for variable entries could also be persisted with extra attributes, so addAsChainedEntry = true
+                  // referenced entries for variable entries could also be persisted with extra
+                  // attributes, so addAsChainedEntry = true
                   addToResult(
                       rawEntry,
                       extraEntries[j],
@@ -632,7 +634,8 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
           if (containerEntries == null) {
             if (JavaModelManager.CP_RESOLVE_VERBOSE
                 || JavaModelManager.CP_RESOLVE_VERBOSE_FAILURE) {
-              //                            JavaModelManager.getJavaModelManager().verbose_missbehaving_container_null_entries(this, rawEntry.getPath());
+              //
+              // JavaModelManager.getJavaModelManager().verbose_missbehaving_container_null_entries(this, rawEntry.getPath());
             }
             break;
           }
@@ -643,11 +646,14 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
             if (cEntry == null) {
               if (JavaModelManager.CP_RESOLVE_VERBOSE
                   || JavaModelManager.CP_RESOLVE_VERBOSE_FAILURE) {
-                //                                JavaModelManager.getJavaModelManager().verbose_missbehaving_container(this, rawEntry.getPath(), containerEntries);
+                //
+                // JavaModelManager.getJavaModelManager().verbose_missbehaving_container(this,
+                // rawEntry.getPath(), containerEntries);
               }
               break;
             }
-            // if container is exported or restricted, then its nested entries must in turn be exported  (21749) and/or propagate restrictions
+            // if container is exported or restricted, then its nested entries must in turn be
+            // exported  (21749) and/or propagate restrictions
             cEntry = cEntry.combineWith((ClasspathEntry) rawEntry);
 
             if (cEntry.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
@@ -793,7 +799,7 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
         typeName = typeName.substring(0, typeName.length() - extension.length() - 1);
         String qualifiedName = null;
         if (packageName.length() > 0) {
-          qualifiedName = packageName + "." + typeName; //$NON-NLS-1$
+          qualifiedName = packageName + "." + typeName; // $NON-NLS-1$
         } else {
           qualifiedName = typeName;
         }
@@ -1110,7 +1116,8 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
     if (rscFile.exists()) {
       bytes = Util.getResourceContentsAsByteArray(rscFile);
     } else {
-      // when a project is imported, we get a first delta for the addition of the .project, but the .classpath is not accessible
+      // when a project is imported, we get a first delta for the addition of the .project, but the
+      // .classpath is not accessible
       // so default to using java.io.File
       // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=96258
 
@@ -1118,12 +1125,15 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
       // TODO: this is original Eclipse code
       //            URI location = rscFile.getLocationURI();
       //            if (location == null)
-      //            throw new IOException("Cannot obtain a location URI for " + rscFile); //$NON-NLS-1$
+      //            throw new IOException("Cannot obtain a location URI for " + rscFile);
+      // //$NON-NLS-1$
       //            File file = Util.toLocalFile(location, null/*no progress monitor available*/);
       //            if (file == null)
-      //                throw new IOException("Unable to fetch file from " + location); //$NON-NLS-1$
+      //                throw new IOException("Unable to fetch file from " + location);
+      // //$NON-NLS-1$
       //            try {
-      //                bytes = org.eclipse.jdt.internal.compiler.util.Util.getFileByteContent(file);
+      //                bytes =
+      // org.eclipse.jdt.internal.compiler.util.Util.getFileByteContent(file);
       //            } catch (IOException e) {
       //                if (!file.exists())
       return new IClasspathEntry[][] {defaultClasspath(), ClasspathEntry.NO_ENTRIES};
@@ -1143,7 +1153,7 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
               org.eclipse.jdt.internal.compiler.util.Util
                   .UTF_8); // .classpath always encoded with UTF-8
     } catch (UnsupportedEncodingException e) {
-      Util.log(e, "Could not read .classpath with UTF-8 encoding"); //$NON-NLS-1$
+      Util.log(e, "Could not read .classpath with UTF-8 encoding"); // $NON-NLS-1$
       // fallback to default
       xmlClasspath = new String(bytes);
     }
@@ -1174,7 +1184,7 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
       reader.close();
     }
 
-    if (!cpElement.getNodeName().equalsIgnoreCase("classpath")) { //$NON-NLS-1$
+    if (!cpElement.getNodeName().equalsIgnoreCase("classpath")) { // $NON-NLS-1$
       throw new IOException(Messages.file_badFormat);
     }
     NodeList list = cpElement.getElementsByTagName(ClasspathEntry.TAG_CLASSPATHENTRY);
@@ -1378,7 +1388,8 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
       case IResource.FILE:
         return new JarPackageFragmentRoot(resource, this);
       case IResource.FOLDER:
-        //                if (ExternalFoldersManager.isInternalPathForExternalFolder(resource.getFullPath()))
+        //                if
+        // (ExternalFoldersManager.isInternalPathForExternalFolder(resource.getFullPath()))
         //                    return new ExternalPackageFragmentRoot(resource, entryPath, this);
         return new PackageFragmentRoot(resource, this);
       case IResource.PROJECT:
@@ -1395,7 +1406,7 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
    * @return String
    */
   public String rootID() {
-    return "[PRJ]" + this.project.getFullPath(); //$NON-NLS-1$
+    return "[PRJ]" + this.project.getFullPath(); // $NON-NLS-1$
   }
 
   @Override
@@ -1485,7 +1496,7 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
 
   /** Returns a default output location. This is the project bin folder */
   protected IPath defaultOutputLocation() {
-    return this.project.getFullPath().append("bin"); //$NON-NLS-1$
+    return this.project.getFullPath().append("bin"); // $NON-NLS-1$
   }
 
   @Override
@@ -1528,7 +1539,8 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
   protected boolean buildStructure(
       OpenableElementInfo info, IProgressMonitor pm, Map newElements, IResource underlyingResource)
       throws JavaModelException {
-    // cannot refresh cp markers on opening (emulate cp check on startup) since can create deadlocks (see bug 37274)
+    // cannot refresh cp markers on opening (emulate cp check on startup) since can create deadlocks
+    // (see bug 37274)
     IClasspathEntry[] resolvedClasspath = getResolvedClasspath();
 
     // compute the pkg fragment roots
@@ -1575,7 +1587,8 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
    * no path canonicalization
    */
   public IPackageFragmentRoot getPackageFragmentRoot0(IPath externalLibraryPath) {
-    //        IFolder linkedFolder = JavaModelManager.getExternalManager().getFolder(externalLibraryPath);
+    //        IFolder linkedFolder =
+    // JavaModelManager.getExternalManager().getFolder(externalLibraryPath);
     //        if (linkedFolder != null)
     //            return new ExternalPackageFragmentRoot(linkedFolder, externalLibraryPath, this);
     return new JarPackageFragmentRoot(externalLibraryPath, this);
@@ -1817,13 +1830,16 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
         }
       }
     }
-    //        if (resolvedEntry.getEntryKind() == IClasspathEntry.CPE_LIBRARY &&/* ExternalFoldersManager.isExternalFolderPath(resolvedPath)*/ false) {
-    //            externalFoldersManager.addFolder(resolvedPath, true/*scheduleForCreation*/); // no-op if not an external folder or if already registered
+    //        if (resolvedEntry.getEntryKind() == IClasspathEntry.CPE_LIBRARY &&/*
+    // ExternalFoldersManager.isExternalFolderPath(resolvedPath)*/ false) {
+    //            externalFoldersManager.addFolder(resolvedPath, true/*scheduleForCreation*/); //
+    // no-op if not an external folder or if already registered
     //        }
     // https://bugs.eclipse.org/bugs/show_bug.cgi?id=336046
     //        // The source attachment path could be external too and in which case, must be added.
     //        IPath sourcePath = resolvedEntry.getSourceAttachmentPath();
-    //        if (sourcePath != null && driveExists(sourcePath, knownDrives) && ExternalFoldersManager.isExternalFolderPath(sourcePath)) {
+    //        if (sourcePath != null && driveExists(sourcePath, knownDrives) &&
+    // ExternalFoldersManager.isExternalFolderPath(sourcePath)) {
     //            externalFoldersManager.addFolder(sourcePath, true);
     //        }
   }
@@ -1923,10 +1939,12 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
     perProjectInfo.preferences = eclipsePreferences;
 
     //        // Listen to new preferences node
-    //        final IEclipsePreferences eclipseParentPreferences = (IEclipsePreferences) eclipsePreferences.parent();
+    //        final IEclipsePreferences eclipseParentPreferences = (IEclipsePreferences)
+    // eclipsePreferences.parent();
     //        if (eclipseParentPreferences != null) {
     //            if (this.preferencesNodeListener != null) {
-    //                eclipseParentPreferences.removeNodeChangeListener(this.preferencesNodeListener);
+    //
+    // eclipseParentPreferences.removeNodeChangeListener(this.preferencesNodeListener);
     //            }
     //            this.preferencesNodeListener = new IEclipsePreferences.INodeChangeListener() {
     //                public void added(IEclipsePreferences.NodeChangeEvent event) {
@@ -1934,7 +1952,8 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
     //                }
     //                public void removed(IEclipsePreferences.NodeChangeEvent event) {
     //                    if (event.getChild() == eclipsePreferences) {
-    //                        JavaModelManager.getJavaModelManager().resetProjectPreferences(JavaProject.this);
+    //
+    // JavaModelManager.getJavaModelManager().resetProjectPreferences(JavaProject.this);
     //                    }
     //                }
     //            };
@@ -1953,20 +1972,26 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
     //                    if (propertyName.equals(JavaCore.CORE_JAVA_BUILD_CLEAN_OUTPUT_FOLDER) ||
     //                        propertyName.equals(JavaCore.CORE_JAVA_BUILD_RESOURCE_COPY_FILTER) ||
     //                        propertyName.equals(JavaCore.CORE_JAVA_BUILD_DUPLICATE_RESOURCE) ||
-    //                        propertyName.equals(JavaCore.CORE_JAVA_BUILD_RECREATE_MODIFIED_CLASS_FILES_IN_OUTPUT_FOLDER) ||
+    //
+    // propertyName.equals(JavaCore.CORE_JAVA_BUILD_RECREATE_MODIFIED_CLASS_FILES_IN_OUTPUT_FOLDER)
+    // ||
     //                        propertyName.equals(JavaCore.CORE_JAVA_BUILD_INVALID_CLASSPATH) ||
-    //                        propertyName.equals(JavaCore.CORE_ENABLE_CLASSPATH_EXCLUSION_PATTERNS) ||
-    //                        propertyName.equals(JavaCore.CORE_ENABLE_CLASSPATH_MULTIPLE_OUTPUT_LOCATIONS) ||
+    //                        propertyName.equals(JavaCore.CORE_ENABLE_CLASSPATH_EXCLUSION_PATTERNS)
+    // ||
+    //
+    // propertyName.equals(JavaCore.CORE_ENABLE_CLASSPATH_MULTIPLE_OUTPUT_LOCATIONS) ||
     //                        propertyName.equals(JavaCore.CORE_INCOMPLETE_CLASSPATH) ||
     //                        propertyName.equals(JavaCore.CORE_CIRCULAR_CLASSPATH) ||
-    //                        propertyName.equals(JavaCore.CORE_OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE) ||
+    //
+    // propertyName.equals(JavaCore.CORE_OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE) ||
     //                        propertyName.equals(JavaCore.CORE_INCOMPATIBLE_JDK_LEVEL) ||
     //                        propertyName.equals(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM))
     //                    {
     //                        manager.deltaState.addClasspathValidation(JavaProject.this);
     //                    }
     //                    manager.resetProjectOptions(JavaProject.this);
-    //                    JavaProject.this.resetCaches(); // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=233568
+    //                    JavaProject.this.resetCaches(); // see
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=233568
     //                }
     //            }
     //        };
@@ -2013,7 +2038,8 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
     } else if (externalPath.isAbsolute()) {
       result = canonicalPath;
     } else {
-      // if path is relative, remove the first segments that were added by the java.io.File canonicalization
+      // if path is relative, remove the first segments that were added by the java.io.File
+      // canonicalization
       // e.g. 'lib/classes.zip' was converted to 'd:/myfolder/lib/classes.zip'
       int externalLength = externalPath.segmentCount();
       if (canonicalLength >= externalLength) {
@@ -2023,11 +2049,13 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
       }
     }
 
-    // keep device only if it was specified (this is because File.getCanonicalPath() converts '/lib/classes.zip' to 'd:/lib/classes/zip')
+    // keep device only if it was specified (this is because File.getCanonicalPath() converts
+    // '/lib/classes.zip' to 'd:/lib/classes/zip')
     if (externalPath.getDevice() == null) {
       result = result.setDevice(null);
     }
-    // keep trailing separator only if it was specified (this is because File.getCanonicalPath() converts 'd:/lib/classes/' to 'd:/lib/classes')
+    // keep trailing separator only if it was specified (this is because File.getCanonicalPath()
+    // converts 'd:/lib/classes/' to 'd:/lib/classes')
     if (externalPath.hasTrailingSeparator()) {
       result = result.addTrailingSeparator();
     }
@@ -2035,25 +2063,34 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
   }
 
   /** Remove all markers denoting classpath problems */
-  //TODO (philippe) should improve to use a bitmask instead of booleans (CYCLE, FORMAT, VALID)
+  // TODO (philippe) should improve to use a bitmask instead of booleans (CYCLE, FORMAT, VALID)
   protected void flushClasspathProblemMarkers(
       boolean flushCycleMarkers,
       boolean flushClasspathFormatMarkers,
       boolean flushOverlappingOutputMarkers) {
     //        try {
     //            if (this.project.isAccessible()) {
-    //                IMarker[] markers = this.project.findMarkers(IJavaModelMarker.BUILDPATH_PROBLEM_MARKER, false, IResource.DEPTH_ZERO);
+    //                IMarker[] markers =
+    // this.project.findMarkers(IJavaModelMarker.BUILDPATH_PROBLEM_MARKER, false,
+    // IResource.DEPTH_ZERO);
     //                for (int i = 0, length = markers.length; i < length; i++) {
     //                    IMarker marker = markers[i];
-    //                    if (flushCycleMarkers && flushClasspathFormatMarkers && flushOverlappingOutputMarkers) {
+    //                    if (flushCycleMarkers && flushClasspathFormatMarkers &&
+    // flushOverlappingOutputMarkers) {
     //                        marker.delete();
     //                    } else {
-    //                        String cycleAttr = (String)marker.getAttribute(IJavaModelMarker.CYCLE_DETECTED);
-    //                        String classpathFileFormatAttr =  (String)marker.getAttribute(IJavaModelMarker.CLASSPATH_FILE_FORMAT);
-    //                        String overlappingOutputAttr = (String) marker.getAttribute(IJavaModelMarker.OUTPUT_OVERLAPPING_SOURCE);
-    //                        if ((flushCycleMarkers == (cycleAttr != null && cycleAttr.equals("true"))) //$NON-NLS-1$
-    //                            && (flushOverlappingOutputMarkers == (overlappingOutputAttr != null && overlappingOutputAttr.equals("true"))) //$NON-NLS-1$
-    //                            && (flushClasspathFormatMarkers == (classpathFileFormatAttr != null && classpathFileFormatAttr.equals("true")))){ //$NON-NLS-1$
+    //                        String cycleAttr =
+    // (String)marker.getAttribute(IJavaModelMarker.CYCLE_DETECTED);
+    //                        String classpathFileFormatAttr =
+    // (String)marker.getAttribute(IJavaModelMarker.CLASSPATH_FILE_FORMAT);
+    //                        String overlappingOutputAttr = (String)
+    // marker.getAttribute(IJavaModelMarker.OUTPUT_OVERLAPPING_SOURCE);
+    //                        if ((flushCycleMarkers == (cycleAttr != null &&
+    // cycleAttr.equals("true"))) //$NON-NLS-1$
+    //                            && (flushOverlappingOutputMarkers == (overlappingOutputAttr !=
+    // null && overlappingOutputAttr.equals("true"))) //$NON-NLS-1$
+    //                            && (flushClasspathFormatMarkers == (classpathFileFormatAttr !=
+    // null && classpathFileFormatAttr.equals("true")))){ //$NON-NLS-1$
     //                            marker.delete();
     //                        }
     //                    }
@@ -2126,7 +2163,7 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
               org.eclipse.jdt.internal.compiler.util.Util
                   .UTF_8); // .classpath always encoded with UTF-8
     } catch (UnsupportedEncodingException e) {
-      Util.log(e, "Could not write .classpath with UTF-8 encoding "); //$NON-NLS-1$
+      Util.log(e, "Could not write .classpath with UTF-8 encoding "); // $NON-NLS-1$
       // fallback to default
       bytes = value.getBytes();
     }
@@ -2135,7 +2172,8 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
     if (rscFile.exists()) {
       //            if (rscFile.isReadOnly()) {
       //                // provide opportunity to checkout read-only .classpath file (23984)
-      //                ResourcesPlugin.getWorkspace().validateEdit(new IFile[]{rscFile}, IWorkspace.VALIDATE_PROMPT);
+      //                ResourcesPlugin.getWorkspace().validateEdit(new IFile[]{rscFile},
+      // IWorkspace.VALIDATE_PROMPT);
       //            }
       rscFile.setContents(inputStream, IResource.FORCE, null);
     } else {
@@ -2197,7 +2235,7 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
       throws JavaModelException {
     try {
       ByteArrayOutputStream s = new ByteArrayOutputStream();
-      OutputStreamWriter writer = new OutputStreamWriter(s, "UTF8"); //$NON-NLS-1$
+      OutputStreamWriter writer = new OutputStreamWriter(s, "UTF8"); // $NON-NLS-1$
       XMLWriter xmlWriter = new XMLWriter(writer, this, true /*print XML version*/);
 
       xmlWriter.startTag(ClasspathEntry.TAG_CLASSPATH, indent);
@@ -2228,7 +2266,7 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
       xmlWriter.endTag(ClasspathEntry.TAG_CLASSPATH, indent, true /*insert new line*/);
       writer.flush();
       writer.close();
-      return s.toString("UTF8"); //$NON-NLS-1$
+      return s.toString("UTF8"); // $NON-NLS-1$
     } catch (IOException e) {
       throw new JavaModelException(e, IJavaModelStatusConstants.IO_EXCEPTION);
     }
@@ -2237,7 +2275,7 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
   public String encodeClasspathEntry(IClasspathEntry classpathEntry) {
     try {
       ByteArrayOutputStream s = new ByteArrayOutputStream();
-      OutputStreamWriter writer = new OutputStreamWriter(s, "UTF8"); //$NON-NLS-1$
+      OutputStreamWriter writer = new OutputStreamWriter(s, "UTF8"); // $NON-NLS-1$
       XMLWriter xmlWriter = new XMLWriter(writer, this, false /*don't print XML version*/);
 
       ((ClasspathEntry) classpathEntry)
@@ -2251,7 +2289,7 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
 
       writer.flush();
       writer.close();
-      return s.toString("UTF8"); //$NON-NLS-1$
+      return s.toString("UTF8"); // $NON-NLS-1$
     } catch (IOException e) {
       return null; // never happens since all is done in memory
     }
@@ -2269,19 +2307,19 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
       Util.log(
           e,
           "Exception while reading "
-              + getPath().append(JavaProject.CLASSPATH_FILENAME)); //$NON-NLS-1$
+              + getPath().append(JavaProject.CLASSPATH_FILENAME)); // $NON-NLS-1$
       return new IClasspathEntry[][] {JavaProject.INVALID_CLASSPATH, ClasspathEntry.NO_ENTRIES};
     } catch (IOException e) {
       Util.log(
           e,
           "Exception while reading "
-              + getPath().append(JavaProject.CLASSPATH_FILENAME)); //$NON-NLS-1$
+              + getPath().append(JavaProject.CLASSPATH_FILENAME)); // $NON-NLS-1$
       return new IClasspathEntry[][] {JavaProject.INVALID_CLASSPATH, ClasspathEntry.NO_ENTRIES};
     } catch (ClasspathEntry.AssertionFailedException e) {
       Util.log(
           e,
           "Exception while reading "
-              + getPath().append(JavaProject.CLASSPATH_FILENAME)); //$NON-NLS-1$
+              + getPath().append(JavaProject.CLASSPATH_FILENAME)); // $NON-NLS-1$
       return new IClasspathEntry[][] {JavaProject.INVALID_CLASSPATH, ClasspathEntry.NO_ENTRIES};
     }
   }

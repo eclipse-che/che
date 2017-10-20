@@ -73,7 +73,7 @@ public abstract class AbstractRefactoringDescriptorResourceMapping extends Resou
   /** {@inheritDoc} */
   public final IProject[] getProjects() {
     final String project = fDescriptor.getProject();
-    if (project != null && !"".equals(project)) //$NON-NLS-1$
+    if (project != null && !"".equals(project)) // $NON-NLS-1$
     return new IProject[] {ResourcesPlugin.getWorkspace().getRoot().getProject(project)};
     return new IProject[] {};
   }

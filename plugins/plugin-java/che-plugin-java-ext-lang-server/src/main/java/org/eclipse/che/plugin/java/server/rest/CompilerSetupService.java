@@ -74,19 +74,19 @@ public class CompilerSetupService {
   @Produces(APPLICATION_JSON)
   public Map<String, String> getAllParameters(@QueryParam("projectpath") String projectPath) {
     if (projectPath == null || projectPath.isEmpty()) {
-      //noinspection unchecked
+      // noinspection unchecked
       CompilerOptions options = new CompilerOptions(new HashMap<>(JavaCore.getOptions()));
-      //noinspection unchecked
+      // noinspection unchecked
       return options.getMap();
     }
 
     IJavaProject project = JAVA_MODEL.getJavaProject(projectPath);
 
-    //noinspection unchecked
+    // noinspection unchecked
     Map<String, String> map = project.getOptions(true);
     CompilerOptions options = new CompilerOptions(map);
 
-    //noinspection unchecked
+    // noinspection unchecked
     return options.getMap();
   }
 }

@@ -100,7 +100,7 @@ public class InlineTempRefactoring extends Refactoring {
   private int fSelectionLength;
   private ICompilationUnit fCu;
 
-  //the following fields are set after the construction
+  // the following fields are set after the construction
   private VariableDeclaration fVariableDeclaration;
   private SimpleName[] fReferences;
   private CompilationUnit fASTRoot;
@@ -200,7 +200,7 @@ public class InlineTempRefactoring extends Refactoring {
   @Override
   public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
     try {
-      pm.beginTask("", 1); //$NON-NLS-1$
+      pm.beginTask("", 1); // $NON-NLS-1$
 
       RefactoringStatus result =
           Checks.validateModifiesFiles(
@@ -283,14 +283,14 @@ public class InlineTempRefactoring extends Refactoring {
   @Override
   public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
     try {
-      pm.beginTask("", 1); //$NON-NLS-1$
+      pm.beginTask("", 1); // $NON-NLS-1$
       return new RefactoringStatus();
     } finally {
       pm.done();
     }
   }
 
-  //----- changes
+  // ----- changes
 
   @Override
   public Change createChange(IProgressMonitor pm) throws CoreException {
@@ -504,13 +504,13 @@ public class InlineTempRefactoring extends Refactoring {
           oldIndent,
           project,
           "",
-          TextUtilities.getDefaultLineDelimiter(document)); //$NON-NLS-1$
+          TextUtilities.getDefaultLineDelimiter(document)); // $NON-NLS-1$
     } catch (MalformedTreeException e) {
       JavaPlugin.log(e);
     } catch (BadLocationException e) {
       JavaPlugin.log(e);
     }
-    //fallback:
+    // fallback:
     return fCu.getBuffer().getText(invocation.getStartPosition(), invocation.getLength());
   }
 

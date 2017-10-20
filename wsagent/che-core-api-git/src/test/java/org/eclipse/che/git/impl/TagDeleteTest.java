@@ -48,8 +48,8 @@ public class TagDeleteTest {
   )
   public void testDeleteTag(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
-    //create tags
+    // given
+    // create tags
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
 
     connection.tagCreate(TagCreateParams.create("first-tag"));
@@ -58,11 +58,11 @@ public class TagDeleteTest {
     List<Tag> tags = connection.tagList(null);
     assertTrue(tagExists(tags, "first-tag"));
     assertTrue(tagExists(tags, "second-tag"));
-    //when
-    //delete first-tag
+    // when
+    // delete first-tag
     connection.tagDelete("first-tag");
-    //then
-    //check not exists more
+    // then
+    // check not exists more
     tags = connection.tagList(null);
     assertFalse(tagExists(tags, "first-tag"));
     assertTrue(tagExists(tags, "second-tag"));

@@ -330,7 +330,8 @@ public class CallInliner {
   // the checks depend on invocation context and therefore can't be done in SourceAnalyzer
   private void checkMethodDeclaration(RefactoringStatus result, int severity) {
     MethodDeclaration methodDeclaration = fSourceProvider.getDeclaration();
-    // it is not allowed to inline constructor invocation only if it is used for class instance creation
+    // it is not allowed to inline constructor invocation only if it is used for class instance
+    // creation
     // if constructor is invoked from another constructor then we can inline such invocation
     if (fInvocation.getNodeType() != ASTNode.CONSTRUCTOR_INVOCATION
         && methodDeclaration.isConstructor()) {
@@ -377,7 +378,7 @@ public class CallInliner {
     } else if (nodeType == ASTNode.METHOD_INVOCATION) {
       ASTNode parent = fTargetNode.getParent();
       if (isReturnStatement(parent)) {
-        //support inlining even if the execution flow is interrupted
+        // support inlining even if the execution flow is interrupted
         return;
       }
       if (fSourceProvider.isExecutionFlowInterrupted()) {
@@ -516,7 +517,7 @@ public class CallInliner {
         fFlowInfo = new InputFlowAnalyzer(fFlowContext, selection, true).perform(fBodyDeclaration);
         break;
       default:
-        Assert.isTrue(false, "Should not happen"); //$NON-NLS-1$
+        Assert.isTrue(false, "Should not happen"); // $NON-NLS-1$
     }
   }
 
@@ -621,7 +622,7 @@ public class CallInliner {
         fLocals.add(
             createLocalDeclaration(
                 receiver.resolveTypeBinding(),
-                fInvocationScope.createName("r", true), //$NON-NLS-1$
+                fInvocationScope.createName("r", true), // $NON-NLS-1$
                 (Expression) fRewrite.createCopyTarget(receiver)));
         return;
       case 1:
@@ -629,7 +630,7 @@ public class CallInliner {
             fBuffer.getDocument().get(receiver.getStartPosition(), receiver.getLength());
         return;
       default:
-        String local = fInvocationScope.createName("r", true); //$NON-NLS-1$
+        String local = fInvocationScope.createName("r", true); // $NON-NLS-1$
         fLocals.add(
             createLocalDeclaration(
                 receiver.resolveTypeBinding(),
@@ -804,7 +805,7 @@ public class CallInliner {
     VariableDeclarationStatement decl =
         (VariableDeclarationStatement)
             ASTNodeFactory.newStatement(
-                fInvocation.getAST(), typeName + " " + name + ";"); //$NON-NLS-1$ //$NON-NLS-2$
+                fInvocation.getAST(), typeName + " " + name + ";"); // $NON-NLS-1$ //$NON-NLS-2$
     ((VariableDeclarationFragment) decl.fragments().get(0)).setInitializer(initializer);
     return decl;
   }

@@ -116,7 +116,7 @@ public class GitCheckoutDetector {
         Type type = content.contains("ref:") ? BRANCH : REVISION;
         String name = type == REVISION ? content : PATTERN.split(content)[1];
 
-        //Update project attributes with new git values
+        // Update project attributes with new git values
 
         projectManager.setType(it.split("/")[1], GitProjectType.TYPE_ID, true);
 

@@ -96,9 +96,9 @@ public class UnnecessaryCodeCleanUp extends AbstractMultiFix {
     StringBuffer buf = new StringBuffer();
 
     if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS)) {
-      buf.append("Boolean b= Boolean.TRUE;\n"); //$NON-NLS-1$
+      buf.append("Boolean b= Boolean.TRUE;\n"); // $NON-NLS-1$
     } else {
-      buf.append("Boolean b= (Boolean) Boolean.TRUE;\n"); //$NON-NLS-1$
+      buf.append("Boolean b= (Boolean) Boolean.TRUE;\n"); // $NON-NLS-1$
     }
 
     return buf.toString();

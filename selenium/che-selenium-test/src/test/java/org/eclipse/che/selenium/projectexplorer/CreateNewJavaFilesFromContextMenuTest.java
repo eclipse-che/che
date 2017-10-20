@@ -70,20 +70,20 @@ public class CreateNewJavaFilesFromContextMenuTest {
     projectExplorer.waitItem(PROJECT_NAME);
     notificationsPopupPanel.waitProgressPopupPanelClose();
 
-    //go to folder for creation files
+    // go to folder for creation files
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
     loader.waitOnClosed();
 
-    //create new class
+    // create new class
     createNewFile(NEW_CLASS, AskForValueDialog.JavaFiles.CLASS);
     checkDefaultTextInEditorForFile(DEFAULT_TEXT_FOR_NEW_CLASS);
 
-    //create new interface
+    // create new interface
     createNewFile(NEW_INTERFACE, AskForValueDialog.JavaFiles.INTERFACE);
     checkDefaultTextInEditorForFile(DEFAULT_TEXT_FOR_NEW_INTERFACE);
 
-    //create new enum
+    // create new enum
     createNewFile(NEW_ENUM, AskForValueDialog.JavaFiles.ENUM);
     checkDefaultTextInEditorForFile(DEFAULT_TEXT_FOR_NEW_ENUM);
   }
@@ -91,7 +91,7 @@ public class CreateNewJavaFilesFromContextMenuTest {
   private void createNewFile(String name, AskForValueDialog.JavaFiles item) {
     projectExplorer.selectItem(PATH_TO_FILES);
 
-    //create new File from context menu
+    // create new File from context menu
     projectExplorer.openContextMenuByPathSelectedItem(PATH_TO_FILES);
     projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.NEW);
     projectExplorer.clickOnNewContextMenuItem(

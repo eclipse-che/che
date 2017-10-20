@@ -133,7 +133,7 @@ public class JavaElementLinks {
    * @since 3.6
    */
   public static String createLink(String uri, String label) {
-    return "<a href='" + uri + "'>" + label + "</a>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+    return "<a href='" + uri + "'>" + label + "</a>"; // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
   }
 
   /**
@@ -166,13 +166,14 @@ public class JavaElementLinks {
     StringBuffer buf = new StringBuffer();
 
     //        if (!Strings.USE_TEXT_PROCESSOR) {
-    //            new JavaElementLinkedLabelComposer(linkAllNames ? null : element, buf).appendElementLabel(element, flags);
+    //            new JavaElementLinkedLabelComposer(linkAllNames ? null : element,
+    // buf).appendElementLabel(element, flags);
     //            return Strings.markJavaElementLabelLTR(buf.toString());
     //        } else {
     String label = JavaElementLabels.getElementLabel(element, flags);
     return label
         .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+        .replaceAll(">", "&gt;"); // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
     //        }
   }
 
@@ -246,10 +247,10 @@ public class JavaElementLinks {
                 if (methods != null) {
                   return methods[0];
                 } else {
-                  //TODO: methods whose signature contains type parameters can not be found
+                  // TODO: methods whose signature contains type parameters can not be found
                   // easily, since the Javadoc references are erasures
 
-                  //Shortcut: only check name and parameter count:
+                  // Shortcut: only check name and parameter count:
                   methods = type.getMethods();
                   for (int i = 0; i < methods.length; i++) {
                     method = methods[i];
@@ -257,9 +258,13 @@ public class JavaElementLinks {
                         && method.getNumberOfParameters() == paramSignatures.length) return method;
                   }
 
-                  //                                    // reference can also point to method from supertype:
-                  //                                    ITypeHierarchy hierarchy= SuperTypeHierarchyCache.getTypeHierarchy(type);
-                  //                                    method= JavaModelUtil.findMethodInHierarchy(hierarchy, type, refMemberName, paramSignatures, false);
+                  //                                    // reference can also point to method from
+                  // supertype:
+                  //                                    ITypeHierarchy hierarchy=
+                  // SuperTypeHierarchyCache.getTypeHierarchy(type);
+                  //                                    method=
+                  // JavaModelUtil.findMethodInHierarchy(hierarchy, type, refMemberName,
+                  // paramSignatures, false);
                   //                                    if (method != null)
                   //                                        return method;
                 }
@@ -278,7 +283,8 @@ public class JavaElementLinks {
             }
           } else {
             // FIXME: either remove or show dialog
-            //						JavaPlugin.logErrorMessage("JavaElementLinks could not resolve " + uri); //$NON-NLS-1$
+            //						JavaPlugin.logErrorMessage("JavaElementLinks could not resolve " + uri);
+            // //$NON-NLS-1$
           }
           return type;
         } catch (JavaModelException e) {
@@ -291,7 +297,8 @@ public class JavaElementLinks {
 
   private static IType resolvePackageInfoType(IPackageFragment pack, String refTypeName)
       throws JavaModelException {
-    // Note: The scoping rules of JLS7 6.3 are broken for package-info.java, see https://bugs.eclipse.org/216451#c4
+    // Note: The scoping rules of JLS7 6.3 are broken for package-info.java, see
+    // https://bugs.eclipse.org/216451#c4
     // We follow the javadoc tool's implementation and only support fully-qualified type references:
     IJavaProject javaProject = pack.getJavaProject();
     return javaProject.findType(refTypeName, (IProgressMonitor) null);
@@ -319,7 +326,8 @@ public class JavaElementLinks {
     //
     //		ICompilationUnit cu= pack.getCompilationUnit(JavaModelUtil.PACKAGE_INFO_JAVA);
     //		if (! cu.exists()) {
-    //			// refTypeName is a simple name in the package-info.java from the source attachment. Sorry, we give up here...
+    //			// refTypeName is a simple name in the package-info.java from the source attachment. Sorry,
+    // we give up here...
     //			return null;
     //		}
     //
@@ -346,12 +354,14 @@ public class JavaElementLinks {
     //		}
     //
     //		// 2) enclosing package
-    //		IType type= javaProject.findType(pack.getElementName() + '.' + refTypeName, (IProgressMonitor) null);
+    //		IType type= javaProject.findType(pack.getElementName() + '.' + refTypeName,
+    // (IProgressMonitor) null);
     //		if (type != null)
     //			return type;
     //
     //		// 3) java.lang.* (JLS7 7.3)
-    //		type= javaProject.findType("java.lang." + refTypeName, (IProgressMonitor) null); //$NON-NLS-1$
+    //		type= javaProject.findType("java.lang." + refTypeName, (IProgressMonitor) null);
+    // //$NON-NLS-1$
     //		if (type != null)
     //			return type;
     //

@@ -136,7 +136,7 @@ public abstract class AbstractMethodCorrectionProposal extends LinkedCorrectionP
       takenNames.add(declaredFields[i].getName());
     }
 
-    String bodyStatement = ""; //$NON-NLS-1$
+    String bodyStatement = ""; // $NON-NLS-1$
     if (!isConstructor()) {
       Type returnType = getNewMethodType(rewrite);
       decl.setReturnType2(returnType);

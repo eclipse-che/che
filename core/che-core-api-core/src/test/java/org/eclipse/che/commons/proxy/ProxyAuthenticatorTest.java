@@ -34,38 +34,38 @@ public class ProxyAuthenticatorTest {
 
   @Test
   public void shouldInitHttpsProxyAuthenticator() throws Exception {
-    //when
+    // when
     ProxyAuthenticator.initAuthenticator(HTTPS_URL);
     PasswordAuthentication testAuthentication =
         Authenticator.requestPasswordAuthentication(null, 0, null, null, null);
 
-    //then
+    // then
     assertEquals(testAuthentication.getUserName(), "user2");
     assertEquals(String.valueOf(testAuthentication.getPassword()), "paswd2");
 
-    //when
+    // when
     ProxyAuthenticator.resetAuthenticator();
 
-    //then
+    // then
     testAuthentication = Authenticator.requestPasswordAuthentication(null, 0, null, null, null);
     assertEquals(testAuthentication, null);
   }
 
   @Test
   public void shouldInitHttpProxyAuthenticator() throws Exception {
-    //when
+    // when
     ProxyAuthenticator.initAuthenticator(HTTP_URL);
 
-    //then
+    // then
     PasswordAuthentication testAuthentication =
         Authenticator.requestPasswordAuthentication(null, 0, null, null, null);
     assertEquals(testAuthentication.getUserName(), "user1");
     assertEquals(String.valueOf(testAuthentication.getPassword()), "paswd1");
 
-    //when
+    // when
     ProxyAuthenticator.resetAuthenticator();
 
-    //then
+    // then
     testAuthentication = Authenticator.requestPasswordAuthentication(null, 0, null, null, null);
     assertEquals(testAuthentication, null);
   }

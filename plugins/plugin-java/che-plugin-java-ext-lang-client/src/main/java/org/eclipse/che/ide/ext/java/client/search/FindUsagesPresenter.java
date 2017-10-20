@@ -150,7 +150,7 @@ public class FindUsagesPresenter extends BasePresenter implements FindUsagesView
                     handleError(((ServerException) cause).getHTTPStatus(), cause.getMessage());
                     return;
                   }
-                  //in case websocket request
+                  // in case websocket request
                   if (cause
                       instanceof org.eclipse.che.ide.websocket.rest.exceptions.ServerException) {
                     handleError(

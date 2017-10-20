@@ -72,13 +72,13 @@ public class ReturnTypeSubProcessor {
             couldBeObject = true;
           }
         } else {
-          return ast.resolveWellKnownType("void"); //$NON-NLS-1$
+          return ast.resolveWellKnownType("void"); // $NON-NLS-1$
         }
       }
       if (couldBeObject) {
-        return ast.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+        return ast.resolveWellKnownType("java.lang.Object"); // $NON-NLS-1$
       }
-      return ast.resolveWellKnownType("void"); //$NON-NLS-1$
+      return ast.resolveWellKnownType("void"); // $NON-NLS-1$
     }
 
     @Override
@@ -148,7 +148,7 @@ public class ReturnTypeSubProcessor {
 
         ITypeBinding binding = Bindings.normalizeTypeBinding(expr.resolveTypeBinding());
         if (binding == null) {
-          binding = ast.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+          binding = ast.resolveWellKnownType("java.lang.Object"); // $NON-NLS-1$
         }
         if (binding.isWildcardType()) {
           binding = ASTResolving.normalizeWildcardType(binding, true, ast);
@@ -180,7 +180,7 @@ public class ReturnTypeSubProcessor {
         } else {
           rewrite.replace(methodDeclaration.getReturnType2(), newReturnType, null);
         }
-        String key = "return_type"; //$NON-NLS-1$
+        String key = "return_type"; // $NON-NLS-1$
         proposal.addLinkedPosition(rewrite.track(newReturnType), true, key);
         ITypeBinding[] bindings = ASTResolving.getRelaxingTypes(ast, binding);
         for (int i = 0; i < bindings.length; i++) {
@@ -197,7 +197,7 @@ public class ReturnTypeSubProcessor {
           JavadocTagsSubProcessor.insertTag(
               rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY), newTag, null);
           proposal.addLinkedPosition(
-              rewrite.track(commentStart), false, "comment_start"); //$NON-NLS-1$
+              rewrite.track(commentStart), false, "comment_start"); // $NON-NLS-1$
         }
         proposals.add(proposal);
       }
@@ -234,7 +234,7 @@ public class ReturnTypeSubProcessor {
       ITypeBinding typeBinding = eval.getTypeBinding(decl.getAST());
       typeBinding = Bindings.normalizeTypeBinding(typeBinding);
       if (typeBinding == null) {
-        typeBinding = ast.resolveWellKnownType("void"); //$NON-NLS-1$
+        typeBinding = ast.resolveWellKnownType("void"); // $NON-NLS-1$
       }
       if (typeBinding.isWildcardType()) {
         typeBinding = ASTResolving.normalizeWildcardType(typeBinding, true, ast);
@@ -270,10 +270,10 @@ public class ReturnTypeSubProcessor {
         JavadocTagsSubProcessor.insertTag(
             rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY), newTag, null);
         proposal.addLinkedPosition(
-            rewrite.track(commentStart), false, "comment_start"); //$NON-NLS-1$
+            rewrite.track(commentStart), false, "comment_start"); // $NON-NLS-1$
       }
 
-      String key = "return_type"; //$NON-NLS-1$
+      String key = "return_type"; // $NON-NLS-1$
       proposal.addLinkedPosition(rewrite.track(type), true, key);
       if (typeBinding != null) {
         ITypeBinding[] bindings = ASTResolving.getRelaxingTypes(ast, typeBinding);
@@ -341,7 +341,7 @@ public class ReturnTypeSubProcessor {
                 cu, methodDecl, existingStatement, IProposalRelevance.MISSING_RETURN_TYPE));
 
         Type returnType = methodDecl.getReturnType2();
-        if (returnType != null && !"void".equals(ASTNodes.asString(returnType))) { //$NON-NLS-1$
+        if (returnType != null && !"void".equals(ASTNodes.asString(returnType))) { // $NON-NLS-1$
           AST ast = methodDecl.getAST();
           ASTRewrite rewrite = ASTRewrite.create(ast);
           rewrite.replace(returnType, ast.newPrimitiveType(PrimitiveType.VOID), null);

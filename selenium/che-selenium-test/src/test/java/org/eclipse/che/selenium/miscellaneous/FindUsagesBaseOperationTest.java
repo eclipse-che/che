@@ -131,8 +131,8 @@ public class FindUsagesBaseOperationTest {
     findUsages.clickOnIconNodeInFindUsagesPanel("AppController");
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
 
-    //try-catch was added because test fails while trying to open node by click action
-    //issue: https://github.com/eclipse/che/issues/6499
+    // try-catch was added because test fails while trying to open node by click action
+    // issue: https://github.com/eclipse/che/issues/6499
     try {
       findUsages.clickOnIconNodeInFindUsagesPanel(
           "handleRequest(HttpServletRequest, HttpServletResponse)");

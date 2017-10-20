@@ -53,7 +53,7 @@ public class LogTest {
   )
   public void testSimpleLog(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     addFile(connection, "README.txt", "someChanges");
     connection.add(AddParams.create(ImmutableList.of("README.txt")));
@@ -67,10 +67,10 @@ public class LogTest {
     connection.add(AddParams.create(ImmutableList.of("README.txt")));
     connection.commit(CommitParams.create("Third commit"));
 
-    //when
+    // when
     List<Revision> commits = connection.log(LogParams.create()).getCommits();
 
-    //then
+    // then
     assertEquals("Third commit", commits.get(0).getMessage());
     assertEquals("Second commit", commits.get(1).getMessage());
     assertEquals("Initial add", commits.get(2).getMessage());
@@ -82,7 +82,7 @@ public class LogTest {
   )
   public void testLogWithFileFilter(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     addFile(connection, "README.txt", "someChanges");
     connection.add(AddParams.create(ImmutableList.of("README.txt")));
@@ -100,7 +100,7 @@ public class LogTest {
     connection.add(AddParams.create(ImmutableList.of("newFile.txt")));
     connection.commit(CommitParams.create("Add newFile.txt"));
 
-    //when
+    // when
     int readMeCommitCount =
         connection
             .log(LogParams.create().withFileFilter(Collections.singletonList("README.txt")))
@@ -117,7 +117,7 @@ public class LogTest {
     int allFilesCommitCount =
         connection.log(LogParams.create().withFileFilter(fileFilter)).getCommits().size();
 
-    //then
+    // then
     assertEquals(3, readMeCommitCount);
     assertEquals(1, newFileCommitCount);
     assertEquals(4, allFilesCommitCount);
@@ -128,7 +128,7 @@ public class LogTest {
     dataProviderClass = GitConnectionFactoryProvider.class
   )
   public void testLogSkip(GitConnectionFactory connectionFactory) throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     addFile(connection, "1.txt", "someChanges");
     connection.add(AddParams.create());
@@ -146,14 +146,14 @@ public class LogTest {
     connection.add(AddParams.create());
     connection.commit(CommitParams.create("add 4.txt file"));
 
-    //when
+    // when
     List<Revision> allCommits = connection.log(LogParams.create()).getCommits();
     List<Revision> firstBucketOfCommits =
         connection.log(LogParams.create().withSkip(1)).getCommits();
     List<Revision> secondBucketOfCommits =
         connection.log(LogParams.create().withSkip(3)).getCommits();
 
-    //then
+    // then
     assertEquals(4, allCommits.size());
 
     assertEquals(3, firstBucketOfCommits.size());
@@ -190,7 +190,7 @@ public class LogTest {
   )
   public void testLogMaxCount(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     addFile(connection, "1.txt", "someChanges");
     connection.add(AddParams.create());
@@ -208,14 +208,14 @@ public class LogTest {
     connection.add(AddParams.create());
     connection.commit(CommitParams.create("add 4.txt file"));
 
-    //when
+    // when
     List<Revision> allCommits = connection.log(LogParams.create()).getCommits();
     List<Revision> firstBucketOfCommits =
         connection.log(LogParams.create().withMaxCount(4)).getCommits();
     List<Revision> secondBucketOfCommits =
         connection.log(LogParams.create().withMaxCount(2)).getCommits();
 
-    //then
+    // then
     assertEquals(4, allCommits.size());
 
     assertEquals(4, firstBucketOfCommits.size());
@@ -235,7 +235,7 @@ public class LogTest {
   )
   public void testLogWithSkipAndMaxCount(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     addFile(connection, "1.txt", "someChanges");
     connection.add(AddParams.create());
@@ -253,14 +253,14 @@ public class LogTest {
     connection.add(AddParams.create());
     connection.commit(CommitParams.create("add 4.txt file"));
 
-    //when
+    // when
     List<Revision> allCommits = connection.log(LogParams.create()).getCommits();
     List<Revision> firstBacketOfCommits =
         connection.log(LogParams.create().withSkip(1).withMaxCount(2)).getCommits();
     List<Revision> secondBacketOfCommits =
         connection.log(LogParams.create().withSkip(2).withMaxCount(2)).getCommits();
 
-    //then
+    // then
     assertEquals(4, allCommits.size());
 
     assertEquals(2, firstBacketOfCommits.size());
@@ -297,7 +297,7 @@ public class LogTest {
   )
   public void testLogSince(GitConnectionFactory connectionFactory)
       throws GitException, IOException, InterruptedException {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     addFile(connection, "1.txt", "someChanges");
     connection.add(AddParams.create());
@@ -315,7 +315,7 @@ public class LogTest {
     connection.add(AddParams.create());
     String fourthCommitId = connection.commit(CommitParams.create("add 4.txt file")).getId();
 
-    //when
+    // when
     List<Revision> allCommits = connection.log(LogParams.create()).getCommits();
     List<Revision> secondAndThirdAndFourthCommits =
         connection
@@ -332,7 +332,7 @@ public class LogTest {
                     .withRevisionRangeUntil(fourthCommitId))
             .getCommits();
 
-    //then
+    // then
     assertEquals(4, allCommits.size());
     assertEquals(3, secondAndThirdAndFourthCommits.size());
     assertEquals(2, thirdAndFourthCommits.size());

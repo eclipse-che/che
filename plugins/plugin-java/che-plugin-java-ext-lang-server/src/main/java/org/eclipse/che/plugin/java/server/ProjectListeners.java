@@ -79,7 +79,7 @@ public class ProjectListeners {
           .deltaState
           .resourceChanged(new ResourceChangedEvent(workspace, event));
     } catch (Throwable t) {
-      //catch all exceptions that may be happened
+      // catch all exceptions that may be happened
       LOG.error("Can't update java model in " + eventPath, t);
     }
     if (event.getType() == ProjectItemModifiedEvent.EventType.UPDATED) {
@@ -123,7 +123,7 @@ public class ProjectListeners {
             .deltaState
             .resourceChanged(new ResourceChangedEvent(workspace, event));
       } catch (Throwable t) {
-        //catch all exceptions that may be happened
+        // catch all exceptions that may be happened
         LOG.error("Can't update java model " + event.getProjectPath(), t);
       }
     }

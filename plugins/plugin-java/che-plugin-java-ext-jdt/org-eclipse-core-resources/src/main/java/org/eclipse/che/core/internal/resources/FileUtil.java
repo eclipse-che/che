@@ -49,10 +49,12 @@ public class FileUtil {
   //		fileInfo.setAttribute(EFS.ATTRIBUTE_SYMLINK, attributes.isSymbolicLink());
   //		fileInfo.setAttribute(EFS.ATTRIBUTE_GROUP_READ, attributes.isSet(EFS.ATTRIBUTE_GROUP_READ));
   //		fileInfo.setAttribute(EFS.ATTRIBUTE_GROUP_WRITE, attributes.isSet(EFS.ATTRIBUTE_GROUP_WRITE));
-  //		fileInfo.setAttribute(EFS.ATTRIBUTE_GROUP_EXECUTE, attributes.isSet(EFS.ATTRIBUTE_GROUP_EXECUTE));
+  //		fileInfo.setAttribute(EFS.ATTRIBUTE_GROUP_EXECUTE,
+  // attributes.isSet(EFS.ATTRIBUTE_GROUP_EXECUTE));
   //		fileInfo.setAttribute(EFS.ATTRIBUTE_OTHER_READ, attributes.isSet(EFS.ATTRIBUTE_OTHER_READ));
   //		fileInfo.setAttribute(EFS.ATTRIBUTE_OTHER_WRITE, attributes.isSet(EFS.ATTRIBUTE_OTHER_WRITE));
-  //		fileInfo.setAttribute(EFS.ATTRIBUTE_OTHER_EXECUTE, attributes.isSet(EFS.ATTRIBUTE_OTHER_EXECUTE));
+  //		fileInfo.setAttribute(EFS.ATTRIBUTE_OTHER_EXECUTE,
+  // attributes.isSet(EFS.ATTRIBUTE_OTHER_EXECUTE));
   //		return fileInfo;
   //	}
 
@@ -62,7 +64,7 @@ public class FileUtil {
     try {
       final String pathString = path.toOSString();
       final String canonicalPath = new java.io.File(pathString).getCanonicalPath();
-      //only create a new path if necessary
+      // only create a new path if necessary
       if (canonicalPath.equals(pathString)) return path;
       return new Path(canonicalPath);
     } catch (IOException e) {
@@ -74,7 +76,7 @@ public class FileUtil {
   public static URI canonicalURI(URI uri) {
     if (uri == null) return null;
     if (EFS.SCHEME_FILE.equals(uri.getScheme())) {
-      //only create a new URI if it is different
+      // only create a new URI if it is different
       final IPath inputPath = URIUtil.toPath(uri);
       final IPath canonicalPath = canonicalPath(inputPath);
       if (inputPath == canonicalPath) return uri;
@@ -130,7 +132,8 @@ public class FileUtil {
   //		}
   //		IFileStore store1 = system.getStore(location1);
   //		IFileStore store2 = system.getStore(location2);
-  //		return store1.equals(store2) || store1.isParentOf(store2) || (bothDirections && store2.isParentOf(store1));
+  //		return store1.equals(store2) || store1.isParentOf(store2) || (bothDirections &&
+  // store2.isParentOf(store1));
   //	}
   //
   //	/**
@@ -147,10 +150,12 @@ public class FileUtil {
   //		attributes.setSymbolicLink(fileInfo.getAttribute(EFS.ATTRIBUTE_SYMLINK));
   //		attributes.set(EFS.ATTRIBUTE_GROUP_READ, fileInfo.getAttribute(EFS.ATTRIBUTE_GROUP_READ));
   //		attributes.set(EFS.ATTRIBUTE_GROUP_WRITE, fileInfo.getAttribute(EFS.ATTRIBUTE_GROUP_WRITE));
-  //		attributes.set(EFS.ATTRIBUTE_GROUP_EXECUTE, fileInfo.getAttribute(EFS.ATTRIBUTE_GROUP_EXECUTE));
+  //		attributes.set(EFS.ATTRIBUTE_GROUP_EXECUTE,
+  // fileInfo.getAttribute(EFS.ATTRIBUTE_GROUP_EXECUTE));
   //		attributes.set(EFS.ATTRIBUTE_OTHER_READ, fileInfo.getAttribute(EFS.ATTRIBUTE_OTHER_READ));
   //		attributes.set(EFS.ATTRIBUTE_OTHER_WRITE, fileInfo.getAttribute(EFS.ATTRIBUTE_OTHER_WRITE));
-  //		attributes.set(EFS.ATTRIBUTE_OTHER_EXECUTE, fileInfo.getAttribute(EFS.ATTRIBUTE_OTHER_EXECUTE));
+  //		attributes.set(EFS.ATTRIBUTE_OTHER_EXECUTE,
+  // fileInfo.getAttribute(EFS.ATTRIBUTE_OTHER_EXECUTE));
   //		return attributes;
   //	}
   //
@@ -204,7 +209,8 @@ public class FileUtil {
   //		Preferences rootNode = Platform.getPreferencesService().getRootNode();
   //		String value = null;
   //		// if the file does not exist or has no content yet, try with project preferences
-  //		value = getLineSeparatorFromPreferences(rootNode.node(ProjectScope.SCOPE).node(file.getProject().getName()));
+  //		value =
+  // getLineSeparatorFromPreferences(rootNode.node(ProjectScope.SCOPE).node(file.getProject().getName()));
   //		if (value != null)
   //			return value;
   //		// try with instance preferences
@@ -259,7 +265,7 @@ public class FileUtil {
     try {
       if (stream != null) stream.close();
     } catch (IOException e) {
-      //ignore
+      // ignore
     }
   }
 

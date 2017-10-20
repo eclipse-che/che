@@ -74,7 +74,7 @@ public class EditorGroupSynchronizationImpl
     EditorPartPresenter groupMember = synchronizedEditors.keySet().iterator().next();
     if ((groupMember instanceof EditorWithAutoSave)
         && !((EditorWithAutoSave) groupMember).isAutoSaveEnabled()) {
-      //group can contains unsaved content - we need update content for the editor
+      // group can contains unsaved content - we need update content for the editor
       Document editorDocument = documentHandle.getDocument();
       Document groupMemberDocument = getDocumentHandleFor(groupMember).getDocument();
 

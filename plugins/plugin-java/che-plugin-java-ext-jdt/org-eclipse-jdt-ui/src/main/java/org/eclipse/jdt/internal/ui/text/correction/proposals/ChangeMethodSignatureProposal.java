@@ -170,7 +170,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
         InsertDescription desc = (InsertDescription) curr;
         SingleVariableDeclaration newNode = ast.newSingleVariableDeclaration();
         newNode.setType(imports.addImport(desc.type, ast, context));
-        newNode.setName(ast.newSimpleName("x")); //$NON-NLS-1$
+        newNode.setName(ast.newSimpleName("x")); // $NON-NLS-1$
 
         // remember to set name later
         desc.resultingParamName = new SimpleName[] {newNode.getName()};
@@ -183,9 +183,9 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
         if (javadoc != null) {
           TagElement newTagElement = ast.newTagElement();
           newTagElement.setTagName(TagElement.TAG_PARAM);
-          SimpleName arg = ast.newSimpleName("x"); //$NON-NLS-1$
+          SimpleName arg = ast.newSimpleName("x"); // $NON-NLS-1$
           newTagElement.fragments().add(arg);
-          insertTabStop(rewrite, newTagElement.fragments(), "param_tagcomment" + i); //$NON-NLS-1$
+          insertTabStop(rewrite, newTagElement.fragments(), "param_tagcomment" + i); // $NON-NLS-1$
           insertParamTag(
               rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY), parameters, k, newTagElement);
           desc.resultingTagArg = arg; // set the name later
@@ -227,13 +227,13 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
           SimpleName[] names = LinkedNodeFinder.findByBinding(decl.getRoot(), binding);
           SimpleName[] newNames = new SimpleName[names.length];
           for (int j = 0; j < names.length; j++) {
-            SimpleName newName = ast.newSimpleName("x"); //$NON-NLS-1$  // name will be set later
+            SimpleName newName = ast.newSimpleName("x"); // $NON-NLS-1$  // name will be set later
             newNames[j] = newName;
             rewrite.replace(names[j], newName, null);
           }
           desc.resultingParamName = newNames;
         } else {
-          SimpleName newName = ast.newSimpleName("x"); //$NON-NLS-1$  // name will be set later
+          SimpleName newName = ast.newSimpleName("x"); // $NON-NLS-1$  // name will be set later
           rewrite.replace(decl.getName(), newName, null);
           // remember to set name later
           desc.resultingParamName = new SimpleName[] {newName};
@@ -249,7 +249,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
         if (tagNode != null) {
           List<? extends ASTNode> fragments = tagNode.fragments();
           if (!fragments.isEmpty()) {
-            SimpleName arg = ast.newSimpleName("x"); //$NON-NLS-1$
+            SimpleName arg = ast.newSimpleName("x"); // $NON-NLS-1$
             rewrite.replace(fragments.get(0), arg, null);
             desc.resultingTagArg = arg;
           }
@@ -409,7 +409,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
           newTagElement.setTagName(TagElement.TAG_THROWS);
           ASTNode newRef = ASTNodeFactory.newName(ast, type);
           newTagElement.fragments().add(newRef);
-          insertTabStop(rewrite, newTagElement.fragments(), "throws_tagcomment" + i); //$NON-NLS-1$
+          insertTabStop(rewrite, newTagElement.fragments(), "throws_tagcomment" + i); // $NON-NLS-1$
           insertThrowsTag(
               rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY), exceptions, k, newTagElement);
 
@@ -468,7 +468,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 
   private void insertTabStop(ASTRewrite rewriter, List<ASTNode> fragments, String linkedName) {
     TextElement textElement = rewriter.getAST().newTextElement();
-    textElement.setText(""); //$NON-NLS-1$
+    textElement.setText(""); // $NON-NLS-1$
     fragments.add(textElement);
     addLinkedPosition(rewriter.track(textElement), false, linkedName);
   }
@@ -495,14 +495,14 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
   }
 
   public String getParamNameGroupId(int idx) {
-    return "param_name_" + idx; //$NON-NLS-1$
+    return "param_name_" + idx; // $NON-NLS-1$
   }
 
   public String getParamTypeGroupId(int idx) {
-    return "param_type_" + idx; //$NON-NLS-1$
+    return "param_type_" + idx; // $NON-NLS-1$
   }
 
   public String getExceptionTypeGroupId(int idx) {
-    return "exc_type_" + idx; //$NON-NLS-1$
+    return "exc_type_" + idx; // $NON-NLS-1$
   }
 }

@@ -34,21 +34,21 @@ import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
  */
 public final class ProposalSorterHandle {
   /** The extension schema name of the id attribute. */
-  private static final String ID = "id"; //$NON-NLS-1$
+  private static final String ID = "id"; // $NON-NLS-1$
   /** The extension schema name of the name attribute. */
-  private static final String NAME = "name"; //$NON-NLS-1$
+  private static final String NAME = "name"; // $NON-NLS-1$
   /** The extension schema name of the class attribute. */
-  private static final String CLASS = "class"; //$NON-NLS-1$
+  private static final String CLASS = "class"; // $NON-NLS-1$
   /** The name of the performance event used to trace extensions. */
   private static final String PERFORMANCE_EVENT =
-      JavaPlugin.getPluginId() + "/perf/content_assist_sorters/extensions"; //$NON-NLS-1$
+      JavaPlugin.getPluginId() + "/perf/content_assist_sorters/extensions"; // $NON-NLS-1$
   /**
    * If <code>true</code>, execution time of extensions is measured and extensions may be disabled
    * if execution takes too long.
    */
   private static final boolean MEASURE_PERFORMANCE = PerformanceStats.isEnabled(PERFORMANCE_EVENT);
   /** The one and only operation name. */
-  private static final String SORT = "sort"; //$NON-NLS-1$
+  private static final String SORT = "sort"; // $NON-NLS-1$
 
   /** The identifier of the extension. */
   private final String fId;
@@ -221,7 +221,7 @@ public final class ProposalSorterHandle {
         JavaPlugin.getPluginId(),
         IStatus.OK,
         disable + " " + reason,
-        x); //$NON-NLS-1$
+        x); // $NON-NLS-1$
   }
 
   Status createExceptionStatus(CoreException x) {
@@ -233,7 +233,7 @@ public final class ProposalSorterHandle {
         JavaPlugin.getPluginId(),
         IStatus.OK,
         disable + " " + reason,
-        x); //$NON-NLS-1$
+        x); // $NON-NLS-1$
   }
 
   Status createExceptionStatus(RuntimeException x) {
@@ -245,7 +245,7 @@ public final class ProposalSorterHandle {
         JavaPlugin.getPluginId(),
         IStatus.OK,
         disable + " " + reason,
-        x); //$NON-NLS-1$
+        x); // $NON-NLS-1$
   }
 
   private Status createAPIViolationStatus(String operation) {
@@ -258,7 +258,7 @@ public final class ProposalSorterHandle {
         JavaPlugin.getPluginId(),
         IStatus.OK,
         disable + " " + reason,
-        null); //$NON-NLS-1$
+        null); // $NON-NLS-1$
   }
 
   private Status createPerformanceStatus(String operation) {
@@ -272,7 +272,7 @@ public final class ProposalSorterHandle {
         JavaPlugin.getPluginId(),
         IStatus.OK,
         disable + " " + reason,
-        null); //$NON-NLS-1$
+        null); // $NON-NLS-1$
   }
 
   private String createBlameMessage() {

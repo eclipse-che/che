@@ -54,14 +54,14 @@ public class Rules implements IResourceRuleFactory, ILifecycleListener {
 
   /** Obtains the scheduling rule from the appropriate factory for a build operation. */
   public ISchedulingRule buildRule() {
-    //team hook currently cannot change this rule
+    // team hook currently cannot change this rule
     return root;
   }
 
   /** Obtains the scheduling rule from the appropriate factories for a copy operation. */
   public ISchedulingRule copyRule(IResource source, IResource destination) {
     if (source.getType() == IResource.ROOT || destination.getType() == IResource.ROOT) return root;
-    //source is not modified, destination is created
+    // source is not modified, destination is created
     return factoryFor(destination).copyRule(source, destination);
   }
 
@@ -81,9 +81,9 @@ public class Rules implements IResourceRuleFactory, ILifecycleListener {
   private IResourceRuleFactory factoryFor(IResource destination) {
     IResourceRuleFactory fac = projectsToRules.get(destination.getFullPath().segment(0));
     if (fac == null) {
-      //use the default factory if the project is not yet accessible
+      // use the default factory if the project is not yet accessible
       if (!destination.getProject().isAccessible()) return defaultFactory;
-      //ask the team hook to supply one
+      // ask the team hook to supply one
       fac = teamHook.getRuleFactory(destination.getProject());
       projectsToRules.put(destination.getFullPath().segment(0), fac);
     }
@@ -94,9 +94,9 @@ public class Rules implements IResourceRuleFactory, ILifecycleListener {
    * @see org.eclipse.core.internal.events.ILifecycleListener#handleEvent(org.eclipse.core.internal.events.LifecycleEvent)
    */
   public void handleEvent(LifecycleEvent event) {
-    //clear resource rule factory for projects that are about to be closed
-    //or deleted. It is ok to do this during a PRE event because the rule
-    //has already been obtained at this point.
+    // clear resource rule factory for projects that are about to be closed
+    // or deleted. It is ok to do this during a PRE event because the rule
+    // has already been obtained at this point.
     switch (event.kind) {
       case LifecycleEvent.PRE_PROJECT_CLOSE:
       case LifecycleEvent.PRE_PROJECT_DELETE:
@@ -115,13 +115,13 @@ public class Rules implements IResourceRuleFactory, ILifecycleListener {
    * Obtains the scheduling rule from the appropriate factory for a derived flag change operation.
    */
   public ISchedulingRule derivedRule(IResource resource) {
-    //team hook currently cannot change this rule
+    // team hook currently cannot change this rule
     return null;
   }
 
   /** Obtains the scheduling rule from the appropriate factory for a marker change operation. */
   public ISchedulingRule markerRule(IResource resource) {
-    //team hook currently cannot change this rule
+    // team hook currently cannot change this rule
     return null;
   }
 
@@ -134,7 +134,7 @@ public class Rules implements IResourceRuleFactory, ILifecycleListener {
   /** Obtains the scheduling rule from the appropriate factories for a move operation. */
   public ISchedulingRule moveRule(IResource source, IResource destination) {
     if (source.getType() == IResource.ROOT || destination.getType() == IResource.ROOT) return root;
-    //treat a move across projects as a create on the destination and a delete on the source
+    // treat a move across projects as a create on the destination and a delete on the source
     if (!source.getFullPath().segment(0).equals(destination.getFullPath().segment(0)))
       return MultiRule.combine(
           modifyRule(source.getProject()), modifyRule(destination.getProject()));
@@ -158,12 +158,12 @@ public class Rules implements IResourceRuleFactory, ILifecycleListener {
   /** Combines rules for each parameter to validateEdit from the corresponding rule factories. */
   public ISchedulingRule validateEditRule(IResource[] resources) {
     if (resources.length == 0) return null;
-    //optimize rule for single file
+    // optimize rule for single file
     if (resources.length == 1) {
       if (resources[0].getType() == IResource.ROOT) return root;
       return factoryFor(resources[0]).validateEditRule(resources);
     }
-    //gather rules for each resource from appropriate factory
+    // gather rules for each resource from appropriate factory
     HashSet<ISchedulingRule> rules = new HashSet<ISchedulingRule>();
     IResource[] oneResource = new IResource[1];
     for (int i = 0; i < resources.length; i++) {

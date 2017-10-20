@@ -123,7 +123,8 @@ public class GitHubOAuthAuthenticator extends OAuthAuthenticator {
   public OAuthToken getToken(String userId) throws IOException {
     final OAuthToken token = super.getToken(userId);
     if (!(token == null || token.getToken() == null || token.getToken().isEmpty())) {
-      // Need to check if token which stored is valid for requests, then if valid - we returns it to caller
+      // Need to check if token which stored is valid for requests, then if valid - we returns it to
+      // caller
       String tokenVerifyUrl = "https://api.github.com/?access_token=" + token.getToken();
       HttpURLConnection http = null;
       try {

@@ -74,7 +74,7 @@ public class EditorTabContextMenu extends ContextMenu {
     final Action[] children = mainActionGroup.getChildren(null);
     for (final Action action : children) {
       final Presentation presentation = presentationFactory.getPresentation(action);
-      //pass into action properties
+      // pass into action properties
       presentation.putClientProperty(CURRENT_FILE_PROP, editorTab.getFile());
       presentation.putClientProperty(CURRENT_TAB_PROP, editorTab);
       presentation.putClientProperty(CURRENT_PANE_PROP, editorPartStack);

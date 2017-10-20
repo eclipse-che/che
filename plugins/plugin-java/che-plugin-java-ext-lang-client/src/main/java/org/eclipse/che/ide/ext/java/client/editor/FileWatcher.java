@@ -91,7 +91,7 @@ public class FileWatcher {
             if (propId == EditorPartPresenter.PROP_DIRTY) {
               if (!editor.isDirty()) {
                 reparseAllOpenedFiles();
-                //remove just saved editor
+                // remove just saved editor
                 editor2reconcile.remove(editor);
               }
             }

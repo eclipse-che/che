@@ -51,7 +51,7 @@ public class GitValueProviderFactory implements ValueProviderFactory {
         String fsPath = pathTransformer.transform(projectConfig.getPath()).toString();
 
         try (GitConnection gitConnection = gitConnectionFactory.getConnection(fsPath)) {
-          //check whether the folder belongs to git repository
+          // check whether the folder belongs to git repository
           if (!gitConnection.isInsideWorkTree()) {
             return emptyList();
           }

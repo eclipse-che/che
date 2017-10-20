@@ -49,10 +49,10 @@ import org.testng.annotations.Test;
 public class FreeResourcesLimitServiceTest {
   private static final String TEST_RESOURCE_TYPE = "test";
 
-  @SuppressWarnings("unused") //is declared for deploying by everrest-assured
+  @SuppressWarnings("unused") // is declared for deploying by everrest-assured
   private ApiExceptionMapper mapper;
 
-  @SuppressWarnings("unused") //is declared for deploying by everrest-assured
+  @SuppressWarnings("unused") // is declared for deploying by everrest-assured
   private CheJsonProvider jsonProvider = new CheJsonProvider(new HashSet<>());
 
   @Mock private FreeResourcesLimitManager freeResourcesLimitManager;

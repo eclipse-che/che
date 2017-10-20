@@ -181,7 +181,7 @@ public class AutocompleteFeaturesInEditorTest {
     editor.waitTabFileWithSavedStatus("AppController");
   }
 
-  //need for check ready - state the ide editor
+  // need for check ready - state the ide editor
   private void reparseEditorCode() {
     editor.setCursorToLine(36);
     editor.typeTextIntoEditor("a;");

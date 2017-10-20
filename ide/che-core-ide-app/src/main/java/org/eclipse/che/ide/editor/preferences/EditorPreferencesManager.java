@@ -116,7 +116,7 @@ public class EditorPreferencesManager {
     defaultPreferences.put(AUTO_COMPLETE_COMMENTS.toString(), JSONBoolean.getInstance(true));
     defaultPreferences.put(SMART_INDENTATION.toString(), JSONBoolean.getInstance(true));
 
-    //white spaces
+    // white spaces
     defaultPreferences.put(SHOW_WHITESPACES.toString(), JSONBoolean.getInstance(false));
 
     // editor features (rulers)

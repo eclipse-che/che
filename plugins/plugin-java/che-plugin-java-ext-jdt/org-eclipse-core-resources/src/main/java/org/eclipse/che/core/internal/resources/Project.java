@@ -232,14 +232,14 @@ public class Project extends Container implements IProject {
 
   @Override
   public IProject[] getReferencedProjects() throws CoreException {
-    //TODO need to use Project API to solve this
+    // TODO need to use Project API to solve this
     return new IProject[0];
   }
 
   @Override
   public IProject[] getReferencingProjects() {
     //        throw new UnsupportedOperationException();
-    //TODO need to use Project API to solve this
+    // TODO need to use Project API to solve this
     return new IProject[0];
   }
 
@@ -284,7 +284,7 @@ public class Project extends Container implements IProject {
   @Override
   public void open(int updateFlags, IProgressMonitor monitor) throws CoreException {
     //        throw new UnsupportedOperationException();
-    //TODO
+    // TODO
   }
 
   @Override
@@ -308,7 +308,7 @@ public class Project extends Container implements IProject {
   public void setDescription(
       IProjectDescription iProjectDescription, int i, IProgressMonitor iProgressMonitor)
       throws CoreException {
-    //ignore
+    // ignore
   }
 
   @Override

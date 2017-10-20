@@ -19,9 +19,9 @@ import org.eclipse.jdt.ui.search.IQueryParticipant;
 
 /** */
 public class SearchParticipantDescriptor {
-  private static final String CLASS = "class"; //$NON-NLS-1$
-  private static final String NATURE = "nature"; //$NON-NLS-1$
-  private static final String ID = "id"; //$NON-NLS-1$
+  private static final String CLASS = "class"; // $NON-NLS-1$
+  private static final String NATURE = "nature"; // $NON-NLS-1$
+  private static final String ID = "id"; // $NON-NLS-1$
 
   private IConfigurationElement fConfigurationElement;
   private boolean fEnabled; //

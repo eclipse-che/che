@@ -65,35 +65,35 @@ public class TypeEnvironment {
   /** Type code for the primitive type "int". */
   public final PrimitiveType INT =
       new PrimitiveType(
-          this, PrimitiveType.INT, BindingKey.createTypeBindingKey("int")); //$NON-NLS-1$
+          this, PrimitiveType.INT, BindingKey.createTypeBindingKey("int")); // $NON-NLS-1$
   /** Type code for the primitive type "char". */
   public final PrimitiveType CHAR =
       new PrimitiveType(this, PrimitiveType.CHAR, BindingKey.createTypeBindingKey("char"));
-  //$NON-NLS-1$
+  // $NON-NLS-1$
   /** Type code for the primitive type "boolean". */
   public final PrimitiveType BOOLEAN =
       new PrimitiveType(this, PrimitiveType.BOOLEAN, BindingKey.createTypeBindingKey("boolean"));
-  //$NON-NLS-1$
+  // $NON-NLS-1$
   /** Type code for the primitive type "short". */
   public final PrimitiveType SHORT =
       new PrimitiveType(this, PrimitiveType.SHORT, BindingKey.createTypeBindingKey("short"));
-  //$NON-NLS-1$
+  // $NON-NLS-1$
   /** Type code for the primitive type "long". */
   public final PrimitiveType LONG =
       new PrimitiveType(this, PrimitiveType.LONG, BindingKey.createTypeBindingKey("long"));
-  //$NON-NLS-1$
+  // $NON-NLS-1$
   /** Type code for the primitive type "float". */
   public final PrimitiveType FLOAT =
       new PrimitiveType(this, PrimitiveType.FLOAT, BindingKey.createTypeBindingKey("float"));
-  //$NON-NLS-1$
+  // $NON-NLS-1$
   /** Type code for the primitive type "double". */
   public final PrimitiveType DOUBLE =
       new PrimitiveType(this, PrimitiveType.DOUBLE, BindingKey.createTypeBindingKey("double"));
-  //$NON-NLS-1$
+  // $NON-NLS-1$
   /** Type code for the primitive type "byte". */
   public final PrimitiveType BYTE =
       new PrimitiveType(this, PrimitiveType.BYTE, BindingKey.createTypeBindingKey("byte"));
-  //$NON-NLS-1$
+  // $NON-NLS-1$
 
   /** Type code for the primitive type "null". */
   public final NullType NULL = new NullType(this);
@@ -104,15 +104,15 @@ public class TypeEnvironment {
 
   private static final String[] BOXED_PRIMITIVE_NAMES =
       new String[] {
-        "java.lang.Integer", //$NON-NLS-1$
-        "java.lang.Character", //$NON-NLS-1$
-        "java.lang.Boolean", //$NON-NLS-1$
-        "java.lang.Short", //$NON-NLS-1$
-        "java.lang.Long", //$NON-NLS-1$
-        "java.lang.Float", //$NON-NLS-1$
-        "java.lang.Double", //$NON-NLS-1$
+        "java.lang.Integer", // $NON-NLS-1$
+        "java.lang.Character", // $NON-NLS-1$
+        "java.lang.Boolean", // $NON-NLS-1$
+        "java.lang.Short", // $NON-NLS-1$
+        "java.lang.Long", // $NON-NLS-1$
+        "java.lang.Float", // $NON-NLS-1$
+        "java.lang.Double", // $NON-NLS-1$
         "java.lang.Byte"
-      }; //$NON-NLS-1$
+      }; // $NON-NLS-1$
 
   private TType OBJECT_TYPE = null;
 
@@ -237,7 +237,7 @@ public class TypeEnvironment {
         return createCaptureType(binding);
       }
     }
-    if ("null".equals(binding.getName())) //$NON-NLS-1$
+    if ("null".equals(binding.getName())) // $NON-NLS-1$
     return NULL;
     return createStandardType(binding);
   }
@@ -266,7 +266,7 @@ public class TypeEnvironment {
   public void initializeJavaLangObject(IJavaProject project) {
     if (OBJECT_TYPE != null) return;
 
-    TType objectType = createStandardType("java.lang.Object", project); //$NON-NLS-1$
+    TType objectType = createStandardType("java.lang.Object", project); // $NON-NLS-1$
     Assert.isTrue(objectType.isJavaLangObject());
   }
 
@@ -337,7 +337,7 @@ public class TypeEnvironment {
         return PRIMITIVE_TYPES[i];
       }
     }
-    Assert.isTrue(false, "Primitive type " + name + "unkown"); //$NON-NLS-1$//$NON-NLS-2$
+    Assert.isTrue(false, "Primitive type " + name + "unkown"); // $NON-NLS-1$//$NON-NLS-2$
     return null;
   }
 

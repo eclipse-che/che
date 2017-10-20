@@ -59,12 +59,12 @@ public class RemoteAddTest {
   )
   public void testSimpleRemoteAdd(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     int beforeCount = connection.remoteList(null, false).size();
-    //when
+    // when
     connection.remoteAdd(RemoteAddParams.create("origin", "some.url"));
-    //then
+    // then
     int afterCount = connection.remoteList(null, false).size();
     assertEquals(afterCount, beforeCount + 1);
   }
@@ -75,7 +75,7 @@ public class RemoteAddTest {
   )
   public void testAddNotAllBranchesTracked(GitConnectionFactory connectionFactory)
       throws GitException, URISyntaxException, IOException, UnauthorizedException {
-    //given
+    // given
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
     connection.branchCreate("b1", null);
     connection.branchCreate("b2", null);
@@ -83,14 +83,14 @@ public class RemoteAddTest {
 
     GitConnection connection2 = connectionFactory.getConnection(remoteRepo.getAbsolutePath());
     connection2.init(false);
-    //when
-    //add remote tracked only to b1 and b3 branches.
+    // when
+    // add remote tracked only to b1 and b3 branches.
     RemoteAddParams params =
         RemoteAddParams.create("origin", connection.getWorkingDir().getAbsolutePath())
             .withBranches(ImmutableList.of("b1", "b3"));
     connection2.remoteAdd(params);
-    //then
-    //make pull
+    // then
+    // make pull
     connection2.pull(PullParams.create("origin"));
 
     assertTrue(

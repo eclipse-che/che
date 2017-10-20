@@ -78,7 +78,7 @@ public class StatementAnalyzer extends SelectionAnalyzer {
         int selectionEnd = getSelection().getInclusiveEnd();
         if (pos <= selectionEnd) {
           IScanner scanner = fScanner.getScanner();
-          char[] token = scanner.getCurrentTokenSource(); //see https://bugs.eclipse.org/324237
+          char[] token = scanner.getCurrentTokenSource(); // see https://bugs.eclipse.org/324237
           if (start < lastNodeEnd && token.length == 1 && (token[0] == ';' || token[0] == ',')) {
             setSelection(Selection.createFromStartEnd(start, lastNodeEnd - 1));
           } else {

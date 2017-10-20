@@ -245,7 +245,7 @@ public class LuceneSearcher implements Searcher {
             OffsetAttribute offsetAtt = tokenStream.addAttribute(OffsetAttribute.class);
 
             QueryScorer queryScorer = new QueryScorer(luceneQuery);
-            //TODO think about this constant
+            // TODO think about this constant
             queryScorer.setMaxDocCharsToAnalyze(1_000_000);
             TokenStream newStream = queryScorer.init(tokenStream);
             if (newStream != null) {
@@ -256,7 +256,7 @@ public class LuceneSearcher implements Searcher {
             tokenStream.reset();
 
             int startOffset, endOffset;
-            //TODO think about this constant
+            // TODO think about this constant
             for (boolean next = tokenStream.incrementToken();
                 next && (offsetAtt.startOffset() < 1_000_000);
                 next = tokenStream.incrementToken()) {

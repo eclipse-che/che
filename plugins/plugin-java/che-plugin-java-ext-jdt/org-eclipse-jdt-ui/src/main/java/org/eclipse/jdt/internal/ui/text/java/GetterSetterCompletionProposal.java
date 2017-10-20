@@ -101,7 +101,7 @@ public class GetterSetterCompletionProposal extends JavaTypeCompletionProposal
         length,
         JavaPluginImages.get(JavaPluginImages.DESC_MISC_PUBLIC),
         getDisplayName(field, isGetter),
-        relevance); //$NON-NLS-1$
+        relevance); // $NON-NLS-1$
     Assert.isNotNull(field);
 
     fField = field;
@@ -117,8 +117,10 @@ public class GetterSetterCompletionProposal extends JavaTypeCompletionProposal
     if (isGetter) {
       buf.append(
           BasicElementLabels.getJavaElementName(
-              GetterSetterUtil.getGetterName(field, null) + "() : " + fieldTypeName)); //$NON-NLS-1$
-      buf.append(" - ", StyledString.QUALIFIER_STYLER); //$NON-NLS-1$
+              GetterSetterUtil.getGetterName(field, null)
+                  + "() : "
+                  + fieldTypeName)); // $NON-NLS-1$
+      buf.append(" - ", StyledString.QUALIFIER_STYLER); // $NON-NLS-1$
       buf.append(
           Messages.format(
               JavaTextMessages.GetterSetterCompletionProposal_getter_label, fieldNameLabel),
@@ -129,8 +131,8 @@ public class GetterSetterCompletionProposal extends JavaTypeCompletionProposal
               GetterSetterUtil.getSetterName(field, null)
                   + '('
                   + fieldTypeName
-                  + ") : void")); //$NON-NLS-1$
-      buf.append(" - ", StyledString.QUALIFIER_STYLER); //$NON-NLS-1$
+                  + ") : void")); // $NON-NLS-1$
+      buf.append(" - ", StyledString.QUALIFIER_STYLER); // $NON-NLS-1$
       buf.append(
           Messages.format(
               JavaTextMessages.GetterSetterCompletionProposal_setter_label, fieldNameLabel),

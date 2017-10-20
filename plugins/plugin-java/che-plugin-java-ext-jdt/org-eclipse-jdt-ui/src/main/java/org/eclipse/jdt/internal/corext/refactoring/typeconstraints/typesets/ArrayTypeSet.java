@@ -222,6 +222,6 @@ public class ArrayTypeSet extends TypeSet {
 
   @Override
   public String toString() {
-    return "{" + fID + ": array(" + fElemTypeSet + ")}"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+    return "{" + fID + ": array(" + fElemTypeSet + ")}"; // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
   }
 }

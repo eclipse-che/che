@@ -122,14 +122,14 @@ public class RenameVirtualMethodInClassTest extends RefactoringTest {
 
     assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
     assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager().anythingToRedo());
-    //assertEquals("1 to undo", 1, Refactoring.getUndoManager().getRefactoringLog().size());
+    // assertEquals("1 to undo", 1, Refactoring.getUndoManager().getRefactoringLog().size());
 
     RefactoringCore.getUndoManager().performUndo(null, new NullProgressMonitor());
     assertEqualLines("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
 
     assertTrue("! anythingToUndo", !RefactoringCore.getUndoManager().anythingToUndo());
     assertTrue("anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
-    //assertEquals("1 to redo", 1, Refactoring.getUndoManager().getRedoStack().size());
+    // assertEquals("1 to redo", 1, Refactoring.getUndoManager().getRedoStack().size());
 
     RefactoringCore.getUndoManager().performRedo(null, new NullProgressMonitor());
     assertEqualLines("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
@@ -406,7 +406,7 @@ public class RenameVirtualMethodInClassTest extends RefactoringTest {
 
   @Test
   public void testFail38() throws Exception {
-    //printTestDisabledMessage("must fix - nested type");
+    // printTestDisabledMessage("must fix - nested type");
     helper1();
   }
 
@@ -417,7 +417,7 @@ public class RenameVirtualMethodInClassTest extends RefactoringTest {
 
   @Test
   public void testFail40() throws Exception {
-    //Autoboxing -> calls to methods can be redirected due to overloading
+    // Autoboxing -> calls to methods can be redirected due to overloading
     helper1_0("m", "k", new String[] {Signature.SIG_INT});
   }
 
@@ -469,7 +469,7 @@ public class RenameVirtualMethodInClassTest extends RefactoringTest {
 
   @Test
   public void test17() throws Exception {
-    //printTestDisabledMessage("overloading");
+    // printTestDisabledMessage("overloading");
     helper2_0("m", "kk", new String[] {Signature.SIG_INT});
   }
 
@@ -524,7 +524,7 @@ public class RenameVirtualMethodInClassTest extends RefactoringTest {
     helper2();
   }
 
-  //anonymous inner class
+  // anonymous inner class
 
   @Test
   public void test23() throws Exception {
@@ -538,7 +538,8 @@ public class RenameVirtualMethodInClassTest extends RefactoringTest {
 
   @Test
   public void test25() throws Exception {
-    //printTestDisabledMessage("waiting for 1GIIBC3: ITPJCORE:WINNT - search for method references - missing matches");
+    // printTestDisabledMessage("waiting for 1GIIBC3: ITPJCORE:WINNT - search for method references
+    // - missing matches");
     helper2();
   }
 
@@ -631,7 +632,7 @@ public class RenameVirtualMethodInClassTest extends RefactoringTest {
         "invalid renaming A", getFileContents(getOutputTestFileName("A")), cu.getSource());
   }
 
-  //anonymous inner class
+  // anonymous inner class
 
   @Test
   public void testAnon0() throws Exception {

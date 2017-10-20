@@ -50,6 +50,6 @@ public class ReturnTypeInfo {
 
   @Override
   public String toString() {
-    return fOldTypeName + " -> " + fNewTypeName; //$NON-NLS-1$
+    return fOldTypeName + " -> " + fNewTypeName; // $NON-NLS-1$
   }
 }

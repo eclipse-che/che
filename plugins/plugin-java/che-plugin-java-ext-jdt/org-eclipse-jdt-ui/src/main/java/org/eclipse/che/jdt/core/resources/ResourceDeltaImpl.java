@@ -67,7 +67,8 @@ public class ResourceDeltaImpl implements IResourceDelta {
   @Override
   public void accept(IResourceDeltaVisitor visitor, int memberFlags) throws CoreException {
     final boolean includePhantoms = (memberFlags & IContainer.INCLUDE_PHANTOMS) != 0;
-    //        final boolean includeTeamPrivate = (memberFlags & IContainer.INCLUDE_TEAM_PRIVATE_MEMBERS) != 0;
+    //        final boolean includeTeamPrivate = (memberFlags &
+    // IContainer.INCLUDE_TEAM_PRIVATE_MEMBERS) != 0;
     //        final boolean includeHidden = (memberFlags & IContainer.INCLUDE_HIDDEN) != 0;
     //        int mask = includePhantoms ? ALL_WITH_PHANTOMS : REMOVED | ADDED | CHANGED;
     //        if ((getKind() & mask) == 0)

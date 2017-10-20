@@ -19,7 +19,7 @@ import org.eclipse.osgi.util.NLS;
 public class UndoMessages extends NLS {
 
   private static final String BUNDLE_NAME =
-      "org.eclipse.ui.internal.ide.undo.messages"; //$NON-NLS-1$
+      "org.eclipse.ui.internal.ide.undo.messages"; // $NON-NLS-1$
 
   static {
     // load message values from bundle file

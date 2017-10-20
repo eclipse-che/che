@@ -69,7 +69,7 @@ public class GdbBacktrace {
         }
 
       } catch (NumberFormatException e) {
-        //we can't get info about current frame, but we are trying to get info about another frames
+        // we can't get info about current frame, but we are trying to get info about another frames
       }
     }
 

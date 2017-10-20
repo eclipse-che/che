@@ -31,10 +31,10 @@ import org.eclipse.text.edits.TextEditGroup;
 
 public abstract class ConvertLoopOperation extends CompilationUnitRewriteOperation {
 
-  protected static final String FOR_LOOP_ELEMENT_IDENTIFIER = "element"; //$NON-NLS-1$
+  protected static final String FOR_LOOP_ELEMENT_IDENTIFIER = "element"; // $NON-NLS-1$
 
   protected static final IStatus ERROR_STATUS =
-      new Status(IStatus.ERROR, JavaPlugin.getPluginId(), ""); //$NON-NLS-1$
+      new Status(IStatus.ERROR, JavaPlugin.getPluginId(), ""); // $NON-NLS-1$
 
   private final ForStatement fStatement;
   private ConvertLoopOperation fOperation;

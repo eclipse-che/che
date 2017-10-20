@@ -27,7 +27,8 @@ public class CodeAssistantTest extends BaseTest {
     b.append("}\n}");
     int offset = b.indexOf("   i");
     CodeAssist codeAssist = new CodeAssist();
-    //        Proposals proposals = codeAssist.computeProposals(project, "org.eclipse.che.test.MyClass", offset, b.toString());
+    //        Proposals proposals = codeAssist.computeProposals(project,
+    // "org.eclipse.che.test.MyClass", offset, b.toString());
     //        assertThat(proposals).isNotNull();
     //        assertThat(proposals.getProposals()).isNotEmpty();
   }

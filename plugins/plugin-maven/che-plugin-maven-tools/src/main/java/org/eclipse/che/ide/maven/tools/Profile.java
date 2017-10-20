@@ -351,18 +351,18 @@ public class Profile {
     this.modules = new ArrayList<>(modules);
 
     if (isNew()) return;
-    //if modules element exists we should replace it children
-    //with new set of modules, otherwise create element for it
+    // if modules element exists we should replace it children
+    // with new set of modules, otherwise create element for it
     if (element.hasSingleChild("modules")) {
       final Element modulesElement = element.getSingleChild("modules");
       if (modulesElement == null) {
         return;
       }
-      //remove all modules from element
+      // remove all modules from element
       for (Element module : modulesElement.getChildren()) {
         module.remove();
       }
-      //append each new module to "modules" element
+      // append each new module to "modules" element
       for (String module : modules) {
         element.appendChild(createElement("module", module));
       }

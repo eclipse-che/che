@@ -143,9 +143,9 @@ public abstract class ResourceNode<R extends Resource> extends AbstractTreeNode
       nodePresentation = new NodePresentation();
     }
 
-    //need to force update presentation to correct display node in project explorer after restart
-    //workspace details https://github.com/eclipse/che/issues/6314
-    //problem reproduce randomly
+    // need to force update presentation to correct display node in project explorer after restart
+    // workspace details https://github.com/eclipse/che/issues/6314
+    // problem reproduce randomly
     updatePresentation(nodePresentation);
 
     return nodePresentation;

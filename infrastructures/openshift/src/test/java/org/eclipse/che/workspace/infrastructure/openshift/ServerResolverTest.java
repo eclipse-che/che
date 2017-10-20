@@ -42,7 +42,7 @@ public class ServerResolverTest {
 
   @Test
   public void testResolvingServersWhenThereIsNoMatchedServiceByPodLabels() {
-    //given
+    // given
     Container container = createContainer();
     Pod pod = createPod(ImmutableMap.of("kind", "web-app"));
     Service nonMatchedByPodService =
@@ -55,10 +55,10 @@ public class ServerResolverTest {
     ServerResolver serverResolver =
         ServerResolver.of(singletonList(nonMatchedByPodService), singletonList(route));
 
-    //when
+    // when
     Map<String, ServerImpl> resolved = serverResolver.resolve(pod, container);
 
-    //then
+    // then
     assertTrue(resolved.isEmpty());
   }
 
@@ -191,7 +191,7 @@ public class ServerResolverTest {
         .build();
   }
 
-  //TODO Think about common builders
+  // TODO Think about common builders
   private Route createRoute(String name, Map<String, ServerConfigImpl> servers) {
     return new RouteBuilder()
         .withNewMetadata()

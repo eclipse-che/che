@@ -874,7 +874,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 
   @Test
   public void testAssignToLocal13() throws Exception {
-    // assign to local in context that requires fully qualified type, https://bugs.eclipse.org/bugs/show_bug.cgi?id=239735
+    // assign to local in context that requires fully qualified type,
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=239735
 
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     StringBuffer buf = new StringBuffer();
@@ -1611,7 +1612,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
   @Test
   public void testExtractToLocalVariable2() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=276467
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=276467
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test1;\n");
@@ -1676,7 +1677,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
   @Test
   public void testExtractToLocalVariable3() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=276467
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=276467
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test1;\n");
@@ -1745,7 +1746,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
   @Test
   public void testExtractToMethod1() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=41302
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=41302
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test1;\n");
@@ -1832,7 +1833,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
   @Test
   public void testExtractToMethod2() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=41302
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=41302
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test1;\n");
@@ -1887,7 +1888,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
   @Test
   public void testExtractToMethod3() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=41302
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=41302
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test1;\n");
@@ -1942,7 +1943,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
   @Test
   public void testExtractToMethod4() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=41302
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=41302
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test1;\n");
@@ -4281,7 +4282,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
   @Test
   public void testInvertEquals24() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=385389
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=385389
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test1;\n");
@@ -7172,7 +7173,8 @@ public class AssistQuickFixTest extends QuickFixTest {
   //			buf.append("}\n");
   //			String expected7= buf.toString();
   //
-  //			assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3, expected4, expected5, expected6, expected7 });
+  //			assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3,
+  // expected4, expected5, expected6, expected7 });
   //		} finally {
   //			fJProject1.setOptions(oldOptions);
   //		}
@@ -7476,7 +7478,8 @@ public class AssistQuickFixTest extends QuickFixTest {
   //			buf.append("\n");
   //			buf.append("public class A {\n");
   //			buf.append("    public void foo(Object o1, Object o2) {\n");
-  //			buf.append("        System.out.println(MessageFormat.format(\"foo{0} \\\"bar\\\" {1}\", new Object[]{o1,\n");
+  //			buf.append("        System.out.println(MessageFormat.format(\"foo{0} \\\"bar\\\" {1}\", new
+  // Object[]{o1,\n");
   //			buf.append("                o2}));\n");
   //			buf.append("    }\n");
   //			buf.append("}\n");
@@ -7545,7 +7548,8 @@ public class AssistQuickFixTest extends QuickFixTest {
   //			buf.append("}\n");
   //			String expected7= buf.toString();
   //
-  //			assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3, expected4, expected5, expected6, expected7 });
+  //			assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3,
+  // expected4, expected5, expected6, expected7 });
   //		} finally {
   //			fJProject1.setOptions(oldOptions);
   //		}
@@ -7680,7 +7684,8 @@ public class AssistQuickFixTest extends QuickFixTest {
   //			buf.append("\n");
   //			buf.append("public class A {\n");
   //			buf.append("    public void foo(Object o1, Object o2) {\n");
-  //			buf.append("        System.out.println(MessageFormat.format(\"foo{0} \\\"bar\\\" \", new Object[]{new Integer(1)}));\n");
+  //			buf.append("        System.out.println(MessageFormat.format(\"foo{0} \\\"bar\\\" \", new
+  // Object[]{new Integer(1)}));\n");
   //			buf.append("    }\n");
   //			buf.append("}\n");
   //			String expected1= buf.toString();
@@ -7738,7 +7743,8 @@ public class AssistQuickFixTest extends QuickFixTest {
   //			buf.append("}\n");
   //			String expected6= buf.toString();
   //
-  //			assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3, expected4, expected5, expected6 });
+  //			assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3,
+  // expected4, expected5, expected6 });
   //		} finally {
   //			fJProject1.setOptions(oldOptions);
   //		}
@@ -8473,7 +8479,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
   @Test
   public void testMissingEnumConstantsInCase5() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=372840
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=372840
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("p", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package p;\n");
@@ -9556,16 +9562,19 @@ public class AssistQuickFixTest extends QuickFixTest {
   //		Map saveOptions= fJProject1.getOptions(false);
   //		Map newOptions= new HashMap();
   //		JavaCore.setComplianceOptions(JavaCore.VERSION_1_4, newOptions);
-  //		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
+  //		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE,
+  // "true");
   //		try {
   //			fJProject1.setOptions(newOptions);
   //
   //			String selection= "collection";
-  //			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
+  //			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) +
+  // selection.length(), 0);
   //			List proposals= collectAssists(context, false);
   //
   //			assertNumberOfProposals(proposals, 3);
-  //			assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_generate_enhanced_for_loop);
+  //			assertProposalDoesNotExist(proposals,
+  // CorrectionMessages.QuickAssistProcessor_generate_enhanced_for_loop);
   //			assertCorrectLabels(proposals);
   //
   //			String[] expected= new String[1];
@@ -9577,7 +9586,8 @@ public class AssistQuickFixTest extends QuickFixTest {
   //			buf.append("import java.util.Iterator;\n");
   //			buf.append("public class E {\n");
   //			buf.append("    void foo(Collection collection) {\n");
-  //			buf.append("        for (Iterator iterator = collection.iterator(); iterator.hasNext();) {\n");
+  //			buf.append("        for (Iterator iterator = collection.iterator(); iterator.hasNext();)
+  // {\n");
   //			buf.append("            Object object = iterator.next();\n");
   //			buf.append("            \n");
   //			buf.append("        }\n");

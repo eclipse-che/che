@@ -54,7 +54,8 @@ public final class ServiceUtil {
                     new OAuthCallback() {
                       @Override
                       public void onAuthenticated(final OAuthStatus authStatus) {
-                        // maybe it's possible to avoid this request if authStatus contains the vcs host user.
+                        // maybe it's possible to avoid this request if authStatus contains the vcs
+                        // host user.
                         service
                             .getUserInfo()
                             .then(

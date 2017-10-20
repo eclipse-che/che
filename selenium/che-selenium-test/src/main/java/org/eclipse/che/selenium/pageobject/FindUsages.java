@@ -160,7 +160,7 @@ public class FindUsages {
    */
   public void sendCommandByKeyboardInFindUsagespanel(String command) {
     actionsFactory.createAction(seleniumWebDriver).sendKeys(command).perform();
-    //waiting for ending animation in the widget
+    // waiting for ending animation in the widget
     WaitUtils.sleepQuietly(500, TimeUnit.MILLISECONDS);
   }
 

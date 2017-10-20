@@ -167,7 +167,7 @@ public class ProjectService {
       throws ConflictException, ForbiddenException, ServerException, NotFoundException,
           BadRequestException {
 
-    return getProjectServiceApi().createProject(uriInfo, projectConfig);
+    return getProjectServiceApi().createProject(uriInfo,projectConfig);
   }
 
   @POST

@@ -73,7 +73,8 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 
   protected static class Array extends AbstractIterable {
     public Array() {
-      super("array", JavaTemplateMessages.JavaContextType_variable_description_array); //$NON-NLS-1$
+      super(
+          "array", JavaTemplateMessages.JavaContextType_variable_description_array); // $NON-NLS-1$
     }
 
     @Override
@@ -86,7 +87,7 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
     public Iterable() {
       super(
           "iterable",
-          JavaTemplateMessages.JavaContextType_variable_description_iterable); //$NON-NLS-1$
+          JavaTemplateMessages.JavaContextType_variable_description_iterable); // $NON-NLS-1$
     }
 
     @Override
@@ -153,7 +154,7 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
       super(
           "array_type",
           JavaTemplateMessages.JavaContextType_variable_description_array_type,
-          "array"); //$NON-NLS-1$ //$NON-NLS-2$
+          "array"); // $NON-NLS-1$ //$NON-NLS-2$
     }
 
     @Override
@@ -167,7 +168,7 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
       super(
           "iterable_type",
           JavaTemplateMessages.JavaContextType_variable_description_iterable_type,
-          "iterable"); //$NON-NLS-1$ //$NON-NLS-2$
+          "iterable"); // $NON-NLS-1$ //$NON-NLS-2$
     }
 
     @Override
@@ -239,7 +240,7 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
       super(
           "array_element",
           JavaTemplateMessages.JavaContextType_variable_description_array_element,
-          "array"); //$NON-NLS-1$ //$NON-NLS-2$
+          "array"); // $NON-NLS-1$ //$NON-NLS-2$
     }
 
     @Override
@@ -253,7 +254,7 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
       super(
           "iterable_element",
           JavaTemplateMessages.JavaContextType_variable_description_iterable_element,
-          "iterable"); //$NON-NLS-1$ //$NON-NLS-2$
+          "iterable"); // $NON-NLS-1$ //$NON-NLS-2$
     }
 
     @Override
@@ -264,24 +265,24 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 
   protected static class Index extends NameResolver {
     public Index() {
-      super("int"); //$NON-NLS-1$
-      setType("index"); //$NON-NLS-1$
+      super("int"); // $NON-NLS-1$
+      setType("index"); // $NON-NLS-1$
       setDescription(JavaTemplateMessages.JavaContextType_variable_description_index);
     }
   }
 
   protected static class Collection extends VarResolver {
     public Collection() {
-      super("java.util.Collection"); //$NON-NLS-1$
-      setType("collection"); //$NON-NLS-1$
+      super("java.util.Collection"); // $NON-NLS-1$
+      setType("collection"); // $NON-NLS-1$
       setDescription(JavaTemplateMessages.JavaContextType_variable_description_collection);
     }
   }
 
   protected static class Iterator extends NameResolver {
     public Iterator() {
-      super("java.util.Iterator"); //$NON-NLS-1$
-      setType("iterator"); //$NON-NLS-1$
+      super("java.util.Iterator"); // $NON-NLS-1$
+      setType("iterator"); // $NON-NLS-1$
       setDescription(JavaTemplateMessages.JavaContextType_variable_description_iterator);
     }
   }
@@ -289,18 +290,18 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
   protected static class Todo extends TemplateVariableResolver {
 
     public Todo() {
-      super("todo", JavaTemplateMessages.JavaContextType_variable_description_todo); //$NON-NLS-1$
+      super("todo", JavaTemplateMessages.JavaContextType_variable_description_todo); // $NON-NLS-1$
     }
 
     @Override
     protected String resolve(TemplateContext context) {
       JavaContext javaContext = (JavaContext) context;
       ICompilationUnit compilationUnit = javaContext.getCompilationUnit();
-      if (compilationUnit == null) return "XXX"; //$NON-NLS-1$
+      if (compilationUnit == null) return "XXX"; // $NON-NLS-1$
 
       IJavaProject javaProject = compilationUnit.getJavaProject();
       String todoTaskTag = StubUtility.getTodoTaskTag(javaProject);
-      if (todoTaskTag == null) return "XXX"; //$NON-NLS-1$
+      if (todoTaskTag == null) return "XXX"; // $NON-NLS-1$
 
       return todoTaskTag;
     }

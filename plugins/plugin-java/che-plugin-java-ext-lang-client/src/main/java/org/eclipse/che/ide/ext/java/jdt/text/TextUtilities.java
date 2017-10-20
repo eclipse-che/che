@@ -33,7 +33,7 @@ public class TextUtilities {
 
   /** Default line delimiters used by the text functions of this class. */
   public static final String[] DELIMITERS =
-      new String[] {"\n", "\r", "\r\n"}; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+      new String[] {"\n", "\r", "\r\n"}; // $NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 
   /**
    * Determines which one of default line delimiters appears first in the list. If none of them the
@@ -186,7 +186,7 @@ public class TextUtilities {
     int offset = firstEvent.getOffset();
     int length = firstEvent.getLength();
     final StringBuffer text =
-        new StringBuffer(firstEvent.getText() == null ? "" : firstEvent.getText()); //$NON-NLS-1$
+        new StringBuffer(firstEvent.getText() == null ? "" : firstEvent.getText()); // $NON-NLS-1$
 
     while (iterator.hasNext()) {
 
@@ -195,7 +195,7 @@ public class TextUtilities {
       final DocumentEvent event = (DocumentEvent) iterator.next();
       final int eventOffset = event.getOffset();
       final int eventLength = event.getLength();
-      final String eventText = event.getText() == null ? "" : event.getText(); //$NON-NLS-1$
+      final String eventText = event.getText() == null ? "" : event.getText(); // $NON-NLS-1$
 
       // event is right from merged event
       if (eventOffset > offset + length + delta) {
@@ -430,7 +430,8 @@ public class TextUtilities {
   }
 
   // /**
-  // * Computes and returns the partition managing position categories for the given document or <code>null</code> if this was
+  // * Computes and returns the partition managing position categories for the given document or
+  // <code>null</code> if this was
   // * impossible.
   // *
   // * @param document the document
@@ -491,7 +492,7 @@ public class TextUtilities {
 
     if (lineDelimiter != null) return lineDelimiter;
 
-    String sysLineDelimiter = "\n"; //System.getProperty("line.separator"); //$NON-NLS-1$
+    String sysLineDelimiter = "\n"; // System.getProperty("line.separator"); //$NON-NLS-1$
     String[] delimiters = document.getLegalLineDelimiters();
     Assert.isTrue(delimiters.length > 0);
     for (int i = 0; i < delimiters.length; i++) {

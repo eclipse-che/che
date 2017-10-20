@@ -69,7 +69,7 @@ public class ParameterGuessingProposal extends JavaMethodCompletionProposal
   /** Tells whether this class is in debug mode. */
   private static final boolean DEBUG =
       "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jdt.ui/debug/ResultCollector"));
-  //$NON-NLS-1$//$NON-NLS-2$
+  // $NON-NLS-1$//$NON-NLS-2$
 
   private ICompletionProposal[][] fChoices; // initialized by guessParameters()
   private Position[] fPositions; // initialized by guessParameters()
@@ -129,7 +129,8 @@ public class ParameterGuessingProposal extends JavaMethodCompletionProposal
           RegionImpl region = new RegionImpl();
           region.setOffset(positionOffset);
           region.setLength(positionLength);
-          //                        group.addPositions(new LinkedPosition(document, positionOffset, positionLength, LinkedPositionGroup.NO_STOP));
+          //                        group.addPositions(new LinkedPosition(document, positionOffset,
+          // positionLength, LinkedPositionGroup.NO_STOP));
           group.addPositions(region);
         } else {
           //                        ensurePositionCategoryInstalled(document, model);
@@ -138,7 +139,8 @@ public class ParameterGuessingProposal extends JavaMethodCompletionProposal
           region.setOffset(positionOffset);
           region.setLength(positionLength);
           //                        group.addPositions(
-          //                                new ProposalPosition(document, positionOffset, positionLength, LinkedPositionGroup.NO_STOP, fChoices[i]));
+          //                                new ProposalPosition(document, positionOffset,
+          // positionLength, LinkedPositionGroup.NO_STOP, fChoices[i]));
           group.addPositions(region);
           LinkedDataImpl data = new LinkedDataImpl();
           for (ICompletionProposal proposal : fChoices[i]) {
@@ -158,21 +160,28 @@ public class ParameterGuessingProposal extends JavaMethodCompletionProposal
       //                }
 
       //                LinkedModeUI ui = new EditorLinkedModeUI(model, getTextViewer());
-      //                ui.setExitPosition(getTextViewer(), baseOffset + replacement.length(), 0, Integer.MAX_VALUE);
+      //                ui.setExitPosition(getTextViewer(), baseOffset + replacement.length(), 0,
+      // Integer.MAX_VALUE);
       //                // exit character can be either ')' or ';'
       //                final char exitChar = replacement.charAt(replacement.length() - 1);
       //                ui.setExitPolicy(new ExitPolicy(exitChar, document) {
       //                    @Override
-      //                    public ExitFlags doExit(LinkedModeModel model2, VerifyEvent event, int offset2, int length) {
+      //                    public ExitFlags doExit(LinkedModeModel model2, VerifyEvent event, int
+      // offset2, int length) {
       //                        if (event.character == ',') {
-      //                            for (int i = 0; i < fPositions.length - 1; i++) { // not for the last one
+      //                            for (int i = 0; i < fPositions.length - 1; i++) { // not for the
+      // last one
       //                                Position position = fPositions[i];
-      //                                if (position.offset <= offset2 && offset2 + length <= position.offset + position.length) {
+      //                                if (position.offset <= offset2 && offset2 + length <=
+      // position.offset + position.length) {
       //                                    try {
       //                                        ITypedRegion partition = TextUtilities
-      //                                                .getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset2 + length, false);
-      //                                        if (IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType())
-      //                                            || offset2 + length == partition.getOffset() + partition.getLength()) {
+      //                                                .getPartition(document,
+      // IJavaPartitions.JAVA_PARTITIONING, offset2 + length, false);
+      //                                        if
+      // (IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType())
+      //                                            || offset2 + length == partition.getOffset() +
+      // partition.getLength()) {
       //                                            event.character = '\t';
       //                                            event.keyCode = SWT.TAB;
       //                                            return null;
@@ -185,7 +194,8 @@ public class ParameterGuessingProposal extends JavaMethodCompletionProposal
       //                        } else if (event.character == ')' && exitChar != ')') {
       //                            // exit from link mode when user is in the last ')' position.
       //                            Position position = fPositions[fPositions.length - 1];
-      //                            if (position.offset <= offset2 && offset2 + length <= position.offset + position.length) {
+      //                            if (position.offset <= offset2 && offset2 + length <=
+      // position.offset + position.length) {
       //								return new ExitFlags(ILinkedModeListener.UPDATE_CARET, false);
       //							}
       //						}
@@ -231,7 +241,7 @@ public class ParameterGuessingProposal extends JavaMethodCompletionProposal
     }
     if (DEBUG)
       System.err.println(
-          "Parameter Guessing: " + (System.currentTimeMillis() - millis)); //$NON-NLS-1$
+          "Parameter Guessing: " + (System.currentTimeMillis() - millis)); // $NON-NLS-1$
 
     return replacement;
   }
@@ -306,15 +316,19 @@ public class ParameterGuessingProposal extends JavaMethodCompletionProposal
 
   private ICompletionProposal[][] guessParameters(char[][] parameterNames)
       throws JavaModelException {
-    // find matches in reverse order.  Do this because people tend to declare the variable meant for the last
-    // parameter last.  That is, local variables for the last parameter in the method completion are more
-    // likely to be closer to the point of code completion. As an example consider a "delegation" completion:
+    // find matches in reverse order.  Do this because people tend to declare the variable meant for
+    // the last
+    // parameter last.  That is, local variables for the last parameter in the method completion are
+    // more
+    // likely to be closer to the point of code completion. As an example consider a "delegation"
+    // completion:
     //
     // 		public void myMethod(int param1, int param2, int param3) {
     // 			someOtherObject.yourMethod(param1, param2, param3);
     //		}
     //
-    // The other consideration is giving preference to variables that have not previously been used in this
+    // The other consideration is giving preference to variables that have not previously been used
+    // in this
     // code completion (which avoids "someOtherObject.yourMethod(param1, param1, param1)";
 
     int count = parameterNames.length;
@@ -375,7 +389,8 @@ public class ParameterGuessingProposal extends JavaMethodCompletionProposal
 
   private void openErrorDialog(Exception e) {
     //		Shell shell= getTextViewer().getTextWidget().getShell();
-    //		MessageDialog.openError(shell, JavaTextMessages.ParameterGuessingProposal_error_msg, e.getMessage());
+    //		MessageDialog.openError(shell, JavaTextMessages.ParameterGuessingProposal_error_msg,
+    // e.getMessage());
     JavaPlugin.log(e);
   }
 
@@ -414,7 +429,7 @@ public class ParameterGuessingProposal extends JavaMethodCompletionProposal
   }
 
   private String getCategory() {
-    return "ParameterGuessingProposal_" + toString(); //$NON-NLS-1$
+    return "ParameterGuessingProposal_" + toString(); // $NON-NLS-1$
   }
 
   @Override

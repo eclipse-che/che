@@ -31,7 +31,8 @@ import org.eclipse.che.ide.commons.exception.UnauthorizedException;
 public abstract class AsyncRequestCallback<T> implements RequestCallback {
 
   // HTTP code 207 is "Multi-Status"
-  // IE misinterpreting HTTP status code 204 as 1223 (http://www.mail-archive.com/jquery-en@googlegroups.com/msg13093.html)
+  // IE misinterpreting HTTP status code 204 as 1223
+  // (http://www.mail-archive.com/jquery-en@googlegroups.com/msg13093.html)
   private static final int[] DEFAULT_SUCCESS_CODES = {
     Response.SC_OK, Response.SC_CREATED, Response.SC_NO_CONTENT, 207, 1223
   };
@@ -95,7 +96,8 @@ public abstract class AsyncRequestCallback<T> implements RequestCallback {
       loader.hide();
     }
 
-    // If there is no connection to the server then status equals 0 ( In Internet Explorer status is 12029 )
+    // If there is no connection to the server then status equals 0 ( In Internet Explorer status is
+    // 12029 )
     if (response.getStatusCode() == 0 || response.getStatusCode() == 12029) {
       onServerDisconnected();
       return;
@@ -129,7 +131,7 @@ public abstract class AsyncRequestCallback<T> implements RequestCallback {
   private void handleSuccess(Response response) {
     try {
       if (unmarshaller != null) {
-        //It's needed for handling a situation when response DTO object is NULL
+        // It's needed for handling a situation when response DTO object is NULL
         if (response.getStatusCode() != Response.SC_NO_CONTENT) {
           unmarshaller.unmarshal(response);
         }
@@ -148,7 +150,7 @@ public abstract class AsyncRequestCallback<T> implements RequestCallback {
     String host = Window.Location.getHost();
     String url = this.request.getRequestBuilder().getUrl();
 
-    //deletes query params
+    // deletes query params
     url = url.substring(0, url.indexOf('?'));
 
     message

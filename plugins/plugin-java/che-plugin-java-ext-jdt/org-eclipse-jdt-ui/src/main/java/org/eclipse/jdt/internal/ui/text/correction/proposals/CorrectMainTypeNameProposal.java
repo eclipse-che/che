@@ -51,7 +51,7 @@ public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
       String oldTypeName,
       String newTypeName,
       int relevance) {
-    super("", cu, null, relevance, null); //$NON-NLS-1$
+    super("", cu, null, relevance, null); // $NON-NLS-1$
     fContext = context;
 
     setDisplayName(

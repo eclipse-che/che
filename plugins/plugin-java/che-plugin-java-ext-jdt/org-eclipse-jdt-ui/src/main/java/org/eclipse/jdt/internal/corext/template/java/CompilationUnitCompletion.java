@@ -99,7 +99,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
       // Collection extends Iterable
       if ((fType == UNKNOWN || fType == ITERABLE)
           && (fChecked & COLLECTION) == 0
-          && isSubtypeOf("java.util.Collection")) //$NON-NLS-1$
+          && isSubtypeOf("java.util.Collection")) // $NON-NLS-1$
       fType = COLLECTION;
       fChecked |= COLLECTION;
       return fType == COLLECTION;
@@ -115,7 +115,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
     public boolean isIterable() {
       if (fType == UNKNOWN
           && (fChecked & ITERABLE) == 0
-          && isSubtypeOf("java.lang.Iterable")) //$NON-NLS-1$
+          && isSubtypeOf("java.lang.Iterable")) // $NON-NLS-1$
       fType = ITERABLE;
       fChecked |= ITERABLE;
       return fType == ITERABLE || fType == COLLECTION; // Collection extends Iterable
@@ -134,7 +134,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
       if (implementorName.length() == 0) return false;
 
       int implementorDims = Signature.getArrayCount(signature);
-      int superDimsIndex = supertype.indexOf("[]"); //$NON-NLS-1$
+      int superDimsIndex = supertype.indexOf("[]"); // $NON-NLS-1$
       int superDims;
       if (superDimsIndex != -1) {
         superDims = (supertype.length() - superDimsIndex) / 2;
@@ -143,7 +143,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
         superDims = 0;
       }
       if (implementorDims > superDims) {
-        return "java.lang.Object".equals(supertype); //$NON-NLS-1$
+        return "java.lang.Object".equals(supertype); // $NON-NLS-1$
       } else if (superDims != implementorDims) {
         return false;
       }
@@ -245,11 +245,11 @@ final class CompilationUnitCompletion extends CompletionRequestor {
           try {
             try {
               TypeParameterResolver util = new TypeParameterResolver(this);
-              fMemberTypes = util.computeBinding("java.lang.Iterable", 0); //$NON-NLS-1$
+              fMemberTypes = util.computeBinding("java.lang.Iterable", 0); // $NON-NLS-1$
             } catch (JavaModelException e) {
               try {
                 TypeParameterResolver util = new TypeParameterResolver(this);
-                fMemberTypes = util.computeBinding("java.util.Collection", 0); //$NON-NLS-1$
+                fMemberTypes = util.computeBinding("java.util.Collection", 0); // $NON-NLS-1$
               } catch (JavaModelException x) {
                 fMemberTypes = new String[0];
               }
@@ -260,7 +260,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
         }
         if (fMemberTypes.length > 0) return fMemberTypes;
       }
-      return new String[] {Signature.createTypeSignature("java.lang.Object", true)}; //$NON-NLS-1$
+      return new String[] {Signature.createTypeSignature("java.lang.Object", true)}; // $NON-NLS-1$
     }
 
     /**
@@ -279,7 +279,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
         int dim = Signature.getArrayCount(sig);
         if (local != null && dim > 0) {
           StringBuffer array = new StringBuffer(local);
-          for (int j = 0; j < dim; j++) array.append("[]"); //$NON-NLS-1$
+          for (int j = 0; j < dim; j++) array.append("[]"); // $NON-NLS-1$
           local = array.toString();
         }
         if (local != null) names[i] = local;
@@ -312,7 +312,9 @@ final class CompilationUnitCompletion extends CompletionRequestor {
         }
       }
       if (all.isEmpty())
-        return new String[] {Signature.createTypeSignature("java.lang.Object", true)}; //$NON-NLS-1$
+        return new String[] {
+          Signature.createTypeSignature("java.lang.Object", true)
+        }; // $NON-NLS-1$
       return all.toArray(new String[all.size()]);
     }
 
@@ -324,16 +326,16 @@ final class CompilationUnitCompletion extends CompletionRequestor {
       String type;
       switch (fType) {
         case ITERABLE:
-          type = "ITERABLE"; //$NON-NLS-1$
+          type = "ITERABLE"; // $NON-NLS-1$
           break;
         case COLLECTION:
-          type = "COLLECTION"; //$NON-NLS-1$
+          type = "COLLECTION"; // $NON-NLS-1$
           break;
         case ARRAY:
-          type = "ARRAY"; //$NON-NLS-1$
+          type = "ARRAY"; // $NON-NLS-1$
           break;
         default:
-          type = "UNKNOWN"; //$NON-NLS-1$
+          type = "UNKNOWN"; // $NON-NLS-1$
           break;
       }
       return "LocalVariable [name=\""
@@ -344,7 +346,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
           + type
           + "\" member=\""
           + getMemberTypeSignature()
-          + "\"]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+          + "\"]"; // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
     }
   }
 
@@ -353,7 +355,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
    * considering any type constraints along the inheritance path.
    */
   private final class TypeParameterResolver {
-    private static final String OBJECT_SIGNATURE = "Ljava.lang.Object;"; //$NON-NLS-1$
+    private static final String OBJECT_SIGNATURE = "Ljava.lang.Object;"; // $NON-NLS-1$
 
     private final ITypeHierarchy fHierarchy;
     private final Variable fVariable;
@@ -405,7 +407,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
                     JavaPlugin.getPluginId(),
                     IStatus.OK,
                     "No such type",
-                    null))); //$NON-NLS-1$
+                    null))); // $NON-NLS-1$
       return computeBinding(type, index);
     }
 
@@ -567,7 +569,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
                   JavaPlugin.getPluginId(),
                   IStatus.OK,
                   "Illegal hierarchy",
-                  null))); //$NON-NLS-1$
+                  null))); // $NON-NLS-1$
     }
 
     /**
@@ -790,8 +792,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
     String[] names = new String[fLocalVariables.size()];
     int i = 0;
     for (ListIterator<Variable> iterator = fLocalVariables.listIterator(fLocalVariables.size());
-        iterator.hasPrevious();
-        ) {
+        iterator.hasPrevious(); ) {
       Variable localVariable = iterator.previous();
       names[i++] = localVariable.getName();
     }
@@ -808,8 +809,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
     String[] names = new String[fFields.size()];
     int i = 0;
     for (ListIterator<Variable> iterator = fFields.listIterator(fFields.size());
-        iterator.hasPrevious();
-        ) {
+        iterator.hasPrevious(); ) {
       Variable field = iterator.previous();
       names[i++] = field.getName();
     }
@@ -826,8 +826,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 
     // local variables
     for (ListIterator<Variable> iterator = fLocalVariables.listIterator(fLocalVariables.size());
-        iterator.hasPrevious();
-        ) {
+        iterator.hasPrevious(); ) {
       Variable localVariable = iterator.previous();
 
       if (localVariable.isArray()) arrays.add(localVariable);
@@ -835,8 +834,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 
     // fields
     for (ListIterator<Variable> iterator = fFields.listIterator(fFields.size());
-        iterator.hasPrevious();
-        ) {
+        iterator.hasPrevious(); ) {
       Variable field = iterator.previous();
 
       if (field.isArray()) arrays.add(field);
@@ -856,8 +854,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
     List<Variable> matches = new ArrayList<Variable>();
 
     for (ListIterator<Variable> iterator = fLocalVariables.listIterator(fLocalVariables.size());
-        iterator.hasPrevious();
-        ) {
+        iterator.hasPrevious(); ) {
       Variable localVariable = iterator.previous();
 
       if (localVariable.isSubtypeOf(clazz)) matches.add(localVariable);
@@ -877,8 +874,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
     List<Variable> matches = new ArrayList<Variable>();
 
     for (ListIterator<Variable> iterator = fFields.listIterator(fFields.size());
-        iterator.hasPrevious();
-        ) {
+        iterator.hasPrevious(); ) {
       Variable localVariable = iterator.previous();
 
       if (localVariable.isSubtypeOf(clazz)) matches.add(localVariable);
@@ -899,8 +895,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 
     // local variables
     for (ListIterator<Variable> iterator = fLocalVariables.listIterator(fLocalVariables.size());
-        iterator.hasPrevious();
-        ) {
+        iterator.hasPrevious(); ) {
       Variable localVariable = iterator.previous();
 
       if (localVariable.isArray() || localVariable.isIterable()) iterables.add(localVariable);
@@ -908,8 +903,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 
     // fields
     for (ListIterator<Variable> iterator = fFields.listIterator(fFields.size());
-        iterator.hasPrevious();
-        ) {
+        iterator.hasPrevious(); ) {
       Variable field = iterator.previous();
 
       if (field.isArray() || field.isIterable()) iterables.add(field);

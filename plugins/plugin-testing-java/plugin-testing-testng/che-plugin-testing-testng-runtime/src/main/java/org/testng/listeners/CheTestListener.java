@@ -51,11 +51,11 @@ public class CheTestListener implements ITestListener {
 
   @Override
   public void onStart(ITestContext context) {
-    //ignore
+    // ignore
   }
 
   @Override
   public void onFinish(ITestContext context) {
-    //ignore
+    // ignore
   }
 }

@@ -79,7 +79,7 @@ public class EditorPropertiesSectionViewImpl extends Composite
   @Override
   public void setSectionTitle(String title) {
     sectionTitle.setText(title);
-    propertiesPanel.ensureDebugId("editorPropertiesSection-" + title); //for selenium tests
+    propertiesPanel.ensureDebugId("editorPropertiesSection-" + title); // for selenium tests
   }
 
   @Override

@@ -62,7 +62,7 @@ public class ResourceChangeChecker implements IConditionChecker {
     //			checker.getDeltaFactory().change(files[i]);
     //		}
     //		return checker.check(monitor);
-    //TODO
+    // TODO
     return new RefactoringStatus();
   }
 

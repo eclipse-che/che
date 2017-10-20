@@ -14,7 +14,7 @@ import org.eclipse.osgi.util.NLS;
 /** Provides translatable messages for the file system bundle */
 public class Messages extends NLS {
   private static final String BUNDLE_NAME =
-      "org.eclipse.core.internal.filesystem.messages"; //$NON-NLS-1$
+      "org.eclipse.core.internal.filesystem.messages"; // $NON-NLS-1$
 
   public static String copying;
   public static String couldnotDelete;

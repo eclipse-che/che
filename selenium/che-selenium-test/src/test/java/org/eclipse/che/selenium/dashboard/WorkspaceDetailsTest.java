@@ -74,7 +74,7 @@ public class WorkspaceDetailsTest {
   public void workingWithEnvVariables() {
     dashboardWorkspace.selectTabInWorspaceMenu(TabNames.ENV_VARIABLES);
 
-    //create a new variable, save changes and check it exists
+    // create a new variable, save changes and check it exists
     dashboardWorkspace.selectMachine("Environment variables", "dev-machine");
     dashboardWorkspace.clickOnAddEnvVariableButton();
     dashboardWorkspace.checkAddNewEnvVarialbleDialogIsOpen();
@@ -83,7 +83,7 @@ public class WorkspaceDetailsTest {
     clickOnSaveButton();
     Assert.assertTrue(dashboardWorkspace.checkEnvVariableExists("logi"));
 
-    //rename the variable, save changes and check it is renamed
+    // rename the variable, save changes and check it is renamed
     Assert.assertTrue(dashboardWorkspace.checkValueExists("logi", "admin"));
     dashboardWorkspace.clickOnEditEnvVariableButton("logi");
     dashboardWorkspace.enterEnvVariableName("login");
@@ -91,14 +91,14 @@ public class WorkspaceDetailsTest {
     clickOnSaveButton();
     Assert.assertTrue(dashboardWorkspace.checkValueExists("login", "admin"));
 
-    //delete the variable, save changes and check it is not exists
+    // delete the variable, save changes and check it is not exists
     dashboardWorkspace.clickOnEnvVariableCheckbox("login");
     dashboardWorkspace.clickOnDeleteBtn();
     dashboardWorkspace.clickOnDeleteDialogButton();
     clickOnSaveButton();
     dashboardWorkspace.checkValueIsNotExists("login", "admin");
 
-    //delete all variable from db machine, check they don't exist and save changes
+    // delete all variable from db machine, check they don't exist and save changes
     dashboardWorkspace.selectMachine("Environment variables", "db");
     variables.forEach(
         (name, value) -> {
@@ -109,7 +109,7 @@ public class WorkspaceDetailsTest {
 
     clickOnSaveButton();
 
-    //restore variables to db machine, check they exist and save changes
+    // restore variables to db machine, check they exist and save changes
     variables.forEach(
         (name, value) -> {
           loader.waitOnClosed();
@@ -127,14 +127,14 @@ public class WorkspaceDetailsTest {
   public void workingWithAgents() {
     dashboardWorkspace.selectTabInWorspaceMenu(TabNames.AGENTS);
 
-    //check all needed agents in dev-machine exist
+    // check all needed agents in dev-machine exist
     dashboardWorkspace.selectMachine("Workspace Agents", "dev-machine");
     agents.forEach(
         (name, value) -> {
           dashboardWorkspace.checkAgentExists(name);
         });
 
-    //switch all agents and save changes
+    // switch all agents and save changes
     agents.forEach(
         (name, value) -> {
           Assert.assertEquals(dashboardWorkspace.getAgentState(name), value);
@@ -143,7 +143,8 @@ public class WorkspaceDetailsTest {
         });
     clickOnSaveButton();
 
-    //switch all agents, save changes and check its states are as previous(by default for the Java-MySql stack)
+    // switch all agents, save changes and check its states are as previous(by default for the
+    // Java-MySql stack)
     agents.forEach(
         (name, value) -> {
           dashboardWorkspace.switchAgentState(name);
@@ -160,7 +161,7 @@ public class WorkspaceDetailsTest {
   public void workingWithServers() {
     dashboardWorkspace.selectTabInWorspaceMenu(TabNames.SERVERS);
 
-    //add a new server to db machine, save changes and check it exists
+    // add a new server to db machine, save changes and check it exists
     dashboardWorkspace.selectMachine("Servers", "db");
     dashboardWorkspace.clickOnAddServerButton();
     dashboardWorkspace.waitAddServerDialogIsOpen();
@@ -171,7 +172,7 @@ public class WorkspaceDetailsTest {
     clickOnSaveButton();
     dashboardWorkspace.checkServerExists("agen", "8080");
 
-    //edit the server and check it exists
+    // edit the server and check it exists
     dashboardWorkspace.clickOnEditServerButton("agen");
     dashboardWorkspace.enterReference("agent");
     dashboardWorkspace.enterPort("80");
@@ -179,7 +180,7 @@ public class WorkspaceDetailsTest {
     dashboardWorkspace.clickOnUpdateDialogButton();
     dashboardWorkspace.checkServerExists("agent", "80");
 
-    //delete the server and check it is not exist
+    // delete the server and check it is not exist
     dashboardWorkspace.clickOnDeleteServerButton("agent");
     dashboardWorkspace.clickOnDeleteDialogButton();
     clickOnSaveButton();
@@ -190,12 +191,12 @@ public class WorkspaceDetailsTest {
   public void workingWithMachines() {
     String machineName = "new_machine";
 
-    //check that all machines of the Java-MySql stack created by default exist
+    // check that all machines of the Java-MySql stack created by default exist
     dashboardWorkspace.selectTabInWorspaceMenu(TabNames.MACHINES);
     dashboardWorkspace.checkMachineExists("db");
     dashboardWorkspace.checkMachineExists("dev-machine");
 
-    //create a new machine, delete and check it is not exist
+    // create a new machine, delete and check it is not exist
     createMachine(machineName);
     dashboardWorkspace.clickOnDeleteMachineButton(machineName);
     dashboardWorkspace.clickOnCloseDialogButton();
@@ -204,7 +205,7 @@ public class WorkspaceDetailsTest {
     dashboardWorkspace.clickOnDeleteDialogButton();
     dashboardWorkspace.checkMachineIsNotExists(machineName);
 
-    //create a new machine, edit(change the name) and save changes
+    // create a new machine, edit(change the name) and save changes
     createMachine(machineName);
     dashboardWorkspace.clickOnEditMachineButton(machineName);
     dashboardWorkspace.checkEditTheMachineDialogIsOpen();
@@ -218,16 +219,16 @@ public class WorkspaceDetailsTest {
   public void workingWithProjects() {
     dashboardWorkspace.selectTabInWorspaceMenu(TabNames.PROJECTS);
 
-    //create a new project and save changes
+    // create a new project and save changes
     dashboardWorkspace.clickOnAddNewProjectButton();
     dashboardWorkspace.selectSample("web-java-petclinic");
     dashboardWorkspace.clickOnAddProjects();
     clickOnSaveButton();
 
-    //check that project exists(workspace will restart)
+    // check that project exists(workspace will restart)
     dashboardProject.waitProjectIsPresent(Template.WEB_JAVA_PETCLINIC.value());
 
-    //start the workspace and check that the new project exists
+    // start the workspace and check that the new project exists
     dashboardWorkspace.clickOpenInIdeWsBtn();
     seleniumWebDriver.switchFromDashboardIframeToIde();
     projectExplorer.waitProjectExplorer();
@@ -236,7 +237,7 @@ public class WorkspaceDetailsTest {
         Template.WEB_JAVA_PETCLINIC.value(), PROJECT_FOLDER);
     notificationsPopupPanel.waitPopUpPanelsIsClosed();
 
-    //check that created machine exists in the Process Console tree
+    // check that created machine exists in the Process Console tree
     consoles.waitProcessInProcessConsoleTree("machine");
     consoles.waitTabNameProcessIsPresent("machine");
   }
@@ -268,7 +269,7 @@ public class WorkspaceDetailsTest {
   }
 
   private void createWsFromJavaMySqlStack() {
-    //create and start a workspace from the Java-MySql stack
+    // create and start a workspace from the Java-MySql stack
     dashboard.open();
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(NavigationBar.MenuItem.WORKSPACES);
@@ -299,7 +300,7 @@ public class WorkspaceDetailsTest {
   }
 
   private void createMachine(String machineName) {
-    //add new machine and check it exists
+    // add new machine and check it exists
     dashboardWorkspace.clickOnAddMachineButton();
     dashboardWorkspace.checkAddNewMachineDialogIsOpen();
     dashboardWorkspace.setMachineNameInDialog(machineName);

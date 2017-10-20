@@ -83,7 +83,8 @@ public class RuntimesTest {
   //        // given
   //        WorkspaceImpl workspace = createWorkspace();
   //
-  //        Runtime runtime = runtimes.start(workspace, workspace.getConfig().getDefaultEnv(), null);
+  //        Runtime runtime = runtimes.start(workspace, workspace.getConfig().getDefaultEnv(),
+  // null);
   //        assertNotNull(runtime);
   //        assertEquals(runtime, runtimes.get(WORKSPACE_ID));
   //
@@ -95,15 +96,18 @@ public class RuntimesTest {
   //        // given
   //        WorkspaceImpl workspace = createWorkspace();
   //
-  //        Future<Runtime> future =  runtimes.startAsync(workspace, workspace.getConfig().getDefaultEnv(), null);
+  //        Future<Runtime> future =  runtimes.startAsync(workspace,
+  // workspace.getConfig().getDefaultEnv(), null);
   //        assertNotNull(future.get());
   //        assertEquals(future.get(), runtimes.get(WORKSPACE_ID));
   //
   //    }
 
   //    @Test(expectedExceptions = ServerException.class,
-  //          expectedExceptionsMessageRegExp = "Dev machine is not found in active environment of workspace 'workspace123'")
-  //    public void shouldThrowExceptionOnGetRuntimesIfDevMachineIsMissingInTheEnvironment() throws Exception {
+  //          expectedExceptionsMessageRegExp = "Dev machine is not found in active environment of
+  // workspace 'workspace123'")
+  //    public void shouldThrowExceptionOnGetRuntimesIfDevMachineIsMissingInTheEnvironment() throws
+  // Exception {
   //        // given
   //        WorkspaceImpl workspace = createWorkspace();
   //
@@ -141,17 +145,22 @@ public class RuntimesTest {
   //        // then
   //        RuntimeDescriptor expected = new RuntimeDescriptor(WorkspaceStatus.RUNNING,
   //                                                           new RuntimeImpl(workspace.getConfig()
-  //                                                                                             .getDefaultEnv(),
-  //                                                                                    devMachine.getRuntime()
-  //                                                                                              .projectsRoot(),
+  //
+  // .getDefaultEnv(),
+  //
+  // devMachine.getRuntime()
+  //
+  // .projectsRoot(),
   //                                                                                    machines,
-  //                                                                                    devMachine));
+  //
+  // devMachine));
   //        verify(envEngine, times(2)).getMachines(workspace.getId());
   //        assertEquals(runtimeDescriptor, expected);
   //    }
   //
   //    @Test(expectedExceptions = ServerException.class,
-  //          expectedExceptionsMessageRegExp = "Could not perform operation because application server is stopping")
+  //          expectedExceptionsMessageRegExp = "Could not perform operation because application
+  // server is stopping")
   //    public void shouldNotStartTheWorkspaceIfPostConstructWasIsInvoked() throws Exception {
   //        // given
   //        WorkspaceImpl workspace = createWorkspace();
@@ -192,13 +201,15 @@ public class RuntimesTest {
   //    }
   //
   //    @Test
-  //    public void workspaceShouldContainAllMachinesAndBeInRunningStatusAfterSuccessfulStart() throws Exception {
+  //    public void workspaceShouldContainAllMachinesAndBeInRunningStatusAfterSuccessfulStart()
+  // throws Exception {
   //        // given
   //        WorkspaceImpl workspace = createWorkspace();
   //
   //        // when
   //        RuntimeDescriptor runningWorkspace = runtimes.start(workspace,
-  //                                                            workspace.getConfig().getDefaultEnv(),
+  //
+  // workspace.getConfig().getDefaultEnv(),
   //                                                            false);
   //
   //        // then
@@ -208,7 +219,8 @@ public class RuntimesTest {
   //    }
   //
   //    @Test(expectedExceptions = ConflictException.class,
-  //          expectedExceptionsMessageRegExp = "Could not start workspace '.*' because its status is 'RUNNING'")
+  //          expectedExceptionsMessageRegExp = "Could not start workspace '.*' because its status
+  // is 'RUNNING'")
   //    public void shouldNotStartWorkspaceIfItIsAlreadyRunning() throws Exception {
   //        // given
   //        WorkspaceImpl workspace = createWorkspace();
@@ -253,7 +265,8 @@ public class RuntimesTest {
   //
   //    @Test(expectedExceptions = NotFoundException.class,
   //          expectedExceptionsMessageRegExp = "Workspace with id 'workspace123' is not running.")
-  //    public void shouldThrowNotFoundExceptionWhenStoppingWorkspaceWhichDoesNotHaveRuntime() throws Exception {
+  //    public void shouldThrowNotFoundExceptionWhenStoppingWorkspaceWhichDoesNotHaveRuntime()
+  // throws Exception {
   //        runtimes.stop(WORKSPACE_ID, null);
   //    }
   //
@@ -264,7 +277,8 @@ public class RuntimesTest {
   //
   //        // when
   //        Runtime descriptorFromStartMethod = runtimes.start(workspace,
-  //                                                           workspace.getConfig().getDefaultEnv(),
+  //
+  // workspace.getConfig().getDefaultEnv(),
   //                                                           null);
   //        Runtime descriptorFromGetMethod = runtimes.get(workspace.getId());
   //
@@ -287,7 +301,8 @@ public class RuntimesTest {
   //        verify(eventService).publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
   //                                               .withWorkspaceId(workspace.getId())
   //                                               .withStatus(WorkspaceStatus.STARTING)
-  //                                               .withEventType(WorkspaceStatusEvent.EventType.STARTING)
+  //
+  // .withEventType(WorkspaceStatusEvent.EventType.STARTING)
   //                                               .withPrevStatus(WorkspaceStatus.STOPPED));
   //    }
   //
@@ -305,7 +320,8 @@ public class RuntimesTest {
   //        verify(eventService).publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
   //                                               .withStatus(WorkspaceStatus.RUNNING)
   //                                               .withWorkspaceId(workspace.getId())
-  //                                               .withEventType(WorkspaceStatusEvent.EventType.RUNNING)
+  //
+  // .withEventType(WorkspaceStatusEvent.EventType.RUNNING)
   //                                               .withPrevStatus(WorkspaceStatus.STARTING));
   //    }
   //
@@ -350,7 +366,8 @@ public class RuntimesTest {
   //        verify(eventService).publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
   //                                               .withStatus(WorkspaceStatus.STOPPING)
   //                                               .withWorkspaceId(workspace.getId())
-  //                                               .withEventType(WorkspaceStatusEvent.EventType.STOPPING)
+  //
+  // .withEventType(WorkspaceStatusEvent.EventType.STOPPING)
   //                                               .withPrevStatus(WorkspaceStatus.RUNNING));
   //    }
   //
@@ -369,7 +386,8 @@ public class RuntimesTest {
   //        verify(eventService).publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
   //                                               .withStatus(WorkspaceStatus.STOPPED)
   //                                               .withWorkspaceId(workspace.getId())
-  //                                               .withEventType(WorkspaceStatusEvent.EventType.STOPPED)
+  //
+  // .withEventType(WorkspaceStatusEvent.EventType.STOPPED)
   //                                               .withPrevStatus(WorkspaceStatus.STOPPING));
   //    }
   //
@@ -388,7 +406,8 @@ public class RuntimesTest {
   //            // then
   //            verify(eventService).publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
   //                                                   .withWorkspaceId(workspace.getId())
-  //                                                   .withEventType(WorkspaceStatusEvent.EventType.FAILED)
+  //
+  // .withEventType(WorkspaceStatusEvent.EventType.FAILED)
   //                                                   .withPrevStatus(WorkspaceStatus.STOPPING)
   //                                                   .withError("Test error"));
   //        }
@@ -403,7 +422,8 @@ public class RuntimesTest {
   //                       false);
   //        OldMachineConfigImpl config = createConfig(false);
   //        Instance instance = mock(Instance.class);
-  //        when(envEngine.startMachine(anyString(), any(OldMachineConfig.class), any())).thenReturn(instance);
+  //        when(envEngine.startMachine(anyString(), any(OldMachineConfig.class),
+  // any())).thenReturn(instance);
   //        when(instance.getConfig()).thenReturn(config);
   //
   //        // when
@@ -423,7 +443,8 @@ public class RuntimesTest {
   ////                       false);
   ////        OldMachineConfigImpl config = createConfig(false);
   ////        Runtime instance = mock(Runtime.class);
-  ////        when(envEngine.startMachine(anyString(), any(OldMachineConfig.class), any())).thenReturn(instance);
+  ////        when(envEngine.startMachine(anyString(), any(OldMachineConfig.class),
+  // any())).thenReturn(instance);
   ////        when(instance.getConfig()).thenReturn(config);
   ////
   ////        // when
@@ -447,7 +468,8 @@ public class RuntimesTest {
   //        runtimes.startMachine("someWsID", config);
   //
   //        // then
-  //        verify(envEngine, never()).startMachine(anyString(), any(OldMachineConfig.class), any());
+  //        verify(envEngine, never()).startMachine(anyString(), any(OldMachineConfig.class),
+  // any());
   //    }
   //
   //    @Test
@@ -523,7 +545,8 @@ public class RuntimesTest {
   //
   //    @Test(expectedExceptions = NotFoundException.class,
   //          expectedExceptionsMessageRegExp = "test exception")
-  //    public void shouldThrowExceptionIfGetMachineFromEnvEngineThrowsException() throws Exception {
+  //    public void shouldThrowExceptionIfGetMachineFromEnvEngineThrowsException() throws Exception
+  // {
   //        // given
   //        Instance expected = createMachine(false);
   //        when(envEngine.getMachine(WORKSPACE_ID, expected.getId()))
@@ -546,7 +569,8 @@ public class RuntimesTest {
   //                       false);
   //        expectedWorkspaces.put(workspace.getId(),
   //                               new WorkspaceRuntimes.WorkspaceState(RUNNING,
-  //                                                                    workspace.getConfig().getDefaultEnv()));
+  //
+  // workspace.getConfig().getDefaultEnv()));
   //        WorkspaceImpl workspace2 = spy(createWorkspace());
   //        when(workspace2.getId()).thenReturn("testWsId");
   //        when(envEngine.getMachines(workspace2.getId()))
@@ -556,10 +580,12 @@ public class RuntimesTest {
   //                       false);
   //        expectedWorkspaces.put(workspace2.getId(),
   //                               new WorkspaceRuntimes.WorkspaceState(RUNNING,
-  //                                                                    workspace2.getConfig().getDefaultEnv()));
+  //
+  // workspace2.getConfig().getDefaultEnv()));
   //
   //        // when
-  //        Map<String, WorkspaceRuntimes.WorkspaceState> actualWorkspaces = runtimes.getWorkspaces();
+  //        Map<String, WorkspaceRuntimes.WorkspaceState> actualWorkspaces =
+  // runtimes.getWorkspaces();
   //
   //        // then
   //        assertEquals(actualWorkspaces, expectedWorkspaces);
@@ -572,7 +598,8 @@ public class RuntimesTest {
   //
   //        runtimes.snapshotAsync(workspace.getId());
   //
-  //        assertEquals(runtimes.get(workspace.getId()).getRuntimeStatus(), WorkspaceStatus.SNAPSHOTTING);
+  //        assertEquals(runtimes.get(workspace.getId()).getRuntimeStatus(),
+  // WorkspaceStatus.SNAPSHOTTING);
   //    }
   //
   //    @Test
@@ -583,18 +610,22 @@ public class RuntimesTest {
   //        runtimes.snapshotAsync(workspace.getId());
   //
   //        captureAsyncTaskAndExecuteSynchronously();
-  //        assertEquals(runtimes.get(workspace.getId()).getRuntimeStatus(), WorkspaceStatus.RUNNING);
+  //        assertEquals(runtimes.get(workspace.getId()).getRuntimeStatus(),
+  // WorkspaceStatus.RUNNING);
   //    }
   //
   //    @Test(expectedExceptions = NotFoundException.class,
   //          expectedExceptionsMessageRegExp = "Workspace with id 'non-existing' is not running")
-  //    public void throwsNotFoundExceptionWhenBeginningSnapshottingForNonExistingWorkspace() throws Exception {
+  //    public void throwsNotFoundExceptionWhenBeginningSnapshottingForNonExistingWorkspace() throws
+  // Exception {
   //        runtimes.snapshot("non-existing");
   //    }
   //
   //    @Test(expectedExceptions = ConflictException.class,
-  //          expectedExceptionsMessageRegExp = "Workspace with id '.*' is not 'RUNNING', it's status is 'SNAPSHOTTING'")
-  //    public void throwsConflictExceptionWhenBeginningSnapshottingForNotRunningWorkspace() throws Exception {
+  //          expectedExceptionsMessageRegExp = "Workspace with id '.*' is not 'RUNNING', it's
+  // status is 'SNAPSHOTTING'")
+  //    public void throwsConflictExceptionWhenBeginningSnapshottingForNotRunningWorkspace() throws
+  // Exception {
   //        final WorkspaceImpl workspace = createWorkspace();
   //        runtimes.start(workspace, workspace.getConfig().getDefaultEnv(), false);
   //
@@ -602,7 +633,8 @@ public class RuntimesTest {
   //        runtimes.snapshotAsync(workspace.getId());
   //    }
   //
-  //    @Test(expectedExceptions = ServerException.class, expectedExceptionsMessageRegExp = "can't save")
+  //    @Test(expectedExceptions = ServerException.class, expectedExceptionsMessageRegExp = "can't
+  // save")
   //    public void failsToCreateSnapshotWhenDevMachineSnapshottingFailed() throws Exception {
   //        final WorkspaceImpl workspace = createWorkspace();
   //        runtimes.start(workspace, workspace.getConfig().getDefaultEnv(), false);
@@ -621,7 +653,8 @@ public class RuntimesTest {
   //                                                   .withError("can't save")
   //                                                   .withStatus(WorkspaceStatus.RUNNING)
   //                                                   .withPrevStatus(WorkspaceStatus.SNAPSHOTTING)
-  //                                                   .withEventType(EventType.SNAPSHOT_CREATION_ERROR));
+  //
+  // .withEventType(EventType.SNAPSHOT_CREATION_ERROR));
   //            throw x;
   //        }
   //    }
@@ -645,20 +678,23 @@ public class RuntimesTest {
   //                                                   .withWorkspaceId(workspace.getId()));
   //            verify(eventService).publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
   //                                                   .withStatus(WorkspaceStatus.RUNNING)
-  //                                                   .withEventType(EventType.SNAPSHOT_CREATION_ERROR)
+  //
+  // .withEventType(EventType.SNAPSHOT_CREATION_ERROR)
   //                                                   .withWorkspaceId(workspace.getId())
   //                                                   .withPrevStatus(WorkspaceStatus.SNAPSHOTTING)
   //                                                   .withError("test"));
   //            verify(snapshotDao).replaceSnapshots(any(),
   //                                                 any(),
   //                                                 snapshotsCaptor.capture());
-  //            verify(envEngine, times(snapshotsCaptor.getValue().size())).removeSnapshot(snapshot);
+  //            verify(envEngine,
+  // times(snapshotsCaptor.getValue().size())).removeSnapshot(snapshot);
   //            throw x;
   //        }
   //    }
   //
   //    @Test
-  //    public void removesOldSnapshotsWhenNewSnapshotsMetadataSuccessfullySaved() throws Exception {
+  //    public void removesOldSnapshotsWhenNewSnapshotsMetadataSuccessfullySaved() throws Exception
+  // {
   //        WorkspaceImpl workspace = createWorkspace();
   //        runtimes.start(workspace, workspace.getConfig().getDefaultEnv(), false);
   //        SnapshotImpl oldSnapshot = mock(SnapshotImpl.class);
@@ -704,13 +740,16 @@ public class RuntimesTest {
   //    }
   //
   //    private static WorkspaceImpl createWorkspace() {
-  //        EnvironmentImpl environment = new EnvironmentImpl(new RecipeImpl("test", "text/text", "", ""), null);
+  //        EnvironmentImpl environment = new EnvironmentImpl(new RecipeImpl("test", "text/text",
+  // "", ""), null);
   //        WorkspaceConfigImpl wsConfig = WorkspaceConfigImpl.builder()
   //                                                          .setName("test workspace")
-  //                                                          .setEnvironments(singletonMap(ENV_NAME, environment))
+  //
+  // .setEnvironments(singletonMap(ENV_NAME, environment))
   //                                                          .setDefaultEnv(ENV_NAME)
   //                                                          .build();
-  //        return new WorkspaceImpl(WORKSPACE_ID, new AccountImpl("accountId", "user123", "test"), wsConfig);
+  //        return new WorkspaceImpl(WORKSPACE_ID, new AccountImpl("accountId", "user123", "test"),
+  // wsConfig);
   //    }
 
   //    @SuppressWarnings("unchecked")
@@ -759,7 +798,8 @@ public class RuntimesTest {
   //        }
   //
   //        @Override
-  //        public RuntimeContext prepare(RuntimeIdentityImpl id, Environment environment) throws ValidationException, ApiException, IOException {
+  //        public RuntimeContext prepare(RuntimeIdentityImpl id, Environment environment) throws
+  // ValidationException, ApiException, IOException {
   //            return new TestRuntimeContext(environment, id, this);
   //        }
   //
@@ -773,11 +813,13 @@ public class RuntimesTest {
   //
   //
   //        @Override
-  //        public Runtime start(RuntimeIdentityImpl runtimeId, Environment environment, MessageConsumer<MachineLogMessage> logger,
+  //        public Runtime start(RuntimeIdentityImpl runtimeId, Environment environment,
+  // MessageConsumer<MachineLogMessage> logger,
   //                                      Map<String, String> options, Subject subject)
   //                throws NotFoundException, ConflictException, ServerException {
   //
-  //            Runtime rt = new RuntimeImpl(runtimeId.getEnvName(), new HashMap<>(), subject.getUserName());
+  //            Runtime rt = new RuntimeImpl(runtimeId.getEnvName(), new HashMap<>(),
+  // subject.getUserName());
   //            runtimes.put(runtimeId, rt);
   //            return rt;
   //        }
@@ -790,12 +832,14 @@ public class RuntimesTest {
   //
   //    public static class TestRuntimeContext extends RuntimeContext {
   //        public TestRuntimeContext(Environment environment, RuntimeIdentityImpl identity,
-  //                                  RuntimeInfrastructure infrastructure) throws ApiException, IOException, ValidationException {
+  //                                  RuntimeInfrastructure infrastructure) throws ApiException,
+  // IOException, ValidationException {
   //            super(environment, identity, infrastructure, null);
   //        }
   //
   //        @Override
-  //        protected InternalRuntime internalStart(Map<String, String> startOptions) throws ServerException {
+  //        protected InternalRuntime internalStart(Map<String, String> startOptions) throws
+  // ServerException {
   //            return new TestInternalRuntime(this);
   //        }
   //

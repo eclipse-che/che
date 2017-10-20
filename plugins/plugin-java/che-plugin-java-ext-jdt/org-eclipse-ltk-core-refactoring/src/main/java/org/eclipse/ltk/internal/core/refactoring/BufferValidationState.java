@@ -268,7 +268,8 @@ class NoStampValidationState extends BufferValidationState {
     // If we have initialized the content stamp with the 'null' stamp then we can't compare it with
     // the current stamp since a change executed later could have set a concrete stamp for the
     // current content
-    // if (fChanged || (fContentStamp != IResource.NULL_STAMP && fContentStamp != fFile.getModificationStamp())
+    // if (fChanged || (fContentStamp != IResource.NULL_STAMP && fContentStamp !=
+    // fFile.getModificationStamp())
     if (fChanged || fContentStamp != fFile.getModificationStamp()) {
       result.addFatalError(
           Messages.format(

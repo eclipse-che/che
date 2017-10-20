@@ -42,7 +42,7 @@ public final class ConstraintCollector extends ASTVisitor {
     return fConstraints.toArray(new ITypeConstraint[fConstraints.size()]);
   }
 
-  //------------------------- visit methods -------------------------//
+  // ------------------------- visit methods -------------------------//
 
   /* (non-Javadoc)
    * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.AnonymousClassDeclaration)

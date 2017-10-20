@@ -211,7 +211,7 @@ public class WorkspaceService extends Service {
           Integer maxItems,
       @ApiParam("Workspace status") @QueryParam("status") String status)
       throws ServerException, BadRequestException {
-    //TODO add maxItems & skipCount to manager
+    // TODO add maxItems & skipCount to manager
     return withLinks(
         workspaceManager
             .getWorkspaces(EnvironmentContext.getCurrent().getSubject().getUserId(), false)
@@ -293,7 +293,7 @@ public class WorkspaceService extends Service {
   public void delete(@ApiParam("The workspace id") @PathParam("id") String id)
       throws BadRequestException, ServerException, NotFoundException, ConflictException,
           ForbiddenException {
-    //workspaceManager.removeSnapshots(id);
+    // workspaceManager.removeSnapshots(id);
     workspaceManager.removeWorkspace(id);
   }
 

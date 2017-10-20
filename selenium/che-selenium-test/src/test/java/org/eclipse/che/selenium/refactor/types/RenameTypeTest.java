@@ -191,7 +191,7 @@ public class RenameTypeTest {
     try {
       refactorPanel.clickOkButtonRefactorForm();
     } catch (org.openqa.selenium.TimeoutException ex) {
-      //For response from server side if a net works too slowly
+      // For response from server side if a net works too slowly
       WaitUtils.sleepQuietly(1);
       refactorPanel.typeNewName("B.java");
       refactorPanel.sendKeysIntoField(Keys.ARROW_LEFT.toString());

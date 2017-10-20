@@ -56,9 +56,9 @@ public class LocalGitUserResolverTest {
 
   @Test
   public void shouldMakeGetPreferencesRequest() throws Exception {
-    //when
+    // when
     resolver.getUser();
-    //then
+    // then
     String url = fromUri(PREFECENCES_URL).path(PreferencesService.class, "find").build().toString();
     verify(requestFactory).fromUrl(eq(url));
     verify(jsonRequest).useGetMethod();

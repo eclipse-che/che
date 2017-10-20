@@ -43,8 +43,7 @@ public class TightSourceRangeComputer extends TargetSourceRangeComputer {
 
     List<StructuralPropertyDescriptor> properties = reference.structuralPropertiesForType();
     for (Iterator<StructuralPropertyDescriptor> iterator = properties.iterator();
-        iterator.hasNext();
-        ) {
+        iterator.hasNext(); ) {
       StructuralPropertyDescriptor descriptor = iterator.next();
       if (descriptor.isChildProperty()) {
         ASTNode child = (ASTNode) reference.getStructuralProperty(descriptor);

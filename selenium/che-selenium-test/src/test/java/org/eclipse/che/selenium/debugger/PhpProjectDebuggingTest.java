@@ -85,7 +85,8 @@ public class PhpProjectDebuggingTest {
 
   @BeforeMethod
   public void startDebug() {
-    // goto root item in the Project Explorer to have proper value of ${current.project.path} when executing maven command.
+    // goto root item in the Project Explorer to have proper value of ${current.project.path} when
+    // executing maven command.
     projectExplorer.selectItem(PROJECT);
   }
 
@@ -145,7 +146,7 @@ public class PhpProjectDebuggingTest {
     // when
     debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_OUT);
 
-    //then
+    // then
     editor.waitTabFileWithSavedStatus("index.php");
     debugPanel.waitDebugHighlightedText("echo sayHello(\"man\");");
     debugPanel.waitTextInVariablesPanel("$_GET=array [0]");
@@ -190,7 +191,7 @@ public class PhpProjectDebuggingTest {
     // when
     debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_OUT);
 
-    //then
+    // then
     editor.waitTabFileWithSavedStatus("index.php");
     debugPanel.waitDebugHighlightedText("echo sayHello(\"man\");");
     debugPanel.waitTextInVariablesPanel("$_GET=array [3]");

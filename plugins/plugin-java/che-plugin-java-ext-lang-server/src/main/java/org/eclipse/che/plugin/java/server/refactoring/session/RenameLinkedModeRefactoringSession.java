@@ -98,7 +98,7 @@ public class RenameLinkedModeRefactoringSession extends RefactoringSession {
     final int pos = nameNode.getStartPosition();
     ASTNode[] sameNodes = LinkedNodeFinder.findByNode(root, nameNode);
 
-    //TODO: copied from LinkedNamesAssistProposal#apply(..):
+    // TODO: copied from LinkedNamesAssistProposal#apply(..):
     // sort for iteration order, starting with the node @ offset
     Arrays.sort(
         sameNodes,
@@ -235,9 +235,11 @@ public class RenameLinkedModeRefactoringSession extends RefactoringSession {
     if (elementType != IJavaElement.PACKAGE_FRAGMENT_ROOT) descriptor.setUpdateReferences(true);
 
     //        IDialogSettings javaSettings= JavaPlugin.getDefault().getDialogSettings();
-    //        IDialogSettings refactoringSettings= javaSettings.getSection(RefactoringWizardPage.REFACTORING_SETTINGS); //TODO: undocumented API
+    //        IDialogSettings refactoringSettings=
+    // javaSettings.getSection(RefactoringWizardPage.REFACTORING_SETTINGS); //TODO: undocumented API
     //        if (refactoringSettings == null) {
-    //            refactoringSettings= javaSettings.addNewSection(RefactoringWizardPage.REFACTORING_SETTINGS);
+    //            refactoringSettings=
+    // javaSettings.addNewSection(RefactoringWizardPage.REFACTORING_SETTINGS);
     //        }
 
     switch (elementType) {
@@ -256,7 +258,7 @@ public class RenameLinkedModeRefactoringSession extends RefactoringSession {
         int strategy;
         try {
           strategy =
-              1; //refactoringSettings.getInt(RenameRefactoringWizard.TYPE_SIMILAR_MATCH_STRATEGY);
+              1; // refactoringSettings.getInt(RenameRefactoringWizard.TYPE_SIMILAR_MATCH_STRATEGY);
         } catch (NumberFormatException e) {
           strategy = RenamingNameSuggestor.STRATEGY_EXACT;
         }
@@ -287,7 +289,7 @@ public class RenameLinkedModeRefactoringSession extends RefactoringSession {
       case IJavaElement.TYPE:
       case IJavaElement.FIELD:
         boolean updateTextualOccurrences =
-            false; //refactoringSettings.getBoolean(RenameRefactoringWizard.UPDATE_TEXTUAL_MATCHES);
+            false; // refactoringSettings.getBoolean(RenameRefactoringWizard.UPDATE_TEXTUAL_MATCHES);
         descriptor.setUpdateTextualOccurrences(updateTextualOccurrences);
         //                fShowPreview|= updateTextualOccurrences;
     }

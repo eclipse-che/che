@@ -80,6 +80,8 @@ public class ResourcesPlugin {
    * @since 2.1
    */
   private static final String PREF_DESCRIPTION_PREFIX = "description."; //$NON-NLS-1$
+
+
   /**
    * Name of a preference for configuring whether the workspace performs auto- builds.
    *
@@ -88,7 +90,7 @@ public class ResourcesPlugin {
    * @since 2.1
    */
   public static final String PREF_AUTO_BUILDING =
-      PREF_DESCRIPTION_PREFIX + "autobuilding"; //$NON-NLS-1$
+      PREF_DESCRIPTION_PREFIX + "autobuilding"; // $NON-NLS-1$
   /**
    * Name of a preference for configuring the maximum number of times that the workspace should
    * rebuild when builders affect projects that have already been built.
@@ -98,7 +100,7 @@ public class ResourcesPlugin {
    * @since 2.1
    */
   public static final String PREF_MAX_BUILD_ITERATIONS =
-      PREF_DESCRIPTION_PREFIX + "maxbuilditerations"; //$NON-NLS-1$
+      PREF_DESCRIPTION_PREFIX + "maxbuilditerations"; // $NON-NLS-1$
   /**
    * Name of a preference for configuring whether to apply the specified history size policy.
    *
@@ -107,7 +109,7 @@ public class ResourcesPlugin {
    * @since 3.6
    */
   public static final String PREF_APPLY_FILE_STATE_POLICY =
-      PREF_DESCRIPTION_PREFIX + "applyfilestatepolicy"; //$NON-NLS-1$
+      PREF_DESCRIPTION_PREFIX + "applyfilestatepolicy"; // $NON-NLS-1$
   /**
    * Name of a preference for configuring the maximum number of milliseconds a file state should be
    * kept in the local history
@@ -117,7 +119,7 @@ public class ResourcesPlugin {
    * @since 2.1
    */
   public static final String PREF_FILE_STATE_LONGEVITY =
-      PREF_DESCRIPTION_PREFIX + "filestatelongevity"; //$NON-NLS-1$
+      PREF_DESCRIPTION_PREFIX + "filestatelongevity"; // $NON-NLS-1$
   /**
    * Name of a preference for configuring the maximum number of states per file that can be stored
    * in the local history.
@@ -127,7 +129,7 @@ public class ResourcesPlugin {
    * @since 2.1
    */
   public static final String PREF_MAX_FILE_STATES =
-      PREF_DESCRIPTION_PREFIX + "maxfilestates"; //$NON-NLS-1$
+      PREF_DESCRIPTION_PREFIX + "maxfilestates"; // $NON-NLS-1$
   /**
    * Name of a preference for configuring the maximum permitted size of a file to be stored in the
    * local history
@@ -137,7 +139,7 @@ public class ResourcesPlugin {
    * @since 2.1
    */
   public static final String PREF_MAX_FILE_STATE_SIZE =
-      PREF_DESCRIPTION_PREFIX + "maxfilestatesize"; //$NON-NLS-1$
+      PREF_DESCRIPTION_PREFIX + "maxfilestatesize"; // $NON-NLS-1$
   /**
    * Name of a preference for configuring the amount of time in milliseconds between automatic
    * workspace snapshots
@@ -148,6 +150,8 @@ public class ResourcesPlugin {
    */
   public static final String PREF_SNAPSHOT_INTERVAL =
       PREF_DESCRIPTION_PREFIX + "snapshotinterval"; //$NON-NLS-1$
+
+
   /**
    * Name of a preference for turning off support for linked resources. When this preference is set
    * to "true", attempting to create linked resources will fail.
@@ -155,7 +159,7 @@ public class ResourcesPlugin {
    * @since 2.1
    */
   public static final String PREF_DISABLE_LINKING =
-      PREF_DESCRIPTION_PREFIX + "disableLinking"; //$NON-NLS-1$
+      PREF_DESCRIPTION_PREFIX + "disableLinking"; // $NON-NLS-1$
   /**
    * Name of a preference for configuring the order projects in the workspace are built.
    *
@@ -164,7 +168,7 @@ public class ResourcesPlugin {
    * @since 2.1
    */
   public static final String PREF_BUILD_ORDER =
-      PREF_DESCRIPTION_PREFIX + "buildorder"; //$NON-NLS-1$
+      PREF_DESCRIPTION_PREFIX + "buildorder"; // $NON-NLS-1$
   /**
    * Name of a preference for configuring whether to use the workspace's default order for building
    * projects.
@@ -173,6 +177,8 @@ public class ResourcesPlugin {
    */
   public static final String PREF_DEFAULT_BUILD_ORDER =
       PREF_DESCRIPTION_PREFIX + "defaultbuildorder"; //$NON-NLS-1$
+
+
   /**
    * The workspace managed by the single instance of this plug-in runtime class, or <code>null
    * </code> is there is none.
@@ -247,7 +253,7 @@ public class ResourcesPlugin {
   public static String getEncoding() {
     String enc = null; // getPlugin().getPluginPreferences().getString(PREF_ENCODING);
     //        if (enc == null || enc.length() == 0) {
-    enc = System.getProperty("file.encoding"); //$NON-NLS-1$
+    enc = System.getProperty("file.encoding"); // $NON-NLS-1$
     //        }
     return enc;
   }

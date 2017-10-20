@@ -35,9 +35,9 @@ import org.eclipse.swt.graphics.Point;
 public class TemplateEngine {
 
   private static final String $_LINE_SELECTION =
-      "${" + GlobalTemplateVariables.LineSelection.NAME + "}"; //$NON-NLS-1$ //$NON-NLS-2$
+      "${" + GlobalTemplateVariables.LineSelection.NAME + "}"; // $NON-NLS-1$ //$NON-NLS-2$
   private static final String $_WORD_SELECTION =
-      "${" + GlobalTemplateVariables.WordSelection.NAME + "}"; //$NON-NLS-1$ //$NON-NLS-2$
+      "${" + GlobalTemplateVariables.WordSelection.NAME + "}"; // $NON-NLS-1$ //$NON-NLS-2$
 
   /** The context type. */
   private TemplateContextType fContextType;
@@ -63,8 +63,7 @@ public class TemplateEngine {
   public void reset() {
     fProposals.clear();
     for (Iterator<Entry<IDocument, Position>> it = fPositions.entrySet().iterator();
-        it.hasNext();
-        ) {
+        it.hasNext(); ) {
       Entry<IDocument, Position> entry = it.next();
       IDocument doc = entry.getKey();
       Position position = entry.getValue();
@@ -113,7 +112,7 @@ public class TemplateEngine {
     CompilationUnitContext context =
         ((CompilationUnitContextType) fContextType)
             .createContext(document, position, compilationUnit);
-    context.setVariable("selection", selectedText); //$NON-NLS-1$
+    context.setVariable("selection", selectedText); // $NON-NLS-1$
     int start = context.getStart();
     int end = context.getEnd();
     IRegion region = new Region(start, end - start);

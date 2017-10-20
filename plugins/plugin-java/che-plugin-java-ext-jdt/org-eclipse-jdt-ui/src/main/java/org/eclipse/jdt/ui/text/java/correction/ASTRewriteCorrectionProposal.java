@@ -129,7 +129,7 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
   protected ASTRewrite getRewrite() throws CoreException {
     if (fRewrite == null) {
       IStatus status =
-          JavaUIStatus.createError(IStatus.ERROR, "Rewrite not initialized", null); //$NON-NLS-1$
+          JavaUIStatus.createError(IStatus.ERROR, "Rewrite not initialized", null); // $NON-NLS-1$
       throw new CoreException(status);
     }
     return fRewrite;

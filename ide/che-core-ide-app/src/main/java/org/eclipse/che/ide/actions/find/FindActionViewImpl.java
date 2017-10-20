@@ -288,8 +288,8 @@ public class FindActionViewImpl extends PopupPanel implements FindActionView {
         hide();
         break;
       default:
-        //here we need some delay to be sure that input box initiated with given value
-        //in manually testing hard to reproduce this problem but it reproduced with selenium tests
+        // here we need some delay to be sure that input box initiated with given value
+        // in manually testing hard to reproduce this problem but it reproduced with selenium tests
         new Timer() {
           @Override
           public void run() {

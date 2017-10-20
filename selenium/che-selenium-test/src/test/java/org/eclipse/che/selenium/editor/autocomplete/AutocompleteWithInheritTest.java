@@ -68,7 +68,7 @@ public class AutocompleteWithInheritTest {
   @Test
   public void updateDependencyWithInheritTest() {
     projectExplorer.waitProjectExplorer();
-    //projectExplorer.waitItem(PROJECT_NAME);
+    // projectExplorer.waitItem(PROJECT_NAME);
     mavenPluginStatusBar.waitClosingInfoPanel();
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByVisibleNameInExplorer("AppController.java");

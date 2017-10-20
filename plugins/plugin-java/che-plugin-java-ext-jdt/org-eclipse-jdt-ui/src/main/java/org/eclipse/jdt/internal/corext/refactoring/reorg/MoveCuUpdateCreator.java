@@ -66,7 +66,7 @@ public class MoveCuUpdateCreator {
   private ICompilationUnit[] fCus;
   private IPackageFragment fDestination;
 
-  private Map<ICompilationUnit, ImportRewrite> fImportRewrites; //ICompilationUnit -> ImportEdit
+  private Map<ICompilationUnit, ImportRewrite> fImportRewrites; // ICompilationUnit -> ImportEdit
 
   public MoveCuUpdateCreator(ICompilationUnit cu, IPackageFragment pack) {
     this(new ICompilationUnit[] {cu}, pack);
@@ -79,12 +79,12 @@ public class MoveCuUpdateCreator {
     fDestination = pack;
     fImportRewrites = new HashMap<ICompilationUnit, ImportRewrite>();
     fNewPackage =
-        fDestination.isDefaultPackage() ? "" : fDestination.getElementName() + '.'; //$NON-NLS-1$
+        fDestination.isDefaultPackage() ? "" : fDestination.getElementName() + '.'; // $NON-NLS-1$
   }
 
   public TextChangeManager createChangeManager(IProgressMonitor pm, RefactoringStatus status)
       throws JavaModelException {
-    pm.beginTask("", 5); //$NON-NLS-1$
+    pm.beginTask("", 5); // $NON-NLS-1$
     try {
       TextChangeManager changeManager = new TextChangeManager();
       addUpdates(changeManager, new SubProgressMonitor(pm, 4), status);
@@ -115,7 +115,7 @@ public class MoveCuUpdateCreator {
   private void addUpdates(
       TextChangeManager changeManager, IProgressMonitor pm, RefactoringStatus status)
       throws CoreException {
-    pm.beginTask("", fCus.length); //$NON-NLS-1$
+    pm.beginTask("", fCus.length); // $NON-NLS-1$
     for (int i = 0; i < fCus.length; i++) {
       if (pm.isCanceled()) throw new OperationCanceledException();
 
@@ -130,7 +130,7 @@ public class MoveCuUpdateCreator {
       RefactoringStatus status)
       throws CoreException {
     try {
-      pm.beginTask("", 3); //$NON-NLS-1$
+      pm.beginTask("", 3); // $NON-NLS-1$
       pm.subTask(
           Messages.format(
               RefactoringCoreMessages.MoveCuUpdateCreator_searching,
@@ -208,7 +208,7 @@ public class MoveCuUpdateCreator {
     else if (result.length() == 0) // move TO default package
     result.append(old.substring(oldPackLength + 1)); // cut "."
     else result.append(old.substring(oldPackLength));
-    int index = result.lastIndexOf("."); //$NON-NLS-1$
+    int index = result.lastIndexOf("."); // $NON-NLS-1$
     if (index > 0 && index < result.length() - 1)
       rewrite.addStaticImport(
           result.substring(0, index), result.substring(index + 1, result.length()), true);
@@ -287,13 +287,13 @@ public class MoveCuUpdateCreator {
       return true;
     }
 
-    //heuristic
+    // heuristic
     if (referencingCu
         .getImport(movedUnit.getParent().getElementName() + ".*")
-        .exists()) //$NON-NLS-1$
+        .exists()) // $NON-NLS-1$
     return true; // has old star import
     if (referencingCu.getParent().equals(movedUnit.getParent()))
-      return true; //is moved away from same package
+      return true; // is moved away from same package
     return false;
   }
 

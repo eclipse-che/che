@@ -82,7 +82,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 public class TypeContextChecker {
   private static class MethodTypesChecker {
 
-    private static final String METHOD_NAME = "__$$__"; //$NON-NLS-1$
+    private static final String METHOD_NAME = "__$$__"; // $NON-NLS-1$
 
     private final IMethod fMethod;
     private final StubTypeContext fStubTypeContext;
@@ -147,7 +147,7 @@ public class TypeContextChecker {
 
     private ITypeBinding[] resolveBindings(
         String[] types, RefactoringStatus[] results, boolean firstPass) throws CoreException {
-      //TODO: split types into parameterTypes and returnType
+      // TODO: split types into parameterTypes and returnType
       int parameterCount = types.length - 1;
       ITypeBinding[] typeBindings = new ITypeBinding[types.length];
 
@@ -226,9 +226,9 @@ public class TypeContextChecker {
         throws JavaModelException {
       int flags = fMethod.getFlags();
       if (Flags.isStatic(flags)) {
-        cuString.append("static "); //$NON-NLS-1$
+        cuString.append("static "); // $NON-NLS-1$
       } else if (Flags.isDefaultMethod(flags)) {
-        cuString.append("default "); //$NON-NLS-1$
+        cuString.append("default "); // $NON-NLS-1$
       }
 
       ITypeParameter[] methodTypeParameters = fMethod.getTypeParameters();
@@ -239,7 +239,7 @@ public class TypeContextChecker {
           if (i > 0) cuString.append(',');
           cuString.append(typeParameter.getElementName());
         }
-        cuString.append("> "); //$NON-NLS-1$
+        cuString.append("> "); // $NON-NLS-1$
       }
 
       cuString.append(types[parameterCount]).append(' ');
@@ -247,9 +247,9 @@ public class TypeContextChecker {
       cuString.append(METHOD_NAME).append('(');
       for (int i = 0; i < parameterCount; i++) {
         if (i > 0) cuString.append(',');
-        cuString.append(types[i]).append(" p").append(i); //$NON-NLS-1$
+        cuString.append(types[i]).append(" p").append(i); // $NON-NLS-1$
       }
-      cuString.append(");"); //$NON-NLS-1$
+      cuString.append(");"); // $NON-NLS-1$
 
       return offsetBeforeMethodName;
     }
@@ -376,7 +376,7 @@ public class TypeContextChecker {
           try {
             visible = JavaModelUtil.isVisible(type, currPackage);
           } catch (JavaModelException e) {
-            //Assume visibile if not available
+            // Assume visibile if not available
           }
           if (visible) {
             result.add(curr);
@@ -419,7 +419,7 @@ public class TypeContextChecker {
 
     private RefactoringStatus checkReturnTypeSyntax() {
       String newTypeName = fReturnTypeInfo.getNewTypeName();
-      if ("".equals(newTypeName.trim())) { //$NON-NLS-1$
+      if ("".equals(newTypeName.trim())) { // $NON-NLS-1$
         String msg = RefactoringCoreMessages.TypeContextChecker_return_type_not_empty;
         return RefactoringStatus.createFatalErrorStatus(msg);
       }
@@ -461,14 +461,14 @@ public class TypeContextChecker {
 
   private static Type parseType(
       String typeString, IJavaProject javaProject, List<String> problemsCollector) {
-    if ("".equals(typeString.trim())) //speed up for a common case //$NON-NLS-1$
+    if ("".equals(typeString.trim())) // speed up for a common case //$NON-NLS-1$
     return null;
     if (!typeString.trim().equals(typeString)) return null;
 
     StringBuffer cuBuff = new StringBuffer();
-    cuBuff.append("interface A{"); //$NON-NLS-1$
+    cuBuff.append("interface A{"); // $NON-NLS-1$
     int offset = cuBuff.length();
-    cuBuff.append(typeString).append(" m();}"); //$NON-NLS-1$
+    cuBuff.append(typeString).append(" m();}"); // $NON-NLS-1$
 
     ASTParser p = ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
     p.setSource(cuBuff.toString().toCharArray());
@@ -496,7 +496,7 @@ public class TypeContextChecker {
     if (typeBinding == null) return null;
     else if (typeBinding.isGenericType()
         && !typeBinding.isRawType()
-        && !typeBinding.isParameterizedType()) return null; //see bug 84585
+        && !typeBinding.isParameterizedType()) return null; // see bug 84585
     else return typeBinding;
   }
 
@@ -522,7 +522,7 @@ public class TypeContextChecker {
     String newTypeName = ParameterInfo.stripEllipsis(type.trim()).trim();
     String typeLabel = BasicElementLabels.getJavaElementName(type);
 
-    if ("".equals(newTypeName.trim())) { //$NON-NLS-1$
+    if ("".equals(newTypeName.trim())) { // $NON-NLS-1$
       String msg =
           Messages.format(RefactoringCoreMessages.TypeContextChecker_parameter_type, typeLabel);
       return RefactoringStatus.createFatalErrorStatus(msg);
@@ -592,7 +592,7 @@ public class TypeContextChecker {
     for (Iterator<? extends BodyDeclaration> iter = types.iterator(); iter.hasNext(); ) {
       BodyDeclaration bodyDeclaration = iter.next();
       if (!(bodyDeclaration instanceof AbstractTypeDeclaration)) {
-        //account for local classes:
+        // account for local classes:
         if (!(bodyDeclaration instanceof MethodDeclaration)) continue;
         int bodyStart = bodyDeclaration.getStartPosition();
         int bodyEnd = bodyDeclaration.getStartPosition() + bodyDeclaration.getLength();
@@ -601,9 +601,9 @@ public class TypeContextChecker {
         buf = bufBefore;
         appendModifiers(buf, methodDeclaration.modifiers());
         appendTypeParameters(buf, methodDeclaration.typeParameters());
-        buf.append(" void "); //$NON-NLS-1$
+        buf.append(" void "); // $NON-NLS-1$
         buf.append(methodDeclaration.getName().getIdentifier());
-        buf.append("(){\n"); //$NON-NLS-1$
+        buf.append("(){\n"); // $NON-NLS-1$
         Block body = methodDeclaration.getBody();
         body.accept(
             new HierarchicalASTVisitor() {
@@ -621,16 +621,16 @@ public class TypeContextChecker {
                 int anonStart = anonDecl.getStartPosition();
                 int anonEnd = anonDecl.getStartPosition() + anonDecl.getLength();
                 if (!(anonStart < focalPosition && focalPosition < anonEnd)) return false;
-                bufBefore.append(" new "); //$NON-NLS-1$
+                bufBefore.append(" new "); // $NON-NLS-1$
                 bufBefore.append(node.getType().toString());
-                bufBefore.append("(){\n"); //$NON-NLS-1$
+                bufBefore.append("(){\n"); // $NON-NLS-1$
                 fillWithTypeStubs(bufBefore, bufAfter, focalPosition, anonDecl.bodyDeclarations());
-                bufAfter.append("};\n"); //$NON-NLS-1$
+                bufAfter.append("};\n"); // $NON-NLS-1$
                 return false;
               }
             });
         buf = bufAfter;
-        buf.append("}\n"); //$NON-NLS-1$
+        buf.append("}\n"); // $NON-NLS-1$
         continue;
       }
 
@@ -640,11 +640,11 @@ public class TypeContextChecker {
 
       if (decl instanceof TypeDeclaration) {
         TypeDeclaration type = (TypeDeclaration) decl;
-        buf.append(type.isInterface() ? "interface " : "class "); //$NON-NLS-1$//$NON-NLS-2$
+        buf.append(type.isInterface() ? "interface " : "class "); // $NON-NLS-1$//$NON-NLS-2$
         buf.append(type.getName().getIdentifier());
         appendTypeParameters(buf, type.typeParameters());
         if (type.getSuperclassType() != null) {
-          buf.append(" extends "); //$NON-NLS-1$
+          buf.append(" extends "); // $NON-NLS-1$
           buf.append(ASTNodes.asString(type.getSuperclassType()));
         }
         List<Type> superInterfaces = type.superInterfaceTypes();
@@ -652,22 +652,22 @@ public class TypeContextChecker {
 
       } else if (decl instanceof AnnotationTypeDeclaration) {
         AnnotationTypeDeclaration annotation = (AnnotationTypeDeclaration) decl;
-        buf.append("@interface "); //$NON-NLS-1$
+        buf.append("@interface "); // $NON-NLS-1$
         buf.append(annotation.getName().getIdentifier());
 
       } else if (decl instanceof EnumDeclaration) {
         EnumDeclaration enumDecl = (EnumDeclaration) decl;
-        buf.append("enum "); //$NON-NLS-1$
+        buf.append("enum "); // $NON-NLS-1$
         buf.append(enumDecl.getName().getIdentifier());
         List<Type> superInterfaces = enumDecl.superInterfaceTypes();
         appendSuperInterfaces(buf, superInterfaces);
       }
 
-      buf.append("{\n"); //$NON-NLS-1$
-      if (decl instanceof EnumDeclaration) buf.append(";\n"); //$NON-NLS-1$
+      buf.append("{\n"); // $NON-NLS-1$
+      if (decl instanceof EnumDeclaration) buf.append(";\n"); // $NON-NLS-1$
       fillWithTypeStubs(bufBefore, bufAfter, focalPosition, decl.bodyDeclarations());
       buf = decl.getStartPosition() + decl.getLength() < focalPosition ? bufBefore : bufAfter;
-      buf.append("}\n"); //$NON-NLS-1$
+      buf.append("}\n"); // $NON-NLS-1$
     }
   }
 
@@ -697,7 +697,7 @@ public class TypeContextChecker {
   private static void appendSuperInterfaces(StringBuffer buf, List<Type> superInterfaces) {
     int superInterfaceCount = superInterfaces.size();
     if (superInterfaceCount > 0) {
-      buf.append(" implements "); //$NON-NLS-1$
+      buf.append(" implements "); // $NON-NLS-1$
       for (int i = 0; i < superInterfaceCount; i++) {
         Type superInterface = superInterfaces.get(i);
         buf.append(ASTNodes.asString(superInterface));
@@ -724,8 +724,8 @@ public class TypeContextChecker {
             + typeName
             + (isInterface
                 ? " implements "
-                : " extends "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-    String epilog = " {} "; //$NON-NLS-1$
+                : " extends "); // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+    String epilog = " {} "; // $NON-NLS-1$
     if (enclosingType != null) {
       try {
         ICompilationUnit cu = enclosingType.getCompilationUnit();
@@ -756,7 +756,7 @@ public class TypeContextChecker {
           new StubTypeContext(
               cu,
               "package " + packageFragment.getElementName() + ";" + prolog,
-              epilog); //$NON-NLS-1$//$NON-NLS-2$
+              epilog); // $NON-NLS-1$//$NON-NLS-2$
 
     } else {
       stubTypeContext = new StubTypeContext(null, null, null);
@@ -778,10 +778,10 @@ public class TypeContextChecker {
     }
 
     StringBuffer cuBuff = new StringBuffer();
-    if (isInterface) cuBuff.append("class __X__ implements "); //$NON-NLS-1$
-    else cuBuff.append("class __X__ extends "); //$NON-NLS-1$
+    if (isInterface) cuBuff.append("class __X__ implements "); // $NON-NLS-1$
+    else cuBuff.append("class __X__ extends "); // $NON-NLS-1$
     int offset = cuBuff.length();
-    cuBuff.append(superType).append(" {}"); //$NON-NLS-1$
+    cuBuff.append(superType).append(" {}"); // $NON-NLS-1$
 
     ASTParser p = ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
     p.setSource(cuBuff.toString().toCharArray());
@@ -856,7 +856,7 @@ public class TypeContextChecker {
     for (int i = 0; i <= last; i++) {
       interfaceOffsets[i] = cuString.length();
       cuString.append(interfaces[i]);
-      if (i != last) cuString.append(", "); //$NON-NLS-1$
+      if (i != last) cuString.append(", "); // $NON-NLS-1$
     }
     cuString.append(superInterfaceContext.getAfterString());
 

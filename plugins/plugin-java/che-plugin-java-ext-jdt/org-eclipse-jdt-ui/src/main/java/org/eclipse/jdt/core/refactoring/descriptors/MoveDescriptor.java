@@ -42,51 +42,51 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 public final class MoveDescriptor extends JavaRefactoringDescriptor {
 
   /** The destination attribute (a java element) */
-  private static final String ATTRIBUTE_DESTINATION = "destination"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_DESTINATION = "destination"; // $NON-NLS-1$
 
   /** The files attribute */
-  private static final String ATTRIBUTE_FILES = "files"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_FILES = "files"; // $NON-NLS-1$
 
   /** The folders attribute */
-  private static final String ATTRIBUTE_FOLDERS = "folders"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_FOLDERS = "folders"; // $NON-NLS-1$
 
   /** The fragments attribute */
-  private static final String ATTRIBUTE_FRAGMENTS = "fragments"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_FRAGMENTS = "fragments"; // $NON-NLS-1$
 
   /** The members attribute */
-  private static final String ATTRIBUTE_MEMBERS = "members"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_MEMBERS = "members"; // $NON-NLS-1$
 
   /** The patterns attribute */
-  private static final String ATTRIBUTE_PATTERNS = "patterns"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_PATTERNS = "patterns"; // $NON-NLS-1$
 
   /** The policy attribute */
-  private static final String ATTRIBUTE_POLICY = "policy"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_POLICY = "policy"; // $NON-NLS-1$
 
   /** The qualified attribute */
-  private static final String ATTRIBUTE_QUALIFIED = "qualified"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_QUALIFIED = "qualified"; // $NON-NLS-1$
 
   /** The roots attribute */
-  private static final String ATTRIBUTE_ROOTS = "roots"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_ROOTS = "roots"; // $NON-NLS-1$
 
   /** The target attribute (a resource) */
-  private static final String ATTRIBUTE_TARGET = "target"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_TARGET = "target"; // $NON-NLS-1$
 
   /** The units attribute */
-  private static final String ATTRIBUTE_UNITS = "units"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_UNITS = "units"; // $NON-NLS-1$
 
   /** The move members policy */
-  private static final String POLICY_MOVE_MEMBERS = "org.eclipse.jdt.ui.moveMembers"; //$NON-NLS-1$
+  private static final String POLICY_MOVE_MEMBERS = "org.eclipse.jdt.ui.moveMembers"; // $NON-NLS-1$
 
   /** The move packages policy */
   private static final String POLICY_MOVE_PACKAGES =
-      "org.eclipse.jdt.ui.movePackages"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.movePackages"; // $NON-NLS-1$
 
   /** The move resources policy */
   private static final String POLICY_MOVE_RESOURCES =
-      "org.eclipse.jdt.ui.moveResources"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.moveResources"; // $NON-NLS-1$
 
   /** The move package fragment roots policy */
-  private static final String POLICY_MOVE_ROOTS = "org.eclipse.jdt.ui.moveRoots"; //$NON-NLS-1$
+  private static final String POLICY_MOVE_ROOTS = "org.eclipse.jdt.ui.moveRoots"; // $NON-NLS-1$
 
   /** The destination, either an IJavaElement, or a full IPath */
   private Object fDestination;
@@ -280,7 +280,7 @@ public final class MoveDescriptor extends JavaRefactoringDescriptor {
    */
   public void setFileNamePatterns(final String patterns) {
     Assert.isNotNull(patterns);
-    Assert.isLegal(!"".equals(patterns), "Pattern must not be empty"); //$NON-NLS-1$ //$NON-NLS-2$
+    Assert.isLegal(!"".equals(patterns), "Pattern must not be empty"); // $NON-NLS-1$ //$NON-NLS-2$
     fPatterns = patterns;
   }
 
@@ -295,7 +295,7 @@ public final class MoveDescriptor extends JavaRefactoringDescriptor {
     Assert.isNotNull(members);
     Assert.isTrue(
         fMovePolicy == null,
-        "Clients must only call one of the 'setMoveXXX' methods."); //$NON-NLS-1$
+        "Clients must only call one of the 'setMoveXXX' methods."); // $NON-NLS-1$
     fMembers = members;
     fMovePolicy = POLICY_MOVE_MEMBERS;
   }
@@ -311,7 +311,7 @@ public final class MoveDescriptor extends JavaRefactoringDescriptor {
     Assert.isNotNull(roots);
     Assert.isTrue(
         fMovePolicy == null,
-        "Clients must only call one of the 'setMoveXXX' methods."); //$NON-NLS-1$
+        "Clients must only call one of the 'setMoveXXX' methods."); // $NON-NLS-1$
     fRoots = roots;
     fMovePolicy = POLICY_MOVE_ROOTS;
   }
@@ -327,7 +327,7 @@ public final class MoveDescriptor extends JavaRefactoringDescriptor {
     Assert.isNotNull(fragments);
     Assert.isTrue(
         fMovePolicy == null,
-        "Clients must only call one of the 'setMoveXXX' methods."); //$NON-NLS-1$
+        "Clients must only call one of the 'setMoveXXX' methods."); // $NON-NLS-1$
     fFragments = fragments;
     fMovePolicy = POLICY_MOVE_PACKAGES;
   }
@@ -348,7 +348,7 @@ public final class MoveDescriptor extends JavaRefactoringDescriptor {
     Assert.isNotNull(units);
     Assert.isTrue(
         fMovePolicy == null,
-        "Clients must only call one of the 'setMoveXXX' methods."); //$NON-NLS-1$
+        "Clients must only call one of the 'setMoveXXX' methods."); // $NON-NLS-1$
     fFiles = new IPath[files.length];
     for (int i = 0; i < files.length; i++) {
       fFiles[i] = files[i].getFullPath();

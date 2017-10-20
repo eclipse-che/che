@@ -90,7 +90,7 @@ public class JavaSearchResult extends AbstractJavaSearchResult {
               JavaPlugin.getPluginId(),
               0,
               "A second search participant was found for an element",
-              null)); //$NON-NLS-1$
+              null)); // $NON-NLS-1$
       return false;
     }
     fElementsToParticipants.put(element, participant);

@@ -34,10 +34,10 @@ public class ShowReferencePresenterTest {
   private static final Path PATH = Path.valueOf("path");
   private static final String PROJECT_TYPE = "type";
 
-  //constructor mocks
+  // constructor mocks
   @Mock private ShowReferenceView view;
 
-  //additional mocks
+  // additional mocks
   @Mock private FqnProvider provider;
 
   @Mock private Resource resource;
