@@ -39,7 +39,7 @@ export class CheProjectItem {
       hasAction: '=?cheHasAction'
     };
 
-    this.templateUrl = 'app/projects/list-projects/project-item/project-item.html';
+    this.templateUrl = 'app/workspaces/workspace-details/workspace-projects/project-item/project-item.html';
 
 
     this.controller = 'ProjectItemCtrl';

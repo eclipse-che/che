@@ -28,7 +28,7 @@ export class ProjectItemCtrl {
   }
 
   redirectToProjectDetails() {
-    this.$location.path('/project/' + this.workspace.namespace + '/' + this.workspace.config.name + '/' + this.project.name);
+    this.$location.path('/workspace/' + this.workspace.namespace + '/' + this.workspace.config.name + '/' + this.project.name);
   }
 
 }

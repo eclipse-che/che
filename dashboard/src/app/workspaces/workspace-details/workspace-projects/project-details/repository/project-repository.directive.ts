@@ -23,7 +23,7 @@ export class ProjectRepository {
   constructor() {
     this.restrict = 'E';
 
-    this.templateUrl = 'app/projects/project-details/repository/project-repository.html';
+    this.templateUrl = 'app/workspaces/workspace-details/workspace-projects/project-details/repository/project-repository.html';
 
     this.controller = 'ProjectRepositoryController';
     this.controllerAs = 'projectRepositoryController';

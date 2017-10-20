@@ -10,7 +10,7 @@
  */
 'use strict';
 
-import {gitMixinId, subversionMixinId} from '../repository/project-repository-data';
+import {gitMixinId, subversionMixinId} from './project-repository-data';
 
 export class ProjectRepositoryController {
 

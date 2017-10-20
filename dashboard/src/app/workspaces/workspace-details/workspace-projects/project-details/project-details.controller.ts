@@ -9,7 +9,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {ConfirmDialogService} from '../../../components/service/confirm-dialog/confirm-dialog.service';
+import {ConfirmDialogService} from '../../../../../components/service/confirm-dialog/confirm-dialog.service';
 
 /**
  * Controller for a project details
@@ -116,7 +116,7 @@ export class ProjectDetailsController {
     if (this.$location.path().endsWith(this.projectDetails.name)) {
       return;
     }
-    this.$location.path('/project/' + this.namespace + '/' + this.workspaceName + '/' + this.projectDetails.name);
+    this.$location.path('/workspace/' + this.namespace + '/' + this.workspaceName + '/' + this.projectDetails.name);
   }
 
   setProjectDetails(projectDetails) {
