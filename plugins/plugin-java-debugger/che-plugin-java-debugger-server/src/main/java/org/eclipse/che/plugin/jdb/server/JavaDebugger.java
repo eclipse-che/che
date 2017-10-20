@@ -46,8 +46,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import org.eclipse.che.api.debug.shared.dto.BreakpointConfigurationDto;
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
-import org.eclipse.che.api.debug.shared.dto.ConditionsDto;
 import org.eclipse.che.api.debug.shared.dto.action.ResumeActionDto;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
@@ -65,7 +65,7 @@ import org.eclipse.che.api.debug.shared.model.action.StepIntoAction;
 import org.eclipse.che.api.debug.shared.model.action.StepOutAction;
 import org.eclipse.che.api.debug.shared.model.action.StepOverAction;
 import org.eclipse.che.api.debug.shared.model.impl.*;
-import org.eclipse.che.api.debug.shared.model.impl.ConditionsImpl;
+import org.eclipse.che.api.debug.shared.model.impl.BreakpointConfigurationImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.BreakpointActivatedEventImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.DisconnectEventImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.SuspendEventImpl;
@@ -209,7 +209,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
     BreakpointImpl breakpoint =
         new BreakpointImpl(
             new LocationImpl(action.getTarget(), action.getLineNumber()),
-            new ConditionsImpl(null, -1),
+            new BreakpointConfigurationImpl(null, -1),
             false);
 
     try {
@@ -279,13 +279,14 @@ public class JavaDebugger implements EventsHandler, Debugger {
     try {
       EventRequest breakPointRequest = requestManager.createBreakpointRequest(location);
       breakPointRequest.setSuspendPolicy(EventRequest.SUSPEND_ALL);
-      String expression = breakpoint.getConditions().getHitCondition();
+      String expression = breakpoint.getBreakpointConfiguration().getCondition();
       if (!(expression == null || expression.isEmpty())) {
         ExpressionParser parser = ExpressionParser.newInstance(expression);
         breakPointRequest.putProperty(
             "org.eclipse.che.ide.java.debug.condition.expression.parser", parser);
       }
-      breakPointRequest.putProperty("hit_count", breakpoint.getConditions().getHitCount());
+      breakPointRequest.putProperty(
+          "hit_count", breakpoint.getBreakpointConfiguration().getHitCount());
       breakPointRequest.setEnabled(true);
     } catch (NativeMethodException | IllegalThreadStateException | InvalidRequestStateException e) {
       throw new DebuggerException(e.getMessage(), e);
@@ -293,7 +294,8 @@ public class JavaDebugger implements EventsHandler, Debugger {
 
     debuggerCallback.onEvent(
         new BreakpointActivatedEventImpl(
-            new BreakpointImpl(breakpoint.getLocation(), breakpoint.getConditions(), true)));
+            new BreakpointImpl(
+                breakpoint.getLocation(), breakpoint.getBreakpointConfiguration(), true)));
 
     LOG.debug("Add breakpoint: {}", location);
   }
@@ -340,8 +342,8 @@ public class JavaDebugger implements EventsHandler, Debugger {
       breakPoints.add(
           newDto(BreakpointDto.class)
               .withEnabled(true)
-              .withConditions(
-                  newDto(ConditionsDto.class)
+              .withBreakpointConfiguration(
+                  newDto(BreakpointConfigurationDto.class)
                       .withHitCount((Integer) breakpointRequest.getProperty("hit_count")))
               .withLocation(asDto(new JdbLocation(location))));
     }
@@ -379,7 +381,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
       invalidateCurrentThread();
 
       for (Breakpoint breakpoint : getAllBreakpoints()) {
-        if (breakpoint.getConditions().getHitCount() == -1) {
+        if (breakpoint.getBreakpointConfiguration().getHitCount() == -1) {
           deleteBreakpoint(breakpoint.getLocation());
         }
       }

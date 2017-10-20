@@ -23,14 +23,8 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
-import org.eclipse.che.api.debug.shared.dto.ConditionsDto;
-import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
-import org.eclipse.che.api.debug.shared.dto.LocationDto;
-import org.eclipse.che.api.debug.shared.dto.SimpleValueDto;
-import org.eclipse.che.api.debug.shared.dto.ThreadStateDto;
-import org.eclipse.che.api.debug.shared.dto.VariableDto;
-import org.eclipse.che.api.debug.shared.dto.VariablePathDto;
+import org.eclipse.che.api.debug.shared.dto.*;
+import org.eclipse.che.api.debug.shared.dto.BreakpointConfigurationDto;
 import org.eclipse.che.api.debug.shared.dto.action.ResumeActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.RunToLocationActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StartActionDto;
@@ -368,17 +362,17 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
       locationDto.setTarget(location.getTarget());
       locationDto.setResourceProjectPath(location.getResourceProjectPath());
 
-      ConditionsDto conditions =
+      BreakpointConfigurationDto conditions =
           dtoFactory
-              .createDto(ConditionsDto.class)
-              .withHitCondition(breakpoint.getConditions().getHitCondition())
-              .withHitCount(breakpoint.getConditions().getHitCount());
+              .createDto(BreakpointConfigurationDto.class)
+              .withCondition(breakpoint.getBreakpointConfiguration().getCondition())
+              .withHitCount(breakpoint.getBreakpointConfiguration().getHitCount());
       BreakpointDto breakpointDto =
           dtoFactory
               .createDto(BreakpointDto.class)
               .withLocation(locationDto)
               .withEnabled(true)
-              .withConditions(conditions);
+              .withBreakpointConfiguration(conditions);
 
       Promise<Void> promise = service.addBreakpoint(debugSessionDto.getId(), breakpointDto);
       promise
@@ -502,15 +496,15 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
       locationDto.setTarget(location.getTarget());
       locationDto.setResourceProjectPath(location.getResourceProjectPath());
 
-      ConditionsDto conditions =
+      BreakpointConfigurationDto conditions =
           dtoFactory
-              .createDto(ConditionsDto.class)
-              .withHitCondition(breakpoint.getConditions().getHitCondition())
-              .withHitCount(breakpoint.getConditions().getHitCount());
+              .createDto(BreakpointConfigurationDto.class)
+              .withCondition(breakpoint.getBreakpointConfiguration().getCondition())
+              .withHitCount(breakpoint.getBreakpointConfiguration().getHitCount());
       BreakpointDto breakpointDto = dtoFactory.createDto(BreakpointDto.class);
       breakpointDto.setLocation(locationDto);
       breakpointDto.setEnabled(true);
-      breakpointDto.setConditions(conditions);
+      breakpointDto.setBreakpointConfiguration(conditions);
 
       breakpoints.add(breakpointDto);
     }
@@ -594,14 +588,16 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   }
 
   @Override
-  public void runToLocation(int lineNumber, String source) {
-    RunToLocationActionDto action =
-        dtoFactory
-            .createDto(RunToLocationActionDto.class)
-            .withType(Action.TYPE.RUN_TO_LOCATION)
-            .withTarget(source)
-            .withLineNumber(lineNumber);
-    service.runToLocation(debugSessionDto.getId(), action);
+  public void runToLocation(Location location) {
+    if (isConnected()) {
+      RunToLocationActionDto action =
+          dtoFactory
+              .createDto(RunToLocationActionDto.class)
+              .withType(Action.TYPE.RUN_TO_LOCATION)
+              .withTarget(location.getTarget())
+              .withLineNumber(location.getLineNumber());
+      service.runToLocation(debugSessionDto.getId(), action);
+    }
   }
 
   @Override

@@ -25,8 +25,8 @@ import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.event.BreakpointActivatedEvent;
 import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
 import org.eclipse.che.api.debug.shared.model.event.SuspendEvent;
+import org.eclipse.che.api.debug.shared.model.impl.BreakpointConfigurationImpl;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
-import org.eclipse.che.api.debug.shared.model.impl.ConditionsImpl;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.ResumeActionImpl;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
@@ -69,7 +69,8 @@ public class BreakpointsTest {
             "/test/src/org/eclipse/BreakpointsTest.java", 35, false, -1, "/test", null, -1);
 
     try {
-      debugger.addBreakpoint(new BreakpointImpl(location, new ConditionsImpl(null, 0), false));
+      debugger.addBreakpoint(
+          new BreakpointImpl(location, new BreakpointConfigurationImpl(null, 0), false));
     } catch (DebuggerException e) {
       // class might not be loaded yet
     }
@@ -99,7 +100,8 @@ public class BreakpointsTest {
         new LocationImpl("org.eclipse.BreakpointsTest", 20, false, -1, "/test", null, -1);
 
     try {
-      debugger.addBreakpoint(new BreakpointImpl(location, new ConditionsImpl(null, 0), false));
+      debugger.addBreakpoint(
+          new BreakpointImpl(location, new BreakpointConfigurationImpl(null, 0), false));
     } catch (DebuggerException e) {
       // class might not be loaded yet
     }
@@ -132,7 +134,8 @@ public class BreakpointsTest {
             "/test/src/org/eclipse/BreakpointsTest.java", 40, false, -1, "/test", null, -1);
 
     try {
-      debugger.addBreakpoint(new BreakpointImpl(location, new ConditionsImpl(null, 0), false));
+      debugger.addBreakpoint(
+          new BreakpointImpl(location, new BreakpointConfigurationImpl(null, 0), false));
     } catch (DebuggerException e) {
       // class might not be loaded yet
     }
@@ -163,7 +166,8 @@ public class BreakpointsTest {
             "/test/src/org/eclipse/BreakpointsTest.java", 24, false, -1, "/test", null, -1);
 
     try {
-      debugger.addBreakpoint(new BreakpointImpl(location, new ConditionsImpl(null, 0), false));
+      debugger.addBreakpoint(
+          new BreakpointImpl(location, new BreakpointConfigurationImpl(null, 0), false));
     } catch (DebuggerException e) {
       // class might not be loaded yet
     }
@@ -194,7 +198,8 @@ public class BreakpointsTest {
             "/test/src/org/eclipse/BreakpointsTest.java", 30, false, -1, "/test", null, -1);
 
     try {
-      debugger.addBreakpoint(new BreakpointImpl(location, new ConditionsImpl(null, 0), false));
+      debugger.addBreakpoint(
+          new BreakpointImpl(location, new BreakpointConfigurationImpl(null, 0), false));
     } catch (DebuggerException e) {
       // class might not be loaded yet
     }
@@ -233,7 +238,8 @@ public class BreakpointsTest {
         new LocationImpl(
             "/test/src/org/eclipse/BreakpointsTest.java", 35, false, -1, "/test", null, -1);
 
-    debugger.addBreakpoint(new BreakpointImpl(location, new ConditionsImpl(null, 0), false));
+    debugger.addBreakpoint(
+        new BreakpointImpl(location, new BreakpointConfigurationImpl(null, 0), false));
     assertEquals(debugger.getAllBreakpoints().size(), 1);
 
     debugger.deleteBreakpoint(location);
@@ -245,7 +251,8 @@ public class BreakpointsTest {
     Location location =
         new LocationImpl(
             "/test/src/org/eclipse/BreakpointsTest.java", 35, false, -1, "/test", null, -1);
-    debugger.addBreakpoint(new BreakpointImpl(location, new ConditionsImpl(null, 0), false));
+    debugger.addBreakpoint(
+        new BreakpointImpl(location, new BreakpointConfigurationImpl(null, 0), false));
 
     List<Breakpoint> breakpoints = debugger.getAllBreakpoints();
     assertEquals(breakpoints.size(), 1);

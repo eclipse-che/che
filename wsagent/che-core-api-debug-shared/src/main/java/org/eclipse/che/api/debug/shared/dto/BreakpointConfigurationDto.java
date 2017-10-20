@@ -10,22 +10,22 @@
  */
 package org.eclipse.che.api.debug.shared.dto;
 
-import org.eclipse.che.api.debug.shared.model.Conditions;
+import org.eclipse.che.api.debug.shared.model.BreakpointConfiguration;
 import org.eclipse.che.dto.shared.DTO;
 
 /** @author Igor Vinokur */
 @DTO
-public interface ConditionsDto extends Conditions {
+public interface BreakpointConfigurationDto extends BreakpointConfiguration {
 
-  String getHitCondition();
+  String getCondition();
 
-  void setHitCondition(String hitCondition);
+  void setCondition(String condition);
 
-  ConditionsDto withHitCondition(String hitCondition);
+  BreakpointConfigurationDto withCondition(String condition);
 
   int getHitCount();
 
   void setHitCount(int hitCount);
 
-  ConditionsDto withHitCount(int hitCount);
+  BreakpointConfigurationDto withHitCount(int hitCount);
 }

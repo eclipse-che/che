@@ -16,12 +16,12 @@ import org.eclipse.che.api.debug.shared.model.action.ResumeAction;
 import org.eclipse.che.api.debug.shared.model.action.RunToLocationAction;
 
 /** @author Igor Vinokur */
-public interface Conditions {
+public interface BreakpointConfiguration {
 
   /** Code that must return @{code boolean} value. If {@code false} then breakpoint must be skipped*/
-  String getHitCondition();
+  String getCondition();
 
-  void setHitCondition(String hitCondition);
+  void setCondition(String condition);
 
   /**
    * Number of activations for breakpoint. If is set to 0 then breakpoint can be activated an

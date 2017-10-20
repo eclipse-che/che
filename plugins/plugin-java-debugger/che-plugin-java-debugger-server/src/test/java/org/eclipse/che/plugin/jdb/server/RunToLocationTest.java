@@ -20,8 +20,8 @@ import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.event.BreakpointActivatedEvent;
 import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
 import org.eclipse.che.api.debug.shared.model.event.SuspendEvent;
+import org.eclipse.che.api.debug.shared.model.impl.BreakpointConfigurationImpl;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
-import org.eclipse.che.api.debug.shared.model.impl.ConditionsImpl;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.ResumeActionImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.RunToLocationActionImpl;
@@ -69,7 +69,7 @@ public class RunToLocationTest {
     Location actualLocation = actualBreakpoint.getLocation();
     assertEquals(actualLocation.getLineNumber(), 20);
     assertEquals(actualLocation.getTarget(), "/test/src/org/eclipse/RunToLocationTest.java");
-    assertTrue(actualBreakpoint.getConditions().getHitCount() == -1);
+    assertTrue(actualBreakpoint.getBreakpointConfiguration().getHitCount() == -1);
     assertTrue(actualBreakpoint.isEnabled());
 
     debuggerEvent = events.take();
@@ -90,8 +90,10 @@ public class RunToLocationTest {
     Location location2 =
         new LocationImpl(
             "/test/src/org/eclipse/RunToLocationTest.java", 23, false, -1, "/test", null, -1);
-    debugger.addBreakpoint(new BreakpointImpl(location1, new ConditionsImpl(null, 0), false));
-    debugger.addBreakpoint(new BreakpointImpl(location2, new ConditionsImpl(null, 0), false));
+    debugger.addBreakpoint(
+        new BreakpointImpl(location1, new BreakpointConfigurationImpl(null, 0), false));
+    debugger.addBreakpoint(
+        new BreakpointImpl(location2, new BreakpointConfigurationImpl(null, 0), false));
 
     DebuggerEvent debuggerEvent = events.take();
     assertTrue(debuggerEvent instanceof BreakpointActivatedEvent);

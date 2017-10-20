@@ -26,8 +26,8 @@ import org.eclipse.che.api.debug.shared.model.event.BreakpointActivatedEvent;
 import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
 import org.eclipse.che.api.debug.shared.model.event.DisconnectEvent;
 import org.eclipse.che.api.debug.shared.model.event.SuspendEvent;
+import org.eclipse.che.api.debug.shared.model.impl.BreakpointConfigurationImpl;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
-import org.eclipse.che.api.debug.shared.model.impl.ConditionsImpl;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.ResumeActionImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.StartActionImpl;
@@ -76,7 +76,9 @@ public class JavaDebuggerTest {
   public void testStartDebugger() throws Exception {
     BreakpointImpl breakpoint =
         new BreakpointImpl(
-            new LocationImpl("com.HelloWorld", 17), new ConditionsImpl(null, 0), false);
+            new LocationImpl("com.HelloWorld", 17),
+            new BreakpointConfigurationImpl(null, 0),
+            false);
     debugger.start(new StartActionImpl(singletonList(breakpoint)));
 
     DebuggerEvent debuggerEvent = events.take();
@@ -96,7 +98,9 @@ public class JavaDebuggerTest {
 
     debugger.addBreakpoint(
         new BreakpointImpl(
-            new LocationImpl("com.HelloWorld", 20), new ConditionsImpl(null, 0), false));
+            new LocationImpl("com.HelloWorld", 20),
+            new BreakpointConfigurationImpl(null, 0),
+            false));
 
     assertTrue(events.take() instanceof BreakpointActivatedEvent);
 

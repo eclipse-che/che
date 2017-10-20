@@ -16,6 +16,7 @@ import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.ThreadStateDto;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
+import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.Variable;
@@ -82,7 +83,7 @@ public interface Debugger extends DebuggerObservable {
   void resume();
 
   /** Runs application to specified location. */
-  void runToLocation(int lineNumber, String source);
+  void runToLocation(Location location);
 
   /** Suspends application. */
   void suspend();

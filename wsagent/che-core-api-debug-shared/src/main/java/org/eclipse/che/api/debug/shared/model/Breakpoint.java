@@ -15,8 +15,8 @@ public interface Breakpoint {
   /** The location of the breakpoint. */
   Location getLocation();
 
-  /** Conditions of the breakpoint. */
-  Conditions getConditions();
+  /** BreakpointConfiguration of the breakpoint. */
+  BreakpointConfiguration getBreakpointConfiguration();
 
   /** Indicates if it is enabled or not. */
   boolean isEnabled();

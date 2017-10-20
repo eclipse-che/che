@@ -44,7 +44,7 @@ public class BreakpointConfigurationPresenter
   public void onApplyClicked() {
     view.close();
 
-    breakpoint.getConditions().setHitCondition(
+    breakpoint.getBreakpointConfiguration().setCondition(
         Strings.isNullOrEmpty(view.getBreakpointCondition())
             ? null
             : view.getBreakpointCondition());

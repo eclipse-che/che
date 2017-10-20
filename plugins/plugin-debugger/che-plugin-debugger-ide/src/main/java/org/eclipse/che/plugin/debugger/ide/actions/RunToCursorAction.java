@@ -16,6 +16,8 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 
 import com.google.inject.Inject;
 import java.util.Collections;
+
+import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -57,9 +59,9 @@ public class RunToCursorAction extends AbstractPerspectiveAction {
     Debugger debugger = debuggerManager.getActiveDebugger();
     EditorPartPresenter editor = editorAgent.getActiveEditor();
     int line = ((TextEditor) editor).getCursorPosition().getLine() + 1;
-    String path = editor.getEditorInput().getFile().getLocation().toString();
+    String target = editor.getEditorInput().getFile().getLocation().toString();
     if (debugger != null) {
-      debugger.runToLocation(line, path);
+      debugger.runToLocation(new LocationImpl(target, line));
     }
   }
 

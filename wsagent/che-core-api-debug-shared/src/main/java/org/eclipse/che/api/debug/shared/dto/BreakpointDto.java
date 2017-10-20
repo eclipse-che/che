@@ -22,11 +22,11 @@ public interface BreakpointDto extends Breakpoint {
 
   BreakpointDto withLocation(LocationDto location);
 
-  ConditionsDto getConditions();
+  BreakpointConfigurationDto getBreakpointConfiguration();
 
-  void setConditions(ConditionsDto conditions);
+  void setBreakpointConfiguration(BreakpointConfigurationDto breakpointConfiguration);
 
-  BreakpointDto withConditions(ConditionsDto conditions);
+  BreakpointDto withBreakpointConfiguration(BreakpointConfigurationDto breakpointConfiguration);
 
   boolean isEnabled();
 

@@ -11,23 +11,23 @@
 package org.eclipse.che.api.debug.shared.model.impl;
 
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
-import org.eclipse.che.api.debug.shared.model.Conditions;
+import org.eclipse.che.api.debug.shared.model.BreakpointConfiguration;
 import org.eclipse.che.api.debug.shared.model.Location;
 
 /** @author Anatoliy Bazko */
 public class BreakpointImpl implements Breakpoint {
   private final Location location;
-  private Conditions conditions;
+  private BreakpointConfiguration breakpointConfiguration;
   private boolean enabled;
 
-  public BreakpointImpl(Location location, Conditions conditions, boolean enabled) {
+  public BreakpointImpl(Location location, BreakpointConfiguration breakpointConfiguration, boolean enabled) {
     this.location = location;
-    this.conditions = conditions;
+    this.breakpointConfiguration = breakpointConfiguration;
     this.enabled = enabled;
   }
 
   public BreakpointImpl(Location location) {
-    this(location, new ConditionsImpl(null, 0), false);
+    this(location, new BreakpointConfigurationImpl(null, 0), false);
   }
 
   @Override
@@ -36,8 +36,8 @@ public class BreakpointImpl implements Breakpoint {
   }
 
   @Override
-  public Conditions getConditions() {
-    return conditions;
+  public BreakpointConfiguration getBreakpointConfiguration() {
+    return breakpointConfiguration;
   }
 
   @Override
@@ -54,14 +54,14 @@ public class BreakpointImpl implements Breakpoint {
 
     if (enabled != that.enabled) return false;
     if (location != null ? !location.equals(that.location) : that.location != null) return false;
-    return !(conditions != null ? !conditions.equals(that.conditions) : that.conditions != null);
+    return !(breakpointConfiguration != null ? !breakpointConfiguration.equals(that.breakpointConfiguration) : that.breakpointConfiguration != null);
   }
 
   @Override
   public int hashCode() {
     int result = location != null ? location.hashCode() : 0;
     result = 31 * result + (enabled ? 1 : 0);
-    result = 31 * result + (conditions != null ? conditions.hashCode() : 0);
+    result = 31 * result + (breakpointConfiguration != null ? breakpointConfiguration.hashCode() : 0);
     return result;
   }
 }

@@ -222,7 +222,7 @@ public interface Debugger {
    * @param action contains specific parameters
    * @throws DebuggerException if any error occur
    */
-  void runToLocation(RunToLocationAction action) throws DebuggerException;
+  default void runToLocation(RunToLocationAction action) throws DebuggerException {}
 
   /**
    * Dump values of local variables, fields and method arguments of the current frame.

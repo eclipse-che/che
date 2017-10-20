@@ -320,11 +320,6 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
   }
 
   @Override
-  public void runToLocation(RunToLocationAction action) throws DebuggerException {
-    // Not implemented
-  }
-
-  @Override
   public void resume(ResumeAction action) throws DebuggerException {
     sendGo();
   }

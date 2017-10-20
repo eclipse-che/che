@@ -347,9 +347,6 @@ public class GdbDebugger implements Debugger {
   }
 
   @Override
-  public void runToLocation(RunToLocationAction action) throws DebuggerException {}
-
-  @Override
   public void resume(ResumeAction action) throws DebuggerException {
     try {
       GdbContinue gdbContinue = gdb.cont();

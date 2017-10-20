@@ -26,7 +26,7 @@ import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.testng.annotations.*;
 
 /** @author Igor Vinokur */
-public class RunDebugToCursorTest {
+public class RunToCursorDebugTest {
   private static final String PROJECT = "java-run-to-cursor";
   private static final String PATH_TO_CLASS = PROJECT + "/src/main/java/test/App.java";
 

@@ -214,11 +214,6 @@ public class NodeJsDebugger implements Debugger, NodeJsProcessObserver {
   }
 
   @Override
-  public void runToLocation(RunToLocationAction action) throws DebuggerException {
-    // Not implemented
-  }
-
-  @Override
   public void resume(ResumeAction action) throws DebuggerException {
     try {
       library.cont();
