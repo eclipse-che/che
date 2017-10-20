@@ -23,6 +23,7 @@ import com.google.gwt.user.client.ui.Widget;
 import elemental.dom.Element;
 import elemental.events.Event;
 import elemental.events.EventListener;
+import elemental.events.MouseEvent;
 import elemental.js.dom.JsElement;
 import java.util.ArrayList;
 import java.util.List;
@@ -95,18 +96,11 @@ public class SimpleList<M> extends UiComponent<SimpleList.View> implements IsWid
 
   /** Receives events fired on items in the list. */
   public interface ListEventDelegate<M> {
-    void onListItemClicked(Element listItemBase, M itemData);
+    default void onListItemClicked(Element listItemBase, M itemData) {}
 
-    void onListItemDoubleClicked(Element listItemBase, M itemData);
-  }
+    default void onListItemDoubleClicked(Element listItemBase, M itemData) {}
 
-  /** A {@link ListEventDelegate} which performs no action. */
-  public static class NoOpListEventDelegate<M> implements ListEventDelegate<M> {
-    @Override
-    public void onListItemClicked(Element listItemBase, M itemData) {}
-
-    @Override
-    public void onListItemDoubleClicked(Element listItemBase, M itemData) {}
+    default void onListItemContextMenu(int clientX, int clientY, M itemData) {}
   }
 
   /** Item style selectors for a simple list item. */
@@ -439,6 +433,32 @@ public class SimpleList<M> extends UiComponent<SimpleList.View> implements IsWid
 
                 ListItem<M> listItem = ListItem.cast(listItemElem);
                 eventDelegate.onListItemDoubleClicked(listItem, listItem.getData());
+              }
+            },
+            false);
+
+    getView()
+        .addEventListener(
+            Event.CONTEXTMENU,
+            new EventListener() {
+              @Override
+              public void handleEvent(Event evt) {
+                MouseEvent mouseEvt = (MouseEvent) evt;
+                Element listItemElem =
+                    CssUtils.getAncestorOrSelfWithClassName(
+                        (Element) evt.getTarget(), css.listItem());
+
+                if (listItemElem == null) {
+                  Log.warn(
+                      SimpleList.class,
+                      "Unable to find an ancestor that was a list item for a click on: ",
+                      evt.getTarget());
+                  return;
+                }
+
+                ListItem<M> listItem = ListItem.cast(listItemElem);
+                eventDelegate.onListItemContextMenu(
+                    mouseEvt.getClientX(), mouseEvt.getClientY(), listItem.getData());
               }
             },
             false);

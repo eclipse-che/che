@@ -56,14 +56,14 @@ public class AbstractPerspectiveTest {
 
   private static final String SOME_TEXT = "someText";
 
-  //constructor mocks
+  // constructor mocks
   @Mock private PerspectiveViewImpl view;
   @Mock private PartStackPresenterFactory stackPresenterFactory;
   @Mock private PartStackViewFactory partStackViewFactory;
   @Mock private WorkBenchControllerFactory controllerFactory;
   @Mock private EventBus eventBus;
 
-  //additional mocks
+  // additional mocks
   @Mock private FlowPanel panel;
   @Mock private SplitLayoutPanel layoutPanel;
   @Mock private SimplePanel simplePanel;

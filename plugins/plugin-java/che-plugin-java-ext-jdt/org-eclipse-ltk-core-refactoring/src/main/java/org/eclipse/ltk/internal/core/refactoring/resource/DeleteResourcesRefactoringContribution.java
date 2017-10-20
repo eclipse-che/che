@@ -18,11 +18,11 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.resource.DeleteResourcesDescriptor;
 
 public class DeleteResourcesRefactoringContribution extends RefactoringContribution {
-  private static final String TRUE = "true"; //$NON-NLS-1$
-  private static final String FALSE = "false"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_DELETE_CONTENTS = "deleteContents"; //$NON-NLS-1$
+  private static final String TRUE = "true"; // $NON-NLS-1$
+  private static final String FALSE = "false"; // $NON-NLS-1$
+  private static final String ATTRIBUTE_DELETE_CONTENTS = "deleteContents"; // $NON-NLS-1$
   /** Key used for the number of resource to be deleted */
-  private static final String ATTRIBUTE_NUMBER_OF_RESOURCES = "resources"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_NUMBER_OF_RESOURCES = "resources"; // $NON-NLS-1$
 
   /**
    * Key prefix used for the path of the resource to be deleted
@@ -30,7 +30,7 @@ public class DeleteResourcesRefactoringContribution extends RefactoringContribut
    * <p>The element arguments are simply distinguished by appending a number to the argument name,
    * e.g. element1. The indices of this argument are one-based.
    */
-  private static final String ATTRIBUTE_ELEMENT = "element"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_ELEMENT = "element"; // $NON-NLS-1$
 
   /* (non-Javadoc)
    * @see org.eclipse.ltk.core.refactoring.RefactoringContribution#retrieveArgumentMap(org.eclipse.ltk.core.refactoring.RefactoringDescriptor)
@@ -73,7 +73,7 @@ public class DeleteResourcesRefactoringContribution extends RefactoringContribut
       int numResources = Integer.parseInt((String) arguments.get(ATTRIBUTE_NUMBER_OF_RESOURCES));
       if (numResources < 0 || numResources > 100000) {
         throw new IllegalArgumentException(
-            "Can not restore DeleteResourcesDescriptor from map, number of moved elements invalid"); //$NON-NLS-1$
+            "Can not restore DeleteResourcesDescriptor from map, number of moved elements invalid"); // $NON-NLS-1$
       }
 
       IPath[] resourcePaths = new IPath[numResources];
@@ -81,7 +81,7 @@ public class DeleteResourcesRefactoringContribution extends RefactoringContribut
         String resource = (String) arguments.get(ATTRIBUTE_ELEMENT + String.valueOf(i + 1));
         if (resource == null) {
           throw new IllegalArgumentException(
-              "Can not restore DeleteResourcesDescriptor from map, resource missing"); //$NON-NLS-1$
+              "Can not restore DeleteResourcesDescriptor from map, resource missing"); // $NON-NLS-1$
         }
         resourcePaths[i] = ResourceProcessors.handleToResourcePath(project, resource);
       }
@@ -98,9 +98,9 @@ public class DeleteResourcesRefactoringContribution extends RefactoringContribut
       }
     } catch (NumberFormatException e) {
       throw new IllegalArgumentException(
-          "Can not restore DeleteResourcesDescriptor from map"); //$NON-NLS-1$
+          "Can not restore DeleteResourcesDescriptor from map"); // $NON-NLS-1$
     }
     throw new IllegalArgumentException(
-        "Can not restore DeleteResourceDescriptor from map"); //$NON-NLS-1$
+        "Can not restore DeleteResourceDescriptor from map"); // $NON-NLS-1$
   }
 }

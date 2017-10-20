@@ -8,7 +8,7 @@ import java.io.InputStreamReader;
 /** @author Evgen Vidolob */
 public class NLSUtil {
 
-  //no instances
+  // no instances
   private NLSUtil() {}
 
   /**

@@ -60,10 +60,10 @@ public class PersonalAccountPermissionsCheckerTest {
 
   @Test
   public void shouldReturnPersonalAccountType() throws Exception {
-    //when
+    // when
     final String accountType = permissionsChecker.getAccountType();
 
-    //then
+    // then
     Assert.assertEquals(accountType, UserManager.PERSONAL_ACCOUNT);
   }
 }

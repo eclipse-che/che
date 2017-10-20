@@ -215,7 +215,7 @@ public class ServerContainerInitializeListener implements ServletContextListener
   }
 
   protected SecurityContext createSecurityContext(final HandshakeRequest req) {
-    final boolean isSecure = false; //todo: get somehow from request
+    final boolean isSecure = false; // todo: get somehow from request
     final String authType = "BASIC";
     final Subject subject = EnvironmentContext.getCurrent().getSubject();
 

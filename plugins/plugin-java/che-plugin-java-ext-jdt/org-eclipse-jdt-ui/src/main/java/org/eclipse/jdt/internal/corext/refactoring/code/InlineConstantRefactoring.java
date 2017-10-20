@@ -124,8 +124,8 @@ import org.eclipse.text.edits.TextEditGroup;
 
 public class InlineConstantRefactoring extends Refactoring {
 
-  private static final String ATTRIBUTE_REPLACE = "replace"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_REMOVE = "remove"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_REPLACE = "replace"; // $NON-NLS-1$
+  private static final String ATTRIBUTE_REMOVE = "remove"; // $NON-NLS-1$
 
   private static class InlineTargetCompilationUnit {
 
@@ -406,7 +406,7 @@ public class InlineConstantRefactoring extends Refactoring {
               return;
             }
           }
-          qualifyToTopLevelClass(memberName); //otherwise: qualify and import non-static
+          qualifyToTopLevelClass(memberName); // otherwise: qualify and import non-static
         }
       }
 
@@ -643,7 +643,7 @@ public class InlineConstantRefactoring extends Refactoring {
             oldIndent,
             project,
             "",
-            TextUtilities.getDefaultLineDelimiter(document)); //$NON-NLS-1$
+            TextUtilities.getDefaultLineDelimiter(document)); // $NON-NLS-1$
       } catch (MalformedTreeException e) {
         JavaPlugin.log(e);
       } catch (BadLocationException e) {
@@ -670,7 +670,8 @@ public class InlineConstantRefactoring extends Refactoring {
     }
   }
 
-  // ---- End InlineTargetCompilationUnit ----------------------------------------------------------------------------------------------
+  // ---- End InlineTargetCompilationUnit
+  // ----------------------------------------------------------------------------------------------
 
   private static SimpleName getLeftmost(Name name) {
     if (name instanceof SimpleName) return (SimpleName) name;
@@ -788,7 +789,7 @@ public class InlineConstantRefactoring extends Refactoring {
   @Override
   public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
     try {
-      pm.beginTask("", 3); //$NON-NLS-1$
+      pm.beginTask("", 3); // $NON-NLS-1$
 
       if (!fSelectionCu.isStructureKnown())
         return RefactoringStatus.createStatus(
@@ -906,7 +907,7 @@ public class InlineConstantRefactoring extends Refactoring {
   @Override
   public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
     RefactoringStatus result = new RefactoringStatus();
-    pm.beginTask("", 3); //$NON-NLS-1$
+    pm.beginTask("", 3); // $NON-NLS-1$
 
     try {
       fSelectionCuRewrite.clearASTAndImportRewrites();
@@ -1076,7 +1077,7 @@ public class InlineConstantRefactoring extends Refactoring {
           JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION,
           new Integer(fSelectionStart).toString()
               + " "
-              + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+              + new Integer(fSelectionLength).toString()); // $NON-NLS-1$
       arguments.put(ATTRIBUTE_REMOVE, Boolean.valueOf(fRemoveDeclaration).toString());
       arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplaceAllReferences).toString());
       return new DynamicValidationRefactoringChange(

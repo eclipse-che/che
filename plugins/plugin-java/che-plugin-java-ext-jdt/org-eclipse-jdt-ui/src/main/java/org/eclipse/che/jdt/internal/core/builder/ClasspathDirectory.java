@@ -152,9 +152,9 @@ public class ClasspathDirectory extends CodenvyClasspathLocation {
 
   public String toString() {
     String start =
-        "Binary classpath directory " + this.binaryFolder.getFullPath().toString(); //$NON-NLS-1$
+        "Binary classpath directory " + this.binaryFolder.getFullPath().toString(); // $NON-NLS-1$
     if (this.accessRuleSet == null) return start;
-    return start + " with " + this.accessRuleSet; //$NON-NLS-1$
+    return start + " with " + this.accessRuleSet; // $NON-NLS-1$
   }
 
   public String debugPathString() {

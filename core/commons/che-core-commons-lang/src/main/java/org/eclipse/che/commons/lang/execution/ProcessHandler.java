@@ -58,7 +58,7 @@ public class ProcessHandler implements Executor {
   private ProcessListener createNotifier() {
     InvocationHandler invocationHandler =
         (proxy, method, args) -> {
-          //call method over all listeners
+          // call method over all listeners
           for (ProcessListener listener : listeners) {
             method.invoke(listener, args);
           }

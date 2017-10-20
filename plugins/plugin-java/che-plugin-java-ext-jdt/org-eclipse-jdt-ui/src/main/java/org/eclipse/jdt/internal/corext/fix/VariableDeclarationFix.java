@@ -125,8 +125,7 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 
       List<VariableDeclarationFragment> fragments = node.fragments();
       for (Iterator<VariableDeclarationFragment> iterator = fragments.iterator();
-          iterator.hasNext();
-          ) {
+          iterator.hasNext(); ) {
         VariableDeclarationFragment fragment = iterator.next();
         Expression initializer = fragment.getInitializer();
         if (initializer != null) {
@@ -144,8 +143,7 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 
       List<VariableDeclarationFragment> fragments = node.fragments();
       for (Iterator<VariableDeclarationFragment> iterator = fragments.iterator();
-          iterator.hasNext();
-          ) {
+          iterator.hasNext(); ) {
         VariableDeclarationFragment fragment = iterator.next();
         Expression initializer = fragment.getInitializer();
         if (initializer != null) {
@@ -206,15 +204,15 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
       if (Modifier.isStatic(((FieldDeclaration) fragment.getParent()).getModifiers())) return false;
 
       if (!fWrittenVariables.containsKey(binding)) {
-        //variable is not written
-        if (fragment.getInitializer() == null) { //variable is not initialized
+        // variable is not written
+        if (fragment.getInitializer() == null) { // variable is not initialized
           return false;
         } else {
           return true;
         }
       }
 
-      if (fragment.getInitializer() != null) //variable is initialized and written
+      if (fragment.getInitializer() != null) // variable is initialized and written
       return false;
 
       ITypeBinding declaringClass = binding.getDeclaringClass();
@@ -229,7 +227,7 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
         SimpleName name = writes.get(i);
         MethodDeclaration constructor = getWritingConstructor(name);
         if (writingConstructors.contains(
-            constructor)) //variable is written twice or more in constructor
+            constructor)) // variable is written twice or more in constructor
         return false;
 
         if (canReturn(constructor)) return false;
@@ -245,7 +243,7 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
         MethodDeclaration constructor = writingConstructors.get(i);
         if (callsWritingConstructor(
             constructor,
-            writingConstructorBindings)) //writing constructor calls other writing constructor
+            writingConstructorBindings)) // writing constructor calls other writing constructor
         return false;
       }
 
@@ -263,8 +261,9 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
           if (!writingConstructorBindings.contains(methodBinding)) {
             if (!callsWritingConstructor(
                 methods[i],
-                writingConstructorBindings)) //non writing constructor does not call a writing constructor
-            return false;
+                writingConstructorBindings)) // non writing constructor does not call a writing
+              // constructor
+              return false;
           }
         }
       }

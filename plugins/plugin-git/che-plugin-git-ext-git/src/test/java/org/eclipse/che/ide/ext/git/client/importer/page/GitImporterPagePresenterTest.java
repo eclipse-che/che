@@ -108,7 +108,7 @@ public class GitImporterPagePresenterTest {
 
   @Test
   public void testSshUriWithHostBetweenDoubleSlashAndSlash() {
-    //Check for type uri which start with ssh:// and has host between // and /
+    // Check for type uri which start with ssh:// and has host between // and /
     String correctUrl = "ssh://host.com/some/path";
     when(view.getProjectName()).thenReturn("");
 
@@ -119,7 +119,7 @@ public class GitImporterPagePresenterTest {
 
   @Test
   public void testSshUriWithHostBetweenDoubleSlashAndColon() {
-    //Check for type uri with host between // and :
+    // Check for type uri with host between // and :
     String correctUrl = "ssh://host.com:port/some/path";
     when(view.getProjectName()).thenReturn("");
 
@@ -130,7 +130,7 @@ public class GitImporterPagePresenterTest {
 
   @Test
   public void testGitUriWithHostBetweenDoubleSlashAndSlash() {
-    //Check for type uri which start with git:// and has host between // and /
+    // Check for type uri which start with git:// and has host between // and /
     String correctUrl = "git://host.com/user/repo";
     when(view.getProjectName()).thenReturn("");
 
@@ -141,7 +141,7 @@ public class GitImporterPagePresenterTest {
 
   @Test
   public void testSshUriWithHostBetweenAtAndColon() {
-    //Check for type uri with host between @ and :
+    // Check for type uri with host between @ and :
     String correctUrl = "user@host.com:login/repo";
     when(view.getProjectName()).thenReturn("");
 
@@ -152,7 +152,7 @@ public class GitImporterPagePresenterTest {
 
   @Test
   public void testSshUriWithHostBetweenAtAndSlash() {
-    //Check for type uri with host between @ and /
+    // Check for type uri with host between @ and /
     String correctUrl = "ssh://user@host.com/some/path";
     when(view.getProjectName()).thenReturn("");
 

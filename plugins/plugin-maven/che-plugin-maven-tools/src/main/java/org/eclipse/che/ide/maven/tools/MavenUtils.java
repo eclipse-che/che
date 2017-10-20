@@ -267,7 +267,8 @@ public class MavenUtils {
               }
               if ("Maven version".equals(key)) {
                 int valueEnd = valueStart;
-                // Don't show version details, e.g. (0728685237757ffbf44136acec0402957f723d9a; 2013-09-17 18:22:22+0300)
+                // Don't show version details, e.g. (0728685237757ffbf44136acec0402957f723d9a;
+                // 2013-09-17 18:22:22+0300)
                 while (valueEnd < l && '(' != line.charAt(valueEnd)) {
                   valueEnd++;
                 }

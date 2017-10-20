@@ -46,7 +46,7 @@ public class UnixSshScript extends SshScript {
   @Override
   protected void protectPrivateKeyFile(File sshKey) throws ServerException {
     try {
-      //set permission to -rw-------
+      // set permission to -rw-------
       Set<PosixFilePermission> permissions = EnumSet.of(OWNER_READ, OWNER_WRITE);
       Files.setPosixFilePermissions(sshKey.toPath(), permissions);
     } catch (IOException e) {

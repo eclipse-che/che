@@ -122,7 +122,8 @@ public class SemanticHighlightingReconciler {
      */
     @Override
     public boolean visit(ConstructorInvocation node) {
-      // XXX Hack for performance reasons (should loop over fJobSemanticHighlightings can call consumes(*))
+      // XXX Hack for performance reasons (should loop over fJobSemanticHighlightings can call
+      // consumes(*))
       if (fJobDeprecatedMemberHighlighting != null) {
         IMethodBinding constructorBinding = node.resolveConstructorBinding();
         if (constructorBinding != null && constructorBinding.isDeprecated()) {
@@ -141,7 +142,8 @@ public class SemanticHighlightingReconciler {
      */
     @Override
     public boolean visit(SuperConstructorInvocation node) {
-      // XXX Hack for performance reasons (should loop over fJobSemanticHighlightings can call consumes(*))
+      // XXX Hack for performance reasons (should loop over fJobSemanticHighlightings can call
+      // consumes(*))
       if (fJobDeprecatedMemberHighlighting != null) {
         IMethodBinding constructorBinding = node.resolveConstructorBinding();
         if (constructorBinding != null && constructorBinding.isDeprecated()) {

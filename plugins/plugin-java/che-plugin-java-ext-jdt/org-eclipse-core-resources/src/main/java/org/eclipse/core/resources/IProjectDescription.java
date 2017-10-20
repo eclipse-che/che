@@ -29,7 +29,7 @@ public interface IProjectDescription {
    *
    * @since 2.0
    */
-  public static final String DESCRIPTION_FILE_NAME = ".project"; //$NON-NLS-1$
+  public static final String DESCRIPTION_FILE_NAME = ".project"; // $NON-NLS-1$
 
   /**
    * Returns the build configurations referenced by the specified configuration for the described

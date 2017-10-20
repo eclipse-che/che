@@ -74,7 +74,7 @@ public final class CaptureType extends AbstractTypeVariable {
         return ((WildcardType) lhs).checkAssignmentBound(this);
 
       case TYPE_VARIABLE:
-        return false; //fWildcard.doCanAssignTo(lhs);
+        return false; // fWildcard.doCanAssignTo(lhs);
 
       case CAPTURE_TYPE:
         return ((CaptureType) lhs).checkLowerBound(this.getWildcard());
@@ -98,11 +98,11 @@ public final class CaptureType extends AbstractTypeVariable {
 
   @Override
   public String getName() {
-    return ""; //$NON-NLS-1$
+    return ""; // $NON-NLS-1$
   }
 
   @Override
   protected String getPlainPrettySignature() {
-    return "capture-of " + fWildcard.getPrettySignature(); //$NON-NLS-1$
+    return "capture-of " + fWildcard.getPrettySignature(); // $NON-NLS-1$
   }
 }

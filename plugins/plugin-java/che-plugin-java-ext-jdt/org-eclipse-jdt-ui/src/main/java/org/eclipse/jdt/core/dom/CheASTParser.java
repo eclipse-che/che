@@ -226,10 +226,10 @@ public class CheASTParser {
       }
       ArrayList pendingErrors = main.pendingErrors;
       if (pendingErrors != null && pendingErrors.size() != 0) {
-        throw new IllegalStateException("invalid environment settings"); //$NON-NLS-1$
+        throw new IllegalStateException("invalid environment settings"); // $NON-NLS-1$
       }
     } catch (IllegalArgumentException e) {
-      throw new IllegalStateException("invalid environment settings"); //$NON-NLS-1$
+      throw new IllegalStateException("invalid environment settings"); // $NON-NLS-1$
     }
     return allClasspaths;
   }
@@ -738,10 +738,10 @@ public class CheASTParser {
    */
   public ASTNode createAST(IProgressMonitor monitor) {
     ASTNode result = null;
-    if (monitor != null) monitor.beginTask("", 1); //$NON-NLS-1$
+    if (monitor != null) monitor.beginTask("", 1); // $NON-NLS-1$
     try {
       if (this.rawSource == null && this.typeRoot == null) {
-        throw new IllegalStateException("source not specified"); //$NON-NLS-1$
+        throw new IllegalStateException("source not specified"); // $NON-NLS-1$
       }
       result = internalCreateAST(monitor);
     } finally {
@@ -826,7 +826,7 @@ public class CheASTParser {
       }
       if ((this.bits & CompilationUnitResolver.RESOLVE_BINDING) != 0) {
         if (this.project == null)
-          throw new IllegalStateException("project not specified"); //$NON-NLS-1$
+          throw new IllegalStateException("project not specified"); // $NON-NLS-1$
         if ((this.bits & CompilationUnitResolver.BINDING_RECOVERY) != 0) {
           flags |= ICompilationUnit.ENABLE_BINDINGS_RECOVERY;
         }
@@ -931,7 +931,7 @@ public class CheASTParser {
         if (this.classpaths == null
             && this.sourcepaths == null
             && ((this.bits & CompilationUnitResolver.INCLUDE_RUNNING_VM_BOOTCLASSPATH) == 0)) {
-          throw new IllegalStateException("no environment is specified"); //$NON-NLS-1$
+          throw new IllegalStateException("no environment is specified"); // $NON-NLS-1$
         }
         if ((this.bits & CompilationUnitResolver.BINDING_RECOVERY) != 0) {
           flags |= ICompilationUnit.ENABLE_BINDINGS_RECOVERY;
@@ -1000,7 +1000,7 @@ public class CheASTParser {
   public IBinding[] createBindings(IJavaElement[] elements, IProgressMonitor monitor) {
     try {
       if (this.project == null)
-        throw new IllegalStateException("project or classpath not specified"); //$NON-NLS-1$
+        throw new IllegalStateException("project or classpath not specified"); // $NON-NLS-1$
       int flags = 0;
       if ((this.bits & CompilationUnitResolver.STATEMENT_RECOVERY) != 0) {
         flags |= ICompilationUnit.ENABLE_STATEMENTS_RECOVERY;
@@ -1099,7 +1099,8 @@ public class CheASTParser {
               PackageFragment packageFragment = (PackageFragment) this.typeRoot.getParent();
               BinaryType type = (BinaryType) this.typeRoot.findPrimaryType();
               IBinaryType binaryType = (IBinaryType) type.getElementInfo();
-              // file name is used to recreate the Java element, so it has to be the toplevel .class file name
+              // file name is used to recreate the Java element, so it has to be the toplevel .class
+              // file name
               char[] fileName = binaryType.getFileName();
               int firstDollar = CharOperation.indexOf('$', fileName);
               if (firstDollar != -1) {
@@ -1143,7 +1144,7 @@ public class CheASTParser {
                     this.rawSource,
                     null,
                     this.unitName == null ? "" : this.unitName,
-                    this.project); //$NON-NLS-1$
+                    this.project); // $NON-NLS-1$
           } else {
             throw new IllegalStateException();
           }

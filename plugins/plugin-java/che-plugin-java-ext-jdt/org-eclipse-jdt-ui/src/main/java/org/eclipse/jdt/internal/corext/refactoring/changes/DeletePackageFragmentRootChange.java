@@ -105,7 +105,7 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
         IPackageFragmentRoot.ORIGINATING_PROJECT_CLASSPATH
             | IPackageFragmentRoot.OTHER_REFERRING_PROJECTS_CLASSPATH;
 
-    pm.beginTask("", 2); //$NON-NLS-1$
+    pm.beginTask("", 2); // $NON-NLS-1$
     IPackageFragmentRoot root = getRoot();
     IResource rootResource = root.getResource();
     CompositeChange result = new CompositeChange(getName());
@@ -115,7 +115,7 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
     HashMap<IFile, String> classpathFilesContents = new HashMap<IFile, String>();
     for (int i = 0; i < referencingProjects.length; i++) {
       IJavaProject javaProject = referencingProjects[i];
-      IFile classpathFile = javaProject.getProject().getFile(".classpath"); //$NON-NLS-1$
+      IFile classpathFile = javaProject.getProject().getFile(".classpath"); // $NON-NLS-1$
       if (classpathFile.exists()) {
         classpathFilesContents.put(classpathFile, getFileContents(classpathFile));
       }
@@ -125,12 +125,11 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 
     rootDescription.recordStateFromHistory(rootResource, new SubProgressMonitor(pm, 1));
     for (Iterator<Entry<IFile, String>> iterator = classpathFilesContents.entrySet().iterator();
-        iterator.hasNext();
-        ) {
+        iterator.hasNext(); ) {
       Entry<IFile, String> entry = iterator.next();
       IFile file = entry.getKey();
       String contents = entry.getValue();
-      //Restore time stamps? This should probably be some sort of UndoTextFileChange.
+      // Restore time stamps? This should probably be some sort of UndoTextFileChange.
       TextFileChange classpathUndo =
           new TextFileChange(
               Messages.format(
@@ -181,7 +180,7 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 
   private boolean confirmDeleteIfReferenced() throws JavaModelException {
     IPackageFragmentRoot root = getRoot();
-    if (!root.isArchive() && !root.isExternal()) //for source folders, you don't ask, just do it
+    if (!root.isArchive() && !root.isExternal()) // for source folders, you don't ask, just do it
     return true;
     if (fUpdateClasspathQuery == null) return true;
     IJavaProject[] referencingProjects = JavaElementUtil.getReferencingProjects(getRoot());

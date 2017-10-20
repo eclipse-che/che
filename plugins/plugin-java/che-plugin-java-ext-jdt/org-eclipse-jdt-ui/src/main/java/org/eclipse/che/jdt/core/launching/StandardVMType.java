@@ -36,17 +36,17 @@ public class StandardVMType implements IVMInstallType {
 
   private static final Logger LOG = LoggerFactory.getLogger(Launching.class);
   /** Constants for common {@link String}s */
-  private static final String RT_JAR = "rt.jar"; //$NON-NLS-1$
+  private static final String RT_JAR = "rt.jar"; // $NON-NLS-1$
 
-  private static final String SRC = "src"; //$NON-NLS-1$
-  private static final String SRC_ZIP = "src.zip"; //$NON-NLS-1$
-  private static final String SRC_JAR = "src.jar"; //$NON-NLS-1$
-  private static final String JRE = "jre"; //$NON-NLS-1$
-  private static final String LIB = "lib"; //$NON-NLS-1$
-  private static final String BAR = "|"; //$NON-NLS-1$
+  private static final String SRC = "src"; // $NON-NLS-1$
+  private static final String SRC_ZIP = "src.zip"; // $NON-NLS-1$
+  private static final String SRC_JAR = "src.jar"; // $NON-NLS-1$
+  private static final String JRE = "jre"; // $NON-NLS-1$
+  private static final String LIB = "lib"; // $NON-NLS-1$
+  private static final String BAR = "|"; // $NON-NLS-1$
 
   public static final String ID_STANDARD_VM_TYPE =
-      "org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType"; //$NON-NLS-1$
+      "org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType"; // $NON-NLS-1$
 
   /**
    * The minimal -Xmx size for launching a JVM. <br>
@@ -56,7 +56,7 @@ public class StandardVMType implements IVMInstallType {
    *
    * @since 3.7.100
    */
-  public static final String MIN_VM_SIZE = "-Xmx16m"; //$NON-NLS-1$
+  public static final String MIN_VM_SIZE = "-Xmx16m"; // $NON-NLS-1$
 
   /**
    * Name filter for files ending in .jar or .zip
@@ -66,12 +66,12 @@ public class StandardVMType implements IVMInstallType {
   private static FilenameFilter fgArchiveFilter =
       new FilenameFilter() {
         public boolean accept(File arg0, String arg1) {
-          return arg1.endsWith(".zip") || arg1.endsWith(".jar"); //$NON-NLS-1$//$NON-NLS-2$
+          return arg1.endsWith(".zip") || arg1.endsWith(".jar"); // $NON-NLS-1$//$NON-NLS-2$
         }
       };
 
   /** The root path for the attached source */
-  private String fDefaultRootPath = ""; //$NON-NLS-1$
+  private String fDefaultRootPath = ""; // $NON-NLS-1$
 
   /**
    * Map of the install path for which we were unable to generate the library info during this
@@ -96,10 +96,11 @@ public class StandardVMType implements IVMInstallType {
   private static final String[] fgCandidateJavaFiles = {
     "javaw", "javaw.exe", "java", "java.exe", "j9w", "j9w.exe", "j9", "j9.exe"
   };
-  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
+  // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
+  // //$NON-NLS-8$
   private static final String[] fgCandidateJavaLocations = {
     "bin" + File.separatorChar, JRE + File.separatorChar + "bin" + File.separatorChar
-  }; //$NON-NLS-1$ //$NON-NLS-2$
+  }; // $NON-NLS-1$ //$NON-NLS-2$
 
   //	private static ILibraryLocationResolver[] fgLibraryLocationResolvers = null;
 
@@ -133,16 +134,19 @@ public class StandardVMType implements IVMInstallType {
   //	 */
   //	private static ILibraryLocationResolver[] getLibraryLocationResolvers() {
   //		if (fgLibraryLocationResolvers == null) {
-  //			IExtensionPoint extensionPoint = Platform.getExtensionRegistry().getExtensionPoint(Launching.ID_PLUGIN,
+  //			IExtensionPoint extensionPoint =
+  // Platform.getExtensionRegistry().getExtensionPoint(Launching.ID_PLUGIN,
   //																							   JavaRuntime
   //
   // .EXTENSION_POINT_LIBRARY_LOCATION_RESOLVERS);
   //			IConfigurationElement[] configs = extensionPoint.getConfigurationElements();
-  //			List<ILibraryLocationResolver> resolvers = new ArrayList<ILibraryLocationResolver>(configs.length);
+  //			List<ILibraryLocationResolver> resolvers = new
+  // ArrayList<ILibraryLocationResolver>(configs.length);
   //			for (int i = 0; i < configs.length; i++) {
   //				IConfigurationElement e = configs[i];
   //				try {
-  //					resolvers.add((ILibraryLocationResolver)e.createExecutableExtension("class")); //$NON-NLS-1$
+  //					resolvers.add((ILibraryLocationResolver)e.createExecutableExtension("class"));
+  // //$NON-NLS-1$
   //				} catch (CoreException e1) {
   //					Launching.log(e1.getStatus());
   //				}
@@ -185,7 +189,7 @@ public class StandardVMType implements IVMInstallType {
     String installPath = javaHome.getAbsolutePath();
     LibraryInfo info = Launching.getLibraryInfo(installPath);
     if (info == null || Launching.timeStampChanged(installPath)) {
-      //Todo IDEX-1255 Incorrect log message
+      // Todo IDEX-1255 Incorrect log message
       //			info = fgFailedInstallPath.get(installPath);
       //			if (info == null) {
       //				info = generateLibraryInfo(javaHome, javaExecutable);
@@ -213,7 +217,7 @@ public class StandardVMType implements IVMInstallType {
   protected boolean canDetectDefaultSystemLibraries(File javaHome, File javaExecutable) {
     LibraryLocation[] locations = getDefaultLibraryLocations(javaHome);
     String version = getVMVersion(javaHome, javaExecutable);
-    return locations.length > 0 && !version.startsWith("1.1"); //$NON-NLS-1$
+    return locations.length > 0 && !version.startsWith("1.1"); // $NON-NLS-1$
   }
 
   /**
@@ -241,7 +245,7 @@ public class StandardVMType implements IVMInstallType {
     // return null.
     File javaHome;
     try {
-      javaHome = new File(System.getProperty("java.home")).getCanonicalFile(); //$NON-NLS-1$
+      javaHome = new File(System.getProperty("java.home")).getCanonicalFile(); // $NON-NLS-1$
     } catch (IOException e) {
       Launching.log(e);
       return null;
@@ -309,7 +313,7 @@ public class StandardVMType implements IVMInstallType {
       }
       parentsrc = new File(parent, SRC_ZIP);
       if (parentsrc.isFile()) {
-        setDefaultRootPath(""); //$NON-NLS-1$
+        setDefaultRootPath(""); // $NON-NLS-1$
         return new Path(parentsrc.getPath());
       }
       parent = parent.getParentFile();
@@ -328,14 +332,14 @@ public class StandardVMType implements IVMInstallType {
       srcPath = srcPath.removeLastSegments(1);
       StringBuffer buf = new StringBuffer();
       buf.append(prefix);
-      buf.append("-src."); //$NON-NLS-1$
+      buf.append("-src."); // $NON-NLS-1$
       buf.append(extension);
       srcPath = srcPath.append(buf.toString());
       if (srcPath.toFile().exists()) {
         return srcPath;
       }
     }
-    setDefaultRootPath(""); //$NON-NLS-1$
+    setDefaultRootPath(""); // $NON-NLS-1$
     return Path.EMPTY;
   }
 
@@ -344,16 +348,16 @@ public class StandardVMType implements IVMInstallType {
   private IPath checkForJ9LibrarySource(File libLocation) {
     File parent = libLocation.getParentFile();
     String name = libLocation.getName();
-    if (name.equalsIgnoreCase("classes.zip")) { //$NON-NLS-1$
-      File source = new File(parent, "source/source.zip"); //$NON-NLS-1$
+    if (name.equalsIgnoreCase("classes.zip")) { // $NON-NLS-1$
+      File source = new File(parent, "source/source.zip"); // $NON-NLS-1$
       return source.isFile() ? new Path(source.getPath()) : Path.EMPTY;
     }
-    if (name.equalsIgnoreCase("locale.zip")) { //$NON-NLS-1$
-      File source = new File(parent, "source/locale-src.zip"); //$NON-NLS-1$
+    if (name.equalsIgnoreCase("locale.zip")) { // $NON-NLS-1$
+      File source = new File(parent, "source/locale-src.zip"); // $NON-NLS-1$
       return source.isFile() ? new Path(source.getPath()) : Path.EMPTY;
     }
-    if (name.equalsIgnoreCase("charconv.zip")) { //$NON-NLS-1$
-      File source = new File(parent, "charconv-src.zip"); //$NON-NLS-1$
+    if (name.equalsIgnoreCase("charconv.zip")) { // $NON-NLS-1$
+      File source = new File(parent, "charconv-src.zip"); // $NON-NLS-1$
       return source.isFile() ? new Path(source.getPath()) : Path.EMPTY;
     }
     return null;
@@ -372,8 +376,8 @@ public class StandardVMType implements IVMInstallType {
    * @see org.eclipse.jdt.launching.IVMInstallType#getDefaultLibraryLocations(java.io.File)
    */
   public LibraryLocation[] getDefaultLibraryLocations(File installLocation) {
-    //NOTE: We do not add libraries from the "endorsed" directory explicitly, as
-    //the bootpath contains these entries already (if they exist).
+    // NOTE: We do not add libraries from the "endorsed" directory explicitly, as
+    // the bootpath contains these entries already (if they exist).
     // Determine the java executable that corresponds to the specified install location
     // and use this to generate library information.  If no java executable was found,
     // the 'standard' libraries will be returned.
@@ -409,7 +413,7 @@ public class StandardVMType implements IVMInstallType {
       // Add all extension libraries
       allLibs.addAll(gatherAllLibraries(libInfo.getExtensionDirs()));
 
-      //remove duplicates
+      // remove duplicates
       HashSet<String> set = new HashSet<String>();
       LibraryLocation lib = null;
       for (ListIterator<LibraryLocation> liter = allLibs.listIterator(); liter.hasNext(); ) {
@@ -417,11 +421,12 @@ public class StandardVMType implements IVMInstallType {
         IPath systemLibraryPath = lib.getSystemLibraryPath();
         String device = systemLibraryPath.getDevice();
         if (device != null) {
-          // @see Bug 197866 - Installed JRE Wizard creates duplicate system libraries when drive letter is lower case
+          // @see Bug 197866 - Installed JRE Wizard creates duplicate system libraries when drive
+          // letter is lower case
           systemLibraryPath = systemLibraryPath.setDevice(device.toUpperCase());
         }
         if (!set.add(systemLibraryPath.toOSString())) {
-          //did not add it, duplicate
+          // did not add it, duplicate
           liter.remove();
         }
       }
@@ -452,7 +457,7 @@ public class StandardVMType implements IVMInstallType {
     } else {
       endDirs = new String[] {endDir.getAbsolutePath()};
     }
-    return new LibraryInfo("???", new String[] {rtjar.toOSString()}, dirs, endDirs); //$NON-NLS-1$
+    return new LibraryInfo("???", new String[] {rtjar.toOSString()}, dirs, endDirs); // $NON-NLS-1$
   }
 
   /**
@@ -519,7 +524,7 @@ public class StandardVMType implements IVMInstallType {
       jre = new File(installLocation, JRE);
     }
     File lib = new File(jre, LIB);
-    File ext = new File(lib, "ext"); //$NON-NLS-1$
+    File ext = new File(lib, "ext"); // $NON-NLS-1$
     return ext;
   }
 
@@ -533,7 +538,7 @@ public class StandardVMType implements IVMInstallType {
    */
   protected File getDefaultEndorsedDirectory(File installLocation) {
     File lib = new File(installLocation, LIB);
-    File ext = new File(lib, "endorsed"); //$NON-NLS-1$
+    File ext = new File(lib, "endorsed"); // $NON-NLS-1$
     return ext;
   }
 
@@ -590,26 +595,28 @@ public class StandardVMType implements IVMInstallType {
 
     // if this is 1.1.X, the properties will not exist
     IPath classesZip =
-        new Path(javaHome.getAbsolutePath()).append(LIB).append("classes.zip"); //$NON-NLS-1$
+        new Path(javaHome.getAbsolutePath()).append(LIB).append("classes.zip"); // $NON-NLS-1$
     if (classesZip.toFile().exists()) {
       return new LibraryInfo(
           "1.1.x",
           new String[] {classesZip.toOSString()},
           new String[0],
-          new String[0]); //$NON-NLS-1$
+          new String[0]); // $NON-NLS-1$
     }
     //		//locate the launching support jar - it contains the main program to run
     //		File file = Launching.getFileInPlugin(new Path("lib/launchingsupport.jar")); //$NON-NLS-1$
     //		if (file != null && file.exists()) {
     //			String javaExecutablePath = javaExecutable.getAbsolutePath();
     //			String[] cmdLine = new String[] { javaExecutablePath, MIN_VM_SIZE,
-    //					"-classpath", file.getAbsolutePath(), "org.eclipse.jdt.internal.launching.support.LibraryDetector" }; //$NON-NLS-1$
+    //					"-classpath", file.getAbsolutePath(),
+    // "org.eclipse.jdt.internal.launching.support.LibraryDetector" }; //$NON-NLS-1$
     // $NON-NLS-2$
     //			Process p = null;
     //			try {
     //				String envp[] = null;
     ////				if (Platform.OS_MACOSX.equals(Platform.getOS())) {
-    ////					Map<String, String> map = DebugPlugin.getDefault().getLaunchManager().getNativeEnvironmentCasePreserved();
+    ////					Map<String, String> map =
+    // DebugPlugin.getDefault().getLaunchManager().getNativeEnvironmentCasePreserved();
     ////					if (map.remove(StandardVMDebugger.JAVA_JVM_VERSION) != null) {
     ////						envp = new String[map.size()];
     ////						Iterator<Entry<String, String>> iterator = map.entrySet().iterator();
@@ -622,7 +629,8 @@ public class StandardVMType implements IVMInstallType {
     ////					}
     ////				}
     //				p = DebugPlugin.exec(cmdLine, null, envp);
-    //				IProcess process = DebugPlugin.newProcess(new Launch(null, ILaunchManager.RUN_MODE, null), p, "Library Detection");
+    //				IProcess process = DebugPlugin.newProcess(new Launch(null, ILaunchManager.RUN_MODE, null),
+    // p, "Library Detection");
     // $NON-NLS-1$
     //				for (int i= 0; i < 600; i++) {
     //					// Wait no more than 30 seconds (600 * 50 milliseconds)
@@ -649,7 +657,7 @@ public class StandardVMType implements IVMInstallType {
           NLS.bind(
               "Failed to retrieve default libraries for {0}",
               new String[] {javaHome.getAbsolutePath()}));
-      //$NON-NLS-1$
+      // $NON-NLS-1$
     }
     return info;
   }
@@ -703,7 +711,7 @@ public class StandardVMType implements IVMInstallType {
       index = paths.indexOf(File.pathSeparatorChar, pos);
     }
     String path = paths.substring(pos);
-    if (!path.equals("null")) { //$NON-NLS-1$
+    if (!path.equals("null")) { // $NON-NLS-1$
       list.add(path);
     }
     return list.toArray(new String[list.size()]);
@@ -749,19 +757,19 @@ public class StandardVMType implements IVMInstallType {
   public static URL getDefaultJavadocLocation(String version) {
     try {
       if (version.startsWith(org.eclipse.jdt.core.JavaCore.VERSION_1_8)) {
-        return new URL("https://docs.oracle.com/javase/8/docs/api/"); //$NON-NLS-1$
+        return new URL("https://docs.oracle.com/javase/8/docs/api/"); // $NON-NLS-1$
       } else if (version.startsWith(org.eclipse.jdt.core.JavaCore.VERSION_1_7)) {
-        return new URL("https://docs.oracle.com/javase/7/docs/api/"); //$NON-NLS-1$
+        return new URL("https://docs.oracle.com/javase/7/docs/api/"); // $NON-NLS-1$
       } else if (version.startsWith(org.eclipse.jdt.core.JavaCore.VERSION_1_6)) {
-        return new URL("https://docs.oracle.com/javase/6/docs/api/"); //$NON-NLS-1$
+        return new URL("https://docs.oracle.com/javase/6/docs/api/"); // $NON-NLS-1$
       } else if (version.startsWith(org.eclipse.jdt.core.JavaCore.VERSION_1_5)) {
-        return new URL("https://docs.oracle.com/javase/1.5.0/docs/api/"); //$NON-NLS-1$
+        return new URL("https://docs.oracle.com/javase/1.5.0/docs/api/"); // $NON-NLS-1$
       } else if (version.startsWith(org.eclipse.jdt.core.JavaCore.VERSION_1_4)) {
         // archived: http://download.oracle.com/javase/1.4.2/docs/api/
-        return new URL("https://docs.oracle.com/javase/1.5.0/docs/api/"); //$NON-NLS-1$
+        return new URL("https://docs.oracle.com/javase/1.5.0/docs/api/"); // $NON-NLS-1$
       } else if (version.startsWith(org.eclipse.jdt.core.JavaCore.VERSION_1_3)) {
         // archived: http://download.oracle.com/javase/1.3/docs/api/
-        return new URL("https://docs.oracle.com/javase/1.5.0/docs/api/"); //$NON-NLS-1$
+        return new URL("https://docs.oracle.com/javase/1.5.0/docs/api/"); // $NON-NLS-1$
       }
     } catch (MalformedURLException e) {
     }

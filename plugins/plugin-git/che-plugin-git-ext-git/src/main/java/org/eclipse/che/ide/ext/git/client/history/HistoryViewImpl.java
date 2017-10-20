@@ -101,7 +101,8 @@ public class HistoryViewImpl extends Window implements HistoryView {
     if (selectionModel.getSelectedObject() == null) {
       delegate.onRevisionUnselected();
     }
-    // if the size of the panel is greater then the size of the loaded list of the history then no scroller has been appeared yet
+    // if the size of the panel is greater then the size of the loaded list of the history then no
+    // scroller has been appeared yet
     onPanelScrolled(null);
   }
 

@@ -67,15 +67,15 @@ public class SearchResultGroup {
       buf.append("  ")
           .append(match.getOffset())
           .append(", ")
-          .append(match.getLength()); //$NON-NLS-1$//$NON-NLS-2$
+          .append(match.getLength()); // $NON-NLS-1$//$NON-NLS-2$
       buf.append(
           match.getAccuracy() == SearchMatch.A_ACCURATE
               ? "; acc"
-              : "; inacc"); //$NON-NLS-1$//$NON-NLS-2$
-      if (match.isInsideDocComment()) buf.append("; inDoc"); //$NON-NLS-1$
+              : "; inacc"); // $NON-NLS-1$//$NON-NLS-2$
+      if (match.isInsideDocComment()) buf.append("; inDoc"); // $NON-NLS-1$
       if (match.getElement() instanceof IJavaElement)
         buf.append("; in: ")
-            .append(((IJavaElement) match.getElement()).getElementName()); //$NON-NLS-1$
+            .append(((IJavaElement) match.getElement()).getElementName()); // $NON-NLS-1$
       buf.append('\n');
     }
     return buf.toString();

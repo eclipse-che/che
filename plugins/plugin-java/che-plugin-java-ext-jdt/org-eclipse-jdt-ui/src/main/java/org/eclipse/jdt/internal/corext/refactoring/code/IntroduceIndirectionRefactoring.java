@@ -348,7 +348,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
   public String getIntermediaryTypeName() {
     return fIntermediaryType != null
         ? fIntermediaryType.getFullyQualifiedName('.')
-        : ""; //$NON-NLS-1$
+        : ""; // $NON-NLS-1$
   }
 
   // ********** CONDITION CHECKING **********
@@ -361,7 +361,8 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
       fRewrites = new HashMap<ICompilationUnit, CompilationUnitRewrite>();
 
       // This refactoring has been invoked on
-      // (1) a TextSelection inside an ICompilationUnit or inside an IClassFile (definitely with source), or
+      // (1) a TextSelection inside an ICompilationUnit or inside an IClassFile (definitely with
+      // source), or
       // (2) an IMethod inside a ICompilationUnit or inside an IClassFile (with or without source)
 
       if (fTargetMethod == null) {
@@ -413,7 +414,8 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
         fTargetMethodBinding = targetMethodBinding.getMethodDeclaration(); // resolve generics
         fTargetMethod = (IMethod) fTargetMethodBinding.getJavaElement();
 
-        //allow single updating mode if an invocation was selected and the invocation can be updated
+        // allow single updating mode if an invocation was selected and the invocation can be
+        // updated
         if (selectionNode instanceof MethodInvocation && fSelectionCompilationUnit != null)
           fSelectionMethodInvocation = (MethodInvocation) selectionNode;
 
@@ -432,7 +434,8 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
               ASTNodeSearchUtil.getMethodDeclarationNode(fTargetMethod, selectionCURoot);
           fTargetMethodBinding = declaration.resolveBinding().getMethodDeclaration();
         } else {
-          // binary method - no CURewrite available (and none needed as we cannot update the method anyway)
+          // binary method - no CURewrite available (and none needed as we cannot update the method
+          // anyway)
           ASTParser parser = ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
           parser.setProject(fTargetMethod.getJavaProject());
           IBinding[] bindings = parser.createBindings(new IJavaElement[] {fTargetMethod}, null);
@@ -495,7 +498,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
             + hierarchyTicks
             + visibilityTicks
             + referenceTicks
-            + creationTicks); //$NON-NLS-1$
+            + creationTicks); // $NON-NLS-1$
     pm.setTaskName(RefactoringCoreMessages.IntroduceIndirectionRefactoring_checking_conditions);
 
     result.merge(Checks.checkMethodName(fIntermediaryMethodName, fIntermediaryType));
@@ -528,7 +531,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
           RefactoringCoreMessages.IntroduceIndirectionRefactoring_checking_conditions
               + " "
               + RefactoringCoreMessages
-                  .IntroduceIndirectionRefactoring_looking_for_references); //$NON-NLS-1$
+                  .IntroduceIndirectionRefactoring_looking_for_references); // $NON-NLS-1$
       result.merge(updateReferences(new NoOverrideProgressMonitor(pm, referenceTicks)));
       pm.setTaskName(RefactoringCoreMessages.IntroduceIndirectionRefactoring_checking_conditions);
     } else {
@@ -583,7 +586,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
         RefactoringCoreMessages.IntroduceIndirectionRefactoring_checking_conditions
             + " "
             + RefactoringCoreMessages
-                .IntroduceIndirectionRefactoring_adjusting_visibility); //$NON-NLS-1$
+                .IntroduceIndirectionRefactoring_adjusting_visibility); // $NON-NLS-1$
     result.merge(updateTargetVisibility(new NoOverrideProgressMonitor(pm, 0)));
     result.merge(updateIntermediaryVisibility(new NoOverrideProgressMonitor(pm, 0)));
     pm.worked(visibilityTicks);
@@ -648,7 +651,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 
     RefactoringStatus result = new RefactoringStatus();
 
-    monitor.beginTask("", 90); //$NON-NLS-1$
+    monitor.beginTask("", 90); // $NON-NLS-1$
 
     if (monitor.isCanceled()) throw new OperationCanceledException();
 
@@ -701,7 +704,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 
         Assert.isTrue(
             target instanceof MethodInvocation,
-            "Element of call should be a MethodInvocation."); //$NON-NLS-1$
+            "Element of call should be a MethodInvocation."); // $NON-NLS-1$
 
         MethodInvocation invocation = (MethodInvocation) target;
         ITypeBinding typeBinding = getExpressionType(invocation);
@@ -748,7 +751,8 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
     ITypeBinding current = typeBinding;
 
     if (current.equals(highest) || Bindings.isSuperType(highest, current))
-      // current is the same as highest or highest is already a supertype of current in the same hierarchy => no change
+      // current is the same as highest or highest is already a supertype of current in the same
+      // hierarchy => no change
       return status;
 
     // find lowest common supertype with the method
@@ -1002,7 +1006,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
       ntp.setName(imRewrite.getAST().newSimpleName(typeParameters[i].getName()));
       ITypeBinding[] bounds = typeParameters[i].getTypeBounds();
       for (int j = 0; j < bounds.length; j++)
-        if (!"java.lang.Object".equals(bounds[j].getQualifiedName())) //$NON-NLS-1$
+        if (!"java.lang.Object".equals(bounds[j].getQualifiedName())) // $NON-NLS-1$
         ntp.typeBounds().add(imRewrite.getImportRewrite().addImport(bounds[j], imRewrite.getAST()));
       list.add(ntp);
     }
@@ -1056,7 +1060,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
       parameter.setName(rew.getAST().newSimpleName(current.getName()));
       ITypeBinding[] bounds = current.getTypeBounds();
       for (int j = 0; j < bounds.length; j++)
-        if (!"java.lang.Object".equals(bounds[j].getQualifiedName())) //$NON-NLS-1$
+        if (!"java.lang.Object".equals(bounds[j].getQualifiedName())) // $NON-NLS-1$
         parameter.typeBounds().add(rew.getImportRewrite().addImport(bounds[j], rew.getAST()));
 
       intermediary.typeParameters().add(parameter);
@@ -1182,7 +1186,8 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 
     ITypeBinding currentTypeBinding = null;
     if (methodDeclaration != null) {
-      // Case 1) : Declaring type is inside this cu => use its name if it's declared in an enclosing type
+      // Case 1) : Declaring type is inside this cu => use its name if it's declared in an enclosing
+      // type
       if (ASTNodes.isParent(originalInvocation, methodDeclaration.getParent()))
         currentTypeBinding = methodBinding.getDeclaringClass();
       else currentTypeBinding = ASTNodes.getEnclosingType(originalInvocation);
@@ -1386,11 +1391,11 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
         }
         typeBinding = typeBounds[0].getTypeDeclaration();
       } else {
-        typeBinding = invocation.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+        typeBinding = invocation.getAST().resolveWellKnownType("java.lang.Object"); // $NON-NLS-1$
       }
     }
     Assert.isNotNull(
-        typeBinding, "Type binding of target expression may not be null"); //$NON-NLS-1$
+        typeBinding, "Type binding of target expression may not be null"); // $NON-NLS-1$
     return typeBinding;
   }
 
@@ -1613,7 +1618,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
               RefactoringCoreMessages.InitializableRefactoring_argument_not_exist,
               JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES));
     final String name = arguments.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
-    if (name != null && !"".equals(name)) //$NON-NLS-1$
+    if (name != null && !"".equals(name)) // $NON-NLS-1$
     return setIntermediaryMethodName(name);
     else
       return RefactoringStatus.createFatalErrorStatus(

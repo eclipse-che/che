@@ -83,13 +83,13 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
     return RefactoringAvailabilityTester.isRenameNonVirtualMethodAvailable(getMethod());
   }
 
-  //----------- preconditions --------------
+  // ----------- preconditions --------------
 
   @Override
   protected RefactoringStatus doCheckFinalConditions(
       IProgressMonitor pm, CheckConditionsContext checkContext) throws CoreException {
     try {
-      pm.beginTask("", 3); //$NON-NLS-1$
+      pm.beginTask("", 3); // $NON-NLS-1$
       RefactoringStatus result = new RefactoringStatus();
       result.merge(super.doCheckFinalConditions(new SubProgressMonitor(pm, 1), checkContext));
       if (result.hasFatalError()) return result;
@@ -141,7 +141,7 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
   protected void addOccurrences(
       TextChangeManager manager, IProgressMonitor pm, RefactoringStatus status)
       throws CoreException {
-    pm.beginTask("", 1); //$NON-NLS-1$
+    pm.beginTask("", 1); // $NON-NLS-1$
     // declaration update must be registered first
     addDeclarationUpdate(manager);
     if (getUpdateReferences()) addReferenceUpdates(manager, pm);

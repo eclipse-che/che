@@ -165,20 +165,20 @@ public class StatusInfo implements IStatus {
   @Override
   public String toString() {
     StringBuffer buf = new StringBuffer();
-    buf.append("StatusInfo "); //$NON-NLS-1$
+    buf.append("StatusInfo "); // $NON-NLS-1$
     if (fSeverity == OK) {
-      buf.append("OK"); //$NON-NLS-1$
+      buf.append("OK"); // $NON-NLS-1$
     } else if (fSeverity == ERROR) {
-      buf.append("ERROR"); //$NON-NLS-1$
+      buf.append("ERROR"); // $NON-NLS-1$
     } else if (fSeverity == WARNING) {
-      buf.append("WARNING"); //$NON-NLS-1$
+      buf.append("WARNING"); // $NON-NLS-1$
     } else if (fSeverity == INFO) {
-      buf.append("INFO"); //$NON-NLS-1$
+      buf.append("INFO"); // $NON-NLS-1$
     } else {
-      buf.append("severity="); //$NON-NLS-1$
+      buf.append("severity="); // $NON-NLS-1$
       buf.append(fSeverity);
     }
-    buf.append(": "); //$NON-NLS-1$
+    buf.append(": "); // $NON-NLS-1$
     buf.append(fStatusMessage);
     return buf.toString();
   }

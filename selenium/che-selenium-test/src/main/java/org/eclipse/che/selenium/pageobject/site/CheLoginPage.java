@@ -44,9 +44,10 @@ public class CheLoginPage implements LoginPage {
     PageFactory.initElements(seleniumWebDriver, this);
 
     webDriverWait =
-        new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+        new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC);
   }
 
+  @Override
   public void login(String username, String password) {
     waitOnOpen();
     usernameInput.clear();
@@ -57,15 +58,7 @@ public class CheLoginPage implements LoginPage {
     waitOnClose();
   }
 
-  public void waitOnOpen() {
-    webDriverWait.until(ExpectedConditions.visibilityOf(loginButton));
-  }
-
-  public void waitOnClose() {
-    webDriverWait.until(
-        ExpectedConditions.invisibilityOfAllElements(ImmutableList.of(loginButton)));
-  }
-
+  @Override
   public boolean isOpened() {
     try {
       waitOnOpen();
@@ -74,5 +67,15 @@ public class CheLoginPage implements LoginPage {
     }
 
     return true;
+  }
+
+  private void waitOnOpen() {
+    webDriverWait.until(ExpectedConditions.visibilityOf(loginButton));
+  }
+
+  private void waitOnClose() {
+    webDriverWait.until(
+        ExpectedConditions.invisibilityOfAllElements(
+            ImmutableList.of(loginButton, passwordInput, usernameInput)));
   }
 }

@@ -14,7 +14,7 @@ import org.eclipse.osgi.util.NLS;
 public final class CorextMessages extends NLS {
 
   private static final String BUNDLE_NAME =
-      "org.eclipse.jdt.internal.corext.CorextMessages"; //$NON-NLS-1$
+      "org.eclipse.jdt.internal.corext.CorextMessages"; // $NON-NLS-1$
 
   private CorextMessages() {
     // Do not instantiate

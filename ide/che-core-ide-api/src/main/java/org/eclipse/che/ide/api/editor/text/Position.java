@@ -180,7 +180,7 @@ public class Position {
    */
   @Override
   public String toString() {
-    String position = "offset: " + offset + ", length: " + length; //$NON-NLS-1$//$NON-NLS-2$
-    return isDeleted ? position + " (deleted)" : position; //$NON-NLS-1$
+    String position = "offset: " + offset + ", length: " + length; // $NON-NLS-1$//$NON-NLS-2$
+    return isDeleted ? position + " (deleted)" : position; // $NON-NLS-1$
   }
 }

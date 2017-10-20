@@ -104,9 +104,9 @@ public class StringCleanUp extends AbstractMultiFix {
     StringBuffer buf = new StringBuffer();
 
     if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS)) {
-      buf.append("public String s;"); //$NON-NLS-1$
+      buf.append("public String s;"); // $NON-NLS-1$
     } else {
-      buf.append("public String s; //$NON-NLS-1$"); //$NON-NLS-1$
+      buf.append("public String s; //$NON-NLS-1$"); // $NON-NLS-1$
     }
 
     return buf.toString();
@@ -129,7 +129,8 @@ public class StringCleanUp extends AbstractMultiFix {
     try {
       ICompilationUnit cu = (ICompilationUnit) compilationUnit.getJavaElement();
       if (!cu.isStructureKnown())
-        return 0; //[clean up] 'Remove unnecessary $NLS-TAGS$' removes necessary ones in case of syntax errors: https://bugs.eclipse.org/bugs/show_bug.cgi?id=285814 :
+        return 0; // [clean up] 'Remove unnecessary $NLS-TAGS$' removes necessary ones in case of
+      // syntax errors: https://bugs.eclipse.org/bugs/show_bug.cgi?id=285814 :
     } catch (JavaModelException e) {
       return 0;
     }

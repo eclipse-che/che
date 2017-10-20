@@ -14,7 +14,7 @@ import org.eclipse.jdt.core.Signature;
 public final class VoidType extends TType {
 
   protected VoidType(TypeEnvironment environment) {
-    super(environment, Signature.createTypeSignature("void", true)); //$NON-NLS-1$
+    super(environment, Signature.createTypeSignature("void", true)); // $NON-NLS-1$
   }
 
   @Override
@@ -44,7 +44,7 @@ public final class VoidType extends TType {
 
   @Override
   public String getName() {
-    return "void"; //$NON-NLS-1$
+    return "void"; // $NON-NLS-1$
   }
 
   @Override

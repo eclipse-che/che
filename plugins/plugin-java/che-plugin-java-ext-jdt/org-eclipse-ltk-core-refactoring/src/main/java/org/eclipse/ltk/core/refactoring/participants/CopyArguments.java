@@ -61,6 +61,6 @@ public class CopyArguments extends RefactoringArguments {
    * @since 3.2
    */
   public String toString() {
-    return "copy to " + fDestination.toString(); //$NON-NLS-1$
+    return "copy to " + fDestination.toString(); // $NON-NLS-1$
   }
 }

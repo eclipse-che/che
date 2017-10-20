@@ -61,7 +61,7 @@ public class FetchTest {
   public void testSimpleFetch(GitConnectionFactory connectionFactory)
       throws ServerException, IOException, UnauthorizedException, URISyntaxException {
 
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     GitConnection fetchConnection =
         connectionFactory.getConnection(fetchTestRepo.getAbsolutePath());
@@ -69,22 +69,22 @@ public class FetchTest {
     addFile(connection, "README", "readme content");
     connection.add(AddParams.create(singletonList(".")));
     connection.commit(CommitParams.create("fetch test"));
-    //clone default repo into fetchRepo
+    // clone default repo into fetchRepo
     fetchConnection.clone(
         CloneParams.create(connection.getWorkingDir().getAbsolutePath())
             .withWorkingDir(fetchConnection.getWorkingDir().getAbsolutePath()));
 
-    //add new File into defaultRepository
+    // add new File into defaultRepository
     addFile(connection, "newfile1", "newfile1 content");
-    //add file to index and make commit
+    // add file to index and make commit
     connection.add(AddParams.create(singletonList(".")));
     connection.commit(CommitParams.create("fetch test"));
 
-    //when
+    // when
     fetchConnection.fetch(FetchParams.create(repository.getAbsolutePath()));
 
-    //then
-    //make merge with FETCH_HEAD
+    // then
+    // make merge with FETCH_HEAD
     fetchConnection.merge("FETCH_HEAD");
     assertTrue(new File(fetchTestRepo, "newfile1").exists());
   }
@@ -96,7 +96,7 @@ public class FetchTest {
   public void testFetchBranch(GitConnectionFactory connectionFactory)
       throws ServerException, IOException, UnauthorizedException, URISyntaxException {
 
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     GitConnection fetchConnection =
         connectionFactory.getConnection(fetchTestRepo.getAbsolutePath());
@@ -104,12 +104,12 @@ public class FetchTest {
     addFile(connection, "README", "readme content");
     connection.add(AddParams.create(singletonList(".")));
     connection.commit(CommitParams.create("fetch test"));
-    //clone default repo into fetchRepo
+    // clone default repo into fetchRepo
     fetchConnection.clone(CloneParams.create(repository.getAbsolutePath()));
 
-    //add new File into defaultRepository
+    // add new File into defaultRepository
     addFile(connection, "newfile1", "newfile1 content");
-    //add file to index and make commit
+    // add file to index and make commit
     connection.add(AddParams.create(singletonList(".")));
     connection.commit(CommitParams.create("fetch test"));
 
@@ -120,10 +120,10 @@ public class FetchTest {
     connection.add(AddParams.create(singletonList(".")));
     connection.commit(CommitParams.create("fetch branch test"));
 
-    //when
+    // when
     fetchConnection.fetch(FetchParams.create(repository.getAbsolutePath()));
-    //then
-    //make merge with FETCH_HEAD
+    // then
+    // make merge with FETCH_HEAD
     fetchConnection.merge("FETCH_HEAD");
     assertTrue(new File(fetchTestRepo, "otherfile1").exists());
     assertTrue(new File(fetchTestRepo, "otherfile2").exists());
@@ -142,10 +142,10 @@ public class FetchTest {
   )
   public void testWhenThereAreNoAnyRemotes(GitConnectionFactory connectionFactory)
       throws Exception {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
 
-    //when
+    // when
     connection.fetch(FetchParams.create(null));
   }
 }

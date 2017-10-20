@@ -33,20 +33,23 @@ public class JavaCorrectionProcessor
     implements org.eclipse.che.jface.text.quickassist.IQuickAssistProcessor {
 
   private static final String QUICKFIX_PROCESSOR_CONTRIBUTION_ID =
-      "quickFixProcessors"; //$NON-NLS-1$
+      "quickFixProcessors"; // $NON-NLS-1$
   private static final String QUICKASSIST_PROCESSOR_CONTRIBUTION_ID =
-      "quickAssistProcessors"; //$NON-NLS-1$
+      "quickAssistProcessors"; // $NON-NLS-1$
 
   private static ContributedProcessorDescriptor[] fgContributedAssistProcessors = null;
   private static ContributedProcessorDescriptor[] fgContributedCorrectionProcessors = null;
 
   private static ContributedProcessorDescriptor[] getProcessorDescriptors(
       String contributionId, boolean testMarkerTypes) {
-    //		IConfigurationElement[] elements= Platform.getExtensionRegistry().getConfigurationElementsFor(JavaPlugin.ID_PLUGIN, contributionId);
+    //		IConfigurationElement[] elements=
+    // Platform.getExtensionRegistry().getConfigurationElementsFor(JavaPlugin.ID_PLUGIN,
+    // contributionId);
     ArrayList<ContributedProcessorDescriptor> res = new ArrayList<>();
     //
     //		for (int i= 0; i < elements.length; i++) {
-    //			ContributedProcessorDescriptor desc= new ContributedProcessorDescriptor(elements[i], testMarkerTypes);
+    //			ContributedProcessorDescriptor desc= new ContributedProcessorDescriptor(elements[i],
+    // testMarkerTypes);
     //			IStatus status= desc.checkSyntax();
     //			if (status.isOK()) {
     //				res.add(desc);
@@ -96,7 +99,8 @@ public class JavaCorrectionProcessor
   }
 
   //	public static boolean isQuickFixableType(Annotation annotation) {
-  //		return (annotation instanceof IJavaAnnotation || annotation instanceof SimpleMarkerAnnotation) && !annotation.isMarkedDeleted();
+  //		return (annotation instanceof IJavaAnnotation || annotation instanceof SimpleMarkerAnnotation)
+  // && !annotation.isMarkedDeleted();
   //	}
 
   public static boolean hasCorrections(Annotation annotation) {
@@ -175,20 +179,24 @@ public class JavaCorrectionProcessor
     //					if (key == null)
     //						return CorrectionMessages.JavaCorrectionProcessor_go_to_original_using_menu;
     //					else
-    //						return Messages.format(CorrectionMessages.JavaCorrectionProcessor_go_to_original_using_key, key);
+    //						return
+    // Messages.format(CorrectionMessages.JavaCorrectionProcessor_go_to_original_using_key, key);
     //				} else if (fAssistant.isProblemLocationAvailable()) {
     //					String key= getQuickAssistBinding();
     //					if (key == null)
     //						return CorrectionMessages.JavaCorrectionProcessor_go_to_closest_using_menu;
     //					else
-    //						return Messages.format(CorrectionMessages.JavaCorrectionProcessor_go_to_closest_using_key, key);
+    //						return
+    // Messages.format(CorrectionMessages.JavaCorrectionProcessor_go_to_closest_using_key, key);
     //				} else
     //					return ""; //$NON-NLS-1$
     //			}
     //
     //			private String getQuickAssistBinding() {
-    //				final IBindingService bindingSvc= (IBindingService) PlatformUI.getWorkbench().getAdapter(IBindingService.class);
-    //				return bindingSvc.getBestActiveBindingFormattedFor(ITextEditorActionDefinitionIds.QUICK_ASSIST);
+    //				final IBindingService bindingSvc= (IBindingService)
+    // PlatformUI.getWorkbench().getAdapter(IBindingService.class);
+    //				return
+    // bindingSvc.getBestActiveBindingFormattedFor(ITextEditorActionDefinitionIds.QUICK_ASSIST);
     //			}
     //		});
   }
@@ -204,7 +212,8 @@ public class JavaCorrectionProcessor
     ////		IEditorPart part= fAssistant.getEditor();
     //
     //		ICompilationUnit cu= JavaUI.getWorkingCopyManager().getWorkingCopy(part.getEditorInput());
-    //		IAnnotationModel model= JavaUI.getDocumentProvider().getAnnotationModel(part.getEditorInput());
+    //		IAnnotationModel model=
+    // JavaUI.getDocumentProvider().getAnnotationModel(part.getEditorInput());
     //
     //		AssistContext context= null;
     //		if (cu != null) {
@@ -219,7 +228,8 @@ public class JavaCorrectionProcessor
     //		ICompletionProposal[] res= null;
     //		if (model != null && context != null && annotations != null) {
     //			ArrayList<IJavaCompletionProposal> proposals= new ArrayList<IJavaCompletionProposal>(10);
-    //			IStatus status= collectProposals(context, model, annotations, true, !fAssistant.isUpdatedOffset(), proposals);
+    //			IStatus status= collectProposals(context, model, annotations, true,
+    // !fAssistant.isUpdatedOffset(), proposals);
     //			res= proposals.toArray(new ICompletionProposal[proposals.size()]);
     //			if (!status.isOK()) {
     //				fErrorMessage= status.getMessage();
@@ -228,7 +238,8 @@ public class JavaCorrectionProcessor
     //		}
     //
     //		if (res == null || res.length == 0) {
-    //			return new ICompletionProposal[] { new ChangeCorrectionProposal(CorrectionMessages.NoCorrectionProposal_description, new
+    //			return new ICompletionProposal[] { new
+    // ChangeCorrectionProposal(CorrectionMessages.NoCorrectionProposal_description, new
     // NullChange(""), IProposalRelevance.NO_SUGGESSTIONS_AVAILABLE, null) }; //$NON-NLS-1$
     //		}
     //		if (res.length > 1) {
@@ -298,18 +309,21 @@ public class JavaCorrectionProcessor
     return Status.OK_STATUS;
   }
 
-  //	private static ProblemLocation getProblemLocation(IJavaAnnotation javaAnnotation, IAnnotationModel model) {
+  //	private static ProblemLocation getProblemLocation(IJavaAnnotation javaAnnotation,
+  // IAnnotationModel model) {
   //		int problemId= javaAnnotation.getId();
   //		if (problemId != -1) {
   //			Position pos= model.getPosition((Annotation) javaAnnotation);
   //			if (pos != null) {
-  //				return new ProblemLocation(pos.getOffset(), pos.getLength(), javaAnnotation); // java problems all handled by the quick assist processors
+  //				return new ProblemLocation(pos.getOffset(), pos.getLength(), javaAnnotation); // java
+  // problems all handled by the quick assist processors
   //			}
   //		}
   //		return null;
   //	}
 
-  //	private static void collectMarkerProposals(SimpleMarkerAnnotation annotation, Collection<IJavaCompletionProposal> proposals) {
+  //	private static void collectMarkerProposals(SimpleMarkerAnnotation annotation,
+  // Collection<IJavaCompletionProposal> proposals) {
   //		IMarker marker= annotation.getMarker();
   //		IMarkerResolution[] res= IDE.getMarkerHelpRegistry().getResolutions(marker);
   //		if (res.length > 0) {

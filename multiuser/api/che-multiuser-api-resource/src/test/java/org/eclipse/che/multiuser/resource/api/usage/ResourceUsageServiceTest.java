@@ -48,7 +48,7 @@ public class ResourceUsageServiceTest {
   private static final Long RESOURCE_AMOUNT = 1000L;
   private static final String RESOURCE_UNIT = "mb";
 
-  @SuppressWarnings("unused") //is declared for deploying by everrest-assured
+  @SuppressWarnings("unused") // is declared for deploying by everrest-assured
   private ApiExceptionMapper exceptionMapper;
 
   @Mock ResourceImpl resource;

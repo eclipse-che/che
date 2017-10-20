@@ -42,7 +42,7 @@ public class MavenWrapperManager {
     }
 
     if (usedServers.contains(wrapper)) {
-      //need to warn here
+      // need to warn here
       return serverManager.createMavenServer();
     }
 

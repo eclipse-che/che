@@ -82,8 +82,8 @@ import org.eclipse.text.edits.TextEditGroup;
 public class ReplaceInvocationsRefactoring extends Refactoring {
 
   private static final String ID_REPLACE_INVOCATIONS =
-      "org.eclipse.jdt.ui.replace.invocations"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_MODE = "mode"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.replace.invocations"; // $NON-NLS-1$
+  private static final String ATTRIBUTE_MODE = "mode"; // $NON-NLS-1$
 
   public static class Mode {
     private Mode() {}
@@ -160,7 +160,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
   }
 
   public void setBody(String body, String[] parameterNames) {
-    //TODO: validate parameter name count and body
+    // TODO: validate parameter name count and body
     fBody = body;
     fParameterNames = parameterNames;
   }
@@ -259,7 +259,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 
     } else {
       IClassFile classFile = method.getClassFile();
-      //TODO: use source if available?
+      // TODO: use source if available?
       StubCreator stubCreator =
           new StubCreator(true) {
             @Override
@@ -335,7 +335,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 
   @Override
   public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
-    pm.beginTask("", 20); //$NON-NLS-1$
+    pm.beginTask("", 20); // $NON-NLS-1$
     fChangeManager = new TextChangeManager();
     RefactoringStatus result = new RefactoringStatus();
 
@@ -372,7 +372,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
             filesToBeModified, new SubProgressMonitor(pm, 1)));
     checkOverridden(result, new SubProgressMonitor(pm, 4));
     IProgressMonitor sub = new SubProgressMonitor(pm, 15);
-    sub.beginTask("", units.length * 3); //$NON-NLS-1$
+    sub.beginTask("", units.length * 3); // $NON-NLS-1$
     for (int c = 0; c < units.length; c++) {
       ICompilationUnit unit = units[c];
       sub.subTask(
@@ -484,7 +484,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
             description,
             comment.asString(),
             arguments,
-            flags) {}; //REVIEW Unregistered ID!
+            flags) {}; // REVIEW Unregistered ID!
     arguments.put(
         JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT,
         JavaRefactoringDescriptorUtil.elementToHandle(project, fSelectionTypeRoot));
@@ -492,7 +492,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
         JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION,
         new Integer(fSelectionStart).toString()
             + " "
-            + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+            + new Integer(fSelectionLength).toString()); // $NON-NLS-1$
     arguments.put(ATTRIBUTE_MODE, new Integer(fTargetProvider.isSingle() ? 0 : 1).toString());
     return new DynamicValidationRefactoringChange(
         descriptor,
@@ -519,7 +519,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 
   private void checkOverridden(RefactoringStatus status, IProgressMonitor pm)
       throws JavaModelException {
-    pm.beginTask("", 9); //$NON-NLS-1$
+    pm.beginTask("", 9); // $NON-NLS-1$
     pm.setTaskName(RefactoringCoreMessages.InlineMethodRefactoring_checking_overridden);
     MethodDeclaration decl = fSourceProvider.getDeclaration();
     IMethod method = (IMethod) decl.resolveBinding().getJavaElement();
@@ -534,7 +534,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
         status, method, hierarchy.getAllSuperclasses(type), new SubProgressMonitor(pm, 1));
     checkSuperInterfaces(
         status, method, hierarchy.getAllSuperInterfaces(type), new SubProgressMonitor(pm, 1));
-    pm.setTaskName(""); //$NON-NLS-1$
+    pm.setTaskName(""); // $NON-NLS-1$
   }
 
   private void checkSubTypes(
@@ -569,7 +569,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 
   private void checkTypes(
       RefactoringStatus result, IMethod method, IType[] types, String key, IProgressMonitor pm) {
-    pm.beginTask("", types.length); //$NON-NLS-1$
+    pm.beginTask("", types.length); // $NON-NLS-1$
     for (int i = 0; i < types.length; i++) {
       pm.worked(1);
       IMethod[] overridden = types[i].findMethods(method);
@@ -621,7 +621,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 
   private RefactoringStatus initialize(JavaRefactoringArguments arguments) {
     final String value = arguments.getAttribute(ATTRIBUTE_MODE);
-    if (value != null && !"".equals(value)) { //$NON-NLS-1$
+    if (value != null && !"".equals(value)) { // $NON-NLS-1$
       int mode = 0;
       try {
         mode = Integer.parseInt(value);

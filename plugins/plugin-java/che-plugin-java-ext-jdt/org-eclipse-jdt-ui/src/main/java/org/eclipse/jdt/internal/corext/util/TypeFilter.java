@@ -73,8 +73,8 @@ public class TypeFilter /*implements IPropertyChangeListener */ {
   private synchronized StringMatcher[] getStringMatchers() {
     if (fStringMatchers == null) {
       String str =
-          ""; //PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.TYPEFILTER_ENABLED);
-      StringTokenizer tok = new StringTokenizer(str, ";"); //$NON-NLS-1$
+          ""; // PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.TYPEFILTER_ENABLED);
+      StringTokenizer tok = new StringTokenizer(str, ";"); // $NON-NLS-1$
       int nTokens = tok.countTokens();
 
       fStringMatchers = new StringMatcher[nTokens];
@@ -113,7 +113,8 @@ public class TypeFilter /*implements IPropertyChangeListener */ {
   }
 
   //	/* (non-Javadoc)
-  //	 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
+  //	 * @see
+  // org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
   //	 */
   //	public synchronized void propertyChange(PropertyChangeEvent event) {
   //		if (PreferenceConstants.TYPEFILTER_ENABLED.equals(event.getProperty())) {

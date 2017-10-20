@@ -22,6 +22,6 @@ public class DummySettingsProvider implements SettingsProvider {
 
   @Override
   public void setSettings(NodeSettings settings) {
-    //stub
+    // stub
   }
 }

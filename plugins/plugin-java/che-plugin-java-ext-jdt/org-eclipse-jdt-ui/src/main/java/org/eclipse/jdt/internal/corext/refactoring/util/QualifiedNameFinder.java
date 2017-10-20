@@ -41,7 +41,7 @@ public class QualifiedNameFinder {
   private static final GroupCategorySet QUALIFIED_NAMES =
       new GroupCategorySet(
           new GroupCategory(
-              "org.eclipse.jdt.internal.corext.qualifiedNames", //$NON-NLS-1$
+              "org.eclipse.jdt.internal.corext.qualifiedNames", // $NON-NLS-1$
               RefactoringCoreMessages.QualifiedNameFinder_qualifiedNames_name,
               RefactoringCoreMessages.QualifiedNameFinder_qualifiedNames_description));
 
@@ -68,7 +68,7 @@ public class QualifiedNameFinder {
       String segment = path.segment(0);
       if (segment != null
           && (segment.startsWith(".refactorings")
-              || segment.startsWith(".deprecations"))) //$NON-NLS-1$
+              || segment.startsWith(".deprecations"))) // $NON-NLS-1$
         // $NON-NLS-2$
         return false;
 
@@ -121,7 +121,7 @@ public class QualifiedNameFinder {
 
     if (filePatterns == null || filePatterns.length() == 0) {
       // Eat progress.
-      monitor.beginTask("", 1); //$NON-NLS-1$
+      monitor.beginTask("", 1); // $NON-NLS-1$
       monitor.worked(1);
       return;
     }
@@ -144,7 +144,7 @@ public class QualifiedNameFinder {
   }
 
   private static Pattern getFilePattern(String filePatterns) {
-    StringTokenizer tokenizer = new StringTokenizer(filePatterns, ","); //$NON-NLS-1$
+    StringTokenizer tokenizer = new StringTokenizer(filePatterns, ","); // $NON-NLS-1$
     String[] filePatternArray = new String[tokenizer.countTokens()];
     int i = 0;
     while (tokenizer.hasMoreTokens()) {

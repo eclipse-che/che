@@ -46,11 +46,12 @@ public class WindowsPathEscaper {
     if (path.indexOf(":") == 1) {
       // check and replace only occurrence of ":" after disk label on Windows host (e.g. C:/)
       // but keep other occurrences it can be marker for docker mount volumes
-      // (e.g. /path/dir/from/host:/name/of/dir/in/container                                               )
+      // (e.g. /path/dir/from/host:/name/of/dir/in/container
+      //       )
       esc = path.replaceFirst(":", "").replace('\\', '/');
       esc =
           Character.toLowerCase(esc.charAt(0))
-              + esc.substring(1); //letter of disk mark must be lower case
+              + esc.substring(1); // letter of disk mark must be lower case
     } else {
       esc = path.replace('\\', '/');
     }

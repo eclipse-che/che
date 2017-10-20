@@ -662,7 +662,7 @@ public class XMLTreeTest {
     final XMLTree tree1 = XMLTree.from(XML_CONTENT);
     final XMLTree tree2 = XMLTree.from(XML_CONTENT);
 
-    //first tree
+    // first tree
     tree1
         .getSingleElement("//dependencies")
         .appendChild(
@@ -671,7 +671,7 @@ public class XMLTreeTest {
                 NewElement.createElement("artifactId", "test-artifact"),
                 NewElement.createElement("groupId", "test-group"),
                 NewElement.createElement("version", "test-version")));
-    //second tree
+    // second tree
     final NewElement dependency =
         NewElement.createElement("dependency")
             .appendChild(NewElement.createElement("artifactId", "test-artifact"))
@@ -687,14 +687,14 @@ public class XMLTreeTest {
     final XMLTree tree1 = XMLTree.from(XML_CONTENT);
     final XMLTree tree2 = XMLTree.from(XML_CONTENT);
 
-    //removing dependencies from first tree
+    // removing dependencies from first tree
     tree1.removeElement("/project/dependencies/dependency[3]");
     tree1.removeElement("/project/dependencies/dependency[2]");
     tree1.removeElement("/project/dependencies/dependency[1]");
-    //removing dependencies from second tree
+    // removing dependencies from second tree
     tree2.getSingleElement("//dependencies").removeChildren("dependency");
 
-    //use strings for assertion to quick review difference if assertion failed
+    // use strings for assertion to quick review difference if assertion failed
     assertEquals(tree1.toString(), tree2.toString());
   }
 
@@ -744,7 +744,7 @@ public class XMLTreeTest {
         .getLastChild()
         .remove();
 
-    //use strings for assertion to quick review difference if assertion failed
+    // use strings for assertion to quick review difference if assertion failed
     assertEquals(tree.toString(), XML_CONTENT);
   }
 
@@ -763,7 +763,7 @@ public class XMLTreeTest {
         .getPreviousSibling()
         .remove();
 
-    //use strings for assertion to quick review difference if assertion failed
+    // use strings for assertion to quick review difference if assertion failed
     assertEquals(tree.toString(), XML_CONTENT);
   }
 
@@ -893,18 +893,18 @@ public class XMLTreeTest {
             + "http://maven.apache.org/xsd/maven-4.0.0.xsd\"></project>");
     assertEquals(tree.getRoot().getAttributes().size(), 3);
 
-    //xmlns
+    // xmlns
     assertTrue(tree.getRoot().hasAttribute("xmlns"));
     final Attribute xmlns = tree.getRoot().getAttribute("xmlns");
     assertEquals(xmlns.getValue(), "http://maven.apache.org/POM/4.0.0");
 
-    //xmlns:xsi
+    // xmlns:xsi
     assertTrue(tree.getRoot().hasAttribute("xmlns:xsi"));
     final Attribute xmlnsXsi = tree.getRoot().getAttribute("xmlns:xsi");
     assertEquals(xmlnsXsi.getValue(), "http://www.w3.org/2001/XMLSchema-instance");
     assertEquals(xmlnsXsi.getPrefix(), "xmlns");
 
-    //xsi:schemaLocation
+    // xsi:schemaLocation
     assertTrue(tree.getRoot().hasAttribute("xsi:schemaLocation"));
     final Attribute xsiSchemaLocation = tree.getRoot().getAttribute("xsi:schemaLocation");
     assertEquals(
@@ -1170,19 +1170,19 @@ public class XMLTreeTest {
   public void batchUpdateShouldProduceExpectedContent() {
     final XMLTree tree = XMLTree.from(XML_CONTENT);
 
-    //removing parent
+    // removing parent
     tree.removeElement("//parent");
-    //removing configuration
+    // removing configuration
     tree.getSingleElement("//configuration").remove();
-    //adding groupId before artifactId and version after
+    // adding groupId before artifactId and version after
     tree.getSingleElement("/project/artifactId")
         .insertBefore(NewElement.createElement("groupId", "test-group"))
         .insertAfter(NewElement.createElement("version", "test-version"));
-    //delete all test dependencies
+    // delete all test dependencies
     for (Element element : tree.getElements("//dependency[scope='test']")) {
       element.remove();
     }
-    //adding junit dependency to the end of dependencies list
+    // adding junit dependency to the end of dependencies list
     tree.getSingleElement("//dependencies")
         .appendChild(
             NewElement.createElement(
@@ -1190,7 +1190,7 @@ public class XMLTreeTest {
                 NewElement.createElement("artifactId", "junit"),
                 NewElement.createElement("groupId", "junit"),
                 NewElement.createElement("version", "4.0")));
-    //change junit version
+    // change junit version
     tree.updateText("//dependency[artifactId='junit']/version", "4.1");
 
     assertEquals(
@@ -1305,9 +1305,9 @@ public class XMLTreeTest {
                 + "</project>");
 
     tree.updateText("//artifactId", "longer artifact identifier");
-    //all elements which are right from artifact id
-    //should be shifted right on "new artifact id length" minus "old artifact id length"
-    //to check it lets modify elements which are right
+    // all elements which are right from artifact id
+    // should be shifted right on "new artifact id length" minus "old artifact id length"
+    // to check it lets modify elements which are right
     tree.removeElement("//packaging");
     tree.updateText("//name", "new name");
 
@@ -1336,9 +1336,9 @@ public class XMLTreeTest {
                 + "</project>");
 
     tree.updateText("//artifactId", "smaller-art-id");
-    //all elements which are right from artifact id
-    //should be shifted left on "old artifact id length" minus "new artifact id length"
-    //to check it lets modify elements which are right
+    // all elements which are right from artifact id
+    // should be shifted left on "old artifact id length" minus "new artifact id length"
+    // to check it lets modify elements which are right
     tree.removeElement("//packaging");
     tree.updateText("//name", "new name");
 
@@ -1526,7 +1526,7 @@ public class XMLTreeTest {
         .getAttribute("location")
         .setValue("other-build");
 
-    //to check that segments were shifted
+    // to check that segments were shifted
     tree.removeElement("//tstamp");
 
     assertEquals(
@@ -1560,8 +1560,8 @@ public class XMLTreeTest {
                 + CDATA
                 + "]]></description>\n"
                 + "</model>");
-    //AS tree#getSingleText uses XPath for selecting text content
-    //we can easily select CDATA from element
+    // AS tree#getSingleText uses XPath for selecting text content
+    // we can easily select CDATA from element
     assertEquals(tree.getSingleText("/model/description"), CDATA);
     assertTrue(tree.getSingleElement("/model/description").getText().isEmpty());
   }
@@ -1903,7 +1903,7 @@ public class XMLTreeTest {
 
   @Test(dataProvider = "custom-xml-files")
   public void shouldBeAbleToCreateTreeFromCustomXML(File xml) throws IOException {
-    //should be able to parse file
+    // should be able to parse file
     try {
       XMLTree.from(xml);
     } catch (XMLTreeException ex) {

@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.command.editor.page.goal;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.anySet;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -137,14 +137,14 @@ public class GoalPageTest {
     // given
     InputDialog inputDialog = mock(InputDialog.class);
     when(dialogFactory.createInputDialog(
-            anyString(),
-            anyString(),
-            anyString(),
+            nullable(String.class),
+            nullable(String.class),
+            nullable(String.class),
             eq(0),
             eq(0),
-            anyString(),
-            any(InputCallback.class),
-            any(CancelCallback.class)))
+            nullable(String.class),
+            nullable(InputCallback.class),
+            nullable(CancelCallback.class)))
         .thenReturn(inputDialog);
     String newGoalId = "new goal";
 
@@ -155,14 +155,14 @@ public class GoalPageTest {
     ArgumentCaptor<InputCallback> inputCaptor = ArgumentCaptor.forClass(InputCallback.class);
     verify(dialogFactory)
         .createInputDialog(
-            anyString(),
-            anyString(),
-            anyString(),
+            nullable(String.class),
+            nullable(String.class),
+            nullable(String.class),
             eq(0),
             eq(0),
-            anyString(),
+            nullable(String.class),
             inputCaptor.capture(),
-            isNull(CancelCallback.class));
+            isNull());
     verify(inputDialog).show();
     inputCaptor.getValue().accepted(newGoalId);
     verify(view).setGoal(eq(newGoalId));

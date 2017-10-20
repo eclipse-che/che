@@ -29,7 +29,7 @@ public class UndoablePackageDeleteChange extends DynamicValidationStateChange {
   @Override
   public Change perform(IProgressMonitor pm) throws CoreException {
     int count = fPackageDeletes.size();
-    pm.beginTask("", count * 3); //$NON-NLS-1$
+    pm.beginTask("", count * 3); // $NON-NLS-1$
     ResourceDescription[] packageDeleteDescriptions =
         new ResourceDescription[fPackageDeletes.size()];
     for (int i = 0; i < fPackageDeletes.size(); i++) {

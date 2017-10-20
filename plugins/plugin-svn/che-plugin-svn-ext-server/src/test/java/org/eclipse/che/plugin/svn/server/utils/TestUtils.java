@@ -229,7 +229,7 @@ public class TestUtils {
             .withPaths(pathsToAdd)
             .withAddParents(true));
 
-    //Add properties
+    // Add properties
     final CLIOutputResponse propResponse =
         subversionApi.propset(
             dtoFactory

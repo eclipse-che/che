@@ -219,7 +219,8 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     //  1   enable swap with size equal to current memory size
     //
     //  according to docker docs field  memorySwap should be equal to memory+swap
-    //  we calculate this field as memorySwap=memory * (1 + multiplier) so we just add 1 to multiplier
+    //  we calculate this field as memorySwap=memory * (1 + multiplier) so we just add 1 to
+    // multiplier
     this.memorySwapMultiplier = memorySwapMultiplier == -1 ? -1 : memorySwapMultiplier + 1;
     this.jsonRpcEndpointToMachineNameHolder = jsonRpcEndpointToMachineNameHolder;
     this.networkDriver = networkDriver;
@@ -696,8 +697,10 @@ public class MachineProviderImpl implements MachineInstanceProvider {
   // We can detect
   //  - when no command/entrypoint is set
   //  - when most common shell interpreters are used and require additional arguments
-  //  - when most common shell interpreters are used and they require interactive mode which we don't support
-  // When we identify such situation we change CMD/entrypoint in such a way that it runs "tail -f /dev/null".
+  //  - when most common shell interpreters are used and they require interactive mode which we
+  // don't support
+  // When we identify such situation we change CMD/entrypoint in such a way that it runs "tail -f
+  // /dev/null".
   // This command does nothing and lasts until workspace is stopped.
   // Images such as "ubuntu" or "openjdk" fits this situation.
   protected void setNonExitingContainerCommandIfNeeded(ContainerConfig containerConfig)

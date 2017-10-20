@@ -78,7 +78,7 @@ public class OrganizationNotificationEmailSender implements EventSubscriber<Orga
             userManager.getByName(event.getOrganization().getName());
             return;
           } catch (NotFoundException ex) {
-            //it is not personal organization
+            // it is not personal organization
           }
         }
         switch (event.getType()) {

@@ -99,14 +99,14 @@ public class OrganizationPermissionsFilterTest {
 
   @Test
   public void shouldTestThatAllPublicMethodsAreCoveredByPermissionsFilter() throws Exception {
-    //given
+    // given
     final List<String> collect =
         Stream.of(OrganizationService.class.getDeclaredMethods())
             .filter(method -> Modifier.isPublic(method.getModifiers()))
             .map(Method::getName)
             .collect(Collectors.toList());
 
-    //then
+    // then
     assertEquals(collect.size(), 7);
     assertTrue(collect.contains(OrganizationPermissionsFilter.CREATE_METHOD));
     assertTrue(collect.contains(OrganizationPermissionsFilter.UPDATE_METHOD));

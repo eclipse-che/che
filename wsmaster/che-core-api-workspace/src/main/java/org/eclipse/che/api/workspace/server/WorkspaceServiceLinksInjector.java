@@ -117,7 +117,8 @@ public class WorkspaceServiceLinksInjector {
             APPLICATION_JSON,
             LINK_REL_GET_SNAPSHOT));
 
-    //TODO here we add url to IDE with workspace name not good solution do it here but critical for this task  https://jira.codenvycorp.com/browse/IDEX-3619
+    // TODO here we add url to IDE with workspace name not good solution do it here but critical for
+    // this task  https://jira.codenvycorp.com/browse/IDEX-3619
     final URI ideUri =
         uriBuilder
             .clone()

@@ -99,7 +99,7 @@ public class EditorPropertiesManager {
     defaultProperties.put(TAB_SIZE.toString(), new JSONNumber(4));
     defaultProperties.put(EXPAND_TAB.toString(), JSONBoolean.getInstance(true));
 
-    //Soft wrap
+    // Soft wrap
     defaultProperties.put(SOFT_WRAP.toString(), JSONBoolean.getInstance(false));
 
     // SourceCodeActions (typing)
@@ -111,7 +111,7 @@ public class EditorPropertiesManager {
     defaultProperties.put(AUTO_COMPLETE_COMMENTS.toString(), JSONBoolean.getInstance(true));
     defaultProperties.put(SMART_INDENTATION.toString(), JSONBoolean.getInstance(true));
 
-    //white spaces
+    // white spaces
     defaultProperties.put(SHOW_WHITESPACES.toString(), JSONBoolean.getInstance(false));
 
     // editor features (rulers)

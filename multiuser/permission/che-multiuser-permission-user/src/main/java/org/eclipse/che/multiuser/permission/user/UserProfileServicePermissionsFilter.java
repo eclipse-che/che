@@ -38,7 +38,7 @@ public class UserProfileServicePermissionsFilter extends CheMethodInvokerFilter 
             SystemDomain.DOMAIN_ID, null, UserServicePermissionsFilter.MANAGE_USERS_ACTION);
         break;
       default:
-        //public methods
+        // public methods
     }
   }
 }

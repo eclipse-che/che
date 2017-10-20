@@ -27,9 +27,9 @@ public class ParticipantManager {
     // no instance
   }
 
-  //---- Rename participants ----------------------------------------------------------------
+  // ---- Rename participants ----------------------------------------------------------------
 
-  private static final String RENAME_PARTICIPANT_EXT_POINT = "renameParticipants"; //$NON-NLS-1$
+  private static final String RENAME_PARTICIPANT_EXT_POINT = "renameParticipants"; // $NON-NLS-1$
   private static ParticipantExtensionPoint fgRenameInstance =
       new ParticipantExtensionPoint(
           RefactoringCorePlugin.getPluginId(),
@@ -90,9 +90,9 @@ public class ParticipantManager {
     return result;
   }
 
-  //---- Move participants ----------------------------------------------------------------
+  // ---- Move participants ----------------------------------------------------------------
 
-  private static final String MOVE_PARTICIPANT_EXT_POINT = "moveParticipants"; //$NON-NLS-1$
+  private static final String MOVE_PARTICIPANT_EXT_POINT = "moveParticipants"; // $NON-NLS-1$
   private static ParticipantExtensionPoint fgMoveExtensions =
       new ParticipantExtensionPoint(
           RefactoringCorePlugin.getPluginId(), MOVE_PARTICIPANT_EXT_POINT, MoveParticipant.class);
@@ -151,9 +151,9 @@ public class ParticipantManager {
     return result;
   }
 
-  //---- Delete participants ----------------------------------------------------------------
+  // ---- Delete participants ----------------------------------------------------------------
 
-  private static final String DELETE_PARTICIPANT_EXT_POINT = "deleteParticipants"; //$NON-NLS-1$
+  private static final String DELETE_PARTICIPANT_EXT_POINT = "deleteParticipants"; // $NON-NLS-1$
   private static ParticipantExtensionPoint fgDeleteInstance =
       new ParticipantExtensionPoint(
           RefactoringCorePlugin.getPluginId(),
@@ -214,9 +214,9 @@ public class ParticipantManager {
     return result;
   }
 
-  //---- Create participants ----------------------------------------------------------------
+  // ---- Create participants ----------------------------------------------------------------
 
-  private static final String CREATE_PARTICIPANT_EXT_POINT = "createParticipants"; //$NON-NLS-1$
+  private static final String CREATE_PARTICIPANT_EXT_POINT = "createParticipants"; // $NON-NLS-1$
   private static ParticipantExtensionPoint fgCreateInstance =
       new ParticipantExtensionPoint(
           RefactoringCorePlugin.getPluginId(),
@@ -277,9 +277,9 @@ public class ParticipantManager {
     return result;
   }
 
-  //---- Copy participants ----------------------------------------------------------------
+  // ---- Copy participants ----------------------------------------------------------------
 
-  private static final String COPY_PARTICIPANT_EXT_POINT = "copyParticipants"; //$NON-NLS-1$
+  private static final String COPY_PARTICIPANT_EXT_POINT = "copyParticipants"; // $NON-NLS-1$
   private static ParticipantExtensionPoint fgCopyInstance =
       new ParticipantExtensionPoint(
           RefactoringCorePlugin.getPluginId(), COPY_PARTICIPANT_EXT_POINT, CopyParticipant.class);

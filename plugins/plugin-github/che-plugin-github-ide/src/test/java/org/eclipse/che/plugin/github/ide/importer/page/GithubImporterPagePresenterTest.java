@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.github.ide.importer.page;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
@@ -126,8 +127,8 @@ public class GithubImporterPagePresenterTest {
                 locale));
     doReturn(Collections.singletonList(gitHubUser))
         .when(presenter)
-        .toOrgList(any(JsArrayMixed.class));
-    doReturn(Collections.emptyList()).when(presenter).toRepoList(any(JsArrayMixed.class));
+        .toOrgList(nullable(JsArrayMixed.class));
+    doReturn(Collections.emptyList()).when(presenter).toRepoList(nullable(JsArrayMixed.class));
     presenter.setUpdateDelegate(updateDelegate);
     presenter.init(dataObject);
   }
@@ -142,7 +143,7 @@ public class GithubImporterPagePresenterTest {
     String importerDescription = "description";
     AcceptsOneWidget container = mock(AcceptsOneWidget.class);
     ProjectImporterDescriptor projectImporter = mock(ProjectImporterDescriptor.class);
-    //when(wizardContext.getData(ImportProjectWizard.PROJECT_IMPORTER)).thenReturn(projectImporter);
+    // when(wizardContext.getData(ImportProjectWizard.PROJECT_IMPORTER)).thenReturn(projectImporter);
     when(projectImporter.getDescription()).thenReturn(importerDescription);
 
     presenter.go(container);
@@ -163,7 +164,7 @@ public class GithubImporterPagePresenterTest {
               }
             })
         .when(presenter)
-        .doRequest(any(Promise.class), any(Promise.class), any(Promise.class));
+        .doRequest(nullable(Promise.class), nullable(Promise.class), nullable(Promise.class));
     when(view.getAccountName()).thenReturn("AccountName");
 
     presenter.onLoadRepoClicked();
@@ -193,7 +194,7 @@ public class GithubImporterPagePresenterTest {
               }
             })
         .when(presenter)
-        .doRequest(any(Promise.class), any(Promise.class), any(Promise.class));
+        .doRequest(nullable(Promise.class), nullable(Promise.class), nullable(Promise.class));
 
     presenter.onLoadRepoClicked();
 
@@ -264,7 +265,7 @@ public class GithubImporterPagePresenterTest {
 
   @Test
   public void testSshUriWithHostBetweenDoubleSlashAndSlash() {
-    //Check for type uri which start with ssh:// and has host between // and /
+    // Check for type uri which start with ssh:// and has host between // and /
     String correctUrl = "ssh://host.com/some/path";
     when(view.getProjectName()).thenReturn("");
 
@@ -275,7 +276,7 @@ public class GithubImporterPagePresenterTest {
 
   @Test
   public void testSshUriWithHostBetweenDoubleSlashAndColon() {
-    //Check for type uri with host between // and :
+    // Check for type uri with host between // and :
     String correctUrl = "ssh://host.com:port/some/path";
     when(view.getProjectName()).thenReturn("");
 
@@ -286,7 +287,7 @@ public class GithubImporterPagePresenterTest {
 
   @Test
   public void testGitUriWithHostBetweenDoubleSlashAndSlash() {
-    //Check for type uri which start with git:// and has host between // and /
+    // Check for type uri which start with git:// and has host between // and /
     String correctUrl = "git://host.com/user/repo";
     when(view.getProjectName()).thenReturn("");
 
@@ -297,7 +298,7 @@ public class GithubImporterPagePresenterTest {
 
   @Test
   public void testSshUriWithHostBetweenAtAndColon() {
-    //Check for type uri with host between @ and :
+    // Check for type uri with host between @ and :
     String correctUrl = "user@host.com:login/repo";
     when(view.getProjectName()).thenReturn("");
 
@@ -308,7 +309,7 @@ public class GithubImporterPagePresenterTest {
 
   @Test
   public void testSshUriWithHostBetweenAtAndSlash() {
-    //Check for type uri with host between @ and /
+    // Check for type uri with host between @ and /
     String correctUrl = "ssh://user@host.com/some/path";
     when(view.getProjectName()).thenReturn("");
 
@@ -510,7 +511,7 @@ public class GithubImporterPagePresenterTest {
               }
             })
         .when(presenter)
-        .doRequest(any(Promise.class), any(Promise.class), any(Promise.class));
+        .doRequest(nullable(Promise.class), nullable(Promise.class), nullable(Promise.class));
     doReturn(exception).when(promiseError).getCause();
 
     presenter.onLoadRepoClicked();
@@ -550,7 +551,7 @@ public class GithubImporterPagePresenterTest {
               }
             })
         .when(presenter)
-        .doRequest(any(Promise.class), any(Promise.class), any(Promise.class));
+        .doRequest(nullable(Promise.class), nullable(Promise.class), nullable(Promise.class));
     final Throwable exception = mock(UnauthorizedException.class);
     String userId = "userId";
     CurrentUser user = mock(CurrentUser.class);

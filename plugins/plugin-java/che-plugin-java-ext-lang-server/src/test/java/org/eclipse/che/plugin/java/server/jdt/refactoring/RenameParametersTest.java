@@ -25,6 +25,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class RenameParametersTest extends RefactoringTest {
@@ -63,7 +64,7 @@ public class RenameParametersTest extends RefactoringTest {
     return fileName + getSimpleTestFileName(canRename, input);
   }
 
-  //------------
+  // ------------
   protected ICompilationUnit createCUfromTestFile(
       IPackageFragment pack, boolean canRename, boolean input) throws Exception {
     return createCU(
@@ -81,9 +82,9 @@ public class RenameParametersTest extends RefactoringTest {
         RefactoringAvailabilityTester.isChangeSignatureAvailable(method));
     ChangeSignatureProcessor processor = new ChangeSignatureProcessor(method);
     Refactoring ref = new ProcessorBasedRefactoring(processor);
-    //ref.setUpdateReferences(updateReferences);
-    //ref.setNewParameterNames(newNames);
-    //ref.setNewNames(createRenamings(method, newNames));
+    // ref.setUpdateReferences(updateReferences);
+    // ref.setNewParameterNames(newNames);
+    // ref.setNewNames(createRenamings(method, newNames));
     modifyInfos(processor.getParameterInfos(), newNames);
 
     RefactoringStatus result = performRefactoring(ref);
@@ -103,7 +104,7 @@ public class RenameParametersTest extends RefactoringTest {
 
   private void helper2(String[] newNames, String[] signature) throws Exception {
     IType classA = getType(createCUfromTestFile(getPackageP(), false, false), "A");
-    //DebugUtils.dump("classA" + classA);
+    // DebugUtils.dump("classA" + classA);
     IMethod method = classA.getMethod("m", signature);
     Assert.assertTrue(
         "refactoring not available",
@@ -179,6 +180,8 @@ public class RenameParametersTest extends RefactoringTest {
     helper1(new String[] {"j"}, new String[] {"I"});
   }
 
+  @Test
+  @Ignore
   public void test11() throws Exception {
     printTestDisabledMessage("revisit in the context of anonymous types in type hierarchies");
     // helper1(new String[]{"j"}, new String[]{"I"});
@@ -254,12 +257,14 @@ public class RenameParametersTest extends RefactoringTest {
     helper1(new String[] {"j"}, new String[] {"I"});
   }
 
+  @Test
+  @Ignore
   public void test26() throws Exception {
     printTestDisabledMessage("revisit in the context of anonymous types in type hierarchies");
-    //helper1(new String[]{"j"}, new String[]{"I"});
+    // helper1(new String[]{"j"}, new String[]{"I"});
   }
 
-  //removed - see testFail21
+  // removed - see testFail21
   //	public void test27() throws Exception{
   //		helper1(new String[]{"j"}, new String[]{"I"});
   //	}
@@ -284,10 +289,14 @@ public class RenameParametersTest extends RefactoringTest {
     helper1(new String[] {"kk", "j"}, new String[] {"I", "I"});
   }
 
+  @Test
+  @Ignore
   public void test32() throws Exception {
     printTestDisabledMessage("must do - constructor params");
   }
 
+  @Test
+  @Ignore
   public void test33() throws Exception {
     printTestDisabledMessage("revisit - removed the 'no ref update' option");
     //		helper1(new String[]{"b"}, new String[]{"QA;"}, false);
@@ -299,6 +308,8 @@ public class RenameParametersTest extends RefactoringTest {
     helper1(new String[] {"test2"}, new String[] {"Z"});
   }
 
+  @Test
+  @Ignore
   public void test35() throws Exception {
     printTestDisabledMessage("regression test for bug#6224");
     //		helper1(new String[]{"j"}, new String[]{"I"});
@@ -312,6 +323,8 @@ public class RenameParametersTest extends RefactoringTest {
 
   // -----
 
+  @Test
+  @Ignore
   public void testFail0() throws Exception {
     printTestDisabledMessage("must fix - name collision with an instance var");
     //		helper2(new String[]{"j"}, new String[]{"I"});
@@ -342,21 +355,29 @@ public class RenameParametersTest extends RefactoringTest {
     helper2(new String[] {"j"}, new String[] {"I"});
   }
 
+  @Test
+  @Ignore
   public void testFail6() throws Exception {
     printTestDisabledMessage("must fix - name collision with an instance var");
     //		helper2(new String[]{"j"}, new String[]{"I"});
   }
 
+  @Test
+  @Ignore
   public void testFail7() throws Exception {
     printTestDisabledMessage("waiting for better conflict detection story from DB");
     //		helper2(new String[]{"j"}, new String[]{"I"});
   }
 
+  @Test
+  @Ignore
   public void testFail8() throws Exception {
     printTestDisabledMessage("waiting for better conflict detection story from DB");
     //		helper2(new String[]{"j"}, new String[]{"I"});
   }
 
+  @Test
+  @Ignore
   public void testFail9() throws Exception {
     printTestDisabledMessage("waiting for better conflict detection story from DB");
     //		helper2(new String[]{"j"}, new String[]{"I"});
@@ -372,16 +393,22 @@ public class RenameParametersTest extends RefactoringTest {
     helper2(new String[] {"j", "j"}, new String[] {"I", "I"});
   }
 
+  @Test
+  @Ignore
   public void testFail12() throws Exception {
     printTestDisabledMessage("waiting for better conflict detection story from DB");
     //		helper2(new String[]{"j"}, new String[]{"I"});
   }
 
+  @Test
+  @Ignore
   public void testFail13() throws Exception {
     printTestDisabledMessage("waiting for better conflict detection story from DB");
     //		helper2(new String[]{"j"}, new String[]{"I"});
   }
 
+  @Test
+  @Ignore
   public void testFail14() throws Exception {
     printTestDisabledMessage("waiting for better conflict detection story from DB");
     //		helper2(new String[]{"j"}, new String[]{"QA;"});
@@ -407,16 +434,22 @@ public class RenameParametersTest extends RefactoringTest {
     helper2(new String[] {"j"}, new String[] {"I"});
   }
 
+  @Test
+  @Ignore
   public void testFail19() throws Exception {
     printTestDisabledMessage("waiting for better conflict detection story from DB");
     //		helper2(new String[]{"j"}, new String[]{"I"});
   }
 
+  @Test
+  @Ignore
   public void testFail20() throws Exception {
     printTestDisabledMessage("waiting for better conflict detection story from DB");
     //		helper2(new String[]{"j"}, new String[]{"I"});
   }
 
+  @Test
+  @Ignore
   public void testFail21() throws Exception {
     printTestDisabledMessage("Disabled since 1.4 compliance level doesn't produce error message");
     // helper2(new String[]{"j"}, new String[]{"I"});

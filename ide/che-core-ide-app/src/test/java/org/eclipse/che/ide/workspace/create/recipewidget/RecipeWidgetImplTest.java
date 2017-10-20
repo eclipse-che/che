@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.ide.workspace.create.recipewidget;
 
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -57,8 +58,8 @@ public class RecipeWidgetImplTest {
     verify(descriptor).getName();
     verify(descriptor).getType();
 
-    verify(tag.tagName).setText(anyString());
-    verify(tag.type).setText(anyString());
+    verify(tag.tagName).setText(nullable(String.class));
+    verify(tag.type).setText(nullable(String.class));
 
     verify(resources).recipe();
     verify(tag.icon).getElement();

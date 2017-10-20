@@ -64,13 +64,14 @@ public class IndexManager extends JobManager implements IIndexConstants {
   public static final Integer REUSE_STATE = new Integer(4);
   // should JDT manage (update, delete as needed) pre-built indexes?
   public static final String MANAGE_PRODUCT_INDEXES_PROPERTY =
-      "jdt.core.manageProductIndexes"; //$NON-NLS-1$
+      "jdt.core.manageProductIndexes"; // $NON-NLS-1$
   private static final boolean IS_MANAGING_PRODUCT_INDEXES_PROPERTY =
       Boolean.getBoolean(MANAGE_PRODUCT_INDEXES_PROPERTY);
   // Debug
   public static boolean DEBUG = false;
   // key = containerPath, value = indexLocation path
-  // indexLocation path is created by appending an index file name to the getJavaPluginWorkingLocation() path
+  // indexLocation path is created by appending an index file name to the
+  // getJavaPluginWorkingLocation() path
   public SimpleLookupTable indexLocations = new SimpleLookupTable();
   // key = indexLocation path, value = an index
   private SimpleLookupTable indexes = new SimpleLookupTable();
@@ -81,11 +82,11 @@ public class IndexManager extends JobManager implements IIndexConstants {
   // key = indexLocation path, value = index state integer
   private SimpleLookupTable indexStates = null;
   private File indexNamesMapFile;
-  //$NON-NLS-1$
+  // $NON-NLS-1$
   private File savedIndexNamesFile;
-  //$NON-NLS-1$
+  // $NON-NLS-1$
   private File participantIndexNamesFile;
-  //$NON-NLS-1$
+  // $NON-NLS-1$
   private boolean javaLikeNamesChanged = true;
   // search participants who register indexes with the index manager
   private SimpleLookupTable participantsContainers = null;
@@ -181,7 +182,8 @@ public class IndexManager extends JobManager implements IIndexConstants {
         this.indexLocations.put(containerPath, indexLocation);
       }
     } else {
-      // an existing index location exists - make sure it has not changed (i.e. the URL has not changed)
+      // an existing index location exists - make sure it has not changed (i.e. the URL has not
+      // changed)
       URL existingURL = indexLocation.getUrl();
       if (newIndexURL != null) {
         // if either URL is different then the index location has been updated so rebuild.
@@ -205,11 +207,12 @@ public class IndexManager extends JobManager implements IIndexConstants {
       String pathString = containerPath.toOSString();
       CRC32 checksumCalculator = new CRC32();
       checksumCalculator.update(pathString.getBytes());
-      String fileName = Long.toString(checksumCalculator.getValue()) + ".index"; //$NON-NLS-1$
+      String fileName = Long.toString(checksumCalculator.getValue()) + ".index"; // $NON-NLS-1$
       if (JobManager.VERBOSE)
         Util.verbose(
-            "-> index name for " + pathString + " is " + fileName); //$NON-NLS-1$ //$NON-NLS-2$
-      // to share the indexLocation between the indexLocations and indexStates tables, get the key from the indexStates table
+            "-> index name for " + pathString + " is " + fileName); // $NON-NLS-1$ //$NON-NLS-2$
+      // to share the indexLocation between the indexLocations and indexStates tables, get the key
+      // from the indexStates table
       indexLocation =
           (IndexLocation)
               getIndexStates()
@@ -220,7 +223,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
   }
 
   public void deleteIndexFiles() {
-    if (DEBUG) Util.verbose("Deleting index files"); //$NON-NLS-1$
+    if (DEBUG) Util.verbose("Deleting index files"); // $NON-NLS-1$
     this.savedIndexNamesFile.delete(); // forget saved indexes & delete each index file
     deleteIndexFiles(null);
     getSavedIndexesDirectory().delete();
@@ -234,11 +237,11 @@ public class IndexManager extends JobManager implements IIndexConstants {
       String fileName = indexesFiles[i].getAbsolutePath();
       if (pathsToKeep != null && pathsToKeep.includes(new FileIndexLocation(indexesFiles[i])))
         continue;
-      String suffix = ".index"; //$NON-NLS-1$
+      String suffix = ".index"; // $NON-NLS-1$
       if (fileName.regionMatches(
           true, fileName.length() - suffix.length(), suffix, 0, suffix.length())) {
         if (JobManager.VERBOSE || DEBUG)
-          Util.verbose("Deleting index file " + indexesFiles[i]); //$NON-NLS-1$
+          Util.verbose("Deleting index file " + indexesFiles[i]); // $NON-NLS-1$
         indexesFiles[i].delete();
       }
     }
@@ -260,7 +263,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
       IJavaProject project, ISourceElementRequestor requestor) {
     // disable task tags to speed up parsing
     Map options = project.getOptions(true);
-    options.put(JavaCore.COMPILER_TASK_TAGS, ""); //$NON-NLS-1$
+    options.put(JavaCore.COMPILER_TASK_TAGS, ""); // $NON-NLS-1$
     try {
       SourceElementParser parser =
           new IndexingParser(
@@ -329,7 +332,8 @@ public class IndexManager extends JobManager implements IIndexConstants {
       Integer currentIndexState = state == null ? UNKNOWN_STATE : (Integer) state;
       if (currentIndexState == UNKNOWN_STATE) {
         // should only be reachable for query jobs
-        // IF you put an index in the cache, then AddJarFileToIndex fails because it thinks there is nothing to do
+        // IF you put an index in the cache, then AddJarFileToIndex fails because it thinks there is
+        // nothing to do
         rebuildIndex(indexLocation, containerPath);
         return null;
       }
@@ -339,7 +343,8 @@ public class IndexManager extends JobManager implements IIndexConstants {
           containerPath.getDevice() == null ? containerPath.toString() : containerPath.toOSString();
       if (reuseExistingFile) {
         if (indexLocation
-            .exists()) { // check before creating index so as to avoid creating a new empty index if file is missing
+            .exists()) { // check before creating index so as to avoid creating a new empty index if
+          // file is missing
           try {
             index = new Index(indexLocation, containerPathString, true /*reuse index file*/);
             this.indexes.put(indexLocation, index);
@@ -354,12 +359,13 @@ public class IndexManager extends JobManager implements IIndexConstants {
                     "-> cannot reuse existing index: "
                         + indexLocation
                         + " path: "
-                        + containerPathString); //$NON-NLS-1$ //$NON-NLS-2$
+                        + containerPathString); // $NON-NLS-1$ //$NON-NLS-2$
               rebuildIndex(indexLocation, containerPath);
               return null;
             }
             /*index = null;*/
-            // will fall thru to createIfMissing & create a empty index for the rebuild all job to populate
+            // will fall thru to createIfMissing & create a empty index for the rebuild all job to
+            // populate
           }
         }
         if (currentIndexState == SAVED_STATE) { // rebuild index if existing file is missing
@@ -373,7 +379,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
                 "-> cannot reuse given index: "
                     + indexLocation
                     + " path: "
-                    + containerPathString); //$NON-NLS-1$ //$NON-NLS-2$
+                    + containerPathString); // $NON-NLS-1$ //$NON-NLS-2$
           this.indexLocations.put(containerPath, null);
           indexLocation = computeIndexLocation(containerPath);
           rebuildIndex(indexLocation, containerPath);
@@ -388,7 +394,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
                 "-> create empty index: "
                     + indexLocation
                     + " path: "
-                    + containerPathString); //$NON-NLS-1$ //$NON-NLS-2$
+                    + containerPathString); // $NON-NLS-1$ //$NON-NLS-2$
           index = new Index(indexLocation, containerPathString, false /*do not reuse index file*/);
           this.indexes.put(indexLocation, index);
           return index;
@@ -398,13 +404,14 @@ public class IndexManager extends JobManager implements IIndexConstants {
                 "-> unable to create empty index: "
                     + indexLocation
                     + " path: "
-                    + containerPathString); //$NON-NLS-1$ //$NON-NLS-2$
+                    + containerPathString); // $NON-NLS-1$ //$NON-NLS-2$
           // The file could not be created. Possible reason: the project has been deleted.
           return null;
         }
       }
     }
-    //System.out.println(" index name: " + path.toOSString() + " <----> " + index.getIndexFile().getName());
+    // System.out.println(" index name: " + path.toOSString() + " <----> " +
+    // index.getIndexFile().getName());
     return index;
   }
 
@@ -449,7 +456,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
               if (DEBUG)
                 Util.verbose(
                     "Change in javaLikeNames - removing index file for "
-                        + containerPath); //$NON-NLS-1$
+                        + containerPath); // $NON-NLS-1$
               indexFile.delete();
             }
             this.indexes.put(indexLocation, null);
@@ -510,7 +517,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
                       indexesDirectoryPath,
                       String.valueOf(savedName))); // shares indexesDirectoryPath's segments
           if (JobManager.VERBOSE)
-            Util.verbose("Reading saved index file " + indexLocation); //$NON-NLS-1$
+            Util.verbose("Reading saved index file " + indexLocation); // $NON-NLS-1$
           this.indexStates.put(indexLocation, SAVED_STATE);
         }
       }
@@ -535,7 +542,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
   private IPath getJavaPluginWorkingLocation() {
     if (this.javaPluginLocation != null) return this.javaPluginLocation;
 
-    IPath stateLocation = new Path(indexLocation); //JavaCore.getPlugin().getStateLocation();
+    IPath stateLocation = new Path(indexLocation); // JavaCore.getPlugin().getStateLocation();
 
     return this.javaPluginLocation = stateLocation;
   }
@@ -563,13 +570,13 @@ public class IndexManager extends JobManager implements IIndexConstants {
       if (JobManager.VERBOSE && current != 1)
         Util.verbose(
             "No Java like names found and there is atleast one non-default javaLikeName",
-            System.err); //$NON-NLS-1$
-      return (current != 1); //Ignore if only java
+            System.err); // $NON-NLS-1$
+      return (current != 1); // Ignore if only java
     }
     int prev = prevNames.length;
     if (current != prev) {
       if (JobManager.VERBOSE)
-        Util.verbose("Java like names have changed", System.err); //$NON-NLS-1$
+        Util.verbose("Java like names have changed", System.err); // $NON-NLS-1$
       return true;
     }
     if (current > 1) {
@@ -584,7 +591,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
     for (int i = 0; i < current; i++) {
       if (!CharOperation.equals(currentNames[i], prevNames[i])) {
         if (JobManager.VERBOSE)
-          Util.verbose("Java like names have changed", System.err); //$NON-NLS-1$
+          Util.verbose("Java like names have changed", System.err); // $NON-NLS-1$
         return true;
       }
     }
@@ -734,7 +741,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
   private char[][] readJavaLikeNamesFile() {
     try {
       String pathName = getJavaPluginWorkingLocation().toOSString();
-      File javaLikeNamesFile = new File(pathName, "javaLikeNames.txt"); //$NON-NLS-1$
+      File javaLikeNamesFile = new File(pathName, "javaLikeNames.txt"); // $NON-NLS-1$
       if (!javaLikeNamesFile.exists()) return null;
       char[] javaLikeNames =
           org.eclipse.jdt.internal.compiler.util.Util.getFileCharContent(javaLikeNamesFile, null);
@@ -743,7 +750,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
         return names;
       }
     } catch (IOException ignored) {
-      if (JobManager.VERBOSE) Util.verbose("Failed to read javaLikeNames file"); //$NON-NLS-1$
+      if (JobManager.VERBOSE) Util.verbose("Failed to read javaLikeNames file"); // $NON-NLS-1$
     }
     return null;
   }
@@ -757,7 +764,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
           "-> request to rebuild index: "
               + indexLocation
               + " path: "
-              + containerPath); //$NON-NLS-1$ //$NON-NLS-2$
+              + containerPath); // $NON-NLS-1$ //$NON-NLS-2$
 
     updateIndexState(indexLocation, REBUILDING_STATE);
     IndexRequest request = null;
@@ -794,7 +801,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
             "-> recreating index: "
                 + indexLocation
                 + " for path: "
-                + containerPathString); //$NON-NLS-1$ //$NON-NLS-2$
+                + containerPathString); // $NON-NLS-1$ //$NON-NLS-2$
       index = new Index(indexLocation, containerPathString, false /*do not reuse index file*/);
       this.indexes.put(indexLocation, index);
       index.monitor = monitor;
@@ -802,7 +809,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
     } catch (IOException e) {
       // The file could not be created. Possible reason: the project has been deleted.
       if (JobManager.VERBOSE) {
-        Util.verbose("-> failed to recreate index for path: " + containerPathString); //$NON-NLS-1$
+        Util.verbose("-> failed to recreate index for path: " + containerPathString); // $NON-NLS-1$
         e.printStackTrace();
       }
       return null;
@@ -818,7 +825,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 
   /** Removes the index for a given path. This is a no-op if the index did not exist. */
   public synchronized void removeIndex(IPath containerPath) {
-    if (JobManager.VERBOSE || DEBUG) Util.verbose("removing index " + containerPath); //$NON-NLS-1$
+    if (JobManager.VERBOSE || DEBUG) Util.verbose("removing index " + containerPath); // $NON-NLS-1$
     IndexLocation indexLocation = computeIndexLocation(containerPath);
     Index index = getIndex(indexLocation);
     File indexFile = null;
@@ -834,7 +841,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
       indexLocation.close();
       this.indexLocations.put(containerPath, null);
     } else if (indexFile != null && indexFile.exists()) {
-      if (DEBUG) Util.verbose("removing index file " + indexFile); //$NON-NLS-1$
+      if (DEBUG) Util.verbose("removing index file " + indexFile); // $NON-NLS-1$
       indexFile.delete();
     }
     this.indexes.removeKey(indexLocation);
@@ -846,7 +853,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 
   /** Removes all indexes whose paths start with (or are equal to) the given path. */
   public synchronized void removeIndexPath(IPath path) {
-    if (JobManager.VERBOSE || DEBUG) Util.verbose("removing index path " + path); //$NON-NLS-1$
+    if (JobManager.VERBOSE || DEBUG) Util.verbose("removing index path " + path); // $NON-NLS-1$
     Object[] keyTable = this.indexes.keyTable;
     Object[] valueTable = this.indexes.valueTable;
     IndexLocation[] locations = null;
@@ -863,7 +870,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
         if (this.indexStates.get(indexLocation) == REUSE_STATE) {
           indexLocation.close();
         } else {
-          if (DEBUG) Util.verbose("removing index file " + indexLocation); //$NON-NLS-1$
+          if (DEBUG) Util.verbose("removing index file " + indexLocation); // $NON-NLS-1$
           indexLocation.delete();
         }
       } else {
@@ -947,7 +954,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
             "-> reseting index: "
                 + indexLocation
                 + " for path: "
-                + containerPathString); //$NON-NLS-1$ //$NON-NLS-2$
+                + containerPathString); // $NON-NLS-1$ //$NON-NLS-2$
       }
       if (index == null) {
         // the index does not exist, try to recreate it
@@ -958,7 +965,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
     } catch (IOException e) {
       // The file could not be created. Possible reason: the project has been deleted.
       if (JobManager.VERBOSE) {
-        Util.verbose("-> failed to reset index for path: " + containerPathString); //$NON-NLS-1$
+        Util.verbose("-> failed to reset index for path: " + containerPathString); // $NON-NLS-1$
         e.printStackTrace();
       }
       return false;
@@ -969,7 +976,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
     // must have permission to write from the write monitor
     if (index.hasChanged()) {
       if (JobManager.VERBOSE)
-        Util.verbose("-> saving index " + index.getIndexLocation()); //$NON-NLS-1$
+        Util.verbose("-> saving index " + index.getIndexLocation()); // $NON-NLS-1$
       index.save();
     }
     synchronized (this) {
@@ -1005,7 +1012,8 @@ public class IndexManager extends JobManager implements IIndexConstants {
       if (monitor == null) continue; // index got deleted since acquired
       try {
         // take read lock before checking if index has changed
-        // don't take write lock yet since it can cause a deadlock (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=50571)
+        // don't take write lock yet since it can cause a deadlock (see
+        // https://bugs.eclipse.org/bugs/show_bug.cgi?id=50571)
         monitor.enterRead();
         if (index.hasChanged()) {
           if (monitor.exitReadEnterWrite()) {
@@ -1014,7 +1022,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
             } catch (IOException e) {
               if (JobManager.VERBOSE) {
                 Util.verbose(
-                    "-> got the following exception while saving:", System.err); //$NON-NLS-1$
+                    "-> got the following exception while saving:", System.err); // $NON-NLS-1$
                 e.printStackTrace();
               }
               allSaved = false;
@@ -1072,7 +1080,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
           }
 
           public String toString() {
-            return "indexing " + searchDocument.getPath(); //$NON-NLS-1$
+            return "indexing " + searchDocument.getPath(); // $NON-NLS-1$
           }
         });
   }
@@ -1080,13 +1088,13 @@ public class IndexManager extends JobManager implements IIndexConstants {
   public String toString() {
     StringBuffer buffer = new StringBuffer(10);
     buffer.append(super.toString());
-    buffer.append("In-memory indexes:\n"); //$NON-NLS-1$
+    buffer.append("In-memory indexes:\n"); // $NON-NLS-1$
     int count = 0;
     Object[] valueTable = this.indexes.valueTable;
     for (int i = 0, l = valueTable.length; i < l; i++) {
       Index index = (Index) valueTable[i];
       if (index != null)
-        buffer.append(++count).append(" - ").append(index.toString()).append('\n'); //$NON-NLS-1$
+        buffer.append(++count).append(" - ").append(index.toString()).append('\n'); // $NON-NLS-1$
     }
     return buffer.toString();
   }
@@ -1111,7 +1119,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
         }
       }
     } catch (IOException ignored) {
-      if (JobManager.VERBOSE) Util.verbose("Failed to read saved index file names"); //$NON-NLS-1$
+      if (JobManager.VERBOSE) Util.verbose("Failed to read saved index file names"); // $NON-NLS-1$
     }
     return;
   }
@@ -1124,13 +1132,14 @@ public class IndexManager extends JobManager implements IIndexConstants {
       if (savedIndexNames.length > 0) {
         char[][] names = CharOperation.splitOn('\n', savedIndexNames);
         if (names.length > 1) {
-          // First line is DiskIndex signature + saved plugin working location (see writeSavedIndexNamesFile())
-          String savedSignature = DiskIndex.SIGNATURE + "+" + dirOSString; //$NON-NLS-1$
+          // First line is DiskIndex signature + saved plugin working location (see
+          // writeSavedIndexNamesFile())
+          String savedSignature = DiskIndex.SIGNATURE + "+" + dirOSString; // $NON-NLS-1$
           if (savedSignature.equals(new String(names[0]))) return names;
         }
       }
     } catch (IOException ignored) {
-      if (JobManager.VERBOSE) Util.verbose("Failed to read saved index file names"); //$NON-NLS-1$
+      if (JobManager.VERBOSE) Util.verbose("Failed to read saved index file names"); // $NON-NLS-1$
     }
     return null;
   }
@@ -1156,7 +1165,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
       }
     } catch (IOException ignored) {
       if (JobManager.VERBOSE)
-        Util.verbose("Failed to read participant index file names"); //$NON-NLS-1$
+        Util.verbose("Failed to read participant index file names"); // $NON-NLS-1$
     }
     this.participantsContainers = containers;
     return;
@@ -1171,7 +1180,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
       if ((this.indexStates.removeKey(locations[i]) != null)) {
         changed = true;
         if (JobManager.VERBOSE) {
-          Util.verbose("-> index state updated to: ? for: " + locations[i]); //$NON-NLS-1$
+          Util.verbose("-> index state updated to: ? for: " + locations[i]); // $NON-NLS-1$
         }
       }
     }
@@ -1197,19 +1206,19 @@ public class IndexManager extends JobManager implements IIndexConstants {
 
     if (JobManager.VERBOSE) {
       if (indexState == null) {
-        Util.verbose("-> index state removed for: " + indexLocation); //$NON-NLS-1$
+        Util.verbose("-> index state removed for: " + indexLocation); // $NON-NLS-1$
       } else {
-        String state = "?"; //$NON-NLS-1$
-        if (indexState == SAVED_STATE) state = "SAVED"; //$NON-NLS-1$
-        else if (indexState == UPDATING_STATE) state = "UPDATING"; //$NON-NLS-1$
-        else if (indexState == UNKNOWN_STATE) state = "UNKNOWN"; //$NON-NLS-1$
-        else if (indexState == REBUILDING_STATE) state = "REBUILDING"; //$NON-NLS-1$
-        else if (indexState == REUSE_STATE) state = "REUSE"; //$NON-NLS-1$
+        String state = "?"; // $NON-NLS-1$
+        if (indexState == SAVED_STATE) state = "SAVED"; // $NON-NLS-1$
+        else if (indexState == UPDATING_STATE) state = "UPDATING"; // $NON-NLS-1$
+        else if (indexState == UNKNOWN_STATE) state = "UNKNOWN"; // $NON-NLS-1$
+        else if (indexState == REBUILDING_STATE) state = "REBUILDING"; // $NON-NLS-1$
+        else if (indexState == REUSE_STATE) state = "REUSE"; // $NON-NLS-1$
         Util.verbose(
             "-> index state updated to: "
                 + state
                 + " for: "
-                + indexLocation); //$NON-NLS-1$ //$NON-NLS-2$
+                + indexLocation); // $NON-NLS-1$ //$NON-NLS-2$
       }
     }
   }
@@ -1237,7 +1246,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
         System.arraycopy(currentNames, 0, currentNames = new char[length][], 0, length);
         Util.sort(currentNames);
       }
-      File javaLikeNamesFile = new File(pathName, "javaLikeNames.txt"); //$NON-NLS-1$
+      File javaLikeNamesFile = new File(pathName, "javaLikeNames.txt"); // $NON-NLS-1$
       writer = new BufferedWriter(new FileWriter(javaLikeNamesFile));
       for (int i = 0; i < length - 1; i++) {
         writer.write(currentNames[i]);
@@ -1247,7 +1256,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 
     } catch (IOException ignored) {
       if (JobManager.VERBOSE)
-        Util.verbose("Failed to write javaLikeNames file", System.err); //$NON-NLS-1$
+        Util.verbose("Failed to write javaLikeNames file", System.err); // $NON-NLS-1$
     } finally {
       if (writer != null) {
         try {
@@ -1281,7 +1290,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
       }
     } catch (IOException ignored) {
       if (JobManager.VERBOSE)
-        Util.verbose("Failed to write saved index file names", System.err); //$NON-NLS-1$
+        Util.verbose("Failed to write saved index file names", System.err); // $NON-NLS-1$
     } finally {
       if (writer != null) {
         try {
@@ -1312,7 +1321,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
       }
     } catch (IOException ignored) {
       if (JobManager.VERBOSE)
-        Util.verbose("Failed to write participant index file names", System.err); //$NON-NLS-1$
+        Util.verbose("Failed to write participant index file names", System.err); // $NON-NLS-1$
     } finally {
       if (writer != null) {
         try {
@@ -1343,7 +1352,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
       }
     } catch (IOException ignored) {
       if (JobManager.VERBOSE)
-        Util.verbose("Failed to write saved index file names", System.err); //$NON-NLS-1$
+        Util.verbose("Failed to write saved index file names", System.err); // $NON-NLS-1$
     } finally {
       if (writer != null) {
         try {

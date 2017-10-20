@@ -105,7 +105,7 @@ public class FlowContext {
     fLocals[local.getVariableId() - fStart] = local;
   }
 
-  //---- Exception handling --------------------------------------------------------
+  // ---- Exception handling --------------------------------------------------------
 
   void pushExcptions(TryStatement node) {
     List<CatchClause> catchClauses = node.catchClauses();
@@ -120,11 +120,9 @@ public class FlowContext {
 
   boolean isExceptionCaught(ITypeBinding excpetionType) {
     for (Iterator<List<CatchClause>> exceptions = fExceptionStack.iterator();
-        exceptions.hasNext();
-        ) {
+        exceptions.hasNext(); ) {
       for (Iterator<CatchClause> catchClauses = exceptions.next().iterator();
-          catchClauses.hasNext();
-          ) {
+          catchClauses.hasNext(); ) {
         SingleVariableDeclaration caughtException = catchClauses.next().getException();
         IVariableBinding binding = caughtException.resolveBinding();
         if (binding == null) continue;

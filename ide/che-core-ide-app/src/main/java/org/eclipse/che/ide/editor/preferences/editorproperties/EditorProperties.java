@@ -19,11 +19,11 @@ import javax.validation.constraints.NotNull;
  */
 public enum EditorProperties {
 
-  //Tabs section
+  // Tabs section
   TAB_SIZE("tabSize"),
   EXPAND_TAB("expandTab"),
 
-  //Typing section
+  // Typing section
   AUTO_PAIR_PARENTHESES("autoPairParentheses"),
   AUTO_PAIR_BRACES("autoPairBraces"),
   AUTO_PAIR_SQUARE_BRACKETS("autoPairSquareBrackets"),
@@ -32,21 +32,21 @@ public enum EditorProperties {
   AUTO_COMPLETE_COMMENTS("autoCompleteComments"),
   SMART_INDENTATION("smartIndentation"),
 
-  //White spaces section
+  // White spaces section
   SHOW_WHITESPACES("showWhitespaces"),
 
-  //Edit section
+  // Edit section
   ENABLE_AUTO_SAVE("enableAutoSave"),
   SOFT_WRAP("wordWrap"),
 
-  //Rulers section
+  // Rulers section
   SHOW_ANNOTATION_RULER("annotationRuler"),
   SHOW_LINE_NUMBER_RULER("lineNumberRuler"),
   SHOW_FOLDING_RULER("foldingRuler"),
   SHOW_OVERVIEW_RULER("overviewRuler"),
   SHOW_ZOOM_RULER("zoomRuler"),
 
-  //Language tools section
+  // Language tools section
   SHOW_OCCURRENCES("showOccurrences"),
   SHOW_CONTENT_ASSIST_AUTOMATICALLY("contentAssistAutoTrigger");
 

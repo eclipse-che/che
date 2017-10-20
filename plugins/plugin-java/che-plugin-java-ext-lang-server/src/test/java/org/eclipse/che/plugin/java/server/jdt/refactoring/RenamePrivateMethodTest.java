@@ -97,14 +97,14 @@ public class RenamePrivateMethodTest extends RefactoringTest {
 
     assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
     assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager().anythingToRedo());
-    //assertEquals("1 to undo", 1, Refactoring.getUndoManager().getRefactoringLog().size());
+    // assertEquals("1 to undo", 1, Refactoring.getUndoManager().getRefactoringLog().size());
 
     RefactoringCore.getUndoManager().performUndo(null, new NullProgressMonitor());
     assertEqualLines("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
 
     assertTrue("! anythingToUndo", !RefactoringCore.getUndoManager().anythingToUndo());
     assertTrue("anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
-    //assertEquals("1 to redo", 1, Refactoring.getUndoManager().getRedoStack().size());
+    // assertEquals("1 to redo", 1, Refactoring.getUndoManager().getRedoStack().size());
 
     RefactoringCore.getUndoManager().performRedo(null, new NullProgressMonitor());
     assertEqualLines("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());

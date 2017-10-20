@@ -13,6 +13,7 @@ package org.eclipse.che.ide.workspace.create;
 import static org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter.MAX_COUNT;
 import static org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter.RECIPE_TYPE;
 import static org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter.SKIP_COUNT;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -62,12 +63,12 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /** @author Dmitry Shnurenko */
 @RunWith(MockitoJUnitRunner.class)
 public class CreateWorkspacePresenterTest {
-  //constructor mocks
+  // constructor mocks
   @Mock private CreateWorkspaceView view;
   @Mock private DtoFactory dtoFactory;
   @Mock private WorkspaceServiceClient workspaceClient;
@@ -76,7 +77,7 @@ public class CreateWorkspacePresenterTest {
   @Mock private RecipeServiceClient recipeServiceClient;
   @Mock private BrowserAddress browserAddress;
 
-  //additional mocks
+  // additional mocks
   @Mock private Callback<Component, Exception> componentCallback;
   @Mock private HidePopupCallBack popupCallBack;
   @Mock private Promise<List<RecipeDescriptor>> recipesPromise;
@@ -85,7 +86,7 @@ public class CreateWorkspacePresenterTest {
   @Mock private DefaultWorkspaceComponent workspaceComponent;
   @Mock private MachineLimitsDto limitsDto;
 
-  //DTOs
+  // DTOs
   private MachineConfigDto machineConfigDto;
   private WorkspaceConfigDto workspaceConfigDto;
   @Mock private MachineDto machineDto;
@@ -109,20 +110,9 @@ public class CreateWorkspacePresenterTest {
     workspaceConfigDto = mock(WorkspaceConfigDto.class, new SelfReturningAnswer());
     when(usersWorkspaceDto.getConfig()).thenReturn(workspaceConfigDto);
 
-    when(dtoFactory.createDto(MachineSourceDto.class)).thenReturn(machineSourceDto);
-    when(machineSourceDto.withType(anyString())).thenReturn(machineSourceDto);
-    when(machineSourceDto.withLocation(anyString())).thenReturn(machineSourceDto);
-
-    when(dtoFactory.createDto(MachineLimitsDto.class)).thenReturn(limitsDto);
-    when(limitsDto.withRam(anyInt())).thenReturn(limitsDto);
-
-    when(dtoFactory.createDto(MachineConfigDto.class)).thenReturn(machineConfigDto);
-
     when(dtoFactory.createDto(EnvironmentDto.class)).thenReturn(environmentDto);
-
     when(dtoFactory.createDto(WorkspaceConfigDto.class)).thenReturn(workspaceConfigDto);
 
-    when(dtoFactory.createDto(WorkspaceDto.class)).thenReturn(usersWorkspaceDto);
     environmentDto = mock(EnvironmentDto.class, new SelfReturningAnswer());
     when(dtoFactory.createDto(EnvironmentDto.class)).thenReturn(environmentDto);
     environmentRecipeDto = mock(EnvironmentRecipeDto.class, new SelfReturningAnswer());
@@ -147,7 +137,7 @@ public class CreateWorkspacePresenterTest {
     presenter.show(Collections.singletonList(usersWorkspaceDto), componentCallback);
 
     verify(browserAddress).getWorkspaceName();
-    verify(view).setWorkspaceName(anyString());
+    verify(view).setWorkspaceName(nullable(String.class));
 
     verify(view).show();
   }
@@ -274,11 +264,10 @@ public class CreateWorkspacePresenterTest {
   }
 
   private void clickOnCreateButton() {
-    when(workspaceClient.create(Matchers.<WorkspaceConfigDto>anyObject(), anyString()))
+    when(workspaceClient.create(Matchers.<WorkspaceConfigDto>any(), nullable(String.class)))
         .thenReturn(userWsPromise);
-    when(userWsPromise.then(Matchers.<Operation<WorkspaceDto>>anyObject()))
-        .thenReturn(userWsPromise);
-    when(userWsPromise.catchError(Matchers.<Operation<PromiseError>>anyObject()))
+    when(userWsPromise.then(Matchers.<Operation<WorkspaceDto>>any())).thenReturn(userWsPromise);
+    when(userWsPromise.catchError(Matchers.<Operation<PromiseError>>any()))
         .thenReturn(userWsPromise);
     when(recipeServiceClient.getAllRecipes()).thenReturn(recipesPromise);
 
@@ -287,7 +276,7 @@ public class CreateWorkspacePresenterTest {
     presenter.onCreateButtonClicked();
 
     verify(recipeServiceClient).getAllRecipes();
-    verify(recipesPromise).then(Matchers.<Operation<List<RecipeDescriptor>>>anyObject());
+    verify(recipesPromise).then(Matchers.<Operation<List<RecipeDescriptor>>>any());
 
     verify(view).show();
   }
@@ -306,8 +295,6 @@ public class CreateWorkspacePresenterTest {
 
   @Test
   public void workspaceShouldBeCreatedForDevMachine() throws Exception {
-    when(machineConfigDto.isDev()).thenReturn(true);
-
     callApplyCreateWorkspaceMethod();
 
     verify(wsComponentProvider).get();
@@ -318,9 +305,6 @@ public class CreateWorkspacePresenterTest {
     Map<String, EnvironmentDto> environments = new HashMap<>();
     environments.put("name", environmentDto);
 
-    when(workspaceConfigDto.getDefaultEnv()).thenReturn("name");
-    when(workspaceConfigDto.getEnvironments()).thenReturn(environments);
-
     clickOnCreateButton();
 
     verify(userWsPromise).then(workspaceOperation.capture());
@@ -329,8 +313,6 @@ public class CreateWorkspacePresenterTest {
 
   @Test
   public void workspaceShouldBeCreatedForNotDevMachine() throws Exception {
-    when(machineConfigDto.isDev()).thenReturn(false);
-
     callApplyCreateWorkspaceMethod();
 
     verify(workspaceComponent).startWorkspace(usersWorkspaceDto, componentCallback);
@@ -345,7 +327,7 @@ public class CreateWorkspacePresenterTest {
     verify(userWsPromise).catchError(errorOperation.capture());
     errorOperation.getValue().apply(promiseError);
 
-    //noinspection ThrowableResultOfMethodCallIgnored
+    // noinspection ThrowableResultOfMethodCallIgnored
     verify(promiseError).getCause();
     verify(componentCallback).onFailure(Matchers.<Exception>anyObject());
   }

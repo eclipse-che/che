@@ -47,7 +47,7 @@ public class CompilationUnitChange extends TextFileChange {
     super(name, getFile(cunit));
     Assert.isNotNull(cunit);
     fCUnit = cunit;
-    setTextType("java"); //$NON-NLS-1$
+    setTextType("java"); // $NON-NLS-1$
   }
 
   private static IFile getFile(ICompilationUnit cunit) {
@@ -70,7 +70,7 @@ public class CompilationUnitChange extends TextFileChange {
 
   /** {@inheritDoc} */
   protected IDocument acquireDocument(IProgressMonitor pm) throws CoreException {
-    pm.beginTask("", 2); //$NON-NLS-1$
+    pm.beginTask("", 2); // $NON-NLS-1$
     fCUnit.becomeWorkingCopy(new SubProgressMonitor(pm, 1));
     return super.acquireDocument(new SubProgressMonitor(pm, 1));
   }

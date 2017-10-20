@@ -94,12 +94,12 @@ public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
               .setSigningKey(getJwtPublicKey(false))
               .parseClaimsJws(token);
       LOG.debug("JWT = ", jwt);
-      //OK, we can trust this JWT
+      // OK, we can trust this JWT
     } catch (SignatureException
         | NoSuchAlgorithmException
         | InvalidKeySpecException
         | IllegalArgumentException e) {
-      //don't trust the JWT!
+      // don't trust the JWT!
       LOG.error("Failed verifying the JWT token", e);
       try {
         LOG.info("Retrying after updating the public key", e);
@@ -109,12 +109,12 @@ public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
                 .setSigningKey(getJwtPublicKey(true))
                 .parseClaimsJws(token);
         LOG.debug("JWT = ", jwt);
-        //OK, we can trust this JWT
+        // OK, we can trust this JWT
       } catch (SignatureException
           | NoSuchAlgorithmException
           | InvalidKeySpecException
           | IllegalArgumentException ee) {
-        //don't trust the JWT!
+        // don't trust the JWT!
         LOG.error("Failed verifying the JWT token after public key update", e);
         send403(res);
         return;

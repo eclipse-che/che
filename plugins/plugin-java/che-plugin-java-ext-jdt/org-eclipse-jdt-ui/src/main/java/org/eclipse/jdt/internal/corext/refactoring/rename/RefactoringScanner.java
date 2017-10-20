@@ -49,7 +49,7 @@ public class RefactoringScanner {
   private final String fQualifier;
 
   private IScanner fScanner;
-  private Set<TextMatch> fMatches; //Set<TextMatch>
+  private Set<TextMatch> fMatches; // Set<TextMatch>
 
   public RefactoringScanner(String name, String qualifier) {
     Assert.isNotNull(name);
@@ -104,7 +104,7 @@ public class RefactoringScanner {
         token = fScanner.getNextToken();
       }
     } catch (InvalidInputException e) {
-      //ignore
+      // ignore
     }
   }
 
@@ -161,7 +161,8 @@ public class RefactoringScanner {
       char qualifierChar = value.charAt(qualifierCharPos);
       char goalQualifierChar = fQualifier.charAt(fQualifier.length() - 1 - i);
       if (qualifierChar != goalQualifierChar)
-        // the chars do not match. return OK if last read char was a non-separator and the current one a non-qualifier
+        // the chars do not match. return OK if last read char was a non-separator and the current
+        // one a non-qualifier
         return (canFinish && !isQualifierPart(qualifierChar)) ? MATCH_UNQUALIFIED : NO_MATCH;
 
       canFinish = !isQualifierSeparator(qualifierChar);
@@ -195,7 +196,7 @@ public class RefactoringScanner {
   }
 
   private boolean isQualifierSeparator(char c) {
-    return ".#".indexOf(c) != -1; //$NON-NLS-1$
+    return ".#".indexOf(c) != -1; // $NON-NLS-1$
   }
 
   private void addMatch(int matchStart, int matchCode) {

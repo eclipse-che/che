@@ -27,10 +27,10 @@ public class CleanUpOptions {
   private final Map<String, String> fOptions;
 
   /** True value */
-  public static final String TRUE = "true"; //$NON-NLS-1$
+  public static final String TRUE = "true"; // $NON-NLS-1$
 
   /** False value */
-  public static final String FALSE = "false"; //$NON-NLS-1$
+  public static final String FALSE = "false"; // $NON-NLS-1$
 
   /**
    * Creates a new CleanUpOptions instance with the given options.

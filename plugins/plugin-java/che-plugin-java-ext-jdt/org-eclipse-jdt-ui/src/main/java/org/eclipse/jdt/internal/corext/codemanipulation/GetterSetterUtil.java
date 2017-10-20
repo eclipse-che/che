@@ -43,7 +43,7 @@ public class GetterSetterUtil {
 
   private static final String[] EMPTY = new String[0];
 
-  //no instances
+  // no instances
   private GetterSetterUtil() {}
 
   public static String getGetterName(IField field, String[] excludedNames)
@@ -123,7 +123,8 @@ public class GetterSetterUtil {
         JavaModelUtil.findMethod(getterName, new String[0], false, field.getDeclaringType());
     if (!JavaModelUtil.isBoolean(field) || (primaryCandidate != null && primaryCandidate.exists()))
       return primaryCandidate;
-    //bug 30906 describes why we need to look for other alternatives here (try with get... for booleans)
+    // bug 30906 describes why we need to look for other alternatives here (try with get... for
+    // booleans)
     String secondCandidateName = getGetterName(field, EMPTY, false);
     return JavaModelUtil.findMethod(
         secondCandidateName, new String[0], false, field.getDeclaringType());
@@ -165,7 +166,8 @@ public class GetterSetterUtil {
     boolean isFinal = Flags.isFinal(flags);
 
     String lineDelim =
-        "\n"; // Use default line delimiter, as generated stub has to be formatted anyway //$NON-NLS-1$
+        "\n"; // Use default line delimiter, as generated stub has to be formatted anyway
+    // //$NON-NLS-1$
     StringBuffer buf = new StringBuffer();
     if (addComments) {
       String comment =
@@ -185,23 +187,23 @@ public class GetterSetterUtil {
     }
     buf.append(JdtFlags.getVisibilityString(flags));
     buf.append(' ');
-    if (isStatic) buf.append("static "); //$NON-NLS-1$
-    if (isSync) buf.append("synchronized "); //$NON-NLS-1$
-    if (isFinal) buf.append("final "); //$NON-NLS-1$
+    if (isStatic) buf.append("static "); // $NON-NLS-1$
+    if (isSync) buf.append("synchronized "); // $NON-NLS-1$
+    if (isFinal) buf.append("final "); // $NON-NLS-1$
 
-    buf.append("void "); //$NON-NLS-1$
+    buf.append("void "); // $NON-NLS-1$
     buf.append(setterName);
     buf.append('(');
     buf.append(typeName);
     buf.append(' ');
     buf.append(argname);
-    buf.append(") {"); //$NON-NLS-1$
+    buf.append(") {"); // $NON-NLS-1$
     buf.append(lineDelim);
 
     boolean useThis = StubUtility.useThisForFieldAccess(project);
     if (argname.equals(fieldName) || (useThis && !isStatic)) {
       if (isStatic) fieldName = parentType.getElementName() + '.' + fieldName;
-      else fieldName = "this." + fieldName; //$NON-NLS-1$
+      else fieldName = "this." + fieldName; // $NON-NLS-1$
     }
     String body =
         CodeGeneration.getSetterMethodBodyContent(
@@ -214,7 +216,7 @@ public class GetterSetterUtil {
     if (body != null) {
       buf.append(body);
     }
-    buf.append("}"); //$NON-NLS-1$
+    buf.append("}"); // $NON-NLS-1$
     buf.append(lineDelim);
     return buf.toString();
   }
@@ -243,7 +245,8 @@ public class GetterSetterUtil {
     String accessorName = StubUtility.getBaseName(field);
 
     String lineDelim =
-        "\n"; // Use default line delimiter, as generated stub has to be formatted anyway //$NON-NLS-1$
+        "\n"; // Use default line delimiter, as generated stub has to be formatted anyway
+    // //$NON-NLS-1$
     StringBuffer buf = new StringBuffer();
     if (addComments) {
       String comment =
@@ -263,19 +266,19 @@ public class GetterSetterUtil {
 
     buf.append(JdtFlags.getVisibilityString(flags));
     buf.append(' ');
-    if (isStatic) buf.append("static "); //$NON-NLS-1$
-    if (isSync) buf.append("synchronized "); //$NON-NLS-1$
-    if (isFinal) buf.append("final "); //$NON-NLS-1$
+    if (isStatic) buf.append("static "); // $NON-NLS-1$
+    if (isSync) buf.append("synchronized "); // $NON-NLS-1$
+    if (isFinal) buf.append("final "); // $NON-NLS-1$
 
     buf.append(typeName);
     buf.append(' ');
     buf.append(getterName);
-    buf.append("() {"); //$NON-NLS-1$
+    buf.append("() {"); // $NON-NLS-1$
     buf.append(lineDelim);
 
     boolean useThis = StubUtility.useThisForFieldAccess(field.getJavaProject());
     if (useThis && !isStatic) {
-      fieldName = "this." + fieldName; //$NON-NLS-1$
+      fieldName = "this." + fieldName; // $NON-NLS-1$
     }
 
     String body =
@@ -288,7 +291,7 @@ public class GetterSetterUtil {
     if (body != null) {
       buf.append(body);
     }
-    buf.append("}"); //$NON-NLS-1$
+    buf.append("}"); // $NON-NLS-1$
     buf.append(lineDelim);
     return buf.toString();
   }
@@ -384,7 +387,7 @@ public class GetterSetterUtil {
     infix.setLeftOperand(getterExpression);
     infix.setOperator(operator);
     NumberLiteral number = ast.newNumberLiteral();
-    number.setToken("1"); //$NON-NLS-1$
+    number.setToken("1"); // $NON-NLS-1$
     infix.setRightOperand(number);
     ITypeBinding infixType = infix.resolveTypeBinding();
     return createNarrowCastIfNessecary(infix, infixType, ast, variableType, is50OrHigher);
@@ -407,20 +410,20 @@ public class GetterSetterUtil {
       ITypeBinding variableType,
       boolean is50OrHigher) {
     PrimitiveType castTo = null;
-    if (variableType.isEqualTo(expressionType)) return expression; //no cast for same type
+    if (variableType.isEqualTo(expressionType)) return expression; // no cast for same type
     if (is50OrHigher) {
-      if (ast.resolveWellKnownType("java.lang.Character").isEqualTo(variableType)) //$NON-NLS-1$
+      if (ast.resolveWellKnownType("java.lang.Character").isEqualTo(variableType)) // $NON-NLS-1$
       castTo = ast.newPrimitiveType(PrimitiveType.CHAR);
-      if (ast.resolveWellKnownType("java.lang.Byte").isEqualTo(variableType)) //$NON-NLS-1$
+      if (ast.resolveWellKnownType("java.lang.Byte").isEqualTo(variableType)) // $NON-NLS-1$
       castTo = ast.newPrimitiveType(PrimitiveType.BYTE);
-      if (ast.resolveWellKnownType("java.lang.Short").isEqualTo(variableType)) //$NON-NLS-1$
+      if (ast.resolveWellKnownType("java.lang.Short").isEqualTo(variableType)) // $NON-NLS-1$
       castTo = ast.newPrimitiveType(PrimitiveType.SHORT);
     }
-    if (ast.resolveWellKnownType("char").isEqualTo(variableType)) //$NON-NLS-1$
+    if (ast.resolveWellKnownType("char").isEqualTo(variableType)) // $NON-NLS-1$
     castTo = ast.newPrimitiveType(PrimitiveType.CHAR);
-    if (ast.resolveWellKnownType("byte").isEqualTo(variableType)) //$NON-NLS-1$
+    if (ast.resolveWellKnownType("byte").isEqualTo(variableType)) // $NON-NLS-1$
     castTo = ast.newPrimitiveType(PrimitiveType.BYTE);
-    if (ast.resolveWellKnownType("short").isEqualTo(variableType)) //$NON-NLS-1$
+    if (ast.resolveWellKnownType("short").isEqualTo(variableType)) // $NON-NLS-1$
     castTo = ast.newPrimitiveType(PrimitiveType.SHORT);
     if (castTo != null) {
       CastExpression cast = ast.newCastExpression();

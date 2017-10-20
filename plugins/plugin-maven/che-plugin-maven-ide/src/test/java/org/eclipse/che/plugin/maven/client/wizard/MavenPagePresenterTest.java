@@ -83,8 +83,6 @@ public class MavenPagePresenterTest {
 
     when(containerPromise.then(Matchers.<Operation<Optional<Container>>>anyObject()))
         .thenReturn(containerPromise);
-    when(containerPromise.catchError(Matchers.<Operation<PromiseError>>anyObject()))
-        .thenReturn(containerPromise);
   }
 
   @Test

@@ -422,7 +422,7 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 
   @Test
   public void testReplaceReturnConditionWithIf4() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=112443
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=112443
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test1;\n");

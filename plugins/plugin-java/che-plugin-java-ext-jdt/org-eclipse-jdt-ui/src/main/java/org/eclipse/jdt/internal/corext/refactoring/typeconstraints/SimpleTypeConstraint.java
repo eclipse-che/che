@@ -48,7 +48,7 @@ public final class SimpleTypeConstraint implements ITypeConstraint {
         + " "
         + fOperator.toString()
         + " "
-        + getRight().toString(); //$NON-NLS-1$ //$NON-NLS-2$
+        + getRight().toString(); // $NON-NLS-1$ //$NON-NLS-2$
   }
 
   /* (non-Javadoc)
@@ -59,7 +59,7 @@ public final class SimpleTypeConstraint implements ITypeConstraint {
         + " "
         + fOperator.toString()
         + " "
-        + getRight().toResolvedString(); //$NON-NLS-1$ //$NON-NLS-2$
+        + getRight().toResolvedString(); // $NON-NLS-1$ //$NON-NLS-2$
   }
 
   /* (non-Javadoc)

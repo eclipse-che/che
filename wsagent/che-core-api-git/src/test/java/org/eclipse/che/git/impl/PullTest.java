@@ -64,17 +64,17 @@ public class PullTest {
   )
   public void testSimplePull(GitConnectionFactory connectionFactory)
       throws IOException, ServerException, URISyntaxException, UnauthorizedException {
-    //given
-    //create new repository clone of default
+    // given
+    // create new repository clone of default
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     GitConnection connection2 = connectionFactory.getConnection(remoteRepo.getAbsolutePath());
     connection2.clone(CloneParams.create(connection.getWorkingDir().getAbsolutePath()));
     addFile(connection, "newfile1", "new file1 content");
     connection.add(AddParams.create(singletonList(".")));
     connection.commit(CommitParams.create("Test commit"));
-    //when
+    // when
     connection2.pull(PullParams.create("origin").withTimeout(-1));
-    //then
+    // then
     assertTrue(new File(remoteRepo.getAbsolutePath(), "newfile1").exists());
   }
 
@@ -84,7 +84,7 @@ public class PullTest {
   )
   public void testPullWithRebase(GitConnectionFactory connectionFactory)
       throws IOException, ServerException, URISyntaxException, UnauthorizedException {
-    //given
+    // given
     GitConnection remote = connectToInitializedGitRepository(connectionFactory, remoteRepo);
     addFile(remote, "file", "file content");
     remote.add(AddParams.create(singletonList(".")));
@@ -98,11 +98,11 @@ public class PullTest {
     remote.add(AddParams.create(singletonList(".")));
     remote.commit(CommitParams.create("Second commit remote"));
 
-    //when
+    // when
     local.pull(PullParams.create("origin").withRebase(true));
     List<Revision> commits = local.log(LogParams.create()).getCommits();
 
-    //then
+    // then
     assertTrue("Second commit local".equals(commits.get(0).getMessage()));
     assertTrue("Second commit remote".equals(commits.get(1).getMessage()));
     assertTrue("First commit common".equals(commits.get(2).getMessage()));
@@ -114,19 +114,19 @@ public class PullTest {
   )
   public void testPullWithRefSpec(GitConnectionFactory connectionFactory)
       throws ServerException, URISyntaxException, IOException, UnauthorizedException {
-    //given
-    //create new repository clone of default
+    // given
+    // create new repository clone of default
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
     GitConnection connection2 = connectionFactory.getConnection(remoteRepo.getAbsolutePath());
 
     connection2.clone(CloneParams.create(connection.getWorkingDir().getAbsolutePath()));
-    //add new branch
+    // add new branch
     connection.checkout(CheckoutParams.create("b1").withCreateNew(true));
     addFile(connection, "newfile1", "new file1 content");
     connection.add(AddParams.create(singletonList(".")));
     connection.commit(CommitParams.create("Test commit"));
     int branchesBefore = connection2.branchList(null).size();
-    //when
+    // when
     connection2.pull(
         PullParams.create("origin").withRefSpec("refs/heads/b1:refs/heads/b1").withTimeout(-1));
     int branchesAfter = connection2.branchList(null).size();
@@ -139,7 +139,7 @@ public class PullTest {
   )
   public void testPullRemote(GitConnectionFactory connectionFactory)
       throws GitException, IOException, URISyntaxException, UnauthorizedException {
-    //given
+    // given
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
     String branchName = "remoteBranch";
     connection.checkout(CheckoutParams.create(branchName).withCreateNew(true));
@@ -149,12 +149,12 @@ public class PullTest {
 
     GitConnection connection2 = connectToGitRepositoryWithContent(connectionFactory, remoteRepo);
 
-    //when
+    // when
     PullParams params =
         PullParams.create(connection.getWorkingDir().getAbsolutePath())
             .withRefSpec("refs/heads/remoteBranch:refs/heads/remoteBranch");
     connection2.pull(params);
-    //then
+    // then
     assertTrue(new File(remoteRepo.getAbsolutePath(), "remoteFile").exists());
   }
 
@@ -169,10 +169,10 @@ public class PullTest {
   )
   public void testWhenThereAreNoAnyRemotes(GitConnectionFactory connectionFactory)
       throws Exception {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
 
-    //when
+    // when
     connection.pull(PullParams.create(null));
   }
 
@@ -187,7 +187,7 @@ public class PullTest {
   )
   public void testWhenThereAreNoAnyRemotesBehindTheProxy(GitConnectionFactory connectionFactory)
       throws Exception {
-    //given
+    // given
     System.setProperty("http.proxyUser", "user1");
     System.setProperty("http.proxyPassword", "paswd1");
     System.setProperty("https.proxyUser", "user2");
@@ -195,7 +195,7 @@ public class PullTest {
 
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
 
-    //when
+    // when
     connection.pull(PullParams.create(null));
   }
 

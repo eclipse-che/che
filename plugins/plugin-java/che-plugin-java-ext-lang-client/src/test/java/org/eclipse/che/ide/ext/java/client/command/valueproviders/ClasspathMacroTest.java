@@ -16,7 +16,6 @@ import static org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind.LIBRARY;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -161,16 +160,6 @@ public class ClasspathMacroTest {
 
     verify(classpathResolver).resolveClasspathEntries(entries);
     assertEquals("/projects/name:", classpath);
-  }
-
-  @Test
-  public void returnEmptyClasspathIfProjectDoesNotSupportJava() throws Exception {
-    Map<String, List<String>> attributes = new HashMap<>();
-    attributes.put(Constants.LANGUAGE, singletonList("c"));
-
-    when(project.getAttributes()).thenReturn(attributes);
-
-    verify(classpathContainer, never()).getClasspathEntries(anyString());
   }
 
   @Test

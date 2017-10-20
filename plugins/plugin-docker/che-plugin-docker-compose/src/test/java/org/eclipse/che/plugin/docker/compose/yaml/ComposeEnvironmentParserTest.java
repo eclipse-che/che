@@ -107,10 +107,10 @@ public class ComposeEnvironmentParserTest {
     when(recipe.getContent()).thenReturn(COMPOSE_CONTENT);
     CheServicesEnvironmentImpl expectedEnv = createTestEnv();
 
-    //when
+    // when
     CheServicesEnvironmentImpl cheServicesEnvironment = parser.parse(environment);
 
-    //then
+    // then
     assertEquals(cheServicesEnvironment, expectedEnv);
   }
 
@@ -121,10 +121,10 @@ public class ComposeEnvironmentParserTest {
     when(recipe.getContent()).thenReturn(COMPOSE_CONTENT);
     CheServicesEnvironmentImpl expectedEnv = createTestEnv();
 
-    //when
+    // when
     CheServicesEnvironmentImpl cheServicesEnvironment = parser.parse(environment);
 
-    //then
+    // then
     assertEquals(cheServicesEnvironment, expectedEnv);
   }
 
@@ -135,10 +135,10 @@ public class ComposeEnvironmentParserTest {
     when(recipe.getContent()).thenReturn(COMPOSE_CONTENT);
     CheServicesEnvironmentImpl expectedEnv = createTestEnv();
 
-    //when
+    // when
     CheServicesEnvironmentImpl cheServicesEnvironment = parser.parse(environment);
 
-    //then
+    // then
     assertEquals(cheServicesEnvironment, expectedEnv);
   }
 
@@ -151,10 +151,10 @@ public class ComposeEnvironmentParserTest {
     when(recipe.getLocation()).thenReturn(TEXT);
     CheServicesEnvironmentImpl expectedEnv = createTestEnv();
 
-    //when
+    // when
     CheServicesEnvironmentImpl cheServicesEnvironment = parser.parse(environment);
 
-    //then
+    // then
     assertEquals(cheServicesEnvironment, expectedEnv);
   }
 

@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
 public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposal {
 
-  protected static final String RETURN_EXPRESSION_KEY = "value"; //$NON-NLS-1$
+  protected static final String RETURN_EXPRESSION_KEY = "value"; // $NON-NLS-1$
 
   private MethodDeclaration fMethodDecl;
   protected ReturnStatement fExistingReturn;
@@ -46,7 +46,7 @@ public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposa
         cu,
         null,
         relevance,
-        JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)); //$NON-NLS-1$
+        JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)); // $NON-NLS-1$
     fMethodDecl = decl;
     fExistingReturn = existingReturn;
   }

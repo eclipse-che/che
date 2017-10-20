@@ -27,7 +27,7 @@ import org.eclipse.search.ui.ISearchResultViewPart;
 
 public class InternalSearchUI {
 
-  //The shared instance.
+  // The shared instance.
   private static InternalSearchUI fgInstance;
 
   // contains all running jobs
@@ -109,7 +109,8 @@ public class InternalSearchUI {
 
     //		fSearchViewManager = new SearchViewManager(fSearchResultsManager);
 
-    //		PlatformUI.getWorkbench().getProgressService().registerIconForFamily(SearchPluginImages.DESC_VIEW_SEARCHRES, FAMILY_SEARCH);
+    //
+    //	PlatformUI.getWorkbench().getProgressService().registerIconForFamily(SearchPluginImages.DESC_VIEW_SEARCHRES, FAMILY_SEARCH);
   }
 
   /** @return returns the shared instance. */
@@ -127,7 +128,8 @@ public class InternalSearchUI {
   //		if (view != null) {
   //			IWorkbenchPartSite site = view.getSite();
   //			if (site != null)
-  //				return (IWorkbenchSiteProgressService)view.getSite().getAdapter(IWorkbenchSiteProgressService.class);
+  //				return
+  // (IWorkbenchSiteProgressService)view.getSite().getAdapter(IWorkbenchSiteProgressService.class);
   //		}
   //		return null;
   //	}

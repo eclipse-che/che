@@ -159,7 +159,8 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal
       if (fLinkedProposalModel.hasLinkedPositions()) {
         // enter linked mode
         //					ITextViewer viewer= ((JavaEditor) part).getViewer();
-        //					new LinkedProposalModelPresenter().enterLinkedMode(viewer, part, didOpenEditor(), fLinkedProposalModel);
+        //					new LinkedProposalModelPresenter().enterLinkedMode(viewer, part, didOpenEditor(),
+        // fLinkedProposalModel);
         boolean added = false;
         LinkedModeModelImpl model = new LinkedModeModelImpl();
         Iterator<LinkedProposalPositionGroup> iterator =
@@ -180,15 +181,18 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal
                   position.setOffset(pos.getOffset());
                   position.setLength(pos.getLength());
                   //                                        group.addPositions(
-                  //                                                new LinkedPosition(document, pos.getOffset(), pos.getLength(), pos.getSequenceRank()));
+                  //                                                new LinkedPosition(document,
+                  // pos.getOffset(), pos.getLength(), pos.getSequenceRank()));
                   group.addPositions(position);
                 }
               }
             } else {
-              //                                LinkedPositionProposalImpl[] proposalImpls= new LinkedPositionProposalImpl[linkedModeProposals.length];
+              //                                LinkedPositionProposalImpl[] proposalImpls= new
+              // LinkedPositionProposalImpl[linkedModeProposals.length];
               LinkedDataImpl data = new LinkedDataImpl();
               for (int i = 0; i < linkedModeProposals.length; i++) {
-                //                                    proposalImpls[i] = new LinkedPositionProposalImpl(linkedModeProposals[i], model);
+                //                                    proposalImpls[i] = new
+                // LinkedPositionProposalImpl(linkedModeProposals[i], model);
                 data.addValues(linkedModeProposals[i].getDisplayString());
               }
               group.setData(data);
@@ -196,8 +200,10 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal
                 LinkedProposalPositionGroup.PositionInformation pos = positions[i];
                 if (pos.getOffset() != -1) {
                   //                                        group.addPosition(
-                  //                                                new ProposalPosition(document, pos.getOffset(), pos.getLength(), pos.getSequenceRank(),
-                  //                                                                     proposalImpls));
+                  //                                                new ProposalPosition(document,
+                  // pos.getOffset(), pos.getLength(), pos.getSequenceRank(),
+                  //
+                  // proposalImpls));
                   RegionImpl position = new RegionImpl();
                   position.setOffset(pos.getOffset());
                   position.setLength(pos.getLength());
@@ -219,7 +225,8 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal
         }
       }
       //				else if (part instanceof ITextEditor) {
-      //					LinkedProposalPositionGroup.PositionInformation endPosition= fLinkedProposalModel.getEndPosition();
+      //					LinkedProposalPositionGroup.PositionInformation endPosition=
+      // fLinkedProposalModel.getEndPosition();
       //					if (endPosition != null) {
       //						// select a result
       //						int pos= endPosition.getOffset() + endPosition.getLength();

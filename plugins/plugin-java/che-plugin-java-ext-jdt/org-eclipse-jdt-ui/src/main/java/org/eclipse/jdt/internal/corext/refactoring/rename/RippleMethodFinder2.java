@@ -82,7 +82,7 @@ public class RippleMethodFinder2 {
       fElementToRepresentative.put(type, type);
     }
 
-    //path compression:
+    // path compression:
     public IType find(IType element) {
       IType root = element;
       IType rep = fElementToRepresentative.get(root);
@@ -185,17 +185,17 @@ public class RippleMethodFinder2 {
 
   private IMethod[] findAllRippleMethods(IProgressMonitor pm, WorkingCopyOwner owner)
       throws CoreException {
-    pm.beginTask("", 4); //$NON-NLS-1$
+    pm.beginTask("", 4); // $NON-NLS-1$
 
     findAllDeclarations(new SubProgressMonitor(pm, 1), owner);
 
-    //TODO: report assertion as error status and fall back to only return fMethod
-    //check for bug 81058:
+    // TODO: report assertion as error status and fall back to only return fMethod
+    // check for bug 81058:
     if (!fDeclarations.contains(fMethod))
       Assert.isTrue(
           false,
           "Search for method declaration did not find original element: "
-              + fMethod.toString()); //$NON-NLS-1$
+              + fMethod.toString()); // $NON-NLS-1$
 
     createHierarchyOfDeclarations(new SubProgressMonitor(pm, 1), owner);
     createTypeToMethod();
@@ -217,8 +217,8 @@ public class RippleMethodFinder2 {
     Assert.isTrue(partitioning.size() > 0);
     if (partitioning.size() == 1) return fDeclarations.toArray(new IMethod[fDeclarations.size()]);
 
-    //Multiple partitions; must look out for nasty marriage cases
-    //(types inheriting method from two ancestors, but without redeclaring it).
+    // Multiple partitions; must look out for nasty marriage cases
+    // (types inheriting method from two ancestors, but without redeclaring it).
     IType methodTypeRep = fUnionFind.find(fMethod.getDeclaringType());
     List<IType> relatedTypes = partitioning.get(methodTypeRep);
     boolean hasRelatedInterfaces = false;
@@ -229,7 +229,7 @@ public class RippleMethodFinder2 {
       if (relatedType.isInterface()) hasRelatedInterfaces = true;
     }
 
-    //Definition: An alien type is a type that is not a related type. The set of
+    // Definition: An alien type is a type that is not a related type. The set of
     // alien types diminishes as new types become related (a.k.a marry a relatedType).
 
     List<IMethod> alienDeclarations = new ArrayList<IMethod>(fDeclarations);
@@ -243,17 +243,17 @@ public class RippleMethodFinder2 {
       alienTypes.add(alienType);
       if (alienType.isInterface()) hasAlienInterfaces = true;
     }
-    if (alienTypes.size() == 0) //no nasty marriage scenarios without types to marry with...
+    if (alienTypes.size() == 0) // no nasty marriage scenarios without types to marry with...
     return relatedMethods.toArray(new IMethod[relatedMethods.size()]);
     if (!hasRelatedInterfaces
-        && !hasAlienInterfaces) //no nasty marriage scenarios without interfaces...
+        && !hasAlienInterfaces) // no nasty marriage scenarios without interfaces...
     return relatedMethods.toArray(new IMethod[relatedMethods.size()]);
 
-    //find all subtypes of related types:
+    // find all subtypes of related types:
     HashSet<IType> relatedSubTypes = new HashSet<IType>();
     List<IType> relatedTypesToProcess = new ArrayList<IType>(relatedTypes);
     while (relatedTypesToProcess.size() > 0) {
-      //TODO: would only need subtype hierarchies of all top-of-ripple relatedTypesToProcess
+      // TODO: would only need subtype hierarchies of all top-of-ripple relatedTypesToProcess
       for (Iterator<IType> iter = relatedTypesToProcess.iterator(); iter.hasNext(); ) {
         if (pm.isCanceled()) throw new OperationCanceledException();
         IType relatedType = iter.next();
@@ -264,7 +264,7 @@ public class RippleMethodFinder2 {
         IType[] allSubTypes = hierarchy.getAllSubtypes(relatedType);
         for (int i = 0; i < allSubTypes.length; i++) relatedSubTypes.add(allSubTypes[i]);
       }
-      relatedTypesToProcess.clear(); //processed; make sure loop terminates
+      relatedTypesToProcess.clear(); // processed; make sure loop terminates
 
       HashSet<IType> marriedAlienTypeReps = new HashSet<IType>();
       for (Iterator<IType> iter = alienTypes.iterator(); iter.hasNext(); ) {
@@ -298,8 +298,8 @@ public class RippleMethodFinder2 {
           IType marriedAlienInterfaceType = iterator.next();
           relatedMethods.add(fTypeToMethod.get(marriedAlienInterfaceType));
         }
-        alienTypes.removeAll(marriedAlienTypes); //not alien any more
-        relatedTypesToProcess.addAll(marriedAlienTypes); //process freshly married types again
+        alienTypes.removeAll(marriedAlienTypes); // not alien any more
+        relatedTypesToProcess.addAll(marriedAlienTypes); // process freshly married types again
       }
     }
 
@@ -410,10 +410,10 @@ public class RippleMethodFinder2 {
       IType supertype = supertypes[i];
       IType superRep = fUnionFind.find(supertype);
       if (superRep == null) {
-        //Type doesn't declare method, but maybe supertypes?
+        // Type doesn't declare method, but maybe supertypes?
         uniteWithSupertypes(anchor, supertype);
       } else {
-        //check whether method in supertype is really overridden:
+        // check whether method in supertype is really overridden:
         IMember superMethod = fTypeToMethod.get(supertype);
         if (JavaModelUtil.isVisibleInHierarchy(superMethod, anchor.getPackageFragment())) {
           IType rep = fUnionFind.find(anchor);
@@ -422,7 +422,7 @@ public class RippleMethodFinder2 {
           fRootTypes.remove(anchor);
           uniteWithSupertypes(supertype, supertype);
         } else {
-          //Not overridden -> overriding chain ends here.
+          // Not overridden -> overriding chain ends here.
         }
       }
     }

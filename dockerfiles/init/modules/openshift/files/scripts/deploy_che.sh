@@ -93,22 +93,45 @@ done
 # Set configuration common to both minishift and openshift
 # --------------------------------------------------------
 
-CHE_MULTI_USER=${CHE_MULTI_USER:-"false"}
 DEFAULT_COMMAND="deploy"
 COMMAND=${COMMAND:-${DEFAULT_COMMAND}}
 
+export CHE_EPHEMERAL=${CHE_EPHEMERAL:-false}
+CHE_USE_ACME_CERTIFICATE=${CHE_USE_ACME_CERTIFICATE:-false}
+
+CHE_FABRIC8_MULTITENANT=${CHE_FABRIC8_MULTITENANT:-false}
+CHE_FABRIC8_USER__SERVICE_ENDPOINT=${CHE_FABRIC8_USER__SERVICE_ENDPOINT:-"https://api.openshift.io/api/user/services"}
+CHE_FABRIC8_WORKSPACES_ROUTING__SUFFIX=${CHE_FABRIC8_WORKSPACES_ROUTING__SUFFIX:-"8a09.starter-us-east-2.openshiftapps.com"}
+if [ "${CHE_FABRIC8_MULTITENANT}" == "true" ]; then
+  CHE_DOCKER_ENABLE__CONTAINER__STOP__DETECTOR=false
+  DEFAULT_CHE_MULTI_USER=true
+else
+  CHE_DOCKER_ENABLE__CONTAINER__STOP__DETECTOR=true
+  DEFAULT_CHE_MULTI_USER=false
+fi
+
+CHE_MULTI_USER=${CHE_MULTI_USER:-${DEFAULT_CHE_MULTI_USER}}
+
 if [ "${CHE_MULTI_USER}" == "true" ]; then
   DEFAULT_CHE_KEYCLOAK_DISABLED="false"
-  CHE_DEDICATED_KEYCLOAK=${CHE_DEDICATED_KEYCLOAK:-"true"}
-  DEFAULT_CHE_IMAGE_REPO="docker.io/eclipse/che-server-multiuser"
+  
+  if [ "${CHE_FABRIC8_MULTITENANT}" == "true" ]; then
+    CHE_DEDICATED_KEYCLOAK="false"
+    DEFAULT_CHE_IMAGE_REPO="docker.io/rhchestage/che-server-multiuser"
+    DEFAULT_CHE_IMAGE_TAG="nightly-fabric8"
+  else
+    CHE_DEDICATED_KEYCLOAK=${CHE_DEDICATED_KEYCLOAK:-"true"}
+    DEFAULT_CHE_IMAGE_REPO="docker.io/eclipse/che-server-multiuser"
+    DEFAULT_CHE_IMAGE_TAG="nightly"
+  fi
 else
   DEFAULT_CHE_KEYCLOAK_DISABLED="true"
   CHE_DEDICATED_KEYCLOAK="false"
   DEFAULT_CHE_IMAGE_REPO="docker.io/eclipse/che-server"
+  DEFAULT_CHE_IMAGE_TAG="nightly"
 fi
 
 CHE_IMAGE_REPO=${CHE_IMAGE_REPO:-${DEFAULT_CHE_IMAGE_REPO}}
-DEFAULT_CHE_IMAGE_TAG="nightly"
 CHE_IMAGE_TAG=${CHE_IMAGE_TAG:-${DEFAULT_CHE_IMAGE_TAG}}
 DEFAULT_CHE_LOG_LEVEL="INFO"
 CHE_LOG_LEVEL=${CHE_LOG_LEVEL:-${DEFAULT_CHE_LOG_LEVEL}}
@@ -120,7 +143,7 @@ K8S_VERSION_PRIOR_TO_1_6=${K8S_VERSION_PRIOR_TO_1_6:-${DEFAULT_K8S_VERSION_PRIOR
 # Keycloak production endpoints are used by default
 DEFAULT_KEYCLOAK_OSO_ENDPOINT="https://sso.openshift.io/auth/realms/fabric8/broker/openshift-v3/token"
 KEYCLOAK_OSO_ENDPOINT=${KEYCLOAK_OSO_ENDPOINT:-${DEFAULT_KEYCLOAK_OSO_ENDPOINT}}
-DEFAULT_KEYCLOAK_GITHUB_ENDPOINT="https://sso.openshift.io/auth/realms/fabric8/broker/github/token"
+DEFAULT_KEYCLOAK_GITHUB_ENDPOINT="https://auth.openshift.io/api/token?for=https://github.com"
 KEYCLOAK_GITHUB_ENDPOINT=${KEYCLOAK_GITHUB_ENDPOINT:-${DEFAULT_KEYCLOAK_GITHUB_ENDPOINT}}
 
 # OPENSHIFT_FLAVOR can be minishift or openshift
@@ -369,6 +392,25 @@ MULTI_USER_REPLACEMENT_STRING="          - name: \"CHE_WORKSPACE_LOGS\"
           - name: \"CHE_HOST\"
             value: \"${CHE_HOST}\""
 
+if [ "${CHE_FABRIC8_MULTITENANT}" == "true" ]; then
+  MULTI_USER_REPLACEMENT_STRING="          - name: \"CHE_FABRIC8_MULTITENANT\"
+            value: \"${CHE_FABRIC8_MULTITENANT}\"
+          - name: \"CHE_FABRIC8_USER__SERVICE_ENDPOINT\"
+            value: \"${CHE_FABRIC8_USER__SERVICE_ENDPOINT}\"
+          - name: \"CHE_FABRIC8_WORKSPACES_ROUTING__SUFFIX\"
+            value: \"${CHE_FABRIC8_WORKSPACES_ROUTING__SUFFIX}\"
+          - name: \"CHE_DOCKER_ENABLE__CONTAINER__STOP__DETECTOR\"
+            value: \"${CHE_DOCKER_ENABLE__CONTAINER__STOP__DETECTOR}\"
+          - name: \"CHE_WORKSPACE_CHE__SERVER__ENDPOINT\"
+            value: \"\"
+$MULTI_USER_REPLACEMENT_STRING"
+  
+  MULTITENANT_CUSTOM_TEMPLATE_REPLACEMENT="s/    che.docker.server_evaluation_strategy.custom.template: .*/    che.docker.server_evaluation_strategy.custom.template: <serverName>-<if(isDevMachine)><workspaceIdWithoutPrefix><else><machineName><endif>-<if(workspacesRoutingSuffix)><user>-che.<workspacesRoutingSuffix><else><externalAddress><endif>/"
+  MULTITENANT_IDLING_REPLACEMENT="s/    che-server-timeout-ms: .*/    che-server-timeout-ms: '0'/"
+fi
+
+
+
 # TODO When merging the multi-user work to master, this replacement string should
 # be replaced by the corresponding change in the fabric8 deployment descriptor
 MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING="s|            path: /api/system/state|            path: /api|"
@@ -394,6 +436,8 @@ if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
     if [ "${CHE_KEYCLOAK_DISABLED}" == "true" ]; then sed "s/    keycloak-disabled: \"false\"/    keycloak-disabled: \"true\"/" ; else cat -; fi | \
     sed "$MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING" | \
     append_after_match "env:" "${MULTI_USER_REPLACEMENT_STRING}" | \
+    if [ "${CHE_FABRIC8_MULTITENANT}" == "true" ]; then sed "$MULTITENANT_CUSTOM_TEMPLATE_REPLACEMENT" ; else cat -; fi | \
+    if [ "${CHE_FABRIC8_MULTITENANT}" == "true" ]; then sed "$MULTITENANT_IDLING_REPLACEMENT" ; else cat -; fi | \
     oc apply --force=true -f -
 elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
   echo "[CHE] Deploying Che on OSIO (image ${CHE_IMAGE})"
@@ -406,6 +450,8 @@ elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
     if [ "${CHE_KEYCLOAK_DISABLED}" == "true" ]; then sed "s/    keycloak-disabled: \"false\"/    keycloak-disabled: \"true\"/" ; else cat -; fi | \
     sed "$MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING" | \
     append_after_match "env:" "${MULTI_USER_REPLACEMENT_STRING}" | \
+    if [ "${CHE_FABRIC8_MULTITENANT}" == "true" ]; then sed "$MULTITENANT_CUSTOM_TEMPLATE_REPLACEMENT" ; else cat -; fi | \
+    if [ "${CHE_FABRIC8_MULTITENANT}" == "true" ]; then sed "$MULTITENANT_IDLING_REPLACEMENT" ; else cat -; fi | \
     oc apply --force=true -f -
 else
   echo "[CHE] Deploying Che on OpenShift Container Platform (image ${CHE_IMAGE})"
@@ -424,9 +470,23 @@ else
     if [ "${K8S_VERSION_PRIOR_TO_1_6}" == "true" ]; then sed "s/    che-openshift-precreate-subpaths: \"false\"/    che-openshift-precreate-subpaths: \"true\"/"  ; else cat -; fi | \
     sed "$MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING" | \
     append_after_match "env:" "${MULTI_USER_REPLACEMENT_STRING}" | \
+    if [ "${CHE_FABRIC8_MULTITENANT}" == "true" ]; then sed "$MULTITENANT_CUSTOM_TEMPLATE_REPLACEMENT" ; else cat -; fi | \
+    if [ "${CHE_FABRIC8_MULTITENANT}" == "true" ]; then sed "$MULTITENANT_IDLING_REPLACEMENT" ; else cat -; fi | \
     oc apply --force=true -f -
 fi
 echo
+
+if [ "${CHE_EPHEMERAL}" == "true" ]; then
+  oc volume dc/che --remove --confirm
+  oc delete pvc/claim-che-workspace
+  oc delete pvc/che-data-volume
+elif [ "${CHE_FABRIC8_MULTITENANT}" == "true" ]; then
+  oc delete pvc/claim-che-workspace
+fi
+
+if [ "${CHE_USE_ACME_CERTIFICATE}" == "true" ]; then
+  oc annotate route/che kubernetes.io/tls-acme=true
+fi
 
 if [ "${CHE_DEDICATED_KEYCLOAK}" == "true" ]; then
   ${COMMAND_DIR}/multi-user/configure_and_start_keycloak.sh

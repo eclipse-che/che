@@ -41,7 +41,7 @@ public class RunCommandActionTest {
 
   private static final String NAME_PROPERTY = "name";
 
-  //constructors mocks
+  // constructors mocks
   @Mock CommandManager commandManager;
   @Mock private CommandExecutor commandExecutor;
   @Mock private CoreLocalizationConstant locale;

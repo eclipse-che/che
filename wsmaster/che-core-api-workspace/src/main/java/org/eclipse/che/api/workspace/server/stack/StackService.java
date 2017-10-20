@@ -176,7 +176,7 @@ public class StackService extends Service {
             .setName(updateDto.getName())
             .setDescription(updateDto.getDescription())
             .setScope(updateDto.getScope())
-            //user can't edit creator
+            // user can't edit creator
             .setCreator(stack.getCreator())
             .setTags(updateDto.getTags())
             .setWorkspaceConfig(updateDto.getWorkspaceConfig())

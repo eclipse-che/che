@@ -50,9 +50,9 @@ public class ExtensionCasesTest extends WsAgentTestBase {
     workspaceHolder = new TestWorkspaceHolder(projects);
     ProjectTypeRegistry projectTypeRegistry = new ProjectTypeRegistry(new HashSet<>());
     projectTypeRegistry.registerProjectType(new PT1());
-    //projectTypeRegistry.registerProjectType(new PT3());
+    // projectTypeRegistry.registerProjectType(new PT3());
 
-    //ProjectHandlerRegistry projectHandlerRegistry = new ProjectHandlerRegistry(new HashSet<>());
+    // ProjectHandlerRegistry projectHandlerRegistry = new ProjectHandlerRegistry(new HashSet<>());
 
     projectRegistry =
         new ProjectRegistry(
@@ -86,7 +86,7 @@ public class ExtensionCasesTest extends WsAgentTestBase {
             projectFolder.createFolder("project2");
             projectRegistry.setProjectType("/project1/project2", BaseProjectType.ID, false);
 
-            //System.out.println(">>S>>> "+projectRegistry);
+            // System.out.println(">>S>>> "+projectRegistry);
 
           }
 

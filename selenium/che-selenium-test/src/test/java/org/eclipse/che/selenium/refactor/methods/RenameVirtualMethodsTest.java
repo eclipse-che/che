@@ -151,7 +151,7 @@ public class RenameVirtualMethodsTest {
     refactor.typeNewName(newName);
     refactor.sendKeysIntoField(Keys.ARROW_LEFT.toString());
     refactor.sendKeysIntoField(Keys.ARROW_LEFT.toString());
-    //need for validation on server side
+    // need for validation on server side
     WaitUtils.sleepQuietly(2);
     refactor.clickOkButtonRefactorForm();
     refactor.waitRenameMethodFormIsClosed();

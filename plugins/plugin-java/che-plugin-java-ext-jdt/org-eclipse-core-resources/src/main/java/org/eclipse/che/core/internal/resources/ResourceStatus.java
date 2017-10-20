@@ -49,13 +49,13 @@ public class ResourceStatus extends Status implements IResourceStatus {
   private String getTypeName() {
     switch (getSeverity()) {
       case IStatus.OK:
-        return "OK"; //$NON-NLS-1$
+        return "OK"; // $NON-NLS-1$
       case IStatus.ERROR:
-        return "ERROR"; //$NON-NLS-1$
+        return "ERROR"; // $NON-NLS-1$
       case IStatus.INFO:
-        return "INFO"; //$NON-NLS-1$
+        return "INFO"; // $NON-NLS-1$
       case IStatus.WARNING:
-        return "WARNING"; //$NON-NLS-1$
+        return "WARNING"; // $NON-NLS-1$
       default:
         return String.valueOf(getSeverity());
     }
@@ -65,17 +65,17 @@ public class ResourceStatus extends Status implements IResourceStatus {
   @Override
   public String toString() {
     StringBuffer sb = new StringBuffer();
-    sb.append("[type: "); //$NON-NLS-1$
+    sb.append("[type: "); // $NON-NLS-1$
     sb.append(getTypeName());
-    sb.append("], [path: "); //$NON-NLS-1$
+    sb.append("], [path: "); // $NON-NLS-1$
     sb.append(getPath());
-    sb.append("], [message: "); //$NON-NLS-1$
+    sb.append("], [message: "); // $NON-NLS-1$
     sb.append(getMessage());
-    sb.append("], [plugin: "); //$NON-NLS-1$
+    sb.append("], [plugin: "); // $NON-NLS-1$
     sb.append(getPlugin());
-    sb.append("], [exception: "); //$NON-NLS-1$
+    sb.append("], [exception: "); // $NON-NLS-1$
     sb.append(getException());
-    sb.append("]\n"); //$NON-NLS-1$
+    sb.append("]\n"); // $NON-NLS-1$
     return sb.toString();
   }
 }

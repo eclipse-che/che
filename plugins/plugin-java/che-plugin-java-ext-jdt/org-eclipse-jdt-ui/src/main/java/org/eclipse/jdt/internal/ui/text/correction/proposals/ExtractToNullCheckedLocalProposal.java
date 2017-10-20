@@ -88,7 +88,7 @@ import org.eclipse.text.edits.TextEditGroup;
  */
 public class ExtractToNullCheckedLocalProposal extends LinkedCorrectionProposal {
 
-  private static final String LOCAL_NAME_POSITION_GROUP = "localName"; //$NON-NLS-1$
+  private static final String LOCAL_NAME_POSITION_GROUP = "localName"; // $NON-NLS-1$
 
   /** Protocol for rearranging the bits and pieces into a new code structure. */
   private abstract static class RearrangeStrategy {
@@ -178,8 +178,10 @@ public class ExtractToNullCheckedLocalProposal extends LinkedCorrectionProposal 
 
       @Override
       public void insertIfStatement(IfStatement ifStmt, Block thenBlock) {
-        // when stmt declares a local variable (see RearrangeStrategy.create(..)) we need to move all
-        // subsequent statements into the then-block to ensure that the existing declared local is visible:
+        // when stmt declares a local variable (see RearrangeStrategy.create(..)) we need to move
+        // all
+        // subsequent statements into the then-block to ensure that the existing declared local is
+        // visible:
         List<ASTNode> blockStmts = this.block.statements();
         int stmtIdx = blockStmts.indexOf(this.origStmt);
         int lastIdx = blockStmts.size() - 1;
@@ -313,7 +315,8 @@ public class ExtractToNullCheckedLocalProposal extends LinkedCorrectionProposal 
     Block elseBlock = ast.newBlock();
     String elseStatement =
         "// TODO "
-            + FixMessages.ExtractToNullCheckedLocalProposal_todoHandleNullDescription; //$NON-NLS-1$
+            + FixMessages
+                .ExtractToNullCheckedLocalProposal_todoHandleNullDescription; // $NON-NLS-1$
     if (origStmt instanceof ReturnStatement) {
       Type returnType =
           newType(((ReturnStatement) origStmt).getExpression().resolveTypeBinding(), ast, imports);

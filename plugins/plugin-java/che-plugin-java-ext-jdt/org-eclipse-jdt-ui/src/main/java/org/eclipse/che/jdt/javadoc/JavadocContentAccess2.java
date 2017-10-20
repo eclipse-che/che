@@ -104,14 +104,14 @@ import org.slf4j.LoggerFactory;
 public class JavadocContentAccess2 {
   private static final Logger LOG = LoggerFactory.getLogger(JavadocContentAccess2.class);
 
-  private static final String BLOCK_TAG_START = "<dl>"; //$NON-NLS-1$
-  private static final String BLOCK_TAG_END = "</dl>"; //$NON-NLS-1$
+  private static final String BLOCK_TAG_START = "<dl>"; // $NON-NLS-1$
+  private static final String BLOCK_TAG_END = "</dl>"; // $NON-NLS-1$
 
-  private static final String BlOCK_TAG_ENTRY_START = "<dd>"; //$NON-NLS-1$
-  private static final String BlOCK_TAG_ENTRY_END = "</dd>"; //$NON-NLS-1$
+  private static final String BlOCK_TAG_ENTRY_START = "<dd>"; // $NON-NLS-1$
+  private static final String BlOCK_TAG_ENTRY_END = "</dd>"; // $NON-NLS-1$
 
-  private static final String PARAM_NAME_START = "<b>"; //$NON-NLS-1$
-  private static final String PARAM_NAME_END = "</b> "; //$NON-NLS-1$
+  private static final String PARAM_NAME_START = "<b>"; // $NON-NLS-1$
+  private static final String PARAM_NAME_END = "</b> "; // $NON-NLS-1$
   /** Either an IMember or an IPackageFragment. */
   private final IJavaElement fElement;
   /**
@@ -172,7 +172,7 @@ public class JavadocContentAccess2 {
     String sourceJavadoc = getHTMLContentFromSource(member, urlPrefix);
     if (sourceJavadoc == null
         || sourceJavadoc.length() == 0
-        || sourceJavadoc.trim().equals("{@inheritDoc}")) { //$NON-NLS-1$
+        || sourceJavadoc.trim().equals("{@inheritDoc}")) { // $NON-NLS-1$
       if (useAttachedJavadoc) {
         if (member.getOpenable().getBuffer() == null) { // only if no source available
           return member.getAttachedJavadoc(null);
@@ -219,11 +219,11 @@ public class JavadocContentAccess2 {
     if (!hasSuperInterfaceMethods && superClassMethod[0] == null) return null;
 
     StringBuffer buf = new StringBuffer();
-    buf.append("<div>"); //$NON-NLS-1$
+    buf.append("<div>"); // $NON-NLS-1$
     if (hasSuperInterfaceMethods) {
-      buf.append("<b>"); //$NON-NLS-1$
+      buf.append("<b>"); // $NON-NLS-1$
       buf.append(JavaDocMessages.JavaDoc2HTMLTextReader_specified_by_section);
-      buf.append("</b> "); //$NON-NLS-1$
+      buf.append("</b> "); // $NON-NLS-1$
       for (Iterator<IMethod> iter = superInterfaceMethods.iterator(); iter.hasNext(); ) {
         IMethod overridden = iter.next();
         buf.append(createMethodInTypeLinks(overridden, urlPrefix));
@@ -232,12 +232,12 @@ public class JavadocContentAccess2 {
     }
     if (superClassMethod[0] != null) {
       if (hasSuperInterfaceMethods) buf.append(JavaElementLabels.COMMA_STRING);
-      buf.append("<b>"); //$NON-NLS-1$
+      buf.append("<b>"); // $NON-NLS-1$
       buf.append(JavaDocMessages.JavaDoc2HTMLTextReader_overrides_section);
-      buf.append("</b> "); //$NON-NLS-1$
+      buf.append("</b> "); // $NON-NLS-1$
       buf.append(createMethodInTypeLinks(superClassMethod[0], urlPrefix));
     }
-    buf.append("</div>"); //$NON-NLS-1$
+    buf.append("</div>"); // $NON-NLS-1$
     return buf;
   }
 
@@ -253,16 +253,16 @@ public class JavadocContentAccess2 {
 
   private static CharSequence createSimpleMemberLink(IMember member, String urlPrefix) {
     StringBuffer buf = new StringBuffer();
-    buf.append("<a href='"); //$NON-NLS-1$
+    buf.append("<a href='"); // $NON-NLS-1$
     try {
       String uri = JavaElementLinks.createURI(urlPrefix, member);
       buf.append(uri);
     } catch (URISyntaxException e) {
       LOG.error(e.getMessage(), e);
     }
-    buf.append("'>"); //$NON-NLS-1$
+    buf.append("'>"); // $NON-NLS-1$
     JavaElementLabels.getElementLabel(member, 0, buf);
-    buf.append("</a>"); //$NON-NLS-1$
+    buf.append("</a>"); // $NON-NLS-1$
     return buf;
   }
 
@@ -277,7 +277,7 @@ public class JavadocContentAccess2 {
     if (javadocRange == null) {
       if (canInheritJavadoc(member)) {
         // Try to use the inheritDoc algorithm.
-        String inheritedJavadoc = javadoc2HTML(member, "/***/", urlPrefix); //$NON-NLS-1$
+        String inheritedJavadoc = javadoc2HTML(member, "/***/", urlPrefix); // $NON-NLS-1$
         if (inheritedJavadoc != null && inheritedJavadoc.length() > 0) {
           return inheritedJavadoc;
         }
@@ -290,7 +290,8 @@ public class JavadocContentAccess2 {
   }
 
   //    private static String getJavaFxPropertyDoc(IMember member) throws JavaModelException {
-  //        // XXX: should not do this by default (but we don't have settings for Javadoc, see https://bugs.eclipse.org/424283 )
+  //        // XXX: should not do this by default (but we don't have settings for Javadoc, see
+  // https://bugs.eclipse.org/424283 )
   //        if (member instanceof IMethod) {
   //            String name = member.getElementName();
   //            boolean isGetter = name.startsWith("get") && name.length() > 3; //$NON-NLS-1$
@@ -300,16 +301,19 @@ public class JavadocContentAccess2 {
   //            if (isGetter || isBooleanGetter || isSetter) {
   //                String propertyName = firstToLower(name.substring(isBooleanGetter ? 2 : 3));
   //                IType type = member.getDeclaringType();
-  //                IMethod method = type.getMethod(propertyName + "Property", new String[0]); //$NON-NLS-1$
+  //                IMethod method = type.getMethod(propertyName + "Property", new String[0]);
+  // //$NON-NLS-1$
   //
   //                if (method.exists()) {
   //                    String content = getHTMLContentFromSource(method, urlPrefix);
   //                    if (content != null) {
   //                        if (isSetter) {
-  //                            content = MessageFormat.format(JavaDocMessages.JavadocContentAccess2_setproperty_message,
+  //                            content =
+  // MessageFormat.format(JavaDocMessages.JavadocContentAccess2_setproperty_message,
   //                                                           new Object[]{propertyName, content});
   //                        } else {
-  //                            content = MessageFormat.format(JavaDocMessages.JavadocContentAccess2_getproperty_message,
+  //                            content =
+  // MessageFormat.format(JavaDocMessages.JavadocContentAccess2_getproperty_message,
   //                                                           new Object[]{propertyName, content});
   //                        }
   //                    }
@@ -335,11 +339,11 @@ public class JavadocContentAccess2 {
   }
 
   private static Javadoc getJavadocNode(IJavaElement element, String rawJavadoc) {
-    //FIXME: take from SharedASTProvider if available
-    //Caveat: Javadoc nodes are not available when Javadoc processing has been disabled!
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=212207
+    // FIXME: take from SharedASTProvider if available
+    // Caveat: Javadoc nodes are not available when Javadoc processing has been disabled!
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=212207
 
-    String source = rawJavadoc + "class C{}"; //$NON-NLS-1$
+    String source = rawJavadoc + "class C{}"; // $NON-NLS-1$
     CompilationUnit root = createAST(element, source);
     if (root == null) return null;
     List<AbstractTypeDeclaration> types = root.types();
@@ -391,7 +395,7 @@ public class JavadocContentAccess2 {
           try {
             contentReader.close();
           } catch (IOException e) {
-            //ignore
+            // ignore
           }
         }
       }
@@ -463,7 +467,7 @@ public class JavadocContentAccess2 {
             if (overridden == null) return InheritDocVisitor.CONTINUE;
 
             if (overridden.getOpenable().getBuffer() == null) { // only if no source available
-              //TODO: BaseURL for method can be wrong for attached Javadoc from overridden
+              // TODO: BaseURL for method can be wrong for attached Javadoc from overridden
               // (e.g. when overridden is from rt.jar). Fix would be to add baseURL here.
               String attachedJavadoc = overridden.getAttachedJavadoc(null);
               if (attachedJavadoc != null) return attachedJavadoc;
@@ -481,16 +485,16 @@ public class JavadocContentAccess2 {
       String rep = null;
       switch (ch) {
         case '&':
-          rep = "&amp;"; //$NON-NLS-1$
+          rep = "&amp;"; // $NON-NLS-1$
           break;
         case '"':
-          rep = "&quot;"; //$NON-NLS-1$
+          rep = "&quot;"; // $NON-NLS-1$
           break;
         case '<':
-          rep = "&lt;"; //$NON-NLS-1$
+          rep = "&lt;"; // $NON-NLS-1$
           break;
         case '>':
-          rep = "&gt;"; //$NON-NLS-1$
+          rep = "&gt;"; // $NON-NLS-1$
           break;
       }
       if (rep != null) {
@@ -519,7 +523,7 @@ public class JavadocContentAccess2 {
         try {
           in.close();
         } catch (IOException e) {
-          //ignore
+          // ignore
         }
       }
     }
@@ -550,7 +554,7 @@ public class JavadocContentAccess2 {
       String encoding = null;
 
       if (sourceAttachmentPath.getDevice() == null) {
-        //the path could be a workspace relative path to a zip or to the source folder
+        // the path could be a workspace relative path to a zip or to the source folder
         IWorkspaceRoot wsRoot = ResourcesPlugin.getWorkspace().getRoot();
         IResource res = wsRoot.findMember(sourceAttachmentPath);
 
@@ -574,15 +578,15 @@ public class JavadocContentAccess2 {
       if (file == null || !file.exists()) file = sourceAttachmentPath.toFile();
 
       if (file.isDirectory()) {
-        //the path is an absolute filesystem path to the source folder
+        // the path is an absolute filesystem path to the source folder
         IPath packagedocPath = sourceAttachmentPath.append(filePath);
         if (packagedocPath.toFile().exists()) return getFileContent(packagedocPath.toFile());
 
       } else if (file.exists()) {
-        //the package documentation is in a Jar/Zip
+        // the package documentation is in a Jar/Zip
         IPath sourceAttachmentRootPath = root.getSourceAttachmentRootPath();
         String packagedocPath;
-        //consider the root path also in the search path if it exists
+        // consider the root path also in the search path if it exists
         if (sourceAttachmentRootPath != null) {
           packagedocPath = sourceAttachmentRootPath.append(filePath).toString();
         } else {
@@ -607,14 +611,14 @@ public class JavadocContentAccess2 {
               in.close();
             }
           } catch (IOException e) {
-            //ignore
+            // ignore
           }
           try {
             if (zipFile != null) {
-              zipFile.close(); //this will close the InputStream also
+              zipFile.close(); // this will close the InputStream also
             }
           } catch (IOException e) {
-            //ignore
+            // ignore
           }
         }
       }
@@ -646,10 +650,10 @@ public class JavadocContentAccess2 {
     } finally {
       try {
         if (reader != null) {
-          reader.close(); //this will also close the InputStream wrapped in the reader
+          reader.close(); // this will also close the InputStream wrapped in the reader
         }
       } catch (IOException e) {
-        //ignore
+        // ignore
       }
     }
     return buffer.toString();
@@ -710,7 +714,8 @@ public class JavadocContentAccess2 {
     fBuf = new StringBuffer();
     fLiteralContent = 0;
 
-    // After first loop, non-null entries in the following two lists are missing and need to be inherited:
+    // After first loop, non-null entries in the following two lists are missing and need to be
+    // inherited:
     List<String> parameterNames = initParameterNames();
     List<String> exceptionNames = initExceptionNames();
 
@@ -780,7 +785,7 @@ public class JavadocContentAccess2 {
       }
     }
 
-    //TODO: @Documented annotations before header
+    // TODO: @Documented annotations before header
     if (deprecatedTag != null) handleDeprecatedTag(deprecatedTag);
     if (start != null) handleContentElements(start.fragments());
     else if (fMethod != null) {
@@ -837,12 +842,12 @@ public class JavadocContentAccess2 {
   }
 
   private void handleDeprecatedTag(TagElement tag) {
-    fBuf.append("<p><b>"); //$NON-NLS-1$
+    fBuf.append("<p><b>"); // $NON-NLS-1$
     fBuf.append(JavaDocMessages.JavaDoc2HTMLTextReader_deprecated_section);
-    fBuf.append("</b> <i>"); //$NON-NLS-1$
+    fBuf.append("</b> <i>"); // $NON-NLS-1$
     handleContentElements(tag.fragments());
-    fBuf.append(
-        "</i><p>"); //$NON-NLS-1$ TODO: Why not </p>? See https://bugs.eclipse.org/bugs/show_bug.cgi?id=243318 .
+    fBuf.append("</i><p>"); // $NON-NLS-1$ TODO: Why not </p>? See
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=243318 .
   }
 
   private void handleSuperMethodReferences() {
@@ -1062,13 +1067,13 @@ public class JavadocContentAccess2 {
           Exception exception =
               new Exception(
                   "Illegal ASTNode positions: previousEnd="
-                      + previousEnd //$NON-NLS-1$
+                      + previousEnd // $NON-NLS-1$
                       + ", childStart="
-                      + childStart //$NON-NLS-1$
+                      + childStart // $NON-NLS-1$
                       + ", element="
-                      + fElement.getHandleIdentifier() //$NON-NLS-1$
+                      + fElement.getHandleIdentifier() // $NON-NLS-1$
                       + ", Javadoc:\n"
-                      + fSource); //$NON-NLS-1$
+                      + fSource); // $NON-NLS-1$
           LOG.error(exception.getMessage(), exception);
         } else if (previousEnd != childStart) {
           // Need to preserve whitespace before a node that's not
@@ -1083,10 +1088,10 @@ public class JavadocContentAccess2 {
       if (child instanceof TextElement) {
         String text = ((TextElement) child).getText();
         if (skipLeadingWhitespace) {
-          text = text.replaceFirst("^\\s+", ""); //$NON-NLS-1$ //$NON-NLS-2$
+          text = text.replaceFirst("^\\s+", ""); // $NON-NLS-1$ //$NON-NLS-2$
         }
         // workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=233481 :
-        text = text.replaceAll("(\r\n?|\n)([ \t]*\\*)", "$1"); //$NON-NLS-1$ //$NON-NLS-2$
+        text = text.replaceAll("(\r\n?|\n)([ \t]*\\*)", "$1"); // $NON-NLS-1$ //$NON-NLS-2$
         handleText(text);
       } else if (child instanceof TagElement) {
         handleInlineTagElement((TagElement) child);
@@ -1100,11 +1105,11 @@ public class JavadocContentAccess2 {
   }
 
   private String removeDocLineIntros(String textWithStars) {
-    String lineBreakGroup = "(\\r\\n?|\\n)"; //$NON-NLS-1$
-    String noBreakSpace = "[^\r\n&&\\s]"; //$NON-NLS-1$
+    String lineBreakGroup = "(\\r\\n?|\\n)"; // $NON-NLS-1$
+    String noBreakSpace = "[^\r\n&&\\s]"; // $NON-NLS-1$
     return textWithStars.replaceAll(
         lineBreakGroup + noBreakSpace + "*\\*" /*+ noBreakSpace + '?'*/,
-        "$1"); //$NON-NLS-1$ //$NON-NLS-2$
+        "$1"); // $NON-NLS-1$ //$NON-NLS-2$
   }
 
   private void handleText(String text) {
@@ -1126,7 +1131,7 @@ public class JavadocContentAccess2 {
     boolean isLiteral = TagElement.TAG_LITERAL.equals(name);
 
     if (isLiteral || isCode) fLiteralContent++;
-    if (isLink || isCode) fBuf.append("<code>"); //$NON-NLS-1$
+    if (isLink || isCode) fBuf.append("<code>"); // $NON-NLS-1$
 
     if (isLink || isLinkplain) handleLink(node.fragments());
     else if (isCode || isLiteral) handleContentElements(node.fragments(), true);
@@ -1135,13 +1140,13 @@ public class JavadocContentAccess2 {
     } else if (handleDocRoot(node)) {
       // handled
     } else {
-      //print uninterpreted source {@tagname ...} for unknown tags
+      // print uninterpreted source {@tagname ...} for unknown tags
       int start = node.getStartPosition();
       String text = fSource.substring(start, start + node.getLength());
       fBuf.append(removeDocLineIntros(text));
     }
 
-    if (isLink || isCode) fBuf.append("</code>"); //$NON-NLS-1$
+    if (isLink || isCode) fBuf.append("</code>"); // $NON-NLS-1$
     if (isLiteral || isCode) fLiteralContent--;
   }
 
@@ -1244,8 +1249,8 @@ public class JavadocContentAccess2 {
 
     String url = null;
     if (fElement instanceof IMember && ((IMember) fElement).isBinary()) {
-      //TODO
-      URL javadocBaseLocation = null; //JavaUI.getJavadocBaseLocation(fElement);
+      // TODO
+      URL javadocBaseLocation = null; // JavaUI.getJavadocBaseLocation(fElement);
       if (javadocBaseLocation != null) {
         url = javadocBaseLocation.toExternalForm();
       }
@@ -1268,7 +1273,7 @@ public class JavadocContentAccess2 {
       }
     }
     if (url != null) {
-      if (url.endsWith("/")) { //$NON-NLS-1$
+      if (url.endsWith("/")) { // $NON-NLS-1$
         url = url.substring(0, url.length() - 1);
       }
       fBuf.append(url);
@@ -1378,9 +1383,9 @@ public class JavadocContentAccess2 {
   }
 
   private void handleBlockTagTitle(String title) {
-    fBuf.append("<dt>"); //$NON-NLS-1$
+    fBuf.append("<dt>"); // $NON-NLS-1$
     fBuf.append(title);
-    fBuf.append("</dt>"); //$NON-NLS-1$
+    fBuf.append("</dt>"); // $NON-NLS-1$
   }
 
   private void handleSeeTag(TagElement tag) {
@@ -1463,7 +1468,8 @@ public class JavadocContentAccess2 {
     IPackageFragmentRoot root =
         (IPackageFragmentRoot) packageFragment.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 
-    //1==> Handle the case when the documentation is present in package-info.java or package-info.class file
+    // 1==> Handle the case when the documentation is present in package-info.java or
+    // package-info.class file
     ITypeRoot packageInfo;
     boolean isBinary = root.getKind() == IPackageFragmentRoot.K_BINARY;
     if (isBinary) {
@@ -1473,7 +1479,7 @@ public class JavadocContentAccess2 {
     }
     if (packageInfo != null && packageInfo.exists()) {
       String cuSource = packageInfo.getSource();
-      //the source can be null for some of the class files
+      // the source can be null for some of the class files
       if (cuSource != null) {
         Javadoc packageJavadocNode = getPackageJavadocNode(packageFragment, cuSource);
         if (packageJavadocNode != null) {
@@ -1489,7 +1495,8 @@ public class JavadocContentAccess2 {
       }
     }
 
-    // 2==> Handle the case when the documentation is done in package.html file. The file can be either in normal source folder or
+    // 2==> Handle the case when the documentation is done in package.html file. The file can be
+    // either in normal source folder or
     // coming from a jar file
     else {
       Object[] nonJavaResources = packageFragment.getNonJavaResources();
@@ -1516,13 +1523,13 @@ public class JavadocContentAccess2 {
             }
           }
         }
-        //2.3 ==>The file is present in the source attachment path.
+        // 2.3 ==>The file is present in the source attachment path.
         String contents = getHTMLContentFromAttachedSource(root, packageFragment, urlPrefix);
         if (contents != null) return contents;
       }
     }
 
-    //3==> Handle the case when the documentation is coming from the attached Javadoc
+    // 3==> Handle the case when the documentation is coming from the attached Javadoc
     if ((root.isArchive() || root.isExternal())) {
       return packageFragment.getAttachedJavadoc(null);
     }
@@ -1569,8 +1576,8 @@ public class JavadocContentAccess2 {
         i++;
       } else if (first instanceof TextElement) {
         String firstText = ((TextElement) first).getText();
-        if ("<".equals(firstText)) { //$NON-NLS-1$
-          fBuf.append("&lt;"); //$NON-NLS-1$
+        if ("<".equals(firstText)) { // $NON-NLS-1$
+          fBuf.append("&lt;"); // $NON-NLS-1$
           i++;
           if (size > 1) {
             Object second = fragments.get(1);
@@ -1581,8 +1588,8 @@ public class JavadocContentAccess2 {
               if (size > 2) {
                 Object third = fragments.get(2);
                 String thirdText = ((TextElement) third).getText();
-                if (">".equals(thirdText)) { //$NON-NLS-1$
-                  fBuf.append("&gt;"); //$NON-NLS-1$
+                if (">".equals(thirdText)) { // $NON-NLS-1$
+                  fBuf.append("&gt;"); // $NON-NLS-1$
                   i++;
                 }
               }
@@ -1597,7 +1604,7 @@ public class JavadocContentAccess2 {
   }
 
   private void handleLink(List<? extends ASTNode> fragments) {
-    //TODO: Javadoc shortens type names to minimal length according to context
+    // TODO: Javadoc shortens type names to minimal length according to context
     int fs = fragments.size();
     if (fs > 0) {
       Object first = fragments.get(0);
@@ -1611,12 +1618,12 @@ public class JavadocContentAccess2 {
       } else if (first instanceof MemberRef) {
         MemberRef memberRef = (MemberRef) first;
         Name qualifier = memberRef.getQualifier();
-        refTypeName = qualifier == null ? "" : qualifier.getFullyQualifiedName(); //$NON-NLS-1$
+        refTypeName = qualifier == null ? "" : qualifier.getFullyQualifiedName(); // $NON-NLS-1$
         refMemberName = memberRef.getName().getIdentifier();
       } else if (first instanceof MethodRef) {
         MethodRef methodRef = (MethodRef) first;
         Name qualifier = methodRef.getQualifier();
-        refTypeName = qualifier == null ? "" : qualifier.getFullyQualifiedName(); //$NON-NLS-1$
+        refTypeName = qualifier == null ? "" : qualifier.getFullyQualifiedName(); // $NON-NLS-1$
         refMemberName = methodRef.getName().getIdentifier();
         List<MethodRefParameter> params = methodRef.parameters();
         int ps = params.size();
@@ -1631,7 +1638,7 @@ public class JavadocContentAccess2 {
       }
 
       if (refTypeName != null) {
-        fBuf.append("<a href='"); //$NON-NLS-1$
+        fBuf.append("<a href='"); // $NON-NLS-1$
         try {
           String scheme = urlPrefix;
           String uri =
@@ -1641,7 +1648,7 @@ public class JavadocContentAccess2 {
         } catch (URISyntaxException e) {
           LOG.error(e.getMessage(), e);
         }
-        fBuf.append("'>"); //$NON-NLS-1$
+        fBuf.append("'>"); // $NON-NLS-1$
         if (fs > 1 && !(fs == 2 && isWhitespaceTextElement(fragments.get(1)))) {
           handleContentElements(fragments.subList(1, fs), true);
         } else {
@@ -1661,14 +1668,14 @@ public class JavadocContentAccess2 {
                   fBuf.append(' ').append(pName);
                 }
                 if (i < refMethodParamTypes.length - 1) {
-                  fBuf.append(", "); //$NON-NLS-1$
+                  fBuf.append(", "); // $NON-NLS-1$
                 }
               }
               fBuf.append(')');
             }
           }
         }
-        fBuf.append("</a>"); //$NON-NLS-1$
+        fBuf.append("</a>"); // $NON-NLS-1$
       } else {
         handleContentElements(fragments);
       }
@@ -1706,14 +1713,14 @@ public class JavadocContentAccess2 {
           @Override
           public String toString() {
             return "STOP_BRANCH";
-          } //$NON-NLS-1$
+          } // $NON-NLS-1$
         };
     public static final Object CONTINUE =
         new Object() {
           @Override
           public String toString() {
             return "CONTINUE";
-          } //$NON-NLS-1$
+          } // $NON-NLS-1$
         };
 
     /**
@@ -1754,7 +1761,7 @@ public class JavadocContentAccess2 {
 
       IType superClass;
       if (currentType.isInterface())
-        superClass = currentType.getJavaProject().findType("java.lang.Object"); //$NON-NLS-1$
+        superClass = currentType.getJavaProject().findType("java.lang.Object"); // $NON-NLS-1$
       else superClass = typeHierarchy.getSuperclass(currentType);
 
       while (superClass != null && !visited.contains(superClass)) {
@@ -1795,7 +1802,7 @@ public class JavadocContentAccess2 {
         visited.add(superInterface);
         Object result = visit(superInterface);
         if (result == InheritDocVisitor.STOP_BRANCH) {
-          //skip
+          // skip
         } else if (result == InheritDocVisitor.CONTINUE) {
           toVisitChildren.add(superInterface);
         } else {

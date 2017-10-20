@@ -67,7 +67,7 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
     if (!parentPack.isDefaultPackage() && decls.length == 0) {
       String lineDelim = StubUtility.getLineDelimiterUsed(cu);
       String str =
-          "package " + parentPack.getElementName() + ';' + lineDelim + lineDelim; //$NON-NLS-1$
+          "package " + parentPack.getElementName() + ';' + lineDelim + lineDelim; // $NON-NLS-1$
       root.addChild(new InsertEdit(0, str));
       return;
     }

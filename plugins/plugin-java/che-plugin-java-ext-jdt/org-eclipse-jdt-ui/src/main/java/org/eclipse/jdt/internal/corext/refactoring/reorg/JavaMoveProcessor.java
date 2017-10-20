@@ -114,7 +114,7 @@ public final class JavaMoveProcessor extends MoveProcessor
 
   @Override
   public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
-    pm.beginTask("", 1); //$NON-NLS-1$
+    pm.beginTask("", 1); // $NON-NLS-1$
     try {
       RefactoringStatus result = new RefactoringStatus();
       result.merge(

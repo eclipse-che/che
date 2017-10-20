@@ -165,7 +165,7 @@ public class MergePresenter implements MergeView.ActionDelegate {
                         constant.mergeTitle(),
                         constant.committerIdentityInfoEmpty(),
                         () -> {
-                          //do nothing
+                          // do nothing
                         })
                     .show();
                 return;

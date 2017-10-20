@@ -38,7 +38,7 @@ import org.eclipse.che.commons.lang.NameGenerator;
 @Entity(name = "Factory")
 @Table(name = "che_factory")
 // TODO fix after issue: https://github.com/eclipse/che/issues/2110
-//(uniqueConstraints = {@UniqueConstraint(columnNames = {"name", "userId"})})
+// (uniqueConstraints = {@UniqueConstraint(columnNames = {"name", "userId"})})
 public class FactoryImpl implements Factory {
 
   public static FactoryImplBuilder builder() {

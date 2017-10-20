@@ -186,7 +186,8 @@ public class JpaWorkerDao extends AbstractJpaPermissionsDao<WorkerImpl> implemen
     void removeWorkers(String workspaceId, int pageSize) throws ServerException {
       Page<WorkerImpl> workersPage;
       do {
-        // skip count always equals to 0 because elements will be shifted after removing previous items
+        // skip count always equals to 0 because elements will be shifted after removing previous
+        // items
         workersPage = workerDao.getWorkers(workspaceId, pageSize, 0);
         for (WorkerImpl worker : workersPage.getItems()) {
           workerDao.removeWorker(worker.getInstanceId(), worker.getUserId());

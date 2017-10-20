@@ -59,7 +59,7 @@ public class DefaultWorkspaceValidator implements WorkspaceValidator {
             + "latin letters, underscores, dots, dashes and should start and end only with digits, "
             + "latin letters or underscores");
 
-    //environments
+    // environments
     checkArgument(
         !isNullOrEmpty(config.getDefaultEnv()), "Workspace default environment name required");
     checkNotNull(config.getEnvironments(), "Workspace should contain at least one environment");
@@ -75,7 +75,7 @@ public class DefaultWorkspaceValidator implements WorkspaceValidator {
       }
     }
 
-    //commands
+    // commands
     for (Command command : config.getCommands()) {
       checkArgument(
           !isNullOrEmpty(command.getName()),
@@ -88,14 +88,14 @@ public class DefaultWorkspaceValidator implements WorkspaceValidator {
           config.getName());
     }
 
-    //projects
-    //TODO
+    // projects
+    // TODO
   }
 
   @Override
   public void validateAttributes(Map<String, String> attributes) throws BadRequestException {
     for (String attributeName : attributes.keySet()) {
-      //attribute name should not be empty and should not start with codenvy
+      // attribute name should not be empty and should not start with codenvy
       checkArgument(
           attributeName != null
               && !attributeName.trim().isEmpty()

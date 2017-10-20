@@ -281,10 +281,11 @@ public class TemplateProposal
         //				}
         //
         //				LinkedModeUI ui= new EditorLinkedModeUI(model, viewer);
-        //				ui.setExitPosition(viewer, getCaretOffset(templateBuffer) + start, 0, Integer.MAX_VALUE);
+        //				ui.setExitPosition(viewer, getCaretOffset(templateBuffer) + start, 0,
+        // Integer.MAX_VALUE);
         //				ui.enter();
 
-        fSelectedRegion = fRegion; //ui.getSelectedRegion();
+        fSelectedRegion = fRegion; // ui.getSelectedRegion();
       } else {
         fSelectedRegion = new Region(getCaretOffset(templateBuffer) + start, 0);
       }
@@ -335,7 +336,8 @@ public class TemplateProposal
   //			model.addLinkingListener(new ILinkedModeListener() {
   //
   //				/*
-  //				 * @see org.eclipse.jface.text.link.ILinkedModeListener#left(org.eclipse.jface.text.link.LinkedModeModel, int)
+  //				 * @see
+  // org.eclipse.jface.text.link.ILinkedModeListener#left(org.eclipse.jface.text.link.LinkedModeModel, int)
   //				 */
   //				public void left(LinkedModeModel environment, int flags) {
   //					ensurePositionCategoryRemoved(document);
@@ -359,7 +361,7 @@ public class TemplateProposal
   }
 
   private String getCategory() {
-    return "TemplateProposalCategory_" + toString(); //$NON-NLS-1$
+    return "TemplateProposalCategory_" + toString(); // $NON-NLS-1$
   }
 
   private int getCaretOffset(TemplateBuffer buffer) {
@@ -439,7 +441,8 @@ public class TemplateProposal
 
     } catch (BadLocationException e) {
       //			handleException(
-      //					JavaPlugin.getActiveWorkbenchShell(), new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, "", e))); //$NON-NLS-1$
+      //					JavaPlugin.getActiveWorkbenchShell(), new CoreException(new Status(IStatus.ERROR,
+      // JavaPlugin.getPluginId(), IStatus.OK, "", e))); //$NON-NLS-1$
       JavaPlugin.log(e);
       return null;
     }
@@ -488,11 +491,13 @@ public class TemplateProposal
   }
 
   //	private void openErrorDialog(Shell shell, Exception e) {
-  //		MessageDialog.openError(shell, TemplateContentAssistMessages.TemplateEvaluator_error_title, e.getMessage());
+  //		MessageDialog.openError(shell, TemplateContentAssistMessages.TemplateEvaluator_error_title,
+  // e.getMessage());
   //	}
 
   //	private void handleException(Shell shell, CoreException e) {
-  //		ExceptionHandler.handle(e, shell, TemplateContentAssistMessages.TemplateEvaluator_error_title, null);
+  //		ExceptionHandler.handle(e, shell, TemplateContentAssistMessages.TemplateEvaluator_error_title,
+  // null);
   //	}
 
   /*
@@ -507,7 +512,8 @@ public class TemplateProposal
   }
 
   //	/*
-  //	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getInformationControlCreator()
+  //	 * @see
+  // org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getInformationControlCreator()
   //	 */
   //	public IInformationControlCreator getInformationControlCreator() {
   //		int orientation;
@@ -541,7 +547,7 @@ public class TemplateProposal
         boolean valid = templateName.startsWith(content.toLowerCase());
         if (!valid
             && fContext instanceof JavaDocContext
-            && templateName.startsWith("<")) { //$NON-NLS-1$
+            && templateName.startsWith("<")) { // $NON-NLS-1$
           valid = templateName.startsWith(content.toLowerCase(), 1);
         }
         return valid;
@@ -557,7 +563,7 @@ public class TemplateProposal
    */
   public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
     // bug 114360 - don't make selection templates prefix-completable
-    if (isSelectionTemplate()) return ""; //$NON-NLS-1$
+    if (isSelectionTemplate()) return ""; // $NON-NLS-1$
     return fTemplate.getName();
   }
 

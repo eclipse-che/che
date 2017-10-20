@@ -13,6 +13,7 @@ package org.eclipse.che.ide.command.explorer;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -253,7 +254,10 @@ public class CommandsExplorerPresenterTest {
     // given
     ConfirmDialog confirmDialog = mock(ConfirmDialog.class);
     when(dialogFactory.createConfirmDialog(
-            anyString(), anyString(), any(ConfirmCallback.class), any(CancelCallback.class)))
+            nullable(String.class),
+            nullable(String.class),
+            nullable(ConfirmCallback.class),
+            nullable(CancelCallback.class)))
         .thenReturn(confirmDialog);
     ArgumentCaptor<ConfirmCallback> confirmCallbackCaptor =
         ArgumentCaptor.forClass(ConfirmCallback.class);
@@ -261,7 +265,7 @@ public class CommandsExplorerPresenterTest {
     CommandImpl command = mock(CommandImpl.class);
     String cmdName = "build";
     when(command.getName()).thenReturn(cmdName);
-    when(commandManager.removeCommand(anyString())).thenReturn(voidPromise);
+    when(commandManager.removeCommand(nullable(String.class))).thenReturn(voidPromise);
 
     // when
     presenter.onCommandRemove(command);
@@ -269,10 +273,10 @@ public class CommandsExplorerPresenterTest {
     // then
     verify(dialogFactory)
         .createConfirmDialog(
-            anyString(),
-            anyString(),
+            nullable(String.class),
+            nullable(String.class),
             confirmCallbackCaptor.capture(),
-            isNull(CancelCallback.class));
+            isNull());
     confirmCallbackCaptor.getValue().accepted();
     verify(confirmDialog).show();
     verify(commandManager).removeCommand(cmdName);
@@ -282,7 +286,10 @@ public class CommandsExplorerPresenterTest {
   public void shouldNotRemoveCommandWhenCancelled() throws Exception {
     ConfirmDialog confirmDialog = mock(ConfirmDialog.class);
     when(dialogFactory.createConfirmDialog(
-            anyString(), anyString(), any(ConfirmCallback.class), any(CancelCallback.class)))
+            nullable(String.class),
+            nullable(String.class),
+            nullable(ConfirmCallback.class),
+            nullable(CancelCallback.class)))
         .thenReturn(confirmDialog);
     CommandImpl command = mock(CommandImpl.class);
 
@@ -290,7 +297,10 @@ public class CommandsExplorerPresenterTest {
 
     verify(dialogFactory)
         .createConfirmDialog(
-            anyString(), anyString(), any(ConfirmCallback.class), isNull(CancelCallback.class));
+            nullable(String.class),
+            nullable(String.class),
+            nullable(ConfirmCallback.class),
+            isNull());
     verify(confirmDialog).show();
     verify(commandManager, never()).removeCommand(anyString());
   }
@@ -300,12 +310,15 @@ public class CommandsExplorerPresenterTest {
     // given
     ConfirmDialog confirmDialog = mock(ConfirmDialog.class);
     when(dialogFactory.createConfirmDialog(
-            anyString(), anyString(), any(ConfirmCallback.class), any(CancelCallback.class)))
+            nullable(String.class),
+            nullable(String.class),
+            nullable(ConfirmCallback.class),
+            nullable(CancelCallback.class)))
         .thenReturn(confirmDialog);
     ArgumentCaptor<ConfirmCallback> confirmCallbackCaptor =
         ArgumentCaptor.forClass(ConfirmCallback.class);
 
-    when(commandManager.removeCommand(anyString())).thenReturn(voidPromise);
+    when(commandManager.removeCommand(nullable(String.class))).thenReturn(voidPromise);
 
     // when
     presenter.onCommandRemove(mock(CommandImpl.class));
@@ -313,10 +326,11 @@ public class CommandsExplorerPresenterTest {
     // then
     verify(dialogFactory)
         .createConfirmDialog(
-            anyString(),
-            anyString(),
+            nullable(String.class),
+            nullable(String.class),
             confirmCallbackCaptor.capture(),
-            isNull(CancelCallback.class));
+            isNull());
+
     confirmCallbackCaptor.getValue().accepted();
 
     verify(voidPromise).catchError(errorOperationCaptor.capture());

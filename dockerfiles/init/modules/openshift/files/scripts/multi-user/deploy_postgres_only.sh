@@ -6,13 +6,17 @@
 # http://www.eclipse.org/legal/epl-v10.html
 #
 
-set -e
-
 COMMAND_DIR=$(dirname "$0")
+export CHE_EPHEMERAL=${CHE_EPHEMERAL:-false}
 
 oc create -f "$COMMAND_DIR"/che-init-image-stream.yaml
 
 oc create -f "$COMMAND_DIR"/postgres/
+
+if [ "${CHE_EPHEMERAL}" == "true" ]; then
+  oc volume dc/postgres --remove --confirm
+  oc delete pvc/postgres-data
+fi 
 
 IMAGE_INIT=${IMAGE_INIT:-"eclipse/che-init:nightly"}
 

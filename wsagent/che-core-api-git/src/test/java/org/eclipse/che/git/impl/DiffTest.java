@@ -60,14 +60,14 @@ public class DiffTest {
   )
   public void testDiffNameStatus(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     makeCommitInMaster(connection);
 
-    //when
+    // when
     List<String> diff =
         readDiff(DiffParams.create().withType(DiffType.NAME_STATUS).withRenameLimit(0), connection);
-    //then
+    // then
     assertEquals(diff.size(), 1);
     assertTrue(diff.contains("M\taaa"));
   }
@@ -78,15 +78,15 @@ public class DiffTest {
   )
   public void testDiffNameStatusWithCommits(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     makeCommitInMaster(connection);
-    //change README.txt
+    // change README.txt
     connection.add(AddParams.create(AddRequest.DEFAULT_PATTERN));
     connection.rm(RmParams.create(singletonList("README.txt")));
     connection.commit(CommitParams.create("testDiffNameStatusWithCommits"));
 
-    //when
+    // when
     List<String> diff =
         readDiff(
             DiffParams.create()
@@ -97,7 +97,7 @@ public class DiffTest {
                 .withCommitB("HEAD"),
             connection);
 
-    //then
+    // then
     assertEquals(diff.size(), 2);
     assertTrue(diff.contains("D\tREADME.txt"));
     assertTrue(diff.contains("A\taaa"));
@@ -109,7 +109,7 @@ public class DiffTest {
   )
   public void testDiffNameStatusWithFileFilterAndCommits(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     makeCommitInMaster(connection);
 
@@ -117,7 +117,7 @@ public class DiffTest {
     connection.rm(RmParams.create(singletonList("README.txt")));
     connection.commit(CommitParams.create("testDiffNameStatusWithCommits"));
 
-    //when
+    // when
     List<String> diff =
         readDiff(
             DiffParams.create()
@@ -129,7 +129,7 @@ public class DiffTest {
                 .withCommitB("HEAD"),
             connection);
 
-    //then
+    // then
     assertEquals(diff.size(), 1);
     assertTrue(diff.contains("A\taaa"));
   }
@@ -140,11 +140,11 @@ public class DiffTest {
   )
   public void testDiffNameOnly(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     makeCommitInMaster(connection);
 
-    //when
+    // when
     List<String> diff =
         readDiff(
             DiffParams.create()
@@ -154,7 +154,7 @@ public class DiffTest {
                 .withRenameLimit(0),
             connection);
 
-    //then
+    // then
     assertEquals(diff.size(), 1);
     assertTrue(diff.contains("aaa"));
   }
@@ -165,7 +165,7 @@ public class DiffTest {
   )
   public void testDiffNameOnlyWithCommits(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     makeCommitInMaster(connection);
 
@@ -173,7 +173,7 @@ public class DiffTest {
     connection.rm(RmParams.create(singletonList("README.txt")));
     connection.commit(CommitParams.create("testDiffNameStatusWithCommits"));
 
-    //when
+    // when
     List<String> diff =
         readDiff(
             DiffParams.create()
@@ -185,7 +185,7 @@ public class DiffTest {
                 .withCommitB("HEAD"),
             connection);
 
-    //then
+    // then
     assertEquals(diff.size(), 2);
     assertTrue(diff.contains("README.txt"));
     assertTrue(diff.contains("aaa"));
@@ -197,11 +197,11 @@ public class DiffTest {
   )
   public void testDiffNameOnlyCached(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     makeCommitInMaster(connection);
 
-    //when
+    // when
     connection.add(AddParams.create(singletonList("aaa")));
     List<String> diff =
         readDiff(
@@ -214,7 +214,7 @@ public class DiffTest {
                 .withCached(true),
             connection);
 
-    //then
+    // then
     assertEquals(diff.size(), 1);
     assertTrue(diff.contains("aaa"));
   }
@@ -225,11 +225,11 @@ public class DiffTest {
   )
   public void testDiffNameOnlyCachedNoCommit(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     makeCommitInMaster(connection);
 
-    //when
+    // when
     connection.add(AddParams.create(singletonList("aaa")));
     List<String> diff =
         readDiff(
@@ -242,7 +242,7 @@ public class DiffTest {
                 .withCached(true),
             connection);
 
-    //then
+    // then
     assertEquals(diff.size(), 1);
     assertTrue(diff.contains("aaa"));
   }
@@ -253,11 +253,11 @@ public class DiffTest {
   )
   public void testDiffNameOnlyWorkingTree(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     makeCommitInMaster(connection);
 
-    //when
+    // when
     List<String> diff =
         readDiff(
             DiffParams.create()
@@ -269,7 +269,7 @@ public class DiffTest {
                 .withCached(false),
             connection);
 
-    //then
+    // then
     assertEquals(diff.size(), 1);
     assertTrue(diff.contains("aaa"));
   }
@@ -280,11 +280,11 @@ public class DiffTest {
   )
   public void testDiffNameOnlyWithFileFilter(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     makeCommitInMaster(connection);
 
-    //when
+    // when
     List<String> diff =
         readDiff(
             DiffParams.create()
@@ -294,7 +294,7 @@ public class DiffTest {
                 .withRenameLimit(0),
             connection);
 
-    //then
+    // then
     assertEquals(diff.size(), 1);
     assertTrue(diff.contains("aaa"));
   }
@@ -305,11 +305,11 @@ public class DiffTest {
   )
   public void testDiffNameOnlyNotMatchingWithFileFilter(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     makeCommitInMaster(connection);
 
-    //when
+    // when
     List<String> diff =
         readDiff(
             DiffParams.create()
@@ -318,7 +318,7 @@ public class DiffTest {
                 .withNoRenames(false)
                 .withRenameLimit(0),
             connection);
-    //then
+    // then
     assertEquals(diff.size(), 0);
   }
 
@@ -328,7 +328,7 @@ public class DiffTest {
   )
   public void testDiffNameOnlyWithFileFilterAndCommits(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     makeCommitInMaster(connection);
 
@@ -336,7 +336,7 @@ public class DiffTest {
     connection.rm(RmParams.create(singletonList("README.txt")));
     connection.commit(CommitParams.create("testDiffNameStatusWithCommits"));
 
-    //when
+    // when
     List<String> diff =
         readDiff(
             DiffParams.create()
@@ -348,7 +348,7 @@ public class DiffTest {
                 .withCommitB("HEAD"),
             connection);
 
-    //then
+    // then
     assertEquals(diff.size(), 1);
     assertTrue(diff.contains("aaa"));
   }
@@ -358,11 +358,11 @@ public class DiffTest {
     dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
   )
   public void testDiffRaw(GitConnectionFactory connectionFactory) throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     makeCommitInMaster(connection);
 
-    //when
+    // when
     DiffParams params =
         DiffParams.create()
             .withFileFilter(null)
@@ -371,7 +371,7 @@ public class DiffTest {
             .withRenameLimit(0);
     DiffPage diffPage = connection.diff(params);
 
-    //then
+    // then
     diffPage.writeTo(System.out);
   }
 
@@ -381,7 +381,7 @@ public class DiffTest {
   )
   public void testDiffRawWithCommits(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     makeCommitInMaster(connection);
 
@@ -389,7 +389,7 @@ public class DiffTest {
     connection.rm(RmParams.create(singletonList("README.txt")));
     connection.commit(CommitParams.create("testDiffNameStatusWithCommits"));
 
-    //when
+    // when
     DiffParams params =
         DiffParams.create()
             .withFileFilter(null)
@@ -400,7 +400,7 @@ public class DiffTest {
             .withCommitB("HEAD");
     DiffPage diffPage = connection.diff(params);
 
-    //then
+    // then
     diffPage.writeTo(System.out);
   }
 
@@ -420,12 +420,12 @@ public class DiffTest {
   }
 
   private void makeCommitInMaster(GitConnection connection) throws GitException, IOException {
-    //create branch "master"
+    // create branch "master"
     addFile(connection, "README.txt", org.eclipse.che.git.impl.GitTestUtil.CONTENT);
     connection.add(AddParams.create(singletonList("README.txt")));
     connection.commit(CommitParams.create("Initial addd"));
 
-    //make some changes
+    // make some changes
     addFile(connection, "aaa", "AAA\n");
     connection.add(AddParams.create(singletonList(".")));
     addFile(connection, "aaa", "BBB\n");

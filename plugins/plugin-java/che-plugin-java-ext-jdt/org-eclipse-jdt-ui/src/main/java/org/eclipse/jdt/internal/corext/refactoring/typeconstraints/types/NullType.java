@@ -12,7 +12,7 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types;
 public final class NullType extends TType {
 
   protected NullType(TypeEnvironment environment) {
-    super(environment, "N"); //$NON-NLS-1$
+    super(environment, "N"); // $NON-NLS-1$
   }
 
   @Override
@@ -37,7 +37,7 @@ public final class NullType extends TType {
 
   @Override
   public String getName() {
-    return "null"; //$NON-NLS-1$
+    return "null"; // $NON-NLS-1$
   }
 
   @Override

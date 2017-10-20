@@ -13,6 +13,7 @@ package org.eclipse.che.plugin.ssh.key.client.manage;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
@@ -57,6 +58,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Matchers;
@@ -167,15 +169,18 @@ public class SshKeyManagerPresenterTest {
     when(constant.deleteSshKeyQuestion(anyString())).thenReturn(safeHtml);
     when(safeHtml.asString()).thenReturn("");
     when(dialogFactory.createConfirmDialog(
-            anyString(), anyString(), (ConfirmCallback) anyObject(), (CancelCallback) anyObject()))
+            nullable(String.class),
+            nullable(String.class),
+            nullable(ConfirmCallback.class),
+            nullable(CancelCallback.class)))
         .thenReturn(confirmDialog);
 
     presenter.onDeleteClicked(sshPairDto);
 
     verify(dialogFactory)
         .createConfirmDialog(
-            anyString(),
-            anyString(),
+            nullable(String.class),
+            nullable(String.class),
             confirmCallbackCaptor.capture(),
             (CancelCallback) anyObject());
     ConfirmCallback confirmCallback = confirmCallbackCaptor.getValue();
@@ -190,19 +195,22 @@ public class SshKeyManagerPresenterTest {
   public void testOnDeleteClickedWhenDeleteKeyCanceled() {
     SafeHtml safeHtml = mock(SafeHtml.class);
     ConfirmDialog confirmDialog = mock(ConfirmDialog.class);
-    when(constant.deleteSshKeyQuestion(anyString())).thenReturn(safeHtml);
+    when(constant.deleteSshKeyQuestion(nullable(String.class))).thenReturn(safeHtml);
     when(safeHtml.asString()).thenReturn("");
     when(dialogFactory.createConfirmDialog(
-            anyString(), anyString(), (ConfirmCallback) anyObject(), (CancelCallback) anyObject()))
+            nullable(String.class),
+            nullable(String.class),
+            nullable(ConfirmCallback.class),
+            nullable(CancelCallback.class)))
         .thenReturn(confirmDialog);
 
     presenter.onDeleteClicked(sshPairDto);
 
     verify(dialogFactory)
         .createConfirmDialog(
-            anyString(),
-            anyString(),
-            (ConfirmCallback) anyObject(),
+            nullable(String.class),
+            nullable(String.class),
+            nullable(ConfirmCallback.class),
             cancelCallbackCaptor.capture());
     CancelCallback cancelCallback = cancelCallbackCaptor.getValue();
     cancelCallback.cancelled();
@@ -221,15 +229,18 @@ public class SshKeyManagerPresenterTest {
     when(constant.deleteSshKeyQuestion(anyString())).thenReturn(safeHtml);
     when(safeHtml.asString()).thenReturn("");
     when(dialogFactory.createConfirmDialog(
-            anyString(), anyString(), (ConfirmCallback) anyObject(), (CancelCallback) anyObject()))
+            nullable(String.class),
+            nullable(String.class),
+            nullable(ConfirmCallback.class),
+            nullable(CancelCallback.class)))
         .thenReturn(confirmDialog);
 
     presenter.onDeleteClicked(sshPairDto);
 
     verify(dialogFactory)
         .createConfirmDialog(
-            anyString(),
-            anyString(),
+            nullable(String.class),
+            nullable(String.class),
             confirmCallbackCaptor.capture(),
             (CancelCallback) anyObject());
     ConfirmCallback confirmCallback = confirmCallbackCaptor.getValue();
@@ -253,15 +264,18 @@ public class SshKeyManagerPresenterTest {
     when(constant.deleteSshKeyQuestion(anyString())).thenReturn(safeHtml);
     when(safeHtml.asString()).thenReturn("");
     when(dialogFactory.createConfirmDialog(
-            anyString(), anyString(), (ConfirmCallback) anyObject(), (CancelCallback) anyObject()))
+            nullable(String.class),
+            nullable(String.class),
+            nullable(ConfirmCallback.class),
+            nullable(CancelCallback.class)))
         .thenReturn(confirmDialog);
 
     presenter.onDeleteClicked(sshPairDto);
 
     verify(dialogFactory)
         .createConfirmDialog(
-            anyString(),
-            anyString(),
+            nullable(String.class),
+            nullable(String.class),
             confirmCallbackCaptor.capture(),
             (CancelCallback) anyObject());
     ConfirmCallback confirmCallback = confirmCallbackCaptor.getValue();
@@ -287,17 +301,20 @@ public class SshKeyManagerPresenterTest {
     when(constant.deleteSshKeyQuestion(anyString())).thenReturn(safeHtml);
     when(safeHtml.asString()).thenReturn("");
     when(dialogFactory.createConfirmDialog(
-            anyString(), anyString(), (ConfirmCallback) anyObject(), (CancelCallback) anyObject()))
+            nullable(String.class),
+            nullable(String.class),
+            nullable(ConfirmCallback.class),
+            nullable(CancelCallback.class)))
         .thenReturn(confirmDialog);
 
     presenter.onDeleteClicked(sshPairDto);
 
     verify(dialogFactory)
         .createConfirmDialog(
-            anyString(),
-            anyString(),
+            nullable(String.class),
+            nullable(String.class),
             confirmCallbackCaptor.capture(),
-            (CancelCallback) anyObject());
+            nullable(CancelCallback.class));
     ConfirmCallback confirmCallback = confirmCallbackCaptor.getValue();
     confirmCallback.accepted();
 
@@ -324,15 +341,18 @@ public class SshKeyManagerPresenterTest {
     when(constant.deleteSshKeyQuestion(anyString())).thenReturn(safeHtml);
     when(safeHtml.asString()).thenReturn("");
     when(dialogFactory.createConfirmDialog(
-            anyString(), anyString(), (ConfirmCallback) anyObject(), (CancelCallback) anyObject()))
+            nullable(String.class),
+            nullable(String.class),
+            nullable(ConfirmCallback.class),
+            nullable(CancelCallback.class)))
         .thenReturn(confirmDialog);
 
     presenter.onDeleteClicked(sshPairDto);
 
     verify(dialogFactory)
         .createConfirmDialog(
-            anyString(),
-            anyString(),
+            nullable(String.class),
+            nullable(String.class),
             confirmCallbackCaptor.capture(),
             (CancelCallback) anyObject());
     ConfirmCallback confirmCallback = confirmCallbackCaptor.getValue();
@@ -350,7 +370,10 @@ public class SshKeyManagerPresenterTest {
     verify(service).getPairs(Matchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE));
     verify(view, never()).setPairs(eq(sshPairDtoArray));
     verify(notificationManager)
-        .notify(anyString(), any(StatusNotification.Status.class), (DisplayMode) anyObject());
+        .notify(
+            nullable(String.class),
+            any(StatusNotification.Status.class),
+            (DisplayMode) anyObject());
   }
 
   @Test
@@ -390,14 +413,20 @@ public class SshKeyManagerPresenterTest {
   @Test
   public void testOnGenerateClickedWhenUserConfirmGenerateKey() {
     when(dialogFactory.createInputDialog(
-            anyString(), anyString(), (InputCallback) anyObject(), (CancelCallback) anyObject()))
+            nullable(String.class),
+            nullable(String.class),
+            nullable(InputCallback.class),
+            nullable(CancelCallback.class)))
         .thenReturn(inputDialog);
 
     presenter.onGenerateClicked();
 
     verify(dialogFactory)
         .createInputDialog(
-            anyString(), anyString(), inputCallbackCaptor.capture(), (CancelCallback) anyObject());
+            nullable(String.class),
+            nullable(String.class),
+            inputCallbackCaptor.capture(),
+            (CancelCallback) anyObject());
     InputCallback inputCallback = inputCallbackCaptor.getValue();
     inputCallback.accepted(GITHUB_HOST);
 
@@ -408,14 +437,20 @@ public class SshKeyManagerPresenterTest {
   @Test
   public void testOnGenerateClickedWhenUserCancelGenerateKey() {
     when(dialogFactory.createInputDialog(
-            anyString(), anyString(), (InputCallback) anyObject(), (CancelCallback) anyObject()))
+            nullable(String.class),
+            nullable(String.class),
+            nullable(InputCallback.class),
+            nullable(CancelCallback.class)))
         .thenReturn(inputDialog);
 
     presenter.onGenerateClicked();
 
     verify(dialogFactory)
         .createInputDialog(
-            anyString(), anyString(), (InputCallback) anyObject(), cancelCallbackCaptor.capture());
+            nullable(String.class),
+            nullable(String.class),
+            ArgumentMatchers.<InputCallback>any(),
+            cancelCallbackCaptor.capture());
     CancelCallback cancelCallback = cancelCallbackCaptor.getValue();
     cancelCallback.cancelled();
 
@@ -426,14 +461,17 @@ public class SshKeyManagerPresenterTest {
   @Test
   public void testOnGenerateClickedWhenGenerateKeyIsFailed() throws OperationException {
     when(dialogFactory.createInputDialog(
-            anyString(), anyString(), (InputCallback) anyObject(), (CancelCallback) anyObject()))
+            nullable(String.class),
+            nullable(String.class),
+            nullable(InputCallback.class),
+            nullable(CancelCallback.class)))
         .thenReturn(inputDialog);
 
     presenter.onGenerateClicked();
 
     verify(dialogFactory)
         .createInputDialog(
-            anyString(), anyString(),
+            nullable(String.class), nullable(String.class),
             inputCallbackCaptor.capture(), cancelCallbackCaptor.capture());
     InputCallback inputCallback = inputCallbackCaptor.getValue();
     inputCallback.accepted(GITHUB_HOST);
@@ -447,8 +485,8 @@ public class SshKeyManagerPresenterTest {
     verify(view, never()).setPairs((List<SshPairDto>) anyObject());
     verify(notificationManager)
         .notify(
-            anyString(),
-            anyString(),
+            nullable(String.class),
+            nullable(String.class),
             any(StatusNotification.Status.class),
             (DisplayMode) anyObject());
   }
@@ -457,14 +495,17 @@ public class SshKeyManagerPresenterTest {
   public void testShouldRefreshKeysAfterSuccessfulGenerateKey() throws OperationException {
     List<SshPairDto> sshPairDtoArray = new ArrayList<>();
     when(dialogFactory.createInputDialog(
-            anyString(), anyString(), (InputCallback) anyObject(), (CancelCallback) anyObject()))
+            nullable(String.class),
+            nullable(String.class),
+            nullable(InputCallback.class),
+            nullable(CancelCallback.class)))
         .thenReturn(inputDialog);
 
     presenter.onGenerateClicked();
 
     verify(dialogFactory)
         .createInputDialog(
-            anyString(), anyString(),
+            nullable(String.class), nullable(String.class),
             inputCallbackCaptor.capture(), cancelCallbackCaptor.capture());
     InputCallback inputCallback = inputCallbackCaptor.getValue();
     inputCallback.accepted(GITHUB_HOST);

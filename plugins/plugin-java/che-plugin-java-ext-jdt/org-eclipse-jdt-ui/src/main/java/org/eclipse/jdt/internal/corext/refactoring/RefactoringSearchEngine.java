@@ -43,10 +43,10 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 public class RefactoringSearchEngine {
 
   private RefactoringSearchEngine() {
-    //no instances
+    // no instances
   }
 
-  //TODO: throw CoreException
+  // TODO: throw CoreException
   public static ICompilationUnit[] findAffectedCompilationUnits(
       SearchPattern pattern,
       IJavaSearchScope scope,
@@ -95,7 +95,7 @@ public class RefactoringSearchEngine {
     return result.toArray(new ICompilationUnit[result.size()]);
   }
 
-  //TODO: throw CoreException
+  // TODO: throw CoreException
   public static ICompilationUnit[] findAffectedCompilationUnits(
       SearchPattern pattern,
       IJavaSearchScope scope,
@@ -118,7 +118,7 @@ public class RefactoringSearchEngine {
    * @see SearchMatch
    * @throws JavaModelException when the search failed
    */
-  //TODO: throw CoreException
+  // TODO: throw CoreException
   public static SearchResultGroup[] search(
       SearchPattern pattern,
       IJavaSearchScope scope,
@@ -129,7 +129,7 @@ public class RefactoringSearchEngine {
         new SearchEngine(), pattern, scope, new CollectingSearchRequestor(), monitor, status);
   }
 
-  //TODO: throw CoreException
+  // TODO: throw CoreException
   public static SearchResultGroup[] search(
       SearchPattern pattern,
       WorkingCopyOwner owner,
@@ -146,7 +146,7 @@ public class RefactoringSearchEngine {
         status);
   }
 
-  //TODO: throw CoreException
+  // TODO: throw CoreException
   public static SearchResultGroup[] search(
       SearchPattern pattern,
       IJavaSearchScope scope,
@@ -157,7 +157,7 @@ public class RefactoringSearchEngine {
     return internalSearch(new SearchEngine(), pattern, scope, requestor, monitor, status);
   }
 
-  //TODO: throw CoreException
+  // TODO: throw CoreException
   public static SearchResultGroup[] search(
       SearchPattern pattern,
       WorkingCopyOwner owner,
@@ -175,7 +175,7 @@ public class RefactoringSearchEngine {
         status);
   }
 
-  //TODO: throw CoreException
+  // TODO: throw CoreException
   private static SearchResultGroup[] internalSearch(
       SearchEngine searchEngine,
       SearchPattern pattern,
@@ -250,7 +250,7 @@ public class RefactoringSearchEngine {
           "Invalid java element: "
               + first.getHandleIdentifier()
               + "\n"
-              + first.toString()); //$NON-NLS-1$ //$NON-NLS-2$
+              + first.toString()); // $NON-NLS-1$ //$NON-NLS-2$
     while (iter.hasNext()) {
       IJavaElement each = iter.next();
       SearchPattern nextPattern =
@@ -260,7 +260,7 @@ public class RefactoringSearchEngine {
             "Invalid java element: "
                 + each.getHandleIdentifier()
                 + "\n"
-                + each.toString()); //$NON-NLS-1$ //$NON-NLS-2$
+                + each.toString()); // $NON-NLS-1$ //$NON-NLS-2$
       pattern = SearchPattern.createOrPattern(pattern, nextPattern);
     }
     return pattern;
