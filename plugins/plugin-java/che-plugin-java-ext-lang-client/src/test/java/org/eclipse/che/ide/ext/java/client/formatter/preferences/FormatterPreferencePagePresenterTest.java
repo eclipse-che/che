@@ -54,7 +54,8 @@ public class FormatterPreferencePagePresenterTest {
     when(javaFormatterServiceClient.updateProjectFormatter(anyString(), anyString()))
         .thenReturn(updatingResponce);
     when(javaFormatterServiceClient.updateRootFormatter(anyString())).thenReturn(updatingResponce);
-    when(updatingResponce.then(Matchers.<Operation<Void>>anyObject())).thenReturn(updatingResponce);
+    when(updatingResponce.then(org.mockito.ArgumentMatchers.<Operation<Void>>anyObject()))
+        .thenReturn(updatingResponce);
 
     presenter =
         new FormatterPreferencePagePresenter(

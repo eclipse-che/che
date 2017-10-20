@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.command.palette;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -81,7 +82,7 @@ public class CommandsPalettePresenterTest {
 
     verify(view).show();
     verify(commandManager).getCommands();
-    verify(view).setCommands(Matchers.any());
+    verify(view).setCommands(any());
   }
 
   @Test

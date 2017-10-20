@@ -73,7 +73,7 @@ public class FindResultPresenterTest {
     }
 
     when(projectServiceClient.search(queryExpression)).thenReturn(searchResultPromise);
-    when(searchResultPromise.then(Matchers.<Operation<SearchResult>>any()))
+    when(searchResultPromise.then(org.mockito.ArgumentMatchers.<Operation<SearchResult>>any()))
         .thenReturn(searchResultPromise);
     when(result.getItemReferences()).thenReturn(items);
   }

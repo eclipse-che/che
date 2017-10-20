@@ -197,9 +197,12 @@ public class EditorPartStackPresenterTest {
   public void constructorShouldBeVerified() {
     verify(view, times(2)).setDelegate(presenter);
     verify(view).addPaneMenuButton(editorPaneMenu);
-    verify(editorPaneMenuItemFactory, times(4)).createMenuItem(Matchers.<Action>anyObject());
-    verify(editorPaneMenu).addItem(Matchers.<PaneMenuActionItemWidget>anyObject(), eq(true));
-    verify(editorPaneMenu, times(3)).addItem(Matchers.<PaneMenuActionItemWidget>anyObject());
+    verify(editorPaneMenuItemFactory, times(4))
+        .createMenuItem(org.mockito.ArgumentMatchers.<Action>anyObject());
+    verify(editorPaneMenu)
+        .addItem(org.mockito.ArgumentMatchers.<PaneMenuActionItemWidget>anyObject(), eq(true));
+    verify(editorPaneMenu, times(3))
+        .addItem(org.mockito.ArgumentMatchers.<PaneMenuActionItemWidget>anyObject());
   }
 
   @Test
@@ -213,7 +216,8 @@ public class EditorPartStackPresenterTest {
   public void partShouldBeAdded() {
     presenter.addPart(partPresenter1);
 
-    verify(partPresenter1, times(2)).addPropertyListener(Matchers.<PropertyListener>anyObject());
+    verify(partPresenter1, times(2))
+        .addPropertyListener(org.mockito.ArgumentMatchers.<PropertyListener>anyObject());
 
     verify(tabItemFactory).createEditorPartButton(partPresenter1, presenter);
 

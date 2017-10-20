@@ -163,7 +163,7 @@ public class RenamePresenterTest {
         .thenReturn(renameRefactoringSessionPromise);
     when(session.getWizardType()).thenReturn(RenameRefactoringSession.RenameWizard.LOCAL_VARIABLE);
     when(renameRefactoringSessionPromise.then(
-            Matchers.<Operation<RenameRefactoringSession>>anyObject()))
+            org.mockito.ArgumentMatchers.<Operation<RenameRefactoringSession>>anyObject()))
         .thenReturn(renameRefactoringSessionPromise);
     when(view.isUpdateDelegateUpdating()).thenReturn(true);
     when(view.isUpdateQualifiedNames()).thenReturn(true);
@@ -172,11 +172,13 @@ public class RenamePresenterTest {
         .thenReturn(RenameSettings.MachStrategy.SUFFIX);
     when(refactorService.setRenameSettings(renameSettings)).thenReturn(renameSettingsPromise);
     when(renameSettingsPromise.thenPromise(
-            Matchers.<Function<Void, Promise<ChangeCreationResult>>>any()))
+            org.mockito.ArgumentMatchers.<Function<Void, Promise<ChangeCreationResult>>>any()))
         .thenReturn(changeCreationResultPromise);
-    when(changeCreationResultPromise.then(Matchers.<Operation<ChangeCreationResult>>any()))
+    when(changeCreationResultPromise.then(
+            org.mockito.ArgumentMatchers.<Operation<ChangeCreationResult>>any()))
         .thenReturn(changeCreationResultPromise);
-    when(changeCreationResultPromise.catchError(Matchers.<Operation<PromiseError>>anyObject()))
+    when(changeCreationResultPromise.catchError(
+            org.mockito.ArgumentMatchers.<Operation<PromiseError>>anyObject()))
         .thenReturn(changeCreationResultPromise);
     when(refactorService.applyRefactoring(refactoringSession)).thenReturn(refactoringStatusPromise);
 
@@ -187,7 +189,8 @@ public class RenamePresenterTest {
     when(refactoringUpdater.handleMovingFiles(anyList())).thenReturn(handleMovingFilesPromise);
     when(refactoringUpdater.updateAfterRefactoring(anyList()))
         .thenReturn(updateAfterRefactoringPromise);
-    when(updateAfterRefactoringPromise.then(Matchers.<Operation<Void>>anyObject()))
+    when(updateAfterRefactoringPromise.then(
+            org.mockito.ArgumentMatchers.<Operation<Void>>anyObject()))
         .thenReturn(updateAfterRefactoringPromise);
 
     renamePresenter =
@@ -593,7 +596,8 @@ public class RenamePresenterTest {
 
     verify(updateAfterRefactoringPromise).then(updateAfterRefactoringOperation.capture());
     updateAfterRefactoringOperation.getValue().apply(null);
-    verify(refactoringUpdater).updateAfterRefactoring(Matchers.<List<ChangeInfo>>anyObject());
+    verify(refactoringUpdater)
+        .updateAfterRefactoring(org.mockito.ArgumentMatchers.<List<ChangeInfo>>anyObject());
     verify(refactoringUpdater).handleMovingFiles(anyList());
     verify(clientServerEventService).sendFileTrackingResumeEvent();
   }
@@ -633,7 +637,8 @@ public class RenamePresenterTest {
     verify(view).hide();
     verify(updateAfterRefactoringPromise).then(updateAfterRefactoringOperation.capture());
     updateAfterRefactoringOperation.getValue().apply(null);
-    verify(refactoringUpdater).updateAfterRefactoring(Matchers.<List<ChangeInfo>>anyObject());
+    verify(refactoringUpdater)
+        .updateAfterRefactoring(org.mockito.ArgumentMatchers.<List<ChangeInfo>>anyObject());
     verify(refactoringUpdater).handleMovingFiles(anyList());
     verify(clientServerEventService).sendFileTrackingResumeEvent();
   }
@@ -730,8 +735,8 @@ public class RenamePresenterTest {
             nullable(String.class),
             nullable(String.class),
             nullable(String.class),
-            Matchers.<ConfirmCallback>anyObject(),
-            Matchers.<CancelCallback>anyObject()))
+            org.mockito.ArgumentMatchers.<ConfirmCallback>anyObject(),
+            org.mockito.ArgumentMatchers.<CancelCallback>anyObject()))
         .thenReturn(dialog);
     renamePresenter.onAcceptButtonClicked();
 
@@ -744,8 +749,8 @@ public class RenamePresenterTest {
             nullable(String.class),
             nullable(String.class),
             nullable(String.class),
-            Matchers.<ConfirmCallback>anyObject(),
-            Matchers.<CancelCallback>anyObject());
+            org.mockito.ArgumentMatchers.<ConfirmCallback>anyObject(),
+            org.mockito.ArgumentMatchers.<CancelCallback>anyObject());
     verify(dialog).show();
   }
 

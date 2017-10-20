@@ -159,7 +159,7 @@ public class EditorTabWidgetTest {
 
     verify(editorPartPresenter, times(2)).getEditorInput();
     verify(editorPartPresenter, times(2)).getTitleImage();
-    verify(tab.iconPanel).setWidget(Matchers.<SVGImage>anyObject());
+    verify(tab.iconPanel).setWidget(org.mockito.ArgumentMatchers.<SVGImage>anyObject());
   }
 
   @Test

@@ -110,7 +110,8 @@ public class StartWorkspacePresenterTest {
     presenter.onCreateWorkspaceClicked();
 
     verify(view).hide();
-    verify(createWorkspacePresenter).show(Matchers.<List<WorkspaceDto>>anyObject(), eq(callback));
+    verify(createWorkspacePresenter)
+        .show(org.mockito.ArgumentMatchers.<List<WorkspaceDto>>anyObject(), eq(callback));
   }
 
   @Test

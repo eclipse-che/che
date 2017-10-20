@@ -73,7 +73,8 @@ public class EditorContentSynchronizerImplTest {
 
   @Test
   public void constructorShouldBeVerified() {
-    verify(eventBus, times(3)).addHandler(Matchers.<Event.Type<Object>>anyObject(), anyObject());
+    verify(eventBus, times(3))
+        .addHandler(org.mockito.ArgumentMatchers.<Event.Type<Object>>anyObject(), anyObject());
   }
 
   @Test

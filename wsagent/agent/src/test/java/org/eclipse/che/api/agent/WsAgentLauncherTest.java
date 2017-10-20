@@ -12,6 +12,8 @@ package org.eclipse.che.api.agent;
 
 import static org.eclipse.che.api.workspace.shared.Constants.WS_AGENT_PROCESS_NAME;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 
 import java.net.HttpURLConnection;
 import java.util.Collections;
@@ -103,14 +105,14 @@ public class WsAgentLauncherTest {
 
     Mockito.verify(machineProcessManager)
         .exec(
-            Matchers.eq(WORKSPACE_ID),
-            Matchers.eq(MACHINE_ID),
-            Matchers.eq(
+            eq(WORKSPACE_ID),
+            eq(MACHINE_ID),
+            eq(
                 new CommandImpl(
                     "org.eclipse.che.ws-agent",
                     "script\n" + WsAgentLauncher.DEFAULT_WS_AGENT_RUN_COMMAND,
                     WS_AGENT_PROCESS_NAME)),
-            Matchers.eq(WsAgentLauncher.getWsAgentProcessOutputChannel(WORKSPACE_ID)));
+            eq(WsAgentLauncher.getWsAgentProcessOutputChannel(WORKSPACE_ID)));
   }
 
   @Test
@@ -167,17 +169,13 @@ public class WsAgentLauncherTest {
   public void shouldThrowMachineExceptionIfMachineManagerExecInDevMachineThrowsNotFoundException()
       throws Exception {
     Mockito.when(
-            machineProcessManager.exec(
-                Matchers.anyString(),
-                Matchers.anyString(),
-                any(Command.class),
-                Matchers.anyString()))
+            machineProcessManager.exec(anyString(), anyString(), any(Command.class), anyString()))
         .thenThrow(new NotFoundException("Test exception"));
 
     wsAgentLauncher.launch(machine, agent);
 
     Mockito.verify(machineProcessManager)
-        .exec(Matchers.anyString(), Matchers.anyString(), any(Command.class), Matchers.anyString());
+        .exec(anyString(), anyString(), any(Command.class), anyString());
   }
 
   @Test(
@@ -187,17 +185,13 @@ public class WsAgentLauncherTest {
   public void shouldThrowMachineExceptionIfMachineManagerExecInDevMachineThrowsMachineException()
       throws Exception {
     Mockito.when(
-            machineProcessManager.exec(
-                Matchers.anyString(),
-                Matchers.anyString(),
-                any(Command.class),
-                Matchers.anyString()))
+            machineProcessManager.exec(anyString(), anyString(), any(Command.class), anyString()))
         .thenThrow(new MachineException("Test exception"));
 
     wsAgentLauncher.launch(machine, agent);
 
     Mockito.verify(machineProcessManager)
-        .exec(Matchers.anyString(), Matchers.anyString(), any(Command.class), Matchers.anyString());
+        .exec(anyString(), anyString(), any(Command.class), anyString());
   }
 
   @Test(
@@ -207,17 +201,13 @@ public class WsAgentLauncherTest {
   public void shouldThrowExceptionIfMachineManagerExecInDevMachineThrowsBadRequestException()
       throws Exception {
     Mockito.when(
-            machineProcessManager.exec(
-                Matchers.anyString(),
-                Matchers.anyString(),
-                any(Command.class),
-                Matchers.anyString()))
+            machineProcessManager.exec(anyString(), anyString(), any(Command.class), anyString()))
         .thenThrow(new BadRequestException("Test exception"));
 
     wsAgentLauncher.launch(machine, agent);
 
     Mockito.verify(machineProcessManager)
-        .exec(Matchers.anyString(), Matchers.anyString(), any(Command.class), Matchers.anyString());
+        .exec(anyString(), anyString(), any(Command.class), anyString());
   }
 
   @Test(

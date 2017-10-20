@@ -34,6 +34,7 @@ import org.eclipse.che.ide.workspace.create.recipewidget.RecipeWidget;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
@@ -219,7 +220,7 @@ public class CreateWorkspaceViewImplTest {
 
     verify(view.tagsError).setVisible(true);
 
-    verify(delegate).onTagsChanged(Matchers.<HidePopupCallBack>anyObject());
+    verify(delegate).onTagsChanged(ArgumentMatchers.<HidePopupCallBack>anyObject());
   }
 
   @Test
@@ -232,7 +233,7 @@ public class CreateWorkspaceViewImplTest {
 
     verify(view.tagsError).setVisible(true);
 
-    verify(delegate).onTagsChanged(Matchers.<HidePopupCallBack>anyObject());
+    verify(delegate).onTagsChanged(ArgumentMatchers.<HidePopupCallBack>anyObject());
   }
 
   @Test

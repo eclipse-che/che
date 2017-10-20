@@ -123,7 +123,8 @@ public class EvaluateExpressionTest extends BaseTest {
     when(view.getExpression()).thenReturn(EXPRESSION);
     when(debugger.evaluate(view.getExpression(), THREAD_ID, FRAME_INDEX)).thenReturn(promise);
     when(promise.then((Operation) anyObject())).thenReturn(promise);
-    when(promise.catchError(Matchers.<Operation<PromiseError>>anyObject())).thenReturn(promise);
+    when(promise.catchError(org.mockito.ArgumentMatchers.<Operation<PromiseError>>any()))
+        .thenReturn(promise);
     when(debuggerManager.getActiveDebugger()).thenReturn(debugger);
     when(promiseError.getMessage()).thenReturn(FAIL_REASON);
 

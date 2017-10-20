@@ -70,7 +70,9 @@ public class EditorMultiPartStackPresenterTest {
 
   @Test
   public void constructorShouldBeVerified() {
-    verify(eventBus).addHandler(Matchers.<ActivePartChangedEvent.Type>anyObject(), eq(presenter));
+    verify(eventBus)
+        .addHandler(
+            org.mockito.ArgumentMatchers.<ActivePartChangedEvent.Type>anyObject(), eq(presenter));
   }
 
   @Test

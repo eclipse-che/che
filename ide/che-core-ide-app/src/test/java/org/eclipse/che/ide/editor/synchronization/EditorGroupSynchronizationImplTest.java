@@ -12,6 +12,7 @@ package org.eclipse.che.ide.editor.synchronization;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -227,7 +228,8 @@ public class EditorGroupSynchronizationImplTest {
 
     verify(documentEventBus)
         .addHandler(
-            Matchers.<DocumentChangedEvent.Type>anyObject(), eq(editorGroupSynchronization));
+            org.mockito.ArgumentMatchers.<DocumentChangedEvent.Type>anyObject(),
+            eq(editorGroupSynchronization));
   }
 
   @Test
@@ -244,7 +246,8 @@ public class EditorGroupSynchronizationImplTest {
     verify(document).replace(anyInt(), anyInt(), anyString());
     verify(documentEventBus)
         .addHandler(
-            Matchers.<DocumentChangedEvent.Type>anyObject(), eq(editorGroupSynchronization));
+            org.mockito.ArgumentMatchers.<DocumentChangedEvent.Type>anyObject(),
+            eq(editorGroupSynchronization));
   }
 
   @Test

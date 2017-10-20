@@ -16,6 +16,7 @@ import static org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent.Ev
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -105,7 +106,7 @@ public class MachineStatusHandlerTest {
     workspaceCaptor.getValue().apply(workspace);
 
     verify(appContext).setWorkspace(workspace);
-    verify(handler).onMachineCreating(Matchers.anyObject());
+    verify(handler).onMachineCreating(any());
   }
 
   @Test
@@ -119,7 +120,7 @@ public class MachineStatusHandlerTest {
     workspaceCaptor.getValue().apply(workspace);
 
     verify(appContext).setWorkspace(workspace);
-    verify(handler).onMachineCreating(Matchers.anyObject());
+    verify(handler).onMachineCreating(any());
   }
 
   @Test
@@ -133,7 +134,7 @@ public class MachineStatusHandlerTest {
     workspaceCaptor.getValue().apply(workspace);
 
     verify(appContext).setWorkspace(workspace);
-    verify(handler).onMachineRunning(Matchers.anyObject());
+    verify(handler).onMachineRunning(any());
   }
 
   @Test
@@ -147,7 +148,7 @@ public class MachineStatusHandlerTest {
     workspaceCaptor.getValue().apply(workspace);
 
     verify(appContext).setWorkspace(workspace);
-    verify(handler).onMachineRunning(Matchers.anyObject());
+    verify(handler).onMachineRunning(any());
   }
 
   @Test

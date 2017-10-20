@@ -197,7 +197,8 @@ public class JavaRefactoringRenameTest {
 
     mainCheckRenameRefactoring();
 
-    verify(refactoringUpdater).updateAfterRefactoring(Matchers.<List<ChangeInfo>>any());
+    verify(refactoringUpdater)
+        .updateAfterRefactoring(org.mockito.ArgumentMatchers.<List<ChangeInfo>>any());
     verify(eventBus).addHandler(FileEvent.TYPE, refactoringRename);
 
     verify(updateAfterRefactoringPromise).then(updateAfterRefactoringOperation.capture());
@@ -301,8 +302,8 @@ public class JavaRefactoringRenameTest {
             nullable(String.class),
             nullable(String.class),
             nullable(String.class),
-            Matchers.<ConfirmCallback>anyObject(),
-            Matchers.<CancelCallback>anyObject());
+            org.mockito.ArgumentMatchers.<ConfirmCallback>anyObject(),
+            org.mockito.ArgumentMatchers.<CancelCallback>anyObject());
     verify(confirmDialog).show();
   }
 
@@ -347,8 +348,8 @@ public class JavaRefactoringRenameTest {
             nullable(String.class),
             nullable(String.class),
             nullable(String.class),
-            Matchers.<ConfirmCallback>anyObject(),
-            Matchers.<CancelCallback>anyObject());
+            org.mockito.ArgumentMatchers.<ConfirmCallback>anyObject(),
+            org.mockito.ArgumentMatchers.<CancelCallback>anyObject());
     verify(confirmDialog).show();
   }
 

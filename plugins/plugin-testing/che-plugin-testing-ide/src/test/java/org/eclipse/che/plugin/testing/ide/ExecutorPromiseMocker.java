@@ -45,7 +45,7 @@ public class ExecutorPromiseMocker<T> extends PromiseMocker<T> {
                   return null;
                 }))
         .when(resolveFunction)
-        .apply(Matchers.<T>any());
+        .apply(org.mockito.ArgumentMatchers.<T>any());
 
     doAnswer(
             new FunctionAnswer<PromiseError, Void>(

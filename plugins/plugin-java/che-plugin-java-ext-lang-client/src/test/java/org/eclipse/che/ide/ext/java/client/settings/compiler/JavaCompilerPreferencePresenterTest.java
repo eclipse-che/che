@@ -98,9 +98,10 @@ public class JavaCompilerPreferencePresenterTest {
   @Before
   public void setUp() {
     when(preferencesManager.loadPreferences()).thenReturn(mapPromise);
-    when(mapPromise.then(Matchers.<Operation<Map<String, String>>>anyObject()))
+    when(mapPromise.then(org.mockito.ArgumentMatchers.<Operation<Map<String, String>>>anyObject()))
         .thenReturn(mapPromise);
-    when(propertyFactory.create(Matchers.<ErrorWarningsOptions>anyObject())).thenReturn(widget);
+    when(propertyFactory.create(org.mockito.ArgumentMatchers.<ErrorWarningsOptions>anyObject()))
+        .thenReturn(widget);
 
     presenter.setUpdateDelegate(dirtyStateListener);
   }
@@ -223,7 +224,8 @@ public class JavaCompilerPreferencePresenterTest {
     verify(mapPromise).then(operationCaptor.capture());
     operationCaptor.getValue().apply(getAllProperties());
 
-    verify(propertyFactory, times(18)).create(Matchers.<ErrorWarningsOptions>anyObject());
+    verify(propertyFactory, times(18))
+        .create(org.mockito.ArgumentMatchers.<ErrorWarningsOptions>anyObject());
     verify(widget, times(18)).selectPropertyValue(nullable(String.class));
     verify(widget, times(18)).setDelegate(presenter);
     verify(view, times(18)).addProperty(widget);

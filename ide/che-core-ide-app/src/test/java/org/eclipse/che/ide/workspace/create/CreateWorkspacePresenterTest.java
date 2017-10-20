@@ -59,6 +59,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -225,7 +226,7 @@ public class CreateWorkspacePresenterTest {
 
     when(view.getTags()).thenReturn(tags);
     when(recipeServiceClient.searchRecipes(
-            Matchers.<List<String>>anyObject(), anyString(), anyInt(), anyInt()))
+            ArgumentMatchers.<List<String>>anyObject(), anyString(), anyInt(), anyInt()))
         .thenReturn(recipesPromise);
 
     presenter.onTagsChanged(popupCallBack);
@@ -245,14 +246,15 @@ public class CreateWorkspacePresenterTest {
 
     verify(view).setVisibleTagsError(true);
     verify(popupCallBack).hidePopup();
-    verify(view, never()).showFoundByTagRecipes(Matchers.<List<RecipeDescriptor>>anyObject());
+    verify(view, never())
+        .showFoundByTagRecipes(ArgumentMatchers.<List<RecipeDescriptor>>anyObject());
   }
 
   @Test
   public void predefinedRecipesShouldBeFound() {
     presenter.onPredefinedRecipesClicked();
 
-    verify(view).showPredefinedRecipes(Matchers.<List<RecipeDescriptor>>anyObject());
+    verify(view).showPredefinedRecipes(ArgumentMatchers.<List<RecipeDescriptor>>anyObject());
   }
 
   @Test
@@ -263,10 +265,11 @@ public class CreateWorkspacePresenterTest {
   }
 
   private void clickOnCreateButton() {
-    when(workspaceClient.create(Matchers.<WorkspaceConfigDto>any(), nullable(String.class)))
+    when(workspaceClient.create(ArgumentMatchers.<WorkspaceConfigDto>any(), nullable(String.class)))
         .thenReturn(userWsPromise);
-    when(userWsPromise.then(Matchers.<Operation<WorkspaceDto>>any())).thenReturn(userWsPromise);
-    when(userWsPromise.catchError(Matchers.<Operation<PromiseError>>any()))
+    when(userWsPromise.then(ArgumentMatchers.<Operation<WorkspaceDto>>any()))
+        .thenReturn(userWsPromise);
+    when(userWsPromise.catchError(ArgumentMatchers.<Operation<PromiseError>>any()))
         .thenReturn(userWsPromise);
     when(recipeServiceClient.getAllRecipes()).thenReturn(recipesPromise);
 
@@ -275,7 +278,7 @@ public class CreateWorkspacePresenterTest {
     presenter.onCreateButtonClicked();
 
     verify(recipeServiceClient).getAllRecipes();
-    verify(recipesPromise).then(Matchers.<Operation<List<RecipeDescriptor>>>any());
+    verify(recipesPromise).then(ArgumentMatchers.<Operation<List<RecipeDescriptor>>>any());
 
     verify(view).show();
   }
@@ -328,6 +331,6 @@ public class CreateWorkspacePresenterTest {
 
     // noinspection ThrowableResultOfMethodCallIgnored
     verify(promiseError).getCause();
-    verify(componentCallback).onFailure(Matchers.<Exception>anyObject());
+    verify(componentCallback).onFailure(ArgumentMatchers.<Exception>anyObject());
   }
 }

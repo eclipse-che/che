@@ -91,15 +91,18 @@ public class AbstractPerspectivePersistenceTest {
     when(partStackPresenter.getPartStackState()).thenReturn(PartStack.State.NORMAL);
 
     when(controllerFactory.createController(
-            Matchers.<SplitLayoutPanel>anyObject(), Matchers.<SimplePanel>anyObject()))
+            org.mockito.ArgumentMatchers.<SplitLayoutPanel>anyObject(),
+            org.mockito.ArgumentMatchers.<SimplePanel>anyObject()))
         .thenReturn(workBenchController);
 
     when(partStackViewFactory.create(
-            Matchers.<PartStackView.TabPosition>anyObject(), Matchers.<FlowPanel>anyObject()))
+            org.mockito.ArgumentMatchers.<PartStackView.TabPosition>anyObject(),
+            org.mockito.ArgumentMatchers.<FlowPanel>anyObject()))
         .thenReturn(partStackView);
 
     when(stackPresenterFactory.create(
-            Matchers.<PartStackView>anyObject(), Matchers.<WorkBenchPartController>anyObject()))
+            org.mockito.ArgumentMatchers.<PartStackView>anyObject(),
+            org.mockito.ArgumentMatchers.<WorkBenchPartController>anyObject()))
         .thenReturn(partStackPresenter);
 
     perspective =
