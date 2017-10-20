@@ -27,7 +27,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.EditorWithAutoSave;
-import org.eclipse.che.ide.api.parts.ActivePartChangedEvent;
+import org.eclipse.che.ide.api.editor.events.EditorDirtyStateChangedEvent;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
@@ -56,7 +56,7 @@ public class EditorContentSynchronizerImplTest {
   @Mock private EditorInput editorInput;
   @Mock private VirtualFile virtualFile;
   @Mock private EditorGroupSynchronization editorGroupSynchronization;
-  @Mock private ActivePartChangedEvent activePartChangedEvent;
+  @Mock private EditorDirtyStateChangedEvent editorDirtyStateChangedEvent;
   private EditorPartPresenter activeEditor;
 
   @InjectMocks EditorContentSynchronizerImpl editorContentSynchronizer;
@@ -69,11 +69,12 @@ public class EditorContentSynchronizerImplTest {
     when(editorInput.getFile()).thenReturn(virtualFile);
     when(virtualFile.getLocation()).thenReturn(new Path(FILE_PATH));
     when(editorGroupSyncProvider.get()).thenReturn(editorGroupSynchronization);
+    when(editorDirtyStateChangedEvent.getEditor()).thenReturn(activeEditor);
   }
 
   @Test
   public void constructorShouldBeVerified() {
-    verify(eventBus, times(2)).addHandler(Matchers.<Event.Type<Object>>anyObject(), anyObject());
+    verify(eventBus, times(3)).addHandler(Matchers.<Event.Type<Object>>anyObject(), anyObject());
   }
 
   @Test
@@ -190,5 +191,51 @@ public class EditorContentSynchronizerImplTest {
 
     assertNull(oldGroup);
     assertNotNull(newGroup);
+  }
+
+  @Test
+  // we sync 'dirty' state of editors only for case when content of an active editor IS SAVED
+  public void shouldSkipEditorDirtyStateChangedEventWhenEditorIsDirty() {
+    when(activeEditor.isDirty()).thenReturn(true);
+    EditorPartPresenter openedEditor1 = mock(EditorPartPresenter.class);
+    when(openedEditor1.getEditorInput()).thenReturn(editorInput);
+    editorContentSynchronizer.trackEditor(openedEditor1);
+    editorContentSynchronizer.trackEditor(activeEditor);
+
+    editorContentSynchronizer.onEditorDirtyStateChanged(editorDirtyStateChangedEvent);
+
+    EditorGroupSynchronization group =
+        editorContentSynchronizer.editorGroups.get(new Path(FILE_PATH));
+    verify(group, never()).onEditorDirtyStateChanged(activeEditor);
+  }
+
+  @Test
+  public void shouldSkipEditorDirtyStateChangedEventWhenEditorIsNull() {
+    when(editorDirtyStateChangedEvent.getEditor()).thenReturn(null);
+    EditorPartPresenter openedEditor1 = mock(EditorPartPresenter.class);
+    when(openedEditor1.getEditorInput()).thenReturn(editorInput);
+    editorContentSynchronizer.trackEditor(openedEditor1);
+    editorContentSynchronizer.trackEditor(activeEditor);
+
+    editorContentSynchronizer.onEditorDirtyStateChanged(editorDirtyStateChangedEvent);
+
+    EditorGroupSynchronization group =
+        editorContentSynchronizer.editorGroups.get(new Path(FILE_PATH));
+    verify(group, never()).onEditorDirtyStateChanged(activeEditor);
+  }
+
+  @Test
+  public void shouldNotifyGroupWhenEditorContentHasSaved() {
+    when(activeEditor.isDirty()).thenReturn(false);
+    EditorPartPresenter openedEditor1 = mock(EditorPartPresenter.class);
+    when(openedEditor1.getEditorInput()).thenReturn(editorInput);
+    editorContentSynchronizer.trackEditor(openedEditor1);
+    editorContentSynchronizer.trackEditor(activeEditor);
+
+    editorContentSynchronizer.onEditorDirtyStateChanged(editorDirtyStateChangedEvent);
+
+    EditorGroupSynchronization group =
+        editorContentSynchronizer.editorGroups.get(new Path(FILE_PATH));
+    verify(group).onEditorDirtyStateChanged(activeEditor);
   }
 }
