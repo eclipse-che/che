@@ -20,11 +20,11 @@ import org.eclipse.che.selenium.core.UrlUtil;
 @Singleton
 public class CheTestIdeUrlProvider implements TestIdeUrlProvider {
   @Inject
-  @Named("sys.protocol")
+  @Named("che.protocol")
   private String protocol;
 
   @Inject
-  @Named("sys.host")
+  @Named("che.host")
   private String host;
 
   @Inject
