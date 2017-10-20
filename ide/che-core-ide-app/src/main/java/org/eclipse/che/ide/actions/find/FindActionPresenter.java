@@ -227,7 +227,8 @@ public class FindActionPresenter implements Presenter, FindActionView.ActionDele
       final char c = pattern.charAt(i);
       if (Character.isLetterOrDigit(c)
           || UnicodeUtils.regexpIdentifierOrWhitespace.test(String.valueOf(c))) {
-        // This logic allows to use uppercase letters only to catch the name like PDM for PsiDocumentManager
+        // This logic allows to use uppercase letters only to catch the name like PDM for
+        // PsiDocumentManager
         if (Character.isUpperCase(c) || Character.isDigit(c)) {
 
           if (!firstIdentifierLetter) {

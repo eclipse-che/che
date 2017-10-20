@@ -61,13 +61,13 @@ public interface IPreferenceStore {
   public static final long LONG_DEFAULT_DEFAULT = 0L;
 
   /** The default-default value for String preferences (<code>""</code>). */
-  public static final String STRING_DEFAULT_DEFAULT = ""; //$NON-NLS-1$
+  public static final String STRING_DEFAULT_DEFAULT = ""; // $NON-NLS-1$
 
   /** The string representation used for <code>true</code> (<code>"true"</code>). */
-  public static final String TRUE = "true"; //$NON-NLS-1$
+  public static final String TRUE = "true"; // $NON-NLS-1$
 
   /** The string representation used for <code>false</code> (<code>"false"</code>). */
-  public static final String FALSE = "false"; //$NON-NLS-1$
+  public static final String FALSE = "false"; // $NON-NLS-1$
 
   //    /**
   //     * <p>

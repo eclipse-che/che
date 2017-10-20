@@ -86,7 +86,7 @@ public class WorkspaceActivityManager {
                 activeWorkspaces.remove(event.getWorkspaceId());
                 break;
               default:
-                //do nothing
+                // do nothing
             }
           }
         };

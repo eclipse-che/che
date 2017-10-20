@@ -54,7 +54,7 @@ public class EditorRegistryImpl implements EditorRegistry {
 
   @Override
   public void registerDefaultEditor(@NotNull FileType fileType, @NotNull EditorProvider provider) {
-    //todo store default editor, add checks to ensure that default editor sets only one time
+    // todo store default editor, add checks to ensure that default editor sets only one time
     register(fileType, provider);
   }
 

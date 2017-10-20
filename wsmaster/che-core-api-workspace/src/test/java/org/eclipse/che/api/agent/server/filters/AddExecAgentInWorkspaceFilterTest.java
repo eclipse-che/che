@@ -52,10 +52,10 @@ import org.testng.annotations.Test;
 /** @author Alexander Garagatyi */
 @Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})
 public class AddExecAgentInWorkspaceFilterTest {
-  @SuppressWarnings("unused") //is declared for deploying by everrest-assured
+  @SuppressWarnings("unused") // is declared for deploying by everrest-assured
   private static final ApiExceptionMapper MAPPER = new ApiExceptionMapper();
 
-  @SuppressWarnings("unused") //is declared for deploying by everrest-assured
+  @SuppressWarnings("unused") // is declared for deploying by everrest-assured
   private CheJsonProvider jsonProvider = new CheJsonProvider(new HashSet<>());
 
   @Mock private WorkspaceService workspaceService;

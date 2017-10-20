@@ -54,6 +54,6 @@ public class DeleteArguments extends RefactoringArguments {
    * @since 3.2
    */
   public String toString() {
-    return "delete"; //$NON-NLS-1$
+    return "delete"; // $NON-NLS-1$
   }
 }

@@ -152,7 +152,7 @@ public class TypeMismatchSubProcessor {
       }
     }
 
-    boolean nullOrVoid = currBinding == null || "void".equals(currBinding.getName()); //$NON-NLS-1$
+    boolean nullOrVoid = currBinding == null || "void".equals(currBinding.getName()); // $NON-NLS-1$
 
     // change method return statement to actual type
     if (!nullOrVoid && parentNodeType == ASTNode.RETURN_STATEMENT) {
@@ -162,7 +162,7 @@ public class TypeMismatchSubProcessor {
 
         currBinding = Bindings.normalizeTypeBinding(currBinding);
         if (currBinding == null) {
-          currBinding = ast.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+          currBinding = ast.resolveWellKnownType("java.lang.Object"); // $NON-NLS-1$
         }
         if (currBinding.isWildcardType()) {
           currBinding = ASTResolving.normalizeWildcardType(currBinding, true, ast);
@@ -186,7 +186,7 @@ public class TypeMismatchSubProcessor {
         Type newReturnType = imports.addImport(currBinding, ast, importRewriteContext);
         rewrite.replace(methodDeclaration.getReturnType2(), newReturnType, null);
 
-        String returnKey = "return"; //$NON-NLS-1$
+        String returnKey = "return"; // $NON-NLS-1$
         proposal.addLinkedPosition(rewrite.track(newReturnType), true, returnKey);
         ITypeBinding[] typeSuggestions = ASTResolving.getRelaxingTypes(ast, currBinding);
         for (int i = 0; i < typeSuggestions.length; i++) {
@@ -199,7 +199,7 @@ public class TypeMismatchSubProcessor {
     if (!nullOrVoid && receiverNode != null) {
       currBinding = Bindings.normalizeTypeBinding(currBinding);
       if (currBinding == null) {
-        currBinding = ast.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+        currBinding = ast.resolveWellKnownType("java.lang.Object"); // $NON-NLS-1$
       }
       if (currBinding.isWildcardType()) {
         currBinding = ASTResolving.normalizeWildcardType(currBinding, true, ast);
@@ -224,7 +224,7 @@ public class TypeMismatchSubProcessor {
     if (castTypeBinding == ast.resolveWellKnownType("boolean")
         && currBinding != null
         && !currBinding.isPrimitive()
-        && !Bindings.isVoidType(currBinding)) { //$NON-NLS-1$
+        && !Bindings.isVoidType(currBinding)) { // $NON-NLS-1$
       String label = CorrectionMessages.TypeMismatchSubProcessor_insertnullcheck_description;
       Image image = JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
       ASTRewrite rewrite = ASTRewrite.create(astRoot.getAST());
@@ -304,7 +304,7 @@ public class TypeMismatchSubProcessor {
         && nodeToCast.getLocationInParent() == SingleMemberAnnotation.TYPE_NAME_PROPERTY) {
       declaringType = (ITypeBinding) callerBinding;
       callerBindingDecl =
-          Bindings.findMethodInType(declaringType, "value", (String[]) null); //$NON-NLS-1$
+          Bindings.findMethodInType(declaringType, "value", (String[]) null); // $NON-NLS-1$
       if (callerBindingDecl == null) {
         return;
       }
@@ -495,7 +495,7 @@ public class TypeMismatchSubProcessor {
 
       for (int i = 0; i < undeclaredExceptions.size(); i++) {
         changes[i + definedExceptions.length] =
-            new InsertDescription(undeclaredExceptions.get(i), ""); //$NON-NLS-1$
+            new InsertDescription(undeclaredExceptions.get(i), ""); // $NON-NLS-1$
       }
       IMethodBinding overriddenDecl = overridden.getMethodDeclaration();
       String[] args = {
@@ -549,7 +549,7 @@ public class TypeMismatchSubProcessor {
     } else {
       IMethodBinding iteratorMethod =
           Bindings.findMethodInHierarchy(
-              expressionBinding, "iterator", new String[0]); //$NON-NLS-1$
+              expressionBinding, "iterator", new String[0]); // $NON-NLS-1$
       if (iteratorMethod == null) {
         return;
       }

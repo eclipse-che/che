@@ -97,7 +97,8 @@ import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
       ASTNode first = fNodes.get(0);
       ASTNode candidate = first.getParent();
       if (candidate == null) return false;
-      // return invalid if the opening and closing parenthesis of the method signature is part of the node to be replaced
+      // return invalid if the opening and closing parenthesis of the method signature is part of
+      // the node to be replaced
       if (candidate.getNodeType() == ASTNode.METHOD_DECLARATION) return true;
       return false;
     }

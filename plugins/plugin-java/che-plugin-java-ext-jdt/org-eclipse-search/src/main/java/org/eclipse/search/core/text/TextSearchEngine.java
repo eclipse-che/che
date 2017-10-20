@@ -37,7 +37,7 @@ public abstract class TextSearchEngine {
    * @return the created {@link TextSearchEngine}.
    */
   public static TextSearchEngine create() {
-    return createDefault(); //SearchPlugin.getDefault().getTextSearchEngineRegistry().getPreferred();
+    return createDefault(); // SearchPlugin.getDefault().getTextSearchEngineRegistry().getPreferred();
   }
 
   /**

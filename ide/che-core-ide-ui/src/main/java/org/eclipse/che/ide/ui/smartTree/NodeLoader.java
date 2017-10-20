@@ -102,7 +102,7 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
       Node parent = event.getRequestedNode();
       tree.getView().onLoadChange(tree.getNodeDescriptor(parent), false);
 
-      //remove joint element if non-leaf node doesn't have any children
+      // remove joint element if non-leaf node doesn't have any children
       if (!parent.isLeaf() && event.getReceivedNodes().isEmpty()) {
         tree.getView().onJointChange(tree.getNodeDescriptor(parent), Tree.Joint.NONE);
       }
@@ -110,17 +110,17 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
       NodeDescriptor requested = tree.getNodeDescriptor(parent);
 
       if (requested == null) {
-        //smth happened, that requested node isn't registered in storage
+        // smth happened, that requested node isn't registered in storage
         Log.error(this.getClass(), "Requested node not found.");
         return;
       }
 
       requested.setLoading(false);
 
-      //search node which has been removed from server to remove them from the tree
+      // search node which has been removed from server to remove them from the tree
       List<NodeDescriptor> removedNodes = findRemovedNodes(requested, event.getReceivedNodes());
 
-      //now search new nodes to add then into the tree
+      // now search new nodes to add then into the tree
       List<Node> newNodes = findNewNodes(requested, event.getReceivedNodes());
 
       if (removedNodes.isEmpty() && newNodes.equals(event.getReceivedNodes())) {
@@ -137,7 +137,7 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
         }
       }
 
-      //Iterate on nested descendants to make additional load request
+      // Iterate on nested descendants to make additional load request
       if (childRequested.remove(parent)) {
         for (Node node : tree.getNodeStorage().getChildren(parent)) {
           if (tree.isExpanded(node)) {
@@ -287,7 +287,7 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
   }
 
   public boolean loadChildren(Node parent, boolean reloadExpandedChild) {
-    //we don't need to load children for leaf nodes
+    // we don't need to load children for leaf nodes
     if (parent.isLeaf()) {
       return false;
     }

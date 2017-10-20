@@ -54,8 +54,8 @@ public class RefactoringExecutionHelper {
 
     public void run(IProgressMonitor pm) throws CoreException {
       try {
-        pm.beginTask("", fForked && !fForkChangeExecution ? 7 : 11); //$NON-NLS-1$
-        pm.subTask(""); //$NON-NLS-1$
+        pm.beginTask("", fForked && !fForkChangeExecution ? 7 : 11); // $NON-NLS-1$
+        pm.subTask(""); // $NON-NLS-1$
 
         final RefactoringStatus status =
             fRefactoring.checkAllConditions(
@@ -85,7 +85,7 @@ public class RefactoringExecutionHelper {
 
         fPerformChangeOperation =
             new PerformChangeOperation(
-                fChange); //RefactoringUI.createUIAwareChangeOperation(fChange);
+                fChange); // RefactoringUI.createUIAwareChangeOperation(fChange);
         fPerformChangeOperation.setUndoManager(
             RefactoringCore.getUndoManager(), fRefactoring.getName());
         if (fRefactoring instanceof IScheduledRefactoring)
@@ -105,7 +105,8 @@ public class RefactoringExecutionHelper {
     //		 * @return <code>true</code> iff the operation should be cancelled
     //		 */
     //		private boolean showStatusDialog(RefactoringStatus status) {
-    //			Dialog dialog = RefactoringUI.createRefactoringStatusDialog(status, fParent, fRefactoring.getName(), false);
+    //			Dialog dialog = RefactoringUI.createRefactoringStatusDialog(status, fParent,
+    // fRefactoring.getName(), false);
     //			return dialog.open() == IDialogConstants.CANCEL_ID;
     //		}
   }
@@ -190,7 +191,8 @@ public class RefactoringExecutionHelper {
           ResourcesPlugin.getWorkspace().run(op.fPerformChangeOperation, new NullProgressMonitor());
         }
         //				if (fork && !forkChangeExecution && op.fPerformChangeOperation != null)
-        //					fExecContext.run(false, false, new WorkbenchRunnableAdapter(op.fPerformChangeOperation, rule, true));
+        //					fExecContext.run(false, false, new
+        // WorkbenchRunnableAdapter(op.fPerformChangeOperation, rule, true));
 
         if (op.fPerformChangeOperation != null) {
           RefactoringStatus validationStatus = op.fPerformChangeOperation.getValidationStatus();

@@ -23,7 +23,7 @@ import org.eclipse.jface.text.Region;
 
 public class TempDeclarationFinder {
 
-  //no instances
+  // no instances
   private TempDeclarationFinder() {}
 
   /**
@@ -69,7 +69,7 @@ public class TempDeclarationFinder {
       super(Selection.createFromStartLength(selectionOffset, selectionLength), true);
     }
 
-    //overridden
+    // overridden
     @Override
     public boolean visitNode(ASTNode node) {
       if (node instanceof VariableDeclaration)
@@ -101,7 +101,7 @@ public class TempDeclarationFinder {
       }
     }
 
-    //overridden
+    // overridden
     @Override
     public ASTNode[] getSelectedNodes() {
       if (fNode != null) return new ASTNode[] {fNode};

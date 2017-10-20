@@ -190,8 +190,8 @@ abstract class DtoImpl {
     for (Class<?> superInterface : dto.getInterfaces()) {
       if (!superInterface.isAnnotationPresent(DTO.class)) {
         for (Method method : superInterface.getDeclaredMethods()) {
-          //when method is already present in map then child interface
-          //overrides it, which means that it should not be put into getters
+          // when method is already present in map then child interface
+          // overrides it, which means that it should not be put into getters
           if (isDtoGetter(method) && !getters.containsKey(method.getName())) {
             getters.put(method.getName(), method);
           }

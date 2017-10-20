@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.constant.TestBrowser;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -35,6 +36,8 @@ import org.slf4j.LoggerFactory;
  * @author Anatolii Bazko
  */
 public abstract class PageObjectsInjector {
+
+  private static final Logger LOG = LoggerFactory.getLogger(PageObjectsInjector.class);
 
   @Inject
   @Named("sys.browser")
@@ -64,19 +67,11 @@ public abstract class PageObjectsInjector {
       container.putAll(getDependenciesWithWebdriver(seleniumWebDriver));
 
       for (Field f : toInject.get(poIndex)) {
-        LoggerFactory.getLogger(this.getClass())
-            .info("Inject field {} into test {}.", f, testInstance);
-
         try {
           injectField(f, testInstance, container, injector);
         } catch (Exception e) {
-          LoggerFactory.getLogger(this.getClass())
-              .error(
-                  format(
-                      "Error of injection member '%s' into test '%s'. %s",
-                      f, testInstance, e.getMessage()),
-                  e);
-          throw e;
+          throw new RuntimeException(
+              format("Error of injection member '%s' into test '%s'.", f, testInstance), e);
         }
       }
     }

@@ -30,7 +30,7 @@ public class CommandLineOutputProcessor implements LineConsumer {
 
   @Override
   public void close() throws IOException {
-    //nothing to close
+    // nothing to close
   }
 
   public List<String> getOutput() {

@@ -188,7 +188,7 @@ public abstract class RefactoringTest extends BaseTest {
 
   private void refreshFromLocal() throws CoreException {
     if (getRoot().exists()) getRoot().getResource().refreshLocal(IResource.DEPTH_INFINITE, null);
-    else if (getPackageP().exists()) //don't refresh package if root already refreshed
+    else if (getPackageP().exists()) // don't refresh package if root already refreshed
     getPackageP().getResource().refreshLocal(IResource.DEPTH_INFINITE, null);
   }
 
@@ -459,7 +459,7 @@ public abstract class RefactoringTest extends BaseTest {
         "\n" + getClass().getName() + "::" + /* getName() + */ " disabled (" + explanation + ")");
   }
 
-  //-----------------------
+  // -----------------------
   public static InputStream getStream(String content) {
     return new ByteArrayInputStream(content.getBytes());
   }

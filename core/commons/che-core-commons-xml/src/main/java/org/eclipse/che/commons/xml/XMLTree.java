@@ -158,7 +158,8 @@ public final class XMLTree {
   /** Factories configuration. */
   static {
     try {
-      // Disable doctype declaration to avoid: XML Entity Expansion injection, XML External Entity Injection
+      // Disable doctype declaration to avoid: XML Entity Expansion injection, XML External Entity
+      // Injection
       DOCUMENT_BUILDER_FACTORY.setFeature(
           "http://apache.org/xml/features/disallow-doctype-decl", true);
       // Force parser to use secure settings
@@ -171,7 +172,8 @@ public final class XMLTree {
       // Force xpath factory to use secure settings
       XPATH_FACTORY.setFeature(FEATURE_SECURE_PROCESSING, true);
 
-      // Disable DTD support at all to avoid: XML Entity Expansion injection, XML External Entity Injection
+      // Disable DTD support at all to avoid: XML Entity Expansion injection, XML External Entity
+      // Injection
       XML_INPUT_FACTORY.setProperty(SUPPORT_DTD, false);
       // Disable usage of external entities to avoid: XML External Entity Injection
       XML_INPUT_FACTORY.setProperty(IS_SUPPORTING_EXTERNAL_ENTITIES, false);
@@ -192,9 +194,9 @@ public final class XMLTree {
     elements = new LinkedList<>();
     namespaces = newHashMapWithExpectedSize(EXPECTED_NAMESPACES_SIZE);
     this.xml = normalizeLineEndings(xml);
-    //reason: parser is going to replace all '\r\n' sequences with single '\n'
-    //which will affect elements position in source xml and produce incorrect XMLTree behaviour
-    //it comes from spec http://www.w3.org/TR/2004/REC-xml11-20040204/
+    // reason: parser is going to replace all '\r\n' sequences with single '\n'
+    // which will affect elements position in source xml and produce incorrect XMLTree behaviour
+    // it comes from spec http://www.w3.org/TR/2004/REC-xml11-20040204/
     document = parseQuietly(this.xml);
     constructTreeQuietly();
   }
@@ -401,28 +403,28 @@ public final class XMLTree {
   private void constructTree() throws XMLStreamException {
     final XMLStreamReader reader = newXMLStreamReader();
     final LinkedList<Element> stack = new LinkedList<>();
-    //before element open tag index
+    // before element open tag index
     int beforeStart = rootStart(xml) - 1;
-    //used to associate each element with document node
+    // used to associate each element with document node
     Node node = document.getDocumentElement();
-    //used to hold previous reader event
+    // used to hold previous reader event
     int prevEvent = START_DOCUMENT;
     while (reader.hasNext()) {
       switch (reader.next()) {
         case START_ELEMENT:
           final Element newElement = new Element(this);
           newElement.start = new Segment(beforeStart + 1, elementRight(beforeStart + 1, reader));
-          //if new node is not xml root - set up relationships
+          // if new node is not xml root - set up relationships
           if (!stack.isEmpty()) {
             node = deepNext(node, true);
           }
-          //connect node with element
+          // connect node with element
           node.setUserData("element", newElement, null);
 
           newElement.delegate = safeCast(node);
-          //let next event know about its start
+          // let next event know about its start
           beforeStart = newElement.start.right;
-          //if element has declared namespaces register it
+          // if element has declared namespaces register it
           putNamespaces(reader);
           stack.push(newElement);
           break;
@@ -433,14 +435,14 @@ public final class XMLTree {
           beforeStart = element.end.right;
           break;
         case CHARACTERS:
-          //characters event may be invoked 2 or more times
-          //on the element text, but related node is single text node
-          //so the only segment should be created for it
+          // characters event may be invoked 2 or more times
+          // on the element text, but related node is single text node
+          // so the only segment should be created for it
           if (prevEvent == CHARACTERS) continue;
 
           final Element current = stack.peek();
           if (current.text == null) {
-            //TODO replace with array list as we know current node 'text nodes' count
+            // TODO replace with array list as we know current node 'text nodes' count
             current.text = new LinkedList<>();
           }
 
@@ -462,7 +464,7 @@ public final class XMLTree {
           }
           break;
         default:
-          //DO NOTHING
+          // DO NOTHING
       }
       prevEvent = reader.getEventType();
     }
@@ -476,7 +478,7 @@ public final class XMLTree {
         && (node.getNodeType() == TEXT_NODE || node.getNodeType() == CDATA_SECTION_NODE)) {
       length += node.getTextContent().length();
       if (node.getNodeType() == CDATA_SECTION_NODE) {
-        length += 12; //<![CDATA[]]> - 12
+        length += 12; // <![CDATA[]]> - 12
       }
       node = node.getNextSibling();
     }
@@ -590,16 +592,16 @@ public final class XMLTree {
    * otherwise only first text segment will be used for update, other text segments will be removed.
    */
   void updateText(Element target) {
-    //it may be null when target element doesn't contain
-    //text <element></element> so CHARACTERS event was not processed
+    // it may be null when target element doesn't contain
+    // text <element></element> so CHARACTERS event was not processed
     if (target.text == null) {
       target.text = new LinkedList<>();
-      //updateSegmentContent will set up right bound
+      // updateSegmentContent will set up right bound
       target.text.add(new Segment(target.start.right + 1, target.start.right));
     }
     final Iterator<Segment> segIt = target.text.iterator();
     final Segment first = segIt.next();
-    //removing all segments instead of first
+    // removing all segments instead of first
     while (segIt.hasNext()) {
       final Segment removal = segIt.next();
       segIt.remove();
@@ -618,13 +620,13 @@ public final class XMLTree {
     final int level = level(parent) + 1;
     final int lengthBefore = xml.length;
     final int insertHere = lastIndexOf(xml, '>', parent.end.left) + 1;
-    //inserting new element bytes to tree bytes
+    // inserting new element bytes to tree bytes
     xml = insertInto(xml, insertHere, '\n' + tabulate(newElement.asString(), level));
-    //shift existing segments which are after parent start
+    // shift existing segments which are after parent start
     shiftSegments(insertHere, xml.length - lengthBefore);
-    //create and set up start, end, text segments to created element
+    // create and set up start, end, text segments to created element
     applySegments(newElement, relatedToNew, insertHere - 1, level);
-    //let tree know about added element
+    // let tree know about added element
     registerElement(relatedToNew);
   }
 
@@ -632,14 +634,14 @@ public final class XMLTree {
   void insertAfter(NewElement newElement, Element relatedToNew, Element refElement) {
     final int level = level(refElement);
     final int lengthBefore = xml.length;
-    //inserting new element bytes to tree bytes
+    // inserting new element bytes to tree bytes
     xml = insertInto(xml, refElement.end.right + 1, '\n' + tabulate(newElement.asString(), level));
-    //shift existing segments which are after parent start
+    // shift existing segments which are after parent start
     shiftSegments(refElement.end.right, xml.length - lengthBefore);
-    //create and set up start, end, text segments to created element
-    //+1 because of \n
+    // create and set up start, end, text segments to created element
+    // +1 because of \n
     applySegments(newElement, relatedToNew, refElement.end.right, level);
-    //let tree know about inserted element
+    // let tree know about inserted element
     registerElement(relatedToNew);
   }
 
@@ -651,13 +653,13 @@ public final class XMLTree {
   void insertAfterParent(NewElement newElement, Element relatedToNew, Element parent) {
     final int level = level(parent) + 1;
     final int lengthBefore = xml.length;
-    //inserting after parent
+    // inserting after parent
     xml = insertInto(xml, parent.start.right + 1, '\n' + tabulate(newElement.asString(), level));
-    //shift existing segments which are after parent start
+    // shift existing segments which are after parent start
     shiftSegments(parent.start.right, xml.length - lengthBefore);
-    //create and set up start, end, text segments to created element
+    // create and set up start, end, text segments to created element
     applySegments(newElement, relatedToNew, parent.start.right, level);
-    //let tree know about inserted element
+    // let tree know about inserted element
     registerElement(relatedToNew);
   }
 
@@ -687,25 +689,25 @@ public final class XMLTree {
   void removeElement(Element element) {
     final int leftBound = lastIndexOf(xml, '>', element.start.left) + 1;
     final int lengthBefore = xml.length;
-    //if text segment before removal element
-    //exists it should go to hell with removal
+    // if text segment before removal element
+    // exists it should go to hell with removal
     if (leftBound != element.start.left - 1) {
       removeSegmentFromElement(element.getParent(), leftBound);
     }
-    //replacing content with nothing
+    // replacing content with nothing
     xml = insertBetween(xml, leftBound, element.end.right, "");
-    //shift all elements which are right from removed element
+    // shift all elements which are right from removed element
     shiftSegments(element.end.right, xml.length - lengthBefore);
-    //let tree know that element is not a family member
+    // let tree know that element is not a family member
     unregisterElement(element);
   }
 
   /** Inserts new attribute value content to tree bytes */
   void insertAttribute(NewAttribute attribute, Element owner) {
     final int len = xml.length;
-    //inserting new attribute content
+    // inserting new attribute content
     xml = insertInto(xml, owner.start.right, ' ' + attribute.asString());
-    //shift all elements which are right from removed element
+    // shift all elements which are right from removed element
     shiftSegments(owner.start.left - 1, xml.length - len);
   }
 
@@ -714,18 +716,18 @@ public final class XMLTree {
     final Element element = attribute.getElement();
     final int lengthBefore = xml.length;
     final Segment segment = attributeSegment(attribute);
-    //replacing attribute segment with nothing
+    // replacing attribute segment with nothing
     xml = insertBetween(xml, segment.left - 1, segment.right, "");
-    //shift all elements which are left from owner left
+    // shift all elements which are left from owner left
     shiftSegments(element.start.left, xml.length - lengthBefore);
   }
 
-  //TODO should it be public?
+  // TODO should it be public?
   void putNamespace(String prefix, String uri) {
     namespaces.put(prefix, uri);
   }
 
-  //TODO should it be public?
+  // TODO should it be public?
   String getNamespaceUri(String prefix) {
     final String uri = namespaces.get(prefix);
     return uri == null ? XML_NS_URI : uri;
@@ -850,32 +852,32 @@ public final class XMLTree {
     //
     //       | prevElementCloseRight
     //       v
-    //<parent>\n   *<child>...
+    // <parent>\n   *<child>...
     // +1 because of '\n'
     final int beforeOpenLeft = 1 + prevElementCloseRight + levelTextLength;
 
-    //we should add text segment which
-    //is before new element to the parent text segments and start to track it
+    // we should add text segment which
+    // is before new element to the parent text segments and start to track it
     final Element parent = relatedToNew.getParent();
     if (parent.text == null) {
       parent.text = new LinkedList<>();
     }
     parent.text.add(new Segment(prevElementCloseRight + 1, beforeOpenLeft));
 
-    //pos of open tag right '>'
+    // pos of open tag right '>'
     final int openRight = beforeOpenLeft + openTagLength(newElement);
 
     relatedToNew.start = new Segment(beforeOpenLeft + 1, openRight);
-    //if element is void it doesn't have children and text
-    //and it has same start and end so we can initialize
-    //only start and end segments
+    // if element is void it doesn't have children and text
+    // and it has same start and end so we can initialize
+    // only start and end segments
     if (relatedToNew.isVoid()) {
       relatedToNew.end = relatedToNew.start;
       return openRight;
     }
-    //if element has children it doesn't have text instead of
-    //whitespaces, so all what we need - detect element close tag segment
-    //to do so we need to map segments for all children first
+    // if element has children it doesn't have text instead of
+    // whitespaces, so all what we need - detect element close tag segment
+    // to do so we need to map segments for all children first
     int childRight = openRight;
     if (newElement.hasChildren()) {
 
@@ -888,9 +890,9 @@ public final class XMLTree {
     } else {
       relatedToNew.text = new LinkedList<>();
     }
-    //before element close tag pos
+    // before element close tag pos
     //                        +
-    //<parent>\n    <child>text</child>
+    // <parent>\n    <child>text</child>
     int beforeCloseLeft;
     if (newElement.hasChildren()) {
       beforeCloseLeft = childRight + levelTextLength + 1;
@@ -905,12 +907,12 @@ public final class XMLTree {
 
   private byte[] normalizeLineEndings(byte[] src) {
     final String separator = System.getProperty("line.separator");
-    //replacing all \r\n with \n
+    // replacing all \r\n with \n
     if (separator.equals("\r\n")) {
       src = replaceAll(src, "\r\n".getBytes(), "\n".getBytes());
     }
-    //replacing all \r with \n to prevent combination of \r\n which was created after
-    //\r\n replacement, i.e. content \r\r\n after first replacement will be \r\n which is not okay
+    // replacing all \r with \n to prevent combination of \r\n which was created after
+    // \r\n replacement, i.e. content \r\r\n after first replacement will be \r\n which is not okay
     return replaceAll(src, "\r".getBytes(), "\n".getBytes());
   }
 

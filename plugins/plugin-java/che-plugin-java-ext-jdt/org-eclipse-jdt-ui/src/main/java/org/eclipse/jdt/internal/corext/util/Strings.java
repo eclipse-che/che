@@ -34,12 +34,12 @@ public class Strings {
   public static final boolean USE_TEXT_PROCESSOR;
 
   static {
-    String testString = "args : String[]"; //$NON-NLS-1$
+    String testString = "args : String[]"; // $NON-NLS-1$
     USE_TEXT_PROCESSOR = testString != TextProcessor.process(testString);
   }
 
   private static final String JAVA_ELEMENT_DELIMITERS =
-      TextProcessor.getDefaultDelimiters() + "<>(),?{} "; //$NON-NLS-1$
+      TextProcessor.getDefaultDelimiters() + "<>(),?{} "; // $NON-NLS-1$
 
   /**
    * Adds special marks so that that the given styled string is readable in a BiDi environment.
@@ -258,7 +258,7 @@ public class Strings {
       }
     }
     if (start == 0) return line;
-    else if (start == size) return ""; //$NON-NLS-1$
+    else if (start == size) return ""; // $NON-NLS-1$
     else return line.substring(start);
   }
 
@@ -274,7 +274,7 @@ public class Strings {
       }
     }
     if (end == size) return line;
-    else if (end == 0) return ""; //$NON-NLS-1$
+    else if (end == 0) return ""; // $NON-NLS-1$
     else return line.substring(0, end);
   }
 
@@ -484,7 +484,7 @@ public class Strings {
 
   private static int findLastNonEmptyLineIndex(String[] sourceLines) {
     for (int i = sourceLines.length - 1; i >= 0; i--) {
-      if (!sourceLines[i].trim().equals("")) //$NON-NLS-1$
+      if (!sourceLines[i].trim().equals("")) // $NON-NLS-1$
       return i;
     }
     return -1;
@@ -571,7 +571,7 @@ public class Strings {
       }
       return result.toString();
     } catch (BadLocationException e) {
-      Assert.isTrue(false, "Can not happend"); //$NON-NLS-1$
+      Assert.isTrue(false, "Can not happend"); // $NON-NLS-1$
       return null;
     }
   }
@@ -612,7 +612,7 @@ public class Strings {
       }
     }
     if (end == size) return text;
-    else if (end == 0) return ""; //$NON-NLS-1$
+    else if (end == 0) return ""; // $NON-NLS-1$
     else return text.substring(0, end);
   }
 

@@ -131,7 +131,7 @@ public class DefaultPresentationRenderer<N extends Node> extends AbstractPresent
     textElement.setInnerText(nullToEmpty(presentation.getPresentableText()));
     textElement.setAttribute("style", presentation.getPresentableTextCss());
 
-    //TODO support text colorization
+    // TODO support text colorization
 
     return textElement;
   }
@@ -156,7 +156,7 @@ public class DefaultPresentationRenderer<N extends Node> extends AbstractPresent
     textElement.setInnerText(sb.toString());
     textElement.setAttribute("style", presentation.getInfoTextCss());
 
-    //TODO support text colorization
+    // TODO support text colorization
 
     return textElement;
   }

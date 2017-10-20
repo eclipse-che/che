@@ -61,7 +61,7 @@ public class OpenLocationPresenter extends BasePresenter
     view.setTitle(title);
   }
 
-  //TODO maybe we should use some generic data object not a DTO
+  // TODO maybe we should use some generic data object not a DTO
   public void openLocation(Promise<List<Location>> promise) {
     promise
         .then(

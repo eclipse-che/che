@@ -61,7 +61,7 @@ public abstract class AbstractJavaCompletionProposal
   static final class ReferenceTracker {
 
     /** The reference position category name. */
-    private static final String CATEGORY = "reference_position"; //$NON-NLS-1$
+    private static final String CATEGORY = "reference_position"; // $NON-NLS-1$
     /** The position updater of the reference position. */
     private final IPositionUpdater fPositionUpdater = new DefaultPositionUpdater(CATEGORY);
     /** The reference position. */
@@ -119,10 +119,12 @@ public abstract class AbstractJavaCompletionProposal
   //        }
   //
   //        /*
-  //         * @see org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitPolicy#doExit(org.eclipse.jdt.internal.ui.text.link
+  //         * @see
+  // org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitPolicy#doExit(org.eclipse.jdt.internal.ui.text.link
   //         * .LinkedPositionManager, org.eclipse.swt.events.VerifyEvent, int, int)
   //         */
-  //        public ExitFlags doExit(LinkedModeModel environment, VerifyEvent event, int offset, int length) {
+  //        public ExitFlags doExit(LinkedModeModel environment, VerifyEvent event, int offset, int
+  // length) {
   //
   //            if (event.character == fExitCharacter) {
   //                if (environment.anyPositionContains(offset))
@@ -137,7 +139,8 @@ public abstract class AbstractJavaCompletionProposal
   //                case SWT.CR:
   //                    // 1) when entering an anonymous class as a parameter, we don't want
   //                    // to jump after the parenthesis when return is pressed
-  //                    // 2) after auto completion of methods without parameters, exit from linked mode when return is pressed
+  //                    // 2) after auto completion of methods without parameters, exit from linked
+  // mode when return is pressed
   //                    if (offset > 0) {
   //                        try {
   //                            char prevOffsetChar = fDocument.getChar(offset - 1);
@@ -322,13 +325,14 @@ public abstract class AbstractJavaCompletionProposal
       if (isSmartTrigger || trigger == (char) 0) {
         int referenceOffset = getReplacementOffset() + getReplacementLength();
         replacement = getReplacementString();
-        //add ; to the replacement string if replacement string do not end with a semicolon and the document do not already have
+        // add ; to the replacement string if replacement string do not end with a semicolon and the
+        // document do not already have
         // a ; at the reference offset.
         if (trigger == ';'
             && replacement.charAt(replacement.length() - 1) != ';'
             && (referenceOffset >= document.getLength()
                 || document.getChar(referenceOffset) != ';')) {
-          replacement = replacement + ";"; //$NON-NLS-1$
+          replacement = replacement + ";"; // $NON-NLS-1$
           setReplacementString(replacement);
         }
       } else {
@@ -338,7 +342,8 @@ public abstract class AbstractJavaCompletionProposal
         if ((getCursorPosition() > 0
             && getCursorPosition() <= buffer.length()
             && buffer.charAt(getCursorPosition() - 1) != trigger)) {
-          // insert trigger ';' for methods with parameter at the end of the replacement string and not at the cursor position.
+          // insert trigger ';' for methods with parameter at the end of the replacement string and
+          // not at the cursor position.
           int length = getReplacementString().length();
           if (trigger == ';' && getCursorPosition() != length) {
             if (buffer.charAt(length - 1) != trigger) {
@@ -369,7 +374,7 @@ public abstract class AbstractJavaCompletionProposal
         // avoid inserting redundant semicolon when smart insert is enabled.
         if (!(trigger == ';'
             && (replacement.endsWith(";")
-                || document.getChar(referenceOffset) == ';'))) { //$NON-NLS-1$
+                || document.getChar(referenceOffset) == ';'))) { // $NON-NLS-1$
           handleSmartTrigger(document, trigger, referenceOffset);
         }
       }
@@ -389,7 +394,8 @@ public abstract class AbstractJavaCompletionProposal
    */
   protected LazyJavaCompletionProposal createRequiredTypeCompletionProposal(
       CompletionProposal completionProposal, JavaContentAssistInvocationContext invocationContext) {
-    //        if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES))
+    //        if
+    // (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES))
     return (LazyJavaCompletionProposal)
         new FillArgumentNamesCompletionProposalCollector(invocationContext)
             .createJavaCompletionProposal(completionProposal);
@@ -445,7 +451,7 @@ public abstract class AbstractJavaCompletionProposal
           document.replace(offset, 0, String.valueOf(trigger));
           setCursorPosition(getCursorPosition() + 1);
           if (trigger == '(' && autocloseBrackets()) {
-            document.replace(getReplacementOffset() + getCursorPosition(), 0, ")"); //$NON-NLS-1$
+            document.replace(getReplacementOffset() + getCursorPosition(), 0, ")"); // $NON-NLS-1$
             //						setUpLinkedMode(document, ')');
           }
         } catch (BadLocationException x) {
@@ -523,7 +529,7 @@ public abstract class AbstractJavaCompletionProposal
    */
   public String getDisplayString() {
     if (fDisplayString != null) return fDisplayString.getString();
-    return ""; //$NON-NLS-1$
+    return ""; // $NON-NLS-1$
   }
 
   /*
@@ -550,11 +556,13 @@ public abstract class AbstractJavaCompletionProposal
         try {
           element = getProposalInfo().getJavaElement();
           if (element instanceof IMember) {
-            //TODO
-            //						String base= JavaDocLocations.getBaseURL(element, ((IMember)element).isBinary());
+            // TODO
+            //						String base= JavaDocLocations.getBaseURL(element,
+            // ((IMember)element).isBinary());
             //						if (base != null) {
             //							int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
-            //							buffer.insert(endHeadIdx, "\n<base href='" + base + "'>\n"); //$NON-NLS-1$ //$NON-NLS-2$
+            //							buffer.insert(endHeadIdx, "\n<base href='" + base + "'>\n"); //$NON-NLS-1$
+            // //$NON-NLS-2$
             //						}
           }
         } catch (JavaModelException e) {
@@ -607,7 +615,8 @@ public abstract class AbstractJavaCompletionProposal
     //		}
     //		String css= fgCSSStyles;
     //		if (css != null) {
-    //			FontData fontData= JFaceResources.getFontRegistry().getFontData(PreferenceConstants.APPEARANCE_JAVADOC_FONT)[0];
+    //			FontData fontData=
+    // JFaceResources.getFontRegistry().getFontData(PreferenceConstants.APPEARANCE_JAVADOC_FONT)[0];
     //			css= HTMLPrinter.convertTopLevelFont(css, fontData);
     //		}
     //		return css;
@@ -820,7 +829,7 @@ public abstract class AbstractJavaCompletionProposal
       if (length > 0) return document.get(getReplacementOffset(), length);
     } catch (BadLocationException x) {
     }
-    return ""; //$NON-NLS-1$
+    return ""; // $NON-NLS-1$
   }
 
   /**
@@ -895,14 +904,16 @@ public abstract class AbstractJavaCompletionProposal
 
   //	private static Color getForegroundColor() {
   //		IPreferenceStore preference= JavaPlugin.getDefault().getPreferenceStore();
-  //		RGB rgb= PreferenceConverter.getColor(preference, PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND);
+  //		RGB rgb= PreferenceConverter.getColor(preference,
+  // PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND);
   //		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
   //		return textTools.getColorManager().getColor(rgb);
   //	}
   //
   //	private static Color getBackgroundColor() {
   //		IPreferenceStore preference= JavaPlugin.getDefault().getPreferenceStore();
-  //		RGB rgb= PreferenceConverter.getColor(preference, PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND);
+  //		RGB rgb= PreferenceConverter.getColor(preference,
+  // PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND);
   //		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
   //		return textTools.getColorManager().getColor(rgb);
   //	}
@@ -912,7 +923,8 @@ public abstract class AbstractJavaCompletionProposal
   //			if (viewer instanceof ITextViewerExtension2) {
   //				// attempts to reduce the redraw area
   //				ITextViewerExtension2 viewer2= (ITextViewerExtension2)viewer;
-  //				viewer2.invalidateTextPresentation(fRememberedStyleRange.start, fRememberedStyleRange.length);
+  //				viewer2.invalidateTextPresentation(fRememberedStyleRange.start,
+  // fRememberedStyleRange.length);
   //			} else
   //				viewer.invalidateTextPresentation();
   //		}
@@ -1013,7 +1025,8 @@ public abstract class AbstractJavaCompletionProposal
     //				if (fTextPresentationListener == null) {
     //					fTextPresentationListener= new ITextPresentationListener() {
     //						/* (non-Javadoc)
-    //						 * @see org.eclipse.jface.text.ITextPresentationListener#applyTextPresentation(org.eclipse.jface.text.TextPresentation)
+    //						 * @see
+    // org.eclipse.jface.text.ITextPresentationListener#applyTextPresentation(org.eclipse.jface.text.TextPresentation)
     //						 */
     //						public void applyTextPresentation(TextPresentation textPresentation) {
     //							fRememberedStyleRange= createStyleRange(viewer);
@@ -1044,7 +1057,8 @@ public abstract class AbstractJavaCompletionProposal
   }
   //
   //	/*
-  //	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getInformationControlCreator()
+  //	 * @see
+  // org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getInformationControlCreator()
   //	 */
   //	public IInformationControlCreator getInformationControlCreator() {
   //		Shell shell= JavaPlugin.getActiveWorkbenchShell();
@@ -1056,7 +1070,8 @@ public abstract class AbstractJavaCompletionProposal
   //			 * FIXME: Take control creators (and link handling) out of JavadocHover,
   //			 * see https://bugs.eclipse.org/bugs/show_bug.cgi?id=232024
   //			 */
-  //			JavadocHover.PresenterControlCreator presenterControlCreator= new JavadocHover.PresenterControlCreator(getSite());
+  //			JavadocHover.PresenterControlCreator presenterControlCreator= new
+  // JavadocHover.PresenterControlCreator(getSite());
   //			fCreator= new JavadocHover.HoverControlCreator(presenterControlCreator, true);
   //		}
   //		return fCreator;

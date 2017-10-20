@@ -24,7 +24,7 @@ public class MavenProjectGeneratorTest {
 
   @Before
   public void setup() throws Exception {
-    //VirtualFile mockFile = Mockito.mock(VirtualFile.class);
+    // VirtualFile mockFile = Mockito.mock(VirtualFile.class);
     //        FolderEntry folderEntry = new FolderEntry(Mockito.anyString(), mockFile);
 
     GeneratorStrategy generatorStrategy = Mockito.mock(GeneratorStrategy.class);

@@ -49,7 +49,8 @@ public class FileEntry extends VirtualFileEntry {
     try {
       return getVirtualFile().getContentAsBytes();
     } catch (ForbiddenException e) {
-      // A ForbiddenException might be thrown if backend VirtualFile isn't regular file but folder. This isn't expected here.
+      // A ForbiddenException might be thrown if backend VirtualFile isn't regular file but folder.
+      // This isn't expected here.
       throw new IllegalStateException(e.getMessage(), e);
     }
   }
@@ -58,7 +59,8 @@ public class FileEntry extends VirtualFileEntry {
     try {
       return getVirtualFile().getContent();
     } catch (ForbiddenException e) {
-      // A ForbiddenException might be thrown if backend VirtualFile isn't regular file but folder. This isn't expected here.
+      // A ForbiddenException might be thrown if backend VirtualFile isn't regular file but folder.
+      // This isn't expected here.
       throw new IllegalStateException(e.getMessage(), e);
     }
   }

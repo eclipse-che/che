@@ -74,7 +74,8 @@ public class ApiEndpointAccessibilityChecker {
             + "The Che server will stop this workspace after a short timeout. "
             + "You can get help by posting your config, stacktrace and workspace /etc/hosts below as a GitHub issue.");
 
-    // content of /etc/hosts file may provide clues on why the connection failed, e.g. how che-host is resolved
+    // content of /etc/hosts file may provide clues on why the connection failed, e.g. how che-host
+    // is resolved
     try {
       LOG.info(
           "Workspace /etc/hosts: "

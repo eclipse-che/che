@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import org.eclipse.che.plugin.openshift.client.exception.OpenShiftException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,6 +68,8 @@ public class OpenShiftPvcHelper {
   private final String jobImage;
   private final String jobMemoryLimit;
 
+  @Inject private OpenshiftWorkspaceEnvironmentProvider openshiftUserAccountProvider;
+
   protected enum Command {
     REMOVE,
     MAKE
@@ -93,6 +96,7 @@ public class OpenShiftPvcHelper {
    *     create/delete.
    * @return true if Pod terminates with phase "Succeeded" or mkdir command issued for already
    *     created worksapce, false otherwise.
+   * @throws OpenShiftException
    * @see Command
    */
   protected boolean createJobPod(
@@ -100,7 +104,8 @@ public class OpenShiftPvcHelper {
       String projectNamespace,
       String jobNamePrefix,
       Command command,
-      String... workspaceDirs) {
+      String... workspaceDirs)
+      throws OpenShiftException {
 
     if (workspaceDirs.length == 0) {
       return true;
@@ -174,7 +179,8 @@ public class OpenShiftPvcHelper {
             .endSpec()
             .build();
 
-    try (OpenShiftClient openShiftClient = new DefaultOpenShiftClient()) {
+    try (OpenShiftClient openShiftClient =
+        new DefaultOpenShiftClient(openshiftUserAccountProvider.getWorkspacesOpenshiftConfig())) {
       openShiftClient.pods().inNamespace(projectNamespace).create(podSpec);
       boolean completed = false;
       while (!completed) {

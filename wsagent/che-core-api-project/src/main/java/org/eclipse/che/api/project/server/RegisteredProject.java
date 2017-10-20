@@ -171,7 +171,8 @@ public class RegisteredProject implements ProjectConfig {
                   ATTRIBUTE_NAME_PROBLEM,
                   "Value for required attribute is not initialized " + variable.getId());
           this.problems.add(problem);
-          //throw new ProjectTypeConstraintException("Value for required attribute is not initialized " + variable.getId());
+          // throw new ProjectTypeConstraintException("Value for required attribute is not
+          // initialized " + variable.getId());
         }
 
         if (!value.isEmpty()) {

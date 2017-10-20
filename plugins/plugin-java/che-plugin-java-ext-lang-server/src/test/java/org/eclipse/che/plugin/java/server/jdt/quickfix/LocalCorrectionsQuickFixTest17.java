@@ -211,7 +211,7 @@ public class LocalCorrectionsQuickFixTest17 extends QuickFixTest {
     ICompilationUnit cu = pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
     CompilationUnit astRoot = getASTRoot(cu);
-    ArrayList proposals = collectCorrections(cu, astRoot, 3, 0); //quick fix on 1st problem
+    ArrayList proposals = collectCorrections(cu, astRoot, 3, 0); // quick fix on 1st problem
     assertNumberOfProposals(proposals, 3);
     assertCorrectLabels(proposals);
 
@@ -329,7 +329,7 @@ public class LocalCorrectionsQuickFixTest17 extends QuickFixTest {
     ICompilationUnit cu = pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
     CompilationUnit astRoot = getASTRoot(cu);
-    ArrayList proposals = collectCorrections(cu, astRoot, 3, 1); //quick fix on 2nd problem
+    ArrayList proposals = collectCorrections(cu, astRoot, 3, 1); // quick fix on 2nd problem
     assertNumberOfProposals(proposals, 3);
     assertCorrectLabels(proposals);
 
@@ -447,7 +447,7 @@ public class LocalCorrectionsQuickFixTest17 extends QuickFixTest {
     ICompilationUnit cu = pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
     CompilationUnit astRoot = getASTRoot(cu);
-    ArrayList proposals = collectCorrections(cu, astRoot, 3, 2); //quick fix on 3rd problem
+    ArrayList proposals = collectCorrections(cu, astRoot, 3, 2); // quick fix on 3rd problem
     assertNumberOfProposals(proposals, 5);
     assertCorrectLabels(proposals);
 
@@ -589,7 +589,7 @@ public class LocalCorrectionsQuickFixTest17 extends QuickFixTest {
 
   @Test
   public void testUncaughtExceptionTryWithResources4() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=351464
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=351464
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test1;\n");
@@ -693,7 +693,7 @@ public class LocalCorrectionsQuickFixTest17 extends QuickFixTest {
 
   @Test
   public void testUncaughtExceptionTryWithResources5() throws Exception {
-    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=139231
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=139231
     IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
     StringBuffer buf = new StringBuffer();
     buf.append("package test1;\n");
@@ -709,7 +709,7 @@ public class LocalCorrectionsQuickFixTest17 extends QuickFixTest {
     ICompilationUnit cu = pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
     CompilationUnit astRoot = getASTRoot(cu);
-    ArrayList proposals = collectCorrections(cu, astRoot, 2, 0); //quick fix on 1st problem
+    ArrayList proposals = collectCorrections(cu, astRoot, 2, 0); // quick fix on 1st problem
     assertNumberOfProposals(proposals, 3);
     assertCorrectLabels(proposals);
 

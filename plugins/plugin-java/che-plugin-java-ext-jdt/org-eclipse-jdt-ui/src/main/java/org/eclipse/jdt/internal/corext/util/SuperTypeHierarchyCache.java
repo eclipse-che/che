@@ -64,7 +64,7 @@ public class SuperTypeHierarchyCache {
      */
     @Override
     public String toString() {
-      return "Super hierarchy of: " + fTypeHierarchy.getType().getElementName(); //$NON-NLS-1$
+      return "Super hierarchy of: " + fTypeHierarchy.getType().getElementName(); // $NON-NLS-1$
     }
   }
 
@@ -115,8 +115,7 @@ public class SuperTypeHierarchyCache {
   private static void removeMethodOverrideTester(ITypeHierarchy hierarchy) {
     synchronized (fgMethodOverrideTesterCache) {
       for (Iterator<MethodOverrideTester> iter = fgMethodOverrideTesterCache.values().iterator();
-          iter.hasNext();
-          ) {
+          iter.hasNext(); ) {
         MethodOverrideTester curr = iter.next();
         if (curr.getTypeHierarchy().equals(hierarchy)) {
           iter.remove();

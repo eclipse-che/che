@@ -10,6 +10,9 @@
  */
 package org.eclipse.che.api.deploy;
 
+import static org.eclipse.che.plugin.docker.machine.ExecAgentLogDirSetterEnvVariableProvider.LOGS_DIR_SETTER_VARIABLE;
+import static org.eclipse.che.plugin.docker.machine.ExecAgentLogDirSetterEnvVariableProvider.LOGS_DIR_VARIABLE;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 import javax.sql.DataSource;
@@ -46,7 +49,7 @@ public class MultiUserCheWsMasterModule extends AbstractModule {
         new org.eclipse.che.multiuser.permission.workspace.server.jpa
             .MultiuserWorkspaceJpaModule());
 
-    //Permission filters
+    // Permission filters
     bind(org.eclipse.che.multiuser.permission.system.SystemServicePermissionsFilter.class);
     bind(org.eclipse.che.multiuser.permission.user.UserProfileServicePermissionsFilter.class);
     bind(org.eclipse.che.multiuser.permission.user.UserServicePermissionsFilter.class);
@@ -66,7 +69,7 @@ public class MultiUserCheWsMasterModule extends AbstractModule {
 
     install(new KeycloakModule());
 
-    //User and profile - use profile from keycloak and other stuff is JPA
+    // User and profile - use profile from keycloak and other stuff is JPA
     bind(PasswordEncryptor.class).to(PBKDF2PasswordEncryptor.class);
     bind(UserDao.class).to(JpaUserDao.class);
     bind(PreferenceDao.class).to(JpaPreferenceDao.class);
@@ -87,6 +90,10 @@ public class MultiUserCheWsMasterModule extends AbstractModule {
                 + "-addr :4412 "
                 + "-cmd ${SHELL_INTERPRETER} "
                 + "-enable-auth "
-                + "-logs-dir $HOME/che/exec-agent/logs");
+                + "-logs-dir $(eval \"$"
+                + LOGS_DIR_SETTER_VARIABLE
+                + "\"; echo \"$"
+                + LOGS_DIR_VARIABLE
+                + "\")");
   }
 }

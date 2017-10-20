@@ -79,7 +79,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
     return traverseNode(node);
   }
 
-  //---- Hooks to create Flow info objects. User may introduce their own infos.
+  // ---- Hooks to create Flow info objects. User may introduce their own infos.
 
   protected ReturnFlowInfo createReturn(ReturnStatement statement) {
     return new ReturnFlowInfo(statement);
@@ -141,7 +141,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
     return fFlowContext;
   }
 
-  //---- Helpers to access flow analysis objects ----------------------------------------
+  // ---- Helpers to access flow analysis objects ----------------------------------------
 
   protected FlowInfo getFlowInfo(ASTNode node) {
     return fData.remove(node);
@@ -161,7 +161,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
     return fData.get(node);
   }
 
-  //---- Helpers to process sequential flow infos -------------------------------------
+  // ---- Helpers to process sequential flow infos -------------------------------------
 
   protected GenericSequentialFlowInfo processSequential(
       ASTNode parent, List<? extends ASTNode> nodes) {
@@ -196,7 +196,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
     return result;
   }
 
-  //---- Generic merge methods --------------------------------------------------------
+  // ---- Generic merge methods --------------------------------------------------------
 
   protected void process(GenericSequentialFlowInfo info, List<? extends ASTNode> nodes) {
     if (nodes == null) return;
@@ -214,7 +214,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
     if (node2 != null) info.merge(getFlowInfo(node2), fFlowContext);
   }
 
-  //---- special visit methods -------------------------------------------------------
+  // ---- special visit methods -------------------------------------------------------
 
   @Override
   public boolean visit(EmptyStatement node) {
@@ -240,7 +240,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
     return false;
   }
 
-  //---- Helper to process switch statement ----------------------------------------
+  // ---- Helper to process switch statement ----------------------------------------
 
   protected SwitchData createSwitchData(SwitchStatement node) {
     SwitchData result = new SwitchData();
@@ -286,7 +286,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
     switchFlowInfo.removeLabel(null);
   }
 
-  //---- concret endVisit methods ---------------------------------------------------
+  // ---- concret endVisit methods ---------------------------------------------------
 
   @Override
   public void endVisit(AnnotationTypeDeclaration node) {

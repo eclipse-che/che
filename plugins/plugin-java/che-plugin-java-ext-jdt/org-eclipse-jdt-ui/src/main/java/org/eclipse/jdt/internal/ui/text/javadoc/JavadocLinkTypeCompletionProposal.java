@@ -38,7 +38,7 @@ public class JavadocLinkTypeCompletionProposal extends LazyJavaTypeCompletionPro
     // XXX: respect the auto-close preference, but do so consistently with method completions
     // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=113544
     //		if (autocloseBrackets())
-    return "{@link " + typeReplacement + "}"; //$NON-NLS-1$ //$NON-NLS-2$
+    return "{@link " + typeReplacement + "}"; // $NON-NLS-1$ //$NON-NLS-2$
     //		else
     //			return "{@link " + typeReplacement; //$NON-NLS-1$
   }

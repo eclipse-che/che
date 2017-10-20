@@ -99,7 +99,7 @@ public class CopyResourceChange extends ResourceChange {
    * @throws CoreException thrown when teh resource cannpt be accessed
    */
   private boolean deleteIfAlreadyExists(IProgressMonitor pm, String newName) throws CoreException {
-    pm.beginTask("", 1); //$NON-NLS-1$
+    pm.beginTask("", 1); // $NON-NLS-1$
     IResource current = getDestination().findMember(newName);
     if (current == null) return true;
     if (!current.exists()) return true;

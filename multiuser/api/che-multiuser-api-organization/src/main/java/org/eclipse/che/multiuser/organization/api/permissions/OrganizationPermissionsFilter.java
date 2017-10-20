@@ -67,7 +67,7 @@ public class OrganizationPermissionsFilter extends CheMethodInvokerFilter {
           action = OrganizationDomain.MANAGE_SUBORGANIZATIONS;
           break;
         }
-        //anybody can create root organization
+        // anybody can create root organization
         return;
 
       case UPDATE_METHOD:
@@ -95,10 +95,10 @@ public class OrganizationPermissionsFilter extends CheMethodInvokerFilter {
             && !superPrivilegesChecker.hasSuperPrivileges()) {
           throw new ForbiddenException("The user is able to specify only his own id");
         }
-        //user specified his user id or has super privileges
+        // user specified his user id or has super privileges
         return;
 
-        //methods accessible to every user
+        // methods accessible to every user
       case GET_BY_ID_METHOD:
       case FIND_METHOD:
         return;
@@ -107,15 +107,15 @@ public class OrganizationPermissionsFilter extends CheMethodInvokerFilter {
         throw new ForbiddenException("The user does not have permission to perform this operation");
     }
 
-    //user is not admin and it is need to check permissions on organization instance level
+    // user is not admin and it is need to check permissions on organization instance level
     final Organization organization = manager.getById(organizationId);
     final String parentOrganizationId = organization.getParent();
-    //check permissions on parent organization level when updating or removing child organization
+    // check permissions on parent organization level when updating or removing child organization
     if (parentOrganizationId != null
         && (OrganizationDomain.UPDATE.equals(action) || OrganizationDomain.DELETE.equals(action))) {
       if (currentSubject.hasPermission(
           OrganizationDomain.DOMAIN_ID, parentOrganizationId, MANAGE_SUBORGANIZATIONS)) {
-        //user has permissions to manage organization on parent organization level
+        // user has permissions to manage organization on parent organization level
         return;
       }
     }

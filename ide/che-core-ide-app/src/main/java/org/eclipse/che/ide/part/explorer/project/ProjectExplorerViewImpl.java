@@ -231,9 +231,9 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
   /** {@inheritDoc} */
   @Override
   public void reloadChildren(Node parent, boolean deep) {
-    //iterate on root nodes and call tree widget to reload their children
+    // iterate on root nodes and call tree widget to reload their children
     for (Node node : parent == null ? tree.getRootNodes() : singletonList(parent)) {
-      if (node.isLeaf()) { //just preventive actions
+      if (node.isLeaf()) { // just preventive actions
         continue;
       }
 
@@ -302,7 +302,7 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
   @Override
   public void onGoIntoStateChanged(GoIntoStateEvent event) {
     if (event.getState() == ACTIVATED) {
-      //lazy button initializing
+      // lazy button initializing
       if (goBackButton == null) {
         initGoIntoBackButton();
         return;

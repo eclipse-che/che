@@ -63,31 +63,31 @@ import org.w3c.dom.Text;
 /** @see org.eclipse.jdt.core.IClasspathEntry */
 public class ClasspathEntry implements IClasspathEntry {
 
-  public static final String TAG_CLASSPATH = "classpath"; //$NON-NLS-1$
-  public static final String TAG_CLASSPATHENTRY = "classpathentry"; //$NON-NLS-1$
-  public static final String TAG_REFERENCED_ENTRY = "referencedentry"; //$NON-NLS-1$
-  public static final String TAG_OUTPUT = "output"; //$NON-NLS-1$
-  public static final String TAG_KIND = "kind"; //$NON-NLS-1$
-  public static final String TAG_PATH = "path"; //$NON-NLS-1$
-  public static final String TAG_SOURCEPATH = "sourcepath"; //$NON-NLS-1$
-  public static final String TAG_ROOTPATH = "rootpath"; //$NON-NLS-1$
-  public static final String TAG_EXPORTED = "exported"; //$NON-NLS-1$
-  public static final String TAG_INCLUDING = "including"; //$NON-NLS-1$
-  public static final String TAG_EXCLUDING = "excluding"; //$NON-NLS-1$
-  public static final String TAG_ATTRIBUTES = "attributes"; //$NON-NLS-1$
-  public static final String TAG_ATTRIBUTE = "attribute"; //$NON-NLS-1$
-  public static final String TAG_ATTRIBUTE_NAME = "name"; //$NON-NLS-1$
-  public static final String TAG_ATTRIBUTE_VALUE = "value"; //$NON-NLS-1$
-  public static final String TAG_COMBINE_ACCESS_RULES = "combineaccessrules"; //$NON-NLS-1$
-  public static final String TAG_ACCESS_RULES = "accessrules"; //$NON-NLS-1$
-  public static final String TAG_ACCESS_RULE = "accessrule"; //$NON-NLS-1$
-  public static final String TAG_PATTERN = "pattern"; //$NON-NLS-1$
-  public static final String TAG_ACCESSIBLE = "accessible"; //$NON-NLS-1$
-  public static final String TAG_NON_ACCESSIBLE = "nonaccessible"; //$NON-NLS-1$
-  public static final String TAG_DISCOURAGED = "discouraged"; //$NON-NLS-1$
-  public static final String TAG_IGNORE_IF_BETTER = "ignoreifbetter"; //$NON-NLS-1$
+  public static final String TAG_CLASSPATH = "classpath"; // $NON-NLS-1$
+  public static final String TAG_CLASSPATHENTRY = "classpathentry"; // $NON-NLS-1$
+  public static final String TAG_REFERENCED_ENTRY = "referencedentry"; // $NON-NLS-1$
+  public static final String TAG_OUTPUT = "output"; // $NON-NLS-1$
+  public static final String TAG_KIND = "kind"; // $NON-NLS-1$
+  public static final String TAG_PATH = "path"; // $NON-NLS-1$
+  public static final String TAG_SOURCEPATH = "sourcepath"; // $NON-NLS-1$
+  public static final String TAG_ROOTPATH = "rootpath"; // $NON-NLS-1$
+  public static final String TAG_EXPORTED = "exported"; // $NON-NLS-1$
+  public static final String TAG_INCLUDING = "including"; // $NON-NLS-1$
+  public static final String TAG_EXCLUDING = "excluding"; // $NON-NLS-1$
+  public static final String TAG_ATTRIBUTES = "attributes"; // $NON-NLS-1$
+  public static final String TAG_ATTRIBUTE = "attribute"; // $NON-NLS-1$
+  public static final String TAG_ATTRIBUTE_NAME = "name"; // $NON-NLS-1$
+  public static final String TAG_ATTRIBUTE_VALUE = "value"; // $NON-NLS-1$
+  public static final String TAG_COMBINE_ACCESS_RULES = "combineaccessrules"; // $NON-NLS-1$
+  public static final String TAG_ACCESS_RULES = "accessrules"; // $NON-NLS-1$
+  public static final String TAG_ACCESS_RULE = "accessrule"; // $NON-NLS-1$
+  public static final String TAG_PATTERN = "pattern"; // $NON-NLS-1$
+  public static final String TAG_ACCESSIBLE = "accessible"; // $NON-NLS-1$
+  public static final String TAG_NON_ACCESSIBLE = "nonaccessible"; // $NON-NLS-1$
+  public static final String TAG_DISCOURAGED = "discouraged"; // $NON-NLS-1$
+  public static final String TAG_IGNORE_IF_BETTER = "ignoreifbetter"; // $NON-NLS-1$
   private static final IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
-  //$NON-NLS-1$
+  // $NON-NLS-1$
   public static final ClasspathEntry[] NO_ENTRIES = new ClasspathEntry[0];
   /*
    * Default inclusion pattern set
@@ -108,7 +108,7 @@ public class ClasspathEntry implements IClasspathEntry {
   /** A constant indicating an output location. */
   public static final int K_OUTPUT = 10;
 
-  public static final String DOT_DOT = ".."; //$NON-NLS-1$
+  public static final String DOT_DOT = ".."; // $NON-NLS-1$
   private static final char[][] UNINIT_PATTERNS =
       new char[][] {"Non-initialized yet".toCharArray()};
   private static final IPath[] NO_PATHS = new IPath[0];
@@ -122,7 +122,8 @@ public class ClasspathEntry implements IClasspathEntry {
    * K_SOURCE or K_OUTPUT.
    */
   public int contentKind;
-  //    private final static IWorkspaceRoot                                 workspaceRoot   = ResourcesPlugin.getWorkspace().getRoot();
+  //    private final static IWorkspaceRoot                                 workspaceRoot   =
+  // ResourcesPlugin.getWorkspace().getRoot();
   /**
    * The meaning of the path of a classpath entry depends on its entry kind:
    *
@@ -317,7 +318,7 @@ public class ClasspathEntry implements IClasspathEntry {
         else if (TAG_DISCOURAGED.equals(tagKind)) kind = IAccessRule.K_DISCOURAGED;
         else continue;
         boolean ignoreIfBetter =
-            "true".equals(elementAccessRule.getAttribute(TAG_IGNORE_IF_BETTER)); //$NON-NLS-1$
+            "true".equals(elementAccessRule.getAttribute(TAG_IGNORE_IF_BETTER)); // $NON-NLS-1$
         result[index++] =
             new ClasspathAccessRule(
                 new Path(pattern), ignoreIfBetter ? kind | IAccessRule.IGNORE_IF_BETTER : kind);
@@ -330,7 +331,7 @@ public class ClasspathEntry implements IClasspathEntry {
   /** Decode some element tag containing a sequence of patterns into IPath[] */
   private static IPath[] decodePatterns(NamedNodeMap nodeMap, String tag) {
     String sequence = removeAttribute(tag, nodeMap);
-    if (!sequence.equals("")) { //$NON-NLS-1$
+    if (!sequence.equals("")) { // $NON-NLS-1$
       char[][] patterns = CharOperation.splitOn('|', sequence.toCharArray());
       int patternCount;
       if ((patternCount = patterns.length) > 0) {
@@ -401,12 +402,12 @@ public class ClasspathEntry implements IClasspathEntry {
     ByteArrayOutputStream s = new ByteArrayOutputStream();
     OutputStreamWriter writer;
     try {
-      writer = new OutputStreamWriter(s, "UTF8"); //$NON-NLS-1$
+      writer = new OutputStreamWriter(s, "UTF8"); // $NON-NLS-1$
       XMLWriter xmlWriter = new XMLWriter(writer, project, false /*don't print XML version*/);
       decodeUnknownNode(node, xmlWriter, true /*insert new line*/);
       xmlWriter.flush();
       xmlWriter.close();
-      buffer.append(s.toString("UTF8")); //$NON-NLS-1$
+      buffer.append(s.toString("UTF8")); // $NON-NLS-1$
     } catch (UnsupportedEncodingException e) {
       // ignore (UTF8 is always supported)
     }
@@ -470,7 +471,7 @@ tag if no children*/);
                 "Invalid Class-Path entry "
                     + calledFileName
                     + " in manifest of jar file: "
-                    + jarPath.toOSString()); //$NON-NLS-1$ //$NON-NLS-2$
+                    + jarPath.toOSString()); // $NON-NLS-1$ //$NON-NLS-2$
           }
         } else {
           IPath calledJar = directoryPath.append(new Path(calledFileName));
@@ -481,7 +482,7 @@ tag if no children*/);
                   "Invalid Class-Path entry "
                       + calledFileName
                       + " in manifest of jar file: "
-                      + jarPath.toOSString()); //$NON-NLS-1$ //$NON-NLS-2$
+                      + jarPath.toOSString()); // $NON-NLS-1$ //$NON-NLS-2$
             }
             continue;
           }
@@ -503,7 +504,7 @@ tag if no children*/);
     List calledFileNames = null;
     try {
       zip = manager.getZipFile(jarPath);
-      ZipEntry manifest = zip.getEntry("META-INF/MANIFEST.MF"); //$NON-NLS-1$
+      ZipEntry manifest = zip.getEntry("META-INF/MANIFEST.MF"); // $NON-NLS-1$
       if (manifest == null) return null;
       // non-null implies regular file
       ManifestAnalyzer analyzer = new ManifestAnalyzer();
@@ -514,14 +515,14 @@ tag if no children*/);
         if (JavaModelManager.CP_RESOLVE_VERBOSE_FAILURE) {
           Util.verbose(
               "Invalid Class-Path header in manifest of jar file: "
-                  + jarPath.toOSString()); //$NON-NLS-1$
+                  + jarPath.toOSString()); // $NON-NLS-1$
         }
         return null;
       } else if (analyzer.getClasspathSectionsCount() > 1) {
         if (JavaModelManager.CP_RESOLVE_VERBOSE_FAILURE) {
           Util.verbose(
               "Multiple Class-Path headers in manifest of jar file: "
-                  + jarPath.toOSString()); //$NON-NLS-1$
+                  + jarPath.toOSString()); // $NON-NLS-1$
         }
         return null;
       }
@@ -530,7 +531,7 @@ tag if no children*/);
       if (JavaModelManager.CP_RESOLVE_VERBOSE_FAILURE) {
         Util.verbose(
             "Could not read Class-Path header in manifest of jar file: "
-                + jarPath.toOSString()); //$NON-NLS-1$
+                + jarPath.toOSString()); // $NON-NLS-1$
         e.printStackTrace();
       }
     } catch (IOException e) {
@@ -538,7 +539,7 @@ tag if no children*/);
       if (JavaModelManager.CP_RESOLVE_VERBOSE_FAILURE) {
         Util.verbose(
             "Could not read Class-Path header in manifest of jar file: "
-                + jarPath.toOSString()); //$NON-NLS-1$
+                + jarPath.toOSString()); // $NON-NLS-1$
         e.printStackTrace();
       }
     } finally {
@@ -600,12 +601,12 @@ tag if no children*/);
       parameters.put(TAG_ROOTPATH, String.valueOf(this.sourceAttachmentRootPath));
     }
     if (this.isExported) {
-      parameters.put(TAG_EXPORTED, "true"); //$NON-NLS-1$
+      parameters.put(TAG_EXPORTED, "true"); // $NON-NLS-1$
     }
     encodePatterns(this.inclusionPatterns, TAG_INCLUDING, parameters);
     encodePatterns(this.exclusionPatterns, TAG_EXCLUDING, parameters);
     if (this.entryKind == IClasspathEntry.CPE_PROJECT && !this.combineAccessRules)
-      parameters.put(TAG_COMBINE_ACCESS_RULES, "false"); //$NON-NLS-1$
+      parameters.put(TAG_COMBINE_ACCESS_RULES, "false"); // $NON-NLS-1$
 
     // unknown attributes
     UnknownXmlElements unknownXmlElements =
@@ -688,7 +689,7 @@ tag if no children*/);
         parameters.put(TAG_KIND, TAG_ACCESSIBLE);
         break;
     }
-    if (accessRule.ignoreIfBetter()) parameters.put(TAG_IGNORE_IF_BETTER, "true"); //$NON-NLS-1$
+    if (accessRule.ignoreIfBetter()) parameters.put(TAG_IGNORE_IF_BETTER, "true"); // $NON-NLS-1$
 
     writer.printTag(TAG_ACCESS_RULE, parameters, indent, newLine, true);
   }
@@ -738,7 +739,7 @@ tag if no children*/);
             : null;
 
     // exported flag (optional)
-    boolean isExported = removeAttribute(TAG_EXPORTED, attributes).equals("true"); //$NON-NLS-1$
+    boolean isExported = removeAttribute(TAG_EXPORTED, attributes).equals("true"); // $NON-NLS-1$
 
     // inclusion patterns (optional)
     IPath[] inclusionPatterns = decodePatterns(attributes, TAG_INCLUDING);
@@ -759,7 +760,7 @@ tag if no children*/);
 
     // combine access rules (optional)
     boolean combineAccessRestrictions =
-        !removeAttribute(TAG_COMBINE_ACCESS_RULES, attributes).equals("false"); //$NON-NLS-1$
+        !removeAttribute(TAG_COMBINE_ACCESS_RULES, attributes).equals("false"); // $NON-NLS-1$
 
     // extra attributes (optional)
     attributeList = getChildAttributes(TAG_ATTRIBUTES, children, foundChildren);
@@ -938,17 +939,17 @@ tag if no children*/);
   /** Returns the kind of a <code>PackageFragmentRoot</code> from its <code>String</code> form. */
   static int kindFromString(String kindStr) {
 
-    if (kindStr.equalsIgnoreCase("prj")) //$NON-NLS-1$
+    if (kindStr.equalsIgnoreCase("prj")) // $NON-NLS-1$
     return IClasspathEntry.CPE_PROJECT;
-    if (kindStr.equalsIgnoreCase("var")) //$NON-NLS-1$
+    if (kindStr.equalsIgnoreCase("var")) // $NON-NLS-1$
     return IClasspathEntry.CPE_VARIABLE;
-    if (kindStr.equalsIgnoreCase("con")) //$NON-NLS-1$
+    if (kindStr.equalsIgnoreCase("con")) // $NON-NLS-1$
     return IClasspathEntry.CPE_CONTAINER;
-    if (kindStr.equalsIgnoreCase("src")) //$NON-NLS-1$
+    if (kindStr.equalsIgnoreCase("src")) // $NON-NLS-1$
     return IClasspathEntry.CPE_SOURCE;
-    if (kindStr.equalsIgnoreCase("lib")) //$NON-NLS-1$
+    if (kindStr.equalsIgnoreCase("lib")) // $NON-NLS-1$
     return IClasspathEntry.CPE_LIBRARY;
-    if (kindStr.equalsIgnoreCase("output")) //$NON-NLS-1$
+    if (kindStr.equalsIgnoreCase("output")) // $NON-NLS-1$
     return org.eclipse.jdt.internal.core.ClasspathEntry.K_OUTPUT;
     return -1;
   }
@@ -960,17 +961,17 @@ tag if no children*/);
       case IClasspathEntry.CPE_PROJECT:
         return "src"; // backward compatibility //$NON-NLS-1$
       case IClasspathEntry.CPE_SOURCE:
-        return "src"; //$NON-NLS-1$
+        return "src"; // $NON-NLS-1$
       case IClasspathEntry.CPE_LIBRARY:
-        return "lib"; //$NON-NLS-1$
+        return "lib"; // $NON-NLS-1$
       case IClasspathEntry.CPE_VARIABLE:
-        return "var"; //$NON-NLS-1$
+        return "var"; // $NON-NLS-1$
       case IClasspathEntry.CPE_CONTAINER:
-        return "con"; //$NON-NLS-1$
+        return "con"; // $NON-NLS-1$
       case org.eclipse.jdt.internal.core.ClasspathEntry.K_OUTPUT:
-        return "output"; //$NON-NLS-1$
+        return "output"; // $NON-NLS-1$
       default:
-        return "unknown"; //$NON-NLS-1$
+        return "unknown"; // $NON-NLS-1$
     }
   }
 
@@ -1267,7 +1268,7 @@ tag if no children*/);
     for (int i = 0, length = this.extraAttributes.length; i < length; i++) {
       IClasspathAttribute attribute = this.extraAttributes[i];
       if (IClasspathAttribute.OPTIONAL.equals(attribute.getName())
-          && "true".equals(attribute.getValue())) //$NON-NLS-1$
+          && "true".equals(attribute.getValue())) // $NON-NLS-1$
       return true;
     }
     return false;
@@ -1293,51 +1294,51 @@ tag if no children*/);
     buffer.append('[');
     switch (getEntryKind()) {
       case IClasspathEntry.CPE_LIBRARY:
-        buffer.append("CPE_LIBRARY"); //$NON-NLS-1$
+        buffer.append("CPE_LIBRARY"); // $NON-NLS-1$
         break;
       case IClasspathEntry.CPE_PROJECT:
-        buffer.append("CPE_PROJECT"); //$NON-NLS-1$
+        buffer.append("CPE_PROJECT"); // $NON-NLS-1$
         break;
       case IClasspathEntry.CPE_SOURCE:
-        buffer.append("CPE_SOURCE"); //$NON-NLS-1$
+        buffer.append("CPE_SOURCE"); // $NON-NLS-1$
         break;
       case IClasspathEntry.CPE_VARIABLE:
-        buffer.append("CPE_VARIABLE"); //$NON-NLS-1$
+        buffer.append("CPE_VARIABLE"); // $NON-NLS-1$
         break;
       case IClasspathEntry.CPE_CONTAINER:
-        buffer.append("CPE_CONTAINER"); //$NON-NLS-1$
+        buffer.append("CPE_CONTAINER"); // $NON-NLS-1$
         break;
     }
-    buffer.append("]["); //$NON-NLS-1$
+    buffer.append("]["); // $NON-NLS-1$
     switch (getContentKind()) {
       case IPackageFragmentRoot.K_BINARY:
-        buffer.append("K_BINARY"); //$NON-NLS-1$
+        buffer.append("K_BINARY"); // $NON-NLS-1$
         break;
       case IPackageFragmentRoot.K_SOURCE:
-        buffer.append("K_SOURCE"); //$NON-NLS-1$
+        buffer.append("K_SOURCE"); // $NON-NLS-1$
         break;
       case org.eclipse.jdt.internal.core.ClasspathEntry.K_OUTPUT:
-        buffer.append("K_OUTPUT"); //$NON-NLS-1$
+        buffer.append("K_OUTPUT"); // $NON-NLS-1$
         break;
     }
     buffer.append(']');
     if (getSourceAttachmentPath() != null) {
-      buffer.append("[sourcePath:"); //$NON-NLS-1$
+      buffer.append("[sourcePath:"); // $NON-NLS-1$
       buffer.append(getSourceAttachmentPath());
       buffer.append(']');
     }
     if (getSourceAttachmentRootPath() != null) {
-      buffer.append("[rootPath:"); //$NON-NLS-1$
+      buffer.append("[rootPath:"); // $NON-NLS-1$
       buffer.append(getSourceAttachmentRootPath());
       buffer.append(']');
     }
-    buffer.append("[isExported:"); //$NON-NLS-1$
+    buffer.append("[isExported:"); // $NON-NLS-1$
     buffer.append(this.isExported);
     buffer.append(']');
     IPath[] patterns = this.inclusionPatterns;
     int length;
     if ((length = patterns == null ? 0 : patterns.length) > 0) {
-      buffer.append("[including:"); //$NON-NLS-1$
+      buffer.append("[including:"); // $NON-NLS-1$
       for (int i = 0; i < length; i++) {
         buffer.append(patterns[i]);
         if (i != length - 1) {
@@ -1348,7 +1349,7 @@ tag if no children*/);
     }
     patterns = this.exclusionPatterns;
     if ((length = patterns == null ? 0 : patterns.length) > 0) {
-      buffer.append("[excluding:"); //$NON-NLS-1$
+      buffer.append("[excluding:"); // $NON-NLS-1$
       for (int i = 0; i < length; i++) {
         buffer.append(patterns[i]);
         if (i != length - 1) {
@@ -1363,17 +1364,17 @@ tag if no children*/);
       buffer.append(']');
     }
     if (this.entryKind == IClasspathEntry.CPE_PROJECT) {
-      buffer.append("[combine access rules:"); //$NON-NLS-1$
+      buffer.append("[combine access rules:"); // $NON-NLS-1$
       buffer.append(this.combineAccessRules);
       buffer.append(']');
     }
     if (getOutputLocation() != null) {
-      buffer.append("[output:"); //$NON-NLS-1$
+      buffer.append("[output:"); // $NON-NLS-1$
       buffer.append(getOutputLocation());
       buffer.append(']');
     }
     if ((length = this.extraAttributes == null ? 0 : this.extraAttributes.length) > 0) {
-      buffer.append("[attributes:"); //$NON-NLS-1$
+      buffer.append("[attributes:"); // $NON-NLS-1$
       for (int i = 0; i < length; i++) {
         buffer.append(this.extraAttributes[i]);
         if (i != length - 1) {
@@ -1444,22 +1445,22 @@ tag if no children*/);
     if (this.rootID == null) {
       switch (this.entryKind) {
         case IClasspathEntry.CPE_LIBRARY:
-          this.rootID = "[LIB]" + this.path; //$NON-NLS-1$
+          this.rootID = "[LIB]" + this.path; // $NON-NLS-1$
           break;
         case IClasspathEntry.CPE_PROJECT:
-          this.rootID = "[PRJ]" + this.path; //$NON-NLS-1$
+          this.rootID = "[PRJ]" + this.path; // $NON-NLS-1$
           break;
         case IClasspathEntry.CPE_SOURCE:
-          this.rootID = "[SRC]" + this.path; //$NON-NLS-1$
+          this.rootID = "[SRC]" + this.path; // $NON-NLS-1$
           break;
         case IClasspathEntry.CPE_VARIABLE:
-          this.rootID = "[VAR]" + this.path; //$NON-NLS-1$
+          this.rootID = "[VAR]" + this.path; // $NON-NLS-1$
           break;
         case IClasspathEntry.CPE_CONTAINER:
-          this.rootID = "[CON]" + this.path; //$NON-NLS-1$
+          this.rootID = "[CON]" + this.path; // $NON-NLS-1$
           break;
         default:
-          this.rootID = ""; //$NON-NLS-1$
+          this.rootID = ""; // $NON-NLS-1$
           break;
       }
     }
@@ -1526,7 +1527,7 @@ tag if no children*/);
       for (int i = 0; i < this.extraAttributes.length; i++) {
         IClasspathAttribute attrib = this.extraAttributes[i];
         if (IClasspathAttribute.IGNORE_OPTIONAL_PROBLEMS.equals(attrib.getName())) {
-          return "true".equals(attrib.getValue()); //$NON-NLS-1$
+          return "true".equals(attrib.getValue()); // $NON-NLS-1$
         }
       }
     }
@@ -1599,10 +1600,12 @@ tag if no children*/);
     //        }
     //        if (projectOutputLocation.isAbsolute()) {
     //            if (!projectPath.isPrefixOf(projectOutputLocation)) {
-    //                return new JavaModelStatus(IJavaModelStatusConstants.PATH_OUTSIDE_PROJECT, javaProject, projectOutputLocation.toString());
+    //                return new JavaModelStatus(IJavaModelStatusConstants.PATH_OUTSIDE_PROJECT,
+    // javaProject, projectOutputLocation.toString());
     //            }
     //        } else {
-    //            return new JavaModelStatus(IJavaModelStatusConstants.RELATIVE_PATH, projectOutputLocation);
+    //            return new JavaModelStatus(IJavaModelStatusConstants.RELATIVE_PATH,
+    // projectOutputLocation);
     //        }
     //
     //        boolean hasSource = false;
@@ -1613,23 +1616,29 @@ tag if no children*/);
     //        if (rawClasspath == null)
     //            return JavaModelStatus.VERIFIED_OK;
     //
-    //        // check duplicate entries on raw classpath only (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=175226 )
+    //        // check duplicate entries on raw classpath only (see
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=175226 )
     //        int rawLength = rawClasspath.length;
     //        HashSet pathes = new HashSet(rawLength);
     //        for (int i = 0 ; i < rawLength; i++) {
     //            IPath entryPath = rawClasspath[i].getPath();
     //            if (!pathes.add(entryPath)){
-    //                String entryPathMsg = projectName.equals(entryPath.segment(0)) ? entryPath.removeFirstSegments(1).toString() : entryPath.makeRelative().toString();
-    //                return new JavaModelStatus(IJavaModelStatusConstants.NAME_COLLISION, Messages.bind(Messages.classpath_duplicateEntryPath,
-    //                                                                                                   new String[]{entryPathMsg, projectName}));
+    //                String entryPathMsg = projectName.equals(entryPath.segment(0)) ?
+    // entryPath.removeFirstSegments(1).toString() : entryPath.makeRelative().toString();
+    //                return new JavaModelStatus(IJavaModelStatusConstants.NAME_COLLISION,
+    // Messages.bind(Messages.classpath_duplicateEntryPath,
+    //
+    //     new String[]{entryPathMsg, projectName}));
     //            }
     //        }
     //
     //        // retrieve resolved classpath
     //        IClasspathEntry[] classpath;
     //        try {
-    //            // don't resolve chained libraries: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=259685
-    //            classpath = ((JavaProject)javaProject).resolveClasspath(rawClasspath, false/*don't use previous session*/, false/*don't resolve chained libraries*/).resolvedClasspath;
+    //            // don't resolve chained libraries: see
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=259685
+    //            classpath = ((JavaProject)javaProject).resolveClasspath(rawClasspath, false/*don't
+    // use previous session*/, false/*don't resolve chained libraries*/).resolvedClasspath;
     //        } catch(JavaModelException e){
     //            return e.getJavaModelStatus();
     //        }
@@ -1643,15 +1652,21 @@ tag if no children*/);
     //        // retrieve and check output locations
     //        IPath potentialNestedOutput = null; // for error reporting purpose
     //        int sourceEntryCount = 0;
-    //        boolean disableExclusionPatterns = JavaCore.DISABLED.equals(javaProject.getOption(JavaCore.CORE_ENABLE_CLASSPATH_EXCLUSION_PATTERNS, true));
-    //        boolean disableCustomOutputLocations = JavaCore.DISABLED.equals(javaProject.getOption(JavaCore.CORE_ENABLE_CLASSPATH_MULTIPLE_OUTPUT_LOCATIONS, true));
+    //        boolean disableExclusionPatterns =
+    // JavaCore.DISABLED.equals(javaProject.getOption(JavaCore.CORE_ENABLE_CLASSPATH_EXCLUSION_PATTERNS, true));
+    //        boolean disableCustomOutputLocations =
+    // JavaCore.DISABLED.equals(javaProject.getOption(JavaCore.CORE_ENABLE_CLASSPATH_MULTIPLE_OUTPUT_LOCATIONS, true));
     //
     //        for (int i = 0 ; i < length; i++) {
     //            IClasspathEntry resolvedEntry = classpath[i];
     //            if (disableExclusionPatterns &&
-    //                ((resolvedEntry.getInclusionPatterns() != null && resolvedEntry.getInclusionPatterns().length > 0)
-    //                 || (resolvedEntry.getExclusionPatterns() != null && resolvedEntry.getExclusionPatterns().length > 0))) {
-    //                return new JavaModelStatus(IJavaModelStatusConstants.DISABLED_CP_EXCLUSION_PATTERNS, javaProject, resolvedEntry.getPath());
+    //                ((resolvedEntry.getInclusionPatterns() != null &&
+    // resolvedEntry.getInclusionPatterns().length > 0)
+    //                 || (resolvedEntry.getExclusionPatterns() != null &&
+    // resolvedEntry.getExclusionPatterns().length > 0))) {
+    //                return new
+    // JavaModelStatus(IJavaModelStatusConstants.DISABLED_CP_EXCLUSION_PATTERNS, javaProject,
+    // resolvedEntry.getPath());
     //            }
     //            switch(resolvedEntry.getEntryKind()){
     //                case IClasspathEntry.CPE_SOURCE :
@@ -1661,23 +1676,30 @@ tag if no children*/);
     //                    if ((customOutput = resolvedEntry.getOutputLocation()) != null) {
     //
     //                        if (disableCustomOutputLocations) {
-    //                            return new JavaModelStatus(IJavaModelStatusConstants.DISABLED_CP_MULTIPLE_OUTPUT_LOCATIONS, javaProject, resolvedEntry.getPath());
+    //                            return new
+    // JavaModelStatus(IJavaModelStatusConstants.DISABLED_CP_MULTIPLE_OUTPUT_LOCATIONS, javaProject,
+    // resolvedEntry.getPath());
     //                        }
     //                        // ensure custom output is in project
     //                        if (customOutput.isAbsolute()) {
     //                            if (!javaProject.getPath().isPrefixOf(customOutput)) {
-    //                                return new JavaModelStatus(IJavaModelStatusConstants.PATH_OUTSIDE_PROJECT, javaProject, customOutput.toString());
+    //                                return new
+    // JavaModelStatus(IJavaModelStatusConstants.PATH_OUTSIDE_PROJECT, javaProject,
+    // customOutput.toString());
     //                            }
     //                        } else {
-    //                            return new JavaModelStatus(IJavaModelStatusConstants.RELATIVE_PATH, customOutput);
+    //                            return new
+    // JavaModelStatus(IJavaModelStatusConstants.RELATIVE_PATH, customOutput);
     //                        }
     //
     //                        // ensure custom output doesn't conflict with other outputs
     //                        // check exact match
-    //                        if (Util.indexOfMatchingPath(customOutput, outputLocations, outputCount) != -1) {
+    //                        if (Util.indexOfMatchingPath(customOutput, outputLocations,
+    // outputCount) != -1) {
     //                            continue; // already found
     //                        }
-    //                        // accumulate all outputs, will check nesting once all available (to handle ordering issues)
+    //                        // accumulate all outputs, will check nesting once all available (to
+    // handle ordering issues)
     //                        outputLocations[outputCount++] = customOutput;
     //                    }
     //            }
@@ -1687,25 +1709,32 @@ tag if no children*/);
     //            IPath customOutput = outputLocations[i];
     //            int index;
     //            // check nesting
-    //            if ((index = Util.indexOfEnclosingPath(customOutput, outputLocations, outputCount)) != -1 && index != i) {
+    //            if ((index = Util.indexOfEnclosingPath(customOutput, outputLocations,
+    // outputCount)) != -1 && index != i) {
     //                if (index == 0) {
-    //                    // custom output is nested in project's output: need to check if all source entries have a custom
+    //                    // custom output is nested in project's output: need to check if all
+    // source entries have a custom
     //                    // output before complaining
     //                    if (potentialNestedOutput == null) potentialNestedOutput = customOutput;
     //                } else {
-    //                    return new JavaModelStatus(IJavaModelStatusConstants.INVALID_CLASSPATH, Messages.bind(
+    //                    return new JavaModelStatus(IJavaModelStatusConstants.INVALID_CLASSPATH,
+    // Messages.bind(
     //                            Messages.classpath_cannotNestOutputInOutput,
-    //                            new String[]{customOutput.makeRelative().toString(), outputLocations[index].makeRelative().toString()}));
+    //                            new String[]{customOutput.makeRelative().toString(),
+    // outputLocations[index].makeRelative().toString()}));
     //                }
     //            }
     //        }
-    //        // allow custom output nesting in project's output if all source entries have a custom output
+    //        // allow custom output nesting in project's output if all source entries have a custom
+    // output
     //        if (sourceEntryCount <= outputCount-1) {
     //            allowNestingInOutputLocations[0] = true;
     //        } else if (potentialNestedOutput != null) {
-    //            return new JavaModelStatus(IJavaModelStatusConstants.INVALID_CLASSPATH, Messages.bind(
+    //            return new JavaModelStatus(IJavaModelStatusConstants.INVALID_CLASSPATH,
+    // Messages.bind(
     //                    Messages.classpath_cannotNestOutputInOutput,
-    //                    new String[]{potentialNestedOutput.makeRelative().toString(), outputLocations[0].makeRelative().toString()}));
+    //                    new String[]{potentialNestedOutput.makeRelative().toString(),
+    // outputLocations[0].makeRelative().toString()}));
     //        }
     //
     //        for (int i = 0 ; i < length; i++) {
@@ -1716,15 +1745,18 @@ tag if no children*/);
     //
     //                case IClasspathEntry.CPE_SOURCE :
     //                    hasSource = true;
-    //                    if ((index = Util.indexOfMatchingPath(path, outputLocations, outputCount)) != -1){
+    //                    if ((index = Util.indexOfMatchingPath(path, outputLocations, outputCount))
+    // != -1){
     //                        allowNestingInOutputLocations[index] = true;
     //                    }
     //                    break;
     //
     //                case IClasspathEntry.CPE_LIBRARY:
-    //                    Object target = JavaModel.getTarget(path, false/*don't check resource existence*/);
+    //                    Object target = JavaModel.getTarget(path, false/*don't check resource
+    // existence*/);
     //                    hasLibFolder |= target instanceof IContainer;
-    //                    if ((index = Util.indexOfMatchingPath(path, outputLocations, outputCount)) != -1){
+    //                    if ((index = Util.indexOfMatchingPath(path, outputLocations, outputCount))
+    // != -1){
     //                        allowNestingInOutputLocations[index] = true;
     //                    }
     //                    break;
@@ -1745,16 +1777,20 @@ tag if no children*/);
     //            if (entryPath.equals(projectPath)){
     //                // complain if self-referring project entry
     //                if (kind == IClasspathEntry.CPE_PROJECT){
-    //                    return new JavaModelStatus(IJavaModelStatusConstants.INVALID_PATH, Messages.bind(Messages.classpath_cannotReferToItself,
-    //                                                                                                     entryPath.makeRelative().toString()));
+    //                    return new JavaModelStatus(IJavaModelStatusConstants.INVALID_PATH,
+    // Messages.bind(Messages.classpath_cannotReferToItself,
+    //
+    //       entryPath.makeRelative().toString()));
     //                }
     //                // tolerate nesting output in src if src==prj
     //                continue;
     //            }
     //
-    //            // allow nesting source entries in each other as long as the outer entry excludes the inner one
+    //            // allow nesting source entries in each other as long as the outer entry excludes
+    // the inner one
     //            if (kind == IClasspathEntry.CPE_SOURCE
-    //                || (kind == IClasspathEntry.CPE_LIBRARY && (JavaModel.getTarget(entryPath, false/*don't check existence*/) instanceof IContainer))) {
+    //                || (kind == IClasspathEntry.CPE_LIBRARY && (JavaModel.getTarget(entryPath,
+    // false/*don't check existence*/) instanceof IContainer))) {
     //                for (int j = 0; j < classpath.length; j++){
     //                    IClasspathEntry otherEntry = classpath[j];
     //                    if (otherEntry == null) continue;
@@ -1763,36 +1799,56 @@ tag if no children*/);
     //                    if (entry != otherEntry
     //                        && (otherKind == IClasspathEntry.CPE_SOURCE
     //                            || (otherKind == IClasspathEntry.CPE_LIBRARY
-    //                                && (JavaModel.getTarget(otherPath, false/*don't check existence*/) instanceof IContainer)))) {
+    //                                && (JavaModel.getTarget(otherPath, false/*don't check
+    // existence*/) instanceof IContainer)))) {
     //                        char[][] inclusionPatterns, exclusionPatterns;
     //                        if (otherPath.isPrefixOf(entryPath)
     //                            && !otherPath.equals(entryPath)
-    //                            && !Util.isExcluded(entryPath.append("*"), inclusionPatterns = ((ClasspathEntry)otherEntry).fullInclusionPatternChars(), exclusionPatterns = ((ClasspathEntry)otherEntry).fullExclusionPatternChars(), false)) { //$NON-NLS-1$
-    //                            String exclusionPattern = entryPath.removeFirstSegments(otherPath.segmentCount()).segment(0);
-    //                            if (Util.isExcluded(entryPath, inclusionPatterns, exclusionPatterns, false)) {
-    //                                return new JavaModelStatus(IJavaModelStatusConstants.INVALID_CLASSPATH, Messages.bind(
+    //                            && !Util.isExcluded(entryPath.append("*"), inclusionPatterns =
+    // ((ClasspathEntry)otherEntry).fullInclusionPatternChars(), exclusionPatterns =
+    // ((ClasspathEntry)otherEntry).fullExclusionPatternChars(), false)) { //$NON-NLS-1$
+    //                            String exclusionPattern =
+    // entryPath.removeFirstSegments(otherPath.segmentCount()).segment(0);
+    //                            if (Util.isExcluded(entryPath, inclusionPatterns,
+    // exclusionPatterns, false)) {
+    //                                return new
+    // JavaModelStatus(IJavaModelStatusConstants.INVALID_CLASSPATH, Messages.bind(
     //                                        Messages.classpath_mustEndWithSlash,
-    //                                        new String[]{exclusionPattern, entryPath.makeRelative().toString()}));
+    //                                        new String[]{exclusionPattern,
+    // entryPath.makeRelative().toString()}));
     //                            } else {
     //                                if (otherKind == IClasspathEntry.CPE_SOURCE) {
     //                                    exclusionPattern += '/';
     //                                    if (!disableExclusionPatterns) {
-    //                                        return new JavaModelStatus(IJavaModelStatusConstants.INVALID_CLASSPATH, Messages.bind(
-    //                                                Messages.classpath_cannotNestEntryInEntry, new String[]{entryPath.makeRelative().toString(),
-    //                                                                                                        otherEntry.getPath().makeRelative()
-    //                                                                                                                  .toString(),
-    //                                                                                                        exclusionPattern}));
+    //                                        return new
+    // JavaModelStatus(IJavaModelStatusConstants.INVALID_CLASSPATH, Messages.bind(
+    //                                                Messages.classpath_cannotNestEntryInEntry, new
+    // String[]{entryPath.makeRelative().toString(),
+    //
+    //          otherEntry.getPath().makeRelative()
+    //
+    //                    .toString(),
+    //
+    //          exclusionPattern}));
     //                                    } else {
-    //                                        return new JavaModelStatus(IJavaModelStatusConstants.INVALID_CLASSPATH, Messages.bind(
-    //                                                Messages.classpath_cannotNestEntryInEntryNoExclusion,
-    //                                                new String[]{entryPath.makeRelative().toString(),
-    //                                                             otherEntry.getPath().makeRelative().toString(), exclusionPattern}));
+    //                                        return new
+    // JavaModelStatus(IJavaModelStatusConstants.INVALID_CLASSPATH, Messages.bind(
+    //
+    // Messages.classpath_cannotNestEntryInEntryNoExclusion,
+    //                                                new
+    // String[]{entryPath.makeRelative().toString(),
+    //
+    // otherEntry.getPath().makeRelative().toString(), exclusionPattern}));
     //                                    }
     //                                } else {
-    //                                    return new JavaModelStatus(IJavaModelStatusConstants.INVALID_CLASSPATH, Messages.bind(
-    //                                            Messages.classpath_cannotNestEntryInLibrary, new String[]{entryPath.makeRelative().toString(),
-    //                                                                                                      otherEntry.getPath().makeRelative()
-    //                                                                                                                .toString()}));
+    //                                    return new
+    // JavaModelStatus(IJavaModelStatusConstants.INVALID_CLASSPATH, Messages.bind(
+    //                                            Messages.classpath_cannotNestEntryInLibrary, new
+    // String[]{entryPath.makeRelative().toString(),
+    //
+    //        otherEntry.getPath().makeRelative()
+    //
+    //                  .toString()}));
     //                                }
     //                            }
     //                        }
@@ -1800,36 +1856,47 @@ tag if no children*/);
     //                }
     //            }
     //
-    //            // prevent nesting output location inside entry unless enclosing is a source entry which explicitly exclude the output location
+    //            // prevent nesting output location inside entry unless enclosing is a source entry
+    // which explicitly exclude the output location
     //            char[][] inclusionPatterns = ((ClasspathEntry)entry).fullInclusionPatternChars();
     //            char[][] exclusionPatterns = ((ClasspathEntry)entry).fullExclusionPatternChars();
     //            for (int j = 0; j < outputCount; j++){
     //                IPath currentOutput = outputLocations[j];
     //                if (entryPath.equals(currentOutput)) continue;
     //                if (entryPath.isPrefixOf(currentOutput)) {
-    //                    if (kind != IClasspathEntry.CPE_SOURCE || !Util.isExcluded(currentOutput, inclusionPatterns, exclusionPatterns, true)) {
-    //                        return new JavaModelStatus(IJavaModelStatusConstants.INVALID_CLASSPATH, Messages.bind(
+    //                    if (kind != IClasspathEntry.CPE_SOURCE || !Util.isExcluded(currentOutput,
+    // inclusionPatterns, exclusionPatterns, true)) {
+    //                        return new
+    // JavaModelStatus(IJavaModelStatusConstants.INVALID_CLASSPATH, Messages.bind(
     //                                Messages.classpath_cannotNestOutputInEntry,
-    //                                new String[]{currentOutput.makeRelative().toString(), entryPath.makeRelative().toString()}));
+    //                                new String[]{currentOutput.makeRelative().toString(),
+    // entryPath.makeRelative().toString()}));
     //                    }
     //                }
     //            }
     //
-    //            // prevent nesting entry inside output location - when distinct from project or a source folder
+    //            // prevent nesting entry inside output location - when distinct from project or a
+    // source folder
     //            for (int j = 0; j < outputCount; j++){
     //                if (allowNestingInOutputLocations[j]) continue;
     //                IPath currentOutput = outputLocations[j];
     //                if (currentOutput.isPrefixOf(entryPath)) {
-    //                    return new JavaModelStatus(IJavaModelStatusConstants.INVALID_CLASSPATH, Messages.bind(
+    //                    return new JavaModelStatus(IJavaModelStatusConstants.INVALID_CLASSPATH,
+    // Messages.bind(
     //                            Messages.classpath_cannotNestEntryInOutput,
-    //                            new String[]{entryPath.makeRelative().toString(), currentOutput.makeRelative().toString()}));
+    //                            new String[]{entryPath.makeRelative().toString(),
+    // currentOutput.makeRelative().toString()}));
     //                }
     //            }
     //        }
-    //        // ensure that no specific output is coincidating with another source folder (only allowed if matching current source folder)
-    //        // 36465 - for 2.0 backward compatibility, only check specific output locations (the default can still coincidate)
-    //        // perform one separate iteration so as to not take precedence over previously checked scenarii (in particular should
-    //        // diagnose nesting source folder issue before this one, for example, [src]"Project/", [src]"Project/source/" and output="Project/" should
+    //        // ensure that no specific output is coincidating with another source folder (only
+    // allowed if matching current source folder)
+    //        // 36465 - for 2.0 backward compatibility, only check specific output locations (the
+    // default can still coincidate)
+    //        // perform one separate iteration so as to not take precedence over previously checked
+    // scenarii (in particular should
+    //        // diagnose nesting source folder issue before this one, for example, [src]"Project/",
+    // [src]"Project/source/" and output="Project/" should
     //        // first complain about missing exclusion pattern
     //        IJavaModelStatus cachedStatus = null;
     //        for (int i = 0 ; i < length; i++) {
@@ -1840,34 +1907,49 @@ tag if no children*/);
     //
     //            // Build some common strings for status message
     //            boolean isProjectRelative = projectName.equals(entryPath.segment(0));
-    //            String entryPathMsg = isProjectRelative ? entryPath.removeFirstSegments(1).toString() : entryPath.makeRelative().toString();
+    //            String entryPathMsg = isProjectRelative ?
+    // entryPath.removeFirstSegments(1).toString() : entryPath.makeRelative().toString();
     //
     //            if (kind == IClasspathEntry.CPE_SOURCE) {
     //                IPath output = entry.getOutputLocation();
-    //                if (output == null) output = projectOutputLocation; // if no specific output, still need to check using default output (this line would check default output)
+    //                if (output == null) output = projectOutputLocation; // if no specific output,
+    // still need to check using default output (this line would check default output)
     //                for (int j = 0; j < length; j++) {
     //                    IClasspathEntry otherEntry = classpath[j];
     //                    if (otherEntry == entry) continue;
     //
     //                    switch (otherEntry.getEntryKind()) {
     //                        case IClasspathEntry.CPE_SOURCE :
-    //                            // Bug 287164 : Report errors of overlapping output locations only if the user sets the corresponding preference.
-    //                            // The check is required for backward compatibility with bug-fix 36465.
-    //                            String option = javaProject.getOption(JavaCore.CORE_OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE, true);
+    //                            // Bug 287164 : Report errors of overlapping output locations only
+    // if the user sets the corresponding preference.
+    //                            // The check is required for backward compatibility with bug-fix
+    // 36465.
+    //                            String option =
+    // javaProject.getOption(JavaCore.CORE_OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE, true);
     //                            if (otherEntry.getPath().equals(output)
     //                                && !JavaCore.IGNORE.equals(option)) {
-    //                                boolean opStartsWithProject = projectName.equals(otherEntry.getPath().segment(0));
-    //                                String otherPathMsg = opStartsWithProject ? otherEntry.getPath().removeFirstSegments(1).toString() : otherEntry.getPath().makeRelative().toString();
+    //                                boolean opStartsWithProject =
+    // projectName.equals(otherEntry.getPath().segment(0));
+    //                                String otherPathMsg = opStartsWithProject ?
+    // otherEntry.getPath().removeFirstSegments(1).toString() :
+    // otherEntry.getPath().makeRelative().toString();
     //                                if (JavaCore.ERROR.equals(option)) {
-    //                                    return new JavaModelStatus(IStatus.ERROR, IJavaModelStatusConstants.OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE,
-    //                                                               Messages.bind(Messages.classpath_cannotUseDistinctSourceFolderAsOutput, new String[] {
-    //                                                                       entryPathMsg, otherPathMsg, projectName }));
+    //                                    return new JavaModelStatus(IStatus.ERROR,
+    // IJavaModelStatusConstants.OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE,
+    //
+    // Messages.bind(Messages.classpath_cannotUseDistinctSourceFolderAsOutput, new String[] {
+    //                                                                       entryPathMsg,
+    // otherPathMsg, projectName }));
     //                                }
     //                                if (cachedStatus == null) {
-    //                                    // Note that the isOK() is being overridden to return true. This is an exceptional scenario
-    //                                    cachedStatus = new JavaModelStatus(IStatus.OK, IJavaModelStatusConstants.OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE,
-    //                                                                       Messages.bind(Messages.classpath_cannotUseDistinctSourceFolderAsOutput, new String[] {
-    //                                                                               entryPathMsg, otherPathMsg, projectName })){
+    //                                    // Note that the isOK() is being overridden to return
+    // true. This is an exceptional scenario
+    //                                    cachedStatus = new JavaModelStatus(IStatus.OK,
+    // IJavaModelStatusConstants.OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE,
+    //
+    // Messages.bind(Messages.classpath_cannotUseDistinctSourceFolderAsOutput, new String[] {
+    //                                                                               entryPathMsg,
+    // otherPathMsg, projectName })){
     //                                        public boolean isOK() {
     //                                            return true;
     //                                        }
@@ -1876,18 +1958,28 @@ tag if no children*/);
     //                            }
     //                            break;
     //                        case IClasspathEntry.CPE_LIBRARY :
-    //                            if (output != projectOutputLocation && otherEntry.getPath().equals(output)) {
-    //                                boolean opStartsWithProject = projectName.equals(otherEntry.getPath().segment(0));
-    //                                String otherPathMsg = opStartsWithProject ? otherEntry.getPath().removeFirstSegments(1).toString() : otherEntry.getPath().makeRelative().toString();
-    //                                return new JavaModelStatus(IJavaModelStatusConstants.INVALID_CLASSPATH, Messages.bind(Messages.classpath_cannotUseLibraryAsOutput, new String[] {entryPathMsg, otherPathMsg, projectName}));
+    //                            if (output != projectOutputLocation &&
+    // otherEntry.getPath().equals(output)) {
+    //                                boolean opStartsWithProject =
+    // projectName.equals(otherEntry.getPath().segment(0));
+    //                                String otherPathMsg = opStartsWithProject ?
+    // otherEntry.getPath().removeFirstSegments(1).toString() :
+    // otherEntry.getPath().makeRelative().toString();
+    //                                return new
+    // JavaModelStatus(IJavaModelStatusConstants.INVALID_CLASSPATH,
+    // Messages.bind(Messages.classpath_cannotUseLibraryAsOutput, new String[] {entryPathMsg,
+    // otherPathMsg, projectName}));
     //                            }
     //                    }
     //                }
     //            }
     //        }
     //
-    //        // NOTE: The above code that checks for IJavaModelStatusConstants.OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE, can be configured to return
-    //        // a WARNING status and hence should be at the end of this validation method. Any other code that might return a more severe ERROR should be
+    //        // NOTE: The above code that checks for
+    // IJavaModelStatusConstants.OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE, can be configured to
+    // return
+    //        // a WARNING status and hence should be at the end of this validation method. Any
+    // other code that might return a more severe ERROR should be
     //        // inserted before the mentioned code.
     //        if (cachedStatus != null) return cachedStatus;
 
@@ -1902,17 +1994,22 @@ tag if no children*/);
   //	 * @param project the given java project
   //	 * @param entry the given classpath entry
   //	 * @param checkSourceAttachment a flag to determine if source attachment should be checked
-  //	 * @param referredByContainer flag indicating whether the given entry is referred by a classpath container
-  //	 * @return a java model status describing the problem related to this classpath entry if any, a status object with code <code>IStatus
+  //	 * @param referredByContainer flag indicating whether the given entry is referred by a
+  // classpath container
+  //	 * @return a java model status describing the problem related to this classpath entry if any, a
+  // status object with code <code>IStatus
   // .OK</code> if the entry is fine
   //	 */
-  //	public static IJavaModelStatus validateClasspathEntry(IJavaProject project, IClasspathEntry entry, boolean checkSourceAttachment,
+  //	public static IJavaModelStatus validateClasspathEntry(IJavaProject project, IClasspathEntry
+  // entry, boolean checkSourceAttachment,
   // boolean referredByContainer){
   //		if (entry.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
   //			JavaModelManager.getJavaModelManager().removeFromInvalidArchiveCache(entry.getPath());
   //		}
-  //		IJavaModelStatus status = validateClasspathEntry(project, entry, null, checkSourceAttachment, referredByContainer);
-  //		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=171136 and https://bugs.eclipse.org/bugs/show_bug.cgi?id=300136
+  //		IJavaModelStatus status = validateClasspathEntry(project, entry, null, checkSourceAttachment,
+  // referredByContainer);
+  //		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=171136 and
+  // https://bugs.eclipse.org/bugs/show_bug.cgi?id=300136
   //		// Ignore class path errors from optional entries.
   //		int statusCode = status.getCode();
   //		if ( (statusCode == IJavaModelStatusConstants.INVALID_CLASSPATH ||
@@ -1973,7 +2070,8 @@ tag if no children*/);
               return new JavaModelStatus(
                   IJavaModelStatusConstants.CP_CONTAINER_PATH_UNBOUND, project, path);
             } else if (container == JavaModelManager.CONTAINER_INITIALIZATION_IN_PROGRESS) {
-              // don't create a marker if initialization is in progress (case of cp initialization batching)
+              // don't create a marker if initialization is in progress (case of cp initialization
+              // batching)
               return JavaModelStatus.VERIFIED_OK;
             }
             IClasspathEntry[] containerEntries = container.getClasspathEntries();
@@ -2083,7 +2181,8 @@ tag if no children*/);
                 containerInfo,
                 checkSourceAttachment ? entry.getSourceAttachmentPath() : null,
                 entryPathMsg);
-        // https://bugs.eclipse.org/bugs/show_bug.cgi?id=171136, ignore class path errors from optional entries
+        // https://bugs.eclipse.org/bugs/show_bug.cgi?id=171136, ignore class path errors from
+        // optional entries
         if (status.getCode() == IJavaModelStatusConstants.INVALID_CLASSPATH
             && ((ClasspathEntry) entry).isOptional()) status = JavaModelStatus.VERIFIED_OK;
         if (!status.isOK()) return status;
@@ -2202,8 +2301,10 @@ tag if no children*/);
     return JavaModelStatus.VERIFIED_OK;
   }
 
-  // https://bugs.eclipse.org/bugs/show_bug.cgi?id=232816, Now we have the facility to include a container
-  // name in diagnostics. If the parameter ``container'' is not null, it is used to point to the library
+  // https://bugs.eclipse.org/bugs/show_bug.cgi?id=232816, Now we have the facility to include a
+  // container
+  // name in diagnostics. If the parameter ``container'' is not null, it is used to point to the
+  // library
   // more fully.
   private static IJavaModelStatus validateLibraryEntry(
       IPath path,

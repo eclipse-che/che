@@ -276,7 +276,8 @@ public class MethodOverrideTester {
       if (erasure1 == null || !erasure1.equals(erasure2)) {
         return false;
       }
-      // comparing only the erasure is not really correct: Need to compare all bounds, that can be in different order
+      // comparing only the erasure is not really correct: Need to compare all bounds, that can be
+      // in different order
       int nBounds = overriddenTypeParameters[i].getBounds().length;
       if (nBounds > 1 && nBounds != overridingTypeParameters[i].getBounds().length) {
         return false;
@@ -488,7 +489,7 @@ public class MethodOverrideTester {
     if (bounds.length > 0) {
       return getSubstitutedTypeName(Signature.createTypeSignature(bounds[0], false), context);
     }
-    return "Object"; //$NON-NLS-1$
+    return "Object"; // $NON-NLS-1$
   }
 
   /**
@@ -537,7 +538,7 @@ public class MethodOverrideTester {
               buf.append(getVariableSubstitution(context, erasureName));
             }
           } else {
-            Assert.isTrue(false, "Unknown class type signature"); //$NON-NLS-1$
+            Assert.isTrue(false, "Unknown class type signature"); // $NON-NLS-1$
           }
           if (!erasure) {
             String[] typeArguments = Signature.getTypeArguments(typeSig);
@@ -568,16 +569,16 @@ public class MethodOverrideTester {
           if (ch == Signature.C_STAR) {
             return buf;
           } else if (ch == Signature.C_EXTENDS) {
-            buf.append(" extends "); //$NON-NLS-1$
+            buf.append(" extends "); // $NON-NLS-1$
           } else {
-            buf.append(" super "); //$NON-NLS-1$
+            buf.append(" super "); // $NON-NLS-1$
           }
           return internalGetSubstitutedTypeName(typeSig.substring(1), context, erasure, buf);
         }
       case Signature.CAPTURE_TYPE_SIGNATURE:
         return internalGetSubstitutedTypeName(typeSig.substring(1), context, erasure, buf);
       default:
-        Assert.isTrue(false, "Unhandled type signature kind"); //$NON-NLS-1$
+        Assert.isTrue(false, "Unhandled type signature kind"); // $NON-NLS-1$
         return buf;
     }
   }

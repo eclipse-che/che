@@ -20,11 +20,11 @@ package org.eclipse.che.ide.api.machine.events;
 public abstract class AbstractWsAgentStateHandler implements WsAgentStateHandler {
   @Override
   public void onWsAgentStarted(WsAgentStateEvent event) {
-    //to be override
+    // to be override
   }
 
   @Override
   public void onWsAgentStopped(WsAgentStateEvent event) {
-    //to be override
+    // to be override
   }
 }

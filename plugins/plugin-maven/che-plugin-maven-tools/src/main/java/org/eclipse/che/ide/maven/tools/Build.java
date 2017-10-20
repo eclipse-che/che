@@ -308,15 +308,15 @@ public class Build extends BuildBase {
     this.plugins = new ArrayList<>(plugins);
 
     if (isNew()) return;
-    //if plugins element exists we should replace it children
-    //with new set of plugins, otherwise create element for it
+    // if plugins element exists we should replace it children
+    // with new set of plugins, otherwise create element for it
     if (buildElement.hasSingleChild("plugins")) {
-      //remove "plugins" element children
+      // remove "plugins" element children
       final Element pluginsElement = buildElement.getSingleChild("plugins");
       for (Element plugin : pluginsElement.getChildren()) {
         plugin.remove();
       }
-      //append each new plugin to "plugins" element
+      // append each new plugin to "plugins" element
       for (Plugin plugin : plugins) {
         pluginsElement.appendChild(plugin.asXMLElement());
       }
@@ -392,15 +392,15 @@ public class Build extends BuildBase {
     this.resources = new ArrayList<>(resources);
 
     if (isNew()) return;
-    //if resources element exists we should replace it children
-    //with new set of resources, otherwise create element for it
+    // if resources element exists we should replace it children
+    // with new set of resources, otherwise create element for it
     if (buildElement.hasSingleChild("resources")) {
-      //remove "resources" element children
+      // remove "resources" element children
       final Element resourcesElement = buildElement.getSingleChild("resources");
       for (Element resource : resourcesElement.getChildren()) {
         resource.remove();
       }
-      //append each new resource to "resources" element
+      // append each new resource to "resources" element
       for (Resource resource : resources) {
         resourcesElement.appendChild(resource.asXMLElement());
         resource.resourceElement = resourcesElement.getLastChild();

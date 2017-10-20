@@ -92,7 +92,8 @@ public class DebugExternalClassTest {
 
     projectExplorer.quickRevealToItemWithJavaScript(PATH_TO_CLASS);
 
-    // perform command "Maven > Reimport" to avoid "Type with fully qualified name: ch.qos.logback.classic.Logger was not found" error
+    // perform command "Maven > Reimport" to avoid "Type with fully qualified name:
+    // ch.qos.logback.classic.Logger was not found" error
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT);
     projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.MAVEN);
     projectExplorer.clickOnNewContextMenuItem(
@@ -135,9 +136,11 @@ public class DebugExternalClassTest {
     // then
     editor.waitActiveTabFileName("Logger"); // there should be class "Logger" opened
     debugPanel.waitDebugHighlightedText(
-        "    "); // we can't rely on concrete code of external library which can be changed in future
+        "    "); // we can't rely on concrete code of external library which can be changed in
+    // future
     debugPanel.waitTextInVariablesPanel(
-        "=\"Info from java logger\""); // there should be at least parameter with value "Info from java logger"
+        "=\"Info from java logger\""); // there should be at least parameter with value "Info from
+    // java logger"
 
     // when
     debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.RESUME_BTN_ID);
@@ -161,7 +164,8 @@ public class DebugExternalClassTest {
 
     // then
     editor.waitActiveTabFileName(
-        "Logger"); // there should be class "Logger" opened in decompiled view with "Download sources" link at the top
+        "Logger"); // there should be class "Logger" opened in decompiled view with "Download
+    // sources" link at the top
     editor.clickOnDownloadSourcesLink();
     editor.waitActiveTabFileName("Logger"); // there should be class "Logger" opened
     debugPanel.waitDebugHighlightedText(
@@ -200,11 +204,13 @@ public class DebugExternalClassTest {
 
     // then
     editor.waitActiveTabFileName(
-        "Category"); // there should be class "Category" opened in decompiled view with "Download sources" link at the top
-    editor
-        .clickOnDownloadSourcesLink(); // there should be "Download sources" link displayed in at the top of editor. Download they.
+        "Category"); // there should be class "Category" opened in decompiled view with "Download
+    // sources" link at the top
+    editor.clickOnDownloadSourcesLink(); // there should be "Download sources" link displayed in at
+    // the top of editor. Download they.
     notifications.waitExpectedMessageOnProgressPanelAndClosed(
-        "Download sources for 'org.apache.log4j.Category' failed"); // there should an error of downloading the sources
+        "Download sources for 'org.apache.log4j.Category' failed"); // there should an error of
+    // downloading the sources
     editor.waitActiveTabFileName("Category"); // there should be class "Category" opened
 
     // when

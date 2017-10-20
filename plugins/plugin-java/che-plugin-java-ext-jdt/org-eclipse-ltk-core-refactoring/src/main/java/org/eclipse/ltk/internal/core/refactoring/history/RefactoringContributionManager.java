@@ -32,13 +32,13 @@ import org.eclipse.ltk.internal.core.refactoring.RefactoringCorePlugin;
 public final class RefactoringContributionManager implements IRegistryChangeListener {
 
   /** The class attribute */
-  private static final String ATTRIBUTE_CLASS = "class"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_CLASS = "class"; // $NON-NLS-1$
 
   /** The id attribute */
-  private static final String ATTRIBUTE_ID = "id"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_ID = "id"; // $NON-NLS-1$
   /** The refactoring contributions extension point */
   private static final String REFACTORING_CONTRIBUTIONS_EXTENSION_POINT =
-      "refactoringContributions"; //$NON-NLS-1$
+      "refactoringContributions"; // $NON-NLS-1$
   /** The singleton instance */
   private static RefactoringContributionManager fInstance = null;
   /**
@@ -118,7 +118,7 @@ public final class RefactoringContributionManager implements IRegistryChangeList
    */
   public RefactoringContribution getRefactoringContribution(final String id) {
     Assert.isNotNull(id);
-    Assert.isTrue(!"".equals(id)); //$NON-NLS-1$
+    Assert.isTrue(!"".equals(id)); // $NON-NLS-1$
     populateCache();
     return (RefactoringContribution) fContributionCache.get(id);
   }
@@ -168,12 +168,14 @@ public final class RefactoringContributionManager implements IRegistryChangeList
               RefactoringCorePlugin.log(exception);
             }
           });
-      //			final IConfigurationElement[] elements= Platform.getExtensionRegistry().getConfigurationElementsFor(RefactoringCore.ID_PLUGIN,
+      //			final IConfigurationElement[] elements=
+      // Platform.getExtensionRegistry().getConfigurationElementsFor(RefactoringCore.ID_PLUGIN,
       // REFACTORING_CONTRIBUTIONS_EXTENSION_POINT);
       //			for (int index= 0; index < elements.length; index++) {
       //				final IConfigurationElement element= elements[index];
       //				final String attributeId= element.getAttribute(ATTRIBUTE_ID);
-      //				final String point= RefactoringCore.ID_PLUGIN + "." + REFACTORING_CONTRIBUTIONS_EXTENSION_POINT; //$NON-NLS-1$
+      //				final String point= RefactoringCore.ID_PLUGIN + "." +
+      // REFACTORING_CONTRIBUTIONS_EXTENSION_POINT; //$NON-NLS-1$
       //				if (attributeId != null && !"".equals(attributeId)) { //$NON-NLS-1$
       //					final String className= element.getAttribute(ATTRIBUTE_CLASS);
       //					if (className != null && !"".equals(className)) { //$NON-NLS-1$
@@ -186,14 +188,17 @@ public final class RefactoringContributionManager implements IRegistryChangeList
       //								fContributionCache.put(attributeId, implementation);
       //								fIdCache.put(implementation, attributeId);
       //							} else
-      //								RefactoringCorePlugin.logErrorMessage(Messages.format(RefactoringCoreMessages.RefactoringCorePlugin_creation_error, new String[] { point, attributeId}));
+      //
+      //	RefactoringCorePlugin.logErrorMessage(Messages.format(RefactoringCoreMessages.RefactoringCorePlugin_creation_error, new String[] { point, attributeId}));
       //						} catch (CoreException exception) {
       //							RefactoringCorePlugin.log(exception);
       //						}
       //					} else
-      //						RefactoringCorePlugin.logErrorMessage(Messages.format(RefactoringCoreMessages.RefactoringCorePlugin_missing_class_attribute, new String[] { point, attributeId, ATTRIBUTE_CLASS}));
+      //
+      //	RefactoringCorePlugin.logErrorMessage(Messages.format(RefactoringCoreMessages.RefactoringCorePlugin_missing_class_attribute, new String[] { point, attributeId, ATTRIBUTE_CLASS}));
       //				} else
-      //					RefactoringCorePlugin.logErrorMessage(Messages.format(RefactoringCoreMessages.RefactoringCorePlugin_missing_attribute, new String[] { point, ATTRIBUTE_ID}));
+      //
+      //	RefactoringCorePlugin.logErrorMessage(Messages.format(RefactoringCoreMessages.RefactoringCorePlugin_missing_attribute, new String[] { point, ATTRIBUTE_ID}));
       //			}
     }
   }

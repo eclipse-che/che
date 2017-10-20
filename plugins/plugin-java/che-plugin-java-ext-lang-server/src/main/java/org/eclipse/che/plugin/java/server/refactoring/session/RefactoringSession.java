@@ -271,7 +271,7 @@ public abstract class RefactoringSession {
     if (change instanceof CompositeChange) {
       compositeChange = (CompositeChange) change;
     } else {
-      compositeChange = new CompositeChange("Dummy Change"); //$NON-NLS-1$
+      compositeChange = new CompositeChange("Dummy Change"); // $NON-NLS-1$
       compositeChange.add(change);
     }
     previewNode = AbstractChangeNode.createNode(null, compositeChange);

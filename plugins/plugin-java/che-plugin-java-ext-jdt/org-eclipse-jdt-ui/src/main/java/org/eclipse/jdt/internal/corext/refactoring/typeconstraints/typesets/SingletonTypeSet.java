@@ -16,7 +16,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 public class SingletonTypeSet extends TypeSet {
   private final TType fType;
 
-  //TODO: encapsulate in factory method and return the same set for known types
+  // TODO: encapsulate in factory method and return the same set for known types
   public SingletonTypeSet(TType t, TypeSetEnvironment typeSetEnvironment) {
     super(typeSetEnvironment);
     Assert.isNotNull(t);
@@ -36,7 +36,7 @@ public class SingletonTypeSet extends TypeSet {
    */
   @Override
   public TypeSet makeClone() {
-    return this; //new SingletonTypeSet(fType, getTypeSetEnvironment());
+    return this; // new SingletonTypeSet(fType, getTypeSetEnvironment());
   }
 
   /* (non-Javadoc)
@@ -196,6 +196,6 @@ public class SingletonTypeSet extends TypeSet {
         + fID
         + ": "
         + fType.getPrettySignature()
-        + "}"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        + "}"; // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
   }
 }

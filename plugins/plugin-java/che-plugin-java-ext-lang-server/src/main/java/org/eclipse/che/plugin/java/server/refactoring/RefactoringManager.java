@@ -140,7 +140,7 @@ public class RefactoringManager {
         ReorgPolicyFactory.createMovePolicy(new IResource[0], javaElements);
     if (policy.canEnable()) {
       JavaMoveProcessor processor = new JavaMoveProcessor(policy);
-      //TODO this may overwrite existing sources.
+      // TODO this may overwrite existing sources.
       processor.setReorgQueries(new NullReorgQueries());
       processor.setCreateTargetQueries(() -> null);
       Refactoring refactoring = new MoveRefactoring(processor);
@@ -282,7 +282,7 @@ public class RefactoringManager {
       IJavaElement element, ICompilationUnit cu, int offset, boolean lightweight)
       throws CoreException, RefactoringException {
 
-    //package fragments are always renamed with wizard
+    // package fragments are always renamed with wizard
     RenameRefactoringSession session = DtoFactory.newDto(RenameRefactoringSession.class);
     String id = String.format("rename-%s", sessionId.getAndIncrement());
     session.setSessionId(id);

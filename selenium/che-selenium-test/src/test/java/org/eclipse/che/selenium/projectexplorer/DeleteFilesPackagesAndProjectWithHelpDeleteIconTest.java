@@ -103,59 +103,59 @@ public class DeleteFilesPackagesAndProjectWithHelpDeleteIconTest {
     projectExplorer.openItemByPath(PATH_TO_WEB_APP + "/index.jsp");
     editor.waitActiveEditor();
 
-    //delete jsp file
+    // delete jsp file
     deleteFromDeleteIcon(DELETE_TEXT_FOR_JSP, PATH_TO_JSP);
 
-    //delete css file
+    // delete css file
     deleteFromDeleteIcon(DELETE_TEXT_FOR_CSS, PATH_TO_CSS);
 
-    //delete xml file
+    // delete xml file
     deleteFromDeleteIcon(DELETE_TEXT_FOR_XML, PATH_TO_XML);
 
-    //delete less file
+    // delete less file
     deleteFromDeleteIcon(DELETE_TEXT_FOR_LESS, PATH_TO_LESS);
 
-    //delete html file
+    // delete html file
     deleteFromDeleteIcon(DELETE_TEXT_FOR_HTML, PATH_TO_HTML);
     checkDeletion(PATH_TO_HTML);
 
-    //delete js file
+    // delete js file
     deleteFromDeleteIcon(DELETE_TEXT_FOR_JS, PATH_TO_JAVASCRIPT);
 
-    //delete java class file
+    // delete java class file
     deleteFromDeleteIcon(DELETE_TEXT_FOR_JAVA_CLASS, PATH_TO_JAVA_CLASS);
 
-    //delete simple file
+    // delete simple file
     deleteFromDeleteIcon(DELETE_TEXT_FOR_SIMPLE_FILE, PATH_TO_SIMPLE_FILE);
 
-    //delete sql file
+    // delete sql file
     deleteFromDeleteIcon(DELETE_TEXT_FOR_SQL, PATH_TO_SQL);
 
-    //select package1 for deletion
+    // select package1 for deletion
     projectExplorer.selectItem(PATH_TO_WEB_INF);
     deletePackage(DELETE_TEXT1);
     loader.waitOnClosed();
-    //check that package disappeared
+    // check that package disappeared
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitDisappearItemByPath(PATH_TO_WEB_INF);
 
-    //select package2 for deletion
+    // select package2 for deletion
     projectExplorer.selectItem(PATH_TO_WEB_APP);
     deletePackage(DELETE_TEXT2);
-    //check that package disappeared
+    // check that package disappeared
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitDisappearItemByPath(PATH_TO_WEB_APP);
 
-    //select package3 for deletion
+    // select package3 for deletion
     projectExplorer.selectItem(PATH_TO_PACKAGE3);
     deletePackage(DELETE_TEXT3);
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitDisappearItemByPath(PATH_TO_PACKAGE3);
 
-    //delete project
+    // delete project
     projectExplorer.selectItem(PROJECT_NAME);
     deletePackage(DELETE_PROJECT);
-    //check that project doesn't exist
+    // check that project doesn't exist
     loader.waitOnClosed();
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitDisappearItemByPath(PROJECT_NAME);

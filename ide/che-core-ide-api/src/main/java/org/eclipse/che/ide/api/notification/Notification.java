@@ -111,7 +111,7 @@ public class Notification {
   }
 
   protected void setUnreadState() {
-    //lets collect all calls instead of continuously calling update observers
+    // lets collect all calls instead of continuously calling update observers
     setUnreadStateTask.delay(200);
   }
 

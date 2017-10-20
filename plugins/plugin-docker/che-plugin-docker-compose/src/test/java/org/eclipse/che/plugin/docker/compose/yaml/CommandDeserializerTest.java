@@ -49,7 +49,7 @@ public class CommandDeserializerTest {
           + "   MYSQL_PASSWORD: password\n"
           + "  mem_limit: 2147483648\n"
           + "  command: %s\n"
-          + //<- test target
+          + // <- test target
           "  expose: [4403, 5502]";
 
   @Test(dataProvider = "validCommand")
@@ -76,7 +76,7 @@ public class CommandDeserializerTest {
   @DataProvider(name = "validCommand")
   private Object[][] validCommand() {
     return new Object[][] {
-      //allow command in one line
+      // allow command in one line
       {"service mysql start", asList("service", "mysql", "start"), 3},
       {
         "service mysql start && tail -f /dev/null",
@@ -87,7 +87,7 @@ public class CommandDeserializerTest {
       {"service mysql start         ", asList("service", "mysql", "start"), 3},
       {"service mysql start         ", asList("service", "mysql", "start"), 3},
 
-      //allow break line feature
+      // allow break line feature
       {"| \n" + "   service mysql\n" + "   restart", asList("service", "mysql", "restart"), 3},
       {"| \r" + "   service mysql\r" + "   restart", asList("service", "mysql", "restart"), 3},
       {"| \r\n" + "   service mysql\r\n" + "   restart", asList("service", "mysql", "restart"), 3},
@@ -100,15 +100,15 @@ public class CommandDeserializerTest {
       },
       {"> \n \n" + "   ls -a\n \n" + "   -i -p", asList("ls", "-a", "-i", "-p"), 4},
 
-      //allow list command words
-      //first form
+      // allow list command words
+      // first form
       {"[service, mysql, start]", asList("service", "mysql", "start"), 3},
       {
         "[service, mysql, start, '&&', tail, -f, /dev/null]",
         asList("service", "mysql", "start", "&&", "tail", "-f", "/dev/null"),
         7
       },
-      //second form
+      // second form
       {"\n" + "   - tail\n" + "   - -f\n" + "   - /dev/null", asList("tail", "-f", "/dev/null"), 3},
       {
         "\n"
@@ -123,7 +123,7 @@ public class CommandDeserializerTest {
         7
       },
 
-      //Some special symbol should be accessible in case line was wrapped by quotes
+      // Some special symbol should be accessible in case line was wrapped by quotes
       {"\"echo ${PWD}\"", asList("echo", "${PWD}"), 2},
       {"\"(Test)\"", singletonList("(Test)"), 1},
       {"\"\"", singletonList(""), 1},
@@ -165,7 +165,8 @@ public class CommandDeserializerTest {
       // it should fail.
       fail("The command " + command.getCommand() + " has invalid symbol and it should fail");
     } catch (ReaderException e) {
-      // we're checking the exception there without throwing it, else it will print to testng-results.xml file an invalid symbol, thus the xml will be invalid.
+      // we're checking the exception there without throwing it, else it will print to
+      // testng-results.xml file an invalid symbol, thus the xml will be invalid.
       assertEquals(e.getMessage(), "special characters are not allowed");
     }
   }

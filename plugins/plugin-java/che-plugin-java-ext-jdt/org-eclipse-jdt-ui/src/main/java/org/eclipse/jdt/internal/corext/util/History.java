@@ -56,8 +56,8 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public abstract class History {
 
-  private static final String DEFAULT_ROOT_NODE_NAME = "histroyRootNode"; //$NON-NLS-1$
-  private static final String DEFAULT_INFO_NODE_NAME = "infoNode"; //$NON-NLS-1$
+  private static final String DEFAULT_ROOT_NODE_NAME = "histroyRootNode"; // $NON-NLS-1$
+  private static final String DEFAULT_INFO_NODE_NAME = "infoNode"; // $NON-NLS-1$
   private static final int MAX_HISTORY_SIZE = 60;
 
   private static JavaUIException createException(Throwable t, String message) {
@@ -132,7 +132,7 @@ public abstract class History {
 
     int pos = fPositions.get(key).intValue() + 1;
 
-    //containsKey(key) implies fHistory.size()>0
+    // containsKey(key) implies fHistory.size()>0
     return (float) pos / (float) fHistory.size();
   }
 
@@ -155,7 +155,7 @@ public abstract class History {
     if (file.exists()) {
       InputStreamReader reader = null;
       try {
-        reader = new InputStreamReader(new FileInputStream(file), "utf-8"); //$NON-NLS-1$
+        reader = new InputStreamReader(new FileInputStream(file), "utf-8"); // $NON-NLS-1$
         load(new InputSource(reader));
       } catch (IOException e) {
         JavaPlugin.log(e);
@@ -302,9 +302,9 @@ public abstract class History {
       }
 
       Transformer transformer = TransformerFactory.newInstance().newTransformer();
-      transformer.setOutputProperty(OutputKeys.METHOD, "xml"); //$NON-NLS-1$
-      transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8"); //$NON-NLS-1$
-      transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
+      transformer.setOutputProperty(OutputKeys.METHOD, "xml"); // $NON-NLS-1$
+      transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8"); // $NON-NLS-1$
+      transformer.setOutputProperty(OutputKeys.INDENT, "yes"); // $NON-NLS-1$
       DOMSource source = new DOMSource(document);
       StreamResult result = new StreamResult(stream);
 

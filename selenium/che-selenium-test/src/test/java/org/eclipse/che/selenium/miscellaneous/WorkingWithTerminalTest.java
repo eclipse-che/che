@@ -125,29 +125,29 @@ public class WorkingWithTerminalTest {
     terminal.typeIntoTerminal("cd ~ && touch -f testfile.txt" + Keys.ENTER);
 
     openMC("~");
-    //check F5
+    // check F5
     terminal.typeIntoTerminal("" + Keys.END + Keys.F5);
 
     terminal.waitExpectedTextIntoTerminal("Copy file \"testfile.txt\" with source mask");
     terminal.typeIntoTerminal("" + Keys.ESCAPE + Keys.ESCAPE);
 
-    //check F6
+    // check F6
     terminal.typeIntoTerminal(Keys.F6.toString());
     terminal.waitExpectedTextIntoTerminal("Move file \"testfile.txt\" with source mask");
     terminal.typeIntoTerminal("" + Keys.ESCAPE + Keys.ESCAPE);
 
-    //check F7
+    // check F7
     terminal.typeIntoTerminal(Keys.F7.toString());
     terminal.waitExpectedTextIntoTerminal("Enter directory name:");
     terminal.typeIntoTerminal("" + Keys.ESCAPE + Keys.ESCAPE);
 
-    //check F8
+    // check F8
     terminal.typeIntoTerminal(Keys.F8.toString());
     terminal.waitExpectedTextIntoTerminal("Delete file");
     terminal.waitExpectedTextIntoTerminal("\"testfile.txt\"?");
     terminal.typeIntoTerminal("" + Keys.ESCAPE + Keys.ESCAPE);
 
-    //check F9 - Select menu in MC
+    // check F9 - Select menu in MC
     terminal.typeIntoTerminal("" + Keys.F9 + Keys.ENTER);
     terminal.waitExpectedTextIntoTerminal("File listing");
     terminal.typeIntoTerminal("" + Keys.ESCAPE + Keys.ESCAPE);
@@ -186,7 +186,7 @@ public class WorkingWithTerminalTest {
   public void shouldNavigateToMC() {
     openMC("/");
 
-    //navigate to midnight commander tree
+    // navigate to midnight commander tree
     consoles.selectProcessByTabName("Terminal");
     terminal.typeIntoTerminal(Keys.ARROW_DOWN.toString());
     terminal.typeIntoTerminal(Keys.ARROW_DOWN.toString());
@@ -226,7 +226,7 @@ public class WorkingWithTerminalTest {
     terminal.typeIntoTerminal(BASH_SCRIPT + Keys.ENTER);
     terminal.waitExpectedTextIntoTerminal("test=1");
 
-    //cancel script
+    // cancel script
     terminal.typeIntoTerminal(Keys.CONTROL + "c");
 
     // wait 1 sec. If process was really stopped we should not get text "test=2"
@@ -238,7 +238,7 @@ public class WorkingWithTerminalTest {
   public void shouldBeClear() {
     terminal.typeIntoTerminal("cd / && ls -l" + Keys.ENTER);
 
-    //clear terminal
+    // clear terminal
     terminal.typeIntoTerminal("clear" + Keys.ENTER);
     terminal.waitExpectedTextNotPresentTerminal("clear");
 
@@ -251,7 +251,7 @@ public class WorkingWithTerminalTest {
   public void shouldBeReset() {
     terminal.typeIntoTerminal("cd / && ls -l" + Keys.ENTER);
 
-    //clear terminal
+    // clear terminal
     terminal.typeIntoTerminal("reset" + Keys.ENTER.toString());
     terminal.waitExpectedTextNotPresentTerminal("reset");
 
@@ -262,7 +262,8 @@ public class WorkingWithTerminalTest {
 
   @Test(priority = 9)
   public void shouldTurnToNormalModeFromAlternativeScreenModeAndOtherwise() {
-    // open MC - terminal will switch off from normal mode to alternative screen with text user interface (pseudo user graphics).
+    // open MC - terminal will switch off from normal mode to alternative screen with text user
+    // interface (pseudo user graphics).
     openMC("/");
 
     // turn back to "normal" mode
@@ -299,7 +300,7 @@ public class WorkingWithTerminalTest {
   public void shouldViewFolderIntoMC() {
     openMC("/");
 
-    //select bin folder and view this folder by "F3" key
+    // select bin folder and view this folder by "F3" key
     terminal.waitExpectedTextIntoTerminal("/bin");
     terminal.typeIntoTerminal(Keys.HOME.toString() + Keys.F3.toString());
     for (String partOfContent : VIEW_BIN_FOLDER) {
@@ -319,9 +320,9 @@ public class WorkingWithTerminalTest {
   public void shouldEditFileIntoMCEdit() {
     openMC("/projects/" + PROJECT_NAME);
 
-    //check End, Home, F4, Delete keys
+    // check End, Home, F4, Delete keys
     terminal.typeIntoTerminal("" + Keys.END + Keys.ENTER + Keys.END + Keys.ARROW_UP + Keys.F4);
-    //select editor
+    // select editor
     terminal.typeIntoTerminal(valueOf(1) + Keys.ENTER);
 
     terminal.waitExpectedTextIntoTerminal(

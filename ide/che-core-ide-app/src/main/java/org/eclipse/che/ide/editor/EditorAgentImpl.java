@@ -189,7 +189,7 @@ public class EditorAgentImpl
       if (editorPartPresenter.isDirty()) {
         event.setMessage(
             coreLocalizationConstant
-                .changesMayBeLost()); //TODO need to move this into standalone component
+                .changesMayBeLost()); // TODO need to move this into standalone component
         return;
       }
     }
@@ -197,7 +197,7 @@ public class EditorAgentImpl
 
   @Override
   public void onWindowClosed(WindowActionEvent event) {
-    //do nothing
+    // do nothing
   }
 
   @Override
@@ -598,7 +598,7 @@ public class EditorAgentImpl
       Map<EditorPartPresenter, EditorPartStack> activeEditors) {
 
     if (files.hasKey("FILES")) {
-      //plain
+      // plain
       JsonArray filesArray = files.getArray("FILES");
       List<Promise<Void>> promises = new ArrayList<>();
       for (int i = 0; i < filesArray.length(); i++) {
@@ -608,7 +608,7 @@ public class EditorAgentImpl
       }
       return promises;
     } else {
-      //split
+      // split
       return restoreSplit(files, editorPartStack, activeEditors);
     }
   }

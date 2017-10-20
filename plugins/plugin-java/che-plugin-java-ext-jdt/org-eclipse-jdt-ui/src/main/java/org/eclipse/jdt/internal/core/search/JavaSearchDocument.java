@@ -91,6 +91,6 @@ public class JavaSearchDocument extends SearchDocument {
   }
 
   public String toString() {
-    return "SearchDocument for " + getPath(); //$NON-NLS-1$
+    return "SearchDocument for " + getPath(); // $NON-NLS-1$
   }
 }

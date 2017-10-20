@@ -15,10 +15,10 @@ import org.eclipse.che.ide.api.editor.text.TypedRegion;
 public class DirtyRegion implements TypedRegion {
 
   /** Identifies an insert operation. */
-  public static final String INSERT = "__insert"; //$NON-NLS-1$
+  public static final String INSERT = "__insert"; // $NON-NLS-1$
 
   /** Identifies a remove operation. */
-  public static final String REMOVE = "__remove"; //$NON-NLS-1$
+  public static final String REMOVE = "__remove"; // $NON-NLS-1$
 
   /** The region's offset. */
   private int fOffset;

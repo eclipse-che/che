@@ -17,14 +17,14 @@ package org.eclipse.che.ide.runtime;
 public class Status implements IStatus {
 
   /** Constant used to indicate an unknown plugin id. */
-  private static final String unknownId = "unknown"; //$NON-NLS-1$
+  private static final String unknownId = "unknown"; // $NON-NLS-1$
 
   /**
    * A standard OK status with an "ok" message.
    *
    * @since 3.0
    */
-  public static final IStatus OK_STATUS = new Status(OK, unknownId, OK, "ok", null); //$NON-NLS-1$
+  public static final IStatus OK_STATUS = new Status(OK, unknownId, OK, "ok", null); // $NON-NLS-1$
 
   /**
    * A standard CANCEL status with no message.
@@ -32,7 +32,7 @@ public class Status implements IStatus {
    * @since 3.0
    */
   public static final IStatus CANCEL_STATUS =
-      new Status(CANCEL, unknownId, 1, "", null); //$NON-NLS-1$
+      new Status(CANCEL, unknownId, 1, "", null); // $NON-NLS-1$
 
   /**
    * The severity. One of
@@ -204,7 +204,7 @@ public class Status implements IStatus {
    * @param message a human-readable message, localized to the current locale
    */
   protected void setMessage(String message) {
-    if (message == null) this.message = ""; //$NON-NLS-1$
+    if (message == null) this.message = ""; // $NON-NLS-1$
     else this.message = message;
   }
 
@@ -237,24 +237,24 @@ public class Status implements IStatus {
   /** Returns a string representation of the status, suitable for debugging purposes only. */
   public String toString() {
     StringBuffer buf = new StringBuffer();
-    buf.append("Status "); //$NON-NLS-1$
+    buf.append("Status "); // $NON-NLS-1$
     if (severity == OK) {
-      buf.append("OK"); //$NON-NLS-1$
+      buf.append("OK"); // $NON-NLS-1$
     } else if (severity == ERROR) {
-      buf.append("ERROR"); //$NON-NLS-1$
+      buf.append("ERROR"); // $NON-NLS-1$
     } else if (severity == WARNING) {
-      buf.append("WARNING"); //$NON-NLS-1$
+      buf.append("WARNING"); // $NON-NLS-1$
     } else if (severity == INFO) {
-      buf.append("INFO"); //$NON-NLS-1$
+      buf.append("INFO"); // $NON-NLS-1$
     } else if (severity == CANCEL) {
-      buf.append("CANCEL"); //$NON-NLS-1$
+      buf.append("CANCEL"); // $NON-NLS-1$
     } else {
-      buf.append("severity="); //$NON-NLS-1$
+      buf.append("severity="); // $NON-NLS-1$
       buf.append(severity);
     }
-    buf.append(": "); //$NON-NLS-1$
+    buf.append(": "); // $NON-NLS-1$
     buf.append(pluginId);
-    buf.append(" code="); //$NON-NLS-1$
+    buf.append(" code="); // $NON-NLS-1$
     buf.append(code);
     buf.append(' ');
     buf.append(message);

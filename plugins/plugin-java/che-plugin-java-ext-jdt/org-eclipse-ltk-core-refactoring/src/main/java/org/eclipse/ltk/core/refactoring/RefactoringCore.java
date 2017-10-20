@@ -30,7 +30,7 @@ public class RefactoringCore {
    *
    * @since 3.2
    */
-  public static final String ID_PLUGIN = "org.eclipse.ltk.core.refactoring"; //$NON-NLS-1$
+  public static final String ID_PLUGIN = "org.eclipse.ltk.core.refactoring"; // $NON-NLS-1$
 
   private static IValidationCheckResultQueryFactory fQueryFactory = new DefaultQueryFactory();
 

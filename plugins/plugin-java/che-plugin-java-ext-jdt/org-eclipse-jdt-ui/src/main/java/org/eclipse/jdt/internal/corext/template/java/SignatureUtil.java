@@ -33,11 +33,11 @@ public final class SignatureUtil {
    * <p>The representation of the null type is the signature of a type variable named <code>null
    * </code> ({@value}), which will only work if no such variable gets declared in the same context.
    */
-  private static final String NULL_TYPE_SIGNATURE = "Tnull;"; //$NON-NLS-1$
+  private static final String NULL_TYPE_SIGNATURE = "Tnull;"; // $NON-NLS-1$
 
   private static final char[] NULL_TYPE_SIGNATURE_ARRAY = NULL_TYPE_SIGNATURE.toCharArray();
   /** The signature of <code>java.lang.Object</code> ({@value}). */
-  private static final String OBJECT_SIGNATURE = "Ljava.lang.Object;"; //$NON-NLS-1$
+  private static final String OBJECT_SIGNATURE = "Ljava.lang.Object;"; // $NON-NLS-1$
 
   private static final char[] OBJECT_SIGNATURE_ARRAY = OBJECT_SIGNATURE.toCharArray();
 
@@ -248,7 +248,7 @@ public final class SignatureUtil {
       signature = fix83600(signature);
     }
 
-    StringBuffer res = new StringBuffer("("); //$NON-NLS-1$
+    StringBuffer res = new StringBuffer("("); // $NON-NLS-1$
     char[][] parameters = Signature.getParameterTypes(signature);
     for (int i = 0; i < parameters.length; i++) {
       char[] param = parameters[i];

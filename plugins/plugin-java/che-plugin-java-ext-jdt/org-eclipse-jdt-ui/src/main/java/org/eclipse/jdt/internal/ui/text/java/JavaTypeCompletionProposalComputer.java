@@ -65,7 +65,8 @@ public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalCo
       if (types.size() > 0 && context.computeIdentifierPrefix().length() == 0) {
         IType expectedType = javaContext.getExpectedType();
         if (expectedType != null) {
-          // empty prefix completion - insert LRU types if known, but prune if they already occur in the core list
+          // empty prefix completion - insert LRU types if known, but prune if they already occur in
+          // the core list
 
           // compute minmimum relevance and already proposed list
           int relevance = Integer.MAX_VALUE;

@@ -29,7 +29,7 @@ public class Annotation {
    * <p>Value: <code>"org.eclipse.che.ide.api.editor.text.annotation.unknown"</code>
    */
   public static final String TYPE_UNKNOWN =
-      "org.eclipse.che.ide.api.editor.text.annotation.unknown"; //$NON-NLS-1$
+      "org.eclipse.che.ide.api.editor.text.annotation.unknown"; // $NON-NLS-1$
 
   /** The type of this annotation. */
   private String type;

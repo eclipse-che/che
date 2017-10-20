@@ -13,7 +13,7 @@ import org.eclipse.osgi.util.NLS;
 
 public final class CorextMessages extends NLS {
 
-  private static final String BUNDLE_NAME = CorextMessages.class.getName(); //$NON-NLS-1$
+  private static final String BUNDLE_NAME = CorextMessages.class.getName(); // $NON-NLS-1$
   public static String Resources_outOfSyncResources;
   public static String Resources_outOfSync;
   public static String Resources_modifiedResources;

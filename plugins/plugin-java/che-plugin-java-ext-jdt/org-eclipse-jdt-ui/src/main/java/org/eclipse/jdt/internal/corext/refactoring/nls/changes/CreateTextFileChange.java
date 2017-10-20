@@ -34,13 +34,13 @@ public class CreateTextFileChange extends CreateFileChange {
 
   public String getCurrentContent() throws JavaModelException {
     IFile file = getOldFile(new NullProgressMonitor());
-    if (!file.exists()) return ""; //$NON-NLS-1$
+    if (!file.exists()) return ""; // $NON-NLS-1$
     InputStream stream = null;
     try {
       stream = file.getContents();
       String encoding = file.getCharset();
       String c = NLSUtil.readString(stream, encoding);
-      return (c == null) ? "" : c; //$NON-NLS-1$
+      return (c == null) ? "" : c; // $NON-NLS-1$
     } catch (CoreException e) {
       throw new JavaModelException(e, IJavaModelStatusConstants.CORE_EXCEPTION);
     } finally {

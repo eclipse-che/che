@@ -48,7 +48,7 @@ public class LanguageRegistryService {
   @Path("initialize")
   public ServerCapabilitiesDto initialize(@QueryParam("path") String path)
       throws LanguageServerException {
-    //in most cases starts new LS if not already started
+    // in most cases starts new LS if not already started
     ServerCapabilities capabilities = registry.initialize(LanguageServiceUtils.prefixURI(path));
     return capabilities == null ? null : new ServerCapabilitiesDto(capabilities);
   }

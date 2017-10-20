@@ -51,7 +51,7 @@ public class ClasspathBuilder {
       IJavaProject project, List<String> sourceFolders, List<String> library)
       throws ServerException {
     List<IClasspathEntry> classpathEntries = new ArrayList<>();
-    //create classpath container for default JRE
+    // create classpath container for default JRE
     IClasspathEntry jreContainer =
         JavaCore.newContainerEntry(new Path(JREContainerInitializer.JRE_CONTAINER));
     classpathEntries.add(jreContainer);

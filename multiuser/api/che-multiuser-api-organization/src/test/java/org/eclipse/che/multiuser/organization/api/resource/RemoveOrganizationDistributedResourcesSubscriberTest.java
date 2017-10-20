@@ -47,27 +47,27 @@ public class RemoveOrganizationDistributedResourcesSubscriberTest {
 
   @Test
   public void shouldResetResourcesDistributionBeforeSuborganizationRemoving() throws Exception {
-    //given
+    // given
     when(organization.getId()).thenReturn("suborg123");
     when(organization.getParent()).thenReturn("org123");
 
-    //when
+    // when
     suborganizationsRemover.onEvent(new BeforeOrganizationRemovedEvent(organization));
 
-    //then
+    // then
     verify(organizationDistributedResourcesDao).remove("suborg123");
   }
 
   @Test
   public void shouldNotResetResourcesDistributionBeforeRootOrganizationRemoving() throws Exception {
-    //given
+    // given
     when(organization.getId()).thenReturn("org123");
     when(organization.getParent()).thenReturn(null);
 
-    //when
+    // when
     suborganizationsRemover.onEvent(new BeforeOrganizationRemovedEvent(organization));
 
-    //then
+    // then
     verify(organizationDistributedResourcesDao, never()).remove("org123");
   }
 }

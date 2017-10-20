@@ -236,7 +236,7 @@ public class WorkspaceService extends Service {
           Integer maxItems,
       @ApiParam("Workspace status") @QueryParam("status") String status)
       throws ServerException, BadRequestException {
-    //TODO add maxItems & skipCount to manager
+    // TODO add maxItems & skipCount to manager
     return workspaceManager
         .getWorkspaces(EnvironmentContext.getCurrent().getSubject().getUserId(), false)
         .stream()

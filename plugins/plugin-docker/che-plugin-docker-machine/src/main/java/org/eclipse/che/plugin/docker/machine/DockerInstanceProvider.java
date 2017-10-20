@@ -207,7 +207,8 @@ public class DockerInstanceProvider implements InstanceProvider {
     try {
       URL url =
           UriBuilder.fromUri("https://" + DOCKER_HUB_BASE_URI)
-              // we use v1 here because docker hub doesn't provide open v2 REST API for repository deletion
+              // we use v1 here because docker hub doesn't provide open v2 REST API for repository
+              // deletion
               .path("/v1/repositories/{repository}/")
               .build(repository)
               .toURL();

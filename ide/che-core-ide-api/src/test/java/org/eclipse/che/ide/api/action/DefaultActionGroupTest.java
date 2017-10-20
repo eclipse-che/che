@@ -67,7 +67,7 @@ public class DefaultActionGroupTest {
     // when
     Action[] result = defaultActionGroup.getChildren(mock(ActionEvent.class));
 
-    //then
+    // then
     assertThat(Arrays.asList(result)).isEmpty();
   }
 
@@ -86,7 +86,7 @@ public class DefaultActionGroupTest {
     // when
     Action[] result = defaultActionGroup.getChildren(mock(ActionEvent.class));
 
-    //then
+    // then
     assertThat(Arrays.asList(result))
         .hasSize(6)
         .containsExactly(
@@ -108,7 +108,7 @@ public class DefaultActionGroupTest {
     // when
     Action[] result = defaultActionGroup.getChildren(mock(ActionEvent.class));
 
-    //then
+    // then
     assertThat(Arrays.asList(result))
         .hasSize(6)
         .containsExactly(
@@ -130,7 +130,7 @@ public class DefaultActionGroupTest {
     // when
     Action[] result = defaultActionGroup.getChildren(mock(ActionEvent.class));
 
-    //then
+    // then
     assertThat(Arrays.asList(result))
         .hasSize(6)
         .containsExactly(
@@ -152,7 +152,7 @@ public class DefaultActionGroupTest {
     // when
     Action[] result = defaultActionGroup.getChildren(mock(ActionEvent.class));
 
-    //then
+    // then
     assertThat(Arrays.asList(result))
         .hasSize(6)
         .containsExactly(
@@ -174,7 +174,7 @@ public class DefaultActionGroupTest {
     // when
     Action[] result = defaultActionGroup.getChildren(mock(ActionEvent.class));
 
-    //then
+    // then
     assertThat(Arrays.asList(result))
         .hasSize(6)
         .containsExactly(
@@ -196,7 +196,7 @@ public class DefaultActionGroupTest {
     // when
     Action[] result = defaultActionGroup.getChildren(mock(ActionEvent.class));
 
-    //then
+    // then
     assertThat(Arrays.asList(result))
         .hasSize(6)
         .containsExactly(
@@ -260,7 +260,7 @@ public class DefaultActionGroupTest {
     // when
     Action[] result = defaultActionGroup.getChildren(mock(ActionEvent.class));
 
-    //then
+    // then
     assertThat(Arrays.asList(result))
         .hasSize(6)
         .containsExactly(
@@ -282,7 +282,7 @@ public class DefaultActionGroupTest {
     // when
     Action[] result = defaultActionGroup.getChildren(mock(ActionEvent.class));
 
-    //then
+    // then
     assertThat(Arrays.asList(result))
         .hasSize(6)
         .containsExactly(

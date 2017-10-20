@@ -66,8 +66,8 @@ public class ImportRemover {
   }
 
   private final String PROPERTY_KEY = String.valueOf(System.currentTimeMillis());
-  private final String REMOVED = "removed"; //$NON-NLS-1$
-  private final String RETAINED = "retained"; //$NON-NLS-1$
+  private final String REMOVED = "removed"; // $NON-NLS-1$
+  private final String RETAINED = "retained"; // $NON-NLS-1$
 
   private Set<String> fAddedImports = new HashSet<String>();
 
@@ -154,8 +154,7 @@ public class ImportRemover {
       else unremovedRefs.add(name);
     }
     for (Iterator<ImportDeclaration> iterator = fInlinedStaticImports.iterator();
-        iterator.hasNext();
-        ) {
+        iterator.hasNext(); ) {
       ImportDeclaration importDecl = iterator.next();
       Name name = importDecl.getName();
       if (name instanceof QualifiedName) name = ((QualifiedName) name).getName();
@@ -223,8 +222,7 @@ public class ImportRemover {
   private boolean hasAddedStaticImport(String qualifier, String member, boolean field) {
     StaticImportData data = null;
     for (final Iterator<StaticImportData> iterator = fAddedStaticImports.iterator();
-        iterator.hasNext();
-        ) {
+        iterator.hasNext(); ) {
       data = iterator.next();
       if (data.fQualifier.equals(qualifier) && data.fMember.equals(member) && data.fField == field)
         return true;

@@ -165,7 +165,7 @@ public class ASTFragmentFactory {
 
     @Override
     public boolean visit(ASTNode node) {
-      //let fragment be null
+      // let fragment be null
       return false;
     }
 

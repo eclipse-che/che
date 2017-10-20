@@ -75,7 +75,7 @@ class FindResultViewImpl extends BaseView<FindResultView.ActionDelegate> impleme
     nextBtn.setHTML("<i class=\"fa fa-angle-right\" aria-hidden=\"true\"></i>");
     previousBtn.setHTML("<i class=\"fa fa-angle-left\" aria-hidden=\"true\"></i>");
 
-    //do not remove debug id; it's needed for selenium tests
+    // do not remove debug id; it's needed for selenium tests
     tree.ensureDebugId("result-search-tree");
     ensureDebugId("find-info-panel");
 

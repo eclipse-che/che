@@ -66,7 +66,8 @@ public class NewSearchUI {
   //				if (!status.isOK())
   //					SearchPlugin.log(status);
   //				if (status.getSeverity() == IStatus.ERROR) {
-  //					ErrorDialog.openError(SearchPlugin.getActiveWorkbenchShell(), SearchMessages.NewSearchUI_error_title, SearchMessages
+  //					ErrorDialog.openError(SearchPlugin.getActiveWorkbenchShell(),
+  // SearchMessages.NewSearchUI_error_title, SearchMessages
   //							.NewSearchUI_error_label, status);
   //				}
   //			}
@@ -88,7 +89,7 @@ public class NewSearchUI {
    */
   public static void runQueryInBackground(ISearchQuery query) throws IllegalArgumentException {
     if (query == null) {
-      throw new IllegalArgumentException("query must not be null"); //$NON-NLS-1$
+      throw new IllegalArgumentException("query must not be null"); // $NON-NLS-1$
     }
     runQueryInBackground(query, null);
   }
@@ -112,11 +113,11 @@ public class NewSearchUI {
   public static void runQueryInBackground(ISearchQuery query, ISearchResultViewPart view)
       throws IllegalArgumentException {
     if (query == null) {
-      throw new IllegalArgumentException("query must not be null"); //$NON-NLS-1$
+      throw new IllegalArgumentException("query must not be null"); // $NON-NLS-1$
     }
     if (query.canRunInBackground())
       InternalSearchUI.getInstance().runSearchInBackground(query, view);
-    else throw new IllegalArgumentException("Query can not be run in background"); //$NON-NLS-1$
+    else throw new IllegalArgumentException("Query can not be run in background"); // $NON-NLS-1$
   }
 
   /**
@@ -134,7 +135,7 @@ public class NewSearchUI {
    */
   public static IStatus runQueryInForeground(IRunnableContext context, ISearchQuery query) {
     if (query == null) {
-      throw new IllegalArgumentException("query must not be null"); //$NON-NLS-1$
+      throw new IllegalArgumentException("query must not be null"); // $NON-NLS-1$
     }
     return runQueryInForeground(context, query, null);
   }
@@ -159,7 +160,7 @@ public class NewSearchUI {
   public static IStatus runQueryInForeground(
       IRunnableContext context, ISearchQuery query, ISearchResultViewPart view) {
     if (query == null) {
-      throw new IllegalArgumentException("query must not be null"); //$NON-NLS-1$
+      throw new IllegalArgumentException("query must not be null"); // $NON-NLS-1$
     }
     return InternalSearchUI.getInstance().runSearchInForeground(context, query, view);
   }
@@ -205,7 +206,7 @@ public class NewSearchUI {
    */
   public static boolean isQueryRunning(ISearchQuery query) {
     if (query == null) {
-      throw new IllegalArgumentException("query must not be null"); //$NON-NLS-1$
+      throw new IllegalArgumentException("query must not be null"); // $NON-NLS-1$
     }
     return InternalSearchUI.getInstance().isQueryRunning(query);
   }
@@ -219,7 +220,7 @@ public class NewSearchUI {
    */
   public static void cancelQuery(ISearchQuery query) {
     if (query == null) {
-      throw new IllegalArgumentException("query must not be null"); //$NON-NLS-1$
+      throw new IllegalArgumentException("query must not be null"); // $NON-NLS-1$
     }
     InternalSearchUI.getInstance().cancelSearch(query);
   }
@@ -235,21 +236,21 @@ public class NewSearchUI {
   }
 
   /** Search Plug-in Id (value <code>"org.eclipse.search"</code>). */
-  public static final String PLUGIN_ID = "org.eclipse.search"; //$NON-NLS-1$
+  public static final String PLUGIN_ID = "org.eclipse.search"; // $NON-NLS-1$
 
   /**
    * Search marker type (value <code>"org.eclipse.search.searchmarker"</code>).
    *
    * @see org.eclipse.core.resources.IMarker
    */
-  public static final String SEARCH_MARKER = PLUGIN_ID + ".searchmarker"; //$NON-NLS-1$
+  public static final String SEARCH_MARKER = PLUGIN_ID + ".searchmarker"; // $NON-NLS-1$
 
   /** Id of the new Search view (value <code>"org.eclipse.search.ui.views.SearchView"</code>). */
   public static final String SEARCH_VIEW_ID =
-      "org.eclipse.search.ui.views.SearchView"; //$NON-NLS-1$
+      "org.eclipse.search.ui.views.SearchView"; // $NON-NLS-1$
 
   /** Id of the Search action set (value <code>"org.eclipse.search.searchActionSet"</code>). */
-  public static final String ACTION_SET_ID = PLUGIN_ID + ".searchActionSet"; //$NON-NLS-1$
+  public static final String ACTION_SET_ID = PLUGIN_ID + ".searchActionSet"; // $NON-NLS-1$
 
   //
   //	/**

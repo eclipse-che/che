@@ -101,12 +101,6 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>sun.jdt</groupId>
-            <artifactId>tools</artifactId>
-            <scope>system</scope>
-            <systemPath>${java.home}/../lib/tools.jar</systemPath>
-        </dependency>
-        <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <scope>test</scope>
@@ -287,6 +281,20 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+        <profile>
+            <id>java8-tools</id>
+            <activation>
+                <jdk>(,1.9)</jdk>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>sun.jdt</groupId>
+                    <artifactId>tools</artifactId>
+                    <scope>system</scope>
+                    <systemPath>${java.home}/../lib/tools.jar</systemPath>
+                </dependency>
+            </dependencies>
         </profile>
     </profiles>
 </project>

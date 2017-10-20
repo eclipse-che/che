@@ -30,7 +30,7 @@ class Util {
       ISourceRange selection, ISourceRange nodes, IBuffer buffer) {
     if (!covers(selection, nodes)) return false;
 
-    //TODO: skip leading comments. Consider that leading line comment must be followed by newline!
+    // TODO: skip leading comments. Consider that leading line comment must be followed by newline!
     if (!isJustWhitespace(selection.getOffset(), nodes.getOffset(), buffer)) return true;
     if (!isJustWhitespaceOrComment(
         nodes.getOffset() + nodes.getLength(),

@@ -324,7 +324,7 @@ public final class CronExpression implements Serializable, Cloneable {
   public Date getNextInvalidTimeAfter(Date date) {
     long difference = 1000;
 
-    //move back to the nearest second so differences will be accurate
+    // move back to the nearest second so differences will be accurate
     Calendar adjustCal = Calendar.getInstance(getTimeZone());
     adjustCal.setTime(date);
     adjustCal.set(Calendar.MILLISECOND, 0);
@@ -332,9 +332,11 @@ public final class CronExpression implements Serializable, Cloneable {
 
     Date newDate;
 
-    //FUTURE_TODO: (QUARTZ-481) IMPROVE THIS! The following is a BAD solution to this problem. Performance will be very bad here, depending on the cron expression. It is, however A solution.
+    // FUTURE_TODO: (QUARTZ-481) IMPROVE THIS! The following is a BAD solution to this problem.
+    // Performance will be very bad here, depending on the cron expression. It is, however A
+    // solution.
 
-    //keep getting the next included time until it's farther than one second
+    // keep getting the next included time until it's farther than one second
     // apart. At that point, lastDate is the last valid fire time. We return
     // the second immediately following it.
     while (difference == 1000) {
@@ -1145,7 +1147,7 @@ public final class CronExpression implements Serializable, Cloneable {
     // loop until we've computed the next time, or we've past the endTime
     while (!gotOne) {
 
-      //if (endTime != null && cl.getTime().after(endTime)) return null;
+      // if (endTime != null && cl.getTime().after(endTime)) return null;
       if (cl.get(Calendar.YEAR) > 2999) { // prevent endless loop...
         return null;
       }

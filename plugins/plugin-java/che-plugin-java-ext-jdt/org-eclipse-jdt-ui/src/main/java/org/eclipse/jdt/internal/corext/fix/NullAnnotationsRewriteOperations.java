@@ -116,7 +116,7 @@ public class NullAnnotationsRewriteOperations {
           if (pairs.length > 0) {
             // is default cancelled by "false" or "value=false" ?
             for (int j = 0; j < pairs.length; j++)
-              if (pairs[j].getKey() == null || pairs[j].getKey().equals("value")) //$NON-NLS-1$
+              if (pairs[j].getKey() == null || pairs[j].getKey().equals("value")) // $NON-NLS-1$
               return (pairs[j].getValue() != Boolean.FALSE);
           }
           return true;
@@ -155,7 +155,7 @@ public class NullAnnotationsRewriteOperations {
         boolean allowRemove,
         String message) {
       fUnit = unit;
-      fKey = method.resolveBinding().getKey() + "<return>"; //$NON-NLS-1$
+      fKey = method.resolveBinding().getKey() + "<return>"; // $NON-NLS-1$
       fBodyDeclaration = method;
       fAnnotationToAdd = annotationToAdd;
       fAnnotationToRemove = annotationToRemove;
@@ -174,7 +174,8 @@ public class NullAnnotationsRewriteOperations {
       TextEditGroup group = createTextEditGroup(fMessage, cuRewrite);
       if (!checkExisting(fBodyDeclaration.modifiers(), listRewrite, group)) return;
       if (hasNonNullDefault(fBodyDeclaration.resolveBinding()))
-        return; // should be safe, as in this case checkExisting() should've already produced a change (remove existing
+        return; // should be safe, as in this case checkExisting() should've already produced a
+      // change (remove existing
       // annotation).
       Annotation newAnnotation = ast.newMarkerAnnotation();
       ImportRewrite importRewrite = cuRewrite.getImportRewrite();
@@ -217,7 +218,7 @@ public class NullAnnotationsRewriteOperations {
           "Argument "
               + paramName
               + " not found in method "
-              + method.getName().getIdentifier()); //$NON-NLS-1$ //$NON-NLS-2$
+              + method.getName().getIdentifier()); // $NON-NLS-1$ //$NON-NLS-2$
     }
 
     ParameterAnnotationRewriteOperation(
@@ -477,7 +478,8 @@ public class NullAnnotationsRewriteOperations {
             // statement suggests changing parameters:
             if (declaration.getNodeType() == ASTNode.METHOD_DECLARATION
                 && selectedNode instanceof SimpleName) {
-              // don't call findAffectedParameterName(), in this branch we're not interested in any target method
+              // don't call findAffectedParameterName(), in this branch we're not interested in any
+              // target method
               String paramName = ((SimpleName) selectedNode).getIdentifier();
               if (paramName != null) {
                 String message =
@@ -497,7 +499,7 @@ public class NullAnnotationsRewriteOperations {
             }
             break;
           }
-          //$FALL-THROUGH$
+          // $FALL-THROUGH$
         case IProblem.IllegalReturnNullityRedefinition:
           String message =
               Messages.format(
@@ -664,7 +666,8 @@ public class NullAnnotationsRewriteOperations {
     if (methodDecl == null) return null;
     declaration = (MethodDeclaration) methodDecl;
     // TODO(SH): decide whether we want to propose overwriting existing annotations in super
-    //		if (hasNullAnnotation(declaration)) // if overridden has explicit declaration don't propose to change it
+    //		if (hasNullAnnotation(declaration)) // if overridden has explicit declaration don't propose
+    // to change it
     //			return null;
     String message =
         Messages.format(

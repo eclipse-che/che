@@ -93,7 +93,7 @@ public abstract class RefactoringDescriptor implements Comparable {
    * IRefactoringHistoryListener} in order to keep clients of these listeners synchronized with the
    * workbench's operation history.
    */
-  public static final String ID_UNKNOWN = "org.eclipse.ltk.core.refactoring.unknown"; //$NON-NLS-1$
+  public static final String ID_UNKNOWN = "org.eclipse.ltk.core.refactoring.unknown"; // $NON-NLS-1$
 
   /**
    * Constant describing the multi change flag (value: <code>4</code>).
@@ -168,14 +168,14 @@ public abstract class RefactoringDescriptor implements Comparable {
       final String comment,
       final int flags) {
     Assert.isNotNull(id);
-    Assert.isLegal(!"".equals(id), "Refactoring id must not be empty"); //$NON-NLS-1$ //$NON-NLS-2$
+    Assert.isLegal(!"".equals(id), "Refactoring id must not be empty"); // $NON-NLS-1$ //$NON-NLS-2$
     Assert.isLegal(
         project == null || !"".equals(project),
-        "Project must either be null or non-empty"); //$NON-NLS-1$ //$NON-NLS-2$
+        "Project must either be null or non-empty"); // $NON-NLS-1$ //$NON-NLS-2$
     Assert.isNotNull(description);
     Assert.isLegal(
-        !"".equals(description), "Description must not be empty"); //$NON-NLS-1$//$NON-NLS-2$
-    Assert.isLegal(flags >= NONE, "Flags must be non-negative"); //$NON-NLS-1$
+        !"".equals(description), "Description must not be empty"); // $NON-NLS-1$//$NON-NLS-2$
+    Assert.isLegal(flags >= NONE, "Flags must be non-negative"); // $NON-NLS-1$
     fRefactoringId = id;
     fDescription = description;
     fProject = project;
@@ -256,7 +256,7 @@ public abstract class RefactoringDescriptor implements Comparable {
    * @return the details comment, or the empty string
    */
   public final String getComment() {
-    return (fComment != null) ? fComment : ""; //$NON-NLS-1$
+    return (fComment != null) ? fComment : ""; // $NON-NLS-1$
   }
 
   /**
@@ -337,7 +337,7 @@ public abstract class RefactoringDescriptor implements Comparable {
   public void setDescription(final String description) {
     Assert.isNotNull(description);
     Assert.isLegal(
-        !"".equals(description), "Description must not be empty"); //$NON-NLS-1$ //$NON-NLS-2$
+        !"".equals(description), "Description must not be empty"); // $NON-NLS-1$ //$NON-NLS-2$
     fDescription = description;
   }
 
@@ -351,7 +351,7 @@ public abstract class RefactoringDescriptor implements Comparable {
    * @since 3.3
    */
   public void setFlags(final int flags) {
-    Assert.isLegal(flags >= NONE, "Flags must be non-negative"); //$NON-NLS-1$
+    Assert.isLegal(flags >= NONE, "Flags must be non-negative"); // $NON-NLS-1$
     fFlags = flags;
   }
 
@@ -366,7 +366,7 @@ public abstract class RefactoringDescriptor implements Comparable {
   public void setProject(final String project) {
     Assert.isLegal(
         project == null || !"".equals(project),
-        "Project must either be null or non-empty"); //$NON-NLS-1$ //$NON-NLS-2$
+        "Project must either be null or non-empty"); // $NON-NLS-1$ //$NON-NLS-2$
     fProject = project;
   }
 
@@ -389,21 +389,21 @@ public abstract class RefactoringDescriptor implements Comparable {
     final StringBuffer buffer = new StringBuffer(128);
 
     buffer.append(getClass().getName());
-    if (fRefactoringId.equals(ID_UNKNOWN)) buffer.append("[unknown refactoring]"); //$NON-NLS-1$
+    if (fRefactoringId.equals(ID_UNKNOWN)) buffer.append("[unknown refactoring]"); // $NON-NLS-1$
     else {
-      buffer.append("[timeStamp="); //$NON-NLS-1$
+      buffer.append("[timeStamp="); // $NON-NLS-1$
       buffer.append(fTimeStamp);
-      buffer.append(",id="); //$NON-NLS-1$
+      buffer.append(",id="); // $NON-NLS-1$
       buffer.append(fRefactoringId);
-      buffer.append(",description="); //$NON-NLS-1$
+      buffer.append(",description="); // $NON-NLS-1$
       buffer.append(fDescription);
-      buffer.append(",project="); //$NON-NLS-1$
+      buffer.append(",project="); // $NON-NLS-1$
       buffer.append(fProject);
-      buffer.append(",comment="); //$NON-NLS-1$
+      buffer.append(",comment="); // $NON-NLS-1$
       buffer.append(fComment);
-      buffer.append(",flags="); //$NON-NLS-1$
+      buffer.append(",flags="); // $NON-NLS-1$
       buffer.append(fFlags);
-      buffer.append("]"); //$NON-NLS-1$
+      buffer.append("]"); // $NON-NLS-1$
     }
 
     return buffer.toString();

@@ -85,7 +85,7 @@ public class TokenScanner {
     IBuffer buffer = typeRoot.getBuffer();
     if (buffer == null) {
       throw new CoreException(
-          createError(DOCUMENT_ERROR, "Element has no source", null)); //$NON-NLS-1$
+          createError(DOCUMENT_ERROR, "Element has no source", null)); // $NON-NLS-1$
     }
     String sourceLevel = project.getOption(JavaCore.COMPILER_SOURCE, true);
     String complianceLevel = project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
@@ -145,7 +145,7 @@ public class TokenScanner {
       try {
         curr = fScanner.getNextToken();
         if (curr == ITerminalSymbols.TokenNameEOF) {
-          throw new CoreException(createError(END_OF_FILE, "End Of File", null)); //$NON-NLS-1$
+          throw new CoreException(createError(END_OF_FILE, "End Of File", null)); // $NON-NLS-1$
         }
       } catch (InvalidInputException e) {
         throw new CoreException(createError(LEXICAL_ERROR, e.getMessage(), e));
@@ -418,7 +418,7 @@ public class TokenScanner {
       try {
         return fDocument.getLineOfOffset(offset);
       } catch (BadLocationException e) {
-        String message = "Illegal offset: " + offset; //$NON-NLS-1$
+        String message = "Illegal offset: " + offset; // $NON-NLS-1$
         throw new CoreException(createError(DOCUMENT_ERROR, message, e));
       }
     }
@@ -431,7 +431,7 @@ public class TokenScanner {
         IRegion region = fDocument.getLineInformation(line);
         return region.getOffset() + region.getLength();
       } catch (BadLocationException e) {
-        String message = "Illegal line: " + line; //$NON-NLS-1$
+        String message = "Illegal line: " + line; // $NON-NLS-1$
         throw new CoreException(createError(DOCUMENT_ERROR, message, e));
       }
     }

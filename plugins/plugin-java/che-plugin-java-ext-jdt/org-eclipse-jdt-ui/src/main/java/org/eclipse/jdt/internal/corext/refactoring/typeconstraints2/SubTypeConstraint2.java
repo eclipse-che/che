@@ -30,7 +30,8 @@ public final class SubTypeConstraint2 implements ITypeConstraint2 {
    */
   @Override
   public final boolean equals(Object other) {
-    // can use object identity on ConstraintVariables, since we have the stored (or to be stored) objects
+    // can use object identity on ConstraintVariables, since we have the stored (or to be stored)
+    // objects
     if (other.getClass() != SubTypeConstraint2.class) return false;
 
     ITypeConstraint2 otherTC = (ITypeConstraint2) other;
@@ -58,6 +59,6 @@ public final class SubTypeConstraint2 implements ITypeConstraint2 {
    */
   @Override
   public final String toString() {
-    return fDescendant.toString() + " <= " + fAncestor.toString(); //$NON-NLS-1$
+    return fDescendant.toString() + " <= " + fAncestor.toString(); // $NON-NLS-1$
   }
 }

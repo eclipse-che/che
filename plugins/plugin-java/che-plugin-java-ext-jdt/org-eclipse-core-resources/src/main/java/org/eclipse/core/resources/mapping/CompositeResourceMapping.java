@@ -111,7 +111,7 @@ public final class CompositeResourceMapping extends ResourceMapping {
       throws CoreException {
     if (monitor == null) monitor = new NullProgressMonitor();
     try {
-      monitor.beginTask("", 100 * mappings.length); //$NON-NLS-1$
+      monitor.beginTask("", 100 * mappings.length); // $NON-NLS-1$
       List<ResourceTraversal> result = new ArrayList<ResourceTraversal>();
       for (int i = 0; i < mappings.length; i++) {
         ResourceMapping mapping = mappings[i];

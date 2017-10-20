@@ -151,7 +151,7 @@ public class RenamePackageTest extends RefactoringTest {
       for (int j = 0; j < packageFiles[i].length; j++) {
         createCUfromTestFile(
             packages[i], packageFiles[i][j], packageNames[i].replace('.', '/') + "/");
-        //DebugUtils.dump(cu.getElementName() + "\n" + cu.getSource());
+        // DebugUtils.dump(cu.getElementName() + "\n" + cu.getSource());
       }
     }
     IPackageFragment thisPackage = packages[0];
@@ -259,7 +259,7 @@ public class RenamePackageTest extends RefactoringTest {
       }
     }
 
-    //---
+    // ---
 
     if (hasSubpackages) {
       assertTrue(
@@ -280,11 +280,11 @@ public class RenamePackageTest extends RefactoringTest {
         String s1 = getFileContents(getOutputTestFileName(packageFileNames[i][j], packageName));
         ICompilationUnit cu =
             (i == 0) ? newPackage.getCompilationUnit(packageFileNames[i][j] + ".java") : cus[i][j];
-        //DebugUtils.dump("cu:" + cu.getElementName());
+        // DebugUtils.dump("cu:" + cu.getElementName());
         String s2 = cu.getSource();
 
-        //DebugUtils.dump("expected:" + s1);
-        //DebugUtils.dump("was:" + s2);
+        // DebugUtils.dump("expected:" + s1);
+        // DebugUtils.dump("was:" + s2);
         assertEqualLines("invalid update in file " + cu.getElementName(), s1, s2);
       }
     }
@@ -361,11 +361,11 @@ public class RenamePackageTest extends RefactoringTest {
               (r == 0 && pa == 0)
                   ? newPackage.getCompilationUnit(cuNames[r][pa][typ] + ".java")
                   : cus[r][pa][typ];
-          //DebugUtils.dump("cu:" + cu.getElementName());
+          // DebugUtils.dump("cu:" + cu.getElementName());
           String s2 = cu.getSource();
 
-          //DebugUtils.dump("expected:" + s1);
-          //DebugUtils.dump("was:" + s2);
+          // DebugUtils.dump("expected:" + s1);
+          // DebugUtils.dump("was:" + s2);
           assertEqualLines("invalid update in file " + cu.toString(), s1, s2);
         }
       }
@@ -895,13 +895,18 @@ public class RenamePackageTest extends RefactoringTest {
   //	public void testHierarchicalJUnit() throws Exception {
   //		fRenameSubpackages= true;
   //
-  //		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
+  //		File junitSrcArchive=
+  // JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
   //		assertTrue(junitSrcArchive != null && junitSrcArchive.exists());
-  //		IPackageFragmentRoot src= JavaProjectHelper.addSourceContainerWithImport(getRoot().getJavaProject(), "src", junitSrcArchive,
+  //		IPackageFragmentRoot src=
+  // JavaProjectHelper.addSourceContainerWithImport(getRoot().getJavaProject(), "src",
+  // junitSrcArchive,
   // JavaProjectHelper.JUNIT_SRC_ENCODING);
   //
-  //		String[] packageNames= new String[]{"junit", "junit.extensions", "junit.framework", "junit.runner", "junit.samples", "junit
-  // .samples.money", "junit.tests", "junit.tests.extensions", "junit.tests.framework", "junit.tests.runner", "junit.textui"};
+  //		String[] packageNames= new String[]{"junit", "junit.extensions", "junit.framework",
+  // "junit.runner", "junit.samples", "junit
+  // .samples.money", "junit.tests", "junit.tests.extensions", "junit.tests.framework",
+  // "junit.tests.runner", "junit.textui"};
   //		ICompilationUnit[][] cus= new ICompilationUnit[packageNames.length][];
   //		for (int i= 0; i < cus.length; i++) {
   //			cus[i]= src.getPackageFragment(packageNames[i]).getCompilationUnits();
@@ -909,7 +914,8 @@ public class RenamePackageTest extends RefactoringTest {
   //		IPackageFragment thisPackage= src.getPackageFragment("junit");
   //
   //		ParticipantTesting.reset();
-  //		PackageRename rename= new PackageRename(packageNames, new String[packageNames.length][0],"jdiverge");
+  //		PackageRename rename= new PackageRename(packageNames, new
+  // String[packageNames.length][0],"jdiverge");
   //
   //		RenameArguments[] renameArguments= new RenameArguments[packageNames.length + 1];
   //		for (int i= 0; i < packageNames.length; i++) {
@@ -917,9 +923,11 @@ public class RenamePackageTest extends RefactoringTest {
   //		}
   //		renameArguments[packageNames.length]= new RenameArguments("jdiverge", true);
   //		String[] renameHandles= new String[packageNames.length + 1];
-  //		System.arraycopy(ParticipantTesting.createHandles(JavaElementUtil.getPackageAndSubpackages(thisPackage)), 0, renameHandles, 0,
+  //
+  //	System.arraycopy(ParticipantTesting.createHandles(JavaElementUtil.getPackageAndSubpackages(thisPackage)), 0, renameHandles, 0,
   // packageNames.length);
-  //		renameHandles[packageNames.length]= ParticipantTesting.createHandles(thisPackage.getResource())[0];
+  //		renameHandles[packageNames.length]=
+  // ParticipantTesting.createHandles(thisPackage.getResource())[0];
   //
   //		// --- execute:
   //		RenameJavaElementDescriptor descriptor= createRefactoringDescriptor(thisPackage, "jdiverge");
@@ -952,7 +960,8 @@ public class RenamePackageTest extends RefactoringTest {
   //			assertTrue(entry.getCode() == RefactoringStatusCodes.MAIN_METHOD);
   //		}
   //
-  //		assertTrue("package not renamed: " + rename.fPackageNames[0], ! src.getPackageFragment(rename.fPackageNames[0]).exists());
+  //		assertTrue("package not renamed: " + rename.fPackageNames[0], !
+  // src.getPackageFragment(rename.fPackageNames[0]).exists());
   //		IPackageFragment newPackage= src.getPackageFragment(rename.fNewPackageName);
   //		assertTrue("new package does not exist", newPackage.exists());
   //		// ---
@@ -963,17 +972,19 @@ public class RenamePackageTest extends RefactoringTest {
   //		ResourcesPlugin.getWorkspace().run(performUndo, new NullProgressMonitor());
   //
   //		assertTrue("new package still exists", ! newPackage.exists());
-  //		assertTrue("original package does not exist: " + rename.fPackageNames[0], src.getPackageFragment(rename.fPackageNames[0]).exists
+  //		assertTrue("original package does not exist: " + rename.fPackageNames[0],
+  // src.getPackageFragment(rename.fPackageNames[0]).exists
   // ());
   //
-  //		ZipInputStream zis= new ZipInputStream(new BufferedInputStream(new FileInputStream(junitSrcArchive)));
+  //		ZipInputStream zis= new ZipInputStream(new BufferedInputStream(new
+  // FileInputStream(junitSrcArchive)));
   //		ZipTools.compareWithZipped(src, zis, JavaProjectHelper.JUNIT_SRC_ENCODING);
   //	}
   @Test
   @Ignore
   public void testFail1() throws Exception {
     printTestDisabledMessage("needs revisiting");
-    //helper1(new String[]{"r.p1"}, new String[][]{{"A"}}, "r");
+    // helper1(new String[]{"r.p1"}, new String[][]{{"A"}}, "r");
   }
 
   @Test
@@ -999,7 +1010,7 @@ public class RenamePackageTest extends RefactoringTest {
   @Test
   @Ignore
   public void testFail7() throws Exception {
-    //printTestDisabledMessage("1GK90H4: ITPJCORE:WIN2000 - search: missing package reference");
+    // printTestDisabledMessage("1GK90H4: ITPJCORE:WIN2000 - search: missing package reference");
     printTestDisabledMessage("corner case - name obscuring");
     //		helper1(new String[]{"r", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
   }
@@ -1011,13 +1022,13 @@ public class RenamePackageTest extends RefactoringTest {
     //		helper1(new String[]{"r", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
   }
 
-  //native method used r.A as a parameter
+  // native method used r.A as a parameter
   @Test
   @Ignore
   public void testFail9() throws Exception {
     printTestDisabledMessage(
         "corner case - qualified name used  as a parameter of a native method");
-    //helper1(new String[]{"r", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
+    // helper1(new String[]{"r", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
   }
 
   @Test
@@ -1035,7 +1046,7 @@ public class RenamePackageTest extends RefactoringTest {
     fIsPreDeltaTest = true;
   }
 
-  //-------
+  // -------
 
   @Test
   public void test1() throws Exception {
@@ -1082,7 +1093,8 @@ public class RenamePackageTest extends RefactoringTest {
     RenamePackageProcessor processor =
         helper2(new String[] {"r", "fred"}, new String[][] {{"A"}, {"A"}}, "p1");
 
-    // test that participants are correctly informed after '< Back': https://bugs.eclipse.org/bugs/show_bug.cgi?id=280068
+    // test that participants are correctly informed after '< Back':
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=280068
     performUndo();
 
     ParticipantTesting.reset();
@@ -1145,7 +1157,7 @@ public class RenamePackageTest extends RefactoringTest {
   }
 
   @Test
-  public void test6() throws Exception { //bug 66250
+  public void test6() throws Exception { // bug 66250
     fUpdateReferences = false;
     fUpdateTextualMatches = true;
     fIsPreDeltaTest = true;
@@ -1305,7 +1317,7 @@ public class RenamePackageTest extends RefactoringTest {
   @Test
   @Ignore
   public void testImportFromMultiRoots4() throws Exception {
-    //circular buildpath references
+    // circular buildpath references
     IJavaProject projectPrg = null;
     IJavaProject projectTest = null;
     Hashtable options = JavaCore.getOptions();
@@ -1342,7 +1354,7 @@ public class RenamePackageTest extends RefactoringTest {
   @Test
   @Ignore
   public void testImportFromMultiRoots5() throws Exception {
-    //rename srcTest-p.p to q => ATest now must import p.p.A
+    // rename srcTest-p.p to q => ATest now must import p.p.A
     IJavaProject projectPrg = null;
     IJavaProject projectTest = null;
     try {
@@ -1372,7 +1384,7 @@ public class RenamePackageTest extends RefactoringTest {
   @Test
   @Ignore
   public void testImportFromMultiRoots6() throws Exception {
-    //rename srcTest-p.p to a.b.c => ATest must retain import p.p.A
+    // rename srcTest-p.p to a.b.c => ATest must retain import p.p.A
     helperMultiRoots(
         new String[] {"srcTest", "srcPrg"},
         new String[][] {new String[] {"p.p"}, new String[] {"p.p"}},
@@ -1392,17 +1404,17 @@ public class RenamePackageTest extends RefactoringTest {
       prj = JavaProjectHelper.createJavaProject("prj", "bin");
       assertNotNull(JavaProjectHelper.addRTJar(prj));
       IPackageFragmentRoot srcPrj =
-          JavaProjectHelper.addSourceContainer(prj, "srcPrj"); //$NON-NLS-1$
+          JavaProjectHelper.addSourceContainer(prj, "srcPrj"); // $NON-NLS-1$
 
       prjRef = JavaProjectHelper.createJavaProject("prj.ref", "bin");
       assertNotNull(JavaProjectHelper.addRTJar(prjRef));
       IPackageFragmentRoot srcPrjRef =
-          JavaProjectHelper.addSourceContainer(prjRef, "srcPrj.ref"); //$NON-NLS-1$
+          JavaProjectHelper.addSourceContainer(prjRef, "srcPrj.ref"); // $NON-NLS-1$
 
       prjOther = JavaProjectHelper.createJavaProject("prj.other", "bin");
       assertNotNull(JavaProjectHelper.addRTJar(prjOther));
       IPackageFragmentRoot srcPrjOther =
-          JavaProjectHelper.addSourceContainer(prjRef, "srcPrj.other"); //$NON-NLS-1$
+          JavaProjectHelper.addSourceContainer(prjRef, "srcPrj.other"); // $NON-NLS-1$
 
       JavaProjectHelper.addRequiredProject(prjRef, prj);
       JavaProjectHelper.addRequiredProject(prjRef, prjOther);

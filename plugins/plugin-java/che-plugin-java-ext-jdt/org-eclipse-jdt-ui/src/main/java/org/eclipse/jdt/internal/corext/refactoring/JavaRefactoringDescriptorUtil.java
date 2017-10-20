@@ -42,7 +42,7 @@ public class JavaRefactoringDescriptorUtil {
    * <p>The element arguments are simply distinguished by appending a number to the argument name,
    * e.g. element1. The indices of this argument are non zero-based.
    */
-  public static final String ATTRIBUTE_ELEMENT = "element"; //$NON-NLS-1$
+  public static final String ATTRIBUTE_ELEMENT = "element"; // $NON-NLS-1$
 
   /**
    * Predefined argument called <code>input</code>.
@@ -52,7 +52,7 @@ public class JavaRefactoringDescriptorUtil {
    * possible to uniquely identify the input element using the value of this argument in conjunction
    * with the values of the other user-defined attributes.
    */
-  public static final String ATTRIBUTE_INPUT = "input"; //$NON-NLS-1$
+  public static final String ATTRIBUTE_INPUT = "input"; // $NON-NLS-1$
 
   /**
    * Predefined argument called <code>name</code>.
@@ -60,7 +60,7 @@ public class JavaRefactoringDescriptorUtil {
    * <p>This argument should be used to name the element being refactored. The value of this
    * argument may be shown in the user interface.
    */
-  public static final String ATTRIBUTE_NAME = "name"; //$NON-NLS-1$
+  public static final String ATTRIBUTE_NAME = "name"; // $NON-NLS-1$
 
   /**
    * Predefined argument called <code>references</code>.
@@ -68,7 +68,7 @@ public class JavaRefactoringDescriptorUtil {
    * <p>This argument should be used to describe whether references to the elements being refactored
    * should be updated as well.
    */
-  public static final String ATTRIBUTE_REFERENCES = "references"; //$NON-NLS-1$
+  public static final String ATTRIBUTE_REFERENCES = "references"; // $NON-NLS-1$
 
   /**
    * Predefined argument called <code>selection</code>.
@@ -76,7 +76,7 @@ public class JavaRefactoringDescriptorUtil {
    * <p>This argument should be used to describe user input selections within a text file. The value
    * of this argument has the format "offset length".
    */
-  public static final String ATTRIBUTE_SELECTION = "selection"; //$NON-NLS-1$
+  public static final String ATTRIBUTE_SELECTION = "selection"; // $NON-NLS-1$
 
   /**
    * Converts the specified element to an input handle.
@@ -172,11 +172,11 @@ public class JavaRefactoringDescriptorUtil {
    */
   public static IResource handleToResource(final String project, final String handle) {
     final IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-    if ("".equals(handle)) //$NON-NLS-1$
+    if ("".equals(handle)) // $NON-NLS-1$
     return null;
     final IPath path = Path.fromPortableString(handle);
     if (path == null) return null;
-    if (project != null && !"".equals(project) && !path.isAbsolute()) //$NON-NLS-1$
+    if (project != null && !"".equals(project) && !path.isAbsolute()) // $NON-NLS-1$
     return root.getProject(project).findMember(path);
     return root.findMember(path);
   }
@@ -192,7 +192,7 @@ public class JavaRefactoringDescriptorUtil {
   public static String resourceToHandle(final String project, final IResource resource) {
     if (project != null
         && !"".equals(project)
-        && project.equals(resource.getProject().getName())) //$NON-NLS-1$
+        && project.equals(resource.getProject().getName())) // $NON-NLS-1$
     return resource.getProjectRelativePath().toPortableString();
     return resource.getFullPath().toPortableString();
   }

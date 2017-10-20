@@ -48,7 +48,7 @@ public class EditorTabWidgetTest {
 
   private static final String SOME_TEXT = "someText";
 
-  //constructor mocks
+  // constructor mocks
   @Mock(answer = Answers.RETURNS_DEEP_STUBS)
   private PartStackUIResources resources;
 
@@ -57,7 +57,7 @@ public class EditorTabWidgetTest {
   @Mock private EditorPartPresenter editorPartPresenter;
   @Mock private EditorPartStack editorPartStack;
 
-  //additional mocks
+  // additional mocks
   @Mock private Element element;
   @Mock private OMSVGSVGElement svg;
   @Mock private ActionDelegate delegate;

@@ -69,12 +69,12 @@ public class RenameWorkspaceTest {
     dashboardWorkspace.clickOnSaveBtn();
     dashboardWorkspace.checkStateOfWorkspace(StateWorkspace.STOPPING);
 
-    //This temporary solution for detect problem with this test
-    //we will make screenshot every 5 ms for understanding problem
+    // This temporary solution for detect problem with this test
+    // we will make screenshot every 5 ms for understanding problem
     screenshot(StateWorkspace.STOPPING.getStatus());
 
     int i = 1;
-    while (!checkStateOfWorkspace(StateWorkspace.STARTING) && i < 120) {
+    while (!checkStateOfWorkspaceIsStarting() && i < 120) {
       screenshot(StateWorkspace.STARTING.getStatus() + i);
       WaitUtils.sleepQuietly(500, TimeUnit.MILLISECONDS);
       i++;
@@ -94,15 +94,13 @@ public class RenameWorkspaceTest {
     Files.copy(new ByteArrayInputStream(data), screenshot);
   }
 
-  public boolean checkStateOfWorkspace(StateWorkspace stateWorkspace) {
+  public boolean checkStateOfWorkspaceIsStarting() {
     try {
       dashboard
           .driver()
           .findElement(
               By.xpath(
-                  format(
-                      "//div[contains(@class, 'workspace-status')]/span[text()='%s']",
-                      stateWorkspace.getStatus())));
+                  format("//div[contains(@class, 'workspace-status')]/span[text()='starting']")));
       return true;
     } catch (NoSuchElementException e) {
       return false;

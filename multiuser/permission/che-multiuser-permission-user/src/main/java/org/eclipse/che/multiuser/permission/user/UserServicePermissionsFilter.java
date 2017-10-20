@@ -54,12 +54,12 @@ public class UserServicePermissionsFilter extends CheMethodInvokerFilter {
       case "getById":
       case "find":
       case "getSettings":
-        //public methods
+        // public methods
         return;
       case "create":
         final String token = (String) arguments[1];
         if (token != null) {
-          //it is available to create user from token without permissions
+          // it is available to create user from token without permissions
           if (!userSelfCreationAllowed
               && !subject.hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_USERS_ACTION)) {
             throw new ForbiddenException(
@@ -74,13 +74,13 @@ public class UserServicePermissionsFilter extends CheMethodInvokerFilter {
       case "remove":
         final String userToRemove = (String) arguments[0];
         if (subject.getUserId().equals(userToRemove)) {
-          //everybody should be able to remove himself
+          // everybody should be able to remove himself
           return;
         }
         subject.checkPermission(SystemDomain.DOMAIN_ID, null, MANAGE_USERS_ACTION);
         break;
       default:
-        //unknown method
+        // unknown method
         throw new ForbiddenException("User is not authorized to perform this operation");
     }
   }

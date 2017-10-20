@@ -63,7 +63,8 @@ public final class ExtendsWildcardType extends WildcardType {
       case PARAMETERIZED_TYPE:
         return rhs.canAssignTo(getBound());
       case RAW_TYPE:
-        // unchecked conversion not allowed here; fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=127583
+        // unchecked conversion not allowed here; fix for
+        // https://bugs.eclipse.org/bugs/show_bug.cgi?id=127583
         return !getBound().isParameterizedType() && rhs.canAssignTo(getBound());
 
       case UNBOUND_WILDCARD_TYPE:
@@ -94,11 +95,11 @@ public final class ExtendsWildcardType extends WildcardType {
 
   @Override
   public String getName() {
-    return internalGetName("extends"); //$NON-NLS-1$
+    return internalGetName("extends"); // $NON-NLS-1$
   }
 
   @Override
   protected String getPlainPrettySignature() {
-    return internalGetPrettySignature("extends"); //$NON-NLS-1$
+    return internalGetPrettySignature("extends"); // $NON-NLS-1$
   }
 }

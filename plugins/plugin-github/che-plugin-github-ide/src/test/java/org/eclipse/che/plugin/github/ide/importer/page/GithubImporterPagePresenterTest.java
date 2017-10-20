@@ -143,7 +143,7 @@ public class GithubImporterPagePresenterTest {
     String importerDescription = "description";
     AcceptsOneWidget container = mock(AcceptsOneWidget.class);
     ProjectImporterDescriptor projectImporter = mock(ProjectImporterDescriptor.class);
-    //when(wizardContext.getData(ImportProjectWizard.PROJECT_IMPORTER)).thenReturn(projectImporter);
+    // when(wizardContext.getData(ImportProjectWizard.PROJECT_IMPORTER)).thenReturn(projectImporter);
     when(projectImporter.getDescription()).thenReturn(importerDescription);
 
     presenter.go(container);
@@ -265,7 +265,7 @@ public class GithubImporterPagePresenterTest {
 
   @Test
   public void testSshUriWithHostBetweenDoubleSlashAndSlash() {
-    //Check for type uri which start with ssh:// and has host between // and /
+    // Check for type uri which start with ssh:// and has host between // and /
     String correctUrl = "ssh://host.com/some/path";
     when(view.getProjectName()).thenReturn("");
 
@@ -276,7 +276,7 @@ public class GithubImporterPagePresenterTest {
 
   @Test
   public void testSshUriWithHostBetweenDoubleSlashAndColon() {
-    //Check for type uri with host between // and :
+    // Check for type uri with host between // and :
     String correctUrl = "ssh://host.com:port/some/path";
     when(view.getProjectName()).thenReturn("");
 
@@ -287,7 +287,7 @@ public class GithubImporterPagePresenterTest {
 
   @Test
   public void testGitUriWithHostBetweenDoubleSlashAndSlash() {
-    //Check for type uri which start with git:// and has host between // and /
+    // Check for type uri which start with git:// and has host between // and /
     String correctUrl = "git://host.com/user/repo";
     when(view.getProjectName()).thenReturn("");
 
@@ -298,7 +298,7 @@ public class GithubImporterPagePresenterTest {
 
   @Test
   public void testSshUriWithHostBetweenAtAndColon() {
-    //Check for type uri with host between @ and :
+    // Check for type uri with host between @ and :
     String correctUrl = "user@host.com:login/repo";
     when(view.getProjectName()).thenReturn("");
 
@@ -309,7 +309,7 @@ public class GithubImporterPagePresenterTest {
 
   @Test
   public void testSshUriWithHostBetweenAtAndSlash() {
-    //Check for type uri with host between @ and /
+    // Check for type uri with host between @ and /
     String correctUrl = "ssh://user@host.com/some/path";
     when(view.getProjectName()).thenReturn("");
 

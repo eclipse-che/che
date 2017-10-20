@@ -58,7 +58,7 @@ import org.eclipse.swt.graphics.Image;
 public class SuppressWarningsSubProcessor {
 
   private static final String ADD_SUPPRESSWARNINGS_ID =
-      "org.eclipse.jdt.ui.correction.addSuppressWarnings"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.correction.addSuppressWarnings"; // $NON-NLS-1$
 
   public static final boolean hasSuppressWarningsProposal(IJavaProject javaProject, int problemId) {
     if (CorrectionEngine.getWarningToken(problemId) != null
@@ -184,7 +184,7 @@ public class SuppressWarningsSubProcessor {
         SingleMemberAnnotation newAnnot = ast.newSingleMemberAnnotation();
         String importString =
             createImportRewrite((CompilationUnit) fNode.getRoot())
-                .addImport("java.lang.SuppressWarnings"); //$NON-NLS-1$
+                .addImport("java.lang.SuppressWarnings"); // $NON-NLS-1$
         newAnnot.setTypeName(ast.newName(importString));
 
         newAnnot.setValue(newStringLiteral);
@@ -203,7 +203,7 @@ public class SuppressWarningsSubProcessor {
           ListRewrite listRewrite =
               rewrite.getListRewrite(annotation, NormalAnnotation.VALUES_PROPERTY);
           MemberValuePair pair = ast.newMemberValuePair();
-          pair.setName(ast.newSimpleName("value")); //$NON-NLS-1$
+          pair.setName(ast.newSimpleName("value")); // $NON-NLS-1$
           pair.setValue(newStringLiteral);
           listRewrite.insertFirst(pair, null);
         }
@@ -231,7 +231,7 @@ public class SuppressWarningsSubProcessor {
     private static Expression findValue(List<MemberValuePair> keyValues) {
       for (int i = 0, len = keyValues.size(); i < len; i++) {
         MemberValuePair curr = keyValues.get(i);
-        if ("value".equals(curr.getName().getIdentifier())) { //$NON-NLS-1$
+        if ("value".equals(curr.getName().getIdentifier())) { // $NON-NLS-1$
           return curr.getValue();
         }
       }
@@ -245,14 +245,15 @@ public class SuppressWarningsSubProcessor {
           Annotation annotation = (Annotation) curr;
           ITypeBinding typeBinding = annotation.resolveTypeBinding();
           if (typeBinding != null) {
-            if ("java.lang.SuppressWarnings".equals(typeBinding.getQualifiedName())) { //$NON-NLS-1$
+            if ("java.lang.SuppressWarnings"
+                .equals(typeBinding.getQualifiedName())) { // $NON-NLS-1$
               return annotation;
             }
           } else {
             String fullyQualifiedName = annotation.getTypeName().getFullyQualifiedName();
             if ("SuppressWarnings".equals(fullyQualifiedName)
                 || "java.lang.SuppressWarnings"
-                    .equals(fullyQualifiedName)) { //$NON-NLS-1$ //$NON-NLS-2$
+                    .equals(fullyQualifiedName)) { // $NON-NLS-1$ //$NON-NLS-2$
               return annotation;
             }
           }
@@ -320,12 +321,13 @@ public class SuppressWarningsSubProcessor {
         // case ASTNode.INITIALIZER: not used, because Initializer cannot have annotations
       case ASTNode.METHOD_DECLARATION:
         property = MethodDeclaration.MODIFIERS2_PROPERTY;
-        name = ((MethodDeclaration) node).getName().getIdentifier() + "()"; //$NON-NLS-1$
+        name = ((MethodDeclaration) node).getName().getIdentifier() + "()"; // $NON-NLS-1$
         break;
       case ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION:
         property = AnnotationTypeMemberDeclaration.MODIFIERS2_PROPERTY;
         name =
-            ((AnnotationTypeMemberDeclaration) node).getName().getIdentifier() + "()"; //$NON-NLS-1$
+            ((AnnotationTypeMemberDeclaration) node).getName().getIdentifier()
+                + "()"; // $NON-NLS-1$
         break;
       case ASTNode.ENUM_CONSTANT_DECLARATION:
         property = EnumConstantDeclaration.MODIFIERS2_PROPERTY;
@@ -424,7 +426,7 @@ public class SuppressWarningsSubProcessor {
     Image image =
         JavaPluginImages.get(
             JavaPluginImages
-                .IMG_TOOL_DELETE); //JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+                .IMG_TOOL_DELETE); // JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
     ASTRewriteCorrectionProposal proposal =
         new ASTRewriteCorrectionProposal(
             label,

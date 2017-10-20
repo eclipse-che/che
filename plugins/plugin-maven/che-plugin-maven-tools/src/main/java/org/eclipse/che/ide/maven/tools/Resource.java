@@ -198,15 +198,15 @@ public class Resource {
     this.includes = new ArrayList<>(includes);
 
     if (isNew()) return;
-    //if includes element exists we should replace it children
-    //with new set of includes, otherwise create element for it
+    // if includes element exists we should replace it children
+    // with new set of includes, otherwise create element for it
     if (resourceElement.hasSingleChild("includes")) {
       final Element includesElement = resourceElement.getSingleChild("includes");
-      //remove all includes from element
+      // remove all includes from element
       for (Element inclusion : includesElement.getChildren()) {
         inclusion.remove();
       }
-      //append each new inclusion to "includes" element
+      // append each new inclusion to "includes" element
       for (String inclusion : includes) {
         includesElement.appendChild(createElement("include", inclusion));
       }
@@ -234,15 +234,15 @@ public class Resource {
     this.excludes = new ArrayList<>(excludes);
 
     if (isNew()) return;
-    //if excludes element exists we should replace it children
-    //with new set of excludes, otherwise create element for it
+    // if excludes element exists we should replace it children
+    // with new set of excludes, otherwise create element for it
     if (resourceElement.hasSingleChild("excludes")) {
       final Element excludesElement = resourceElement.getSingleChild("excludes");
-      //remove all exclusions from element
+      // remove all exclusions from element
       for (Element exclusion : excludesElement.getChildren()) {
         exclusion.remove();
       }
-      //append each new exclusion to "excludes" element
+      // append each new exclusion to "excludes" element
       for (String exclusion : excludes) {
         excludesElement.appendChild(createElement("exclude", exclusion));
       }

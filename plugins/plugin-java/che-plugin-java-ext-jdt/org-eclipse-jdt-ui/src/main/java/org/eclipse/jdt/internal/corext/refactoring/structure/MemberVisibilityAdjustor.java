@@ -74,7 +74,7 @@ public final class MemberVisibilityAdjustor {
   public static final GroupCategorySet SET_VISIBILITY_ADJUSTMENTS =
       new GroupCategorySet(
           new GroupCategory(
-              "org.eclipse.jdt.internal.corext.visibilityAdjustments", //$NON-NLS-1$
+              "org.eclipse.jdt.internal.corext.visibilityAdjustments", // $NON-NLS-1$
               RefactoringCoreMessages.MemberVisibilityAdjustor_adjustments_name,
               RefactoringCoreMessages.MemberVisibilityAdjustor_adjustments_description));
 
@@ -200,7 +200,7 @@ public final class MemberVisibilityAdjustor {
       Assert.isNotNull(adjustor);
       Assert.isNotNull(monitor);
       try {
-        monitor.beginTask("", 1); //$NON-NLS-1$
+        monitor.beginTask("", 1); // $NON-NLS-1$
         monitor.setTaskName(RefactoringCoreMessages.MemberVisibilityAdjustor_adjusting);
         if (fNeedsRewriting) {
           if (adjustor.fRewrite != null && adjustor.fRoot != null)
@@ -277,7 +277,7 @@ public final class MemberVisibilityAdjustor {
       Assert.isNotNull(adjustor);
       Assert.isNotNull(monitor);
       try {
-        monitor.beginTask("", 1); //$NON-NLS-1$
+        monitor.beginTask("", 1); // $NON-NLS-1$
         monitor.setTaskName(RefactoringCoreMessages.MemberVisibilityAdjustor_adjusting);
         if (fNeedsRewriting) {
           final CompilationUnitRewrite rewrite =
@@ -479,7 +479,8 @@ public final class MemberVisibilityAdjustor {
   private Map<IMember, IncomingMemberVisibilityAdjustment> fAdjustments =
       new LinkedHashMap<
           IMember,
-          IncomingMemberVisibilityAdjustment>(); // LinkedHashMap to preserve order of generated warnings
+          IncomingMemberVisibilityAdjustment>(); // LinkedHashMap to preserve order of generated
+  // warnings
 
   /** Should incoming references be adjusted? */
   private boolean fIncoming = true;
@@ -670,7 +671,7 @@ public final class MemberVisibilityAdjustor {
   private void adjustIncomingVisibility(
       final SearchResultGroup[] groups, final IProgressMonitor monitor) throws JavaModelException {
     try {
-      monitor.beginTask("", groups.length); //$NON-NLS-1$
+      monitor.beginTask("", groups.length); // $NON-NLS-1$
       monitor.setTaskName(RefactoringCoreMessages.MemberVisibilityAdjustor_checking);
       SearchMatch[] matches = null;
       boolean adjusted = false;
@@ -704,7 +705,7 @@ public final class MemberVisibilityAdjustor {
   private void adjustOutgoingVisibility(final IField field, final ModifierKeyword threshold)
       throws JavaModelException {
     Assert.isTrue(!field.isBinary() && !field.isReadOnly());
-    //bug 100555 (moving inner class to top level class; taking private fields with you)
+    // bug 100555 (moving inner class to top level class; taking private fields with you)
     final IType declaring = field.getDeclaringType();
     if (declaring != null && declaring.equals(fReferenced)) return;
     if (hasLowerVisibility(field.getFlags(), keywordToVisibility(threshold))
@@ -814,7 +815,7 @@ public final class MemberVisibilityAdjustor {
   private void adjustOutgoingVisibility(
       final SearchResultGroup[] groups, final IProgressMonitor monitor) throws JavaModelException {
     try {
-      monitor.beginTask("", groups.length); //$NON-NLS-1$
+      monitor.beginTask("", groups.length); // $NON-NLS-1$
       monitor.setTaskName(RefactoringCoreMessages.MemberVisibilityAdjustor_checking);
       IJavaElement element = null;
       SearchMatch[] matches = null;
@@ -827,12 +828,16 @@ public final class MemberVisibilityAdjustor {
           for (int offset = 0; offset < matches.length; offset++)
             adjustOutgoingVisibility(matches[offset], new SubProgressMonitor(monitor, 1));
         } // else if (element != null)
-        // fStatus.merge(RefactoringStatus.createStatus(fFailureSeverity, RefactoringCoreMessages.getFormattedString
-        // ("MemberVisibilityAdjustor.binary.outgoing.project", new String[] { element.getJavaProject().getElementName(), getLabel
+        // fStatus.merge(RefactoringStatus.createStatus(fFailureSeverity,
+        // RefactoringCoreMessages.getFormattedString
+        // ("MemberVisibilityAdjustor.binary.outgoing.project", new String[] {
+        // element.getJavaProject().getElementName(), getLabel
         // (fReferenced)}), null, null, RefactoringStatusEntry.NO_CODE, null)); //$NON-NLS-1$
         // else if (group.getResource() != null)
-        // fStatus.merge(RefactoringStatus.createStatus(fFailureSeverity, RefactoringCoreMessages.getFormattedString
-        // ("MemberVisibilityAdjustor.binary.outgoing.resource", new String[] { group.getResource().getName(), getLabel
+        // fStatus.merge(RefactoringStatus.createStatus(fFailureSeverity,
+        // RefactoringCoreMessages.getFormattedString
+        // ("MemberVisibilityAdjustor.binary.outgoing.resource", new String[] {
+        // group.getResource().getName(), getLabel
         // (fReferenced)}), null, null, RefactoringStatusEntry.NO_CODE, null)); //$NON-NLS-1$
 
         // TW: enable when bug 78387 is fixed
@@ -852,7 +857,7 @@ public final class MemberVisibilityAdjustor {
    */
   public final void adjustVisibility(final IProgressMonitor monitor) throws JavaModelException {
     try {
-      monitor.beginTask("", 7); //$NON-NLS-1$
+      monitor.beginTask("", 7); // $NON-NLS-1$
       monitor.setTaskName(RefactoringCoreMessages.MemberVisibilityAdjustor_checking);
       final RefactoringSearchEngine2 engine =
           new RefactoringSearchEngine2(
@@ -919,7 +924,7 @@ public final class MemberVisibilityAdjustor {
     Assert.isTrue(!(referenced instanceof IInitializer));
     ModifierKeyword keyword = ModifierKeyword.PUBLIC_KEYWORD;
     try {
-      monitor.beginTask("", 1); //$NON-NLS-1$
+      monitor.beginTask("", 1); // $NON-NLS-1$
       monitor.setTaskName(RefactoringCoreMessages.MemberVisibilityAdjustor_checking);
       final int referencingType = referencing.getElementType();
       final int referencedType = referenced.getElementType();
@@ -1065,7 +1070,7 @@ public final class MemberVisibilityAdjustor {
             || referenced instanceof IMethod);
     ModifierKeyword keyword = ModifierKeyword.PUBLIC_KEYWORD;
     try {
-      monitor.beginTask("", 1); //$NON-NLS-1$
+      monitor.beginTask("", 1); // $NON-NLS-1$
       monitor.setTaskName(RefactoringCoreMessages.MemberVisibilityAdjustor_checking);
       final int referencingType = referencing.getElementType();
       final int referencedType = referenced.getElementType();
@@ -1209,7 +1214,7 @@ public final class MemberVisibilityAdjustor {
       throws JavaModelException {
     ITypeHierarchy hierarchy = null;
     try {
-      monitor.beginTask("", 1); //$NON-NLS-1$
+      monitor.beginTask("", 1); // $NON-NLS-1$
       monitor.setTaskName(RefactoringCoreMessages.MemberVisibilityAdjustor_checking);
       try {
         hierarchy = fTypeHierarchies.get(type);
@@ -1257,13 +1262,12 @@ public final class MemberVisibilityAdjustor {
   public final void rewriteVisibility(final ICompilationUnit unit, final IProgressMonitor monitor)
       throws JavaModelException {
     try {
-      monitor.beginTask("", fAdjustments.keySet().size()); //$NON-NLS-1$
+      monitor.beginTask("", fAdjustments.keySet().size()); // $NON-NLS-1$
       monitor.setTaskName(RefactoringCoreMessages.MemberVisibilityAdjustor_adjusting);
       IMember member = null;
       IVisibilityAdjustment adjustment = null;
       for (final Iterator<IMember> iterator = fAdjustments.keySet().iterator();
-          iterator.hasNext();
-          ) {
+          iterator.hasNext(); ) {
         member = iterator.next();
         if (unit.equals(member.getCompilationUnit())) {
           adjustment = fAdjustments.get(member);
@@ -1285,13 +1289,12 @@ public final class MemberVisibilityAdjustor {
    */
   public final void rewriteVisibility(final IProgressMonitor monitor) throws JavaModelException {
     try {
-      monitor.beginTask("", fAdjustments.keySet().size()); //$NON-NLS-1$
+      monitor.beginTask("", fAdjustments.keySet().size()); // $NON-NLS-1$
       monitor.setTaskName(RefactoringCoreMessages.MemberVisibilityAdjustor_adjusting);
       IMember member = null;
       IVisibilityAdjustment adjustment = null;
       for (final Iterator<IMember> iterator = fAdjustments.keySet().iterator();
-          iterator.hasNext();
-          ) {
+          iterator.hasNext(); ) {
         member = iterator.next();
         adjustment = fAdjustments.get(member);
         if (adjustment != null)

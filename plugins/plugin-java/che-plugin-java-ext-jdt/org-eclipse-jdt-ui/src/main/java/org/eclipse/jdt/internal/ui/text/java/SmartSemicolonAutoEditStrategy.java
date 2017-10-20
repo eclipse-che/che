@@ -37,11 +37,11 @@ import org.eclipse.text.edits.MalformedTreeException;
 public class SmartSemicolonAutoEditStrategy /*implements IAutoEditStrategy*/ {
 
   /** String representation of a semicolon. */
-  private static final String SEMICOLON = ";"; //$NON-NLS-1$
+  private static final String SEMICOLON = ";"; // $NON-NLS-1$
   /** Char representation of a semicolon. */
   private static final char SEMICHAR = ';';
   /** String represenattion of a opening brace. */
-  private static final String BRACE = "{"; //$NON-NLS-1$
+  private static final String BRACE = "{"; // $NON-NLS-1$
   /** Char representation of a opening brace */
   private static final char BRACECHAR = '{';
 
@@ -75,7 +75,8 @@ public class SmartSemicolonAutoEditStrategy /*implements IAutoEditStrategy*/ {
     //		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
     //		if (fCharacter == SEMICHAR && !store.getBoolean(PreferenceConstants.EDITOR_SMART_SEMICOLON))
     //			return;
-    //		if (fCharacter == BRACECHAR && !store.getBoolean(PreferenceConstants.EDITOR_SMART_OPENING_BRACE))
+    //		if (fCharacter == BRACECHAR &&
+    // !store.getBoolean(PreferenceConstants.EDITOR_SMART_OPENING_BRACE))
     //			return;
     //
     //		IWorkbenchPage page= JavaPlugin.getActivePage();
@@ -87,7 +88,8 @@ public class SmartSemicolonAutoEditStrategy /*implements IAutoEditStrategy*/ {
     //		CompilationUnitEditor editor= (CompilationUnitEditor)part;
     //		if (editor.getInsertMode() != ITextEditorExtension3.SMART_INSERT || !editor.isEditable())
     //			return;
-    //		ITextEditorExtension2 extension= (ITextEditorExtension2)editor.getAdapter(ITextEditorExtension2.class);
+    //		ITextEditorExtension2 extension=
+    // (ITextEditorExtension2)editor.getAdapter(ITextEditorExtension2.class);
     //		if (extension != null && !extension.validateEditorInputState())
     //			return;
     //		if (isMultilineSelection(document, command))
@@ -121,9 +123,12 @@ public class SmartSemicolonAutoEditStrategy /*implements IAutoEditStrategy*/ {
 
     try {
 
-      //			final SmartBackspaceManager manager= (SmartBackspaceManager) editor.getAdapter(SmartBackspaceManager.class);
-      //			if (manager != null && JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_BACKSPACE)) {
-      //				TextEdit e1= new ReplaceEdit(command.offset, command.text.length(), document.get(command.offset, command.length));
+      //			final SmartBackspaceManager manager= (SmartBackspaceManager)
+      // editor.getAdapter(SmartBackspaceManager.class);
+      //			if (manager != null &&
+      // JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_BACKSPACE)) {
+      //				TextEdit e1= new ReplaceEdit(command.offset, command.text.length(),
+      // document.get(command.offset, command.length));
       //				UndoSpec s1= new UndoSpec(command.offset + command.text.length(),
       //						new Region(command.offset, 0),
       //						new TextEdit[] {e1},
@@ -182,15 +187,15 @@ public class SmartSemicolonAutoEditStrategy /*implements IAutoEditStrategy*/ {
     if (character == BRACECHAR) {
       if (position > 0 && position <= doc.getLength()) {
         int pos = position - 1;
-        if (looksLike(doc, pos, ")") //$NON-NLS-1$
-            || looksLike(doc, pos, "=") //$NON-NLS-1$
-            || looksLike(doc, pos, "]") //$NON-NLS-1$
-            || looksLike(doc, pos, "try") //$NON-NLS-1$
-            || looksLike(doc, pos, "else") //$NON-NLS-1$
-            || looksLike(doc, pos, "synchronized") //$NON-NLS-1$
-            || looksLike(doc, pos, "static") //$NON-NLS-1$
-            || looksLike(doc, pos, "finally") //$NON-NLS-1$
-            || looksLike(doc, pos, "do")) //$NON-NLS-1$
+        if (looksLike(doc, pos, ")") // $NON-NLS-1$
+            || looksLike(doc, pos, "=") // $NON-NLS-1$
+            || looksLike(doc, pos, "]") // $NON-NLS-1$
+            || looksLike(doc, pos, "try") // $NON-NLS-1$
+            || looksLike(doc, pos, "else") // $NON-NLS-1$
+            || looksLike(doc, pos, "synchronized") // $NON-NLS-1$
+            || looksLike(doc, pos, "static") // $NON-NLS-1$
+            || looksLike(doc, pos, "finally") // $NON-NLS-1$
+            || looksLike(doc, pos, "do")) // $NON-NLS-1$
         return new String(new char[] {' ', character});
       }
     }
@@ -253,7 +258,8 @@ public class SmartSemicolonAutoEditStrategy /*implements IAutoEditStrategy*/ {
       } else {
         int nextPartitionPos = nextPartitionOrLineEnd(document, line, offset, partitioning);
         insertPos = startOfWhitespaceBeforeOffset(text, nextPartitionPos);
-        // if there is a semi present, return its location as alreadyPresent() will take it out this way.
+        // if there is a semi present, return its location as alreadyPresent() will take it out this
+        // way.
         if (insertPos > 0 && text.charAt(insertPos - 1) == character) insertPos = insertPos - 1;
         else if (insertPos > 0 && text.charAt(insertPos - 1) == '}') {
           int opening =
@@ -337,12 +343,12 @@ public class SmartSemicolonAutoEditStrategy /*implements IAutoEditStrategy*/ {
     if (p == -1) return -1;
     p--;
 
-    if (looksLike(doc, p, "try") //$NON-NLS-1$
-        || looksLike(doc, p, "do") //$NON-NLS-1$
-        || looksLike(doc, p, "synchronized") //$NON-NLS-1$
-        || looksLike(doc, p, "static") //$NON-NLS-1$
-        || looksLike(doc, p, "finally") //$NON-NLS-1$
-        || looksLike(doc, p, "else")) //$NON-NLS-1$
+    if (looksLike(doc, p, "try") // $NON-NLS-1$
+        || looksLike(doc, p, "do") // $NON-NLS-1$
+        || looksLike(doc, p, "synchronized") // $NON-NLS-1$
+        || looksLike(doc, p, "static") // $NON-NLS-1$
+        || looksLike(doc, p, "finally") // $NON-NLS-1$
+        || looksLike(doc, p, "else")) // $NON-NLS-1$
     return p + 1 - line.getOffset();
 
     return -1;
@@ -548,15 +554,19 @@ public class SmartSemicolonAutoEditStrategy /*implements IAutoEditStrategy*/ {
   }
 
   //	/**
-  //	 * Finds the highest position in <code>document</code> such that the position is &lt;= <code>position</code>
-  //	 * and &gt; <code>bound</code> and <code>document.getChar(position) == ch</code> evaluates to <code>true</code>
+  //	 * Finds the highest position in <code>document</code> such that the position is &lt;=
+  // <code>position</code>
+  //	 * and &gt; <code>bound</code> and <code>document.getChar(position) == ch</code> evaluates to
+  // <code>true</code>
   //	 * and the position is in the default partition.
   //	 *
   //	 * @param document the document being modified
   //	 * @param position the first character position in <code>document</code> to be considered
-  //	 * @param bound the first position in <code>document</code> to not consider any more, with <code>scanTo</code> &gt; <code>position</code>
+  //	 * @param bound the first position in <code>document</code> to not consider any more, with
+  // <code>scanTo</code> &gt; <code>position</code>
   //	 * @param chars an array of <code>char</code> to search for
-  //	 * @return the highest position of one element in <code>chars</code> in [<code>position</code>, <code>scanTo</code>) that resides in a Java partition, or <code>-1</code> if none can be found
+  //	 * @return the highest position of one element in <code>chars</code> in [<code>position</code>,
+  // <code>scanTo</code>) that resides in a Java partition, or <code>-1</code> if none can be found
   //	 */
   //	private static int scanBackward(IDocument document, int position, int bound, char ch) {
   //		return scanBackward(document, position, bound, new char[] {ch});
@@ -637,10 +647,10 @@ public class SmartSemicolonAutoEditStrategy /*implements IAutoEditStrategy*/ {
 
     try {
       String text = document.get(offset, length);
-      int pos = text.indexOf("new"); //$NON-NLS-1$
+      int pos = text.indexOf("new"); // $NON-NLS-1$
 
       while (pos != -1 && !isDefaultPartition(document, pos + offset, partitioning))
-        pos = text.indexOf("new", pos + 2); //$NON-NLS-1$
+        pos = text.indexOf("new", pos + 2); // $NON-NLS-1$
 
       if (pos < 0) return false;
 
@@ -769,12 +779,12 @@ public class SmartSemicolonAutoEditStrategy /*implements IAutoEditStrategy*/ {
     position = firstNonWhitespaceBackward(document, position, partitioning, -1);
     if (position == -1) return false;
 
-    return looksLike(document, position, "if") //$NON-NLS-1$
-        || looksLike(document, position, "while") //$NON-NLS-1$
-        || looksLike(document, position, "catch") //$NON-NLS-1$
-        || looksLike(document, position, "synchronized") //$NON-NLS-1$
-        || looksLike(document, position, "switch") //$NON-NLS-1$
-        || looksLike(document, position, "for"); //$NON-NLS-1$
+    return looksLike(document, position, "if") // $NON-NLS-1$
+        || looksLike(document, position, "while") // $NON-NLS-1$
+        || looksLike(document, position, "catch") // $NON-NLS-1$
+        || looksLike(document, position, "synchronized") // $NON-NLS-1$
+        || looksLike(document, position, "switch") // $NON-NLS-1$
+        || looksLike(document, position, "for"); // $NON-NLS-1$
   }
 
   /**
@@ -994,7 +1004,7 @@ public class SmartSemicolonAutoEditStrategy /*implements IAutoEditStrategy*/ {
    */
   private static boolean isForStatement(String line, int offset) {
     /* searching for (^|\s)for(\s|$) */
-    int forPos = line.indexOf("for"); //$NON-NLS-1$
+    int forPos = line.indexOf("for"); // $NON-NLS-1$
     if (forPos != -1) {
       if ((forPos == 0 || !Character.isJavaIdentifierPart(line.charAt(forPos - 1)))
           && (line.length() == forPos + 3

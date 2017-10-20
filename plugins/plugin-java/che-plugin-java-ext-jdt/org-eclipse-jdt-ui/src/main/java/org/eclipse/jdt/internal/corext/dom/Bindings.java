@@ -69,7 +69,7 @@ import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 public class Bindings {
 
   public static final String ARRAY_LENGTH_FIELD_BINDING_STRING =
-      "(array type):length"; //$NON-NLS-1$
+      "(array type):length"; // $NON-NLS-1$
 
   private Bindings() {
     // No instance
@@ -142,7 +142,7 @@ public class Bindings {
   private static String asString(IVariableBinding variableBinding) {
     if (!variableBinding.isField()) return variableBinding.toString();
     if (variableBinding.getDeclaringClass() == null) {
-      Assert.isTrue(variableBinding.getName().equals("length")); //$NON-NLS-1$
+      Assert.isTrue(variableBinding.getName().equals("length")); // $NON-NLS-1$
       return ARRAY_LENGTH_FIELD_BINDING_STRING;
     }
     StringBuffer result = new StringBuffer();
@@ -163,7 +163,7 @@ public class Bindings {
     for (int i = 0; i < parameters.length; i++) {
       ITypeBinding parameter = parameters[i];
       result.append(parameter.getName());
-      if (i < lastComma) result.append(", "); //$NON-NLS-1$
+      if (i < lastComma) result.append(", "); // $NON-NLS-1$
     }
     result.append(')');
     return result.toString();
@@ -205,7 +205,7 @@ public class Bindings {
       case IBinding.TYPE:
         return getRawQualifiedName((ITypeBinding) binding);
       case IBinding.PACKAGE:
-        return binding.getName() + ".*"; //$NON-NLS-1$
+        return binding.getName() + ".*"; // $NON-NLS-1$
       case IBinding.METHOD:
         declaring = ((IMethodBinding) binding).getDeclaringClass();
         break;
@@ -241,7 +241,7 @@ public class Bindings {
     if (!baseType.isAnonymous()) {
       list.add(type.getName());
     } else {
-      list.add("$local$"); //$NON-NLS-1$
+      list.add("$local$"); // $NON-NLS-1$
     }
   }
 
@@ -276,7 +276,8 @@ public class Bindings {
   public static boolean isRuntimeException(ITypeBinding thrownException) {
     if (thrownException == null || thrownException.isPrimitive() || thrownException.isArray())
       return false;
-    return findTypeInHierarchy(thrownException, "java.lang.RuntimeException") != null; //$NON-NLS-1$
+    return findTypeInHierarchy(thrownException, "java.lang.RuntimeException")
+        != null; // $NON-NLS-1$
   }
 
   /**
@@ -651,7 +652,7 @@ public class Bindings {
    * @return return <code>true</code> if the two bindings are equal
    * @deprecated use {@link #isSubsignature(IMethodBinding, IMethodBinding)}
    */
-  //TODO: rename to isErasureEquivalentMethod and change to two IMethodBinding parameters
+  // TODO: rename to isErasureEquivalentMethod and change to two IMethodBinding parameters
   public static boolean isEqualMethod(
       IMethodBinding method, String methodName, ITypeBinding[] parameters) {
     if (!method.getName().equals(methodName)) return false;
@@ -661,9 +662,10 @@ public class Bindings {
     for (int i = 0; i < parameters.length; i++) {
       if (!equals(methodParameters[i].getErasure(), parameters[i].getErasure())) return false;
     }
-    //Can't use this fix, since some clients assume that this method tests erasure equivalence:
+    // Can't use this fix, since some clients assume that this method tests erasure equivalence:
     //		if (method.getTypeParameters().length == 0) {
-    //			//a method without type parameters cannot be overridden by one that declares type parameters -> can be exact here
+    //			//a method without type parameters cannot be overridden by one that declares type
+    // parameters -> can be exact here
     //			for (int i= 0; i < parameters.length; i++) {
     //				if ( ! (equals(methodParameters[i], parameters[i])
     //						|| equals(methodParameters[i].getErasure(), parameters[i]))) // subsignature
@@ -687,7 +689,8 @@ public class Bindings {
    *     types are not taken into account. Note that subsignature is <em>not</em> symmetric!
    */
   public static boolean isSubsignature(IMethodBinding overriding, IMethodBinding overridden) {
-    //TODO: use IMethodBinding#isSubsignature(..) once it is tested and fixed (only erasure of m1's parameter types, considering type variable counts, doing type variable substitution
+    // TODO: use IMethodBinding#isSubsignature(..) once it is tested and fixed (only erasure of m1's
+    // parameter types, considering type variable counts, doing type variable substitution
     if (!overriding.getName().equals(overridden.getName())) return false;
 
     ITypeBinding[] m1Params = overriding.getParameterTypes();
@@ -697,22 +700,22 @@ public class Bindings {
     ITypeBinding[] m1TypeParams = overriding.getTypeParameters();
     ITypeBinding[] m2TypeParams = overridden.getTypeParameters();
     if (m1TypeParams.length != m2TypeParams.length
-        && m1TypeParams.length != 0) //non-generic m1 can override a generic m2
+        && m1TypeParams.length != 0) // non-generic m1 can override a generic m2
     return false;
 
-    //m1TypeParameters.length == (m2TypeParameters.length || 0)
+    // m1TypeParameters.length == (m2TypeParameters.length || 0)
     if (m2TypeParams.length != 0) {
-      //Note: this branch does not 100% adhere to the spec and may report some false positives.
+      // Note: this branch does not 100% adhere to the spec and may report some false positives.
       // Full compliance would require major duplication of compiler code.
 
-      //Compare type parameter bounds:
+      // Compare type parameter bounds:
       for (int i = 0; i < m1TypeParams.length; i++) {
         // loop over m1TypeParams, which is either empty, or equally long as m2TypeParams
         Set<ITypeBinding> m1Bounds = getTypeBoundsForSubsignature(m1TypeParams[i]);
         Set<ITypeBinding> m2Bounds = getTypeBoundsForSubsignature(m2TypeParams[i]);
         if (!m1Bounds.equals(m2Bounds)) return false;
       }
-      //Compare parameter types:
+      // Compare parameter types:
       if (equals(m2Params, m1Params)) return true;
       for (int i = 0; i < m1Params.length; i++) {
         ITypeBinding m1Param = m1Params[i];
@@ -759,7 +762,7 @@ public class Bindings {
     Set<ITypeBinding> result = new HashSet<ITypeBinding>(typeBounds.length);
     for (int i = 0; i < typeBounds.length; i++) {
       ITypeBinding bound = typeBounds[i];
-      if ("java.lang.Object".equals(typeBounds[0].getQualifiedName())) //$NON-NLS-1$
+      if ("java.lang.Object".equals(typeBounds[0].getQualifiedName())) // $NON-NLS-1$
       continue;
       else if (containsTypeVariables(bound))
         result.add(bound.getErasure()); // try to achieve effect of "rename type variables"
@@ -963,7 +966,7 @@ public class Bindings {
     return null;
   }
 
-  //---- Helper methods to convert a method ---------------------------------------------
+  // ---- Helper methods to convert a method ---------------------------------------------
 
   private static boolean sameParameters(IMethodBinding method, IMethod candidate)
       throws JavaModelException {
@@ -1005,7 +1008,7 @@ public class Bindings {
         String[][] qualifiedCandidates = scope.resolveType(Signature.toString(candidate));
         if (qualifiedCandidates == null || qualifiedCandidates.length == 0) return false;
         String packageName =
-            type.getPackage().isUnnamed() ? "" : type.getPackage().getName(); //$NON-NLS-1$
+            type.getPackage().isUnnamed() ? "" : type.getPackage().getName(); // $NON-NLS-1$
         String typeName = getTypeQualifiedName(type);
         for (int i = 0; i < qualifiedCandidates.length; i++) {
           String[] qualifiedCandidate = qualifiedCandidates[i];
@@ -1047,7 +1050,7 @@ public class Bindings {
   }
 
   public static boolean isVoidType(ITypeBinding binding) {
-    return "void".equals(binding.getName()); //$NON-NLS-1$
+    return "void".equals(binding.getName()); // $NON-NLS-1$
   }
 
   /**
@@ -1060,7 +1063,7 @@ public class Bindings {
    * @return the normalized type to be used in declarations, or <code>null</code>
    */
   public static ITypeBinding normalizeForDeclarationUse(ITypeBinding binding, AST ast) {
-    if (binding.isNullType()) return ast.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+    if (binding.isNullType()) return ast.resolveWellKnownType("java.lang.Object"); // $NON-NLS-1$
     if (binding.isPrimitive()) return binding;
     binding = normalizeTypeBinding(binding);
     if (binding == null || !binding.isWildcardType()) return binding;
@@ -1138,7 +1141,7 @@ public class Bindings {
   }
 
   public static String getRawQualifiedName(ITypeBinding binding) {
-    final String EMPTY = ""; //$NON-NLS-1$
+    final String EMPTY = ""; // $NON-NLS-1$
 
     if (binding.isAnonymous() || binding.isLocal()) {
       return EMPTY;
@@ -1309,22 +1312,22 @@ public class Bindings {
   }
 
   private static String getBoxedTypeName(String primitiveName) {
-    if ("long".equals(primitiveName)) //$NON-NLS-1$
-    return "java.lang.Long"; //$NON-NLS-1$
-    else if ("int".equals(primitiveName)) //$NON-NLS-1$
-    return "java.lang.Integer"; //$NON-NLS-1$
-    else if ("short".equals(primitiveName)) //$NON-NLS-1$
-    return "java.lang.Short"; //$NON-NLS-1$
-    else if ("char".equals(primitiveName)) //$NON-NLS-1$
-    return "java.lang.Character"; //$NON-NLS-1$
-    else if ("byte".equals(primitiveName)) //$NON-NLS-1$
-    return "java.lang.Byte"; //$NON-NLS-1$
-    else if ("boolean".equals(primitiveName)) //$NON-NLS-1$
-    return "java.lang.Boolean"; //$NON-NLS-1$
-    else if ("float".equals(primitiveName)) //$NON-NLS-1$
-    return "java.lang.Float"; //$NON-NLS-1$
-    else if ("double".equals(primitiveName)) //$NON-NLS-1$
-    return "java.lang.Double"; //$NON-NLS-1$
+    if ("long".equals(primitiveName)) // $NON-NLS-1$
+    return "java.lang.Long"; // $NON-NLS-1$
+    else if ("int".equals(primitiveName)) // $NON-NLS-1$
+    return "java.lang.Integer"; // $NON-NLS-1$
+    else if ("short".equals(primitiveName)) // $NON-NLS-1$
+    return "java.lang.Short"; // $NON-NLS-1$
+    else if ("char".equals(primitiveName)) // $NON-NLS-1$
+    return "java.lang.Character"; // $NON-NLS-1$
+    else if ("byte".equals(primitiveName)) // $NON-NLS-1$
+    return "java.lang.Byte"; // $NON-NLS-1$
+    else if ("boolean".equals(primitiveName)) // $NON-NLS-1$
+    return "java.lang.Boolean"; // $NON-NLS-1$
+    else if ("float".equals(primitiveName)) // $NON-NLS-1$
+    return "java.lang.Float"; // $NON-NLS-1$
+    else if ("double".equals(primitiveName)) // $NON-NLS-1$
+    return "java.lang.Double"; // $NON-NLS-1$
     else return null;
   }
 
@@ -1346,22 +1349,22 @@ public class Bindings {
   }
 
   private static String getUnboxedTypeName(String boxedName) {
-    if ("java.lang.Long".equals(boxedName)) //$NON-NLS-1$
-    return "long"; //$NON-NLS-1$
-    else if ("java.lang.Integer".equals(boxedName)) //$NON-NLS-1$
-    return "int"; //$NON-NLS-1$
-    else if ("java.lang.Short".equals(boxedName)) //$NON-NLS-1$
-    return "short"; //$NON-NLS-1$
-    else if ("java.lang.Character".equals(boxedName)) //$NON-NLS-1$
-    return "char"; //$NON-NLS-1$
-    else if ("java.lang.Byte".equals(boxedName)) //$NON-NLS-1$
-    return "byte"; //$NON-NLS-1$
-    else if ("java.lang.Boolean".equals(boxedName)) //$NON-NLS-1$
-    return "boolean"; //$NON-NLS-1$
-    else if ("java.lang.Float".equals(boxedName)) //$NON-NLS-1$
-    return "float"; //$NON-NLS-1$
-    else if ("java.lang.Double".equals(boxedName)) //$NON-NLS-1$
-    return "double"; //$NON-NLS-1$
+    if ("java.lang.Long".equals(boxedName)) // $NON-NLS-1$
+    return "long"; // $NON-NLS-1$
+    else if ("java.lang.Integer".equals(boxedName)) // $NON-NLS-1$
+    return "int"; // $NON-NLS-1$
+    else if ("java.lang.Short".equals(boxedName)) // $NON-NLS-1$
+    return "short"; // $NON-NLS-1$
+    else if ("java.lang.Character".equals(boxedName)) // $NON-NLS-1$
+    return "char"; // $NON-NLS-1$
+    else if ("java.lang.Byte".equals(boxedName)) // $NON-NLS-1$
+    return "byte"; // $NON-NLS-1$
+    else if ("java.lang.Boolean".equals(boxedName)) // $NON-NLS-1$
+    return "boolean"; // $NON-NLS-1$
+    else if ("java.lang.Float".equals(boxedName)) // $NON-NLS-1$
+    return "float"; // $NON-NLS-1$
+    else if ("java.lang.Double".equals(boxedName)) // $NON-NLS-1$
+    return "double"; // $NON-NLS-1$
     else return null;
   }
 
@@ -1378,9 +1381,10 @@ public class Bindings {
    * @since 3.5
    */
   public static IBinding resolveExpressionBinding(Expression expression, boolean goIntoCast) {
-    //TODO: search for callers of resolve*Binding() methods and replace with call to this method
+    // TODO: search for callers of resolve*Binding() methods and replace with call to this method
 
-    // similar to StubUtility#getVariableNameSuggestions(int, IJavaProject, ITypeBinding, Expression, Collection)
+    // similar to StubUtility#getVariableNameSuggestions(int, IJavaProject, ITypeBinding,
+    // Expression, Collection)
     switch (expression.getNodeType()) {
       case ASTNode.SIMPLE_NAME:
       case ASTNode.QUALIFIED_NAME:

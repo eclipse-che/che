@@ -509,7 +509,7 @@ public abstract class TType {
     Map<TType, ArrayList<TType>> subTypes = fEnvironment.getSubTypes();
     if (subTypes == null)
       throw new IllegalStateException(
-          "This TypeEnvironment does not remember subtypes"); //$NON-NLS-1$
+          "This TypeEnvironment does not remember subtypes"); // $NON-NLS-1$
     List<TType> subtypes = subTypes.get(this);
     if (subtypes == null) return EMPTY_TYPE_ARRAY;
     else return subtypes.toArray(new TType[subtypes.size()]);

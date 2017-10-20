@@ -68,7 +68,7 @@ public final class UnboundWildcardType extends WildcardType {
 
   @Override
   public String getName() {
-    return "?"; //$NON-NLS-1$
+    return "?"; // $NON-NLS-1$
   }
 
   @Override

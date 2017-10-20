@@ -350,7 +350,7 @@ public class JpaEntitiesCascadeRemovalTest {
             .isEmpty());
     assertTrue(snapshotDao.findSnapshots(workspace1.getId()).isEmpty());
     assertTrue(snapshotDao.findSnapshots(workspace2.getId()).isEmpty());
-    //Check workers and parent entity is removed
+    // Check workers and parent entity is removed
     assertTrue(workspaceDao.getByNamespace(user2.getId()).isEmpty());
     assertEquals(workerDao.getWorkers(workspace3.getId(), 1, 0).getTotalItemsCount(), 0);
     // Check stack and recipes are removed
@@ -384,7 +384,7 @@ public class JpaEntitiesCascadeRemovalTest {
     assertNull(
         notFoundToNull(() -> organizationResourcesDistributor.get(childOrganization.getId())));
 
-    //cleanup
+    // cleanup
     stackDao.remove(stack3.getId());
     memberDao.remove(organization2.getId(), user3.getId());
     organizationManager.remove(organization2.getId());
@@ -486,7 +486,7 @@ public class JpaEntitiesCascadeRemovalTest {
         new RecipePermissionsImpl(
             user2.getId(), recipe2.getId(), asList(SET_PERMISSIONS, "read", "execute")));
 
-    //creator will have all permissions for newly created organization
+    // creator will have all permissions for newly created organization
     prepareCreator(user.getId());
     organization = organizationManager.create(new OrganizationImpl(null, "testOrg", null));
     organizationalAccount = accountDao.getById(organization.getId());

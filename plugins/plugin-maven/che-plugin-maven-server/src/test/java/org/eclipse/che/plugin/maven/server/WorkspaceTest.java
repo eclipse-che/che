@@ -718,7 +718,7 @@ public class WorkspaceTest extends BaseTest {
         .onProperty("path")
         .contains(new Path("/test/target/generated-sources/dto/"));
 
-    //attributes should be updated
+    // attributes should be updated
     List<String> sourceFolders =
         projectRegistry.getProject("test").getAttributes().get(Constants.SOURCE_FOLDER);
     List<String> testSourceFolders =

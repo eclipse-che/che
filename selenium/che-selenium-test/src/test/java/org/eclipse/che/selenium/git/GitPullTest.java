@@ -84,7 +84,7 @@ public class GitPullTest {
 
   @Test
   public void pullTest() throws Exception {
-    //Reset test repository's HEAD to default commit
+    // Reset test repository's HEAD to default commit
     gitHubClientService.hardResetHeadToCommit(
         REPO_NAME, DEFAULT_COMMIT_SSH, gitHubUsername, gitHubPassword);
     projectExplorer.waitProjectExplorer();
@@ -95,7 +95,7 @@ public class GitPullTest {
 
     projectExplorer.quickExpandWithJavaScript();
 
-    //Change contents index.jsp
+    // Change contents index.jsp
     loader.waitOnClosed();
     projectExplorer.openItemByPath(FIRST_PROJECT_NAME + "/my-webapp/src/main/webapp/index.jsp");
     editor.waitActiveEditor();
@@ -106,7 +106,7 @@ public class GitPullTest {
     editor.closeFileByNameWithSaving("index.jsp");
     editor.waitWhileFileIsClosed("index.jsp");
 
-    //Change contents in java file
+    // Change contents in java file
     projectExplorer.openItemByPath(
         FIRST_PROJECT_NAME + "/my-webapp/src/main/java/helloworld/GreetingController.java");
     editor.waitActiveEditor();
@@ -118,7 +118,7 @@ public class GitPullTest {
     editor.closeFileByNameWithSaving("GreetingController");
     editor.waitWhileFileIsClosed("GreetingController");
 
-    //Remove web.xml from index
+    // Remove web.xml from index
     projectExplorer.selectItem(FIRST_PROJECT_NAME + "/my-webapp/src/main/webapp/WEB-INF/web.xml");
     menu.runCommand(
         TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.REMOVE_FROM_INDEX);
@@ -127,7 +127,7 @@ public class GitPullTest {
     git.confirmRemoveFromIndexForm();
     loader.waitOnClosed();
 
-    //Add all files to index
+    // Add all files to index
     projectExplorer.waitItem(
         FIRST_PROJECT_NAME + "/my-webapp/src/main/java/helloworld/GreetingController.java");
     projectExplorer.waitItem(FIRST_PROJECT_NAME + "/my-webapp/src/main/webapp/index.jsp");
@@ -138,7 +138,7 @@ public class GitPullTest {
     events.clickProjectEventsTab();
     events.waitExpectedMessage(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
 
-    //Commit and push changes
+    // Commit and push changes
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
     git.waitAndRunCommit(COMMIT_MESSAGE);
     menu.runCommand(

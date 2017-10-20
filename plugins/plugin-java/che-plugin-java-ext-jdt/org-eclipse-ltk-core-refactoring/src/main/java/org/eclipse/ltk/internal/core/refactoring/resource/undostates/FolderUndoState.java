@@ -70,7 +70,7 @@ public class FolderUndoState extends ContainerUndoState {
     }
     IFolder folderHandle = (IFolder) resource;
     try {
-      monitor.beginTask("", 200); //$NON-NLS-1$
+      monitor.beginTask("", 200); // $NON-NLS-1$
       monitor.setTaskName(RefactoringCoreMessages.FolderDescription_NewFolderProgress);
       if (monitor.isCanceled()) {
         throw new OperationCanceledException();

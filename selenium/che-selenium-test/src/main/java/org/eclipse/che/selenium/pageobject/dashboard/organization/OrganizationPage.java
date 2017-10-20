@@ -59,7 +59,8 @@ public class OrganizationPage {
         "//md-content[contains(@class, 'organization-member-list')]//div[contains(@class, 'che-list-header-column')]//span";
     String MEMBERS_LIST_ITEM_XPATH =
         "//md-content[contains(@class, 'organization-member-list')]//span[text() = '%s']";
-    //        String MEMBER_CHECKBOX = "//div[contains(@class,'che-list-item-checkbox-main')]/md-checkbox[contains(@aria-label,'member')]";
+    //        String MEMBER_CHECKBOX =
+    // "//div[contains(@class,'che-list-item-checkbox-main')]/md-checkbox[contains(@aria-label,'member')]";
     String MEMBER_CHECKBOX = "//md-checkbox[contains(@aria-label,'member')]";
     // todo: //span[text()='Delete'] to get Delete button only
     String DELETE_MEMBER_WIDGET_BUTTON = "//che-popup//button";

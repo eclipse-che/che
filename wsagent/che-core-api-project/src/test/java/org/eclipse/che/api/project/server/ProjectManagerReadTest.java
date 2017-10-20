@@ -132,8 +132,8 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
     assertEquals(1, projectRegistry.getProject("/foo").getProblems().size());
     assertEquals(12, projectRegistry.getProject("/foo").getProblems().get(0).getCode());
 
-    //Value for required attribute is not initialized pt3:pt2-var2
-    //Value for required attribute is not initialized pt3:pt2-provided1
+    // Value for required attribute is not initialized pt3:pt2-var2
+    // Value for required attribute is not initialized pt3:pt2-provided1
     assertEquals(2, projectRegistry.getProject("/bar").getProblems().size());
     assertEquals(13, projectRegistry.getProject("/bar").getProblems().get(0).getCode());
   }
@@ -222,7 +222,8 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
   //
   //        //pm.getProject("/normal").getBaseFolder().createFolder("file1");
   //
-  //        System.out.println (">>>> "+pm.estimateProject("/normal", "pt3").get("pt2-provided1").getString());
+  //        System.out.println (">>>> "+pm.estimateProject("/normal",
+  // "pt3").get("pt2-provided1").getString());
   //
   //    }
 

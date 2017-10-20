@@ -137,7 +137,7 @@ public class FoundOccurrenceNode extends AbstractTreeNode implements HasPresenta
 
   /** {@inheritDoc} */
   @Override
-  //TODO
+  // TODO
   public void updatePresentation(@NotNull NodePresentation presentation) {
     SpanElement spanElement = createSpanElement(styles.styles().presentableTextContainer());
     spanElement.setAttribute("debugFilePath", itemPath);

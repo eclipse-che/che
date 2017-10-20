@@ -40,7 +40,7 @@ public final class StoreRecordChangeEvent extends GwtEvent<StoreRecordChangeHand
     return TYPE;
   }
 
-  //TODO support providing for passing nodes into event
+  // TODO support providing for passing nodes into event
 
   @Override
   public Type<StoreRecordChangeHandler> getAssociatedType() {
