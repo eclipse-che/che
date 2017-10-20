@@ -261,7 +261,7 @@ public class BindingLabelProvider /*extends LabelProvider */ {
     if ((flags & JavaElementLabels.M_EXCEPTIONS) != 0) {
       ITypeBinding[] exceptions = binding.getExceptionTypes();
       if (exceptions.length > 0) {
-        buffer.append(" throws "); //$NON-NLS-1$
+        buffer.append(" throws "); // $NON-NLS-1$
         for (int index = 0; index < exceptions.length; index++) {
           if (index > 0) {
             buffer.append(JavaElementLabels.COMMA_STRING);
@@ -346,9 +346,9 @@ public class BindingLabelProvider /*extends LabelProvider */ {
       ITypeBinding bound = binding.getBound();
       if (bound != null) {
         if (binding.isUpperbound()) {
-          buffer.append(" extends "); //$NON-NLS-1$
+          buffer.append(" extends "); // $NON-NLS-1$
         } else {
-          buffer.append(" super "); //$NON-NLS-1$
+          buffer.append(" super "); // $NON-NLS-1$
         }
         getTypeLabel(bound, flags & JavaElementLabels.T_TYPE_PARAMETERS, buffer);
       }
@@ -378,7 +378,7 @@ public class BindingLabelProvider /*extends LabelProvider */ {
             buffer.append(JavaUIMessages.JavaElementLabels_anonym);
           }
         } else {
-          buffer.append("UNKNOWN"); //$NON-NLS-1$
+          buffer.append("UNKNOWN"); // $NON-NLS-1$
         }
       } else {
         buffer.append(name);
@@ -536,6 +536,6 @@ public class BindingLabelProvider /*extends LabelProvider */ {
     if (element instanceof IBinding) {
       return getBindingLabel((IBinding) element, fTextFlags);
     }
-    return element == null ? "" : element.toString(); //$NON-NLS-1$
+    return element == null ? "" : element.toString(); // $NON-NLS-1$
   }
 }

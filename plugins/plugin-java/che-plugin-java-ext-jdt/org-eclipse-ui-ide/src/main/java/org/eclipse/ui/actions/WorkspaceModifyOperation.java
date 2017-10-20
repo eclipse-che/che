@@ -116,8 +116,8 @@ class WorkspaceModifyOperation /*implements IRunnableWithProgress, IThreadListen
    * @since 3.2
    */
   public void threadChange(Thread thread) {
-    //we must make sure we aren't transferring control away from a thread that
-    //already owns a scheduling rule because this is deadlock prone (bug 105491)
+    // we must make sure we aren't transferring control away from a thread that
+    // already owns a scheduling rule because this is deadlock prone (bug 105491)
     if (rule == null) {
       return;
     }
@@ -130,7 +130,7 @@ class WorkspaceModifyOperation /*implements IRunnableWithProgress, IThreadListen
       return;
     }
     throw new IllegalStateException(
-        "Cannot fork a thread from a thread owning a rule"); //$NON-NLS-1$
+        "Cannot fork a thread from a thread owning a rule"); // $NON-NLS-1$
   }
 
   /**

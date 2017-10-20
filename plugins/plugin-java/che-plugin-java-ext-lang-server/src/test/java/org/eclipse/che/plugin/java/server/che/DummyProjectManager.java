@@ -45,7 +45,8 @@ public class DummyProjectManager /*implements ProjectManager*/ {
   }
   //
   //    @Override
-  //    public List<Project> getProjects(String workspace) throws ServerException, NotFoundException, ForbiddenException {
+  //    public List<Project> getProjects(String workspace) throws ServerException,
+  // NotFoundException, ForbiddenException {
   //        final FolderEntry myRoot = getProjectsRoot(workspace);
   //        final List<Project> projects = new ArrayList<>();
   //        for (FolderEntry folder : myRoot.getChildFolders()) {
@@ -58,9 +59,11 @@ public class DummyProjectManager /*implements ProjectManager*/ {
   //    }
   //
   //    @Override
-  //    public Project getProject(String workspace, String projectPath) throws ForbiddenException, ServerException, NotFoundException {
+  //    public Project getProject(String workspace, String projectPath) throws ForbiddenException,
+  // ServerException, NotFoundException {
   //        final FolderEntry myRoot = getProjectsRoot(workspace);
-  //        final VirtualFileEntry child = myRoot.getChild(projectPath.startsWith("/") ? projectPath.substring(1) : projectPath);
+  //        final VirtualFileEntry child = myRoot.getChild(projectPath.startsWith("/") ?
+  // projectPath.substring(1) : projectPath);
   //        if (child != null && child.isFolder() && isProjectFolder((FolderEntry)child)) {
   //            return new Project((FolderEntry)child, this);
   //        }
@@ -68,18 +71,22 @@ public class DummyProjectManager /*implements ProjectManager*/ {
   //    }
   //
   //    @Override
-  //    public ProjectConfigDto getProjectFromWorkspace(@NotNull String wsId, @NotNull String projectPath) throws ServerException {
+  //    public ProjectConfigDto getProjectFromWorkspace(@NotNull String wsId, @NotNull String
+  // projectPath) throws ServerException {
   //        throw new UnsupportedOperationException("The method unsupported in this mode.");
   //    }
   //
   //    @Override
-  //    public List<ProjectConfigDto> getAllProjectsFromWorkspace(@NotNull String workspaceId) throws ServerException {
+  //    public List<ProjectConfigDto> getAllProjectsFromWorkspace(@NotNull String workspaceId)
+  // throws ServerException {
   //        throw new UnsupportedOperationException("The method unsupported in this mode.");
   //    }
   //
   //    @Override
-  //    public Project createProject(String workspace, String name, ProjectConfig projectConfig, Map<String, String> options)
-  //            throws ConflictException, ForbiddenException, ServerException, ProjectTypeConstraintException, NotFoundException {
+  //    public Project createProject(String workspace, String name, ProjectConfig projectConfig,
+  // Map<String, String> options)
+  //            throws ConflictException, ForbiddenException, ServerException,
+  // ProjectTypeConstraintException, NotFoundException {
   //        final FolderEntry myRoot = getProjectsRoot(workspace);
   //        final FolderEntry projectFolder = myRoot.createFolder(name);
   //        final Project project = new Project(projectFolder, this);
@@ -88,23 +95,28 @@ public class DummyProjectManager /*implements ProjectManager*/ {
   //
   //    @Override
   //    public Project updateProject(String workspace, String path, ProjectConfig newConfig)
-  //            throws ForbiddenException, ServerException, NotFoundException, ConflictException, IOException {
+  //            throws ForbiddenException, ServerException, NotFoundException, ConflictException,
+  // IOException {
   //        throw new UnsupportedOperationException();
   //    }
   //
   //    @Override
-  //    public FolderEntry getProjectsRoot(String workspace) throws ServerException, NotFoundException {
-  //        return new FolderEntry(workspace, localFileSystemProvider.getMountPoint(true).getRoot());
+  //    public FolderEntry getProjectsRoot(String workspace) throws ServerException,
+  // NotFoundException {
+  //        return new FolderEntry(workspace,
+  // localFileSystemProvider.getMountPoint(true).getRoot());
   //    }
   //
   //    @Override
-  //    public ProjectConfig getProjectConfig(Project project) throws ServerException, ProjectTypeConstraintException, ValueStorageException {
+  //    public ProjectConfig getProjectConfig(Project project) throws ServerException,
+  // ProjectTypeConstraintException, ValueStorageException {
   //        throw new UnsupportedOperationException();
   //    }
   //
   //    @Override
   //    public void updateProjectConfig(Project project, ProjectConfig config)
-  //            throws ServerException, ValueStorageException, ProjectTypeConstraintException, InvalidValueException {
+  //            throws ServerException, ValueStorageException, ProjectTypeConstraintException,
+  // InvalidValueException {
   //        throw new UnsupportedOperationException();
   //    }
   //
@@ -143,8 +155,10 @@ public class DummyProjectManager /*implements ProjectManager*/ {
   //    }
   //
   //    @Override
-  //    public Map<String, AttributeValue> estimateProject(String workspace, String path, String projectTypeId)
-  //            throws ValueStorageException, ServerException, ForbiddenException, NotFoundException, ProjectTypeConstraintException {
+  //    public Map<String, AttributeValue> estimateProject(String workspace, String path, String
+  // projectTypeId)
+  //            throws ValueStorageException, ServerException, ForbiddenException,
+  // NotFoundException, ProjectTypeConstraintException {
   //        throw new UnsupportedOperationException();
   //    }
   //
@@ -158,29 +172,35 @@ public class DummyProjectManager /*implements ProjectManager*/ {
   //    }
   //
   //    @Override
-  //    public List<SourceEstimation> resolveSources(String workspace, String path, boolean transientOnly)
-  //            throws ServerException, ForbiddenException, NotFoundException, ValueStorageException, ProjectTypeConstraintException {
+  //    public List<SourceEstimation> resolveSources(String workspace, String path, boolean
+  // transientOnly)
+  //            throws ServerException, ForbiddenException, NotFoundException,
+  // ValueStorageException, ProjectTypeConstraintException {
   //        throw new UnsupportedOperationException();
   //    }
   //
   //    @Override
-  //    public Project convertFolderToProject(String workspace, String path, ProjectConfig projectConfig)
+  //    public Project convertFolderToProject(String workspace, String path, ProjectConfig
+  // projectConfig)
   //            throws ConflictException, ForbiddenException, ServerException, NotFoundException {
   //        throw new UnsupportedOperationException();
   //    }
   //
   //    @Override
-  //    public VirtualFileEntry rename(String workspace, String path, String newName, String newMediaType)
+  //    public VirtualFileEntry rename(String workspace, String path, String newName, String
+  // newMediaType)
   //            throws ForbiddenException, ServerException, ConflictException, NotFoundException {
   //        throw new UnsupportedOperationException();
   //    }
   //
   //    @Override
-  //    public void delete(String workspace, String path) throws ServerException, ForbiddenException, NotFoundException, ConflictException {
+  //    public void delete(String workspace, String path) throws ServerException,
+  // ForbiddenException, NotFoundException, ConflictException {
   //        deleteEntry(workspace, path);
   //    }
   //
-  //    private void deleteEntry(String workspace, String deleteEntryPath) throws ServerException, NotFoundException, ForbiddenException {
+  //    private void deleteEntry(String workspace, String deleteEntryPath) throws ServerException,
+  // NotFoundException, ForbiddenException {
   //        final FolderEntry root = getProjectsRoot(workspace);
   //        final VirtualFileEntry entry = root.getChild(deleteEntryPath);
   //
@@ -188,10 +208,14 @@ public class DummyProjectManager /*implements ProjectManager*/ {
   //    }
   //
   //    @Override
-  //    public void deleteModule(String workspaceId, String pathToParent, String pathToModule) throws ServerException,
-  //                                                                                                  NotFoundException,
-  //                                                                                                  ForbiddenException,
-  //                                                                                                  ConflictException {
+  //    public void deleteModule(String workspaceId, String pathToParent, String pathToModule)
+  // throws ServerException,
+  //
+  //  NotFoundException,
+  //
+  //  ForbiddenException,
+  //
+  //  ConflictException {
   //        deleteEntry(workspaceId, pathToModule);
   //    }
   //

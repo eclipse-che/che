@@ -20,7 +20,7 @@ import org.eclipse.che.dto.shared.DTO;
  * @author Eugene Voevodin
  * @author Alexander Garagatyi
  */
-//@EventOrigin("machine")
+// @EventOrigin("machine")
 @DTO
 public interface MachineStatusEvent {
 

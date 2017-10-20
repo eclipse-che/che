@@ -116,7 +116,7 @@ import org.eclipse.swt.graphics.Image;
 public class UnresolvedElementsSubProcessor {
 
   private static final String ADD_IMPORT_ID =
-      "org.eclipse.jdt.ui.correction.addImport"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.correction.addImport"; // $NON-NLS-1$
 
   public static void getVariableProposals(
       IInvocationContext context,
@@ -347,7 +347,7 @@ public class UnresolvedElementsSubProcessor {
         Image image =
             JavaPluginImages.get(
                 JavaPluginImages
-                    .IMG_TOOL_DELETE); //JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+                    .IMG_TOOL_DELETE); // JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
         ASTRewriteCorrectionProposal proposal =
             new ASTRewriteCorrectionProposal(
                 label, cu, rewrite, IProposalRelevance.REMOVE_ASSIGNMENT, image);
@@ -539,7 +539,7 @@ public class UnresolvedElementsSubProcessor {
       ITypeBinding guessedType = ASTResolving.guessBindingForReference(node);
 
       ITypeBinding objectBinding =
-          astRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+          astRoot.getAST().resolveWellKnownType("java.lang.Object"); // $NON-NLS-1$
       String identifier = node.getIdentifier();
       boolean isInStaticContext = ASTResolving.isInStaticContext(node);
       ArrayList<CUCorrectionProposal> newProposals = new ArrayList<CUCorrectionProposal>(51);
@@ -632,7 +632,7 @@ public class UnresolvedElementsSubProcessor {
       if (newProposals.size() <= 50) proposals.addAll(newProposals);
     }
     if (binding != null && binding.isArray()) {
-      String idLength = "length"; //$NON-NLS-1$
+      String idLength = "length"; // $NON-NLS-1$
       String label =
           Messages.format(
               CorrectionMessages.UnresolvedElementsSubProcessor_changevariable_description,
@@ -784,9 +784,11 @@ public class UnresolvedElementsSubProcessor {
   private static void addNullityAnnotationTypesProposals(
       ICompilationUnit cu, Name node, Collection<ICommandAccess> proposals) throws CoreException {
     //		ASTNode parent= node.getParent();
-    //		boolean isAnnotationName= parent instanceof Annotation && ((Annotation) parent).getTypeNameProperty() == node.getLocationInParent();
+    //		boolean isAnnotationName= parent instanceof Annotation && ((Annotation)
+    // parent).getTypeNameProperty() == node.getLocationInParent();
     //		if (!isAnnotationName) {
-    //			boolean isImportName= parent instanceof ImportDeclaration && ImportDeclaration.NAME_PROPERTY == node.getLocationInParent();
+    //			boolean isImportName= parent instanceof ImportDeclaration &&
+    // ImportDeclaration.NAME_PROPERTY == node.getLocationInParent();
     //			if (!isImportName)
     //				return;
     //		}
@@ -795,7 +797,9 @@ public class UnresolvedElementsSubProcessor {
     //		String name= node.getFullyQualifiedName();
     //
     //		String nullityAnnotation= null;
-    //		String[] annotationNameOptions= { JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME, JavaCore.COMPILER_NONNULL_ANNOTATION_NAME, JavaCore.COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME };
+    //		String[] annotationNameOptions= { JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME,
+    // JavaCore.COMPILER_NONNULL_ANNOTATION_NAME,
+    // JavaCore.COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME };
     //		Hashtable<String, String> defaultOptions= JavaCore.getDefaultOptions();
     //		for (String annotationNameOption : annotationNameOptions) {
     //			String annotationName= javaProject.getOption(annotationNameOption, true);
@@ -809,16 +813,22 @@ public class UnresolvedElementsSubProcessor {
     //			return;
     //		if (javaProject.findType(defaultOptions.get(annotationNameOptions[0])) != null)
     //			return;
-    //		String version= JavaModelUtil.is18OrHigher(javaProject) ? "2" : "[1.1.0,2.0.0)"; //$NON-NLS-1$ //$NON-NLS-2$
-    //		Bundle[] annotationsBundles= JavaPlugin.getDefault().getBundles("org.eclipse.jdt.annotation", version); //$NON-NLS-1$
+    //		String version= JavaModelUtil.is18OrHigher(javaProject) ? "2" : "[1.1.0,2.0.0)";
+    // //$NON-NLS-1$ //$NON-NLS-2$
+    //		Bundle[] annotationsBundles=
+    // JavaPlugin.getDefault().getBundles("org.eclipse.jdt.annotation", version); //$NON-NLS-1$
     //		if (annotationsBundles == null)
     //			return;
     //
-    //		if (! cu.getJavaProject().getProject().hasNature("org.eclipse.pde.PluginNature")) //$NON-NLS-1$
-    //			addCopyAnnotationsJarProposal(cu, node, nullityAnnotation, annotationsBundles[0], proposals);
+    //		if (! cu.getJavaProject().getProject().hasNature("org.eclipse.pde.PluginNature"))
+    // //$NON-NLS-1$
+    //			addCopyAnnotationsJarProposal(cu, node, nullityAnnotation, annotationsBundles[0],
+    // proposals);
   }
 
-  //	private static void addCopyAnnotationsJarProposal(final ICompilationUnit cu, final Name name, final String fullyQualifiedName, Bundle annotationsBundle, Collection<ICommandAccess> proposals) {
+  //	private static void addCopyAnnotationsJarProposal(final ICompilationUnit cu, final Name name,
+  // final String fullyQualifiedName, Bundle annotationsBundle, Collection<ICommandAccess>
+  // proposals) {
   //		final IJavaProject javaProject= cu.getJavaProject();
   //		final File bundleFile;
   //		try {
@@ -828,10 +838,13 @@ public class UnresolvedElementsSubProcessor {
   //			return;
   //		}
   //		if (!bundleFile.isFile() || !bundleFile.canRead())
-  //			return; // we only support a JAR'd bundle, so this won't work in the runtime if you have org.eclipse.jdt.annotation in source.
+  //			return; // we only support a JAR'd bundle, so this won't work in the runtime if you have
+  // org.eclipse.jdt.annotation in source.
   //
-  //		final String changeName= CorrectionMessages.UnresolvedElementsSubProcessor_copy_annotation_jar_description;
-  //		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(changeName, null, IProposalRelevance.COPY_ANNOTATION_JAR) {
+  //		final String changeName=
+  // CorrectionMessages.UnresolvedElementsSubProcessor_copy_annotation_jar_description;
+  //		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(changeName, null,
+  // IProposalRelevance.COPY_ANNOTATION_JAR) {
   //			@Override
   //			protected Change createChange() throws CoreException {
   //				final IFile file= javaProject.getProject().getFile(bundleFile.getName());
@@ -844,7 +857,8 @@ public class UnresolvedElementsSubProcessor {
   //							file.create(new BufferedInputStream(new FileInputStream(bundleFile)), false, pm);
   //							return new DeleteResourceChange(file.getFullPath(), false);
   //						} catch (FileNotFoundException e) {
-  //							throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), e.getMessage()));
+  //							throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
+  // e.getMessage()));
   //						}
   //					}
   //					@Override
@@ -859,7 +873,8 @@ public class UnresolvedElementsSubProcessor {
   //				ClasspathChange addEntryChange= ClasspathChange.addEntryChange(javaProject, JavaCore
   //						.newLibraryEntry(file.getFullPath(), null, null));
   //				CompilationUnitChange addImportChange= createAddImportChange(cu, name, fullyQualifiedName);
-  //				return new CompositeChange(changeName, new Change[] { copyFileChange, addEntryChange, addImportChange});
+  //				return new CompositeChange(changeName, new Change[] { copyFileChange, addEntryChange,
+  // addImportChange});
   //			}
   //
   //			@Override
@@ -1115,18 +1130,22 @@ public class UnresolvedElementsSubProcessor {
           IJavaElement enclosing =
               enclosingPackage != null ? (IJavaElement) enclosingPackage : enclosingType;
 
-          //TODO NewCUUsingWizardProposal
+          // TODO NewCUUsingWizardProposal
           if ((kind & SimilarElementsRequestor.CLASSES) != 0) {
-            //						proposals.add(new NewCUUsingWizardProposal(cu, node, NewCUUsingWizardProposal.K_CLASS, enclosing, rel+3));
+            //						proposals.add(new NewCUUsingWizardProposal(cu, node,
+            // NewCUUsingWizardProposal.K_CLASS, enclosing, rel+3));
           }
           if ((kind & SimilarElementsRequestor.INTERFACES) != 0) {
-            //						proposals.add(new NewCUUsingWizardProposal(cu, node, NewCUUsingWizardProposal.K_INTERFACE, enclosing, rel+2));
+            //						proposals.add(new NewCUUsingWizardProposal(cu, node,
+            // NewCUUsingWizardProposal.K_INTERFACE, enclosing, rel+2));
           }
           if ((kind & SimilarElementsRequestor.ENUMS) != 0) {
-            //						proposals.add(new NewCUUsingWizardProposal(cu, node, NewCUUsingWizardProposal.K_ENUM, enclosing, rel));
+            //						proposals.add(new NewCUUsingWizardProposal(cu, node,
+            // NewCUUsingWizardProposal.K_ENUM, enclosing, rel));
           }
           if ((kind & SimilarElementsRequestor.ANNOTATIONS) != 0) {
-            //						proposals.add(new NewCUUsingWizardProposal(cu, node, NewCUUsingWizardProposal.K_ANNOTATION, enclosing, rel + 1));
+            //						proposals.add(new NewCUUsingWizardProposal(cu, node,
+            // NewCUUsingWizardProposal.K_ANNOTATION, enclosing, rel + 1));
             addNullityAnnotationTypesProposals(cu, node, proposals);
           }
         }
@@ -1261,7 +1280,8 @@ public class UnresolvedElementsSubProcessor {
     if (!isSuperInvocation
         && sender == null
         && invocationNode.getParent() instanceof ThrowStatement) {
-      String str = "new "; //$NON-NLS-1$ // do it the manual way, copting all the arguments is nasty
+      String str =
+          "new "; // $NON-NLS-1$ // do it the manual way, copting all the arguments is nasty
       String label = CorrectionMessages.UnresolvedElementsSubProcessor_addnewkeyword_description;
       int relevance =
           Character.isUpperCase(methodName.charAt(0))
@@ -1285,7 +1305,7 @@ public class UnresolvedElementsSubProcessor {
       String pref =
           PreferenceConstants.getPreference(
               PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, project);
-      String[] favourites = pref.split(";"); //$NON-NLS-1$
+      String[] favourites = pref.split(";"); // $NON-NLS-1$
       if (favourites.length == 0) {
         return;
       }
@@ -1716,7 +1736,7 @@ public class UnresolvedElementsSubProcessor {
     StringBuffer buf = new StringBuffer();
     for (int i = 0; i < types.length; i++) {
       if (i > 0) {
-        buf.append(", "); //$NON-NLS-1$
+        buf.append(", "); // $NON-NLS-1$
       }
       buf.append(ASTResolving.getTypeSignature(types[i]));
     }
@@ -1813,7 +1833,7 @@ public class UnresolvedElementsSubProcessor {
         String name = getExpressionBaseName(arg);
         ITypeBinding newType = Bindings.normalizeTypeBinding(argTypes[idx]);
         if (newType == null) {
-          newType = astRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+          newType = astRoot.getAST().resolveWellKnownType("java.lang.Object"); // $NON-NLS-1$
         }
         if (newType.isWildcardType()) {
           newType = ASTResolving.normalizeWildcardType(newType, true, astRoot.getAST());
@@ -1878,7 +1898,7 @@ public class UnresolvedElementsSubProcessor {
         curr = ASTResolving.normalizeWildcardType(curr, true, expr.getAST());
       }
       if (curr == null) {
-        curr = expr.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+        curr = expr.getAST().resolveWellKnownType("java.lang.Object"); // $NON-NLS-1$
       }
       params[i] = curr;
     }
@@ -2145,7 +2165,7 @@ public class UnresolvedElementsSubProcessor {
       if (!curr.isNullType()) { // don't normalize null type
         curr = Bindings.normalizeTypeBinding(curr);
         if (curr == null) {
-          curr = expression.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+          curr = expression.getAST().resolveWellKnownType("java.lang.Object"); // $NON-NLS-1$
         }
       }
       res[i] = curr;
@@ -2367,7 +2387,7 @@ public class UnresolvedElementsSubProcessor {
       }
     }
     // always suggest 'length'
-    String lengthId = "length"; //$NON-NLS-1$
+    String lengthId = "length"; // $NON-NLS-1$
     String label =
         CorrectionMessages.UnresolvedElementsSubProcessor_arraychangetolength_description;
     int offset = nameNode.getStartPosition();
@@ -2399,7 +2419,7 @@ public class UnresolvedElementsSubProcessor {
       memberName = ((SimpleName) selectedNode).getIdentifier();
     } else if (selectedNode.getLocationInParent() == SingleMemberAnnotation.VALUE_PROPERTY) {
       annotation = (Annotation) selectedNode.getParent();
-      memberName = "value"; //$NON-NLS-1$
+      memberName = "value"; // $NON-NLS-1$
     } else {
       return;
     }

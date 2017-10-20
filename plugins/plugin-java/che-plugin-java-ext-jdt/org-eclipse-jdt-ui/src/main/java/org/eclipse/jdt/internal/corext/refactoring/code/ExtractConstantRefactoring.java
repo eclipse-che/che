@@ -102,14 +102,14 @@ import org.eclipse.text.edits.TextEditGroup;
 
 public class ExtractConstantRefactoring extends Refactoring {
 
-  private static final String ATTRIBUTE_REPLACE = "replace"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_QUALIFY = "qualify"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_VISIBILITY = "visibility"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_REPLACE = "replace"; // $NON-NLS-1$
+  private static final String ATTRIBUTE_QUALIFY = "qualify"; // $NON-NLS-1$
+  private static final String ATTRIBUTE_VISIBILITY = "visibility"; // $NON-NLS-1$
 
-  private static final String MODIFIER = "static final"; //$NON-NLS-1$
+  private static final String MODIFIER = "static final"; // $NON-NLS-1$
 
-  private static final String KEY_NAME = "name"; //$NON-NLS-1$
-  private static final String KEY_TYPE = "type"; //$NON-NLS-1$
+  private static final String KEY_NAME = "name"; // $NON-NLS-1$
+  private static final String KEY_TYPE = "type"; // $NON-NLS-1$
 
   private CompilationUnitRewrite fCuRewrite;
   private int fSelectionStart;
@@ -118,10 +118,10 @@ public class ExtractConstantRefactoring extends Refactoring {
 
   private IExpressionFragment fSelectedExpression;
   private Type fConstantTypeCache;
-  private boolean fReplaceAllOccurrences = true; //default value
-  private boolean fQualifyReferencesWithDeclaringClassName = false; //default value
+  private boolean fReplaceAllOccurrences = true; // default value
+  private boolean fQualifyReferencesWithDeclaringClassName = false; // default value
 
-  private String fVisibility = JdtFlags.VISIBILITY_STRING_PRIVATE; //default value
+  private String fVisibility = JdtFlags.VISIBILITY_STRING_PRIVATE; // default value
   private boolean fTargetIsInterface = false;
   private String fConstantName;
   private String[] fExcludedVariableNames;
@@ -129,7 +129,7 @@ public class ExtractConstantRefactoring extends Refactoring {
   private boolean fSelectionAllStaticFinal;
   private boolean fAllStaticFinalCheckPerformed = false;
 
-  //Constant Declaration Location
+  // Constant Declaration Location
   private BodyDeclaration fToInsertAfter;
   private boolean fInsertFirst;
 
@@ -155,7 +155,7 @@ public class ExtractConstantRefactoring extends Refactoring {
     fCu = unit;
     fCuRewrite = null;
     fLinkedProposalModel = null;
-    fConstantName = ""; //$NON-NLS-1$
+    fConstantName = ""; // $NON-NLS-1$
     fCheckResultForCompileProblems = true;
   }
 
@@ -170,7 +170,7 @@ public class ExtractConstantRefactoring extends Refactoring {
     fCu = (ICompilationUnit) astRoot.getTypeRoot();
     fCuRewrite = new CompilationUnitRewrite(fCu, astRoot);
     fLinkedProposalModel = null;
-    fConstantName = ""; //$NON-NLS-1$
+    fConstantName = ""; // $NON-NLS-1$
     fCheckResultForCompileProblems = true;
   }
 
@@ -275,7 +275,7 @@ public class ExtractConstantRefactoring extends Refactoring {
   @Override
   public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
     try {
-      pm.beginTask("", 7); //$NON-NLS-1$
+      pm.beginTask("", 7); // $NON-NLS-1$
 
       RefactoringStatus result = Checks.validateEdit(fCu, getValidationContext());
       if (result.hasFatalError()) return result;
@@ -322,7 +322,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 
   private RefactoringStatus checkSelection(IProgressMonitor pm) throws JavaModelException {
     try {
-      pm.beginTask("", 2); //$NON-NLS-1$
+      pm.beginTask("", 2); // $NON-NLS-1$
 
       IExpressionFragment selectedExpression = getSelectedExpression();
 
@@ -459,7 +459,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 
   // !! similar to ExtractTempRefactoring equivalent
   public String getConstantSignaturePreview() throws JavaModelException {
-    String space = " "; //$NON-NLS-1$
+    String space = " "; // $NON-NLS-1$
     return getVisibility()
         + space
         + MODIFIER
@@ -484,7 +484,7 @@ public class ExtractConstantRefactoring extends Refactoring {
      * values. (e.g. see ExtractConstantRefactoring.checkConstantNameOnChange())
      */
 
-    //TODO: possibly add more checking for name conflicts that might
+    // TODO: possibly add more checking for name conflicts that might
     //      lead to a change in behavior
 
     try {
@@ -658,7 +658,7 @@ public class ExtractConstantRefactoring extends Refactoring {
             RefactoringCoreMessages.ExtractConstantRefactoring_constant_expression_pattern,
             BasicElementLabels.getJavaCodeString(expression)));
     String visibility = fVisibility;
-    if ("".equals(visibility)) //$NON-NLS-1$
+    if ("".equals(visibility)) // $NON-NLS-1$
     visibility = RefactoringCoreMessages.ExtractConstantRefactoring_default_visibility;
     comment.addSetting(
         Messages.format(
@@ -675,7 +675,7 @@ public class ExtractConstantRefactoring extends Refactoring {
         JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION,
         new Integer(fSelectionStart).toString()
             + " "
-            + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+            + new Integer(fSelectionLength).toString()); // $NON-NLS-1$
     arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplaceAllOccurrences).toString());
     arguments.put(
         ATTRIBUTE_QUALIFY, Boolean.valueOf(fQualifyReferencesWithDeclaringClassName).toString());
@@ -773,8 +773,7 @@ public class ExtractConstantRefactoring extends Refactoring {
     if (bd instanceof FieldDeclaration) {
       FieldDeclaration fieldDecl = (FieldDeclaration) bd;
       for (Iterator<VariableDeclarationFragment> fragments = fieldDecl.fragments().iterator();
-          fragments.hasNext();
-          ) {
+          fragments.hasNext(); ) {
         VariableDeclarationFragment fragment = fragments.next();
         SimpleName staticFieldName = fragment.getName();
         if (selected.getSubFragmentsMatching(
@@ -838,8 +837,7 @@ public class ExtractConstantRefactoring extends Refactoring {
     }
 
     for (Iterator<IExtendedModifier> iter = containingType.modifiers().iterator();
-        iter.hasNext();
-        ) {
+        iter.hasNext(); ) {
       IExtendedModifier modifier = iter.next();
       if (modifier instanceof Annotation) {
         scope.add((ASTNode) modifier);
@@ -847,8 +845,7 @@ public class ExtractConstantRefactoring extends Refactoring {
     }
 
     for (Iterator<BodyDeclaration> bodyDeclarations = containingType.bodyDeclarations().iterator();
-        bodyDeclarations.hasNext();
-        ) {
+        bodyDeclarations.hasNext(); ) {
       BodyDeclaration bodyDeclaration = bodyDeclarations.next();
 
       if (bodyDeclaration == getNodeToInsertConstantDeclarationAfter())
@@ -987,7 +984,7 @@ public class ExtractConstantRefactoring extends Refactoring {
               RefactoringCoreMessages.InitializableRefactoring_argument_not_exist,
               JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
     final String visibility = arguments.getAttribute(ATTRIBUTE_VISIBILITY);
-    if (visibility != null && !"".equals(visibility)) { //$NON-NLS-1$
+    if (visibility != null && !"".equals(visibility)) { // $NON-NLS-1$
       int flag = 0;
       try {
         flag = Integer.parseInt(visibility);
@@ -1000,7 +997,7 @@ public class ExtractConstantRefactoring extends Refactoring {
       fVisibility = JdtFlags.getVisibilityString(flag);
     }
     final String name = arguments.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
-    if (name != null && !"".equals(name)) //$NON-NLS-1$
+    if (name != null && !"".equals(name)) // $NON-NLS-1$
     fConstantName = name;
     else
       return RefactoringStatus.createFatalErrorStatus(

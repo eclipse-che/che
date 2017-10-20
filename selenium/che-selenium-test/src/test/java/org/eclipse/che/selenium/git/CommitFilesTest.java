@@ -111,7 +111,8 @@ public class CommitFilesTest {
     git.waitItemCheckBoxToBeSelectedInCommitWindow(
         "webapp", "WEB-INF", "jsp", "guess_num.jsp", "web.xml", "spring-servlet.xml", "index.jsp");
 
-    // unselect folder, select nested file, check that all parent folders of the file are also selected
+    // unselect folder, select nested file, check that all parent folders of the file are also
+    // selected
     git.clickItemCheckBoxInCommitWindow("webapp");
     git.clickItemCheckBoxInCommitWindow("guess_num.jsp");
     git.waitItemCheckBoxToBeSelectedInCommitWindow("webapp", "WEB-INF", "jsp", "guess_num.jsp");
@@ -122,7 +123,8 @@ public class CommitFilesTest {
     git.waitItemCheckBoxToBeUnSelectedInCommitWindow(
         "webapp", "WEB-INF", "jsp", "guess_num.jsp", "web.xml", "spring-servlet.xml", "index.jsp");
 
-    //select parent folder, unselect nested file, check that all nodes are selected except unselected file and his folder
+    // select parent folder, unselect nested file, check that all nodes are selected except
+    // unselected file and his folder
     git.clickItemCheckBoxInCommitWindow("webapp");
     git.clickItemCheckBoxInCommitWindow("guess_num.jsp");
     git.waitItemCheckBoxToBeSelectedInCommitWindow("webapp", "WEB-INF");

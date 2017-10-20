@@ -34,10 +34,10 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
 public class ReferenceFinderUtil {
 
   private ReferenceFinderUtil() {
-    //no instances
+    // no instances
   }
 
-  //----- referenced types -
+  // ----- referenced types -
 
   public static IType[] getTypesReferencedIn(IJavaElement[] elements, IProgressMonitor pm)
       throws JavaModelException {
@@ -59,7 +59,7 @@ public class ReferenceFinderUtil {
       throws JavaModelException {
 
     List<SearchMatch> referencedTypes = new ArrayList<SearchMatch>();
-    pm.beginTask("", elements.length); //$NON-NLS-1$
+    pm.beginTask("", elements.length); // $NON-NLS-1$
     for (int i = 0; i < elements.length; i++) {
       referencedTypes.addAll(
           getTypeReferencesIn(elements[i], owner, new SubProgressMonitor(pm, 1)));
@@ -76,7 +76,7 @@ public class ReferenceFinderUtil {
     return requestor.getResults();
   }
 
-  //----- referenced fields ----
+  // ----- referenced fields ----
 
   public static IField[] getFieldsReferencedIn(IJavaElement[] elements, IProgressMonitor pm)
       throws JavaModelException {
@@ -97,7 +97,7 @@ public class ReferenceFinderUtil {
       IJavaElement[] elements, WorkingCopyOwner owner, IProgressMonitor pm)
       throws JavaModelException {
     List<SearchMatch> referencedFields = new ArrayList<SearchMatch>();
-    pm.beginTask("", elements.length); //$NON-NLS-1$
+    pm.beginTask("", elements.length); // $NON-NLS-1$
     for (int i = 0; i < elements.length; i++) {
       referencedFields.addAll(
           getFieldReferencesIn(elements[i], owner, new SubProgressMonitor(pm, 1)));
@@ -114,7 +114,7 @@ public class ReferenceFinderUtil {
     return requestor.getResults();
   }
 
-  //----- referenced methods ----
+  // ----- referenced methods ----
 
   public static IMethod[] getMethodsReferencedIn(IJavaElement[] elements, IProgressMonitor pm)
       throws JavaModelException {
@@ -135,7 +135,7 @@ public class ReferenceFinderUtil {
       IJavaElement[] elements, WorkingCopyOwner owner, IProgressMonitor pm)
       throws JavaModelException {
     List<SearchMatch> referencedMethods = new ArrayList<SearchMatch>();
-    pm.beginTask("", elements.length); //$NON-NLS-1$
+    pm.beginTask("", elements.length); // $NON-NLS-1$
     for (int i = 0; i < elements.length; i++) {
       referencedMethods.addAll(
           getMethodReferencesIn(elements[i], owner, new SubProgressMonitor(pm, 1)));
@@ -160,7 +160,7 @@ public class ReferenceFinderUtil {
     return typesUsed.toArray(new ITypeBinding[typesUsed.size()]);
   }
 
-  //set of ITypeBindings
+  // set of ITypeBindings
   public static Set<ITypeBinding> getTypesUsedInDeclaration(MethodDeclaration methodDeclaration) {
     if (methodDeclaration == null) return new HashSet<ITypeBinding>(0);
     Set<ITypeBinding> result = new HashSet<ITypeBinding>();
@@ -172,15 +172,13 @@ public class ReferenceFinderUtil {
     }
 
     for (Iterator<SingleVariableDeclaration> iter = methodDeclaration.parameters().iterator();
-        iter.hasNext();
-        ) {
+        iter.hasNext(); ) {
       binding = iter.next().getType().resolveBinding();
       if (binding != null) result.add(binding);
     }
 
     for (Iterator<Type> iter = methodDeclaration.thrownExceptionTypes().iterator();
-        iter.hasNext();
-        ) {
+        iter.hasNext(); ) {
       binding = iter.next().resolveBinding();
       if (binding != null) result.add(binding);
     }

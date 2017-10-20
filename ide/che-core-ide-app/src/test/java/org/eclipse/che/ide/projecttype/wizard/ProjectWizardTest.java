@@ -252,13 +252,17 @@ public class ProjectWizardTest {
   public void shouldCreateConfigForFolder() throws Exception {
     //        prepareWizard(UPDATE);
     //
-    //        when(workspaceRoot.getContainer(any(Path.class))).thenReturn(optionalContainerPromise);
+    //
+    // when(workspaceRoot.getContainer(any(Path.class))).thenReturn(optionalContainerPromise);
     //        when(folderToUpdate.getResourceType()).thenReturn(Resource.FOLDER);
     //        when(folderToUpdate.toProject()).thenReturn(createProjectRequest);
-    //        when(createProjectRequest.withBody(any(ProjectConfig.class))).thenReturn(createProjectRequest);
+    //
+    // when(createProjectRequest.withBody(any(ProjectConfig.class))).thenReturn(createProjectRequest);
     //        when(createProjectRequest.send()).thenReturn(createProjectPromise);
-    //        when(createProjectPromise.then(any(Operation.class))).thenReturn(createProjectPromise);
-    //        when(createProjectPromise.catchError(any(Operation.class))).thenReturn(createProjectPromise);
+    //
+    // when(createProjectPromise.then(any(Operation.class))).thenReturn(createProjectPromise);
+    //
+    // when(createProjectPromise.catchError(any(Operation.class))).thenReturn(createProjectPromise);
     //
     //        wizard.complete(completeCallback);
     //
@@ -275,13 +279,17 @@ public class ProjectWizardTest {
   public void shouldFailCreateConfigForFolder() throws Exception {
     //        prepareWizard(UPDATE);
     //
-    //        when(workspaceRoot.getContainer(any(Path.class))).thenReturn(optionalContainerPromise);
+    //
+    // when(workspaceRoot.getContainer(any(Path.class))).thenReturn(optionalContainerPromise);
     //        when(folderToUpdate.getResourceType()).thenReturn(Resource.FOLDER);
     //        when(folderToUpdate.toProject()).thenReturn(createProjectRequest);
-    //        when(createProjectRequest.withBody(any(ProjectConfig.class))).thenReturn(createProjectRequest);
+    //
+    // when(createProjectRequest.withBody(any(ProjectConfig.class))).thenReturn(createProjectRequest);
     //        when(createProjectRequest.send()).thenReturn(createProjectPromise);
-    //        when(createProjectPromise.then(any(Operation.class))).thenReturn(createProjectPromise);
-    //        when(createProjectPromise.catchError(any(Operation.class))).thenReturn(createProjectPromise);
+    //
+    // when(createProjectPromise.then(any(Operation.class))).thenReturn(createProjectPromise);
+    //
+    // when(createProjectPromise.catchError(any(Operation.class))).thenReturn(createProjectPromise);
     //        when(promiseError.getCause()).thenReturn(exception);
     //
     //        wizard.complete(completeCallback);

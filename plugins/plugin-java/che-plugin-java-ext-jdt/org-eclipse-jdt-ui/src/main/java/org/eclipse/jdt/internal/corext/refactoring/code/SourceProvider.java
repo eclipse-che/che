@@ -200,7 +200,7 @@ public class SourceProvider {
   public boolean hasReturnValue() {
     IMethodBinding binding = fDeclaration.resolveBinding();
     return binding.getReturnType()
-        != fDeclaration.getAST().resolveWellKnownType("void"); //$NON-NLS-1$
+        != fDeclaration.getAST().resolveWellKnownType("void"); // $NON-NLS-1$
   }
 
   // returns true if the declaration has a vararg and
@@ -603,7 +603,7 @@ public class SourceProvider {
     if (!context.receiverIsStatic && Modifier.isStatic(modifiers)) {
       if ("this".equals(receiver)
           && invocationType != null
-          && Bindings.equals(invocationType, sourceType)) { //$NON-NLS-1$
+          && Bindings.equals(invocationType, sourceType)) { // $NON-NLS-1$
         receiver = null;
       } else {
         receiver = context.importer.addImport(sourceType, importRewriteContext);

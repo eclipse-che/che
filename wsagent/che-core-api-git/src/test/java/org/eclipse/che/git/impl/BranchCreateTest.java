@@ -55,7 +55,7 @@ public class BranchCreateTest {
   )
   public void testSimpleBranchCreate(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     addFile(connection, "README.txt", org.eclipse.che.git.impl.GitTestUtil.CONTENT);
     connection.add(AddParams.create(singletonList("README.txt")));
@@ -63,10 +63,10 @@ public class BranchCreateTest {
 
     int beforeCountOfBranches = connection.branchList(LIST_LOCAL).size();
 
-    //when
+    // when
     connection.branchCreate("new-branch", null);
 
-    //then
+    // then
     int afterCountOfBranches = connection.branchList(LIST_LOCAL).size();
     assertEquals(afterCountOfBranches, beforeCountOfBranches + 1);
   }
@@ -77,24 +77,24 @@ public class BranchCreateTest {
   )
   public void testBranchCreateWithStartPoint(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     addFile(connection, "newfile1", "file 1 content");
     connection.add(AddParams.create(singletonList(".")));
     connection.commit(CommitParams.create("Commit message"));
 
-    //change content
+    // change content
     addFile(connection, "newfile1", "new file 1 content");
     connection.commit(CommitParams.create("Commit message").withAll(true));
 
-    //get list of master branch commits
+    // get list of master branch commits
     List<Revision> revCommitList = connection.log(LogParams.create()).getCommits();
     int beforeCheckoutCommitsCount = revCommitList.size();
 
-    //when
-    //create new branch to 2nd commit
+    // when
+    // create new branch to 2nd commit
     Branch branch = connection.branchCreate("new-branch", revCommitList.get(1).getId());
-    //then
+    // then
     connection.checkout(CheckoutParams.create(branch.getDisplayName()));
 
     int afterCheckoutCommitsCount = connection.log(LogParams.create()).getCommits().size();

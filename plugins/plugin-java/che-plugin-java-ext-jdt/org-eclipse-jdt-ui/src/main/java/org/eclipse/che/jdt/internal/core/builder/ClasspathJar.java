@@ -45,7 +45,7 @@ public class ClasspathJar extends CodenvyClasspathLocation {
     try {
       java.net.URI location = resource.getLocationURI();
       if (location == null) {
-        this.zipFilename = ""; //$NON-NLS-1$
+        this.zipFilename = ""; // $NON-NLS-1$
       } else {
         File localFile = Util.toLocalFile(location, null);
         this.zipFilename = localFile.getPath();
@@ -85,7 +85,7 @@ public class ClasspathJar extends CodenvyClasspathLocation {
     String zipFileName = jar.zipFilename;
 
     SimpleSet packageSet = new SimpleSet(41);
-    packageSet.add(""); //$NON-NLS-1$
+    packageSet.add(""); // $NON-NLS-1$
     nextEntry:
     for (Enumeration e = jar.zipFile.entries(); e.hasMoreElements(); ) {
       String fileName = ((ZipEntry) e.nextElement()).getName();
@@ -205,7 +205,7 @@ public class ClasspathJar extends CodenvyClasspathLocation {
               "("
                   + Thread.currentThread()
                   + ") [ClasspathJar.isPackage(String)] Creating ZipFile on "
-                  + this.zipFilename); //$NON-NLS-1$	//$NON-NLS-2$
+                  + this.zipFilename); // $NON-NLS-1$	//$NON-NLS-2$
         }
         this.zipFile = new ZipFile(this.zipFilename);
         this.closeZipFileAtEnd = true;
@@ -222,14 +222,14 @@ public class ClasspathJar extends CodenvyClasspathLocation {
   }
 
   public String toString() {
-    String start = "Classpath jar file " + this.zipFilename; //$NON-NLS-1$
+    String start = "Classpath jar file " + this.zipFilename; // $NON-NLS-1$
     if (this.accessRuleSet == null) return start;
-    return start + " with " + this.accessRuleSet; //$NON-NLS-1$
+    return start + " with " + this.accessRuleSet; // $NON-NLS-1$
   }
 
   public String debugPathString() {
     long time = lastModified();
     if (time == 0) return this.zipFilename;
-    return this.zipFilename + '(' + (new Date(time)) + " : " + time + ')'; //$NON-NLS-1$
+    return this.zipFilename + '(' + (new Date(time)) + " : " + time + ')'; // $NON-NLS-1$
   }
 }

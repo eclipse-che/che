@@ -51,7 +51,7 @@ import org.eclipse.text.edits.TextEdit;
 
 class DeleteChangeCreator {
   private DeleteChangeCreator() {
-    //private
+    // private
   }
 
   /**
@@ -109,8 +109,8 @@ class DeleteChangeCreator {
   }
 
   private static Change createDeleteChange(IResource resource) {
-    Assert.isTrue(!(resource instanceof IWorkspaceRoot)); //cannot be done
-    Assert.isTrue(!(resource instanceof IProject)); //project deletion is handled by the workbench
+    Assert.isTrue(!(resource instanceof IWorkspaceRoot)); // cannot be done
+    Assert.isTrue(!(resource instanceof IProject)); // project deletion is handled by the workbench
     return new DeleteResourceChange(resource.getFullPath(), true);
   }
 
@@ -146,7 +146,7 @@ class DeleteChangeCreator {
     }
   }
 
-  //List<IJavaElement>
+  // List<IJavaElement>
   private static List<IJavaElement> getElementsSmallerThanCu(IJavaElement[] javaElements) {
     List<IJavaElement> result = new ArrayList<IJavaElement>();
     for (int i = 0; i < javaElements.length; i++) {
@@ -170,15 +170,15 @@ class DeleteChangeCreator {
         return createSourceManipulationDeleteChange((ICompilationUnit) javaElement);
 
       case IJavaElement.CLASS_FILE:
-        //if this assert fails, it means that a precondition is missing
+        // if this assert fails, it means that a precondition is missing
         Assert.isTrue(((IClassFile) javaElement).getResource() instanceof IFile);
         return createDeleteChange(((IClassFile) javaElement).getResource());
 
-      case IJavaElement.JAVA_MODEL: //cannot be done
+      case IJavaElement.JAVA_MODEL: // cannot be done
         Assert.isTrue(false);
         return null;
 
-      case IJavaElement.JAVA_PROJECT: //handled differently
+      case IJavaElement.JAVA_PROJECT: // handled differently
         Assert.isTrue(false);
         return null;
 
@@ -189,16 +189,16 @@ class DeleteChangeCreator {
       case IJavaElement.PACKAGE_DECLARATION:
       case IJavaElement.IMPORT_CONTAINER:
       case IJavaElement.IMPORT_DECLARATION:
-        Assert.isTrue(false); //not done here
+        Assert.isTrue(false); // not done here
         return new NullChange();
       default:
-        Assert.isTrue(false); //there's no more kinds
+        Assert.isTrue(false); // there's no more kinds
         return new NullChange();
     }
   }
 
   private static Change createSourceManipulationDeleteChange(ISourceManipulation element) {
-    //XXX workaround for bug 31384, in case of linked ISourceManipulation delete the resource
+    // XXX workaround for bug 31384, in case of linked ISourceManipulation delete the resource
     if (element instanceof ICompilationUnit || element instanceof IPackageFragment) {
       IResource resource;
       if (element instanceof ICompilationUnit)
@@ -213,9 +213,9 @@ class DeleteChangeCreator {
       throws JavaModelException {
     IResource resource = root.getResource();
     if (resource != null && resource.isLinked()) {
-      //XXX using this code is a workaround for jcore bug 31998
-      //jcore cannot handle linked stuff
-      //normally, we should always create DeletePackageFragmentRootChange
+      // XXX using this code is a workaround for jcore bug 31998
+      // jcore cannot handle linked stuff
+      // normally, we should always create DeletePackageFragmentRootChange
       CompositeChange composite =
           new DynamicValidationStateChange(
               RefactoringCoreMessages.DeleteRefactoring_delete_package_fragment_root);
@@ -225,7 +225,7 @@ class DeleteChangeCreator {
       if (change != null) {
         composite.add(change);
       }
-      Assert.isTrue(!Checks.isClasspathDelete(root)); //checked in preconditions
+      Assert.isTrue(!Checks.isClasspathDelete(root)); // checked in preconditions
       composite.add(createDeleteChange(resource));
 
       return composite;

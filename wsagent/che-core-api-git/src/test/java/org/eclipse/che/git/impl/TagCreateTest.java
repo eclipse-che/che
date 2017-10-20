@@ -23,6 +23,7 @@ import org.eclipse.che.api.git.params.TagCreateParams;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
 /** @author Eugene Voevodin */
 public class TagCreateTest {
 
@@ -44,12 +45,12 @@ public class TagCreateTest {
   )
   public void testCreateTag(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
     int beforeTagCount = connection.tagList(null).size();
-    //when
+    // when
     connection.tagCreate(TagCreateParams.create("v1").withMessage("first version"));
-    //then
+    // then
     int afterTagCount = connection.tagList(null).size();
     assertEquals(afterTagCount, beforeTagCount + 1);
   }

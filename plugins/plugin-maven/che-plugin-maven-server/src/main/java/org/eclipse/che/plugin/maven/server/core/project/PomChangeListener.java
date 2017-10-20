@@ -66,8 +66,9 @@ public class PomChangeListener {
           public void onEvent(ProjectItemModifiedEvent event) {
             String eventPath = event.getPath();
             if (!event.isFolder() && eventPath.endsWith("pom.xml")) {
-              //TODO update only pom file that in root of project
-              //                    if(event.getProject().equals(eventPath.substring(0, eventPath.lastIndexOf("pom.xml") - 1))) {
+              // TODO update only pom file that in root of project
+              //                    if(event.getProject().equals(eventPath.substring(0,
+              // eventPath.lastIndexOf("pom.xml") - 1))) {
               if (pomIsValid(eventPath)) {
                 projectToUpdate.add(new Path(eventPath).removeLastSegments(1).toOSString());
               }

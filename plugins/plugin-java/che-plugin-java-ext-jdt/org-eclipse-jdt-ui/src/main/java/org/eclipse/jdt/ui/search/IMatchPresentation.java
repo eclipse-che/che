@@ -9,9 +9,9 @@
  */
 package org.eclipse.jdt.ui.search;
 //
-//import org.eclipse.jface.viewers.ILabelProvider;
-//import org.eclipse.search.ui.text.Match;
-//import org.eclipse.ui.PartInitException;
+// import org.eclipse.jface.viewers.ILabelProvider;
+// import org.eclipse.search.ui.text.Match;
+// import org.eclipse.ui.PartInitException;
 
 /**
  * This interface serves to display elements that a search participant has contributed to a search
@@ -39,7 +39,8 @@ public interface IMatchPresentation {
   //	/**
   //	 * Opens an editor on the given element and selects the given range of text.
   //	 * The location of matches are automatically updated when a file is edited
-  //	 * through the file buffer infrastructure (see {@link org.eclipse.core.filebuffers.ITextFileBufferManager}).
+  //	 * through the file buffer infrastructure (see {@link
+  // org.eclipse.core.filebuffers.ITextFileBufferManager}).
   //	 * When a file buffer is saved, the current positions are written back to the
   //	 * match.
   //	 * If the <code>activate</code> parameter is <code>true</code> the opened editor
@@ -56,5 +57,6 @@ public interface IMatchPresentation {
   //	 * @throws PartInitException
   //	 *             If an editor can't be opened.
   //	 */
-  //	void showMatch(Match match, int currentOffset, int currentLength, boolean activate) throws PartInitException;
+  //	void showMatch(Match match, int currentOffset, int currentLength, boolean activate) throws
+  // PartInitException;
 }

@@ -58,7 +58,7 @@ public class OrganizationalAccountPermissionsCheckerTest {
 
   @Test
   public void shouldReturnOrganizationalReturnType() throws Exception {
-    //then
+    // then
     assertEquals(permissionsChecker.getAccountType(), OrganizationImpl.ORGANIZATIONAL_ACCOUNT);
   }
 

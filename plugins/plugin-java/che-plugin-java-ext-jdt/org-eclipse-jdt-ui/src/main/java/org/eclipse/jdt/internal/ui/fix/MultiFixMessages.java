@@ -15,7 +15,7 @@ import org.eclipse.osgi.util.NLS;
 
 public class MultiFixMessages extends NLS {
   private static final String BUNDLE_NAME =
-      "org.eclipse.jdt.internal.ui.fix.MultiFixMessages"; //$NON-NLS-1$
+      "org.eclipse.jdt.internal.ui.fix.MultiFixMessages"; // $NON-NLS-1$
 
   private MultiFixMessages() {}
 

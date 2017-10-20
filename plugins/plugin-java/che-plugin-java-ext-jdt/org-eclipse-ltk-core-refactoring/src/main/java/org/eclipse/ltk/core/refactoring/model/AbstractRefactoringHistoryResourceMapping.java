@@ -77,7 +77,7 @@ public abstract class AbstractRefactoringHistoryResourceMapping extends Resource
     final RefactoringDescriptorProxy[] proxies = fRefactoringHistory.getDescriptors();
     for (int index = 0; index < proxies.length; index++) {
       final String name = proxies[index].getProject();
-      if (name != null && !"".equals(name)) //$NON-NLS-1$
+      if (name != null && !"".equals(name)) // $NON-NLS-1$
       set.add(root.getProject(name));
     }
     return (IProject[]) set.toArray(new IProject[set.size()]);

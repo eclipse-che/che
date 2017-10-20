@@ -982,7 +982,8 @@ public class ReorgQuickFixTest extends QuickFixTest {
   //			otherPack.createCompilationUnit("Foo.java", buf.toString(), false, null);
   //
   //			MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, "", null);
-  //			ClasspathFixProposal[] proposals= ClasspathFixProcessorDescriptor.getProposals(cu.getJavaProject(), "mylib.Foo", status);
+  //			ClasspathFixProposal[] proposals=
+  // ClasspathFixProcessorDescriptor.getProposals(cu.getJavaProject(), "mylib.Foo", status);
   //			assertEquals(1, proposals.length);
   //			assertTrue(status.isOK());
   //
@@ -1007,10 +1008,12 @@ public class ReorgQuickFixTest extends QuickFixTest {
   //		try {
   //			File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
   //			assertTrue("lib does not exist",  lib != null && lib.exists());
-  //			IPackageFragmentRoot otherRoot= JavaProjectHelper.addLibraryWithImport(otherProject, Path.fromOSString(lib.getPath()), null, null);
+  //			IPackageFragmentRoot otherRoot= JavaProjectHelper.addLibraryWithImport(otherProject,
+  // Path.fromOSString(lib.getPath()), null, null);
   //
   //			MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, "", null);
-  //			ClasspathFixProposal[] proposals= ClasspathFixProcessorDescriptor.getProposals(cu.getJavaProject(), "mylib.Foo", status);
+  //			ClasspathFixProposal[] proposals=
+  // ClasspathFixProcessorDescriptor.getProposals(cu.getJavaProject(), "mylib.Foo", status);
   //			assertEquals(1, proposals.length);
   //			assertTrue(status.isOK());
   //
@@ -1020,7 +1023,8 @@ public class ReorgQuickFixTest extends QuickFixTest {
   //		}
   //	}
   //
-  //	private void assertAddedClassPathEntry(ClasspathFixProposal curr, IPath addedPath, ICompilationUnit cu, IClasspathEntry[] prevClasspath) throws CoreException {
+  //	private void assertAddedClassPathEntry(ClasspathFixProposal curr, IPath addedPath,
+  // ICompilationUnit cu, IClasspathEntry[] prevClasspath) throws CoreException {
   //		new PerformChangeOperation(curr.createChange(null)).run(null);
   //
   //		IClasspathEntry[] newClasspath= cu.getJavaProject().getRawClasspath();
@@ -1051,7 +1055,8 @@ public class ReorgQuickFixTest extends QuickFixTest {
   //			JavaProjectHelper.addToClasspath(otherProject, entry);
   //
   //			MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, "", null);
-  //			ClasspathFixProposal[] proposals= ClasspathFixProcessorDescriptor.getProposals(cu.getJavaProject(), "mylib.Foo", status);
+  //			ClasspathFixProposal[] proposals=
+  // ClasspathFixProcessorDescriptor.getProposals(cu.getJavaProject(), "mylib.Foo", status);
   //			assertEquals(2, proposals.length);
   //			assertTrue(status.isOK());
   //
@@ -1079,7 +1084,8 @@ public class ReorgQuickFixTest extends QuickFixTest {
   //			assertTrue("lib does not exist",  lib != null && lib.exists());
   //			IPath path= Path.fromOSString(lib.getPath());
   //			final IClasspathEntry[] entries= { JavaCore.newLibraryEntry(path, null, null) };
-  //			final IPath containerPath= new Path(JavaCore.USER_LIBRARY_CONTAINER_ID).append("MyUserLibrary");
+  //			final IPath containerPath= new
+  // Path(JavaCore.USER_LIBRARY_CONTAINER_ID).append("MyUserLibrary");
   //
   //
   //			IClasspathContainer newContainer= new IClasspathContainer() {
@@ -1099,14 +1105,16 @@ public class ReorgQuickFixTest extends QuickFixTest {
   //					return containerPath;
   //				}
   //			};
-  //			ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(JavaCore.USER_LIBRARY_CONTAINER_ID);
+  //			ClasspathContainerInitializer initializer=
+  // JavaCore.getClasspathContainerInitializer(JavaCore.USER_LIBRARY_CONTAINER_ID);
   //			initializer.requestClasspathContainerUpdate(containerPath, otherProject, newContainer);
   //
   //			IClasspathEntry entry= JavaCore.newContainerEntry(containerPath);
   //			JavaProjectHelper.addToClasspath(otherProject, entry);
   //
   //			MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, "", null);
-  //			ClasspathFixProposal[] proposals= ClasspathFixProcessorDescriptor.getProposals(cu.getJavaProject(), "mylib.Foo", status);
+  //			ClasspathFixProposal[] proposals=
+  // ClasspathFixProcessorDescriptor.getProposals(cu.getJavaProject(), "mylib.Foo", status);
   //			assertEquals(1, proposals.length);
   //			assertTrue(status.isOK());
   //

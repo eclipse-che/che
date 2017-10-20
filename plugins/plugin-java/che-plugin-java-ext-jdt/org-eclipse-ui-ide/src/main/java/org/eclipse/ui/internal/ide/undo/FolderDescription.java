@@ -83,7 +83,7 @@ public class FolderDescription extends ContainerDescription {
     }
     IFolder folderHandle = (IFolder) resource;
     try {
-      monitor.beginTask("", 200); //$NON-NLS-1$
+      monitor.beginTask("", 200); // $NON-NLS-1$
       monitor.setTaskName(UndoMessages.FolderDescription_NewFolderProgress);
       if (monitor.isCanceled()) {
         throw new OperationCanceledException();

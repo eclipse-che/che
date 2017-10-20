@@ -34,7 +34,7 @@ public class ASTProvider {
   public static final boolean SHARED_AST_STATEMENT_RECOVERY = true;
   public static final boolean SHARED_BINDING_RECOVERY = true;
   private static final Logger LOG = LoggerFactory.getLogger(ASTProvider.class);
-  private static final String DEBUG_PREFIX = "ASTProvider > "; //$NON-NLS-1$
+  private static final String DEBUG_PREFIX = "ASTProvider > "; // $NON-NLS-1$
   /**
    * Tells whether this class is in debug mode.
    *
@@ -94,10 +94,10 @@ public class ASTProvider {
                         + " - "
                         + DEBUG_PREFIX
                         + "creating AST for: "
-                        + input.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
+                        + input.getElementName()); // $NON-NLS-1$ //$NON-NLS-2$
               root[0] = (CompilationUnit) parser.createAST(progressMonitor);
 
-              //mark as unmodifiable
+              // mark as unmodifiable
               ASTNodes.setFlagsToAST(root[0], ASTNode.PROTECT);
             } catch (OperationCanceledException ex) {
               return;

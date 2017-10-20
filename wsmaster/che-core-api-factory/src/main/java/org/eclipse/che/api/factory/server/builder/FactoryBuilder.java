@@ -219,7 +219,8 @@ public class FactoryBuilder {
 
       // if value is null or empty collection or default value for primitives
       if (ValueHelper.isEmpty(parameterValue)) {
-        // field must not be a mandatory, unless it's ignored or deprecated or doesn't suit to the version
+        // field must not be a mandatory, unless it's ignored or deprecated or doesn't suit to the
+        // version
         if (Obligation.MANDATORY.equals(factoryParameter.obligation())
             && factoryParameter.deprecatedSince().compareTo(version) > 0
             && factoryParameter.ignoredSince().compareTo(version) > 0

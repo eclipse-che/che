@@ -63,7 +63,7 @@ public class KeyBindingManager implements KeyBindingAgent {
     addScheme(new SchemeImpl(SCHEME_GLOBAL_ID, "Global"));
     addScheme(new SchemeImpl(SCHEME_ECLIPSE_ID, "Eclipse Scheme"));
 
-    //TODO check user settings
+    // TODO check user settings
     activeScheme = SCHEME_GLOBAL_ID;
 
     presentationFactory = new PresentationFactory();
@@ -89,7 +89,7 @@ public class KeyBindingManager implements KeyBindingAgent {
               return;
             }
 
-            //handle event in active scheme
+            // handle event in active scheme
             int digest = CharCodeWithModifiers.computeKeyDigest(signalEvent);
             preventDefaultBrowserAction((KeyboardEvent) event, digest);
 
@@ -98,25 +98,25 @@ public class KeyBindingManager implements KeyBindingAgent {
             if (!actionIds.isEmpty()) {
               runActions(actionIds, event);
             }
-            //else handle event in global scheme
+            // else handle event in global scheme
             else if (!(actionIds = getGlobal().getActionIds(digest)).isEmpty()) {
               runActions(actionIds, event);
             }
 
-            //default, lets this event handle other part of the IDE
+            // default, lets this event handle other part of the IDE
           }
         };
     if (UserAgent.isFirefox()) {
       // firefox fires keypress events
       documentElement.addEventListener(Event.KEYPRESS, downListener, true);
     } else {
-      //webkit fires keydown events
+      // webkit fires keydown events
       documentElement.addEventListener(Event.KEYDOWN, downListener, true);
     }
   }
 
   private void preventDefaultBrowserAction(KeyboardEvent keyboardEvent, int digest) {
-    //prevent browser default action on Ctrl + S
+    // prevent browser default action on Ctrl + S
     if (digest == 65651) {
       keyboardEvent.preventDefault();
     }

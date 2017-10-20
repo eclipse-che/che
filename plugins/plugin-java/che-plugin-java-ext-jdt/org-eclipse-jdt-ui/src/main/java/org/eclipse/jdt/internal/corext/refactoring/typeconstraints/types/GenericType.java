@@ -73,13 +73,13 @@ public final class GenericType extends HierarchyType {
   @Override
   protected String getPlainPrettySignature() {
     StringBuffer result = new StringBuffer(getJavaElementType().getFullyQualifiedName('.'));
-    result.append("<"); //$NON-NLS-1$
+    result.append("<"); // $NON-NLS-1$
     result.append(fTypeParameters[0].getPrettySignature());
     for (int i = 1; i < fTypeParameters.length; i++) {
-      result.append(", "); //$NON-NLS-1$
+      result.append(", "); // $NON-NLS-1$
       result.append(fTypeParameters[i].getPrettySignature());
     }
-    result.append(">"); //$NON-NLS-1$
+    result.append(">"); // $NON-NLS-1$
     return result.toString();
   }
 }

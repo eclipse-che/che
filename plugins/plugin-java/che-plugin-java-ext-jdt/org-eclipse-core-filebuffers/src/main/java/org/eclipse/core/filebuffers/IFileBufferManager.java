@@ -77,7 +77,8 @@ public interface IFileBufferManager {
   //	 * </p>
   //	 *
   //	 * @param fileStore the file store to be connected
-  //	 * @param monitor the progress monitor, or <code>null</code> if progress reporting is not desired
+  //	 * @param monitor the progress monitor, or <code>null</code> if progress reporting is not
+  // desired
   //	 * @throws CoreException if the file could not successfully be connected
   //	 * @since 3.3
   //	 */
@@ -131,7 +132,8 @@ public interface IFileBufferManager {
   //	 * </p>
   //	 *
   //	 * @param fileStore the file store to be disconnected
-  //	 * @param monitor the progress monitor, or <code>null</code> if progress reporting is not desired
+  //	 * @param monitor the progress monitor, or <code>null</code> if progress reporting is not
+  // desired
   //	 * @throws CoreException if the file could not successfully be disconnected
   //	 * @since 3.3
   //	 */

@@ -113,7 +113,7 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
   @Override
   public String getPreview() {
     // not used when not provided as a true cleanup(?)
-    return "No preview available"; //$NON-NLS-1$
+    return "No preview available"; // $NON-NLS-1$
   }
 
   /** {@inheritDoc} */
@@ -137,7 +137,8 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
       int id = problems[i].getID();
       if (id == this.handledProblemID) {
         // FIXME search specifically: return param (which??)
-        //				if (!QuickFixes.hasExplicitNullnessAnnotation(compilationUnit, problems[i].getSourceStart()))
+        //				if (!QuickFixes.hasExplicitNullnessAnnotation(compilationUnit,
+        // problems[i].getSourceStart()))
         result++;
       }
     }

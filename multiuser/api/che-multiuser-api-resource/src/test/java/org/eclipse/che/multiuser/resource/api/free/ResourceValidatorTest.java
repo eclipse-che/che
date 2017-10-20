@@ -53,7 +53,7 @@ public class ResourceValidatorTest {
     expectedExceptionsMessageRegExp = "Specified resources type 'unsupported' is not supported"
   )
   public void shouldThrowBadRequestExceptionWhenResourceHasNonSupportedType() throws Exception {
-    //when
+    // when
     validator.validate(DtoFactory.newDto(ResourceDto.class).withType("unsupported").withUnit("mb"));
   }
 
@@ -63,20 +63,20 @@ public class ResourceValidatorTest {
         "Specified resources type 'test' support only following units: mb, gb"
   )
   public void shouldThrowBadRequestExceptionWhenResourceHasNonSupportedUnit() throws Exception {
-    //when
+    // when
     validator.validate(DtoFactory.newDto(ResourceDto.class).withType(RESOURCE_TYPE).withUnit("kb"));
   }
 
   @Test
   public void shouldSetDefaultResourceUnitWhenItIsMissed() throws Exception {
-    //given
+    // given
     ResourceDto toValidate =
         DtoFactory.newDto(ResourceDto.class).withType(RESOURCE_TYPE).withUnit(null);
 
-    //when
+    // when
     validator.validate(toValidate);
 
-    //then
+    // then
     assertEquals(toValidate.getUnit(), DEFAULT_RESOURCE_UNIT);
   }
 
@@ -85,7 +85,7 @@ public class ResourceValidatorTest {
     expectedExceptionsMessageRegExp = "Resources with type 'test' has negative amount"
   )
   public void shouldThrowBadRequestExceptionWhenResourceHasNegativeAmount() throws Exception {
-    //when
+    // when
     validator.validate(
         DtoFactory.newDto(ResourceDto.class)
             .withType(RESOURCE_TYPE)
@@ -95,7 +95,7 @@ public class ResourceValidatorTest {
 
   @Test
   public void shouldNotThrowAnyExceptionsWhenResourceHasSupportedTypeAndUnit() throws Exception {
-    //when
+    // when
     validator.validate(DtoFactory.newDto(ResourceDto.class).withType(RESOURCE_TYPE).withUnit("mb"));
   }
 }

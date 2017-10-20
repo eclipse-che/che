@@ -41,7 +41,7 @@ public class FreeResourcesLimitValidatorTest {
     expectedExceptionsMessageRegExp = "Missed free resources limit description."
   )
   public void shouldThrowBadRequestExceptionWhenFreeResourcesIsNull() throws Exception {
-    //when
+    // when
     validator.check(null);
   }
 
@@ -50,7 +50,7 @@ public class FreeResourcesLimitValidatorTest {
     expectedExceptionsMessageRegExp = "Missed account id."
   )
   public void shouldThrowBadRequestExceptionWhenAccountIdIsMissed() throws Exception {
-    //when
+    // when
     validator.check(
         DtoFactory.newDto(FreeResourcesLimitDto.class)
             .withResources(
@@ -66,13 +66,13 @@ public class FreeResourcesLimitValidatorTest {
     expectedExceptionsMessageRegExp = "invalid resource"
   )
   public void shouldRethrowBadRequestExceptionWhenThereIsAnyInvalidResource() throws Exception {
-    //given
+    // given
     Mockito.doNothing()
         .doThrow(new BadRequestException("invalid resource"))
         .when(resourceValidator)
         .validate(any());
 
-    //when
+    // when
     validator.check(
         DtoFactory.newDto(FreeResourcesLimitDto.class)
             .withAccountId("account123")
@@ -96,7 +96,7 @@ public class FreeResourcesLimitValidatorTest {
   public void
       shouldThrowBadRequestExceptionWhenAccountResourcesLimitContainTwoResourcesWithTheSameType()
           throws Exception {
-    //when
+    // when
     validator.check(
         DtoFactory.newDto(FreeResourcesLimitDto.class)
             .withAccountId("account123")
@@ -114,7 +114,7 @@ public class FreeResourcesLimitValidatorTest {
 
   @Test
   public void shouldNotThrowAnyExceptionWhenAccountResourcesLimitIsValid() throws Exception {
-    //when
+    // when
     validator.check(
         DtoFactory.newDto(FreeResourcesLimitDto.class)
             .withAccountId("account123")

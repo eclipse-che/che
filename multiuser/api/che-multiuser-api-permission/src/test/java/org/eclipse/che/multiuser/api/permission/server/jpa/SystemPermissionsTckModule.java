@@ -55,7 +55,7 @@ public class SystemPermissionsTckModule extends TckModule {
     bind(SchemaInitializer.class)
         .toInstance(new FlywaySchemaInitializer(server.getDataSource(), "che-schema"));
     bind(TckResourcesCleaner.class).toInstance(new H2JpaCleaner(server));
-    //Creates empty multibinder to avoid error during container starting
+    // Creates empty multibinder to avoid error during container starting
     Multibinder.newSetBinder(
         binder(), String.class, Names.named(SystemDomain.SYSTEM_DOMAIN_ACTIONS));
 

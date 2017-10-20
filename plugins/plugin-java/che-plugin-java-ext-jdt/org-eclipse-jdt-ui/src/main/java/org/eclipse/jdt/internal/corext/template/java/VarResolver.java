@@ -16,7 +16,7 @@ public class VarResolver extends AbstractVariableResolver {
 
   /** Default ctor for instantiation by the extension point. */
   public VarResolver() {
-    this("java.lang.Object"); //$NON-NLS-1$
+    this("java.lang.Object"); // $NON-NLS-1$
   }
 
   VarResolver(String defaultType) {

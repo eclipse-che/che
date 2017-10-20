@@ -175,7 +175,7 @@ public final class CopySourceEdit extends TextEdit {
     // The source content can be null if the edit wasn't executed
     // due to an exclusion list of the text edit processor. Return
     // the empty string which can be moved without any harm.
-    if (fSourceContent == null) return ""; //$NON-NLS-1$
+    if (fSourceContent == null) return ""; // $NON-NLS-1$
     return fSourceContent;
   }
 
@@ -221,10 +221,11 @@ public final class CopySourceEdit extends TextEdit {
   void performConsistencyCheck(TextEditProcessor processor, Document document)
       throws MalformedTreeException {
     if (fTarget == null)
-      throw new MalformedTreeException(getParent(), this, "No target edit provided."); //$NON-NLS-1$
+      throw new MalformedTreeException(
+          getParent(), this, "No target edit provided."); // $NON-NLS-1$
     if (fTarget.getSourceEdit() != this)
       throw new MalformedTreeException(
-          getParent(), this, "Target edit has different source edit."); //$NON-NLS-1$
+          getParent(), this, "Target edit has different source edit."); // $NON-NLS-1$
     /*
      * causes ASTRewrite to fail if (getRoot() != fTarget.getRoot()) throw new MalformedTreeException(getParent(), this,
      * TextEditMessages.getString("CopySourceEdit.different_tree")); //$NON-NLS-1$

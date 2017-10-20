@@ -177,7 +177,7 @@ public class RunPlainJavaProjectTest {
     loader.waitOnClosed();
     projectExplorer.waitItem(PROJECT_NAME + "/bin");
 
-    //check starting application
+    // check starting application
     commandsEditor.selectTabByName(NAME_COMMAND);
     commandsEditor.waitActiveTabFileName(NAME_COMMAND);
     commandsEditor.clickOnRunButton();

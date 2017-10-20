@@ -124,14 +124,14 @@ public class RenameMethodInInterfaceTest extends RefactoringTest {
 
     assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
     assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager().anythingToRedo());
-    //assertEquals("1 to undo", 1, Refactoring.getUndoManager().getRefactoringLog().size());
+    // assertEquals("1 to undo", 1, Refactoring.getUndoManager().getRefactoringLog().size());
 
     RefactoringCore.getUndoManager().performUndo(null, new NullProgressMonitor());
     assertEqualLines("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
 
     assertTrue("! anythingToUndo", !RefactoringCore.getUndoManager().anythingToUndo());
     assertTrue("anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
-    //assertEquals("1 to redo", 1, Refactoring.getUndoManager().getRedoStack().size());
+    // assertEquals("1 to redo", 1, Refactoring.getUndoManager().getRedoStack().size());
 
     RefactoringCore.getUndoManager().performRedo(null, new NullProgressMonitor());
     assertEqualLines("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
@@ -452,10 +452,10 @@ public class RenameMethodInInterfaceTest extends RefactoringTest {
     helper2();
   }
 
-  //test13 became testFail45
-  //public void test13() throws Exception{
+  // test13 became testFail45
+  // public void test13() throws Exception{
   //	helper2();
-  //}
+  // }
   @Test
   public void test14() throws Exception {
     helper2();
@@ -490,12 +490,12 @@ public class RenameMethodInInterfaceTest extends RefactoringTest {
   public void test20() throws Exception {
     helper2();
   }
-  //anonymous inner class
+  // anonymous inner class
   @Test
   @Ignore
   public void test21() throws Exception {
     printTestDisabledMessage("must fix - incorrect warnings");
-    //helper2_fail();
+    // helper2_fail();
   }
 
   @Test
@@ -503,10 +503,10 @@ public class RenameMethodInInterfaceTest extends RefactoringTest {
     helper2();
   }
 
-  //test23 became testFail45
-  //public void test23() throws Exception{
+  // test23 became testFail45
+  // public void test23() throws Exception{
   //	helper2();
-  //}
+  // }
 
   @Test
   public void test24() throws Exception {
@@ -542,12 +542,12 @@ public class RenameMethodInInterfaceTest extends RefactoringTest {
   public void test30() throws Exception {
     helper2();
   }
-  //anonymous inner class
+  // anonymous inner class
   @Test
   public void test31() throws Exception {
     helper2();
   }
-  //anonymous inner class
+  // anonymous inner class
   @Test
   public void test32() throws Exception {
     helper2();

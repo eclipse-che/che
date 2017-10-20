@@ -24,7 +24,7 @@ public class TestFailedEvent extends TestNodeEvent {
     failureMessage = message.getFailureMessage();
     stackTrace = message.getStackTrace();
     error = message.isError();
-    //TODO add additional info about failed test
+    // TODO add additional info about failed test
   }
 
   public String getFailureMessage() {

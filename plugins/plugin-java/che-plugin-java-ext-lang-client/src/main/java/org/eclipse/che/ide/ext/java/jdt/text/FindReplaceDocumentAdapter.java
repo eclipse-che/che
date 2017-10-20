@@ -134,7 +134,7 @@ public class FindReplaceDocumentAdapter implements CharSequence {
     if ((operationCode == REPLACE || operationCode == REPLACE_FIND_NEXT)
         && (fFindReplaceState != FIND_FIRST && fFindReplaceState != FIND_NEXT))
       throw new IllegalStateException(
-          "illegal findReplace state: cannot replace without preceding find"); //$NON-NLS-1$
+          "illegal findReplace state: cannot replace without preceding find"); // $NON-NLS-1$
 
     if (operationCode == FIND_FIRST) {
       // Reset
@@ -148,7 +148,7 @@ public class FindReplaceDocumentAdapter implements CharSequence {
 
       if (caseSensitive) patternFlags += "i";
 
-      if (wholeWord) findString = "\\b" + findString + "\\b"; //$NON-NLS-1$ //$NON-NLS-2$
+      if (wholeWord) findString = "\\b" + findString + "\\b"; // $NON-NLS-1$ //$NON-NLS-2$
 
       if (!wholeWord) findString = asRegPattern(findString);
 
@@ -261,7 +261,7 @@ public class FindReplaceDocumentAdapter implements CharSequence {
     for (int i = 0, length = string.length(); i < length; i++) {
       char ch = string.charAt(i);
       if (ch == '\\') {
-        out.append("\\\\"); //$NON-NLS-1$
+        out.append("\\\\"); // $NON-NLS-1$
       } else if (ch == '*') {
         out.append("\\*");
       } else {
@@ -306,27 +306,27 @@ public class FindReplaceDocumentAdapter implements CharSequence {
 
         case '\r':
           if (i + 1 < length && string.charAt(i + 1) == '\n') i++;
-          //$FALL-THROUGH$
+          // $FALL-THROUGH$
           break;
         case '\n':
-          pattern.append("\\R"); //$NON-NLS-1$
+          pattern.append("\\R"); // $NON-NLS-1$
           break;
         case '\t':
-          pattern.append("\\t"); //$NON-NLS-1$
+          pattern.append("\\t"); // $NON-NLS-1$
           break;
         case '\f':
-          pattern.append("\\f"); //$NON-NLS-1$
+          pattern.append("\\f"); // $NON-NLS-1$
           break;
         case 0x07:
-          pattern.append("\\a"); //$NON-NLS-1$
+          pattern.append("\\a"); // $NON-NLS-1$
           break;
         case 0x1B:
-          pattern.append("\\e"); //$NON-NLS-1$
+          pattern.append("\\e"); // $NON-NLS-1$
           break;
 
         default:
           if (0 <= ch && ch < 0x20) {
-            pattern.append("\\x"); //$NON-NLS-1$
+            pattern.append("\\x"); // $NON-NLS-1$
             pattern.append(Integer.toHexString(ch).toUpperCase());
           } else {
             pattern.append(ch);

@@ -87,7 +87,7 @@ public class GitCheckoutHandler {
         }
     }
 
-    //Update project attributes from server.
+    // Update project attributes from server.
     appContext.getWorkspaceRoot().synchronize();
   }
 }

@@ -154,7 +154,7 @@ public abstract class TeamHook extends InternalTeamHook {
    * @since 3.2
    */
   public IStatus validateCreateLink(IFile file, int updateFlags, URI location) {
-    //forward to old method to ensure old hooks get a chance to validate in the local case
+    // forward to old method to ensure old hooks get a chance to validate in the local case
     if (EFS.SCHEME_FILE.equals(location.getScheme()))
       return validateCreateLink(file, updateFlags, URIUtil.toPath(location));
     return Status.OK_STATUS;
@@ -212,7 +212,7 @@ public abstract class TeamHook extends InternalTeamHook {
    * @since 3.2
    */
   public IStatus validateCreateLink(IFolder folder, int updateFlags, URI location) {
-    //forward to old method to ensure old hooks get a chance to validate in the local case
+    // forward to old method to ensure old hooks get a chance to validate in the local case
     if (EFS.SCHEME_FILE.equals(location.getScheme()))
       return validateCreateLink(folder, updateFlags, URIUtil.toPath(location));
     return Status.OK_STATUS;

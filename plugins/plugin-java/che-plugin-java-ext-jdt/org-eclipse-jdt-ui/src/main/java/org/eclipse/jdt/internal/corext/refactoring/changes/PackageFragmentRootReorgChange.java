@@ -121,8 +121,8 @@ abstract class PackageFragmentRootReorgChange extends ResourceChange {
     final int originating;
     final int otherProjects;
     if (isCopy) {
-      originating = 0; //ORIGINATING_PROJECT_CLASSPATH does not apply to copy
-      otherProjects = 0; //OTHER_REFERRING_PROJECTS_CLASSPATH does not apply to copy
+      originating = 0; // ORIGINATING_PROJECT_CLASSPATH does not apply to copy
+      otherProjects = 0; // OTHER_REFERRING_PROJECTS_CLASSPATH does not apply to copy
     } else {
       originating = IPackageFragmentRoot.ORIGINATING_PROJECT_CLASSPATH;
       otherProjects = IPackageFragmentRoot.OTHER_REFERRING_PROJECTS_CLASSPATH;

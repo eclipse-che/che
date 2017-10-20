@@ -66,45 +66,45 @@ public class CheckAutoSaveForFileWhichAlreadyExistTest {
   @Test
   public void saveDialogForChangedFiles() throws Exception {
     projectExplorer.waitProjectExplorer();
-    //open .html file, get text from there and compare with expected text
+    // open .html file, get text from there and compare with expected text
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PATH_TO_JAVA);
-    //change java file
+    // change java file
     addChangingToFile("AppController", 36, "String ll = null;");
     loader.waitOnClosed();
 
-    //change less file
+    // change less file
     projectExplorer.openItemByPath(PATH_TO_LESS);
     addChangingToFile("LessFile.less", 12, "p {color: red}");
     loader.waitOnClosed();
 
-    //change simple file
+    // change simple file
     projectExplorer.openItemByPath(PATH_TO_SIMPLE_FILE);
     addChangingToFile("another", 16, "simple text for simple file");
     loader.waitOnClosed();
 
-    //change css file
+    // change css file
     projectExplorer.openItemByPath(PATH_TO_CSS);
     addChangingToFile("cssFile.css", 16, "a {color: red}");
     loader.waitOnClosed();
 
-    //change xml file
+    // change xml file
     projectExplorer.openItemByPath(PATH_TO_XML);
     addChangingToFile("web.xml", 29, "<myElement />");
     loader.waitOnClosed();
 
-    //change html file
+    // change html file
     projectExplorer.openItemByPath(PATH_TO_HTML);
     addChangingToFile("htmlFile.html", 20, "<input value='some text'>");
     loader.waitOnClosed();
 
-    //change jsp
+    // change jsp
     projectExplorer.openItemByPath(PATH_TO_JSP);
     addChangingToFile("index.jsp", 15, "<p>some text</p>");
     loader.waitOnClosed();
 
-    //change sql file
+    // change sql file
     projectExplorer.openItemByPath(PATH_TO_SQL);
     addChangingToFile("sqlFile.sql", 12, "use cardb;");
     loader.waitOnClosed();

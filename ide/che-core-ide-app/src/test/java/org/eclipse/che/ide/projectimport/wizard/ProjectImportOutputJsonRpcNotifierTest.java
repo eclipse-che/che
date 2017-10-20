@@ -66,7 +66,7 @@ public class ProjectImportOutputJsonRpcNotifierTest {
 
   @Test
   public void testShouldSubscribeForDisplayingNotification() throws Exception {
-    //given
+    // given
     final ImportProgressRecordDto dto = mock(ImportProgressRecordDto.class);
     when(dto.getNum()).thenReturn(1);
     when(dto.getLine()).thenReturn("message");
@@ -88,10 +88,10 @@ public class ProjectImportOutputJsonRpcNotifierTest {
         mock(ConsumerConfiguratorOneToNone.class);
     when(resultConfiguratorFromOne.noResult()).thenReturn(consumerConfiguratorOneToNone);
 
-    //when
+    // when
     notifier.subscribe("project");
 
-    //then
+    // then
     verify(constant).importingProject(eq("project"));
     verify(consumerConfiguratorOneToNone).withConsumer(argumentCaptor.capture());
     argumentCaptor.getValue().accept(dto);
@@ -101,7 +101,7 @@ public class ProjectImportOutputJsonRpcNotifierTest {
 
   @Test
   public void testShouldUnSubscribeFromDisplayingNotification() throws Exception {
-    //given
+    // given
     when(constant.importProjectMessageSuccess(nullable(String.class))).thenReturn("message");
     final StatusNotification statusNotification = mock(StatusNotification.class);
     when(notificationManager.notify(
@@ -118,11 +118,11 @@ public class ProjectImportOutputJsonRpcNotifierTest {
         mock(ConsumerConfiguratorOneToNone.class);
     when(resultConfiguratorFromOne.noResult()).thenReturn(consumerConfiguratorOneToNone);
 
-    //when
+    // when
     notifier.subscribe("project");
     notifier.onSuccess();
 
-    //then
+    // then
     verify(statusNotification).setStatus(eq(SUCCESS));
     verify(statusNotification).setTitle(eq("message"));
     verify(statusNotification).setContent(eq(""));
@@ -132,7 +132,7 @@ public class ProjectImportOutputJsonRpcNotifierTest {
   public void testShouldUnSubscribeFromDisplayingNotificationIfExceptionOccurred()
       throws Exception {
 
-    //given
+    // given
     final StatusNotification statusNotification = mock(StatusNotification.class);
     when(notificationManager.notify(
             nullable(String.class), nullable(Status.class), nullable(DisplayMode.class)))
@@ -148,11 +148,11 @@ public class ProjectImportOutputJsonRpcNotifierTest {
         mock(ConsumerConfiguratorOneToNone.class);
     when(resultConfiguratorFromOne.noResult()).thenReturn(consumerConfiguratorOneToNone);
 
-    //when
+    // when
     notifier.subscribe("project");
     notifier.onFailure("message");
 
-    //then
+    // then
     verify(statusNotification).setStatus(eq(FAIL));
     verify(statusNotification).setContent(eq("message"));
   }

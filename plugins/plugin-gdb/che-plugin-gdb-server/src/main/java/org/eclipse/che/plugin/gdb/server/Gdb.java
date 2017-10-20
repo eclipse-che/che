@@ -120,7 +120,8 @@ public class Gdb extends GdbProcess {
             processId = processInfo.getProcessId();
           }
         } catch (Exception e) {
-          //we can't get info about current process, but we are trying to get info about another processes
+          // we can't get info about current process, but we are trying to get info about another
+          // processes
         }
       }
 

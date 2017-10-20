@@ -45,7 +45,8 @@ public class JdbMethod implements Method {
       synchronized (arguments) {
         if (arguments.get() == null) {
           try {
-            // to reduce unnecessary requests. Value can be retrieved on demand throw Debugger.getValue() method
+            // to reduce unnecessary requests. Value can be retrieved on demand throw
+            // Debugger.getValue() method
             arguments.set(
                 jdiMethod
                     .arguments()

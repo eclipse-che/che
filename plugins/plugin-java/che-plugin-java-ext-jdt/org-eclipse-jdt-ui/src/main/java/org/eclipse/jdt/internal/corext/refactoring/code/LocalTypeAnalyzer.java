@@ -35,7 +35,7 @@ public class LocalTypeAnalyzer extends ASTVisitor {
   private String fBeforeTypeReferenced;
   private String fSelectedTypeReferenced;
 
-  //---- Analyzing statements ----------------------------------------------------------------
+  // ---- Analyzing statements ----------------------------------------------------------------
 
   public static RefactoringStatus perform(BodyDeclaration declaration, Selection selection) {
     LocalTypeAnalyzer analyzer = new LocalTypeAnalyzer(selection);

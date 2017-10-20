@@ -76,7 +76,7 @@ public class JavaCompilerPreferencePresenterTest {
   private static final String VALUE_1 = "value1";
   private static final String VALUE_2 = "value2";
 
-  //constructor mocks
+  // constructor mocks
   @Mock private ErrorWarningsView view;
   @Mock private PropertyWidgetFactory propertyFactory;
   @Mock private JavaLocalizationConstant locale;

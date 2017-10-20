@@ -80,17 +80,17 @@ public class DialogSettings implements IDialogSettings {
   // A Map with all the keys mapped to array of strings.
   private Map<String, String[]> arrayItems;
 
-  private static final String TAG_SECTION = "section"; //$NON-NLS-1$
+  private static final String TAG_SECTION = "section"; // $NON-NLS-1$
 
-  private static final String TAG_NAME = "name"; //$NON-NLS-1$
+  private static final String TAG_NAME = "name"; // $NON-NLS-1$
 
-  private static final String TAG_KEY = "key"; //$NON-NLS-1$
+  private static final String TAG_KEY = "key"; // $NON-NLS-1$
 
-  private static final String TAG_VALUE = "value"; //$NON-NLS-1$
+  private static final String TAG_VALUE = "value"; // $NON-NLS-1$
 
-  private static final String TAG_LIST = "list"; //$NON-NLS-1$
+  private static final String TAG_LIST = "list"; // $NON-NLS-1$
 
-  private static final String TAG_ITEM = "item"; //$NON-NLS-1$
+  private static final String TAG_ITEM = "item"; // $NON-NLS-1$
 
   /**
    * Create an empty dialog settings which loads and saves its content to a file. Use the methods
@@ -181,7 +181,7 @@ public class DialogSettings implements IDialogSettings {
       throw new NumberFormatException(
           "There is no setting associated with the key \""
               + key
-              + "\""); //$NON-NLS-1$ //$NON-NLS-2$
+              + "\""); // $NON-NLS-1$ //$NON-NLS-2$
     }
 
     return new Double(setting).doubleValue();
@@ -197,7 +197,7 @@ public class DialogSettings implements IDialogSettings {
       throw new NumberFormatException(
           "There is no setting associated with the key \""
               + key
-              + "\""); //$NON-NLS-1$ //$NON-NLS-2$
+              + "\""); // $NON-NLS-1$ //$NON-NLS-2$
     }
 
     return new Float(setting).floatValue();
@@ -210,12 +210,12 @@ public class DialogSettings implements IDialogSettings {
   public int getInt(String key) throws NumberFormatException {
     String setting = items.get(key);
     if (setting == null) {
-      //new Integer(null) will throw a NumberFormatException and meet our spec, but this message
-      //is clearer.
+      // new Integer(null) will throw a NumberFormatException and meet our spec, but this message
+      // is clearer.
       throw new NumberFormatException(
           "There is no setting associated with the key \""
               + key
-              + "\""); //$NON-NLS-1$ //$NON-NLS-2$
+              + "\""); // $NON-NLS-1$ //$NON-NLS-2$
     }
 
     return new Integer(setting).intValue();
@@ -228,12 +228,12 @@ public class DialogSettings implements IDialogSettings {
   public long getLong(String key) throws NumberFormatException {
     String setting = items.get(key);
     if (setting == null) {
-      //new Long(null) will throw a NumberFormatException and meet our spec, but this message
-      //is clearer.
+      // new Long(null) will throw a NumberFormatException and meet our spec, but this message
+      // is clearer.
       throw new NumberFormatException(
           "There is no setting associated with the key \""
               + key
-              + "\""); //$NON-NLS-1$ //$NON-NLS-2$
+              + "\""); // $NON-NLS-1$ //$NON-NLS-2$
     }
 
     return new Long(setting).longValue();
@@ -294,7 +294,7 @@ public class DialogSettings implements IDialogSettings {
       //		parser.setProcessNamespace(true);
       document = parser.parse(new InputSource(r));
 
-      //Strip out any comments first
+      // Strip out any comments first
       Node root = document.getFirstChild();
       while (root.getNodeType() == Node.COMMENT_NODE) {
         document.removeChild(root);
@@ -317,7 +317,7 @@ public class DialogSettings implements IDialogSettings {
   public void load(String fileName) throws IOException {
     FileInputStream stream = new FileInputStream(fileName);
     BufferedReader reader =
-        new BufferedReader(new InputStreamReader(stream, "utf-8")); //$NON-NLS-1$
+        new BufferedReader(new InputStreamReader(stream, "utf-8")); // $NON-NLS-1$
     load(reader);
     reader.close();
   }
@@ -359,7 +359,7 @@ public class DialogSettings implements IDialogSettings {
     for (int i = 0; i < l.getLength(); i++) {
       Node n = l.item(i);
       if (root == n.getParentNode()) {
-        DialogSettings s = new DialogSettings("NoName"); //$NON-NLS-1$
+        DialogSettings s = new DialogSettings("NoName"); // $NON-NLS-1$
         s.load(document, (Element) n);
         addSection(s);
       }
@@ -448,29 +448,29 @@ public class DialogSettings implements IDialogSettings {
    */
   private void save(XMLWriter out) throws IOException {
     HashMap<String, String> attributes = new HashMap<String, String>(2);
-    attributes.put(TAG_NAME, name == null ? "" : name); //$NON-NLS-1$
+    attributes.put(TAG_NAME, name == null ? "" : name); // $NON-NLS-1$
     out.startTag(TAG_SECTION, attributes);
     attributes.clear();
 
     for (Iterator<String> i = items.keySet().iterator(); i.hasNext(); ) {
       String key = i.next();
-      attributes.put(TAG_KEY, key == null ? "" : key); //$NON-NLS-1$
+      attributes.put(TAG_KEY, key == null ? "" : key); // $NON-NLS-1$
       String string = items.get(key);
-      attributes.put(TAG_VALUE, string == null ? "" : string); //$NON-NLS-1$
+      attributes.put(TAG_VALUE, string == null ? "" : string); // $NON-NLS-1$
       out.printTag(TAG_ITEM, attributes, true);
     }
 
     attributes.clear();
     for (Iterator<String> i = arrayItems.keySet().iterator(); i.hasNext(); ) {
       String key = i.next();
-      attributes.put(TAG_KEY, key == null ? "" : key); //$NON-NLS-1$
+      attributes.put(TAG_KEY, key == null ? "" : key); // $NON-NLS-1$
       out.startTag(TAG_LIST, attributes);
       String[] value = arrayItems.get(key);
       attributes.clear();
       if (value != null) {
         for (int index = 0; index < value.length; index++) {
           String string = value[index];
-          attributes.put(TAG_VALUE, string == null ? "" : string); //$NON-NLS-1$
+          attributes.put(TAG_VALUE, string == null ? "" : string); // $NON-NLS-1$
           out.printTag(TAG_ITEM, attributes, true);
         }
       }
@@ -494,7 +494,7 @@ public class DialogSettings implements IDialogSettings {
 
     /** the xml header */
     protected static final String XML_VERSION =
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"; //$NON-NLS-1$
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"; // $NON-NLS-1$
 
     /**
      * Create a new XMLWriter
@@ -503,7 +503,7 @@ public class DialogSettings implements IDialogSettings {
      * @throws IOException
      */
     public XMLWriter(OutputStream output) throws IOException {
-      this(new OutputStreamWriter(output, "UTF8")); //$NON-NLS-1$
+      this(new OutputStreamWriter(output, "UTF8")); // $NON-NLS-1$
     }
 
     /**
@@ -531,7 +531,7 @@ public class DialogSettings implements IDialogSettings {
      */
     public void endTag(String name) throws IOException {
       tab--;
-      printTag("/" + name, null, false); //$NON-NLS-1$
+      printTag("/" + name, null, false); // $NON-NLS-1$
     }
 
     private void printTabulation() throws IOException {
@@ -565,14 +565,13 @@ public class DialogSettings implements IDialogSettings {
       sb.append(name);
       if (parameters != null) {
         for (Enumeration<String> e = Collections.enumeration(parameters.keySet());
-            e.hasMoreElements();
-            ) {
-          sb.append(" "); //$NON-NLS-1$
+            e.hasMoreElements(); ) {
+          sb.append(" "); // $NON-NLS-1$
           String key = e.nextElement();
           sb.append(key);
-          sb.append("=\""); //$NON-NLS-1$
+          sb.append("=\""); // $NON-NLS-1$
           sb.append(getEscaped(String.valueOf(parameters.get(key))));
-          sb.append("\""); //$NON-NLS-1$
+          sb.append("\""); // $NON-NLS-1$
         }
       }
       if (close) {
@@ -632,21 +631,21 @@ public class DialogSettings implements IDialogSettings {
       // being converted to spaces on deserialization
       switch (c) {
         case '<':
-          return "lt"; //$NON-NLS-1$
+          return "lt"; // $NON-NLS-1$
         case '>':
-          return "gt"; //$NON-NLS-1$
+          return "gt"; // $NON-NLS-1$
         case '"':
-          return "quot"; //$NON-NLS-1$
+          return "quot"; // $NON-NLS-1$
         case '\'':
-          return "apos"; //$NON-NLS-1$
+          return "apos"; // $NON-NLS-1$
         case '&':
-          return "amp"; //$NON-NLS-1$
+          return "amp"; // $NON-NLS-1$
         case '\r':
-          return "#x0D"; //$NON-NLS-1$
+          return "#x0D"; // $NON-NLS-1$
         case '\n':
-          return "#x0A"; //$NON-NLS-1$
+          return "#x0A"; // $NON-NLS-1$
         case '\u0009':
-          return "#x09"; //$NON-NLS-1$
+          return "#x09"; // $NON-NLS-1$
       }
       return null;
     }

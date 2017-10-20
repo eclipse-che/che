@@ -61,7 +61,7 @@ public class WsMasterModule extends AbstractModule {
     bind(PlaceholderReplacer.class)
         .toProvider(org.eclipse.che.core.db.schema.impl.flyway.PlaceholderReplacerProvider.class);
 
-    //factory
+    // factory
     bind(FactoryAcceptValidator.class)
         .to(org.eclipse.che.api.factory.server.impl.FactoryAcceptValidatorImpl.class);
     bind(FactoryCreateValidator.class)
@@ -149,7 +149,8 @@ public class WsMasterModule extends AbstractModule {
         .addBinding()
         .to(org.eclipse.che.api.workspace.server.WorkspaceServiceTermination.class);
     // FIXME: spi
-    //        bind(org.eclipse.che.api.agent.server.filters.AddExecInstallerInWorkspaceFilter.class);
+    //
+    // bind(org.eclipse.che.api.agent.server.filters.AddExecInstallerInWorkspaceFilter.class);
     //        bind(org.eclipse.che.api.agent.server.filters.AddExecInstallerInStackFilter.class);
 
     bind(org.eclipse.che.api.user.server.AppStatesPreferenceCleaner.class);

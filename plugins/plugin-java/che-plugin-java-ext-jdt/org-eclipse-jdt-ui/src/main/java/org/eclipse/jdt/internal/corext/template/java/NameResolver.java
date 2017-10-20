@@ -30,7 +30,7 @@ public class NameResolver extends TemplateVariableResolver {
 
   /** Default ctor for instantiation by the extension point. */
   public NameResolver() {
-    this("java.lang.Object"); //$NON-NLS-1$
+    this("java.lang.Object"); // $NON-NLS-1$
   }
 
   NameResolver(String defaultType) {

@@ -129,7 +129,8 @@ public class RenameSupport {
   //			starter = RenameUserInterfaceManager.getDefault().getStarter(fRefactoring);
   //		} else {
   //			starter = new RenameUserInterfaceStarter();
-  //			RenameRefactoringWizard wizard = new RenameRefactoringWizard(fRefactoring, fRefactoring.getName(), null, null, null) {
+  //			RenameRefactoringWizard wizard = new RenameRefactoringWizard(fRefactoring,
+  // fRefactoring.getName(), null, null, null) {
   //				@Override
   //				protected void addUserInputPages() {
   //					// nothing to add
@@ -259,7 +260,8 @@ public class RenameSupport {
   //	 * @throws CoreException if an unexpected error occurred while creating
   //	 * the {@link RenameSupport}.
   //	 */
-  //	public static RenameSupport create(IJavaProject project, String newName, int flags) throws CoreException {
+  //	public static RenameSupport create(IJavaProject project, String newName, int flags) throws
+  // CoreException {
   //		JavaRenameProcessor processor= new RenameJavaProjectProcessor(project);
   //		return new RenameSupport(processor, newName, flags);
   //	}
@@ -274,7 +276,8 @@ public class RenameSupport {
   //	 * @throws CoreException if an unexpected error occurred while creating
   //	 * the {@link RenameSupport}.
   //	 */
-  //	public static RenameSupport create(IPackageFragmentRoot root, String newName) throws CoreException {
+  //	public static RenameSupport create(IPackageFragmentRoot root, String newName) throws
+  // CoreException {
   //		JavaRenameProcessor processor= new RenameSourceFolderProcessor(root);
   //		return new RenameSupport(processor, newName, 0);
   //	}
@@ -469,7 +472,8 @@ public class RenameSupport {
   //	private RenameSelectionState createSelectionState() {
   //		RenameProcessor processor= (RenameProcessor) fRefactoring.getProcessor();
   //		Object[] elements= processor.getElements();
-  //		RenameSelectionState state= elements.length == 1 ? new RenameSelectionState(elements[0]) : null;
+  //		RenameSelectionState state= elements.length == 1 ? new RenameSelectionState(elements[0]) :
+  // null;
   //		return state;
   //	}
   //

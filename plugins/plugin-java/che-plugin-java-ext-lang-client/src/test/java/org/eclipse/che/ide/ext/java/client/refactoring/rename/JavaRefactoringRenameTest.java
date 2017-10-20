@@ -97,7 +97,7 @@ public class JavaRefactoringRenameTest {
   private static final String SESSION_ID = "some session id";
   private static final int CURSOR_OFFSET = 10;
 
-  //variables for constructor
+  // variables for constructor
   @Mock private RenamePresenter renamePresenter;
   @Mock private JavaLocalizationConstant locale;
   @Mock private DialogFactory dialogFactory;
@@ -386,7 +386,7 @@ public class JavaRefactoringRenameTest {
   @Test
   public void shouldUndoRenameRefactoringWhenUserEnterNewNameButEscapeRename()
       throws OperationException {
-    //use case: user hit Refactoring -> Rename action, type a new name and press escape button
+    // use case: user hit Refactoring -> Rename action, type a new name and press escape button
 
     refactoringRename.refactor(textEditor);
 
@@ -412,7 +412,8 @@ public class JavaRefactoringRenameTest {
   @Test
   public void shouldDoNotApplyUndoOperationWhenUserNotEnterNewNameAndEscapeRename()
       throws OperationException {
-    //use case: user hit Refactoring -> Rename action, DO NOT type a new name and press escape button
+    // use case: user hit Refactoring -> Rename action, DO NOT type a new name and press escape
+    // button
 
     refactoringRename.refactor(textEditor);
 

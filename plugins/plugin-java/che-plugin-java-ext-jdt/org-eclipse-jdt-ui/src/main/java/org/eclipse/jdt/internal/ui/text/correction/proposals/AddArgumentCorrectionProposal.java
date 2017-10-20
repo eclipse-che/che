@@ -59,7 +59,7 @@ public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 
     for (int i = 0; i < fInsertIndexes.length; i++) {
       int idx = fInsertIndexes[i];
-      String key = "newarg_" + i; //$NON-NLS-1$
+      String key = "newarg_" + i; // $NON-NLS-1$
       Expression newArg = evaluateArgumentExpressions(ast, fParamTypes[idx], key);
       ListRewrite listRewriter = rewrite.getListRewrite(fCallerNode, property);
       listRewriter.insertAt(newArg, idx, null);
@@ -73,7 +73,7 @@ public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
     List<StructuralPropertyDescriptor> list = fCallerNode.structuralPropertiesForType();
     for (int i = 0; i < list.size(); i++) {
       StructuralPropertyDescriptor curr = list.get(i);
-      if (curr.isChildListProperty() && "arguments".equals(curr.getId())) { //$NON-NLS-1$
+      if (curr.isChildListProperty() && "arguments".equals(curr.getId())) { // $NON-NLS-1$
         return (ChildListPropertyDescriptor) curr;
       }
     }

@@ -43,7 +43,7 @@ public class Changes {
 
   public static CoreException asCoreException(BadLocationException e) {
     String message = e.getMessage();
-    if (message == null) message = "BadLocationException"; //$NON-NLS-1$
+    if (message == null) message = "BadLocationException"; // $NON-NLS-1$
     return new CoreException(
         new Status(
             IStatus.ERROR,
@@ -55,7 +55,7 @@ public class Changes {
 
   public static CoreException asCoreException(MalformedTreeException e) {
     String message = e.getMessage();
-    if (message == null) message = "MalformedTreeException"; //$NON-NLS-1$
+    if (message == null) message = "MalformedTreeException"; // $NON-NLS-1$
     return new CoreException(
         new Status(
             IStatus.ERROR,

@@ -50,7 +50,7 @@ public final class DeleteEdit extends TextEdit {
 
   /* @see TextEdit#performDocumentUpdating */
   int performDocumentUpdating(Document document) throws BadLocationException {
-    document.replace(getOffset(), getLength(), ""); //$NON-NLS-1$
+    document.replace(getOffset(), getLength(), ""); // $NON-NLS-1$
     fDelta = -getLength();
     return fDelta;
   }

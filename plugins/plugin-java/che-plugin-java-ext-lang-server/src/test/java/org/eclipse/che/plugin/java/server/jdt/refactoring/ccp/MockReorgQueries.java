@@ -39,7 +39,7 @@ public class MockReorgQueries implements IReorgQueries, INewNameQueries {
     fQueriesRun.add(new Integer(queryID));
   }
 
-  //List<Integer>
+  // List<Integer>
   public List getRunQueryIDs() {
     return fQueriesRun;
   }

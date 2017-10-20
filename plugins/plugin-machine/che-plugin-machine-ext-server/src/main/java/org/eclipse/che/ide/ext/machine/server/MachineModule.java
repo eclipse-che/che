@@ -14,7 +14,7 @@ import com.google.inject.AbstractModule;
 import org.eclipse.che.ide.ext.machine.server.ssh.KeysInjector;
 import org.eclipse.che.ide.ext.machine.server.ssh.WorkspaceSshKeys;
 
-//@DynaModule
+// @DynaModule
 public class MachineModule extends AbstractModule {
 
   @Override

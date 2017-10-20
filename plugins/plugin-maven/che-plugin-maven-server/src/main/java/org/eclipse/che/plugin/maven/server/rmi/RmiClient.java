@@ -81,7 +81,7 @@ public abstract class RmiClient<Remote> {
       if (entry == null) {
         result = null;
       } else {
-        //TODO add proxy for remote object
+        // TODO add proxy for remote object
         result = (Remote) lookup;
       }
     } else {
@@ -319,7 +319,7 @@ public abstract class RmiClient<Remote> {
   }
 
   static {
-    //set up RMI
+    // set up RMI
     System.setProperty("java.rmi.server.hostname", "localhost");
     System.setProperty("java.rmi.server.disableHttp", "true");
   }

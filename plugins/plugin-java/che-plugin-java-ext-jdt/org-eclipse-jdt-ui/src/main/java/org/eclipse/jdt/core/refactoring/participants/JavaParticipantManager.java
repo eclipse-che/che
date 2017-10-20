@@ -29,16 +29,17 @@ import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
  */
 public class JavaParticipantManager {
 
-  private static final String PLUGIN_ID = "org.eclipse.jdt.core.manipulation"; //$NON-NLS-1$
+  private static final String PLUGIN_ID = "org.eclipse.jdt.core.manipulation"; // $NON-NLS-1$
 
   private JavaParticipantManager() {
     // no instance
   }
 
-  //---- Change method signature participants ----------------------------------------------------------------
+  // ---- Change method signature participants
+  // ----------------------------------------------------------------
 
   private static final String METHOD_SIGNATURE_PARTICIPANT_EXT_POINT =
-      "changeMethodSignatureParticipants"; //$NON-NLS-1$
+      "changeMethodSignatureParticipants"; // $NON-NLS-1$
 
   private static ParticipantExtensionPoint fgMethodSignatureInstance =
       new ParticipantExtensionPoint(

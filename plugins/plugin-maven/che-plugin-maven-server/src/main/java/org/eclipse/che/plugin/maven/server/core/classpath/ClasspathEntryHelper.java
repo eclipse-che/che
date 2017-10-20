@@ -61,7 +61,7 @@ public class ClasspathEntryHelper {
     setClasspathEntry(classpathEntry);
   }
 
-  //Copied from org.eclipse.m2e.jdt.internal.ClasspathEntryDescriptor
+  // Copied from org.eclipse.m2e.jdt.internal.ClasspathEntryDescriptor
   public IClasspathEntry toClasspathEntry() {
     Map<String, String> attributes = new HashMap<String, String>(this.attributes);
 
@@ -133,7 +133,7 @@ public class ClasspathEntryHelper {
         break;
       default:
         throw new IllegalArgumentException(
-            "Unsupported IClasspathEntry kind=" + kind); //$NON-NLS-1$
+            "Unsupported IClasspathEntry kind=" + kind); // $NON-NLS-1$
     }
     return entry;
   }
@@ -152,7 +152,7 @@ public class ClasspathEntryHelper {
     return null;
   }
 
-  //Copied from org.eclipse.m2e.jdt.internal.ClasspathEntryDescriptor
+  // Copied from org.eclipse.m2e.jdt.internal.ClasspathEntryDescriptor
   private void setClasspathEntry(IClasspathEntry entry) {
     this.kind = entry.getEntryKind();
     this.path = entry.getPath();

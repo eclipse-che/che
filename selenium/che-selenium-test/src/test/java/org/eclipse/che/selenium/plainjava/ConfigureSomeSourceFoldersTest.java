@@ -119,7 +119,8 @@ public class ConfigureSomeSourceFoldersTest {
     commandsExplorer.checkCommandIsPresentInGoal(RUN_GOAL, JAVA_NAME);
     commandsEditor.waitTabFileWithSavedStatus(JAVA_NAME);
     notificationsPopupPanel.waitProgressPopupPanelClose(
-        20); //TODO it is a workaround: https://github.com/eclipse/che/issues/6734, delete after resolve
+        20); // TODO it is a workaround: https://github.com/eclipse/che/issues/6734, delete after
+    // resolve
     commandsEditor.clickOnRunButton();
   }
 }

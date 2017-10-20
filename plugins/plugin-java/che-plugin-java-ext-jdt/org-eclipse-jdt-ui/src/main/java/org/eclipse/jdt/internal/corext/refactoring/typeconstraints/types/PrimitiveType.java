@@ -31,15 +31,15 @@ public final class PrimitiveType extends TType {
   public static final int BYTE = 7;
 
   static final String[] NAMES = {
-    "int", //$NON-NLS-1$
-    "char", //$NON-NLS-1$
-    "boolean", //$NON-NLS-1$
-    "short", //$NON-NLS-1$
-    "long", //$NON-NLS-1$
-    "float", //$NON-NLS-1$
-    "double", //$NON-NLS-1$
+    "int", // $NON-NLS-1$
+    "char", // $NON-NLS-1$
+    "boolean", // $NON-NLS-1$
+    "short", // $NON-NLS-1$
+    "long", // $NON-NLS-1$
+    "float", // $NON-NLS-1$
+    "double", // $NON-NLS-1$
     "byte"
-  }; //$NON-NLS-1$
+  }; // $NON-NLS-1$
 
   private int fId;
 

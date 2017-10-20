@@ -48,7 +48,7 @@ public class EditorMultiPartStackPresenterTest {
 
   private Constraints constraints = new Constraints(HORIZONTALLY, RELATIVE_PART_ID);
 
-  //constructor mocks
+  // constructor mocks
   @Mock private EditorMultiPartStackView view;
   @Mock private EventBus eventBus;
   @Mock private AppContext appContext;
@@ -56,7 +56,7 @@ public class EditorMultiPartStackPresenterTest {
 
   @Mock private Provider<EditorPartStack> editorPartStackProvider;
 
-  //additional mocks
+  // additional mocks
   @Mock private EditorPartStackPresenter editorPartStack;
   @Mock private AbstractEditorPresenter partPresenter1;
   @Mock private AbstractEditorPresenter partPresenter2;

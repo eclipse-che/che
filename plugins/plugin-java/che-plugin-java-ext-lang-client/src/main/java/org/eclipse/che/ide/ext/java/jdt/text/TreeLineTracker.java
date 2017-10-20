@@ -65,7 +65,7 @@ abstract class TreeLineTracker implements LineTracker {
    * The empty delimiter of the last line. The last line and only the last line must have this
    * zero-length delimiter.
    */
-  private static final String NO_DELIM = ""; //$NON-NLS-1$
+  private static final String NO_DELIM = ""; // $NON-NLS-1$
 
   /**
    * A node represents one line. Its character and line offsets are 0-based and relative to the
@@ -113,19 +113,19 @@ abstract class TreeLineTracker implements LineTracker {
       String bal;
       switch (balance) {
         case 0:
-          bal = "="; //$NON-NLS-1$
+          bal = "="; // $NON-NLS-1$
           break;
         case 1:
-          bal = "+"; //$NON-NLS-1$
+          bal = "+"; // $NON-NLS-1$
           break;
         case 2:
-          bal = "++"; //$NON-NLS-1$
+          bal = "++"; // $NON-NLS-1$
           break;
         case -1:
-          bal = "-"; //$NON-NLS-1$
+          bal = "-"; // $NON-NLS-1$
           break;
         case -2:
-          bal = "--"; //$NON-NLS-1$
+          bal = "--"; // $NON-NLS-1$
           break;
         default:
           bal = Byte.toString(balance);
@@ -140,7 +140,8 @@ abstract class TreeLineTracker implements LineTracker {
           + line
           + "|"
           + bal
-          + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+          + "]"; // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+      // //$NON-NLS-6$
     }
 
     /**
@@ -1168,7 +1169,7 @@ abstract class TreeLineTracker implements LineTracker {
     int WIDTH = 30;
     int leaves = (int) Math.pow(2, depth - 1);
     int width = WIDTH * leaves;
-    String empty = "."; //$NON-NLS-1$
+    String empty = "."; // $NON-NLS-1$
 
     List<Node> roots = new LinkedList<TreeLineTracker.Node>();
     roots.add(fRoot);

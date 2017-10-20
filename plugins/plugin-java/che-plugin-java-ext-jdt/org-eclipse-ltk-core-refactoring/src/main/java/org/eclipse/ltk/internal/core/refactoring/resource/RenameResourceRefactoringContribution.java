@@ -24,13 +24,13 @@ import org.eclipse.ltk.core.refactoring.resource.RenameResourceDescriptor;
 public final class RenameResourceRefactoringContribution extends RefactoringContribution {
 
   /** Key used for the path of the resource to be renamed */
-  private static final String ATTRIBUTE_INPUT = "input"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_INPUT = "input"; // $NON-NLS-1$
 
   /** Key used for the new resource name */
-  private static final String ATTRIBUTE_NAME = "name"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_NAME = "name"; // $NON-NLS-1$
 
   /** Key used for the 'update references' property */
-  private static final String ATTRIBUTE_UPDATE_REFERENCES = "updateReferences"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_UPDATE_REFERENCES = "updateReferences"; // $NON-NLS-1$
 
   /* (non-Javadoc)
    * @see org.eclipse.ltk.core.refactoring.RefactoringContribution#retrieveArgumentMap(org.eclipse.ltk.core.refactoring.RefactoringDescriptor)
@@ -47,7 +47,7 @@ public final class RenameResourceRefactoringContribution extends RefactoringCont
       map.put(ATTRIBUTE_NAME, resourceDescriptor.getNewName());
       map.put(
           ATTRIBUTE_UPDATE_REFERENCES,
-          resourceDescriptor.isUpdateReferences() ? "true" : "false"); //$NON-NLS-1$//$NON-NLS-2$
+          resourceDescriptor.isUpdateReferences() ? "true" : "false"); // $NON-NLS-1$//$NON-NLS-2$
       return map;
     }
     return null;
@@ -69,7 +69,7 @@ public final class RenameResourceRefactoringContribution extends RefactoringCont
     String newName = (String) arguments.get(ATTRIBUTE_NAME);
 
     boolean updateReferences =
-        "true".equals(arguments.get(ATTRIBUTE_UPDATE_REFERENCES)); //$NON-NLS-1$
+        "true".equals(arguments.get(ATTRIBUTE_UPDATE_REFERENCES)); // $NON-NLS-1$
 
     if (pathString != null && newName != null) {
       IPath path = ResourceProcessors.handleToResourcePath(project, pathString);
@@ -84,6 +84,6 @@ public final class RenameResourceRefactoringContribution extends RefactoringCont
       return descriptor;
     }
     throw new IllegalArgumentException(
-        "Can not restore RenameResourceDescriptor from map"); //$NON-NLS-1$
+        "Can not restore RenameResourceDescriptor from map"); // $NON-NLS-1$
   }
 }

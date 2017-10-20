@@ -96,7 +96,7 @@ public class ResourceRuleFactory implements IResourceRuleFactory {
    * @see org.eclipse.core.resources.IResourceRuleFactory#copyRule(IResource, IResource)
    */
   public ISchedulingRule copyRule(IResource source, IResource destination) {
-    //source is not modified, destination is created
+    // source is not modified, destination is created
     return parent(destination);
   }
 
@@ -164,7 +164,7 @@ public class ResourceRuleFactory implements IResourceRuleFactory {
    */
   public ISchedulingRule modifyRule(IResource resource) {
     IPath path = resource.getFullPath();
-    //modifying the project description may cause linked resources to be created or deleted
+    // modifying the project description may cause linked resources to be created or deleted
     if (path.segmentCount() == 2
         && path.segment(1).equals(IProjectDescription.DESCRIPTION_FILE_NAME))
       return parent(resource);
@@ -184,7 +184,7 @@ public class ResourceRuleFactory implements IResourceRuleFactory {
    * @see org.eclipse.core.resources.IResourceRuleFactory#moveRule(IResource, IResource)
    */
   public ISchedulingRule moveRule(IResource source, IResource destination) {
-    //move needs the parent of both source and destination
+    // move needs the parent of both source and destination
     return MultiRule.combine(parent(source), parent(destination));
   }
 
@@ -235,9 +235,9 @@ public class ResourceRuleFactory implements IResourceRuleFactory {
    */
   public ISchedulingRule validateEditRule(IResource[] resources) {
     if (resources.length == 0) return null;
-    //optimize rule for single file
+    // optimize rule for single file
     if (resources.length == 1) return isReadOnly(resources[0]) ? parent(resources[0]) : null;
-    //need a lock on the parents of all read-only files
+    // need a lock on the parents of all read-only files
     HashSet<ISchedulingRule> rules = new HashSet<ISchedulingRule>();
     for (int i = 0; i < resources.length; i++)
       if (isReadOnly(resources[i])) rules.add(parent(resources[i]));

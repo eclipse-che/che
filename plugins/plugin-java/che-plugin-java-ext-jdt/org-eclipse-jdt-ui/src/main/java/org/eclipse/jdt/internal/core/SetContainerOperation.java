@@ -44,7 +44,7 @@ public class SetContainerOperation extends ChangeClasspathOperation {
   protected void executeOperation() throws JavaModelException {
     checkCanceled();
     try {
-      beginTask("", 1); //$NON-NLS-1$
+      beginTask("", 1); // $NON-NLS-1$
       if (JavaModelManager.CP_RESOLVE_VERBOSE) verbose_set_container();
       if (JavaModelManager.CP_RESOLVE_VERBOSE_ADVANCED) verbose_set_container_invocation_trace();
 
@@ -85,7 +85,8 @@ public class SetContainerOperation extends ChangeClasspathOperation {
         }
         if (!found) {
           modifiedProjects[i] =
-              null; // filter out this project - does not reference the container path, or isnt't yet Java project
+              null; // filter out this project - does not reference the container path, or isnt't
+          // yet Java project
           manager.containerPut(affectedProject, this.containerPath, newContainer);
           continue;
         }
@@ -129,7 +130,8 @@ public class SetContainerOperation extends ChangeClasspathOperation {
               affectedProject.getProject().touch(this.progressMonitor);
             } catch (CoreException e) {
               // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=148970
-              //							if (!ExternalJavaProject.EXTERNAL_PROJECT_NAME.equals(affectedProject.getElementName()))
+              //							if
+              // (!ExternalJavaProject.EXTERNAL_PROJECT_NAME.equals(affectedProject.getElementName()))
               //								throw e;
 
             }
@@ -161,9 +163,9 @@ public class SetContainerOperation extends ChangeClasspathOperation {
   private void verbose_failure(CoreException e) {
     Util.verbose(
         "CPContainer SET  - FAILED DUE TO EXCEPTION\n"
-            + //$NON-NLS-1$
+            + // $NON-NLS-1$
             "	container path: "
-            + this.containerPath, //$NON-NLS-1$
+            + this.containerPath, // $NON-NLS-1$
         System.err);
     e.printStackTrace();
   }
@@ -171,25 +173,25 @@ public class SetContainerOperation extends ChangeClasspathOperation {
   private void verbose_update_project(JavaProject affectedProject) {
     Util.verbose(
         "CPContainer SET  - updating affected project due to setting container\n"
-            + //$NON-NLS-1$
+            + // $NON-NLS-1$
             "	project: "
             + affectedProject.getElementName()
             + '\n'
-            + //$NON-NLS-1$
+            + // $NON-NLS-1$
             "	container path: "
-            + this.containerPath); //$NON-NLS-1$
+            + this.containerPath); // $NON-NLS-1$
   }
 
   private void verbose_set_container() {
     Util.verbose(
         "CPContainer SET  - setting container\n"
-            + //$NON-NLS-1$
+            + // $NON-NLS-1$
             "	container path: "
             + this.containerPath
             + '\n'
-            + //$NON-NLS-1$
+            + // $NON-NLS-1$
             "	projects: {"
-            + //$NON-NLS-1$
+            + // $NON-NLS-1$
             org.eclipse.jdt.internal.compiler.util.Util.toString(
                 this.affectedProjects,
                 new org.eclipse.jdt.internal.compiler.util.Util.Displayable() {
@@ -198,39 +200,39 @@ public class SetContainerOperation extends ChangeClasspathOperation {
                   }
                 })
             + "}\n	values: {\n"
-            + //$NON-NLS-1$
+            + // $NON-NLS-1$
             org.eclipse.jdt.internal.compiler.util.Util.toString(
                 this.respectiveContainers,
                 new org.eclipse.jdt.internal.compiler.util.Util.Displayable() {
                   public String displayString(Object o) {
-                    StringBuffer buffer = new StringBuffer("		"); //$NON-NLS-1$
+                    StringBuffer buffer = new StringBuffer("		"); // $NON-NLS-1$
                     if (o == null) {
-                      buffer.append("<null>"); //$NON-NLS-1$
+                      buffer.append("<null>"); // $NON-NLS-1$
                       return buffer.toString();
                     }
                     IClasspathContainer container = (IClasspathContainer) o;
                     buffer.append(container.getDescription());
-                    buffer.append(" {\n"); //$NON-NLS-1$
+                    buffer.append(" {\n"); // $NON-NLS-1$
                     IClasspathEntry[] entries = container.getClasspathEntries();
                     if (entries != null) {
                       for (int i = 0; i < entries.length; i++) {
-                        buffer.append(" 			"); //$NON-NLS-1$
+                        buffer.append(" 			"); // $NON-NLS-1$
                         buffer.append(entries[i]);
                         buffer.append('\n');
                       }
                     }
-                    buffer.append(" 		}"); //$NON-NLS-1$
+                    buffer.append(" 		}"); // $NON-NLS-1$
                     return buffer.toString();
                   }
                 })
-            + "\n	}"); //$NON-NLS-1$
+            + "\n	}"); // $NON-NLS-1$
   }
 
   private void verbose_set_container_invocation_trace() {
     Util.verbose(
         "CPContainer SET  - setting container\n"
-            + //$NON-NLS-1$
-            "	invocation stack trace:"); //$NON-NLS-1$
-    new Exception("<Fake exception>").printStackTrace(System.out); //$NON-NLS-1$
+            + // $NON-NLS-1$
+            "	invocation stack trace:"); // $NON-NLS-1$
+    new Exception("<Fake exception>").printStackTrace(System.out); // $NON-NLS-1$
   }
 }

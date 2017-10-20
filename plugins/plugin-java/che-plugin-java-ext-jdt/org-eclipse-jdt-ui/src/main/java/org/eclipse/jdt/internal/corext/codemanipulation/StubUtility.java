@@ -211,8 +211,8 @@ public class StubUtility {
       ASTNode locationInAST,
       String lineDelimiter)
       throws CoreException {
-    String enclosingType = ""; //$NON-NLS-1$
-    String enclosingMethod = ""; //$NON-NLS-1$
+    String enclosingType = ""; // $NON-NLS-1$
+    String enclosingMethod = ""; // $NON-NLS-1$
 
     if (locationInAST != null) {
       MethodDeclaration parentMethod = ASTResolving.findParentMethodDeclaration(locationInAST);
@@ -266,7 +266,7 @@ public class StubUtility {
     String packDecl =
         pack.isDefaultPackage()
             ? ""
-            : "package " + pack.getElementName() + ';'; //$NON-NLS-1$ //$NON-NLS-2$
+            : "package " + pack.getElementName() + ';'; // $NON-NLS-1$ //$NON-NLS-2$
     return getCompilationUnitContent(
         cu, packDecl, fileComment, typeComment, typeContent, lineDelimiter);
   }
@@ -290,9 +290,11 @@ public class StubUtility {
     context.setCompilationUnitVariables(cu);
     context.setVariable(CodeTemplateContextType.PACKAGE_DECLARATION, packDecl);
     context.setVariable(
-        CodeTemplateContextType.TYPE_COMMENT, typeComment != null ? typeComment : ""); //$NON-NLS-1$
+        CodeTemplateContextType.TYPE_COMMENT,
+        typeComment != null ? typeComment : ""); // $NON-NLS-1$
     context.setVariable(
-        CodeTemplateContextType.FILE_COMMENT, fileComment != null ? fileComment : ""); //$NON-NLS-1$
+        CodeTemplateContextType.FILE_COMMENT,
+        fileComment != null ? fileComment : ""); // $NON-NLS-1$
     context.setVariable(CodeTemplateContextType.TYPE_DECLARATION, typeContent);
     context.setVariable(
         CodeTemplateContextType.TYPENAME, JavaCore.removeJavaLikeExtension(cu.getElementName()));
@@ -428,14 +430,14 @@ public class StubUtility {
       String methodName,
       String[] parameterTypesQualifiedNames) {
     StringBuffer buf = new StringBuffer();
-    buf.append("@see "); //$NON-NLS-1$
+    buf.append("@see "); // $NON-NLS-1$
     buf.append(declaringClassQualifiedName);
     buf.append('#');
     buf.append(methodName);
     buf.append('(');
     for (int i = 0; i < parameterTypesQualifiedNames.length; i++) {
       if (i > 0) {
-        buf.append(", "); //$NON-NLS-1$
+        buf.append(", "); // $NON-NLS-1$
       }
       buf.append(parameterTypesQualifiedNames[i]);
     }
@@ -469,7 +471,7 @@ public class StubUtility {
       String templateID, ICompilationUnit cu, String typeName, String lineDelim)
       throws CoreException {
     if (!VALID_TYPE_BODY_TEMPLATES.contains(templateID)) {
-      throw new IllegalArgumentException("Invalid code template ID: " + templateID); //$NON-NLS-1$
+      throw new IllegalArgumentException("Invalid code template ID: " + templateID); // $NON-NLS-1$
     }
 
     Template template = getCodeTemplate(templateID, cu.getJavaProject());
@@ -913,33 +915,33 @@ public class StubUtility {
       if (buf.length() > 0) {
         buf.append(lineDelimiter).append(lineStart);
       }
-      buf.append("@param <").append(typeParameterNames[i]).append('>'); //$NON-NLS-1$
+      buf.append("@param <").append(typeParameterNames[i]).append('>'); // $NON-NLS-1$
     }
     for (int i = 0; i < paramNames.length; i++) {
       if (buf.length() > 0) {
         buf.append(lineDelimiter).append(lineStart);
       }
-      buf.append("@param ").append(paramNames[i]); //$NON-NLS-1$
+      buf.append("@param ").append(paramNames[i]); // $NON-NLS-1$
     }
-    if (returnType != null && !returnType.equals("void")) { //$NON-NLS-1$
+    if (returnType != null && !returnType.equals("void")) { // $NON-NLS-1$
       if (buf.length() > 0) {
         buf.append(lineDelimiter).append(lineStart);
       }
-      buf.append("@return"); //$NON-NLS-1$
+      buf.append("@return"); // $NON-NLS-1$
     }
     if (exceptionNames != null) {
       for (int i = 0; i < exceptionNames.length; i++) {
         if (buf.length() > 0) {
           buf.append(lineDelimiter).append(lineStart);
         }
-        buf.append("@throws ").append(exceptionNames[i]); //$NON-NLS-1$
+        buf.append("@throws ").append(exceptionNames[i]); // $NON-NLS-1$
       }
     }
     if (isDeprecated) {
       if (buf.length() > 0) {
         buf.append(lineDelimiter).append(lineStart);
       }
-      buf.append("@deprecated"); //$NON-NLS-1$
+      buf.append("@deprecated"); // $NON-NLS-1$
     }
     if (buf.length() == 0 && isAllCommentWhitespace(lineStart)) {
       int prevLine = textBuffer.getLineOfOffset(offset) - 1;
@@ -947,7 +949,7 @@ public class StubUtility {
         IRegion prevRegion = textBuffer.getLineInformation(prevLine);
         int prevLineEnd = prevRegion.getOffset() + prevRegion.getLength();
         // clear full line
-        textBuffer.replace(prevLineEnd, offset + length - prevLineEnd, ""); //$NON-NLS-1$
+        textBuffer.replace(prevLineEnd, offset + length - prevLineEnd, ""); // $NON-NLS-1$
         return;
       }
     }
@@ -981,7 +983,7 @@ public class StubUtility {
     String lineDelimiter = getLineDelimiterPreference(project);
     if (lineDelimiter != null) return lineDelimiter;
 
-    return System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+    return System.getProperty("line.separator", "\n"); // $NON-NLS-1$ //$NON-NLS-2$
   }
 
   public static String getLineDelimiterPreference(IProject project) {
@@ -996,7 +998,8 @@ public class StubUtility {
     }
     // workspace preference
     scopeContext = new IScopeContext[] {InstanceScope.INSTANCE};
-    String platformDefault = System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+    String platformDefault =
+        System.getProperty("line.separator", "\n"); // $NON-NLS-1$ //$NON-NLS-2$
     return Platform.getPreferencesService()
         .getString(
             Platform.PI_RUNTIME, Platform.PREF_LINE_SEPARATOR, platformDefault, scopeContext);
@@ -1213,7 +1216,7 @@ public class StubUtility {
     String prop =
         variableKind == NamingConventions.VK_STATIC_FINAL_FIELD
             ? "X"
-            : "x"; //$NON-NLS-1$//$NON-NLS-2$
+            : "x"; // $NON-NLS-1$//$NON-NLS-2$
     String name = prop;
     int i = 1;
     while (excluded.contains(name)) {
@@ -1270,7 +1273,7 @@ public class StubUtility {
 
   private static final String[] KNOWN_METHOD_NAME_PREFIXES = {
     "get", "is", "to"
-  }; //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-1$
+  }; // $NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-1$
 
   private static void add(String[] names, Set<String> result) {
     for (int i = 0; i < names.length; i++) {
@@ -1534,7 +1537,7 @@ public class StubUtility {
     }
     String[][] names = new String[nParams][];
     for (int i = 0; i < names.length; i++) {
-      names[i] = new String[] {"arg" + i}; //$NON-NLS-1$
+      names[i] = new String[] {"arg" + i}; // $NON-NLS-1$
     }
     return names;
   }
@@ -1574,7 +1577,7 @@ public class StubUtility {
     }
     String[] names = new String[nParams];
     for (int i = 0; i < names.length; i++) {
-      names[i] = "arg" + i; //$NON-NLS-1$
+      names[i] = "arg" + i; // $NON-NLS-1$
     }
     return names;
   }
@@ -1678,7 +1681,7 @@ public class StubUtility {
   }
 
   private static boolean hasPrefixOrSuffix(String prefixes, String suffixes, String name) {
-    final String listSeparartor = ","; //$NON-NLS-1$
+    final String listSeparartor = ","; // $NON-NLS-1$
 
     StringTokenizer tok = new StringTokenizer(prefixes, listSeparartor);
     while (tok.hasMoreTokens()) {

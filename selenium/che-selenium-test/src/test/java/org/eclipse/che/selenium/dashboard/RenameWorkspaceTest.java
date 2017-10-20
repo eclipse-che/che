@@ -69,8 +69,8 @@ public class RenameWorkspaceTest {
     dashboardWorkspace.clickOnSaveBtn();
     dashboardWorkspace.checkStateOfWorkspace(StateWorkspace.STOPPING);
 
-    //This temporary solution for detect problem with this test
-    //we will make screenshot every 5 ms for understanding problem
+    // This temporary solution for detect problem with this test
+    // we will make screenshot every 5 ms for understanding problem
     screenshot(StateWorkspace.STOPPING.getStatus());
 
     int i = 1;

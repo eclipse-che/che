@@ -54,7 +54,7 @@ import org.xml.sax.helpers.DefaultHandler;
 public class Launching {
   private static final Logger LOG = LoggerFactory.getLogger(Launching.class);
   /** The id of the JDT launching plug-in (value <code>"org.eclipse.jdt.launching"</code>). */
-  public static final String ID_PLUGIN = "org.eclipse.jdt.launching"; //$NON-NLS-1$
+  public static final String ID_PLUGIN = "org.eclipse.jdt.launching"; // $NON-NLS-1$
 
   public static boolean DEBUG_JRE_CONTAINER = false;
   /** Mapping of top-level VM installation directories to library info for that VM. */
@@ -101,7 +101,7 @@ public class Launching {
   private static void restoreLibraryInfo() {
     fgLibraryInfoMap = new HashMap<String, LibraryInfo>(10);
     IPath libPath = getDefault().getStateLocation();
-    libPath = libPath.append("libraryInfos.xml"); //$NON-NLS-1$
+    libPath = libPath.append("libraryInfos.xml"); // $NON-NLS-1$
     File file = libPath.toFile();
     if (file.exists()) {
       try {
@@ -109,7 +109,7 @@ public class Launching {
         DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         parser.setErrorHandler(new DefaultHandler());
         Element root = parser.parse(new InputSource(stream)).getDocumentElement();
-        if (!root.getNodeName().equals("libraryInfos")) { //$NON-NLS-1$
+        if (!root.getNodeName().equals("libraryInfos")) { // $NON-NLS-1$
           return;
         }
 
@@ -121,12 +121,12 @@ public class Launching {
           if (type == Node.ELEMENT_NODE) {
             Element element = (Element) node;
             String nodeName = element.getNodeName();
-            if (nodeName.equalsIgnoreCase("libraryInfo")) { //$NON-NLS-1$
-              String version = element.getAttribute("version"); //$NON-NLS-1$
-              String location = element.getAttribute("home"); //$NON-NLS-1$
-              String[] bootpath = getPathsFromXML(element, "bootpath"); //$NON-NLS-1$
-              String[] extDirs = getPathsFromXML(element, "extensionDirs"); //$NON-NLS-1$
-              String[] endDirs = getPathsFromXML(element, "endorsedDirs"); //$NON-NLS-1$
+            if (nodeName.equalsIgnoreCase("libraryInfo")) { // $NON-NLS-1$
+              String version = element.getAttribute("version"); // $NON-NLS-1$
+              String location = element.getAttribute("home"); // $NON-NLS-1$
+              String[] bootpath = getPathsFromXML(element, "bootpath"); // $NON-NLS-1$
+              String[] extDirs = getPathsFromXML(element, "extensionDirs"); // $NON-NLS-1$
+              String[] endDirs = getPathsFromXML(element, "endorsedDirs"); // $NON-NLS-1$
               if (location != null) {
                 LibraryInfo info = new LibraryInfo(version, bootpath, extDirs, endDirs);
                 fgLibraryInfoMap.put(location, info);
@@ -233,8 +233,8 @@ public class Launching {
             if (t == Node.ELEMENT_NODE) {
               Element entryElement = (Element) n;
               String name = entryElement.getNodeName();
-              if (name.equals("entry")) { //$NON-NLS-1$
-                String path = entryElement.getAttribute("path"); //$NON-NLS-1$
+              if (name.equals("entry")) { // $NON-NLS-1$
+                String path = entryElement.getAttribute("path"); // $NON-NLS-1$
                 if (path != null && path.length() > 0) {
                   paths.add(path);
                 }
@@ -273,7 +273,7 @@ public class Launching {
             return false;
           }
         }
-        //if there is no recorded stamp we have to assume it is new
+        // if there is no recorded stamp we have to assume it is new
         stamp = new Long(fstamp);
         fgInstallTimeMap.put(location, stamp);
         writeInstallInfo();
@@ -293,7 +293,7 @@ public class Launching {
   private static void readInstallInfo() {
     fgInstallTimeMap = new HashMap<String, Long>();
     IPath libPath = getDefault().getStateLocation();
-    libPath = libPath.append(".install.xml"); //$NON-NLS-1$
+    libPath = libPath.append(".install.xml"); // $NON-NLS-1$
     File file = libPath.toFile();
     if (file.exists()) {
       try {
@@ -301,7 +301,7 @@ public class Launching {
         DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         parser.setErrorHandler(new DefaultHandler());
         Element root = parser.parse(new InputSource(stream)).getDocumentElement();
-        if (root.getNodeName().equalsIgnoreCase("dirs")) { //$NON-NLS-1$
+        if (root.getNodeName().equalsIgnoreCase("dirs")) { // $NON-NLS-1$
           NodeList nodes = root.getChildNodes();
           Node node = null;
           Element element = null;
@@ -309,14 +309,14 @@ public class Launching {
             node = nodes.item(i);
             if (node.getNodeType() == Node.ELEMENT_NODE) {
               element = (Element) node;
-              if (element.getNodeName().equalsIgnoreCase("entry")) { //$NON-NLS-1$
-                String loc = element.getAttribute("loc"); //$NON-NLS-1$
-                String stamp = element.getAttribute("stamp"); //$NON-NLS-1$
+              if (element.getNodeName().equalsIgnoreCase("entry")) { // $NON-NLS-1$
+                String loc = element.getAttribute("loc"); // $NON-NLS-1$
+                String stamp = element.getAttribute("stamp"); // $NON-NLS-1$
                 try {
                   Long l = new Long(stamp);
                   fgInstallTimeMap.put(loc, l);
                 } catch (NumberFormatException nfe) {
-                  //do nothing
+                  // do nothing
                 }
               }
             }
@@ -352,7 +352,7 @@ public class Launching {
     } else {
       fgLibraryInfoMap.put(javaInstallPath, info);
     }
-    //once the library info has been set we can forget it has changed
+    // once the library info has been set we can forget it has changed
     fgHasChanged.remove(javaInstallPath);
     saveLibraryInfo();
   }
@@ -363,13 +363,13 @@ public class Launching {
     try {
       String xml = getLibraryInfoAsXML();
       IPath libPath = getDefault().getStateLocation();
-      libPath = libPath.append("libraryInfos.xml"); //$NON-NLS-1$
+      libPath = libPath.append("libraryInfos.xml"); // $NON-NLS-1$
       File file = libPath.toFile();
       if (!file.exists()) {
         file.createNewFile();
       }
       stream = new BufferedOutputStream(new FileOutputStream(file));
-      stream.write(xml.getBytes("UTF8")); //$NON-NLS-1$
+      stream.write(xml.getBytes("UTF8")); // $NON-NLS-1$
     } catch (IOException e) {
       log(e);
     } catch (CoreException e) {
@@ -398,7 +398,7 @@ public class Launching {
   private static String getLibraryInfoAsXML() throws CoreException {
 
     Document doc = newDocument();
-    Element config = doc.createElement("libraryInfos"); //$NON-NLS-1$
+    Element config = doc.createElement("libraryInfos"); // $NON-NLS-1$
     doc.appendChild(config);
 
     // Create a node for each info in the table
@@ -407,7 +407,7 @@ public class Launching {
       String home = locations.next();
       LibraryInfo info = fgLibraryInfoMap.get(home);
       Element locationElemnet = infoAsElement(doc, info);
-      locationElemnet.setAttribute("home", home); //$NON-NLS-1$
+      locationElemnet.setAttribute("home", home); // $NON-NLS-1$
       config.appendChild(locationElemnet);
     }
 
@@ -423,11 +423,12 @@ public class Launching {
    * @return Element
    */
   private static Element infoAsElement(Document doc, LibraryInfo info) {
-    Element libraryElement = doc.createElement("libraryInfo"); //$NON-NLS-1$
-    libraryElement.setAttribute("version", info.getVersion()); //$NON-NLS-1$
-    appendPathElements(doc, "bootpath", libraryElement, info.getBootpath()); //$NON-NLS-1$
-    appendPathElements(doc, "extensionDirs", libraryElement, info.getExtensionDirs()); //$NON-NLS-1$
-    appendPathElements(doc, "endorsedDirs", libraryElement, info.getEndorsedDirs()); //$NON-NLS-1$
+    Element libraryElement = doc.createElement("libraryInfo"); // $NON-NLS-1$
+    libraryElement.setAttribute("version", info.getVersion()); // $NON-NLS-1$
+    appendPathElements(doc, "bootpath", libraryElement, info.getBootpath()); // $NON-NLS-1$
+    appendPathElements(
+        doc, "extensionDirs", libraryElement, info.getExtensionDirs()); // $NON-NLS-1$
+    appendPathElements(doc, "endorsedDirs", libraryElement, info.getEndorsedDirs()); // $NON-NLS-1$
     return libraryElement;
   }
 
@@ -446,9 +447,9 @@ public class Launching {
       libraryElement.appendChild(child);
       for (int i = 0; i < paths.length; i++) {
         String path = paths[i];
-        Element entry = doc.createElement("entry"); //$NON-NLS-1$
+        Element entry = doc.createElement("entry"); // $NON-NLS-1$
         child.appendChild(entry);
-        entry.setAttribute("path", path); //$NON-NLS-1$
+        entry.setAttribute("path", path); // $NON-NLS-1$
       }
     }
   }
@@ -476,7 +477,7 @@ public class Launching {
     try {
       return getDocument();
     } catch (ParserConfigurationException e) {
-      abort("Unable to create new XML document.", e); //$NON-NLS-1$
+      abort("Unable to create new XML document.", e); // $NON-NLS-1$
     }
     return null;
   }
@@ -495,12 +496,12 @@ public class Launching {
     ByteArrayOutputStream s = new ByteArrayOutputStream();
     TransformerFactory factory = TransformerFactory.newInstance();
     Transformer transformer = factory.newTransformer();
-    transformer.setOutputProperty(OutputKeys.METHOD, "xml"); //$NON-NLS-1$
-    transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
+    transformer.setOutputProperty(OutputKeys.METHOD, "xml"); // $NON-NLS-1$
+    transformer.setOutputProperty(OutputKeys.INDENT, "yes"); // $NON-NLS-1$
     DOMSource source = new DOMSource(doc);
     StreamResult outputTarget = new StreamResult(s);
     transformer.transform(source, outputTarget);
-    return s.toString("UTF8"); //$NON-NLS-1$
+    return s.toString("UTF8"); // $NON-NLS-1$
   }
 
   /**
@@ -514,9 +515,9 @@ public class Launching {
     try {
       return serializeDocumentInt(document);
     } catch (TransformerException e) {
-      abort("Unable to serialize XML document.", e); //$NON-NLS-1$
+      abort("Unable to serialize XML document.", e); // $NON-NLS-1$
     } catch (IOException e) {
-      abort("Unable to serialize XML document.", e); //$NON-NLS-1$
+      abort("Unable to serialize XML document.", e); // $NON-NLS-1$
     }
     return null;
   }
@@ -542,33 +543,33 @@ public class Launching {
       OutputStream stream = null;
       try {
         Document doc = newDocument();
-        Element root = doc.createElement("dirs"); //$NON-NLS-1$
+        Element root = doc.createElement("dirs"); // $NON-NLS-1$
         doc.appendChild(root);
         Map.Entry<String, Long> entry = null;
         Element e = null;
         String key = null;
         for (Iterator<Map.Entry<String, Long>> i = fgInstallTimeMap.entrySet().iterator();
-            i.hasNext();
-            ) {
+            i.hasNext(); ) {
           entry = i.next();
           key = entry.getKey();
           if (fgLibraryInfoMap == null || fgLibraryInfoMap.containsKey(key)) {
-            //only persist the info if the library map also has info OR is null - prevent persisting deleted JRE information
-            e = doc.createElement("entry"); //$NON-NLS-1$
+            // only persist the info if the library map also has info OR is null - prevent
+            // persisting deleted JRE information
+            e = doc.createElement("entry"); // $NON-NLS-1$
             root.appendChild(e);
-            e.setAttribute("loc", key); //$NON-NLS-1$
-            e.setAttribute("stamp", entry.getValue().toString()); //$NON-NLS-1$
+            e.setAttribute("loc", key); // $NON-NLS-1$
+            e.setAttribute("stamp", entry.getValue().toString()); // $NON-NLS-1$
           }
         }
         String xml = serializeDocument(doc);
         IPath libPath = getDefault().getStateLocation();
-        libPath = libPath.append(".install.xml"); //$NON-NLS-1$
+        libPath = libPath.append(".install.xml"); // $NON-NLS-1$
         File file = libPath.toFile();
         if (!file.exists()) {
           file.createNewFile();
         }
         stream = new BufferedOutputStream(new FileOutputStream(file));
-        stream.write(xml.getBytes("UTF8")); //$NON-NLS-1$
+        stream.write(xml.getBytes("UTF8")); // $NON-NLS-1$
       } catch (IOException e) {
         log(e);
       } catch (CoreException e) {
@@ -611,8 +612,8 @@ public class Launching {
     }
     // check if URL are file: URL as we may have two URL pointing to the same doc location
     // but with different representation - (i.e. file:/C;/ and file:C:/)
-    final boolean isFile1 = "file".equalsIgnoreCase(url1.getProtocol()); //$NON-NLS-1$
-    final boolean isFile2 = "file".equalsIgnoreCase(url2.getProtocol()); //$NON-NLS-1$
+    final boolean isFile1 = "file".equalsIgnoreCase(url1.getProtocol()); // $NON-NLS-1$
+    final boolean isFile2 = "file".equalsIgnoreCase(url2.getProtocol()); // $NON-NLS-1$
     if (isFile1 && isFile2) {
       File file1 = new File(url1.getFile());
       File file2 = new File(url2.getFile());
@@ -635,10 +636,10 @@ public class Launching {
   private static String getExternalForm(URL url) {
     String externalForm = url.toExternalForm();
     if (externalForm == null) {
-      return ""; //$NON-NLS-1$
+      return ""; // $NON-NLS-1$
     }
     externalForm = externalForm.trim();
-    if (externalForm.endsWith("/")) { //$NON-NLS-1$
+    if (externalForm.endsWith("/")) { // $NON-NLS-1$
       // Remove the trailing slash
       externalForm = externalForm.substring(0, externalForm.length() - 1);
     }

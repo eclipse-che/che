@@ -243,12 +243,12 @@ public class JavaQuickAssistProcessor implements QuickAssistProcessor {
 
   private Problem createProblem(JavaAnnotation javaAnnotation, Position pos) {
     Problem problem = dtoFactory.createDto(Problem.class);
-    //server use only this fields
+    // server use only this fields
     problem.setID(javaAnnotation.getId());
     problem.setError(javaAnnotation.isError());
     problem.setArguments(Arrays.asList(javaAnnotation.getArguments()));
     problem.setSourceStart(pos.getOffset());
-    //TODO I don't know why but in that place source end is bugger on 1 char
+    // TODO I don't know why but in that place source end is bugger on 1 char
     problem.setSourceEnd(pos.getOffset() + pos.getLength() - 1);
 
     return problem;

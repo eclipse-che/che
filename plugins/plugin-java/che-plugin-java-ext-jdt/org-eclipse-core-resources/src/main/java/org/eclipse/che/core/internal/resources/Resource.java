@@ -153,7 +153,7 @@ public abstract class Resource implements IResource, IPathRequestor, ICoreConsta
   @Override
   public void accept(final IResourceVisitor visitor, int depth, int memberFlags)
       throws CoreException {
-    //use the fast visitor if visiting to infinite depth
+    // use the fast visitor if visiting to infinite depth
     if (depth == IResource.DEPTH_INFINITE) {
       accept(
           new IResourceProxyVisitor() {
@@ -170,7 +170,7 @@ public abstract class Resource implements IResource, IPathRequestor, ICoreConsta
     int flags = getFlags(info);
     if ((memberFlags & IContainer.DO_NOT_CHECK_EXISTENCE) == 0) checkAccessible(flags);
 
-    //check that this resource matches the member flags
+    // check that this resource matches the member flags
     if (!isMember(flags, memberFlags)) return;
     // visit this resource
     if (!visitor.visit(this) || depth == DEPTH_ZERO) return;
@@ -210,14 +210,14 @@ public abstract class Resource implements IResource, IPathRequestor, ICoreConsta
     if ((memberFlags & IContainer.INCLUDE_TEAM_PRIVATE_MEMBERS) == 0)
       excludeMask |= M_TEAM_PRIVATE_MEMBER;
     if ((memberFlags & IContainer.EXCLUDE_DERIVED) != 0) excludeMask |= M_DERIVED;
-    //the resource is a matching member if it matches none of the exclude flags
+    // the resource is a matching member if it matches none of the exclude flags
     return flags != NULL_FLAG && (flags & excludeMask) == 0;
   }
 
   @Override
   public boolean contains(ISchedulingRule rule) {
     if (this == rule) return true;
-    //must allow notifications to nest in all resource rules
+    // must allow notifications to nest in all resource rules
     if (rule.getClass().equals(WorkManager.NotifyRule.class)) return true;
     if (rule instanceof MultiRule) {
       MultiRule multi = (MultiRule) rule;
@@ -297,9 +297,11 @@ public abstract class Resource implements IResource, IPathRequestor, ICoreConsta
         //                final IFileStore originalStore = getStore();
         //                boolean wasLinked = isLinked();
         //                message = Messages.resources_deleteProblem;
-        //                MultiStatus status = new MultiStatus(ResourcesPlugin.PI_RESOURCES, IResourceStatus.FAILED_DELETE_LOCAL, message, null);
+        //                MultiStatus status = new MultiStatus(ResourcesPlugin.PI_RESOURCES,
+        // IResourceStatus.FAILED_DELETE_LOCAL, message, null);
         WorkManager workManager = workspace.getWorkManager();
-        //                ResourceTree tree = new ResourceTree(workspace.getFileSystemManager(), workManager.getLock(), status, updateFlags);
+        //                ResourceTree tree = new ResourceTree(workspace.getFileSystemManager(),
+        // workManager.getLock(), status, updateFlags);
         int depth = 0;
         try {
           depth = workManager.beginUnprotected();
@@ -310,7 +312,8 @@ public abstract class Resource implements IResource, IPathRequestor, ICoreConsta
         }
         if (getType() == ROOT) {
           //                    // need to clear out the root info
-          //                    workspace.getMarkerManager().removeMarkers(this, IResource.DEPTH_ZERO);
+          //                    workspace.getMarkerManager().removeMarkers(this,
+          // IResource.DEPTH_ZERO);
           //                    getPropertyManager().deleteProperties(this, IResource.DEPTH_ZERO);
           //                    getResourceInfo(false, false).clearSessionProperties();
         }
@@ -318,13 +321,15 @@ public abstract class Resource implements IResource, IPathRequestor, ICoreConsta
         //                tree.makeInvalid();
         //                if (!tree.getStatus().isOK())
         //                    throw new ResourceException(tree.getStatus());
-        //update any aliases of this resource
-        //note that deletion of a linked resource cannot affect other resources
+        // update any aliases of this resource
+        // note that deletion of a linked resource cannot affect other resources
         //                if (!wasLinked)
-        //                    workspace.getAliasManager().updateAliases(this, originalStore, IResource.DEPTH_INFINITE, monitor);
+        //                    workspace.getAliasManager().updateAliases(this, originalStore,
+        // IResource.DEPTH_INFINITE, monitor);
         //                if (getType() == PROJECT) {
         //                     make sure the rule factory is cleared on project deletion
-        //                    ((Rules) workspace.getRuleFactory()).setRuleFactory((IProject) this, null);
+        //                    ((Rules) workspace.getRuleFactory()).setRuleFactory((IProject) this,
+        // null);
         //                     make sure project deletion is remembered
         //                    workspace.getSaveManager().requestSnapshot();
         //                }
@@ -358,7 +363,7 @@ public abstract class Resource implements IResource, IPathRequestor, ICoreConsta
   public IMarker[] findMarkers(String type, boolean includeSubtypes, int depth)
       throws CoreException {
     //        throw new UnsupportedOperationException();
-    //TODO
+    // TODO
     return new IMarker[0];
   }
 
@@ -373,7 +378,7 @@ public abstract class Resource implements IResource, IPathRequestor, ICoreConsta
     String name = getName();
     int index = name.lastIndexOf('.');
     if (index == -1) return null;
-    if (index == (name.length() - 1)) return ""; //$NON-NLS-1$
+    if (index == (name.length() - 1)) return ""; // $NON-NLS-1$
     return name.substring(index + 1);
   }
 
@@ -417,7 +422,7 @@ public abstract class Resource implements IResource, IPathRequestor, ICoreConsta
   @Override
   public IContainer getParent() {
     int segments = path.segmentCount();
-    //zero and one segments handled by subclasses
+    // zero and one segments handled by subclasses
     if (segments < 2) Assert.isLegal(false, path.toString());
     if (segments == 2) return workspace.getRoot().getProject(path.segment(0));
     IPath parentPath = this.path.removeLastSegments(1);
@@ -444,8 +449,9 @@ public abstract class Resource implements IResource, IPathRequestor, ICoreConsta
       return (IProject) this;
     }
     final IProject[] projects = workspace.getRoot().getProjects();
-    //here we try to found project by path of resources. We will get all projects and select longest path of project that
-    //start with path of resource.
+    // here we try to found project by path of resources. We will get all projects and select
+    // longest path of project that
+    // start with path of resource.
     final Optional<IProject> max =
         Arrays.stream(projects)
             .filter(iProject -> path.toOSString().startsWith(iProject.getFullPath().toOSString()))
@@ -476,7 +482,8 @@ public abstract class Resource implements IResource, IPathRequestor, ICoreConsta
   @Override
   public IPath getRawLocation() {
     //        if (isLinked())
-    //            return FileUtil.toPath(((Project) getProject()).internalGetDescription().getLinkLocationURI(getProjectRelativePath()));
+    //            return FileUtil.toPath(((Project)
+    // getProject()).internalGetDescription().getLinkLocationURI(getProjectRelativePath()));
     //        return getLocation();
     throw new UnsupportedOperationException();
   }
@@ -484,7 +491,8 @@ public abstract class Resource implements IResource, IPathRequestor, ICoreConsta
   @Override
   public URI getRawLocationURI() {
     //        if (isLinked())
-    //            return ((Project) getProject()).internalGetDescription().getLinkLocationURI(getProjectRelativePath());
+    //            return ((Project)
+    // getProject()).internalGetDescription().getLinkLocationURI(getProjectRelativePath());
     //        return getLocationURI();
     throw new UnsupportedOperationException();
   }
@@ -648,7 +656,8 @@ public abstract class Resource implements IResource, IPathRequestor, ICoreConsta
     //        IMoveDeleteHook hook = workspace.getMoveDeleteHook();
     switch (getType()) {
       case IResource.FILE:
-        //                if (!hook.moveFile(tree, (IFile) this, (IFile) destination, updateFlags, Policy.subMonitorFor(monitor, Policy.opWork / 2)))
+        //                if (!hook.moveFile(tree, (IFile) this, (IFile) destination, updateFlags,
+        // Policy.subMonitorFor(monitor, Policy.opWork / 2)))
         workspace.standardMoveFile(
             (IFile) this,
             (IFile) destination,
@@ -656,7 +665,8 @@ public abstract class Resource implements IResource, IPathRequestor, ICoreConsta
             Policy.subMonitorFor(monitor, Policy.opWork));
         break;
       case IResource.FOLDER:
-        //                if (!hook.moveFolder(tree, (IFolder) this, (IFolder) destination, updateFlags, Policy.subMonitorFor(monitor, Policy.opWork / 2)))
+        //                if (!hook.moveFolder(tree, (IFolder) this, (IFolder) destination,
+        // updateFlags, Policy.subMonitorFor(monitor, Policy.opWork / 2)))
         workspace.standardMoveFolder(
             (IFolder) this,
             (IFolder) destination,
@@ -669,7 +679,8 @@ public abstract class Resource implements IResource, IPathRequestor, ICoreConsta
         if (getName().equals(destination.getName())) return false;
         IProjectDescription description = project.getDescription();
         description.setName(destination.getName());
-        //                if (!hook.moveProject(tree, project, description, updateFlags, Policy.subMonitorFor(monitor, Policy.opWork / 2)))
+        //                if (!hook.moveProject(tree, project, description, updateFlags,
+        // Policy.subMonitorFor(monitor, Policy.opWork / 2)))
         workspace.standardMoveProject(
             project, description, updateFlags, Policy.subMonitorFor(monitor, Policy.opWork));
         break;
@@ -768,15 +779,15 @@ public abstract class Resource implements IResource, IPathRequestor, ICoreConsta
   public String getTypeString() {
     switch (getType()) {
       case FILE:
-        return "L"; //$NON-NLS-1$
+        return "L"; // $NON-NLS-1$
       case FOLDER:
-        return "F"; //$NON-NLS-1$
+        return "F"; // $NON-NLS-1$
       case PROJECT:
-        return "P"; //$NON-NLS-1$
+        return "P"; // $NON-NLS-1$
       case ROOT:
-        return "R"; //$NON-NLS-1$
+        return "R"; // $NON-NLS-1$
     }
-    return ""; //$NON-NLS-1$
+    return ""; // $NON-NLS-1$
   }
 
   @Override
@@ -799,7 +810,7 @@ public abstract class Resource implements IResource, IPathRequestor, ICoreConsta
   @Override
   public boolean isConflicting(ISchedulingRule rule) {
     if (this == rule) return true;
-    //must not schedule at same time as notification
+    // must not schedule at same time as notification
     if (rule.getClass().equals(WorkManager.NotifyRule.class)) return true;
     if (rule instanceof MultiRule) {
       MultiRule multi = (MultiRule) rule;
@@ -817,7 +828,7 @@ public abstract class Resource implements IResource, IPathRequestor, ICoreConsta
   @Override
   public void touch(IProgressMonitor iProgressMonitor) throws CoreException {
     // do nothing
-    //todo
+    // todo
   }
 
   /* (non-Javadoc)

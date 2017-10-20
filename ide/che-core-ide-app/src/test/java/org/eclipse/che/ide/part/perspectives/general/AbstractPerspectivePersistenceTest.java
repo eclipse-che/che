@@ -53,14 +53,14 @@ import org.mockito.stubbing.Answer;
 @RunWith(GwtMockitoTestRunner.class)
 public class AbstractPerspectivePersistenceTest {
 
-  //constructor mocks
+  // constructor mocks
   @Mock private PerspectiveViewImpl view;
   @Mock private PartStackPresenterFactory stackPresenterFactory;
   @Mock private PartStackViewFactory partStackViewFactory;
   @Mock private WorkBenchControllerFactory controllerFactory;
   @Mock private EventBus eventBus;
 
-  //additional mocks
+  // additional mocks
   @Mock private FlowPanel panel;
   @Mock private SplitLayoutPanel layoutPanel;
   @Mock private SimplePanel simplePanel;
@@ -192,7 +192,7 @@ public class AbstractPerspectivePersistenceTest {
   }
 
   @Test
-  @Ignore //TODO
+  @Ignore // TODO
   public void shouldRestoreOpenedParts() throws Exception {
     JsonObject state = Json.createObject();
     JsonObject parts = Json.createObject();

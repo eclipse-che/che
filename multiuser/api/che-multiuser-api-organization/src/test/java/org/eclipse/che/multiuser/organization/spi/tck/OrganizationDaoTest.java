@@ -141,13 +141,13 @@ public class OrganizationDaoTest {
 
   @Test(dependsOnMethods = "shouldThrowNotFoundExceptionOnGettingNonExistingOrganizationById")
   public void shouldRemoveOrganization() throws Exception {
-    //given
+    // given
     final OrganizationImpl organization = organizations[0];
 
-    //when
+    // when
     organizationDao.remove(organization.getId());
 
-    //then
+    // then
     assertNull(notFoundToNull(() -> organizationDao.getById(organization.getId())));
   }
 

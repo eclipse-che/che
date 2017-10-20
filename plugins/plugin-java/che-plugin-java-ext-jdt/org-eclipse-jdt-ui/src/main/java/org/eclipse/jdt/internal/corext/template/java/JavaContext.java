@@ -186,7 +186,7 @@ public class JavaContext extends CompilationUnitContext {
 
     //		IPreferenceStore prefs = JavaPlugin.getDefault().getPreferenceStore();
     boolean useCodeFormatter =
-        true; //prefs.getBoolean(PreferenceConstants.TEMPLATES_USE_CODEFORMATTER);
+        true; // prefs.getBoolean(PreferenceConstants.TEMPLATES_USE_CODEFORMATTER);
 
     IJavaProject project = getJavaProject();
     JavaFormatter formatter =
@@ -308,7 +308,7 @@ public class JavaContext extends CompilationUnitContext {
 
       int start = getStart();
       int end = getCompletionOffset();
-      return start <= end ? document.get(start, end - start) : ""; //$NON-NLS-1$
+      return start <= end ? document.get(start, end - start) : ""; // $NON-NLS-1$
 
     } catch (BadLocationException e) {
       return super.getKey();
@@ -460,7 +460,7 @@ public class JavaContext extends CompilationUnitContext {
   private String[] suggestVariableName(String type, String[] excludes)
       throws IllegalArgumentException {
     int dim = 0;
-    while (type.endsWith("[]")) { //$NON-NLS-1$
+    while (type.endsWith("[]")) { // $NON-NLS-1$
       dim++;
       type = type.substring(0, type.length() - 2);
     }
@@ -548,7 +548,7 @@ public class JavaContext extends CompilationUnitContext {
         qualifiedMemberName.substring(memberOffset + 1, qualifiedMemberName.length());
     try {
       boolean isField;
-      if ("*".equals(memberName)) { //$NON-NLS-1$
+      if ("*".equals(memberName)) { // $NON-NLS-1$
         isField = true;
       } else {
         IJavaProject javaProject = cu.getJavaProject();
@@ -618,7 +618,7 @@ public class JavaContext extends CompilationUnitContext {
       Position position = new Position(getCompletionOffset(), 0);
       IDocument document = getDocument();
       final String category =
-          "__template_position_importer" + System.currentTimeMillis(); //$NON-NLS-1$
+          "__template_position_importer" + System.currentTimeMillis(); // $NON-NLS-1$
       IPositionUpdater updater = new DefaultPositionUpdater(category);
       document.addPositionCategory(category);
       document.addPositionUpdater(updater);

@@ -83,12 +83,12 @@ public class WorkspaceRoot extends Container implements IWorkspaceRoot {
 
   @Override
   public IProject getProject(String name) {
-    //first check our project cache
+    // first check our project cache
     Project result = projectTable.get(name);
     if (result == null) {
       IPath projectPath = new Path(null, name).makeAbsolute();
-      //try to get the project using a canonical name
-      String canonicalName = projectPath.toOSString(); //.lastSegment();
+      // try to get the project using a canonical name
+      String canonicalName = projectPath.toOSString(); // .lastSegment();
       result = projectTable.get(canonicalName);
       if (result != null) return result;
       result = new Project(projectPath, workspace);

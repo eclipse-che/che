@@ -124,14 +124,14 @@ public class DeleteResourceManager {
     Resource[] projects = projectsList.toArray(new Resource[projectsList.size()]);
 
     if (projectsList.isEmpty()) {
-      //if no project were found in nodes list
+      // if no project were found in nodes list
       return promptUserToDelete(filtered);
     } else if (projects.length < filtered.length) {
-      //inform user that we can't delete mixed list of the nodes
+      // inform user that we can't delete mixed list of the nodes
       return promiseProvider.reject(
           JsPromiseError.create(localization.mixedProjectDeleteMessage()));
     } else {
-      //delete only project nodes
+      // delete only project nodes
       return promptUserToDelete(projects);
     }
   }
@@ -245,7 +245,7 @@ public class DeleteResourceManager {
           if (element == element2) {
             continue;
           }
-          //compare only paths to increase performance, don't operation in this case with parents
+          // compare only paths to increase performance, don't operation in this case with parents
           if (element.getLocation().isPrefixOf(element2.getLocation())) {
             filteredElements.remove(element2);
             break outer;
@@ -262,7 +262,7 @@ public class DeleteResourceManager {
     return new ConfirmCallback() {
       @Override
       public void accepted() {
-        if (resources == null) { //sometimes we may occur NPE here while reading length
+        if (resources == null) { // sometimes we may occur NPE here while reading length
           callback.onFailure(new IllegalStateException());
           return;
         }

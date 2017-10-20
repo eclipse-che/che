@@ -72,8 +72,8 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
   public static final int LOCAL = 1;
   public static final int FIELD = 2;
 
-  private final String KEY_NAME = "name"; //$NON-NLS-1$
-  private final String KEY_TYPE = "type"; //$NON-NLS-1$
+  private final String KEY_NAME = "name"; // $NON-NLS-1$
+  private final String KEY_TYPE = "type"; // $NON-NLS-1$
 
   private final int fVariableKind;
   private final ASTNode fNodeToAssign; // ExpressionStatement or SingleVariableDeclaration
@@ -87,7 +87,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
       ExpressionStatement node,
       ITypeBinding typeBinding,
       int relevance) {
-    super("", cu, null, relevance, null); //$NON-NLS-1$
+    super("", cu, null, relevance, null); // $NON-NLS-1$
 
     fVariableKind = variableKind;
     fNodeToAssign = node;
@@ -112,7 +112,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
       VariableDeclarationFragment existingFragment,
       ITypeBinding typeBinding,
       int relevance) {
-    super("", cu, null, relevance, null); //$NON-NLS-1$
+    super("", cu, null, relevance, null); // $NON-NLS-1$
 
     fVariableKind = FIELD;
     fNodeToAssign = parameter;
@@ -236,9 +236,14 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
     if (isStatic) {
       modifiers |= Modifier.STATIC;
     } else if (isConstructorParam) {
-      //			String saveActionsKey= AbstractSaveParticipantPreferenceConfiguration.EDITOR_SAVE_PARTICIPANT_PREFIX + CleanUpPostSaveListener.POSTSAVELISTENER_ID;
-      //			IScopeContext[] scopes= { InstanceScope.INSTANCE, new ProjectScope(project.getProject()) };
-      //			boolean safeActionsEnabled= Platform.getPreferencesService().getBoolean(JavaPlugin.getPluginId(), saveActionsKey, false, scopes);
+      //			String saveActionsKey=
+      // AbstractSaveParticipantPreferenceConfiguration.EDITOR_SAVE_PARTICIPANT_PREFIX +
+      // CleanUpPostSaveListener.POSTSAVELISTENER_ID;
+      //			IScopeContext[] scopes= { InstanceScope.INSTANCE, new ProjectScope(project.getProject())
+      // };
+      //			boolean safeActionsEnabled=
+      // Platform.getPreferencesService().getBoolean(JavaPlugin.getPluginId(), saveActionsKey,
+      // false, scopes);
     }
     if (
     /*safeActionsEnabled &&*/

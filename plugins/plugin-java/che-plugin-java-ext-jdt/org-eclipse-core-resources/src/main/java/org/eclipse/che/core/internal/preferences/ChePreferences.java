@@ -41,12 +41,12 @@ import org.osgi.service.prefs.Preferences;
 /** @author Evgen Vidolob */
 public class ChePreferences implements IEclipsePreferences {
 
-  protected static final String VERSION_KEY = "eclipse.preferences.version"; //$NON-NLS-1$
-  protected static final String VERSION_VALUE = "1"; //$NON-NLS-1$
-  protected static final String DOUBLE_SLASH = "//"; //$NON-NLS-1$
-  protected static final String EMPTY_STRING = ""; //$NON-NLS-1$
-  private static final String FALSE = "false"; //$NON-NLS-1$
-  private static final String TRUE = "true"; //$NON-NLS-1$
+  protected static final String VERSION_KEY = "eclipse.preferences.version"; // $NON-NLS-1$
+  protected static final String VERSION_VALUE = "1"; // $NON-NLS-1$
+  protected static final String DOUBLE_SLASH = "//"; // $NON-NLS-1$
+  protected static final String EMPTY_STRING = ""; // $NON-NLS-1$
+  private static final String FALSE = "false"; // $NON-NLS-1$
+  private static final String TRUE = "true"; // $NON-NLS-1$
   /** Protects write access to properties and children. */
   protected ImmutableMap properties = ImmutableMap.EMPTY;
 
@@ -88,11 +88,13 @@ public class ChePreferences implements IEclipsePreferences {
     } catch (FileNotFoundException e) {
       // file doesn't exist but that's ok.
       //            if (DEBUG_PREFERENCE_GENERAL)
-      //                PrefsMessages.message("Preference file does not exist: " + location); //$NON-NLS-1$
+      //                PrefsMessages.message("Preference file does not exist: " + location);
+      // //$NON-NLS-1$
       return result;
     } catch (IOException e) {
       //            String message = NLS.bind(PrefsMessages.preferences_loadException, location);
-      //            log(new Status(IStatus.INFO, PrefsMessages.OWNER_NAME, IStatus.INFO, message, e));
+      //            log(new Status(IStatus.INFO, PrefsMessages.OWNER_NAME, IStatus.INFO, message,
+      // e));
       throw new BackingStoreException(e.getMessage(), e);
     } finally {
       if (input != null)
@@ -113,7 +115,7 @@ public class ChePreferences implements IEclipsePreferences {
       throws BackingStoreException {
     // add the key/value pairs from this node
     boolean addSeparator = prefix.length() != 0;
-    //thread safety: copy reference in case of concurrent change
+    // thread safety: copy reference in case of concurrent change
     ImmutableMap temp;
     synchronized (childAndPropertyLock) {
       temp = properties;
@@ -127,7 +129,8 @@ public class ChePreferences implements IEclipsePreferences {
     //        IEclipsePreferences[] childNodes = getChildren(true);
     //        for (int i = 0; i < childNodes.length; i++) {
     //            ChePreferences child = (ChePreferences) childNodes[i];
-    //            String fullPath = addSeparator ? prefix + PATH_SEPARATOR + child.name() : child.name();
+    //            String fullPath = addSeparator ? prefix + PATH_SEPARATOR + child.name() :
+    // child.name();
     //            child.convertToProperties(result, fullPath);
     //        }
     return result;
@@ -172,8 +175,9 @@ public class ChePreferences implements IEclipsePreferences {
         path = makeRelative(path);
         String key = splitPath[1];
         //                if (DEBUG_PREFERENCE_SET)
-        //                    PrefsMessages.message("Setting preference: " + path + '/' + key + '=' + value); //$NON-NLS-1$
-        //use internal methods to avoid notifying listeners
+        //                    PrefsMessages.message("Setting preference: " + path + '/' + key + '='
+        // + value); //$NON-NLS-1$
+        // use internal methods to avoid notifying listeners
         ChePreferences childNode = (ChePreferences) node.internalNode(path, false, null);
         String oldValue = childNode.internalPut(key, value);
         //                // notify listeners if applicable
@@ -195,7 +199,8 @@ public class ChePreferences implements IEclipsePreferences {
       String oldValue = properties.get(key);
       if (oldValue != null && oldValue.equals(newValue)) return oldValue;
       //            if (DEBUG_PREFERENCE_SET)
-      //                PrefsMessages.message("Setting preference: " + absolutePath() + '/' + key + '=' + newValue); //$NON-NLS-1$
+      //                PrefsMessages.message("Setting preference: " + absolutePath() + '/' + key +
+      // '=' + newValue); //$NON-NLS-1$
       properties = properties.put(key, newValue);
       return oldValue;
     }
@@ -209,7 +214,7 @@ public class ChePreferences implements IEclipsePreferences {
 
     // short circuit this node
     //        if (path.length() == 0)
-    //TODO only
+    // TODO only
     return this;
     //
     //        // if we have an absolute path use the root relative to
@@ -229,7 +234,8 @@ public class ChePreferences implements IEclipsePreferences {
     //        // notify listeners if a child was added
     //        if (added && notify)
     //            fireNodeEvent(new NodeChangeEvent(this, child), true);
-    //        return (IEclipsePreferences) child.node(index == -1 ? EMPTY_STRING : path.substring(index + 1));
+    //        return (IEclipsePreferences) child.node(index == -1 ? EMPTY_STRING :
+    // path.substring(index + 1));
   }
 
   //    /**
@@ -348,7 +354,7 @@ public class ChePreferences implements IEclipsePreferences {
     synchronized (childAndPropertyLock) {
       toFlush = internalFlush();
     }
-    //if we aren't at the right level, then flush the appropriate node
+    // if we aren't at the right level, then flush the appropriate node
     if (toFlush != null) toFlush.flush();
   }
 
@@ -381,13 +387,13 @@ public class ChePreferences implements IEclipsePreferences {
     // this node is a load level
     // any work to do?
     if (!dirty) return null;
-    //remove dirty bit before saving, to ensure that concurrent
-    //changes during save mark the store as dirty
+    // remove dirty bit before saving, to ensure that concurrent
+    // changes during save mark the store as dirty
     dirty = false;
     try {
       save();
     } catch (BackingStoreException e) {
-      //mark it dirty again because the save failed
+      // mark it dirty again because the save failed
       dirty = true;
       throw e;
     }
@@ -404,14 +410,16 @@ public class ChePreferences implements IEclipsePreferences {
     //        if (descriptor == null) {
     save(filePath);
     //        } else {
-    //            descriptor.save(absolutePath(), convertToProperties(new Properties(), "")); //$NON-NLS-1$
+    //            descriptor.save(absolutePath(), convertToProperties(new Properties(), ""));
+    // //$NON-NLS-1$
     //        }
   }
 
   protected void save(String location) throws BackingStoreException {
     if (location == null) {
       //            if (DEBUG_PREFERENCE_GENERAL)
-      //                PrefsMessages.message("Unable to determine location of preference file for node: " + absolutePath()); //$NON-NLS-1$
+      //                PrefsMessages.message("Unable to determine location of preference file for
+      // node: " + absolutePath()); //$NON-NLS-1$
       return;
     }
     //        if (DEBUG_PREFERENCE_GENERAL)
@@ -421,7 +429,8 @@ public class ChePreferences implements IEclipsePreferences {
       File file = new File(location);
       // nothing to save. delete existing file if one exists.
       if (file.exists() && !file.delete()) {
-        //                String message = NLS.bind(PrefsMessages.preferences_failedDelete, location);
+        //                String message = NLS.bind(PrefsMessages.preferences_failedDelete,
+        // location);
         ResourcesPlugin.log(
             new Status(
                 IStatus.WARNING,
@@ -459,7 +468,7 @@ public class ChePreferences implements IEclipsePreferences {
         file.createNewFile();
       }
       output = new SafeFileOutputStream(file);
-      output.write(removeTimestampFromTable(properties).getBytes("UTF-8")); //$NON-NLS-1$
+      output.write(removeTimestampFromTable(properties).getBytes("UTF-8")); // $NON-NLS-1$
       output.flush();
     } catch (IOException e) {
       //            String message = NLS.bind(PrefsMessages.preferences_saveException, location);
@@ -489,8 +498,8 @@ public class ChePreferences implements IEclipsePreferences {
     } finally {
       output.close();
     }
-    String string = output.toString("UTF-8"); //$NON-NLS-1$
-    String separator = System.getProperty("line.separator"); //$NON-NLS-1$
+    String string = output.toString("UTF-8"); // $NON-NLS-1$
+    String separator = System.getProperty("line.separator"); // $NON-NLS-1$
     return string.substring(string.indexOf(separator) + separator.length());
   }
 
@@ -535,7 +544,8 @@ public class ChePreferences implements IEclipsePreferences {
       result = properties.get(key);
     }
     //        if (DEBUG_PREFERENCE_GET)
-    //            PrefsMessages.message("Getting preference value: " + absolutePath() + '/' + key + "->" + result); //$NON-NLS-1$ //$NON-NLS-2$
+    //            PrefsMessages.message("Getting preference value: " + absolutePath() + '/' + key +
+    // "->" + result); //$NON-NLS-1$ //$NON-NLS-2$
     return result;
   }
 
@@ -562,7 +572,7 @@ public class ChePreferences implements IEclipsePreferences {
     synchronized (childAndPropertyLock) {
       keys = properties.keys();
     }
-    //don't synchronize remove call because it calls listeners
+    // don't synchronize remove call because it calls listeners
     for (int i = 0; i < keys.length; i++) remove(keys[i]);
     makeDirty();
   }

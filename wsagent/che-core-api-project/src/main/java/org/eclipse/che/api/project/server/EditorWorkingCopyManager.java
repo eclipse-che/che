@@ -132,7 +132,7 @@ public class EditorWorkingCopyManager {
             if (workingCopy == null) {
               createWorkingCopy(path);
             }
-            //TODO At opening file we can have persistent working copy when user has unsaved data
+            // TODO At opening file we can have persistent working copy when user has unsaved data
             // at this case we need provide ability to recover unsaved data
             break;
           }
@@ -146,7 +146,7 @@ public class EditorWorkingCopyManager {
 
             if (isWorkingCopyHasUnsavedData(path)) {
               createPersistentWorkingCopy(
-                  path); //to have ability to recover unsaved data when the file will be open later
+                  path); // to have ability to recover unsaved data when the file will be open later
             } else {
               VirtualFileEntry persistentWorkingCopy =
                   getPersistentWorkingCopy(path, workingCopy.getProjectPath());
