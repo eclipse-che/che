@@ -143,7 +143,7 @@ checkParameters() {
         elif [[ "$var" =~ -P.* ]]; then :
         elif [[ "$var" == "--help" ]]; then :
         elif [[ "$var" == "--compare-with-ci" ]]; then :
-        elif [[ "$var" =~ --workspace-pool-size=auto|[0-9]+$ ]]; then :
+        elif [[ "$var" =~ ^--workspace-pool-size=(auto|[0-9]+)$ ]]; then :
         elif [[ "$var" =~ ^[0-9]+$ ]] && [[ $@ =~ --compare-with-ci[[:space:]]$var ]]; then :
         else
             printHelp
@@ -700,7 +700,7 @@ runTests() {
                 -Ddriver.version=${WEBDRIVER_VERSION} \
                 -Dbrowser=${BROWSER} \
                 -Dche.threads=${THREADS} \
-                -Dche.workspace.pool.size=${WORKSPACE_POOL_SIZE} \
+                -Dche.workspace__pool__size=${WORKSPACE_POOL_SIZE} \
                 ${DEBUG_OPTIONS} \
                 ${GRID_OPTIONS} \
                 ${MAVEN_OPTIONS}

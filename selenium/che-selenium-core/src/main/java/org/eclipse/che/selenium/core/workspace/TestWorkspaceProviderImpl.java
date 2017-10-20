@@ -53,7 +53,7 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
 
   @Inject
   public TestWorkspaceProviderImpl(
-      @Named("che.workspace.pool.size") String poolSize,
+      @Named("che.workspace_pool_size") String poolSize,
       @Named("che.threads") int threads,
       @Named("workspace.default_memory_gb") int defaultMemoryGb,
       TestUser defaultUser,
