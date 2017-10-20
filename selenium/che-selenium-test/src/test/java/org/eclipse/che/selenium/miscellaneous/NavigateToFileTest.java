@@ -147,6 +147,7 @@ public class NavigateToFileTest {
     selectFileFromNavigateLaunchByKeyboard("R", FILE_README + PATH_2_TO_README_FILE);
     editor.waitTabIsPresent("README.md");
     editor.waitActiveEditor();
+    editor.closeAllTabsByContextMenu();
 
     // Check that form is closed by pressing ESC button
     menu.runCommand(
@@ -182,7 +183,7 @@ public class NavigateToFileTest {
   public void checkNavigateToFileFunctionWithFilesFromHiddenFolders() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.openItemByPath(PROJECT_NAME);
+    projectExplorer.selectItem(PROJECT_NAME);
     menu.runCommand(
         TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.INITIALIZE_REPOSITORY);
     askDialog.acceptDialogWithText(
@@ -196,7 +197,7 @@ public class NavigateToFileTest {
         TestMenuCommandsConstants.Assistant.NAVIGATE_TO_FILE);
     navigateToFile.waitFormToOpen();
     loader.waitOnClosed();
-    navigateToFile.typeSymbolInFileNameField("h");
+    navigateToFile.typeSymbolInFileNameField("H");
     loader.waitOnClosed();
     navigateToFile.waitFileNamePopUp();
     Assert.assertFalse(navigateToFile.waitListOfFilesNames(FILE_H_SYMBOL));
