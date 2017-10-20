@@ -62,7 +62,6 @@ readonly FAILSAFE_REPORT="target/site/failsafe-report.html"
 [[ -z ${CALLER+x} ]] && { CALLER=$(basename $0); }
 [[ -z ${CUR_DIR+x} ]] && { CUR_DIR=$(cd "$(dirname "$0")"; pwd); }
 
-[[ -z ${API_SUFFIX+x} ]] && { API_SUFFIX=":8080/api/"; }
 [[ -z ${BASE_ACTUAL_RESULTS_URL+x} ]] && { BASE_ACTUAL_RESULTS_URL="https://ci.codenvycorp.com/view/qa/job/che-integration-tests/"; }
 
 MODE="grid"
@@ -175,6 +174,10 @@ applyCustomOptions() {
 
         elif [[ "$var" =~ --host=.* ]]; then
             PRODUCT_HOST=$(echo "$var" | sed -e "s/--host=//g")
+
+        elif [[ "$var" =~ --port=.* ]]; then
+            PRODUCT_PORT=$(echo "$var" | sed -e "s/--port=//g");
+            API_SUFFIX=":${PRODUCT_PORT}/api/";
 
         elif [[ "$var" =~ --threads=.* ]]; then
             THREADS=$(echo "$var" | sed -e "s/--threads=//g")
@@ -377,6 +380,7 @@ Options:
     --http                              Use 'http' protocol to connect to product
     --https                             Use 'https' protocol to connect to product
     --host=<PRODUCT_HOST>               Set host where product is deployed
+    --port=<PRODUCT_PORT>               Set port where product is deployed
 
 Modes (defines environment to run tests):
     local                               All tests will be run in a Web browser on the developer machine.
@@ -387,7 +391,7 @@ Modes (defines environment to run tests):
     --web-driver-port=<PORT>            To run WebDriver on the specific port, by default: "${WEBDRIVER_PORT}"
     --threads=<THREADS>                 Number of tests that will be run simultaneously. It also means the very same number of
                                         Web browsers will be opened on the developer machine.
-                                        Default value is in range [2,5] and depends on available RAM.                                        
+                                        Default value is in range [2,5] and depends on available RAM.
     --workspace-pool-size=[<SIZE>|auto] Size of test workspace pool.
                                         Default value is 0, that means that test workspaces are created on demand.
 
@@ -454,6 +458,7 @@ printRunOptions() {
     echo "[TEST] ==================================================="
     echo "[TEST] Product Protocol    : "${PRODUCT_PROTOCOL}
     echo "[TEST] Product Host        : "${PRODUCT_HOST}
+    echo "[TEST] Product Port        : "${PRODUCT_PORT}
     echo "[TEST] Tests               : "${TESTS_SCOPE}
     echo "[TEST] Threads             : "${THREADS}
     echo "[TEST] Workspace pool size : "${WORKSPACE_POOL_SIZE}
@@ -690,6 +695,7 @@ runTests() {
     mvn clean verify -Pselenium-test \
                 ${TESTS_SCOPE} \
                 -Dhost=${PRODUCT_HOST} \
+                -Dport=${PRODUCT_PORT} \
                 -Dprotocol=${PRODUCT_PROTOCOL} \
                 -Ddocker.interface.ip=$(detectDockerInterfaceIp) \
                 -Ddriver.port=${WEBDRIVER_PORT} \
