@@ -106,7 +106,11 @@ public class BreakpointRendererImpl implements BreakpointRenderer {
               ? (hasCondition ? activeConditionBreakpointMark : activeBreakpointMark)
               : (hasCondition ? inactiveConditionBreakpointMark : inactiveBreakpointMark);
       if (hasCondition) {
-        newElement.setTitle("Condition: " + breakpointConfiguration.getCondition());
+        newElement.setTitle(
+            "Condition: "
+                + breakpointConfiguration.getCondition()
+                + ", hit count: "
+                + breakpointConfiguration.getCondition());
       }
 
       Element existedElement = hasGutter.getGutterItem(lineNumber, BREAKPOINTS_GUTTER);

@@ -15,6 +15,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
@@ -39,13 +40,7 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.jsonrpc.commons.reception.ConsumerConfiguratorOneToNone;
 import org.eclipse.che.api.core.jsonrpc.commons.reception.ResultConfiguratorFromOne;
-import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
-import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
-import org.eclipse.che.api.debug.shared.dto.LocationDto;
-import org.eclipse.che.api.debug.shared.dto.SimpleValueDto;
-import org.eclipse.che.api.debug.shared.dto.StackFrameDumpDto;
-import org.eclipse.che.api.debug.shared.dto.VariableDto;
-import org.eclipse.che.api.debug.shared.dto.VariablePathDto;
+import org.eclipse.che.api.debug.shared.dto.*;
 import org.eclipse.che.api.debug.shared.dto.action.ResumeActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StartActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepIntoActionDto;
@@ -135,6 +130,7 @@ public class DebuggerTest extends BaseTest {
   @Mock private DebuggerObserver observer;
   @Mock private LocationDto locationDto;
   @Mock private BreakpointDto breakpointDto;
+  @Mock private BreakpointConfigurationDto breakpointConfigurationDtoDto;
   @Mock private Optional<Project> optional;
 
   @Captor private ArgumentCaptor<WsAgentStateHandler> extServerStateHandlerCaptor;
@@ -161,6 +157,9 @@ public class DebuggerTest extends BaseTest {
     debuggerDescriptor = new DebuggerDescriptor(NAME + " " + VERSION, HOST + ":" + PORT);
 
     doReturn(locationDto).when(dtoFactory).createDto(LocationDto.class);
+    doReturn(breakpointConfigurationDtoDto)
+        .when(dtoFactory)
+        .createDto(BreakpointConfigurationDto.class);
     doReturn(breakpointDto).when(dtoFactory).createDto(BreakpointDto.class);
     doReturn(locationDto).when(breakpointDto).getLocation();
 
@@ -411,10 +410,15 @@ public class DebuggerTest extends BaseTest {
     doReturn(promiseVoid).when(promiseVoid).then((Operation<Void>) any());
     when(locationDto.withLineNumber(LINE_NUMBER)).thenReturn(locationDto);
     when(locationDto.withTarget(anyString())).thenReturn(locationDto);
+    when(breakpointConfigurationDtoDto.withCondition(eq(null)))
+        .thenReturn(breakpointConfigurationDtoDto);
+    when(breakpointConfigurationDtoDto.withHitCount(anyInt()))
+        .thenReturn(breakpointConfigurationDtoDto);
     when(breakpointDto.getLocation().getLineNumber()).thenReturn(LINE_NUMBER);
     when(breakpointDto.withLocation(locationDto)).thenReturn(breakpointDto);
-    when(breakpointDto.withEnabled(true)).thenReturn(breakpointDto);
     when(breakpointDto.withBreakpointConfiguration(any())).thenReturn(breakpointDto);
+    when(breakpointDto.withEnabled(true)).thenReturn(breakpointDto);
+    when(breakpointDto.getBreakpointConfiguration()).thenReturn(breakpointConfigurationDtoDto);
 
     debugger.addBreakpoint(breakpointDto);
 
