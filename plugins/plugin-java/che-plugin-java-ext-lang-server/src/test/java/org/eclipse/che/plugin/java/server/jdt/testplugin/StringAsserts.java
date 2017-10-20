@@ -69,7 +69,7 @@ public class StringAsserts {
               + ": "
               + diffStr
               + "\nexpected:\n"
-              + expected; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+              + expected; // $NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 
       Assert.assertEquals(message, expected, actual);
     }

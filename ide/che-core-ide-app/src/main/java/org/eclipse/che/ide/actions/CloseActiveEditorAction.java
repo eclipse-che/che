@@ -36,9 +36,7 @@ public class CloseActiveEditorAction extends AbstractPerspectiveAction {
     super(
         singletonList(PROJECT_PERSPECTIVE_ID),
         locale.editorTabClose(),
-        locale.editorTabCloseDescription(),
-        null,
-        null);
+        locale.editorTabCloseDescription());
     this.editorAgent = editorAgent;
   }
 

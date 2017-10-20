@@ -92,7 +92,7 @@ public abstract class DelegateCreator {
           new GroupCategory(
               "org.eclipse.jdt.internal.corext.refactoring.delegates.delegate",
               RefactoringCoreMessages.DelegateCreator_change_category_title,
-              RefactoringCoreMessages.DelegateCreator_change_category_description)); //$NON-NLS-1$
+              RefactoringCoreMessages.DelegateCreator_change_category_description)); // $NON-NLS-1$
 
   /*
    * We are dealing with two CURewrites here:
@@ -405,7 +405,7 @@ public abstract class DelegateCreator {
     Assert.isNotNull(declaration);
 
     String msg = RefactoringCoreMessages.DelegateCreator_use_member_instead;
-    int firstParam = msg.indexOf("{0}"); //$NON-NLS-1$
+    int firstParam = msg.indexOf("{0}"); // $NON-NLS-1$
     Assert.isTrue(firstParam != -1);
 
     List<ASTNode> fragments = new ArrayList<ASTNode>();

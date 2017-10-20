@@ -55,9 +55,9 @@ import org.eclipse.ltk.internal.core.refactoring.RefactoringCorePlugin;
 public class ProcessorBasedRefactoring extends Refactoring {
 
   private static final String PERF_CHECK_CONDITIONS =
-      "org.eclipse.ltk.core.refactoring/perf/participants/checkConditions"; //$NON-NLS-1$
+      "org.eclipse.ltk.core.refactoring/perf/participants/checkConditions"; // $NON-NLS-1$
   private static final String PERF_CREATE_CHANGES =
-      "org.eclipse.ltk.core.refactoring/perf/participants/createChanges"; //$NON-NLS-1$
+      "org.eclipse.ltk.core.refactoring/perf/participants/createChanges"; // $NON-NLS-1$
 
   private RefactoringProcessor fProcessor;
 
@@ -187,7 +187,7 @@ public class ProcessorBasedRefactoring extends Refactoring {
   public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
     if (pm == null) pm = new NullProgressMonitor();
     RefactoringStatus result = new RefactoringStatus();
-    pm.beginTask("", 10); //$NON-NLS-1$
+    pm.beginTask("", 10); // $NON-NLS-1$
     pm.setTaskName(RefactoringCoreMessages.ProcessorBasedRefactoring_initial_conditions);
 
     result.merge(getProcessor().checkInitialConditions(new SubProgressMonitor(pm, 8)));
@@ -205,7 +205,7 @@ public class ProcessorBasedRefactoring extends Refactoring {
     RefactoringStatus result = new RefactoringStatus();
     CheckConditionsContext context = createCheckConditionsContext();
 
-    pm.beginTask("", 9); //$NON-NLS-1$
+    pm.beginTask("", 9); // $NON-NLS-1$
     pm.setTaskName(RefactoringCoreMessages.ProcessorBasedRefactoring_final_conditions);
 
     result.merge(getProcessor().checkFinalConditions(new SubProgressMonitor(pm, 5), context));
@@ -233,14 +233,14 @@ public class ProcessorBasedRefactoring extends Refactoring {
     }
     IProgressMonitor sm = new SubProgressMonitor(pm, 2);
 
-    sm.beginTask("", fParticipants.size()); //$NON-NLS-1$
+    sm.beginTask("", fParticipants.size()); // $NON-NLS-1$
     for (Iterator iter = fParticipants.iterator(); iter.hasNext() && !result.hasFatalError(); ) {
 
       RefactoringParticipant participant = (RefactoringParticipant) iter.next();
 
       final PerformanceStats stats =
           PerformanceStats.getStats(
-              PERF_CHECK_CONDITIONS, getName() + ", " + participant.getName()); //$NON-NLS-1$
+              PERF_CHECK_CONDITIONS, getName() + ", " + participant.getName()); // $NON-NLS-1$
       stats.startRun();
 
       try {
@@ -276,7 +276,7 @@ public class ProcessorBasedRefactoring extends Refactoring {
   /** {@inheritDoc} */
   public Change createChange(IProgressMonitor pm) throws CoreException {
     if (pm == null) pm = new NullProgressMonitor();
-    pm.beginTask("", fParticipants.size() + 3); //$NON-NLS-1$
+    pm.beginTask("", fParticipants.size() + 3); // $NON-NLS-1$
     pm.setTaskName(RefactoringCoreMessages.ProcessorBasedRefactoring_create_change);
     Change processorChange = getProcessor().createChange(new SubProgressMonitor(pm, 1));
     if (pm.isCanceled()) throw new OperationCanceledException();
@@ -293,7 +293,7 @@ public class ProcessorBasedRefactoring extends Refactoring {
       try {
         final PerformanceStats stats =
             PerformanceStats.getStats(
-                PERF_CREATE_CHANGES, getName() + ", " + participant.getName()); //$NON-NLS-1$
+                PERF_CREATE_CHANGES, getName() + ", " + participant.getName()); // $NON-NLS-1$
         stats.startRun();
 
         Change preChange = participant.createPreChange(new SubProgressMonitor(pm, 1));
@@ -384,7 +384,7 @@ public class ProcessorBasedRefactoring extends Refactoring {
     return getName();
   }
 
-  //---- Helper methods ---------------------------------------------------------------------
+  // ---- Helper methods ---------------------------------------------------------------------
 
   private CheckConditionsContext createCheckConditionsContext() throws CoreException {
     CheckConditionsContext result = new CheckConditionsContext();

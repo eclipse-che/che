@@ -111,7 +111,7 @@ public class StandardJavaElementContentProvider
    *     units and class files are the leaves provided by this content provider.
    */
   public void setProvideMembers(boolean b) {
-    //hello
+    // hello
     fProvideMembers = b;
   }
 

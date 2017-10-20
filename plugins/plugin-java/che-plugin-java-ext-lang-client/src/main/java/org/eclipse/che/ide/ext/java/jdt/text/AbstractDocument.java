@@ -623,7 +623,7 @@ public abstract class AbstractDocument implements Document {
 
     if (fInitialLineDelimiter != null) return fInitialLineDelimiter;
 
-    String sysLineDelimiter = "\n"; //$NON-NLS-1$
+    String sysLineDelimiter = "\n"; // $NON-NLS-1$
     String[] delimiters = getLegalLineDelimiters();
     Assert.isTrue(delimiters.length > 0);
     for (String delimiter : delimiters) {
@@ -1069,7 +1069,8 @@ public abstract class AbstractDocument implements Document {
     // if (partitioner instanceof IDocumentPartitionerExtension2)
     // {
     // checkStateOfPartitioner(partitioner, partitioning);
-    // return ((IDocumentPartitionerExtension2)partitioner).getContentType(offset, preferOpenPartitions);
+    // return ((IDocumentPartitionerExtension2)partitioner).getContentType(offset,
+    // preferOpenPartitions);
     // }
     // else
     if (partitioner != null) {
@@ -1111,7 +1112,8 @@ public abstract class AbstractDocument implements Document {
     // if (partitioner instanceof IDocumentPartitionerExtension2)
     // {
     // checkStateOfPartitioner(partitioner, partitioning);
-    // return ((IDocumentPartitionerExtension2)partitioner).getPartition(offset, preferOpenPartitions);
+    // return ((IDocumentPartitionerExtension2)partitioner).getPartition(offset,
+    // preferOpenPartitions);
     // }
     // else
     if (partitioner != null) {
@@ -1197,7 +1199,8 @@ public abstract class AbstractDocument implements Document {
   // }
   //
   // /*
-  // * @see org.eclipse.jface.text.IDocumentExtension4#startRewriteSession(org.eclipse.jface.text.DocumentRewriteSessionType)
+  // * @see
+  // org.eclipse.jface.text.IDocumentExtension4#startRewriteSession(org.eclipse.jface.text.DocumentRewriteSessionType)
   // * @since 3.1
   // */
   // public DocumentRewriteSession startRewriteSession(DocumentRewriteSessionType sessionType)
@@ -1208,7 +1211,8 @@ public abstract class AbstractDocument implements Document {
   //
   // fDocumentRewriteSession = new DocumentRewriteSession(sessionType);
   // if (DEBUG)
-  //         System.out.println("AbstractDocument: Starting rewrite session: " + fDocumentRewriteSession); //$NON-NLS-1$
+  //         System.out.println("AbstractDocument: Starting rewrite session: " +
+  // fDocumentRewriteSession); //$NON-NLS-1$
   //
   // fireRewriteSessionChanged(new DocumentRewriteSessionEvent(this, fDocumentRewriteSession,
   // DocumentRewriteSessionEvent.SESSION_START));
@@ -1254,7 +1258,8 @@ public abstract class AbstractDocument implements Document {
   // }
   //
   // /*
-  // * @see org.eclipse.jface.text.IDocumentExtension4#stopRewriteSession(org.eclipse.jface.text.DocumentRewriteSession)
+  // * @see
+  // org.eclipse.jface.text.IDocumentExtension4#stopRewriteSession(org.eclipse.jface.text.DocumentRewriteSession)
   // * @since 3.1
   // */
   // public void stopRewriteSession(DocumentRewriteSession session)
@@ -1263,7 +1268,8 @@ public abstract class AbstractDocument implements Document {
   // {
   //
   // if (DEBUG)
-  //            System.out.println("AbstractDocument: Stopping rewrite session: " + session); //$NON-NLS-1$
+  //            System.out.println("AbstractDocument: Stopping rewrite session: " + session);
+  // //$NON-NLS-1$
   //
   // DocumentRewriteSessionType sessionType = session.getSessionType();
   // if (DocumentRewriteSessionType.SEQUENTIAL == sessionType
@@ -1300,7 +1306,8 @@ public abstract class AbstractDocument implements Document {
   // while (e.hasNext())
   // {
   // String partitioning = (String)e.next();
-  // IDocumentPartitioner partitioner = (IDocumentPartitioner)fDocumentPartitioners.get(partitioning);
+  // IDocumentPartitioner partitioner =
+  // (IDocumentPartitioner)fDocumentPartitioners.get(partitioning);
   // if (partitioner instanceof IDocumentPartitionerExtension3)
   // {
   // IDocumentPartitionerExtension3 extension = (IDocumentPartitionerExtension3)partitioner;
@@ -1356,7 +1363,8 @@ public abstract class AbstractDocument implements Document {
     // extension.stopRewriteSession(session);
     //
     // if (DEBUG)
-    //            System.out.println("AbstractDocument: Flushing rewrite session for partition type: " + partitioning); //$NON-NLS-1$
+    //            System.out.println("AbstractDocument: Flushing rewrite session for partition type:
+    // " + partitioning); //$NON-NLS-1$
     //
     // DocumentPartitioningChangedEvent event = new DocumentPartitioningChangedEvent(this);
     // event.setPartitionChange(partitioning, 0, getLength());

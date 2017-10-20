@@ -57,7 +57,7 @@ public class JavaRefactoringDescriptorUtil {
    *     full handle is returned
    */
   public static String resourcePathToHandle(final String project, final IPath resourcePath) {
-    if (project != null && !"".equals(project) && resourcePath.segmentCount() != 1) //$NON-NLS-1$
+    if (project != null && !"".equals(project) && resourcePath.segmentCount() != 1) // $NON-NLS-1$
     if (resourcePath.segment(0).equals(project)) {
         return resourcePath.removeFirstSegments(1).toPortableString();
       }
@@ -114,11 +114,11 @@ public class JavaRefactoringDescriptorUtil {
    */
   public static IResource handleToResource(final String project, final String handle) {
     final IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-    if ("".equals(handle)) //$NON-NLS-1$
+    if ("".equals(handle)) // $NON-NLS-1$
     return null;
     final IPath path = Path.fromPortableString(handle);
     if (path == null) return null;
-    if (project != null && !"".equals(project)) //$NON-NLS-1$
+    if (project != null && !"".equals(project)) // $NON-NLS-1$
     return root.getProject(project).findMember(path);
     return root.findMember(path);
   }
@@ -133,7 +133,7 @@ public class JavaRefactoringDescriptorUtil {
    */
   public static IPath handleToResourcePath(final String project, final String handle) {
     final IPath path = Path.fromPortableString(handle);
-    if (project != null && !"".equals(project) && !path.isAbsolute()) //$NON-NLS-1$
+    if (project != null && !"".equals(project) && !path.isAbsolute()) // $NON-NLS-1$
     return new Path(project).append(path).makeAbsolute();
     return path;
   }
@@ -155,7 +155,7 @@ public class JavaRefactoringDescriptorUtil {
     if (object == null) {
       if (allowNull) return null;
       throw new IllegalArgumentException(
-          "The map does not contain the attribute '" + attribute + "'"); //$NON-NLS-1$//$NON-NLS-2$
+          "The map does not contain the attribute '" + attribute + "'"); // $NON-NLS-1$//$NON-NLS-2$
     }
     if (object instanceof String) {
       String value = (String) object;
@@ -164,7 +164,7 @@ public class JavaRefactoringDescriptorUtil {
     throw new IllegalArgumentException(
         "The provided map does not contain a string for attribute '"
             + attribute
-            + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+            + "'"); // $NON-NLS-1$ //$NON-NLS-2$
   }
 
   /**
@@ -220,7 +220,7 @@ public class JavaRefactoringDescriptorUtil {
               + attribute
               + "' does not contain a valid int '"
               + value
-              + "'"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+              + "'"); // $NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
     }
   }
 
@@ -247,7 +247,7 @@ public class JavaRefactoringDescriptorUtil {
               + attribute
               + "' does not contain a valid int '"
               + value
-              + "'"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+              + "'"); // $NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
     }
   }
 
@@ -315,7 +315,8 @@ public class JavaRefactoringDescriptorUtil {
       Map map, String attribute, String project, boolean allowNull)
       throws IllegalArgumentException {
     String handle = getString(map, attribute, allowNull);
-    if (handle != null) return handleToElement(null, project, handle, false); //TODO: update Javadoc
+    if (handle != null)
+      return handleToElement(null, project, handle, false); // TODO: update Javadoc
     return null;
   }
 
@@ -433,7 +434,7 @@ public class JavaRefactoringDescriptorUtil {
    */
   public static boolean getBoolean(Map map, String attribute) throws IllegalArgumentException {
     String value = getString(map, attribute).toLowerCase();
-    //Boolean.valueOf(value) does not complain about wrong values
+    // Boolean.valueOf(value) does not complain about wrong values
     if (LOWER_CASE_TRUE.equals(value)) return true;
     if (LOWER_CASE_FALSE.equals(value)) return false;
     throw new IllegalArgumentException(
@@ -441,7 +442,7 @@ public class JavaRefactoringDescriptorUtil {
             + attribute
             + "' does not contain a valid boolean: '"
             + value
-            + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+            + "'"); // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
   }
 
   /**
@@ -454,7 +455,7 @@ public class JavaRefactoringDescriptorUtil {
     String string = getString(map, attribute, true);
     if (string == null) return false;
 
-    //Boolean.valueOf(value) does not complain about wrong values
+    // Boolean.valueOf(value) does not complain about wrong values
     String value = string.toLowerCase();
     if (LOWER_CASE_TRUE.equals(value)) return true;
 
@@ -464,7 +465,7 @@ public class JavaRefactoringDescriptorUtil {
             + attribute
             + "' does not contain a valid boolean: '"
             + value
-            + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+            + "'"); // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
   }
 
   /**
@@ -483,7 +484,7 @@ public class JavaRefactoringDescriptorUtil {
     String value = getString(map, attribute, true);
     if (value == null) return defaultValue;
     value = value.toLowerCase();
-    //Boolean.valueOf(value) does not complain about wrong values
+    // Boolean.valueOf(value) does not complain about wrong values
     if (LOWER_CASE_TRUE.equals(value)) return true;
     if (LOWER_CASE_FALSE.equals(value)) return false;
     throw new IllegalArgumentException(
@@ -491,7 +492,7 @@ public class JavaRefactoringDescriptorUtil {
             + attribute
             + "' does not contain a valid boolean: '"
             + value
-            + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+            + "'"); // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
   }
 
   /**
@@ -512,7 +513,7 @@ public class JavaRefactoringDescriptorUtil {
       throw new IllegalArgumentException(
           "The element for attribute '"
               + attribute
-              + "' may not be null"); //$NON-NLS-1$ //$NON-NLS-2$
+              + "' may not be null"); // $NON-NLS-1$ //$NON-NLS-2$
     setString(arguments, attribute, elementToHandle(project, element));
   }
 
@@ -534,7 +535,7 @@ public class JavaRefactoringDescriptorUtil {
       throw new IllegalArgumentException(
           "The resource for attribute '"
               + attribute
-              + "' may not be null"); //$NON-NLS-1$//$NON-NLS-2$
+              + "' may not be null"); // $NON-NLS-1$//$NON-NLS-2$
     setString(arguments, attribute, resourcePathToHandle(project, resourcePath));
   }
 
@@ -582,7 +583,7 @@ public class JavaRefactoringDescriptorUtil {
       throw new IllegalArgumentException(
           "The values for arrayAttribute '"
               + arrayAttribute
-              + "' may not be null"); //$NON-NLS-1$ //$NON-NLS-2$
+              + "' may not be null"); // $NON-NLS-1$ //$NON-NLS-2$
     if (countAttribute != null) setInt(arguments, countAttribute, value.length);
     for (int i = 0; i < value.length; i++) {
       setBoolean(arguments, getAttributeName(arrayAttribute, i + offset), value[i]);
@@ -600,13 +601,13 @@ public class JavaRefactoringDescriptorUtil {
    */
   public static void setString(Map arguments, String attribute, String value)
       throws IllegalArgumentException {
-    if (attribute == null || "".equals(attribute) || attribute.indexOf(' ') != -1) //$NON-NLS-1$
+    if (attribute == null || "".equals(attribute) || attribute.indexOf(' ') != -1) // $NON-NLS-1$
     throw new IllegalArgumentException(
           "Attribute '"
               + attribute
               + "' is not valid: '"
               + value
-              + "'"); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+              + "'"); // $NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
     if (value != null) arguments.put(attribute, value);
     else arguments.remove(attribute);
   }
@@ -629,7 +630,7 @@ public class JavaRefactoringDescriptorUtil {
       throw new IllegalArgumentException(
           "The values for arrayAttribute '"
               + arrayAttribute
-              + "' may not be null"); //$NON-NLS-1$ //$NON-NLS-2$
+              + "' may not be null"); // $NON-NLS-1$ //$NON-NLS-2$
     if (countAttribute != null) setInt(arguments, countAttribute, value.length);
     for (int i = 0; i < value.length; i++) {
       String string = value[i];
@@ -648,7 +649,7 @@ public class JavaRefactoringDescriptorUtil {
    */
   public static void setSelection(Map arguments, String attribute, int offset, int length)
       throws IllegalArgumentException {
-    String value = Integer.toString(offset) + " " + Integer.toString(length); //$NON-NLS-1$
+    String value = Integer.toString(offset) + " " + Integer.toString(length); // $NON-NLS-1$
     setString(arguments, attribute, value);
   }
 
@@ -677,7 +678,7 @@ public class JavaRefactoringDescriptorUtil {
       throw new IllegalArgumentException(
           "The resources for arrayAttribute '"
               + arrayAttribute
-              + "' may not be null"); //$NON-NLS-1$ //$NON-NLS-2$
+              + "' may not be null"); // $NON-NLS-1$ //$NON-NLS-2$
     if (countAttribute != null) setInt(arguments, countAttribute, resourcePaths.length);
     for (int i = 0; i < resourcePaths.length; i++) {
       IPath resourcePath = resourcePaths[i];
@@ -711,7 +712,7 @@ public class JavaRefactoringDescriptorUtil {
       throw new IllegalArgumentException(
           "The elements for arrayAttribute '"
               + arrayAttributePrefix
-              + "' may not be null"); //$NON-NLS-1$ //$NON-NLS-2$
+              + "' may not be null"); // $NON-NLS-1$ //$NON-NLS-2$
     if (countAttribute != null) setInt(arguments, countAttribute, elements.length);
     for (int i = 0; i < elements.length; i++) {
       IJavaElement element = elements[i];

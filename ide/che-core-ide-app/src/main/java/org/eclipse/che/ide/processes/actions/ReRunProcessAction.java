@@ -43,7 +43,6 @@ public class ReRunProcessAction extends AbstractPerspectiveAction {
         singletonList(PROJECT_PERSPECTIVE_ID),
         locale.reRunControlTitle(),
         locale.reRunControlDescription(),
-        null,
         machineResources.reRunIcon());
     this.processesPanelPresenter = processesPanelPresenter;
   }

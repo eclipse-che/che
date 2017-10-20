@@ -41,7 +41,6 @@ public class FormatterAction extends AbstractPerspectiveAction {
         singletonList(PROJECT_PERSPECTIVE_ID),
         localization.formatName(),
         localization.formatDescription(),
-        null,
         resources.format());
     this.editorAgent = editorAgent;
   }

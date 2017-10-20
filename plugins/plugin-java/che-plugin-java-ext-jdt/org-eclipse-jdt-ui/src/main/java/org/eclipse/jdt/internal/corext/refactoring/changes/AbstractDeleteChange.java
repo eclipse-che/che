@@ -45,7 +45,7 @@ abstract class AbstractDeleteChange extends ResourceChange {
         && buffer.isDirty()
         && buffer.isStateValidated()
         && buffer.isSynchronized()) {
-      pm.beginTask("", 2); //$NON-NLS-1$
+      pm.beginTask("", 2); // $NON-NLS-1$
       buffer.commit(new SubProgressMonitor(pm, 1), false);
       file.refreshLocal(IResource.DEPTH_ONE, new SubProgressMonitor(pm, 1));
     }

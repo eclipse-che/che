@@ -39,7 +39,6 @@ public class StepIntoAction extends AbstractPerspectiveAction {
         Collections.singletonList(PROJECT_PERSPECTIVE_ID),
         locale.stepInto(),
         locale.stepIntoDescription(),
-        null,
         resources.stepInto());
     this.debuggerManager = debuggerManager;
   }

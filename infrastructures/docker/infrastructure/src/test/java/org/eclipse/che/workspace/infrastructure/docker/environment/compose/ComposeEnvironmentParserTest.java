@@ -103,10 +103,10 @@ public class ComposeEnvironmentParserTest {
     when(recipe.getContent()).thenReturn(COMPOSE_CONTENT);
     DockerEnvironment expectedEnv = createTestEnv();
 
-    //when
+    // when
     DockerEnvironment cheContainersEnvironment = parser.parse(environment);
 
-    //then
+    // then
     assertEquals(cheContainersEnvironment, expectedEnv);
   }
 
@@ -117,10 +117,10 @@ public class ComposeEnvironmentParserTest {
     when(recipe.getContent()).thenReturn(COMPOSE_CONTENT);
     DockerEnvironment expectedEnv = createTestEnv();
 
-    //when
+    // when
     DockerEnvironment cheContainersEnvironment = parser.parse(environment);
 
-    //then
+    // then
     assertEquals(cheContainersEnvironment, expectedEnv);
   }
 
@@ -131,10 +131,10 @@ public class ComposeEnvironmentParserTest {
     when(recipe.getContent()).thenReturn(COMPOSE_CONTENT);
     DockerEnvironment expectedEnv = createTestEnv();
 
-    //when
+    // when
     DockerEnvironment cheContainersEnvironment = parser.parse(environment);
 
-    //then
+    // then
     assertEquals(cheContainersEnvironment, expectedEnv);
   }
 

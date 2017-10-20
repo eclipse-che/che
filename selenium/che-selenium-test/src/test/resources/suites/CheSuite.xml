@@ -494,25 +494,6 @@
                 </methods>
             </class>
             <class name="org.eclipse.che.selenium.refactor.types.TestFailTest"/>
-            <class name="org.eclipse.che.selenium.subversion.CommitTest"/>
-            <class name="org.eclipse.che.selenium.subversion.CopyTest"/>
-            <class name="org.eclipse.che.selenium.subversion.DiffViewTest">
-                <methods>
-                    <exclude name="checkDiffView"/>
-                </methods>
-            </class>
-            <class name="org.eclipse.che.selenium.subversion.LockFileTest">
-                <methods>
-                    <exclude name="lockFileTest"/>
-                </methods>
-            </class>
-            <class name="org.eclipse.che.selenium.subversion.PropertiesTest"/>
-            <class name="org.eclipse.che.selenium.subversion.SvnUpdateTest"/>
-            <class name="org.eclipse.che.selenium.subversion.UpdateToRevisionTest">
-                <methods>
-                    <exclude name="updateToRevisionTest"/>
-                </methods>
-            </class>
             <class name="org.eclipse.che.selenium.swagger.SwaggerTest">
                 <methods>
                     <exclude name="checkNameProjectTest"/>

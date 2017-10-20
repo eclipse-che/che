@@ -21,13 +21,13 @@ public class TypeSetEnvironment {
   private final EmptyTypeSet fEmptyTypeSet;
 
   private final Map<TType, SubTypesOfSingleton> fSubtypesOfSingletons =
-      new LinkedHashMap<TType, SubTypesOfSingleton>(); //@perf
+      new LinkedHashMap<TType, SubTypesOfSingleton>(); // @perf
   private final Map<TypeSet, SubTypesSet> fSubTypesSets =
-      new LinkedHashMap<TypeSet, SubTypesSet>(); //@perf
+      new LinkedHashMap<TypeSet, SubTypesSet>(); // @perf
   private final Map<TType, SuperTypesOfSingleton> fSuperTypesOfSingletons =
-      new LinkedHashMap<TType, SuperTypesOfSingleton>(); //@perf
+      new LinkedHashMap<TType, SuperTypesOfSingleton>(); // @perf
   private final Map<Object, SuperTypesSet> fSuperTypesSets =
-      new LinkedHashMap<Object, SuperTypesSet>(); //@perf
+      new LinkedHashMap<Object, SuperTypesSet>(); // @perf
 
   private int fgCommonExprHits = 0;
   private int fgCommonExprMisses = 0;
@@ -114,7 +114,7 @@ public class TypeSetEnvironment {
   }
 
   public void dumpStats() {
-    System.out.println("Common expression hits:   " + fgCommonExprHits); //$NON-NLS-1$
-    System.out.println("Common expression misses: " + fgCommonExprMisses); //$NON-NLS-1$
+    System.out.println("Common expression hits:   " + fgCommonExprHits); // $NON-NLS-1$
+    System.out.println("Common expression misses: " + fgCommonExprMisses); // $NON-NLS-1$
   }
 }

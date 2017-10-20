@@ -47,7 +47,7 @@ public class StartUpActionsParser {
   protected static StartUpAction parseActionQuery(String action) {
     String actionId;
     String params;
-    if (action.contains(":")) { //action has parameters
+    if (action.contains(":")) { // action has parameters
       final String[] split = action.split(":");
       actionId = split[0];
       params = split[1];

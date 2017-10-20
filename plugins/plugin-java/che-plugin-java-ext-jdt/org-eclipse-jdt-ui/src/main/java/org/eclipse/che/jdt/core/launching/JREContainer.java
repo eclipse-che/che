@@ -181,18 +181,21 @@ public class JREContainer implements IClasspathContainer {
   //		IVMInstallChangedListener listener = new IVMInstallChangedListener() {
   //
   //			/* (non-Javadoc)
-  //			 * @see org.eclipse.jdt.launching.IVMInstallChangedListener#defaultVMInstallChanged(org.eclipse.jdt.launching.IVMInstall, org
+  //			 * @see
+  // org.eclipse.jdt.launching.IVMInstallChangedListener#defaultVMInstallChanged(org.eclipse.jdt.launching.IVMInstall, org
   // .eclipse.jdt.launching.IVMInstall)
   //			 */
   //			public void defaultVMInstallChanged(IVMInstall previous, IVMInstall current) {}
   //
   //			/* (non-Javadoc)
-  //			 * @see org.eclipse.jdt.launching.IVMInstallChangedListener#vmAdded(org.eclipse.jdt.launching.IVMInstall)
+  //			 * @see
+  // org.eclipse.jdt.launching.IVMInstallChangedListener#vmAdded(org.eclipse.jdt.launching.IVMInstall)
   //			 */
   //			public void vmAdded(IVMInstall newVm) {}
   //
   //			/* (non-Javadoc)
-  //			 * @see org.eclipse.jdt.launching.IVMInstallChangedListener#vmChanged(org.eclipse.jdt.launching.PropertyChangeEvent)
+  //			 * @see
+  // org.eclipse.jdt.launching.IVMInstallChangedListener#vmChanged(org.eclipse.jdt.launching.PropertyChangeEvent)
   //			 */
   //			public void vmChanged(PropertyChangeEvent event) {
   //				if (event.getSource() != null) {
@@ -202,7 +205,8 @@ public class JREContainer implements IClasspathContainer {
   //			}
   //
   //			/* (non-Javadoc)
-  //			 * @see org.eclipse.jdt.launching.IVMInstallChangedListener#vmRemoved(org.eclipse.jdt.launching.IVMInstall)
+  //			 * @see
+  // org.eclipse.jdt.launching.IVMInstallChangedListener#vmRemoved(org.eclipse.jdt.launching.IVMInstall)
   //			 */
   //			public void vmRemoved(IVMInstall removedVm) {
   //				fgClasspathEntries.remove(removedVm);
@@ -219,7 +223,8 @@ public class JREContainer implements IClasspathContainer {
   //					IVMInstall install = (IVMInstall) obj;
   //					RuleKey key = null;
   //					ArrayList<RuleKey> list = new ArrayList<RuleKey>();
-  //					for(Iterator<RuleKey> iter = fgClasspathEntriesWithRules.keySet().iterator(); iter.hasNext();) {
+  //					for(Iterator<RuleKey> iter = fgClasspathEntriesWithRules.keySet().iterator();
+  // iter.hasNext();) {
   //						key  = iter.next();
   //						if(key.fInstall.equals(install)) {
   //							list.add(key);
@@ -256,7 +261,7 @@ public class JREContainer implements IClasspathContainer {
       }
     } else {
       if (Launching.DEBUG_JRE_CONTAINER) {
-        Launching.log("\tEE:\t" + id); //$NON-NLS-1$
+        Launching.log("\tEE:\t" + id); // $NON-NLS-1$
       }
       // dynamically compute entries when bound to an EE
       entries = computeClasspathEntries(vm, project, id);
@@ -278,9 +283,9 @@ public class JREContainer implements IClasspathContainer {
     IPath[] sourcePaths;
     IPath[] sourceRootPaths;
     URL[] javadocLocations;
-    LibraryLocation[] locations = null; //vm.getLibraryLocations();
+    LibraryLocation[] locations = null; // vm.getLibraryLocations();
     if (locations == null) {
-      URL defJavaDocLocation = null; //vm.getJavadocLocation();
+      URL defJavaDocLocation = null; // vm.getJavadocLocation();
       File installLocation = vm.detectInstallLocation();
       if (installLocation == null) {
         return new LibraryLocation[0];
@@ -341,7 +346,7 @@ public class JREContainer implements IClasspathContainer {
    */
   private static IClasspathEntry[] computeClasspathEntries(
       IVMInstallType vm, IJavaProject project, String environmentId) {
-    LibraryLocation[] libs = null; //vm.getLibraryLocations();
+    LibraryLocation[] libs = null; // vm.getLibraryLocations();
     boolean overrideJavaDoc = false;
     if (libs == null) {
       libs = getLibraryLocations(vm);
@@ -402,7 +407,7 @@ public class JREContainer implements IClasspathContainer {
     // process the javadoc location
     URL javadocLocation = lib.getJavadocLocation();
     if (overrideJavaDoc && javadocLocation == null) {
-      javadocLocation = null; //vm.getJavadocLocation();
+      javadocLocation = null; // vm.getJavadocLocation();
     }
     if (javadocLocation != null) {
       IClasspathAttribute javadocCPAttribute =
@@ -438,14 +443,14 @@ public class JREContainer implements IClasspathContainer {
   /** @see IClasspathContainer#getClasspathEntries() */
   public IClasspathEntry[] getClasspathEntries() {
     if (Launching.DEBUG_JRE_CONTAINER) {
-      Launching.log("<JRE_CONTAINER> getClasspathEntries() " + this.toString()); //$NON-NLS-1$
-      Launching.log("\tJRE:\t" + fVMInstall.getName()); //$NON-NLS-1$
-      Launching.log("\tPath:\t" + getPath().toString()); //$NON-NLS-1$
-      Launching.log("\tProj:\t" + fProject.getProject().getName()); //$NON-NLS-1$
+      Launching.log("<JRE_CONTAINER> getClasspathEntries() " + this.toString()); // $NON-NLS-1$
+      Launching.log("\tJRE:\t" + fVMInstall.getName()); // $NON-NLS-1$
+      Launching.log("\tPath:\t" + getPath().toString()); // $NON-NLS-1$
+      Launching.log("\tProj:\t" + fProject.getProject().getName()); // $NON-NLS-1$
     }
     IClasspathEntry[] entries = getClasspathEntries(fVMInstall, getPath(), fProject);
     if (Launching.DEBUG_JRE_CONTAINER) {
-      Launching.log("\tResolved " + entries.length + " entries:"); //$NON-NLS-1$//$NON-NLS-2$
+      Launching.log("\tResolved " + entries.length + " entries:"); // $NON-NLS-1$//$NON-NLS-2$
     }
     return entries;
   }

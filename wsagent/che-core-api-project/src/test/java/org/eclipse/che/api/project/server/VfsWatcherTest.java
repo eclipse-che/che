@@ -54,7 +54,7 @@ public class VfsWatcherTest extends WsAgentTestBase {
 
     Thread.sleep(5000);
 
-    //System.out.println(" >>>>> "+pm.getProjects().size());
+    // System.out.println(" >>>>> "+pm.getProjects().size());
 
   }
 

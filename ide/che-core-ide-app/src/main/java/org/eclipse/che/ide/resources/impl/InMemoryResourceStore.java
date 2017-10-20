@@ -78,14 +78,14 @@ class InMemoryResourceStore implements ResourceStore {
 
       final int index = binarySearch(container, resource, NAME_COMPARATOR);
 
-      if (index >= 0) { //update existing resource with new one
+      if (index >= 0) { // update existing resource with new one
         container[index] = resource;
 
         intercept(resource);
 
         return false;
-      } else { //such resource doesn't exists, then simply add it
-        final int posIndex = -index - 1; //negate inverted index into positive one
+      } else { // such resource doesn't exists, then simply add it
+        final int posIndex = -index - 1; // negate inverted index into positive one
         final int size = container.length;
         final Resource[] tmpContainer = copyOf(container, size + 1);
         arraycopy(
@@ -93,7 +93,7 @@ class InMemoryResourceStore implements ResourceStore {
             posIndex,
             tmpContainer,
             posIndex + 1,
-            size - posIndex); //prepare cell to insert
+            size - posIndex); // prepare cell to insert
         tmpContainer[posIndex] = resource;
         container = tmpContainer;
 

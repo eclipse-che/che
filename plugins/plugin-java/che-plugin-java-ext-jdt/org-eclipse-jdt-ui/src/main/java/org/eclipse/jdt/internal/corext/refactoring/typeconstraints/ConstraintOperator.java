@@ -24,10 +24,10 @@ public final class ConstraintOperator {
   private static final int CODE_DEFINES = 2;
   private static final int CODE_STRICT_SUBTYPE = 3;
 
-  private static final String STRING_SUBTYPE = "<="; //$NON-NLS-1$
-  private static final String STRING_EQUALS = "=="; //$NON-NLS-1$
-  private static final String STRING_DEFINES = "=^="; //$NON-NLS-1$
-  private static final String STRING_STRICT_SUBTYPE = "<"; //$NON-NLS-1$
+  private static final String STRING_SUBTYPE = "<="; // $NON-NLS-1$
+  private static final String STRING_EQUALS = "=="; // $NON-NLS-1$
+  private static final String STRING_DEFINES = "=^="; // $NON-NLS-1$
+  private static final String STRING_STRICT_SUBTYPE = "<"; // $NON-NLS-1$
   private static final Collection<String> fgOperatorStrings =
       new HashSet<String>(
           Arrays.asList(

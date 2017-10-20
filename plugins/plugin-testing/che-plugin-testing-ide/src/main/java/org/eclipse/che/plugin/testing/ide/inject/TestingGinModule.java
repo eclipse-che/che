@@ -13,6 +13,7 @@ package org.eclipse.che.plugin.testing.ide.inject;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
+
 /**
  * Gin Module for test runner extension.
  *

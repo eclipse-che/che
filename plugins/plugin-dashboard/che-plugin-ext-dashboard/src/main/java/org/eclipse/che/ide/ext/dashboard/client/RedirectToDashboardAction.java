@@ -21,8 +21,8 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.api.action.CustomComponentAction;
 import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -35,7 +35,7 @@ import org.eclipse.che.ide.ui.Tooltip;
  *
  * @author Oleksii Orel
  */
-public class RedirectToDashboardAction extends Action
+public class RedirectToDashboardAction extends BaseAction
     implements CustomComponentAction, WorkspaceRunningEvent.Handler, WorkspaceStoppedEvent.Handler {
 
   private final DashboardLocalizationConstant constant;

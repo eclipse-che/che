@@ -84,7 +84,7 @@ public class AutoSaveModeImpl
     this.editorPreferencesManager = editorPreferencesManager;
     this.editorWorkingCopySynchronizer = editorWorkingCopySynchronizer;
 
-    mode = ACTIVATED; //autosave is activated by default
+    mode = ACTIVATED; // autosave is activated by default
 
     addHandlers();
   }

@@ -82,7 +82,7 @@ public class CellTableRuntimeInfoWidgetFactory implements RuntimeInfoWidgetFacto
     CheckBox hideCheckBox = new CheckBox("Hide internal servers");
     hideCheckBox.addValueChangeHandler(
         event -> {
-          if (event.getValue()) { //if hide = true
+          if (event.getValue()) { // if hide = true
             dataProvider.setList(
                 runtimeList
                     .stream()

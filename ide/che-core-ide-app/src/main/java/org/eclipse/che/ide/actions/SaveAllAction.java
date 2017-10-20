@@ -53,7 +53,7 @@ public class SaveAllAction extends ProjectAction {
             @Override
             public void onFailure(Throwable caught) {
               Log.error(SaveAllAction.class, caught);
-              //try to save other files
+              // try to save other files
               editors.remove(editorPartPresenter);
               save(editors);
             }

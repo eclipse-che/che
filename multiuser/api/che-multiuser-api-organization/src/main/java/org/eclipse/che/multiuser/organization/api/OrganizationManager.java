@@ -248,7 +248,7 @@ public class OrganizationManager {
 
   private String buildQualifiedName(String oldQualifiedName, String newName) {
     int lastSlashIndex = oldQualifiedName.lastIndexOf("/");
-    if (lastSlashIndex != -1) { //check that it is not root organization
+    if (lastSlashIndex != -1) { // check that it is not root organization
       return oldQualifiedName.substring(0, lastSlashIndex + 1) + newName;
     } else {
       return newName;
@@ -301,7 +301,8 @@ public class OrganizationManager {
   void removeSuborganizations(String organizationId) throws ServerException {
     Page<? extends Organization> suborganizationsPage;
     do {
-      // skip count always equals to 0 because elements will be shifted after removing previous items
+      // skip count always equals to 0 because elements will be shifted after removing previous
+      // items
       suborganizationsPage = organizationDao.getByParent(organizationId, 100, 0);
       for (Organization suborganization : suborganizationsPage.getItems()) {
         remove(suborganization.getId());
@@ -314,7 +315,8 @@ public class OrganizationManager {
     List<Member> removed = new ArrayList<>();
     Page<MemberImpl> membersPage;
     do {
-      // skip count always equals to 0 because elements will be shifted after removing previous items
+      // skip count always equals to 0 because elements will be shifted after removing previous
+      // items
       membersPage = memberDao.getMembers(organizationId, 100, 0);
       for (MemberImpl member : membersPage.getItems()) {
         removed.add(member);

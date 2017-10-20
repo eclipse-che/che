@@ -400,7 +400,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
     final Resource resource = delta.getResource();
     final Path movedFrom = delta.getFromPath();
 
-    //file moved directly
+    // file moved directly
     if (document.getFile().getLocation().equals(movedFrom)) {
       deletedFilesController.add(movedFrom.toString());
       document.setFile((File) resource);
@@ -408,7 +408,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
 
       updateContent();
     } else if (movedFrom.isPrefixOf(
-        document.getFile().getLocation())) { //directory where file moved
+        document.getFile().getLocation())) { // directory where file moved
       final Path relPath =
           document.getFile().getLocation().removeFirstSegments(movedFrom.segmentCount());
       final Path newPath = delta.getToPath().append(relPath);
@@ -655,7 +655,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
 
   @Override
   public void doSave(final AsyncCallback<EditorInput> callback) {
-    //If the workspace is stopped we shouldn't try to save a file
+    // If the workspace is stopped we shouldn't try to save a file
     if (isReadOnly() || appContext.getWorkspace().getStatus() != RUNNING) {
       return;
     }
@@ -960,7 +960,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
   }
 
   private void showSignatureHelp() {
-    //TODO XXX
+    // TODO XXX
     SignatureHelpProvider signatureHelpProvider = getConfiguration().getSignatureHelpProvider();
     if (document != null && signatureHelpProvider != null) {
       Promise<Optional<SignatureHelp>> promise =
@@ -1125,7 +1125,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
           document.getLineCount(),
           configuration.getTabWidth());
 
-      //TODO: delayed activation
+      // TODO: delayed activation
       // handle delayed focus (initialization editor widget)
       // should also check if I am visible, but how ?
       if (delayedFocus) {

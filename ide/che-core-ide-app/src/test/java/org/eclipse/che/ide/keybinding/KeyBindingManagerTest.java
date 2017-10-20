@@ -34,7 +34,7 @@ public class KeyBindingManagerTest {
 
   @Before
   public void setUp() {
-    keyManager = new KeyBindingManager(null, null);
+    keyManager = new KeyBindingManager(null);
     testScheme = new SchemeImpl("org.eclipse.che.test.scheme", "Sample Description");
   }
 

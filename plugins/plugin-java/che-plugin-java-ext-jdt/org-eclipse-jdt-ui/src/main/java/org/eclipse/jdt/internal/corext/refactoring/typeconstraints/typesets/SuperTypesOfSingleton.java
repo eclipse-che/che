@@ -36,7 +36,7 @@ public class SuperTypesOfSingleton extends TypeSet {
    */
   @Override
   public TypeSet makeClone() {
-    return this; //new SuperTypesOfSingleton(fLowerBound, getTypeSetEnvironment());
+    return this; // new SuperTypesOfSingleton(fLowerBound, getTypeSetEnvironment());
   }
 
   /* (non-Javadoc)
@@ -194,7 +194,8 @@ public class SuperTypesOfSingleton extends TypeSet {
     //			// If the lower bound is an array type, return the set of array types
     //			// { Array(superType(elementTypeOf(fUpperBound))) }
     //			boolean isArray= (fLowerBound instanceof ArrayType);
-    //			private Set/*<TType>*/ superTypes= sTypeHierarchy.getAllSupertypes(getElementTypeOf(fLowerBound));
+    //			private Set/*<TType>*/ superTypes=
+    // sTypeHierarchy.getAllSupertypes(getElementTypeOf(fLowerBound));
     //			private Iterator/*<TType>*/ superTypeIter= superTypes.iterator();
     //			private int nDims= getDimsOf(fLowerBound);
     //			private int idx= (isArray ? -2 : -1);
@@ -270,6 +271,6 @@ public class SuperTypesOfSingleton extends TypeSet {
         + fID
         + ": superTypes("
         + fLowerBound.getPrettySignature()
-        + ")>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        + ")>"; // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
   }
 }

@@ -61,7 +61,6 @@ public class GetEffectivePomAction extends AbstractPerspectiveAction {
         Collections.singletonList(PROJECT_PERSPECTIVE_ID),
         constant.actionGetEffectivePomTitle(),
         constant.actionGetEffectivePomDescription(),
-        null,
         mavenResources.maven());
     this.editorAgent = editorAgent;
     this.notificationManager = notificationManager;

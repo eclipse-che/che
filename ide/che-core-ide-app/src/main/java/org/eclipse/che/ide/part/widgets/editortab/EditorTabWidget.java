@@ -217,9 +217,10 @@ public class EditorTabWidget extends Composite
   /** {@inheritDoc} */
   @Override
   public void onContextMenu(ContextMenuEvent event) {
-    //construct for each editor tab own context menu,
-    //that will have store information about selected virtual file and pin state at first step
-    //in future maybe we should create another mechanism to associate context menu with initial dto's
+    // construct for each editor tab own context menu,
+    // that will have store information about selected virtual file and pin state at first step
+    // in future maybe we should create another mechanism to associate context menu with initial
+    // dto's
     editorTabContextMenu
         .newContextMenu(this, relatedEditorPart, relatedEditorPartStack)
         .show(event.getNativeEvent().getClientX(), event.getNativeEvent().getClientY());

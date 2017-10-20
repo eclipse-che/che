@@ -74,10 +74,10 @@ public class LanguageServerFormatter implements ContentFormatter {
     if (selectedRange != null
         && !selectedRange.getFrom().equals(selectedRange.getTo())
         && capabilities.getDocumentRangeFormattingProvider()) {
-      //selection formatting
+      // selection formatting
       formatRange(selectedRange, document);
     } else if (capabilities.getDocumentFormattingProvider()) {
-      //full document formatting
+      // full document formatting
       formatFullDocument(document);
     }
   }

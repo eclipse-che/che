@@ -66,25 +66,25 @@ public class DefaultGoInto implements GoInto {
       return false;
     }
 
-    //save node
+    // save node
     this.node = node;
 
-    //save root nodes
+    // save root nodes
     rootNodes = tree.getRootNodes();
 
-    //reset selection
+    // reset selection
     tree.getSelectionModel().deselectAll();
 
     Element rootContainer = tree.getContainer(null);
     rootContainer.setInnerHTML("");
     rootContainer.appendChild(tree.getNodeDescriptor(node).getRootContainer());
 
-    //if go into node is collapsed - then we need to expand it
+    // if go into node is collapsed - then we need to expand it
     if (!tree.getNodeDescriptor(node).isExpanded()) {
       tree.setExpanded(node, true);
     }
 
-    //then select go into node
+    // then select go into node
     tree.getSelectionModel().select(node, false);
 
     tree.update();
@@ -101,19 +101,19 @@ public class DefaultGoInto implements GoInto {
 
   /** {@inheritDoc} */
   public void reset() {
-    //reset selection
+    // reset selection
     tree.getSelectionModel().deselectAll();
 
     Element rootContainer = tree.getContainer(null);
     rootContainer.setInnerHTML("");
 
-    //restore root nodes
+    // restore root nodes
     for (Node rootNode : rootNodes) {
       NodeDescriptor descriptor = tree.getNodeDescriptor(rootNode);
       rootContainer.appendChild(descriptor.getRootContainer());
     }
 
-    //then re-add our go into node
+    // then re-add our go into node
     Node parent = node.getParent();
     if (parent != null) {
       tree.getNodeStorage().add(parent, node);

@@ -19,10 +19,10 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class ASTCreator {
 
-  public static final String CU_PROPERTY = "org.eclipse.jdt.ui.refactoring.cu"; //$NON-NLS-1$
+  public static final String CU_PROPERTY = "org.eclipse.jdt.ui.refactoring.cu"; // $NON-NLS-1$
 
   private ASTCreator() {
-    //private
+    // private
   }
 
   public static CompilationUnit createAST(ICompilationUnit cu, WorkingCopyOwner workingCopyOwner) {

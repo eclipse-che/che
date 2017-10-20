@@ -74,8 +74,7 @@ public class MenuBarItem implements ActionSelectedHandler {
     Presentation presentation = presentationFactory.getPresentation(group);
     title = presentation.getText();
     element.setInnerText(presentation.getText());
-    setEnabled(
-        Utils.hasVisibleChildren(group, presentationFactory, actionManager, managerProvider.get()));
+    setEnabled(Utils.hasVisibleChildren(group, presentationFactory, actionManager));
   }
 
   /** Close opened Popup Menu. */
@@ -180,7 +179,6 @@ public class MenuBarItem implements ActionSelectedHandler {
   }
 
   public void update() {
-    setEnabled(
-        Utils.hasVisibleChildren(group, presentationFactory, actionManager, managerProvider.get()));
+    setEnabled(Utils.hasVisibleChildren(group, presentationFactory, actionManager));
   }
 }

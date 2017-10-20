@@ -56,7 +56,7 @@ public class ContextBasedRuntimeInfoProvider implements RuntimeInfoProvider {
       return emptyList();
     }
 
-    //map with servers where probably port is set
+    // map with servers where probably port is set
     MachineConfigImpl preConfiguredRuntime =
         workspace
             .getConfig()
@@ -65,7 +65,7 @@ public class ContextBasedRuntimeInfoProvider implements RuntimeInfoProvider {
             .getMachines()
             .get(machineName);
 
-    //current runtime, usually always exists
+    // current runtime, usually always exists
     Optional<MachineImpl> runtimeMachine = workspace.getRuntime().getMachineByName(machineName);
 
     if (runtimeMachine.isPresent()) {

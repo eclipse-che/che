@@ -75,7 +75,7 @@ public class ProcessUtilTest {
     Assert.assertTrue((end - start) < 3000, "Fail kill process");
 
     System.out.println(processError[0]);
-    //processError[0].printStackTrace();
+    // processError[0].printStackTrace();
     System.out.println(stdout);
     System.out.println(stderr);
   }

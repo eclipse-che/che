@@ -118,7 +118,7 @@ public class BranchPresenterTest extends BaseTest {
 
   @Test
   public void shouldShowLocalBranchesWheBranchesFilterIsSetToLocal() throws Exception {
-    //given
+    // given
     final List<Branch> branches = Collections.singletonList(selectedBranch);
     when(service.branchList(anyObject(), eq(BranchListMode.LIST_LOCAL)))
         .thenReturn(branchListPromise);
@@ -126,12 +126,12 @@ public class BranchPresenterTest extends BaseTest {
     when(branchListPromise.catchError(any(Operation.class))).thenReturn(branchListPromise);
     when(view.getFilterValue()).thenReturn("local");
 
-    //when
+    // when
     presenter.showBranches(project);
     verify(branchListPromise).then(branchListCaptor.capture());
     branchListCaptor.getValue().apply(branches);
 
-    //then
+    // then
     verify(view).showDialogIfClosed();
     verify(view).setBranches(eq(branches));
     verify(console, never()).printError(anyString());
@@ -141,7 +141,7 @@ public class BranchPresenterTest extends BaseTest {
 
   @Test
   public void shouldShowRemoteBranchesWheBranchesFilterIsSetToRemote() throws Exception {
-    //given
+    // given
     final List<Branch> branches = Collections.singletonList(selectedBranch);
     when(service.branchList(anyObject(), eq(BranchListMode.LIST_LOCAL)))
         .thenReturn(branchListPromise);
@@ -149,12 +149,12 @@ public class BranchPresenterTest extends BaseTest {
     when(branchListPromise.catchError(any(Operation.class))).thenReturn(branchListPromise);
     when(view.getFilterValue()).thenReturn("remote");
 
-    //when
+    // when
     presenter.showBranches(project);
     verify(branchListPromise).then(branchListCaptor.capture());
     branchListCaptor.getValue().apply(branches);
 
-    //then
+    // then
     verify(view).showDialogIfClosed();
     verify(view).setBranches(eq(branches));
     verify(console, never()).printError(anyString());

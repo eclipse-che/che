@@ -56,7 +56,7 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 /** @author Valeriy Svydenko */
 @RunWith(GwtMockitoTestRunner.class)
 public class OpenImplementationPresenterTest {
-  //constructor mocks
+  // constructor mocks
   @Mock private JavaNavigationService javaNavigationService;
   @Mock private AppContext appContext;
   @Mock private EditorAgent editorAgent;
@@ -68,7 +68,7 @@ public class OpenImplementationPresenterTest {
 
   @Mock private JavaLocalizationConstant locale;
 
-  //other mocks
+  // other mocks
 
   @Mock private TextEditor editor;
   @Mock private EditorInput editorInput;

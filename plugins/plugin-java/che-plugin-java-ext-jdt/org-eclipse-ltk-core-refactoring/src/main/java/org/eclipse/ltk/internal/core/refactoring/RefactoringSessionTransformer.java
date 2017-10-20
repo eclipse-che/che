@@ -162,7 +162,7 @@ public final class RefactoringSessionTransformer {
             fDocument.createAttribute(IRefactoringSerializationConstants.ATTRIBUTE_DESCRIPTION);
         attribute.setValue(description);
         fRefactoringArguments.add(attribute);
-        if (comment != null && !"".equals(comment)) { //$NON-NLS-1$
+        if (comment != null && !"".equals(comment)) { // $NON-NLS-1$
           attribute =
               fDocument.createAttribute(IRefactoringSerializationConstants.ATTRIBUTE_COMMENT);
           attribute.setValue(comment);
@@ -209,7 +209,7 @@ public final class RefactoringSessionTransformer {
             fDocument.createAttribute(IRefactoringSerializationConstants.ATTRIBUTE_VERSION);
         attribute.setValue(version);
         fSessionArguments.add(attribute);
-        if (comment != null && !"".equals(comment)) { //$NON-NLS-1$
+        if (comment != null && !"".equals(comment)) { // $NON-NLS-1$
           attribute =
               fDocument.createAttribute(IRefactoringSerializationConstants.ATTRIBUTE_COMMENT);
           attribute.setValue(comment);
@@ -247,7 +247,7 @@ public final class RefactoringSessionTransformer {
    */
   public void createArgument(final String name, final String value) throws CoreException {
     Assert.isNotNull(name);
-    Assert.isTrue(!"".equals(name)); //$NON-NLS-1$
+    Assert.isTrue(!"".equals(name)); // $NON-NLS-1$
     Assert.isNotNull(value);
     if (fDocument != null && fRefactoringArguments != null && value != null) {
       try {

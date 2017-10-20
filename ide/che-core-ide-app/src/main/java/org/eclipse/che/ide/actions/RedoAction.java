@@ -41,7 +41,6 @@ public class RedoAction extends AbstractPerspectiveAction {
         Arrays.asList(PROJECT_PERSPECTIVE_ID),
         localization.redoName(),
         localization.redoDescription(),
-        null,
         resources.redo());
     this.editorAgent = editorAgent;
   }

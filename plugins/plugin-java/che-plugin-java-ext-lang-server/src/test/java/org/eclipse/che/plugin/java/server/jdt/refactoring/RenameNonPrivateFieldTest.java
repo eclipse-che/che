@@ -50,7 +50,7 @@ public class RenameNonPrivateFieldTest extends RefactoringTest {
 
   private Object fPrefixPref;
 
-  //Test methods can configure these fields:
+  // Test methods can configure these fields:
   private boolean fUpdateReferences = true;
   private boolean fUpdateTextualMatches = false;
   private boolean fRenameGetter = false;
@@ -191,7 +191,7 @@ public class RenameNonPrivateFieldTest extends RefactoringTest {
     helper2("f", "g");
   }
 
-  //--------- tests ----------
+  // --------- tests ----------
   @Test
   public void testFail0() throws Exception {
     helper1();
@@ -259,13 +259,13 @@ public class RenameNonPrivateFieldTest extends RefactoringTest {
 
   @Test
   public void testFail13() throws Exception {
-    //printTestDisabledMessage("1GKZ8J6: ITPJCORE:WIN2000 - search: missing field occurrecnces");
+    // printTestDisabledMessage("1GKZ8J6: ITPJCORE:WIN2000 - search: missing field occurrecnces");
     helper1();
   }
 
   @Test
   public void testFail14() throws Exception {
-    //printTestDisabledMessage("1GKZ8J6: ITPJCORE:WIN2000 - search: missing field occurrecnces");
+    // printTestDisabledMessage("1GKZ8J6: ITPJCORE:WIN2000 - search: missing field occurrecnces");
     helper1();
   }
 
@@ -294,7 +294,7 @@ public class RenameNonPrivateFieldTest extends RefactoringTest {
   @Test
   public void test4() throws Exception {
     helper2();
-    //printTestDisabledMessage("1GKZ8J6: ITPJCORE:WIN2000 - search: missing field occurrecnces");
+    // printTestDisabledMessage("1GKZ8J6: ITPJCORE:WIN2000 - search: missing field occurrecnces");
   }
 
   @Test
@@ -304,7 +304,8 @@ public class RenameNonPrivateFieldTest extends RefactoringTest {
 
   @Test
   public void test6() throws Exception {
-    //printTestDisabledMessage("1GKB9YH: ITPJCORE:WIN2000 - search for field refs - incorrect results");
+    // printTestDisabledMessage("1GKB9YH: ITPJCORE:WIN2000 - search for field refs - incorrect
+    // results");
     helper2();
   }
 
@@ -315,7 +316,8 @@ public class RenameNonPrivateFieldTest extends RefactoringTest {
 
   @Test
   public void test8() throws Exception {
-    //printTestDisabledMessage("1GD79XM: ITPJCORE:WINNT - Search - search for field references - not all found");
+    // printTestDisabledMessage("1GD79XM: ITPJCORE:WINNT - Search - search for field references -
+    // not all found");
     helper2();
   }
 
@@ -336,13 +338,15 @@ public class RenameNonPrivateFieldTest extends RefactoringTest {
 
   @Test
   public void test12() throws Exception {
-    //System.out.println("\nRenameNonPrivateField::" + name() + " disabled (1GIHUQP: ITPJCORE:WINNT - search for static field should be more accurate)");
+    // System.out.println("\nRenameNonPrivateField::" + name() + " disabled (1GIHUQP: ITPJCORE:WINNT
+    // - search for static field should be more accurate)");
     helper2();
   }
 
   @Test
   public void test13() throws Exception {
-    //System.out.println("\nRenameNonPrivateField::" + name() + " disabled (1GIHUQP: ITPJCORE:WINNT - search for static field should be more accurate)");
+    // System.out.println("\nRenameNonPrivateField::" + name() + " disabled (1GIHUQP: ITPJCORE:WINNT
+    // - search for static field should be more accurate)");
     helper2();
   }
 
@@ -368,7 +372,8 @@ public class RenameNonPrivateFieldTest extends RefactoringTest {
 
   @Test
   public void test17() throws Exception {
-    //		printTestDisabledMessage("test for bug 66250, 79131 (corner case: reference "A.f" to p.A#f)");
+    //		printTestDisabledMessage("test for bug 66250, 79131 (corner case: reference "A.f" to
+    // p.A#f)");
     fUpdateReferences = false;
     fUpdateTextualMatches = true;
     helper2("f", "g");
@@ -382,7 +387,7 @@ public class RenameNonPrivateFieldTest extends RefactoringTest {
     helper2("field", "member");
   }
 
-  //--- test 1.5 features: ---
+  // --- test 1.5 features: ---
 
   @Test
   public void test19() throws Exception {
@@ -415,7 +420,7 @@ public class RenameNonPrivateFieldTest extends RefactoringTest {
     helper2();
   }
 
-  //--- end test 1.5 features. ---
+  // --- end test 1.5 features. ---
 
   @Test
   public void testBug5821() throws Exception {
@@ -424,7 +429,7 @@ public class RenameNonPrivateFieldTest extends RefactoringTest {
 
   @Test
   public void testStaticImport() throws Exception {
-    //bug 77622
+    // bug 77622
     IPackageFragment test1 = getRoot().createPackageFragment("test1", true, null);
     ICompilationUnit cuC = null;
     ICompilationUnit cuB = createCUfromTestFile(test1, "B");
@@ -440,7 +445,7 @@ public class RenameNonPrivateFieldTest extends RefactoringTest {
 
   @Test
   public void testEnumConst() throws Exception {
-    //bug 77619
+    // bug 77619
     IPackageFragment test1 = getRoot().createPackageFragment("test1", true, null);
     ICompilationUnit cuC = null;
     ICompilationUnit cuB = createCUfromTestFile(test1, "B");

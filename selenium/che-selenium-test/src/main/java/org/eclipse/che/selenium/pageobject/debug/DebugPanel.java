@@ -385,7 +385,8 @@ public class DebugPanel {
    * @param cleanUpTomcat
    */
   public void stopDebuggerWithUiAndCleanUpTomcat(String cleanUpTomcat) {
-    //if something went wrong on ui we refresh browser and try to click on remove all breakpoints button again
+    // if something went wrong on ui we refresh browser and try to click on remove all breakpoints
+    // button again
     if (isDebuggerBtnPanelPresent()) {
       try {
         removeAllBreakpoints();

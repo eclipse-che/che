@@ -264,7 +264,7 @@ public class ProjectServiceTest {
 
     HttpJsonRequest httpJsonRequest = mock(HttpJsonRequest.class, new SelfReturningAnswer());
 
-    //List<ProjectConfigDto> modules = new ArrayList<>();
+    // List<ProjectConfigDto> modules = new ArrayList<>();
 
     projects = new ArrayList<>();
     addMockedProjectConfigDto(myProjectType, "my_project");
@@ -276,7 +276,8 @@ public class ProjectServiceTest {
     when(workspaceConfigMock.getProjects()).thenReturn(projects);
 
     //        verify(httpJsonRequestFactory).fromLink(eq(DtoFactory.newDto(Link.class)
-    //                                                             .withHref(apiEndpoint + "/workspace/" + workspace + "/project")
+    //                                                             .withHref(apiEndpoint +
+    // "/workspace/" + workspace + "/project")
     //                                                             .withMethod(PUT)));
 
     DependencySupplierImpl dependencies = new DependencySupplierImpl();
@@ -422,7 +423,7 @@ public class ProjectServiceTest {
 
   @Test
   public void testGetNotValidProject() throws Exception {
-    //MountPoint mountPoint = pm.getProjectsRoot(workspace).getVirtualFile().getMountPoint();
+    // MountPoint mountPoint = pm.getProjectsRoot(workspace).getVirtualFile().getMountPoint();
     vfsProvider.getVirtualFileSystem().getRoot().createFolder("not_project");
     // to refresh
     projectRegistry.initProjects();
@@ -533,7 +534,7 @@ public class ProjectServiceTest {
     RegisteredProject project = pm.getProject("new_project");
     assertNotNull(project);
 
-    //ProjectConfig config = project.getConfig();
+    // ProjectConfig config = project.getConfig();
 
     assertEquals(project.getDescription(), newProjectConfig.getDescription());
     assertEquals(project.getProjectType().getId(), newProjectConfig.getType());
@@ -548,7 +549,7 @@ public class ProjectServiceTest {
 
   @Test
   public void testCreateBatchProjects() throws Exception {
-    //prepare first project
+    // prepare first project
     final String projectName1 = "testProject1";
     final String projectTypeId1 = "testProjectType1";
     final String projectPath1 = "/testProject1";
@@ -556,7 +557,7 @@ public class ProjectServiceTest {
     createTestProjectType(projectTypeId1);
     phRegistry.register(createProjectHandlerFor(projectName1, projectTypeId1));
 
-    //prepare inner project
+    // prepare inner project
     final String innerProjectName = "innerProject";
     final String innerProjectTypeId = "testProjectType2";
     final String innerProjectPath = "/testProject1/innerProject";
@@ -564,7 +565,7 @@ public class ProjectServiceTest {
     createTestProjectType(innerProjectTypeId);
     phRegistry.register(createProjectHandlerFor(innerProjectName, innerProjectTypeId));
 
-    //prepare project to import
+    // prepare project to import
     final String importProjectName = "testImportProject";
     final String importProjectTypeId = "testImportProjectType";
     final String importProjectPath = "/testImportProject";
@@ -647,7 +648,7 @@ public class ProjectServiceTest {
 
     RegisteredProject project = pm.getProject("/testUpdateProject");
     assertNotNull(project);
-    //ProjectConfig config = project.getConfig();
+    // ProjectConfig config = project.getConfig();
 
     assertEquals(project.getDescription(), "updated project");
     assertEquals(project.getProjectType().getId(), "testUpdateProject");
@@ -655,8 +656,8 @@ public class ProjectServiceTest {
 
   @Test
   public void testUpdateBadProject() throws Exception {
-    //MountPoint mountPoint = pm.getProjectsRoot(workspace).getVirtualFile().getMountPoint();
-    //mountPoint.getRoot().createFolder("not_project");
+    // MountPoint mountPoint = pm.getProjectsRoot(workspace).getVirtualFile().getMountPoint();
+    // mountPoint.getRoot().createFolder("not_project");
     pm.getProjectsRoot().createFolder("not_project");
     projectRegistry.initProjects();
 
@@ -694,7 +695,7 @@ public class ProjectServiceTest {
     assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
     RegisteredProject project = pm.getProject("not_project");
     assertNotNull(project);
-    //ProjectConfig description = project.getConfig();
+    // ProjectConfig description = project.getConfig();
 
     assertEquals(project.getDescription(), "updated project");
     assertEquals(project.getProjectType().getId(), "my_project_type");
@@ -727,7 +728,7 @@ public class ProjectServiceTest {
   public void testEstimateProject() throws Exception {
     VirtualFile root = pm.getProjectsRoot().getVirtualFile();
 
-    //getVirtualFileSystemRegistry().getProvider("my_ws").getMountPoint(false).getRoot();
+    // getVirtualFileSystemRegistry().getProvider("my_ws").getMountPoint(false).getRoot();
     root.createFolder("testEstimateProjectGood").createFolder("check");
     root.createFolder("testEstimateProjectBad");
 
@@ -775,7 +776,7 @@ public class ProjectServiceTest {
             null,
             null);
     assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
-    //noinspection unchecked
+    // noinspection unchecked
     SourceEstimation result = (SourceEstimation) response.getEntity();
     assertTrue(result.isMatched());
     assertEquals(result.getAttributes().size(), 1);
@@ -794,7 +795,7 @@ public class ProjectServiceTest {
             null);
 
     assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
-    //noinspection unchecked
+    // noinspection unchecked
     result = (SourceEstimation) response.getEntity();
     assertFalse(result.isMatched());
     assertEquals(result.getAttributes().size(), 0);
@@ -903,7 +904,7 @@ public class ProjectServiceTest {
     RegisteredProject newProject = pm.getProject("new_project");
     assertNotNull(newProject);
 
-    //assertNotNull(newProject.getConfig());
+    // assertNotNull(newProject.getConfig());
   }
 
   private void registerImporter(String importType, InputStream zip) throws Exception {
@@ -973,7 +974,7 @@ public class ProjectServiceTest {
     VirtualFileEntry file = pm.getProject("my_project").getBaseFolder().getChild("test.txt");
     Assert.assertTrue(file.isFile());
     FileEntry _file = (FileEntry) file;
-    //assertEquals(_file.getMediaType(), TEXT_PLAIN);
+    // assertEquals(_file.getMediaType(), TEXT_PLAIN);
     assertEquals(new String(_file.contentAsBytes()), myContent);
   }
 
@@ -1865,7 +1866,7 @@ public class ProjectServiceTest {
     assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
     result = (ItemReference) response.getEntity();
     assertEquals(result.getType(), "file");
-    //assertEquals(result.getMediaType(), TEXT_PLAIN);
+    // assertEquals(result.getMediaType(), TEXT_PLAIN);
   }
 
   @Test
@@ -1883,7 +1884,7 @@ public class ProjectServiceTest {
     assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
     ItemReference result = (ItemReference) response.getEntity();
     assertEquals(result.getType(), "file");
-    //assertEquals(result.getMediaType(), TEXT_PLAIN);
+    // assertEquals(result.getMediaType(), TEXT_PLAIN);
   }
 
   @Test

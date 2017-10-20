@@ -10,6 +10,9 @@
  */
 package org.eclipse.che.selenium.debugger;
 
+import static org.eclipse.che.selenium.pageobject.debug.DebugPanel.DebuggerButtonsPanel.BTN_DISCONNECT;
+import static org.eclipse.che.selenium.pageobject.debug.DebugPanel.DebuggerButtonsPanel.RESUME_BTN_ID;
+
 import com.google.inject.Inject;
 import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
@@ -113,8 +116,7 @@ public class InnerClassAndLambdaDebuggingTest {
   @AfterMethod
   public void stopDebug() {
     debugPanel.removeAllBreakpoints();
-    menu.runCommand(
-        TestMenuCommandsConstants.Run.RUN_MENU, TestMenuCommandsConstants.Run.END_DEBUG_SESSION);
+    debugPanel.clickOnButton(BTN_DISCONNECT);
   }
 
   @Test
@@ -122,7 +124,7 @@ public class InnerClassAndLambdaDebuggingTest {
     // when
     editor.setCursorToLine(37);
     editor.setBreakpoint(37);
-    debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.RESUME_BTN_ID);
+    debugPanel.clickOnButton(RESUME_BTN_ID);
 
     // then
     editor.waitActiveBreakpoint(37);
@@ -134,7 +136,7 @@ public class InnerClassAndLambdaDebuggingTest {
     // when
     editor.setCursorToLine(53);
     editor.setBreakpoint(53);
-    debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.RESUME_BTN_ID);
+    debugPanel.clickOnButton(RESUME_BTN_ID);
 
     // then
     editor.waitActiveBreakpoint(53);
@@ -146,7 +148,7 @@ public class InnerClassAndLambdaDebuggingTest {
     // when
     editor.setCursorToLine(64);
     editor.setBreakpoint(64);
-    debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.RESUME_BTN_ID);
+    debugPanel.clickOnButton(RESUME_BTN_ID);
 
     // then
     editor.waitActiveBreakpoint(64);
@@ -158,7 +160,7 @@ public class InnerClassAndLambdaDebuggingTest {
     // when
     editor.setCursorToLine(72);
     editor.setBreakpoint(72);
-    debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.RESUME_BTN_ID);
+    debugPanel.clickOnButton(RESUME_BTN_ID);
 
     // then
     editor.waitActiveBreakpoint(72);
@@ -171,21 +173,21 @@ public class InnerClassAndLambdaDebuggingTest {
     editor.setCursorToLine(79);
     editor.setBreakPointAndWaitActiveState(79);
     editor.setBreakPointAndWaitActiveState(87);
-    debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.RESUME_BTN_ID);
+    debugPanel.clickOnButton(RESUME_BTN_ID);
 
     // then
     editor.waitActiveBreakpoint(79);
     debugPanel.waitTextInVariablesPanel("j=1");
 
     // when
-    debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.RESUME_BTN_ID);
+    debugPanel.clickOnButton(RESUME_BTN_ID);
 
     // then
     editor.waitActiveBreakpoint(79);
     debugPanel.waitTextInVariablesPanel("j=2");
 
     // when
-    debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.RESUME_BTN_ID);
+    debugPanel.clickOnButton(RESUME_BTN_ID);
 
     // then
     editor.waitActiveBreakpoint(87);

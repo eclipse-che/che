@@ -54,6 +54,6 @@ public class ReferencesInBinaryContext extends RefactoringStatusContext {
 
   @Override
   public String toString() {
-    return fDescription + " (" + fMatches.size() + " matches)"; //$NON-NLS-1$ //$NON-NLS-2$
+    return fDescription + " (" + fMatches.size() + " matches)"; // $NON-NLS-1$ //$NON-NLS-2$
   }
 }

@@ -21,6 +21,7 @@ import org.eclipse.che.ide.api.editor.link.LinkedModelData;
 import org.eclipse.che.ide.api.editor.link.LinkedModelGroup;
 import org.eclipse.che.ide.api.editor.text.Position;
 import org.eclipse.che.ide.util.Pair;
+
 /**
  * Resolve snippets, producing resolved text and a linked mode model for the editor
  *

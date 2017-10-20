@@ -52,10 +52,10 @@ public class StubCreator {
       if (Flags.isEnum(field.getFlags())) list.add(field);
     }
     for (int index = 0; index < list.size(); index++) {
-      if (index > 0) fBuffer.append(","); //$NON-NLS-1$
+      if (index > 0) fBuffer.append(","); // $NON-NLS-1$
       fBuffer.append(list.get(index).getElementName());
     }
-    fBuffer.append(";"); //$NON-NLS-1$
+    fBuffer.append(";"); // $NON-NLS-1$
   }
 
   protected void appendExpression(final String signature) {
@@ -65,7 +65,7 @@ public class StubCreator {
   protected void appendExpression(String signature, boolean castNull) {
     switch (signature.charAt(0)) {
       case Signature.C_BOOLEAN:
-        fBuffer.append("false"); //$NON-NLS-1$
+        fBuffer.append("false"); // $NON-NLS-1$
         break;
       case Signature.C_BYTE:
       case Signature.C_CHAR:
@@ -74,31 +74,31 @@ public class StubCreator {
       case Signature.C_INT:
       case Signature.C_LONG:
       case Signature.C_SHORT:
-        fBuffer.append("0"); //$NON-NLS-1$
+        fBuffer.append("0"); // $NON-NLS-1$
         break;
       default:
         if (castNull) {
-          fBuffer.append("("); //$NON-NLS-1$
+          fBuffer.append("("); // $NON-NLS-1$
           fBuffer.append(Signature.toString(signature));
-          fBuffer.append(")"); //$NON-NLS-1$
+          fBuffer.append(")"); // $NON-NLS-1$
         }
-        fBuffer.append("null"); //$NON-NLS-1$
+        fBuffer.append("null"); // $NON-NLS-1$
         break;
     }
   }
 
   protected void appendFieldDeclaration(final IField field) throws JavaModelException {
     appendFlags(field);
-    fBuffer.append(" "); //$NON-NLS-1$
+    fBuffer.append(" "); // $NON-NLS-1$
     final String signature = field.getTypeSignature();
     fBuffer.append(Signature.toString(signature));
-    fBuffer.append(" "); //$NON-NLS-1$
+    fBuffer.append(" "); // $NON-NLS-1$
     fBuffer.append(field.getElementName());
     if (Flags.isFinal(field.getFlags())) {
-      fBuffer.append("="); //$NON-NLS-1$
+      fBuffer.append("="); // $NON-NLS-1$
       appendExpression(signature);
     }
-    fBuffer.append(";"); //$NON-NLS-1$
+    fBuffer.append(";"); // $NON-NLS-1$
   }
 
   protected void appendFlags(final IMember member) throws JavaModelException {
@@ -125,7 +125,7 @@ public class StubCreator {
 
   private void appendAnnotation(IAnnotation annotation) throws JavaModelException {
     String name = annotation.getElementName();
-    if (!fStubInvisible && name.startsWith("sun.")) //$NON-NLS-1$
+    if (!fStubInvisible && name.startsWith("sun.")) // $NON-NLS-1$
     return; // skip Sun-internal annotations
 
     fBuffer.append('@');
@@ -192,21 +192,21 @@ public class StubCreator {
           final String name = method.getElementName();
           if (method.getDeclaringType().isEnum()) {
             final int count = method.getNumberOfParameters();
-            if (count == 0 && "values".equals(name)) //$NON-NLS-1$
+            if (count == 0 && "values".equals(name)) // $NON-NLS-1$
             continue;
             if (count == 1
                 && "valueOf".equals(name)
                 && "Ljava.lang.String;"
-                    .equals(method.getParameterTypes()[0])) //$NON-NLS-1$ //$NON-NLS-2$
+                    .equals(method.getParameterTypes()[0])) // $NON-NLS-1$ //$NON-NLS-2$
             continue;
             if (method.isConstructor()) continue;
           }
-          boolean skip = !stub || name.equals("<clinit>"); //$NON-NLS-1$
+          boolean skip = !stub || name.equals("<clinit>"); // $NON-NLS-1$
           if (method.isConstructor()) skip = false;
           skip = skip || Flags.isSynthetic(flags) || Flags.isBridge(flags);
           if (!skip) appendMethodDeclaration(method);
         }
-        fBuffer.append("\n"); //$NON-NLS-1$
+        fBuffer.append("\n"); // $NON-NLS-1$
       }
     } finally {
       monitor.done();
@@ -281,71 +281,71 @@ public class StubCreator {
           if (superConstructor != null) {
             final String[] superParameters = superConstructor.getParameterTypes();
             final int paramLength = superParameters.length;
-            fBuffer.append("super("); //$NON-NLS-1$
+            fBuffer.append("super("); // $NON-NLS-1$
             if (paramLength != 0) {
               for (int index = 0; index < paramLength; index++) {
-                if (index > 0) fBuffer.append(","); //$NON-NLS-1$
+                if (index > 0) fBuffer.append(","); // $NON-NLS-1$
                 appendExpression(superParameters[index], multi);
               }
             }
-            fBuffer.append(");"); //$NON-NLS-1$
+            fBuffer.append(");"); // $NON-NLS-1$
           }
         }
       }
     } else {
       String returnType = method.getReturnType();
       if (!Signature.SIG_VOID.equals(returnType)) {
-        fBuffer.append("return "); //$NON-NLS-1$
+        fBuffer.append("return "); // $NON-NLS-1$
         appendExpression(returnType);
-        fBuffer.append(";"); //$NON-NLS-1$
+        fBuffer.append(";"); // $NON-NLS-1$
       }
     }
   }
 
   protected void appendMethodDeclaration(final IMethod method) throws JavaModelException {
     appendFlags(method);
-    fBuffer.append(" "); //$NON-NLS-1$
+    fBuffer.append(" "); // $NON-NLS-1$
     final ITypeParameter[] parameters = method.getTypeParameters();
     if (parameters.length > 0) {
       appendTypeParameters(parameters);
-      fBuffer.append(" "); //$NON-NLS-1$
+      fBuffer.append(" "); // $NON-NLS-1$
     }
     final String returnType = method.getReturnType();
     if (!method.isConstructor()) {
       fBuffer.append(Signature.toString(returnType));
-      fBuffer.append(" "); //$NON-NLS-1$
+      fBuffer.append(" "); // $NON-NLS-1$
     }
     fBuffer.append(method.getElementName());
-    fBuffer.append("("); //$NON-NLS-1$
+    fBuffer.append("("); // $NON-NLS-1$
     final String[] parameterTypes = method.getParameterTypes();
     final int flags = method.getFlags();
     final boolean varargs = Flags.isVarargs(flags);
     final int parameterLength = parameterTypes.length;
     for (int index = 0; index < parameterLength; index++) {
-      if (index > 0) fBuffer.append(","); //$NON-NLS-1$
+      if (index > 0) fBuffer.append(","); // $NON-NLS-1$
       fBuffer.append(Signature.toString(parameterTypes[index]));
       if (varargs && index == parameterLength - 1) {
         final int length = fBuffer.length();
-        if (length >= 2 && fBuffer.indexOf("[]", length - 2) >= 0) //$NON-NLS-1$
+        if (length >= 2 && fBuffer.indexOf("[]", length - 2) >= 0) // $NON-NLS-1$
         fBuffer.setLength(length - 2);
-        fBuffer.append("..."); //$NON-NLS-1$
+        fBuffer.append("..."); // $NON-NLS-1$
       }
-      fBuffer.append(" "); //$NON-NLS-1$
+      fBuffer.append(" "); // $NON-NLS-1$
       appendMethodParameterName(method, index);
     }
-    fBuffer.append(")"); //$NON-NLS-1$
+    fBuffer.append(")"); // $NON-NLS-1$
     final String[] exceptionTypes = method.getExceptionTypes();
     final int exceptionLength = exceptionTypes.length;
-    if (exceptionLength > 0) fBuffer.append(" throws "); //$NON-NLS-1$
+    if (exceptionLength > 0) fBuffer.append(" throws "); // $NON-NLS-1$
     for (int index = 0; index < exceptionLength; index++) {
-      if (index > 0) fBuffer.append(","); //$NON-NLS-1$
+      if (index > 0) fBuffer.append(","); // $NON-NLS-1$
       fBuffer.append(Signature.toString(exceptionTypes[index]));
     }
-    if (Flags.isAbstract(flags) || Flags.isNative(flags)) fBuffer.append(";"); //$NON-NLS-1$
+    if (Flags.isAbstract(flags) || Flags.isNative(flags)) fBuffer.append(";"); // $NON-NLS-1$
     else {
-      fBuffer.append("{\n"); //$NON-NLS-1$
+      fBuffer.append("{\n"); // $NON-NLS-1$
       appendMethodBody(method);
-      fBuffer.append("}"); //$NON-NLS-1$
+      fBuffer.append("}"); // $NON-NLS-1$
     }
   }
 
@@ -356,18 +356,18 @@ public class StubCreator {
    * @param index the index of the parameter
    */
   protected void appendMethodParameterName(IMethod method, int index) {
-    fBuffer.append("a"); //$NON-NLS-1$
+    fBuffer.append("a"); // $NON-NLS-1$
     fBuffer.append(index);
   }
 
   protected void appendSuperInterfaceTypes(final IType type) throws JavaModelException {
     final String[] signatures = type.getSuperInterfaceTypeSignatures();
     if (signatures.length > 0) {
-      if (type.isInterface()) fBuffer.append(" extends "); //$NON-NLS-1$
-      else fBuffer.append(" implements "); //$NON-NLS-1$
+      if (type.isInterface()) fBuffer.append(" extends "); // $NON-NLS-1$
+      else fBuffer.append(" implements "); // $NON-NLS-1$
     }
     for (int index = 0; index < signatures.length; index++) {
-      if (index > 0) fBuffer.append(","); //$NON-NLS-1$
+      if (index > 0) fBuffer.append(","); // $NON-NLS-1$
       fBuffer.append(Signature.toString(signatures[index]));
     }
   }
@@ -376,9 +376,9 @@ public class StubCreator {
       throws JavaModelException {
     String packageName = type.getPackageFragment().getElementName();
     if (packageName.length() > 0) {
-      fBuffer.append("package "); //$NON-NLS-1$
+      fBuffer.append("package "); // $NON-NLS-1$
       fBuffer.append(packageName);
-      fBuffer.append(";\n"); //$NON-NLS-1$
+      fBuffer.append(";\n"); // $NON-NLS-1$
     }
     appendTypeDeclaration(type, subProgressMonitor);
   }
@@ -389,43 +389,43 @@ public class StubCreator {
       monitor.beginTask(RefactoringCoreMessages.StubCreationOperation_creating_type_stubs, 1);
       if (type.isAnnotation()) {
         appendFlags(type);
-        fBuffer.append(" @interface "); //$NON-NLS-1$
+        fBuffer.append(" @interface "); // $NON-NLS-1$
         fBuffer.append(type.getElementName());
-        fBuffer.append("{\n"); //$NON-NLS-1$
+        fBuffer.append("{\n"); // $NON-NLS-1$
         appendMembers(type, new SubProgressMonitor(monitor, 1));
-        fBuffer.append("}"); //$NON-NLS-1$
+        fBuffer.append("}"); // $NON-NLS-1$
       } else if (type.isInterface()) {
         appendFlags(type);
-        fBuffer.append(" interface "); //$NON-NLS-1$
+        fBuffer.append(" interface "); // $NON-NLS-1$
         fBuffer.append(type.getElementName());
         appendTypeParameters(type.getTypeParameters());
         appendSuperInterfaceTypes(type);
-        fBuffer.append("{\n"); //$NON-NLS-1$
+        fBuffer.append("{\n"); // $NON-NLS-1$
         appendMembers(type, new SubProgressMonitor(monitor, 1));
-        fBuffer.append("}"); //$NON-NLS-1$
+        fBuffer.append("}"); // $NON-NLS-1$
       } else if (type.isClass()) {
         appendFlags(type);
-        fBuffer.append(" class "); //$NON-NLS-1$
+        fBuffer.append(" class "); // $NON-NLS-1$
         fBuffer.append(type.getElementName());
         appendTypeParameters(type.getTypeParameters());
         final String signature = type.getSuperclassTypeSignature();
         if (signature != null) {
-          fBuffer.append(" extends "); //$NON-NLS-1$
+          fBuffer.append(" extends "); // $NON-NLS-1$
           fBuffer.append(Signature.toString(signature));
         }
         appendSuperInterfaceTypes(type);
-        fBuffer.append("{\n"); //$NON-NLS-1$
+        fBuffer.append("{\n"); // $NON-NLS-1$
         appendMembers(type, new SubProgressMonitor(monitor, 1));
-        fBuffer.append("}"); //$NON-NLS-1$
+        fBuffer.append("}"); // $NON-NLS-1$
       } else if (type.isEnum()) {
         appendFlags(type);
-        fBuffer.append(" enum "); //$NON-NLS-1$
+        fBuffer.append(" enum "); // $NON-NLS-1$
         fBuffer.append(type.getElementName());
         appendSuperInterfaceTypes(type);
-        fBuffer.append("{\n"); //$NON-NLS-1$
+        fBuffer.append("{\n"); // $NON-NLS-1$
         appendEnumConstants(type);
         appendMembers(type, new SubProgressMonitor(monitor, 1));
-        fBuffer.append("}"); //$NON-NLS-1$
+        fBuffer.append("}"); // $NON-NLS-1$
       }
     } finally {
       monitor.done();
@@ -434,20 +434,20 @@ public class StubCreator {
 
   protected void appendTypeParameters(final ITypeParameter[] parameters) throws JavaModelException {
     final int length = parameters.length;
-    if (length > 0) fBuffer.append("<"); //$NON-NLS-1$
+    if (length > 0) fBuffer.append("<"); // $NON-NLS-1$
     for (int index = 0; index < length; index++) {
-      if (index > 0) fBuffer.append(","); //$NON-NLS-1$
+      if (index > 0) fBuffer.append(","); // $NON-NLS-1$
       final ITypeParameter parameter = parameters[index];
       fBuffer.append(parameter.getElementName());
       final String[] bounds = parameter.getBounds();
       final int size = bounds.length;
-      if (size > 0) fBuffer.append(" extends "); //$NON-NLS-1$
+      if (size > 0) fBuffer.append(" extends "); // $NON-NLS-1$
       for (int offset = 0; offset < size; offset++) {
-        if (offset > 0) fBuffer.append(" & "); //$NON-NLS-1$
+        if (offset > 0) fBuffer.append(" & "); // $NON-NLS-1$
         fBuffer.append(bounds[offset]);
       }
     }
-    if (length > 0) fBuffer.append(">"); //$NON-NLS-1$
+    if (length > 0) fBuffer.append(">"); // $NON-NLS-1$
   }
 
   /**

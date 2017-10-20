@@ -88,7 +88,7 @@ public class MissingAnnotationAttributesProposal extends LinkedCorrectionProposa
         implementedAttribs.add(curr.getName().getIdentifier());
       }
     } else if (fAnnotation instanceof SingleMemberAnnotation) {
-      implementedAttribs.add("value"); //$NON-NLS-1$
+      implementedAttribs.add("value"); // $NON-NLS-1$
     }
     ASTRewrite rewriter = listRewriter.getASTRewrite();
     AST ast = rewriter.getAST();
@@ -107,8 +107,8 @@ public class MissingAnnotationAttributesProposal extends LinkedCorrectionProposa
         pair.setValue(newDefaultExpression(ast, curr.getReturnType(), context));
         listRewriter.insertLast(pair, null);
 
-        addLinkedPosition(rewriter.track(pair.getName()), false, "val_name_" + i); //$NON-NLS-1$
-        addLinkedPosition(rewriter.track(pair.getValue()), false, "val_type_" + i); //$NON-NLS-1$
+        addLinkedPosition(rewriter.track(pair.getName()), false, "val_name_" + i); // $NON-NLS-1$
+        addLinkedPosition(rewriter.track(pair.getValue()), false, "val_type_" + i); // $NON-NLS-1$
       }
     }
   }
@@ -117,13 +117,13 @@ public class MissingAnnotationAttributesProposal extends LinkedCorrectionProposa
       AST ast, ITypeBinding type, ImportRewriteContext context) {
     if (type.isPrimitive()) {
       String name = type.getName();
-      if ("boolean".equals(name)) { //$NON-NLS-1$
+      if ("boolean".equals(name)) { // $NON-NLS-1$
         return ast.newBooleanLiteral(false);
       } else {
-        return ast.newNumberLiteral("0"); //$NON-NLS-1$
+        return ast.newNumberLiteral("0"); // $NON-NLS-1$
       }
     }
-    if (type == ast.resolveWellKnownType("java.lang.String")) { //$NON-NLS-1$
+    if (type == ast.resolveWellKnownType("java.lang.String")) { // $NON-NLS-1$
       return ast.newStringLiteral();
     }
     if (type.isArray()) {

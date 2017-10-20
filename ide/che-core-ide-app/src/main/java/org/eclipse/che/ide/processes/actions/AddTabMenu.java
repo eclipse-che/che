@@ -18,10 +18,10 @@ import com.google.inject.Provider;
 import java.util.Map;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.FontAwesome;
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionGroup;
 import org.eclipse.che.ide.api.action.ActionManager;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.action.IdeActions;
 import org.eclipse.che.ide.api.action.Separator;
@@ -102,7 +102,7 @@ public class AddTabMenu extends ContextMenu {
   }
 
   /** Action to add new Terminal tab. */
-  public class NewTerminalMenuAction extends Action {
+  public class NewTerminalMenuAction extends BaseAction {
 
     private String machineName;
 
@@ -111,7 +111,6 @@ public class AddTabMenu extends ContextMenu {
       super(
           locale.newTerminal(),
           locale.newTerminalDescription(),
-          null,
           machineResources.addTerminalIcon());
       this.machineName = machineName;
     }
@@ -123,12 +122,12 @@ public class AddTabMenu extends ContextMenu {
   }
 
   /** Action to add new SSH tab. */
-  public class AddSSHMenuAction extends Action {
+  public class AddSSHMenuAction extends BaseAction {
 
     private String machineName;
 
     public AddSSHMenuAction(String machineName) {
-      super("SSH", "SSH", null, null, FontAwesome.RETWEET);
+      super("SSH", "SSH", FontAwesome.RETWEET);
       this.machineName = machineName;
     }
 
@@ -139,7 +138,7 @@ public class AddTabMenu extends ContextMenu {
   }
 
   /** Action to display bound servers. */
-  public class ShowServersAction extends Action {
+  public class ShowServersAction extends BaseAction {
 
     private String machineName;
 
@@ -147,7 +146,6 @@ public class AddTabMenu extends ContextMenu {
       super(
           runtimeInfoLocalization.showInfoActionTitle(),
           runtimeInfoLocalization.showInfoActionDescription(),
-          null,
           machineResources.remote());
       this.machineName = machineName;
     }

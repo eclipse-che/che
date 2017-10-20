@@ -206,7 +206,7 @@ public class JavaElementLabels {
                   | CU_QUALIFIED)
           .longValue();
   /** User-readable string for ellipsis ("..."). */
-  public static final String ELLIPSIS_STRING = "..."; //$NON-NLS-1$
+  public static final String ELLIPSIS_STRING = "..."; // $NON-NLS-1$
 
   public static String COMMA_STRING = ",\\ ";
   public static String CONCAT_STRING = "\\ -\\ ";

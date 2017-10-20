@@ -40,7 +40,8 @@ public class JsonUtil {
     } else if (value instanceof JsonElement) {
       return (JsonElement) value;
     } else if (value instanceof Map) {
-      // assumption here is that this is a json-like structure with map for object, list for array, etc.
+      // assumption here is that this is a json-like structure with map for object, list for array,
+      // etc.
       @SuppressWarnings("unchecked")
       Map<String, Object> object = (Map<String, Object>) value;
       JsonObject result = new JsonObject();
@@ -49,7 +50,8 @@ public class JsonUtil {
       }
       return result;
     } else if (value instanceof List) {
-      // assumption here is that this is a json-like structure with map for object, list for array, etc.
+      // assumption here is that this is a json-like structure with map for object, list for array,
+      // etc.
       @SuppressWarnings("unchecked")
       List<Object> array = (List<Object>) value;
       JsonArray result = new JsonArray();

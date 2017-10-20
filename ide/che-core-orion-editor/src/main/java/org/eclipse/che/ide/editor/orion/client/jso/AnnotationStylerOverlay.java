@@ -20,9 +20,10 @@ import com.google.gwt.core.client.JavaScriptObject;
 public class AnnotationStylerOverlay extends JavaScriptObject {
   protected AnnotationStylerOverlay() {}
 
-  //TODO add all this methods if needed
+  // TODO add all this methods if needed
   //    getAnnotationsByType(annotationModel, start, end)
-  //    Returns an array of annotations in the specified annotation model for the given range of text sorted by type.
+  //    Returns an array of annotations in the specified annotation model for the given range of
+  // text sorted by type.
   //
   //    getAnnotationTypePriority(type)
   //    Gets the annotation type priority.

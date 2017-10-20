@@ -356,7 +356,7 @@ public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcesso
 
   @Override
   public void onFinishTesting() {
-    //TODO check test tree finish state
+    // TODO check test tree finish state
 
     testSuiteStack.clear();
     testRootState.setFinished();

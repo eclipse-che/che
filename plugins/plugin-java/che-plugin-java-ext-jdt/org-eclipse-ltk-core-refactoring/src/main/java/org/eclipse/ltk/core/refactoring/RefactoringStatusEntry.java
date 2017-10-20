@@ -266,18 +266,18 @@ public class RefactoringStatusEntry {
    */
   public String toString() {
     String contextString =
-        fContext == null ? "<Unspecified context>" : fContext.toString(); //$NON-NLS-1$
-    return "\n" //$NON-NLS-1$
+        fContext == null ? "<Unspecified context>" : fContext.toString(); // $NON-NLS-1$
+    return "\n" // $NON-NLS-1$
         + RefactoringStatus.getSeverityString(fSeverity)
         + ": "
         + fMessage
-        + //$NON-NLS-1$
+        + // $NON-NLS-1$
         "\nContext: "
         + contextString
-        + //$NON-NLS-1$
+        + // $NON-NLS-1$
         (fCode == NO_CODE ? "\ncode: none" : "\nplug-in id: " + fPluginId + "code: " + fCode)
-        + //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        + // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         "\nData: "
-        + fData; //$NON-NLS-1$
+        + fData; // $NON-NLS-1$
   }
 }

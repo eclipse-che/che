@@ -68,7 +68,8 @@ public class NullAnnotationsCorrectionProcessor {
       Image image = JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
       Map<String, String> options = new Hashtable<String, String>();
       if (fix.getCu() != context.getASTRoot()) {
-        // workaround: adjust the unit to operate on, depending on the findings of RewriteOperations.createAddAnnotationOperation(..)
+        // workaround: adjust the unit to operate on, depending on the findings of
+        // RewriteOperations.createAddAnnotationOperation(..)
         final CompilationUnit cu = fix.getCu();
         final IInvocationContext originalContext = context;
         context =
@@ -102,7 +103,8 @@ public class NullAnnotationsCorrectionProcessor {
           (changeKind == ChangeKind.OVERRIDDEN)
               ? IProposalRelevance.CHANGE_NULLNESS_ANNOTATION_IN_OVERRIDDEN_METHOD
               : IProposalRelevance
-                  .CHANGE_NULLNESS_ANNOTATION; //raise local change above change in overridden method
+                  .CHANGE_NULLNESS_ANNOTATION; // raise local change above change in overridden
+      // method
       FixCorrectionProposal proposal =
           new FixCorrectionProposal(
               fix,

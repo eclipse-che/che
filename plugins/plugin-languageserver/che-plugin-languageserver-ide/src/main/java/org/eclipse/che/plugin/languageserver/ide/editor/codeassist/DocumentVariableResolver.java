@@ -27,7 +27,8 @@ public class DocumentVariableResolver implements VariableResolver {
   private static final Map<String, BiFunction<Document, TextPosition, String>> VARIABLES;
 
   static {
-    // well known variables according to https://github.com/Microsoft/vscode/blob/0ebd01213a65231f0af8187acaf264243629e4dc/src/vs/editor/contrib/snippet/browser/snippet.md
+    // well known variables according to
+    // https://github.com/Microsoft/vscode/blob/0ebd01213a65231f0af8187acaf264243629e4dc/src/vs/editor/contrib/snippet/browser/snippet.md
     VARIABLES = new HashMap<>();
     VARIABLES.put("TM_SELECTED_TEXT", DocumentVariableResolver::getSelectedText);
     VARIABLES.put("TM_CURRENT_LINE", DocumentVariableResolver::getCurrentLine);

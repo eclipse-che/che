@@ -25,13 +25,13 @@ public final class ContributedProcessorDescriptor {
   private String fRequiredSourceLevel;
   //	private final Set<String> fHandledMarkerTypes;
 
-  private static final String ID = "id"; //$NON-NLS-1$
-  private static final String CLASS = "class"; //$NON-NLS-1$
+  private static final String ID = "id"; // $NON-NLS-1$
+  private static final String CLASS = "class"; // $NON-NLS-1$
 
-  private static final String REQUIRED_SOURCE_LEVEL = "requiredSourceLevel"; //$NON-NLS-1$
+  private static final String REQUIRED_SOURCE_LEVEL = "requiredSourceLevel"; // $NON-NLS-1$
 
-  private static final String HANDLED_MARKER_TYPES = "handledMarkerTypes"; //$NON-NLS-1$
-  private static final String MARKER_TYPE = "markerType"; //$NON-NLS-1$
+  private static final String HANDLED_MARKER_TYPES = "handledMarkerTypes"; // $NON-NLS-1$
+  private static final String MARKER_TYPE = "markerType"; // $NON-NLS-1$
 
   public ContributedProcessorDescriptor(Object processorInstance, boolean testMarkerTypes) {
     //		fConfigurationElement= element;
@@ -65,13 +65,15 @@ public final class ContributedProcessorDescriptor {
   }
 
   public IStatus checkSyntax() {
-    //		IConfigurationElement[] children= fConfigurationElement.getChildren(ExpressionTagNames.ENABLEMENT);
+    //		IConfigurationElement[] children=
+    // fConfigurationElement.getChildren(ExpressionTagNames.ENABLEMENT);
     //		if (children.length > 1) {
     //			String id= fConfigurationElement.getAttribute(ID);
-    //			return new StatusInfo(IStatus.ERROR, "Only one < enablement > element allowed. Disabling " + id); //$NON-NLS-1$
+    //			return new StatusInfo(IStatus.ERROR, "Only one < enablement > element allowed. Disabling "
+    // + id); //$NON-NLS-1$
     //		}
     return new StatusInfo(
-        IStatus.OK, "Syntactically correct quick assist/fix processor"); //$NON-NLS-1$
+        IStatus.OK, "Syntactically correct quick assist/fix processor"); // $NON-NLS-1$
   }
 
   //	private boolean matches(ICompilationUnit cunit) {
@@ -86,7 +88,8 @@ public final class ContributedProcessorDescriptor {
   //			return fStatus.booleanValue();
   //		}
   //
-  //		IConfigurationElement[] children= fConfigurationElement.getChildren(ExpressionTagNames.ENABLEMENT);
+  //		IConfigurationElement[] children=
+  // fConfigurationElement.getChildren(ExpressionTagNames.ENABLEMENT);
   //		if (children.length == 1) {
   //			try {
   //				ExpressionConverter parser= ExpressionConverter.getDefault();
@@ -96,7 +99,8 @@ public final class ContributedProcessorDescriptor {
   //				IJavaProject javaProject= cunit.getJavaProject();
   //				String[] natures= javaProject.getProject().getDescription().getNatureIds();
   //				evalContext.addVariable("projectNatures", Arrays.asList(natures)); //$NON-NLS-1$
-  //				evalContext.addVariable("sourceLevel", javaProject.getOption(JavaCore.COMPILER_SOURCE, true)); //$NON-NLS-1$
+  //				evalContext.addVariable("sourceLevel", javaProject.getOption(JavaCore.COMPILER_SOURCE,
+  // true)); //$NON-NLS-1$
   //				return expression.evaluate(evalContext) == EvaluationResult.TRUE;
   //			} catch (CoreException e) {
   //				JavaPlugin.log(e);
@@ -116,7 +120,8 @@ public final class ContributedProcessorDescriptor {
     //						fProcessorInstance= extension;
     //					} else {
     //						String message= "Invalid extension to " + fConfigurationElement.getName() //$NON-NLS-1$
-    //						+ ". Must extends '" + expectedType.getName() + "'." + fConfigurationElement.getContributor().getName(); //$NON-NLS-1$ //$NON-NLS-2$
+    //						+ ". Must extends '" + expectedType.getName() + "'." +
+    // fConfigurationElement.getContributor().getName(); //$NON-NLS-1$ //$NON-NLS-2$
     //						JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.ID_PLUGIN, message));
     //						fStatus= Boolean.FALSE;
     //						return null;

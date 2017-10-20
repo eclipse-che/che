@@ -90,9 +90,9 @@ import org.eclipse.che.ide.actions.common.HidePartAction;
 import org.eclipse.che.ide.actions.common.MaximizePartAction;
 import org.eclipse.che.ide.actions.common.RestorePartAction;
 import org.eclipse.che.ide.actions.find.FindActionAction;
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.action.IdeActions;
 import org.eclipse.che.ide.api.constraints.Constraints;
@@ -144,6 +144,7 @@ import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
 import org.eclipse.che.ide.workspace.StopWorkspaceAction;
 import org.eclipse.che.ide.xml.NewXmlFileAction;
+import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
@@ -400,7 +401,7 @@ public class StandardComponentInitializer {
 
   @Inject private ProjectConfigSynchronized projectConfigSynchronized;
 
-  @Inject private TreeResourceRevealer treeResourceRevealer; //just to work with it
+  @Inject private TreeResourceRevealer treeResourceRevealer; // just to work with it
 
   @Inject private TerminalInitializer terminalInitializer;
 
@@ -477,7 +478,9 @@ public class StandardComponentInitializer {
 
     DefaultActionGroup newGroup = new DefaultActionGroup("New", true, actionManager);
     newGroup.getTemplatePresentation().setDescription("Create...");
-    newGroup.getTemplatePresentation().setSVGResource(resources.newResource());
+    newGroup
+        .getTemplatePresentation()
+        .setImageElement(new SVGImage(resources.newResource()).getElement());
     actionManager.registerAction(GROUP_FILE_NEW, newGroup);
     projectGroup.add(newGroup);
 
@@ -492,7 +495,9 @@ public class StandardComponentInitializer {
     newGroup.addSeparator();
 
     actionManager.registerAction("newXmlFile", newXmlFileAction);
-    newXmlFileAction.getTemplatePresentation().setSVGResource(xmlFile.getImage());
+    newXmlFileAction
+        .getTemplatePresentation()
+        .setImageElement(new SVGImage(xmlFile.getImage()).getElement());
     newGroup.addAction(newXmlFileAction);
 
     actionManager.registerAction("uploadFile", uploadFileAction);
@@ -596,7 +601,7 @@ public class StandardComponentInitializer {
     actionManager.registerAction(NAVIGATE_TO_FILE, navigateToFileAction);
     assistantGroup.add(navigateToFileAction);
 
-    //Compose Profile menu
+    // Compose Profile menu
     DefaultActionGroup profileGroup = (DefaultActionGroup) actionManager.getAction(GROUP_PROFILE);
     actionManager.registerAction("showPreferences", showPreferencesAction);
 
@@ -708,7 +713,7 @@ public class StandardComponentInitializer {
     consolesTreeContextMenu.add(stopProcessAction);
     consolesTreeContextMenu.add(closeConsoleAction);
 
-    //Editor context menu group
+    // Editor context menu group
     DefaultActionGroup editorTabContextMenu =
         (DefaultActionGroup) actionManager.getAction(GROUP_EDITOR_TAB_CONTEXT_MENU);
     editorTabContextMenu.add(closeAction);
@@ -816,7 +821,7 @@ public class StandardComponentInitializer {
 
     final Map<String, Perspective> perspectives = perspectiveManager.getPerspectives();
     if (perspectives.size()
-        > 1) { //if registered perspectives will be more then 2 Main Menu -> Window
+        > 1) { // if registered perspectives will be more then 2 Main Menu -> Window
       // will appears and contains all of them as sub-menu
       final DefaultActionGroup windowMenu = new DefaultActionGroup("Window", true, actionManager);
       actionManager.registerAction("Window", windowMenu);
@@ -824,8 +829,8 @@ public class StandardComponentInitializer {
           (DefaultActionGroup) actionManager.getAction(GROUP_MAIN_MENU);
       mainMenu.add(windowMenu);
       for (Perspective perspective : perspectives.values()) {
-        final Action action =
-            new Action(perspective.getPerspectiveName()) {
+        final BaseAction action =
+            new BaseAction(perspective.getPerspectiveName()) {
               @Override
               public void actionPerformed(ActionEvent e) {
                 perspectiveManager.setPerspectiveId(perspective.getPerspectiveId());

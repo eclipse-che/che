@@ -331,6 +331,7 @@ public class FactoryDaoTest {
     exMachine1.setServers(ImmutableMap.of("ref1", serverConf1, "ref2", serverConf2));
     exMachine1.setInstallers(ImmutableList.of("agent5", "agent4"));
     exMachine1.setAttributes(singletonMap("att1", "val"));
+    exMachine1.setEnv(singletonMap("CHE_ENV", "value"));
 
     final MachineConfigImpl exMachine2 = new MachineConfigImpl();
     final ServerConfigImpl serverConf3 = new ServerConfigImpl("2333", "https", "/path1");
@@ -338,12 +339,14 @@ public class FactoryDaoTest {
     exMachine2.setServers(ImmutableMap.of("ref1", serverConf3, "ref2", serverConf4));
     exMachine2.setInstallers(ImmutableList.of("agent2", "agent1"));
     exMachine2.setAttributes(singletonMap("att1", "val"));
+    exMachine2.setEnv(singletonMap("CHE_ENV2", "value"));
 
     final MachineConfigImpl exMachine3 = new MachineConfigImpl();
     final ServerConfigImpl serverConf5 = new ServerConfigImpl("2333", "https", "/path3");
     exMachine3.setServers(singletonMap("ref1", serverConf5));
     exMachine3.setInstallers(ImmutableList.of("agent6", "agent2"));
     exMachine3.setAttributes(singletonMap("att1", "val"));
+    exMachine3.setEnv(singletonMap("CHE_ENV3", "value"));
 
     // Environments
     final RecipeImpl recipe1 = new RecipeImpl();

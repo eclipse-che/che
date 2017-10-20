@@ -82,7 +82,7 @@ public class TestingRPCService {
       }
       return testLaunchResult.withSuccess(true);
     } else {
-      //TODO add logging and send info message about failure
+      // TODO add logging and send info message about failure
       return testLaunchResult.withSuccess(false);
     }
   }

@@ -36,12 +36,7 @@ public class StopWorkspaceAction extends AbstractPerspectiveAction {
       CoreLocalizationConstant locale,
       AppContext appContext,
       CurrentWorkspaceManager workspaceManager) {
-    super(
-        singletonList(PROJECT_PERSPECTIVE_ID),
-        locale.stopWsTitle(),
-        locale.stopWsDescription(),
-        null,
-        null);
+    super(singletonList(PROJECT_PERSPECTIVE_ID), locale.stopWsTitle(), locale.stopWsDescription());
     this.appContext = appContext;
     this.workspaceManager = workspaceManager;
   }

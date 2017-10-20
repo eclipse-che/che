@@ -109,12 +109,12 @@ import org.eclipse.text.edits.TextEditGroup;
 /** Encapsulates a field into getter and setter calls. */
 public class SelfEncapsulateFieldRefactoring extends Refactoring {
 
-  private static final String ATTRIBUTE_VISIBILITY = "visibility"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_GETTER = "getter"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_SETTER = "setter"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_INSERTION = "insertion"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_COMMENTS = "comments"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_DECLARING = "declaring"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_VISIBILITY = "visibility"; // $NON-NLS-1$
+  private static final String ATTRIBUTE_GETTER = "getter"; // $NON-NLS-1$
+  private static final String ATTRIBUTE_SETTER = "setter"; // $NON-NLS-1$
+  private static final String ATTRIBUTE_INSERTION = "insertion"; // $NON-NLS-1$
+  private static final String ATTRIBUTE_COMMENTS = "comments"; // $NON-NLS-1$
+  private static final String ATTRIBUTE_DECLARING = "declaring"; // $NON-NLS-1$
 
   private IField fField;
   private TextChangeManager fChangeManager;
@@ -137,7 +137,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
   private List<IMethodBinding> fUsedModifyNames;
   private boolean fConsiderVisibility = true;
 
-  private static final String NO_NAME = ""; //$NON-NLS-1$
+  private static final String NO_NAME = ""; // $NON-NLS-1$
 
   /**
    * Creates a new self encapsulate field refactoring.
@@ -218,7 +218,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
     fGenerateJavadoc = value;
   }
 
-  //----activation checking ----------------------------------------------------------
+  // ----activation checking ----------------------------------------------------------
 
   @Override
   public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
@@ -276,7 +276,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
         BasicElementLabels.getJavaElementName(fField.getElementName()));
   }
 
-  //---- Input checking ----------------------------------------------------------
+  // ---- Input checking ----------------------------------------------------------
 
   public RefactoringStatus checkMethodNames() {
     return checkMethodNames(isUsingLocalGetter(), isUsingLocalSetter());
@@ -297,7 +297,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
       IType type,
       boolean reUseExistingField,
       IField field) {
-    if ("".equals(name)) { //$NON-NLS-1$
+    if ("".equals(name)) { // $NON-NLS-1$
       status.addFatalError(RefactoringCoreMessages.Checks_Choose_name);
       return;
     }
@@ -505,7 +505,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
             RefactoringCoreMessages.SelfEncapsulateField_setter_pattern,
             BasicElementLabels.getJavaElementName(fSetterName)));
     String visibility = JdtFlags.getVisibilityString(fVisibility);
-    if ("".equals(visibility)) //$NON-NLS-1$
+    if ("".equals(visibility)) // $NON-NLS-1$
     visibility = RefactoringCoreMessages.SelfEncapsulateField_default_visibility;
     comment.addSetting(
         Messages.format(
@@ -545,7 +545,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
     return RefactoringCoreMessages.SelfEncapsulateField_name;
   }
 
-  //---- Helper methods -------------------------------------------------------------
+  // ---- Helper methods -------------------------------------------------------------
 
   private void checkCompileErrors(
       RefactoringStatus result, CompilationUnit root, ICompilationUnit element) {
@@ -576,7 +576,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
       checkMethodInHierarchy(
           type,
           fSetterName,
-          fFieldDeclaration.getAST().resolveWellKnownType("void"), //$NON-NLS-1$
+          fFieldDeclaration.getAST().resolveWellKnownType("void"), // $NON-NLS-1$
           new ITypeBinding[] {fieldType},
           status,
           usingLocalSetter);
@@ -850,7 +850,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
       }
     } else {
       if (nameConflict || StubUtility.useThisForFieldAccess(fField.getJavaProject())) {
-        return "this." + fieldName; //$NON-NLS-1$
+        return "this." + fieldName; // $NON-NLS-1$
       }
     }
     return fieldName;
@@ -869,7 +869,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
             && fieldName.equals(fField.getDeclaringType().getElementName()))
         || JavaConventionsUtil.validateIdentifier(fArgName, fField).getSeverity()
             == IStatus.ERROR) {
-      fArgName = "_" + fArgName; //$NON-NLS-1$
+      fArgName = "_" + fArgName; // $NON-NLS-1$
     }
   }
 
@@ -881,7 +881,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
           (ClassInstanceCreation) ASTNodes.getParent(type, ClassInstanceCreation.class);
       return ASTNodes.asString(node.getType());
     }
-    Assert.isTrue(false, "Should not happen"); //$NON-NLS-1$
+    Assert.isTrue(false, "Should not happen"); // $NON-NLS-1$
     return null;
   }
 
@@ -908,7 +908,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
               RefactoringCoreMessages.InitializableRefactoring_argument_not_exist,
               JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
     String name = arguments.getAttribute(ATTRIBUTE_GETTER);
-    if (name != null && !"".equals(name)) //$NON-NLS-1$
+    if (name != null && !"".equals(name)) // $NON-NLS-1$
     fGetterName = name;
     else
       return RefactoringStatus.createFatalErrorStatus(
@@ -916,7 +916,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
               RefactoringCoreMessages.InitializableRefactoring_argument_not_exist,
               ATTRIBUTE_GETTER));
     name = arguments.getAttribute(ATTRIBUTE_SETTER);
-    if (name != null && !"".equals(name)) //$NON-NLS-1$
+    if (name != null && !"".equals(name)) // $NON-NLS-1$
     fSetterName = name;
     else
       return RefactoringStatus.createFatalErrorStatus(
@@ -940,7 +940,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
               RefactoringCoreMessages.InitializableRefactoring_argument_not_exist,
               ATTRIBUTE_COMMENTS));
     final String visibility = arguments.getAttribute(ATTRIBUTE_VISIBILITY);
-    if (visibility != null && !"".equals(visibility)) { //$NON-NLS-1$
+    if (visibility != null && !"".equals(visibility)) { // $NON-NLS-1$
       int flag = 0;
       try {
         flag = Integer.parseInt(visibility);
@@ -953,7 +953,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
       fVisibility = flag;
     }
     final String insertion = arguments.getAttribute(ATTRIBUTE_INSERTION);
-    if (insertion != null && !"".equals(insertion)) { //$NON-NLS-1$
+    if (insertion != null && !"".equals(insertion)) { // $NON-NLS-1$
       int index = 0;
       try {
         index = Integer.parseInt(insertion);

@@ -55,13 +55,13 @@ public class ParametricStructureComputer {
 
     @Override
     public String toString() {
-      if (this == NONE) return "NONE"; //$NON-NLS-1$
+      if (this == NONE) return "NONE"; // $NON-NLS-1$
       else
         return "ParamStructure "
             + fBase.toString()
             + '<'
             + Arrays.asList(fParameters)
-            + '>'; //$NON-NLS-1$
+            + '>'; // $NON-NLS-1$
     }
   }
 
@@ -88,7 +88,7 @@ public class ParametricStructureComputer {
   }
 
   private void dumpContainerStructure() {
-    System.out.println("\n*** Container Structure: ***\n"); //$NON-NLS-1$
+    System.out.println("\n*** Container Structure: ***\n"); // $NON-NLS-1$
     for (int i = 0; i < fAllConstraintVariables.length; i++) {
       ConstraintVariable2 v = fAllConstraintVariables[i];
       if (elemStructure(v) != null && !(elemStructure(v) == ParametricStructure.NONE))
@@ -96,7 +96,7 @@ public class ParametricStructureComputer {
             "elemStructure("
                 + v.toString()
                 + ") = "
-                + elemStructure(v)); //$NON-NLS-1$ //$NON-NLS-2$
+                + elemStructure(v)); // $NON-NLS-1$ //$NON-NLS-2$
     }
     System.out.println();
   }
@@ -108,10 +108,10 @@ public class ParametricStructureComputer {
     fWorkList2.push(v);
   }
 
-  //TODO hard-wired to collections
+  // TODO hard-wired to collections
   private void initializeContainerStructure() {
     if (DEBUG_INITIALIZATION)
-      System.out.println("  *** Seeding container structure ***"); //$NON-NLS-1$
+      System.out.println("  *** Seeding container structure ***"); // $NON-NLS-1$
     for (int i = 0; i < fAllConstraintVariables.length; i++) {
       ConstraintVariable2 v = fAllConstraintVariables[i];
       TType varType = declaredTypeOf(v);
@@ -123,12 +123,12 @@ public class ParametricStructureComputer {
         // List<String> to a binary method taking a raw List.
         if (isParametricType(varType) && !isUnmodifiableFieldOrMethod(v)) {
           if (DEBUG_INITIALIZATION)
-            System.out.println("Entity has           container structure: " + v); //$NON-NLS-1$
+            System.out.println("Entity has           container structure: " + v); // $NON-NLS-1$
           setStructureAndPush(v, newParametricType(varType));
         } else if (!mightBeParametric(varType)) {
           // Not a supertype of any container type - can't have container structure
           if (DEBUG_INITIALIZATION)
-            System.out.println("Entity DOES NOT have container structure: " + v); //$NON-NLS-1$
+            System.out.println("Entity DOES NOT have container structure: " + v); // $NON-NLS-1$
           setStructureAndPush(v, ParametricStructure.NONE);
         }
         // else we're not sure yet whether this has container structure
@@ -136,22 +136,28 @@ public class ParametricStructureComputer {
         //				TType exprType= v.getType(); // TODO: always null!
         //
         //				if (isArrayAccess(v)) {
-        //					if (DEBUG_INITIALIZATION) System.out.println("Entity DOES NOT have container structure: " + v);
-        //					setStructureAndPush(v, NO_STRUCTURE); // definitely not container structure, Java 1.5 says no generics inside arrays
+        //					if (DEBUG_INITIALIZATION) System.out.println("Entity DOES NOT have container
+        // structure: " + v);
+        //					setStructureAndPush(v, NO_STRUCTURE); // definitely not container structure, Java 1.5
+        // says no generics inside arrays
         //				} else if (isParametricType(exprType)) {
-        //					if (DEBUG_INITIALIZATION) System.out.println("Entity has           container structure: " + v);
+        //					if (DEBUG_INITIALIZATION) System.out.println("Entity has           container
+        // structure: " + v);
         //					setStructureAndPush(v, newParametricType(exprType));
         //				} else if (exprType != null && !mightBeParametric(exprType)) {
         //					// Not a supertype of any container type - can't have container structure
-        //					if (DEBUG_INITIALIZATION) System.out.println("Entity DOES NOT have container structure: " + v);
+        //					if (DEBUG_INITIALIZATION) System.out.println("Entity DOES NOT have container
+        // structure: " + v);
         //					setStructureAndPush(v, NO_STRUCTURE);
         //				}
 
-        // TODO Markus: the following just updates the set of child element variables of the parent variable of 'v'.
+        // TODO Markus: the following just updates the set of child element variables of the parent
+        // variable of 'v'.
         // You already maintain this information automatically, so the code below is not needed...
         //				if (v instanceof CollectionElementVariable2) {
         //					CollectionElementVariable2 ev= (CollectionElementVariable2) v;
-        //					int idx= ev.getDeclarationTypeVariableIndex(); //TODO : INDEX IS -1 IF THE TYPE VARIABLE COMES FROM A SUPERTYPE!!!
+        //					int idx= ev.getDeclarationTypeVariableIndex(); //TODO : INDEX IS -1 IF THE TYPE
+        // VARIABLE COMES FROM A SUPERTYPE!!!
         //
         //					Collection/*<ConstraintVariable2>*/ vars= fTCModel.getElementVariables(ev).values();
         //
@@ -163,13 +169,15 @@ public class ParametricStructureComputer {
       }
     }
     // Every variable v in fAllVariables is now in one of 3 states:
-    //  - elemStructure(v) == some parametric type:       definitely container structure, but we may not know the sub-structure yet
+    //  - elemStructure(v) == some parametric type:       definitely container structure, but we may
+    // not know the sub-structure yet
     //  - elemStructure(v) == some AbstractTypeParameter: definitely not container structure
     //  - elemStructure(v) == null:                       we know nothing yet about its structure
   }
 
   protected static TType declaredTypeOf(ConstraintVariable2 cv) {
-    //TODO: record original type of CollectionElementVariable2 iff source already had type parameter
+    // TODO: record original type of CollectionElementVariable2 iff source already had type
+    // parameter
     return cv.getType();
 
     //		if (v instanceof ContextualExpressionVariable) {
@@ -193,12 +201,12 @@ public class ParametricStructureComputer {
   }
 
   private boolean mightBeParametric(TType type) {
-    return isParametricType(type); //TODO check this is the only case?
+    return isParametricType(type); // TODO check this is the only case?
   }
 
   private void computeContainerStructure() {
     if (DEBUG_INITIALIZATION)
-      System.out.println("\n*** Computing Container Structure ***\n"); //$NON-NLS-1$
+      System.out.println("\n*** Computing Container Structure ***\n"); // $NON-NLS-1$
 
     initializeContainerStructure();
 
@@ -245,7 +253,7 @@ public class ParametricStructureComputer {
               + rhs
               + " {"
               + elemStructure(rhs)
-              + "}"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+              + "}"); // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 
     if (updateStructureOfVar(lhs, elemStructure(rhs), TypeOperator.SubType)) {
       if (lhs instanceof CollectionElementVariable2)
@@ -260,13 +268,13 @@ public class ParametricStructureComputer {
   }
 
   private ParametricStructure newParametricType(TType varType) {
-    //TODO: create CollectionElementVariable2s if necessary?
+    // TODO: create CollectionElementVariable2s if necessary?
     GenericType genericType = (GenericType) varType.getTypeDeclaration();
     return new ParametricStructure(genericType);
   }
 
   private boolean isUnmodifiableFieldOrMethod(ConstraintVariable2 v) {
-    return false; //TODO: find out whether it's declared in a binary type
+    return false; // TODO: find out whether it's declared in a binary type
   }
 
   private boolean isParametricType(TType type) {
@@ -286,7 +294,7 @@ public class ParametricStructureComputer {
 
     Assert.isTrue(
         structure1 != otherStructure,
-        "updateStructureOfIthParamFrom(): attempt to unify ith param of a parametric type with itself!"); //$NON-NLS-1$
+        "updateStructureOfIthParamFrom(): attempt to unify ith param of a parametric type with itself!"); // $NON-NLS-1$
 
     ParametricStructure param1 = structure1.getParameters()[i];
     boolean param1Unknown = (param1 == null);
@@ -299,7 +307,7 @@ public class ParametricStructureComputer {
                 + " of "
                 + structure1
                 + " to "
-                + otherStructure); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                + otherStructure); // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
       structure1.getParameters()[i] = otherStructure;
       return true;
     }
@@ -333,8 +341,7 @@ public class ParametricStructureComputer {
       ParametricStructure t = elemStructure(v);
       for (Iterator<CollectionElementVariable2> iterator =
               fTCModel.getElementVariables(v).values().iterator();
-          iterator.hasNext();
-          ) {
+          iterator.hasNext(); ) {
         CollectionElementVariable2 typeVar = iterator.next();
         int declarationTypeVariableIndex = typeVar.getDeclarationTypeVariableIndex();
 
@@ -371,9 +378,10 @@ public class ParametricStructureComputer {
     ParametricStructure v1Structure = elemStructure(v1);
     int parmIdx =
         elemVar
-            .getDeclarationTypeVariableIndex(); //TODO: index is NOT_DECLARED_TYPE_VARIABLE_INDEX if the type variable comes from a supertype!!!
+            .getDeclarationTypeVariableIndex(); // TODO: index is NOT_DECLARED_TYPE_VARIABLE_INDEX
+    // if the type variable comes from a supertype!!!
     if (parmIdx == CollectionElementVariable2.NOT_DECLARED_TYPE_VARIABLE_INDEX)
-      return; //TODO: ParametricStructure should use type variable keys instead of index
+      return; // TODO: ParametricStructure should use type variable keys instead of index
 
     if (elemContainerStructure == v1Structure
         || containsSubStructure(
@@ -392,7 +400,7 @@ public class ParametricStructureComputer {
             "  updated structure of "
                 + elemContainer
                 + " to "
-                + elemContainerStructure); //$NON-NLS-1$ //$NON-NLS-2$
+                + elemContainerStructure); // $NON-NLS-1$ //$NON-NLS-2$
     }
   }
 
@@ -441,9 +449,9 @@ public class ParametricStructureComputer {
       fOp = op;
     }
 
-    public static TypeOperator Equals = new TypeOperator("=^="); //$NON-NLS-1$
-    public static TypeOperator SubType = new TypeOperator("<="); //$NON-NLS-1$
-    public static TypeOperator SuperType = new TypeOperator("=>"); //$NON-NLS-1$
+    public static TypeOperator Equals = new TypeOperator("=^="); // $NON-NLS-1$
+    public static TypeOperator SubType = new TypeOperator("<="); // $NON-NLS-1$
+    public static TypeOperator SuperType = new TypeOperator("=>"); // $NON-NLS-1$
 
     @Override
     public String toString() {
@@ -468,7 +476,7 @@ public class ParametricStructureComputer {
     if (vStructureUnknown) {
       if (DEBUG_INITIALIZATION)
         System.out.println(
-            "  setting structure of " + v + " to " + type2); //$NON-NLS-1$ //$NON-NLS-2$
+            "  setting structure of " + v + " to " + type2); // $NON-NLS-1$ //$NON-NLS-2$
       setStructureAndPush(v, type2);
       return true;
     }
@@ -515,7 +523,7 @@ public class ParametricStructureComputer {
     computeContainerStructure();
 
     if (DEBUG_INITIALIZATION)
-      System.out.println("\n*** Creating Element Variables: ***\n"); //$NON-NLS-1$
+      System.out.println("\n*** Creating Element Variables: ***\n"); // $NON-NLS-1$
 
     for (int i = 0; i < fAllConstraintVariables.length; i++) {
       newVars.addAll(createVariablesFor(fAllConstraintVariables[i]));
@@ -549,7 +557,7 @@ public class ParametricStructureComputer {
     }
     throw new IllegalStateException(
         "Attempt to create element variables for parametric variable of unknown type: "
-            + parmType); //$NON-NLS-1$
+            + parmType); // $NON-NLS-1$
   }
 
   private Collection<CollectionElementVariable2> getElementVariables(
@@ -560,10 +568,12 @@ public class ParametricStructureComputer {
 
   private Collection<CollectionElementVariable2> createAndInitVars(
       ConstraintVariable2 v, ParametricStructure parmType) {
-    //TODO (->): in InferTypeArgumentsConstraintsSolver#createInitialEstimate(..)
-    //->		fTypeEstimates.setEstimateOf(v, SubTypesOfSingleton.create(ParametricStructure.getBaseContainerType(parmType.getBase(), sHierarchy)));
+    // TODO (->): in InferTypeArgumentsConstraintsSolver#createInitialEstimate(..)
+    // ->		fTypeEstimates.setEstimateOf(v,
+    // SubTypesOfSingleton.create(ParametricStructure.getBaseContainerType(parmType.getBase(),
+    // sHierarchy)));
     Collection<CollectionElementVariable2> elementVars = getElementVariables(parmType.getBase(), v);
-    //->		setNewTypeParamEstimateForEach(elementVars);
+    // ->		setNewTypeParamEstimateForEach(elementVars);
     Collection<CollectionElementVariable2> result =
         createVars(elementVars, parmType.getParameters());
     return result;
@@ -572,7 +582,8 @@ public class ParametricStructureComputer {
   private Collection<CollectionElementVariable2> createVars(
       Collection<CollectionElementVariable2> cvs, ParametricStructure[] parms) {
     if (parms.length > 0) { // happens, e.g., for Properties (non-parametric)
-      //			Assert.isTrue(cvs.size() == parms.length, "cvs.length==" + cvs.size() + " parms.length=" + parms.length); //assumption is wrong in presence of NOT_DECLARED_TYPE_VARIABLE_INDEX
+      //			Assert.isTrue(cvs.size() == parms.length, "cvs.length==" + cvs.size() + " parms.length="
+      // + parms.length); //assumption is wrong in presence of NOT_DECLARED_TYPE_VARIABLE_INDEX
       for (Iterator<CollectionElementVariable2> iter = cvs.iterator(); iter.hasNext(); ) {
         CollectionElementVariable2 childVar = iter.next();
         int declarationTypeVariableIndex = childVar.getDeclarationTypeVariableIndex();
@@ -592,7 +603,7 @@ public class ParametricStructureComputer {
       }
     }
     List<CollectionElementVariable2> result =
-        new ArrayList<CollectionElementVariable2>(cvs.size() * 2); //roughly
+        new ArrayList<CollectionElementVariable2>(cvs.size() * 2); // roughly
     for (Iterator<CollectionElementVariable2> iter = cvs.iterator(); iter.hasNext(); ) {
       CollectionElementVariable2 childVar = iter.next();
       int declarationTypeVariableIndex = childVar.getDeclarationTypeVariableIndex();

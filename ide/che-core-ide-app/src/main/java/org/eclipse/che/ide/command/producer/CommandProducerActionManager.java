@@ -21,13 +21,14 @@ import com.google.web.bindery.event.shared.EventBus;
 import java.util.HashSet;
 import java.util.Set;
 import org.eclipse.che.ide.Resources;
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.command.CommandProducer;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
+import org.vectomatic.dom.svg.ui.SVGImage;
 
 /**
  * Manages actions for the commands.
@@ -75,7 +76,9 @@ public class CommandProducerActionManager {
     commandActionsPopUpGroup =
         new DefaultActionGroup(messages.actionCommandsTitle(), true, actionManager);
     actionManager.registerAction("commandActionsPopUpGroup", commandActionsPopUpGroup);
-    commandActionsPopUpGroup.getTemplatePresentation().setSVGResource(resources.compile());
+    commandActionsPopUpGroup
+        .getTemplatePresentation()
+        .setImageElement(new SVGImage(resources.compile()).getElement());
     commandActionsPopUpGroup
         .getTemplatePresentation()
         .setDescription(messages.actionCommandsDescription());
@@ -100,7 +103,7 @@ public class CommandProducerActionManager {
 
   /** Creates actions for the given {@link CommandProducer}. */
   private void createActionsForProducer(CommandProducer producer) {
-    Action action = commandProducerActionFactory.create(producer.getName(), producer);
+    BaseAction action = commandProducerActionFactory.create(producer.getName(), producer);
 
     actionManager.registerAction(producer.getName(), action);
 

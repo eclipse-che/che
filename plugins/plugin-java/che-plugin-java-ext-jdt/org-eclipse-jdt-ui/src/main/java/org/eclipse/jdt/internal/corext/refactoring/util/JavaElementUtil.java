@@ -43,7 +43,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
  */
 public class JavaElementUtil {
 
-  //no instances
+  // no instances
   private JavaElementUtil() {}
 
   public static String createMethodSignature(IMethod method) {
@@ -56,7 +56,7 @@ public class JavaElementUtil {
               false,
               !method.isConstructor()));
     } catch (JavaModelException e) {
-      return BasicElementLabels.getJavaElementName(method.getElementName()); //fallback
+      return BasicElementLabels.getJavaElementName(method.getElementName()); // fallback
     }
   }
 
@@ -64,7 +64,7 @@ public class JavaElementUtil {
     return BasicElementLabels.getJavaElementName(
         field.getDeclaringType().getFullyQualifiedName('.')
             + "."
-            + field.getElementName()); //$NON-NLS-1$
+            + field.getElementName()); // $NON-NLS-1$
   }
 
   public static String createSignature(IMember member) {

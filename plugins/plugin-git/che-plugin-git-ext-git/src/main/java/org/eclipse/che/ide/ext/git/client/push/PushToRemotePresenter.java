@@ -124,7 +124,7 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
 
   /** Update list of local and remote branches on view. */
   void updateLocalBranches() {
-    //getting local branches
+    // getting local branches
     getBranchesForCurrentProject(
         LIST_LOCAL,
         new AsyncCallback<List<Branch>>() {
@@ -140,7 +140,7 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
               }
             }
 
-            //getting remote branch only after selecting current local branch
+            // getting remote branch only after selecting current local branch
             updateRemoteBranches();
           }
 

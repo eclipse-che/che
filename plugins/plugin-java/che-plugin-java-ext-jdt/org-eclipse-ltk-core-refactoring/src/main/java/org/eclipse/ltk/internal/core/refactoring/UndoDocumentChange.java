@@ -54,7 +54,7 @@ public class UndoDocumentChange extends Change {
   /** {@inheritDoc} */
   public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
     if (pm == null) pm = new NullProgressMonitor();
-    pm.beginTask("", 1); //$NON-NLS-1$
+    pm.beginTask("", 1); // $NON-NLS-1$
     RefactoringStatus result = TextChanges.isValid(fDocument, fLength);
     pm.worked(1);
     return result;

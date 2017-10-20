@@ -81,12 +81,12 @@ public class ExpressionsCleanUp extends AbstractCleanUp {
 
     if (isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES)
         && isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS)) {
-      buf.append("boolean b= (((i > 0) && (i < 10)) || (i == 50));\n"); //$NON-NLS-1$
+      buf.append("boolean b= (((i > 0) && (i < 10)) || (i == 50));\n"); // $NON-NLS-1$
     } else if (isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES)
         && isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER)) {
-      buf.append("boolean b= i > 0 && i < 10 || i == 50;\n"); //$NON-NLS-1$
+      buf.append("boolean b= i > 0 && i < 10 || i == 50;\n"); // $NON-NLS-1$
     } else {
-      buf.append("boolean b= (i > 0 && i < 10 || i == 50);\n"); //$NON-NLS-1$
+      buf.append("boolean b= (i > 0 && i < 10 || i == 50);\n"); // $NON-NLS-1$
     }
 
     return buf.toString();

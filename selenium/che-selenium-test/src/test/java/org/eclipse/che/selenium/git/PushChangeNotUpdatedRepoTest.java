@@ -133,7 +133,7 @@ public class PushChangeNotUpdatedRepoTest {
     // check conflict, pull
     projectExplorer.openItemByPath(PROJECT_2);
 
-    //change one file in second project
+    // change one file in second project
     projectExplorer.openItemByPath(PROJECT_2 + "/" + FILE_FOR_CHANGED_2);
     projectExplorer.waitItem(PROJECT_2 + "/" + FILE_FOR_CHANGED_2);
     editor.waitActiveEditor();
@@ -145,7 +145,7 @@ public class PushChangeNotUpdatedRepoTest {
     editor.closeFileByNameWithSaving(FILE_FOR_CHANGED_2);
     addToIndexAndCommitAll(COMMIT_MESSAGE_2, PROJECT_2);
 
-    //step 3 get conflict message
+    // step 3 get conflict message
     menu.runCommand(
         TestMenuCommandsConstants.Git.GIT,
         TestMenuCommandsConstants.Git.Remotes.REMOTES_TOP,
@@ -164,7 +164,7 @@ public class PushChangeNotUpdatedRepoTest {
     events.clickEventLogBtn();
     events.waitExpectedMessage("Pushed to origin");
 
-    //step 4 valid pull
+    // step 4 valid pull
     menu.runCommand(
         TestMenuCommandsConstants.Git.GIT,
         TestMenuCommandsConstants.Git.Remotes.REMOTES_TOP,
@@ -225,7 +225,7 @@ public class PushChangeNotUpdatedRepoTest {
     events.waitExpectedMessage(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
     projectExplorer.selectItem(project);
 
-    //commit
+    // commit
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
     git.waitAndRunCommit(commitMessage);
     git.waitGitStatusBarWithMess(TestGitConstants.COMMIT_MESSAGE_SUCCESS);

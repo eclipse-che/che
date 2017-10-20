@@ -44,20 +44,20 @@ import org.slf4j.LoggerFactory;
 
 public class JavaDocLocations {
   private static final Logger LOG = LoggerFactory.getLogger(JavaDocLocations.class);
-  private static final String JAR_PROTOCOL = "jar"; //$NON-NLS-1$
-  public static final String ARCHIVE_PREFIX = "jar:"; //$NON-NLS-1$
+  private static final String JAR_PROTOCOL = "jar"; // $NON-NLS-1$
+  public static final String ARCHIVE_PREFIX = "jar:"; // $NON-NLS-1$
   private static final String PREF_JAVADOCLOCATIONS =
-      "org.eclipse.jdt.ui.javadoclocations"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.javadoclocations"; // $NON-NLS-1$
   public static final String PREF_JAVADOCLOCATIONS_MIGRATED =
-      "org.eclipse.jdt.ui.javadoclocations.migrated"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.javadoclocations.migrated"; // $NON-NLS-1$
 
-  private static final String NODE_ROOT = "javadoclocation"; //$NON-NLS-1$
-  private static final String NODE_ENTRY = "location_01"; //$NON-NLS-1$
-  private static final String NODE_PATH = "path"; //$NON-NLS-1$
-  private static final String NODE_URL = "url"; //$NON-NLS-1$
+  private static final String NODE_ROOT = "javadoclocation"; // $NON-NLS-1$
+  private static final String NODE_ENTRY = "location_01"; // $NON-NLS-1$
+  private static final String NODE_PATH = "path"; // $NON-NLS-1$
+  private static final String NODE_URL = "url"; // $NON-NLS-1$
 
   private static final QualifiedName PROJECT_JAVADOC =
-      new QualifiedName("JavaUI.ID_PLUGIN", "project_javadoc_location"); //$NON-NLS-1$
+      new QualifiedName("JavaUI.ID_PLUGIN", "project_javadoc_location"); // $NON-NLS-1$
 
   //	public static void migrateToClasspathAttributes() {
   //		final Map<IPath, String> oldLocations= loadOldForCompatibility();
@@ -92,7 +92,8 @@ public class JavaDocLocations {
   //		job.schedule();
   //	}
 
-  //	final static void updateClasspathEntries(Map<IPath, String> oldLocationMap, IProgressMonitor monitor) throws JavaModelException {
+  //	final static void updateClasspathEntries(Map<IPath, String> oldLocationMap, IProgressMonitor
+  // monitor) throws JavaModelException {
   //		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
   //		IJavaProject[] javaProjects= JavaCore.create(root).getJavaProjects();
   //		try {
@@ -128,7 +129,8 @@ public class JavaDocLocations {
   //		}
   //	}
   //
-  //	private static IClasspathEntry getConvertedEntry(IClasspathEntry entry, IJavaProject project, Map<IPath, String> oldLocationMap) {
+  //	private static IClasspathEntry getConvertedEntry(IClasspathEntry entry, IJavaProject project,
+  // Map<IPath, String> oldLocationMap) {
   //		IPath path= null;
   //		switch (entry.getEntryKind()) {
   //			case IClasspathEntry.CPE_SOURCE:
@@ -151,7 +153,8 @@ public class JavaDocLocations {
   //		}
   //		IClasspathAttribute[] extraAttributes= entry.getExtraAttributes();
   //		for (int i= 0; i < extraAttributes.length; i++) {
-  //			if (IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME.equals(extraAttributes[i].getName())) {
+  //			if (IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME.equals(extraAttributes[i].getName()))
+  // {
   //				return null;
   //			}
   //		}
@@ -164,7 +167,8 @@ public class JavaDocLocations {
   //		return null;
   //	}
   //
-  //	private static void convertContainer(IClasspathEntry entry, IJavaProject project, Map<IPath, String> oldLocationMap) {
+  //	private static void convertContainer(IClasspathEntry entry, IJavaProject project, Map<IPath,
+  // String> oldLocationMap) {
   //		try {
   //			IClasspathContainer container= JavaCore.getClasspathContainer(entry.getPath(), project);
   //			if (container == null) {
@@ -226,13 +230,13 @@ public class JavaDocLocations {
 
   public static URL getLibraryJavadocLocation(IClasspathEntry entry) {
     if (entry == null) {
-      throw new IllegalArgumentException("Entry must not be null"); //$NON-NLS-1$
+      throw new IllegalArgumentException("Entry must not be null"); // $NON-NLS-1$
     }
 
     int kind = entry.getEntryKind();
     if (kind != IClasspathEntry.CPE_LIBRARY && kind != IClasspathEntry.CPE_VARIABLE) {
       throw new IllegalArgumentException(
-          "Entry must be of kind CPE_LIBRARY or CPE_VARIABLE"); //$NON-NLS-1$
+          "Entry must be of kind CPE_LIBRARY or CPE_VARIABLE"); // $NON-NLS-1$
     }
 
     IClasspathAttribute[] extraAttributes = entry.getExtraAttributes();
@@ -335,7 +339,8 @@ public class JavaDocLocations {
   //		// in 2.0, the Javadoc locations were stored as one big string in the persistent properties
   //		// note that it is wrong to use a stream reader with XML declaring to be UTF-8
   //		try {
-  //			final QualifiedName QUALIFIED_NAME= new QualifiedName(JavaUI.ID_PLUGIN, "jdoclocation"); //$NON-NLS-1$
+  //			final QualifiedName QUALIFIED_NAME= new QualifiedName(JavaUI.ID_PLUGIN, "jdoclocation");
+  // //$NON-NLS-1$
   //
   //			IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
   //			String xmlString= root.getPersistentProperty(QUALIFIED_NAME);
@@ -360,7 +365,8 @@ public class JavaDocLocations {
   //		return resultingOldLocations;
   //	}
 
-  //	private static void loadFromStream(InputSource inputSource, Map<IPath, String> oldLocations) throws CoreException {
+  //	private static void loadFromStream(InputSource inputSource, Map<IPath, String> oldLocations)
+  // throws CoreException {
   //		Element cpElement;
   //		try {
   //			DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -395,7 +401,8 @@ public class JavaDocLocations {
   //		}
   //	}
 
-  //	public static URL getJavadocLocation(IJavaElement element, boolean includeMemberReference) throws JavaModelException {
+  //	public static URL getJavadocLocation(IJavaElement element, boolean includeMemberReference)
+  // throws JavaModelException {
   //		URL baseLocation= getJavadocBaseLocation(element);
   //		if (baseLocation == null) {
   //			return null;
@@ -457,7 +464,8 @@ public class JavaDocLocations {
   //
   //				if (decl.isOnDemand()) {
   //					IJavaElement
-  //							cont= JavaModelUtil.findTypeContainer(element.getJavaProject(), Signature.getQualifier(decl.getElementName()));
+  //							cont= JavaModelUtil.findTypeContainer(element.getJavaProject(),
+  // Signature.getQualifier(decl.getElementName()));
   //					if (cont instanceof IType) {
   //						appendTypePath((IType) cont, pathBuffer);
   //					} else if (cont instanceof IPackageFragment) {
@@ -499,11 +507,11 @@ public class JavaDocLocations {
   private static void appendPackageSummaryPath(IPackageFragment pack, StringBuffer buf) {
     String packPath = pack.getElementName().replace('.', '/');
     buf.append(packPath);
-    buf.append("/package-summary.html"); //$NON-NLS-1$
+    buf.append("/package-summary.html"); // $NON-NLS-1$
   }
 
   private static void appendIndexPath(StringBuffer buf) {
-    buf.append("index.html"); //$NON-NLS-1$
+    buf.append("index.html"); // $NON-NLS-1$
   }
 
   private static void appendTypePath(IType type, StringBuffer buf) {
@@ -515,7 +523,7 @@ public class JavaDocLocations {
       buf.append('/');
     }
     buf.append(typePath);
-    buf.append(".html"); //$NON-NLS-1$
+    buf.append(".html"); // $NON-NLS-1$
   }
 
   private static void appendFieldReference(IField field, StringBuffer buf) {
@@ -539,7 +547,7 @@ public class JavaDocLocations {
     int lastParam = params.length - 1;
     for (int i = 0; i <= lastParam; i++) {
       if (i != 0) {
-        buf.append(is18OrHigher ? "-" : ", "); //$NON-NLS-1$ //$NON-NLS-2$
+        buf.append(is18OrHigher ? "-" : ", "); // $NON-NLS-1$ //$NON-NLS-2$
       }
       String curr = Signature.getTypeErasure(params[i]);
       String fullName = JavaModelUtil.getResolvedTypeName(curr, declaringType);
@@ -553,11 +561,11 @@ public class JavaDocLocations {
           dim--;
         }
         while (dim > 0) {
-          buf.append(is18OrHigher ? ":A" : "[]"); //$NON-NLS-1$ //$NON-NLS-2$
+          buf.append(is18OrHigher ? ":A" : "[]"); // $NON-NLS-1$ //$NON-NLS-2$
           dim--;
         }
         if (i == lastParam && isVararg) {
-          buf.append("..."); //$NON-NLS-1$
+          buf.append("..."); // $NON-NLS-1$
         }
       }
     }
@@ -570,10 +578,12 @@ public class JavaDocLocations {
   //	 * @param element whose Javadoc location has to be found
   //	 * @param isBinary <code>true</code> if the Java element is from a binary container
   //	 * @return the location URL of the Javadoc or <code>null</code> if the location cannot be found
-  //	 * @throws org.eclipse.jdt.core.JavaModelException thrown when the Java element cannot be accessed
+  //	 * @throws org.eclipse.jdt.core.JavaModelException thrown when the Java element cannot be
+  // accessed
   //	 * @since 3.9
   //	 */
-  //	public static String getBaseURL(IJavaElement element, boolean isBinary) throws JavaModelException {
+  //	public static String getBaseURL(IJavaElement element, boolean isBinary) throws
+  // JavaModelException {
   //		if (isBinary) {
   //			// Source attachment usually does not include Javadoc resources
   //			// => Always use the Javadoc location as base:
@@ -582,7 +592,8 @@ public class JavaDocLocations {
   //				if (baseURL.getProtocol().equals(JAR_PROTOCOL)) {
   //					// It's a JarURLConnection, which is not known to the browser widget.
   //					// Let's start the help web server:
-  //					URL baseURL2= PlatformUI.getWorkbench().getHelpSystem().resolve(baseURL.toExternalForm(), true);
+  //					URL baseURL2= PlatformUI.getWorkbench().getHelpSystem().resolve(baseURL.toExternalForm(),
+  // true);
   //					if (baseURL2 != null) { // can be null if org.eclipse.help.ui is not available
   //						baseURL= baseURL2;
   //					}
@@ -684,9 +695,9 @@ public class JavaDocLocations {
       } catch (URISyntaxException e) {
         try {
           // don't log, since we used to store bad (unencoded) URLs
-          if (url.startsWith("file:/")) { //$NON-NLS-1$
+          if (url.startsWith("file:/")) { // $NON-NLS-1$
             // workaround for a bug in the 3-arg URI constructor for paths that contain '[' or ']':
-            return new URI("file", null, url.substring(5), null).toURL(); //$NON-NLS-1$
+            return new URI("file", null, url.substring(5), null).toURL(); // $NON-NLS-1$
           } else {
             return URIUtil.fromString(url).toURL();
           }

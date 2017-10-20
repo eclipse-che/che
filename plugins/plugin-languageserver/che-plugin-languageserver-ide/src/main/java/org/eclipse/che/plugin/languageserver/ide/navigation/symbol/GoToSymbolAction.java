@@ -85,9 +85,7 @@ public class GoToSymbolAction extends AbstractPerspectiveAction
     super(
         singletonList(PROJECT_PERSPECTIVE_ID),
         localization.goToSymbolActionDescription(),
-        localization.goToSymbolActionTitle(),
-        null,
-        null);
+        localization.goToSymbolActionTitle());
     this.presenter = presenter;
     this.localization = localization;
     this.client = client;
@@ -171,7 +169,7 @@ public class GoToSymbolAction extends AbstractPerspectiveAction
             new TextRange(
                 new TextPosition(range.getStart().getLine(), range.getStart().getCharacter()),
                 new TextPosition(range.getEnd().getLine(), range.getEnd().getCharacter()));
-        //TODO add icons
+        // TODO add icons
         result.add(
             new SymbolEntry(
                 label,

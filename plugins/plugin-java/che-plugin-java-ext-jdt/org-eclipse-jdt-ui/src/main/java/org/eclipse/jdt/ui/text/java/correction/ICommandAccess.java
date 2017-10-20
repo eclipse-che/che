@@ -18,10 +18,10 @@ package org.eclipse.jdt.ui.text.java.correction;
 public interface ICommandAccess {
 
   /** Correction commands starting with this prefix will be handled by the Java editor. */
-  public static final String COMMAND_ID_PREFIX = "org.eclipse.jdt.ui.correction."; //$NON-NLS-1$
+  public static final String COMMAND_ID_PREFIX = "org.eclipse.jdt.ui.correction."; // $NON-NLS-1$
 
   /** Commands for quick assists must have this suffix. */
-  public static final String ASSIST_SUFFIX = ".assist"; //$NON-NLS-1$
+  public static final String ASSIST_SUFFIX = ".assist"; // $NON-NLS-1$
 
   /**
    * Returns the id of the command that should invoke this correction proposal.

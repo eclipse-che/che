@@ -93,32 +93,32 @@ public class DeleteFilesTest {
     projectExplorer.openItemByPath(PATH_TO_WEB_APP + "/index.jsp");
     editor.waitActiveEditor();
 
-    //delete jsp file
+    // delete jsp file
     deleteFromMenuFile(DELETE_TEXT_FOR_JSP, PATH_TO_JSP);
 
-    //delete css file
+    // delete css file
     deleteFromMenuFile(DELETE_TEXT_FOR_CSS, PATH_TO_CSS);
 
-    //delete xml file
+    // delete xml file
     deleteFromMenuFile(DELETE_TEXT_FOR_XML, PATH_TO_XML);
 
-    //delete less file
+    // delete less file
     deleteFromMenuFile(DELETE_TEXT_FOR_LESS, PATH_TO_LESS);
 
-    //delete html file
+    // delete html file
     deleteFromMenuFile(DELETE_TEXT_FOR_HTML, PATH_TO_HTML);
     checkDeletion(PATH_TO_HTML);
 
-    //delete js file
+    // delete js file
     deleteFromMenuFile(DELETE_TEXT_FOR_JS, PATH_TO_JAVASCRIPT);
 
-    //delete java class file
+    // delete java class file
     deleteFromMenuFile(DELETE_TEXT_FOR_JAVA_CLASS, PATH_TO_JAVA_CLASS);
 
-    //delete simple file
+    // delete simple file
     deleteFromMenuFile(DELETE_TEXT_FOR_SIMPLE_FILE, PATH_TO_SIMPLE_FILE);
 
-    //delete sql file
+    // delete sql file
     deleteFromMenuFile(DELETE_TEXT_FOR_SQL, PATH_TO_SQL);
   }
 

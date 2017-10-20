@@ -32,7 +32,7 @@ import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
 public class CheckMacrosFeatureTest {
-  //TODO In this test need add more macros for checking
+  // TODO In this test need add more macros for checking
   private static final String PROJECT_NAME = CheckMacrosFeatureTest.class.getSimpleName();
   private static final String COMMAND =
       "echo ${editor.current.file.name} ${editor.current.file.path}"

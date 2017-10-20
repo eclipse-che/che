@@ -117,7 +117,7 @@ public abstract class ResourceChange extends Change {
    */
   public RefactoringStatus isValid(IProgressMonitor pm)
       throws CoreException, OperationCanceledException {
-    pm.beginTask("", 2); //$NON-NLS-1$
+    pm.beginTask("", 2); // $NON-NLS-1$
     try {
       RefactoringStatus result = new RefactoringStatus();
       IResource resource = getModifiedResource();

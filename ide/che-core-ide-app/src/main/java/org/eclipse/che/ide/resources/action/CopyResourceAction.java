@@ -57,7 +57,6 @@ public class CopyResourceAction extends AbstractPerspectiveAction {
         singletonList(PROJECT_PERSPECTIVE_ID),
         localization.copyItemsActionText(),
         localization.copyItemsActionDescription(),
-        null,
         resources.copy());
     this.clipboardManager = clipboardManager;
     this.appContext = appContext;

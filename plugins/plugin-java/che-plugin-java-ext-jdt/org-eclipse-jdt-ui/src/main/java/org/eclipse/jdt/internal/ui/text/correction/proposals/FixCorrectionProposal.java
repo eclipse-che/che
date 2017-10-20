@@ -73,7 +73,8 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal
     //			}
     //
     //			ImageDescriptor composite =
-    //					new JavaElementImageDescriptor(image, flag, new Point(image.getImageData().width, image.getImageData().height));
+    //					new JavaElementImageDescriptor(image, flag, new Point(image.getImageData().width,
+    // image.getImageData().height));
     //			return composite.createImage();
     //		} else {
     return super.getImage();
@@ -93,15 +94,15 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal
 
     IStatus status = getFixStatus();
     if (status != null && !status.isOK()) {
-      result.append("<b>"); //$NON-NLS-1$
+      result.append("<b>"); // $NON-NLS-1$
       if (status.getSeverity() == IStatus.WARNING) {
         result.append(CorrectionMessages.FixCorrectionProposal_WarningAdditionalProposalInfo);
       } else if (status.getSeverity() == IStatus.ERROR) {
         result.append(CorrectionMessages.FixCorrectionProposal_ErrorAdditionalProposalInfo);
       }
-      result.append("</b>"); //$NON-NLS-1$
+      result.append("</b>"); // $NON-NLS-1$
       result.append(status.getMessage());
-      result.append("<br><br>"); //$NON-NLS-1$
+      result.append("<br><br>"); // $NON-NLS-1$
     }
 
     String info = fFix.getAdditionalProposalInfo();
@@ -155,7 +156,8 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal
     //			int stopSeverity= RefactoringCore.getConditionCheckingFailedSeverity();
     //			Shell shell= JavaPlugin.getActiveWorkbenchShell();
     //			IRunnableContext context= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-    //			RefactoringExecutionHelper executer= new RefactoringExecutionHelper(refactoring, stopSeverity, RefactoringSaveHelper.SAVE_NOTHING, shell, context);
+    //			RefactoringExecutionHelper executer= new RefactoringExecutionHelper(refactoring,
+    // stopSeverity, RefactoringSaveHelper.SAVE_NOTHING, shell, context);
     //			try {
     //				executer.perform(true, true);
     //			} catch (InterruptedException e) {
@@ -167,7 +169,8 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal
     apply(viewer.getDocument());
   }
 
-  //	public void resolve(MultiFixTarget[] targets, final IProgressMonitor monitor) throws CoreException {
+  //	public void resolve(MultiFixTarget[] targets, final IProgressMonitor monitor) throws
+  // CoreException {
   //		if (targets.length == 0)
   //			return;
   //
@@ -190,13 +193,15 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal
   //		refactoring.addCleanUp(fCleanUp);
   //
   //		IRunnableContext context= new IRunnableContext() {
-  //			public void run(boolean fork, boolean cancelable, IRunnableWithProgress runnable) throws InvocationTargetException, InterruptedException {
+  //			public void run(boolean fork, boolean cancelable, IRunnableWithProgress runnable) throws
+  // InvocationTargetException, InterruptedException {
   //				runnable.run(monitor == null ? new NullProgressMonitor() : monitor);
   //			}
   //		};
   //
   //		Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-  //		RefactoringExecutionHelper helper= new RefactoringExecutionHelper(refactoring, IStatus.INFO, RefactoringSaveHelper.SAVE_REFACTORING, shell, context);
+  //		RefactoringExecutionHelper helper= new RefactoringExecutionHelper(refactoring, IStatus.INFO,
+  // RefactoringSaveHelper.SAVE_REFACTORING, shell, context);
   //		try {
   //			helper.perform(true, true);
   //		} catch (InterruptedException e) {
@@ -205,7 +210,8 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal
   //			if (cause instanceof CoreException) {
   //				throw (CoreException)cause;
   //			} else {
-  //				throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, cause.getLocalizedMessage(), cause));
+  //				throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN,
+  // cause.getLocalizedMessage(), cause));
   //			}
   //		}
   //	}

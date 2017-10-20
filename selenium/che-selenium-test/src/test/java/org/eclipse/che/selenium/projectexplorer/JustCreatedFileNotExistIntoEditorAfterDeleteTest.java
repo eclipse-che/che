@@ -66,7 +66,7 @@ public class JustCreatedFileNotExistIntoEditorAfterDeleteTest {
     projectExplorer.selectVisibleItem("webapp");
     loader.waitOnClosed();
 
-    //create new file
+    // create new file
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.New.NEW,
@@ -82,7 +82,7 @@ public class JustCreatedFileNotExistIntoEditorAfterDeleteTest {
     loader.waitOnClosed();
     editor.waitTabIsPresent("fileForeTest.jsp");
 
-    //delete new file
+    // delete new file
     projectExplorer.selectItem(PROJECT_NAME + "/src/main/webapp/fileForeTest.jsp");
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.DELETE);
 

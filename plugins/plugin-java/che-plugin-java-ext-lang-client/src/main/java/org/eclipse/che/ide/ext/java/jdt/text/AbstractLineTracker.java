@@ -216,7 +216,8 @@ public abstract class AbstractLineTracker implements LineTracker {
   protected abstract DelimiterInfo nextDelimiterInfo(String text, int offset);
 
   // /*
-  // * @see org.eclipse.jface.text.ILineTrackerExtension#startRewriteSession(org.eclipse.jface.text.DocumentRewriteSession)
+  // * @see
+  // org.eclipse.jface.text.ILineTrackerExtension#startRewriteSession(org.eclipse.jface.text.DocumentRewriteSession)
   // * @since 3.1
   // */
   // public final void startRewriteSession(DocumentRewriteSession session) {
@@ -227,7 +228,8 @@ public abstract class AbstractLineTracker implements LineTracker {
   // }
   //
   // /*
-  // * @see org.eclipse.jface.text.ILineTrackerExtension#stopRewriteSession(org.eclipse.jface.text.DocumentRewriteSession,
+  // * @see
+  // org.eclipse.jface.text.ILineTrackerExtension#stopRewriteSession(org.eclipse.jface.text.DocumentRewriteSession,
   // java.lang.String)
   // * @since 3.1
   // */

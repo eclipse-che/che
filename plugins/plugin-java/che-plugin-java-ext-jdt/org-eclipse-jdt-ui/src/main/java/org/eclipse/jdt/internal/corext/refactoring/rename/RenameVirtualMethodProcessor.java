@@ -105,14 +105,14 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
     return RefactoringAvailabilityTester.isRenameVirtualMethodAvailable(getMethod());
   }
 
-  //------------ preconditions -------------
+  // ------------ preconditions -------------
 
   @Override
   public RefactoringStatus checkInitialConditions(IProgressMonitor monitor) throws CoreException {
     RefactoringStatus result = super.checkInitialConditions(monitor);
     if (result.hasFatalError()) return result;
     try {
-      monitor.beginTask("", 3); //$NON-NLS-1$
+      monitor.beginTask("", 3); // $NON-NLS-1$
       if (!fActivationChecked) {
         // the following code may change the method to be changed.
         IMethod method = getMethod();
@@ -139,7 +139,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
   protected RefactoringStatus doCheckFinalConditions(
       IProgressMonitor pm, CheckConditionsContext checkContext) throws CoreException {
     try {
-      pm.beginTask("", 9); //$NON-NLS-1$
+      pm.beginTask("", 9); // $NON-NLS-1$
       RefactoringStatus result = new RefactoringStatus();
 
       result.merge(super.doCheckFinalConditions(new SubProgressMonitor(pm, 7), checkContext));
@@ -169,7 +169,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
                   new String[] {
                     BasicElementLabels.getJavaElementName(method.getElementName()),
                     "UnsatisfiedLinkError"
-                  })); //$NON-NLS-1$
+                  })); // $NON-NLS-1$
         }
 
         IMethod[] hierarchyMethods =
@@ -200,14 +200,14 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
     }
   }
 
-  //---- Interface checks -------------------------------------
+  // ---- Interface checks -------------------------------------
 
   private IMethod[] relatedTypeDeclaresMethodName(
       IProgressMonitor pm, IMethod method, String newName) throws CoreException {
     try {
       Set<IMethod> result = new HashSet<IMethod>();
       Set<IType> types = getRelatedTypes();
-      pm.beginTask("", types.size()); //$NON-NLS-1$
+      pm.beginTask("", types.size()); // $NON-NLS-1$
       for (Iterator<IType> iter = types.iterator(); iter.hasNext(); ) {
         final IMethod found = Checks.findMethod(method, iter.next());
         final IType declaring = found.getDeclaringType();
@@ -233,17 +233,17 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
           "toString",
           "toString",
           "toString",
-          "equals", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+          "equals", // $NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
           "equals",
           "getClass",
           "getClass",
           "hashCode",
-          "notify", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+          "notify", // $NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
           "notifyAll",
           "wait",
           "wait",
           "wait"
-        }; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+        }; // $NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
     String[][] specialParamTypes =
         new String[][] {
           noParams,
@@ -253,7 +253,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
           {"QObject;"},
           {"Qjava.lang.Object;"},
           noParams,
-          noParams, //$NON-NLS-2$ //$NON-NLS-1$
+          noParams, // $NON-NLS-2$ //$NON-NLS-1$
           noParams,
           noParams,
           noParams,
@@ -266,11 +266,11 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
           "QString;",
           "QString;",
           "Qjava.lang.String;",
-          "Qjava.lang.String;", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+          "Qjava.lang.String;", // $NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
           Signature.SIG_BOOLEAN,
           Signature.SIG_BOOLEAN,
           "QClass;",
-          "Qjava.lang.Class;", //$NON-NLS-2$ //$NON-NLS-1$
+          "Qjava.lang.Class;", // $NON-NLS-2$ //$NON-NLS-1$
           Signature.SIG_INT,
           Signature.SIG_VOID,
           Signature.SIG_VOID,
@@ -300,7 +300,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
     return result;
   }
 
-  //---- Class checks -------------------------------------
+  // ---- Class checks -------------------------------------
 
   private boolean classesDeclareOverridingNativeMethod(IType[] classes) throws CoreException {
     for (int i = 0; i < classes.length; i++) {

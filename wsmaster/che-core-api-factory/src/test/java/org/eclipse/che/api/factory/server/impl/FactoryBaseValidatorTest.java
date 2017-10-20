@@ -316,70 +316,70 @@ public class FactoryBaseValidatorTest {
 
   @Test(expectedExceptions = BadRequestException.class)
   public void shouldNotValidateOpenfileActionIfInWrongSectionOnAppClosed() throws Exception {
-    //given
+    // given
     validator = new TesterFactoryBaseValidator();
     List<IdeActionDto> actions = singletonList(newDto(IdeActionDto.class).withId("openFile"));
     IdeDto ide =
         newDto(IdeDto.class).withOnAppClosed(newDto(OnAppClosedDto.class).withActions(actions));
     FactoryDto factoryWithAccountId = requireNonNull(getInstance().clone(factory)).withIde(ide);
-    //when
+    // when
     validator.validateProjectActions(factoryWithAccountId);
   }
 
   @Test(expectedExceptions = BadRequestException.class)
   public void shouldNotValidateFindReplaceActionIfInWrongSectionOnAppLoaded() throws Exception {
-    //given
+    // given
     validator = new TesterFactoryBaseValidator();
     List<IdeActionDto> actions = singletonList(newDto(IdeActionDto.class).withId("findReplace"));
     IdeDto ide =
         newDto(IdeDto.class).withOnAppLoaded(newDto(OnAppLoadedDto.class).withActions(actions));
     FactoryDto factoryWithAccountId = requireNonNull(getInstance().clone(factory)).withIde(ide);
-    //when
+    // when
     validator.validateProjectActions(factoryWithAccountId);
   }
 
   @Test(expectedExceptions = BadRequestException.class)
   public void shouldNotValidateIfOpenfileActionInsufficientParams() throws Exception {
-    //given
+    // given
     validator = new TesterFactoryBaseValidator();
     List<IdeActionDto> actions = singletonList(newDto(IdeActionDto.class).withId("openFile"));
     IdeDto ide =
         newDto(IdeDto.class)
             .withOnProjectsLoaded(newDto(OnProjectsLoadedDto.class).withActions(actions));
     FactoryDto factoryWithAccountId = requireNonNull(getInstance().clone(factory)).withIde(ide);
-    //when
+    // when
     validator.validateProjectActions(factoryWithAccountId);
   }
 
   @Test(expectedExceptions = BadRequestException.class)
   public void shouldNotValidateIfrunCommandActionInsufficientParams() throws Exception {
-    //given
+    // given
     validator = new TesterFactoryBaseValidator();
     List<IdeActionDto> actions = singletonList(newDto(IdeActionDto.class).withId("openFile"));
     IdeDto ide =
         newDto(IdeDto.class)
             .withOnProjectsLoaded(newDto(OnProjectsLoadedDto.class).withActions(actions));
     FactoryDto factoryWithAccountId = requireNonNull(getInstance().clone(factory)).withIde(ide);
-    //when
+    // when
     validator.validateProjectActions(factoryWithAccountId);
   }
 
   @Test(expectedExceptions = BadRequestException.class)
   public void shouldNotValidateIfOpenWelcomePageActionInsufficientParams() throws Exception {
-    //given
+    // given
     validator = new TesterFactoryBaseValidator();
     List<IdeActionDto> actions =
         singletonList(newDto(IdeActionDto.class).withId("openWelcomePage"));
     IdeDto ide =
         newDto(IdeDto.class).withOnAppLoaded((newDto(OnAppLoadedDto.class).withActions(actions)));
     FactoryDto factoryWithAccountId = requireNonNull(getInstance().clone(factory)).withIde(ide);
-    //when
+    // when
     validator.validateProjectActions(factoryWithAccountId);
   }
 
   @Test(expectedExceptions = BadRequestException.class)
   public void shouldNotValidateIfFindReplaceActionInsufficientParams() throws Exception {
-    //given
+    // given
     validator = new TesterFactoryBaseValidator();
     Map<String, String> params = new HashMap<>();
     params.put("in", "pom.xml");
@@ -391,13 +391,13 @@ public class FactoryBaseValidatorTest {
         newDto(IdeDto.class)
             .withOnProjectsLoaded(newDto(OnProjectsLoadedDto.class).withActions(actions));
     FactoryDto factoryWithAccountId = requireNonNull(getInstance().clone(factory)).withIde(ide);
-    //when
+    // when
     validator.validateProjectActions(factoryWithAccountId);
   }
 
   @Test
   public void shouldValidateFindReplaceAction() throws Exception {
-    //given
+    // given
     validator = new TesterFactoryBaseValidator();
     Map<String, String> params = new HashMap<>();
     params.put("in", "pom.xml");
@@ -409,13 +409,13 @@ public class FactoryBaseValidatorTest {
         newDto(IdeDto.class)
             .withOnProjectsLoaded(newDto(OnProjectsLoadedDto.class).withActions(actions));
     FactoryDto factoryWithAccountId = requireNonNull(getInstance().clone(factory)).withIde(ide);
-    //when
+    // when
     validator.validateProjectActions(factoryWithAccountId);
   }
 
   @Test
   public void shouldValidateOpenfileAction() throws Exception {
-    //given
+    // given
     validator = new TesterFactoryBaseValidator();
     Map<String, String> params = new HashMap<>();
     params.put("file", "pom.xml");
@@ -425,7 +425,7 @@ public class FactoryBaseValidatorTest {
         newDto(IdeDto.class)
             .withOnProjectsLoaded(newDto(OnProjectsLoadedDto.class).withActions(actions));
     FactoryDto factoryWithAccountId = requireNonNull(getInstance().clone(factory)).withIde(ide);
-    //when
+    // when
     validator.validateProjectActions(factoryWithAccountId);
   }
 

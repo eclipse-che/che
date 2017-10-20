@@ -260,21 +260,21 @@ public class CommitViewImpl extends Window implements CommitView {
     @Override
     public Element render(
         final Node node, final String domID, final Tree.Joint joint, final int depth) {
-      //Initialize HTML elements.
+      // Initialize HTML elements.
       final Element rootContainer = super.render(node, domID, joint, depth);
       final Element nodeContainer = rootContainer.getFirstChildElement();
       final Element checkBoxElement = new CheckBox().getElement();
       final InputElement checkBoxInputElement =
           (InputElement) checkBoxElement.getElementsByTagName("input").getItem(0);
 
-      //Set check-box state.
+      // Set check-box state.
       final Path nodePath =
           node instanceof ChangedFileNode
               ? Path.valueOf(node.getName())
               : ((ChangedFolderNode) node).getPath();
       checkBoxInputElement.setChecked(!unselectedNodePaths.contains(nodePath));
 
-      //Add check-box click handler.
+      // Add check-box click handler.
       Event.sinkEvents(checkBoxElement, Event.ONCLICK);
       Event.setEventListener(
           checkBoxElement,
@@ -287,7 +287,7 @@ public class CommitViewImpl extends Window implements CommitView {
             }
           });
 
-      //Paste check-box element to node container.
+      // Paste check-box element to node container.
       nodeContainer.insertAfter(checkBoxElement, nodeContainer.getFirstChild());
 
       return rootContainer;

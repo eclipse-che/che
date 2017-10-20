@@ -94,7 +94,8 @@ public class MissingReturnTypeInLambdaCorrectionProposal
     for (int i = 0; i < bindings.length; i++) {
       IVariableBinding curr = (IVariableBinding) bindings[i];
       ITypeBinding type = curr.getType();
-      // Bindings are compared to make sure that a lambda does not return a variable which is yet to be initialised.
+      // Bindings are compared to make sure that a lambda does not return a variable which is yet to
+      // be initialised.
       if (type != null
           && type.isAssignmentCompatible(returnBinding)
           && testModifier(curr)

@@ -109,5 +109,7 @@ public class EnvironmentParser {
       container.getExpose().add(normalizedPort);
     }
     container.setExpose(container.getExpose().stream().distinct().collect(Collectors.toList()));
+
+    container.getEnvironment().putAll(machineConfig.getEnv());
   }
 }

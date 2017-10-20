@@ -34,12 +34,7 @@ public class RecentFileAction extends AbstractPerspectiveAction {
 
   @Inject
   public RecentFileAction(@Assisted File file, EditorAgent editorAgent) {
-    super(
-        singletonList(PROJECT_PERSPECTIVE_ID),
-        getShortPath(file.getLocation().toString()),
-        null,
-        null,
-        null);
+    super(singletonList(PROJECT_PERSPECTIVE_ID), getShortPath(file.getLocation().toString()));
     this.file = file;
     this.editorAgent = editorAgent;
   }

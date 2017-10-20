@@ -318,8 +318,8 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
         hidePopup();
         break;
       default:
-        //here need some delay to be sure input box initiated with given value
-        //in manually testing hard to reproduce this problem but it reproduced with selenium tests
+        // here need some delay to be sure input box initiated with given value
+        // in manually testing hard to reproduce this problem but it reproduced with selenium tests
         new Timer() {
           @Override
           public void run() {

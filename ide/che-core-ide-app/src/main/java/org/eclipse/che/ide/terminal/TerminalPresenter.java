@@ -42,7 +42,7 @@ import org.eclipse.che.requirejs.ModuleHolder;
  */
 public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate {
 
-  //event which is performed when user input data into terminal
+  // event which is performed when user input data into terminal
   private static final String DATA_EVENT_NAME = "data";
   private static final int TIME_BETWEEN_CONNECTIONS = 2_000;
 

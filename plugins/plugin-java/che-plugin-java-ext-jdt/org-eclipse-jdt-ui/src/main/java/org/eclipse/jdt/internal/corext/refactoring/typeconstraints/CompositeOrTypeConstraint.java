@@ -29,7 +29,7 @@ public class CompositeOrTypeConstraint implements ITypeConstraint {
   }
 
   private static ITypeConstraint[] sort(ITypeConstraint[] constraints) {
-    //TODO bogus to sort by toString - will have to come up with something better
+    // TODO bogus to sort by toString - will have to come up with something better
     Arrays.sort(
         constraints,
         new Comparator<ITypeConstraint>() {
@@ -47,7 +47,7 @@ public class CompositeOrTypeConstraint implements ITypeConstraint {
     StringBuffer buff = new StringBuffer();
     for (int i = 0; i < fConstraints.length; i++) {
       ITypeConstraint constraint = fConstraints[i];
-      if (i > 0) buff.append(" or "); //$NON-NLS-1$
+      if (i > 0) buff.append(" or "); // $NON-NLS-1$
       buff.append(constraint.toResolvedString());
     }
     return buff.toString();
@@ -68,7 +68,7 @@ public class CompositeOrTypeConstraint implements ITypeConstraint {
     StringBuffer buff = new StringBuffer();
     for (int i = 0; i < fConstraints.length; i++) {
       ITypeConstraint constraint = fConstraints[i];
-      if (i > 0) buff.append(" or "); //$NON-NLS-1$
+      if (i > 0) buff.append(" or "); // $NON-NLS-1$
       buff.append(constraint.toString());
     }
     return buff.toString();

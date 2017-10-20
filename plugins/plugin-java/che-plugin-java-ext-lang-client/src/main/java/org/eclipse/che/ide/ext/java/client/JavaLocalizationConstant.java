@@ -462,7 +462,7 @@ public interface JavaLocalizationConstant extends Messages {
   @Key("macro.project.java.classpath.description")
   String macroProjectJavaClasspathDescription();
 
-  //Formatter
+  // Formatter
   @Key("formatter.preferences.group.title")
   String formatterPreferencesGroupTitle();
 

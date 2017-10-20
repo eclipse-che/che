@@ -76,39 +76,39 @@ public class DeletePackageFromContextMenuTest {
     openItemByPath(PATH_TO_WEB_INF + "/spring-servlet.xml");
     openItemByPath(PATH_TO_WEB_INF + "/web.xml");
 
-    //select package1 for deletion
+    // select package1 for deletion
     projectExplorer.selectItem(PATH_TO_PACKAGE1);
     deletePackage(PATH_TO_PACKAGE1, DELETE_TEXT1);
     loader.waitOnClosed();
-    //check that files from deleted package was closed in editor
+    // check that files from deleted package was closed in editor
 
     editor.waitTabIsNotPresent("spring-servlet.xml");
     editor.waitTabIsNotPresent("web.xml");
 
-    //check that package disappeared in editor
+    // check that package disappeared in editor
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitDisappearItemByPath(PATH_TO_PACKAGE1);
 
-    //select package2 for deletion
+    // select package2 for deletion
     projectExplorer.selectItem(PATH_TO_PACKAGE2);
     deletePackage(PATH_TO_PACKAGE2, DELETE_TEXT2);
     loader.waitOnClosed();
-    //check that files from deleted package was closed in editor
+    // check that files from deleted package was closed in editor
     editor.waitTabIsNotPresent("index.jsp");
 
-    //check that package disappeared in editor
+    // check that package disappeared in editor
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitDisappearItemByPath(PATH_TO_PACKAGE2);
 
-    //select package3 for deletion
+    // select package3 for deletion
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples");
     projectExplorer.selectItem(PATH_TO_PACKAGE3);
     deletePackage(PATH_TO_PACKAGE3, DELETE_TEXT3);
     loader.waitOnClosed();
-    //check that files from deleted package was closed in editor
+    // check that files from deleted package was closed in editor
     editor.waitTabIsNotPresent("AppController");
 
-    //check that package disappeared in editor
+    // check that package disappeared in editor
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitDisappearItemByPath(PATH_TO_PACKAGE3);
   }

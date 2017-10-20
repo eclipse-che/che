@@ -18,6 +18,7 @@ package org.eclipse.che.jdt.internal.compiler.parser;
  * remote field constant inlining. | Given the intended purpose of the conversion is to resolve
  * references, this is not | a problem.
  */
+
 import org.eclipse.jdt.core.IAnnotatable;
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -148,7 +149,8 @@ public class SourceTypeConverter extends TypeConverter {
                 >= CompilationUnitElementInfo.ANNOTATION_THRESHOLD_FOR_DIET_PARSE
             || (compilationUnitElementInfo.hasFunctionalTypes && (this.flags & LOCAL_TYPE) != 0))) {
       // If more than 10 annotations, diet parse as this is faster, but not if
-      // the client wants local and anonymous types to be converted (https://bugs.eclipse.org/bugs/show_bug.cgi?id=254738)
+      // the client wants local and anonymous types to be converted
+      // (https://bugs.eclipse.org/bugs/show_bug.cgi?id=254738)
       // Also see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=405843
       if ((this.flags & LOCAL_TYPE) == 0) {
         return new Parser(this.problemReporter, true).dietParse(this.cu, compilationResult);

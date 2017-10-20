@@ -121,11 +121,11 @@ public class ToastLoader {
                 }
                 // if we have state exception during get element
                 catch (StaleElementReferenceException ex) {
-                  //average timeout for disappearance loader
+                  // average timeout for disappearance loader
                   WaitUtils.sleepQuietly(7);
                   return true;
                 }
-                //if loader does not appear
+                // if loader does not appear
                 catch (TimeoutException ex) {
                   return true;
                 }
@@ -163,11 +163,11 @@ public class ToastLoader {
                 }
                 // if we have state exception during get element
                 catch (StaleElementReferenceException ex) {
-                  //average timeout for disappearance loader
+                  // average timeout for disappearance loader
                   WaitUtils.sleepQuietly(userTimeout);
                   return true;
                 }
-                //if loader does not appear
+                // if loader does not appear
                 catch (TimeoutException ex) {
                   return true;
                 }

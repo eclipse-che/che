@@ -42,7 +42,7 @@ public class CopyOnWriteTextStore implements TextStore {
 
     /** Create an empty text store. */
     private StringTextStore() {
-      this(""); //$NON-NLS-1$
+      this(""); // $NON-NLS-1$
     }
 
     /**
@@ -52,7 +52,7 @@ public class CopyOnWriteTextStore implements TextStore {
      */
     private StringTextStore(String text) {
       super();
-      fText = text != null ? text : ""; //$NON-NLS-1$
+      fText = text != null ? text : ""; // $NON-NLS-1$
       fCopyLimit = fText.length() > SMALL_TEXT_LIMIT ? fText.length() / 2 : 0;
     }
 
@@ -136,6 +136,6 @@ public class CopyOnWriteTextStore implements TextStore {
   /* @see org.eclipse.jface.text.ITextStore#set(java.lang.String) */
   public void set(String text) {
     fTextStore = new StringTextStore(text);
-    fModifiableTextStore.set(""); //$NON-NLS-1$
+    fModifiableTextStore.set(""); // $NON-NLS-1$
   }
 }

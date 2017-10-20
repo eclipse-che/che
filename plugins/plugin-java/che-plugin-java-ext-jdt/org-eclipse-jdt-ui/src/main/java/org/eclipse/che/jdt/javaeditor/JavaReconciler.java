@@ -150,7 +150,7 @@ public class JavaReconciler {
       positions = semanticHighlighting.reconcileSemanticHighlight(unit);
 
       if (workingCopy instanceof ClassFileWorkingCopy) {
-        //we don't wont to show any errors from ".class" files
+        // we don't wont to show any errors from ".class" files
         problemRequestor.reset();
       }
     } catch (JavaModelException e) {
@@ -166,7 +166,7 @@ public class JavaReconciler {
           workingCopy.getBuffer().close();
           workingCopy.discardWorkingCopy();
         } catch (JavaModelException e) {
-          //ignore
+          // ignore
         }
       }
     }
@@ -267,7 +267,7 @@ public class JavaReconciler {
         return;
       }
     } catch (JavaModelException e) {
-      return; //ignore - we haven't compilation unit to reconcile
+      return; // ignore - we haven't compilation unit to reconcile
     }
 
     try {

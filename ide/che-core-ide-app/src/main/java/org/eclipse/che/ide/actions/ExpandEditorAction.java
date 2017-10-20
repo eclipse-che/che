@@ -24,8 +24,8 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.Resources;
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.api.action.CustomComponentAction;
 import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.parts.PartStack;
@@ -38,7 +38,7 @@ import org.eclipse.che.ide.api.parts.PerspectiveManager;
  * @author Dmitry Shnurenko
  */
 @Singleton
-public class ExpandEditorAction extends Action implements CustomComponentAction {
+public class ExpandEditorAction extends BaseAction implements CustomComponentAction {
 
   private final Resources resources;
   private final CoreLocalizationConstant constant;
@@ -52,7 +52,7 @@ public class ExpandEditorAction extends Action implements CustomComponentAction 
       Resources resources,
       PerspectiveManager perspectiveManager,
       CoreLocalizationConstant constant) {
-    super(constant.actionExpandEditorTitle(), null, null, null, FontAwesome.EXPAND);
+    super(constant.actionExpandEditorTitle(), null, FontAwesome.EXPAND);
     this.resources = resources;
     this.perspectiveManager = perspectiveManager;
     this.constant = constant;

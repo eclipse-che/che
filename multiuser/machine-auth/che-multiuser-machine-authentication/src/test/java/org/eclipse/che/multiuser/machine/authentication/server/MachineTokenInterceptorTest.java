@@ -61,7 +61,8 @@ public class MachineTokenInterceptorTest {
     Module module =
         new AbstractModule() {
           public void configure() {
-            //Bind manager and his dep-s. To bind interceptor, guice must create intercepted class by himself.
+            // Bind manager and his dep-s. To bind interceptor, guice must create intercepted class
+            // by himself.
             bind(WorkspaceDao.class).toInstance(mock(WorkspaceDao.class));
             bind(EventService.class).toInstance(mock(EventService.class));
             bind(EntityManagerFactory.class).toInstance(mock(EntityManagerFactory.class));
@@ -77,7 +78,7 @@ public class MachineTokenInterceptorTest {
 
             bind(WorkspaceRuntimes.class);
 
-            //Main injection
+            // Main injection
             install(new MachineAuthModule());
 
             // To prevent real methods of manager calling

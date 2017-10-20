@@ -54,7 +54,7 @@ abstract class PackageReorgChange extends ResourceChange {
       IPackageFragment pack = getPackage();
       ResourceMapping mapping = JavaElementResourceMapping.create(pack);
       final Change result = doPerformReorg(pm);
-      //markAsExecuted(pack, mapping);
+      // markAsExecuted(pack, mapping);
       return result;
     } finally {
       pm.done();

@@ -104,7 +104,7 @@ public abstract class TextEdit {
       if (offset2 + length2 <= offset1) {
         return 1;
       }
-      throw new MalformedTreeException(null, edit1, "Overlapping text edits"); //$NON-NLS-1$
+      throw new MalformedTreeException(null, edit1, "Overlapping text edits"); // $NON-NLS-1$
     }
   }
 
@@ -342,7 +342,7 @@ public abstract class TextEdit {
   public final TextEdit removeChild(int index) {
     if (fChildren == null)
       throw new IndexOutOfBoundsException(
-          "Index: " + index + " Size: 0"); //$NON-NLS-1$//$NON-NLS-2$
+          "Index: " + index + " Size: 0"); // $NON-NLS-1$//$NON-NLS-2$
     TextEdit result = (TextEdit) fChildren.remove(index);
     result.internalSetParent(null);
     if (fChildren.isEmpty()) fChildren = null;
@@ -494,9 +494,9 @@ public abstract class TextEdit {
    */
   void internalToString(StringBuffer buffer, int indent) {
     for (int i = indent; i > 0; i--) {
-      buffer.append("  "); //$NON-NLS-1$
+      buffer.append("  "); // $NON-NLS-1$
     }
-    buffer.append("{"); //$NON-NLS-1$
+    buffer.append("{"); // $NON-NLS-1$
     String name = getClass().getName();
     int index = name.lastIndexOf('.');
     if (index != -1) {
@@ -504,15 +504,15 @@ public abstract class TextEdit {
     } else {
       buffer.append(name);
     }
-    buffer.append("} "); //$NON-NLS-1$
+    buffer.append("} "); // $NON-NLS-1$
     if (isDeleted()) {
-      buffer.append("[deleted]"); //$NON-NLS-1$
+      buffer.append("[deleted]"); // $NON-NLS-1$
     } else {
-      buffer.append("["); //$NON-NLS-1$
+      buffer.append("["); // $NON-NLS-1$
       buffer.append(getOffset());
-      buffer.append(","); //$NON-NLS-1$
+      buffer.append(","); // $NON-NLS-1$
       buffer.append(getLength());
-      buffer.append("]"); //$NON-NLS-1$
+      buffer.append("]"); // $NON-NLS-1$
     }
   }
 
@@ -722,10 +722,10 @@ public abstract class TextEdit {
   void internalAdd(TextEdit child) throws MalformedTreeException {
     child.aboutToBeAdded(this);
     if (child.isDeleted())
-      throw new MalformedTreeException(this, child, "Cannot add deleted edit"); //$NON-NLS-1$
+      throw new MalformedTreeException(this, child, "Cannot add deleted edit"); // $NON-NLS-1$
     if (!covers(child))
       throw new MalformedTreeException(
-          this, child, "Range of child edit lies outside of parent edit"); //$NON-NLS-1$
+          this, child, "Range of child edit lies outside of parent edit"); // $NON-NLS-1$
     if (fChildren == null) {
       fChildren = new ArrayList<TextEdit>(2);
     }

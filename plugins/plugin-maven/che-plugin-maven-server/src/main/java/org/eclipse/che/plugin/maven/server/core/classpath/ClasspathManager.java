@@ -90,7 +90,8 @@ public class ClasspathManager {
         localRepository = mavenServer.getLocalRepository();
       } catch (RuntimeException e) {
         // We can got this exception if maven not install in system
-        // This is temporary solution will be fix more accurate in https://jira.codenvycorp.com/browse/CHE-1120
+        // This is temporary solution will be fix more accurate in
+        // https://jira.codenvycorp.com/browse/CHE-1120
         LOG.warn("Maven server not started looks like you don't have Maven in your path");
       } finally {
         wrapperManager.release(mavenServer);

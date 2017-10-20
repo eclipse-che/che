@@ -245,7 +245,8 @@ public class CheArtifactResolver implements ArtifactResolver, Disposable {
         artifactRequest.setArtifact(RepositoryUtils.toArtifact(artifact));
         artifactRequest.setRepositories(RepositoryUtils.toRepos(remoteRepositories));
 
-        // Maven 2.x quirk: an artifact always points at the local repo, regardless whether resolved or not
+        // Maven 2.x quirk: an artifact always points at the local repo, regardless whether resolved
+        // or not
         LocalRepositoryManager lrm = session.getLocalRepositoryManager();
         String path = lrm.getPathForLocalArtifact(artifactRequest.getArtifact());
         artifact.setFile(new File(lrm.getRepository().getBasedir(), path));
@@ -430,8 +431,10 @@ public class CheArtifactResolver implements ArtifactResolver, Disposable {
       throws ArtifactResolutionException, ArtifactNotFoundException {
     ArtifactResolutionResult result = resolve(request);
 
-    // We have collected all the problems so let's mimic the way the old code worked and just blow up right here.
-    // That's right lets just let it rip right here and send a big incomprehensible blob of text at unsuspecting
+    // We have collected all the problems so let's mimic the way the old code worked and just blow
+    // up right here.
+    // That's right lets just let it rip right here and send a big incomprehensible blob of text at
+    // unsuspecting
     // users. Bad dog!
 
     resolutionErrorHandler.throwErrors(request, result);
@@ -452,7 +455,8 @@ public class CheArtifactResolver implements ArtifactResolver, Disposable {
     ArtifactFilter resolutionFilter = request.getResolutionFilter();
     RepositorySystemSession session = getSession(request.getLocalRepository());
 
-    //TODO: hack because metadata isn't generated in m2e correctly and i want to run the maven i have in the workspace
+    // TODO: hack because metadata isn't generated in m2e correctly and i want to run the maven i
+    // have in the workspace
     if (source == null) {
       try {
         source = container.lookup(ArtifactMetadataSource.class);
@@ -473,9 +477,11 @@ public class CheArtifactResolver implements ArtifactResolver, Disposable {
 
     ArtifactResolutionResult result = new ArtifactResolutionResult();
 
-    // The root artifact may, or may not be resolved so we need to check before we attempt to resolve.
+    // The root artifact may, or may not be resolved so we need to check before we attempt to
+    // resolve.
     // This is often an artifact like a POM that is taken from disk and we already have hold of the
-    // file reference. But this may be a Maven Plugin that we need to resolve from a remote repository
+    // file reference. But this may be a Maven Plugin that we need to resolve from a remote
+    // repository
     // as well as its dependencies.
 
     if (request.isResolveRoot() /* && rootArtifact.getFile() == null */) {
@@ -552,7 +558,8 @@ public class CheArtifactResolver implements ArtifactResolver, Disposable {
       return result;
     }
 
-    // After the collection we will have the artifact object in the result but they will not be resolved yet.
+    // After the collection we will have the artifact object in the result but they will not be
+    // resolved yet.
     result =
         artifactCollector.collect(
             artifacts,
@@ -598,7 +605,8 @@ public class CheArtifactResolver implements ArtifactResolver, Disposable {
       }
     }
 
-    // We want to send the root artifact back in the result but we need to do this after the other dependencies
+    // We want to send the root artifact back in the result but we need to do this after the other
+    // dependencies
     // have been resolved.
     if (request.isResolveRoot()) {
       // Add the root artifact (as the first artifact to retain logical order of class path!)
@@ -678,7 +686,8 @@ public class CheArtifactResolver implements ArtifactResolver, Disposable {
           result.addMissingArtifact(artifact);
         }
       } catch (ArtifactResolutionException e) {
-        // This is really a wagon TransferFailedException so something went wrong after we successfully
+        // This is really a wagon TransferFailedException so something went wrong after we
+        // successfully
         // retrieved the metadata.
 
         synchronized (result) {

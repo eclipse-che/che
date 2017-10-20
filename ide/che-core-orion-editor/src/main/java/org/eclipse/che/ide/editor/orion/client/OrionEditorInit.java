@@ -213,7 +213,8 @@ public class OrionEditorInit {
       hasKeyBindings.addKeyBinding(
           new KeyBinding(true, false, false, false, KeyCode.SPACE, action), CONTENT_ASSIST);
 
-      // handle CompletionRequest events that come from text operations instead of simple key binding
+      // handle CompletionRequest events that come from text operations instead of simple key
+      // binding
       documentHandle
           .getDocEventBus()
           .addHandler(
@@ -243,7 +244,8 @@ public class OrionEditorInit {
         hasKeyBindings.addKeyBinding(
             new KeyBinding(true, false, false, false, KeyCode.SPACE, action), CONTENT_ASSIST);
       }
-      // handle CompletionRequest events that come from text operations instead of simple key binding
+      // handle CompletionRequest events that come from text operations instead of simple key
+      // binding
       documentHandle
           .getDocEventBus()
           .addHandler(
@@ -347,7 +349,8 @@ public class OrionEditorInit {
                   if (filteredInterceptors == null || filteredInterceptors.isEmpty()) {
                     return;
                   }
-                  // don't apply the interceptors if the range end doesn't belong to the same partition
+                  // don't apply the interceptors if the range end doesn't belong to the same
+                  // partition
                   final TextPosition to = change.getTo();
                   if (to != null && !from.equals(to)) {
                     final int endOffset = documentHandle.getDocument().getIndexFromPosition(to);

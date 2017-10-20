@@ -49,7 +49,7 @@ public class FindReferencesAction extends AbstractPerspectiveAction {
       OpenLocationPresenterFactory presenterFactory,
       TextDocumentServiceClient client,
       DtoFactory dtoFactory) {
-    super(singletonList(PROJECT_PERSPECTIVE_ID), "Find References", "Find References", null, null);
+    super(singletonList(PROJECT_PERSPECTIVE_ID), "Find References", "Find References");
     this.editorAgent = editorAgent;
     this.client = client;
     this.dtoFactory = dtoFactory;
@@ -79,7 +79,7 @@ public class FindReferencesAction extends AbstractPerspectiveAction {
   public void actionPerformed(ActionEvent e) {
     EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
 
-    //TODO replace this
+    // TODO replace this
     if (!(activeEditor instanceof TextEditor)) {
       return;
     }

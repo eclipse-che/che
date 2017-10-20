@@ -190,7 +190,8 @@ public class JavaElementImageDescriptor extends ImageDescriptor {
   //			return false;
   //
   //		JavaElementImageDescriptor other= (JavaElementImageDescriptor)object;
-  //		return (fBaseImage.equals(other.fBaseImage) && fFlags == other.fFlags && fSize.equals(other.fSize));
+  //		return (fBaseImage.equals(other.fBaseImage) && fFlags == other.fFlags &&
+  // fSize.equals(other.fSize));
   //	}
   //
   //	/* (non-Javadoc)
@@ -226,7 +227,8 @@ public class JavaElementImageDescriptor extends ImageDescriptor {
   //		ImageData data= descriptor.getImageData(); // see bug 51965: getImageData can return null
   //		if (data == null) {
   //			data= DEFAULT_IMAGE_DATA;
-  //			JavaPlugin.logErrorMessage("Image data not available: " + descriptor.toString()); //$NON-NLS-1$
+  //			JavaPlugin.logErrorMessage("Image data not available: " + descriptor.toString());
+  // //$NON-NLS-1$
   //		}
   //		return data;
   //	}

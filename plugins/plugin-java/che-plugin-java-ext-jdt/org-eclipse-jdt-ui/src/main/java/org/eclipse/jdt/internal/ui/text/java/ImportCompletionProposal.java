@@ -95,7 +95,7 @@ public class ImportCompletionProposal extends AbstractJavaCompletionProposal {
       if (proposalKind == CompletionProposal.TYPE_IMPORT) {
         String simpleType = fImportRewrite.addImport(qualifiedTypeName, fImportContext);
         if (fParentProposalKind == CompletionProposal.METHOD_REF)
-          return simpleType + "."; //$NON-NLS-1$
+          return simpleType + "."; // $NON-NLS-1$
       } else {
         String res =
             fImportRewrite.addStaticImport(
@@ -109,7 +109,7 @@ public class ImportCompletionProposal extends AbstractJavaCompletionProposal {
           return typeName + '.';
         }
       }
-      return ""; //$NON-NLS-1$
+      return ""; // $NON-NLS-1$
     }
 
     // Case where we don't have an import rewrite (see allowAddingImports)
@@ -120,11 +120,11 @@ public class ImportCompletionProposal extends AbstractJavaCompletionProposal {
       /* No imports for implicit imports. */
 
       if (fProposal.getKind() == CompletionProposal.TYPE_IMPORT
-          && fParentProposalKind == CompletionProposal.FIELD_REF) return ""; //$NON-NLS-1$
+          && fParentProposalKind == CompletionProposal.FIELD_REF) return ""; // $NON-NLS-1$
       qualifiedTypeName = String.valueOf(Signature.getSignatureSimpleName(qualifiedType));
     }
 
-    return qualifiedTypeName + "."; //$NON-NLS-1$
+    return qualifiedTypeName + "."; // $NON-NLS-1$
   }
 
   /*
@@ -202,7 +202,7 @@ public class ImportCompletionProposal extends AbstractJavaCompletionProposal {
     if (isInJavadoc() && !isJavadocProcessingEnabled()) return false;
 
     //		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
-    return true; //preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_ADDIMPORT);
+    return true; // preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_ADDIMPORT);
   }
 
   /**

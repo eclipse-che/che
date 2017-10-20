@@ -110,7 +110,7 @@ public class WorkManager implements IManager {
       incrementPreparedOperations();
       success = true;
     } finally {
-      //remember if we failed to check in, so we can avoid check out
+      // remember if we failed to check in, so we can avoid check out
       if (!success) checkInFailed.set(Boolean.TRUE);
     }
   }
@@ -126,9 +126,9 @@ public class WorkManager implements IManager {
    */
   public boolean checkInFailed(ISchedulingRule rule) {
     if (checkInFailed.get() != null) {
-      //clear the failure flag for this thread
+      // clear the failure flag for this thread
       checkInFailed.set(null);
-      //must still end the rule even in the case of failure
+      // must still end the rule even in the case of failure
       if (!workspace.isTreeLocked()) jobManager.endRule(rule);
       return true;
     }
@@ -139,14 +139,14 @@ public class WorkManager implements IManager {
   public synchronized void checkOut(ISchedulingRule rule) {
     decrementPreparedOperations();
     rebalanceNestedOperations();
-    //reset state if this is the end of a top level operation
+    // reset state if this is the end of a top level operation
     if (preparedOperations == 0) hasBuildChanges = false;
-    //don't let cancelation of this operation affect other operations
+    // don't let cancelation of this operation affect other operations
     operationCanceled = false;
     try {
       lock.release();
     } finally {
-      //end rule in finally in case lock.release throws an exception
+      // end rule in finally in case lock.release throws an exception
       jobManager.endRule(rule);
     }
   }
@@ -221,7 +221,7 @@ public class WorkManager implements IManager {
     try {
       boolean success = lock.acquire(0L);
       if (success) {
-        //if lock depth is greater than one, then we already owned it
+        // if lock depth is greater than one, then we already owned it
         // before
         result = lock.getDepth() > 1;
         lock.release();
@@ -285,7 +285,7 @@ public class WorkManager implements IManager {
     try {
       lock.release();
     } finally {
-      //end rule in finally in case lock.release throws an exception
+      // end rule in finally in case lock.release throws an exception
       jobManager.endRule(workspace.getRoot());
     }
   }

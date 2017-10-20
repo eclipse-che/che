@@ -37,7 +37,7 @@ public class CheConfigurationListener implements IConfigurationListener {
 
   @Override
   public void onConfigurationSkip(ITestResult itr) {
-    //ignore
+    // ignore
   }
 
   public void setIgnoreStarted() {

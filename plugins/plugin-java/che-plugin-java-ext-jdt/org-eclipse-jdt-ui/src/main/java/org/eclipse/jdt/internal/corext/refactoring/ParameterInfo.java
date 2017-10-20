@@ -16,7 +16,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 public class ParameterInfo {
 
   public static final int INDEX_FOR_ADDED = -1;
-  public static final String ELLIPSIS = "..."; //$NON-NLS-1$
+  public static final String ELLIPSIS = "..."; // $NON-NLS-1$
 
   private IVariableBinding fOldBinding;
   private ITypeBinding fOldTypeBinding;
@@ -51,7 +51,7 @@ public class ParameterInfo {
     fOldName = name;
     fNewName = name;
     fOldIndex = index;
-    fDefaultValue = ""; //$NON-NLS-1$
+    fDefaultValue = ""; // $NON-NLS-1$
     fIsDeleted = false;
   }
 
@@ -63,7 +63,7 @@ public class ParameterInfo {
    * @return the parameter info object
    */
   public static ParameterInfo createInfoForAddedParameter(String type, String name) {
-    ParameterInfo info = new ParameterInfo("", "", INDEX_FOR_ADDED); //$NON-NLS-1$ //$NON-NLS-2$
+    ParameterInfo info = new ParameterInfo("", "", INDEX_FOR_ADDED); // $NON-NLS-1$ //$NON-NLS-2$
     info.setNewTypeName(type);
     info.setNewName(name);
     info.setResolve(false);
@@ -76,7 +76,7 @@ public class ParameterInfo {
 
   public static ParameterInfo createInfoForAddedParameter(
       String type, String name, String defaultValue) {
-    ParameterInfo info = new ParameterInfo("", "", INDEX_FOR_ADDED); //$NON-NLS-1$ //$NON-NLS-2$
+    ParameterInfo info = new ParameterInfo("", "", INDEX_FOR_ADDED); // $NON-NLS-1$ //$NON-NLS-2$
     info.setNewTypeName(type);
     info.setNewName(name);
     info.setDefaultValue(defaultValue);
@@ -86,7 +86,7 @@ public class ParameterInfo {
   public static ParameterInfo createInfoForAddedParameter(
       ITypeBinding typeBinding, String type, String name, String defaultValue) {
     ParameterInfo info =
-        new ParameterInfo(null, typeBinding, "", "", INDEX_FOR_ADDED); //$NON-NLS-1$ //$NON-NLS-2$
+        new ParameterInfo(null, typeBinding, "", "", INDEX_FOR_ADDED); // $NON-NLS-1$ //$NON-NLS-2$
     info.setNewTypeName(type);
     info.setNewName(name);
     info.setDefaultValue(defaultValue);
@@ -102,7 +102,7 @@ public class ParameterInfo {
   }
 
   public void markAsDeleted() {
-    Assert.isTrue(!isAdded()); //added param infos should be simply removed from the list
+    Assert.isTrue(!isAdded()); // added param infos should be simply removed from the list
     fIsDeleted = true;
   }
 
@@ -184,13 +184,13 @@ public class ParameterInfo {
         + fOldName
         + " @"
         + fOldIndex
-        + " -> " //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+        + " -> " // $NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
         + fNewTypeName
         + " "
         + fNewName
         + ": "
-        + fDefaultValue //$NON-NLS-1$//$NON-NLS-2$
-        + (fIsDeleted ? " (deleted)" : " (stays)"); //$NON-NLS-1$//$NON-NLS-2$
+        + fDefaultValue // $NON-NLS-1$//$NON-NLS-2$
+        + (fIsDeleted ? " (deleted)" : " (stays)"); // $NON-NLS-1$//$NON-NLS-2$
   }
 
   public static String stripEllipsis(String typeName) {
@@ -199,7 +199,7 @@ public class ParameterInfo {
   }
 
   public static boolean isVarargs(String typeName) {
-    return typeName.endsWith("..."); //$NON-NLS-1$
+    return typeName.endsWith("..."); // $NON-NLS-1$
   }
 
   public ITypeBinding getOldTypeBinding() {
@@ -216,7 +216,7 @@ public class ParameterInfo {
   }
 
   public void setOldBinding(IVariableBinding binding) {
-    //The variableBinding is needed by IPOR to check what modifier were present
+    // The variableBinding is needed by IPOR to check what modifier were present
     fOldBinding = binding;
     fOldTypeBinding = binding.getType();
     fNewTypeBinding = binding.getType();

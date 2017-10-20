@@ -67,7 +67,7 @@ public class DtoGenerator {
         generator.setPackageBase(arg.substring("--package_base=".length()));
       } else {
         throw new RuntimeException("Unknown flag: " + arg);
-        //System.exit(1);
+        // System.exit(1);
       }
     }
     generator.generate();

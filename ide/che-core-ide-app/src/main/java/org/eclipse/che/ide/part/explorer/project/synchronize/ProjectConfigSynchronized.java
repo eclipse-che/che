@@ -94,7 +94,7 @@ public class ProjectConfigSynchronized {
         (Project.ProblemProjectMarker) marker.get();
     final Map<Integer, String> problems = problemProjectMarker.getProblems();
 
-    //If no project folder on file system
+    // If no project folder on file system
     final String noProjectFolderProblem = problems.get(NO_PROJECT_ON_FILE_SYSTEM);
     final List<String> importingProjects = appContext.getImportingProjects();
     if (!isNullOrEmpty(noProjectFolderProblem) && !importingProjects.contains(project.getPath())) {

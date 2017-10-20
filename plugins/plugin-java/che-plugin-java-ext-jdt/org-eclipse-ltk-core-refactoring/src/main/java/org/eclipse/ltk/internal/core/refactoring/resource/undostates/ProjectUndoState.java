@@ -77,7 +77,7 @@ public class ProjectUndoState extends ContainerUndoState {
       return;
     }
     IProject projectHandle = (IProject) resource;
-    monitor.beginTask("", 200); //$NON-NLS-1$
+    monitor.beginTask("", 200); // $NON-NLS-1$
     monitor.setTaskName(RefactoringCoreMessages.FolderDescription_NewFolderProgress);
     if (projectDescription == null) {
       projectHandle.create(new SubProgressMonitor(monitor, 100));

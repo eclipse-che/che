@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
  */
 public class CodeStyleConfiguration {
 
-  private static final Pattern SEMICOLON_PATTERN = Pattern.compile(";"); //$NON-NLS-1$
+  private static final Pattern SEMICOLON_PATTERN = Pattern.compile(";"); // $NON-NLS-1$
 
   private CodeStyleConfiguration() {
     // do not instantiate and subclass
@@ -66,11 +66,11 @@ public class CodeStyleConfiguration {
   }
 
   private static ImportRewrite configureImportRewrite(ImportRewrite rewrite) {
-    //TODO Configure
+    // TODO Configure
     IJavaProject project = rewrite.getCompilationUnit().getJavaProject();
     String order =
         PreferenceConstants.getPreference(PreferenceConstants.ORGIMPORTS_IMPORTORDER, project);
-    if (order.endsWith(";")) { //$NON-NLS-1$
+    if (order.endsWith(";")) { // $NON-NLS-1$
       order = order.substring(0, order.length() - 1);
     }
     String[] split = SEMICOLON_PATTERN.split(order, -1);

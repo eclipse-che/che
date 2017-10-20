@@ -156,7 +156,7 @@ public class WorkspaceManager {
       throws NotFoundException, ServerException {
     requireNonNull(name, "Required non-null workspace name");
     requireNonNull(namespace, "Required non-null workspace owner");
-    //return getByKey(namespace + ":" +name);
+    // return getByKey(namespace + ":" +name);
     return normalizeState(workspaceDao.get(name, namespace), true);
   }
 
@@ -292,10 +292,11 @@ public class WorkspaceManager {
       throws NotFoundException, ServerException, ConflictException {
     requireNonNull(workspaceId, "Required non-null workspace id");
     final WorkspaceImpl workspace = workspaceDao.get(workspaceId);
-    //final String restoreAttr = workspace.getAttributes().get(AUTO_RESTORE_FROM_SNAPSHOT);
-    //final boolean autoRestore = restoreAttr == null ? defaultAutoRestore : parseBoolean(restoreAttr);
-    //startAsync(workspace, envName, firstNonNull(restore, autoRestore));
-    //&& !getSnapshot(workspaceId).isEmpty());
+    // final String restoreAttr = workspace.getAttributes().get(AUTO_RESTORE_FROM_SNAPSHOT);
+    // final boolean autoRestore = restoreAttr == null ? defaultAutoRestore :
+    // parseBoolean(restoreAttr);
+    // startAsync(workspace, envName, firstNonNull(restore, autoRestore));
+    // && !getSnapshot(workspaceId).isEmpty());
     startAsync(workspace, envName, options);
     return normalizeState(workspace, true);
   }

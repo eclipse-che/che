@@ -220,6 +220,6 @@ public class ResourceAttributes {
   /** Returns a string representation of the attributes, suitable for debugging purposes only. */
   @Override
   public String toString() {
-    return "ResourceAttributes(" + attributes + ')'; //$NON-NLS-1$
+    return "ResourceAttributes(" + attributes + ')'; // $NON-NLS-1$
   }
 }

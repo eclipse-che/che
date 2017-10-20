@@ -173,7 +173,7 @@ public class MultiStateTextFileChange extends TextEditBasedChange {
       } else if (fOriginal instanceof InsertEdit) {
         return ((InsertEdit) getOriginal()).getText();
       }
-      return ""; //$NON-NLS-1$
+      return ""; // $NON-NLS-1$
     }
 
     private final ReplaceEdit getUndo() {
@@ -199,11 +199,11 @@ public class MultiStateTextFileChange extends TextEditBasedChange {
 
   /** The position category for the resulting edit positions */
   private static final String COMPOSABLE_POSITION_CATEGORY =
-      "ComposableEditPositionCategory_" + System.currentTimeMillis(); //$NON-NLS-1$
+      "ComposableEditPositionCategory_" + System.currentTimeMillis(); // $NON-NLS-1$
 
   /** The position category for the preview region range marker */
   private static final String MARKER_POSITION_CATEGORY =
-      "MarkerPositionCategory_" + System.currentTimeMillis(); //$NON-NLS-1$
+      "MarkerPositionCategory_" + System.currentTimeMillis(); // $NON-NLS-1$
 
   /** The text file buffer */
   private ITextFileBuffer fBuffer;
@@ -249,7 +249,7 @@ public class MultiStateTextFileChange extends TextEditBasedChange {
     Assert.isNotNull(file);
     fFile = file;
 
-    setTextType("txt"); //$NON-NLS-1$
+    setTextType("txt"); // $NON-NLS-1$
   }
 
   /**
@@ -401,7 +401,7 @@ public class MultiStateTextFileChange extends TextEditBasedChange {
   public final IDocument getCurrentDocument(IProgressMonitor monitor) throws CoreException {
     if (monitor == null) monitor = new NullProgressMonitor();
     IDocument result = null;
-    monitor.beginTask("", 2); //$NON-NLS-1$
+    monitor.beginTask("", 2); // $NON-NLS-1$
     try {
       result = acquireDocument(new SubProgressMonitor(monitor, 1));
     } finally {
@@ -465,7 +465,7 @@ public class MultiStateTextFileChange extends TextEditBasedChange {
               else
                 RefactoringCorePlugin.logErrorMessage(
                     "Could not find a copy for the indexed text edit "
-                        + originalEdit.toString()); //$NON-NLS-1$
+                        + originalEdit.toString()); // $NON-NLS-1$
             }
           }
 
@@ -500,7 +500,7 @@ public class MultiStateTextFileChange extends TextEditBasedChange {
                   } else if (!(edit instanceof MultiTextEdit)) {
                     RefactoringCorePlugin.logErrorMessage(
                         "Could not find the original of the copied text edit "
-                            + edit.toString()); //$NON-NLS-1$
+                            + edit.toString()); // $NON-NLS-1$
                   }
                   return true;
                 }
@@ -639,7 +639,7 @@ public class MultiStateTextFileChange extends TextEditBasedChange {
             ComposableEditPosition position = new ComposableEditPosition();
             if (cachedGroups.contains(edit.getGroup())) {
 
-              if (text == null || text.equals("")) { //$NON-NLS-1$
+              if (text == null || text.equals("")) { // $NON-NLS-1$
                 position.offset = offset;
                 if (length != 0) {
                   // Undo is a delete, create final insert
@@ -648,13 +648,13 @@ public class MultiStateTextFileChange extends TextEditBasedChange {
                   position.setText(edit.getOriginalText());
                 } else
                   RefactoringCorePlugin.logErrorMessage(
-                      "Dubious undo edit found: " + undo.toString()); //$NON-NLS-1$
+                      "Dubious undo edit found: " + undo.toString()); // $NON-NLS-1$
 
               } else if (length == 0) {
                 position.offset = offset;
                 // Undo is an insert, create final delete
                 // edit
-                position.setText(""); //$NON-NLS-1$
+                position.setText(""); // $NON-NLS-1$
                 position.length = text.length();
               } else {
                 // Undo is a replace, create final replace edit
@@ -699,7 +699,7 @@ public class MultiStateTextFileChange extends TextEditBasedChange {
             document.replace(
                 position.offset,
                 position.length,
-                position.getText() != null ? position.getText() : ""); //$NON-NLS-1$
+                position.getText() != null ? position.getText() : ""); // $NON-NLS-1$
           }
 
         } catch (BadPositionCategoryException exception) {
@@ -790,7 +790,7 @@ public class MultiStateTextFileChange extends TextEditBasedChange {
    */
   public final void initializeValidationData(IProgressMonitor monitor) {
     if (monitor == null) monitor = new NullProgressMonitor();
-    monitor.beginTask("", 1); //$NON-NLS-1$
+    monitor.beginTask("", 1); // $NON-NLS-1$
     try {
       fValidationState = BufferValidationState.create(fFile);
     } finally {
@@ -804,14 +804,14 @@ public class MultiStateTextFileChange extends TextEditBasedChange {
   public final RefactoringStatus isValid(IProgressMonitor monitor)
       throws CoreException, OperationCanceledException {
     if (monitor == null) monitor = new NullProgressMonitor();
-    monitor.beginTask("", 1); //$NON-NLS-1$
+    monitor.beginTask("", 1); // $NON-NLS-1$
     try {
       if (fValidationState == null)
         throw new CoreException(
             new Status(
                 IStatus.ERROR,
                 RefactoringCorePlugin.getPluginId(),
-                "MultiStateTextFileChange has not been initialialized")); //$NON-NLS-1$
+                "MultiStateTextFileChange has not been initialialized")); // $NON-NLS-1$
 
       final ITextFileBuffer buffer =
           FileBuffers.getTextFileBufferManager()
@@ -846,7 +846,7 @@ public class MultiStateTextFileChange extends TextEditBasedChange {
    * @see org.eclipse.ltk.core.refactoring.Change#perform(org.eclipse.core.runtime.IProgressMonitor)
    */
   public final Change perform(final IProgressMonitor monitor) throws CoreException {
-    monitor.beginTask("", 3); //$NON-NLS-1$
+    monitor.beginTask("", 3); // $NON-NLS-1$
 
     IDocument document = null;
 
