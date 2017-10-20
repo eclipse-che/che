@@ -1,17 +1,24 @@
-/**
- * ***************************************************************************** Copyright (c)
- * 2016-2017 Red Hat Inc. and others. All rights reserved. This program and the accompanying
- * materials are made available under the terms of the Eclipse Public License v1.0 which accompanies
- * this distribution, and is available at http://www.eclipse.org/legal/epl-v10.html
+/*
+ * Copyright (c) 2012-2017 Red Hat, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
- * <p>Contributors: Red Hat Inc. - initial API and implementation
- * *****************************************************************************
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.plugin.java.languageserver;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+/**
+ * Status report class copied from
+ * https://github.com/eclipse/eclipse.jdt.ls/blob/master/org.eclipse.jdt.ls.core/src/org/eclipse/jdt/ls/core/internal/StatusReport.java
+ *
+ * @author Thomas Mäder
+ */
 public class StatusReport {
 
   /** The message type. See { */
