@@ -108,7 +108,7 @@ export class DiagnosticsWorkspaceStartCheck {
               defered.reject(message.content);
             }
           });
-          this.cheWorkspace.onStopWorkspace(workspace.id, false);
+          this.cheWorkspace.onStopWorkspace(workspace.id);
         } else {
           this.cheWorkspace.deleteWorkspaceConfig(workspace.id).finally(() => {
             defered.resolve(true);
@@ -182,7 +182,7 @@ export class DiagnosticsWorkspaceStartCheck {
     this.recreateDiagnosticWorkspace(diagnosticCallback).then((workspace : che.IWorkspace) => {
 
       let statusLink = this.lodash.find(workspace.links, (link: any) => {
-        return link.rel === 'environment.status_channel';
+        return link.rel === 'environment/statusChannel';
       });
 
       let eventChannelLink = this.lodash.find(workspace.links, (link: any) => {
@@ -190,7 +190,7 @@ export class DiagnosticsWorkspaceStartCheck {
       });
 
       let outputLink = this.lodash.find(workspace.links, (link: any) => {
-        return link.rel === 'environment.output_channel';
+        return link.rel === 'environment/outputChannel';
       });
 
       let eventChannel = eventChannelLink ? eventChannelLink.parameters[0].defaultValue : null;

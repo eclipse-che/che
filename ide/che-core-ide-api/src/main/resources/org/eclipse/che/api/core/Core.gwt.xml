@@ -24,4 +24,5 @@
     <source path='jsonrpc/json'/>
     <source path='jsonrpc/commons'/>
     <source path='logger/commons'/>
+    <source path='notification/dto'/>
 </module>

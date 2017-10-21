@@ -316,8 +316,8 @@ export class WorkspaceDetailsController {
     });
   }
 
-  stopWorkspace(isCreateSnapshot?: boolean): ng.IPromise<any> {
-    return this.workspaceDetailsService.stopWorkspace(this.workspaceDetails.id, isCreateSnapshot);
+  stopWorkspace(): ng.IPromise<any> {
+    return this.workspaceDetailsService.stopWorkspace(this.workspaceDetails.id);
   }
 
   /**

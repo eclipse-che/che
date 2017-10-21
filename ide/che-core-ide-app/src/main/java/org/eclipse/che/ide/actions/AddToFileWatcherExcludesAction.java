@@ -16,7 +16,7 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toSet;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -27,7 +27,7 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.event.ng.FileWatcherExcludesOperation;
+import org.eclipse.che.ide.api.filewatcher.FileWatcherExcludesOperation;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Resource;
 
@@ -52,9 +52,7 @@ public class AddToFileWatcherExcludesAction extends AbstractPerspectiveAction {
     super(
         singletonList(PROJECT_PERSPECTIVE_ID),
         locale.addToFileWatcherExludesName(),
-        locale.addToFileWatcherExludesDescription(),
-        null,
-        null);
+        locale.addToFileWatcherExludesDescription());
     this.appContext = appContext;
     this.notificationManager = notificationManager;
     this.fileWatcherExcludesOperation = fileWatcherExcludesOperation;

@@ -23,11 +23,9 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.eclipse.che.api.project.shared.dto.ImportProgressRecordDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
-import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
+import org.eclipse.che.ide.api.workspace.event.WsAgentServerStoppedEvent;
 
 /**
  * Json RPC based implementation of the {@link ProjectNotificationSubscriber} which notifies user
@@ -59,18 +57,12 @@ public class ProjectImportOutputJsonRpcNotifier implements ProjectNotificationSu
     this.requestHandlerManager = requestHandlerManager;
 
     eventBus.addHandler(
-        WsAgentStateEvent.TYPE,
-        new WsAgentStateHandler() {
-          @Override
-          public void onWsAgentStarted(WsAgentStateEvent event) {}
-
-          @Override
-          public void onWsAgentStopped(WsAgentStateEvent event) {
-            requestHandlerManager.deregister(EVENT_IMPORT_OUTPUT_PROGRESS + "/" + projectName);
-            if (singletonNotification != null) {
-              singletonNotification.setStatus(FAIL);
-              singletonNotification.setContent("");
-            }
+        WsAgentServerStoppedEvent.TYPE,
+        e -> {
+          requestHandlerManager.deregister(EVENT_IMPORT_OUTPUT_PROGRESS + "/" + projectName);
+          if (singletonNotification != null) {
+            singletonNotification.setStatus(FAIL);
+            singletonNotification.setContent("");
           }
         });
   }

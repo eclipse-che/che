@@ -16,11 +16,11 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.ext.web.WebLocalizationConstant;
 import org.eclipse.che.ide.newresource.AbstractNewResourceAction;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
 /**
  * Action to create new HTML file.

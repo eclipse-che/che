@@ -11,13 +11,12 @@
 package org.eclipse.che.ide.console;
 
 import java.util.function.Consumer;
-import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
-import org.eclipse.che.api.machine.shared.dto.execagent.ProcessSubscribeResponseDto;
-import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessDiedEventDto;
-import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStartedEventDto;
-import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdErrEventDto;
-import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdOutEventDto;
 import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.command.exec.dto.ProcessSubscribeResponseDto;
+import org.eclipse.che.ide.api.command.exec.dto.event.ProcessDiedEventDto;
+import org.eclipse.che.ide.api.command.exec.dto.event.ProcessStartedEventDto;
+import org.eclipse.che.ide.api.command.exec.dto.event.ProcessStdErrEventDto;
+import org.eclipse.che.ide.api.command.exec.dto.event.ProcessStdOutEventDto;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 
 /** Describes requirements for the console for command output. */
@@ -36,10 +35,6 @@ public interface CommandOutputConsole extends OutputConsole {
   /** Start listening to the output on the given WebSocket channel. */
   @Deprecated
   void listenToOutput(String wsChannel);
-
-  /** Attaches to the process launched by the command. */
-  @Deprecated
-  void attachToProcess(MachineProcessDto process);
 
   /**
    * Get an output console related operations that should be performed when an standard error

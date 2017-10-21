@@ -11,26 +11,11 @@
 package org.eclipse.che.ide.api.project.type;
 
 import java.util.List;
-import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor;
 
-/**
- * Registry for {@link ProjectTemplateDescriptor}s.
- *
- * @author Artem Zatsarynnyi
- */
+/** Registry of project templates. */
 public interface ProjectTemplateRegistry {
-  /**
-   * Register the specified {@code descriptor}.
-   *
-   * @param descriptor template descriptor to register
-   */
-  void register(@NotNull ProjectTemplateDescriptor descriptor);
 
-  /**
-   * Get all {@link org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor}s for
-   * the specified {@code projectTypeId}.
-   */
-  @NotNull
-  List<ProjectTemplateDescriptor> getTemplateDescriptors(@NotNull String projectTypeId);
+  /** Get project templates for the specified {@code projectTypeId} or empty list if none. */
+  List<ProjectTemplateDescriptor> getTemplates(String projectTypeId);
 }

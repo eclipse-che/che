@@ -237,10 +237,8 @@ public class FindTextFeatureTest {
     findText.clickOnSearchButtonMainForm();
     findText.waitFindInfoPanelIsOpen();
     findText.waitExpectedTextInFindInfoPanel(FIND_NOTHING);
-    findText.clickHideBtnFindInfoPanel();
-    findText.clickFindTab();
-    findText.waitFindInfoPanelIsOpen();
 
+    findText.clickHideBtnFindInfoPanel();
     projectExplorer.selectItem(PROJECT_NAME);
     findText.launchFindFormByKeyboard();
     findText.waitFindTextMainFormIsOpen();

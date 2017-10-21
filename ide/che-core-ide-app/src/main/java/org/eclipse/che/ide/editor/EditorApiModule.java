@@ -44,6 +44,7 @@ import org.eclipse.che.ide.editor.synchronization.workingCopy.EditorWorkingCopyS
 import org.eclipse.che.ide.editor.synchronization.workingCopy.EditorWorkingCopySynchronizerImpl;
 import org.eclipse.che.ide.editor.texteditor.TextEditorPartViewImpl;
 import org.eclipse.che.ide.editor.texteditor.infopanel.InfoPanel;
+import org.eclipse.che.ide.part.editor.AddEditorTabMenuFactory;
 import org.eclipse.che.ide.part.editor.EditorPartStackView;
 import org.eclipse.che.ide.part.editor.EditorTabContextMenuFactory;
 import org.eclipse.che.ide.part.editor.recent.RecentFileActionFactory;
@@ -115,6 +116,7 @@ public class EditorApiModule extends AbstractGinModule {
     install(new GinFactoryModuleBuilder().build(QuickAssistWidgetFactory.class));
 
     install(new GinFactoryModuleBuilder().build(EditorTabContextMenuFactory.class));
+    install(new GinFactoryModuleBuilder().build(AddEditorTabMenuFactory.class));
 
     install(new GinFactoryModuleBuilder().build(RecentFileActionFactory.class));
     bind(RecentFileList.class).to(RecentFileStore.class).in(Singleton.class);

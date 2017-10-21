@@ -74,7 +74,6 @@ func main() {
 							return err
 						}
 						tunnel := jsonrpc.NewManagedTunnel(conn)
-						tunnel.Go()
 						tunnel.SayHello()
 						return nil
 					},

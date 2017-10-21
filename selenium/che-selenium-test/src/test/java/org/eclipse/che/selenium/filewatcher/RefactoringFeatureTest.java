@@ -83,8 +83,8 @@ public class RefactoringFeatureTest {
         ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME, ProjectTemplates.MAVEN_SPRING);
     ide1.open(ws);
     ide2.open(ws);
-    events1.clickProjectEventsTab();
-    events2.clickProjectEventsTab();
+    events1.clickEventLogBtn();
+    events2.clickEventLogBtn();
   }
 
   @Test

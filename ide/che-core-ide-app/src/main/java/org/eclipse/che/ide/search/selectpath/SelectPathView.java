@@ -12,8 +12,8 @@ package org.eclipse.che.ide.search.selectpath;
 
 import com.google.inject.ImplementedBy;
 import java.util.List;
-import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.mvp.View;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 
 /**
  * Represents the structure of the workspace. It needs for choosing a directory to search.

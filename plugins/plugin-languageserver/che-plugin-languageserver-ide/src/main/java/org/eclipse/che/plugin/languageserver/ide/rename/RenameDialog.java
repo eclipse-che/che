@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.languageserver.ide.rename;
 
 import java.util.function.Consumer;
 import javax.inject.Inject;
-import org.eclipse.che.ide.api.dialogs.CancelCallback;
+import org.eclipse.che.ide.ui.dialogs.CancelCallback;
 import org.eclipse.che.ide.ui.dialogs.input.InputDialogViewImpl;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerLocalization;
 

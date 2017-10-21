@@ -12,11 +12,12 @@ package org.eclipse.che.ide.actions;
 
 import com.google.inject.Inject;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandManager;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.util.loging.Log;
 
 /**
@@ -24,7 +25,7 @@ import org.eclipse.che.ide.util.loging.Log;
  *
  * @author Max Shaposhnik
  */
-public class RunCommandAction extends Action {
+public class RunCommandAction extends BaseAction {
 
   public static final String NAME_PARAM_ID = "name";
 
@@ -58,11 +59,13 @@ public class RunCommandAction extends Action {
       return;
     }
 
-    commandManager
-        .getCommand(name)
+    final WorkspaceImpl workspace = appContext.getWorkspace();
+    workspace
+        .getDevMachine()
         .ifPresent(
-            command ->
-                commandExecutor.executeCommand(
-                    command, appContext.getDevMachine().getDescriptor()));
+            m ->
+                commandManager
+                    .getCommand(name)
+                    .ifPresent(command -> commandExecutor.executeCommand(command, m.getName())));
   }
 }

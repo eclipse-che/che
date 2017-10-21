@@ -27,15 +27,15 @@ import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.MergeResult;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.commons.exception.ServerException;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
+import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
 /**
  * Presenter to perform merge reference with current HEAD commit.
@@ -106,7 +106,7 @@ public class MergePresenter implements MergeView.ActionDelegate {
         .catchError(
             error -> {
               console.printError(error.getMessage());
-              consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+              consolesPanelPresenter.addCommandOutput(console);
               notificationManager.notify(constant.branchesListFailed(), FAIL, FLOAT_MODE);
             });
 
@@ -127,7 +127,7 @@ public class MergePresenter implements MergeView.ActionDelegate {
         .catchError(
             error -> {
               console.printError(error.getMessage());
-              consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+              consolesPanelPresenter.addCommandOutput(console);
               notificationManager.notify(constant.branchesListFailed(), FAIL, FLOAT_MODE);
             });
 
@@ -150,7 +150,7 @@ public class MergePresenter implements MergeView.ActionDelegate {
         .then(
             result -> {
               console.print(formMergeMessage(result));
-              consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+              consolesPanelPresenter.addCommandOutput(console);
               notificationManager.notify(formMergeMessage(result));
 
               project.synchronize();
@@ -171,7 +171,7 @@ public class MergePresenter implements MergeView.ActionDelegate {
                 return;
               }
               console.printError(error.getMessage());
-              consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+              consolesPanelPresenter.addCommandOutput(console);
               notificationManager.notify(constant.mergeFailed(), FAIL, FLOAT_MODE);
             });
   }

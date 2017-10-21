@@ -25,8 +25,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.data.tree.Node;
-import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.api.resources.SearchItemReference;
 import org.eclipse.che.ide.api.resources.SearchResult;
@@ -34,6 +32,7 @@ import org.eclipse.che.ide.search.factory.FindResultNodeFactory;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.Tree;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 
 /**
  * Implementation for FindResult view. Uses tree for presenting search results.
@@ -43,11 +42,8 @@ import org.eclipse.che.ide.ui.smartTree.Tree;
 @Singleton
 class FindResultViewImpl extends BaseView<FindResultView.ActionDelegate> implements FindResultView {
 
-  interface FindResultViewImplUiBinder extends UiBinder<Widget, FindResultViewImpl> {}
-
   private final Tree tree;
   private final FindResultNodeFactory findResultNodeFactory;
-
   @UiField FlowPanel paginationPanel;
   @UiField Button nextBtn;
   @UiField Button previousBtn;
@@ -56,12 +52,9 @@ class FindResultViewImpl extends BaseView<FindResultView.ActionDelegate> impleme
 
   @Inject
   public FindResultViewImpl(
-      PartStackUIResources resources,
       FindResultViewImplUiBinder uiBinder,
       FindResultNodeFactory findResultNodeFactory,
       CoreLocalizationConstant localizationConstant) {
-    super(resources);
-
     NodeStorage nodeStorage = new NodeStorage();
     NodeLoader loader = new NodeLoader(emptySet());
     tree = new Tree(nodeStorage, loader);
@@ -164,4 +157,6 @@ class FindResultViewImpl extends BaseView<FindResultView.ActionDelegate> impleme
   public void previousBtnClick(ClickEvent event) {
     delegate.onPreviousButtonClicked();
   }
+
+  interface FindResultViewImplUiBinder extends UiBinder<Widget, FindResultViewImpl> {}
 }

@@ -34,7 +34,7 @@ import java.util.List;
 import org.eclipse.che.api.project.shared.dto.SearchResultDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
-import org.eclipse.che.ide.api.autocomplete.AutoCompleteResources;
+import org.eclipse.che.ide.api.editor.codeassist.AutoCompleteResources;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.list.SimpleList;
 import org.eclipse.che.ide.util.dom.Elements;

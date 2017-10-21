@@ -84,7 +84,7 @@ class ProcessWidget extends FlowPanel {
   }
 
   private Label createMachineNameLabel(Process process) {
-    final Label label = new InlineHTML(process.getMachine().getConfig().getName() + ":&nbsp;");
+    final Label label = new InlineHTML(process.getMachineName() + ":&nbsp;");
 
     label.addStyleName(RESOURCES.commandToolbarCss().processWidgetText());
     label.addStyleName(RESOURCES.commandToolbarCss().processWidgetMachineNameLabel());

@@ -43,9 +43,6 @@ export class CheHttpBackend {
   private permissionsMap: Map<string, Array<che.IPermissions>>;
   private resourcesMap: Map<string, Map<string, any>>;
 
-  private   isAutoSnapshot: boolean = false;
-  private   isAutoRestore: boolean = false;
-
   /**
    * Constructor to use
    */
@@ -111,12 +108,6 @@ export class CheHttpBackend {
       this.httpBackend.when('DELETE', '/api/workspace/' + key).respond(200);
     }
 
-    let workspacSettings = {
-      'che.workspace.auto_snapshot': this.isAutoSnapshot,
-      'che.workspace.auto_restore': this.isAutoRestore
-    };
-    this.httpBackend.when('GET', '/api/workspace/settings').respond(200, workspacSettings);
-
     this.httpBackend.when('GET', '/api/workspace/settings').respond({});
 
     this.httpBackend.when('GET', '/api/workspace').respond(workspaceReturn);
@@ -175,23 +166,6 @@ export class CheHttpBackend {
     }
     this.httpBackend.when('GET', /\/_app\/compilation-mappings(\?.*$)?/).respond(200, '');
   }
-
-  /**
-   * Set workspace auto snapshot status
-   * @param isAutoSnapshot {boolean}
-   */
-  setWorkspaceAutoSnapshot(isAutoSnapshot: boolean): void {
-    this.isAutoSnapshot = isAutoSnapshot;
-  }
-
-  /**
-   * Set workspace auto restore status
-   * @param isAutoRestore {boolean}
-   */
-  setWorkspaceAutoRestore(isAutoRestore: boolean): void {
-    this.isAutoRestore = isAutoRestore;
-  }
-
 
   /**
    * Add the given workspaces on this backend

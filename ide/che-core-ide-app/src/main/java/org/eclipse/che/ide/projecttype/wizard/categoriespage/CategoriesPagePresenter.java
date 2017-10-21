@@ -22,11 +22,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
-import org.eclipse.che.api.core.model.project.NewProjectConfig;
+import org.eclipse.che.api.project.shared.NewProjectConfig;
 import org.eclipse.che.api.project.shared.dto.ProjectTypeDto;
 import org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor;
-import org.eclipse.che.api.workspace.shared.dto.NewProjectConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.NewProjectConfigImpl;
@@ -34,9 +35,9 @@ import org.eclipse.che.ide.api.project.type.ProjectTemplateRegistry;
 import org.eclipse.che.ide.api.project.type.ProjectTypeRegistry;
 import org.eclipse.che.ide.api.project.type.wizard.PreSelectedProjectTypeManager;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode;
-import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistry;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
+import org.eclipse.che.ide.projecttype.wizard.ProjectWizardRegistry;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.selector.SelectPathPresenter;
 import org.eclipse.che.ide.resources.selector.SelectionPathHandler;
@@ -112,7 +113,7 @@ public class CategoriesPagePresenter extends AbstractWizardPage<MutableProjectCo
       } else {
         preSelectedProjectTypeId = preSelectedProjectTypeManager.getPreSelectedProjectTypeId();
       }
-      if (wizardRegistry.getWizardRegistrar(preSelectedProjectTypeId) != null) {
+      if (wizardRegistry.getWizardRegistrar(preSelectedProjectTypeId).isPresent()) {
         dataObject.setType(preSelectedProjectTypeId);
       }
     }
@@ -232,14 +233,14 @@ public class CategoriesPagePresenter extends AbstractWizardPage<MutableProjectCo
 
   private void updateProjectConfigs(
       String newProjectPath, ProjectTemplateDescriptor projectTemplate) {
-    final List<NewProjectConfigDto> configDtoList = projectTemplate.getProjects();
+    final List<ProjectConfigDto> configDtoList = projectTemplate.getProjects();
     if (newProjectPath.equals("/")) {
       return;
     }
 
     final String templatePath = projectTemplate.getPath();
     final List<NewProjectConfig> updatedConfigs = new ArrayList<>(configDtoList.size());
-    for (NewProjectConfigDto configDto : configDtoList) {
+    for (ProjectConfigDto configDto : configDtoList) {
       final NewProjectConfig newConfig = new NewProjectConfigImpl(configDto);
       final String projectPath = configDto.getPath();
       if (projectPath.startsWith(templatePath)) {
@@ -256,16 +257,18 @@ public class CategoriesPagePresenter extends AbstractWizardPage<MutableProjectCo
     Map<String, Set<ProjectTypeDto>> typesByCategory = new HashMap<>();
     Map<String, Set<ProjectTemplateDescriptor>> templatesByCategory = new HashMap<>();
     for (ProjectTypeDto type : projectTypes) {
-      if (wizardRegistry.getWizardRegistrar(type.getId()) != null) {
-        final String category = wizardRegistry.getWizardCategory(type.getId());
-        if (!typesByCategory.containsKey(category)) {
-          typesByCategory.put(category, new HashSet<ProjectTypeDto>());
+      if (wizardRegistry.getWizardRegistrar(type.getId()).isPresent()) {
+        final Optional<String> category = wizardRegistry.getWizardCategory(type.getId());
+        if (category.isPresent()) {
+          if (!typesByCategory.containsKey(category.get())) {
+            typesByCategory.put(category.get(), new HashSet<ProjectTypeDto>());
+          }
+          typesByCategory.get(category.get()).add(type);
         }
-        typesByCategory.get(category).add(type);
       }
 
       List<ProjectTemplateDescriptor> templateDescriptors =
-          projectTemplateRegistry.getTemplateDescriptors(type.getId());
+          projectTemplateRegistry.getTemplates(type.getId());
       for (ProjectTemplateDescriptor template : templateDescriptors) {
         final String category =
             template.getCategory() == null ? DEFAULT_TEMPLATE_CATEGORY : template.getCategory();

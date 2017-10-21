@@ -1,0 +1,8 @@
+{
+  "id": "org.eclipse.che.ls.yaml",
+  "version": "1.0.0",
+  "name": "Yaml language server",
+  "description": "Yaml intellisense",
+  "dependencies": [],
+  "properties": {}
+}

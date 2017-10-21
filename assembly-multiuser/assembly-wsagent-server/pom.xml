@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che.assembly-multiuser</groupId>
-        <version>5.20.0-SNAPSHOT</version>
+        <version>6.0.0-M1-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-wsagent-server</artifactId>
     <packaging>pom</packaging>

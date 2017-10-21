@@ -37,7 +37,6 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.FontAwesome;
-import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.ui.buttonLoader.ButtonLoaderResources;
 import org.eclipse.che.ide.ui.listbox.CustomListBox;
@@ -105,13 +104,10 @@ public class ContributePartViewImpl extends BaseView<ContributePartView.ActionDe
 
   @Inject
   public ContributePartViewImpl(
-      @NotNull final PartStackUIResources partStackUIResources,
       @NotNull final ContributeMessages messages,
       @NotNull final ContributeResources resources,
       @NotNull final ButtonLoaderResources buttonLoaderResources,
       @NotNull final ContributePartViewUiBinder uiBinder) {
-    super(partStackUIResources);
-
     this.messages = messages;
     this.resources = resources;
     this.statusSteps = new StatusSteps();

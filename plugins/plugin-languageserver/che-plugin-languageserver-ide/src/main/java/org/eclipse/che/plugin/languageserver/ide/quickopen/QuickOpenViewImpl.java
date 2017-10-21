@@ -32,7 +32,7 @@ import elemental.html.SpanElement;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.che.ide.Resources;
-import org.eclipse.che.ide.api.autocomplete.AutoCompleteResources;
+import org.eclipse.che.ide.api.editor.codeassist.AutoCompleteResources;
 import org.eclipse.che.ide.filters.Match;
 import org.eclipse.che.ide.ui.list.SimpleList;
 import org.eclipse.che.ide.util.dom.Elements;

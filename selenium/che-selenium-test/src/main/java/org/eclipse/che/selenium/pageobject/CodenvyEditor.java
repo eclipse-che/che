@@ -129,7 +129,7 @@ public class CodenvyEditor {
     private Locators() {}
 
     public static final String CONTEXT_MENU = "//div[@id='menu-lock-layer-id']/div[2]";
-    public static final String EDITOR_TABS_PANEL = "gwt-debug-editorPartStack-tabsPanel";
+    public static final String EDITOR_TABS_PANEL = "gwt-debug-multiSplitPanel-tabsPanel";
     public static final String ACTIVE_LINE_NUMBER =
         "//div[@class='textviewSelection']/following::div[contains(text(),':')]";
     public static final String POSITION_CURSOR_NUMBER =
@@ -146,13 +146,14 @@ public class CodenvyEditor {
         "//div[@class='annotationLine currentLine' and @role='presentation']";
     public static final String ACTIVE_TAB_FILE_NAME = "//div[@active]/descendant::div[text()='%s']";
     public static final String TAB_FILE_NAME_XPATH =
-        "//div[@id='gwt-debug-editorPartStack-tabsPanel']//div[text()='%s']";
+        "//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[text()='%s']";
     public static final String TAB_FILE_NAME_AND_STYLE =
-        "//div[@id='gwt-debug-editorPartStack-tabsPanel']//div[text()='%s' and @style='%s']";
+        "//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[text()='%s' and @style='%s']";
     public static final String TAB_FILE_CLOSE_ICON =
-        "//div[@id='gwt-debug-editorPartStack-tabsPanel']//div[text()='%s']/following::div[1]";
+        "//div[@id='gwt-debug-editorMultiPartStack-contentPanel']//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[text()='%s']/following::div[1]";
+
     public static final String ALL_TABS_XPATH =
-        "//div[@id='gwt-debug-editorPartStack-tabsPanel']//div[string-length(text())>0]";
+        "//div[@id='gwt-debug-editorMultiPartStack-contentPanel']//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[string-length(text())>0]";
     public static final String SELECTED_ITEM_IN_EDITOR =
         "//div[@contenteditable='true']//span[contains(text(), '%s')]";
 
@@ -181,7 +182,7 @@ public class CodenvyEditor {
     public static final String DOWNLOAD_SOURCES_LINK = "//anchor[text()='Download sources']";
 
     public static final String TAB_LIST_BUTTON =
-        "//div[@id='gwt-debug-editorPartStack-tabsPanel']/div[1]/div";
+        "(//div[@id='gwt-debug-plusPanel'])[2]/following-sibling::div";
     public static final String ITEM_TAB_LIST =
         "//div[@class='popupContent']//div[text()='%s']/parent::div";
 

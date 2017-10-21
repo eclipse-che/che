@@ -1,0 +1,439 @@
+---
+apiVersion: v1
+kind: List
+items:
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    labels:
+      app: che
+      provider: fabric8
+      version: 1.0.293
+      group: io.fabric8.online.apps
+    name: che
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      fabric8.io/app-menu: development
+      fabric8.io/git-commit: 3abe9e3deb93fc2ee3b0e905850a40d09b22dbbc
+      fabric8.io/scm-con-url: scm:git:git@github.com:fabric8io/fabric8-online.git/apps/che
+      fabric8.io/scm-url: http://github.com/fabric8io/fabric8-online/apps/che
+      fabric8.io/iconUrl: https://cdn.rawgit.com/fabric8io/fabric8-online/master/apps/che/src/main/fabric8/icon.png
+      fabric8.io/git-branch: release-v1.0.293
+      fabric8.io/scm-devcon-url: scm:git:git@github.com:fabric8io/fabric8-online.git/apps/che
+      fabric8.io/scm-tag: fabric8-online-2.0.1
+    labels:
+      app: che
+      provider: fabric8
+      expose: "false"
+      version: 1.0.293
+      group: io.fabric8.online.apps
+    name: che-host
+  spec:
+    ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: che
+      provider: fabric8
+      group: io.fabric8.online.apps
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    labels:
+      app: che
+      provider: fabric8
+      version: 1.0.293
+      group: io.fabric8.online.apps
+    name: che-data-volume
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 1Gi
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    labels:
+      app: che
+      provider: fabric8
+      version: 1.0.293
+      group: io.fabric8.online.apps
+    name: claim-che-workspace
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 1Gi
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    labels:
+      app: che
+      provider: fabric8
+      version: 1.0.293
+      group: io.fabric8.online.apps
+    name: che
+  data:
+    CHE_INFRASTRUCTURE_ACTIVE: openshift
+    CHE_INFRA_OPENSHIFT_MASTER__URL: ""
+    CHE_INFRA_OPENSHIFT_USERNAME: ""
+    CHE_INFRA_OPENSHIFT_PASSWORD: ""
+    CHE_INFRA_OPENSHIFT_OAUTH__TOKEN: ""
+    CHE_INFRA_OPENSHIFT_TRUST__CERTS: "false"
+    CHE_INFRA_OPENSHIFT_TLS__ENABLED: "true"
+    CHE_INFRA_OPENSHIFT_PROJECT: ""
+    CHE_INFRA_OPENSHIFT_MACHINE__START__TIMEOUT__MIN: "5"
+    CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL: http://${DEFAULT_OPENSHIFT_NAMESPACE_URL}/agent-binaries/linux_amd64/bootstrapper/bootstrapper
+    CHE_API: http://${DEFAULT_OPENSHIFT_NAMESPACE_URL}/wsmaster/api
+    CHE_HOST: ${DEFAULT_OPENSHIFT_NAMESPACE_URL}
+    CHE_WEBSOCKET_ENDPOINT:  ws://${DEFAULT_OPENSHIFT_NAMESPACE_URL}/wsmaster/websocket
+    CHE_PORT: "8080"
+    DOCKER_HOST: tcp://172.18.0.1:2375
+    hostname-http: ${PROJECT_NAME}-che.${DOMAIN}
+    workspace-storage: /home/user/che/workspaces
+    workspace-storage-create-folders: "false"
+    local-conf-dir: /etc/conf
+    openshift-serviceaccountname: che
+    che-server-evaluation-strategy: docker-local-custom
+    che.logs.dir: /data/logs
+    che.docker.server_evaluation_strategy.custom.template: <serverName>-<if(isDevMachine)><workspaceIdWithoutPrefix><else><machineName><endif>-<externalAddress>
+    che.docker.server_evaluation_strategy.custom.external.protocol: https
+    che.predefined.stacks.reload_on_start: "true"
+    log-level: INFO
+    docker-connector: openshift
+    port: "8080"
+    remote-debugging-enabled: "false"
+    che-oauth-github-forceactivation: "true"
+    workspaces-memory-limit: 2300Mi
+    workspaces-memory-request: 1500Mi
+    enable-workspaces-autostart: "false"
+    keycloak-oso-endpoint: ${KEYCLOAK_OSO_ENDPOINT}
+    keycloak-github-endpoint: ${KEYCLOAK_GITHUB_ENDPOINT}
+    keycloak-disabled: "false"
+    che-server-java-opts: -XX:+UseG1GC -XX:+UseStringDeduplication -XX:MinHeapFreeRatio=20 -XX:MaxHeapFreeRatio=40 -XX:MaxRAM=700m -Xms256m
+    che-workspaces-java-opts: -XX:+UseG1GC -XX:+UseStringDeduplication -XX:MinHeapFreeRatio=20 -XX:MaxHeapFreeRatio=40 -XX:MaxRAM=1300m -Xms256m
+    che-openshift-secure-routes: "true"
+    che-secure-external-urls: "true"
+    che-server-timeout-ms: "3600000"
+    che-openshift-precreate-subpaths: "false"
+    che-workspace-auto-snapshot: "false"
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      fabric8.io/git-commit: 3abe9e3deb93fc2ee3b0e905850a40d09b22dbbc
+      fabric8.io/metrics-path: dashboard/file/kubernetes-pods.json/?var-project=che&var-version=1.0.293
+      fabric8.io/scm-con-url: scm:git:git@github.com:fabric8io/fabric8-online.git/apps/che
+      fabric8.io/scm-url: http://github.com/fabric8io/fabric8-online/apps/che
+      fabric8.io/iconUrl: https://cdn.rawgit.com/fabric8io/fabric8-online/master/apps/che/src/main/fabric8/icon.png
+      fabric8.io/git-branch: release-v1.0.293
+      fabric8.io/scm-devcon-url: scm:git:git@github.com:fabric8io/fabric8-online.git/apps/che
+      fabric8.io/scm-tag: fabric8-online-2.0.1
+    labels:
+      app: che
+      provider: fabric8
+      version: 1.0.293
+      group: io.fabric8.online.apps
+    name: che
+  spec:
+    replicas: 1
+    selector:
+      app: che
+      provider: fabric8
+      group: io.fabric8.online.apps
+    strategy:
+      recreateParams:
+        timeoutSeconds: 3600
+      type: Recreate
+    template:
+      metadata:
+        annotations:
+          fabric8.io/git-commit: 3abe9e3deb93fc2ee3b0e905850a40d09b22dbbc
+          fabric8.io/metrics-path: dashboard/file/kubernetes-pods.json/?var-project=che&var-version=1.0.293
+          fabric8.io/scm-con-url: scm:git:git@github.com:fabric8io/fabric8-online.git/apps/che
+          fabric8.io/scm-url: http://github.com/fabric8io/fabric8-online/apps/che
+          fabric8.io/iconUrl: https://cdn.rawgit.com/fabric8io/fabric8-online/master/apps/che/src/main/fabric8/icon.png
+          fabric8.io/git-branch: release-v1.0.293
+          fabric8.io/scm-devcon-url: scm:git:git@github.com:fabric8io/fabric8-online.git/apps/che
+          fabric8.io/scm-tag: fabric8-online-2.0.1
+        labels:
+          app: che
+          provider: fabric8
+          version: 1.0.293
+          group: io.fabric8.online.apps
+      spec:
+        containers:
+        - env:
+          - name: CHE_INFRA_OPENSHIFT_MASTER__URL
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_OPENSHIFT_MASTER__URL
+                name: che
+          - name: CHE_INFRA_OPENSHIFT_USERNAME
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_OPENSHIFT_USERNAME
+                name: che
+          - name: CHE_INFRASTRUCTURE_ACTIVE
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRASTRUCTURE_ACTIVE
+                name: che
+          - name: CHE_INFRA_OPENSHIFT_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_OPENSHIFT_PASSWORD
+                name: che
+          - name: CHE_INFRA_OPENSHIFT_OAUTH__TOKEN
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_OPENSHIFT_OAUTH__TOKEN
+                name: che
+          - name: CHE_INFRA_OPENSHIFT_TRUST__CERTS
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_OPENSHIFT_TRUST__CERTS
+                name: che
+          - name: CHE_INFRA_OPENSHIFT_TLS__ENABLED
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_OPENSHIFT_TLS__ENABLED
+                name: che
+          - name: CHE_INFRA_OPENSHIFT_PROJECT
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_OPENSHIFT_PROJECT
+                name: che
+          - name: CHE_INFRA_OPENSHIFT_MACHINE__START__TIMEOUT__MIN
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_OPENSHIFT_MACHINE__START__TIMEOUT__MIN
+                name: che
+          - name: CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL
+                name: che
+          - name: DOCKER_HOST
+            valueFrom:
+              configMapKeyRef:
+                key: DOCKER_HOST
+                name: che
+          - name: CHE_WEBSOCKET_ENDPOINT
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_WEBSOCKET_ENDPOINT
+                name: che
+          - name: CHE_DOCKER_IP_EXTERNAL
+            valueFrom:
+              configMapKeyRef:
+                key: hostname-http
+                name: che
+          - name: CHE_WORKSPACE_STORAGE
+            valueFrom:
+              configMapKeyRef:
+                key: workspace-storage
+                name: che
+          - name: CHE_LOGS_DIR
+            valueFrom:
+              configMapKeyRef:
+                key: che.logs.dir
+                name: che
+          - name: CHE_WORKSPACE_STORAGE_CREATE_FOLDERS
+            valueFrom:
+              configMapKeyRef:
+                key: workspace-storage-create-folders
+                name: che
+          - name: CHE_LOCAL_CONF_DIR
+            valueFrom:
+              configMapKeyRef:
+                key: local-conf-dir
+                name: che
+          - name: CHE_OPENSHIFT_PROJECT
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: CHE_OPENSHIFT_SERVICEACCOUNTNAME
+            valueFrom:
+              configMapKeyRef:
+                key: openshift-serviceaccountname
+                name: che
+          - name: CHE_DOCKER_SERVER__EVALUATION__STRATEGY
+            valueFrom:
+              configMapKeyRef:
+                key: che-server-evaluation-strategy
+                name: che
+          - name: CHE_DOCKER_SERVER__EVALUATION__STRATEGY_CUSTOM_TEMPLATE
+            valueFrom:
+              configMapKeyRef:
+                key: che.docker.server_evaluation_strategy.custom.template
+                name: che
+          - name: CHE_DOCKER_SERVER__EVALUATION__STRATEGY_CUSTOM_EXTERNAL_PROTOCOL
+            valueFrom:
+              configMapKeyRef:
+                key: che.docker.server_evaluation_strategy.custom.external.protocol
+                name: che
+          - name: CHE_PREDEFINED_STACKS_RELOAD__ON__START
+            valueFrom:
+              configMapKeyRef:
+                key: che.predefined.stacks.reload_on_start
+                name: che
+          - name: CHE_LOG_LEVEL
+            valueFrom:
+              configMapKeyRef:
+                key: log-level
+                name: che
+          - name: CHE_PORT
+            valueFrom:
+              configMapKeyRef:
+                key: port
+                name: che
+          - name: CHE_HOST
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_HOST
+                name: che
+          - name: CHE_API
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_API
+                name: che
+          - name: CHE_DOCKER_CONNECTOR
+            valueFrom:
+              configMapKeyRef:
+                key: docker-connector
+                name: che
+          - name: CHE_DEBUG_SERVER
+            valueFrom:
+              configMapKeyRef:
+                key: remote-debugging-enabled
+                name: che
+          - name: CHE_OAUTH_GITHUB_FORCEACTIVATION
+            valueFrom:
+              configMapKeyRef:
+                key: che-oauth-github-forceactivation
+                name: che
+          - name: CHE_OPENSHIFT_WORKSPACE_MEMORY_OVERRIDE
+            valueFrom:
+              configMapKeyRef:
+                key: workspaces-memory-limit
+                name: che
+          - name: CHE_OPENSHIFT_WORKSPACE_MEMORY_REQUEST
+            valueFrom:
+              configMapKeyRef:
+                key: workspaces-memory-request
+                name: che
+          - name: CHE_WORKSPACE_AUTO_START
+            valueFrom:
+              configMapKeyRef:
+                key: enable-workspaces-autostart
+                name: che
+          - name: JAVA_OPTS
+            valueFrom:
+              configMapKeyRef:
+                key: che-server-java-opts
+                name: che
+          - name: CHE_WORKSPACE_JAVA_OPTIONS
+            valueFrom:
+              configMapKeyRef:
+                key: che-workspaces-java-opts
+                name: che
+          - name: CHE_OPENSHIFT_SECURE_ROUTES
+            valueFrom:
+              configMapKeyRef:
+                key: che-openshift-secure-routes
+                name: che
+          - name: CHE_DOCKER_SERVER__EVALUATION__STRATEGY_SECURE_EXTERNAL_URLS
+            valueFrom:
+              configMapKeyRef:
+                key: che-secure-external-urls
+                name: che
+          - name: CHE_OPENSHIFT_SERVER_INACTIVE_STOP_TIMEOUT_MS
+            valueFrom:
+              configMapKeyRef:
+                key: che-server-timeout-ms
+                name: che
+          - name: CHE_OPENSHIFT_PRECREATE_WORKSPACE_DIRS
+            valueFrom:
+              configMapKeyRef:
+                key: che-openshift-precreate-subpaths
+                name: che
+          - name: CHE_KEYCLOAK_OSO_ENDPOINT
+            valueFrom:
+              configMapKeyRef:
+                key: keycloak-oso-endpoint
+                name: che
+          - name: CHE_KEYCLOAK_GITHUB_ENDPOINT
+            valueFrom:
+              configMapKeyRef:
+                key: keycloak-github-endpoint
+                name: che
+          - name: CHE_KEYCLOAK_DISABLED
+            valueFrom:
+              configMapKeyRef:
+                key: keycloak-disabled
+                name: che
+          - name: CHE_WORKSPACE_AUTO__SNAPSHOT
+            valueFrom:
+              configMapKeyRef:
+                key: che-workspace-auto-snapshot
+                name: che
+          image: rhche/che-server:96acc83-fabric8-87a202e
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              path: /api/system/state
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 120
+            timeoutSeconds: 10
+          name: che
+          ports:
+          - containerPort: 8080
+            name: http
+          - containerPort: 8000
+            name: http-debug
+          readinessProbe:
+            httpGet:
+              path: /api/system/state
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            timeoutSeconds: 10
+          resources:
+            limits:
+              memory: 700Mi
+            requests:
+              memory: 256Mi
+          volumeMounts:
+          - mountPath: /data
+            name: che-data-volume
+        serviceAccountName: che
+        volumes:
+        - name: che-data-volume
+          persistentVolumeClaim:
+            claimName: che-data-volume
+    triggers:
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Route
+  metadata:
+    labels:
+      app: che
+      provider: fabric8
+      version: 1.0.293
+      group: io.fabric8.online.apps
+    name: che
+  spec:
+    tls:
+      insecureEdgeTerminationPolicy: Redirect
+      termination: edge
+    to:
+      kind: Service
+      name: che-host

@@ -12,9 +12,8 @@ package org.eclipse.che.ide.command.producer;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandProducer;
@@ -25,22 +24,19 @@ import org.eclipse.che.ide.api.command.CommandProducer;
  * @author Artem Zatsarynnyi
  * @see CommandProducer
  */
-public class CommandProducerAction extends Action {
+public class CommandProducerAction extends BaseAction {
 
   private final CommandProducer commandProducer;
-  private final Machine machine;
   private final CommandExecutor commandExecutor;
 
   @Inject
   public CommandProducerAction(
       @Assisted String name,
       @Assisted CommandProducer commandProducer,
-      @Assisted Machine machine,
       CommandExecutor commandExecutor) {
     super(name);
 
     this.commandProducer = commandProducer;
-    this.machine = machine;
     this.commandExecutor = commandExecutor;
   }
 
@@ -51,7 +47,7 @@ public class CommandProducerAction extends Action {
 
   @Override
   public void actionPerformed(ActionEvent e) {
-    CommandImpl command = commandProducer.createCommand(machine);
-    commandExecutor.executeCommand(command, machine);
+    CommandImpl command = commandProducer.createCommand();
+    commandExecutor.executeCommand(command);
   }
 }

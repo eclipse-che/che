@@ -20,13 +20,13 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.ssh.shared.dto.SshPairDto;
-import org.eclipse.che.ide.api.dialogs.CancelCallback;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.preferences.AbstractPreferencePagePresenter;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.ide.ext.ssh.client.SshLocalizationConstant;
 import org.eclipse.che.ide.ext.ssh.client.upload.UploadSshKeyPresenter;
+import org.eclipse.che.ide.ui.dialogs.CancelCallback;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.util.browser.BrowserUtils;
 
 /**

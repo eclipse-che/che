@@ -19,10 +19,10 @@ import com.google.inject.Singleton;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.git.shared.Remote;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
+import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.ext.git.client.remote.add.AddRemoteRepositoryPresenter;
@@ -124,7 +124,7 @@ public class RemotePresenter implements RemoteView.ActionDelegate {
                 caught.getMessage() != null ? caught.getMessage() : constant.remoteAddFailed();
             GitOutputConsole console = gitOutputConsoleFactory.create(REMOTE_REPO_COMMAND_NAME);
             console.printError(errorMessage);
-            consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+            consolesPanelPresenter.addCommandOutput(console);
             notificationManager.notify(constant.remoteAddFailed(), FAIL, FLOAT_MODE);
           }
         });
@@ -152,7 +152,7 @@ public class RemotePresenter implements RemoteView.ActionDelegate {
                   error.getMessage() != null ? error.getMessage() : constant.remoteDeleteFailed();
               GitOutputConsole console = gitOutputConsoleFactory.create(REMOTE_REPO_COMMAND_NAME);
               console.printError(errorMessage);
-              consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+              consolesPanelPresenter.addCommandOutput(console);
               notificationManager.notify(constant.remoteDeleteFailed(), FAIL, FLOAT_MODE);
             });
   }
@@ -167,7 +167,7 @@ public class RemotePresenter implements RemoteView.ActionDelegate {
   private void handleError(@NotNull String errorMessage) {
     GitOutputConsole console = gitOutputConsoleFactory.create(REMOTE_REPO_COMMAND_NAME);
     console.printError(errorMessage);
-    consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+    consolesPanelPresenter.addCommandOutput(console);
     notificationManager.notify(errorMessage);
   }
 }

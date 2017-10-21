@@ -45,7 +45,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import org.eclipse.che.api.agent.server.filters.AddExecAgentInEnvironmentUtil;
+import org.eclipse.che.api.agent.server.filters.AddExecInstallerInEnvironmentUtil;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
@@ -53,8 +53,8 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.factory.Factory;
-import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.user.User;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.factory.server.builder.FactoryBuilder;
 import org.eclipse.che.api.factory.shared.dto.AuthorDto;
@@ -136,11 +136,12 @@ public class FactoryService extends Service {
     @ApiResponse(code = 500, message = "Internal server error occurred")
   })
   public FactoryDto saveFactory(FactoryDto factory)
-      throws BadRequestException, ServerException, ForbiddenException, ConflictException {
+      throws BadRequestException, ServerException, ForbiddenException, ConflictException,
+          NotFoundException {
     requiredNotNull(factory, "Factory configuration");
     factoryBuilder.checkValid(factory);
     processDefaults(factory);
-    AddExecAgentInEnvironmentUtil.addExecAgent(factory.getWorkspace());
+    AddExecInstallerInEnvironmentUtil.addExecInstaller(factory.getWorkspace());
     createValidator.validateOnCreate(factory);
     return injectLinks(asDto(factoryManager.saveFactory(factory)));
   }

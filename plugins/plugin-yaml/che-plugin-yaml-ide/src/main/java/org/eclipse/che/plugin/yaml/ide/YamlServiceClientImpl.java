@@ -65,6 +65,6 @@ public class YamlServiceClientImpl implements YamlServiceClient {
   }
 
   private String getWsAgentBaseUrl() {
-    return appContext.getDevMachine().getWsAgentBaseUrl();
+    return appContext.getWsAgentServerApiEndpoint();
   }
 }

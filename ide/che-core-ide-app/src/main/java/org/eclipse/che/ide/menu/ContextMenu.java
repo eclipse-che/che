@@ -44,9 +44,9 @@ import org.eclipse.che.ide.ui.toolbar.PresentationFactory;
 @Singleton
 public class ContextMenu implements CloseMenuHandler, ActionSelectedHandler {
 
-  private final ActionManager actionManager;
-  private final KeyBindingAgent keyBindingAgent;
-  private final Provider<PerspectiveManager> managerProvider;
+  protected final ActionManager actionManager;
+  protected final KeyBindingAgent keyBindingAgent;
+  protected final Provider<PerspectiveManager> managerProvider;
 
   private PopupMenu popupMenu;
   private MenuLockLayer lockLayer;
@@ -116,13 +116,18 @@ public class ContextMenu implements CloseMenuHandler, ActionSelectedHandler {
             new Scheduler.ScheduledCommand() {
               @Override
               public void execute() {
-                popupMenu.getElement().getStyle().setProperty("opacity", "1");
-                updateMenuPosition(popupMenu, x, y);
+                setPosition(x, y);
               }
             });
   }
 
-  private void updateMenuPosition(PopupMenu popupMenu, int x, int y) {
+  private void setPosition(int x, int y) {
+    if (popupMenu == null) {
+      return;
+    }
+
+    popupMenu.getElement().getStyle().setProperty("opacity", "1");
+
     if (x + popupMenu.getOffsetWidth() > Window.getClientWidth()) {
       popupMenu.getElement().getStyle().setLeft(x - popupMenu.getOffsetWidth() - 1, PX);
     } else {

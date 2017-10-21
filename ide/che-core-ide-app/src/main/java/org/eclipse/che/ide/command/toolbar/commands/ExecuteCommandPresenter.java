@@ -17,7 +17,6 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.HashSet;
 import java.util.Set;
-import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.ide.api.command.CommandAddedEvent;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandGoal;
@@ -27,6 +26,7 @@ import org.eclipse.che.ide.api.command.CommandRemovedEvent;
 import org.eclipse.che.ide.api.command.CommandUpdatedEvent;
 import org.eclipse.che.ide.api.command.CommandsLoadedEvent;
 import org.eclipse.che.ide.api.mvp.Presenter;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.command.goal.DebugGoal;
 import org.eclipse.che.ide.command.goal.RunGoal;
 import org.eclipse.che.ide.command.toolbar.CommandCreationGuide;
@@ -86,8 +86,8 @@ public class ExecuteCommandPresenter implements Presenter, ExecuteCommandView.Ac
   }
 
   @Override
-  public void onCommandExecute(CommandImpl command, Machine machine) {
-    commandExecutorProvider.get().executeCommand(command, machine);
+  public void onCommandExecute(CommandImpl command, MachineImpl machine) {
+    commandExecutorProvider.get().executeCommand(command, machine.getName());
   }
 
   @Override

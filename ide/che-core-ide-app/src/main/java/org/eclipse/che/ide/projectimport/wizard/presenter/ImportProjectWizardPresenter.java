@@ -15,18 +15,19 @@ import com.google.inject.Provider;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.project.shared.dto.ProjectImporterDescriptor;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistrar;
-import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistry;
 import org.eclipse.che.ide.api.wizard.Wizard;
 import org.eclipse.che.ide.api.wizard.WizardPage;
 import org.eclipse.che.ide.projectimport.wizard.ImportWizard;
 import org.eclipse.che.ide.projectimport.wizard.ImportWizardFactory;
+import org.eclipse.che.ide.projectimport.wizard.ImportWizardRegistry;
 import org.eclipse.che.ide.projectimport.wizard.mainpage.MainPagePresenter;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
 /**
  * Presenter for import project wizard dialog.
@@ -145,16 +146,16 @@ public class ImportProjectWizardPresenter
       return wizardsCache.get(importer);
     }
 
-    final ImportWizardRegistrar wizardRegistrar =
+    final Optional<ImportWizardRegistrar> wizardRegistrar =
         wizardRegistry.getWizardRegistrar(importer.getId());
-    if (wizardRegistrar == null) {
+    if (!wizardRegistrar.isPresent()) {
       // should never occur
       throw new IllegalStateException(
           "WizardRegistrar for the importer " + importer.getId() + " isn't registered.");
     }
 
     List<Provider<? extends WizardPage<MutableProjectConfig>>> pageProviders =
-        wizardRegistrar.getWizardPages();
+        wizardRegistrar.get().getWizardPages();
     final ImportWizard importWizard = createDefaultWizard();
     for (Provider<? extends WizardPage<MutableProjectConfig>> provider : pageProviders) {
       importWizard.addPage(provider.get(), 1, false);

@@ -346,14 +346,11 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
 
     const newDefaultMachine: IEnvironmentManagerMachine = {
       'name': machineName,
-      'agents': [],
       'attributes': {
         memoryLimitBytes: 2147483648
       },
       'recipe': jsyaml.load(`image: codenvy/ubuntu_jdk8\nmem_limit: 2147483648\n`)
     };
-    newDefaultMachine.agents.push(this.SSH_AGENT_NAME);
-    newDefaultMachine.agents.push(this.TERMINAL_AGENT_NAME);
 
     return newDefaultMachine;
   }
@@ -379,12 +376,12 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
     const machineName = machine.name;
     delete machine.name;
 
-    machine.agents = machine.agents ? machine.agents : [];
-    if (machine.agents.indexOf(this.SSH_AGENT_NAME) < 0) {
-      machine.agents.push(this.SSH_AGENT_NAME);
+    machine.installers = machine.installers ? machine.installers : [];
+    if (machine.installers.indexOf(this.SSH_AGENT_NAME) < 0) {
+      machine.installers.push(this.SSH_AGENT_NAME);
     }
-    if (machine.agents.indexOf(this.TERMINAL_AGENT_NAME) < 0) {
-      machine.agents.push(this.TERMINAL_AGENT_NAME);
+    if (machine.installers.indexOf(this.TERMINAL_AGENT_NAME) < 0) {
+      machine.installers.push(this.TERMINAL_AGENT_NAME);
     }
 
     environment.machines[machineName] = machine;

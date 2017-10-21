@@ -120,6 +120,11 @@ public class ActionManagerImpl implements ActionManager {
         new DefaultActionGroup(IdeActions.GROUP_PART_MENU, false, this);
     registerAction(IdeActions.GROUP_PART_MENU, partMenuGroup);
 
+    // register default action groups for toolbar controller menu
+    DefaultActionGroup toolbarControllerMenuGroup =
+        new DefaultActionGroup(IdeActions.GROUP_TOOLBAR_CONTROLLER, false, this);
+    registerAction(IdeActions.GROUP_TOOLBAR_CONTROLLER, toolbarControllerMenuGroup);
+
     DefaultActionGroup leftMainMenu = new DefaultActionGroup(this);
     registerAction(IdeActions.GROUP_LEFT_MAIN_MENU, leftMainMenu);
 
@@ -211,8 +216,7 @@ public class ActionManagerImpl implements ActionManager {
     final Action action;
     if (actionId != null && (action = getAction(actionId)) != null) {
       final Presentation presentation = presentationFactory.getPresentation(action);
-      final ActionEvent actionEvent =
-          new ActionEvent(presentation, this, managerProvider.get(), parameters);
+      final ActionEvent actionEvent = new ActionEvent(presentation, this, parameters);
 
       action.update(actionEvent);
 

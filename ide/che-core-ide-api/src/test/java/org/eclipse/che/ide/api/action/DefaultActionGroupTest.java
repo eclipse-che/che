@@ -17,6 +17,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.gwtmockito.GwtMockitoTestRunner;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,23 +26,22 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
 /** @author Mihail Kuznyetsov. */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(GwtMockitoTestRunner.class)
 public class DefaultActionGroupTest {
 
-  @Mock Action firstAction;
+  @Mock BaseAction firstAction;
 
-  @Mock Action secondAction;
+  @Mock BaseAction secondAction;
 
-  @Mock Action thirdAction;
+  @Mock BaseAction thirdAction;
 
-  @Mock Action fourthAction;
+  @Mock BaseAction fourthAction;
 
-  @Mock Action fifthAction;
+  @Mock BaseAction fifthAction;
 
-  @Mock Action sixthAction;
+  @Mock BaseAction sixthAction;
 
   @Mock ActionManager actionManager;
 
@@ -54,7 +54,7 @@ public class DefaultActionGroupTest {
 
   @Test
   public void shouldNotAddSameActionTwice() {
-    Action action = mock(Action.class);
+    BaseAction action = mock(BaseAction.class);
 
     defaultActionGroup.add(action, new Constraints(AFTER, "someAction"));
     defaultActionGroup.add(action, new Constraints(BEFORE, "someAction"));

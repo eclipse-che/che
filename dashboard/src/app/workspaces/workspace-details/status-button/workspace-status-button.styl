@@ -1,61 +1,9 @@
 .che-workspace-button
-  position relative
-  min-width 110px
 
-  che-button-default button, .fa-caret-down
+  che-button-default button
     margin 0 !important
-    min-height 40px
-    float left
 
-  che-button-default.run-button
+  che-button-default
     button.md-accent.md-raised.md-hue-2.md-button.md-chedefault-theme
       min-width 72px
-      border-right 1px solid $white-color
-      border-top-right-radius 0 !important
-      border-bottom-right-radius 0 !important
       background-color alpha($label-secondary-color, 0.95) !important
-
-  che-button-default.drop-down
-    button
-      padding 0
-      background-color $label-secondary-color !important
-      &.md-accent.md-raised.md-hue-2.md-button.md-chedefault-theme
-        padding 0
-        min-width 38px
-        border-top-left-radius 0 !important
-        border-bottom-left-radius 0 !important
-      md-icon
-        width 100%
-        &:before
-          font-size 15px
-      .fa-caret-down:before
-        position relative
-        top 4px
-    button[disabled] md-icon:before
-     color #9F9F9F !important
-    button:not([disabled]) md-icon:before
-      color $white-color !important
-
-  .area-drop-down
-    background $white-color
-    color $label-secondary-color
-    border-radius 2px
-    left inherit
-    top 42px
-    right 0
-    li
-      outline none
-      cursor pointer
-    li.selected-item
-      background alpha($mouse-gray-color, 0.75)
-      &:hover
-        che-brightness(95%)
-    li:not(.selected-item):hover
-      background alpha($mouse-gray-color, 0.4)
-    span
-      display inline-block
-      white-space nowrap
-      line-height 20px
-      padding 0 10px
-      font-size 12px
-      width 100%

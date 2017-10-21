@@ -13,8 +13,8 @@ package org.eclipse.che.ide.command.node;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import org.eclipse.che.ide.api.command.CommandImpl;
-import org.eclipse.che.ide.api.data.tree.HasAction;
 import org.eclipse.che.ide.command.CommandUtils;
+import org.eclipse.che.ide.ui.smartTree.data.HasAction;
 
 /**
  * Extension of {@link AbstractCommandNode} that can execute a command when performing an action is

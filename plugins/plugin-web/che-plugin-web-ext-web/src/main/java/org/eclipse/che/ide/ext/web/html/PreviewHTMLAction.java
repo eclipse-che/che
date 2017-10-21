@@ -11,14 +11,14 @@
 package org.eclipse.che.ide.ext.web.html;
 
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.eclipse.che.ide.api.WsAgentURLModifier;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.web.WebLocalizationConstant;
@@ -43,9 +43,7 @@ public class PreviewHTMLAction extends AbstractPerspectiveAction {
     super(
         singletonList(PROJECT_PERSPECTIVE_ID),
         localizationConstants.previewHTMLActionTitle(),
-        localizationConstants.previewHTMLActionDescription(),
-        null,
-        null);
+        localizationConstants.previewHTMLActionDescription());
     this.wsAgentURLModifier = wsAgentURLModifier;
     this.appContext = appContext;
   }

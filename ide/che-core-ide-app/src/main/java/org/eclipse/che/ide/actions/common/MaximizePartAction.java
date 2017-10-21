@@ -14,10 +14,10 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
-import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
+import org.eclipse.che.ide.api.action.BaseAction;
+import org.eclipse.che.ide.api.parts.ActivePartChangedEvent;
+import org.eclipse.che.ide.api.parts.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.parts.PartStack;
 
 /**
@@ -26,7 +26,7 @@ import org.eclipse.che.ide.api.parts.PartStack;
  * @author Vitaliy Guliy
  */
 @Singleton
-public class MaximizePartAction extends Action implements ActivePartChangedHandler {
+public class MaximizePartAction extends BaseAction implements ActivePartChangedHandler {
 
   private PartStack activePartStack;
 

@@ -317,6 +317,15 @@ public interface Theme {
   /** Border of the MenuButton widget. */
   String getMenuButtonBorder();
 
+  /** Background color of Toolbar controller menu button. */
+  String toolbarControllerBackground();
+
+  /** Left border color of Toolbar controller menu button. */
+  String toolbarControllerLeftColor();
+
+  /** Top border color of Toolbar controller menu button. */
+  String toolbarControllerTopColor();
+
   /**
    * Background color of default button.
    *
@@ -865,6 +874,13 @@ public interface Theme {
    * @return the color
    */
   String getMainMenuBkgColor();
+
+  /**
+   * Delimiter background color of main menu
+   *
+   * @return the color
+   */
+  String mainMenuDelimiterBackground();
 
   /**
    * Background color of selected menu items
@@ -1583,4 +1599,17 @@ public interface Theme {
   String popupLoaderTitleColor();
 
   String popupLoaderTextColor();
+
+  /** Cell table */
+  String cellTableHrefColor();
+
+  String cellTableHeaderColor();
+
+  String cellTableHeaderBackground();
+
+  String cellTableOddRowBackground();
+
+  String cellTableEvenRowBackground();
+
+  String cellTableCellColor();
 }

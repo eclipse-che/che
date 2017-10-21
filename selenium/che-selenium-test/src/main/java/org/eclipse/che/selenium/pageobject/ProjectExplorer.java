@@ -98,13 +98,21 @@ public class ProjectExplorer {
     String ALL_PROJECTS_XPATH = "//div[@path=@project]";
     String REFRESH_BUTTON_ID = "gwt-debug-refreshSelectedPath";
     String PROJECT_EXPLORER_TAB_IN_THE_LEFT_PANEL =
-        "//div[@id='gwt-debug-leftPanel']//div[text()='Projects']";
+        "//div[@id='gwt-debug-navPanel']//div[@id='gwt-debug-partButton-Projects']";
   }
 
   public interface FolderTypes {
     String SIMPLE_FOLDER = "simpleFolder";
     String PROJECT_FOLDER = "projectFolder";
     String JAVA_SOURCE_FOLDER = "javaSourceFolder";
+  }
+
+  public interface ProjectExplorerOptionsMenuItem {
+    String MAXIMIZE = "contextMenu/Maximize";
+    String MINIMIZE = "contextMenu/Minimize";
+    String COLLAPSE_ALL = "contextMenu/Collapse All";
+    String REFRESH_MAIN = "contextMenu/Refresh 'main'";
+    String LINK_WITH_EDITOR = "contextMenu/Link with editor";
   }
 
   @FindBy(id = Locators.PROJECT_EXPLORER_TREE_ITEMS)
@@ -127,6 +135,23 @@ public class ProjectExplorer {
 
   @FindBy(xpath = Locators.PROJECT_EXPLORER_TAB_IN_THE_LEFT_PANEL)
   WebElement projectExplorerTabInTheLeftPanel;
+
+  public void clickOnProjectExplorerOptionsButton() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(
+                    "//div[@id='gwt-debug-navPanel']//div[@name='workBenchIconPartStackOptions']")))
+        .click();
+  }
+
+  public void clickOnOptionsMenuItem(String menuID) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.elementToBeClickable(
+                By.xpath(String.format("//nobr[@id='%s']", menuID))))
+        .click();
+  }
 
   /** wait appearance of the IDE Project Explorer */
   public void waitProjectExplorer() {
@@ -560,10 +585,9 @@ public class ProjectExplorer {
   }
 
   /** click on the 'collapse all' in the project explorer */
-  public void clickCollapseAllButton() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.elementToBeClickable(collapseAllBtn));
-    collapseAllBtn.click();
+  public void collapseProjectTreeByOptionsButton() {
+    clickOnProjectExplorerOptionsButton();
+    clickOnOptionsMenuItem(ProjectExplorerOptionsMenuItem.COLLAPSE_ALL);
   }
 
   /** click on the 'go back' in the project explorer */

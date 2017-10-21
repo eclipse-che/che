@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.imageviewer;
 
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -19,11 +19,11 @@ import com.google.inject.name.Named;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.api.WsAgentURLModifier;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.filetypes.FileType;
-import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.util.browser.BrowserUtils;
@@ -57,9 +57,7 @@ public class PreviewImageAction extends AbstractPerspectiveAction {
     super(
         singletonList(PROJECT_PERSPECTIVE_ID),
         constant.actionPreviewImageTitle(),
-        constant.actionPreviewImageDescription(),
-        null,
-        null);
+        constant.actionPreviewImageDescription());
     this.wsAgentURLModifier = wsAgentURLModifier;
     this.appContext = appContext;
 

@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.plugin.languageserver.ide;
 
-import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.inject.Inject;
@@ -22,7 +21,6 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.editor.EditorRegistry;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.editor.orion.client.OrionContentTypeRegistrant;
@@ -30,6 +28,7 @@ import org.eclipse.che.ide.editor.orion.client.OrionHoverRegistrant;
 import org.eclipse.che.ide.editor.orion.client.OrionOccurrencesRegistrant;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionContentTypeOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionHighlightingConfigurationOverlay;
+import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorProvider;
 import org.eclipse.che.plugin.languageserver.ide.highlighting.OccurrencesProvider;
 import org.eclipse.che.plugin.languageserver.ide.hover.HoverProvider;
@@ -38,7 +37,7 @@ import org.eclipse.che.plugin.languageserver.ide.service.LanguageServerRegistryS
 
 /** @author Evgen Vidolob */
 @Singleton
-public class LanguageServerFileTypeRegister implements WsAgentComponent {
+public class LanguageServerFileTypeRegister {
   private static Logger LOGGER = Logger.getLogger(LanguageServerFileTypeRegister.class.getName());
 
   private final LanguageServerRegistryServiceClient serverLanguageRegistry;
@@ -76,8 +75,7 @@ public class LanguageServerFileTypeRegister implements WsAgentComponent {
     this.occurrencesProvider = occurrencesProvider;
   }
 
-  @Override
-  public void start(final Callback<WsAgentComponent, Exception> callback) {
+  void start() {
     Promise<List<LanguageDescription>> registeredLanguages =
         serverLanguageRegistry.getSupportedLanguages();
     registeredLanguages
@@ -125,14 +123,13 @@ public class LanguageServerFileTypeRegister implements WsAgentComponent {
                   orionOccurrencesRegistrant.registerOccurrencesHandler(
                       contentTypes, occurrencesProvider);
                 }
-                callback.onSuccess(LanguageServerFileTypeRegister.this);
               }
             })
         .catchError(
             new Operation<PromiseError>() {
               @Override
               public void apply(PromiseError arg) throws OperationException {
-                callback.onFailure(new Exception(arg.getMessage(), arg.getCause()));
+                Log.error(LanguageServerFileTypeRegister.this.getClass(), arg.getCause());
               }
             });
   }

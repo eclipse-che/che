@@ -31,14 +31,14 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
               "attributes" : {}
             },
             "db": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.terminal"
               ],
               "servers": {},
@@ -105,14 +105,14 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
               "attributes" : {}
             },
             "db": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal"
               ],
               "servers": {},
@@ -180,7 +180,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
@@ -237,7 +237,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
@@ -295,7 +295,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
@@ -366,7 +366,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
@@ -431,7 +431,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.csharp"
               ],
               "servers": {},
@@ -504,7 +504,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
@@ -574,7 +574,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
@@ -651,7 +651,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
@@ -721,7 +721,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json"
               ],
               "servers": {},
@@ -838,7 +838,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php"
               ],
               "servers": {},
@@ -940,7 +940,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.python"
               ],
               "servers": {},
@@ -1011,7 +1011,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
@@ -1079,7 +1079,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
@@ -1124,7 +1124,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec",
                 "org.eclipse.che.terminal",
                 "org.eclipse.che.ws-agent",
@@ -1191,7 +1191,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
@@ -1267,7 +1267,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
@@ -1346,7 +1346,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json"
               ],
               "servers": {},
@@ -1412,7 +1412,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.python"
               ],
               "servers": {},
@@ -1475,7 +1475,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.python"
               ],
               "servers": {},
@@ -1557,7 +1557,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
@@ -1609,7 +1609,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
@@ -1660,7 +1660,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
@@ -1721,7 +1721,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json"
               ],
               "servers": {},
@@ -1828,7 +1828,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
@@ -1935,7 +1935,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec",
                 "org.eclipse.che.terminal",
                 "org.eclipse.che.ws-agent",
@@ -2030,7 +2030,7 @@
           },
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec",
                 "org.eclipse.che.terminal",
                 "org.eclipse.che.ws-agent",
@@ -2118,8 +2118,7 @@
               "attributes": {
                 "memoryLimitBytes": "2147483648"
               },
-
-              "agents": [
+              "installers": [
                 "org.eclipse.che.terminal",
                 "org.eclipse.che.ws-agent",
                 "org.eclipse.che.ssh"
@@ -2198,7 +2197,7 @@
               "attributes": {
                 "memoryLimitBytes": "2147483648"
               },
-              "agents": [
+              "installers": [
                 "org.eclipse.che.terminal",
                 "org.eclipse.che.ws-agent",
                 "org.eclipse.che.ssh"
@@ -2272,7 +2271,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
@@ -2321,7 +2320,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
@@ -2378,7 +2377,7 @@
       "default": {
         "machines": {
           "dev-machine": {
-            "agents": [
+            "installers": [
               "org.eclipse.che.terminal",
               "org.eclipse.che.ws-agent",
               "org.eclipse.che.ssh"
@@ -2464,7 +2463,7 @@
                 "memoryLimitBytes": "2147483648"
               },
               "servers": {},
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec",
                 "org.eclipse.che.terminal",
                 "org.eclipse.che.ws-agent",
@@ -2552,6 +2551,96 @@
     "stackIcon": {
       "name": "type-ceylon.svg",
       "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "openshift-default",
+    "name": "Openshift Default",
+    "description": "Openshift Single Pod Workspace",
+    "scope": "general",
+    "tags": [
+      "Openshift"
+    ],
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "app/main": {
+              "installers": [
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
+              ],
+              "servers": {
+                "web": {
+                  "protocol": "http",
+                  "port": "8080/tcp"
+                }
+              }
+            }
+          },
+          "recipe": {
+            "content": "kind: List\nitems:\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: app\n  spec:\n    containers:\n      -\n        image: rhche/centos_jdk8:latest\n        name: main\n        ports:\n          -\n            containerPort: 8080\n            protocol: TCP",
+            "contentType": "application/x-yaml",
+            "type": "openshift"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": []
+    }
+  },
+  {
+    "id": "openshift-sql",
+    "name": "Openshift Sql",
+    "description": "Openshift Multi Pod Workspace",
+    "scope": "general",
+    "tags": [
+      "Openshift"
+    ],
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "web/main": {
+              "installers": [
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
+              ],
+              "servers": {
+                "web": {
+                  "protocol": "http",
+                  "port": "8080/tcp"
+                }
+              }
+            },
+            "db/main": {
+              "installers": [
+                "org.eclipse.che.terminal"
+              ],
+              "servers": {}
+            }
+          },
+          "recipe": {
+            "content": "---\nkind: List\nitems:\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: web\n  spec:\n    containers:\n      -\n        image: rhche/centos_jdk8:latest\n        name: main\n        ports:\n          -\n            containerPort: 8080\n            protocol: TCP\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: db\n    labels:\n      type: db\n  spec:\n    containers:\n      -\n        image: centos/mysql-57-centos7\n        name: main\n        ports:\n          -\n            name: mysql\n            containerPort: 3306\n            protocol: TCP\n        env:\n          - \n            name: MYSQL_USER\n            value: 'petclinic'\n          - \n            name: MYSQL_ROOT_PASSWORD\n            value: 'password'\n          - \n            name: MYSQL_PASSWORD\n            value: 'password'\n          - \n            name: MYSQL_DATABASE\n            value: 'petclinic'\n\n-\n  apiVersion: v1\n  kind: Service\n  metadata:\n    name: db\n  spec:\n    selector:\n      type: db\n    ports:\n      - name: mysql\n        port: 3306\n        protocol: TCP\n        targetPort: mysql",
+            "contentType": "application/x-yaml",
+            "type": "openshift"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": [
+        {
+          "commandLine": "mvn clean install -f ${current.project.path}",
+          "name": "build",
+          "type": "mvn",
+          "attributes": {
+            "previewUrl": "",
+            "goal": "Build"
+          }
+        }
+      ]
     }
   }
 ]

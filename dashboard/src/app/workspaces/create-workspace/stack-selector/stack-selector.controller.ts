@@ -198,15 +198,17 @@ export class StackSelectorController {
         // get machines memory limits
               const defaultEnv = stack.workspaceConfig.defaultEnv,
                     environment = stack.workspaceConfig.environments[defaultEnv],
-                    environmentManager = this.getEnvironmentManager(environment.recipe.type),
-                    machines = environmentManager.getMachines(environment);
+                    environmentManager = this.getEnvironmentManager(environment.recipe.type);
+              if (environmentManager) {
+                let machines = environmentManager.getMachines(environment);
 
-              machines.forEach((machine: any) => {
-                this.stackMachines[stack.id].push({
-                  name: machine.name,
-                  memoryLimitBytes: environmentManager.getMemoryLimit(machine)
+                machines.forEach((machine: any) => {
+                  this.stackMachines[stack.id].push({
+                    name: machine.name,
+                    memoryLimitBytes: environmentManager.getMemoryLimit(machine)
+                  });
                 });
-              });
+              }
       }
     });
   }

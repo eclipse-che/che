@@ -13,7 +13,6 @@ package org.eclipse.che.ide.processes;
 import java.util.Collection;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.ui.tree.TreeNodeElement;
 import org.eclipse.che.ide.util.UUID;
 import org.vectomatic.dom.svg.ui.SVGResource;
@@ -35,9 +34,8 @@ public class ProcessTreeNode {
   private ProcessTreeNode parent;
   private TreeNodeElement<ProcessTreeNode> treeNodeElement;
   private boolean hasUnreadContent;
-  private boolean hasTerminalAgent;
-  private boolean hasSSHAgent;
-  private boolean running;
+  private boolean terminalServerRunning;
+  private boolean sshServerRunning;
 
   public ProcessTreeNode(
       ProcessNodeType type,
@@ -53,10 +51,10 @@ public class ProcessTreeNode {
 
     switch (type) {
       case MACHINE_NODE:
-        if (data instanceof MachineEntity) {
-          MachineEntity machine = (MachineEntity) data;
-          id = machine.getId();
-          displayName = machine.getDisplayName();
+        if (data instanceof String) {
+          String machineName = (String) data;
+          id = machineName;
+          displayName = machineName;
         } else {
           throw new IllegalArgumentException("Data type is not a machine setting default value");
         }
@@ -132,28 +130,20 @@ public class ProcessTreeNode {
     this.hasUnreadContent = hasUnreadContent;
   }
 
-  public boolean hasTerminalAgent() {
-    return hasTerminalAgent;
+  public boolean isTerminalServerRunning() {
+    return terminalServerRunning;
   }
 
-  public void setHasTerminalAgent(boolean hasTerminalAgent) {
-    this.hasTerminalAgent = hasTerminalAgent;
+  public void setTerminalServerRunning(boolean terminalServerRunning) {
+    this.terminalServerRunning = terminalServerRunning;
   }
 
-  public boolean hasSSHAgent() {
-    return hasSSHAgent;
+  public boolean isSshServerRunning() {
+    return sshServerRunning;
   }
 
-  public void setHasSSHAgent(boolean hasSSHAgent) {
-    this.hasSSHAgent = hasSSHAgent;
-  }
-
-  public boolean isRunning() {
-    return running;
-  }
-
-  public void setRunning(boolean running) {
-    this.running = running;
+  public void setSshServerRunning(boolean sshServerRunning) {
+    this.sshServerRunning = sshServerRunning;
   }
 
   @Override

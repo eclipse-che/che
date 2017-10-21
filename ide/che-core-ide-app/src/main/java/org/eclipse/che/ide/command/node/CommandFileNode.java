@@ -14,11 +14,11 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.command.CommandImpl;
-import org.eclipse.che.ide.api.data.tree.HasAction;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.command.CommandUtils;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.ui.smartTree.data.HasAction;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 
 /**

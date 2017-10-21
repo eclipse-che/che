@@ -27,7 +27,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.EditorWithAutoSave;
-import org.eclipse.che.ide.api.event.EditorDirtyStateChangedEvent;
+import org.eclipse.che.ide.api.editor.events.EditorDirtyStateChangedEvent;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
@@ -36,6 +36,7 @@ import org.eclipse.che.ide.resource.Path;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -74,7 +75,7 @@ public class EditorContentSynchronizerImplTest {
   @Test
   public void constructorShouldBeVerified() {
     verify(eventBus, times(3))
-        .addHandler(org.mockito.ArgumentMatchers.<Event.Type<Object>>anyObject(), anyObject());
+        .addHandler(ArgumentMatchers.<Event.Type<Object>>anyObject(), anyObject());
   }
 
   @Test
@@ -194,7 +195,7 @@ public class EditorContentSynchronizerImplTest {
   }
 
   @Test
-  // we sync 'dirty' state of editors only for case when content of an active editor HAS SAVED
+  // we sync 'dirty' state of editors only for case when content of an active editor IS SAVED
   public void shouldSkipEditorDirtyStateChangedEventWhenEditorIsDirty() {
     when(activeEditor.isDirty()).thenReturn(true);
     EditorPartPresenter openedEditor1 = mock(EditorPartPresenter.class);

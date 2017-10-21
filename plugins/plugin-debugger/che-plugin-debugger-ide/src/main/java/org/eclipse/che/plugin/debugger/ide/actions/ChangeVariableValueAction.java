@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.plugin.debugger.ide.actions;
 
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Inject;
 import java.util.Collections;
@@ -41,7 +41,6 @@ public class ChangeVariableValueAction extends AbstractPerspectiveAction {
         Collections.singletonList(PROJECT_PERSPECTIVE_ID),
         locale.changeVariableValue(),
         locale.changeVariableValueDescription(),
-        null,
         resources.changeVariableValue());
     this.changeValuePresenter = changeValuePresenter;
     this.debuggerPresenter = debuggerPresenter;

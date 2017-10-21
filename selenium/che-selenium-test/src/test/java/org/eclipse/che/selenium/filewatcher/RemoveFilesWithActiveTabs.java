@@ -178,7 +178,7 @@ public class RemoveFilesWithActiveTabs {
     projectExplorer2.waitItem(PROJECT_NAME);
     projectExplorer2.quickExpandWithJavaScript();
 
-    events1.clickProjectEventsTab();
-    events2.clickProjectEventsTab();
+    events1.clickEventLogBtn();
+    events2.clickEventLogBtn();
   }
 }

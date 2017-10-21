@@ -84,7 +84,7 @@ export class CheRemoteWorkspace {
     let deferredPromise = deferred.promise;
     this.cheJsonRpcMasterApi = this.cheJsonRpcApi.getJsonRpcMasterApi(remoteWsURL);
     this.cheJsonRpcMasterApi.subscribeWorkspaceStatus(workspaceId, (message: any) => {
-      if (message.eventType === 'RUNNING' && message.workspaceId === workspaceId) {
+      if (message.status === 'RUNNING' && message.workspaceId === workspaceId) {
         let promise = this.remoteWorkspaceAPI.getDetails({workspaceId: workspaceId}, {}).$promise;
         promise.then((workspace: any) => {
           deferred.resolve(workspace);

@@ -11,12 +11,13 @@
 package org.eclipse.che.selenium.workspaces;
 
 import com.google.inject.Inject;
-import org.eclipse.che.selenium.core.constant.TestWorkspaceConstants;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.WorkspaceTemplate;
 import org.eclipse.che.selenium.pageobject.Ide;
-import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
+import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.ToastLoader;
+import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.testng.annotations.Test;
 
 /** @author Alexander Garagatyi */
@@ -25,12 +26,14 @@ public class WorkspaceFromOfficialUbuntuImageStartTest {
   private TestWorkspace testWorkspace;
 
   @Inject private Ide ide;
-  @Inject private NotificationsPopupPanel notificationsPopupPanel;
+  @Inject private ProjectExplorer projectExplorer;
+  @Inject private ToastLoader toastLoader;
+  @Inject private MachineTerminal terminal;
 
   @Test
   public void ensureWorkspaceStartsFromOfficialUbuntuImage() throws Exception {
     ide.open(testWorkspace);
-    notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed(
-        TestWorkspaceConstants.RUNNING_WORKSPACE_MESS, 300);
+    projectExplorer.waitProjectExplorer();
+    terminal.waitTerminalTab();
   }
 }

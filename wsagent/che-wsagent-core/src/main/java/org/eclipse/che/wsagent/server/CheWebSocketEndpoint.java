@@ -20,8 +20,7 @@ import org.eclipse.che.api.core.websocket.impl.WebSocketSessionRegistry;
 import org.eclipse.che.api.core.websocket.impl.WebsocketIdService;
 
 /**
- * Implementation of BasicWebSocketEndpoint for Che packaging. Add only mapping
- * "/websocket/{endpoint-id}".
+ * Implementation of BasicWebSocketEndpoint for Che packaging. Add only mapping "/wsagent".
  *
  * @author Vitalii Parfonov
  */

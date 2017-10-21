@@ -21,7 +21,7 @@ import java.util.Set;
 public interface CommandTypeRegistry {
 
   /**
-   * Returns {@code Optional} {@link CommandType} with the specified ID or {@code Optional.absent()}
+   * Returns {@code Optional} {@link CommandType} with the specified ID or {@code Optional.empty()}
    * if none.
    *
    * @param id the ID of the command type

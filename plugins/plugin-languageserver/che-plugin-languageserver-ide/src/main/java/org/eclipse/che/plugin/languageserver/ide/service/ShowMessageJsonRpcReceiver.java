@@ -10,14 +10,13 @@
  */
 package org.eclipse.che.plugin.languageserver.ide.service;
 
-import com.google.web.bindery.event.shared.EventBus;
+import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
+
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.plugin.languageserver.ide.window.ShowMessageProcessor;
 import org.eclipse.che.plugin.languageserver.ide.window.ShowMessageRequestProcessor;
 import org.eclipse.lsp4j.MessageActionItem;
@@ -27,20 +26,16 @@ import org.eclipse.lsp4j.ShowMessageRequestParams;
 @Singleton
 public class ShowMessageJsonRpcReceiver {
 
-  @Inject
-  public ShowMessageJsonRpcReceiver(RequestTransmitter transmitter, EventBus eventBus) {
-    eventBus.addHandler(
-        WsAgentStateEvent.TYPE,
-        new WsAgentStateHandler() {
-          @Override
-          public void onWsAgentStarted(WsAgentStateEvent event) {
-            subscribe(transmitter);
-            subscribeShowMessageRequest(transmitter);
-          }
+  private final RequestTransmitter transmitter;
 
-          @Override
-          public void onWsAgentStopped(WsAgentStateEvent event) {}
-        });
+  @Inject
+  public ShowMessageJsonRpcReceiver(RequestTransmitter transmitter) {
+    this.transmitter = transmitter;
+  }
+
+  public void subscribe() {
+    subscribe(transmitter);
+    subscribeShowMessageRequest(transmitter);
   }
 
   @Inject
@@ -57,7 +52,7 @@ public class ShowMessageJsonRpcReceiver {
   private void subscribe(RequestTransmitter transmitter) {
     transmitter
         .newRequest()
-        .endpointId("ws-agent")
+        .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
         .methodName("window/showMessage/subscribe")
         .noParams()
         .sendAndSkipResult();

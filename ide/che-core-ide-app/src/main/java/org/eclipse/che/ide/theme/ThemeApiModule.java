@@ -16,16 +16,13 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.theme.Theme;
 import org.eclipse.che.ide.api.theme.ThemeAgent;
 
-/**
- * GIN module for configuring Theme API components.
- *
- * @author Artem Zatsarynnyi
- */
+/** GIN module for configuring Theme API components. */
 public class ThemeApiModule extends AbstractGinModule {
 
   @Override
   protected void configure() {
     bind(ThemeAgent.class).to(ThemeAgentImpl.class).in(Singleton.class);
+    bind(ThemeAgent.class).asEagerSingleton();
 
     GinMultibinder<Theme> themeBinder = GinMultibinder.newSetBinder(binder(), Theme.class);
     themeBinder.addBinding().to(DarkTheme.class);

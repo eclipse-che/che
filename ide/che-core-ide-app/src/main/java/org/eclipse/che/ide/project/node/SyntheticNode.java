@@ -12,11 +12,11 @@ package org.eclipse.che.ide.project.node;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-import org.eclipse.che.ide.api.data.HasDataObject;
-import org.eclipse.che.ide.api.data.tree.AbstractTreeNode;
-import org.eclipse.che.ide.api.data.tree.settings.HasSettings;
-import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.ui.smartTree.data.AbstractTreeNode;
+import org.eclipse.che.ide.ui.smartTree.data.HasDataObject;
+import org.eclipse.che.ide.ui.smartTree.data.settings.HasSettings;
+import org.eclipse.che.ide.ui.smartTree.data.settings.NodeSettings;
 import org.eclipse.che.ide.ui.smartTree.presentation.HasPresentation;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 

@@ -50,10 +50,9 @@ export class AdminPluginsCtrl {
     promise.then(() => {
         this.updateData();
         this.isLoading = false;
-      },
-      (error) => {
+      }, (error: any) => {
         this.isLoading = false;
-        if (error.status === 304) {
+        if (error && error.status === 304) {
           this.updateData();
         }
       });

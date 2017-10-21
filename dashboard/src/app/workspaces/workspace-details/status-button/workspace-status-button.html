@@ -1,18 +1,12 @@
-<div class="che-workspace-button" class="btn-group" uib-dropdown>
-  <che-button-default id="split-button"
+<div class="che-workspace-button">
+  <che-button-default ng-if="showStopButton===false"
+                      id="runButton"
                       ng-disabled="isDisabled"
-                      class="run-button"
-                      che-button-title="{{isStopButton ? 'Stop' : 'Run'}}"
-                      name="runButton"
-                      ng-click="changeWorkspaceStatus()"></che-button-default>
-  <che-button-default uib-dropdown-toggle
-                      ng-disabled="!isStopButton || isDisabled || isStarting"
-                      class="drop-down"
-                      che-button-title="" name="dropDown"
-                      che-button-icon="fa fa-caret-down"></che-button-default>
-  <ul class="area-drop-down" uib-dropdown-menu role="menu" aria-labelledby="split-button">
-    <li role="menuitem" ng-repeat="dropDownItem in dropDownItems track by $index"
-        ng-class="{'selected-item' : dropDownSelectPos  === $index}"
-        ng-mousedown="onSelect($index)"><span>{{dropDownItem}}</span></li>
-  </ul>
+                      che-button-title="Run"
+                      ng-click="onRunWorkspace()"></che-button-default>
+  <che-button-default ng-if="showStopButton"
+                      id="stopButton"
+                      ng-disabled="isDisabled"
+                      che-button-title="Stop"
+                      ng-click="onStopWorkspace()"></che-button-default>
 </div>

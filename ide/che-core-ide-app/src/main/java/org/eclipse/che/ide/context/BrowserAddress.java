@@ -70,13 +70,15 @@ public class BrowserAddress {
     return workspaceKey.substring(workspaceKey.lastIndexOf("/") + 1);
   }
 
-  /**
-   * Returns workspace key from current address or empty string when it is undefined.
-   *
-   * @see org.eclipse.che.ide.api.workspace.WorkspaceServiceClient#getWorkspace(String)
-   */
+  /** Returns workspace key from current address or empty string when it is undefined. */
   public String getWorkspaceKey() {
     String browserUrl = Window.Location.getPath();
+
+    // TODO temporary to make it work with not "path obliged" URL
+    String wsParam = Window.Location.getParameter("ws");
+    if (wsParam != null) return wsParam;
+    //
+
     String[] urlParts = browserUrl.split("/", NAMESPACE_START_SEGMENT + 1);
     if (urlParts.length < NAMESPACE_START_SEGMENT) {
       return "";

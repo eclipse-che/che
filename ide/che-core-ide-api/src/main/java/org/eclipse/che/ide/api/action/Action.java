@@ -8,97 +8,21 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.api.action;
 
-import com.google.gwt.resources.client.ImageResource;
-import org.vectomatic.dom.svg.ui.SVGResource;
+package org.eclipse.che.ide.api.action;
 
 /**
  * Represents an entity that has a state, a presentation and can be performed.
  *
- * <p>For an action to be useful, you need to implement {@link Action#actionPerformed} and
- * optionally to override {@link Action#update}. By overriding the {@link Action#update} method you
- * can dynamically change action's presentation.
+ * <p>For an action to be useful, you need to implement {@link BaseAction#actionPerformed} and
+ * optionally to override {@link BaseAction#update}. By overriding the {@link BaseAction#update}
+ * method you can dynamically change action's presentation.
  *
  * <p>The same action can have various presentations.
  *
- * @author Evgen Vidolob
- * @author Dmitry Shnurenko
- * @author Vitaliy Guliy
+ * @author Yevhen Vydolob
  */
-public abstract class Action {
-
-  private final Presentation presentation = new Presentation();
-
-  /** Creates a new action with its text, description and icon set to <code>null</code>. */
-  public Action() {
-    this(null, null, null, null);
-  }
-
-  /**
-   * Creates a new action with the specified text. Description and icon are set to <code>null</code>
-   * .
-   *
-   * @param text Serves as a tooltip when the presentation is a button and the name of the menu item
-   *     when the presentation is a menu item.
-   */
-  public Action(String text) {
-    this(text, null, null, null);
-  }
-
-  /**
-   * Constructs a new action with the specified text, description.
-   *
-   * @param text Serves as a tooltip when the presentation is a button and the name of the menu item
-   *     when the presentation is a menu item
-   * @param description Describes current action, this description will appear on the status bar
-   *     when presentation has focus
-   */
-  public Action(String text, String description) {
-    this(text, description, null, null);
-  }
-
-  /**
-   * Constructs a new action with the specified text, description and icon.
-   *
-   * @param text Serves as a tooltip when the presentation is a button and the name of the menu item
-   *     when the presentation is a menu item
-   * @param description Describes current action, this description will appear on the status bar
-   *     when presentation has focus
-   * @param imageResource Action's icon
-   * @param svgResource Action's SVG icon
-   */
-  public Action(
-      String text, String description, ImageResource imageResource, SVGResource svgResource) {
-    presentation.setText(text);
-    presentation.setDescription(description);
-    presentation.setImageResource(imageResource);
-    presentation.setSVGResource(svgResource);
-  }
-
-  /**
-   * Constructs a new action with the specified text, description and icon.
-   *
-   * @param text Serves as a tooltip when the presentation is a button and the name of the menu item
-   *     when the presentation is a menu item
-   * @param description Describes current action, this description will appear on the status bar
-   *     when presentation has focus
-   * @param imageResource Action's icon
-   * @param svgResource Action's SVG icon
-   * @param htmlResource HTML representation of icon
-   */
-  public Action(
-      String text,
-      String description,
-      ImageResource imageResource,
-      SVGResource svgResource,
-      String htmlResource) {
-    presentation.setText(text);
-    presentation.setDescription(description);
-    presentation.setImageResource(imageResource);
-    presentation.setSVGResource(svgResource);
-    presentation.setHTMLResource(htmlResource);
-  }
+public interface Action {
 
   /**
    * Updates the state of the action. Default implementation does nothing. Override this method to
@@ -114,26 +38,19 @@ public abstract class Action {
    *
    * @param e Carries information on the invocation place and data available
    */
-  public void update(ActionEvent e) {}
+  void update(ActionEvent e);
 
   /**
    * Returns a template presentation that will be used as a template for created presentations.
    *
    * @return template presentation
    */
-  public final Presentation getTemplatePresentation() {
-    return presentation;
-  }
+  Presentation getTemplatePresentation();
 
   /**
    * Implement this method to provide your action handler.
    *
    * @param e Carries information on the invocation place
    */
-  public abstract void actionPerformed(ActionEvent e);
-
-  @Override
-  public String toString() {
-    return getTemplatePresentation().toString();
-  }
+  void actionPerformed(ActionEvent e);
 }

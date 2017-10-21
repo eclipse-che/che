@@ -31,8 +31,8 @@ export class CheAgent {
     this.agents = [];
 
     // remote call
-    this.remoteAgentAPI = this.$resource('/api/agent', {}, {
-      getAgents: { method: 'GET', url: '/api/agent', isArray: true }
+    this.remoteAgentAPI = this.$resource('/api/installer', {}, {
+      getAgents: { method: 'GET', url: '/api/installer', isArray: true }
     });
   }
 

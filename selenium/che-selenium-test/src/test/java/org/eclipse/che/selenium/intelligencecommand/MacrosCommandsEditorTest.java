@@ -113,23 +113,25 @@ public class MacrosCommandsEditorTest {
     commandsEditor.setCursorToLine(1);
     commandsEditor.waitActiveEditor();
     commandsEditor.selectMacrosLinkInCommandsEditor(PREVIEW_MACROS_LINK);
-    commandsEditor.typeTextIntoSearchMacroField("server.22/");
-    commandsEditor.waitTextIntoSearchMacroField("server.22/");
+    commandsEditor.typeTextIntoSearchMacroField("server.");
+    commandsEditor.waitTextIntoSearchMacroField("server.");
     String[] macrosItems = {
-      "${server.22/tcp.hostname}",
-      "${server.22/tcp.port}",
-      "${server.22/tcp.protocol}",
-      "${server.22/tcp}",
-      "Returns hostname of a server registered by name",
-      "Returns port of a server registered by name",
-      "Returns protocol of a server registered by name",
-      "Returns protocol, hostname and port of an internal server"
+      "${server.4403/tcp}",
+      "${server.8000/tcp}",
+      "${server.8080/tcp}",
+      "${server.9876/tcp}",
+      "${server.exec-agent/http}",
+      "${server.exec-agent/ws}",
+      "${server.ssh}",
+      "${server.terminal}",
+      "${server.wsagent/http}",
+      "${server.wsagent/ws}"
     };
     for (String macrosItem : macrosItems) {
       commandsEditor.waitTextIntoMacrosContainer(macrosItem);
     }
-    commandsEditor.enterMacroCommandByEnter("${server.22/tcp.hostname}");
-    commandsEditor.waitTextIntoEditor("${server.22/tcp.hostname}");
+    commandsEditor.enterMacroCommandByEnter("${server.ssh}");
+    commandsEditor.waitTextIntoEditor("${server.ssh");
     commandsEditor.clickOnRunButton();
     consoles.waitExpectedTextIntoPreviewUrl("ssh");
     commandsEditor.setFocusIntoTypeCommandsEditor(PREVIEW_URL_EDITOR);
@@ -137,12 +139,12 @@ public class MacrosCommandsEditorTest {
     commandsEditor.selectLineAndDelete();
     commandsEditor.waitActiveEditor();
     commandsEditor.selectMacrosLinkInCommandsEditor(PREVIEW_MACROS_LINK);
-    commandsEditor.selectMacroCommand("${server.22/tcp}");
+    commandsEditor.selectMacroCommand("${server.ssh}");
     commandsEditor.typeTextIntoEditor(Keys.ARROW_UP.toString());
     commandsEditor.typeTextIntoEditor(Keys.SPACE.toString());
-    commandsEditor.waitMacroCommandIsSelected("${server.22/tcp.protocol}");
-    commandsEditor.enterMacroCommandByDoubleClick("${server.22/tcp.protocol}");
-    commandsEditor.waitTextIntoEditor("${server.22/tcp.protocol}");
+    commandsEditor.waitMacroCommandIsSelected("${server.ssh}");
+    commandsEditor.enterMacroCommandByDoubleClick("${server.ssh}");
+    commandsEditor.waitTextIntoEditor("${server.ssh}");
     commandsEditor.clickOnRunButton();
     consoles.waitExpectedTextIntoPreviewUrl("ssh");
   }

@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.ide.terminal;
 
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_TERMINAL_REFERENCE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
@@ -23,13 +24,12 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import javax.validation.constraints.NotNull;
-import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+import org.eclipse.che.ide.api.workspace.model.ServerImpl;
 import org.eclipse.che.ide.collections.Jso;
 import org.eclipse.che.ide.websocket.WebSocket;
 import org.eclipse.che.ide.websocket.events.ConnectionErrorHandler;
@@ -50,7 +50,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
   private final TerminalOptionsJso options;
   private final NotificationManager notificationManager;
   private final CoreLocalizationConstant locale;
-  private final MachineEntity machine;
+  private final MachineImpl machine;
   private final TerminalInitializePromiseHolder terminalHolder;
   private final ModuleHolder moduleHolder;
 
@@ -67,7 +67,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
       TerminalView view,
       NotificationManager notificationManager,
       CoreLocalizationConstant locale,
-      @NotNull @Assisted MachineEntity machine,
+      @NotNull @Assisted MachineImpl machine,
       @Assisted TerminalOptionsJso options,
       final TerminalInitializePromiseHolder terminalHolder,
       final ModuleHolder moduleHolder) {
@@ -97,23 +97,26 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
       terminalHolder
           .getInitializerPromise()
           .then(
-              new Operation<Void>() {
-                @Override
-                public void apply(Void arg) throws OperationException {
-                  connectToTerminalWebSocket(machine.getTerminalUrl());
-                }
+              aVoid -> {
+                ServerImpl terminalServer =
+                    machine
+                        .getServerByName(SERVER_TERMINAL_REFERENCE)
+                        .orElseThrow(
+                            () ->
+                                new OperationException(
+                                    "Machine "
+                                        + machine.getName()
+                                        + " doesn't provide terminal server."));
+                connectToTerminal(terminalServer.getUrl());
               })
           .catchError(
-              new Operation<PromiseError>() {
-                @Override
-                public void apply(PromiseError arg) throws OperationException {
-                  notificationManager.notify(
-                      locale.failedToConnectTheTerminal(),
-                      locale.terminalCanNotLoadScript(),
-                      FAIL,
-                      NOT_EMERGE_MODE);
-                  reconnect();
-                }
+              arg -> {
+                notificationManager.notify(
+                    locale.failedToConnectTheTerminal(),
+                    locale.terminalCanNotLoadScript(),
+                    FAIL,
+                    NOT_EMERGE_MODE);
+                reconnect();
               });
     }
   }
@@ -132,7 +135,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
     }
   }
 
-  private void connectToTerminalWebSocket(@NotNull String wsUrl) {
+  private void connectToTerminal(@NotNull String wsUrl) {
     countRetry--;
 
     socket = WebSocket.create(wsUrl);

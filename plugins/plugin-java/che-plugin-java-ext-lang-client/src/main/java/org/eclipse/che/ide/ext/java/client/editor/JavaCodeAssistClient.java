@@ -19,8 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.MimeType;
+import org.eclipse.che.ide.api.WsAgentURLModifier;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.ext.java.shared.dto.Change;
 import org.eclipse.che.ide.ext.java.shared.dto.ConflictImportDTO;
 import org.eclipse.che.ide.ext.java.shared.dto.OrganizeImportResult;
@@ -66,7 +66,7 @@ public class JavaCodeAssistClient {
       String contents,
       AsyncRequestCallback<Proposals> callback) {
     String url =
-        appContext.getDevMachine().getWsAgentBaseUrl()
+        appContext.getWsAgentServerApiEndpoint()
             + CODE_ASSIST_URL_PREFIX
             + "/compute/completion"
             + "/?projectpath="
@@ -85,7 +85,7 @@ public class JavaCodeAssistClient {
       List<Problem> problems,
       AsyncRequestCallback<Proposals> callback) {
     String url =
-        appContext.getDevMachine().getWsAgentBaseUrl()
+        appContext.getWsAgentServerApiEndpoint()
             + CODE_ASSIST_URL_PREFIX
             + "/compute/assist"
             + "/?projectpath="
@@ -105,7 +105,7 @@ public class JavaCodeAssistClient {
       boolean insert,
       final AsyncCallback<ProposalApplyResult> callback) {
     String url =
-        appContext.getDevMachine().getWsAgentBaseUrl()
+        appContext.getWsAgentServerApiEndpoint()
             + CODE_ASSIST_URL_PREFIX
             + "/apply/completion/?sessionid="
             + sessionId
@@ -133,7 +133,7 @@ public class JavaCodeAssistClient {
 
   public String getProposalDocUrl(int id, String sessionId) {
     return urlDecorator.modify(
-        appContext.getDevMachine().getWsAgentBaseUrl()
+        appContext.getWsAgentServerApiEndpoint()
             + CODE_ASSIST_URL_PREFIX
             + "/compute/info?sessionid="
             + sessionId
@@ -150,7 +150,7 @@ public class JavaCodeAssistClient {
    */
   public Promise<OrganizeImportResult> organizeImports(String projectPath, String fqn) {
     String url =
-        appContext.getDevMachine().getWsAgentBaseUrl()
+        appContext.getWsAgentServerApiEndpoint()
             + CODE_ASSIST_URL_PREFIX
             + "/organize-imports?projectpath="
             + projectPath
@@ -171,7 +171,7 @@ public class JavaCodeAssistClient {
   public Promise<List<Change>> applyChosenImports(
       String projectPath, String fqn, ConflictImportDTO chosen) {
     String url =
-        appContext.getDevMachine().getWsAgentBaseUrl()
+        appContext.getWsAgentServerApiEndpoint()
             + CODE_ASSIST_URL_PREFIX
             + "/apply-imports?projectpath="
             + projectPath

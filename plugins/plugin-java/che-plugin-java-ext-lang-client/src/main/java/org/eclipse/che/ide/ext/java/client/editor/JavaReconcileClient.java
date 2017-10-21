@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.ide.ext.java.client.editor;
 
+import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcPromise;
@@ -26,7 +28,6 @@ import org.eclipse.che.ide.util.loging.Log;
 /** @author Evgen Vidolob */
 @Singleton
 public class JavaReconcileClient {
-  private static final String ENDPOINT_ID = "ws-agent";
   private static final String OUTCOMING_METHOD = "request:java-reconcile";
 
   private final RequestTransmitter requestTransmitter;
@@ -61,7 +62,7 @@ public class JavaReconcileClient {
         dtoFactory.createDto(JavaClassInfo.class).withFQN(fqn).withProjectPath(projectPath);
     return requestTransmitter
         .newRequest()
-        .endpointId(ENDPOINT_ID)
+        .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
         .methodName(OUTCOMING_METHOD)
         .paramsAsDto(javaClassInfo)
         .sendAndReceiveResultAsDto(ReconcileResult.class);
@@ -71,7 +72,7 @@ public class JavaReconcileClient {
   @Deprecated
   public void reconcile(String projectPath, String fqn, final ReconcileCallback callback) {
     String url =
-        appContext.getDevMachine().getWsAgentBaseUrl()
+        appContext.getWsAgentServerApiEndpoint()
             + "/java/reconcile/?projectpath="
             + projectPath
             + "&fqn="

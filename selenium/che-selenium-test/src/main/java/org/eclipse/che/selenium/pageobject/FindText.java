@@ -60,10 +60,12 @@ public class FindText {
     String FILE_MASK_FIELD = "gwt-debug-text-search-files";
     String CANCEL_BUTTON = "search-cancel-button";
     String SEARCH_BUTTON = "search-button";
-    String FIND_INFO_PANEL = "gwt-debug-find-info-panel";
+    String FIND_INFO_PANEL =
+        "//div[@id='gwt-debug-infoPanel']//div[@id='gwt-debug-partStackContent']";
     String FIND_TAB = "gwt-debug-partButton-Find";
-    String HIDE_FIND_PANEL =
-        "//div[@id='gwt-debug-find-info-panel']//div[text()='Find']/following::div[3]";
+    String HIDE_FIND_PANEL = "//div[@id='gwt-debug-infoPanel']//div[@id='gwt-debug-hideButton']";
+    String ITEM_FIND_PANEL =
+        "//div[@id='gwt-debug-infoPanel']//div[@id='gwt-debug-partStackContent']//div[text()='%s']";
     String OCCURRENCE = "//span[@debugfilepath = '%s']";
   }
 

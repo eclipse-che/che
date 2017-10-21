@@ -14,7 +14,9 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.factory.server.FactoryCreateValidator;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.WorkspaceValidator;
@@ -32,10 +34,14 @@ public class FactoryCreateValidatorImpl extends FactoryBaseValidator
 
   @Override
   public void validateOnCreate(FactoryDto factory)
-      throws BadRequestException, ServerException, ForbiddenException {
+      throws BadRequestException, ServerException, ForbiddenException, NotFoundException {
     validateProjects(factory);
     validateCurrentTimeAfterSinceUntil(factory);
     validateProjectActions(factory);
-    workspaceConfigValidator.validateConfig(factory.getWorkspace());
+    try {
+      workspaceConfigValidator.validateConfig(factory.getWorkspace());
+    } catch (ValidationException x) {
+      throw new BadRequestException(x.getMessage());
+    }
   }
 }

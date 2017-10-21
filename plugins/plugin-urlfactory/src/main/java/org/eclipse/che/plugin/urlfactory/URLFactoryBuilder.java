@@ -11,8 +11,6 @@
 package org.eclipse.che.plugin.urlfactory;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 import com.google.common.base.Strings;
@@ -25,11 +23,10 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.factory.server.FactoryMessageBodyAdapter;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
-import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
-import org.eclipse.che.api.workspace.shared.dto.EnvironmentRecipeDto;
-import org.eclipse.che.api.workspace.shared.dto.ExtendedMachineDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.dto.server.DtoFactory;
+
+// FIXME: spi
 
 /**
  * Handle the creation of some elements used inside a {@link FactoryDto}
@@ -97,34 +94,30 @@ public class URLFactoryBuilder {
 
     // if remote repository contains a codenvy docker file, use it
     // else use the default image.
-    EnvironmentRecipeDto recipeDto;
-    if (dockerFileLocation != null && URLChecker.exists(dockerFileLocation)) {
-      recipeDto =
-          newDto(EnvironmentRecipeDto.class)
-              .withLocation(dockerFileLocation)
-              .withType("dockerfile")
-              .withContentType("text/x-dockerfile");
-    } else {
-      recipeDto =
-          newDto(EnvironmentRecipeDto.class)
-              .withLocation(DEFAULT_DOCKER_IMAGE)
-              .withType("dockerimage");
-    }
-    ExtendedMachineDto machine =
-        newDto(ExtendedMachineDto.class)
-            .withAgents(singletonList("org.eclipse.che.ws-agent"))
-            .withAttributes(singletonMap("memoryLimitBytes", MEMORY_LIMIT_BYTES));
-
-    // setup environment
-    EnvironmentDto environmentDto =
-        newDto(EnvironmentDto.class)
-            .withRecipe(recipeDto)
-            .withMachines(singletonMap(MACHINE_NAME, machine));
+    //        RecipeDto recipeDto;
+    //        if (dockerFileLocation != null && URLChecker.exists(dockerFileLocation)) {
+    //            recipeDto = newDto(EnvironmentRecipeDto.class).withLocation(dockerFileLocation)
+    //                                                          .withType("dockerfile")
+    //
+    // .withContentType("text/x-dockerfile");
+    //        } else {
+    //            recipeDto = newDto(EnvironmentRecipeDto.class).withLocation(DEFAULT_DOCKER_IMAGE)
+    //                                                          .withType("dockerimage");
+    //        }
+    //        ExtendedMachineDto machine =
+    // newDto(ExtendedMachineDto.class).withInstallers(singletonList("org.eclipse.che.ws-agent"))
+    //
+    // .withAttributes(singletonMap("memoryLimitBytes", MEMORY_LIMIT_BYTES));
+    //
+    //        // setup environment
+    //        EnvironmentDto environmentDto = newDto(EnvironmentDto.class).withRecipe(recipeDto)
+    //
+    // .withMachines(singletonMap(MACHINE_NAME, machine));
 
     // workspace configuration using the environment
     return newDto(WorkspaceConfigDto.class)
         .withDefaultEnv(environmentName)
-        .withEnvironments(singletonMap(environmentName, environmentDto))
+        //                .withEnvironments(singletonMap(environmentName, environmentDto))
         .withName(name);
   }
 }

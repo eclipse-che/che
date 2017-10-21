@@ -42,7 +42,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
-import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
+import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackComponentImpl;
@@ -143,7 +143,7 @@ public class StackServiceTest {
     componentsImpl = singletonList(new StackComponentImpl(COMPONENT_NAME, COMPONENT_VERSION));
     stackSourceImpl = new StackSourceImpl(SOURCE_TYPE, SOURCE_ORIGIN);
     CommandImpl command = new CommandImpl(COMMAND_NAME, COMMAND_LINE, COMMAND_TYPE);
-    EnvironmentImpl environment = new EnvironmentImpl(null, null);
+    EnvironmentImpl environment = new EnvironmentImpl(null, null, null);
 
     WorkspaceConfigImpl workspaceConfig =
         WorkspaceConfigImpl.builder()

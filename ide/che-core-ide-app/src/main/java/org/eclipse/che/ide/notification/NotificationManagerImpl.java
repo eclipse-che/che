@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.Resources;
-import org.eclipse.che.ide.api.event.ng.EditorFileStatusNotificationOperation;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.notification.Notification;
 import org.eclipse.che.ide.api.notification.NotificationListener;
@@ -33,6 +32,7 @@ import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.notification.StatusNotification.Status;
 import org.eclipse.che.ide.api.notification.StatusNotificationListener;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
+import org.eclipse.che.ide.editor.EditorFileStatusNotificationOperation;
 import org.eclipse.che.providers.DynaObject;
 import org.vectomatic.dom.svg.ui.SVGResource;
 

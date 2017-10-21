@@ -74,9 +74,9 @@ export class Workspace {
         defaultEnvironment.setRecipe(new org.eclipse.che.api.workspace.shared.dto.EnvironmentRecipeDtoImpl(createWorkspaceConfig.machineConfigSource));
 
 
-        let commandsToCreate : Array<org.eclipse.che.api.machine.shared.dto.CommandDto> = new Array;
+        let commandsToCreate : Array<org.eclipse.che.api.workspace.shared.dto.CommandDto> = new Array;
         createWorkspaceConfig.commands.forEach(commandConfig => {
-            let command : org.eclipse.che.api.machine.shared.dto.CommandDto = new org.eclipse.che.api.machine.shared.dto.CommandDtoImpl();
+            let command : org.eclipse.che.api.workspace.shared.dto.CommandDto = new org.eclipse.che.api.machine.shared.dto.CommandDtoImpl();
             command.withCommandLine(commandConfig.commandLine).withName(commandConfig.name).withType(commandConfig.type);
             if (commandConfig.attributes.previewUrl) {
                 command.getAttributes().set("previewUrl", commandConfig.attributes.previewUrl);

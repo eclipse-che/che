@@ -12,21 +12,21 @@ package org.eclipse.che.ide.command.toolbar.commands.button;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 
-/** Item contains {@link CommandImpl} and {@link Machine}. */
+/** Item contains {@link CommandImpl} and {@link MachineImpl}. */
 public class MachineItem extends AbstractMenuItem {
 
-  private final Machine machine;
+  private final MachineImpl machine;
   private final String name;
 
   @AssistedInject
-  public MachineItem(@Assisted CommandImpl command, @Assisted Machine machine) {
+  public MachineItem(@Assisted CommandImpl command, @Assisted MachineImpl machine) {
     super(command);
 
     this.machine = machine;
-    this.name = machine.getConfig().getName();
+    this.name = machine.getName();
   }
 
   @AssistedInject
@@ -34,7 +34,7 @@ public class MachineItem extends AbstractMenuItem {
     super(item.getCommand());
 
     this.machine = item.machine;
-    this.name = getCommand().getName() + " on " + machine.getConfig().getName();
+    this.name = getCommand().getName() + " on " + machine.getName();
   }
 
   @Override
@@ -42,7 +42,7 @@ public class MachineItem extends AbstractMenuItem {
     return name;
   }
 
-  public Machine getMachine() {
+  public MachineImpl getMachine() {
     return machine;
   }
 }

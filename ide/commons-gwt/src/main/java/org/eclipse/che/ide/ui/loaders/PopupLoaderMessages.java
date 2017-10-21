@@ -43,12 +43,6 @@ public interface PopupLoaderMessages extends Messages {
   @Key("creatingProject.description")
   String creatingProjectDescription();
 
-  @Key("snapshottingWorkspace.title")
-  String snapshottingWorkspace();
-
-  @Key("snapshottingWorkspace.description")
-  String snapshottingWorkspaceDescription();
-
   @Key("workspaceStopped.title")
   String workspaceStopped();
 

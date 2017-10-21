@@ -20,12 +20,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ext.java.shared.dto.model.JavaProject;
 import org.eclipse.che.ide.ext.java.shared.dto.model.PackageFragment;
 import org.eclipse.che.ide.ext.java.shared.dto.model.PackageFragmentRoot;
 import org.eclipse.che.ide.ext.java.shared.dto.search.Match;
 import org.eclipse.che.ide.project.shared.NodesResources;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.presentation.AbstractPresentationNode;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 

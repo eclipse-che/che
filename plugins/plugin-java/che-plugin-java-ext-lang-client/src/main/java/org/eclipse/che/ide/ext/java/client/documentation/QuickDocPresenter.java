@@ -13,12 +13,12 @@ package org.eclipse.che.ide.ext.java.client.documentation;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.eclipse.che.ide.api.WsAgentURLModifier;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.position.PositionConverter;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -78,7 +78,7 @@ public class QuickDocPresenter implements QuickDocumentation, QuickDocView.Actio
       final String fqn = JavaUtil.resolveFQN((Container) srcFolder.get(), resource);
 
       final String docUrl =
-          appContext.getDevMachine().getWsAgentBaseUrl()
+          appContext.getWsAgentServerApiEndpoint()
               + "/java/javadoc/find?fqn="
               + fqn
               + "&projectpath="

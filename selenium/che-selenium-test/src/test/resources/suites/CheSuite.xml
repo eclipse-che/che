@@ -159,7 +159,6 @@
                     <exclude name="checkFactoryAcceptingWithSincePolicy"/>
                 </methods>
             </class>
-            <class name="org.eclipse.che.selenium.factory.CheckFactoryWithSvnCVSTest"/>
             <class name="org.eclipse.che.selenium.factory.CheckFactoryWithUntilPolicyTest"/>
             <class name="org.eclipse.che.selenium.factory.CheckOpenFileFeatureTest"/>
             <class name="org.eclipse.che.selenium.factory.CheckRunCommandFeatureTest"/>
@@ -390,12 +389,10 @@
             <class name="org.eclipse.che.selenium.projectexplorer.CreateNewNotJavaFilesTest"/>
             <class name="org.eclipse.che.selenium.projectexplorer.CreateNewPackageFromContextMenuTest"/>
             <class name="org.eclipse.che.selenium.projectexplorer.CreateNewPackagesWithHelpCreationJavaClassTest"/>
-            <class name="org.eclipse.che.selenium.projectexplorer.CreatePackagesAndFilesWithHelpIconCreateTest"/>
             <class name="org.eclipse.che.selenium.projectexplorer.CreateProjectInSelectedFolderTest"/>
             <class name="org.eclipse.che.selenium.projectexplorer.CreateProjectsForArtikPluginTest"/>
             <class name="org.eclipse.che.selenium.projectexplorer.CreateProjectTest"/>
             <class name="org.eclipse.che.selenium.projectexplorer.DeleteFilesFromContextMenuTest"/>
-            <class name="org.eclipse.che.selenium.projectexplorer.DeleteFilesPackagesAndProjectWithHelpDeleteIconTest"/>
             <class name="org.eclipse.che.selenium.projectexplorer.DeleteFilesTest"/>
             <class name="org.eclipse.che.selenium.projectexplorer.DeletePackageFromContextMenuTest"/>
             <class name="org.eclipse.che.selenium.projectexplorer.DeletePackageTest"/>
@@ -497,25 +494,6 @@
                 </methods>
             </class>
             <class name="org.eclipse.che.selenium.refactor.types.TestFailTest"/>
-            <class name="org.eclipse.che.selenium.subversion.CommitTest"/>
-            <class name="org.eclipse.che.selenium.subversion.CopyTest"/>
-            <class name="org.eclipse.che.selenium.subversion.DiffViewTest">
-                <methods>
-                    <exclude name="checkDiffView"/>
-                </methods>
-            </class>
-            <class name="org.eclipse.che.selenium.subversion.LockFileTest">
-                <methods>
-                    <exclude name="lockFileTest"/>
-                </methods>
-            </class>
-            <class name="org.eclipse.che.selenium.subversion.PropertiesTest"/>
-            <class name="org.eclipse.che.selenium.subversion.SvnUpdateTest"/>
-            <class name="org.eclipse.che.selenium.subversion.UpdateToRevisionTest">
-                <methods>
-                    <exclude name="updateToRevisionTest"/>
-                </methods>
-            </class>
             <class name="org.eclipse.che.selenium.swagger.SwaggerTest">
                 <methods>
                     <exclude name="checkNameProjectTest"/>
@@ -530,7 +508,6 @@
                 </methods>
             </class>
             <class name="org.eclipse.che.selenium.workspaces.ProjectStateAfterWorkspaceRestartTest"/>
-            <class name="org.eclipse.che.selenium.workspaces.SnapshotTest"/>
             <class name="org.eclipse.che.selenium.workspaces.WorkingWithJavaMySqlStackTest"/>
             <class name="org.eclipse.che.selenium.workspaces.WorkingWithNodeWsTest">
                 <methods>
@@ -538,6 +515,7 @@
                 </methods>
             </class>
             <class name="org.eclipse.che.selenium.workspaces.WorkspaceFromOfficialUbuntuImageStartTest"/>
+            <class name="org.eclipse.che.selenium.consoles.ServerRuntimeInfoTest"/>
         </classes>
     </test>
 </suite>

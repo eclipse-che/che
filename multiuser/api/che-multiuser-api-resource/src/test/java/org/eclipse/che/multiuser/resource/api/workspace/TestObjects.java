@@ -10,36 +10,17 @@
  */
 package org.eclipse.che.multiuser.resource.api.workspace;
 
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
-import static java.util.stream.Collectors.toList;
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
-import static org.eclipse.che.api.workspace.shared.Utils.getDevMachineName;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import java.util.HashMap;
-import java.util.Map;
 import org.eclipse.che.account.spi.AccountImpl;
-import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
-import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
-import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
-import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
-import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
-import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentRecipeImpl;
-import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceRuntimeImpl;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.commons.lang.Size;
-import org.eclipse.che.plugin.docker.compose.ComposeEnvironment;
-import org.eclipse.che.plugin.docker.compose.ComposeServiceImpl;
 
 /**
  * Test util class, helps to create test objects.
@@ -54,34 +35,35 @@ public final class TestObjects {
 
   public static EnvironmentImpl createEnvironment(String devMachineRam, String... machineRams)
       throws Exception {
-    Map<String, ExtendedMachineImpl> machines = new HashMap<>();
-    machines.put(
-        "dev-machine",
-        new ExtendedMachineImpl(
-            singletonList("org.eclipse.che.ws-agent"),
-            emptyMap(),
-            singletonMap("memoryLimitBytes", Long.toString(Size.parseSize(devMachineRam)))));
-    HashMap<String, ComposeServiceImpl> services = new HashMap<>(1 + machineRams.length);
-    services.put("dev-machine", createService());
-    for (int i = 0; i < machineRams.length; i++) {
-      services.put("machine" + i, createService());
-      // null is allowed to reproduce situation with default RAM size
-      if (machineRams[i] != null) {
-        machines.put(
-            "machine" + i,
-            new ExtendedMachineImpl(
-                null,
-                null,
-                singletonMap("memoryLimitBytes", Long.toString(Size.parseSize(machineRams[i])))));
-      }
-    }
-    ComposeEnvironment composeEnvironment = new ComposeEnvironment();
-    composeEnvironment.setServices(services);
-    String yaml = YAML_PARSER.writeValueAsString(composeEnvironment);
-    EnvironmentRecipeImpl recipe =
-        new EnvironmentRecipeImpl("compose", "application/x-yaml", yaml, null);
+    return null; /*
+                 Map<String, ExtendedMachineImpl> machines = new HashMap<>();
+                 machines.put(
+                     "dev-machine",
+                     new ExtendedMachineImpl(
+                         singletonList("org.eclipse.che.ws-agent"),
+                         emptyMap(),
+                         singletonMap("memoryLimitBytes", Long.toString(Size.parseSize(devMachineRam)))));
+                 HashMap<String, ComposeServiceImpl> services = new HashMap<>(1 + machineRams.length);
+                 services.put("dev-machine", createService());
+                 for (int i = 0; i < machineRams.length; i++) {
+                   services.put("machine" + i, createService());
+                   // null is allowed to reproduce situation with default RAM size
+                   if (machineRams[i] != null) {
+                     machines.put(
+                         "machine" + i,
+                         new ExtendedMachineImpl(
+                             null,
+                             null,
+                             singletonMap("memoryLimitBytes", Long.toString(Size.parseSize(machineRams[i])))));
+                   }
+                 }
+                 ComposeEnvironment composeEnvironment = new ComposeEnvironment();
+                 composeEnvironment.setServices(services);
+                 String yaml = YAML_PARSER.writeValueAsString(composeEnvironment);
+                 EnvironmentRecipeImpl recipe =
+                     new EnvironmentRecipeImpl("compose", "application/x-yaml", yaml, null);
 
-    return new EnvironmentImpl(recipe, machines);
+                 return new EnvironmentImpl(recipe, machines);*/
   }
 
   /** Creates users workspace object based on the owner and machines RAM. */
@@ -112,6 +94,7 @@ public final class TestObjects {
   /** Creates runtime workspace object based on the machines RAM. */
   public static WorkspaceImpl createRuntime(String devMachineRam, String... machineRams)
       throws Exception {
+    /*
     final WorkspaceImpl workspace = createWorkspace(DEFAULT_USER_NAME, devMachineRam, machineRams);
     final String envName = workspace.getConfig().getDefaultEnv();
     EnvironmentImpl env = workspace.getConfig().getEnvironments().get(envName);
@@ -145,8 +128,10 @@ public final class TestObjects {
     workspace.setStatus(RUNNING);
     workspace.setRuntime(runtime);
     return workspace;
+    */
+    return null;
   }
-
+  /*
   private static MachineImpl createMachine(
       String workspaceId, String envName, String machineName, boolean isDev, String memoryBytes) {
 
@@ -174,6 +159,7 @@ public final class TestObjects {
     service.setImage("image");
     return service;
   }
+  */
 
   private TestObjects() {}
 }

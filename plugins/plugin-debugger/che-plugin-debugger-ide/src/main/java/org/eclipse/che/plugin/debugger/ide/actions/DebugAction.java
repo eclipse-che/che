@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.plugin.debugger.ide.actions;
 
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
@@ -43,7 +43,6 @@ public class DebugAction extends AbstractPerspectiveAction {
         Collections.singletonList(PROJECT_PERSPECTIVE_ID),
         localizationConstants.debugActionTitle(),
         localizationConstants.debugActionDescription(),
-        null,
         resources.debug());
     this.localizationConstants = localizationConstants;
     this.configurationsManager = debugConfigurationsManager;

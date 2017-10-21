@@ -70,9 +70,10 @@ export abstract class EnvironmentManager {
     }
 
     let machines: IEnvironmentManagerMachine[] = [];
-    runtime.machines.forEach((runtimeMachine: any) => {
-      let name = runtimeMachine.config.name,
-          machine: any = {name: name};
+
+    Object.keys(runtime.machines).forEach((machineName: string) => {
+      let runtimeMachine = runtime.machines[machineName];
+      let machine: any = {name: machineName};
       if (runtimeMachine.runtime && runtimeMachine.runtime.servers) {
         machine.runtime = {
           servers: runtimeMachine.runtime.servers
@@ -134,7 +135,7 @@ export abstract class EnvironmentManager {
         newEnvironment.machines[machineName] = {attributes: {}};
       }
       newEnvironment.machines[machineName].attributes.memoryLimitBytes = machine.attributes ? machine.attributes.memoryLimitBytes : '1073741824';
-      newEnvironment.machines[machineName].agents = angular.copy(machine.agents);
+      newEnvironment.machines[machineName].installers = angular.copy(machine.installers);
       newEnvironment.machines[machineName].servers = angular.copy(machine.servers);
     });
 
@@ -148,7 +149,7 @@ export abstract class EnvironmentManager {
    * @returns {boolean}
    */
   isDev(machine: IEnvironmentManagerMachine): boolean {
-    return machine.agents && machine.agents.indexOf(WS_AGENT_NAME) >= 0;
+    return machine.installers && machine.installers.indexOf(WS_AGENT_NAME) >= 0;
   }
 
   /**
@@ -160,21 +161,21 @@ export abstract class EnvironmentManager {
   setDev(machine: IEnvironmentManagerMachine, isDev: boolean): void {
     let hasWsAgent = this.isDev(machine);
     if (isDev) {
-      machine.agents = machine.agents ? machine.agents : [];
+      machine.installers = machine.installers ? machine.installers : [];
       if (!hasWsAgent) {
-        machine.agents.push(WS_AGENT_NAME);
+        machine.installers.push(WS_AGENT_NAME);
       }
-      if (machine.agents.indexOf(SSH_AGENT_NAME) < 0) {
-        machine.agents.push(SSH_AGENT_NAME);
+      if (machine.installers.indexOf(SSH_AGENT_NAME) < 0) {
+        machine.installers.push(SSH_AGENT_NAME);
       }
-      if (machine.agents.indexOf(TERMINAL_AGENT_NAME) < 0) {
-        machine.agents.push(TERMINAL_AGENT_NAME);
+      if (machine.installers.indexOf(TERMINAL_AGENT_NAME) < 0) {
+        machine.installers.push(TERMINAL_AGENT_NAME);
       }
       return;
     }
 
     if (!isDev && hasWsAgent) {
-      machine.agents.splice(machine.agents.indexOf(WS_AGENT_NAME), 1);
+      machine.installers.splice(machine.installers.indexOf(WS_AGENT_NAME), 1);
     }
   }
 
@@ -192,7 +193,6 @@ export abstract class EnvironmentManager {
     if (!machine.runtime) {
       return servers;
     }
-
     Object.keys(machine.runtime.servers).forEach((runtimeServerName: string) => {
       let runtimeServer: che.IWorkspaceRuntimeMachineServer = machine.runtime.servers[runtimeServerName],
           runtimeServerReference = runtimeServer.ref;
@@ -238,11 +238,11 @@ export abstract class EnvironmentManager {
   }
 
   getAgents(machine: IEnvironmentManagerMachine): string[] {
-    return machine.agents || [];
+    return machine.installers || [];
   }
 
   setAgents(machine: IEnvironmentManagerMachine, agents: string[]): void {
-    machine.agents = angular.copy(agents);
+    machine.installers = angular.copy(agents);
   }
 
   /**

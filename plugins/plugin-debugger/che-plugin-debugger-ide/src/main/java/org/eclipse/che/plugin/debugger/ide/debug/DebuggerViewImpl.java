@@ -42,7 +42,6 @@ import org.eclipse.che.api.debug.shared.model.impl.MutableVariableImpl;
 import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.Resources;
-import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.list.SimpleList;
@@ -92,13 +91,12 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
 
   @Inject
   protected DebuggerViewImpl(
-      PartStackUIResources partStackUIResources,
       DebuggerResources resources,
       DebuggerLocalizationConstant locale,
       Resources coreRes,
       VariableTreeNodeRenderer.Resources rendererResources,
       DebuggerViewImplUiBinder uiBinder) {
-    super(partStackUIResources);
+    super();
 
     this.locale = locale;
     this.debuggerResources = resources;
@@ -161,7 +159,6 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
           public void onKeyboard(@NotNull KeyboardEvent event) {}
         });
     this.variablesPanel.add(variables);
-    minimizeButton.ensureDebugId("debugger-minimizeBut");
   }
 
   @Override

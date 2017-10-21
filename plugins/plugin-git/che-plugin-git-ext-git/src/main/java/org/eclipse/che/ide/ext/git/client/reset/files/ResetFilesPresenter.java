@@ -21,17 +21,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.eclipse.che.api.git.shared.IndexFile;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
+import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
 /**
  * Presenter for resetting files from index.
@@ -149,7 +149,7 @@ public class ResetFilesPresenter implements ResetFilesView.ActionDelegate {
                   error.getMessage() != null ? error.getMessage() : constant.statusFailed();
               GitOutputConsole console = gitOutputConsoleFactory.create(STATUS_COMMAND_NAME);
               console.printError(errorMassage);
-              consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+              consolesPanelPresenter.addCommandOutput(console);
               notificationManager.notify(errorMassage);
             });
   }
@@ -173,7 +173,7 @@ public class ResetFilesPresenter implements ResetFilesView.ActionDelegate {
     if (paths.length == 0) {
       view.close();
       console.print(constant.nothingToReset());
-      consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+      consolesPanelPresenter.addCommandOutput(console);
       notificationManager.notify(constant.nothingToReset());
       return;
     }
@@ -184,7 +184,7 @@ public class ResetFilesPresenter implements ResetFilesView.ActionDelegate {
         .then(
             ignored -> {
               console.print(constant.resetFilesSuccessfully());
-              consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+              consolesPanelPresenter.addCommandOutput(console);
               notificationManager.notify(constant.resetFilesSuccessfully());
             })
         .catchError(
@@ -192,7 +192,7 @@ public class ResetFilesPresenter implements ResetFilesView.ActionDelegate {
               String errorMassage =
                   error.getMessage() != null ? error.getMessage() : constant.resetFilesFailed();
               console.printError(errorMassage);
-              consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+              consolesPanelPresenter.addCommandOutput(console);
               notificationManager.notify(errorMassage);
             });
   }

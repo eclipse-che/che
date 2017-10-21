@@ -37,7 +37,7 @@
                 "default" : {
                     "machines": {
                         "devmachine": {
-                            "agents": [
+                            "installers": [
                                 "org.eclipse.che.ws-agent"
                             ],
                             "attributes" : {
@@ -120,7 +120,7 @@
                 "default" : {
                     "machines": {
                         "devmachine": {
-                            "agents": [
+                            "installers": [
                                 "org.eclipse.che.ws-agent"
                             ],
                             "attributes" : {
@@ -200,7 +200,7 @@
                 "default" : {
                     "machines": {
                         "devmachine": {
-                            "agents": [
+                            "installers": [
                                 "org.eclipse.che.ws-agent"
                             ],
                             "attributes" : {
@@ -280,7 +280,7 @@
                 "default" : {
                     "machines": {
                         "devmachine": {
-                            "agents": [
+                            "installers": [
                                 "org.eclipse.che.ws-agent"
                             ],
                             "attributes" : {
@@ -360,7 +360,7 @@
                 "default" : {
                     "machines": {
                         "devmachine": {
-                            "agents": [
+                            "installers": [
                                 "org.eclipse.che.ws-agent"
                             ]
                         }

@@ -50,15 +50,6 @@ export class WorkspaceItemCtrl {
   }
 
   getMemoryLimit(workspace: che.IWorkspace): string {
-    if (workspace.runtime && workspace.runtime.machines && workspace.runtime.machines.length > 0) {
-      let limits = this.lodash.pluck(workspace.runtime.machines, 'config.limits.ram');
-      let total = 0;
-      limits.forEach((limit: number) => {
-        total += limit;
-      });
-      return Math.round(total) + ' MB';
-    }
-
     let environment = this.getDefaultEnvironment(workspace);
     if (environment) {
       let limits = this.lodash.pluck(environment.machines, 'attributes.memoryLimitBytes');

@@ -40,7 +40,7 @@ public class KeycloakProvider {
   public KeycloakProvider(AppContext appContext, PromiseProvider promiseProvider) {
     this.appContext = appContext;
     String keycloakSettings =
-        getKeycloakSettings(KeycloakConstants.getEndpoint(appContext.getMasterEndpoint()));
+        getKeycloakSettings(KeycloakConstants.getEndpoint(appContext.getMasterApiEndpoint()));
     Map<String, String> settings = JsonHelper.toMap(keycloakSettings);
     Log.info(getClass(), "Keycloak settings: ", settings);
 

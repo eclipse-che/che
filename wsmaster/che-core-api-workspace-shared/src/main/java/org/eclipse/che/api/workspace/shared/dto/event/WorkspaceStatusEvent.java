@@ -24,26 +24,6 @@ import org.eclipse.che.dto.shared.DTO;
 @EventOrigin("workspace")
 @DTO
 public interface WorkspaceStatusEvent {
-
-  /** Defines event type for workspace status event changes. */
-  enum EventType {
-    STARTING,
-    RUNNING,
-    STOPPING,
-    STOPPED,
-    ERROR,
-    SNAPSHOT_CREATING,
-    SNAPSHOT_CREATED,
-    SNAPSHOT_CREATION_ERROR
-  }
-
-  /** Returns the type of this event. */
-  EventType getEventType();
-
-  void setEventType(EventType eventType);
-
-  WorkspaceStatusEvent withEventType(EventType eventType);
-
   WorkspaceStatus getStatus();
 
   void setStatus(WorkspaceStatus status);
@@ -68,10 +48,7 @@ public interface WorkspaceStatusEvent {
 
   WorkspaceStatusEvent withWorkspaceId(String machineId);
 
-  /**
-   * Returns an error message value if and only if the type of this event is either {@link
-   * EventType#ERROR} or {@link EventType#SNAPSHOT_CREATION_ERROR}.
-   */
+  /** Returns an error message value. */
   @Nullable
   String getError();
 

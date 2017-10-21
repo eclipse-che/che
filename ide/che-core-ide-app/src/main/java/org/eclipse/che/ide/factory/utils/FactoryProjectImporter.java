@@ -18,6 +18,7 @@ import static org.eclipse.che.api.core.ErrorCodes.UNAUTHORIZED_GIT_OPERATION;
 import static org.eclipse.che.api.core.ErrorCodes.UNAUTHORIZED_SVN_OPERATION;
 import static org.eclipse.che.api.git.shared.ProviderInfo.AUTHENTICATE_URL;
 import static org.eclipse.che.api.git.shared.ProviderInfo.PROVIDER_NAME;
+import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
@@ -36,33 +37,32 @@ import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.api.core.model.project.SourceStorage;
-import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.git.shared.event.GitCheckoutEvent;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.importer.AbstractImporter;
+import org.eclipse.che.ide.api.factory.model.FactoryImpl;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorRegistry;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorUrlProvider;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
-import org.eclipse.che.ide.api.project.wizard.ImportProjectNotificationSubscriberFactory;
-import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.api.resources.Project;
-import org.eclipse.che.ide.api.user.AskCredentialsDialog;
-import org.eclipse.che.ide.api.user.Credentials;
+import org.eclipse.che.ide.api.workspace.model.ProjectConfigImpl;
+import org.eclipse.che.ide.projectimport.AbstractImporter;
+import org.eclipse.che.ide.projectimport.wizard.ImportProjectNotificationSubscriberFactory;
 import org.eclipse.che.ide.projectimport.wizard.ProjectImportOutputJsonRpcNotifier;
+import org.eclipse.che.ide.projectimport.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.resource.Path;
-import org.eclipse.che.ide.rest.RestContext;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.ide.ui.dialogs.askcredentials.AskCredentialsDialog;
+import org.eclipse.che.ide.ui.dialogs.askcredentials.Credentials;
 import org.eclipse.che.ide.util.ExceptionUtils;
 import org.eclipse.che.ide.util.StringUtils;
 import org.eclipse.che.security.oauth.OAuthStatus;
@@ -85,7 +85,7 @@ public class FactoryProjectImporter extends AbstractImporter {
 
   private final Map<String, CheckoutContext> checkoutContextRegistry = new HashMap<>();
 
-  private FactoryDto factory;
+  private FactoryImpl factory;
   private AsyncCallback<Void> callback;
 
   @Inject
@@ -95,7 +95,6 @@ public class FactoryProjectImporter extends AbstractImporter {
       AskCredentialsDialog askCredentialsDialog,
       CoreLocalizationConstant locale,
       ImportProjectNotificationSubscriberFactory subscriberFactory,
-      @RestContext String restContext,
       DialogFactory dialogFactory,
       OAuth2AuthenticatorRegistry oAuth2AuthenticatorRegistry,
       RequestTransmitter requestTransmitter,
@@ -104,7 +103,7 @@ public class FactoryProjectImporter extends AbstractImporter {
     this.notificationManager = notificationManager;
     this.askCredentialsDialog = askCredentialsDialog;
     this.locale = locale;
-    this.restContext = restContext;
+    this.restContext = appContext.getMasterApiEndpoint();
     this.dialogFactory = dialogFactory;
     this.oAuth2AuthenticatorRegistry = oAuth2AuthenticatorRegistry;
     this.requestTransmitter = requestTransmitter;
@@ -139,7 +138,7 @@ public class FactoryProjectImporter extends AbstractImporter {
     notificationManager.notify(title, content, SUCCESS, FLOAT_MODE);
   }
 
-  public void startImporting(FactoryDto factory, AsyncCallback<Void> callback) {
+  public void startImporting(FactoryImpl factory, AsyncCallback<Void> callback) {
     this.callback = callback;
     this.factory = factory;
     importProjects();
@@ -178,7 +177,7 @@ public class FactoryProjectImporter extends AbstractImporter {
    */
   private void importProjects(Set<String> projectsToImport) {
     final List<Promise<Project>> promises = new ArrayList<>();
-    for (final ProjectConfigDto projectConfig : factory.getWorkspace().getProjects()) {
+    for (final ProjectConfigImpl projectConfig : factory.getWorkspace().getProjects()) {
       if (projectsToImport.contains(projectConfig.getName())) {
         promises.add(
             startImport(Path.valueOf(projectConfig.getPath()), projectConfig.getSource())
@@ -327,7 +326,7 @@ public class FactoryProjectImporter extends AbstractImporter {
         key, new CheckoutContext(projectName, repository, branch, startPoint));
     requestTransmitter
         .newRequest()
-        .endpointId("ws-agent")
+        .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
         .methodName("git/checkoutOutput/subscribe")
         .paramsAsString(key)
         .sendAndSkipResult();
@@ -339,7 +338,7 @@ public class FactoryProjectImporter extends AbstractImporter {
     checkoutContextRegistry.remove(key);
     requestTransmitter
         .newRequest()
-        .endpointId("ws-agent")
+        .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
         .methodName("git/checkoutOutput/unsubscribe")
         .paramsAsString(key)
         .sendAndSkipResult();

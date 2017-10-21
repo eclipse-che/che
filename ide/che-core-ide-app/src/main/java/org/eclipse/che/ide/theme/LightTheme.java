@@ -290,6 +290,21 @@ public class LightTheme implements Theme {
   }
 
   @Override
+  public String toolbarControllerBackground() {
+    return "#cacacc";
+  }
+
+  @Override
+  public String toolbarControllerLeftColor() {
+    return "#8E8E8E";
+  }
+
+  @Override
+  public String toolbarControllerTopColor() {
+    return "#8E8E8E";
+  }
+
+  @Override
   public String getButtonBackground() {
     return "#5A5A5A";
   }
@@ -677,6 +692,11 @@ public class LightTheme implements Theme {
   @Override
   public String getMainMenuBkgColor() {
     return "#cacacc";
+  }
+
+  @Override
+  public String mainMenuDelimiterBackground() {
+    return "#ececec";
   }
 
   @Override
@@ -1666,5 +1686,35 @@ public class LightTheme implements Theme {
   @Override
   public String popupLoaderTextColor() {
     return "#999999";
+  }
+
+  @Override
+  public String cellTableHrefColor() {
+    return "rgb(97, 183, 239)";
+  }
+
+  @Override
+  public String cellTableHeaderColor() {
+    return "#555555";
+  }
+
+  @Override
+  public String cellTableHeaderBackground() {
+    return "#CCCCCC";
+  }
+
+  @Override
+  public String cellTableOddRowBackground() {
+    return "#D6D6D6";
+  }
+
+  @Override
+  public String cellTableEvenRowBackground() {
+    return "rgba(214, 214, 214, 0.8)";
+  }
+
+  @Override
+  public String cellTableCellColor() {
+    return "#666666";
   }
 }

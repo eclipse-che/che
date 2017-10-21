@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
+import org.eclipse.che.api.workspace.server.adapter.WorkspaceConfigJsonAdapter;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -79,7 +80,7 @@ public class WorkspaceConfigJsonAdapterTest {
     final JsonObject devMachineServerObj = devMachineServersObj.get("ref").getAsJsonObject();
     assertEquals(devMachineServerObj.get("port").getAsString(), "9090/udp");
     assertEquals(devMachineServerObj.get("protocol").getAsString(), "protocol");
-    assertTrue(devMachineObj.has("agents"), "dev machine has agents");
+    assertTrue(devMachineObj.has("installers"), "dev machine has installers");
     assertTrue(devMachineObj.has("attributes"), "dev machine has attributes");
     assertTrue(
         devMachineObj.get("attributes").isJsonObject(), "dev machine attributes is json object");

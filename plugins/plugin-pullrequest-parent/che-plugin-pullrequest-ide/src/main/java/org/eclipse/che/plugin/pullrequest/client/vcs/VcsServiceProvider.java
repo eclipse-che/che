@@ -14,7 +14,7 @@ import static org.eclipse.che.ide.ext.git.client.GitUtil.isUnderGit;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
-import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 
 /**
  * Provider for the {@link VcsService}.

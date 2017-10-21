@@ -14,7 +14,6 @@ import static org.eclipse.che.ide.command.node.CommandFileNode.FILE_TYPE_EXT;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
-import com.google.gwt.inject.client.multibindings.GinMapBinder;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
@@ -24,10 +23,9 @@ import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandGoalRegistry;
 import org.eclipse.che.ide.api.command.CommandManager;
+import org.eclipse.che.ide.api.command.CommandProducer;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
-import org.eclipse.che.ide.api.component.Component;
-import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.command.editor.CommandEditorView;
 import org.eclipse.che.ide.command.editor.CommandEditorViewImpl;
@@ -43,7 +41,6 @@ import org.eclipse.che.ide.command.execute.CommandExecutorImpl;
 import org.eclipse.che.ide.command.execute.ExecuteCommandActionFactory;
 import org.eclipse.che.ide.command.execute.ExecuteCommandActionManager;
 import org.eclipse.che.ide.command.execute.GoalPopUpGroupFactory;
-import org.eclipse.che.ide.command.explorer.CommandsExplorerPresenter;
 import org.eclipse.che.ide.command.explorer.CommandsExplorerView;
 import org.eclipse.che.ide.command.explorer.CommandsExplorerViewImpl;
 import org.eclipse.che.ide.command.goal.BuildGoal;
@@ -65,10 +62,14 @@ import org.eclipse.che.ide.command.toolbar.ToolbarButtonsFactory;
 import org.eclipse.che.ide.command.toolbar.commands.ExecuteCommandView;
 import org.eclipse.che.ide.command.toolbar.commands.ExecuteCommandViewImpl;
 import org.eclipse.che.ide.command.toolbar.commands.button.MenuItemsFactory;
+import org.eclipse.che.ide.command.toolbar.controller.ToolbarControllerView;
+import org.eclipse.che.ide.command.toolbar.controller.ToolbarControllerViewImpl;
 import org.eclipse.che.ide.command.toolbar.previews.PreviewsView;
 import org.eclipse.che.ide.command.toolbar.previews.PreviewsViewImpl;
 import org.eclipse.che.ide.command.toolbar.processes.ProcessesListView;
 import org.eclipse.che.ide.command.toolbar.processes.ProcessesListViewImpl;
+import org.eclipse.che.ide.command.toolbar.selector.PanelSelectorView;
+import org.eclipse.che.ide.command.toolbar.selector.PanelSelectorViewImpl;
 import org.eclipse.che.ide.command.type.CommandTypeRegistryImpl;
 import org.eclipse.che.ide.command.type.chooser.CommandTypeChooserView;
 import org.eclipse.che.ide.command.type.chooser.CommandTypeChooserViewImpl;
@@ -99,23 +100,12 @@ public class CommandApiModule extends AbstractGinModule {
     bind(CommandGoalRegistry.class).to(CommandGoalRegistryImpl.class).in(Singleton.class);
 
     bind(CommandManager.class).to(CommandManagerImpl.class).in(Singleton.class);
+    bind(CommandManager.class).asEagerSingleton();
+    bind(ExecuteCommandActionManager.class).asEagerSingleton();
 
-    // start-up components
-    GinMapBinder<String, Component> componentBinder =
-        GinMapBinder.newMapBinder(binder(), String.class, Component.class);
-    componentBinder
-        .addBinding("CommandProducerActionManager")
-        .to(CommandProducerActionManager.class);
-
-    GinMapBinder<String, WsAgentComponent> wsAgentComponentBinder =
-        GinMapBinder.newMapBinder(binder(), String.class, WsAgentComponent.class);
-    wsAgentComponentBinder.addBinding("Z CommandManagerImpl").to(CommandManagerImpl.class);
-    wsAgentComponentBinder
-        .addBinding("Z CommandsExplorerPresenter")
-        .to(CommandsExplorerPresenter.class);
-    wsAgentComponentBinder
-        .addBinding("Z ExecuteCommandActionManager")
-        .to(ExecuteCommandActionManager.class);
+    GinMultibinder<CommandProducer> commandProducerBinder =
+        GinMultibinder.newSetBinder(binder(), CommandProducer.class);
+    bind(CommandProducerActionManager.class).asEagerSingleton();
 
     install(new GinFactoryModuleBuilder().build(ExecuteCommandActionFactory.class));
     install(new GinFactoryModuleBuilder().build(GoalPopUpGroupFactory.class));
@@ -138,6 +128,12 @@ public class CommandApiModule extends AbstractGinModule {
     bind(ExecuteCommandView.class).to(ExecuteCommandViewImpl.class).in(Singleton.class);
     bind(ProcessesListView.class).to(ProcessesListViewImpl.class).in(Singleton.class);
     bind(PreviewsView.class).to(PreviewsViewImpl.class).in(Singleton.class);
+
+    // Panel selector
+    bind(PanelSelectorView.class).to(PanelSelectorViewImpl.class).in(Singleton.class);
+
+    // Toolbar controller
+    bind(ToolbarControllerView.class).to(ToolbarControllerViewImpl.class).in(Singleton.class);
 
     install(new GinFactoryModuleBuilder().build(ToolbarButtonsFactory.class));
     install(new GinFactoryModuleBuilder().build(MenuItemsFactory.class));

@@ -35,9 +35,6 @@ import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
-import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.commons.exception.ServerException;
@@ -46,6 +43,8 @@ import org.eclipse.che.ide.ext.git.client.DateTimeFormatter;
 import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmCallback;
+import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmDialog;
 import org.junit.Test;
 import org.mockito.Mock;
 
@@ -90,7 +89,6 @@ public class CommitPresenterTest extends BaseTest {
     when(appContext.getResources()).thenReturn(new Resource[] {});
     when(appContext.getResource()).thenReturn(resource);
     when(resource.getLocation()).thenReturn(Path.valueOf("test/location"));
-    when(appContext.getDevMachine()).thenReturn(mock(DevMachine.class));
     when(appContext.getRootProject()).thenReturn(mock(Project.class));
 
     when(voidPromise.then(any(Operation.class))).thenReturn(voidPromise);

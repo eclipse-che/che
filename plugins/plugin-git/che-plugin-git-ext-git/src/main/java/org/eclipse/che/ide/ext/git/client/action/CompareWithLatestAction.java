@@ -20,15 +20,15 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
+import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
 import org.eclipse.che.ide.ext.git.client.compare.changeslist.ChangesListPresenter;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
 /**
  * Action for comparing with latest repository version
@@ -56,7 +56,7 @@ public class CompareWithLatestAction extends GitAction {
       NotificationManager notificationManager,
       GitServiceClient service,
       GitLocalizationConstant constant) {
-    super(constant.compareWithLatestTitle(), constant.compareWithLatestTitle(), null, appContext);
+    super(constant.compareWithLatestTitle(), constant.compareWithLatestTitle(), appContext);
     this.comparePresenter = presenter;
     this.changesListPresenter = changesListPresenter;
     this.dialogFactory = dialogFactory;

@@ -11,9 +11,8 @@
 package org.eclipse.che.ide.ext.git.client.action;
 
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
-import com.google.gwt.resources.client.ImageResource;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -31,14 +30,18 @@ public abstract class GitAction extends AbstractPerspectiveAction {
 
   protected final AppContext appContext;
 
-  public GitAction(String title, String description, Object icon, AppContext appContext) {
-    super(
-        singletonList(PROJECT_PERSPECTIVE_ID),
-        title,
-        description,
-        icon instanceof ImageResource ? (ImageResource) icon : null,
-        icon instanceof SVGResource ? (SVGResource) icon : null,
-        icon instanceof String ? String.valueOf(icon) : null);
+  public GitAction(String title, String description, SVGResource icon, AppContext appContext) {
+    super(singletonList(PROJECT_PERSPECTIVE_ID), title, description, icon);
+    this.appContext = appContext;
+  }
+
+  public GitAction(String title, String description, String icon, AppContext appContext) {
+    super(singletonList(PROJECT_PERSPECTIVE_ID), title, description, icon);
+    this.appContext = appContext;
+  }
+
+  public GitAction(String title, String description, AppContext appContext) {
+    super(singletonList(PROJECT_PERSPECTIVE_ID), title, description);
     this.appContext = appContext;
   }
 
