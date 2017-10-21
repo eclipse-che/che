@@ -12,9 +12,9 @@ package org.eclipse.che.ide.ext.java.client.editor;
 
 import static org.eclipse.che.ide.project.ResolvingProjectStateHolder.ResolvingProjectState.IN_PROGRESS;
 import static org.eclipse.che.ide.project.ResolvingProjectStateHolder.ResolvingProjectState.RESOLVED;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -50,9 +50,8 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /** @author Roman Nikitenko */
 @RunWith(MockitoJUnitRunner.class)
@@ -103,7 +102,8 @@ public class JavaReconcilerStrategyTest {
     when(localizationConstant.codeAssistErrorMessageResolvingProject()).thenReturn("error");
 
     when(client.reconcile(anyString(), anyString())).thenReturn(reconcileResultPromise);
-    when(reconcileResultPromise.onSuccess(Matchers.<Consumer<ReconcileResult>>any()))
+    when(reconcileResultPromise.onSuccess(
+            org.mockito.ArgumentMatchers.<Consumer<ReconcileResult>>any()))
         .thenReturn(reconcileResultPromise);
 
     javaReconcilerStrategy.setDocument(mock(Document.class));
