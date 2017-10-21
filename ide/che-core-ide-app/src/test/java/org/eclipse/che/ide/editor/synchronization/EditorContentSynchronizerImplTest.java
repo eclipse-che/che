@@ -36,6 +36,7 @@ import org.eclipse.che.ide.resource.Path;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -73,7 +74,8 @@ public class EditorContentSynchronizerImplTest {
 
   @Test
   public void constructorShouldBeVerified() {
-    verify(eventBus, times(3)).addHandler(Matchers.<Event.Type<Object>>anyObject(), anyObject());
+    verify(eventBus, times(3))
+        .addHandler(ArgumentMatchers.<Event.Type<Object>>anyObject(), anyObject());
   }
 
   @Test
