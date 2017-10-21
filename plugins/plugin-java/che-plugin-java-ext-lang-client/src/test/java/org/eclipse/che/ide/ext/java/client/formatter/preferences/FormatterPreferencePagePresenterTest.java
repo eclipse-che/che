@@ -11,8 +11,8 @@
 package org.eclipse.che.ide.ext.java.client.formatter.preferences;
 
 import static org.junit.Assert.assertFalse;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -31,7 +31,6 @@ import org.eclipse.che.ide.ext.java.client.formatter.JavaFormatterServiceClient;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 
 @RunWith(GwtMockitoTestRunner.class)
@@ -55,7 +54,8 @@ public class FormatterPreferencePagePresenterTest {
     when(javaFormatterServiceClient.updateProjectFormatter(anyString(), anyString()))
         .thenReturn(updatingResponce);
     when(javaFormatterServiceClient.updateRootFormatter(anyString())).thenReturn(updatingResponce);
-    when(updatingResponce.then(Matchers.<Operation<Void>>anyObject())).thenReturn(updatingResponce);
+    when(updatingResponce.then(org.mockito.ArgumentMatchers.<Operation<Void>>anyObject()))
+        .thenReturn(updatingResponce);
 
     presenter =
         new FormatterPreferencePagePresenter(

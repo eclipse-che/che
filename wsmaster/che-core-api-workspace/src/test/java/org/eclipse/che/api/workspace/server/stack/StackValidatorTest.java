@@ -11,7 +11,7 @@
 package org.eclipse.che.api.workspace.server.stack;
 
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 
 import java.util.ArrayList;

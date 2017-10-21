@@ -13,7 +13,7 @@ package org.eclipse.che.api.vfs.impl.file;
 import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.CREATED;
 import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.DELETED;
 import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.MODIFIED;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;

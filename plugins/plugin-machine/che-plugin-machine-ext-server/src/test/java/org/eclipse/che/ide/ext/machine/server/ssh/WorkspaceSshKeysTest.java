@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.ide.ext.machine.server.ssh;
 
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;

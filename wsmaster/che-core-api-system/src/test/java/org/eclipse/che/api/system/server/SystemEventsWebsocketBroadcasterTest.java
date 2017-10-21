@@ -12,7 +12,7 @@ package org.eclipse.che.api.system.server;
 
 import static org.eclipse.che.api.system.shared.SystemStatus.PREPARING_TO_SHUTDOWN;
 import static org.eclipse.che.api.system.shared.SystemStatus.RUNNING;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 

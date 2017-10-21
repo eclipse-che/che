@@ -11,7 +11,7 @@
 package org.eclipse.che.multiuser.machine.authentication.server;
 
 import static org.eclipse.che.api.machine.shared.Constants.TERMINAL_REFERENCE;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
