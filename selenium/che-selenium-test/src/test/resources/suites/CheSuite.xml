@@ -159,7 +159,6 @@
                     <exclude name="checkFactoryAcceptingWithSincePolicy"/>
                 </methods>
             </class>
-            <class name="org.eclipse.che.selenium.factory.CheckFactoryWithSvnCVSTest"/>
             <class name="org.eclipse.che.selenium.factory.CheckFactoryWithUntilPolicyTest"/>
             <class name="org.eclipse.che.selenium.factory.CheckOpenFileFeatureTest"/>
             <class name="org.eclipse.che.selenium.factory.CheckRunCommandFeatureTest"/>
