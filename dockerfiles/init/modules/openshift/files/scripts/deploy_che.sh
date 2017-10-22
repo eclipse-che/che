@@ -116,7 +116,13 @@ DEFAULT_ENABLE_SSL="true"
 ENABLE_SSL=${ENABLE_SSL:-${DEFAULT_ENABLE_SSL}}
 DEFAULT_K8S_VERSION_PRIOR_TO_1_6="true"
 K8S_VERSION_PRIOR_TO_1_6=${K8S_VERSION_PRIOR_TO_1_6:-${DEFAULT_K8S_VERSION_PRIOR_TO_1_6}}
-
+if [ "${ENABLE_SSL}" == "true" ]; then
+    HTTP_PROTOCOL="https"
+    WS_PROTOCOL="wss"
+else
+    HTTP_PROTOCOL="http"
+    WS_PROTOCOL="ws"
+fi
 # Keycloak production endpoints are used by default
 DEFAULT_KEYCLOAK_OSO_ENDPOINT="https://sso.openshift.io/auth/realms/fabric8/broker/openshift-v3/token"
 KEYCLOAK_OSO_ENDPOINT=${KEYCLOAK_OSO_ENDPOINT:-${DEFAULT_KEYCLOAK_OSO_ENDPOINT}}
@@ -402,10 +408,10 @@ cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     sed "s|    keycloak-github-endpoint:.*|    keycloak-github-endpoint: ${KEYCLOAK_GITHUB_ENDPOINT}|" | \
     sed "s/    CHE_INFRA_OPENSHIFT_TLS__ENABLED: \"true\"/    CHE_INFRA_OPENSHIFT_TLS__ENABLED: \"false\"/" | \
     sed "s|    CHE_INFRA_OPENSHIFT_PROJECT:.*|    CHE_INFRA_OPENSHIFT_PROJECT: ${CHE_OPENSHIFT_PROJECT}|" | \
-    sed "s|    CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL:.*|    CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL: http://che-${DEFAULT_OPENSHIFT_NAMESPACE_URL}/agent-binaries/linux_amd64/bootstrapper/bootstrapper|" | \
-    sed "s|    CHE_WEBSOCKET_ENDPOINT:.*|    CHE_WEBSOCKET_ENDPOINT: ws://che-${DEFAULT_OPENSHIFT_NAMESPACE_URL}/wsmaster/websocket|" | \
+    sed "s|    CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL:.*|    CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL: ${HTTP_PROTOCOL}://che-${DEFAULT_OPENSHIFT_NAMESPACE_URL}/agent-binaries/linux_amd64/bootstrapper/bootstrapper|" | \
+    sed "s|    CHE_WEBSOCKET_ENDPOINT:.*|    CHE_WEBSOCKET_ENDPOINT: ${WS_PROTOCOL}://che-${DEFAULT_OPENSHIFT_NAMESPACE_URL}/wsmaster/websocket|" | \
     sed "s|    CHE_HOST: \${DEFAULT_OPENSHIFT_NAMESPACE_URL}|    CHE_HOST: che-${DEFAULT_OPENSHIFT_NAMESPACE_URL}|" | \
-    sed "s|    CHE_API: http://\${DEFAULT_OPENSHIFT_NAMESPACE_URL}/wsmaster/api|    CHE_API: http://che-${DEFAULT_OPENSHIFT_NAMESPACE_URL}/wsmaster/api|" | \
+    sed "s|    CHE_API: http://\${DEFAULT_OPENSHIFT_NAMESPACE_URL}/wsmaster/api|    CHE_API: ${HTTP_PROTOCOL}://che-${DEFAULT_OPENSHIFT_NAMESPACE_URL}/wsmaster/api|" | \
     grep -v -e "tls:" -e "insecureEdgeTerminationPolicy: Redirect" -e "termination: edge" | \
     if [ "${CHE_INFRA_OPENSHIFT_OAUTH__TOKEN+x}" ]; then sed "s|    CHE_INFRA_OPENSHIFT_OAUTH__TOKEN:.*|    CHE_INFRA_OPENSHIFT_OAUTH__TOKEN: ${CHE_INFRA_OPENSHIFT_OAUTH__TOKEN}|"; else cat -;  fi | \
     if [ "${CHE_INFRA_OPENSHIFT_USERNAME+x}" ]; then sed "s|    CHE_INFRA_OPENSHIFT_USERNAME:.*|    CHE_INFRA_OPENSHIFT_USERNAME: ${CHE_INFRA_OPENSHIFT_USERNAME}|"; else cat -;  fi | \
@@ -425,10 +431,10 @@ cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     sed "s|    keycloak-oso-endpoint:.*|    keycloak-oso-endpoint: ${KEYCLOAK_OSO_ENDPOINT}|" | \
     sed "s|    keycloak-github-endpoint:.*|    keycloak-github-endpoint: ${KEYCLOAK_GITHUB_ENDPOINT}|" | \
     sed "s|    CHE_INFRA_OPENSHIFT_PROJECT:.*|    CHE_INFRA_OPENSHIFT_PROJECT: ${CHE_OPENSHIFT_PROJECT}|" | \
-    sed "s|    CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL:.*|    CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL: https://che-${DEFAULT_OPENSHIFT_NAMESPACE_URL}/agent-binaries/linux_amd64/bootstrapper/bootstrapper|" | \
-    sed "s|    CHE_WEBSOCKET_ENDPOINT:.*|    CHE_WEBSOCKET_ENDPOINT: wss://che-${DEFAULT_OPENSHIFT_NAMESPACE_URL}/wsmaster/websocket|" | \
+    sed "s|    CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL:.*|    CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL: ${HTTP_PROTOCOL}://che-${DEFAULT_OPENSHIFT_NAMESPACE_URL}/agent-binaries/linux_amd64/bootstrapper/bootstrapper|" | \
+    sed "s|    CHE_WEBSOCKET_ENDPOINT:.*|    CHE_WEBSOCKET_ENDPOINT: ${WS_PROTOCOL}://che-${DEFAULT_OPENSHIFT_NAMESPACE_URL}/wsmaster/websocket|" | \
     sed "s|    CHE_HOST: \${DEFAULT_OPENSHIFT_NAMESPACE_URL}|    CHE_HOST: che-${DEFAULT_OPENSHIFT_NAMESPACE_URL}|" | \
-    sed "s|    CHE_API: http://\${DEFAULT_OPENSHIFT_NAMESPACE_URL}/wsmaster/api|    CHE_API: https://che-${DEFAULT_OPENSHIFT_NAMESPACE_URL}/wsmaster/api|" | \
+    sed "s|    CHE_API: http://\${DEFAULT_OPENSHIFT_NAMESPACE_URL}/wsmaster/api|    CHE_API: ${HTTP_PROTOCOL}://che-${DEFAULT_OPENSHIFT_NAMESPACE_URL}/wsmaster/api|" | \
     sed "s/          image:.*/          image: \"${CHE_IMAGE_SANITIZED}\"/" | \
     sed "s/          imagePullPolicy:.*/          imagePullPolicy: \"${IMAGE_PULL_POLICY}\"/" | \
     if [ "${CHE_KEYCLOAK_DISABLED}" == "true" ]; then sed "s/    keycloak-disabled: \"false\"/    keycloak-disabled: \"true\"/" ; else cat -; fi | \
@@ -449,15 +455,16 @@ cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     sed "s|    keycloak-github-endpoint:.*|    keycloak-github-endpoint: ${KEYCLOAK_GITHUB_ENDPOINT}|" | \
     sed "s/    keycloak-disabled:.*/    keycloak-disabled: \"${CHE_KEYCLOAK_DISABLED}\"/" | \
     sed "s|    CHE_INFRA_OPENSHIFT_PROJECT:.*|    CHE_INFRA_OPENSHIFT_PROJECT: ${CHE_INFRA_OPENSHIFT_PROJECT}|" | \
-    sed "s|    CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL:.*|    CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL: https://che-${OPENSHIFT_NAMESPACE_URL}/agent-binaries/linux_amd64/bootstrapper/bootstrapper|" | \
-    sed "s|    CHE_WEBSOCKET_ENDPOINT:.*|    CHE_WEBSOCKET_ENDPOINT: wss://che-${OPENSHIFT_NAMESPACE_URL}/wsmaster/websocket|" | \
+    sed "s|    CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL:.*|    CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL: ${HTTP_PROTOCOL}://che-${OPENSHIFT_NAMESPACE_URL}/agent-binaries/linux_amd64/bootstrapper/bootstrapper|" | \
+    sed "s|    CHE_WEBSOCKET_ENDPOINT:.*|    CHE_WEBSOCKET_ENDPOINT: ${WS_PROTOCOL}://che-${OPENSHIFT_NAMESPACE_URL}/wsmaster/websocket|" | \
     sed "s|    CHE_HOST: \${DEFAULT_OPENSHIFT_NAMESPACE_URL}|    CHE_HOST: che-${OPENSHIFT_NAMESPACE_URL}|" | \
-    sed "s|    CHE_API: http://\${DEFAULT_OPENSHIFT_NAMESPACE_URL}/wsmaster/api|    CHE_API: https://che-${OPENSHIFT_NAMESPACE_URL}/wsmaster/api|" | \
+    sed "s|    CHE_API: http://\${DEFAULT_OPENSHIFT_NAMESPACE_URL}/wsmaster/api|    CHE_API: ${HTTP_PROTOCOL}://che-${OPENSHIFT_NAMESPACE_URL}/wsmaster/api|" | \
     if [ "${CHE_INFRA_OPENSHIFT_OAUTH__TOKEN+x}" ]; then sed "s|    CHE_INFRA_OPENSHIFT_OAUTH__TOKEN:.*|    CHE_INFRA_OPENSHIFT_OAUTH__TOKEN: ${CHE_INFRA_OPENSHIFT_OAUTH__TOKEN}|"; else cat -;  fi | \
     if [ "${CHE_INFRA_OPENSHIFT_USERNAME+x}" ]; then sed "s|    CHE_INFRA_OPENSHIFT_USERNAME:.*|    CHE_INFRA_OPENSHIFT_USERNAME: ${CHE_INFRA_OPENSHIFT_USERNAME}|"; else cat -;  fi | \
     if [ "${CHE_INFRA_OPENSHIFT_PASSWORD+x}" ]; then sed "s|    CHE_INFRA_OPENSHIFT_PASSWORD:.*|    CHE_INFRA_OPENSHIFT_PASSWORD: ${CHE_INFRA_OPENSHIFT_PASSWORD}|"; else cat -;  fi | \
     if [ "${CHE_LOG_LEVEL}" == "DEBUG" ]; then sed "s/    log-level: \"INFO\"/    log-level: \"DEBUG\"/" ; else cat -; fi | \
     if [ "${CHE_DEBUGGING_ENABLED}" == "true" ]; then sed "s/    remote-debugging-enabled: \"false\"/    remote-debugging-enabled: \"true\"/"; else cat -; fi | \
+    if [ "${ENABLE_SSL}" == "false" ]; then sed "s/    CHE_INFRA_OPENSHIFT_TLS__ENABLED: \"true\"/    CHE_INFRA_OPENSHIFT_TLS__ENABLED: \"false\"/" ; else cat -; fi | \
     if [ "${ENABLE_SSL}" == "false" ]; then sed "s/    che-openshift-secure-routes: \"true\"/    che-openshift-secure-routes: \"false\"/" ; else cat -; fi | \
     if [ "${ENABLE_SSL}" == "false" ]; then sed "s/    che-secure-external-urls: \"true\"/    che-secure-external-urls: \"false\"/" ; else cat -; fi | \
     if [ "${ENABLE_SSL}" == "false" ]; then grep -v -e "tls:" -e "insecureEdgeTerminationPolicy: Redirect" -e "termination: edge" ; else cat -; fi | \

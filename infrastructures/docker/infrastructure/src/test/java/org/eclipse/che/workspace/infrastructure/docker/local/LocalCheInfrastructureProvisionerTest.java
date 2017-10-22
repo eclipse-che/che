@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker.local;
 
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;

@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift;
 
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;

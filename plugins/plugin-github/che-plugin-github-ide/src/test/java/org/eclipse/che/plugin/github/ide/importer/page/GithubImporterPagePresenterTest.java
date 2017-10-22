@@ -12,11 +12,11 @@ package org.eclipse.che.plugin.github.ide.importer.page;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -62,7 +62,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
@@ -174,9 +173,9 @@ public class GithubImporterPagePresenterTest {
     verify(view).setInputsEnableState(eq(false));
     verify(view).setLoaderVisibility(eq(false));
     verify(view).setInputsEnableState(eq(true));
-    verify(view).setAccountNames(Matchers.<Set>anyObject());
+    verify(view).setAccountNames(org.mockito.ArgumentMatchers.<Set>anyObject());
     verify(view, times(2)).showGithubPanel();
-    verify(view).setRepositories(Matchers.<List<ProjectData>>anyObject());
+    verify(view).setRepositories(org.mockito.ArgumentMatchers.<List<ProjectData>>anyObject());
     verify(view).reset();
   }
 
@@ -205,7 +204,8 @@ public class GithubImporterPagePresenterTest {
     verify(view).setInputsEnableState(eq(true));
     verify(view, never()).setAccountNames((Set<String>) anyObject());
     verify(view, never()).showGithubPanel();
-    verify(view, never()).setRepositories(Matchers.<List<ProjectData>>anyObject());
+    verify(view, never())
+        .setRepositories(org.mockito.ArgumentMatchers.<List<ProjectData>>anyObject());
   }
 
   @Test
@@ -524,7 +524,8 @@ public class GithubImporterPagePresenterTest {
     verify(view, times(2)).setInputsEnableState(eq(true));
     verify(view, never()).setAccountNames((Set<String>) anyObject());
     verify(view, never()).showGithubPanel();
-    verify(view, never()).setRepositories(Matchers.<List<ProjectData>>anyObject());
+    verify(view, never())
+        .setRepositories(org.mockito.ArgumentMatchers.<List<ProjectData>>anyObject());
   }
 
   @Test

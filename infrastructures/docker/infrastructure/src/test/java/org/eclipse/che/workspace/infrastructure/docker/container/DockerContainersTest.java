@@ -12,7 +12,7 @@ package org.eclipse.che.workspace.infrastructure.docker.container;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;

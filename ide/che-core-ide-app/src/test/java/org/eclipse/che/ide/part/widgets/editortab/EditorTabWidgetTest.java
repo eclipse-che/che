@@ -35,7 +35,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.vectomatic.dom.svg.OMSVGSVGElement;
 import org.vectomatic.dom.svg.ui.SVGImage;
@@ -154,7 +153,7 @@ public class EditorTabWidgetTest {
 
     verify(editorPartPresenter, times(2)).getEditorInput();
     verify(editorPartPresenter, times(2)).getTitleImage();
-    verify(tab.iconPanel).setWidget(Matchers.<SVGImage>anyObject());
+    verify(tab.iconPanel).setWidget(org.mockito.ArgumentMatchers.<SVGImage>anyObject());
   }
 
   @Test
