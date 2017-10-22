@@ -93,7 +93,7 @@ get_image_manifest() {
     IMAGE_LIST=$(cat /version/$1/images)
   fi
   if [ -z "${CHE_MULTIUSER:-}" ]; then
-     IMAGE_LIST=$(echo "${IMAGE_LIST}" | sed '/IMAGE_KEYCLOACK/d; /IMAGE_POSTGRES/d; /IMAGE_CHE_MULTI_*/d')
+     IMAGE_LIST=$(echo "${IMAGE_LIST}" | sed '/IMAGE_KEY*/d; /IMAGE_POSTGRES/d; /IMAGE_CHE_MULTI_*/d')
   else
      IMAGE_LIST=$(echo "${IMAGE_LIST}" | sed '/IMAGE_CHE=/d')
    fi
