@@ -33,8 +33,11 @@ import org.eclipse.che.selenium.pageobject.FindText;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
+import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.PanelSelector;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.Wizard;
+import org.eclipse.che.selenium.pageobject.Wizard.SamplesName;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.openqa.selenium.Keys;
 import org.testng.Assert;
@@ -126,6 +129,19 @@ public class FindTextFeatureTest {
               + "(2 occurrences of 'String' found)",
           PROJECT_NAME);
 
+  private static final String PR_6_PATH_1 = "/web-java-petclinic/pom.xml";
+  private static final String PR_6_PATH_2 =
+      "/web-java-petclinic/src/main/resources/spring/mvc-view-config.xml";
+  private static final String PR_6_PATH_3 =
+      "/web-java-petclinic/src/test/java/org/springframework/samples/petclinic/web/VisitsViewTests.java";
+
+  private static final String PR_6_EXPECTED_TEXT_1 =
+      "62:    <webjars-bootstrap.version>2.3.0</webjars-bootstrap.version>";
+  private static final String PR_6_EXPECTED_TEXT_2 =
+      "36:    <!-- Simple strategy: only path extension is taken into account -->";
+  private static final String PR_6_EXPECTED_TEXT_3 =
+      "19:   import static org.hamcrest.Matchers.containsString;";
+
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
@@ -139,6 +155,8 @@ public class FindTextFeatureTest {
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private Consoles consoles;
   @Inject private PanelSelector panelSelector;
+  @Inject private NotificationsPopupPanel notificationsPopupPanel;
+  @Inject private Wizard wizard;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -220,6 +238,7 @@ public class FindTextFeatureTest {
     findText.sendCommandByKeyboardInFindInfoPanel(Keys.ENTER.toString());
     editor.waitActiveTabFileName(fileNameCreatedFromAPI);
     Assert.assertEquals(editor.getPositionOfLine(), 1);
+    editor.closeAllTabsByContextMenu();
   }
 
   @Test
@@ -383,6 +402,67 @@ public class FindTextFeatureTest {
     findText.waitFindInfoPanelIsOpen();
     findText.waitExpectedTextIsNotPresentInFindInfoPanel(PR_5_EXPECTED_TEXT_1);
     findText.waitExpectedTextInFindInfoPanel(asList(PR_5_EXPECTED_TEXT_2.split("\n")));
+  }
+
+  @Test
+  public void checkTextResultsPagination() {
+    String resultsOnFirstPage =
+        "125 occurrences found in 30 files (per page results) for 'Str'. Total file count - 63";
+    String resultsOnSecondPage =
+        "178 occurrences found in 30 files (per page results) for 'Str'. Total file count - 63";
+    String resultsOnThirdPage =
+        "10 occurrences found in 3 files (per page results) for 'Str'. Total file count - 63";
+
+    menu.runCommand(
+        TestMenuCommandsConstants.Workspace.WORKSPACE,
+        TestMenuCommandsConstants.Workspace.CREATE_PROJECT);
+    wizard.selectProjectAndCreate(SamplesName.WEB_JAVA_PETCLINIC, "web-java-petclinic");
+    notificationsPopupPanel.waitProgressPopupPanelClose();
+    projectExplorer.selectItem("web-java-petclinic");
+    projectExplorer.openItemByPath("web-java-petclinic");
+    findText.launchFindFormByKeyboard();
+    findText.waitFindTextMainFormIsOpen();
+    findText.typeTextIntoFindField("Str");
+    findText.waitTextIntoFindField("Str");
+    findText.clickOnSearchButtonMainForm();
+    findText.waitFindInfoPanelIsOpen();
+
+    // check results, open a file and check cursor position
+    Assert.assertEquals(findText.getResults(), resultsOnFirstPage);
+    findText.openFileNodeByDoubleClick(PR_6_PATH_1);
+    findText.waitExpectedTextInFindInfoPanel(PR_6_EXPECTED_TEXT_1);
+    findText.selectItemInFindInfoPanelByDoubleClick(PR_6_PATH_1, PR_6_EXPECTED_TEXT_1);
+    editor.waitActiveEditor();
+    editor.waitActiveTabFileName("spring-petclinic");
+    Assert.assertEquals(editor.getPositionOfLine(), 62);
+
+    // check that the previous page button is disabled on the first page and click on the next page
+    // button
+    Assert.assertFalse(findText.checkPreviousPageButtonIsEnabled());
+    findText.clickOnNextPageButton();
+
+    // check results on second page and the previous page button is enabled
+    Assert.assertEquals(findText.getResults(), resultsOnSecondPage);
+    Assert.assertTrue(findText.checkPreviousPageButtonIsEnabled());
+    findText.openFileNodeByDoubleClick(PR_6_PATH_2);
+    findText.waitExpectedTextInFindInfoPanel(PR_6_EXPECTED_TEXT_2);
+    findText.clickOnNextPageButton();
+
+    // check results on third page and that the next page button is disabled
+    Assert.assertEquals(findText.getResults(), resultsOnThirdPage);
+    Assert.assertFalse(findText.checkNextPageButtonIsEnabled());
+    findText.openFileNodeByDoubleClick(PR_6_PATH_3);
+    findText.waitExpectedTextInFindInfoPanel(PR_6_EXPECTED_TEXT_3);
+    findText.clickOnPreviousPageButton();
+
+    Assert.assertEquals(findText.getResults(), resultsOnSecondPage);
+    Assert.assertTrue(findText.checkNextPageButtonIsEnabled());
+    findText.clickOnPreviousPageButton();
+
+    Assert.assertEquals(findText.getResults(), resultsOnFirstPage);
+    Assert.assertFalse(findText.checkPreviousPageButtonIsEnabled());
+
+    editor.closeAllTabsByContextMenu();
   }
 
   private void createFileFromAPI(String path, String fileName, String content) throws Exception {
