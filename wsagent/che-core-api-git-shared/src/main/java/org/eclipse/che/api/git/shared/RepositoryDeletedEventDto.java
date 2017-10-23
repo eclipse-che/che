@@ -8,22 +8,17 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.git.shared.event;
+package org.eclipse.che.api.git.shared;
 
 import org.eclipse.che.dto.shared.DTO;
 
-/**
- * Event for indicating that Git repository initialized.
- *
- * @author Igor Vinokur
- * @author Mykola Morhun
- */
+/** @author Mykola Morhun */
 @DTO
-public interface GitRepositoryInitializedEvent extends GitEvent {
-  @Override
+public interface RepositoryDeletedEventDto {
+  /** Name of project in which git repository was deleted. */
   String getProjectName();
 
   void setProjectName(String projectName);
 
-  GitRepositoryInitializedEvent withProjectName(String projectName);
+  RepositoryDeletedEventDto withProjectName(String projectName);
 }

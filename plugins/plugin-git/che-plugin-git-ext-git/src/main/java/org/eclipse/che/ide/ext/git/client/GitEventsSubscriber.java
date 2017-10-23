@@ -11,6 +11,8 @@
 package org.eclipse.che.ide.ext.git.client;
 
 import org.eclipse.che.api.git.shared.FileChangedEventDto;
+import org.eclipse.che.api.git.shared.RepositoryDeletedEventDto;
+import org.eclipse.che.api.git.shared.RepositoryInitializedEventDto;
 import org.eclipse.che.api.git.shared.StatusChangedEventDto;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
 
@@ -22,7 +24,7 @@ import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
 public interface GitEventsSubscriber {
 
   /** Invoked when a project file was changed */
-  void onFileChanged(String endpointId, FileChangedEventDto dto);
+  default void onFileChanged(String endpointId, FileChangedEventDto dto) {}
 
   // TODO change method name or behaviour. It is not git status actually.
   // For example, this even won't be fired when:
@@ -31,8 +33,16 @@ public interface GitEventsSubscriber {
   // - delete a committed file
   // And maybe some others
   /** Invoked when git status of project was changed */
-  void onGitStatusChanged(String endpointId, StatusChangedEventDto dto);
+  default void onGitStatusChanged(String endpointId, StatusChangedEventDto dto) {}
 
   /** Invoked when git checkout was performed */
-  void onGitCheckout(String endpointId, GitCheckoutEventDto dto);
+  default void onGitCheckout(String endpointId, GitCheckoutEventDto dto) {}
+
+  /** Invoked when git repository was initialized inside an existing project. */
+  default void onGitRepositoryInitialized(
+      String endpointId, RepositoryInitializedEventDto gitRepositoryInitializedEventDto) {}
+
+  /** Invoked when git repository was deleted inside an existing project. */
+  default void onGitRepositoryDeleted(
+      String endpointId, RepositoryDeletedEventDto repositoryDeletedEventDto) {}
 }

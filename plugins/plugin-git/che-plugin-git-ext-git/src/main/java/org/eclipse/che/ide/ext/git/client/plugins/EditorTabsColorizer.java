@@ -20,7 +20,6 @@ import com.google.inject.Provider;
 import org.eclipse.che.api.git.shared.FileChangedEventDto;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.git.shared.StatusChangedEventDto;
-import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.parts.EditorMultiPartStack;
 import org.eclipse.che.ide.api.parts.EditorTab;
@@ -99,7 +98,4 @@ public class EditorTabsColorizer implements GitEventsSubscriber {
               }
             });
   }
-
-  @Override
-  public void onGitCheckout(String endpointId, GitCheckoutEventDto dto) {}
 }

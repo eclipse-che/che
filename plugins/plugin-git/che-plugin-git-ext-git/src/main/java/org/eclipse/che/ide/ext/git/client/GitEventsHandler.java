@@ -16,6 +16,8 @@ import java.util.HashSet;
 import java.util.Set;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.git.shared.FileChangedEventDto;
+import org.eclipse.che.api.git.shared.RepositoryDeletedEventDto;
+import org.eclipse.che.api.git.shared.RepositoryInitializedEventDto;
 import org.eclipse.che.api.git.shared.StatusChangedEventDto;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
 
@@ -31,8 +33,10 @@ import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
 public class GitEventsHandler implements GitEventSubscribable {
 
   private static final String EVENT_GIT_FILE_CHANGED = "event/git-change";
-  private static final String EVENT_GIT_STATUS_CHANGED = "event/git/statusChanged";
+  private static final String EVENT_GIT_STATUS_CHANGED = "event/git/status-changed";
   private static final String EVENT_GIT_CHECKOUT = "event/git-checkout";
+  private static final String EVENT_GIT_REPOSITORY_INITIALIZED = "event/git/initialized";
+  private static final String EVENT_GIT_REPOSITORY_DELETED = "event/git/deleted";
 
   private final Set<GitEventsSubscriber> subscribers = new HashSet<>();
 
@@ -62,6 +66,20 @@ public class GitEventsHandler implements GitEventSubscribable {
         .paramsAsDto(GitCheckoutEventDto.class)
         .noResult()
         .withBiConsumer(this::onCheckoutHandler);
+
+    configurator
+        .newConfiguration()
+        .methodName(EVENT_GIT_REPOSITORY_INITIALIZED)
+        .paramsAsDto(RepositoryInitializedEventDto.class)
+        .noResult()
+        .withBiConsumer(this::onRepositoryInitializedHandler);
+
+    configurator
+        .newConfiguration()
+        .methodName(EVENT_GIT_REPOSITORY_DELETED)
+        .paramsAsDto(RepositoryDeletedEventDto.class)
+        .noResult()
+        .withBiConsumer(this::onRepositoryDeletedHandler);
   }
 
   private void onFileChangedHandler(String endpointId, FileChangedEventDto fileChangedEventDto) {
@@ -80,6 +98,20 @@ public class GitEventsHandler implements GitEventSubscribable {
   private void onCheckoutHandler(String endpointId, GitCheckoutEventDto gitCheckoutEventDto) {
     for (GitEventsSubscriber subscriber : subscribers) {
       subscriber.onGitCheckout(endpointId, gitCheckoutEventDto);
+    }
+  }
+
+  private void onRepositoryInitializedHandler(
+      String endpointId, RepositoryInitializedEventDto repositoryInitializedEvent) {
+    for (GitEventsSubscriber subscriber : subscribers) {
+      subscriber.onGitRepositoryInitialized(endpointId, repositoryInitializedEvent);
+    }
+  }
+
+  private void onRepositoryDeletedHandler(
+      String endpointId, RepositoryDeletedEventDto repositoryDeletedEvent) {
+    for (GitEventsSubscriber subscriber : subscribers) {
+      subscriber.onGitRepositoryDeleted(endpointId, repositoryDeletedEvent);
     }
   }
 

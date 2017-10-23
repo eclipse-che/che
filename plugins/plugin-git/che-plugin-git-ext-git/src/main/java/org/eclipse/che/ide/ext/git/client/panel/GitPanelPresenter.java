@@ -22,6 +22,8 @@ import com.google.web.bindery.event.shared.EventBus;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.git.shared.FileChangedEventDto;
+import org.eclipse.che.api.git.shared.RepositoryDeletedEventDto;
+import org.eclipse.che.api.git.shared.RepositoryInitializedEventDto;
 import org.eclipse.che.api.git.shared.StatusChangedEventDto;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -43,7 +45,6 @@ import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
 import org.eclipse.che.ide.ext.git.client.compare.MutableAlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelPresenter;
-import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
@@ -217,16 +218,32 @@ public class GitPanelPresenter extends BasePresenter
     Resource resource = event.getDelta().getResource();
     if (resource.isProject() && resource.getLocation().segmentCount() == 1) {
       // resource is a root project
-      if (event.getDelta().getKind() == ResourceDelta.ADDED) {
-        if (projectUnderGit(resource.asProject())) {
+      if (projectUnderGit(resource.asProject())) {
+        if (event.getDelta().getKind() == ResourceDelta.ADDED) {
           changes.put(resource.getName(), new MutableAlteredFiles(resource.asProject()));
           view.addRepository(resource.getName());
+        } else if (event.getDelta().getKind() == ResourceDelta.REMOVED) {
+          changes.remove(resource.getName());
+          view.removeRepository(resource.getName());
         }
-      } else if (event.getDelta().getKind() == ResourceDelta.REMOVED) {
-        changes.remove(resource.getName());
-        view.removeRepository(resource.getName());
       }
     }
+  }
+
+  @Override
+  public void onGitRepositoryInitialized(
+      String endpointId, RepositoryInitializedEventDto repositoryInitializedEventDto) {
+    String projectName = repositoryInitializedEventDto.getProjectName();
+    changes.put(projectName, new MutableAlteredFiles(findProjectByName(projectName)));
+    view.addRepository(projectName);
+  }
+
+  @Override
+  public void onGitRepositoryDeleted(
+      String endpointId, RepositoryDeletedEventDto repositoryDeletedEventDto) {
+    String projectName = repositoryDeletedEventDto.getProjectName();
+    changes.remove(projectName);
+    view.removeRepository(projectName);
   }
 
   @Override
@@ -270,19 +287,26 @@ public class GitPanelPresenter extends BasePresenter
   }
 
   /**
-   * Reloads information about specified project and updates the panel.
-   * Does nothing if project is not under git or doesn't exist.
+   * Reloads information about specified project and updates the panel. Does nothing if project is
+   * not under git or doesn't exist.
    */
   private void updateRepositoryData(String projectName) {
-    for (Project project : appContext.getProjects()) {
-      if (projectName.equals(project.getName())) {
-        if (projectUnderGit(project)) {
-          reloadRepositoryData(project);
-        } else {
-          break;
-        }
+    Project project = findProjectByName(projectName);
+    if (project != null) {
+      if (projectUnderGit(project)) {
+        reloadRepositoryData(project);
       }
     }
+  }
+
+  /** Returns project by its name or null if project with specified name doesn't exist. */
+  private Project findProjectByName(String projectName) {
+    for (Project project : appContext.getProjects()) {
+      if (projectName.equals(project.getName())) {
+        return project;
+      }
+    }
+    return null;
   }
 
   /** Returns true if given project is under git version control system, false otherwise. */

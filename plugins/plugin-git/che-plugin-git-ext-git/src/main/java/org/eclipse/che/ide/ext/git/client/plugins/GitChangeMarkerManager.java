@@ -20,7 +20,6 @@ import java.util.List;
 import org.eclipse.che.api.git.shared.EditedRegion;
 import org.eclipse.che.api.git.shared.FileChangedEventDto;
 import org.eclipse.che.api.git.shared.StatusChangedEventDto;
-import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorOpenedEvent;
 import org.eclipse.che.ide.api.git.GitServiceClient;
@@ -116,7 +115,4 @@ public class GitChangeMarkerManager implements GitEventsSubscriber {
               }
             });
   }
-
-  @Override
-  public void onGitCheckout(String endpointId, GitCheckoutEventDto dto) {}
 }
