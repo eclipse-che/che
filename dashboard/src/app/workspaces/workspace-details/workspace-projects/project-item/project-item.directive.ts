@@ -16,36 +16,28 @@
  * @param{string} workspaceId
  * @param{object} project
  */
-export class CheProjectItem {
+export class CheProjectItem implements ng.IDirective {
+  restrict = 'E';
 
-  /**
-   * Default constructor.
-   */
-  constructor() {
-    this.restrict = 'E';
+  // we require ngModel as we want to use it inside our directive
+  require = ['ngModel'];
 
-    // we require ngModel as we want to use it inside our directive
-    this.require = ['ngModel'];
+  // scope values
+  scope = {
+    workspace: '=cheProjectItemWorkspace',
+    project: '=cheProjectItemProject',
+    profileCreationDate: '=cheProfileCreationDate',
+    isDisplayWorkspace: '=cheDisplayWorkspace',
+    isSelectable: '=cheSelectable',
+    isSelect: '=?ngModel',
+    onCheckboxClick: '&?cheOnCheckboxClick',
+    hasAction: '=?cheHasAction'
+  };
 
-    // scope values
-    this.scope = {
-      workspace: '=cheProjectItemWorkspace',
-      project: '=cheProjectItemProject',
-      profileCreationDate: '=cheProfileCreationDate',
-      isDisplayWorkspace: '=cheDisplayWorkspace',
-      isSelectable: '=cheSelectable',
-      isSelect: '=?ngModel',
-      onCheckboxClick: '&?cheOnCheckboxClick',
-      hasAction: '=?cheHasAction'
-    };
+  templateUrl = 'app/workspaces/workspace-details/workspace-projects/project-item/project-item.html';
 
-    this.templateUrl = 'app/workspaces/workspace-details/workspace-projects/project-item/project-item.html';
-
-
-    this.controller = 'ProjectItemCtrl';
-    this.controllerAs = 'projectItemCtrl';
-    this.bindToController = true;
-
-  }
+  controller = 'ProjectItemCtrl';
+  controllerAs = 'projectItemCtrl';
+  bindToController = true;
 
 }

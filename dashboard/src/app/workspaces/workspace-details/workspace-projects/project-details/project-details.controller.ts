@@ -10,6 +10,9 @@
  */
 'use strict';
 import {ConfirmDialogService} from '../../../../../components/service/confirm-dialog/confirm-dialog.service';
+import {CheNotification} from '../../../../../components/notification/che-notification.factory';
+import {CheAPI} from '../../../../../components/api/che-api.factory';
+import {CheProject} from '../../../../../components/api/che-project';
 
 /**
  * Controller for a project details
@@ -17,13 +20,39 @@ import {ConfirmDialogService} from '../../../../../components/service/confirm-di
  * @author Oleksii Orel
  */
 export class ProjectDetailsController {
-
+  private $log: ng.ILogService;
+  private cheNotification: CheNotification;
+  private cheAPI: CheAPI;
+  private $location: ng.ILocationService;
+  private lodash: any;
+  private $timeout: ng.ITimeoutService;
   private confirmDialogService: ConfirmDialogService;
+
+  private namespace: string;
+  private workspaceName: string;
+  private projectName: string;
+  private projectPath: string;
+  private loading: boolean = true;
+  private workspace: che.IWorkspace;
+  private timeoutPromise: ng.IPromise<any>;
+  private projectService: CheProject;
+  private invalidProject: boolean;
+  private projectDetails: che.IProjectTemplate;
+  private projectDescription: string;
+
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($scope, $log, $route, $location, cheAPI, confirmDialogService, cheNotification, lodash, $timeout) {
+  constructor($scope: ng.IScope,
+              $log: ng.ILogService,
+              $route: ng.route.IRouteService,
+              $location: ng.ILocationService,
+              $timeout: ng.ITimeoutService,
+              cheAPI: CheAPI,
+              confirmDialogService: ConfirmDialogService,
+              cheNotification: CheNotification,
+              lodash: any) {
     this.$log = $log;
     this.cheNotification = cheNotification;
     this.cheAPI = cheAPI;
@@ -51,7 +80,7 @@ export class ProjectDetailsController {
         } else {
           this.loading = false;
         }
-      }, (error) => {
+      }, (error: any) => {
         this.cheNotification.showError(error.data.message ? error.data.message : 'Failed to get runtime of the project workspace.');
         this.$log.log('error', error);
       });
@@ -59,7 +88,6 @@ export class ProjectDetailsController {
       this.fetchProjectDetails();
     }
 
-    this.timeoutPromise;
     $scope.$on('$destroy', () => {
       if (this.timeoutPromise) {
         $timeout.cancel(this.timeoutPromise);
@@ -67,7 +95,7 @@ export class ProjectDetailsController {
     });
   }
 
-  fetchProjectDetails() {
+  fetchProjectDetails(): void {
     this.loading = true;
 
     if (this.workspace.status !== 'STARTING' && this.workspace.status !== 'RUNNING') {
@@ -88,7 +116,7 @@ export class ProjectDetailsController {
         this.projectService.fetchProjectDetails(this.workspace.id, this.projectPath).then(() => {
           this.loading = false;
           this.updateProjectDetails();
-        }, (error) => {
+        }, (error: any) => {
           if (error.status === 304) {
             this.loading = false;
             this.updateProjectDetails();
@@ -99,27 +127,27 @@ export class ProjectDetailsController {
           }
         });
       }
-    }, (error) => {
+    }, (error: any) => {
       this.$log.error(error);
       this.loading = false;
     });
   }
 
-  updateProjectDetails() {
+  updateProjectDetails(): void {
     this.projectDetails = this.projectService.getProjectDetailsByKey(this.projectPath);
     this.projectName = angular.copy(this.projectDetails.name);
     this.projectDescription = angular.copy(this.projectDetails.description);
     this.loading = false;
   }
 
-  updateLocation() {
+  updateLocation(): void {
     if (this.$location.path().endsWith(this.projectDetails.name)) {
       return;
     }
     this.$location.path('/workspace/' + this.namespace + '/' + this.workspaceName + '/' + this.projectDetails.name);
   }
 
-  setProjectDetails(projectDetails) {
+  setProjectDetails(projectDetails: che.IProjectTemplate): void {
     projectDetails.description = this.projectDescription;
     let promise = this.projectService.updateProjectDetails(projectDetails);
 
@@ -127,13 +155,13 @@ export class ProjectDetailsController {
       this.cheNotification.showInfo('Project information successfully updated.');
       this.updateLocation();
       if (this.isNameChanged()) {
-        this.projectService.fetchProjectDetails(this.projectPath).then(() => {
+        this.projectService.fetchProjectDetails(this.workspace.id, this.projectPath).then(() => {
           this.updateProjectDetails();
         });
       } else {
         this.projectDescription = projectDetails.description;
       }
-    }, (error) => {
+    }, (error: any) => {
       this.projectDetails.description = this.projectDescription;
       this.cheNotification.showError(error.data.message ? error.data.message : 'Update information failed.');
       this.$log.log('error', error);
@@ -141,7 +169,7 @@ export class ProjectDetailsController {
 
   }
 
-  isNameChanged() {
+  isNameChanged(): boolean {
     if (this.projectDetails) {
       return this.projectName !== this.projectDetails.name;
     } else {
@@ -149,7 +177,7 @@ export class ProjectDetailsController {
     }
   }
 
-  isDescriptionChanged() {
+  isDescriptionChanged(): boolean {
     if (this.projectDetails) {
       return this.projectDescription !== this.projectDetails.description;
     } else {
@@ -157,7 +185,7 @@ export class ProjectDetailsController {
     }
   }
 
-  updateInfo(isInputFormValid) {
+  updateInfo(isInputFormValid: boolean): void {
     this.$timeout.cancel(this.timeoutPromise);
 
     if (!isInputFormValid || !(this.isNameChanged() || this.isDescriptionChanged())) {
@@ -169,7 +197,7 @@ export class ProjectDetailsController {
     }, 500);
   }
 
-  doUpdateInfo() {
+  doUpdateInfo(): void {
     if (this.isNameChanged()) {
       let promise = this.projectService.rename(this.projectDetails.name, this.projectName);
 
@@ -184,7 +212,7 @@ export class ProjectDetailsController {
         } else {
           this.setProjectDetails(this.projectDetails);
         }
-      }, (error) => {
+      }, (error: any) => {
         this.projectDetails.name = this.projectName;
         this.cheNotification.showError(error.data.message ? error.data.message : 'Update information failed.');
         this.$log.log('error', error);
@@ -194,7 +222,7 @@ export class ProjectDetailsController {
     }
   }
 
-  deleteProject() {
+  deleteProject(): void {
     let content = 'Would you like to delete the project \'' + this.projectDetails.name + '\' ?';
     this.confirmDialogService.showConfirmDialog('Remove project', content, 'Delete').then(() => {
       // remove it !
@@ -213,7 +241,7 @@ export class ProjectDetailsController {
    * Returns list of projects of current workspace excluding current project
    * @returns {*|Array}
    */
-  getWorkspaceProjects() {
+  getWorkspaceProjects(): Array<che.IProject> {
     let projects = this.cheAPI.getWorkspace().getWorkspaceProjects()[this.workspace.id];
     let _projects = this.lodash.filter(projects, (project) => { return project.name !== this.projectName});
     return _projects;
@@ -223,7 +251,7 @@ export class ProjectDetailsController {
    * Returns current status of workspace
    * @returns {String}
    */
-  getWorkspaceStatus() {
+  getWorkspaceStatus(): string {
     if (!this.workspace) {
       return 'unknown';
     }

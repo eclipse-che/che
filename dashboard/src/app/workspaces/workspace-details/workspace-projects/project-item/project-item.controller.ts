@@ -9,6 +9,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import {CheWorkspace} from '../../../../../components/api/workspace/che-workspace.factory';
 
 /**
  * @ngdoc controller
@@ -17,17 +18,23 @@
  * @author Florent Benoit
  */
 export class ProjectItemCtrl {
+  private $location: ng.ILocationService;
+  private cheWorkspace: CheWorkspace;
+
+  private workspace: che.IWorkspace;
+  private project: che.IProject;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($location, cheWorkspace) {
+  constructor($location: ng.ILocationService,
+              cheWorkspace: CheWorkspace) {
     this.$location = $location;
     this.cheWorkspace = cheWorkspace;
   }
 
-  redirectToProjectDetails() {
+  redirectToProjectDetails(): void {
     this.$location.path('/workspace/' + this.workspace.namespace + '/' + this.workspace.config.name + '/' + this.project.name);
   }
 
