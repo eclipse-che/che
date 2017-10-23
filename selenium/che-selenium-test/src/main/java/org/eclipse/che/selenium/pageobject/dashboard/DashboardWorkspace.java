@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.pageobject.dashboard;
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
@@ -20,7 +21,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.openqa.selenium.By;
@@ -48,7 +48,7 @@ public class DashboardWorkspace {
     String PROJECTS = "Projects";
     String MACHINES = "Machines";
     String SERVERS = "Servers";
-    String AGENTS = "Agents";
+    String INSTALLERS = "Installers";
     String ENV_VARIABLES = "Env Variables";
     String CONFIG = "Config";
     String SSH = "Ssh";
@@ -148,9 +148,9 @@ public class DashboardWorkspace {
     String ADD_SERVER_REFERENCE_FIELD = "server-reference-input";
     String ADD_SERVER_PORT_FIELD = "server-port-input";
     String ADD_SERVER_PROTOCOL_FIELD = "server-protocol-input";
-    String AGENT_NAME = "//span[@agent-name='%s']";
-    String AGENT_DESCRIPTION = "//span[@agent-description='%s']";
-    String AGENT_STATE = "//md-switch[@agent-switch='%s']";
+    String INSTALLER_NAME = "//span[@agent-name='%s']";
+    String INSTALLER_DESCRIPTION = "//span[@agent-description='%s']";
+    String INSTALLER_STATE = "//md-switch[@agent-switch='%s']";
     String ADD_NEW_PROJECT_BUTTON = "//che-button-primary[@che-button-title='Add Project']/button";
     String ADD_PROJECT_BUTTON = "//che-button-primary[@name='addButton']/button";
     String SAMPLE_CHECKBOX_XPATH = "//md-checkbox[@aria-label='Sample %s']";
@@ -250,7 +250,7 @@ public class DashboardWorkspace {
   WebElement workspaceState;
 
   public void waitToolbarTitleName(String titleName) {
-    new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.LOADER_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
                 By.xpath(format(Locators.TOOLBAR_TITLE_NAME, titleName))));
@@ -394,7 +394,7 @@ public class DashboardWorkspace {
    * @param stateWorkspace expected state of workspace
    */
   public void checkStateOfWorkspace(StateWorkspace stateWorkspace) {
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
         .until(
             ExpectedConditions.textToBePresentInElement(
                 workspaceState, stateWorkspace.getStatus()));
@@ -789,37 +789,37 @@ public class DashboardWorkspace {
         .click();
   }
 
-  public void checkAgentExists(String agentName) {
+  public void checkInstallerExists(String installerName) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(format(Locators.AGENT_NAME, agentName))));
+                By.xpath(format(Locators.INSTALLER_NAME, installerName))));
   }
 
-  public void switchAgentState(String agentName) {
+  public void switchInstallerState(String installerName) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(format(Locators.AGENT_STATE, agentName))))
+                By.xpath(format(Locators.INSTALLER_STATE, installerName))))
         .click();
   }
 
-  public Boolean getAgentState(String agentName) {
+  public Boolean getInstallerState(String installerName) {
     String state =
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
             .until(
                 ExpectedConditions.visibilityOfElementLocated(
-                    By.xpath(format(Locators.AGENT_STATE, agentName))))
+                    By.xpath(format(Locators.INSTALLER_STATE, installerName))))
             .getAttribute("aria-checked");
 
     return Boolean.parseBoolean(state);
   }
 
-  public String checkAgentDescription(String agentName) {
+  public String checkInstallerDescription(String installerName) {
     return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(format(Locators.AGENT_DESCRIPTION, agentName))))
+                By.xpath(format(Locators.INSTALLER_DESCRIPTION, installerName))))
         .getText();
   }
 
