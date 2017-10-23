@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.jdb.ide.configuration;
 
 import static java.lang.Boolean.TRUE;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;

@@ -13,13 +13,13 @@ package org.eclipse.che.plugin.docker.client;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -121,7 +121,6 @@ import org.eclipse.che.plugin.docker.client.params.network.InspectNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.network.RemoveNetworkParams;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -308,7 +307,8 @@ public class DockerConnectorTest {
 
     doReturn(images)
         .when(dockerConnector)
-        .parseResponseStreamAndClose(eq(inputStream), Matchers.<TypeToken<List<Image>>>any());
+        .parseResponseStreamAndClose(
+            eq(inputStream), org.mockito.ArgumentMatchers.<TypeToken<List<Image>>>any());
 
     List<Image> returnedImages = dockerConnector.listImages(listImagesParams);
 
@@ -330,7 +330,8 @@ public class DockerConnectorTest {
 
     doReturn(images)
         .when(dockerConnector)
-        .parseResponseStreamAndClose(eq(inputStream), Matchers.<TypeToken<List<Image>>>any());
+        .parseResponseStreamAndClose(
+            eq(inputStream), org.mockito.ArgumentMatchers.<TypeToken<List<Image>>>any());
 
     List<Image> returnedImages = dockerConnector.listImages();
 
@@ -364,7 +365,8 @@ public class DockerConnectorTest {
     doReturn(expectedListContainers)
         .when(dockerConnector)
         .parseResponseStreamAndClose(
-            eq(inputStream), Matchers.<TypeToken<List<ContainerListEntry>>>any());
+            eq(inputStream),
+            org.mockito.ArgumentMatchers.<TypeToken<List<ContainerListEntry>>>any());
 
     List<ContainerListEntry> containers = dockerConnector.listContainers(listContainersParams);
 
@@ -378,7 +380,8 @@ public class DockerConnectorTest {
     verify(dockerResponse).getInputStream();
     verify(dockerConnector)
         .parseResponseStreamAndClose(
-            eq(inputStream), Matchers.<TypeToken<List<ContainerListEntry>>>any());
+            eq(inputStream),
+            org.mockito.ArgumentMatchers.<TypeToken<List<ContainerListEntry>>>any());
 
     assertEquals(containers, expectedListContainers);
   }
@@ -394,7 +397,8 @@ public class DockerConnectorTest {
     doReturn(expectedListContainers)
         .when(dockerConnector)
         .parseResponseStreamAndClose(
-            eq(inputStream), Matchers.<TypeToken<List<ContainerListEntry>>>any());
+            eq(inputStream),
+            org.mockito.ArgumentMatchers.<TypeToken<List<ContainerListEntry>>>any());
 
     List<ContainerListEntry> containers = dockerConnector.listContainers(listContainersParams);
 

@@ -31,7 +31,9 @@ public final class KubernetesStringUtils {
    */
   public static String getNormalizedString(String input) {
     int end = Math.min(input.length(), MAX_CHARS - 1);
-    return input.substring(0, end);
+    String stringLessThan63chars = input.substring(0, end);
+    String normalizedString = removeSpecialCharactersInTheEnd(stringLessThan63chars);
+    return normalizedString;
   }
 
   /**
@@ -172,5 +174,10 @@ public final class KubernetesStringUtils {
       return null;
     }
     return pullSpec.replaceAll(".*:", "");
+  }
+
+  /** Removes non-word-characters at the end of the string */
+  private static String removeSpecialCharactersInTheEnd(final String input) {
+    return input.replaceAll("\\W+$", "");
   }
 }
