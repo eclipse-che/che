@@ -18,10 +18,6 @@
          metadata-complete="true">
 
     <context-param>
-        <param-name>org.everrest.websocket.context</param-name>
-        <param-value>/api</param-value>
-    </context-param>
-    <context-param>
         <param-name>org.eclipse.che.websocket.endpoint</param-name>
         <param-value>/ws</param-value>
     </context-param>
@@ -35,10 +31,6 @@
     </listener>
     <listener>
         <listener-class>org.eclipse.che.everrest.ServerContainerInitializeListener</listener-class>
-    </listener>
-
-    <listener>
-        <listener-class>org.everrest.websockets.WSConnectionTracker</listener-class>
     </listener>
 
     <filter>
