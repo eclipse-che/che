@@ -220,7 +220,7 @@ public class TestGitHubServiceClient {
 
     return properties
         .stream()
-        .filter(map -> map.containsKey("email"))
+        .filter(map -> map.get("primary").equals("true") && map.get("visibility").equals("public"))
         .map(map -> map.get("email"))
         .collect(Collectors.joining());
   }
