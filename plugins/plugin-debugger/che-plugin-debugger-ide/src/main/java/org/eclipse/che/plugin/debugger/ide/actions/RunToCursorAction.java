@@ -14,7 +14,6 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 
 import com.google.inject.Inject;
 import java.util.Collections;
-
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.Variable;

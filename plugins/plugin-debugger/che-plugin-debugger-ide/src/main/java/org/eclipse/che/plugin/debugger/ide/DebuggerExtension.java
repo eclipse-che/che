@@ -180,8 +180,8 @@ public class DebuggerExtension {
         .getGlobal()
         .addKey(new KeyBuilder().charCode(KeyCodeMap.F9).build(), RESUME_EXECUTION_ID);
     keyBinding
-            .getGlobal()
-            .addKey(new KeyBuilder().alt().charCode(KeyCodeMap.F9).build(), RUN_TO_CURSOR_ID);
+        .getGlobal()
+        .addKey(new KeyBuilder().alt().charCode(KeyCodeMap.F9).build(), RUN_TO_CURSOR_ID);
     keyBinding
         .getGlobal()
         .addKey(new KeyBuilder().alt().charCode(KeyCodeMap.F8).build(), EVALUATE_EXPRESSION_ID);
