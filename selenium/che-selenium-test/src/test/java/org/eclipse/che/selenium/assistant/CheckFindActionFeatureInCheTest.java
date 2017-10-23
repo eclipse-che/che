@@ -11,7 +11,8 @@
 package org.eclipse.che.selenium.assistant;
 
 import com.google.inject.Inject;
-
+import java.net.URL;
+import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
@@ -24,9 +25,6 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import java.net.URL;
-import java.nio.file.Paths;
 
 /** @author Musienko Maxim */
 public class CheckFindActionFeatureInCheTest {
