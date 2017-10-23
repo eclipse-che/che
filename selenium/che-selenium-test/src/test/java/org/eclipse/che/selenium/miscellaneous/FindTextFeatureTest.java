@@ -228,9 +228,6 @@ public class FindTextFeatureTest {
         format("/%s/my-webapp/src/main/webapp/WEB-INF/jsp/guess_num.jsp", PROJECT_NAME);
     String pathToSayHelloFile =
         format("/%s/my-lib/src/main/java/hello/SayHello.java", PROJECT_NAME);
-    String pathToAppControllerFile =
-        format(
-            "/%s/my-webapp/src/main/java/org/eclipse/qa/examples/AppController.java", PROJECT_NAME);
     projectExplorer.waitProjectExplorer();
     projectExplorer.selectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.FIND);
@@ -242,12 +239,15 @@ public class FindTextFeatureTest {
     findText.clickOnSearchButtonMainForm();
     findText.waitFindInfoPanelIsOpen();
     findText.waitExpectedTextInFindInfoPanel(FIND_NOTHING);
+
+    // check find info panel when switch to processes panel
     consoles.clickOnProcessesButton();
     findText.waitFindInfoPanelIsClosed();
     findText.clickFindTextButton();
     findText.waitFindInfoPanelIsOpen();
     consoles.closeProcessesArea();
     findText.waitFindInfoPanelIsClosed();
+
     projectExplorer.selectItem(PROJECT_NAME);
     findText.launchFindFormByKeyboard();
     findText.waitFindTextMainFormIsOpen();
