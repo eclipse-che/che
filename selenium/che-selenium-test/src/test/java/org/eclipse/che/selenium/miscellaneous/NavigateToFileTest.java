@@ -10,23 +10,27 @@
  */
 package org.eclipse.che.selenium.miscellaneous;
 
+import static org.testng.AssertJUnit.assertFalse;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.constant.TestGitConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NavigateToFile;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.git.Git;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
@@ -76,8 +80,9 @@ public class NavigateToFileTest {
   @Inject private CodenvyEditor editor;
   @Inject private NavigateToFile navigateToFile;
   @Inject private Menu menu;
-  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Git git;
+  @Inject private AskDialog askDialog;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -97,7 +102,7 @@ public class NavigateToFileTest {
   }
 
   @Test
-  public void checkFunctionNavigateFile() {
+  public void checkNavigateToFileFunction() {
     // Open the project one and check function 'Navigate To File'
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
@@ -139,10 +144,19 @@ public class NavigateToFileTest {
     selectFileFromNavigateLaunchByKeyboard("R", FILE_README + PATH_2_TO_README_FILE);
     editor.waitTabIsPresent("README.md");
     editor.waitActiveEditor();
+    editor.closeAllTabsByContextMenu();
+
+    // Check that form is closed by pressing ESC button
+    menu.runCommand(
+        TestMenuCommandsConstants.Assistant.ASSISTANT,
+        TestMenuCommandsConstants.Assistant.NAVIGATE_TO_FILE);
+    navigateToFile.waitFormToOpen();
+    navigateToFile.closeNavigateToFileForm();
+    navigateToFile.waitFormToClose();
   }
 
   @Test
-  public void checkNavigateFileFunctionWithJustCreatedFiles() throws Exception {
+  public void checkNavigateToFileFunctionWithJustCreatedFiles() throws Exception {
     String content = "NavigateToFileTest";
 
     projectExplorer.waitProjectExplorer();
@@ -162,6 +176,30 @@ public class NavigateToFileTest {
     editor.closeFileByNameWithSaving(FILE_CREATED_FROM_CONSOLE);
   }
 
+  @Test
+  public void checkNavigateToFileFunctionWithFilesFromHiddenFolders() {
+    projectExplorer.waitProjectExplorer();
+    projectExplorer.waitItem(PROJECT_NAME);
+    projectExplorer.selectItem(PROJECT_NAME);
+    menu.runCommand(
+        TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.INITIALIZE_REPOSITORY);
+    askDialog.acceptDialogWithText(
+        "Do you want to initialize the local repository " + PROJECT_NAME + "?");
+    loader.waitOnClosed();
+    git.waitGitStatusBarWithMess(TestGitConstants.GIT_INITIALIZED_SUCCESS);
+
+    // check that HEAD file from .git folder is not appear in list of found files
+    menu.runCommand(
+        TestMenuCommandsConstants.Assistant.ASSISTANT,
+        TestMenuCommandsConstants.Assistant.NAVIGATE_TO_FILE);
+    navigateToFile.waitFormToOpen();
+    navigateToFile.typeSymbolInFileNameField("H");
+    navigateToFile.waitFileNamePopUp();
+    assertFalse(navigateToFile.isFilenameSuggested("HEAD (/NavigateFile/.git)"));
+    navigateToFile.closeNavigateToFileForm();
+    navigateToFile.waitFormToClose();
+  }
+
   private void selectFileFromNavigate(String symbol, String pathName, List<String> files) {
     loader.waitOnClosed();
     menu.runCommand(
@@ -173,7 +211,7 @@ public class NavigateToFileTest {
     loader.waitOnClosed();
     navigateToFile.waitFileNamePopUp();
     for (String listFiles : files) {
-      navigateToFile.waitListOfFilesNames(listFiles);
+      navigateToFile.isFilenameSuggested(listFiles);
     }
     navigateToFile.selectFileByFullName(pathName);
     navigateToFile.waitFormToClose();
@@ -190,7 +228,7 @@ public class NavigateToFileTest {
     loader.waitOnClosed();
     navigateToFile.waitFileNamePopUp();
     for (String listFiles : FILES_I_SYMBOL) {
-      navigateToFile.waitListOfFilesNames(listFiles);
+      navigateToFile.isFilenameSuggested(listFiles);
     }
     navigateToFile.selectFileByFullName(pathName);
     navigateToFile.waitFormToClose();
@@ -205,7 +243,7 @@ public class NavigateToFileTest {
     loader.waitOnClosed();
     navigateToFile.waitFileNamePopUp();
     for (String listFiles : FILES_R_SYMBOL) {
-      navigateToFile.waitListOfFilesNames(listFiles);
+      navigateToFile.isFilenameSuggested(listFiles);
     }
     navigateToFile.selectFileByFullName(pathName);
     navigateToFile.waitFormToClose();
