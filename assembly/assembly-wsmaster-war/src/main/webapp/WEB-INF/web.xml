@@ -17,8 +17,20 @@
          version="3.0"
          metadata-complete="true">
 
+    <context-param>
+        <param-name>org.eclipse.che.websocket.endpoint</param-name>
+        <param-value>/ws</param-value>
+    </context-param>
+    <context-param>
+        <param-name>org.eclipse.che.eventbus.endpoint</param-name>
+        <param-value>/eventbus/</param-value>
+    </context-param>
+
     <listener>
         <listener-class>org.eclipse.che.inject.CheBootstrap</listener-class>
+    </listener>
+    <listener>
+        <listener-class>org.eclipse.che.everrest.ServerContainerInitializeListener</listener-class>
     </listener>
 
     <filter>
@@ -29,6 +41,7 @@
         <filter-name>guiceFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
+
 
     <resource-env-ref>
         <resource-env-ref-name>jdbc/che</resource-env-ref-name>
