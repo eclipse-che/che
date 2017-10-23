@@ -12,7 +12,7 @@ package org.eclipse.che.plugin.java.plain.server.projecttype;
 
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;

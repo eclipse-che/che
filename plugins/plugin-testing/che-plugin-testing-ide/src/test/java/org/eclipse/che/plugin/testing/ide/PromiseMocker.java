@@ -18,7 +18,6 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.mockito.Matchers;
 
 /**
  * Mockito mock provider for Che Promise objects.
@@ -42,7 +41,7 @@ public class PromiseMocker<T> {
   }
 
   public <B> PromiseMocker<T> applyOnThenPromise(T value) {
-    when(promise.thenPromise(Matchers.<Function<T, Promise<B>>>any()))
+    when(promise.thenPromise(org.mockito.ArgumentMatchers.<Function<T, Promise<B>>>any()))
         .then(
             new FunctionAnswer<Function<T, Promise<B>>, Promise<B>>(
                 function -> {
@@ -57,7 +56,7 @@ public class PromiseMocker<T> {
   }
 
   public PromiseMocker<T> applyOnThenOperation(T value) {
-    when(promise.then(Matchers.<Operation<T>>any()))
+    when(promise.then(org.mockito.ArgumentMatchers.<Operation<T>>any()))
         .then(
             new FunctionAnswer<Operation<T>, Promise<T>>(
                 op -> {
@@ -72,7 +71,7 @@ public class PromiseMocker<T> {
   }
 
   public PromiseMocker<T> applyOnCatchErrorOperation(PromiseError error) {
-    when(promise.catchError(Matchers.<Operation<PromiseError>>any()))
+    when(promise.catchError(org.mockito.ArgumentMatchers.<Operation<PromiseError>>any()))
         .then(
             new FunctionAnswer<Operation<PromiseError>, Promise<T>>(
                 op -> {
