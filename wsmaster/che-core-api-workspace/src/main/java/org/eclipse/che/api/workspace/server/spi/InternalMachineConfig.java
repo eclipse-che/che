@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.api.workspace.server.spi;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 
 import java.util.ArrayList;
@@ -88,21 +89,43 @@ public class InternalMachineConfig {
     try {
       List<Installer> sortedInstallers = installerRegistry.getOrderedInstallers(installersKeys);
       for (Installer installer : sortedInstallers) {
-        this.installers.add(new InstallerImpl(installer));
-        for (Map.Entry<String, ? extends ServerConfig> serverEntry :
-            installer.getServers().entrySet()) {
-          if (servers.putIfAbsent(serverEntry.getKey(), serverEntry.getValue()) != null
-              && servers.get(serverEntry.getKey()).equals(serverEntry.getValue())) {
-            throw new InfrastructureException(
-                format(
-                    "Installer '%s' contains server '%s' conflicting with machine configuration",
-                    installer.getId(), serverEntry.getKey()));
-          }
-        }
+        applyInstaller(installer);
       }
     } catch (InstallerException e) {
-      // TODO installers has circular dependency or missing, what should we throw in that case?
       throw new InfrastructureException(e.getLocalizedMessage(), e);
+    }
+  }
+
+  private void applyInstaller(Installer installer) throws InfrastructureException {
+    this.installers.add(new InstallerImpl(installer));
+    for (Map.Entry<String, ? extends ServerConfig> serverEntry :
+        installer.getServers().entrySet()) {
+      if (servers.putIfAbsent(serverEntry.getKey(), serverEntry.getValue()) != null
+          && !servers.get(serverEntry.getKey()).equals(serverEntry.getValue())) {
+        throw new InfrastructureException(
+            format(
+                "Installer '%s' contains server '%s' conflicting with machine configuration",
+                installer.getId(), serverEntry.getKey()));
+      }
+    }
+    addEnvVars(installer);
+  }
+
+  private void addEnvVars(Installer installer) {
+    String environment = installer.getProperties().get(Installer.ENVIRONMENT_PROPERTY);
+    if (isNullOrEmpty(environment)) {
+      return;
+    }
+
+    for (String env : environment.split(",")) {
+      String[] items = env.split("=");
+      if (items.length != 2) {
+        // TODO add warning
+        // LOG.warn(format("Illegal environment variable '%s' format", env));
+        continue;
+      }
+
+      this.env.put(items[0], items[1]);
     }
   }
 }

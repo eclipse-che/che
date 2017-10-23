@@ -14,6 +14,7 @@ import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil.containsWsAgentServer;
 
 import com.google.inject.Inject;
@@ -188,7 +189,7 @@ public class TestWorkspaceServiceClient {
         .forEach(
             m ->
                 m.getAttributes()
-                    .put("memoryLimitBytes", Long.toString(convertToByte(memory, memoryUnit))));
+                    .put(MEMORY_LIMIT_ATTRIBUTE, Long.toString(convertToByte(memory, memoryUnit))));
     workspace.getEnvironments().remove("replaced_name");
     workspace.getEnvironments().put(workspaceName, environment);
     workspace.setName(workspaceName);

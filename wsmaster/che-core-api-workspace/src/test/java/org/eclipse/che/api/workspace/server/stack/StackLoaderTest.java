@@ -11,6 +11,7 @@
 package org.eclipse.che.api.workspace.server.stack;
 
 import static java.util.Collections.singletonMap;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -194,7 +195,7 @@ public class StackLoaderTest {
         newDto(MachineConfigDto.class)
             .withInstallers(Arrays.asList("agent1", "agent2"))
             .withServers(servers)
-            .withAttributes(singletonMap("memoryLimitBytes", "" + 512L * 1024L * 1024L)));
+            .withAttributes(singletonMap(MEMORY_LIMIT_ATTRIBUTE, "" + 512L * 1024L * 1024L)));
 
     EnvironmentDto environmentDto =
         newDto(EnvironmentDto.class).withRecipe(environmentRecipe).withMachines(machines);

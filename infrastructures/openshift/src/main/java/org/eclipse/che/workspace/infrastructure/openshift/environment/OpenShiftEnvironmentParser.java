@@ -11,34 +11,25 @@
 package org.eclipse.che.workspace.infrastructure.openshift.environment;
 
 import static java.lang.String.format;
-import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_POD_NAME_LABEL;
 
-import io.fabric8.kubernetes.api.model.Container;
-import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
-import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.openshift.api.model.DeploymentConfig;
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.client.OpenShiftClient;
 import java.io.ByteArrayInputStream;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment.InternalRecipe;
-import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
-import org.eclipse.che.workspace.infrastructure.openshift.ServerExposer;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment.Builder;
 
 /**
@@ -63,8 +54,6 @@ public class OpenShiftEnvironmentParser {
   static final int PVC_IGNORED_WARNING_CODE = 4101;
   static final String PVC_IGNORED_WARNING_MESSAGE =
       "Persistent volume claims specified in OpenShift recipe are ignored.";
-
-  static final String DEFAULT_RESTART_POLICY = "Never";
 
   private final OpenShiftClientFactory clientFactory;
 
@@ -144,73 +133,12 @@ public class OpenShiftEnvironmentParser {
           new WarningImpl(PVC_IGNORED_WARNING_CODE, PVC_IGNORED_WARNING_MESSAGE));
     }
 
-    OpenShiftEnvironment openShiftEnv = openShiftEnvBuilder.build();
-
-    normalizeEnvironment(openShiftEnv, environment);
-
-    return openShiftEnv;
-  }
-
-  private void normalizeEnvironment(
-      OpenShiftEnvironment openShiftEnvironment, InternalEnvironment environment)
-      throws ValidationException {
-    for (Pod podConfig : openShiftEnvironment.getPods().values()) {
-      final String podName = podConfig.getMetadata().getName();
-      getLabels(podConfig).put(CHE_POD_NAME_LABEL, podName);
-      final PodSpec podSpec = podConfig.getSpec();
-      rewriteRestartPolicy(podSpec, podName, environment);
-      for (Container containerConfig : podSpec.getContainers()) {
-        String machineName = podName + '/' + containerConfig.getName();
-        InternalMachineConfig machineConfig = environment.getMachines().get(machineName);
-        if (machineConfig != null && !machineConfig.getServers().isEmpty()) {
-          ServerExposer serverExposer =
-              new ServerExposer(machineName, containerConfig, openShiftEnvironment);
-          serverExposer.expose(machineConfig.getServers());
-
-          for (Entry<String, String> envEntry : machineConfig.getEnv().entrySet()) {
-            putEnv(containerConfig.getEnv(), envEntry.getKey(), envEntry.getValue());
-          }
-        }
-      }
-    }
-  }
-
-  private Map<String, String> getLabels(Pod pod) {
-    ObjectMeta metadata = pod.getMetadata();
-    if (metadata == null) {
-      metadata = new ObjectMeta();
-      pod.setMetadata(metadata);
-    }
-
-    Map<String, String> labels = metadata.getLabels();
-    if (labels == null) {
-      labels = new HashMap<>();
-      metadata.setLabels(labels);
-    }
-    return labels;
-  }
-
-  private void rewriteRestartPolicy(PodSpec podSpec, String podName, InternalEnvironment env) {
-    final String restartPolicy = podSpec.getRestartPolicy();
-
-    if (restartPolicy != null && !DEFAULT_RESTART_POLICY.equalsIgnoreCase(restartPolicy)) {
-      final String warnMsg =
-          format(
-              "Restart policy '%s' for pod '%s' is rewritten with %s",
-              restartPolicy, podName, DEFAULT_RESTART_POLICY);
-      env.addWarning(new WarningImpl(101, warnMsg));
-    }
-    podSpec.setRestartPolicy(DEFAULT_RESTART_POLICY);
+    return openShiftEnvBuilder.build();
   }
 
   private void checkNotNull(Object object, String errorMessage) throws ValidationException {
     if (object == null) {
       throw new ValidationException(errorMessage);
     }
-  }
-
-  private void putEnv(List<EnvVar> envs, String key, String value) {
-    envs.removeIf(env -> key.equals(env.getName()));
-    envs.add(new EnvVar(key, value, null));
   }
 }

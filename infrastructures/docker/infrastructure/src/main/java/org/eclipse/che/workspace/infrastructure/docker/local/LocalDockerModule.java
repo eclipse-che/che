@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker.local;
 
-import static org.eclipse.che.workspace.infrastructure.docker.local.installer.LocalInstallersConfigProvisioner.LOCAL_INSTALLERS_PROVISIONERS;
+import static org.eclipse.che.workspace.infrastructure.docker.local.installer.LocalInstallersBinariesVolumeProvisioner.LOCAL_INSTALLERS_PROVISIONERS;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;

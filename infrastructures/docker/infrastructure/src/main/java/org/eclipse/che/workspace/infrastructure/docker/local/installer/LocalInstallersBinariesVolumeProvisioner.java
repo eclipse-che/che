@@ -8,40 +8,43 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.docker.provisioner.labels;
+package org.eclipse.che.workspace.infrastructure.docker.local.installer;
 
-import java.util.Map;
+import java.util.Set;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
-import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
-import org.eclipse.che.workspace.infrastructure.docker.Labels;
-import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.ConfigurationProvisioner;
 
 /**
- * Provision labels related to workspace configuration to docker environment.
+ * Provisions an environment with binaries that comes from installers of machines in the
+ * environment.
  *
  * @author Alexander Garagatyi
  */
-public class LabelsProvisioner implements ConfigurationProvisioner {
+public class LocalInstallersBinariesVolumeProvisioner implements ConfigurationProvisioner {
+  public static final String LOCAL_INSTALLERS_PROVISIONERS =
+      "infrastructure.docker.local_installers_provisioners";
+
+  private final Set<ConfigurationProvisioner> localInstallerProvisioners;
+
+  @Inject
+  public LocalInstallersBinariesVolumeProvisioner(
+      @Named(LOCAL_INSTALLERS_PROVISIONERS)
+          Set<ConfigurationProvisioner> localInstallerProvisioners) {
+    this.localInstallerProvisioners = localInstallerProvisioners;
+  }
+
   @Override
   public void provision(
       InternalEnvironment envConfig, DockerEnvironment internalEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
-    for (Map.Entry<String, InternalMachineConfig> entry : envConfig.getMachines().entrySet()) {
-      String name = entry.getKey();
-      DockerContainerConfig container = internalEnv.getContainers().get(name);
-      container
-          .getLabels()
-          .putAll(
-              Labels.newSerializer()
-                  .machineName(name)
-                  .runtimeId(identity)
-                  .servers(entry.getValue().getServers())
-                  .labels());
+    for (ConfigurationProvisioner infrastructureProvisioner : localInstallerProvisioners) {
+      infrastructureProvisioner.provision(envConfig, internalEnv, identity);
     }
   }
 }
