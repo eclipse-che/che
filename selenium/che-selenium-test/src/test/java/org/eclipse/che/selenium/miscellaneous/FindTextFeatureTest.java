@@ -33,6 +33,7 @@ import org.eclipse.che.selenium.pageobject.FindText;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
+import org.eclipse.che.selenium.pageobject.PanelSelector;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.openqa.selenium.Keys;
@@ -137,6 +138,7 @@ public class FindTextFeatureTest {
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private Consoles consoles;
+  @Inject private PanelSelector panelSelector;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -174,12 +176,15 @@ public class FindTextFeatureTest {
     projectExplorer.waitProjectExplorer();
     projectExplorer.selectItem(PROJECT_NAME);
     if (!consoles.processesMainAreaIsOpen()) {
-      consoles.clickOnProcessesTab();
+      panelSelector.selectPanelTypeFromPanelSelector(PanelSelector.PanelTypes.LEFT_BOTTOM);
     }
+    consoles.clickOnProcessesButton();
     terminal.waitTerminalTab();
     terminal.selectTerminalTab();
     createFileInTerminal(fileNameCreatedFromTerminal);
     WaitUtils.sleepQuietly(TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC);
+    projectExplorer.selectItem(
+        PROJECT_NAME); // TODO it is a workaround, see: https://github.com/eclipse/che/issues/6370,
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.FIND);
     findText.waitFindTextMainFormIsOpen();
     findText.typeTextIntoFindField("Filesystem");
@@ -237,8 +242,12 @@ public class FindTextFeatureTest {
     findText.clickOnSearchButtonMainForm();
     findText.waitFindInfoPanelIsOpen();
     findText.waitExpectedTextInFindInfoPanel(FIND_NOTHING);
-
-    findText.clickHideBtnFindInfoPanel();
+    consoles.clickOnProcessesButton();
+    findText.waitFindInfoPanelIsClosed();
+    findText.clickFindTextButton();
+    findText.waitFindInfoPanelIsOpen();
+    consoles.closeProcessesArea();
+    findText.waitFindInfoPanelIsClosed();
     projectExplorer.selectItem(PROJECT_NAME);
     findText.launchFindFormByKeyboard();
     findText.waitFindTextMainFormIsOpen();
@@ -264,8 +273,9 @@ public class FindTextFeatureTest {
     editor.waitActiveTabFileName("guess_num.jsp");
     editor.waitTextIntoEditor("String");
     Assert.assertEquals(editor.getPositionOfLine(), 25);
-    findText.clickHideBtnFindInfoPanel();
-    findText.clickFindTab();
+    consoles.closeProcessesArea();
+    findText.waitFindInfoPanelIsClosed();
+    panelSelector.selectPanelTypeFromPanelSelector(PanelSelector.PanelTypes.LEFT_BOTTOM);
     findText.waitFindInfoPanelIsOpen();
     findText.selectItemInFindInfoPanel(
         pathToQuessNumFile,
