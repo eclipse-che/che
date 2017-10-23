@@ -205,7 +205,7 @@ public class TestGitHubServiceClient {
     return "Basic " + base64;
   }
 
-  public String getUserPublicEmail(String username, String password) throws Exception {
+  public String getUserPublicPrimaryEmail(String username, String password) throws Exception {
     String url = "https://api.github.com/user/public_emails";
     HttpJsonResponse response =
         requestFactory
