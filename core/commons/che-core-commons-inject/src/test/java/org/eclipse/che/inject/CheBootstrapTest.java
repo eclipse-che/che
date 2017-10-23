@@ -15,7 +15,7 @@ import static java.util.Collections.emptyEnumeration;
 import static org.eclipse.che.commons.test.SystemPropertiesHelper.overrideSystemProperties;
 import static org.eclipse.che.inject.CheBootstrap.CHE_LOCAL_CONF_DIR;
 import static org.eclipse.che.inject.CheBootstrap.PROPERTIES_ALIASES_CONFIG_FILE;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;

@@ -18,10 +18,10 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -73,7 +73,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -198,9 +197,12 @@ public class EditorPartStackPresenterTest {
   public void constructorShouldBeVerified() {
     verify(view, times(2)).setDelegate(presenter);
     verify(view).addPaneMenuButton(editorPaneMenu);
-    verify(editorPaneMenuItemFactory, times(4)).createMenuItem(Matchers.<BaseAction>anyObject());
-    verify(editorPaneMenu).addItem(Matchers.<PaneMenuActionItemWidget>anyObject(), eq(true));
-    verify(editorPaneMenu, times(3)).addItem(Matchers.<PaneMenuActionItemWidget>anyObject());
+    verify(editorPaneMenuItemFactory, times(4))
+        .createMenuItem(org.mockito.ArgumentMatchers.<BaseAction>anyObject());
+    verify(editorPaneMenu)
+        .addItem(org.mockito.ArgumentMatchers.<PaneMenuActionItemWidget>anyObject(), eq(true));
+    verify(editorPaneMenu, times(3))
+        .addItem(org.mockito.ArgumentMatchers.<PaneMenuActionItemWidget>anyObject());
   }
 
   @Test
@@ -214,7 +216,8 @@ public class EditorPartStackPresenterTest {
   public void partShouldBeAdded() {
     presenter.addPart(partPresenter1);
 
-    verify(partPresenter1, times(2)).addPropertyListener(Matchers.<PropertyListener>anyObject());
+    verify(partPresenter1, times(2))
+        .addPropertyListener(org.mockito.ArgumentMatchers.<PropertyListener>anyObject());
 
     verify(tabItemFactory).createEditorPartButton(partPresenter1, presenter);
 

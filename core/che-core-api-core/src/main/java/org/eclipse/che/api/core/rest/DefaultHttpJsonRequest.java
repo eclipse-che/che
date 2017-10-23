@@ -237,7 +237,9 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
           str = CharStreams.toString(reader);
         }
         final String contentType = conn.getContentType();
-        if (contentType != null && contentType.startsWith(MediaType.APPLICATION_JSON)) {
+        if (contentType != null
+            && (contentType.startsWith(MediaType.APPLICATION_JSON)
+                || contentType.startsWith("application/vnd.api+json"))) {
           final ServiceError serviceError =
               DtoFactory.getInstance().createDtoFromJson(str, ServiceError.class);
           if (serviceError.getMessage() != null) {
@@ -266,7 +268,8 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
       final String contentType = conn.getContentType();
       if (responseCode != HttpURLConnection.HTTP_NO_CONTENT
           && contentType != null
-          && !contentType.startsWith(MediaType.APPLICATION_JSON)) {
+          && !(contentType.startsWith(MediaType.APPLICATION_JSON)
+              || contentType.startsWith("application/vnd.api+json"))) {
         throw new IOException(conn.getResponseMessage());
       }
 

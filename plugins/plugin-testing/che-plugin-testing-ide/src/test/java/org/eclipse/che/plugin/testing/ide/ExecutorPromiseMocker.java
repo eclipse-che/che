@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.plugin.testing.ide;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
@@ -19,7 +19,6 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Executor;
 import org.eclipse.che.api.promises.client.js.RejectFunction;
 import org.eclipse.che.api.promises.client.js.ResolveFunction;
-import org.mockito.Matchers;
 
 /**
  * Utility class that allows mocking a Che Promise from an Executor.ExecutorBody.
@@ -46,7 +45,7 @@ public class ExecutorPromiseMocker<T> extends PromiseMocker<T> {
                   return null;
                 }))
         .when(resolveFunction)
-        .apply(Matchers.<T>any());
+        .apply(org.mockito.ArgumentMatchers.<T>any());
 
     doAnswer(
             new FunctionAnswer<PromiseError, Void>(
