@@ -99,7 +99,10 @@ public class GitJsonRpcMessenger implements EventSubscriber<GitEvent> {
     }
 
     StatusChangedEventDto statusChangeEventDto =
-        newDto(StatusChangedEventDto.class).withStatus(status).withModifiedFiles(modifiedFiles);
+        newDto(StatusChangedEventDto.class)
+            .withProjectName(event.getProjectName())
+            .withStatus(status)
+            .withModifiedFiles(modifiedFiles);
     for (String endpointId : endpointIds) {
       transmitter
           .newRequest()

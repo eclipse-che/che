@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.git.shared.FileChangedEventDto;
@@ -30,6 +31,10 @@ import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
+import org.eclipse.che.ide.api.resources.ResourceChangedEvent.ResourceChangedHandler;
+import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.ext.git.client.GitEventSubscribable;
 import org.eclipse.che.ide.ext.git.client.GitEventsSubscriber;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
@@ -38,6 +43,7 @@ import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
 import org.eclipse.che.ide.ext.git.client.compare.MutableAlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelPresenter;
+import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
@@ -47,14 +53,16 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  */
 @Singleton
 public class GitPanelPresenter extends BasePresenter
-    implements GitPanelView.ActionDelegate, GitEventsSubscriber {
+    implements GitPanelView.ActionDelegate, GitEventsSubscriber, ResourceChangedHandler {
 
+  private static final String VCS_GIT = "git";
   private static final String REVISION = "HEAD";
 
   private final GitPanelView view;
   private final GitServiceClient service;
   private final ChangesPanelPresenter changesPanelPresenter;
   private final AppContext appContext;
+  private final EventBus eventBus;
   private final NotificationManager notificationManager;
   private final GitEventSubscribable subscribeToGitEvents;
   private final GitResources gitResources;
@@ -71,6 +79,7 @@ public class GitPanelPresenter extends BasePresenter
       ChangesPanelPresenter changesPanelPresenter,
       WorkspaceAgent workspaceAgent,
       AppContext appContext,
+      EventBus eventBus,
       GitEventSubscribable subscribeToGitEvents,
       NotificationManager notificationManager,
       GitResources gitResources,
@@ -79,6 +88,7 @@ public class GitPanelPresenter extends BasePresenter
     this.service = service;
     this.changesPanelPresenter = changesPanelPresenter;
     this.appContext = appContext;
+    this.eventBus = eventBus;
     this.subscribeToGitEvents = subscribeToGitEvents;
     this.notificationManager = notificationManager;
     this.gitResources = gitResources;
@@ -94,12 +104,19 @@ public class GitPanelPresenter extends BasePresenter
     this.initialized = false;
   }
 
+  private void registerEventHandlers() {
+    eventBus.addHandler(ResourceChangedEvent.getType(), this);
+    // eventBus.addHandler(GitRepositoryInitializedEvent.class, );
+
+    subscribeToGitEvents.addSubscriber(this);
+  }
+
   /** Invoked each time when panel is activated. */
   @Override
   public void onOpen() {
     if (!initialized) {
       loadPanelData();
-      subscribeToGitEvents.addSubscriber(this);
+      registerEventHandlers();
 
       initialized = true;
     }
@@ -110,21 +127,24 @@ public class GitPanelPresenter extends BasePresenter
     this.changes = new HashMap<>();
 
     for (Project project : appContext.getProjects()) {
-      String projectName = project.getLocation().toString().substring(1);
-      view.addRepository(projectName);
-      service
-          .diff(project.getLocation(), null, NAME_STATUS, false, 0, REVISION, false)
-          .then(
-              diff -> {
-                MutableAlteredFiles alteredFiles = new MutableAlteredFiles(project, diff);
-                changes.put(projectName, alteredFiles);
-                view.updateRepositoryChanges(projectName, alteredFiles.getFilesQuantity());
-              })
-          .catchError(
-              arg -> {
-                notificationManager.notify(locale.diffFailed(), FAIL, NOT_EMERGE_MODE);
-              });
+      view.addRepository(project.getName());
+      reloadRepositoryData(project);
     }
+  }
+
+  private void reloadRepositoryData(Project project) {
+    service
+        .diff(project.getLocation(), null, NAME_STATUS, false, 0, REVISION, false)
+        .then(
+            diff -> {
+              MutableAlteredFiles alteredFiles = new MutableAlteredFiles(project, diff);
+              changes.put(project.getName(), alteredFiles);
+              view.updateRepositoryChanges(project.getName(), alteredFiles.getFilesQuantity());
+            })
+        .catchError(
+            arg -> {
+              notificationManager.notify(locale.diffFailed(), FAIL, NOT_EMERGE_MODE);
+            });
   }
 
   @Override
@@ -191,14 +211,33 @@ public class GitPanelPresenter extends BasePresenter
     }
   }
 
+  /** Handles creation and deletion of projects. */
+  @Override
+  public void onResourceChanged(ResourceChangedEvent event) {
+    Resource resource = event.getDelta().getResource();
+    if (resource.isProject() && resource.getLocation().segmentCount() == 1) {
+      // resource is a root project
+      if (event.getDelta().getKind() == ResourceDelta.ADDED) {
+        if (projectUnderGit(resource.asProject())) {
+          changes.put(resource.getName(), new MutableAlteredFiles(resource.asProject()));
+          view.addRepository(resource.getName());
+        }
+      } else if (event.getDelta().getKind() == ResourceDelta.REMOVED) {
+        changes.remove(resource.getName());
+        view.removeRepository(resource.getName());
+      }
+    }
+  }
+
   @Override
   public void onGitStatusChanged(String endpointId, StatusChangedEventDto dto) {
-    // TODO handle project name
+    updateRepositoryData(dto.getProjectName());
   }
 
   @Override
   public void onGitCheckout(String endpointId, GitCheckoutEventDto dto) {
-    // TODO update current branch in the panel
+    // this update is needed to correctly handle checkout with force
+    updateRepositoryData(dto.getProjectName());
   }
 
   /** Removes first segment from given path. */
@@ -228,5 +267,26 @@ public class GitPanelPresenter extends BasePresenter
 
   private void updateChangedFiles(AlteredFiles alteredFiles) {
     changesPanelPresenter.show(alteredFiles);
+  }
+
+  /**
+   * Reloads information about specified project and updates the panel.
+   * Does nothing if project is not under git or doesn't exist.
+   */
+  private void updateRepositoryData(String projectName) {
+    for (Project project : appContext.getProjects()) {
+      if (projectName.equals(project.getName())) {
+        if (projectUnderGit(project)) {
+          reloadRepositoryData(project);
+        } else {
+          break;
+        }
+      }
+    }
+  }
+
+  /** Returns true if given project is under git version control system, false otherwise. */
+  private boolean projectUnderGit(Project project) {
+    return VCS_GIT.equals(project.getAttribute("vcs.provider.name"));
   }
 }

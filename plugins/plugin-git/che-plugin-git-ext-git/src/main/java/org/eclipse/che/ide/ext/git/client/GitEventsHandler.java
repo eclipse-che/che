@@ -20,8 +20,9 @@ import org.eclipse.che.api.git.shared.StatusChangedEventDto;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
 
 /**
- * Receives git events from server side. To avoid a risk of IDE slow down this handler bypasses
- * event bus because of heavy load.
+ * Receives git events from server side.
+ *
+ * <p>To avoid a risk of IDE slow down this handler bypasses event bus because of heavy load.
  *
  * @author Igor Vinokur
  * @author Mykola Morhun

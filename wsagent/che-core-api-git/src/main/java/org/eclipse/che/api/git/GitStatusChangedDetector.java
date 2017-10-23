@@ -146,7 +146,10 @@ public class GitStatusChangedDetector {
         }
 
         StatusChangedEventDto statusChangeEventDto =
-            newDto(StatusChangedEventDto.class).withStatus(status).withModifiedFiles(modifiedFiles);
+            newDto(StatusChangedEventDto.class)
+                .withProjectName(connection.getWorkingDir().getName())
+                .withStatus(status)
+                .withModifiedFiles(modifiedFiles);
         transmitter
             .newRequest()
             .endpointId(id)
