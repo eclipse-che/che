@@ -12,7 +12,7 @@ package org.eclipse.che.api.project.server.type;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static java.lang.String.format;
-import static org.eclipse.che.api.project.server.type.ProjectTypeResolver.newDefaultResolution;
+import static java.util.Collections.emptyMap;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +38,12 @@ public class SimpleProjectTypeResolver implements ProjectTypeResolver {
   public ProjectTypeResolution resolve(ProjectType type, String wsPath) {
     RegisteredProject project = projectManager.getOrNull(wsPath);
     if (project == null) {
-      return newDefaultResolution(type.getId(), newHashMap(), false);
+      return new ProjectTypeResolution(type.getId(), newHashMap()) {
+        @Override
+        public boolean matched() {
+          return false;
+        }
+      };
     }
 
     Map<String, Value> matchAttrs = new HashMap<>();
@@ -65,7 +70,12 @@ public class SimpleProjectTypeResolver implements ProjectTypeResolver {
                   errorMessage.isEmpty()
                       ? format("Value for required attribute %s is not initialized", name)
                       : errorMessage;
-              return newDefaultResolution(type.getId(), errorMessage, false);
+              return new ProjectTypeResolution(type.getId(), emptyMap(), errorMessage) {
+                @Override
+                public boolean matched() {
+                  return false;
+                }
+              };
             }
           } else {
             // add one more matched attribute
@@ -75,6 +85,11 @@ public class SimpleProjectTypeResolver implements ProjectTypeResolver {
       }
     }
 
-    return newDefaultResolution(type.getId(), matchAttrs, true);
+    return new ProjectTypeResolution(type.getId(), matchAttrs) {
+      @Override
+      public boolean matched() {
+        return !matchAttrs.isEmpty();
+      }
+    };
   }
 }

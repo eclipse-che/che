@@ -283,9 +283,10 @@ public class ProjectServiceApi {
 
     URI location =
         serviceContext
-            .getServiceUriBuilder()
+            .getBaseUriBuilder()
             .clone()
-            .path(getClass(), "getFile")
+            .path(ProjectService.class)
+            .path(ProjectService.class, "getFile")
             .build(new String[] {wsPath.substring(1)}, false);
 
     ItemReference asDto = fsDtoConverter.asDto(wsPath);
@@ -302,9 +303,10 @@ public class ProjectServiceApi {
 
     final URI location =
         serviceContext
-            .getServiceUriBuilder()
+            .getBaseUriBuilder()
             .clone()
-            .path(getClass(), "getChildren")
+            .path(ProjectService.class)
+            .path(ProjectService.class, "getChildren")
             .build(new String[] {wsPath.substring(1)}, false);
 
     String project =
@@ -391,10 +393,14 @@ public class ProjectServiceApi {
       fsManager.copy(srcWsPath, dstWsPath, overwrite, true);
     }
 
+    String method = fsManager.existsAsFile(srcWsPath) ? "getFile" : "getChildren";
+
     URI location =
         serviceContext
-            .getServiceUriBuilder()
-            .path(getClass(), fsManager.existsAsFile(srcWsPath) ? "getFile" : "getChildren")
+            .getBaseUriBuilder()
+            .clone()
+            .path(ProjectService.class)
+            .path(ProjectService.class, method)
             .build(new String[] {dstWsPath.substring(1)}, false);
 
     return Response.created(location).build();
@@ -431,10 +437,13 @@ public class ProjectServiceApi {
       fsManager.move(wsPath, dstWsPath, overwrite, true);
     }
 
+    String method = fsManager.existsAsFile(wsPath) ? "getFile" : "getChildren";
     final URI location =
         serviceContext
-            .getServiceUriBuilder()
-            .path(getClass(), fsManager.existsAsFile(wsPath) ? "getFile" : "getChildren")
+            .getBaseUriBuilder()
+            .clone()
+            .path(ProjectService.class)
+            .path(ProjectService.class, method)
             .build(new String[] {dstWsPath.substring(1)}, false);
 
     return Response.created(location).build();
@@ -481,6 +490,7 @@ public class ProjectServiceApi {
             serviceContext
                 .getBaseUriBuilder()
                 .clone()
+                .path(ProjectService.class)
                 .path(ProjectService.class, "getChildren")
                 .build(new String[] {wsPath.substring(1)}, false))
         .build();

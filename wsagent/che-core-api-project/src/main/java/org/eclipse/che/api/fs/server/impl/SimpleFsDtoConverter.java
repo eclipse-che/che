@@ -10,10 +10,10 @@
  */
 package org.eclipse.che.api.fs.server.impl;
 
+import static org.eclipse.che.api.fs.server.WsPathUtils.isRoot;
+import static org.eclipse.che.api.fs.server.WsPathUtils.nameOf;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
-import java.io.File;
-import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -23,7 +23,6 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.fs.server.FsDtoConverter;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 
@@ -32,37 +31,38 @@ public class SimpleFsDtoConverter implements FsDtoConverter {
 
   private final ProjectManager projectManager;
   private final FsManager fsManager;
-  private final FsOperations fsOperations;
-  private final PathTransformer pathTransformer;
 
   @Inject
-  public SimpleFsDtoConverter(
-      ProjectManager projectManager,
-      FsManager fsManager,
-      FsOperations fsOperations,
-      PathTransformer pathTransformer) {
+  public SimpleFsDtoConverter(ProjectManager projectManager, FsManager fsManager) {
     this.projectManager = projectManager;
     this.fsManager = fsManager;
-    this.fsOperations = fsOperations;
-    this.pathTransformer = pathTransformer;
   }
 
   @Override
   public ItemReference asDto(String wsPath) throws NotFoundException {
-    Path fsPath = pathTransformer.transform(wsPath);
-
-    boolean exists = fsOperations.exists(fsPath);
-    if (!exists) {
+    if (!fsManager.exists(wsPath)) {
       throw new NotFoundException("Can't find item " + wsPath);
     }
 
-    File file = fsOperations.toIoFile(fsPath);
-    String name = file.getName();
-    String projectPath =
-        projectManager
-            .getClosest(wsPath)
-            .orElseThrow(() -> new NotFoundException("Can't find project for item " + wsPath))
-            .getPath();
+    String name = nameOf(wsPath);
+
+    Long length;
+    if (fsManager.isFile(wsPath)) {
+      length = fsManager.length(wsPath);
+    } else {
+      length = null;
+    }
+
+    String project;
+    if (isRoot(wsPath)) {
+      project = null;
+    } else {
+      project =
+          projectManager
+              .getClosest(wsPath)
+              .orElseThrow(() -> new NotFoundException("Can't find project for item " + wsPath))
+              .getPath();
+    }
 
     String type;
     if (projectManager.isRegistered(wsPath)) {
@@ -73,18 +73,14 @@ public class SimpleFsDtoConverter implements FsDtoConverter {
       type = "file";
     }
 
-    long lastModified = fsOperations.lastModified(fsPath);
     ItemReference itemReference =
-        newDto(ItemReference.class)
-            .withName(name)
-            .withPath(wsPath)
-            .withProject(projectPath)
-            .withType(type)
-            .withModified(lastModified);
+        newDto(ItemReference.class).withName(name).withPath(wsPath).withType(type);
 
-    boolean isFile = fsOperations.isFile(fsPath);
-    if (isFile) {
-      long length = fsOperations.length(fsPath);
+    if (project != null) {
+      itemReference.withProject(project);
+    }
+
+    if (length != null) {
       itemReference.withContentLength(length);
     }
 
