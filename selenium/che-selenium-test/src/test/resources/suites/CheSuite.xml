@@ -53,6 +53,7 @@
                     <exclude name="renameNameWorkspaceTest"/>
                 </methods>
             </class>
+            <class name="org.eclipse.che.selenium.dashboard.WorkspaceDetailsTest"/>
             <class name="org.eclipse.che.selenium.debugger.ChangeVariableWithEvaluatingTest"/>
             <class name="org.eclipse.che.selenium.debugger.CheckBreakPointStateTest"/>
             <class name="org.eclipse.che.selenium.debugger.CppProjectDebuggingTest">
@@ -117,7 +118,7 @@
             <class name="org.eclipse.che.selenium.editor.autocomplete.QuickFixAndCodeAssistantFeaturesTest"/>
             <class name="org.eclipse.che.selenium.editor.autocomplete.ShowHintsCommandTest"/>
             <class name="org.eclipse.che.selenium.editor.CheckReplaceFeatureInEditorTest"/>
-            <class name="org.eclipse.che.selenium.editor.CheckRestoringOfSplitEditor">
+            <class name="org.eclipse.che.selenium.editor.CheckRestoringSplitEditorTest">
                 <methods>
                     <exclude name="checkRestoringStateSplittedEditor"/>
                 </methods>
@@ -158,7 +159,6 @@
                     <exclude name="checkFactoryAcceptingWithSincePolicy"/>
                 </methods>
             </class>
-            <class name="org.eclipse.che.selenium.factory.CheckFactoryWithSvnCVSTest"/>
             <class name="org.eclipse.che.selenium.factory.CheckFactoryWithUntilPolicyTest"/>
             <class name="org.eclipse.che.selenium.factory.CheckOpenFileFeatureTest"/>
             <class name="org.eclipse.che.selenium.factory.CheckRunCommandFeatureTest"/>

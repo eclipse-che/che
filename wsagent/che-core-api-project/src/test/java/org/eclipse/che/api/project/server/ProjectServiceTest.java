@@ -23,7 +23,7 @@ import static org.eclipse.che.commons.lang.ws.rs.ExtMediaType.APPLICATION_ZIP;
 import static org.everrest.core.ApplicationContext.anApplicationContext;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;

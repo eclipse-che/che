@@ -11,7 +11,7 @@
 package org.eclipse.che.multiuser.resource.api.free;
 
 import static java.util.Collections.singletonList;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 
 import java.util.Arrays;
 import org.eclipse.che.api.core.BadRequestException;

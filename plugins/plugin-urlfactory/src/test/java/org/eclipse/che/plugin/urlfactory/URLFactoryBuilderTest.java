@@ -17,7 +17,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.plugin.urlfactory.URLFactoryBuilder.DEFAULT_DOCKER_IMAGE;
 import static org.eclipse.che.plugin.urlfactory.URLFactoryBuilder.MACHINE_NAME;
 import static org.eclipse.che.plugin.urlfactory.URLFactoryBuilder.MEMORY_LIMIT_BYTES;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;

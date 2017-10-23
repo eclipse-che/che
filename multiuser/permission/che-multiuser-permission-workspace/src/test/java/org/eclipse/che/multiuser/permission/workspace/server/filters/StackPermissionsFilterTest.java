@@ -19,11 +19,11 @@ import static org.eclipse.che.multiuser.permission.workspace.server.stack.StackD
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -58,7 +58,6 @@ import org.everrest.core.GenericContainerRequest;
 import org.everrest.core.RequestFilter;
 import org.everrest.core.resource.GenericResourceMethod;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.Assert;
@@ -124,7 +123,7 @@ public class StackPermissionsFilterTest {
 
     assertEquals(response.getStatusCode(), 204);
     verify(service).getStack("stack123");
-    verify(subject).hasPermission(eq("stack"), eq("stack123"), Matchers.eq(READ));
+    verify(subject).hasPermission(eq("stack"), eq("stack123"), eq(READ));
   }
 
   @Test
@@ -141,7 +140,7 @@ public class StackPermissionsFilterTest {
 
     assertEquals(response.getStatusCode(), 204);
     verify(service).updateStack(any(), eq("stack123"));
-    verify(subject).hasPermission(eq("stack"), eq("stack123"), Matchers.eq(UPDATE));
+    verify(subject).hasPermission(eq("stack"), eq("stack123"), eq(UPDATE));
   }
 
   @Test
@@ -158,7 +157,7 @@ public class StackPermissionsFilterTest {
 
     assertEquals(response.getStatusCode(), 204);
     verify(service).removeStack(eq("stack123"));
-    verify(subject).hasPermission(eq("stack"), eq("stack123"), Matchers.eq(DELETE));
+    verify(subject).hasPermission(eq("stack"), eq("stack123"), eq(DELETE));
   }
 
   @Test
@@ -190,7 +189,7 @@ public class StackPermissionsFilterTest {
 
     assertEquals(response.getStatusCode(), 204);
     verify(service).getIcon(eq("stack123"));
-    verify(subject).hasPermission(eq("stack"), eq("stack123"), Matchers.eq(READ));
+    verify(subject).hasPermission(eq("stack"), eq("stack123"), eq(READ));
   }
 
   @Test
@@ -208,7 +207,7 @@ public class StackPermissionsFilterTest {
 
     assertEquals(response.getStatusCode(), 204);
     verify(service).uploadIcon(any(), eq("stack123"));
-    verify(subject).hasPermission(eq("stack"), eq("stack123"), Matchers.eq(UPDATE));
+    verify(subject).hasPermission(eq("stack"), eq("stack123"), eq(UPDATE));
   }
 
   @Test
@@ -245,7 +244,7 @@ public class StackPermissionsFilterTest {
 
     assertEquals(response.getStatusCode(), 204);
     verify(service).removeIcon(eq("stack123"));
-    verify(subject).hasPermission(eq("stack"), eq("stack123"), Matchers.eq(UPDATE));
+    verify(subject).hasPermission(eq("stack"), eq("stack123"), eq(UPDATE));
   }
 
   @Test(
@@ -298,8 +297,7 @@ public class StackPermissionsFilterTest {
 
     assertEquals(response.getStatusCode() / 100, 2);
     verify(subject)
-        .hasPermission(
-            eq(SystemDomain.DOMAIN_ID), eq(null), Matchers.eq(SystemDomain.MANAGE_SYSTEM_ACTION));
+        .hasPermission(eq(SystemDomain.DOMAIN_ID), eq(null), eq(SystemDomain.MANAGE_SYSTEM_ACTION));
   }
 
   @Test(dataProvider = "coveredPaths")
@@ -320,8 +318,7 @@ public class StackPermissionsFilterTest {
 
     assertEquals(response.getStatusCode(), 403);
     verify(subject)
-        .hasPermission(
-            eq(SystemDomain.DOMAIN_ID), eq(null), Matchers.eq(SystemDomain.MANAGE_SYSTEM_ACTION));
+        .hasPermission(eq(SystemDomain.DOMAIN_ID), eq(null), eq(SystemDomain.MANAGE_SYSTEM_ACTION));
   }
 
   @DataProvider(name = "coveredPaths")

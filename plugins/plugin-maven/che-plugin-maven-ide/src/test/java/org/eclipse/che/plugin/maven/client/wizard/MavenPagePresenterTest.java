@@ -12,8 +12,8 @@ package org.eclipse.che.plugin.maven.client.wizard;
 
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.UPDATE;
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar.WIZARD_MODE_KEY;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,9 +39,8 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /** @author Valeriy Svydenko */
 @RunWith(MockitoJUnitRunner.class)
@@ -81,7 +80,8 @@ public class MavenPagePresenterTest {
     when(workspaceRoot.getContainer(TEXT)).thenReturn(containerPromise);
     when(workspaceRoot.estimate(MavenAttributes.MAVEN_ID)).thenReturn(sourceEstimationPromise);
 
-    when(containerPromise.then(Matchers.<Operation<Optional<Container>>>anyObject()))
+    when(containerPromise.then(
+            org.mockito.ArgumentMatchers.<Operation<Optional<Container>>>anyObject()))
         .thenReturn(containerPromise);
   }
 
@@ -101,9 +101,11 @@ public class MavenPagePresenterTest {
     when(localization.mavenPageErrorDialogTitle()).thenReturn(dialogTitle);
     when(dialogFactory.createMessageDialog(anyString(), anyString(), anyObject()))
         .thenReturn(messageDialog);
-    when(sourceEstimationPromise.then(Matchers.<Operation<SourceEstimation>>anyObject()))
+    when(sourceEstimationPromise.then(
+            org.mockito.ArgumentMatchers.<Operation<SourceEstimation>>anyObject()))
         .thenReturn(sourceEstimationPromise);
-    when(sourceEstimationPromise.catchError(Matchers.<Operation<PromiseError>>anyObject()))
+    when(sourceEstimationPromise.catchError(
+            org.mockito.ArgumentMatchers.<Operation<PromiseError>>anyObject()))
         .thenReturn(sourceEstimationPromise);
 
     mavenPagePresenter.init(projectConfig);

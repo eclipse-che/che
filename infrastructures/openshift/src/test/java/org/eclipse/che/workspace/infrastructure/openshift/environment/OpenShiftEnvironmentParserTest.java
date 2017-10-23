@@ -18,7 +18,7 @@ import static org.eclipse.che.workspace.infrastructure.openshift.environment.Ope
 import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentParser.PVC_IGNORED_WARNING_MESSAGE;
 import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentParser.ROUTES_IGNORED_WARNING_MESSAGE;
 import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentParser.ROUTE_IGNORED_WARNING_CODE;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
