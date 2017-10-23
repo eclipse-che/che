@@ -108,7 +108,7 @@ public class ServersMapper {
         ports
             .entrySet()
             .stream()
-            .filter(entry -> entry.getValue().size() == 1)
+            .filter(entry -> entry.getValue() != null && entry.getValue().size() == 1)
             .map(entry -> toContainerPort(entry.getKey(), entry.getValue().get(0)))
             .toArray(ContainerPort[]::new),
         configs);

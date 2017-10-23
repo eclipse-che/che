@@ -18,8 +18,17 @@ import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
  * An entity that might additionally injected into machine and brings functionality.
  *
  * @author Anatoliy Bazko
+ * @author Alexander Garagatyi
  */
 public interface Installer {
+
+  /**
+   * Name of a property from {@link #getProperties()} that can contain environment variables that
+   * should be injected into machine.
+   *
+   * <p>Example: { "environment" : "envVar1=value1,envVar2=value2" }
+   */
+  String ENVIRONMENT_PROPERTY = "environment";
 
   /** Returns the id of the installer. */
   String getId();

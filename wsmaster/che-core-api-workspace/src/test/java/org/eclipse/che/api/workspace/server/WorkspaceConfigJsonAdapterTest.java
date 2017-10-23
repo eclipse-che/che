@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.api.workspace.server;
 
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -85,8 +86,8 @@ public class WorkspaceConfigJsonAdapterTest {
     assertTrue(
         devMachineObj.get("attributes").isJsonObject(), "dev machine attributes is json object");
     final JsonObject attributes = devMachineObj.getAsJsonObject("attributes");
-    assertTrue(attributes.has("memoryLimitBytes"), "has memory limit");
-    assertEquals(attributes.get("memoryLimitBytes").getAsString(), "2147483648");
+    assertTrue(attributes.has(MEMORY_LIMIT_ATTRIBUTE), "has memory limit");
+    assertEquals(attributes.get(MEMORY_LIMIT_ATTRIBUTE).getAsString(), "2147483648");
 
     // check environment recipe
     assertTrue(environmentObj.has("recipe"), "environment contains recipe");
