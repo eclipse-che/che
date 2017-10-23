@@ -19,7 +19,6 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestStacksConstants;
-import org.eclipse.che.selenium.core.constant.TestWorkspaceConstants;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.Consoles;
@@ -43,7 +42,7 @@ public class WorkspaceDetailsTest {
   private static final String WORKSPACE = NameGenerator.generate("java-mysql", 4);
   private static final String PROJECT_NAME = "web-java-petclinic";
 
-  private Map<String, Boolean> agents = new HashMap<>();
+  private Map<String, Boolean> installers = new HashMap<>();
   private Map<String, String> variables = new HashMap<>();
 
   @Inject private TestUser testUser;
@@ -124,36 +123,36 @@ public class WorkspaceDetailsTest {
   }
 
   @Test
-  public void workingWithAgents() {
-    dashboardWorkspace.selectTabInWorspaceMenu(TabNames.AGENTS);
+  public void workingWithInstallers() {
+    dashboardWorkspace.selectTabInWorspaceMenu(TabNames.INSTALLERS);
 
-    // check all needed agents in dev-machine exist
-    dashboardWorkspace.selectMachine("Workspace Agents", "dev-machine");
-    agents.forEach(
+    // check all needed installers in dev-machine exist
+    dashboardWorkspace.selectMachine("Workspace Installers", "dev-machine");
+    installers.forEach(
         (name, value) -> {
-          dashboardWorkspace.checkAgentExists(name);
+          dashboardWorkspace.checkInstallerExists(name);
         });
 
-    // switch all agents and save changes
-    agents.forEach(
+    // switch all installers and save changes
+    installers.forEach(
         (name, value) -> {
-          Assert.assertEquals(dashboardWorkspace.getAgentState(name), value);
-          dashboardWorkspace.switchAgentState(name);
+          Assert.assertEquals(dashboardWorkspace.getInstallerState(name), value);
+          dashboardWorkspace.switchInstallerState(name);
           WaitUtils.sleepQuietly(1);
         });
     clickOnSaveButton();
 
-    // switch all agents, save changes and check its states are as previous(by default for the
+    // switch all installers, save changes and check its states are as previous(by default for the
     // Java-MySql stack)
-    agents.forEach(
+    installers.forEach(
         (name, value) -> {
-          dashboardWorkspace.switchAgentState(name);
+          dashboardWorkspace.switchInstallerState(name);
           loader.waitOnClosed();
         });
     clickOnSaveButton();
-    agents.forEach(
+    installers.forEach(
         (name, value) -> {
-          Assert.assertEquals(dashboardWorkspace.getAgentState(name), value);
+          Assert.assertEquals(dashboardWorkspace.getInstallerState(name), value);
         });
   }
 
@@ -235,7 +234,6 @@ public class WorkspaceDetailsTest {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.waitFolderDefinedTypeOfFolderByPath(
         Template.WEB_JAVA_PETCLINIC.value(), PROJECT_FOLDER);
-    notificationsPopupPanel.waitPopUpPanelsIsClosed();
 
     // check that created machine exists in the Process Console tree
     consoles.waitProcessInProcessConsoleTree("machine");
@@ -243,18 +241,18 @@ public class WorkspaceDetailsTest {
   }
 
   private void createMaps() {
-    agents.put("C# language server", false);
-    agents.put("Exec", true);
-    agents.put("File sync", false);
-    agents.put("Git credentials", false);
-    agents.put("JSON language server", false);
-    agents.put("PHP language server", false);
-    agents.put("Python language server", false);
-    agents.put("SSH", true);
-    agents.put("Terminal", true);
-    agents.put("TypeScript language server", false);
-    agents.put("Workspace API", true);
-    agents.put("Yaml language server", false);
+    installers.put("C# language server", false);
+    installers.put("Exec", true);
+    installers.put("File sync", false);
+    installers.put("Git credentials", false);
+    installers.put("JSON language server", false);
+    installers.put("PHP language server", false);
+    installers.put("Python language server", false);
+    installers.put("SSH", true);
+    installers.put("Terminal", true);
+    installers.put("TypeScript language server", false);
+    installers.put("Workspace API", true);
+    installers.put("Yaml language server", false);
 
     variables.put("MYSQL_DATABASE", "petclinic");
     variables.put("MYSQL_PASSWORD", "password");
@@ -284,8 +282,6 @@ public class WorkspaceDetailsTest {
     seleniumWebDriver.switchFromDashboardIframeToIde(60);
     loader.waitOnClosed();
     projectExplorer.waitProjectExplorer();
-    notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed(
-        TestWorkspaceConstants.RUNNING_WORKSPACE_MESS);
 
     dashboard.open();
     dashboard.waitDashboardToolbarTitle();
