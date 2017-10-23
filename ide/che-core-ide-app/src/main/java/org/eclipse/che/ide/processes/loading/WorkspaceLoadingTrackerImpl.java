@@ -186,7 +186,8 @@ public class WorkspaceLoadingTrackerImpl
   private void handleDockerOutput(Image machine, String text) {
     try {
       if (dockerPullingStarted(machine, text)) {
-        // [DOCKER] sha256:40a6dd3c1f3af152d834e66fdf1dbca722dbc8ab4e98e157251c5179e8a6aa44: Pulling from docker.io/eclipse/ubuntu_jdk8
+        // [DOCKER] sha256:40a6dd3c1f3af152d834e66fdf1dbca722dbc8ab4e98e157251c5179e8a6aa44: Pulling
+        // from docker.io/eclipse/ubuntu_jdk8
         // Containing image SHA and image URL
         return;
 

@@ -18,7 +18,8 @@ import javax.inject.Inject;
 /** Represents loading mode widget for project explorer */
 public class ProjectExplorerPlaceholderWidget extends Composite {
 
-  interface ProjectExplorerPlaceholderWidgetUiBinder extends UiBinder<Widget, ProjectExplorerPlaceholderWidget> {}
+  interface ProjectExplorerPlaceholderWidgetUiBinder
+      extends UiBinder<Widget, ProjectExplorerPlaceholderWidget> {}
 
   @Inject
   public ProjectExplorerPlaceholderWidget(ProjectExplorerPlaceholderWidgetUiBinder uiBinder) {

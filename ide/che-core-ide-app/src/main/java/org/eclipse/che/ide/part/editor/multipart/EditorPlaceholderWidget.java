@@ -24,8 +24,7 @@ public class EditorPlaceholderWidget extends Composite {
 
   interface EditorPlaceholderWidgetUiBinder extends UiBinder<Widget, EditorPlaceholderWidget> {}
 
-  @UiField
-  DivElement lineNumbers;
+  @UiField DivElement lineNumbers;
 
   @Inject
   public EditorPlaceholderWidget(EditorPlaceholderWidgetUiBinder uiBinder) {
