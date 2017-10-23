@@ -61,7 +61,7 @@ public class FindText {
     String CANCEL_BUTTON = "search-cancel-button";
     String SEARCH_BUTTON = "search-button";
     String FIND_INFO_PANEL =
-        "//div[@id='gwt-debug-infoPanel']//div[@id='gwt-debug-partStackContent']";
+        "//div[@id='gwt-debug-find-info-panel']//div[@id='gwt-debug-result-search-tree']";
     String FIND_TAB = "gwt-debug-partButton-Find";
     String HIDE_FIND_PANEL = "//div[@id='gwt-debug-infoPanel']//div[@id='gwt-debug-hideButton']";
     String ITEM_FIND_PANEL =
@@ -78,7 +78,7 @@ public class FindText {
   @FindBy(xpath = Locators.FILE_MASK_CHECKBOX_INP)
   WebElement fileMaskCheckBox;
 
-  @FindBy(id = Locators.FIND_INFO_PANEL)
+  @FindBy(xpath = Locators.FIND_INFO_PANEL)
   WebElement findInfoPanel;
 
   @FindBy(id = Locators.FIND_TAB)
@@ -355,7 +355,7 @@ public class FindText {
   /** wait the 'Find' info panel is open */
   public void waitFindInfoPanelIsOpen() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.id(Locators.FIND_INFO_PANEL)));
+        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.FIND_INFO_PANEL)));
   }
 
   /** press on the 'Hide' button on the 'Find' info panel */
@@ -369,7 +369,7 @@ public class FindText {
   /** wait the 'Find' info panel is closed */
   public void waitFindInfoPanelIsClosed() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.FIND_INFO_PANEL)));
+        .until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(Locators.FIND_INFO_PANEL)));
   }
 
   /** click on the find tab */
