@@ -404,8 +404,9 @@ if [ "${CHE_FABRIC8_MULTITENANT}" == "true" ]; then
           - name: \"CHE_WORKSPACE_CHE__SERVER__ENDPOINT\"
             value: \"\"
 $MULTI_USER_REPLACEMENT_STRING"
+
   MULTITENANT_CUSTOM_STRATEGY_REPLACEMENT="s/    che-server-evaluation-strategy: .*/    che-server-evaluation-strategy: always-external-custom/"
-  MULTITENANT_CUSTOM_TEMPLATE_REPLACEMENT="s/    che.docker.server_evaluation_strategy.custom.template: .*/    che.docker.server_evaluation_strategy.custom.template: <serverName>-<if(isDevMachine)><workspaceIdWithoutPrefix><else><machineName><endif>-<if(workspacesRoutingSuffix)><user>-che.<workspacesRoutingSuffix><else><externalAddress><endif>/"
+  MULTITENANT_CUSTOM_TEMPLATE_REPLACEMENT="s/    che.docker.server_evaluation_strategy.custom.template: .*/    che.docker.server_evaluation_strategy.custom.template: <serverName>-<if(isDevMachine)><workspaceIdWithoutPrefix><else><machineName><endif>-<if(workspacesRoutingSuffix)><workspacesRoutingSuffix><else><externalAddress><endif>/"
   MULTITENANT_IDLING_REPLACEMENT="s/    che-server-timeout-ms: .*/    che-server-timeout-ms: '0'/"
 fi
 
