@@ -11,7 +11,7 @@
       Red Hat, Inc. - initial API and implementation
 
 -->
-<Context allowCasualMultipartParsing="true" sessionCookiePath="/api">
+<Context>
 
   <JarScanner>
     <JarScanFilter
@@ -20,7 +20,4 @@
       pluggabilityScan=""></JarScanFilter>
   </JarScanner>
 
-  <Resource name="jdbc/che" auth="Container"
-    type="javax.sql.DataSource"
-    factory="org.eclipse.che.core.db.h2.H2SQLJndiDataSourceFactory"/>
 </Context>

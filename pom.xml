@@ -1436,6 +1436,17 @@
             <url>https://maven.codenvycorp.com/content/repositories/codenvy-public-snapshots/</url>
         </pluginRepository>
     </pluginRepositories>
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.eclipse.che.core</groupId>
+                    <artifactId>che-core-dynamodule-maven-plugin</artifactId>
+                    <version>${che.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
     <profiles>
         <!-- Profile for building Che faster by skipping unit tests, license checks and other enforcement features -->
         <profile>
