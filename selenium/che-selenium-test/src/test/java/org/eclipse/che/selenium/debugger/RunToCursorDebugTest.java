@@ -10,15 +10,14 @@
  */
 package org.eclipse.che.selenium.debugger;
 
-import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.CUSTOM;
-import static org.eclipse.che.selenium.core.project.ProjectTemplates.PLAIN_JAVA;
-
 import com.google.inject.Inject;
 import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestBuildConstants;
+import org.eclipse.che.selenium.core.constant.TestCommandsConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.*;
 import org.eclipse.che.selenium.pageobject.debug.DebugPanel;
@@ -55,14 +54,14 @@ public class RunToCursorDebugTest {
         Paths.get(
             getClass().getResource("/projects/plugins/DebuggerPlugin/java-run-to-cursor").toURI()),
         PROJECT,
-        PLAIN_JAVA);
+        ProjectTemplates.CONSOLE_JAVA_SIMPLE);
 
     testCommandServiceClient.createCommand(
         "mvn -f ${current.project.path} clean install && "
             + "java -jar -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y "
             + "${current.project.path}/target/*.jar",
         BUILD_AND_DEBUG_COMMAND_NAME,
-        CUSTOM,
+        TestCommandsConstants.MAVEN,
         ws.getId());
 
     // open IDE

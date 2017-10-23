@@ -33,7 +33,7 @@ public interface BreakpointRenderer {
 
   /**
    * Adds a breakpoint mark of the given breakpoint. If the mark exists then it will be changed
-   * depending on {@code active} state and {@link Breakpoint#getBreakpointConfiguration()}.
+   * depending on {@code active} state and {@link Breakpoint#getCondition()}.
    *
    * @param breakpoint the given breakpoint
    * @param active indicates if breakpoint is active or isn't

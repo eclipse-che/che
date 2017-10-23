@@ -63,7 +63,7 @@ public class DebuggerExtension {
   public static final String STEP_OVER_ID = "stepOver";
   public static final String STEP_OUT_ID = "stepOut";
   public static final String RESUME_EXECUTION_ID = "resumeExecution";
-  public static final String RUN_TO_LOCATION_ID = "runToCursor";
+  public static final String RUN_TO_CURSOR_ID = "runToCursor";
   public static final String SUSPEND_EXECUTION_ID = "suspendExecution";
   public static final String EVALUATE_EXPRESSION_ID = "evaluateExpression";
   public static final String CHANGE_VARIABLE_VALUE_ID = "changeVariableValue";
@@ -107,7 +107,7 @@ public class DebuggerExtension {
     actionManager.registerAction(STEP_INTO_ID, stepIntoAction);
     actionManager.registerAction(STEP_OVER_ID, stepOverAction);
     actionManager.registerAction(STEP_OUT_ID, stepOutAction);
-    actionManager.registerAction(RUN_TO_LOCATION_ID, runToCursorAction);
+    actionManager.registerAction(RUN_TO_CURSOR_ID, runToCursorAction);
     actionManager.registerAction(RESUME_EXECUTION_ID, resumeExecutionAction);
     actionManager.registerAction(SUSPEND_EXECUTION_ID, suspendAction);
     actionManager.registerAction(EVALUATE_EXPRESSION_ID, evaluateExpressionAction);
@@ -179,6 +179,9 @@ public class DebuggerExtension {
     keyBinding
         .getGlobal()
         .addKey(new KeyBuilder().charCode(KeyCodeMap.F9).build(), RESUME_EXECUTION_ID);
+    keyBinding
+            .getGlobal()
+            .addKey(new KeyBuilder().alt().charCode(KeyCodeMap.F9).build(), RUN_TO_CURSOR_ID);
     keyBinding
         .getGlobal()
         .addKey(new KeyBuilder().alt().charCode(KeyCodeMap.F8).build(), EVALUATE_EXPRESSION_ID);

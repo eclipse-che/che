@@ -27,7 +27,6 @@ import org.eclipse.che.api.debug.shared.dto.ThreadStateDto;
 import org.eclipse.che.api.debug.shared.dto.VariableDto;
 import org.eclipse.che.api.debug.shared.dto.action.ActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.ResumeActionDto;
-import org.eclipse.che.api.debug.shared.dto.action.RunToLocationActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StartActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepIntoActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepOutActionDto;
@@ -191,11 +190,6 @@ public class DebuggerServiceClientImpl implements DebuggerServiceClient {
 
   @Override
   public Promise<Void> stepOver(String id, StepOverActionDto action) {
-    return performAction(id, action);
-  }
-
-  @Override
-  public Promise<Void> runToLocation(String id, RunToLocationActionDto action) {
     return performAction(id, action);
   }
 

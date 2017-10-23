@@ -20,7 +20,6 @@ public interface Action {
     STEP_OVER,
     START,
     RESUME,
-    RUN_TO_LOCATION,
     SUSPEND
   }
 }

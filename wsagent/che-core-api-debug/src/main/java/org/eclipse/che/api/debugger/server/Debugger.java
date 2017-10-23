@@ -21,7 +21,6 @@ import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.action.ResumeAction;
-import org.eclipse.che.api.debug.shared.model.action.RunToLocationAction;
 import org.eclipse.che.api.debug.shared.model.action.StartAction;
 import org.eclipse.che.api.debug.shared.model.action.StepIntoAction;
 import org.eclipse.che.api.debug.shared.model.action.StepOutAction;
@@ -214,15 +213,6 @@ public interface Debugger {
    * @throws DebuggerException if any error occur
    */
   void resume(ResumeAction action) throws DebuggerException;
-
-  /**
-   * Resume application is being debugged to specified location. When process reaches specified
-   * location then {@link SuspendEvent} must be fired.
-   *
-   * @param action contains specific parameters
-   * @throws DebuggerException if any error occur
-   */
-  default void runToLocation(RunToLocationAction action) throws DebuggerException {}
 
   /**
    * Dump values of local variables, fields and method arguments of the current frame.

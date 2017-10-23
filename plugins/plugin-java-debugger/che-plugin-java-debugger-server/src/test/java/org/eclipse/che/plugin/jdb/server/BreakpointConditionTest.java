@@ -24,7 +24,6 @@ import org.eclipse.che.api.debug.shared.model.event.BreakpointActivatedEvent;
 import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
 import org.eclipse.che.api.debug.shared.model.event.DisconnectEvent;
 import org.eclipse.che.api.debug.shared.model.event.SuspendEvent;
-import org.eclipse.che.api.debug.shared.model.impl.BreakpointConfigurationImpl;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.ResumeActionImpl;
@@ -78,8 +77,8 @@ public class BreakpointConditionTest {
                 "/test",
                 null,
                 -1),
-            new BreakpointConfigurationImpl("i==5", 0),
-            true);
+            true,
+            "i==5");
 
     debugger.addBreakpoint(breakpoint);
 

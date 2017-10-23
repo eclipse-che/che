@@ -23,10 +23,14 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.api.debug.shared.dto.*;
-import org.eclipse.che.api.debug.shared.dto.BreakpointConfigurationDto;
+import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
+import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
+import org.eclipse.che.api.debug.shared.dto.LocationDto;
+import org.eclipse.che.api.debug.shared.dto.SimpleValueDto;
+import org.eclipse.che.api.debug.shared.dto.ThreadStateDto;
+import org.eclipse.che.api.debug.shared.dto.VariableDto;
+import org.eclipse.che.api.debug.shared.dto.VariablePathDto;
 import org.eclipse.che.api.debug.shared.dto.action.ResumeActionDto;
-import org.eclipse.che.api.debug.shared.dto.action.RunToLocationActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StartActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepIntoActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepOutActionDto;
@@ -37,7 +41,6 @@ import org.eclipse.che.api.debug.shared.dto.event.DebuggerEventDto;
 import org.eclipse.che.api.debug.shared.dto.event.DisconnectEventDto;
 import org.eclipse.che.api.debug.shared.dto.event.SuspendEventDto;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
-import org.eclipse.che.api.debug.shared.model.BreakpointConfiguration;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
@@ -363,18 +366,12 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
       locationDto.setTarget(location.getTarget());
       locationDto.setResourceProjectPath(location.getResourceProjectPath());
 
-      BreakpointConfiguration breakpointConfiguration = breakpoint.getBreakpointConfiguration();
-      BreakpointConfigurationDto conditions =
-          dtoFactory
-              .createDto(BreakpointConfigurationDto.class)
-              .withCondition(breakpointConfiguration.getCondition())
-              .withHitCount(breakpointConfiguration.getHitCount());
       BreakpointDto breakpointDto =
           dtoFactory
               .createDto(BreakpointDto.class)
               .withLocation(locationDto)
               .withEnabled(true)
-              .withBreakpointConfiguration(conditions);
+              .withCondition(breakpoint.getCondition());
 
       Promise<Void> promise = service.addBreakpoint(debugSessionDto.getId(), breakpointDto);
       promise
@@ -498,15 +495,10 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
       locationDto.setTarget(location.getTarget());
       locationDto.setResourceProjectPath(location.getResourceProjectPath());
 
-      BreakpointConfigurationDto conditions =
-          dtoFactory
-              .createDto(BreakpointConfigurationDto.class)
-              .withCondition(breakpoint.getBreakpointConfiguration().getCondition())
-              .withHitCount(breakpoint.getBreakpointConfiguration().getHitCount());
       BreakpointDto breakpointDto = dtoFactory.createDto(BreakpointDto.class);
       breakpointDto.setLocation(locationDto);
       breakpointDto.setEnabled(true);
-      breakpointDto.setBreakpointConfiguration(conditions);
+      breakpointDto.setCondition(breakpoint.getCondition());
 
       breakpoints.add(breakpointDto);
     }
@@ -582,29 +574,6 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
       action.setType(Action.TYPE.STEP_OVER);
 
       Promise<Void> promise = service.stepOver(debugSessionDto.getId(), action);
-      promise.catchError(
-          error -> {
-            Log.error(AbstractDebugger.class, error.getCause());
-          });
-    }
-  }
-
-  @Override
-  public void runToLocation(Location location) {
-    if (isConnected()) {
-      for (DebuggerObserver observer : observers) {
-        observer.onPreResume();
-      }
-      removeCurrentLocation();
-      preserveDebuggerState();
-
-      RunToLocationActionDto action =
-          dtoFactory
-              .createDto(RunToLocationActionDto.class)
-              .withType(Action.TYPE.RUN_TO_LOCATION)
-              .withTarget(location.getTarget())
-              .withLineNumber(location.getLineNumber());
-      Promise<Void> promise = service.runToLocation(debugSessionDto.getId(), action);
       promise.catchError(
           error -> {
             Log.error(AbstractDebugger.class, error.getCause());

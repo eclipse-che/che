@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.Variable;
-import org.eclipse.che.api.debug.shared.model.impl.BreakpointConfigurationImpl;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.promises.client.Promise;
@@ -342,10 +341,7 @@ public class BreakpointManagerImpl
 
           toRemove.add(breakpoint);
           toAdd.add(
-              new BreakpointImpl(
-                  newLocation,
-                  new BreakpointConfigurationImpl(breakpoint.getBreakpointConfiguration()),
-                  breakpoint.isEnabled()));
+              new BreakpointImpl(newLocation, breakpoint.isEnabled(), breakpoint.getCondition()));
         }
       }
 

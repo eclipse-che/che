@@ -22,15 +22,15 @@ public interface BreakpointDto extends Breakpoint {
 
   BreakpointDto withLocation(LocationDto location);
 
-  BreakpointConfigurationDto getBreakpointConfiguration();
-
-  void setBreakpointConfiguration(BreakpointConfigurationDto breakpointConfiguration);
-
-  BreakpointDto withBreakpointConfiguration(BreakpointConfigurationDto breakpointConfiguration);
-
   boolean isEnabled();
 
   void setEnabled(boolean enabled);
 
   BreakpointDto withEnabled(boolean enabled);
+
+  String getCondition();
+
+  void setCondition(String condition);
+
+  BreakpointDto withCondition(String condition);
 }

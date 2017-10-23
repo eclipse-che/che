@@ -20,11 +20,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import org.eclipse.che.api.debug.shared.dto.BreakpointConfigurationDto;
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.LocationDto;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
-import org.eclipse.che.api.debug.shared.model.BreakpointConfiguration;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
@@ -200,15 +198,9 @@ public class BreakpointStorageImpl implements BreakpointStorage {
             .withExternalResource(location.isExternalResource())
             .withResourceProjectPath(location.getResourceProjectPath());
 
-    BreakpointConfiguration configuration = breakpoint.getBreakpointConfiguration();
-    BreakpointConfigurationDto conditions =
-        dtoFactory
-            .createDto(BreakpointConfigurationDto.class)
-            .withCondition(configuration.getCondition())
-            .withHitCount(configuration.getHitCount());
     return dtoFactory
         .createDto(BreakpointDto.class)
         .withLocation(locationDto)
-        .withBreakpointConfiguration(conditions);
+        .withCondition(breakpoint.getCondition());
   }
 }

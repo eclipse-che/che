@@ -17,7 +17,6 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import elemental.dom.Element;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
-import org.eclipse.che.api.debug.shared.model.BreakpointConfiguration;
 import org.eclipse.che.ide.api.debug.BreakpointRenderer;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.gutter.Gutter;
@@ -95,22 +94,15 @@ public class BreakpointRendererImpl implements BreakpointRenderer {
       final Breakpoint breakpoint, final boolean active, final LineChangeAction action) {
 
     if (hasGutter != null) {
-      BreakpointConfiguration breakpointConfiguration = breakpoint.getBreakpointConfiguration();
       int lineNumber = breakpoint.getLocation().getLineNumber() - 1;
-      boolean hasCondition =
-          !Strings.isNullOrEmpty(breakpointConfiguration.getCondition())
-              || breakpointConfiguration.getHitCount() != 0;
+      boolean hasCondition = !Strings.isNullOrEmpty(breakpoint.getCondition());
 
       Element newElement =
           active
               ? (hasCondition ? activeConditionBreakpointMark : activeBreakpointMark)
               : (hasCondition ? inactiveConditionBreakpointMark : inactiveBreakpointMark);
       if (hasCondition) {
-        newElement.setTitle(
-            "Condition: "
-                + breakpointConfiguration.getCondition()
-                + ", hit count: "
-                + breakpointConfiguration.getCondition());
+        newElement.setTitle("Condition: " + breakpoint.getCondition());
       }
 
       Element existedElement = hasGutter.getGutterItem(lineNumber, BREAKPOINTS_GUTTER);

@@ -29,7 +29,6 @@ import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.Provider;
 import org.eclipse.che.api.debug.shared.dto.action.ActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.ResumeActionDto;
-import org.eclipse.che.api.debug.shared.dto.action.RunToLocationActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StartActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepIntoActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepOutActionDto;
@@ -80,8 +79,6 @@ public class DebuggerActionProvider implements MessageBodyReader<ActionDto> {
     switch (actionType) {
       case RESUME:
         return DtoFactory.getInstance().createDtoFromJson(json, ResumeActionDto.class);
-      case RUN_TO_LOCATION:
-        return DtoFactory.getInstance().createDtoFromJson(json, RunToLocationActionDto.class);
       case START:
         return DtoFactory.getInstance().createDtoFromJson(json, StartActionDto.class);
       case STEP_INTO:

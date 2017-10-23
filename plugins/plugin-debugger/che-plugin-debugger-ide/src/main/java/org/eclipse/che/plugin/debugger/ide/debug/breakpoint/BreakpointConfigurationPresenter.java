@@ -44,12 +44,10 @@ public class BreakpointConfigurationPresenter
   public void onApplyClicked() {
     view.close();
 
-    breakpoint
-        .getBreakpointConfiguration()
-        .setCondition(
-            Strings.isNullOrEmpty(view.getBreakpointCondition())
-                ? null
-                : view.getBreakpointCondition());
+    breakpoint.setCondition(
+        Strings.isNullOrEmpty(view.getBreakpointCondition())
+            ? null
+            : view.getBreakpointCondition());
     breakpointManager.update(breakpoint);
   }
 }

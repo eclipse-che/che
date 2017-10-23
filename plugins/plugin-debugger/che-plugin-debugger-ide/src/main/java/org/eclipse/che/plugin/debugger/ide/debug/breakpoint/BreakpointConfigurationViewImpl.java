@@ -87,8 +87,8 @@ public class BreakpointConfigurationViewImpl extends Window implements Breakpoin
         .append(location.getLineNumber());
     breakpointLocation.setText(labelText.toString());
 
-    if (breakpoint.getBreakpointConfiguration() != null) {
-      breakpointCondition.setText(breakpoint.getBreakpointConfiguration().getCondition());
+    if (breakpoint.getCondition() != null) {
+      breakpointCondition.setText(breakpoint.getCondition());
     } else {
       breakpointCondition.setText("");
     }
