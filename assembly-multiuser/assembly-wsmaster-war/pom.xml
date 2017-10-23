@@ -48,10 +48,6 @@
             <artifactId>che-core-db-vendor-postgresql</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.infrastructure</groupId>
-            <artifactId>infrastructure-openshift</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
             <artifactId>che-multiuser-api-authorization-impl</artifactId>
         </dependency>
