@@ -58,7 +58,7 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
 
   private static final String PROJECT_TREE_WIDGET_ID = "projectTree";
 
-  private LoadingModeWidget loadingModeWidget;
+  private ProjectExplorerPlaceholderWidget projectExplorerPlaceholderWidget;
 
   @Inject
   public ProjectExplorerViewImpl(
@@ -67,12 +67,12 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
       final Set<NodeInterceptor> nodeInterceptorSet,
       final SkipHiddenNodesInterceptor skipHiddenNodesInterceptor,
       final EmptyTreePanel emptyTreePanel,
-      final LoadingModeWidget loadingModeWidget) {
+      final ProjectExplorerPlaceholderWidget projectExplorerPlaceholderWidget) {
     this.skipHiddenNodesInterceptor = skipHiddenNodesInterceptor;
 
     setTitle(coreLocalizationConstant.projectExplorerTitleBarText());
 
-    this.loadingModeWidget = loadingModeWidget;
+    this.projectExplorerPlaceholderWidget = projectExplorerPlaceholderWidget;
 
     NodeStorage nodeStorage = new NodeStorage();
 
@@ -274,12 +274,12 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
   @Override
   public void setLoadingMode(boolean loadingMode) {
     if (loadingMode) {
-      if (!loadingModeWidget.getElement().hasParentElement()) {
-        getElement().appendChild(loadingModeWidget.getElement());
+      if (!projectExplorerPlaceholderWidget.getElement().hasParentElement()) {
+        getElement().appendChild(projectExplorerPlaceholderWidget.getElement());
       }
     } else {
-      if (loadingModeWidget.getElement().hasParentElement()) {
-        getElement().removeChild(loadingModeWidget.getElement());
+      if (projectExplorerPlaceholderWidget.getElement().hasParentElement()) {
+        getElement().removeChild(projectExplorerPlaceholderWidget.getElement());
       }
     }
   }

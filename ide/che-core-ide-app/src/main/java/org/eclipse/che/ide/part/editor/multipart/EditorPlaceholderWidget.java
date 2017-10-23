@@ -10,18 +10,31 @@
  */
 package org.eclipse.che.ide.part.editor.multipart;
 
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import javax.inject.Inject;
 
 /** Represents loading mode widget for editor */
-public class EditorLoadingModeWidget extends Composite {
+public class EditorPlaceholderWidget extends Composite {
 
-  interface EditorLoadingModeWidgetUiBinder extends UiBinder<Widget, EditorLoadingModeWidget> {}
+  interface EditorPlaceholderWidgetUiBinder extends UiBinder<Widget, EditorPlaceholderWidget> {}
+
+  @UiField
+  DivElement lineNumbers;
 
   @Inject
-  public EditorLoadingModeWidget(EditorLoadingModeWidgetUiBinder uiBinder) {
+  public EditorPlaceholderWidget(EditorPlaceholderWidgetUiBinder uiBinder) {
     initWidget(uiBinder.createAndBindUi(this));
+
+    for (int i = 0; i < 100; i++) {
+      Element lineNumber = DOM.createDiv();
+      lineNumber.setInnerText("" + i);
+      lineNumbers.appendChild(lineNumber);
+    }
   }
 }

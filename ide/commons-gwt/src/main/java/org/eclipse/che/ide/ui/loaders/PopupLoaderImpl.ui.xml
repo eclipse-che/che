@@ -36,6 +36,7 @@
             box-sizing: border-box;
             -moz-box-shadow: popupLoaderShadow;
             box-shadow: popupLoaderShadow;
+            display: none;
         }
 
         .title {

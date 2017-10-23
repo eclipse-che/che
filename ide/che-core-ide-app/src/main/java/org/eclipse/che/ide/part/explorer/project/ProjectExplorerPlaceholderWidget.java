@@ -15,13 +15,13 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import javax.inject.Inject;
 
-/** Represents loading mode widget for Project explorer */
-public class LoadingModeWidget extends Composite {
+/** Represents loading mode widget for project explorer */
+public class ProjectExplorerPlaceholderWidget extends Composite {
 
-  interface LoadingModeWidgetUiBinder extends UiBinder<Widget, LoadingModeWidget> {}
+  interface ProjectExplorerPlaceholderWidgetUiBinder extends UiBinder<Widget, ProjectExplorerPlaceholderWidget> {}
 
   @Inject
-  public LoadingModeWidget(LoadingModeWidgetUiBinder uiBinder) {
+  public ProjectExplorerPlaceholderWidget(ProjectExplorerPlaceholderWidgetUiBinder uiBinder) {
     initWidget(uiBinder.createAndBindUi(this));
   }
 }

@@ -36,7 +36,7 @@
             box-sizing: border-box;
             border-top: 1px solid transparent;
             overflow: hidden;
-            animation-name: fadeIn;
+            animation-name: projectExplorerFadeIn;
             animation-duration: 0.2s;
             animation-fill-mode: both;
         }
@@ -55,7 +55,7 @@
             top: 3px;
         }
 
-        @keyframes fadeIn {
+        @keyframes projectExplorerFadeIn {
             from {
                 opacity: 0;
             }
@@ -72,6 +72,23 @@
             right: 10px;
             top: 8px;
             background-color: #333846;
+            background-size: 800px 104px;
+            background-image: -webkit-linear-gradient(left, #333846 0%, #495061 20%, #333846 40%, #333846 100%);
+            background-repeat: no-repeat;
+            background-position: 827px;
+            animation-duration: 2s;
+            animation-iteration-count: infinite;
+            animation-name: projectExplorerPlaceHolderAnimation;
+        }
+
+        @keyframes projectExplorerPlaceHolderAnimation {
+            0% {
+                background-position: -1500px 0;
+            }
+
+            100% {
+                background-position: 1500px 0;
+            }
         }
 
         .shifted .icon {
