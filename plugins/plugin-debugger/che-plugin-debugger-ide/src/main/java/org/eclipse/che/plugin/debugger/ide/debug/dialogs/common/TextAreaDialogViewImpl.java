@@ -8,11 +8,8 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.debugger.ide.debug.changevalue;
+package org.eclipse.che.plugin.debugger.ide.debug.dialogs.common;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -23,61 +20,52 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.inject.assistedinject.Assisted;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.ui.window.Window;
-import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
 
 /**
- * The implementation of {@link ChangeValueView}.
+ * The implementation of {@link TextAreaDialogView}.
  *
  * @author <a href="mailto:aplotnikov@codenvy.com">Andrey Plotnikov</a>
+ * @author Oleksandr Andriienko
  */
-@Singleton
-public class ChangeValueViewImpl extends Window implements ChangeValueView {
-  interface ChangeValueViewImplUiBinder extends UiBinder<Widget, ChangeValueViewImpl> {}
-
-  private static ChangeValueViewImplUiBinder uiBinder =
-      GWT.create(ChangeValueViewImplUiBinder.class);
+public class TextAreaDialogViewImpl extends Window implements TextAreaDialogView {
+  interface ChangeValueViewImplUiBinder extends UiBinder<Widget, TextAreaDialogViewImpl> {}
 
   @UiField TextArea value;
-  @UiField Label changeValueLabel;
+  @UiField Label textAreaLabel;
 
   private ActionDelegate delegate;
-  private Button changeButton;
+  private Button agreeButton;
 
   /** Create view. */
   @Inject
-  protected ChangeValueViewImpl(DebuggerLocalizationConstant locale) {
+  public TextAreaDialogViewImpl(
+      ChangeValueViewImplUiBinder uiBinder,
+      @NotNull @Assisted("title") String title,
+      @NotNull @Assisted("agreeBtnLabel") String agreeBtnLabel,
+      @NotNull @Assisted("cancelBtnLabel") String cancelBtnLabel) {
     Widget widget = uiBinder.createAndBindUi(this);
 
-    this.setTitle(locale.changeValueViewTitle());
+    this.setTitle(title);
     this.setWidget(widget);
+    this.ensureDebugId("debugger-textarea-dialog");
 
     Button cancelButton =
         createButton(
-            locale.changeValueViewCancelButtonTitle(),
-            "debugger-change-value-cancel-btn",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent clickEvent) {
-                delegate.onCancelClicked();
-              }
-            });
+            cancelBtnLabel,
+            "debugger-textarea-dialog-cancel-btn",
+            clickEvent -> delegate.onCancelClicked());
 
-    changeButton =
+    agreeButton =
         createButton(
-            locale.changeValueViewChangeButtonTitle(),
-            "debugger-change-value-change-btn",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent clickEvent) {
-                delegate.onChangeClicked();
-              }
-            });
+            agreeBtnLabel,
+            "debugger-textarea-dialog-agree-btn",
+            clickEvent -> delegate.onAgreeClicked());
 
     addButtonToFooter(cancelButton);
-    addButtonToFooter(changeButton);
+    addButtonToFooter(agreeButton);
   }
 
   /** {@inheritDoc} */
@@ -96,7 +84,7 @@ public class ChangeValueViewImpl extends Window implements ChangeValueView {
   /** {@inheritDoc} */
   @Override
   public void setEnableChangeButton(boolean isEnable) {
-    changeButton.setEnabled(isEnable);
+    agreeButton.setEnabled(isEnable);
   }
 
   /** {@inheritDoc} */
@@ -119,7 +107,7 @@ public class ChangeValueViewImpl extends Window implements ChangeValueView {
   /** {@inheritDoc} */
   @Override
   public void setValueTitle(@NotNull String title) {
-    changeValueLabel.getElement().setInnerHTML(title);
+    textAreaLabel.getElement().setInnerHTML(title);
   }
 
   /** {@inheritDoc} */
@@ -130,8 +118,8 @@ public class ChangeValueViewImpl extends Window implements ChangeValueView {
 
   /** {@inheritDoc} */
   @Override
-  public void showDialog() {
-    this.show();
+  public void show() {
+    super.show();
     if (!value.getText().isEmpty()) {
       value.selectAll();
       setEnableChangeButton(true);
@@ -146,6 +134,6 @@ public class ChangeValueViewImpl extends Window implements ChangeValueView {
 
   @UiHandler("value")
   public void onValueChanged(KeyUpEvent event) {
-    delegate.onVariableValueChanged();
+    delegate.onValueChanged();
   }
 }
