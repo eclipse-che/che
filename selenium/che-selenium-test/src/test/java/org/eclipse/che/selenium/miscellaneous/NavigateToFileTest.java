@@ -10,13 +10,14 @@
  */
 package org.eclipse.che.selenium.miscellaneous;
 
+import static org.testng.AssertJUnit.assertFalse;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestGitConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
@@ -24,15 +25,14 @@ import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
-import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NavigateToFile;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.git.Git;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.openqa.selenium.Keys;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -71,7 +71,6 @@ public class NavigateToFileTest {
       Arrays.asList(
           "classpath (/NavigateFile_2/.che)", "classpath (/NavigateFile/.che)",
           "createdFrom.con (/NavigateFile_2)", "createdFrom.api (/NavigateFile)");
-  private static final String FILE_H_SYMBOL = "HEAD (/NavigateFile/.git)";
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
@@ -81,11 +80,9 @@ public class NavigateToFileTest {
   @Inject private CodenvyEditor editor;
   @Inject private NavigateToFile navigateToFile;
   @Inject private Menu menu;
-  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
-  @Inject private org.eclipse.che.selenium.pageobject.git.Git git;
+  @Inject private Git git;
   @Inject private AskDialog askDialog;
-  @Inject private Events events;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -196,11 +193,9 @@ public class NavigateToFileTest {
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.NAVIGATE_TO_FILE);
     navigateToFile.waitFormToOpen();
-    loader.waitOnClosed();
     navigateToFile.typeSymbolInFileNameField("H");
-    loader.waitOnClosed();
     navigateToFile.waitFileNamePopUp();
-    Assert.assertFalse(navigateToFile.waitListOfFilesNames(FILE_H_SYMBOL));
+    assertFalse(navigateToFile.isFilenameSuggested("HEAD (/NavigateFile/.git)"));
     navigateToFile.closeNavigateToFileForm();
     navigateToFile.waitFormToClose();
   }
@@ -216,7 +211,7 @@ public class NavigateToFileTest {
     loader.waitOnClosed();
     navigateToFile.waitFileNamePopUp();
     for (String listFiles : files) {
-      navigateToFile.waitListOfFilesNames(listFiles);
+      navigateToFile.isFilenameSuggested(listFiles);
     }
     navigateToFile.selectFileByFullName(pathName);
     navigateToFile.waitFormToClose();
@@ -233,7 +228,7 @@ public class NavigateToFileTest {
     loader.waitOnClosed();
     navigateToFile.waitFileNamePopUp();
     for (String listFiles : FILES_I_SYMBOL) {
-      navigateToFile.waitListOfFilesNames(listFiles);
+      navigateToFile.isFilenameSuggested(listFiles);
     }
     navigateToFile.selectFileByFullName(pathName);
     navigateToFile.waitFormToClose();
@@ -248,7 +243,7 @@ public class NavigateToFileTest {
     loader.waitOnClosed();
     navigateToFile.waitFileNamePopUp();
     for (String listFiles : FILES_R_SYMBOL) {
-      navigateToFile.waitListOfFilesNames(listFiles);
+      navigateToFile.isFilenameSuggested(listFiles);
     }
     navigateToFile.selectFileByFullName(pathName);
     navigateToFile.waitFormToClose();
