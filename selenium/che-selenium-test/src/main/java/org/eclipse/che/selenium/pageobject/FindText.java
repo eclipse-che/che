@@ -61,8 +61,7 @@ public class FindText {
     String CANCEL_BUTTON = "search-cancel-button";
     String SEARCH_BUTTON = "search-button";
     String FIND_INFO_PANEL = "gwt-debug-find-info-panel";
-    String FIND_INFO_PANEL_TEXT_CONTAINER =
-        "//div[@id='gwt-debug-infoPanel']//div[@id='gwt-debug-partStackContent']";
+    String FIND_INFO_PANEL_TEXT_CONTAINER = "gwt-debug-partStackContent";
     String FIND_TEXT_BUTTON = "gwt-debug-partButton-Find";
     String OCCURRENCE = "//span[@debugfilepath = '%s']";
   }
@@ -79,7 +78,7 @@ public class FindText {
   @FindBy(id = Locators.FIND_INFO_PANEL)
   WebElement findInfoPanel;
 
-  @FindBy(xpath = Locators.FIND_INFO_PANEL_TEXT_CONTAINER)
+  @FindBy(id = Locators.FIND_INFO_PANEL_TEXT_CONTAINER)
   WebElement findInfoPanelTextContainer;
 
   @FindBy(id = Locators.FIND_TEXT_BUTTON)

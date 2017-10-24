@@ -562,7 +562,6 @@ public class ProjectExplorer {
    * @param item item form {@code SubMenuNew}
    */
   public void clickOnNewContextMenuItem(String item) {
-
     new WebDriverWait(seleniumWebDriver, 10)
         .until(ExpectedConditions.visibilityOf(seleniumWebDriver.findElement(By.id(item))))
         .click();
