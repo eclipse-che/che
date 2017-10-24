@@ -40,8 +40,7 @@ public class Consoles {
   private final WebDriverWait updateProjDriverWait;
 
   public static final String PROCESS_NAME_XPATH = "//span[text()='%s']";
-  public static final String PROCESSES_MAIN_AREA =
-      "//div[@role='toolbar-header']//div[text()='Processes']";
+  public static final String PROCESSES_MAIN_AREA = "gwt-debug-consolesPanel";
   public static final String CLOSE_PROCESS_ICON =
       "//div[@id='gwt-debug-consolesPanel']//ul//span[text()='%s']/parent::span/span";
   public static final String TAB_PROCESS_NAME =
@@ -53,7 +52,7 @@ public class Consoles {
   public static final String OPEN_NEW_TERMINAL = "//div[@id='gwt-debug-process-tree']//span/span";
   public static final String CLOSE_TERMINAL_CONSOLES_ICON =
       "//span[text()='Terminal']/preceding::span[2]";
-  public static final String PROCESSES_TAB = "gwt-debug-partButton-Processes";
+  public static final String PROCESSES_BUTTON = "gwt-debug-partButton-Processes";
   public static final String MAXIMIZE_PANEL_ICON =
       "//div[@id='gwt-debug-infoPanel']//div[@id='gwt-debug-maximizeButton']";
   public static final String HIDE_CONSOLES_ICON =
@@ -84,8 +83,8 @@ public class Consoles {
   @FindBy(css = CONSOLE_PANEL_DRUGGER_CSS)
   WebElement consolesPanelDrag;
 
-  @FindBy(id = PROCESSES_TAB)
-  WebElement processesTab;
+  @FindBy(id = PROCESSES_BUTTON)
+  WebElement processesBtn;
 
   @FindBy(id = DEBUG_TAB)
   WebElement debugTab;
@@ -108,7 +107,7 @@ public class Consoles {
   @FindBy(xpath = PREVIEW_URL)
   WebElement previewUrl;
 
-  @FindBy(xpath = PROCESSES_MAIN_AREA)
+  @FindBy(id = PROCESSES_MAIN_AREA)
   WebElement processesMainArea;
 
   @FindBy(id = PLUS_ICON)
@@ -123,9 +122,11 @@ public class Consoles {
   @FindBy(id = SERVER_INFO_HIDE_INTERNAL_CHECK_BOX)
   WebElement serverInfoHideInternalCheckBox;
 
-  /** click on consoles tab in bottom and wait opening console area (terminal on other console ) */
-  public void clickOnProcessesTab() {
-    redrawDriverWait.until(visibilityOf(processesTab)).click();
+  /**
+   * click on consoles icon in side line and wait opening console area (terminal on other console )
+   */
+  public void clickOnProcessesButton() {
+    redrawDriverWait.until(visibilityOf(processesBtn)).click();
   }
 
   /** click on consoles tab in bottom and wait opening console area (terminal on other console ) */
