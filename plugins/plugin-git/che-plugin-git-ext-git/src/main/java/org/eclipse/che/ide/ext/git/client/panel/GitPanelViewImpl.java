@@ -15,7 +15,6 @@ import static com.google.common.collect.Iterables.getFirst;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import java.util.Comparator;
 import javax.inject.Inject;
@@ -38,7 +37,6 @@ public class GitPanelViewImpl extends BaseView<ActionDelegate> implements GitPan
   interface GitPanelViewImplUiBinder extends UiBinder<Widget, GitPanelViewImpl> {}
 
   @UiField FlowPanel changesPanel;
-  @UiField SimplePanel repositoriesPanel;
 
   @UiField(provided = true)
   final GitResources gitResources;
@@ -46,9 +44,10 @@ public class GitPanelViewImpl extends BaseView<ActionDelegate> implements GitPan
   @UiField(provided = true)
   final GitLocalizationConstant locale;
 
-  private final RepositoryNodeFactory repositoryNodeFactory;
+  @UiField(provided = true)
+  Tree repositoriesList;
 
-  private Tree repositoriesList;
+  private final RepositoryNodeFactory repositoryNodeFactory;
 
   @Inject
   public GitPanelViewImpl(
@@ -63,9 +62,8 @@ public class GitPanelViewImpl extends BaseView<ActionDelegate> implements GitPan
     this.gitResources = gitResources;
     this.locale = locale;
 
-    setContentWidget(uiBinder.createAndBindUi(this));
-
     createRepositoriesList();
+    setContentWidget(uiBinder.createAndBindUi(this));
   }
 
   private void createRepositoriesList() {
@@ -86,7 +84,6 @@ public class GitPanelViewImpl extends BaseView<ActionDelegate> implements GitPan
             delegate.onRepositorySelectionChanged(node.getName());
           }
         });
-    this.repositoriesPanel.add(repositoriesList);
   }
 
   @Override

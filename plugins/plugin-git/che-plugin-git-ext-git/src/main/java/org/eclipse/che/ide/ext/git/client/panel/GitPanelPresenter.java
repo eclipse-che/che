@@ -107,7 +107,6 @@ public class GitPanelPresenter extends BasePresenter
 
   private void registerEventHandlers() {
     eventBus.addHandler(ResourceChangedEvent.getType(), this);
-    // eventBus.addHandler(GitRepositoryInitializedEvent.class, );
 
     subscribeToGitEvents.addSubscriber(this);
   }
