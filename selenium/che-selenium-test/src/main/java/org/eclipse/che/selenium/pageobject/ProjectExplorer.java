@@ -562,8 +562,11 @@ public class ProjectExplorer {
    * @param item item form {@code SubMenuNew}
    */
   public void clickOnNewContextMenuItem(String item) {
-    WebElement menuItem = seleniumWebDriver.findElement(By.id(item));
-    menuItem.click();
+
+    new WebDriverWait(seleniumWebDriver, 10)
+        .until(ExpectedConditions.visibilityOf(seleniumWebDriver.findElement(By.id(item))))
+        .click();
+
     waitContextMenuPopUpClosed();
   }
 
@@ -832,7 +835,7 @@ public class ProjectExplorer {
     } catch (StaleElementReferenceException ex) {
       WaitUtils.sleepQuietly(1);
     }
-    navigateToFile.waitListOfFilesNames(file);
+    navigateToFile.isFilenameSuggested(file);
     navigateToFile.selectFileByName(file);
     navigateToFile.waitFormToClose();
     menu.runCommand(

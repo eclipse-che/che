@@ -61,11 +61,8 @@ public class FindText {
     String CANCEL_BUTTON = "search-cancel-button";
     String SEARCH_BUTTON = "search-button";
     String FIND_INFO_PANEL =
-        "//div[@id='gwt-debug-find-info-panel']//div[@id='gwt-debug-result-search-tree']";
-    String FIND_TAB = "gwt-debug-partButton-Find";
-    String HIDE_FIND_PANEL = "//div[@id='gwt-debug-infoPanel']//div[@id='gwt-debug-hideButton']";
-    String ITEM_FIND_PANEL =
         "//div[@id='gwt-debug-infoPanel']//div[@id='gwt-debug-partStackContent']//div[text()='%s']";
+    String FIND_TEXT_BUTTON = "gwt-debug-partButton-Find";
     String OCCURRENCE = "//span[@debugfilepath = '%s']";
   }
 
@@ -81,8 +78,8 @@ public class FindText {
   @FindBy(xpath = Locators.FIND_INFO_PANEL)
   WebElement findInfoPanel;
 
-  @FindBy(id = Locators.FIND_TAB)
-  WebElement findTab;
+  @FindBy(id = Locators.FIND_TEXT_BUTTON)
+  WebElement findTextBtn;
 
   /** wait the 'Find Text' main form is open */
   public void waitFindTextMainFormIsOpen() {
@@ -358,25 +355,17 @@ public class FindText {
         .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.FIND_INFO_PANEL)));
   }
 
-  /** press on the 'Hide' button on the 'Find' info panel */
-  public void clickHideBtnFindInfoPanel() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.elementToBeClickable(By.xpath(Locators.HIDE_FIND_PANEL)))
-        .click();
-    waitFindInfoPanelIsClosed();
-  }
-
   /** wait the 'Find' info panel is closed */
   public void waitFindInfoPanelIsClosed() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(Locators.FIND_INFO_PANEL)));
   }
 
-  /** click on the find tab */
-  public void clickFindTab() {
+  /** click on the find text button on the find info panel */
+  public void clickFindTextButton() {
     loader.waitOnClosed();
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(findTab))
+        .until(ExpectedConditions.visibilityOf(findTextBtn))
         .click();
     loader.waitOnClosed();
   }

@@ -122,11 +122,13 @@ public class NavigateToFile {
   /**
    * wait expected text in the dropdawn list of the widget
    *
-   * @param text a text that should be into list
+   * @param nameFragment a text that should be into list
    */
-  public void waitListOfFilesNames(final String text) {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until((ExpectedCondition<Boolean>) webDriver -> suggestionPanel.getText().contains(text));
+  public Boolean isFilenameSuggested(final String nameFragment) {
+    return new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(
+            (ExpectedCondition<Boolean>)
+                webDriver -> suggestionPanel.getText().contains(nameFragment));
   }
 
   public String getText() {
