@@ -17,7 +17,7 @@ import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createSnapshot;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createSshPair;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createUser;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createWorkspace;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;

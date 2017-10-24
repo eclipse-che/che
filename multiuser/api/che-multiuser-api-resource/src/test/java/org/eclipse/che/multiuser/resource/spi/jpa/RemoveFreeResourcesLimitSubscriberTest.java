@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.multiuser.resource.spi.jpa;
 
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 import org.eclipse.che.account.event.BeforeAccountRemovedEvent;

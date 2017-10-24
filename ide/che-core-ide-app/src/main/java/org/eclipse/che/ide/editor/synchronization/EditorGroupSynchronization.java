@@ -43,6 +43,9 @@ public interface EditorGroupSynchronization {
   /** Notify group that active editor has changed */
   void onActiveEditorChanged(@NotNull EditorPartPresenter activeEditor);
 
+  /** Notify group that editor dirty state has changed */
+  void onEditorDirtyStateChanged(@NotNull EditorPartPresenter changedEditor);
+
   /** Removes all editors from the group and stops to track changes of content for them. */
   void unInstall();
 
