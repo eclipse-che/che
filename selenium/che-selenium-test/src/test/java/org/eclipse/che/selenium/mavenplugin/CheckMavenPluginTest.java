@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.mavenplugin;
 
+import static java.nio.file.Paths.get;
+import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.SIMPLE_FOLDER;
@@ -59,9 +61,9 @@ public class CheckMavenPluginTest {
     URL resource = getClass().getResource("/projects/check-maven-plugin-test");
     testProjectServiceClient.importProject(
         workspace.getId(),
-        Paths.get(resource.toURI()),
+        get(resource.toURI()),
         PROJECT_NAME,
-        ProjectTemplates.MAVEN_SPRING);
+        MAVEN_SPRING);
     ide.open(workspace);
     projectExplorer.waitProjectExplorer();
   }
