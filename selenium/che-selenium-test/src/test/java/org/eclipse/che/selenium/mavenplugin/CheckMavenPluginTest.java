@@ -13,11 +13,13 @@ package org.eclipse.che.selenium.mavenplugin;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import java.net.URL;
+import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
-import org.eclipse.che.selenium.core.constant.TestCommandsConstants;
+import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -27,7 +29,6 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.MavenPluginStatusBar;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.git.Git;
 import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
@@ -36,7 +37,6 @@ import org.testng.annotations.Test;
 /** @author Musienko Maxim */
 public class CheckMavenPluginTest {
   private static final String PROJECT_NAME = NameGenerator.generate("project", 6);
-  private static final String CHECKOUT_COMMAND = "checkout";
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
@@ -48,92 +48,73 @@ public class CheckMavenPluginTest {
   @Inject private Loader loader;
   @Inject private AskForValueDialog askDialog;
   @Inject private Git git;
-
-  @Inject
-  @Named("github.username")
-  private String gitHubUsername;
+  @Inject private TestProjectServiceClient testProjectServiceClient;
 
   @Inject private TestCommandServiceClient commandServiceClient;
 
   @BeforeClass
   public void setUp() throws Exception {
-    commandServiceClient.createCommand(
-        "cd /projects/" + PROJECT_NAME + " && git checkout contrib-12042015",
-        CHECKOUT_COMMAND,
-        TestCommandsConstants.CUSTOM,
-        workspace.getId());
-
+    URL resource = getClass().getResource("/projects/check-maven-plugin-test");
+    testProjectServiceClient.importProject(
+        workspace.getId(),
+        Paths.get(resource.toURI()),
+        PROJECT_NAME,
+        ProjectTemplates.MAVEN_SPRING);
     ide.open(workspace);
     projectExplorer.waitProjectExplorer();
   }
 
   @Test
-  public void mavenStatusBarShouldDisplayResolvingProjectMessage() {
-    git.importJavaAppAndCheckMavenPluginBar(
-        "https://github.com/" + gitHubUsername + "/pushChangesTest.git",
-        PROJECT_NAME,
-        Wizard.TypeProject.MAVEN);
-    mavenPluginStatusBar.waitClosingInfoPanel(100);
-    projectExplorer.waitItem(PROJECT_NAME);
-  }
-
-  @Test(priority = 1)
-  public void shouldExecuteCommandAndWaitTextInConsole() throws Exception {
-    projectExplorer.invokeCommandWithContextMenu(
-        ProjectExplorer.CommandsGoal.COMMON, PROJECT_NAME, CHECKOUT_COMMAND);
-
-    console.waitExpectedTextIntoConsole("Switched to a new branch 'contrib-12042015'");
-  }
-
-  @Test(priority = 2)
   public void shouldAccessClassCreatedInAnotherModule() {
-    projectExplorer.expandPathInProjectExplorer(PROJECT_NAME + "/my-lib/src/main/java/hello");
+    projectExplorer.quickExpandWithJavaScript();
+    projectExplorer.selectItem(PROJECT_NAME + "/my-lib/src/main/java/hello");
     createNewFileFromMenuFile("TestClass", AskForValueDialog.JavaFiles.CLASS, ".java");
-
-    projectExplorer.collapseProjectTreeByOptionsButton();
-    projectExplorer.expandPathInProjectExplorerAndOpenFile(
-        PROJECT_NAME + "/my-webapp/src/main/java/helloworld", "GreetingController.java");
+    projectExplorer.openItemByPath(
+        PROJECT_NAME + "/my-webapp/src/main/java/che/eclipse/sample/Aclass.java");
     editor.waitActiveEditor();
-    editor.setCursorToLine(24);
+    editor.setCursorToLine(14);
     enterClassNameViaAutocomplete();
     editor.typeTextIntoEditor(" testClass = new TestClass();");
     editor.waitAllMarkersDisappear(ERROR_MARKER);
   }
 
-  @Test(priority = 3)
+  @Test(priority = 1)
   public void excludeIncludeModules() {
-    projectExplorer.collapseProjectTreeByOptionsButton();
-    projectExplorer.expandPathInProjectExplorerAndOpenFile(PROJECT_NAME, "pom.xml");
+    projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
     editor.waitActiveEditor();
-    editor.setCursorToDefinedLineAndChar(13, 8);
+    editor.setCursorToDefinedLineAndChar(25, 8);
     editor.typeTextIntoEditor("!--");
-    editor.setCursorToDefinedLineAndChar(13, 32);
+    editor.setCursorToDefinedLineAndChar(26, 32);
     editor.typeTextIntoEditor("--");
 
     projectExplorer.waitFolderDefinedTypeOfFolderByPath(
         PROJECT_NAME + "/my-lib", ProjectExplorer.FolderTypes.SIMPLE_FOLDER);
 
-    editor.setCursorToDefinedLineAndChar(13, 32);
+    projectExplorer.waitFolderDefinedTypeOfFolderByPath(
+            PROJECT_NAME + "/my-webapp", ProjectExplorer.FolderTypes.SIMPLE_FOLDER);
+
+    editor.setCursorToDefinedLineAndChar(26, 32);
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.typeTextIntoEditor(Keys.DELETE.toString());
-    editor.setCursorToDefinedLineAndChar(13, 8);
+    editor.setCursorToDefinedLineAndChar(25, 8);
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.typeTextIntoEditor(Keys.DELETE.toString());
 
     projectExplorer.waitFolderDefinedTypeOfFolderByPath(
         PROJECT_NAME + "/my-lib", ProjectExplorer.FolderTypes.PROJECT_FOLDER);
+    projectExplorer.waitFolderDefinedTypeOfFolderByPath(
+            PROJECT_NAME + "/my-webapp", ProjectExplorer.FolderTypes.SIMPLE_FOLDER);
 
     editor.closeAllTabs();
   }
 
-  @Test(priority = 4)
+ // @Test(priority = 2)
   public void shouldAccessClassCreatedInAnotherModuleAfterIncludingModule() {
-    projectExplorer.collapseProjectTreeByOptionsButton();
-    projectExplorer.expandPathInProjectExplorerAndOpenFile(
-        PROJECT_NAME + "/my-webapp/src/main/java/helloworld", "GreetingController.java");
+    projectExplorer.openItemByPath(
+        PROJECT_NAME + "/my-webapp/src/main/java/che/eclipse/sample/Aclass.java");
     editor.waitActiveEditor();
-    editor.setCursorToDefinedLineAndChar(27, 1);
+    editor.setCursorToDefinedLineAndChar(17, 1);
     enterClassNameViaAutocomplete();
     editor.typeTextIntoEditor(" testClass2 = new TestClass();");
     editor.waitAllMarkersDisappear(ERROR_MARKER);
