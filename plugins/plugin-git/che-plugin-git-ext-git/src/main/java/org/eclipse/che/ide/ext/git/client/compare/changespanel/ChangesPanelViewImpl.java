@@ -70,13 +70,18 @@ public class ChangesPanelViewImpl extends Composite implements ChangesPanelView 
   private Set<Path> nodePaths;
 
   private final NodesResources nodesResources;
+  private final GitResources gitResources;
 
   @Inject
   public ChangesPanelViewImpl(
-      GitResources resources, GitLocalizationConstant locale, NodesResources nodesResources) {
+      GitResources resources,
+      GitLocalizationConstant locale,
+      NodesResources nodesResources,
+      GitResources gitResources) {
     this.res = resources;
     this.locale = locale;
     this.nodesResources = nodesResources;
+    this.gitResources = gitResources;
     this.nodePaths = new HashSet<>();
 
     initWidget(uiBinder.createAndBindUi(this));
@@ -115,7 +120,7 @@ public class ChangesPanelViewImpl extends Composite implements ChangesPanelView 
               file ->
                   nodeStorage.add(
                       new ChangedFileNode(
-                          file, files.getStatusByFilePath(file), nodesResources, delegate, false)));
+                          file, files.getStatusByFilePath(file), gitResources, delegate, false)));
     }
   }
 
@@ -146,8 +151,17 @@ public class ChangesPanelViewImpl extends Composite implements ChangesPanelView 
   }
 
   @Override
-  public void setTextToChangeViewModeButton(String text) {
-    changeViewModeButton.setText(text);
+  public void updateChangeViewModeButton(ViewMode viewMode) {
+    switch (viewMode) {
+      case TREE:
+        changeViewModeButton.getElement().setInnerHTML(FontAwesome.LIST_UL);
+        changeViewModeButton.setTitle(locale.changeListRowListViewButtonText());
+        break;
+      case LIST:
+        changeViewModeButton.getElement().setInnerHTML(FontAwesome.FOLDER);
+        changeViewModeButton.setTitle(locale.changeListGroupByDirectoryButtonText());
+        break;
+    }
   }
 
   @Override
@@ -209,7 +223,7 @@ public class ChangesPanelViewImpl extends Composite implements ChangesPanelView 
         if (pathName.segmentCount() != i) {
           continue;
         }
-        Node fileNode = new ChangedFileNode(file, items.get(file), nodesResources, delegate, true);
+        Node fileNode = new ChangedFileNode(file, items.get(file), gitResources, delegate, true);
         String filePath = pathName.removeLastSegments(1).toString();
         if (currentChildNodes.keySet().contains(filePath)) {
           currentChildNodes.get(filePath).add(fileNode);
