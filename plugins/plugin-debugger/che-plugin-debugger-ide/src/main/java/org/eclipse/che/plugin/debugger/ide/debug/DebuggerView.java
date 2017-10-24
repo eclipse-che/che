@@ -15,11 +15,10 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.Location;
-import org.eclipse.che.api.debug.shared.model.MutableVariable;
-import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.Variable;
+import org.eclipse.che.api.debug.shared.model.WatchExpression;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
@@ -31,16 +30,12 @@ import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
  *
  * @author Andrey Plotnikov
  * @author Dmitry Shnurenko
+ * @author Oleksandr Andriienko
  */
 public interface DebuggerView extends View<DebuggerView.ActionDelegate> {
+
   /** Needs for delegate some function into Debugger view. */
   interface ActionDelegate extends BaseActionDelegate {
-    /**
-     * Performs any actions appropriate in response to the user having pressed the expand button in
-     * variables tree.
-     */
-    void onExpandVariablesTree(MutableVariable variable);
-
     /** Is invoked when a new thread is selected. */
     void onSelectedThread(long threadId);
 
@@ -53,6 +48,21 @@ public interface DebuggerView extends View<DebuggerView.ActionDelegate> {
 
     /** Breakpoint context menu is invoked. */
     void onBreakpointContextMenu(int clientX, int clientY, Breakpoint breakpoint);
+
+    /**
+     * Performs any actions appropriate in response to the user having pressed the expand button in
+     * variables tree.
+     */
+    void onExpandVariable(Variable variable);
+
+    /** Is invoked when a add watch expression button clicked */
+    void onAddExpressionBtnClicked(WatchExpression expression);
+
+    /** Is invoked when remove watch expression button clicked. */
+    void onRemoveExpressionBtnClicked(WatchExpression expression);
+
+    /** Is invoked when edit watch expression button clicked. */
+    void onEditExpressionBtnClicked(WatchExpression expression);
   }
 
   /**
@@ -62,15 +72,60 @@ public interface DebuggerView extends View<DebuggerView.ActionDelegate> {
    */
   void setExecutionPoint(@NotNull Location location);
 
+  /** Remove all variables */
+  void removeAllVariables();
+
   /**
-   * Sets variables.
+   * Set variables.
    *
    * @param variables available variables
    */
   void setVariables(@NotNull List<? extends Variable> variables);
 
   /** Updates variable in the list */
-  void setVariableValue(@NotNull Variable variable, @NotNull SimpleValue value);
+  void updateVariable(Variable variable);
+
+  /**
+   * Expand variable in the debugger tree.
+   *
+   * @param variable to expand
+   */
+  void expandVariable(Variable variable);
+
+  /**
+   * Returns selected variable on the debugger panel or null if none selected variable.
+   *
+   * @return selected variable or null otherwise.
+   */
+  Variable getSelectedVariable();
+
+  /**
+   * Returns selected expression on the debugger panel or null if none selected expression.
+   *
+   * @return selected expression or null otherwise.
+   */
+  WatchExpression getSelectedExpression();
+
+  /**
+   * Add new watch expression.
+   *
+   * @param expression to add
+   */
+  void addExpression(WatchExpression expression);
+
+  /**
+   * Update new expression.
+   *
+   * @param expression to update
+   */
+  void updateExpression(WatchExpression expression);
+
+  /**
+   * Remove expression.
+   *
+   * @param expression to remove
+   */
+  void removeExpression(WatchExpression expression);
 
   /**
    * Sets breakpoints.
@@ -108,12 +163,9 @@ public interface DebuggerView extends View<DebuggerView.ActionDelegate> {
   /** Returns selected frame index inside thread or -1 if there is no selection. */
   int getSelectedFrameIndex();
 
-  /**
-   * Returns selected variable in the variables list on debugger panel or null if no selection.
-   *
-   * @return selected variable or null if no selection.
-   */
-  MutableVariable getSelectedDebuggerVariable();
-
+  /** Returns debugger toolbar panel widget. */
   AcceptsOneWidget getDebuggerToolbarPanel();
+
+  /** Returns debugger watch toolbar panel widget. */
+  AcceptsOneWidget getDebuggerWatchToolbarPanel();
 }

@@ -29,6 +29,7 @@ import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.MutableVariable;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.ThreadState;
+import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -58,6 +59,7 @@ import org.mockito.junit.MockitoRule;
  * Testing {@link DebuggerPresenter} functionality.
  *
  * @author Dmytro Nochevnov
+ * @author Oleksandr Andriienko
  */
 public class DebuggerPresenterTest extends BaseTest {
 
@@ -72,6 +74,7 @@ public class DebuggerPresenterTest extends BaseTest {
   @Mock private NotificationManager notificationManager;
   @Mock private DebuggerResources debuggerResources;
   @Mock @DebuggerToolbar private ToolbarPresenter debuggerToolbar;
+  @Mock @DebuggerWatchToolBar private ToolbarPresenter watchToolbar;
   @Mock private DebuggerManager debuggerManager;
   @Mock private WorkspaceAgent workspaceAgent;
   @Mock private DebuggerResourceHandlerFactory debuggerResourceHandlerFactory;
@@ -108,6 +111,7 @@ public class DebuggerPresenterTest extends BaseTest {
                 notificationManager,
                 debuggerResources,
                 debuggerToolbar,
+                watchToolbar,
                 debuggerManager,
                 workspaceAgent,
                 debuggerResourceHandlerFactory,
@@ -126,13 +130,13 @@ public class DebuggerPresenterTest extends BaseTest {
         .getValue(eq(selectedVariable), eq(THREAD_ID), eq(FRAME_INDEX));
     doReturn(promiseValue).when(promiseValue).then((Operation<SimpleValueDto>) any());
 
-    presenter.onExpandVariablesTree(selectedVariable);
+    presenter.onExpandVariable(selectedVariable);
 
     verify(promiseValue).then(operationValueCaptor.capture());
     operationValueCaptor.getValue().apply(valueDto);
 
     verify(debugger).getValue(eq(selectedVariable), eq(THREAD_ID), eq(FRAME_INDEX));
-    verify(view).setVariableValue(selectedVariable, valueDto);
+    verify(view).expandVariable(any(Variable.class));
   }
 
   @Test
@@ -231,6 +235,6 @@ public class DebuggerPresenterTest extends BaseTest {
     verify(promiseValue).then(operationValueCaptor.capture());
     operationValueCaptor.getValue().apply(valueDto);
     verify(debugger).getValue(eq(selectedVariable), eq(THREAD_ID), eq(FRAME_INDEX));
-    verify(view).setVariableValue(selectedVariable, valueDto);
+    verify(view).updateVariable(any(Variable.class));
   }
 }
