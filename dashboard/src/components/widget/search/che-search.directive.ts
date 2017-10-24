@@ -59,7 +59,9 @@ export class CheSearch {
           replaceElement.addClass('search-replace-element-hidden');
         }
         element.addClass('search-component-flex');
-        element.find('input').focus();
+        $scope.$applyAsync(() => {
+          element.find('input').focus();
+        });
       } else {
         $scope.valueModel = '';
         if ($scope.replaceElement) {
