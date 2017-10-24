@@ -40,6 +40,9 @@ import org.eclipse.che.api.workspace.server.stack.StackLoader;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.github.factory.resolver.GithubFactoryParametersResolver;
+import org.eclipse.che.workspace.infrastructure.docker.DockerInfraModule;
+import org.eclipse.che.workspace.infrastructure.docker.local.LocalDockerModule;
+import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfraModule;
 import org.flywaydb.core.internal.util.PlaceholderReplacer;
 
 /** @author andrew00x */
@@ -152,6 +155,14 @@ public class WsMasterModule extends AbstractModule {
     //
     // bind(org.eclipse.che.api.agent.server.filters.AddExecInstallerInWorkspaceFilter.class);
     //        bind(org.eclipse.che.api.agent.server.filters.AddExecInstallerInStackFilter.class);
+
+    String infrastructure = System.getenv("CHE_INFRASTRUCTURE_ACTIVE");
+    if ("openshift".equals(infrastructure)) {
+      install(new OpenShiftInfraModule());
+    } else {
+      install(new LocalDockerModule());
+      install(new DockerInfraModule());
+    }
 
     bind(org.eclipse.che.api.user.server.AppStatesPreferenceCleaner.class);
   }

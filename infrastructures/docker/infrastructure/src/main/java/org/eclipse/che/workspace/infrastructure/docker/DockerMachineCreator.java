@@ -33,6 +33,7 @@ public class DockerMachineCreator {
   private final String registry;
   private final boolean snapshotUseRegistry;
   private final String registryNamespace;
+  private final String internalDockerIP;
   private final DockerMachineStopDetector dockerMachineStopDetector;
 
   @Inject
@@ -41,11 +42,13 @@ public class DockerMachineCreator {
       @Named("che.docker.registry") String registry,
       @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry,
       @Named("che.docker.namespace") @Nullable String registryNamespace,
+      @Named("che.docker.ip") @Nullable String internalDockerIP,
       DockerMachineStopDetector dockerMachineStopDetector) {
     this.docker = docker;
     this.registry = registry;
     this.snapshotUseRegistry = snapshotUseRegistry;
     this.registryNamespace = registryNamespace;
+    this.internalDockerIP = internalDockerIP;
     this.dockerMachineStopDetector = dockerMachineStopDetector;
   }
 
@@ -61,7 +64,12 @@ public class DockerMachineCreator {
   /** Creates new docker machine instance from the full container description. */
   public DockerMachine create(ContainerInfo container) {
     NetworkSettings networkSettings = container.getNetworkSettings();
-    String hostname = networkSettings.getGateway();
+    String hostname;
+    if (internalDockerIP != null) {
+      hostname = internalDockerIP;
+    } else {
+      hostname = networkSettings.getGateway();
+    }
     Map<String, ServerConfig> configs =
         Labels.newDeserializer(container.getConfig().getLabels()).servers();
 
