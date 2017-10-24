@@ -43,6 +43,5 @@ public class SystemInfo {
     return unix;
   }
 
-
   private SystemInfo() {}
 }
