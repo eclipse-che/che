@@ -88,6 +88,7 @@ public class NavigationByKeyboardTest {
 
   @Test
   public void navigationByKeyboard() throws Exception {
+    projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
     notificationsPopupPanel.waitProgressPopupPanelClose();

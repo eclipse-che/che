@@ -67,6 +67,7 @@ public class AutocompleteProposalJavaDocTest {
     ide.open(workspace);
     loader.waitOnClosed();
     projectExplorer.waitItem(PROJECT);
+    projectExplorer.selectItem(PROJECT);
     notificationsPopupPanel.waitProgressPopupPanelClose();
 
     projectExplorer.quickExpandWithJavaScript();
