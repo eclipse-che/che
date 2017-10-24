@@ -233,6 +233,10 @@ public class TestGitHubServiceClient {
                 map -> map.get("primary").equals("true") && map.get("visibility").equals("public"))
             .collect(toList());
 
+    if (primaryPublicGithubEmails.isEmpty()) {
+      throw new NoSuchElementException("The list with github primary, public emails is empty");
+    }
+
     return primaryPublicGithubEmails.get(0).get("email");
   }
 }
