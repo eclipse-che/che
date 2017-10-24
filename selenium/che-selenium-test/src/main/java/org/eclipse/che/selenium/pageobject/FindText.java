@@ -60,8 +60,9 @@ public class FindText {
     String FILE_MASK_FIELD = "gwt-debug-text-search-files";
     String CANCEL_BUTTON = "search-cancel-button";
     String SEARCH_BUTTON = "search-button";
-    String FIND_INFO_PANEL =
-        "//div[@id='gwt-debug-infoPanel']//div[@id='gwt-debug-partStackContent']//div[text()='%s']";
+    String FIND_INFO_PANEL = "gwt-debug-find-info-panel";
+    String FIND_INFO_PANEL_TEXT_CONTAINER =
+        "//div[@id='gwt-debug-infoPanel']//div[@id='gwt-debug-partStackContent']";
     String FIND_TEXT_BUTTON = "gwt-debug-partButton-Find";
     String OCCURRENCE = "//span[@debugfilepath = '%s']";
   }
@@ -75,8 +76,11 @@ public class FindText {
   @FindBy(xpath = Locators.FILE_MASK_CHECKBOX_INP)
   WebElement fileMaskCheckBox;
 
-  @FindBy(xpath = Locators.FIND_INFO_PANEL)
+  @FindBy(id = Locators.FIND_INFO_PANEL)
   WebElement findInfoPanel;
+
+  @FindBy(xpath = Locators.FIND_INFO_PANEL_TEXT_CONTAINER)
+  WebElement findInfoPanelTextContainer;
 
   @FindBy(id = Locators.FIND_TEXT_BUTTON)
   WebElement findTextBtn;
@@ -352,13 +356,13 @@ public class FindText {
   /** wait the 'Find' info panel is open */
   public void waitFindInfoPanelIsOpen() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.FIND_INFO_PANEL)));
+        .until(ExpectedConditions.visibilityOf(findInfoPanel));
   }
 
   /** wait the 'Find' info panel is closed */
   public void waitFindInfoPanelIsClosed() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(Locators.FIND_INFO_PANEL)));
+        .until(ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.FIND_INFO_PANEL)));
   }
 
   /** click on the find text button on the find info panel */
@@ -415,7 +419,7 @@ public class FindText {
    * @return text from 'find usages' panel
    */
   public String getTextFromFindInfoPanel() {
-    return findInfoPanel.getText();
+    return findInfoPanelTextContainer.getText();
   }
 
   public void selectItemInFindInfoPanel(String fileName, String textToFind) {
