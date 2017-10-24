@@ -18,6 +18,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
@@ -100,7 +101,7 @@ public class NavigateToFile {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOf(fileNameInput));
     fileNameInput.clear();
-    loader.waitOnClosed();
+    WaitUtils.sleepQuietly(1); // timeout for waiting that input field is cleared
     fileNameInput.sendKeys(symbol);
   }
 
