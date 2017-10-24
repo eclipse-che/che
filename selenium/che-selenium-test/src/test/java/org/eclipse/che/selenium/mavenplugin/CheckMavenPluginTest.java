@@ -18,12 +18,10 @@ import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.SI
 
 import com.google.inject.Inject;
 import java.net.URL;
-import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -60,10 +58,7 @@ public class CheckMavenPluginTest {
   public void setUp() throws Exception {
     URL resource = getClass().getResource("/projects/check-maven-plugin-test");
     testProjectServiceClient.importProject(
-        workspace.getId(),
-        get(resource.toURI()),
-        PROJECT_NAME,
-        MAVEN_SPRING);
+        workspace.getId(), get(resource.toURI()), PROJECT_NAME, MAVEN_SPRING);
     ide.open(workspace);
     projectExplorer.waitProjectExplorer();
   }
@@ -116,7 +111,7 @@ public class CheckMavenPluginTest {
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     projectExplorer.waitFolderDefinedTypeOfFolderByPath(PROJECT_NAME + "/my-lib", PROJECT_FOLDER);
     projectExplorer.waitFolderDefinedTypeOfFolderByPath(
-            PROJECT_NAME + "/my-webapp", PROJECT_FOLDER);
+        PROJECT_NAME + "/my-webapp", PROJECT_FOLDER);
     editor.closeAllTabs();
   }
 
