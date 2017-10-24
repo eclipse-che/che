@@ -14,7 +14,7 @@ import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.ext.java.shared.Constants.LANGUAGE;
 import static org.eclipse.che.ide.ext.java.shared.Constants.OUTPUT_FOLDER;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 

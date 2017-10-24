@@ -25,7 +25,6 @@ import org.eclipse.che.ide.ext.java.client.settings.property.PropertyWidget.Acti
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 
 /** @author Dmitry Shnurenko */
@@ -42,7 +41,8 @@ public class PropertyWidgetImplTest {
 
   @Before
   public void setUp() {
-    when(nameManager.getName(Matchers.<ErrorWarningsOptions>anyObject())).thenReturn(SOME_TEXT);
+    when(nameManager.getName(org.mockito.ArgumentMatchers.<ErrorWarningsOptions>anyObject()))
+        .thenReturn(SOME_TEXT);
 
     widget = new PropertyWidgetImpl(nameManager, DEAD_CODE);
     widget.setDelegate(delegate);

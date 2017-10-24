@@ -20,7 +20,7 @@ import static org.eclipse.che.api.environment.server.EnvironmentParser.SERVER_CO
 import static org.eclipse.che.api.environment.server.EnvironmentParser.SERVER_CONF_LABEL_PREFIX;
 import static org.eclipse.che.api.environment.server.EnvironmentParser.SERVER_CONF_LABEL_PROTOCOL_SUFFIX;
 import static org.eclipse.che.api.environment.server.EnvironmentParser.SERVER_CONF_LABEL_REF_SUFFIX;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;

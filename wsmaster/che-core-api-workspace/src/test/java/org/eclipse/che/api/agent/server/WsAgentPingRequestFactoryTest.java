@@ -11,7 +11,7 @@
 package org.eclipse.che.api.agent.server;
 
 import static org.eclipse.che.api.machine.shared.Constants.WS_AGENT_PORT;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;

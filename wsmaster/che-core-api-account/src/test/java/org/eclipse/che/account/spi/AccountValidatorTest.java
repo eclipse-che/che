@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.account.spi;
 
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 
 import org.eclipse.che.account.api.AccountManager;

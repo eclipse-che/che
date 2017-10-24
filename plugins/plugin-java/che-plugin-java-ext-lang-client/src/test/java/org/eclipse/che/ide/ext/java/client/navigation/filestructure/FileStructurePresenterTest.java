@@ -10,10 +10,10 @@
  */
 package org.eclipse.che.ide.ext.java.client.navigation.filestructure;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -47,10 +47,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FileStructurePresenterTest {
@@ -99,8 +98,10 @@ public class FileStructurePresenterTest {
     when(relatedProject.getLocation()).thenReturn(Path.valueOf("/project"));
     when(javaNavigationService.getCompilationUnit(any(Path.class), anyString(), anyBoolean()))
         .thenReturn(promise);
-    when(promise.then(Matchers.<Operation<CompilationUnit>>anyObject())).thenReturn(promise);
-    when(promise.catchError(Matchers.<Operation<PromiseError>>anyObject())).thenReturn(promise);
+    when(promise.then(org.mockito.ArgumentMatchers.<Operation<CompilationUnit>>anyObject()))
+        .thenReturn(promise);
+    when(promise.catchError(org.mockito.ArgumentMatchers.<Operation<PromiseError>>anyObject()))
+        .thenReturn(promise);
     when(loaderFactory.newLoader()).thenReturn(loader);
 
     presenter =
@@ -143,6 +144,7 @@ public class FileStructurePresenterTest {
 
     verify(editor).setFocus();
     verify(editor).getDocument();
-    verify(document).setSelectedRange(Matchers.<LinearRange>anyObject(), eq(true));
+    verify(document)
+        .setSelectedRange(org.mockito.ArgumentMatchers.<LinearRange>anyObject(), eq(true));
   }
 }
