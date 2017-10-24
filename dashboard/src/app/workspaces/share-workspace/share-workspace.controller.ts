@@ -381,7 +381,7 @@ export class ShareWorkspaceController {
         existingUsers: this.existingUsers
       },
       parent: parentEl,
-      templateUrl: 'app/workspace/share-workspace/add-developers/add-developers.html'
+      templateUrl: 'app/workspaces/share-workspace/add-developers/add-developers.html'
     });
   }
 
