@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
+import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
@@ -99,6 +100,7 @@ public class NavigateToFile {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOf(fileNameInput));
     fileNameInput.clear();
+    loader.waitOnClosed();
     fileNameInput.sendKeys(symbol);
   }
 
@@ -119,16 +121,18 @@ public class NavigateToFile {
         .until(ExpectedConditions.visibilityOf(suggestionPanel));
   }
 
+  public Boolean isFilenameSuggested(final String nameFragment) {
+    return suggestionPanel.getText().contains(nameFragment);
+  }
+
   /**
    * wait expected text in the dropdawn list of the widget
    *
-   * @param nameFragment a text that should be into list
+   * @param text a text that should be into list
    */
-  public Boolean isFilenameSuggested(final String nameFragment) {
-    return new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            (ExpectedCondition<Boolean>)
-                webDriver -> suggestionPanel.getText().contains(nameFragment));
+  public void waitListOfFilesNames(final String text) {
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until((ExpectedCondition<Boolean>) webDriver -> suggestionPanel.getText().contains(text));
   }
 
   public String getText() {
@@ -144,7 +148,7 @@ public class NavigateToFile {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(String.format(Locators.FILE_NAME_LIST_SELECT_WITH_PATH, pathName))))
+                By.xpath(format(Locators.FILE_NAME_LIST_SELECT_WITH_PATH, pathName))))
         .click();
     actionsFactory.createAction(seleniumWebDriver).doubleClick().perform();
   }
@@ -158,7 +162,7 @@ public class NavigateToFile {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(String.format(Locators.FILE_NAME_LIST_SELECT, nameOfFile))))
+                By.xpath(format(Locators.FILE_NAME_LIST_SELECT, nameOfFile))))
         .click();
     actionsFactory.createAction(seleniumWebDriver).doubleClick().perform();
   }

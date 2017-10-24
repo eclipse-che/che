@@ -194,6 +194,7 @@ public class NavigateToFileTest {
         TestMenuCommandsConstants.Assistant.NAVIGATE_TO_FILE);
     navigateToFile.waitFormToOpen();
     navigateToFile.typeSymbolInFileNameField("H");
+    loader.waitOnClosed();
     navigateToFile.waitFileNamePopUp();
     assertFalse(navigateToFile.isFilenameSuggested("HEAD (/NavigateFile/.git)"));
     navigateToFile.closeNavigateToFileForm();
@@ -211,7 +212,7 @@ public class NavigateToFileTest {
     loader.waitOnClosed();
     navigateToFile.waitFileNamePopUp();
     for (String listFiles : files) {
-      navigateToFile.isFilenameSuggested(listFiles);
+      navigateToFile.waitListOfFilesNames(listFiles);
     }
     navigateToFile.selectFileByFullName(pathName);
     navigateToFile.waitFormToClose();
@@ -228,7 +229,7 @@ public class NavigateToFileTest {
     loader.waitOnClosed();
     navigateToFile.waitFileNamePopUp();
     for (String listFiles : FILES_I_SYMBOL) {
-      navigateToFile.isFilenameSuggested(listFiles);
+      navigateToFile.waitListOfFilesNames(listFiles);
     }
     navigateToFile.selectFileByFullName(pathName);
     navigateToFile.waitFormToClose();
@@ -243,7 +244,7 @@ public class NavigateToFileTest {
     loader.waitOnClosed();
     navigateToFile.waitFileNamePopUp();
     for (String listFiles : FILES_R_SYMBOL) {
-      navigateToFile.isFilenameSuggested(listFiles);
+      navigateToFile.waitListOfFilesNames(listFiles);
     }
     navigateToFile.selectFileByFullName(pathName);
     navigateToFile.waitFormToClose();
