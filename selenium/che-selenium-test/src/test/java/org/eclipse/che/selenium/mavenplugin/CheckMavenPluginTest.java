@@ -11,6 +11,8 @@
 package org.eclipse.che.selenium.mavenplugin;
 
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
+import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
+import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.SIMPLE_FOLDER;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -79,38 +81,20 @@ public class CheckMavenPluginTest {
   }
 
   @Test(priority = 1)
-  public void excludeIncludeModules() {
+  public void shouldExcludeModules() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
     editor.waitActiveEditor();
     editor.setCursorToDefinedLineAndChar(25, 8);
     editor.typeTextIntoEditor("!--");
     editor.setCursorToDefinedLineAndChar(26, 32);
     editor.typeTextIntoEditor("--");
-
-    projectExplorer.waitFolderDefinedTypeOfFolderByPath(
-        PROJECT_NAME + "/my-lib", ProjectExplorer.FolderTypes.SIMPLE_FOLDER);
-
-    projectExplorer.waitFolderDefinedTypeOfFolderByPath(
-            PROJECT_NAME + "/my-webapp", ProjectExplorer.FolderTypes.SIMPLE_FOLDER);
-
-    editor.setCursorToDefinedLineAndChar(26, 32);
-    editor.typeTextIntoEditor(Keys.DELETE.toString());
-    editor.typeTextIntoEditor(Keys.DELETE.toString());
-    editor.setCursorToDefinedLineAndChar(25, 8);
-    editor.typeTextIntoEditor(Keys.DELETE.toString());
-    editor.typeTextIntoEditor(Keys.DELETE.toString());
-    editor.typeTextIntoEditor(Keys.DELETE.toString());
-
-    projectExplorer.waitFolderDefinedTypeOfFolderByPath(
-        PROJECT_NAME + "/my-lib", ProjectExplorer.FolderTypes.PROJECT_FOLDER);
-    projectExplorer.waitFolderDefinedTypeOfFolderByPath(
-            PROJECT_NAME + "/my-webapp", ProjectExplorer.FolderTypes.SIMPLE_FOLDER);
-
-    editor.closeAllTabs();
+    projectExplorer.waitFolderDefinedTypeOfFolderByPath(PROJECT_NAME + "/my-lib", SIMPLE_FOLDER);
+    projectExplorer.waitFolderDefinedTypeOfFolderByPath(PROJECT_NAME + "/my-webapp", SIMPLE_FOLDER);
   }
 
- // @Test(priority = 2)
+  @Test(priority = 2)
   public void shouldAccessClassCreatedInAnotherModuleAfterIncludingModule() {
+    includeModulesInTheParentPom();
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/my-webapp/src/main/java/che/eclipse/sample/Aclass.java");
     editor.waitActiveEditor();
@@ -118,6 +102,20 @@ public class CheckMavenPluginTest {
     enterClassNameViaAutocomplete();
     editor.typeTextIntoEditor(" testClass2 = new TestClass();");
     editor.waitAllMarkersDisappear(ERROR_MARKER);
+  }
+
+  private void includeModulesInTheParentPom() {
+    editor.setCursorToDefinedLineAndChar(26, 32);
+    editor.typeTextIntoEditor(Keys.DELETE.toString());
+    editor.typeTextIntoEditor(Keys.DELETE.toString());
+    editor.setCursorToDefinedLineAndChar(25, 8);
+    editor.typeTextIntoEditor(Keys.DELETE.toString());
+    editor.typeTextIntoEditor(Keys.DELETE.toString());
+    editor.typeTextIntoEditor(Keys.DELETE.toString());
+    projectExplorer.waitFolderDefinedTypeOfFolderByPath(PROJECT_NAME + "/my-lib", PROJECT_FOLDER);
+    projectExplorer.waitFolderDefinedTypeOfFolderByPath(
+            PROJECT_NAME + "/my-webapp", PROJECT_FOLDER);
+    editor.closeAllTabs();
   }
 
   /** check ability just created class in autocomplete container */
