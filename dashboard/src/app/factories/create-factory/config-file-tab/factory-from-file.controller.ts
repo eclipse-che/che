@@ -30,7 +30,9 @@ export class FactoryFromFileCtrl {
    * @ngInject for Dependency injection
    */
   constructor($filter: ng.IFilterService, cheAPI: CheAPI, cheNotification: CheNotification, FileUploader: any) {
+    /* tslint:disable */
     'ngInject';
+    /* tslint:enable */
 
     this.cheAPI = cheAPI;
     this.cheNotification = cheNotification;
@@ -79,7 +81,7 @@ export class FactoryFromFileCtrl {
     });
 
     // callback
-    this.uploader.onAfterAddingFile = function (fileItem) {
+    this.uploader.onAfterAddingFile = function (fileItem: any) {
       let uploadedFileName = fileItem._file.name;
       let reader = new FileReader();
 
