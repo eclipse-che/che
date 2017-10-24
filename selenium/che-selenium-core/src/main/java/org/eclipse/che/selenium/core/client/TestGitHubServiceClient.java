@@ -20,7 +20,7 @@ import com.google.inject.Singleton;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.NoSuchElementException;
 import javax.xml.bind.DatatypeConverter;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
@@ -218,10 +218,25 @@ public class TestGitHubServiceClient {
     List<Map<String, String>> properties =
         response.as(List.class, new TypeToken<List<Map<String, String>>>() {}.getType());
 
-    return properties
-        .stream()
-        .filter(map -> map.get("primary").equals("true") && map.get("visibility").equals("public"))
-        .map(map -> map.get("email"))
-        .collect(Collectors.joining());
+    if (properties.isEmpty()) {
+      throw new NoSuchElementException("The list with github emails is empty");
+    }
+
+    return filterPropertiesAndGetGithubPrimaryEmail(properties);
+  }
+
+  private String filterPropertiesAndGetGithubPrimaryEmail(List<Map<String, String>> properties) {
+    List<Map<String, String>> primaryPublicGithubEmails =
+        properties
+            .stream()
+            .filter(
+                map -> map.get("primary").equals("true") && map.get("visibility").equals("public"))
+            .collect(toList());
+
+    if (primaryPublicGithubEmails.isEmpty()) {
+      throw new NoSuchElementException("The list with github primary, public emails is empty");
+    }
+
+    return primaryPublicGithubEmails.get(0).get("email");
   }
 }
