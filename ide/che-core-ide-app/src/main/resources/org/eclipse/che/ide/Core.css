@@ -813,10 +813,10 @@ div[name="linkWithEditor"][activated="true"]  i {
 }
 
 .search-match {
-    background: linear-gradient(to bottom, #c1be9e 6%, #B89C07 64%);
+    background: findResultsBackground;
     border-radius: 2px;
     padding-right: 2px;
     padding-left: 2px;
+    color: findResultsTextColor;
+    text-shadow: none;
 }
-
-

@@ -711,7 +711,7 @@ public class LightTheme implements Theme {
 
   @Override
   public String getMainMenuFontColor() {
-    return "#555555";
+    return "#3c3c3c;";
   }
 
   @Override
@@ -1006,7 +1006,7 @@ public class LightTheme implements Theme {
 
   @Override
   public String getPopupHotKeyColor() {
-    return "#A2A2A2";
+    return "#222222";
   }
 
   @Override
@@ -1346,12 +1346,12 @@ public class LightTheme implements Theme {
 
   @Override
   public String projectExplorerPresentableTextShadow() {
-    return "1px 1px 1px rgba(0, 0, 0, 0.1)";
+    return "none";
   }
 
   @Override
   public String projectExplorerInfoTextShadow() {
-    return "1px 1px 1px rgba(0, 0, 0, 0.1)";
+    return "none";
   }
 
   @Override
@@ -1716,5 +1716,15 @@ public class LightTheme implements Theme {
   @Override
   public String cellTableCellColor() {
     return "#666666";
+  }
+
+  @Override
+  public String findResultsBackground() {
+    return "#c1be9e";
+  }
+
+  @Override
+  public String findResultsTextColor() {
+    return "#272727";
   }
 }
