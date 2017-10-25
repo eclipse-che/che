@@ -14,7 +14,7 @@ import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.CUSTO
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Run.EDIT_DEBUG_CONFIGURATION;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Run.RUN_MENU;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.PLAIN_JAVA;
-import static org.eclipse.che.selenium.pageobject.debug.DebugPanel.DebuggerButtonsPanel.RESUME_BTN_ID;
+import static org.eclipse.che.selenium.pageobject.debug.DebugPanel.DebuggerActionButtons.RESUME_BTN_ID;
 
 import com.google.inject.Inject;
 import java.nio.file.Paths;

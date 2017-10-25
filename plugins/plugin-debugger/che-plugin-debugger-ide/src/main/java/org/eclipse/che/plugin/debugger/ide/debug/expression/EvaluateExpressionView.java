@@ -20,7 +20,7 @@ import org.eclipse.che.ide.api.mvp.View;
  */
 public interface EvaluateExpressionView extends View<EvaluateExpressionView.ActionDelegate> {
   /** Needs for delegate some function into EvaluateExpression view. */
-  public interface ActionDelegate {
+  interface ActionDelegate {
     /** Performs any actions appropriate in response to the user having pressed the Close button. */
     void onCloseClicked();
 
