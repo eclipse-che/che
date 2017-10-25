@@ -25,7 +25,6 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.resource.Path;
-import org.eclipse.che.ide.ui.smartTree.data.Node;
 
 /**
  * Util class, helps to open file by path in editor
