@@ -145,7 +145,7 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
     }
 
     LOG.info("Destroy remained workspaces: {}.", extractWorkspaceInfo());
-    testWorkspaceQueue.forEach(TestWorkspace::delete);
+    testWorkspaceQueue.parallelStream().forEach(TestWorkspace::delete);
 
     if (isInterrupted) {
       Thread.currentThread().interrupt();
