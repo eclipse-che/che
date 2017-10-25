@@ -17,6 +17,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import java.util.Comparator;
+import java.util.List;
 import javax.inject.Inject;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
@@ -70,6 +71,7 @@ public class GitPanelViewImpl extends BaseView<ActionDelegate> implements GitPan
     NodeStorage nodeStorage = new NodeStorage();
     NodeLoader nodeLoader = new NodeLoader();
     repositoriesList = new Tree(nodeStorage, nodeLoader);
+    repositoriesList.getElement().getStyle().setProperty("maxHeight", "200px");
     repositoriesList
         .getNodeStorage()
         .addSortInfo(new StoreSortInfo(Comparator.comparing(Node::getName), SortDir.ASC));
@@ -108,6 +110,15 @@ public class GitPanelViewImpl extends BaseView<ActionDelegate> implements GitPan
       node.setChanges(changes);
       repositoriesList.refresh(node);
     }
+  }
+
+  @Override
+  public String getSelectedRepository() {
+    List<Node> selection = repositoriesList.getSelectionModel().getSelectedNodes();
+    if (selection.isEmpty()) {
+      return null;
+    }
+    return selection.get(0).getName();
   }
 
   private RepositoryNode findNode(String repositoryName) {

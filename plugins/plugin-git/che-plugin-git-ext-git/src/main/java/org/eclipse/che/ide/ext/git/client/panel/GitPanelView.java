@@ -39,6 +39,12 @@ public interface GitPanelView extends View<GitPanelView.ActionDelegate> {
    */
   void updateRepositoryChanges(String repository, int changes);
 
+  /**
+   * Returns repository which is selected in the repositories list.
+   * If nothing selected null will be returned.
+   */
+  String getSelectedRepository();
+
   /** Embed changed files panel ui */
   void setChangesPanelView(ChangesPanelView changesPanelView);
 

@@ -127,8 +127,10 @@ public class GitPanelPresenter extends BasePresenter
     this.changes = new HashMap<>();
 
     for (Project project : appContext.getProjects()) {
-      view.addRepository(project.getName());
-      reloadRepositoryData(project);
+      if (projectUnderGit(project)) {
+        view.addRepository(project.getName());
+        reloadRepositoryData(project);
+      }
     }
   }
 
@@ -140,6 +142,10 @@ public class GitPanelPresenter extends BasePresenter
               MutableAlteredFiles alteredFiles = new MutableAlteredFiles(project, diff);
               changes.put(project.getName(), alteredFiles);
               view.updateRepositoryChanges(project.getName(), alteredFiles.getFilesQuantity());
+              // update changed files list if this repository is selected
+              if (project.getName().equals(view.getSelectedRepository())) {
+                updateChangedFiles(alteredFiles);
+              }
             })
         .catchError(
             arg -> {
