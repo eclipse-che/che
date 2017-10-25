@@ -22,7 +22,6 @@ import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.websocket.MessageBus;
-import org.eclipse.che.plugin.debugger.ide.debug.DisposableBreakpointRemoverFactory;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;

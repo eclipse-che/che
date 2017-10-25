@@ -24,8 +24,7 @@ import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 import org.eclipse.che.plugin.debugger.ide.debug.AbstractDebugger;
-import org.eclipse.che.plugin.debugger.ide.debug.DebuggerResourceHandlerFactory;
-import org.eclipse.che.plugin.debugger.ide.debug.DisposableBreakpointRemoverFactory;
+import org.eclipse.che.plugin.debugger.ide.debug.DebuggerLocationHandlerManager;
 
 /**
  * The NodeJs Debugger Client.
@@ -48,8 +47,7 @@ public class NodeJsDebugger extends AbstractDebugger {
       NotificationManager notificationManager,
       BreakpointManager breakpointManager,
       RequestHandlerManager requestHandlerManager,
-      DebuggerResourceHandlerFactory debuggerResourceHandlerFactory,
-      DisposableBreakpointRemoverFactory disposableBreakpointRemoverFactory) {
+      DebuggerLocationHandlerManager debuggerLocationHandlerManager) {
 
     super(
         service,
@@ -62,8 +60,7 @@ public class NodeJsDebugger extends AbstractDebugger {
         notificationManager,
         breakpointManager,
         requestHandlerManager,
-        debuggerResourceHandlerFactory,
-        disposableBreakpointRemoverFactory,
+        debuggerLocationHandlerManager,
         ID);
   }
 

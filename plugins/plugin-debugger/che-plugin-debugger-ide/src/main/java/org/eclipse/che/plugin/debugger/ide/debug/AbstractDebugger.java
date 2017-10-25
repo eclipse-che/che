@@ -101,10 +101,9 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   private final DebuggerServiceClient service;
   private final LocalStorageProvider localStorageProvider;
   private final EventBus eventBus;
-  private final DebuggerResourceHandlerFactory debuggerResourceHandlerFactory;
+  private final DebuggerLocationHandlerManager debuggerLocationHandlerManager;
   private final DebuggerManager debuggerManager;
   private final BreakpointManager breakpointManager;
-  private final DisposableBreakpointRemoverFactory disposableBreakpointRemoverFactory;
   private final String debuggerType;
   private final RequestHandlerManager requestHandlerManager;
 
@@ -122,8 +121,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
       NotificationManager notificationManager,
       BreakpointManager breakpointManager,
       RequestHandlerManager requestHandlerManager,
-      DebuggerResourceHandlerFactory debuggerResourceHandlerFactory,
-      DisposableBreakpointRemoverFactory disposableBreakpointRemoverFactory,
+      DebuggerLocationHandlerManager debuggerLocationHandlerManager,
       String type) {
     this.service = service;
     this.transmitter = transmitter;
@@ -131,11 +129,10 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     this.dtoFactory = dtoFactory;
     this.localStorageProvider = localStorageProvider;
     this.eventBus = eventBus;
-    this.debuggerResourceHandlerFactory = debuggerResourceHandlerFactory;
+    this.debuggerLocationHandlerManager = debuggerLocationHandlerManager;
     this.debuggerManager = debuggerManager;
     this.notificationManager = notificationManager;
     this.breakpointManager = breakpointManager;
-    this.disposableBreakpointRemoverFactory = disposableBreakpointRemoverFactory;
     this.observers = new ArrayList<>();
     this.debuggerType = type;
     this.requestHandlerManager = requestHandlerManager;
@@ -176,8 +173,8 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                       }
 
                       if (currentLocation != null) {
-                        debuggerResourceHandlerFactory
-                            .getOrDefault(getDebuggerType())
+                        debuggerLocationHandlerManager
+                            .getOrDefault(currentLocation)
                             .find(
                                 currentLocation,
                                 new AsyncCallback<VirtualFile>() {
@@ -236,8 +233,8 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   }
 
   private void open(Location location) {
-    debuggerResourceHandlerFactory
-        .getOrDefault(getDebuggerType())
+    debuggerLocationHandlerManager
+        .getOrDefault(location)
         .open(
             location,
             new AsyncCallback<VirtualFile>() {
@@ -618,10 +615,6 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
           .addBreakpoint(debugSessionDto.getId(), breakpointDto)
           .then(
               it -> {
-                DisposableBreakpointRemover disposableBreakpointRemover =
-                    disposableBreakpointRemoverFactory.create(breakpointDto, this);
-                addObserver(disposableBreakpointRemover);
-
                 resume();
               });
     }

@@ -8,11 +8,11 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.debugger.ide;
+package org.eclipse.che.plugin.debugger.ide.debug.dialogs.changevalue;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -23,14 +23,15 @@ import org.eclipse.che.api.debug.shared.dto.SimpleValueDto;
 import org.eclipse.che.api.debug.shared.dto.VariableDto;
 import org.eclipse.che.api.debug.shared.dto.VariablePathDto;
 import org.eclipse.che.api.debug.shared.model.MutableVariable;
+import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerManager;
+import org.eclipse.che.plugin.debugger.ide.BaseTest;
 import org.eclipse.che.plugin.debugger.ide.debug.DebuggerPresenter;
-import org.eclipse.che.plugin.debugger.ide.debug.changevalue.ChangeValuePresenter;
-import org.eclipse.che.plugin.debugger.ide.debug.changevalue.ChangeValueView;
+import org.eclipse.che.plugin.debugger.ide.debug.dialogs.DebuggerDialogFactory;
+import org.eclipse.che.plugin.debugger.ide.debug.dialogs.common.TextAreaDialogView;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 /**
@@ -38,17 +39,20 @@ import org.mockito.Mock;
  *
  * @author Artem Zatsarynnyi
  */
-public class ChangeVariableValueTest extends BaseTest {
+public class ChangeValuePresenterTest extends BaseTest {
   private static final String VAR_VALUE = "var_value";
   private static final String VAR_NAME = "var_name";
   private static final String EMPTY_VALUE = "";
-  @Mock private ChangeValueView view;
-  @InjectMocks private ChangeValuePresenter presenter;
+  @Mock private TextAreaDialogView view;
+  @Mock private DebuggerManager debuggerManager;
+  @Mock private DebuggerPresenter debuggerPresenter;
+  @Mock private DebuggerDialogFactory dialogFactory;
+
+  private ChangeValuePresenter presenter;
+
   @Mock private VariableDto var;
   @Mock private VariablePathDto varPath;
-  @Mock private DebuggerManager debuggerManager;
   @Mock private Debugger debugger;
-  @Mock private DebuggerPresenter debuggerPresenter;
   @Mock private MutableVariable variable;
   @Mock private VariablePathDto variablePathDto;
   @Mock private SimpleValueDto simpleValueDto;
@@ -56,12 +60,16 @@ public class ChangeVariableValueTest extends BaseTest {
   @Before
   public void setUp() {
     super.setUp();
+    when(dialogFactory.createTextAreaDialogView(any(), any(), any())).thenReturn(view);
     when(var.getName()).thenReturn(VAR_NAME);
     when(var.getValue()).thenReturn(simpleValueDto);
     when(var.getVariablePath()).thenReturn(varPath);
     when(simpleValueDto.getString()).thenReturn(VAR_VALUE);
     when(dtoFactory.createDto(VariableDto.class)).thenReturn(mock(VariableDto.class));
     when(debugger.isSuspended()).thenReturn(true);
+
+    presenter =
+        new ChangeValuePresenter(dialogFactory, constants, debuggerManager, debuggerPresenter);
   }
 
   @Test
@@ -77,7 +85,7 @@ public class ChangeVariableValueTest extends BaseTest {
     verify(view).focusInValueField();
     verify(view).selectAllText();
     verify(view).setEnableChangeButton(eq(DISABLE_BUTTON));
-    verify(view).showDialog();
+    verify(view).show();
   }
 
   @Test
@@ -91,7 +99,7 @@ public class ChangeVariableValueTest extends BaseTest {
   public void shouldDisableChangeButtonIfNoValue() throws Exception {
     when(view.getValue()).thenReturn(EMPTY_VALUE);
 
-    presenter.onVariableValueChanged();
+    presenter.onValueChanged();
 
     verify(view).setEnableChangeButton(eq(DISABLE_BUTTON));
   }
@@ -100,7 +108,7 @@ public class ChangeVariableValueTest extends BaseTest {
   public void shouldEnableChangeButtonIfValueNotEmpty() throws Exception {
     when(view.getValue()).thenReturn(VAR_VALUE);
 
-    presenter.onVariableValueChanged();
+    presenter.onValueChanged();
 
     verify(view).setEnableChangeButton(eq(!DISABLE_BUTTON));
   }
@@ -115,9 +123,9 @@ public class ChangeVariableValueTest extends BaseTest {
     when(variablePathDto.getPath()).thenReturn(new ArrayList<>());
 
     presenter.showDialog();
-    presenter.onChangeClicked();
+    presenter.onAgreeClicked();
 
-    verify(debugger).setValue(anyObject(), anyLong(), anyInt());
+    verify(debugger).setValue(any(Variable.class), anyLong(), anyInt());
     verify(view).close();
   }
 }

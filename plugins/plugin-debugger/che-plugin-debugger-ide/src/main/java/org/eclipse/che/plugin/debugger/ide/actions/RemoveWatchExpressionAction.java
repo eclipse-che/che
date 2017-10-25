@@ -10,50 +10,50 @@
  */
 package org.eclipse.che.plugin.debugger.ide.actions;
 
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Inject;
-import java.util.Collections;
+import org.eclipse.che.api.debug.shared.model.WatchExpression;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
 import org.eclipse.che.plugin.debugger.ide.DebuggerResources;
 import org.eclipse.che.plugin.debugger.ide.debug.DebuggerPresenter;
-import org.eclipse.che.plugin.debugger.ide.debug.changevalue.ChangeValuePresenter;
 
 /**
- * Action which allows change value of selected variable with debugger
+ * Action allows remove debugger watch expression from debugger tree.
  *
- * @author Mykola Morhun
+ * @author Oleksandr Andriienko
  */
-public class ChangeVariableValueAction extends AbstractPerspectiveAction {
+public class RemoveWatchExpressionAction extends AbstractPerspectiveAction {
 
-  private final ChangeValuePresenter changeValuePresenter;
   private final DebuggerPresenter debuggerPresenter;
 
   @Inject
-  public ChangeVariableValueAction(
+  public RemoveWatchExpressionAction(
       DebuggerLocalizationConstant locale,
       DebuggerResources resources,
-      ChangeValuePresenter changeValuePresenter,
       DebuggerPresenter debuggerPresenter) {
     super(
-        Collections.singletonList(PROJECT_PERSPECTIVE_ID),
-        locale.changeVariableValue(),
-        locale.changeVariableValueDescription(),
+        singletonList(PROJECT_PERSPECTIVE_ID),
+        locale.removeWatchExpression(),
+        locale.removeWatchExpressionDescription(),
         null,
-        resources.changeVariableValue());
-    this.changeValuePresenter = changeValuePresenter;
+        resources.removeWatchExpressionBtn());
     this.debuggerPresenter = debuggerPresenter;
   }
 
   @Override
-  public void actionPerformed(ActionEvent e) {
-    changeValuePresenter.showDialog();
+  public void actionPerformed(ActionEvent event) {
+    WatchExpression expression = debuggerPresenter.getSelectedWatchExpression();
+    if (expression != null) {
+      debuggerPresenter.onRemoveExpressionBtnClicked(expression);
+    }
   }
 
   @Override
   public void updateInPerspective(ActionEvent event) {
-    event.getPresentation().setEnabled(debuggerPresenter.getSelectedVariable() != null);
+    event.getPresentation().setEnabled(debuggerPresenter.getSelectedWatchExpression() != null);
   }
 }

@@ -124,7 +124,7 @@ public class CppProjectDebuggingTest {
     debugPanel.waitTextInVariablesPanel("\"man\"");
 
     // when
-    debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_OUT);
+    debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_OUT);
 
     // then
     debugPanel.waitDebugHighlightedText("  std::cout << hello.sayHello(\"man\") << std::endl;");

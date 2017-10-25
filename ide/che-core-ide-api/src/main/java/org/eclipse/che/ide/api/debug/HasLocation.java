@@ -8,17 +8,15 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.debugger.ide.debug;
+package org.eclipse.che.ide.api.debug;
 
-import org.eclipse.che.api.debug.shared.model.Breakpoint;
-import org.eclipse.che.ide.debug.Debugger;
+import org.eclipse.che.api.debug.shared.model.Location;
 
 /**
- * Factory for {@link DisposableBreakpointRemover}.
+ * Marker to indicate that given implementation can deal with debug {@link Location}.
  *
- * @author Igor Vinokur
+ * @author Anatolii Bazko
  */
-public interface DisposableBreakpointRemoverFactory {
-
-  DisposableBreakpointRemover create(Breakpoint breakpoint, Debugger debugger);
+public interface HasLocation {
+  Location toLocation(int lineNumber);
 }

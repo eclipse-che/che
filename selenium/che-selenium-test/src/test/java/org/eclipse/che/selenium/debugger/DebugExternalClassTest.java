@@ -131,7 +131,7 @@ public class DebugExternalClassTest {
 
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
     editor.waitActiveBreakpoint(19);
-    debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_INTO);
+    debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_INTO);
 
     // then
     editor.waitActiveTabFileName("Logger"); // there should be class "Logger" opened
@@ -143,7 +143,7 @@ public class DebugExternalClassTest {
     // java logger"
 
     // when
-    debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.RESUME_BTN_ID);
+    debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.RESUME_BTN_ID);
 
     // then
     editor.waitActiveTabFileName("SimpleLogger");
@@ -160,7 +160,7 @@ public class DebugExternalClassTest {
 
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
     editor.waitActiveBreakpoint(23);
-    debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_INTO);
+    debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_INTO);
 
     // then
     editor.waitActiveTabFileName(
@@ -174,14 +174,14 @@ public class DebugExternalClassTest {
         "=\"Info from {}\""); // there should be at least parameter with value "Info from {}"
 
     // when
-    debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_OVER);
+    debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_OVER);
 
     // then
     editor.waitActiveTabFileName("Logger"); // there should be class "Logger" opened
     debugPanel.waitDebugHighlightedText("  }");
 
     // when
-    debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_OVER);
+    debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_OVER);
 
     // then
     editor.waitActiveTabFileName("SimpleLogger");
@@ -200,7 +200,7 @@ public class DebugExternalClassTest {
 
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
     editor.waitActiveBreakpoint(27);
-    debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_INTO);
+    debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_INTO);
 
     // then
     editor.waitActiveTabFileName(
@@ -214,7 +214,7 @@ public class DebugExternalClassTest {
     editor.waitActiveTabFileName("Category"); // there should be class "Category" opened
 
     // when
-    debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_OUT);
+    debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_OUT);
 
     // then
     editor.waitActiveTabFileName("SimpleLogger");
