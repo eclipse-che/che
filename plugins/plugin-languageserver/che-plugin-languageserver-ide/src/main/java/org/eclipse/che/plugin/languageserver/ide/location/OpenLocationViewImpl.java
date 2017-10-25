@@ -19,16 +19,16 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedLocation;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.ide.api.data.tree.AbstractTreeNode;
-import org.eclipse.che.ide.api.data.tree.HasAction;
-import org.eclipse.che.ide.api.data.tree.Node;
-import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
 import org.eclipse.che.ide.ui.smartTree.Tree;
+import org.eclipse.che.ide.ui.smartTree.data.AbstractTreeNode;
+import org.eclipse.che.ide.ui.smartTree.data.HasAction;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
+import org.eclipse.che.ide.ui.smartTree.data.NodeInterceptor;
 import org.eclipse.che.ide.ui.smartTree.presentation.HasPresentation;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 
@@ -40,7 +40,6 @@ public class OpenLocationViewImpl extends BaseView<OpenLocationView.ActionDelega
 
   @Inject
   public OpenLocationViewImpl(PartStackUIResources resources) {
-    super(resources);
     DockLayoutPanel panel = new DockLayoutPanel(Style.Unit.PX);
 
     NodeStorage storage =
@@ -61,7 +60,7 @@ public class OpenLocationViewImpl extends BaseView<OpenLocationView.ActionDelega
   @Override
   public void setLocations(List<ExtendedLocation> locations) {
     tree.getNodeStorage().clear();
-    //TODO workaround, tree has bug with adding list of nodes
+    // TODO workaround, tree has bug with adding list of nodes
     for (ExtendedLocation location : locations) {
       tree.getNodeStorage().add(new LocationNode(location));
     }
