@@ -404,7 +404,7 @@ if [ "${CHE_FABRIC8_MULTITENANT}" == "true" ]; then
           - name: \"CHE_WORKSPACE_CHE__SERVER__ENDPOINT\"
             value: \"\"
 $MULTI_USER_REPLACEMENT_STRING"
-  
+  MULTITENANT_CUSTOM_STRATEGY_REPLACEMENT="s/    che-server-evaluation-strategy: .*/    che-server-evaluation-strategy: always-external-custom/"
   MULTITENANT_CUSTOM_TEMPLATE_REPLACEMENT="s/    che.docker.server_evaluation_strategy.custom.template: .*/    che.docker.server_evaluation_strategy.custom.template: <serverName>-<if(isDevMachine)><workspaceIdWithoutPrefix><else><machineName><endif>-<if(workspacesRoutingSuffix)><user>-che.<workspacesRoutingSuffix><else><externalAddress><endif>/"
   MULTITENANT_IDLING_REPLACEMENT="s/    che-server-timeout-ms: .*/    che-server-timeout-ms: '0'/"
 fi
@@ -436,6 +436,7 @@ if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
     if [ "${CHE_KEYCLOAK_DISABLED}" == "true" ]; then sed "s/    keycloak-disabled: \"false\"/    keycloak-disabled: \"true\"/" ; else cat -; fi | \
     sed "$MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING" | \
     append_after_match "env:" "${MULTI_USER_REPLACEMENT_STRING}" | \
+    if [ "${CHE_FABRIC8_MULTITENANT}" == "true" ]; then sed "$MULTITENANT_CUSTOM_STRATEGY_REPLACEMENT" ; else cat -; fi | \
     if [ "${CHE_FABRIC8_MULTITENANT}" == "true" ]; then sed "$MULTITENANT_CUSTOM_TEMPLATE_REPLACEMENT" ; else cat -; fi | \
     if [ "${CHE_FABRIC8_MULTITENANT}" == "true" ]; then sed "$MULTITENANT_IDLING_REPLACEMENT" ; else cat -; fi | \
     oc apply --force=true -f -
@@ -450,6 +451,7 @@ elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
     if [ "${CHE_KEYCLOAK_DISABLED}" == "true" ]; then sed "s/    keycloak-disabled: \"false\"/    keycloak-disabled: \"true\"/" ; else cat -; fi | \
     sed "$MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING" | \
     append_after_match "env:" "${MULTI_USER_REPLACEMENT_STRING}" | \
+    if [ "${CHE_FABRIC8_MULTITENANT}" == "true" ]; then sed "$MULTITENANT_CUSTOM_STRATEGY_REPLACEMENT" ; else cat -; fi | \
     if [ "${CHE_FABRIC8_MULTITENANT}" == "true" ]; then sed "$MULTITENANT_CUSTOM_TEMPLATE_REPLACEMENT" ; else cat -; fi | \
     if [ "${CHE_FABRIC8_MULTITENANT}" == "true" ]; then sed "$MULTITENANT_IDLING_REPLACEMENT" ; else cat -; fi | \
     oc apply --force=true -f -
@@ -470,6 +472,7 @@ else
     if [ "${K8S_VERSION_PRIOR_TO_1_6}" == "true" ]; then sed "s/    che-openshift-precreate-subpaths: \"false\"/    che-openshift-precreate-subpaths: \"true\"/"  ; else cat -; fi | \
     sed "$MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING" | \
     append_after_match "env:" "${MULTI_USER_REPLACEMENT_STRING}" | \
+    if [ "${CHE_FABRIC8_MULTITENANT}" == "true" ]; then sed "$MULTITENANT_CUSTOM_STRATEGY_REPLACEMENT" ; else cat -; fi | \
     if [ "${CHE_FABRIC8_MULTITENANT}" == "true" ]; then sed "$MULTITENANT_CUSTOM_TEMPLATE_REPLACEMENT" ; else cat -; fi | \
     if [ "${CHE_FABRIC8_MULTITENANT}" == "true" ]; then sed "$MULTITENANT_IDLING_REPLACEMENT" ; else cat -; fi | \
     oc apply --force=true -f -
