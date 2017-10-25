@@ -20,7 +20,6 @@ import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
@@ -47,100 +46,7 @@ import org.testng.annotations.Test;
 /** @author Aleksandr Shmaraev */
 public class FindTextFeatureTest {
 
-  private static final String PROJECT_NAME = NameGenerator.generate("FindTextFeature", 4);
-
-  private static final String FIND_NOTHING = "No results found for\n'dddhhh'\n";
-
-  private static final String PR_1_EXPECTED_TEXT_1 =
-      format(
-          "1 occurrence found in 1 file (per page results) for 'Filesystem'. Total file count - 1\n"
-              + "/%s/readme.con\n"
-              + "(1 occurrence of 'Filesystem' found)\n"
-              + "1:   Filesystem 1K-blocks Used Available Use%% Mounted on",
-          PROJECT_NAME);
-  private static final String PR_1_EXPECTED_TEXT_2 =
-      format(
-          "1 occurrence found in 1 file (per page results) for 'Feature'. Total file count - 1\n"
-              + "/%s/readme.api\n"
-              + "(1 occurrence of 'Feature' found)\n"
-              + "1:   FindTextFeatureTest",
-          PROJECT_NAME);
-
-  private static final String PR_2_EXPECTED_TEXT_1 =
-      format(
-          "9 occurrences found in 4 files (per page results) for 'String'. Total file count - 4\n"
-              + "/%1$s/my-webapp/src/main/java/org/eclipse/qa/examples/AppController.java\n"
-              + "(4 occurrences of 'String' found)\n"
-              + "/%1$s/my-webapp/src/main/webapp/WEB-INF/jsp/guess_num.jsp\n"
-              + "(2 occurrences of 'String' found)\n"
-              + "/%1$s/my-lib/src/test/java/hello/SayHelloTest.java\n"
-              + "(1 occurrence of 'String' found)\n"
-              + "/%1$s/my-lib/src/main/java/hello/SayHello.java\n"
-              + "(2 occurrences of 'String' found)",
-          PROJECT_NAME);
-
-  private static final String PR_3_EXPECTED_TEXT_1 =
-      format(
-          "10 occurrences found in 4 files (per page results) for 'uess'. Total file count - 4\n"
-              + "/%1$s/my-webapp/src/main/java/org/eclipse/qa/examples/AppController.java\n"
-              + "(6 occurrences of 'uess' found)\n"
-              + "/%1$s/my-webapp/src/main/webapp/index.jsp\n"
-              + "(1 occurrence of 'uess' found)\n"
-              + "/%1$s/my-webapp/src/main/webapp/WEB-INF/jsp/guess_num.jsp\n"
-              + "(2 occurrences of 'uess' found)\n"
-              + "/%1$s/my-webapp/src/main/webapp/WEB-INF/spring-servlet.xml\n"
-              + "(1 occurrence of 'uess' found)",
-          PROJECT_NAME);
-
-  private static final String PR_4_PATH_1 =
-      PROJECT_NAME + "/my-webapp/src/main/java/org/eclipse/qa/examples";
-  private static final String PR_4_EXPECTED_TEXT_1 =
-      format(
-          "6 occurrences found in 1 file (per page results) for 'uess'. Total file count - 1\n"
-              + "/%1$s/my-webapp/src/main/java/org/eclipse/qa/examples/AppController.java\n"
-              + "(6 occurrences of 'uess' found)",
-          PROJECT_NAME);
-
-  private static final String PR_4_PATH_2 = format("/%s/my-lib", PROJECT_NAME);
-  private static final String PR_4_EXPECTED_TEXT_2 =
-      format(
-          "15 occurrences found in 2 files (per page results) for 'hello'. Total file count - 2\n"
-              + "/%1$s/my-lib/src/test/java/hello/SayHelloTest.java\n"
-              + "(10 occurrences of 'hello' found)\n"
-              + "/%1$s/my-lib/src/main/java/hello/SayHello.java\n"
-              + "(5 occurrences of 'hello' found)",
-          PROJECT_NAME);
-
-  private static final String PR_5_EXPECTED_TEXT_1 =
-      format(
-          "7 occurrences found in 3 files (per page results) for 'String'. Total file count - 3\n"
-              + "/%1$s/my-webapp/src/main/java/org/eclipse/qa/examples/AppController.java\n"
-              + "(4 occurrences of 'String' found)\n"
-              + "/%1$s/my-lib/src/test/java/hello/SayHelloTest.java\n"
-              + "(1 occurrence of 'String' found)\n"
-              + "/%1$s/my-lib/src/main/java/hello/SayHello.java\n"
-              + "(2 occurrences of 'String' found)",
-          PROJECT_NAME);
-
-  private static final String PR_5_EXPECTED_TEXT_2 =
-      format(
-          "2 occurrences found in 1 file (per page results) for 'String'. Total file count - 1\n"
-              + "/%s/my-webapp/src/main/webapp/WEB-INF/jsp/guess_num.jsp\n"
-              + "(2 occurrences of 'String' found)",
-          PROJECT_NAME);
-
-  private static final String PR_6_PATH_1 = "/web-java-petclinic/pom.xml";
-  private static final String PR_6_PATH_2 =
-      "/web-java-petclinic/src/main/resources/spring/mvc-view-config.xml";
-  private static final String PR_6_PATH_3 =
-      "/web-java-petclinic/src/test/java/org/springframework/samples/petclinic/web/VisitsViewTests.java";
-
-  private static final String PR_6_EXPECTED_TEXT_1 =
-      "62:    <webjars-bootstrap.version>2.3.0</webjars-bootstrap.version>";
-  private static final String PR_6_EXPECTED_TEXT_2 =
-      "36:    <!-- Simple strategy: only path extension is taken into account -->";
-  private static final String PR_6_EXPECTED_TEXT_3 =
-      "19:   import static org.hamcrest.Matchers.containsString;";
+  private static final String PROJECT_NAME = NameGenerator.generate("project", 4);
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
@@ -151,7 +57,6 @@ public class FindTextFeatureTest {
   @Inject private ConfigureClasspath configureClasspath;
   @Inject private MachineTerminal terminal;
   @Inject private FindText findText;
-  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private Consoles consoles;
   @Inject private PanelSelector panelSelector;
@@ -187,6 +92,20 @@ public class FindTextFeatureTest {
 
   @Test
   public void checkRecentlyCreatedFiles() throws Exception {
+    String expectedText1 =
+        format(
+            "1 occurrence found in 1 file (per page results) for 'Filesystem'. Total file count - 1\n"
+                + "/%s/readme.con\n"
+                + "(1 occurrence of 'Filesystem' found)\n"
+                + "1:   Filesystem 1K-blocks Used Available Use%% Mounted on",
+            PROJECT_NAME);
+    String expectedText2 =
+        format(
+            "1 occurrence found in 1 file (per page results) for 'Feature'. Total file count - 1\n"
+                + "/%s/readme.api\n"
+                + "(1 occurrence of 'Feature' found)\n"
+                + "1:   FindTextFeatureTest",
+            PROJECT_NAME);
     String content = "FindTextFeatureTest";
     String fileNameCreatedFromAPI = "readme.api";
     String fileNameCreatedFromTerminal = "readme.con";
@@ -212,7 +131,7 @@ public class FindTextFeatureTest {
     findText.clickOnSearchButtonMainForm();
     findText.waitFindInfoPanelIsOpen();
     findText.sendCommandByKeyboardInFindInfoPanel(ARROW_RIGHT.toString());
-    findText.waitExpectedTextInFindInfoPanel(asList(PR_1_EXPECTED_TEXT_1.split("\n")));
+    findText.waitExpectedTextInFindInfoPanel(asList(expectedText1.split("\n")));
     findText.selectItemInFindInfoPanel(
         format("/%s/readme.con", PROJECT_NAME),
         "1:   Filesystem 1K-blocks Used Available Use% Mounted on");
@@ -232,7 +151,7 @@ public class FindTextFeatureTest {
     findText.clickOnSearchButtonMainForm();
     findText.waitFindInfoPanelIsOpen();
     findText.sendCommandByKeyboardInFindInfoPanel(ARROW_RIGHT.toString());
-    findText.waitExpectedTextInFindInfoPanel(asList(PR_1_EXPECTED_TEXT_2.split("\n")));
+    findText.waitExpectedTextInFindInfoPanel(asList(expectedText2.split("\n")));
     findText.selectItemInFindInfoPanel(
         format("/%s/readme.api", PROJECT_NAME), "1:   FindTextFeatureTest");
     findText.sendCommandByKeyboardInFindInfoPanel(Keys.ENTER.toString());
@@ -243,10 +162,24 @@ public class FindTextFeatureTest {
 
   @Test
   public void checkFindTextBasic() {
+    String expectedText =
+        format(
+            "9 occurrences found in 4 files (per page results) for 'String'. Total file count - 4\n"
+                + "/%1$s/my-webapp/src/main/java/org/eclipse/qa/examples/AppController.java\n"
+                + "(4 occurrences of 'String' found)\n"
+                + "/%1$s/my-webapp/src/main/webapp/WEB-INF/jsp/guess_num.jsp\n"
+                + "(2 occurrences of 'String' found)\n"
+                + "/%1$s/my-lib/src/test/java/hello/SayHelloTest.java\n"
+                + "(1 occurrence of 'String' found)\n"
+                + "/%1$s/my-lib/src/main/java/hello/SayHello.java\n"
+                + "(2 occurrences of 'String' found)",
+            PROJECT_NAME);
+    String findNothing = "No results found for\n'dddhhh'\n";
     String pathToQuessNumFile =
         format("/%s/my-webapp/src/main/webapp/WEB-INF/jsp/guess_num.jsp", PROJECT_NAME);
     String pathToSayHelloFile =
         format("/%s/my-lib/src/main/java/hello/SayHello.java", PROJECT_NAME);
+
     projectExplorer.waitProjectExplorer();
     projectExplorer.selectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.FIND);
@@ -257,7 +190,7 @@ public class FindTextFeatureTest {
     loader.waitOnClosed();
     findText.clickOnSearchButtonMainForm();
     findText.waitFindInfoPanelIsOpen();
-    findText.waitExpectedTextInFindInfoPanel(FIND_NOTHING);
+    findText.waitExpectedTextInFindInfoPanel(findNothing);
 
     // check find info panel when switch to processes panel
     consoles.clickOnProcessesButton();
@@ -276,7 +209,7 @@ public class FindTextFeatureTest {
     findText.waitPathIntoRootField("/" + PROJECT_NAME);
     findText.clickOnSearchButtonMainForm();
     findText.waitFindInfoPanelIsOpen();
-    findText.waitExpectedTextInFindInfoPanel(asList(PR_2_EXPECTED_TEXT_1.split("\n")));
+    findText.waitExpectedTextInFindInfoPanel(asList(expectedText.split("\n")));
     findText.sendCommandByKeyboardInFindInfoPanel(ARROW_RIGHT.toString());
     findText.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
     findText.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
@@ -317,6 +250,18 @@ public class FindTextFeatureTest {
 
   @Test
   public void checkFindWholeWordOnly() {
+    String expectedText =
+        format(
+            "10 occurrences found in 4 files (per page results) for 'uess'. Total file count - 4\n"
+                + "/%1$s/my-webapp/src/main/java/org/eclipse/qa/examples/AppController.java\n"
+                + "(6 occurrences of 'uess' found)\n"
+                + "/%1$s/my-webapp/src/main/webapp/index.jsp\n"
+                + "(1 occurrence of 'uess' found)\n"
+                + "/%1$s/my-webapp/src/main/webapp/WEB-INF/jsp/guess_num.jsp\n"
+                + "(2 occurrences of 'uess' found)\n"
+                + "/%1$s/my-webapp/src/main/webapp/WEB-INF/spring-servlet.xml\n"
+                + "(1 occurrence of 'uess' found)",
+            PROJECT_NAME);
     projectExplorer.waitProjectExplorer();
     projectExplorer.selectItem(PROJECT_NAME);
     findText.launchFindFormByKeyboard();
@@ -327,7 +272,7 @@ public class FindTextFeatureTest {
     findText.waitPathIntoRootField("/" + PROJECT_NAME);
     findText.clickOnSearchButtonMainForm();
     findText.waitFindInfoPanelIsOpen();
-    findText.waitExpectedTextInFindInfoPanel(asList(PR_3_EXPECTED_TEXT_1.split("\n")));
+    findText.waitExpectedTextInFindInfoPanel(asList(expectedText.split("\n")));
     projectExplorer.selectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.FIND);
     findText.waitFindTextMainFormIsOpen();
@@ -342,18 +287,34 @@ public class FindTextFeatureTest {
 
   @Test
   public void checkFindIntoSelectedPath() {
+    String path1 = PROJECT_NAME + "/my-webapp/src/main/java/org/eclipse/qa/examples";
+    String expectedText1 =
+        format(
+            "6 occurrences found in 1 file (per page results) for 'uess'. Total file count - 1\n"
+                + "/%1$s/my-webapp/src/main/java/org/eclipse/qa/examples/AppController.java\n"
+                + "(6 occurrences of 'uess' found)",
+            PROJECT_NAME);
+    String path2 = format("/%s/my-lib", PROJECT_NAME);
+    String expectedText2 =
+        format(
+            "15 occurrences found in 2 files (per page results) for 'hello'. Total file count - 2\n"
+                + "/%1$s/my-lib/src/test/java/hello/SayHelloTest.java\n"
+                + "(10 occurrences of 'hello' found)\n"
+                + "/%1$s/my-lib/src/main/java/hello/SayHello.java\n"
+                + "(5 occurrences of 'hello' found)",
+            PROJECT_NAME);
     projectExplorer.waitProjectExplorer();
     projectExplorer.selectItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.selectItem(PR_4_PATH_1);
+    projectExplorer.selectItem(path1);
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.FIND);
     findText.waitFindTextMainFormIsOpen();
     findText.typeTextIntoFindField("uess");
     findText.waitTextIntoFindField("uess");
     findText.setAndWaitStateSearchRootCheckbox(false);
-    findText.waitPathIntoRootField("/" + PR_4_PATH_1);
+    findText.waitPathIntoRootField("/" + path1);
     findText.clickOnSearchButtonMainForm();
-    findText.waitExpectedTextInFindInfoPanel(asList(PR_4_EXPECTED_TEXT_1.split("\n")));
+    findText.waitExpectedTextInFindInfoPanel(asList(expectedText1.split("\n")));
 
     projectExplorer.selectItem(PROJECT_NAME);
     findText.launchFindFormByKeyboard();
@@ -368,14 +329,30 @@ public class FindTextFeatureTest {
     configureClasspath.waitItemInSelectPathForm("my-webapp");
     configureClasspath.selectItemInSelectPathForm("my-lib");
     configureClasspath.clickOkBtnSelectPathForm();
-    findText.waitPathIntoRootField(PR_4_PATH_2);
+    findText.waitPathIntoRootField(path2);
     findText.clickOnSearchButtonMainForm();
     findText.waitFindInfoPanelIsOpen();
-    findText.waitExpectedTextInFindInfoPanel(asList(PR_4_EXPECTED_TEXT_2.split("\n")));
+    findText.waitExpectedTextInFindInfoPanel(asList(expectedText2.split("\n")));
   }
 
   @Test
   public void checkFindByFileMask() {
+    String expectedText1 =
+        format(
+            "7 occurrences found in 3 files (per page results) for 'String'. Total file count - 3\n"
+                + "/%1$s/my-webapp/src/main/java/org/eclipse/qa/examples/AppController.java\n"
+                + "(4 occurrences of 'String' found)\n"
+                + "/%1$s/my-lib/src/test/java/hello/SayHelloTest.java\n"
+                + "(1 occurrence of 'String' found)\n"
+                + "/%1$s/my-lib/src/main/java/hello/SayHello.java\n"
+                + "(2 occurrences of 'String' found)",
+            PROJECT_NAME);
+    String expectedText2 =
+        format(
+            "2 occurrences found in 1 file (per page results) for 'String'. Total file count - 1\n"
+                + "/%s/my-webapp/src/main/webapp/WEB-INF/jsp/guess_num.jsp\n"
+                + "(2 occurrences of 'String' found)",
+            PROJECT_NAME);
     projectExplorer.waitProjectExplorer();
     projectExplorer.selectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.FIND);
@@ -387,8 +364,8 @@ public class FindTextFeatureTest {
     findText.waitTextIntoFileNameFilter("*.java");
     findText.clickOnSearchButtonMainForm();
     findText.waitFindInfoPanelIsOpen();
-    findText.waitExpectedTextInFindInfoPanel(asList(PR_5_EXPECTED_TEXT_1.split("\n")));
-    findText.waitExpectedTextIsNotPresentInFindInfoPanel(PR_5_EXPECTED_TEXT_2);
+    findText.waitExpectedTextInFindInfoPanel(asList(expectedText1.split("\n")));
+    findText.waitExpectedTextIsNotPresentInFindInfoPanel(expectedText2);
 
     projectExplorer.selectItem(PROJECT_NAME);
     findText.launchFindFormByKeyboard();
@@ -400,12 +377,20 @@ public class FindTextFeatureTest {
     findText.waitTextIntoFileNameFilter("*.jsp");
     findText.clickOnSearchButtonMainForm();
     findText.waitFindInfoPanelIsOpen();
-    findText.waitExpectedTextIsNotPresentInFindInfoPanel(PR_5_EXPECTED_TEXT_1);
-    findText.waitExpectedTextInFindInfoPanel(asList(PR_5_EXPECTED_TEXT_2.split("\n")));
+    findText.waitExpectedTextIsNotPresentInFindInfoPanel(expectedText1);
+    findText.waitExpectedTextInFindInfoPanel(asList(expectedText2.split("\n")));
   }
 
   @Test
   public void checkTextResultsPagination() {
+    String path1 = "/web-java-petclinic/pom.xml";
+    String path2 = "/web-java-petclinic/src/main/resources/spring/mvc-view-config.xml";
+    String path3 =
+        "/web-java-petclinic/src/test/java/org/springframework/samples/petclinic/web/VisitsViewTests.java";
+    String expectedText1 = "62:    <webjars-bootstrap.version>2.3.0</webjars-bootstrap.version>";
+    String expectedText2 =
+        "36:    <!-- Simple strategy: only path extension is taken into account -->";
+    String expectedText3 = "19:   import static org.hamcrest.Matchers.containsString;";
     String resultsOnFirstPage =
         "125 occurrences found in 30 files (per page results) for 'Str'. Total file count - 63";
     String resultsOnSecondPage =
@@ -429,9 +414,9 @@ public class FindTextFeatureTest {
 
     // check results, open a file and check cursor position
     Assert.assertEquals(findText.getResults(), resultsOnFirstPage);
-    findText.openFileNodeByDoubleClick(PR_6_PATH_1);
-    findText.waitExpectedTextInFindInfoPanel(PR_6_EXPECTED_TEXT_1);
-    findText.selectItemInFindInfoPanelByDoubleClick(PR_6_PATH_1, PR_6_EXPECTED_TEXT_1);
+    findText.openFileNodeByDoubleClick(path1);
+    findText.waitExpectedTextInFindInfoPanel(expectedText1);
+    findText.selectItemInFindInfoPanelByDoubleClick(path1, expectedText1);
     editor.waitActiveEditor();
     editor.waitActiveTabFileName("spring-petclinic");
     Assert.assertEquals(editor.getPositionOfLine(), 62);
@@ -444,15 +429,15 @@ public class FindTextFeatureTest {
     // check results on second page and the previous page button is enabled
     Assert.assertEquals(findText.getResults(), resultsOnSecondPage);
     Assert.assertTrue(findText.checkPreviousPageButtonIsEnabled());
-    findText.openFileNodeByDoubleClick(PR_6_PATH_2);
-    findText.waitExpectedTextInFindInfoPanel(PR_6_EXPECTED_TEXT_2);
+    findText.openFileNodeByDoubleClick(path2);
+    findText.waitExpectedTextInFindInfoPanel(expectedText2);
     findText.clickOnNextPageButton();
 
     // check results on third page and that the next page button is disabled
     Assert.assertEquals(findText.getResults(), resultsOnThirdPage);
     Assert.assertFalse(findText.checkNextPageButtonIsEnabled());
-    findText.openFileNodeByDoubleClick(PR_6_PATH_3);
-    findText.waitExpectedTextInFindInfoPanel(PR_6_EXPECTED_TEXT_3);
+    findText.openFileNodeByDoubleClick(path3);
+    findText.waitExpectedTextInFindInfoPanel(expectedText3);
     findText.clickOnPreviousPageButton();
 
     Assert.assertEquals(findText.getResults(), resultsOnSecondPage);

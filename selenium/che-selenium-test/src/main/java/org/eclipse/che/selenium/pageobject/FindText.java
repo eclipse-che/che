@@ -423,7 +423,7 @@ public class FindText {
    * @return text from 'find usages' panel
    */
   public String getTextFromFindInfoPanel() {
-    return findInfoPanelTextContainer.getText();
+    return findInfoPanel.getText();
   }
 
   public void selectItemInFindInfoPanel(String fileName, String textToFind) {
