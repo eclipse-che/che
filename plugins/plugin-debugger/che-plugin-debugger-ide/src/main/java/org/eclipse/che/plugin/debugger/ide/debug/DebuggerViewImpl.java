@@ -10,6 +10,9 @@
  */
 package org.eclipse.che.plugin.debugger.ide.debug;
 
+import static org.eclipse.che.ide.ui.smartTree.SelectionModel.Mode.SINGLE;
+import static org.eclipse.che.ide.ui.smartTree.SortDir.ASC;
+
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -24,40 +27,43 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import elemental.dom.Element;
-import elemental.events.KeyboardEvent;
-import elemental.events.MouseEvent;
-import elemental.html.SpanElement;
 import elemental.html.TableElement;
 import java.util.ArrayList;
 import java.util.List;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.Location;
-import org.eclipse.che.api.debug.shared.model.MutableVariable;
-import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.Variable;
-import org.eclipse.che.api.debug.shared.model.impl.MutableVariableImpl;
-import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
+import org.eclipse.che.api.debug.shared.model.WatchExpression;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.Resources;
+import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.list.SimpleList;
-import org.eclipse.che.ide.ui.tree.Tree;
-import org.eclipse.che.ide.ui.tree.TreeNodeElement;
+import org.eclipse.che.ide.ui.smartTree.NodeLoader;
+import org.eclipse.che.ide.ui.smartTree.NodeStorage;
+import org.eclipse.che.ide.ui.smartTree.Tree;
+import org.eclipse.che.ide.ui.status.StatusText;
 import org.eclipse.che.ide.util.dom.Elements;
-import org.eclipse.che.ide.util.input.SignalEvent;
 import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
 import org.eclipse.che.plugin.debugger.ide.DebuggerResources;
+import org.eclipse.che.plugin.debugger.ide.debug.tree.node.DebuggerNodeFactory;
+import org.eclipse.che.plugin.debugger.ide.debug.tree.node.VariableNode;
+import org.eclipse.che.plugin.debugger.ide.debug.tree.node.WatchExpressionNode;
+import org.eclipse.che.plugin.debugger.ide.debug.tree.node.comparator.DebugNodeTypeComparator;
+import org.eclipse.che.plugin.debugger.ide.debug.tree.node.comparator.VariableNodeComparator;
+import org.eclipse.che.plugin.debugger.ide.debug.tree.node.key.DebugNodeUniqueKeyProvider;
 
 /**
  * The class business logic which allow us to change visual representation of debugger panel.
  *
  * @author Andrey Plotnikov
  * @author Dmitry Shnurenko
+ * @author Oleksandr Andriienko
  */
 @Singleton
 public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
@@ -68,8 +74,8 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
   @UiField Label vmName;
   @UiField Label executionPoint;
   @UiField SimplePanel toolbarPanel;
-  @UiField ScrollPanel variablesPanel;
   @UiField ScrollPanel breakpointsPanel;
+  @UiField SimplePanel watchExpressionPanel;
 
   @UiField(provided = true)
   DebuggerLocalizationConstant locale;
@@ -80,15 +86,18 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
   @UiField(provided = true)
   SplitLayoutPanel splitPanel = new SplitLayoutPanel(3);
 
+  @UiField(provided = true)
+  Tree tree;
+
   @UiField ListBox threads;
   @UiField ScrollPanel framesPanel;
 
-  private final Tree<MutableVariable> variables;
   private final SimpleList<Breakpoint> breakpoints;
   private final SimpleList<StackFrameDump> frames;
   private final DebuggerResources debuggerResources;
 
-  private TreeNodeElement<MutableVariable> selectedVariable;
+  private final DebuggerNodeFactory nodeFactory;
+  private final DebugNodeUniqueKeyProvider nodeKeyProvider;
 
   @Inject
   protected DebuggerViewImpl(
@@ -96,14 +105,20 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
       DebuggerResources resources,
       DebuggerLocalizationConstant locale,
       Resources coreRes,
-      VariableTreeNodeRenderer.Resources rendererResources,
-      DebuggerViewImplUiBinder uiBinder) {
+      DebuggerViewImplUiBinder uiBinder,
+      DebuggerNodeFactory nodeFactory,
+      DebugNodeUniqueKeyProvider nodeKeyProvider) {
     super(partStackUIResources);
 
     this.locale = locale;
     this.debuggerResources = resources;
     this.coreRes = coreRes;
+    this.nodeKeyProvider = nodeKeyProvider;
 
+    StatusText<Tree> emptyTreeStatus = new StatusText<>();
+    emptyTreeStatus.setText("");
+
+    tree = new Tree(new NodeStorage(nodeKeyProvider), new NodeLoader(), emptyTreeStatus);
     setContentWidget(uiBinder.createAndBindUi(this));
 
     this.breakpoints = createBreakpointList();
@@ -111,57 +126,28 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
 
     this.frames = createFramesList();
     this.framesPanel.add(frames);
+    this.nodeFactory = nodeFactory;
 
-    this.variables =
-        Tree.create(
-            rendererResources,
-            new VariableNodeDataAdapter(),
-            new VariableTreeNodeRenderer(rendererResources));
-    this.variables.setTreeEventHandler(
-        new Tree.Listener<MutableVariable>() {
-          @Override
-          public void onNodeAction(@NotNull TreeNodeElement<MutableVariable> node) {}
+    tree.ensureDebugId("debugger-tree");
 
-          @Override
-          public void onNodeClosed(@NotNull TreeNodeElement<MutableVariable> node) {
-            selectedVariable = node;
+    tree.getSelectionModel().setSelectionMode(SINGLE);
+
+    tree.addExpandHandler(
+        event -> {
+          Node expandedNode = event.getNode();
+          if (expandedNode instanceof VariableNode) {
+            delegate.onExpandVariable(((VariableNode) expandedNode).getData());
           }
-
-          @Override
-          public void onNodeContextMenu(
-              int mouseX, int mouseY, @NotNull TreeNodeElement<MutableVariable> node) {}
-
-          @Override
-          public void onNodeDragStart(
-              @NotNull TreeNodeElement<MutableVariable> node, @NotNull MouseEvent event) {}
-
-          @Override
-          public void onNodeDragDrop(
-              @NotNull TreeNodeElement<MutableVariable> node, @NotNull MouseEvent event) {}
-
-          @Override
-          public void onNodeExpanded(@NotNull final TreeNodeElement<MutableVariable> node) {
-            selectedVariable = node;
-            delegate.onExpandVariablesTree(node.getData());
-          }
-
-          @Override
-          public void onNodeSelected(
-              @NotNull TreeNodeElement<MutableVariable> node, @NotNull SignalEvent event) {
-            selectedVariable = node;
-          }
-
-          @Override
-          public void onRootContextMenu(int mouseX, int mouseY) {}
-
-          @Override
-          public void onRootDragDrop(@NotNull MouseEvent event) {}
-
-          @Override
-          public void onKeyboard(@NotNull KeyboardEvent event) {}
         });
-    this.variablesPanel.add(variables);
+
+    tree.getNodeStorage()
+        .addSortInfo(new NodeStorage.StoreSortInfo(new DebugNodeTypeComparator(), ASC));
+    tree.getNodeStorage()
+        .addSortInfo(new NodeStorage.StoreSortInfo(new VariableNodeComparator(), ASC));
+
     minimizeButton.ensureDebugId("debugger-minimizeBut");
+
+    watchExpressionPanel.addStyleName(resources.getCss().watchExpressionsPanel());
   }
 
   @Override
@@ -175,43 +161,85 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
           .append(location.getLineNumber())
           .append("} ");
     }
-    executionPoint.getElement().setClassName(coreRes.coreCss().defaultFont());
+    executionPoint.getElement().addClassName(coreRes.coreCss().defaultFont());
     executionPoint.setText(labelText.toString());
   }
 
   @Override
-  public void setVariables(@NotNull List<? extends Variable> variables) {
-    MutableVariable root = this.variables.getModel().getRoot();
-    if (root == null) {
-      root = new MutableVariableImpl();
-      this.variables.getModel().setRoot(root);
+  public void removeAllVariables() {
+    for (Node node : tree.getNodeStorage().getAll()) {
+      if (node instanceof VariableNode) {
+        tree.getNodeStorage().remove(node);
+      }
     }
-    root.setValue(new SimpleValueImpl(variables, null));
-    this.variables.renderTree(0);
   }
 
   @Override
-  public void setVariableValue(Variable variable, SimpleValue value) {
-    MutableVariableImpl nodeData = new MutableVariableImpl(variable);
+  public void setVariables(@NotNull List<? extends Variable> variables) {
+    for (Variable variable : variables) {
+      VariableNode node = nodeFactory.createVariableNode(variable);
+      tree.getNodeStorage().add(node);
+    }
+  }
 
-    TreeNodeElement<MutableVariable> node = variables.getNode(nodeData);
-    if (node != null) {
-      node.getData().setValue(value);
-
-      SpanElement element = variables.getModel().getNodeRenderer().renderNodeContents(nodeData);
-      node.getNodeLabel().setInnerHTML(element.getInnerHTML());
-
-      for (Variable nestedVariable : value.getVariables()) {
-        setVariableValue(nestedVariable, nestedVariable.getValue());
+  @Override
+  public void expandVariable(Variable variable) {
+    String key = nodeKeyProvider.evaluateKey(variable);
+    Node nodeToUpdate = tree.getNodeStorage().findNodeWithKey(key);
+    if (nodeToUpdate != null) {
+      tree.getNodeStorage().update(nodeToUpdate);
+      List<? extends Variable> varChildren = variable.getValue().getVariables();
+      for (int i = 0; i < varChildren.size(); i++) {
+        Node childNode = nodeFactory.createVariableNode(varChildren.get(i));
+        tree.getNodeStorage().insert(nodeToUpdate, i, childNode);
       }
+    }
+  }
 
-      if (node.isOpen()) {
-        if (value.getVariables().isEmpty()) {
-          variables.closeNode(node);
-        } else {
-          variables.expandNode(node);
-        }
+  @Override
+  public void updateVariable(Variable variable) {
+    String key = nodeKeyProvider.evaluateKey(variable);
+    Node nodeToUpdate = tree.getNodeStorage().findNodeWithKey(key);
+    if (nodeToUpdate != null && nodeToUpdate instanceof VariableNode) {
+      VariableNode variableNode = ((VariableNode) nodeToUpdate);
+      variableNode.setData(variable);
+      tree.getNodeStorage().update(variableNode);
+
+      if (tree.isExpanded(nodeToUpdate)) {
+        tree.getNodeLoader().loadChildren(variableNode);
+      } else {
+        tree.refresh(nodeToUpdate);
       }
+    }
+  }
+
+  @Override
+  public void addExpression(WatchExpression expression) {
+    String key = nodeKeyProvider.evaluateKey(expression);
+    if (tree.getNodeStorage().findNodeWithKey(key) == null) {
+      WatchExpressionNode node = nodeFactory.createExpressionNode(expression);
+      tree.getNodeStorage().add(node);
+    }
+  }
+
+  @Override
+  public void updateExpression(WatchExpression expression) {
+    String key = nodeKeyProvider.evaluateKey(expression);
+    Node nodeToUpdate = tree.getNodeStorage().findNodeWithKey(key);
+    if (nodeToUpdate != null && nodeToUpdate instanceof WatchExpressionNode) {
+      WatchExpressionNode expNode = ((WatchExpressionNode) nodeToUpdate);
+      expNode.setData(expression);
+      tree.getNodeStorage().update(nodeToUpdate);
+      tree.refresh(nodeToUpdate);
+    }
+  }
+
+  @Override
+  public void removeExpression(WatchExpression expression) {
+    String key = nodeKeyProvider.evaluateKey(expression);
+    Node nodeToRemove = tree.getNodeStorage().findNodeWithKey(key);
+    if (nodeToRemove != null) {
+      tree.getNodeStorage().remove(nodeToRemove);
     }
   }
 
@@ -258,16 +286,38 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
   }
 
   @Override
-  public MutableVariable getSelectedDebuggerVariable() {
-    if (selectedVariable != null) {
-      return selectedVariable.getData();
+  public Variable getSelectedVariable() {
+    Node selectedNode = getSelectedNode();
+    if (selectedNode instanceof VariableNode) {
+      return ((VariableNode) selectedNode).getData();
     }
     return null;
   }
 
   @Override
+  public WatchExpression getSelectedExpression() {
+    Node selectedNode = getSelectedNode();
+    if (selectedNode instanceof WatchExpressionNode) {
+      return ((WatchExpressionNode) selectedNode).getData();
+    }
+    return null;
+  }
+
+  private Node getSelectedNode() {
+    if (tree.getSelectionModel().getSelectedNodes().isEmpty()) {
+      return null;
+    }
+    return tree.getSelectionModel().getSelectedNodes().get(0);
+  }
+
+  @Override
   public AcceptsOneWidget getDebuggerToolbarPanel() {
     return toolbarPanel;
+  }
+
+  @Override
+  public AcceptsOneWidget getDebuggerWatchToolbarPanel() {
+    return watchExpressionPanel;
   }
 
   @Override

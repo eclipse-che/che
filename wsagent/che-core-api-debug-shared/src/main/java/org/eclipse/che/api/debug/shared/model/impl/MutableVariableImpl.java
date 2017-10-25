@@ -18,10 +18,10 @@ import org.eclipse.che.api.debug.shared.model.VariablePath;
 
 /** @author Anatoliy Bazko */
 public class MutableVariableImpl implements MutableVariable {
-  private final String name;
   private final String type;
   private final boolean isPrimitive;
   private final VariablePath variablePath;
+  private String name;
   private SimpleValue value;
 
   public MutableVariableImpl(
@@ -51,6 +51,11 @@ public class MutableVariableImpl implements MutableVariable {
   @Override
   public String getName() {
     return name;
+  }
+
+  @Override
+  public void setName(String name) {
+    this.name = name;
   }
 
   @Override
