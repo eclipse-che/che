@@ -107,9 +107,21 @@
     color: toolbarIconColor;
 }
 
-.popupMenuIconField path,
+.popupMenuIconField path {
+    fill: toolbarIconColor !important;
+}
+
+.popupMenuIconFieldDisabled,
+.popupMenuIconFieldDisabled > * {
+    color: disabledMenuColor !important;
+}
+
 .popupMenuIconFieldDisabled path {
-    fill: toolbarIconColor;
+    fill: disabledMenuColor !important;
+}
+
+.popupMenuTitleField {
+    color: mainMenuFontColor;
 }
 
 .popupMenuSubMenuField,

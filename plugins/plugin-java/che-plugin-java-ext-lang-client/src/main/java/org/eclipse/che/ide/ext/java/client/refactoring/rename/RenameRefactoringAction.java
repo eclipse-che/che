@@ -193,7 +193,7 @@ public class RenameRefactoringAction extends AbstractPerspectiveAction
     } else {
       final Resource[] resources = appContext.getResources();
 
-      if (resources == null || resources.length > 1) {
+      if (resources == null || resources.length != 1) {
         event.getPresentation().setEnabledAndVisible(false);
         return;
       }
@@ -226,6 +226,10 @@ public class RenameRefactoringAction extends AbstractPerspectiveAction
 
   protected boolean isJavaFile(VirtualFile file) {
     String fileExtension = fileTypeRegistry.getFileTypeByFile(file).getExtension();
+
+    if (fileExtension == null) {
+      return false;
+    }
 
     return fileExtension.equals("java") || fileExtension.equals("class");
   }

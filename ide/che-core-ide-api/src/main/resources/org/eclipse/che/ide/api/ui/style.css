@@ -215,6 +215,7 @@
 @eval mainMenuSelectedBkgColor org.eclipse.che.ide.api.theme.Style.getMainMenuSelectedBkgColor();
 @eval mainMenuSelectedBorderColor org.eclipse.che.ide.api.theme.Style.getMainMenuSelectedBorderColor();
 @eval mainMenuFontColor org.eclipse.che.ide.api.theme.Style.getMainMenuFontColor();
+@eval disabledMenuColor org.eclipse.che.ide.api.theme.Style.theme.getDisabledMenuColor();
 @eval mainMenuFontHoverColor org.eclipse.che.ide.api.theme.Style.getMainMenuFontHoverColor();
 @eval mainMenuFontSelectedColor org.eclipse.che.ide.api.theme.Style.getMainMenuFontSelectedColor();
 @def fontMenuSize 11px;
@@ -406,3 +407,7 @@
 @eval loaderBoxShadow org.eclipse.che.ide.api.theme.Style.theme.loaderBoxShadow();
 @eval loaderSVGFill org.eclipse.che.ide.api.theme.Style.theme.loaderSVGFill();
 @eval loaderLabelColor org.eclipse.che.ide.api.theme.Style.theme.loaderLabelColor();
+
+/*Find results*/
+@eval findResultsBackground org.eclipse.che.ide.api.theme.Style.theme.findResultsBackground();
+@eval findResultsTextColor org.eclipse.che.ide.api.theme.Style.theme.findResultsTextColor();
