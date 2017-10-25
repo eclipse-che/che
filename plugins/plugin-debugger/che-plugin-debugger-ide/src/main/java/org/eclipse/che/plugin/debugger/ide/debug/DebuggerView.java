@@ -49,6 +49,8 @@ public interface DebuggerView extends View<DebuggerView.ActionDelegate> {
     /** Breakpoint context menu is invoked. */
     void onBreakpointContextMenu(int clientX, int clientY, Breakpoint breakpoint);
 
+    void onBreakpointDoubleClick(Breakpoint breakpoint);
+
     /**
      * Performs any actions appropriate in response to the user having pressed the expand button in
      * variables tree.

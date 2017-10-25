@@ -117,7 +117,7 @@ public class DebuggerTest extends BaseTest {
   @Mock private DtoFactory dtoFactory;
   @Mock private LocalStorageProvider localStorageProvider;
   @Mock private EventBus eventBus;
-  @Mock private DebuggerResourceHandlerFactory debuggerResourceHandlerFactory;
+  @Mock private DebuggerLocationHandlerManager debuggerLocationHandlerManager;
   @Mock private DebuggerManager debuggerManager;
   @Mock private NotificationManager notificationManager;
   @Mock private BreakpointManager breakpointManager;
@@ -194,7 +194,7 @@ public class DebuggerTest extends BaseTest {
                 notificationManager,
                 appContext,
                 "id",
-                debuggerResourceHandlerFactory));
+                debuggerLocationHandlerManager));
     doReturn(promiseInfo).when(service).getSessionInfo(SESSION_ID);
     doReturn(promiseInfo).when(promiseInfo).then(any(Operation.class));
 
@@ -615,7 +615,7 @@ public class DebuggerTest extends BaseTest {
         NotificationManager notificationManager,
         AppContext appContext,
         String id,
-        DebuggerResourceHandlerFactory debuggerResourceHandlerFactory) {
+        DebuggerLocationHandlerManager debuggerLocationHandlerManager) {
       super(
           service,
           transmitter,
@@ -628,7 +628,7 @@ public class DebuggerTest extends BaseTest {
           appContext,
           breakpointManager,
           requestHandlerManager,
-          debuggerResourceHandlerFactory,
+          debuggerLocationHandlerManager,
           id);
     }
 

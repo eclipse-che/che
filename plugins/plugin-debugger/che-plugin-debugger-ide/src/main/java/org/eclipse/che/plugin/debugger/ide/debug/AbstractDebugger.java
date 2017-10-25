@@ -98,7 +98,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   private final RequestHandlerConfigurator configurator;
   private final DebuggerServiceClient service;
   private final LocalStorageProvider localStorageProvider;
-  private final DebuggerResourceHandlerFactory debuggerResourceHandlerFactory;
+  private final DebuggerLocationHandlerManager debuggerLocationHandlerManager;
   private final DebuggerManager debuggerManager;
   private final BreakpointManager breakpointManager;
   private final String debuggerType;
@@ -119,14 +119,14 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
       AppContext appContext,
       BreakpointManager breakpointManager,
       RequestHandlerManager requestHandlerManager,
-      DebuggerResourceHandlerFactory debuggerResourceHandlerFactory,
+      DebuggerLocationHandlerManager debuggerLocationHandlerManager,
       String type) {
     this.service = service;
     this.transmitter = transmitter;
     this.configurator = configurator;
     this.dtoFactory = dtoFactory;
     this.localStorageProvider = localStorageProvider;
-    this.debuggerResourceHandlerFactory = debuggerResourceHandlerFactory;
+    this.debuggerLocationHandlerManager = debuggerLocationHandlerManager;
     this.debuggerManager = debuggerManager;
     this.notificationManager = notificationManager;
     this.breakpointManager = breakpointManager;
@@ -170,8 +170,8 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
               }
 
               if (currentLocation != null) {
-                debuggerResourceHandlerFactory
-                    .getOrDefault(getDebuggerType())
+                debuggerLocationHandlerManager
+                    .getOrDefault(currentLocation)
                     .find(
                         currentLocation,
                         new AsyncCallback<VirtualFile>() {
@@ -225,8 +225,8 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   }
 
   private void open(Location location) {
-    debuggerResourceHandlerFactory
-        .getOrDefault(getDebuggerType())
+    debuggerLocationHandlerManager
+        .getOrDefault(location)
         .open(
             location,
             new AsyncCallback<VirtualFile>() {
