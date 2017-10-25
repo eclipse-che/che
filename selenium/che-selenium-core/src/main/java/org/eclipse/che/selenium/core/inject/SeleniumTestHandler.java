@@ -105,7 +105,7 @@ public abstract class SeleniumTestHandler
 
   private final Map<Long, Object> runningTests = new ConcurrentHashMap<>();
 
-  private static AtomicBoolean isCleanUpFinished = new AtomicBoolean(false);
+  private static AtomicBoolean isCleanUpCompleted = new AtomicBoolean();
 
   @Override
   public void onTestStart(ITestResult result) {}
@@ -352,7 +352,7 @@ public abstract class SeleniumTestHandler
 
   /** Cleans up test environment. */
   public void shutdown() {
-    if (isCleanUpFinished.get()) {
+    if (isCleanUpCompleted.get()) {
       return;
     }
 
@@ -370,7 +370,7 @@ public abstract class SeleniumTestHandler
       defaultTestUser.delete();
     }
 
-    isCleanUpFinished.set(true);
+    isCleanUpCompleted.set(true);
   }
 
   /** Returns list of parent modules */
