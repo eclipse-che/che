@@ -55,7 +55,7 @@ public class LanguageServerRegistry {
     this.fileTypeRegistry = fileTypeRegistry;
   }
 
-  public Promise<ServerCapabilities> getOrInitializeServer(String projectPath, VirtualFile file) {
+  public Promise<ServerCapabilities> getOrInitializeServer(VirtualFile file) {
     // call initialize service
     final MessageLoader loader =
         loaderFactory.newLoader("Initializing Language Server for " + file.getName());
