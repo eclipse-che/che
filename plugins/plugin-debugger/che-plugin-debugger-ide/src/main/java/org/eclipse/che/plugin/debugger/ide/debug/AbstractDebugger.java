@@ -98,7 +98,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   private final DebuggerServiceClient service;
   private final LocalStorageProvider localStorageProvider;
   private final EventBus eventBus;
-  private final DebuggerResourceHandlerFactory debuggerResourceHandlerFactory;
+  private final DebuggerLocationHandlerManager debuggerLocationHandlerManager;
   private final DebuggerManager debuggerManager;
   private final BreakpointManager breakpointManager;
   private final String debuggerType;
@@ -118,7 +118,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
       NotificationManager notificationManager,
       BreakpointManager breakpointManager,
       RequestHandlerManager requestHandlerManager,
-      DebuggerResourceHandlerFactory debuggerResourceHandlerFactory,
+      DebuggerLocationHandlerManager debuggerLocationHandlerManager,
       String type) {
     this.service = service;
     this.transmitter = transmitter;
@@ -126,7 +126,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     this.dtoFactory = dtoFactory;
     this.localStorageProvider = localStorageProvider;
     this.eventBus = eventBus;
-    this.debuggerResourceHandlerFactory = debuggerResourceHandlerFactory;
+    this.debuggerLocationHandlerManager = debuggerLocationHandlerManager;
     this.debuggerManager = debuggerManager;
     this.notificationManager = notificationManager;
     this.breakpointManager = breakpointManager;
@@ -170,8 +170,8 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                       }
 
                       if (currentLocation != null) {
-                        debuggerResourceHandlerFactory
-                            .getOrDefault(getDebuggerType())
+                        debuggerLocationHandlerManager
+                            .getOrDefault(currentLocation)
                             .find(
                                 currentLocation,
                                 new AsyncCallback<VirtualFile>() {
@@ -230,8 +230,8 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   }
 
   private void open(Location location) {
-    debuggerResourceHandlerFactory
-        .getOrDefault(getDebuggerType())
+    debuggerLocationHandlerManager
+        .getOrDefault(location)
         .open(
             location,
             new AsyncCallback<VirtualFile>() {

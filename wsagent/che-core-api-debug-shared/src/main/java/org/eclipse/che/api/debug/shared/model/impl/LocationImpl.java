@@ -42,6 +42,15 @@ public class LocationImpl implements Location {
     this.threadId = threadId;
   }
 
+  public LocationImpl(
+      String target,
+      int lineNumber,
+      boolean externalResource,
+      int externalResourceId,
+      String resourceProjectPath) {
+    this(target, lineNumber, externalResource, externalResourceId, resourceProjectPath, null, -1);
+  }
+
   public LocationImpl(String target, int lineNumber, String resourceProjectPath) {
     this(target, lineNumber, false, 0, resourceProjectPath, null, -1);
   }

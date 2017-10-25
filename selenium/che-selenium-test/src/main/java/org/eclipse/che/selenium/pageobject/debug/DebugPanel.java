@@ -512,4 +512,18 @@ public class DebugPanel {
         .until(visibilityOfElementLocated(xpath(BreakpointConfigurationWindow.APPLY_BTN)))
         .click();
   }
+
+  public void navigateToBreakpoint(String fileName, int lineNumber) {
+    String breakpointItem = format(BreakpointsPanel.BREAKPOINT_ITEM, fileName + ":" + lineNumber);
+
+    seleniumWebDriver
+        .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(xpath(breakpointItem)));
+
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .doubleClick(seleniumWebDriver.findElement(xpath(breakpointItem)))
+        .build()
+        .perform();
+  }
 }

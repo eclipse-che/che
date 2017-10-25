@@ -29,27 +29,32 @@ import org.eclipse.che.ide.api.resources.VirtualFile;
 
 /** @author Anatoliy Bazko */
 @Singleton
-public class DefaultDebuggerResourceHandler implements DebuggerResourceHandler {
+public class FileResourceLocationHandler implements DebuggerLocationHandler {
 
   private final EditorAgent editorAgent;
   private final AppContext appContext;
 
   @Inject
-  public DefaultDebuggerResourceHandler(EditorAgent editorAgent, AppContext appContext) {
+  public FileResourceLocationHandler(EditorAgent editorAgent, AppContext appContext) {
     this.editorAgent = editorAgent;
     this.appContext = appContext;
+  }
+
+  @Override
+  public boolean isSuitedFor(Location location) {
+    return true;
   }
 
   /**
    * Tries to find file and open it. To perform the operation the following sequence of methods
    * invocation are processed:
    *
-   * <p>{@link DefaultDebuggerResourceHandler#findInOpenedEditors(Location, AsyncCallback)} {@link
-   * DefaultDebuggerResourceHandler#findInProject(Location, AsyncCallback)} {@link
-   * DefaultDebuggerResourceHandler#findInWorkspace(Location, AsyncCallback)} {@link
-   * DefaultDebuggerResourceHandler#searchSource(Location, AsyncCallback)}
+   * <p>{@link FileResourceLocationHandler#findInOpenedEditors(Location, AsyncCallback)} {@link
+   * FileResourceLocationHandler#findInProject(Location, AsyncCallback)} {@link
+   * FileResourceLocationHandler#findInWorkspace(Location, AsyncCallback)} {@link
+   * FileResourceLocationHandler#searchSource(Location, AsyncCallback)}
    *
-   * @see DebuggerResourceHandler#open(Location, AsyncCallback)
+   * @see DebuggerLocationHandler#open(Location, AsyncCallback)
    */
   @Override
   public void open(final Location location, final AsyncCallback<VirtualFile> callback) {

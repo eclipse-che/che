@@ -21,7 +21,7 @@ import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationServ
 import org.eclipse.che.ide.ext.java.client.tree.JavaNodeFactory;
 import org.eclipse.che.ide.ext.java.client.tree.library.JarFileNode;
 import org.eclipse.che.ide.resource.Path;
-import org.eclipse.che.plugin.debugger.ide.debug.DefaultDebuggerResourceHandler;
+import org.eclipse.che.plugin.debugger.ide.debug.FileResourceLocationHandler;
 
 /**
  * Responsible to open files in editor when debugger stopped at breakpoint.
@@ -29,13 +29,13 @@ import org.eclipse.che.plugin.debugger.ide.debug.DefaultDebuggerResourceHandler;
  * @author Anatoliy Bazko
  */
 @Singleton
-public class JavaDebuggerResourceHandler extends DefaultDebuggerResourceHandler {
+public class ExternalResourceLocationHandler extends FileResourceLocationHandler {
 
   private final JavaNavigationService javaNavigationService;
   private final JavaNodeFactory nodeFactory;
 
   @Inject
-  public JavaDebuggerResourceHandler(
+  public ExternalResourceLocationHandler(
       EditorAgent editorAgent,
       AppContext appContext,
       JavaNavigationService javaNavigationService,
@@ -47,17 +47,18 @@ public class JavaDebuggerResourceHandler extends DefaultDebuggerResourceHandler 
   }
 
   @Override
+  public boolean isSuitedFor(Location location) {
+    return location.isExternalResource() && location.getExternalResourceId() != 0;
+  }
+
+  @Override
   public void find(Location location, AsyncCallback<VirtualFile> callback) {
     findInOpenedEditors(
         location,
         new AsyncCallback<VirtualFile>() {
           @Override
           public void onFailure(Throwable caught) {
-            if (location.isExternalResource()) {
-              findExternalResource(location, callback);
-            } else {
-              JavaDebuggerResourceHandler.super.find(location, callback);
-            }
+            findExternalResource(location, callback);
           }
 
           @Override
@@ -69,6 +70,7 @@ public class JavaDebuggerResourceHandler extends DefaultDebuggerResourceHandler 
 
   private void findExternalResource(
       final Location location, final AsyncCallback<VirtualFile> callback) {
+
     final String className = extractOuterClassFqn(location.getTarget());
     final int libId = location.getExternalResourceId();
     final Path projectPath = new Path(location.getResourceProjectPath());
