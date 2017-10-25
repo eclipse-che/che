@@ -834,7 +834,7 @@ public class ProjectExplorer {
     } catch (StaleElementReferenceException ex) {
       WaitUtils.sleepQuietly(1);
     }
-    navigateToFile.isFilenameSuggested(file);
+    navigateToFile.waitListOfFilesNames(file);
     navigateToFile.selectFileByName(file);
     navigateToFile.waitFormToClose();
     menu.runCommand(
