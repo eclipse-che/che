@@ -25,6 +25,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentI
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -55,7 +56,6 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** @author Musienko Maxim */
 @Singleton
@@ -63,7 +63,7 @@ public class CodenvyEditor {
 
   public static final String CLOSE_ALL_TABS = "gwt-debug-contextMenu/closeAllEditors";
   public static final String VCS_RULER = "//div[@class='ruler vcs']/div";
-  public static final Logger LOG = LoggerFactory.getLogger(CodenvyEditor.class);
+  public static final Logger LOG = getLogger(CodenvyEditor.class);
 
   public static final class EditorContextMenu {
     public static final String REFACTORING = "contextMenu/Refactoring";
