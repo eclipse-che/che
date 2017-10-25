@@ -186,7 +186,8 @@ public class DebuggerTest extends BaseTest {
                 debuggerManager,
                 notificationManager,
                 "id",
-                debuggerResourceHandlerFactory));
+                debuggerResourceHandlerFactory,
+                disposableBreakpointRemoverFactory));
     doReturn(promiseInfo).when(service).getSessionInfo(SESSION_ID);
     doReturn(promiseInfo).when(promiseInfo).then(any(Operation.class));
 
@@ -607,7 +608,8 @@ public class DebuggerTest extends BaseTest {
         DebuggerManager debuggerManager,
         NotificationManager notificationManager,
         String id,
-        DebuggerResourceHandlerFactory debuggerResourceHandlerFactory) {
+        DebuggerResourceHandlerFactory debuggerResourceHandlerFactory,
+        DisposableBreakpointRemoverFactory disposableBreakpointRemoverFactory) {
       super(
           service,
           transmitter,
@@ -620,6 +622,7 @@ public class DebuggerTest extends BaseTest {
           breakpointManager,
           requestHandlerManager,
           debuggerResourceHandlerFactory,
+          disposableBreakpointRemoverFactory,
           id);
     }
 

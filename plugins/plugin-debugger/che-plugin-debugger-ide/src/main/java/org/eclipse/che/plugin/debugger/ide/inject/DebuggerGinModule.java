@@ -25,6 +25,7 @@ import org.eclipse.che.plugin.debugger.ide.configuration.EditDebugConfigurations
 import org.eclipse.che.plugin.debugger.ide.debug.DebuggerToolbar;
 import org.eclipse.che.plugin.debugger.ide.debug.DebuggerView;
 import org.eclipse.che.plugin.debugger.ide.debug.DebuggerViewImpl;
+import org.eclipse.che.plugin.debugger.ide.debug.DisposableBreakpointRemoverFactory;
 import org.eclipse.che.plugin.debugger.ide.debug.breakpoint.BreakpointConfigurationView;
 import org.eclipse.che.plugin.debugger.ide.debug.breakpoint.BreakpointConfigurationViewImpl;
 import org.eclipse.che.plugin.debugger.ide.debug.breakpoint.BreakpointContextMenuFactory;
@@ -66,5 +67,6 @@ public class DebuggerGinModule extends AbstractGinModule {
         .in(Singleton.class);
 
     install(new GinFactoryModuleBuilder().build(BreakpointContextMenuFactory.class));
+    install(new GinFactoryModuleBuilder().build(DisposableBreakpointRemoverFactory.class));
   }
 }

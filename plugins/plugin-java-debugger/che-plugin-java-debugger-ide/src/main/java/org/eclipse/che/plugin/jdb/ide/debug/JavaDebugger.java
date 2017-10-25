@@ -28,6 +28,7 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 import org.eclipse.che.plugin.debugger.ide.debug.AbstractDebugger;
 import org.eclipse.che.plugin.debugger.ide.debug.DebuggerResourceHandlerFactory;
+import org.eclipse.che.plugin.debugger.ide.debug.DisposableBreakpointRemoverFactory;
 
 /**
  * The java debugger.
@@ -50,7 +51,8 @@ public class JavaDebugger extends AbstractDebugger {
       DebuggerManager debuggerManager,
       NotificationManager notificationManager,
       BreakpointManager breakpointManager,
-      RequestHandlerManager requestHandlerManager) {
+      RequestHandlerManager requestHandlerManager,
+      DisposableBreakpointRemoverFactory disposableBreakpointRemoverFactory) {
     super(
         service,
         transmitter,
@@ -63,6 +65,7 @@ public class JavaDebugger extends AbstractDebugger {
         breakpointManager,
         requestHandlerManager,
         debuggerResourceHandlerFactory,
+        disposableBreakpointRemoverFactory,
         ID);
   }
 

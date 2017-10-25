@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
@@ -26,6 +27,7 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
 import org.eclipse.che.api.debug.shared.dto.LocationDto;
+import org.eclipse.che.api.debug.shared.dto.MethodDto;
 import org.eclipse.che.api.debug.shared.dto.SimpleValueDto;
 import org.eclipse.che.api.debug.shared.dto.ThreadStateDto;
 import org.eclipse.che.api.debug.shared.dto.VariableDto;
@@ -43,6 +45,7 @@ import org.eclipse.che.api.debug.shared.dto.event.SuspendEventDto;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.Method;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.Variable;
@@ -101,6 +104,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   private final DebuggerResourceHandlerFactory debuggerResourceHandlerFactory;
   private final DebuggerManager debuggerManager;
   private final BreakpointManager breakpointManager;
+  private final DisposableBreakpointRemoverFactory disposableBreakpointRemoverFactory;
   private final String debuggerType;
   private final RequestHandlerManager requestHandlerManager;
 
@@ -119,6 +123,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
       BreakpointManager breakpointManager,
       RequestHandlerManager requestHandlerManager,
       DebuggerResourceHandlerFactory debuggerResourceHandlerFactory,
+      DisposableBreakpointRemoverFactory disposableBreakpointRemoverFactory,
       String type) {
     this.service = service;
     this.transmitter = transmitter;
@@ -130,6 +135,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     this.debuggerManager = debuggerManager;
     this.notificationManager = notificationManager;
     this.breakpointManager = breakpointManager;
+    this.disposableBreakpointRemoverFactory = disposableBreakpointRemoverFactory;
     this.observers = new ArrayList<>();
     this.debuggerType = type;
     this.requestHandlerManager = requestHandlerManager;
@@ -359,17 +365,10 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   @Override
   public void addBreakpoint(final Breakpoint breakpoint) {
     if (isConnected()) {
-      Location location = breakpoint.getLocation();
-
-      LocationDto locationDto = dtoFactory.createDto(LocationDto.class);
-      locationDto.setLineNumber(location.getLineNumber());
-      locationDto.setTarget(location.getTarget());
-      locationDto.setResourceProjectPath(location.getResourceProjectPath());
-
       BreakpointDto breakpointDto =
           dtoFactory
               .createDto(BreakpointDto.class)
-              .withLocation(locationDto)
+              .withLocation(toDto(breakpoint.getLocation()))
               .withEnabled(true)
               .withCondition(breakpoint.getCondition());
 
@@ -393,14 +392,9 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     if (!isConnected()) {
       return;
     }
-    Location location = breakpoint.getLocation();
 
-    LocationDto locationDto = dtoFactory.createDto(LocationDto.class);
-    locationDto.setLineNumber(location.getLineNumber());
-    locationDto.setTarget(location.getTarget());
-    locationDto.setResourceProjectPath(location.getResourceProjectPath());
-
-    Promise<Void> promise = service.deleteBreakpoint(debugSessionDto.getId(), locationDto);
+    Promise<Void> promise =
+        service.deleteBreakpoint(debugSessionDto.getId(), toDto(breakpoint.getLocation()));
     promise
         .then(
             it -> {
@@ -488,15 +482,8 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   protected void startDebugger(final DebugSessionDto debugSessionDto) {
     List<BreakpointDto> breakpoints = new ArrayList<>();
     for (Breakpoint breakpoint : breakpointManager.getBreakpointList()) {
-      Location location = breakpoint.getLocation();
-
-      LocationDto locationDto = dtoFactory.createDto(LocationDto.class);
-      locationDto.setLineNumber(location.getLineNumber());
-      locationDto.setTarget(location.getTarget());
-      locationDto.setResourceProjectPath(location.getResourceProjectPath());
-
       BreakpointDto breakpointDto = dtoFactory.createDto(BreakpointDto.class);
-      breakpointDto.setLocation(locationDto);
+      breakpointDto.setLocation(toDto(breakpoint.getLocation()));
       breakpointDto.setEnabled(true);
       breakpointDto.setCondition(breakpoint.getCondition());
 
@@ -618,6 +605,25 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
           error -> {
             Log.error(AbstractDebugger.class, error.getCause());
           });
+    }
+  }
+
+  @Override
+  public void runToLocation(Location location) {
+    if (isConnected()) {
+      BreakpointDto breakpointDto =
+          dtoFactory.createDto(BreakpointDto.class).withLocation(toDto(location)).withEnabled(true);
+
+      service
+          .addBreakpoint(debugSessionDto.getId(), breakpointDto)
+          .then(
+              it -> {
+                DisposableBreakpointRemover disposableBreakpointRemover =
+                    disposableBreakpointRemoverFactory.create(breakpointDto, this);
+                addObserver(disposableBreakpointRemover);
+
+                resume();
+              });
     }
   }
 
@@ -779,6 +785,26 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     dto.withName(variable.getName());
 
     return dto;
+  }
+
+  private LocationDto toDto(Location location) {
+    MethodDto methodDto = dtoFactory.createDto(MethodDto.class);
+    Method method = location.getMethod();
+    if (method != null) {
+      List<VariableDto> arguments =
+          method.getArguments().stream().map(this::toDto).collect(Collectors.toList());
+      methodDto.setArguments(arguments);
+      methodDto.setName(method.getName());
+    }
+    return dtoFactory
+        .createDto(LocationDto.class)
+        .withTarget(location.getTarget())
+        .withLineNumber(location.getLineNumber())
+        .withExternalResource(location.isExternalResource())
+        .withExternalResourceId(location.getExternalResourceId())
+        .withResourceProjectPath(location.getResourceProjectPath())
+        .withMethod(methodDto)
+        .withThreadId(location.getThreadId());
   }
 
   protected abstract DebuggerDescriptor toDescriptor(Map<String, String> connectionProperties);
