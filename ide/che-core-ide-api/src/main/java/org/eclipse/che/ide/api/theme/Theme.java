@@ -1623,5 +1623,4 @@ public interface Theme {
   String findResultsBackground();
 
   String findResultsTextColor();
-
 }
