@@ -74,7 +74,7 @@ public class DebuggerPresenterTest extends BaseTest {
   @Mock @DebuggerToolbar private ToolbarPresenter debuggerToolbar;
   @Mock private DebuggerManager debuggerManager;
   @Mock private WorkspaceAgent workspaceAgent;
-  @Mock private DebuggerResourceHandlerFactory debuggerResourceHandlerFactory;
+  @Mock private DebuggerLocationHandlerManager debuggerLocationHandlerManager;
   @Mock private BreakpointContextMenuFactory breakpointContextMenuFactory;
 
   @Mock private Debugger debugger;
@@ -110,7 +110,7 @@ public class DebuggerPresenterTest extends BaseTest {
                 debuggerToolbar,
                 debuggerManager,
                 workspaceAgent,
-                debuggerResourceHandlerFactory,
+                debuggerLocationHandlerManager,
                 breakpointContextMenuFactory));
 
     Mockito.reset(view);

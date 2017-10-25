@@ -63,7 +63,10 @@ public class ConditionalBreakpointsTest {
         PLAIN_JAVA);
 
     testCommandServiceClient.createCommand(
-        "cd ${current.project.path}/src/ && javac -g HelloWorld.java &&"
+        "cd ${current.project.path}/src/ && javac -g HelloWorld.java", "build", CUSTOM, ws.getId());
+
+    testCommandServiceClient.createCommand(
+        "cd ${current.project.path}/src/ &&"
             + " java -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y HelloWorld",
         "debug",
         CUSTOM,
@@ -71,17 +74,42 @@ public class ConditionalBreakpointsTest {
 
     ide.open(ws);
     projectExplorer.waitItem(PROJECT);
+    commandsPalette.openCommandPalette();
+    commandsPalette.startCommandByDoubleClick("build");
     projectExplorer.quickExpandWithJavaScript();
     debugPanel.openDebugPanel();
-
-    projectExplorer.openItemByPath(PROJECT + "/src/HelloWorld.java");
   }
 
   @Test
-  public void shouldAddConditionalBreakpoint() throws Exception {
+  public void shouldNavigateToBreakpoint() throws Exception {
+    projectExplorer.openItemByPath(PROJECT + "/src/HelloWorld.java");
     editor.setBreakpoint(14);
+    editor.waitInactiveBreakpoint(14);
+
+    projectExplorer.openItemByVisibleNameInExplorer("External Libraries");
+    projectExplorer.openItemByVisibleNameInExplorer("rt.jar");
+    projectExplorer.openItemByVisibleNameInExplorer("com");
+    projectExplorer.openItemByVisibleNameInExplorer("oracle");
+    projectExplorer.openItemByVisibleNameInExplorer("net");
+    projectExplorer.openItemByVisibleNameInExplorer("Sdp");
+    editor.setBreakpoint(6);
+    editor.waitInactiveBreakpoint(6);
+
+    editor.closeAllTabs();
+
+    debugPanel.navigateToBreakpoint("com.oracle.net.Sdp", 6);
+    editor.waitActiveTabFileName("Sdp");
+
+    debugPanel.navigateToBreakpoint("HelloWorld.java", 14);
+    editor.waitActiveTabFileName("HelloWorld");
+  }
+
+  @Test(priority = 1)
+  public void shouldAddConditionalBreakpoint() throws Exception {
+    projectExplorer.openItemByPath(PROJECT + "/src/HelloWorld.java");
     editor.setBreakpoint(15);
     editor.waitInactiveBreakpoint(15);
+
     debugPanel.makeBreakpointConditional("HelloWorld.java", 15, "i == 3");
     editor.waitConditionalBreakpoint(15, false);
 

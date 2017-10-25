@@ -14,9 +14,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.debug.DebuggerManager;
-import org.eclipse.che.plugin.debugger.ide.debug.DebuggerResourceHandlerFactory;
+import org.eclipse.che.plugin.debugger.ide.debug.DebuggerLocationHandlerManager;
+import org.eclipse.che.plugin.jdb.ide.debug.ExternalResourceLocationHandler;
 import org.eclipse.che.plugin.jdb.ide.debug.JavaDebugger;
-import org.eclipse.che.plugin.jdb.ide.debug.JavaDebuggerResourceHandler;
 
 /**
  * Extension allows debug Java web applications.
@@ -35,9 +35,9 @@ public class JavaDebuggerExtension {
   public JavaDebuggerExtension(
       DebuggerManager debuggerManager,
       JavaDebugger javaDebugger,
-      DebuggerResourceHandlerFactory debuggerResourceHandlerFactory,
-      JavaDebuggerResourceHandler javaDebuggerResourceHandler) {
+      DebuggerLocationHandlerManager debuggerLocationHandlerManager,
+      ExternalResourceLocationHandler javaDebuggerResourceHandler) {
     debuggerManager.registeredDebugger(JavaDebugger.ID, javaDebugger);
-    debuggerResourceHandlerFactory.register(JavaDebugger.ID, javaDebuggerResourceHandler);
+    debuggerLocationHandlerManager.register(javaDebuggerResourceHandler);
   }
 }

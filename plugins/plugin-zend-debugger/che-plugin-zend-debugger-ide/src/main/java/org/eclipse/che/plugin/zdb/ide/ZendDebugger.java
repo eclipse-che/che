@@ -23,7 +23,7 @@ import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 import org.eclipse.che.plugin.debugger.ide.debug.AbstractDebugger;
-import org.eclipse.che.plugin.debugger.ide.debug.DebuggerResourceHandlerFactory;
+import org.eclipse.che.plugin.debugger.ide.debug.DebuggerLocationHandlerManager;
 import org.eclipse.che.plugin.zdb.ide.configuration.ZendDbgConfigurationType;
 
 /**
@@ -47,7 +47,7 @@ public class ZendDebugger extends AbstractDebugger {
       DebuggerManager debuggerManager,
       BreakpointManager breakpointManager,
       RequestHandlerManager requestHandlerManager,
-      DebuggerResourceHandlerFactory debuggerResourceHandlerFactory) {
+      DebuggerLocationHandlerManager debuggerLocationHandlerManager) {
     super(
         service,
         transmitter,
@@ -59,7 +59,7 @@ public class ZendDebugger extends AbstractDebugger {
         notificationManager,
         breakpointManager,
         requestHandlerManager,
-        debuggerResourceHandlerFactory,
+        debuggerLocationHandlerManager,
         ID);
   }
 
