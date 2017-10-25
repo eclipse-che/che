@@ -90,6 +90,7 @@ public class DebugPanel {
 
   public interface DebuggerActionButtons {
     String RESUME_BTN_ID = "gwt-debug-ActionButton/resumeExecution-true";
+    String RUN_TO_CURSOR = "gwt-debug-ActionButton/runToCursor-true";
     String STEP_INTO = "gwt-debug-ActionButton/stepInto-true";
     String STEP_OVER = "gwt-debug-ActionButton/stepOver-true";
     String STEP_OUT = "gwt-debug-ActionButton/stepOut-true";
