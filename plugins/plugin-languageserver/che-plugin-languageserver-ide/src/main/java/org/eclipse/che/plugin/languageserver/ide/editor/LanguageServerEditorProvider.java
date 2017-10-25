@@ -22,7 +22,6 @@ import org.eclipse.che.ide.api.editor.defaulteditor.EditorBuilder;
 import org.eclipse.che.ide.api.editor.editorconfig.DefaultTextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.util.loging.Log;
@@ -72,35 +71,30 @@ public class LanguageServerEditorProvider implements AsyncEditorProvider, Editor
 
   @Override
   public Promise<EditorPartPresenter> createEditor(VirtualFile file) {
-    if (file instanceof File) {
-      File resource = (File) file;
 
-      Promise<ServerCapabilities> promise =
-          registry.getOrInitializeServer(resource.getProject().getPath(), file);
-      return promise.then(
-          new Function<ServerCapabilities, EditorPartPresenter>() {
-            @Override
-            public EditorPartPresenter apply(ServerCapabilities capabilities)
-                throws FunctionException {
-              if (editorBuilder == null) {
-                Log.debug(
-                    AbstractTextEditorProvider.class,
-                    "No builder registered for default editor type - giving up.");
-                return null;
-              }
-
-              final TextEditor editor = editorBuilder.buildEditor();
-              if (capabilities == null) {
-                // create an editor with no capabilities
-                capabilities = new ServerCapabilities();
-              }
-              TextEditorConfiguration configuration =
-                  editorConfigurationFactory.build(editor, capabilities);
-              editor.initialize(configuration);
-              return editor;
+    Promise<ServerCapabilities> promise = registry.getOrInitializeServer(file);
+    return promise.then(
+        new Function<ServerCapabilities, EditorPartPresenter>() {
+          @Override
+          public EditorPartPresenter apply(ServerCapabilities capabilities)
+              throws FunctionException {
+            if (editorBuilder == null) {
+              Log.debug(
+                  AbstractTextEditorProvider.class,
+                  "No builder registered for default editor type - giving up.");
+              return null;
             }
-          });
-    }
-    return null;
+
+            final TextEditor editor = editorBuilder.buildEditor();
+            if (capabilities == null) {
+              // create an editor with no capabilities
+              capabilities = new ServerCapabilities();
+            }
+            TextEditorConfiguration configuration =
+                editorConfigurationFactory.build(editor, capabilities);
+            editor.initialize(configuration);
+            return editor;
+          }
+        });
   }
 }
