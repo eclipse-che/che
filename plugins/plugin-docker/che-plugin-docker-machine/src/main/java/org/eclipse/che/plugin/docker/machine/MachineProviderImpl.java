@@ -154,7 +154,6 @@ public class MachineProviderImpl implements MachineInstanceProvider {
   private final boolean doForcePullImage;
   private final boolean privilegedMode;
   private final String[] securityOpt;
-  // private final SecurityOptProvider securityOptProvider;
   private final int pidsLimit;
   private final DockerMachineFactory dockerMachineFactory;
   private final List<String> devMachinePortsToExpose;
@@ -190,9 +189,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
       @Named("machine.docker.machine_volumes") Set<String> allMachinesSystemVolumes,
       @Named("che.docker.always_pull_image") boolean doForcePullImage,
       @Named("che.docker.privileged") boolean privilegedMode,
-      // @Named("che.docker.securityopt") String[] securityOpt,
       @Nullable @Named("che.docker.securityopt") String[] securityOpt,
-      // SecurityOptProvider securityOptProvider,
       @Named("che.docker.pids_limit") int pidsLimit,
       @Named("machine.docker.dev_machine.machine_env") Set<String> devMachineEnvVariables,
       @Named("machine.docker.machine_env") Set<String> allMachinesEnvVariables,
@@ -217,7 +214,6 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     this.doForcePullImage = doForcePullImage;
     this.privilegedMode = privilegedMode;
     this.securityOpt = securityOpt;
-    // this.securityOptProvider = securityOptProvider;
     this.snapshotUseRegistry = snapshotUseRegistry;
     // use-cases:
     //  -1  enable unlimited swap
