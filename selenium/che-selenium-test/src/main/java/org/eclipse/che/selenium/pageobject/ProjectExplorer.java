@@ -502,7 +502,7 @@ public class ProjectExplorer {
     String locator =
         "//div[@path='/"
             + pathToFolder
-            + "']//*[local-name() = 'svg' and @id='"
+            + "']/div/*[local-name() = 'svg' and @id='"
             + typeFolder
             + "']";
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
