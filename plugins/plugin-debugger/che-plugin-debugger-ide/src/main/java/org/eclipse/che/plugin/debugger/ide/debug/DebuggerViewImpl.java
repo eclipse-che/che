@@ -346,6 +346,11 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
           public void onListItemContextMenu(int clientX, int clientY, Breakpoint itemData) {
             delegate.onBreakpointContextMenu(clientX, clientY, itemData);
           }
+
+          @Override
+          public void onListItemDoubleClicked(Element listItemBase, Breakpoint itemData) {
+            delegate.onBreakpointDoubleClick(itemData);
+          }
         };
 
     return SimpleList.create(

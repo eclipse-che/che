@@ -82,7 +82,7 @@ public class DebuggerPresenter extends BasePresenter
   private final DebuggerView view;
   private final DebuggerManager debuggerManager;
   private final WorkspaceAgent workspaceAgent;
-  private final DebuggerResourceHandlerFactory resourceHandlerManager;
+  private final DebuggerLocationHandlerManager resourceHandlerManager;
   private final BreakpointContextMenuFactory breakpointContextMenuFactory;
 
   private List<Variable> variables;
@@ -102,7 +102,7 @@ public class DebuggerPresenter extends BasePresenter
       final @DebuggerWatchToolBar ToolbarPresenter watchToolbar,
       final DebuggerManager debuggerManager,
       final WorkspaceAgent workspaceAgent,
-      final DebuggerResourceHandlerFactory resourceHandlerManager,
+      final DebuggerLocationHandlerManager resourceHandlerManager,
       final BreakpointContextMenuFactory breakpointContextMenuFactory) {
     this.view = view;
     this.debuggerResources = debuggerResources;
@@ -203,8 +203,7 @@ public class DebuggerPresenter extends BasePresenter
   protected void open(Location location) {
     Debugger debugger = debuggerManager.getActiveDebugger();
     if (debugger != null) {
-      DebuggerResourceHandler handler =
-          resourceHandlerManager.getOrDefault(debugger.getDebuggerType());
+      DebuggerLocationHandler handler = resourceHandlerManager.getOrDefault(location);
 
       handler.open(
           location,
@@ -526,5 +525,21 @@ public class DebuggerPresenter extends BasePresenter
     Scheduler.get()
         .scheduleDeferred(
             () -> breakpointContextMenuFactory.newContextMenu(breakpoint).show(clientX, clientY));
+  }
+
+  @Override
+  public void onBreakpointDoubleClick(Breakpoint breakpoint) {
+    Location location = breakpoint.getLocation();
+    resourceHandlerManager
+        .getOrDefault(location)
+        .open(
+            location,
+            new AsyncCallback<VirtualFile>() {
+              @Override
+              public void onFailure(Throwable caught) {}
+
+              @Override
+              public void onSuccess(VirtualFile result) {}
+            });
   }
 }
