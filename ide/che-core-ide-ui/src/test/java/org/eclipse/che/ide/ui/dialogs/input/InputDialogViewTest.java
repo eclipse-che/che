@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.ide.ui.dialogs.input;
 
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 import org.eclipse.che.ide.ui.UILocalizationConstant;

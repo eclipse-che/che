@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.api.machine.server.recipe;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;

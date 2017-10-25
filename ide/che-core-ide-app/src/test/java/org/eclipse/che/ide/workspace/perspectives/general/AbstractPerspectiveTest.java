@@ -47,7 +47,7 @@ import org.eclipse.che.providers.DynaProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 
 /** @author Dmitry Shnurenko */
@@ -94,15 +94,17 @@ public class AbstractPerspectiveTest {
     when(view.getToolPanel()).thenReturn(simplePanel);
 
     when(controllerFactory.createController(
-            Matchers.<SplitLayoutPanel>anyObject(), Matchers.<SimplePanel>anyObject()))
+            ArgumentMatchers.<SplitLayoutPanel>anyObject(),
+            ArgumentMatchers.<SimplePanel>anyObject()))
         .thenReturn(workBenchController);
 
     when(partStackViewFactory.create(
-            Matchers.<TabPosition>anyObject(), Matchers.<FlowPanel>anyObject()))
+            ArgumentMatchers.<TabPosition>anyObject(), ArgumentMatchers.<FlowPanel>anyObject()))
         .thenReturn(partStackView);
 
     when(stackPresenterFactory.create(
-            Matchers.<PartStackView>anyObject(), Matchers.<WorkBenchPartController>anyObject()))
+            ArgumentMatchers.<PartStackView>anyObject(),
+            ArgumentMatchers.<WorkBenchPartController>anyObject()))
         .thenReturn(partStackPresenter);
 
     perspective =

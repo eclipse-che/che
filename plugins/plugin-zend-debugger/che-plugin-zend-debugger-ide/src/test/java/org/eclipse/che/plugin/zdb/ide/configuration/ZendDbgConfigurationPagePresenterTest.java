@@ -17,7 +17,7 @@ import static org.eclipse.che.plugin.zdb.ide.configuration.ZendDbgConfigurationT
 import static org.eclipse.che.plugin.zdb.ide.configuration.ZendDbgConfigurationType.DEFAULT_CLIENT_HOST_IP;
 import static org.eclipse.che.plugin.zdb.ide.configuration.ZendDbgConfigurationType.DEFAULT_DEBUG_PORT;
 import static org.eclipse.che.plugin.zdb.ide.configuration.ZendDbgConfigurationType.DEFAULT_USE_SSL_ENCRYPTION;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -36,7 +36,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Zend dbg configuration page presenter tests.

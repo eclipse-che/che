@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.part.explorer.project.macro;
 
 import static org.junit.Assert.assertSame;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 import com.google.common.base.Joiner;

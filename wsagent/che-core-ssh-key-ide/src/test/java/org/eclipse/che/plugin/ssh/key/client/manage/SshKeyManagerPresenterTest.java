@@ -13,11 +13,11 @@ package org.eclipse.che.plugin.ssh.key.client.manage;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.RETURNS_DEFAULTS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -58,10 +58,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -143,7 +141,8 @@ public class SshKeyManagerPresenterTest {
 
     presenter.go(container);
 
-    verify(service).getPairs(Matchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE));
+    verify(service)
+        .getPairs(org.mockito.ArgumentMatchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE));
     verify(container).setWidget(eq(view));
   }
 
@@ -188,7 +187,9 @@ public class SshKeyManagerPresenterTest {
 
     verify(confirmDialog).show();
     verify(service)
-        .deletePair(Matchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE), eq(GITHUB_HOST));
+        .deletePair(
+            org.mockito.ArgumentMatchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE),
+            eq(GITHUB_HOST));
   }
 
   @Test
@@ -217,7 +218,8 @@ public class SshKeyManagerPresenterTest {
 
     verify(confirmDialog).show();
     verify(service, never())
-        .deletePair(Matchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE), anyString());
+        .deletePair(
+            org.mockito.ArgumentMatchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE), anyString());
   }
 
   @Test
@@ -251,8 +253,11 @@ public class SshKeyManagerPresenterTest {
 
     verify(confirmDialog).show();
     verify(service)
-        .deletePair(Matchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE), eq(GITHUB_HOST));
-    verify(service).getPairs(Matchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE));
+        .deletePair(
+            org.mockito.ArgumentMatchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE),
+            eq(GITHUB_HOST));
+    verify(service)
+        .getPairs(org.mockito.ArgumentMatchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE));
   }
 
   @Test
@@ -285,10 +290,13 @@ public class SshKeyManagerPresenterTest {
     operationErrorCapture.getValue().apply(JsPromiseError.create(""));
 
     verify(confirmDialog).show();
-    verify(service).deletePair(Matchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE), anyString());
+    verify(service)
+        .deletePair(
+            org.mockito.ArgumentMatchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE), anyString());
     verify(notificationManager)
         .notify(anyString(), eq(StatusNotification.Status.FAIL), eq(FLOAT_MODE));
-    verify(service, never()).getPairs(Matchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE));
+    verify(service, never())
+        .getPairs(org.mockito.ArgumentMatchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE));
   }
 
   @Test
@@ -326,8 +334,11 @@ public class SshKeyManagerPresenterTest {
 
     verify(confirmDialog).show();
     verify(service)
-        .deletePair(Matchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE), eq(GITHUB_HOST));
-    verify(service).getPairs(Matchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE));
+        .deletePair(
+            org.mockito.ArgumentMatchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE),
+            eq(GITHUB_HOST));
+    verify(service)
+        .getPairs(org.mockito.ArgumentMatchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE));
     verify(view).setPairs(eq(sshPairDtoArray));
   }
 
@@ -366,8 +377,11 @@ public class SshKeyManagerPresenterTest {
 
     verify(confirmDialog).show();
     verify(service)
-        .deletePair(Matchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE), eq(GITHUB_HOST));
-    verify(service).getPairs(Matchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE));
+        .deletePair(
+            org.mockito.ArgumentMatchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE),
+            eq(GITHUB_HOST));
+    verify(service)
+        .getPairs(org.mockito.ArgumentMatchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE));
     verify(view, never()).setPairs(eq(sshPairDtoArray));
     verify(notificationManager)
         .notify(
@@ -389,7 +403,8 @@ public class SshKeyManagerPresenterTest {
     verify(sshPairDTOsPromise).then(operationSshPairDTOsCapture.capture());
     operationSshPairDTOsCapture.getValue().apply(sshPairDtoArray);
 
-    verify(service).getPairs(Matchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE));
+    verify(service)
+        .getPairs(org.mockito.ArgumentMatchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE));
     verify(view).setPairs(eq(sshPairDtoArray));
   }
 
@@ -406,7 +421,8 @@ public class SshKeyManagerPresenterTest {
     verify(sshPairDTOsPromise).catchError(operationErrorCapture.capture());
     operationErrorCapture.getValue().apply(JsPromiseError.create(""));
 
-    verify(service).getPairs(Matchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE));
+    verify(service)
+        .getPairs(org.mockito.ArgumentMatchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE));
     verify(view, never()).setPairs(eq(sshPairDtoArray));
   }
 
@@ -431,7 +447,9 @@ public class SshKeyManagerPresenterTest {
     inputCallback.accepted(GITHUB_HOST);
 
     verify(service)
-        .generatePair(Matchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE), eq(GITHUB_HOST));
+        .generatePair(
+            org.mockito.ArgumentMatchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE),
+            eq(GITHUB_HOST));
   }
 
   @Test
@@ -449,13 +467,15 @@ public class SshKeyManagerPresenterTest {
         .createInputDialog(
             nullable(String.class),
             nullable(String.class),
-            ArgumentMatchers.<InputCallback>any(),
+            org.mockito.ArgumentMatchers.<InputCallback>any(),
             cancelCallbackCaptor.capture());
     CancelCallback cancelCallback = cancelCallbackCaptor.getValue();
     cancelCallback.cancelled();
 
     verify(service, never())
-        .generatePair(Matchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE), eq(GITHUB_HOST));
+        .generatePair(
+            org.mockito.ArgumentMatchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE),
+            eq(GITHUB_HOST));
   }
 
   @Test
@@ -480,8 +500,11 @@ public class SshKeyManagerPresenterTest {
     operationErrorCapture.getValue().apply(JsPromiseError.create(""));
 
     verify(service)
-        .generatePair(Matchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE), eq(GITHUB_HOST));
-    verify(service, never()).getPairs(Matchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE));
+        .generatePair(
+            org.mockito.ArgumentMatchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE),
+            eq(GITHUB_HOST));
+    verify(service, never())
+        .getPairs(org.mockito.ArgumentMatchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE));
     verify(view, never()).setPairs((List<SshPairDto>) anyObject());
     verify(notificationManager)
         .notify(
@@ -517,8 +540,11 @@ public class SshKeyManagerPresenterTest {
     operationSshPairDTOsCapture.getValue().apply(sshPairDtoArray);
 
     verify(service)
-        .generatePair(Matchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE), eq(GITHUB_HOST));
-    verify(service).getPairs(Matchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE));
+        .generatePair(
+            org.mockito.ArgumentMatchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE),
+            eq(GITHUB_HOST));
+    verify(service)
+        .getPairs(org.mockito.ArgumentMatchers.eq(SshKeyManagerPresenter.VCS_SSH_SERVICE));
     verify(view).setPairs(eq(sshPairDtoArray));
   }
 

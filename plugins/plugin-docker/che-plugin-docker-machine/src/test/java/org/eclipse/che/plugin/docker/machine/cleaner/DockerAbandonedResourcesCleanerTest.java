@@ -13,9 +13,10 @@ package org.eclipse.che.plugin.docker.machine.cleaner;
 import static java.util.Arrays.asList;
 import static java.util.Optional.of;
 import static org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator.ContainerNameInfo;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -45,7 +46,6 @@ import org.eclipse.che.plugin.docker.client.json.network.ContainerInNetwork;
 import org.eclipse.che.plugin.docker.client.json.network.Network;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -219,7 +219,7 @@ public class DockerAbandonedResourcesCleanerTest {
     verify(environmentEngine, times(3)).getMachine(anyString(), anyString());
 
     verify(dockerConnector, times(2)).killContainer(anyString());
-    verify(dockerConnector, times(2)).removeContainer(Matchers.anyObject());
+    verify(dockerConnector, times(2)).removeContainer(anyObject());
 
     verify(dockerConnector, never()).killContainer(containerId1);
     verify(dockerConnector, never())
@@ -248,7 +248,7 @@ public class DockerAbandonedResourcesCleanerTest {
 
     verify(dockerConnector, never()).killContainer(anyString());
 
-    verify(dockerConnector, never()).removeContainer(Matchers.anyObject());
+    verify(dockerConnector, never()).removeContainer(any());
   }
 
   @Test
@@ -260,7 +260,7 @@ public class DockerAbandonedResourcesCleanerTest {
 
     verify(dockerConnector, never()).killContainer(anyString());
 
-    verify(dockerConnector, never()).removeContainer(Matchers.anyObject());
+    verify(dockerConnector, never()).removeContainer(any());
   }
 
   @Test
