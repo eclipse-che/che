@@ -382,10 +382,6 @@ MULTI_USER_REPLACEMENT_STRING="          - name: \"CHE_WORKSPACE_LOGS\"
           - name: \"CHE_HOST\"
             value: \"${CHE_HOST}\""
 
-# TODO When merging the multi-user work to master, this replacement string should
-# be replaced by the corresponding change in the fabric8 deployment descriptor
-MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING="s|            path: /api/system/state|            path: /api|"
-
 echo
 if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
   echo "[CHE] Deploying Che on minishift (image ${CHE_IMAGE})"
@@ -418,7 +414,6 @@ cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     if [ "${CHE_INFRA_OPENSHIFT_PASSWORD+x}" ]; then sed "s|    CHE_INFRA_OPENSHIFT_PASSWORD:.*|    CHE_INFRA_OPENSHIFT_PASSWORD: ${CHE_INFRA_OPENSHIFT_PASSWORD}|"; else cat -;  fi | \
     if [ "${CHE_KEYCLOAK_DISABLED}" == "true" ]; then sed "s/    keycloak-disabled: \"false\"/    keycloak-disabled: \"true\"/" ; else cat -; fi | \
     if [ "${CHE_DEBUGGING_ENABLED}" == "true" ]; then sed "s/    remote-debugging-enabled: \"false\"/    remote-debugging-enabled: \"true\"/"; else cat -; fi | \
-    sed "$MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING" | \
     append_after_match "env:" "${MULTI_USER_REPLACEMENT_STRING}" | \
     oc apply --force=true -f -
 elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
@@ -439,7 +434,6 @@ cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     sed "s/          imagePullPolicy:.*/          imagePullPolicy: \"${IMAGE_PULL_POLICY}\"/" | \
     if [ "${CHE_KEYCLOAK_DISABLED}" == "true" ]; then sed "s/    keycloak-disabled: \"false\"/    keycloak-disabled: \"true\"/" ; else cat -; fi | \
     if [ "${CHE_DEBUGGING_ENABLED}" == "true" ]; then sed "s/    remote-debugging-enabled: \"false\"/    remote-debugging-enabled: \"true\"/"; else cat -; fi | \
-    sed "$MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING" | \
     append_after_match "env:" "${MULTI_USER_REPLACEMENT_STRING}" | \
     oc apply --force=true -f -
 else
@@ -470,7 +464,6 @@ cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     if [ "${ENABLE_SSL}" == "false" ]; then grep -v -e "tls:" -e "insecureEdgeTerminationPolicy: Redirect" -e "termination: edge" ; else cat -; fi | \
     if [ "${ENABLE_SSL}" == "false" ]; then sed "s/    che.docker.server_evaluation_strategy.custom.external.protocol: https/    che.docker.server_evaluation_strategy.custom.external.protocol: http/" ; else cat -; fi | \
     if [ "${K8S_VERSION_PRIOR_TO_1_6}" == "true" ]; then sed "s/    che-openshift-precreate-subpaths: \"false\"/    che-openshift-precreate-subpaths: \"true\"/"  ; else cat -; fi | \
-    sed "$MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING" | \
     append_after_match "env:" "${MULTI_USER_REPLACEMENT_STRING}" | \
     oc apply --force=true -f -
 fi
