@@ -218,6 +218,7 @@ public class WsMasterModule extends AbstractModule {
         .asEagerSingleton();
 
     install(new org.eclipse.che.plugin.docker.machine.dns.DnsResolversModule());
+    install(new org.eclipse.che.plugin.docker.machine.SecurityOptModule());
 
     bind(org.eclipse.che.api.agent.server.filters.AddExecAgentInWorkspaceFilter.class);
     bind(org.eclipse.che.api.agent.server.filters.AddExecAgentInStackFilter.class);
