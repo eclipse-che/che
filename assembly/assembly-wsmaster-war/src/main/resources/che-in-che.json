@@ -53,7 +53,7 @@
       "description": null,
       "commands": [
         {
-          "commandLine": "mvn clean install -f ${current.project.path}",
+          "commandLine": "mvn clean install -DskipIntegrationTests=true -Pnative -f ${current.project.path}",
           "name": "Build project",
           "type": "custom"
         }
