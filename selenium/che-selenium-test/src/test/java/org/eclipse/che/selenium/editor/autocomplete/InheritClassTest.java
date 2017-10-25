@@ -70,6 +70,7 @@ public class InheritClassTest {
     projectExplorer.waitItem(PROJECT_NAME);
     notificationsPopupPanel.waitProgressPopupPanelClose();
     loader.waitOnClosed();
+    projectExplorer.selectItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     loader.waitOnClosed();
     projectExplorer.openItemByPath(COMMON_PACKAGE + "/AppController.java");

@@ -502,7 +502,7 @@ public class ProjectExplorer {
     String locator =
         "//div[@path='/"
             + pathToFolder
-            + "']//*[local-name() = 'svg' and @id='"
+            + "']/div/*[local-name() = 'svg' and @id='"
             + typeFolder
             + "']";
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
@@ -562,8 +562,10 @@ public class ProjectExplorer {
    * @param item item form {@code SubMenuNew}
    */
   public void clickOnNewContextMenuItem(String item) {
-    WebElement menuItem = seleniumWebDriver.findElement(By.id(item));
-    menuItem.click();
+    new WebDriverWait(seleniumWebDriver, 10)
+        .until(ExpectedConditions.visibilityOf(seleniumWebDriver.findElement(By.id(item))))
+        .click();
+
     waitContextMenuPopUpClosed();
   }
 
@@ -832,7 +834,7 @@ public class ProjectExplorer {
     } catch (StaleElementReferenceException ex) {
       WaitUtils.sleepQuietly(1);
     }
-    navigateToFile.isFilenameSuggested(file);
+    navigateToFile.waitListOfFilesNames(file);
     navigateToFile.selectFileByName(file);
     navigateToFile.waitFormToClose();
     menu.runCommand(
