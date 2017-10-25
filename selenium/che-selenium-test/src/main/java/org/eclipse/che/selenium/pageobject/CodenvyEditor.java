@@ -1771,18 +1771,17 @@ public class CodenvyEditor {
     waitJavaDocPopupSrcAttributeIsNotEmpty();
 
     loadPageDriverWait.until(
-        new ExpectedCondition<Boolean>() {
-          @Override
-          public Boolean apply(WebDriver driver) {
-            String javaDocPopupHtmlText = "";
-            try {
-              javaDocPopupHtmlText = getJavaDocPopupText();
-            } catch (IOException e) {
-              LOG.error("Can not get java doc HTML text from autocomplete context menu in editor");
-            }
-            return verifyJavaDoc(javaDocPopupHtmlText, expectedText);
-          }
-        });
+        (ExpectedCondition<Boolean>)
+            driver -> {
+              String javaDocPopupHtmlText = "";
+              try {
+                javaDocPopupHtmlText = getJavaDocPopupText();
+              } catch (IOException e) {
+                LOG.error(
+                    "Can not get java doc HTML text from autocomplete context menu in editor");
+              }
+              return verifyJavaDoc(javaDocPopupHtmlText, expectedText);
+            });
   }
 
   private void waitJavaDocPopupSrcAttributeIsNotEmpty() {
