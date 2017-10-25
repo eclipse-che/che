@@ -61,8 +61,7 @@ RUN sudo apt-get update && \
     && sudo rm "node-v$NODE_VERSION-linux-x64.tar.gz" SHASUMS256.txt.asc
 
 EXPOSE 3000 5000 9000
-#RUN sudo npm install -g npm@lastest
-#RUN sudo npm install --unsafe-perm -g gulp bower typings
+
 RUN mkdir ~/gopath && \
     cd /home/user && wget -q https://storage.googleapis.com/golang/go$GOLANG_VERSION.linux-amd64.tar.gz && \
     sudo tar -xvf go$GOLANG_VERSION.linux-amd64.tar.gz -C /opt/ && \
