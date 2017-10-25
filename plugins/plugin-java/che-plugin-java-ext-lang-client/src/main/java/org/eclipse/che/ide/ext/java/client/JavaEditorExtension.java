@@ -30,8 +30,8 @@ public class JavaEditorExtension {
       final JavaResources javaResources,
       Resources resources) {
     // register editor provider
-    //editorRegistry.registerDefaultEditor(javaFile, javaEditorProvider);
-    //editorRegistry.registerDefaultEditor(classFile, javaEditorProvider);
+    // editorRegistry.registerDefaultEditor(javaFile, javaEditorProvider);
+    // editorRegistry.registerDefaultEditor(classFile, javaEditorProvider);
 
     javaResources.css().ensureInjected();
     resources.css().ensureInjected();
