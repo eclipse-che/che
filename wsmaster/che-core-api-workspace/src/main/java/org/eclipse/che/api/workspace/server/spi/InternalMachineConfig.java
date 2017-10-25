@@ -14,16 +14,18 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.installer.server.exception.InstallerException;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.installer.shared.model.Installer;
+import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 
 /**
  * "pre-processed" Machine Config. To use inside infrastructure
@@ -35,7 +37,7 @@ public class InternalMachineConfig {
   // ordered installers to launch on start
   private final List<InstallerImpl> installers;
   // set of servers including ones configured by installers
-  private final Map<String, ServerConfig> servers;
+  private Map<String, ServerConfig> servers;
   private final Map<String, String> env;
   private final Map<String, String> attributes;
 
@@ -58,6 +60,7 @@ public class InternalMachineConfig {
 
     this.installers = new ArrayList<>();
     initInstallers(originalConfig.getInstallers(), installerRegistry);
+    servers = normalizeServers(servers);
   }
 
   /**
@@ -66,22 +69,22 @@ public class InternalMachineConfig {
    * <p>Note that servers provided by installers in this machine are already added to this map.
    */
   public Map<String, ServerConfig> getServers() {
-    return Collections.unmodifiableMap(servers);
+    return servers;
   }
 
-  /** Returns unmodifiable list of installers configs of the machine. */
+  /** Returns list of installers configs of the machine. */
   public List<InstallerImpl> getInstallers() {
-    return Collections.unmodifiableList(installers);
+    return installers;
   }
 
-  /** Returns unmodifiable map of machine environment variables. */
+  /** Returns map of machine environment variables. */
   public Map<String, String> getEnv() {
-    return Collections.unmodifiableMap(env);
+    return env;
   }
 
-  /** Returns unmodifiable map of machine attributes. */
+  /** Returns map of machine attributes. */
   public Map<String, String> getAttributes() {
-    return Collections.unmodifiableMap(attributes);
+    return attributes;
   }
 
   private void initInstallers(List<String> installersKeys, InstallerRegistry installerRegistry)
@@ -127,5 +130,20 @@ public class InternalMachineConfig {
 
       this.env.put(items[0], items[1]);
     }
+  }
+
+  private Map<String, ServerConfig> normalizeServers(Map<String, ServerConfig> servers) {
+    return servers
+        .entrySet()
+        .stream()
+        .collect(Collectors.toMap(Entry::getKey, e -> normalizeServer(e.getValue())));
+  }
+
+  private ServerConfig normalizeServer(ServerConfig serverConfig) {
+    String port = serverConfig.getPort();
+    if (port != null && !port.contains("/")) {
+      port = port + "/tcp";
+    }
+    return new ServerConfigImpl(port, serverConfig.getProtocol(), serverConfig.getPath());
   }
 }
