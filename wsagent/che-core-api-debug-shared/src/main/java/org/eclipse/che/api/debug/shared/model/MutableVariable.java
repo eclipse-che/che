@@ -15,4 +15,6 @@ public interface MutableVariable extends Variable {
 
   /** Sets the new variable value. */
   void setValue(SimpleValue value);
+
+  void setName(String name);
 }

@@ -97,7 +97,7 @@ public class ThreadDumpTest {
     assertEquals(frames.length, 1);
     assertTrue(frames[0].contains("main(String[]):19, App"));
 
-    debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.RESUME_BTN_ID);
+    debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.RESUME_BTN_ID);
     debugPanel.waitDebugHighlightedText("this.title = title;");
 
     frames = debugPanel.getFrames();

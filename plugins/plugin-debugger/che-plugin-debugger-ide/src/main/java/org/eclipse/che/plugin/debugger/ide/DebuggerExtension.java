@@ -25,12 +25,14 @@ import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
 import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
-import org.eclipse.che.plugin.debugger.ide.actions.ChangeVariableValueAction;
+import org.eclipse.che.plugin.debugger.ide.actions.AddWatchExpressionAction;
 import org.eclipse.che.plugin.debugger.ide.actions.DebugAction;
 import org.eclipse.che.plugin.debugger.ide.actions.DeleteAllBreakpointsAction;
 import org.eclipse.che.plugin.debugger.ide.actions.DisconnectDebuggerAction;
 import org.eclipse.che.plugin.debugger.ide.actions.EditConfigurationsAction;
+import org.eclipse.che.plugin.debugger.ide.actions.EditDebugVariableAction;
 import org.eclipse.che.plugin.debugger.ide.actions.EvaluateExpressionAction;
+import org.eclipse.che.plugin.debugger.ide.actions.RemoveWatchExpressionAction;
 import org.eclipse.che.plugin.debugger.ide.actions.ResumeExecutionAction;
 import org.eclipse.che.plugin.debugger.ide.actions.ShowHideDebuggerPanelAction;
 import org.eclipse.che.plugin.debugger.ide.actions.StepIntoAction;
@@ -50,6 +52,7 @@ import org.eclipse.che.plugin.debugger.ide.debug.breakpoint.BreakpointConfigurat
  * @author Valeriy Svydenko
  * @author Anatoliy Bazko
  * @author Mykola Morhun
+ * @author Oleksandr Andriienko
  */
 @Singleton
 @Extension(title = "Debugger", version = "4.1.0")
@@ -64,7 +67,9 @@ public class DebuggerExtension {
   public static final String RESUME_EXECUTION_ID = "resumeExecution";
   public static final String SUSPEND_EXECUTION_ID = "suspendExecution";
   public static final String EVALUATE_EXPRESSION_ID = "evaluateExpression";
-  public static final String CHANGE_VARIABLE_VALUE_ID = "changeVariableValue";
+  public static final String EDIT_DEBUG_VARIABLE_ID = "editDebugVariable";
+  public static final String ADD_WATCH_EXPRESSION = "addWatchExpression";
+  public static final String REMOVE_WATCH_EXPRESSION = "removeWatchExpression";
   public static final String SHOW_HIDE_DEBUGGER_PANEL_ID = "showHideDebuggerPanel";
   public static final String BREAKPOINT_CONFIGURATION_ID = "breakpointSettings";
   public static final String BREAKPOINT_CONTEXT_MENU = "breakpointContextMenu";
@@ -85,10 +90,12 @@ public class DebuggerExtension {
       SuspendAction suspendAction,
       EvaluateExpressionAction evaluateExpressionAction,
       DeleteAllBreakpointsAction deleteAllBreakpointsAction,
-      ChangeVariableValueAction changeVariableValueAction,
+      EditDebugVariableAction editDebugVariableAction,
       ShowHideDebuggerPanelAction showHideDebuggerPanelAction,
       EditConfigurationsAction editConfigurationsAction,
       BreakpointConfigurationAction breakpointConfigurationAction,
+      AddWatchExpressionAction addWatchExpressionAction,
+      RemoveWatchExpressionAction removeWatchExpressionAction,
       DebugConfigurationsGroup configurationsGroup,
       DebuggerPresenter debuggerPresenter,
       KeyBindingAgent keyBinding,
@@ -107,7 +114,9 @@ public class DebuggerExtension {
     actionManager.registerAction(RESUME_EXECUTION_ID, resumeExecutionAction);
     actionManager.registerAction(SUSPEND_EXECUTION_ID, suspendAction);
     actionManager.registerAction(EVALUATE_EXPRESSION_ID, evaluateExpressionAction);
-    actionManager.registerAction(CHANGE_VARIABLE_VALUE_ID, changeVariableValueAction);
+    actionManager.registerAction(EDIT_DEBUG_VARIABLE_ID, editDebugVariableAction);
+    actionManager.registerAction(ADD_WATCH_EXPRESSION, addWatchExpressionAction);
+    actionManager.registerAction(REMOVE_WATCH_EXPRESSION, removeWatchExpressionAction);
     actionManager.registerAction(SHOW_HIDE_DEBUGGER_PANEL_ID, showHideDebuggerPanelAction);
     actionManager.registerAction(BREAKPOINT_CONFIGURATION_ID, breakpointConfigurationAction);
 
@@ -145,9 +154,17 @@ public class DebuggerExtension {
     debuggerToolbarActionGroup.add(stepOutAction);
     debuggerToolbarActionGroup.add(disconnectDebuggerAction);
     debuggerToolbarActionGroup.add(deleteAllBreakpointsAction);
-    debuggerToolbarActionGroup.add(changeVariableValueAction);
     debuggerToolbarActionGroup.add(evaluateExpressionAction);
     debuggerPresenter.getDebuggerToolbar().bindMainGroup(debuggerToolbarActionGroup);
+
+    DefaultActionGroup watchDebuggerActionGroup = new DefaultActionGroup(actionManager);
+    watchDebuggerActionGroup.add(addWatchExpressionAction);
+    watchDebuggerActionGroup.add(removeWatchExpressionAction);
+
+    watchDebuggerActionGroup.add(editDebugVariableAction);
+
+    // create watch debugger toolbar action group
+    debuggerPresenter.getWatchExpressionToolbar().bindMainGroup(watchDebuggerActionGroup);
 
     // add actions in 'Debug' context menu
     final DefaultActionGroup debugContextMenuGroup =
@@ -178,7 +195,7 @@ public class DebuggerExtension {
         .addKey(new KeyBuilder().alt().charCode(KeyCodeMap.F8).build(), EVALUATE_EXPRESSION_ID);
     keyBinding
         .getGlobal()
-        .addKey(new KeyBuilder().charCode(KeyCodeMap.F2).build(), CHANGE_VARIABLE_VALUE_ID);
+        .addKey(new KeyBuilder().charCode(KeyCodeMap.F2).build(), EDIT_DEBUG_VARIABLE_ID);
 
     if (UserAgent.isMac()) {
       keyBinding
