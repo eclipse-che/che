@@ -13,13 +13,6 @@ EXPOSE 4403 8080 8000 9876 22
 
 LABEL che:server:8080:ref=tomcat8 che:server:8080:protocol=http che:server:8000:ref=tomcat8-debug che:server:8000:protocol=http che:server:9876:ref=codeserver che:server:9876:protocol=http
 
-ENV M2_HOME=/opt/rh/rh-maven35/root/usr/share/maven \
-    TOMCAT_HOME=/home/user/tomcat8 \
-    TERM=xterm
-ENV PATH=$M2_HOME/bin:$PATH
-
-
-
 RUN sudo yum -y update && \
     sudo yum -y install  \
            rh-maven35 \
@@ -34,6 +27,9 @@ RUN sudo yum -y update && \
     cat /opt/rh/rh-nodejs6/enable >> /home/user/.bashrc
 
 USER user
+
+ENV TOMCAT_HOME=/home/user/tomcat8 \
+    TERM=xterm
 
 ENV MAVEN_OPTS=$JAVA_OPTS\
     GOPATH=$HOME/go \
