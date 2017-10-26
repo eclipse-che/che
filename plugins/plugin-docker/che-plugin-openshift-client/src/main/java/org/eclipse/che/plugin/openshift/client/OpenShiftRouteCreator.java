@@ -97,7 +97,7 @@ public class OpenShiftRouteCreator {
       final String cheWorkspacesRoutingSuffix,
       final String namespace) {
     if (cheWorkspacesRoutingSuffix != null) {
-      return routeName + "-" + namespace + "." + cheWorkspacesRoutingSuffix;
+      return routeName + "-" + cheWorkspacesRoutingSuffix;
     } else {
       return routeName + "-" + openShiftNamespaceExternalAddress;
     }
