@@ -49,7 +49,4 @@ ENV LD_LIBRARY_PATH=/opt/rh/rh-nodejs6/root/usr/lib64${LD_LIBRARY_PATH:+:${LD_LI
  NPM_CONFIG_PREFIX=$HOME/.npm-global
 ENV PATH=$HOME/node_modules/.bin/:$HOME/.npm-global/bin/:$GOPATH/bin:$M2_HOME/bin:/opt/rh/rh-nodejs6/root/usr/bin:/usr/local/go/bin:$PATH
 
-ADD ./contrib/settings.xml $HOME/.m2/settings.xml
-
-
 WORKDIR /home/user
