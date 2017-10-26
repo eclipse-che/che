@@ -8,16 +8,18 @@
 #   Red Hat, Inc.- initial API and implementation
 
 
- FROM eclipse/centos_nodejs
+FROM eclipse/centos_jdk8
 
 
 RUN sudo yum -y install  \
+           rh-nodejs6 \
            gcc-c++ \
            gcc \
            glibc-devel \
            make \
            golang \
-    sudo yum clean all
+    sudo yum clean all && \
+    cat /opt/rh/rh-nodejs6/enable >> /home/user/.bashrc
 
 
 
