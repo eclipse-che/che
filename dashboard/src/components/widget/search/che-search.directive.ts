@@ -10,6 +10,11 @@
  */
 'use strict';
 
+interface ICheSearchScope extends ng.IScope {
+  replaceElement: any;
+  valueModel: any;
+}
+
 /**
  * @ngdoc directive
  * @name components.directive:cheSearch
@@ -29,44 +34,39 @@
  *
  * @author Ann Shumilova
  */
-export class CheSearch {
+export class CheSearch implements ng.IDirective {
+  restrict = 'E';
+  transclude = true;
+  templateUrl = 'components/widget/search/che-search.html';
 
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor () {
-    this.restrict = 'E';
-    this.transclude= true;
-    this.templateUrl = 'components/widget/search/che-search.html';
+  require = ['ngModel'];
 
-    this.require = ['ngModel'];
+  // scope values
+  scope = {
+    placeholder: '@chePlaceholder',
+    replaceElement: '@?cheReplaceElement',
+    valueModel : '=ngModel',
+    inputName: '@?cheName'
+  };
 
-    // scope values
-    this.scope = {
-      placeholder:'@chePlaceholder',
-      replaceElement: '@cheReplaceElement',
-      valueModel : '=ngModel',
-      inputName:'@cheName'
-    };
-  }
-
-  link($scope, element) {
-    $scope.$watch('isShown', (isShown) => {
+  link($scope: ICheSearchScope, $element: ng.IAugmentedJQuery): void {
+    $scope.$watch('isShown', (isShown: boolean) => {
       if (isShown) {
         if ($scope.replaceElement) {
           let replaceElement = angular.element('#' + $scope.replaceElement);
           replaceElement.addClass('search-replace-element-hidden');
         }
-        element.addClass('search-component-flex');
-        element.find('input').focus();
+        $element.addClass('search-component-flex');
+        $scope.$applyAsync(() => {
+          $element.find('input').focus();
+        });
       } else {
         $scope.valueModel = '';
         if ($scope.replaceElement) {
           let replaceElement = angular.element('#' + $scope.replaceElement);
           replaceElement.removeClass('search-replace-element-hidden');
         }
-        element.removeClass('search-component-flex');
+        $element.removeClass('search-component-flex');
       }
     });
   }
