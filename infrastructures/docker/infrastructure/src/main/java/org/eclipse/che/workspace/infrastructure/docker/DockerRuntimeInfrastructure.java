@@ -24,6 +24,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.RecipeRetriever;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
+import org.eclipse.che.api.workspace.server.spi.normalization.ServersNormalizer;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.container.ContainersStartStrategy;
 import org.eclipse.che.workspace.infrastructure.docker.container.DockerContainers;
@@ -62,14 +63,16 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
       EventService eventService,
       InstallerRegistry installerRegistry,
       RecipeRetriever recipeRetriever,
-      Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners) {
+      Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners,
+      ServersNormalizer serversNormalizer) {
     super(
         "docker",
         environmentParsers.keySet(),
         eventService,
         installerRegistry,
         recipeRetriever,
-        internalEnvironmentProvisioners);
+        internalEnvironmentProvisioners,
+        serversNormalizer);
     this.dockerEnvironmentValidator = dockerEnvironmentValidator;
     this.dockerEnvironmentParser = dockerEnvironmentParser;
     this.startStrategy = startStrategy;

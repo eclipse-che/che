@@ -22,6 +22,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.RecipeRetriever;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
+import org.eclipse.che.api.workspace.server.spi.normalization.ServersNormalizer;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentParser;
@@ -41,14 +42,16 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
       EventService eventService,
       InstallerRegistry installerRegistry,
       RecipeRetriever recipeRetriever,
-      Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners) {
+      Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners,
+      ServersNormalizer serversNormalizer) {
     super(
         "openshift",
         ImmutableSet.of("openshift"),
         eventService,
         installerRegistry,
         recipeRetriever,
-        internalEnvironmentProvisioners);
+        internalEnvironmentProvisioners,
+        serversNormalizer);
     this.runtimeContextFactory = runtimeContextFactory;
     this.envParser = envParser;
     this.infrastructureProvisioner = infrastructureProvisioner;

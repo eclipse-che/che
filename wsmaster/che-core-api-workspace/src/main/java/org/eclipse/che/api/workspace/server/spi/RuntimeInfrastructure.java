@@ -17,21 +17,18 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
-import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.installer.server.exception.InstallerException;
 import org.eclipse.che.api.installer.shared.model.Installer;
+import org.eclipse.che.api.workspace.server.spi.normalization.ServersNormalizer;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
-import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 
 /**
  * Starting point of describing the contract which infrastructure provider should implement for
@@ -47,6 +44,7 @@ public abstract class RuntimeInfrastructure {
   private final RecipeRetriever recipeRetriever;
   private final EventService eventService;
   private final Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners;
+  private final ServersNormalizer serversNormalizer;
 
   public RuntimeInfrastructure(
       String name,
@@ -54,7 +52,9 @@ public abstract class RuntimeInfrastructure {
       EventService eventService,
       InstallerRegistry installerRegistry,
       RecipeRetriever recipeRetriever,
-      Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners) {
+      Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners,
+      ServersNormalizer serversNormalizer) {
+    this.serversNormalizer = serversNormalizer;
     Preconditions.checkArgument(!types.isEmpty());
     this.name = Objects.requireNonNull(name);
     this.recipeTypes = ImmutableSet.copyOf(types);
@@ -162,6 +162,7 @@ public abstract class RuntimeInfrastructure {
     for (InternalEnvironmentProvisioner provisioner : internalEnvironmentProvisioners) {
       provisioner.provision(id, environment);
     }
+    serversNormalizer.normalize(environment);
     return internalPrepare(id, environment);
   }
 
@@ -204,14 +205,11 @@ public abstract class RuntimeInfrastructure {
       MachineConfig machineConfig = machineEntry.getValue();
       List<Installer> installers = getInstallers(machineConfig.getInstallers());
 
-      //TODO Move to provisioning
-      Map<String, ServerConfig> servers = normalizeServers(machineConfig.getServers());
-
       internalMachines.put(
           machineEntry.getKey(),
           new InternalMachineConfig(
               installers,
-              servers,
+              machineConfig.getServers(),
               machineConfig.getEnv(),
               machineConfig.getAttributes()));
     }
@@ -225,21 +223,5 @@ public abstract class RuntimeInfrastructure {
     } catch (InstallerException e) {
       throw new InfrastructureException(e.getMessage(), e);
     }
-  }
-
-  //TODO Take a look | Add tests
-  private Map<String, ServerConfig> normalizeServers(Map<String, ? extends ServerConfig> servers) {
-    return servers
-        .entrySet()
-        .stream()
-        .collect(Collectors.toMap(Entry::getKey, e -> normalizeServer(e.getValue())));
-  }
-
-  private ServerConfig normalizeServer(ServerConfig serverConfig) {
-    String port = serverConfig.getPort();
-    if (port != null && !port.contains("/")) {
-      port = port + "/tcp";
-    }
-    return new ServerConfigImpl(port, serverConfig.getProtocol(), serverConfig.getPath());
   }
 }

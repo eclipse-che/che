@@ -226,7 +226,8 @@ public class WorkspaceRuntimesTest {
           null,
           installerRegistry,
           recipeRetriever,
-          Collections.emptySet());
+          Collections.emptySet(),
+          null);
     }
 
     @Override
