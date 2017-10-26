@@ -28,9 +28,11 @@ RUN sudo yum -y update && \
     cat /opt/rh/rh-nodejs6/enable >> /home/user/.bashrc && \
     sudo ln -s /opt/rh/rh-nodejs6/root/usr/bin/node /usr/local/bin/nodejs
 
+ENV TOMCAT_VERSION=8.5.23
+
 RUN mkdir $HOME/.m2 && \
     mkdir /home/user/tomcat8 && \
-    wget -qO- "https://archive.apache.org/dist/tomcat/tomcat-8/v8.5.23/bin/apache-tomcat-8.5.23.tar.gz" | tar -zx --strip-components=1 -C /home/user/tomcat8 && \
+    wget -qO- "https://archive.apache.org/dist/tomcat/tomcat-8/v$TOMCAT_VERSION/bin/apache-tomcat-$TOMCAT_VERSION.tar.gz" | tar -zx --strip-components=1 -C /home/user/tomcat8 && \
     rm -rf /home/user/tomcat8/webapps/* && \
     echo "export MAVEN_OPTS=\$JAVA_OPTS" >> /home/user/.bashrc
 
