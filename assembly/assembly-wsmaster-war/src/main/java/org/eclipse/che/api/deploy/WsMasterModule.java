@@ -38,6 +38,7 @@ import org.eclipse.che.api.workspace.server.adapter.WorkspaceMessageBodyAdapter;
 import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
 import org.eclipse.che.api.workspace.server.spi.provision.InstallerConfigProvisioner;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
+import org.eclipse.che.api.workspace.server.spi.provision.env.AgentAuthEnableEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.EnvVarEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.server.spi.provision.env.EnvVarProvider;
@@ -122,6 +123,7 @@ public class WsMasterModule extends AbstractModule {
     envVarProviders.addBinding().to(JavaOptsEnvVariableProvider.class);
     envVarProviders.addBinding().to(MavenOptsEnvVariableProvider.class);
     envVarProviders.addBinding().to(ProjectsRootEnvVariableProvider.class);
+    envVarProviders.addBinding().to(AgentAuthEnableEnvVarProvider.class);
 
     bind(org.eclipse.che.api.workspace.server.bootstrap.InstallerService.class);
     bind(org.eclipse.che.api.workspace.server.event.WorkspaceMessenger.class).asEagerSingleton();

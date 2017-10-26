@@ -38,6 +38,8 @@ public class CheWsMasterModule extends AbstractModule {
 
     bind(org.eclipse.che.api.user.server.CheUserCreator.class);
 
+    bindConstant().annotatedWith(Names.named("che.agents.auth_enabled")).to(false);
+
     bindConstant()
         .annotatedWith(Names.named("machine.terminal_agent.run_command"))
         .to(
