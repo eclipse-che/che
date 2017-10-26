@@ -8,28 +8,28 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.docker.provisioner.server;
-
-import static org.eclipse.che.workspace.infrastructure.docker.DockerMachine.API_ENDPOINT_URL_VARIABLE;
+package org.eclipse.che.workspace.infrastructure.docker;
 
 import com.google.common.base.Strings;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiEnvVarProvider;
 import org.eclipse.che.commons.lang.Pair;
 
 /**
- * Add env variable to docker machine with url of Che API
+ * Provides env variable to docker machine with url of Che API.
  *
  * @author Alexander Garagatyi
  */
 @Singleton
-public class ApiEndpointEnvVariableProvider implements ServerEnvironmentVariableProvider {
+public class DockerCheApiEnvVarProvider implements CheApiEnvVarProvider {
+
   private Pair<String, String> apiEnvVar;
 
   @Inject
-  public ApiEndpointEnvVariableProvider(
+  public DockerCheApiEnvVarProvider(
       @Named("che.infra.docker.master_api_endpoint") String apiEndpoint) {
     String apiEndpointEnvVar = System.getenv(API_ENDPOINT_URL_VARIABLE);
     if (Strings.isNullOrEmpty(apiEndpoint) && !Strings.isNullOrEmpty(apiEndpointEnvVar)) {

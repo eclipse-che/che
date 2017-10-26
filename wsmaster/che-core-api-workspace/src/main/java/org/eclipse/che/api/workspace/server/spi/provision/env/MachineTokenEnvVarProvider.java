@@ -8,13 +8,11 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.docker.provisioner.server;
-
-import static org.eclipse.che.workspace.infrastructure.docker.DockerMachine.CHE_MACHINE_TOKEN;
+package org.eclipse.che.api.workspace.server.spi.provision.env;
 
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.token.MachineTokenException;
 import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
 import org.eclipse.che.commons.lang.Pair;
 
@@ -25,7 +23,10 @@ import org.eclipse.che.commons.lang.Pair;
  * @author Alexander Garagatyi
  * @author Sergii Leshchenko
  */
-public class MachineTokenEnvVarProvider implements ServerEnvironmentVariableProvider {
+public class MachineTokenEnvVarProvider implements EnvVarProvider {
+  /** Environment variable that will be setup in machines and contains machine token. */
+  public static final String MACHINE_TOKEN = "CHE_MACHINE_TOKEN";
+
   private final MachineTokenProvider machineTokenProvider;
 
   @Inject
@@ -34,12 +35,7 @@ public class MachineTokenEnvVarProvider implements ServerEnvironmentVariableProv
   }
 
   @Override
-  public Pair<String, String> get(RuntimeIdentity runtimeIdentity) {
-    try {
-      return Pair.of(
-          CHE_MACHINE_TOKEN, machineTokenProvider.getToken(runtimeIdentity.getWorkspaceId()));
-    } catch (InfrastructureException e) {
-      return null;
-    }
+  public Pair<String, String> get(RuntimeIdentity runtimeIdentity) throws MachineTokenException {
+    return Pair.of(MACHINE_TOKEN, machineTokenProvider.getToken(runtimeIdentity.getWorkspaceId()));
   }
 }
