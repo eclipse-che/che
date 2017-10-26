@@ -30,6 +30,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.installer.server.exception.InstallerException;
 import org.eclipse.che.api.installer.shared.model.Installer;
+import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 
 /**
@@ -45,19 +46,22 @@ public abstract class RuntimeInfrastructure {
   private final InstallerRegistry installerRegistry;
   private final RecipeRetriever recipeRetriever;
   private final EventService eventService;
+  private final Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners;
 
   public RuntimeInfrastructure(
       String name,
       Collection<String> types,
       EventService eventService,
       InstallerRegistry installerRegistry,
-      RecipeRetriever recipeRetriever) {
+      RecipeRetriever recipeRetriever,
+      Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners) {
     Preconditions.checkArgument(!types.isEmpty());
     this.name = Objects.requireNonNull(name);
     this.recipeTypes = ImmutableSet.copyOf(types);
     this.eventService = eventService;
     this.installerRegistry = installerRegistry;
     this.recipeRetriever = recipeRetriever;
+    this.internalEnvironmentProvisioners = internalEnvironmentProvisioners;
   }
 
   /** Returns the name of this runtime infrastructure. */
@@ -145,7 +149,7 @@ public abstract class RuntimeInfrastructure {
   /**
    * Making Runtime is a two phase process. On the first phase implementation MUST prepare
    * RuntimeContext, this is supposedly "fast" method On the second phase Runtime is created with
-   * RuntimeContext.start() which is supposedly "long" method
+   * RuntimeContext.start() which is supposedly "long" method.
    *
    * @param id the RuntimeIdentity
    * @param environment incoming internal environment
@@ -153,7 +157,26 @@ public abstract class RuntimeInfrastructure {
    * @throws ValidationException if incoming environment is not valid
    * @throws InfrastructureException if any other error occurred
    */
-  public abstract RuntimeContext prepare(RuntimeIdentity id, InternalEnvironment environment)
+  public RuntimeContext prepare(RuntimeIdentity id, InternalEnvironment environment)
+      throws ValidationException, InfrastructureException {
+    for (InternalEnvironmentProvisioner provisioner : internalEnvironmentProvisioners) {
+      provisioner.provision(id, environment);
+    }
+    return internalPrepare(id, environment);
+  }
+
+  /**
+   * An Infrastructure implementation should be able to prepare RuntimeContext. This method is not
+   * supposed to be called by clients of class {@link RuntimeInfrastructure}.
+   *
+   * @param id the RuntimeIdentity
+   * @param environment incoming internal environment
+   * @return new RuntimeContext object
+   * @throws ValidationException if incoming environment is not valid
+   * @throws InfrastructureException if any other error occurred
+   */
+  protected abstract RuntimeContext internalPrepare(
+      RuntimeIdentity id, InternalEnvironment environment)
       throws ValidationException, InfrastructureException;
 
   /**
@@ -164,7 +187,6 @@ public abstract class RuntimeInfrastructure {
    * <ul>
    *   <li>Downloaded recipe;
    *   <li>Fetched information about configured {@link Installer installers};
-   *   <li>Full servers list that includes: configured servers by users and provided by installers.
    * </ul>
    *
    * @param environment environment to resolve
@@ -182,16 +204,16 @@ public abstract class RuntimeInfrastructure {
       MachineConfig machineConfig = machineEntry.getValue();
       List<Installer> installers = getInstallers(machineConfig.getInstallers());
 
-      Map<String, ServerConfig> servers = new HashMap<>(machineConfig.getServers());
-
-      fillServers(servers, installers);
-
-      servers = normalizeServers(servers);
+      //TODO Move to provisioning
+      Map<String, ServerConfig> servers = normalizeServers(machineConfig.getServers());
 
       internalMachines.put(
           machineEntry.getKey(),
           new InternalMachineConfig(
-              installers, servers, machineConfig.getEnv(), machineConfig.getAttributes()));
+              installers,
+              servers,
+              machineConfig.getEnv(),
+              machineConfig.getAttributes()));
     }
     return new InternalEnvironment(internalRecipe, internalMachines);
   }
@@ -205,32 +227,8 @@ public abstract class RuntimeInfrastructure {
     }
   }
 
-  /**
-   * Fill specified map with servers that are provided by installers.
-   *
-   * @param servers map to fill
-   * @param installers installers to retrieve servers
-   * @throws InfrastructureException if any installer has server that conflicts with already
-   *     configured one
-   */
-  private void fillServers(Map<String, ServerConfig> servers, List<Installer> installers)
-      throws InfrastructureException {
-    for (Installer installer : installers) {
-      for (Map.Entry<String, ? extends ServerConfig> serverEntry :
-          installer.getServers().entrySet()) {
-        if (servers.putIfAbsent(serverEntry.getKey(), serverEntry.getValue()) != null
-            && !servers.get(serverEntry.getKey()).equals(serverEntry.getValue())) {
-          throw new InfrastructureException(
-              String.format(
-                  "Installer '%s' contains server '%s' conflicting with machine configuration",
-                  installer.getId(), serverEntry.getKey()));
-        }
-      }
-    }
-  }
-
   //TODO Take a look | Add tests
-  private Map<String, ServerConfig> normalizeServers(Map<String, ServerConfig> servers) {
+  private Map<String, ServerConfig> normalizeServers(Map<String, ? extends ServerConfig> servers) {
     return servers
         .entrySet()
         .stream()

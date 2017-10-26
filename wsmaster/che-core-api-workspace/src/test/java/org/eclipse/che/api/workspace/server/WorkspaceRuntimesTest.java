@@ -220,7 +220,13 @@ public class WorkspaceRuntimesTest {
 
     public TestInfrastructure(
         InstallerRegistry installerRegistry, RecipeRetriever recipeRetriever, String... types) {
-      super("test", Arrays.asList(types), null, installerRegistry, recipeRetriever);
+      super(
+          "test",
+          Arrays.asList(types),
+          null,
+          installerRegistry,
+          recipeRetriever,
+          Collections.emptySet());
     }
 
     @Override
@@ -229,7 +235,7 @@ public class WorkspaceRuntimesTest {
     }
 
     @Override
-    public RuntimeContext prepare(RuntimeIdentity id, InternalEnvironment environment)
+    public RuntimeContext internalPrepare(RuntimeIdentity id, InternalEnvironment environment)
         throws InfrastructureException {
       throw new UnsupportedOperationException();
     }

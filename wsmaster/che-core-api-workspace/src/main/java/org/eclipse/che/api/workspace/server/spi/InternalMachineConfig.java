@@ -10,7 +10,9 @@
  */
 package org.eclipse.che.api.workspace.server.spi;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
@@ -29,23 +31,29 @@ public class InternalMachineConfig {
 
   InternalMachineConfig(
       List<Installer> installers,
-      Map<String, ServerConfig> servers,
+      Map<String, ? extends ServerConfig> servers,
       Map<String, String> env,
       Map<String, String> attributes)
       throws InfrastructureException {
-    this.servers = servers;
-    this.installers = installers;
-    this.env = env;
-    this.attributes = attributes;
-  }
+    this.servers = new HashMap<>();
+    if (servers != null) {
+      this.servers.putAll(servers);
+    }
 
-  /**
-   * Returns unmodifiable map of servers configured in the machine.
-   *
-   * <p>Note that servers provided by installers in this machine are already added to this map.
-   */
-  public Map<String, ServerConfig> getServers() {
-    return Collections.unmodifiableMap(servers);
+    this.installers = new ArrayList<>();
+    if (installers != null) {
+      this.installers.addAll(installers);
+    }
+
+    this.env = new HashMap<>();
+    if (env != null) {
+      this.env.putAll(env);
+    }
+
+    this.attributes = new HashMap<>();
+    if (attributes != null) {
+      this.attributes.putAll(attributes);
+    }
   }
 
   /** Returns unmodifiable ordered list of installers configs of the machine. */
@@ -53,13 +61,18 @@ public class InternalMachineConfig {
     return Collections.unmodifiableList(installers);
   }
 
-  /** Returns unmodifiable map of machine environment variables. */
-  public Map<String, String> getEnv() {
-    return Collections.unmodifiableMap(env);
+  /** Returns modifiable map of servers configured in the machine. */
+  public Map<String, ServerConfig> getServers() {
+    return servers;
   }
 
-  /** Returns unmodifiable map of machine attributes. */
+  /** Returns modifiable map of machine environment variables. */
+  public Map<String, String> getEnv() {
+    return env;
+  }
+
+  /** Returns modifiable map of machine attributes. */
   public Map<String, String> getAttributes() {
-    return Collections.unmodifiableMap(attributes);
+    return attributes;
   }
 }
