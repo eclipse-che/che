@@ -52,4 +52,4 @@ ENV PATH=$HOME/node_modules/.bin/:$HOME/.npm-global/bin/:$GOPATH/bin:$M2_HOME/bi
 ADD ./contrib/settings.xml $HOME/.m2/settings.xml
 
 
-WORKDIR /projects/
+WORKDIR /home/user
