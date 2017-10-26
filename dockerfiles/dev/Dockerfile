@@ -20,6 +20,7 @@ RUN sudo yum -y update && \
            gcc-c++ \
            gcc \
            glibc-devel \
+           bzip2 \
            make \
            golang \
     sudo yum clean all && \
