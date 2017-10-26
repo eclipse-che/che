@@ -13,7 +13,7 @@ package org.eclipse.che.account.spi;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.eclipse.che.account.api.AccountManager;
+import org.eclipse.che.account.api.AccccountManager;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -42,10 +42,10 @@ public class AccountValidator {
   private static final Pattern VALID_ACCOUNT_NAME =
       Pattern.compile("^(?:[a-zA-Z0-9]-?)*[a-zA-Z0-9]+");
 
-  private final AccountManager accountManager;
+  private final AccccountManager accountManager;
 
   @Inject
-  public AccountValidator(AccountManager accountManager) {
+  public AccountValidator(AccccountManager accountManager) {
     this.accountManager = accountManager;
   }
 

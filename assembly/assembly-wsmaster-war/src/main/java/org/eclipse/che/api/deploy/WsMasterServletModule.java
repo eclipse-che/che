@@ -16,6 +16,8 @@ import java.util.Map;
 import javax.inject.Singleton;
 import org.apache.catalina.filters.CorsFilter;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.multiuser.keycloak.server.deploy.KeycloakServletModule;
+import org.eclipse.che.multiuser.machine.authentication.server.MachineLoginFilter;
 import org.everrest.guice.servlet.GuiceEverrestServlet;
 
 /** @author andrew00x */
@@ -46,5 +48,15 @@ public class WsMasterServletModule extends ServletModule {
 
     serveRegex("^/(?!ws$|ws/|websocket.?)(.*)").with(GuiceEverrestServlet.class);
     install(new org.eclipse.che.swagger.deploy.BasicSwaggerConfigurationModule());
+  }
+
+  private void configureSingleuser() {
+    filter("/*").through(org.eclipse.che.api.local.filters.EnvironmentInitializationFilter.class);
+  }
+
+  private void configureMultiuser() {
+    // Not contains '/websocket/' and not ends with '/ws' or '/eventbus'
+    filterRegex("^(?!.*/websocket/)(?!.*(/ws|/eventbus)$).*").through(MachineLoginFilter.class);
+    install(new KeycloakServletModule());
   }
 }

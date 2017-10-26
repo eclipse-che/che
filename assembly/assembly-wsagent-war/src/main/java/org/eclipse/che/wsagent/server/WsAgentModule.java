@@ -18,9 +18,11 @@ import org.eclipse.che.inject.DynaModule;
 
 /** Provide multi user specific implementation of ws-agent components. */
 @DynaModule
-public class WsAgentMachineAuthModule extends AbstractModule {
+public class WsAgentModule extends AbstractModule {
   @Override
-  protected void configure() {
+  protected void configure() {}
+
+  private void configureMultiuser() {
     bind(HttpJsonRequestFactory.class).to(AgentHttpJsonRequestFactory.class);
     bind(RequestTokenExtractor.class).to(ChainedTokenExtractor.class);
   }
