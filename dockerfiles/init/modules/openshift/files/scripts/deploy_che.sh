@@ -8,11 +8,11 @@
 # This script is meant for quick & easy install of Che on OpenShift via:
 #
 #  ``` bash
-#   DEPLOY_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/spi/dockerfiles/cli/scripts/openshift/deploy_che.sh
+#   DEPLOY_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/che6/dockerfiles/cli/scripts/openshift/deploy_che.sh
 #   curl -fsSL ${DEPLOY_SCRIPT_URL} -o get-che.sh
-#   WAIT_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/spi/dockerfiles/cli/scripts/openshift/wait_until_che_is_available.sh
+#   WAIT_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/che6/dockerfiles/cli/scripts/openshift/wait_until_che_is_available.sh
 #   curl -fsSL ${WAIT_SCRIPT_URL} -o wait-che.sh
-#   STACKS_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/spi/dockerfiles/cli/scripts/openshift/replace_stacks.sh
+#   STACKS_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/che6/dockerfiles/cli/scripts/openshift/replace_stacks.sh
 #   curl -fsSL ${STACKS_SCRIPT_URL} -o stacks-che.sh
 #   bash get-che.sh && wait-che.sh && stacks-che.sh
 #   ```
@@ -390,7 +390,7 @@ MULTI_USER_REPLACEMENT_STRING="          - name: \"CHE_WORKSPACE_LOGS\"
 echo
 if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
   echo "[CHE] Deploying Che on minishift (image ${CHE_IMAGE})"
-  DEFAULT_CHE_DEPLOYMENT_FILE_PATH=./che-spi-openshift.yml
+  DEFAULT_CHE_DEPLOYMENT_FILE_PATH=./che-che6-openshift.yml
   CHE_DEPLOYMENT_FILE_PATH=${CHE_DEPLOYMENT_FILE_PATH:-${DEFAULT_CHE_DEPLOYMENT_FILE_PATH}}
 
 cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
@@ -423,7 +423,7 @@ cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     oc apply --force=true -f -
 elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
   echo "[CHE] Deploying Che on OSIO (image ${CHE_IMAGE})"
-  DEFAULT_CHE_DEPLOYMENT_FILE_PATH=./che-spi-openshift.yml
+  DEFAULT_CHE_DEPLOYMENT_FILE_PATH=./che-che6-openshift.yml
   CHE_DEPLOYMENT_FILE_PATH=${CHE_DEPLOYMENT_FILE_PATH:-${DEFAULT_CHE_DEPLOYMENT_FILE_PATH}}
 
 cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
@@ -443,7 +443,7 @@ cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     oc apply --force=true -f -
 else
   echo "[CHE] Deploying Che on OpenShift Container Platform (image ${CHE_IMAGE})"
-  DEFAULT_CHE_DEPLOYMENT_FILE_PATH=./che-spi-openshift.yml
+  DEFAULT_CHE_DEPLOYMENT_FILE_PATH=./che-che6-openshift.yml
   CHE_DEPLOYMENT_FILE_PATH=${CHE_DEPLOYMENT_FILE_PATH:-${DEFAULT_CHE_DEPLOYMENT_FILE_PATH}}
 
 cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
