@@ -9,13 +9,13 @@
 
 
 FROM registry.centos.org/che-stacks/centos-stack-base
-EXPOSE 4403 8080 8000 9876 22
 
-LABEL che:server:8080:ref=tomcat8 che:server:8080:protocol=http che:server:8000:ref=tomcat8-debug che:server:8000:protocol=http che:server:9876:ref=codeserver che:server:9876:protocol=http
+EXPOSE 4403 8080 8000 9876 22
 
 RUN sudo yum -y update && \
     sudo yum -y install  \
            rh-maven35 \
+           plexus-classworlds \
            rh-nodejs6 \
            gcc-c++ \
            gcc \
@@ -29,11 +29,12 @@ RUN sudo yum -y update && \
 USER user
 
 ENV TOMCAT_HOME=/home/user/tomcat8 \
-    TERM=xterm
+    TERM=xterm \
+    M2_HOME=/opt/rh/rh-maven35/root/usr/share/maven 
 
 ENV MAVEN_OPTS=$JAVA_OPTS\
     GOPATH=$HOME/go \
-    PATH=$GOPATH/bin:/usr/local/go/bin:$PATH
+    PATH=$GOPATH/bin:$M2_HOME/bin:/usr/local/go/bin:$PATH
 
 RUN mkdir $HOME/.m2 && \
     mkdir /home/user/tomcat8 && \
