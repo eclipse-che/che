@@ -12,7 +12,6 @@ package org.eclipse.che.multiuser.machine.authentication.ide;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.base.Strings.nullToEmpty;
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.Response;
@@ -20,12 +19,16 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
+import java.util.Optional;
 import javax.annotation.PostConstruct;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.commons.exception.UnmarshallerException;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.AsyncRequest;
@@ -48,7 +51,6 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory
   private final AppContext appContext;
 
   private String machineToken;
-  private String wsAgentBaseUrl;
   private String csrfToken;
 
   @Inject
@@ -100,7 +102,6 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory
   @Override
   public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
     machineToken = null;
-    wsAgentBaseUrl = null;
   }
 
   /**
@@ -110,11 +111,22 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory
    * @return
    */
   protected boolean isWsAgentRequest(String url) {
-    if (appContext.getWorkspace() == null
-        || !RUNNING.equals(appContext.getWorkspace().getStatus())) {
+    WorkspaceImpl currentWorkspace = appContext.getWorkspace();
+    if (currentWorkspace == null || !isWsAgentStarted(currentWorkspace)) {
       return false; // ws-agent not started
     }
     return url.contains(nullToEmpty(appContext.getWsAgentServerApiEndpoint()));
+  }
+
+  private boolean isWsAgentStarted(WorkspaceImpl workspace) {
+    RuntimeImpl runtime = workspace.getRuntime();
+    if (runtime == null) {
+      return false;
+    }
+
+    Optional<MachineImpl> devMachine = runtime.getDevMachine();
+
+    return devMachine.isPresent();
   }
 
   private Promise<String> requestCsrfToken() {

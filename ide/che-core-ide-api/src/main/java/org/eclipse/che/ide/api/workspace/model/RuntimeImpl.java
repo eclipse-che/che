@@ -29,6 +29,7 @@ public class RuntimeImpl implements Runtime {
 
   private final String activeEnv;
   private final String owner;
+  private final String machineToken;
   private Map<String, MachineImpl> machines;
   private List<Warning> warnings;
 
@@ -36,6 +37,7 @@ public class RuntimeImpl implements Runtime {
       String activeEnv,
       Map<String, ? extends Machine> machines,
       String owner,
+      String machineToken,
       List<? extends Warning> warnings) {
     this.activeEnv = activeEnv;
     if (machines != null) {
@@ -53,6 +55,7 @@ public class RuntimeImpl implements Runtime {
                               entry.getValue().getServers())));
     }
     this.owner = owner;
+    this.machineToken = machineToken;
     if (warnings != null) {
       this.warnings = warnings.stream().map(WarningImpl::new).collect(toList());
     }
@@ -90,6 +93,10 @@ public class RuntimeImpl implements Runtime {
   @Override
   public String getOwner() {
     return owner;
+  }
+
+  public String getMachineToken() {
+    return machineToken;
   }
 
   @Override
