@@ -17,6 +17,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/eclipse/che/agents/go-agents/bootstrapper/booter"
@@ -78,11 +79,19 @@ func init() {
 		"",
 		"WebSocket endpoint where to push logs",
 	)
+	// auth configuration
+	defaultAuthEnabled := false
+	authEnabledEnv := os.Getenv("CHE_AUTH_ENABLED")
+	b, e := strconv.ParseBool(authEnabledEnv)
+	if e == nil {
+		defaultAuthEnabled = b
+	}
 	flag.BoolVar(
 		&AuthEnabled,
 		"enable-auth",
-		false,
-		"Whether authenication on workspace master is needed",
+		defaultAuthEnabled,
+		"whether authenticate requests on workspace master before allowing them to proceed."+
+			"By default the value from 'CHE_AUTH_ENABLED' environment variable is used or `false` if it is missing",
 	)
 	flag.StringVar(
 		&runtimeIDRaw,
