@@ -8,17 +8,8 @@
                    che-place-holder="Name of the command"
                    aria-label="Name of the command"
                    ng-model="factoryCommandCtrl.commandLineName"
-                   required
-                   ng-minlength="1"
-                   ng-maxlength="20"
-                   ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
+                   required>
           <div ng-message="required">A name is required.</div>
-          <div ng-message="pattern">Workspace name may contain digits, latin letters, _ , . , - and should start only
-            with digits, latin
-            letters or underscores
-          </div>
-          <div ng-message="minlength">The name has to be more than 1 character long.</div>
-          <div ng-message="maxlength">The name has to be less than 20 characters long.</div>
         </che-input>
         <che-input che-form="commandsForm"
                    che-name="commandLine"
