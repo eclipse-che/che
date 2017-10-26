@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 import javax.annotation.PreDestroy;
 import javax.inject.Named;
@@ -104,6 +105,8 @@ public abstract class SeleniumTestHandler
 
   private final Map<Long, Object> runningTests = new ConcurrentHashMap<>();
 
+  private static AtomicBoolean isCleanUpCompleted = new AtomicBoolean();
+
   @Override
   public void onTestStart(ITestResult result) {}
 
@@ -157,7 +160,9 @@ public abstract class SeleniumTestHandler
   }
 
   @Override
-  public void onFinish(ISuite suite) {}
+  public void onFinish(ISuite suite) {
+    shutdown();
+  }
 
   @Override
   public void beforeInvocation(IInvokedMethod method, ITestResult testResult) {
@@ -346,7 +351,11 @@ public abstract class SeleniumTestHandler
   }
 
   /** Cleans up test environment. */
-  private void shutdown() {
+  public void shutdown() {
+    if (isCleanUpCompleted.get()) {
+      return;
+    }
+
     LOG.info("Cleaning up test environment...");
 
     for (Object testInstance : runningTests.values()) {
@@ -360,6 +369,8 @@ public abstract class SeleniumTestHandler
     if (defaultTestUser != null) {
       defaultTestUser.delete();
     }
+
+    isCleanUpCompleted.set(true);
   }
 
   /** Returns list of parent modules */
