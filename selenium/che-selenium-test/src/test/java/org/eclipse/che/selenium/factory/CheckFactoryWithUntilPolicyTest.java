@@ -11,8 +11,6 @@
 package org.eclipse.che.selenium.factory;
 
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
-import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -25,9 +23,8 @@ import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.PopupDialogsBrowser;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.WarningDialog;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -35,8 +32,8 @@ import org.testng.annotations.Test;
 /** @author Mihail Kuznyetsov */
 public class CheckFactoryWithUntilPolicyTest {
   private static final String FACTORY_NAME = NameGenerator.generate("untilPolicy", 3);
-  private static final String ALERT_EXPIRE_MESSAGE =
-      "Error: This Factory has expired due to time restrictions applied by its owner. Please, contact owner for more information.";
+  private static final String EXPIRE_MESSAGE =
+      "Unable to load Factory: This Factory has expired due to time restrictions applied by its owner. Please, contact owner for more information.";
   private static final long INIT_TIME = System.currentTimeMillis();
   private static final int ADDITIONAL_TIME = 60000;
 
@@ -45,7 +42,7 @@ public class CheckFactoryWithUntilPolicyTest {
   @Inject private PopupDialogsBrowser popupDialogsBrowser;
   @Inject private Dashboard dashboard;
   @Inject private SeleniumWebDriver seleniumWebDriver;
-
+  @Inject private WarningDialog warningDialog;
   private TestFactory testFactory;
 
   @BeforeClass
@@ -65,13 +62,16 @@ public class CheckFactoryWithUntilPolicyTest {
 
   @Test
   public void checkFactoryAcceptingWithUntilPolicy() throws Exception {
+    testFactory.open(seleniumWebDriver);
+    seleniumWebDriver.switchFromDashboardIframeToIde();
+
     // first
     dashboard.open();
     testFactory.open(seleniumWebDriver);
     seleniumWebDriver.switchFromDashboardIframeToIde();
     projectExplorer.waitProjectExplorer();
     while (System.currentTimeMillis() <= INIT_TIME + ADDITIONAL_TIME) {
-      if (popupDialogsBrowser.isAlertPresent()) {
+      if (warningDialog.isPresent()) {
         popupDialogsBrowser.acceptAlert();
         fail("Factory expired before the until period");
       }
@@ -80,11 +80,7 @@ public class CheckFactoryWithUntilPolicyTest {
 
     // second
     testFactory.open(seleniumWebDriver);
-    new WebDriverWait(seleniumWebDriver, PREPARING_WS_TIMEOUT_SEC)
-        .until(ExpectedConditions.alertIsPresent());
-    assertTrue(
-        seleniumWebDriver.switchTo().alert().getText().contains(ALERT_EXPIRE_MESSAGE),
-        "actual message: " + seleniumWebDriver.switchTo().alert().getText());
-    popupDialogsBrowser.acceptAlert();
+    seleniumWebDriver.switchFromDashboardIframeToIde();
+    warningDialog.waitWaitWarnDialogWindowWithSpecifiedTextMess(EXPIRE_MESSAGE);
   }
 }
