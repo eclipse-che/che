@@ -1033,7 +1033,7 @@ public class CodenvyEditor {
                     String.format(
                         Locators.TAB_FILE_NAME_AND_STYLE,
                         fileName,
-                        "color: rgb(255, 255, 255);"))));
+                        "color: rgb(160, 169, 183);"))));
   }
 
   /**
