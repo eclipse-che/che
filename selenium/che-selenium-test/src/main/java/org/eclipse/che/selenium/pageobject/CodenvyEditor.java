@@ -1776,11 +1776,12 @@ public class CodenvyEditor {
               String javaDocPopupHtmlText = "";
               try {
                 javaDocPopupHtmlText = getJavaDocPopupText();
-              } catch (IOException e) {
+              } catch (StaleElementReferenceException e) {
                 LOG.error(
                     "Can not get java doc HTML text from autocomplete context menu in editor");
               }
-              return verifyJavaDoc(javaDocPopupHtmlText, expectedText);
+              return javaDocPopupHtmlText.length() > 0
+                  && verifyJavaDoc(javaDocPopupHtmlText, expectedText);
             });
   }
 
@@ -1792,20 +1793,49 @@ public class CodenvyEditor {
         .until(ExpectedConditions.attributeToBeNotEmpty(autocompleteProposalJavaDocPopup, "src"));
   }
 
-  private String getJavaDocPopupText() throws IOException {
-    URL connectionUrl = new URL(autocompleteProposalJavaDocPopup.getAttribute("src"));
-    HttpURLConnection connection = (HttpURLConnection) connectionUrl.openConnection();
-    connection.setRequestMethod("GET");
+  private String getJavaDocPopupText() {
+    HttpURLConnection connection = null;
 
-    try (BufferedReader br =
-        new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"))) {
-      return br.lines().collect(Collectors.joining());
+    try {
+      URL connectionUrl = new URL(getElementSrcLink(autocompleteProposalJavaDocPopup));
+      connection = (HttpURLConnection) connectionUrl.openConnection();
+      connection.setRequestMethod("GET");
+
+      return openStreamAndGetAllText(connection);
+
+    } catch (IOException e) {
+      LOG.error("Can not open connection for src link ");
     } finally {
-      connection.disconnect();
+      if (connection != null) connection.disconnect();
     }
+
+    return "";
   }
 
   private boolean verifyJavaDoc(String javaDocHtml, String regex) {
     return Pattern.compile(regex, Pattern.DOTALL).matcher(javaDocHtml).matches();
+  }
+
+  private String getElementSrcLink(WebElement element) {
+    String srcLink = "";
+    try {
+      srcLink = element.getAttribute("src");
+    } catch (StaleElementReferenceException ex) {
+      LOG.error("src link in the context java doc window does not attached");
+    }
+    return srcLink;
+  }
+
+  private String openStreamAndGetAllText(HttpURLConnection httpURLConnection) {
+    if (httpURLConnection != null) {
+      try (BufferedReader br =
+          new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream(), "UTF-8"))) {
+        return br.lines().collect(Collectors.joining());
+
+      } catch (IOException ex) {
+        LOG.error("Can not get stream in openConnectionAndSetRequestMethod");
+      }
+    }
+    return "";
   }
 }
