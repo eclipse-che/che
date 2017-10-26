@@ -87,6 +87,7 @@ items:
     CHE_INFRA_OPENSHIFT_OAUTH__TOKEN: ""
     CHE_INFRA_OPENSHIFT_TRUST__CERTS: "false"
     CHE_INFRA_OPENSHIFT_TLS__ENABLED: "true"
+    CHE_INFRA_OPENSHIFT_PVC_STRATEGY: "common"
     CHE_INFRA_OPENSHIFT_PROJECT: ""
     CHE_INFRA_OPENSHIFT_MACHINE__START__TIMEOUT__MIN: "5"
     CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL: http://${DEFAULT_OPENSHIFT_NAMESPACE_URL}/agent-binaries/linux_amd64/bootstrapper/bootstrapper
@@ -199,6 +200,11 @@ items:
             valueFrom:
               configMapKeyRef:
                 key: CHE_INFRA_OPENSHIFT_TRUST__CERTS
+                name: che
+          - name: CHE_INFRA_OPENSHIFT_PVC_STRATEGY
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_OPENSHIFT_PVC_STRATEGY
                 name: che
           - name: CHE_INFRA_OPENSHIFT_TLS__ENABLED
             valueFrom:
