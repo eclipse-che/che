@@ -68,10 +68,6 @@
                 </executions>
                 <configuration>
                     <scanWarDependencies>true</scanWarDependencies>
-                    <skipResources>
-                        <skipResource>.*CheWsAgentModule.class</skipResource>
-                        <skipResource>.*CheWsAgentServletModule.class</skipResource>
-                    </skipResources>
                 </configuration>
             </plugin>
             <plugin>
