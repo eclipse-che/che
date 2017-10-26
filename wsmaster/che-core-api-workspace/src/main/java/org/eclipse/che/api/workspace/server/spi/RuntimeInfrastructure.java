@@ -14,14 +14,23 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
+import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
-import org.eclipse.che.api.workspace.server.RecipeRetriever;
+import org.eclipse.che.api.installer.server.exception.InstallerException;
+import org.eclipse.che.api.installer.shared.model.Installer;
+import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 
 /**
  * Starting point of describing the contract which infrastructure provider should implement for
@@ -30,6 +39,7 @@ import org.eclipse.che.api.workspace.server.RecipeRetriever;
  * @author gazarenkov
  */
 public abstract class RuntimeInfrastructure {
+
   private final Set<String> recipeTypes;
   private final String name;
   private final InstallerRegistry installerRegistry;
@@ -87,9 +97,11 @@ public abstract class RuntimeInfrastructure {
   @Beta
   public InternalEnvironment estimate(Environment environment)
       throws ValidationException, InfrastructureException {
-    InternalEnvironment internalEnvironment =
-        new InternalEnvironment(environment, installerRegistry, recipeRetriever);
+
+    InternalEnvironment internalEnvironment = resolveInternalEnvironment(environment);
+
     internalEstimate(internalEnvironment);
+
     return internalEnvironment;
   }
 
@@ -143,4 +155,93 @@ public abstract class RuntimeInfrastructure {
    */
   public abstract RuntimeContext prepare(RuntimeIdentity id, InternalEnvironment environment)
       throws ValidationException, InfrastructureException;
+
+  /**
+   * Resolves {@link InternalEnvironment} instance based on specified {@link Environment}.
+   *
+   * <p>Resolved internal environment will have:
+   *
+   * <ul>
+   *   <li>Downloaded recipe;
+   *   <li>Fetched information about configured {@link Installer installers};
+   *   <li>Full servers list that includes: configured servers by users and provided by installers.
+   * </ul>
+   *
+   * @param environment environment to resolve
+   * @return resolved internal environment
+   * @throws InfrastructureException if any exception occurs on environment resolving
+   * @see InternalEnvironment
+   */
+  private InternalEnvironment resolveInternalEnvironment(Environment environment)
+      throws InfrastructureException {
+    InternalRecipe internalRecipe = recipeRetriever.getRecipe(environment.getRecipe());
+
+    Map<String, InternalMachineConfig> internalMachines = new HashMap<>();
+    for (Map.Entry<String, ? extends MachineConfig> machineEntry :
+        environment.getMachines().entrySet()) {
+      MachineConfig machineConfig = machineEntry.getValue();
+      List<Installer> installers = getInstallers(machineConfig.getInstallers());
+
+      Map<String, ServerConfig> servers = new HashMap<>(machineConfig.getServers());
+
+      fillServers(servers, installers);
+
+      servers = normalizeServers(servers);
+
+      internalMachines.put(
+          machineEntry.getKey(),
+          new InternalMachineConfig(
+              installers, servers, machineConfig.getEnv(), machineConfig.getAttributes()));
+    }
+    return new InternalEnvironment(internalRecipe, internalMachines);
+  }
+
+  private List<Installer> getInstallers(List<String> installersKeys)
+      throws InfrastructureException {
+    try {
+      return installerRegistry.getOrderedInstallers(installersKeys);
+    } catch (InstallerException e) {
+      throw new InfrastructureException(e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Fill specified map with servers that are provided by installers.
+   *
+   * @param servers map to fill
+   * @param installers installers to retrieve servers
+   * @throws InfrastructureException if any installer has server that conflicts with already
+   *     configured one
+   */
+  private void fillServers(Map<String, ServerConfig> servers, List<Installer> installers)
+      throws InfrastructureException {
+    for (Installer installer : installers) {
+      for (Map.Entry<String, ? extends ServerConfig> serverEntry :
+          installer.getServers().entrySet()) {
+        if (servers.putIfAbsent(serverEntry.getKey(), serverEntry.getValue()) != null
+            && !servers.get(serverEntry.getKey()).equals(serverEntry.getValue())) {
+          throw new InfrastructureException(
+              String.format(
+                  "Installer '%s' contains server '%s' conflicting with machine configuration",
+                  installer.getId(), serverEntry.getKey()));
+        }
+      }
+    }
+  }
+
+  //TODO Take a look | Add tests
+  private Map<String, ServerConfig> normalizeServers(Map<String, ServerConfig> servers) {
+    return servers
+        .entrySet()
+        .stream()
+        .collect(Collectors.toMap(Entry::getKey, e -> normalizeServer(e.getValue())));
+  }
+
+  private ServerConfig normalizeServer(ServerConfig serverConfig) {
+    String port = serverConfig.getPort();
+    if (port != null && !port.contains("/")) {
+      port = port + "/tcp";
+    }
+    return new ServerConfigImpl(port, serverConfig.getProtocol(), serverConfig.getPath());
+  }
 }
