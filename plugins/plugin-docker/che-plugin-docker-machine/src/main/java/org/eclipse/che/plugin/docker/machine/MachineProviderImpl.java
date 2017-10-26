@@ -189,7 +189,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
       @Named("machine.docker.machine_volumes") Set<String> allMachinesSystemVolumes,
       @Named("che.docker.always_pull_image") boolean doForcePullImage,
       @Named("che.docker.privileged") boolean privilegedMode,
-      @Nullable @Named("che.docker.securityopt") String[] securityOpt,
+      SecurityOptProvider securityOptProvider,
       @Named("che.docker.pids_limit") int pidsLimit,
       @Named("machine.docker.dev_machine.machine_env") Set<String> devMachineEnvVariables,
       @Named("machine.docker.machine_env") Set<String> allMachinesEnvVariables,
@@ -213,7 +213,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     this.transmitter = transmitter;
     this.doForcePullImage = doForcePullImage;
     this.privilegedMode = privilegedMode;
-    this.securityOpt = securityOpt;
+    this.securityOpt = securityOptProvider.get();
     this.snapshotUseRegistry = snapshotUseRegistry;
     // use-cases:
     //  -1  enable unlimited swap
