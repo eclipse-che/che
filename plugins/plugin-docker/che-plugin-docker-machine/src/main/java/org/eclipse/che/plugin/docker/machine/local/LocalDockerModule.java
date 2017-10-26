@@ -20,6 +20,7 @@ import java.util.Set;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
+import org.eclipse.che.plugin.docker.machine.AlwaysExternalCustomServerEvaluationStrategy;
 import org.eclipse.che.plugin.docker.machine.DockerInstance;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceRuntimeInfo;
 import org.eclipse.che.plugin.docker.machine.DockerProcess;
@@ -62,6 +63,9 @@ public class LocalDockerModule extends AbstractModule {
     strategies
         .addBinding("custom")
         .to(org.eclipse.che.plugin.docker.machine.CustomServerEvaluationStrategy.class);
+    strategies
+        .addBinding("always-external-custom")
+        .to(AlwaysExternalCustomServerEvaluationStrategy.class);
 
     bind(org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider.class)
         .to(
