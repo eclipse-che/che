@@ -23,24 +23,30 @@ RUN sudo yum -y update && \
            make \
            golang \
     sudo yum clean all && \
-    cat /opt/rh/rh-maven35/enable >> /home/user/.bashrc  &&\
-    cat /opt/rh/rh-nodejs6/enable >> /home/user/.bashrc
-
-USER user
-
-ENV TOMCAT_HOME=/home/user/tomcat8 \
-    TERM=xterm \
-    M2_HOME=/opt/rh/rh-maven35/root/usr/share/maven 
-
-ENV MAVEN_OPTS=$JAVA_OPTS\
-    GOPATH=$HOME/go \
-    PATH=$GOPATH/bin:$M2_HOME/bin:/usr/local/go/bin:$PATH
+    cat /opt/rh/rh-maven35/enable >> /home/user/.bashrc  && \
+    cat /opt/rh/rh-nodejs6/enable >> /home/user/.bashrc && \
+    sudo ln -s /opt/rh/rh-nodejs6/root/usr/bin/node /usr/local/bin/nodejs
 
 RUN mkdir $HOME/.m2 && \
     mkdir /home/user/tomcat8 && \
     wget -qO- "https://archive.apache.org/dist/tomcat/tomcat-8/v8.5.23/bin/apache-tomcat-8.5.23.tar.gz" | tar -zx --strip-components=1 -C /home/user/tomcat8 && \
     rm -rf /home/user/tomcat8/webapps/* && \
     echo "export MAVEN_OPTS=\$JAVA_OPTS" >> /home/user/.bashrc
+
+USER user
+
+
+ENV LD_LIBRARY_PATH=/opt/rh/rh-nodejs6/root/usr/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}} \
+ PYTHONPATH=/opt/rh/rh-nodejs6/root/usr/lib/python2.7/site-packages${PYTHONPATH:+:${PYTHONPATH}} \
+ MANPATH=/opt/rh/rh-nodejs6/root/usr/share/man:$MANPATH \
+ TOMCAT_HOME=/home/user/tomcat8 \
+ TERM=xterm  \
+ M2_HOME=/opt/rh/rh-maven35/root/usr/share/maven \
+ GOPATH=$HOME/go \
+ NODEJS_VERSION=6 \
+ NPM_RUN=start \
+ NPM_CONFIG_PREFIX=$HOME/.npm-global
+ENV PATH=$HOME/node_modules/.bin/:$HOME/.npm-global/bin/:$GOPATH/bin:$M2_HOME/bin:/opt/rh/rh-nodejs6/root/usr/bin:/usr/local/go/bin:$PATH
 
 ADD ./contrib/settings.xml $HOME/.m2/settings.xml
 
