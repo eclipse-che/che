@@ -6,7 +6,16 @@
           "attributes": {
             "memoryLimitBytes": "2147483648"
           },
-          "servers": {},
+          "servers": {
+            "8080/tcp" : {
+              "port" : "8080",
+              "protocol" : "http"
+            },
+            "8000/tcp" : {
+              "port" : "8000",
+              "protocol" : "http"
+            }
+          },
           "installers": [
             "org.eclipse.che.terminal",
             "org.eclipse.che.ws-agent",

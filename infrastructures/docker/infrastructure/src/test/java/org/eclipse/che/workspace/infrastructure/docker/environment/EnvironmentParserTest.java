@@ -18,11 +18,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertEqualsNoOrder;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -131,70 +129,6 @@ public class EnvironmentParserTest {
     // then
     assertEquals(actual, dockerEnv);
     verify(envParser).parse(environment);
-  }
-
-  @Test
-  public void shouldOverrideMemoryLimitFromExtendedMachineInAnEnv() throws Exception {
-    // given
-    Map<String, InternalMachineConfig> machines =
-        ImmutableMap.of(
-            "machine1", mockMachine(singletonMap("memoryLimitBytes", "101010")),
-            "machine2", mockMachine());
-    when(environment.getMachines()).thenReturn(machines);
-
-    DockerEnvironment dockerEnv = new DockerEnvironment();
-    dockerEnv.getContainers().put("machine1", new DockerContainerConfig());
-    dockerEnv.getContainers().put("machine2", new DockerContainerConfig());
-    when(envParser.parse(environment)).thenReturn(dockerEnv);
-
-    DockerEnvironment expected = new DockerEnvironment();
-    expected.getContainers().put("machine1", new DockerContainerConfig().setMemLimit(101010L));
-    expected.getContainers().put("machine2", new DockerContainerConfig());
-
-    // when
-    DockerEnvironment actual = parser.parse(environment);
-
-    // then
-    assertEquals(actual, expected);
-  }
-
-  @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Value of attribute 'memoryLimitBytes' of machine '.*' is illegal"
-  )
-  public void shouldThrowExceptionInCaseFailedParseMemoryLimit() throws Exception {
-    // given
-    when(machine.getAttributes()).thenReturn(singletonMap("memoryLimitBytes", "AF"));
-
-    // when
-    parser.parse(environment);
-  }
-
-  @Test(dataProvider = "environmentWithServersProvider")
-  public void shouldAddExposesFromExtendedMachineServers(
-      InternalMachineConfig machineConfig,
-      DockerContainerConfig parsedContainer,
-      List<String> expectedExposes)
-      throws Exception {
-
-    // given
-    when(environment.getMachines()).thenReturn(singletonMap(DEFAULT_MACHINE_NAME, machineConfig));
-    when(dockerEnv.getContainers()).thenReturn(singletonMap(DEFAULT_MACHINE_NAME, parsedContainer));
-
-    // when
-    DockerEnvironment actual = parser.parse(environment);
-
-    // then
-    // prevent failures because of reordered entries of expose field
-    assertEquals(actual.getContainers().size(), 1);
-    assertEqualsNoOrder(
-        actual.getContainers().get(DEFAULT_MACHINE_NAME).getExpose().toArray(),
-        expectedExposes.toArray(),
-        String.format(
-            "Arrays are not equal. Actual: '%s'. Expected: '%s'",
-            Arrays.toString(actual.getContainers().get(DEFAULT_MACHINE_NAME).getExpose().toArray()),
-            Arrays.toString(expectedExposes.toArray())));
   }
 
   @DataProvider(name = "environmentWithServersProvider")

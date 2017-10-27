@@ -11,7 +11,6 @@
 package org.eclipse.che.workspace.infrastructure.docker.environment;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.workspace.infrastructure.docker.ArgumentsValidator.checkArgument;
 
@@ -233,23 +232,6 @@ public class EnvironmentValidator {
 
   private void validateExtendedMachine(InternalMachineConfig machineConfig, String machineName)
       throws ValidationException {
-    if (machineConfig.getAttributes() != null
-        && machineConfig.getAttributes().get("memoryLimitBytes") != null) {
-
-      try {
-        long memoryLimitBytes =
-            Long.parseLong(machineConfig.getAttributes().get("memoryLimitBytes"));
-        checkArgument(
-            memoryLimitBytes > 0,
-            "Value of attribute 'memoryLimitBytes' of machine '%s' in environment is illegal",
-            machineName);
-      } catch (NumberFormatException e) {
-        throw new ValidationException(
-            format(
-                "Value of attribute 'memoryLimitBytes' of machine '%s' in environment is illegal",
-                machineName));
-      }
-    }
 
     if (machineConfig.getServers() != null) {
       for (Map.Entry<String, ? extends ServerConfig> serverEntry :

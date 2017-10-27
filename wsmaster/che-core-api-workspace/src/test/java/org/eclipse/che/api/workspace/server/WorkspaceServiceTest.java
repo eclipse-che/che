@@ -19,6 +19,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
@@ -917,7 +918,7 @@ public class WorkspaceServiceTest {
             singletonList("org.eclipse.che.ws-agent"),
             null,
             singletonMap("CHE_ENV", "value"),
-            singletonMap("memoryLimitBytes", "10000"));
+            singletonMap(MEMORY_LIMIT_ATTRIBUTE, "10000"));
 
     return DtoConverter.asDto(
         new EnvironmentImpl(

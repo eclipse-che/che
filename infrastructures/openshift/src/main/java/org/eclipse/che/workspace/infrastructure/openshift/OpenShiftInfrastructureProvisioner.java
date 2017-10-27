@@ -17,8 +17,12 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesProvisioner;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.env.EnvVarsConverter;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.installer.InstallerConfigProvisioner;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.labels.PodNameLabelProvisioner;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.restartpolicy.RestartPolicyRewriter;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.route.TlsRouteProvisioner;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.server.ServersConverter;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.volume.PersistentVolumeClaimProvisioner;
 
 /**
@@ -26,33 +30,54 @@ import org.eclipse.che.workspace.infrastructure.openshift.provision.volume.Persi
  * the desired order, which corresponds to the needs of the OpenShift infrastructure.
  *
  * @author Anton Korneta
+ * @author Alexander Garagatyi
  */
 @Singleton
 public class OpenShiftInfrastructureProvisioner {
-
   private final InstallerConfigProvisioner installerConfigProvisioner;
   private final PersistentVolumeClaimProvisioner persistentVolumeClaimProvisioner;
   private final UniqueNamesProvisioner uniqueNamesProvisioner;
   private final TlsRouteProvisioner tlsRouteProvisioner;
+  private final ServersConverter serversConverter;
+  private final EnvVarsConverter envVarsConverter;
+  private final RestartPolicyRewriter restartPolicyRewriter;
+  private final PodNameLabelProvisioner podNameLabelProvisioner;
 
   @Inject
   public OpenShiftInfrastructureProvisioner(
       InstallerConfigProvisioner installerConfigProvisioner,
       PersistentVolumeClaimProvisioner projectVolumeProvisioner,
       UniqueNamesProvisioner uniqueNamesProvisioner,
-      TlsRouteProvisioner tlsRouteProvisioner) {
+      TlsRouteProvisioner tlsRouteProvisioner,
+      ServersConverter serversConverter,
+      EnvVarsConverter envVarsConverter,
+      RestartPolicyRewriter restartPolicyRewriter,
+      PodNameLabelProvisioner podNameLabelProvisioner) {
     this.installerConfigProvisioner = installerConfigProvisioner;
     this.persistentVolumeClaimProvisioner = projectVolumeProvisioner;
     this.uniqueNamesProvisioner = uniqueNamesProvisioner;
     this.tlsRouteProvisioner = tlsRouteProvisioner;
+    this.serversConverter = serversConverter;
+    this.envVarsConverter = envVarsConverter;
+    this.restartPolicyRewriter = restartPolicyRewriter;
+    this.podNameLabelProvisioner = podNameLabelProvisioner;
   }
 
   public void provision(
       InternalEnvironment environment, OpenShiftEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException {
+    // 1 stage - add Che business logic items to Che model env
     installerConfigProvisioner.provision(environment, osEnv, identity);
+    // 2 stage - converting Che model env to OpenShift env
+    serversConverter.provision(environment, osEnv, identity);
+    envVarsConverter.provision(environment, osEnv, identity);
+    // 3 stage - add OpenShift env items
+    podNameLabelProvisioner.provision(environment, osEnv, identity);
+    restartPolicyRewriter.provision(environment, osEnv, identity);
     persistentVolumeClaimProvisioner.provision(environment, osEnv, identity);
     uniqueNamesProvisioner.provision(environment, osEnv, identity);
     tlsRouteProvisioner.provision(environment, osEnv, identity);
   }
+
+  // TODO memory attribute provisioner
 }

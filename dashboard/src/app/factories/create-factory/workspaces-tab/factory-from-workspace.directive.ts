@@ -14,29 +14,23 @@
  * Defines a directive for configuring factory form workspace.
  * @author Oleksii Orel
  */
-export class FactoryFromWorkspace {
+export class FactoryFromWorkspace implements ng.IDirective {
 
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor() {
-    this.restrict = 'E';
+  restrict = 'E';
 
-    this.templateUrl = 'app/factories/create-factory/workspaces-tab/factory-from-workspace.html';
-    this.replace = false;
+  templateUrl = 'app/factories/create-factory/workspaces-tab/factory-from-workspace.html';
+  replace = false;
 
-    this.controller = 'FactoryFromWorkspaceCtrl';
-    this.controllerAs = 'factoryFromWorkspaceCtrl';
+  controller = 'FactoryFromWorkspaceCtrl';
+  controllerAs = 'factoryFromWorkspaceCtrl';
 
-    this.bindToController = true;
+  bindToController = true;
 
-    // scope values
-    this.scope = {
-      isLoading: '=cdvyIsLoading',
-      isImporting: '=cdvyIsImporting',
-      factoryContent: '=cdvyFactoryContent'
-    };
-  }
+  // scope values
+  scope = {
+    isLoading: '=cdvyIsLoading',
+    isImporting: '=cdvyIsImporting',
+    factoryContent: '=cdvyFactoryContent'
+  };
 
 }

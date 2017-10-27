@@ -10,10 +10,8 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.environment;
 
-import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentParser.DEFAULT_RESTART_POLICY;
 import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentParser.PVC_IGNORED_WARNING_CODE;
 import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentParser.PVC_IGNORED_WARNING_MESSAGE;
 import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentParser.ROUTES_IGNORED_WARNING_MESSAGE;
@@ -26,17 +24,10 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
-import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.DoneableKubernetesList;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
-import io.fabric8.kubernetes.api.model.ObjectMeta;
-import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
-import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.api.model.PodBuilder;
-import io.fabric8.kubernetes.api.model.PodSpec;
-import io.fabric8.kubernetes.api.model.PodSpecBuilder;
 import io.fabric8.kubernetes.client.dsl.KubernetesListMixedOperation;
 import io.fabric8.kubernetes.client.dsl.RecreateFromServerGettable;
 import io.fabric8.openshift.api.model.Route;
@@ -64,8 +55,6 @@ import org.testng.annotations.Test;
 public class OpenShiftEnvironmentParserTest {
 
   private static final String YAML_RECIPE = "application/x-yaml";
-  private static final String TEST_POD_NAME = "app";
-  private static final String ALWAYS_RESTART_POLICY = "Always";
 
   private OpenShiftEnvironmentParser osEnvironmentParser;
 
@@ -93,23 +82,6 @@ public class OpenShiftEnvironmentParserTest {
     when(internalEnvironment.getRecipe()).thenReturn(internalRecipe);
     when(internalRecipe.getContentType()).thenReturn(YAML_RECIPE);
     when(internalRecipe.getContent()).thenReturn("recipe content");
-  }
-
-  @Test
-  public void rewritesRestartPolicyWhenItsDifferentWithDefaultOne() throws Exception {
-    final List<HasMetadata> pods = singletonList(newPod(TEST_POD_NAME, ALWAYS_RESTART_POLICY));
-    when(validatedObjects.getItems()).thenReturn(pods);
-
-    final OpenShiftEnvironment parsed = osEnvironmentParser.parse(internalEnvironment);
-
-    assertEquals(
-        parsed.getPods().get(TEST_POD_NAME).getSpec().getRestartPolicy(), DEFAULT_RESTART_POLICY);
-    verifyWarnings(
-        new WarningImpl(
-            101,
-            format(
-                "Restart policy '%s' for pod '%s' is rewritten with %s",
-                ALWAYS_RESTART_POLICY, TEST_POD_NAME, DEFAULT_RESTART_POLICY)));
   }
 
   @Test
@@ -151,12 +123,5 @@ public class OpenShiftEnvironmentParserTest {
   private List<Warning> captureWarnings() {
     verify(internalEnvironment, atLeastOnce()).addWarning(warningCaptor.capture());
     return warningCaptor.getAllValues();
-  }
-
-  private static Pod newPod(String podName, String restartPolicy, Container... containers) {
-    final ObjectMeta podMetadata = new ObjectMetaBuilder().withName(podName).build();
-    final PodSpec podSpec =
-        new PodSpecBuilder().withRestartPolicy(restartPolicy).withContainers(containers).build();
-    return new PodBuilder().withMetadata(podMetadata).withSpec(podSpec).build();
   }
 }

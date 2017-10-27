@@ -16,11 +16,9 @@ import static org.eclipse.che.workspace.infrastructure.docker.ArgumentsValidator
 
 import com.google.common.base.Joiner;
 import java.util.Map;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
-import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment.InternalRecipe;
@@ -75,41 +73,19 @@ public class EnvironmentParser {
 
       InternalMachineConfig machineConfig = environment.getMachines().get(entry.getKey());
       if (machineConfig != null) {
-        normalizeMachine(entry.getKey(), entry.getValue(), machineConfig);
+        entry
+            .getValue()
+            .setExpose(
+                entry
+                    .getValue()
+                    .getExpose()
+                    .stream()
+                    .map(expose -> expose.contains("/") ? expose : expose + "/tcp")
+                    .distinct()
+                    .collect(toList()));
       }
     }
 
     return dockerEnvironment;
-  }
-
-  private void normalizeMachine(
-      String name, DockerContainerConfig container, InternalMachineConfig machineConfig)
-      throws ValidationException {
-    if (machineConfig.getAttributes().containsKey("memoryLimitBytes")) {
-      try {
-        container.setMemLimit(
-            Long.parseLong(machineConfig.getAttributes().get("memoryLimitBytes")));
-      } catch (NumberFormatException e) {
-        throw new ValidationException(
-            format("Value of attribute 'memoryLimitBytes' of machine '%s' is illegal", name));
-      }
-    }
-    container.setExpose(
-        container
-            .getExpose()
-            .stream()
-            .map(expose -> expose.contains("/") ? expose : expose + "/tcp")
-            .collect(toList()));
-    for (ServerConfig serverConfig : machineConfig.getServers().values()) {
-      String normalizedPort =
-          serverConfig.getPort().contains("/")
-              ? serverConfig.getPort()
-              : serverConfig.getPort() + "/tcp";
-
-      container.getExpose().add(normalizedPort);
-    }
-    container.setExpose(container.getExpose().stream().distinct().collect(Collectors.toList()));
-
-    container.getEnvironment().putAll(machineConfig.getEnv());
   }
 }
