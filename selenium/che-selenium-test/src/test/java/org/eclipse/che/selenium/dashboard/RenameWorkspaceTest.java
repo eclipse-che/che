@@ -10,12 +10,12 @@
  */
 package org.eclipse.che.selenium.dashboard;
 
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import java.io.IOException;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -28,8 +28,8 @@ import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
 public class RenameWorkspaceTest {
-  private static final String MIN_WORKSPACE_NAME = NameGenerator.generate("", 3);
-  private static final String MAX_WORKSPACE_NAME = NameGenerator.generate("", 100);
+  private static final String MIN_WORKSPACE_NAME_SIZE = generate("", 3);
+  private static final String MAX_WORKSPACE_NAME_SIZE = generate("", 100);
   private static final String WS_NAME_TOO_SHORT =
       ("The name has to be more than 3 characters long.");
   private static final String WS_NAME_TOO_LONG =
@@ -69,16 +69,16 @@ public class RenameWorkspaceTest {
     dashboardWorkspace.checkNameWorkspace(workspaceName);
 
     // type name with 101 characters and check error message that this name is too long
-    dashboardWorkspace.enterNameWorkspace(MAX_WORKSPACE_NAME + "1");
+    dashboardWorkspace.enterNameWorkspace(MAX_WORKSPACE_NAME_SIZE + "1");
     assertTrue(dashboardWorkspace.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_LONG));
     dashboardWorkspace.clickOnCancelBtn();
     dashboardWorkspace.checkNameWorkspace(workspaceName);
 
     // type a name with min possible size and check that the workspace renamed
-    renameWorkspace(MIN_WORKSPACE_NAME);
+    renameWorkspace(MIN_WORKSPACE_NAME_SIZE);
 
     // type a name with max possible size and check that the workspace renamed
-    renameWorkspace(MAX_WORKSPACE_NAME);
+    renameWorkspace(MAX_WORKSPACE_NAME_SIZE);
   }
 
   private void renameWorkspace(String name) {
