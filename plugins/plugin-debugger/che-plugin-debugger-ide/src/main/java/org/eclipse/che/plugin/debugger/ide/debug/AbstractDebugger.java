@@ -89,7 +89,6 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   public static final String LOCAL_STORAGE_DEBUGGER_STATE_KEY = "che-debugger-state";
   public static final String LOCAL_STORAGE_DEBUGGER_DISPOSABLE_BREAKPOINT_KEY =
       "che-debugger-disposable-breakpoint";
-  public static final String WS_AGENT_ENDPOINT = "ws-agent";
 
   public static final String EVENT_DEBUGGER_MESSAGE_BREAKPOINT = "event:debugger:breakpoint";
   public static final String EVENT_DEBUGGER_MESSAGE_DISCONNECT = "event:debugger:disconnect";
