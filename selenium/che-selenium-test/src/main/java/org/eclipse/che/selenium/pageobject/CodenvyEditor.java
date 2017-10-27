@@ -345,14 +345,14 @@ public class CodenvyEditor {
   public void waitTextIntoEditor(final String text) {
     try {
       LOG.error("=============>>>>>   waitTextIntoEditor  start");
-      loadPageDriverWait.until(
+      elemDriverWait.until(
           (ExpectedCondition<Boolean>) driver -> getVisibleTextFromEditor().contains(text));
       LOG.error("=============>>>>>   waitTextIntoEditor  1");
     } catch (Exception ex) {
       ex.printStackTrace();
       WaitUtils.sleepQuietly(REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
       LOG.error("=============>>>>>   waitTextIntoEditor  2");
-      attachElemDriverWait.until(
+      elemDriverWait.until(
           (ExpectedCondition<Boolean>) driver -> getVisibleTextFromEditor().contains(text));
       LOG.error("=============>>>>>   waitTextIntoEditor  3");
     }
