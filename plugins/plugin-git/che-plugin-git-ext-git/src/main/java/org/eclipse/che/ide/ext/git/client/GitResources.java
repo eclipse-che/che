@@ -40,6 +40,9 @@ public interface GitResources extends ClientBundle {
     @ClassName("git-panel-panel-upper-indent")
     String topIndent();
 
+    @ClassName("git-panel-vertical-items")
+    String verticalItems();
+
     @ClassName("git-panel-repository-changes-label")
     String repositoryChangesLabel();
   }

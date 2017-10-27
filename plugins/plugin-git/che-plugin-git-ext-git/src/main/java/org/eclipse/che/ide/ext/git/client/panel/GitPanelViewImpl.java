@@ -14,7 +14,7 @@ import static com.google.common.collect.Iterables.getFirst;
 
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import java.util.Comparator;
 import java.util.List;
@@ -37,7 +37,7 @@ import org.eclipse.che.ide.ui.smartTree.Tree;
 public class GitPanelViewImpl extends BaseView<ActionDelegate> implements GitPanelView {
   interface GitPanelViewImplUiBinder extends UiBinder<Widget, GitPanelViewImpl> {}
 
-  @UiField FlowPanel changesPanel;
+  @UiField SimplePanel changesPanel;
 
   @UiField(provided = true)
   final GitResources gitResources;

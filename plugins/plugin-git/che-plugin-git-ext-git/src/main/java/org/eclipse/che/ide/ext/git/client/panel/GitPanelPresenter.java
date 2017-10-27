@@ -297,10 +297,8 @@ public class GitPanelPresenter extends BasePresenter
    */
   private void updateRepositoryData(String projectName) {
     Project project = findProjectByName(projectName);
-    if (project != null) {
-      if (projectUnderGit(project)) {
-        reloadRepositoryData(project);
-      }
+    if (project != null && projectUnderGit(project)) {
+      reloadRepositoryData(project);
     }
   }
 
