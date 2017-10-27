@@ -946,15 +946,16 @@ public class DashboardWorkspace {
 
   public void deleteAllWorkspaces(List<String> workspaces) {
     workspaces.forEach(
-        wsName -> {
+        workspaceName -> {
           seleniumWebDriver.get(getDashboardWorkspaceUrl());
           waitToolbarTitleName(WORKSPACE_TOOLBAR_TITLE);
           waitListWorkspacesOnDashboard();
-          selectWorkspaceItemName(wsName);
-          waitToolbarTitleName(Arrays.asList(wsName.split("/")).get(1));
+          selectWorkspaceItemName(workspaceName);
+          waitToolbarTitleName(Arrays.asList(workspaceName.split("/")).get(1));
           clickOnDeleteWorkspace();
           clickOnDeleteDialogButton();
           waitToolbarTitleName(WORKSPACE_TOOLBAR_TITLE);
+          waitWorkspaceIsNotPresent(workspaceName);
         });
   }
 
