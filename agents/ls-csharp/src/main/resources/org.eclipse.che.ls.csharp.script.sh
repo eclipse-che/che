@@ -237,8 +237,10 @@ fi
 ### Install C# LS ###
 #####################
 
-curl -s ${AGENT_BINARIES_URI} | tar xzf - -C ${CHE_DIR}
+if [ ! -f "${LS_LAUNCHER}" ]; then
+    curl -s ${AGENT_BINARIES_URI} | tar xzf - -C ${CHE_DIR}
 
-touch ${LS_LAUNCHER}
-chmod +x ${LS_LAUNCHER}
-echo "nodejs ${LS_DIR}/node_modules/omnisharp-client/languageserver/server.js" > ${LS_LAUNCHER}
+    touch ${LS_LAUNCHER}
+    chmod +x ${LS_LAUNCHER}
+    echo "nodejs ${LS_DIR}/node_modules/omnisharp-client/languageserver/server.js" > ${LS_LAUNCHER}
+fi
