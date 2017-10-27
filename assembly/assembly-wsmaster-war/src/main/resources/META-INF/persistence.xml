@@ -67,19 +67,5 @@
         <class>org.eclipse.che.multiuser.organization.spi.impl.OrganizationDistributedResourcesImpl</class>
 
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
-        <properties>
-            <property name="eclipselink.exception-handler" value="org.eclipse.che.core.db.h2.jpa.eclipselink.H2ExceptionHandler"/>
-            <property name="eclipselink.target-server" value="None"/>
-            <property name="eclipselink.logging.logger" value="DefaultLogger"/>
-            <property name="eclipselink.logging.level" value="SEVERE"/>
-        </properties>
-        
-         <properties>
-            <property name="eclipselink.exception-handler" value="org.eclipse.che.core.db.postgresql.jpa.eclipselink.PostgreSqlExceptionHandler"/>
-            <property name="eclipselink.target-server" value="None"/>
-            <property name="eclipselink.logging.logger" value="DefaultLogger"/>
-            <property name="eclipselink.logging.level" value="SEVERE"/>
-        </properties>
-        
     </persistence-unit>
 </persistence>

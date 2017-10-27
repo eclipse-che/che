@@ -19,6 +19,8 @@ import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import javax.sql.DataSource;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
@@ -72,7 +74,6 @@ public class WsMasterModule extends AbstractModule {
   @Override
   protected void configure() {
     // db related components modules
-    install(new com.google.inject.persist.jpa.JpaPersistModule("main"));
     install(new org.eclipse.che.account.api.AccountModule());
     install(new org.eclipse.che.api.ssh.server.jpa.SshJpaModule());
     install(new org.eclipse.che.api.core.jsonrpc.impl.JsonRpcModule());
@@ -176,12 +177,26 @@ public class WsMasterModule extends AbstractModule {
     //
     // bind(org.eclipse.che.api.agent.server.filters.AddExecInstallerInWorkspaceFilter.class);
     //        bind(org.eclipse.che.api.agent.server.filters.AddExecInstallerInStackFilter.class);
+    Map<String, String> persistenceProperties = new HashMap<>();
+    persistenceProperties.put("eclipselink.target-server", "None");
+    persistenceProperties.put("eclipselink.logging.logger", "DefaultLogger");
+    persistenceProperties.put("eclipselink.logging.level", "SEVERE");
 
     if (Boolean.valueOf(System.getenv("CHE_MULTIUSER"))) {
+      persistenceProperties.put(
+          "eclipselink.exception-handler",
+          "org.eclipse.che.core.db.postgresql.jpa.eclipselink.PostgreSqlExceptionHandler");
       configureMultiuser();
     } else {
+      persistenceProperties.put(
+          "eclipselink.exception-handler",
+          "org.eclipse.che.core.db.h2.jpa.eclipselink.H2ExceptionHandler");
       configureSingleuser();
     }
+
+    install(
+        new com.google.inject.persist.jpa.JpaPersistModule("main")
+            .properties(persistenceProperties));
 
     String infrastructure = System.getenv("CHE_INFRASTRUCTURE_ACTIVE");
     if ("openshift".equals(infrastructure)) {
