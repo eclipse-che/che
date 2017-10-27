@@ -283,7 +283,18 @@ public class CodenvyEditor {
    */
   public String getVisibleTextFromEditor() {
     waitActiveEditor();
+
+    LOG.error("========>>>>  getVisibleTextFromEditor start");
+
+    elemDriverWait.until(
+        ExpectedConditions.presenceOfAllElementsLocatedBy(
+            By.xpath(Locators.ORION_CONTENT_ACTIVE_EDITOR_XPATH)));
+
+    LOG.error("========>>>>  getVisibleTextFromEditor 1");
+
     elemDriverWait.until(ExpectedConditions.visibilityOfAllElements(editorLines));
+    LOG.error("========>>>>  getVisibleTextFromEditor finish");
+
     return getTextFromOrionLines(editorLines);
   }
 
