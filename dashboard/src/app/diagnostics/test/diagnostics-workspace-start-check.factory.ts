@@ -210,7 +210,7 @@ export class DiagnosticsWorkspaceStartCheck {
             this.cheWorkspace.fetchWorkspaceDetails(workspace.id).then(() => {
               let workspace = this.cheWorkspace.getWorkspaceById(workspaceId);
               diagnosticCallback.shared('workspace', workspace);
-              diagnosticCallback.shared('machineToken', workspace.runtime.devMachine.runtime.envVariables['USER_TOKEN']);
+              diagnosticCallback.shared('machineToken', workspace.runtime.devMachine.runtime.envVariables['CHE_MACHINE_TOKEN']);
               diagnosticCallback.success('Starting workspace OK');
             })
           });
@@ -255,7 +255,7 @@ export class DiagnosticsWorkspaceStartCheck {
             this.cheWorkspace.fetchWorkspaceDetails(workspace.id).then(() => {
               let workspace = this.cheWorkspace.getWorkspaceById(workspaceId);
               diagnosticCallback.shared('workspace', workspace);
-              diagnosticCallback.shared('machineToken', workspace.runtime.devMachine.runtime.envVariables['USER_TOKEN']);
+              diagnosticCallback.shared('machineToken', workspace.runtime.devMachine.runtime.envVariables['CHE_MACHINE_TOKEN']);
               let newCallback : DiagnosticCallback = diagnosticCallback.newCallback('Test connection from browser to workspace agent by using Workspace Agent IP');
               this.diagnosticsRunningWorkspaceCheck.checkWsAgent(newCallback, false);
               let websocketCallback : DiagnosticCallback = diagnosticCallback.newCallback('Test connection from browser to workspace agent with websocket');

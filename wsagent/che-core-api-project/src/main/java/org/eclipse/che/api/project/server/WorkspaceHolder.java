@@ -41,7 +41,7 @@ public class WorkspaceHolder extends WorkspaceProjectsSyncer {
 
   private String workspaceId;
 
-  private final String userToken;
+  private final String machineToken;
 
   private HttpJsonRequestFactory httpJsonRequestFactory;
 
@@ -54,11 +54,11 @@ public class WorkspaceHolder extends WorkspaceProjectsSyncer {
     this.httpJsonRequestFactory = httpJsonRequestFactory;
 
     this.workspaceId = System.getenv("CHE_WORKSPACE_ID");
-    this.userToken = System.getenv("USER_TOKEN");
+    this.machineToken = System.getenv("CHE_MACHINE_TOKEN");
 
     LOG.info("Workspace ID: " + workspaceId);
     LOG.info("API Endpoint: " + apiEndpoint);
-    LOG.info("User Token  : " + (userToken != null));
+    LOG.info("Machine Token  : " + (machineToken != null));
 
     // check connection
     try {
@@ -92,7 +92,7 @@ public class WorkspaceHolder extends WorkspaceProjectsSyncer {
         UriBuilder.fromUri(apiEndpoint)
             .path(WorkspaceService.class)
             .path(WorkspaceService.class, "addProject");
-    if (userToken != null) builder.queryParam("token", userToken);
+    if (machineToken != null) builder.queryParam("token", machineToken);
     final String href = builder.build(workspaceId).toString();
     try {
       httpJsonRequestFactory.fromUrl(href).usePostMethod().setBody(asDto(project)).request();
@@ -113,7 +113,7 @@ public class WorkspaceHolder extends WorkspaceProjectsSyncer {
         UriBuilder.fromUri(apiEndpoint)
             .path(WorkspaceService.class)
             .path(WorkspaceService.class, "updateProject");
-    if (userToken != null) builder.queryParam("token", userToken);
+    if (machineToken != null) builder.queryParam("token", machineToken);
     final String href =
         builder.build(new String[] {workspaceId, project.getPath()}, false).toString();
     try {
@@ -129,7 +129,7 @@ public class WorkspaceHolder extends WorkspaceProjectsSyncer {
         UriBuilder.fromUri(apiEndpoint)
             .path(WorkspaceService.class)
             .path(WorkspaceService.class, "deleteProject");
-    if (userToken != null) builder.queryParam("token", userToken);
+    if (machineToken != null) builder.queryParam("token", machineToken);
     final String href =
         builder.build(new String[] {workspaceId, project.getPath()}, false).toString();
     try {
@@ -149,7 +149,7 @@ public class WorkspaceHolder extends WorkspaceProjectsSyncer {
         UriBuilder.fromUri(apiEndpoint)
             .path(WorkspaceService.class)
             .path(WorkspaceService.class, "getByKey");
-    if (userToken != null) builder.queryParam("token", userToken);
+    if (machineToken != null) builder.queryParam("token", machineToken);
     final String href = builder.build(workspaceId).toString();
     try {
       return httpJsonRequestFactory

@@ -798,7 +798,7 @@ public class WorkspaceService extends Service {
     RuntimeDto runtimeDto = workspaceDto.getRuntime();
     if (runtimeDto != null) {
       try {
-        runtimeDto.setUserToken(machineTokenProvider.getToken(workspace.getId()));
+        runtimeDto.setMachineToken(machineTokenProvider.getToken(workspace.getId()));
       } catch (MachineTokenException e) {
         throw new ServerException(e.getMessage(), e);
       }
