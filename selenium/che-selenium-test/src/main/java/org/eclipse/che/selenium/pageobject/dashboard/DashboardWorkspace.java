@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.pageobject.dashboard;
 
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
@@ -20,7 +21,6 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRA
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.Arrays;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
@@ -944,23 +944,25 @@ public class DashboardWorkspace {
         .click();
   }
 
-  public void deleteAllWorkspaces(List<String> workspaces) {
-    workspaces.forEach(
-        workspaceName -> {
-          seleniumWebDriver.get(getDashboardWorkspaceUrl());
-          waitToolbarTitleName(WORKSPACE_TOOLBAR_TITLE);
-          waitListWorkspacesOnDashboard();
-          selectWorkspaceItemName(workspaceName);
-          waitToolbarTitleName(Arrays.asList(workspaceName.split("/")).get(1));
-          clickOnDeleteWorkspace();
-          clickOnDeleteDialogButton();
-          waitToolbarTitleName(WORKSPACE_TOOLBAR_TITLE);
-          waitWorkspaceIsNotPresent(workspaceName);
-        });
+  public void deleteAllWorkspaces(List<String> workspacesQualifiedNames) {
+    workspacesQualifiedNames.forEach(
+        workspaceQualifiedName -> deleteWorkspace(workspaceQualifiedName));
   }
 
   public void deleteAllWorkspaces() {
-    deleteAllWorkspaces(getAllWorkspaceNames());
+    deleteAllWorkspaces(getAllWorkspaceQualifiedNames());
+  }
+
+  public void deleteWorkspace(String workspaceQualifiedName) {
+    seleniumWebDriver.get(getDashboardWorkspaceUrl());
+    waitToolbarTitleName(WORKSPACE_TOOLBAR_TITLE);
+    waitListWorkspacesOnDashboard();
+    selectWorkspaceItemName(workspaceQualifiedName);
+    waitToolbarTitleName(asList(workspaceQualifiedName.split("/")).get(1));
+    clickOnDeleteWorkspace();
+    clickOnDeleteDialogButton();
+    waitToolbarTitleName(WORKSPACE_TOOLBAR_TITLE);
+    waitWorkspaceIsNotPresent(workspaceQualifiedName);
   }
 
   public void waitAllWorkspacesIsNotPresent(List<String> workspaceNames) {
@@ -971,18 +973,18 @@ public class DashboardWorkspace {
     return apiEndpointUrlProvider.get().toString().replace("api/", "") + "dashboard/#/workspaces";
   }
 
-  public List<String> getAllWorkspaceNames() {
-    return getNotFilteredWorkspaceNames()
+  public List<String> getAllWorkspaceQualifiedNames() {
+    return getNotFilteredWorkspaceQualifiedNames()
         .stream()
-        .filter(name -> isWorkspaceName(name))
+        .filter(name -> isWorkspaceQualifiedName(name))
         .collect(toList());
   }
 
-  public boolean isWorkspaceName(String workspaceName) {
+  public boolean isWorkspaceQualifiedName(String workspaceName) {
     return workspaceName.contains("/") && workspaceName.length() > 3;
   }
 
-  private List<String> getNotFilteredWorkspaceNames() {
-    return Arrays.asList(getTextFromListWorkspaces().split("\n"));
+  private List<String> getNotFilteredWorkspaceQualifiedNames() {
+    return asList(getTextFromListWorkspaces().split("\n"));
   }
 }
