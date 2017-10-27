@@ -29,8 +29,7 @@ public class SecurityOptProvider implements Provider<String[]> {
   private final String[] securityOpt;
 
   @Inject
-  public SecurityOptProvider(
-      @Nullable @Named("che.docker.hostconfig.securityopt") String[] securityOpt) {
+  public SecurityOptProvider(@Nullable @Named("che.docker.securityopt") String[] securityOpt) {
     if (securityOpt == null
         || securityOpt.length == 0
         || (securityOpt.length == 1 && isNullOrEmpty(securityOpt[0]))) {
