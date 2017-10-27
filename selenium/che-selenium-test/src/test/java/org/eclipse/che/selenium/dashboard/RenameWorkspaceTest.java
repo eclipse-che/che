@@ -11,6 +11,8 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace.StateWorkspace.STARTING;
+import static org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace.StateWorkspace.STOPPING;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
@@ -21,7 +23,6 @@ import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
-import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace.StateWorkspace;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -51,7 +52,7 @@ public class RenameWorkspaceTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    workspaceServiceClient.delete(ws.getName(), user.getName());
+    workspaceServiceClient.delete(MAX_WORKSPACE_NAME_SIZE, user.getName());
   }
 
   @Test
@@ -85,14 +86,14 @@ public class RenameWorkspaceTest {
     dashboardWorkspace.enterNameWorkspace(name);
     assertFalse(dashboardWorkspace.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_SHORT));
     assertFalse(dashboardWorkspace.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_LONG));
-    clickOnSaveButton();
+    clickOnSaveBtnAndWaitWorkspaceRestarted();
     dashboardWorkspace.checkNameWorkspace(name);
   }
 
-  private void clickOnSaveButton() {
+  private void clickOnSaveBtnAndWaitWorkspaceRestarted() {
     dashboardWorkspace.clickOnSaveBtn();
-    dashboardWorkspace.checkStateOfWorkspace(StateWorkspace.STOPPING);
-    dashboardWorkspace.checkStateOfWorkspace(StateWorkspace.STARTING);
+    dashboardWorkspace.checkStateOfWorkspace(STOPPING);
+    dashboardWorkspace.checkStateOfWorkspace(STARTING);
     dashboard.waitNotificationMessage("Workspace updated");
     dashboard.waitNotificationIsClosed();
   }
