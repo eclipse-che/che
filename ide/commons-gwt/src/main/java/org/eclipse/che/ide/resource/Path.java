@@ -137,7 +137,7 @@ public final class Path {
     // no segment validations are done for performance reasons
     this.segments = segments;
     this.device = device;
-    //hash code is cached in all but the bottom three bits of the separators field
+    // hash code is cached in all but the bottom three bits of the separators field
     this.separators = (computeHashCode() << 3) | (_separators & ALL_SEPARATORS);
   }
 
@@ -216,13 +216,13 @@ public final class Path {
    * @since 4.0.0-RC5
    */
   public Path append(Path path) {
-    //optimize some easy cases
+    // optimize some easy cases
     if (path == null || path.segmentCount() == 0) return this;
-    //these call chains look expensive, but in most cases they are no-ops
+    // these call chains look expensive, but in most cases they are no-ops
     if (this.isEmpty()) return path.setDevice(device).makeRelative().makeUNC(isUNC());
     if (this.isRoot()) return path.setDevice(device).makeAbsolute().makeUNC(isUNC());
 
-    //concatenate the two segment arrays
+    // concatenate the two segment arrays
     int myLen = segments.length;
     int tailLen = path.segmentCount();
     String[] newSegments = new String[myLen + tailLen];
@@ -230,7 +230,7 @@ public final class Path {
     for (int i = 0; i < tailLen; i++) {
       newSegments[myLen + i] = path.segment(i);
     }
-    //use my leading separators and the tail's trailing separator
+    // use my leading separators and the tail's trailing separator
     Path result =
         new Path(
             device,
@@ -257,26 +257,26 @@ public final class Path {
    * @since 4.0.0-RC5
    */
   public Path append(String path) {
-    //optimize addition of a single segment
+    // optimize addition of a single segment
     if (path.indexOf(SEPARATOR) == -1
         && path.indexOf("\\") == -1
         && path.indexOf(DEVICE_SEPARATOR) == -1) {
       int tailLength = path.length();
       if (tailLength < 3) {
-        //some special cases
+        // some special cases
         if (tailLength == 0 || ".".equals(path)) {
           return this;
         }
         if ("..".equals(path)) return removeLastSegments(1);
       }
-      //just add the segment
+      // just add the segment
       int myLen = segments.length;
       String[] newSegments = new String[myLen + 1];
       System.arraycopy(segments, 0, newSegments, 0, myLen);
       newSegments[myLen] = path;
       return new Path(device, newSegments, separators & ~HAS_TRAILING);
     }
-    //go with easy implementation
+    // go with easy implementation
     return append(new Path(path));
   }
 
@@ -290,15 +290,15 @@ public final class Path {
    * @since 4.0.0-RC5
    */
   private boolean canonicalize() {
-    //look for segments that need canonicalizing
+    // look for segments that need canonicalizing
     for (int i = 0, max = segments.length; i < max; i++) {
       String segment = segments[i];
       if (segment.charAt(0) == '.' && (segment.equals("..") || segment.equals("."))) {
-        //path needs to be canonicalized
+        // path needs to be canonicalized
         collapseParentReferences();
-        //paths of length 0 have no trailing separator
+        // paths of length 0 have no trailing separator
         if (segments.length == 0) separators &= (HAS_LEADING | IS_UNC);
-        //recompute hash because canonicalize affects hash
+        // recompute hash because canonicalize affects hash
         separators = (separators & ALL_SEPARATORS) | (computeHashCode() << 3);
         return true;
       }
@@ -318,20 +318,20 @@ public final class Path {
           // so we need to accumulate segments.  But only if the original
           // path is relative.  If it is absolute then we can't go any higher than
           // root so simply toss the .. references.
-          if (!isAbsolute()) stack[stackPointer++] = segment; //stack push
+          if (!isAbsolute()) stack[stackPointer++] = segment; // stack push
         } else {
           // if the top is '..' then we are accumulating segments so don't pop
           if ("..".equals(stack[stackPointer - 1])) stack[stackPointer++] = "..";
           else stackPointer--;
-          //stack pop
+          // stack pop
         }
-        //collapse current references
+        // collapse current references
       } else if (!segment.equals(".") || segmentCount == 1)
-        stack[stackPointer++] = segment; //stack push
+        stack[stackPointer++] = segment; // stack push
     }
-    //if the number of segments hasn't changed, then no modification needed
+    // if the number of segments hasn't changed, then no modification needed
     if (stackPointer == segmentCount) return;
-    //build the new segment array backwards by popping the stack
+    // build the new segment array backwards by popping the stack
     String[] newSegments = new String[stackPointer];
     System.arraycopy(stack, 0, newSegments, 0, stackPointer);
     this.segments = newSegments;
@@ -385,7 +385,7 @@ public final class Path {
     int hash = device == null ? 17 : device.hashCode();
     int segmentCount = segments.length;
     for (int i = 0; i < segmentCount; i++) {
-      //this function tends to given a fairly even distribution
+      // this function tends to given a fairly even distribution
       hash = hash * 37 + segments[i].hashCode();
     }
 
@@ -400,13 +400,13 @@ public final class Path {
     if (device != null) length += device.length();
     if ((separators & HAS_LEADING) != 0) length++;
     if ((separators & IS_UNC) != 0) length++;
-    //add the segment lengths
+    // add the segment lengths
     int max = segments.length;
     if (max > 0) {
       for (String segment : segments) {
         length += segment.length();
       }
-      //add the separator lengths
+      // add the separator lengths
       length += max - 1;
     }
     if ((separators & HAS_TRAILING) != 0) length++;
@@ -480,15 +480,15 @@ public final class Path {
     if (this == obj) return true;
     if (!(obj instanceof Path)) return false;
     Path target = (Path) obj;
-    //check leading separators and hash code
+    // check leading separators and hash code
     if ((separators & HASH_MASK) != (target.separators & HASH_MASK)) return false;
     String[] targetSegments = target.segments;
     int i = segments.length;
-    //check segment count
+    // check segment count
     if (i != targetSegments.length) return false;
-    //check segments in reverse order - later segments more likely to differ
+    // check segments in reverse order - later segments more likely to differ
     while (--i >= 0) if (!segments[i].equals(targetSegments[i])) return false;
-    //check device last (least likely to differ)
+    // check device last (least likely to differ)
     return device == target.device || (device != null && device.equals(target.device));
   }
 
@@ -578,7 +578,7 @@ public final class Path {
     path = collapseSlashes(path);
     int len = path.length();
 
-    //compute the separators array
+    // compute the separators array
     if (len < 2) {
       if (len == 1 && path.charAt(0) == SEPARATOR) {
         this.separators = HAS_LEADING;
@@ -588,16 +588,16 @@ public final class Path {
     } else {
       boolean hasLeading = path.charAt(0) == SEPARATOR;
       boolean isUNC = hasLeading && path.charAt(1) == SEPARATOR;
-      //UNC path of length two has no trailing separator
+      // UNC path of length two has no trailing separator
       boolean hasTrailing = !(isUNC && len == 2) && path.charAt(len - 1) == SEPARATOR;
       separators = hasLeading ? HAS_LEADING : 0;
       if (isUNC) separators |= IS_UNC;
       if (hasTrailing) separators |= HAS_TRAILING;
     }
-    //compute segments and ensure canonical form
+    // compute segments and ensure canonical form
     segments = computeSegments(path);
     if (!canonicalize()) {
-      //compute hash now because canonicalize didn't need to do it
+      // compute hash now because canonicalize didn't need to do it
       separators = (separators & ALL_SEPARATORS) | (computeHashCode() << 3);
     }
     return this;
@@ -613,7 +613,7 @@ public final class Path {
    * @since 4.0.0-RC5
    */
   public boolean isAbsolute() {
-    //it's absolute if it has a leading separator
+    // it's absolute if it has a leading separator
     return (separators & HAS_LEADING) != 0;
   }
 
@@ -624,7 +624,7 @@ public final class Path {
    * @since 4.0.0-RC5
    */
   public boolean isEmpty() {
-    //true if no segments and no leading prefix
+    // true if no segments and no leading prefix
     return segments.length == 0 && ((separators & ALL_SEPARATORS) != HAS_LEADING);
   }
 
@@ -673,7 +673,7 @@ public final class Path {
    * @since 4.0.0-RC5
    */
   public boolean isRoot() {
-    //must have no segments, a leading separator, and not be a UNC path.
+    // must have no segments, a leading separator, and not be a UNC path.
     return this == ROOT || (segments.length == 0 && ((separators & ALL_SEPARATORS) == HAS_LEADING));
   }
 
@@ -757,7 +757,7 @@ public final class Path {
       return this;
     }
     Path result = new Path(device, segments, separators | HAS_LEADING);
-    //may need canonicalizing if it has leading ".." or "." segments
+    // may need canonicalizing if it has leading ".." or "." segments
     if (result.segmentCount() > 0) {
       String first = result.segment(0);
       assert first != null;
@@ -796,7 +796,7 @@ public final class Path {
    * @since 4.0.0-RC5
    */
   public Path makeRelativeTo(Path base) {
-    //can't make relative if devices are not equal
+    // can't make relative if devices are not equal
     if (device != base.getDevice()
         && (device == null || !device.equalsIgnoreCase(base.getDevice()))) return this;
     int commonLength = matchingFirstSegments(base);
@@ -804,9 +804,9 @@ public final class Path {
     final int newSegmentLength = differenceLength + segmentCount() - commonLength;
     if (newSegmentLength == 0) return Path.EMPTY;
     String[] newSegments = new String[newSegmentLength];
-    //add parent references for each segment different from the base
-    Arrays.fill(newSegments, 0, differenceLength, ".."); //$NON-NLS-1$
-    //append the segments of this path not in common with the base
+    // add parent references for each segment different from the base
+    Arrays.fill(newSegments, 0, differenceLength, ".."); // $NON-NLS-1$
+    // append the segments of this path not in common with the base
     System.arraycopy(
         segments, commonLength, newSegments, differenceLength, newSegmentLength - differenceLength);
     return new Path(null, newSegments, separators & HAS_TRAILING);
@@ -831,7 +831,7 @@ public final class Path {
     if (toUNC) {
       newSeparators |= HAS_LEADING | IS_UNC;
     } else {
-      //mask out the UNC bit
+      // mask out the UNC bit
       newSeparators &= HAS_LEADING | HAS_TRAILING;
     }
     return new Path(toUNC ? null : device, segments, newSeparators);
@@ -903,7 +903,7 @@ public final class Path {
     String[] newSegments = new String[newSize];
     System.arraycopy(this.segments, count, newSegments, 0, newSize);
 
-    //result is always a relative path
+    // result is always a relative path
     return new Path(device, newSegments, separators & HAS_TRAILING);
   }
 
@@ -924,7 +924,7 @@ public final class Path {
   public Path removeLastSegments(int count) {
     if (count == 0) return this;
     if (count >= segments.length) {
-      //result will have no trailing separator
+      // result will have no trailing separator
       return new Path(device, NO_SEGMENTS, separators & (HAS_LEADING | IS_UNC));
     }
     checkArgument(count > 0);
@@ -1006,7 +1006,7 @@ public final class Path {
           device.indexOf(Path.DEVICE_SEPARATOR) == (device.length() - 1),
           "Last character should be the device separator");
     }
-    //return the receiver if the device is the same
+    // return the receiver if the device is the same
     if (device == this.device || (device != null && device.equals(this.device))) return this;
 
     return new Path(device, segments, separators);
@@ -1052,14 +1052,14 @@ public final class Path {
     if ((separators & IS_UNC) != 0) result[offset++] = SEPARATOR;
     int len = segments.length - 1;
     if (len >= 0) {
-      //append all but the last segment, with separators
+      // append all but the last segment, with separators
       for (int i = 0; i < len; i++) {
         int size = segments[i].length();
         segments[i].getChars(0, size, result, offset);
         offset += size;
         result[offset++] = SEPARATOR;
       }
-      //append the last segment
+      // append the last segment
       int size = segments[len].length();
       segments[len].getChars(0, size, result, offset);
       offset += size;

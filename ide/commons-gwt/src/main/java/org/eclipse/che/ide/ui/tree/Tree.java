@@ -279,7 +279,7 @@ public class Tree<D> extends UiComponent<Tree.View<D>> implements IsWidget {
           Element treeNodeBody =
               CssUtils.getAncestorOrSelfWithClassName(eventTarget, css.treeNodeBody());
           if (treeNodeBody != null) {
-            //this code emulate double click for tablets
+            // this code emulate double click for tablets
             if (Event.MOUSEDOWN.equals(evt.getType())) {
               double currentClickMs = Duration.currentTimeMillis();
               if (currentClickMs - previousClickMs < MouseGestureListener.MAX_CLICK_TIMEOUT_MS
@@ -359,7 +359,8 @@ public class Tree<D> extends UiComponent<Tree.View<D>> implements IsWidget {
       // preventDefault() actions, but this badly affected the inline editing
       // experience inside the Tree (e.g. debugger's RemoteObjectTree).
 
-      // Ok. Currently RemoteObjectTree doesn't exist anymore. So, the event can be changed on MOUSEDOWN.
+      // Ok. Currently RemoteObjectTree doesn't exist anymore. So, the event can be changed on
+      // MOUSEDOWN.
 
       getElement()
           .addEventListener(

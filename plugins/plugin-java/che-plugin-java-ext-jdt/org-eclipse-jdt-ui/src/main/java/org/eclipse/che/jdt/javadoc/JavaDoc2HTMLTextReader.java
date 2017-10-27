@@ -96,7 +96,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 
   private String substituteQualification(String qualification) {
     String result;
-    if (qualification.indexOf("<a") == -1) { //$NON-NLS-1$
+    if (qualification.indexOf("<a") == -1) { // $NON-NLS-1$
       // No tag at all, use smart way
       result = qualification.replace('#', '.');
     } else {
@@ -109,11 +109,11 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
         if (charAt == '<' && result.charAt(i + 1) == 'a') insideTag = true;
         if (charAt == '>') insideTag = false;
         if (charAt == '#' && !insideTag)
-          result = result.substring(0, i) + "." + result.substring(i + 1); //$NON-NLS-1$
+          result = result.substring(0, i) + "." + result.substring(i + 1); // $NON-NLS-1$
       }
     }
 
-    if (result.startsWith(".")) //$NON-NLS-1$
+    if (result.startsWith(".")) // $NON-NLS-1$
     result = result.substring(1);
     return result;
   }
@@ -122,21 +122,21 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
     Iterator<String> e = list.iterator();
     while (e.hasNext()) {
       String s = e.next();
-      buffer.append("<dd>"); //$NON-NLS-1$
+      buffer.append("<dd>"); // $NON-NLS-1$
       if (!firstword) buffer.append(s);
       else {
-        buffer.append("<b>"); //$NON-NLS-1$
+        buffer.append("<b>"); // $NON-NLS-1$
 
         int i = getParamEndOffset(s);
         if (i <= s.length()) {
           buffer.append(HTMLPrinter.convertToHTMLContent(s.substring(0, i)));
-          buffer.append("</b>"); //$NON-NLS-1$
+          buffer.append("</b>"); // $NON-NLS-1$
           buffer.append(s.substring(i));
         } else {
-          buffer.append("</b>"); //$NON-NLS-1$
+          buffer.append("</b>"); // $NON-NLS-1$
         }
       }
-      buffer.append("</dd>"); //$NON-NLS-1$
+      buffer.append("</dd>"); // $NON-NLS-1$
     }
   }
 
@@ -161,21 +161,21 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 
   private void print(StringBuffer buffer, String tag, List<String> elements, boolean firstword) {
     if (!elements.isEmpty()) {
-      buffer.append("<dt>"); //$NON-NLS-1$
+      buffer.append("<dt>"); // $NON-NLS-1$
       buffer.append(tag);
-      buffer.append("</dt>"); //$NON-NLS-1$
+      buffer.append("</dt>"); // $NON-NLS-1$
       printDefinitions(buffer, elements, firstword);
     }
   }
 
   private void print(StringBuffer buffer, String tag, String content) {
     if (content != null) {
-      buffer.append("<dt>"); //$NON-NLS-1$
+      buffer.append("<dt>"); // $NON-NLS-1$
       buffer.append(tag);
-      buffer.append("</dt>"); //$NON-NLS-1$
-      buffer.append("<dd>"); //$NON-NLS-1$
+      buffer.append("</dt>"); // $NON-NLS-1$
+      buffer.append("<dd>"); // $NON-NLS-1$
       buffer.append(content);
-      buffer.append("</dd>"); //$NON-NLS-1$
+      buffer.append("</dd>"); // $NON-NLS-1$
     }
   }
 
@@ -184,19 +184,19 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
       Iterator<Pair> e = fRest.iterator();
       while (e.hasNext()) {
         Pair p = e.next();
-        buffer.append("<dt>"); //$NON-NLS-1$
+        buffer.append("<dt>"); // $NON-NLS-1$
         if (p.fTag != null) buffer.append(p.fTag);
-        buffer.append("</dt>"); //$NON-NLS-1$
-        buffer.append("<dd>"); //$NON-NLS-1$
+        buffer.append("</dt>"); // $NON-NLS-1$
+        buffer.append("<dd>"); // $NON-NLS-1$
         if (p.fContent != null) buffer.append(p.fContent);
-        buffer.append("</dd>"); //$NON-NLS-1$
+        buffer.append("</dd>"); // $NON-NLS-1$
       }
     }
   }
 
   private String printSimpleTag() {
     StringBuffer buffer = new StringBuffer();
-    buffer.append("<dl>"); //$NON-NLS-1$
+    buffer.append("<dl>"); // $NON-NLS-1$
     print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_see_section, fSees, false);
     print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_parameters_section, fParameters, true);
     print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_returns_section, fReturn);
@@ -204,7 +204,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
     print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_author_section, fAuthors, false);
     print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_since_section, fSince, false);
     printRest(buffer);
-    buffer.append("</dl>"); //$NON-NLS-1$
+    buffer.append("</dl>"); // $NON-NLS-1$
 
     return buffer.toString();
   }
@@ -291,14 +291,14 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
       if (TagElement.TAG_LINK.equals(tag))
         return "<code>"
             + substituteQualification(tagContent.substring(labelStart))
-            + "</code>"; //$NON-NLS-1$//$NON-NLS-2$
+            + "</code>"; // $NON-NLS-1$//$NON-NLS-2$
       else return substituteQualification(tagContent.substring(labelStart));
 
     } else if (TagElement.TAG_LITERAL.equals(tag)) {
       return printLiteral(tagContent);
 
     } else if (TagElement.TAG_CODE.equals(tag)) {
-      return "<code>" + printLiteral(tagContent) + "</code>"; //$NON-NLS-1$//$NON-NLS-2$
+      return "<code>" + printLiteral(tagContent) + "</code>"; // $NON-NLS-1$//$NON-NLS-2$
     }
 
     // If something went wrong at least replace the {} with the content

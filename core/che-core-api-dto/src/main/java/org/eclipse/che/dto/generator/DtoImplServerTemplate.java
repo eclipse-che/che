@@ -73,7 +73,8 @@ public class DtoImplServerTemplate extends DtoImpl {
     emitDelegateMethods(builder);
     // "builder" method, it is method that set field and return "this" instance
     emitWithMethods(getters, dtoInterfaceName, builder);
-    // Implement withXXX methods that are declared directly in this DTO even if there are no any getter for the fields.
+    // Implement withXXX methods that are declared directly in this DTO even if there are no any
+    // getter for the fields.
     // Need that to override methods from super DTO and return correct type for with method.
     // @DTO
     // public interface A {
@@ -350,7 +351,8 @@ public class DtoImplServerTemplate extends DtoImpl {
 
   /** Generates a static factory method that creates a new instance based on a JsonElement. */
   private void emitDeserializer(List<Method> getters, StringBuilder builder) {
-    // The default fromJsonElement(json) works in unsafe mode and clones the JSON's for 'any' properties
+    // The default fromJsonElement(json) works in unsafe mode and clones the JSON's for 'any'
+    // properties
     builder
         .append("    public static ")
         .append(getImplClassName())
@@ -802,7 +804,7 @@ public class DtoImplServerTemplate extends DtoImpl {
   private String getFqParameterizedName(Type type) {
     if (type instanceof Class<?>) {
       return ((Class<?>) type).getCanonicalName();
-      //return getImplNameForDto((Class<?>)type);
+      // return getImplNameForDto((Class<?>)type);
 
     } else if (type instanceof ParameterizedType) {
       ParameterizedType pType = (ParameterizedType) type;

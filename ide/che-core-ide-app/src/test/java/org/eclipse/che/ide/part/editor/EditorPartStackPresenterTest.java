@@ -18,9 +18,10 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -72,7 +73,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -82,7 +82,7 @@ public class EditorPartStackPresenterTest {
 
   private static final String SOME_TEXT = "someText";
 
-  //constructor mocks
+  // constructor mocks
   @Mock private EditorPartStackView view;
   @Mock private AppContext appContext;
   @Mock private PartMenu partMenu;
@@ -99,7 +99,7 @@ public class EditorPartStackPresenterTest {
   @Mock private EditorPaneMenuItemFactory editorPaneMenuItemFactory;
   @Mock private EditorAgent editorAgent;
 
-  //additional mocks
+  // additional mocks
   @Mock private SplitHorizontallyAction splitHorizontallyAction;
   @Mock private SplitVerticallyAction splitVerticallyAction;
   @Mock private Presentation presentation;
@@ -146,10 +146,9 @@ public class EditorPartStackPresenterTest {
     when(partPresenter3.getEditorInput()).thenReturn(editorInput3);
     when(editorInput3.getFile()).thenReturn(file3);
 
-    when(presentationFactory.getPresentation((Action) anyObject())).thenReturn(presentation);
+    when(presentationFactory.getPresentation(nullable(Action.class))).thenReturn(presentation);
 
-    when(eventBus.addHandler((Event.Type<Object>) anyObject(), anyObject()))
-        .thenReturn(handlerRegistration);
+    when(eventBus.addHandler(any(), any())).thenReturn(handlerRegistration);
 
     when(actionManager.getAction(EditorActions.SPLIT_HORIZONTALLY))
         .thenReturn(splitHorizontallyAction);
@@ -159,15 +158,15 @@ public class EditorPartStackPresenterTest {
     when(closeAllTabsPaneAction.getTemplatePresentation()).thenReturn(presentation);
     when(splitHorizontallyAction.getTemplatePresentation()).thenReturn(presentation);
     when(splitVerticallyAction.getTemplatePresentation()).thenReturn(presentation);
-    when(editorPaneMenuItemFactory.createMenuItem((Action) anyObject()))
+    when(editorPaneMenuItemFactory.createMenuItem((Action) any()))
         .thenReturn(editorPaneActionMenuItem);
-    when(editorPaneMenuItemFactory.createMenuItem((TabItem) anyObject()))
+    when(editorPaneMenuItemFactory.createMenuItem((TabItem) any()))
         .thenReturn(editorPaneTabMenuItem);
 
     Container container = mock(Container.class);
     Promise promise = mock(Promise.class);
     when(appContext.getWorkspaceRoot()).thenReturn(container);
-    when(container.getFile(any(Path.class))).thenReturn(promise);
+    when(container.getFile(nullable(Path.class))).thenReturn(promise);
 
     when(appContext.getDevMachine()).thenReturn(mock(DevMachine.class));
 
@@ -198,9 +197,12 @@ public class EditorPartStackPresenterTest {
   public void constructorShouldBeVerified() {
     verify(view, times(2)).setDelegate(presenter);
     verify(view).addPaneMenuButton(editorPaneMenu);
-    verify(editorPaneMenuItemFactory, times(4)).createMenuItem(Matchers.<Action>anyObject());
-    verify(editorPaneMenu).addItem(Matchers.<PaneMenuActionItemWidget>anyObject(), eq(true));
-    verify(editorPaneMenu, times(3)).addItem(Matchers.<PaneMenuActionItemWidget>anyObject());
+    verify(editorPaneMenuItemFactory, times(4))
+        .createMenuItem(org.mockito.ArgumentMatchers.<Action>anyObject());
+    verify(editorPaneMenu)
+        .addItem(org.mockito.ArgumentMatchers.<PaneMenuActionItemWidget>anyObject(), eq(true));
+    verify(editorPaneMenu, times(3))
+        .addItem(org.mockito.ArgumentMatchers.<PaneMenuActionItemWidget>anyObject());
   }
 
   @Test
@@ -214,7 +216,8 @@ public class EditorPartStackPresenterTest {
   public void partShouldBeAdded() {
     presenter.addPart(partPresenter1);
 
-    verify(partPresenter1, times(2)).addPropertyListener(Matchers.<PropertyListener>anyObject());
+    verify(partPresenter1, times(2))
+        .addPropertyListener(org.mockito.ArgumentMatchers.<PropertyListener>anyObject());
 
     verify(tabItemFactory).createEditorPartButton(partPresenter1, presenter);
 
@@ -437,6 +440,6 @@ public class EditorPartStackPresenterTest {
 
     presenter.paneMenuTabItemHandler.onCloseButtonClicked(editorPaneTabMenuItem);
 
-    verify(editorAgent).closeEditor(any(EditorPartPresenter.class));
+    verify(editorAgent).closeEditor(nullable(EditorPartPresenter.class));
   }
 }

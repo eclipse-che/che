@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 @Singleton
 public class DockerApiVersionPathPrefixProvider implements Provider<String> {
 
-  //Supports docker api version value in format: '1', '1.18' etc.
+  // Supports docker api version value in format: '1', '1.18' etc.
   private static final Pattern VERSION_API_PATTERN = Pattern.compile("([0-9]+)(\\.[0-9]+)?");
   private static final String VALID_PROPERTY_EXAMPLE =
       "Valid docker api version contains digits which can be separated by symbol '.'. For example: '1', '1.18'";

@@ -114,7 +114,7 @@ public class EditDebugConfigurationsPresenter
               selectedConfiguration.getPort(),
               selectedConfiguration.getConnectionProperties());
       if (selectedConfiguration.equals(view.getSelectedConfiguration())) {
-        //update selected configuration name
+        // update selected configuration name
         view.getSelectedConfiguration().setName(conf.getName());
       }
     }

@@ -88,7 +88,7 @@ public class TempOccurrenceAnalyzer extends ASTVisitor {
     return nodes;
   }
 
-  //------- visit ------ (don't call)
+  // ------- visit ------ (don't call)
 
   @Override
   public boolean visit(Javadoc node) {
@@ -105,7 +105,7 @@ public class TempOccurrenceAnalyzer extends ASTVisitor {
   public boolean visit(SimpleName node) {
     if (node.getParent() instanceof VariableDeclaration) {
       if (((VariableDeclaration) node.getParent()).getName() == node)
-        return true; //don't include declaration
+        return true; // don't include declaration
     }
 
     if (fTempBinding != null && fTempBinding == node.resolveBinding()) {

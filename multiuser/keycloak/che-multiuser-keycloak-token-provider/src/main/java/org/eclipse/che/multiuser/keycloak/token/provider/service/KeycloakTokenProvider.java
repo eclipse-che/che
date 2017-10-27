@@ -13,7 +13,6 @@ package org.eclipse.che.multiuser.keycloak.token.provider.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -26,7 +25,6 @@ import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.multiuser.keycloak.token.provider.util.UrlHelper;
 
 @Singleton
 public class KeycloakTokenProvider {
@@ -50,7 +48,7 @@ public class KeycloakTokenProvider {
    * Return GitHub access token based on Keycloak token
    *
    * <p>Note: valid response from keycloak endpoint:
-   * access_token=token&scope=scope&token_type=bearer
+   * {"access_token":"token","scope":"admin:repo_hook,gist,read:org,repo,user","token_type":"bearer"}
    *
    * @param keycloakToken
    * @return GitHub access token
@@ -62,13 +60,10 @@ public class KeycloakTokenProvider {
    * @throws UnauthorizedException
    * @throws ServerException
    */
-  public String obtainGitHubToken(String keycloakToken)
+  public String obtainGitHubToken(final String keycloakToken)
       throws ServerException, UnauthorizedException, ForbiddenException, NotFoundException,
           ConflictException, BadRequestException, IOException {
-    String responseBody = getResponseBody(gitHubEndpoint, keycloakToken);
-    Map<String, String> parameter = UrlHelper.splitQuery(responseBody);
-    String token = parameter.get(ACCESS_TOKEN);
-    return token;
+    return getAccessToken(gitHubEndpoint, keycloakToken);
   }
 
   /**
@@ -86,10 +81,16 @@ public class KeycloakTokenProvider {
    * @throws UnauthorizedException
    * @throws ServerException
    */
-  public String obtainOsoToken(String keycloakToken)
+  public String obtainOsoToken(final String keycloakToken)
       throws IOException, ServerException, UnauthorizedException, ForbiddenException,
           NotFoundException, ConflictException, BadRequestException {
-    String responseBody = getResponseBody(openShiftEndpoint, keycloakToken);
+    return getAccessToken(openShiftEndpoint, keycloakToken);
+  }
+
+  private String getAccessToken(final String endpoint, final String keycloakToken)
+      throws IOException, ForbiddenException, BadRequestException, ConflictException,
+          NotFoundException, ServerException, UnauthorizedException {
+    String responseBody = getResponseBody(endpoint, keycloakToken);
     ObjectMapper mapper = new ObjectMapper();
     JsonNode json = mapper.readTree(responseBody);
     JsonNode token = json.get(ACCESS_TOKEN);

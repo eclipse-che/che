@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.plugin.activity;
 
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -38,7 +38,7 @@ import org.testng.annotations.Test;
 @Listeners(value = MockitoTestNGListener.class)
 /** Tests for {@link WorkspaceActivityNotifier} */
 public class WorkspaceActivityManagerTest {
-  private static final long EXPIRE_PERIOD_MS = 60_000L; //1 minute
+  private static final long EXPIRE_PERIOD_MS = 60_000L; // 1 minute
 
   @Mock private AccountManager accountManager;
 

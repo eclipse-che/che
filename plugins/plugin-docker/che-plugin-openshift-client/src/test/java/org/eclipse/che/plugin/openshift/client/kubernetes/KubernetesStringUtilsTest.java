@@ -100,6 +100,18 @@ public class KubernetesStringUtilsTest {
   }
 
   @Test
+  public void getNormilizedStringWithoutDashInTheEnd() {
+    // Given
+    String input = RandomStringUtils.random(61, true, true) + "-";
+
+    // When
+    String output = KubernetesStringUtils.getNormalizedString(input);
+
+    // Then
+    assertTrue(!output.endsWith("-"), "Normalized string can not end with '-'");
+  }
+
+  @Test
   public void convertPullSpecToTagNameShouldLimitLength() {
     // Given
     String input = RandomStringUtils.random(100, true, false);

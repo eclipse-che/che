@@ -11,8 +11,8 @@
 package org.eclipse.che.plugin.gdb.ide.configuration;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -32,7 +32,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /** @author Artem Zatsarynnyi */
 @RunWith(MockitoJUnitRunner.class)
@@ -78,7 +78,7 @@ public class GdbConfigurationPagePresenterTest {
     verify(configuration, atLeastOnce()).getConnectionProperties();
     verify(pageView).setHost(eq(HOST));
     verify(pageView).setPort(eq(PORT));
-    verify(pageView).setBinaryPath(anyString());
+    verify(pageView).setBinaryPath(nullable(String.class));
     verify(pageView).setDevHost(eq(false));
     verify(pageView).setPortEnableState(eq(true));
     verify(pageView).setHostEnableState(eq(true));

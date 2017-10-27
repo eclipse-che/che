@@ -25,14 +25,14 @@ import org.eclipse.che.ide.websocket.MessageBus;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Base test for java debugger extension.
  *
  * @author Artem Zatsarynnyi
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public abstract class BaseTest {
   public static final String HOST = "some.host";
   public static final int PORT = 8000;

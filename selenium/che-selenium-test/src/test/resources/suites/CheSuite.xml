@@ -53,6 +53,7 @@
                     <exclude name="renameNameWorkspaceTest"/>
                 </methods>
             </class>
+            <class name="org.eclipse.che.selenium.dashboard.WorkspaceDetailsTest"/>
             <class name="org.eclipse.che.selenium.debugger.ChangeVariableWithEvaluatingTest"/>
             <class name="org.eclipse.che.selenium.debugger.CheckBreakPointStateTest"/>
             <class name="org.eclipse.che.selenium.debugger.CppProjectDebuggingTest">
@@ -76,6 +77,7 @@
                 </methods>
             </class>
             <class name="org.eclipse.che.selenium.debugger.MultimoduleProjectDebuggingTest"/>
+            <class name="org.eclipse.che.selenium.debugger.DebuggerWatchExpressionTest"/>
             <class name="org.eclipse.che.selenium.debugger.NodeJsDebugTest">
                 <methods>
                     <exclude name="debugNodeJsTest"/>
@@ -85,6 +87,7 @@
             <class name="org.eclipse.che.selenium.debugger.StepIntoStepOverStepReturnWithChangeVariableTest"/>
             <class name="org.eclipse.che.selenium.debugger.ThreadDumpTest"/>
             <class name="org.eclipse.che.selenium.debugger.BreakpointReorderingTest"/>
+            <class name="org.eclipse.che.selenium.debugger.ConditionalBreakpointsTest"/>
             <class name="org.eclipse.che.selenium.editor.autocomplete.AutocompleteFeaturesInEditorTest"/>
             <class name="org.eclipse.che.selenium.editor.autocomplete.AutocompleteJSFilesTest"/>
             <class name="org.eclipse.che.selenium.editor.autocomplete.AutocompleteProposalJavaDocTest">
@@ -116,7 +119,7 @@
             <class name="org.eclipse.che.selenium.editor.autocomplete.QuickFixAndCodeAssistantFeaturesTest"/>
             <class name="org.eclipse.che.selenium.editor.autocomplete.ShowHintsCommandTest"/>
             <class name="org.eclipse.che.selenium.editor.CheckReplaceFeatureInEditorTest"/>
-            <class name="org.eclipse.che.selenium.editor.CheckRestoringOfSplitEditor">
+            <class name="org.eclipse.che.selenium.editor.CheckRestoringSplitEditorTest">
                 <methods>
                     <exclude name="checkRestoringStateSplittedEditor"/>
                 </methods>

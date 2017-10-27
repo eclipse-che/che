@@ -50,11 +50,11 @@ public class RemoveTest {
   )
   public void testNotCachedRemove(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
-    //when
+    // when
     connection.rm(RmParams.create(singletonList("README.txt")).withCached(false));
-    //then
+    // then
     assertFalse(new File(connection.getWorkingDir(), "README.txt").exists());
     assertEquals(connection.status(emptyList()).getRemoved().get(0), "README.txt");
     assertTrue(connection.status(emptyList()).getUntracked().isEmpty());
@@ -66,11 +66,11 @@ public class RemoveTest {
   )
   public void testCachedRemove(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
-    //when
+    // when
     connection.rm(RmParams.create(singletonList("README.txt")).withCached(true));
-    //then
+    // then
     assertTrue(new File(connection.getWorkingDir(), "README.txt").exists());
     assertEquals(connection.status(emptyList()).getRemoved().get(0), "README.txt");
     assertEquals(connection.status(emptyList()).getUntracked().get(0), "README.txt");

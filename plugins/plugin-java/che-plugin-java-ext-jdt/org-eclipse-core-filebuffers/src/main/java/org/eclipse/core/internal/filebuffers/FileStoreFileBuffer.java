@@ -228,6 +228,6 @@ public abstract class FileStoreFileBuffer extends AbstractFileBuffer {
    * @see org.eclipse.core.filebuffers.IStateValidationSupport#validationStateChanged(boolean, org.eclipse.core.runtime.IStatus)
    */
   public void validationStateChanged(boolean validationState, IStatus status) {
-    //nop
+    // nop
   }
 }

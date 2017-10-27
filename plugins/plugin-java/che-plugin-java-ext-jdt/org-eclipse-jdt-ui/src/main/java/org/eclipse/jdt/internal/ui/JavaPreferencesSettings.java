@@ -18,13 +18,13 @@ public class JavaPreferencesSettings {
   public static CodeGenerationSettings getCodeGenerationSettings(IJavaProject project) {
     CodeGenerationSettings res = new CodeGenerationSettings();
     res.createComments =
-        false; //Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_ADD_COMMENTS, project)).booleanValue();
+        false; // Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_ADD_COMMENTS, project)).booleanValue();
     res.useKeywordThis =
-        false; //Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_KEYWORD_THIS, project)).booleanValue();
+        false; // Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_KEYWORD_THIS, project)).booleanValue();
     res.overrideAnnotation =
-        true; //Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_USE_OVERRIDE_ANNOTATION, project)).booleanValue();
+        true; // Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_USE_OVERRIDE_ANNOTATION, project)).booleanValue();
     res.importIgnoreLowercase =
-        true; //Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.ORGIMPORTS_IGNORELOWERCASE, project)).booleanValue();
+        true; // Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.ORGIMPORTS_IGNORELOWERCASE, project)).booleanValue();
     res.tabWidth = CodeFormatterUtil.getTabWidth(project);
     res.indentWidth = CodeFormatterUtil.getIndentWidth(project);
     return res;

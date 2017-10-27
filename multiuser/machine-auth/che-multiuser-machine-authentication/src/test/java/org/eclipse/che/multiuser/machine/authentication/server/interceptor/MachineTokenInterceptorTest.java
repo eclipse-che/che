@@ -12,7 +12,7 @@ package org.eclipse.che.multiuser.machine.authentication.server.interceptor;
 
 import static com.google.inject.matcher.Matchers.subclassesOf;
 import static org.eclipse.che.inject.Matchers.names;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -64,7 +64,8 @@ public class MachineTokenInterceptorTest {
     Module module =
         new AbstractModule() {
           public void configure() {
-            //Bind manager and his dep-s. To bind interceptor, guice must create intercepted class by himself.
+            // Bind manager and his dep-s. To bind interceptor, guice must create intercepted class
+            // by himself.
             bind(WorkspaceDao.class).toInstance(mock(WorkspaceDao.class));
             bind(WorkspaceRuntimes.class).toInstance(mock(WorkspaceRuntimes.class));
             bind(EventService.class).toInstance(mock(EventService.class));
@@ -80,7 +81,7 @@ public class MachineTokenInterceptorTest {
 
             bind(MachineTokenRegistry.class).toInstance(tokenRegistry);
 
-            //Main injection
+            // Main injection
             install(new InterceptorModule());
 
             // To prevent real methods of manager calling

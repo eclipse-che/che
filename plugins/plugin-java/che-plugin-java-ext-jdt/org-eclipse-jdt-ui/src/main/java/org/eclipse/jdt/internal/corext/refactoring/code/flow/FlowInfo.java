@@ -158,13 +158,13 @@ public abstract class FlowInfo {
     /* THROW */ {NOT_POSSIBLE, THROW, THROW, VALUE_RETURN, VOID_RETURN, VALUE_RETURN, THROW}
   };
 
-  protected static final String UNLABELED = "@unlabeled"; //$NON-NLS-1$
+  protected static final String UNLABELED = "@unlabeled"; // $NON-NLS-1$
   protected static final IVariableBinding[] EMPTY_ARRAY = new IVariableBinding[0];
 
   protected int fReturnKind;
   protected int[] fAccessModes;
   protected Set<String> fBranches;
-  //protected Set<ITypeBinding> fExceptions;
+  // protected Set<ITypeBinding> fExceptions;
   protected Set<ITypeBinding> fTypeVariables;
 
   protected FlowInfo() {
@@ -175,7 +175,7 @@ public abstract class FlowInfo {
     fReturnKind = returnKind;
   }
 
-  //---- General Helpers ----------------------------------------------------------
+  // ---- General Helpers ----------------------------------------------------------
 
   protected void assignExecutionFlow(FlowInfo right) {
     fReturnKind = right.fReturnKind;
@@ -203,7 +203,7 @@ public abstract class FlowInfo {
     mergeTypeVariablesSequential(info);
   }
 
-  //---- Return Kind ------------------------------------------------------------------
+  // ---- Return Kind ------------------------------------------------------------------
 
   public void setNoReturn() {
     fReturnKind = NO_RETURN;
@@ -237,7 +237,7 @@ public abstract class FlowInfo {
     return fReturnKind == VOID_RETURN || fReturnKind == VALUE_RETURN;
   }
 
-  //---- Branches -------------------------------------------------------------------------
+  // ---- Branches -------------------------------------------------------------------------
 
   public boolean branches() {
     return fBranches != null && !fBranches.isEmpty();
@@ -259,7 +259,7 @@ public abstract class FlowInfo {
     else return label.getIdentifier();
   }
 
-  //---- Type parameters -----------------------------------------------------------------
+  // ---- Type parameters -----------------------------------------------------------------
 
   public ITypeBinding[] getTypeVariables() {
     if (fTypeVariables == null) return new ITypeBinding[0];
@@ -279,7 +279,7 @@ public abstract class FlowInfo {
     fTypeVariables = mergeSets(fTypeVariables, otherInfo.fTypeVariables);
   }
 
-  //---- Execution flow -------------------------------------------------------------------
+  // ---- Execution flow -------------------------------------------------------------------
 
   private void mergeExecutionFlowSequential(FlowInfo otherInfo) {
     int other = otherInfo.fReturnKind;
@@ -311,7 +311,7 @@ public abstract class FlowInfo {
     return thisSet;
   }
 
-  //---- Local access handling --------------------------------------------------
+  // ---- Local access handling --------------------------------------------------
 
   /**
    * Returns an array of <code>IVariableBinding</code> that conform to the given access mode <code>

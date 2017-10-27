@@ -160,7 +160,7 @@ public class CommandsExplorer {
     commandTypeElement.click();
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(ExpectedConditions.elementToBeSelected(commandTypeElement));
-    //add timeout to be sure webelement ready to dbClick in some test got exception here
+    // add timeout to be sure webelement ready to dbClick in some test got exception here
     WaitUtils.sleepQuietly(200, TimeUnit.MILLISECONDS);
     new Actions(seleniumWebDriver).doubleClick(commandTypeElement).perform();
   }

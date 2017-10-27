@@ -12,8 +12,7 @@ package org.eclipse.che.ide.ext.java.client.command.valueproviders;
 
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.never;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -42,7 +41,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /** @author Valeriy Svydenko */
 @RunWith(MockitoJUnitRunner.class)
@@ -106,12 +105,10 @@ public class SourcepathMacroTest {
   @Test
   public void defaultValueOfSourcepathShouldBeBuilt() throws Exception {
     List<ClasspathEntryDto> entries = new ArrayList<>();
-    Set<String> libs = new HashSet<>();
     Path projectsRoot = Path.valueOf("/projects");
 
     when(appContext.getProjectsRoot()).thenReturn(projectsRoot);
     when(classpathContainer.getClasspathEntries(anyString())).thenReturn(classpathEntriesPromise);
-    when(classpathResolver.getLibs()).thenReturn(libs);
 
     sourcepathMacro.expand();
 
@@ -120,16 +117,6 @@ public class SourcepathMacroTest {
 
     verify(classpathResolver).resolveClasspathEntries(entries);
     assertEquals("/projects/name", classpath);
-  }
-
-  @Test
-  public void returnEmptySourcepathIfProjectDoesNotSupportJava() throws Exception {
-    Map<String, List<String>> attributes = new HashMap<>();
-    attributes.put(Constants.LANGUAGE, singletonList("c"));
-
-    when(project.getAttributes()).thenReturn(attributes);
-
-    verify(classpathContainer, never()).getClasspathEntries(anyString());
   }
 
   @Test

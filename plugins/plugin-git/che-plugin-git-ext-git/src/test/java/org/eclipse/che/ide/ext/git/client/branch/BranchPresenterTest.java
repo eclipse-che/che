@@ -12,12 +12,12 @@ package org.eclipse.che.ide.ext.git.client.branch;
 
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_ALL;
 import static org.eclipse.che.ide.ext.git.client.patcher.WindowPatcher.RETURNED_MESSAGE;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -118,7 +118,7 @@ public class BranchPresenterTest extends BaseTest {
 
   @Test
   public void shouldShowLocalBranchesWheBranchesFilterIsSetToLocal() throws Exception {
-    //given
+    // given
     final List<Branch> branches = Collections.singletonList(selectedBranch);
     when(service.branchList(anyObject(), eq(BranchListMode.LIST_LOCAL)))
         .thenReturn(branchListPromise);
@@ -126,12 +126,12 @@ public class BranchPresenterTest extends BaseTest {
     when(branchListPromise.catchError(any(Operation.class))).thenReturn(branchListPromise);
     when(view.getFilterValue()).thenReturn("local");
 
-    //when
+    // when
     presenter.showBranches(project);
     verify(branchListPromise).then(branchListCaptor.capture());
     branchListCaptor.getValue().apply(branches);
 
-    //then
+    // then
     verify(view).showDialogIfClosed();
     verify(view).setBranches(eq(branches));
     verify(console, never()).printError(anyString());
@@ -141,7 +141,7 @@ public class BranchPresenterTest extends BaseTest {
 
   @Test
   public void shouldShowRemoteBranchesWheBranchesFilterIsSetToRemote() throws Exception {
-    //given
+    // given
     final List<Branch> branches = Collections.singletonList(selectedBranch);
     when(service.branchList(anyObject(), eq(BranchListMode.LIST_LOCAL)))
         .thenReturn(branchListPromise);
@@ -149,12 +149,12 @@ public class BranchPresenterTest extends BaseTest {
     when(branchListPromise.catchError(any(Operation.class))).thenReturn(branchListPromise);
     when(view.getFilterValue()).thenReturn("remote");
 
-    //when
+    // when
     presenter.showBranches(project);
     verify(branchListPromise).then(branchListCaptor.capture());
     branchListCaptor.getValue().apply(branches);
 
-    //then
+    // then
     verify(view).showDialogIfClosed();
     verify(view).setBranches(eq(branches));
     verify(console, never()).printError(anyString());

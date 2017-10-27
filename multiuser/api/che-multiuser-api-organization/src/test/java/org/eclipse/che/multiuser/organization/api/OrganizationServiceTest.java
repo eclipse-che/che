@@ -16,10 +16,11 @@ import static java.util.stream.Collectors.toList;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -61,13 +62,13 @@ public class OrganizationServiceTest {
 
   private static final String CURRENT_USER_ID = "user123";
 
-  @SuppressWarnings("unused") //is declared for deploying by everrest-assured
+  @SuppressWarnings("unused") // is declared for deploying by everrest-assured
   private ApiExceptionMapper mapper;
 
-  @SuppressWarnings("unused") //is declared for deploying by everrest-assured
+  @SuppressWarnings("unused") // is declared for deploying by everrest-assured
   private EnvironmentFilter filter;
 
-  @SuppressWarnings("unused") //is declared for deploying by everrest-assured
+  @SuppressWarnings("unused") // is declared for deploying by everrest-assured
   private CheJsonProvider jsonProvider = new CheJsonProvider(new HashSet<>());
 
   @Mock private OrganizationManager orgManager;
@@ -260,7 +261,7 @@ public class OrganizationServiceTest {
 
     doReturn(new Page<>(singletonList(toFetch), 0, 1, 1))
         .when(orgManager)
-        .getByParent(anyString(), anyInt(), anyInt());
+        .getByParent(anyString(), anyInt(), anyLong());
 
     final Response response =
         given()

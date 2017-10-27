@@ -506,7 +506,8 @@ public final class JavaConventions {
     }
 
     if (scannedID != null) {
-      //			IStatus status = ResourcesPlugin.getWorkspace().validateName(new String(scannedID), IResource.FILE);
+      //			IStatus status = ResourcesPlugin.getWorkspace().validateName(new String(scannedID),
+      // IResource.FILE);
       //			if (!status.isOK()) {
       //				return status;
       //			}
@@ -661,7 +662,7 @@ public final class JavaConventions {
       }
     }
     //		IWorkspace workspace = ResourcesPlugin.getWorkspace();
-    StringTokenizer st = new StringTokenizer(name, "."); //$NON-NLS-1$
+    StringTokenizer st = new StringTokenizer(name, "."); // $NON-NLS-1$
     boolean firstToken = true;
     IStatus warningStatus = null;
     while (st.hasMoreTokens()) {
@@ -767,7 +768,8 @@ public final class JavaConventions {
    */
   public static IJavaModelStatus validateClasspathEntry(
       IJavaProject project, IClasspathEntry entry, boolean checkSourceAttachment) {
-    //		return ClasspathEntry.validateClasspathEntry(project, entry, checkSourceAttachment, false/*not referred by container*/);
+    //		return ClasspathEntry.validateClasspathEntry(project, entry, checkSourceAttachment,
+    // false/*not referred by container*/);
     throw new UnsupportedOperationException();
   }
 

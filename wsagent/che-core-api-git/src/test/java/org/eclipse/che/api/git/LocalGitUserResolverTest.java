@@ -11,8 +11,8 @@
 package org.eclipse.che.api.git;
 
 import static javax.ws.rs.core.UriBuilder.fromUri;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -56,9 +56,9 @@ public class LocalGitUserResolverTest {
 
   @Test
   public void shouldMakeGetPreferencesRequest() throws Exception {
-    //when
+    // when
     resolver.getUser();
-    //then
+    // then
     String url = fromUri(PREFECENCES_URL).path(PreferencesService.class, "find").build().toString();
     verify(requestFactory).fromUrl(eq(url));
     verify(jsonRequest).useGetMethod();

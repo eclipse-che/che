@@ -10,10 +10,10 @@
  */
 package org.eclipse.che.filter;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -58,7 +58,7 @@ public class CheCacheDisablingFilterTest {
   public void shouldSetDisablingCacheHeaders(String uri) throws Exception {
     when(request.getRequestURI()).thenReturn(uri);
 
-    //when
+    // when
     filter.doFilter(request, response, chain);
 
     verify(response).setDateHeader(eq("Date"), anyLong());
@@ -71,7 +71,7 @@ public class CheCacheDisablingFilterTest {
   public void shouldBypassDisablingCacheHeaders(String uri) throws Exception {
     when(request.getRequestURI()).thenReturn(uri);
 
-    //when
+    // when
     filter.doFilter(request, response, chain);
 
     verify(response, never()).setHeader(eq("Cache-control"), anyString());

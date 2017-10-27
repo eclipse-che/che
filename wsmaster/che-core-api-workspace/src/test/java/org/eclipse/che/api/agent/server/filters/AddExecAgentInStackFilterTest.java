@@ -22,7 +22,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -57,7 +57,7 @@ public class AddExecAgentInStackFilterTest {
   @SuppressWarnings("unused")
   static final ApiExceptionMapper MAPPER = new ApiExceptionMapper();
 
-  @SuppressWarnings("unused") //is declared for deploying by everrest-assured
+  @SuppressWarnings("unused") // is declared for deploying by everrest-assured
   private CheJsonProvider jsonProvider = new CheJsonProvider(new HashSet<>());
 
   @Mock private StackService stackService;

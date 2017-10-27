@@ -105,7 +105,7 @@ public class AddUnimplementedMethodsOperation extends CompilationUnitRewriteOper
               anonymousClassDeclaration, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
       settings.createComments = false;
     } else {
-      Assert.isTrue(false, "Unknown type node"); //$NON-NLS-1$
+      Assert.isTrue(false, "Unknown type node"); // $NON-NLS-1$
       return;
     }
 
@@ -139,7 +139,7 @@ public class AddUnimplementedMethodsOperation extends CompilationUnitRewriteOper
 
     IMethodBinding[] methodsToOverride = getMethodsToImplement();
     StringBuffer buf = new StringBuffer();
-    buf.append("<b>"); //$NON-NLS-1$
+    buf.append("<b>"); // $NON-NLS-1$
     if (methodsToOverride.length == 1) {
       buf.append(CorrectionMessages.UnimplementedMethodsCorrectionProposal_info_singular);
     } else {
@@ -148,15 +148,15 @@ public class AddUnimplementedMethodsOperation extends CompilationUnitRewriteOper
               CorrectionMessages.UnimplementedMethodsCorrectionProposal_info_plural,
               String.valueOf(methodsToOverride.length)));
     }
-    buf.append("</b><ul>"); //$NON-NLS-1$
+    buf.append("</b><ul>"); // $NON-NLS-1$
     for (int i = 0; i < methodsToOverride.length; i++) {
-      buf.append("<li>"); //$NON-NLS-1$
+      buf.append("<li>"); // $NON-NLS-1$
       buf.append(
           BindingLabelProvider.getBindingLabel(
               methodsToOverride[i], JavaElementLabels.ALL_FULLY_QUALIFIED));
-      buf.append("</li>"); //$NON-NLS-1$
+      buf.append("</li>"); // $NON-NLS-1$
     }
-    buf.append("</ul>"); //$NON-NLS-1$
+    buf.append("</ul>"); // $NON-NLS-1$
     return buf.toString();
   }
 

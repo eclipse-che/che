@@ -10,8 +10,8 @@
  */
 package org.eclipse.che.api.project.server.importer;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,7 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Unit test for the {@link ProjectImportOutputJsonRpcLineConsumer}.
@@ -49,7 +49,7 @@ public class ProjectImportOutputJsonRpcLineConsumerTest {
 
   @Test
   public void testShouldSendOutputLineThroughJsonRpcToEndpoint() throws Exception {
-    //given
+    // given
     when(registrar.getRegisteredEndpoints()).thenReturn(Collections.singleton("endpointId"));
 
     final EndpointIdConfigurator endpointIdConfigurator = mock(EndpointIdConfigurator.class);
@@ -64,10 +64,10 @@ public class ProjectImportOutputJsonRpcLineConsumerTest {
     final SendConfiguratorFromOne sendConfiguratorFromOne = mock(SendConfiguratorFromOne.class);
     when(paramsConfigurator.paramsAsDto(any())).thenReturn(sendConfiguratorFromOne);
 
-    //when
+    // when
     consumer.sendOutputLine("message");
 
-    //then
+    // then
     verify(sendConfiguratorFromOne).sendAndSkipResult();
   }
 }

@@ -108,7 +108,7 @@ public class CheckConditionsContext {
             return 0;
           }
         });
-    pm.beginTask("", values.size()); //$NON-NLS-1$
+    pm.beginTask("", values.size()); // $NON-NLS-1$
     for (Iterator iter = values.iterator(); iter.hasNext(); ) {
       IConditionChecker checker = (IConditionChecker) iter.next();
       result.merge(checker.check(new SubProgressMonitor(pm, 1)));

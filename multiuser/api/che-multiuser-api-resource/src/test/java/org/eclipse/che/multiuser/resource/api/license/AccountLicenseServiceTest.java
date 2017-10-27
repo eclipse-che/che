@@ -15,7 +15,7 @@ import static java.util.Collections.singletonList;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -43,10 +43,10 @@ import org.testng.annotations.Test;
  */
 @Listeners({EverrestJetty.class, MockitoTestNGListener.class})
 public class AccountLicenseServiceTest {
-  @SuppressWarnings("unused") //is declared for deploying by everrest-assured
+  @SuppressWarnings("unused") // is declared for deploying by everrest-assured
   private ApiExceptionMapper mapper;
 
-  @SuppressWarnings("unused") //is declared for deploying by everrest-assured
+  @SuppressWarnings("unused") // is declared for deploying by everrest-assured
   private CheJsonProvider jsonProvider = new CheJsonProvider(new HashSet<>());
 
   @Mock private AccountLicenseManager accountLicenseManager;
@@ -55,7 +55,7 @@ public class AccountLicenseServiceTest {
 
   @Test
   public void shouldGetLicense() throws Exception {
-    //given
+    // given
     final ResourceDto testResource =
         DtoFactory.newDto(ResourceDto.class).withType("test").withAmount(1234).withUnit("mb");
 
@@ -73,11 +73,11 @@ public class AccountLicenseServiceTest {
                         .withResources(singletonList(testResource))))
             .withTotalResources(singletonList(testResource));
 
-    //when
+    // when
     when(accountLicenseManager.getByAccount(eq("account123")))
         .thenReturn(new AccountLicenseImpl(toFetch));
 
-    //then
+    // then
     final Response response =
         given()
             .auth()

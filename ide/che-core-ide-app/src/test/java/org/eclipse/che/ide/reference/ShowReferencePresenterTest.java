@@ -25,7 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /** @author Dmitry Shnurenko */
 @RunWith(MockitoJUnitRunner.class)
@@ -34,10 +34,10 @@ public class ShowReferencePresenterTest {
   private static final Path PATH = Path.valueOf("path");
   private static final String PROJECT_TYPE = "type";
 
-  //constructor mocks
+  // constructor mocks
   @Mock private ShowReferenceView view;
 
-  //additional mocks
+  // additional mocks
   @Mock private FqnProvider provider;
 
   @Mock private Resource resource;

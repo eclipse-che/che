@@ -44,7 +44,8 @@ public class TextFileBufferManager implements ITextFileBufferManager {
     }
   }
 
-  //	protected static final IContentType TEXT_CONTENT_TYPE= Platform.getContentTypeManager().getContentType(IContentTypeManager.CT_TEXT);
+  //	protected static final IContentType TEXT_CONTENT_TYPE=
+  // Platform.getContentTypeManager().getContentType(IContentTypeManager.CT_TEXT);
 
   private Map fFilesBuffers = new HashMap();
   private Map fFileStoreFileBuffers = new HashMap();
@@ -115,7 +116,8 @@ public class TextFileBufferManager implements ITextFileBufferManager {
   //	 * @see org.eclipse.core.filebuffers.IFileBufferManager#connectFileStore(org.eclipse.core.filesystem.IFileStore, org.eclipse.core.runtime.IProgressMonitor)
   //	 * @since 3.3
   //	 */
-  //	public void connectFileStore(IFileStore fileStore, IProgressMonitor monitor) throws CoreException {
+  //	public void connectFileStore(IFileStore fileStore, IProgressMonitor monitor) throws
+  // CoreException {
   //		Assert.isLegal(fileStore != null);
   //
   //		FileStoreFileBuffer fileBuffer= null;
@@ -129,7 +131,9 @@ public class TextFileBufferManager implements ITextFileBufferManager {
   //
   //		fileBuffer= createFileBuffer(fileStore);
   //		if (fileBuffer == null)
-  //			throw new CoreException(new Status(IStatus.ERROR, FileBuffersPlugin.PLUGIN_ID, IFileBufferStatusCodes.CREATION_FAILED, FileBuffersMessages.FileBufferManager_error_canNotCreateFilebuffer, null));
+  //			throw new CoreException(new Status(IStatus.ERROR, FileBuffersPlugin.PLUGIN_ID,
+  // IFileBufferStatusCodes.CREATION_FAILED,
+  // FileBuffersMessages.FileBufferManager_error_canNotCreateFilebuffer, null));
   //
   //		fileBuffer.create(fileStore, monitor);
   //
@@ -191,10 +195,12 @@ public class TextFileBufferManager implements ITextFileBufferManager {
   }
 
   //	/*
-  //	 * @see org.eclipse.core.filebuffers.IFileBufferManager#disconnectFileStore(org.eclipse.core.filesystem.IFileStore, org.eclipse.core.runtime.IProgressMonitor)
+  //	 * @see
+  // org.eclipse.core.filebuffers.IFileBufferManager#disconnectFileStore(org.eclipse.core.filesystem.IFileStore, org.eclipse.core.runtime.IProgressMonitor)
   //	 * @since 3.3
   //	 */
-  //	public void disconnectFileStore(IFileStore fileStore, IProgressMonitor monitor) throws CoreException {
+  //	public void disconnectFileStore(IFileStore fileStore, IProgressMonitor monitor) throws
+  // CoreException {
   //		Assert.isLegal(fileStore != null);
   //
   //		AbstractFileBuffer fileBuffer;
@@ -255,7 +261,8 @@ public class TextFileBufferManager implements ITextFileBufferManager {
   //			InputStream is= null;
   //			try {
   //				is= fileStore.openInputStream(EFS.NONE, null);
-  //				IContentDescription description= manager.getDescriptionFor(is, fileStore.getName(), IContentDescription.ALL);
+  //				IContentDescription description= manager.getDescriptionFor(is, fileStore.getName(),
+  // IContentDescription.ALL);
   //				if (description != null) {
   //					IContentType type= description.getContentType();
   //					if (type != null)
@@ -323,7 +330,8 @@ public class TextFileBufferManager implements ITextFileBufferManager {
   }
 
   //	/*
-  //	 * @see org.eclipse.core.filebuffers.IFileBufferManager#getFileStoreFileBuffer(org.eclipse.core.filesystem.IFileStore)
+  //	 * @see
+  // org.eclipse.core.filebuffers.IFileBufferManager#getFileStoreFileBuffer(org.eclipse.core.filesystem.IFileStore)
   //	 * @since 3.3
   //	 */
   //	public IFileBuffer getFileStoreFileBuffer(IFileStore fileStore) {
@@ -361,7 +369,8 @@ public class TextFileBufferManager implements ITextFileBufferManager {
   }
   //
   //	/*
-  //	 * @see org.eclipse.core.filebuffers.ITextFileBufferManager#getFileStoreTextFileBuffer(org.eclipse.core.filesystem.IFileStore)
+  //	 * @see
+  // org.eclipse.core.filebuffers.ITextFileBufferManager#getFileStoreTextFileBuffer(org.eclipse.core.filesystem.IFileStore)
   //	 * @since 3.3
   //	 */
   //	public ITextFileBuffer getFileStoreTextFileBuffer(IFileStore fileStore) {
@@ -431,7 +440,7 @@ public class TextFileBufferManager implements ITextFileBufferManager {
    * @see org.eclipse.core.buffer.text.IBufferedFileManager#getDefaultEncoding()
    */
   public String getDefaultEncoding() {
-    return System.getProperty("file.encoding"); //$NON-NLS-1$;
+    return System.getProperty("file.encoding"); // $NON-NLS-1$;
   }
 
   /**
@@ -464,25 +473,30 @@ public class TextFileBufferManager implements ITextFileBufferManager {
         ((IDocumentExtension4) document).setInitialLineDelimiter(initalLineDelimiter);
     }
 
-    //		final IDocumentSetupParticipant[] participants= fRegistry.getDocumentSetupParticipants(location, locationKind);
+    //		final IDocumentSetupParticipant[] participants=
+    // fRegistry.getDocumentSetupParticipants(location, locationKind);
     //		if (participants != null) {
     //			for (int i= 0; i < participants.length; i++) {
     //				final IDocumentSetupParticipant participant= participants[i];
     //				ISafeRunnable runnable= new ISafeRunnable() {
     //					public void run() throws Exception {
     //						if (participant instanceof IDocumentSetupParticipantExtension)
-    //							((IDocumentSetupParticipantExtension)participant).setup(document, location, locationKind);
+    //							((IDocumentSetupParticipantExtension)participant).setup(document, location,
+    // locationKind);
     //						else
     //							participant.setup(document);
     //
     //						if (document.getDocumentPartitioner() != null) {
-    //							String message= NLSUtility.format(FileBuffersMessages.TextFileBufferManager_warning_documentSetupInstallsDefaultPartitioner, participant.getClass());
-    //							IStatus status= new Status(IStatus.WARNING, FileBuffersPlugin.PLUGIN_ID, IStatus.OK, message, null);
+    //							String message=
+    // NLSUtility.format(FileBuffersMessages.TextFileBufferManager_warning_documentSetupInstallsDefaultPartitioner, participant.getClass());
+    //							IStatus status= new Status(IStatus.WARNING, FileBuffersPlugin.PLUGIN_ID, IStatus.OK,
+    // message, null);
     //							FileBuffersPlugin.getDefault().log(status);
     //						}
     //					}
     //					public void handleException(Throwable t) {
-    //						IStatus status= new Status(IStatus.ERROR, FileBuffersPlugin.PLUGIN_ID, IStatus.OK, FileBuffersMessages.TextFileBufferManager_error_documentSetupFailed, t);
+    //						IStatus status= new Status(IStatus.ERROR, FileBuffersPlugin.PLUGIN_ID, IStatus.OK,
+    // FileBuffersMessages.TextFileBufferManager_error_documentSetupFailed, t);
     //						FileBuffersPlugin.getDefault().log(status);
     //					}
     //				};
@@ -502,17 +516,20 @@ public class TextFileBufferManager implements ITextFileBufferManager {
   //	 * @since 3.5
   //	 * @deprecated As of 3.5
   //	 */
-  //	private IDocument createDocumentFromFactory(final IPath location, final LocationKind locationKind) {
+  //	private IDocument createDocumentFromFactory(final IPath location, final LocationKind
+  // locationKind) {
   //		final IDocument[] runnableResult= new IDocument[1];
   //		if (location != null) {
-  //			final org.eclipse.core.filebuffers.IDocumentFactory factory= fRegistry.getDocumentFactory(location, locationKind);
+  //			final org.eclipse.core.filebuffers.IDocumentFactory factory=
+  // fRegistry.getDocumentFactory(location, locationKind);
   //			if (factory != null) {
   //				ISafeRunnable runnable= new ISafeRunnable() {
   //					public void run() throws Exception {
   //						runnableResult[0]= factory.createDocument();
   //					}
   //					public void handleException(Throwable t) {
-  //						IStatus status= new Status(IStatus.ERROR, FileBuffersPlugin.PLUGIN_ID, IStatus.OK, FileBuffersMessages.TextFileBufferManager_error_documentFactoryFailed, t);
+  //						IStatus status= new Status(IStatus.ERROR, FileBuffersPlugin.PLUGIN_ID, IStatus.OK,
+  // FileBuffersMessages.TextFileBufferManager_error_documentFactoryFailed, t);
   //						FileBuffersPlugin.getDefault().log(status);
   //					}
   //				};
@@ -532,7 +549,8 @@ public class TextFileBufferManager implements ITextFileBufferManager {
   //	}
 
   //	/*
-  //	 * @see org.eclipse.core.filebuffers.ITextFileBufferManager#createAnnotationModel(org.eclipse.core.runtime.IPath, org.eclipse.core.filebuffers.LocationKind)
+  //	 * @see
+  // org.eclipse.core.filebuffers.ITextFileBufferManager#createAnnotationModel(org.eclipse.core.runtime.IPath, org.eclipse.core.filebuffers.LocationKind)
   //	 * @since 3.3
   //	 */
   //	public IAnnotationModel createAnnotationModel(IPath location, LocationKind locationKind) {
@@ -544,7 +562,8 @@ public class TextFileBufferManager implements ITextFileBufferManager {
   //	}
   //
   //	/*
-  //	 * @see org.eclipse.core.filebuffers.IFileBufferManager#addFileBufferListener(org.eclipse.core.filebuffers.IFileBufferListener)
+  //	 * @see
+  // org.eclipse.core.filebuffers.IFileBufferManager#addFileBufferListener(org.eclipse.core.filebuffers.IFileBufferListener)
   //	 */
   //	public void addFileBufferListener(IFileBufferListener listener) {
   //		Assert.isNotNull(listener);
@@ -555,7 +574,8 @@ public class TextFileBufferManager implements ITextFileBufferManager {
   //	}
   //
   //	/*
-  //	 * @see org.eclipse.core.filebuffers.IFileBufferManager#removeFileBufferListener(org.eclipse.core.filebuffers.IFileBufferListener)
+  //	 * @see
+  // org.eclipse.core.filebuffers.IFileBufferManager#removeFileBufferListener(org.eclipse.core.filebuffers.IFileBufferListener)
   //	 */
   //	public void removeFileBufferListener(IFileBufferListener listener) {
   //		Assert.isNotNull(listener);
@@ -827,6 +847,6 @@ public class TextFileBufferManager implements ITextFileBufferManager {
    * @since 3.3
    */
   protected String getLineDelimiterPreference(IPath location, LocationKind locationKind) {
-    return System.getProperty("line.separator"); //$NON-NLS-1$
+    return System.getProperty("line.separator"); // $NON-NLS-1$
   }
 }

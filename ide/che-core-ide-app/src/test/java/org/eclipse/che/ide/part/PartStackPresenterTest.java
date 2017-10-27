@@ -40,7 +40,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -54,7 +53,7 @@ public class PartStackPresenterTest {
   private static final String SOME_TEXT = "someText";
   private static final double PART_SIZE = 170;
 
-  //constructor mocks
+  // constructor mocks
   @Mock private EventBus eventBus;
   @Mock private PartMenu partMenu;
   @Mock private WorkBenchPartController workBenchPartController;
@@ -64,7 +63,7 @@ public class PartStackPresenterTest {
   @Mock private PartStackView view;
   @Mock private PropertyListener propertyListener;
 
-  //additional mocks
+  // additional mocks
   @Mock private AcceptsOneWidget container;
   @Mock private PartPresenter partPresenter;
   @Mock private Constraints constraints;
@@ -119,7 +118,8 @@ public class PartStackPresenterTest {
     verify(partPresenter).addPropertyListener(listenerCaptor.capture());
     listenerCaptor.getValue().propertyChanged(editorPartPresenter, EditorPartPresenter.PROP_DIRTY);
 
-    verify(eventBus).fireEvent(Matchers.<EditorDirtyStateChangedEvent>anyObject());
+    verify(eventBus)
+        .fireEvent(org.mockito.ArgumentMatchers.<EditorDirtyStateChangedEvent>anyObject());
   }
 
   @Test
@@ -142,7 +142,7 @@ public class PartStackPresenterTest {
     verify(partButton).setDelegate(presenter);
 
     verify(view).addTab(partButton, basePresenter);
-    verify(view).setTabPositions(Matchers.<List<PartPresenter>>anyObject());
+    verify(view).setTabPositions(org.mockito.ArgumentMatchers.<List<PartPresenter>>anyObject());
     verify(partStackHandler).onRequestFocus(presenter);
   }
 

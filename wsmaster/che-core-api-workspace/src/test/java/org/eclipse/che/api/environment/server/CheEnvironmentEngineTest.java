@@ -17,10 +17,10 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -328,7 +328,7 @@ public class CheEnvironmentEngineTest {
     // given
     EnvironmentImpl env = createEnv();
     String machineName = "machineWithoutRam";
-    //prepare CheServicesEnvironmentImpl which should return compose parser
+    // prepare CheServicesEnvironmentImpl which should return compose parser
     CheServicesEnvironmentImpl cheServicesEnvironment = createCheServicesEnvByName(machineName);
 
     // when
@@ -356,7 +356,7 @@ public class CheEnvironmentEngineTest {
     // given
     EnvironmentImpl env = createEnv();
     String machineName = "machineWithoutRam";
-    //prepare CheServicesEnvironmentImpl which should return compose parser
+    // prepare CheServicesEnvironmentImpl which should return compose parser
     CheServicesEnvironmentImpl cheServicesEnvironment = createCheServicesEnvByName(machineName);
     cheServicesEnvironment.getServices().get(machineName).withMemLimit(42943433L);
 
@@ -388,7 +388,7 @@ public class CheEnvironmentEngineTest {
     String dockerfileContent = "this is dockerfile content";
     when(recipeDownloader.getRecipe(anyString())).thenReturn(dockerfileContent);
 
-    //prepare CheServicesEnvironmentImpl which should return compose parser
+    // prepare CheServicesEnvironmentImpl which should return compose parser
     CheServicesEnvironmentImpl cheServicesEnvironment = createCheServicesEnvByName(machineName);
     cheServicesEnvironment
         .getServices()
@@ -424,7 +424,7 @@ public class CheEnvironmentEngineTest {
     String machineName = "machineWithDockerfileNotFromApi";
     String contextUrl = "http://another-server.com/recipe/12345";
 
-    //prepare CheServicesEnvironmentImpl which should return compose parser
+    // prepare CheServicesEnvironmentImpl which should return compose parser
     CheServicesEnvironmentImpl cheServicesEnvironment = createCheServicesEnvByName(machineName);
     cheServicesEnvironment
         .getServices()
@@ -457,7 +457,7 @@ public class CheEnvironmentEngineTest {
     EnvironmentImpl env = createEnv();
     String machineName = "extraMachine";
 
-    //prepare CheServicesEnvironmentImpl which should return compose parser
+    // prepare CheServicesEnvironmentImpl which should return compose parser
     CheServicesEnvironmentImpl cheServicesEnvironment = createCheServicesEnvByName(machineName);
     cheServicesEnvironment.getServices().get(machineName).withImage("codenvy/ubuntu_jdk8");
 
@@ -1211,7 +1211,7 @@ public class CheEnvironmentEngineTest {
 
   @Test
   public void shouldReplaceServiceNameWithContainerNameInLinks() {
-    //given
+    // given
     final String serviceNameToLink = "service";
     final String containerNameToLink = "container";
 
@@ -1240,7 +1240,7 @@ public class CheEnvironmentEngineTest {
 
   @Test
   public void shouldReplaceServiceNameWithContainerNameAndUseAliasInLinks() {
-    //given
+    // given
     final String serviceNameToLink = "service";
     final String containerNameToLink = "container";
     final String AliasToServiceToLink = "alias";

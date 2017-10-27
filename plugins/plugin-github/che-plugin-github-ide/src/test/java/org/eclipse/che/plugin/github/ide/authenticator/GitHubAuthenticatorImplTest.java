@@ -14,8 +14,8 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMod
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.RETURNS_DEFAULTS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -49,7 +49,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -89,8 +88,9 @@ public class GitHubAuthenticatorImplTest {
     sshPairDTOsPromise = createPromise();
     voidPromise = createPromise();
 
-    when(sshServiceClient.getPairs(anyString())).thenReturn(sshPairDTOsPromise);
-    when(sshServiceClient.deletePair(anyString(), anyString())).thenReturn(voidPromise);
+    when(sshServiceClient.getPairs(nullable(String.class))).thenReturn(sshPairDTOsPromise);
+    when(sshServiceClient.deletePair(nullable(String.class), nullable(String.class)))
+        .thenReturn(voidPromise);
   }
 
   private Promise createPromise() {
@@ -143,7 +143,8 @@ public class GitHubAuthenticatorImplTest {
     verify(view).isGenerateKeysSelected();
     verify(registry).getUploader(eq(GITHUB_HOST));
     verify(appContext).getCurrentUser();
-    verify(sshKeyUploader).uploadKey(eq(userId), Matchers.<AsyncCallback<Void>>anyObject());
+    verify(sshKeyUploader)
+        .uploadKey(eq(userId), org.mockito.ArgumentMatchers.<AsyncCallback<Void>>anyObject());
   }
 
   @Test
@@ -190,7 +191,7 @@ public class GitHubAuthenticatorImplTest {
     verify(view).isGenerateKeysSelected();
     verify(registry).getUploader(eq(GITHUB_HOST));
     verify(appContext).getCurrentUser();
-    verify(notificationManager).notify(anyString(), eq(SUCCESS), eq(FLOAT_MODE));
+    verify(notificationManager).notify(nullable(String.class), eq(SUCCESS), eq(FLOAT_MODE));
   }
 
   @Test
@@ -210,7 +211,9 @@ public class GitHubAuthenticatorImplTest {
     when(user.getProfile()).thenReturn(profile);
     when(profile.getUserId()).thenReturn(userId);
     when(dialogFactory.createMessageDialog(
-            anyString(), anyString(), Matchers.<ConfirmCallback>anyObject()))
+            nullable(String.class),
+            nullable(String.class),
+            org.mockito.ArgumentMatchers.<ConfirmCallback>anyObject()))
         .thenReturn(messageDialog);
 
     gitHubAuthenticator.authenticate(null, getCallBack());
@@ -224,7 +227,10 @@ public class GitHubAuthenticatorImplTest {
     verify(registry).getUploader(eq(GITHUB_HOST));
     verify(appContext).getCurrentUser();
     verify(dialogFactory)
-        .createMessageDialog(anyString(), anyString(), Matchers.<ConfirmCallback>anyObject());
+        .createMessageDialog(
+            nullable(String.class),
+            nullable(String.class),
+            org.mockito.ArgumentMatchers.<ConfirmCallback>anyObject());
     verify(messageDialog).show();
     verify(sshServiceClient).getPairs(eq(SshKeyManagerPresenter.VCS_SSH_SERVICE));
   }
@@ -248,7 +254,9 @@ public class GitHubAuthenticatorImplTest {
     when(user.getProfile()).thenReturn(profile);
     when(profile.getUserId()).thenReturn(userId);
     when(dialogFactory.createMessageDialog(
-            anyString(), anyString(), Matchers.<ConfirmCallback>anyObject()))
+            nullable(String.class),
+            nullable(String.class),
+            org.mockito.ArgumentMatchers.<ConfirmCallback>anyObject()))
         .thenReturn(messageDialog);
     when(pair.getName()).thenReturn(GITHUB_HOST);
     when(pair.getService()).thenReturn(SshKeyManagerPresenter.VCS_SSH_SERVICE);
@@ -267,7 +275,10 @@ public class GitHubAuthenticatorImplTest {
     verify(registry).getUploader(eq(GITHUB_HOST));
     verify(appContext).getCurrentUser();
     verify(dialogFactory)
-        .createMessageDialog(anyString(), anyString(), Matchers.<ConfirmCallback>anyObject());
+        .createMessageDialog(
+            nullable(String.class),
+            nullable(String.class),
+            org.mockito.ArgumentMatchers.<ConfirmCallback>anyObject());
     verify(messageDialog).show();
     verify(sshServiceClient).getPairs(eq(SshKeyManagerPresenter.VCS_SSH_SERVICE));
     verify(sshServiceClient)

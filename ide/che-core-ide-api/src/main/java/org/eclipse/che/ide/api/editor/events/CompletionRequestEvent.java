@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.api.editor.events;
 
 import com.google.gwt.event.shared.GwtEvent;
+
 /** Events that correspond to external completion requests. */
 public class CompletionRequestEvent extends GwtEvent<CompletionRequestHandler> {
 

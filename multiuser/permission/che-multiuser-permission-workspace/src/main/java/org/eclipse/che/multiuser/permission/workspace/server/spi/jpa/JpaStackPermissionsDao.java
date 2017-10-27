@@ -171,7 +171,8 @@ public class JpaStackPermissionsDao extends AbstractJpaPermissionsDao<StackPermi
         throws ServerException, NotFoundException {
       Page<StackPermissionsImpl> stacksPage;
       do {
-        // skip count always equals to 0 because elements will be shifted after removing previous items
+        // skip count always equals to 0 because elements will be shifted after removing previous
+        // items
         stacksPage = dao.getByInstance(stackId, pageSize, 0);
         for (StackPermissionsImpl stackPermissions : stacksPage.getItems()) {
           dao.remove(stackPermissions.getUserId(), stackPermissions.getInstanceId());

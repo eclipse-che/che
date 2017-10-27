@@ -36,5 +36,5 @@ public class TestFailed extends BaseTestMessage {
     return Boolean.valueOf(error);
   }
 
-  //TODO there should be more info about failure like comparison result
+  // TODO there should be more info about failure like comparison result
 }

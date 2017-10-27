@@ -54,7 +54,7 @@ public class RenameResourceProcessor extends RenameProcessor {
    */
   public RenameResourceProcessor(IResource resource) {
     if (resource == null || !resource.exists()) {
-      throw new IllegalArgumentException("resource must not be null and must exist"); //$NON-NLS-1$
+      throw new IllegalArgumentException("resource must not be null and must exist"); // $NON-NLS-1$
     }
 
     fResource = resource;
@@ -123,7 +123,7 @@ public class RenameResourceProcessor extends RenameProcessor {
    */
   public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context)
       throws CoreException {
-    pm.beginTask("", 1); //$NON-NLS-1$
+    pm.beginTask("", 1); // $NON-NLS-1$
     try {
       fRenameArguments = new RenameArguments(getNewResourceName(), isUpdateReferences());
 
@@ -147,7 +147,7 @@ public class RenameResourceProcessor extends RenameProcessor {
    * @return returns the resulting status of the validation
    */
   public RefactoringStatus validateNewElementName(String newName) {
-    Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
+    Assert.isNotNull(newName, "new name"); // $NON-NLS-1$
     IContainer c = fResource.getParent();
     if (c == null)
       return RefactoringStatus.createFatalErrorStatus(
@@ -200,7 +200,7 @@ public class RenameResourceProcessor extends RenameProcessor {
    * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#createChange(org.eclipse.core.runtime.IProgressMonitor)
    */
   public Change createChange(IProgressMonitor pm) throws CoreException {
-    pm.beginTask("", 1); //$NON-NLS-1$
+    pm.beginTask("", 1); // $NON-NLS-1$
     try {
       RenameResourceChange change =
           new RenameResourceChange(fResource.getFullPath(), getNewResourceName());
@@ -226,7 +226,7 @@ public class RenameResourceProcessor extends RenameProcessor {
    * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getIdentifier()
    */
   public String getIdentifier() {
-    return "org.eclipse.ltk.core.refactoring.renameResourceProcessor"; //$NON-NLS-1$
+    return "org.eclipse.ltk.core.refactoring.renameResourceProcessor"; // $NON-NLS-1$
   }
 
   /* (non-Javadoc)

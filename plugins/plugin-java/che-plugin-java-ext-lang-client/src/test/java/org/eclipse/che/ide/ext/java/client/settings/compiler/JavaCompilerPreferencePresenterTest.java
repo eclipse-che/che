@@ -32,8 +32,9 @@ import static org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarning
 import static org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarningsOptions.USAGE_OF_RAW_TYPE;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -61,9 +62,8 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /** @author Dmitry Shnurenko */
 @RunWith(MockitoJUnitRunner.class)
@@ -75,7 +75,7 @@ public class JavaCompilerPreferencePresenterTest {
   private static final String VALUE_1 = "value1";
   private static final String VALUE_2 = "value2";
 
-  //constructor mocks
+  // constructor mocks
   @Mock private ErrorWarningsView view;
   @Mock private PropertyWidgetFactory propertyFactory;
   @Mock private JavaLocalizationConstant locale;
@@ -98,9 +98,10 @@ public class JavaCompilerPreferencePresenterTest {
   @Before
   public void setUp() {
     when(preferencesManager.loadPreferences()).thenReturn(mapPromise);
-    when(mapPromise.then(Matchers.<Operation<Map<String, String>>>anyObject()))
+    when(mapPromise.then(org.mockito.ArgumentMatchers.<Operation<Map<String, String>>>anyObject()))
         .thenReturn(mapPromise);
-    when(propertyFactory.create(Matchers.<ErrorWarningsOptions>anyObject())).thenReturn(widget);
+    when(propertyFactory.create(org.mockito.ArgumentMatchers.<ErrorWarningsOptions>anyObject()))
+        .thenReturn(widget);
 
     presenter.setUpdateDelegate(dirtyStateListener);
   }
@@ -223,8 +224,9 @@ public class JavaCompilerPreferencePresenterTest {
     verify(mapPromise).then(operationCaptor.capture());
     operationCaptor.getValue().apply(getAllProperties());
 
-    verify(propertyFactory, times(18)).create(Matchers.<ErrorWarningsOptions>anyObject());
-    verify(widget, times(18)).selectPropertyValue(anyString());
+    verify(propertyFactory, times(18))
+        .create(org.mockito.ArgumentMatchers.<ErrorWarningsOptions>anyObject());
+    verify(widget, times(18)).selectPropertyValue(nullable(String.class));
     verify(widget, times(18)).setDelegate(presenter);
     verify(view, times(18)).addProperty(widget);
   }
@@ -244,6 +246,6 @@ public class JavaCompilerPreferencePresenterTest {
     errorOperationCaptor.getValue().apply(promiseError);
 
     verify(preferencesManager).loadPreferences();
-    verify(notificationManager).notify(anyString(), eq(FAIL), eq(FLOAT_MODE));
+    verify(notificationManager).notify(nullable(String.class), eq(FAIL), eq(FLOAT_MODE));
   }
 }

@@ -14,8 +14,8 @@ import static com.jayway.restassured.RestAssured.given;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -84,14 +84,14 @@ public class AccountLicenseServicePermissionsFilterTest {
 
   @Test
   public void shouldTestThatAllPublicMethodsAreCoveredByPermissionsFilter() throws Exception {
-    //given
+    // given
     final List<String> collect =
         Stream.of(AccountLicenseService.class.getDeclaredMethods())
             .filter(method -> Modifier.isPublic(method.getModifiers()))
             .map(Method::getName)
             .collect(Collectors.toList());
 
-    //then
+    // then
     assertEquals(collect.size(), 1);
     assertTrue(collect.contains(LicenseServicePermissionsFilter.GET_LICENSE_METHOD));
   }

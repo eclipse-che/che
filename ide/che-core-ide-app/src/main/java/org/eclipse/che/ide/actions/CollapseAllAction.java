@@ -30,7 +30,7 @@ public class CollapseAllAction extends ProjectAction {
 
   @Override
   protected void updateProjectAction(ActionEvent e) {
-    //stub
+    // stub
   }
 
   @Override

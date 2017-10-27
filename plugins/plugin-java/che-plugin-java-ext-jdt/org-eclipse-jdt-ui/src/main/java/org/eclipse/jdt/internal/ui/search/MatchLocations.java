@@ -120,15 +120,21 @@ public class MatchLocations {
   //			composite.setLayout(blayout);
   //
   //			if (fSearchFor == IJavaSearchConstants.METHOD || fSearchFor == IJavaSearchConstants.FIELD) {
-  //				createButton(composite, SearchMessages.MatchLocations_this_label, IJavaSearchConstants.THIS_REFERENCE);
-  //				createButton(composite, SearchMessages.MatchLocations_implicit_this_label, IJavaSearchConstants.IMPLICIT_THIS_REFERENCE);
+  //				createButton(composite, SearchMessages.MatchLocations_this_label,
+  // IJavaSearchConstants.THIS_REFERENCE);
+  //				createButton(composite, SearchMessages.MatchLocations_implicit_this_label,
+  // IJavaSearchConstants.IMPLICIT_THIS_REFERENCE);
   //
-  //				createButton(composite, SearchMessages.MatchLocations_super_label, IJavaSearchConstants.SUPER_REFERENCE);
-  //				createButton(composite, SearchMessages.MatchLocations_qualified_label, IJavaSearchConstants.QUALIFIED_REFERENCE);
+  //				createButton(composite, SearchMessages.MatchLocations_super_label,
+  // IJavaSearchConstants.SUPER_REFERENCE);
+  //				createButton(composite, SearchMessages.MatchLocations_qualified_label,
+  // IJavaSearchConstants.QUALIFIED_REFERENCE);
   //			}
   //
-  //			if (fSearchFor == IJavaSearchConstants.METHOD || fSearchFor == IJavaSearchConstants.CONSTRUCTOR) {
-  //				createButton(composite, SearchMessages.MatchLocations_method_reference_label, IJavaSearchConstants.METHOD_REFERENCE_EXPRESSION);
+  //			if (fSearchFor == IJavaSearchConstants.METHOD || fSearchFor ==
+  // IJavaSearchConstants.CONSTRUCTOR) {
+  //				createButton(composite, SearchMessages.MatchLocations_method_reference_label,
+  // IJavaSearchConstants.METHOD_REFERENCE_EXPRESSION);
   //			}
   //		}
   //
@@ -138,41 +144,56 @@ public class MatchLocations {
   //			group.setLayout(new GridLayout(1, false));
   //			group.setText(SearchMessages.MatchLocations_declaration_group_label);
   //
-  //			createButton(group, SearchMessages.MatchLocations_imports_label, IJavaSearchConstants.IMPORT_DECLARATION_TYPE_REFERENCE);
-  //			createButton(group, SearchMessages.MatchLocations_super_types_label, IJavaSearchConstants.SUPERTYPE_TYPE_REFERENCE);
+  //			createButton(group, SearchMessages.MatchLocations_imports_label,
+  // IJavaSearchConstants.IMPORT_DECLARATION_TYPE_REFERENCE);
+  //			createButton(group, SearchMessages.MatchLocations_super_types_label,
+  // IJavaSearchConstants.SUPERTYPE_TYPE_REFERENCE);
   //			addSeparator(group);
   //
-  //			createButton(group, SearchMessages.MatchLocations_annotations_label , IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE);
+  //			createButton(group, SearchMessages.MatchLocations_annotations_label ,
+  // IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE);
   //			addSeparator(group);
   //
-  //			createButton(group, SearchMessages.MatchLocations_field_types_label, IJavaSearchConstants.FIELD_DECLARATION_TYPE_REFERENCE);
-  //			createButton(group, SearchMessages.MatchLocations_local_types_label, IJavaSearchConstants.LOCAL_VARIABLE_DECLARATION_TYPE_REFERENCE);
+  //			createButton(group, SearchMessages.MatchLocations_field_types_label,
+  // IJavaSearchConstants.FIELD_DECLARATION_TYPE_REFERENCE);
+  //			createButton(group, SearchMessages.MatchLocations_local_types_label,
+  // IJavaSearchConstants.LOCAL_VARIABLE_DECLARATION_TYPE_REFERENCE);
   //			addSeparator(group);
   //
-  //			createButton(group, SearchMessages.MatchLocations_method_types_label, IJavaSearchConstants.RETURN_TYPE_REFERENCE);
-  //			createButton(group, SearchMessages.MatchLocations_parameter_types_label, IJavaSearchConstants.PARAMETER_DECLARATION_TYPE_REFERENCE);
-  //			createButton(group, SearchMessages.MatchLocations_thrown_exceptions_label, IJavaSearchConstants.THROWS_CLAUSE_TYPE_REFERENCE);
+  //			createButton(group, SearchMessages.MatchLocations_method_types_label,
+  // IJavaSearchConstants.RETURN_TYPE_REFERENCE);
+  //			createButton(group, SearchMessages.MatchLocations_parameter_types_label,
+  // IJavaSearchConstants.PARAMETER_DECLARATION_TYPE_REFERENCE);
+  //			createButton(group, SearchMessages.MatchLocations_thrown_exceptions_label,
+  // IJavaSearchConstants.THROWS_CLAUSE_TYPE_REFERENCE);
   //
   //			Group ptGroup= new Group(contents, SWT.NONE);
   //			ptGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
   //			ptGroup.setLayout(new GridLayout(1, false));
   //			ptGroup.setText(SearchMessages.MatchLocations_in_parameterized_types_group_label);
   //
-  //			createButton(ptGroup, SearchMessages.MatchLocations_type_parameter_bounds_label, IJavaSearchConstants.TYPE_VARIABLE_BOUND_TYPE_REFERENCE);
-  //			createButton(ptGroup, SearchMessages.MatchLocations_wildcard_bounds_label, IJavaSearchConstants.WILDCARD_BOUND_TYPE_REFERENCE);
+  //			createButton(ptGroup, SearchMessages.MatchLocations_type_parameter_bounds_label,
+  // IJavaSearchConstants.TYPE_VARIABLE_BOUND_TYPE_REFERENCE);
+  //			createButton(ptGroup, SearchMessages.MatchLocations_wildcard_bounds_label,
+  // IJavaSearchConstants.WILDCARD_BOUND_TYPE_REFERENCE);
   //
-  //			createButton(ptGroup, SearchMessages.MatchLocations_type_arguments_label, IJavaSearchConstants.TYPE_ARGUMENT_TYPE_REFERENCE);
+  //			createButton(ptGroup, SearchMessages.MatchLocations_type_arguments_label,
+  // IJavaSearchConstants.TYPE_ARGUMENT_TYPE_REFERENCE);
   //
   //			Group statementGroup= new Group(contents, SWT.NONE);
   //			statementGroup.setLayoutData(new GridData(SWT.FILL, SWT.END, true, false));
   //			statementGroup.setLayout(new GridLayout(1, false));
   //			statementGroup.setText(SearchMessages.MatchLocations_expression_group_label);
   //
-  //			createButton(statementGroup, SearchMessages.MatchLocations_casts_label, IJavaSearchConstants.CAST_TYPE_REFERENCE);
-  //			createButton(statementGroup, SearchMessages.MatchLocations_catch_clauses_label, IJavaSearchConstants.CATCH_TYPE_REFERENCE);
+  //			createButton(statementGroup, SearchMessages.MatchLocations_casts_label,
+  // IJavaSearchConstants.CAST_TYPE_REFERENCE);
+  //			createButton(statementGroup, SearchMessages.MatchLocations_catch_clauses_label,
+  // IJavaSearchConstants.CATCH_TYPE_REFERENCE);
   //			addSeparator(statementGroup);
-  //			createButton(statementGroup, SearchMessages.MatchLocations_class_instance_label, IJavaSearchConstants.CLASS_INSTANCE_CREATION_TYPE_REFERENCE);
-  //			createButton(statementGroup, SearchMessages.MatchLocations_instanceof_label, IJavaSearchConstants.INSTANCEOF_TYPE_REFERENCE);
+  //			createButton(statementGroup, SearchMessages.MatchLocations_class_instance_label,
+  // IJavaSearchConstants.CLASS_INSTANCE_CREATION_TYPE_REFERENCE);
+  //			createButton(statementGroup, SearchMessages.MatchLocations_instanceof_label,
+  // IJavaSearchConstants.INSTANCEOF_TYPE_REFERENCE);
   //		}
   //
   //		protected final void performSelectAction(boolean selectAll) {

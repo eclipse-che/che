@@ -63,7 +63,7 @@ public class MethodDeclarationCompletionProposal extends JavaTypeCompletionPropo
     if (prefix.length() > 0
         && !"main".equals(prefix)
         && !hasMethod(methods, prefix)
-        && suggestedMethods.add(prefix)) { //$NON-NLS-1$
+        && suggestedMethods.add(prefix)) { // $NON-NLS-1$
       if (!JavaConventionsUtil.validateMethodName(prefix, type).matches(IStatus.ERROR))
         result.add(
             new MethodDeclarationCompletionProposal(
@@ -94,7 +94,7 @@ public class MethodDeclarationCompletionProposal extends JavaTypeCompletionPropo
         length,
         null,
         getDisplayName(methodName, returnTypeSig),
-        relevance); //$NON-NLS-1$
+        relevance); // $NON-NLS-1$
     Assert.isNotNull(type);
     Assert.isNotNull(methodName);
 
@@ -105,8 +105,11 @@ public class MethodDeclarationCompletionProposal extends JavaTypeCompletionPropo
     if (returnTypeSig == null) {
       setProposalInfo(new ProposalInfo(type));
 
-      //            ImageDescriptor desc = new JavaElementImageDescriptor(JavaPluginImages.DESC_MISC_PUBLIC, JavaElementImageDescriptor.CONSTRUCTOR,
-      //                                                                  JavaElementImageProvider.SMALL_SIZE);
+      //            ImageDescriptor desc = new
+      // JavaElementImageDescriptor(JavaPluginImages.DESC_MISC_PUBLIC,
+      // JavaElementImageDescriptor.CONSTRUCTOR,
+      //
+      // JavaElementImageProvider.SMALL_SIZE);
       //            setImage(JavaPlugin.getImageDescriptorRegistry().get(desc));
       setImage(JavaPluginImages.get(JavaPluginImages.DESC_MISC_PUBLIC));
     } else {
@@ -120,13 +123,13 @@ public class MethodDeclarationCompletionProposal extends JavaTypeCompletionPropo
     buf.append('(');
     buf.append(')');
     if (returnTypeSig != null) {
-      buf.append(" : "); //$NON-NLS-1$
+      buf.append(" : "); // $NON-NLS-1$
       buf.append(Signature.toString(returnTypeSig));
-      buf.append(" - ", StyledString.QUALIFIER_STYLER); //$NON-NLS-1$
+      buf.append(" - ", StyledString.QUALIFIER_STYLER); // $NON-NLS-1$
       buf.append(
           JavaTextMessages.MethodCompletionProposal_method_label, StyledString.QUALIFIER_STYLER);
     } else {
-      buf.append(" - ", StyledString.QUALIFIER_STYLER); //$NON-NLS-1$
+      buf.append(" - ", StyledString.QUALIFIER_STYLER); // $NON-NLS-1$
       buf.append(
           JavaTextMessages.MethodCompletionProposal_constructor_label,
           StyledString.QUALIFIER_STYLER);
@@ -171,11 +174,11 @@ public class MethodDeclarationCompletionProposal extends JavaTypeCompletionPropo
     }
     if (fReturnTypeSig != null) {
       if (!isInterface) {
-        buf.append("private "); //$NON-NLS-1$
+        buf.append("private "); // $NON-NLS-1$
       }
     } else {
-      if (fType.isEnum()) buf.append("private "); //$NON-NLS-1$
-      else buf.append("public "); //$NON-NLS-1$
+      if (fType.isEnum()) buf.append("private "); // $NON-NLS-1$
+      else buf.append("public "); // $NON-NLS-1$
     }
 
     if (fReturnTypeSig != null) {
@@ -184,10 +187,10 @@ public class MethodDeclarationCompletionProposal extends JavaTypeCompletionPropo
     buf.append(' ');
     buf.append(fMethodName);
     if (isInterface) {
-      buf.append("();"); //$NON-NLS-1$
+      buf.append("();"); // $NON-NLS-1$
       buf.append(lineDelim);
     } else {
-      buf.append("() {"); //$NON-NLS-1$
+      buf.append("() {"); // $NON-NLS-1$
       buf.append(lineDelim);
 
       String body =
@@ -197,12 +200,12 @@ public class MethodDeclarationCompletionProposal extends JavaTypeCompletionPropo
               fMethodName,
               fReturnTypeSig == null,
               "",
-              lineDelim); //$NON-NLS-1$
+              lineDelim); // $NON-NLS-1$
       if (body != null) {
         buf.append(body);
         buf.append(lineDelim);
       }
-      buf.append("}"); //$NON-NLS-1$
+      buf.append("}"); // $NON-NLS-1$
       buf.append(lineDelim);
     }
     String stub = buf.toString();

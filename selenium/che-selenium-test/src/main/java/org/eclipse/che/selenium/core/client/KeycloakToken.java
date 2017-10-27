@@ -23,7 +23,8 @@ public class KeycloakToken {
   @SerializedName("refresh_token")
   private String refreshToken;
 
-  private TokenDetails details;
+  private TokenDetails accessDetails;
+  private TokenDetails refreshDetails;
 
   public KeycloakToken() {}
 
@@ -51,12 +52,20 @@ public class KeycloakToken {
     this.refreshToken = refreshToken;
   }
 
-  public TokenDetails getDetails() {
-    return details;
+  public TokenDetails getAccessDetails() {
+    return accessDetails;
   }
 
-  public void setDetails(TokenDetails details) {
-    this.details = details;
+  public void setAccessDetails(TokenDetails accessDetails) {
+    this.accessDetails = accessDetails;
+  }
+
+  public TokenDetails getRefreshDetails() {
+    return refreshDetails;
+  }
+
+  public void setRefreshDetails(TokenDetails refreshDetails) {
+    this.refreshDetails = refreshDetails;
   }
 
   class TokenDetails {

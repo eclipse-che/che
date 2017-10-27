@@ -95,7 +95,8 @@ public class MavenWorkspace {
           @Override
           public void projectResolved(
               MavenProject project, MavenProjectModifications modifications) {
-            //                communication.sendUpdateMassage(Collections.emptySet(), Collections.emptyList());
+            //                communication.sendUpdateMassage(Collections.emptySet(),
+            // Collections.emptyList());
           }
 
           @Override
@@ -173,7 +174,7 @@ public class MavenWorkspace {
   }
 
   private void runResolve() {
-    //TODO synchronise on projectsToResolve change
+    // TODO synchronise on projectsToResolve change
     Set<MavenProject> needResolve = new HashSet<>(projectsToResolve);
     projectsToResolve.clear();
 
@@ -207,9 +208,9 @@ public class MavenWorkspace {
         IPath testSourcePath = project.getProject().getFullPath().append(testSource);
         helper.addSourceEntry(testSourcePath, testOutputPath);
       }
-      //add maven classpath container
+      // add maven classpath container
       helper.addContainerEntry(new Path(MavenClasspathContainer.CONTAINER_ID));
-      //add JRE classpath container
+      // add JRE classpath container
       helper.addContainerEntry(new Path(JREContainerInitializer.JRE_CONTAINER));
 
       javaProject.setRawClasspath(helper.getEntries(), null);

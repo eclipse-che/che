@@ -48,7 +48,7 @@ public class TempAssignmentFinder extends ASTVisitor {
     return fFirstAssignment;
   }
 
-  //-- visit methods
+  // -- visit methods
 
   @Override
   public boolean visit(Assignment assignment) {

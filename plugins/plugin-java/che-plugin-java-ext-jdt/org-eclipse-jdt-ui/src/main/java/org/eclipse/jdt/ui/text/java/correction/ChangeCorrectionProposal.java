@@ -44,7 +44,7 @@ public class ChangeCorrectionProposal
         CheActionAcces {
 
   private static final NullChange COMPUTING_CHANGE =
-      new NullChange("ChangeCorrectionProposal computing..."); //$NON-NLS-1$
+      new NullChange("ChangeCorrectionProposal computing..."); // $NON-NLS-1$
 
   private Change fChange;
   private String fName;
@@ -64,7 +64,7 @@ public class ChangeCorrectionProposal
    */
   public ChangeCorrectionProposal(String name, Change change, int relevance, Image image) {
     if (name == null) {
-      throw new IllegalArgumentException("Name must not be null"); //$NON-NLS-1$
+      throw new IllegalArgumentException("Name must not be null"); // $NON-NLS-1$
     }
     fName = name;
     fChange = change;
@@ -128,9 +128,12 @@ public class ChangeCorrectionProposal
         //					}
         //					/*
         //					 * Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=195834#c7 :
-        //					 * During change execution, an EventLoopProgressMonitor can process the event queue while the text
-        //					 * widget has focus. When that happens and the user e.g. pressed a key, the event is prematurely
-        //					 * delivered to the text widget and screws up the document. Change execution fails or performs
+        //					 * During change execution, an EventLoopProgressMonitor can process the event queue
+        // while the text
+        //					 * widget has focus. When that happens and the user e.g. pressed a key, the event is
+        // prematurely
+        //					 * delivered to the text widget and screws up the document. Change execution fails or
+        // performs
         //					 * wrong changes.
         //					 *
         //					 * The fix is to temporarily disable the text widget.
@@ -185,8 +188,10 @@ public class ChangeCorrectionProposal
       //			if (disabledStyledText != null) {
       //				disabledStyledText.setEditable(true);
       //				disabledStyledText.removeTraverseListener(traverseBlocker);
-      //				// Workaround to fix bug 434791 during 4.4 RC2. Will be replaced by official API during 4.5.
-      //				ITextOperationTarget textOperationTarget= (ITextOperationTarget) activeEditor.getAdapter(ITextOperationTarget.class);
+      //				// Workaround to fix bug 434791 during 4.4 RC2. Will be replaced by official API during
+      // 4.5.
+      //				ITextOperationTarget textOperationTarget= (ITextOperationTarget)
+      // activeEditor.getAdapter(ITextOperationTarget.class);
       //				if (textOperationTarget != null && textOperationTarget.canDoOperation(-100))
       //					textOperationTarget.doOperation(-100);
       //			}
@@ -213,7 +218,7 @@ public class ChangeCorrectionProposal
    */
   public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
     StringBuffer buf = new StringBuffer();
-    buf.append("<p>"); //$NON-NLS-1$
+    buf.append("<p>"); // $NON-NLS-1$
     try {
       Change change = getChange();
       if (change != null) {
@@ -226,11 +231,11 @@ public class ChangeCorrectionProposal
         return null;
       }
     } catch (CoreException e) {
-      buf.append("Unexpected error when accessing this proposal:<p><pre>"); //$NON-NLS-1$
+      buf.append("Unexpected error when accessing this proposal:<p><pre>"); // $NON-NLS-1$
       buf.append(e.getLocalizedMessage());
-      buf.append("</pre>"); //$NON-NLS-1$
+      buf.append("</pre>"); // $NON-NLS-1$
     }
-    buf.append("</p>"); //$NON-NLS-1$
+    buf.append("</p>"); // $NON-NLS-1$
     return buf.toString();
   }
 
@@ -247,7 +252,8 @@ public class ChangeCorrectionProposal
   public String getDisplayString() {
     //		String shortCutString= CorrectionCommandHandler.getShortCutString(getCommandId());
     //		if (shortCutString != null) {
-    //			return Messages.format(CorrectionMessages.ChangeCorrectionProposal_name_with_shortcut, new String[]{getName(), shortCutString});
+    //			return Messages.format(CorrectionMessages.ChangeCorrectionProposal_name_with_shortcut, new
+    // String[]{getName(), shortCutString});
     //		}
     return getName();
   }
@@ -261,8 +267,10 @@ public class ChangeCorrectionProposal
     //		String shortCutString= CorrectionCommandHandler.getShortCutString(getCommandId());
     //		if (shortCutString != null) {
     //			String decorated= Messages
-    //					.format(CorrectionMessages.ChangeCorrectionProposal_name_with_shortcut, new String[]{getName(), shortCutString});
-    //			return StyledCellLabelProvider.styleDecoratedString(decorated, StyledString.QUALIFIER_STYLER, str);
+    //					.format(CorrectionMessages.ChangeCorrectionProposal_name_with_shortcut, new
+    // String[]{getName(), shortCutString});
+    //			return StyledCellLabelProvider.styleDecoratedString(decorated,
+    // StyledString.QUALIFIER_STYLER, str);
     //		}
     return str;
   }
@@ -310,10 +318,12 @@ public class ChangeCorrectionProposal
   public final Change getChange() throws CoreException {
     //		if (Util.isGtk()) {
     //			// workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=293995 :
-    //			// [Widgets] Deadlock while UI thread displaying/computing a change proposal and non-UI thread creating image
+    //			// [Widgets] Deadlock while UI thread displaying/computing a change proposal and non-UI
+    // thread creating image
     //
     //			// Solution is to create the change outside a 'synchronized' block.
-    //			// Synchronization is achieved by polling fChange, using "fChange == COMPUTING_CHANGE" as barrier.
+    //			// Synchronization is achieved by polling fChange, using "fChange == COMPUTING_CHANGE" as
+    // barrier.
     //			// Timeout of 10s for safety reasons (should not be reached).
     //			long end= System.currentTimeMillis() + 10000;
     //			do {
@@ -389,7 +399,7 @@ public class ChangeCorrectionProposal
    */
   public void setDisplayName(String name) {
     if (name == null) {
-      throw new IllegalArgumentException("Name must not be null"); //$NON-NLS-1$
+      throw new IllegalArgumentException("Name must not be null"); // $NON-NLS-1$
     }
     fName = name;
   }

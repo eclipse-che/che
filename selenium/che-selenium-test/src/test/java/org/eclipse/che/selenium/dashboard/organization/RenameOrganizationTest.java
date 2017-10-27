@@ -52,7 +52,7 @@ public class RenameOrganizationTest {
 
   @Inject
   @Named("admin")
-  private TestOrganizationServiceClient organizationServiceClient;
+  private TestOrganizationServiceClient testOrganizationServiceClient;
 
   @Inject private TestUser testUser;
   @Inject private AdminTestUser adminTestUser;
@@ -62,14 +62,14 @@ public class RenameOrganizationTest {
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
 
     parentOrganization =
-        organizationServiceClient.create(NameGenerator.generate("organization", 5));
+        testOrganizationServiceClient.create(NameGenerator.generate("organization", 5));
     childOrganization =
-        organizationServiceClient.create(
+        testOrganizationServiceClient.create(
             NameGenerator.generate("organization", 5), parentOrganization.getId());
 
     parentNewName = NameGenerator.generate("newname", 5);
-    organizationServiceClient.addAdmin(parentOrganization.getId(), testUser.getId());
-    organizationServiceClient.addAdmin(childOrganization.getId(), testUser.getId());
+    testOrganizationServiceClient.addAdmin(parentOrganization.getId(), testUser.getId());
+    testOrganizationServiceClient.addAdmin(childOrganization.getId(), testUser.getId());
 
     dashboard.logout();
     dashboard.open(testUser.getName(), testUser.getPassword());
@@ -77,7 +77,7 @@ public class RenameOrganizationTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    organizationServiceClient.deleteById(parentOrganization.getId());
+    testOrganizationServiceClient.deleteById(parentOrganization.getId());
   }
 
   @Test(priority = 1)

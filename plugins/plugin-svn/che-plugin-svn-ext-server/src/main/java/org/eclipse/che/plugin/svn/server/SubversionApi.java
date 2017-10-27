@@ -195,7 +195,7 @@ public class SubversionApi {
   public CLIOutputResponse copy(final CopyRequest request)
       throws IOException, SubversionException, UnauthorizedException {
 
-    //for security reason we should forbid file protocol
+    // for security reason we should forbid file protocol
     if (request.getSource().startsWith("file://")
         || request.getDestination().startsWith("file://")) {
       throw new SubversionException("Url is not acceptable");
@@ -775,7 +775,7 @@ public class SubversionApi {
           }
         };
 
-    //for security reason we should forbid file protocol
+    // for security reason we should forbid file protocol
     if (Iterables.any(request.getSource(), sourcePredicate)
         || request.getDestination().startsWith("file://")) {
       throw new SubversionException("Url is not acceptable");

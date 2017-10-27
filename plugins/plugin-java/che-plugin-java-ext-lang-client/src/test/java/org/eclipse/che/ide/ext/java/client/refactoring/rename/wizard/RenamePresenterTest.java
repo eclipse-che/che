@@ -13,11 +13,11 @@ package org.eclipse.che.ide.ext.java.client.refactoring.rename.wizard;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.CreateRenameRefactoring.RenameType.COMPILATION_UNIT;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.CreateRenameRefactoring.RenameType.JAVA_ELEMENT;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.CreateRenameRefactoring.RenameType.PACKAGE;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -76,7 +76,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 
 @RunWith(GwtMockitoTestRunner.class)
@@ -84,7 +83,7 @@ public class RenamePresenterTest {
   private static final String SESSION_ID = "sessionId";
   private static final String TEXT = "text.text";
 
-  //variables for constructor
+  // variables for constructor
   @Mock private RenameView view;
   @Mock private SimilarNamesConfigurationPresenter similarNamesConfigurationPresenter;
   @Mock private JavaLocalizationConstant locale;
@@ -164,7 +163,7 @@ public class RenamePresenterTest {
         .thenReturn(renameRefactoringSessionPromise);
     when(session.getWizardType()).thenReturn(RenameRefactoringSession.RenameWizard.LOCAL_VARIABLE);
     when(renameRefactoringSessionPromise.then(
-            Matchers.<Operation<RenameRefactoringSession>>anyObject()))
+            org.mockito.ArgumentMatchers.<Operation<RenameRefactoringSession>>anyObject()))
         .thenReturn(renameRefactoringSessionPromise);
     when(view.isUpdateDelegateUpdating()).thenReturn(true);
     when(view.isUpdateQualifiedNames()).thenReturn(true);
@@ -173,11 +172,13 @@ public class RenamePresenterTest {
         .thenReturn(RenameSettings.MachStrategy.SUFFIX);
     when(refactorService.setRenameSettings(renameSettings)).thenReturn(renameSettingsPromise);
     when(renameSettingsPromise.thenPromise(
-            Matchers.<Function<Void, Promise<ChangeCreationResult>>>any()))
+            org.mockito.ArgumentMatchers.<Function<Void, Promise<ChangeCreationResult>>>any()))
         .thenReturn(changeCreationResultPromise);
-    when(changeCreationResultPromise.then(Matchers.<Operation<ChangeCreationResult>>any()))
+    when(changeCreationResultPromise.then(
+            org.mockito.ArgumentMatchers.<Operation<ChangeCreationResult>>any()))
         .thenReturn(changeCreationResultPromise);
-    when(changeCreationResultPromise.catchError(Matchers.<Operation<PromiseError>>anyObject()))
+    when(changeCreationResultPromise.catchError(
+            org.mockito.ArgumentMatchers.<Operation<PromiseError>>anyObject()))
         .thenReturn(changeCreationResultPromise);
     when(refactorService.applyRefactoring(refactoringSession)).thenReturn(refactoringStatusPromise);
 
@@ -188,7 +189,8 @@ public class RenamePresenterTest {
     when(refactoringUpdater.handleMovingFiles(anyList())).thenReturn(handleMovingFilesPromise);
     when(refactoringUpdater.updateAfterRefactoring(anyList()))
         .thenReturn(updateAfterRefactoringPromise);
-    when(updateAfterRefactoringPromise.then(Matchers.<Operation<Void>>anyObject()))
+    when(updateAfterRefactoringPromise.then(
+            org.mockito.ArgumentMatchers.<Operation<Void>>anyObject()))
         .thenReturn(updateAfterRefactoringPromise);
 
     renamePresenter =
@@ -216,7 +218,7 @@ public class RenamePresenterTest {
     renamePresenter.show(refactorInfo);
 
     verify(createRenameRefactoringDto).setRefactorLightweight(false);
-    verify(createRenameRefactoringDto).setPath(anyString());
+    verify(createRenameRefactoringDto).setPath(nullable(String.class));
     verify(createRenameRefactoringDto).setType(COMPILATION_UNIT);
     verify(createRenameRefactoringDto).setProjectPath(eq("/project"));
 
@@ -225,7 +227,10 @@ public class RenamePresenterTest {
     promiseErrorCaptor.getValue().apply(promiseError);
     verify(notificationManager)
         .notify(
-            anyString(), anyString(), any(StatusNotification.Status.class), any(DisplayMode.class));
+            nullable(String.class),
+            nullable(String.class),
+            any(StatusNotification.Status.class),
+            any(DisplayMode.class));
   }
 
   @Test
@@ -248,7 +253,7 @@ public class RenamePresenterTest {
     verifyPreparingWizard();
 
     verify(locale).renameCompilationUnitTitle();
-    verify(view).setTitle(anyString());
+    verify(view).setTitle(nullable(String.class));
     verify(view).setVisiblePatternsPanel(true);
     verify(view).setVisibleFullQualifiedNamePanel(true);
     verify(view).setVisibleSimilarlyVariablesPanel(true);
@@ -275,7 +280,7 @@ public class RenamePresenterTest {
     verifyPreparingWizard();
 
     verify(locale).renamePackageTitle();
-    verify(view).setTitle(anyString());
+    verify(view).setTitle(nullable(String.class));
     verify(view).setVisiblePatternsPanel(true);
     verify(view).setVisibleFullQualifiedNamePanel(true);
     verify(view).setVisibleRenameSubpackagesPanel(true);
@@ -302,7 +307,7 @@ public class RenamePresenterTest {
     verifyPreparingWizard();
 
     verify(locale).renameTypeTitle();
-    verify(view).setTitle(anyString());
+    verify(view).setTitle(nullable(String.class));
     verify(view).setVisiblePatternsPanel(true);
     verify(view).setVisibleFullQualifiedNamePanel(true);
     verify(view).setVisibleSimilarlyVariablesPanel(true);
@@ -329,7 +334,7 @@ public class RenamePresenterTest {
     verifyPreparingWizard();
 
     verify(locale).renameFieldTitle();
-    verify(view).setTitle(anyString());
+    verify(view).setTitle(nullable(String.class));
     verify(view).setVisiblePatternsPanel(true);
 
     verify(view).show();
@@ -354,7 +359,7 @@ public class RenamePresenterTest {
     verifyPreparingWizard();
 
     verify(locale).renameEnumTitle();
-    verify(view).setTitle(anyString());
+    verify(view).setTitle(nullable(String.class));
     verify(view).setVisiblePatternsPanel(true);
 
     verify(view).show();
@@ -379,7 +384,7 @@ public class RenamePresenterTest {
     verifyPreparingWizard();
 
     verify(locale).renameTypeVariableTitle();
-    verify(view).setTitle(anyString());
+    verify(view).setTitle(nullable(String.class));
 
     verify(view).show();
   }
@@ -403,7 +408,7 @@ public class RenamePresenterTest {
     verifyPreparingWizard();
 
     verify(locale).renameMethodTitle();
-    verify(view).setTitle(anyString());
+    verify(view).setTitle(nullable(String.class));
     verify(view).setVisibleKeepOriginalPanel(true);
 
     verify(view).show();
@@ -427,7 +432,7 @@ public class RenamePresenterTest {
     verifyPreparingWizard();
 
     verify(locale).renameLocalVariableTitle();
-    verify(view).setTitle(anyString());
+    verify(view).setTitle(nullable(String.class));
 
     verify(view).show();
   }
@@ -439,7 +444,7 @@ public class RenamePresenterTest {
     renamePresenter.show((RefactorInfo) null);
 
     verify(createRenameRefactoringDto).setType(JAVA_ELEMENT);
-    verify(createRenameRefactoringDto).setPath(anyString());
+    verify(createRenameRefactoringDto).setPath(nullable(String.class));
     verify(createRenameRefactoringDto).setOffset(2);
 
     verify(refactorService).createRenameRefactoring(createRenameRefactoringDto);
@@ -449,7 +454,7 @@ public class RenamePresenterTest {
     verifyPreparingWizard();
 
     verify(locale).renameLocalVariableTitle();
-    verify(view).setTitle(anyString());
+    verify(view).setTitle(nullable(String.class));
 
     verify(view).show();
   }
@@ -476,7 +481,7 @@ public class RenamePresenterTest {
     verifyPreparingWizard();
 
     verify(locale).renameCompilationUnitTitle();
-    verify(view).setTitle(anyString());
+    verify(view).setTitle(nullable(String.class));
 
     verify(view).show();
   }
@@ -495,7 +500,7 @@ public class RenamePresenterTest {
 
   private void verifyPreparingRenameRefactoringDto() {
     verify(createRenameRefactoringDto).setRefactorLightweight(false);
-    verify(createRenameRefactoringDto).setPath(anyString());
+    verify(createRenameRefactoringDto).setPath(nullable(String.class));
     verify(createRenameRefactoringDto).setType(COMPILATION_UNIT);
     verify(createRenameRefactoringDto).setProjectPath(eq("/project"));
   }
@@ -545,7 +550,10 @@ public class RenamePresenterTest {
     verify(promiseError).getMessage();
     verify(notificationManager)
         .notify(
-            anyString(), anyString(), any(StatusNotification.Status.class), any(DisplayMode.class));
+            nullable(String.class),
+            nullable(String.class),
+            any(StatusNotification.Status.class),
+            any(DisplayMode.class));
   }
 
   @Test
@@ -588,7 +596,8 @@ public class RenamePresenterTest {
 
     verify(updateAfterRefactoringPromise).then(updateAfterRefactoringOperation.capture());
     updateAfterRefactoringOperation.getValue().apply(null);
-    verify(refactoringUpdater).updateAfterRefactoring(Matchers.<List<ChangeInfo>>anyObject());
+    verify(refactoringUpdater)
+        .updateAfterRefactoring(org.mockito.ArgumentMatchers.<List<ChangeInfo>>anyObject());
     verify(refactoringUpdater).handleMovingFiles(anyList());
     verify(clientServerEventService).sendFileTrackingResumeEvent();
   }
@@ -628,7 +637,8 @@ public class RenamePresenterTest {
     verify(view).hide();
     verify(updateAfterRefactoringPromise).then(updateAfterRefactoringOperation.capture());
     updateAfterRefactoringOperation.getValue().apply(null);
-    verify(refactoringUpdater).updateAfterRefactoring(Matchers.<List<ChangeInfo>>anyObject());
+    verify(refactoringUpdater)
+        .updateAfterRefactoring(org.mockito.ArgumentMatchers.<List<ChangeInfo>>anyObject());
     verify(refactoringUpdater).handleMovingFiles(anyList());
     verify(clientServerEventService).sendFileTrackingResumeEvent();
   }
@@ -677,7 +687,10 @@ public class RenamePresenterTest {
     verify(promiseError).getMessage();
     verify(notificationManager)
         .notify(
-            anyString(), anyString(), any(StatusNotification.Status.class), any(DisplayMode.class));
+            nullable(String.class),
+            nullable(String.class),
+            any(StatusNotification.Status.class),
+            any(DisplayMode.class));
   }
 
   @Test
@@ -703,7 +716,7 @@ public class RenamePresenterTest {
 
     verify(view).hide();
     verify(previewPresenter).show(SESSION_ID, refactorInfo);
-    verify(previewPresenter).setTitle(anyString());
+    verify(previewPresenter).setTitle(nullable(String.class));
   }
 
   @Test
@@ -718,12 +731,12 @@ public class RenamePresenterTest {
     when(refactoringStatus.getEntries()).thenReturn(entries);
     when(refactoringStatus.getSeverity()).thenReturn(2);
     when(dialogFactory.createConfirmDialog(
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            Matchers.<ConfirmCallback>anyObject(),
-            Matchers.<CancelCallback>anyObject()))
+            nullable(String.class),
+            nullable(String.class),
+            nullable(String.class),
+            nullable(String.class),
+            org.mockito.ArgumentMatchers.<ConfirmCallback>anyObject(),
+            org.mockito.ArgumentMatchers.<CancelCallback>anyObject()))
         .thenReturn(dialog);
     renamePresenter.onAcceptButtonClicked();
 
@@ -732,12 +745,12 @@ public class RenamePresenterTest {
 
     verify(dialogFactory)
         .createConfirmDialog(
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            Matchers.<ConfirmCallback>anyObject(),
-            Matchers.<CancelCallback>anyObject());
+            nullable(String.class),
+            nullable(String.class),
+            nullable(String.class),
+            nullable(String.class),
+            org.mockito.ArgumentMatchers.<ConfirmCallback>anyObject(),
+            org.mockito.ArgumentMatchers.<CancelCallback>anyObject());
     verify(dialog).show();
   }
 
@@ -781,7 +794,7 @@ public class RenamePresenterTest {
     verify(view).isUpdateReferences();
     verify(renameSettings).setUpdateQualifiedNames(true);
     verify(view, times(2)).isUpdateQualifiedNames();
-    verify(renameSettings).setFilePatterns(anyString());
+    verify(renameSettings).setFilePatterns(nullable(String.class));
     verify(renameSettings).setUpdateTextualMatches(anyBoolean());
     verify(view).isUpdateTextualOccurrences();
     verify(renameSettings).setUpdateSimilarDeclarations(true);

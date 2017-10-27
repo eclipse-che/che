@@ -133,10 +133,10 @@ public abstract class TextEditBasedChange extends Change {
    * @see #setTextType(String)
    */
   protected TextEditBasedChange(String name) {
-    Assert.isNotNull(name, "Name must not be null"); //$NON-NLS-1$
+    Assert.isNotNull(name, "Name must not be null"); // $NON-NLS-1$
     fChangeGroups = new ArrayList(5);
     fName = name;
-    fTextType = "txt"; //$NON-NLS-1$
+    fTextType = "txt"; // $NON-NLS-1$
   }
 
   /**
@@ -209,7 +209,7 @@ public abstract class TextEditBasedChange extends Change {
           // or else spurious changes show up that look like deletes from the source
           if (surroundingLines == 0) {
             // empty: show nothing
-            return ""; //$NON-NLS-1$
+            return ""; // $NON-NLS-1$
           }
 
           endLine =
@@ -388,7 +388,7 @@ public abstract class TextEditBasedChange extends Change {
    *     default text type <code>txt</code>.
    */
   public void setTextType(String type) {
-    if (type == null) type = "txt"; //$NON-NLS-1$
+    if (type == null) type = "txt"; // $NON-NLS-1$
     fTextType = type;
   }
 }

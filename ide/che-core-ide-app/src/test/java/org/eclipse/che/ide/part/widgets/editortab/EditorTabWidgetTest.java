@@ -36,7 +36,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.vectomatic.dom.svg.OMSVGSVGElement;
 import org.vectomatic.dom.svg.ui.SVGImage;
@@ -48,7 +47,7 @@ public class EditorTabWidgetTest {
 
   private static final String SOME_TEXT = "someText";
 
-  //constructor mocks
+  // constructor mocks
   @Mock(answer = Answers.RETURNS_DEEP_STUBS)
   private PartStackUIResources resources;
 
@@ -57,7 +56,7 @@ public class EditorTabWidgetTest {
   @Mock private EditorPartPresenter editorPartPresenter;
   @Mock private EditorPartStack editorPartStack;
 
-  //additional mocks
+  // additional mocks
   @Mock private Element element;
   @Mock private OMSVGSVGElement svg;
   @Mock private ActionDelegate delegate;
@@ -160,7 +159,7 @@ public class EditorTabWidgetTest {
 
     verify(editorPartPresenter, times(2)).getEditorInput();
     verify(editorPartPresenter, times(2)).getTitleImage();
-    verify(tab.iconPanel).setWidget(Matchers.<SVGImage>anyObject());
+    verify(tab.iconPanel).setWidget(org.mockito.ArgumentMatchers.<SVGImage>anyObject());
   }
 
   @Test

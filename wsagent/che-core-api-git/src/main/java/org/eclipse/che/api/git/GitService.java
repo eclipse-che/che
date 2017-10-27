@@ -526,7 +526,7 @@ public class GitService {
             String value = config.get(entry);
             result.put(entry, value);
           } catch (GitException exception) {
-            //value for this config property non found. Do nothing
+            // value for this config property non found. Do nothing
           }
         }
       }
@@ -563,7 +563,7 @@ public class GitService {
           try {
             config.unset(entry);
           } catch (GitException exception) {
-            //value for this config property non found. Do nothing
+            // value for this config property non found. Do nothing
           }
         }
       }

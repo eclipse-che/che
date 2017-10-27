@@ -58,7 +58,7 @@ public class BranchDeleteTest {
   )
   public void testSimpleDelete(GitConnectionFactory connectionFactory)
       throws GitException, IOException, UnauthorizedException {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     addFile(connection, "README.txt", org.eclipse.che.git.impl.GitTestUtil.CONTENT);
     connection.add(AddParams.create(singletonList("README.txt")));
@@ -80,9 +80,9 @@ public class BranchDeleteTest {
                         .withActive(false)
                         .withRemote(false)))
             .isEmpty());
-    //when
+    // when
     connection.branchDelete("newbranch", false);
-    //then
+    // then
     assertTrue(
         Sets.symmetricDifference(
                 Sets.newHashSet(connection.branchList(LIST_LOCAL)),
@@ -101,22 +101,22 @@ public class BranchDeleteTest {
   )
   public void shouldDeleteNotFullyMergedBranchWithForce(GitConnectionFactory connectionFactory)
       throws GitException, IOException, UnauthorizedException {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     addFile(connection, "README.txt", org.eclipse.che.git.impl.GitTestUtil.CONTENT);
     connection.add(AddParams.create(singletonList("README.txt")));
     connection.commit(CommitParams.create("Initial addd"));
-    //create new branch and make a commit
+    // create new branch and make a commit
     connection.checkout(CheckoutParams.create("newbranch").withCreateNew(true));
     addFile(connection, "newfile", "new file content");
     connection.add(AddParams.create(singletonList(".")));
     connection.commit(CommitParams.create("second commit"));
     connection.checkout(CheckoutParams.create("master"));
 
-    //when
+    // when
     connection.branchDelete("newbranch", true);
 
-    //then
+    // then
     assertTrue(
         Sets.symmetricDifference(
                 Sets.newHashSet(connection.branchList(LIST_LOCAL)),
@@ -138,12 +138,12 @@ public class BranchDeleteTest {
       GitConnectionFactory connectionFactory)
       throws GitException, IOException, UnauthorizedException, NoSuchFieldException,
           IllegalAccessException {
-    //given
+    // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     addFile(connection, "README.txt", org.eclipse.che.git.impl.GitTestUtil.CONTENT);
     connection.add(AddParams.create(singletonList("README.txt")));
     connection.commit(CommitParams.create("Initial addd"));
-    //create new branch and make a commit
+    // create new branch and make a commit
     connection.checkout(CheckoutParams.create("newbranch").withCreateNew(true));
     addFile(connection, "newfile", "new file content");
     connection.add(AddParams.create(singletonList(".")));

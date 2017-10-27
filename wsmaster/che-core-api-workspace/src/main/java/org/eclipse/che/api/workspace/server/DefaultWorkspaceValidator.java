@@ -32,9 +32,9 @@ import org.eclipse.che.api.environment.server.CheEnvironmentValidator;
  */
 @Singleton
 public class DefaultWorkspaceValidator implements WorkspaceValidator {
-  /* should contain [3, 20] characters, first and last character is letter or digit, available characters {A-Za-z0-9.-_}*/
+  /* should contain [3, 100] characters, first and last character is letter or digit, available characters {A-Za-z0-9.-_}*/
   private static final Pattern WS_NAME =
-      Pattern.compile("[a-zA-Z0-9][-_.a-zA-Z0-9]{1,18}[a-zA-Z0-9]");
+      Pattern.compile("[a-zA-Z0-9][-_.a-zA-Z0-9]{1,98}[a-zA-Z0-9]");
 
   private final CheEnvironmentValidator environmentValidator;
 
@@ -55,11 +55,11 @@ public class DefaultWorkspaceValidator implements WorkspaceValidator {
     checkNotNull(config.getName(), "Workspace name required");
     checkArgument(
         WS_NAME.matcher(config.getName()).matches(),
-        "Incorrect workspace name, it must be between 3 and 20 characters and may contain digits, "
+        "Incorrect workspace name, it must be between 3 and 100 characters and may contain digits, "
             + "latin letters, underscores, dots, dashes and should start and end only with digits, "
             + "latin letters or underscores");
 
-    //environments
+    // environments
     checkArgument(
         !isNullOrEmpty(config.getDefaultEnv()), "Workspace default environment name required");
     checkNotNull(config.getEnvironments(), "Workspace should contain at least one environment");
@@ -75,7 +75,7 @@ public class DefaultWorkspaceValidator implements WorkspaceValidator {
       }
     }
 
-    //commands
+    // commands
     for (Command command : config.getCommands()) {
       checkArgument(
           !isNullOrEmpty(command.getName()),
@@ -88,14 +88,14 @@ public class DefaultWorkspaceValidator implements WorkspaceValidator {
           config.getName());
     }
 
-    //projects
-    //TODO
+    // projects
+    // TODO
   }
 
   @Override
   public void validateAttributes(Map<String, String> attributes) throws BadRequestException {
     for (String attributeName : attributes.keySet()) {
-      //attribute name should not be empty and should not start with codenvy
+      // attribute name should not be empty and should not start with codenvy
       checkArgument(
           attributeName != null
               && !attributeName.trim().isEmpty()

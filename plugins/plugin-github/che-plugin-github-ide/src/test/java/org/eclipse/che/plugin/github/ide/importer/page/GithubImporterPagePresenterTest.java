@@ -12,10 +12,11 @@ package org.eclipse.che.plugin.github.ide.importer.page;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -63,7 +64,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
@@ -126,8 +126,8 @@ public class GithubImporterPagePresenterTest {
                 locale));
     doReturn(Collections.singletonList(gitHubUser))
         .when(presenter)
-        .toOrgList(any(JsArrayMixed.class));
-    doReturn(Collections.emptyList()).when(presenter).toRepoList(any(JsArrayMixed.class));
+        .toOrgList(nullable(JsArrayMixed.class));
+    doReturn(Collections.emptyList()).when(presenter).toRepoList(nullable(JsArrayMixed.class));
     presenter.setUpdateDelegate(updateDelegate);
     presenter.init(dataObject);
   }
@@ -142,7 +142,7 @@ public class GithubImporterPagePresenterTest {
     String importerDescription = "description";
     AcceptsOneWidget container = mock(AcceptsOneWidget.class);
     ProjectImporterDescriptor projectImporter = mock(ProjectImporterDescriptor.class);
-    //when(wizardContext.getData(ImportProjectWizard.PROJECT_IMPORTER)).thenReturn(projectImporter);
+    // when(wizardContext.getData(ImportProjectWizard.PROJECT_IMPORTER)).thenReturn(projectImporter);
     when(projectImporter.getDescription()).thenReturn(importerDescription);
 
     presenter.go(container);
@@ -163,7 +163,7 @@ public class GithubImporterPagePresenterTest {
               }
             })
         .when(presenter)
-        .doRequest(any(Promise.class), any(Promise.class), any(Promise.class));
+        .doRequest(nullable(Promise.class), nullable(Promise.class), nullable(Promise.class));
     when(view.getAccountName()).thenReturn("AccountName");
 
     presenter.onLoadRepoClicked();
@@ -176,9 +176,9 @@ public class GithubImporterPagePresenterTest {
     verify(view).setInputsEnableState(eq(false));
     verify(view).setLoaderVisibility(eq(false));
     verify(view).setInputsEnableState(eq(true));
-    verify(view).setAccountNames(Matchers.<Set>anyObject());
+    verify(view).setAccountNames(org.mockito.ArgumentMatchers.<Set>anyObject());
     verify(view, times(2)).showGithubPanel();
-    verify(view).setRepositories(Matchers.<List<ProjectData>>anyObject());
+    verify(view).setRepositories(org.mockito.ArgumentMatchers.<List<ProjectData>>anyObject());
     verify(view).reset();
   }
 
@@ -193,7 +193,7 @@ public class GithubImporterPagePresenterTest {
               }
             })
         .when(presenter)
-        .doRequest(any(Promise.class), any(Promise.class), any(Promise.class));
+        .doRequest(nullable(Promise.class), nullable(Promise.class), nullable(Promise.class));
 
     presenter.onLoadRepoClicked();
 
@@ -207,7 +207,8 @@ public class GithubImporterPagePresenterTest {
     verify(view).setInputsEnableState(eq(true));
     verify(view, never()).setAccountNames((Set<String>) anyObject());
     verify(view, never()).showGithubPanel();
-    verify(view, never()).setRepositories(Matchers.<List<ProjectData>>anyObject());
+    verify(view, never())
+        .setRepositories(org.mockito.ArgumentMatchers.<List<ProjectData>>anyObject());
   }
 
   @Test
@@ -264,7 +265,7 @@ public class GithubImporterPagePresenterTest {
 
   @Test
   public void testSshUriWithHostBetweenDoubleSlashAndSlash() {
-    //Check for type uri which start with ssh:// and has host between // and /
+    // Check for type uri which start with ssh:// and has host between // and /
     String correctUrl = "ssh://host.com/some/path";
     when(view.getProjectName()).thenReturn("");
 
@@ -275,7 +276,7 @@ public class GithubImporterPagePresenterTest {
 
   @Test
   public void testSshUriWithHostBetweenDoubleSlashAndColon() {
-    //Check for type uri with host between // and :
+    // Check for type uri with host between // and :
     String correctUrl = "ssh://host.com:port/some/path";
     when(view.getProjectName()).thenReturn("");
 
@@ -286,7 +287,7 @@ public class GithubImporterPagePresenterTest {
 
   @Test
   public void testGitUriWithHostBetweenDoubleSlashAndSlash() {
-    //Check for type uri which start with git:// and has host between // and /
+    // Check for type uri which start with git:// and has host between // and /
     String correctUrl = "git://host.com/user/repo";
     when(view.getProjectName()).thenReturn("");
 
@@ -297,7 +298,7 @@ public class GithubImporterPagePresenterTest {
 
   @Test
   public void testSshUriWithHostBetweenAtAndColon() {
-    //Check for type uri with host between @ and :
+    // Check for type uri with host between @ and :
     String correctUrl = "user@host.com:login/repo";
     when(view.getProjectName()).thenReturn("");
 
@@ -308,7 +309,7 @@ public class GithubImporterPagePresenterTest {
 
   @Test
   public void testSshUriWithHostBetweenAtAndSlash() {
-    //Check for type uri with host between @ and /
+    // Check for type uri with host between @ and /
     String correctUrl = "ssh://user@host.com/some/path";
     when(view.getProjectName()).thenReturn("");
 
@@ -510,7 +511,7 @@ public class GithubImporterPagePresenterTest {
               }
             })
         .when(presenter)
-        .doRequest(any(Promise.class), any(Promise.class), any(Promise.class));
+        .doRequest(nullable(Promise.class), nullable(Promise.class), nullable(Promise.class));
     doReturn(exception).when(promiseError).getCause();
 
     presenter.onLoadRepoClicked();
@@ -528,7 +529,8 @@ public class GithubImporterPagePresenterTest {
     verify(view, times(2)).setInputsEnableState(eq(true));
     verify(view, never()).setAccountNames((Set<String>) anyObject());
     verify(view, never()).showGithubPanel();
-    verify(view, never()).setRepositories(Matchers.<List<ProjectData>>anyObject());
+    verify(view, never())
+        .setRepositories(org.mockito.ArgumentMatchers.<List<ProjectData>>anyObject());
   }
 
   @Test
@@ -550,7 +552,7 @@ public class GithubImporterPagePresenterTest {
               }
             })
         .when(presenter)
-        .doRequest(any(Promise.class), any(Promise.class), any(Promise.class));
+        .doRequest(nullable(Promise.class), nullable(Promise.class), nullable(Promise.class));
     final Throwable exception = mock(UnauthorizedException.class);
     String userId = "userId";
     CurrentUser user = mock(CurrentUser.class);

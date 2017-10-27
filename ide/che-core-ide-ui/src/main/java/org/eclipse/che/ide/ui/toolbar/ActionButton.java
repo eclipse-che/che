@@ -218,7 +218,7 @@ public class ActionButton extends Composite
       return;
     }
 
-    //todo handle popup group
+    // todo handle popup group
     ActionEvent e = new ActionEvent(presentation, actionManager, perspectiveManager);
     if (action instanceof ActionGroup
         && !(action instanceof CustomComponentAction)

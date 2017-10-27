@@ -107,35 +107,35 @@ import org.eclipse.swt.graphics.Image;
 public class QuickAssistProcessor implements IQuickAssistProcessor {
 
   public static final String SPLIT_JOIN_VARIABLE_DECLARATION_ID =
-      "org.eclipse.jdt.ui.correction.splitJoinVariableDeclaration.assist"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.correction.splitJoinVariableDeclaration.assist"; // $NON-NLS-1$
   public static final String CONVERT_FOR_LOOP_ID =
-      "org.eclipse.jdt.ui.correction.convertForLoop.assist"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.correction.convertForLoop.assist"; // $NON-NLS-1$
   public static final String ASSIGN_TO_LOCAL_ID =
-      "org.eclipse.jdt.ui.correction.assignToLocal.assist"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.correction.assignToLocal.assist"; // $NON-NLS-1$
   public static final String ASSIGN_TO_FIELD_ID =
-      "org.eclipse.jdt.ui.correction.assignToField.assist"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.correction.assignToField.assist"; // $NON-NLS-1$
   public static final String ASSIGN_PARAM_TO_FIELD_ID =
-      "org.eclipse.jdt.ui.correction.assignParamToField.assist"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.correction.assignParamToField.assist"; // $NON-NLS-1$
   public static final String ADD_BLOCK_ID =
-      "org.eclipse.jdt.ui.correction.addBlock.assist"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.correction.addBlock.assist"; // $NON-NLS-1$
   public static final String EXTRACT_LOCAL_ID =
-      "org.eclipse.jdt.ui.correction.extractLocal.assist"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.correction.extractLocal.assist"; // $NON-NLS-1$
   public static final String EXTRACT_LOCAL_NOT_REPLACE_ID =
-      "org.eclipse.jdt.ui.correction.extractLocalNotReplaceOccurrences.assist"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.correction.extractLocalNotReplaceOccurrences.assist"; // $NON-NLS-1$
   public static final String EXTRACT_CONSTANT_ID =
-      "org.eclipse.jdt.ui.correction.extractConstant.assist"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.correction.extractConstant.assist"; // $NON-NLS-1$
   public static final String INLINE_LOCAL_ID =
-      "org.eclipse.jdt.ui.correction.inlineLocal.assist"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.correction.inlineLocal.assist"; // $NON-NLS-1$
   public static final String CONVERT_LOCAL_TO_FIELD_ID =
-      "org.eclipse.jdt.ui.correction.convertLocalToField.assist"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.correction.convertLocalToField.assist"; // $NON-NLS-1$
   public static final String CONVERT_ANONYMOUS_TO_LOCAL_ID =
-      "org.eclipse.jdt.ui.correction.convertAnonymousToLocal.assist"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.correction.convertAnonymousToLocal.assist"; // $NON-NLS-1$
   public static final String CONVERT_TO_STRING_BUFFER_ID =
-      "org.eclipse.jdt.ui.correction.convertToStringBuffer.assist"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.correction.convertToStringBuffer.assist"; // $NON-NLS-1$
   public static final String CONVERT_TO_MESSAGE_FORMAT_ID =
-      "org.eclipse.jdt.ui.correction.convertToMessageFormat.assist"; //$NON-NLS-1$;
+      "org.eclipse.jdt.ui.correction.convertToMessageFormat.assist"; // $NON-NLS-1$;
   public static final String EXTRACT_METHOD_INPLACE_ID =
-      "org.eclipse.jdt.ui.correction.extractMethodInplace.assist"; //$NON-NLS-1$;
+      "org.eclipse.jdt.ui.correction.extractMethodInplace.assist"; // $NON-NLS-1$;
 
   public QuickAssistProcessor() {
     super();
@@ -300,7 +300,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
     final ExtractMethodRefactoring extractMethodRefactoring =
         new ExtractMethodRefactoring(
             context.getASTRoot(), context.getSelectionOffset(), context.getSelectionLength());
-    extractMethodRefactoring.setMethodName("extracted"); //$NON-NLS-1$
+    extractMethodRefactoring.setMethodName("extracted"); // $NON-NLS-1$
     if (extractMethodRefactoring.checkInitialConditions(new NullProgressMonitor()).isOK()) {
       String label = CorrectionMessages.QuickAssistProcessor_extractmethod_description;
       LinkedProposalModel linkedProposalModel = new LinkedProposalModel();
@@ -612,7 +612,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
     Statement statementInBlockBody;
     Expression bodyExpr = (Expression) rewrite.createMoveTarget(lambda.getBody());
     if (ast.resolveWellKnownType("void")
-        .isEqualTo(lambda.resolveMethodBinding().getReturnType())) { //$NON-NLS-1$
+        .isEqualTo(lambda.resolveMethodBinding().getReturnType())) { // $NON-NLS-1$
       ExpressionStatement expressionStatement = ast.newExpressionStatement(bodyExpr);
       statementInBlockBody = expressionStatement;
     } else {
@@ -753,8 +753,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
       int relevance =
           locations == null
               ? IProposalRelevance.INSERT_INFERRED_TYPE_ARGUMENTS
-              : IProposalRelevance
-                  .INSERT_INFERRED_TYPE_ARGUMENTS_ERROR; // if error -> higher than ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals()
+              : IProposalRelevance.INSERT_INFERRED_TYPE_ARGUMENTS_ERROR; // if error -> higher than
+      // ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals()
       Map<String, String> options = new HashMap<String, String>();
       options.put(CleanUpConstants.USE_TYPE_ARGUMENTS, CleanUpOptions.TRUE);
       options.put(CleanUpConstants.INSERT_INFERRED_TYPE_ARGUMENTS, CleanUpOptions.TRUE);
@@ -923,8 +923,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
             image);
     boolean commandConflict = false;
     for (Iterator<ICommandAccess> iterator = resultingCollections.iterator();
-        iterator.hasNext();
-        ) {
+        iterator.hasNext(); ) {
       Object completionProposal = iterator.next();
       if (completionProposal instanceof ChangeCorrectionProposal) {
         if (SPLIT_JOIN_VARIABLE_DECLARATION_ID.equals(
@@ -992,7 +991,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
       return false;
 
     AST ast = node.getAST();
-    ITypeBinding stringBinding = ast.resolveWellKnownType("java.lang.String"); //$NON-NLS-1$
+    ITypeBinding stringBinding = ast.resolveWellKnownType("java.lang.String"); // $NON-NLS-1$
 
     if (node instanceof Expression && !(node instanceof InfixExpression)) {
       node = node.getParent();
@@ -1036,9 +1035,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
     String bufferOrBuilderName;
     ICompilationUnit cu = context.getCompilationUnit();
     if (JavaModelUtil.is50OrHigher(cu.getJavaProject())) {
-      bufferOrBuilderName = "StringBuilder"; //$NON-NLS-1$
+      bufferOrBuilderName = "StringBuilder"; // $NON-NLS-1$
     } else {
-      bufferOrBuilderName = "StringBuffer"; //$NON-NLS-1$
+      bufferOrBuilderName = "StringBuffer"; // $NON-NLS-1$
     }
 
     ASTRewrite rewrite = ASTRewrite.create(ast);
@@ -1061,7 +1060,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
     Statement insertAfter;
     String bufferName;
 
-    String groupID = "nameId"; //$NON-NLS-1$
+    String groupID = "nameId"; // $NON-NLS-1$
     ListRewrite listRewrite;
 
     Statement enclosingStatement = ASTResolving.findParentStatement(oldInfixExpression);
@@ -1141,7 +1140,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
       Expression operand = iter.next();
 
       MethodInvocation appendIncovationExpression = ast.newMethodInvocation();
-      appendIncovationExpression.setName(ast.newSimpleName("append")); //$NON-NLS-1$
+      appendIncovationExpression.setName(ast.newSimpleName("append")); // $NON-NLS-1$
       SimpleName bufferNameReference = ast.newSimpleName(bufferName);
 
       // If there was an existing name, don't offer to rename it
@@ -1170,7 +1169,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
     } else {
       // replace old expression with toString
       MethodInvocation bufferToString = ast.newMethodInvocation();
-      bufferToString.setName(ast.newSimpleName("toString")); //$NON-NLS-1$
+      bufferToString.setName(ast.newSimpleName("toString")); // $NON-NLS-1$
       SimpleName bufferNameReference = ast.newSimpleName(bufferName);
       bufferToString.setExpression(bufferNameReference);
       proposal.addLinkedPosition(rewrite.track(bufferNameReference), true, groupID);
@@ -1220,7 +1219,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
       if (methodInvocation.getParent() instanceof Statement) {
 
         // ..of a function called append:
-        if ("append".equals(methodInvocation.getName().getIdentifier())) { //$NON-NLS-1$
+        if ("append".equals(methodInvocation.getName().getIdentifier())) { // $NON-NLS-1$
           Expression expression = methodInvocation.getExpression();
 
           // ..and the append is being called on a Simple object:
@@ -1231,7 +1230,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
               // And the object's type is a StringBuilder or StringBuffer:
               if ("java.lang.StringBuilder".equals(typeName)
-                  || "java.lang.StringBuffer".equals(typeName)) { //$NON-NLS-1$ //$NON-NLS-2$
+                  || "java.lang.StringBuffer".equals(typeName)) { // $NON-NLS-1$ //$NON-NLS-2$
                 return (SimpleName) expression;
               }
             }
@@ -1260,7 +1259,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
     collectInfixPlusOperands(oldInfixExpression, operands);
 
     List<Expression> formatArguments = new ArrayList<Expression>();
-    String formatString = ""; //$NON-NLS-1$
+    String formatString = ""; // $NON-NLS-1$
     int i = 0;
     for (Iterator<Expression> iterator = operands.iterator(); iterator.hasNext(); ) {
       Expression operand = iterator.next();
@@ -1268,10 +1267,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
       if (operand instanceof StringLiteral) {
         String value = ((StringLiteral) operand).getEscapedValue();
         value = value.substring(1, value.length() - 1);
-        value = value.replaceAll("'", "''"); //$NON-NLS-1$ //$NON-NLS-2$
+        value = value.replaceAll("'", "''"); // $NON-NLS-1$ //$NON-NLS-2$
         formatString += value;
       } else {
-        formatString += "{" + i + "}"; //$NON-NLS-1$ //$NON-NLS-2$
+        formatString += "{" + i + "}"; // $NON-NLS-1$ //$NON-NLS-2$
 
         Expression argument;
         if (is50OrHigher) {
@@ -1312,16 +1311,16 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
     proposal.setImportRewrite(importRewrite);
 
     String messageType =
-        importRewrite.addImport("java.text.MessageFormat", importContext); //$NON-NLS-1$
+        importRewrite.addImport("java.text.MessageFormat", importContext); // $NON-NLS-1$
 
     MethodInvocation formatInvocation = ast.newMethodInvocation();
     formatInvocation.setExpression(ast.newName(messageType));
-    formatInvocation.setName(ast.newSimpleName("format")); //$NON-NLS-1$
+    formatInvocation.setName(ast.newSimpleName("format")); // $NON-NLS-1$
 
     List<Expression> arguments = formatInvocation.arguments();
 
     StringLiteral formatStringArgument = ast.newStringLiteral();
-    formatStringArgument.setEscapedValue("\"" + formatString + "\""); //$NON-NLS-1$ //$NON-NLS-2$
+    formatStringArgument.setEscapedValue("\"" + formatString + "\""); // $NON-NLS-1$ //$NON-NLS-2$
     arguments.add(formatStringArgument);
 
     if (is50OrHigher) {
@@ -1331,7 +1330,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
     } else {
       ArrayCreation objectArrayCreation = ast.newArrayCreation();
 
-      Type objectType = ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
+      Type objectType = ast.newSimpleType(ast.newSimpleName("Object")); // $NON-NLS-1$
       ArrayType arrayType = ast.newArrayType(objectType);
       objectArrayCreation.setType(arrayType);
 
@@ -1989,7 +1988,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
     //		newCatchClause.setBody((Block) rewrite.createCopyTarget(catchClause.getBody()));
 
-    //newCatchClause#setBody() destroys the formatting, hence copy statement by statement.
+    // newCatchClause#setBody() destroys the formatting, hence copy statement by statement.
     List<Statement> statements = catchClause.getBody().statements();
     for (Iterator<Statement> iterator2 = statements.iterator(); iterator2.hasNext(); ) {
       newCatchClause.getBody().statements().add(rewrite.createCopyTarget(iterator2.next()));
@@ -2033,7 +2032,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
       IProblemLocation[] locations,
       Collection<ICommandAccess> resultingCollections)
       throws CoreException {
-    //TODO RENAME
+    // TODO RENAME
     //		if (!(context instanceof AssistContext)) {
     //			return false;
     //		}
@@ -2051,7 +2050,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
     //		}
     //
     //		IJavaElement javaElement= binding.getJavaElement();
-    //		if (javaElement == null || !RefactoringAvailabilityTester.isRenameElementAvailable(javaElement)) {
+    //		if (javaElement == null ||
+    // !RefactoringAvailabilityTester.isRenameElementAvailable(javaElement)) {
     //			return false;
     //		}
     //
@@ -2191,9 +2191,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
       outer = block;
       label = CorrectionMessages.QuickAssistProcessor_unwrap_block;
     } else if (outer instanceof ParenthesizedExpression) {
-      //ParenthesizedExpression expression= (ParenthesizedExpression) outer;
-      //body= expression.getExpression();
-      //label= CorrectionMessages.getString("QuickAssistProcessor.unwrap.parenthesis");	 //$NON-NLS-1$
+      // ParenthesizedExpression expression= (ParenthesizedExpression) outer;
+      // body= expression.getExpression();
+      // label= CorrectionMessages.getString("QuickAssistProcessor.unwrap.parenthesis");
+      // //$NON-NLS-1$
     } else if (outer instanceof MethodInvocation) {
       MethodInvocation invocation = (MethodInvocation) outer;
       if (invocation.arguments().size() == 1) {
@@ -2478,11 +2479,11 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
     MethodInvocation method = (MethodInvocation) node;
     String identifier = method.getName().getIdentifier();
     if (!"equals".equals(identifier)
-        && !"equalsIgnoreCase".equals(identifier)) { //$NON-NLS-1$ //$NON-NLS-2$
+        && !"equalsIgnoreCase".equals(identifier)) { // $NON-NLS-1$ //$NON-NLS-2$
       return false;
     }
     List<Expression> arguments = method.arguments();
-    if (arguments.size() != 1) { //overloaded equals w/ more than 1 argument
+    if (arguments.size() != 1) { // overloaded equals w/ more than 1 argument
       return false;
     }
     Expression right = arguments.get(0);
@@ -2490,7 +2491,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
     if (binding != null
         && !(binding.isClass()
             || binding.isInterface()
-            || binding.isEnum())) { //overloaded equals w/ non-class/interface argument or null
+            || binding.isEnum())) { // overloaded equals w/ non-class/interface argument or null
       return false;
     }
     if (resultingCollections == null) {
@@ -2697,15 +2698,15 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
     boolean initializerIsArray = initializerTypeBinding.isArray();
     ITypeBinding initializerListType =
-        Bindings.findTypeInHierarchy(initializerTypeBinding, "java.util.List"); //$NON-NLS-1$
+        Bindings.findTypeInHierarchy(initializerTypeBinding, "java.util.List"); // $NON-NLS-1$
     ITypeBinding initializerIterableType =
-        Bindings.findTypeInHierarchy(initializerTypeBinding, "java.lang.Iterable"); //$NON-NLS-1$
+        Bindings.findTypeInHierarchy(initializerTypeBinding, "java.lang.Iterable"); // $NON-NLS-1$
 
     if (initializerIterableType != null) {
       String label = CorrectionMessages.QuickAssistProcessor_convert_to_iterator_for_loop;
       Image image = JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 
-      String iterNameKey = "iterName"; //$NON-NLS-1$
+      String iterNameKey = "iterName"; // $NON-NLS-1$
       ASTRewrite rewrite = ASTRewrite.create(ast);
       LinkedCorrectionProposal proposal =
           new LinkedCorrectionProposal(
@@ -2720,14 +2721,14 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
       // create initializer
       MethodInvocation iterInitializer = ast.newMethodInvocation();
-      iterInitializer.setName(ast.newSimpleName("iterator")); //$NON-NLS-1$
+      iterInitializer.setName(ast.newSimpleName("iterator")); // $NON-NLS-1$
       ImportRewrite imports = proposal.createImportRewrite(context.getASTRoot());
       ImportRewriteContext importRewriteContext =
           new ContextSensitiveImportRewriteContext(node, imports);
       Type iterType =
           ast.newSimpleType(
               ast.newName(
-                  imports.addImport("java.util.Iterator", importRewriteContext))); //$NON-NLS-1$
+                  imports.addImport("java.util.Iterator", importRewriteContext))); // $NON-NLS-1$
       if (initializerIterableType.getTypeArguments().length == 1) {
         Type iterTypeArgument =
             imports.addImport(
@@ -2762,7 +2763,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
       // create condition
       MethodInvocation condition = ast.newMethodInvocation();
-      condition.setName(ast.newSimpleName("hasNext")); //$NON-NLS-1$
+      condition.setName(ast.newSimpleName("hasNext")); // $NON-NLS-1$
       SimpleName conditionExpression = ast.newSimpleName(iterName);
       proposal.addLinkedPosition(
           rewrite.track(conditionExpression), LinkedPositionGroup.NO_STOP, iterNameKey);
@@ -2781,7 +2782,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
           rewrite.track(elementIterName), LinkedPositionGroup.NO_STOP, iterNameKey);
 
       MethodInvocation getMethodInvocation = ast.newMethodInvocation();
-      getMethodInvocation.setName(ast.newSimpleName("next")); //$NON-NLS-1$
+      getMethodInvocation.setName(ast.newSimpleName("next")); // $NON-NLS-1$
       getMethodInvocation.setExpression(elementIterName);
       elementFragment.setInitializer(getMethodInvocation);
 
@@ -2818,8 +2819,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
       String label = CorrectionMessages.QuickAssistProcessor_convert_to_indexed_for_loop;
       Image image = JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 
-      String varNameKey = "varName"; //$NON-NLS-1$
-      String indexNameKey = "indexName"; //$NON-NLS-1$
+      String varNameKey = "varName"; // $NON-NLS-1$
+      String indexNameKey = "indexName"; // $NON-NLS-1$
       ASTRewrite rewrite = ASTRewrite.create(ast);
       LinkedCorrectionProposal proposal =
           new LinkedCorrectionProposal(
@@ -2928,10 +2929,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
       Expression conditionRight;
       if (initializerIsArray) {
         conditionRight =
-            ast.newQualifiedName(conditionRightName, ast.newSimpleName("length")); //$NON-NLS-1$
+            ast.newQualifiedName(conditionRightName, ast.newSimpleName("length")); // $NON-NLS-1$
       } else {
         MethodInvocation sizeMethodInvocation = ast.newMethodInvocation();
-        sizeMethodInvocation.setName(ast.newSimpleName("size")); //$NON-NLS-1$
+        sizeMethodInvocation.setName(ast.newSimpleName("size")); // $NON-NLS-1$
         sizeMethodInvocation.setExpression(conditionRightName);
         conditionRight = sizeMethodInvocation;
       }
@@ -2971,7 +2972,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
         elementAccess = elementArrayAccess;
       } else {
         MethodInvocation getMethodInvocation = ast.newMethodInvocation();
-        getMethodInvocation.setName(ast.newSimpleName("get")); //$NON-NLS-1$
+        getMethodInvocation.setName(ast.newSimpleName("get")); // $NON-NLS-1$
         getMethodInvocation.setExpression(elementVarName);
         getMethodInvocation.arguments().add(elementIndexName);
         elementAccess = getMethodInvocation;
@@ -3084,8 +3085,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
             .fragments()
             .get(0)
             .toString()
-            .equals("$missing$")) { //$NON-NLS-1$
-      // variable name is resolved to the type in a variable declaration statement, see https://bugs.eclipse.org/430336
+            .equals("$missing$")) { // $NON-NLS-1$
+      // variable name is resolved to the type in a variable declaration statement, see
+      // https://bugs.eclipse.org/430336
       Type type = ((VariableDeclarationStatement) statement).getType();
       if (type instanceof SimpleType) {
         SimpleType simpleType = (SimpleType) type;
@@ -3100,7 +3102,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
     if (expressionType == null) return false;
 
-    if (Bindings.findTypeInHierarchy(expressionType, "java.lang.Iterable") != null) { //$NON-NLS-1$
+    if (Bindings.findTypeInHierarchy(expressionType, "java.lang.Iterable") != null) { // $NON-NLS-1$
       if (resultingCollections == null) return true;
       GenerateForLoopAssistProposal proposal =
           new GenerateForLoopAssistProposal(
@@ -3111,7 +3113,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
               GenerateForLoopAssistProposal.GENERATE_ITERATOR_FOR);
       proposal.setRelevance(proposal.getRelevance() + relevanceBoost);
       resultingCollections.add(proposal);
-      if (Bindings.findTypeInHierarchy(expressionType, "java.util.List") != null) { //$NON-NLS-1$
+      if (Bindings.findTypeInHierarchy(expressionType, "java.util.List") != null) { // $NON-NLS-1$
         proposal =
             new GenerateForLoopAssistProposal(
                 cu,
@@ -3171,7 +3173,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
       name = ((QualifiedName) variableIdentifier.getName()).getName();
     }
 
-    // analyze variables which are available in the scope at the position of the quick assist invokation
+    // analyze variables which are available in the scope at the position of the quick assist
+    // invokation
     IBinding[] declarationsInScope =
         analyzer.getDeclarationsInScope(name.getStartPosition(), ScopeAnalyzer.VARIABLES);
     for (int i = 0; i < declarationsInScope.length; i++) {

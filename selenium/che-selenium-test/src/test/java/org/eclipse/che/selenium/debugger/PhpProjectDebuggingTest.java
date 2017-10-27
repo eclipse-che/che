@@ -85,7 +85,8 @@ public class PhpProjectDebuggingTest {
 
   @BeforeMethod
   public void startDebug() {
-    // goto root item in the Project Explorer to have proper value of ${current.project.path} when executing maven command.
+    // goto root item in the Project Explorer to have proper value of ${current.project.path} when
+    // executing maven command.
     projectExplorer.selectItem(PROJECT);
   }
 
@@ -134,7 +135,7 @@ public class PhpProjectDebuggingTest {
     debugPanel.waitTextInVariablesPanel("$_GET=array [0]");
 
     // when
-    debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.RESUME_BTN_ID);
+    debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.RESUME_BTN_ID);
 
     // then
     editor.waitTabFileWithSavedStatus("lib.php");
@@ -143,9 +144,9 @@ public class PhpProjectDebuggingTest {
     debugPanel.waitTextInVariablesPanel("$name=\"man\"");
 
     // when
-    debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_OUT);
+    debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_OUT);
 
-    //then
+    // then
     editor.waitTabFileWithSavedStatus("index.php");
     debugPanel.waitDebugHighlightedText("echo sayHello(\"man\");");
     debugPanel.waitTextInVariablesPanel("$_GET=array [0]");
@@ -188,9 +189,9 @@ public class PhpProjectDebuggingTest {
     debugPanel.waitTextInVariablesPanel("$name=\"man\"");
 
     // when
-    debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_OUT);
+    debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_OUT);
 
-    //then
+    // then
     editor.waitTabFileWithSavedStatus("index.php");
     debugPanel.waitDebugHighlightedText("echo sayHello(\"man\");");
     debugPanel.waitTextInVariablesPanel("$_GET=array [3]");

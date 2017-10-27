@@ -74,13 +74,13 @@ public class CreatePackagesAndFilesWithHelpIconCreateTest {
     projectExplorer.selectVisibleItem("java");
     loader.waitOnClosed();
 
-    //create new package
+    // create new package
     ideMainDockPanel.clickCreateIcon();
     ideMainDockPanel.runCommandFromCreateIconList(IdeMainDockPanel.CreateMenuCommand.PACKAGE);
     askForValueDialog.createNotJavaFileByName(NEW_PACKAGE_NAME);
     projectExplorer.waitItemInVisibleArea(NEW_PACKAGE_NAME);
 
-    //create new folder
+    // create new folder
     projectExplorer.waitItem(PROJECT_NAME + "/src/main");
     projectExplorer.selectItem(PROJECT_NAME + "/src/main");
     ideMainDockPanel.clickCreateIcon();
@@ -97,7 +97,7 @@ public class CreatePackagesAndFilesWithHelpIconCreateTest {
     editor.waitTabIsPresent(NEW_CLASS);
     loader.waitOnClosed();
 
-    //create new files with different type
+    // create new files with different type
     createNewFile(NEW_FILE_NAME, IdeMainDockPanel.CreateMenuCommand.FILE, "");
     editor.waitTabIsPresent(NEW_FILE_NAME);
     loader.waitOnClosed();

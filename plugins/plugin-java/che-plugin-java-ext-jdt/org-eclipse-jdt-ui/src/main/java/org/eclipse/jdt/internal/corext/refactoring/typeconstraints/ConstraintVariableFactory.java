@@ -256,6 +256,6 @@ public class ConstraintVariableFactory implements IConstraintVariableFactory {
 
   protected void dumpConstraintStats() {
     System.out.println(
-        "created: " + nrCreated + ", retrieved: " + nrRetrieved); //$NON-NLS-1$ //$NON-NLS-2$
+        "created: " + nrCreated + ", retrieved: " + nrRetrieved); // $NON-NLS-1$ //$NON-NLS-2$
   }
 }

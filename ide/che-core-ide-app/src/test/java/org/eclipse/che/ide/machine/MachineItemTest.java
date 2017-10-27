@@ -18,6 +18,7 @@ package org.eclipse.che.ide.machine;
  * <p>Contributors: Red Hat, Inc. - initial API and implementation
  * *****************************************************************************
  */
+
 import static org.eclipse.che.api.machine.shared.Constants.TERMINAL_REFERENCE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -41,7 +42,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /** @author Dmitry Shnurenko */
 @RunWith(MockitoJUnitRunner.class)

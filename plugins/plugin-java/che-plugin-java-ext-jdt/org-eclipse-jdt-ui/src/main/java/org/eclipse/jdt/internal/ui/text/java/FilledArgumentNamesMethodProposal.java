@@ -66,7 +66,8 @@ public class FilledArgumentNamesMethodProposal extends JavaMethodCompletionPropo
       //                }
       //
       //                LinkedModeUI ui = new EditorLinkedModeUI(model, getTextViewer());
-      //                ui.setExitPosition(getTextViewer(), baseOffset + replacement.length(), 0, Integer.MAX_VALUE);
+      //                ui.setExitPosition(getTextViewer(), baseOffset + replacement.length(), 0,
+      // Integer.MAX_VALUE);
       //                ui.setExitPolicy(new ExitPolicy(')', document));
       //                ui.setDoContextInfo(true);
       //                ui.setCyclingMode(LinkedModeUI.CYCLE_WHEN_NO_PARENT);
@@ -156,7 +157,8 @@ public class FilledArgumentNamesMethodProposal extends JavaMethodCompletionPropo
 
   private void openErrorDialog(BadLocationException e) {
     //		Shell shell= getTextViewer().getTextWidget().getShell();
-    //		MessageDialog.openError(shell, JavaTextMessages.FilledArgumentNamesMethodProposal_error_msg, e.getMessage());\
+    //		MessageDialog.openError(shell, JavaTextMessages.FilledArgumentNamesMethodProposal_error_msg,
+    // e.getMessage());\
     JavaPlugin.log(e);
   }
 

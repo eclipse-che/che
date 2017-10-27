@@ -47,7 +47,7 @@ public class HttpJsonHelper {
   /** Implementation HttpJsonHelper methods. */
   private static HttpJsonHelperImpl httpJsonHelperImpl = new HttpJsonHelperImpl();
 
-  //==============================================================
+  // ==============================================================
   public static <DTO> DTO request(
       Class<DTO> dtoInterface, Link link, Object body, Pair<String, ?>... parameters)
       throws IOException, ServerException, NotFoundException, ForbiddenException,
@@ -433,7 +433,7 @@ public class HttpJsonHelper {
       final String authToken = EnvironmentContext.getCurrent().getSubject().getToken();
       if ((parameters != null && parameters.length > 0) || authToken != null) {
         final UriBuilder ub = UriBuilder.fromUri(url);
-        //remove sensitive information from url.
+        // remove sensitive information from url.
         ub.replaceQueryParam("token", null);
 
         if (parameters != null && parameters.length > 0) {
@@ -448,7 +448,7 @@ public class HttpJsonHelper {
       conn.setReadTimeout(timeout > 0 ? timeout : 60000);
       try {
         conn.setRequestMethod(method);
-        //drop a hint for server side that we want to receive application/json
+        // drop a hint for server side that we want to receive application/json
         conn.addRequestProperty(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
         if (authToken != null) {
           conn.setRequestProperty(HttpHeaders.AUTHORIZATION, authToken);
@@ -457,8 +457,8 @@ public class HttpJsonHelper {
           conn.addRequestProperty(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
           conn.setDoOutput(true);
 
-          if (HttpMethod.DELETE.equals(
-              method)) { //to avoid jdk bug described here http://bugs.java.com/view_bug.do?bug_id=7157360
+          if (HttpMethod.DELETE.equals(method)) { // to avoid jdk bug described here
+            // http://bugs.java.com/view_bug.do?bug_id=7157360
             conn.setRequestMethod(HttpMethod.POST);
             conn.setRequestProperty("X-HTTP-Method-Override", HttpMethod.DELETE);
           }

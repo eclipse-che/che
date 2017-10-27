@@ -185,7 +185,7 @@ public class CheckFileWatcherExcludeFeatureTest {
         PATH_FOR_EXCLUDED_FILE,
         ProjectExplorer.FileWatcherExcludeOperations.REMOVE_FROM_FILE_WATCHER_EXCLUDES);
     editor.waitTextNotPresentIntoEditor(FILE_NAME_FOR_EXCLUDE);
-    //This test fails because of issue: https://github.com/eclipse/che/issues/5883.
+    // This test fails because of issue: https://github.com/eclipse/che/issues/5883.
     events.waitMessageIsNotPresent("File 'fileWatcherIgnore' is updated");
   }
 

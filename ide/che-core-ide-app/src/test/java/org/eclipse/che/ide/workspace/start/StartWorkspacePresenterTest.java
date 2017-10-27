@@ -10,8 +10,8 @@
  */
 package org.eclipse.che.ide.workspace.start;
 
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -35,22 +35,21 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /** @author Dmitry Shnurenko */
 @RunWith(MockitoJUnitRunner.class)
 public class StartWorkspacePresenterTest {
 
-  //constructor mocks
+  // constructor mocks
   @Mock private StartWorkspaceView view;
   @Mock private Provider<WorkspaceComponent> wsComponentProvider;
   @Mock private WorkspaceWidgetFactory widgetFactory;
   @Mock private CreateWorkspacePresenter createWorkspacePresenter;
   @Mock private BrowserAddress browserAddress;
 
-  //additional mocks
+  // additional mocks
   @Mock private WorkspaceDto workspaceDto;
   @Mock private WorkspaceConfigDto workspaceConfigDto;
   @Mock private WorkspaceWidget widget;
@@ -111,7 +110,8 @@ public class StartWorkspacePresenterTest {
     presenter.onCreateWorkspaceClicked();
 
     verify(view).hide();
-    verify(createWorkspacePresenter).show(Matchers.<List<WorkspaceDto>>anyObject(), eq(callback));
+    verify(createWorkspacePresenter)
+        .show(org.mockito.ArgumentMatchers.<List<WorkspaceDto>>anyObject(), eq(callback));
   }
 
   @Test

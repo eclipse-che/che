@@ -331,16 +331,16 @@ public class JavaNavigation {
     IJavaElement[] children = iType.getChildren();
     for (IJavaElement child : children) {
       switch (child.getElementType()) {
-        case 7: //type
+        case 7: // type
           types.add(convertToDTOType((IType) child));
           break;
-        case 8: //field
+        case 8: // field
           fields.add(convertToDTOField((IField) child));
           break;
-        case 9: //method
+        case 9: // method
           methods.add(convertToDTOMethod((IMethod) child));
           break;
-        case 10: //initializer
+        case 10: // initializer
           initializers.add(convertToDTOInitializer((IInitializer) child));
           break;
         default:
@@ -561,7 +561,7 @@ public class JavaNavigation {
     getHierarchicalPackageChildren((IPackageFragmentRoot) fragment.getParent(), fragment, result);
     IClassFile[] classFiles = fragment.getClassFiles();
     List<IClassFile> filtered = new ArrayList<>();
-    //filter inner classes
+    // filter inner classes
     for (IClassFile classFile : classFiles) {
       if (!classFile.getElementName().contains("$")) {
         filtered.add(classFile);
@@ -585,7 +585,7 @@ public class JavaNavigation {
       IPackageFragmentRoot parent, IPackageFragment fragment, Collection<Object> result)
       throws JavaModelException {
     IJavaElement[] children = parent.getChildren();
-    String prefix = fragment != null ? fragment.getElementName() + '.' : ""; //$NON-NLS-1$
+    String prefix = fragment != null ? fragment.getElementName() + '.' : ""; // $NON-NLS-1$
     int prefixLen = prefix.length();
     for (int i = 0; i < children.length; i++) {
       IPackageFragment curr = (IPackageFragment) children[i];
@@ -697,7 +697,7 @@ public class JavaNavigation {
     }
 
     if (path.startsWith("/")) {
-      //non java file
+      // non java file
       if (root instanceof JarPackageFragmentRoot) {
         JarPackageFragmentRoot jarPackageFragmentRoot = (JarPackageFragmentRoot) root;
         ZipFile jar = null;
@@ -741,7 +741,7 @@ public class JavaNavigation {
   }
 
   public ClassContent getContent(IJavaProject project, String path) throws JavaModelException {
-    //java class or file
+    // java class or file
     IType type = project.findType(path);
     if (type != null) {
       if (type.isBinary()) {
@@ -834,7 +834,7 @@ public class JavaNavigation {
       }
 
     } else {
-      //java class or file
+      // java class or file
       IType type = project.findType(path);
       if (type != null && type.isBinary()) {
         IClassFile classFile = type.getClassFile();

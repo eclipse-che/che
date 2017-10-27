@@ -91,7 +91,7 @@ public class RefactoringService {
 
                 IType type = javaProject.findType(javaElement.getPath());
 
-                //in some cases client may send FQN that doesn't exist
+                // in some cases client may send FQN that doesn't exist
                 if (type == null) {
                   throw new IllegalArgumentException("Can't find type: " + javaElement.getPath());
                 }

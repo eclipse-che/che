@@ -123,7 +123,7 @@ public final class MethodProposalInfo extends MemberProposalInfo {
         map.put(variable, SignatureUtil.getLowerBound(concreteParameters[i]));
       else
         // fProposal.getDeclarationSignature() is a raw type - use Object
-        map.put(variable, "Ljava.lang.Object;".toCharArray()); //$NON-NLS-1$
+        map.put(variable, "Ljava.lang.Object;".toCharArray()); // $NON-NLS-1$
     }
 
     return map;
@@ -229,7 +229,7 @@ public final class MethodProposalInfo extends MemberProposalInfo {
   private String computeSimpleTypeName(String signature, Map<String, char[]> typeVariables) {
     // method equality uses erased types
     String erasure = Signature.getTypeErasure(signature);
-    erasure = erasure.replaceAll("/", "."); //$NON-NLS-1$//$NON-NLS-2$
+    erasure = erasure.replaceAll("/", "."); // $NON-NLS-1$//$NON-NLS-2$
     String simpleName = Signature.getSimpleName(Signature.toString(erasure));
     char[] typeVar = typeVariables.get(simpleName);
     if (typeVar != null) simpleName = String.valueOf(Signature.getSignatureSimpleName(typeVar));

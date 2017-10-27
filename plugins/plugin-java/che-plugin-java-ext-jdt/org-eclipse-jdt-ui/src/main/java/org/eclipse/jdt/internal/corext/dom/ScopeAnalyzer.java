@@ -202,7 +202,7 @@ public class ScopeAnalyzer {
       return true;
     } else if (binding.isArray()) {
       if (addInherited(
-          fRoot.getAST().resolveWellKnownType("java.lang.Object"), flags, requestor)) //$NON-NLS-1$
+          fRoot.getAST().resolveWellKnownType("java.lang.Object"), flags, requestor)) // $NON-NLS-1$
       return true;
     }
 

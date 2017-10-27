@@ -12,9 +12,9 @@ package org.eclipse.che.ide.part.explorer.project.synchronize;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -47,7 +47,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 
 @RunWith(GwtMockitoTestRunner.class)
@@ -158,7 +157,7 @@ public class ProjectConfigSynchronizedTest {
     String projectRemoved = "project removed";
 
     when(resource.delete()).thenReturn(deleteProjectPromise);
-    when(deleteProjectPromise.then(Matchers.<Operation<Void>>any()))
+    when(deleteProjectPromise.then(org.mockito.ArgumentMatchers.<Operation<Void>>any()))
         .thenReturn(deleteProjectPromise);
     when(locale.projectRemoved(PROJECT_NAME)).thenReturn(projectRemoved);
 
@@ -209,7 +208,7 @@ public class ProjectConfigSynchronizedTest {
     when(sourceStorage.getLocation()).thenReturn(null);
     when(changeLocationWidget.getText()).thenReturn(newLocation);
     when(dialogFactory.createConfirmDialog(
-            anyString(), Matchers.<IsWidget>any(), anyObject(), anyObject()))
+            anyString(), org.mockito.ArgumentMatchers.<IsWidget>any(), anyObject(), anyObject()))
         .thenReturn(changeConfirmDialog);
 
     subscribeToOnBeforeLoadNodeEvent();

@@ -68,7 +68,7 @@ public class ClipboardManagerImpl implements ClipboardManager {
     public boolean isCopyEnable(AppContext appContext) {
       final Resource[] resources = appContext.getResources();
 
-      //check general state
+      // check general state
       return !(resources == null || resources.length == 0);
     }
 
@@ -77,7 +77,7 @@ public class ClipboardManagerImpl implements ClipboardManager {
     public void performCopy(AppContext appContext) {
       final Resource[] resources = appContext.getResources();
 
-      //check general state
+      // check general state
       checkState(resources != null && resources.length > 0);
 
       copyPasteManager.setResources(resources, false);
@@ -88,13 +88,13 @@ public class ClipboardManagerImpl implements ClipboardManager {
     public boolean isCutEnable(AppContext appContext) {
       final Resource[] resources = appContext.getResources();
 
-      //check general state
+      // check general state
       if (resources == null || resources.length == 0) {
         return false;
       }
 
       for (Resource resource : resources) {
-        //if there is at least one root project
+        // if there is at least one root project
         if (resource.getResourceType() == PROJECT && resource.getLocation().segmentCount() == 1) {
           return false;
         }
@@ -108,11 +108,11 @@ public class ClipboardManagerImpl implements ClipboardManager {
     public void performCut(AppContext appContext) {
       final Resource[] resources = appContext.getResources();
 
-      //check general state
+      // check general state
       checkState(resources != null && resources.length > 0);
 
       for (Resource resource : resources) {
-        //if there is at least one root project
+        // if there is at least one root project
         if (resource.getResourceType() == PROJECT && resource.getLocation().segmentCount() == 1) {
           throw new IllegalStateException(
               "Project '" + resource.getLocation() + "' can not be cut");
@@ -127,21 +127,21 @@ public class ClipboardManagerImpl implements ClipboardManager {
     public boolean isPastePossible(AppContext appContext) {
       final Resource[] resources = appContext.getResources();
 
-      //check general state
+      // check general state
       if (resources == null || resources.length > 1) {
         return false;
       }
 
       final Resource destination = resources[0];
 
-      //destination should be a container type
+      // destination should be a container type
       if (destination instanceof Container) {
         return true;
       }
 
       final Resource[] items = copyPasteManager.getResources();
 
-      //check prepared items
+      // check prepared items
       if (items == null || items.length == 0) {
         return false;
       }
@@ -154,12 +154,12 @@ public class ClipboardManagerImpl implements ClipboardManager {
     public void performPaste(AppContext appContext) {
       final Resource[] resources = appContext.getResources();
 
-      //check general state
+      // check general state
       checkState(resources != null && resources.length == 1 && resources[0] instanceof Container);
 
       final Resource[] items = copyPasteManager.getResources();
 
-      //check prepared items
+      // check prepared items
       if (items == null || items.length == 0) {
         throw new IllegalStateException("Nothing to process");
       }

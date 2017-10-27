@@ -88,7 +88,7 @@ public class ImportOperation extends WorkspaceModifyOperation {
 
   private boolean createContainerStructure = true;
 
-  //The constants for the overwrite 3 state
+  // The constants for the overwrite 3 state
   private static final int OVERWRITE_NOT_SET = 0;
 
   private static final int OVERWRITE_NONE = 1;
@@ -97,7 +97,7 @@ public class ImportOperation extends WorkspaceModifyOperation {
 
   private int overwriteState = OVERWRITE_NOT_SET;
 
-  private static final String ABSOLUTE_PATH = "<Absolute Path>"; //$NON-NLS-1$
+  private static final String ABSOLUTE_PATH = "<Absolute Path>"; // $NON-NLS-1$
 
   /**
    * Creates a new operation that recursively imports the entire contents of the specified root file
@@ -286,12 +286,12 @@ public class ImportOperation extends WorkspaceModifyOperation {
 
     int segmentCount = path.segmentCount();
 
-    //No containers to create
+    // No containers to create
     if (segmentCount == 0) {
       return currentFolder;
     }
 
-    //Needs to be handles differently at the root
+    // Needs to be handles differently at the root
     if (currentFolder.getType() == IResource.ROOT) {
       return createFromRoot(path);
     }
@@ -321,7 +321,7 @@ public class ImportOperation extends WorkspaceModifyOperation {
 
     int segmentCount = path.segmentCount();
 
-    //Assume the project exists
+    // Assume the project exists
     IContainer currentFolder = ((IWorkspaceRoot) destinationContainer).getProject(path.segment(0));
 
     for (int i = 1; i < segmentCount; i++) {
@@ -358,7 +358,7 @@ public class ImportOperation extends WorkspaceModifyOperation {
 
     try {
       if (selectedFiles == null) {
-        //Set the amount to 1000 as we have no idea of how long this will take
+        // Set the amount to 1000 as we have no idea of how long this will take
         monitor.beginTask("Importing:", 1000);
         ContainerGenerator generator = new ContainerGenerator(destinationPath);
         monitor.worked(30);
@@ -366,7 +366,7 @@ public class ImportOperation extends WorkspaceModifyOperation {
         monitor.worked(50);
         destinationContainer = generator.generateContainer(new SubProgressMonitor(monitor, 50));
         importRecursivelyFrom(source, POLICY_DEFAULT);
-        //Be sure it finishes
+        // Be sure it finishes
         monitor.worked(90);
       } else {
         // Choose twice the selected files size to take folders into account
@@ -568,7 +568,8 @@ public class ImportOperation extends WorkspaceModifyOperation {
 
       //            if (provider instanceof TarLeveledStructureProvider) {
       //            	try {
-      //            		targetResource.setResourceAttributes(((TarLeveledStructureProvider) provider).getResourceAttributes(fileObject));
+      //            		targetResource.setResourceAttributes(((TarLeveledStructureProvider)
+      // provider).getResourceAttributes(fileObject));
       //            	} catch (CoreException e) {
       //            		errorTable.add(e.getStatus());
       //            	}
@@ -810,7 +811,7 @@ public class ImportOperation extends WorkspaceModifyOperation {
    * @return <code>true</code> if the file should be overwritten, and <code>false</code> if not.
    */
   boolean queryOverwriteFile(IFile targetFile, int policy) {
-    //If force overwrite is on don't bother
+    // If force overwrite is on don't bother
     if (policy != POLICY_FORCE_OVERWRITE) {
       if (this.overwriteState == OVERWRITE_NOT_SET && !queryOverwrite(targetFile.getFullPath())) {
         return false;
@@ -882,13 +883,13 @@ public class ImportOperation extends WorkspaceModifyOperation {
       IWorkspace workspace = ResourcesPlugin.getWorkspace();
       IStatus status = workspace.validateEdit(files, null);
 
-      //If there was a mix return the bad ones
+      // If there was a mix return the bad ones
       if (status.isMultiStatus()) {
         return getRejectedFiles(status, files);
       }
 
       if (!status.isOK()) {
-        //If just a single status reject them all
+        // If just a single status reject them all
         errorTable.add(status);
         ArrayList filteredFiles = new ArrayList();
 

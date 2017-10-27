@@ -129,6 +129,7 @@ import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
@@ -398,7 +399,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
     final Resource resource = delta.getResource();
     final Path movedFrom = delta.getFromPath();
 
-    //file moved directly
+    // file moved directly
     if (document.getFile().getLocation().equals(movedFrom)) {
       deletedFilesController.add(movedFrom.toString());
       document.setFile((File) resource);
@@ -406,7 +407,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
 
       updateContent();
     } else if (movedFrom.isPrefixOf(
-        document.getFile().getLocation())) { //directory where file moved
+        document.getFile().getLocation())) { // directory where file moved
       final Path relPath =
           document.getFile().getLocation().removeFirstSegments(movedFrom.segmentCount());
       final Path newPath = delta.getToPath().append(relPath);
@@ -436,7 +437,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
   }
 
   @Override
-  protected void updateDirtyState(boolean dirty) {
+  public void updateDirtyState(boolean dirty) {
     if (isReadOnly()) {
       dirtyState = false;
       return;
@@ -653,7 +654,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
 
   @Override
   public void doSave(final AsyncCallback<EditorInput> callback) {
-    //If the workspace is stopped we shouldn't try to save a file
+    // If the workspace is stopped we shouldn't try to save a file
     if (isReadOnly() || appContext.getDevMachine() == null) {
       return;
     }
@@ -958,7 +959,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
   }
 
   private void showSignatureHelp() {
-    //TODO XXX
+    // TODO XXX
     SignatureHelpProvider signatureHelpProvider = getConfiguration().getSignatureHelpProvider();
     if (document != null && signatureHelpProvider != null) {
       Promise<Optional<SignatureHelp>> promise =
@@ -1123,7 +1124,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
           document.getLineCount(),
           configuration.getTabWidth());
 
-      //TODO: delayed activation
+      // TODO: delayed activation
       // handle delayed focus (initialization editor widget)
       // should also check if I am visible, but how ?
       if (delayedFocus) {
@@ -1210,7 +1211,15 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
                       new OrionVcsChangeMarkersRuler(
                           orionExtRulerOverlay, editorWidget.getEditor());
 
-                  String vcsName = appContext.getRootProject().getAttribute("vcs.provider.name");
+                  VirtualFile file = input.getFile();
+                  Project project =
+                      file instanceof Resource ? ((Resource) file).getProject() : null;
+                  if (project == null) {
+                    resolve.apply(null);
+                    return;
+                  }
+
+                  String vcsName = project.getAttribute("vcs.provider.name");
                   VcsChangeMarkerRenderFactory vcsChangeMarkerRenderFactory =
                       vcsChangeMarkerRenderFactoryMap.get(vcsName);
                   if (vcsChangeMarkerRenderFactory != null) {

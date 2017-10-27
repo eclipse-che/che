@@ -51,7 +51,7 @@ import org.eclipse.core.runtime.Assert;
 public class RefactoringSessionDescriptor {
 
   /** The version constant for v1.0 (value: 1.0) */
-  public static final String VERSION_1_0 = "1.0"; //$NON-NLS-1$
+  public static final String VERSION_1_0 = "1.0"; // $NON-NLS-1$
 
   /** The comment , or <code>null</code> for no comment */
   private final String fComment;
@@ -72,7 +72,7 @@ public class RefactoringSessionDescriptor {
   public RefactoringSessionDescriptor(
       final RefactoringDescriptor[] descriptors, final String version, final String comment) {
     Assert.isNotNull(descriptors);
-    Assert.isTrue(version != null && !"".equals(version)); //$NON-NLS-1$
+    Assert.isTrue(version != null && !"".equals(version)); // $NON-NLS-1$
     fDescriptors = new RefactoringDescriptor[descriptors.length];
     System.arraycopy(descriptors, 0, fDescriptors, 0, descriptors.length);
     fVersion = version;
@@ -85,7 +85,7 @@ public class RefactoringSessionDescriptor {
    * @return the comment, or the empty string
    */
   public final String getComment() {
-    return (fComment != null) ? fComment : ""; //$NON-NLS-1$
+    return (fComment != null) ? fComment : ""; // $NON-NLS-1$
   }
 
   /**

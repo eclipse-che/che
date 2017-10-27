@@ -126,7 +126,7 @@ abstract class TargetProvider {
 
   static void fastDone(IProgressMonitor pm) {
     if (pm == null) return;
-    pm.beginTask("", 1); //$NON-NLS-1$
+    pm.beginTask("", 1); // $NON-NLS-1$
     pm.worked(1);
     pm.done();
   }
@@ -419,7 +419,7 @@ abstract class TargetProvider {
         finder = new InvocationFinder(methodBinding);
         type.accept(finder);
       } else {
-        //scope of local class is enclosing block
+        // scope of local class is enclosing block
         ASTNode block = type.getParent().getParent();
         finder =
             new InvocationFinder(methodBinding) {

@@ -70,7 +70,7 @@ public class Rename18Test extends RefactoringTest {
 
   private ISourceRange getSelection(ICompilationUnit cu) throws Exception {
     String source = cu.getSource();
-    //Warning: this *includes* the SQUARE_BRACKET_OPEN!
+    // Warning: this *includes* the SQUARE_BRACKET_OPEN!
     int offset = source.indexOf(SQUARE_BRACKET_OPEN);
     int end = source.indexOf(SQUARE_BRACKET_CLOSE);
     return new SourceRange(offset + SQUARE_BRACKET_OPEN.length(), end - offset);
@@ -172,14 +172,14 @@ public class Rename18Test extends RefactoringTest {
 
     assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
     assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager().anythingToRedo());
-    //assertEquals("1 to undo", 1, Refactoring.getUndoManager().getRefactoringLog().size());
+    // assertEquals("1 to undo", 1, Refactoring.getUndoManager().getRefactoringLog().size());
 
     RefactoringCore.getUndoManager().performUndo(null, new NullProgressMonitor());
     assertEqualLines("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
 
     assertTrue("! anythingToUndo", !RefactoringCore.getUndoManager().anythingToUndo());
     assertTrue("anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
-    //assertEquals("1 to redo", 1, Refactoring.getUndoManager().getRedoStack().size());
+    // assertEquals("1 to redo", 1, Refactoring.getUndoManager().getRedoStack().size());
 
     RefactoringCore.getUndoManager().performRedo(null, new NullProgressMonitor());
     assertEqualLines("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());

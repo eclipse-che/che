@@ -35,21 +35,21 @@ public class OrganizationResourceLockKeyProviderTest {
 
   @Test
   public void shouldReturnRootOrganizationId() throws Exception {
-    //given
+    // given
     createOrganization("root", null);
     createOrganization("suborg", "root");
     createOrganization("subsuborg", "suborg");
 
-    //when
+    // when
     final String lockId = lockProvider.getLockKey("subsuborg");
 
-    //then
+    // then
     assertEquals(lockId, "root");
   }
 
   @Test
   public void shouldReturnOrganizationalReturnType() throws Exception {
-    //then
+    // then
     assertEquals(lockProvider.getAccountType(), OrganizationImpl.ORGANIZATIONAL_ACCOUNT);
   }
 

@@ -280,7 +280,7 @@ public class KeyCodeMap {
         return "↓";
       case DELETE:
         return "Delete";
-        //todo add others keys
+        // todo add others keys
     }
 
     return "";

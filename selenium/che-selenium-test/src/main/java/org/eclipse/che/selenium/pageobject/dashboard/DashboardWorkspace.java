@@ -11,7 +11,11 @@
 package org.eclipse.che.selenium.pageobject.dashboard;
 
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
@@ -19,7 +23,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
+import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.openqa.selenium.By;
@@ -37,61 +41,23 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 @Singleton
 public class DashboardWorkspace {
 
+  private final String WORKSPACE_TOOLBAR_TITLE = "Workspaces";
   private final SeleniumWebDriver seleniumWebDriver;
   private final Loader loader;
   private final Dashboard dashboard;
   private final DashboardProject dashboardProject;
+  private final TestApiEndpointUrlProvider apiEndpointUrlProvider;
 
   public interface TabNames {
-    String WS_CONFIG = "Workspace Config";
-    String RUNTIME = "Runtime";
-    String STACK_LIBRARY = "Stack library";
-    String STACK_IMPORT = "Stack import";
-    String STACK_AUTHORING = "Stack authoring";
     String OVERVIEW = "Overview";
     String PROJECTS = "Projects";
     String MACHINES = "Machines";
-    String AGENTS = "Agents";
     String SERVERS = "Servers";
+    String AGENTS = "Agents";
     String ENV_VARIABLES = "Env Variables";
     String CONFIG = "Config";
     String SSH = "Ssh";
     String SHARE = "Share";
-  }
-
-  // names of ready-to-go stacks
-  public interface ReadyGoToStacks {
-    String JAVA = "java-default";
-    String NODE = "node-default";
-    String JAVA_MYSQL = "java-mysql";
-  }
-
-  public interface RecipeTypeBtn {
-    String COMPOSE = "compose";
-    String DOCKERFILE = "dockerfile";
-    String MACHINES_WARNING_MSG =
-        "The environment should contain exactly one dev machine. "
-            + "Switch on Dev property to have terminal, SSH and IDE tooling injected to the machine.";
-  }
-
-  public enum StackLibrary {
-    BITNAMI_CODEIGNITER("Bitnami Codeigniter"),
-    BITNAMI_SYMFONY("Bitnami Symfony"),
-    BITNAMI_PLAY_FOR_JAVA("Bitnami Play for Java"),
-    BITNAMI_RAILS("Bitnami Rails"),
-    BITNAMI_EXPRESS("Bitnami Express"),
-    BITNAMI_LARAVEL("Bitnami Laravel"),
-    BITNAMI_SWIFT("Bitnami Swift");
-
-    private String name;
-
-    StackLibrary(String name) {
-      this.name = name;
-    }
-
-    public String getName() {
-      return name;
-    }
   }
 
   private interface Locators {
@@ -101,7 +67,7 @@ public class DashboardWorkspace {
         "//div[contains(@class,'che-toolbar')]//span[contains(text(),'%s')]";
     String WORKSPACES_LIST = "//ng-transclude[@class='che-list-content']";
     String WORKSPACE_ITEM_NAME =
-        "//div[contains(@class, 'che-list-item-name')]/span[contains(text(),'%s')]";
+        "//div[contains(@class, 'workspace-name-clip')]//div[contains(@data-str, '%s')]";
     String EXPORT_WORKSPACE_BTN =
         "//button[contains(@class, 'che-button')]/span[text()='Export as a file']";
     String DOWNLOAD_WORKSPACE_BTN = "//che-button-default[@che-button-title='download']";
@@ -118,14 +84,13 @@ public class DashboardWorkspace {
     String RUN_WORKSPACE_BTN = "//button/span[text()='Run']";
     String STOP_WORKSPACE_BTN = "//button/span[contains(text(),'Stop')]";
     String DELETE_WORKSPACE_BTN = "//button/span[text()='Delete']";
-    String STATE_WORKSPACE = "//div[contains(@class, 'workspace-status')]/span[text()='%s']";
+    String WORKSPACE_STATE = "workspace-status";
     String WORKSPACE_TITLE = "//div[contains(@class,'toolbar-info')]/span[text()='%s']";
     String DELETE_BTN_DIALOG_WIND =
         "//button[@ng-click='cheConfirmDialogController.hide()']//span[text()='Delete']";
     String CREATE_WS_FROM_STACK =
         "//md-radio-button[@aria-label='Create new workspace from stack']";
     String STACK_LIBRARY_ITEM = "//div[text()='%s']";
-    String SAVE_BUTTON = "//che-button-save-flat//span[text()='Save']";
     String RESENT_WS_NAVBAR = "//div[@class='admin-navbar-menu recent-workspaces']";
     String LEFT_SIDE_BAR = "//div[@class='left-sidebar-container']";
     String ADD_DEVLOPER_BTN = "//span[text()='Add Developer']";
@@ -144,15 +109,63 @@ public class DashboardWorkspace {
         "//div[contains(@class, 'recipe-editor')]//div[@class='CodeMirror-code']";
     String WARNING_DIALOG_DELETE = "//div[@class='ng-binding' and text()=\"%s\"]";
     String WS_TIMEOUT_MESSAGE = "//div[@che-label-name='Idle timeout']//div[@ng-transclude]";
+    String SAVE_BUTTON = "//che-button-save-flat//span[text()='Save']";
+    String CANCEL_BUTTON = "//che-button-cancel-flat//span[text()='Cancel']";
+    String DELETE_BUTTON = "//che-button-primary[@che-button-title='Delete']/button";
+    String ADD_MACHINE_BUTTON = "//che-button-primary[@che-button-title = 'Add machine']/button";
     String RAM_WORKSPACE = "//input[contains(@name, 'memory')]";
-    String CANCEL_BUTTON = "//che-popup[@title='Remove machine']//button";
+    String MACHINE_NAME = "//span[@machine-name='%s']";
+    String MACHINE_IMAGE = "//span[@machine-image='%s']";
+    String EDIT_MACHINE = "//div[@edit-machine='%s']";
+    String DELETE_MACHINE = "//div[@delete-machine='%s']";
+    String NEW_MACHINE_NAME = "//div[@che-form='editMachineForm']//input";
+    String EDIT_MACHINE_NAME_BUTTON = "//che-button-primary[@che-button-title='Edit']/button";
+    String EDIT_MACHINE_DIALOG_NAME = "//md-dialog/che-popup[@title='Edit the machine']";
+    String REMOVE_MACHINE_DIALOG_NAME = "//md-dialog/che-popup[@title='Remove machine']";
+    String ADD_MACHINE_DIALOG_NAME = "//md-dialog/che-popup[@title='Add a new machine']";
+    String CANCEL_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Cancel']";
+    String CLOSE_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Close']";
+    String DELETE_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Delete']";
+    String UPDATE_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Update']";
+    String ADD_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Add']";
+    String MACHINE_BUTTON =
+        "//che-machine-selector[@content-title='%s']//toggle-single-button[@id = 'workspace-machine-%s']//span";
+    String ENV_VARIABLE = "env-variable-name-%s";
+    String ADD_ENV_VARIABLE_BUTTON =
+        "//che-button-primary[@che-button-title='Add Env Variable']/button";
+    String ADD_ENV_VARIABLE_DIALOG_NAME =
+        "//md-dialog/che-popup[@title='Add a new environment variable']";
+    String VARIABLE_CHECKBOX = "//md-checkbox[@aria-label='Environment-Variable-%s']";
+    String VARIABLE_NAME = "//span[@variable-name='%s']";
+    String VARIABLE_VALUE = "//div[@id='env-variable-name-%s']//span[@variable-value='%s']";
+    String NEW_ENV_VARIABLE_NAME = "variable-name-input";
+    String NEW_ENV_VARIABLE_VALUE = "//textarea[@name='deskvalue']";
+    String EDIT_ENV_VARIABLE = "//div[@edit-variable='%s']";
+    String DELETE_ENV_VARIABLE = "//div[@delete-variable='%s']";
+    String SERVER = "server-name-%s";
+    String SERVER_REFERENCE = "//span[@server-reference='%s']";
+    String SERVER_PORT = "//div[@id='server-name-%s']//span[@server-port='%s']";
+    String SERVER_PROTOCOL = "//div[@id='server-name-%s']//span[@server-protocol='%s']";
+    String EDIT_SERVER_BUTTON = "//div[@edit-server='%s']";
+    String DELETE_SERVER_BUTTON = "//div[@delete-server='%s']";
+    String ADD_SERVER_BUTTON = "//che-button-primary[@che-button-title='Add Server']/button";
+    String ADD_NEW_SERVER_DIALOG_NAME = "//md-dialog/che-popup[@title='Add a new server']";
+    String ADD_SERVER_REFERENCE_FIELD = "server-reference-input";
+    String ADD_SERVER_PORT_FIELD = "server-port-input";
+    String ADD_SERVER_PROTOCOL_FIELD = "server-protocol-input";
+    String AGENT_NAME = "//span[@agent-name='%s']";
+    String AGENT_DESCRIPTION = "//span[@agent-description='%s']";
+    String AGENT_STATE = "//md-switch[@agent-switch='%s']";
+    String ADD_NEW_PROJECT_BUTTON = "//che-button-primary[@che-button-title='Add Project']/button";
+    String ADD_PROJECT_BUTTON = "//che-button-primary[@name='addButton']/button";
+    String SAMPLE_CHECKBOX_XPATH = "//md-checkbox[@aria-label='Sample %s']";
   }
 
   public enum StateWorkspace {
-    STOPPED("stopped"),
-    STARTING("starting"),
-    RUNNING("running"),
-    STOPPING("stopping");
+    STOPPED("Stopped"),
+    STARTING("Starting"),
+    RUNNING("Running"),
+    STOPPING("Stopping");
 
     private final String status;
 
@@ -170,11 +183,13 @@ public class DashboardWorkspace {
       SeleniumWebDriver seleniumWebDriver,
       Loader loader,
       Dashboard dashboard,
-      DashboardProject dashboardProject) {
+      DashboardProject dashboardProject,
+      TestApiEndpointUrlProvider apiEndpointUrlProvider) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
     this.dashboard = dashboard;
     this.dashboardProject = dashboardProject;
+    this.apiEndpointUrlProvider = apiEndpointUrlProvider;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -229,11 +244,20 @@ public class DashboardWorkspace {
   @FindBy(xpath = Locators.SAVE_BUTTON)
   WebElement saveBtn;
 
+  @FindBy(xpath = Locators.DELETE_BUTTON)
+  WebElement deleteBtn;
+
+  @FindBy(xpath = Locators.CANCEL_BUTTON)
+  WebElement cancelBtn;
+
   @FindBy(xpath = Locators.WS_TIMEOUT_MESSAGE)
   WebElement wsTimeotMessage;
 
+  @FindBy(id = Locators.WORKSPACE_STATE)
+  WebElement workspaceState;
+
   public void waitToolbarTitleName(String titleName) {
-    new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.LOADER_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
                 By.xpath(format(Locators.TOOLBAR_TITLE_NAME, titleName))));
@@ -296,27 +320,6 @@ public class DashboardWorkspace {
         .click();
   }
 
-  public void clickOnImportWorkspaceBtn() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(importWsRadioBtn))
-        .click();
-  }
-
-  public void selectRecipeType(String recipeType) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(format(Locators.RECIPE_TYPE_BUTTON, recipeType))))
-        .click();
-  }
-
-  /** set the focus into 'recipe-editor' form in the 'Stack authoring' */
-  public void clickIntoWorkspaceRecipeEditor() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.RECIPE_EDITOR)))
-        .click();
-  }
-
   /**
    * wait the warning message when there is two or more machines
    *
@@ -347,12 +350,6 @@ public class DashboardWorkspace {
         .until(ExpectedConditions.visibilityOf(recipeUrlField));
   }
 
-  public void typeCustomRecipeUrl(String nameOfWs) {
-    waitCustomRecipeUrlField();
-    recipeUrlField.clear();
-    recipeUrlField.sendKeys(nameOfWs);
-  }
-
   /** wait 'Open in IDE' btn on All workspaces page' */
   public void waitOpenInIdeWsEBtn() {
     new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
@@ -365,19 +362,6 @@ public class DashboardWorkspace {
     waitOpenInIdeWsEBtn();
     new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
         .until(ExpectedConditions.elementToBeClickable(openInIdeWsBtn))
-        .click();
-  }
-
-  /**
-   * select defined stack from 'READY-TO-GO STACKS' tab
-   *
-   * @param stackName name of stack from 'READY-TO-GO STACKS'
-   */
-  public void selectReadyToGoStack(String stackName) {
-    new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(format(Locators.STACK_NAME_XPATH, stackName))))
         .click();
   }
 
@@ -417,10 +401,10 @@ public class DashboardWorkspace {
    * @param stateWorkspace expected state of workspace
    */
   public void checkStateOfWorkspace(StateWorkspace stateWorkspace) {
-    new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
+    new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
         .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(format(Locators.STATE_WORKSPACE, stateWorkspace.getStatus()))));
+            ExpectedConditions.textToBePresentInElement(
+                workspaceState, stateWorkspace.getStatus()));
   }
 
   /** click on 'RUN' button in 'Workspace Information' */
@@ -466,39 +450,30 @@ public class DashboardWorkspace {
 
   /** wait the workspace is not present on dashboard */
   public void waitWorkspaceIsNotPresent(String nameWorkspace) {
-    new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
         .until(
             ExpectedConditions.invisibilityOfElementLocated(
                 By.xpath(format(Locators.WORKSPACE_ITEM_NAME, nameWorkspace))));
   }
 
-  /** Select 'Create new workspace from stack' on the 'New Workspace' page */
-  public void selectCreateNewWorkspaceFromStack() {
-    loader.waitOnClosed();
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.CREATE_WS_FROM_STACK)))
-        .click();
-  }
-
-  /**
-   * Select stack library by name
-   *
-   * @param stackLibrary name of stack
-   */
-  public void selectStackLibrary(StackLibrary stackLibrary) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(format(Locators.STACK_LIBRARY_ITEM, stackLibrary.getName()))))
-        .click();
-  }
-
-  /** Click on 'Save' on the 'New Workspace' page */
   public void clickOnSaveBtn() {
     loader.waitOnClosed();
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOf(saveBtn))
+        .click();
+  }
+
+  public void clickOnDeleteBtn() {
+    loader.waitOnClosed();
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOf(deleteBtn))
+        .click();
+  }
+
+  public void clickOnCancelBtn() {
+    loader.waitOnClosed();
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOf(cancelBtn))
         .click();
   }
 
@@ -574,26 +549,13 @@ public class DashboardWorkspace {
                 By.xpath(format(Locators.DEVELOPER_SHARE_ITEM, email))));
   }
 
-  /** Select 'Runtime' tab in workspace menu */
-  public void selectRuntimeTab() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.RUNTIME_TAB)))
-        .click();
-  }
-
-  /** Expand 'DEV-MACHINE' settings on the 'Runtime' tab */
-  public void expandDevMachineSettings() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.DEV_MACHINE)))
-        .click();
-  }
-
   /**
    * Select tab into workspace menu
    *
    * @param tabName is the tab name into workspace menu
    */
   public void selectTabInWorspaceMenu(String tabName) {
+    loader.waitOnClosed();
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
@@ -603,16 +565,6 @@ public class DashboardWorkspace {
 
   public void clickNewProjectButtonOnDashboard() throws Exception {
     dashboard.clickOnNewProjectLinkOnDashboard();
-  }
-
-  public void createNewWorkspaceFromStackLibrary(
-      StackLibrary stackLibrary, String workspaceName, String projectName) {
-    selectCreateNewWorkspaceFromStack();
-    selectTabInWorspaceMenu(DashboardWorkspace.TabNames.STACK_LIBRARY);
-    selectStackLibrary(stackLibrary);
-    enterNameWorkspace(workspaceName);
-    dashboardProject.selectTemplateProject(projectName);
-    dashboardProject.clickOnCreateProject();
   }
 
   public String getWsTimeoutMessage() {
@@ -627,5 +579,412 @@ public class DashboardWorkspace {
             (WebDriver webdriver) -> webdriver.findElement(By.xpath(Locators.WS_TIMEOUT_MESSAGE)))
         .getText()
         .contains(expectedMessage);
+  }
+
+  /**
+   * Check if machine exists in machines list
+   *
+   * @param machineName the name of machine
+   */
+  public void checkMachineExists(String machineName) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(format(Locators.MACHINE_NAME, machineName))));
+    loader.waitOnClosed();
+  }
+
+  public void checkMachineIsNotExists(String machineName) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.invisibilityOfElementLocated(
+                By.xpath(format(Locators.MACHINE_NAME, machineName))));
+    loader.waitOnClosed();
+  }
+
+  public void clickOnAddMachineButton() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.ADD_MACHINE_BUTTON)))
+        .click();
+  }
+
+  /**
+   * Click on the Edit Machine button
+   *
+   * @param machineName the name of machine
+   */
+  public void clickOnEditMachineButton(String machineName) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(format(Locators.EDIT_MACHINE, machineName))))
+        .click();
+  }
+
+  /**
+   * Click on the Delete Machine button
+   *
+   * @param machineName the name of machine
+   */
+  public void clickOnDeleteMachineButton(String machineName) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(format(Locators.DELETE_MACHINE, machineName))))
+        .click();
+  }
+
+  /** Check that the Add New Machine dialog is opened */
+  public void checkAddNewMachineDialogIsOpen() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(Locators.ADD_MACHINE_DIALOG_NAME)));
+  }
+
+  /** Check that the Edit Machine dialog is opened */
+  public void checkEditTheMachineDialogIsOpen() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(Locators.EDIT_MACHINE_DIALOG_NAME)));
+  }
+
+  public void setMachineNameInDialog(String machineName) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.NEW_MACHINE_NAME)))
+        .clear();
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.NEW_MACHINE_NAME)))
+        .sendKeys(machineName);
+  }
+
+  public void clickOnEditDialogButton() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(Locators.EDIT_MACHINE_NAME_BUTTON)))
+        .click();
+  }
+
+  public void clickOnCloseDialogButton() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.CLOSE_DIALOG_BUTTON)))
+        .click();
+  }
+
+  public void clickOnCancelDialogButton() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.CANCEL_DIALOG_BUTTON)))
+        .click();
+  }
+
+  public void clickOnDeleteDialogButton() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.DELETE_DIALOG_BUTTON)))
+        .click();
+  }
+
+  public void clickOnUpdateDialogButton() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.UPDATE_DIALOG_BUTTON)))
+        .click();
+  }
+
+  public void clickOnAddDialogButton() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.ADD_DIALOG_BUTTON)))
+        .click();
+  }
+
+  public void clickOnAddServerButton() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.ADD_SERVER_BUTTON)))
+        .click();
+  }
+
+  public void waitAddServerDialogIsOpen() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(Locators.ADD_NEW_SERVER_DIALOG_NAME)));
+  }
+
+  public void enterReference(String name) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.id(Locators.ADD_SERVER_REFERENCE_FIELD)))
+        .clear();
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.id(Locators.ADD_SERVER_REFERENCE_FIELD)))
+        .sendKeys(name);
+  }
+
+  public void enterPort(String name) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOfElementLocated(By.id(Locators.ADD_SERVER_PORT_FIELD)))
+        .clear();
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOfElementLocated(By.id(Locators.ADD_SERVER_PORT_FIELD)))
+        .sendKeys(name);
+  }
+
+  public void enterProtocol(String protocol) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.id(Locators.ADD_SERVER_PROTOCOL_FIELD)))
+        .clear();
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.id(Locators.ADD_SERVER_PROTOCOL_FIELD)))
+        .sendKeys(protocol);
+  }
+
+  public void checkServerName(String serverName) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(format(Locators.SERVER_REFERENCE, serverName))));
+  }
+
+  public void checkServerExists(String serverName, String port) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(format(Locators.SERVER_PORT, serverName, port))));
+    loader.waitOnClosed();
+  }
+
+  public void checkServerIsNotExists(String serverName, String port) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.invisibilityOfElementLocated(
+                By.xpath(format(Locators.SERVER_PORT, serverName, port))));
+    loader.waitOnClosed();
+  }
+
+  public void clickOnDeleteServerButton(String serverName) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(format(Locators.DELETE_SERVER_BUTTON, serverName))))
+        .click();
+  }
+
+  public void clickOnEditServerButton(String serverName) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(format(Locators.EDIT_SERVER_BUTTON, serverName))))
+        .click();
+  }
+
+  public void selectMachine(String tabName, String machineName) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(format(Locators.MACHINE_BUTTON, tabName, machineName))))
+        .click();
+  }
+
+  public void checkAgentExists(String agentName) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(format(Locators.AGENT_NAME, agentName))));
+  }
+
+  public void switchAgentState(String agentName) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(format(Locators.AGENT_STATE, agentName))))
+        .click();
+  }
+
+  public Boolean getAgentState(String agentName) {
+    String state =
+        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+            .until(
+                ExpectedConditions.visibilityOfElementLocated(
+                    By.xpath(format(Locators.AGENT_STATE, agentName))))
+            .getAttribute("aria-checked");
+
+    return Boolean.parseBoolean(state);
+  }
+
+  public String checkAgentDescription(String agentName) {
+    return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(format(Locators.AGENT_DESCRIPTION, agentName))))
+        .getText();
+  }
+
+  public void clickOnAddEnvVariableButton() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(Locators.ADD_ENV_VARIABLE_BUTTON)))
+        .click();
+  }
+
+  public void checkAddNewEnvVarialbleDialogIsOpen() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(Locators.ADD_ENV_VARIABLE_DIALOG_NAME)));
+  }
+
+  public void enterEnvVariableName(String name) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOfElementLocated(By.id(Locators.NEW_ENV_VARIABLE_NAME)))
+        .clear();
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOfElementLocated(By.id(Locators.NEW_ENV_VARIABLE_NAME)))
+        .sendKeys(name);
+  }
+
+  public void enterEnvVariableValue(String value) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(Locators.NEW_ENV_VARIABLE_VALUE)))
+        .clear();
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(Locators.NEW_ENV_VARIABLE_VALUE)))
+        .sendKeys(value);
+  }
+
+  public void addNewEnvironmentVariable(String name, String value) {
+    enterEnvVariableName(name);
+    enterEnvVariableValue(value);
+  }
+
+  public Boolean checkEnvVariableExists(String varName) {
+    return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(format(Locators.VARIABLE_NAME, varName))))
+        .getText()
+        .equals(varName);
+  }
+
+  public Boolean checkValueExists(String varName, String varValue) {
+    loader.waitOnClosed();
+    return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(format(Locators.VARIABLE_VALUE, varName, varValue))))
+        .isDisplayed();
+  }
+
+  public void checkValueIsNotExists(String varName, String varValue) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.invisibilityOfElementLocated(
+                By.xpath(format(Locators.VARIABLE_VALUE, varName, varValue))));
+    loader.waitOnClosed();
+  }
+
+  public void clickOnDeleteEnvVariableButton(String varName) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(format(Locators.DELETE_ENV_VARIABLE, varName))))
+        .click();
+  }
+
+  public void clickOnEditEnvVariableButton(String varName) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(format(Locators.EDIT_ENV_VARIABLE, varName))))
+        .click();
+  }
+
+  public void clickOnEnvVariableCheckbox(String varName) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(format(Locators.VARIABLE_CHECKBOX, varName))))
+        .click();
+  }
+
+  public void clickOnAddNewProjectButton() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(Locators.ADD_NEW_PROJECT_BUTTON)))
+        .click();
+  }
+
+  public void clickOnAddProjects() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.ADD_PROJECT_BUTTON)))
+        .click();
+  }
+
+  public void selectSample(String name) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(format(Locators.SAMPLE_CHECKBOX_XPATH, name))))
+        .click();
+  }
+
+  public void deleteAllWorkspaces(List<String> workspacesQualifiedNames) {
+    workspacesQualifiedNames.forEach(
+        workspaceQualifiedName -> deleteWorkspace(workspaceQualifiedName));
+  }
+
+  public void deleteAllWorkspaces() {
+    deleteAllWorkspaces(getAllWorkspaceQualifiedNames());
+  }
+
+  public void deleteWorkspace(String workspaceQualifiedName) {
+    seleniumWebDriver.get(getDashboardWorkspaceUrl());
+    waitToolbarTitleName(WORKSPACE_TOOLBAR_TITLE);
+    waitListWorkspacesOnDashboard();
+    selectWorkspaceItemName(workspaceQualifiedName);
+    waitToolbarTitleName(asList(workspaceQualifiedName.split("/")).get(1));
+    clickOnDeleteWorkspace();
+    clickOnDeleteDialogButton();
+    waitToolbarTitleName(WORKSPACE_TOOLBAR_TITLE);
+    waitWorkspaceIsNotPresent(workspaceQualifiedName);
+  }
+
+  public void waitAllWorkspacesIsNotPresent(List<String> workspaceNames) {
+    workspaceNames.forEach(name -> waitWorkspaceIsNotPresent(name));
+  }
+
+  public String getDashboardWorkspaceUrl() {
+    return apiEndpointUrlProvider.get().toString().replace("api/", "") + "dashboard/#/workspaces";
+  }
+
+  public List<String> getAllWorkspaceQualifiedNames() {
+    return getNotFilteredWorkspaceQualifiedNames()
+        .stream()
+        .filter(name -> isWorkspaceQualifiedName(name))
+        .collect(toList());
+  }
+
+  public boolean isWorkspaceQualifiedName(String workspaceName) {
+    return workspaceName.contains("/") && workspaceName.length() > 3;
+  }
+
+  private List<String> getNotFilteredWorkspaceQualifiedNames() {
+    return asList(getTextFromListWorkspaces().split("\n"));
   }
 }

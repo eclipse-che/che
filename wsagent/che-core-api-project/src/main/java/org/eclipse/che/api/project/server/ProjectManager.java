@@ -55,7 +55,6 @@ import org.eclipse.che.api.vfs.Path;
 import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.api.vfs.VirtualFileSystem;
 import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
-import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationListener;
 import org.eclipse.che.api.vfs.search.Searcher;
@@ -81,7 +80,6 @@ public class ProjectManager {
   private final ProjectRegistry projectRegistry;
   private final ProjectHandlerRegistry handlers;
   private final ProjectImporterRegistry importers;
-  private final FileTreeWatcher fileWatcher;
   private final FileWatcherNotificationHandler fileWatchNotifier;
   private final ExecutorService executor;
   private final WorkspaceProjectsSyncer workspaceProjectsHolder;
@@ -98,7 +96,6 @@ public class ProjectManager {
       ProjectHandlerRegistry handlers,
       ProjectImporterRegistry importers,
       FileWatcherNotificationHandler fileWatcherNotificationHandler,
-      FileTreeWatcher fileTreeWatcher,
       WorkspaceProjectsSyncer workspaceProjectsHolder,
       FileWatcherManager fileWatcherManager)
       throws ServerException {
@@ -109,7 +106,6 @@ public class ProjectManager {
     this.handlers = handlers;
     this.importers = importers;
     this.fileWatchNotifier = fileWatcherNotificationHandler;
-    this.fileWatcher = fileTreeWatcher;
     this.workspaceProjectsHolder = workspaceProjectsHolder;
     this.fileWatcherManager = fileWatcherManager;
 
@@ -164,12 +160,6 @@ public class ProjectManager {
           }
         };
     fileWatchNotifier.addNotificationListener(defaultListener);
-    try {
-      fileWatcher.startup();
-    } catch (IOException e) {
-      LOG.error(e.getMessage(), e);
-      fileWatchNotifier.removeNotificationListener(defaultListener);
-    }
   }
 
   @PreDestroy
@@ -198,13 +188,9 @@ public class ProjectManager {
     fileWatchNotifier.removeNotificationListener(listener);
   }
 
-  public void addWatchExcludeMatcher(PathMatcher matcher) {
-    fileWatcher.addExcludeMatcher(matcher);
-  }
+  public void addWatchExcludeMatcher(PathMatcher matcher) {}
 
-  public void removeWatchExcludeMatcher(PathMatcher matcher) {
-    fileWatcher.removeExcludeMatcher(matcher);
-  }
+  public void removeWatchExcludeMatcher(PathMatcher matcher) {}
 
   /**
    * @return all the projects
@@ -353,7 +339,7 @@ public class ProjectManager {
         RegisteredProject registeredProject;
         final String pathToProject = projectConfig.getPath();
 
-        //creating project(by config or by importing source code)
+        // creating project(by config or by importing source code)
         try {
           final SourceStorage sourceStorage = projectConfig.getSource();
           if (sourceStorage != null && !isNullOrEmpty(sourceStorage.getLocation())) {
@@ -368,13 +354,13 @@ public class ProjectManager {
             continue;
           }
         } catch (Exception e) {
-          if (!isVirtualFileExist(pathToProject)) { //project folder is absent
+          if (!isVirtualFileExist(pathToProject)) { // project folder is absent
             rollbackCreatingBatchProjects(projects);
             throw e;
           }
         }
 
-        //update project
+        // update project
         if (isVirtualFileExist(pathToProject)) {
           try {
             registeredProject = updateProject(projectConfig);
@@ -542,7 +528,8 @@ public class ProjectManager {
     final String name = folder.getPath().getName();
     for (ProjectConfig project : workspaceProjectsHolder.getProjects()) {
       if (normalizePath.equals(project.getPath())) {
-        // TODO Needed for factory project importing with keepDir. It needs to find more appropriate solution
+        // TODO Needed for factory project importing with keepDir. It needs to find more appropriate
+        // solution
         List<String> innerProjects = projectRegistry.getProjects(normalizePath);
         for (String innerProject : innerProjects) {
           RegisteredProject registeredProject = projectRegistry.getProject(innerProject);

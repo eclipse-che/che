@@ -77,68 +77,68 @@ public class FreeResourcesLimitDaoTest {
 
   @Test
   public void shouldCreateNewResourcesLimitWhenStoringNotExistentOne() throws Exception {
-    //given
+    // given
     FreeResourcesLimitImpl toStore = limits[0];
     limitDao.remove(toStore.getAccountId());
 
-    //when
+    // when
     limitDao.store(toStore);
 
-    //then
+    // then
     assertEquals(limitDao.get(toStore.getAccountId()), new FreeResourcesLimitImpl(toStore));
   }
 
   @Test
   public void shouldUpdateResourcesLimitWhenStoringExistentOne() throws Exception {
-    //given
+    // given
     FreeResourcesLimitImpl toStore =
         new FreeResourcesLimitImpl(
             limits[0].getAccountId(),
             singletonList(new ResourceImpl(TEST_RESOURCE_TYPE, 1000, "unit")));
 
-    //when
+    // when
     limitDao.store(toStore);
 
-    //then
+    // then
     assertEquals(limitDao.get(toStore.getAccountId()), new FreeResourcesLimitImpl(toStore));
   }
 
   @Test(expectedExceptions = NullPointerException.class)
   public void shouldThrowNpeWhenStoringNullableResourcesLimit() throws Exception {
-    //when
+    // when
     limitDao.store(null);
   }
 
   @Test
   public void shouldGetResourcesLimitForSpecifiedAccountId() throws Exception {
-    //given
+    // given
     FreeResourcesLimitImpl stored = limits[0];
 
-    //when
+    // when
     FreeResourcesLimitImpl fetched = limitDao.get(stored.getAccountId());
 
-    //then
+    // then
     assertEquals(fetched, stored);
   }
 
   @Test(expectedExceptions = NotFoundException.class)
   public void shouldThrowNotFoundExceptionWhenGettingNonExistentResourcesLimit() throws Exception {
-    //when
+    // when
     limitDao.get("account123");
   }
 
   @Test(expectedExceptions = NullPointerException.class)
   public void shouldThrowNpeWhenGettingFreeResourcesLimitByNullAccountId() throws Exception {
-    //when
+    // when
     limitDao.get(null);
   }
 
   @Test
   public void shouldGetAllLimits() throws Exception {
-    //when
+    // when
     final Page<FreeResourcesLimitImpl> children = limitDao.getAll(1, 1);
 
-    //then
+    // then
     assertEquals(children.getTotalItemsCount(), 3);
     assertEquals(children.getItemsCount(), 1);
     assertTrue(
@@ -149,19 +149,19 @@ public class FreeResourcesLimitDaoTest {
 
   @Test(expectedExceptions = NotFoundException.class)
   public void shouldRemoveResourcesLimit() throws Exception {
-    //given
+    // given
     FreeResourcesLimitImpl existedLimit = limits[0];
 
-    //when
+    // when
     limitDao.remove(existedLimit.getAccountId());
 
-    //then
+    // then
     limitDao.get(existedLimit.getAccountId());
   }
 
   @Test(expectedExceptions = NullPointerException.class)
   public void shouldThrowNpeWhenRemovingFreeResourcesLimitByNullId() throws Exception {
-    //when
+    // when
     limitDao.remove(null);
   }
 }

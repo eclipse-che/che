@@ -10,10 +10,10 @@
  */
 package org.eclipse.che.api.workspace.server;
 
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.intThat;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.intThat;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.List;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
-import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -48,40 +47,14 @@ public class TemporaryWorkspaceRemoverTest {
     // return 50 items when skip count is 200, and return empty list when skip count is 300.
     doReturn(createEntities(100))
         .when(workspaceDao)
-        .getWorkspaces(
-            eq(true),
-            intThat(
-                new ArgumentMatcher<Integer>() {
-                  @Override
-                  public boolean matches(Object argument) {
-                    return ((int) argument) < 200;
-                  }
-                }),
-            anyInt());
+        .getWorkspaces(eq(true), intThat(integer -> integer.intValue() < 200), anyInt());
     doReturn(createEntities(50))
         .when(workspaceDao)
-        .getWorkspaces(
-            eq(true),
-            intThat(
-                new ArgumentMatcher<Integer>() {
-                  @Override
-                  public boolean matches(Object argument) {
-                    return ((int) argument) == 200;
-                  }
-                }),
-            anyInt());
+        .getWorkspaces(eq(true), intThat(argument -> ((int) argument) == 200), anyInt());
     doReturn(Collections.emptyList())
         .when(workspaceDao)
         .getWorkspaces(
-            eq(true),
-            intThat(
-                new ArgumentMatcher<Integer>() {
-                  @Override
-                  public boolean matches(Object argument) {
-                    return ((int) argument) > COUNT_OF_WORKSPACES;
-                  }
-                }),
-            anyInt());
+            eq(true), intThat(argument -> ((int) argument) > COUNT_OF_WORKSPACES), anyInt());
 
     remover.removeTemporaryWs();
 

@@ -24,7 +24,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 public final class SerialVersionDefaultOperation extends AbstractSerialVersionOperation {
 
   /** The initializer linked position group id */
-  private static final String GROUP_INITIALIZER = "initializer"; //$NON-NLS-1$
+  private static final String GROUP_INITIALIZER = "initializer"; // $NON-NLS-1$
 
   /**
    * Creates a new serial version default proposal.

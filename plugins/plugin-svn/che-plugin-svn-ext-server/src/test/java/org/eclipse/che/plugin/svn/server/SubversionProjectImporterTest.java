@@ -38,7 +38,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SubversionProjectImporterTest {
@@ -79,9 +79,6 @@ public class SubversionProjectImporterTest {
     // Init virtual file system
     VirtualFileSystem virtualFileSystem = TestUtils.createVirtualFileSystem();
     root = virtualFileSystem.getRoot();
-
-    // Create the test user
-    TestUtils.createTestUser(userProfileDao);
 
     // Create the Subversion repository
     repoRoot = TestUtils.createGreekTreeRepository();
@@ -143,7 +140,7 @@ public class SubversionProjectImporterTest {
     final String projectName = NameGenerator.generate("project-", 3);
     final VirtualFile virtualFile =
         root.createFolder(
-            projectName); //root.getChild(org.eclipse.che.api.vfs.Path.of(projectName));
+            projectName); // root.getChild(org.eclipse.che.api.vfs.Path.of(projectName));
     FolderEntry projectFolder = new FolderEntry(virtualFile);
     try {
       String fakeUrl = Paths.get(repoRoot.getAbsolutePath()).toUri() + "fake";

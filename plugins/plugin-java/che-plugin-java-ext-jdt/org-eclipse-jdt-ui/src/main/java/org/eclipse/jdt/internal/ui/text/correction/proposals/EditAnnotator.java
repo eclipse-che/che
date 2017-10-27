@@ -49,12 +49,12 @@ public class EditAnnotator extends TextEditVisitor {
 
   @Override
   public boolean visit(MoveTargetEdit edit) {
-    return true; //rangeAdded(edit);
+    return true; // rangeAdded(edit);
   }
 
   @Override
   public boolean visit(CopyTargetEdit edit) {
-    return true; //return rangeAdded(edit);
+    return true; // return rangeAdded(edit);
   }
 
   @Override
@@ -84,7 +84,7 @@ public class EditAnnotator extends TextEditVisitor {
   }
 
   private boolean rangeAdded(TextEdit edit) {
-    return annotateEdit(edit, "<b>", "</b>"); //$NON-NLS-1$ //$NON-NLS-2$
+    return annotateEdit(edit, "<b>", "</b>"); // $NON-NLS-1$ //$NON-NLS-2$
   }
 
   protected boolean annotateEdit(TextEdit edit, String startTag, String endTag) {
@@ -106,7 +106,7 @@ public class EditAnnotator extends TextEditVisitor {
       boolean dotsAdded = false;
       if (surroundLinesOnly && startOffset == 0) { // no surround lines for the top no-change range
         startLine = Math.max(endLine - surroundLines, 0);
-        fBuf.append("...<br>"); //$NON-NLS-1$
+        fBuf.append("...<br>"); // $NON-NLS-1$
         dotsAdded = true;
       }
 
@@ -114,7 +114,7 @@ public class EditAnnotator extends TextEditVisitor {
         if (surroundLinesOnly) {
           if ((i - startLine > surroundLines) && (endLine - i > surroundLines)) {
             if (!dotsAdded) {
-              fBuf.append("...<br>"); //$NON-NLS-1$
+              fBuf.append("...<br>"); // $NON-NLS-1$
               dotsAdded = true;
             } else if (endOffset == text.getLength()) {
               return; // no surround lines for the bottom no-change range
@@ -136,16 +136,16 @@ public class EditAnnotator extends TextEditVisitor {
         for (int k = 0; k < content.length(); k++) {
           char ch = content.charAt(k);
           if (ch == '<') {
-            fBuf.append("&lt;"); //$NON-NLS-1$
+            fBuf.append("&lt;"); // $NON-NLS-1$
           } else if (ch == '>') {
-            fBuf.append("&gt;"); //$NON-NLS-1$
+            fBuf.append("&gt;"); // $NON-NLS-1$
           } else {
             fBuf.append(ch);
           }
         }
         if (to == end
             && to != endOffset) { // new line when at the end of the line, and not end of range
-          fBuf.append("<br>"); //$NON-NLS-1$
+          fBuf.append("<br>"); // $NON-NLS-1$
         }
       }
     } catch (BadLocationException e) {

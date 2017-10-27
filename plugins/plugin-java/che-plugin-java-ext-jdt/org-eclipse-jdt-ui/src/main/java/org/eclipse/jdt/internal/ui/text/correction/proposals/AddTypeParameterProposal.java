@@ -59,7 +59,7 @@ public class AddTypeParameterProposal extends LinkedCorrectionProposal {
         targetCU,
         null,
         relevance,
-        JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC)); //$NON-NLS-1$
+        JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC)); // $NON-NLS-1$
 
     Assert.isTrue(binding != null && Bindings.isDeclarationBinding(binding));
     Assert.isTrue(binding instanceof IMethodBinding || binding instanceof ITypeBinding);

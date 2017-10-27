@@ -13,7 +13,6 @@ import {CheWorkspace, WorkspaceStatus} from '../../../components/api/workspace/c
 import {CheNotification} from '../../../components/notification/che-notification.factory';
 import {WorkspaceDetailsService} from './workspace-details.service';
 import IdeSvc from '../../ide/ide.service';
-import {CheService} from '../../../components/api/che-service.factory';
 
 export  interface IInitData {
   namespaceId: string;
@@ -63,7 +62,7 @@ export class WorkspaceDetailsController {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($location: ng.ILocationService, $log: ng.ILogService, $scope: ng.IScope, cheNotification: CheNotification, cheWorkspace: CheWorkspace, ideSvc: IdeSvc, workspaceDetailsService: WorkspaceDetailsService, initData: IInitData, cheService: CheService, chePermissions: che.api.IChePermissions) {
+  constructor($location: ng.ILocationService, $log: ng.ILogService, $scope: ng.IScope, cheNotification: CheNotification, cheWorkspace: CheWorkspace, ideSvc: IdeSvc, workspaceDetailsService: WorkspaceDetailsService, initData: IInitData) {
     this.$log = $log;
     this.$scope = $scope;
     this.$location = $location;
@@ -103,10 +102,6 @@ export class WorkspaceDetailsController {
       this.cheWorkspace.unsubscribeOnWorkspaceChange(this.workspaceId, action);
       searchDeRegistrationFn();
     });
-
-    if (cheService.isServiceAvailable(chePermissions.getPermissionsServicePath())) {
-      this.workspaceDetailsService.addPage('Share', '<share-workspace></share-workspace>', 'icon-ic_folder_shared_24px');
-    }
   }
 
   /**

@@ -86,38 +86,38 @@ public class CreateNewNotJavaFilesFromContextMenuTest {
     projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
     loader.waitOnClosed();
 
-    //create new file
+    // create new file
     createNewFile(NEW_FILE_NAME, TestProjectExplorerContextMenuConstants.SubMenuNew.FILE, "");
     checkDefaultTextInCodeMirrorEditorForFile(DEFAULT_TEXT_FOR_NEW_FILE_NAME, NEW_FILE_NAME);
     editor.closeFileByNameWithSaving(NEW_FILE_NAME);
 
-    //create new xml file
+    // create new xml file
     createNewFile(
         NEW_XML_FILE, TestProjectExplorerContextMenuConstants.SubMenuNew.XML_FILE, ".xml");
     checkDefaultTextInCodeMirrorEditorForFile(DEFAULT_TEXT_FOR_NEW_XML_FILE, NEW_XML_FILE + ".xml");
     editor.closeFileByNameWithSaving(NEW_XML_FILE + ".xml");
 
-    //create new less file
+    // create new less file
     createNewFile(
         NEW_LESS_FILE, TestProjectExplorerContextMenuConstants.SubMenuNew.LESS_FILE, ".less");
     checkDefaultTextInCodeMirrorEditorForFile(
         DEFAULT_TEXT_FOR_NEW_LESS_FILE, NEW_LESS_FILE + ".less");
     editor.closeFileByNameWithSaving(NEW_LESS_FILE + ".less");
 
-    //create new css file
+    // create new css file
     createNewFile(
         NEW_CSS_FILE, TestProjectExplorerContextMenuConstants.SubMenuNew.CSS_FILE, ".css");
     checkDefaultTextInCodeMirrorEditorForFile(DEFAULT_TEXT_FOR_NEW_CSS_FILE, NEW_CSS_FILE + ".css");
     editor.closeFileByNameWithSaving(NEW_CSS_FILE + ".css");
 
-    //create new html file
+    // create new html file
     createNewFile(
         NEW_HTML_FILE, TestProjectExplorerContextMenuConstants.SubMenuNew.HTML_FILE, ".html");
     checkDefaultTextInCodeMirrorEditorForFile(
         DEFAULT_TEXT_FOR_NEW_HTML_FILE, NEW_HTML_FILE + ".html");
     editor.closeFileByNameWithSaving(NEW_HTML_FILE + ".html");
 
-    //create new js file
+    // create new js file
     createNewFile(
         NEW_JS_FILE, TestProjectExplorerContextMenuConstants.SubMenuNew.JAVASCRIPT_FILE, ".js");
     editor.closeFileByNameWithSaving(NEW_JS_FILE + ".js");
@@ -126,7 +126,7 @@ public class CreateNewNotJavaFilesFromContextMenuTest {
   public void createNewFile(String name, String type, String fileExt) throws Exception {
     projectExplorer.selectItem(PATH_TO_FILES);
 
-    //create new File from context menu
+    // create new File from context menu
     projectExplorer.openContextMenuByPathSelectedItem(PATH_TO_FILES);
     projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.NEW);
     projectExplorer.clickOnItemInContextMenu(type);

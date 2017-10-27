@@ -23,11 +23,11 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -253,14 +253,18 @@ public class StackServiceTest {
 
   //    @Test
   //    public void shouldThrowBadRequestExceptionOnCreateStackWithEmptyName() {
-  //        StackComponentDto stackComponentDto = newDto(StackComponentDto.class).withName("Java").withVersion("1.8.45");
-  //        StackSourceDto stackSourceDto = newDto(StackSourceDto.class).withType("image").withOrigin("codenvy/ubuntu_jdk8");
+  //        StackComponentDto stackComponentDto =
+  // newDto(StackComponentDto.class).withName("Java").withVersion("1.8.45");
+  //        StackSourceDto stackSourceDto =
+  // newDto(StackSourceDto.class).withType("image").withOrigin("codenvy/ubuntu_jdk8");
   //        StackDto stackDto = newDto(StackDto.class).withId(USER_ID)
   //                                                  .withDescription("")
-  //                                                  .withScope("Simple java stack for generation java projects")
+  //                                                  .withScope("Simple java stack for generation
+  // java projects")
   //                                                  .withTags(asList("java", "maven"))
   //                                                  .withCreator("che")
-  //                                                  .withComponents(singletonList(stackComponentDto))
+  //
+  // .withComponents(singletonList(stackComponentDto))
   //                                                  .withSource(stackSourceDto);
   //
   //        Response response = given().auth()
@@ -271,7 +275,8 @@ public class StackServiceTest {
   //                                   .post(SECURE_PATH + "/stack");
   //
   //        assertEquals(response.getStatusCode(), 400);
-  //        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), "Stack name required");
+  //        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), "Stack name
+  // required");
   //    }
 
   /** Get stack by id */
@@ -426,7 +431,8 @@ public class StackServiceTest {
     StackImpl stack2 = new StackImpl(stackImpl);
     stack2.setTags(singletonList("subversion"));
     List<StackImpl> stacks = asList(stackImpl, stack2);
-    when(stackDao.searchStacks(anyString(), anyList(), anyInt(), anyInt())).thenReturn(stacks);
+    when(stackDao.searchStacks(anyString(), nullable(List.class), anyInt(), anyInt()))
+        .thenReturn(stacks);
 
     Response response =
         given()
@@ -436,7 +442,7 @@ public class StackServiceTest {
             .get(SECURE_PATH + "/stack");
 
     assertEquals(response.getStatusCode(), 200);
-    verify(stackDao).searchStacks(anyString(), anyList(), anyInt(), anyInt());
+    verify(stackDao).searchStacks(anyString(), nullable(List.class), anyInt(), anyInt());
 
     List<StackDto> result = unwrapListDto(response, StackDto.class);
     assertEquals(result.size(), 2);

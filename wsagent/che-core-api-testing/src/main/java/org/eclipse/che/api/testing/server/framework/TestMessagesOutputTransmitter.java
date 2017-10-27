@@ -54,7 +54,7 @@ public class TestMessagesOutputTransmitter {
 
           @Override
           public void onProcessWillTerminate(ProcessEvent event) {
-            //ignore
+            // ignore
           }
         });
 

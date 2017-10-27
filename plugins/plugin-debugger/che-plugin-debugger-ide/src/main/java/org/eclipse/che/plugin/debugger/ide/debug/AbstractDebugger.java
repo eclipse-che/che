@@ -98,7 +98,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   private final DebuggerServiceClient service;
   private final LocalStorageProvider localStorageProvider;
   private final EventBus eventBus;
-  private final DebuggerResourceHandlerFactory debuggerResourceHandlerFactory;
+  private final DebuggerLocationHandlerManager debuggerLocationHandlerManager;
   private final DebuggerManager debuggerManager;
   private final BreakpointManager breakpointManager;
   private final String debuggerType;
@@ -118,7 +118,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
       NotificationManager notificationManager,
       BreakpointManager breakpointManager,
       RequestHandlerManager requestHandlerManager,
-      DebuggerResourceHandlerFactory debuggerResourceHandlerFactory,
+      DebuggerLocationHandlerManager debuggerLocationHandlerManager,
       String type) {
     this.service = service;
     this.transmitter = transmitter;
@@ -126,7 +126,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     this.dtoFactory = dtoFactory;
     this.localStorageProvider = localStorageProvider;
     this.eventBus = eventBus;
-    this.debuggerResourceHandlerFactory = debuggerResourceHandlerFactory;
+    this.debuggerLocationHandlerManager = debuggerLocationHandlerManager;
     this.debuggerManager = debuggerManager;
     this.notificationManager = notificationManager;
     this.breakpointManager = breakpointManager;
@@ -170,8 +170,8 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                       }
 
                       if (currentLocation != null) {
-                        debuggerResourceHandlerFactory
-                            .getOrDefault(getDebuggerType())
+                        debuggerLocationHandlerManager
+                            .getOrDefault(currentLocation)
                             .find(
                                 currentLocation,
                                 new AsyncCallback<VirtualFile>() {
@@ -230,8 +230,8 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   }
 
   private void open(Location location) {
-    debuggerResourceHandlerFactory
-        .getOrDefault(getDebuggerType())
+    debuggerLocationHandlerManager
+        .getOrDefault(location)
         .open(
             location,
             new AsyncCallback<VirtualFile>() {
@@ -357,7 +357,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   }
 
   @Override
-  public void addBreakpoint(final VirtualFile file, final Breakpoint breakpoint) {
+  public void addBreakpoint(final Breakpoint breakpoint) {
     if (isConnected()) {
       Location location = breakpoint.getLocation();
 
@@ -367,7 +367,11 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
       locationDto.setResourceProjectPath(location.getResourceProjectPath());
 
       BreakpointDto breakpointDto =
-          dtoFactory.createDto(BreakpointDto.class).withLocation(locationDto).withEnabled(true);
+          dtoFactory
+              .createDto(BreakpointDto.class)
+              .withLocation(locationDto)
+              .withEnabled(true)
+              .withCondition(breakpoint.getCondition());
 
       Promise<Void> promise = service.addBreakpoint(debugSessionDto.getId(), breakpointDto);
       promise
@@ -385,7 +389,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   }
 
   @Override
-  public void deleteBreakpoint(final VirtualFile file, final Breakpoint breakpoint) {
+  public void deleteBreakpoint(final Breakpoint breakpoint) {
     if (!isConnected()) {
       return;
     }
@@ -494,6 +498,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
       BreakpointDto breakpointDto = dtoFactory.createDto(BreakpointDto.class);
       breakpointDto.setLocation(locationDto);
       breakpointDto.setEnabled(true);
+      breakpointDto.setCondition(breakpoint.getCondition());
 
       breakpoints.add(breakpointDto);
     }

@@ -17,5 +17,5 @@ package org.eclipse.jdt.internal.ui.model;
 public class JavaModelProvider {
   /** The model provider id */
   public static final String JAVA_MODEL_PROVIDER_ID =
-      "org.eclipse.jdt.ui.modelProvider"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.modelProvider"; // $NON-NLS-1$
 }

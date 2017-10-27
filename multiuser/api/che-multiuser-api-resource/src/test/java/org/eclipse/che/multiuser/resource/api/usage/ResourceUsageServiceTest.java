@@ -16,8 +16,8 @@ import static java.util.stream.Collectors.toList;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -48,7 +48,7 @@ public class ResourceUsageServiceTest {
   private static final Long RESOURCE_AMOUNT = 1000L;
   private static final String RESOURCE_UNIT = "mb";
 
-  @SuppressWarnings("unused") //is declared for deploying by everrest-assured
+  @SuppressWarnings("unused") // is declared for deploying by everrest-assured
   private ApiExceptionMapper exceptionMapper;
 
   @Mock ResourceImpl resource;

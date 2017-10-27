@@ -289,7 +289,7 @@ public class UndoableOperation2ChangeAdapter
           public void run(IProgressMonitor monitor) throws CoreException {
             boolean reverseIsInitialized = false;
             try {
-              monitor.beginTask("", 11); //$NON-NLS-1$
+              monitor.beginTask("", 11); // $NON-NLS-1$
               result.validationStatus = fActiveChange.isValid(new SubProgressMonitor(monitor, 2));
               if (result.validationStatus.hasFatalError()) {
                 query.stopped(result.validationStatus);

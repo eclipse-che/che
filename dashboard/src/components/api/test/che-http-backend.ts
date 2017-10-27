@@ -469,6 +469,9 @@ export class CheHttpBackend {
       this.httpBackend.when('DELETE', '/api/factory/' + factory.id).respond(() => {
         return [200, {success: true, errors: []}];
       });
+      if (this.defaultUser) {
+        this.httpBackend.when('GET', `/api/factory/find?creator.userId=${this.defaultUser.id}&name=${factory.name}`).respond([factory]);
+      }
       allFactories.push(factory);
     }
 

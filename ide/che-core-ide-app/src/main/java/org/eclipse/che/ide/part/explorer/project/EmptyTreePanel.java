@@ -54,8 +54,9 @@ public class EmptyTreePanel extends EmptyEditorsPanel {
 
     root.getStyle().setTop(46, Style.Unit.PX);
 
-    //Sometimes initialization of Create/Import Project actions are completed after the Empty editor page is rendered.
-    //In this case we need to wait when actions will be initialized.
+    // Sometimes initialization of Create/Import Project actions are completed after the Empty
+    // editor page is rendered.
+    // In this case we need to wait when actions will be initialized.
     new Timer() {
       @Override
       public void run() {

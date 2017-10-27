@@ -84,7 +84,7 @@ abstract class LifecycleModule extends AbstractModule {
     try {
       return cache.get(key);
     } catch (ExecutionException e) {
-      //should never happen
+      // should never happen
       throw new RuntimeException(e.getLocalizedMessage(), e);
     }
   }

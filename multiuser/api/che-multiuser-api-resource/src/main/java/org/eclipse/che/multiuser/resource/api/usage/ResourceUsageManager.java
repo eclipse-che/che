@@ -122,7 +122,7 @@ public class ResourceUsageManager {
   public void checkResourcesAvailability(String accountId, List<? extends Resource> resources)
       throws NotFoundException, NoEnoughResourcesException, ServerException {
     List<? extends Resource> availableResources = getAvailableResources(accountId);
-    //check resources availability
+    // check resources availability
     resourceAggregator.deduct(availableResources, resources);
   }
 }

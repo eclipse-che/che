@@ -55,15 +55,15 @@ public class RemoteUpdateTest {
   )
   public void testUpdateBranches(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
     addInitialRemote(connection);
-    //when
-    //change branch1 to branch2
+    // when
+    // change branch1 to branch2
     RemoteUpdateParams request =
         RemoteUpdateParams.create("newRemote").withBranches(singletonList("branch2"));
     connection.remoteUpdate(request);
-    //then
+    // then
     assertEquals(
         parseAllConfig(connection).get("remote.newRemote.fetch").get(0),
         "+refs/heads/branch2:refs/remotes/newRemote/branch2");
@@ -74,13 +74,13 @@ public class RemoteUpdateTest {
     dataProviderClass = GitConnectionFactoryProvider.class
   )
   public void testAddUrl(GitConnectionFactory connectionFactory) throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
     addInitialRemote(connection);
-    //when
+    // when
     connection.remoteUpdate(
         RemoteUpdateParams.create("newRemote").withAddUrl(singletonList("new.com")));
-    //then
+    // then
     assertTrue(parseAllConfig(connection).get("remote.newRemote.url").contains("new.com"));
   }
 
@@ -90,13 +90,13 @@ public class RemoteUpdateTest {
   )
   public void testAddPushUrl(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
     addInitialRemote(connection);
-    //when
+    // when
     connection.remoteUpdate(
         RemoteUpdateParams.create("newRemote").withAddPushUrl(singletonList("pushurl1")));
-    //then
+    // then
     assertTrue(parseAllConfig(connection).get("remote.newRemote.pushurl").contains("pushurl1"));
   }
 
@@ -106,16 +106,16 @@ public class RemoteUpdateTest {
   )
   public void testDeleteUrl(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
-    //add url
+    // given
+    // add url
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
     addInitialRemote(connection);
     connection.remoteUpdate(
         RemoteUpdateParams.create("newRemote").withAddUrl(singletonList("newUrl")));
-    //when
+    // when
     connection.remoteUpdate(
         RemoteUpdateParams.create("newRemote").withRemoveUrl(singletonList("newUrl")));
-    //then
+    // then
     assertFalse(parseAllConfig(connection).containsKey("remote.newRemote.newUrl"));
   }
 
@@ -125,17 +125,17 @@ public class RemoteUpdateTest {
   )
   public void testDeletePushUrl(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
-    //given
+    // given
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
     addInitialRemote(connection);
-    //add push url
+    // add push url
     connection.remoteUpdate(
         RemoteUpdateParams.create("newRemote").withAddPushUrl(singletonList("pushurl")));
 
-    //when
+    // when
     connection.remoteUpdate(
         RemoteUpdateParams.create("newRemote").withRemovePushUrl(singletonList("pushurl")));
-    //then
+    // then
     assertNull(parseAllConfig(connection).get("remote.newRemote.pushurl"));
   }
 

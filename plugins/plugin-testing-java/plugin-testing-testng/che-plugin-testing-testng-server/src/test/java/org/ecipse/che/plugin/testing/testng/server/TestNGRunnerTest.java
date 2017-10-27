@@ -10,7 +10,7 @@
  */
 package org.ecipse.che.plugin.testing.testng.server;
 
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -73,7 +73,7 @@ public class TestNGRunnerTest extends BaseTest {
     testsFolder.createFile("TestNGTest.java", b.toString().getBytes());
     projectRegistry.setProjectType(folder.getPath().toString(), "java", false);
 
-    //inform DeltaProcessingStat about new project
+    // inform DeltaProcessingStat about new project
     JavaModelManager.getJavaModelManager()
         .deltaState
         .resourceChanged(new ResourceChangedEvent(root, new ProjectCreatedEvent("", "/Test")));

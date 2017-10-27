@@ -18,10 +18,10 @@ import static org.eclipse.che.multiuser.organization.api.permissions.Organizatio
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -99,14 +99,14 @@ public class OrganizationPermissionsFilterTest {
 
   @Test
   public void shouldTestThatAllPublicMethodsAreCoveredByPermissionsFilter() throws Exception {
-    //given
+    // given
     final List<String> collect =
         Stream.of(OrganizationService.class.getDeclaredMethods())
             .filter(method -> Modifier.isPublic(method.getModifiers()))
             .map(Method::getName)
             .collect(Collectors.toList());
 
-    //then
+    // then
     assertEquals(collect.size(), 7);
     assertTrue(collect.contains(OrganizationPermissionsFilter.CREATE_METHOD));
     assertTrue(collect.contains(OrganizationPermissionsFilter.UPDATE_METHOD));

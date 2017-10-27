@@ -38,7 +38,7 @@ public final class RenameJavaProjectChange extends AbstractJavaElementRenameChan
         newName,
         IResource.NULL_STAMP,
         updateReferences);
-    Assert.isTrue(!project.isReadOnly(), "should not be read only"); //$NON-NLS-1$
+    Assert.isTrue(!project.isReadOnly(), "should not be read only"); // $NON-NLS-1$
   }
 
   private RenameJavaProjectChange(
@@ -118,7 +118,7 @@ public final class RenameJavaProjectChange extends AbstractJavaElementRenameChan
 
   private void modifyClassPath(IJavaProject referencingProject, IProgressMonitor pm)
       throws JavaModelException {
-    pm.beginTask("", 1); //$NON-NLS-1$
+    pm.beginTask("", 1); // $NON-NLS-1$
     IClasspathEntry[] oldEntries = referencingProject.getRawClasspath();
     IClasspathEntry[] newEntries = new IClasspathEntry[oldEntries.length];
     for (int i = 0; i < newEntries.length; i++) {

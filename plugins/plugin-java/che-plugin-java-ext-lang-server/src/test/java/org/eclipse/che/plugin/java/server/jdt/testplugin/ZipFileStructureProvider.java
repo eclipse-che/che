@@ -30,7 +30,7 @@ import org.eclipse.ui.wizards.datatransfer.IImportStructureProvider;
 public class ZipFileStructureProvider implements IImportStructureProvider {
   private ZipFile zipFile;
 
-  private ZipEntry root = new ZipEntry("/"); //$NON-NLS-1$
+  private ZipEntry root = new ZipEntry("/"); // $NON-NLS-1$
 
   private Map children;
 

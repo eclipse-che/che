@@ -110,8 +110,6 @@ services:
       - CHE_POSTGRES_USERNAME=<%= scope.lookupvar('postgres::che_pg_username') %>
       - CHE_POSTGRES_PASSWORD=<%= scope.lookupvar('postgres::che_pg_password') %>
       - CHE_POSTGRES_DATABASE=<%= scope.lookupvar('postgres::che_pg_database') %>
- 
-  
     volumes:
       - '<%= scope.lookupvar('che::che_instance') -%>/data/postgres:/var/lib/pgsql/data'
       - '<%= scope.lookupvar('che::che_instance') -%>/config/postgres/init-che-user.sh:/var/lib/pgsql/init-che-user.sh'

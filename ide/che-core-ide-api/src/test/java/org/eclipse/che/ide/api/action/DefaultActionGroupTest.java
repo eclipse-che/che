@@ -13,7 +13,7 @@ package org.eclipse.che.ide.api.action;
 import static org.eclipse.che.ide.api.constraints.Anchor.AFTER;
 import static org.eclipse.che.ide.api.constraints.Anchor.BEFORE;
 import static org.fest.assertions.Assertions.assertThat;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -25,7 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /** @author Mihail Kuznyetsov. */
 @RunWith(MockitoJUnitRunner.class)
@@ -67,7 +67,7 @@ public class DefaultActionGroupTest {
     // when
     Action[] result = defaultActionGroup.getChildren(mock(ActionEvent.class));
 
-    //then
+    // then
     assertThat(Arrays.asList(result)).isEmpty();
   }
 
@@ -86,7 +86,7 @@ public class DefaultActionGroupTest {
     // when
     Action[] result = defaultActionGroup.getChildren(mock(ActionEvent.class));
 
-    //then
+    // then
     assertThat(Arrays.asList(result))
         .hasSize(6)
         .containsExactly(
@@ -108,7 +108,7 @@ public class DefaultActionGroupTest {
     // when
     Action[] result = defaultActionGroup.getChildren(mock(ActionEvent.class));
 
-    //then
+    // then
     assertThat(Arrays.asList(result))
         .hasSize(6)
         .containsExactly(
@@ -130,7 +130,7 @@ public class DefaultActionGroupTest {
     // when
     Action[] result = defaultActionGroup.getChildren(mock(ActionEvent.class));
 
-    //then
+    // then
     assertThat(Arrays.asList(result))
         .hasSize(6)
         .containsExactly(
@@ -152,7 +152,7 @@ public class DefaultActionGroupTest {
     // when
     Action[] result = defaultActionGroup.getChildren(mock(ActionEvent.class));
 
-    //then
+    // then
     assertThat(Arrays.asList(result))
         .hasSize(6)
         .containsExactly(
@@ -174,7 +174,7 @@ public class DefaultActionGroupTest {
     // when
     Action[] result = defaultActionGroup.getChildren(mock(ActionEvent.class));
 
-    //then
+    // then
     assertThat(Arrays.asList(result))
         .hasSize(6)
         .containsExactly(
@@ -196,7 +196,7 @@ public class DefaultActionGroupTest {
     // when
     Action[] result = defaultActionGroup.getChildren(mock(ActionEvent.class));
 
-    //then
+    // then
     assertThat(Arrays.asList(result))
         .hasSize(6)
         .containsExactly(
@@ -260,7 +260,7 @@ public class DefaultActionGroupTest {
     // when
     Action[] result = defaultActionGroup.getChildren(mock(ActionEvent.class));
 
-    //then
+    // then
     assertThat(Arrays.asList(result))
         .hasSize(6)
         .containsExactly(
@@ -282,7 +282,7 @@ public class DefaultActionGroupTest {
     // when
     Action[] result = defaultActionGroup.getChildren(mock(ActionEvent.class));
 
-    //then
+    // then
     assertThat(Arrays.asList(result))
         .hasSize(6)
         .containsExactly(
@@ -362,7 +362,6 @@ public class DefaultActionGroupTest {
     when(actionManager.getId(eq(secondAction))).thenReturn("secondAction");
 
     defaultActionGroup.add(thirdAction, new Constraints(AFTER, "fourthAction"));
-    when(actionManager.getId(eq(thirdAction))).thenReturn("thirdAction");
 
     // verify order
     Action[] result = defaultActionGroup.getChildren(mock(ActionEvent.class));
@@ -371,7 +370,6 @@ public class DefaultActionGroupTest {
 
     // add other actions
     defaultActionGroup.add(fourthAction);
-    when(actionManager.getId(eq(thirdAction))).thenReturn("thirdAction");
 
     defaultActionGroup.add(fifthAction, Constraints.FIRST);
     when(actionManager.getId(eq(fifthAction))).thenReturn("fifthAction");

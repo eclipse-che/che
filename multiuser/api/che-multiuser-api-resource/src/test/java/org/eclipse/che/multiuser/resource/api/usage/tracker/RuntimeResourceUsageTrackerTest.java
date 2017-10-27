@@ -11,10 +11,10 @@
 package org.eclipse.che.multiuser.resource.api.usage.tracker;
 
 import static java.util.Collections.singletonList;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -100,7 +100,7 @@ public class RuntimeResourceUsageTrackerTest {
     Resource usedRuntimes = usedRuntimesOpt.get();
     assertEquals(usedRuntimes.getType(), RuntimeResourceType.ID);
     assertEquals(
-        usedRuntimes.getAmount(), WorkspaceStatus.values().length - 1); //except stopped workspaces
+        usedRuntimes.getAmount(), WorkspaceStatus.values().length - 1); // except stopped workspaces
     assertEquals(usedRuntimes.getUnit(), RuntimeResourceType.UNIT);
     verify(accountManager).getById(eq("account123"));
     verify(workspaceManager).getByNamespace(eq("testAccount"), eq(false));

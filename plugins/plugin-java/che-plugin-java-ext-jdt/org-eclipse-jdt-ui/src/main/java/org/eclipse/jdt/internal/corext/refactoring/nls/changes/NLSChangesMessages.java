@@ -14,7 +14,7 @@ import org.eclipse.osgi.util.NLS;
 public final class NLSChangesMessages extends NLS {
 
   private static final String BUNDLE_NAME =
-      "org.eclipse.jdt.internal.corext.refactoring.nls.changes.NLSChangesMessages"; //$NON-NLS-1$
+      "org.eclipse.jdt.internal.corext.refactoring.nls.changes.NLSChangesMessages"; // $NON-NLS-1$
 
   private NLSChangesMessages() {
     // Do not instantiate

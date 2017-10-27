@@ -109,7 +109,7 @@ public class AccountManager {
       eventService.publish(new BeforeAccountRemovedEvent(toRemove)).propagateException();
       accountDao.remove(id);
     } catch (NotFoundException ignored) {
-      //account is already removed
+      // account is already removed
     }
   }
 }

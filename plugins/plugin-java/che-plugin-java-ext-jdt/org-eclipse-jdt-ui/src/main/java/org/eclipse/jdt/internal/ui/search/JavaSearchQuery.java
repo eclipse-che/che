@@ -45,14 +45,14 @@ import org.eclipse.search.ui.text.Match;
 public class JavaSearchQuery implements ISearchQuery {
 
   private static final String PERF_SEARCH_PARTICIPANT =
-      "org.eclipse.jdt.ui/perf/search/participants"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui/perf/search/participants"; // $NON-NLS-1$
 
   private ISearchResult fResult;
   private final QuerySpecification fPatternData;
 
   public JavaSearchQuery(QuerySpecification data) {
     if (data == null) {
-      throw new IllegalArgumentException("data must not be null"); //$NON-NLS-1$
+      throw new IllegalArgumentException("data must not be null"); // $NON-NLS-1$
     }
     fPatternData = data;
   }

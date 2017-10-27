@@ -99,17 +99,17 @@ import org.eclipse.text.edits.TextEdit;
 public class LocalCorrectionsSubProcessor {
 
   private static final String RAW_TYPE_REFERENCE_ID =
-      "org.eclipse.jdt.ui.correction.rawTypeReference"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.correction.rawTypeReference"; // $NON-NLS-1$
   private static final String ADD_EXCEPTION_TO_THROWS_ID =
-      "org.eclipse.jdt.ui.correction.addThrowsDecl"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.correction.addThrowsDecl"; // $NON-NLS-1$
   private static final String ADD_NON_NLS_ID =
-      "org.eclipse.jdt.ui.correction.addNonNLS"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.correction.addNonNLS"; // $NON-NLS-1$
   private static final String ADD_FIELD_QUALIFICATION_ID =
-      "org.eclipse.jdt.ui.correction.qualifyField"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.correction.qualifyField"; // $NON-NLS-1$
   private static final String ADD_STATIC_ACCESS_ID =
-      "org.eclipse.jdt.ui.correction.changeToStatic"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.correction.changeToStatic"; // $NON-NLS-1$
   private static final String REMOVE_UNNECESSARY_NLS_TAG_ID =
-      "org.eclipse.jdt.ui.correction.removeNlsTag"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.correction.removeNlsTag"; // $NON-NLS-1$
 
   public static void addUncaughtExceptionProposals(
       IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals)
@@ -138,7 +138,7 @@ public class LocalCorrectionsSubProcessor {
       length = selectionEnd - offset;
     }
 
-    //Surround with proposals
+    // Surround with proposals
     SurroundWithTryCatchRefactoring refactoring =
         SurroundWithTryCatchRefactoring.create(cu, offset, length);
     if (refactoring == null) return;
@@ -172,7 +172,7 @@ public class LocalCorrectionsSubProcessor {
       }
     }
 
-    //Catch exception
+    // Catch exception
     BodyDeclaration decl = ASTResolving.findParentBodyDeclaration(selectedNode);
     if (decl == null) {
       return;
@@ -228,8 +228,8 @@ public class LocalCorrectionsSubProcessor {
           }
           clausesRewrite.insertLast(newClause, null);
 
-          String typeKey = "type" + i; //$NON-NLS-1$
-          String nameKey = "name" + i; //$NON-NLS-1$
+          String typeKey = "type" + i; // $NON-NLS-1$
+          String nameKey = "name" + i; // $NON-NLS-1$
           proposal.addLinkedPosition(rewrite.track(var.getType()), false, typeKey);
           proposal.addLinkedPosition(rewrite.track(var.getName()), false, nameKey);
           addExceptionTypeLinkProposals(proposal, excBinding, typeKey);
@@ -267,7 +267,7 @@ public class LocalCorrectionsSubProcessor {
               Type type2 = imports.addImport(excBinding, ast, importRewriteContext);
               listRewrite.insertLast(type2, null);
 
-              String typeKey = "type" + i; //$NON-NLS-1$
+              String typeKey = "type" + i; // $NON-NLS-1$
               proposal.addLinkedPosition(rewrite.track(type2), false, typeKey);
               addExceptionTypeLinkProposals(proposal, excBinding, typeKey);
             }
@@ -281,7 +281,7 @@ public class LocalCorrectionsSubProcessor {
               Type type2 = imports.addImport(excBinding, ast, importRewriteContext);
               types.add(type2);
 
-              String typeKey = "type" + i; //$NON-NLS-1$
+              String typeKey = "type" + i; // $NON-NLS-1$
               proposal.addLinkedPosition(rewrite.track(type2), false, typeKey);
               addExceptionTypeLinkProposals(proposal, excBinding, typeKey);
             }
@@ -321,17 +321,17 @@ public class LocalCorrectionsSubProcessor {
             Type type2 = imports.addImport(excBinding, ast, importRewriteContext);
             types.add(type2);
 
-            String typeKey = "type" + i; //$NON-NLS-1$
+            String typeKey = "type" + i; // $NON-NLS-1$
             proposal.addLinkedPosition(rewrite.track(type2), false, typeKey);
             addExceptionTypeLinkProposals(proposal, excBinding, typeKey);
           }
-          String nameKey = "name"; //$NON-NLS-1$
+          String nameKey = "name"; // $NON-NLS-1$
           proposal.addLinkedPosition(rewrite.track(var.getName()), false, nameKey);
           var.setType(newUnionType);
           newCatchClause.setException(var);
           String catchBody =
               StubUtility.getCatchBodyContent(
-                  cu, "Exception", name, selectedNode, String.valueOf('\n')); //$NON-NLS-1$
+                  cu, "Exception", name, selectedNode, String.valueOf('\n')); // $NON-NLS-1$
           if (catchBody != null) {
             ASTNode node = rewrite.createStringPlaceholder(catchBody, ASTNode.RETURN_STATEMENT);
             newCatchClause.getBody().statements().add(node);
@@ -344,7 +344,7 @@ public class LocalCorrectionsSubProcessor {
       }
     }
 
-    //Add throws declaration
+    // Add throws declaration
     if (decl instanceof MethodDeclaration) {
       MethodDeclaration methodDecl = (MethodDeclaration) decl;
       IMethodBinding binding = methodDecl.resolveBinding();
@@ -394,7 +394,7 @@ public class LocalCorrectionsSubProcessor {
         }
         for (int i = 0; i < uncaughtExceptions.length; i++) {
           desc[i + nExistingExceptions] =
-              new InsertDescription(uncaughtExceptions[i], ""); //$NON-NLS-1$
+              new InsertDescription(uncaughtExceptions[i], ""); // $NON-NLS-1$
         }
 
         String label = CorrectionMessages.LocalCorrectionsSubProcessor_addthrows_description;
@@ -427,12 +427,10 @@ public class LocalCorrectionsSubProcessor {
     filteredExceptions.addAll(Arrays.asList(exceptions));
 
     for (Iterator<ITypeBinding> subtypeIterator = filteredExceptions.iterator();
-        subtypeIterator.hasNext();
-        ) {
+        subtypeIterator.hasNext(); ) {
       ITypeBinding iTypeBinding = subtypeIterator.next();
       for (Iterator<ITypeBinding> supertypeIterator = filteredExceptions.iterator();
-          supertypeIterator.hasNext();
-          ) {
+          supertypeIterator.hasNext(); ) {
         ITypeBinding superTypeBinding = supertypeIterator.next();
         if (!iTypeBinding.equals(superTypeBinding)
             && iTypeBinding.isSubTypeCompatible(superTypeBinding)) {
@@ -447,7 +445,7 @@ public class LocalCorrectionsSubProcessor {
   private static void addExceptionTypeLinkProposals(
       LinkedCorrectionProposal proposal, ITypeBinding exc, String key) {
     // all super classes except Object
-    while (exc != null && !"java.lang.Object".equals(exc.getQualifiedName())) { //$NON-NLS-1$
+    while (exc != null && !"java.lang.Object".equals(exc.getQualifiedName())) { // $NON-NLS-1$
       proposal.addLinkedPositionProposal(key, exc);
       exc = exc.getSuperclass();
     }
@@ -484,7 +482,8 @@ public class LocalCorrectionsSubProcessor {
     //		}
     //		String name= CorrectionMessages.LocalCorrectionsSubProcessor_externalizestrings_description;
 
-    //		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, null, IProposalRelevance.EXTERNALIZE_STRINGS, JavaPluginImages
+    //		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, null,
+    // IProposalRelevance.EXTERNALIZE_STRINGS, JavaPluginImages
     //				.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
     //			@Override
     //			public void apply(IDocument document) {
@@ -504,7 +503,8 @@ public class LocalCorrectionsSubProcessor {
     //			Map<String, String> options= new Hashtable<String, String>();
     //			options.put(CleanUpConstants.ADD_MISSING_NLS_TAGS, CleanUpOptions.TRUE);
     //			FixCorrectionProposal
-    //					addNLS= new FixCorrectionProposal(fix, new StringCleanUp(options), IProposalRelevance.ADD_MISSING_NLS_TAGS, image, context);
+    //					addNLS= new FixCorrectionProposal(fix, new StringCleanUp(options),
+    // IProposalRelevance.ADD_MISSING_NLS_TAGS, image, context);
     //			addNLS.setCommandId(ADD_NON_NLS_ID);
     //			proposals.add(addNLS);
     //		}
@@ -518,7 +518,7 @@ public class LocalCorrectionsSubProcessor {
       Image image =
           JavaPluginImages.get(
               JavaPluginImages
-                  .IMG_TOOL_DELETE); //JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+                  .IMG_TOOL_DELETE); // JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
       Map<String, String> options = new Hashtable<String, String>();
       options.put(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS, CleanUpOptions.TRUE);
       FixCorrectionProposal proposal =
@@ -682,7 +682,7 @@ public class LocalCorrectionsSubProcessor {
       LinkedCorrectionProposal proposal =
           new LinkedCorrectionProposal(
               label, cu, rewrite, IProposalRelevance.INITIALIZE_VARIABLE, image);
-      proposal.addLinkedPosition(rewrite.track(expression), false, "initializer"); //$NON-NLS-1$
+      proposal.addLinkedPosition(rewrite.track(expression), false, "initializer"); // $NON-NLS-1$
       proposals.add(proposal);
     }
   }
@@ -794,7 +794,7 @@ public class LocalCorrectionsSubProcessor {
       Image image =
           JavaPluginImages.get(
               JavaPluginImages
-                  .IMG_TOOL_DELETE); //JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+                  .IMG_TOOL_DELETE); // JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
       FixCorrectionProposal proposal =
           new FixCorrectionProposal(
               fix, fix.getCleanUp(), IProposalRelevance.UNUSED_MEMBER, image, context);
@@ -812,7 +812,7 @@ public class LocalCorrectionsSubProcessor {
             problem.getOffset(),
             problem.getLength(),
             "",
-            IProposalRelevance.REMOVE_SEMICOLON); //$NON-NLS-1$
+            IProposalRelevance.REMOVE_SEMICOLON); // $NON-NLS-1$
     proposals.add(proposal);
   }
 
@@ -986,7 +986,7 @@ public class LocalCorrectionsSubProcessor {
     }
 
     if (problem.getProblemId() == IProblem.UseEnumAsAnIdentifier) {
-      valueSuggestion = "enumeration"; //$NON-NLS-1$
+      valueSuggestion = "enumeration"; // $NON-NLS-1$
     } else {
       valueSuggestion = nameNode.getIdentifier() + '1';
     }
@@ -1371,7 +1371,7 @@ public class LocalCorrectionsSubProcessor {
     Image image =
         JavaPluginImages.get(
             JavaPluginImages
-                .IMG_TOOL_DELETE); //JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+                .IMG_TOOL_DELETE); // JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
     String label =
         CorrectionMessages
             .LocalCorrectionsSubProcessor_removeunreachablecode_including_condition_description;
@@ -1444,7 +1444,7 @@ public class LocalCorrectionsSubProcessor {
     Image image =
         JavaPluginImages.get(
             JavaPluginImages
-                .IMG_TOOL_DELETE); //JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+                .IMG_TOOL_DELETE); // JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
     ASTRewriteCorrectionProposal proposal =
         new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 10, image);
     proposals.add(proposal);
@@ -1468,7 +1468,7 @@ public class LocalCorrectionsSubProcessor {
 
       if (exprType != null
           && Bindings.isSuperType(
-              ast.resolveWellKnownType("java.lang.Throwable"), exprType)) { //$NON-NLS-1$
+              ast.resolveWellKnownType("java.lang.Throwable"), exprType)) { // $NON-NLS-1$
         ASTRewrite rewrite = ASTRewrite.create(ast);
         TightSourceRangeComputer sourceRangeComputer = new TightSourceRangeComputer();
         rewrite.setTargetSourceRangeComputer(sourceRangeComputer);
@@ -1532,7 +1532,7 @@ public class LocalCorrectionsSubProcessor {
         Image image =
             JavaPluginImages.get(
                 JavaPluginImages
-                    .IMG_TOOL_DELETE); //JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+                    .IMG_TOOL_DELETE); // JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
         ASTRewriteCorrectionProposal proposal =
             new ASTRewriteCorrectionProposal(
                 label,
@@ -1695,7 +1695,7 @@ public class LocalCorrectionsSubProcessor {
       proposals.add(proposal);
     }
 
-    //Infer Generic Type Arguments... proposal
+    // Infer Generic Type Arguments... proposal
     boolean hasInferTypeArgumentsProposal = false;
     for (Iterator<ICommandAccess> iterator = proposals.iterator(); iterator.hasNext(); ) {
       Object completionProposal = iterator.next();
@@ -1793,7 +1793,7 @@ public class LocalCorrectionsSubProcessor {
       ASTNode parent = node.getParent();
       if (parent instanceof Type
           && parent.getLocationInParent() == ClassInstanceCreation.TYPE_PROPERTY
-          && binding.isInterface()) { //bug 351853
+          && binding.isInterface()) { // bug 351853
         return;
       }
       ITypeBinding simpleBinding = binding;
@@ -1833,7 +1833,7 @@ public class LocalCorrectionsSubProcessor {
       Image image =
           JavaPluginImages.get(
               JavaPluginImages
-                  .IMG_TOOL_DELETE); //JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+                  .IMG_TOOL_DELETE); // JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
       Map<String, String> options = new HashMap<String, String>();
       options.put(CleanUpConstants.USE_TYPE_ARGUMENTS, CleanUpOptions.TRUE);
       options.put(CleanUpConstants.REMOVE_REDUNDANT_TYPE_ARGUMENTS, CleanUpOptions.TRUE);
@@ -1878,7 +1878,7 @@ public class LocalCorrectionsSubProcessor {
       listRewrite = rewrite.getListRewrite(parent, SwitchStatement.STATEMENTS_PROPERTY);
       ASTNode fallThroughComment =
           rewrite.createStringPlaceholder(
-              "//$FALL-THROUGH$", ASTNode.EMPTY_STATEMENT); //$NON-NLS-1$
+              "//$FALL-THROUGH$", ASTNode.EMPTY_STATEMENT); // $NON-NLS-1$
       listRewrite.insertBefore(fallThroughComment, selectedNode, null);
 
       label = CorrectionMessages.LocalCorrectionsSubProcessor_insert_fall_through;
@@ -1912,7 +1912,7 @@ public class LocalCorrectionsSubProcessor {
               rewrite.getListRewrite(parent, SwitchStatement.STATEMENTS_PROPERTY);
           ASTNode casesOmittedComment =
               rewrite.createStringPlaceholder(
-                  "//$CASES-OMITTED$", ASTNode.EMPTY_STATEMENT); //$NON-NLS-1$
+                  "//$CASES-OMITTED$", ASTNode.EMPTY_STATEMENT); // $NON-NLS-1$
           listRewrite.insertBefore(casesOmittedComment, statement, null);
 
           String label = CorrectionMessages.LocalCorrectionsSubProcessor_insert_cases_omitted;
@@ -1955,7 +1955,8 @@ public class LocalCorrectionsSubProcessor {
             method.setName(ast.newSimpleName(methodName[1]));
             ASTNode parent = selectedNode.getParent();
             ICompilationUnit cu = context.getCompilationUnit();
-            // add explicit type arguments if necessary (for 1.8 and later, we're optimistic that inference just works):
+            // add explicit type arguments if necessary (for 1.8 and later, we're optimistic that
+            // inference just works):
             if (Invocations.isInvocationWithArguments(parent)
                 && !JavaModelUtil.is18OrHigher(cu.getJavaProject())) {
               IMethodBinding methodBinding = Invocations.resolveBinding(parent);
@@ -2014,17 +2015,17 @@ public class LocalCorrectionsSubProcessor {
           "java.util.Collections.EMPTY_MAP",
           new String[] {
             "java.util.Collections", "emptyMap"
-          }); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+          }); // $NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
       resolveMap.put(
           "java.util.Collections.EMPTY_SET",
           new String[] {
             "java.util.Collections", "emptySet"
-          }); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+          }); // $NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
       resolveMap.put(
           "java.util.Collections.EMPTY_LIST",
           new String[] {
             "java.util.Collections", "emptyList"
-          }); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+          }); // $NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
     }
     return resolveMap.get(fieldName);
   }
@@ -2215,7 +2216,7 @@ public class LocalCorrectionsSubProcessor {
       }
     }
     if (hasInstanceFields) {
-      //Generate hashCode() and equals()... proposal
+      // Generate hashCode() and equals()... proposal
       String label =
           CorrectionMessages.LocalCorrectionsSubProcessor_generate_hashCode_equals_description;
       Image image = JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -2253,9 +2254,9 @@ public class LocalCorrectionsSubProcessor {
       proposals.add(proposal);
     }
 
-    //Override hashCode() proposal
+    // Override hashCode() proposal
     IMethodBinding superHashCode =
-        Bindings.findMethodInHierarchy(binding, "hashCode", new ITypeBinding[0]); //$NON-NLS-1$
+        Bindings.findMethodInHierarchy(binding, "hashCode", new ITypeBinding[0]); // $NON-NLS-1$
     if (superHashCode == null) {
       return;
     }

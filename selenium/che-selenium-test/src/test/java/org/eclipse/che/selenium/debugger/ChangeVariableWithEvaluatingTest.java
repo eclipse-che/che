@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.debugger;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
@@ -130,19 +131,20 @@ public class ChangeVariableWithEvaluatingTest {
             + "://"
             + workspaceServiceClient.getServerAddressByPort(ws.getId(), 8080)
             + "/spring/guess";
-    String requestMess = "11";
+    String requestMess = "numGuess=11&submit=Ok";
     editor.waitActiveBreakpoint(34);
     CompletableFuture<String> instToRequestThread =
-        debuggerUtils.gotoDebugAppAndSendRequest(appUrl, requestMess);
+        debuggerUtils.gotoDebugAppAndSendRequest(
+            appUrl, requestMess, APPLICATION_FORM_URLENCODED, 200);
     debugPanel.openDebugPanel();
     debugPanel.waitDebugHighlightedText("result = \"Sorry, you failed. Try again later!\";");
     debugPanel.waitVariablesPanel();
-    debugPanel.selectVarInVariablePanel("numGuessByUser=\"11\"");
-    debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.CHANGE_VARIABLE);
+    debugPanel.selectNodeInDebuggerTree("numGuessByUser=\"11\"");
+    debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.CHANGE_DEBUG_TREE_NODE);
     String secretNum = getValueOfSecretNumFromVarWidget().trim();
-    debugPanel.typeAndChangeVariable(secretNum);
-    debugPanel.selectVarInVariablePanel(String.format("numGuessByUser=%s", secretNum));
-    debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.EVALUATE_EXPRESSIONS);
+    debugPanel.typeAndSaveTextAreaDialog(secretNum);
+    debugPanel.selectNodeInDebuggerTree(String.format("numGuessByUser=%s", secretNum));
+    debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.EVALUATE_EXPRESSIONS);
     debugPanel.typeEvaluateExpression("numGuessByUser.length()");
     debugPanel.clickEvaluateBtn();
     debugPanel.waitExpectedResultInEvaluateExpression("1");
@@ -150,7 +152,7 @@ public class ChangeVariableWithEvaluatingTest {
     debugPanel.clickEvaluateBtn();
     debugPanel.waitExpectedResultInEvaluateExpression("false");
     debugPanel.clickCloseEvaluateBtn();
-    debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.RESUME_BTN_ID);
+    debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.RESUME_BTN_ID);
     assertTrue(instToRequestThread.get().contains("Sorry, you failed. Try again later!"));
   }
 
@@ -166,7 +168,7 @@ public class ChangeVariableWithEvaluatingTest {
   }
 
   private String getValueOfSecretNumFromVarWidget() {
-    Pattern compile = Pattern.compile("secretNum=(.*)\n");
+    Pattern compile = Pattern.compile("secretNum=(.*)(\n)?");
     Matcher matcher = compile.matcher(debugPanel.getVariables());
     return matcher.find() ? matcher.group(1) : null;
   }

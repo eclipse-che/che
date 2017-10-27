@@ -107,16 +107,16 @@ public final class RefactoringHistoryService implements IRefactoringHistoryServi
   private static RefactoringHistoryService fInstance = null;
 
   /** The refactoring history file */
-  public static final String NAME_HISTORY_FILE = "refactorings.history"; //$NON-NLS-1$
+  public static final String NAME_HISTORY_FILE = "refactorings.history"; // $NON-NLS-1$
 
   /** The refactoring history folder */
-  public static final String NAME_HISTORY_FOLDER = ".refactorings"; //$NON-NLS-1$
+  public static final String NAME_HISTORY_FOLDER = ".refactorings"; // $NON-NLS-1$
 
   /** The refactoring history index file name */
-  public static final String NAME_INDEX_FILE = "refactorings.index"; //$NON-NLS-1$
+  public static final String NAME_INDEX_FILE = "refactorings.index"; // $NON-NLS-1$
 
   /** The name of the special workspace project */
-  public static final String NAME_WORKSPACE_PROJECT = ".workspace"; //$NON-NLS-1$
+  public static final String NAME_WORKSPACE_PROJECT = ".workspace"; // $NON-NLS-1$
 
   /** The no history constant */
   private static final NullRefactoringHistory NO_HISTORY = new NullRefactoringHistory();
@@ -224,7 +224,7 @@ public final class RefactoringHistoryService implements IRefactoringHistoryServi
     Assert.isTrue(project.isAccessible());
     if (monitor == null) monitor = new NullProgressMonitor();
     try {
-      monitor.beginTask("", 300); //$NON-NLS-1$
+      monitor.beginTask("", 300); // $NON-NLS-1$
       final String name = project.getName();
       final URI uri = project.getLocationURI();
       if (uri != null) {
@@ -392,7 +392,7 @@ public final class RefactoringHistoryService implements IRefactoringHistoryServi
       final Map projects = new HashMap();
       for (int index = 0; index < proxies.length; index++) {
         String project = proxies[index].getProject();
-        if (project == null || "".equals(project)) //$NON-NLS-1$
+        if (project == null || "".equals(project)) // $NON-NLS-1$
         project = RefactoringHistoryService.NAME_WORKSPACE_PROJECT;
         Collection collection = (Collection) projects.get(project);
         if (collection == null) {
@@ -596,7 +596,7 @@ public final class RefactoringHistoryService implements IRefactoringHistoryServi
         final String message =
             "The refactoring executed at "
                 + time
-                + " contributed a refactoring descriptor with invalid format:"; //$NON-NLS-1$//$NON-NLS-2$
+                + " contributed a refactoring descriptor with invalid format:"; // $NON-NLS-1$//$NON-NLS-2$
         final IStatus comment =
             new Status(IStatus.ERROR, RefactoringCorePlugin.getPluginId(), descriptor.getComment());
         RefactoringCorePlugin.log(
@@ -846,7 +846,7 @@ public final class RefactoringHistoryService implements IRefactoringHistoryServi
     Assert.isTrue(flags >= RefactoringDescriptor.NONE);
     if (monitor == null) monitor = new NullProgressMonitor();
     try {
-      monitor.beginTask("", 100 * proxies.length); //$NON-NLS-1$
+      monitor.beginTask("", 100 * proxies.length); // $NON-NLS-1$
       connect();
       final List list = new ArrayList(proxies.length);
       for (int index = 0; index < proxies.length; index++) {
@@ -1029,7 +1029,7 @@ public final class RefactoringHistoryService implements IRefactoringHistoryServi
         EFS.getLocalFileSystem()
             .getStore(RefactoringCorePlugin.getDefault().getStateLocation())
             .getChild(NAME_HISTORY_FOLDER);
-    if (name != null && !"".equals(name)) { //$NON-NLS-1$
+    if (name != null && !"".equals(name)) { // $NON-NLS-1$
       try {
         final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
         if (project.isAccessible()) {

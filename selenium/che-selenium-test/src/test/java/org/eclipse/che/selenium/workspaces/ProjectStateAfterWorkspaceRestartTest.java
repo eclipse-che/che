@@ -89,7 +89,7 @@ public class ProjectStateAfterWorkspaceRestartTest {
     consoles.closeProcessesArea();
     editor.waitTabIsNotPresent("AppController");
     editor.waitTabIsNotPresent("index.jsp");
-    //projectExplorer.clickOnProjectExplorerTab();
+    // projectExplorer.clickOnProjectExplorerTab();
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitDisappearItemByPath(PROJECT_NAME);
     toastLoader.waitExpectedTextInToastLoader("Workspace is not running");

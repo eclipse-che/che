@@ -12,9 +12,10 @@
 package org.eclipse.che.git.impl.jgit;
 
 import static java.util.Collections.singletonList;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -115,7 +116,7 @@ public class JGitConnectionTest {
   @Test(dataProvider = "gitUrlsWithCredentials")
   public void shouldExecuteRemoteCommandByHttpOrHttpsUrlWithCredentials(String url)
       throws Exception {
-    //given
+    // given
     ArgumentCaptor<UsernamePasswordCredentialsProvider> captor =
         ArgumentCaptor.forClass(UsernamePasswordCredentialsProvider.class);
     Field usernameField = UsernamePasswordCredentialsProvider.class.getDeclaredField("username");
@@ -123,10 +124,10 @@ public class JGitConnectionTest {
     usernameField.setAccessible(true);
     passwordField.setAccessible(true);
 
-    //when
+    // when
     jGitConnection.executeRemoteCommand(url, transportCommand, null, null);
 
-    //then
+    // then
     verify(transportCommand).setCredentialsProvider(captor.capture());
     UsernamePasswordCredentialsProvider credentialsProvider = captor.getValue();
     String username = (String) usernameField.get(credentialsProvider);
@@ -138,16 +139,16 @@ public class JGitConnectionTest {
   @Test(dataProvider = "gitUrlsWithoutOrWrongCredentials")
   public void shouldNotSetCredentialsProviderIfUrlDoesNotContainCredentials(String url)
       throws Exception {
-    //when
+    // when
     jGitConnection.executeRemoteCommand(url, transportCommand, null, null);
 
-    //then
+    // then
     verify(transportCommand, never()).setCredentialsProvider(any());
   }
 
   @Test
   public void shouldSetSshSessionFactoryWhenSshTransportReceived() throws Exception {
-    //given
+    // given
     SshTransport sshTransport = mock(SshTransport.class);
     when(sshKeyProvider.getPrivateKey(anyString())).thenReturn(new byte[0]);
     doAnswer(
@@ -160,16 +161,16 @@ public class JGitConnectionTest {
         .when(transportCommand)
         .setTransportConfigCallback(any());
 
-    //when
+    // when
     jGitConnection.executeRemoteCommand("ssh://host.xz/repo.git", transportCommand, null, null);
 
-    //then
+    // then
     verify(sshTransport).setSshSessionFactory(any());
   }
 
   @Test
   public void shouldDoNothingWhenTransportHttpReceived() throws Exception {
-    //given
+    // given
 
     /*
      * We need create {@link TransportHttp} mock, but this class has parent
@@ -200,10 +201,10 @@ public class JGitConnectionTest {
         .when(transportCommand)
         .setTransportConfigCallback(any());
 
-    //when
+    // when
     jGitConnection.executeRemoteCommand("ssh://host.xz/repo.git", transportCommand, null, null);
 
-    //then
+    // then
     verifyZeroInteractions(transportHttp);
   }
 
@@ -232,12 +233,12 @@ public class JGitConnectionTest {
   )
   public void testCommitNotChangedSpecifiedPathsWithAmendWhenOtherStagedChangesArePresent()
       throws Exception {
-    //given
+    // given
     Status status = mock(Status.class);
     when(status.getChanged()).thenReturn(singletonList("ChangedNotSpecified"));
     doReturn(status).when(jGitConnection).status(anyObject());
 
-    //when
+    // when
     jGitConnection.commit(
         CommitParams.create("message")
             .withFiles(singletonList("NotChangedSpecified"))
@@ -253,12 +254,12 @@ public class JGitConnectionTest {
   public void
       testCommitNotChangedSpecifiedPathsWithAmendAndWithAllWhenOtherUnstagedChangesArePresent()
           throws Exception {
-    //given
+    // given
     Status status = mock(Status.class);
     when(status.getModified()).thenReturn(singletonList("ChangedNotSpecified"));
     doReturn(status).when(jGitConnection).status(anyObject());
 
-    //when
+    // when
     jGitConnection.commit(
         CommitParams.create("message")
             .withFiles(singletonList("NotChangedSpecified"))
@@ -268,7 +269,7 @@ public class JGitConnectionTest {
 
   @Test
   public void shouldCloseCloneCommand() throws Exception {
-    //given
+    // given
     File fileMock = mock(File.class);
     Git cloneCommand = mock(Git.class);
     jGitConnection.setOutputLineConsumerFactory(mock(LineConsumerFactory.class));
@@ -277,12 +278,16 @@ public class JGitConnectionTest {
     when(repository.getConfig()).thenReturn(mock(StoredConfig.class));
     doReturn(cloneCommand)
         .when(jGitConnection)
-        .executeRemoteCommand(anyString(), anyObject(), anyString(), anyString());
+        .executeRemoteCommand(
+            nullable(String.class),
+            nullable(TransportCommand.class),
+            nullable(String.class),
+            nullable(String.class));
 
-    //when
+    // when
     jGitConnection.clone(CloneParams.create("url").withWorkingDir("fakePath"));
 
-    //then
+    // then
     verify(cloneCommand).close();
   }
 }

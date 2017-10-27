@@ -31,7 +31,7 @@ import org.testng.annotations.Test;
  */
 @Listeners(MockitoTestNGListener.class)
 public class RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriberTest {
-  //mocks for constructor
+  // mocks for constructor
   @Mock private EventService eventService;
   @Mock private WorkspaceFilesCleaner workspaceFilesCleaner;
 

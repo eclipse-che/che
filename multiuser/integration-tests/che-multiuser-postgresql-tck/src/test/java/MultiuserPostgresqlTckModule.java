@@ -8,6 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
+
 import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_DRIVER;
 import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_PASSWORD;
 import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_URL;
@@ -120,14 +121,14 @@ public class MultiuserPostgresqlTckModule extends TckModule {
     bind(DBInitializer.class).asEagerSingleton();
     bind(TckResourcesCleaner.class).to(JpaCleaner.class);
 
-    //repositories
-    //api-account
+    // repositories
+    // api-account
     bind(new TypeLiteral<TckRepository<AccountImpl>>() {})
         .toInstance(new JpaTckRepository<>(AccountImpl.class));
-    //api-user
+    // api-user
     bind(new TypeLiteral<TckRepository<UserImpl>>() {}).to(UserJpaTckRepository.class);
 
-    //api-workspace
+    // api-workspace
     bind(new TypeLiteral<TckRepository<WorkspaceImpl>>() {})
         .toInstance(new JpaTckRepository<>(WorkspaceImpl.class));
     bind(new TypeLiteral<TckRepository<StackImpl>>() {})
@@ -135,10 +136,10 @@ public class MultiuserPostgresqlTckModule extends TckModule {
     bind(new TypeLiteral<TckRepository<WorkerImpl>>() {})
         .toInstance(new JpaTckRepository<>(WorkerImpl.class));
 
-    //api-machine
+    // api-machine
     bind(new TypeLiteral<TckRepository<RecipeImpl>>() {})
         .toInstance(new JpaTckRepository<>(RecipeImpl.class));
-    //api permission
+    // api permission
     bind(new TypeLiteral<TckRepository<RecipePermissionsImpl>>() {})
         .toInstance(new JpaTckRepository<>(RecipePermissionsImpl.class));
     bind(new TypeLiteral<TckRepository<StackPermissionsImpl>>() {})
@@ -153,7 +154,7 @@ public class MultiuserPostgresqlTckModule extends TckModule {
     bind(new TypeLiteral<PermissionsDao<SystemPermissionsImpl>>() {})
         .to(JpaSystemPermissionsDao.class);
 
-    //permissions domains
+    // permissions domains
     bind(new TypeLiteral<AbstractPermissionsDomain<RecipePermissionsImpl>>() {})
         .to(RecipePermissionsDaoTest.TestDomain.class);
     bind(new TypeLiteral<AbstractPermissionsDomain<StackPermissionsImpl>>() {})
@@ -163,7 +164,7 @@ public class MultiuserPostgresqlTckModule extends TckModule {
     bind(new TypeLiteral<AbstractPermissionsDomain<SystemPermissionsImpl>>() {})
         .to(SystemPermissionsDaoTest.TestDomain.class);
 
-    //api-organization
+    // api-organization
     bind(new TypeLiteral<TckRepository<OrganizationImpl>>() {})
         .to(JpaOrganizationImplTckRepository.class);
     bind(new TypeLiteral<TckRepository<MemberImpl>>() {})
@@ -171,11 +172,11 @@ public class MultiuserPostgresqlTckModule extends TckModule {
     bind(new TypeLiteral<TckRepository<OrganizationDistributedResourcesImpl>>() {})
         .toInstance(new JpaTckRepository<>(OrganizationDistributedResourcesImpl.class));
 
-    //api-resource
+    // api-resource
     bind(new TypeLiteral<TckRepository<FreeResourcesLimitImpl>>() {})
         .toInstance(new JpaTckRepository<>(FreeResourcesLimitImpl.class));
 
-    //dao
+    // dao
     bind(OrganizationDao.class).to(JpaOrganizationDao.class);
     bind(OrganizationDistributedResourcesDao.class)
         .to(JpaOrganizationDistributedResourcesDao.class);
@@ -189,7 +190,7 @@ public class MultiuserPostgresqlTckModule extends TckModule {
     // SHA-512 ecnryptor is faster than PBKDF2 so it is better for testing
     bind(PasswordEncryptor.class).to(SHA512PasswordEncryptor.class).in(Singleton.class);
 
-    //Creates empty multibinder to avoid error during container starting
+    // Creates empty multibinder to avoid error during container starting
     Multibinder.newSetBinder(
         binder(), String.class, Names.named(SystemDomain.SYSTEM_DOMAIN_ACTIONS));
   }
@@ -270,7 +271,7 @@ public class MultiuserPostgresqlTckModule extends TckModule {
     public void createAll(Collection<? extends OrganizationImpl> entities)
         throws TckRepositoryException {
       super.createAll(entities);
-      //It's important to save organization to remove them in the reverse order
+      // It's important to save organization to remove them in the reverse order
       createdOrganizations.addAll(entities);
     }
 
@@ -294,7 +295,7 @@ public class MultiuserPostgresqlTckModule extends TckModule {
                     .getSingleResult();
             manager.remove(organizationToRemove);
           } catch (NoResultException ignored) {
-            //it is already removed
+            // it is already removed
           }
         }
         createdOrganizations.clear();
@@ -309,7 +310,7 @@ public class MultiuserPostgresqlTckModule extends TckModule {
         uow.end();
       }
 
-      //remove all objects that was created in tests
+      // remove all objects that was created in tests
       super.removeAll();
     }
   }

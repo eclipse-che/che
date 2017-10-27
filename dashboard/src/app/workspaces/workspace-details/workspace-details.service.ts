@@ -15,6 +15,7 @@ import {CreateWorkspaceSvc} from '../create-workspace/create-workspace.service';
 import {IObservable, IObservableCallbackFn, Observable} from '../../../components/utils/observable';
 import {WorkspaceDetailsProjectsService} from './workspace-projects/workspace-details-projects.service';
 import {CheWorkspace, WorkspaceStatus} from '../../../components/api/workspace/che-workspace.factory';
+import {CheService} from '../../../components/api/che-service.factory';
 
 interface IPage {
   title: string;
@@ -83,7 +84,9 @@ export class WorkspaceDetailsService {
     cheNotification: CheNotification,
     ideSvc: IdeSvc,
     createWorkspaceSvc: CreateWorkspaceSvc,
-    workspaceDetailsProjectsService: WorkspaceDetailsProjectsService
+    workspaceDetailsProjectsService: WorkspaceDetailsProjectsService,
+    cheService: CheService,
+    chePermissions: che.api.IChePermissions
   ) {
     this.$log = $log;
     this.$q = $q;
@@ -98,6 +101,12 @@ export class WorkspaceDetailsService {
     this.pages = [];
     this.sections = [];
     this.observable = new Observable();
+
+    cheService.fetchServices().finally(() => {
+      if (cheService.isServiceAvailable(chePermissions.getPermissionsServicePath())) {
+        this.addPage('Share', '<share-workspace></share-workspace>', 'icon-ic_folder_shared_24px');
+      }
+    });
   }
 
   /**

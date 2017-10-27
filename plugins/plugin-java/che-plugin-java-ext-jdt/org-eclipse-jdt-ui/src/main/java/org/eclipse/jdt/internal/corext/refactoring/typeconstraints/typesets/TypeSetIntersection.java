@@ -46,7 +46,7 @@ public class TypeSetIntersection extends TypeSet {
    */
   @Override
   public TypeSet makeClone() {
-    return this; //new TypeSetIntersection(fLHS.makeClone(), fRHS.makeClone());
+    return this; // new TypeSetIntersection(fLHS.makeClone(), fRHS.makeClone());
   }
 
   /* (non-Javadoc)
@@ -280,7 +280,7 @@ public class TypeSetIntersection extends TypeSet {
         + fLHS
         + ","
         + fRHS
-        + ")>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+        + ")>"; // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
   }
 
   /* (non-Javadoc)

@@ -35,7 +35,7 @@ public class PublishDiagnosticsProcessor {
   public void processDiagnostics(ExtendedPublishDiagnosticsParams diagnosticsMessage) {
     EditorPartPresenter openedEditor =
         editorAgent.getOpenedEditor(new Path(diagnosticsMessage.getParams().getUri()));
-    //TODO add markers
+    // TODO add markers
     if (openedEditor == null) {
       return;
     }

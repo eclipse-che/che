@@ -17,11 +17,11 @@ import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringSta
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.INFO;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.OK;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.WARNING;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -67,7 +67,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
@@ -92,7 +91,7 @@ public class MovePresenterTest {
   @Mock private NotificationManager notificationManager;
   @Mock private EditorAgent editorAgent;
 
-  //local params
+  // local params
   @Mock private RefactorInfo refactorInfo;
   @Mock private File file;
   @Mock private Container srcFolder;
@@ -160,9 +159,11 @@ public class MovePresenterTest {
 
     when(refactorService.setMoveSettings(moveSettings)).thenReturn(moveSettingsPromise);
     when(moveSettingsPromise.thenPromise(
-            Matchers.<Function<Void, Promise<ChangeCreationResult>>>anyObject()))
+            org.mockito.ArgumentMatchers
+                .<Function<Void, Promise<ChangeCreationResult>>>anyObject()))
         .thenReturn(changeCreationResultPromise);
-    when(changeCreationResultPromise.then(Matchers.<Operation<ChangeCreationResult>>anyObject()))
+    when(changeCreationResultPromise.then(
+            org.mockito.ArgumentMatchers.<Operation<ChangeCreationResult>>anyObject()))
         .thenReturn(changeCreationResultPromise);
 
     presenter =
@@ -220,11 +221,11 @@ public class MovePresenterTest {
 
     presenter.onPreviewButtonClicked();
 
-    verify(moveSettings).setSessionId(anyString());
+    verify(moveSettings).setSessionId(nullable(String.class));
     verify(moveSettings).setUpdateReferences(anyBoolean());
     verify(moveSettings).setUpdateQualifiedNames(anyBoolean());
-    verify(moveSettings).setFilePatterns(anyString());
-    verify(session).setSessionId(anyString());
+    verify(moveSettings).setFilePatterns(nullable(String.class));
+    verify(session).setSessionId(nullable(String.class));
 
     verify(moveSettingsPromise).thenPromise(changeCreationFunction.capture());
     changeCreationFunction.getValue().apply(any());
@@ -232,7 +233,7 @@ public class MovePresenterTest {
 
     verify(changeCreationResultPromise).then(changeResultOperation.capture());
     changeResultOperation.getValue().apply(changeCreationResult);
-    verify(previewPresenter).show(anyString(), any());
+    verify(previewPresenter).show(nullable(String.class), any());
     verify(moveView).hide();
   }
 
@@ -245,7 +246,8 @@ public class MovePresenterTest {
 
     verify(locale).showPreviewError();
     verify(promiseError).getMessage();
-    verify(notificationManager).notify(anyString(), anyString(), eq(FAIL), eq(FLOAT_MODE));
+    verify(notificationManager)
+        .notify(nullable(String.class), nullable(String.class), eq(FAIL), eq(FLOAT_MODE));
   }
 
   @Test
@@ -255,11 +257,11 @@ public class MovePresenterTest {
 
     presenter.onPreviewButtonClicked();
 
-    verify(moveSettings).setSessionId(anyString());
+    verify(moveSettings).setSessionId(nullable(String.class));
     verify(moveSettings).setUpdateReferences(anyBoolean());
     verify(moveSettings).setUpdateQualifiedNames(anyBoolean());
-    verify(moveSettings).setFilePatterns(anyString());
-    verify(session).setSessionId(anyString());
+    verify(moveSettings).setFilePatterns(nullable(String.class));
+    verify(session).setSessionId(nullable(String.class));
 
     verify(moveSettingsPromise).thenPromise(changeCreationFunction.capture());
     changeCreationFunction.getValue().apply(any());
@@ -267,7 +269,7 @@ public class MovePresenterTest {
 
     verify(changeCreationResultPromise).then(changeResultOperation.capture());
     changeResultOperation.getValue().apply(changeCreationResult);
-    verify(previewPresenter, never()).show(anyString(), any());
+    verify(previewPresenter, never()).show(nullable(String.class), any());
     verify(moveView, never()).hide();
     verify(moveView).showStatusMessage(refactoringStatus);
   }
@@ -280,11 +282,11 @@ public class MovePresenterTest {
 
     presenter.onAcceptButtonClicked();
 
-    verify(moveSettings).setSessionId(anyString());
+    verify(moveSettings).setSessionId(nullable(String.class));
     verify(moveSettings).setUpdateReferences(anyBoolean());
     verify(moveSettings).setUpdateQualifiedNames(anyBoolean());
-    verify(moveSettings).setFilePatterns(anyString());
-    verify(session).setSessionId(anyString());
+    verify(moveSettings).setFilePatterns(nullable(String.class));
+    verify(session).setSessionId(nullable(String.class));
 
     verify(moveSettingsPromise).thenPromise(changeCreationFunction.capture());
     changeCreationFunction.getValue().apply(any());
@@ -305,7 +307,8 @@ public class MovePresenterTest {
 
     verify(locale).applyMoveError();
     verify(promiseError).getMessage();
-    verify(notificationManager).notify(anyString(), anyString(), eq(FAIL), eq(FLOAT_MODE));
+    verify(notificationManager)
+        .notify(nullable(String.class), nullable(String.class), eq(FAIL), eq(FLOAT_MODE));
   }
 
   @Test
@@ -323,11 +326,11 @@ public class MovePresenterTest {
 
     presenter.onAcceptButtonClicked();
 
-    verify(moveSettings).setSessionId(anyString());
+    verify(moveSettings).setSessionId(nullable(String.class));
     verify(moveSettings).setUpdateReferences(anyBoolean());
     verify(moveSettings).setUpdateQualifiedNames(anyBoolean());
-    verify(moveSettings).setFilePatterns(anyString());
-    verify(session).setSessionId(anyString());
+    verify(moveSettings).setFilePatterns(nullable(String.class));
+    verify(session).setSessionId(nullable(String.class));
 
     verify(moveSettingsPromise).thenPromise(changeCreationFunction.capture());
     changeCreationFunction.getValue().apply(any());
@@ -364,11 +367,11 @@ public class MovePresenterTest {
 
     presenter.onAcceptButtonClicked();
 
-    verify(moveSettings).setSessionId(anyString());
+    verify(moveSettings).setSessionId(nullable(String.class));
     verify(moveSettings).setUpdateReferences(anyBoolean());
     verify(moveSettings).setUpdateQualifiedNames(anyBoolean());
-    verify(moveSettings).setFilePatterns(anyString());
-    verify(session).setSessionId(anyString());
+    verify(moveSettings).setFilePatterns(nullable(String.class));
+    verify(session).setSessionId(nullable(String.class));
 
     verify(moveSettingsPromise).thenPromise(changeCreationFunction.capture());
     changeCreationFunction.getValue().apply(any());
@@ -397,7 +400,7 @@ public class MovePresenterTest {
     presenter.setMoveDestinationPath(DESTINATION, PROJECT_PATH);
 
     verify(destination).setType(ReorgDestination.DestinationType.PACKAGE);
-    verify(destination).setSessionId(anyString());
+    verify(destination).setSessionId(nullable(String.class));
     verify(destination).setProjectPath(PROJECT_PATH);
     verify(destination).setDestination(DESTINATION);
 
@@ -415,7 +418,7 @@ public class MovePresenterTest {
     presenter.setMoveDestinationPath(DESTINATION, PROJECT_PATH);
 
     verify(destination).setType(ReorgDestination.DestinationType.PACKAGE);
-    verify(destination).setSessionId(anyString());
+    verify(destination).setSessionId(nullable(String.class));
     verify(destination).setProjectPath(PROJECT_PATH);
     verify(destination).setDestination(DESTINATION);
 
@@ -433,7 +436,7 @@ public class MovePresenterTest {
     presenter.setMoveDestinationPath(DESTINATION, PROJECT_PATH);
 
     verify(destination).setType(ReorgDestination.DestinationType.PACKAGE);
-    verify(destination).setSessionId(anyString());
+    verify(destination).setSessionId(nullable(String.class));
     verify(destination).setProjectPath(PROJECT_PATH);
     verify(destination).setDestination(DESTINATION);
 
@@ -451,7 +454,7 @@ public class MovePresenterTest {
     presenter.setMoveDestinationPath(DESTINATION, PROJECT_PATH);
 
     verify(destination).setType(ReorgDestination.DestinationType.PACKAGE);
-    verify(destination).setSessionId(anyString());
+    verify(destination).setSessionId(nullable(String.class));
     verify(destination).setProjectPath(PROJECT_PATH);
     verify(destination).setDestination(DESTINATION);
 
@@ -472,7 +475,7 @@ public class MovePresenterTest {
     presenter.setMoveDestinationPath(DESTINATION, PROJECT_PATH);
 
     verify(destination).setType(ReorgDestination.DestinationType.PACKAGE);
-    verify(destination).setSessionId(anyString());
+    verify(destination).setSessionId(nullable(String.class));
     verify(destination).setProjectPath(PROJECT_PATH);
     verify(destination).setDestination(DESTINATION);
 

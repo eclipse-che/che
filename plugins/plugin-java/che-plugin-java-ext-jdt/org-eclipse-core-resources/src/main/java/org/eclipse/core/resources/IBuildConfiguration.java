@@ -49,7 +49,7 @@ import org.eclipse.core.runtime.IAdaptable;
 public interface IBuildConfiguration extends IAdaptable {
 
   /** The Id of the default build configuration */
-  public static final String DEFAULT_CONFIG_NAME = ""; //$NON-NLS-1$
+  public static final String DEFAULT_CONFIG_NAME = ""; // $NON-NLS-1$
 
   /** @return the project that the config is for; never null. */
   public IProject getProject();

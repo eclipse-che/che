@@ -34,14 +34,13 @@ import org.eclipse.che.providers.DynaProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 
 /** @author Dmitry Shnurenko */
 @RunWith(GwtMockitoTestRunner.class)
 public class ProjectPerspectiveTest {
 
-  //constructor mocks
+  // constructor mocks
   @Mock private PerspectiveViewImpl view;
   @Mock private PartStackViewFactory partViewFactory;
   @Mock private WorkBenchControllerFactory controllerFactory;
@@ -49,7 +48,7 @@ public class ProjectPerspectiveTest {
   @Mock private EventBus eventBus;
   @Mock private EditorMultiPartStackPresenter editorMultiPartStackPresenter;
 
-  //additional mocks
+  // additional mocks
   @Mock private FlowPanel panel;
   @Mock private SplitLayoutPanel layoutPanel;
   @Mock private SimplePanel simplePanel;
@@ -77,15 +76,18 @@ public class ProjectPerspectiveTest {
     when(view.getToolPanel()).thenReturn(simplePanel);
 
     when(controllerFactory.createController(
-            Matchers.<SplitLayoutPanel>anyObject(), Matchers.<SimplePanel>anyObject()))
+            org.mockito.ArgumentMatchers.<SplitLayoutPanel>anyObject(),
+            org.mockito.ArgumentMatchers.<SimplePanel>anyObject()))
         .thenReturn(workBenchController);
 
     when(partViewFactory.create(
-            Matchers.<PartStackView.TabPosition>anyObject(), Matchers.<FlowPanel>anyObject()))
+            org.mockito.ArgumentMatchers.<PartStackView.TabPosition>anyObject(),
+            org.mockito.ArgumentMatchers.<FlowPanel>anyObject()))
         .thenReturn(partStackView);
 
     when(stackPresenterFactory.create(
-            Matchers.<PartStackView>anyObject(), Matchers.<WorkBenchPartController>anyObject()))
+            org.mockito.ArgumentMatchers.<PartStackView>anyObject(),
+            org.mockito.ArgumentMatchers.<WorkBenchPartController>anyObject()))
         .thenReturn(partStackPresenter);
 
     perspective =

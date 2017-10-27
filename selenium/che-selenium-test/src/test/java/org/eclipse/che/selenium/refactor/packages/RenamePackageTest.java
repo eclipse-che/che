@@ -40,7 +40,8 @@ public class RenamePackageTest {
   private static String PROJECT_NAME = NameGenerator.generate("CheckRenamePackageProject-", 4);
   private static final Logger LOG = LoggerFactory.getLogger(RenamePackageTest.class);
 
-  // TODO move all data from this fields into resources. See Utils.readContentFromFile, for example RenameMethodInInterfaceTest
+  // TODO move all data from this fields into resources. See Utils.readContentFromFile, for example
+  // RenameMethodInInterfaceTest
   private static String TEST0_P1_OUT =
       "package test0.p1;\n"
           + "/**\n"
@@ -420,7 +421,7 @@ public class RenamePackageTest {
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/test4/q");
     projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/test4/r");
 
-    //TODO this is temporary solution, because tree is not refresh
+    // TODO this is temporary solution, because tree is not refresh
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/src/main/java/test4/r");
     projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.REFRESH);
 

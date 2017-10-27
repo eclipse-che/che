@@ -204,7 +204,7 @@ public abstract class MavenServerWrapper extends RmiObjectWrapper<MavenServer> {
     }
   }
 
-  //TODO enable notification after MavenServerProgressNotifier reworked
+  // TODO enable notification after MavenServerProgressNotifier reworked
   private static class MavenServerProgressNotifierWrapper implements MavenServerProgressNotifier {
 
     private MavenProgressNotifier delegate;

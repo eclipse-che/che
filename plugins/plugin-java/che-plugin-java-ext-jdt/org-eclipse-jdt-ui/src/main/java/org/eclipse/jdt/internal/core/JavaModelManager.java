@@ -119,10 +119,10 @@ public class JavaModelManager {
     defaultOptions.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
   }
 
-  public static final String TRUE = "true"; //$NON-NLS-1$
+  public static final String TRUE = "true"; // $NON-NLS-1$
   public static final ICompilationUnit[] NO_WORKING_COPY = new ICompilationUnit[0];
   private static final String INDEXED_SECONDARY_TYPES =
-      "#@*_indexing secondary cache_*@#"; //$NON-NLS-1$
+      "#@*_indexing secondary cache_*@#"; // $NON-NLS-1$
   public static boolean VERBOSE = false;
   public static boolean CP_RESOLVE_VERBOSE = false;
   public static boolean CP_RESOLVE_VERBOSE_ADVANCED = false;
@@ -142,7 +142,7 @@ public class JavaModelManager {
    */
   private static final String RESOLVE_REFERENCED_LIBRARIES_FOR_CONTAINERS =
       "resolveReferencedLibrariesForContainers";
-  //$NON-NLS-1$
+  // $NON-NLS-1$
 
   public static final IClasspathContainer CONTAINER_INITIALIZATION_IN_PROGRESS =
       new IClasspathContainer() {
@@ -152,7 +152,7 @@ public class JavaModelManager {
 
         public String getDescription() {
           return "Container Initialization In Progress";
-        } //$NON-NLS-1$
+        } // $NON-NLS-1$
 
         public int getKind() {
           return 0;
@@ -175,7 +175,8 @@ public class JavaModelManager {
   //     * The singleton manager
   //     */
   private static JavaModelManager MANAGER = new JavaModelManager();
-  // Non-static, which will give it a chance to retain the default when and if JavaModelManager is restarted.
+  // Non-static, which will give it a chance to retain the default when and if JavaModelManager is
+  // restarted.
   boolean resolveReferencedLibrariesForContainers = false;
 
   /*
@@ -276,12 +277,12 @@ public class JavaModelManager {
     javaModel = new org.eclipse.jdt.internal.core.JavaModel();
     this.indexManager = new IndexManager(ResourcesPlugin.getIndexPath());
     deltaState = new DeltaProcessingState(this);
-    this.nonChainingJars = new HashSet(); //loadClasspathListCache(NON_CHAINING_JARS_CACHE);
-    this.invalidArchives = new HashSet(); //loadClasspathListCache(INVALID_ARCHIVES_CACHE);
+    this.nonChainingJars = new HashSet(); // loadClasspathListCache(NON_CHAINING_JARS_CACHE);
+    this.invalidArchives = new HashSet(); // loadClasspathListCache(INVALID_ARCHIVES_CACHE);
     this.externalFiles =
-        new CopyOnWriteArraySet<>(); //loadClasspathListCache(EXTERNAL_FILES_CACHE);
+        new CopyOnWriteArraySet<>(); // loadClasspathListCache(EXTERNAL_FILES_CACHE);
     this.assumedExternalFiles =
-        new HashSet(); //loadClasspathListCache(ASSUMED_EXTERNAL_FILES_CACHE);
+        new HashSet(); // loadClasspathListCache(ASSUMED_EXTERNAL_FILES_CACHE);
     String includeContainerReferencedLib =
         System.getProperty(RESOLVE_REFERENCED_LIBRARIES_FOR_CONTAINERS);
     containerInitializersCache.put(
@@ -407,7 +408,8 @@ public class JavaModelManager {
           (IClasspathContainer) previousContainerValues.get(containerPath);
       if (previousContainer != null) {
         if (JavaModelManager.CP_RESOLVE_VERBOSE_ADVANCED)
-          //                    verbose_reentering_project_container_access(containerPath, project, previousContainer);
+          //                    verbose_reentering_project_container_access(containerPath, project,
+          // previousContainer);
           return previousContainer;
       }
     }
@@ -438,7 +440,7 @@ public class JavaModelManager {
             "WARNING : creating unit element outside classpath ("
                 + Thread.currentThread()
                 + "): "
-                + file.getFullPath()); //$NON-NLS-1$//$NON-NLS-2$
+                + file.getFullPath()); // $NON-NLS-1$//$NON-NLS-2$
       }
     }
     return pkg.getCompilationUnit(file.getName());
@@ -770,11 +772,14 @@ public class JavaModelManager {
   }
 
   public synchronized String intern(String s) {
-    // make sure to copy the string (so that it doesn't hold on the underlying char[] that might be much bigger than necessary)
+    // make sure to copy the string (so that it doesn't hold on the underlying char[] that might be
+    // much bigger than necessary)
     return (String) this.stringSymbols.add(new String(s));
 
-    // Note1: String#intern() cannot be used as on some VMs this prevents the string from being garbage collected
-    // Note 2: Instead of using a WeakHashset, one could use a WeakHashMap with the following implementation
+    // Note1: String#intern() cannot be used as on some VMs this prevents the string from being
+    // garbage collected
+    // Note 2: Instead of using a WeakHashset, one could use a WeakHashMap with the following
+    // implementation
     // 			   This would costs more per entry (one Entry object and one WeakReference more))
 
     /*
@@ -853,7 +858,7 @@ public class JavaModelManager {
             "("
                 + Thread.currentThread()
                 + ") [JavaModelManager.getZipFile(IPath)] Creating ZipFile on "
-                + localFile); //$NON-NLS-1$ //$NON-NLS-2$
+                + localFile); // $NON-NLS-1$ //$NON-NLS-2$
       }
       zipFile = new ZipFile(localFile);
       if (zipCache != null) {
@@ -964,29 +969,29 @@ public class JavaModelManager {
           String elementType;
           switch (element.getElementType()) {
             case IJavaElement.JAVA_PROJECT:
-              elementType = "project"; //$NON-NLS-1$
+              elementType = "project"; // $NON-NLS-1$
               break;
             case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-              elementType = "root"; //$NON-NLS-1$
+              elementType = "root"; // $NON-NLS-1$
               break;
             case IJavaElement.PACKAGE_FRAGMENT:
-              elementType = "package"; //$NON-NLS-1$
+              elementType = "package"; // $NON-NLS-1$
               break;
             case IJavaElement.CLASS_FILE:
-              elementType = "class file"; //$NON-NLS-1$
+              elementType = "class file"; // $NON-NLS-1$
               break;
             case IJavaElement.COMPILATION_UNIT:
-              elementType = "compilation unit"; //$NON-NLS-1$
+              elementType = "compilation unit"; // $NON-NLS-1$
               break;
             default:
-              elementType = "element"; //$NON-NLS-1$
+              elementType = "element"; // $NON-NLS-1$
           }
           System.out.println(
               Thread.currentThread()
                   + " CLOSING "
                   + elementType
                   + " "
-                  + element.toStringWithAncestors()); //$NON-NLS-1$//$NON-NLS-2$
+                  + element.toStringWithAncestors()); // $NON-NLS-1$//$NON-NLS-2$
           wasVerbose = true;
           JavaModelCache.VERBOSE = false;
         }
@@ -996,7 +1001,7 @@ public class JavaModelManager {
         }
         this.cache.removeInfo(element);
         if (wasVerbose) {
-          System.out.println(this.cache.toStringFillingRation("-> ")); //$NON-NLS-1$
+          System.out.println(this.cache.toStringFillingRation("-> ")); // $NON-NLS-1$
         }
       } finally {
         JavaModelCache.VERBOSE = wasVerbose;
@@ -1024,7 +1029,7 @@ public class JavaModelManager {
    * The given project is being removed. Remove all containers for this project from the cache.
    */
   public synchronized void containerRemove(IJavaProject project) {
-    //TODO
+    // TODO
     //        Map initializations = (Map) this.containerInitializationInProgress.get();
     //        if (initializations != null) {
     //            initializations.remove(project);
@@ -1231,7 +1236,7 @@ public class JavaModelManager {
   public Map secondaryTypes(IJavaProject project, boolean waitForIndexes, IProgressMonitor monitor)
       throws JavaModelException {
     if (VERBOSE) {
-      StringBuffer buffer = new StringBuffer("JavaModelManager.secondaryTypes("); //$NON-NLS-1$
+      StringBuffer buffer = new StringBuffer("JavaModelManager.secondaryTypes("); // $NON-NLS-1$
       buffer.append(project.getElementName());
       buffer.append(',');
       buffer.append(waitForIndexes);
@@ -1249,7 +1254,8 @@ public class JavaModelManager {
       return projectInfo.secondaryTypes;
     }
 
-    // Perform search request only if secondary types cache is not initialized yet (this will happen only once!)
+    // Perform search request only if secondary types cache is not initialized yet (this will happen
+    // only once!)
     if (projectInfo.secondaryTypes == null) {
       return secondaryTypesSearching(project, waitForIndexes, monitor, projectInfo);
     }
@@ -1286,13 +1292,13 @@ public class JavaModelManager {
    */
   private Hashtable secondaryTypesMerging(Hashtable secondaryTypes) {
     if (VERBOSE) {
-      Util.verbose("JavaModelManager.getSecondaryTypesMerged()"); //$NON-NLS-1$
-      Util.verbose("	- current cache to merge:"); //$NON-NLS-1$
+      Util.verbose("JavaModelManager.getSecondaryTypesMerged()"); // $NON-NLS-1$
+      Util.verbose("	- current cache to merge:"); // $NON-NLS-1$
       Iterator entries = secondaryTypes.entrySet().iterator();
       while (entries.hasNext()) {
         Map.Entry entry = (Map.Entry) entries.next();
         String packName = (String) entry.getKey();
-        Util.verbose("		+ " + packName + ':' + entry.getValue()); //$NON-NLS-1$
+        Util.verbose("		+ " + packName + ':' + entry.getValue()); // $NON-NLS-1$
       }
     }
 
@@ -1332,12 +1338,12 @@ public class JavaModelManager {
       }
     }
     if (VERBOSE) {
-      Util.verbose("	- secondary types cache merged:"); //$NON-NLS-1$
+      Util.verbose("	- secondary types cache merged:"); // $NON-NLS-1$
       entries = secondaryTypes.entrySet().iterator();
       while (entries.hasNext()) {
         Map.Entry entry = (Map.Entry) entries.next();
         String packName = (String) entry.getKey();
-        Util.verbose("		+ " + packName + ':' + entry.getValue()); //$NON-NLS-1$
+        Util.verbose("		+ " + packName + ':' + entry.getValue()); // $NON-NLS-1$
       }
     }
     return secondaryTypes;
@@ -1351,7 +1357,7 @@ public class JavaModelManager {
    */
   public Object getLastBuiltState(IProject project, IProgressMonitor monitor) {
     if (!JavaProject.hasJavaNature(project)) {
-      if (JavaBuilder.DEBUG) System.out.println(project + " is not a Java project"); //$NON-NLS-1$
+      if (JavaBuilder.DEBUG) System.out.println(project + " is not a Java project"); // $NON-NLS-1$
       return null; // should never be requested on non-Java projects
     }
     PerProjectInfo info = getPerProjectInfo(project, true /*create if missing*/);
@@ -1360,7 +1366,7 @@ public class JavaModelManager {
       //            try {
       if (monitor != null)
         monitor.subTask(Messages.bind(Messages.build_readStateProgress, project.getName()));
-      info.savedState = null; //readState(project);
+      info.savedState = null; // readState(project);
       //            } catch (CoreException e) {
       //                e.printStackTrace();
       //            }
@@ -1379,7 +1385,7 @@ public class JavaModelManager {
   public void secondaryTypesRemoving(IFile file, boolean cleanIndexCache) {
     if (VERBOSE) {
       StringBuffer buffer =
-          new StringBuffer("JavaModelManager.removeFromSecondaryTypesCache("); //$NON-NLS-1$
+          new StringBuffer("JavaModelManager.removeFromSecondaryTypesCache("); // $NON-NLS-1$
       buffer.append(file.getName());
       buffer.append(')');
       Util.verbose(buffer.toString());
@@ -1389,7 +1395,8 @@ public class JavaModelManager {
       if (projectInfo != null && projectInfo.secondaryTypes != null) {
         if (VERBOSE) {
           Util.verbose(
-              "-> remove file from cache of project: " + file.getProject().getName()); //$NON-NLS-1$
+              "-> remove file from cache of project: "
+                  + file.getProject().getName()); // $NON-NLS-1$
         }
 
         // Clean current cache
@@ -1435,7 +1442,7 @@ public class JavaModelManager {
   private void secondaryTypesRemoving(Hashtable secondaryTypesMap, IFile file) {
     if (VERBOSE) {
       StringBuffer buffer =
-          new StringBuffer("JavaModelManager.removeSecondaryTypesFromMap("); //$NON-NLS-1$
+          new StringBuffer("JavaModelManager.removeSecondaryTypesFromMap("); // $NON-NLS-1$
       Iterator entries = secondaryTypesMap.entrySet().iterator();
       while (entries.hasNext()) {
         Map.Entry entry = (Map.Entry) entries.next();
@@ -1489,12 +1496,12 @@ public class JavaModelManager {
       }
     }
     if (VERBOSE) {
-      Util.verbose("	- new secondary types map:"); //$NON-NLS-1$
+      Util.verbose("	- new secondary types map:"); // $NON-NLS-1$
       Iterator entries = secondaryTypesMap.entrySet().iterator();
       while (entries.hasNext()) {
         Map.Entry entry = (Map.Entry) entries.next();
         String qualifiedName = (String) entry.getKey();
-        Util.verbose("		+ " + qualifiedName + ':' + entry.getValue()); //$NON-NLS-1$
+        Util.verbose("		+ " + qualifiedName + ':' + entry.getValue()); // $NON-NLS-1$
       }
     }
   }
@@ -1521,7 +1528,7 @@ public class JavaModelManager {
       throws JavaModelException {
     if (VERBOSE || BasicSearchEngine.VERBOSE) {
       StringBuffer buffer =
-          new StringBuffer("JavaModelManager.secondaryTypesSearch("); //$NON-NLS-1$
+          new StringBuffer("JavaModelManager.secondaryTypesSearch("); // $NON-NLS-1$
       buffer.append(project.getElementName());
       buffer.append(',');
       buffer.append(waitForIndexes);
@@ -1539,7 +1546,7 @@ public class JavaModelManager {
               char[][] enclosingTypeNames,
               String path,
               AccessRestriction access) {
-            String key = packageName == null ? "" : new String(packageName); //$NON-NLS-1$
+            String key = packageName == null ? "" : new String(packageName); // $NON-NLS-1$
             HashMap types = (HashMap) secondaryTypes.get(key);
             if (types == null) types = new HashMap(3);
             types.put(new String(simpleTypeName), path);
@@ -1587,19 +1594,20 @@ public class JavaModelManager {
       types.putAll(tempTypes);
     }
 
-    // Store result in per project info cache if still null or there's still an indexing cache (may have been set by another thread...)
+    // Store result in per project info cache if still null or there's still an indexing cache (may
+    // have been set by another thread...)
     if (projectInfo.secondaryTypes == null
         || projectInfo.secondaryTypes.get(INDEXED_SECONDARY_TYPES) != null) {
       projectInfo.secondaryTypes = secondaryTypes;
       if (VERBOSE || BasicSearchEngine.VERBOSE) {
         System.out.print(
-            Thread.currentThread() + "	-> secondary paths stored in cache: "); //$NON-NLS-1$
+            Thread.currentThread() + "	-> secondary paths stored in cache: "); // $NON-NLS-1$
         System.out.println();
         Iterator entries = secondaryTypes.entrySet().iterator();
         while (entries.hasNext()) {
           Map.Entry entry = (Map.Entry) entries.next();
           String qualifiedName = (String) entry.getKey();
-          Util.verbose("		- " + qualifiedName + '-' + entry.getValue()); //$NON-NLS-1$
+          Util.verbose("		- " + qualifiedName + '-' + entry.getValue()); // $NON-NLS-1$
         }
       }
     }
@@ -1621,7 +1629,8 @@ public class JavaModelManager {
       String value = optionsCache.get(optionName);
       //            if (value == null && optionLevel == DEPRECATED_OPTION) {
       //                 May be a deprecated option, retrieve the new value in compatible options
-      //                String[] compatibleOptions = (String[]) this.deprecatedOptions.get(optionName);
+      //                String[] compatibleOptions = (String[])
+      // this.deprecatedOptions.get(optionName);
       //                value = service.get(compatibleOptions[0], null, this.preferencesLookup);
       //            }
       return value == null ? null : value.trim();
@@ -1676,8 +1685,8 @@ public class JavaModelManager {
   public Hashtable getOptions() {
 
     // return cached options if already computed
-    Hashtable
-        cachedOptions; // use a local variable to avoid race condition (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=256329 )
+    Hashtable cachedOptions; // use a local variable to avoid race condition (see
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=256329 )
     if ((cachedOptions = this.optionsCache) != null) {
       return new Hashtable(cachedOptions);
     }
@@ -1734,7 +1743,8 @@ public class JavaModelManager {
 
     Hashtable defaultOptions = new Hashtable(10);
 
-    // see JavaCorePreferenceInitializer#initializeDefaultPluginPreferences() for changing default settings
+    // see JavaCorePreferenceInitializer#initializeDefaultPluginPreferences() for changing default
+    // settings
     // If modified, also modify the method getDefaultOptionsNoInitialization()
     //        IEclipsePreferences defaultPreferences = getDefaultPreferences();
 
@@ -1783,7 +1793,7 @@ public class JavaModelManager {
 
     // Builder settings
     defaultOptionsMap.put(
-        org.eclipse.jdt.core.JavaCore.CORE_JAVA_BUILD_RESOURCE_COPY_FILTER, ""); //$NON-NLS-1$
+        org.eclipse.jdt.core.JavaCore.CORE_JAVA_BUILD_RESOURCE_COPY_FILTER, ""); // $NON-NLS-1$
     defaultOptionsMap.put(
         org.eclipse.jdt.core.JavaCore.CORE_JAVA_BUILD_INVALID_CLASSPATH,
         org.eclipse.jdt.core.JavaCore.ABORT);
@@ -1829,25 +1839,25 @@ public class JavaModelManager {
         org.eclipse.jdt.core.JavaCore.CODEASSIST_IMPLICIT_QUALIFICATION,
         org.eclipse.jdt.core.JavaCore.DISABLED);
     defaultOptionsMap.put(
-        org.eclipse.jdt.core.JavaCore.CODEASSIST_FIELD_PREFIXES, ""); //$NON-NLS-1$
+        org.eclipse.jdt.core.JavaCore.CODEASSIST_FIELD_PREFIXES, ""); // $NON-NLS-1$
     defaultOptionsMap.put(
-        org.eclipse.jdt.core.JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, ""); //$NON-NLS-1$
+        org.eclipse.jdt.core.JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, ""); // $NON-NLS-1$
     defaultOptionsMap.put(
-        org.eclipse.jdt.core.JavaCore.CODEASSIST_STATIC_FINAL_FIELD_PREFIXES, ""); //$NON-NLS-1$
+        org.eclipse.jdt.core.JavaCore.CODEASSIST_STATIC_FINAL_FIELD_PREFIXES, ""); // $NON-NLS-1$
     defaultOptionsMap.put(
-        org.eclipse.jdt.core.JavaCore.CODEASSIST_LOCAL_PREFIXES, ""); //$NON-NLS-1$
+        org.eclipse.jdt.core.JavaCore.CODEASSIST_LOCAL_PREFIXES, ""); // $NON-NLS-1$
     defaultOptionsMap.put(
-        org.eclipse.jdt.core.JavaCore.CODEASSIST_ARGUMENT_PREFIXES, ""); //$NON-NLS-1$
+        org.eclipse.jdt.core.JavaCore.CODEASSIST_ARGUMENT_PREFIXES, ""); // $NON-NLS-1$
     defaultOptionsMap.put(
-        org.eclipse.jdt.core.JavaCore.CODEASSIST_FIELD_SUFFIXES, ""); //$NON-NLS-1$
+        org.eclipse.jdt.core.JavaCore.CODEASSIST_FIELD_SUFFIXES, ""); // $NON-NLS-1$
     defaultOptionsMap.put(
-        org.eclipse.jdt.core.JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, ""); //$NON-NLS-1$
+        org.eclipse.jdt.core.JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, ""); // $NON-NLS-1$
     defaultOptionsMap.put(
-        org.eclipse.jdt.core.JavaCore.CODEASSIST_STATIC_FINAL_FIELD_SUFFIXES, ""); //$NON-NLS-1$
+        org.eclipse.jdt.core.JavaCore.CODEASSIST_STATIC_FINAL_FIELD_SUFFIXES, ""); // $NON-NLS-1$
     defaultOptionsMap.put(
-        org.eclipse.jdt.core.JavaCore.CODEASSIST_LOCAL_SUFFIXES, ""); //$NON-NLS-1$
+        org.eclipse.jdt.core.JavaCore.CODEASSIST_LOCAL_SUFFIXES, ""); // $NON-NLS-1$
     defaultOptionsMap.put(
-        org.eclipse.jdt.core.JavaCore.CODEASSIST_ARGUMENT_SUFFIXES, ""); //$NON-NLS-1$
+        org.eclipse.jdt.core.JavaCore.CODEASSIST_ARGUMENT_SUFFIXES, ""); // $NON-NLS-1$
     defaultOptionsMap.put(
         org.eclipse.jdt.core.JavaCore.CODEASSIST_FORBIDDEN_REFERENCE_CHECK,
         org.eclipse.jdt.core.JavaCore.ENABLED);
@@ -1864,7 +1874,7 @@ public class JavaModelManager {
     // Time out for parameter names
     defaultOptionsMap.put(
         org.eclipse.jdt.core.JavaCore.TIMEOUT_FOR_PARAMETER_NAME_FROM_ATTACHED_JAVADOC,
-        "50"); //$NON-NLS-1$
+        "50"); // $NON-NLS-1$
 
     return new Hashtable(defaultOptionsMap);
   }
@@ -2090,11 +2100,13 @@ public class JavaModelManager {
           container = initializer.getFailureContainer(containerPath, project);
           //                if (container == null) {
           //                    if (CP_RESOLVE_VERBOSE || CP_RESOLVE_VERBOSE_FAILURE)
-          //                        verbose_container_null_failure_container(project, containerPath, initializer);
+          //                        verbose_container_null_failure_container(project, containerPath,
+          // initializer);
           //                    return null; // break cycle
           //                }
           //                if (CP_RESOLVE_VERBOSE || CP_RESOLVE_VERBOSE_FAILURE)
-          //                    verbose_container_using_failure_container(project, containerPath, initializer);
+          //                    verbose_container_using_failure_container(project, containerPath,
+          // initializer);
           containerPut(project, containerPath, container);
         }
       } catch (CoreException e) {
@@ -2131,7 +2143,7 @@ public class JavaModelManager {
    */
   public void secondaryTypeAdding(String path, char[] typeName, char[] packageName) {
     if (VERBOSE) {
-      StringBuffer buffer = new StringBuffer("JavaModelManager.addSecondaryType("); //$NON-NLS-1$
+      StringBuffer buffer = new StringBuffer("JavaModelManager.addSecondaryType("); // $NON-NLS-1$
       buffer.append(path);
       buffer.append(',');
       buffer.append('[');
@@ -2150,7 +2162,8 @@ public class JavaModelManager {
         IProject project = resource.getProject();
         try {
           PerProjectInfo projectInfo = getPerProjectInfoCheckExistence(project);
-          // Get or create map to cache secondary types while indexing (can be not synchronized as indexing insure a non-concurrent usage)
+          // Get or create map to cache secondary types while indexing (can be not synchronized as
+          // indexing insure a non-concurrent usage)
           HashMap indexedSecondaryTypes = null;
           if (projectInfo.secondaryTypes == null) {
             projectInfo.secondaryTypes = new Hashtable(3);
@@ -2164,7 +2177,8 @@ public class JavaModelManager {
               projectInfo.secondaryTypes.put(INDEXED_SECONDARY_TYPES, indexedSecondaryTypes);
             }
           }
-          // Store the secondary type in temporary cache (these are just handles => no problem to create it now...)
+          // Store the secondary type in temporary cache (these are just handles => no problem to
+          // create it now...)
           HashMap allTypes = (HashMap) indexedSecondaryTypes.get(resource);
           if (allTypes == null) {
             allTypes = new HashMap(3);
@@ -2187,12 +2201,12 @@ public class JavaModelManager {
             packageTypes.put(typeString, type);
           }
           if (VERBOSE) {
-            Util.verbose("	- indexing cache:"); //$NON-NLS-1$
+            Util.verbose("	- indexing cache:"); // $NON-NLS-1$
             Iterator entries = indexedSecondaryTypes.entrySet().iterator();
             while (entries.hasNext()) {
               Map.Entry entry = (Map.Entry) entries.next();
               IFile file = (IFile) entry.getKey();
-              Util.verbose("		+ " + file.getFullPath() + ':' + entry.getValue()); //$NON-NLS-1$
+              Util.verbose("		+ " + file.getFullPath() + ':' + entry.getValue()); // $NON-NLS-1$
             }
           }
         } catch (JavaModelException jme) {
@@ -2330,13 +2344,13 @@ public class JavaModelManager {
       final IClasspathEntry[] oldEntries) {
     Util.verbose(
         "CPContainer SET  - missbehaving container\n"
-            + //$NON-NLS-1$
+            + // $NON-NLS-1$
             "	container path: "
             + containerPath
             + '\n'
-            + //$NON-NLS-1$
+            + // $NON-NLS-1$
             "	projects: {"
-            + //$NON-NLS-1$
+            + // $NON-NLS-1$
             org.eclipse.jdt.internal.compiler.util.Util.toString(
                 projects,
                 new org.eclipse.jdt.internal.compiler.util.Util.Displayable() {
@@ -2345,86 +2359,86 @@ public class JavaModelManager {
                   }
                 })
             + "}\n	values on previous session: {\n"
-            + //$NON-NLS-1$
+            + // $NON-NLS-1$
             org.eclipse.jdt.internal.compiler.util.Util.toString(
                 respectiveContainers,
                 new org.eclipse.jdt.internal.compiler.util.Util.Displayable() {
                   public String displayString(Object o) {
-                    StringBuffer buffer = new StringBuffer("		"); //$NON-NLS-1$
+                    StringBuffer buffer = new StringBuffer("		"); // $NON-NLS-1$
                     if (o == null) {
-                      buffer.append("<null>"); //$NON-NLS-1$
+                      buffer.append("<null>"); // $NON-NLS-1$
                       return buffer.toString();
                     }
                     buffer.append(container.getDescription());
-                    buffer.append(" {\n"); //$NON-NLS-1$
+                    buffer.append(" {\n"); // $NON-NLS-1$
                     if (oldEntries == null) {
-                      buffer.append(" 			"); //$NON-NLS-1$
-                      buffer.append("<null>\n"); //$NON-NLS-1$
+                      buffer.append(" 			"); // $NON-NLS-1$
+                      buffer.append("<null>\n"); // $NON-NLS-1$
                     } else {
                       for (int j = 0; j < oldEntries.length; j++) {
-                        buffer.append(" 			"); //$NON-NLS-1$
+                        buffer.append(" 			"); // $NON-NLS-1$
                         buffer.append(oldEntries[j]);
                         buffer.append('\n');
                       }
                     }
-                    buffer.append(" 		}"); //$NON-NLS-1$
+                    buffer.append(" 		}"); // $NON-NLS-1$
                     return buffer.toString();
                   }
                 })
             + "}\n	new values: {\n"
-            + //$NON-NLS-1$
+            + // $NON-NLS-1$
             org.eclipse.jdt.internal.compiler.util.Util.toString(
                 respectiveContainers,
                 new org.eclipse.jdt.internal.compiler.util.Util.Displayable() {
                   public String displayString(Object o) {
-                    StringBuffer buffer = new StringBuffer("		"); //$NON-NLS-1$
+                    StringBuffer buffer = new StringBuffer("		"); // $NON-NLS-1$
                     if (o == null) {
-                      buffer.append("<null>"); //$NON-NLS-1$
+                      buffer.append("<null>"); // $NON-NLS-1$
                       return buffer.toString();
                     }
                     buffer.append(container.getDescription());
-                    buffer.append(" {\n"); //$NON-NLS-1$
+                    buffer.append(" {\n"); // $NON-NLS-1$
                     for (int j = 0; j < newEntries.length; j++) {
-                      buffer.append(" 			"); //$NON-NLS-1$
+                      buffer.append(" 			"); // $NON-NLS-1$
                       buffer.append(newEntries[j]);
                       buffer.append('\n');
                     }
-                    buffer.append(" 		}"); //$NON-NLS-1$
+                    buffer.append(" 		}"); // $NON-NLS-1$
                     return buffer.toString();
                   }
                 })
-            + "\n	}"); //$NON-NLS-1$
+            + "\n	}"); // $NON-NLS-1$
   }
 
   void verbose_missbehaving_container(
       IJavaProject project, IPath containerPath, IClasspathEntry[] classpathEntries) {
     Util.verbose(
         "CPContainer GET - missbehaving container (returning null classpath entry)\n"
-            + //$NON-NLS-1$
+            + // $NON-NLS-1$
             "	project: "
             + project.getElementName()
             + '\n'
-            + //$NON-NLS-1$
+            + // $NON-NLS-1$
             "	container path: "
             + containerPath
             + '\n'
-            + //$NON-NLS-1$
+            + // $NON-NLS-1$
             "	classpath entries: {\n"
-            + //$NON-NLS-1$
+            + // $NON-NLS-1$
             org.eclipse.jdt.internal.compiler.util.Util.toString(
                 classpathEntries,
                 new org.eclipse.jdt.internal.compiler.util.Util.Displayable() {
                   public String displayString(Object o) {
-                    StringBuffer buffer = new StringBuffer("		"); //$NON-NLS-1$
+                    StringBuffer buffer = new StringBuffer("		"); // $NON-NLS-1$
                     if (o == null) {
-                      buffer.append("<null>"); //$NON-NLS-1$
+                      buffer.append("<null>"); // $NON-NLS-1$
                       return buffer.toString();
                     }
                     buffer.append(o);
                     return buffer.toString();
                   }
                 })
-            + "\n	}" //$NON-NLS-1$
+            + "\n	}" // $NON-NLS-1$
         );
   }
 
@@ -2561,7 +2575,7 @@ public class JavaModelManager {
             "("
                 + Thread.currentThread()
                 + ") [JavaModelManager.closeZipFile(ZipFile)] Closing ZipFile on "
-                + zipFile.getName()); //$NON-NLS-1$	//$NON-NLS-2$
+                + zipFile.getName()); // $NON-NLS-1$	//$NON-NLS-2$
       }
       zipFile.close();
     } catch (IOException e) {
@@ -2609,7 +2623,8 @@ public class JavaModelManager {
         previousContainers.remove(containerPath);
       }
     }
-    // container values are persisted in preferences during save operations, see #saving(ISaveContext)
+    // container values are persisted in preferences during save operations, see
+    // #saving(ISaveContext)
   }
 
   public int getOpenableCacheSize() {
@@ -2662,7 +2677,7 @@ public class JavaModelManager {
                 "("
                     + currentThread
                     + ") [JavaModelManager.flushZipFiles()] Closing ZipFile on "
-                    + zipFile.getName()); //$NON-NLS-1$//$NON-NLS-2$
+                    + zipFile.getName()); // $NON-NLS-1$//$NON-NLS-2$
           }
           zipFile.close();
         } catch (IOException e) {
@@ -2731,7 +2746,8 @@ public class JavaModelManager {
       //                    if (rootInfos.get(path) == null) {
       //                        externalTimeStamps.remove(path);
       //                        indexManager.removeIndex(
-      //                                path); // force reindexing on next reference (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=250083 )
+      //                                path); // force reindexing on next reference (see
+      // https://bugs.eclipse.org/bugs/show_bug.cgi?id=250083 )
       //                    }
       //                }
       //            }
@@ -2741,7 +2757,8 @@ public class JavaModelManager {
     public void rememberExternalLibTimestamps() {
       //            IClasspathEntry[] classpath = this.resolvedClasspath;
       //            if (classpath == null) return;
-      //            Map externalTimeStamps = JavaModelManager.getJavaModelManager().deltaState.getExternalLibTimeStamps();
+      //            Map externalTimeStamps =
+      // JavaModelManager.getJavaModelManager().deltaState.getExternalLibTimeStamps();
       //            for (int i = 0, length = classpath.length; i < length; i++) {
       //                IClasspathEntry entry = classpath[i];
       //                if (entry.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
@@ -2749,7 +2766,8 @@ public class JavaModelManager {
       //                    if (externalTimeStamps.get(path) == null) {
       //                        Object target = JavaModel.getExternalTarget(path, true);
       //                        if (target instanceof File) {
-      //                            long timestamp = DeltaProcessor.getTimeStamp((java.io.File)target);
+      //                            long timestamp =
+      // DeltaProcessor.getTimeStamp((java.io.File)target);
       //                            externalTimeStamps.put(path, new Long(timestamp));
       //                        }
       //                    }
@@ -2940,40 +2958,40 @@ public class JavaModelManager {
 
     public String toString() {
       StringBuffer buffer = new StringBuffer();
-      buffer.append("Info for "); //$NON-NLS-1$
+      buffer.append("Info for "); // $NON-NLS-1$
       //            buffer.append(this.project.getFullPath());
-      buffer.append("\nRaw classpath:\n"); //$NON-NLS-1$
+      buffer.append("\nRaw classpath:\n"); // $NON-NLS-1$
       if (this.rawClasspath == null) {
-        buffer.append("  <null>\n"); //$NON-NLS-1$
+        buffer.append("  <null>\n"); // $NON-NLS-1$
       } else {
         for (int i = 0, length = this.rawClasspath.length; i < length; i++) {
-          buffer.append("  "); //$NON-NLS-1$
+          buffer.append("  "); // $NON-NLS-1$
           buffer.append(this.rawClasspath[i]);
           buffer.append('\n');
         }
       }
-      buffer.append("Resolved classpath:\n"); //$NON-NLS-1$
+      buffer.append("Resolved classpath:\n"); // $NON-NLS-1$
       IClasspathEntry[] resolvedCP = this.resolvedClasspath;
       if (resolvedCP == null) {
-        buffer.append("  <null>\n"); //$NON-NLS-1$
+        buffer.append("  <null>\n"); // $NON-NLS-1$
       } else {
         for (int i = 0, length = resolvedCP.length; i < length; i++) {
-          buffer.append("  "); //$NON-NLS-1$
+          buffer.append("  "); // $NON-NLS-1$
           buffer.append(resolvedCP[i]);
           buffer.append('\n');
         }
       }
-      buffer.append("Resolved classpath status: "); //$NON-NLS-1$
+      buffer.append("Resolved classpath status: "); // $NON-NLS-1$
       if (this.unresolvedEntryStatus == NEED_RESOLUTION)
-        buffer.append("NEED RESOLUTION"); //$NON-NLS-1$
+        buffer.append("NEED RESOLUTION"); // $NON-NLS-1$
       else
         buffer.append(
             this.unresolvedEntryStatus == null
                 ? "<null>\n"
-                : this.unresolvedEntryStatus.toString()); //$NON-NLS-1$
-      buffer.append("Output location:\n  "); //$NON-NLS-1$
+                : this.unresolvedEntryStatus.toString()); // $NON-NLS-1$
+      buffer.append("Output location:\n  "); // $NON-NLS-1$
       if (this.outputLocation == null) {
-        buffer.append("<null>"); //$NON-NLS-1$
+        buffer.append("<null>"); // $NON-NLS-1$
       } else {
         buffer.append(this.outputLocation);
       }
@@ -3059,15 +3077,15 @@ public class JavaModelManager {
 
     public String toString() {
       StringBuffer buffer = new StringBuffer();
-      buffer.append("Info for "); //$NON-NLS-1$
+      buffer.append("Info for "); // $NON-NLS-1$
       buffer.append(((JavaElement) this.workingCopy).toStringWithAncestors());
-      buffer.append("\nUse count = "); //$NON-NLS-1$
+      buffer.append("\nUse count = "); // $NON-NLS-1$
       buffer.append(this.useCount);
-      buffer.append("\nProblem requestor:\n  "); //$NON-NLS-1$
+      buffer.append("\nProblem requestor:\n  "); // $NON-NLS-1$
       buffer.append(this.problemRequestor);
       if (this.problemRequestor == null) {
         IProblemRequestor requestor = getProblemRequestor();
-        buffer.append("\nOwner problem requestor:\n  "); //$NON-NLS-1$
+        buffer.append("\nOwner problem requestor:\n  "); // $NON-NLS-1$
         buffer.append(requestor);
       }
       return buffer.toString();

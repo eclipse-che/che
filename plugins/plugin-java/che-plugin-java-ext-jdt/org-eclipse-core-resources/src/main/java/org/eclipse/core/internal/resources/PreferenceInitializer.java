@@ -18,16 +18,16 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 public class PreferenceInitializer extends AbstractPreferenceInitializer {
 
   // internal preference keys
-  public static final String PREF_OPERATIONS_PER_SNAPSHOT = "snapshots.operations"; //$NON-NLS-1$
-  public static final String PREF_DELTA_EXPIRATION = "delta.expiration"; //$NON-NLS-1$
+  public static final String PREF_OPERATIONS_PER_SNAPSHOT = "snapshots.operations"; // $NON-NLS-1$
+  public static final String PREF_DELTA_EXPIRATION = "delta.expiration"; // $NON-NLS-1$
 
   // DEFAULTS
   public static final boolean PREF_AUTO_REFRESH_DEFAULT = false;
   public static final boolean PREF_LIGHTWEIGHT_AUTO_REFRESH_DEFAULT = false;
   public static final boolean PREF_DISABLE_LINKING_DEFAULT = false;
-  public static final String PREF_ENCODING_DEFAULT = ""; //$NON-NLS-1$
+  public static final String PREF_ENCODING_DEFAULT = ""; // $NON-NLS-1$
   public static final boolean PREF_AUTO_BUILDING_DEFAULT = true;
-  public static final String PREF_BUILD_ORDER_DEFAULT = ""; //$NON-NLS-1$
+  public static final String PREF_BUILD_ORDER_DEFAULT = ""; // $NON-NLS-1$
   public static final int PREF_MAX_BUILD_ITERATIONS_DEFAULT = 10;
   public static final boolean PREF_DEFAULT_BUILD_ORDER_DEFAULT = true;
   public static final long PREF_SNAPSHOT_INTERVAL_DEFAULT = 5 * 60 * 1000L; // 5 min

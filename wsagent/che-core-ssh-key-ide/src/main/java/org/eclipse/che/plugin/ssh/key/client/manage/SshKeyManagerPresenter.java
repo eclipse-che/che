@@ -116,7 +116,7 @@ public class SshKeyManagerPresenter extends AbstractPreferencePagePresenter
     return new CancelCallback() {
       @Override
       public void cancelled() {
-        //for now do nothing but it need for tests
+        // for now do nothing but it need for tests
       }
     };
   }

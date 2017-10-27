@@ -68,7 +68,7 @@ public class ContentStamps {
     }
 
     public String toString() {
-      return "Stamp: " + fValue; //$NON-NLS-1$
+      return "Stamp: " + fValue; // $NON-NLS-1$
     }
   }
 
@@ -78,7 +78,7 @@ public class ContentStamps {
     }
 
     public String toString() {
-      return "Null Stamp"; //$NON-NLS-1$
+      return "Null Stamp"; // $NON-NLS-1$
     }
   }
 
@@ -108,7 +108,7 @@ public class ContentStamps {
     ContentStampImpl stamp = (ContentStampImpl) s;
     if (document instanceof IDocumentExtension4 && stamp.isDocumentStamp()) {
       try {
-        ((IDocumentExtension4) document).replace(0, 0, "", stamp.getValue()); //$NON-NLS-1$
+        ((IDocumentExtension4) document).replace(0, 0, "", stamp.getValue()); // $NON-NLS-1$
         return true;
       } catch (BadLocationException e) {
         throw Changes.asCoreException(e);

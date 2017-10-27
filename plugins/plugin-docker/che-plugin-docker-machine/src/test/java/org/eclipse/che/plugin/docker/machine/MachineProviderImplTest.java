@@ -18,9 +18,9 @@ import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.DOCKER_FILE_TYPE;
 import static org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.MACHINE_SNAPSHOT_PREFIX;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -1114,15 +1114,15 @@ public class MachineProviderImplTest {
 
   @Test
   public void shouldAddExtraHostOnDevInstanceCreationFromRecipe() throws Exception {
-    //given
+    // given
     provider = new MachineProviderBuilder().setExtraHosts("dev.box.com:192.168.0.1").build();
 
     final boolean isDev = true;
 
-    //when
+    // when
     createInstanceFromRecipe(isDev);
 
-    //then
+    // then
     ArgumentCaptor<CreateContainerParams> argumentCaptor =
         ArgumentCaptor.forClass(CreateContainerParams.class);
     verify(dockerConnector).createContainer(argumentCaptor.capture());
@@ -1136,7 +1136,7 @@ public class MachineProviderImplTest {
 
   @Test
   public void shouldAddExtraHostOnDevInstanceCreationFromSnapshot() throws Exception {
-    //given
+    // given
     provider =
         new MachineProviderBuilder()
             .setExtraHosts("dev.box.com:192.168.0.1", "codenvy.com.com:185")
@@ -1144,9 +1144,9 @@ public class MachineProviderImplTest {
 
     final boolean isDev = true;
 
-    //when
+    // when
     createInstanceFromSnapshot(isDev);
-    //then
+    // then
 
     ArgumentCaptor<CreateContainerParams> argumentCaptor =
         ArgumentCaptor.forClass(CreateContainerParams.class);
@@ -1162,15 +1162,15 @@ public class MachineProviderImplTest {
 
   @Test
   public void shouldAddExtraHostOnNonDevInstanceCreationFromRecipe() throws Exception {
-    //given
+    // given
     provider = new MachineProviderBuilder().setExtraHosts("dev.box.com:192.168.0.1").build();
 
     final boolean isDev = false;
 
-    //when
+    // when
     createInstanceFromRecipe(isDev);
 
-    //then
+    // then
     ArgumentCaptor<CreateContainerParams> argumentCaptor =
         ArgumentCaptor.forClass(CreateContainerParams.class);
     verify(dockerConnector).createContainer(argumentCaptor.capture());
@@ -1184,7 +1184,7 @@ public class MachineProviderImplTest {
 
   @Test
   public void shouldAddExtraHostOnNonDevInstanceCreationFromSnapshot() throws Exception {
-    //given
+    // given
     provider =
         new MachineProviderBuilder()
             .setExtraHosts("dev.box.com:192.168.0.1", "codenvy.com.com:185")
@@ -1192,9 +1192,9 @@ public class MachineProviderImplTest {
 
     final boolean isDev = false;
 
-    //when
+    // when
     createInstanceFromSnapshot(isDev);
-    //then
+    // then
 
     ArgumentCaptor<CreateContainerParams> argumentCaptor =
         ArgumentCaptor.forClass(CreateContainerParams.class);

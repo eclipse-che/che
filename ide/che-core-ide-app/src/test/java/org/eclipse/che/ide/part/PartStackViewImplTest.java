@@ -14,7 +14,7 @@ import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.BELOW;
 import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.LEFT;
 import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.RIGHT;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -58,7 +58,7 @@ public class PartStackViewImplTest {
   @Mock DeckLayoutPanel contentPanel;
   @Mock FlowPanel tabsPanel;
 
-  //additional mocks
+  // additional mocks
   @Mock private MouseDownEvent event;
   @Mock private ContextMenuEvent contextMenuEvent;
   @Mock private ActionDelegate delegate;

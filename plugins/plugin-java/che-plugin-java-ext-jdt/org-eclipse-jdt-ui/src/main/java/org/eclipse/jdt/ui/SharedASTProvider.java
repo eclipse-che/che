@@ -72,7 +72,7 @@ public final class SharedASTProvider {
    * <p>An AST will be created by this AST provider if the shared AST is not for the given Java
    * element.
    */
-  public static final WAIT_FLAG WAIT_YES = new WAIT_FLAG("wait yes"); //$NON-NLS-1$
+  public static final WAIT_FLAG WAIT_YES = new WAIT_FLAG("wait yes"); // $NON-NLS-1$
 
   /**
    * Wait flag indicating that a client requesting an AST only wants to wait for the shared AST of
@@ -80,7 +80,7 @@ public final class SharedASTProvider {
    *
    * <p>No AST will be created by the AST provider.
    */
-  public static final WAIT_FLAG WAIT_ACTIVE_ONLY = new WAIT_FLAG("wait active only"); //$NON-NLS-1$
+  public static final WAIT_FLAG WAIT_ACTIVE_ONLY = new WAIT_FLAG("wait active only"); // $NON-NLS-1$
 
   /**
    * Wait flag indicating that a client requesting an AST only wants the already available shared
@@ -88,7 +88,7 @@ public final class SharedASTProvider {
    *
    * <p>No AST will be created by the AST provider.
    */
-  public static final WAIT_FLAG WAIT_NO = new WAIT_FLAG("don't wait"); //$NON-NLS-1$
+  public static final WAIT_FLAG WAIT_NO = new WAIT_FLAG("don't wait"); // $NON-NLS-1$
 
   /**
    * Returns a compilation unit AST for the given Java element. If the element is the input of the

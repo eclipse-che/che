@@ -26,13 +26,12 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 import org.eclipse.che.plugin.debugger.ide.debug.AbstractDebugger;
-import org.eclipse.che.plugin.debugger.ide.debug.DebuggerResourceHandlerFactory;
+import org.eclipse.che.plugin.debugger.ide.debug.DebuggerLocationHandlerManager;
 
 /**
  * The GDB debugger client.
@@ -60,7 +59,7 @@ public class GdbDebugger extends AbstractDebugger {
       BreakpointManager breakpointManager,
       AppContext appContext,
       RequestHandlerManager requestHandlerManager,
-      DebuggerResourceHandlerFactory debuggerResourceHandlerFactory) {
+      DebuggerLocationHandlerManager debuggerLocationHandlerManager) {
 
     super(
         service,
@@ -73,19 +72,19 @@ public class GdbDebugger extends AbstractDebugger {
         notificationManager,
         breakpointManager,
         requestHandlerManager,
-        debuggerResourceHandlerFactory,
+        debuggerLocationHandlerManager,
         ID);
     this.locale = locale;
     this.appContext = appContext;
   }
 
   @Override
-  public void addBreakpoint(final VirtualFile file, final Breakpoint breakpoint) {
+  public void addBreakpoint(final Breakpoint breakpoint) {
     if (isConnected() && !isSuspended()) {
       notificationManager.notify(locale.messageSuspendToActivateBreakpoints(), FAIL, FLOAT_MODE);
     }
 
-    super.addBreakpoint(file, breakpoint);
+    super.addBreakpoint(breakpoint);
   }
 
   @Override

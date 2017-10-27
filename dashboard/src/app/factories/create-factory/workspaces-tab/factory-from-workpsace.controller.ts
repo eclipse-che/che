@@ -68,9 +68,9 @@ export class FactoryFromWorkspaceCtrl {
 
   /**
    * Get factory content from workspace
-   * @param workspace is selected workspace
+   * @param {che.IWorkspace} workspace is selected workspace
    */
-  getFactoryContentFromWorkspace(workspace: che.IWorkspace) {
+  getFactoryContentFromWorkspace(workspace: che.IWorkspace): void {
     let factoryContent = this.cheAPI.getFactory().getFactoryContentFromWorkspace(workspace);
     if (factoryContent) {
       this.factoryContent = this.$filter('json')(factoryContent, 2);
@@ -85,7 +85,7 @@ export class FactoryFromWorkspaceCtrl {
       this.isImporting = false;
       this.factoryContent = this.$filter('json')(factoryContent, 2);
     }, (error: any) => {
-      let message = (error.data && error.data.message) ? error.data.message : 'Get factory configuration failed.'
+      let message = (error.data && error.data.message) ? error.data.message : 'Get factory configuration failed.';
       if (error.status === 400) {
         message = 'Factory can\'t be created. The selected workspace has no projects defined. Project sources must be available from an external storage.';
       }
@@ -98,9 +98,9 @@ export class FactoryFromWorkspaceCtrl {
 
   /**
    * Set all workspaces in the filters of workspaces
-   * @param isChecked is setting value
+   * @param {boolean} isChecked is setting value
    */
-  setAllFiltersWorkspaces(isChecked: boolean) {
+  setAllFiltersWorkspaces(isChecked: boolean): void {
     this.workspaces.forEach((workspace: che.IWorkspace) => {
       this.filtersWorkspaceSelected[workspace.id] = isChecked;
     });
@@ -108,10 +108,10 @@ export class FactoryFromWorkspaceCtrl {
 
   /**
    * Get the workspace name by ID
-   * @param workspaceId
-   * @returns {String} workspace name
+   * @param {string} workspaceId
+   * @returns {string} workspace name
    */
-  getWorkspaceName(workspaceId: string) {
+  getWorkspaceName(workspaceId: string): string {
     let workspace = this.workspacesById.get(workspaceId);
     if (workspace && workspace.config.name) {
       return workspace.config.name;

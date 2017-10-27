@@ -64,7 +64,8 @@ public class LinkedNamesAssistProposal
   //
   //		public ExitFlags doExit(LinkedModeModel model, VerifyEvent event, int offset, int length) {
   //			if (length == 0 && (event.character == SWT.BS || event.character == SWT.DEL)) {
-  //				LinkedPosition position = model.findPosition(new LinkedPosition(fDocument, offset, 0, LinkedPositionGroup.NO_STOP));
+  //				LinkedPosition position = model.findPosition(new LinkedPosition(fDocument, offset, 0,
+  // LinkedPositionGroup.NO_STOP));
   //				if (position != null) {
   //					if (event.character == SWT.BS) {
   //						if (offset - 1 < position.getOffset()) {
@@ -85,7 +86,7 @@ public class LinkedNamesAssistProposal
   //	}
 
   public static final String ASSIST_ID =
-      "org.eclipse.jdt.ui.correction.renameInFile.assist"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.correction.renameInFile.assist"; // $NON-NLS-1$
 
   private SimpleName fNode;
   private IInvocationContext fContext;
@@ -159,7 +160,8 @@ public class LinkedNamesAssistProposal
         region.setOffset(elem.getStartPosition());
         region.setLength(elem.getLength());
         group.addPositions(region);
-        //				group.addPosition(new LinkedPosition(document, elem.getStartPosition(), elem.getLength(), i));
+        //				group.addPosition(new LinkedPosition(document, elem.getStartPosition(),
+        // elem.getLength(), i));
       }
 
       LinkedModeModelImpl model = new LinkedModeModelImpl();
@@ -185,7 +187,8 @@ public class LinkedNamesAssistProposal
         //				seletion = new Point(selectedRegion.getOffset(), fValueSuggestion.length());
       }
 
-      //			viewer.setSelectedRange(seletion.x, seletion.y); // by default full word is selected, restore original selection
+      //			viewer.setSelectedRange(seletion.x, seletion.y); // by default full word is selected,
+      // restore original selection
 
     } catch (BadLocationException e) {
       JavaPlugin.log(e);
@@ -219,7 +222,8 @@ public class LinkedNamesAssistProposal
   public String getDisplayString() {
     //		String shortCutString = CorrectionCommandHandler.getShortCutString(getCommandId());
     //		if (shortCutString != null) {
-    //			return Messages.format(CorrectionMessages.ChangeCorrectionProposal_name_with_shortcut, new String[]{fLabel, shortCutString});
+    //			return Messages.format(CorrectionMessages.ChangeCorrectionProposal_name_with_shortcut, new
+    // String[]{fLabel, shortCutString});
     //		}
     return fLabel;
   }
@@ -233,8 +237,10 @@ public class LinkedNamesAssistProposal
     //		String shortCutString = CorrectionCommandHandler.getShortCutString(getCommandId());
     //		if (shortCutString != null) {
     //			String decorated= Messages
-    //					.format(CorrectionMessages.ChangeCorrectionProposal_name_with_shortcut, new String[]{fLabel, shortCutString});
-    //			return StyledCellLabelProvider.styleDecoratedString(decorated, StyledString.QUALIFIER_STYLER, str);
+    //					.format(CorrectionMessages.ChangeCorrectionProposal_name_with_shortcut, new
+    // String[]{fLabel, shortCutString});
+    //			return StyledCellLabelProvider.styleDecoratedString(decorated,
+    // StyledString.QUALIFIER_STYLER, str);
     //		}
     return str;
   }

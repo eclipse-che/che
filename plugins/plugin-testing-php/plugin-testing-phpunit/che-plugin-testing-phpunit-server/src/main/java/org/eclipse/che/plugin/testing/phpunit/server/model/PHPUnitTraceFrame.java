@@ -20,15 +20,15 @@ import org.eclipse.che.plugin.testing.phpunit.server.PHPUnitMessageParser;
  */
 public class PHPUnitTraceFrame extends AbstractPHPUnitElement {
 
-  private String traceFunction = ""; //$NON-NLS-1$
-  private String traceClass = ""; //$NON-NLS-1$
+  private String traceFunction = ""; // $NON-NLS-1$
+  private String traceClass = ""; // $NON-NLS-1$
   private String traceType = PHPUnitMessageParser.CALL_DYNAMIC;
 
   public PHPUnitTraceFrame(final Map<?, ?> frame, final AbstractPHPUnitTestEvent parent) {
     super(frame, parent);
-    traceFunction = (String) frame.get("function"); //$NON-NLS-1$
-    traceClass = (String) frame.get("class"); //$NON-NLS-1$
-    traceType = (String) frame.get("type"); //$NON-NLS-1$
+    traceFunction = (String) frame.get("function"); // $NON-NLS-1$
+    traceClass = (String) frame.get("class"); // $NON-NLS-1$
+    traceType = (String) frame.get("type"); // $NON-NLS-1$
   }
 
   /**

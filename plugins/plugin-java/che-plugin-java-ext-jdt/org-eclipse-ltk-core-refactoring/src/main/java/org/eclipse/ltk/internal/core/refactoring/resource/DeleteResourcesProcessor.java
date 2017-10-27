@@ -127,7 +127,7 @@ public class DeleteResourcesProcessor extends DeleteProcessor {
    */
   public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context)
       throws CoreException, OperationCanceledException {
-    pm.beginTask("", 1); //$NON-NLS-1$
+    pm.beginTask("", 1); // $NON-NLS-1$
     try {
       RefactoringStatus result = new RefactoringStatus();
 
@@ -300,7 +300,7 @@ public class DeleteResourcesProcessor extends DeleteProcessor {
    * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getIdentifier()
    */
   public String getIdentifier() {
-    return "org.eclipse.ltk.core.refactoring.deleteResourcesProcessor"; //$NON-NLS-1$
+    return "org.eclipse.ltk.core.refactoring.deleteResourcesProcessor"; // $NON-NLS-1$
   }
 
   /* (non-Javadoc)

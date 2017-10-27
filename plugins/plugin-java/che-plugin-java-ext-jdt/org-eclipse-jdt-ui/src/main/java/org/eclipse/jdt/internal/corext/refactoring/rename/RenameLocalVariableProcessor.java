@@ -69,7 +69,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor
   private ILocalVariable fLocalVariable;
   private ICompilationUnit fCu;
 
-  //the following fields are set or modified after the construction
+  // the following fields are set or modified after the construction
   private boolean fUpdateReferences;
   private String fCurrentName;
   private String fNewName;
@@ -83,7 +83,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor
   private RenameAnalyzeUtil.LocalAnalyzePackage fLocalAnalyzePackage;
 
   public static final String IDENTIFIER =
-      "org.eclipse.jdt.ui.renameLocalVariableProcessor"; //$NON-NLS-1$
+      "org.eclipse.jdt.ui.renameLocalVariableProcessor"; // $NON-NLS-1$
 
   /**
    * Creates a new rename local variable processor.
@@ -95,7 +95,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor
     fUpdateReferences = true;
     if (localVariable != null)
       fCu = (ICompilationUnit) localVariable.getAncestor(IJavaElement.COMPILATION_UNIT);
-    fNewName = ""; //$NON-NLS-1$
+    fNewName = ""; // $NON-NLS-1$
     fIsComposite = false;
   }
 
@@ -210,7 +210,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor
    * @see org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating#getNewElement()
    */
   public Object getNewElement() {
-    return null; //cannot create an ILocalVariable
+    return null; // cannot create an ILocalVariable
   }
 
   @Override
@@ -273,7 +273,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor
     try {
       initAST();
       initNames();
-      pm.beginTask("", 1); //$NON-NLS-1$
+      pm.beginTask("", 1); // $NON-NLS-1$
 
       RefactoringStatus result = checkNewElementName(fNewName);
       if (result.hasFatalError()) return result;
@@ -453,7 +453,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor
               RefactoringCoreMessages.InitializableRefactoring_argument_not_exist,
               JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
     final String name = extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
-    if (name != null && !"".equals(name)) //$NON-NLS-1$
+    if (name != null && !"".equals(name)) // $NON-NLS-1$
     setNewElementName(name);
     else
       return RefactoringStatus.createFatalErrorStatus(
