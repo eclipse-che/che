@@ -183,7 +183,7 @@ elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
   # Set osio configuration
   # ----------------------
   if [ -z "${OPENSHIFT_TOKEN+x}" ]; then echo "[CHE] **ERROR** Env var OPENSHIFT_TOKEN is unset. You need to set it with your OSO token to continue. To retrieve your token: https://console.starter-us-east-2.openshift.com/console/command-line. Aborting"; exit 1; fi
-  
+
   DEFAULT_OPENSHIFT_ENDPOINT="https://api.starter-us-east-2.openshift.com"
   OPENSHIFT_ENDPOINT=${OPENSHIFT_ENDPOINT:-${DEFAULT_OPENSHIFT_ENDPOINT}}
   DEFAULT_CHE_OPENSHIFT_PROJECT="$(oc get projects -o=custom-columns=NAME:.metadata.name --no-headers | grep "\\-che$")"
@@ -257,7 +257,7 @@ oc project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null
 echo "done!"
 
 # -------------------------------------------------------------
-# If command == clean up then delete all openshift objects
+# If command == cleanup then delete all openshift objects
 # -------------------------------------------------------------
 if [ "${COMMAND}" == "cleanup" ]; then
   echo "[CHE] Deleting all OpenShift objects..."
@@ -265,7 +265,7 @@ if [ "${COMMAND}" == "cleanup" ]; then
   echo "[CHE] Cleanup successfully started. Use \"oc get all\" to verify that all resources have been deleted."
   exit 0
 # -------------------------------------------------------------
-# If command == clean up then delete all openshift objects
+# If command == rollupdate then update Che
 # -------------------------------------------------------------
 elif [ "${COMMAND}" == "rollupdate" ]; then
   echo "[CHE] Rollout latest version of Che..."
@@ -293,8 +293,6 @@ if [ "${CHE_MULTI_USER}" == "true" ]; then
     else
         "${COMMAND_DIR}"/multi-user/deploy_postgres_only.sh
     fi
-
-    "${COMMAND_DIR}"/multi-user/wait_until_postgres_is_available.sh
 fi
 
 # -------------------------------------------------------------
@@ -390,7 +388,7 @@ MULTI_USER_REPLACEMENT_STRING="          - name: \"CHE_WORKSPACE_LOGS\"
 echo
 if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
   echo "[CHE] Deploying Che on minishift (image ${CHE_IMAGE})"
-  DEFAULT_CHE_DEPLOYMENT_FILE_PATH=./che-che6-openshift.yml
+  DEFAULT_CHE_DEPLOYMENT_FILE_PATH=./che-openshift.yml
   CHE_DEPLOYMENT_FILE_PATH=${CHE_DEPLOYMENT_FILE_PATH:-${DEFAULT_CHE_DEPLOYMENT_FILE_PATH}}
 
 cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
@@ -423,7 +421,7 @@ cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     oc apply --force=true -f -
 elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
   echo "[CHE] Deploying Che on OSIO (image ${CHE_IMAGE})"
-  DEFAULT_CHE_DEPLOYMENT_FILE_PATH=./che-che6-openshift.yml
+  DEFAULT_CHE_DEPLOYMENT_FILE_PATH=./che-openshift.yml
   CHE_DEPLOYMENT_FILE_PATH=${CHE_DEPLOYMENT_FILE_PATH:-${DEFAULT_CHE_DEPLOYMENT_FILE_PATH}}
 
 cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
@@ -443,7 +441,7 @@ cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     oc apply --force=true -f -
 else
   echo "[CHE] Deploying Che on OpenShift Container Platform (image ${CHE_IMAGE})"
-  DEFAULT_CHE_DEPLOYMENT_FILE_PATH=./che-che6-openshift.yml
+  DEFAULT_CHE_DEPLOYMENT_FILE_PATH=./che-openshift.yml
   CHE_DEPLOYMENT_FILE_PATH=${CHE_DEPLOYMENT_FILE_PATH:-${DEFAULT_CHE_DEPLOYMENT_FILE_PATH}}
 
 cat "${CHE_DEPLOYMENT_FILE_PATH}" | \

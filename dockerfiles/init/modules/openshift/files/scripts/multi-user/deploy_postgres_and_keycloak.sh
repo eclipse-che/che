@@ -19,7 +19,7 @@ if [ "${CHE_EPHEMERAL}" == "true" ]; then
   oc volume dc/keycloak --remove --confirm
   oc delete pvc/keycloak-log
   oc delete pvc/keycloak-data
-fi 
+fi
 
 IMAGE_KEYCLOACK=${IMAGE_KEYCLOACK:-"jboss/keycloak-openshift:3.3.0.CR2-3"}
 
