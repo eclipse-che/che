@@ -13,6 +13,7 @@ package org.eclipse.che.plugin.urlfactory;
 import static java.lang.Boolean.FALSE;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.plugin.urlfactory.URLFactoryBuilder.DEFAULT_DOCKER_IMAGE;
 import static org.eclipse.che.plugin.urlfactory.URLFactoryBuilder.MACHINE_NAME;
@@ -64,7 +65,7 @@ public class URLFactoryBuilderTest {
     MachineConfigDto machine =
         newDto(MachineConfigDto.class)
             .withInstallers(singletonList("org.eclipse.che.ws-agent"))
-            .withAttributes(singletonMap("memoryLimitBytes", MEMORY_LIMIT_BYTES));
+            .withAttributes(singletonMap(MEMORY_LIMIT_ATTRIBUTE, MEMORY_LIMIT_BYTES));
 
     // setup environment
     EnvironmentDto environmentDto =
@@ -101,7 +102,7 @@ public class URLFactoryBuilderTest {
     MachineConfigDto machine =
         newDto(MachineConfigDto.class)
             .withInstallers(singletonList("org.eclipse.che.ws-agent"))
-            .withAttributes(singletonMap("memoryLimitBytes", MEMORY_LIMIT_BYTES));
+            .withAttributes(singletonMap(MEMORY_LIMIT_ATTRIBUTE, MEMORY_LIMIT_BYTES));
 
     // setup environment
     EnvironmentDto environmentDto =
@@ -137,7 +138,7 @@ public class URLFactoryBuilderTest {
     MachineConfigDto machine =
         newDto(MachineConfigDto.class)
             .withInstallers(singletonList("org.eclipse.che.ws-agent"))
-            .withAttributes(singletonMap("memoryLimitBytes", MEMORY_LIMIT_BYTES));
+            .withAttributes(singletonMap(MEMORY_LIMIT_ATTRIBUTE, MEMORY_LIMIT_BYTES));
 
     // setup environment
     EnvironmentDto environmentDto =

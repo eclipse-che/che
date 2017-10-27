@@ -12,6 +12,7 @@ package org.eclipse.che.api.workspace.server.adapter;
 
 import static com.google.common.primitives.Ints.tryParse;
 import static java.lang.String.format;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -174,7 +175,7 @@ public class WorkspaceConfigJsonAdapter {
                   envName));
         }
         final JsonObject attributes = new JsonObject();
-        attributes.addProperty("memoryLimitBytes", Long.toString(1024L * 1024L * ram));
+        attributes.addProperty(MEMORY_LIMIT_ATTRIBUTE, Long.toString(1024L * 1024L * ram));
         newMachine.add("attributes", attributes);
       }
     }

@@ -18,6 +18,7 @@ import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.WorkspaceManager.UPDATED_ATTRIBUTE_NAME;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyObject;
@@ -557,7 +558,7 @@ public class WorkspaceManagerTest {
             singletonList("org.eclipse.che.ws-agent"),
             null,
             singletonMap("CHE_ENV", "value"),
-            singletonMap("memoryLimitBytes", "10000"));
+            singletonMap(MEMORY_LIMIT_ATTRIBUTE, "10000"));
     EnvironmentImpl environment =
         new EnvironmentImpl(
             new RecipeImpl("type", "contentType", "content", null),

@@ -28,52 +28,33 @@ import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
 public class CheckFindActionFeatureInCheTest {
-  private static final String FIRST_ACTION_NAME = "con";
-  private static final String SECOND_ACTION_NAME = "comm";
+  private static final String FIRST_ACTION_NAME = "config";
+  private static final String SECOND_ACTION_NAME = "commands";
   private static final String THIRD_ACTION_NAME = "che";
 
-  private static final String FIRST_ACTION_NAME_EXPECTED_ARRAY_LOCAL_MODE =
-      "Configuration...  Project\n"
-          + "Update Project Configuration...  Project\n"
-          + "Configure Classpath  Project\n"
-          + "Content Assist  Assistant\n"
-          + "Convert To Project  Project\n"
-          + "Edit Debug Configurations... [Alt+Shift+F9]  Run";
-
-  private static final String SECOND_ACTION_NAME_EXPECTED_ARRAY_LOCAL_MODE =
-      "Commands Palette [Shift+F10]  Run\n"
-          + "Commit ... [Alt+C]  GitCommandGroup\n"
-          + "Community  Help\n"
-          + "Revert commit...  GitCommandGroup\n";
-
-  private static final String THIRD_ACTION_NAME_EXPECTED_ARRAY_LOCAL_MODE =
-      "Branches... [Ctrl+B]  GitCommandGroup\n" + "Checkout Reference...  GitCommandGroup";
-
-  private static final String FIRST_ACTION_NAME_EXPECTED_ARRAY_WITH_FLAG_LOCAL_MODE =
+  private static final String FIRST_EXPECTED_ITEMS_WITH_DISABLED_NONE_MENU_ACTIONS_CHECKBOX =
       "Update Project Configuration...  Project\n"
           + "Configure Classpath  Project\n"
-          + "Content Assist  Assistant\n"
-          + "Convert To Project  Project\n"
+          + "Edit Debug Configurations... [Alt+Shift+F9]  Run\n"
+          + "Import From Codenvy Config...  Project";
+
+  private static final String SECOND_EXPECTED_ITEMS_WITH_DISABLED_NONE_MENU_ACTIONS_CHECKBOX =
+      "Commands Palette [Shift+F10]  Run";
+
+  private static final String THIRD_EXPECTED_ITEMS_WITH_DISABLED_NONE_MENU_ACTIONS_CHECKBOX =
+      "Branches... [Ctrl+B]  GitCommandGroup\n" + "Checkout Reference...  GitCommandGroup";
+
+  private static final String FIRST_EXPECTED_ITEMS_WITH_ENABLED_NONE_MENU_ACTIONS_CHECKBOX =
+      "Configuration \n"
+          + "Update Project Configuration...  Project\n"
+          + "Configure Classpath  Project\n"
           + "Edit Debug Configurations... [Alt+Shift+F9]  Run\n"
           + "Import From Codenvy Config...  Project\n"
-          + "consolesTreeContextMenu \n"
-          + "debugGroupContextMenu \n"
-          + "editorTabContextMenu \n"
-          + "mainContextMenu \n"
-          + "projectExplorerContextMenu \n"
-          + "runGroupContextMenu ";
+          + "breakpointConfiguration";
 
-  private static final String SECOND_ACTION_NAME_EXPECTED_ARRAY_WITH_FLAG_LOCAL_MODE =
-      "Commands \n"
-          + "Commands Palette [Shift+F10]  Run\n"
-          + "Commit ... [Alt+C]  GitCommandGroup\n"
-          + "Community  Help\n"
-          + "Execute default command of Debug goal [Alt+D] \n"
-          + "Execute default command of Run goal [Alt+R] \n"
-          + "GitCommandGroup \n"
-          + "Revert commit...  GitCommandGroup";
-
-  private static final String THIRD_ACTION_NAME_EXPECTED_ARRAY_WITH_FLAG_LOCAL_MODE =
+  private static final String SECOND_EXPECTED_ITEMS_WITH_ENABLED_NONE_MENU_ACTIONS_CHECKBOX =
+      "Commands \n" + "Commands \n" + "Commands Palette [Shift+F10]  Run";
+  private static final String THIRD_EXPECTED_ITEMS_WITH_ENABLED_NONE_MENU_ACTIONS_CHECKBOX =
       "Branches... [Ctrl+B]  GitCommandGroup\n" + "Checkout Reference...  GitCommandGroup";
 
   private static final String PROJECT_NAME =
@@ -119,18 +100,18 @@ public class CheckFindActionFeatureInCheTest {
   @DataProvider
   private Object[][] checkingDataWithMenuActionsOnly() {
     return new Object[][] {
-      {FIRST_ACTION_NAME, FIRST_ACTION_NAME_EXPECTED_ARRAY_LOCAL_MODE},
-      {SECOND_ACTION_NAME, SECOND_ACTION_NAME_EXPECTED_ARRAY_LOCAL_MODE},
-      {THIRD_ACTION_NAME, THIRD_ACTION_NAME_EXPECTED_ARRAY_LOCAL_MODE}
+      {FIRST_ACTION_NAME, FIRST_EXPECTED_ITEMS_WITH_DISABLED_NONE_MENU_ACTIONS_CHECKBOX},
+      {SECOND_ACTION_NAME, SECOND_EXPECTED_ITEMS_WITH_DISABLED_NONE_MENU_ACTIONS_CHECKBOX},
+      {THIRD_ACTION_NAME, THIRD_EXPECTED_ITEMS_WITH_DISABLED_NONE_MENU_ACTIONS_CHECKBOX}
     };
   }
 
   @DataProvider
   private Object[][] checkingDataAllActionsData() {
     return new Object[][] {
-      {FIRST_ACTION_NAME, FIRST_ACTION_NAME_EXPECTED_ARRAY_WITH_FLAG_LOCAL_MODE},
-      {SECOND_ACTION_NAME, SECOND_ACTION_NAME_EXPECTED_ARRAY_WITH_FLAG_LOCAL_MODE},
-      {THIRD_ACTION_NAME, THIRD_ACTION_NAME_EXPECTED_ARRAY_WITH_FLAG_LOCAL_MODE}
+      {FIRST_ACTION_NAME, FIRST_EXPECTED_ITEMS_WITH_ENABLED_NONE_MENU_ACTIONS_CHECKBOX},
+      {SECOND_ACTION_NAME, SECOND_EXPECTED_ITEMS_WITH_ENABLED_NONE_MENU_ACTIONS_CHECKBOX},
+      {THIRD_ACTION_NAME, THIRD_EXPECTED_ITEMS_WITH_ENABLED_NONE_MENU_ACTIONS_CHECKBOX}
     };
   }
 

@@ -1619,4 +1619,15 @@ public interface Theme {
   String cellTableEvenRowBackground();
 
   String cellTableCellColor();
+
+  /**
+   * ******************************************************************************************
+   *
+   * <p>Find results bottom panel
+   *
+   * <p>******************************************************************************************
+   */
+  String findResultsBackground();
+
+  String findResultsTextColor();
 }

@@ -114,7 +114,9 @@ public class CheckOnValidAndInvalidPackageNameTest {
 
   private void createPackageByPath(String packagePath, String packageName) {
     projectExplorer.openContextMenuByPathSelectedItem(packagePath);
+    projectExplorer.waitContextMenu();
     projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.NEW);
+    projectExplorer.waitContextMenu();
     projectExplorer.clickOnNewContextMenuItem(
         TestProjectExplorerContextMenuConstants.SubMenuNew.JAVA_PACKAGE);
     askForValueDialog.waitFormToOpen();

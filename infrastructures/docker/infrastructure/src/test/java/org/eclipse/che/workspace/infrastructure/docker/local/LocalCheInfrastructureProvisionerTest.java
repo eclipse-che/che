@@ -15,16 +15,18 @@ import static org.mockito.ArgumentMatchers.eq;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.local.dod.DockerApiHostEnvVariableProvisioner;
-import org.eclipse.che.workspace.infrastructure.docker.local.installer.LocalInstallersConfigProvisioner;
+import org.eclipse.che.workspace.infrastructure.docker.local.installer.LocalInstallersBinariesVolumeProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.local.installer.WsAgentServerConfigProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.local.projects.ProjectsVolumeProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.ContainerSystemSettingsProvisionersApplier;
-import org.eclipse.che.workspace.infrastructure.docker.provisioner.labels.LabelsProvisioner;
+import org.eclipse.che.workspace.infrastructure.docker.provisioner.env.EnvVarsConverter;
+import org.eclipse.che.workspace.infrastructure.docker.provisioner.labels.RuntimeLabelsProvisioner;
+import org.eclipse.che.workspace.infrastructure.docker.provisioner.memory.MemoryAttributeConverter;
+import org.eclipse.che.workspace.infrastructure.docker.provisioner.server.ServersConverter;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.server.ToolingServersEnvVarsProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.snapshot.ExcludeFoldersFromSnapshotProvisioner;
 import org.mockito.InOrder;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.testng.MockitoTestNGListener;
@@ -35,23 +37,42 @@ import org.testng.annotations.Test;
 /** @author Alexander Garagatyi */
 @Listeners(MockitoTestNGListener.class)
 public class LocalCheInfrastructureProvisionerTest {
+
   @Mock private ContainerSystemSettingsProvisionersApplier settingsProvisioners;
   @Mock private ExcludeFoldersFromSnapshotProvisioner snapshotProvisioner;
   @Mock private ProjectsVolumeProvisioner projectsVolumeProvisioner;
-  @Mock private LocalInstallersConfigProvisioner installerConfigProvisioner;
-  @Mock private LabelsProvisioner labelsProvisioner;
+  @Mock private LocalInstallersBinariesVolumeProvisioner installerConfigProvisioner;
+  @Mock private RuntimeLabelsProvisioner labelsProvisioner;
   @Mock private DockerApiHostEnvVariableProvisioner dockerApiEnvProvisioner;
   @Mock private ToolingServersEnvVarsProvisioner toolingServersEnvVarsProvisioner;
   @Mock private InternalEnvironment environment;
   @Mock private DockerEnvironment dockerEnvironment;
   @Mock private RuntimeIdentity runtimeIdentity;
   @Mock private WsAgentServerConfigProvisioner wsAgentServerConfigProvisioner;
-  @InjectMocks private LocalCheInfrastructureProvisioner provisioner;
+  @Mock private ServersConverter serversConverter;
+  @Mock private EnvVarsConverter envVarsConverter;
+  @Mock private MemoryAttributeConverter memoryAttributeConverter;
+
+  private LocalCheInfrastructureProvisioner provisioner;
 
   private Object[] allInnerProvisioners;
 
   @BeforeMethod
   public void setUp() throws Exception {
+    provisioner =
+        new LocalCheInfrastructureProvisioner(
+            settingsProvisioners,
+            snapshotProvisioner,
+            projectsVolumeProvisioner,
+            installerConfigProvisioner,
+            labelsProvisioner,
+            dockerApiEnvProvisioner,
+            toolingServersEnvVarsProvisioner,
+            wsAgentServerConfigProvisioner,
+            serversConverter,
+            envVarsConverter,
+            memoryAttributeConverter);
+
     allInnerProvisioners =
         new Object[] {
           settingsProvisioners,
@@ -61,7 +82,10 @@ public class LocalCheInfrastructureProvisionerTest {
           labelsProvisioner,
           dockerApiEnvProvisioner,
           toolingServersEnvVarsProvisioner,
-          wsAgentServerConfigProvisioner
+          wsAgentServerConfigProvisioner,
+          serversConverter,
+          envVarsConverter,
+          memoryAttributeConverter
         };
   }
 
@@ -73,6 +97,18 @@ public class LocalCheInfrastructureProvisionerTest {
     // then
     InOrder inOrder = Mockito.inOrder((Object[]) allInnerProvisioners);
     inOrder
+        .verify(serversConverter)
+        .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
+    inOrder
+        .verify(envVarsConverter)
+        .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
+    inOrder
+        .verify(memoryAttributeConverter)
+        .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
+    inOrder
+        .verify(labelsProvisioner)
+        .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
+    inOrder
         .verify(snapshotProvisioner)
         .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
     inOrder
@@ -82,19 +118,16 @@ public class LocalCheInfrastructureProvisionerTest {
         .verify(projectsVolumeProvisioner)
         .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
     inOrder
-        .verify(settingsProvisioners)
+        .verify(wsAgentServerConfigProvisioner)
         .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
     inOrder
-        .verify(labelsProvisioner)
+        .verify(settingsProvisioners)
         .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
     inOrder
         .verify(dockerApiEnvProvisioner)
         .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
     inOrder
         .verify(toolingServersEnvVarsProvisioner)
-        .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
-    inOrder
-        .verify(wsAgentServerConfigProvisioner)
         .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
     inOrder.verifyNoMoreInteractions();
   }

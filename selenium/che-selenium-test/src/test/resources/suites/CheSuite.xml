@@ -77,6 +77,7 @@
                 </methods>
             </class>
             <class name="org.eclipse.che.selenium.debugger.MultimoduleProjectDebuggingTest"/>
+            <class name="org.eclipse.che.selenium.debugger.DebuggerWatchExpressionTest"/>
             <class name="org.eclipse.che.selenium.debugger.NodeJsDebugTest">
                 <methods>
                     <exclude name="debugNodeJsTest"/>
@@ -227,7 +228,7 @@
                     <exclude name="checkImportProjectSubmoduleFromGithub"/>
                 </methods>
             </class>
-            <class name="org.eclipse.che.selenium.git.ImportRecursiveSubmoduleTest"/>
+            <class name="org.eclipse.che.selenium.git.ImportProjectIntoSpecifiedBranchTest"/>
             <class name="org.eclipse.che.selenium.git.InitializeAndDeleteLocalRepositoryTest"/>
             <class name="org.eclipse.che.selenium.git.KeepDirectoryGitImportTest">
                 <methods>

@@ -219,7 +219,7 @@ public class DarkTheme implements Theme {
 
   @Override
   public String getDisabledMenuColor() {
-    return "#808080";
+    return "#707070";
   }
 
   @Override
@@ -1039,7 +1039,7 @@ public class DarkTheme implements Theme {
 
   @Override
   public String getPopupHotKeyColor() {
-    return "#727272";
+    return "#d5d5d7";
   }
 
   @Override
@@ -1379,12 +1379,12 @@ public class DarkTheme implements Theme {
 
   @Override
   public String projectExplorerPresentableTextShadow() {
-    return "1px 1px 0 rgba(0, 0, 0, 0.4)";
+    return "none";
   }
 
   @Override
   public String projectExplorerInfoTextShadow() {
-    return "1px 1px 0 rgba(0, 0, 0, 0.4)";
+    return "none";
   }
 
   @Override
@@ -1749,5 +1749,15 @@ public class DarkTheme implements Theme {
   @Override
   public String cellTableCellColor() {
     return "#dbdbdb";
+  }
+
+  @Override
+  public String findResultsBackground() {
+    return "#c1be9e";
+  }
+
+  @Override
+  public String findResultsTextColor() {
+    return "#272727";
   }
 }

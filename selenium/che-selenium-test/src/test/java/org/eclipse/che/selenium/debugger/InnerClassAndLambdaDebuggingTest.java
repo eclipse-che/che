@@ -10,8 +10,8 @@
  */
 package org.eclipse.che.selenium.debugger;
 
-import static org.eclipse.che.selenium.pageobject.debug.DebugPanel.DebuggerButtonsPanel.BTN_DISCONNECT;
-import static org.eclipse.che.selenium.pageobject.debug.DebugPanel.DebuggerButtonsPanel.RESUME_BTN_ID;
+import static org.eclipse.che.selenium.pageobject.debug.DebugPanel.DebuggerActionButtons.BTN_DISCONNECT;
+import static org.eclipse.che.selenium.pageobject.debug.DebugPanel.DebuggerActionButtons.RESUME_BTN_ID;
 
 import com.google.inject.Inject;
 import java.nio.file.Paths;

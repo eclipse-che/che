@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
 import com.google.common.base.Predicate;
@@ -60,13 +61,14 @@ public class FindText {
     String FILE_MASK_FIELD = "gwt-debug-text-search-files";
     String CANCEL_BUTTON = "search-cancel-button";
     String SEARCH_BUTTON = "search-button";
-    String FIND_INFO_PANEL =
-        "//div[@id='gwt-debug-infoPanel']//div[@id='gwt-debug-partStackContent']";
-    String FIND_TAB = "gwt-debug-partButton-Find";
-    String HIDE_FIND_PANEL = "//div[@id='gwt-debug-infoPanel']//div[@id='gwt-debug-hideButton']";
-    String ITEM_FIND_PANEL =
-        "//div[@id='gwt-debug-infoPanel']//div[@id='gwt-debug-partStackContent']//div[text()='%s']";
+    String FIND_INFO_PANEL = "gwt-debug-find-info-panel";
+    String FIND_INFO_PANEL_TEXT_CONTAINER = "gwt-debug-partStackContent";
+    String FIND_TEXT_BUTTON = "gwt-debug-partButton-Find";
     String OCCURRENCE = "//span[@debugfilepath = '%s']";
+    String PREVIOUS_BUTTON = "gwt-debug-previous-button";
+    String NEXT_BUTTON = "gwt-debug-next-button";
+    String SEARCH_RESULTS = "gwt-debug-search-result-label";
+    String FILE_NODE = "//span[@id='%s']";
   }
 
   @FindBy(id = Locators.WHOLE_WORD_CHECKLBOX_INP)
@@ -81,8 +83,11 @@ public class FindText {
   @FindBy(id = Locators.FIND_INFO_PANEL)
   WebElement findInfoPanel;
 
-  @FindBy(id = Locators.FIND_TAB)
-  WebElement findTab;
+  @FindBy(id = Locators.FIND_INFO_PANEL_TEXT_CONTAINER)
+  WebElement findInfoPanelTextContainer;
+
+  @FindBy(id = Locators.FIND_TEXT_BUTTON)
+  WebElement findTextBtn;
 
   /** wait the 'Find Text' main form is open */
   public void waitFindTextMainFormIsOpen() {
@@ -106,7 +111,7 @@ public class FindText {
   /** wait the 'Find Text' main form is closed */
   public void waitFindTextMainFormIsClosed() {
     loader.waitOnClosed();
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
         .until(ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.MAIN_FORM)));
   }
 
@@ -355,15 +360,7 @@ public class FindText {
   /** wait the 'Find' info panel is open */
   public void waitFindInfoPanelIsOpen() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.id(Locators.FIND_INFO_PANEL)));
-  }
-
-  /** press on the 'Hide' button on the 'Find' info panel */
-  public void clickHideBtnFindInfoPanel() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.elementToBeClickable(By.xpath(Locators.HIDE_FIND_PANEL)))
-        .click();
-    waitFindInfoPanelIsClosed();
+        .until(ExpectedConditions.visibilityOf(findInfoPanel));
   }
 
   /** wait the 'Find' info panel is closed */
@@ -372,11 +369,11 @@ public class FindText {
         .until(ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.FIND_INFO_PANEL)));
   }
 
-  /** click on the find tab */
-  public void clickFindTab() {
+  /** click on the find text button on the find info panel */
+  public void clickFindTextButton() {
     loader.waitOnClosed();
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(findTab))
+        .until(ExpectedConditions.visibilityOf(findTextBtn))
         .click();
     loader.waitOnClosed();
   }
@@ -466,5 +463,41 @@ public class FindText {
     loader.waitOnClosed();
     actionsFactory.createAction(seleniumWebDriver).sendKeys(command).perform();
     loader.waitOnClosed();
+  }
+
+  public String getResults() {
+    loader.waitOnClosed();
+    return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOfElementLocated(By.id(Locators.SEARCH_RESULTS)))
+        .getText();
+  }
+
+  public void clickOnPreviousPageButton() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOfElementLocated(By.id(Locators.PREVIOUS_BUTTON)))
+        .click();
+  }
+
+  public void clickOnNextPageButton() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOfElementLocated(By.id(Locators.NEXT_BUTTON)))
+        .click();
+  }
+
+  public Boolean checkNextPageButtonIsEnabled() {
+    return seleniumWebDriver.findElement(By.id(Locators.NEXT_BUTTON)).isEnabled();
+  }
+
+  public Boolean checkPreviousPageButtonIsEnabled() {
+    return seleniumWebDriver.findElement(By.id(Locators.PREVIOUS_BUTTON)).isEnabled();
+  }
+
+  public void openFileNodeByDoubleClick(String pathToFile) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(String.format(Locators.FILE_NODE, pathToFile))))
+        .click();
+    actionsFactory.createAction(seleniumWebDriver).doubleClick().perform();
   }
 }

@@ -68,6 +68,7 @@ public class DeleteProjectsTest {
     }
     ide.open(workspace);
     projectExplorer.waitProjectExplorer();
+    waitAllProjectsInProjectExplorer();
     loader.waitOnClosed();
     consoles.selectProcessByTabName("dev-machine");
   }
@@ -138,5 +139,9 @@ public class DeleteProjectsTest {
       Assert.fail("Error message is present in console");
     } catch (TimeoutException ex) {
     }
+  }
+
+  private void waitAllProjectsInProjectExplorer() {
+    PROJECT_NAMES.forEach((String projectName) -> projectExplorer.waitItem(projectName));
   }
 }

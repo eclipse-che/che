@@ -23,6 +23,7 @@ export class FactoryActionBoxController {
   private factoryObject: any;
   private lifecycle: any;
   private onChange: Function;
+  private selectedParam: string;
 
   /**
    * Default constructor that is using resource injection
@@ -84,17 +85,17 @@ export class FactoryActionBoxController {
     let actionToAdd;
     if ('openfile' === this.selectedAction) {
       actionToAdd = {
-        "properties": {
-          "file": this.selectedParam
+        'properties': {
+          'file': this.selectedParam
         },
-        "id": "openFile"
+        'id': 'openFile'
       };
     } else if ('runcommand' === this.selectedAction) {
       actionToAdd = {
-        "properties": {
-          "name": this.selectedParam
+        'properties': {
+          'name': this.selectedParam
         },
-        "id": "runCommand"
+        'id': 'runCommand'
       };
     }
     if (actionToAdd) {

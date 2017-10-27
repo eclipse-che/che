@@ -15,6 +15,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -81,7 +82,7 @@ public class EnvironmentValidatorTest {
     when(machineConfig.getServers())
         .thenReturn(singletonMap(Constants.SERVER_WS_AGENT_HTTP_REFERENCE, server));
     Map<String, String> attributes =
-        ImmutableMap.of("testKey", "value", "memoryLimitBytes", "1000000000");
+        ImmutableMap.of("testKey", "value", MEMORY_LIMIT_ATTRIBUTE, "1000000000");
     when(machineConfig.getAttributes()).thenReturn(attributes);
     when(container.getExpose()).thenReturn(asList("8090", "9090/tcp", "7070/udp"));
     when(container.getLinks()).thenReturn(singletonList(machine2Name + ":alias1"));
@@ -275,27 +276,6 @@ public class EnvironmentValidatorTest {
 
     // when
     environmentValidator.validate(environment, dockerEnvironment);
-  }
-
-  @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Value of attribute 'memoryLimitBytes' of machine '.*' in environment is illegal",
-    dataProvider = "memoryAttributeValue"
-  )
-  public void shouldFailIfMemoryAttributeIsIllegal(String memoryAttributeValue) throws Exception {
-    // given
-    Map<String, String> attributes =
-        ImmutableMap.of("testKey", "value", "memoryLimitBytes", memoryAttributeValue);
-    when(machineConfig.getAttributes()).thenReturn(attributes);
-
-    // when
-    environmentValidator.validate(environment, dockerEnvironment);
-  }
-
-  @DataProvider(name = "memoryAttributeValue")
-  public static Object[][] memoryAttributeValue() {
-    return new Object[][] {{"aa"}, {""}, {"!"}, {"156a"}, {"0"}, {"-1"}};
   }
 
   @Test(
