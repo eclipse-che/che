@@ -79,12 +79,12 @@ public class InstallerConfigProvisionerTest {
     // then
     Map<String, String> env = machine1.getEnv();
     verifyContainsEnv(env, "CHE_API", CHE_SERVER_ENDPOINT);
-    verifyContainsEnv(env, "USER_TOKEN", "superToken");
+    verifyContainsEnv(env, "CHE_MACHINE_TOKEN", "superToken");
     verifyContainsEnv(env, "CHE_WORKSPACE_ID", WORKSPACE_ID);
 
     env = machine2.getEnv();
     verifyContainsEnv(env, "CHE_API", CHE_SERVER_ENDPOINT);
-    verifyContainsEnv(env, "USER_TOKEN", "superToken");
+    verifyContainsEnv(env, "CHE_MACHINE_TOKEN", "superToken");
     assertFalse(
         env.containsKey("CHE_WORKSPACE_ID"), "Environment variable '%s' found CHE_WORKSPACE_ID");
   }
