@@ -245,30 +245,37 @@ public class ExecutiveProjectManager implements ProjectManager {
       throws ConflictException, NotFoundException, ServerException, BadRequestException,
           ForbiddenException {
 
-    RegisteredProject project =
-        get(wsPath).orElseThrow(() -> new NotFoundException("Can't find project"));
+    RegisteredProject registeredProject = projectConfigRegistry.getOrNull(wsPath);
 
-    List<String> mixins = project.getMixins();
+    if (registeredProject == null) {
+      NewProjectConfig newProjectConfig =
+          new NewProjectConfigImpl(
+              wsPath, type, new ArrayList<>(), nameOf(wsPath), nameOf(wsPath), null, null, null);
+      return projectConfigRegistry.put(newProjectConfig, true, true);
+    }
+
+    List<String> newMixins = registeredProject.getMixins();
+    String newType = registeredProject.getType();
     if (asMixin) {
-      if (!mixins.contains(type)) {
-        mixins.add(type);
+      if (!newMixins.contains(type)) {
+        newMixins.add(type);
       }
+    } else {
+      newType = type;
     }
 
     NewProjectConfig newProjectConfig =
         new NewProjectConfigImpl(
-            project.getPath(),
-            type,
-            mixins,
-            project.getName(),
-            project.getDescription(),
-            project.getAttributes(),
+            registeredProject.getPath(),
+            newType,
+            newMixins,
+            registeredProject.getName(),
+            registeredProject.getDescription(),
+            registeredProject.getAttributes(),
             null,
-            project.getSource());
+            registeredProject.getSource());
 
-    projectConfigRegistry.put(newProjectConfig, true, false);
-
-    return projectConfigRegistry.getOrNull(wsPath);
+    return projectConfigRegistry.put(newProjectConfig, true, registeredProject.isDetected());
   }
 
   @Override

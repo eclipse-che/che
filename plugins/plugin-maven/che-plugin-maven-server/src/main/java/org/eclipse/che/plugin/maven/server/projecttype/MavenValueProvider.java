@@ -11,6 +11,8 @@
 package org.eclipse.che.plugin.maven.server.projecttype;
 
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
+import static org.eclipse.che.api.fs.server.WsPathUtils.resolve;
 import static org.eclipse.che.ide.ext.java.shared.Constants.OUTPUT_FOLDER;
 import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.ARTIFACT_ID;
@@ -30,14 +32,12 @@ import static org.eclipse.che.plugin.maven.shared.MavenAttributes.TEST_SOURCE_FO
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.VERSION;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.type.ReadonlyValueProvider;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.commons.xml.XMLTreeException;
@@ -50,12 +50,15 @@ import org.eclipse.che.plugin.maven.server.core.project.MavenProject;
 /** @author Vitalii Parfonov */
 public class MavenValueProvider extends ReadonlyValueProvider {
 
+  private final String projectWsPath;
+  private final FsManager fsManager;
   private MavenProjectManager mavenProjectManager;
-  private String projectWsPath;
 
-  protected MavenValueProvider(MavenProjectManager mavenProjectManager, String projectWsPath) {
+  protected MavenValueProvider(
+      MavenProjectManager mavenProjectManager, String projectWsPath, FsManager fsManager) {
     this.mavenProjectManager = mavenProjectManager;
-    this.projectWsPath = projectWsPath.startsWith("/") ? projectWsPath : "/" + projectWsPath;
+    this.projectWsPath = absolutize(projectWsPath);
+    this.fsManager = fsManager;
   }
 
   @Override
@@ -185,12 +188,13 @@ public class MavenValueProvider extends ReadonlyValueProvider {
 
   protected Model readModel(String wsPath)
       throws ValueStorageException, ServerException, ForbiddenException, IOException {
-    String pomXmlWsPath = wsPath + "pom.xml";
-    Path pomXmlFsPath = Paths.get("/projects/", pomXmlWsPath);
-    if (!pomXmlFsPath.toFile().exists()) {
+    String pomXmlWsPath = resolve(wsPath, "pom.xml");
+
+    if (!fsManager.exists(pomXmlWsPath)) {
       throw new ValueStorageException("pom.xml does not exist.");
     }
-    return Model.readFrom(Files.newInputStream(pomXmlFsPath));
+
+    return Model.readFrom(fsManager.toIoFile(pomXmlWsPath));
   }
 
   protected void throwReadException(Exception e) throws ValueStorageException {

@@ -88,7 +88,11 @@ public class SimpleProjectTypeResolver implements ProjectTypeResolver {
     return new ProjectTypeResolution(type.getId(), matchAttrs) {
       @Override
       public boolean matched() {
-        return !matchAttrs.isEmpty();
+        // this is due to inability to properly resolve project type
+        // for some configurations (e.g. maven project)
+        // must be fixed in future updates
+        // return !matchAttrs.isEmpty();
+        return true;
       }
     };
   }
