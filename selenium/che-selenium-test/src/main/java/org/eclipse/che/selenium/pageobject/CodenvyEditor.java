@@ -282,7 +282,9 @@ public class CodenvyEditor {
    * @return text from active tab of orion editor
    */
   public String getVisibleTextFromEditor() {
+    LOG.error("=========>>>>> getVisibleTextFromEditor start");
     waitActiveEditor();
+    LOG.error("=========>>>>> getVisibleTextFromEditor finish");
 
     LOG.error("========>>>>  getVisibleTextFromEditor start");
 
@@ -342,14 +344,19 @@ public class CodenvyEditor {
    */
   public void waitTextIntoEditor(final String text) {
     try {
+      LOG.error("=============>>>>>   waitTextIntoEditor  start");
       loadPageDriverWait.until(
           (ExpectedCondition<Boolean>) driver -> getVisibleTextFromEditor().contains(text));
+      LOG.error("=============>>>>>   waitTextIntoEditor  1");
     } catch (Exception ex) {
       ex.printStackTrace();
       WaitUtils.sleepQuietly(REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+      LOG.error("=============>>>>>   waitTextIntoEditor  2");
       attachElemDriverWait.until(
           (ExpectedCondition<Boolean>) driver -> getVisibleTextFromEditor().contains(text));
+      LOG.error("=============>>>>>   waitTextIntoEditor  3");
     }
+    LOG.error("=============>>>>>   waitTextIntoEditor  finish");
     loader.waitOnClosed();
   }
 
