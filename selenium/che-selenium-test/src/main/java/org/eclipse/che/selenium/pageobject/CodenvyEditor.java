@@ -257,6 +257,9 @@ public class CodenvyEditor {
   @FindBy(xpath = Locators.AUTOCOMPLETE_PROPOSAL_JAVA_DOC_POPUP)
   private WebElement autocompleteProposalJavaDocPopup;
 
+  @FindBy(xpath = Locators.ORION_CONTENT_ACTIVE_EDITOR_XPATH)
+  private List<WebElement> editorLines;
+
   /**
    * wait active editor
    *
@@ -280,10 +283,8 @@ public class CodenvyEditor {
    */
   public String getVisibleTextFromEditor() {
     waitActiveEditor();
-    List<WebElement> lines =
-        elemDriverWait.until(
-            presenceOfAllElementsLocatedBy(By.xpath(Locators.ORION_CONTENT_ACTIVE_EDITOR_XPATH)));
-    return getTextFromOrionLines(lines);
+    elemDriverWait.until(ExpectedConditions.visibilityOfAllElements(editorLines));
+    return getTextFromOrionLines(editorLines);
   }
 
   /**
