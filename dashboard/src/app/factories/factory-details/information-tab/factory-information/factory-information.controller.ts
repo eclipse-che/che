@@ -144,26 +144,29 @@ export class FactoryInformationController {
    * Update factory name.
    *
    * @param {string} name new factory name.
-   * @raram {ng.IFormController} form
    */
-  updateName(name: string, form: ng.IFormController): void {
-    if (form.$invalid) {
-      return;
-    }
-
+  updateFactoryName(name: string): void {
     this.copyOriginFactory.name = name;
-
-    this.updateFactory(form);
+    this.updateFactory();
   }
 
   /**
-   * Update factory data.
-   * @param {ng.IFormController} form
+   * Update workspace name.
+   *
+   * @param {string} name new workspace name.
    */
-  updateFactory(form: ng.IFormController): void {
+  updateWorkspaceName(name: string): void {
+    this.copyOriginFactory.workspace.name = name;
+    this.updateFactory();
+  }
+
+  /**
+   * Save factory data.
+   */
+  updateFactory(): void {
     this.factoryContent = this.$filter('json')(this.copyOriginFactory);
 
-    if (form.$invalid || !this.isFactoryChanged()) {
+    if (this.factoryInformationForm.$invalid || !this.isFactoryChanged()) {
       return;
     }
 
