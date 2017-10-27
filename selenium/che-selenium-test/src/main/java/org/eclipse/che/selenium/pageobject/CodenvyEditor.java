@@ -1684,31 +1684,36 @@ public class CodenvyEditor {
    */
   private String getTextFromOrionLines(List<WebElement> lines) {
     StringBuilder stringBuilder = new StringBuilder();
+
     try {
-      for (WebElement line : lines) {
-        List<WebElement> elements = line.findElements(By.tagName("span"));
-        elements.remove(elements.size() - 1);
-        for (WebElement elem : elements) {
-          stringBuilder.append(elem.getText());
-        }
-        stringBuilder.append("\n");
-      }
+      lines.forEach(
+          line -> {
+            loadPageDriverWait.until(
+                ExpectedConditions.visibilityOfAllElements(line.findElements(By.tagName("span"))));
+            List<WebElement> elements = line.findElements(By.tagName("span"));
+            elements.remove(elements.size() - 1);
+            elements.forEach(elem -> stringBuilder.append(elem.getText()));
+            stringBuilder.append("\n");
+          });
+
       stringBuilder.deleteCharAt(stringBuilder.length() - 1);
     }
     // If an editor do not attached to the DOM (we will have state element exception). We wait
     // attaching 2 second and try to read text again.
     catch (WebDriverException ex) {
       WaitUtils.sleepQuietly(2);
+
       stringBuilder.setLength(0);
-      for (WebElement line : lines) {
-        List<WebElement> elements = line.findElements(By.tagName("span"));
-        elements.remove(elements.size() - 1);
-        for (WebElement elem : elements) {
-          stringBuilder.append(elem.getText());
-        }
-        stringBuilder.append("\n");
-      }
-      stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+
+      lines.forEach(
+          line -> {
+            loadPageDriverWait.until(
+                ExpectedConditions.visibilityOfAllElements(line.findElements(By.tagName("span"))));
+            List<WebElement> elements = line.findElements(By.tagName("span"));
+            elements.remove(elements.size() - 1);
+            elements.forEach(elem -> stringBuilder.append(elem.getText()));
+            stringBuilder.append("\n");
+          });
     }
 
     return stringBuilder.toString();
