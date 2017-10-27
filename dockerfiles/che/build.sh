@@ -30,27 +30,5 @@ cp -r "${BUILD_ASSEMBLY_DIR}" "${LOCAL_ASSEMBLY_DIR}"
 init --name:server "$@"
 build
 
-# Build che-multiuser
-# grab assembly
-if [ ! -d "${DIR}/../../assembly-multiuser/assembly-main/target" ]; then
-  echo "${ERROR}Have you built assembly-multiuser/assemby-main in ${DIR}/../assembly-multiuser/assembly-main 'mvn clean install'?"
-  exit 2
-fi
-
-# Use of folder
-BUILD_ASSEMBLY_MULTIUSER_DIR=$(echo "${DIR}"/../../assembly-multiuser/assembly-main/target/eclipse-che-*/eclipse-che-*)
-LOCAL_ASSEMBLY_MULTIUSER_DIR="${DIR}"/eclipse-che
-
-if [ -d "${LOCAL_ASSEMBLY_MULTIUSER_DIR}" ]; then
-  rm -r "${LOCAL_ASSEMBLY_MULTIUSER_DIR}"
-fi
-
-echo "Copying assembly ${BUILD_ASSEMBLY_MULTIUSER_DIR} --> ${LOCAL_ASSEMBLY_MULTIUSER_DIR}"
-cp -r "${BUILD_ASSEMBLY_MULTIUSER_DIR}" "${LOCAL_ASSEMBLY_MULTIUSER_DIR}"
-
-init --name:server-multiuser "$@"
-build
-
-
 #cleanUp
 rm -rf ${DIR}/eclipse-che

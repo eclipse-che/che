@@ -13,7 +13,7 @@ package org.eclipse.che.account.spi;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 
-import org.eclipse.che.account.api.AccccountManager;
+import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.api.core.NotFoundException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -33,7 +33,7 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class AccountValidatorTest {
 
-  @Mock private AccccountManager accountManager;
+  @Mock private AccountManager accountManager;
 
   @InjectMocks private AccountValidator accountValidator;
 

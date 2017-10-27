@@ -12,11 +12,7 @@ services:
   # CHE
   ########################
   che:
-<% if scope.lookupvar('che::che_multiuser') == 'true' -%>
-    image: <%= ENV["IMAGE_CHE_MULTIUSER"] %>
-<% else -%>
     image: <%= ENV["IMAGE_CHE"] %>
-<% end -%>
     env_file:
 <% if @compose_file_for_containers == true -%>
       - '<%= ENV["CHE_CONTAINER_ROOT"] %>/instance/config/che/che.env'
@@ -110,8 +106,6 @@ services:
       - CHE_POSTGRES_USERNAME=<%= scope.lookupvar('postgres::che_pg_username') %>
       - CHE_POSTGRES_PASSWORD=<%= scope.lookupvar('postgres::che_pg_password') %>
       - CHE_POSTGRES_DATABASE=<%= scope.lookupvar('postgres::che_pg_database') %>
- 
-  
     volumes:
       - '<%= scope.lookupvar('che::che_instance') -%>/data/postgres:/var/lib/pgsql/data'
       - '<%= scope.lookupvar('che::che_instance') -%>/config/postgres/init-che-user.sh:/var/lib/pgsql/init-che-user.sh'

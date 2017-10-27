@@ -48,6 +48,12 @@ public class WsMasterServletModule extends ServletModule {
 
     serveRegex("^/(?!ws$|ws/|websocket.?)(.*)").with(GuiceEverrestServlet.class);
     install(new org.eclipse.che.swagger.deploy.BasicSwaggerConfigurationModule());
+
+    if (Boolean.valueOf(System.getenv("CHE_MULTIUSER"))) {
+      configureMultiuser();
+    } else {
+      configureSingleuser();
+    }
   }
 
   private void configureSingleuser() {
