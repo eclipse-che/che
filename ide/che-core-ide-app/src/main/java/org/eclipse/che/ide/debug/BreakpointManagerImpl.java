@@ -33,6 +33,7 @@ import org.eclipse.che.ide.api.debug.BreakpointRenderer;
 import org.eclipse.che.ide.api.debug.BreakpointRenderer.LineChangeAction;
 import org.eclipse.che.ide.api.debug.BreakpointStorage;
 import org.eclipse.che.ide.api.debug.HasBreakpointRenderer;
+import org.eclipse.che.ide.api.debug.HasLocation;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorOpenedEvent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
@@ -45,7 +46,6 @@ import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.api.resources.VirtualFile;
-import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.resource.Path;
 
 /**
@@ -100,22 +100,13 @@ public class BreakpointManagerImpl
     if (existedBreakpoint.isPresent()) {
       deleteBreakpoint(activeFile, existedBreakpoint.get());
     } else {
-      String project = null;
-      if (activeFile instanceof SyntheticNode) {
-        project = ((SyntheticNode) activeFile).getProject().toString();
-      } else if (activeFile instanceof Resource) {
-        project = ((Resource) activeFile).getProject().getPath();
-      }
-
-      if (project == null) {
-        LOG.warning("Impossible to figure out project for: " + activeFile.getLocation().toString());
+      if (activeFile instanceof HasLocation) {
+        addBreakpoint(
+            activeFile, new BreakpointImpl(((HasLocation) activeFile).toLocation(lineNumber + 1)));
+      } else {
+        LOG.warning("Impossible to figure debug location for: " + activeFile.getLocation());
         return;
       }
-
-      addBreakpoint(
-          activeFile,
-          new BreakpointImpl(
-              new LocationImpl(activeFile.getLocation().toString(), lineNumber + 1, project)));
     }
   }
 

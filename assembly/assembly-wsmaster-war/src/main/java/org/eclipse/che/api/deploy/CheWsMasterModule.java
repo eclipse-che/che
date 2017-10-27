@@ -16,9 +16,6 @@ import javax.sql.DataSource;
 import org.eclipse.che.api.user.server.TokenValidator;
 import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.workspace.infrastructure.docker.DockerInfraModule;
-import org.eclipse.che.workspace.infrastructure.docker.local.LocalDockerModule;
-import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfraModule;
 
 /**
  * Single-user version Che specific bindings
@@ -29,14 +26,6 @@ import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfraModule;
 public class CheWsMasterModule extends AbstractModule {
   @Override
   protected void configure() {
-
-    String infrastructure = System.getenv("CHE_INFRASTRUCTURE_ACTIVE");
-    if ("openshift".equals(infrastructure)) {
-      install(new OpenShiftInfraModule());
-    } else {
-      install(new LocalDockerModule());
-      install(new DockerInfraModule());
-    }
 
     bind(TokenValidator.class).to(org.eclipse.che.api.local.DummyTokenValidator.class);
     bind(MachineTokenProvider.class).to(MachineTokenProvider.EmptyMachineTokenProvider.class);

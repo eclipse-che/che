@@ -125,19 +125,19 @@ public class MultimoduleProjectDebuggingTest {
         getXpathForDebugConfigurationMenuItem());
     notificationPopup.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
     editor.waitActiveBreakpoint(19);
-    debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_INTO);
+    debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_INTO);
 
     // then
     try {
       editor.waitTabFileWithSavedStatus("ClassLoader");
-      debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_OUT);
-      debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_OUT);
-      debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_INTO);
+      debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_OUT);
+      debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_OUT);
+      debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_INTO);
     } catch (Exception e) {
     }
 
     editor.waitTabFileWithSavedStatus("BookImpl");
-    debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_OVER);
+    debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_OVER);
     debugPanel.waitDebugHighlightedText("this.title = title;");
     debugPanel.waitTextInVariablesPanel("title=\"java\"");
     debugPanel.waitTextInVariablesPanel("author=\"oracle\"");

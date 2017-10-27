@@ -14,6 +14,8 @@ import com.sun.jna.Library;
 import com.sun.jna.Native;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -35,10 +37,12 @@ class UnixProcessManager extends ProcessManager {
   private static final CLibrary C_LIBRARY;
 
   private static final Field PID_FIELD;
+  private static final Method PID_METHOD;
 
   static {
     CLibrary lib = null;
     Field pidField = null;
+    Method pidMethod = null;
     if (SystemInfo.isUnix()) {
       try {
         lib = ((CLibrary) Native.loadLibrary("c", CLibrary.class));
@@ -53,11 +57,17 @@ class UnixProcessManager extends ProcessManager {
                 .getDeclaredField("pid");
         pidField.setAccessible(true);
       } catch (Exception e) {
-        LOG.error(e.getMessage(), e);
+        // try with Java9
+        try {
+          pidMethod = Process.class.getDeclaredMethod("pid");
+        } catch (NoSuchMethodException e1) {
+          LOG.error(e1.getMessage(), e1);
+        }
       }
     }
     C_LIBRARY = lib;
     PID_FIELD = pidField;
+    PID_METHOD = pidMethod;
   }
 
   private static interface CLibrary extends Library {
@@ -171,6 +181,12 @@ class UnixProcessManager extends ProcessManager {
       try {
         return ((Number) PID_FIELD.get(process)).intValue();
       } catch (IllegalAccessException e) {
+        throw new IllegalStateException("Can't get process' pid. Not unix system?", e);
+      }
+    } else if (PID_METHOD != null) {
+      try {
+        return ((Long) PID_METHOD.invoke(process)).intValue();
+      } catch (IllegalAccessException | InvocationTargetException e) {
         throw new IllegalStateException("Can't get process' pid. Not unix system?", e);
       }
     } else {

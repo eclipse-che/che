@@ -17,12 +17,15 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.InfrastructureProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.local.dod.DockerApiHostEnvVariableProvisioner;
-import org.eclipse.che.workspace.infrastructure.docker.local.installer.LocalInstallersConfigProvisioner;
+import org.eclipse.che.workspace.infrastructure.docker.local.installer.LocalInstallersBinariesVolumeProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.local.installer.WsAgentServerConfigProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.local.projects.ProjectsVolumeProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.ContainerSystemSettingsProvisionersApplier;
-import org.eclipse.che.workspace.infrastructure.docker.provisioner.labels.LabelsProvisioner;
+import org.eclipse.che.workspace.infrastructure.docker.provisioner.env.EnvVarsConverter;
+import org.eclipse.che.workspace.infrastructure.docker.provisioner.labels.RuntimeLabelsProvisioner;
+import org.eclipse.che.workspace.infrastructure.docker.provisioner.memory.MemoryAttributeConverter;
+import org.eclipse.che.workspace.infrastructure.docker.provisioner.server.ServersConverter;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.server.ToolingServersEnvVarsProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.snapshot.ExcludeFoldersFromSnapshotProvisioner;
 
@@ -34,34 +37,44 @@ import org.eclipse.che.workspace.infrastructure.docker.provisioner.snapshot.Excl
  */
 @Singleton
 public class LocalCheInfrastructureProvisioner implements InfrastructureProvisioner {
-  private final ContainerSystemSettingsProvisionersApplier settingsProvisioners;
-  private final ExcludeFoldersFromSnapshotProvisioner snapshotProvisioner;
+
+  private final ContainerSystemSettingsProvisionersApplier dockerSettingsProvisioners;
+  private final ExcludeFoldersFromSnapshotProvisioner snapshotVolumeProvisioner;
   private final ProjectsVolumeProvisioner projectsVolumeProvisioner;
-  private final LocalInstallersConfigProvisioner installerConfigProvisioner;
-  private final LabelsProvisioner labelsProvisioner;
+  private final LocalInstallersBinariesVolumeProvisioner installersBinariesVolumeProvisioner;
+  private final RuntimeLabelsProvisioner runtimeLabelsProvisioner;
   private final DockerApiHostEnvVariableProvisioner dockerApiEnvProvisioner;
-  private final ToolingServersEnvVarsProvisioner toolingServersEnvVarsProvisioner;
+  private final ToolingServersEnvVarsProvisioner agentsServersEnvVarsProvisioner;
   private final WsAgentServerConfigProvisioner wsAgentServerConfigProvisioner;
+  private final ServersConverter serversConverter;
+  private final EnvVarsConverter envVarsConverter;
+  private final MemoryAttributeConverter memoryAttributeConverter;
 
   @Inject
   public LocalCheInfrastructureProvisioner(
-      ContainerSystemSettingsProvisionersApplier settingsProvisioners,
-      ExcludeFoldersFromSnapshotProvisioner snapshotProvisioner,
+      ContainerSystemSettingsProvisionersApplier dockerSettingsProvisioners,
+      ExcludeFoldersFromSnapshotProvisioner snapshotVolumeProvisioner,
       ProjectsVolumeProvisioner projectsVolumeProvisioner,
-      LocalInstallersConfigProvisioner installerConfigProvisioner,
-      LabelsProvisioner labelsProvisioner,
+      LocalInstallersBinariesVolumeProvisioner installersBinariesVolumeProvisioner,
+      RuntimeLabelsProvisioner runtimeLabelsProvisioner,
       DockerApiHostEnvVariableProvisioner dockerApiEnvProvisioner,
-      ToolingServersEnvVarsProvisioner toolingServersEnvVarsProvisioner,
-      WsAgentServerConfigProvisioner wsAgentServerConfigProvisioner) {
+      ToolingServersEnvVarsProvisioner agentsServersEnvVarsProvisioner,
+      WsAgentServerConfigProvisioner wsAgentServerConfigProvisioner,
+      ServersConverter serversConverter,
+      EnvVarsConverter envVarsConverter,
+      MemoryAttributeConverter memoryAttributeConverter) {
 
-    this.settingsProvisioners = settingsProvisioners;
-    this.snapshotProvisioner = snapshotProvisioner;
+    this.dockerSettingsProvisioners = dockerSettingsProvisioners;
+    this.snapshotVolumeProvisioner = snapshotVolumeProvisioner;
     this.projectsVolumeProvisioner = projectsVolumeProvisioner;
-    this.installerConfigProvisioner = installerConfigProvisioner;
-    this.labelsProvisioner = labelsProvisioner;
+    this.installersBinariesVolumeProvisioner = installersBinariesVolumeProvisioner;
+    this.runtimeLabelsProvisioner = runtimeLabelsProvisioner;
     this.dockerApiEnvProvisioner = dockerApiEnvProvisioner;
-    this.toolingServersEnvVarsProvisioner = toolingServersEnvVarsProvisioner;
+    this.agentsServersEnvVarsProvisioner = agentsServersEnvVarsProvisioner;
     this.wsAgentServerConfigProvisioner = wsAgentServerConfigProvisioner;
+    this.serversConverter = serversConverter;
+    this.envVarsConverter = envVarsConverter;
+    this.memoryAttributeConverter = memoryAttributeConverter;
   }
 
   @Override
@@ -69,13 +82,20 @@ public class LocalCheInfrastructureProvisioner implements InfrastructureProvisio
       InternalEnvironment envConfig, DockerEnvironment internalEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
-    snapshotProvisioner.provision(envConfig, internalEnv, identity);
-    installerConfigProvisioner.provision(envConfig, internalEnv, identity);
+    // 1 stage - add Che business logic items to Che model env
+    // 2 stage - converting Che model env to docker env
+    serversConverter.provision(envConfig, internalEnv, identity);
+    envVarsConverter.provision(envConfig, internalEnv, identity);
+    memoryAttributeConverter.provision(envConfig, internalEnv, identity);
+    // 3 stage - add docker env items
+    runtimeLabelsProvisioner.provision(envConfig, internalEnv, identity);
+    snapshotVolumeProvisioner.provision(envConfig, internalEnv, identity);
+    installersBinariesVolumeProvisioner.provision(envConfig, internalEnv, identity);
     projectsVolumeProvisioner.provision(envConfig, internalEnv, identity);
-    settingsProvisioners.provision(envConfig, internalEnv, identity);
-    labelsProvisioner.provision(envConfig, internalEnv, identity);
-    dockerApiEnvProvisioner.provision(envConfig, internalEnv, identity);
-    toolingServersEnvVarsProvisioner.provision(envConfig, internalEnv, identity);
     wsAgentServerConfigProvisioner.provision(envConfig, internalEnv, identity);
+    dockerSettingsProvisioners.provision(envConfig, internalEnv, identity);
+    dockerApiEnvProvisioner.provision(envConfig, internalEnv, identity);
+    // TODO move to abstract code
+    agentsServersEnvVarsProvisioner.provision(envConfig, internalEnv, identity);
   }
 }

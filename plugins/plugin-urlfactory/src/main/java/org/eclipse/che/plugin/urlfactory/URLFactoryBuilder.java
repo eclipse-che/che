@@ -11,6 +11,9 @@
 package org.eclipse.che.plugin.urlfactory;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 import com.google.common.base.Strings;
@@ -23,13 +26,14 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.factory.server.FactoryMessageBodyAdapter;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
+import org.eclipse.che.api.workspace.shared.dto.MachineConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.RecipeDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.dto.server.DtoFactory;
 
-// FIXME: spi
-
 /**
- * Handle the creation of some elements used inside a {@link FactoryDto}
+ * Handle the creation of some elements used inside a {@link FactoryDto}.
  *
  * @author Florent Benoit
  */
@@ -40,17 +44,21 @@ public class URLFactoryBuilder {
   protected static final String DEFAULT_DOCKER_IMAGE = "codenvy/ubuntu_jdk8";
 
   /** Default docker type (if repository has no dockerfile) */
-  protected static final String MEMORY_LIMIT_BYTES = Long.toString(2000L * 1024L * 1024L);
+  protected static final String DEFAULT_MEMORY_LIMIT_BYTES = Long.toString(2000L * 1024L * 1024L);
 
   protected static final String MACHINE_NAME = "ws-machine";
 
-  /** Check if URL is existing or not */
-  @Inject private URLChecker URLChecker;
+  private final URLChecker urlChecker;
+  private final URLFetcher urlFetcher;
+  private final FactoryMessageBodyAdapter factoryAdapter;
 
-  /** Grab content of URLs */
-  @Inject private URLFetcher URLFetcher;
-
-  @Inject private FactoryMessageBodyAdapter factoryAdapter;
+  @Inject
+  public URLFactoryBuilder(
+      URLChecker urlChecker, URLFetcher urlFetcher, FactoryMessageBodyAdapter factoryAdapter) {
+    this.urlChecker = urlChecker;
+    this.urlFetcher = urlFetcher;
+    this.factoryAdapter = factoryAdapter;
+  }
 
   /**
    * Build a default factory using the provided json file or create default one
@@ -62,7 +70,7 @@ public class URLFactoryBuilder {
 
     // Check if there is factory json file inside the repository
     if (jsonFileLocation != null) {
-      String factoryJsonContent = URLFetcher.fetch(jsonFileLocation);
+      String factoryJsonContent = urlFetcher.fetch(jsonFileLocation);
       if (!Strings.isNullOrEmpty(factoryJsonContent)) {
         // Adapt an old factory format to a new one if necessary
         try {
@@ -94,30 +102,32 @@ public class URLFactoryBuilder {
 
     // if remote repository contains a codenvy docker file, use it
     // else use the default image.
-    //        RecipeDto recipeDto;
-    //        if (dockerFileLocation != null && URLChecker.exists(dockerFileLocation)) {
-    //            recipeDto = newDto(EnvironmentRecipeDto.class).withLocation(dockerFileLocation)
-    //                                                          .withType("dockerfile")
-    //
-    // .withContentType("text/x-dockerfile");
-    //        } else {
-    //            recipeDto = newDto(EnvironmentRecipeDto.class).withLocation(DEFAULT_DOCKER_IMAGE)
-    //                                                          .withType("dockerimage");
-    //        }
-    //        ExtendedMachineDto machine =
-    // newDto(ExtendedMachineDto.class).withInstallers(singletonList("org.eclipse.che.ws-agent"))
-    //
-    // .withAttributes(singletonMap("memoryLimitBytes", MEMORY_LIMIT_BYTES));
-    //
-    //        // setup environment
-    //        EnvironmentDto environmentDto = newDto(EnvironmentDto.class).withRecipe(recipeDto)
-    //
-    // .withMachines(singletonMap(MACHINE_NAME, machine));
+    RecipeDto recipeDto;
+    if (dockerFileLocation != null && urlChecker.exists(dockerFileLocation)) {
+      recipeDto =
+          newDto(RecipeDto.class)
+              .withLocation(dockerFileLocation)
+              .withType("dockerfile")
+              .withContentType("text/x-dockerfile");
+    } else {
+      recipeDto =
+          newDto(RecipeDto.class).withLocation(DEFAULT_DOCKER_IMAGE).withType("dockerimage");
+    }
+    MachineConfigDto machine =
+        newDto(MachineConfigDto.class)
+            .withInstallers(singletonList("org.eclipse.che.ws-agent"))
+            .withAttributes(singletonMap(MEMORY_LIMIT_ATTRIBUTE, DEFAULT_MEMORY_LIMIT_BYTES));
+
+    // setup environment
+    EnvironmentDto environmentDto =
+        newDto(EnvironmentDto.class)
+            .withRecipe(recipeDto)
+            .withMachines(singletonMap(MACHINE_NAME, machine));
 
     // workspace configuration using the environment
     return newDto(WorkspaceConfigDto.class)
         .withDefaultEnv(environmentName)
-        //                .withEnvironments(singletonMap(environmentName, environmentDto))
+        .withEnvironments(singletonMap(environmentName, environmentDto))
         .withName(name);
   }
 }

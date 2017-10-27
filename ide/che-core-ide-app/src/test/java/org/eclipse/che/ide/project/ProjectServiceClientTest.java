@@ -67,7 +67,7 @@ import org.mockito.Mock;
  * Unit test for {@link ProjectServiceClient}.
  *
  * @author Vlad Zhukovskyi
- * @author Oleksander Andriienko
+ * @author Oleksandr Andriienko
  */
 @RunWith(GwtMockitoTestRunner.class)
 public class ProjectServiceClientTest {

@@ -27,12 +27,13 @@
 # For Windows, replace $PWD with Che source code directory.
 #
 
-FROM codenvy/debian_jdk8
-ENV NODE_VERSION=4.8.0 \
+FROM eclipse/debian_jdk8
+ENV NODE_VERSION=6.11.2 \
+    GOLANG_VERSION=1.8.3 \
     NODE_PATH=/usr/local/lib/node_modules
 
 RUN sudo apt-get update && \
-    sudo apt-get -y install build-essential libssl-dev libkrb5-dev gcc make ruby-full rubygems && \
+    sudo apt-get -y install build-essential libkrb5-dev gcc make ruby-full rubygems && \
     sudo gem install sass compass && \
     sudo apt-get clean && \
     sudo apt-get -y autoremove && \
@@ -60,12 +61,11 @@ RUN sudo apt-get update && \
     && sudo rm "node-v$NODE_VERSION-linux-x64.tar.gz" SHASUMS256.txt.asc
 
 EXPOSE 3000 5000 9000
-RUN sudo npm install -g npm@latest
-RUN sudo npm install --unsafe-perm -g gulp bower typings
+
 RUN mkdir ~/gopath && \
-    cd /home/user && wget -q https://storage.googleapis.com/golang/go1.6.2.linux-amd64.tar.gz && \
-    sudo tar -xvf go1.6.2.linux-amd64.tar.gz -C /opt/ && \
-    rm go1.6.2.linux-amd64.tar.gz
+    cd /home/user && wget -q https://storage.googleapis.com/golang/go$GOLANG_VERSION.linux-amd64.tar.gz && \
+    sudo tar -xvf go$GOLANG_VERSION.linux-amd64.tar.gz -C /opt/ && \
+    rm go$GOLANG_VERSION.linux-amd64.tar.gz
 ENV GOROOT=/opt/go
 ENV GOPATH=/home/user/gopath
 RUN echo "export PATH=$GOROOT/bin:$PATH" >> ~/.bashrc && \

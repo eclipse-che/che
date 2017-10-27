@@ -13,7 +13,7 @@
 -->
 <Context allowCasualMultipartParsing="true" sessionCookiePath="/api">
 
-    <Resource name="jdbc/che" auth="Container"
-              type="javax.sql.DataSource"
-              factory="org.eclipse.che.core.db.h2.H2SQLJndiDataSourceFactory"/>
+  <Resource name="jdbc/che" auth="Container"
+    type="javax.sql.DataSource"
+    factory="org.eclipse.che.core.db.h2.H2SQLJndiDataSourceFactory"/>
 </Context>

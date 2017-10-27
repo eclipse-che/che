@@ -463,8 +463,6 @@ public class DockerMachineStarter {
     hostConfig.setBinds(bindMountVolumes.toArray(new String[bindMountVolumes.size()]));
     config.setVolumes(nonBindMountVolumes);
 
-    config.getHostConfig().withPublishAllPorts(true);
-
     setNonExitingContainerCommandIfNeeded(config);
 
     return docker
@@ -479,12 +477,15 @@ public class DockerMachineStarter {
     Map<String, PortBinding[]> portsBindings = Maps.newHashMapWithExpectedSize(portsSpecs.size());
     for (String portSpec : portsSpecs) {
       String[] portMapping = portSpec.split(":");
-      if (portMapping.length != 2) {
+      if (portMapping.length == 1) {
+        portsBindings.put(portMapping[0], new PortBinding[] {new PortBinding()});
+      } else if (portMapping.length == 2) {
+        portsBindings.put(
+            portMapping[0], new PortBinding[] {new PortBinding().withHostPort(portMapping[1])});
+      } else {
         throw new InternalInfrastructureException(
             format("Invalid port specification '%s' found machine '%s'", portsSpecs, machineName));
       }
-      portsBindings.put(
-          portMapping[0], new PortBinding[] {new PortBinding().withHostPort(portMapping[1])});
     }
     return portsBindings;
   }
