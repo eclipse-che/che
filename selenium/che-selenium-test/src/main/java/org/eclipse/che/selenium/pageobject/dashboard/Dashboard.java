@@ -144,7 +144,7 @@ public class Dashboard {
    * @param notification
    */
   public void waitNotificationMessage(String notification) {
-    new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
         .until(ExpectedConditions.textToBePresentInElement(notificationPopUp, notification));
   }
 
