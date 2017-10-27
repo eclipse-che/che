@@ -56,6 +56,4 @@ RUN sudo  ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N '' && \
     sudo  ssh-keygen -t rsa -f /etc/ssh/ssh_host_ecdsa_key -N '' && \
     sudo  ssh-keygen -t rsa -f /etc/ssh/ssh_host_ed25519_key -N ''
 
-
-
 WORKDIR /home/user
