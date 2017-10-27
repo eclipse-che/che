@@ -158,10 +158,10 @@ init_global_vars() {
   DEFAULT_CHE_LICENSE=false
   CHE_LICENSE=${CHE_LICENSE:-${DEFAULT_CHE_LICENSE}}
 
-  if [[ "${CHE_CONTAINER_NAME}" = "${CHE_MINI_PRODUCT_NAME}" ]]; then
+  if [[ "${CHE_CONTAINER_NAME}" = "${CHE_MINI_PRODUCT_NAME}" ]]; then   
     if [[ "${CHE_PORT}" != "${DEFAULT_CHE_PORT}" ]]; then
       CHE_CONTAINER_NAME="${CHE_CONTAINER_PREFIX}-${CHE_PORT}"
-    else
+    else 
       CHE_CONTAINER_NAME="${CHE_CONTAINER_PREFIX}"
     fi
   fi
