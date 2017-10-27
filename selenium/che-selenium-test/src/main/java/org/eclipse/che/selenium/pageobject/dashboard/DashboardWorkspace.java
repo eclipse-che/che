@@ -941,11 +941,7 @@ public class DashboardWorkspace {
         .click();
   }
 
-  public Boolean isWorkspaceNameTooShort() {
-    return errorMessages.getText().equals("The name has to be more than 3 characters long.");
-  }
-
-  public Boolean isWorkspaceNameTooLong() {
-    return errorMessages.getText().equals("The name has to be less than 101 characters long.");
+  public Boolean isWorkspaceNameErrorMessageEquals(String message) {
+    return errorMessages.getText().equals(message);
   }
 }
