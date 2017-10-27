@@ -282,22 +282,23 @@ public class CodenvyEditor {
    * @return text from active tab of orion editor
    */
   public String getVisibleTextFromEditor() {
-    LOG.error("=========>>>>> getVisibleTextFromEditor start");
+    LOG.debug("=========>>>>> getVisibleTextFromEditor start");
     waitActiveEditor();
-    LOG.error("=========>>>>> getVisibleTextFromEditor finish");
+    LOG.debug("=========>>>>> getVisibleTextFromEditor finish");
 
-    LOG.error("========>>>>  getVisibleTextFromEditor start");
+    LOG.debug("========>>>>  getVisibleTextFromEditor start");
 
     elemDriverWait.until(
         ExpectedConditions.presenceOfAllElementsLocatedBy(
             By.xpath(Locators.ORION_CONTENT_ACTIVE_EDITOR_XPATH)));
 
-    LOG.error("========>>>>  getVisibleTextFromEditor 1");
+    LOG.debug("========>>>>  getVisibleTextFromEditor 1");
 
-    elemDriverWait.until(ExpectedConditions.visibilityOfAllElements(editorLines));
-    LOG.error("========>>>>  getVisibleTextFromEditor finish");
+    String result = getTextFromOrionLines(editorLines);
 
-    return getTextFromOrionLines(editorLines);
+    LOG.debug("========>>>>  getVisibleTextFromEditor finish");
+
+    return result;
   }
 
   /**
@@ -343,20 +344,24 @@ public class CodenvyEditor {
    * @param text expected text
    */
   public void waitTextIntoEditor(final String text) {
+    LOG.debug("============>>>>>>>>> wait active editor start");
+    waitActiveEditor();
+    System.out.println("============>>>>>>>>> wait active is successful");
+
     try {
-      LOG.error("=============>>>>>   waitTextIntoEditor  start");
+      LOG.debug("=============>>>>>   waitTextIntoEditor  start");
       elemDriverWait.until(
           (ExpectedCondition<Boolean>) driver -> getVisibleTextFromEditor().contains(text));
-      LOG.error("=============>>>>>   waitTextIntoEditor  1");
+      LOG.debug("=============>>>>>   waitTextIntoEditor  1");
     } catch (Exception ex) {
       ex.printStackTrace();
       WaitUtils.sleepQuietly(REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
-      LOG.error("=============>>>>>   waitTextIntoEditor  2");
+      LOG.debug("=============>>>>>   waitTextIntoEditor  2");
       elemDriverWait.until(
           (ExpectedCondition<Boolean>) driver -> getVisibleTextFromEditor().contains(text));
-      LOG.error("=============>>>>>   waitTextIntoEditor  3");
+      LOG.debug("=============>>>>>   waitTextIntoEditor  3");
     }
-    LOG.error("=============>>>>>   waitTextIntoEditor  finish");
+    LOG.debug("=============>>>>>   waitTextIntoEditor  finish");
     loader.waitOnClosed();
   }
 
@@ -1706,9 +1711,9 @@ public class CodenvyEditor {
     try {
       lines.forEach(
           line -> {
-            loadPageDriverWait.until(
-                ExpectedConditions.visibilityOfAllElements(line.findElements(By.tagName("span"))));
-            List<WebElement> elements = line.findElements(By.tagName("span"));
+            List<WebElement> elements =
+                loadPageDriverWait.until(
+                    ExpectedConditions.presenceOfAllElementsLocatedBy(By.tagName("span")));
             elements.remove(elements.size() - 1);
             elements.forEach(elem -> stringBuilder.append(elem.getText()));
             stringBuilder.append("\n");
@@ -1725,9 +1730,9 @@ public class CodenvyEditor {
 
       lines.forEach(
           line -> {
-            loadPageDriverWait.until(
-                ExpectedConditions.visibilityOfAllElements(line.findElements(By.tagName("span"))));
-            List<WebElement> elements = line.findElements(By.tagName("span"));
+            List<WebElement> elements =
+                loadPageDriverWait.until(
+                    ExpectedConditions.presenceOfAllElementsLocatedBy(By.tagName("span")));
             elements.remove(elements.size() - 1);
             elements.forEach(elem -> stringBuilder.append(elem.getText()));
             stringBuilder.append("\n");
