@@ -257,9 +257,6 @@ public class CodenvyEditor {
   @FindBy(xpath = Locators.AUTOCOMPLETE_PROPOSAL_JAVA_DOC_POPUP)
   private WebElement autocompleteProposalJavaDocPopup;
 
-  @FindBy(xpath = Locators.ORION_CONTENT_ACTIVE_EDITOR_XPATH)
-  private List<WebElement> editorLines;
-
   /**
    * wait active editor
    *
@@ -282,23 +279,11 @@ public class CodenvyEditor {
    * @return text from active tab of orion editor
    */
   public String getVisibleTextFromEditor() {
-    LOG.debug("=========>>>>> getVisibleTextFromEditor start");
     waitActiveEditor();
-    LOG.debug("=========>>>>> getVisibleTextFromEditor finish");
-
-    LOG.debug("========>>>>  getVisibleTextFromEditor start");
-
-    elemDriverWait.until(
-        ExpectedConditions.presenceOfAllElementsLocatedBy(
-            By.xpath(Locators.ORION_CONTENT_ACTIVE_EDITOR_XPATH)));
-
-    LOG.debug("========>>>>  getVisibleTextFromEditor 1");
-
-    String result = getTextFromOrionLines(editorLines);
-
-    LOG.debug("========>>>>  getVisibleTextFromEditor finish");
-
-    return result;
+    List<WebElement> lines =
+        elemDriverWait.until(
+            presenceOfAllElementsLocatedBy(By.xpath(Locators.ORION_CONTENT_ACTIVE_EDITOR_XPATH)));
+    return getTextFromOrionLines(lines);
   }
 
   /**
@@ -344,24 +329,15 @@ public class CodenvyEditor {
    * @param text expected text
    */
   public void waitTextIntoEditor(final String text) {
-    LOG.debug("============>>>>>>>>> wait active editor start");
-    waitActiveEditor();
-    System.out.println("============>>>>>>>>> wait active is successful");
-
     try {
-      LOG.debug("=============>>>>>   waitTextIntoEditor  start");
-      elemDriverWait.until(
+      loadPageDriverWait.until(
           (ExpectedCondition<Boolean>) driver -> getVisibleTextFromEditor().contains(text));
-      LOG.debug("=============>>>>>   waitTextIntoEditor  1");
     } catch (Exception ex) {
       ex.printStackTrace();
       WaitUtils.sleepQuietly(REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
-      LOG.debug("=============>>>>>   waitTextIntoEditor  2");
-      elemDriverWait.until(
+      attachElemDriverWait.until(
           (ExpectedCondition<Boolean>) driver -> getVisibleTextFromEditor().contains(text));
-      LOG.debug("=============>>>>>   waitTextIntoEditor  3");
     }
-    LOG.debug("=============>>>>>   waitTextIntoEditor  finish");
     loader.waitOnClosed();
   }
 
@@ -1707,36 +1683,31 @@ public class CodenvyEditor {
    */
   private String getTextFromOrionLines(List<WebElement> lines) {
     StringBuilder stringBuilder = new StringBuilder();
-
     try {
-      lines.forEach(
-          line -> {
-            List<WebElement> elements =
-                loadPageDriverWait.until(
-                    ExpectedConditions.presenceOfAllElementsLocatedBy(By.tagName("span")));
-            elements.remove(elements.size() - 1);
-            elements.forEach(elem -> stringBuilder.append(elem.getText()));
-            stringBuilder.append("\n");
-          });
-
+      for (WebElement line : lines) {
+        List<WebElement> elements = line.findElements(By.tagName("span"));
+        elements.remove(elements.size() - 1);
+        for (WebElement elem : elements) {
+          stringBuilder.append(elem.getText());
+        }
+        stringBuilder.append("\n");
+      }
       stringBuilder.deleteCharAt(stringBuilder.length() - 1);
     }
     // If an editor do not attached to the DOM (we will have state element exception). We wait
     // attaching 2 second and try to read text again.
     catch (WebDriverException ex) {
       WaitUtils.sleepQuietly(2);
-
       stringBuilder.setLength(0);
-
-      lines.forEach(
-          line -> {
-            List<WebElement> elements =
-                loadPageDriverWait.until(
-                    ExpectedConditions.presenceOfAllElementsLocatedBy(By.tagName("span")));
-            elements.remove(elements.size() - 1);
-            elements.forEach(elem -> stringBuilder.append(elem.getText()));
-            stringBuilder.append("\n");
-          });
+      for (WebElement line : lines) {
+        List<WebElement> elements = line.findElements(By.tagName("span"));
+        elements.remove(elements.size() - 1);
+        for (WebElement elem : elements) {
+          stringBuilder.append(elem.getText());
+        }
+        stringBuilder.append("\n");
+      }
+      stringBuilder.deleteCharAt(stringBuilder.length() - 1);
     }
 
     return stringBuilder.toString();
