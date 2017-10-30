@@ -173,4 +173,3 @@ test "${TS_NPMS}" = "" || {
 touch ${LS_LAUNCHER}
 chmod +x ${LS_LAUNCHER}
 echo "typescript-language-server --stdio" > ${LS_LAUNCHER}
-
