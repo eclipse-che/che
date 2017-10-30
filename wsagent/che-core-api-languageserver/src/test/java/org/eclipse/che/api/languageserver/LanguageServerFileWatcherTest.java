@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.api.languageserver;
 
-import static org.mockito.Mockito.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,7 +23,7 @@ import java.util.function.Consumer;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.registry.LanguageServerDescription;
 import org.eclipse.che.api.languageserver.registry.LanguageServerFileWatcher;
-import org.eclipse.che.api.languageserver.registry.ServerInitializer;
+import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.registry.ServerInitializerObserver;
 import org.eclipse.che.api.watcher.server.FileWatcherManager;
 import org.eclipse.lsp4j.services.LanguageServer;
@@ -43,7 +43,7 @@ public class LanguageServerFileWatcherTest {
   @Mock private LanguageServerLauncher launcher;
   @Mock private LanguageServer server;
   @Mock private FileWatcherManager watcherManager;
-  @Mock private ServerInitializer initializer;
+  @Mock private LanguageServerRegistry registry;
   @Captor private ArgumentCaptor<Consumer<String>> changedCaptor;
 
   private LanguageServerFileWatcher watcher;
@@ -57,16 +57,16 @@ public class LanguageServerFileWatcherTest {
 
   @Test
   public void testShouldAddObserver() throws Exception {
-    watcher = new LanguageServerFileWatcher(watcherManager, initializer);
-    verify(initializer).addObserver(any());
+    watcher = new LanguageServerFileWatcher(watcherManager, registry);
+    verify(registry).addObserver(any());
   }
 
   @Test
   public void testRegisterFileWatcher() throws Exception {
     ArgumentCaptor<ServerInitializerObserver> argumentCaptor =
         ArgumentCaptor.forClass(ServerInitializerObserver.class);
-    watcher = new LanguageServerFileWatcher(watcherManager, initializer);
-    verify(initializer).addObserver(argumentCaptor.capture());
+    watcher = new LanguageServerFileWatcher(watcherManager, registry);
+    verify(registry).addObserver(argumentCaptor.capture());
     ServerInitializerObserver value = argumentCaptor.getValue();
 
     LanguageServerDescription description =
@@ -87,8 +87,8 @@ public class LanguageServerFileWatcherTest {
   public void testSendNotification() throws Exception {
     ArgumentCaptor<ServerInitializerObserver> argumentCaptor =
         ArgumentCaptor.forClass(ServerInitializerObserver.class);
-    watcher = new LanguageServerFileWatcher(watcherManager, initializer);
-    verify(initializer).addObserver(argumentCaptor.capture());
+    watcher = new LanguageServerFileWatcher(watcherManager, registry);
+    verify(registry).addObserver(argumentCaptor.capture());
     ServerInitializerObserver value = argumentCaptor.getValue();
 
     LanguageServerDescription description =

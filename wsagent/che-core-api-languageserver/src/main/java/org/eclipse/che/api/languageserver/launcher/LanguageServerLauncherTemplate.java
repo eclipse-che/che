@@ -1,12 +1,9 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2012-2017 Red Hat, Inc. All rights reserved. This program and the accompanying
+ * materials are made available under the terms of the Eclipse Public License v1.0 which accompanies
+ * this distribution, and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Red Hat, Inc. - initial API and implementation
+ * Contributors: Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.api.languageserver.launcher;
 
@@ -22,12 +19,22 @@ import org.slf4j.LoggerFactory;
 /** @author Anatolii Bazko */
 public abstract class LanguageServerLauncherTemplate implements LanguageServerLauncher {
 
+  private LaunchingStrategy launchingStrategy;
+
+  public LanguageServerLauncherTemplate() {
+    this.launchingStrategy = createLauncherStrategy();
+  }
+
+  protected LaunchingStrategy createLauncherStrategy() {
+    return PerWorkspaceLaunchingStrategy.INSTANCE;
+  }
+
   private static Logger LOGGER = LoggerFactory.getLogger(LanguageServerLauncherTemplate.class);
 
   @Override
-  public final LanguageServer launch(String projectPath, LanguageClient client)
+  public final LanguageServer launch(String fileUri, LanguageClient client)
       throws LanguageServerException {
-    Process languageServerProcess = startLanguageServerProcess(projectPath);
+    Process languageServerProcess = startLanguageServerProcess(fileUri);
     waitCheckProcess(languageServerProcess);
     return connectToLanguageServer(languageServerProcess, client);
   }
@@ -65,7 +72,12 @@ public abstract class LanguageServerLauncherTemplate implements LanguageServerLa
     }
   }
 
-  protected abstract Process startLanguageServerProcess(String projectPath)
+  @Override
+  public LaunchingStrategy getLaunchingStrategy() {
+    return launchingStrategy;
+  }
+
+  protected abstract Process startLanguageServerProcess(String fileUri)
       throws LanguageServerException;
 
   protected abstract LanguageServer connectToLanguageServer(

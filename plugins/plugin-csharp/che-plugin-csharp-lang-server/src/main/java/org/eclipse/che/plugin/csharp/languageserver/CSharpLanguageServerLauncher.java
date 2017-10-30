@@ -20,6 +20,8 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
+import org.eclipse.che.api.languageserver.launcher.LaunchingStrategy;
+import org.eclipse.che.api.languageserver.launcher.PerProjectLaunchingStrategy;
 import org.eclipse.che.api.languageserver.registry.DocumentFilter;
 import org.eclipse.che.api.languageserver.registry.LanguageServerDescription;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
@@ -44,8 +46,8 @@ public class CSharpLanguageServerLauncher extends LanguageServerLauncherTemplate
   }
 
   @Override
-  protected Process startLanguageServerProcess(String projectPath) throws LanguageServerException {
-    restoreDependencies(projectPath);
+  protected Process startLanguageServerProcess(String fileUri) throws LanguageServerException {
+    restoreDependencies(LanguageServiceUtils.extractProjectPath(fileUri));
 
     ProcessBuilder processBuilder = new ProcessBuilder(launchScript.toString());
     processBuilder.redirectInput(ProcessBuilder.Redirect.PIPE);
@@ -56,6 +58,11 @@ public class CSharpLanguageServerLauncher extends LanguageServerLauncherTemplate
     } catch (IOException e) {
       throw new LanguageServerException("Can't start CSharp language server", e);
     }
+  }
+
+  @Override
+  protected LaunchingStrategy createLauncherStrategy() {
+    return PerProjectLaunchingStrategy.INSTANCE;
   }
 
   private void restoreDependencies(String projectPath) throws LanguageServerException {

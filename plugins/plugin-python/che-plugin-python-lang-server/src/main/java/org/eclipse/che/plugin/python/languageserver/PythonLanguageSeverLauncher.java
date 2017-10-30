@@ -43,7 +43,7 @@ public class PythonLanguageSeverLauncher extends LanguageServerLauncherTemplate 
   }
 
   @Override
-  protected Process startLanguageServerProcess(String projectPath) throws LanguageServerException {
+  protected Process startLanguageServerProcess(String fileUri) throws LanguageServerException {
     ProcessBuilder processBuilder = new ProcessBuilder(launchScript.toString());
     processBuilder.redirectInput(ProcessBuilder.Redirect.PIPE);
     processBuilder.redirectOutput(ProcessBuilder.Redirect.PIPE);
