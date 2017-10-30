@@ -37,8 +37,11 @@ public interface GitResources extends ClientBundle {
     @ClassName("git-panel-full-height")
     String fullHeight();
 
-    @ClassName("git-panel-panel-upper-indent")
+    @ClassName("git-panel-panel-top-indent")
     String topIndent();
+
+    @ClassName("git-panel-panel-bottom-indent")
+    String bottomIndent();
 
     @ClassName("git-panel-vertical-items")
     String verticalItems();

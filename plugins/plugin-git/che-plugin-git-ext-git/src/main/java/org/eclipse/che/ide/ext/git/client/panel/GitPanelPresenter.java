@@ -13,6 +13,8 @@ package org.eclipse.che.ide.ext.git.client.panel;
 import static org.eclipse.che.api.git.shared.DiffType.NAME_STATUS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_FROM;
+import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_TO;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -220,14 +222,37 @@ public class GitPanelPresenter extends BasePresenter
   /** Handles creation and deletion of projects. */
   @Override
   public void onResourceChanged(ResourceChangedEvent event) {
-    Resource resource = event.getDelta().getResource();
+    ResourceDelta delta = event.getDelta();
+    Resource resource = delta.getResource();
     if (resource.isProject() && resource.getLocation().segmentCount() == 1) {
       // resource is a root project
       if (projectUnderGit(resource.asProject())) {
-        if (event.getDelta().getKind() == ResourceDelta.ADDED) {
-          changes.put(resource.getName(), new MutableAlteredFiles(resource.asProject()));
-          view.addRepository(resource.getName());
-        } else if (event.getDelta().getKind() == ResourceDelta.REMOVED) {
+        if (delta.getKind() == ResourceDelta.ADDED) {
+          if ((delta.getFlags() & (MOVED_FROM | MOVED_TO)) != 0) {
+            // project renamed
+            String oldProjectName = delta.getFromPath().segment(0);
+            String newProjectName = delta.getToPath().segment(0);
+            MutableAlteredFiles alteredFiles = new MutableAlteredFiles(
+                findProjectByName(newProjectName), changes.remove(oldProjectName));
+
+            changes.put(newProjectName, alteredFiles);
+            // TODO uncomment rename and delete code below after fixing of events problem:
+            // It is fired: Added at first, then Renamed for project under rename
+            //view.renameRepository(oldProjectName, newProjectName);
+            view.removeRepository(oldProjectName);
+            view.updateRepositoryChanges(newProjectName, alteredFiles.getFilesQuantity());
+          } else {
+            // TODO delete this if statement code. There is a bug when Create project event is fired twice.
+            if (changes.containsKey(resource.getName())) {
+              return;
+            }
+
+            // project created
+            changes.put(resource.getName(), new MutableAlteredFiles(resource.asProject()));
+            view.addRepository(resource.getName());
+          }
+        } else if (delta.getKind() == ResourceDelta.REMOVED) {
+          // project deleted
           changes.remove(resource.getName());
           view.removeRepository(resource.getName());
         }

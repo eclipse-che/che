@@ -104,6 +104,16 @@ public class GitPanelViewImpl extends BaseView<ActionDelegate> implements GitPan
   }
 
   @Override
+  public void renameRepository(String oldRepositoryName, String newRepositoryName) {
+    RepositoryNode node = findNode(oldRepositoryName);
+    if (node != null) {
+      NodeStorage nodeStorage = repositoriesList.getNodeStorage();
+      nodeStorage.remove(node);
+      nodeStorage.add(repositoryNodeFactory.newRepositoryNode(newRepositoryName, node.getChanges()));
+    }
+  }
+
+  @Override
   public void updateRepositoryChanges(String repository, int changes) {
     RepositoryNode node = findNode(repository);
     if (node != null) {

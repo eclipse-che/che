@@ -31,6 +31,18 @@ public class MutableAlteredFiles extends AlteredFiles {
   }
 
   /**
+   * Created mutable altered files list based on changes from another project.
+   *
+   * @param project the project under diff operation
+   * @param alteredFiles changes from another project
+   */
+  public MutableAlteredFiles(Project project, AlteredFiles alteredFiles) {
+    super(project, "");
+    this.alteredFilesStatuses.putAll(alteredFiles.alteredFilesStatuses);
+    this.alteredFilesList.addAll(alteredFiles.alteredFilesList);
+  }
+
+  /**
    * Creates an empty list of altered files.
    *
    * @param project the project under diff operation

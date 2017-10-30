@@ -32,6 +32,14 @@ public interface GitPanelView extends View<GitPanelView.ActionDelegate> {
   void removeRepository(String repository);
 
   /**
+   * Changes repository title in the git panel.
+   *
+   * @param oldRepositoryName name of repository before rename
+   * @param newRepositoryName name of repository after rename
+   */
+  void renameRepository(String oldRepositoryName, String newRepositoryName);
+
+  /**
    * Updates label with changes number of the specified repository.
    *
    * @param repository name of repository

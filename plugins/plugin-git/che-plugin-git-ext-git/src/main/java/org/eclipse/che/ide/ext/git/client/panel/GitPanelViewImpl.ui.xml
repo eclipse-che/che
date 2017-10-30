@@ -20,14 +20,14 @@
   <ui:with field='locale' type='org.eclipse.che.ide.ext.git.client.GitLocalizationConstant'/>
 
   <g:VerticalPanel addStyleNames="{gitResources.gitPanelCss.verticalItems}">
-    <g:FlowPanel addStyleNames="{gitResources.gitPanelCss.topIndent}">
+    <g:FlowPanel addStyleNames="{gitResources.gitPanelCss.topIndent} {gitResources.gitPanelCss.bottomIndent}">
       <g:HorizontalPanel>
         <svg:SVGImage resource="{gitResources.repository}" height="16px"/>
         <g:Label text="{locale.repositories}"/>
       </g:HorizontalPanel>
       <che:smartTree.Tree ui:field="repositoriesList" debugId="git-panel-repositories"/>
     </g:FlowPanel>
-    <g:SimplePanel ui:field="changesPanel" debugId="git-panel-changedFiles" addStyleNames="{gitResources.gitPanelCss.topIndent} {gitResources.gitPanelCss.fullHeight}"/>
+    <g:SimplePanel ui:field="changesPanel" debugId="git-panel-changedFiles" addStyleNames="{gitResources.gitPanelCss.fullHeight}"/>
   </g:VerticalPanel>
 
 </ui:UiBinder>

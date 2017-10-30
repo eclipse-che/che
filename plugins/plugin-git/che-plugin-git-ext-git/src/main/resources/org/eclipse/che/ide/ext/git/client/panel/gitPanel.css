@@ -13,8 +13,12 @@
   height: 100%;
 }
 
-.git-panel-panel-upper-indent {
+.git-panel-panel-top-indent {
   margin-top: 5px;
+}
+
+.git-panel-panel-bottom-indent {
+  margin-bottom: 5px;
 }
 
 .git-panel-vertical-items {
