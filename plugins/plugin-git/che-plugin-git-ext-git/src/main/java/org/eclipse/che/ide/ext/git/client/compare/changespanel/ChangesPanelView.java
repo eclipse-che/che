@@ -81,7 +81,7 @@ public interface ChangesPanelView extends View<ChangesPanelView.ActionDelegate> 
   void setEnabledChangeViewModeButton(boolean enabled);
 
   /**
-   * Update button that changes view viewMode of changed files with proper icon and title.
+   * Update button that changes view mode of changed files with proper icon and title.
    *
    * @param viewMode selected view mode (tree or list)
    */
