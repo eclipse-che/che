@@ -54,6 +54,7 @@ ENV PATH=$HOME/node_modules/.bin/:$HOME/.npm-global/bin/:$GOPATH/bin:$M2_HOME/bi
 RUN sudo mkdir /var/run/sshd
 RUN sudo  ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N '' && \
     sudo  ssh-keygen -t rsa -f /etc/ssh/ssh_host_ecdsa_key -N '' && \
-    sudo  ssh-keygen -t rsa -f /etc/ssh/ssh_host_ed25519_key -N ''
+    sudo  ssh-keygen -t rsa -f /etc/ssh/ssh_host_ed25519_key -N '' && \
+    sudo npm install -g typescript typescript-language-server
 
 WORKDIR /home/user
