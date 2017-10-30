@@ -16,13 +16,13 @@
                 ng-model="factoryFromWorkspaceCtrl.workspaceFilter.config.name"></che-search>
   </div>
   <span class="projects-list-workspace-name">{{factoryFromWorkspaceCtrl.getWorkspaceName(workspaceId)}}</span>
-                  <span ng-show="(workspaces | filter:factoryFromWorkspaceCtrl.workspaceFilter).length == 0 && workspaces.length > 0"
-                        class="workspace-list-empty">No workspaces found</span>
+  <span ng-show="(workspaces | filter:factoryFromWorkspaceCtrl.workspaceFilter).length == 0 && workspaces.length > 0"
+        class="workspace-list-empty">No workspaces found</span>
   </che-list-title>
   <che-list>
     <che-list-item ng-show="(factoryFromWorkspaceCtrl.workspaces | filter:factoryFromWorkspaceCtrl.workspaceFilter).length > 0"
-    ng-repeat="workspace in factoryFromWorkspaceCtrl.workspaces | filter:factoryFromWorkspaceCtrl.workspaceFilter"
-                    flex-gt-sm="100" flex="33" ng-mouseover="hover=true" ng-mouseout="hover=false">
+                   ng-repeat="workspace in factoryFromWorkspaceCtrl.workspaces | filter:factoryFromWorkspaceCtrl.workspaceFilter"
+                   flex-gt-sm="100" flex="33" ng-mouseover="hover=true" ng-mouseout="hover=false">
       <div layout-gt-sm="row" flex="100" layout-align="start center" class="project-list-row"
            ng-click="factoryFromWorkspaceCtrl.getFactoryContentFromWorkspace(workspace)">
         <div class="workspace-list-static-icon" layout-align="center center">

@@ -17,7 +17,7 @@
        thread-count="4">
     <test name="all">
         <classes>
-            <class name="com.codenvy.ide.addsshkey.AddSshKeyForGitHubTest"/>
+            <class name="org.eclipse.che.selenium.addsshkey.AddSshKeyForGitHubTest"/>
             <class name="org.eclipse.che.selenium.debugger.ChangeVariableWithEvaluatingTest"/>
             <class name="org.eclipse.che.selenium.debugger.StepIntoStepOverStepReturnWithChangeVariableTest"/>
             <class name="org.eclipse.che.selenium.debugger.CheckBreakPointStateTest"/>

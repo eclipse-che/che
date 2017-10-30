@@ -25,19 +25,23 @@ import org.eclipse.che.plugin.debugger.ide.configuration.EditDebugConfigurations
 import org.eclipse.che.plugin.debugger.ide.debug.DebuggerToolbar;
 import org.eclipse.che.plugin.debugger.ide.debug.DebuggerView;
 import org.eclipse.che.plugin.debugger.ide.debug.DebuggerViewImpl;
+import org.eclipse.che.plugin.debugger.ide.debug.DebuggerWatchToolBar;
 import org.eclipse.che.plugin.debugger.ide.debug.breakpoint.BreakpointConfigurationView;
 import org.eclipse.che.plugin.debugger.ide.debug.breakpoint.BreakpointConfigurationViewImpl;
 import org.eclipse.che.plugin.debugger.ide.debug.breakpoint.BreakpointContextMenuFactory;
-import org.eclipse.che.plugin.debugger.ide.debug.changevalue.ChangeValueView;
-import org.eclipse.che.plugin.debugger.ide.debug.changevalue.ChangeValueViewImpl;
+import org.eclipse.che.plugin.debugger.ide.debug.dialogs.DebuggerDialogFactory;
+import org.eclipse.che.plugin.debugger.ide.debug.dialogs.common.TextAreaDialogView;
+import org.eclipse.che.plugin.debugger.ide.debug.dialogs.common.TextAreaDialogViewImpl;
 import org.eclipse.che.plugin.debugger.ide.debug.expression.EvaluateExpressionView;
 import org.eclipse.che.plugin.debugger.ide.debug.expression.EvaluateExpressionViewImpl;
+import org.eclipse.che.plugin.debugger.ide.debug.tree.node.DebuggerNodeFactory;
 
 /**
  * GIN module for Debugger extension.
  *
  * @author Andrey Plotnikov
  * @author Artem Zatsarynnyi
+ * @author Oleksandr Andriienko
  */
 @ExtensionGinModule
 public class DebuggerGinModule extends AbstractGinModule {
@@ -46,7 +50,6 @@ public class DebuggerGinModule extends AbstractGinModule {
   protected void configure() {
     bind(DebuggerView.class).to(DebuggerViewImpl.class).in(Singleton.class);
     bind(EvaluateExpressionView.class).to(EvaluateExpressionViewImpl.class).in(Singleton.class);
-    bind(ChangeValueView.class).to(ChangeValueViewImpl.class).in(Singleton.class);
     bind(BreakpointConfigurationView.class).to(BreakpointConfigurationViewImpl.class);
     bind(EditDebugConfigurationsView.class)
         .to(EditDebugConfigurationsViewImpl.class)
@@ -59,6 +62,16 @@ public class DebuggerGinModule extends AbstractGinModule {
         new GinFactoryModuleBuilder()
             .implement(Action.class, DebugConfigurationAction.class)
             .build(DebugConfigurationActionFactory.class));
+    install(
+        new GinFactoryModuleBuilder()
+            .implement(TextAreaDialogView.class, TextAreaDialogViewImpl.class)
+            .build(DebuggerDialogFactory.class));
+    install(new GinFactoryModuleBuilder().build(DebuggerNodeFactory.class));
+
+    bind(ToolbarPresenter.class)
+        .annotatedWith(DebuggerWatchToolBar.class)
+        .to(ToolbarPresenter.class)
+        .in(Singleton.class);
 
     bind(ToolbarPresenter.class)
         .annotatedWith(DebuggerToolbar.class)

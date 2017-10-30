@@ -11,6 +11,8 @@
 package org.eclipse.che.selenium.pageobject.dashboard;
 
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
@@ -21,6 +23,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.openqa.selenium.By;
@@ -38,10 +41,12 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 @Singleton
 public class DashboardWorkspace {
 
+  private final String WORKSPACE_TOOLBAR_TITLE = "Workspaces";
   private final SeleniumWebDriver seleniumWebDriver;
   private final Loader loader;
   private final Dashboard dashboard;
   private final DashboardProject dashboardProject;
+  private final TestApiEndpointUrlProvider apiEndpointUrlProvider;
 
   public interface TabNames {
     String OVERVIEW = "Overview";
@@ -154,6 +159,7 @@ public class DashboardWorkspace {
     String ADD_NEW_PROJECT_BUTTON = "//che-button-primary[@che-button-title='Add Project']/button";
     String ADD_PROJECT_BUTTON = "//che-button-primary[@name='addButton']/button";
     String SAMPLE_CHECKBOX_XPATH = "//md-checkbox[@aria-label='Sample %s']";
+    String WS_NAME_ERROR_MESSAGES = "//che-error-messages";
   }
 
   public enum StateWorkspace {
@@ -178,11 +184,13 @@ public class DashboardWorkspace {
       SeleniumWebDriver seleniumWebDriver,
       Loader loader,
       Dashboard dashboard,
-      DashboardProject dashboardProject) {
+      DashboardProject dashboardProject,
+      TestApiEndpointUrlProvider apiEndpointUrlProvider) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
     this.dashboard = dashboard;
     this.dashboardProject = dashboardProject;
+    this.apiEndpointUrlProvider = apiEndpointUrlProvider;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -248,6 +256,9 @@ public class DashboardWorkspace {
 
   @FindBy(id = Locators.WORKSPACE_STATE)
   WebElement workspaceState;
+
+  @FindBy(xpath = Locators.WS_NAME_ERROR_MESSAGES)
+  WebElement errorMessages;
 
   public void waitToolbarTitleName(String titleName) {
     new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
@@ -935,5 +946,53 @@ public class DashboardWorkspace {
             ExpectedConditions.visibilityOfElementLocated(
                 By.xpath(format(Locators.SAMPLE_CHECKBOX_XPATH, name))))
         .click();
+  }
+
+  public void deleteAllWorkspaces(List<String> workspacesQualifiedNames) {
+    workspacesQualifiedNames.forEach(
+        workspaceQualifiedName -> deleteWorkspace(workspaceQualifiedName));
+  }
+
+  public void deleteAllWorkspaces() {
+    deleteAllWorkspaces(getAllWorkspaceQualifiedNames());
+  }
+
+  public void deleteWorkspace(String workspaceQualifiedName) {
+    seleniumWebDriver.get(getDashboardWorkspaceUrl());
+    waitToolbarTitleName(WORKSPACE_TOOLBAR_TITLE);
+    waitListWorkspacesOnDashboard();
+    selectWorkspaceItemName(workspaceQualifiedName);
+    waitToolbarTitleName(asList(workspaceQualifiedName.split("/")).get(1));
+    clickOnDeleteWorkspace();
+    clickOnDeleteDialogButton();
+    waitToolbarTitleName(WORKSPACE_TOOLBAR_TITLE);
+    waitWorkspaceIsNotPresent(workspaceQualifiedName);
+  }
+
+  public void waitAllWorkspacesIsNotPresent(List<String> workspaceNames) {
+    workspaceNames.forEach(name -> waitWorkspaceIsNotPresent(name));
+  }
+
+  public String getDashboardWorkspaceUrl() {
+    return apiEndpointUrlProvider.get().toString().replace("api/", "") + "dashboard/#/workspaces";
+  }
+
+  public List<String> getAllWorkspaceQualifiedNames() {
+    return getNotFilteredWorkspaceQualifiedNames()
+        .stream()
+        .filter(name -> isWorkspaceQualifiedName(name))
+        .collect(toList());
+  }
+
+  public boolean isWorkspaceQualifiedName(String workspaceName) {
+    return workspaceName.contains("/") && workspaceName.length() > 3;
+  }
+
+  private List<String> getNotFilteredWorkspaceQualifiedNames() {
+    return asList(getTextFromListWorkspaces().split("\n"));
+  }
+
+  public Boolean isWorkspaceNameErrorMessageEquals(String message) {
+    return errorMessages.getText().equals(message);
   }
 }

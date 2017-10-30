@@ -20,6 +20,7 @@ import com.google.inject.Singleton;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import javax.xml.bind.DatatypeConverter;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
@@ -202,5 +203,40 @@ public class TestGitHubServiceClient {
     byte[] nameAndPass = (username + ":" + password).getBytes("UTF-8");
     String base64 = DatatypeConverter.printBase64Binary(nameAndPass);
     return "Basic " + base64;
+  }
+
+  public String getUserPublicPrimaryEmail(String username, String password) throws Exception {
+    String url = "https://api.github.com/user/public_emails";
+    HttpJsonResponse response =
+        requestFactory
+            .fromUrl(url)
+            .useGetMethod()
+            .setAuthorizationHeader(createBasicAuthHeader(username, password))
+            .request();
+
+    @SuppressWarnings("unchecked")
+    List<Map<String, String>> properties =
+        response.as(List.class, new TypeToken<List<Map<String, String>>>() {}.getType());
+
+    if (properties.isEmpty()) {
+      throw new NoSuchElementException("The list with github emails is empty");
+    }
+
+    return filterPropertiesAndGetGithubPrimaryEmail(properties);
+  }
+
+  private String filterPropertiesAndGetGithubPrimaryEmail(List<Map<String, String>> properties) {
+    List<Map<String, String>> primaryPublicGithubEmails =
+        properties
+            .stream()
+            .filter(
+                map -> map.get("primary").equals("true") && map.get("visibility").equals("public"))
+            .collect(toList());
+
+    if (primaryPublicGithubEmails.isEmpty()) {
+      throw new NoSuchElementException("The list with github primary, public emails is empty");
+    }
+
+    return primaryPublicGithubEmails.get(0).get("email");
   }
 }

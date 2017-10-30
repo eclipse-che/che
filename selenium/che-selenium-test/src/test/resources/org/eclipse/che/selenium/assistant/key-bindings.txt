@@ -33,7 +33,7 @@ Step Over F8
 Step Out Shift+F8
 Resume F9
 Evaluate Expression Alt+F8
-Change Value F2
+Change variable value or expression F2
 Show/Hide Debugger Panel Alt+5
 Go To Symbol Ctrl+F12
 Find Project Symbol Alt+N

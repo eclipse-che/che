@@ -56,7 +56,7 @@
           addStyleNames="{style.paginationPanel}">
           <g:Button ui:field="previousBtn" debugId="previous-button"
             addStyleNames="{style.button}"/>
-          <g:Button ui:field="nextBtn" debugId="previous-button" addStyleNames="{style.button}"/>
+          <g:Button ui:field="nextBtn" debugId="next-button" addStyleNames="{style.button}"/>
         </g:FlowPanel>
       </g:FlowPanel>
     </g:north>

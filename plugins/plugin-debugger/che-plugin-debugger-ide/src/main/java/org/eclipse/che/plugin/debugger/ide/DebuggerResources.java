@@ -20,6 +20,9 @@ public interface DebuggerResources extends ClientBundle {
   @Source("resume.svg")
   SVGResource resumeExecution();
 
+  @Source("runtocursor.svg")
+  SVGResource runToCursor();
+
   @Source("connect.svg")
   SVGResource connectButton();
 
@@ -39,7 +42,7 @@ public interface DebuggerResources extends ClientBundle {
   SVGResource debug();
 
   @Source("edit.svg")
-  SVGResource changeVariableValue();
+  SVGResource editDebugNode();
 
   @Source("evaluate.svg")
   SVGResource evaluateExpression();
@@ -57,6 +60,15 @@ public interface DebuggerResources extends ClientBundle {
   @Source("debug-icon.svg")
   SVGResource debugIcon();
 
+  @Source("add-watch-expression-button.svg")
+  SVGResource addWatchExpressionBtn();
+
+  @Source("remove-watch-expression-button.svg")
+  SVGResource removeWatchExpressionBtn();
+
+  @Source("watch-expression-icon.svg")
+  SVGResource watchExpressionIcon();
+
   /** Returns the CSS resource for the Debugger extension. */
   @Source({"debugger.css", "org/eclipse/che/ide/api/ui/style.css"})
   Css getCss();
@@ -67,5 +79,7 @@ public interface DebuggerResources extends ClientBundle {
     String selectConfigurationBox();
 
     String selectConfigurationsBoxIconPanel();
+
+    String watchExpressionsPanel();
   }
 }

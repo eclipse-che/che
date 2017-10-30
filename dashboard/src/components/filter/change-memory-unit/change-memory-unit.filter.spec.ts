@@ -37,11 +37,7 @@ describe('ChangeMemoryUnitFilter', () => {
 
     it('string instead of a number', () => {
       let input = 'some string',
-<<<<<<< 2a4cf1ed39159fe78ecce06ca74c03be66393a17
           expectedResult = input;
-=======
-        expectedResult = input;
->>>>>>> CHE-5259: add machine page to workspace details
 
       let result = $filter('changeMemoryUnit')(input, ['B', 'GB']);
 
@@ -50,11 +46,7 @@ describe('ChangeMemoryUnitFilter', () => {
 
     it('negative numbers', () => {
       let input = -12345678,
-<<<<<<< 2a4cf1ed39159fe78ecce06ca74c03be66393a17
-          expectedResult = input;
-=======
         expectedResult = input;
->>>>>>> CHE-5259: add machine page to workspace details
 
       let result = $filter('changeMemoryUnit')(input, ['B', 'GB']);
 
@@ -63,13 +55,8 @@ describe('ChangeMemoryUnitFilter', () => {
 
     it('unexpected unit type', () => {
       let input = 12345678,
-<<<<<<< 2a4cf1ed39159fe78ecce06ca74c03be66393a17
-          unknownUnit = 'BM',
-          expectedResult = input;
-=======
         unknownUnit = 'BM',
         expectedResult = input;
->>>>>>> CHE-5259: add machine page to workspace details
 
       let result = $filter('changeMemoryUnit')(input, ['B', unknownUnit]);
 
@@ -83,13 +70,8 @@ describe('ChangeMemoryUnitFilter', () => {
 
     it('KB', () => {
       let number = 48 * 1024,
-<<<<<<< 2a4cf1ed39159fe78ecce06ca74c03be66393a17
-          unitTo = 'KB',
-          expectedResult = 48 + ' ' + unitTo;
-=======
         unitTo = 'KB',
         expectedResult = 48 + ' ' + unitTo;
->>>>>>> CHE-5259: add machine page to workspace details
 
       let result = $filter('changeMemoryUnit')(number, [unitFrom, unitTo]);
 
@@ -98,13 +80,8 @@ describe('ChangeMemoryUnitFilter', () => {
 
     it('MB', () => {
       let number = 48 * Math.pow(1024, 2),
-<<<<<<< 2a4cf1ed39159fe78ecce06ca74c03be66393a17
           unitTo = 'MB',
           expectedResult = 48 + ' ' + unitTo;
-=======
-        unitTo = 'MB',
-        expectedResult = 48 + ' ' + unitTo;
->>>>>>> CHE-5259: add machine page to workspace details
 
       let result = $filter('changeMemoryUnit')(number, [unitFrom, unitTo]);
 
@@ -113,13 +90,8 @@ describe('ChangeMemoryUnitFilter', () => {
 
     it('GB', () => {
       let number = 48 * Math.pow(1024, 3),
-<<<<<<< 2a4cf1ed39159fe78ecce06ca74c03be66393a17
-          unitTo = 'GB',
-          expectedResult = 48 + ' ' + unitTo;
-=======
         unitTo = 'GB',
         expectedResult = 48 + ' ' + unitTo;
->>>>>>> CHE-5259: add machine page to workspace details
 
       let result = $filter('changeMemoryUnit')(number, [unitFrom, unitTo]);
 
@@ -128,13 +100,8 @@ describe('ChangeMemoryUnitFilter', () => {
 
     it('GB', () => {
       let number = 48 * Math.pow(1024, 4),
-<<<<<<< 2a4cf1ed39159fe78ecce06ca74c03be66393a17
-          unitTo = 'TB',
-          expectedResult = 48 + ' ' + unitTo;
-=======
         unitTo = 'TB',
         expectedResult = 48 + ' ' + unitTo;
->>>>>>> CHE-5259: add machine page to workspace details
 
       let result = $filter('changeMemoryUnit')(number, [unitFrom, unitTo]);
 

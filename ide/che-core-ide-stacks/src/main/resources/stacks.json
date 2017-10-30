@@ -476,6 +476,80 @@
     }
   },
   {
+    "id": "dotnet-centos",
+    "creator": "ide",
+    "name": ".NET CentOS",
+    "description": "CentOS .NET 2.0 Stack with .NET Core SDK",
+    "scope": "general",
+    "tags": [
+      "CentOS",
+      "dotnet",
+      "Git"
+    ],
+    "components": [
+      {
+        "name": "CentOS",
+        "version": "---"
+      },
+      {
+        "name": ".NET Core SDK",
+        "version": "rh-dotnet20"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "registry.centos.org/che-stacks/centos-dotnet20"
+    },
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "dev-machine": {
+              "agents": [
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.csharp"
+              ],
+              "servers": {},
+              "attributes" : {
+                "memoryLimitBytes": "2147483648"
+              }
+            }
+          },
+          "recipe": {
+            "location": "registry.centos.org/che-stacks/centos-dotnet20",
+            "type": "dockerimage"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": [
+        {
+          "name": "update dependencies",
+          "type": "custom",
+          "commandLine": "cd ${current.project.path} && dotnet restore",
+          "attributes": {
+            "previewUrl": "",
+            "goal": "Build"
+          }
+        },
+        {
+          "name": "run",
+          "type": "custom",
+          "commandLine": "cd ${current.project.path} && dotnet run",
+          "attributes": {
+            "previewUrl": "http://${server.port.5000}",
+            "goal": "Run"
+          }
+        }
+      ]
+    },
+    "stackIcon": {
+      "name": "type-dotnet.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
     "id": "go-default",
     "creator": "ide",
     "name": "Go",
@@ -2120,6 +2194,7 @@
               },
 
               "agents": [
+	        "org.eclipse.che.exec",
                 "org.eclipse.che.terminal",
                 "org.eclipse.che.ws-agent",
                 "org.eclipse.che.ssh"
@@ -2167,6 +2242,7 @@
   {
     "name": "CentOS nodejs",
     "id": "nodejs4",
+    "creator": "Dharmit Shah",
     "scope": "advanced",
     "source": {
       "type": "image",
@@ -2199,6 +2275,7 @@
                 "memoryLimitBytes": "2147483648"
               },
               "agents": [
+                "org.eclipse.che.exec",
                 "org.eclipse.che.terminal",
                 "org.eclipse.che.ws-agent",
                 "org.eclipse.che.ssh"
@@ -2249,7 +2326,10 @@
         "version": "---"
       }
     ],
-    "creator": "Dharmit Shah"
+    "stackIcon": {
+      "name": "type-node.svg",
+      "mediaType": "image/svg+xml"
+    }
   },
   {
     "id": "kotlin-default",

@@ -21,7 +21,10 @@ import org.eclipse.che.ide.api.resources.VirtualFile;
  * @see Location#getLineNumber()
  * @author Anatoliy Bazko
  */
-public interface DebuggerResourceHandler {
+public interface DebuggerLocationHandler {
+
+  /** Indicates if handler can deal with the given location. */
+  boolean isSuitedFor(Location location);
 
   /**
    * Opens resource is being debugged and scrolls to the position {@link Location#getLineNumber()}.

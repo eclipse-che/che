@@ -8,6 +8,9 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
+
+@external .leftToolbarPart, watchExpressionsPanel, toolbarActionGroupPanel
+
 .selectConfigurationBox:first-child > .selectConfigurationsBoxIconPanel:first-child {
     border-top-left-radius: 2px;
     border-bottom-left-radius: 2px;
@@ -29,6 +32,20 @@
     white-space: nowrap;
     margin: 0 !important;
     display: inline-block;
+}
+
+.watchExpressionsPanel {
+}
+
+.watchExpressionsPanel .leftToolbarPart {
+    margin: 0;
+    float: none;
+    height: auto;
+    display: table;
+}
+
+.watchExpressionsPanel .leftToolbarPart .toolbarActionGroupPanel {
+    margin: 0;
 }
 
 .selectConfigurationsBoxIconPanel {
