@@ -46,11 +46,11 @@ public class JavaDebugger extends AbstractDebugger {
       RequestHandlerConfigurator configurator,
       LocalStorageProvider localStorageProvider,
       EventBus eventBus,
-      DebuggerLocationHandlerManager debuggerLocationHandlerManager,
       DebuggerManager debuggerManager,
       NotificationManager notificationManager,
       BreakpointManager breakpointManager,
-      RequestHandlerManager requestHandlerManager) {
+      RequestHandlerManager requestHandlerManager,
+      DebuggerLocationHandlerManager debuggerLocationHandlerManager) {
     super(
         service,
         transmitter,
