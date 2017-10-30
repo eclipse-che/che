@@ -20,25 +20,25 @@ import org.eclipse.che.api.core.rest.shared.dto.Link;
 
 /**
  * Implementation of {@link org.eclipse.che.api.core.rest.HttpJsonRequestFactory} that add
- * ```user.token``` as authorization header. Used to make request from ws-agent to ws-master.
+ * ```machine.token``` as authorization header. Used to make request from ws-agent to ws-master.
  */
 @Singleton
 public class AgentHttpJsonRequestFactory extends DefaultHttpJsonRequestFactory {
 
-  private final String TOKEN;
+  private final String machineToken;
 
   @Inject
-  public AgentHttpJsonRequestFactory(@Named("user.token") String token) {
-    this.TOKEN = token;
+  public AgentHttpJsonRequestFactory(@Named("machine.token") String machineToken) {
+    this.machineToken = machineToken;
   }
 
   @Override
   public HttpJsonRequest fromUrl(@NotNull String url) {
-    return super.fromUrl(url).setAuthorizationHeader(TOKEN);
+    return super.fromUrl(url).setAuthorizationHeader(machineToken);
   }
 
   @Override
   public HttpJsonRequest fromLink(@NotNull Link link) {
-    return super.fromLink(link).setAuthorizationHeader(TOKEN);
+    return super.fromLink(link).setAuthorizationHeader(machineToken);
   }
 }

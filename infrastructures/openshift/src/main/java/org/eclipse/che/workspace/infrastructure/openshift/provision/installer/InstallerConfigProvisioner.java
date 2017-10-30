@@ -56,7 +56,9 @@ public class InstallerConfigProvisioner implements ConfigurationProvisioner {
       // CHE_API is used by installers for agent binary downloading
       config.getEnv().put("CHE_API", cheServerEndpoint);
 
-      config.getEnv().put("USER_TOKEN", machineTokenProvider.getToken(identity.getWorkspaceId()));
+      config
+          .getEnv()
+          .put("CHE_MACHINE_TOKEN", machineTokenProvider.getToken(identity.getWorkspaceId()));
 
       // TODO incorrect place for env variable addition. workspace ID is needed for wsagent
       // server, not installer

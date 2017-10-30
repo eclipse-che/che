@@ -326,7 +326,7 @@ public class WorkspaceServiceTest {
 
     assertEquals(response.getStatusCode(), 200);
     WorkspaceDto retrievedWorkspace = unwrapDto(response, WorkspaceDto.class);
-    assertEquals(retrievedWorkspace.getRuntime().getUserToken(), "superToken");
+    assertEquals(retrievedWorkspace.getRuntime().getMachineToken(), "superToken");
     verify(machineTokenProvider).getToken(workspace.getId());
   }
 
