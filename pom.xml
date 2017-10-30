@@ -1885,7 +1885,7 @@
             <id>fast</id>
             <properties>
                 <findbugs.skip>true</findbugs.skip>
-                <gwt.localWorkers>1C</gwt.localWorkers>
+                <gwt.compiler.localWorkers>2 -T 1C</gwt.compiler.localWorkers>
                 <license.skip>true</license.skip>
                 <mdep.analyze.skip>true</mdep.analyze.skip>
                 <skipTests>true</skipTests>
