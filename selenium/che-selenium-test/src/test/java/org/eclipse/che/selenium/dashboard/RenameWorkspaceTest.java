@@ -10,26 +10,29 @@
  */
 package org.eclipse.che.selenium.dashboard;
 
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace.StateWorkspace.STARTING;
+import static org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace.StateWorkspace.STOPPING;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import java.io.IOException;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
-import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace.StateWorkspace;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
 public class RenameWorkspaceTest {
-  private static final String MIN_WORKSPACE_NAME = NameGenerator.generate("", 3);
-  private static final String MAX_WORKSPACE_NAME = NameGenerator.generate("", 100);
+  private static final int MIN_WORKSPACE_NAME_SIZE = 3;
+  private static final int MAX_WORKSPACE_NAME_SIZE = 100;
+  private static final String MIN_WORKSPACE_NAME = generate("", MIN_WORKSPACE_NAME_SIZE);
+  private static final String MAX_WORKSPACE_NAME = generate("", MAX_WORKSPACE_NAME_SIZE);
   private static final String WS_NAME_TOO_SHORT =
       ("The name has to be more than 3 characters long.");
   private static final String WS_NAME_TOO_LONG =
@@ -51,7 +54,9 @@ public class RenameWorkspaceTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    workspaceServiceClient.delete(ws.getName(), user.getName());
+    workspaceServiceClient.delete(workspaceName, user.getName());
+    workspaceServiceClient.delete(MIN_WORKSPACE_NAME, user.getName());
+    workspaceServiceClient.delete(MAX_WORKSPACE_NAME, user.getName());
   }
 
   @Test
@@ -69,7 +74,7 @@ public class RenameWorkspaceTest {
     dashboardWorkspace.checkNameWorkspace(workspaceName);
 
     // type name with 101 characters and check error message that this name is too long
-    dashboardWorkspace.enterNameWorkspace(MAX_WORKSPACE_NAME + "1");
+    dashboardWorkspace.enterNameWorkspace(MAX_WORKSPACE_NAME + "a");
     assertTrue(dashboardWorkspace.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_LONG));
     dashboardWorkspace.clickOnCancelBtn();
     dashboardWorkspace.checkNameWorkspace(workspaceName);
@@ -85,14 +90,14 @@ public class RenameWorkspaceTest {
     dashboardWorkspace.enterNameWorkspace(name);
     assertFalse(dashboardWorkspace.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_SHORT));
     assertFalse(dashboardWorkspace.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_LONG));
-    clickOnSaveButton();
+    saveAndWaitWorkspaceRestarted();
     dashboardWorkspace.checkNameWorkspace(name);
   }
 
-  private void clickOnSaveButton() {
+  private void saveAndWaitWorkspaceRestarted() {
     dashboardWorkspace.clickOnSaveBtn();
-    dashboardWorkspace.checkStateOfWorkspace(StateWorkspace.STOPPING);
-    dashboardWorkspace.checkStateOfWorkspace(StateWorkspace.STARTING);
+    dashboardWorkspace.checkStateOfWorkspace(STOPPING);
+    dashboardWorkspace.checkStateOfWorkspace(STARTING);
     dashboard.waitNotificationMessage("Workspace updated");
     dashboard.waitNotificationIsClosed();
   }
