@@ -1684,53 +1684,43 @@ public class CodenvyEditor {
   private String getTextFromOrionLines(List<WebElement> lines) {
     StringBuilder stringBuilder = new StringBuilder();
     try {
-      for (int i = 0; i < lines.size(); i++) {
-        WebElement line = lines.get(i);
-        List<WebElement> elements;
-        if (i < lines.size() - 1) {
-          elements =
-              redrawDriverWait.until(
-                  ExpectedConditions.visibilityOfAllElements(
-                      line.findElements(By.tagName("span"))));
-        } else {
-          elements = line.findElements(By.tagName("span"));
-        }
-
-        elements.remove(elements.size() - 1);
-        for (WebElement elem : elements) {
-          stringBuilder.append(elem.getText());
-        }
-        stringBuilder.append("\n");
-      }
-      stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+      stringBuilder = waitLineElementsVisibilityAndGetText(lines);
     }
     // If an editor do not attached to the DOM (we will have state element exception). We wait
     // attaching 2 second and try to read text again.
     catch (WebDriverException ex) {
       WaitUtils.sleepQuietly(2);
-      stringBuilder.setLength(0);
-      for (int i = 0; i < lines.size(); i++) {
-        WebElement line = lines.get(i);
-        List<WebElement> elements = null;
-        if (i < lines.size() - 1) {
-          elements =
-              redrawDriverWait.until(
-                  ExpectedConditions.visibilityOfAllElements(
-                      line.findElements(By.tagName("span"))));
-        } else {
-          elements = line.findElements(By.tagName("span"));
-        }
 
-        elements.remove(elements.size() - 1);
-        for (WebElement elem : elements) {
-          stringBuilder.append(elem.getText());
-        }
-        stringBuilder.append("\n");
+      stringBuilder.setLength(0);
+
+      stringBuilder = waitLineElementsVisibilityAndGetText(lines);
+    }
+    return stringBuilder.toString();
+  }
+
+  private StringBuilder waitLineElementsVisibilityAndGetText(List<WebElement> lines) {
+    StringBuilder stringBuilder = new StringBuilder();
+
+    for (int i = 0; i < lines.size(); i++) {
+      WebElement line = lines.get(i);
+      List<WebElement> elements;
+      if (i < lines.size() - 1) {
+        elements =
+            redrawDriverWait.until(
+                ExpectedConditions.visibilityOfAllElements(line.findElements(By.tagName("span"))));
+      } else {
+        elements = line.findElements(By.tagName("span"));
       }
-      stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+
+      elements.remove(elements.size() - 1);
+      for (WebElement elem : elements) {
+        stringBuilder.append(elem.getText());
+      }
+      stringBuilder.append("\n");
     }
 
-    return stringBuilder.toString();
+    stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+    return stringBuilder;
   }
 
   /** open context menu into editor */
