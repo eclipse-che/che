@@ -39,9 +39,12 @@ public class WorkspaceProjectsSyncer {
   }
 
   private void updateProjects(String endpointId) {
-    Container workspaceRoot = appContext.getWorkspaceRoot();
-    if (workspaceRoot != null) {
-      workspaceRoot.synchronize();
-    }
+    //Temporary disabled synchronization due to excessive calls to actual synchronization mechanism.
+    //Will be reviewed this mechanism in nearest future. But for now, it temporary disabled.
+
+//    Container workspaceRoot = appContext.getWorkspaceRoot();
+//    if (workspaceRoot != null) {
+//      workspaceRoot.synchronize();
+//    }
   }
 }
