@@ -44,7 +44,7 @@ public class LanguageServerFileWatcher {
 
   @Inject
   public LanguageServerFileWatcher(
-      FileWatcherManager watcherManager, ServerInitializer serverInitializer) {
+      FileWatcherManager watcherManager, LanguageServerRegistry serverInitializer) {
     this.watcherManager = watcherManager;
     serverInitializer.addObserver(this::onServerInitialized);
   }
