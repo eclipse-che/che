@@ -40,11 +40,11 @@ public interface RuntimeDto extends Runtime, Hyperlinks {
 
   RuntimeDto withOwner(String owner);
 
-  String getUserToken();
+  String getMachineToken();
 
-  RuntimeDto withUserToken(String userToken);
+  RuntimeDto withMachineToken(String machineToken);
 
-  void setUserToken(String userToken);
+  void setMachineToken(String machineToken);
 
   @Override
   List<WarningDto> getWarnings();

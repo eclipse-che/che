@@ -23,7 +23,7 @@ public class ServersEnvVarsProvisioningModule extends AbstractModule {
     mb.addBinding().to(JavaOptsEnvVariableProvider.class);
     mb.addBinding().to(MavenOptsEnvVariableProvider.class);
     mb.addBinding().to(ProjectsRootEnvVariableProvider.class);
-    mb.addBinding().to(UserTokenEnvVarProvider.class);
+    mb.addBinding().to(MachineTokenEnvVarProvider.class);
     mb.addBinding().to(WorkspaceIdEnvVarProvider.class);
   }
 }

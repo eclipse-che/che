@@ -224,7 +224,7 @@ public class JavaDebuggerUtils {
       return iMember.getDeclaringType().getFullyQualifiedName();
     }
 
-    return location.getTarget();
+    throw new DebuggerException("Unable to calculate breakpoint location");
   }
 
   private IJavaProject getJavaProject(IPath path) throws DebuggerException {

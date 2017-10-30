@@ -16,8 +16,8 @@ import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.plugin.urlfactory.URLFactoryBuilder.DEFAULT_DOCKER_IMAGE;
+import static org.eclipse.che.plugin.urlfactory.URLFactoryBuilder.DEFAULT_MEMORY_LIMIT_BYTES;
 import static org.eclipse.che.plugin.urlfactory.URLFactoryBuilder.MACHINE_NAME;
-import static org.eclipse.che.plugin.urlfactory.URLFactoryBuilder.MEMORY_LIMIT_BYTES;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -45,10 +45,10 @@ import org.testng.annotations.Test;
 public class URLFactoryBuilderTest {
 
   /** Check if URL is existing or not */
-  @Mock private URLChecker URLChecker;
+  @Mock private URLChecker urlChecker;
 
   /** Grab content of URLs */
-  @Mock private URLFetcher URLFetcher;
+  @Mock private URLFetcher urlFetcher;
 
   @Mock private FactoryMessageBodyAdapter factoryAdapter;
 
@@ -56,8 +56,7 @@ public class URLFactoryBuilderTest {
   @InjectMocks private URLFactoryBuilder urlFactoryBuilder;
 
   /** Check if not specifying a custom docker file we have the default value */
-  // FIXME: spi
-  @Test(enabled = false)
+  @Test
   public void checkDefaultImage() throws Exception {
 
     RecipeDto recipeDto =
@@ -65,7 +64,7 @@ public class URLFactoryBuilderTest {
     MachineConfigDto machine =
         newDto(MachineConfigDto.class)
             .withInstallers(singletonList("org.eclipse.che.ws-agent"))
-            .withAttributes(singletonMap(MEMORY_LIMIT_ATTRIBUTE, MEMORY_LIMIT_BYTES));
+            .withAttributes(singletonMap(MEMORY_LIMIT_ATTRIBUTE, DEFAULT_MEMORY_LIMIT_BYTES));
 
     // setup environment
     EnvironmentDto environmentDto =
@@ -89,8 +88,7 @@ public class URLFactoryBuilderTest {
    * Check that by specifying a location of custom dockerfile it's stored in the machine source if
    * URL is accessible
    */
-  // FIXME: spi
-  @Test(enabled = false)
+  @Test
   public void checkWithCustomDockerfile() throws Exception {
 
     String myLocation = "http://foo-location";
@@ -102,7 +100,7 @@ public class URLFactoryBuilderTest {
     MachineConfigDto machine =
         newDto(MachineConfigDto.class)
             .withInstallers(singletonList("org.eclipse.che.ws-agent"))
-            .withAttributes(singletonMap(MEMORY_LIMIT_ATTRIBUTE, MEMORY_LIMIT_BYTES));
+            .withAttributes(singletonMap(MEMORY_LIMIT_ATTRIBUTE, DEFAULT_MEMORY_LIMIT_BYTES));
 
     // setup environment
     EnvironmentDto environmentDto =
@@ -116,7 +114,7 @@ public class URLFactoryBuilderTest {
             .withEnvironments(singletonMap("foo", environmentDto))
             .withName("dumm");
 
-    when(URLChecker.exists(myLocation)).thenReturn(true);
+    when(urlChecker.exists(myLocation)).thenReturn(true);
 
     WorkspaceConfigDto actualWsConfigDto =
         urlFactoryBuilder.buildWorkspaceConfig("foo", "dumm", myLocation);
@@ -128,17 +126,15 @@ public class URLFactoryBuilderTest {
    * Check that by specifying a location of custom dockerfile it's stored in the machine source if
    * URL is accessible
    */
-  // FIXME: spi
-  @Test(enabled = false)
+  @Test
   public void checkWithNonAccessibleCustomDockerfile() throws Exception {
-
     String myLocation = "http://foo-location";
     RecipeDto recipeDto =
         newDto(RecipeDto.class).withLocation(DEFAULT_DOCKER_IMAGE).withType("dockerimage");
     MachineConfigDto machine =
         newDto(MachineConfigDto.class)
             .withInstallers(singletonList("org.eclipse.che.ws-agent"))
-            .withAttributes(singletonMap(MEMORY_LIMIT_ATTRIBUTE, MEMORY_LIMIT_BYTES));
+            .withAttributes(singletonMap(MEMORY_LIMIT_ATTRIBUTE, DEFAULT_MEMORY_LIMIT_BYTES));
 
     // setup environment
     EnvironmentDto environmentDto =
@@ -152,7 +148,7 @@ public class URLFactoryBuilderTest {
             .withEnvironments(singletonMap("foo", environmentDto))
             .withName("dumm");
 
-    when(URLChecker.exists(myLocation)).thenReturn(false);
+    when(urlChecker.exists(myLocation)).thenReturn(false);
 
     WorkspaceConfigDto actualWsConfigDto =
         urlFactoryBuilder.buildWorkspaceConfig("foo", "dumm", myLocation);
@@ -172,8 +168,8 @@ public class URLFactoryBuilderTest {
     String jsonFactory = DtoFactory.getInstance().toJson(templateFactory);
 
     String myLocation = "http://foo-location";
-    when(URLChecker.exists(myLocation)).thenReturn(FALSE);
-    when(URLFetcher.fetch(myLocation)).thenReturn(jsonFactory);
+    when(urlChecker.exists(myLocation)).thenReturn(FALSE);
+    when(urlFetcher.fetch(myLocation)).thenReturn(jsonFactory);
 
     FactoryDto factory = urlFactoryBuilder.createFactory(myLocation);
 
