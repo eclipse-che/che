@@ -186,12 +186,12 @@ public class WsMasterModule extends AbstractModule {
       persistenceProperties.put(
           "eclipselink.exception-handler",
           "org.eclipse.che.core.db.postgresql.jpa.eclipselink.PostgreSqlExceptionHandler");
-      configureMultiuser();
+      configureMultiUserMode();
     } else {
       persistenceProperties.put(
           "eclipselink.exception-handler",
           "org.eclipse.che.core.db.h2.jpa.eclipselink.H2ExceptionHandler");
-      configureSingleuser();
+      configureSingleUserMode();
     }
 
     install(
@@ -207,9 +207,10 @@ public class WsMasterModule extends AbstractModule {
     }
 
     bind(org.eclipse.che.api.user.server.AppStatesPreferenceCleaner.class);
+    bind(DataSource.class).toProvider(org.eclipse.che.core.db.JndiDataSourceProvider.class);
   }
 
-  private void configureSingleuser() {
+  private void configureSingleUserMode() {
 
     bind(TokenValidator.class).to(org.eclipse.che.api.local.DummyTokenValidator.class);
     bind(MachineTokenProvider.class).to(MachineTokenProvider.EmptyMachineTokenProvider.class);
@@ -221,6 +222,8 @@ public class WsMasterModule extends AbstractModule {
     install(new org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule());
 
     bind(org.eclipse.che.api.user.server.CheUserCreator.class);
+
+    bindConstant().annotatedWith(Names.named("db.jndi.datasource.name")).to("jdbc/che-h2");
 
     bindConstant()
         .annotatedWith(Names.named("machine.terminal_agent.run_command"))
@@ -238,10 +241,9 @@ public class WsMasterModule extends AbstractModule {
                 + "-logs-dir $HOME/che/exec-agent/logs");
   }
 
-  private void configureMultiuser() {
+  private void configureMultiUserMode() {
     bind(TemplateProcessor.class).to(STTemplateProcessorImpl.class);
 
-    bind(DataSource.class).toProvider(org.eclipse.che.core.db.JndiDataSourceProvider.class);
     install(new org.eclipse.che.multiuser.api.permission.server.jpa.SystemPermissionsJpaModule());
     install(new org.eclipse.che.multiuser.api.permission.server.PermissionsModule());
     install(
@@ -278,6 +280,8 @@ public class WsMasterModule extends AbstractModule {
     bind(UserDao.class).to(JpaUserDao.class);
     bind(PreferenceDao.class).to(JpaPreferenceDao.class);
     bind(PermissionChecker.class).to(PermissionCheckerImpl.class);
+
+    bindConstant().annotatedWith(Names.named("db.jndi.datasource.name")).to("jdbc/che-pg");
 
     bindConstant()
         .annotatedWith(Names.named("machine.terminal_agent.run_command"))

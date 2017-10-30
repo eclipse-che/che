@@ -50,17 +50,17 @@ public class WsMasterServletModule extends ServletModule {
     install(new org.eclipse.che.swagger.deploy.BasicSwaggerConfigurationModule());
 
     if (Boolean.valueOf(System.getenv("CHE_MULTIUSER"))) {
-      configureMultiuser();
+      configureMultiUserMode();
     } else {
-      configureSingleuser();
+      configureSingleUserMode();
     }
   }
 
-  private void configureSingleuser() {
+  private void configureSingleUserMode() {
     filter("/*").through(org.eclipse.che.api.local.filters.EnvironmentInitializationFilter.class);
   }
 
-  private void configureMultiuser() {
+  private void configureMultiUserMode() {
     // Not contains '/websocket/' and not ends with '/ws' or '/eventbus'
     filterRegex("^(?!.*/websocket/)(?!.*(/ws|/eventbus)$).*").through(MachineLoginFilter.class);
     install(new KeycloakServletModule());
