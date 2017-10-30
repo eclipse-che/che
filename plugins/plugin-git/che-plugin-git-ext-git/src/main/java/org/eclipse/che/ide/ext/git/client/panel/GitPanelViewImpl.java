@@ -109,7 +109,8 @@ public class GitPanelViewImpl extends BaseView<ActionDelegate> implements GitPan
     if (node != null) {
       NodeStorage nodeStorage = repositoriesList.getNodeStorage();
       nodeStorage.remove(node);
-      nodeStorage.add(repositoryNodeFactory.newRepositoryNode(newRepositoryName, node.getChanges()));
+      nodeStorage.add(
+          repositoryNodeFactory.newRepositoryNode(newRepositoryName, node.getChanges()));
     }
   }
 

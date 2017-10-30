@@ -232,17 +232,19 @@ public class GitPanelPresenter extends BasePresenter
             // project renamed
             String oldProjectName = delta.getFromPath().segment(0);
             String newProjectName = delta.getToPath().segment(0);
-            MutableAlteredFiles alteredFiles = new MutableAlteredFiles(
-                findProjectByName(newProjectName), changes.remove(oldProjectName));
+            MutableAlteredFiles alteredFiles =
+                new MutableAlteredFiles(
+                    findProjectByName(newProjectName), changes.remove(oldProjectName));
 
             changes.put(newProjectName, alteredFiles);
             // TODO uncomment rename and delete code below after fixing of events problem:
             // It is fired: Added at first, then Renamed for project under rename
-            //view.renameRepository(oldProjectName, newProjectName);
+            // view.renameRepository(oldProjectName, newProjectName);
             view.removeRepository(oldProjectName);
             view.updateRepositoryChanges(newProjectName, alteredFiles.getFilesQuantity());
           } else {
-            // TODO delete this if statement code. There is a bug when Create project event is fired twice.
+            // TODO delete this if statement code. There is a bug when Create project event is fired
+            // twice.
             if (changes.containsKey(resource.getName())) {
               return;
             }
