@@ -22,12 +22,22 @@ import org.slf4j.LoggerFactory;
 /** @author Anatolii Bazko */
 public abstract class LanguageServerLauncherTemplate implements LanguageServerLauncher {
 
+  private LaunchingStrategy launchingStrategy;
+
+  public LanguageServerLauncherTemplate() {
+    this.launchingStrategy = createLauncherStrategy();
+  }
+
+  protected LaunchingStrategy createLauncherStrategy() {
+    return PerWorkspaceLaunchingStrategy.INSTANCE;
+  }
+
   private static Logger LOGGER = LoggerFactory.getLogger(LanguageServerLauncherTemplate.class);
 
   @Override
-  public final LanguageServer launch(String projectPath, LanguageClient client)
+  public final LanguageServer launch(String fileUri, LanguageClient client)
       throws LanguageServerException {
-    Process languageServerProcess = startLanguageServerProcess(projectPath);
+    Process languageServerProcess = startLanguageServerProcess(fileUri);
     waitCheckProcess(languageServerProcess);
     return connectToLanguageServer(languageServerProcess, client);
   }
@@ -65,7 +75,12 @@ public abstract class LanguageServerLauncherTemplate implements LanguageServerLa
     }
   }
 
-  protected abstract Process startLanguageServerProcess(String projectPath)
+  @Override
+  public LaunchingStrategy getLaunchingStrategy() {
+    return launchingStrategy;
+  }
+
+  protected abstract Process startLanguageServerProcess(String fileUri)
       throws LanguageServerException;
 
   protected abstract LanguageServer connectToLanguageServer(
