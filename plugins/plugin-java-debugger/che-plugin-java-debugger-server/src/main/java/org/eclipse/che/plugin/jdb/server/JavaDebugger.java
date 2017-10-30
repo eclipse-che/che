@@ -216,7 +216,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
     // it may mean that class doesn't loaded by a target JVM yet
     if (classes.isEmpty()) {
       deferBreakpoint(className, breakpoint);
-      throw new DebuggerException("Class not loaded");
+      return;
     }
 
     ReferenceType clazz = classes.get(0);
@@ -331,11 +331,22 @@ public class JavaDebugger implements EventsHandler, Debugger {
         LOG.debug("Delete breakpoint: {}", location);
       }
     }
+
+    List<Breakpoint> defferedByClass = deferredBreakpoints.get(className);
+    if (defferedByClass != null) {
+      defferedByClass.removeIf(
+          breakpoint -> {
+            Location l = breakpoint.getLocation();
+            return l.getLineNumber() == location.getLineNumber()
+                && l.getTarget().equals(location.getTarget());
+          });
+    }
   }
 
   @Override
   public void deleteAllBreakpoints() throws DebuggerException {
     getEventManager().deleteAllBreakpoints();
+    deferredBreakpoints.clear();
   }
 
   @Override

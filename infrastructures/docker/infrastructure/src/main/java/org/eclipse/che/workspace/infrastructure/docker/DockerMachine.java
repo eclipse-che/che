@@ -68,8 +68,8 @@ public class DockerMachine implements Machine {
    */
   public static final String CHE_HOST = "che-host";
 
-  /** Environment variable that will be setup in developer machine and contains user token. */
-  public static final String USER_TOKEN = "USER_TOKEN";
+  /** Environment variable that will be setup in developer machine and contains machine token. */
+  public static final String CHE_MACHINE_TOKEN = "CHE_MACHINE_TOKEN";
 
   private final String container;
   private final DockerConnector docker;

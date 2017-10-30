@@ -257,4 +257,16 @@ public class BreakpointsTest {
     assertEquals(actualLocation.getResourceProjectPath(), "/test");
     assertTrue(actualBreakpoint.isEnabled());
   }
+
+  @Test(priority = 7, expectedExceptions = DebuggerException.class)
+  public void shouldNotAddBreakpointToCommentedLine() throws Exception {
+    Location location = new LocationImpl("/test/src/org/eclipse/BreakpointsTest.java", 1, "/test");
+    debugger.addBreakpoint(new BreakpointImpl(location));
+  }
+
+  @Test(priority = 8, expectedExceptions = DebuggerException.class)
+  public void shouldNotAddBreakpointToNonExecutedLine() throws Exception {
+    Location location = new LocationImpl("/test/src/org/eclipse/BreakpointsTest.java", 42, "/test");
+    debugger.addBreakpoint(new BreakpointImpl(location));
+  }
 }

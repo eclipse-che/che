@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker.provisioner.server;
 
-import static org.eclipse.che.workspace.infrastructure.docker.DockerMachine.USER_TOKEN;
+import static org.eclipse.che.workspace.infrastructure.docker.DockerMachine.CHE_MACHINE_TOKEN;
 
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -25,18 +25,19 @@ import org.eclipse.che.commons.lang.Pair;
  * @author Alexander Garagatyi
  * @author Sergii Leshchenko
  */
-public class UserTokenEnvVarProvider implements ServerEnvironmentVariableProvider {
+public class MachineTokenEnvVarProvider implements ServerEnvironmentVariableProvider {
   private final MachineTokenProvider machineTokenProvider;
 
   @Inject
-  public UserTokenEnvVarProvider(MachineTokenProvider machineTokenProvider) {
+  public MachineTokenEnvVarProvider(MachineTokenProvider machineTokenProvider) {
     this.machineTokenProvider = machineTokenProvider;
   }
 
   @Override
   public Pair<String, String> get(RuntimeIdentity runtimeIdentity) {
     try {
-      return Pair.of(USER_TOKEN, machineTokenProvider.getToken(runtimeIdentity.getWorkspaceId()));
+      return Pair.of(
+          CHE_MACHINE_TOKEN, machineTokenProvider.getToken(runtimeIdentity.getWorkspaceId()));
     } catch (InfrastructureException e) {
       return null;
     }
