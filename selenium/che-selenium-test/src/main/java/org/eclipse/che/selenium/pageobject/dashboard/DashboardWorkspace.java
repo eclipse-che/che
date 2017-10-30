@@ -159,6 +159,7 @@ public class DashboardWorkspace {
     String ADD_NEW_PROJECT_BUTTON = "//che-button-primary[@che-button-title='Add Project']/button";
     String ADD_PROJECT_BUTTON = "//che-button-primary[@name='addButton']/button";
     String SAMPLE_CHECKBOX_XPATH = "//md-checkbox[@aria-label='Sample %s']";
+    String WS_NAME_ERROR_MESSAGES = "//che-error-messages";
   }
 
   public enum StateWorkspace {
@@ -255,6 +256,9 @@ public class DashboardWorkspace {
 
   @FindBy(id = Locators.WORKSPACE_STATE)
   WebElement workspaceState;
+
+  @FindBy(xpath = Locators.WS_NAME_ERROR_MESSAGES)
+  WebElement errorMessages;
 
   public void waitToolbarTitleName(String titleName) {
     new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
@@ -986,5 +990,9 @@ public class DashboardWorkspace {
 
   private List<String> getNotFilteredWorkspaceQualifiedNames() {
     return asList(getTextFromListWorkspaces().split("\n"));
+  }
+
+  public Boolean isWorkspaceNameErrorMessageEquals(String message) {
+    return errorMessages.getText().equals(message);
   }
 }
