@@ -177,7 +177,7 @@ public class WsMasterModule extends AbstractModule {
     //
     // bind(org.eclipse.che.api.agent.server.filters.AddExecInstallerInWorkspaceFilter.class);
     //        bind(org.eclipse.che.api.agent.server.filters.AddExecInstallerInStackFilter.class);
-    Map<String, String> persistenceProperties = new HashMap<>();
+    final Map<String, String> persistenceProperties = new HashMap<>();
     persistenceProperties.put("eclipselink.target-server", "None");
     persistenceProperties.put("eclipselink.logging.logger", "DefaultLogger");
     persistenceProperties.put("eclipselink.logging.level", "SEVERE");
