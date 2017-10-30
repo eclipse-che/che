@@ -13,12 +13,14 @@ package org.eclipse.che.plugin.debugger.ide.debug;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
+import com.google.common.base.Strings;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
@@ -26,6 +28,7 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
 import org.eclipse.che.api.debug.shared.dto.LocationDto;
+import org.eclipse.che.api.debug.shared.dto.MethodDto;
 import org.eclipse.che.api.debug.shared.dto.SimpleValueDto;
 import org.eclipse.che.api.debug.shared.dto.ThreadStateDto;
 import org.eclipse.che.api.debug.shared.dto.VariableDto;
@@ -43,6 +46,7 @@ import org.eclipse.che.api.debug.shared.dto.event.SuspendEventDto;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.Method;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.Variable;
@@ -81,6 +85,8 @@ import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   public static final String LOCAL_STORAGE_DEBUGGER_SESSION_KEY = "che-debugger-session";
   public static final String LOCAL_STORAGE_DEBUGGER_STATE_KEY = "che-debugger-state";
+  public static final String LOCAL_STORAGE_DEBUGGER_DISPOSABLE_BREAKPOINT_KEY =
+      "che-debugger-disposable-breakpoint";
   public static final String WS_AGENT_ENDPOINT = "ws-agent";
 
   public static final String EVENT_DEBUGGER_MESSAGE_BREAKPOINT = "event:debugger:breakpoint";
@@ -106,6 +112,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
 
   private DebugSessionDto debugSessionDto;
   private Location currentLocation;
+  private BreakpointDto disposableBreakpoint;
 
   public AbstractDebugger(
       DebuggerServiceClient service,
@@ -212,6 +219,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
       case SUSPEND:
         currentLocation = ((SuspendEventDto) event).getLocation();
         open(currentLocation);
+        removeDisposableBreakpoint();
         break;
       case BREAKPOINT_ACTIVATED:
         BreakpointDto breakpointDto = ((BreakpointActivatedEventDto) event).getBreakpoint();
@@ -226,6 +234,14 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
         return;
     }
 
+    preserveDebuggerState();
+  }
+
+  private void removeDisposableBreakpoint() {
+    if (disposableBreakpoint != null) {
+      deleteBreakpoint(disposableBreakpoint);
+    }
+    invalidateDisposableBreakpoint();
     preserveDebuggerState();
   }
 
@@ -359,21 +375,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   @Override
   public void addBreakpoint(final Breakpoint breakpoint) {
     if (isConnected()) {
-      Location location = breakpoint.getLocation();
-
-      LocationDto locationDto = dtoFactory.createDto(LocationDto.class);
-      locationDto.setLineNumber(location.getLineNumber());
-      locationDto.setTarget(location.getTarget());
-      locationDto.setResourceProjectPath(location.getResourceProjectPath());
-
-      BreakpointDto breakpointDto =
-          dtoFactory
-              .createDto(BreakpointDto.class)
-              .withLocation(locationDto)
-              .withEnabled(true)
-              .withCondition(breakpoint.getCondition());
-
-      Promise<Void> promise = service.addBreakpoint(debugSessionDto.getId(), breakpointDto);
+      Promise<Void> promise = service.addBreakpoint(debugSessionDto.getId(), toDto(breakpoint));
       promise
           .then(
               it -> {
@@ -393,14 +395,9 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     if (!isConnected()) {
       return;
     }
-    Location location = breakpoint.getLocation();
 
-    LocationDto locationDto = dtoFactory.createDto(LocationDto.class);
-    locationDto.setLineNumber(location.getLineNumber());
-    locationDto.setTarget(location.getTarget());
-    locationDto.setResourceProjectPath(location.getResourceProjectPath());
-
-    Promise<Void> promise = service.deleteBreakpoint(debugSessionDto.getId(), locationDto);
+    Promise<Void> promise =
+        service.deleteBreakpoint(debugSessionDto.getId(), toDto(breakpoint.getLocation()));
     promise
         .then(
             it -> {
@@ -488,15 +485,8 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   protected void startDebugger(final DebugSessionDto debugSessionDto) {
     List<BreakpointDto> breakpoints = new ArrayList<>();
     for (Breakpoint breakpoint : breakpointManager.getBreakpointList()) {
-      Location location = breakpoint.getLocation();
-
-      LocationDto locationDto = dtoFactory.createDto(LocationDto.class);
-      locationDto.setLineNumber(location.getLineNumber());
-      locationDto.setTarget(location.getTarget());
-      locationDto.setResourceProjectPath(location.getResourceProjectPath());
-
       BreakpointDto breakpointDto = dtoFactory.createDto(BreakpointDto.class);
-      breakpointDto.setLocation(locationDto);
+      breakpointDto.setLocation(toDto(breakpoint.getLocation()));
       breakpointDto.setEnabled(true);
       breakpointDto.setCondition(breakpoint.getCondition());
 
@@ -521,6 +511,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
       disconnect = Promises.resolve(null);
     }
 
+    invalidateDisposableBreakpoint();
     invalidateDebugSession();
     preserveDebuggerState();
 
@@ -622,6 +613,40 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   }
 
   @Override
+  public void runToLocation(Location location) {
+    if (!isConnected()) {
+      return;
+    }
+
+    if (disposableBreakpoint != null) {
+      return;
+    }
+
+    disposableBreakpoint =
+        dtoFactory.createDto(BreakpointDto.class).withLocation(toDto(location)).withEnabled(true);
+
+    service
+        .addBreakpoint(debugSessionDto.getId(), disposableBreakpoint)
+        .then(
+            it -> {
+              preserveDebuggerState();
+              resume();
+            })
+        .catchError(
+            error -> {
+              service
+                  .deleteBreakpoint(debugSessionDto.getId(), disposableBreakpoint.getLocation())
+                  .catchError(
+                      err -> {
+                        Log.error(AbstractDebugger.class, err.getMessage());
+                      });
+
+              invalidateDisposableBreakpoint();
+              preserveDebuggerState();
+            });
+  }
+
+  @Override
   public void suspend() {
     if (!isConnected()) {
       return;
@@ -705,6 +730,10 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     currentLocation = null;
   }
 
+  private void invalidateDisposableBreakpoint() {
+    disposableBreakpoint = null;
+  }
+
   /** Preserves debugger information into the local storage. */
   protected void preserveDebuggerState() {
     LocalStorage localStorage = localStorageProvider.get();
@@ -716,12 +745,22 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     if (!isConnected()) {
       localStorage.setItem(LOCAL_STORAGE_DEBUGGER_SESSION_KEY, "");
       localStorage.setItem(LOCAL_STORAGE_DEBUGGER_STATE_KEY, "");
+      localStorage.setItem(LOCAL_STORAGE_DEBUGGER_DISPOSABLE_BREAKPOINT_KEY, "");
     } else {
       localStorage.setItem(LOCAL_STORAGE_DEBUGGER_SESSION_KEY, dtoFactory.toJson(debugSessionDto));
+
       if (currentLocation == null) {
         localStorage.setItem(LOCAL_STORAGE_DEBUGGER_STATE_KEY, "");
       } else {
         localStorage.setItem(LOCAL_STORAGE_DEBUGGER_STATE_KEY, dtoFactory.toJson(currentLocation));
+      }
+
+      if (disposableBreakpoint == null) {
+        localStorage.setItem(LOCAL_STORAGE_DEBUGGER_DISPOSABLE_BREAKPOINT_KEY, "");
+      } else {
+        localStorage.setItem(
+            LOCAL_STORAGE_DEBUGGER_DISPOSABLE_BREAKPOINT_KEY,
+            dtoFactory.toJson(disposableBreakpoint));
       }
     }
   }
@@ -736,7 +775,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     }
 
     String data = localStorage.getItem(LOCAL_STORAGE_DEBUGGER_SESSION_KEY);
-    if (data != null && !data.isEmpty()) {
+    if (!Strings.isNullOrEmpty(data)) {
       DebugSessionDto debugSessionDto = dtoFactory.createDtoFromJson(data, DebugSessionDto.class);
       if (!debugSessionDto.getType().equals(getDebuggerType())) {
         return;
@@ -746,8 +785,13 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     }
 
     data = localStorage.getItem(LOCAL_STORAGE_DEBUGGER_STATE_KEY);
-    if (data != null && !data.isEmpty()) {
+    if (!Strings.isNullOrEmpty(data)) {
       currentLocation = dtoFactory.createDtoFromJson(data, LocationDto.class);
+    }
+
+    data = localStorage.getItem(LOCAL_STORAGE_DEBUGGER_DISPOSABLE_BREAKPOINT_KEY);
+    if (!Strings.isNullOrEmpty(data)) {
+      disposableBreakpoint = dtoFactory.createDtoFromJson(data, BreakpointDto.class);
     }
   }
 
@@ -779,6 +823,34 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     dto.withName(variable.getName());
 
     return dto;
+  }
+
+  protected LocationDto toDto(Location location) {
+    MethodDto methodDto = dtoFactory.createDto(MethodDto.class);
+    Method method = location.getMethod();
+    if (method != null) {
+      List<VariableDto> arguments =
+          method.getArguments().stream().map(this::toDto).collect(Collectors.toList());
+      methodDto.setArguments(arguments);
+      methodDto.setName(method.getName());
+    }
+    return dtoFactory
+        .createDto(LocationDto.class)
+        .withTarget(location.getTarget())
+        .withLineNumber(location.getLineNumber())
+        .withExternalResource(location.isExternalResource())
+        .withExternalResourceId(location.getExternalResourceId())
+        .withResourceProjectPath(location.getResourceProjectPath())
+        .withMethod(methodDto)
+        .withThreadId(location.getThreadId());
+  }
+
+  protected BreakpointDto toDto(Breakpoint breakpoint) {
+    return dtoFactory
+        .createDto(BreakpointDto.class)
+        .withLocation(toDto(breakpoint.getLocation()))
+        .withEnabled(true)
+        .withCondition(breakpoint.getCondition());
   }
 
   protected abstract DebuggerDescriptor toDescriptor(Map<String, String> connectionProperties);
