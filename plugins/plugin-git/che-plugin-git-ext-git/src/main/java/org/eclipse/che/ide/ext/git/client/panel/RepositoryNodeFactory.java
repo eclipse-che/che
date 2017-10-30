@@ -8,9 +8,15 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.git.shared.event;
+package org.eclipse.che.ide.ext.git.client.panel;
 
-public interface GitEvent {
-  /** Returns name of project in which the event was fired. */
-  String getProjectName();
+/** @author Mykola Morhun */
+public interface RepositoryNodeFactory {
+  /**
+   * Creates new repository entry.
+   *
+   * @param repository repository name
+   * @param changes number of changed file in the repository
+   */
+  RepositoryNode newRepositoryNode(String repository, int changes);
 }

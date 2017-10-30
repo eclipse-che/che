@@ -652,12 +652,15 @@ public interface GitLocalizationConstant extends Messages {
   @Key("checkout.reference.message")
   String checkoutReferenceMessage();
 
-  // Panel
+  /* Panel */
   @Key("panel.title")
   String panelTitle();
 
   @Key("panel.title.tooltip")
   String panelTitleToolTip();
+
+  @Key("panel.repositories")
+  String repositories();
 
   /* Controls */
   @Key("control.branches.title")

@@ -50,6 +50,7 @@ import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputPartView;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputPartViewImpl;
 import org.eclipse.che.ide.ext.git.client.panel.GitPanelView;
 import org.eclipse.che.ide.ext.git.client.panel.GitPanelViewImpl;
+import org.eclipse.che.ide.ext.git.client.panel.RepositoryNodeFactory;
 import org.eclipse.che.ide.ext.git.client.plugins.EditorTabsColorizer;
 import org.eclipse.che.ide.ext.git.client.plugins.GitChangeMarkerManager;
 import org.eclipse.che.ide.ext.git.client.plugins.ProjectExplorerTreeColorizer;
@@ -116,6 +117,7 @@ public class GitGinModule extends AbstractGinModule {
         new GinFactoryModuleBuilder()
             .implement(GitOutputConsole.class, GitOutputConsolePresenter.class)
             .build(GitOutputConsoleFactory.class));
+    install(new GinFactoryModuleBuilder().build(RepositoryNodeFactory.class));
 
     bind(GitEventsHandler.class).asEagerSingleton();
 

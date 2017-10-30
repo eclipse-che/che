@@ -11,14 +11,23 @@
 
 -->
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
-<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-  xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+<ui:UiBinder
+  xmlns:ui='urn:ui:com.google.gwt.uibinder'
+  xmlns:g='urn:import:com.google.gwt.user.client.ui'
+  xmlns:che='urn:import:org.eclipse.che.ide.ui'
+  xmlns:svg="urn:import:org.vectomatic.dom.svg.ui">
+  <ui:with field='gitResources' type='org.eclipse.che.ide.ext.git.client.GitResources'/>
   <ui:with field='locale' type='org.eclipse.che.ide.ext.git.client.GitLocalizationConstant'/>
-  <ui:with field='res' type='org.eclipse.che.ide.ext.git.client.GitResources'/>
-  <g:DockLayoutPanel>
-    <g:center>
-      <g:FlowPanel ui:field="changesPanel"/>
-    </g:center>
-  </g:DockLayoutPanel>
+
+  <g:VerticalPanel addStyleNames="{gitResources.gitPanelCss.verticalItems}">
+    <g:FlowPanel addStyleNames="{gitResources.gitPanelCss.topIndent} {gitResources.gitPanelCss.bottomIndent}">
+      <g:HorizontalPanel>
+        <svg:SVGImage resource="{gitResources.repository}" height="16px"/>
+        <g:Label text="{locale.repositories}"/>
+      </g:HorizontalPanel>
+      <che:smartTree.Tree ui:field="repositoriesList" debugId="git-panel-repositories"/>
+    </g:FlowPanel>
+    <g:SimplePanel ui:field="changesPanel" debugId="git-panel-changedFiles" addStyleNames="{gitResources.gitPanelCss.fullHeight}"/>
+  </g:VerticalPanel>
 
 </ui:UiBinder>

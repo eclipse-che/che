@@ -16,8 +16,6 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUC
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import org.eclipse.che.api.git.shared.FileChangedEventDto;
-import org.eclipse.che.api.git.shared.StatusChangedEventDto;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto.Type;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -50,12 +48,6 @@ public class GitCheckoutNotifier implements GitEventsSubscriber {
 
     subscribeToGitEvents.addSubscriber(this);
   }
-
-  @Override
-  public void onFileChanged(String endpointId, FileChangedEventDto dto) {}
-
-  @Override
-  public void onGitStatusChanged(String endpointId, StatusChangedEventDto statusChangedEventDto) {}
 
   @Override
   public void onGitCheckout(String endpointId, GitCheckoutEventDto gitCheckoutEventDto) {

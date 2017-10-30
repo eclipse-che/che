@@ -31,6 +31,18 @@ public class MutableAlteredFiles extends AlteredFiles {
   }
 
   /**
+   * Created mutable altered files list based on changes from another project.
+   *
+   * @param project the project under diff operation
+   * @param alteredFiles changes from another project
+   */
+  public MutableAlteredFiles(Project project, AlteredFiles alteredFiles) {
+    super(project, "");
+    this.alteredFilesStatuses.putAll(alteredFiles.alteredFilesStatuses);
+    this.alteredFilesList.addAll(alteredFiles.alteredFilesList);
+  }
+
+  /**
    * Creates an empty list of altered files.
    *
    * @param project the project under diff operation
@@ -40,7 +52,7 @@ public class MutableAlteredFiles extends AlteredFiles {
   }
 
   /**
-   * Adds a file to altered file list. If given file is already exists
+   * Adds a file to altered file list. If given file is already exists does nothing.
    *
    * @param file full path to file and its name relatively to project root
    * @param status git status of the file
@@ -57,10 +69,10 @@ public class MutableAlteredFiles extends AlteredFiles {
   }
 
   /**
-   * Removes given file from the altered files list.
+   * Removes given file from the altered files list. If given file isn't present does nothing.
    *
    * @param file full path to file and its name relatively to project root
-   * @return true if the file as deleted and false otherwise
+   * @return true if the file was deleted and false otherwise
    */
   public boolean removeFile(String file) {
     alteredFilesStatuses.remove(file);

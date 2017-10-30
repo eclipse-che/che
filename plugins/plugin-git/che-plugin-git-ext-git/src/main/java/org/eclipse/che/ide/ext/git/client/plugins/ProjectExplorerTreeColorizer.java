@@ -21,7 +21,6 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.git.shared.FileChangedEventDto;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.git.shared.StatusChangedEventDto;
-import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.vcs.VcsStatus;
@@ -108,7 +107,4 @@ public class ProjectExplorerTreeColorizer implements GitEventsSubscriber {
               }
             });
   }
-
-  @Override
-  public void onGitCheckout(String endpointId, GitCheckoutEventDto dto) {}
 }

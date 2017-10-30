@@ -8,9 +8,17 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.git.shared.event;
+package org.eclipse.che.api.git.shared;
 
-public interface GitEvent {
-  /** Returns name of project in which the event was fired. */
+import org.eclipse.che.dto.shared.DTO;
+
+/** @author Mykola Morhun */
+@DTO
+public interface RepositoryDeletedEventDto {
+  /** Name of project in which git repository was deleted. */
   String getProjectName();
+
+  void setProjectName(String projectName);
+
+  RepositoryDeletedEventDto withProjectName(String projectName);
 }
