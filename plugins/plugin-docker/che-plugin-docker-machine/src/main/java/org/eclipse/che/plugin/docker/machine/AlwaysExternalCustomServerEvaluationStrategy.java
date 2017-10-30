@@ -61,6 +61,11 @@ public class AlwaysExternalCustomServerEvaluationStrategy extends BaseServerEval
   @Override
   protected ServerImpl updateServer(ServerImpl server) {
     super.updateServer(server);
+    setExternalProtocolForInternalUrl(server);
+    return server;
+  }
+
+  private void setExternalProtocolForInternalUrl(ServerImpl server) {
     ServerPropertiesImpl properties = (ServerPropertiesImpl) server.getProperties();
     String url = properties.getInternalUrl();
     String externalProtocol = server.getProtocol();
@@ -70,6 +75,5 @@ public class AlwaysExternalCustomServerEvaluationStrategy extends BaseServerEval
         properties.setInternalUrl(externalProtocol.concat(url.substring(internalUrlProtocolEnd)));
       }
     }
-    return server;
   }
 }
