@@ -29,5 +29,5 @@ public interface ServerInitializerObserver {
       LanguageServerLauncher launcher,
       LanguageServer server,
       ServerCapabilities capabilities,
-      String projectPath);
+      String rootPath);
 }
