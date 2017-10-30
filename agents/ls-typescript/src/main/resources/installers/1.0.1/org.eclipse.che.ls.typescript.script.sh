@@ -26,7 +26,6 @@ unset PACKAGES
 command -v tar >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" tar"; }
 command -v curl >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" curl"; }
 
-AGENT_BINARIES_URI=https://codenvy.com/update/repository/public/download/org.eclipse.che.ls.typescript.binaries/1.0.1
 CHE_DIR=$HOME/che
 LS_DIR=${CHE_DIR}/ls-typescript
 LS_LAUNCHER=${LS_DIR}/launch.sh
@@ -161,8 +160,16 @@ fi
 ### Install JS-TS LS ###
 ########################
 
-curl -s ${AGENT_BINARIES_URI} | tar xzf - -C ${LS_DIR}
+# Check if tsserver and typescript-language-server are installed
+
+unset TS_NPMS
+command -v tsserver >/dev/null 2>&1 || { TS_NPMS=${TS_NPMS}" typescript"; }
+command -v typescript-language-server >/dev/null 2>&1 || { TS_NPMS=${TS_NPMS}" typescript-language-server"; }
+
+test "${TS_NPMS}" = "" || {
+       ${SUDO} npm install -g ${TS_NPMS};
+   }
 
 touch ${LS_LAUNCHER}
 chmod +x ${LS_LAUNCHER}
-echo "nodejs ${LS_DIR}/build/language-server-stdio.js" > ${LS_LAUNCHER}
+echo "typescript-language-server --stdio" > ${LS_LAUNCHER}
