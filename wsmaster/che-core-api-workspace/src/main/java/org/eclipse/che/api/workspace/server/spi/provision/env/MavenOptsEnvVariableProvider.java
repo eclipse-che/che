@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.docker.provisioner.server;
+package org.eclipse.che.api.workspace.server.spi.provision.env;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -22,7 +22,7 @@ import org.eclipse.che.commons.lang.Pair;
  *
  * @author Yevhenii Voevodin
  */
-public class MavenOptsEnvVariableProvider implements ServerEnvironmentVariableProvider {
+public class MavenOptsEnvVariableProvider implements EnvVarProvider {
 
   @Inject
   @Named("che.workspace.java.options")

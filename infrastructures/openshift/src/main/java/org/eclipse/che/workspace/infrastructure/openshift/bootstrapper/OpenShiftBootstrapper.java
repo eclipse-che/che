@@ -18,7 +18,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
+import org.eclipse.che.api.installer.shared.model.Installer;
 import org.eclipse.che.api.workspace.server.bootstrap.AbstractBootstrapper;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftMachine;
@@ -41,7 +41,7 @@ public class OpenShiftBootstrapper extends AbstractBootstrapper {
   private static final String CONFIG_FILE = "config.json";
 
   private final RuntimeIdentity runtimeIdentity;
-  private final List<InstallerImpl> installers;
+  private final List<Installer> installers;
   private final int serverCheckPeriodSeconds;
   private final int installerTimeoutSeconds;
   private final OpenShiftMachine openShiftMachine;
@@ -50,7 +50,7 @@ public class OpenShiftBootstrapper extends AbstractBootstrapper {
   @Inject
   public OpenShiftBootstrapper(
       @Assisted RuntimeIdentity runtimeIdentity,
-      @Assisted List<InstallerImpl> installers,
+      @Assisted List<Installer> installers,
       @Assisted OpenShiftMachine openShiftMachine,
       @Named("che.websocket.endpoint") String cheWebsocketEndpoint,
       @Named("che.infra.openshift.bootstrapper.binary_url") String bootstrapperBinaryUrl,

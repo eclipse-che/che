@@ -8,9 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.docker.provisioner.server;
-
-import static org.eclipse.che.workspace.infrastructure.docker.DockerMachine.JAVA_OPTS_VARIABLE;
+package org.eclipse.che.api.workspace.server.spi.provision.env;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -18,21 +16,24 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.commons.lang.Pair;
 
 /**
- * Add env variable to docker machine with java opts
+ * Provides environment variable that is used for enabling/disabling authentication on agents.
  *
- * @author Roman Iuvshyn
- * @author Alexander Garagatyi
+ * @author Sergii Leshchenko
  */
-public class JavaOptsEnvVariableProvider implements ServerEnvironmentVariableProvider {
-  private String javaOpts;
+public class AgentAuthEnableEnvVarProvider implements EnvVarProvider {
+
+  public static final String CHE_AUTH_ENABLED_ENV = "CHE_AUTH_ENABLED";
+
+  private final boolean agentsAuthEnabled;
 
   @Inject
-  public JavaOptsEnvVariableProvider(@Named("che.workspace.java.options") String javaOpts) {
-    this.javaOpts = javaOpts;
+  public AgentAuthEnableEnvVarProvider(
+      @Named("che.agents.auth_enabled") boolean agentsAuthEnabled) {
+    this.agentsAuthEnabled = agentsAuthEnabled;
   }
 
   @Override
   public Pair<String, String> get(RuntimeIdentity runtimeIdentity) {
-    return Pair.of(JAVA_OPTS_VARIABLE, javaOpts);
+    return Pair.of(CHE_AUTH_ENABLED_ENV, Boolean.toString(agentsAuthEnabled));
   }
 }

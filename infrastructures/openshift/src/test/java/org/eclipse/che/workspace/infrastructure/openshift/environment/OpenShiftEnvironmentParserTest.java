@@ -38,7 +38,7 @@ import java.util.List;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
-import org.eclipse.che.api.workspace.server.spi.InternalEnvironment.InternalRecipe;
+import org.eclipse.che.api.workspace.server.spi.InternalRecipe;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;

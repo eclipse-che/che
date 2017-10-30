@@ -18,11 +18,11 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.WsAgentURLModifier;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.core.AgentURLModifier;
 import org.eclipse.che.ide.download.DownloadContainer;
 
 /**
@@ -37,14 +37,14 @@ public class DownloadResourceAction extends AbstractPerspectiveAction {
 
   private final AppContext appContext;
   private final DownloadContainer downloadContainer;
-  private final WsAgentURLModifier urlModifier;
+  private final AgentURLModifier urlModifier;
 
   @Inject
   public DownloadResourceAction(
       AppContext appContext,
       CoreLocalizationConstant locale,
       DownloadContainer downloadContainer,
-      WsAgentURLModifier urlModifier) {
+      AgentURLModifier urlModifier) {
     super(
         singletonList(PROJECT_PERSPECTIVE_ID),
         locale.downloadItemName(),

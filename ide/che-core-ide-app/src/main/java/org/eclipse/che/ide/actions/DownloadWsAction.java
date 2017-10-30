@@ -18,11 +18,11 @@ import com.google.inject.Singleton;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
-import org.eclipse.che.ide.api.WsAgentURLModifier;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.core.AgentURLModifier;
 import org.eclipse.che.ide.download.DownloadContainer;
 
 /**
@@ -34,13 +34,13 @@ import org.eclipse.che.ide.download.DownloadContainer;
 public class DownloadWsAction extends AbstractPerspectiveAction {
 
   private final AppContext appContext;
-  private final WsAgentURLModifier wsAgentURLModifier;
+  private final AgentURLModifier agentURLModifier;
   private final DownloadContainer downloadContainer;
 
   @Inject
   public DownloadWsAction(
       AppContext appContext,
-      WsAgentURLModifier wsAgentURLModifier,
+      AgentURLModifier agentURLModifier,
       CoreLocalizationConstant locale,
       Resources resources,
       DownloadContainer downloadContainer) {
@@ -50,7 +50,7 @@ public class DownloadWsAction extends AbstractPerspectiveAction {
         locale.downloadProjectAsZipDescription(),
         resources.downloadZip());
     this.appContext = appContext;
-    this.wsAgentURLModifier = wsAgentURLModifier;
+    this.agentURLModifier = agentURLModifier;
     this.downloadContainer = downloadContainer;
   }
 
@@ -58,7 +58,7 @@ public class DownloadWsAction extends AbstractPerspectiveAction {
   @Override
   public void actionPerformed(ActionEvent e) {
     downloadContainer.setUrl(
-        wsAgentURLModifier.modify(appContext.getWsAgentServerApiEndpoint() + "/project/export/"));
+        agentURLModifier.modify(appContext.getWsAgentServerApiEndpoint() + "/project/export/"));
   }
 
   /** {@inheritDoc} */
