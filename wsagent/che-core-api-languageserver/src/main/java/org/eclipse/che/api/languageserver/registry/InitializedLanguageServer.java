@@ -25,16 +25,19 @@ public class InitializedLanguageServer {
   private final LanguageServer server;
   private final InitializeResult initializeResult;
   private final LanguageServerLauncher launcher;
+  private final String launchKey;
 
   public InitializedLanguageServer(
       String id,
       LanguageServer server,
       InitializeResult initializeResult,
-      LanguageServerLauncher launcher) {
+      LanguageServerLauncher launcher,
+      String launchKey) {
     this.id = id;
     this.server = server;
     this.initializeResult = initializeResult;
     this.launcher = launcher;
+    this.launchKey = launchKey;
   }
 
   public String getId() {
@@ -51,5 +54,9 @@ public class InitializedLanguageServer {
 
   public LanguageServerLauncher getLauncher() {
     return launcher;
+  }
+
+  public String getLaunchKey() {
+    return launchKey;
   }
 }

@@ -24,11 +24,13 @@ public interface LanguageServerLauncher {
    * @param projectPath absolute path to the project
    * @param client an interface implementing handlers for server->client communication
    */
-  LanguageServer launch(String projectPath, LanguageClient client) throws LanguageServerException;
+  LanguageServer launch(String fileUri, LanguageClient client) throws LanguageServerException;
 
   /** Gets the language server description */
   LanguageServerDescription getDescription();
 
   /** Indicates if language server is installed and is ready to be started. */
   boolean isAbleToLaunch();
+
+  LaunchingStrategy getLaunchingStrategy();
 }
