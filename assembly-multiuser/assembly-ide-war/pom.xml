@@ -32,7 +32,7 @@
             <artifactId>assembly-ide-war</artifactId>
             <type>war</type>
         </dependency>
-        <!-- required to make transitive dependencies visible for gwt:compile and source generators -->
+        <!-- brings transitive dependencies for GWT compiler and source generators -->
         <dependency>
             <groupId>org.eclipse.che</groupId>
             <artifactId>che-ide-gwt-app</artifactId>
@@ -207,6 +207,7 @@
                                 <include>WEB-INF/rewrite.config</include>
                                 <include>WEB-INF/web.xml</include>
                                 <include>WEB-INF/classes/org/eclipse/che/*.class</include>
+                                <include>WEB-INF/lib/</include>
                             </includes>
                         </overlay>
                         <overlay />

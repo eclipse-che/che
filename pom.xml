@@ -1866,8 +1866,8 @@
                     <codeserverArgs>
                         <arg>-noprecompile</arg>
                         <arg>-noincremental</arg>
-                        <!-- For che-in-che development, the CodeServer launched inside a container
-                             must be reachable at local machine (by default, 127.0.0.1). -->
+                        <!-- For che-in-che development, the CodeServer launched
+                             inside a container must be reachable at local machine. -->
                         <arg>-bindAddress</arg>
                         <arg>0.0.0.0</arg>
                     </codeserverArgs>

@@ -23,15 +23,13 @@
     <name>Che IDE :: War Packaging</name>
     <description>Packages Che IDE GWT application as a Java web app</description>
     <properties>
-        <generated.sources.directory>${project.build.directory}/generated-sources/gen</generated.sources.directory>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
+        <!-- overlay the IDE GWT app’s content in the resulting WAR -->
         <dependency>
             <groupId>org.eclipse.che</groupId>
             <artifactId>che-ide-gwt-app</artifactId>
-            <!-- Using <type>war</type> has the advantage that the maven-war-plugin
-            will automatically overlay the gwt-app’s content in the resulting WAR -->
             <type>war</type>
         </dependency>
         <dependency>
