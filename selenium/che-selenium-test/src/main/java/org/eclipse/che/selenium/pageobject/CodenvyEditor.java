@@ -1684,10 +1684,18 @@ public class CodenvyEditor {
   private String getTextFromOrionLines(List<WebElement> lines) {
     StringBuilder stringBuilder = new StringBuilder();
     try {
-      for (WebElement line : lines) {
-        List<WebElement> elements =
-            redrawDriverWait.until(
-                ExpectedConditions.visibilityOfAllElements(line.findElements(By.tagName("span"))));
+      for (int i = 0; i < lines.size(); i++) {
+        WebElement line = lines.get(i);
+        List<WebElement> elements;
+        if (i < lines.size() - 1) {
+          elements =
+              redrawDriverWait.until(
+                  ExpectedConditions.visibilityOfAllElements(
+                      line.findElements(By.tagName("span"))));
+        } else {
+          elements = line.findElements(By.tagName("span"));
+        }
+
         elements.remove(elements.size() - 1);
         for (WebElement elem : elements) {
           stringBuilder.append(elem.getText());
@@ -1701,10 +1709,18 @@ public class CodenvyEditor {
     catch (WebDriverException ex) {
       WaitUtils.sleepQuietly(2);
       stringBuilder.setLength(0);
-      for (WebElement line : lines) {
-        List<WebElement> elements =
-            redrawDriverWait.until(
-                ExpectedConditions.visibilityOfAllElements(line.findElements(By.tagName("span"))));
+      for (int i = 0; i < lines.size(); i++) {
+        WebElement line = lines.get(i);
+        List<WebElement> elements = null;
+        if (i < lines.size() - 1) {
+          elements =
+              redrawDriverWait.until(
+                  ExpectedConditions.visibilityOfAllElements(
+                      line.findElements(By.tagName("span"))));
+        } else {
+          elements = line.findElements(By.tagName("span"));
+        }
+
         elements.remove(elements.size() - 1);
         for (WebElement elem : elements) {
           stringBuilder.append(elem.getText());
