@@ -31,7 +31,7 @@ public class LocalTestLSLauncher extends LanguageServerLauncherTemplate {
   }
 
   @Override
-  protected Process startLanguageServerProcess(String projectPath) throws LanguageServerException {
+  protected Process startLanguageServerProcess(String fileUri) throws LanguageServerException {
     ProcessBuilder processBuilder = new ProcessBuilder(command);
     processBuilder.redirectInput(ProcessBuilder.Redirect.PIPE);
     processBuilder.redirectOutput(ProcessBuilder.Redirect.PIPE);

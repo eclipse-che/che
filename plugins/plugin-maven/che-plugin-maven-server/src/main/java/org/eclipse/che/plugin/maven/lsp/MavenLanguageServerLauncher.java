@@ -17,6 +17,8 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.editor.server.impl.EditorWorkingCopyManager;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
+import org.eclipse.che.api.languageserver.launcher.LaunchingStrategy;
+import org.eclipse.che.api.languageserver.launcher.PerWorkspaceLaunchingStrategy;
 import org.eclipse.che.api.languageserver.registry.LanguageServerDescription;
 import org.eclipse.che.plugin.maven.server.core.MavenProjectManager;
 import org.eclipse.che.plugin.maven.server.core.reconcile.PomReconciler;
@@ -55,5 +57,10 @@ public class MavenLanguageServerLauncher implements LanguageServerLauncher {
   public LanguageServerDescription getDescription() {
     return new LanguageServerDescription(
         "org.eclipse.che.plugin.maven", Collections.singletonList("pom"), Collections.emptyList());
+  }
+
+  @Override
+  public LaunchingStrategy getLaunchingStrategy() {
+    return PerWorkspaceLaunchingStrategy.INSTANCE;
   }
 }

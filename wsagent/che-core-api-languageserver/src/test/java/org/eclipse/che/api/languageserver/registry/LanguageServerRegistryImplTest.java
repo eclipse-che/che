@@ -13,7 +13,6 @@ package org.eclipse.che.api.languageserver.registry;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -30,6 +29,7 @@ import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
+import org.eclipse.che.api.languageserver.launcher.PerWorkspaceLaunchingStrategy;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.commons.lang.Pair;
@@ -54,7 +54,6 @@ public class LanguageServerRegistryImplTest {
   private static final String FILE_PATH = "/projects/1/test.txt";
   private static final String PROJECT_PATH = "file:///projects/1";
 
-  @Mock private ServerInitializer initializer;
   @Mock private LanguageServerLauncher languageServerLauncher;
   @Mock private LanguageDescription languageDescription;
   @Mock private LanguageServer languageServer;
@@ -88,6 +87,10 @@ public class LanguageServerRegistryImplTest {
     when(languageServerLauncher.isAbleToLaunch()).thenReturn(true);
     when(languageServerLauncher.getDescription()).thenReturn(serverDescription);
     when(languageServerLauncher.isLocal()).thenReturn(true);
+    when(languageServerLauncher.getLaunchingStrategy())
+            .thenReturn(PerWorkspaceLaunchingStrategy.INSTANCE);
+    when(languageServerLauncher.launch(anyString(), any(LanguageClient.class)))
+            .thenReturn(languageServer);
     when(languageDescription.getLanguageId()).thenReturn("id");
     when(languageDescription.getFileExtensions()).thenReturn(Collections.singletonList("txt"));
     when(languageDescription.getMimeType()).thenReturn("plain/text");
@@ -117,7 +120,6 @@ public class LanguageServerRegistryImplTest {
                 Collections.singleton(languageServerLauncher),
                 Collections.singleton(languageDescription),
                 pmp,
-                initializer,
                 null,
                 clientFactory,
                 languageRecognizer) {
@@ -126,10 +128,6 @@ public class LanguageServerRegistryImplTest {
                 return PROJECT_PATH;
               }
             });
-
-    when(initializer.initialize(
-            any(LanguageServerLauncher.class), any(LanguageClient.class), anyString()))
-        .thenAnswer(invocation -> completedFuture(Pair.of(languageServer, initializeResult)));
   }
 
   @Test
@@ -138,7 +136,5 @@ public class LanguageServerRegistryImplTest {
 
     assertNotNull(cap);
     assertEquals(cap, serverCapabilities);
-    Mockito.verify(initializer)
-        .initialize(eq(languageServerLauncher), any(LanguageClient.class), eq(PROJECT_PATH));
   }
 }

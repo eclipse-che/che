@@ -18,6 +18,8 @@ import java.util.Arrays;
 import javax.inject.Singleton;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
+import org.eclipse.che.api.languageserver.launcher.LaunchingStrategy;
+import org.eclipse.che.api.languageserver.launcher.PerProjectLaunchingStrategy;
 import org.eclipse.che.api.languageserver.registry.DocumentFilter;
 import org.eclipse.che.api.languageserver.registry.LanguageServerDescription;
 import org.eclipse.che.plugin.web.shared.Constants;
@@ -39,7 +41,7 @@ public class TSLSLauncher extends LanguageServerLauncherTemplate {
   }
 
   @Override
-  protected Process startLanguageServerProcess(String projectPath) throws LanguageServerException {
+  protected Process startLanguageServerProcess(String fileUri) throws LanguageServerException {
     ProcessBuilder processBuilder = new ProcessBuilder(launchScript.toString());
     processBuilder.redirectInput(ProcessBuilder.Redirect.PIPE);
     processBuilder.redirectOutput(ProcessBuilder.Redirect.PIPE);
@@ -48,6 +50,11 @@ public class TSLSLauncher extends LanguageServerLauncherTemplate {
     } catch (IOException e) {
       throw new LanguageServerException("Can't start TypeScript language server", e);
     }
+  }
+
+  @Override
+  protected LaunchingStrategy createLauncherStrategy() {
+    return PerProjectLaunchingStrategy.INSTANCE;
   }
 
   @Override

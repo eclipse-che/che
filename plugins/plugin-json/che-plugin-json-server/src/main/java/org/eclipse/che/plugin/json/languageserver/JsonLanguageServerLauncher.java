@@ -67,7 +67,7 @@ public class JsonLanguageServerLauncher extends LanguageServerLauncherTemplate
     return launcher.getRemoteProxy();
   }
 
-  protected Process startLanguageServerProcess(String projectPath) throws LanguageServerException {
+  protected Process startLanguageServerProcess(String fileUri) throws LanguageServerException {
     ProcessBuilder processBuilder = new ProcessBuilder(launchScript.toString());
     processBuilder.redirectInput(ProcessBuilder.Redirect.PIPE);
     processBuilder.redirectOutput(ProcessBuilder.Redirect.PIPE);
@@ -83,7 +83,7 @@ public class JsonLanguageServerLauncher extends LanguageServerLauncherTemplate
       LanguageServerLauncher launcher,
       LanguageServer server,
       ServerCapabilities capabilities,
-      String projectPath) {
+      String rootPath) {
     Endpoint endpoint = ServiceEndpoints.toEndpoint(server);
     JsonExtension serviceObject = ServiceEndpoints.toServiceObject(endpoint, JsonExtension.class);
     Map<String, String[]> associations = new HashMap<>();

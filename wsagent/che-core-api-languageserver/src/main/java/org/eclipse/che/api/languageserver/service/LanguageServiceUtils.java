@@ -10,6 +10,9 @@
  */
 package org.eclipse.che.api.languageserver.service;
 
+import org.eclipse.che.api.languageserver.exception.LanguageServerException;
+import org.eclipse.che.api.vfs.Path;
+
 /** Language service service utilities */
 public class LanguageServiceUtils {
 
@@ -42,5 +45,16 @@ public class LanguageServiceUtils {
 
   public static String prefixProject(String path) {
     return path.startsWith(PROJECTS) ? path : PROJECTS + path;
+  }
+
+  public static String extractProjectPath(String fileUri) throws LanguageServerException {
+    if (!isProjectUri(fileUri)) {
+      throw new LanguageServerException("Not a project URI: " + fileUri);
+    }
+    Path path = Path.of(removeUriScheme(fileUri));
+    if (path.length() < 1) {
+      throw new LanguageServerException("Not a project URI: " + fileUri);
+    }
+    return path.subPath(0, 2).toString();
   }
 }

@@ -19,6 +19,8 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
+import org.eclipse.che.api.languageserver.launcher.LaunchingStrategy;
+import org.eclipse.che.api.languageserver.launcher.PerProjectLaunchingStrategy;
 import org.eclipse.che.api.languageserver.registry.DocumentFilter;
 import org.eclipse.che.api.languageserver.registry.LanguageServerDescription;
 import org.eclipse.che.plugin.php.inject.PhpModule;
@@ -46,6 +48,11 @@ public class PhpLanguageServerLauncher extends LanguageServerLauncherTemplate {
   }
 
   @Override
+  protected LaunchingStrategy createLauncherStrategy() {
+    return PerProjectLaunchingStrategy.INSTANCE;
+  }
+
+  @Override
   public boolean isAbleToLaunch() {
     return Files.exists(launchScript);
   }
@@ -62,7 +69,7 @@ public class PhpLanguageServerLauncher extends LanguageServerLauncherTemplate {
     return launcher.getRemoteProxy();
   }
 
-  protected Process startLanguageServerProcess(String projectPath) throws LanguageServerException {
+  protected Process startLanguageServerProcess(String fileUri) throws LanguageServerException {
     ProcessBuilder processBuilder = new ProcessBuilder(launchScript.toString());
     processBuilder.redirectInput(ProcessBuilder.Redirect.PIPE);
     processBuilder.redirectOutput(ProcessBuilder.Redirect.PIPE);

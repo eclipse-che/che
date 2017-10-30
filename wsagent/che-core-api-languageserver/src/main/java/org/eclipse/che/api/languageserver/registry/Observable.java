@@ -10,9 +10,12 @@
  */
 package org.eclipse.che.api.languageserver.registry;
 
-/** @author Anatoliy Bazko */
-public interface ServerInitializerObservable {
-  void addObserver(ServerInitializerObserver observer);
+/**
+ * @author Thomas Mäder
+ * @param <L> the type of listener
+ */
+public interface Observable<L> {
+  void addObserver(L observer);
 
-  void removeObserver(ServerInitializerObserver observer);
+  void removeObserver(L observer);
 }
