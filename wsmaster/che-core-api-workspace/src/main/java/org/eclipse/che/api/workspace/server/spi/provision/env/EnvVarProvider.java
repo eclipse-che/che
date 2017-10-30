@@ -8,25 +8,23 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.docker.provisioner.server;
+package org.eclipse.che.api.workspace.server.spi.provision.env;
 
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.lang.Pair;
 
 /**
  * Provides an environment variable which is needed for servers used by Che for providing IDE
  * features.
  *
- * @author Alexander Garagatyi
+ * @author Sergii Leshchenko
  */
-public interface ServerEnvironmentVariableProvider {
+public interface EnvVarProvider {
   /**
-   * Returns environment variable which should be injected into container environment or {@code
-   * null} otherwise.
+   * Returns environment variable which should be injected into machine environment.
    *
    * @param runtimeIdentity which may be needed to evaluate environment variable value
    */
-  @Nullable
-  Pair<String, String> get(RuntimeIdentity runtimeIdentity);
+  Pair<String, String> get(RuntimeIdentity runtimeIdentity) throws InfrastructureException;
 }

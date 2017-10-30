@@ -15,12 +15,12 @@ import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.P
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.eclipse.che.ide.api.WsAgentURLModifier;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.core.AgentURLModifier;
 import org.eclipse.che.ide.ext.web.WebLocalizationConstant;
 import org.eclipse.che.ide.util.browser.BrowserUtils;
 
@@ -32,19 +32,19 @@ import org.eclipse.che.ide.util.browser.BrowserUtils;
 @Singleton
 public class PreviewHTMLAction extends AbstractPerspectiveAction {
 
-  private final WsAgentURLModifier wsAgentURLModifier;
+  private final AgentURLModifier agentURLModifier;
   private final AppContext appContext;
 
   @Inject
   public PreviewHTMLAction(
-      WsAgentURLModifier wsAgentURLModifier,
+      AgentURLModifier agentURLModifier,
       AppContext appContext,
       WebLocalizationConstant localizationConstants) {
     super(
         singletonList(PROJECT_PERSPECTIVE_ID),
         localizationConstants.previewHTMLActionTitle(),
         localizationConstants.previewHTMLActionDescription());
-    this.wsAgentURLModifier = wsAgentURLModifier;
+    this.agentURLModifier = agentURLModifier;
     this.appContext = appContext;
   }
 
@@ -70,7 +70,7 @@ public class PreviewHTMLAction extends AbstractPerspectiveAction {
     final Resource selectedResource = appContext.getResource();
     if (Resource.FILE == selectedResource.getResourceType()) {
       final String contentUrl = ((File) selectedResource).getContentUrl();
-      BrowserUtils.openInNewTab(wsAgentURLModifier.modify(contentUrl));
+      BrowserUtils.openInNewTab(agentURLModifier.modify(contentUrl));
     }
   }
 }

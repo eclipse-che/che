@@ -8,9 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.docker.provisioner.server;
-
-import static org.eclipse.che.workspace.infrastructure.docker.DockerMachine.PROJECTS_ROOT_VARIABLE;
+package org.eclipse.che.api.workspace.server.spi.provision.env;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -18,11 +16,15 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.commons.lang.Pair;
 
 /**
- * Add env variable to docker machine with path to root folder of projects
+ * Add env variable to machines with path to root folder of projects
  *
  * @author Alexander Garagatyi
  */
-public class ProjectsRootEnvVariableProvider implements ServerEnvironmentVariableProvider {
+public class ProjectsRootEnvVariableProvider implements EnvVarProvider {
+
+  /** Env variable that points to root folder of projects in a machine */
+  public static final String PROJECTS_ROOT_VARIABLE = "CHE_PROJECTS_ROOT";
+
   private String projectFolderPath;
 
   @Inject

@@ -31,7 +31,5 @@ public class MachineApiModule extends AbstractGinModule {
     bindConstant()
         .annotatedWith(Names.named("machine.extension.api_port"))
         .to(Constants.WS_AGENT_PORT);
-
-    bind(WsAgentURLModifierInitializer.class).asEagerSingleton();
   }
 }

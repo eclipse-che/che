@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.workspace.server;
+package org.eclipse.che.api.workspace.server.spi;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -25,7 +25,6 @@ import javax.inject.Named;
 import javax.ws.rs.core.UriBuilder;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
 import org.eclipse.che.api.core.util.FileCleaner;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.slf4j.Logger;
@@ -55,8 +54,12 @@ public class RecipeRetriever {
    * @throws NullPointerException when recipe is null
    * @throws IllegalArgumentException when both recipe content and location are null or empty
    */
-  public String getRecipe(Recipe recipe) throws InfrastructureException {
+  public InternalRecipe getRecipe(Recipe recipe) throws InfrastructureException {
     Objects.requireNonNull(recipe, "Recipe should not be null");
+    return new InternalRecipe(recipe.getType(), recipe.getContentType(), retrieveContent(recipe));
+  }
+
+  private String retrieveContent(Recipe recipe) throws InfrastructureException {
     if (recipe.getContent() != null && !recipe.getContent().isEmpty()) {
       // no downloading is needed
       return recipe.getContent();

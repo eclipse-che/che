@@ -8,22 +8,33 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.docker.provisioner.server;
+package org.eclipse.che.api.workspace.server.spi.provision.env;
 
-import static org.eclipse.che.workspace.infrastructure.docker.DockerMachine.CHE_WORKSPACE_ID;
-
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.commons.lang.Pair;
 
 /**
- * Provides environment variable with workspace ID that may be needed for accessing Che master API
- * from a container.
+ * Add env variable to machines with java opts.
  *
+ * @author Roman Iuvshyn
  * @author Alexander Garagatyi
  */
-public class WorkspaceIdEnvVarProvider implements ServerEnvironmentVariableProvider {
+public class JavaOptsEnvVariableProvider implements EnvVarProvider {
+
+  /** Env variable for jvm settings */
+  public static final String JAVA_OPTS_VARIABLE = "JAVA_OPTS";
+
+  private String javaOpts;
+
+  @Inject
+  public JavaOptsEnvVariableProvider(@Named("che.workspace.java.options") String javaOpts) {
+    this.javaOpts = javaOpts;
+  }
+
   @Override
   public Pair<String, String> get(RuntimeIdentity runtimeIdentity) {
-    return Pair.of(CHE_WORKSPACE_ID, runtimeIdentity.getWorkspaceId());
+    return Pair.of(JAVA_OPTS_VARIABLE, javaOpts);
   }
 }
