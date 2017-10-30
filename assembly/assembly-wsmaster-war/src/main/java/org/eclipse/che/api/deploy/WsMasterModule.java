@@ -66,6 +66,7 @@ import org.eclipse.che.security.PasswordEncryptor;
 import org.eclipse.che.workspace.infrastructure.docker.DockerInfraModule;
 import org.eclipse.che.workspace.infrastructure.docker.local.LocalDockerModule;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfraModule;
+import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.flywaydb.core.internal.util.PlaceholderReplacer;
 
 /** @author andrew00x */
@@ -178,19 +179,23 @@ public class WsMasterModule extends AbstractModule {
     // bind(org.eclipse.che.api.agent.server.filters.AddExecInstallerInWorkspaceFilter.class);
     //        bind(org.eclipse.che.api.agent.server.filters.AddExecInstallerInStackFilter.class);
     final Map<String, String> persistenceProperties = new HashMap<>();
-    persistenceProperties.put("eclipselink.target-server", "None");
-    persistenceProperties.put("eclipselink.logging.logger", "DefaultLogger");
-    persistenceProperties.put("eclipselink.logging.level", "SEVERE");
+    persistenceProperties.put(PersistenceUnitProperties.TARGET_SERVER, "None");
+    persistenceProperties.put(PersistenceUnitProperties.LOGGING_LOGGER, "DefaultLogger");
+    persistenceProperties.put(PersistenceUnitProperties.LOGGING_LEVEL, "SEVERE");
 
     if (Boolean.valueOf(System.getenv("CHE_MULTIUSER"))) {
       persistenceProperties.put(
-          "eclipselink.exception-handler",
+          PersistenceUnitProperties.EXCEPTION_HANDLER_CLASS,
           "org.eclipse.che.core.db.postgresql.jpa.eclipselink.PostgreSqlExceptionHandler");
+      persistenceProperties.put(
+          PersistenceUnitProperties.NON_JTA_DATASOURCE, "java:/comp/env/jdbc/che-pg");
       configureMultiUserMode();
     } else {
       persistenceProperties.put(
-          "eclipselink.exception-handler",
+          PersistenceUnitProperties.EXCEPTION_HANDLER_CLASS,
           "org.eclipse.che.core.db.h2.jpa.eclipselink.H2ExceptionHandler");
+      persistenceProperties.put(
+          PersistenceUnitProperties.NON_JTA_DATASOURCE, "java:/comp/env/jdbc/che-h2");
       configureSingleUserMode();
     }
 
@@ -207,7 +212,6 @@ public class WsMasterModule extends AbstractModule {
     }
 
     bind(org.eclipse.che.api.user.server.AppStatesPreferenceCleaner.class);
-    bind(DataSource.class).toProvider(org.eclipse.che.core.db.JndiDataSourceProvider.class);
   }
 
   private void configureSingleUserMode() {
@@ -223,7 +227,9 @@ public class WsMasterModule extends AbstractModule {
 
     bind(org.eclipse.che.api.user.server.CheUserCreator.class);
 
-    bindConstant().annotatedWith(Names.named("db.jndi.datasource.name")).to("jdbc/che-h2");
+    bindConstant()
+        .annotatedWith(Names.named("db.jndi.datasource.name"))
+        .to("java:/comp/env/jdbc/che-h2");
 
     bindConstant()
         .annotatedWith(Names.named("machine.terminal_agent.run_command"))
@@ -243,6 +249,7 @@ public class WsMasterModule extends AbstractModule {
 
   private void configureMultiUserMode() {
     bind(TemplateProcessor.class).to(STTemplateProcessorImpl.class);
+    bind(DataSource.class).toProvider(org.eclipse.che.core.db.JndiDataSourceProvider.class);
 
     install(new org.eclipse.che.multiuser.api.permission.server.jpa.SystemPermissionsJpaModule());
     install(new org.eclipse.che.multiuser.api.permission.server.PermissionsModule());
@@ -281,7 +288,9 @@ public class WsMasterModule extends AbstractModule {
     bind(PreferenceDao.class).to(JpaPreferenceDao.class);
     bind(PermissionChecker.class).to(PermissionCheckerImpl.class);
 
-    bindConstant().annotatedWith(Names.named("db.jndi.datasource.name")).to("jdbc/che-pg");
+    bindConstant()
+        .annotatedWith(Names.named("db.jndi.datasource.name"))
+        .to("java:/comp/env/jdbc/che-pg");
 
     bindConstant()
         .annotatedWith(Names.named("machine.terminal_agent.run_command"))
