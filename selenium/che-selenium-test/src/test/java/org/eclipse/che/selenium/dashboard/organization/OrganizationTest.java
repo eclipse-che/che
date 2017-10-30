@@ -60,15 +60,17 @@ public class OrganizationTest {
     String firstName = generate("F", 7);
     String lastName = generate("L", 7);
 
-    dashboard.open();
     orgName = generate("orgX", 6);
-
     organization = testOrganizationServiceClient.create(orgName);
+    testOrganizationServiceClient.addAdmin(organization.getId(), adminTestUser.getId());
+
+    dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
   }
 
   @AfterClass
   public void tearDown() throws Exception {
     testOrganizationServiceClient.deleteById(organization.getId());
+    testOrganizationServiceClient.deleteByName(orgName);
   }
 
   @Test
@@ -115,16 +117,16 @@ public class OrganizationTest {
     }
   }
 
-  // @Test(priority = 1)
+  @Test(priority = 1)
   public void addOrganizationWithMembers() {
-    String name = generate("orgY", 4);
+    orgName = generate("orgY", 4);
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(NavigationBar.MenuItem.ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
     organizationListPage.clickAddOrganizationButton();
     addOrganization.waitAddOrganization();
-    addOrganization.setOrganizationName(name);
+    addOrganization.setOrganizationName(orgName);
 
     addOrganization.clickAddMemberButton();
     addMember.waitAddMemberWidget();
@@ -138,9 +140,8 @@ public class OrganizationTest {
     loader.waitOnClosed();
     addOrganization.clickCreateOrganizationButton();
 
-    organizationPage.waitOrganizationName(name);
+    organizationPage.waitOrganizationName(orgName);
     organizationPage.clickMembersTab();
-
-    organizationPage.clickSettingsTab();
+    organizationPage.checkMemberExistsInMembersList(memberUser.getEmail());
   }
 }
