@@ -29,8 +29,10 @@ import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
 public class RenameWorkspaceTest {
-  private static final String MIN_WORKSPACE_NAME_SIZE = generate("", 3);
-  private static final String MAX_WORKSPACE_NAME_SIZE = generate("", 100);
+  private static final int MIN_WORKSPACE_NAME_SIZE = 3;
+  private static final int MAX_WORKSPACE_NAME_SIZE = 100;
+  private static final String MIN_WORKSPACE_NAME = generate("", MIN_WORKSPACE_NAME_SIZE);
+  private static final String MAX_WORKSPACE_NAME = generate("", MAX_WORKSPACE_NAME_SIZE);
   private static final String WS_NAME_TOO_SHORT =
       ("The name has to be more than 3 characters long.");
   private static final String WS_NAME_TOO_LONG =
@@ -52,7 +54,9 @@ public class RenameWorkspaceTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    workspaceServiceClient.delete(MAX_WORKSPACE_NAME_SIZE, user.getName());
+    workspaceServiceClient.delete(workspaceName, user.getName());
+    workspaceServiceClient.delete(MIN_WORKSPACE_NAME, user.getName());
+    workspaceServiceClient.delete(MAX_WORKSPACE_NAME, user.getName());
   }
 
   @Test
@@ -70,27 +74,27 @@ public class RenameWorkspaceTest {
     dashboardWorkspace.checkNameWorkspace(workspaceName);
 
     // type name with 101 characters and check error message that this name is too long
-    dashboardWorkspace.enterNameWorkspace(MAX_WORKSPACE_NAME_SIZE + "1");
+    dashboardWorkspace.enterNameWorkspace(MAX_WORKSPACE_NAME + "a");
     assertTrue(dashboardWorkspace.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_LONG));
     dashboardWorkspace.clickOnCancelBtn();
     dashboardWorkspace.checkNameWorkspace(workspaceName);
 
     // type a name with min possible size and check that the workspace renamed
-    renameWorkspace(MIN_WORKSPACE_NAME_SIZE);
+    renameWorkspace(MIN_WORKSPACE_NAME);
 
     // type a name with max possible size and check that the workspace renamed
-    renameWorkspace(MAX_WORKSPACE_NAME_SIZE);
+    renameWorkspace(MAX_WORKSPACE_NAME);
   }
 
   private void renameWorkspace(String name) {
     dashboardWorkspace.enterNameWorkspace(name);
     assertFalse(dashboardWorkspace.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_SHORT));
     assertFalse(dashboardWorkspace.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_LONG));
-    clickOnSaveBtnAndWaitWorkspaceRestarted();
+    saveAndWaitWorkspaceRestarted();
     dashboardWorkspace.checkNameWorkspace(name);
   }
 
-  private void clickOnSaveBtnAndWaitWorkspaceRestarted() {
+  private void saveAndWaitWorkspaceRestarted() {
     dashboardWorkspace.clickOnSaveBtn();
     dashboardWorkspace.checkStateOfWorkspace(STOPPING);
     dashboardWorkspace.checkStateOfWorkspace(STARTING);
