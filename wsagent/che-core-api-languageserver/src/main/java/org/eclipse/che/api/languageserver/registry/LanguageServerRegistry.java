@@ -17,7 +17,7 @@ import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.lsp4j.ServerCapabilities;
 
 /** @author Anatoliy Bazko */
-public interface LanguageServerRegistry {
+public interface LanguageServerRegistry extends Observable<ServerInitializerObserver> {
   /**
    * Finds appropriate language servers according to file uri.
    *
