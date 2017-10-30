@@ -30,7 +30,7 @@ export class FactoryInformationController {
   private timeoutPromise: ng.IPromise<any>;
   private editorLoadedPromise: ng.IPromise<any>;
   private editorOptions: any;
-  private factoryInformationForm: any;
+  private factoryInformationForm: ng.IFormController;
   private stackRecipeMode: string;
   private factory: che.IFactory;
   private copyOriginFactory: che.IFactory;
