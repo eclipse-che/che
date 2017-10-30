@@ -30,7 +30,7 @@ public interface WsPathUtils {
   }
 
   static String resolve(String wsPath, String name) {
-    return wsPath + SEPARATOR + name;
+    return wsPath.endsWith(SEPARATOR) ? wsPath + name : wsPath + SEPARATOR + name;
   }
 
   static String absolutize(String wsPath) {

@@ -22,6 +22,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
+import org.eclipse.che.api.fs.server.FsManager;
 
 @Singleton
 public class ProjectConfigRegistry {
@@ -29,10 +30,13 @@ public class ProjectConfigRegistry {
   private final Map<String, RegisteredProject> projects = new ConcurrentHashMap<>();
 
   private final RegisteredProjectFactory registeredProjectFactory;
+  private final FsManager fsManager;
 
   @Inject
-  public ProjectConfigRegistry(RegisteredProjectFactory registeredProjectFactory) {
+  public ProjectConfigRegistry(
+      RegisteredProjectFactory registeredProjectFactory, FsManager fsManager) {
     this.registeredProjectFactory = registeredProjectFactory;
+    this.fsManager = fsManager;
   }
 
   public Set<RegisteredProject> getAll() {

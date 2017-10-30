@@ -28,6 +28,7 @@ import org.eclipse.che.api.core.model.project.type.Attribute;
 import org.eclipse.che.api.core.model.project.type.Value;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
+import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypes;
@@ -52,7 +53,6 @@ public class RegisteredProject implements ProjectConfig {
   private final ProjectTypes types;
   private boolean updated;
   private boolean detected;
-
   /**
    * Either root folder or config can be null, in this case Project is configured with problem.
    *
@@ -69,26 +69,27 @@ public class RegisteredProject implements ProjectConfig {
       @Assisted("config") ProjectConfig config,
       @Assisted("updated") boolean updated,
       @Assisted("detected") boolean detected,
-      ProjectTypesFactory projectTypesFactory)
+      ProjectTypesFactory projectTypesFactory,
+      FsManager fsManager)
       throws ServerException {
     problems = new ArrayList<>();
     attributes = new HashMap<>();
 
-    String path;
+    String wsPath;
     if (folder != null) {
-      path = folder;
+      wsPath = folder;
     } else if (config != null) {
-      path = config.getPath();
+      wsPath = config.getPath();
     } else {
       throw new ServerException("Invalid Project Configuration. Path undefined.");
     }
 
     this.folder = folder;
-    this.config = config == null ? new NewProjectConfigImpl(path) : config;
+    this.config = config == null ? new NewProjectConfigImpl(wsPath) : config;
     this.updated = updated;
     this.detected = detected;
 
-    if (folder == null) {
+    if (wsPath == null || !fsManager.existsAsDir(wsPath)) {
       problems.add(
           new ProjectProblemImpl(
               NO_PROJECT_ON_FILE_SYSTEM,
