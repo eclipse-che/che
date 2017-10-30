@@ -20,7 +20,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>che-plugin-product-info</artifactId>
-    <packaging>jar</packaging>
+    <packaging>gwt-lib</packaging>
     <name>Che Plugin ::  Product Info :: Client</name>
     <dependencies>
         <dependency>
@@ -54,14 +54,15 @@
         </dependency>
     </dependencies>
     <build>
-        <outputDirectory>target/classes</outputDirectory>
-        <resources>
-            <resource>
-                <directory>src/main/java</directory>
-            </resource>
-            <resource>
-                <directory>src/main/resources</directory>
-            </resource>
-        </resources>
+        <plugins>
+            <plugin>
+                <groupId>net.ltgt.gwt.maven</groupId>
+                <artifactId>gwt-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <moduleName>org.eclipse.che.plugin.product.info.ProductInfo</moduleName>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
 </project>

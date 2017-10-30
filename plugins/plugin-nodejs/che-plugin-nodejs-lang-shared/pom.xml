@@ -20,11 +20,4 @@
     </parent>
     <artifactId>che-plugin-nodejs-lang-shared</artifactId>
     <name>Che Plugin :: NodeJs :: Extension Shared</name>
-    <build>
-        <resources>
-            <resource>
-                <directory>src/main/java</directory>
-            </resource>
-        </resources>
-    </build>
 </project>
