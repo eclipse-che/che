@@ -434,7 +434,11 @@ public class BreakpointManagerImpl
             .then(
                 breakpoints -> {
                   for (Breakpoint breakpoint : breakpoints) {
-                    if (breakpoint.getLocation().getTarget().equals(filePath)) {
+                    Location location = breakpoint.getLocation();
+                    String target = location.getTarget();
+                    int lineNumber = location.getLineNumber();
+                    if (target.equals(filePath)
+                        && breakpointStorage.get(target, lineNumber).isPresent()) {
                       renderer.setBreakpointMark(
                           breakpoint, true, BreakpointManagerImpl.this::onLineChange);
                     }
