@@ -14,24 +14,16 @@
  * Defines a directive for displaying project repository widget.
  * @author Oleksii Orel
  */
-export class ProjectRepository {
+export class ProjectRepository implements ng.IDirective {
+  restrict = 'E';
 
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor() {
-    this.restrict = 'E';
+  templateUrl = 'app/workspaces/workspace-details/workspace-projects/project-details/repository/project-repository.html';
 
-    this.templateUrl = 'app/projects/project-details/repository/project-repository.html';
+  controller = 'ProjectRepositoryController';
+  controllerAs = 'projectRepositoryController';
 
-    this.controller = 'ProjectRepositoryController';
-    this.controllerAs = 'projectRepositoryController';
+  bindToController = true;
 
-    this.bindToController = true;
-
-    this.scope = true;
-
-  }
+  scope = true;
 
 }
