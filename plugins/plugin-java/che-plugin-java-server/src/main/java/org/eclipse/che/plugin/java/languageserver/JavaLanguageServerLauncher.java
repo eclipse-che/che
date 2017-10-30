@@ -88,7 +88,7 @@ public class JavaLanguageServerLauncher extends LanguageServerLauncherTemplate
     LOG.info("{}: {}", report.getType(), report.getMessage());
   }
 
-  protected Process startLanguageServerProcess(String projectPath) throws LanguageServerException {
+  protected Process startLanguageServerProcess(String fileUri) throws LanguageServerException {
     ProcessBuilder processBuilder = new ProcessBuilder(launchScript.toString());
     processBuilder.directory(launchScript.getParent().toFile());
     processBuilder.redirectInput(ProcessBuilder.Redirect.PIPE);
@@ -125,7 +125,7 @@ public class JavaLanguageServerLauncher extends LanguageServerLauncherTemplate
       LanguageServerLauncher launcher,
       LanguageServer server,
       ServerCapabilities capabilities,
-      String projectPath) {
+      String rootPath) {
     Map<String, String> settings =
         Collections.singletonMap("java.configuration.updateBuildConfiguration", "automatic");
     server.getWorkspaceService().didChangeConfiguration(new DidChangeConfigurationParams(settings));
