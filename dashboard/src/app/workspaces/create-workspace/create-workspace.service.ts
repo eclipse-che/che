@@ -317,7 +317,11 @@ export class CreateWorkspaceSvc {
   }
 
   private getIDE(): any {
-    return (this.$document.find('#ide-application-iframe') as any).contentWindow.IDE;
+    const jqIframe = this.$document.find('#ide-application-iframe');
+    if (!jqIframe || jqIframe.length === 0) {
+      return null;
+    }
+    return (jqIframe as any).contentWindow.IDE;
   }
 
 }

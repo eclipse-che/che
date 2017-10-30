@@ -136,9 +136,9 @@ func Parse() {
 		log.Fatal("Push logs endpoint protocol must be either ws or wss")
 	}
 
-	// auth-enabled - fetch USER_TOKEN
+	// auth-enabled - fetch CHE_MACHINE_TOKEN
 	if AuthEnabled {
-		Token = os.Getenv("USER_TOKEN")
+		Token = os.Getenv("CHE_MACHINE_TOKEN")
 	}
 
 	// runtime-id
