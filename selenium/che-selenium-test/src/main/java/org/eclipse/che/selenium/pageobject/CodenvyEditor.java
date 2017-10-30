@@ -1685,7 +1685,9 @@ public class CodenvyEditor {
     StringBuilder stringBuilder = new StringBuilder();
     try {
       for (WebElement line : lines) {
-        List<WebElement> elements = line.findElements(By.tagName("span"));
+        List<WebElement> elements =
+            redrawDriverWait.until(
+                ExpectedConditions.visibilityOfAllElements(line.findElements(By.tagName("span"))));
         elements.remove(elements.size() - 1);
         for (WebElement elem : elements) {
           stringBuilder.append(elem.getText());
@@ -1700,7 +1702,9 @@ public class CodenvyEditor {
       WaitUtils.sleepQuietly(2);
       stringBuilder.setLength(0);
       for (WebElement line : lines) {
-        List<WebElement> elements = line.findElements(By.tagName("span"));
+        List<WebElement> elements =
+            redrawDriverWait.until(
+                ExpectedConditions.visibilityOfAllElements(line.findElements(By.tagName("span"))));
         elements.remove(elements.size() - 1);
         for (WebElement elem : elements) {
           stringBuilder.append(elem.getText());
