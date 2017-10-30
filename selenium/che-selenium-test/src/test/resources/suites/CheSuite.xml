@@ -76,6 +76,7 @@
                     <exclude name="shouldDebugStaticInnerClass"/>
                 </methods>
             </class>
+            <class name="org.eclipse.che.selenium.debugger.RunToCursorTest"/>
             <class name="org.eclipse.che.selenium.debugger.MultimoduleProjectDebuggingTest"/>
             <class name="org.eclipse.che.selenium.debugger.DebuggerWatchExpressionTest"/>
             <class name="org.eclipse.che.selenium.debugger.NodeJsDebugTest">

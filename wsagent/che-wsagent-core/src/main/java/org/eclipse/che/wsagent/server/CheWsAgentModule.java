@@ -13,8 +13,8 @@ package org.eclipse.che.wsagent.server;
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 import java.net.URI;
+import org.eclipse.che.MachineTokenProvider;
 import org.eclipse.che.UriApiEndpointProvider;
-import org.eclipse.che.UserTokenProvider;
 import org.eclipse.che.inject.DynaModule;
 
 /**
@@ -27,7 +27,9 @@ public class CheWsAgentModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(URI.class).annotatedWith(Names.named("che.api")).toProvider(UriApiEndpointProvider.class);
-    bind(String.class).annotatedWith(Names.named("user.token")).toProvider(UserTokenProvider.class);
+    bind(String.class)
+        .annotatedWith(Names.named("machine.token"))
+        .toProvider(MachineTokenProvider.class);
 
     bind(WsAgentAnalyticsAddresser.class);
 
