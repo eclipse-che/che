@@ -29,6 +29,10 @@
     <dependencies>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-ide-js-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-ide-core</artifactId>
         </dependency>
         <dependency>
@@ -357,6 +361,11 @@
                         <arg>${gwt.compiler.jvmArgs.Xss}</arg>
                         <arg>${gwt.compiler.jvmArgs.Xmx}</arg>
                     </jvmArgs>
+                    <compilerArgs>
+                        <arg>-generateJsInteropExports</arg>
+                        <arg>-style</arg>
+                        <arg>PRETTY</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
             <plugin>

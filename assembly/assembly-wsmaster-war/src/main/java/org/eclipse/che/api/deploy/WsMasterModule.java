@@ -30,6 +30,7 @@ import org.eclipse.che.api.factory.server.FactoryParametersResolver;
 import org.eclipse.che.api.installer.server.InstallerModule;
 import org.eclipse.che.api.installer.server.impl.InstallersProvider;
 import org.eclipse.che.api.installer.shared.model.Installer;
+import org.eclipse.che.api.plugin.PluginModule;
 import org.eclipse.che.api.system.server.ServiceTermination;
 import org.eclipse.che.api.system.server.SystemModule;
 import org.eclipse.che.api.workspace.server.adapter.StackMessageBodyAdapter;
@@ -123,6 +124,8 @@ public class WsMasterModule extends AbstractModule {
     // installers
     install(new InstallerModule());
     binder().bind(new TypeLiteral<Set<Installer>>() {}).toProvider(InstallersProvider.class);
+
+    install(new PluginModule());
 
     bind(org.eclipse.che.api.deploy.WsMasterAnalyticsAddresser.class);
 

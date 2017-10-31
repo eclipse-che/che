@@ -33,6 +33,8 @@ import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.context.BrowserAddress;
 import org.eclipse.che.ide.core.StandardComponentInitializer;
+import org.eclipse.che.ide.js.api.JsApi;
+import org.eclipse.che.ide.js.plugin.PluginManager;
 import org.eclipse.che.ide.preferences.StyleInjector;
 import org.eclipse.che.ide.statepersistance.AppStateManager;
 import org.eclipse.che.ide.theme.ThemeAgentImpl;
@@ -64,6 +66,8 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
   protected final Provider<WorkspacePresenter> workspacePresenterProvider;
   protected final EventBus eventBus;
   protected final DialogFactory dialogFactory;
+  private final Provider<JsApi> jsApiBootstrapProvider;
+  private final Provider<PluginManager> pluginManagerProvider;
 
   @Inject
   DefaultIdeInitializationStrategy(
@@ -77,7 +81,9 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
       AppStateManager appStateManager,
       Provider<WorkspacePresenter> workspacePresenterProvider,
       EventBus eventBus,
-      DialogFactory dialogFactory) {
+      DialogFactory dialogFactory,
+      Provider<JsApi> jsApiBootstrapProvider,
+      Provider<PluginManager> pluginManagerProvider) {
     this.workspaceServiceClient = workspaceServiceClient;
     this.appContext = appContext;
     this.browserAddress = browserAddress;
@@ -89,6 +95,8 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
     this.workspacePresenterProvider = workspacePresenterProvider;
     this.eventBus = eventBus;
     this.dialogFactory = dialogFactory;
+    this.jsApiBootstrapProvider = jsApiBootstrapProvider;
+    this.pluginManagerProvider = pluginManagerProvider;
   }
 
   @Override
@@ -110,6 +118,7 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
                 })
         .then(initUI())
         .thenPromise(aVoid -> initAppContext())
+        .thenPromise(aVoid -> initJsPlugins())
         .then(showUI())
         .then(
             arg -> {
@@ -118,6 +127,11 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
 
               eventBus.fireEvent(new BasicIDEInitializedEvent());
             });
+  }
+
+  private Promise<Void> initJsPlugins() {
+    jsApiBootstrapProvider.get().initApi();
+    return pluginManagerProvider.get().loadPlugins();
   }
 
   @Override

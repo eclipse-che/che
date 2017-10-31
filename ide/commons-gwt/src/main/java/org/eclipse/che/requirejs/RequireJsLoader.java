@@ -101,7 +101,7 @@ public class RequireJsLoader {
               })
           .inject();
     } else if (!requirejsLoadFailed) {
-      requireScripts(callback, null, config, requiredScripts, moduleKeys);
+      requireScripts(callback, errorHandler, config, requiredScripts, moduleKeys);
     } else {
       Log.error(RequireJsLoader.class, "Require.js load failed, cannot require scripts.");
     }

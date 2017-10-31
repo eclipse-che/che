@@ -1,0 +1,9 @@
+{
+  "name": "@@name@@",
+  "version": "@@version@@",
+  "publisher": "@@publisher@@",
+  "engines": {
+    "che": "^6.0.0"
+  },
+  "main": "@@main@@.nocache.js"
+}

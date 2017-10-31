@@ -113,4 +113,23 @@ public class JsonHelper {
       return -1;
     }
   }
+
+  public static List<String> toList(String jsonStr) {
+    List<String> list = new ArrayList<>();
+
+    JSONValue parsed = JSONParser.parseStrict(jsonStr);
+    JSONArray jsonArr = parsed.isArray();
+    if (jsonArr != null) {
+      for (int i = 0; i < jsonArr.size(); i++) {
+        JSONValue jsonValue = jsonArr.get(i);
+        JSONString jsonString = jsonValue.isString();
+        // if the json value is a string, set the unescaped value, else set the json representation
+        // of the value
+        String stringValue = (jsonString == null) ? jsonValue.toString() : jsonString.stringValue();
+        list.add(stringValue);
+      }
+    }
+
+    return list;
+  }
 }

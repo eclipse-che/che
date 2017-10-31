@@ -27,6 +27,7 @@
         <module>gwt-logger</module>
         <module>commons-gwt</module>
         <module>che-core-ide-api</module>
+        <module>che-core-ide-js-api</module>
         <module>che-core-ide-generators</module>
         <module>che-core-dyna-provider-generator-maven-plugin</module>
         <module>che-core-ide-ui</module>

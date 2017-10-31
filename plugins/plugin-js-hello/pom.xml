@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2012-2017 Red Hat, Inc.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>che-plugin-parent</artifactId>
+        <groupId>org.eclipse.che.plugin</groupId>
+        <version>5.20.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>plugin-js-hello</artifactId>
+    <packaging>jar</packaging>
+    <properties>
+        <gwtModuleName>GwtJsPlugin</gwtModuleName>
+        <publisher>yvydolob</publisher>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.inject.extensions</groupId>
+            <artifactId>guice-assistedinject</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+        </dependency>
+<!--        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-ide-sdk</artifactId>
+        </dependency>-->
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-elemental</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-user</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.gwt.inject</groupId>
+            <artifactId>gin</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.vectomatic</groupId>
+            <artifactId>lib-gwt-svg</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>analyze</id>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>gwt-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                            <!--<goal>test</goal>-->
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.google.gwt</groupId>
+                        <artifactId>gwt-codeserver</artifactId>
+                        <version>${com.google.gwt.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.google.gwt</groupId>
+                        <artifactId>gwt-dev</artifactId>
+                        <version>${com.google.gwt.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.google.gwt</groupId>
+                        <artifactId>gwt-user</artifactId>
+                        <version>${com.google.gwt.version}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <gwtSdkFirstInClasspath>true</gwtSdkFirstInClasspath>
+                    <extraJvmArgs>${gwt.compiler.extraJvmArgs}</extraJvmArgs>
+                    <!--<generateJsInteropExports>true</generateJsInteropExports>-->
+                    <modules>
+                        <module>org.eclipse.che.ide.plugin.gwt.GwtJsPlugin</module>
+                    </modules>
+                    <!-- don' remove it we will use it then need to found bug in compiled JS -->
+                    <!--<style>DETAILED</style>-->
+                    <logLevel>${gwt.compiler.logLevel}</logLevel>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>buildnumber</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <move file="${project.build.directory}/${project.artifactId}-${project.version}/${gwtModuleName}" tofile="${project.build.directory}/${publisher}.${gwtModuleName}-${project.version}" />
+                                <delete dir="${project.build.directory}/${project.artifactId}-${project.version}/WEB-INF" />
+                                <replace file="${project.build.directory}/${publisher}.${gwtModuleName}-${project.version}/package.json" token="@@name@@" value="${gwtModuleName}" />
+                                <replace file="${project.build.directory}/${publisher}.${gwtModuleName}-${project.version}/package.json" token="@@version@@" value="${project.version}" />
+                                <replace file="${project.build.directory}/${publisher}.${gwtModuleName}-${project.version}/package.json" token="@@publisher@@" value="${publisher}" />
+                                <replace file="${project.build.directory}/${publisher}.${gwtModuleName}-${project.version}/package.json" token="@@main@@" value="${gwtModuleName}" />
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <updateOnly>false</updateOnly>
+                    <descriptors>
+                        <descriptor>${project.basedir}/src/main/assembly.xml</descriptor>
+                    </descriptors>
+                    <tarLongFileMode>posix</tarLongFileMode>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

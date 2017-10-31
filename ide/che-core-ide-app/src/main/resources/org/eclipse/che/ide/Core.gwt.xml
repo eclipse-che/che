@@ -37,5 +37,6 @@
     <inherits name="com.google.common.collect.Collect"/>
     <inherits name="org.eclipse.che.providers.Providers"/>
     <inherits name="org.eclipse.che.security.OAuth"/>
+    <inherits name="org.eclipse.che.ide.js.JsApi"/>
     <source path=""/>
 </module>

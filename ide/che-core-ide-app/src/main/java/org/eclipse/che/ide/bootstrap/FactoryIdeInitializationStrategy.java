@@ -32,6 +32,8 @@ import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.context.BrowserAddress;
 import org.eclipse.che.ide.context.QueryParameters;
 import org.eclipse.che.ide.core.StandardComponentInitializer;
+import org.eclipse.che.ide.js.api.JsApi;
+import org.eclipse.che.ide.js.plugin.PluginManager;
 import org.eclipse.che.ide.preferences.StyleInjector;
 import org.eclipse.che.ide.statepersistance.AppStateManager;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
@@ -62,7 +64,9 @@ class FactoryIdeInitializationStrategy extends DefaultIdeInitializationStrategy 
       EventBus eventBus,
       QueryParameters queryParameters,
       DialogFactory dialogFactory,
-      FactoryServiceClient factoryServiceClient) {
+      FactoryServiceClient factoryServiceClient,
+      Provider<JsApi> jsApiBootstrapProvider,
+      Provider<PluginManager> pluginManagerProvider) {
     super(
         workspaceServiceClient,
         appContext,
@@ -74,7 +78,9 @@ class FactoryIdeInitializationStrategy extends DefaultIdeInitializationStrategy 
         appStateManager,
         workspacePresenterProvider,
         eventBus,
-        dialogFactory);
+        dialogFactory,
+        jsApiBootstrapProvider,
+        pluginManagerProvider);
 
     this.queryParameters = queryParameters;
     this.factoryServiceClient = factoryServiceClient;

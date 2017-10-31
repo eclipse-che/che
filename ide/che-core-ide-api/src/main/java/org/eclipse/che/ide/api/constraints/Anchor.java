@@ -20,11 +20,26 @@ public enum Anchor {
   /**
    * Anchor type that specifies the action to be the first in the list at the moment of addition.
    */
-  FIRST,
+  FIRST("first"),
   /** Anchor type that specifies the action to be the last in the list at the moment of addition. */
-  LAST,
+  LAST("last"),
   /** Anchor type that specifies the action to be placed before the relative action. */
-  BEFORE,
+  BEFORE("before"),
   /** Anchor type that specifies the action to be placed after the relative action. */
-  AFTER
+  AFTER("after");
+
+  private final String value;
+
+  Anchor(String value) {
+    this.value = value;
+  }
+
+  public static Anchor getAnchor(String value) {
+    for (Anchor anchor : Anchor.values()) {
+      if (anchor.value.equals(value)) {
+        return anchor;
+      }
+    }
+    return null;
+  }
 }

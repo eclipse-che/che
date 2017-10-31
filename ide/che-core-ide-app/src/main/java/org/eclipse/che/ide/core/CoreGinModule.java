@@ -47,6 +47,7 @@ import org.eclipse.che.ide.editor.EditorApiModule;
 import org.eclipse.che.ide.editor.preferences.EditorPreferencesModule;
 import org.eclipse.che.ide.factory.FactoryGinModule;
 import org.eclipse.che.ide.filetypes.FileTypeApiModule;
+import org.eclipse.che.ide.js.impl.JsApiModule;
 import org.eclipse.che.ide.jsonrpc.JsonRpcModule;
 import org.eclipse.che.ide.keybinding.KeyBindingManager;
 import org.eclipse.che.ide.machine.MachineApiModule;
@@ -85,6 +86,7 @@ public class CoreGinModule extends AbstractGinModule {
 
   @Override
   protected void configure() {
+    install(new JsApiModule());
     install(new JsonRpcModule());
     install(new WebSocketModule());
     install(new ClientServerEventModule());
