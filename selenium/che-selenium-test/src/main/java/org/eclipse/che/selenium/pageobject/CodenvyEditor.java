@@ -292,8 +292,10 @@ public class CodenvyEditor {
    * @param indexOfEditor index of editor that was split
    */
   public String getTextFromSplitEditor(int indexOfEditor) {
+    waitActiveEditor();
     List<WebElement> lines =
-        seleniumWebDriver.findElements(By.xpath(Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH));
+        elemDriverWait.until(
+            presenceOfAllElementsLocatedBy(By.xpath(Locators.ORION_CONTENT_ACTIVE_EDITOR_XPATH)));
     List<WebElement> inner = lines.get(indexOfEditor - 1).findElements(By.tagName("div"));
     return getTextFromOrionLines(inner);
   }
@@ -1684,7 +1686,7 @@ public class CodenvyEditor {
   private String getTextFromOrionLines(List<WebElement> lines) {
     StringBuilder stringBuilder = new StringBuilder();
     try {
-      stringBuilder = waitLineElementsVisibilityAndGetText(lines);
+      stringBuilder = waitLinesElementsPresenceAndGetText(lines);
     }
     // If an editor do not attached to the DOM (we will have state element exception). We wait
     // attaching 2 second and try to read text again.
@@ -1693,23 +1695,25 @@ public class CodenvyEditor {
 
       stringBuilder.setLength(0);
 
-      stringBuilder = waitLineElementsVisibilityAndGetText(lines);
+      stringBuilder = waitLinesElementsPresenceAndGetText(lines);
     }
     return stringBuilder.toString();
   }
 
-  private StringBuilder waitLineElementsVisibilityAndGetText(List<WebElement> lines) {
+  private StringBuilder waitLinesElementsPresenceAndGetText(List<WebElement> lines) {
     StringBuilder stringBuilder = new StringBuilder();
 
     for (int i = 0; i < lines.size(); i++) {
       WebElement line = lines.get(i);
       List<WebElement> elements;
-      if (i < lines.size() - 1) {
-        elements =
-            redrawDriverWait.until(
-                ExpectedConditions.visibilityOfAllElements(line.findElements(By.tagName("span"))));
-      } else {
-        elements = line.findElements(By.tagName("span"));
+
+      elements = line.findElements(By.tagName("span"));
+
+      for (int a = 0; a < elements.size(); a++) {
+
+        elemDriverWait.until(
+            ExpectedConditions.presenceOfNestedElementLocatedBy(
+                line, By.xpath(String.format("span[%s]", a + 1))));
       }
 
       elements.remove(elements.size() - 1);

@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.editor;
 
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabAction;
 
 import com.google.inject.Inject;
@@ -78,16 +79,16 @@ public class SplitEditorFeatureTest {
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor(Keys.UP.toString());
     editor.typeTextIntoEditor(TEXT);
-    editor.waitTextIntoEditor(TEXT);
+    editor.waitTextInDefinedSplitEditor(1, LOAD_PAGE_TIMEOUT_SEC, TEXT);
     editor.selectTabByIndexEditorWindow(0, NAME_JAVA_CLASS);
     editor.waitActiveEditor();
-    editor.waitTextIntoEditor(TEXT);
+    editor.waitTextInDefinedSplitEditor(0, LOAD_PAGE_TIMEOUT_SEC, TEXT);
     editor.selectTabByIndexEditorWindow(2, NAME_JAVA_CLASS);
     editor.waitActiveEditor();
-    editor.waitTextIntoEditor(TEXT);
+    editor.waitTextInDefinedSplitEditor(2, LOAD_PAGE_TIMEOUT_SEC, TEXT);
     editor.selectTabByIndexEditorWindow(2, NAME_JAVA_CLASS);
     editor.waitActiveEditor();
-    editor.waitTextIntoEditor(TEXT);
+    editor.waitTextInDefinedSplitEditor(2, LOAD_PAGE_TIMEOUT_SEC, TEXT);
     editor.setCursorToLine(1);
     editor.deleteCurrentLine();
     editor.selectTabByIndexEditorWindow(0, NAME_JAVA_CLASS);
