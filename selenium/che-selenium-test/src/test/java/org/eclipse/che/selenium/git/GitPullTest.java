@@ -31,6 +31,7 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
+import org.kohsuke.github.GitHub;
 import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -94,7 +95,8 @@ public class GitPullTest {
     git.importJavaApp(repoUrl, FIRST_PROJECT_NAME, Wizard.TypeProject.MAVEN);
 
     projectExplorer.quickExpandWithJavaScript();
-
+    GitHub gitHub = GitHub.connectUsingPassword(gitHubUsername, gitHubPassword);
+    gitHub.getRepository(gitHubUsername + "/" + "gitPullTest").getDirectoryContent("/");
     // Change contents index.jsp
     loader.waitOnClosed();
     projectExplorer.openItemByPath(FIRST_PROJECT_NAME + "/my-webapp/src/main/webapp/index.jsp");
