@@ -166,7 +166,10 @@ public class ProjectImportManager {
             }
           }
 
-          generator.onCreateProject(projectWsPath, valueMap, new HashMap<>());
+          Map<String, String> options =
+              projectConfig.getOptions() == null ? new HashMap<>() : projectConfig.getOptions();
+
+          generator.onCreateProject(projectWsPath, valueMap, options);
         } else {
           fsManager.createDir(projectWsPath);
         }
