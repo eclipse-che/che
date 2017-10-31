@@ -40,6 +40,11 @@ public class BreakpointImpl implements Breakpoint {
   }
 
   @Override
+  public void setEnabled(boolean enabled) {
+    this.enabled = enabled;
+  }
+
+  @Override
   public String getCondition() {
     return condition;
   }

@@ -33,4 +33,6 @@ public interface BreakpointConfigurationView
   void setBreakpoint(Breakpoint breakpoint);
 
   String getBreakpointCondition();
+
+  boolean isBreakpointEnabled();
 }

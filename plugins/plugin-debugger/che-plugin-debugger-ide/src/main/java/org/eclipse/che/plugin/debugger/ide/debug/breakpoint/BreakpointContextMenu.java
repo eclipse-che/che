@@ -17,12 +17,15 @@ import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.ide.api.action.Action;
+import org.eclipse.che.ide.api.action.ActionGroup;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.menu.ContextMenu;
 import org.eclipse.che.plugin.debugger.ide.DebuggerExtension;
+import org.eclipse.che.plugin.debugger.ide.actions.DisableBreakpointAction;
+import org.eclipse.che.plugin.debugger.ide.actions.EnableBreakpointAction;
 
 /** @author Anatolii Bazko */
 public class BreakpointContextMenu extends ContextMenu {
@@ -45,9 +48,13 @@ public class BreakpointContextMenu extends ContextMenu {
   }
 
   @Override
-  public void onActionSelected(Action action) {
-    Presentation presentation = action.getTemplatePresentation();
-    presentation.putClientProperty(BREAKPOINT, breakpoint);
-    super.onActionSelected(action);
+  protected ActionGroup updateActions() {
+    ActionGroup actionGroup = super.updateActions();
+    for (Action action : actionGroup.getChildren(null)) {
+      Presentation presentation = action.getTemplatePresentation();
+      presentation.putClientProperty(BREAKPOINT, breakpoint);
+    }
+
+    return actionGroup;
   }
 }

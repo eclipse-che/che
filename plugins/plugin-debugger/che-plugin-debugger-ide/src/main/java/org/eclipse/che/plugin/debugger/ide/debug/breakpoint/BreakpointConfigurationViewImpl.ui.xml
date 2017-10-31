@@ -19,6 +19,17 @@
         .location {
             font-weight: bold;
         }
+
+        .inline {
+            display: inline-block;
+        }
+
+        .breakpoint-condition {
+            margin-left: 20PX;
+            position: fixed;
+            width: 315PX;
+            height: 98PX;
+        }
     </ui:style>
     <g:DockLayoutPanel unit="PX" width="400PX" height="150PX" debugId="breakpoint-configuration-panel">
         <g:north size="20">
@@ -26,10 +37,16 @@
                 <g:Label ui:field="breakpointLocation" width="100%" debugId="breakpoint-location-label" addStyleNames="{style.location}"/>
             </g:FlowPanel>
         </g:north>
+        <g:north size="20">
+            <g:FlowPanel>
+                <g:CheckBox ui:field="enabled" text="{locale.viewBreakpointConfigurationEnabled}" debugId="breakpoint-enabled"/>
+            </g:FlowPanel>
+        </g:north>
         <g:center>
             <g:FlowPanel>
-                <g:Label text="{locale.viewBreakpointConfigurationCondition}"/>
-                <g:TextArea ui:field="breakpointCondition" width="100%" height="100%" debugId="breakpoint-condition-text"/>
+                <g:Label text="{locale.viewBreakpointConfigurationCondition}" addStyleNames="{style.inline}"/>
+                <g:TextArea ui:field="breakpointCondition" debugId="breakpoint-condition-text"
+                            addStyleNames="{style.breakpoint-condition}"/>
             </g:FlowPanel>
         </g:center>
     </g:DockLayoutPanel>

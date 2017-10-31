@@ -72,6 +72,12 @@ public interface DebuggerLocalizationConstant extends com.google.gwt.i18n.client
   @Key("breakpointConfiguration")
   String breakpointConfiguration();
 
+  @Key("enableBreakpoint")
+  String enableBreakpoint();
+
+  @Key("disableBreakpoint")
+  String disableBreakpoint();
+
   /* actions descriptions */
   @Key("editDebugConfigurationsActionDescription")
   String editDebugConfigurationsActionDescription();
@@ -114,6 +120,12 @@ public interface DebuggerLocalizationConstant extends com.google.gwt.i18n.client
 
   @Key("breakpointConfigurationDescription")
   String breakpointConfigurationDescription();
+
+  @Key("enableBreakpointDescription")
+  String enableBreakpointDescription();
+
+  @Key("disableBreakpointDescription")
+  String disableBreakpointDescription();
 
   /* messages */
   @Key("debugger.connecting.title")
@@ -222,6 +234,9 @@ public interface DebuggerLocalizationConstant extends com.google.gwt.i18n.client
   /* Breakpoint Configuration */
   @Key("view.breakpointConfiguration.condition")
   String viewBreakpointConfigurationCondition();
+
+  @Key("view.breakpointConfiguration.enabled")
+  String viewBreakpointConfigurationEnabled();
 
   @Key("view.breakpointConfiguration.hitCount")
   String viewBreakpointConfigurationHitCount();

@@ -14,6 +14,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.UIObject;
@@ -38,6 +39,7 @@ public class BreakpointConfigurationViewImpl extends Window implements Breakpoin
 
   @UiField Label breakpointLocation;
   @UiField TextArea breakpointCondition;
+  @UiField CheckBox enabled;
 
   private final Button applyButton;
 
@@ -92,10 +94,17 @@ public class BreakpointConfigurationViewImpl extends Window implements Breakpoin
     } else {
       breakpointCondition.setText("");
     }
+
+    enabled.setValue(breakpoint.isEnabled());
   }
 
   @Override
   public String getBreakpointCondition() {
     return breakpointCondition.getText();
+  }
+
+  @Override
+  public boolean isBreakpointEnabled() {
+    return enabled.getValue();
   }
 }

@@ -28,9 +28,11 @@ import org.eclipse.che.ide.util.input.KeyCodeMap;
 import org.eclipse.che.plugin.debugger.ide.actions.AddWatchExpressionAction;
 import org.eclipse.che.plugin.debugger.ide.actions.DebugAction;
 import org.eclipse.che.plugin.debugger.ide.actions.DeleteAllBreakpointsAction;
+import org.eclipse.che.plugin.debugger.ide.actions.DisableBreakpointAction;
 import org.eclipse.che.plugin.debugger.ide.actions.DisconnectDebuggerAction;
 import org.eclipse.che.plugin.debugger.ide.actions.EditConfigurationsAction;
 import org.eclipse.che.plugin.debugger.ide.actions.EditDebugVariableAction;
+import org.eclipse.che.plugin.debugger.ide.actions.EnableBreakpointAction;
 import org.eclipse.che.plugin.debugger.ide.actions.EvaluateExpressionAction;
 import org.eclipse.che.plugin.debugger.ide.actions.RemoveWatchExpressionAction;
 import org.eclipse.che.plugin.debugger.ide.actions.ResumeExecutionAction;
@@ -75,6 +77,8 @@ public class DebuggerExtension {
   public static final String SHOW_HIDE_DEBUGGER_PANEL_ID = "showHideDebuggerPanel";
   public static final String BREAKPOINT_CONFIGURATION_ID = "breakpointSettings";
   public static final String BREAKPOINT_CONTEXT_MENU = "breakpointContextMenu";
+  public static final String DISABLE_BREAKPOINT_ID = "disableBreakpoint";
+  public static final String ENABLE_BREAKPOINT_ID = "enableBreakpoint";
 
   public static final String BREAKPOINT = "breakpoint";
 
@@ -102,7 +106,9 @@ public class DebuggerExtension {
       DebugConfigurationsGroup configurationsGroup,
       DebuggerPresenter debuggerPresenter,
       KeyBindingAgent keyBinding,
-      BreakpointActionGroup breakpointActionGroup) {
+      BreakpointActionGroup breakpointActionGroup,
+      EnableBreakpointAction enableBreakpointAction,
+      DisableBreakpointAction disableBreakpointAction) {
     debuggerResources.getCss().ensureInjected();
 
     final DefaultActionGroup runMenu = (DefaultActionGroup) actionManager.getAction(GROUP_RUN);
@@ -123,6 +129,8 @@ public class DebuggerExtension {
     actionManager.registerAction(REMOVE_WATCH_EXPRESSION, removeWatchExpressionAction);
     actionManager.registerAction(SHOW_HIDE_DEBUGGER_PANEL_ID, showHideDebuggerPanelAction);
     actionManager.registerAction(BREAKPOINT_CONFIGURATION_ID, breakpointConfigurationAction);
+    actionManager.registerAction(ENABLE_BREAKPOINT_ID, enableBreakpointAction);
+    actionManager.registerAction(DISABLE_BREAKPOINT_ID, disableBreakpointAction);
 
     // create group for selecting (changing) debug configurations
     final DefaultActionGroup debugActionGroup =
@@ -132,6 +140,8 @@ public class DebuggerExtension {
     debugActionGroup.add(configurationsGroup);
 
     // breakpoint context menu
+    breakpointActionGroup.add(enableBreakpointAction);
+    breakpointActionGroup.add(disableBreakpointAction);
     breakpointActionGroup.add(breakpointConfigurationAction);
     actionManager.registerAction(BREAKPOINT_CONTEXT_MENU, breakpointActionGroup);
 
