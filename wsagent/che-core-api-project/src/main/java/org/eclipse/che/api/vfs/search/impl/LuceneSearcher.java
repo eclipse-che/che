@@ -25,9 +25,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.Tokenizer;
-import org.apache.lucene.analysis.core.LowerCaseFilter;
-import org.apache.lucene.analysis.core.WhitespaceTokenizer;
+import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
+import org.apache.lucene.analysis.core.WhitespaceTokenizerFactory;
+import org.apache.lucene.analysis.custom.CustomAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.apache.lucene.document.Document;
@@ -121,15 +121,11 @@ public abstract class LuceneSearcher implements Searcher {
     return excludeFileIndexFilters.remove(indexFilter);
   }
 
-  protected Analyzer makeAnalyzer() {
-    return new Analyzer() {
-      @Override
-      protected TokenStreamComponents createComponents(String fieldName) {
-        Tokenizer tokenizer = new WhitespaceTokenizer();
-        TokenStream filter = new LowerCaseFilter(tokenizer);
-        return new TokenStreamComponents(tokenizer, filter);
-      }
-    };
+  protected Analyzer makeAnalyzer() throws IOException {
+    return CustomAnalyzer.builder()
+        .withTokenizer(WhitespaceTokenizerFactory.class)
+        .addTokenFilter(LowerCaseFilterFactory.class)
+        .build();
   }
 
   protected abstract Directory makeDirectory() throws ServerException;
@@ -319,7 +315,7 @@ public abstract class LuceneSearcher implements Searcher {
     }
   }
 
-  private Query createLuceneQuery(QueryExpression query) throws ParseException {
+  private Query createLuceneQuery(QueryExpression query) throws ParseException, IOException {
     BooleanQuery.Builder luceneQueryBuilder = new BooleanQuery.Builder();
     final String name = query.getName();
     final String path = query.getPath();
