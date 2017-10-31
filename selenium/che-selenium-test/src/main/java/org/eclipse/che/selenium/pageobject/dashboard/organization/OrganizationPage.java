@@ -172,7 +172,8 @@ public class OrganizationPage {
   }
 
   public void waitOrganizationName(String name) {
-    WaitUtils.sleepQuietly(1);
+    redrawUiElementsTimeout.until(
+        ExpectedConditions.attributeToBeNotEmpty(organizationName, "value"));
     redrawUiElementsTimeout.until(
         (WebDriver driver) ->
             driver
