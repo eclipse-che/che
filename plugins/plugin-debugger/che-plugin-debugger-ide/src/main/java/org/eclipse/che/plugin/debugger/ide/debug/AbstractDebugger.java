@@ -482,7 +482,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     for (Breakpoint breakpoint : breakpointManager.getBreakpointList()) {
       BreakpointDto breakpointDto = dtoFactory.createDto(BreakpointDto.class);
       breakpointDto.setLocation(toDto(breakpoint.getLocation()));
-      breakpointDto.setEnabled(true);
+      breakpointDto.setEnabled(breakpoint.isEnabled());
       breakpointDto.setCondition(breakpoint.getCondition());
 
       breakpoints.add(breakpointDto);

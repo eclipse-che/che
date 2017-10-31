@@ -21,6 +21,10 @@
     box-sizing: border-box;
 }
 
+.breakpoint.disabled {
+    background-color: rgba(144, 144, 144, 0.4);
+}
+
 .breakpoint.inactive {
     background-color: rgba(144, 144, 144, 0.4);
 }
@@ -28,6 +32,15 @@
 .breakpoint.inactive.condition {
     background-color: rgba(144, 144, 144, 0.4);
 }
+
+.breakpoint.inactive.condition:before {
+    content: "\2714";
+    position: absolute;
+    left: 0px;
+    line-height: 7px;
+    font-size: 7px;
+}
+
 
 .breakpoint.inactive.condition:after {
     content: "?";

@@ -221,7 +221,9 @@ public class BreakpointManagerImpl
     Debugger debugger = debuggerManager.getActiveDebugger();
     if (debugger != null) {
       debugger.deleteBreakpoint(breakpoint);
-      debugger.addBreakpoint(breakpoint);
+      if (breakpoint.isEnabled()) {
+        debugger.addBreakpoint(breakpoint);
+      }
     }
   }
 

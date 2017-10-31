@@ -26,7 +26,7 @@ public class BreakpointImpl implements Breakpoint {
   }
 
   public BreakpointImpl(Location location) {
-    this(location, false, null);
+    this(location, true, null);
   }
 
   @Override
