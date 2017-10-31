@@ -11,6 +11,7 @@
 'use strict';
 import {CheAPI} from '../../../../../components/api/che-api.factory';
 import {CheNotification} from '../../../../../components/notification/che-notification.factory';
+import {ConfirmDialogService} from '../../../../../components/service/confirm-dialog/confirm-dialog.service';
 
 /**
  * Controller for a factory information.
@@ -18,11 +19,12 @@ import {CheNotification} from '../../../../../components/notification/che-notifi
  */
 export class FactoryInformationController {
 
-  private  confirmDialogService: any;
+  private confirmDialogService: ConfirmDialogService;
   private cheAPI: CheAPI;
   private cheNotification: CheNotification;
   private $location: ng.ILocationService;
   private $log: ng.ILogService;
+  private $q: ng.IQService;
   private $timeout: ng.ITimeoutService;
   private lodash: any;
   private $filter: ng.IFilterService;
@@ -34,25 +36,27 @@ export class FactoryInformationController {
   private stackRecipeMode: string;
   private factory: che.IFactory;
   private copyOriginFactory: che.IFactory;
-  private factoryContent: any;
+  private factoryContent: string;
   private workspaceImportedRecipe: any;
   private environmentName: string;
   private workspaceName: string;
   private stackId: string;
   private workspaceConfig: any;
   private origName: string;
+  private isEditorContentChanged: boolean = false;
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
   constructor($scope: ng.IScope, cheAPI: CheAPI, cheNotification: CheNotification, $location: ng.ILocationService, $log: ng.ILogService,
-              $timeout: ng.ITimeoutService, lodash: any, $filter: ng.IFilterService, $q: ng.IQService, confirmDialogService: any) {
+              $timeout: ng.ITimeoutService, lodash: any, $filter: ng.IFilterService, $q: ng.IQService, confirmDialogService: ConfirmDialogService) {
     this.cheAPI = cheAPI;
     this.cheNotification = cheNotification;
     this.$location = $location;
     this.$log = $log;
     this.$timeout = $timeout;
+    this.$q = $q;
     this.lodash = lodash;
     this.$filter = $filter;
     this.confirmDialogService = confirmDialogService;
@@ -69,6 +73,11 @@ export class FactoryInformationController {
     this.editorOptions = {
       onLoad: ((instance: any) => {
         editorLoadedDefer.resolve(instance);
+        if (instance) {
+          instance.on('blur', () => {
+            this.showUpdateIfNecessaryDialog();
+          });
+        }
       })
     };
 
@@ -89,6 +98,8 @@ export class FactoryInformationController {
     if (!this.factory) {
       return;
     }
+
+    this.isEditorContentChanged = false;
 
     this.workspaceName = this.factory.workspace.name;
     this.environmentName = this.factory.workspace.defaultEnv;
@@ -177,6 +188,23 @@ export class FactoryInformationController {
   }
 
   /**
+   * Shows confirmation dialog when editor's content is changes.
+   *
+   * @returns {angular.IPromise<any>}
+   */
+  showUpdateIfNecessaryDialog(): ng.IPromise<any> {
+    if (this.isEditorContentChanged === false) {
+      return this.$q.when();
+    }
+
+    const title = 'Warning',
+      content = `You have unsaved changes in JSON configuration. Would you like to save changes now?`;
+    return this.confirmDialogService.showConfirmDialog(title, content, 'Continue').then(() => {
+      this.updateFactoryContent();
+    });
+  }
+
+  /**
    * Returns the factory url based on id.
    *
    * @returns {link.href|*} link value
@@ -210,13 +238,15 @@ export class FactoryInformationController {
   }
 
   /**
-   * Handler for factory editor focus event.
+   * Handler for factory editor 'change' event.
    */
-  factoryEditorOnFocus(): void {
+  factoryEditorOnChange(): void {
     if (this.timeoutPromise) {
       this.$timeout.cancel(this.timeoutPromise);
-      this.doUpdateFactory(this.copyOriginFactory);
     }
+    this.timeoutPromise = this.$timeout(() => {
+      this.isEditorContentChanged = this.factoryContent !== this.$filter('json')(this.copyOriginFactory);
+    }, 200);
   }
 
   /**
