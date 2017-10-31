@@ -41,8 +41,13 @@ public class KeycloakProvider {
     this.appContext = appContext;
     String keycloakSettings =
         getKeycloakSettings(KeycloakConstants.getEndpoint(appContext.getMasterApiEndpoint()));
-    Map<String, String> settings = JsonHelper.toMap(keycloakSettings);
-    Log.info(getClass(), "Keycloak settings: ", settings);
+    Map<String, String> settings;
+    try {
+       settings = JsonHelper.toMap(keycloakSettings);
+    } catch (Exception e) {
+      keycloakDisabled = true;
+      return;
+    }
 
     keycloak =
         CallbackPromiseHelper.createFromCallback(
@@ -121,5 +126,9 @@ public class KeycloakProvider {
             }
           }
         });
+  }
+
+  public boolean isKeycloakDisabled() {
+    return keycloakDisabled;
   }
 }

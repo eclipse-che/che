@@ -18,14 +18,14 @@ import org.everrest.guice.servlet.GuiceEverrestServlet;
 
 /** Provide bindings of security && authentication filters necessary for multi-user Che */
 @DynaModule
-public class WsAgentServletModule extends ServletModule {
+public class WsAgentAuthServletModule extends ServletModule {
   @Override
   protected void configureServlets() {
     filter("/*").through(CheCorsFilter.class);
     serveRegex("^/api((?!(/(ws|eventbus)($|/.*)))/.*)").with(GuiceEverrestServlet.class);
   }
 
-  private void configureMultiuser() {
+  private void configureMultiUserMode() {
     filter("/*").through(MachineLoginFilter.class);
   }
 }

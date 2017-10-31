@@ -48,7 +48,7 @@ public class KeycloakAsyncRequestFactory extends MachineAsyncRequestFactory {
   protected AsyncRequest doCreateRequest(
       RequestBuilder.Method method, String url, Object dtoBody, boolean async) {
     AsyncRequest request = super.doCreateRequest(method, url, dtoBody, async);
-    if (!isWsAgentRequest(url)) {
+    if (!isWsAgentRequest(url) && !keycloakProvider.isKeycloakDisabled()) {
       AsyncRequest asyncRequest = new KeycloakAsyncRequest(keycloakProvider, method, url, async);
       if (dtoBody != null) {
         if (dtoBody instanceof List<?>) {
