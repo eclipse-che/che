@@ -18,7 +18,6 @@ import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.env.EnvVarsConverter;
-import org.eclipse.che.workspace.infrastructure.openshift.provision.installer.InstallerConfigProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.labels.PodNameLabelProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.restartpolicy.RestartPolicyRewriter;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.route.TlsRouteProvisioner;
@@ -39,7 +38,6 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class OpenShiftInfrastructureProvisionerTest {
 
-  @Mock private InstallerConfigProvisioner installerProvisioner;
   @Mock private PersistentVolumeClaimProvisioner pvcProvisioner;
   @Mock private UniqueNamesProvisioner uniqueNamesProvisioner;
   @Mock private InternalEnvironment environment;
@@ -59,7 +57,6 @@ public class OpenShiftInfrastructureProvisionerTest {
   public void setUp() {
     osInfraProvisioner =
         new OpenShiftInfrastructureProvisioner(
-            installerProvisioner,
             pvcProvisioner,
             uniqueNamesProvisioner,
             tlsRouteProvisioner,
@@ -69,7 +66,6 @@ public class OpenShiftInfrastructureProvisionerTest {
             labelsProvisioner);
     provisionOrder =
         inOrder(
-            installerProvisioner,
             pvcProvisioner,
             uniqueNamesProvisioner,
             tlsRouteProvisioner,
@@ -83,9 +79,6 @@ public class OpenShiftInfrastructureProvisionerTest {
   public void performsOrderedProvisioning() throws Exception {
     osInfraProvisioner.provision(environment, osEnv, runtimeIdentity);
 
-    provisionOrder
-        .verify(installerProvisioner)
-        .provision(eq(environment), eq(osEnv), eq(runtimeIdentity));
     provisionOrder
         .verify(serversProvisioner)
         .provision(eq(environment), eq(osEnv), eq(runtimeIdentity));

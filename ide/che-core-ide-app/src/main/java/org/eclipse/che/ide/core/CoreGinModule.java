@@ -22,7 +22,6 @@ import elemental.json.JsonFactory;
 import org.eclipse.che.ide.actions.ActionApiModule;
 import org.eclipse.che.ide.api.ProductInfoDataProvider;
 import org.eclipse.che.ide.api.ProductInfoDataProviderImpl;
-import org.eclipse.che.ide.api.WsAgentURLModifier;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.exec.ConnectedEventHandler;
 import org.eclipse.che.ide.api.command.exec.ExecAgentCommandManager;
@@ -157,7 +156,6 @@ public class CoreGinModule extends AbstractGinModule {
 
     bind(AskCredentialsDialog.class).to(AskCredentialsDialogImpl.class);
     bind(ProductInfoDataProvider.class).to(ProductInfoDataProviderImpl.class);
-    bind(WsAgentURLModifier.class).to(CheWsAgentLinksModifier.class);
   }
 
   @Provides

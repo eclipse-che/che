@@ -24,7 +24,6 @@ import {DashboardConfig} from './dashboard/dashboard-config';
 // switch to a config
 import {IdeConfig} from './ide/ide-config';
 import {NavbarConfig} from './navbar/navbar-config';
-import {ProjectsConfig} from './projects/projects-config';
 import {ProxySettingsConfig} from './proxy/proxy-settings.constant';
 import {WorkspacesConfig} from './workspaces/workspaces-config';
 import {StacksConfig} from './stacks/stacks-config';
@@ -409,7 +408,6 @@ new IdeConfig(instanceRegister);
 new DiagnosticsConfig(instanceRegister);
 
 new NavbarConfig(instanceRegister);
-new ProjectsConfig(instanceRegister);
 new WorkspacesConfig(instanceRegister);
 new DashboardConfig(instanceRegister);
 new StacksConfig(instanceRegister);

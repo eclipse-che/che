@@ -24,6 +24,11 @@ import {WorkspaceDetailsSshCtrl} from './workspace-details/workspace-ssh/workspa
 import {WorkspaceDetailsProjectsCtrl} from './workspace-details/workspace-projects/workspace-details-projects.controller';
 import {WorkspaceDetailsProjects} from './workspace-details/workspace-projects/workspace-details-projects.directive';
 import {WorkspaceDetailsProjectsService} from './workspace-details/workspace-projects/workspace-details-projects.service';
+import {ProjectDetailsController} from './workspace-details/workspace-projects/project-details/project-details.controller';
+import {ProjectRepositoryController} from './workspace-details/workspace-projects/project-details/repository/project-repository.controller';
+import {ProjectRepository} from './workspace-details/workspace-projects/project-details/repository/project-repository.directive';
+import {CheProjectItem} from './workspace-details/workspace-projects/project-item/project-item.directive';
+import {ProjectItemCtrl} from './workspace-details/workspace-projects/project-item/project-item.controller';
 import {AddProjectPopoverController} from './workspace-details/workspace-projects/add-project-popover/add-project-popover.controller';
 import {AddProjectPopover} from './workspace-details/workspace-projects/add-project-popover/add-project-popover.directive';
 import {WorkspaceDetailsService} from './workspace-details/workspace-details.service';
@@ -70,6 +75,7 @@ import {ImportZipProjectController} from './create-workspace/project-source-sele
 import {ImportZipProjectService} from './create-workspace/project-source-selector/add-import-project/import-zip-project/import-zip-project.service';
 import {ImportZipProject} from './create-workspace/project-source-selector/add-import-project/import-zip-project/import-zip-project.directive';
 import {ImportGithubProjectController} from './create-workspace/project-source-selector/add-import-project/import-github-project/import-github-project.controller';
+import {NoGithubOauthDialogController} from './create-workspace/project-source-selector/add-import-project/import-github-project/oauth-dialog/no-github-oauth-dialog.controller';
 import {ImportGithubProjectService} from './create-workspace/project-source-selector/add-import-project/import-github-project/import-github-project.service';
 import {ImportGithubProject} from './create-workspace/project-source-selector/add-import-project/import-github-project/import-github-project.directive';
 import {GithubRepositoryItem} from './create-workspace/project-source-selector/add-import-project/import-github-project/github-repository-item/github-repository-item.directive';
@@ -142,7 +148,6 @@ import {MachineAgents} from './workspace-details/workspace-machine-agents/machin
 import {MachineAgentsController} from './workspace-details/workspace-machine-agents/machine-agents.controller';
 import {CheWorkspace} from '../../components/api/workspace/che-workspace.factory';
 
-
 /**
  * @ngdoc controller
  * @name workspaces:WorkspacesConfig
@@ -177,6 +182,11 @@ export class WorkspacesConfig {
 
     register.controller('WorkspaceDetailsProjectsCtrl', WorkspaceDetailsProjectsCtrl);
     register.directive('workspaceDetailsProjects', WorkspaceDetailsProjects);
+    register.controller('ProjectDetailsController', ProjectDetailsController);
+    register.controller('ProjectRepositoryController', ProjectRepositoryController);
+    register.directive('projectRepository', ProjectRepository);
+    register.directive('cheProjectItem', CheProjectItem);
+    register.controller('ProjectItemCtrl', ProjectItemCtrl);
     register.service('workspaceDetailsProjectsService', WorkspaceDetailsProjectsService);
     register.controller('AddProjectPopoverController', AddProjectPopoverController);
     register.directive('addProjectPopover', AddProjectPopover);
@@ -242,6 +252,7 @@ export class WorkspacesConfig {
     register.service('importGithubProjectService', ImportGithubProjectService);
     register.directive('importGithubProject', ImportGithubProject);
     register.directive('githubRepositoryItem', GithubRepositoryItem);
+    register.controller('NoGithubOauthDialogController', NoGithubOauthDialogController);
     register.controller('ImportZipProjectController', ImportZipProjectController);
     register.service('importZipProjectService', ImportZipProjectService);
     register.directive('importZipProject', ImportZipProject);
@@ -333,6 +344,14 @@ export class WorkspacesConfig {
         controller: 'ListWorkspacesCtrl',
         controllerAs: 'listWorkspacesCtrl'
       })
+        .accessWhen('/workspace/:namespace*/:workspaceName/:projectName', {
+          title: (params: any) => {
+            return params.workspaceName + ' | ' + params.projectName;
+          },
+          templateUrl: 'app/workspaces/workspace-details/workspace-projects/project-details/project-details.html',
+          controller: 'ProjectDetailsController',
+          controllerAs: 'projectDetailsController'
+        })
         .accessWhen('/workspace/:namespace*/:workspaceName', {
           title: (params: any) => {
             return params.workspaceName;

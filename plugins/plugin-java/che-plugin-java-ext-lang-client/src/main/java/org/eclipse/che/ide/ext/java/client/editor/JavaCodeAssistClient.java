@@ -19,8 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.MimeType;
-import org.eclipse.che.ide.api.WsAgentURLModifier;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.core.AgentURLModifier;
 import org.eclipse.che.ide.ext.java.shared.dto.Change;
 import org.eclipse.che.ide.ext.java.shared.dto.ConflictImportDTO;
 import org.eclipse.che.ide.ext.java.shared.dto.OrganizeImportResult;
@@ -43,7 +43,7 @@ public class JavaCodeAssistClient {
   private final AsyncRequestFactory asyncRequestFactory;
   private final MessageLoader loader;
   private final AppContext appContext;
-  private final WsAgentURLModifier urlDecorator;
+  private final AgentURLModifier urlDecorator;
 
   @Inject
   public JavaCodeAssistClient(
@@ -51,7 +51,7 @@ public class JavaCodeAssistClient {
       AppContext appContext,
       LoaderFactory loaderFactory,
       AsyncRequestFactory asyncRequestFactory,
-      WsAgentURLModifier urlDecorator) {
+      AgentURLModifier urlDecorator) {
     this.appContext = appContext;
     this.unmarshallerFactory = unmarshallerFactory;
     this.loader = loaderFactory.newLoader();

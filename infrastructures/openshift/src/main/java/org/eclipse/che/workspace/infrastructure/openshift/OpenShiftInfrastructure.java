@@ -11,16 +11,19 @@
 package org.eclipse.che.workspace.infrastructure.openshift;
 
 import com.google.common.collect.ImmutableSet;
+import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
-import org.eclipse.che.api.workspace.server.RecipeRetriever;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.RecipeRetriever;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
+import org.eclipse.che.api.workspace.server.spi.normalization.ServersNormalizer;
+import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentParser;
 
@@ -38,13 +41,17 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
       OpenShiftInfrastructureProvisioner infrastructureProvisioner,
       EventService eventService,
       InstallerRegistry installerRegistry,
-      RecipeRetriever recipeRetriever) {
+      RecipeRetriever recipeRetriever,
+      Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners,
+      ServersNormalizer serversNormalizer) {
     super(
         "openshift",
         ImmutableSet.of("openshift"),
         eventService,
         installerRegistry,
-        recipeRetriever);
+        recipeRetriever,
+        internalEnvironmentProvisioners,
+        serversNormalizer);
     this.runtimeContextFactory = runtimeContextFactory;
     this.envParser = envParser;
     this.infrastructureProvisioner = infrastructureProvisioner;
@@ -55,7 +62,8 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
       throws ValidationException, InfrastructureException {}
 
   @Override
-  public OpenShiftRuntimeContext prepare(RuntimeIdentity id, InternalEnvironment environment)
+  public OpenShiftRuntimeContext internalPrepare(
+      RuntimeIdentity id, InternalEnvironment environment)
       throws ValidationException, InfrastructureException {
     OpenShiftEnvironment openShiftEnvironment = envParser.parse(environment);
 

@@ -47,29 +47,12 @@ public class DockerMachine implements Machine {
 
   /** Name of the latest tag used in Docker image. */
   public static final String LATEST_TAG = "latest";
-  /** Env variable that points to root folder of projects in dev machine */
-  public static final String PROJECTS_ROOT_VARIABLE = "CHE_PROJECTS_ROOT";
-
-  /** Env variable for jvm settings */
-  public static final String JAVA_OPTS_VARIABLE = "JAVA_OPTS";
-
-  /** Env variable for dev machine that contains url of Che API */
-  public static final String API_ENDPOINT_URL_VARIABLE = "CHE_API";
-
-  /**
-   * Environment variable that will be setup in developer machine will contain ID of a workspace for
-   * which this machine has been created
-   */
-  public static final String CHE_WORKSPACE_ID = "CHE_WORKSPACE_ID";
 
   /**
    * Default HOSTNAME that will be added in all docker containers that are started. This host will
    * container the Docker host's ip reachable inside the container.
    */
   public static final String CHE_HOST = "che-host";
-
-  /** Environment variable that will be setup in developer machine and contains machine token. */
-  public static final String CHE_MACHINE_TOKEN = "CHE_MACHINE_TOKEN";
 
   private final String container;
   private final DockerConnector docker;

@@ -25,7 +25,7 @@ import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.FileCleaner;
-import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
+import org.eclipse.che.api.installer.shared.model.Installer;
 import org.eclipse.che.api.workspace.server.bootstrap.AbstractBootstrapper;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
@@ -48,7 +48,7 @@ public class DockerBootstrapper extends AbstractBootstrapper {
   private final String machineName;
   private final RuntimeIdentity runtimeIdentity;
   private final DockerMachine dockerMachine;
-  private final List<InstallerImpl> installers;
+  private final List<Installer> installers;
   private final int serverCheckPeriodSeconds;
   private final int installerTimeoutSeconds;
 
@@ -57,7 +57,7 @@ public class DockerBootstrapper extends AbstractBootstrapper {
       @Assisted String machineName,
       @Assisted RuntimeIdentity runtimeIdentity,
       @Assisted DockerMachine dockerMachine,
-      @Assisted List<InstallerImpl> installers,
+      @Assisted List<Installer> installers,
       EventService eventService,
       @Named("che.infra.docker.master_websocket_endpoint") String cheWebsocketEndpoint,
       @Named("che.infra.docker.bootstrapper.timeout_min") int bootstrappingTimeoutMinutes,
