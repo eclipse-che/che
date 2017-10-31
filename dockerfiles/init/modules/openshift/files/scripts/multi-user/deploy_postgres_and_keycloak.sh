@@ -11,7 +11,6 @@ COMMAND_DIR=$(dirname "$0")
 export CHE_EPHEMERAL=${CHE_EPHEMERAL:-false}
 
 "$COMMAND_DIR"/deploy_postgres_only.sh
-"$COMMAND_DIR"/wait_until_postgres_is_available.sh
 
 oc create -f "$COMMAND_DIR"/keycloak/
 
@@ -19,7 +18,7 @@ if [ "${CHE_EPHEMERAL}" == "true" ]; then
   oc volume dc/keycloak --remove --confirm
   oc delete pvc/keycloak-log
   oc delete pvc/keycloak-data
-fi 
+fi
 
 IMAGE_KEYCLOACK=${IMAGE_KEYCLOACK:-"jboss/keycloak-openshift:3.3.0.CR2-3"}
 

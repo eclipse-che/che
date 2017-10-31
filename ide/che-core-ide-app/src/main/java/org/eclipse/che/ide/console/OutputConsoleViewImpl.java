@@ -317,6 +317,11 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
 
   @Override
   public void print(final String text, boolean carriageReturn, String color) {
+
+    if (consoleLines.getElement().getChildCount() > 500) {
+      consoleLines.getElement().getFirstChild().removeFromParent();
+    }
+
     if (this.carriageReturn) {
       Node lastChild = consoleLines.getElement().getLastChild();
       if (lastChild != null) {
