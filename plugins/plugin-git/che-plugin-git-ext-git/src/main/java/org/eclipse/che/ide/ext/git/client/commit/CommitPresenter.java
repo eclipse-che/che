@@ -33,19 +33,19 @@ import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.commons.exception.ServerException;
 import org.eclipse.che.ide.ext.git.client.DateTimeFormatter;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
+import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelPresenter;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
 /**
  * Presenter for commit changes on git.
@@ -305,7 +305,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
     }
     GitOutputConsole console = gitOutputConsoleFactory.create(COMMIT_COMMAND_NAME);
     console.print(message);
-    consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+    consolesPanelPresenter.addCommandOutput(console);
     notificationManager.notify(message);
     view.setMessage("");
   }
@@ -326,7 +326,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
             : constant.commitFailed();
     GitOutputConsole console = gitOutputConsoleFactory.create(COMMIT_COMMAND_NAME);
     console.printError(errorMessage);
-    consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+    consolesPanelPresenter.addCommandOutput(console);
     notificationManager.notify(constant.commitFailed(), errorMessage, FAIL, FLOAT_MODE);
   }
 }

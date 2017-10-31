@@ -12,8 +12,8 @@ package org.eclipse.che.ide.resources.action;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 import static org.eclipse.che.ide.resource.Path.valueOf;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.common.annotations.Beta;
 import com.google.inject.Inject;
@@ -45,7 +45,7 @@ public class RevealResourceAction extends AbstractPerspectiveAction {
 
   @Inject
   public RevealResourceAction(AppContext appContext, EventBus eventBus) {
-    super(singletonList(PROJECT_PERSPECTIVE_ID), "Reveal Resource", null, null, null);
+    super(singletonList(PROJECT_PERSPECTIVE_ID), "Reveal Resource");
     this.appContext = appContext;
     this.eventBus = eventBus;
   }

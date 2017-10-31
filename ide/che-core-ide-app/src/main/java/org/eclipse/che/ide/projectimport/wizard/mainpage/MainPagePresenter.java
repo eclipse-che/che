@@ -25,15 +25,17 @@ import java.util.Set;
 import org.eclipse.che.api.project.shared.dto.ProjectImporterData;
 import org.eclipse.che.api.project.shared.dto.ProjectImporterDescriptor;
 import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
-import org.eclipse.che.ide.api.project.ProjectImportersServiceClient;
-import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistry;
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
+import org.eclipse.che.ide.projectimport.wizard.ImportWizardRegistry;
 import org.eclipse.che.ide.projectimport.wizard.presenter.ImportProjectWizardView;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
+import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.ide.rest.HTTPHeader;
 import org.eclipse.che.ide.rest.Unmarshallable;
 import org.eclipse.che.ide.util.NameUtils;
 
@@ -53,7 +55,7 @@ public class MainPagePresenter extends AbstractWizardPage<MutableProjectConfig>
   private final CoreLocalizationConstant locale;
   private final ImportWizardRegistry importWizardRegistry;
   private final AppContext appContext;
-  private final ProjectImportersServiceClient projectImportersService;
+  private final AsyncRequestFactory asyncRequestFactory;
 
   private ImporterSelectionListener importerSelectionListener;
   private ProjectImporterDescriptor selectedProjectImporter;
@@ -61,21 +63,21 @@ public class MainPagePresenter extends AbstractWizardPage<MutableProjectConfig>
 
   @Inject
   public MainPagePresenter(
-      ProjectImportersServiceClient projectImportersService,
       DtoUnmarshallerFactory dtoUnmarshallerFactory,
       NotificationManager notificationManager,
       CoreLocalizationConstant locale,
       MainPageView view,
       ImportWizardRegistry importWizardRegistry,
-      AppContext appContext) {
+      AppContext appContext,
+      AsyncRequestFactory asyncRequestFactory) {
     super();
     this.view = view;
-    this.projectImportersService = projectImportersService;
     this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
     this.notificationManager = notificationManager;
     this.locale = locale;
     this.importWizardRegistry = importWizardRegistry;
     this.appContext = appContext;
+    this.asyncRequestFactory = asyncRequestFactory;
 
     view.setDelegate(this);
   }
@@ -143,7 +145,7 @@ public class MainPagePresenter extends AbstractWizardPage<MutableProjectConfig>
             for (ProjectImporterDescriptor importer : result) {
               if (importer.isInternal()
                   || importer.getCategory() == null
-                  || importWizardRegistry.getWizardRegistrar(importer.getId()) == null) {
+                  || !importWizardRegistry.getWizardRegistrar(importer.getId()).isPresent()) {
                 continue;
               }
 
@@ -185,7 +187,7 @@ public class MainPagePresenter extends AbstractWizardPage<MutableProjectConfig>
           }
         };
 
-    projectImportersService.getProjectImporters(appContext.getDevMachine(), callback);
+    fetchProjectImporters(callback);
   }
 
   private Comparator<ProjectImporterDescriptor> getProjectImporterComparator(
@@ -213,6 +215,14 @@ public class MainPagePresenter extends AbstractWizardPage<MutableProjectConfig>
 
   public void setImporterSelectionListener(ImporterSelectionListener listener) {
     importerSelectionListener = listener;
+  }
+
+  /** Fetch project importers from the server. */
+  private void fetchProjectImporters(AsyncRequestCallback<ProjectImporterData> callback) {
+    asyncRequestFactory
+        .createGetRequest(appContext.getWsAgentServerApiEndpoint() + "/project-importers")
+        .header(HTTPHeader.CONTENT_TYPE, MimeType.APPLICATION_JSON)
+        .send(callback);
   }
 
   public interface ImporterSelectionListener {

@@ -11,12 +11,10 @@
 package org.eclipse.che.ide.command.toolbar.commands.button;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,15 +28,13 @@ public class MachineItemTest {
   private static final String MACHINE_NAME = "dev-machine";
 
   @Mock private CommandImpl command;
-  @Mock private Machine machine;
+  @Mock private MachineImpl machine;
 
   private MachineItem item;
 
   @Before
   public void setUp() throws Exception {
-    MachineConfig machineConfig = mock(MachineConfig.class);
-    when(machineConfig.getName()).thenReturn(MACHINE_NAME);
-    when(machine.getConfig()).thenReturn(machineConfig);
+    when(machine.getName()).thenReturn(MACHINE_NAME);
 
     item = new MachineItem(command, machine);
   }

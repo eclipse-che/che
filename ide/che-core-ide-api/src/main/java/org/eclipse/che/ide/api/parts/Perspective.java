@@ -13,8 +13,8 @@ package org.eclipse.che.ide.api.parts;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.component.StateComponent;
 import org.eclipse.che.ide.api.constraints.Constraints;
+import org.eclipse.che.ide.api.statepersistance.StateComponent;
 
 /**
  * This interface is a general type for all perspectives. You must implement the interface when you

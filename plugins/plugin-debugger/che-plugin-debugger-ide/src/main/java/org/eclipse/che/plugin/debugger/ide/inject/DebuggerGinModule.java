@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.debugger.ide.inject;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.inject.Singleton;
-import org.eclipse.che.ide.api.action.Action;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.api.debug.DebugConfigurationsManager;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
@@ -60,7 +60,7 @@ public class DebuggerGinModule extends AbstractGinModule {
         .in(Singleton.class);
     install(
         new GinFactoryModuleBuilder()
-            .implement(Action.class, DebugConfigurationAction.class)
+            .implement(BaseAction.class, DebugConfigurationAction.class)
             .build(DebugConfigurationActionFactory.class));
     install(
         new GinFactoryModuleBuilder()

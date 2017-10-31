@@ -38,37 +38,33 @@ import static org.eclipse.che.ide.util.NameUtils.checkProjectName;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
 import com.google.web.bindery.event.shared.EventBus;
 import elemental.util.ArrayOf;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.eclipse.che.api.core.model.project.NewProjectConfig;
-import org.eclipse.che.api.core.model.project.ProjectConfig;
-import org.eclipse.che.api.core.model.project.SourceStorage;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
+import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
+import org.eclipse.che.api.project.shared.NewProjectConfig;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
+import org.eclipse.che.api.project.shared.dto.NewProjectConfigDto;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.project.shared.dto.TreeElement;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
-import org.eclipse.che.api.workspace.shared.dto.NewProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectProblemDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.editor.DeletedFilesController;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
-import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
-import org.eclipse.che.ide.api.event.ng.DeletedFilesController;
-import org.eclipse.che.ide.api.machine.DevMachine;
-import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
+import org.eclipse.che.ide.api.filewatcher.ClientServerEventService;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
-import org.eclipse.che.ide.api.project.ProjectServiceClient;
 import org.eclipse.che.ide.api.project.QueryExpression;
 import org.eclipse.che.ide.api.project.type.ProjectTypeRegistry;
 import org.eclipse.che.ide.api.resources.Container;
@@ -85,7 +81,9 @@ import org.eclipse.che.ide.api.resources.marker.Marker;
 import org.eclipse.che.ide.api.resources.marker.MarkerChangedEvent;
 import org.eclipse.che.ide.api.vcs.VcsStatus;
 import org.eclipse.che.ide.context.AppContextImpl;
+import org.eclipse.che.ide.core.AgentURLModifier;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.project.ProjectServiceClient;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.Arrays;
 
@@ -138,9 +136,9 @@ public final class ResourceManager {
   /** Link to the workspace content root. Immutable among the workspace life. */
   private final Container workspaceRoot;
 
-  private final WsAgentURLModifier urlModifier;
+  private final AppContext appContext;
+  private final AgentURLModifier urlModifier;
   private final ClientServerEventService clientServerEventService;
-  private DevMachine devMachine;
   /** Internal store, which caches requested resources from the server. */
   private ResourceStore store;
 
@@ -149,7 +147,6 @@ public final class ResourceManager {
 
   @Inject
   public ResourceManager(
-      @Assisted DevMachine devMachine,
       ProjectServiceClient ps,
       EventBus eventBus,
       EditorAgent editorAgent,
@@ -159,9 +156,9 @@ public final class ResourceManager {
       DtoFactory dtoFactory,
       ProjectTypeRegistry typeRegistry,
       ResourceStore store,
-      WsAgentURLModifier urlModifier,
-      ClientServerEventService clientServerEventService) {
-    this.devMachine = devMachine;
+      AgentURLModifier urlModifier,
+      ClientServerEventService clientServerEventService,
+      AppContext appContext) {
     this.ps = ps;
     this.eventBus = eventBus;
     this.editorAgent = editorAgent;
@@ -175,6 +172,7 @@ public final class ResourceManager {
     this.clientServerEventService = clientServerEventService;
 
     this.workspaceRoot = resourceFactory.newFolderImpl(Path.ROOT, this);
+    this.appContext = appContext;
   }
 
   /**
@@ -1317,7 +1315,7 @@ public final class ResourceManager {
   protected String getUrl(Resource resource) {
     checkArgument(!resource.getLocation().isRoot(), "Workspace root doesn't have export URL");
 
-    final String baseUrl = devMachine.getWsAgentBaseUrl() + "/project/export";
+    final String baseUrl = appContext.getWsAgentServerApiEndpoint() + "/project/export";
 
     if (resource.getResourceType() == FILE) {
       return baseUrl + "/file" + resource.getLocation();
@@ -1344,6 +1342,6 @@ public final class ResourceManager {
   }
 
   public interface ResourceManagerFactory {
-    ResourceManager newResourceManager(DevMachine devMachine);
+    ResourceManager newResourceManager();
   }
 }

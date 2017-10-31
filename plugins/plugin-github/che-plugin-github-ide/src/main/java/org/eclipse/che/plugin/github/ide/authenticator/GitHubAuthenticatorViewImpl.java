@@ -17,9 +17,9 @@ import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import org.eclipse.che.ide.api.ProductInfoDataProvider;
-import org.eclipse.che.ide.api.dialogs.CancelCallback;
-import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.ui.dialogs.CancelCallback;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmCallback;
 import org.eclipse.che.plugin.github.ide.GitHubLocalizationConstant;
 
 /** @author Roman Nikitenko */

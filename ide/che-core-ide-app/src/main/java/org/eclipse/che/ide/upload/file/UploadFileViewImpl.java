@@ -25,7 +25,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
+import org.eclipse.che.ide.core.AgentURLModifier;
 import org.eclipse.che.ide.ui.window.Window;
 
 /**
@@ -37,7 +37,7 @@ public class UploadFileViewImpl extends Window implements UploadFileView {
 
   public interface UploadFileViewBinder extends UiBinder<Widget, UploadFileViewImpl> {}
 
-  private final WsAgentURLModifier wsAgentURLModifier;
+  private final AgentURLModifier agentURLModifier;
 
   Button btnCancel;
   Button btnUpload;
@@ -54,7 +54,7 @@ public class UploadFileViewImpl extends Window implements UploadFileView {
   public UploadFileViewImpl(
       UploadFileViewBinder uploadFileViewBinder,
       CoreLocalizationConstant locale,
-      WsAgentURLModifier wsAgentURLModifier) {
+      AgentURLModifier agentURLModifier) {
 
     this.setTitle(locale.uploadFileTitle());
     setWidget(uploadFileViewBinder.createAndBindUi(this));
@@ -85,7 +85,7 @@ public class UploadFileViewImpl extends Window implements UploadFileView {
               }
             });
     addButtonToFooter(btnUpload);
-    this.wsAgentURLModifier = wsAgentURLModifier;
+    this.agentURLModifier = agentURLModifier;
   }
 
   /** Bind handlers. */
@@ -136,7 +136,7 @@ public class UploadFileViewImpl extends Window implements UploadFileView {
   /** {@inheritDoc} */
   @Override
   public void setAction(@NotNull String url) {
-    submitForm.setAction(wsAgentURLModifier.modify(url));
+    submitForm.setAction(agentURLModifier.modify(url));
     submitForm.setMethod(FormPanel.METHOD_POST);
   }
 

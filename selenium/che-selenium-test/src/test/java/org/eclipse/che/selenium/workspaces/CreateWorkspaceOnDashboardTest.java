@@ -15,11 +15,10 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestStacksConstants;
-import org.eclipse.che.selenium.core.constant.TestWorkspaceConstants;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.Loader;
-import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
@@ -40,9 +39,9 @@ public class CreateWorkspaceOnDashboardTest {
   @Inject private MachineTerminal terminal;
   @Inject private Dashboard dashboard;
   @Inject private DashboardWorkspace dashboardWorkspace;
-  @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private ToastLoader toastLoader;
 
   @AfterClass
   public void tearDown() throws Exception {
@@ -52,23 +51,19 @@ public class CreateWorkspaceOnDashboardTest {
   @Test
   public void createWorkspaceOnDashboardTest() {
     dashboard.open();
-
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(NavigationBar.MenuItem.WORKSPACES);
     dashboardWorkspace.waitToolbarTitleName("Workspaces");
     dashboardWorkspace.clickOnNewWorkspaceBtn();
-
     createWorkspace.waitToolbar();
     createWorkspace.typeWorkspaceName(WORKSPACE);
     createWorkspace.selectStack(TestStacksConstants.JAVA.getId());
     createWorkspace.setMachineRAM("2");
     createWorkspace.clickCreate();
-
     seleniumWebDriver.switchFromDashboardIframeToIde();
-    notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed(
-        TestWorkspaceConstants.RUNNING_WORKSPACE_MESS, 240);
+    toastLoader.waitExpectedTextInToastLoader("Starting workspace runtime.", 60);
     projectExplorer.waitProjectExplorer();
     loader.waitOnClosed();
-    terminal.waitTerminalConsole(20);
+    terminal.waitTerminalTab();
   }
 }

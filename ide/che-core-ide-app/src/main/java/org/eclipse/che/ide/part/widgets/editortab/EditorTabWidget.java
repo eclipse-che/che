@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.ide.part.widgets.editortab;
 
-import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.CLOSE;
+import static org.eclipse.che.ide.api.editor.events.FileEvent.FileOperation.CLOSE;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_FROM;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_TO;
@@ -37,13 +37,12 @@ import com.google.web.bindery.event.shared.EventBus;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
-import org.eclipse.che.ide.api.event.FileEvent;
-import org.eclipse.che.ide.api.event.FileEvent.FileEventHandler;
+import org.eclipse.che.ide.api.editor.events.FileEvent;
+import org.eclipse.che.ide.api.editor.events.FileEvent.FileEventHandler;
 import org.eclipse.che.ide.api.parts.EditorPartStack;
 import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
-import org.eclipse.che.ide.api.parts.PartStackView.TabPosition;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent.ResourceChangedHandler;
@@ -180,13 +179,6 @@ public class EditorTabWidget extends Composite
   @Override
   public void unSelect() {
     getElement().removeAttribute("focused");
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void setTabPosition(@NotNull TabPosition tabPosition) {
-    throw new UnsupportedOperationException(
-        "This method doesn't allow in this class " + getClass());
   }
 
   /** {@inheritDoc} */

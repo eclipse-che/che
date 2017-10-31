@@ -18,11 +18,11 @@ import java.util.Optional;
 import java.util.Set;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandGoalRegistry;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.dialogs.InputCallback;
 import org.eclipse.che.ide.command.editor.EditorMessages;
 import org.eclipse.che.ide.command.editor.page.AbstractCommandEditorPage;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.ide.ui.dialogs.input.InputCallback;
 
 /**
  * {@link CommandEditorPage} which allows to edit command's goal.

@@ -90,7 +90,7 @@ public class CreateNamedFactoryFromDashBoard {
     loadingBehaviorPage.waitWhileLoadPageIsClosed();
     seleniumWebDriver.switchFromDashboardIframeToIde();
     projectExplorer.waitItem(PROJECT_NAME);
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(CONFIGURING_PROJECT_AND_CLONING_SOURCE_CODE);
     events.waitExpectedMessage("Project " + PROJECT_NAME + " imported");
     notificationsPopupPanel.waitPopUpPanelsIsClosed();

@@ -13,10 +13,9 @@ package org.eclipse.che.ide.api.action;
 import java.util.Map;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.parts.PerspectiveManager;
 
 /**
- * Container for the information necessary to execute {@link Action} and cancel closing of
+ * Container for the information necessary to execute {@link BaseAction} and cancel closing of
  * application.
  *
  * @author Sergii Leschenko
@@ -25,20 +24,15 @@ public class AppCloseActionEvent extends ActionEvent {
   private String cancelMessage;
 
   public AppCloseActionEvent(
-      @NotNull Presentation presentation,
-      @NotNull ActionManager actionManager,
-      @NotNull PerspectiveManager perspectiveManager) {
-
-    super(presentation, actionManager, perspectiveManager);
+      @NotNull Presentation presentation, @NotNull ActionManager actionManager) {
+    super(presentation, actionManager);
   }
 
   public AppCloseActionEvent(
       @NotNull Presentation presentation,
       @NotNull ActionManager actionManager,
-      @NotNull PerspectiveManager perspectiveManager,
       @Nullable Map<String, String> parameters) {
-
-    super(presentation, actionManager, perspectiveManager, parameters);
+    super(presentation, actionManager, parameters);
   }
 
   /**

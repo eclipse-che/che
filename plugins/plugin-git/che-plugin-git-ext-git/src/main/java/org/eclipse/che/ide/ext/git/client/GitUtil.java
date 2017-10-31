@@ -14,7 +14,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import java.util.List;
 import java.util.Map;
-import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;

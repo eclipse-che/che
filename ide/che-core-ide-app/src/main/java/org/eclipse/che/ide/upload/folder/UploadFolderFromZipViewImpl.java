@@ -25,7 +25,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
+import org.eclipse.che.ide.core.AgentURLModifier;
 import org.eclipse.che.ide.ui.window.Window;
 
 /**
@@ -38,7 +38,7 @@ public class UploadFolderFromZipViewImpl extends Window implements UploadFolderF
   public interface UploadFolderFromZipViewBinder
       extends UiBinder<Widget, UploadFolderFromZipViewImpl> {}
 
-  private final WsAgentURLModifier wsAgentURLModifier;
+  private final AgentURLModifier agentURLModifier;
 
   Button btnCancel;
   Button btnUpload;
@@ -57,7 +57,7 @@ public class UploadFolderFromZipViewImpl extends Window implements UploadFolderF
       UploadFolderFromZipViewBinder uploadFileViewBinder,
       CoreLocalizationConstant locale,
       org.eclipse.che.ide.Resources resources,
-      WsAgentURLModifier wsAgentURLModifier) {
+      AgentURLModifier agentURLModifier) {
     this.constant = locale;
     this.setTitle(locale.uploadZipFolderTitle());
     setWidget(uploadFileViewBinder.createAndBindUi(this));
@@ -89,7 +89,7 @@ public class UploadFolderFromZipViewImpl extends Window implements UploadFolderF
             });
     btnUpload.addStyleName(resources.Css().buttonLoader());
     addButtonToFooter(btnUpload);
-    this.wsAgentURLModifier = wsAgentURLModifier;
+    this.agentURLModifier = agentURLModifier;
   }
 
   /** Bind handlers. */
@@ -152,7 +152,7 @@ public class UploadFolderFromZipViewImpl extends Window implements UploadFolderF
   /** {@inheritDoc} */
   @Override
   public void setAction(@NotNull String url) {
-    submitForm.setAction(wsAgentURLModifier.modify(url));
+    submitForm.setAction(agentURLModifier.modify(url));
     submitForm.setMethod(FormPanel.METHOD_POST);
   }
 

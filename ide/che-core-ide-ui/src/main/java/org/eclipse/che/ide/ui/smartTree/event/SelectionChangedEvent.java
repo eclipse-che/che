@@ -15,7 +15,7 @@ import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import java.util.Collections;
 import java.util.List;
-import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent.SelectionChangedHandler;
 
 /**

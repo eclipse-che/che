@@ -20,7 +20,7 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  *
  * @author Evgen Vidolob
  */
-public abstract class ProjectAction extends Action {
+public abstract class ProjectAction extends BaseAction {
 
   protected AppContext appContext;
 
@@ -35,7 +35,7 @@ public abstract class ProjectAction extends Action {
   }
 
   protected ProjectAction(String text, String description, SVGResource svgIcon) {
-    super(text, description, null, svgIcon);
+    super(text, description, svgIcon);
   }
 
   @Override

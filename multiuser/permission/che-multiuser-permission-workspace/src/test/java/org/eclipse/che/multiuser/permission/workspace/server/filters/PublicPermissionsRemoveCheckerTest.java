@@ -26,7 +26,6 @@ import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.multiuser.api.permission.server.PermissionsManager;
 import org.eclipse.che.multiuser.api.permission.server.SystemDomain;
 import org.eclipse.che.multiuser.api.permission.server.filter.check.DefaultRemovePermissionsChecker;
-import org.eclipse.che.multiuser.permission.machine.recipe.RecipeDomain;
 import org.eclipse.che.multiuser.permission.workspace.server.stack.StackDomain;
 import org.eclipse.che.multiuser.permission.workspace.server.stack.StackPermissionsImpl;
 import org.mockito.Mock;
@@ -112,18 +111,5 @@ public class PublicPermissionsRemoveCheckerTest {
     verify(manager, times(1)).get("*", StackDomain.DOMAIN_ID, INSTANCE);
     verify(subj, times(1)).hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_SYSTEM_ACTION);
     verify(defaultChecker, never()).check("*", StackDomain.DOMAIN_ID, INSTANCE);
-  }
-
-  @Test
-  public void permitsRemoveRecipePermissionsWhenAdminUserPassedDefaultCheck() throws Exception {
-    when(manager.get("*", RecipeDomain.DOMAIN_ID, INSTANCE))
-        .thenReturn(new StackPermissionsImpl("*", INSTANCE, singletonList(StackDomain.SEARCH)));
-    when(subj.hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_SYSTEM_ACTION)).thenReturn(true);
-
-    publicPermissionsRemoveChecker.check("*", RecipeDomain.DOMAIN_ID, INSTANCE);
-
-    verify(manager, times(1)).get("*", RecipeDomain.DOMAIN_ID, INSTANCE);
-    verify(subj, times(1)).hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_SYSTEM_ACTION);
-    verify(defaultChecker, never()).check("*", RecipeDomain.DOMAIN_ID, INSTANCE);
   }
 }

@@ -16,10 +16,11 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.che.api.machine.shared.dto.MachineRuntimeInfoDto;
-import org.eclipse.che.api.machine.shared.dto.ServerDto;
+import java.util.Optional;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.DevMachine;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+import org.eclipse.che.ide.api.workspace.model.ServerImpl;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,20 +41,19 @@ public class PreviewUrlTest {
 
   @Before
   public void setUp() {
-    ServerDto server = mock(ServerDto.class);
+    ServerImpl server = mock(ServerImpl.class);
     when(server.getUrl()).thenReturn("http://preview.com");
 
-    Map<String, ServerDto> servers = new HashMap<>();
+    Map<String, ServerImpl> servers = new HashMap<>();
     servers.put(SERVER_PORT + "/tcp", server);
 
-    MachineRuntimeInfoDto machineRuntimeInfo = mock(MachineRuntimeInfoDto.class);
-    when(machineRuntimeInfo.getServers()).thenReturn(servers);
+    MachineImpl devMachine = mock(MachineImpl.class);
+    when(devMachine.getName()).thenReturn(MACHINE_NAME);
+    when(devMachine.getServers()).thenReturn(servers);
 
-    DevMachine devMachine = mock(DevMachine.class);
-    when(devMachine.getDisplayName()).thenReturn(MACHINE_NAME);
-    when(devMachine.getRuntime()).thenReturn(machineRuntimeInfo);
-
-    when(appContext.getDevMachine()).thenReturn(devMachine);
+    WorkspaceImpl workspace = mock(WorkspaceImpl.class);
+    when(workspace.getDevMachine()).thenReturn(Optional.of(devMachine));
+    when(appContext.getWorkspace()).thenReturn(workspace);
 
     previewUrl = new PreviewUrl(PREVIEW_URL, appContext);
   }

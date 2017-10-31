@@ -45,7 +45,7 @@ public class FindUsages {
 
   private interface Locators {
     String FIND_USAGES_INFO_PANEL = "gwt-debug-findUsages-panel";
-    String FIND_USAGES_TAB = "gwt-debug-partButton-Usages";
+    String FIND_USAGES_ICON = "gwt-debug-partButton-Usages";
     String FIND_USAGES_NODE = "//div[@id='gwt-debug-findUsages-panel']//div[text()='%s']";
     String FIND_USAGES_ICON_NODE =
         "//div[@id='gwt-debug-findUsages-panel']//div[text()='%s']"
@@ -57,8 +57,8 @@ public class FindUsages {
   @FindBy(id = Locators.FIND_USAGES_INFO_PANEL)
   WebElement findPanel;
 
-  @FindBy(id = Locators.FIND_USAGES_TAB)
-  WebElement findTab;
+  @FindBy(id = Locators.FIND_USAGES_ICON)
+  WebElement findUsagesIcon;
 
   /** wait the 'find usages' panel is open */
   public void waitFindUsagesPanelIsOpen() {
@@ -76,9 +76,9 @@ public class FindUsages {
   }
 
   /** click on the find tab */
-  public void clickFindUsagesTab() {
+  public void clickFindUsagesIcon() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(findTab))
+        .until(ExpectedConditions.visibilityOf(findUsagesIcon))
         .click();
   }
 
@@ -89,10 +89,7 @@ public class FindUsages {
    */
   public void waitExpectedTextInFindUsagesPanel(String expText) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            (WebDriver driver) -> {
-              return getTextFromFindUsagesPanel().contains(expText);
-            });
+        .until((WebDriver driver) -> getTextFromFindUsagesPanel().contains(expText));
   }
 
   /**
@@ -192,8 +189,7 @@ public class FindUsages {
             By.xpath(String.format(Locators.FIND_USAGES_HIGHLIGHTED_ITEM, nameElement)));
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
-            (WebDriver webDriver) -> {
-              return item.getCssValue("background-image").contains(HIGHLIGHTED_IMAGE);
-            });
+            (WebDriver webDriver) ->
+                item.getCssValue("background-image").contains(HIGHLIGHTED_IMAGE));
   }
 }

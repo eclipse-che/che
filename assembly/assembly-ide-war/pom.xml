@@ -16,20 +16,24 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>5.20.0-SNAPSHOT</version>
+        <version>6.0.0-M1-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-ide-war</artifactId>
     <packaging>war</packaging>
     <name>Che IDE :: Compiling GWT Application</name>
     <properties>
         <generated.sources.directory>${project.build.directory}/generated-sources/gen</generated.sources.directory>
-        <gwt.log.enable>false</gwt.log.enable>
+        <gwt.log.enable>true</gwt.log.enable>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-ide-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.infrastructure.docker</groupId>
+            <artifactId>docker-client</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
@@ -50,10 +54,6 @@
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-debugger-ide</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-docker-client</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
@@ -145,10 +145,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-openshift-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-orion-compare</artifactId>
         </dependency>
         <dependency>
@@ -189,14 +185,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-ssh-machine</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-svn-ext-ide</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-testing-ide</artifactId>
         </dependency>
         <dependency>
@@ -226,6 +214,11 @@
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-zend-debugger-ide</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-dev</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -348,44 +341,22 @@
                     <outputDirectory>${generated.sources.directory}</outputDirectory>
                 </configuration>
             </plugin>
-            <!-- GWT Maven Plugin -->
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
+                <groupId>net.ltgt.gwt.maven</groupId>
                 <artifactId>gwt-maven-plugin</artifactId>
                 <executions>
                     <execution>
                         <goals>
                             <goal>compile</goal>
-                            <!--<goal>test</goal>-->
                         </goals>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.google.gwt</groupId>
-                        <artifactId>gwt-codeserver</artifactId>
-                        <version>${com.google.gwt.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>com.google.gwt</groupId>
-                        <artifactId>gwt-dev</artifactId>
-                        <version>${com.google.gwt.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>com.google.gwt</groupId>
-                        <artifactId>gwt-user</artifactId>
-                        <version>${com.google.gwt.version}</version>
-                    </dependency>
-                </dependencies>
                 <configuration>
-                    <gwtSdkFirstInClasspath>true</gwtSdkFirstInClasspath>
-                    <extraJvmArgs>${gwt.compiler.extraJvmArgs}</extraJvmArgs>
-                    <modules>
-                        <module>org.eclipse.che.ide.IDE</module>
-                    </modules>
-                    <!-- don' remove it we will use it then need to found bug in compiled JS -->
-                    <!--style>DETAILED</style-->
-                    <logLevel>${gwt.compiler.logLevel}</logLevel>
+                    <moduleName>org.eclipse.che.ide.IDE</moduleName>
+                    <jvmArgs>
+                        <arg>${gwt.compiler.jvmArgs.Xss}</arg>
+                        <arg>${gwt.compiler.jvmArgs.Xmx}</arg>
+                    </jvmArgs>
                 </configuration>
             </plugin>
             <plugin>

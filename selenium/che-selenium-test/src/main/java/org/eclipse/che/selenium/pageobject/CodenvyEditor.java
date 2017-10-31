@@ -25,6 +25,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentI
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -35,6 +36,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
@@ -53,6 +55,7 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.slf4j.Logger;
 
 /** @author Musienko Maxim */
 @Singleton
@@ -60,6 +63,7 @@ public class CodenvyEditor {
 
   public static final String CLOSE_ALL_TABS = "gwt-debug-contextMenu/closeAllEditors";
   public static final String VCS_RULER = "//div[@class='ruler vcs']/div";
+  public static final Logger LOG = getLogger(CodenvyEditor.class);
 
   public static final class EditorContextMenu {
     public static final String REFACTORING = "contextMenu/Refactoring";
@@ -129,7 +133,7 @@ public class CodenvyEditor {
     private Locators() {}
 
     public static final String CONTEXT_MENU = "//div[@id='menu-lock-layer-id']/div[2]";
-    public static final String EDITOR_TABS_PANEL = "gwt-debug-editorPartStack-tabsPanel";
+    public static final String EDITOR_TABS_PANEL = "gwt-debug-multiSplitPanel-tabsPanel";
     public static final String ACTIVE_LINE_NUMBER =
         "//div[@class='textviewSelection']/following::div[contains(text(),':')]";
     public static final String POSITION_CURSOR_NUMBER =
@@ -146,13 +150,14 @@ public class CodenvyEditor {
         "//div[@class='annotationLine currentLine' and @role='presentation']";
     public static final String ACTIVE_TAB_FILE_NAME = "//div[@active]/descendant::div[text()='%s']";
     public static final String TAB_FILE_NAME_XPATH =
-        "//div[@id='gwt-debug-editorPartStack-tabsPanel']//div[text()='%s']";
+        "//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[text()='%s']";
     public static final String TAB_FILE_NAME_AND_STYLE =
-        "//div[@id='gwt-debug-editorPartStack-tabsPanel']//div[text()='%s' and @style='%s']";
+        "//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[text()='%s' and @style='%s']";
     public static final String TAB_FILE_CLOSE_ICON =
-        "//div[@id='gwt-debug-editorPartStack-tabsPanel']//div[text()='%s']/following::div[1]";
+        "//div[@id='gwt-debug-editorMultiPartStack-contentPanel']//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[text()='%s']/following::div[1]";
+
     public static final String ALL_TABS_XPATH =
-        "//div[@id='gwt-debug-editorPartStack-tabsPanel']//div[string-length(text())>0]";
+        "//div[@id='gwt-debug-editorMultiPartStack-contentPanel']//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[string-length(text())>0]";
     public static final String SELECTED_ITEM_IN_EDITOR =
         "//div[@contenteditable='true']//span[contains(text(), '%s')]";
 
@@ -181,7 +186,7 @@ public class CodenvyEditor {
     public static final String DOWNLOAD_SOURCES_LINK = "//anchor[text()='Download sources']";
 
     public static final String TAB_LIST_BUTTON =
-        "//div[@id='gwt-debug-editorPartStack-tabsPanel']/div[1]/div";
+        "(//div[@id='gwt-debug-plusPanel'])[2]/following-sibling::div";
     public static final String ITEM_TAB_LIST =
         "//div[@class='popupContent']//div[text()='%s']/parent::div";
 
@@ -1028,7 +1033,7 @@ public class CodenvyEditor {
                     String.format(
                         Locators.TAB_FILE_NAME_AND_STYLE,
                         fileName,
-                        "color: rgb(255, 255, 255);"))));
+                        "color: rgb(160, 169, 183);"))));
   }
 
   /**
@@ -1758,12 +1763,36 @@ public class CodenvyEditor {
    *     attribute of iframe of JavaDoc popup.
    */
   public String getAutocompleteProposalJavaDocHtml() throws IOException {
+    waitJavaDocPopupSrcAttributeIsNotEmpty();
+    return getJavaDocPopupText();
+  }
+
+  public void waitContextMenuJavaDocText(String expectedText) {
+    waitJavaDocPopupSrcAttributeIsNotEmpty();
+
+    loadPageDriverWait.until(
+        (ExpectedCondition<Boolean>)
+            driver -> {
+              String javaDocPopupHtmlText = "";
+              try {
+                javaDocPopupHtmlText = getJavaDocPopupText();
+              } catch (IOException e) {
+                LOG.error(
+                    "Can not get java doc HTML text from autocomplete context menu in editor");
+              }
+              return verifyJavaDoc(javaDocPopupHtmlText, expectedText);
+            });
+  }
+
+  private void waitJavaDocPopupSrcAttributeIsNotEmpty() {
     new FluentWait<>(seleniumWebDriver)
         .withTimeout(LOAD_PAGE_TIMEOUT_SEC * 2, SECONDS)
         .pollingEvery(LOAD_PAGE_TIMEOUT_SEC / 2, SECONDS)
         .ignoring(StaleElementReferenceException.class, NoSuchElementException.class)
         .until(ExpectedConditions.attributeToBeNotEmpty(autocompleteProposalJavaDocPopup, "src"));
+  }
 
+  private String getJavaDocPopupText() throws IOException {
     URL connectionUrl = new URL(autocompleteProposalJavaDocPopup.getAttribute("src"));
     HttpURLConnection connection = (HttpURLConnection) connectionUrl.openConnection();
     connection.setRequestMethod("GET");
@@ -1774,5 +1803,9 @@ public class CodenvyEditor {
     } finally {
       connection.disconnect();
     }
+  }
+
+  private boolean verifyJavaDoc(String javaDocHtml, String regex) {
+    return Pattern.compile(regex, Pattern.DOTALL).matcher(javaDocHtml).matches();
   }
 }

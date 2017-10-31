@@ -14,8 +14,8 @@ import com.google.inject.Singleton;
 import java.util.List;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
-import org.eclipse.che.ide.api.data.tree.Node;
-import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
+import org.eclipse.che.ide.ui.smartTree.data.NodeInterceptor;
 
 /**
  * Default implementation of node interceptor that do nothing. Just need to proper initialization of

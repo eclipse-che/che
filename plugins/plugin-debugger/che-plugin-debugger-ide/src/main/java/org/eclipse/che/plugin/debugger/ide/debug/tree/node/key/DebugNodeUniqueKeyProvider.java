@@ -18,10 +18,10 @@ import com.google.inject.Singleton;
 import java.util.Objects;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.WatchExpression;
-import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.UniqueKeyProvider;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.plugin.debugger.ide.debug.tree.node.VariableNode;
 import org.eclipse.che.plugin.debugger.ide.debug.tree.node.WatchExpressionNode;
 

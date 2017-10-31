@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.ide.part.widgets.editortab;
 
-import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.BELOW;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.mock;
@@ -92,11 +91,6 @@ public class EditorTabWidgetTest {
     tab.getTitle();
 
     verify(tab.title).getText();
-  }
-
-  @Test(expected = UnsupportedOperationException.class)
-  public void exceptionShouldBeThrownWhenTrySetTabPosition() {
-    tab.setTabPosition(BELOW);
   }
 
   @Test

@@ -106,15 +106,14 @@ public class StackLoader {
 
   protected void loadStack(StackImpl stack, Path imagePath) {
     setIconData(stack, imagePath);
-
     try {
-      stackDao.update(stack);
-    } catch (NotFoundException | ConflictException | ServerException e) {
       try {
+        stackDao.update(stack);
+      } catch (NotFoundException ex) {
         stackDao.create(stack);
-      } catch (Exception ex) {
-        LOG.error(format("Failed to load stack with id '%s' ", stack.getId()), ex);
       }
+    } catch (ServerException | ConflictException ex) {
+      LOG.warn(format("Failed to load stack with id '%s' ", stack.getId()), ex.getMessage());
     }
   }
 

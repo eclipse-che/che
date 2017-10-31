@@ -27,7 +27,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
+import org.eclipse.che.ide.api.filewatcher.ClientServerEventService;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
@@ -45,7 +45,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -103,11 +102,13 @@ public class OrganizeImportsPresenterTest {
 
     when(clientServerEventService.sendFileTrackingSuspendEvent())
         .thenReturn(fileTrackingSuspendEventPromise);
-    when(fileTrackingSuspendEventPromise.then(ArgumentMatchers.<Operation<Boolean>>anyObject()))
+    when(fileTrackingSuspendEventPromise.then(
+            org.mockito.ArgumentMatchers.<Operation<Boolean>>anyObject()))
         .thenReturn(fileTrackingSuspendEventPromise);
 
     when(javaCodeAssistClient.organizeImports(anyString(), anyString())).thenReturn(importsPromise);
-    when(importsPromise.then(ArgumentMatchers.<Operation<OrganizeImportResult>>anyObject()))
+    when(importsPromise.then(
+            org.mockito.ArgumentMatchers.<Operation<OrganizeImportResult>>anyObject()))
         .thenReturn(importsPromise);
 
     presenter =
@@ -231,11 +232,12 @@ public class OrganizeImportsPresenterTest {
   public void focusShouldBeSetAfterApplyingConflicts() throws Exception {
     when(view.getSelectedImport()).thenReturn("import1");
     when(dtoFactory.createDto(ConflictImportDTO.class)).thenReturn(conflict1);
-    when(conflict1.withTypeMatches(ArgumentMatchers.<List<String>>anyObject()))
+    when(conflict1.withTypeMatches(org.mockito.ArgumentMatchers.<List<String>>anyObject()))
         .thenReturn(conflict1);
     when(javaCodeAssistClient.applyChosenImports(anyString(), anyString(), any()))
         .thenReturn(resolveConflictsPromise);
-    when(resolveConflictsPromise.then(ArgumentMatchers.<Operation<List<Change>>>anyObject()))
+    when(resolveConflictsPromise.then(
+            org.mockito.ArgumentMatchers.<Operation<List<Change>>>anyObject()))
         .thenReturn(resolveConflictsPromise);
 
     showOrganizeImportsWindow();

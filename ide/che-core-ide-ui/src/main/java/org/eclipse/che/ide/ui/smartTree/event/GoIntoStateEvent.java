@@ -14,7 +14,7 @@ import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.event.shared.HasHandlers;
-import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.event.GoIntoStateEvent.GoIntoStateHandler;
 
 /** @author Vlad Zhukovskiy */

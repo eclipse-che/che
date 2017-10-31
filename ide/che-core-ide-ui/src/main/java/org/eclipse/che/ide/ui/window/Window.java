@@ -44,10 +44,6 @@ public abstract class Window implements IsWidget {
 
   protected static final Resources resources = GWT.create(Resources.class);
 
-  static {
-    resources.windowCss().ensureInjected();
-  }
-
   private boolean blocked = false;
 
   private boolean hideOnEscapeEnabled = true;

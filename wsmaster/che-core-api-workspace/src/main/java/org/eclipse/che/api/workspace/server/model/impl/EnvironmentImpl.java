@@ -10,7 +10,9 @@
  */
 package org.eclipse.che.api.workspace.server.model.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -25,9 +27,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import org.eclipse.che.api.core.model.workspace.Environment;
-import org.eclipse.che.api.core.model.workspace.EnvironmentRecipe;
-import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
+import javax.persistence.Transient;
+import org.eclipse.che.api.core.model.workspace.Warning;
+import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
+import org.eclipse.che.api.core.model.workspace.config.Recipe;
 
 /**
  * Data object for {@link Environment}.
@@ -43,19 +47,23 @@ public class EnvironmentImpl implements Environment {
   @Column(name = "id")
   private Long id;
 
-  @Embedded private EnvironmentRecipeImpl recipe;
+  @Embedded private RecipeImpl recipe;
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
   @JoinColumn(name = "machines_id")
   @MapKeyColumn(name = "machines_key")
-  private Map<String, ExtendedMachineImpl> machines;
+  private Map<String, MachineConfigImpl> machines;
+
+  @Transient private List<WarningImpl> warnings;
 
   public EnvironmentImpl() {}
 
   public EnvironmentImpl(
-      EnvironmentRecipe recipe, Map<String, ? extends ExtendedMachine> machines) {
+      Recipe recipe,
+      Map<String, ? extends MachineConfig> machines,
+      List<? extends Warning> warnings) {
     if (recipe != null) {
-      this.recipe = new EnvironmentRecipeImpl(recipe);
+      this.recipe = new RecipeImpl(recipe);
     }
     if (machines != null) {
       this.machines =
@@ -64,72 +72,73 @@ public class EnvironmentImpl implements Environment {
               .stream()
               .collect(
                   Collectors.toMap(
-                      Map.Entry::getKey, entry -> new ExtendedMachineImpl(entry.getValue())));
+                      Map.Entry::getKey, entry -> new MachineConfigImpl(entry.getValue())));
+    }
+    if (warnings != null) {
+      this.warnings = warnings.stream().map(WarningImpl::new).collect(Collectors.toList());
     }
   }
 
   public EnvironmentImpl(Environment environment) {
-    if (environment.getRecipe() != null) {
-      this.recipe = new EnvironmentRecipeImpl(environment.getRecipe());
-    }
-    if (environment.getMachines() != null) {
-      this.machines =
-          environment
-              .getMachines()
-              .entrySet()
-              .stream()
-              .collect(
-                  Collectors.toMap(
-                      Map.Entry::getKey, entry -> new ExtendedMachineImpl(entry.getValue())));
-    }
+    this(environment.getRecipe(), environment.getMachines(), environment.getWarnings());
   }
 
   @Override
-  public EnvironmentRecipeImpl getRecipe() {
+  public RecipeImpl getRecipe() {
     return recipe;
   }
 
-  public void setRecipe(EnvironmentRecipeImpl environmentRecipe) {
+  public void setRecipe(RecipeImpl environmentRecipe) {
     this.recipe = environmentRecipe;
   }
 
   @Override
-  public Map<String, ExtendedMachineImpl> getMachines() {
+  public Map<String, MachineConfigImpl> getMachines() {
     if (machines == null) {
       machines = new HashMap<>();
     }
     return machines;
   }
 
-  public void setMachines(Map<String, ExtendedMachineImpl> machines) {
+  @Override
+  public List<? extends Warning> getWarnings() {
+    if (warnings == null) {
+      warnings = new ArrayList<>();
+    }
+    return warnings;
+  }
+
+  public void setMachines(Map<String, MachineConfigImpl> machines) {
     this.machines = machines;
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (!(obj instanceof EnvironmentImpl)) {
-      return false;
-    }
-    final EnvironmentImpl that = (EnvironmentImpl) obj;
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof EnvironmentImpl)) return false;
+    EnvironmentImpl that = (EnvironmentImpl) o;
     return Objects.equals(id, that.id)
-        && Objects.equals(recipe, that.recipe)
-        && getMachines().equals(that.getMachines());
+        && Objects.equals(getRecipe(), that.getRecipe())
+        && Objects.equals(getMachines(), that.getMachines())
+        && Objects.equals(getWarnings(), that.getWarnings());
   }
 
   @Override
   public int hashCode() {
-    int hash = 7;
-    hash = 31 * hash + Objects.hashCode(id);
-    hash = 31 * hash + Objects.hashCode(recipe);
-    hash = 31 * hash + getMachines().hashCode();
-    return hash;
+    return Objects.hash(id, getRecipe(), getMachines(), getWarnings());
   }
 
   @Override
   public String toString() {
-    return "EnvironmentImpl{" + "id=" + id + ", recipe=" + recipe + ", machines=" + machines + '}';
+    return "EnvironmentImpl{"
+        + "id="
+        + id
+        + ", recipe="
+        + recipe
+        + ", machines="
+        + machines
+        + ", warnings="
+        + warnings
+        + '}';
   }
 }

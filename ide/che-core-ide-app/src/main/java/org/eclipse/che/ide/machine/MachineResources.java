@@ -64,6 +64,9 @@ public interface MachineResources extends ClientBundle {
   @Source("project-perspective.svg")
   SVGResource projectPerspective();
 
+  @Source("remote.svg")
+  SVGResource remote();
+
   /** CssResource for the image viewer. */
   public interface Css extends CssResource {
     String processTree();

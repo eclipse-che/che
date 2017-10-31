@@ -18,10 +18,10 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.position.PositionConverter;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.core.AgentURLModifier;
 import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
 import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 import org.eclipse.che.ide.util.loging.Log;
@@ -33,14 +33,14 @@ public class QuickDocPresenter implements QuickDocumentation, QuickDocView.Actio
   private final QuickDocView view;
   private final AppContext appContext;
   private final EditorAgent editorAgent;
-  private final WsAgentURLModifier agentURLDecorator;
+  private final AgentURLModifier agentURLDecorator;
 
   @Inject
   public QuickDocPresenter(
       QuickDocView view,
       AppContext appContext,
       EditorAgent editorAgent,
-      WsAgentURLModifier linksDecorator) {
+      AgentURLModifier linksDecorator) {
     this.view = view;
     this.appContext = appContext;
     this.editorAgent = editorAgent;
@@ -78,7 +78,7 @@ public class QuickDocPresenter implements QuickDocumentation, QuickDocView.Actio
       final String fqn = JavaUtil.resolveFQN((Container) srcFolder.get(), resource);
 
       final String docUrl =
-          appContext.getDevMachine().getWsAgentBaseUrl()
+          appContext.getWsAgentServerApiEndpoint()
               + "/java/javadoc/find?fqn="
               + fqn
               + "&projectpath="

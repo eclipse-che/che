@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Set;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.git.shared.Branch;
-import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangedFileNode;
@@ -43,6 +42,7 @@ import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelView;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.ShiftableTextArea;
 import org.eclipse.che.ide.ui.smartTree.Tree;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.presentation.DefaultPresentationRenderer;
 import org.eclipse.che.ide.ui.window.Window;
 

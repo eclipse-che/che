@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.plugin.debugger.ide.configuration;
 
-import org.eclipse.che.ide.api.action.Action;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 
 /**
@@ -19,5 +19,5 @@ import org.eclipse.che.ide.api.debug.DebugConfiguration;
  * @author Artem Zatsarynnyi
  */
 public interface DebugConfigurationActionFactory {
-  Action createAction(DebugConfiguration configuration);
+  BaseAction createAction(DebugConfiguration configuration);
 }

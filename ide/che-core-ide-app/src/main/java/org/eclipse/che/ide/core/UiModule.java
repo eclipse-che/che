@@ -12,36 +12,37 @@ package org.eclipse.che.ide.core;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
-import com.google.gwt.inject.client.multibindings.GinMapBinder;
 import com.google.inject.Singleton;
-import org.eclipse.che.ide.api.component.Component;
-import org.eclipse.che.ide.api.dialogs.ChoiceDialog;
-import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.dialogs.InputDialog;
-import org.eclipse.che.ide.api.dialogs.MessageDialog;
 import org.eclipse.che.ide.api.icon.IconRegistry;
-import org.eclipse.che.ide.icon.DefaultIconsComponent;
+import org.eclipse.che.ide.icon.DefaultIconsRegistrar;
 import org.eclipse.che.ide.icon.IconRegistryImpl;
 import org.eclipse.che.ide.menu.MainMenuView;
 import org.eclipse.che.ide.menu.MainMenuViewImpl;
 import org.eclipse.che.ide.menu.StatusPanelGroupView;
 import org.eclipse.che.ide.menu.StatusPanelGroupViewImpl;
+import org.eclipse.che.ide.part.WorkBenchControllerFactory;
+import org.eclipse.che.ide.part.WorkBenchPartController;
+import org.eclipse.che.ide.part.WorkBenchPartControllerImpl;
 import org.eclipse.che.ide.ui.button.ConsoleButton;
 import org.eclipse.che.ide.ui.button.ConsoleButtonFactory;
 import org.eclipse.che.ide.ui.button.ConsoleButtonImpl;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.ide.ui.dialogs.choice.ChoiceDialog;
 import org.eclipse.che.ide.ui.dialogs.choice.ChoiceDialogFooter;
 import org.eclipse.che.ide.ui.dialogs.choice.ChoiceDialogPresenter;
 import org.eclipse.che.ide.ui.dialogs.choice.ChoiceDialogView;
 import org.eclipse.che.ide.ui.dialogs.choice.ChoiceDialogViewImpl;
+import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmDialog;
 import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmDialogFooter;
 import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmDialogPresenter;
 import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmDialogView;
 import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmDialogViewImpl;
+import org.eclipse.che.ide.ui.dialogs.input.InputDialog;
 import org.eclipse.che.ide.ui.dialogs.input.InputDialogFooter;
 import org.eclipse.che.ide.ui.dialogs.input.InputDialogPresenter;
 import org.eclipse.che.ide.ui.dialogs.input.InputDialogView;
 import org.eclipse.che.ide.ui.dialogs.input.InputDialogViewImpl;
+import org.eclipse.che.ide.ui.dialogs.message.MessageDialog;
 import org.eclipse.che.ide.ui.dialogs.message.MessageDialogFooter;
 import org.eclipse.che.ide.ui.dialogs.message.MessageDialogPresenter;
 import org.eclipse.che.ide.ui.dialogs.message.MessageDialogView;
@@ -59,9 +60,6 @@ import org.eclipse.che.ide.ui.toolbar.MainToolbar;
 import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
 import org.eclipse.che.ide.ui.toolbar.ToolbarView;
 import org.eclipse.che.ide.ui.toolbar.ToolbarViewImpl;
-import org.eclipse.che.ide.workspace.WorkBenchControllerFactory;
-import org.eclipse.che.ide.workspace.WorkBenchPartController;
-import org.eclipse.che.ide.workspace.WorkBenchPartControllerImpl;
 import org.eclipse.che.ide.workspace.WorkspaceView;
 import org.eclipse.che.ide.workspace.WorkspaceViewImpl;
 
@@ -75,11 +73,8 @@ public class UiModule extends AbstractGinModule {
   @Override
   protected void configure() {
     bind(IconRegistry.class).to(IconRegistryImpl.class).in(Singleton.class);
-
-    GinMapBinder<String, Component> componentsBinder =
-        GinMapBinder.newMapBinder(binder(), String.class, Component.class);
-    componentsBinder.addBinding("DefaultIconsComponent").to(DefaultIconsComponent.class);
-    componentsBinder.addBinding("FontAwesomeInjector").to(FontAwesomeInjector.class);
+    bind(DefaultIconsRegistrar.class).asEagerSingleton();
+    bind(FontAwesomeInjector.class).asEagerSingleton();
 
     // core UI components
     install(

@@ -10,17 +10,15 @@
  */
 package org.eclipse.che.ide.command.explorer;
 
-import static org.eclipse.che.ide.api.constraints.Constraints.LAST;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.api.parts.PartStackType.NAVIGATION;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.gwt.core.client.Callback;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.ArrayList;
@@ -43,16 +41,15 @@ import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandRemovedEvent;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandUpdatedEvent;
-import org.eclipse.che.ide.api.component.WsAgentComponent;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.command.CommandsLoadedEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.command.CommandResources;
 import org.eclipse.che.ide.command.CommandUtils;
 import org.eclipse.che.ide.command.node.NodeFactory;
 import org.eclipse.che.ide.command.type.chooser.CommandTypeChooser;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.providers.DynaObject;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -60,11 +57,10 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 @DynaObject
 @Singleton
 public class CommandsExplorerPresenter extends BasePresenter
-    implements CommandsExplorerView.ActionDelegate, WsAgentComponent {
+    implements CommandsExplorerView.ActionDelegate {
 
   private final CommandsExplorerView view;
   private final CommandResources resources;
-  private final WorkspaceAgent workspaceAgent;
   private final CommandManager commandManager;
   private final NotificationManager notificationManager;
   private final CommandTypeChooser commandTypeChooser;
@@ -72,17 +68,13 @@ public class CommandsExplorerPresenter extends BasePresenter
   private final RefreshViewTask refreshViewTask;
   private final DialogFactory dialogFactory;
   private final NodeFactory nodeFactory;
-  private final EditorAgent editorAgent;
+  private final Provider<EditorAgent> editorAgentProvider;
   private final AppContext appContext;
-  private final EventBus eventBus;
-
-  private boolean isFirstActivation;
 
   @Inject
   public CommandsExplorerPresenter(
       CommandsExplorerView view,
       CommandResources commandResources,
-      WorkspaceAgent workspaceAgent,
       CommandManager commandManager,
       NotificationManager notificationManager,
       CommandTypeChooser commandTypeChooser,
@@ -90,12 +82,11 @@ public class CommandsExplorerPresenter extends BasePresenter
       RefreshViewTask refreshViewTask,
       DialogFactory dialogFactory,
       NodeFactory nodeFactory,
-      EditorAgent editorAgent,
+      Provider<EditorAgent> editorAgentProvider,
       AppContext appContext,
       EventBus eventBus) {
     this.view = view;
     this.resources = commandResources;
-    this.workspaceAgent = workspaceAgent;
     this.commandManager = commandManager;
     this.notificationManager = notificationManager;
     this.commandTypeChooser = commandTypeChooser;
@@ -103,46 +94,23 @@ public class CommandsExplorerPresenter extends BasePresenter
     this.refreshViewTask = refreshViewTask;
     this.dialogFactory = dialogFactory;
     this.nodeFactory = nodeFactory;
-    this.editorAgent = editorAgent;
+    this.editorAgentProvider = editorAgentProvider;
     this.appContext = appContext;
-    this.eventBus = eventBus;
 
     view.setDelegate(this);
-  }
-
-  @Override
-  public void onOpen() {
-    super.onOpen();
-
-    if (isFirstActivation) {
-      commandManager.fetchCommands();
-      refreshView();
-      isFirstActivation = false;
-    }
-  }
-
-  @Override
-  public void start(Callback<WsAgentComponent, Exception> callback) {
-    callback.onSuccess(this);
-
-    if (partStack == null || !partStack.containsPart(this)) {
-      workspaceAgent.openPart(this, NAVIGATION, LAST);
-    }
-
-    refreshView();
 
     eventBus.addHandler(
         CommandAddedEvent.getType(), e -> refreshViewAndSelectCommand(e.getCommand()));
     eventBus.addHandler(CommandRemovedEvent.getType(), e -> refreshView());
     eventBus.addHandler(CommandUpdatedEvent.getType(), e -> refreshView());
+    eventBus.addHandler(CommandsLoadedEvent.getType(), e -> refreshView());
   }
 
   @Override
   public void go(AcceptsOneWidget container) {
-    isFirstActivation = true;
-    refreshView();
-
     container.setWidget(getView());
+
+    refreshView();
   }
 
   @Override
@@ -199,7 +167,7 @@ public class CommandsExplorerPresenter extends BasePresenter
           .then(
               command -> {
                 refreshViewAndSelectCommand(command);
-                editorAgent.openEditor(nodeFactory.newCommandFileNode(command));
+                editorAgentProvider.get().openEditor(nodeFactory.newCommandFileNode(command));
               })
           .catchError(showErrorNotification(messages.unableCreate()));
     };
@@ -235,7 +203,7 @@ public class CommandsExplorerPresenter extends BasePresenter
     };
   }
 
-  /** Refresh view and preserve current selection. */
+  /** Refresh view with preserving the current selection. */
   private void refreshView() {
     refreshViewAndSelectCommand(null);
   }

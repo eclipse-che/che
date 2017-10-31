@@ -37,7 +37,7 @@ public class CompareWithRevisionAction extends GitAction {
   @Inject
   public CompareWithRevisionAction(
       RevisionListPresenter presenter, AppContext appContext, GitLocalizationConstant locale) {
-    super(locale.compareWithRevisionTitle(), locale.compareWithRevisionTitle(), null, appContext);
+    super(locale.compareWithRevisionTitle(), locale.compareWithRevisionTitle(), appContext);
     this.presenter = presenter;
   }
 

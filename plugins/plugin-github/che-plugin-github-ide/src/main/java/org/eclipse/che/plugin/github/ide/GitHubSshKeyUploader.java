@@ -18,13 +18,13 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.ProductInfoDataProvider;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.dialogs.CancelCallback;
-import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.commons.exception.UnauthorizedException;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
+import org.eclipse.che.ide.ui.dialogs.CancelCallback;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmCallback;
 import org.eclipse.che.plugin.ssh.key.client.SshKeyUploader;
 import org.eclipse.che.security.oauth.JsOAuthWindow;
 import org.eclipse.che.security.oauth.OAuthCallback;
@@ -61,7 +61,7 @@ public class GitHubSshKeyUploader implements SshKeyUploader, OAuthCallback {
       AppContext appContext,
       SecurityTokenProvider securityTokenProvider) {
     this.gitHubService = gitHubService;
-    this.baseUrl = appContext.getMasterEndpoint();
+    this.baseUrl = appContext.getMasterApiEndpoint();
     this.constant = constant;
     this.notificationManager = notificationManager;
     this.productInfoDataProvider = productInfoDataProvider;

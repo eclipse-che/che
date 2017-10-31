@@ -14,7 +14,7 @@ import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import java.util.List;
-import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 
 /**
  * Event fires when children has been loaded and processed.

@@ -30,7 +30,6 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.UIObject;
@@ -47,6 +46,7 @@ import org.eclipse.che.ide.api.action.Separator;
 import org.eclipse.che.ide.api.action.ToggleAction;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
+import org.eclipse.che.ide.ui.ElementWidget;
 import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.util.input.KeyMapUtil;
 import org.vectomatic.dom.svg.ui.SVGImage;
@@ -221,8 +221,7 @@ public class PopupMenu extends Composite {
     this.actionSelectedHandler = actionSelectedHandler;
 
     List<Utils.VisibleActionGroup> visibleActionGroupList =
-        Utils.renderActionGroup(
-            actionGroup, presentationFactory, actionManager, managerProvider.get());
+        Utils.renderActionGroup(actionGroup, presentationFactory, actionManager);
 
     list = new ArrayList<>();
     for (Utils.VisibleActionGroup groupActions : visibleActionGroupList) {
@@ -314,13 +313,8 @@ public class PopupMenu extends Composite {
       } else {
         Presentation presentation = presentationFactory.getPresentation(menuItem);
 
-        if (presentation.getImageResource() != null) {
-          Image image = new Image(presentation.getImageResource());
-          table.setWidget(i, 0, image);
-
-        } else if (presentation.getSVGResource() != null) {
-          SVGImage image = new SVGImage(presentation.getSVGResource());
-          table.setWidget(i, 0, image);
+        if (presentation.getImageElement() != null) {
+          table.setWidget(i, 0, new ElementWidget(presentation.getImageElement()));
         } else if (presentation.getHTMLResource() != null) {
           table.setHTML(i, 0, presentation.getHTMLResource());
         }
@@ -338,10 +332,7 @@ public class PopupMenu extends Composite {
           if (menuItem instanceof ToggleAction) {
             ToggleAction toggleAction = (ToggleAction) menuItem;
             ActionEvent e =
-                new ActionEvent(
-                    presentationFactory.getPresentation(toggleAction),
-                    actionManager,
-                    managerProvider.get());
+                new ActionEvent(presentationFactory.getPresentation(toggleAction), actionManager);
 
             if (toggleAction.isSelected(e)) {
               // Temporary solution
@@ -413,10 +404,7 @@ public class PopupMenu extends Composite {
         if (menuItem instanceof ActionGroup
             && !(((ActionGroup) menuItem).canBePerformed()
                 && !Utils.hasVisibleChildren(
-                    (ActionGroup) menuItem,
-                    presentationFactory,
-                    actionManager,
-                    managerProvider.get()))) {
+                    (ActionGroup) menuItem, presentationFactory, actionManager))) {
           table.setWidget(i, work, new SVGImage(POPUP_RESOURCES.subMenu()));
           table
               .getCellFormatter()
@@ -465,9 +453,7 @@ public class PopupMenu extends Composite {
       Action action = list.get(i);
       if (action instanceof ToggleAction) {
 
-        ActionEvent e =
-            new ActionEvent(
-                presentationFactory.getPresentation(action), actionManager, managerProvider.get());
+        ActionEvent e = new ActionEvent(presentationFactory.getPresentation(action), actionManager);
         if (((ToggleAction) action).isSelected(e)) {
           return true;
         }
@@ -521,10 +507,7 @@ public class PopupMenu extends Composite {
     if (menuItem instanceof ActionGroup
         && !(((ActionGroup) menuItem).canBePerformed()
             && !Utils.hasVisibleChildren(
-                (ActionGroup) menuItem,
-                presentationFactory,
-                actionManager,
-                managerProvider.get()))) {
+                (ActionGroup) menuItem, presentationFactory, actionManager))) {
       openSubPopupTimer.schedule(300);
     } else {
       closeSubPopupTimer.cancel();
@@ -547,18 +530,13 @@ public class PopupMenu extends Composite {
     if (menuItem instanceof ActionGroup
         && (!((ActionGroup) menuItem).canBePerformed()
             && Utils.hasVisibleChildren(
-                (ActionGroup) menuItem,
-                presentationFactory,
-                actionManager,
-                managerProvider.get()))) {
+                (ActionGroup) menuItem, presentationFactory, actionManager))) {
       openSubPopup(tr);
     } else {
       if (actionSelectedHandler != null) {
         actionSelectedHandler.onActionSelected(menuItem);
       }
-      ActionEvent e =
-          new ActionEvent(
-              presentationFactory.getPresentation(menuItem), actionManager, managerProvider.get());
+      ActionEvent e = new ActionEvent(presentationFactory.getPresentation(menuItem), actionManager);
       menuItem.actionPerformed(e);
     }
   }

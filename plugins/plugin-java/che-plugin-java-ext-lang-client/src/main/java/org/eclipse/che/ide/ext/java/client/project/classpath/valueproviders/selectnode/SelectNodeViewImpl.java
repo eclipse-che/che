@@ -26,8 +26,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.data.tree.Node;
-import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.selectnode.interceptors.ClasspathNodeInterceptor;
 import org.eclipse.che.ide.project.shared.NodesResources;
@@ -36,6 +34,8 @@ import org.eclipse.che.ide.ui.smartTree.KeyboardNavigationHandler;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.Tree;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
+import org.eclipse.che.ide.ui.smartTree.data.NodeInterceptor;
 import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent;
 import org.eclipse.che.ide.ui.window.Window;
 

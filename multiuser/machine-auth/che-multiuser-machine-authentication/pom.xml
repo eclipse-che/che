@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-multiuser-machine-auth</artifactId>
         <groupId>org.eclipse.che.multiuser</groupId>
-        <version>5.20.0-SNAPSHOT</version>
+        <version>6.0.0-M1-SNAPSHOT</version>
     </parent>
     <artifactId>che-multiuser-machine-authentication</artifactId>
     <packaging>jar</packaging>
@@ -42,10 +42,6 @@
             <artifactId>guice</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.annotation</groupId>
-            <artifactId>javax.annotation-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
         </dependency>
@@ -59,23 +55,11 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-account</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-dto</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-machine</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-machine-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -122,10 +106,6 @@
             <artifactId>everrest-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
             <artifactId>che-multiuser-api-permission</artifactId>
             <scope>provided</scope>
@@ -136,6 +116,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>com.google.inject.extensions</groupId>
+            <artifactId>guice-multibindings</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>com.jayway.restassured</groupId>
             <artifactId>rest-assured</artifactId>
             <scope>test</scope>
@@ -143,6 +128,16 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-db</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>javax.persistence</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

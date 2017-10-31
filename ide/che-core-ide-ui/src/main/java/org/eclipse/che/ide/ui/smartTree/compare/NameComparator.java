@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.ui.smartTree.compare;
 
 import java.util.Comparator;
-import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 
 /**
  * Comparator which compare nodes by their name.

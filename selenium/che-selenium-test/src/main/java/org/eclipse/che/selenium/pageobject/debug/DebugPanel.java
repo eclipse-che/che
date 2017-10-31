@@ -200,9 +200,9 @@ public class DebugPanel {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             visibilityOfElementLocated(
-                xpath(String.format(Locators.VARIABLES_TREE_SELECT_NODE, nodeText))));
+                xpath(format(Locators.VARIABLES_TREE_SELECT_NODE, nodeText))));
     seleniumWebDriver
-        .findElement(xpath(String.format(Locators.VARIABLES_TREE_SELECT_NODE, nodeText)))
+        .findElement(xpath(format(Locators.VARIABLES_TREE_SELECT_NODE, nodeText)))
         .click();
   }
 

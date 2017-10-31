@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.plugin.testing.ide;
 
+import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcPromise;
@@ -38,7 +40,7 @@ public class TestServiceClient {
   public JsonRpcPromise<TestLaunchResult> runTests(TestExecutionContext context) {
     return requestTransmitter
         .newRequest()
-        .endpointId("ws-agent")
+        .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
         .methodName(Constants.RUN_TESTS_METHOD)
         .paramsAsDto(context)
         .sendAndReceiveResultAsDto(TestLaunchResult.class);
@@ -47,7 +49,7 @@ public class TestServiceClient {
   public JsonRpcPromise<TestDetectionResult> detectTests(TestDetectionContext context) {
     return requestTransmitter
         .newRequest()
-        .endpointId("ws-agent")
+        .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
         .methodName(Constants.TESTING_RPC_TEST_DETECTION_NAME)
         .paramsAsDto(context)
         .sendAndReceiveResultAsDto(TestDetectionResult.class);

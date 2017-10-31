@@ -16,7 +16,7 @@ import {CheAPIBuilder} from '../builder/che-api-builder.factory';
  * @author Florent Benoit
  */
 export class CheHttpBackend {
-  private httpBackend: ng.IHttpBackendService;
+  private $httpBackend: ng.IHttpBackendService;
   private projectsPerWorkspace: Map<string, any>;
   private workspaces: Map<string, any>;
   private profilesMap: Map<string, any>;
@@ -43,14 +43,11 @@ export class CheHttpBackend {
   private permissionsMap: Map<string, Array<che.IPermissions>>;
   private resourcesMap: Map<string, Map<string, any>>;
 
-  private   isAutoSnapshot: boolean = false;
-  private   isAutoRestore: boolean = false;
-
   /**
    * Constructor to use
    */
   constructor($httpBackend: ng.IHttpBackendService, cheAPIBuilder: CheAPIBuilder) {
-    this.httpBackend = $httpBackend;
+    this.$httpBackend = $httpBackend;
     this.projectsPerWorkspace = new Map();
     this.workspaces = new Map();
     this.profilesMap = new Map();
@@ -90,10 +87,10 @@ export class CheHttpBackend {
    * Setup all data that should be retrieved on calls
    */
   setup(): void {
-    this.httpBackend.when('OPTIONS', '/api/').respond({});
-    this.httpBackend.when('GET', '/api/').respond(200, {rootResources: []});
+    this.$httpBackend.when('OPTIONS', '/api/').respond({});
+    this.$httpBackend.when('GET', '/api/').respond(200, {rootResources: []});
 
-    this.httpBackend.when('GET', '/api/keycloak/settings').respond(404);
+    this.$httpBackend.when('GET', '/api/keycloak/settings').respond(404);
 
     // add the remote call
     let workspaceReturn = [];
@@ -104,94 +101,71 @@ export class CheHttpBackend {
       this.addWorkspaceAgent(key, tmpWorkspace.runtime);
 
       // get by ID
-      this.httpBackend.when('GET', '/api/workspace/' + key).respond(200, tmpWorkspace);
+      this.$httpBackend.when('GET', '/api/workspace/' + key).respond(200, tmpWorkspace);
       // get by namespace/workspaceName
-      this.httpBackend.when('GET', `/api/workspace/${tmpWorkspace.namespace}/${tmpWorkspace.config.name}`).respond(200, tmpWorkspace);
+      this.$httpBackend.when('GET', `/api/workspace/${tmpWorkspace.namespace}/${tmpWorkspace.config.name}`).respond(200, tmpWorkspace);
 
-      this.httpBackend.when('DELETE', '/api/workspace/' + key).respond(200);
+      this.$httpBackend.when('DELETE', '/api/workspace/' + key).respond(200);
     }
 
-    let workspacSettings = {
-      'che.workspace.auto_snapshot': this.isAutoSnapshot,
-      'che.workspace.auto_restore': this.isAutoRestore
-    };
-    this.httpBackend.when('GET', '/api/workspace/settings').respond(200, workspacSettings);
+    this.$httpBackend.when('GET', '/api/workspace/settings').respond({});
 
-    this.httpBackend.when('GET', '/api/workspace/settings').respond({});
+    this.$httpBackend.when('GET', '/api/workspace').respond(workspaceReturn);
 
-    this.httpBackend.when('GET', '/api/workspace').respond(workspaceReturn);
-
-    this.httpBackend.when('GET', '/api/stack?maxItems=50').respond(this.stacks);
+    this.$httpBackend.when('GET', '/api/stack?maxItems=50').respond(this.stacks);
 
     let projectTypeKeys = this.projectTypesWorkspaces.keys();
     for (let key of projectTypeKeys) {
-      this.httpBackend.when('GET', this.workspaceAgentMap.get(key) + '/project-type').respond(this.projectTypesWorkspaces.get(key));
+      this.$httpBackend.when('GET', this.workspaceAgentMap.get(key) + '/project-type').respond(this.projectTypesWorkspaces.get(key));
     }
 
     // profiles
-    this.httpBackend.when('GET', '/api/profile').respond(this.defaultProfile);
+    this.$httpBackend.when('GET', '/api/profile').respond(this.defaultProfile);
     let profileKeys = this.profilesMap.keys();
     for (let key of profileKeys) {
-      this.httpBackend.when('GET', '/api/profile/' + key).respond(this.profilesMap.get(key));
+      this.$httpBackend.when('GET', '/api/profile/' + key).respond(this.profilesMap.get(key));
     }
 
     // preferences
-    this.httpBackend.when('GET', '/api/preferences').respond(this.defaultPreferences);
-    this.httpBackend.when('DELETE', '/api/preferences').respond(200, {});
+    this.$httpBackend.when('GET', '/api/preferences').respond(this.defaultPreferences);
+    this.$httpBackend.when('DELETE', '/api/preferences').respond(200, {});
 
     /// project details
     let projectDetailsKeys = this.projectDetailsMap.keys();
     for (let projectKey of projectDetailsKeys) {
       let workspaceKey = projectKey.split('/')[0];
       let projectId = projectKey.split('/')[1];
-      this.httpBackend.when('GET', this.workspaceAgentMap.get(workspaceKey) + '/project/' + projectId).respond(this.projectDetailsMap.get(projectKey));
+      this.$httpBackend.when('GET', this.workspaceAgentMap.get(workspaceKey) + '/project/' + projectId).respond(this.projectDetailsMap.get(projectKey));
     }
 
     // branding
-    this.httpBackend.when('GET', 'assets/branding/product.json').respond(this.defaultBranding);
+    this.$httpBackend.when('GET', 'assets/branding/product.json').respond(this.defaultBranding);
 
-    this.httpBackend.when('POST', '/api/analytics/log/session-usage').respond(200, {});
+    this.$httpBackend.when('POST', '/api/analytics/log/session-usage').respond(200, {});
 
     // change password
-    this.httpBackend.when('POST', '/api/user/password').respond(() => {
+    this.$httpBackend.when('POST', '/api/user/password').respond(() => {
       return [200, {success: true, errors: []}];
     });
 
     // create new user
-    this.httpBackend.when('POST', '/api/user').respond(() => {
+    this.$httpBackend.when('POST', '/api/user').respond(() => {
       return [200, {success: true, errors: []}];
     });
 
-    this.httpBackend.when('GET', '/api/user').respond(this.defaultUser);
+    this.$httpBackend.when('GET', '/api/user').respond(this.defaultUser);
 
     let userIdKeys = this.userIdMap.keys();
     for (let key of userIdKeys) {
-      this.httpBackend.when('GET', '/api/user/' + key).respond(this.userIdMap.get(key));
+      this.$httpBackend.when('GET', '/api/user/' + key).respond(this.userIdMap.get(key));
     }
 
     let userEmailKeys = this.userEmailMap.keys();
     for (let key of userEmailKeys) {
-      this.httpBackend.when('GET', '/api/user/find?email=' + key).respond(this.userEmailMap.get(key));
+      this.$httpBackend.when('GET', '/api/user/find?email=' + key).respond(this.userEmailMap.get(key));
     }
-    this.httpBackend.when('GET', /\/_app\/compilation-mappings(\?.*$)?/).respond(200, '');
+    this.$httpBackend.when('GET', /\/_app\/compilation-mappings(\?.*$)?/).respond(200, '');
   }
-
-  /**
-   * Set workspace auto snapshot status
-   * @param isAutoSnapshot {boolean}
-   */
-  setWorkspaceAutoSnapshot(isAutoSnapshot: boolean): void {
-    this.isAutoSnapshot = isAutoSnapshot;
-  }
-
-  /**
-   * Set workspace auto restore status
-   * @param isAutoRestore {boolean}
-   */
-  setWorkspaceAutoRestore(isAutoRestore: boolean): void {
-    this.isAutoRestore = isAutoRestore;
-  }
-
 
   /**
    * Add the given workspaces on this backend
@@ -255,13 +229,13 @@ export class CheHttpBackend {
     // add each project
     projects.forEach((project: any) => {
         this.projectsPerWorkspace.get(workspace.id).push(project);
-        this.httpBackend.when('PUT', this.workspaceAgentMap.get(workspace.id) + '/project/' + project.name).respond(200, {});
-        this.httpBackend.when('GET', this.workspaceAgentMap.get(workspace.id) + '/project/resolve/' + project.name).respond(200, []);
+        this.$httpBackend.when('PUT', this.workspaceAgentMap.get(workspace.id) + '/project/' + project.name).respond(200, {});
+        this.$httpBackend.when('GET', this.workspaceAgentMap.get(workspace.id) + '/project/resolve/' + project.name).respond(200, []);
       }
     );
 
     // add call to the backend
-    this.httpBackend.when('GET', this.workspaceAgentMap.get(workspace.id) + '/project/').respond(this.projectsPerWorkspace.get(workspace.id));
+    this.$httpBackend.when('GET', this.workspaceAgentMap.get(workspace.id) + '/project/').respond(this.projectsPerWorkspace.get(workspace.id));
 
   }
 
@@ -310,7 +284,7 @@ export class CheHttpBackend {
    * @param preferences
    */
   setPreferences(preferences: any): void {
-    this.httpBackend.when('POST', '/api/preferences').respond(preferences);
+    this.$httpBackend.when('POST', '/api/preferences').respond(preferences);
     this.defaultPreferences = preferences;
   }
 
@@ -330,11 +304,11 @@ export class CheHttpBackend {
    */
   setAttributes(attributes: che.IProfileAttributes, userId?: string): void {
     if (angular.isUndefined(userId)) {
-      this.httpBackend.when('PUT', '/api/profile/attributes').respond({attributes: attributes});
+      this.$httpBackend.when('PUT', '/api/profile/attributes').respond({attributes: attributes});
       this.defaultProfile.attributes = attributes;
       return;
     }
-    this.httpBackend.when('PUT', `/api/profile/${userId}/attributes`).respond({userId: userId, attributes: attributes});
+    this.$httpBackend.when('PUT', `/api/profile/${userId}/attributes`).respond({userId: userId, attributes: attributes});
   }
 
   /**
@@ -342,15 +316,15 @@ export class CheHttpBackend {
    * @param projectTemplates
    */
   addProjectTemplates(projectTemplates: any): void {
-    this.httpBackend.when('GET', '/api/project-template/all').respond(projectTemplates);
+    this.$httpBackend.when('GET', '/api/project-template/all').respond(projectTemplates);
   }
 
   /**
    * Gets the internal http backend used
-   * @returns {CheHttpBackend.httpBackend|*}
+   * @returns {CheHttpBackend.$httpBackend|*}
    */
   getHttpBackend(): ng.IHttpBackendService {
-    return this.httpBackend;
+    return this.$httpBackend;
   }
 
   /**
@@ -368,7 +342,7 @@ export class CheHttpBackend {
    * @param newProjectDetails
    */
   addUpdatedProjectDetails(workspaceId: string, projectName: string, newProjectDetails: any): void {
-    this.httpBackend.when('PUT', '/project/' + workspaceId + '/' + projectName).respond(newProjectDetails);
+    this.$httpBackend.when('PUT', '/project/' + workspaceId + '/' + projectName).respond(newProjectDetails);
   }
 
   /**
@@ -377,7 +351,7 @@ export class CheHttpBackend {
    * @param projectName the project name
    */
   addFetchProjectDetails(workspaceId: string, projectName: string): void {
-    this.httpBackend.when('GET', '/project/' + projectName)
+    this.$httpBackend.when('GET', '/project/' + projectName)
       .respond(this.projectDetailsMap.get(workspaceId + '/' + projectName));
   }
 
@@ -388,7 +362,7 @@ export class CheHttpBackend {
    * @param newProjectName the new project name
    */
   addUpdatedProjectName(workspaceId: string, projectName: string, newProjectName: string): void {
-    this.httpBackend.when('POST', '/project/rename/' + projectName + '?name=' + newProjectName).respond(newProjectName);
+    this.$httpBackend.when('POST', '/project/rename/' + projectName + '?name=' + newProjectName).respond(newProjectName);
   }
 
   /**
@@ -427,7 +401,7 @@ export class CheHttpBackend {
    * @param projectPath
    */
   getLocalGitUrl(workspaceId: string, projectPath: string): void {
-    this.httpBackend.when('GET', this.workspaceAgentMap.get(workspaceId) + '/git/read-only-url?projectPath=' + projectPath)
+    this.$httpBackend.when('GET', this.workspaceAgentMap.get(workspaceId) + '/git/read-only-url?projectPath=' + projectPath)
       .respond(200, this.localGitUrlsMap.get(workspaceId + projectPath));
   }
 
@@ -437,7 +411,7 @@ export class CheHttpBackend {
    * @param projectPath
    */
   getRemoteGitUrlArray(workspaceId: string, projectPath: string): void {
-    this.httpBackend.when('POST', this.workspaceAgentMap.get(workspaceId) + '/git/remote-list?projectPath=' + projectPath)
+    this.$httpBackend.when('POST', this.workspaceAgentMap.get(workspaceId) + '/git/remote-list?projectPath=' + projectPath)
       .respond(this.remoteGitUrlArraysMap.get(workspaceId + projectPath));
   }
 
@@ -450,7 +424,7 @@ export class CheHttpBackend {
     let svnInfo: {items?: any[]} = {};
     svnInfo.items = [{uRL: this.remoteSvnUrlsMap.get(workspaceId + projectPath)}];
 
-    this.httpBackend.when('POST', this.workspaceAgentMap.get(workspaceId) + '/svn/info?workspaceId=' + workspaceId).respond(svnInfo);
+    this.$httpBackend.when('POST', this.workspaceAgentMap.get(workspaceId) + '/svn/info?workspaceId=' + workspaceId).respond(svnInfo);
   }
 
   /**
@@ -465,18 +439,19 @@ export class CheHttpBackend {
     let factoriesKeys = this.factoriesMap.keys();
     for (let key of factoriesKeys) {
       let factory = this.factoriesMap.get(key);
-      this.httpBackend.when('GET', '/api/factory/' + factory.id).respond(factory);
-      this.httpBackend.when('DELETE', '/api/factory/' + factory.id).respond(() => {
+      this.$httpBackend.when('GET', '/api/factory/' + factory.id).respond(factory);
+      this.$httpBackend.when('PUT', `/api/factory/${factory.id}`).respond({});
+      this.$httpBackend.when('DELETE', '/api/factory/' + factory.id).respond(() => {
         return [200, {success: true, errors: []}];
       });
       if (this.defaultUser) {
-        this.httpBackend.when('GET', `/api/factory/find?creator.userId=${this.defaultUser.id}&name=${factory.name}`).respond([factory]);
+        this.$httpBackend.when('GET', `/api/factory/find?creator.userId=${this.defaultUser.id}&name=${factory.name}`).respond([factory]);
       }
       allFactories.push(factory);
     }
 
     if (this.defaultUser) {
-      this.httpBackend.when('GET', '/api/user').respond(this.defaultUser);
+      this.$httpBackend.when('GET', '/api/user').respond(this.defaultUser);
 
       if (allFactories.length >  this.pageSkipCount) {
         if (allFactories.length > this.pageSkipCount + this.pageMaxItem) {
@@ -485,7 +460,7 @@ export class CheHttpBackend {
           pageFactories = allFactories.slice(this.pageSkipCount);
         }
       }
-      this.httpBackend.when('GET', '/api/factory/find?creator.userId=' + this.defaultUser.id + '&maxItems=' + this.pageMaxItem + '&skipCount=' + this.pageSkipCount).respond(pageFactories);
+      this.$httpBackend.when('GET', '/api/factory/find?creator.userId=' + this.defaultUser.id + '&maxItems=' + this.pageMaxItem + '&skipCount=' + this.pageSkipCount).respond(pageFactories);
     }
   }
 
@@ -493,16 +468,16 @@ export class CheHttpBackend {
    * Setup all users
    */
   usersBackendSetup(): void {
-    this.httpBackend.when('GET', '/api/user').respond(this.defaultUser);
+    this.$httpBackend.when('GET', '/api/user').respond(this.defaultUser);
 
     let userIdKeys = this.userIdMap.keys();
     for (let key of userIdKeys) {
-      this.httpBackend.when('GET', '/api/user/' + key).respond(this.userIdMap.get(key));
+      this.$httpBackend.when('GET', '/api/user/' + key).respond(this.userIdMap.get(key));
     }
 
     let userEmailKeys = this.userEmailMap.keys();
     for (let key of userEmailKeys) {
-      this.httpBackend.when('GET', '/api/user/find?email=' + key).respond(this.userEmailMap.get(key));
+      this.$httpBackend.when('GET', '/api/user/find?email=' + key).respond(this.userEmailMap.get(key));
     }
   }
 
@@ -563,14 +538,14 @@ export class CheHttpBackend {
     let teamsKeys = this.teamsMap.keys();
     for (let key of teamsKeys) {
       let team = this.teamsMap.get(key);
-      this.httpBackend.when('GET', '/api/organization/' + team.id).respond(team);
-      this.httpBackend.when('DELETE', '/api/organization/' + team.id).respond(() => {
+      this.$httpBackend.when('GET', '/api/organization/' + team.id).respond(team);
+      this.$httpBackend.when('DELETE', '/api/organization/' + team.id).respond(() => {
         return [200, {success: true, errors: []}];
       });
       allTeams.push(team);
     }
 
-    this.httpBackend.when('GET', /\/api\/organization(\?.*$)?/).respond(allTeams);
+    this.$httpBackend.when('GET', /\/api\/organization(\?.*$)?/).respond(allTeams);
   }
 
   /**
@@ -590,15 +565,15 @@ export class CheHttpBackend {
     const organizationKeys = this.organizationsMap.keys();
     for (let key of organizationKeys) {
       const organization = this.organizationsMap.get(key);
-      this.httpBackend.when('GET', '/api/organization/' + organization.id).respond(organization);
-      this.httpBackend.when('GET', '/api/organization/find?name=' + encodeURIComponent(organization.qualifiedName)).respond(organization);
-      this.httpBackend.when('DELETE', '/api/organization/' + organization.id).respond(() => {
+      this.$httpBackend.when('GET', '/api/organization/' + organization.id).respond(organization);
+      this.$httpBackend.when('GET', '/api/organization/find?name=' + encodeURIComponent(organization.qualifiedName)).respond(organization);
+      this.$httpBackend.when('DELETE', '/api/organization/' + organization.id).respond(() => {
         return [200, {success: true, errors: []}];
       });
       allOrganizations.push(organization);
     }
-    this.httpBackend.when('GET', /^\/api\/organization\/find\?name=.*$/).respond(404, {}, {message: 'Organization is not found.'});
-    this.httpBackend.when('GET', /\/api\/organization(\?.*$)?/).respond(allOrganizations);
+    this.$httpBackend.when('GET', /^\/api\/organization\/find\?name=.*$/).respond(404, {}, {message: 'Organization is not found.'});
+    this.$httpBackend.when('GET', /\/api\/organization(\?.*$)?/).respond(allOrganizations);
   }
 
   /**
@@ -619,7 +594,7 @@ export class CheHttpBackend {
       const permissionsList = this.permissionsMap.get(domainInstanceKey);
       const {domainId, instanceId} = permissionsList[0];
 
-      this.httpBackend.when('GET', `/api/permissions/${domainId}/all?instance=${instanceId}`).respond(permissionsList);
+      this.$httpBackend.when('GET', `/api/permissions/${domainId}/all?instance=${instanceId}`).respond(permissionsList);
     }
   }
 
@@ -649,13 +624,13 @@ export class CheHttpBackend {
       // distributed
       if (organizationResourcesMap.has('distributed')) {
         const resources = organizationResourcesMap.get('distributed');
-        this.httpBackend.when('GET', `/api/organization/resource/${organizationId}/cap`).respond(resources);
+        this.$httpBackend.when('GET', `/api/organization/resource/${organizationId}/cap`).respond(resources);
       }
 
       // total
       if (organizationResourcesMap.has('total')) {
         const resources = organizationResourcesMap.get('total');
-        this.httpBackend.when('GET', `/api/resource/${organizationId}`).respond(resources);
+        this.$httpBackend.when('GET', `/api/resource/${organizationId}`).respond(resources);
       }
     }
   }

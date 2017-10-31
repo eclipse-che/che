@@ -100,12 +100,6 @@ public class Git {
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
-  /** click on git-info panel tab, wait while info panel will open */
-  public void openGitInfoPanel() {
-    gitStatusBar.clickOnGitStatusBarTab();
-    gitStatusBar.waitGitStatusBarInfoPanel();
-  }
-
   /** click on git-info panel tab, wait while info panel will close */
   public void closeGitInfoPanel() {
     gitStatusBar.clickOnStatusBarMinimizeBtn();
@@ -929,7 +923,22 @@ public class Git {
     projectWizard.selectTypeProject(typeProject);
     loader.waitOnClosed();
     projectWizard.clickSaveButton();
-    mavenPluginStatusBar.waitExpectedTextInInfoPanel(expectedMessage);
+    loader.waitOnClosed();
+    projectWizard.waitCreateProjectWizardFormIsClosed();
+    projectExplorer.waitItem(nameApp);
+    loader.waitOnClosed();
+  }
+
+  public void importJavaAppAndCheckMavenPluginBar(String url, String nameApp, String typeProject) {
+    loader.waitOnClosed();
+    menu.runCommand(
+        TestMenuCommandsConstants.Workspace.WORKSPACE,
+        TestMenuCommandsConstants.Workspace.IMPORT_PROJECT);
+    importProject.waitAndTypeImporterAsGitInfo(url, nameApp);
+    projectWizard.waitCreateProjectWizardForm();
+    projectWizard.selectTypeProject(typeProject);
+    loader.waitOnClosed();
+    projectWizard.clickSaveButton();
     loader.waitOnClosed();
     projectWizard.waitCreateProjectWizardFormIsClosed();
     projectExplorer.waitItem(nameApp);

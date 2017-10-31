@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.ide.processes;
 
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
 import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 
@@ -21,11 +20,7 @@ import elemental.dom.Node;
 import elemental.events.Event;
 import elemental.events.EventListener;
 import elemental.html.SpanElement;
-import org.eclipse.che.api.core.model.machine.MachineConfig;
-import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.eclipse.che.ide.processes.monitoring.MachineMonitors;
 import org.eclipse.che.ide.terminal.AddTerminalClickHandler;
@@ -50,7 +45,6 @@ public class MachineNodeRenderStrategy
         HasPreviewSshClickHandler {
   private final MachineResources resources;
   private final CoreLocalizationConstant locale;
-  private final AppContext appContext;
   private final MachineMonitors machineMonitors;
 
   private AddTerminalClickHandler addTerminalClickHandler;
@@ -60,11 +54,9 @@ public class MachineNodeRenderStrategy
   public MachineNodeRenderStrategy(
       MachineResources resources,
       CoreLocalizationConstant locale,
-      AppContext appContext,
       MachineMonitors machineMonitors) {
     this.resources = resources;
     this.locale = locale;
-    this.appContext = appContext;
     this.machineMonitors = machineMonitors;
   }
 
@@ -74,14 +66,11 @@ public class MachineNodeRenderStrategy
   }
 
   private SpanElement createMachineElement(final ProcessTreeNode node) {
-    final MachineEntity machine = (MachineEntity) node.getData();
-    final String machineId = machine.getId();
-    final MachineConfig machineConfig = machine.getConfig();
+    final String machineName = (String) node.getData();
 
     SpanElement root = Elements.createSpanElement();
 
-    Workspace workspace = appContext.getWorkspace();
-    if (workspace != null && RUNNING == workspace.getStatus() && node.hasTerminalAgent()) {
+    if (node.isTerminalServerRunning()) {
       SpanElement newTerminalButton =
           Elements.createSpanElement(resources.getCss().newTerminalButton());
       newTerminalButton.appendChild((Node) new SVGImage(resources.addTerminalIcon()).getElement());
@@ -96,7 +85,7 @@ public class MachineNodeRenderStrategy
             event.preventDefault();
 
             if (addTerminalClickHandler != null) {
-              addTerminalClickHandler.onAddTerminalClick(machineId);
+              addTerminalClickHandler.onAddTerminalClick(machineName);
             }
           },
           true);
@@ -113,7 +102,7 @@ public class MachineNodeRenderStrategy
       newTerminalButton.addEventListener(Event.DBLCLICK, blockMouseListener, true);
     }
 
-    if (node.isRunning() && node.hasSSHAgent()) {
+    if (node.isSshServerRunning()) {
       SpanElement sshButton = Elements.createSpanElement(resources.getCss().sshButton());
       sshButton.setTextContent("SSH");
       root.appendChild(sshButton);
@@ -122,7 +111,7 @@ public class MachineNodeRenderStrategy
           Event.CLICK,
           event -> {
             if (previewSshClickHandler != null) {
-              previewSshClickHandler.onPreviewSshClick(machineId);
+              previewSshClickHandler.onPreviewSshClick(machineName);
             }
           },
           true);
@@ -133,12 +122,12 @@ public class MachineNodeRenderStrategy
     Element monitorsElement = Elements.createSpanElement(resources.getCss().machineMonitors());
     root.appendChild(monitorsElement);
 
-    Node monitorNode = (Node) machineMonitors.getMonitorWidget(machineId, this).getElement();
+    Node monitorNode = (Node) machineMonitors.getMonitorWidget(machineName, this).getElement();
     monitorsElement.appendChild(monitorNode);
 
     Element nameElement = Elements.createSpanElement(resources.getCss().nameLabel());
-    nameElement.setTextContent(machineConfig.getName());
-    Tooltip.create(nameElement, BOTTOM, MIDDLE, machineConfig.getName());
+    nameElement.setTextContent(machineName);
+    Tooltip.create(nameElement, BOTTOM, MIDDLE, machineName);
     root.appendChild(nameElement);
 
     return root;

@@ -29,7 +29,6 @@ import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.rest.RestContext;
 import org.eclipse.che.plugin.github.ide.GitHubClientService;
 import org.eclipse.che.plugin.github.shared.GitHubPullRequest;
 import org.eclipse.che.plugin.github.shared.GitHubPullRequestCreationInput;
@@ -79,7 +78,6 @@ public class GitHubHostingService implements VcsHostingService {
 
   @Inject
   public GitHubHostingService(
-      @NotNull @RestContext final String baseUrl,
       @NotNull final AppContext appContext,
       @NotNull final DtoFactory dtoFactory,
       @NotNull final GitHubClientService gitHubClientService,
@@ -89,7 +87,7 @@ public class GitHubHostingService implements VcsHostingService {
     this.dtoFactory = dtoFactory;
     this.gitHubClientService = gitHubClientService;
     this.templates = templates;
-    this.baseUrl = baseUrl;
+    this.baseUrl = appContext.getMasterApiEndpoint();
     this.securityTokenProvider = securityTokenProvider;
   }
 
@@ -509,7 +507,7 @@ public class GitHubHostingService implements VcsHostingService {
     final String authUrl =
         baseUrl
             + "/oauth/authenticate?oauth_provider=github&userId="
-            + user.getProfile().getUserId()
+            + user.getId()
             + "&scope=user,repo,write:public_key&redirect_after_login="
             + Window.Location.getProtocol()
             + "//"

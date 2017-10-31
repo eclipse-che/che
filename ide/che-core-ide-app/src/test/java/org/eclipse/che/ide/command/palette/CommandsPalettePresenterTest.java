@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.command.palette;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -21,20 +20,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceRuntimeDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.command.CommandUtils;
 import org.eclipse.che.ide.machine.chooser.MachineChooser;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -63,9 +61,9 @@ public class CommandsPalettePresenterTest {
 
   @Mock private PaletteMessages messages;
 
-  @Mock private Promise<Machine> machinePromise;
+  @Mock private Promise<MachineImpl> machinePromise;
 
-  @Captor private ArgumentCaptor<Operation<Machine>> selectedMachineCaptor;
+  @Captor private ArgumentCaptor<Operation<MachineImpl>> selectedMachineCaptor;
 
   @Captor private ArgumentCaptor<Map<CommandGoal, List<CommandImpl>>> filteredCommandsCaptor;
 
@@ -82,7 +80,7 @@ public class CommandsPalettePresenterTest {
 
     verify(view).show();
     verify(commandManager).getCommands();
-    verify(view).setCommands(any());
+    verify(view).setCommands(org.mockito.ArgumentMatchers.any());
   }
 
   @Test
@@ -118,15 +116,16 @@ public class CommandsPalettePresenterTest {
   @Test
   public void shouldExecuteCommand() throws Exception {
     // given
-    Workspace workspace = mock(Workspace.class);
+    WorkspaceImpl workspace = mock(WorkspaceImpl.class);
     when(appContext.getWorkspace()).thenReturn(workspace);
 
-    WorkspaceRuntimeDto workspaceRuntime = mock(WorkspaceRuntimeDto.class);
+    RuntimeImpl workspaceRuntime = mock(RuntimeImpl.class);
     when(workspace.getRuntime()).thenReturn(workspaceRuntime);
 
-    List<MachineDto> machines = new ArrayList<>(1);
-    MachineDto chosenMachine = mock(MachineDto.class);
-    machines.add(chosenMachine);
+    Map<String, MachineImpl> machines = new HashMap<>();
+    MachineImpl chosenMachine = mock(MachineImpl.class);
+    when(chosenMachine.getName()).thenReturn("machine_id");
+    machines.put("machine_id", chosenMachine);
     when(workspaceRuntime.getMachines()).thenReturn(machines);
 
     when(machineChooser.show()).thenReturn(machinePromise);
@@ -143,6 +142,6 @@ public class CommandsPalettePresenterTest {
     verify(machinePromise).then(selectedMachineCaptor.capture());
     selectedMachineCaptor.getValue().apply(chosenMachine);
 
-    verify(commandExecutor).executeCommand(eq(commandToExecute), eq(chosenMachine));
+    verify(commandExecutor).executeCommand(eq(commandToExecute), eq("machine_id"));
   }
 }

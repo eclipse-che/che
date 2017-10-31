@@ -23,9 +23,6 @@ public interface CommandManager {
   /** Returns all commands. */
   List<CommandImpl> getCommands();
 
-  /** Fetches all commands related to the workspace. */
-  void fetchCommands();
-
   /** Returns optional command by the specified name or {@link Optional#empty()} if none. */
   Optional<CommandImpl> getCommand(String name);
 

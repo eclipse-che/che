@@ -127,7 +127,7 @@ export class ListWorkspacesCtrl {
     promise.then(() => {
       return this.updateSharedWorkspaces();
     }, (error: any) => {
-      if (error.status === 304) {
+      if (error && error.status === 304) {
         // ok
         return this.updateSharedWorkspaces();
       }
@@ -232,12 +232,15 @@ export class ListWorkspacesCtrl {
         this.cheListHelper.itemsSelectionStatus[workspaceId] = false;
 
         let workspace = this.cheWorkspace.getWorkspaceById(workspaceId);
+        if (!workspace) {
+          return;
+        }
         workspaceName = workspace.config.name;
         let stoppedStatusPromise = this.cheWorkspace.fetchStatusChange(workspaceId, 'STOPPED');
 
         // stop workspace if it's status is RUNNING
         if (workspace.status === 'RUNNING') {
-          this.cheWorkspace.stopWorkspace(workspaceId, false);
+          this.cheWorkspace.stopWorkspace(workspaceId);
         }
 
         // delete stopped workspace

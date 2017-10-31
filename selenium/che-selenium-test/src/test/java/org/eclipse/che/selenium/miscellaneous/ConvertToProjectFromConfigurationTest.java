@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
@@ -66,6 +67,7 @@ public class ConvertToProjectFromConfigurationTest {
   @Inject private AskForValueDialog askForValueDialog;
   @Inject private ActionsFactory actionsFactory;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -91,7 +93,10 @@ public class ConvertToProjectFromConfigurationTest {
     projectExplorer.waitItemInVisibleArea("file.php");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/phpFolder/file.php");
     editor.waitActiveEditor();
-    actionsFactory.createAction(ide.driver()).sendKeys(getContentFromFile("file.php")).perform();
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .sendKeys(getContentFromFile("file.php"))
+        .perform();
     editor.waitTextIntoEditor(TEXT_FILE_CSS);
     convertToProject(PHP_FOLDER_NAME, PROJECT_NAME + "/src/main/webapp");
     wizard.selectTypeProject(Wizard.TypeProject.BLANK);
@@ -118,7 +123,10 @@ public class ConvertToProjectFromConfigurationTest {
     projectExplorer.waitItemInVisibleArea("fileJS.js");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/WEB-INF/jsFolder/fileJS.js");
     editor.waitActiveEditor();
-    actionsFactory.createAction(ide.driver()).sendKeys(getContentFromFile("file.js")).perform();
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .sendKeys(getContentFromFile("file.js"))
+        .perform();
     editor.waitTextIntoEditor(TEXT_FILE_JS);
     convertToProject(JS_FOLDER_NAME, PROJECT_NAME + "/src/main/webapp/WEB-INF");
     wizard.selectTypeProject(Wizard.TypeProject.BLANK);

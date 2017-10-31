@@ -12,7 +12,7 @@ package org.eclipse.che.ide.resources.action;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -24,8 +24,8 @@ import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
-import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
+import org.eclipse.che.ide.api.parts.ActivePartChangedEvent;
+import org.eclipse.che.ide.api.parts.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.resources.modification.ClipboardManager;
 import org.eclipse.che.ide.api.selection.Selection;
@@ -57,7 +57,6 @@ public class CutResourceAction extends AbstractPerspectiveAction {
         singletonList(PROJECT_PERSPECTIVE_ID),
         localization.cutItemsActionText(),
         localization.cutItemsActionDescription(),
-        null,
         resources.cut());
     this.clipboardManager = clipboardManager;
     this.appContext = appContext;

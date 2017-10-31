@@ -19,7 +19,6 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.eclipse.che.ide.api.dialogs.InputValidator;
 import org.eclipse.che.ide.ui.UILocalizationConstant;
 import org.eclipse.che.ide.ui.dialogs.BaseTest;
 import org.junit.Before;

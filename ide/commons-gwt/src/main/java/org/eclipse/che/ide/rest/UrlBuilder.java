@@ -21,6 +21,8 @@ import com.google.gwt.json.client.JSONObject;
  */
 public class UrlBuilder extends com.google.gwt.http.client.UrlBuilder {
 
+  private JSONObject o;
+
   /** */
   public UrlBuilder() {}
 
@@ -31,7 +33,7 @@ public class UrlBuilder extends com.google.gwt.http.client.UrlBuilder {
    */
   public UrlBuilder(String url) {
     JavaScriptObject jso = parseUrl(url);
-    JSONObject o = new JSONObject(jso);
+    o = new JSONObject(jso);
     setHost(o.get("host").isString().stringValue());
     setProtocol(o.get("protocol").isString().stringValue());
     if (o.containsKey("port")) {
@@ -46,6 +48,30 @@ public class UrlBuilder extends com.google.gwt.http.client.UrlBuilder {
     for (String key : query.keySet()) {
       setParameter(key, query.get(key).isString().stringValue());
     }
+  }
+
+  public String getHost() {
+    return o.get("host").toString();
+  }
+
+  public String getProtocol() {
+    return o.get("protocol").toString();
+  }
+
+  public String getPort() {
+    return o.get("port").toString();
+  }
+
+  public String getPath() {
+    return o.get("path").toString();
+  }
+
+  public boolean containsPort() {
+    return getPort() != null && !getPort().isEmpty();
+  }
+
+  public String getUrl() {
+    return buildString();
   }
 
   private native JavaScriptObject parseUrl(String url) /*-{

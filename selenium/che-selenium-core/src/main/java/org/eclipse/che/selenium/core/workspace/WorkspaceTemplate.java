@@ -23,8 +23,7 @@ public class WorkspaceTemplate {
   public static final String CODENVY_DEBIAN_JRE = "codenvy_debian_jre.json";
   public static final String CODENVY_UBUNTU_JDK8 = "codenvy_ubuntu_jdk8.json";
   public static final String UBUNTU = "ubuntu.json";
-
-  public static final String DEFAULT = CODENVY_UBUNTU_JDK8;
+  public static final String DEFAULT = "default.json";
 
   private WorkspaceTemplate() {}
 }

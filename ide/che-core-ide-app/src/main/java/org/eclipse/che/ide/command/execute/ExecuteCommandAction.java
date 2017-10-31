@@ -12,16 +12,17 @@ package org.eclipse.che.ide.command.execute;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.command.CommandUtils;
+import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /** Action for executing a {@link CommandImpl}. */
-class ExecuteCommandAction extends Action {
+class ExecuteCommandAction extends BaseAction {
 
   private final CommandImpl command;
   private final CommandExecutor commandExecutor;
@@ -41,7 +42,7 @@ class ExecuteCommandAction extends Action {
 
     final SVGResource commandIcon = commandUtils.getCommandTypeIcon(command.getType());
     if (commandIcon != null) {
-      getTemplatePresentation().setSVGResource(commandIcon);
+      getTemplatePresentation().setImageElement(new SVGImage(commandIcon).getElement());
     }
   }
 

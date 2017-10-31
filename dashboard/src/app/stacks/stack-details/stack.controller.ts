@@ -197,7 +197,7 @@ export class StackController {
       this.loading = false;
       this.prepareStackData();
     }, (error: any) => {
-      if (error.status === 304) {
+      if (error && error.status === 304) {
         this.loading = false;
         this.stack = this.cheStack.getStackById(this.stackId);
         this.prepareStackData();
@@ -449,13 +449,7 @@ export class StackController {
         this.$log.error(error);
       });
       this.cheWorkspace.startUpdateWorkspaceStatus(workspace.id);
-      let tmpWorkspaceIdeUrl = '';
-      angular.forEach(workspace.links, (link: any) => {
-        if (link.rel === 'ide url') {
-          tmpWorkspaceIdeUrl = link.href;
-          return;
-        }
-      });
+      let tmpWorkspaceIdeUrl = workspace.links.ide;
       if (!tmpWorkspaceIdeUrl) {
         this.cheNotification.showError('Testing stack failed.');
         return;
@@ -485,7 +479,7 @@ export class StackController {
    */
   closeStackTestPopup(): void {
     if (this.tmpWorkspaceId) {
-      this.cheWorkspace.stopWorkspace(this.tmpWorkspaceId, false);
+      this.cheWorkspace.stopWorkspace(this.tmpWorkspaceId);
       this.tmpWorkspaceId = '';
     }
     this.cheUIElementsInjectorService.deleteElementById(STACK_TEST_POPUP_ID);

@@ -18,7 +18,7 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.eclipse.che.api.workspace.server.event.WorkspaceCreatedEvent;
+import org.eclipse.che.api.workspace.shared.event.WorkspaceCreatedEvent;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.multiuser.permission.workspace.server.model.impl.WorkerImpl;
 import org.eclipse.che.multiuser.permission.workspace.server.spi.WorkerDao;

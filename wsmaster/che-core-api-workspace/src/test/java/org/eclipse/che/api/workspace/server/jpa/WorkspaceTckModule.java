@@ -13,14 +13,12 @@ package org.eclipse.che.api.workspace.server.jpa;
 import com.google.inject.TypeLiteral;
 import java.util.Collection;
 import org.eclipse.che.account.spi.AccountImpl;
-import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
-import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentRecipeImpl;
-import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
+import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.ServerConf2Impl;
+import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -57,13 +55,12 @@ public class WorkspaceTckModule extends TckModule {
                 WorkspaceConfigImpl.class,
                 ProjectConfigImpl.class,
                 EnvironmentImpl.class,
-                EnvironmentRecipeImpl.class,
-                ExtendedMachineImpl.class,
+                RecipeImpl.class,
+                MachineConfigImpl.class,
                 SourceStorageImpl.class,
-                ServerConf2Impl.class,
+                ServerConfigImpl.class,
                 StackImpl.class,
                 CommandImpl.class,
-                SnapshotImpl.class,
                 RecipeImpl.class)
             .addEntityClass(
                 "org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")

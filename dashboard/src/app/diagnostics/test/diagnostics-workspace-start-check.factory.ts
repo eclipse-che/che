@@ -108,7 +108,7 @@ export class DiagnosticsWorkspaceStartCheck {
               defered.reject(message.content);
             }
           });
-          this.cheWorkspace.onStopWorkspace(workspace.id, false);
+          this.cheWorkspace.onStopWorkspace(workspace.id);
         } else {
           this.cheWorkspace.deleteWorkspaceConfig(workspace.id).finally(() => {
             defered.resolve(true);
@@ -182,7 +182,7 @@ export class DiagnosticsWorkspaceStartCheck {
     this.recreateDiagnosticWorkspace(diagnosticCallback).then((workspace : che.IWorkspace) => {
 
       let statusLink = this.lodash.find(workspace.links, (link: any) => {
-        return link.rel === 'environment.status_channel';
+        return link.rel === 'environment/statusChannel';
       });
 
       let eventChannelLink = this.lodash.find(workspace.links, (link: any) => {
@@ -190,7 +190,7 @@ export class DiagnosticsWorkspaceStartCheck {
       });
 
       let outputLink = this.lodash.find(workspace.links, (link: any) => {
-        return link.rel === 'environment.output_channel';
+        return link.rel === 'environment/outputChannel';
       });
 
       let eventChannel = eventChannelLink ? eventChannelLink.parameters[0].defaultValue : null;
@@ -210,7 +210,7 @@ export class DiagnosticsWorkspaceStartCheck {
             this.cheWorkspace.fetchWorkspaceDetails(workspace.id).then(() => {
               let workspace = this.cheWorkspace.getWorkspaceById(workspaceId);
               diagnosticCallback.shared('workspace', workspace);
-              diagnosticCallback.shared('machineToken', workspace.runtime.devMachine.runtime.envVariables['USER_TOKEN']);
+              diagnosticCallback.shared('machineToken', workspace.runtime.devMachine.runtime.envVariables['CHE_MACHINE_TOKEN']);
               diagnosticCallback.success('Starting workspace OK');
             })
           });
@@ -255,7 +255,7 @@ export class DiagnosticsWorkspaceStartCheck {
             this.cheWorkspace.fetchWorkspaceDetails(workspace.id).then(() => {
               let workspace = this.cheWorkspace.getWorkspaceById(workspaceId);
               diagnosticCallback.shared('workspace', workspace);
-              diagnosticCallback.shared('machineToken', workspace.runtime.devMachine.runtime.envVariables['USER_TOKEN']);
+              diagnosticCallback.shared('machineToken', workspace.runtime.devMachine.runtime.envVariables['CHE_MACHINE_TOKEN']);
               let newCallback : DiagnosticCallback = diagnosticCallback.newCallback('Test connection from browser to workspace agent by using Workspace Agent IP');
               this.diagnosticsRunningWorkspaceCheck.checkWsAgent(newCallback, false);
               let websocketCallback : DiagnosticCallback = diagnosticCallback.newCallback('Test connection from browser to workspace agent with websocket');

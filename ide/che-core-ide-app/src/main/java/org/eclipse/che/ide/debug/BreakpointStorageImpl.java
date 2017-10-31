@@ -25,13 +25,13 @@ import org.eclipse.che.api.debug.shared.dto.LocationDto;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.BreakpointStorage;
-import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.storage.LocalStorage;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
+import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
 
 /**
  * Breakpoints storage based on local storage.
@@ -177,7 +177,7 @@ public class BreakpointStorageImpl implements BreakpointStorage {
       if (key != null && key.startsWith(LOCAL_STORAGE_BREAKPOINTS_KEY_PREFIX)) {
         String wsId = key.substring(LOCAL_STORAGE_BREAKPOINTS_KEY_PREFIX.length());
 
-        Promise<WorkspaceDto> workspace = workspaceServiceClient.getWorkspace(wsId);
+        Promise<WorkspaceImpl> workspace = workspaceServiceClient.getWorkspace(wsId);
         workspace.catchError(
             arg -> {
               storage.removeItem(key);

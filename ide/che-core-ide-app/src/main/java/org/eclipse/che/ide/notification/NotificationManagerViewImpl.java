@@ -18,8 +18,6 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.eclipse.che.ide.Resources;
-import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 
 /**
@@ -41,21 +39,10 @@ public class NotificationManagerViewImpl extends BaseView<NotificationManagerVie
   /** scroll events to the bottom if view is visible */
   private boolean scrollBottomRequired = false;
 
-  /**
-   * Create view.
-   *
-   * @param resources
-   */
+  /** Create view. */
   @Inject
-  public NotificationManagerViewImpl(
-      PartStackUIResources partStackUIResources,
-      Resources resources,
-      NotificationManagerViewImplUiBinder uiBinder) {
-    super(partStackUIResources);
+  public NotificationManagerViewImpl(NotificationManagerViewImplUiBinder uiBinder) {
     setContentWidget(uiBinder.createAndBindUi(this));
-
-    minimizeButton.ensureDebugId("notification-minimizeBut");
-
     scrollPanel.getElement().setTabIndex(0);
   }
 

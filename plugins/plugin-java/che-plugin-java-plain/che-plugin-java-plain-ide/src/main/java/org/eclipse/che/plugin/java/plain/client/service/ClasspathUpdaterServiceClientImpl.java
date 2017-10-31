@@ -49,7 +49,7 @@ public class ClasspathUpdaterServiceClientImpl implements ClasspathUpdaterServic
   @Override
   public Promise<Void> setRawClasspath(String projectPath, List<ClasspathEntryDto> entries) {
     final String url =
-        appContext.getDevMachine().getWsAgentBaseUrl()
+        appContext.getWsAgentServerApiEndpoint()
             + pathToService
             + "update?projectpath="
             + encodePath(valueOf(projectPath));

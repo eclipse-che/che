@@ -27,6 +27,7 @@ import org.eclipse.che.ide.ui.cellview.DataGridResources;
 import org.eclipse.che.ide.ui.list.CategoriesList;
 import org.eclipse.che.ide.ui.list.SimpleList;
 import org.eclipse.che.ide.ui.tree.Tree;
+import org.eclipse.che.ide.ui.window.Window;
 import org.eclipse.che.ide.ui.zeroclipboard.ZeroClipboardResources;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -36,7 +37,8 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  * @author Codenvy crowd
  */
 public interface Resources
-    extends Tree.Resources,
+    extends Window.Resources,
+        Tree.Resources,
         PartStackUIResources,
         SimpleList.Resources,
         MenuResources,
@@ -186,6 +188,24 @@ public interface Resources
   @Source("part/che-logo.svg")
   SVGResource cheLogo();
 
+  @Source("panel/panel-selector-bottom.svg")
+  SVGResource panelSelectorBottom();
+
+  @Source("panel/panel-selector-full-editor.svg")
+  SVGResource panelSelectorFullEditor();
+
+  @Source("panel/panel-selector-left.svg")
+  SVGResource panelSelectorLeft();
+
+  @Source("panel/panel-selector-left-bottom.svg")
+  SVGResource panelSelectorLeftBottom();
+
+  @Source("panel/panel-selector-left-right-bottom.svg")
+  SVGResource panelSelectorLeftRightBottom();
+
+  @Source("panel/panel-selector-right.svg")
+  SVGResource panelSelectorRight();
+
   @Source("searchMatch.svg")
   SVGResource searchMatch();
 
@@ -217,8 +237,6 @@ public interface Resources
     String editorFullScreen();
 
     String createWsTagsPopup();
-
-    String tagsPanel();
 
     @ClassName("found-highlight")
     String foundPhraseHighlight();

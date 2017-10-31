@@ -22,6 +22,8 @@ import org.eclipse.che.ide.api.vcs.VcsChangeMarkerRenderFactory;
 import org.eclipse.che.ide.ext.git.client.GitChangeMarkerRendererFactory;
 import org.eclipse.che.ide.ext.git.client.GitEventSubscribable;
 import org.eclipse.che.ide.ext.git.client.GitEventsHandler;
+import org.eclipse.che.ide.ext.git.client.GitServiceClient;
+import org.eclipse.che.ide.ext.git.client.GitServiceClientImpl;
 import org.eclipse.che.ide.ext.git.client.add.AddToIndexView;
 import org.eclipse.che.ide.ext.git.client.add.AddToIndexViewImpl;
 import org.eclipse.che.ide.ext.git.client.branch.BranchView;
@@ -79,6 +81,8 @@ public class GitGinModule extends AbstractGinModule {
   /** {@inheritDoc} */
   @Override
   protected void configure() {
+    bind(GitServiceClient.class).to(GitServiceClientImpl.class).in(Singleton.class);
+
     GinMultibinder.newSetBinder(binder(), ImportWizardRegistrar.class)
         .addBinding()
         .to(GitImportWizardRegistrar.class);

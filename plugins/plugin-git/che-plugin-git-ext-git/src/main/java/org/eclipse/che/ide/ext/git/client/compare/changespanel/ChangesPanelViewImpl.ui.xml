@@ -16,25 +16,21 @@
     <ui:with field='res' type='org.eclipse.che.ide.ext.git.client.GitResources'/>
     <ui:with field='locale' type='org.eclipse.che.ide.ext.git.client.GitLocalizationConstant'/>
     <ui:style>
-        .space {
+        .button {
             margin-right: 5px;
-        }
-
-        .git-changes-tool-button {
-            min-width: 22px;
-            min-height: 22px;
-            width: 22px;
-            height: 22px;
+            font-size: 14px;
             padding: 0 0;
+            width: 30px;
+            min-width: auto;
         }
     </ui:style>
 
     <g:DockLayoutPanel width="100%" height="100%">
         <g:north size="25">
             <g:FlowPanel>
-                <g:Button ui:field="changeViewModeButton" width="140px" addStyleNames="{style.space}"/>
-                <g:Button ui:field="expandButton"  addStyleNames="{style.space} {style.git-changes-tool-button}"/>
-                <g:Button ui:field="collapseButton" addStyleNames="{style.space} {style.git-changes-tool-button}"/>
+                <g:Button ui:field="changeViewModeButton" addStyleNames="{style.button}"/>
+                <g:Button ui:field="expandButton" addStyleNames="{style.button}"/>
+                <g:Button ui:field="collapseButton" addStyleNames="{style.button}"/>
             </g:FlowPanel>
         </g:north>
         <g:center>

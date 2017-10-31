@@ -17,7 +17,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 import static org.eclipse.che.ide.api.resources.Resource.FILE;
 import static org.eclipse.che.ide.api.resources.Resource.FOLDER;
 import static org.eclipse.che.ide.api.resources.Resource.PROJECT;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -33,10 +33,6 @@ import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.dialogs.InputCallback;
-import org.eclipse.che.ide.api.dialogs.InputDialog;
-import org.eclipse.che.ide.api.dialogs.InputValidator;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -44,6 +40,10 @@ import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.resources.RenamingSupport;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.ide.ui.dialogs.input.InputCallback;
+import org.eclipse.che.ide.ui.dialogs.input.InputDialog;
+import org.eclipse.che.ide.ui.dialogs.input.InputValidator;
 import org.eclipse.che.ide.util.NameUtils;
 
 /**
@@ -77,7 +77,6 @@ public class RenameItemAction extends AbstractPerspectiveAction {
         singletonList(PROJECT_PERSPECTIVE_ID),
         localization.renameItemActionText(),
         localization.renameItemActionDescription(),
-        null,
         resources.rename());
     this.localization = localization;
     this.renamingSupport = renamingSupport;

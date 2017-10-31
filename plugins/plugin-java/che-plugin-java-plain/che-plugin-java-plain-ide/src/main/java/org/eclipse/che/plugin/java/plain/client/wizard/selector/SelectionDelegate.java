@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.java.plain.client.wizard.selector;
 
 import java.util.List;
-import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 
 /**
  * Delegate which handles result of the node selection.

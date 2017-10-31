@@ -16,13 +16,13 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import javax.inject.Inject;
-import org.eclipse.che.api.factory.shared.dto.FactoryDto;
-import org.eclipse.che.api.factory.shared.dto.IdeActionDto;
-import org.eclipse.che.api.factory.shared.dto.IdeDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.factory.FactoryAcceptedEvent;
+import org.eclipse.che.ide.api.factory.model.ActionImpl;
+import org.eclipse.che.ide.api.factory.model.FactoryImpl;
+import org.eclipse.che.ide.api.factory.model.IdeImpl;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
@@ -62,13 +62,14 @@ public class AcceptFactoryHandler {
 
   /** Accepts factory if it is present in context of application */
   public void process() {
-    final FactoryDto factory;
+    final FactoryImpl factory;
     if ((factory = appContext.getFactory()) == null) {
       return;
     }
+
     eventBus.addHandler(
         WorkspaceReadyEvent.getType(),
-        event -> {
+        e -> {
           if (isImportingStarted) {
             return;
           }
@@ -85,7 +86,7 @@ public class AcceptFactoryHandler {
         });
   }
 
-  private void startImporting(final FactoryDto factory) {
+  private void startImporting(final FactoryImpl factory) {
     factoryProjectImporter.startImporting(
         factory,
         new AsyncCallback<Void>() {
@@ -104,23 +105,23 @@ public class AcceptFactoryHandler {
         });
   }
 
-  private void performOnAppLoadedActions(final FactoryDto factory) {
-    final IdeDto ide = factory.getIde();
+  private void performOnAppLoadedActions(final FactoryImpl factory) {
+    final IdeImpl ide = factory.getIde();
     if (ide == null || ide.getOnAppLoaded() == null) {
       return;
     }
-    for (IdeActionDto action : ide.getOnAppLoaded().getActions()) {
+    for (ActionImpl action : ide.getOnAppLoaded().getActions()) {
       actionManager.performAction(action.getId(), action.getProperties());
     }
   }
 
-  private void performOnProjectsLoadedActions(final FactoryDto factory) {
-    final IdeDto ide = factory.getIde();
+  private void performOnProjectsLoadedActions(final FactoryImpl factory) {
+    final IdeImpl ide = factory.getIde();
     if (ide == null || ide.getOnProjectsLoaded() == null) {
       eventBus.fireEvent(new FactoryAcceptedEvent(factory));
       return;
     }
-    for (IdeActionDto action : ide.getOnProjectsLoaded().getActions()) {
+    for (ActionImpl action : ide.getOnProjectsLoaded().getActions()) {
       actionManager.performAction(action.getId(), action.getProperties());
     }
     eventBus.fireEvent(new FactoryAcceptedEvent(factory));

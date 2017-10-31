@@ -17,10 +17,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import org.eclipse.che.api.core.model.project.NewProjectConfig;
 import org.eclipse.che.api.core.model.project.ProjectProblem;
-import org.eclipse.che.api.core.model.project.SourceStorage;
+import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
+import org.eclipse.che.api.project.shared.NewProjectConfig;
 import org.eclipse.che.api.vfs.Path;
 
 /**

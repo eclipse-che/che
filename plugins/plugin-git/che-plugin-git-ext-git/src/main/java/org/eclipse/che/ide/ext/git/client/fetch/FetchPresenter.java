@@ -27,13 +27,13 @@ import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.BranchListMode;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.git.client.BranchSearcher;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
+import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
@@ -109,7 +109,7 @@ public class FetchPresenter implements FetchView.ActionDelegate {
             error -> {
               GitOutputConsole console = gitOutputConsoleFactory.create(FETCH_COMMAND_NAME);
               console.printError(constant.remoteListFailed());
-              processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+              processesPanelPresenter.addCommandOutput(console);
               notificationManager.notify(constant.remoteListFailed(), FAIL, FLOAT_MODE);
               view.setEnableFetchButton(false);
             });
@@ -145,7 +145,7 @@ public class FetchPresenter implements FetchView.ActionDelegate {
                   error.getMessage() != null ? error.getMessage() : constant.branchesListFailed();
               GitOutputConsole console = gitOutputConsoleFactory.create(FETCH_COMMAND_NAME);
               console.printError(errorMessage);
-              processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+              processesPanelPresenter.addCommandOutput(console);
               notificationManager.notify(constant.branchesListFailed(), FAIL, FLOAT_MODE);
               view.setEnableFetchButton(false);
             });
@@ -166,14 +166,14 @@ public class FetchPresenter implements FetchView.ActionDelegate {
         .then(
             ignored -> {
               console.print(constant.fetchSuccess(remoteUrl));
-              processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+              processesPanelPresenter.addCommandOutput(console);
               notification.setStatus(SUCCESS);
               notification.setTitle(constant.fetchSuccess(remoteUrl));
             })
         .catchError(
             error -> {
               handleError(error.getCause(), remoteUrl, notification, console);
-              processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+              processesPanelPresenter.addCommandOutput(console);
             });
     view.close();
   }

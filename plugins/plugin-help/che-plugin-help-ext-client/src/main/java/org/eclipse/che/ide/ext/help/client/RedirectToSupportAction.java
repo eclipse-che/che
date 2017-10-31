@@ -15,8 +15,8 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.ProductInfoDataProvider;
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.util.browser.BrowserUtils;
 
 /**
@@ -26,7 +26,7 @@ import org.eclipse.che.ide.util.browser.BrowserUtils;
  * @author Alexander Andrienko
  */
 @Singleton
-public class RedirectToSupportAction extends Action {
+public class RedirectToSupportAction extends BaseAction {
   private final ProductInfoDataProvider productInfoDataProvider;
 
   @Inject
@@ -37,7 +37,6 @@ public class RedirectToSupportAction extends Action {
     super(
         productInfoDataProvider.getSupportTitle(),
         locale.actionRedirectToSupportDescription(),
-        null,
         resources.getSupport());
     this.productInfoDataProvider = productInfoDataProvider;
   }

@@ -15,13 +15,13 @@ import static com.google.gwt.user.client.Event.ONCLICK;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.Event;
-import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.command.CommandResources;
 import org.eclipse.che.ide.command.explorer.CommandsExplorerView.ActionDelegate;
 import org.eclipse.che.ide.command.node.CommandFileNode;
 import org.eclipse.che.ide.command.node.CommandGoalNode;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.TreeStyles;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.presentation.DefaultPresentationRenderer;
 import org.vectomatic.dom.svg.ui.SVGResource;
 

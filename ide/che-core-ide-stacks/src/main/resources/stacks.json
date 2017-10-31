@@ -31,17 +31,31 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
-              "servers": {},
+              "servers": {
+                "tomcat8" : {
+                  "port" : "8080",
+                  "protocol" : "http"
+                },
+                "tomcat8-debug" : {
+                  "port" : "8000",
+                  "protocol" : "http"
+                }
+              },
               "attributes" : {}
             },
             "db": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.terminal"
               ],
-              "servers": {},
+              "servers": {
+                "mysql" : {
+                  "port" : "3306",
+                  "protocol" : "tcp"
+                }
+              },
               "attributes" : {}
             }
           },
@@ -105,17 +119,35 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
-              "servers": {},
+              "servers": {
+                "tomcat8" : {
+                  "port" : "8080",
+                  "protocol" : "http"
+                },
+                "tomcat8-debug" : {
+                  "port" : "8000",
+                  "protocol" : "http"
+                },
+                "codeserver" : {
+                  "port" : "9876",
+                  "protocol" : "http"
+                }
+              },
               "attributes" : {}
             },
             "db": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal"
               ],
-              "servers": {},
+              "servers": {
+                "mysql" : {
+                  "port" : "3306",
+                  "protocol" : "tcp"
+                }
+              },
               "attributes" : {}
             }
           },
@@ -180,10 +212,23 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
-              "servers": {},
+              "servers": {
+                "tomcat8" : {
+                  "port" : "8080",
+                  "protocol" : "http"
+                },
+                "tomcat8-debug" : {
+                  "port" : "8000",
+                  "protocol" : "http"
+                },
+                "codeserver" : {
+                  "port" : "9876",
+                  "protocol" : "http"
+                }
+              },
               "attributes" : {
                 "memoryLimitBytes": "2147483648"
               }
@@ -237,10 +282,23 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
-              "servers": {},
+              "servers": {
+                "tomcat8" : {
+                  "port" : "8080",
+                  "protocol" : "http"
+                },
+                "tomcat8-debug" : {
+                  "port" : "8000",
+                  "protocol" : "http"
+                },
+                "codeserver" : {
+                  "port" : "9876",
+                  "protocol" : "http"
+                }
+              },
               "attributes" : {
                 "memoryLimitBytes": "2147483648"
               }
@@ -295,10 +353,15 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
-              "servers": {},
+              "servers": {
+                "VNC" : {
+                  "port" : "6080",
+                  "protocol" : "http"
+                }
+              },
               "attributes" : {
                 "memoryLimitBytes": "2147483648"
               }
@@ -366,7 +429,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
@@ -431,10 +494,15 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.csharp"
               ],
-              "servers": {},
+              "servers": {
+                "dot.net.server" : {
+                  "port" : "5000",
+                  "protocol" : "http"
+                }
+              },
               "attributes" : {
                 "memoryLimitBytes": "2147483648"
               }
@@ -442,80 +510,6 @@
           },
           "recipe": {
             "location": "eclipse/dotnet_core",
-            "type": "dockerimage"
-          }
-        }
-      },
-      "name": "default",
-      "defaultEnv": "default",
-      "description": null,
-      "commands": [
-        {
-          "name": "update dependencies",
-          "type": "custom",
-          "commandLine": "cd ${current.project.path} && dotnet restore",
-          "attributes": {
-            "previewUrl": "",
-            "goal": "Build"
-          }
-        },
-        {
-          "name": "run",
-          "type": "custom",
-          "commandLine": "cd ${current.project.path} && dotnet run",
-          "attributes": {
-            "previewUrl": "http://${server.port.5000}",
-            "goal": "Run"
-          }
-        }
-      ]
-    },
-    "stackIcon": {
-      "name": "type-dotnet.svg",
-      "mediaType": "image/svg+xml"
-    }
-  },
-  {
-    "id": "dotnet-centos",
-    "creator": "ide",
-    "name": ".NET CentOS",
-    "description": "CentOS .NET 2.0 Stack with .NET Core SDK",
-    "scope": "general",
-    "tags": [
-      "CentOS",
-      "dotnet",
-      "Git"
-    ],
-    "components": [
-      {
-        "name": "CentOS",
-        "version": "---"
-      },
-      {
-        "name": ".NET Core SDK",
-        "version": "rh-dotnet20"
-      }
-    ],
-    "source": {
-      "type": "image",
-      "origin": "registry.centos.org/che-stacks/centos-dotnet20"
-    },
-    "workspaceConfig": {
-      "environments": {
-        "default": {
-          "machines": {
-            "dev-machine": {
-              "agents": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.csharp"
-              ],
-              "servers": {},
-              "attributes" : {
-                "memoryLimitBytes": "2147483648"
-              }
-            }
-          },
-          "recipe": {
-            "location": "registry.centos.org/che-stacks/centos-dotnet20",
             "type": "dockerimage"
           }
         }
@@ -578,10 +572,15 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
-              "servers": {},
+              "servers": {
+                "8080/tcp" : {
+                  "port" : "8080",
+                  "protocol" : "http"
+                }
+              },
               "attributes" : {
                 "memoryLimitBytes": "2147483648"
               }
@@ -648,10 +647,23 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
-              "servers": {},
+              "servers": {
+                "tomcat8" : {
+                  "port" : "8080",
+                  "protocol" : "http"
+                },
+                "tomcat8-debug" : {
+                  "port" : "8000",
+                  "protocol" : "http"
+                },
+                "codeserver" : {
+                  "port" : "9876",
+                  "protocol" : "http"
+                }
+              },
               "attributes" : {
                 "memoryLimitBytes": "2147483648"
               }
@@ -725,10 +737,23 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
-              "servers": {},
+              "servers": {
+                "3000/tcp" : {
+                  "port" : "3000",
+                  "protocol" : "http"
+                },
+                "5000/tcp" : {
+                  "port" : "5000",
+                  "protocol" : "http"
+                },
+                "9000/tcp" : {
+                  "port" : "9000",
+                  "protocol" : "http"
+                }
+              },
               "attributes" : {
                 "memoryLimitBytes": "2147483648"
               }
@@ -795,10 +820,19 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json"
               ],
-              "servers": {},
+              "servers": {
+                "8080/tcp" : {
+                  "port" : "8080",
+                  "protocol" : "http"
+                },
+                "8000/tcp" : {
+                  "port" : "8000",
+                  "protocol" : "http"
+                }
+              },
               "attributes" : {
                 "memoryLimitBytes": "2147483648"
               }
@@ -912,10 +946,19 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php"
               ],
-              "servers": {},
+              "servers": {
+                "8080/tcp" : {
+                  "port" : "8080",
+                  "protocol" : "http"
+                },
+                "8000/tcp" : {
+                  "port" : "8000",
+                  "protocol" : "http"
+                }
+              },
               "attributes" : {
                 "memoryLimitBytes": "2147483648"
               }
@@ -1014,10 +1057,19 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.python"
               ],
-              "servers": {},
+              "servers": {
+                "8080/tcp" : {
+                  "port" : "8080",
+                  "protocol" : "http"
+                },
+                "8000/tcp" : {
+                  "port" : "8000",
+                  "protocol" : "http"
+                }
+              },
               "attributes" : {
                 "memoryLimitBytes": "2147483648"
               }
@@ -1085,10 +1137,15 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
-              "servers": {},
+              "servers": {
+                "3000/tcp" : {
+                  "port" : "3000",
+                  "protocol" : "http"
+                }
+              },
               "attributes" : {
                 "memoryLimitBytes": "2147483648"
               }
@@ -1153,7 +1210,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
@@ -1198,7 +1255,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec",
                 "org.eclipse.che.terminal",
                 "org.eclipse.che.ws-agent",
@@ -1265,10 +1322,19 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
-              "servers": {},
+              "servers": {
+                "8080/tcp" : {
+                  "port" : "8080",
+                  "protocol" : "http"
+                },
+                "8000/tcp" : {
+                  "port" : "8000",
+                  "protocol" : "http"
+                }
+              },
               "attributes" : {
                 "memoryLimitBytes": "2147483648"
               }
@@ -1341,7 +1407,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
@@ -1420,10 +1486,19 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json"
               ],
-              "servers": {},
+              "servers": {
+                "8080/tcp" : {
+                  "port" : "8080",
+                  "protocol" : "http"
+                },
+                "8000/tcp" : {
+                  "port" : "8000",
+                  "protocol" : "http"
+                }
+              },
               "attributes" : {
                 "memoryLimitBytes": "2147483648"
               }
@@ -1486,10 +1561,19 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.python"
               ],
-              "servers": {},
+              "servers": {
+                "8080/tcp" : {
+                  "port" : "8080",
+                  "protocol" : "http"
+                },
+                "8000/tcp" : {
+                  "port" : "8000",
+                  "protocol" : "http"
+                }
+              },
               "attributes" : {
                 "memoryLimitBytes": "2147483648"
               }
@@ -1549,10 +1633,19 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.python"
               ],
-              "servers": {},
+              "servers": {
+                "8080/tcp" : {
+                  "port" : "8080",
+                  "protocol" : "http"
+                },
+                "8000/tcp" : {
+                  "port" : "8000",
+                  "protocol" : "http"
+                }
+              },
               "attributes" : {
                 "memoryLimitBytes": "2147483648"
               }
@@ -1631,10 +1724,31 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
-              "servers": {},
+              "servers": {
+                "8080/tcp" : {
+                  "port" : "8080",
+                  "protocol" : "http"
+                },
+                "8000/tcp" : {
+                  "port" : "8000",
+                  "protocol" : "http"
+                },
+                "4444/tcp" : {
+                  "port" : "4444",
+                  "protocol" : "tcp"
+                },
+                "6080/tcp" : {
+                  "port" : "6080",
+                  "protocol" : "tcp"
+                },
+                "32745/tcp" : {
+                  "port" : "32745",
+                  "protocol" : "tcp"
+                }
+              },
               "attributes" : {
                 "memoryLimitBytes": "2147483648"
               }
@@ -1683,10 +1797,23 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
-              "servers": {},
+              "servers": {
+                "tomcat8" : {
+                  "port" : "8080",
+                  "protocol" : "http"
+                },
+                "tomcat8-debug" : {
+                  "port" : "8000",
+                  "protocol" : "http"
+                },
+                "codeserver" : {
+                  "port" : "9876",
+                  "protocol" : "http"
+                }
+              },
               "attributes" : {
                 "memoryLimitBytes": "2147483648"
               }
@@ -1734,7 +1861,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
@@ -1795,10 +1922,27 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json"
               ],
-              "servers": {},
+              "servers": {
+                "80/tcp" : {
+                  "port" : "80",
+                  "protocol" : "http"
+                },
+                "443/tcp" : {
+                  "port" : "443",
+                  "protocol" : "http"
+                },
+                "10081/tcp" : {
+                  "port" : "10081",
+                  "protocol" : "tcp"
+                },
+                "10082/tcp" : {
+                  "port" : "10082",
+                  "protocol" : "tcp"
+                }
+              },
               "attributes" : {
                 "memoryLimitBytes": "2147483648"
               }
@@ -1902,10 +2046,19 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
-              "servers": {},
+              "servers": {
+                "8080/tcp" : {
+                  "port" : "8080",
+                  "protocol" : "http"
+                },
+                "8000/tcp" : {
+                  "port" : "8000",
+                  "protocol" : "http"
+                }
+              },
               "attributes" : {
                 "memoryLimitBytes": "2147483648",
                 "auto_snapshot": "true",
@@ -2009,13 +2162,30 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec",
                 "org.eclipse.che.terminal",
                 "org.eclipse.che.ws-agent",
                 "org.eclipse.che.ssh"
               ],
-              "servers": {},
+              "servers": {
+                "vertx" : {
+                  "port" : "8080",
+                  "protocol" : "http"
+                },
+                "tomcat8-debug" : {
+                  "port" : "8000",
+                  "protocol" : "http"
+                },
+                "codeserver" : {
+                  "port" : "9876",
+                  "protocol" : "http"
+                },
+                "vertx-debug" : {
+                  "port" : "5005",
+                  "protocol" : "http"
+                }
+              },
               "attributes": {
                 "memoryLimitBytes": "2147483648"
               }
@@ -2104,12 +2274,26 @@
           },
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec",
                 "org.eclipse.che.terminal",
                 "org.eclipse.che.ws-agent",
                 "org.eclipse.che.ssh"
               ],
+              "servers": {
+                "springboot" : {
+                  "port" : "8080",
+                  "protocol" : "http"
+                },
+                "tomcat8-debug" : {
+                  "port" : "8000",
+                  "protocol" : "http"
+                },
+                "codeserver" : {
+                  "port" : "9876",
+                  "protocol" : "http"
+                }
+              },
               "attributes": {
                 "memoryLimitBytes": "2147483648"
               }
@@ -2192,14 +2376,25 @@
               "attributes": {
                 "memoryLimitBytes": "2147483648"
               },
-
-              "agents": [
-	        "org.eclipse.che.exec",
+              "installers": [
                 "org.eclipse.che.terminal",
                 "org.eclipse.che.ws-agent",
                 "org.eclipse.che.ssh"
               ],
-              "servers": {}
+              "servers": {
+                "wildfly" : {
+                  "port" : "8080",
+                  "protocol" : "http"
+                },
+                "tomcat8-debug" : {
+                  "port" : "8000",
+                  "protocol" : "http"
+                },
+                "codeserver" : {
+                  "port" : "9876",
+                  "protocol" : "http"
+                }
+              }
             }
           }
         }
@@ -2242,7 +2437,6 @@
   {
     "name": "CentOS nodejs",
     "id": "nodejs4",
-    "creator": "Dharmit Shah",
     "scope": "advanced",
     "source": {
       "type": "image",
@@ -2274,13 +2468,25 @@
               "attributes": {
                 "memoryLimitBytes": "2147483648"
               },
-              "agents": [
-                "org.eclipse.che.exec",
+              "installers": [
                 "org.eclipse.che.terminal",
                 "org.eclipse.che.ws-agent",
                 "org.eclipse.che.ssh"
               ],
-              "servers": {}
+              "servers": {
+                "angular" : {
+                  "port" : "8003",
+                  "protocol" : "http"
+                },
+                "node-3000" : {
+                  "port" : "3000",
+                  "protocol" : "http"
+                },
+                "node-9000" : {
+                  "port" : "9000",
+                  "protocol" : "http"
+                }
+              }
             }
           }
         }
@@ -2326,10 +2532,7 @@
         "version": "---"
       }
     ],
-    "stackIcon": {
-      "name": "type-node.svg",
-      "mediaType": "image/svg+xml"
-    }
+    "creator": "Dharmit Shah"
   },
   {
     "id": "kotlin-default",
@@ -2352,7 +2555,7 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
@@ -2401,10 +2604,15 @@
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
-              "servers": {},
+              "servers": {
+                "8080/tcp" : {
+                  "port" : "8080",
+                  "protocol" : "http"
+                }
+              },
               "attributes" : {
                 "memoryLimitBytes": "2147483648"
               }
@@ -2458,7 +2666,7 @@
       "default": {
         "machines": {
           "dev-machine": {
-            "agents": [
+            "installers": [
               "org.eclipse.che.terminal",
               "org.eclipse.che.ws-agent",
               "org.eclipse.che.ssh"
@@ -2543,8 +2751,21 @@
               "attributes": {
                 "memoryLimitBytes": "2147483648"
               },
-              "servers": {},
-              "agents": [
+              "servers": {
+                "tomcat8" : {
+                  "port" : "8080",
+                  "protocol" : "http"
+                },
+                "tomcat8-debug" : {
+                  "port" : "8000",
+                  "protocol" : "http"
+                },
+                "codeserver" : {
+                  "port" : "9876",
+                  "protocol" : "http"
+                }
+              },
+              "installers": [
                 "org.eclipse.che.exec",
                 "org.eclipse.che.terminal",
                 "org.eclipse.che.ws-agent",
@@ -2632,6 +2853,96 @@
     "stackIcon": {
       "name": "type-ceylon.svg",
       "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "openshift-default",
+    "name": "Openshift Default",
+    "description": "Openshift Single Pod Workspace",
+    "scope": "general",
+    "tags": [
+      "Openshift"
+    ],
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "app/main": {
+              "installers": [
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
+              ],
+              "servers": {
+                "web": {
+                  "protocol": "http",
+                  "port": "8080/tcp"
+                }
+              }
+            }
+          },
+          "recipe": {
+            "content": "kind: List\nitems:\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: app\n  spec:\n    containers:\n      -\n        image: rhche/centos_jdk8:latest\n        name: main\n        ports:\n          -\n            containerPort: 8080\n            protocol: TCP",
+            "contentType": "application/x-yaml",
+            "type": "openshift"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": []
+    }
+  },
+  {
+    "id": "openshift-sql",
+    "name": "Openshift Sql",
+    "description": "Openshift Multi Pod Workspace",
+    "scope": "general",
+    "tags": [
+      "Openshift"
+    ],
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "web/main": {
+              "installers": [
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
+              ],
+              "servers": {
+                "web": {
+                  "protocol": "http",
+                  "port": "8080/tcp"
+                }
+              }
+            },
+            "db/main": {
+              "installers": [
+                "org.eclipse.che.terminal"
+              ],
+              "servers": {}
+            }
+          },
+          "recipe": {
+            "content": "---\nkind: List\nitems:\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: web\n  spec:\n    containers:\n      -\n        image: rhche/centos_jdk8:latest\n        name: main\n        ports:\n          -\n            containerPort: 8080\n            protocol: TCP\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: db\n    labels:\n      type: db\n  spec:\n    containers:\n      -\n        image: centos/mysql-57-centos7\n        name: main\n        ports:\n          -\n            name: mysql\n            containerPort: 3306\n            protocol: TCP\n        env:\n          - \n            name: MYSQL_USER\n            value: 'petclinic'\n          - \n            name: MYSQL_ROOT_PASSWORD\n            value: 'password'\n          - \n            name: MYSQL_PASSWORD\n            value: 'password'\n          - \n            name: MYSQL_DATABASE\n            value: 'petclinic'\n\n-\n  apiVersion: v1\n  kind: Service\n  metadata:\n    name: db\n  spec:\n    selector:\n      type: db\n    ports:\n      - name: mysql\n        port: 3306\n        protocol: TCP\n        targetPort: mysql",
+            "contentType": "application/x-yaml",
+            "type": "openshift"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": [
+        {
+          "commandLine": "mvn clean install -f ${current.project.path}",
+          "name": "build",
+          "type": "mvn",
+          "attributes": {
+            "previewUrl": "",
+            "goal": "Build"
+          }
+        }
+      ]
     }
   }
 ]

@@ -65,7 +65,7 @@ public class DirectUrlFactoryWithKeepDirectory {
     seleniumWebDriver.switchFromDashboardIframeToIde();
     projectExplorer.waitProjectExplorer();
     notificationsPopupPanel.waitProgressPopupPanelClose();
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage("Project gitPullTest imported", UPDATING_PROJECT_TIMEOUT_SEC);
     projectExplorer.expandPathInProjectExplorer("gitPullTest/my-lib");
     projectExplorer.waitItem("gitPullTest/my-lib/pom.xml");

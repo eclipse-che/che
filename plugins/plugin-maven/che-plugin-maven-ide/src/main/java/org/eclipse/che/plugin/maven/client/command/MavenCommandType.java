@@ -18,9 +18,6 @@ import org.eclipse.che.ide.api.command.CommandPage;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.icon.IconRegistry;
-import org.eclipse.che.ide.macro.CurrentProjectPathMacro;
-import org.eclipse.che.ide.macro.CurrentProjectRelativePathMacro;
-import org.eclipse.che.ide.macro.ServerAddressMacroRegistrar;
 import org.eclipse.che.plugin.maven.client.MavenResources;
 
 /**
@@ -32,23 +29,13 @@ import org.eclipse.che.plugin.maven.client.MavenResources;
 public class MavenCommandType implements CommandType {
 
   private static final String ID = "mvn";
-  private static final String COMMAND_TEMPLATE = "mvn clean install";
-  private static final String DEF_PORT = "8080";
+  private static final String COMMAND_TEMPLATE = "mvn clean install -f ${current.project.path}";
 
-  private final CurrentProjectPathMacro currentProjectPathMacro;
-  private final CurrentProjectRelativePathMacro currentProjectRelativePathMacro;
   private final List<CommandPage> pages;
 
   @Inject
   public MavenCommandType(
-      MavenResources resources,
-      MavenCommandPagePresenter page,
-      CurrentProjectPathMacro currentProjectPathMacro,
-      CurrentProjectRelativePathMacro currentProjectRelativePathMacro,
-      IconRegistry iconRegistry) {
-    this.currentProjectPathMacro = currentProjectPathMacro;
-    this.currentProjectRelativePathMacro = currentProjectRelativePathMacro;
-
+      MavenResources resources, MavenCommandPagePresenter page, IconRegistry iconRegistry) {
     pages = new LinkedList<>();
     pages.add(page);
 
@@ -77,15 +64,11 @@ public class MavenCommandType implements CommandType {
 
   @Override
   public String getCommandLineTemplate() {
-    return COMMAND_TEMPLATE + " -f " + currentProjectPathMacro.getName();
+    return COMMAND_TEMPLATE;
   }
 
   @Override
   public String getPreviewUrlTemplate() {
-    // TODO: hardcode http after switching WS Master to https
-    return "http://"
-        + ServerAddressMacroRegistrar.MACRO_NAME_TEMPLATE.replace("%", DEF_PORT)
-        + "/"
-        + currentProjectRelativePathMacro.getName();
+    return "${server.tomcat8}/${current.project.relpath}";
   }
 }

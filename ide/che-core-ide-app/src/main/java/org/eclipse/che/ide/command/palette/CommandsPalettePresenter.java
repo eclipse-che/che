@@ -15,16 +15,17 @@ import static org.eclipse.che.ide.util.StringUtils.containsIgnoreCase;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.ArrayList;
 import java.util.List;
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
+import org.eclipse.che.api.core.model.workspace.Runtime;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.command.CommandUtils;
 import org.eclipse.che.ide.machine.chooser.MachineChooser;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
 /**
  * Presenter for Commands Palette.
@@ -93,16 +94,16 @@ public class CommandsPalettePresenter implements CommandsPaletteView.ActionDeleg
           .show()
           .then(
               machine -> {
-                commandExecutor.executeCommand(command, machine);
+                commandExecutor.executeCommand(command, machine.getName());
               });
     }
   }
 
   private List<? extends Machine> getMachines() {
-    final WorkspaceRuntime runtime = appContext.getWorkspace().getRuntime();
+    final Runtime runtime = appContext.getWorkspace().getRuntime();
 
     if (runtime != null) {
-      return runtime.getMachines();
+      return new ArrayList<>(runtime.getMachines().values());
     }
 
     return emptyList();

@@ -31,7 +31,6 @@ import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentFilePathMa
 import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentFileRelativePathMacro;
 import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentProjectNameMacro;
 import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentProjectTypeMacro;
-import org.eclipse.che.ide.workspace.macro.WorkspaceNameMacro;
 
 /**
  * GIN module for configuring Macro API components.
@@ -64,6 +63,8 @@ public class MacroApiModule extends AbstractGinModule {
     macrosBinder.addBinding().to(DevMachineHostNameMacro.class);
     macrosBinder.addBinding().to(CurrentProjectPathMacro.class);
     macrosBinder.addBinding().to(CurrentProjectRelativePathMacro.class);
+
+    bind(ServerAddressMacroRegistrar.class).asEagerSingleton();
 
     bind(MacroChooserView.class).to(MacroChooserViewImpl.class);
   }

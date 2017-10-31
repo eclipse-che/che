@@ -15,12 +15,12 @@ import com.google.inject.assistedinject.Assisted;
 import java.util.List;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.ide.api.data.tree.HasAction;
-import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.navigation.filestructure.FileStructurePresenter;
 import org.eclipse.che.ide.ext.java.client.util.Flags;
 import org.eclipse.che.ide.ext.java.shared.dto.model.Field;
+import org.eclipse.che.ide.ui.smartTree.data.HasAction;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 import org.vectomatic.dom.svg.ui.SVGResource;
 

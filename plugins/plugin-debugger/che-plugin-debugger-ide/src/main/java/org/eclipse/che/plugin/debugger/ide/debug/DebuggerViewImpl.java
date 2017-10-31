@@ -39,14 +39,13 @@ import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.WatchExpression;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.Resources;
-import org.eclipse.che.ide.api.data.tree.Node;
-import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.list.SimpleList;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.Tree;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.status.StatusText;
 import org.eclipse.che.ide.util.dom.Elements;
 import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
@@ -101,14 +100,13 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
 
   @Inject
   protected DebuggerViewImpl(
-      PartStackUIResources partStackUIResources,
       DebuggerResources resources,
       DebuggerLocalizationConstant locale,
       Resources coreRes,
       DebuggerViewImplUiBinder uiBinder,
       DebuggerNodeFactory nodeFactory,
       DebugNodeUniqueKeyProvider nodeKeyProvider) {
-    super(partStackUIResources);
+    super();
 
     this.locale = locale;
     this.debuggerResources = resources;
@@ -144,8 +142,6 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
         .addSortInfo(new NodeStorage.StoreSortInfo(new DebugNodeTypeComparator(), ASC));
     tree.getNodeStorage()
         .addSortInfo(new NodeStorage.StoreSortInfo(new VariableNodeComparator(), ASC));
-
-    minimizeButton.ensureDebugId("debugger-minimizeBut");
 
     watchExpressionPanel.addStyleName(resources.getCss().watchExpressionsPanel());
   }

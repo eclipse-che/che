@@ -21,12 +21,12 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.PromiseProvider;
-import org.eclipse.che.ide.api.component.StateComponent;
-import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.api.statepersistance.StateComponent;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.util.loging.Log;
 
 /**

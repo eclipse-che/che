@@ -66,20 +66,15 @@ public class CreateAndDeleteProjectsTest {
   public void createAndDeleteProjectTest() throws ExecutionException, InterruptedException {
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(NavigationBar.MenuItem.WORKSPACES);
-
     dashboardWorkspace.clickOnNewWorkspaceBtn();
     createWorkspace.waitToolbar();
     createWorkspace.selectStack(TestStacksConstants.JAVA.getId());
     createWorkspace.typeWorkspaceName(WORKSPACE);
-
     projectSourcePage.clickAddOrImportProjectButton();
-
     projectSourcePage.selectSample(DashboardProject.Template.WEB_JAVA_SPRING.value());
     projectSourcePage.selectSample(DashboardProject.Template.CONSOLE_JAVA_SIMPLE.value());
     projectSourcePage.clickAdd();
-
     createWorkspace.clickCreate();
-
     String dashboardWindow = seleniumWebDriver.getWindowHandle();
     seleniumWebDriver.switchFromDashboardIframeToIde();
     loader.waitOnClosed();
@@ -93,7 +88,6 @@ public class CreateAndDeleteProjectsTest {
         DashboardProject.Template.WEB_JAVA_SPRING.value(), PROJECT_FOLDER);
     switchToWindow(dashboardWindow);
     dashboard.selectWorkspacesItemOnDashboard();
-
     dashboardWorkspace.selectWorkspaceItemName(WORKSPACE);
     dashboardWorkspace.selectTabInWorspaceMenu(DashboardWorkspace.TabNames.PROJECTS);
     dashboardProject.waitProjectIsPresent(DashboardProject.Template.WEB_JAVA_SPRING.value());

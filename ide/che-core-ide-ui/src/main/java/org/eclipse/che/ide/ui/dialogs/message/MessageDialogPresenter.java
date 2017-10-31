@@ -16,8 +16,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
-import org.eclipse.che.ide.api.dialogs.MessageDialog;
+import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmCallback;
 
 /**
  * {@link MessageDialog} implementation.

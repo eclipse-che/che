@@ -49,9 +49,9 @@ import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.debug.DebuggerManagerObserver;
+import org.eclipse.che.ide.part.perspectives.project.ProjectPerspective;
 import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective;
 import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
 import org.eclipse.che.plugin.debugger.ide.DebuggerResources;
 import org.eclipse.che.plugin.debugger.ide.debug.breakpoint.BreakpointContextMenuFactory;
@@ -82,7 +82,7 @@ public class DebuggerPresenter extends BasePresenter
   private final DebuggerView view;
   private final DebuggerManager debuggerManager;
   private final WorkspaceAgent workspaceAgent;
-  private final DebuggerLocationHandlerManager locationHandlerManager;
+  private final DebuggerLocationHandlerManager resourceHandlerManager;
   private final BreakpointContextMenuFactory breakpointContextMenuFactory;
 
   private List<Variable> variables;
@@ -102,7 +102,7 @@ public class DebuggerPresenter extends BasePresenter
       final @DebuggerWatchToolBar ToolbarPresenter watchToolbar,
       final DebuggerManager debuggerManager,
       final WorkspaceAgent workspaceAgent,
-      final DebuggerLocationHandlerManager locationHandlerManager,
+      final DebuggerLocationHandlerManager resourceHandlerManager,
       final BreakpointContextMenuFactory breakpointContextMenuFactory) {
     this.view = view;
     this.debuggerResources = debuggerResources;
@@ -110,7 +110,7 @@ public class DebuggerPresenter extends BasePresenter
     this.watchToolbar = watchToolbar;
     this.debuggerManager = debuggerManager;
     this.workspaceAgent = workspaceAgent;
-    this.locationHandlerManager = locationHandlerManager;
+    this.resourceHandlerManager = resourceHandlerManager;
     this.view.setDelegate(this);
     this.view.setTitle(TITLE);
     this.constant = constant;
@@ -203,7 +203,7 @@ public class DebuggerPresenter extends BasePresenter
   protected void open(Location location) {
     Debugger debugger = debuggerManager.getActiveDebugger();
     if (debugger != null) {
-      DebuggerLocationHandler handler = locationHandlerManager.getOrDefault(location);
+      DebuggerLocationHandler handler = resourceHandlerManager.getOrDefault(location);
 
       handler.open(
           location,
@@ -530,7 +530,7 @@ public class DebuggerPresenter extends BasePresenter
   @Override
   public void onBreakpointDoubleClick(Breakpoint breakpoint) {
     Location location = breakpoint.getLocation();
-    locationHandlerManager
+    resourceHandlerManager
         .getOrDefault(location)
         .open(
             location,

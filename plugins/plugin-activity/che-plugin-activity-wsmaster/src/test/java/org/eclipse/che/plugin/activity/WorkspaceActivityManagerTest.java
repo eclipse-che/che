@@ -21,6 +21,7 @@ import java.lang.reflect.Field;
 import java.util.Map;
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.shared.model.Account;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
@@ -106,7 +107,7 @@ public class WorkspaceActivityManagerTest {
 
     subscriber.onEvent(
         DtoFactory.newDto(WorkspaceStatusEvent.class)
-            .withEventType(WorkspaceStatusEvent.EventType.RUNNING)
+            .withStatus(WorkspaceStatus.RUNNING)
             .withWorkspaceId(wsId));
     final Map<String, Long> activeWorkspaces = getActiveWorkspaces(activityManager);
 
@@ -126,7 +127,7 @@ public class WorkspaceActivityManagerTest {
     final boolean contains = activeWorkspaces.containsKey(wsId);
     subscriber.onEvent(
         DtoFactory.newDto(WorkspaceStatusEvent.class)
-            .withEventType(WorkspaceStatusEvent.EventType.STOPPED)
+            .withStatus(WorkspaceStatus.STOPPED)
             .withWorkspaceId(wsId));
 
     assertTrue(contains);

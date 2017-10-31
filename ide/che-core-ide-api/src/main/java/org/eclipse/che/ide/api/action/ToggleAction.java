@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.ide.api.action;
 
-import com.google.gwt.resources.client.ImageResource;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -21,7 +20,8 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  * @author Evgen Vidolob
  * @author Vitaliy Guliy
  */
-public abstract class ToggleAction extends Action implements Toggleable {
+public abstract class ToggleAction extends BaseAction implements Toggleable {
+
   public ToggleAction(@Nullable final String text) {
     super(text);
   }
@@ -29,16 +29,8 @@ public abstract class ToggleAction extends Action implements Toggleable {
   public ToggleAction(
       @Nullable final String text,
       @Nullable final String description,
-      @Nullable final ImageResource icon,
       @Nullable final SVGResource svgIcon) {
-    super(text, description, icon, svgIcon);
-  }
-
-  public ToggleAction(
-      @Nullable final String text,
-      @Nullable final String description,
-      @Nullable final SVGResource svgIcon) {
-    super(text, description, null, svgIcon);
+    super(text, description, svgIcon);
   }
 
   @Override

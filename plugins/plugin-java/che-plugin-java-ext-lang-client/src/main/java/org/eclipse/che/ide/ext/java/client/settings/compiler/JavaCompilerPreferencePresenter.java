@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.ext.java.client.settings.compiler;
 
 import static java.util.Arrays.asList;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarningsOptions.COMPARING_IDENTICAL_VALUES;
@@ -44,11 +45,11 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.preferences.AbstractPreferencePagePresenter;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.inject.factories.PropertyWidgetFactory;
 import org.eclipse.che.ide.ext.java.client.settings.property.PropertyWidget;
@@ -60,7 +61,7 @@ import org.eclipse.che.ide.ext.java.client.settings.property.PropertyWidget;
  */
 @Singleton
 public class JavaCompilerPreferencePresenter extends AbstractPreferencePagePresenter
-    implements PropertyWidget.ActionDelegate, WsAgentStateHandler {
+    implements PropertyWidget.ActionDelegate, WorkspaceRunningEvent.Handler {
   public static final String CATEGORY = "Java Compiler";
 
   private final ErrorWarningsView view;
@@ -77,8 +78,7 @@ public class JavaCompilerPreferencePresenter extends AbstractPreferencePagePrese
       ErrorWarningsView view,
       PropertyWidgetFactory propertyFactory,
       @JavaCompilerPreferenceManager PreferencesManager preferencesManager,
-      Provider<NotificationManager> notificationManagerProvider,
-      EventBus eventBus) {
+      Provider<NotificationManager> notificationManagerProvider) {
     super(locale.compilerSetup(), CATEGORY);
 
     this.view = view;
@@ -88,8 +88,15 @@ public class JavaCompilerPreferencePresenter extends AbstractPreferencePagePrese
     this.locale = locale;
 
     this.widgets = new ArrayList<>();
+  }
 
-    eventBus.addHandler(WsAgentStateEvent.TYPE, this);
+  @Inject
+  private void initialize(AppContext appContext, EventBus eventBus) {
+    eventBus.addHandler(WorkspaceRunningEvent.TYPE, this);
+
+    if (appContext.getWorkspace().getStatus() == RUNNING) {
+      addErrorWarningsPanel();
+    }
   }
 
   /** {@inheritDoc} */
@@ -202,12 +209,7 @@ public class JavaCompilerPreferencePresenter extends AbstractPreferencePagePrese
   }
 
   @Override
-  public void onWsAgentStarted(WsAgentStateEvent event) {
+  public void onWorkspaceRunning(WorkspaceRunningEvent event) {
     addErrorWarningsPanel();
-  }
-
-  @Override
-  public void onWsAgentStopped(WsAgentStateEvent event) {
-    // do nothing
   }
 }
