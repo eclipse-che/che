@@ -21,7 +21,9 @@ import static org.testng.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
+import java.util.Optional;
+import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -34,17 +36,22 @@ import org.testng.annotations.Test;
 @Listeners(value = {MockitoTestNGListener.class})
 public class PlainJavaValueProviderFactoryTest {
 
+  private static final String PROJECT_PATH = "ws/path";
+
   @InjectMocks private PlainJavaValueProviderFactory plainJavaValueProviderFactory;
   @Mock private Map<String, List<String>> attributes;
-  @Mock private ProjectConfig projectConfig;
+  @Mock private ProjectManager projectManager;
+  @Mock private RegisteredProject registeredProject;
   @Captor private ArgumentCaptor<List<String>> captor;
 
   @Test
   public void attributeShouldBeSet() throws Exception {
-    when(projectConfig.getAttributes()).thenReturn(attributes);
+    when(projectManager.get(PROJECT_PATH)).thenReturn(Optional.of(registeredProject));
+    when(registeredProject.getAttributes()).thenReturn(attributes);
+    when(registeredProject.getPath()).thenReturn(PROJECT_PATH);
 
     plainJavaValueProviderFactory
-        .newInstance(projectConfig)
+        .newInstance(PROJECT_PATH)
         .setValues(SOURCE_FOLDER, singletonList("src"));
 
     verify(attributes).put(SOURCE_FOLDER, singletonList("src"));
@@ -52,12 +59,13 @@ public class PlainJavaValueProviderFactoryTest {
 
   @Test
   public void newValueOfAttributeShouldBeAdded() throws Exception {
-    when(projectConfig.getAttributes()).thenReturn(attributes);
+    when(projectManager.get(PROJECT_PATH)).thenReturn(Optional.of(registeredProject));
+    when(registeredProject.getAttributes()).thenReturn(attributes);
     when(attributes.containsKey(SOURCE_FOLDER)).thenReturn(true);
     when(attributes.get(SOURCE_FOLDER)).thenReturn(Arrays.asList("src1", "src2"));
 
     plainJavaValueProviderFactory
-        .newInstance(projectConfig)
+        .newInstance(PROJECT_PATH)
         .setValues(SOURCE_FOLDER, singletonList("src3"));
 
     verify(attributes).put(eq(SOURCE_FOLDER), captor.capture());

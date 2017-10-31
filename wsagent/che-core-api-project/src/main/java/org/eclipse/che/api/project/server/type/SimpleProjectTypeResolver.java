@@ -10,42 +10,21 @@
  */
 package org.eclipse.che.api.project.server.type;
 
-import static com.google.common.collect.Maps.newHashMap;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 
 import java.util.HashMap;
 import java.util.Map;
-import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.project.type.Attribute;
 import org.eclipse.che.api.core.model.project.type.ProjectType;
 import org.eclipse.che.api.core.model.project.type.Value;
-import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
 
 @Singleton
 public class SimpleProjectTypeResolver implements ProjectTypeResolver {
 
-  private final ProjectManager projectManager;
-
-  @Inject
-  protected SimpleProjectTypeResolver(ProjectManager projectManager) {
-    this.projectManager = projectManager;
-  }
-
   @Override
   public ProjectTypeResolution resolve(ProjectType type, String wsPath) {
-    RegisteredProject project = projectManager.getOrNull(wsPath);
-    if (project == null) {
-      return new ProjectTypeResolution(type.getId(), newHashMap()) {
-        @Override
-        public boolean matched() {
-          return false;
-        }
-      };
-    }
-
     Map<String, Value> matchAttrs = new HashMap<>();
     for (Attribute attribute : type.getAttributes()) {
       String name = attribute.getName();
@@ -57,7 +36,7 @@ public class SimpleProjectTypeResolver implements ProjectTypeResolver {
           Value value;
           String errorMessage = "";
           try {
-            value = new AttributeValue(factory.newInstance(project).getValues(name));
+            value = new AttributeValue(factory.newInstance(wsPath).getValues(name));
           } catch (ValueStorageException e) {
             value = null;
             errorMessage = e.getLocalizedMessage();

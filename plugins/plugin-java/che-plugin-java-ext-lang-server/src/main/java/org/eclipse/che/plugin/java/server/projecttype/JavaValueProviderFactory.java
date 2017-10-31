@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.project.server.type.ReadonlyValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProvider;
@@ -52,8 +51,8 @@ public class JavaValueProviderFactory implements ValueProviderFactory {
   }
 
   @Override
-  public ValueProvider newInstance(ProjectConfig projectConfig) {
-    return new JavaValueProvider(pathTransformer.transform(projectConfig.getPath()));
+  public ValueProvider newInstance(String wsPath) {
+    return new JavaValueProvider(pathTransformer.transform(wsPath));
   }
 
   private static class JavaValueProvider extends ReadonlyValueProvider {

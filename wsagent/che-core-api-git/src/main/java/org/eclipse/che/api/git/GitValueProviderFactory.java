@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ApiException;
-import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.git.params.LogParams;
 import org.eclipse.che.api.git.shared.Remote;
@@ -40,15 +39,15 @@ public class GitValueProviderFactory implements ValueProviderFactory {
   @Inject private GitConnectionFactory gitConnectionFactory;
 
   @Override
-  public ValueProvider newInstance(ProjectConfig projectConfig) {
+  public ValueProvider newInstance(String wsPath) {
     return new ReadonlyValueProvider() {
       @Override
       public List<String> getValues(String attributeName) throws ValueStorageException {
-        if (isNullOrEmpty(projectConfig.getPath())) {
+        if (isNullOrEmpty(wsPath)) {
           return emptyList();
         }
 
-        String fsPath = pathTransformer.transform(projectConfig.getPath()).toString();
+        String fsPath = pathTransformer.transform(wsPath).toString();
 
         try (GitConnection gitConnection = gitConnectionFactory.getConnection(fsPath)) {
           // check whether the folder belongs to git repository

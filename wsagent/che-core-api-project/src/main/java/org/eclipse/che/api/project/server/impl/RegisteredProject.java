@@ -135,7 +135,8 @@ public class RegisteredProject implements ProjectConfig {
         // value provided
         if (variable.isValueProvided()) {
 
-          final ValueProvider valueProvider = variable.getValueProviderFactory().newInstance(this);
+          final ValueProvider valueProvider =
+              variable.getValueProviderFactory().newInstance(this.getPath());
 
           if (folder != null) {
 

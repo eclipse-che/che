@@ -14,13 +14,15 @@ import static org.eclipse.che.plugin.composer.shared.Constants.PACKAGE;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.io.IOException;
+import java.lang.annotation.Inherited;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
+import javax.inject.Inject;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
+import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.project.server.type.ReadonlyValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
@@ -28,17 +30,24 @@ import org.eclipse.che.api.project.server.type.ValueStorageException;
 
 public class ComposerValueProviderFactory implements ValueProviderFactory {
 
+  private final PathTransformer pathTransformer;
+
+  @Inject
+  public ComposerValueProviderFactory(PathTransformer pathTransformer) {
+    this.pathTransformer = pathTransformer;
+  }
+
   @Override
-  public ValueProvider newInstance(ProjectConfig projectConfig) {
-    return new ComposerValueProvider(projectConfig);
+  public ValueProvider newInstance(String wsPath) {
+    return new ComposerValueProvider(wsPath);
   }
 
   protected class ComposerValueProvider extends ReadonlyValueProvider {
 
     protected Path projectFsPath;
 
-    protected ComposerValueProvider(ProjectConfig projectConfig) {
-      this.projectFsPath = Paths.get("/projects", projectConfig.getPath());
+    protected ComposerValueProvider(String wsPath) {
+      this.projectFsPath = pathTransformer.transform(wsPath);
     }
 
     @Override

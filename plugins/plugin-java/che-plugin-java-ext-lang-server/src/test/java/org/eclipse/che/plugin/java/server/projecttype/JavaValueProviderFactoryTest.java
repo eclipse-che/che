@@ -22,7 +22,6 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.fs.server.PathTransformer;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -48,8 +47,6 @@ public class JavaValueProviderFactoryTest {
   @Mock private PathTransformer pathTransformer;
   @InjectMocks private JavaValueProviderFactory javaValueProviderFactory;
 
-  @Mock private ProjectConfig projectConfig;
-
   private File projectDirectory;
   private File subDirectory;
   private File file;
@@ -61,7 +58,6 @@ public class JavaValueProviderFactoryTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
-    when(projectConfig.getPath()).thenReturn(PROJECT_PATH);
     when(pathTransformer.transform(PROJECT_PATH)).thenReturn(projectDirectory.toPath());
   }
 
@@ -84,7 +80,7 @@ public class JavaValueProviderFactoryTest {
     file = createFile(projectDirectory.toPath().resolve(HELLOWORLD_JAVA)).toFile();
 
     List<String> hasJavaFiles =
-        javaValueProviderFactory.newInstance(projectConfig).getValues(CONTAINS_JAVA_FILES);
+        javaValueProviderFactory.newInstance(PROJECT_PATH).getValues(CONTAINS_JAVA_FILES);
 
     assertNotNull(hasJavaFiles);
     assertEquals(hasJavaFiles, singletonList("true"));
@@ -96,7 +92,7 @@ public class JavaValueProviderFactoryTest {
     file = createFile(projectDirectory.toPath().resolve(HELLOWORLD_JS)).toFile();
 
     List<String> hasJavaFiles =
-        javaValueProviderFactory.newInstance(projectConfig).getValues(CONTAINS_JAVA_FILES);
+        javaValueProviderFactory.newInstance(PROJECT_PATH).getValues(CONTAINS_JAVA_FILES);
 
     assertNotNull(hasJavaFiles);
     assertEquals(hasJavaFiles, singletonList("false"));
@@ -115,7 +111,7 @@ public class JavaValueProviderFactoryTest {
     file = createFile(subDirectory.toPath().resolve(HELLOWORLD_JAVA)).toFile();
 
     List<String> hasJavaFiles =
-        javaValueProviderFactory.newInstance(projectConfig).getValues(CONTAINS_JAVA_FILES);
+        javaValueProviderFactory.newInstance(PROJECT_PATH).getValues(CONTAINS_JAVA_FILES);
 
     assertNotNull(hasJavaFiles);
     assertEquals(hasJavaFiles, singletonList("true"));
