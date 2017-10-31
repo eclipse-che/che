@@ -11,12 +11,12 @@
 package org.eclipse.che.ide.ext.git.client.action;
 
 import javax.inject.Inject;
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.ext.git.client.panel.GitPanelPresenter;
 
 /** @author Mykola Morhun */
-public class ToggleGitPanelAction extends Action {
+public class ToggleGitPanelAction extends BaseAction {
   private final GitPanelPresenter gitPanelPresenter;
 
   @Inject

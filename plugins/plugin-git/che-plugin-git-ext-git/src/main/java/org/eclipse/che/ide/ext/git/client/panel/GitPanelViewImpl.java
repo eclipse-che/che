@@ -19,8 +19,6 @@ import com.google.gwt.user.client.ui.Widget;
 import java.util.Comparator;
 import java.util.List;
 import javax.inject.Inject;
-import org.eclipse.che.ide.api.data.tree.Node;
-import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
@@ -32,6 +30,7 @@ import org.eclipse.che.ide.ui.smartTree.NodeStorage.StoreSortInfo;
 import org.eclipse.che.ide.ui.smartTree.SelectionModel;
 import org.eclipse.che.ide.ui.smartTree.SortDir;
 import org.eclipse.che.ide.ui.smartTree.Tree;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 
 /** @author Mykola Morhun */
 public class GitPanelViewImpl extends BaseView<ActionDelegate> implements GitPanelView {
@@ -54,11 +53,8 @@ public class GitPanelViewImpl extends BaseView<ActionDelegate> implements GitPan
   public GitPanelViewImpl(
       GitPanelViewImplUiBinder uiBinder,
       RepositoryNodeFactory repositoryNodeFactory,
-      PartStackUIResources resources,
       GitResources gitResources,
       GitLocalizationConstant locale) {
-    super(resources);
-
     this.repositoryNodeFactory = repositoryNodeFactory;
     this.gitResources = gitResources;
     this.locale = locale;
