@@ -71,3 +71,5 @@ spec:
 EOF
 
 oc start-build che-init-image-stream-build
+
+"$COMMAND_DIR"/wait_until_postgres_is_available.sh

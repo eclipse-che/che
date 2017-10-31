@@ -11,7 +11,6 @@ COMMAND_DIR=$(dirname "$0")
 export CHE_EPHEMERAL=${CHE_EPHEMERAL:-false}
 
 "$COMMAND_DIR"/deploy_postgres_only.sh
-"$COMMAND_DIR"/wait_until_postgres_is_available.sh
 
 oc create -f "$COMMAND_DIR"/keycloak/
 
