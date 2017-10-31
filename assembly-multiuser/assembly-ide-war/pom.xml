@@ -23,18 +23,20 @@
     <name>Che IDE Assembly Multiuser :: Compiling GWT Application</name>
     <properties>
         <generated.sources.directory>${project.build.directory}/generated-sources/gen</generated.sources.directory>
+        <gwt.log.enable>false</gwt.log.enable>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
         <dependency>
             <groupId>org.eclipse.che</groupId>
             <artifactId>assembly-ide-war</artifactId>
-            <classifier>classes</classifier>
+            <type>war</type>
         </dependency>
+        <!-- brings transitive dependencies for GWT compiler and source generators -->
         <dependency>
             <groupId>org.eclipse.che</groupId>
-            <artifactId>assembly-ide-war</artifactId>
-            <type>war</type>
+            <artifactId>che-ide-gwt-app</artifactId>
+            <type>pom</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
@@ -152,6 +154,7 @@
             <plugin>
                 <groupId>net.ltgt.gwt.maven</groupId>
                 <artifactId>gwt-maven-plugin</artifactId>
+                <extensions>true</extensions>
                 <executions>
                     <execution>
                         <goals>
@@ -204,6 +207,7 @@
                                 <include>WEB-INF/rewrite.config</include>
                                 <include>WEB-INF/web.xml</include>
                                 <include>WEB-INF/classes/org/eclipse/che/*.class</include>
+                                <include>WEB-INF/lib/</include>
                             </includes>
                         </overlay>
                         <overlay />
