@@ -108,7 +108,7 @@ export class DiagnosticsWorkspaceStartCheck {
               defered.reject(message.content);
             }
           });
-          this.cheWorkspace.onStopWorkspace(workspace.id);
+          this.cheWorkspace.stopWorkspace(workspace.id);
         } else {
           this.cheWorkspace.deleteWorkspaceConfig(workspace.id).finally(() => {
             defered.resolve(true);
