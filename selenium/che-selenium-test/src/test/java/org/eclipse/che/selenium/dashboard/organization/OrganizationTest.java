@@ -52,13 +52,12 @@ public class OrganizationTest {
   private TestOrganizationServiceClient testOrganizationServiceClient;
 
   @Inject private Dashboard dashboard;
-  @Inject private TestUser testUser1;
-  @Inject private TestUser memberUser;
+  @Inject private TestUser testUser;
   @Inject private AdminTestUser adminTestUser;
 
   @BeforeClass
   public void setUp() throws Exception {
-    emailsList = Arrays.asList(testUser1.getEmail());
+    emailsList = Arrays.asList(testUser.getEmail());
 
     organization = testOrganizationServiceClient.create(PRE_CREATED_ORG_NAME);
     testOrganizationServiceClient.addAdmin(organization.getId(), adminTestUser.getId());
@@ -129,7 +128,7 @@ public class OrganizationTest {
     addOrganization.setOrganizationName(NEW_ORG_NAME);
     addOrganization.clickAddMemberButton();
     addMember.waitAddMemberWidget();
-    addMember.setMembersEmail(memberUser.getEmail());
+    addMember.setMembersEmail(testUser.getEmail());
     addMember.clickAddButton();
 
     // Check that the Cancel button in the Add Member Widget works
@@ -143,6 +142,6 @@ public class OrganizationTest {
     // Check that organization is created and the added member exists in the Members tab
     organizationPage.waitOrganizationName(NEW_ORG_NAME);
     organizationPage.clickMembersTab();
-    organizationPage.checkMemberExistsInMembersList(memberUser.getEmail());
+    organizationPage.checkMemberExistsInMembersList(testUser.getEmail());
   }
 }
