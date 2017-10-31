@@ -23,6 +23,8 @@ import java.util.Iterator;
 import java.util.Map;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.EditorWithAutoSave;
+import org.eclipse.che.ide.api.editor.events.EditorDirtyStateChangedEvent;
+import org.eclipse.che.ide.api.editor.events.EditorDirtyStateChangedHandler;
 import org.eclipse.che.ide.api.parts.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.parts.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.parts.EditorPartStack;
@@ -42,7 +44,10 @@ import org.eclipse.che.ide.resource.Path;
  */
 @Singleton
 public class EditorContentSynchronizerImpl
-    implements EditorContentSynchronizer, ActivePartChangedHandler, ResourceChangedHandler {
+    implements EditorContentSynchronizer,
+        ActivePartChangedHandler,
+        ResourceChangedHandler,
+        EditorDirtyStateChangedHandler {
   final Map<Path, EditorGroupSynchronization> editorGroups;
   final Provider<EditorGroupSynchronization> editorGroupSyncProvider;
 
@@ -53,6 +58,7 @@ public class EditorContentSynchronizerImpl
     this.editorGroups = new HashMap<>();
     eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
     eventBus.addHandler(ResourceChangedEvent.getType(), this);
+    eventBus.addHandler(EditorDirtyStateChangedEvent.TYPE, this);
   }
 
   /**
@@ -89,6 +95,20 @@ public class EditorContentSynchronizerImpl
     if (group.getSynchronizedEditors().isEmpty()) {
       group.unInstall();
       editorGroups.remove(path);
+    }
+  }
+
+  @Override
+  public void onEditorDirtyStateChanged(EditorDirtyStateChangedEvent event) {
+    EditorPartPresenter changedEditor = event.getEditor();
+    if (changedEditor == null || changedEditor.isDirty()) {
+      // we sync 'dirty' state of editors only for case when content of an active editor IS SAVED
+      return;
+    }
+
+    Path changedEditorPath = changedEditor.getEditorInput().getFile().getLocation();
+    if (editorGroups.containsKey(changedEditorPath)) {
+      editorGroups.get(changedEditorPath).onEditorDirtyStateChanged(changedEditor);
     }
   }
 

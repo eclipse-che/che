@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.core.client;
 
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
@@ -17,10 +18,13 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import javax.xml.bind.DatatypeConverter;
+import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.dto.server.JsonStringMapImpl;
@@ -185,7 +189,8 @@ public class TestGitHubServiceClient {
     }
   }
 
-  public String getName(final String username, final String password) throws Exception {
+  public String getName(final String username, final String password)
+      throws IOException, ApiException {
     String url = "https://api.github.com/users/" + username;
     HttpJsonResponse response =
         requestFactory
@@ -193,8 +198,20 @@ public class TestGitHubServiceClient {
             .useGetMethod()
             .setAuthorizationHeader(createBasicAuthHeader(username, password))
             .request();
+
+    return obtainNameFromResponse(response);
+  }
+
+  /**
+   * Obtain name of github user from github response
+   *
+   * @param response
+   * @return name if it presents in response and != null, or login otherwise.
+   */
+  private String obtainNameFromResponse(HttpJsonResponse response) throws IOException {
     Map<String, String> properties = response.asProperties();
-    return properties.getOrDefault("name", properties.get("login"));
+    String login = properties.get("login");
+    return ofNullable(properties.getOrDefault("name", login)).orElse(login);
   }
 
   private String createBasicAuthHeader(String username, String password)
@@ -202,5 +219,40 @@ public class TestGitHubServiceClient {
     byte[] nameAndPass = (username + ":" + password).getBytes("UTF-8");
     String base64 = DatatypeConverter.printBase64Binary(nameAndPass);
     return "Basic " + base64;
+  }
+
+  public String getUserPublicPrimaryEmail(String username, String password) throws Exception {
+    String url = "https://api.github.com/user/public_emails";
+    HttpJsonResponse response =
+        requestFactory
+            .fromUrl(url)
+            .useGetMethod()
+            .setAuthorizationHeader(createBasicAuthHeader(username, password))
+            .request();
+
+    @SuppressWarnings("unchecked")
+    List<Map<String, String>> properties =
+        response.as(List.class, new TypeToken<List<Map<String, String>>>() {}.getType());
+
+    if (properties.isEmpty()) {
+      throw new NoSuchElementException("The list with github emails is empty");
+    }
+
+    return filterPropertiesAndGetGithubPrimaryEmail(properties);
+  }
+
+  private String filterPropertiesAndGetGithubPrimaryEmail(List<Map<String, String>> properties) {
+    List<Map<String, String>> primaryPublicGithubEmails =
+        properties
+            .stream()
+            .filter(
+                map -> map.get("primary").equals("true") && map.get("visibility").equals("public"))
+            .collect(toList());
+
+    if (primaryPublicGithubEmails.isEmpty()) {
+      throw new NoSuchElementException("The list with github primary, public emails is empty");
+    }
+
+    return primaryPublicGithubEmails.get(0).get("email");
   }
 }

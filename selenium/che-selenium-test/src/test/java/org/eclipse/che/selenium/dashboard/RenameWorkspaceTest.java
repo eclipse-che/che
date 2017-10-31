@@ -10,34 +10,33 @@
  */
 package org.eclipse.che.selenium.dashboard;
 
-import static java.lang.String.format;
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace.StateWorkspace.STARTING;
+import static org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace.StateWorkspace.STOPPING;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.concurrent.TimeUnit;
-import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
-import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace.StateWorkspace;
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.OutputType;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
 public class RenameWorkspaceTest {
-  private static final String CHANGE_WORKSPACE_NAME = NameGenerator.generate("workspace_new", 4);
+  private static final int MIN_WORKSPACE_NAME_SIZE = 3;
+  private static final int MAX_WORKSPACE_NAME_SIZE = 100;
+  private static final String MIN_WORKSPACE_NAME = generate("", MIN_WORKSPACE_NAME_SIZE);
+  private static final String MAX_WORKSPACE_NAME = generate("", MAX_WORKSPACE_NAME_SIZE);
+  private static final String WS_NAME_TOO_SHORT =
+      ("The name has to be more than 3 characters long.");
+  private static final String WS_NAME_TOO_LONG =
+      ("The name has to be less than 101 characters long.");
 
   @Inject private Dashboard dashboard;
   @Inject private DashboardWorkspace dashboardWorkspace;
@@ -55,7 +54,9 @@ public class RenameWorkspaceTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    workspaceServiceClient.delete(CHANGE_WORKSPACE_NAME, user.getName());
+    workspaceServiceClient.delete(workspaceName, user.getName());
+    workspaceServiceClient.delete(MIN_WORKSPACE_NAME, user.getName());
+    workspaceServiceClient.delete(MAX_WORKSPACE_NAME, user.getName());
   }
 
   @Test
@@ -65,45 +66,39 @@ public class RenameWorkspaceTest {
     dashboardWorkspace.selectWorkspaceItemName(workspaceName);
     dashboardWorkspace.waitToolbarTitleName(workspaceName);
     dashboardWorkspace.selectTabInWorspaceMenu(DashboardWorkspace.TabNames.OVERVIEW);
-    dashboardWorkspace.enterNameWorkspace(CHANGE_WORKSPACE_NAME);
+
+    // type name with 1 characters and check error message that this name is too short
+    dashboardWorkspace.enterNameWorkspace("w");
+    assertTrue(dashboardWorkspace.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_SHORT));
+    dashboardWorkspace.clickOnCancelBtn();
+    dashboardWorkspace.checkNameWorkspace(workspaceName);
+
+    // type name with 101 characters and check error message that this name is too long
+    dashboardWorkspace.enterNameWorkspace(MAX_WORKSPACE_NAME + "a");
+    assertTrue(dashboardWorkspace.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_LONG));
+    dashboardWorkspace.clickOnCancelBtn();
+    dashboardWorkspace.checkNameWorkspace(workspaceName);
+
+    // type a name with min possible size and check that the workspace renamed
+    renameWorkspace(MIN_WORKSPACE_NAME);
+
+    // type a name with max possible size and check that the workspace renamed
+    renameWorkspace(MAX_WORKSPACE_NAME);
+  }
+
+  private void renameWorkspace(String name) {
+    dashboardWorkspace.enterNameWorkspace(name);
+    assertFalse(dashboardWorkspace.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_SHORT));
+    assertFalse(dashboardWorkspace.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_LONG));
+    saveAndWaitWorkspaceRestarted();
+    dashboardWorkspace.checkNameWorkspace(name);
+  }
+
+  private void saveAndWaitWorkspaceRestarted() {
     dashboardWorkspace.clickOnSaveBtn();
-    dashboardWorkspace.checkStateOfWorkspace(StateWorkspace.STOPPING);
-
-    // This temporary solution for detect problem with this test
-    // we will make screenshot every 5 ms for understanding problem
-    screenshot(StateWorkspace.STOPPING.getStatus());
-
-    int i = 1;
-    while (!checkStateOfWorkspaceIsStarting() && i < 120) {
-      screenshot(StateWorkspace.STARTING.getStatus() + i);
-      WaitUtils.sleepQuietly(500, TimeUnit.MILLISECONDS);
-      i++;
-    }
-
-    dashboardWorkspace.checkStateOfWorkspace(StateWorkspace.RUNNING);
+    dashboardWorkspace.checkStateOfWorkspace(STOPPING);
+    dashboardWorkspace.checkStateOfWorkspace(STARTING);
     dashboard.waitNotificationMessage("Workspace updated");
     dashboard.waitNotificationIsClosed();
-    dashboardWorkspace.checkNameWorkspace(CHANGE_WORKSPACE_NAME);
-  }
-
-  private void screenshot(String m) throws IOException {
-    byte[] data = ((SeleniumWebDriver) dashboard.driver()).getScreenshotAs(OutputType.BYTES);
-    Path screenshot =
-        Paths.get(Paths.get("target/screenshots").toString(), "RenameWorkspaceTest_" + m + ".png");
-    Files.createDirectories(screenshot.getParent());
-    Files.copy(new ByteArrayInputStream(data), screenshot);
-  }
-
-  public boolean checkStateOfWorkspaceIsStarting() {
-    try {
-      dashboard
-          .driver()
-          .findElement(
-              By.xpath(
-                  format("//div[contains(@class, 'workspace-status')]/span[text()='starting']")));
-      return true;
-    } catch (NoSuchElementException e) {
-      return false;
-    }
   }
 }

@@ -10,9 +10,9 @@
  */
 package org.eclipse.che.api.workspace.server;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -43,6 +43,7 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
+import org.eclipse.che.api.workspace.server.spi.RecipeRetriever;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
@@ -219,7 +220,14 @@ public class WorkspaceRuntimesTest {
 
     public TestInfrastructure(
         InstallerRegistry installerRegistry, RecipeRetriever recipeRetriever, String... types) {
-      super("test", Arrays.asList(types), null, installerRegistry, recipeRetriever);
+      super(
+          "test",
+          Arrays.asList(types),
+          null,
+          installerRegistry,
+          recipeRetriever,
+          Collections.emptySet(),
+          null);
     }
 
     @Override
@@ -228,7 +236,7 @@ public class WorkspaceRuntimesTest {
     }
 
     @Override
-    public RuntimeContext prepare(RuntimeIdentity id, InternalEnvironment environment)
+    public RuntimeContext internalPrepare(RuntimeIdentity id, InternalEnvironment environment)
         throws InfrastructureException {
       throw new UnsupportedOperationException();
     }

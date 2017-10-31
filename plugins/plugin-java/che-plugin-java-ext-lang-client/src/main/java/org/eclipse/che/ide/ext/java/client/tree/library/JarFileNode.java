@@ -21,10 +21,13 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
 import java.util.Collections;
 import java.util.List;
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
+import org.eclipse.che.ide.api.debug.HasLocation;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.events.FileEvent;
@@ -53,7 +56,7 @@ import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
  */
 @Beta
 public class JarFileNode extends SyntheticNode<JarEntry>
-    implements VirtualFile, HasAction, FileEventHandler, ResourceChangedHandler {
+    implements VirtualFile, HasAction, FileEventHandler, ResourceChangedHandler, HasLocation {
 
   private final int libId;
   private final Path project;
@@ -265,5 +268,11 @@ public class JarFileNode extends SyntheticNode<JarEntry>
       resourceChangeHandlerRegistration.removeHandler();
       resourceChangeHandlerRegistration = null;
     }
+  }
+
+  @Override
+  public Location toLocation(int lineNumber) {
+    return new LocationImpl(
+        getLocation().toString(), lineNumber, true, libId, getProject().toString());
   }
 }

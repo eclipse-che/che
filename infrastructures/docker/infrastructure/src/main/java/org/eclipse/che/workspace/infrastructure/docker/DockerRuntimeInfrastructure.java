@@ -19,11 +19,13 @@ import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
-import org.eclipse.che.api.workspace.server.RecipeRetriever;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.RecipeRetriever;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
+import org.eclipse.che.api.workspace.server.spi.normalization.ServersNormalizer;
+import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.container.ContainersStartStrategy;
 import org.eclipse.che.workspace.infrastructure.docker.container.DockerContainers;
 import org.eclipse.che.workspace.infrastructure.docker.environment.DockerConfigSourceSpecificEnvironmentParser;
@@ -60,8 +62,17 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
       DockerContainers containers,
       EventService eventService,
       InstallerRegistry installerRegistry,
-      RecipeRetriever recipeRetriever) {
-    super("docker", environmentParsers.keySet(), eventService, installerRegistry, recipeRetriever);
+      RecipeRetriever recipeRetriever,
+      Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners,
+      ServersNormalizer serversNormalizer) {
+    super(
+        "docker",
+        environmentParsers.keySet(),
+        eventService,
+        installerRegistry,
+        recipeRetriever,
+        internalEnvironmentProvisioners,
+        serversNormalizer);
     this.dockerEnvironmentValidator = dockerEnvironmentValidator;
     this.dockerEnvironmentParser = dockerEnvironmentParser;
     this.startStrategy = startStrategy;
@@ -99,7 +110,8 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
   }
 
   @Override
-  public DockerRuntimeContext prepare(RuntimeIdentity identity, InternalEnvironment environment)
+  protected DockerRuntimeContext internalPrepare(
+      RuntimeIdentity identity, InternalEnvironment environment)
       throws ValidationException, InfrastructureException {
 
     DockerEnvironment dockerEnvironment = dockerEnvironmentParser.parse(environment);

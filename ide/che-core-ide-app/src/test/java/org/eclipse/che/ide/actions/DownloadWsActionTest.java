@@ -10,8 +10,8 @@
  */
 package org.eclipse.che.ide.actions;
 
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -19,11 +19,11 @@ import static org.mockito.Mockito.when;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
-import org.eclipse.che.ide.api.WsAgentURLModifier;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.core.AgentURLModifier;
 import org.eclipse.che.ide.download.DownloadContainer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,7 +34,7 @@ import org.mockito.Mock;
 @RunWith(GwtMockitoTestRunner.class)
 public class DownloadWsActionTest {
   @Mock private AppContext appContext;
-  @Mock private WsAgentURLModifier wsAgentURLModifier;
+  @Mock private AgentURLModifier agentURLModifier;
   @Mock private DownloadContainer downloadContainer;
   @Mock private CoreLocalizationConstant locale;
   @Mock private Resources resources;
@@ -55,7 +55,7 @@ public class DownloadWsActionTest {
     String baseUrl = "baseUrl";
 
     when(appContext.getWsAgentServerApiEndpoint()).thenReturn(baseUrl);
-    when(wsAgentURLModifier.modify(anyString())).thenReturn(baseUrl);
+    when(agentURLModifier.modify(anyString())).thenReturn(baseUrl);
 
     action.actionPerformed(actionEvent);
 

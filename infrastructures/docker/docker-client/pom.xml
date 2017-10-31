@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-infrastructures-docker-parent</artifactId>
         <groupId>org.eclipse.che.infrastructure.docker</groupId>
-        <version>6.0.0-M1-SNAPSHOT</version>
+        <version>6.0.0-M2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>docker-client</artifactId>
@@ -130,17 +130,6 @@
         </dependency>
     </dependencies>
     <build>
-        <resources>
-            <resource>
-                <directory>src/main/java</directory>
-            </resource>
-            <resource>
-                <directory>src/main/resources</directory>
-            </resource>
-            <resource>
-                <directory>${dto-generator-out-directory}</directory>
-            </resource>
-        </resources>
         <plugins>
             <plugin>
                 <groupId>org.eclipse.che.core</groupId>

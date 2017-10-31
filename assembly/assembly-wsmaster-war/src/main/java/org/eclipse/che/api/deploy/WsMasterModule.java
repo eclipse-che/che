@@ -37,10 +37,24 @@ import org.eclipse.che.api.workspace.server.adapter.StackMessageBodyAdapter;
 import org.eclipse.che.api.workspace.server.adapter.WorkspaceConfigMessageBodyAdapter;
 import org.eclipse.che.api.workspace.server.adapter.WorkspaceMessageBodyAdapter;
 import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
+import org.eclipse.che.api.workspace.server.spi.provision.InstallerConfigProvisioner;
+import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
+import org.eclipse.che.api.workspace.server.spi.provision.env.AgentAuthEnableEnvVarProvider;
+import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiEnvVarProvider;
+import org.eclipse.che.api.workspace.server.spi.provision.env.EnvVarEnvironmentProvisioner;
+import org.eclipse.che.api.workspace.server.spi.provision.env.EnvVarProvider;
+import org.eclipse.che.api.workspace.server.spi.provision.env.JavaOptsEnvVariableProvider;
+import org.eclipse.che.api.workspace.server.spi.provision.env.MachineTokenEnvVarProvider;
+import org.eclipse.che.api.workspace.server.spi.provision.env.MavenOptsEnvVariableProvider;
+import org.eclipse.che.api.workspace.server.spi.provision.env.ProjectsRootEnvVariableProvider;
+import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceIdEnvVarProvider;
 import org.eclipse.che.api.workspace.server.stack.StackLoader;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.github.factory.resolver.GithubFactoryParametersResolver;
+import org.eclipse.che.workspace.infrastructure.docker.DockerInfraModule;
+import org.eclipse.che.workspace.infrastructure.docker.local.LocalDockerModule;
+import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfraModule;
 import org.flywaydb.core.internal.util.PlaceholderReplacer;
 
 /** @author andrew00x */
@@ -95,6 +109,22 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.api.workspace.server.TemporaryWorkspaceRemover.class);
     bind(org.eclipse.che.api.workspace.server.WorkspaceService.class);
     install(new FactoryModuleBuilder().build(ServersCheckerFactory.class));
+
+    Multibinder<InternalEnvironmentProvisioner> internalEnvironmentProvisioners =
+        Multibinder.newSetBinder(binder(), InternalEnvironmentProvisioner.class);
+    internalEnvironmentProvisioners.addBinding().to(InstallerConfigProvisioner.class);
+    internalEnvironmentProvisioners.addBinding().to(EnvVarEnvironmentProvisioner.class);
+
+    Multibinder<EnvVarProvider> envVarProviders =
+        Multibinder.newSetBinder(binder(), EnvVarProvider.class);
+    envVarProviders.addBinding().to(CheApiEnvVarProvider.class);
+    envVarProviders.addBinding().to(MachineTokenEnvVarProvider.class);
+    envVarProviders.addBinding().to(WorkspaceIdEnvVarProvider.class);
+
+    envVarProviders.addBinding().to(JavaOptsEnvVariableProvider.class);
+    envVarProviders.addBinding().to(MavenOptsEnvVariableProvider.class);
+    envVarProviders.addBinding().to(ProjectsRootEnvVariableProvider.class);
+    envVarProviders.addBinding().to(AgentAuthEnableEnvVarProvider.class);
 
     bind(org.eclipse.che.api.workspace.server.bootstrap.InstallerService.class);
     bind(org.eclipse.che.api.workspace.server.event.WorkspaceMessenger.class).asEagerSingleton();
@@ -155,6 +185,14 @@ public class WsMasterModule extends AbstractModule {
     //
     // bind(org.eclipse.che.api.agent.server.filters.AddExecInstallerInWorkspaceFilter.class);
     //        bind(org.eclipse.che.api.agent.server.filters.AddExecInstallerInStackFilter.class);
+
+    String infrastructure = System.getenv("CHE_INFRASTRUCTURE_ACTIVE");
+    if ("openshift".equals(infrastructure)) {
+      install(new OpenShiftInfraModule());
+    } else {
+      install(new LocalDockerModule());
+      install(new DockerInfraModule());
+    }
 
     bind(org.eclipse.che.api.user.server.AppStatesPreferenceCleaner.class);
   }

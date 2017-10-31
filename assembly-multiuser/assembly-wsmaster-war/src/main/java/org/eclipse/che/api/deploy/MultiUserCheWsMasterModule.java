@@ -32,14 +32,12 @@ import org.eclipse.che.multiuser.organization.api.OrganizationJpaModule;
 import org.eclipse.che.multiuser.resource.api.ResourceModule;
 import org.eclipse.che.security.PBKDF2PasswordEncryptor;
 import org.eclipse.che.security.PasswordEncryptor;
-import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfraModule;
 
 @DynaModule
 public class MultiUserCheWsMasterModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    install(new OpenShiftInfraModule());
 
     bind(TemplateProcessor.class).to(STTemplateProcessorImpl.class);
 
@@ -80,6 +78,8 @@ public class MultiUserCheWsMasterModule extends AbstractModule {
     bind(UserDao.class).to(JpaUserDao.class);
     bind(PreferenceDao.class).to(JpaPreferenceDao.class);
     bind(PermissionChecker.class).to(PermissionCheckerImpl.class);
+
+    bindConstant().annotatedWith(Names.named("che.agents.auth_enabled")).to(true);
 
     bindConstant()
         .annotatedWith(Names.named("machine.terminal_agent.run_command"))

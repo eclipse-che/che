@@ -10,6 +10,10 @@
  */
 'use strict';
 
+interface IFactoryFromFileScope extends ng.IScope {
+  clickUpload: () => void;
+}
+
 /**
  * Defines a directive for configuring factory from file.
  * @author Oleksii Orel
@@ -48,7 +52,7 @@ export class FactoryFromFile {
     };
   }
 
-  link($scope: ng.IScope, element: ng.IAugmentedJQuery) {
+  link($scope: IFactoryFromFileScope, element: ng.IAugmentedJQuery) {
     $scope.clickUpload = () => {
       // search the input fields
       let inputElements = element.find('input');

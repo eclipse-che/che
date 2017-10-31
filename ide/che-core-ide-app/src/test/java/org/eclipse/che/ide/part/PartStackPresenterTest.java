@@ -39,7 +39,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -118,7 +117,8 @@ public class PartStackPresenterTest {
     verify(partPresenter).addPropertyListener(listenerCaptor.capture());
     listenerCaptor.getValue().propertyChanged(editorPartPresenter, EditorPartPresenter.PROP_DIRTY);
 
-    verify(eventBus).fireEvent(Matchers.<EditorDirtyStateChangedEvent>anyObject());
+    verify(eventBus)
+        .fireEvent(org.mockito.ArgumentMatchers.<EditorDirtyStateChangedEvent>anyObject());
   }
 
   @Test
@@ -141,7 +141,7 @@ public class PartStackPresenterTest {
     verify(partButton).setDelegate(presenter);
 
     verify(view).addTab(partButton, basePresenter);
-    verify(view).setTabPositions(Matchers.<List<PartPresenter>>anyObject());
+    verify(view).setTabPositions(org.mockito.ArgumentMatchers.<List<PartPresenter>>anyObject());
     verify(partStackHandler).onRequestFocus(presenter);
   }
 

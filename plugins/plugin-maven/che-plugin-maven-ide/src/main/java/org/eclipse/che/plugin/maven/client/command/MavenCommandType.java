@@ -29,7 +29,7 @@ import org.eclipse.che.plugin.maven.client.MavenResources;
 public class MavenCommandType implements CommandType {
 
   private static final String ID = "mvn";
-  private static final String COMMAND_TEMPLATE = "mvn clean install -f ${current.project.relpath}";
+  private static final String COMMAND_TEMPLATE = "mvn clean install -f ${current.project.path}";
 
   private final List<CommandPage> pages;
 

@@ -12,7 +12,20 @@
             "org.eclipse.che.ws-agent",
             "org.eclipse.che.ssh"
           ],
-          "servers": {}
+          "servers": {
+            "3000/tcp" : {
+              "port" : "3000",
+              "protocol" : "http"
+            },
+            "5000/tcp" : {
+              "port" : "5000",
+              "protocol" : "http"
+            },
+            "9000/tcp" : {
+              "port" : "9000",
+              "protocol" : "http"
+            }
+          }
         }
       },
       "recipe": {

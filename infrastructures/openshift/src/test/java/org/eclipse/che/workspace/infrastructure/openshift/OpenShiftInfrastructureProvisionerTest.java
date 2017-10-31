@@ -10,15 +10,18 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift;
 
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesProvisioner;
-import org.eclipse.che.workspace.infrastructure.openshift.provision.installer.InstallerConfigProvisioner;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.env.EnvVarsConverter;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.labels.PodNameLabelProvisioner;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.restartpolicy.RestartPolicyRewriter;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.route.TlsRouteProvisioner;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.server.ServersConverter;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.volume.PersistentVolumeClaimProvisioner;
 import org.mockito.InOrder;
 import org.mockito.Mock;
@@ -35,13 +38,16 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class OpenShiftInfrastructureProvisionerTest {
 
-  @Mock private InstallerConfigProvisioner installerProvisioner;
   @Mock private PersistentVolumeClaimProvisioner pvcProvisioner;
   @Mock private UniqueNamesProvisioner uniqueNamesProvisioner;
   @Mock private InternalEnvironment environment;
   @Mock private OpenShiftEnvironment osEnv;
   @Mock private RuntimeIdentity runtimeIdentity;
   @Mock private TlsRouteProvisioner tlsRouteProvisioner;
+  @Mock private EnvVarsConverter envVarsProvisioner;
+  @Mock private ServersConverter serversProvisioner;
+  @Mock private RestartPolicyRewriter restartPolicyRewriter;
+  @Mock private PodNameLabelProvisioner labelsProvisioner;
 
   private OpenShiftInfrastructureProvisioner osInfraProvisioner;
 
@@ -51,9 +57,22 @@ public class OpenShiftInfrastructureProvisionerTest {
   public void setUp() {
     osInfraProvisioner =
         new OpenShiftInfrastructureProvisioner(
-            installerProvisioner, pvcProvisioner, uniqueNamesProvisioner, tlsRouteProvisioner);
+            pvcProvisioner,
+            uniqueNamesProvisioner,
+            tlsRouteProvisioner,
+            serversProvisioner,
+            envVarsProvisioner,
+            restartPolicyRewriter,
+            labelsProvisioner);
     provisionOrder =
-        inOrder(installerProvisioner, pvcProvisioner, uniqueNamesProvisioner, tlsRouteProvisioner);
+        inOrder(
+            pvcProvisioner,
+            uniqueNamesProvisioner,
+            tlsRouteProvisioner,
+            serversProvisioner,
+            envVarsProvisioner,
+            restartPolicyRewriter,
+            labelsProvisioner);
   }
 
   @Test
@@ -61,7 +80,16 @@ public class OpenShiftInfrastructureProvisionerTest {
     osInfraProvisioner.provision(environment, osEnv, runtimeIdentity);
 
     provisionOrder
-        .verify(installerProvisioner)
+        .verify(serversProvisioner)
+        .provision(eq(environment), eq(osEnv), eq(runtimeIdentity));
+    provisionOrder
+        .verify(envVarsProvisioner)
+        .provision(eq(environment), eq(osEnv), eq(runtimeIdentity));
+    provisionOrder
+        .verify(labelsProvisioner)
+        .provision(eq(environment), eq(osEnv), eq(runtimeIdentity));
+    provisionOrder
+        .verify(restartPolicyRewriter)
         .provision(eq(environment), eq(osEnv), eq(runtimeIdentity));
     provisionOrder
         .verify(pvcProvisioner)

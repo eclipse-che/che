@@ -15,6 +15,8 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.marker.Marker;
@@ -158,5 +160,10 @@ class FileImpl extends ResourceImpl implements File {
   @Override
   public void setVcsStatus(VcsStatus vcsStatus) {
     this.vcsStatus = vcsStatus;
+  }
+
+  @Override
+  public Location toLocation(int lineNumber) {
+    return new LocationImpl(getLocation().toString(), lineNumber, getProject().getPath());
   }
 }

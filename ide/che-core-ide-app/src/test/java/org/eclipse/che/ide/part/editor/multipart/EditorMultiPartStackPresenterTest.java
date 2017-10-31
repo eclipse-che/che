@@ -11,9 +11,9 @@
 package org.eclipse.che.ide.part.editor.multipart;
 
 import static org.eclipse.che.ide.api.constraints.Direction.HORIZONTALLY;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isNull;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -34,7 +34,6 @@ import org.eclipse.che.ide.part.editor.EditorPartStackPresenter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 
 /** @author Roman Nikitenko */
@@ -71,7 +70,9 @@ public class EditorMultiPartStackPresenterTest {
 
   @Test
   public void constructorShouldBeVerified() {
-    verify(eventBus).addHandler(Matchers.<ActivePartChangedEvent.Type>anyObject(), eq(presenter));
+    verify(eventBus)
+        .addHandler(
+            org.mockito.ArgumentMatchers.<ActivePartChangedEvent.Type>anyObject(), eq(presenter));
   }
 
   @Test

@@ -12,6 +12,7 @@ package org.eclipse.che.api.workspace.server;
 
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 import com.google.common.collect.ImmutableMap;
@@ -20,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.ValidationException;
+import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.workspace.shared.dto.CommandDto;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.MachineConfigDto;
@@ -186,6 +188,27 @@ public class WorkspaceValidatorTest {
 
   @Test(
     expectedExceptions = ValidationException.class,
+    expectedExceptionsMessageRegExp =
+        "Value '.*' of attribute '" + MEMORY_LIMIT_ATTRIBUTE + "' in machine '.*' is illegal",
+    dataProvider = "illegalMemoryAttributeValueProvider"
+  )
+  public void shouldFailValidationIfMemoryMachineAttributeHasIllegalValue(String attributeValue)
+      throws Exception {
+    final WorkspaceConfigDto config = createConfig();
+    EnvironmentDto env = config.getEnvironments().values().iterator().next();
+    MachineConfigDto machine = env.getMachines().values().iterator().next();
+    machine.getAttributes().put(MachineConfig.MEMORY_LIMIT_ATTRIBUTE, attributeValue);
+
+    wsValidator.validateConfig(config);
+  }
+
+  @DataProvider(name = "illegalMemoryAttributeValueProvider")
+  public static Object[][] illegalMemoryAttributeValueProvider() {
+    return new Object[][] {{"text"}, {""}, {"123MB"}, {"123GB"}, {"123KB"}};
+  }
+
+  @Test(
+    expectedExceptions = ValidationException.class,
     expectedExceptionsMessageRegExp = "Workspace ws-name contains command with null or empty name"
   )
   public void shouldFailValidationIfCommandNameIsEmpty() throws Exception {
@@ -221,17 +244,17 @@ public class WorkspaceValidatorTest {
     final WorkspaceConfigDto workspaceConfigDto =
         newDto(WorkspaceConfigDto.class).withName("ws-name").withDefaultEnv("dev-env");
 
-    MachineConfigDto extendedMachine =
+    MachineConfigDto machineConfig =
         newDto(MachineConfigDto.class)
             .withInstallers(singletonList("org.eclipse.che.ws-agent"))
             .withServers(
                 singletonMap(
                     "ref1",
                     newDto(ServerConfigDto.class).withPort("8080/tcp").withProtocol("https")))
-            .withAttributes(singletonMap("memoryLimitBytes", "1000000"));
+            .withAttributes(new HashMap<>(singletonMap(MEMORY_LIMIT_ATTRIBUTE, "1000000")));
     EnvironmentDto env =
         newDto(EnvironmentDto.class)
-            .withMachines(singletonMap("devmachine1", extendedMachine))
+            .withMachines(singletonMap("devmachine1", machineConfig))
             .withRecipe(
                 newDto(RecipeDto.class)
                     .withType("type")

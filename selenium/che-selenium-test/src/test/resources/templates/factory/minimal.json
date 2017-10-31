@@ -45,7 +45,21 @@
               "org.eclipse.che.terminal",
               "org.eclipse.che.ws-agent",
               "org.eclipse.che.ssh"
-            ]
+            ],
+            "servers" : {
+              "tomcat8" : {
+                "port" : "8080",
+                "protocol" : "http"
+              },
+              "tomcat8-debug" : {
+                "port" : "8000",
+                "protocol" : "http"
+              },
+              "codeserver" : {
+                "port" : "9876",
+                "protocol" : "http"
+              }
+            }
           }
         }
       }

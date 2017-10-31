@@ -24,7 +24,6 @@ import {DashboardConfig} from './dashboard/dashboard-config';
 // switch to a config
 import {IdeConfig} from './ide/ide-config';
 import {NavbarConfig} from './navbar/navbar-config';
-import {ProjectsConfig} from './projects/projects-config';
 import {ProxySettingsConfig} from './proxy/proxy-settings.constant';
 import {WorkspacesConfig} from './workspaces/workspaces-config';
 import {StacksConfig} from './stacks/stacks-config';
@@ -92,27 +91,29 @@ const keycloakAuth = {
 };
 initModule.constant('keycloakAuth', keycloakAuth);
 
-const promise = new Promise((resolve: IResolveFn<any>, reject: IRejectFn<any>) => {
-  angular.element.get('/api/keycloak/settings').then(resolve, reject);
-});
-promise.then((keycloakSettings: any) => {
-  keycloakAuth.config = buildKeycloakConfig(keycloakSettings);
-
-  // load Keycloak
-  return keycloakLoad(keycloakSettings).then(() => {
-    // init Keycloak
-    return keycloakInit(keycloakAuth.config);
-  }).then((keycloak: any) => {
-    keycloakAuth.isPresent = true;
-    keycloakAuth.keycloak = keycloak;
-    /* tslint:disable */
-    window['_keycloak'] = keycloak;
-    /* tslint:enable */
+angular.element(document).ready(() => {
+  const promise = new Promise((resolve: IResolveFn<any>, reject: IRejectFn<any>) => {
+    angular.element.get('/api/keycloak/settings').then(resolve, reject);
   });
-}).catch((error: any) => {
-  console.error('Keycloak initialization failed with error: ', error);
-}).then(() => {
-  angular.resumeBootstrap();
+  promise.then((keycloakSettings: any) => {
+    keycloakAuth.config = buildKeycloakConfig(keycloakSettings);
+
+    // load Keycloak
+    return keycloakLoad(keycloakSettings).then(() => {
+      // init Keycloak
+      return keycloakInit(keycloakAuth.config);
+    }).then((keycloak: any) => {
+      keycloakAuth.isPresent = true;
+      keycloakAuth.keycloak = keycloak;
+      /* tslint:disable */
+      window['_keycloak'] = keycloak;
+      /* tslint:enable */
+    });
+  }).catch((error: any) => {
+    console.error('Keycloak initialization failed with error: ', error);
+  }).then(() => {
+    angular.resumeBootstrap();
+  });
 });
 
 // add a global resolve flag on all routes (user needs to be resolved first)
@@ -407,7 +408,6 @@ new IdeConfig(instanceRegister);
 new DiagnosticsConfig(instanceRegister);
 
 new NavbarConfig(instanceRegister);
-new ProjectsConfig(instanceRegister);
 new WorkspacesConfig(instanceRegister);
 new DashboardConfig(instanceRegister);
 new StacksConfig(instanceRegister);

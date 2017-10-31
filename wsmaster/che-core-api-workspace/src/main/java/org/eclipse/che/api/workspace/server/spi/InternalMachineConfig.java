@@ -10,18 +10,12 @@
  */
 package org.eclipse.che.api.workspace.server.spi;
 
-import static java.lang.String.format;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
-import org.eclipse.che.api.installer.server.InstallerRegistry;
-import org.eclipse.che.api.installer.server.exception.InstallerException;
-import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.installer.shared.model.Installer;
 
 /**
@@ -30,79 +24,55 @@ import org.eclipse.che.api.installer.shared.model.Installer;
  * @author gazarenkov
  */
 public class InternalMachineConfig {
-
-  // ordered installers to launch on start
-  private final List<InstallerImpl> installers;
-  // set of servers including ones configured by installers
+  private final List<Installer> installers;
   private final Map<String, ServerConfig> servers;
   private final Map<String, String> env;
   private final Map<String, String> attributes;
 
-  InternalMachineConfig(MachineConfig originalConfig, InstallerRegistry installerRegistry)
+  InternalMachineConfig(
+      List<Installer> installers,
+      Map<String, ? extends ServerConfig> servers,
+      Map<String, String> env,
+      Map<String, String> attributes)
       throws InfrastructureException {
     this.servers = new HashMap<>();
-    if (originalConfig.getServers() != null) {
-      this.servers.putAll(originalConfig.getServers());
-    }
-
-    this.env = new HashMap<>();
-    if (originalConfig.getEnv() != null) {
-      this.env.putAll(originalConfig.getEnv());
-    }
-
-    this.attributes = new HashMap<>();
-    if (originalConfig.getAttributes() != null) {
-      this.attributes.putAll(originalConfig.getAttributes());
+    if (servers != null) {
+      this.servers.putAll(servers);
     }
 
     this.installers = new ArrayList<>();
-    initInstallers(originalConfig.getInstallers(), installerRegistry);
+    if (installers != null) {
+      this.installers.addAll(installers);
+    }
+
+    this.env = new HashMap<>();
+    if (env != null) {
+      this.env.putAll(env);
+    }
+
+    this.attributes = new HashMap<>();
+    if (attributes != null) {
+      this.attributes.putAll(attributes);
+    }
   }
 
-  /**
-   * Returns unmodifiable map of servers configured in the machine.
-   *
-   * <p>Note that servers provided by installers in this machine are already added to this map.
-   */
-  public Map<String, ServerConfig> getServers() {
-    return Collections.unmodifiableMap(servers);
-  }
-
-  /** Returns unmodifiable list of installers configs of the machine. */
-  public List<InstallerImpl> getInstallers() {
+  /** Returns unmodifiable ordered list of installers configs of the machine. */
+  public List<Installer> getInstallers() {
     return Collections.unmodifiableList(installers);
   }
 
-  /** Returns unmodifiable map of machine environment variables. */
+  /** Returns modifiable map of servers configured in the machine. */
+  public Map<String, ServerConfig> getServers() {
+    return servers;
+  }
+
+  /** Returns modifiable map of machine environment variables. */
   public Map<String, String> getEnv() {
-    return Collections.unmodifiableMap(env);
+    return env;
   }
 
-  /** Returns unmodifiable map of machine attributes. */
+  /** Returns modifiable map of machine attributes. */
   public Map<String, String> getAttributes() {
-    return Collections.unmodifiableMap(attributes);
-  }
-
-  private void initInstallers(List<String> installersKeys, InstallerRegistry installerRegistry)
-      throws InfrastructureException {
-    try {
-      List<Installer> sortedInstallers = installerRegistry.getOrderedInstallers(installersKeys);
-      for (Installer installer : sortedInstallers) {
-        this.installers.add(new InstallerImpl(installer));
-        for (Map.Entry<String, ? extends ServerConfig> serverEntry :
-            installer.getServers().entrySet()) {
-          if (servers.putIfAbsent(serverEntry.getKey(), serverEntry.getValue()) != null
-              && servers.get(serverEntry.getKey()).equals(serverEntry.getValue())) {
-            throw new InfrastructureException(
-                format(
-                    "Installer '%s' contains server '%s' conflicting with machine configuration",
-                    installer.getId(), serverEntry.getKey()));
-          }
-        }
-      }
-    } catch (InstallerException e) {
-      // TODO installers has circular dependency or missing, what should we throw in that case?
-      throw new InfrastructureException(e.getLocalizedMessage(), e);
-    }
+    return attributes;
   }
 }

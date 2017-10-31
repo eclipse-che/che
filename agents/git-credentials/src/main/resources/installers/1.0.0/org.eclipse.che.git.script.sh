@@ -11,9 +11,9 @@
 
 SCRIPT_FILE=~/.ssh/git.sh
 
-token=$(if [ "$USER_TOKEN" != "dummy_token" ]; then echo "$USER_TOKEN"; fi)
+token=$(if [ "$CHE_MACHINE_TOKEN" != "dummy_token" ]; then echo "$CHE_MACHINE_TOKEN"; fi)
 che_host=$(cat /etc/hosts | grep che-host | awk '{print $1;}')
-api_url=$(if [ "$CHE_API" != "http://che-host:8080/wsmaster/api" ]; then echo "$CHE_API"; else echo "$che_host:8080/api"; fi)
+api_url=$(if [ "$CHE_API" != "http://che-host:8080/api" ]; then echo "$CHE_API"; else echo "$che_host:8080/api"; fi)
 
 CURL_INSTALLED=false
 WGET_INSTALLED=false

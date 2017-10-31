@@ -60,7 +60,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.Mock;
 
@@ -68,7 +67,7 @@ import org.mockito.Mock;
  * Unit test for {@link ProjectServiceClient}.
  *
  * @author Vlad Zhukovskyi
- * @author Oleksander Andriienko
+ * @author Oleksandr Andriienko
  */
 @RunWith(GwtMockitoTestRunner.class)
 public class ProjectServiceClientTest {
@@ -146,7 +145,7 @@ public class ProjectServiceClientTest {
     when(requestFactory.createPostRequest(any(String.class), anyList())).thenReturn(asyncRequest);
     when(requestFactory.createPostRequest(any(String.class), any())).thenReturn(asyncRequest);
     when(requestFactory.createPostRequest(
-            any(String.class), ArgumentMatchers.<List<NewProjectConfigDto>>any()))
+            any(String.class), org.mockito.ArgumentMatchers.<List<NewProjectConfigDto>>any()))
         .thenReturn(asyncRequest);
     when(requestFactory.createPostRequest(any(String.class), nullable(MimeType.class)))
         .thenReturn(asyncRequest);

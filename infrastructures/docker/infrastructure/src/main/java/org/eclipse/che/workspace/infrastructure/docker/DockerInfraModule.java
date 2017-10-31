@@ -14,6 +14,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.Multibinder;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
+import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiEnvVarProvider;
 import org.eclipse.che.infrastructure.docker.client.DockerRegistryDynamicAuthResolver;
 import org.eclipse.che.infrastructure.docker.client.NoOpDockerRegistryDynamicAuthResolverImpl;
 import org.eclipse.che.workspace.infrastructure.docker.bootstrap.DockerBootstrapperFactory;
@@ -29,7 +30,6 @@ import org.eclipse.che.workspace.infrastructure.docker.provisioner.limits.ram.De
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.limits.swap.SwapLimitProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.priviliged.PrivilegedModeProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.proxy.ProxySettingsProvisioner;
-import org.eclipse.che.workspace.infrastructure.docker.provisioner.server.ServersEnvVarsProvisioningModule;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.volume.ExtraVolumesProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.snapshot.JpaSnapshotDao;
 import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotDao;
@@ -53,7 +53,8 @@ public class DockerInfraModule extends AbstractModule {
 
     install(new DockerEnvironmentTypeModule());
     install(new ContainerSystemSettingsProvisioningModule());
-    install(new ServersEnvVarsProvisioningModule());
+
+    bind(CheApiEnvVarProvider.class).to(DockerCheApiEnvVarProvider.class);
 
     Multibinder<RuntimeInfrastructure> mb =
         Multibinder.newSetBinder(binder(), RuntimeInfrastructure.class);
