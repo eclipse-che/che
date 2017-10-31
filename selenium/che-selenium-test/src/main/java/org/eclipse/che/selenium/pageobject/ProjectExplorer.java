@@ -436,6 +436,7 @@ public class ProjectExplorer {
     try {
 
       item.click();
+      waitItemIsSelected(path);
       actionsFactory.createAction(seleniumWebDriver).doubleClick(item).perform();
     }
     // sometimes an element in the project explorer may be is not attached to the DOM. We should
@@ -443,7 +444,9 @@ public class ProjectExplorer {
     catch (StaleElementReferenceException ex) {
       LOG.error(ex.getLocalizedMessage(), ex);
       clickOnRefreshTreeButton();
+      waitItem(path);
       item.click();
+      waitItemIsSelected(path);
       actionsFactory.createAction(seleniumWebDriver).doubleClick(item).perform();
     }
     loader.waitOnClosed();
@@ -868,5 +871,12 @@ public class ProjectExplorer {
     String jsScript = "IDE.ProjectExplorer.reveal(\"" + absPathToResource.replace(".", "/") + "\")";
     JavascriptExecutor js = (JavascriptExecutor) seleniumWebDriver;
     js.executeScript(jsScript);
+  }
+
+  public void waitItemIsSelected(String path) {
+    String locator =
+        "//div[@path='/%s']/div[contains(concat(' ', normalize-space(@class), ' '), ' selected')]";
+    new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC)
+        .until(ExpectedConditions.presenceOfElementLocated(By.xpath(String.format(locator, path))));
   }
 }

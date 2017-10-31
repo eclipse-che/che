@@ -34,7 +34,9 @@ public class NavigationByKeyboardTest {
 
   private String nameFirstModule = "External Libraries";
   private String nameSecondModule = "org.eclipse.qa.examples";
-  private String EXPECTED_TEXT_IN_JAVA_FILE =
+  private final String PATH_TO_SECOND_MODULE =
+      PROJECT_NAME + "/src/main/java/" + nameSecondModule.replace('.', '/');
+  private final String EXPECTED_TEXT_IN_JAVA_FILE =
       "package org.eclipse.qa.examples;\n"
           + "\n"
           + "import java.util.Random;\n"
@@ -90,25 +92,30 @@ public class NavigationByKeyboardTest {
   public void navigationByKeyboard() throws Exception {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.openItemByPath(PROJECT_NAME);
     notificationsPopupPanel.waitProgressPopupPanelClose();
     consoles.closeProcessesArea();
+    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.openItemByPath(PROJECT_NAME);
+    projectExplorer.waitVisibleItem(PROJECT_NAME + "/src");
     projectExplorer.sendToItemDownArrowKey();
+    projectExplorer.waitItemIsSelected(PROJECT_NAME + "/src");
     projectExplorer.sendToItemEnterKey();
     projectExplorer.waitItemInVisibleArea("main");
     projectExplorer.waitItemInVisibleArea("test");
 
     projectExplorer.sendToItemDownArrowKey();
+    projectExplorer.waitItemIsSelected(PROJECT_NAME + "/src/main");
     projectExplorer.sendToItemRightArrowKey();
     projectExplorer.waitItemInVisibleArea("java");
     projectExplorer.waitItemInVisibleArea("webapp");
     projectExplorer.sendToItemDownArrowKey();
+    projectExplorer.waitItemIsSelected(PROJECT_NAME + "/src/main/java");
     projectExplorer.sendToItemEnterKey();
     projectExplorer.waitItemInVisibleArea(nameSecondModule);
     projectExplorer.waitItemInVisibleArea("com.example");
 
-    projectExplorer.selectItem(
-        PROJECT_NAME + "/src/main/java/" + nameSecondModule.replace('.', '/'));
+    projectExplorer.selectItem(PATH_TO_SECOND_MODULE);
+    projectExplorer.waitItemIsSelected(PATH_TO_SECOND_MODULE);
     projectExplorer.sendToItemRightArrowKey();
     checkItemsOfTheSecondModuleIsVisible();
     projectExplorer.sendToItemLeftArrowKey();
@@ -116,6 +123,7 @@ public class NavigationByKeyboardTest {
     projectExplorer.sendToItemEnterKey();
     checkItemsOfTheSecondModuleIsVisible();
     projectExplorer.sendToItemDownArrowKey();
+    projectExplorer.waitItemIsSelected(PATH_TO_SECOND_MODULE + "/AppController.java");
     projectExplorer.sendToItemEnterKey();
     editor.waitActiveEditor();
     editor.waitTextIntoEditor(EXPECTED_TEXT_IN_JAVA_FILE);
