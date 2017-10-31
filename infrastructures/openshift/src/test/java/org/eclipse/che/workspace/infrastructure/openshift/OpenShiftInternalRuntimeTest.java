@@ -58,6 +58,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
+import org.eclipse.che.api.installer.shared.model.Installer;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.hc.ServersChecker;
@@ -150,7 +151,7 @@ public class OpenShiftInternalRuntimeTest {
     when(project.routes()).thenReturn(routes);
     when(project.pods()).thenReturn(pods);
     when(pvcs.get()).thenReturn(emptyList());
-    when(bootstrapperFactory.create(any(), anyListOf(InstallerImpl.class), any()))
+    when(bootstrapperFactory.create(any(), anyListOf(Installer.class), any()))
         .thenReturn(bootstrapper);
     when(context.getEnvironment()).thenReturn(environment);
     doReturn(ImmutableMap.of(M1_NAME, mockMachine(), M2_NAME, mockMachine()))

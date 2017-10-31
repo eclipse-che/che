@@ -13,7 +13,7 @@ package org.eclipse.che.workspace.infrastructure.docker.bootstrap;
 import com.google.inject.assistedinject.Assisted;
 import java.util.List;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
+import org.eclipse.che.api.installer.shared.model.Installer;
 import org.eclipse.che.workspace.infrastructure.docker.DockerMachine;
 
 /** @author Sergii Leshchenko */
@@ -21,6 +21,6 @@ public interface DockerBootstrapperFactory {
   DockerBootstrapper create(
       @Assisted String machineName,
       @Assisted RuntimeIdentity runtimeIdentity,
-      @Assisted List<InstallerImpl> installers,
+      @Assisted List<Installer> installers,
       @Assisted DockerMachine dockerMachine);
 }

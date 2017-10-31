@@ -20,11 +20,4 @@
     </parent>
     <artifactId>che-plugin-python-lang-shared</artifactId>
     <name>che-plugin-python-lang-shared</name>
-    <build>
-        <resources>
-            <resource>
-                <directory>src/main/java</directory>
-            </resource>
-        </resources>
-    </build>
 </project>

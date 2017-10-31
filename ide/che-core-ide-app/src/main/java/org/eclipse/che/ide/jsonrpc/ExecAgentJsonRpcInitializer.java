@@ -27,6 +27,7 @@ import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
 import org.eclipse.che.ide.api.workspace.model.ServerImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
+import org.eclipse.che.ide.core.AgentURLModifier;
 import org.eclipse.che.ide.util.loging.Log;
 
 /** Initializes JSON-RPC connection to the ws-agent server. */
@@ -35,12 +36,17 @@ public class ExecAgentJsonRpcInitializer {
 
   private final AppContext appContext;
   private final JsonRpcInitializer initializer;
+  private final AgentURLModifier agentURLModifier;
 
   @Inject
   public ExecAgentJsonRpcInitializer(
-      JsonRpcInitializer initializer, AppContext appContext, EventBus eventBus) {
+      JsonRpcInitializer initializer,
+      AppContext appContext,
+      EventBus eventBus,
+      AgentURLModifier agentURLModifier) {
     this.appContext = appContext;
     this.initializer = initializer;
+    this.agentURLModifier = agentURLModifier;
 
     eventBus.addHandler(
         ExecAgentServerRunningEvent.TYPE,
@@ -104,7 +110,8 @@ public class ExecAgentJsonRpcInitializer {
               execAgentServer.ifPresent(
                   server ->
                       initializer.initialize(
-                          machine.getName(), singletonMap("url", server.getUrl())));
+                          machine.getName(),
+                          singletonMap("url", agentURLModifier.modify(server.getUrl()))));
             });
   }
 }
