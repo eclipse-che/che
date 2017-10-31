@@ -11,10 +11,10 @@
 
 -->
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
-<suite name="Smoke selenium tests"
+<suite name="Organization tests"
   verbose="10"
   parallel="classes"
-  thread-count="4">
+  thread-count="1">
   <test name="all">
     <classes>
       <class name="org.eclipse.che.selenium.dashboard.organization.AdminOfParentOrganizationTest"/>
