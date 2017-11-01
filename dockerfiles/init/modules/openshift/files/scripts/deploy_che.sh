@@ -408,9 +408,9 @@ cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     sed "s|    keycloak-oso-endpoint:.*|    keycloak-oso-endpoint: ${KEYCLOAK_OSO_ENDPOINT}|" | \
     sed "s|    keycloak-github-endpoint:.*|    keycloak-github-endpoint: ${KEYCLOAK_GITHUB_ENDPOINT}|" | \
     if [ "${CHE_KEYCLOAK_DISABLED}" == "true" ]; then sed "s/    keycloak-disabled: \"false\"/    keycloak-disabled: \"true\"/" ; else cat -; fi | \
-    if [ ! -z "${WORKSPACE_MEMORY_LIMIT+x}" ]; then sed "s/    workspaces-memory-limit: 2300Mi/    workspaces-memory-limit: ${WORKSPACE_MEMORY_LIMIT}/" ; else cat -; fi | \
-    if [ ! -z "${WORKSPACE_MEMORY_REQUEST+x}" ]; then sed "s/    workspaces-memory-request: 1500Mi/    workspaces-memory-request: ${WORKSPACE_MEMORY_REQUEST}/" ; else cat -; fi | \
-    if [ ! -z "${CHE_PREDEFINED_STACKS_RELOAD+x}" ]; then sed "s/    che.predefined.stacks.reload_on_start: \"true\"/    che.predefined.stacks.reload_on_start: \"${CHE_PREDEFINED_STACKS_RELOAD}\"/" ; else cat -; fi | \
+    if [ ! -z "${WORKSPACE_MEMORY_LIMIT}" ]; then sed "s/    workspaces-memory-limit: 2300Mi/    workspaces-memory-limit: ${WORKSPACE_MEMORY_LIMIT}/" ; else cat -; fi | \
+    if [ ! -z "${WORKSPACE_MEMORY_REQUEST}" ]; then sed "s/    workspaces-memory-request: 1500Mi/    workspaces-memory-request: ${WORKSPACE_MEMORY_REQUEST}/" ; else cat -; fi | \
+    if [ ! -z "${CHE_PREDEFINED_STACKS_RELOAD}" ]; then sed "s/    che.predefined.stacks.reload_on_start: \"true\"/    che.predefined.stacks.reload_on_start: \"${CHE_PREDEFINED_STACKS_RELOAD}\"/" ; else cat -; fi | \
     sed "s|    CHE_INFRA_OPENSHIFT_PROJECT:.*|    CHE_INFRA_OPENSHIFT_PROJECT: ${CHE_INFRA_OPENSHIFT_PROJECT}|" | \
     sed "s|    CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL:.*|    CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL: ${HTTP_PROTOCOL}://che-${OPENSHIFT_NAMESPACE_URL}/agent-binaries/linux_amd64/bootstrapper/bootstrapper|" | \
     sed "s|    CHE_WEBSOCKET_ENDPOINT:.*|    CHE_WEBSOCKET_ENDPOINT: ${WS_PROTOCOL}://che-${OPENSHIFT_NAMESPACE_URL}/api/websocket|" | \
