@@ -10,19 +10,17 @@
  */
 package org.eclipse.che.plugin.debugger.ide.actions;
 
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.plugin.debugger.ide.DebuggerExtension.BREAKPOINT;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
+import java.util.Collections;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
-
-import java.util.Collections;
-
-import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
-import static org.eclipse.che.plugin.debugger.ide.DebuggerExtension.BREAKPOINT;
 
 /**
  * Action which allows deleting breakpoint.

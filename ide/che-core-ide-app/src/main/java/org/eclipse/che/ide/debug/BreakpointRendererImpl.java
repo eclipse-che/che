@@ -16,7 +16,8 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import elemental.dom.Element;
 import elemental.html.DivElement;
-
+import java.util.ArrayList;
+import java.util.List;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.debug.BreakpointRenderer;
@@ -25,9 +26,6 @@ import org.eclipse.che.ide.api.editor.gutter.Gutter;
 import org.eclipse.che.ide.api.editor.texteditor.EditorResources;
 import org.eclipse.che.ide.api.editor.texteditor.LineStyler;
 import org.eclipse.che.ide.util.dom.Elements;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /** Renderer for breakpoint marks in gutter (on the left margin of the text). */
 public class BreakpointRendererImpl implements BreakpointRenderer {

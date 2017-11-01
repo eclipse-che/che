@@ -15,7 +15,6 @@ import static org.eclipse.che.plugin.debugger.ide.DebuggerExtension.BREAKPOINT;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import java.util.Collections;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;

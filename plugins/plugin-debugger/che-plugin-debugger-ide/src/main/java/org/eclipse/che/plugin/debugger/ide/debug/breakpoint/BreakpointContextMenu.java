@@ -24,8 +24,6 @@ import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.menu.ContextMenu;
 import org.eclipse.che.plugin.debugger.ide.DebuggerExtension;
-import org.eclipse.che.plugin.debugger.ide.actions.DisableBreakpointAction;
-import org.eclipse.che.plugin.debugger.ide.actions.EnableBreakpointAction;
 
 /** @author Anatolii Bazko */
 public class BreakpointContextMenu extends ContextMenu {
