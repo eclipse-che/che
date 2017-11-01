@@ -10,13 +10,22 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift;
 
+import static org.eclipse.che.workspace.infrastructure.openshift.project.CommonPVCStrategy.COMMON_STRATEGY;
+import static org.eclipse.che.workspace.infrastructure.openshift.project.UniqueWorkspacePVCStrategy.UNIQUE_STRATEGY;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
+import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiEnvVarProvider;
 import org.eclipse.che.workspace.infrastructure.openshift.bootstrapper.OpenShiftBootstrapperFactory;
+import org.eclipse.che.workspace.infrastructure.openshift.project.CommonPVCStrategy;
 import org.eclipse.che.workspace.infrastructure.openshift.project.RemoveProjectOnWorkspaceRemove;
+import org.eclipse.che.workspace.infrastructure.openshift.project.UniqueWorkspacePVCStrategy;
+import org.eclipse.che.workspace.infrastructure.openshift.project.WorkspacePVCCleaner;
+import org.eclipse.che.workspace.infrastructure.openshift.project.WorkspacePVCStrategy;
+import org.eclipse.che.workspace.infrastructure.openshift.project.WorkspacePVCStrategyProvider;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftCheApiEnvVarProvider;
 
 /** @author Sergii Leshchenko */
@@ -31,8 +40,15 @@ public class OpenShiftInfraModule extends AbstractModule {
     install(new FactoryModuleBuilder().build(OpenShiftRuntimeContextFactory.class));
     install(new FactoryModuleBuilder().build(OpenShiftRuntimeFactory.class));
     install(new FactoryModuleBuilder().build(OpenShiftBootstrapperFactory.class));
+    bind(WorkspacePVCCleaner.class).asEagerSingleton();
     bind(RemoveProjectOnWorkspaceRemove.class).asEagerSingleton();
 
     bind(CheApiEnvVarProvider.class).to(OpenShiftCheApiEnvVarProvider.class);
+
+    MapBinder<String, WorkspacePVCStrategy> pvcStrategies =
+        MapBinder.newMapBinder(binder(), String.class, WorkspacePVCStrategy.class);
+    pvcStrategies.addBinding(COMMON_STRATEGY).to(CommonPVCStrategy.class);
+    pvcStrategies.addBinding(UNIQUE_STRATEGY).to(UniqueWorkspacePVCStrategy.class);
+    bind(WorkspacePVCStrategy.class).toProvider(WorkspacePVCStrategyProvider.class);
   }
 }

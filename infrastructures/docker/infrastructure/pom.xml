@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-infrastructures-docker-parent</artifactId>
         <groupId>org.eclipse.che.infrastructure.docker</groupId>
-        <version>6.0.0-M1-SNAPSHOT</version>
+        <version>6.0.0-M2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>infrastructure-docker</artifactId>
@@ -69,10 +69,6 @@
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.antlr</groupId>
-            <artifactId>ST4</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>

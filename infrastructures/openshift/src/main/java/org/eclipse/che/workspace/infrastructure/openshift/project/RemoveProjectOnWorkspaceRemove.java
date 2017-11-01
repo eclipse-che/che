@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.project;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -42,7 +44,7 @@ public class RemoveProjectOnWorkspaceRemove implements EventSubscriber<Workspace
 
   @Inject
   public void subscribe(EventService eventService) {
-    if (projectName == null) {
+    if (isNullOrEmpty(projectName)) {
       eventService.subscribe(this);
     }
   }
