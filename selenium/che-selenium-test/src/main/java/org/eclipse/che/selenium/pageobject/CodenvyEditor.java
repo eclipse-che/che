@@ -295,7 +295,7 @@ public class CodenvyEditor {
     waitActiveEditor();
     List<WebElement> lines =
         elemDriverWait.until(
-            presenceOfAllElementsLocatedBy(By.xpath(Locators.ORION_CONTENT_ACTIVE_EDITOR_XPATH)));
+            presenceOfAllElementsLocatedBy(By.xpath(Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH)));
     List<WebElement> inner = lines.get(indexOfEditor - 1).findElements(By.tagName("div"));
     return getTextFromOrionLines(inner);
   }
@@ -1685,6 +1685,7 @@ public class CodenvyEditor {
    */
   private String getTextFromOrionLines(List<WebElement> lines) {
     StringBuilder stringBuilder = new StringBuilder();
+
     try {
       stringBuilder = waitLinesElementsPresenceAndGetText(lines);
     }
@@ -1694,7 +1695,6 @@ public class CodenvyEditor {
       WaitUtils.sleepQuietly(2);
 
       stringBuilder.setLength(0);
-
       stringBuilder = waitLinesElementsPresenceAndGetText(lines);
     }
     return stringBuilder.toString();
@@ -1703,28 +1703,22 @@ public class CodenvyEditor {
   private StringBuilder waitLinesElementsPresenceAndGetText(List<WebElement> lines) {
     StringBuilder stringBuilder = new StringBuilder();
 
-    for (int i = 0; i < lines.size(); i++) {
-      WebElement line = lines.get(i);
-      List<WebElement> elements;
+    lines.forEach(
+        line -> {
+          List<WebElement> nestedElements = line.findElements(By.tagName("span"));
 
-      elements = line.findElements(By.tagName("span"));
+          for (int a = 0; a < nestedElements.size(); a++) {
+            elemDriverWait.until(
+                ExpectedConditions.presenceOfNestedElementLocatedBy(
+                    line, By.xpath(String.format("span[%s]", a + 1))));
+          }
 
-      for (int a = 0; a < elements.size(); a++) {
+          nestedElements.remove(nestedElements.size() - 1);
+          nestedElements.forEach(elem -> stringBuilder.append(elem.getText()));
+          stringBuilder.append("\n");
+        });
 
-        elemDriverWait.until(
-            ExpectedConditions.presenceOfNestedElementLocatedBy(
-                line, By.xpath(String.format("span[%s]", a + 1))));
-      }
-
-      elements.remove(elements.size() - 1);
-      for (WebElement elem : elements) {
-        stringBuilder.append(elem.getText());
-      }
-      stringBuilder.append("\n");
-    }
-
-    stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-    return stringBuilder;
+    return stringBuilder.deleteCharAt(stringBuilder.length() - 1);
   }
 
   /** open context menu into editor */
