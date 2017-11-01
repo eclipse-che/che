@@ -151,7 +151,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
   public ServerCapabilities initialize(String fileUri) throws LanguageServerException {
     long thread = Thread.currentThread().getId();
     List<LanguageServerLauncher> interestedLaunchers = findApplicableLaunchers(fileUri);
-    LOG.info("interested launchers for thread " + thread + ": " + interestedLaunchers);
+    LOG.info("interested launchers for thread {} : {} ", thread, interestedLaunchers);
     // launchers is the set of things we need to have initialized
     Set<String> requiredServers = new HashSet<>();
 
@@ -195,7 +195,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
                       synchronized (initializedServers) {
                         initializedServers.add(
                             new InitializedLanguageServer(id, server, res, launcher, key));
-                        LOG.info("launched for  " + thread + ": " + key);
+                        LOG.info("launched for  {} : {}", thread, key);
                         requiredServers.remove(key);
                         initializedServers.notifyAll();
                       }
@@ -219,7 +219,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
                         + launcher.getDescription().getId()
                         + ": "
                         + e.getMessage()));
-            LOG.error("Error launching language server for thread  " + thread + "  launcher", e);
+            LOG.error("Error launching language server for thread  {}, {}", thread, launcher, e);
             synchronized (initializedServers) {
               requiredServers.remove(key);
               launchedServers.remove(key);
@@ -239,7 +239,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
         requiredServers.remove(initialized.getLaunchKey());
       }
       while (!requiredServers.isEmpty()) {
-        LOG.info("waiting for launched servers on thread " + thread + ": " + requiredServers);
+        LOG.info("waiting for launched servers on thread {} : {}", thread, requiredServers);
         try {
           initializedServers.wait();
           for (InitializedLanguageServer initialized : initializedServers) {
