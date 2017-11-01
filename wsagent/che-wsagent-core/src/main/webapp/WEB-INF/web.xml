@@ -17,6 +17,9 @@
          version="3.0"
          metadata-complete="true">
     <display-name>Che Machine API</display-name>
+
+    <absolute-ordering></absolute-ordering>
+
     <context-param>
         <param-name>org.everrest.websocket.context</param-name>
         <param-value>/api</param-value>

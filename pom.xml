@@ -1856,6 +1856,15 @@
         </pluginRepository>
     </pluginRepositories>
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.eclipse.che.core</groupId>
+                    <artifactId>che-core-dynamodule-maven-plugin</artifactId>
+                    <version>${che.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <!-- Configuration for launching GWT Super DevMode with gwt:codeserver -->
