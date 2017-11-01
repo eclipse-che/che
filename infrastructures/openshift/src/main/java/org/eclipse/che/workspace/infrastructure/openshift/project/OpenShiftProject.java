@@ -27,8 +27,6 @@ import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory
  */
 public class OpenShiftProject {
 
-  public static final String CHE_WORKSPACE_ID_LABEL = "CHE_WORKSPACE_ID";
-
   private final OpenShiftPods pods;
   private final OpenShiftServices services;
   private final OpenShiftRoutes routes;

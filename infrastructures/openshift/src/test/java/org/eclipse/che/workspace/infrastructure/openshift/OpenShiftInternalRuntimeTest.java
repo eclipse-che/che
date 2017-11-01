@@ -15,7 +15,7 @@ import static java.util.Collections.emptyMap;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.FAILED;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.STARTING;
-import static org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesProvisioner.CHE_ORIGINAL_NAME_LABEL;
+import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_ORIGINAL_NAME_LABEL;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyListOf;
 import static org.mockito.ArgumentMatchers.anyString;
