@@ -14,7 +14,6 @@ import static org.eclipse.che.plugin.composer.shared.Constants.PACKAGE;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.io.IOException;
-import java.lang.annotation.Inherited;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
