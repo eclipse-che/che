@@ -24,6 +24,9 @@ public interface BreakpointConfigurationView
   interface ActionDelegate {
     /** Apply changes. */
     void onApplyClicked();
+
+    /** Discard changes */
+    void onCloseClicked();
   }
 
   void showDialog();

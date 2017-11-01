@@ -41,8 +41,6 @@ public class BreakpointConfigurationViewImpl extends Window implements Breakpoin
   @UiField TextArea breakpointCondition;
   @UiField CheckBox enabled;
 
-  private final Button applyButton;
-
   private ActionDelegate delegate;
 
   @Inject
@@ -51,14 +49,20 @@ public class BreakpointConfigurationViewImpl extends Window implements Breakpoin
 
     this.setWidget(widget);
     this.setTitle(locale.breakpointConfigurationTitle());
+    ensureDebugId("breakpoint-configuration-window");
 
-    applyButton =
+    Button closeButton =
+        createButton(
+            locale.evaluateExpressionViewCloseButtonTitle(),
+            UIObject.DEBUG_ID_PREFIX + "close-btn",
+            clickEvent -> delegate.onCloseClicked());
+    addButtonToFooter(closeButton);
+
+    Button applyButton =
         createButton(
             locale.viewBreakpointConfigurationApplyButton(),
             UIObject.DEBUG_ID_PREFIX + "apply-btn",
             clickEvent -> delegate.onApplyClicked());
-
-    ensureDebugId("breakpoint-configuration-window");
     addButtonToFooter(applyButton);
   }
 

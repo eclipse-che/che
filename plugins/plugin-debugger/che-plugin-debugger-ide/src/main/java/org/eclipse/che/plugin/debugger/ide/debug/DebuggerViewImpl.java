@@ -40,6 +40,7 @@ import org.eclipse.che.api.debug.shared.model.WatchExpression;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
+import org.eclipse.che.ide.debug.BreakpointResources;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.list.SimpleList;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
@@ -93,7 +94,7 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
 
   private final SimpleList<Breakpoint> breakpoints;
   private final SimpleList<StackFrameDump> frames;
-  private final DebuggerResources debuggerResources;
+  private final BreakpointResources breakpointResources;
 
   private final DebuggerNodeFactory nodeFactory;
   private final DebugNodeUniqueKeyProvider nodeKeyProvider;
@@ -104,13 +105,14 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
       DebuggerLocalizationConstant locale,
       Resources coreRes,
       DebuggerViewImplUiBinder uiBinder,
+      BreakpointResources breakpointResources,
       DebuggerNodeFactory nodeFactory,
       DebugNodeUniqueKeyProvider nodeKeyProvider) {
     super();
 
     this.locale = locale;
-    this.debuggerResources = resources;
     this.coreRes = coreRes;
+    this.breakpointResources = breakpointResources;
     this.nodeKeyProvider = nodeKeyProvider;
 
     StatusText<Tree> emptyTreeStatus = new StatusText<>();
@@ -356,7 +358,7 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
     return SimpleList.create(
         (SimpleList.View) breakPointsElement,
         coreRes.defaultSimpleListCss(),
-        new BreakpointItemRender(debuggerResources),
+        new BreakpointItemRender(breakpointResources),
         breakpointListEventDelegate);
   }
 

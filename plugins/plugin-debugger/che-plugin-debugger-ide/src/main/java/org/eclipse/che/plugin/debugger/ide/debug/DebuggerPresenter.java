@@ -226,7 +226,15 @@ public class DebuggerPresenter extends BasePresenter
   }
 
   protected void updateBreakpoints() {
-    view.setBreakpoints(breakpointManager.getBreakpointList());
+    List<Breakpoint> breakpoints = new ArrayList<>(breakpointManager.getBreakpointList());
+    breakpoints.sort(
+        (o1, o2) -> {
+          Location location1 = o1.getLocation();
+          Location location2 = o2.getLocation();
+          int compare = location1.getTarget().compareTo(location2.getTarget());
+          return (compare == 0 ? location1.getLineNumber() - location2.getLineNumber() : compare);
+        });
+    view.setBreakpoints(breakpoints);
   }
 
   protected void updateThreadDump() {

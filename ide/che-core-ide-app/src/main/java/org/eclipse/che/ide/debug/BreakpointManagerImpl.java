@@ -98,7 +98,7 @@ public class BreakpointManagerImpl
         breakpointStorage.get(activeFile.getLocation().toString(), lineNumber + 1);
 
     if (existedBreakpoint.isPresent()) {
-      deleteBreakpoint(activeFile, existedBreakpoint.get());
+      delete(existedBreakpoint.get());
     } else {
       if (activeFile instanceof HasLocation) {
         addBreakpoint(
@@ -107,25 +107,6 @@ public class BreakpointManagerImpl
         LOG.warning("Impossible to figure debug location for: " + activeFile.getLocation());
         return;
       }
-    }
-  }
-
-  /** Deletes breakpoint. Removes breakpoint mark. */
-  private void deleteBreakpoint(final VirtualFile activeFile, final Breakpoint breakpoint) {
-    breakpointStorage.delete(breakpoint);
-
-    BreakpointRenderer renderer = getBreakpointRendererForFile(activeFile.getLocation().toString());
-    if (renderer != null) {
-      renderer.removeBreakpointMark(breakpoint.getLocation().getLineNumber() - 1);
-    }
-
-    for (BreakpointManagerObserver observer : observers) {
-      observer.onBreakpointDeleted(breakpoint);
-    }
-
-    Debugger debugger = debuggerManager.getActiveDebugger();
-    if (debugger != null) {
-      debugger.deleteBreakpoint(breakpoint);
     }
   }
 
@@ -224,6 +205,26 @@ public class BreakpointManagerImpl
       if (breakpoint.isEnabled()) {
         debugger.addBreakpoint(breakpoint);
       }
+    }
+  }
+
+  @Override
+  public void delete(Breakpoint breakpoint) {
+    breakpointStorage.delete(breakpoint);
+
+    BreakpointRenderer renderer =
+        getBreakpointRendererForFile(breakpoint.getLocation().getTarget());
+    if (renderer != null) {
+      renderer.removeBreakpointMark(breakpoint.getLocation().getLineNumber() - 1);
+    }
+
+    Debugger debugger = debuggerManager.getActiveDebugger();
+    if (debugger != null) {
+      debugger.deleteBreakpoint(breakpoint);
+    }
+
+    for (BreakpointManagerObserver observer : observers) {
+      observer.onBreakpointDeleted(breakpoint);
     }
   }
 
@@ -337,7 +338,7 @@ public class BreakpointManagerImpl
       }
 
       for (final Breakpoint breakpoint : toRemove) {
-        deleteBreakpoint(file, breakpoint);
+        delete(breakpoint);
       }
 
       for (final Breakpoint breakpoint : toAdd) {

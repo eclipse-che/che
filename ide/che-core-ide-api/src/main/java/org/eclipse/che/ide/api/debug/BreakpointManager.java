@@ -31,4 +31,7 @@ public interface BreakpointManager extends BreakpointManagerObservable {
 
   /** Updates the given breakpoint. */
   void update(Breakpoint breakpoint);
+
+  /** Deletes the given breakpoint. */
+  void delete(Breakpoint breakpoint);
 }

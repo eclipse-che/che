@@ -52,4 +52,9 @@ public class BreakpointConfigurationPresenter
 
     breakpointManager.update(breakpoint);
   }
+
+  @Override
+  public void onCloseClicked() {
+    view.close();
+  }
 }
