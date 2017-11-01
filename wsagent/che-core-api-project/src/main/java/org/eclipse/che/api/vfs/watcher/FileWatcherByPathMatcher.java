@@ -12,8 +12,10 @@ package org.eclipse.che.api.vfs.watcher;
 
 import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static java.nio.file.Files.exists;
+import static org.eclipse.che.api.vfs.watcher.FileWatcherUtils.toInternalPath;
 
 import com.google.inject.Inject;
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.Iterator;
@@ -23,6 +25,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,8 +47,12 @@ public class FileWatcherByPathMatcher implements Consumer<Path> {
   /** Registered path -> Path watch operation IDs */
   private final Map<Path, Set<Integer>> pathWatchRegistrations = new ConcurrentHashMap<>();
 
+  private final File root;
+
   @Inject
-  public FileWatcherByPathMatcher(FileWatcherByPathValue watcher) {
+  public FileWatcherByPathMatcher(
+      @Named("che.user.workspaces.storage") File root, FileWatcherByPathValue watcher) {
+    this.root = root;
     this.watcher = watcher;
   }
 
@@ -57,6 +64,7 @@ public class FileWatcherByPathMatcher implements Consumer<Path> {
       }
       paths.values().forEach(it -> it.remove(path));
       paths.entrySet().removeIf(it -> it.getValue().isEmpty());
+      return;
     }
 
     for (PathMatcher matcher : matchers.keySet()) {
@@ -74,6 +82,7 @@ public class FileWatcherByPathMatcher implements Consumer<Path> {
               watcher.watch(path, operation.create, operation.modify, operation.delete);
           pathWatchRegistrations.putIfAbsent(path, newConcurrentHashSet());
           pathWatchRegistrations.get(path).add(pathWatcherOperationId);
+          operation.create.accept(toInternalPath(root.toPath(), path));
         }
       }
     }
