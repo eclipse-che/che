@@ -14,6 +14,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.isDirectory;
 import static java.nio.file.Files.lines;
@@ -170,14 +171,7 @@ public class FileWatcherIgnoreFileTracker {
     fileWatcherManager.addIncludeMatcher(getIgnoreFileMatcher());
     fileWatchingOperationID =
         fileWatcherManager.registerByMatcher(
-            getCheDirectoryMatcher(),
-            getCreateConsumer(),
-            getModifyConsumer(),
-            getDeleteConsumer());
-  }
-
-  private PathMatcher getCheDirectoryMatcher() {
-    return path -> isDirectory(path) && CHE_DIR.equals(path.getFileName().toString());
+            getIgnoreFileMatcher(), getCreateConsumer(), getModifyConsumer(), getDeleteConsumer());
   }
 
   private PathMatcher getIgnoreFileMatcher() {
@@ -280,6 +274,11 @@ public class FileWatcherIgnoreFileTracker {
 
   private void writeExcludesToIgnoreFile(Path ignoreFilePath, Set<String> locationsToExclude) {
     try {
+      Path cheDir = ignoreFilePath.getParent();
+      if (!exists(cheDir)) {
+        createDirectories(cheDir);
+      }
+
       write(ignoreFilePath, locationsToExclude, UTF_8, CREATE, APPEND);
     } catch (IOException e) {
       String errorMessage = "Can not add paths to File Watcher excludes ";
