@@ -41,7 +41,7 @@ import org.eclipse.che.dto.server.DtoFactory;
 public class URLFactoryBuilder {
 
   /** Default docker image (if repository has no dockerfile) */
-  protected static final String DEFAULT_DOCKER_IMAGE = "codenvy/ubuntu_jdk8";
+  protected static final String DEFAULT_DOCKER_IMAGE = "eclipse/ubuntu_jdk8";
 
   /** Default docker type (if repository has no dockerfile) */
   protected static final String DEFAULT_MEMORY_LIMIT_BYTES = Long.toString(2000L * 1024L * 1024L);
