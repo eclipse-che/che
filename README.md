@@ -29,7 +29,7 @@ If you are interested in fixing issues and contributing directly to the code bas
 * **Support:** You can ask questions, report bugs, and request features using [GitHub issues](https://github.com/eclipse/che/issues).
 * **Public Chat:** Join the public [eclipse-che](https://mattermost.eclipse.org/eclipse/channels/eclipse-che) Mattermost channel to discuss with community and contributors.
 * **Roadmap:** We maintain [the roadmap](https://github.com/eclipse/che/wiki/Roadmap) on the wiki. 
-* **Weekly Meetings:** Join us on [a hangout](https://github.com/eclipse/che/wiki/Weekly-Planning-Meetings). 
+* **Weekly Meetings:** Join us in our [Che community meeting](https://github.com/eclipse/che/wiki/Che-Dev-Meetings) every second monday.
 
 ### License
 Che is open sourced under the Eclipse Public License 1.0.

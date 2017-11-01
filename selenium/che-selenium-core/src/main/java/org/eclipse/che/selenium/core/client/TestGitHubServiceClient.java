@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.core.client;
 
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
@@ -17,11 +18,13 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import javax.xml.bind.DatatypeConverter;
+import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.dto.server.JsonStringMapImpl;
@@ -186,7 +189,8 @@ public class TestGitHubServiceClient {
     }
   }
 
-  public String getName(final String username, final String password) throws Exception {
+  public String getName(final String username, final String password)
+      throws IOException, ApiException {
     String url = "https://api.github.com/users/" + username;
     HttpJsonResponse response =
         requestFactory
@@ -194,8 +198,20 @@ public class TestGitHubServiceClient {
             .useGetMethod()
             .setAuthorizationHeader(createBasicAuthHeader(username, password))
             .request();
+
+    return obtainNameFromResponse(response);
+  }
+
+  /**
+   * Obtain name of github user from github response
+   *
+   * @param response
+   * @return name if it presents in response and != null, or login otherwise.
+   */
+  private String obtainNameFromResponse(HttpJsonResponse response) throws IOException {
     Map<String, String> properties = response.asProperties();
-    return properties.getOrDefault("name", properties.get("login"));
+    String login = properties.get("login");
+    return ofNullable(properties.getOrDefault("name", login)).orElse(login);
   }
 
   private String createBasicAuthHeader(String username, String password)

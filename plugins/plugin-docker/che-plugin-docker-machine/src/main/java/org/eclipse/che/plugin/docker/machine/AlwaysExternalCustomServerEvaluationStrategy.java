@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.util.Map;
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
+import org.eclipse.che.api.machine.server.model.impl.ServerPropertiesImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.docker.client.WorkspacesRoutingSuffixProvider;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
@@ -55,5 +56,24 @@ public class AlwaysExternalCustomServerEvaluationStrategy extends BaseServerEval
   protected Map<String, String> getInternalAddressesAndPorts(
       ContainerInfo containerInfo, String internalHost) {
     return super.getExternalAddressesAndPorts(containerInfo, internalHost);
+  }
+
+  @Override
+  protected ServerImpl updateServer(ServerImpl server) {
+    super.updateServer(server);
+    setExternalProtocolForInternalUrl(server);
+    return server;
+  }
+
+  private void setExternalProtocolForInternalUrl(ServerImpl server) {
+    ServerPropertiesImpl properties = (ServerPropertiesImpl) server.getProperties();
+    String url = properties.getInternalUrl();
+    String externalProtocol = server.getProtocol();
+    if (url != null && externalProtocol != null) {
+      int internalUrlProtocolEnd = url.indexOf(':');
+      if (internalUrlProtocolEnd > 0) {
+        properties.setInternalUrl(externalProtocol.concat(url.substring(internalUrlProtocolEnd)));
+      }
+    }
   }
 }
