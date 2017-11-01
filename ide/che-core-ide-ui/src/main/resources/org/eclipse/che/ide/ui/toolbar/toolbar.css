@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-@external .blueColored, .greenColored, .redColored, .changeOnHover;
+@external .blueColored, .greenColored, .redColored, .changeOnHover, .leftToolbarPart, .toolbarActionGroupPanel, .centerToolbarPart, .toolbarActionGroupPanel;
 @eval greenIconColor org.eclipse.che.ide.api.theme.Style.getSuccessEventColor();
 
 .toolbarPanel {

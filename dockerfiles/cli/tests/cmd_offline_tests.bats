@@ -34,11 +34,7 @@ source /dockerfiles/cli/tests/test_base.sh
   [[ -f $(ls "${container_tmp_path}"/backup/eclipse_che-init*.tar) ]]
   [[ -f $(ls "${container_tmp_path}"/backup/eclipse_che-ip*.tar) ]]
   [[ -f $(ls "${container_tmp_path}"/backup/eclipse_che-mount*.tar) ]]
-  [[ -f $(ls "${container_tmp_path}"/backup/eclipse_che-server-multiuser*.tar) ]]
   [[ -f $(ls "${container_tmp_path}"/backup/eclipse_che-test*.tar) ]]
-  [[ -f $(ls "${container_tmp_path}"/backup/traefik*.tar) ]]
-  [[ -f $(ls "${container_tmp_path}"/backup/jboss_keycloak-openshift*.tar) ]]
-  [[ -f $(ls "${container_tmp_path}"/backup/centos_postgresql-96-centos7*.tar) ]]
 }
 
 @test "test cli 'offline' command: include custom stack images" {
@@ -65,11 +61,7 @@ source /dockerfiles/cli/tests/test_base.sh
   [[ -f $(ls "${container_tmp_path}"/backup/eclipse_che-init*.tar) ]]
   [[ -f $(ls "${container_tmp_path}"/backup/eclipse_che-ip*.tar) ]]
   [[ -f $(ls "${container_tmp_path}"/backup/eclipse_che-mount*.tar) ]]
-  [[ -f $(ls "${container_tmp_path}"/backup/eclipse_che-server-multiuser*.tar) ]]
   [[ -f $(ls "${container_tmp_path}"/backup/eclipse_che-test*.tar) ]]
-  [[ -f $(ls "${container_tmp_path}"/backup/traefik*.tar) ]]
-  [[ -f $(ls "${container_tmp_path}"/backup/jboss_keycloak-openshift*.tar) ]]
-  [[ -f $(ls "${container_tmp_path}"/backup/centos_postgresql-96-centos7*.tar) ]]
   [[ -f "${container_tmp_path}"/backup/eclipse_alpine_jdk8.tar ]]
   [[ -f "${container_tmp_path}"/backup/eclipse_debian_jre.tar ]]
 }

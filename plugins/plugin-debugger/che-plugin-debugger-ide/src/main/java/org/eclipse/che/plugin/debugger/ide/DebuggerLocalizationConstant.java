@@ -54,11 +54,14 @@ public interface DebuggerLocalizationConstant extends com.google.gwt.i18n.client
   @Key("stepOut")
   String stepOut();
 
+  @Key("runToCursor")
+  String runToCursor();
+
   @Key("suspend")
   String suspend();
 
-  @Key("changeVariableValue")
-  String changeVariableValue();
+  @Key("editDebugVariable")
+  String editDebugVariable();
 
   @Key("evaluateExpression")
   String evaluateExpression();
@@ -91,14 +94,17 @@ public interface DebuggerLocalizationConstant extends com.google.gwt.i18n.client
   @Key("stepOutDescription")
   String stepOutDescription();
 
+  @Key("runToCursorDescription")
+  String runToCursorDescription();
+
   @Key("suspendDescription")
   String suspendDescription();
 
   @Key("deleteAllBreakpointsDescription")
   String deleteAllBreakpointsDescription();
 
-  @Key("changeVariableValueDescription")
-  String changeVariableValueDescription();
+  @Key("editDebugVariableDescription")
+  String editDebugVariableDescription();
 
   @Key("evaluateExpressionDescription")
   String evaluateExpressionDescription();
@@ -222,4 +228,37 @@ public interface DebuggerLocalizationConstant extends com.google.gwt.i18n.client
 
   @Key("view.breakpointConfiguration.applyButton")
   String viewBreakpointConfigurationApplyButton();
+
+  @Key("add.watch.expression")
+  String addWatchExpression();
+
+  @Key("remove.watch.expression")
+  String removeWatchExpression();
+
+  @Key("addWatchExpressionDescription")
+  String addWatchExpressionDescription();
+
+  @Key("removeWatchExpressionDescription")
+  String removeWatchExpressionDescription();
+
+  @Key("add.expression.view.dialog.title")
+  String addExpressionViewDialogTitle();
+
+  @Key("add.expression.view.save.button.title")
+  String addExpressionViewSaveButtonTitle();
+
+  @Key("add.expression.view.cancel.button.title")
+  String addExpressionViewCancelButtonTitle();
+
+  @Key("edit.expression.view.dialog.title")
+  String editExpressionViewDialogTitle();
+
+  @Key("edit.expression.view.save.button.title")
+  String editExpressionViewSaveButtonTitle();
+
+  @Key("edit.expression.view.cancel.button.title")
+  String editExpressionViewCancelButtonTitle();
+
+  @Key("edit.expression.view.expression.field.title")
+  String editExpressionViewExpressionFieldTitle();
 }

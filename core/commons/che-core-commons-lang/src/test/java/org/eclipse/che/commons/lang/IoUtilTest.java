@@ -48,8 +48,9 @@ public class IoUtilTest {
     URI codenvyDir = URI.create("jar:" + testJar + "!/");
 
     List<String> resources = new ArrayList<>();
-    IoUtil.listResources(codenvyDir, path -> resources.add(path.getFileName().toString()));
+    IoUtil.listResources(
+        codenvyDir, path -> resources.add(path.getFileName().toString().replace("/", "")));
 
-    assertTrue(resources.contains("codenvy/"));
+    assertTrue(resources.contains("codenvy"));
   }
 }

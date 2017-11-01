@@ -31,6 +31,7 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.api.workspace.model.ServerImpl;
 import org.eclipse.che.ide.collections.Jso;
+import org.eclipse.che.ide.core.AgentURLModifier;
 import org.eclipse.che.ide.websocket.WebSocket;
 import org.eclipse.che.ide.websocket.events.ConnectionErrorHandler;
 import org.eclipse.che.requirejs.ModuleHolder;
@@ -53,6 +54,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
   private final MachineImpl machine;
   private final TerminalInitializePromiseHolder terminalHolder;
   private final ModuleHolder moduleHolder;
+  private final AgentURLModifier agentURLModifier;
 
   private WebSocket socket;
   private boolean connected;
@@ -70,9 +72,11 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
       @NotNull @Assisted MachineImpl machine,
       @Assisted TerminalOptionsJso options,
       final TerminalInitializePromiseHolder terminalHolder,
-      final ModuleHolder moduleHolder) {
+      final ModuleHolder moduleHolder,
+      AgentURLModifier agentURLModifier) {
     this.view = view;
     this.options = options != null ? options : TerminalOptionsJso.createDefault();
+    this.agentURLModifier = agentURLModifier;
     view.setDelegate(this);
     this.notificationManager = notificationManager;
     this.locale = locale;
@@ -107,7 +111,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
                                     "Machine "
                                         + machine.getName()
                                         + " doesn't provide terminal server."));
-                connectToTerminal(terminalServer.getUrl());
+                connectToTerminal(agentURLModifier.modify(terminalServer.getUrl()));
               })
           .catchError(
               arg -> {

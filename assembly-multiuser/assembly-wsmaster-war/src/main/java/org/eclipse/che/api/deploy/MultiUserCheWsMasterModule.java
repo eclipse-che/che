@@ -79,6 +79,8 @@ public class MultiUserCheWsMasterModule extends AbstractModule {
     bind(PreferenceDao.class).to(JpaPreferenceDao.class);
     bind(PermissionChecker.class).to(PermissionCheckerImpl.class);
 
+    bindConstant().annotatedWith(Names.named("che.agents.auth_enabled")).to(true);
+
     bindConstant()
         .annotatedWith(Names.named("machine.terminal_agent.run_command"))
         .to(

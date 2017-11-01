@@ -50,6 +50,9 @@ public class FontAwesome {
   /** http://fortawesome.github.io/Font-Awesome/icon/expand/ */
   public static final String EXPAND = "<i class=\"fa fa-expand\"></i>";
 
+  /** http://fortawesome.github.io/Font-Awesome/icon/folder/ */
+  public static final String FOLDER = "<i class=\"fa fa-folder\"></i>";
+
   /** http://fortawesome.github.io/Font-Awesome/icon/history/ */
   public static final String HISTORY = "<i class=\"fa fa-history\"></i>";
 
@@ -118,6 +121,9 @@ public class FontAwesome {
 
   /** http://fontawesome.io/icon/list/ */
   public static final String LIST = "<i class=\"fa fa-list\"></i>";
+
+  /** http://fontawesome.io/icon/list-ul/ */
+  public static final String LIST_UL = "<i class=\"fa fa-list-ul\"></i>";
 
   /** http://fontawesome.io/icon/arrow-up/ */
   public static final String ARROW_UP = "<i class=\"fa fa-arrow-up\"></i>";

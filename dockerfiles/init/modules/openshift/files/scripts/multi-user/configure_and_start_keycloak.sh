@@ -42,10 +42,12 @@ if [ "${CHE_SERVER_URL}" == "" ]; then
   fi
   if [ "${CHE_SERVER_ROUTE_TLS}" == "" ]; then
     CHE_SERVER_URL="http://${CHE_SERVER_ROUTE_HOST}"
-  else 
+  else
     CHE_SERVER_URL="https://${CHE_SERVER_ROUTE_HOST}"
   fi
 fi
 
 oc set env buildconfig/keycloak-for-che CHE_SERVER_URL=${CHE_SERVER_URL}
+# This waiting is needed because start-build fails without it
+sleep 3s
 oc start-build keycloak-for-che

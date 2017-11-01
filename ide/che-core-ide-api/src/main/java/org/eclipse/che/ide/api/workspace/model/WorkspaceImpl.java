@@ -14,10 +14,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.workspace.shared.dto.RuntimeDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.annotation.Nullable;
 
@@ -37,7 +37,7 @@ public class WorkspaceImpl implements Workspace {
       String id,
       String namespace,
       WorkspaceConfig config,
-      Runtime runtime,
+      RuntimeDto runtime,
       Map<String, String> attributes,
       boolean isTemporary,
       WorkspaceStatus status,
@@ -53,6 +53,40 @@ public class WorkspaceImpl implements Workspace {
               runtime.getActiveEnv(),
               runtime.getMachines(),
               runtime.getOwner(),
+              runtime.getMachineToken(),
+              runtime.getWarnings());
+    }
+    if (attributes != null) {
+      this.attributes = new HashMap<>(attributes);
+    }
+    this.isTemporary = isTemporary;
+    this.status = status;
+    if (links != null) {
+      this.links = new HashMap<>(links);
+    }
+  }
+
+  public WorkspaceImpl(
+      String id,
+      String namespace,
+      WorkspaceConfig config,
+      RuntimeImpl runtime,
+      Map<String, String> attributes,
+      boolean isTemporary,
+      WorkspaceStatus status,
+      Map<String, String> links) {
+    this.id = id;
+    this.namespace = namespace;
+    if (config != null) {
+      this.config = new WorkspaceConfigImpl(config);
+    }
+    if (runtime != null) {
+      this.runtime =
+          new RuntimeImpl(
+              runtime.getActiveEnv(),
+              runtime.getMachines(),
+              runtime.getOwner(),
+              runtime.getMachineToken(),
               runtime.getWarnings());
     }
     if (attributes != null) {

@@ -37,7 +37,7 @@
         </che-list-header>
         <che-list flex>
           <che-list-item
-            ng-repeat="template in filteredTemplates = (selectTemplateController.templates | sampleTagFilter:selectTemplateController.stack.tags | orderBy:['projectType', selectTemplateController.projectsOrderBy])">
+            ng-repeat="template in filteredTemplates = (selectTemplateController.templates | samplesTagFilter:selectTemplateController.stack.tags | orderBy:['projectType', selectTemplateController.projectsOrderBy])">
             <div flex="100"
                  layout="row"
                  layout-align="start stretch"

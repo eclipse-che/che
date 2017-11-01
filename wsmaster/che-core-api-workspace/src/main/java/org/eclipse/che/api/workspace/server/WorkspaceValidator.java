@@ -12,8 +12,10 @@ package org.eclipse.che.api.workspace.server;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -24,6 +26,7 @@ import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 
@@ -83,7 +86,11 @@ public class WorkspaceValidator {
       checkNotNull(recipe, "Environment recipe must not be null");
       checkNotNull(recipe.getType(), "Environment recipe type must not be null");
 
-      // TODO: spi: deal with exceptions
+      for (Entry<String, ? extends MachineConfig> machineEntry :
+          environment.getMachines().entrySet()) {
+        validateMachine(machineEntry.getKey(), machineEntry.getValue());
+      }
+
       try {
         runtimes.validate(environment);
       } catch (InfrastructureException e) {
@@ -124,6 +131,20 @@ public class WorkspaceValidator {
               && !attributeName.toLowerCase().startsWith("codenvy"),
           "Attribute name '%s' is not valid",
           attributeName);
+    }
+  }
+
+  private void validateMachine(String name, MachineConfig machine) throws ValidationException {
+    String memoryAttribute = machine.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE);
+    if (memoryAttribute != null) {
+      try {
+        Long.parseLong(memoryAttribute);
+      } catch (NumberFormatException e) {
+        throw new ValidationException(
+            format(
+                "Value '%s' of attribute '%s' in machine '%s' is illegal",
+                memoryAttribute, MEMORY_LIMIT_ATTRIBUTE, name));
+      }
     }
   }
 

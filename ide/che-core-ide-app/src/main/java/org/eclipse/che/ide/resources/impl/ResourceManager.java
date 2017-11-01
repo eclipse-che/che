@@ -59,7 +59,6 @@ import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectProblemDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
-import org.eclipse.che.ide.api.WsAgentURLModifier;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.DeletedFilesController;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -82,6 +81,7 @@ import org.eclipse.che.ide.api.resources.marker.Marker;
 import org.eclipse.che.ide.api.resources.marker.MarkerChangedEvent;
 import org.eclipse.che.ide.api.vcs.VcsStatus;
 import org.eclipse.che.ide.context.AppContextImpl;
+import org.eclipse.che.ide.core.AgentURLModifier;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.project.ProjectServiceClient;
 import org.eclipse.che.ide.resource.Path;
@@ -137,7 +137,7 @@ public final class ResourceManager {
   private final Container workspaceRoot;
 
   private final AppContext appContext;
-  private final WsAgentURLModifier urlModifier;
+  private final AgentURLModifier urlModifier;
   private final ClientServerEventService clientServerEventService;
   /** Internal store, which caches requested resources from the server. */
   private ResourceStore store;
@@ -156,7 +156,7 @@ public final class ResourceManager {
       DtoFactory dtoFactory,
       ProjectTypeRegistry typeRegistry,
       ResourceStore store,
-      WsAgentURLModifier urlModifier,
+      AgentURLModifier urlModifier,
       ClientServerEventService clientServerEventService,
       AppContext appContext) {
     this.ps = ps;

@@ -29,7 +29,6 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.debug.DebugPanel;
-import org.eclipse.che.selenium.pageobject.debug.DebugPanel.DebuggerButtonsPanel;
 import org.eclipse.che.selenium.pageobject.debug.NodeJsDebugConfig;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -87,7 +86,7 @@ public class NodeJsDebugTest {
     checkEvaluationFeatures();
 
     // disconnect session, check highlighter is disappear
-    debugPanel.clickOnButton(DebuggerButtonsPanel.RESUME_BTN_ID);
+    debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.RESUME_BTN_ID);
     new WebDriverWait(ide.driver(), REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             ExpectedConditions.invisibilityOfElementLocated(
@@ -111,23 +110,23 @@ public class NodeJsDebugTest {
 
   /** Check step into, step over and step out feature */
   private void checkDebugStepsFeatures() {
-    debugPanel.clickOnButton(DebuggerButtonsPanel.STEP_OVER);
+    debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_OVER);
     debugPanel.waitDebugHighlightedText("var b = greetings.sayHelloInEnglish();");
-    debugPanel.clickOnButton(DebuggerButtonsPanel.STEP_INTO);
+    debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_INTO);
     editorPageObj.waitActiveEditor();
     editorPageObj.waitTabIsPresent("greetings.js");
     debugPanel.waitDebugHighlightedText("return \"HELLO\";");
-    debugPanel.clickOnButton(DebuggerButtonsPanel.STEP_OUT);
+    debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_OUT);
     debugPanel.waitDebugHighlightedText("var c=\"some add value\" + b;");
     new WebDriverWait(ide.driver(), REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
                 By.xpath("//div[text()='{app.js:13} ']")));
-    debugPanel.clickOnButton(DebuggerButtonsPanel.STEP_OVER);
+    debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_OVER);
   }
 
   private void checkEvaluationFeatures() {
-    debugPanel.clickOnButton(DebuggerButtonsPanel.EVALUATE_EXPRESSIONS);
+    debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.EVALUATE_EXPRESSIONS);
     debugPanel.typeEvaluateExpression("c.length");
     debugPanel.clickEvaluateBtn();
     debugPanel.waitExpectedResultInEvaluateExpression("19");

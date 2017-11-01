@@ -54,6 +54,7 @@ import org.eclipse.che.api.debug.shared.dto.action.StepOutActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepOverActionDto;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
+import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.Variable;
@@ -117,7 +118,7 @@ public class DebuggerTest extends BaseTest {
   @Mock private DtoFactory dtoFactory;
   @Mock private LocalStorageProvider localStorageProvider;
   @Mock private EventBus eventBus;
-  @Mock private DebuggerResourceHandlerFactory debuggerResourceHandlerFactory;
+  @Mock private DebuggerLocationHandlerManager debuggerLocationHandlerManager;
   @Mock private DebuggerManager debuggerManager;
   @Mock private NotificationManager notificationManager;
   @Mock private BreakpointManager breakpointManager;
@@ -194,7 +195,7 @@ public class DebuggerTest extends BaseTest {
                 notificationManager,
                 appContext,
                 "id",
-                debuggerResourceHandlerFactory));
+                debuggerLocationHandlerManager));
     doReturn(promiseInfo).when(service).getSessionInfo(SESSION_ID);
     doReturn(promiseInfo).when(promiseInfo).then(any(Operation.class));
 
@@ -416,12 +417,7 @@ public class DebuggerTest extends BaseTest {
     when(resource.getRelatedProject()).thenReturn(optional);
     doReturn(promiseVoid).when(service).addBreakpoint(SESSION_ID, breakpointDto);
     doReturn(promiseVoid).when(promiseVoid).then((Operation<Void>) any());
-    when(locationDto.withLineNumber(LINE_NUMBER)).thenReturn(locationDto);
-    when(locationDto.withTarget(anyString())).thenReturn(locationDto);
-    when(breakpointDto.getLocation().getLineNumber()).thenReturn(LINE_NUMBER);
-    when(breakpointDto.withLocation(locationDto)).thenReturn(breakpointDto);
-    when(breakpointDto.withEnabled(true)).thenReturn(breakpointDto);
-    when(breakpointDto.withCondition(any())).thenReturn(breakpointDto);
+    doReturn(breakpointDto).when(debugger).toDto(any(Breakpoint.class));
 
     debugger.addBreakpoint(breakpointDto);
 
@@ -440,6 +436,7 @@ public class DebuggerTest extends BaseTest {
   public void testDeleteBreakpoint() throws Exception {
     doReturn(promiseVoid).when(service).deleteBreakpoint(SESSION_ID, locationDto);
     doReturn(promiseVoid).when(promiseVoid).then((Operation<Void>) any());
+    doReturn(locationDto).when(debugger).toDto(any(Location.class));
 
     debugger.deleteBreakpoint(breakpointDto);
 
@@ -615,7 +612,7 @@ public class DebuggerTest extends BaseTest {
         NotificationManager notificationManager,
         AppContext appContext,
         String id,
-        DebuggerResourceHandlerFactory debuggerResourceHandlerFactory) {
+        DebuggerLocationHandlerManager debuggerLocationHandlerManager) {
       super(
           service,
           transmitter,
@@ -628,7 +625,7 @@ public class DebuggerTest extends BaseTest {
           appContext,
           breakpointManager,
           requestHandlerManager,
-          debuggerResourceHandlerFactory,
+          debuggerLocationHandlerManager,
           id);
     }
 

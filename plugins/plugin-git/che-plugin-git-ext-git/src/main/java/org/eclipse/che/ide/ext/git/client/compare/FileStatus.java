@@ -14,8 +14,8 @@ import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.ADDED
 import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.COPIED;
 import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.DELETED;
 import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.MODIFIED;
+import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.RENAMED;
 import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.UNMODIFIED;
-import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.UPDATED_BUT_UNMERGED;
 
 /**
  * Class for determining git status of given changed file.
@@ -30,7 +30,8 @@ public class FileStatus {
     ADDED,
     DELETED,
     COPIED,
-    UPDATED_BUT_UNMERGED,
+    RENAMED,
+    UNTRACKED,
     UNMODIFIED
   }
 
@@ -47,10 +48,10 @@ public class FileStatus {
         return DELETED;
       case "A":
         return ADDED;
+      case "R":
+        return RENAMED;
       case "C":
         return COPIED;
-      case "U":
-        return UPDATED_BUT_UNMERGED;
     }
     return UNMODIFIED;
   }
