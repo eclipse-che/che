@@ -11,9 +11,9 @@
 package org.eclipse.che.workspace.infrastructure.openshift.provision;
 
 import static java.util.stream.Collectors.toList;
-import static org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesProvisioner.CHE_ORIGINAL_NAME_LABEL;
+import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_ORIGINAL_NAME_LABEL;
 import static org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesProvisioner.ROUTE_PREFIX;
-import static org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesProvisioner.ROUTE_SUFFIX_SIZE;
+import static org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesProvisioner.ROUTE_PREFIX_SIZE;
 import static org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesProvisioner.SEPARATOR;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
@@ -49,7 +49,7 @@ public class UniqueNamesProvisionerTest {
   private static final String POD_NAME = "testPod";
   private static final String ROUTE_NAME = "testRoute";
   private static final Pattern UNIQUE_ROUTE_NAME_REGEX =
-      Pattern.compile('^' + ROUTE_PREFIX + "[A-z0-9]{" + ROUTE_SUFFIX_SIZE + "}$");
+      Pattern.compile('^' + ROUTE_PREFIX + "[A-z0-9]{" + ROUTE_PREFIX_SIZE + "}$");
 
   @Mock private InternalEnvironment environment;
   @Mock private OpenShiftEnvironment osEnv;

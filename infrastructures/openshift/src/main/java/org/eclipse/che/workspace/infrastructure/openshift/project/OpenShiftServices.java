@@ -10,9 +10,9 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.project;
 
+import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_WORKSPACE_ID_LABEL;
 import static org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftObjectUtil.putLabel;
 import static org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftObjectUtil.putSelector;
-import static org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject.CHE_WORKSPACE_ID_LABEL;
 
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.client.KubernetesClientException;

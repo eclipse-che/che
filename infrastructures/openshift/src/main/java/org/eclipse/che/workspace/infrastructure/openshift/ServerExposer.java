@@ -13,7 +13,7 @@ package org.eclipse.che.workspace.infrastructure.openshift;
 import static java.lang.Integer.parseInt;
 import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_POD_NAME_LABEL;
+import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_ORIGINAL_NAME_LABEL;
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerPort;
@@ -32,7 +32,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesProvisioner;
 
 /**
  * Helps to modify {@link OpenShiftEnvironment} to make servers that are configured by {@link
@@ -110,7 +113,13 @@ public class ServerExposer {
   /**
    * Exposes specified servers.
    *
+   * <p>Note that created OpenShift objects will select the corresponding pods by {@link
+   * Constants#CHE_ORIGINAL_NAME_LABEL} label. That should be added by {@link
+   * UniqueNamesProvisioner}.
+   *
    * @param servers servers to expose
+   * @see UniqueNamesProvisioner#provision(InternalEnvironment, OpenShiftEnvironment,
+   *     RuntimeIdentity)
    */
   public void expose(Map<String, ? extends ServerConfig> servers) {
     Map<String, ServicePort> portToServicePort = exposePort(servers.values());
@@ -118,7 +127,7 @@ public class ServerExposer {
     Service service =
         new ServiceBuilder()
             .withName(generate(SERVER_PREFIX, SERVER_UNIQUE_PART_SIZE) + '-' + machineName)
-            .withSelectorEntry(CHE_POD_NAME_LABEL, machineName.split("/")[0])
+            .withSelectorEntry(CHE_ORIGINAL_NAME_LABEL, machineName.split("/")[0])
             .withPorts(new ArrayList<>(portToServicePort.values()))
             .build();
 
