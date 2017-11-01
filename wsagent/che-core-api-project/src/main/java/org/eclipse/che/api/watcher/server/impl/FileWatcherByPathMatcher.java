@@ -12,7 +12,6 @@ package org.eclipse.che.api.watcher.server.impl;
 
 import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static java.nio.file.Files.exists;
-import static org.eclipse.che.api.vfs.watcher.FileWatcherUtils.toInternalPath;
 
 import com.google.inject.Inject;
 import java.io.File;
@@ -27,11 +26,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import org.eclipse.che.api.fs.server.PathTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
 public class FileWatcherByPathMatcher implements Consumer<Path> {
+
   private static final Logger LOG = LoggerFactory.getLogger(FileWatcherByPathMatcher.class);
 
   private final AtomicInteger operationIdCounter = new AtomicInteger();
@@ -49,11 +50,16 @@ public class FileWatcherByPathMatcher implements Consumer<Path> {
 
   private final File root;
 
+  private PathTransformer pathTransformer;
+
   @Inject
   public FileWatcherByPathMatcher(
-      @Named("che.user.workspaces.storage") File root, FileWatcherByPathValue watcher) {
+      @Named("che.user.workspaces.storage") File root,
+      FileWatcherByPathValue watcher,
+      PathTransformer pathTransformer) {
     this.root = root;
     this.watcher = watcher;
+    this.pathTransformer = pathTransformer;
   }
 
   @Override
@@ -82,7 +88,7 @@ public class FileWatcherByPathMatcher implements Consumer<Path> {
               watcher.watch(path, operation.create, operation.modify, operation.delete);
           pathWatchRegistrations.putIfAbsent(path, newConcurrentHashSet());
           pathWatchRegistrations.get(path).add(pathWatcherOperationId);
-          operation.create.accept(toInternalPath(root.toPath(), path));
+          operation.create.accept(pathTransformer.transform(path));
         }
       }
     }
@@ -136,6 +142,7 @@ public class FileWatcherByPathMatcher implements Consumer<Path> {
   }
 
   private static class Operation {
+
     final Consumer<String> create;
     final Consumer<String> modify;
     final Consumer<String> delete;
