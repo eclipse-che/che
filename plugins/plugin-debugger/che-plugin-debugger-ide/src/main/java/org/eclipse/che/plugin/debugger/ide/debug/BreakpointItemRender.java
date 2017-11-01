@@ -24,7 +24,8 @@ import org.eclipse.che.ide.util.dom.Elements;
  * @see Breakpoint
  * @author Anatolii Bazko
  */
-public class BreakpointItemRender extends SimpleList.ListItemRenderer<Breakpoint> {
+public class BreakpointItemRender
+    extends SimpleList.ListItemRenderer<DebuggerView.ActiveBreakpointWrapper> {
 
   private final BreakpointResources breakpointResources;
 
@@ -33,7 +34,8 @@ public class BreakpointItemRender extends SimpleList.ListItemRenderer<Breakpoint
   }
 
   @Override
-  public void render(Element itemElement, Breakpoint breakpoint) {
+  public void render(Element itemElement, DebuggerView.ActiveBreakpointWrapper breakpointWrapper) {
+    Breakpoint breakpoint = breakpointWrapper.getBreakpoint();
     BreakpointResources.Css css = breakpointResources.getCss();
 
     TableCellElement label = Elements.createTDElement();
@@ -44,8 +46,10 @@ public class BreakpointItemRender extends SimpleList.ListItemRenderer<Breakpoint
     sb.appendHtmlConstant("<div class=\"");
     if (!breakpoint.isEnabled()) {
       sb.appendHtmlConstant(css.breakpoint() + " " + css.disabled());
-    } else {
+    } else if (breakpointWrapper.isActive()) {
       sb.appendHtmlConstant(css.breakpoint() + " " + css.active());
+    } else {
+      sb.appendHtmlConstant(css.breakpoint() + " " + css.inactive());
     }
     sb.appendHtmlConstant("\" style=\"height: 14px; width: 14px; text-align: center\">");
     if (breakpoint.getCondition() != null) {

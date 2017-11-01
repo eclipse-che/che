@@ -23,11 +23,14 @@ public interface BreakpointManager extends BreakpointManagerObservable {
   /** Toggle / untoggle breakpoint. */
   void changeBreakpointState(int lineNumber);
 
+  /** Indicates if breakpoint is active. */
+  boolean isActive(Breakpoint breakpoint);
+
   /** @return all breakpoints */
-  List<Breakpoint> getBreakpointList();
+  List<Breakpoint> getAll();
 
   /** Removes all breakpoints. */
-  void deleteAllBreakpoints();
+  void deleteAll();
 
   /** Updates the given breakpoint. */
   void update(Breakpoint breakpoint);

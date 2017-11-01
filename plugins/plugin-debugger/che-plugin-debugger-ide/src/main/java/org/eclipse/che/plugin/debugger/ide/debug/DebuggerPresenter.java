@@ -26,6 +26,9 @@ import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.MutableVariable;
@@ -226,7 +229,7 @@ public class DebuggerPresenter extends BasePresenter
   }
 
   protected void updateBreakpoints() {
-    List<Breakpoint> breakpoints = new ArrayList<>(breakpointManager.getBreakpointList());
+    List<Breakpoint> breakpoints = new ArrayList<>(breakpointManager.getAll());
     breakpoints.sort(
         (o1, o2) -> {
           Location location1 = o1.getLocation();
@@ -234,7 +237,14 @@ public class DebuggerPresenter extends BasePresenter
           int compare = location1.getTarget().compareTo(location2.getTarget());
           return (compare == 0 ? location1.getLineNumber() - location2.getLineNumber() : compare);
         });
-    view.setBreakpoints(breakpoints);
+    view.setBreakpoints(
+        breakpoints
+            .stream()
+            .map(
+                breakpoint ->
+                    new DebuggerView.ActiveBreakpointWrapper(
+                        breakpoint, breakpointManager.isActive(breakpoint)))
+            .collect(Collectors.toList()));
   }
 
   protected void updateThreadDump() {
@@ -408,6 +418,11 @@ public class DebuggerPresenter extends BasePresenter
 
   @Override
   public void onBreakpointAdded(Breakpoint breakpoint) {
+    updateBreakpoints();
+  }
+
+  @Override
+  public void onBreakpointUpdated(Breakpoint breakpoint) {
     updateBreakpoints();
   }
 

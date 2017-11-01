@@ -92,7 +92,7 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
   @UiField ListBox threads;
   @UiField ScrollPanel framesPanel;
 
-  private final SimpleList<Breakpoint> breakpoints;
+  private final SimpleList<ActiveBreakpointWrapper> breakpoints;
   private final SimpleList<StackFrameDump> frames;
   private final BreakpointResources breakpointResources;
 
@@ -242,7 +242,7 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
   }
 
   @Override
-  public void setBreakpoints(@NotNull List<Breakpoint> breakpoints) {
+  public void setBreakpoints(@NotNull List<ActiveBreakpointWrapper> breakpoints) {
     this.breakpoints.render(breakpoints);
   }
 
@@ -334,24 +334,26 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
     delegate.onSelectedThread(Integer.parseInt(threads.getSelectedValue()));
   }
 
-  private SimpleList<Breakpoint> createBreakpointList() {
+  private SimpleList<ActiveBreakpointWrapper> createBreakpointList() {
     TableElement breakPointsElement = Elements.createTableElement();
     breakPointsElement.setAttribute("style", "width: 100%");
 
-    SimpleList.ListEventDelegate<Breakpoint> breakpointListEventDelegate =
-        new SimpleList.ListEventDelegate<Breakpoint>() {
-          public void onListItemClicked(Element itemElement, Breakpoint itemData) {
+    SimpleList.ListEventDelegate<ActiveBreakpointWrapper> breakpointListEventDelegate =
+        new SimpleList.ListEventDelegate<ActiveBreakpointWrapper>() {
+          public void onListItemClicked(Element itemElement, ActiveBreakpointWrapper itemData) {
             breakpoints.getSelectionModel().setSelectedItem(itemData);
           }
 
           @Override
-          public void onListItemContextMenu(int clientX, int clientY, Breakpoint itemData) {
-            delegate.onBreakpointContextMenu(clientX, clientY, itemData);
+          public void onListItemContextMenu(
+              int clientX, int clientY, ActiveBreakpointWrapper itemData) {
+            delegate.onBreakpointContextMenu(clientX, clientY, itemData.getBreakpoint());
           }
 
           @Override
-          public void onListItemDoubleClicked(Element listItemBase, Breakpoint itemData) {
-            delegate.onBreakpointDoubleClick(itemData);
+          public void onListItemDoubleClicked(
+              Element listItemBase, ActiveBreakpointWrapper itemData) {
+            delegate.onBreakpointDoubleClick(itemData.getBreakpoint());
           }
         };
 
