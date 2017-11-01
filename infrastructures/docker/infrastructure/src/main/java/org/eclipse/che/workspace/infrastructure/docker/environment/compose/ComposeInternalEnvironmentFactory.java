@@ -12,18 +12,23 @@ package org.eclipse.che.workspace.infrastructure.docker.environment.compose;
 
 import static org.eclipse.che.workspace.infrastructure.docker.ArgumentsValidator.checkNotNull;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
+import javax.inject.Inject;
 import org.eclipse.che.api.core.ValidationException;
-import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.core.model.workspace.Warning;
+import org.eclipse.che.api.installer.server.InstallerRegistry;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironmentFactory;
+import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.InternalRecipe;
-import org.eclipse.che.workspace.infrastructure.docker.environment.DockerConfigSourceSpecificEnvironmentParser;
+import org.eclipse.che.api.workspace.server.spi.RecipeRetriever;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeService;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerBuildContext;
@@ -31,23 +36,28 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConf
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
 /**
- * Converters compose file to {@link ComposeEnvironment} and vise versa or converters compose {@link
- * Environment} to {@link DockerEnvironment}.
- *
  * @author Alexander Garagatyi
  * @author Alexander Andrienko
  */
-public class ComposeEnvironmentParser implements DockerConfigSourceSpecificEnvironmentParser {
+public class ComposeInternalEnvironmentFactory extends InternalEnvironmentFactory {
 
+  public static final String TYPE = "compose";
   private static final ObjectMapper YAML_PARSER = new ObjectMapper(new YAMLFactory());
 
+  @Inject
+  public ComposeInternalEnvironmentFactory(
+      InstallerRegistry installerRegistry, RecipeRetriever recipeRetriever) {
+    super(installerRegistry, recipeRetriever);
+  }
+
   @Override
-  public DockerEnvironment parse(InternalEnvironment environment) throws ValidationException {
-    checkNotNull(environment, "Environment should not be null");
-    InternalRecipe recipe = environment.getRecipe();
-    checkNotNull(environment.getRecipe(), "Environment recipe should not be null");
-    ComposeEnvironment composeEnvironment = parse(recipe.getContent(), recipe.getContentType());
-    return asDockerEnvironment(composeEnvironment);
+  protected InternalEnvironment create(
+      Map<String, InternalMachineConfig> machines, InternalRecipe recipe, List<Warning> warnings)
+      throws InfrastructureException, ValidationException {
+    DockerEnvironment dockerEnvironment =
+        asDockerEnvironment(parse(recipe.getContent(), recipe.getContentType()));
+
+    return new ComposeInternalEnvironment(machines, recipe, warnings, dockerEnvironment);
   }
 
   /**
@@ -81,22 +91,6 @@ public class ComposeEnvironmentParser implements DockerConfigSourceSpecificEnvir
                 + "application/x-yaml, text/yaml, text/x-yaml");
     }
     return composeEnvironment;
-  }
-
-  /**
-   * Converts Docker Compose environment model into YAML file.
-   *
-   * @param composeEnvironment Docker Compose environment model file
-   * @throws ValidationException when argument is null or conversion to YAML fails
-   */
-  public String toYaml(ComposeEnvironment composeEnvironment) throws ValidationException {
-    checkNotNull(composeEnvironment, "Compose environment should not be null");
-
-    try {
-      return YAML_PARSER.writeValueAsString(composeEnvironment);
-    } catch (JsonProcessingException e) {
-      throw new ValidationException(e.getLocalizedMessage(), e);
-    }
   }
 
   private DockerEnvironment asDockerEnvironment(ComposeEnvironment composeEnvironment) {

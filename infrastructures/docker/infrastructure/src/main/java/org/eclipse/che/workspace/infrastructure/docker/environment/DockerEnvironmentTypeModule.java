@@ -12,24 +12,20 @@ package org.eclipse.che.workspace.infrastructure.docker.environment;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.MapBinder;
-import org.eclipse.che.workspace.infrastructure.docker.environment.compose.ComposeEnvironmentParser;
-import org.eclipse.che.workspace.infrastructure.docker.environment.dockerfile.DockerfileEnvironmentParser;
-import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironmentParser;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironmentFactory;
+import org.eclipse.che.workspace.infrastructure.docker.environment.compose.ComposeInternalEnvironmentFactory;
+import org.eclipse.che.workspace.infrastructure.docker.environment.dockerfile.DockerfileInternalEnvironmentFactory;
+import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerimageInternalEnvironmentFactory;
 
 /** @author Alexander Garagatyi */
 public class DockerEnvironmentTypeModule extends AbstractModule {
   @Override
   protected void configure() {
     // Environment type
-    MapBinder<String, DockerConfigSourceSpecificEnvironmentParser> envParserMapBinder =
-        MapBinder.newMapBinder(
-            binder(), String.class, DockerConfigSourceSpecificEnvironmentParser.class);
-    envParserMapBinder.addBinding("compose").to(ComposeEnvironmentParser.class);
-    envParserMapBinder
-        .addBinding(DockerfileEnvironmentParser.TYPE)
-        .to(DockerfileEnvironmentParser.class);
-    envParserMapBinder
-        .addBinding(DockerImageEnvironmentParser.TYPE)
-        .to(DockerImageEnvironmentParser.class);
+    MapBinder<String, InternalEnvironmentFactory> environmentFactories =
+        MapBinder.newMapBinder(binder(), String.class, InternalEnvironmentFactory.class);
+    environmentFactories.addBinding(ComposeInternalEnvironmentFactory.TYPE).to(ComposeInternalEnvironmentFactory.class);
+    environmentFactories.addBinding(DockerfileInternalEnvironmentFactory.TYPE).to(DockerfileInternalEnvironmentFactory.class);
+    environmentFactories.addBinding(DockerimageInternalEnvironmentFactory.TYPE).to(DockerimageInternalEnvironmentFactory.class);
   }
 }

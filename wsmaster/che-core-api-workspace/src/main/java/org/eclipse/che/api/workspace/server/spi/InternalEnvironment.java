@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.api.workspace.server.spi;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -24,16 +23,18 @@ import org.eclipse.che.api.core.model.workspace.config.Environment;
  * @author Alexander Garagatyi
  * @author gazarenkov
  */
-public class InternalEnvironment {
-  private final InternalRecipe recipe;
-  private final Map<String, InternalMachineConfig> machines;
-  private final List<Warning> warnings;
+public abstract class InternalEnvironment {
 
-  InternalEnvironment(InternalRecipe recipe, Map<String, InternalMachineConfig> machines)
-      throws InfrastructureException {
-    this.warnings = new ArrayList<>();
-    this.recipe = recipe;
+  protected final InternalRecipe recipe;
+  protected final Map<String, InternalMachineConfig> machines;
+  protected final List<Warning> warnings;
+
+  protected InternalEnvironment(
+      Map<String, InternalMachineConfig> machines, InternalRecipe recipe, List<Warning> warnings) {
+
     this.machines = machines;
+    this.recipe = recipe;
+    this.warnings = warnings;
   }
 
   /** Returns environment recipe which includes recipe content. */

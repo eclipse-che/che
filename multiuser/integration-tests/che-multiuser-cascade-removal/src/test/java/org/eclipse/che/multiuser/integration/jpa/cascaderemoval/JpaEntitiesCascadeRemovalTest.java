@@ -73,6 +73,7 @@ import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceSharedPool;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironmentFactory;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
@@ -226,6 +227,7 @@ public class JpaEntitiesCascadeRemovalTest {
                 bind(RemoveFreeResourcesLimitSubscriber.class).asEagerSingleton();
                 bind(WorkspaceManager.class);
                 Multibinder.newSetBinder(binder(), RuntimeInfrastructure.class);
+                MapBinder.newMapBinder(binder(), String.class, InternalEnvironmentFactory.class);
                 bind(AccountManager.class);
                 bind(Boolean.class)
                     .annotatedWith(Names.named("che.workspace.auto_snapshot"))

@@ -14,9 +14,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.deserializer.CommandDeserializer;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.deserializer.EnvironmentDeserializer;
 
@@ -41,7 +43,7 @@ public class ComposeService {
   @JsonDeserialize(using = EnvironmentDeserializer.class)
   private Map<String, String> environment;
 
-  private List<String> expose;
+  private Set<String> expose = new HashSet<>();
   private List<String> ports;
   private Map<String, String> labels;
   private List<String> links;
@@ -82,9 +84,8 @@ public class ComposeService {
     if (service.getLabels() != null) {
       labels = new HashMap<>(service.getLabels());
     }
-    if (service.getExpose() != null) {
-      expose = new ArrayList<>(service.getExpose());
-    }
+    this.setExpose(service.getExpose());
+
     if (service.getPorts() != null) {
       ports = new ArrayList<>(service.getPorts());
     }
@@ -266,20 +267,21 @@ public class ComposeService {
    *   <li>8000
    * </ul>
    */
-  public List<String> getExpose() {
-    if (expose == null) {
-      expose = new ArrayList<>();
-    }
+  public Set<String> getExpose() {
+//    if (expose == null) {
+//      expose = new ArrayList<>();
+//    }
     return expose;
   }
 
-  public void setExpose(List<String> expose) {
-    this.expose = expose;
+  public void setExpose(Set<String> expose) {
+    for(String exp : expose) {
+      addExpose(exp);
+    }
   }
 
-  public ComposeService withExpose(List<String> expose) {
-    this.expose = expose;
-    return this;
+  public void addExpose(String exposeToAdd) {
+    expose.add(exposeToAdd.contains("/") ? exposeToAdd : exposeToAdd + "/tcp");
   }
 
   /**

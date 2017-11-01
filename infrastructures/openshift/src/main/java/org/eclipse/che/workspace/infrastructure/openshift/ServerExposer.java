@@ -34,12 +34,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
-import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftInternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesProvisioner;
 
 /**
- * Helps to modify {@link OpenShiftEnvironment} to make servers that are configured by {@link
+ * Helps to modify {@link OpenShiftInternalEnvironment} to make servers that are configured by {@link
  * ServerConfig} public accessible.
  *
  * <p>To make server accessible it is needed to make sure that container port is declared, create
@@ -103,10 +102,10 @@ public class ServerExposer {
   private final String machineName;
   private final Container container;
   private final Pod pod;
-  private final OpenShiftEnvironment openShiftEnvironment;
+  private final OpenShiftInternalEnvironment openShiftEnvironment;
 
   public ServerExposer(
-      String machineName, Pod pod, Container container, OpenShiftEnvironment openShiftEnvironment) {
+      String machineName, Pod pod, Container container, OpenShiftInternalEnvironment openShiftEnvironment) {
     this.machineName = machineName;
     this.pod = pod;
     this.container = container;
@@ -121,8 +120,7 @@ public class ServerExposer {
    * UniqueNamesProvisioner}.
    *
    * @param servers servers to expose
-   * @see UniqueNamesProvisioner#provision(InternalEnvironment, OpenShiftEnvironment,
-   *     RuntimeIdentity)
+   * @see UniqueNamesProvisioner#provision(OpenShiftInternalEnvironment, RuntimeIdentity)
    */
   public void expose(Map<String, ? extends ServerConfig> servers) {
     Map<String, ServicePort> portToServicePort = exposePort(servers.values());

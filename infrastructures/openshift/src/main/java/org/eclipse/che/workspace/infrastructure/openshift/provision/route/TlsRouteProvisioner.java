@@ -22,9 +22,8 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.RoutesAnnotations;
-import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftInternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.ConfigurationProvisioner;
 
 /**
@@ -45,8 +44,7 @@ public class TlsRouteProvisioner implements ConfigurationProvisioner {
   }
 
   @Override
-  public void provision(
-      InternalEnvironment environment, OpenShiftEnvironment osEnv, RuntimeIdentity identity)
+  public void provision(OpenShiftInternalEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException {
     if (isTlsEnabled) {
       final Set<Route> routes = new HashSet<>(osEnv.getRoutes().values());

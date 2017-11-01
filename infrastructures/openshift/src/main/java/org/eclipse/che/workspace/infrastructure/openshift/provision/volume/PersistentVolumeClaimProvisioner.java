@@ -15,9 +15,8 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
-import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.WorkspacePVCStrategy;
+import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftInternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.ConfigurationProvisioner;
 
 /**
@@ -40,11 +39,10 @@ public class PersistentVolumeClaimProvisioner implements ConfigurationProvisione
   }
 
   @Override
-  public void provision(
-      InternalEnvironment environment, OpenShiftEnvironment osEnv, RuntimeIdentity runtimeIdentity)
+  public void provision(OpenShiftInternalEnvironment osEnv, RuntimeIdentity runtimeIdentity)
       throws InfrastructureException {
     if (pvcEnable) {
-      pvcStrategy.prepare(environment, osEnv, runtimeIdentity.getWorkspaceId());
+      pvcStrategy.prepare(osEnv, runtimeIdentity.getWorkspaceId());
     }
   }
 }

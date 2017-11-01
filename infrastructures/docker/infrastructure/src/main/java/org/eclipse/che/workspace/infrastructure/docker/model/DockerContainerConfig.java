@@ -12,9 +12,11 @@ package org.eclipse.che.workspace.infrastructure.docker.model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import org.eclipse.che.commons.annotation.Nullable;
 
 /**
@@ -35,7 +37,7 @@ public class DockerContainerConfig {
   private List<String> securityOpt;
   private List<String> entrypoint;
   private Map<String, String> environment;
-  private List<String> expose;
+  private Set<String> expose = new HashSet<>();
   private List<String> extraHosts;
   private String id;
   private String image;
@@ -80,9 +82,7 @@ public class DockerContainerConfig {
     if (container.getEnvironment() != null) {
       environment = new HashMap<>(container.getEnvironment());
     }
-    if (container.getExpose() != null) {
-      expose = new ArrayList<>(container.getExpose());
-    }
+    setExpose(container.getExpose());
     if (container.getExtraHosts() != null) {
       extraHosts = new ArrayList<>(container.getExtraHosts());
     }
@@ -276,18 +276,19 @@ public class DockerContainerConfig {
    *   <li>8000
    * </ul>
    */
-  public List<String> getExpose() {
-    if (expose == null) {
-      expose = new ArrayList<>();
-    }
+  public Set<String> getExpose() {
     return expose;
   }
 
-  public DockerContainerConfig setExpose(List<String> expose) {
-    if (expose != null) {
-      expose = new ArrayList<>(expose);
+  public DockerContainerConfig setExpose(Set<String> expose) {
+    for(String exp : expose) {
+      addExpose(exp);
     }
-    this.expose = expose;
+    return this;
+  }
+
+  public DockerContainerConfig addExpose(String exposeToAdd) {
+    expose.add(exposeToAdd.contains("/") ? exposeToAdd : exposeToAdd + "/tcp");
     return this;
   }
 

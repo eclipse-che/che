@@ -14,8 +14,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
-import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftInternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.env.EnvVarsConverter;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.restartpolicy.RestartPolicyRewriter;
@@ -56,18 +55,17 @@ public class OpenShiftInfrastructureProvisioner {
     this.restartPolicyRewriter = restartPolicyRewriter;
   }
 
-  public void provision(
-      InternalEnvironment environment, OpenShiftEnvironment osEnv, RuntimeIdentity identity)
+  public void provision(OpenShiftInternalEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException {
     // 1 stage - converting Che model env to OpenShift env
-    serversConverter.provision(environment, osEnv, identity);
-    envVarsConverter.provision(environment, osEnv, identity);
+    serversConverter.provision(osEnv, identity);
+    envVarsConverter.provision(osEnv, identity);
 
     // 2 stage - add OpenShift env items
-    restartPolicyRewriter.provision(environment, osEnv, identity);
-    persistentVolumeClaimProvisioner.provision(environment, osEnv, identity);
-    uniqueNamesProvisioner.provision(environment, osEnv, identity);
-    tlsRouteProvisioner.provision(environment, osEnv, identity);
+    restartPolicyRewriter.provision(osEnv, identity);
+    persistentVolumeClaimProvisioner.provision(osEnv, identity);
+    uniqueNamesProvisioner.provision(osEnv, identity);
+    tlsRouteProvisioner.provision(osEnv, identity);
   }
 
   // TODO memory attribute provisioner

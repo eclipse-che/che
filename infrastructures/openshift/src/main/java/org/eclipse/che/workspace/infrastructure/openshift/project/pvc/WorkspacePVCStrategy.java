@@ -11,8 +11,7 @@
 package org.eclipse.che.workspace.infrastructure.openshift.project.pvc;
 
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
-import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftInternalEnvironment;
 
 /**
  * Defines a basic set of operations for workspace PVC strategies.
@@ -24,12 +23,11 @@ public interface WorkspacePVCStrategy {
   /**
    * Prepares PVC for backup of workspace data on a specific machine and in strategy specific way.
    *
-   * @param env internal environment is used to get machines information
    * @param osEnv OpenShift environment that changes as a result of preparation
    * @param workspaceId the workspace identifier for which PVC will be prepared
    * @throws InfrastructureException when any error while preparation occurs
    */
-  void prepare(InternalEnvironment env, OpenShiftEnvironment osEnv, String workspaceId)
+  void prepare(OpenShiftInternalEnvironment osEnv, String workspaceId)
       throws InfrastructureException;
 
   /**

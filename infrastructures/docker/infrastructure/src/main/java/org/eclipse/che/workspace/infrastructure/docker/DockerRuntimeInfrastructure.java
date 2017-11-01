@@ -15,24 +15,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.eclipse.che.api.core.ValidationException;
-import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.installer.server.InstallerRegistry;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
-import org.eclipse.che.api.workspace.server.spi.RecipeRetriever;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
-import org.eclipse.che.api.workspace.server.spi.normalization.ServersNormalizer;
-import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.container.ContainersStartStrategy;
 import org.eclipse.che.workspace.infrastructure.docker.container.DockerContainers;
 import org.eclipse.che.workspace.infrastructure.docker.environment.DockerConfigSourceSpecificEnvironmentParser;
 import org.eclipse.che.workspace.infrastructure.docker.environment.EnvironmentNormalizer;
-import org.eclipse.che.workspace.infrastructure.docker.environment.EnvironmentParser;
-import org.eclipse.che.workspace.infrastructure.docker.environment.EnvironmentValidator;
-import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironmentParser;
+import org.eclipse.che.workspace.infrastructure.docker.environment.compose.ComposeInternalEnvironment;
+import org.eclipse.che.workspace.infrastructure.docker.environment.dockerfile.DockerfileInternalEnvironment;
+import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerimageInternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
 /**
@@ -42,8 +36,7 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
  * @author Alexander Garagatyi
  */
 public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
-  private final EnvironmentValidator dockerEnvironmentValidator;
-  private final EnvironmentParser dockerEnvironmentParser;
+
   private final ContainersStartStrategy startStrategy;
   private final InfrastructureProvisioner infrastructureProvisioner;
   private final EnvironmentNormalizer environmentNormalizer;
@@ -52,29 +45,14 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
 
   @Inject
   public DockerRuntimeInfrastructure(
-      EnvironmentParser dockerEnvironmentParser,
-      EnvironmentValidator dockerEnvironmentValidator,
       ContainersStartStrategy startStrategy,
       InfrastructureProvisioner infrastructureProvisioner,
       EnvironmentNormalizer environmentNormalizer,
       Map<String, DockerConfigSourceSpecificEnvironmentParser> environmentParsers,
       DockerRuntimeContextFactory contextFactory,
       DockerContainers containers,
-      EventService eventService,
-      InstallerRegistry installerRegistry,
-      RecipeRetriever recipeRetriever,
-      Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners,
-      ServersNormalizer serversNormalizer) {
-    super(
-        "docker",
-        environmentParsers.keySet(),
-        eventService,
-        installerRegistry,
-        recipeRetriever,
-        internalEnvironmentProvisioners,
-        serversNormalizer);
-    this.dockerEnvironmentValidator = dockerEnvironmentValidator;
-    this.dockerEnvironmentParser = dockerEnvironmentParser;
+      EventService eventService) {
+    super("docker", environmentParsers.keySet(), eventService);
     this.startStrategy = startStrategy;
     this.infrastructureProvisioner = infrastructureProvisioner;
     this.environmentNormalizer = environmentNormalizer;
@@ -83,39 +61,24 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
   }
 
   @Override
-  public InternalEnvironment estimate(Environment environment)
+  public DockerRuntimeContext prepare(RuntimeIdentity identity, InternalEnvironment environment)
       throws ValidationException, InfrastructureException {
-    // workaround that in dockerimage environment image is in location field instead of content
-    if (DockerImageEnvironmentParser.TYPE.equals(environment.getRecipe().getType())
-        && environment.getRecipe().getLocation() != null) {
-      // move image from location to content
-      EnvironmentImpl envCopy = new EnvironmentImpl(environment);
-      envCopy.getRecipe().setContent(environment.getRecipe().getLocation());
-      envCopy.getRecipe().setLocation(null);
-      return super.estimate(envCopy);
+
+    DockerEnvironment dockerEnvironment;
+    String type = environment.getRecipe().getType();
+    switch (type) {
+      case "dockerfile":
+        dockerEnvironment = ((DockerfileInternalEnvironment) environment).getDockerEnvironment();
+        break;
+      case "dockerimage":
+        dockerEnvironment = ((DockerimageInternalEnvironment) environment).getDockerEnvironment();
+        break;
+      case "compose":
+        dockerEnvironment = ((ComposeInternalEnvironment) environment).getComposeEnvironment();
+        break;
+      default:
+        throw new InfrastructureException("Recipe type is not allowed " + type);
     }
-    return super.estimate(environment);
-  }
-
-  @Override
-  public void internalEstimate(InternalEnvironment environment)
-      throws ValidationException, InfrastructureException {
-    DockerEnvironment dockerEnvironment = dockerEnvironmentParser.parse(environment);
-    dockerEnvironmentValidator.validate(environment, dockerEnvironment);
-    // check that order can be resolved
-    startStrategy.order(dockerEnvironment);
-    // TODO add an actual estimation of what is missing in the environment
-    // memory
-    // machines
-  }
-
-  @Override
-  protected DockerRuntimeContext internalPrepare(
-      RuntimeIdentity identity, InternalEnvironment environment)
-      throws ValidationException, InfrastructureException {
-
-    DockerEnvironment dockerEnvironment = dockerEnvironmentParser.parse(environment);
-    dockerEnvironmentValidator.validate(environment, dockerEnvironment);
 
     // modify environment with everything needed to use docker machines on particular (cloud)
     // infrastructure

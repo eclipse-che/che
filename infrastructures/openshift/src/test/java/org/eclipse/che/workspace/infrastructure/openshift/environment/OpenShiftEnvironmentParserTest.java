@@ -12,10 +12,10 @@ package org.eclipse.che.workspace.infrastructure.openshift.environment;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentParser.PVC_IGNORED_WARNING_CODE;
-import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentParser.PVC_IGNORED_WARNING_MESSAGE;
-import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentParser.ROUTES_IGNORED_WARNING_MESSAGE;
-import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentParser.ROUTE_IGNORED_WARNING_CODE;
+import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory.PVC_IGNORED_WARNING_CODE;
+import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory.PVC_IGNORED_WARNING_MESSAGE;
+import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory.ROUTES_IGNORED_WARNING_MESSAGE;
+import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory.ROUTE_IGNORED_WARNING_CODE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
@@ -36,9 +36,11 @@ import java.io.InputStream;
 import java.util.Iterator;
 import java.util.List;
 import org.eclipse.che.api.core.model.workspace.Warning;
+import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.core.model.workspace.config.Recipe;
+import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
-import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
-import org.eclipse.che.api.workspace.server.spi.InternalRecipe;
+import org.eclipse.che.api.workspace.server.spi.RecipeRetriever;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -48,7 +50,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /**
- * Tests {@link OpenShiftEnvironmentParser}.
+ * Tests {@link OpenShiftEnvironmentFactory}.
  *
  * @author Anton Korneta
  */
@@ -56,16 +58,20 @@ public class OpenShiftEnvironmentParserTest {
 
   private static final String YAML_RECIPE = "application/x-yaml";
 
-  private OpenShiftEnvironmentParser osEnvironmentParser;
+  private OpenShiftEnvironmentFactory osEnvironmentParser;
 
   @Mock private OpenShiftClientFactory factory;
   @Mock private OpenShiftClient client;
-  @Mock private InternalEnvironment internalEnvironment;
-  @Mock private InternalRecipe internalRecipe;
+  @Mock private Environment environment;
+  @Mock private Recipe recipe;
   @Mock private KubernetesListMixedOperation listMixedOperation;
   @Mock private KubernetesList validatedObjects;
+  @Mock private InstallerRegistry installerRegistry;
+  @Mock private RecipeRetriever recipeRetriever;
 
   @Captor private ArgumentCaptor<Warning> warningCaptor;
+
+  OpenShiftInternalEnvironment parsed;
 
   @Mock
   private RecreateFromServerGettable<KubernetesList, KubernetesList, DoneableKubernetesList>
@@ -74,14 +80,15 @@ public class OpenShiftEnvironmentParserTest {
   @BeforeMethod
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    osEnvironmentParser = new OpenShiftEnvironmentParser(factory);
+    osEnvironmentParser =
+        new OpenShiftEnvironmentFactory(installerRegistry, recipeRetriever, factory);
     when(factory.create()).thenReturn(client);
     when(client.lists()).thenReturn(listMixedOperation);
     when(listMixedOperation.load(any(InputStream.class))).thenReturn(serverGettable);
     when(serverGettable.get()).thenReturn(validatedObjects);
-    when(internalEnvironment.getRecipe()).thenReturn(internalRecipe);
-    when(internalRecipe.getContentType()).thenReturn(YAML_RECIPE);
-    when(internalRecipe.getContent()).thenReturn("recipe content");
+    when(environment.getRecipe()).thenReturn(recipe);
+    when(recipe.getContentType()).thenReturn(YAML_RECIPE);
+    when(recipe.getContent()).thenReturn("recipe content");
   }
 
   @Test
@@ -89,7 +96,7 @@ public class OpenShiftEnvironmentParserTest {
     final List<HasMetadata> objects = asList(new Route(), new Route());
     when(validatedObjects.getItems()).thenReturn(objects);
 
-    final OpenShiftEnvironment parsed = osEnvironmentParser.parse(internalEnvironment);
+    parsed = (OpenShiftInternalEnvironment) osEnvironmentParser.create(environment);
 
     assertTrue(parsed.getRoutes().isEmpty());
     verifyWarnings(new WarningImpl(ROUTE_IGNORED_WARNING_CODE, ROUTES_IGNORED_WARNING_MESSAGE));
@@ -100,7 +107,7 @@ public class OpenShiftEnvironmentParserTest {
     final List<HasMetadata> pvc = singletonList(new PersistentVolumeClaim());
     when(validatedObjects.getItems()).thenReturn(pvc);
 
-    final OpenShiftEnvironment parsed = osEnvironmentParser.parse(internalEnvironment);
+    parsed = (OpenShiftInternalEnvironment) osEnvironmentParser.create(environment);
 
     assertTrue(parsed.getRoutes().isEmpty());
     verifyWarnings(new WarningImpl(PVC_IGNORED_WARNING_CODE, PVC_IGNORED_WARNING_MESSAGE));
@@ -121,7 +128,7 @@ public class OpenShiftEnvironmentParserTest {
   }
 
   private List<Warning> captureWarnings() {
-    verify(internalEnvironment, atLeastOnce()).addWarning(warningCaptor.capture());
+    verify(parsed, atLeastOnce()).addWarning(warningCaptor.capture());
     return warningCaptor.getAllValues();
   }
 }

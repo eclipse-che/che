@@ -17,8 +17,7 @@ import io.fabric8.kubernetes.api.model.PodSpec;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
-import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftInternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.ConfigurationProvisioner;
 
 /**
@@ -30,18 +29,18 @@ public class RestartPolicyRewriter implements ConfigurationProvisioner {
   static final String DEFAULT_RESTART_POLICY = "Never";
 
   @Override
-  public void provision(
-      InternalEnvironment environment, OpenShiftEnvironment osEnv, RuntimeIdentity identity)
+  public void provision(OpenShiftInternalEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
     for (Pod podConfig : osEnv.getPods().values()) {
       final String podName = podConfig.getMetadata().getName();
       final PodSpec podSpec = podConfig.getSpec();
-      rewriteRestartPolicy(podSpec, podName, environment);
+      rewriteRestartPolicy(podSpec, podName, osEnv);
     }
   }
 
-  private void rewriteRestartPolicy(PodSpec podSpec, String podName, InternalEnvironment env) {
+  private void rewriteRestartPolicy(
+      PodSpec podSpec, String podName, OpenShiftInternalEnvironment env) {
     final String restartPolicy = podSpec.getRestartPolicy();
 
     if (restartPolicy != null && !DEFAULT_RESTART_POLICY.equalsIgnoreCase(restartPolicy)) {

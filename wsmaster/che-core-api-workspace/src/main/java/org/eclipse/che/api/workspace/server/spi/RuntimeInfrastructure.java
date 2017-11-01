@@ -10,25 +10,14 @@
  */
 package org.eclipse.che.api.workspace.server.spi;
 
-import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import org.eclipse.che.api.core.ValidationException;
-import org.eclipse.che.api.core.model.workspace.config.Environment;
-import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.installer.server.InstallerRegistry;
-import org.eclipse.che.api.installer.server.exception.InstallerException;
-import org.eclipse.che.api.installer.shared.model.Installer;
-import org.eclipse.che.api.workspace.server.spi.normalization.ServersNormalizer;
-import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 
 /**
  * Starting point of describing the contract which infrastructure provider should implement for
@@ -37,31 +26,15 @@ import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentPro
  * @author gazarenkov
  */
 public abstract class RuntimeInfrastructure {
-
   private final Set<String> recipeTypes;
   private final String name;
-  private final InstallerRegistry installerRegistry;
-  private final RecipeRetriever recipeRetriever;
   private final EventService eventService;
-  private final Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners;
-  private final ServersNormalizer serversNormalizer;
 
-  public RuntimeInfrastructure(
-      String name,
-      Collection<String> types,
-      EventService eventService,
-      InstallerRegistry installerRegistry,
-      RecipeRetriever recipeRetriever,
-      Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners,
-      ServersNormalizer serversNormalizer) {
-    this.serversNormalizer = serversNormalizer;
+  public RuntimeInfrastructure(String name, Collection<String> types, EventService eventService) {
     Preconditions.checkArgument(!types.isEmpty());
     this.name = Objects.requireNonNull(name);
     this.recipeTypes = ImmutableSet.copyOf(types);
     this.eventService = eventService;
-    this.installerRegistry = installerRegistry;
-    this.recipeRetriever = recipeRetriever;
-    this.internalEnvironmentProvisioners = internalEnvironmentProvisioners;
   }
 
   /** Returns the name of this runtime infrastructure. */
@@ -83,55 +56,6 @@ public abstract class RuntimeInfrastructure {
   }
 
   /**
-   * Preliminary estimates incoming Environment. Should be used for environment validation before
-   * storing and creation of {@link RuntimeContext}.
-   *
-   * <p>It is supposed that result is used as a parameter of the method {@link
-   * #prepare(RuntimeIdentity, InternalEnvironment)}. <br>
-   * Note: this method will be eventually final, but it is not for now for workaround in Docker
-   * infra - in dockerimage environment image should be in content, not in location. It is marked
-   * with {@link Beta} annotation to hint that. Do not override this method. <br>
-   * Workaround should be removed after resolution of https://github.com/eclipse/che/issues/6006
-   *
-   * @param environment incoming Environment to estimate
-   * @return calculated internal environment.
-   * @throws ValidationException if incoming Environment is not valid
-   * @throws InfrastructureException if any other error occurred
-   */
-  @Beta
-  public InternalEnvironment estimate(Environment environment)
-      throws ValidationException, InfrastructureException {
-
-    InternalEnvironment internalEnvironment = resolveInternalEnvironment(environment);
-
-    internalEstimate(internalEnvironment);
-
-    return internalEnvironment;
-  }
-
-  /**
-   * An Infrastructure implementation should be able to preliminary estimate incoming environment.
-   * This method is not supposed to be called by clients of class {@link RuntimeInfrastructure}.
-   *
-   * <p>For example: for validating it before storing. The method SHOULD validate an incoming
-   * internal environment. If it is valid, an Infrastructure MAY return more fine grained {@link
-   * InternalEnvironment}. <br>
-   * For example:
-   * <li>- if Machines are not described in environment machines list this method may add machine
-   *     descriptions calculated against Recipe
-   * <li>- implementation may add additional Attributes based on incoming Recipe, e.g. default RAM
-   *     amount if it is neither set in Recipe nor attributes
-   * <li>- implementation may add warnings which identify some precautions which may be returned to
-   *     the user
-   *
-   * @param env internal representation of environment
-   * @throws ValidationException if incoming Environment is not valid
-   * @throws InfrastructureException if any other error occurred
-   */
-  protected abstract void internalEstimate(InternalEnvironment env)
-      throws ValidationException, InfrastructureException;
-
-  /**
    * An Infrastructure MAY track Runtimes. In this case the method should be overridden.
    *
    * <p>One of the reason for infrastructure to support this is ability to recover infrastructure
@@ -149,7 +73,7 @@ public abstract class RuntimeInfrastructure {
   /**
    * Making Runtime is a two phase process. On the first phase implementation MUST prepare
    * RuntimeContext, this is supposedly "fast" method On the second phase Runtime is created with
-   * RuntimeContext.start() which is supposedly "long" method.
+   * RuntimeContext.start() which is supposedly "long" method
    *
    * @param id the RuntimeIdentity
    * @param environment incoming internal environment
@@ -157,71 +81,6 @@ public abstract class RuntimeInfrastructure {
    * @throws ValidationException if incoming environment is not valid
    * @throws InfrastructureException if any other error occurred
    */
-  public RuntimeContext prepare(RuntimeIdentity id, InternalEnvironment environment)
-      throws ValidationException, InfrastructureException {
-    for (InternalEnvironmentProvisioner provisioner : internalEnvironmentProvisioners) {
-      provisioner.provision(id, environment);
-    }
-    serversNormalizer.normalize(environment);
-    return internalPrepare(id, environment);
-  }
-
-  /**
-   * An Infrastructure implementation should be able to prepare RuntimeContext. This method is not
-   * supposed to be called by clients of class {@link RuntimeInfrastructure}.
-   *
-   * @param id the RuntimeIdentity
-   * @param environment incoming internal environment
-   * @return new RuntimeContext object
-   * @throws ValidationException if incoming environment is not valid
-   * @throws InfrastructureException if any other error occurred
-   */
-  protected abstract RuntimeContext internalPrepare(
-      RuntimeIdentity id, InternalEnvironment environment)
+  public abstract RuntimeContext prepare(RuntimeIdentity id, InternalEnvironment environment)
       throws ValidationException, InfrastructureException;
-
-  /**
-   * Resolves {@link InternalEnvironment} instance based on specified {@link Environment}.
-   *
-   * <p>Resolved internal environment will have:
-   *
-   * <ul>
-   *   <li>Downloaded recipe;
-   *   <li>Fetched information about configured {@link Installer installers};
-   * </ul>
-   *
-   * @param environment environment to resolve
-   * @return resolved internal environment
-   * @throws InfrastructureException if any exception occurs on environment resolving
-   * @see InternalEnvironment
-   */
-  private InternalEnvironment resolveInternalEnvironment(Environment environment)
-      throws InfrastructureException {
-    InternalRecipe internalRecipe = recipeRetriever.getRecipe(environment.getRecipe());
-
-    Map<String, InternalMachineConfig> internalMachines = new HashMap<>();
-    for (Map.Entry<String, ? extends MachineConfig> machineEntry :
-        environment.getMachines().entrySet()) {
-      MachineConfig machineConfig = machineEntry.getValue();
-      List<Installer> installers = getInstallers(machineConfig.getInstallers());
-
-      internalMachines.put(
-          machineEntry.getKey(),
-          new InternalMachineConfig(
-              installers,
-              machineConfig.getServers(),
-              machineConfig.getEnv(),
-              machineConfig.getAttributes()));
-    }
-    return new InternalEnvironment(internalRecipe, internalMachines);
-  }
-
-  private List<Installer> getInstallers(List<String> installersKeys)
-      throws InfrastructureException {
-    try {
-      return installerRegistry.getOrderedInstallers(installersKeys);
-    } catch (InstallerException e) {
-      throw new InfrastructureException(e.getMessage(), e);
-    }
-  }
 }

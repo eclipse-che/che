@@ -24,7 +24,6 @@ import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
@@ -67,18 +66,18 @@ public class EnvironmentValidator {
   private static final Pattern VOLUME_FROM_PATTERN =
       Pattern.compile("^(?<containerName>" + MACHINE_NAME_REGEXP + ")(:(ro|rw))?$");
 
-  public void validate(InternalEnvironment env, DockerEnvironment dockerEnvironment)
+  public void validate(
+      Map<String, InternalMachineConfig> machines, DockerEnvironment dockerEnvironment)
       throws ValidationException, InfrastructureException {
     checkArgument(
         dockerEnvironment.getContainers() != null && !dockerEnvironment.getContainers().isEmpty(),
         "Environment should contain at least 1 container");
 
     checkArgument(
-        env.getMachines() != null && !env.getMachines().isEmpty(),
-        "Environment should contain at least 1 machine");
+        machines != null && !machines.isEmpty(), "Environment should contain at least 1 machine");
 
     List<String> missingContainers =
-        env.getMachines()
+        machines
             .keySet()
             .stream()
             .filter(machineName -> !dockerEnvironment.getContainers().containsKey(machineName))
@@ -89,7 +88,7 @@ public class EnvironmentValidator {
         Joiner.on(", ").join(missingContainers));
 
     List<String> machinesWithWsagentServer =
-        env.getMachines()
+        machines
             .entrySet()
             .stream()
             .filter(
@@ -111,7 +110,7 @@ public class EnvironmentValidator {
     for (Map.Entry<String, DockerContainerConfig> entry :
         dockerEnvironment.getContainers().entrySet()) {
       validateMachine(
-          entry.getKey(), env.getMachines().get(entry.getKey()), entry.getValue(), containersNames);
+          entry.getKey(), machines.get(entry.getKey()), entry.getValue(), containersNames);
     }
   }
 

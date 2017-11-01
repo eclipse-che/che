@@ -22,29 +22,23 @@ import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.client.OpenShiftClient;
 import java.io.ByteArrayInputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.ValidationException;
+import org.eclipse.che.api.core.model.workspace.Warning;
+import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironmentFactory;
+import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.InternalRecipe;
+import org.eclipse.che.api.workspace.server.spi.RecipeRetriever;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
-import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment.Builder;
 
-/**
- * Parses {@link InternalEnvironment} into {@link OpenShiftEnvironment}.
- *
- * <p>It is done in following way:
- *
- * <ul>
- *   <li>parses OpenShift objects that are specified in recipe;
- *   <li>edits original recipe objects for exposing servers that are configured for machines.
- * </ul>
- *
- * @author Sergii Leshchenko
- */
-public class OpenShiftEnvironmentParser {
+/** @author Sergii Leshchenko */
+public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory {
 
   static final int ROUTE_IGNORED_WARNING_CODE = 4100;
   static final String ROUTES_IGNORED_WARNING_MESSAGE =
@@ -58,21 +52,25 @@ public class OpenShiftEnvironmentParser {
   private final OpenShiftClientFactory clientFactory;
 
   @Inject
-  public OpenShiftEnvironmentParser(OpenShiftClientFactory clientFactory) {
+  public OpenShiftEnvironmentFactory(
+      InstallerRegistry installerRegistry,
+      RecipeRetriever recipeRetriever,
+      OpenShiftClientFactory clientFactory) {
+    super(installerRegistry, recipeRetriever);
     this.clientFactory = clientFactory;
   }
 
-  public OpenShiftEnvironment parse(InternalEnvironment environment)
-      throws ValidationException, InfrastructureException {
-    checkNotNull(environment, "Environment should not be null");
-    InternalRecipe recipe = environment.getRecipe();
-    checkNotNull(environment.getRecipe(), "Environment recipe should not be null");
-    String content = recipe.getContent();
-    checkNotNull(content, "Recipe content should not be null");
-    String contentType = recipe.getContentType();
-    checkNotNull(contentType, "Recipe content type should not be null");
+  @Override
+  protected InternalEnvironment create(
+      Map<String, InternalMachineConfig> machines, InternalRecipe recipe, List<Warning> warnings)
+      throws InfrastructureException, ValidationException {
 
-    switch (contentType) {
+    Map<String, Pod> pods = new HashMap<>();
+    Map<String, Service> services = new HashMap<>();
+    Map<String, PersistentVolumeClaim> pvcs = new HashMap<>();
+    Map<String, Route> routes = new HashMap<>();
+
+    switch (recipe.getContentType()) {
       case "application/x-yaml":
       case "text/yaml":
       case "text/x-yaml":
@@ -80,7 +78,7 @@ public class OpenShiftEnvironmentParser {
       default:
         throw new ValidationException(
             "Provided environment recipe content type '"
-                + contentType
+                + recipe.getContentType()
                 + "' is unsupported. Supported values are: "
                 + "application/x-yaml, text/yaml, text/x-yaml");
     }
@@ -90,12 +88,9 @@ public class OpenShiftEnvironmentParser {
     // containers
     KubernetesList list;
     try (OpenShiftClient client = clientFactory.create()) {
-      list = client.lists().load(new ByteArrayInputStream(content.getBytes())).get();
+      list = client.lists().load(new ByteArrayInputStream(recipe.getContent().getBytes())).get();
     }
 
-    Map<String, Pod> pods = new HashMap<>();
-    Map<String, Service> services = new HashMap<>();
-    Map<String, PersistentVolumeClaim> pvcs = new HashMap<>();
     boolean isAnyRoutePresent = false;
     boolean isAnyPVCPresent = false;
     for (HasMetadata object : list.getItems()) {
@@ -117,28 +112,15 @@ public class OpenShiftEnvironmentParser {
       }
     }
 
-    Builder openShiftEnvBuilder =
-        OpenShiftEnvironment.builder()
-            .setPods(pods)
-            .setServices(services)
-            .setPersistentVolumeClaims(pvcs);
-
     if (isAnyRoutePresent) {
-      environment.addWarning(
-          new WarningImpl(ROUTE_IGNORED_WARNING_CODE, ROUTES_IGNORED_WARNING_MESSAGE));
+      warnings.add(new WarningImpl(ROUTE_IGNORED_WARNING_CODE, ROUTES_IGNORED_WARNING_MESSAGE));
     }
 
     if (isAnyPVCPresent) {
-      environment.addWarning(
-          new WarningImpl(PVC_IGNORED_WARNING_CODE, PVC_IGNORED_WARNING_MESSAGE));
+      warnings.add(new WarningImpl(PVC_IGNORED_WARNING_CODE, PVC_IGNORED_WARNING_MESSAGE));
     }
 
-    return openShiftEnvBuilder.build();
-  }
-
-  private void checkNotNull(Object object, String errorMessage) throws ValidationException {
-    if (object == null) {
-      throw new ValidationException(errorMessage);
-    }
+    return new OpenShiftInternalEnvironment(
+        machines, recipe, warnings, pods, services, pvcs, routes);
   }
 }

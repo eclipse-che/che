@@ -50,6 +50,7 @@ import org.eclipse.che.api.workspace.server.model.impl.RuntimeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironmentFactory;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
@@ -84,10 +85,12 @@ public class WorkspaceRuntimes {
   private final WorkspaceSharedPool sharedPool;
   private final WorkspaceDao workspaceDao;
   private final AtomicBoolean isStartRefused;
+  private final Map<String, InternalEnvironmentFactory> environmentFactories;
 
   @Inject
   public WorkspaceRuntimes(
       EventService eventService,
+      Map<String, InternalEnvironmentFactory> environmentFactories,
       Set<RuntimeInfrastructure> infrastructures,
       WorkspaceSharedPool sharedPool,
       WorkspaceDao workspaceDao,
@@ -115,6 +118,7 @@ public class WorkspaceRuntimes {
       }
     }
     infraByRecipe = ImmutableMap.copyOf(tmp);
+    this.environmentFactories = ImmutableMap.copyOf(environmentFactories);
   }
 
   @PostConstruct
@@ -125,12 +129,13 @@ public class WorkspaceRuntimes {
 
   public void validate(Environment environment)
       throws NotFoundException, InfrastructureException, ValidationException {
+
     String type = environment.getRecipe().getType();
     if (!infraByRecipe.containsKey(type)) {
       throw new NotFoundException("Infrastructure not found for type: " + type);
     }
+    environmentFactory(type).create(environment);
 
-    infraByRecipe.get(type).estimate(environment);
   }
 
   /**
@@ -214,7 +219,8 @@ public class WorkspaceRuntimes {
     RuntimeIdentity runtimeId =
         new RuntimeIdentityImpl(workspaceId, envName, subject.getUserName());
     try {
-      InternalEnvironment internalEnvironment = infra.estimate(environment);
+      InternalEnvironment internalEnvironment = environmentFactory(environment.getRecipe().getType())
+          .create(environment);
       RuntimeContext runtimeContext = infra.prepare(runtimeId, internalEnvironment);
 
       InternalRuntime runtime = runtimeContext.getRuntime();
@@ -470,9 +476,10 @@ public class WorkspaceRuntimes {
 
     InternalRuntime runtime;
     try {
-      InternalEnvironment internalEnvironment = infra.estimate(environment);
+      InternalEnvironment internalEnvironment = environmentFactory(environment.getRecipe().getType())
+          .create(environment);
       runtime = infra.prepare(identity, internalEnvironment).getRuntime();
-    } catch (InfrastructureException | ValidationException x) {
+    } catch (InfrastructureException | ValidationException | NotFoundException x) {
       LOG.error(
           "Couldn't recover runtime '{}:{}'. Error: {}",
           identity.getWorkspaceId(),
@@ -566,6 +573,13 @@ public class WorkspaceRuntimes {
       return Optional.empty();
     }
     return Optional.of(state.runtime.getContext());
+  }
+
+  private InternalEnvironmentFactory environmentFactory(String recipeType) throws NotFoundException {
+    InternalEnvironmentFactory factory = environmentFactories.get(recipeType);
+    if(factory == null)
+      throw new NotFoundException(format("InternalEnvironmentFactory not configured for recipe type: '%s'", recipeType));
+    return factory;
   }
 
   private String sessionUserNameOr(String nameIfNoUser) {
