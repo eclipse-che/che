@@ -950,7 +950,6 @@ public final class ResourceManager {
             itemReference -> {
               final Resource resource = newResourceFrom(itemReference);
 
-              store.dispose(absolutePath, false);
               store.register(resource);
 
               if (resource.isProject()) {
