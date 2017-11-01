@@ -181,7 +181,8 @@ public class GitPanelPresenter extends BasePresenter
   }
 
   public void show() {
-    onActivate();
+    partStack.setActivePart(this);
+    onOpen();
   }
 
   public void hide() {
@@ -236,12 +237,14 @@ public class GitPanelPresenter extends BasePresenter
                 new MutableAlteredFiles(
                     findProjectByName(newProjectName), changes.remove(oldProjectName));
 
-            changes.put(newProjectName, alteredFiles);
-            // TODO uncomment rename and delete code below after fixing of events problem:
-            // It is fired: Added at first, then Renamed for project under rename
-            // view.renameRepository(oldProjectName, newProjectName);
+            // TODO uncomment last two lines abd delete this code after fixing of events problem:
+            // It is fired: Added at first, then Renamed for project under rename, sometimes twice.
             view.removeRepository(oldProjectName);
+            changes.put(newProjectName, alteredFiles);
             view.updateRepositoryChanges(newProjectName, alteredFiles.getFilesQuantity());
+
+            // changes.put(newProjectName, alteredFiles);
+            // view.renameRepository(oldProjectName, newProjectName);
           } else {
             // TODO delete this if statement code. There is a bug when Create project event is fired
             // twice.
