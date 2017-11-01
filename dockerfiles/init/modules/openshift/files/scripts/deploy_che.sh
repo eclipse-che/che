@@ -8,11 +8,11 @@
 # This script is meant for quick & easy install of Che on OpenShift via:
 #
 #  ``` bash
-#   DEPLOY_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/spi/dockerfiles/cli/scripts/openshift/deploy_che.sh
+#   DEPLOY_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/che6/dockerfiles/cli/scripts/openshift/deploy_che.sh
 #   curl -fsSL ${DEPLOY_SCRIPT_URL} -o get-che.sh
-#   WAIT_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/spi/dockerfiles/cli/scripts/openshift/wait_until_che_is_available.sh
+#   WAIT_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/che6/dockerfiles/cli/scripts/openshift/wait_until_che_is_available.sh
 #   curl -fsSL ${WAIT_SCRIPT_URL} -o wait-che.sh
-#   STACKS_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/spi/dockerfiles/cli/scripts/openshift/replace_stacks.sh
+#   STACKS_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/che6/dockerfiles/cli/scripts/openshift/replace_stacks.sh
 #   curl -fsSL ${STACKS_SCRIPT_URL} -o stacks-che.sh
 #   bash get-che.sh && wait-che.sh && stacks-che.sh
 #   ```
@@ -108,14 +108,24 @@ else
 fi
 
 CHE_IMAGE_REPO=${CHE_IMAGE_REPO:-${DEFAULT_CHE_IMAGE_REPO}}
-DEFAULT_CHE_IMAGE_TAG="spi"
+DEFAULT_CHE_IMAGE_TAG="che6"
 CHE_IMAGE_TAG=${CHE_IMAGE_TAG:-${DEFAULT_CHE_IMAGE_TAG}}
 DEFAULT_CHE_LOG_LEVEL="INFO"
 CHE_LOG_LEVEL=${CHE_LOG_LEVEL:-${DEFAULT_CHE_LOG_LEVEL}}
-DEFAULT_ENABLE_SSL="true"
-ENABLE_SSL=${ENABLE_SSL:-${DEFAULT_ENABLE_SSL}}
 DEFAULT_K8S_VERSION_PRIOR_TO_1_6="true"
 K8S_VERSION_PRIOR_TO_1_6=${K8S_VERSION_PRIOR_TO_1_6:-${DEFAULT_K8S_VERSION_PRIOR_TO_1_6}}
+# OPENSHIFT_FLAVOR can be minishift or osio or ocp
+# TODO Set flavour via a parameter
+DEFAULT_OPENSHIFT_FLAVOR=minishift
+OPENSHIFT_FLAVOR=${OPENSHIFT_FLAVOR:-${DEFAULT_OPENSHIFT_FLAVOR}}
+if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
+    DEFAULT_ENABLE_SSL="false"
+elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
+    DEFAULT_ENABLE_SSL="true"
+elif [ "${OPENSHIFT_FLAVOR}" == "ocp" ]; then
+    DEFAULT_ENABLE_SSL="true"
+fi
+ENABLE_SSL=${ENABLE_SSL:-${DEFAULT_ENABLE_SSL}}
 if [ "${ENABLE_SSL}" == "true" ]; then
     HTTP_PROTOCOL="https"
     WS_PROTOCOL="wss"
@@ -128,11 +138,6 @@ DEFAULT_KEYCLOAK_OSO_ENDPOINT="https://sso.openshift.io/auth/realms/fabric8/brok
 KEYCLOAK_OSO_ENDPOINT=${KEYCLOAK_OSO_ENDPOINT:-${DEFAULT_KEYCLOAK_OSO_ENDPOINT}}
 DEFAULT_KEYCLOAK_GITHUB_ENDPOINT="https://sso.openshift.io/auth/realms/fabric8/broker/github/token"
 KEYCLOAK_GITHUB_ENDPOINT=${KEYCLOAK_GITHUB_ENDPOINT:-${DEFAULT_KEYCLOAK_GITHUB_ENDPOINT}}
-
-# OPENSHIFT_FLAVOR can be minishift or openshift
-# TODO Set flavour via a parameter
-DEFAULT_OPENSHIFT_FLAVOR=minishift
-OPENSHIFT_FLAVOR=${OPENSHIFT_FLAVOR:-${DEFAULT_OPENSHIFT_FLAVOR}}
 
 # TODO move this env variable as a config map in the deployment config
 # as soon as the 'che-multiuser' branch is merged to master
@@ -169,6 +174,8 @@ if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
   CHE_APPLY_RESOURCE_QUOTAS=${CHE_APPLY_RESOURCE_QUOTAS:-${DEFAULT_CHE_APPLY_RESOURCE_QUOTAS}}
   DEFAULT_IMAGE_PULL_POLICY="IfNotPresent"
   IMAGE_PULL_POLICY=${IMAGE_PULL_POLICY:-${DEFAULT_IMAGE_PULL_POLICY}}
+  DEFAULT_CHE_INFRA_OPENSHIFT_PVC_STRATEGY="common"
+  CHE_INFRA_OPENSHIFT_PVC_STRATEGY=${CHE_INFRA_OPENSHIFT_PVC_STRATEGY:-${DEFAULT_CHE_INFRA_OPENSHIFT_PVC_STRATEGY}}
 
   DEFAULT_CHE_INFRA_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT}
   CHE_INFRA_OPENSHIFT_PROJECT=${CHE_INFRA_OPENSHIFT_PROJECT:-${DEFAULT_CHE_INFRA_OPENSHIFT_PROJECT}}
@@ -178,7 +185,7 @@ elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
   # Set osio configuration
   # ----------------------
   if [ -z "${OPENSHIFT_TOKEN+x}" ]; then echo "[CHE] **ERROR** Env var OPENSHIFT_TOKEN is unset. You need to set it with your OSO token to continue. To retrieve your token: https://console.starter-us-east-2.openshift.com/console/command-line. Aborting"; exit 1; fi
-  
+
   DEFAULT_OPENSHIFT_ENDPOINT="https://api.starter-us-east-2.openshift.com"
   OPENSHIFT_ENDPOINT=${OPENSHIFT_ENDPOINT:-${DEFAULT_OPENSHIFT_ENDPOINT}}
   DEFAULT_CHE_OPENSHIFT_PROJECT="$(oc get projects -o=custom-columns=NAME:.metadata.name --no-headers | grep "\\-che$")"
@@ -207,6 +214,8 @@ elif [ "${OPENSHIFT_FLAVOR}" == "ocp" ]; then
   CHE_DEBUGGING_ENABLED=${CHE_DEBUGGING_ENABLED:-${DEFAULT_CHE_DEBUGGING_ENABLED}}
   DEFAULT_OC_SKIP_TLS="false"
   OC_SKIP_TLS=${OC_SKIP_TLS:-${DEFAULT_OC_SKIP_TLS}}
+  DEFAULT_CHE_INFRA_OPENSHIFT_PVC_STRATEGY="common"
+  CHE_INFRA_OPENSHIFT_PVC_STRATEGY=${CHE_INFRA_OPENSHIFT_PVC_STRATEGY:-${DEFAULT_CHE_INFRA_OPENSHIFT_PVC_STRATEGY}}
 
 fi
 
@@ -252,7 +261,7 @@ oc project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null
 echo "done!"
 
 # -------------------------------------------------------------
-# If command == clean up then delete all openshift objects
+# If command == cleanup then delete all openshift objects
 # -------------------------------------------------------------
 if [ "${COMMAND}" == "cleanup" ]; then
   echo "[CHE] Deleting all OpenShift objects..."
@@ -260,7 +269,7 @@ if [ "${COMMAND}" == "cleanup" ]; then
   echo "[CHE] Cleanup successfully started. Use \"oc get all\" to verify that all resources have been deleted."
   exit 0
 # -------------------------------------------------------------
-# If command == clean up then delete all openshift objects
+# If command == rollupdate then update Che
 # -------------------------------------------------------------
 elif [ "${COMMAND}" == "rollupdate" ]; then
   echo "[CHE] Rollout latest version of Che..."
@@ -288,8 +297,6 @@ if [ "${CHE_MULTI_USER}" == "true" ]; then
     else
         "${COMMAND_DIR}"/multi-user/deploy_postgres_only.sh
     fi
-
-    "${COMMAND_DIR}"/multi-user/wait_until_postgres_is_available.sh
 fi
 
 # -------------------------------------------------------------
@@ -385,7 +392,7 @@ MULTI_USER_REPLACEMENT_STRING="          - name: \"CHE_WORKSPACE_LOGS\"
 echo
 if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
   echo "[CHE] Deploying Che on minishift (image ${CHE_IMAGE})"
-  DEFAULT_CHE_DEPLOYMENT_FILE_PATH=./che-spi-openshift.yml
+  DEFAULT_CHE_DEPLOYMENT_FILE_PATH=./che-openshift.yml
   CHE_DEPLOYMENT_FILE_PATH=${CHE_DEPLOYMENT_FILE_PATH:-${DEFAULT_CHE_DEPLOYMENT_FILE_PATH}}
 
 cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
@@ -408,7 +415,8 @@ cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     sed "s|    CHE_WEBSOCKET_ENDPOINT:.*|    CHE_WEBSOCKET_ENDPOINT: ${WS_PROTOCOL}://che-${DEFAULT_OPENSHIFT_NAMESPACE_URL}/api/websocket|" | \
     sed "s|    CHE_HOST: \${DEFAULT_OPENSHIFT_NAMESPACE_URL}|    CHE_HOST: che-${DEFAULT_OPENSHIFT_NAMESPACE_URL}|" | \
     sed "s|    CHE_API: http://\${DEFAULT_OPENSHIFT_NAMESPACE_URL}/api|    CHE_API: ${HTTP_PROTOCOL}://che-${DEFAULT_OPENSHIFT_NAMESPACE_URL}/api|" | \
-    grep -v -e "tls:" -e "insecureEdgeTerminationPolicy: Redirect" -e "termination: edge" | \
+    sed "s|    CHE_INFRA_OPENSHIFT_PVC_STRATEGY:.*|    CHE_INFRA_OPENSHIFT_PVC_STRATEGY: ${CHE_INFRA_OPENSHIFT_PVC_STRATEGY}|" | \
+    if [ "${ENABLE_SSL}" == "false" ]; then grep -v -e "tls:" -e "insecureEdgeTerminationPolicy: Redirect" -e "termination: edge" ; else cat -; fi | \
     if [ "${CHE_INFRA_OPENSHIFT_OAUTH__TOKEN+x}" ]; then sed "s|    CHE_INFRA_OPENSHIFT_OAUTH__TOKEN:.*|    CHE_INFRA_OPENSHIFT_OAUTH__TOKEN: ${CHE_INFRA_OPENSHIFT_OAUTH__TOKEN}|"; else cat -;  fi | \
     if [ "${CHE_INFRA_OPENSHIFT_USERNAME+x}" ]; then sed "s|    CHE_INFRA_OPENSHIFT_USERNAME:.*|    CHE_INFRA_OPENSHIFT_USERNAME: ${CHE_INFRA_OPENSHIFT_USERNAME}|"; else cat -;  fi | \
     if [ "${CHE_INFRA_OPENSHIFT_PASSWORD+x}" ]; then sed "s|    CHE_INFRA_OPENSHIFT_PASSWORD:.*|    CHE_INFRA_OPENSHIFT_PASSWORD: ${CHE_INFRA_OPENSHIFT_PASSWORD}|"; else cat -;  fi | \
@@ -418,7 +426,7 @@ cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     oc apply --force=true -f -
 elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
   echo "[CHE] Deploying Che on OSIO (image ${CHE_IMAGE})"
-  DEFAULT_CHE_DEPLOYMENT_FILE_PATH=./che-spi-openshift.yml
+  DEFAULT_CHE_DEPLOYMENT_FILE_PATH=./che-openshift.yml
   CHE_DEPLOYMENT_FILE_PATH=${CHE_DEPLOYMENT_FILE_PATH:-${DEFAULT_CHE_DEPLOYMENT_FILE_PATH}}
 
 cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
@@ -438,7 +446,7 @@ cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     oc apply --force=true -f -
 else
   echo "[CHE] Deploying Che on OpenShift Container Platform (image ${CHE_IMAGE})"
-  DEFAULT_CHE_DEPLOYMENT_FILE_PATH=./che-spi-openshift.yml
+  DEFAULT_CHE_DEPLOYMENT_FILE_PATH=./che-openshift.yml
   CHE_DEPLOYMENT_FILE_PATH=${CHE_DEPLOYMENT_FILE_PATH:-${DEFAULT_CHE_DEPLOYMENT_FILE_PATH}}
 
 cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
@@ -453,6 +461,7 @@ cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     sed "s|    CHE_WEBSOCKET_ENDPOINT:.*|    CHE_WEBSOCKET_ENDPOINT: ${WS_PROTOCOL}://che-${OPENSHIFT_NAMESPACE_URL}/api/websocket|" | \
     sed "s|    CHE_HOST: \${DEFAULT_OPENSHIFT_NAMESPACE_URL}|    CHE_HOST: che-${OPENSHIFT_NAMESPACE_URL}|" | \
     sed "s|    CHE_API: http://\${DEFAULT_OPENSHIFT_NAMESPACE_URL}/api|    CHE_API: ${HTTP_PROTOCOL}://che-${OPENSHIFT_NAMESPACE_URL}/api|" | \
+    sed "s|    CHE_INFRA_OPENSHIFT_PVC_STRATEGY:.*|    CHE_INFRA_OPENSHIFT_PVC_STRATEGY: ${CHE_INFRA_OPENSHIFT_PVC_STRATEGY}|" | \
     if [ "${CHE_INFRA_OPENSHIFT_OAUTH__TOKEN+x}" ]; then sed "s|    CHE_INFRA_OPENSHIFT_OAUTH__TOKEN:.*|    CHE_INFRA_OPENSHIFT_OAUTH__TOKEN: ${CHE_INFRA_OPENSHIFT_OAUTH__TOKEN}|"; else cat -;  fi | \
     if [ "${CHE_INFRA_OPENSHIFT_USERNAME+x}" ]; then sed "s|    CHE_INFRA_OPENSHIFT_USERNAME:.*|    CHE_INFRA_OPENSHIFT_USERNAME: ${CHE_INFRA_OPENSHIFT_USERNAME}|"; else cat -;  fi | \
     if [ "${CHE_INFRA_OPENSHIFT_PASSWORD+x}" ]; then sed "s|    CHE_INFRA_OPENSHIFT_PASSWORD:.*|    CHE_INFRA_OPENSHIFT_PASSWORD: ${CHE_INFRA_OPENSHIFT_PASSWORD}|"; else cat -;  fi | \

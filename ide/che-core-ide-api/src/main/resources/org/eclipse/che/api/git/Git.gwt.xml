@@ -17,6 +17,5 @@
     <inherits name="com.google.gwt.json.JSON"/>
     <inherits name="org.eclipse.che.ide.Commons"/>
     <inherits name="org.eclipse.che.api.machine.Machine"/>
-    <inherits name="org.eclipse.che.ide.Api"/>
     <source path='shared'/>
 </module>

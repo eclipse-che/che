@@ -13,7 +13,6 @@
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.7.0//EN" "http://gwtproject.org/doctype/2.7.0/gwt-module.dtd">
 <module>
     <inherits name="com.google.gwt.user.User"/>
-    <inherits name="org.eclipse.che.ide.useragents"/>
     <inherits name="elemental.Elemental"/>
     <inherits name="com.google.gwt.json.JSON"/>
     <inherits name="org.eclipse.che.api.promises.Promises"/>
@@ -38,19 +37,8 @@
         <when-property-is name="user.agent" value="safari"/>
     </replace-with>
 
-    <!-- Following rules are order dependent: android and iphone have to come after "simple" safari -->
     <replace-with class="org.eclipse.che.ide.util.browser.UserAgentStaticProperties.SafariImpl">
         <when-type-is class="org.eclipse.che.ide.util.browser.UserAgentStaticProperties"/>
         <when-property-is name="user.agent" value="safari"/>
-    </replace-with>
-
-    <replace-with class="org.eclipse.che.ide.util.browser.UserAgentStaticProperties.AndroidImpl">
-        <when-type-is class="org.eclipse.che.ide.util.browser.UserAgentStaticProperties"/>
-        <when-property-is name="mobile.user.agent" value="android"/>
-    </replace-with>
-
-    <replace-with class="org.eclipse.che.ide.util.browser.UserAgentStaticProperties.IPhoneImpl">
-        <when-type-is class="org.eclipse.che.ide.util.browser.UserAgentStaticProperties"/>
-        <when-property-is name="mobile.user.agent" value="iphone"/>
     </replace-with>
 </module>

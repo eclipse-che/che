@@ -17,6 +17,8 @@
          version="3.0"
          metadata-complete="true">
 
+    <absolute-ordering></absolute-ordering>
+
     <context-param>
         <param-name>org.eclipse.che.websocket.endpoint</param-name>
         <param-value>/ws</param-value>

@@ -40,7 +40,7 @@ public final class Labels {
 
   /** Pattern that matches server labels e.g. "org.eclipse.che.server.exec-agent.port". */
   private static final Pattern SERVER_LABEL_PATTERN =
-      Pattern.compile("org\\.eclipse\\.che\\.server\\.(?<ref>[\\w-/]+)\\..+");
+      Pattern.compile("org\\.eclipse\\.che\\.server\\.(?<ref>[\\w-/.]+)\\..+");
 
   /** Creates new label serializer. */
   public static Serializer newSerializer() {

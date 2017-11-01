@@ -16,9 +16,9 @@ oc create -f "$COMMAND_DIR"/postgres/
 if [ "${CHE_EPHEMERAL}" == "true" ]; then
   oc volume dc/postgres --remove --confirm
   oc delete pvc/postgres-data
-fi 
+fi
 
-IMAGE_INIT=${IMAGE_INIT:-"eclipse/che-init:nightly"}
+IMAGE_INIT=${IMAGE_INIT:-"eclipse/che-init:che6"}
 
 oc create -f - <<-EOF
 
@@ -45,7 +45,7 @@ spec:
         name: '${IMAGE_INIT}'
     type: Docker
   triggers:
-    - type: ImageChange 
+    - type: ImageChange
       imageChange: {}
 status:
 
@@ -71,3 +71,5 @@ spec:
 EOF
 
 oc start-build che-init-image-stream-build
+
+"$COMMAND_DIR"/wait_until_postgres_is_available.sh
