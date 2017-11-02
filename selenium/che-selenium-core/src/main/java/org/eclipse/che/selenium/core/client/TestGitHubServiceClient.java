@@ -10,9 +10,11 @@
  */
 package org.eclipse.che.selenium.core.client;
 
+import static java.lang.String.*;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
+import static org.slf4j.LoggerFactory.*;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.reflect.TypeToken;
@@ -29,10 +31,13 @@ import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.dto.server.JsonStringMapImpl;
 import org.eclipse.che.plugin.github.shared.GitHubKey;
+import org.slf4j.Logger;
 
 /** @author Mihail Kuznyetsov. */
 @Singleton
 public class TestGitHubServiceClient {
+  private static final Logger LOG = getLogger(TestGitHubServiceClient.class);
+
   private final HttpJsonRequestFactory requestFactory;
 
   @Inject
@@ -187,6 +192,8 @@ public class TestGitHubServiceClient {
           .setAuthorizationHeader(createBasicAuthHeader(username, password))
           .request();
     }
+
+    LOG.debug(format("Application grants '%s' were removed from github.com", grandsId));
   }
 
   public String getName(final String username, final String password)
