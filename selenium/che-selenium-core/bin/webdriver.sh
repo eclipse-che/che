@@ -145,6 +145,7 @@ checkParameters() {
         elif [[ "$var" == "--compare-with-ci" ]]; then :
         elif [[ "$var" =~ ^--workspace-pool-size=(auto|[0-9]+)$ ]]; then :
         elif [[ "$var" =~ ^[0-9]+$ ]] && [[ $@ =~ --compare-with-ci[[:space:]]$var ]]; then :
+        elif [[ "$var" =~ -D.* ]]; then :
         else
             printHelp
             echo "[TEST] Unrecognized or misused parameter "${var}
@@ -198,6 +199,15 @@ applyCustomOptions() {
         fi
     done
 }
+
+extractSystemProperties() {
+    for var in "$@"; do
+        if [[ "$var" =~ -D.* ]]; then
+            MAVEN_OPTIONS=${MAVEN_OPTIONS}" "$var
+        fi
+    done
+}
+
 
 defineTestsScope() {
     for var in "$@"; do
@@ -783,8 +793,8 @@ generateTestNgFailedReport() {
 
 # generates and updates failsafe report
 generateFailSafeReport () {
-    mvn -q surefire-report:failsafe-report-only
-    mvn -q site -DgenerateReports=false
+    mvn -q surefire-report:failsafe-report-only ${MAVEN_OPTIONS}
+    mvn -q site -DgenerateReports=false ${MAVEN_OPTIONS}
 
     echo "[TEST]"
 
@@ -855,7 +865,7 @@ storeTestReport() {
 }
 
 checkBuild() {
-    mvn package
+    mvn package ${MAVEN_OPTIONS}
     [[ $? != 0 ]] && { exit 1; }
 }
 
@@ -886,6 +896,7 @@ run() {
 
     initVariables
     init
+    extractSystemProperties $@
     checkBuild
 
     checkParameters $@
