@@ -117,9 +117,9 @@ public class MavenMessagesHandler {
     List<String> updatedProjects = dto.getUpdatedProjects();
     Set<String> projectToRefresh = computeUniqueHiLevelProjects(updatedProjects);
 
-    //Temporary delay synchronization, because maven server sends update events in the same time,
-    //when other synchronization call may be performed, such as rename project.
-    //Will be reworked in nearest future, temporary solution.
+    // Temporary delay synchronization, because maven server sends update events in the same time,
+    // when other synchronization call may be performed, such as rename project.
+    // Will be reworked in nearest future, temporary solution.
     new DelayedTask() {
       @Override
       public void onExecute() {

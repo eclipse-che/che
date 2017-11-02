@@ -38,12 +38,13 @@ public class WorkspaceProjectsSyncer {
   }
 
   private void updateProjects(String endpointId) {
-    //Temporary disabled synchronization due to excessive calls to actual synchronization mechanism.
-    //Will be reviewed this mechanism in nearest future. But for now, it temporary disabled.
+    // Temporary disabled synchronization due to excessive calls to actual synchronization
+    // mechanism.
+    // Will be reviewed this mechanism in nearest future. But for now, it temporary disabled.
 
-//    Container workspaceRoot = appContext.getWorkspaceRoot();
-//    if (workspaceRoot != null) {
-//      workspaceRoot.synchronize();
-//    }
+    //    Container workspaceRoot = appContext.getWorkspaceRoot();
+    //    if (workspaceRoot != null) {
+    //      workspaceRoot.synchronize();
+    //    }
   }
 }
