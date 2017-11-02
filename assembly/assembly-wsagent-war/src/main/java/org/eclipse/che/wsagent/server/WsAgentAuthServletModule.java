@@ -11,18 +11,17 @@
 package org.eclipse.che.wsagent.server;
 
 import com.google.inject.servlet.ServletModule;
-import org.eclipse.che.api.core.cors.CheCorsFilter;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.multiuser.machine.authentication.agent.MachineLoginFilter;
-import org.everrest.guice.servlet.GuiceEverrestServlet;
 
 /** Provide bindings of security && authentication filters necessary for multi-user Che */
 @DynaModule
 public class WsAgentAuthServletModule extends ServletModule {
   @Override
   protected void configureServlets() {
-    filter("/*").through(CheCorsFilter.class);
-    serveRegex("^/api((?!(/(ws|eventbus)($|/.*)))/.*)").with(GuiceEverrestServlet.class);
+    if (Boolean.valueOf(System.getenv("CHE_AUTH_ENABLED"))) {
+      configureMultiUserMode();
+    }
   }
 
   private void configureMultiUserMode() {

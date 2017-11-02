@@ -20,7 +20,11 @@ import org.eclipse.che.inject.DynaModule;
 @DynaModule
 public class WsAgentAuthModule extends AbstractModule {
   @Override
-  protected void configure() {}
+  protected void configure() {
+    if (Boolean.valueOf(System.getenv("CHE_AUTH_ENABLED"))) {
+      configureMultiUserMode();
+    }
+  }
 
   private void configureMultiUserMode() {
     bind(HttpJsonRequestFactory.class).to(AgentHttpJsonRequestFactory.class);

@@ -78,7 +78,7 @@ public class KeycloakProvider {
                         settings.get(AUTH_SERVER_URL_SETTING),
                         settings.get(REALM_SETTING),
                         settings.get(CLIENT_ID_SETTING)));
-    Log.info(getClass(), "Keycloak init complete: ", this);
+    Log.debug(getClass(), "Keycloak init complete: ", this);
   }
 
   public static native String getKeycloakSettings(String keycloakSettingsEndpoint) /*-{
