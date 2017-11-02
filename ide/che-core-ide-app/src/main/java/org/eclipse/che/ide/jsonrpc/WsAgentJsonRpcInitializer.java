@@ -29,6 +29,7 @@ import org.eclipse.che.ide.api.workspace.event.WsAgentServerStoppedEvent;
 import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
+import org.eclipse.che.ide.core.AgentURLModifier;
 import org.eclipse.che.ide.util.loging.Log;
 
 /** Initializes JSON-RPC connection to the ws-agent server. */
@@ -38,16 +39,19 @@ public class WsAgentJsonRpcInitializer {
   private final AppContext appContext;
   private final JsonRpcInitializer initializer;
   private final RequestTransmitter requestTransmitter;
+  private final AgentURLModifier agentURLModifier;
 
   @Inject
   public WsAgentJsonRpcInitializer(
       JsonRpcInitializer initializer,
       AppContext appContext,
       EventBus eventBus,
-      RequestTransmitter requestTransmitter) {
+      RequestTransmitter requestTransmitter,
+      AgentURLModifier agentURLModifier) {
     this.appContext = appContext;
     this.initializer = initializer;
     this.requestTransmitter = requestTransmitter;
+    this.agentURLModifier = agentURLModifier;
 
     eventBus.addHandler(WsAgentServerRunningEvent.TYPE, event -> initializeJsonRpcService());
     eventBus.addHandler(
@@ -97,7 +101,8 @@ public class WsAgentJsonRpcInitializer {
                   .getServerByName(SERVER_WS_AGENT_WEBSOCKET_REFERENCE)
                   .ifPresent(
                       server -> {
-                        String separator = server.getUrl().contains("?") ? "&" : "?";
+                        String wsAgentWebSocketUrl = agentURLModifier.modify(server.getUrl());
+                        String separator = wsAgentWebSocketUrl.contains("?") ? "&" : "?";
                         String queryParams =
                             appContext
                                 .getApplicationWebsocketId()
@@ -110,7 +115,7 @@ public class WsAgentJsonRpcInitializer {
 
                         initializer.initialize(
                             WS_AGENT_JSON_RPC_ENDPOINT_ID,
-                            singletonMap("url", server.getUrl() + queryParams),
+                            singletonMap("url", wsAgentWebSocketUrl + queryParams),
                             initActions);
                       });
             });

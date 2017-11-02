@@ -9,6 +9,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import IWorkspaceEnvironment = che.IWorkspaceEnvironment;
 
 export interface IWorkspaceAttributes {
   created: number;
@@ -21,16 +22,16 @@ export interface IWorkspaceAttributes {
  * @author Florent Benoit
  */
 export class CheWorkspaceBuilder {
-  workspace: che.IWorkspace;
+  private workspace: che.IWorkspace;
 
   constructor() {
     this.workspace = {
       temporary: false,
       config: {
+        environments: {},
         projects: []
       }
     };
-
   }
 
   withName(name: string): CheWorkspaceBuilder {
@@ -73,7 +74,7 @@ export class CheWorkspaceBuilder {
     return this;
   }
 
-  withEnvironments(environments: any): CheWorkspaceBuilder {
+  withEnvironments(environments: {[envName: string]: IWorkspaceEnvironment}): CheWorkspaceBuilder {
     this.workspace.config.environments = environments;
     return this;
   }

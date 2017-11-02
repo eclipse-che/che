@@ -10,9 +10,7 @@
  */
 package org.eclipse.che.ide.ext.git.client.compare.changeslist;
 
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -39,22 +37,6 @@ public class ChangesListViewImpl extends Window implements ChangesListView {
     this.setTitle(locale.changeListTitle());
 
     createButtons();
-
-    SafeHtmlBuilder shb = new SafeHtmlBuilder();
-
-    shb.appendHtmlConstant("<table height =\"20\">");
-    shb.appendHtmlConstant("<tr height =\"3\"></tr><tr>");
-    shb.appendHtmlConstant("<td width =\"20\" bgcolor =\"dodgerBlue\"></td>");
-    shb.appendHtmlConstant("<td>modified</td>");
-    shb.appendHtmlConstant("<td width =\"20\" bgcolor =\"red\"></td>");
-    shb.appendHtmlConstant("<td>deleted</td>");
-    shb.appendHtmlConstant("<td width =\"20\" bgcolor =\"green\"></td>");
-    shb.appendHtmlConstant("<td>added</td>");
-    shb.appendHtmlConstant("<td width =\"20\" bgcolor =\"purple\"></td>");
-    shb.appendHtmlConstant("<td>copied</td>");
-    shb.appendHtmlConstant("</tr></table>");
-
-    getFooter().add(new HTML(shb.toSafeHtml()));
   }
 
   @Override

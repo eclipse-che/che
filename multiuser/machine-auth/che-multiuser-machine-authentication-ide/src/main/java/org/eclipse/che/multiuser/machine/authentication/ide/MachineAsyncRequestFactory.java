@@ -20,7 +20,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-import javax.annotation.PostConstruct;
+import java.util.Optional;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
@@ -48,8 +48,8 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory
   private final AppContext appContext;
 
   private String machineToken;
-  private String wsAgentBaseUrl;
   private String csrfToken;
+  private Optional<Boolean> authEnabled = Optional.empty();
 
   @Inject
   public MachineAsyncRequestFactory(
@@ -63,14 +63,13 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory
     eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
   }
 
-  @PostConstruct
-  private void init() {
-    requestCsrfToken();
-  }
-
   @Override
   protected AsyncRequest newAsyncRequest(RequestBuilder.Method method, String url, boolean async) {
-    if (isWsAgentRequest(url)) {
+    if (isWsStarted() && !authEnabled.isPresent()) {
+      authEnabled = Optional.of(false);
+      getMachineToken(); // To determine whether auth is enabled
+    }
+    if (authEnabled.isPresent() && authEnabled.get() && isWsAgentRequest(url)) {
       return new MachineAsyncRequest(method, url, async, getMachineToken());
     }
     if (isModifyingMethod(method)) {
@@ -90,8 +89,14 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory
               (Function<MachineTokenDto, String>)
                   tokenDto -> {
                     machineToken = tokenDto.getMachineToken();
+                    authEnabled = Optional.of(true);
                     return machineToken;
-                  });
+                  })
+          .catchError(
+              arg -> {
+                authEnabled = Optional.of(false);
+                return null;
+              });
     }
   }
 
@@ -100,7 +105,6 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory
   @Override
   public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
     machineToken = null;
-    wsAgentBaseUrl = null;
   }
 
   /**
@@ -110,11 +114,14 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory
    * @return
    */
   protected boolean isWsAgentRequest(String url) {
-    if (appContext.getWorkspace() == null
-        || !RUNNING.equals(appContext.getWorkspace().getStatus())) {
+    if (!isWsStarted()) {
       return false; // ws-agent not started
     }
     return url.contains(nullToEmpty(appContext.getWsAgentServerApiEndpoint()));
+  }
+
+  protected boolean isWsStarted() {
+    return appContext.getWorkspace() != null && RUNNING.equals(appContext.getWorkspace().getStatus());
   }
 
   private Promise<String> requestCsrfToken() {

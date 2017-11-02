@@ -43,7 +43,7 @@ public class KeycloakProvider {
         getKeycloakSettings(KeycloakConstants.getEndpoint(appContext.getMasterApiEndpoint()));
     Map<String, String> settings;
     try {
-       settings = JsonHelper.toMap(keycloakSettings);
+      settings = JsonHelper.toMap(keycloakSettings);
     } catch (Exception e) {
       keycloakDisabled = true;
       return;
