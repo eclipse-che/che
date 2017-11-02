@@ -15,8 +15,8 @@ import static com.google.common.base.Preconditions.checkState;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.reference.ShowReferencePresenter;
@@ -26,7 +26,7 @@ import org.eclipse.che.ide.reference.ShowReferencePresenter;
  * @author Vlad Zhukovskyi
  */
 @Singleton
-public class ShowReferenceAction extends Action {
+public class ShowReferenceAction extends BaseAction {
 
   private final ShowReferencePresenter showReferencePresenter;
   private final AppContext appContext;

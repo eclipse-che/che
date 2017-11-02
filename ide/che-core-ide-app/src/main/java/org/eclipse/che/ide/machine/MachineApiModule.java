@@ -13,27 +13,23 @@ package org.eclipse.che.ide.machine;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.inject.Singleton;
 import com.google.inject.name.Names;
-import org.eclipse.che.api.machine.shared.Constants;
+import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.ide.machine.chooser.MachineChooserView;
 import org.eclipse.che.ide.machine.chooser.MachineChooserViewImpl;
 import org.eclipse.che.requirejs.ModuleHolder;
 
-/**
- * GIN module for configuring Machine API related components.
- *
- * @author Artem Zatsarynnyi
- */
+/** GIN module for configuring Machine API related components. */
 public class MachineApiModule extends AbstractGinModule {
 
   @Override
   protected void configure() {
+    bind(ProcessesOutputRestorer.class).asEagerSingleton();
+    bind(MachineFailNotifier.class).asEagerSingleton();
+
     bind(MachineChooserView.class).to(MachineChooserViewImpl.class);
     bind(ModuleHolder.class).in(Singleton.class);
     bindConstant()
         .annotatedWith(Names.named("machine.extension.api_port"))
         .to(Constants.WS_AGENT_PORT);
-    bind(RecipeScriptDownloadServiceClient.class)
-        .to(RecipeScriptDownloadServiceClientImpl.class)
-        .in(Singleton.class);
   }
 }

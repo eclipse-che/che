@@ -134,7 +134,7 @@ public class MavenMessagesHandler {
     String message = output.getOutput();
     switch (output.getState()) {
       case START:
-        processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), outputConsole);
+        processesPanelPresenter.addCommandOutput(outputConsole);
         outputConsole.clearOutputsButtonClicked();
         outputConsole.printText(message, "green");
         break;

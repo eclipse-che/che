@@ -14,7 +14,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
+import com.google.common.collect.ImmutableSet;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.system.shared.event.service.StoppingSystemServiceEvent;
 import org.eclipse.che.api.system.shared.event.service.SystemServiceStoppedEvent;
@@ -42,7 +42,7 @@ public class SystemTerminatorTest {
   public void setUp() {
     when(termination1.getServiceName()).thenReturn("service1");
     when(termination2.getServiceName()).thenReturn("service2");
-    terminator = new ServiceTerminator(eventService, Arrays.asList(termination1, termination2));
+    terminator = new ServiceTerminator(eventService, ImmutableSet.of(termination1, termination2));
   }
 
   @Test

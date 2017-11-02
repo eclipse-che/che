@@ -20,8 +20,6 @@ import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.factory.server.model.impl.AuthorImpl;
 import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
-import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
@@ -92,30 +90,6 @@ public final class TestObjectsFactory {
         null,
         null,
         null);
-  }
-
-  public static SnapshotImpl createSnapshot(String snapshotId, String workspaceId) {
-    return new SnapshotImpl(
-        snapshotId,
-        "type",
-        null,
-        System.currentTimeMillis(),
-        workspaceId,
-        snapshotId + "_description",
-        true,
-        "dev-machine",
-        snapshotId + "env-name");
-  }
-
-  public static RecipeImpl createRecipe(String id) {
-    return new RecipeImpl(
-        id,
-        "recipe-name-" + id,
-        "recipe-creator",
-        "recipe-type",
-        "recipe-script",
-        asList("recipe-tag1", "recipe-tag2"),
-        "recipe-description");
   }
 
   public static StackImpl createStack(String id, String name) {

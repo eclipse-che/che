@@ -57,14 +57,8 @@ export class FactoryFromTemplateController {
    * Fetch factory template.
    */
   fetchFactoryTemplate() {
-    this.isImporting = true;
-    this.cheFactoryTemplate.fetchFactoryTemplate(this.templateName).then((factory: che.IFactory) => {
-      this.factoryContent = this.$filter('json')(factory, 2);
-    }, (error: any) => {
-      this.cheNotification.showError(error.data.message ? error.data.message : 'Fail to get factory template.');
-    }).finally(() => {
-      this.isImporting = false;
-    });
+    const factory = this.cheFactoryTemplate.getFactoryTemplate(this.templateName);
+    this.factoryContent = this.$filter('json')(factory, 2);
   }
 
 }

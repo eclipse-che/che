@@ -6,26 +6,6 @@
 #
 # Contributors:
 #   Red Hat, Inc.- initial API and implementation
-#
-# build:
-#   docker build -t eclipse/che-dev .
-#
-# use:
-#   docker run -it --rm --name build-che
-#              -v "$HOME/.m2:/home/user/.m2"
-#              -v "$PWD":/home/user/che-build
-#              -w /home/user/che-build
-#              codenvy/che-dev
-#              mvn -DskipTests=true
-#                  -Dfindbugs.skip=true
-#                  -Dgwt.compiler.localWorkers=2 -T 1C
-#                  -Dskip-validate-sources
-#                  -Pnative
-#              clean install
-#
-# For Windows, replace $HOME with maven repo directory.
-# For Windows, replace $PWD with Che source code directory.
-#
 
 
 FROM registry.centos.org/che-stacks/centos-stack-base

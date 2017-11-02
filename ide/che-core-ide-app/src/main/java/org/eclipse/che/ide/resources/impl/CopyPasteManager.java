@@ -24,8 +24,6 @@ import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.RequestCall;
-import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
@@ -35,6 +33,8 @@ import org.eclipse.che.ide.api.resources.modification.ClipboardManager;
 import org.eclipse.che.ide.api.resources.modification.CutResourceMarker;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmCallback;
 import org.eclipse.che.ide.util.loging.Log;
 
 /**

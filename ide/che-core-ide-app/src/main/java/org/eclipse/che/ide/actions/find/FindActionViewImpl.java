@@ -22,11 +22,9 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import elemental.dom.Element;
 import elemental.dom.Node;
 import elemental.html.TableCellElement;
@@ -39,15 +37,14 @@ import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.Presentation;
-import org.eclipse.che.ide.api.autocomplete.AutoCompleteResources;
+import org.eclipse.che.ide.api.editor.codeassist.AutoCompleteResources;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
-import org.eclipse.che.ide.api.parts.PerspectiveManager;
+import org.eclipse.che.ide.ui.ElementWidget;
 import org.eclipse.che.ide.ui.list.SimpleList;
 import org.eclipse.che.ide.ui.toolbar.PresentationFactory;
 import org.eclipse.che.ide.ui.toolbar.ToolbarResources;
 import org.eclipse.che.ide.util.dom.Elements;
 import org.eclipse.che.ide.util.input.KeyMapUtil;
-import org.vectomatic.dom.svg.ui.SVGImage;
 
 /**
  * @author Evgen Vidolob
@@ -83,14 +80,10 @@ public class FindActionViewImpl extends PopupPanel implements FindActionView {
           TableCellElement group = Elements.createTDElement(css.proposalGroup());
 
           Presentation presentation = presentationFactory.getPresentation(itemData);
-          itemData.update(new ActionEvent(presentation, actionManager, perspectiveManager.get()));
+          itemData.update(new ActionEvent(presentation, actionManager));
 
-          if (presentation.getImageResource() != null) {
-            Image image = new Image(presentation.getImageResource());
-            icon.appendChild((Node) image.getElement());
-
-          } else if (presentation.getSVGResource() != null) {
-            SVGImage image = new SVGImage(presentation.getSVGResource());
+          if (presentation.getImageElement() != null) {
+            ElementWidget image = new ElementWidget(presentation.getImageElement());
             image.getElement().setAttribute("class", toolbarResources.toolbar().iconButtonIcon());
             image.getElement().getStyle().setMargin(0, Style.Unit.PX);
             icon.appendChild((Node) image.getElement());
@@ -143,7 +136,6 @@ public class FindActionViewImpl extends PopupPanel implements FindActionView {
 
   private SimpleList<Action> list;
   private Map<Action, String> actions;
-  private Provider<PerspectiveManager> perspectiveManager;
   private ToolbarResources toolbarResources;
 
   @Inject
@@ -152,13 +144,11 @@ public class FindActionViewImpl extends PopupPanel implements FindActionView {
       KeyBindingAgent keyBindingAgent,
       ActionManager actionManager,
       AutoCompleteResources autoCompleteResources,
-      Provider<PerspectiveManager> perspectiveManager,
       ToolbarResources toolbarResources,
       FindActionViewImplUiBinder uiBinder) {
     this.resources = resources;
     this.keyBindingAgent = keyBindingAgent;
     this.actionManager = actionManager;
-    this.perspectiveManager = perspectiveManager;
     this.toolbarResources = toolbarResources;
     this.presentationFactory = new PresentationFactory();
 

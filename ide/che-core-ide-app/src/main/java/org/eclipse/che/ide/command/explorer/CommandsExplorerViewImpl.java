@@ -26,10 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandImpl;
-import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.command.CommandResources;
 import org.eclipse.che.ide.command.node.CommandFileNode;
@@ -38,6 +36,7 @@ import org.eclipse.che.ide.command.node.NodeFactory;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.Tree;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 
 /**
  * Implementation of {@link CommandsExplorerView}.
@@ -61,12 +60,7 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
 
   @Inject
   public CommandsExplorerViewImpl(
-      Resources coreResources,
-      ExplorerMessages messages,
-      CommandResources resources,
-      NodeFactory nodeFactory) {
-    super(coreResources);
-
+      ExplorerMessages messages, CommandResources resources, NodeFactory nodeFactory) {
     this.nodeFactory = nodeFactory;
     commandNodes = new HashMap<>();
 

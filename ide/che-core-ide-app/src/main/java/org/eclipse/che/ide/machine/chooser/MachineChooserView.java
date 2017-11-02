@@ -11,8 +11,8 @@
 package org.eclipse.che.ide.machine.chooser;
 
 import java.util.List;
-import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.ide.api.mvp.View;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 
 /**
  * Contract for the view of the machine chooser.
@@ -28,13 +28,13 @@ public interface MachineChooserView extends View<MachineChooserView.ActionDelega
   void close();
 
   /** Sets the machines to display in the view. */
-  void setMachines(List<? extends Machine> machines);
+  void setMachines(List<? extends MachineImpl> machines);
 
   /** The action delegate for this view. */
   interface ActionDelegate {
 
     /** Called when machine is selected. */
-    void onMachineSelected(Machine machine);
+    void onMachineSelected(MachineImpl machine);
 
     /** Called when machine selection has been canceled. Note that view will be already closed. */
     void onCanceled();

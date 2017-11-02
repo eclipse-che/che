@@ -12,7 +12,7 @@ package org.eclipse.che.ide.actions;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -40,7 +40,7 @@ public class EditFileAction extends AbstractPerspectiveAction {
 
   @Inject
   public EditFileAction(AppContext appContext, Resources resources, EditorAgent editorAgent) {
-    super(singletonList(PROJECT_PERSPECTIVE_ID), "Edit file", null, null, resources.defaultFile());
+    super(singletonList(PROJECT_PERSPECTIVE_ID), "Edit file", null, resources.defaultFile());
     this.appContext = appContext;
     this.editorAgent = editorAgent;
   }

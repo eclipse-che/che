@@ -26,14 +26,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.data.tree.Node;
-import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
 import org.eclipse.che.ide.resources.tree.SkipHiddenNodesInterceptor;
 import org.eclipse.che.ide.search.selectpath.FolderNodeInterceptor;
 import org.eclipse.che.ide.ui.smartTree.KeyboardNavigationHandler;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.Tree;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
+import org.eclipse.che.ide.ui.smartTree.data.NodeInterceptor;
 import org.eclipse.che.ide.ui.window.Window;
 
 /**

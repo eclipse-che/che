@@ -16,6 +16,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDAT
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElement;
+import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
@@ -39,8 +40,7 @@ public class Consoles {
   private final WebDriverWait updateProjDriverWait;
 
   public static final String PROCESS_NAME_XPATH = "//span[text()='%s']";
-  public static final String PROCESSES_MAIN_AREA =
-      "//div[@role='toolbar-header']//div[text()='Processes']";
+  public static final String PROCESSES_MAIN_AREA = "gwt-debug-consolesPanel";
   public static final String CLOSE_PROCESS_ICON =
       "//div[@id='gwt-debug-consolesPanel']//ul//span[text()='%s']/parent::span/span";
   public static final String TAB_PROCESS_NAME =
@@ -52,14 +52,20 @@ public class Consoles {
   public static final String OPEN_NEW_TERMINAL = "//div[@id='gwt-debug-process-tree']//span/span";
   public static final String CLOSE_TERMINAL_CONSOLES_ICON =
       "//span[text()='Terminal']/preceding::span[2]";
-  public static final String PROCESSES_TAB = "gwt-debug-partButton-Processes";
+  public static final String PROCESSES_BUTTON = "gwt-debug-partButton-Processes";
   public static final String MAXIMIZE_PANEL_ICON =
-      "//div[@id='gwt-debug-infoPanel']//div[text()='Processes']/parent::div/following-sibling::div//*[local-name() = 'svg' and @name='workBenchIconMaximize']";
+      "//div[@id='gwt-debug-infoPanel']//div[@id='gwt-debug-maximizeButton']";
   public static final String HIDE_CONSOLES_ICON =
-      "//div[@id='gwt-debug-infoPanel']//div[text()='Processes']/parent::div/following-sibling::div//*[local-name() = 'svg' and @name='workBenchIconMinimize']";
+      "//div[@id='gwt-debug-infoPanel']//div[@id='gwt-debug-hideButton']";
   public static final String PREVIEW_URL = "//div[@active]//a[@href]";
   public static final String COMMAND_CONSOLE_ID =
       "//div[@active]//div[@id='gwt-debug-commandConsoleLines']";
+  public static final String PLUS_ICON = "gwt-debug-plusPanel";
+  public static final String SERVER_MENU_ITEM = "contextMenu/Servers";
+  public static final String SERVER_INFO_TABLE_CAPTION = "gwt-debug-runtimeInfoCellTableCaption";
+  public static final String SERVER_INFO_HIDE_INTERNAL_CHECK_BOX =
+      "gwt-debug-runtimeInfoHideServersCheckBox";
+
   protected final SeleniumWebDriver seleniumWebDriver;
   private final Loader loader;
   private static final String CONSOLE_PANEL_DRUGGER_CSS = "div.gwt-SplitLayoutPanel-VDragger";
@@ -77,8 +83,8 @@ public class Consoles {
   @FindBy(css = CONSOLE_PANEL_DRUGGER_CSS)
   WebElement consolesPanelDrag;
 
-  @FindBy(id = PROCESSES_TAB)
-  WebElement processesTab;
+  @FindBy(id = PROCESSES_BUTTON)
+  WebElement processesBtn;
 
   @FindBy(id = DEBUG_TAB)
   WebElement debugTab;
@@ -101,12 +107,26 @@ public class Consoles {
   @FindBy(xpath = PREVIEW_URL)
   WebElement previewUrl;
 
-  @FindBy(xpath = PROCESSES_MAIN_AREA)
+  @FindBy(id = PROCESSES_MAIN_AREA)
   WebElement processesMainArea;
 
-  /** click on consoles tab in bottom and wait opening console area (terminal on other console ) */
-  public void clickOnProcessesTab() {
-    redrawDriverWait.until(visibilityOf(processesTab)).click();
+  @FindBy(id = PLUS_ICON)
+  WebElement plusMenuBtn;
+
+  @FindBy(id = SERVER_MENU_ITEM)
+  WebElement serverMenuItem;
+
+  @FindBy(id = SERVER_INFO_TABLE_CAPTION)
+  WebElement serverInfoTableCaption;
+
+  @FindBy(id = SERVER_INFO_HIDE_INTERNAL_CHECK_BOX)
+  WebElement serverInfoHideInternalCheckBox;
+
+  /**
+   * click on consoles icon in side line and wait opening console area (terminal on other console )
+   */
+  public void clickOnProcessesButton() {
+    redrawDriverWait.until(visibilityOf(processesBtn)).click();
   }
 
   /** click on consoles tab in bottom and wait opening console area (terminal on other console ) */
@@ -117,6 +137,30 @@ public class Consoles {
   /** click on preview url link */
   public void clickOnPreviewUrl() {
     loadPageDriverWait.until(visibilityOf(previewUrl)).click();
+  }
+
+  public void clickOnServerItemInContextMenu() {
+    redrawDriverWait.until(visibilityOf(serverMenuItem)).click();
+  }
+
+  public void clickOnPlusMenuButton() {
+    redrawDriverWait.until(visibilityOf(plusMenuBtn)).click();
+  }
+
+  public void clickOnHideInternalServers() {
+    redrawDriverWait.until(visibilityOf(serverInfoHideInternalCheckBox)).click();
+  }
+
+  public void waitExpectedTextIntoServerTableCation(String expectedText) {
+    updateProjDriverWait.until(textToBePresentInElement(serverInfoTableCaption, expectedText));
+  }
+
+  public void checkReferenceList(String id, String expectedText) {
+    updateProjDriverWait.until(textToBePresentInElementLocated(By.id(id), expectedText));
+  }
+
+  public void waitReferenceIsNotPresent(String referenceId) {
+    redrawDriverWait.until(invisibilityOfElementLocated(By.id(referenceId)));
   }
 
   public void waitExpectedTextIntoPreviewUrl(String expectedText) {

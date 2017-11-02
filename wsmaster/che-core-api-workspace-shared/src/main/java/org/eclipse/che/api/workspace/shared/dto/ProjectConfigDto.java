@@ -17,7 +17,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.factory.FactoryParameter;
-import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.dto.shared.DTO;
 

@@ -9,6 +9,7 @@
  */
 package org.eclipse.che.plugin.composer.ide;
 
+import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 import static org.eclipse.che.plugin.composer.shared.Constants.COMPOSER_CHANNEL_OUTPUT;
 import static org.eclipse.che.plugin.composer.shared.Constants.COMPOSER_CHANNEL_SUBSCRIBE;
 
@@ -28,7 +29,6 @@ import org.eclipse.che.plugin.composer.shared.dto.ComposerOutput;
  */
 @Singleton
 public class ComposerJsonRpcHandler {
-  private static final String WS_AGENT_ENDPOINT = "ws-agent";
 
   private RequestHandlerConfigurator configurator;
 
@@ -51,7 +51,7 @@ public class ComposerJsonRpcHandler {
 
     requestTransmitter
         .newRequest()
-        .endpointId(WS_AGENT_ENDPOINT)
+        .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
         .methodName(COMPOSER_CHANNEL_SUBSCRIBE)
         .noParams()
         .sendAndSkipResult();

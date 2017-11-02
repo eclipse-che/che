@@ -15,7 +15,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
-import org.eclipse.che.api.core.model.project.SourceStorage;
+import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.project.shared.Constants;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.promises.client.Function;

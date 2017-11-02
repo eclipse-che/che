@@ -46,7 +46,7 @@ public class JavaSearchServiceRest implements JavaSearchService {
     this.asyncRequestFactory = asyncRequestFactory;
     this.unmarshallerFactory = unmarshallerFactory;
     this.loader = loaderFactory.newLoader();
-    this.pathToService = appContext.getDevMachine().getWsAgentBaseUrl() + "/jdt/search/";
+    this.pathToService = appContext.getWsAgentServerApiEndpoint() + "/jdt/search/";
   }
 
   @Override

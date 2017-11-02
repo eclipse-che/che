@@ -22,8 +22,6 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.ide.api.data.tree.Node;
-import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent.ResourceChangedHandler;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
@@ -34,6 +32,8 @@ import org.eclipse.che.ide.ext.java.shared.Jar;
 import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.project.node.SyntheticNodeUpdateEvent;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
+import org.eclipse.che.ide.ui.smartTree.data.settings.NodeSettings;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 
 /** @author Vlad Zhukovskiy */

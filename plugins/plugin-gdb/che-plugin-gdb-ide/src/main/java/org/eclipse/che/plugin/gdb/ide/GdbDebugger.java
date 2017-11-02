@@ -43,7 +43,6 @@ public class GdbDebugger extends AbstractDebugger {
   public static final String ID = "gdb";
 
   private GdbLocalizationConstant locale;
-  private final AppContext appContext;
 
   @Inject
   public GdbDebugger(
@@ -70,12 +69,12 @@ public class GdbDebugger extends AbstractDebugger {
         eventBus,
         debuggerManager,
         notificationManager,
+        appContext,
         breakpointManager,
         requestHandlerManager,
         debuggerLocationHandlerManager,
         ID);
     this.locale = locale;
-    this.appContext = appContext;
   }
 
   @Override

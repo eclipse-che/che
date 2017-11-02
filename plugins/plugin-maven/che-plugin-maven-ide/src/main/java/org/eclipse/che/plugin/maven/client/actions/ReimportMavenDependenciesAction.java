@@ -12,7 +12,7 @@ package org.eclipse.che.plugin.maven.client.actions;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ID;
 
 import com.google.common.base.Optional;
@@ -60,7 +60,6 @@ public class ReimportMavenDependenciesAction extends AbstractPerspectiveAction {
         Collections.singletonList(PROJECT_PERSPECTIVE_ID),
         constant.actionReimportDependenciesTitle(),
         constant.actionReimportDependenciesDescription(),
-        null,
         resources.refresh());
     this.appContext = appContext;
     this.notificationManager = notificationManager;

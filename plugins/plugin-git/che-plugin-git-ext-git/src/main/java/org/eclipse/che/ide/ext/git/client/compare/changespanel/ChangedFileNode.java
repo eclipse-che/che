@@ -15,13 +15,13 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
-import org.eclipse.che.ide.api.data.tree.AbstractTreeNode;
-import org.eclipse.che.ide.api.data.tree.HasAction;
-import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelView.ActionDelegate;
-import org.eclipse.che.ide.project.shared.NodesResources;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.ui.smartTree.data.AbstractTreeNode;
+import org.eclipse.che.ide.ui.smartTree.data.HasAction;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.presentation.HasPresentation;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 
@@ -36,7 +36,7 @@ public class ChangedFileNode extends AbstractTreeNode implements HasPresentation
 
   private final String pathName;
   private final Status status;
-  private final NodesResources nodesResources;
+  private final GitResources gitResources;
   private final ActionDelegate actionDelegate;
   private final boolean viewPath;
 
@@ -45,7 +45,7 @@ public class ChangedFileNode extends AbstractTreeNode implements HasPresentation
    *
    * @param pathName name of the file that represents this node with its full path
    * @param status git status of the file that represents this node
-   * @param nodesResources resources that contain icons
+   * @param gitResources resources that contain icons
    * @param actionDelegate sends delegated events from the view
    * @param viewPath <code>true</code> if it is needed to view file name with its full path, and
    *     <code>false</code> if it is needed to view only name of the file
@@ -53,12 +53,12 @@ public class ChangedFileNode extends AbstractTreeNode implements HasPresentation
   ChangedFileNode(
       String pathName,
       Status status,
-      NodesResources nodesResources,
+      GitResources gitResources,
       ActionDelegate actionDelegate,
       boolean viewPath) {
     this.pathName = pathName;
     this.status = status;
-    this.nodesResources = nodesResources;
+    this.gitResources = gitResources;
     this.actionDelegate = actionDelegate;
     this.viewPath = viewPath;
   }
@@ -91,20 +91,25 @@ public class ChangedFileNode extends AbstractTreeNode implements HasPresentation
   public void updatePresentation(@NotNull NodePresentation presentation) {
     String name = Path.valueOf(pathName).lastSegment();
     presentation.setPresentableText(viewPath ? name : pathName);
-    presentation.setPresentableIcon(nodesResources.file());
 
     switch (status) {
       case MODIFIED:
-        presentation.setPresentableTextCss("color: DodgerBlue ;");
+        presentation.setPresentableIcon(gitResources.iconModified());
         return;
       case DELETED:
-        presentation.setPresentableTextCss("color: red;");
+        presentation.setPresentableIcon(gitResources.iconDeleted());
         return;
       case ADDED:
-        presentation.setPresentableTextCss("color: green;");
+        presentation.setPresentableIcon(gitResources.iconAdded());
+        return;
+      case RENAMED:
+        presentation.setPresentableIcon(gitResources.iconRenamed());
         return;
       case COPIED:
-        presentation.setPresentableTextCss("color: purple;");
+        presentation.setPresentableIcon(gitResources.iconCopied());
+        return;
+      case UNTRACKED:
+        presentation.setPresentableIcon(gitResources.iconUntracked());
         return;
       default:
     }

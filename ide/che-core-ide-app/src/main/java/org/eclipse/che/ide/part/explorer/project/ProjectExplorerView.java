@@ -11,10 +11,10 @@
 package org.eclipse.che.ide.part.explorer.project;
 
 import java.util.List;
-import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
 import org.eclipse.che.ide.ui.smartTree.Tree;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 
 /**
  * View interface for the {@link ProjectExplorerViewImpl}.
@@ -31,6 +31,9 @@ public interface ProjectExplorerView extends View<ProjectExplorerView.ActionDele
    * @return true - if "Go Into" mode has been activated
    */
   boolean setGoIntoModeOn(Node node);
+
+  /** Deactivate "Go Into" mode. */
+  void setGoIntoModeOff();
 
   /**
    * Get "Go Into" state on current tree.
@@ -87,20 +90,5 @@ public interface ProjectExplorerView extends View<ProjectExplorerView.ActionDele
 
   Tree getTree();
 
-  /**
-   * Change state of the 'Link with editor' button.
-   *
-   * @param activated the button will be activated when {@code activated} is {@code true} and
-   *     deactivated otherwise
-   */
-  void activateLinkWithEditorButton(boolean activated);
-
-  interface ActionDelegate extends BaseActionDelegate {
-
-    /**
-     * Performs any actions appropriate in response to user has clicked on the 'Link with editor'
-     * button.
-     */
-    void onLinkWithEditorButtonClicked();
-  }
+  interface ActionDelegate extends BaseActionDelegate {}
 }

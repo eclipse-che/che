@@ -10,10 +10,7 @@
  */
 package org.eclipse.che.api.system.server;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.system.shared.event.service.StoppingSystemServiceEvent;
@@ -31,17 +28,12 @@ class ServiceTerminator {
   private static final Logger LOG = LoggerFactory.getLogger(ServiceTerminator.class);
 
   private final EventService eventService;
-  private final List<ServiceTermination> terminations;
+  private final Set<ServiceTermination> terminations;
 
   @Inject
-  ServiceTerminator(EventService eventService, WorkspaceServiceTermination workspaceTermination) {
-    this(eventService, Collections.singletonList(workspaceTermination));
-  }
-
-  ServiceTerminator(
-      EventService eventService, Collection<? extends ServiceTermination> terminations) {
+  ServiceTerminator(EventService eventService, Set<ServiceTermination> terminations) {
     this.eventService = eventService;
-    this.terminations = new ArrayList<>(terminations);
+    this.terminations = terminations;
   }
 
   /**

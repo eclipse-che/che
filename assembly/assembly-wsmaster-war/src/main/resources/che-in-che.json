@@ -3,21 +3,15 @@
     "id": "che-in-che",
     "creator": "ide",
     "name": "Eclipse Che",
-    "description": "Utilities to build Che in Che with Docker, JDK 8, and Maven.",
+    "description": "Utilities to build Che in Che with JDK 8 and Maven.",
     "scope": "general",
     "tags": [
-      "Docker",
       "Java",
       "JDK",
       "Maven",
-      "Alpine",
       "Git"
     ],
     "components": [
-      {
-        "name": "Docker",
-        "version": "1.12.0"
-      },
       {
         "name": "JDK",
         "version": "1.8.0_92"
@@ -29,27 +23,33 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/alpine_jdk8"
+      "origin": "eclipse/che-dev"
     },
     "workspaceConfig": {
       "environments": {
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "installers": [
                 "org.eclipse.che.exec",
                 "org.eclipse.che.terminal",
                 "org.eclipse.che.ws-agent",
-                "org.eclipse.che.ssh"
+                "org.eclipse.che.ssh",
+                "org.eclipse.che.ls.js-ts"
               ],
-              "servers": {},
+              "servers": {
+                "GWT-CodeServer": {
+                  "protocol": "http",
+                  "port": "9876"
+                }
+              },
               "attributes": {
-                "memoryLimitBytes": "2147483648"
+                "memoryLimitBytes": "7516192768"
               }
             }
           },
           "recipe": {
-            "location": "codenvy/alpine_jdk8",
+            "location": "eclipse/che-dev",
             "type": "dockerimage"
           }
         }
@@ -59,32 +59,18 @@
       "description": null,
       "commands": [
         {
-          "commandLine": "sudo docker rename che-server che-host;sudo apk update; sudo apk add curl;export HOST_IP=$(curl -s https://4.ifcfg.me/)",
-          "name": "1. Setup Che in Che",
+          "commandLine": "mvn clean install -DskipIntegrationTests=true -Pnative -f ${current.project.path}",
+          "name": "Build project",
           "type": "custom"
         },
         {
-          "commandLine": "mvn clean install -f /projects/che/assembly/assembly-main",
-          "name": "2. Build Che in Che",
-          "type": "custom"
-        },
-        {
-          "commandLine": "export CHE_BIN_PATH=$(ls -d /projects/che/assembly/assembly-main/target/eclipse-che-*/eclipse-che-*); sudo docker run -t -v /var/run/docker.sock:/var/run/docker.sock --env CHE_ASSEMBLY=${CHE_BIN_PATH//projects/'home/user/che/workspaces/che'} --env CHE_HOST_IP=$HOST_IP --env CHE_PORT=54321 eclipse/che-launcher start",
-          "name": "3. Run Che in Che",
-          "type": "custom",
+          "commandLine": "cd /projects/che && mvn gwt:codeserver -pl :che-ide-gwt-app -am -Pfast",
+          "name": "GWT SDM",
+          "type": "gwt_sdm_che",
           "attributes": {
-            "previewUrl": "http://<host.ip>:54321/"
+            "previewUrl": "",
+            "goal": "Run"
           }
-        },
-        {
-          "commandLine": "sudo docker run -t -v /var/run/docker.sock:/var/run/docker.sock eclipse/che-launcher stop",
-          "name": "4. Stop Che in Che",
-          "type": "custom"
-        },
-        {
-          "commandLine": "sudo docker rm -f che-server",
-          "name": "** Kill Che in Che **",
-          "type": "custom"
         }
       ]
     },

@@ -10,9 +10,6 @@
  */
 package org.eclipse.che.api.deploy;
 
-import static org.eclipse.che.plugin.docker.machine.ExecAgentLogDirSetterEnvVariableProvider.LOGS_DIR_SETTER_VARIABLE;
-import static org.eclipse.che.plugin.docker.machine.ExecAgentLogDirSetterEnvVariableProvider.LOGS_DIR_VARIABLE;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 import javax.sql.DataSource;
@@ -20,6 +17,8 @@ import org.eclipse.che.api.user.server.jpa.JpaPreferenceDao;
 import org.eclipse.che.api.user.server.jpa.JpaUserDao;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
+import org.eclipse.che.commons.auth.token.ChainedTokenExtractor;
+import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.mail.template.ST.STTemplateProcessorImpl;
 import org.eclipse.che.mail.template.TemplateProcessor;
@@ -27,6 +26,7 @@ import org.eclipse.che.multiuser.api.permission.server.AdminPermissionInitialize
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 import org.eclipse.che.multiuser.api.permission.server.PermissionCheckerImpl;
 import org.eclipse.che.multiuser.keycloak.server.deploy.KeycloakModule;
+import org.eclipse.che.multiuser.machine.authentication.server.MachineAuthModule;
 import org.eclipse.che.multiuser.organization.api.OrganizationApiModule;
 import org.eclipse.che.multiuser.organization.api.OrganizationJpaModule;
 import org.eclipse.che.multiuser.resource.api.ResourceModule;
@@ -38,6 +38,7 @@ public class MultiUserCheWsMasterModule extends AbstractModule {
 
   @Override
   protected void configure() {
+
     bind(TemplateProcessor.class).to(STTemplateProcessorImpl.class);
 
     bind(DataSource.class).toProvider(org.eclipse.che.core.db.JndiDataSourceProvider.class);
@@ -69,11 +70,16 @@ public class MultiUserCheWsMasterModule extends AbstractModule {
 
     install(new KeycloakModule());
 
+    install(new MachineAuthModule());
+    bind(RequestTokenExtractor.class).to(ChainedTokenExtractor.class);
+
     // User and profile - use profile from keycloak and other stuff is JPA
     bind(PasswordEncryptor.class).to(PBKDF2PasswordEncryptor.class);
     bind(UserDao.class).to(JpaUserDao.class);
     bind(PreferenceDao.class).to(JpaPreferenceDao.class);
     bind(PermissionChecker.class).to(PermissionCheckerImpl.class);
+
+    bindConstant().annotatedWith(Names.named("che.agents.auth_enabled")).to(true);
 
     bindConstant()
         .annotatedWith(Names.named("machine.terminal_agent.run_command"))
@@ -90,10 +96,6 @@ public class MultiUserCheWsMasterModule extends AbstractModule {
                 + "-addr :4412 "
                 + "-cmd ${SHELL_INTERPRETER} "
                 + "-enable-auth "
-                + "-logs-dir $(eval \"$"
-                + LOGS_DIR_SETTER_VARIABLE
-                + "\"; echo \"$"
-                + LOGS_DIR_VARIABLE
-                + "\")");
+                + "-logs-dir $HOME/che/exec-agent/logs");
   }
 }

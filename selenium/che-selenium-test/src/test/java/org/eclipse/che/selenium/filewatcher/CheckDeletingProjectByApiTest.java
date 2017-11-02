@@ -45,7 +45,7 @@ public class CheckDeletingProjectByApiTest {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(projectName);
     projectExplorer.waitItem(projectName2);
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     deleteAndWaitProjectNotExistByApi(projectName);
     deleteAndWaitProjectNotExistByApi(projectName2);
   }

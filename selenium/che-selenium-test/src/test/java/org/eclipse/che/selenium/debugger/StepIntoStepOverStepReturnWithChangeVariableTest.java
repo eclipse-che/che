@@ -123,9 +123,10 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
         TestMenuCommandsConstants.Run.DEBUG + "/" + PROJECT);
     editor.waitActiveBreakpoint(34);
     String appUrl =
-        "http"
-            + "://"
-            + workspaceServiceClient.getServerAddressByPort(ws.getId(), 8080)
+        workspaceServiceClient
+                .getServerFromDevMachineBySymbolicName(ws.getId(), "8080/tcp")
+                .getUrl()
+                .replace("tcp", "http")
             + "/spring/guess";
     String requestMess = "numGuess=6&submit=Ok";
     CompletableFuture<String> instToRequestThread =

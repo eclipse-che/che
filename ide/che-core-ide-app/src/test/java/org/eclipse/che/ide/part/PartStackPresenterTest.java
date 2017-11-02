@@ -25,7 +25,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import java.util.List;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
-import org.eclipse.che.ide.api.event.EditorDirtyStateChangedEvent;
+import org.eclipse.che.ide.api.editor.events.EditorDirtyStateChangedEvent;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStackView;
 import org.eclipse.che.ide.api.parts.PropertyListener;
@@ -34,7 +34,6 @@ import org.eclipse.che.ide.menu.PartMenu;
 import org.eclipse.che.ide.part.PartStackPresenter.PartStackEventHandler;
 import org.eclipse.che.ide.part.widgets.TabItemFactory;
 import org.eclipse.che.ide.part.widgets.partbutton.PartButton;
-import org.eclipse.che.ide.workspace.WorkBenchPartController;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -193,7 +192,7 @@ public class PartStackPresenterTest {
     presenter.addPart(partPresenter);
     presenter.setActivePart(partPresenter);
 
-    presenter.minimize();
+    presenter.hide();
 
     verify(workBenchPartController).getSize();
     verify(workBenchPartController).setSize(0);

@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.debugger.ide.debug.tree.node.comparator;
 
 import java.util.Comparator;
-import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.plugin.debugger.ide.debug.tree.node.VariableNode;
 
 /**

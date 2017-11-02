@@ -18,7 +18,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.extension.Extension;
-import org.eclipse.che.ide.rest.RestContext;
 
 /**
  * Adds activity tracking script to IDE.
@@ -30,8 +29,7 @@ import org.eclipse.che.ide.rest.RestContext;
 public class ActivityTrackingExtension {
 
   @Inject
-  public ActivityTrackingExtension(
-      final @RestContext String restContext, final AppContext appContext) {
+  public ActivityTrackingExtension(AppContext appContext) {
 
     ScriptInjector.fromUrl("/_app/activity.js")
         .setWindow(TOP_WINDOW)
@@ -39,7 +37,7 @@ public class ActivityTrackingExtension {
             new Callback<Void, Exception>() {
               @Override
               public void onSuccess(Void result) {
-                init(restContext, appContext.getWorkspaceId());
+                init(appContext.getMasterApiEndpoint(), appContext.getWorkspaceId());
               }
 
               @Override

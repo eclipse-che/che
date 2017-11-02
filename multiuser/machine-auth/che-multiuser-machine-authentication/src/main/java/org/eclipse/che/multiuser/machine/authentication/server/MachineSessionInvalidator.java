@@ -10,10 +10,9 @@
  */
 package org.eclipse.che.multiuser.machine.authentication.server;
 
-import com.google.common.annotations.VisibleForTesting;
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
@@ -27,24 +26,21 @@ import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 public class MachineSessionInvalidator implements EventSubscriber<WorkspaceStatusEvent> {
 
   private final MachineTokenRegistry tokenRegistry;
-  private final EventService eventService;
 
   @Inject
-  public MachineSessionInvalidator(MachineTokenRegistry tokenRegistry, EventService eventService) {
+  public MachineSessionInvalidator(MachineTokenRegistry tokenRegistry) {
     this.tokenRegistry = tokenRegistry;
-    this.eventService = eventService;
   }
 
   @Override
   public void onEvent(WorkspaceStatusEvent event) {
-    if (WorkspaceStatusEvent.EventType.STOPPED.equals(event.getEventType())) {
+    if (WorkspaceStatus.STOPPED.equals(event.getStatus())) {
       tokenRegistry.removeTokens(event.getWorkspaceId()).values();
     }
   }
 
-  @PostConstruct
-  @VisibleForTesting
-  void subscribe() {
+  @Inject
+  private void subscribe(EventService eventService) {
     eventService.subscribe(this);
   }
 }

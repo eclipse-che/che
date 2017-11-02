@@ -22,15 +22,15 @@ import com.google.inject.Singleton;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.git.shared.Revision;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
+import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
 /**
  * Presenter for displaying list of revisions for comparing selected with local changes.

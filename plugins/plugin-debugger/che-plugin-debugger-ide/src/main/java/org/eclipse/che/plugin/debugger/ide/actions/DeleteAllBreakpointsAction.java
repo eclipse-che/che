@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.plugin.debugger.ide.actions;
 
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Inject;
 import java.util.Collections;
@@ -38,7 +38,6 @@ public class DeleteAllBreakpointsAction extends AbstractPerspectiveAction {
         Collections.singletonList(PROJECT_PERSPECTIVE_ID),
         locale.deleteAllBreakpoints(),
         locale.deleteAllBreakpointsDescription(),
-        null,
         resources.deleteAllBreakpoints());
     this.breakpointManager = breakpointManager;
   }

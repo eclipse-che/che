@@ -13,10 +13,10 @@ package org.eclipse.che.api.project.server;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 
 /**
- * Synchronizer for Project Configurations stored in Workspace Configuration with Agent's state
+ * Synchronizer for Project Configurations stored in Workspace Configuration with Installer's state
  *
  * @author gazarenkov
  */

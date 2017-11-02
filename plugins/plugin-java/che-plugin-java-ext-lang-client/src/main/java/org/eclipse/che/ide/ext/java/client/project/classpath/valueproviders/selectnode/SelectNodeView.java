@@ -12,9 +12,9 @@ package org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.sel
 
 import com.google.inject.ImplementedBy;
 import java.util.List;
-import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.selectnode.interceptors.ClasspathNodeInterceptor;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 
 /**
  * Represents the structure of the workspace. It needs for choosing a needed node.

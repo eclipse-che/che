@@ -19,7 +19,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import org.eclipse.che.api.core.model.machine.Command;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.commons.annotation.Nullable;
 
 /** Data object for {@link Command}. */

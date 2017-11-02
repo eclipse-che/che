@@ -65,12 +65,16 @@ export class CreateWorkspaceSvc {
    * Confirmation dialog service.
    */
   private confirmDialogService: ConfirmDialogService;
+  /**
+   * Document service.
+   */
+  private $document: ng.IDocumentService;
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($location: ng.ILocationService, $log: ng.ILogService, $q: ng.IQService, cheWorkspace: CheWorkspace, namespaceSelectorSvc: NamespaceSelectorSvc, stackSelectorSvc: StackSelectorSvc, projectSourceSelectorService: ProjectSourceSelectorService, cheNotification: CheNotification, confirmDialogService: ConfirmDialogService) {
+  constructor($location: ng.ILocationService, $log: ng.ILogService, $q: ng.IQService, cheWorkspace: CheWorkspace, namespaceSelectorSvc: NamespaceSelectorSvc, stackSelectorSvc: StackSelectorSvc, projectSourceSelectorService: ProjectSourceSelectorService, cheNotification: CheNotification, confirmDialogService: ConfirmDialogService, $document: ng.IDocumentService) {
     this.$location = $location;
     this.$log = $log;
     this.$q = $q;
@@ -80,6 +84,7 @@ export class CreateWorkspaceSvc {
     this.projectSourceSelectorService = projectSourceSelectorService;
     this.cheNotification = cheNotification;
     this.confirmDialogService = confirmDialogService;
+    this.$document = $document;
 
     this.workspacesByNamespace = {};
   }
@@ -157,9 +162,10 @@ export class CreateWorkspaceSvc {
   createWorkspace(workspaceConfig: che.IWorkspaceConfig, attributes?: any): ng.IPromise<any> {
     const namespaceId = this.namespaceSelectorSvc.getNamespaceId(),
           projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
-    workspaceConfig.projects = projectTemplates;
+
     return this.checkEditingProgress().then(() => {
       workspaceConfig.projects = projectTemplates;
+      this.addProjectCommands(workspaceConfig, projectTemplates);
       return this.cheWorkspace.createWorkspaceFromConfig(namespaceId, workspaceConfig, attributes).then((workspace: che.IWorkspace) => {
 
         return this.cheWorkspace.startWorkspace(workspace.id, workspace.config.defaultEnv).then(() => {
@@ -171,11 +177,6 @@ export class CreateWorkspaceSvc {
           return this.cheWorkspace.fetchStatusChange(workspace.id, 'RUNNING');
         }).then(() => {
           return this.cheWorkspace.fetchWorkspaceDetails(workspace.id);
-        }).then(() => {
-          return this.addProjectCommands(workspace.id, projectTemplates);
-        }).then(() => {
-          let IDE = this.getIDE();
-          IDE.CommandManager.refresh();
         });
       }, (error: any) => {
         let errorMessage = 'Creation workspace failed.';
@@ -234,39 +235,20 @@ export class CreateWorkspaceSvc {
   }
 
   /**
-   * Adds commands from the bunch of projects in row.
-   * Returns resolved promise if all commands are aded properly, otherwise returns rejected promise with list of names of failed projects.
+   * Adds commands from the bunch of project templates to provided workspace config.
    *
-   * @param {string} workspaceId the workspace ID
+   * @param {che.IWorkspaceConfig} workspaceConfig workspace config
    * @param {Array<che.IProjectTemplate>} projectTemplates the list of project templates
-   * @return {IPromise<any>}
    */
-  addProjectCommands(workspaceId: string, projectTemplates: Array<che.IProjectTemplate>): ng.IPromise<any> {
-    const defer = this.$q.defer();
-    defer.resolve();
-    let accumulatorPromise = defer.promise;
+  addProjectCommands(workspaceConfig: che.IWorkspaceConfig, projectTemplates: Array<che.IProjectTemplate>): void {
+    workspaceConfig.commands = workspaceConfig.commands || [];
 
-    const failedProjects = [];
-
-    accumulatorPromise = projectTemplates.reduce((_accumulatorPromise: ng.IPromise<any>, project: che.IProjectTemplate) => {
-      return _accumulatorPromise.then(() => {
-        return this.addCommands(workspaceId, project.name, project.commands).catch(() => {
-          // adding commands errors, ignore them here
-          return this.$q.when();
-        }).catch((error: any) => {
-          failedProjects.push(project.name);
-          if (error && error.message) {
-            this.$log.error(`Importing of project ${project.name} failed with error: ${error.message}`);
-          }
-        });
+    projectTemplates.forEach((template: che.IProjectTemplate) => {
+      let projectName = template.name;
+      template.commands.forEach((command: any) => {
+        command.name = projectName + ':' + command.name;
+        workspaceConfig.commands.push(command);
       });
-    }, accumulatorPromise);
-
-    return accumulatorPromise.then(() => {
-      if (failedProjects.length) {
-        return this.$q.reject(failedProjects);
-      }
-      return this.$q.when();
     });
   }
 
@@ -311,7 +293,11 @@ export class CreateWorkspaceSvc {
   }
 
   private getIDE(): any {
-    return (window.frames[0] as any).IDE;
+    const jqIframe = this.$document.find('#ide-application-iframe');
+    if (!jqIframe || jqIframe.length === 0) {
+      return null;
+    }
+    return (jqIframe as any).contentWindow.IDE;
   }
 
 }

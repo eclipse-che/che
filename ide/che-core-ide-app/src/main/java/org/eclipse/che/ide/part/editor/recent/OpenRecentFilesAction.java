@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.part.editor.recent;
 
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -35,9 +35,7 @@ public class OpenRecentFilesAction extends AbstractPerspectiveAction {
     super(
         singletonList(PROJECT_PERSPECTIVE_ID),
         locale.openRecentFileTitle(),
-        locale.openRecentFileDescription(),
-        null,
-        null);
+        locale.openRecentFileDescription());
     this.recentFileList = recentFileList;
   }
 

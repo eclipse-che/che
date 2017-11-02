@@ -35,7 +35,6 @@ public class FindActionAction extends AbstractPerspectiveAction {
         null,
         localization.actionFindActionDescription(),
         localization.actionFindActionTitle(),
-        null,
         resources.findActions());
     this.presenter = presenter;
   }

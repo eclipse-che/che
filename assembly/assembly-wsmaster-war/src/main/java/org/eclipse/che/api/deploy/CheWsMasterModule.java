@@ -10,13 +10,11 @@
  */
 package org.eclipse.che.api.deploy;
 
-import static org.eclipse.che.plugin.docker.machine.ExecAgentLogDirSetterEnvVariableProvider.LOGS_DIR_SETTER_VARIABLE;
-import static org.eclipse.che.plugin.docker.machine.ExecAgentLogDirSetterEnvVariableProvider.LOGS_DIR_VARIABLE;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 import javax.sql.DataSource;
 import org.eclipse.che.api.user.server.TokenValidator;
+import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
 import org.eclipse.che.inject.DynaModule;
 
 /**
@@ -30,12 +28,7 @@ public class CheWsMasterModule extends AbstractModule {
   protected void configure() {
 
     bind(TokenValidator.class).to(org.eclipse.che.api.local.DummyTokenValidator.class);
-
-    bind(org.eclipse.che.api.agent.server.WsAgentHealthChecker.class)
-        .to(org.eclipse.che.api.agent.server.WsAgentHealthCheckerImpl.class);
-
-    bind(org.eclipse.che.api.environment.server.MachineInstanceProvider.class)
-        .to(org.eclipse.che.plugin.docker.machine.MachineProviderImpl.class);
+    bind(MachineTokenProvider.class).to(MachineTokenProvider.EmptyMachineTokenProvider.class);
 
     bind(org.eclipse.che.api.workspace.server.stack.StackLoader.class);
     bind(DataSource.class).toProvider(org.eclipse.che.core.db.h2.H2DataSourceProvider.class);
@@ -44,6 +37,8 @@ public class CheWsMasterModule extends AbstractModule {
     install(new org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule());
 
     bind(org.eclipse.che.api.user.server.CheUserCreator.class);
+
+    bindConstant().annotatedWith(Names.named("che.agents.auth_enabled")).to(false);
 
     bindConstant()
         .annotatedWith(Names.named("machine.terminal_agent.run_command"))
@@ -58,10 +53,6 @@ public class CheWsMasterModule extends AbstractModule {
             "$HOME/che/exec-agent/che-exec-agent "
                 + "-addr :4412 "
                 + "-cmd ${SHELL_INTERPRETER} "
-                + "-logs-dir $(eval \"$"
-                + LOGS_DIR_SETTER_VARIABLE
-                + "\"; echo \"$"
-                + LOGS_DIR_VARIABLE
-                + "\")");
+                + "-logs-dir $HOME/che/exec-agent/logs");
   }
 }

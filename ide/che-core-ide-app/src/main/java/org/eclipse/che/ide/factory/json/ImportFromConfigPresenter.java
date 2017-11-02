@@ -17,6 +17,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.api.factory.model.FactoryImpl;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -83,9 +84,9 @@ public class ImportFromConfigPresenter implements ImportFromConfigView.ActionDel
   @Override
   public void onImportClicked() {
     view.closeDialog();
-    FactoryDto factoryJson;
+    FactoryDto factoryDTO;
     try {
-      factoryJson = dtoFactory.createDtoFromJson(view.getFileContent(), FactoryDto.class);
+      factoryDTO = dtoFactory.createDtoFromJson(view.getFileContent(), FactoryDto.class);
     } catch (JSONException jsonException) {
       notification.setStatus(StatusNotification.Status.FAIL);
       notification.setContent("Error parsing factory object.");
@@ -98,7 +99,7 @@ public class ImportFromConfigPresenter implements ImportFromConfigView.ActionDel
             null,
             StatusNotification.Status.PROGRESS,
             NOT_EMERGE_MODE);
-    projectImporter.startImporting(factoryJson, importerCallback);
+    projectImporter.startImporting(new FactoryImpl(factoryDTO), importerCallback);
   }
 
   @Override

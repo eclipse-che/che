@@ -11,6 +11,7 @@
 package org.eclipse.che.plugin.debugger.ide.debug;
 
 import static junit.framework.TestCase.assertEquals;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -63,15 +64,16 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
 import org.eclipse.che.ide.api.filetypes.FileType;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.debug.DebuggerObserver;
@@ -120,6 +122,7 @@ public class DebuggerTest extends BaseTest {
   @Mock private DebuggerManager debuggerManager;
   @Mock private NotificationManager notificationManager;
   @Mock private BreakpointManager breakpointManager;
+  @Mock private AppContext appContext;
 
   @Mock(answer = RETURNS_DEEP_STUBS)
   private RequestTransmitter transmitter;
@@ -137,8 +140,9 @@ public class DebuggerTest extends BaseTest {
   @Mock private LocationDto locationDto;
   @Mock private BreakpointDto breakpointDto;
   @Mock private Optional<Project> optional;
+  @Mock private WorkspaceImpl workspace;
 
-  @Captor private ArgumentCaptor<WsAgentStateHandler> extServerStateHandlerCaptor;
+  @Captor private ArgumentCaptor<WorkspaceRunningEvent.Handler> workspaceRunningHandlerCaptor;
   @Captor private ArgumentCaptor<Operation<PromiseError>> operationPromiseErrorCaptor;
   @Captor private ArgumentCaptor<Operation<Void>> operationVoidCaptor;
   @Captor private ArgumentCaptor<Breakpoint> breakpointCaptor;
@@ -160,6 +164,9 @@ public class DebuggerTest extends BaseTest {
     super.setUp();
 
     debuggerDescriptor = new DebuggerDescriptor(NAME + " " + VERSION, HOST + ":" + PORT);
+
+    doReturn(STOPPED).when(workspace).getStatus();
+    doReturn(workspace).when(appContext).getWorkspace();
 
     doReturn(locationDto).when(dtoFactory).createDto(LocationDto.class);
     doReturn(breakpointDto).when(dtoFactory).createDto(BreakpointDto.class);
@@ -186,15 +193,15 @@ public class DebuggerTest extends BaseTest {
                 eventBus,
                 debuggerManager,
                 notificationManager,
+                appContext,
                 "id",
                 debuggerLocationHandlerManager));
     doReturn(promiseInfo).when(service).getSessionInfo(SESSION_ID);
     doReturn(promiseInfo).when(promiseInfo).then(any(Operation.class));
 
-    verify(eventBus).addHandler(eq(WsAgentStateEvent.TYPE), extServerStateHandlerCaptor.capture());
-    extServerStateHandlerCaptor
-        .getValue()
-        .onWsAgentStarted(WsAgentStateEvent.createWsAgentStartedEvent());
+    verify(eventBus)
+        .addHandler(eq(WorkspaceRunningEvent.TYPE), workspaceRunningHandlerCaptor.capture());
+    workspaceRunningHandlerCaptor.getValue().onWorkspaceRunning(new WorkspaceRunningEvent());
 
     debugger.addObserver(observer);
 
@@ -603,6 +610,7 @@ public class DebuggerTest extends BaseTest {
         EventBus eventBus,
         DebuggerManager debuggerManager,
         NotificationManager notificationManager,
+        AppContext appContext,
         String id,
         DebuggerLocationHandlerManager debuggerLocationHandlerManager) {
       super(
@@ -614,6 +622,7 @@ public class DebuggerTest extends BaseTest {
           eventBus,
           debuggerManager,
           notificationManager,
+          appContext,
           breakpointManager,
           requestHandlerManager,
           debuggerLocationHandlerManager,

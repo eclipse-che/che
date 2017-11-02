@@ -140,6 +140,9 @@ export class CheBranding {
    */
   registerCallback(callbackId: string, callback: Function): void {
     this.callbacks.set(callbackId, callback);
+    if (this.$rootScope.branding) {
+      callback(this.$rootScope.branding);
+    }
   }
 
   /**

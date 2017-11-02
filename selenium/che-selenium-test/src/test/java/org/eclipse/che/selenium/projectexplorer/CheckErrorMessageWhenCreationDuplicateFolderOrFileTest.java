@@ -74,7 +74,7 @@ public class CheckErrorMessageWhenCreationDuplicateFolderOrFileTest {
     askForValueDialog.clickOkBtn();
     askForValueDialog.waitFormToClose();
     notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed(NOTIFICATION_MESSAGE);
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(NOTIFICATION_MESSAGE);
   }
 

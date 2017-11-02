@@ -15,12 +15,12 @@ import static com.google.common.collect.Iterables.getFirst;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangedFolderNode;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelPresenter;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelView;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent.SelectionChangedHandler;
 
 /**

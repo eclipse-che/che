@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.part.editor.actions;
 
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.web.bindery.event.shared.EventBus;
 import javax.validation.constraints.NotNull;
@@ -43,7 +43,7 @@ public abstract class EditorAbstractAction extends AbstractPerspectiveAction {
       SVGResource icon,
       EditorAgent editorAgent,
       EventBus eventBus) {
-    super(singletonList(PROJECT_PERSPECTIVE_ID), tooltip, description, null, icon);
+    super(singletonList(PROJECT_PERSPECTIVE_ID), tooltip, description, icon);
     this.eventBus = eventBus;
     this.editorAgent = editorAgent;
   }

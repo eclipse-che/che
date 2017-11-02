@@ -71,6 +71,12 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("action.delete.description")
   String deleteItemActionDescription();
 
+  @Key("action.goInto.text")
+  String goIntoActionText();
+
+  @Key("action.goBack.text")
+  String goBackActionText();
+
   /* Cut */
   @Key("action.cut.text")
   String cutItemsActionText();
@@ -128,6 +134,18 @@ public interface CoreLocalizationConstant extends Messages {
 
   @Key("action.rename.description")
   String renameItemActionDescription();
+
+  @Key("action.collapseAll.title")
+  String collapseAllActionTitle();
+
+  @Key("action.collapseAll.description")
+  String collapseAllActionDescription();
+
+  @Key("action.refresh.title")
+  String refreshActionTitle();
+
+  @Key("action.refresh.description")
+  String refreshActionDescription();
 
   @Key("renameNodeDialogTitle")
   String renameNodeDialogTitle();
@@ -365,6 +383,9 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("action.link.with.editor")
   String actionLinkWithEditor();
 
+  @Key("action.show.toolbar")
+  String actionShowToolbar();
+
   @Key("action.projectConfiguration.description")
   String actionProjectConfigurationDescription();
 
@@ -401,11 +422,23 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("action.restorePart.description")
   String actionRestorePartDescription();
 
-  @Key("action.minimizePart.title")
-  String actionMinimizePartTitle();
+  @Key("action.hidePart.title")
+  String actionHidePartTitle();
 
-  @Key("action.minimizePart.description")
-  String actionMinimizePartDescription();
+  @Key("action.hidePart.description")
+  String actionHidePartDescription();
+
+  @Key("maximizePartStack.title")
+  String maximizePartStackTitle();
+
+  @Key("restorePartStack.title")
+  String restorePartStackTitle();
+
+  @Key("minimizePartStack.title")
+  String minimizePartStackTitle();
+
+  @Key("partStackOptions.title")
+  String partStackOptionsTitle();
 
   /* NewResource */
   @Key("newResource.title")
@@ -573,9 +606,6 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("start.ws.title")
   String startWsTitle();
 
-  @Key("start.ws.select.to.start")
-  String startWsSelectToStart();
-
   @Key("stop.ws.title")
   String stopWsTitle();
 
@@ -585,21 +615,6 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("started.ws")
   String startedWs();
 
-  @Key("create.snapshot.title")
-  String createSnapshotTitle();
-
-  @Key("create.snapshot.description")
-  String createSnapshotDescription();
-
-  @Key("create.snapshot.progress")
-  String createSnapshotProgress();
-
-  @Key("create.snapshot.success")
-  String createSnapshotSuccess();
-
-  @Key("create.snapshot.failed")
-  String createSnapshotFailed();
-
   @Key("ext.server.started")
   String extServerStarted();
 
@@ -608,12 +623,6 @@ public interface CoreLocalizationConstant extends Messages {
 
   @Key("workspace.recovering.dialog.title")
   String workspaceRecoveringDialogTitle();
-
-  @Key("workspace.recovering.dialog.text")
-  String workspaceRecoveringDialogText();
-
-  @Key("workspace.restore.snapshot")
-  String restoreWorkspaceFromSnapshot();
 
   @Key("workspace.subscribe.on.events.failed")
   String workspaceSubscribeOnEventsFailed();
@@ -1074,12 +1083,6 @@ public interface CoreLocalizationConstant extends Messages {
 
   @Key("export.config.dialog.not.under.vcs.text")
   String exportConfigDialogNotUnderVcsText();
-
-  @Key("messages.server.failure")
-  String messagesServerFailure();
-
-  @Key("connection.closed.dialog.title")
-  String connectionClosedDialogTitle();
 
   @Key("macro.current.project.path.description")
   String macroCurrentProjectPathDescription();

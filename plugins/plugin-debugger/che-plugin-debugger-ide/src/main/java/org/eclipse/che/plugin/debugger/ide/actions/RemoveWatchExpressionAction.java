@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.debugger.ide.actions;
 
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Inject;
 import org.eclipse.che.api.debug.shared.model.WatchExpression;
@@ -39,7 +39,6 @@ public class RemoveWatchExpressionAction extends AbstractPerspectiveAction {
         singletonList(PROJECT_PERSPECTIVE_ID),
         locale.removeWatchExpression(),
         locale.removeWatchExpressionDescription(),
-        null,
         resources.removeWatchExpressionBtn());
     this.debuggerPresenter = debuggerPresenter;
   }

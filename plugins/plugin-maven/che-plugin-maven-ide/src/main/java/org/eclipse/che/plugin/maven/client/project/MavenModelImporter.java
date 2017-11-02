@@ -18,14 +18,14 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.factory.FactoryAcceptedEvent;
 import org.eclipse.che.ide.api.factory.FactoryAcceptedHandler;
+import org.eclipse.che.ide.api.factory.model.FactoryImpl;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.workspace.model.ProjectConfigImpl;
 import org.eclipse.che.plugin.maven.client.service.MavenServerServiceClient;
 import org.eclipse.che.plugin.maven.shared.MavenAttributes;
 
@@ -52,10 +52,10 @@ public class MavenModelImporter implements FactoryAcceptedHandler {
 
   @Override
   public void onFactoryAccepted(FactoryAcceptedEvent event) {
-    final FactoryDto factory = event.getFactory();
-    final List<ProjectConfigDto> projects = factory.getWorkspace().getProjects();
+    final FactoryImpl factory = event.getFactory();
+    final List<ProjectConfigImpl> projects = factory.getWorkspace().getProjects();
     final List<String> paths = new ArrayList<>();
-    for (ProjectConfigDto project : projects) {
+    for (ProjectConfigImpl project : projects) {
       if (MavenAttributes.MAVEN_ID.equals(project.getType())) {
         paths.add(project.getPath());
       }

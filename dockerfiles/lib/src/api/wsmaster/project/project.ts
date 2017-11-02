@@ -48,7 +48,7 @@ export class Project {
         this.authData = authData;
 
         // search the workspace agent link
-        let servers : Map<string, org.eclipse.che.api.machine.shared.dto.ServerDto> = this.workspaceDTO.getRuntime().getDevMachine().getRuntime().getServers();
+        let servers : Map<string, org.eclipse.che.api.workspace.shared.dto.ServerDto> = this.workspaceDTO.getRuntime().getDevMachine().getRuntime().getServers();
 
         var hrefWsAgent : string;
         for (let server of servers.values()) {

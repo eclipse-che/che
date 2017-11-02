@@ -16,13 +16,13 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import org.eclipse.che.api.promises.client.PromiseProvider;
-import org.eclipse.che.ide.api.data.tree.settings.SettingsProvider;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.marker.Marker;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
 import org.eclipse.che.ide.ext.java.shared.ContentRoot;
 import org.eclipse.che.ide.project.node.icon.NodeIconProvider;
+import org.eclipse.che.ide.ui.smartTree.data.settings.SettingsProvider;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /** @author Vlad Zhukovskiy */

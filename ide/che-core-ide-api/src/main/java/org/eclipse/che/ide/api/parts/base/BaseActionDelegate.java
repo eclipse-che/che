@@ -20,20 +20,9 @@ public interface BaseActionDelegate {
   /** Toggles maximized state of the part. */
   void onToggleMaximize();
 
-  /** Minimizes the part. */
-  void onMinimize();
-
   /**
    * Activate Part when clicking the mouse. Is used when the Part contains frames and mouse events
    * are blocked.
    */
   void onActivate();
-
-  /**
-   * Asks to display part toolbar menu.
-   *
-   * @param mouseX mouse left
-   * @param mouseY mouse top
-   */
-  void onPartMenu(int mouseX, int mouseY);
 }

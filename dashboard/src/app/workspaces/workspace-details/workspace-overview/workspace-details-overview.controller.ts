@@ -233,7 +233,7 @@ export class WorkspaceDetailsOverviewController {
     const content = 'Would you like to delete workspace \'' + this.workspaceDetails.config.name + '\'?';
     this.confirmDialogService.showConfirmDialog('Delete workspace', content, 'Delete').then(() => {
       if ([RUNNING, STARTING].indexOf(this.getWorkspaceStatus()) !== -1) {
-        this.cheWorkspace.stopWorkspace(this.workspaceDetails.id, false);
+        this.cheWorkspace.stopWorkspace(this.workspaceDetails.id);
       }
       this.cheWorkspace.fetchStatusChange(this.workspaceDetails.id, STOPPED).then(() => {
         this.cheWorkspace.deleteWorkspaceConfig(this.workspaceDetails.id).then(() => {

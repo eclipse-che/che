@@ -68,7 +68,7 @@ public class JavaFormatterServiceClient {
    * @param formatter configuration of the formatter
    */
   public Promise<Void> updateRootFormatter(String formatter) {
-    final String baseUrl = appContext.getDevMachine().getWsAgentBaseUrl();
+    final String baseUrl = appContext.getWsAgentServerApiEndpoint();
     final String url = baseUrl + FORMATTER_URL_PREFIX + "/update/workspace";
     return asyncRequestFactory
         .createPostRequest(url, null)
@@ -84,7 +84,7 @@ public class JavaFormatterServiceClient {
    * @param projectPath path to the project
    */
   public Promise<Void> updateProjectFormatter(String formatter, String projectPath) {
-    final String baseUrl = appContext.getDevMachine().getWsAgentBaseUrl();
+    final String baseUrl = appContext.getWsAgentServerApiEndpoint();
     final String url =
         baseUrl + FORMATTER_URL_PREFIX + "/update/project?projectpath=" + projectPath;
     return asyncRequestFactory
@@ -96,7 +96,7 @@ public class JavaFormatterServiceClient {
 
   private Promise<List<Change>> getFormatChanges(
       String projectPath, final int offset, final int length, final String content) {
-    final String baseUrl = appContext.getDevMachine().getWsAgentBaseUrl();
+    final String baseUrl = appContext.getWsAgentServerApiEndpoint();
     final String url =
         baseUrl
             + FORMATTER_URL_PREFIX

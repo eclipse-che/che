@@ -65,5 +65,5 @@ public interface Workspace {
    * WorkspaceStatus#STOPPING} then returned value is not null, otherwise it is.
    */
   @Nullable
-  WorkspaceRuntime getRuntime();
+  Runtime getRuntime();
 }

@@ -13,7 +13,6 @@ package org.eclipse.che.multiuser.permission.workspace.server.jpa;
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
-import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao.RemoveSnapshotsBeforeWorkspaceRemovedEventSubscriber;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao.RemoveWorkspaceBeforeAccountRemovedEventSubscriber;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
@@ -41,7 +40,6 @@ public class MultiuserWorkspaceJpaModule extends AbstractModule {
     bind(WorkerDao.class).to(JpaWorkerDao.class);
     bind(WorkspaceDao.class).to(MultiuserJpaWorkspaceDao.class);
     bind(RemoveWorkspaceBeforeAccountRemovedEventSubscriber.class).asEagerSingleton();
-    bind(RemoveSnapshotsBeforeWorkspaceRemovedEventSubscriber.class).asEagerSingleton();
 
     bind(JpaWorkerDao.RemoveWorkersBeforeWorkspaceRemovedEventSubscriber.class).asEagerSingleton();
     bind(JpaWorkerDao.RemoveWorkersBeforeUserRemovedEventSubscriber.class).asEagerSingleton();

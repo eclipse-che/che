@@ -23,7 +23,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.Table;
-import org.eclipse.che.api.core.model.project.SourceStorage;
+import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 
 /**
  * Data object for {@link SourceStorage}.

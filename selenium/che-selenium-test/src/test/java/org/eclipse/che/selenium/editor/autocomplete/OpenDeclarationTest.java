@@ -80,7 +80,7 @@ public class OpenDeclarationTest {
   @Test
   public void navigateToSourceTest() throws Exception {
     projectExplorer.waitItem(PROJECT_NAME);
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     mavenPluginStatusBar.waitClosingInfoPanel();
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByVisibleNameInExplorer("AppController.java");

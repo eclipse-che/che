@@ -10,8 +10,8 @@
  */
 package org.eclipse.che.ide.ui.smartTree.converter.impl;
 
-import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ui.smartTree.converter.NodeConverter;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 
 /**
  * Convert node into String representing. Need for speed search.

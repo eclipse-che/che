@@ -85,7 +85,6 @@ public class WorkingWithJavaMySqlStackTest {
     navigationBar.clickOnMenu(NavigationBar.MenuItem.WORKSPACES);
     dashboardWorkspace.waitToolbarTitleName("Workspaces");
     dashboardWorkspace.clickOnNewWorkspaceBtn();
-
     createWorkspace.waitToolbar();
     loader.waitOnClosed();
     createWorkspace.selectStack(TestStacksConstants.JAVA_MYSQL.getId());
@@ -93,7 +92,6 @@ public class WorkingWithJavaMySqlStackTest {
     projectSourcePage.clickAddOrImportProjectButton();
     projectSourcePage.selectSample(PROJECT_NAME);
     projectSourcePage.clickAdd();
-
     createWorkspace.clickCreate();
     loader.waitOnClosed();
     seleniumWebDriver.switchFromDashboardIframeToIde(60);

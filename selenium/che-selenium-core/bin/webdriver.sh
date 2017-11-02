@@ -10,11 +10,6 @@
 #   Red Hat, Inc. - initial API and implementation
 #
 
-# we need to have at least 2 threads for tests which start several WebDriver instances at once, for example, tests of File Watcher
-readonly MIN_THREAD_COUNT=2
-# having more than 5 threads doesn't impact on performance significantly
-readonly MAX_THREAD_COUNT=5
-
 getRecommendedThreadCount() {
     local threadCount=$MIN_THREAD_COUNT
 
@@ -44,59 +39,61 @@ detectDockerInterfaceIp() {
     docker run --rm --net host eclipse/che-ip:nightly
 }
 
-####################################################################################
+initVariables() {
+    # we need to have at least 2 threads for tests which start several WebDriver instances at once, for example, tests of File Watcher
+    readonly MIN_THREAD_COUNT=2
+    # having more than 5 threads doesn't impact on performance significantly
+    readonly MAX_THREAD_COUNT=5
 
-trap cleanUpEnvironment EXIT
+    readonly FAILSAFE_DIR="target/failsafe-reports"
+    readonly TESTNG_FAILED_SUITE=${FAILSAFE_DIR}"/testng-failed.xml"
+    readonly FAILSAFE_REPORT="target/site/failsafe-report.html"
 
-############################
-### Default variables
-############################
-unset TMP_DIR
+    readonly TEST_INCLUSION_STABLE="STABLE"
+    readonly TEST_INCLUSION_UNSTABLE="UNSTABLE"
+    readonly TEST_INCLUSION_STABLE_AND_UNSTABLE="STABLE_AND_UNSTABLE"
+    readonly TEST_INCLUSION_SINGLE_TEST="SINGLE_TEST"
 
-readonly FAILSAFE_DIR="target/failsafe-reports"
-readonly TESTNG_FAILED_SUITE=${FAILSAFE_DIR}"/testng-failed.xml"
-readonly FAILSAFE_REPORT="target/site/failsafe-report.html"
+    readonly STABLE_MSG="stable tests"
+    readonly UNSTABLE_MSG="unstable tests"
+    readonly STABLE_AND_UNSTABLE_MSG="stable and unstable tests"
+    readonly SINGLE_TEST_MSG="single test/package"
 
-# CALLER variable contains parent caller script name
-# CUR_DIR variable contains the current directory where CALLER is executed
-[[ -z ${CALLER+x} ]] && { CALLER=$(basename $0); }
-[[ -z ${CUR_DIR+x} ]] && { CUR_DIR=$(cd "$(dirname "$0")"; pwd); }
+    readonly MAX_RERUN=2
 
-[[ -z ${API_SUFFIX+x} ]] && { API_SUFFIX=":8080/api/"; }
-[[ -z ${BASE_ACTUAL_RESULTS_URL+x} ]] && { BASE_ACTUAL_RESULTS_URL="https://ci.codenvycorp.com/view/qa/job/che-integration-tests/"; }
+    # CALLER variable contains parent caller script name
+    # CUR_DIR variable contains the current directory where CALLER is executed
+    [[ -z ${CALLER+x} ]] && { CALLER=$(basename $0); }
+    [[ -z ${CUR_DIR+x} ]] && { CUR_DIR=$(cd "$(dirname "$0")"; pwd); }
 
-MODE="grid"
-GRID_OPTIONS="-Dgrid.mode=true"
-RERUN=false
-readonly MAX_RERUN=2
-BROWSER="GOOGLE_CHROME"
-WEBDRIVER_VERSION=$(curl -s http://chromedriver.storage.googleapis.com/LATEST_RELEASE)
-WEBDRIVER_PORT="9515"
-NODE_CHROME_DEBUG_SUFFIX=
-THREADS=$(getRecommendedThreadCount)
-WORKSPACE_POOL_SIZE=0
+    [[ -z ${API_SUFFIX+x} ]] && { API_SUFFIX="/api/"; }
+    [[ -z ${BASE_ACTUAL_RESULTS_URL+x} ]] && { BASE_ACTUAL_RESULTS_URL="https://ci.codenvycorp.com/view/qa/job/che-integration-tests/"; }
 
-ACTUAL_RESULTS=()
-COMPARE_WITH_CI=false
+    MODE="grid"
+    GRID_OPTIONS="-Dgrid.mode=true"
+    RERUN=false
 
-readonly TEST_INCLUSION_STABLE="STABLE"
-readonly TEST_INCLUSION_UNSTABLE="UNSTABLE"
-readonly TEST_INCLUSION_STABLE_AND_UNSTABLE="STABLE_AND_UNSTABLE"
-readonly TEST_INCLUSION_SINGLE_TEST="SINGLE_TEST"
+    BROWSER="GOOGLE_CHROME"
+    WEBDRIVER_VERSION=$(curl -s http://chromedriver.storage.googleapis.com/LATEST_RELEASE)
+    WEBDRIVER_PORT="9515"
+    NODE_CHROME_DEBUG_SUFFIX=
+    THREADS=$(getRecommendedThreadCount)
+    WORKSPACE_POOL_SIZE=0
 
-readonly STABLE_MSG="stable tests"
-readonly UNSTABLE_MSG="unstable tests"
-readonly STABLE_AND_UNSTABLE_MSG="stable and unstable tests"
-readonly SINGLE_TEST_MSG="single test/package"
+    ACTUAL_RESULTS=()
+    COMPARE_WITH_CI=false
 
-PRODUCT_PROTOCOL="http"
-PRODUCT_HOST=$(detectDockerInterfaceIp)
+    PRODUCT_PROTOCOL="http"
+    PRODUCT_HOST=$(detectDockerInterfaceIp)
+    PRODUCT_PORT=8080
 
-unset TEST_INCLUSION
-unset DEBUG_OPTIONS
-unset MAVEN_OPTIONS
-unset TMP_SUITE_PATH
-unset ORIGIN_TESTS_SCOPE
+    unset TEST_INCLUSION
+    unset DEBUG_OPTIONS
+    unset MAVEN_OPTIONS
+    unset TMP_SUITE_PATH
+    unset ORIGIN_TESTS_SCOPE
+    unset TMP_DIR
+}
 
 cleanUpEnvironment() {
     if [[ ${MODE} == "grid" ]]; then
@@ -110,9 +107,10 @@ checkParameters() {
         if [[ "$var" =~ --web-driver-version=.* ]]; then :
         elif [[ "$var" =~ --web-driver-port=[0-9]+$ ]]; then :
         elif [[ "$var" == "--http" ]]; then :
-        elif [[ "$var" == "--https" ]]; then  :
+        elif [[ "$var" == "--https" ]]; then :
         elif [[ "$var" == "--che" ]]; then :
         elif [[ "$var" =~ --host=.* ]]; then :
+        elif [[ "$var" =~ --port=.* ]]; then :
         elif [[ "$var" =~ --threads=[0-9]+$ ]]; then :
         elif [[ "$var" == "--rerun" ]]; then :
         elif [[ "$var" == "--debug" ]]; then :
@@ -145,8 +143,9 @@ checkParameters() {
         elif [[ "$var" =~ -P.* ]]; then :
         elif [[ "$var" == "--help" ]]; then :
         elif [[ "$var" == "--compare-with-ci" ]]; then :
-        elif [[ "$var" =~ --workspace-pool-size=auto|[0-9]+$ ]]; then :
+        elif [[ "$var" =~ ^--workspace-pool-size=(auto|[0-9]+)$ ]]; then :
         elif [[ "$var" =~ ^[0-9]+$ ]] && [[ $@ =~ --compare-with-ci[[:space:]]$var ]]; then :
+        elif [[ "$var" =~ -D.* ]]; then :
         else
             printHelp
             echo "[TEST] Unrecognized or misused parameter "${var}
@@ -176,6 +175,9 @@ applyCustomOptions() {
         elif [[ "$var" =~ --host=.* ]]; then
             PRODUCT_HOST=$(echo "$var" | sed -e "s/--host=//g")
 
+        elif [[ "$var" =~ --port=.* ]]; then
+            PRODUCT_PORT=$(echo "$var" | sed -e "s/--port=//g")
+
         elif [[ "$var" =~ --threads=.* ]]; then
             THREADS=$(echo "$var" | sed -e "s/--threads=//g")
 
@@ -197,6 +199,15 @@ applyCustomOptions() {
         fi
     done
 }
+
+extractSystemProperties() {
+    for var in "$@"; do
+        if [[ "$var" =~ -D.* ]]; then
+            MAVEN_OPTIONS=${MAVEN_OPTIONS}" "$var
+        fi
+    done
+}
+
 
 defineTestsScope() {
     for var in "$@"; do
@@ -323,7 +334,7 @@ checkDockerComposeRequirements() {
 }
 
 checkIfProductIsRun() {
-    local url=${PRODUCT_PROTOCOL}"://"${PRODUCT_HOST}${API_SUFFIX};
+    local url=${PRODUCT_PROTOCOL}"://"${PRODUCT_HOST}:${PRODUCT_PORT}${API_SUFFIX};
 
     curl -s -X OPTIONS ${url} > /dev/null
     if [[ $? != 0 ]]; then
@@ -377,6 +388,7 @@ Options:
     --http                              Use 'http' protocol to connect to product
     --https                             Use 'https' protocol to connect to product
     --host=<PRODUCT_HOST>               Set host where product is deployed
+    --port=<PRODUCT_PORT>               Set port of the product
 
 Modes (defines environment to run tests):
     local                               All tests will be run in a Web browser on the developer machine.
@@ -387,7 +399,7 @@ Modes (defines environment to run tests):
     --web-driver-port=<PORT>            To run WebDriver on the specific port, by default: "${WEBDRIVER_PORT}"
     --threads=<THREADS>                 Number of tests that will be run simultaneously. It also means the very same number of
                                         Web browsers will be opened on the developer machine.
-                                        Default value is in range [2,5] and depends on available RAM.                                        
+                                        Default value is in range [2,5] and depends on available RAM.
     --workspace-pool-size=[<SIZE>|auto] Size of test workspace pool.
                                         Default value is 0, that means that test workspaces are created on demand.
 
@@ -454,6 +466,7 @@ printRunOptions() {
     echo "[TEST] ==================================================="
     echo "[TEST] Product Protocol    : "${PRODUCT_PROTOCOL}
     echo "[TEST] Product Host        : "${PRODUCT_HOST}
+    echo "[TEST] Product Port        : "${PRODUCT_PORT}
     echo "[TEST] Tests               : "${TESTS_SCOPE}
     echo "[TEST] Threads             : "${THREADS}
     echo "[TEST] Workspace pool size : "${WORKSPACE_POOL_SIZE}
@@ -641,7 +654,7 @@ printProposals() {
                           sed -e "s/--test*=[^ ]*//g " | \
                           sed -e "s/--compare-with-ci\W*[0-9]*//g" | \
                           sed -e "s/--threads=[0-9]*//g" | \
-                          sed -e "s/--workspace-pool-size=[0-9]*//g")
+                          sed -e "s/--workspace-pool-size=auto|[0-9]*//g")
 
     local regressions=$(findRegressions)
     local total=$(echo ${regressions[@]} | wc -w)
@@ -689,14 +702,15 @@ runTests() {
 
     mvn clean verify -Pselenium-test \
                 ${TESTS_SCOPE} \
-                -Dhost=${PRODUCT_HOST} \
-                -Dprotocol=${PRODUCT_PROTOCOL} \
+                -Dche.host=${PRODUCT_HOST} \
+                -Dche.port=${PRODUCT_PORT} \
+                -Dche.protocol=${PRODUCT_PROTOCOL} \
                 -Ddocker.interface.ip=$(detectDockerInterfaceIp) \
                 -Ddriver.port=${WEBDRIVER_PORT} \
                 -Ddriver.version=${WEBDRIVER_VERSION} \
                 -Dbrowser=${BROWSER} \
-                -Dthreads=${THREADS} \
-                -Dworkspace_pool_size=${WORKSPACE_POOL_SIZE} \
+                -Dche.threads=${THREADS} \
+                -Dche.workspace_pool_size=${WORKSPACE_POOL_SIZE} \
                 ${DEBUG_OPTIONS} \
                 ${GRID_OPTIONS} \
                 ${MAVEN_OPTIONS}
@@ -779,8 +793,8 @@ generateTestNgFailedReport() {
 
 # generates and updates failsafe report
 generateFailSafeReport () {
-    mvn -q surefire-report:failsafe-report-only
-    mvn -q site -DgenerateReports=false
+    mvn -q surefire-report:failsafe-report-only ${MAVEN_OPTIONS}
+    mvn -q site -DgenerateReports=false ${MAVEN_OPTIONS}
 
     echo "[TEST]"
 
@@ -851,7 +865,7 @@ storeTestReport() {
 }
 
 checkBuild() {
-    mvn package
+    mvn package ${MAVEN_OPTIONS}
     [[ $? != 0 ]] && { exit 1; }
 }
 
@@ -870,37 +884,43 @@ testProduct() {
     fi
 }
 
-if [[ $@ =~ --help ]]; then
-    printHelp
-    exit
-fi
-
-START_TIME=$(date +%s)
-init
-checkBuild
-
-checkParameters $@
-defineOperationSystemSpecificVariables
-defineRunMode $@
-
-defineTestsScope $@
-applyCustomOptions $@
-
-if [[ ${COMPARE_WITH_CI} == true ]]; then
-    fetchActualResults $@
-else
-    prepareToFirstRun
-
-    if [[ ${TEST_INCLUSION} == ${TEST_INCLUSION_STABLE} ]]; then
-        echo "[TEST]"
-        echo -e "[TEST] ${YELLOW}---------------------------------------------------${NO_COLOUR}"
-        echo -e "[TEST] ${YELLOW} RUN STABLE TESTS${NO_COLOUR}"
-        echo -e "[TEST] ${YELLOW}---------------------------------------------------${NO_COLOUR}"
-        echo "[TEST]"
+run() {
+    if [[ $@ =~ --help ]]; then
+        printHelp
+        exit
     fi
 
-    testProduct $@
-fi
+    START_TIME=$(date +%s)
+
+    trap cleanUpEnvironment EXIT
+
+    initVariables
+    init
+    extractSystemProperties $@
+    checkBuild
+
+    checkParameters $@
+    defineOperationSystemSpecificVariables
+    defineRunMode $@
+
+    defineTestsScope $@
+    applyCustomOptions $@
+
+    if [[ ${COMPARE_WITH_CI} == true ]]; then
+        fetchActualResults $@
+    else
+        prepareToFirstRun
+
+        if [[ ${TEST_INCLUSION} == ${TEST_INCLUSION_STABLE} ]]; then
+            echo "[TEST]"
+            echo -e "[TEST] ${YELLOW}---------------------------------------------------${NO_COLOUR}"
+            echo -e "[TEST] ${YELLOW} RUN STABLE TESTS${NO_COLOUR}"
+            echo -e "[TEST] ${YELLOW}---------------------------------------------------${NO_COLOUR}"
+            echo "[TEST]"
+        fi
+
+        testProduct $@
+    fi
 
 analyseTestsResults $@
 
@@ -911,31 +931,34 @@ if [[ ${COMPARE_WITH_CI} == false ]]; then
     printElapsedTime
 fi
 
-if [[ ${TESTS_SCOPE} =~ -DrunSuite ]] \
-      && [[ $(fetchFailedTestsNumber) == 0 ]] \
-      && [[ ${COMPARE_WITH_CI} == false ]] \
-      && [[ ${TEST_INCLUSION} == ${TEST_INCLUSION_STABLE} ]]; then
+    if [[ ${TESTS_SCOPE} =~ -DrunSuite ]] \
+        && [[ $(fetchFailedTestsNumber) == 0 ]] \
+        && [[ ${COMPARE_WITH_CI} == false ]] \
+        && [[ ${TEST_INCLUSION} == ${TEST_INCLUSION_STABLE} ]]; then
 
-    if [[ $(suiteContainsUnstableTests) != 0 ]]; then
+        if [[ $(suiteContainsUnstableTests) != 0 ]]; then
+            echo "[TEST]"
+            echo "[TEST] Test suite '${ORIGIN_TESTS_SCOPE:11}' doesn't have tests which are marked as unstable."
+            echo "[TEST] No more tests will be run."
+            echo "[TEST]"
+            exit
+        fi
+
+        TEST_INCLUSION=${TEST_INCLUSION_UNSTABLE}
+        START_TIME=$(date +%s)
+
         echo "[TEST]"
-        echo "[TEST] Test suite '${ORIGIN_TESTS_SCOPE:11}' doesn't have tests which are marked as unstable."
-        echo "[TEST] No more tests will be run."
         echo "[TEST]"
-        exit
+        echo -e "[TEST] ${YELLOW}---------------------------------------------------${NO_COLOUR}"
+        echo -e "[TEST] ${YELLOW} RUN UNSTABLE TESTS${NO_COLOUR}"
+        echo -e "[TEST] ${YELLOW}---------------------------------------------------${NO_COLOUR}"
+        echo "[TEST]"
+
+        testProduct $@
+        generateFailSafeReport
+        storeTestReport
+        printElapsedTime
     fi
+}
 
-    TEST_INCLUSION=${TEST_INCLUSION_UNSTABLE}
-    START_TIME=$(date +%s)
-
-    echo "[TEST]"
-    echo "[TEST]"
-    echo -e "[TEST] ${YELLOW}---------------------------------------------------${NO_COLOUR}"
-    echo -e "[TEST] ${YELLOW} RUN UNSTABLE TESTS${NO_COLOUR}"
-    echo -e "[TEST] ${YELLOW}---------------------------------------------------${NO_COLOUR}"
-    echo "[TEST]"
-
-    testProduct $@
-    generateFailSafeReport
-    storeTestReport
-    printElapsedTime
-fi
+run "$@"

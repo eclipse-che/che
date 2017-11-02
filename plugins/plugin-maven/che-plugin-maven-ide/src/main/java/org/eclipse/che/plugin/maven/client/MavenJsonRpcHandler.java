@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.plugin.maven.client;
 
+import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ARCHETYPE_CHANEL_OUTPUT;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ARCHETYPE_CHANEL_SUBSCRIBE;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_OUTPUT_PERCENT_METHOD;
@@ -38,8 +39,6 @@ import org.eclipse.che.plugin.maven.shared.dto.TextMessageDto;
  */
 @Singleton
 public class MavenJsonRpcHandler {
-  private static final String WS_AGENT_ENDPOINT = "ws-agent";
-
   private RequestHandlerConfigurator configurator;
 
   private Set<Consumer<TextMessageDto>> textConsumers = new HashSet<>();
@@ -66,14 +65,14 @@ public class MavenJsonRpcHandler {
 
     requestTransmitter
         .newRequest()
-        .endpointId(WS_AGENT_ENDPOINT)
+        .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
         .methodName(MAVEN_OUTPUT_SUBSCRIBE)
         .noParams()
         .sendAndSkipResult();
 
     requestTransmitter
         .newRequest()
-        .endpointId(WS_AGENT_ENDPOINT)
+        .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
         .methodName(MAVEN_ARCHETYPE_CHANEL_SUBSCRIBE)
         .noParams()
         .sendAndSkipResult();

@@ -14,7 +14,7 @@ import java.util.Set;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.events.DocumentChangedEvent;
-import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
+import org.eclipse.che.ide.api.editor.events.FileContentUpdateEvent;
 import org.eclipse.che.ide.resource.Path;
 
 /**
@@ -40,10 +40,10 @@ public interface EditorGroupSynchronization {
    */
   void removeEditor(EditorPartPresenter editor);
 
-  /** Notify group that active editor has changed */
+  /** Notify group that active editor is changed */
   void onActiveEditorChanged(@NotNull EditorPartPresenter activeEditor);
 
-  /** Notify group that editor dirty state has changed */
+  /** Notify group that editor dirty state is changed */
   void onEditorDirtyStateChanged(@NotNull EditorPartPresenter changedEditor);
 
   /** Removes all editors from the group and stops to track changes of content for them. */

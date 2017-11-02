@@ -35,6 +35,7 @@ import static org.eclipse.che.ide.api.action.IdeActions.GROUP_PROJECT;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RECENT_FILES;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RIGHT_MAIN_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RIGHT_TOOLBAR;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_TOOLBAR_CONTROLLER;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_WORKSPACE;
 import static org.eclipse.che.ide.api.constraints.Constraints.FIRST;
 import static org.eclipse.che.ide.api.constraints.Constraints.LAST;
@@ -79,19 +80,19 @@ import org.eclipse.che.ide.actions.ShowConsoleTreeAction;
 import org.eclipse.che.ide.actions.ShowHiddenFilesAction;
 import org.eclipse.che.ide.actions.ShowPreferencesAction;
 import org.eclipse.che.ide.actions.ShowReferenceAction;
+import org.eclipse.che.ide.actions.ShowToolbarAction;
 import org.eclipse.che.ide.actions.SignatureHelpAction;
 import org.eclipse.che.ide.actions.SoftWrapAction;
-import org.eclipse.che.ide.actions.StopWorkspaceAction;
 import org.eclipse.che.ide.actions.UndoAction;
 import org.eclipse.che.ide.actions.UploadFileAction;
 import org.eclipse.che.ide.actions.UploadFolderAction;
+import org.eclipse.che.ide.actions.common.HidePartAction;
 import org.eclipse.che.ide.actions.common.MaximizePartAction;
-import org.eclipse.che.ide.actions.common.MinimizePartAction;
 import org.eclipse.che.ide.actions.common.RestorePartAction;
 import org.eclipse.che.ide.actions.find.FindActionAction;
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.action.IdeActions;
 import org.eclipse.che.ide.api.constraints.Constraints;
@@ -110,10 +111,6 @@ import org.eclipse.che.ide.command.palette.ShowCommandsPaletteAction;
 import org.eclipse.che.ide.imageviewer.ImageViewerProvider;
 import org.eclipse.che.ide.imageviewer.PreviewImageAction;
 import org.eclipse.che.ide.machine.MachineResources;
-import org.eclipse.che.ide.macro.ServerHostNameMacro;
-import org.eclipse.che.ide.macro.ServerMacro;
-import org.eclipse.che.ide.macro.ServerPortMacro;
-import org.eclipse.che.ide.macro.ServerProtocolMacro;
 import org.eclipse.che.ide.newresource.NewFileAction;
 import org.eclipse.che.ide.newresource.NewFolderAction;
 import org.eclipse.che.ide.part.editor.actions.CloseAction;
@@ -145,7 +142,9 @@ import org.eclipse.che.ide.ui.toolbar.MainToolbar;
 import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
 import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
+import org.eclipse.che.ide.workspace.StopWorkspaceAction;
 import org.eclipse.che.ide.xml.NewXmlFileAction;
+import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
@@ -221,8 +220,6 @@ public class StandardComponentInitializer {
   @Inject private DeleteResourceAction deleteResourceAction;
 
   @Inject private RenameItemAction renameItemAction;
-
-  @Inject private CollapseAllAction collapseAllAction;
 
   @Inject private SplitVerticallyAction splitVerticallyAction;
 
@@ -312,11 +309,13 @@ public class StandardComponentInitializer {
 
   @Inject private LinkWithEditorAction linkWithEditorAction;
 
+  @Inject private ShowToolbarAction showToolbarAction;
+
   @Inject private SignatureHelpAction signatureHelpAction;
 
   @Inject private MaximizePartAction maximizePartAction;
 
-  @Inject private MinimizePartAction minimizePartAction;
+  @Inject private HidePartAction hidePartAction;
 
   @Inject private RestorePartAction restorePartAction;
 
@@ -341,6 +340,8 @@ public class StandardComponentInitializer {
   @Inject private AddToFileWatcherExcludesAction addToFileWatcherExcludesAction;
 
   @Inject private RemoveFromFileWatcherExcludesAction removeFromFileWatcherExcludesAction;
+
+  @Inject private CollapseAllAction collapseAllAction;
 
   @Inject private PerspectiveManager perspectiveManager;
 
@@ -401,15 +402,6 @@ public class StandardComponentInitializer {
   @Inject private ProjectConfigSynchronized projectConfigSynchronized;
 
   @Inject private TreeResourceRevealer treeResourceRevealer; // just to work with it
-
-  // do not remove the injections below
-  @Inject private ServerMacro serverMacro;
-
-  @Inject private ServerProtocolMacro serverProtocolMacro;
-
-  @Inject private ServerHostNameMacro serverHostNameMacro;
-
-  @Inject private ServerPortMacro serverPortMacro;
 
   @Inject private TerminalInitializer terminalInitializer;
 
@@ -486,7 +478,9 @@ public class StandardComponentInitializer {
 
     DefaultActionGroup newGroup = new DefaultActionGroup("New", true, actionManager);
     newGroup.getTemplatePresentation().setDescription("Create...");
-    newGroup.getTemplatePresentation().setSVGResource(resources.newResource());
+    newGroup
+        .getTemplatePresentation()
+        .setImageElement(new SVGImage(resources.newResource()).getElement());
     actionManager.registerAction(GROUP_FILE_NEW, newGroup);
     projectGroup.add(newGroup);
 
@@ -501,7 +495,9 @@ public class StandardComponentInitializer {
     newGroup.addSeparator();
 
     actionManager.registerAction("newXmlFile", newXmlFileAction);
-    newXmlFileAction.getTemplatePresentation().setSVGResource(xmlFile.getImage());
+    newXmlFileAction
+        .getTemplatePresentation()
+        .setImageElement(new SVGImage(xmlFile.getImage()).getElement());
     newGroup.addAction(newXmlFileAction);
 
     actionManager.registerAction("uploadFile", uploadFileAction);
@@ -625,6 +621,8 @@ public class StandardComponentInitializer {
     actionManager.registerAction("resourceOperation", resourceOperation);
     actionManager.registerAction("refreshPathAction", refreshPathAction);
     actionManager.registerAction("linkWithEditor", linkWithEditorAction);
+    actionManager.registerAction("showToolbar", showToolbarAction);
+
     resourceOperation.addSeparator();
     resourceOperation.add(previewImageAction);
     resourceOperation.add(showReferenceAction);
@@ -658,9 +656,16 @@ public class StandardComponentInitializer {
     DefaultActionGroup partMenuGroup =
         (DefaultActionGroup) actionManager.getAction(GROUP_PART_MENU);
     partMenuGroup.add(maximizePartAction);
-    partMenuGroup.add(minimizePartAction);
+    partMenuGroup.add(hidePartAction);
     partMenuGroup.add(restorePartAction);
     partMenuGroup.add(showConsoleTreeAction);
+    partMenuGroup.add(collapseAllAction);
+    partMenuGroup.add(refreshPathAction);
+    partMenuGroup.add(linkWithEditorAction);
+
+    DefaultActionGroup toolbarControllerGroup =
+        (DefaultActionGroup) actionManager.getAction(GROUP_TOOLBAR_CONTROLLER);
+    toolbarControllerGroup.add(showToolbarAction);
 
     actionManager.registerAction("expandEditor", expandEditorAction);
     DefaultActionGroup rightMenuGroup =
@@ -824,8 +829,8 @@ public class StandardComponentInitializer {
           (DefaultActionGroup) actionManager.getAction(GROUP_MAIN_MENU);
       mainMenu.add(windowMenu);
       for (Perspective perspective : perspectives.values()) {
-        final Action action =
-            new Action(perspective.getPerspectiveName()) {
+        final BaseAction action =
+            new BaseAction(perspective.getPerspectiveName()) {
               @Override
               public void actionPerformed(ActionEvent e) {
                 perspectiveManager.setPerspectiveId(perspective.getPerspectiveId());

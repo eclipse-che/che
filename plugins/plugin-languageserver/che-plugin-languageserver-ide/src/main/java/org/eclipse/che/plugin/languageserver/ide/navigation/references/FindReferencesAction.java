@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.languageserver.ide.navigation.references;
 
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Inject;
 import java.util.List;
@@ -49,7 +49,7 @@ public class FindReferencesAction extends AbstractPerspectiveAction {
       OpenLocationPresenterFactory presenterFactory,
       TextDocumentServiceClient client,
       DtoFactory dtoFactory) {
-    super(singletonList(PROJECT_PERSPECTIVE_ID), "Find References", "Find References", null, null);
+    super(singletonList(PROJECT_PERSPECTIVE_ID), "Find References", "Find References");
     this.editorAgent = editorAgent;
     this.client = client;
     this.dtoFactory = dtoFactory;

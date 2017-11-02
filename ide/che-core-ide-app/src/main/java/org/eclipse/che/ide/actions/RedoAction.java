@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.ide.actions;
 
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Inject;
 import java.util.Arrays;
@@ -41,7 +41,6 @@ public class RedoAction extends AbstractPerspectiveAction {
         Arrays.asList(PROJECT_PERSPECTIVE_ID),
         localization.redoName(),
         localization.redoDescription(),
-        null,
         resources.redo());
     this.editorAgent = editorAgent;
   }

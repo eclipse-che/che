@@ -68,6 +68,7 @@ public class DeleteProjectsTest {
     }
     ide.open(workspace);
     projectExplorer.waitProjectExplorer();
+    waitAllProjectsInProjectExplorer();
     loader.waitOnClosed();
     consoles.selectProcessByTabName("dev-machine");
   }
@@ -91,14 +92,6 @@ public class DeleteProjectsTest {
   }
 
   @Test(priority = 2)
-  public void shouldDeleteProjectByDeleteIcon() {
-    projectExplorer.waitItem(PROJECT_NAMES.get(2));
-    deleteFromDeleteIcon(PROJECT_NAMES.get(2));
-    acceptDeletion(PROJECT_NAMES.get(2));
-    checkErrorMessageNotPresentInConsole();
-  }
-
-  @Test(priority = 3)
   public void shouldDeleteOpenedProjectByMenuFile() {
     projectExplorer.waitItem(PROJECT_NAMES.get(3));
     projectExplorer.openItemByPath(PROJECT_NAMES.get(3));
@@ -111,7 +104,7 @@ public class DeleteProjectsTest {
     checkErrorMessageNotPresentInConsole();
   }
 
-  @Test(priority = 4)
+  @Test(priority = 3)
   public void shouldDeleteOpenedProjectFromContextMenu() {
     projectExplorer.waitItem(PROJECT_NAMES.get(4));
     projectExplorer.openItemByPath(PROJECT_NAMES.get(4));
@@ -146,5 +139,9 @@ public class DeleteProjectsTest {
       Assert.fail("Error message is present in console");
     } catch (TimeoutException ex) {
     }
+  }
+
+  private void waitAllProjectsInProjectExplorer() {
+    PROJECT_NAMES.forEach((String projectName) -> projectExplorer.waitItem(projectName));
   }
 }

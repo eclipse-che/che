@@ -44,6 +44,7 @@ import org.eclipse.che.ide.ext.git.client.action.ShowBranchesAction;
 import org.eclipse.che.ide.ext.git.client.action.ShowMergeAction;
 import org.eclipse.che.ide.ext.git.client.action.ShowRemoteAction;
 import org.eclipse.che.ide.ext.git.client.action.ShowStatusAction;
+import org.vectomatic.dom.svg.ui.SVGImage;
 
 /**
  * Extension add Git support to the IDE Application.
@@ -94,7 +95,9 @@ public class GitExtension {
       CompareWithRevisionAction compareWithRevisionAction,
       NextDiffAction nextDiffAction,
       PreviousDiffAction previousDiffAction,
-      KeyBindingAgent keyBinding) {
+      KeyBindingAgent keyBinding,
+      GitNotificationsSubscriber gitNotificationsSubscriber) {
+    gitNotificationsSubscriber.subscribe();
 
     resources.gitCSS().ensureInjected();
 
@@ -147,7 +150,9 @@ public class GitExtension {
     commandGroup.add(showMergeAction);
     DefaultActionGroup remoteGroup =
         new DefaultActionGroup(constant.remotesControlTitle(), true, actionManager);
-    remoteGroup.getTemplatePresentation().setSVGResource(resources.remote());
+    remoteGroup
+        .getTemplatePresentation()
+        .setImageElement(new SVGImage(resources.remote()).getElement());
     actionManager.registerAction("gitRemoteGroup", remoteGroup);
     commandGroup.add(remoteGroup);
     actionManager.registerAction("gitResetFiles", resetFilesAction);

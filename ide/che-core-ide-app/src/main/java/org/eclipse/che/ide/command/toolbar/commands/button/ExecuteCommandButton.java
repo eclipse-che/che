@@ -20,9 +20,9 @@ import elemental.html.DivElement;
 import elemental.html.SpanElement;
 import java.util.Optional;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.command.toolbar.ToolbarMessages;
@@ -121,7 +121,7 @@ public class ExecuteCommandButton extends MenuButton {
     tooltip = Tooltip.create((Element) getElement(), BOTTOM, MIDDLE, divElement);
   }
 
-  private class ExecuteDefaultCommandAction extends Action {
+  private class ExecuteDefaultCommandAction extends BaseAction {
 
     ExecuteDefaultCommandAction() {
       super("Execute default command of " + goal.getId() + " goal");

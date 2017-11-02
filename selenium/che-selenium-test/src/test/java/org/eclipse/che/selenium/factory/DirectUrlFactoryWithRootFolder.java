@@ -83,7 +83,7 @@ public class DirectUrlFactoryWithRootFolder {
     seleniumWebDriver.switchFromDashboardIframeToIde();
     projectExplorer.waitProjectExplorer();
     notificationsPopupPanel.waitProgressPopupPanelClose();
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(expectedMessInTheEventsPanel);
     projectExplorer.openItemByPath(expectedProject);
 

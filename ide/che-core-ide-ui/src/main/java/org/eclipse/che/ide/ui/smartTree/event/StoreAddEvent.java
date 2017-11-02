@@ -16,7 +16,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.event.shared.HasHandlers;
 import java.util.Collections;
 import java.util.List;
-import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.event.StoreAddEvent.StoreAddHandler;
 
 /**

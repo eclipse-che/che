@@ -27,12 +27,12 @@ import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.git.shared.StatusChangedEventDto;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorOpenedEvent;
-import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.parts.EditorMultiPartStack;
 import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.vcs.HasVcsChangeMarkerRender;
+import org.eclipse.che.ide.api.vcs.HasVcsStatus;
 import org.eclipse.che.ide.api.vcs.VcsChangeMarkerRender;
 import org.eclipse.che.ide.api.vcs.VcsStatus;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
@@ -68,7 +68,11 @@ public class GitChangesHandler {
     eventBus.addHandler(
         EditorOpenedEvent.TYPE,
         event -> {
-          if (((File) event.getFile()).getVcsStatus() != MODIFIED) {
+          if (!(event.getFile() instanceof HasVcsStatus)) {
+            return;
+          }
+          HasVcsStatus file = (HasVcsStatus) event.getFile();
+          if (file.getVcsStatus() != MODIFIED) {
             return;
           }
           VcsChangeMarkerRender render =

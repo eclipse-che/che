@@ -11,7 +11,7 @@
 
 package org.eclipse.che.ide.ui.smartTree.presentation;
 
-import org.eclipse.che.ide.api.data.tree.AbstractTreeNode;
+import org.eclipse.che.ide.ui.smartTree.data.AbstractTreeNode;
 
 /**
  * Abstract class for utilize holding and creating {@link NodePresentation}, implements {@link

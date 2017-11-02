@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>5.21.0-SNAPSHOT</version>
+        <version>6.0.0-M2-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-wsmaster-war</artifactId>
     <packaging>war</packaging>
@@ -61,6 +61,12 @@
         <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che</groupId>
+            <artifactId>bootstrapper</artifactId>
+            <type>tar.gz</type>
+            <classifier>linux_amd64</classifier>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che</groupId>
@@ -112,10 +118,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-agent</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-auth</artifactId>
         </dependency>
         <dependency>
@@ -128,7 +130,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-machine</artifactId>
+            <artifactId>che-core-api-installer</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -187,24 +189,24 @@
             <artifactId>wsmaster-local</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.infrastructure</groupId>
+            <artifactId>infrastructure-openshift</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.infrastructure.docker</groupId>
+            <artifactId>docker-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.infrastructure.docker</groupId>
+            <artifactId>infrastructure-docker</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.che.lib</groupId>
             <artifactId>che-swagger-module</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-activity-wsmaster</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-docker-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-docker-compose</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-docker-machine</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
@@ -217,26 +219,6 @@
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-github-shared</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-machine-ext-server</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-maven-wsmaster</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-openshift-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-ssh-machine</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-traefik-docker</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
@@ -336,6 +318,25 @@
                         <id>analyze</id>
                         <configuration>
                             <skip>true</skip>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-bootstrapper</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.eclipse.che</groupId>
+                                    <artifactId>bootstrapper</artifactId>
+                                    <classifier>linux_amd64</classifier>
+                                    <type>tar.gz</type>
+                                    <destFileName>bootstrapper.tar.gz</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${project.build.directory}/classes</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>

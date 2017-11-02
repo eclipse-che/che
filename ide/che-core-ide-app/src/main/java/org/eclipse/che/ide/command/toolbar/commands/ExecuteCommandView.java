@@ -11,10 +11,10 @@
 package org.eclipse.che.ide.command.toolbar.commands;
 
 import java.util.Set;
-import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.mvp.View;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 
 /** View for {@link ExecuteCommandPresenter}. */
 public interface ExecuteCommandView extends View<ExecuteCommandView.ActionDelegate> {
@@ -34,7 +34,7 @@ public interface ExecuteCommandView extends View<ExecuteCommandView.ActionDelega
     void onCommandExecute(CommandImpl command);
 
     /** Called when command execution has been requested on the specified machine. */
-    void onCommandExecute(CommandImpl command, Machine machine);
+    void onCommandExecute(CommandImpl command, MachineImpl machine);
 
     /** Called when guide of commands creation has been requested. */
     void onGuide(CommandGoal goal);

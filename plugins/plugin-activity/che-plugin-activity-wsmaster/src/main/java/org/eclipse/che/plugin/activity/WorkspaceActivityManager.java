@@ -10,14 +10,15 @@
  */
 package org.eclipse.che.plugin.activity;
 
+import static java.util.Collections.emptyMap;
 import static org.eclipse.che.activity.shared.Constants.ACTIVITY_CHECKER;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOPPED_BY;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.inject.Inject;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ConflictException;
@@ -68,7 +69,7 @@ public class WorkspaceActivityManager {
         new EventSubscriber<WorkspaceStatusEvent>() {
           @Override
           public void onEvent(WorkspaceStatusEvent event) {
-            switch (event.getEventType()) {
+            switch (event.getStatus()) {
               case RUNNING:
                 try {
                   Workspace workspace = workspaceManager.getWorkspace(event.getWorkspaceId());
@@ -127,7 +128,7 @@ public class WorkspaceActivityManager {
           Workspace workspace = workspaceManager.getWorkspace(workspaceId);
           workspace.getAttributes().put(WORKSPACE_STOPPED_BY, ACTIVITY_CHECKER);
           workspaceManager.updateWorkspace(workspaceId, workspace);
-          workspaceManager.stopWorkspace(workspaceId);
+          workspaceManager.stopWorkspace(workspaceId, emptyMap());
         } catch (NotFoundException ignored) {
           // workspace no longer exists, no need to do anything
         } catch (ConflictException e) {
