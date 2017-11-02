@@ -99,6 +99,7 @@ Handle failing tests:
 
 Other options:
     --debug                             Run tests in debug mode
+    --fast                              Fast build. Skips source validation and enforce plugins
 
 HOW TO of usage:
     Test Eclipse Che single user assembly:
