@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.ext.plugins.client;
 
 import com.google.gwt.resources.client.ClientBundle;
-import com.google.gwt.resources.client.TextResource;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
@@ -23,7 +22,4 @@ public interface PluginsResources extends ClientBundle {
 
   @Source("images/gwt-che-command-type.svg")
   SVGResource gwtCheCommandType();
-
-  @Source("cheClassPath.txt")
-  TextResource cheClassPath();
 }
