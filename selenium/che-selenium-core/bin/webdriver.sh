@@ -145,7 +145,8 @@ checkParameters() {
         elif [[ "$var" == "--compare-with-ci" ]]; then :
         elif [[ "$var" =~ ^--workspace-pool-size=(auto|[0-9]+)$ ]]; then :
         elif [[ "$var" =~ ^[0-9]+$ ]] && [[ $@ =~ --compare-with-ci[[:space:]]$var ]]; then :
-        elif [[ "$var" =~ -D.* ]]; then :
+        elif [[ "$var" =~ ^-D.* ]]; then :
+        elif [[ "$var" =~ ^-[[:alpha:]]$ ]]; then :
         else
             printHelp
             echo "[TEST] Unrecognized or misused parameter "${var}
@@ -200,10 +201,12 @@ applyCustomOptions() {
     done
 }
 
-extractSystemProperties() {
+extractMavenOptions() {
     for var in "$@"; do
-        if [[ "$var" =~ -D.* ]]; then
-            MAVEN_OPTIONS=${MAVEN_OPTIONS}" "$var
+        if [[ "$var" =~ ^-D.* ]]; then
+            MAVEN_OPTIONS="${MAVEN_OPTIONS} $var"
+        elif [[ "$var" =~ ^-[[:alpha:]]$ ]]; then :
+            MAVEN_OPTIONS="${MAVEN_OPTIONS} $var"
         fi
     done
 }
@@ -896,7 +899,7 @@ run() {
 
     initVariables
     init
-    extractSystemProperties $@
+    extractMavenOptions $@
     checkBuild
 
     checkParameters $@
