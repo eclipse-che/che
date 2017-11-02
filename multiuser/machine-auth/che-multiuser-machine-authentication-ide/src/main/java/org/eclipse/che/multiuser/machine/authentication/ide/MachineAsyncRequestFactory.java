@@ -20,11 +20,9 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.Optional;
-import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
@@ -35,7 +33,6 @@ import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.Unmarshallable;
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.multiuser.machine.authentication.shared.dto.MachineTokenDto;
 
 /**
  * Looks at the request and substitutes an appropriate implementation.
@@ -43,16 +40,15 @@ import org.eclipse.che.multiuser.machine.authentication.shared.dto.MachineTokenD
  * @author Anton Korneta
  */
 @Singleton
-public class MachineAsyncRequestFactory extends AsyncRequestFactory
-    implements WorkspaceStoppedEvent.Handler {
+public class MachineAsyncRequestFactory extends AsyncRequestFactory {
   private static final String CSRF_TOKEN_HEADER_NAME = "X-CSRF-Token";
 
   private final Provider<MachineTokenServiceClient> machineTokenServiceProvider;
-  private final AppContext appContext;
-
+  private AppContext appContext;
   private String machineToken;
+
   private String csrfToken;
-  private Optional<Boolean> authEnabled = Optional.empty();
+
 
   @Inject
   public MachineAsyncRequestFactory(
@@ -63,17 +59,13 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory
     super(dtoFactory);
     this.machineTokenServiceProvider = machineTokenServiceProvider;
     this.appContext = appContext;
-    eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
   }
 
   @Override
   protected AsyncRequest newAsyncRequest(RequestBuilder.Method method, String url, boolean async) {
-    if (isWsAgentStarted(appContext.getWorkspace()) && !authEnabled.isPresent()) {
-      authEnabled = Optional.of(false);
-      getMachineToken(); // To determine whether auth is enabled
-    }
-    if (authEnabled.isPresent() && authEnabled.get() && isWsAgentRequest(url)) {
-      return new MachineAsyncRequest(method, url, async, getMachineToken());
+    String machineToken = appContext.getWorkspace().getRuntime().getMachineToken();
+    if (isWsAgentRequest(url) && !isNullOrEmpty(machineToken)) {
+      return new MachineAsyncRequest(method, url, false, machineToken);
     }
     if (isModifyingMethod(method)) {
       return new CsrfPreventingAsyncModifyingRequest(method, url, async);
@@ -81,34 +73,7 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory
     return super.newAsyncRequest(method, url, async);
   }
 
-  private Promise<String> getMachineToken() {
-    if (!isNullOrEmpty(machineToken)) {
-      return Promises.resolve(machineToken);
-    } else {
-      return machineTokenServiceProvider
-          .get()
-          .getMachineToken()
-          .then(
-              (Function<MachineTokenDto, String>)
-                  tokenDto -> {
-                    machineToken = tokenDto.getMachineToken();
-                    authEnabled = Optional.of(true);
-                    return machineToken;
-                  })
-          .catchError(
-              arg -> {
-                authEnabled = Optional.of(false);
-                return null;
-              });
-    }
-  }
 
-  // since the machine token lives with the workspace runtime,
-  // we need to invalidate it on stopping workspace.
-  @Override
-  public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
-    machineToken = null;
-  }
 
   /**
    * Going to check is this request goes to WsAgent
@@ -122,7 +87,9 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory
       Log.info(getClass(), "return false, URL:" + url);
       return false; // ws-agent not started
     }
-    return url.contains(nullToEmpty(appContext.getWsAgentServerApiEndpoint()));
+    final boolean contains = url.contains(nullToEmpty(appContext.getWsAgentServerApiEndpoint()));
+    Log.info(getClass(), contains + " : " + url + " >> " +  appContext.getWsAgentServerApiEndpoint());
+    return contains;
   }
 
   private boolean isWsAgentStarted(WorkspaceImpl workspace) {

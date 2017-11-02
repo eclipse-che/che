@@ -34,13 +34,14 @@ import org.eclipse.che.ide.rest.Unmarshallable;
  */
 public class MachineAsyncRequest extends AsyncRequest {
 
-  private final Promise<String> tokenPromise;
+  private final String token;
 
   protected MachineAsyncRequest(
-      RequestBuilder.Method method, String url, boolean async, Promise<String> tokenPromise) {
+      RequestBuilder.Method method, String url, boolean async, String token) {
     super(method, url, async);
-    this.tokenPromise = tokenPromise;
+    this.token = token;
   }
+
 
   @Override
   public Promise<Void> send() {
@@ -49,9 +50,7 @@ public class MachineAsyncRequest extends AsyncRequest {
         new Executor.ExecutorBody<Void>() {
           @Override
           public void apply(final ResolveFunction<Void> resolve, final RejectFunction reject) {
-            tokenPromise
-                .then(
-                    new Operation<String>() {
+                   new Operation<String>() {
                       @Override
                       public void apply(String machine) throws OperationException {
                         MachineAsyncRequest.this.header(AUTHORIZATION, machine);
@@ -72,14 +71,7 @@ public class MachineAsyncRequest extends AsyncRequest {
                                   }
                                 });
                       }
-                    })
-                .catchError(
-                    new Operation<PromiseError>() {
-                      @Override
-                      public void apply(PromiseError promiseError) throws OperationException {
-                        reject.apply(promiseError);
-                      }
-                    });
+                    };
           }
         };
     final Executor<Void> executor = Executor.create(body);
@@ -111,21 +103,7 @@ public class MachineAsyncRequest extends AsyncRequest {
   @Override
   public void send(final AsyncRequestCallback<?> callback) {
     requestBuilder.setIncludeCredentials(true);
-    tokenPromise
-        .then(
-            new Operation<String>() {
-              @Override
-              public void apply(String machineToken) throws OperationException {
-                MachineAsyncRequest.this.header(AUTHORIZATION, machineToken);
-                MachineAsyncRequest.super.send(callback);
-              }
-            })
-        .catchError(
-            new Operation<PromiseError>() {
-              @Override
-              public void apply(PromiseError arg) throws OperationException {
-                callback.onError(null, arg.getCause());
-              }
-            });
+    header(AUTHORIZATION, token);
+    super.send(callback);
   }
 }
