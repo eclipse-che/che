@@ -325,6 +325,14 @@ public class CodenvyEditor {
                 driver -> getTextFromSplitEditor(numOfEditor).contains(expectedText));
   }
 
+  public void waitTextIsNotPresentInDefinedSplitEditor(
+      int numOfEditor, final int customTimeout, String text) {
+    new WebDriverWait(seleniumWebDriver, customTimeout)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> !getTextFromSplitEditor(numOfEditor).contains(text));
+  }
+
   /**
    * wait expected text in orion editor
    *
