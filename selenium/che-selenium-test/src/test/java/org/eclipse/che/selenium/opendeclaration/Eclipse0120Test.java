@@ -53,8 +53,8 @@ public class Eclipse0120Test {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
-    loader.waitOnClosed();
     projectExplorer.openItemByPath(PROJECT_NAME + PATH_TO_PACKAGE_PREFIX + "Test.java");
+    editor.waitActiveEditor();
     editor.waitMarkerInPosition(WARNING_MARKER, 16);
     editor.setCursorToDefinedLineAndChar(16, 42);
     editor.typeTextIntoEditor(Keys.F4.toString());
