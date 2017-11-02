@@ -432,7 +432,7 @@ cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
 echo
 
 if [ "${CHE_DEDICATED_KEYCLOAK}" == "true" ]; then
-  ${COMMAND_DIR}/multi-user/configure_and_start_keycloak.sh
+  "${COMMAND_DIR}"/multi-user/configure_and_start_keycloak.sh
 fi
 
 # --------------------------------
