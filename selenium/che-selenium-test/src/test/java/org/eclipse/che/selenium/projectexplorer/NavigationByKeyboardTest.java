@@ -86,44 +86,54 @@ public class NavigationByKeyboardTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(testWorkspace);
-  }
-
-  @Test
-  public void navigationByKeyboard() throws Exception {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     notificationsPopupPanel.waitProgressPopupPanelClose();
     consoles.closeProcessesArea();
+  }
+
+  @Test
+  public void navigationByKeyboard() throws Exception {
     projectExplorer.selectItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
     projectExplorer.waitVisibleItem(PROJECT_NAME + "/src");
+
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.waitItemIsSelected(PROJECT_NAME + "/src");
+
     projectExplorer.sendToItemEnterKey();
     projectExplorer.waitItemInVisibleArea("main");
     projectExplorer.waitItemInVisibleArea("test");
 
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.waitItemIsSelected(PROJECT_NAME + "/src/main");
+
     projectExplorer.sendToItemRightArrowKey();
     projectExplorer.waitItemInVisibleArea("java");
     projectExplorer.waitItemInVisibleArea("webapp");
+
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.waitItemIsSelected(PROJECT_NAME + "/src/main/java");
+
     projectExplorer.sendToItemEnterKey();
     projectExplorer.waitItemInVisibleArea(nameSecondModule);
     projectExplorer.waitItemInVisibleArea("com.example");
 
     projectExplorer.selectItem(PATH_TO_SECOND_MODULE);
     projectExplorer.waitItemIsSelected(PATH_TO_SECOND_MODULE);
+
     projectExplorer.sendToItemRightArrowKey();
     checkItemsOfTheSecondModuleIsVisible();
+
     projectExplorer.sendToItemLeftArrowKey();
     checkItemsOfTheSecondModuleIsNotVisible();
+
     projectExplorer.sendToItemEnterKey();
     checkItemsOfTheSecondModuleIsVisible();
+
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.waitItemIsSelected(PATH_TO_SECOND_MODULE + "/AppController.java");
+
     projectExplorer.sendToItemEnterKey();
     editor.waitActiveEditor();
     editor.waitTextIntoEditor(EXPECTED_TEXT_IN_JAVA_FILE);
@@ -131,22 +141,28 @@ public class NavigationByKeyboardTest {
     projectExplorer.selectVisibleItem(nameFirstModule);
     projectExplorer.sendToItemEnterKey();
     checkLibrariesIsVisible();
+
     projectExplorer.sendToItemLeftArrowKey();
     checkLibrariesIsNotVisible();
+
     projectExplorer.sendToItemRightArrowKey();
     checkLibrariesIsVisible();
+
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.sendToItemEnterKey();
     projectExplorer.waitItemInVisibleArea("META-INF");
     projectExplorer.waitItemInVisibleArea("javax.servlet");
+
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.sendToItemRightArrowKey();
     projectExplorer.waitItemInVisibleArea("MANIFEST.MF");
     projectExplorer.selectVisibleItem(nameFirstModule);
+
     projectExplorer.sendToItemEnterKey();
     checkServletInnerFilesIsNotVisible();
     checkLibrariesIsNotVisible();
+
     projectExplorer.sendToItemEnterKey();
     checkLibrariesIsVisible();
     checkServletInnerFilesIsNotVisible();
