@@ -30,6 +30,7 @@ import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.type.AttributeValue;
+import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypes;
 import org.eclipse.che.api.project.server.type.ProjectTypesFactory;
@@ -53,6 +54,7 @@ public class RegisteredProject implements ProjectConfig {
   private final ProjectTypes types;
   private boolean updated;
   private boolean detected;
+
   /**
    * Either root folder or config can be null, in this case Project is configured with problem.
    *
@@ -104,7 +106,10 @@ public class RegisteredProject implements ProjectConfig {
     }
 
     // 1. init project types
-    this.types = projectTypesFactory.create(this.config.getType(), this.config.getMixins());
+    this.types =
+        projectTypesFactory.create(
+            this.config.getType() == null ? BaseProjectType.ID : this.config.getType(),
+            this.config.getMixins());
 
     // 2. init transient (implicit, like git) project types.
     types.addTransient(folder);
