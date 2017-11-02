@@ -49,7 +49,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/che-dev",
+            "location": "eclipse/che-dev:nightly",
             "type": "dockerimage"
           }
         }
