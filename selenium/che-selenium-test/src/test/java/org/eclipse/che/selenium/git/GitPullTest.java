@@ -73,6 +73,10 @@ public class GitPullTest {
   @BeforeClass
   public void prepare() throws Exception {
     try {
+      GitHub gitHub = GitHub.connectUsingPassword(gitHubUsername, gitHubPassword);
+      gitHub
+          .getRepository(gitHubUsername + "/" + "gitPullTest")
+          .getRef("heads/master").updateTo(DEFAULT_COMMIT_SSH, true);
       String publicKey = testSshServiceClient.generateGithubKey();
       gitHubClientService.uploadPublicKey(gitHubUsername, gitHubPassword, publicKey);
     } catch (ConflictException ignored) {
@@ -86,6 +90,7 @@ public class GitPullTest {
   @Test
   public void pullTest() throws Exception {
     // Reset test repository's HEAD to default commit
+
     gitHubClientService.hardResetHeadToCommit(
         REPO_NAME, DEFAULT_COMMIT_SSH, gitHubUsername, gitHubPassword);
     projectExplorer.waitProjectExplorer();
@@ -95,8 +100,6 @@ public class GitPullTest {
     git.importJavaApp(repoUrl, FIRST_PROJECT_NAME, Wizard.TypeProject.MAVEN);
 
     projectExplorer.quickExpandWithJavaScript();
-    GitHub gitHub = GitHub.connectUsingPassword(gitHubUsername, gitHubPassword);
-    gitHub.getRepository(gitHubUsername + "/" + "gitPullTest").getDirectoryContent("/");
     // Change contents index.jsp
     loader.waitOnClosed();
     projectExplorer.openItemByPath(FIRST_PROJECT_NAME + "/my-webapp/src/main/webapp/index.jsp");
