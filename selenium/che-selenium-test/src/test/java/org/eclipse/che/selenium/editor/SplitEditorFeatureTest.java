@@ -82,18 +82,11 @@ public class SplitEditorFeatureTest {
     editor.typeTextIntoEditor(Keys.UP.toString());
     editor.typeTextIntoEditor(TEXT);
 
-    selectSplittedTabAndWaitExpectedText(1, NAME_JAVA_CLASS, TEXT);
-
     selectSplittedTabAndWaitExpectedText(0, NAME_JAVA_CLASS, TEXT);
 
+    selectSplittedTabAndWaitExpectedText(1, NAME_JAVA_CLASS, TEXT);
+
     selectSplittedTabAndWaitExpectedText(2, NAME_JAVA_CLASS, TEXT);
-
-    editor.setCursorToLine(1);
-    editor.deleteCurrentLine();
-
-    selectSplittedTabAndWaitTextIsNotPresent(0, NAME_JAVA_CLASS, TEXT);
-
-    selectSplittedTabAndWaitTextIsNotPresent(1, NAME_JAVA_CLASS, TEXT);
   }
 
   @Test(priority = 1)
