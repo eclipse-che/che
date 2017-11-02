@@ -586,8 +586,7 @@ public class CodenvyEditor {
    * @param position is the number position
    */
   public void waitMarkerInPosition(String markerType, int position) {
-    loadPageDriverWait.until(
-        visibilityOfElementLocated(By.xpath(String.format(markerType, position))));
+    elemDriverWait.until(visibilityOfElementLocated(By.xpath(String.format(markerType, position))));
     setCursorToLine(position);
     expectedNumberOfActiveLine(position);
   }
