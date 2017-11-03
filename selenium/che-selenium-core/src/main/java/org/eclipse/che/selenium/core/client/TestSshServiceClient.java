@@ -17,6 +17,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import java.util.List;
 import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.api.ssh.shared.dto.GenerateSshPairRequest;
@@ -31,6 +32,7 @@ public class TestSshServiceClient {
   private static final Logger LOG = LoggerFactory.getLogger(TestSshServiceClient.class);
   private static final String MACHINE_SERVICE = "machine";
   private static final String VCS_SERVICE = "vcs";
+  public static final String GITHUB_COM = "github.com";
 
   private final String apiEndpoint;
   private final HttpJsonRequestFactory requestFactory;
@@ -62,29 +64,44 @@ public class TestSshServiceClient {
     return sshPair.isEmpty() ? null : sshPair.get(0).getPrivateKey();
   }
 
-  public void deleteMachineKeyByName(String name) throws Exception {
+  private void deleteMachineKeyByName(String name) throws Exception {
     requestFactory
         .fromUrl(apiEndpoint + "ssh/" + MACHINE_SERVICE + "/?name=" + name)
         .useDeleteMethod()
         .request();
   }
 
+  public void deleteVCSKeyByName(String name) throws Exception {
+    requestFactory
+        .fromUrl(apiEndpoint + "ssh/" + VCS_SERVICE + "/?name=" + name)
+        .useDeleteMethod()
+        .request();
+  }
+
   public synchronized void updateGithubKey() throws Exception {
     try {
-      String publicKey = generateGithubKey();
-      testGitHubServiceClient.uploadPublicKey(gitHubUsername, gitHubPassword, publicKey);
+      deleteVCSKeyByName(GITHUB_COM);
+    } catch (NotFoundException e) {
+      // ignore absence of key for github.com
+      LOG.debug("Ssh key for " + GITHUB_COM + " is absent.");
+    }
+
+    try {
+      String publicKey = generateKey(GITHUB_COM);
+      testGitHubServiceClient.uploadPublicKey(
+          gitHubUsername, gitHubPassword, publicKey, "QA selenium test");
     } catch (ConflictException e) {
       // ignore if ssh-key for github.com has already existed
-      LOG.debug("Ssh key for github.com has already existed.");
+      LOG.debug("Ssh key for " + GITHUB_COM + " has already existed.");
       return;
     }
 
-    LOG.info("Ssh key for github.com has been generated.");
+    LOG.info("Ssh key for " + GITHUB_COM + " has been generated.");
   }
 
-  private String generateGithubKey() throws Exception {
+  private String generateKey(String name) throws Exception {
     GenerateSshPairRequest generateSshKeyData =
-        newDto(GenerateSshPairRequest.class).withName("github.com").withService(VCS_SERVICE);
+        newDto(GenerateSshPairRequest.class).withName(name).withService(VCS_SERVICE);
 
     HttpJsonResponse response =
         requestFactory

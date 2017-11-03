@@ -67,15 +67,15 @@ public class TestGitHubServiceClient {
         .request();
   }
 
-  public void uploadPublicKey(final String username, final String password, final String key)
+  public void uploadPublicKey(
+      final String username, final String password, final String key, String keyTitle)
       throws Exception {
-    final String sshKeyTitle = "QA selenium test";
 
     GitHubKey publicSshKey = newDto(GitHubKey.class);
-    publicSshKey.setTitle(sshKeyTitle);
+    publicSshKey.setTitle(keyTitle);
     publicSshKey.setKey(key);
 
-    deletePublicKeys(username, password, sshKeyTitle);
+    deletePublicKeys(username, password, keyTitle);
     createPublicKey(username, password, publicSshKey);
   }
 
