@@ -21,6 +21,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
+import org.eclipse.che.api.debug.shared.dto.LocationDto;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.Variable;
@@ -468,7 +470,14 @@ public class BreakpointManagerImpl
           .getAllBreakpoints()
           .then(
               breakpointDtos -> {
-                activeBreakpoints.addAll(breakpointDtos);
+                for (BreakpointDto breakpointDto : breakpointDtos) {
+                  LocationDto location = breakpointDto.getLocation();
+
+                  breakpointStorage
+                      .get(location.getTarget(), location.getLineNumber())
+                      .ifPresent(activeBreakpoints::add);
+                }
+
                 for (BreakpointManagerObserver observer : observers) {
                   observer.onBreakpointUpdated(null);
                 }
@@ -491,6 +500,11 @@ public class BreakpointManagerImpl
             });
 
     deleteSuspendedLocation();
+
+    activeBreakpoints.clear();
+    for (BreakpointManagerObserver observer : observers) {
+      observer.onBreakpointUpdated(null);
+    }
   }
 
   @Override

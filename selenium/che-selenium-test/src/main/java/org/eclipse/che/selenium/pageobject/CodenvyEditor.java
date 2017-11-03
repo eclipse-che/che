@@ -199,6 +199,8 @@ public class CodenvyEditor {
         "//div[@class='breakpoint active' and text()='%d']";
     public static final String DEBUGGER_BREAKPOINT_CONDITION =
         "//div[@class='breakpoint %s condition' and text()='%d']";
+    public static final String DEBUGGER_BREAKPOINT_DISABLED =
+        "//div[@class='breakpoint disabled' and text()='%d']";
     public static final String JAVA_DOC_POPUP = "//div[@class='gwt-PopupPanel']//iframe";
     public static final String AUTOCOMPLETE_PROPOSAL_JAVA_DOC_POPUP =
         "//div//iframe[contains(@src, 'api/java/code-assist/compute/info?')]";
@@ -1213,6 +1215,12 @@ public class CodenvyEditor {
                     Locators.DEBUGGER_BREAKPOINT_CONDITION,
                     active ? "active" : "inactive",
                     lineNumber))));
+  }
+
+  public void waitDisabledBreakpoint(int lineNumber) {
+    redrawDriverWait.until(
+        visibilityOfElementLocated(
+            By.xpath(String.format(Locators.DEBUGGER_BREAKPOINT_DISABLED, lineNumber))));
   }
 
   /** wait while editor will be empty */

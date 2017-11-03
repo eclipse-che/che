@@ -51,7 +51,13 @@ public class BreakpointItemRender
     } else {
       sb.appendHtmlConstant(css.breakpoint() + " " + css.inactive());
     }
-    sb.appendHtmlConstant("\" style=\"height: 14px; width: 14px; text-align: center\">");
+    sb.appendHtmlConstant("\" style=\"height: 14px; width: 14px; text-align: center\"");
+    sb.appendHtmlConstant(
+        " id=\""
+            + breakpoint.getLocation().getTarget()
+            + ":"
+            + breakpoint.getLocation().getLineNumber()
+            + "\">");
     if (breakpoint.getCondition() != null) {
       sb.appendHtmlConstant("?");
     }
