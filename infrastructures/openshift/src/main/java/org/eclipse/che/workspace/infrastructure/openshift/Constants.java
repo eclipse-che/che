@@ -17,7 +17,18 @@ package org.eclipse.che.workspace.infrastructure.openshift;
  */
 public final class Constants {
 
-  public static final String CHE_POD_NAME_LABEL = "che.pod.name";
+  /**
+   * The label that contains a value with original object name.
+   *
+   * <p>Names of OpenShift objects should be modified to avoid collision with objects of other
+   * workspaces.
+   *
+   * @see org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesProvisioner
+   */
+  public static final String CHE_ORIGINAL_NAME_LABEL = "che.original_name";
+
+  /** The label that contains a value with workspace id to which object belongs to. */
+  public static final String CHE_WORKSPACE_ID_LABEL = "che.workspace_id";
 
   private Constants() {}
 }

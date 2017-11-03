@@ -57,4 +57,4 @@ RUN sudo  ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N '' && \
     sudo  ssh-keygen -t rsa -f /etc/ssh/ssh_host_ed25519_key -N '' && \
     npm install -g typescript@2.5.3 typescript-language-server@0.1.4
 
-WORKDIR /home/user
+WORKDIR /projects

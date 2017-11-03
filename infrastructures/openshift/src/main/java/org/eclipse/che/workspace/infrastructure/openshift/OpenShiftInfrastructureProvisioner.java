@@ -18,7 +18,6 @@ import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.env.EnvVarsConverter;
-import org.eclipse.che.workspace.infrastructure.openshift.provision.labels.PodNameLabelProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.restartpolicy.RestartPolicyRewriter;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.route.TlsRouteProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.server.ServersConverter;
@@ -40,7 +39,6 @@ public class OpenShiftInfrastructureProvisioner {
   private final ServersConverter serversConverter;
   private final EnvVarsConverter envVarsConverter;
   private final RestartPolicyRewriter restartPolicyRewriter;
-  private final PodNameLabelProvisioner podNameLabelProvisioner;
 
   @Inject
   public OpenShiftInfrastructureProvisioner(
@@ -49,15 +47,13 @@ public class OpenShiftInfrastructureProvisioner {
       TlsRouteProvisioner tlsRouteProvisioner,
       ServersConverter serversConverter,
       EnvVarsConverter envVarsConverter,
-      RestartPolicyRewriter restartPolicyRewriter,
-      PodNameLabelProvisioner podNameLabelProvisioner) {
+      RestartPolicyRewriter restartPolicyRewriter) {
     this.persistentVolumeClaimProvisioner = projectVolumeProvisioner;
     this.uniqueNamesProvisioner = uniqueNamesProvisioner;
     this.tlsRouteProvisioner = tlsRouteProvisioner;
     this.serversConverter = serversConverter;
     this.envVarsConverter = envVarsConverter;
     this.restartPolicyRewriter = restartPolicyRewriter;
-    this.podNameLabelProvisioner = podNameLabelProvisioner;
   }
 
   public void provision(
@@ -66,8 +62,8 @@ public class OpenShiftInfrastructureProvisioner {
     // 1 stage - converting Che model env to OpenShift env
     serversConverter.provision(environment, osEnv, identity);
     envVarsConverter.provision(environment, osEnv, identity);
+
     // 2 stage - add OpenShift env items
-    podNameLabelProvisioner.provision(environment, osEnv, identity);
     restartPolicyRewriter.provision(environment, osEnv, identity);
     persistentVolumeClaimProvisioner.provision(environment, osEnv, identity);
     uniqueNamesProvisioner.provision(environment, osEnv, identity);
