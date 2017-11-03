@@ -60,14 +60,14 @@ public class AskDialog {
 
   public void clickOkBtn() {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.elementToBeClickable(okBtn))
+        .until(ExpectedConditions.visibilityOf(okBtn))
         .click();
   }
 
   public void clickCancelBtn() {
     waitFormToOpen();
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.elementToBeClickable(cancelBtn))
+        .until(ExpectedConditions.visibilityOf(cancelBtn))
         .click();
   }
 
