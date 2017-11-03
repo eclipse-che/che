@@ -103,7 +103,7 @@ public class Preferences {
   }
 
   public interface DropDownSshKeysMenu {
-    String SSH_Keystore = "VCS";
+    String VCS = "VCS";
     String MACHINE = "Machine";
   }
 
@@ -530,8 +530,8 @@ public class Preferences {
 
   public void regenerateAndUploadSshKeyOnGithub(String githubUsername, String githubPassword)
       throws Exception {
-    waitMenuInCollapsedDropdown(Preferences.DropDownSshKeysMenu.SSH_Keystore);
-    selectDroppedMenuByName(Preferences.DropDownSshKeysMenu.SSH_Keystore);
+    waitMenuInCollapsedDropdown(Preferences.DropDownSshKeysMenu.VCS);
+    selectDroppedMenuByName(Preferences.DropDownSshKeysMenu.VCS);
 
     loader.waitOnClosed();
 
@@ -540,7 +540,7 @@ public class Preferences {
     // regenerate key and upload it on the gitHub
     clickOnGenerateAndUploadToGitHub();
 
-    askDialog.waitFormToOpen();
+    askDialog.waitFormToOpen(25);
     askDialog.clickOkBtn();
     askDialog.waitFormToClose();
     seleniumWebDriver.switchToNoneCurrentWindow(ideWin);
