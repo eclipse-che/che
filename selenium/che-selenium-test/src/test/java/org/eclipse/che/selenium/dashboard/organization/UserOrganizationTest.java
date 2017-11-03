@@ -23,8 +23,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage;
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationPage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -35,8 +33,6 @@ import org.testng.annotations.Test;
  * @author Ann Shumilova
  */
 public class UserOrganizationTest {
-  private static final Logger LOG = LoggerFactory.getLogger(UserOrganizationTest.class);
-
   private OrganizationDto parentOrganization;
   private OrganizationDto childOrganization;
 
@@ -44,12 +40,11 @@ public class UserOrganizationTest {
   @Inject private OrganizationPage organizationPage;
   @Inject private NavigationBar navigationBar;
   @Inject private Dashboard dashboard;
+  @Inject private TestUser testUser;
 
   @Inject
   @Named("admin")
   private TestOrganizationServiceClient testOrganizationServiceClient;
-
-  @Inject private TestUser testUser;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -71,7 +66,7 @@ public class UserOrganizationTest {
     testOrganizationServiceClient.deleteById(parentOrganization.getId());
   }
 
-  @Test(priority = 1)
+  @Test
   public void testOrganizationListComponents() {
     navigationBar.waitNavigationBar();
     int organizationsCount = 2;
@@ -81,11 +76,11 @@ public class UserOrganizationTest {
 
     assertEquals(
         navigationBar.getMenuCounterValue(NavigationBar.MenuItem.ORGANIZATIONS),
-        String.valueOf(organizationsCount));
+        organizationsCount);
     assertEquals(organizationListPage.getOrganizationsToolbarTitle(), "Organizations");
     assertEquals(
         navigationBar.getMenuCounterValue(NavigationBar.MenuItem.ORGANIZATIONS),
-        String.valueOf(organizationsCount));
+        organizationsCount);
     assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount);
     assertFalse(organizationListPage.isAddOrganizationButtonVisible());
     assertTrue(organizationListPage.isSearchInputVisible());
@@ -110,7 +105,7 @@ public class UserOrganizationTest {
             .contains(childOrganization.getQualifiedName()));
   }
 
-  @Test(priority = 2)
+  @Test
   public void testParentOrganization() {
     organizationListPage.clickOnOrganization(parentOrganization.getName());
 
@@ -140,7 +135,7 @@ public class UserOrganizationTest {
     assertEquals(organizationListPage.getOrganizationListItemCount(), 2);
   }
 
-  @Test(priority = 3)
+  @Test
   public void testChildOrganization() {
     navigationBar.clickOnMenu(NavigationBar.MenuItem.ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();

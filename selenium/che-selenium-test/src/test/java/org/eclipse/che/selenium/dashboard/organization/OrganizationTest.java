@@ -33,7 +33,6 @@ import org.testng.annotations.Test;
 
 /** @author Sergey Skorik */
 public class OrganizationTest {
-
   private static final String PRE_CREATED_ORG_NAME = generate("orgX", 6);
   private static final String NEW_ORG_NAME = generate("orgY", 6);
 
@@ -46,14 +45,13 @@ public class OrganizationTest {
   @Inject private AddOrganization addOrganization;
   @Inject private AddMember addMember;
   @Inject private Loader loader;
+  @Inject private Dashboard dashboard;
+  @Inject private TestUser testUser;
+  @Inject private AdminTestUser adminTestUser;
 
   @Inject
   @Named("admin")
   private TestOrganizationServiceClient testOrganizationServiceClient;
-
-  @Inject private Dashboard dashboard;
-  @Inject private TestUser testUser;
-  @Inject private AdminTestUser adminTestUser;
 
   @BeforeClass
   public void setUp() throws Exception {

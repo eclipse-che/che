@@ -27,8 +27,6 @@ import java.util.ArrayList;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
-import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
-import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
@@ -36,8 +34,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.CheMultiuserAdminDashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage;
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationPage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -49,8 +45,6 @@ import org.testng.annotations.Test;
  */
 public class AdminOfParentOrganizationTest {
 
-  private static final Logger LOG = LoggerFactory.getLogger(AdminOfParentOrganizationTest.class);
-
   private OrganizationDto parentOrganization;
   private OrganizationDto childOrganization;
 
@@ -58,15 +52,13 @@ public class AdminOfParentOrganizationTest {
   @Inject private OrganizationPage organizationPage;
   @Inject private NavigationBar navigationBar;
   @Inject private CheMultiuserAdminDashboard dashboard;
-  @Inject private TestIdeUrlProvider testIdeUrlProvider;
-  @Inject private TestDashboardUrlProvider testDashboardUrlProvider;
+
   @Inject private TestUser testUser;
+  @Inject private AdminTestUser adminTestUser;
 
   @Inject
   @Named("admin")
   private TestOrganizationServiceClient testOrganizationServiceClient;
-
-  @Inject private AdminTestUser adminTestUser;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -88,7 +80,7 @@ public class AdminOfParentOrganizationTest {
     testOrganizationServiceClient.deleteById(parentOrganization.getId());
   }
 
-  @Test(priority = 1)
+  @Test
   public void testOrganizationListComponents() {
     navigationBar.waitNavigationBar();
     int organizationsCount = 2;
@@ -97,14 +89,13 @@ public class AdminOfParentOrganizationTest {
     organizationListPage.waitForOrganizationsList();
     WaitUtils.sleepQuietly(3);
 
-    assertEquals(
-        navigationBar.getMenuCounterValue(ORGANIZATIONS), String.valueOf(organizationsCount));
+    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), organizationsCount);
     assertEquals(organizationListPage.getOrganizationsToolbarTitle(), "Organizations");
-    assertEquals(
-        navigationBar.getMenuCounterValue(ORGANIZATIONS), String.valueOf(organizationsCount));
+    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), organizationsCount);
     assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount);
     assertFalse(organizationListPage.isAddOrganizationButtonVisible());
     assertTrue(organizationListPage.isSearchInputVisible());
+
     // Check all headers are present:
     ArrayList<String> headers = organizationListPage.getOrganizationListHeaders();
     assertTrue(headers.contains(NAME.getTitle()));
@@ -118,7 +109,7 @@ public class AdminOfParentOrganizationTest {
     assertTrue(organizationListPage.getValues(NAME).contains(childOrganization.getQualifiedName()));
   }
 
-  @Test(priority = 2)
+  @Test
   public void testParentOrganization() {
     organizationListPage.clickOnOrganization(parentOrganization.getName());
 
@@ -145,7 +136,7 @@ public class AdminOfParentOrganizationTest {
     assertEquals(organizationListPage.getOrganizationListItemCount(), 2);
   }
 
-  @Test(priority = 3)
+  @Test
   public void testChildOrganization() {
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();

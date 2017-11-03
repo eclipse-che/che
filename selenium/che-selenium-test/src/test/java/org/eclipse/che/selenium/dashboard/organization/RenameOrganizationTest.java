@@ -19,15 +19,12 @@ import com.google.inject.name.Named;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
-import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.EditMode;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage;
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationPage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -38,7 +35,6 @@ import org.testng.annotations.Test;
  * @author Ann Shumilova
  */
 public class RenameOrganizationTest {
-  private static final Logger LOG = LoggerFactory.getLogger(RenameOrganizationTest.class);
 
   private OrganizationDto parentOrganization;
   private OrganizationDto childOrganization;
@@ -49,13 +45,11 @@ public class RenameOrganizationTest {
   @Inject private NavigationBar navigationBar;
   @Inject private EditMode editMode;
   @Inject private Dashboard dashboard;
+  @Inject private TestUser testUser;
 
   @Inject
   @Named("admin")
   private TestOrganizationServiceClient testOrganizationServiceClient;
-
-  @Inject private TestUser testUser;
-  @Inject private AdminTestUser adminTestUser;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -85,9 +79,7 @@ public class RenameOrganizationTest {
     organizationListPage.waitForOrganizationsList();
 
     organizationListPage.clickOnOrganization(parentOrganization.getName());
-
     organizationPage.waitOrganizationTitle(parentOrganization.getName());
-
     organizationPage.setOrganizationName("");
     editMode.waitDisplayed();
     assertFalse(editMode.isSaveEnabled());
@@ -99,27 +91,24 @@ public class RenameOrganizationTest {
     organizationPage.setOrganizationName(parentNewName);
     editMode.waitDisplayed();
     assertTrue(editMode.isSaveEnabled());
-
     editMode.clickSave();
     editMode.waitHidden();
-
     organizationPage.waitOrganizationTitle(parentNewName);
     assertEquals(parentNewName, organizationPage.getOrganizationName());
   }
 
   @Test(priority = 2)
   public void testSubOrganizationRename() {
+    String organizationPath = parentNewName + "/" + childOrganization.getName();
+    String newName = NameGenerator.generate("newname", 5);
+    String path = parentNewName + "/" + newName;
+
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(NavigationBar.MenuItem.ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
-    String organizationPath = parentNewName + "/" + childOrganization.getName();
-
     organizationListPage.clickOnOrganization(organizationPath);
-
     organizationPage.waitOrganizationTitle(organizationPath);
-    String newName = NameGenerator.generate("newname", 5);
-
     organizationPage.setOrganizationName(newName);
     editMode.waitDisplayed();
     assertTrue(editMode.isSaveEnabled());
@@ -127,7 +116,6 @@ public class RenameOrganizationTest {
     editMode.clickSave();
     editMode.waitHidden();
 
-    String path = parentNewName + "/" + newName;
     organizationPage.waitOrganizationTitle(path);
     assertEquals(organizationPage.getOrganizationName(), newName);
 

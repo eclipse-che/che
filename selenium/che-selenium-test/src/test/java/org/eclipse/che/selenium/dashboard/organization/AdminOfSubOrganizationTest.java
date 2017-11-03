@@ -27,14 +27,11 @@ import java.util.ArrayList;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
-import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.CheMultiuserAdminDashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage;
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationPage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -45,7 +42,6 @@ import org.testng.annotations.Test;
  * @author Ann Shumilova
  */
 public class AdminOfSubOrganizationTest {
-  private static final Logger LOG = LoggerFactory.getLogger(AdminOfSubOrganizationTest.class);
 
   private OrganizationDto parentOrganization;
   private OrganizationDto childOrganization;
@@ -54,13 +50,11 @@ public class AdminOfSubOrganizationTest {
   @Inject private OrganizationPage organizationPage;
   @Inject private NavigationBar navigationBar;
   @Inject private CheMultiuserAdminDashboard dashboard;
+  @Inject private TestUser testUser;
 
   @Inject
   @Named("admin")
   private TestOrganizationServiceClient testOrganizationServiceClient;
-
-  @Inject private TestUser testUser;
-  @Inject private AdminTestUser adminTestUser;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -72,7 +66,6 @@ public class AdminOfSubOrganizationTest {
 
     testOrganizationServiceClient.addMember(parentOrganization.getId(), testUser.getId());
     testOrganizationServiceClient.addAdmin(childOrganization.getId(), testUser.getId());
-
     dashboard.open(testUser.getName(), testUser.getPassword());
   }
 
@@ -82,7 +75,7 @@ public class AdminOfSubOrganizationTest {
     testOrganizationServiceClient.deleteById(parentOrganization.getId());
   }
 
-  @Test(priority = 1)
+  @Test
   public void testOrganizationListComponents() {
     navigationBar.waitNavigationBar();
     int organizationsCount = 2;
@@ -90,11 +83,9 @@ public class AdminOfSubOrganizationTest {
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
 
-    assertEquals(
-        navigationBar.getMenuCounterValue(ORGANIZATIONS), String.valueOf(organizationsCount));
+    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), organizationsCount);
     assertEquals(organizationListPage.getOrganizationsToolbarTitle(), "Organizations");
-    assertEquals(
-        navigationBar.getMenuCounterValue(ORGANIZATIONS), String.valueOf(organizationsCount));
+    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), organizationsCount);
 
     assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount);
     assertFalse(organizationListPage.isAddOrganizationButtonVisible());
@@ -113,7 +104,7 @@ public class AdminOfSubOrganizationTest {
     assertTrue(organizationListPage.getValues(NAME).contains(childOrganization.getQualifiedName()));
   }
 
-  @Test(priority = 2)
+  @Test
   public void testParentOrganization() {
     organizationListPage.clickOnOrganization(parentOrganization.getName());
 
@@ -140,7 +131,7 @@ public class AdminOfSubOrganizationTest {
     assertEquals(organizationListPage.getOrganizationListItemCount(), 2);
   }
 
-  @Test(priority = 3)
+  @Test
   public void testChildOrganization() {
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();

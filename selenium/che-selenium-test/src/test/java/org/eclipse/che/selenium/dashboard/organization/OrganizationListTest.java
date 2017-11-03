@@ -35,24 +35,22 @@ import org.testng.annotations.Test;
  */
 public class OrganizationListTest {
   private List<OrganizationDto> organizations;
+  private OrganizationDto organization;
 
   @Inject private OrganizationListPage organizationListPage;
   @Inject private NavigationBar navigationBar;
   @Inject private Dashboard dashboard;
+  @Inject private AdminTestUser adminTestUser;
 
   @Inject
   @Named("admin")
   private TestOrganizationServiceClient testOrganizationServiceClient;
 
-  @Inject private AdminTestUser adminTestUser;
-
-  private OrganizationDto organization;
-
   @BeforeClass
   public void setUp() throws Exception {
-    dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
     organization = testOrganizationServiceClient.create(NameGenerator.generate("organization", 5));
     organizations = testOrganizationServiceClient.getAll();
+    dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
   }
 
   @AfterClass
@@ -62,22 +60,25 @@ public class OrganizationListTest {
 
   @Test
   public void testOrganizationListComponents() {
-    navigationBar.waitNavigationBar();
     int organizationsCount = organizations.size();
+
+    navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(NavigationBar.MenuItem.ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
 
+    // TODO
     assertEquals(
         navigationBar.getMenuCounterValue(NavigationBar.MenuItem.ORGANIZATIONS),
-        String.valueOf(organizationsCount));
+        organizationsCount);
     assertEquals(organizationListPage.getOrganizationsToolbarTitle(), "Organizations");
     assertEquals(
         navigationBar.getMenuCounterValue(NavigationBar.MenuItem.ORGANIZATIONS),
-        String.valueOf(organizationsCount));
+        organizationsCount);
     assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount);
     assertTrue(organizationListPage.isAddOrganizationButtonVisible());
     assertTrue(organizationListPage.isSearchInputVisible());
+
     // Check all headers are present:
     ArrayList<String> headers = organizationListPage.getOrganizationListHeaders();
     assertTrue(headers.contains(OrganizationListPage.OrganizationListHeader.NAME.getTitle()));

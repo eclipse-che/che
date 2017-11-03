@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.dashboard.organization;
 
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
 import static org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.NAME;
 import static org.testng.Assert.assertEquals;
@@ -19,7 +20,6 @@ import static org.testng.Assert.assertTrue;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.util.List;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
@@ -39,8 +39,6 @@ import org.testng.annotations.Test;
  * @author Ann Shumilova
  */
 public class BulkOrganizationDeletionTest {
-  private static final Logger LOG = LoggerFactory.getLogger(BulkOrganizationDeletionTest.class);
-
   private List<OrganizationDto> organizations;
   private OrganizationDto organization1;
   private OrganizationDto organization2;
@@ -58,14 +56,11 @@ public class BulkOrganizationDeletionTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
-
-    String organizationName1 = NameGenerator.generate("organization", 5);
-    String organizationName2 = NameGenerator.generate("organization", 5);
-
-    organization1 = testOrganizationServiceClient.create(organizationName1);
-    organization2 = testOrganizationServiceClient.create(organizationName2);
+    organization1 = testOrganizationServiceClient.create(generate("organization", 5));
+    organization2 = testOrganizationServiceClient.create(generate("organization", 5));
     organizations = testOrganizationServiceClient.getAll();
+
+    dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
   }
 
   @AfterClass
@@ -100,26 +95,24 @@ public class BulkOrganizationDeletionTest {
     organizationListPage.clickCheckbox(organization2.getName());
     assertTrue(organizationListPage.isBulkDeleteVisible());
 
+    // Delete all organizations
     organizationListPage.clickBulkDeleteButton();
     confirmDialog.waitOpened();
     assertEquals(confirmDialog.getTitle(), "Delete organizations");
     assertEquals(
         confirmDialog.getMessage(),
-        String.format("Would you like to delete these %s organizations?", 2));
+        String.format("Would you like to delete these %s organizations?", organizationsCount));
     assertEquals(confirmDialog.getConfirmButtonTitle(), "Delete");
     assertEquals(confirmDialog.getCancelButtonTitle(), "Close");
     confirmDialog.clickConfirm();
-
     confirmDialog.waitClosed();
     organizationListPage.waitForOrganizationsList();
 
     organizationListPage.waitForOrganizationIsRemoved(organization1.getName());
     organizationListPage.waitForOrganizationIsRemoved(organization2.getName());
-
-    assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount - 2);
+    assertEquals(organizationListPage.getOrganizationListItemCount(), 0);
     assertFalse(organizationListPage.getValues(NAME).contains(organization1.getName()));
     assertFalse(organizationListPage.getValues(NAME).contains(organization2.getName()));
-    assertEquals(
-        navigationBar.getMenuCounterValue(ORGANIZATIONS), String.valueOf(organizationsCount - 2));
+    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), 0);
   }
 }

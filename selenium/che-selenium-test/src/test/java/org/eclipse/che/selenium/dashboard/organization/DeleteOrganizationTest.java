@@ -17,7 +17,6 @@ import com.google.inject.name.Named;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
-import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.ConfirmDialog;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
@@ -42,13 +41,11 @@ public class DeleteOrganizationTest {
   @Inject private NavigationBar navigationBar;
   @Inject private ConfirmDialog confirmDialog;
   @Inject private Dashboard dashboard;
+  @Inject private TestUser testUser;
 
   @Inject
   @Named("admin")
   private TestOrganizationServiceClient testOrganizationServiceClient;
-
-  @Inject private TestUser testUser;
-  @Inject private AdminTestUser adminTestUser;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -56,7 +53,6 @@ public class DeleteOrganizationTest {
         testOrganizationServiceClient.create(NameGenerator.generate("organization", 5));
     childOrganization =
         testOrganizationServiceClient.create(NameGenerator.generate("organization", 5));
-
     testOrganizationServiceClient.addAdmin(parentOrganization.getId(), testUser.getId());
     testOrganizationServiceClient.addAdmin(childOrganization.getId(), testUser.getId());
 
@@ -69,15 +65,13 @@ public class DeleteOrganizationTest {
     testOrganizationServiceClient.deleteById(parentOrganization.getId());
   }
 
-  @Test(priority = 1)
+  @Test
   public void testSubOrganizationDelete() {
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(NavigationBar.MenuItem.ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
-
     organizationListPage.clickOnOrganization(childOrganization.getQualifiedName());
-
     organizationPage.waitOrganizationName(childOrganization.getName());
     organizationPage.clickDeleteOrganizationButton();
     confirmDialog.waitOpened();
@@ -93,19 +87,17 @@ public class DeleteOrganizationTest {
 
     organizationListPage.waitForOrganizationsList();
     organizationListPage.waitForOrganizationIsRemoved(childOrganization.getQualifiedName());
-    assertEquals(navigationBar.getMenuCounterValue(NavigationBar.MenuItem.ORGANIZATIONS), "1");
+    assertEquals(navigationBar.getMenuCounterValue(NavigationBar.MenuItem.ORGANIZATIONS), 0);
     assertEquals(organizationListPage.getOrganizationListItemCount(), 1);
   }
 
-  @Test(priority = 2)
+  @Test(priority = 1)
   public void testParentOrganizationDeletion() {
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(NavigationBar.MenuItem.ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
-
     organizationListPage.clickOnOrganization(parentOrganization.getName());
-
     organizationPage.waitOrganizationName(parentOrganization.getName());
     organizationPage.clickDeleteOrganizationButton();
     confirmDialog.waitOpened();
@@ -120,6 +112,6 @@ public class DeleteOrganizationTest {
     confirmDialog.waitClosed();
 
     organizationListPage.waitForOrganizationsEmptyList();
-    assertEquals(navigationBar.getMenuCounterValue(NavigationBar.MenuItem.ORGANIZATIONS), "0");
+    assertEquals(navigationBar.getMenuCounterValue(NavigationBar.MenuItem.ORGANIZATIONS), 0);
   }
 }
