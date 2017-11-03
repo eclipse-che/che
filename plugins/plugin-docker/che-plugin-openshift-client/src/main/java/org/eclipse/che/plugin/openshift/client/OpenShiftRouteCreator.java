@@ -41,8 +41,6 @@ public class OpenShiftRouteCreator {
 
     try (OpenShiftClient openShiftClient = new DefaultOpenShiftClient()) {
       String routeName = generateRouteName(routeId, serverRef);
-      String serviceHost = generateRouteHost(routeName, openShiftNamespaceExternalAddress);
-
       SpecNested<DoneableRoute> routeSpec =
           openShiftClient
               .routes()
@@ -53,7 +51,6 @@ public class OpenShiftRouteCreator {
               .addToLabels(OpenShiftConnector.OPENSHIFT_DEPLOYMENT_LABEL, deploymentName)
               .endMetadata()
               .withNewSpec()
-              .withHost(serviceHost)
               .withNewTo()
               .withKind("Service")
               .withName(serviceName)
@@ -80,10 +77,5 @@ public class OpenShiftRouteCreator {
 
   private String generateRouteName(final String serviceName, final String serverRef) {
     return serverRef + "-" + serviceName;
-  }
-
-  private String generateRouteHost(
-      final String routeName, final String openShiftNamespaceExternalAddress) {
-    return routeName + "-" + openShiftNamespaceExternalAddress;
   }
 }
