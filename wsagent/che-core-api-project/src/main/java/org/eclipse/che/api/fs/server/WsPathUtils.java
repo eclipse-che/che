@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.api.fs.server;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 public interface WsPathUtils {
 
   String ROOT = "/";
@@ -21,19 +23,58 @@ public interface WsPathUtils {
   }
 
   static String nameOf(String wsPath) {
+    if (isNullOrEmpty(wsPath)) {
+      throw new IllegalArgumentException("Can't get name of empty path or null");
+    }
+
+    if (!isAbsolute(wsPath)) {
+      throw new IllegalArgumentException("Workspace path should be absolute");
+    }
+
+    if (isRoot(wsPath)) {
+      throw new IllegalArgumentException("Can't get name of root");
+    }
+
     return wsPath.substring(wsPath.lastIndexOf(SEPARATOR) + 1);
   }
 
   static String parentOf(String wsPath) {
-    String parentWsPath = wsPath.substring(0, wsPath.lastIndexOf(SEPARATOR));
-    return parentWsPath.isEmpty() ? ROOT : parentWsPath;
+    if (isNullOrEmpty(wsPath)) {
+      throw new IllegalArgumentException("Can't get parent of empty path or null");
+    }
+
+    if (!isAbsolute(wsPath)) {
+      throw new IllegalArgumentException("Workspace path should be absolute");
+    }
+
+    if (isRoot(wsPath)) {
+      throw new IllegalArgumentException("Can't get parent of root");
+    }
+
+    return wsPath.substring(0, wsPath.lastIndexOf(SEPARATOR));
   }
 
   static String resolve(String wsPath, String name) {
+    if (isNullOrEmpty(wsPath)) {
+      throw new IllegalArgumentException("Can't resolve for parent that is empty or null");
+    }
+
+    if (!isAbsolute(wsPath)) {
+      throw new IllegalArgumentException("Workspace path should be absolute");
+    }
+
+    if (isNullOrEmpty(name)) {
+      throw new IllegalArgumentException("Can't resolve item that is empty or null");
+    }
+
     return wsPath.endsWith(SEPARATOR) ? wsPath + name : wsPath + SEPARATOR + name;
   }
 
   static String absolutize(String wsPath) {
     return wsPath.startsWith(ROOT) ? wsPath : ROOT + wsPath;
+  }
+
+  static boolean isAbsolute(String wsPath) {
+    return wsPath.startsWith(ROOT);
   }
 }

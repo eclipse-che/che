@@ -13,6 +13,7 @@ package org.eclipse.che.api.project.server.impl;
 import static java.io.File.separator;
 import static java.util.Collections.emptyMap;
 import static java.util.Optional.empty;
+import static org.eclipse.che.api.fs.server.WsPathUtils.isRoot;
 import static org.eclipse.che.api.fs.server.WsPathUtils.nameOf;
 
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.fs.server.FsManager;
+import org.eclipse.che.api.fs.server.WsPathUtils;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
@@ -84,12 +86,12 @@ public class ExecutiveProjectManager implements ProjectManager {
 
   @Override
   public Optional<RegisteredProject> getClosest(String wsPath) {
-    while (!wsPath.isEmpty()) {
+    while (!isRoot(wsPath)) {
       Optional<RegisteredProject> registeredProject = projectConfigRegistry.get(wsPath);
       if (registeredProject.isPresent()) {
         return registeredProject;
       } else {
-        wsPath = wsPath.substring(0, wsPath.lastIndexOf(separator));
+        wsPath = WsPathUtils.parentOf(wsPath);
       }
     }
 

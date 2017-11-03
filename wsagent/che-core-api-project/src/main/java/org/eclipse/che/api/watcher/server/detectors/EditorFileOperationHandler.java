@@ -11,6 +11,8 @@
 package org.eclipse.che.api.watcher.server.detectors;
 
 import static java.lang.String.format;
+import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
+import static org.eclipse.che.api.fs.server.WsPathUtils.isAbsolute;
 import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.MOVE;
 import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.RESUME;
 import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.SUSPEND;
@@ -54,6 +56,16 @@ public class EditorFileOperationHandler {
   }
 
   private void handleFileTrackingOperation(String endpointId, FileTrackingOperationDto operation) {
+    String path = operation.getPath();
+    if (path != null && !isAbsolute(path)) {
+      operation.withPath(absolutize(path));
+    }
+
+    String oldPath = operation.getOldPath();
+    if (oldPath != null && !isAbsolute(oldPath)) {
+      operation.withOldPath(absolutize(oldPath));
+    }
+
     try {
       Type operationType = operation.getType();
       if (operationType == SUSPEND || operationType == RESUME) {

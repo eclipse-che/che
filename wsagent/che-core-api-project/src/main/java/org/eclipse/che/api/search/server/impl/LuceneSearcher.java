@@ -17,7 +17,6 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.che.api.fs.server.WsPathUtils.nameOf;
 import static org.eclipse.che.commons.lang.IoUtil.deleteRecursive;
 
-import com.google.common.io.CharStreams;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.io.File;
 import java.io.IOException;
@@ -467,7 +466,9 @@ public class LuceneSearcher implements Searcher {
     doc.add(new TextField(NAME_FIELD, name, Field.Store.YES));
     if (reader != null) {
       try {
-        doc.add(new TextField(TEXT_FIELD, CharStreams.toString(reader), Field.Store.YES));
+        doc.add(
+            new TextField(
+                TEXT_FIELD, org.apache.commons.io.IOUtils.toString(reader), Field.Store.YES));
       } catch (IOException e) {
         throw new ServerException(e.getLocalizedMessage(), e);
       }
