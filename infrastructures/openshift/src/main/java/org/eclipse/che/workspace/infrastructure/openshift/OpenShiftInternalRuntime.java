@@ -42,6 +42,7 @@ import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
+import org.eclipse.che.api.workspace.shared.dto.event.MachineLogEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.ServerStatusEvent;
@@ -57,6 +58,7 @@ import org.slf4j.LoggerFactory;
  * @author Anton Korneta
  */
 public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeContext> {
+
   private static final Logger LOG = LoggerFactory.getLogger(OpenShiftInternalRuntime.class);
 
   private static final String RUNTIME_STOPPED_STATE = "STOPPED";
@@ -105,6 +107,7 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
       }
 
       registerAbnormalStopHandler();
+      registerContainersEventsPublisher();
 
       createPods(createdServices, createdRoutes);
 
@@ -171,6 +174,19 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
                 }
               }
             });
+  }
+
+  private void registerContainersEventsPublisher() throws InfrastructureException {
+    project
+        .pods()
+        .watchContainers(
+            event ->
+                eventService.publish(
+                    DtoFactory.newDto(MachineLogEvent.class)
+                        .withMachineName(event.getMachineName())
+                        .withRuntimeId(DtoConverter.asDto(getContext().getIdentity()))
+                        .withText(event.getMessage())
+                        .withTime(event.getTime())));
   }
 
   /**

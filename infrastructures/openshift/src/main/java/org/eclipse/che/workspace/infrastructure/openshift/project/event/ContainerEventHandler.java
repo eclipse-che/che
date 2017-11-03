@@ -8,18 +8,15 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.openshift.project;
-
-import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.client.Watcher.Action;
+package org.eclipse.che.workspace.infrastructure.openshift.project.event;
 
 /**
- * Defines the handling mechanism for OpenShift pod action events.
+ * Defines the handling mechanism for OpenShift container events.
  *
- * @author Anton Korneta
+ * @author Sergii Leshchenko
  */
-public interface PodActionHandler {
+public interface ContainerEventHandler {
 
-  /** Handles the pod action events. */
-  void handle(Action action, Pod pod);
+  /** Handles the container event. */
+  void handle(ContainerEvent event);
 }

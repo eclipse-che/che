@@ -15,6 +15,8 @@ import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_W
 import static org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftObjectUtil.putLabel;
 
 import io.fabric8.kubernetes.api.model.DoneablePod;
+import io.fabric8.kubernetes.api.model.Event;
+import io.fabric8.kubernetes.api.model.ObjectReference;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
@@ -35,9 +37,15 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import okhttp3.Response;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.workspace.infrastructure.openshift.Names;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
+import org.eclipse.che.workspace.infrastructure.openshift.project.event.ContainerEvent;
+import org.eclipse.che.workspace.infrastructure.openshift.project.event.ContainerEventHandler;
+import org.eclipse.che.workspace.infrastructure.openshift.project.event.PodActionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,19 +57,31 @@ import org.slf4j.LoggerFactory;
  * @author Anton Korneta
  */
 public class OpenShiftPods {
+
   private static final Logger LOG = LoggerFactory.getLogger(OpenShiftPods.class);
+
+  private static final String CONTAINER_NAME_GROUP = "name";
+  // when event is related to container `fieldPath` field contains
+  // information in the following format: `spec.container{web}`, where `web` is container name
+  private static final Pattern CONTAINER_FIELD_PATH_PATTERN =
+      Pattern.compile("spec.containers\\{(?<" + CONTAINER_NAME_GROUP + ">.*)}");
+
+  private static final String POD_OBJECT_KIND = "Pod";
 
   private final String namespace;
   private final OpenShiftClientFactory clientFactory;
-  private final ConcurrentLinkedQueue<PodActionHandler> handlers;
+  private final ConcurrentLinkedQueue<PodActionHandler> podActionHandlers;
+  private final ConcurrentLinkedQueue<ContainerEventHandler> containerEventsHandlers;
   private final String workspaceId;
-  private Watch watch;
+  private Watch podWatch;
+  private Watch containerWatch;
 
   OpenShiftPods(String namespace, String workspaceId, OpenShiftClientFactory clientFactory) {
     this.namespace = namespace;
     this.workspaceId = workspaceId;
     this.clientFactory = clientFactory;
-    this.handlers = new ConcurrentLinkedQueue<>();
+    this.containerEventsHandlers = new ConcurrentLinkedQueue<>();
+    this.podActionHandlers = new ConcurrentLinkedQueue<>();
   }
 
   /**
@@ -177,25 +197,25 @@ public class OpenShiftPods {
   /**
    * Starts watching the pods inside OpenShift namespace and registers a specified handler for such
    * events. Note that watcher can be started only once so two times invocation of this method will
-   * not produce new watcher and just register the event handlers.
+   * not produce new watcher and just register the event podActionHandlers.
    *
    * @param handler pod action events handler
    * @throws InfrastructureException if any error occurs while watcher starting
    */
   public void watch(PodActionHandler handler) throws InfrastructureException {
-    if (watch == null) {
+    if (podWatch == null) {
       final Watcher<Pod> watcher =
           new Watcher<Pod>() {
             @Override
             public void eventReceived(Action action, Pod pod) {
-              handlers.forEach(h -> h.handle(action, pod));
+              podActionHandlers.forEach(h -> h.handle(action, pod));
             }
 
             @Override
             public void onClose(KubernetesClientException ignored) {}
           };
       try (OpenShiftClient client = clientFactory.create()) {
-        watch =
+        podWatch =
             client
                 .pods()
                 .inNamespace(namespace)
@@ -205,20 +225,77 @@ public class OpenShiftPods {
         throw new InfrastructureException(ex.getMessage());
       }
     }
-    handlers.add(handler);
+    podActionHandlers.add(handler);
+  }
+
+  /**
+   * Registers a specified handler for handling events about changes in pods containers.
+   *
+   * @param handler pod container events handler
+   * @throws InfrastructureException if any error occurs while watcher starting
+   */
+  public void watchContainers(ContainerEventHandler handler) throws InfrastructureException {
+    if (containerWatch == null) {
+      final Watcher<Event> watcher =
+          new Watcher<Event>() {
+            @Override
+            public void eventReceived(Action action, Event event) {
+              ObjectReference involvedObject = event.getInvolvedObject();
+              String fieldPath = involvedObject.getFieldPath();
+
+              // check that event related to
+              if (POD_OBJECT_KIND.equals(involvedObject.getKind()) && fieldPath != null) {
+                Matcher containerFieldMatcher = CONTAINER_FIELD_PATH_PATTERN.matcher(fieldPath);
+                if (containerFieldMatcher.matches()) {
+
+                  String containerName = containerFieldMatcher.group(CONTAINER_NAME_GROUP);
+                  String podName = Names.originalPodName(involvedObject.getName(), workspaceId);
+
+                  ContainerEvent containerEvent =
+                      new ContainerEvent(
+                          Names.machineName(podName, containerName),
+                          event.getMessage(),
+                          event.getMetadata().getCreationTimestamp());
+                  containerEventsHandlers.forEach(h -> h.handle(containerEvent));
+                }
+              }
+            }
+
+            @Override
+            public void onClose(KubernetesClientException ignored) {}
+          };
+      try (OpenShiftClient client = clientFactory.create()) {
+        containerWatch = client.events().inNamespace(namespace).watch(watcher);
+      } catch (KubernetesClientException ex) {
+        throw new InfrastructureException(ex.getMessage());
+      }
+    }
+    containerEventsHandlers.add(handler);
   }
 
   /** Stops watching the pods inside OpenShift namespace. */
   void stopWatch() {
     try {
-      if (watch != null) {
-        watch.close();
+      if (podWatch != null) {
+        podWatch.close();
       }
     } catch (KubernetesClientException ex) {
       LOG.error(
           "Failed to stop pod watcher for namespace '{}' cause '{}'", namespace, ex.getMessage());
     }
-    handlers.clear();
+    podActionHandlers.clear();
+
+    try {
+      if (containerWatch != null) {
+        containerWatch.close();
+      }
+    } catch (KubernetesClientException ex) {
+      LOG.error(
+          "Failed to stop pods containers watcher for namespace '{}' cause '{}'",
+          namespace,
+          ex.getMessage());
+    }
+    containerEventsHandlers.clear();
   }
 
   /**
@@ -313,6 +390,7 @@ public class OpenShiftPods {
   }
 
   private static class DeleteWatcher implements Watcher<Pod> {
+
     private final CompletableFuture<Void> future;
 
     private DeleteWatcher(CompletableFuture<Void> future) {
@@ -333,6 +411,7 @@ public class OpenShiftPods {
   }
 
   private class ExecWatchdog implements ExecListener {
+
     private final CountDownLatch latch;
 
     private ExecWatchdog() {
