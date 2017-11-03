@@ -147,7 +147,7 @@ public class UserOrganizationTest {
     organizationListPage.waitForOrganizationsList();
     organizationListPage.clickOnOrganization(childOrganization.getQualifiedName());
 
-    organizationPage.waitOrganizationName(childOrganization.getQualifiedName());
+    organizationPage.waitOrganizationName(childOrganization.getName());
     assertTrue(organizationPage.isOrganizationNameReadonly());
     assertTrue(organizationPage.isWorkspaceCapReadonly());
     assertTrue(organizationPage.isRunningCapReadonly());
