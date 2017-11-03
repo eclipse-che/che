@@ -38,9 +38,9 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.Tokenizer;
-import org.apache.lucene.analysis.core.LowerCaseFilter;
-import org.apache.lucene.analysis.core.WhitespaceTokenizer;
+import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
+import org.apache.lucene.analysis.core.WhitespaceTokenizerFactory;
+import org.apache.lucene.analysis.custom.CustomAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.apache.lucene.document.Document;
@@ -155,15 +155,11 @@ public class LuceneSearcher implements Searcher {
     }
   }
 
-  private Analyzer makeAnalyzer() {
-    return new Analyzer() {
-      @Override
-      protected TokenStreamComponents createComponents(String fieldName) {
-        Tokenizer tokenizer = new WhitespaceTokenizer();
-        TokenStream filter = new LowerCaseFilter(tokenizer);
-        return new TokenStreamComponents(tokenizer, filter);
-      }
-    };
+  private Analyzer makeAnalyzer() throws IOException {
+    return CustomAnalyzer.builder()
+        .withTokenizer(WhitespaceTokenizerFactory.class)
+        .addTokenFilter(LowerCaseFilterFactory.class)
+        .build();
   }
 
   private Directory makeDirectory() throws ServerException {
@@ -178,7 +174,7 @@ public class LuceneSearcher implements Searcher {
   private void doInitialize() throws ServerException {
     try {
       luceneIndexWriter = new IndexWriter(makeDirectory(), new IndexWriterConfig(makeAnalyzer()));
-      searcherManager = new SearcherManager(luceneIndexWriter, true, new SearcherFactory());
+      searcherManager = new SearcherManager(luceneIndexWriter, true, true, new SearcherFactory());
       closed = false;
     } catch (IOException e) {
       throw new ServerException(e);
@@ -219,7 +215,7 @@ public class LuceneSearcher implements Searcher {
       final int numDocs =
           query.getMaxItems() > 0 ? Math.min(query.getMaxItems(), RESULT_LIMIT) : RESULT_LIMIT;
       TopDocs topDocs = luceneSearcher.searchAfter(after, luceneQuery, numDocs);
-      final int totalHitsNum = topDocs.totalHits;
+      final long totalHitsNum = topDocs.totalHits;
 
       List<SearchResultEntry> results = newArrayList();
       List<OffsetData> offsetData = Collections.emptyList();
@@ -321,25 +317,25 @@ public class LuceneSearcher implements Searcher {
     }
   }
 
-  private Query createLuceneQuery(QueryExpression query) throws ParseException {
-    final BooleanQuery luceneQuery = new BooleanQuery();
+  private Query createLuceneQuery(QueryExpression query) throws ParseException, IOException {
+    BooleanQuery.Builder luceneQueryBuilder = new BooleanQuery.Builder();
     final String name = query.getName();
     final String path = query.getPath();
     final String text = query.getText();
     if (path != null) {
-      luceneQuery.add(new PrefixQuery(new Term(PATH_FIELD, path)), BooleanClause.Occur.MUST);
+      luceneQueryBuilder.add(new PrefixQuery(new Term(PATH_FIELD, path)), BooleanClause.Occur.MUST);
     }
     if (name != null) {
       QueryParser qParser = new QueryParser(NAME_FIELD, makeAnalyzer());
       qParser.setAllowLeadingWildcard(true);
-      luceneQuery.add(qParser.parse(name), BooleanClause.Occur.MUST);
+      luceneQueryBuilder.add(qParser.parse(name), BooleanClause.Occur.MUST);
     }
     if (text != null) {
       QueryParser qParser = new QueryParser(TEXT_FIELD, makeAnalyzer());
       qParser.setAllowLeadingWildcard(true);
-      luceneQuery.add(qParser.parse(text), BooleanClause.Occur.MUST);
+      luceneQueryBuilder.add(qParser.parse(text), BooleanClause.Occur.MUST);
     }
-    return luceneQuery;
+    return luceneQueryBuilder.build();
   }
 
   private ScoreDoc skipScoreDocs(IndexSearcher luceneSearcher, Query luceneQuery, int numSkipDocs)

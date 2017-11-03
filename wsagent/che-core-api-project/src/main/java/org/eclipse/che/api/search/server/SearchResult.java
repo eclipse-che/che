@@ -26,13 +26,13 @@ public class SearchResult {
 
   private final List<SearchResultEntry> results;
   private final Optional<QueryExpression> nextPageQueryExpression;
-  private final int totalHits;
+  private final long totalHits;
   private final long elapsedTimeMillis;
 
   private SearchResult(
       List<SearchResultEntry> results,
       Optional<QueryExpression> nextPageQueryExpression,
-      int totalHits,
+      long totalHits,
       long elapsedTimeMillis) {
     this.results = results;
     this.nextPageQueryExpression = nextPageQueryExpression;
@@ -61,7 +61,7 @@ public class SearchResult {
   }
 
   /** Total number of files that match the search criteria. */
-  public int getTotalHits() {
+  public long getTotalHits() {
     return totalHits;
   }
 
@@ -78,7 +78,7 @@ public class SearchResult {
   public static class SearchResultBuilder {
     private QueryExpression nextPageQueryExpression;
     private List<SearchResultEntry> results;
-    private int totalHits;
+    private long totalHits;
     private long elapsedTimeMillis;
 
     private SearchResultBuilder() {}
@@ -94,7 +94,7 @@ public class SearchResult {
       return this;
     }
 
-    public SearchResultBuilder withTotalHits(int totalHits) {
+    public SearchResultBuilder withTotalHits(long totalHits) {
       this.totalHits = totalHits;
       return this;
     }
