@@ -14,15 +14,8 @@ import static com.google.common.net.HttpHeaders.AUTHORIZATION;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.http.client.RequestBuilder;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.callback.CallbackPromiseHelper;
-import org.eclipse.che.api.promises.client.js.Executor;
-import org.eclipse.che.api.promises.client.js.Promises;
-import org.eclipse.che.api.promises.client.js.RejectFunction;
-import org.eclipse.che.api.promises.client.js.ResolveFunction;
 import org.eclipse.che.ide.rest.AsyncRequest;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.Unmarshallable;
@@ -42,40 +35,11 @@ public class MachineAsyncRequest extends AsyncRequest {
     this.token = token;
   }
 
-
   @Override
   public Promise<Void> send() {
     requestBuilder.setIncludeCredentials(true);
-    final Executor.ExecutorBody<Void> body =
-        new Executor.ExecutorBody<Void>() {
-          @Override
-          public void apply(final ResolveFunction<Void> resolve, final RejectFunction reject) {
-                   new Operation<String>() {
-                      @Override
-                      public void apply(String machine) throws OperationException {
-                        MachineAsyncRequest.this.header(AUTHORIZATION, machine);
-                        MachineAsyncRequest.super
-                            .send()
-                            .then(
-                                new Operation<Void>() {
-                                  @Override
-                                  public void apply(Void arg) throws OperationException {
-                                    resolve.apply(null);
-                                  }
-                                })
-                            .catchError(
-                                new Operation<PromiseError>() {
-                                  @Override
-                                  public void apply(PromiseError arg) throws OperationException {
-                                    reject.apply(arg);
-                                  }
-                                });
-                      }
-                    };
-          }
-        };
-    final Executor<Void> executor = Executor.create(body);
-    return Promises.create(executor);
+    header(AUTHORIZATION, token);
+    return super.send();
   }
 
   @Override

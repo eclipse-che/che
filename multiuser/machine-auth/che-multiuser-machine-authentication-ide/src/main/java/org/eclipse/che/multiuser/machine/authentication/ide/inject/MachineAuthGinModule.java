@@ -18,6 +18,5 @@ import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 public class MachineAuthGinModule extends AbstractGinModule {
 
   @Override
-  protected void configure() {
-  }
+  protected void configure() {}
 }

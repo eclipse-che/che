@@ -42,7 +42,7 @@ import org.eclipse.che.commons.subject.SubjectImpl;
 @Singleton
 public class MachineLoginFilter implements Filter {
 
-  private final String tokenServiceEndpoint;
+  private final String apiEndpoint;
   private final HttpJsonRequestFactory requestFactory;
   private final RequestTokenExtractor tokenExtractor;
 
@@ -51,7 +51,7 @@ public class MachineLoginFilter implements Filter {
       @Named("che.api") String apiEndpoint,
       HttpJsonRequestFactory requestFactory,
       RequestTokenExtractor tokenExtractor) {
-    this.tokenServiceEndpoint = apiEndpoint + "/machine/token";
+    this.apiEndpoint = apiEndpoint;
     this.requestFactory = requestFactory;
     this.tokenExtractor = tokenExtractor;
   }
@@ -84,7 +84,7 @@ public class MachineLoginFilter implements Filter {
     try {
       final UserDto userDescriptor =
           requestFactory
-              .fromUrl(tokenServiceEndpoint + "/user/" + machineToken)
+              .fromUrl(apiEndpoint + "/user/")
               .useGetMethod()
               .setAuthorizationHeader(machineToken)
               .request()

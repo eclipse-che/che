@@ -31,7 +31,6 @@ import org.eclipse.che.ide.rest.AsyncRequest;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.Unmarshallable;
-import org.eclipse.che.ide.util.loging.Log;
 
 /**
  * Looks at the request and substitutes an appropriate implementation.
@@ -43,33 +42,28 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory {
   private static final String CSRF_TOKEN_HEADER_NAME = "X-CSRF-Token";
 
   private AppContext appContext;
-  private String machineToken;
-
   private String csrfToken;
-
 
   @Inject
   public MachineAsyncRequestFactory(
-      DtoFactory dtoFactory,
-      AppContext appContext,
-      EventBus eventBus) {
+      DtoFactory dtoFactory, AppContext appContext, EventBus eventBus) {
     super(dtoFactory);
     this.appContext = appContext;
   }
 
   @Override
   protected AsyncRequest newAsyncRequest(RequestBuilder.Method method, String url, boolean async) {
-    String machineToken = appContext.getWorkspace().getRuntime().getMachineToken();
-    if (isWsAgentRequest(url) && !isNullOrEmpty(machineToken)) {
-      return new MachineAsyncRequest(method, url, false, machineToken);
+    if (isWsAgentRequest(url)) {
+      final String machineToken = appContext.getWorkspace().getRuntime().getMachineToken();
+      if (!isNullOrEmpty(machineToken)) {
+        return new MachineAsyncRequest(method, url, false, machineToken);
+      }
     }
     if (isModifyingMethod(method)) {
       return new CsrfPreventingAsyncModifyingRequest(method, url, async);
     }
     return super.newAsyncRequest(method, url, async);
   }
-
-
 
   /**
    * Going to check is this request goes to WsAgent
@@ -80,11 +74,9 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory {
   protected boolean isWsAgentRequest(String url) {
     WorkspaceImpl currentWorkspace = appContext.getWorkspace();
     if (currentWorkspace == null || !isWsAgentStarted(currentWorkspace)) {
-      Log.info(getClass(), "return false, URL:" + url);
       return false; // ws-agent not started
     }
     final boolean contains = url.contains(nullToEmpty(appContext.getWsAgentServerApiEndpoint()));
-    Log.info(getClass(), contains + " : " + url + " >> " +  appContext.getWsAgentServerApiEndpoint());
     return contains;
   }
 

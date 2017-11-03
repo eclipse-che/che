@@ -13,7 +13,6 @@ package org.eclipse.che.multiuser.keycloak.ide;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.List;
@@ -35,10 +34,9 @@ public class KeycloakAsyncRequestFactory extends MachineAsyncRequestFactory {
   public KeycloakAsyncRequestFactory(
       KeycloakProvider keycloakProvider,
       DtoFactory dtoFactory,
-      Provider<MachineTokenServiceClient> machineTokenServiceProvider,
       AppContext appContext,
       EventBus eventBus) {
-    super(dtoFactory, machineTokenServiceProvider, appContext, eventBus);
+    super(dtoFactory, appContext, eventBus);
     this.dtoFactory = dtoFactory;
     this.keycloakProvider = keycloakProvider;
   }
