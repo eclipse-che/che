@@ -19,6 +19,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
+import org.eclipse.che.workspace.infrastructure.openshift.Names;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.ConfigurationProvisioner;
 
@@ -38,7 +39,7 @@ public class EnvVarsConverter implements ConfigurationProvisioner {
       String podName = pod.getMetadata().getName();
       for (Container container : pod.getSpec().getContainers()) {
         String containerName = container.getName();
-        String machineName = podName + "/" + containerName;
+        String machineName = Names.machineName(podName, containerName);
         InternalMachineConfig machineConf = environment.getMachines().get(machineName);
 
         if (machineConf != null) {

@@ -197,7 +197,7 @@ public class OpenShiftPods {
   /**
    * Starts watching the pods inside OpenShift namespace and registers a specified handler for such
    * events. Note that watcher can be started only once so two times invocation of this method will
-   * not produce new watcher and just register the event podActionHandlers.
+   * not produce new watcher and just register the event handlers.
    *
    * @param handler pod action events handler
    * @throws InfrastructureException if any error occurs while watcher starting

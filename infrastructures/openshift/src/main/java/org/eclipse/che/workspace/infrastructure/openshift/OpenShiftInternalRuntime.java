@@ -236,9 +236,10 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
       final Pod createdPod = project.pods().create(toCreate);
       final ObjectMeta podMetadata = createdPod.getMetadata();
       for (Container container : createdPod.getSpec().getContainers()) {
+        String podOriginalName = podMetadata.getLabels().get(CHE_ORIGINAL_NAME_LABEL);
         OpenShiftMachine machine =
             new OpenShiftMachine(
-                podMetadata.getLabels().get(CHE_ORIGINAL_NAME_LABEL) + '/' + container.getName(),
+                Names.machineName(podOriginalName, container.getName()),
                 podMetadata.getName(),
                 container.getName(),
                 serverResolver.resolve(createdPod, container),

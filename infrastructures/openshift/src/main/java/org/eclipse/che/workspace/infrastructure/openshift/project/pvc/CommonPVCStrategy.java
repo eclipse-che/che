@@ -23,6 +23,7 @@ import io.fabric8.kubernetes.api.model.PodSpec;
 import javax.inject.Named;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.Names;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 
 /**
@@ -72,7 +73,7 @@ public class CommonPVCStrategy implements WorkspacePVCStrategy {
     for (Pod pod : osEnv.getPods().values()) {
       final PodSpec podSpec = pod.getSpec();
       for (Container container : podSpec.getContainers()) {
-        final String machine = pod.getMetadata().getName() + '/' + container.getName();
+        final String machine = Names.machineName(pod, container);
         if (machine.equals(machineWithSources)) {
           final String subPath =
               workspaceId + (projectsPath.startsWith("/") ? projectsPath : "/" + projectsPath);
