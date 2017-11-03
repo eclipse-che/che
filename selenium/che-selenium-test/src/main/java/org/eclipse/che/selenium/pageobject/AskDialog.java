@@ -59,12 +59,16 @@ public class AskDialog {
   WebElement warning_Text;
 
   public void clickOkBtn() {
-    okBtn.click();
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(ExpectedConditions.elementToBeClickable(okBtn))
+        .click();
   }
 
   public void clickCancelBtn() {
     waitFormToOpen();
-    cancelBtn.click();
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(ExpectedConditions.elementToBeClickable(cancelBtn))
+        .click();
   }
 
   /** wait opening the confirmation form */
