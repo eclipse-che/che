@@ -16,7 +16,6 @@ import static com.google.common.base.Strings.nullToEmpty;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.Response;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.Optional;
@@ -43,7 +42,6 @@ import org.eclipse.che.ide.util.loging.Log;
 public class MachineAsyncRequestFactory extends AsyncRequestFactory {
   private static final String CSRF_TOKEN_HEADER_NAME = "X-CSRF-Token";
 
-  private final Provider<MachineTokenServiceClient> machineTokenServiceProvider;
   private AppContext appContext;
   private String machineToken;
 
@@ -53,11 +51,9 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory {
   @Inject
   public MachineAsyncRequestFactory(
       DtoFactory dtoFactory,
-      Provider<MachineTokenServiceClient> machineTokenServiceProvider,
       AppContext appContext,
       EventBus eventBus) {
     super(dtoFactory);
-    this.machineTokenServiceProvider = machineTokenServiceProvider;
     this.appContext = appContext;
   }
 

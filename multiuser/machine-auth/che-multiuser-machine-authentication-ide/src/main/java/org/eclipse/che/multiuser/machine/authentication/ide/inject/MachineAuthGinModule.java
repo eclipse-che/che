@@ -11,10 +11,7 @@
 package org.eclipse.che.multiuser.machine.authentication.ide.inject;
 
 import com.google.gwt.inject.client.AbstractGinModule;
-import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
-import org.eclipse.che.multiuser.machine.authentication.ide.MachineTokenServiceClient;
-import org.eclipse.che.multiuser.machine.authentication.ide.MachineTokenServiceClientImpl;
 
 /** @author Anton Korneta */
 @ExtensionGinModule
@@ -22,8 +19,5 @@ public class MachineAuthGinModule extends AbstractGinModule {
 
   @Override
   protected void configure() {
-    bind(MachineTokenServiceClient.class)
-        .to(MachineTokenServiceClientImpl.class)
-        .in(Singleton.class);
   }
 }
