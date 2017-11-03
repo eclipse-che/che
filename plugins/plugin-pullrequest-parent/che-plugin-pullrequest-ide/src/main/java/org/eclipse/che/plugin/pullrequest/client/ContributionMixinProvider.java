@@ -215,7 +215,7 @@ public class ContributionMixinProvider {
     if (!partStack.containsPart(contributePart)) {
       partStack.addPart(contributePart, FIRST);
       if (partStack.getActivePart() == null) {
-          partStack.setActivePart(contributePart);
+        partStack.setActivePart(contributePart);
       }
     }
   }

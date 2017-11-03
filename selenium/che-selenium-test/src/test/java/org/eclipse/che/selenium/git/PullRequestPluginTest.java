@@ -156,6 +156,7 @@ public class PullRequestPluginTest {
   @Test(priority = 1)
   public void createPullRequest() {
     explorer.waitItem(FIRST_PROJECT_NAME);
+    explorer.selectItem(FIRST_PROJECT_NAME);
     explorer.openItemByPath(FIRST_PROJECT_NAME);
     explorer.openItemByPath(FIRST_PROJECT_NAME + "/README.md");
 
@@ -218,6 +219,7 @@ public class PullRequestPluginTest {
     explorer.waitProjectExplorer();
     explorer.waitItem(FIRST_PROJECT_NAME);
     explorer.waitItem(SECOND_PROJECT_NAME);
+    explorer.selectItem(FIRST_PROJECT_NAME);
     explorer.openItemByPath(FIRST_PROJECT_NAME);
     explorer.openItemByPath(FIRST_PROJECT_NAME + "/README.md");
     editor.waitActiveEditor();
