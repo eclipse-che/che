@@ -13,4 +13,11 @@
 -->
 <Context allowCasualMultipartParsing="true">
     <Valve className="org.apache.catalina.valves.rewrite.RewriteValve"/>
+
+    <JarScanner>
+        <JarScanFilter
+          defaultPluggabilityScan="false"
+          defaultTldScan="false"
+          pluggabilityScan=""></JarScanFilter>
+    </JarScanner>
 </Context>

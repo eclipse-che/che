@@ -106,31 +106,31 @@ public class AutocompleteCommandsEditorTest {
     commandsEditor.setFocusIntoTypeCommandsEditor(PREVIEW_URL_EDITOR);
     commandsEditor.setCursorToLine(1);
     commandsEditor.deleteAllContent();
-    commandsEditor.typeTextIntoEditor("server.80");
+    commandsEditor.typeTextIntoEditor("server.t");
     commandsEditor.launchAutocompleteAndWaitContainer();
     String[] autocompleteItems = {
-      "${server.8000/tcp}", "${server.8080/tcp}",
+      "${server.terminal}", "${server.tomcat8-debug}", "${server.tomcat8}"
     };
     for (String autocompleteItem : autocompleteItems) {
       commandsEditor.waitTextIntoAutocompleteContainer(autocompleteItem);
     }
-    commandsEditor.selectAutocompleteProposal("80/tcp}");
-    commandsEditor.waitTextIntoDescriptionMacrosForm("Returns address of the 8080/tcp server");
+    commandsEditor.selectAutocompleteProposal("omcat8}");
+    commandsEditor.waitTextIntoDescriptionMacrosForm("Returns address of the tomcat8 server");
     commandsEditor.closeAutocomplete();
     commandsEditor.waitActiveEditor();
     commandsEditor.deleteAllContent();
-    commandsEditor.typeTextIntoEditor("80/tcp");
+    commandsEditor.typeTextIntoEditor("omcat8");
     commandsEditor.launchAutocompleteAndWaitContainer();
-    commandsEditor.selectItemIntoAutocompleteAndPasteByDoubleClick("${server.8080/");
-    commandsEditor.waitTextIntoEditor("80/${server.8080/tcp}");
+    commandsEditor.selectItemIntoAutocompleteAndPasteByDoubleClick("-debug}");
+    commandsEditor.waitTextIntoEditor("${server.tomcat8-debug}");
     commandsEditor.typeTextIntoEditor(Keys.ENTER.toString());
     commandsEditor.waitActiveEditor();
-    commandsEditor.typeTextIntoEditor("8080");
+    commandsEditor.typeTextIntoEditor("ssh");
     commandsEditor.launchAutocomplete();
-    commandsEditor.waitTextIntoEditor("${server.8080/tcp}");
+    commandsEditor.waitTextIntoEditor("${server.ssh}");
     commandsEditor.clickOnRunButton();
     consoles.waitExpectedTextIntoConsole(BUILD_SUCCESS);
-    consoles.waitExpectedTextIntoPreviewUrl("80/tcp://172.17.0.1:");
+    consoles.waitExpectedTextIntoPreviewUrl("ssh");
   }
 
   @Test(priority = 3)
