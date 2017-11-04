@@ -11,12 +11,12 @@
 package org.eclipse.che.plugin.maven.client.comunnication;
 
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.base.Optional;
+import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.Arrays;
 import java.util.List;
@@ -35,9 +35,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(GwtMockitoTestRunner.class)
 public class MavenMessagesHandlerTest {
   @Mock private EventBus eventBus;
   @Mock private BackgroundLoaderPresenter dependencyResolver;
@@ -89,8 +88,6 @@ public class MavenMessagesHandlerTest {
     mavenMessagesHandler.handleUpdate(projectsUpdateMessage);
 
     verify(pomEditorReconciler).reconcilePoms(updatedProjects);
-    verify(rootContainer).getContainer(eq("/che"));
-    verify(rootContainer).getContainer(eq("/project"));
   }
 
   @Test
