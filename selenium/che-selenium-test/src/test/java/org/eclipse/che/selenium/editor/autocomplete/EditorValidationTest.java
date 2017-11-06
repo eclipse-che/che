@@ -71,6 +71,7 @@ public class EditorValidationTest {
         PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
     editor.waitActiveEditor();
     // validation warnings
+    editor.waitAllMarkersDisappear(ERROR_MARKER);
     editor.setCursorToLine(28);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor("\n");

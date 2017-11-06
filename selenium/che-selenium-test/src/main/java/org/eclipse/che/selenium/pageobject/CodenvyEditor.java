@@ -703,7 +703,7 @@ public class CodenvyEditor {
    * @param markerType is type of the marker
    */
   public void waitAllMarkersDisappear(String markerType) {
-    loaderDriverWait.until(
+    elemDriverWait.until(
         (ExpectedCondition<Boolean>)
             driver -> driver.findElements(By.xpath(markerType)).size() == 0);
   }
