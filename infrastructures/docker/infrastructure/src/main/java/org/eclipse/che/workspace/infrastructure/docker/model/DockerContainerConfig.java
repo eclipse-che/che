@@ -636,6 +636,8 @@ public class DockerContainerConfig {
         + networks
         + ", ports="
         + ports
+        + ", SecurityOpt="
+        + securityOpt
         + ", volumes="
         + volumes
         + ", volumesFrom="

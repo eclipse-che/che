@@ -32,7 +32,6 @@ public class SecurityOptProvisioner implements ContainerSystemSettingsProvisione
   @Override
   public void provision(DockerEnvironment internalEnv) throws InfrastructureException {
     for (DockerContainerConfig containerConfig : internalEnv.getContainers().values()) {
-      // TODO
       containerConfig.getSecurityOpt().addAll(securityOptProvider.get());
     }
   }
