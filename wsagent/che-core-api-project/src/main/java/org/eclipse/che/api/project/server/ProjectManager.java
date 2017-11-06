@@ -108,8 +108,8 @@ public interface ProjectManager {
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
           NotFoundException;
 
-  ProjectTypeResolution qualify(String wsPath, String projectTypeId)
+  ProjectTypeResolution verify(String wsPath, String projectTypeId)
       throws ServerException, NotFoundException;
 
-  List<ProjectTypeResolution> qualify(String wsPath) throws ServerException, NotFoundException;
+  List<ProjectTypeResolution> recognize(String wsPath) throws ServerException, NotFoundException;
 }

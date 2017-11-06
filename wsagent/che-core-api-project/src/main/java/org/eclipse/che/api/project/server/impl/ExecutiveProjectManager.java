@@ -399,13 +399,13 @@ public class ExecutiveProjectManager implements ProjectManager {
   }
 
   @Override
-  public ProjectTypeResolution qualify(String wsPath, String projectTypeId)
+  public ProjectTypeResolution verify(String wsPath, String projectTypeId)
       throws ServerException, NotFoundException {
     return projectQualifier.qualify(wsPath, projectTypeId);
   }
 
   @Override
-  public List<ProjectTypeResolution> qualify(String wsPath)
+  public List<ProjectTypeResolution> recognize(String wsPath)
       throws ServerException, NotFoundException {
     return projectQualifier.qualify(wsPath);
   }

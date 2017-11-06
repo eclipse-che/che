@@ -233,14 +233,14 @@ public class SynchronizingProjectManager implements ProjectManager {
   }
 
   @Override
-  public ProjectTypeResolution qualify(String wsPath, String projectTypeId)
+  public ProjectTypeResolution verify(String wsPath, String projectTypeId)
       throws ServerException, NotFoundException {
-    return executiveProjectManager.qualify(wsPath, projectTypeId);
+    return executiveProjectManager.verify(wsPath, projectTypeId);
   }
 
   @Override
-  public List<ProjectTypeResolution> qualify(String wsPath)
+  public List<ProjectTypeResolution> recognize(String wsPath)
       throws ServerException, NotFoundException {
-    return executiveProjectManager.qualify(wsPath);
+    return executiveProjectManager.recognize(wsPath);
   }
 }

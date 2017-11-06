@@ -214,7 +214,7 @@ public class ProjectServiceApi {
       throws NotFoundException, ForbiddenException, ServerException, ConflictException {
     wsPath = absolutize(wsPath);
 
-    ProjectTypeResolution resolution = projectManager.qualify(wsPath, projectType);
+    ProjectTypeResolution resolution = projectManager.verify(wsPath, projectType);
 
     Map<String, List<String>> attributes =
         resolution
@@ -235,7 +235,7 @@ public class ProjectServiceApi {
     wsPath = absolutize(wsPath);
 
     return projectManager
-        .qualify(wsPath)
+        .recognize(wsPath)
         .stream()
         .filter(ProjectTypeResolution::matched)
         .map(

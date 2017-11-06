@@ -435,15 +435,15 @@ public class ValidatingProjectManagerTest {
 
   @Test
   public void shouldCallQualifyForProjectType() throws Exception {
-    validatingProjectManager.qualify(WS_PATH, PROJECT_TYPE);
+    validatingProjectManager.verify(WS_PATH, PROJECT_TYPE);
 
-    verify(synchronizingProjectManager).qualify(WS_PATH, PROJECT_TYPE);
+    verify(synchronizingProjectManager).verify(WS_PATH, PROJECT_TYPE);
   }
 
   @Test
   public void shouldCallQualify() throws Exception {
-    validatingProjectManager.qualify(WS_PATH);
+    validatingProjectManager.recognize(WS_PATH);
 
-    verify(synchronizingProjectManager).qualify(WS_PATH);
+    verify(synchronizingProjectManager).recognize(WS_PATH);
   }
 }

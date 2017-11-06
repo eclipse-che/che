@@ -51,7 +51,12 @@ public interface WsPathUtils {
       throw new IllegalArgumentException("Can't get parent of root");
     }
 
-    return wsPath.substring(0, wsPath.lastIndexOf(SEPARATOR));
+    int lastSeparatorPosition = wsPath.lastIndexOf(SEPARATOR);
+    if (lastSeparatorPosition == 0) {
+      return ROOT;
+    } else {
+      return wsPath.substring(0, lastSeparatorPosition);
+    }
   }
 
   static String resolve(String wsPath, String name) {

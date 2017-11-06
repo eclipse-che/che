@@ -13,6 +13,7 @@ package org.eclipse.che.api.git;
 import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static java.nio.file.Files.isDirectory;
 import static java.util.regex.Pattern.compile;
+import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
 import static org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto.Type.BRANCH;
 import static org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto.Type.REVISION;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
@@ -118,7 +119,8 @@ public class GitCheckoutDetector {
 
         // Update project attributes with new git values
 
-        projectManager.setType(it.split("/")[1], GitProjectType.TYPE_ID, true);
+        String wsPath = absolutize(it.split("/")[1]);
+        projectManager.setType(wsPath, GitProjectType.TYPE_ID, true);
 
         endpointIds.forEach(transmitConsumer(type, name));
 

@@ -318,15 +318,15 @@ public class SynchronizingProjectManagerTest {
 
   @Test
   public void shouldCallQualifyForProjectType() throws Exception {
-    synchronizingProjectManager.qualify(WS_PATH, PROJECT_TYPE);
+    synchronizingProjectManager.verify(WS_PATH, PROJECT_TYPE);
 
-    verify(executiveProjectManager).qualify(WS_PATH, PROJECT_TYPE);
+    verify(executiveProjectManager).verify(WS_PATH, PROJECT_TYPE);
   }
 
   @Test
   public void shouldCallQualify() throws Exception {
-    synchronizingProjectManager.qualify(WS_PATH);
+    synchronizingProjectManager.recognize(WS_PATH);
 
-    verify(executiveProjectManager).qualify(WS_PATH);
+    verify(executiveProjectManager).recognize(WS_PATH);
   }
 }

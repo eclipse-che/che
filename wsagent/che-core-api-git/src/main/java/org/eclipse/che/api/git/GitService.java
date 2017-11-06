@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.api.git;
 
+import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
 import static org.eclipse.che.api.fs.server.WsPathUtils.resolve;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
@@ -314,7 +315,7 @@ public class GitService {
             .get(projectPath)
             .orElseThrow(() -> new NotFoundException("Can't find project"));
 
-    String dotGitWsPath = resolve(projectPath, ".git");
+    String dotGitWsPath = resolve(absolutize(projectPath), ".git");
     fsManager.delete(dotGitWsPath);
 
     projectManager.removeType(projectPath, GitProjectType.TYPE_ID);
