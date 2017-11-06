@@ -34,7 +34,9 @@ import org.testng.annotations.Test;
 /** @author Sergey Skorik */
 public class OrganizationTest {
 
-  private String orgName;
+  private static final String PRE_CREATED_ORG_NAME = generate("orgX", 6);
+  private static final String NEW_ORG_NAME = generate("orgY", 6);
+
   private List<String> emailsList;
   private OrganizationDto organization;
 
@@ -50,35 +52,33 @@ public class OrganizationTest {
   private TestOrganizationServiceClient testOrganizationServiceClient;
 
   @Inject private Dashboard dashboard;
-  @Inject private TestUser testUser1;
-  @Inject private TestUser memberUser;
+  @Inject private TestUser testUser;
   @Inject private AdminTestUser adminTestUser;
 
   @BeforeClass
   public void setUp() throws Exception {
-    emailsList = Arrays.asList(testUser1.getEmail());
-    String firstName = generate("F", 7);
-    String lastName = generate("L", 7);
+    emailsList = Arrays.asList(testUser.getEmail());
 
-    dashboard.open();
-    orgName = generate("orgX", 6);
+    organization = testOrganizationServiceClient.create(PRE_CREATED_ORG_NAME);
+    testOrganizationServiceClient.addAdmin(organization.getId(), adminTestUser.getId());
 
-    organization = testOrganizationServiceClient.create(orgName);
+    dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    testOrganizationServiceClient.deleteById(organization.getId());
+    testOrganizationServiceClient.deleteByName(PRE_CREATED_ORG_NAME);
+    testOrganizationServiceClient.deleteByName(NEW_ORG_NAME);
   }
 
   @Test
-  public void operationsWithMembers() {
+  public void testOperationsWithMembersInExistsOrganization() {
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(NavigationBar.MenuItem.ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
     organizationListPage.clickOnOrganization(organization.getQualifiedName());
-    organizationPage.waitOrganizationName(orgName);
+    organizationPage.waitOrganizationName(PRE_CREATED_ORG_NAME);
 
     // Add members to a members list ad 'Admin'
     loader.waitOnClosed();
@@ -115,22 +115,23 @@ public class OrganizationTest {
     }
   }
 
-  // @Test(priority = 1)
-  public void addOrganizationWithMembers() {
-    String name = generate("orgY", 4);
+  @Test
+  public void testAddingMembersToNewOrganization() {
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(NavigationBar.MenuItem.ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
+
+    // Start to create a new organization and add a new member
     organizationListPage.clickAddOrganizationButton();
     addOrganization.waitAddOrganization();
-    addOrganization.setOrganizationName(name);
-
+    addOrganization.setOrganizationName(NEW_ORG_NAME);
     addOrganization.clickAddMemberButton();
     addMember.waitAddMemberWidget();
-    addMember.setMembersEmail(memberUser.getEmail());
+    addMember.setMembersEmail(testUser.getEmail());
     addMember.clickAddButton();
 
+    // Check that the Cancel button in the Add Member Widget works
     addOrganization.clickAddMemberButton();
     addMember.waitAddMemberWidget();
     addMember.clickCancelButton();
@@ -138,9 +139,9 @@ public class OrganizationTest {
     loader.waitOnClosed();
     addOrganization.clickCreateOrganizationButton();
 
-    organizationPage.waitOrganizationName(name);
+    // Check that organization is created and the added member exists in the Members tab
+    organizationPage.waitOrganizationName(NEW_ORG_NAME);
     organizationPage.clickMembersTab();
-
-    organizationPage.clickSettingsTab();
+    organizationPage.checkMemberExistsInMembersList(testUser.getEmail());
   }
 }
