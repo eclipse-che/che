@@ -23,7 +23,7 @@ export class DiagnosticsWorkspaceStartCheck {
   /**
    * Q service for creating delayed promises.
    */
-  private $q : ng.IQService;
+  private $q: ng.IQService;
 
   /**
    * Workspace API used to grab details.
@@ -33,44 +33,44 @@ export class DiagnosticsWorkspaceStartCheck {
   /**
    * Lodash utility.
    */
-  private lodash : any;
+  private lodash: any;
 
   /**
    * Other checker used to spawn new tests.
    */
-  private diagnosticsRunningWorkspaceCheck : DiagnosticsRunningWorkspaceCheck;
+  private diagnosticsRunningWorkspaceCheck: DiagnosticsRunningWorkspaceCheck;
 
   /**
    * Keep a reference to the workspace Agent callback
    */
-  private wsAgentCallback : DiagnosticCallback;
+  private wsAgentCallback: DiagnosticCallback;
 
   /**
    * Keep a reference to the workspace callback
    */
-  private workspaceCallback : DiagnosticCallback;
+  private workspaceCallback: DiagnosticCallback;
 
   /**
    * Keep a reference to the machine callback
    */
-  private machineCallback : DiagnosticCallback;
+  private machineCallback: DiagnosticCallback;
 
   /**
    * Keep a reference to the exec agent callback
    */
-  private execAgentCallback : DiagnosticCallback;
+  private execAgentCallback: DiagnosticCallback;
 
   /**
    * Branding info.
    */
-  private cheBranding : CheBranding;
+  private cheBranding: CheBranding;
 
   /**
    * Default constructor
    * @ngInject for Dependency injection
    */
-  constructor ($q : ng.IQService, lodash : any, cheWorkspace: CheWorkspace, diagnosticsRunningWorkspaceCheck : DiagnosticsRunningWorkspaceCheck, cheBranding : CheBranding) {
-    this.$q =$q;
+  constructor($q: ng.IQService, lodash: any, cheWorkspace: CheWorkspace, diagnosticsRunningWorkspaceCheck: DiagnosticsRunningWorkspaceCheck, cheBranding: CheBranding) {
+    this.$q = $q;
     this.lodash = lodash;
     this.cheWorkspace = cheWorkspace;
     this.cheBranding = cheBranding;
@@ -79,10 +79,10 @@ export class DiagnosticsWorkspaceStartCheck {
 
   /**
    * Delete the diagnostic workspace (by stopping it first) if it's already running
-   * @param diagnosticCallback the callback used to send response
-   * @returns {IPromise}
+   * @param {DiagnosticCallback} diagnosticCallback the callback used to send response
+   * @returns {ng.IPromise<any>}
    */
-  deleteDiagnosticWorkspaceIfPresent(diagnosticCallback : DiagnosticCallback) : ng.IPromise {
+  deleteDiagnosticWorkspaceIfPresent(diagnosticCallback: DiagnosticCallback): ng.IPromise<any> {
     let defered = this.$q.defer();
     this.cheWorkspace.fetchWorkspaces().finally(() => {
       let workspaces: Array<che.IWorkspace> = this.cheWorkspace.getWorkspaces();
@@ -108,7 +108,7 @@ export class DiagnosticsWorkspaceStartCheck {
               defered.reject(message.content);
             }
           });
-          this.cheWorkspace.onStopWorkspace(workspace.id, false);
+          this.cheWorkspace.stopWorkspace(workspace.id, false);
         } else {
           this.cheWorkspace.deleteWorkspaceConfig(workspace.id).finally(() => {
             defered.resolve(true);
@@ -117,7 +117,7 @@ export class DiagnosticsWorkspaceStartCheck {
       } else {
         defered.resolve(true);
       }
-    }).catch((error) => {
+    }).catch((error: any) => {
       defered.reject(error);
     });
     return defered.promise;
@@ -125,42 +125,41 @@ export class DiagnosticsWorkspaceStartCheck {
 
   /**
    * Always create a fresh workspace (by removing the old one if it exists)
-   * @param diagnosticCallback
-   * @returns {IPromise<T>}
+   * @param {DiagnosticCallback} diagnosticCallback
+   * @returns {ng.IPromise<che.IWorkspace>}
    */
-  recreateDiagnosticWorkspace(diagnosticCallback : DiagnosticCallback) : ng.IPromise<che.IWorkspace> {
+  recreateDiagnosticWorkspace(diagnosticCallback: DiagnosticCallback): ng.IPromise<che.IWorkspace> {
     let defered = this.$q.defer();
 
     // delete if present
     this.deleteDiagnosticWorkspaceIfPresent(diagnosticCallback).then(() => {
       // now create workspace config
       let workspaceConfig: che.IWorkspaceConfig = {
-        "projects": [],
-        "environments": {
-          "diagnostics": {
-            "machines": {
-              "dev-machine": {
-                "agents": ["org.eclipse.che.ws-agent"],
-                "servers": {},
-                "attributes": {"memoryLimitBytes": "1147483648"}
+        'projects': [],
+        'environments': {
+          'diagnostics': {
+            'machines': {
+              'dev-machine': {
+                'agents': ['org.eclipse.che.ws-agent'],
+                'servers': {},
+                'attributes': {'memoryLimitBytes': '1147483648'}
               }
             },
-            "recipe": {
-              "content": "FROM openjdk:8-jre-alpine\nCMD tail -f /dev/null\n",
-              "contentType": "text/x-dockerfile",
-              "type": "dockerfile"
+            'recipe': {
+              'content': 'FROM openjdk:8-jre-alpine\nCMD tail -f /dev/null\n',
+              'contentType': 'text/x-dockerfile',
+              'type': 'dockerfile'
             }
           }
         },
-        "name": "diagnostics",
-        "defaultEnv": "diagnostics",
-        "description": "Diagnostics Workspace",
-        "commands": []
+        'name': 'diagnostics',
+        'defaultEnv': 'diagnostics',
+        'commands': []
       };
       return this.cheWorkspace.createWorkspaceFromConfig(null, workspaceConfig);
-    }).then((workspace) => {
+    }).then((workspace: che.IWorkspace) => {
       defered.resolve(workspace);
-    }).catch((error) => {
+    }).catch((error: any) => {
         defered.reject(error);
       }
     );
@@ -169,17 +168,17 @@ export class DiagnosticsWorkspaceStartCheck {
 
   /**
    * Starts the test by adding new callbacks after this one
-   * @param diagnosticCallback the original check
-   * @returns {ng.IPromise}
+   * @param {DiagnosticCallback} diagnosticCallback the original check
+   * @returns {ng.IPromise<any>}
    */
-  start(diagnosticCallback : DiagnosticCallback) : ng.IPromise {
+  start(diagnosticCallback: DiagnosticCallback): ng.IPromise<any> {
     this.workspaceCallback = diagnosticCallback.newCallback('Workspace State');
     this.wsAgentCallback = diagnosticCallback.newCallback('Workspace Agent State');
     this.machineCallback = diagnosticCallback.newCallback('Workspace Runtime State');
     this.execAgentCallback = diagnosticCallback.newCallback('Workspace Exec Agent State');
 
-    let workspaceIsStarted : boolean = false;
-    this.recreateDiagnosticWorkspace(diagnosticCallback).then((workspace : che.IWorkspace) => {
+    let workspaceIsStarted: boolean = false;
+    this.recreateDiagnosticWorkspace(diagnosticCallback).then((workspace: che.IWorkspace) => {
 
       let statusLink = this.lodash.find(workspace.links, (link: any) => {
         return link.rel === 'environment.status_channel';
@@ -210,9 +209,9 @@ export class DiagnosticsWorkspaceStartCheck {
             this.cheWorkspace.fetchWorkspaceDetails(workspace.id).then(() => {
               let workspace = this.cheWorkspace.getWorkspaceById(workspaceId);
               diagnosticCallback.shared('workspace', workspace);
-              diagnosticCallback.shared('machineToken', workspace.runtime.devMachine.runtime.envVariables['USER_TOKEN']);
+              diagnosticCallback.shared('machineToken', workspace.runtime.devMachine.runtime.envVariables.USER_TOKEN);
               diagnosticCallback.success('Starting workspace OK');
-            })
+            });
           });
         }
       });
@@ -241,11 +240,11 @@ export class DiagnosticsWorkspaceStartCheck {
         if (message.indexOf(' Server startup') > 0) {
           this.wsAgentCallback.stateRunning('RUNNING');
 
-          // Server has been startup in the workspace agent and tries to reach workspace agent but is unable to do it
+          // server has been startup in the workspace agent and tries to reach workspace agent but is unable to do it
           // try with the browser ip
           diagnosticCallback.delayFunction(() => {
 
-            let hint : string = 'The workspace agent has started in the workspace, but the ' + this.cheBranding.getName() + ' server cannot verify this. There is a failure for ' + this.cheBranding.getName() + ' server to connect to your workspace\'s agent. Either your firewall is blocking essential ports or you can change ';
+            let hint: string = 'The workspace agent has started in the workspace, but the ' + this.cheBranding.getName() + ' server cannot verify this. There is a failure for ' + this.cheBranding.getName() + ' server to connect to your workspace\'s agent. Either your firewall is blocking essential ports or you can change ';
             if (this.cheBranding.getName() === 'Eclipse Che') {
               hint += 'CHE_DOCKER_IP and DOCKER_HOST to values ';
             }
@@ -255,14 +254,14 @@ export class DiagnosticsWorkspaceStartCheck {
             this.cheWorkspace.fetchWorkspaceDetails(workspace.id).then(() => {
               let workspace = this.cheWorkspace.getWorkspaceById(workspaceId);
               diagnosticCallback.shared('workspace', workspace);
-              diagnosticCallback.shared('machineToken', workspace.runtime.devMachine.runtime.envVariables['USER_TOKEN']);
-              let newCallback : DiagnosticCallback = diagnosticCallback.newCallback('Test connection from browser to workspace agent by using Workspace Agent IP');
+              diagnosticCallback.shared('machineToken', workspace.runtime.devMachine.runtime.envVariables.USER_TOKEN);
+              let newCallback: DiagnosticCallback = diagnosticCallback.newCallback('Test connection from browser to workspace agent by using Workspace Agent IP');
               this.diagnosticsRunningWorkspaceCheck.checkWsAgent(newCallback, false);
-              let websocketCallback : DiagnosticCallback = diagnosticCallback.newCallback('Test connection from browser to workspace agent with websocket');
+              let websocketCallback: DiagnosticCallback = diagnosticCallback.newCallback('Test connection from browser to workspace agent with websocket');
               this.diagnosticsRunningWorkspaceCheck.checkWebSocketWsAgent(websocketCallback);
             });
 
-          }, 7000)
+          }, 7000);
         }
 
         diagnosticCallback.addContent(message);
@@ -270,7 +269,7 @@ export class DiagnosticsWorkspaceStartCheck {
 
       if (outputChannel) {
         diagnosticCallback.subscribeChannel(outputChannel, (message: any) => {
-          let content : string = angular.fromJson(message).content;
+          let content: string = angular.fromJson(message).content;
           diagnosticCallback.addContent(content);
 
           // check if connected (always pull)
@@ -292,18 +291,15 @@ export class DiagnosticsWorkspaceStartCheck {
       diagnosticCallback.delayError('Test limit is for up to 5minutes. Time has exceed.', 5 * 60 * 1000);
 
       let startWorkspacePromise = this.cheWorkspace.startWorkspace(workspace.id, workspace.config.defaultEnv);
-      startWorkspacePromise.then((workspaceData) => {
+      startWorkspacePromise.then((workspaceData: che.IWorkspace) => {
         diagnosticCallback.shared('workspace', workspaceData);
       });
 
-    }).catch((error) => {
+    }).catch((error: any) => {
       diagnosticCallback.error('Unable to start workspace: ' + error);
     });
 
-
     return diagnosticCallback.getPromise();
-
   }
-
 
 }
