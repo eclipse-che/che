@@ -2241,7 +2241,7 @@
   },
   {
     "name": "CentOS nodejs",
-    "id": "nodejs4",
+    "id": "nodejs6",
     "creator": "Dharmit Shah",
     "scope": "advanced",
     "source": {
@@ -2293,7 +2293,7 @@
             "goal": "Run",
             "previewUrl": "http://${server.port.8080}"
           },
-          "commandLine": "cd ${current.project.path} && scl enable rh-nodejs4 'node app.js'"
+          "commandLine": "cd ${current.project.path} && node app.js"
         }
       ],
       "projects": [],
