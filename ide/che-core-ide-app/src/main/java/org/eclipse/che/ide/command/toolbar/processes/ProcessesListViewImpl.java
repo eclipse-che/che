@@ -65,17 +65,17 @@ public class ProcessesListViewImpl implements ProcessesListView {
     dropdownList.setWidth("100%");
     dropdownList.ensureDebugId("dropdown-processes");
     dropdownList.setSelectionHandler(
-            item -> {
-              if (item instanceof CreateCommandItem) {
-                delegate.onCreateCommand();
-              } else {
-                listItems
-                        .entrySet()
-                        .stream()
-                        .filter(entry -> item.equals(entry.getValue()))
-                        .forEach(entry -> delegate.onProcessChosen(entry.getKey()));
-              }
-            });
+        item -> {
+          if (item instanceof CreateCommandItem) {
+            delegate.onCreateCommand();
+          } else {
+            listItems
+                .entrySet()
+                .stream()
+                .filter(entry -> item.equals(entry.getValue()))
+                .forEach(entry -> delegate.onProcessChosen(entry.getKey()));
+          }
+        });
 
     rootPanel = new FlowPanel();
     rootPanel.add(execLabel);

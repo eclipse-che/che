@@ -141,7 +141,8 @@ public class WorkspaceLoadingTrackerImpl
           @Override
           public void onMachineRunning(MachineRunningEvent event) {
             view.onMachineRunning(event.getMachine().getName());
-            processesListView.setLoadingMessage(localizationConstant.menuLoaderMachineRunning(event.getMachine().getName()));
+            processesListView.setLoadingMessage(
+                localizationConstant.menuLoaderMachineRunning(event.getMachine().getName()));
             percentage += delta;
             processesListView.setLoadingProgress(percentage);
           }
@@ -297,7 +298,8 @@ public class WorkspaceLoadingTrackerImpl
 
     view.startWorkspaceMachines();
     view.startWorkspaceMachine(machine.getMachineName(), machine.getDockerImage());
-    processesListView.setLoadingMessage(localizationConstant.menuLoaderMachineStarting(machine.getMachineName()));
+    processesListView.setLoadingMessage(
+        localizationConstant.menuLoaderMachineStarting(machine.getMachineName()));
 
     percentage += delta;
     processesListView.setLoadingProgress(percentage);

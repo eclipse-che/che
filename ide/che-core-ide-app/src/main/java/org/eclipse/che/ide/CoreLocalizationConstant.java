@@ -1231,5 +1231,4 @@ public interface CoreLocalizationConstant extends Messages {
 
   @Key("menu.loader.pullingImage")
   String menuLoaderPullingImage(String image);
-
 }
