@@ -191,6 +191,9 @@ public final class Presentation {
     presentation.enabled = enabled;
     presentation.visible = visible;
     presentation.imageElement = imageElement;
+    if (imageElement != null) {
+      presentation.imageElement = imageElement.cloneNode(true).cast();
+    }
     presentation.htmlResource = htmlResource;
     return presentation;
   }

@@ -43,7 +43,6 @@
         }
 
         .content *[rel="image-name"] {
-            /*color: #8e42d1;*/
         }
 
         .content *[rel="progress"],
@@ -62,6 +61,7 @@
 
     </ui:style>
 
+    <!-- Be careful when changing the following. It may broke the result widget. -->
     <g:HTMLPanel styleName="{style.panel}">
         <pre class="{style.content}">
 
@@ -69,17 +69,18 @@
 
 <pre ui:field="preparingWorkspaceRuntime" style="display: none;">
 -----------------------------------------------------------------------
+
 <pre rel="step-name">Preparing workspace runtimes:</pre> Retrieving workspace's stacks...
 <pre ui:field="preparingWorkspaceRuntimeItems">
 <pre>  - <pre rel="machine-name"></pre> | image <pre rel="image-name"></pre> | <pre rel="progress"></pre> <pre rel="progress-value"></pre></pre>
 </pre></pre>
 <pre ui:field="startingWorkspaceRuntimes" style="display: none;">
 -----------------------------------------------------------------------
+
 <pre rel="step-name">Starting workspace runtimes:</pre> Creating and starting containers...
 <pre ui:field="startingWorkspaceRuntimesItems">
 <pre>  - <pre rel="machine-name"></pre> | image <pre rel="image-name"></pre> | <pre rel="progress"></pre> <pre rel="progress-value"></pre></pre>
-</pre></pre>
-<pre ui:field="initializingWorkspaceAgents" style="display:none;">
+</pre></pre><pre ui:field="initializingWorkspaceAgents" style="display:none;">
 -----------------------------------------------------------------------
 <pre rel="step-name">Initializing exec agents:</pre> Installing and starting exec agents in containers...
 <pre>  - <pre rel="machine-name"></pre> | image <pre rel="image-name"></pre> | <pre rel="progress"></pre> <pre rel="progress-value"></pre></pre>

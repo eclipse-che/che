@@ -152,10 +152,10 @@
             right: 0px;
             background-color: #2f323f;
             background-size: 800px 104px;
-            background-image: -webkit-linear-gradient(left, #2f323f 0%, #444b5c 20%, #2f323f 40%, #2f323f 100%);
+            background-image: -webkit-linear-gradient(left, #2f323f 0%, #181b28 20%, #2f323f 40%, #2f323f 100%);
             background-repeat: no-repeat;
             background-position: 827px;
-            animation-duration: 2s;
+            animation-duration: 10s;
             animation-iteration-count: infinite;
             animation-name: editorPlaceHolderAnimation;
             animation-delay: 0.5s;
@@ -166,8 +166,16 @@
                 background-position: -1500px 0;
             }
 
-            100% {
+            20% {
                 background-position: 1500px 0;
+            }
+
+            50% {
+                background-position: 1500px 0;
+            }
+
+            100% {
+                background-position: -1500px 0;
             }
         }
     </ui:style>
@@ -187,23 +195,23 @@
                 <div class="{style.line}" style="animation-delay: 0.00s;"><div /></div>
                 <div class="{style.line}" style="animation-delay: 0.05s;"><div /></div>
                 <div class="{style.line}" style="animation-delay: 0.10s;"><div style="width: 30%;" /></div>
-                <div class="{style.line}"></div>
+                <div class="{style.line}" />
                 <div class="{style.line}" style="animation-delay: 0.15s;"><div /></div>
                 <div class="{style.line}" style="animation-delay: 0.20s;"><div /></div>
                 <div class="{style.line}" style="animation-delay: 0.25s;"><div style="width: 30%;" /></div>
-                <div class="{style.line}"></div>
+                <div class="{style.line}" />
                 <div class="{style.line}" style="animation-delay: 0.30s;"><div style="width: 40%;" /></div>
                 <div class="{style.line}" style="animation-delay: 0.35s;"><div style="left: 10%; width: 10%;" /></div>
                 <div class="{style.line}" style="animation-delay: 0.40s;"><div style="left: 10%; width: 30%;" /></div>
                 <div class="{style.line}" style="animation-delay: 0.45s;"><div style="left: 10%; width: 30%;" /></div>
                 <div class="{style.line}" style="animation-delay: 0.50s;"><div style="left: 10%; width: 30%;" /></div>
                 <div class="{style.line}" style="animation-delay: 0.55s;"><div style="left: 10%; width: 10%;" /></div>
-                <div class="{style.line}"></div>
-                <div class="{style.line}"></div>
+                <div class="{style.line}" />
+                <div class="{style.line}" />
                 <div class="{style.line}" style="animation-delay: 0.60s;"><div /></div>
                 <div class="{style.line}" style="animation-delay: 0.65s;"><div /></div>
                 <div class="{style.line}" style="animation-delay: 0.70s;"><div /></div>
-                <div class="{style.line}" style="animation-delay: 0.75s;"><div /></div>
+                <div class="{style.line}" style="animation-delay: 0.75s;"><div style="opacity: 0.5;" /></div>
             </div>
         </div>
     </g:HTMLPanel>

@@ -10,18 +10,21 @@
  */
 package org.eclipse.che.ide.processes.loading;
 
+import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.event.MachineRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.MachineStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
 import org.eclipse.che.ide.api.workspace.model.EnvironmentImpl;
 import org.eclipse.che.ide.api.workspace.model.MachineConfigImpl;
+import org.eclipse.che.ide.command.toolbar.processes.ProcessesListView;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.eclipse.che.ide.processes.panel.EnvironmentOutputEvent;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
@@ -90,8 +93,13 @@ public class WorkspaceLoadingTrackerImpl
   private final MachineResources resources;
 
   private final WorkspaceLoadingTrackerView view;
+  private final ProcessesListView processesListView;
+  private final CoreLocalizationConstant localizationConstant;
 
   private Map<String, Image> images = new HashMap<>();
+
+  private int percentage = 0;
+  private int delta = 0;
 
   @Inject
   public WorkspaceLoadingTrackerImpl(
@@ -99,14 +107,17 @@ public class WorkspaceLoadingTrackerImpl
       EventBus eventBus,
       ProcessesPanelPresenter processesPanelPresenter,
       MachineResources resources,
-      WorkspaceLoadingTrackerView view) {
+      WorkspaceLoadingTrackerView view,
+      ProcessesListView processesListView,
+      CoreLocalizationConstant localizationConstant) {
 
     this.appContext = appContext;
     this.eventBus = eventBus;
     this.processesPanelPresenter = processesPanelPresenter;
     this.resources = resources;
-
     this.view = view;
+    this.processesListView = processesListView;
+    this.localizationConstant = localizationConstant;
 
     eventBus.addHandler(
         WorkspaceRunningEvent.TYPE,
@@ -130,6 +141,9 @@ public class WorkspaceLoadingTrackerImpl
           @Override
           public void onMachineRunning(MachineRunningEvent event) {
             view.onMachineRunning(event.getMachine().getName());
+            processesListView.setLoadingMessage(localizationConstant.menuLoaderMachineRunning(event.getMachine().getName()));
+            percentage += delta;
+            processesListView.setLoadingProgress(percentage);
           }
         });
   }
@@ -139,8 +153,17 @@ public class WorkspaceLoadingTrackerImpl
       view.onPullingComplete(machineName);
     }
 
-    //    view.showStartingWorkspaceRuntimes();
     view.onWorkspaceStarted();
+    processesListView.setLoadingMessage(localizationConstant.menuLoaderWorkspaceStarted());
+    processesListView.setLoadingProgress(100);
+
+    /* Delay in switching to command execution mode */
+    new Timer() {
+      @Override
+      public void run() {
+        processesListView.setExecMode();
+      }
+    }.schedule(3000);
   }
 
   @Override
@@ -151,6 +174,10 @@ public class WorkspaceLoadingTrackerImpl
 
     view.startLoading();
 
+    processesListView.setLoadMode();
+    processesListView.setLoadingMessage(localizationConstant.menuLoaderWaitingWorkspace());
+    processesListView.setLoadingProgress(0);
+
     String defaultEnvironmentName = appContext.getWorkspace().getConfig().getDefaultEnv();
     EnvironmentImpl defaultEnvironment =
         appContext.getWorkspace().getConfig().getEnvironments().get(defaultEnvironmentName);
@@ -160,6 +187,8 @@ public class WorkspaceLoadingTrackerImpl
       view.pullMachine(machineName);
       images.put(machineName, new Image(machineName));
     }
+
+    delta = 100 / machines.size() / 2;
 
     eventBus.addHandler(EnvironmentOutputEvent.TYPE, this);
     ((ProcessesPanelView) processesPanelPresenter.getView())
@@ -240,6 +269,7 @@ public class WorkspaceLoadingTrackerImpl
       dockerImage = dockerImage.substring(" Pulling from ".length()).trim();
       machine.setDockerImage(dockerImage);
       view.setMachineImage(machine.getMachineName(), dockerImage);
+      processesListView.setLoadingMessage(localizationConstant.menuLoaderPullingImage(dockerImage));
     }
 
     return true;
@@ -267,6 +297,10 @@ public class WorkspaceLoadingTrackerImpl
 
     view.startWorkspaceMachines();
     view.startWorkspaceMachine(machine.getMachineName(), machine.getDockerImage());
+    processesListView.setLoadingMessage(localizationConstant.menuLoaderMachineStarting(machine.getMachineName()));
+
+    percentage += delta;
+    processesListView.setLoadingProgress(percentage);
 
     return true;
   }
@@ -384,6 +418,23 @@ public class WorkspaceLoadingTrackerImpl
    * @return
    */
   private boolean dockerChunkPullingCompleted(Image machine, String text) {
-    return false;
+    if (!(text.startsWith("[DOCKER] ") && text.indexOf(": Download complete") > 0)) {
+      return false;
+    }
+
+    text = text.substring("[DOCKER] ".length());
+    // now text must be like `e7cfbd075aa8: Download complete`
+
+    String[] parts = text.split(":");
+
+    String hash = parts[0];
+
+    Chunk chunk = machine.getChunks().get(hash);
+    if (chunk != null) {
+      chunk.downloaded = chunk.size;
+      refreshMachineDownloadingProgress(machine);
+    }
+
+    return true;
   }
 }

@@ -30,7 +30,7 @@ public class EditorPlaceholderWidget extends Composite {
   public EditorPlaceholderWidget(EditorPlaceholderWidgetUiBinder uiBinder) {
     initWidget(uiBinder.createAndBindUi(this));
 
-    for (int i = 0; i < 100; i++) {
+    for (int i = 1; i <= 20; i++) {
       Element lineNumber = DOM.createDiv();
       lineNumber.setInnerText("" + i);
       lineNumbers.appendChild(lineNumber);
