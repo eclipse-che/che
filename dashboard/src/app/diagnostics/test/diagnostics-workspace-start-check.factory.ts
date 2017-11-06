@@ -13,6 +13,8 @@ import {DiagnosticCallback} from '../diagnostic-callback';
 import {CheWorkspace} from '../../../components/api/workspace/che-workspace.factory';
 import {DiagnosticsRunningWorkspaceCheck} from './diagnostics-workspace-check-workspace.factory';
 import {CheBranding} from '../../../components/branding/che-branding.factory';
+import {CheJsonRpcApi} from '../../../components/api/json-rpc/che-json-rpc-api.factory';
+import {CheJsonRpcMasterApi} from '../../../components/api/json-rpc/che-json-rpc-master-api';
 
 /**
  * Test the start of a workspace
@@ -23,7 +25,7 @@ export class DiagnosticsWorkspaceStartCheck {
   /**
    * Q service for creating delayed promises.
    */
-  private $q : ng.IQService;
+  private $q: ng.IQService;
 
   /**
    * Workspace API used to grab details.
@@ -33,56 +35,86 @@ export class DiagnosticsWorkspaceStartCheck {
   /**
    * Lodash utility.
    */
-  private lodash : any;
+  private lodash: any;
 
   /**
    * Other checker used to spawn new tests.
    */
-  private diagnosticsRunningWorkspaceCheck : DiagnosticsRunningWorkspaceCheck;
+  private diagnosticsRunningWorkspaceCheck: DiagnosticsRunningWorkspaceCheck;
 
   /**
    * Keep a reference to the workspace Agent callback
    */
-  private wsAgentCallback : DiagnosticCallback;
+  private wsAgentCallback: DiagnosticCallback;
 
   /**
    * Keep a reference to the workspace callback
    */
-  private workspaceCallback : DiagnosticCallback;
+  private workspaceCallback: DiagnosticCallback;
 
   /**
    * Keep a reference to the machine callback
    */
-  private machineCallback : DiagnosticCallback;
+  private machineCallback: DiagnosticCallback;
 
   /**
    * Keep a reference to the exec agent callback
    */
-  private execAgentCallback : DiagnosticCallback;
+  private execAgentCallback: DiagnosticCallback;
 
   /**
    * Branding info.
    */
-  private cheBranding : CheBranding;
+  private cheBranding: CheBranding;
+
+  /**
+   * Location service.
+   */
+  private $location: ng.ILocationService;
+
+  /**
+   * RPC API location string.
+   */
+  private jsonRpcApiLocation: string;
+
+  /**
+   * Workspace master interceptions.
+   */
+  private cheJsonRpcMasterApi: CheJsonRpcMasterApi;
 
   /**
    * Default constructor
    * @ngInject for Dependency injection
    */
-  constructor ($q : ng.IQService, lodash : any, cheWorkspace: CheWorkspace, diagnosticsRunningWorkspaceCheck : DiagnosticsRunningWorkspaceCheck, cheBranding : CheBranding) {
-    this.$q =$q;
+  constructor($q: ng.IQService,
+              lodash: any,
+              cheWorkspace: CheWorkspace,
+              diagnosticsRunningWorkspaceCheck: DiagnosticsRunningWorkspaceCheck,
+              cheBranding: CheBranding,
+              $location: ng.ILocationService,
+              cheJsonRpcApi: CheJsonRpcApi,
+              userDashboardConfig: any,
+              keycloakAuth: any,
+              proxySettings: string) {
+    this.$q = $q;
     this.lodash = lodash;
     this.cheWorkspace = cheWorkspace;
     this.cheBranding = cheBranding;
+    this.$location = $location;
     this.diagnosticsRunningWorkspaceCheck = diagnosticsRunningWorkspaceCheck;
+
+    const keycloakToken = keycloakAuth.isPresent ? '?token=' + keycloakAuth.keycloak.token : '';
+    this.jsonRpcApiLocation = this.cheWorkspace.formJsonRpcApiLocation($location, proxySettings, userDashboardConfig.developmentMode) + cheBranding.getWebsocketContext();
+    this.jsonRpcApiLocation += keycloakToken;
+    this.cheJsonRpcMasterApi = cheJsonRpcApi.getJsonRpcMasterApi(this.jsonRpcApiLocation);
   }
 
   /**
    * Delete the diagnostic workspace (by stopping it first) if it's already running
-   * @param diagnosticCallback the callback used to send response
-   * @returns {IPromise}
+   * @param {DiagnosticCallback} diagnosticCallback the callback used to send response
+   * @returns {ng.IPromise<any>}
    */
-  deleteDiagnosticWorkspaceIfPresent(diagnosticCallback : DiagnosticCallback) : ng.IPromise {
+  deleteDiagnosticWorkspaceIfPresent(diagnosticCallback: DiagnosticCallback): ng.IPromise<any> {
     let defered = this.$q.defer();
     this.cheWorkspace.fetchWorkspaces().finally(() => {
       let workspaces: Array<che.IWorkspace> = this.cheWorkspace.getWorkspaces();
@@ -94,21 +126,22 @@ export class DiagnosticsWorkspaceStartCheck {
         // first stop
         if (workspace.status === 'RUNNING' || workspace.status === 'STARTING') {
           // listen on the events
-          let eventChannelLink = this.lodash.find(workspace.links, (link: any) => {
-            return link.rel === 'get workspace events channel';
-          });
-          let eventChannel = eventChannelLink ? eventChannelLink.parameters[0].defaultValue : null;
-          diagnosticCallback.subscribeChannel(eventChannel, (message: any) => {
-            if (message.eventType === 'STOPPED') {
-              diagnosticCallback.unsubscribeChannel(eventChannel);
+          const callback = (message: any) => {
+            if (message.status === 'STOPPED') {
               this.cheWorkspace.deleteWorkspaceConfig(workspace.id).finally(() => {
                 defered.resolve(true);
               });
-            } else if ('ERROR' === message.eventType) {
+            } else if ('ERROR' === message.status) {
               defered.reject(message.content);
             }
+          };
+          this.cheJsonRpcMasterApi.subscribeWorkspaceStatus(workspace.id, callback);
+          defered.promise.then((wsIsStopped: boolean) => {
+            if (wsIsStopped) {
+              this.cheJsonRpcMasterApi.unSubscribeWorkspaceStatus(workspace.id, callback);
+            }
           });
-          this.cheWorkspace.onStopWorkspace(workspace.id);
+          this.cheWorkspace.stopWorkspace(workspace.id);
         } else {
           this.cheWorkspace.deleteWorkspaceConfig(workspace.id).finally(() => {
             defered.resolve(true);
@@ -117,7 +150,7 @@ export class DiagnosticsWorkspaceStartCheck {
       } else {
         defered.resolve(true);
       }
-    }).catch((error) => {
+    }).catch((error: any) => {
       defered.reject(error);
     });
     return defered.promise;
@@ -125,42 +158,42 @@ export class DiagnosticsWorkspaceStartCheck {
 
   /**
    * Always create a fresh workspace (by removing the old one if it exists)
-   * @param diagnosticCallback
-   * @returns {IPromise<T>}
+   * @param {DiagnosticCallback} diagnosticCallback
+   * @returns {ng.IPromise<che.IWorkspace>}
    */
-  recreateDiagnosticWorkspace(diagnosticCallback : DiagnosticCallback) : ng.IPromise<che.IWorkspace> {
+  recreateDiagnosticWorkspace(diagnosticCallback: DiagnosticCallback): ng.IPromise<che.IWorkspace> {
     let defered = this.$q.defer();
 
     // delete if present
     this.deleteDiagnosticWorkspaceIfPresent(diagnosticCallback).then(() => {
       // now create workspace config
       let workspaceConfig: che.IWorkspaceConfig = {
-        "projects": [],
-        "environments": {
-          "diagnostics": {
-            "machines": {
-              "dev-machine": {
-                "agents": ["org.eclipse.che.ws-agent"],
-                "servers": {},
-                "attributes": {"memoryLimitBytes": "1147483648"}
+        'projects': [],
+        'environments': {
+          'diagnostics': {
+            'machines': {
+              'dev-machine': {
+                'installers': ['org.eclipse.che.ws-agent'],
+                'servers': {},
+                'attributes': {'memoryLimitBytes': '1147483648'}
               }
             },
-            "recipe": {
-              "content": "FROM openjdk:8-jre-alpine\nCMD tail -f /dev/null\n",
-              "contentType": "text/x-dockerfile",
-              "type": "dockerfile"
-            }
+            'recipe': {
+              'content': 'FROM openjdk:8-jre-alpine\nRUN apk add --update bash\nCMD tail -f /dev/null\n',
+              'contentType': 'text/x-dockerfile',
+              'type': 'dockerfile'
+            },
+            warnings: []
           }
         },
-        "name": "diagnostics",
-        "defaultEnv": "diagnostics",
-        "description": "Diagnostics Workspace",
-        "commands": []
+        'name': 'diagnostics',
+        'defaultEnv': 'diagnostics',
+        'commands': []
       };
       return this.cheWorkspace.createWorkspaceFromConfig(null, workspaceConfig);
-    }).then((workspace) => {
+    }).then((workspace: che.IWorkspace) => {
       defered.resolve(workspace);
-    }).catch((error) => {
+    }).catch((error: any) => {
         defered.reject(error);
       }
     );
@@ -169,39 +202,22 @@ export class DiagnosticsWorkspaceStartCheck {
 
   /**
    * Starts the test by adding new callbacks after this one
-   * @param diagnosticCallback the original check
-   * @returns {ng.IPromise}
+   * @param {DiagnosticCallback} diagnosticCallback the original check
+   * @returns {ng.IPromise<any>}
    */
-  start(diagnosticCallback : DiagnosticCallback) : ng.IPromise {
+  start(diagnosticCallback: DiagnosticCallback): ng.IPromise<any> {
     this.workspaceCallback = diagnosticCallback.newCallback('Workspace State');
     this.wsAgentCallback = diagnosticCallback.newCallback('Workspace Agent State');
     this.machineCallback = diagnosticCallback.newCallback('Workspace Runtime State');
     this.execAgentCallback = diagnosticCallback.newCallback('Workspace Exec Agent State');
 
-    let workspaceIsStarted : boolean = false;
-    this.recreateDiagnosticWorkspace(diagnosticCallback).then((workspace : che.IWorkspace) => {
-
-      let statusLink = this.lodash.find(workspace.links, (link: any) => {
-        return link.rel === 'environment/statusChannel';
-      });
-
-      let eventChannelLink = this.lodash.find(workspace.links, (link: any) => {
-        return link.rel === 'get workspace events channel';
-      });
-
-      let outputLink = this.lodash.find(workspace.links, (link: any) => {
-        return link.rel === 'environment/outputChannel';
-      });
-
-      let eventChannel = eventChannelLink ? eventChannelLink.parameters[0].defaultValue : null;
-      let agentChannel = eventChannel + ':ext-server:output';
-      let statusChannel = statusLink ? statusLink.parameters[0].defaultValue : null;
-      let outputChannel = outputLink ? outputLink.parameters[0].defaultValue : null;
+    let workspaceIsStarted: boolean = false;
+    this.recreateDiagnosticWorkspace(diagnosticCallback).then((workspace: che.IWorkspace) => {
 
       diagnosticCallback.shared('workspace', workspace);
-      diagnosticCallback.subscribeChannel(eventChannel, (message: any) => {
+      this.cheJsonRpcMasterApi.subscribeWorkspaceStatus(workspace.id, (message: any) => {
         diagnosticCallback.addContent('EventChannel : ' + JSON.stringify(message));
-        if (message.eventType === 'RUNNING') {
+        if (message.status === 'RUNNING') {
           workspaceIsStarted = true;
           this.workspaceCallback.stateRunning('RUNNING');
           this.cheWorkspace.fetchWorkspaces().then(() => {
@@ -210,42 +226,40 @@ export class DiagnosticsWorkspaceStartCheck {
             this.cheWorkspace.fetchWorkspaceDetails(workspace.id).then(() => {
               let workspace = this.cheWorkspace.getWorkspaceById(workspaceId);
               diagnosticCallback.shared('workspace', workspace);
-              diagnosticCallback.shared('machineToken', workspace.runtime.devMachine.runtime.envVariables['CHE_MACHINE_TOKEN']);
+              diagnosticCallback.shared('machineToken', workspace.runtime.machineToken);
               diagnosticCallback.success('Starting workspace OK');
-            })
+            });
           });
         }
       });
 
-      if (statusChannel) {
-        diagnosticCallback.subscribeChannel(statusChannel, (message: any) => {
-          if (message.eventType === 'DESTROYED' && message.workspaceId === workspace.id) {
-            diagnosticCallback.error('Error while starting the workspace : Workspace has been destroyed', 'Please check the diagnostic logs.');
-          }
-          if (message.eventType === 'ERROR' && message.workspaceId === workspace.id) {
-            diagnosticCallback.error('Error while starting the workspace : ' + JSON.stringify(message));
-          }
+      this.cheJsonRpcMasterApi.subscribeEnvironmentStatus(workspace.id, (message: any) => {
+        if (message.eventType === 'DESTROYED' && message.workspaceId === workspace.id) {
+          diagnosticCallback.error('Error while starting the workspace : Workspace has been destroyed', 'Please check the diagnostic logs.');
+        }
+        if (message.eventType === 'ERROR' && message.workspaceId === workspace.id) {
+          diagnosticCallback.error('Error while starting the workspace : ' + JSON.stringify(message));
+        }
 
-          if (message.eventType === 'RUNNING' && message.workspaceId === workspace.id && message.machineName === 'dev-machine') {
-            this.machineCallback.stateRunning('RUNNING');
-          }
+        if (message.eventType === 'RUNNING' && message.workspaceId === workspace.id && message.machineName === 'dev-machine') {
+          this.machineCallback.stateRunning('RUNNING');
+        }
 
-          diagnosticCallback.addContent('StatusChannel : ' + JSON.stringify(message));
+        diagnosticCallback.addContent('StatusChannel : ' + JSON.stringify(message));
 
-        });
-      }
+      });
 
-      diagnosticCallback.subscribeChannel(agentChannel, (message: any) => {
+      this.cheJsonRpcMasterApi.subscribeWsAgentOutput(workspace.id, (message: any) => {
         diagnosticCallback.addContent('agent channel :' + message);
 
-        if (message.indexOf(' Server startup') > 0) {
+        if (message.text.indexOf(' Server startup') > 0) {
           this.wsAgentCallback.stateRunning('RUNNING');
 
-          // Server has been startup in the workspace agent and tries to reach workspace agent but is unable to do it
+          // server has been startup in the workspace agent and tries to reach workspace agent but is unable to do it
           // try with the browser ip
           diagnosticCallback.delayFunction(() => {
 
-            let hint : string = 'The workspace agent has started in the workspace, but the ' + this.cheBranding.getName() + ' server cannot verify this. There is a failure for ' + this.cheBranding.getName() + ' server to connect to your workspace\'s agent. Either your firewall is blocking essential ports or you can change ';
+            let hint: string = 'The workspace agent has started in the workspace, but the ' + this.cheBranding.getName() + ' server cannot verify this. There is a failure for ' + this.cheBranding.getName() + ' server to connect to your workspace\'s agent. Either your firewall is blocking essential ports or you can change ';
             if (this.cheBranding.getName() === 'Eclipse Che') {
               hint += 'CHE_DOCKER_IP and DOCKER_HOST to values ';
             }
@@ -255,55 +269,50 @@ export class DiagnosticsWorkspaceStartCheck {
             this.cheWorkspace.fetchWorkspaceDetails(workspace.id).then(() => {
               let workspace = this.cheWorkspace.getWorkspaceById(workspaceId);
               diagnosticCallback.shared('workspace', workspace);
-              diagnosticCallback.shared('machineToken', workspace.runtime.devMachine.runtime.envVariables['CHE_MACHINE_TOKEN']);
-              let newCallback : DiagnosticCallback = diagnosticCallback.newCallback('Test connection from browser to workspace agent by using Workspace Agent IP');
+              diagnosticCallback.shared('machineToken', workspace.runtime.machineToken);
+              let newCallback: DiagnosticCallback = diagnosticCallback.newCallback('Test connection from browser to workspace agent by using Workspace Agent IP');
               this.diagnosticsRunningWorkspaceCheck.checkWsAgent(newCallback, false);
-              let websocketCallback : DiagnosticCallback = diagnosticCallback.newCallback('Test connection from browser to workspace agent with websocket');
+              let websocketCallback: DiagnosticCallback = diagnosticCallback.newCallback('Test connection from browser to workspace agent with websocket');
               this.diagnosticsRunningWorkspaceCheck.checkWebSocketWsAgent(websocketCallback);
             });
 
-          }, 7000)
+          }, 7000);
         }
 
         diagnosticCallback.addContent(message);
       });
 
-      if (outputChannel) {
-        diagnosticCallback.subscribeChannel(outputChannel, (message: any) => {
-          let content : string = angular.fromJson(message).content;
-          diagnosticCallback.addContent(content);
+      this.cheJsonRpcMasterApi.subscribeEnvironmentOutput(workspace.id, (message: any) => {
+        const content = message.text;
+        diagnosticCallback.addContent(content);
 
-          // check if connected (always pull)
-          if (content.indexOf('Client.Timeout exceeded while awaiting headers') > 0) {
-            diagnosticCallback.error('Network connection issue', 'Docker was unable to pull the right Docker image for the workspace. Either networking is not working from your Docker daemon or try disabling CHE_DOCKER_ALWAYSE__PULL__IMAGE in `che.env` to avoid pulling images over the network.');
-          }
+        // check if connected (always pull)
+        if (content.indexOf('Client.Timeout exceeded while awaiting headers') > 0) {
+          diagnosticCallback.error('Network connection issue', 'Docker was unable to pull the right Docker image for the workspace. Either networking is not working from your Docker daemon or try disabling CHE_DOCKER_ALWAYSE__PULL__IMAGE in `che.env` to avoid pulling images over the network.');
+        }
 
-          if (content.indexOf('dial tcp: lookup') > 0 && content.indexOf('server misbehaving') > 0) {
-            diagnosticCallback.error('Network connection issue', 'Docker is trying to connect to a Docker registry but the connection is failing. Check Docker\'s DNS settings and network connectivity.');
-          }
+        if (content.indexOf('dial tcp: lookup') > 0 && content.indexOf('server misbehaving') > 0) {
+          diagnosticCallback.error('Network connection issue', 'Docker is trying to connect to a Docker registry but the connection is failing. Check Docker\'s DNS settings and network connectivity.');
+        }
 
-          if (content.indexOf('Exec-agent configuration') > 0) {
-            this.execAgentCallback.stateRunning('RUNNING');
-          }
-          diagnosticCallback.addContent('output channel message :' + JSON.stringify(message));
-        });
-      }
+        if (content.indexOf('Exec-agent configuration') > 0) {
+          this.execAgentCallback.stateRunning('RUNNING');
+        }
+        diagnosticCallback.addContent('output channel message :' + JSON.stringify(message));
+      });
 
       diagnosticCallback.delayError('Test limit is for up to 5minutes. Time has exceed.', 5 * 60 * 1000);
 
       let startWorkspacePromise = this.cheWorkspace.startWorkspace(workspace.id, workspace.config.defaultEnv);
-      startWorkspacePromise.then((workspaceData) => {
+      startWorkspacePromise.then((workspaceData: che.IWorkspace) => {
         diagnosticCallback.shared('workspace', workspaceData);
       });
 
-    }).catch((error) => {
+    }).catch((error: any) => {
       diagnosticCallback.error('Unable to start workspace: ' + error);
     });
 
-
     return diagnosticCallback.getPromise();
-
   }
-
 
 }
