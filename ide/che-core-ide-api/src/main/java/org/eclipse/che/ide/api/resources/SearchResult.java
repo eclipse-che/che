@@ -15,9 +15,9 @@ import java.util.List;
 /** Class contains an information about result of the text search operation. */
 public class SearchResult {
   private List<SearchItemReference> itemReferences;
-  private int totalHits;
+  private long totalHits;
 
-  public SearchResult(List<SearchItemReference> itemReferences, int totalHits) {
+  public SearchResult(List<SearchItemReference> itemReferences, long totalHits) {
     this.itemReferences = itemReferences;
     this.totalHits = totalHits;
   }
@@ -28,7 +28,7 @@ public class SearchResult {
   }
 
   /** returns total file count where requested text was found */
-  public int getTotalHits() {
+  public long getTotalHits() {
     return totalHits;
   }
 }

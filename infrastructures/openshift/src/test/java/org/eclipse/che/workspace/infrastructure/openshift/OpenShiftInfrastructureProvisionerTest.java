@@ -18,7 +18,6 @@ import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.env.EnvVarsConverter;
-import org.eclipse.che.workspace.infrastructure.openshift.provision.labels.PodNameLabelProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.restartpolicy.RestartPolicyRewriter;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.route.TlsRouteProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.server.ServersConverter;
@@ -47,7 +46,6 @@ public class OpenShiftInfrastructureProvisionerTest {
   @Mock private EnvVarsConverter envVarsProvisioner;
   @Mock private ServersConverter serversProvisioner;
   @Mock private RestartPolicyRewriter restartPolicyRewriter;
-  @Mock private PodNameLabelProvisioner labelsProvisioner;
 
   private OpenShiftInfrastructureProvisioner osInfraProvisioner;
 
@@ -62,8 +60,7 @@ public class OpenShiftInfrastructureProvisionerTest {
             tlsRouteProvisioner,
             serversProvisioner,
             envVarsProvisioner,
-            restartPolicyRewriter,
-            labelsProvisioner);
+            restartPolicyRewriter);
     provisionOrder =
         inOrder(
             pvcProvisioner,
@@ -71,8 +68,7 @@ public class OpenShiftInfrastructureProvisionerTest {
             tlsRouteProvisioner,
             serversProvisioner,
             envVarsProvisioner,
-            restartPolicyRewriter,
-            labelsProvisioner);
+            restartPolicyRewriter);
   }
 
   @Test
@@ -84,9 +80,6 @@ public class OpenShiftInfrastructureProvisionerTest {
         .provision(eq(environment), eq(osEnv), eq(runtimeIdentity));
     provisionOrder
         .verify(envVarsProvisioner)
-        .provision(eq(environment), eq(osEnv), eq(runtimeIdentity));
-    provisionOrder
-        .verify(labelsProvisioner)
         .provision(eq(environment), eq(osEnv), eq(runtimeIdentity));
     provisionOrder
         .verify(restartPolicyRewriter)

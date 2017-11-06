@@ -69,6 +69,8 @@ public class CheckAutocompleteFeaturesInTheTestFolderTest {
 
   private void checkOpenDeclaration() {
     editor.setCursorToDefinedLineAndChar(35, 21);
+    editor.waitActiveEditor();
+    editor.waitSpecifiedValueForLineAndChar(35, 21);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("Test");
     String expectedContent =

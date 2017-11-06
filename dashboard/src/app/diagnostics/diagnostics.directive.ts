@@ -26,7 +26,7 @@
  */
 export class Diagnostics {
 
-  replace : boolean = false;
+  replace: boolean = false;
   restrict: string = 'E';
   templateUrl: string = 'app/diagnostics/diagnostics-widget.html';
   controller: string = 'DiagnosticsController';
@@ -41,10 +41,9 @@ export class Diagnostics {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor () {
+  constructor() {
     // scope values
-    this.scope = {
-    };
+    this.scope = {};
   }
 
 }

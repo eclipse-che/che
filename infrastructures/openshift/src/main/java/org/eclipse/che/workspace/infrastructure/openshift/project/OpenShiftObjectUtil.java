@@ -32,12 +32,12 @@ import java.util.Map;
  *
  * @author Anton Korneta
  */
-class OpenShiftObjectUtil {
+public class OpenShiftObjectUtil {
 
   private static final String STORAGE_PARAM = "storage";
 
   /** Adds label to target OpenShift object. */
-  static void putLabel(HasMetadata target, String key, String value) {
+  public static void putLabel(HasMetadata target, String key, String value) {
     ObjectMeta metadata = target.getMetadata();
 
     if (metadata == null) {
@@ -53,7 +53,7 @@ class OpenShiftObjectUtil {
   }
 
   /** Adds selector into target OpenShift service. */
-  static void putSelector(Service target, String key, String value) {
+  public static void putSelector(Service target, String key, String value) {
     ServiceSpec spec = target.getSpec();
 
     if (spec == null) {
