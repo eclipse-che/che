@@ -29,7 +29,7 @@ import org.eclipse.che.ide.api.icon.IconRegistry;
 public class GwtCheCommandType implements CommandType {
 
   private static final String COMMAND_TEMPLATE =
-      "mvn -f /projects/che gwt:codeserver -pl :che-ide-gwt-app -am -Pfast";
+      "mvn -f /projects/che gwt:codeserver -pl :che-ide-gwt-app -am -Pfast,sdm-in-che";
   private static final String ID = "gwt_sdm_che";
 
   @Inject
