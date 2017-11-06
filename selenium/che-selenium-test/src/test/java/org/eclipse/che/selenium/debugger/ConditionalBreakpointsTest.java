@@ -123,6 +123,9 @@ public class ConditionalBreakpointsTest {
     startDebug();
 
     editor.waitConditionalBreakpoint(15, true);
+
+    String filePath = "/" + PROJECT + "/src/HelloWorld.java";
+    debugPanel.waitBreakpointState(filePath, 15, DebugPanel.BreakpointState.ACTIVE, true);
     debugPanel.clickOnButton(RESUME_BTN_ID);
     debugPanel.waitTextInVariablesPanel("i=3");
   }

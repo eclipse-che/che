@@ -11,10 +11,7 @@
 package org.eclipse.che.plugin.debugger.ide.debug;
 
 import static java.util.Collections.emptyList;
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
 import com.google.gwt.core.client.Scheduler;
@@ -41,7 +38,6 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.BreakpointManagerObserver;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
@@ -375,32 +371,10 @@ public class DebuggerPresenter extends BasePresenter
   }
 
   @Override
-  public void onDebuggerAttached(
-      final DebuggerDescriptor debuggerDescriptor, Promise<Void> connect) {
-
-    final String address = debuggerDescriptor.getAddress();
-    final StatusNotification notification =
-        notificationManager.notify(constant.debuggerConnectingTitle(address), PROGRESS, FLOAT_MODE);
-
-    connect
-        .then(
-            aVoid -> {
-              DebuggerPresenter.this.debuggerDescriptor = debuggerDescriptor;
-
-              notification.setTitle(constant.debuggerConnectedTitle());
-              notification.setContent(constant.debuggerConnectedDescription(address));
-              notification.setStatus(SUCCESS);
-
-              view.setVMName(debuggerDescriptor.getInfo());
-              showDebuggerPanel();
-            })
-        .catchError(
-            error -> {
-              notification.setTitle(
-                  constant.failedToConnectToRemoteDebuggerDescription(address, error.getMessage()));
-              notification.setStatus(FAIL);
-              notification.setDisplayMode(FLOAT_MODE);
-            });
+  public void onDebuggerAttached(final DebuggerDescriptor debuggerDescriptor) {
+    this.debuggerDescriptor = debuggerDescriptor;
+    view.setVMName(debuggerDescriptor.getInfo());
+    showDebuggerPanel();
   }
 
   @Override

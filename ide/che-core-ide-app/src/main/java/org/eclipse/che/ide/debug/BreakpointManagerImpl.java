@@ -21,14 +21,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
-import org.eclipse.che.api.debug.shared.dto.LocationDto;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
-import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.BreakpointManagerObservable;
@@ -463,27 +460,7 @@ public class BreakpointManagerImpl
   public void onActiveDebuggerChanged(@Nullable Debugger activeDebugger) {}
 
   @Override
-  public void onDebuggerAttached(DebuggerDescriptor debuggerDescriptor, Promise<Void> connect) {
-    Debugger debugger = debuggerManager.getActiveDebugger();
-    if (debugger != null) {
-      debugger
-          .getAllBreakpoints()
-          .then(
-              breakpointDtos -> {
-                for (BreakpointDto breakpointDto : breakpointDtos) {
-                  LocationDto location = breakpointDto.getLocation();
-
-                  breakpointStorage
-                      .get(location.getTarget(), location.getLineNumber())
-                      .ifPresent(activeBreakpoints::add);
-                }
-
-                for (BreakpointManagerObserver observer : observers) {
-                  observer.onBreakpointUpdated(null);
-                }
-              });
-    }
-  }
+  public void onDebuggerAttached(DebuggerDescriptor debuggerDescriptor) {}
 
   @Override
   public void onDebuggerDisconnected() {
@@ -516,13 +493,16 @@ public class BreakpointManagerImpl
         .get(filePath, lineNumber)
         .ifPresent(
             breakpoint -> {
-              activeBreakpoints.add(breakpoint);
-
               BreakpointRenderer renderer =
                   getBreakpointRendererForFile(breakpoint.getLocation().getTarget());
               if (renderer != null) {
                 renderer.setBreakpointMark(
                     breakpoint, true, BreakpointManagerImpl.this::onLineChange);
+              }
+
+              activeBreakpoints.add(breakpoint);
+              for (BreakpointManagerObserver observer : observers) {
+                observer.onBreakpointUpdated(breakpoint);
               }
             });
   }

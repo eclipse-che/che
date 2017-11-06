@@ -13,13 +13,12 @@ package org.eclipse.che.ide.debug;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.Variable;
-import org.eclipse.che.api.promises.client.Promise;
 
 /** @author Anatoliy Bazko */
 public interface DebuggerObserver {
 
   /** Event happens when debugger client connected to the server. */
-  void onDebuggerAttached(DebuggerDescriptor debuggerDescriptor, Promise<Void> connect);
+  void onDebuggerAttached(DebuggerDescriptor debuggerDescriptor);
 
   /** Event happens when debugger client disconnected from the server. */
   void onDebuggerDisconnected();
