@@ -44,7 +44,7 @@ echo ""
 
 echo -n "[CHE] Fetching the list of new Che stacks..."
 #new_stacks_json=$(curl -X GET -s --header 'Accept: application/json' "${NEW_STACKS_URL}" | sed 's/\\\"//g' | sed 's/\"com\.redhat\.bayesian\.lsp\"//g' | sed 's/ws-agent\",/ws-agent\"/g')
-new_stacks_json=$(curl -X GET -s --header 'Accept: application/json' "${NEW_STACKS_URL}" | sed 's/\"com\.redhat\.bayesian\.lsp\"//g' | sed 's/ws-agent\",/ws-agent\"/g')
+new_stacks_json=$(curl -X GET -s --header 'Accept: application/json' "${NEW_STACKS_URL}" | sed 's/,?\"com\.redhat\.bayesian\.lsp\"//g')
 echo "done."
 
 echo "[CHE] These stacks will be added."
