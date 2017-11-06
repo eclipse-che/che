@@ -32,7 +32,7 @@ public interface WsPathUtils {
     }
 
     if (isRoot(wsPath)) {
-      throw new IllegalArgumentException("Can't get name of root");
+      return ROOT;
     }
 
     return wsPath.substring(wsPath.lastIndexOf(SEPARATOR) + 1);
