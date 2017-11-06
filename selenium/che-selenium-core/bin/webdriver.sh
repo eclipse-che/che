@@ -145,6 +145,9 @@ checkParameters() {
         elif [[ "$var" == "--compare-with-ci" ]]; then :
         elif [[ "$var" =~ ^--workspace-pool-size=(auto|[0-9]+)$ ]]; then :
         elif [[ "$var" =~ ^[0-9]+$ ]] && [[ $@ =~ --compare-with-ci[[:space:]]$var ]]; then :
+        elif [[ "$var" =~ ^-D.* ]]; then :
+        elif [[ "$var" =~ ^-[[:alpha:]]$ ]]; then :
+        elif [[ "$var" == "--skip-sources-validation" ]]; then :
         else
             printHelp
             echo "[TEST] Unrecognized or misused parameter "${var}
@@ -198,6 +201,19 @@ applyCustomOptions() {
         fi
     done
 }
+
+extractMavenOptions() {
+    for var in "$@"; do
+        if [[ "$var" =~ ^-D.* ]]; then
+            MAVEN_OPTIONS="${MAVEN_OPTIONS} $var"
+        elif [[ "$var" =~ ^-[[:alpha:]]$ ]]; then :
+            MAVEN_OPTIONS="${MAVEN_OPTIONS} $var"
+        elif [[ "$var" == "--skip-sources-validation" ]]; then :
+            MAVEN_OPTIONS="${MAVEN_OPTIONS} -Dskip-enforce -Dskip-validate-sources"
+        fi
+    done
+}
+
 
 defineTestsScope() {
     for var in "$@"; do
@@ -418,6 +434,7 @@ Handle failing tests:
 
 Other options:
     --debug                             Run tests in debug mode
+    --skip-sources-validation           Fast build. Skips source validation and enforce plugins
 
 HOW TO of usage:
     Test Eclipse Che assembly:
@@ -783,8 +800,8 @@ generateTestNgFailedReport() {
 
 # generates and updates failsafe report
 generateFailSafeReport () {
-    mvn -q surefire-report:failsafe-report-only
-    mvn -q site -DgenerateReports=false
+    mvn -q surefire-report:failsafe-report-only ${MAVEN_OPTIONS}
+    mvn -q site -DgenerateReports=false ${MAVEN_OPTIONS}
 
     echo "[TEST]"
 
@@ -855,7 +872,7 @@ storeTestReport() {
 }
 
 checkBuild() {
-    mvn package
+    mvn package ${MAVEN_OPTIONS}
     [[ $? != 0 ]] && { exit 1; }
 }
 
@@ -886,6 +903,7 @@ run() {
 
     initVariables
     init
+    extractMavenOptions $@
     checkBuild
 
     checkParameters $@
