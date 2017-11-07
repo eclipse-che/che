@@ -86,6 +86,11 @@
             <type>zip</type>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.ls.jdt</groupId>
+            <artifactId>jdt.ls.extension.product</artifactId>
+            <type>tar.gz</type>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-sdk-tools</artifactId>
             <type>jar</type>
