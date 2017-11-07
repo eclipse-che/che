@@ -30,6 +30,7 @@ import org.eclipse.che.workspace.infrastructure.docker.provisioner.limits.ram.De
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.limits.swap.SwapLimitProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.priviliged.PrivilegedModeProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.proxy.ProxySettingsProvisioner;
+import org.eclipse.che.workspace.infrastructure.docker.provisioner.securityopt.SecurityOptProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.volume.ExtraVolumesProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.snapshot.JpaSnapshotDao;
 import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotDao;
@@ -41,6 +42,7 @@ public class DockerInfraModule extends AbstractModule {
     Multibinder<ContainerSystemSettingsProvisioner> settingsProvisioners =
         Multibinder.newSetBinder(binder(), ContainerSystemSettingsProvisioner.class);
     settingsProvisioners.addBinding().to(DnsSettingsProvisioner.class);
+    settingsProvisioners.addBinding().to(SecurityOptProvisioner.class);
     settingsProvisioners.addBinding().to(ExtraHostsProvisioner.class);
     settingsProvisioners.addBinding().to(ProxySettingsProvisioner.class);
     settingsProvisioners.addBinding().to(ExtraVolumesProvisioner.class);

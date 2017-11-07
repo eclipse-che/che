@@ -419,6 +419,10 @@ public class DockerMachineStarter {
                 .toArray(new String[containerConfig.getExtraHosts().size()]))
         .withPrivileged(containerConfig.getPrivileged())
         .withDns(containerConfig.getDns().toArray(new String[containerConfig.getDns().size()]))
+        .withSecurityOpt(
+            containerConfig
+                .getSecurityOpt()
+                .toArray(new String[containerConfig.getSecurityOpt().size()]))
         .withCpusetCpus(containerConfig.getCpuSet())
         .withCpuQuota(containerConfig.getCpuQuota())
         .withCpuPeriod(containerConfig.getCpuPeriod())
