@@ -3,6 +3,7 @@
   link-href="#/workspaces" link-title="Workspaces" class="workspace-details-toolbar">
   <div layout="row" layout-align="start center" class="toolbar-info">
     <workspace-status che-status="workspaceDetailsController.getWorkspaceStatus()"></workspace-status>
+    <workspace-warnings workspace="workspaceDetailsController.workspaceDetails"></workspace-warnings>
   </div>
   <div flex layout="row" layout-align="end center">
     <workspace-status-button workspace-status="workspaceDetailsController.getWorkspaceStatus()"
