@@ -8,6 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
+
 /**
  * Defines the state of the diagnostic part
  * @author Florent Benoit

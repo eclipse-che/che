@@ -42,11 +42,6 @@ public abstract class UserAgent {
     return UserAgentStaticProperties.get().isWebkit();
   }
 
-  /** @return true iff the user agent uses mobile webkit */
-  public static boolean isMobileWebkit() {
-    return UserAgentStaticProperties.get().isMobileWebkit();
-  }
-
   /** @return true iff the user.agent GWT property is "safari" */
   public static boolean isSafari() {
     return UserAgentStaticProperties.get().isSafari();
@@ -60,16 +55,6 @@ public abstract class UserAgent {
   /** @return true iff the user.agent GWT property is "ie6" */
   public static boolean isIE() {
     return UserAgentStaticProperties.get().isIE();
-  }
-
-  /** @return true iff the user.agent GWT property is "android" */
-  public static boolean isAndroid() {
-    return UserAgentStaticProperties.get().isAndroid();
-  }
-
-  /** @return true iff the user.agent GWT property is "iphone" */
-  public static boolean isIPhone() {
-    return UserAgentStaticProperties.get().isIPhone();
   }
 
   /** @return true if this is the chrome browser */

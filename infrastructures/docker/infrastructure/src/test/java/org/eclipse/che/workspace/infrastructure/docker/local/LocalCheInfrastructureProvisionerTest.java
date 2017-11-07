@@ -24,7 +24,6 @@ import org.eclipse.che.workspace.infrastructure.docker.provisioner.env.EnvVarsCo
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.labels.RuntimeLabelsProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.memory.MemoryAttributeConverter;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.server.ServersConverter;
-import org.eclipse.che.workspace.infrastructure.docker.provisioner.server.ToolingServersEnvVarsProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.snapshot.ExcludeFoldersFromSnapshotProvisioner;
 import org.mockito.InOrder;
 import org.mockito.Mock;
@@ -44,7 +43,6 @@ public class LocalCheInfrastructureProvisionerTest {
   @Mock private LocalInstallersBinariesVolumeProvisioner installerConfigProvisioner;
   @Mock private RuntimeLabelsProvisioner labelsProvisioner;
   @Mock private DockerApiHostEnvVariableProvisioner dockerApiEnvProvisioner;
-  @Mock private ToolingServersEnvVarsProvisioner toolingServersEnvVarsProvisioner;
   @Mock private InternalEnvironment environment;
   @Mock private DockerEnvironment dockerEnvironment;
   @Mock private RuntimeIdentity runtimeIdentity;
@@ -67,7 +65,6 @@ public class LocalCheInfrastructureProvisionerTest {
             installerConfigProvisioner,
             labelsProvisioner,
             dockerApiEnvProvisioner,
-            toolingServersEnvVarsProvisioner,
             wsAgentServerConfigProvisioner,
             serversConverter,
             envVarsConverter,
@@ -81,7 +78,6 @@ public class LocalCheInfrastructureProvisionerTest {
           installerConfigProvisioner,
           labelsProvisioner,
           dockerApiEnvProvisioner,
-          toolingServersEnvVarsProvisioner,
           wsAgentServerConfigProvisioner,
           serversConverter,
           envVarsConverter,
@@ -125,9 +121,6 @@ public class LocalCheInfrastructureProvisionerTest {
         .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
     inOrder
         .verify(dockerApiEnvProvisioner)
-        .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
-    inOrder
-        .verify(toolingServersEnvVarsProvisioner)
         .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
     inOrder.verifyNoMoreInteractions();
   }

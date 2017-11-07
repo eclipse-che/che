@@ -13,7 +13,7 @@ package org.eclipse.che.workspace.infrastructure.openshift;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toSet;
-import static org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesProvisioner.CHE_ORIGINAL_NAME_LABEL;
+import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_ORIGINAL_NAME_LABEL;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
@@ -108,7 +108,7 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
 
       createPods(createdServices, createdRoutes);
 
-      // TODO Rework it to parallel waiting
+      // TODO Rework it to parallel waiting https://github.com/eclipse/che/issues/7067
       for (OpenShiftMachine machine : machines.values()) {
         try {
           machine.waitRunning(machineStartTimeoutMin);

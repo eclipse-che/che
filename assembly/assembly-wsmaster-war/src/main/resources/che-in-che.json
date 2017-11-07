@@ -23,7 +23,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "eclipse/che-dev"
+      "origin": "eclipse/che-dev:nightly"
     },
     "workspaceConfig": {
       "environments": {
@@ -34,16 +34,22 @@
                 "org.eclipse.che.exec",
                 "org.eclipse.che.terminal",
                 "org.eclipse.che.ws-agent",
-                "org.eclipse.che.ssh"
+                "org.eclipse.che.ssh",
+                "org.eclipse.che.ls.js-ts"
               ],
-              "servers": {},
+              "servers": {
+                "GWT-CodeServer": {
+                  "protocol": "http",
+                  "port": "9876"
+                }
+              },
               "attributes": {
                 "memoryLimitBytes": "7516192768"
               }
             }
           },
           "recipe": {
-            "location": "eclipse/che-dev",
+            "location": "eclipse/che-dev:nightly",
             "type": "dockerimage"
           }
         }
@@ -56,6 +62,15 @@
           "commandLine": "mvn clean install -DskipIntegrationTests=true -Pnative -f ${current.project.path}",
           "name": "Build project",
           "type": "custom"
+        },
+        {
+          "commandLine": "cd /projects/che && mvn gwt:codeserver -pl :che-ide-gwt-app -am -Pfast,sdm-in-che",
+          "name": "GWT SDM",
+          "type": "gwt_sdm_che",
+          "attributes": {
+            "previewUrl": "",
+            "goal": "Run"
+          }
         }
       ]
     },

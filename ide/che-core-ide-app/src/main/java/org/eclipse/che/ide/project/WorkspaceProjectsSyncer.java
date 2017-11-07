@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.resources.Container;
 
 /** Handles event about workspace updating from the server using JSON RPC. */
 @Singleton
@@ -39,9 +38,13 @@ public class WorkspaceProjectsSyncer {
   }
 
   private void updateProjects(String endpointId) {
-    Container workspaceRoot = appContext.getWorkspaceRoot();
-    if (workspaceRoot != null) {
-      workspaceRoot.synchronize();
-    }
+    // Temporary disabled synchronization due to excessive calls to actual synchronization
+    // mechanism.
+    // Will be reviewed this mechanism in nearest future. But for now, it temporary disabled.
+
+    //    Container workspaceRoot = appContext.getWorkspaceRoot();
+    //    if (workspaceRoot != null) {
+    //      workspaceRoot.synchronize();
+    //    }
   }
 }

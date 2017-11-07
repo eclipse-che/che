@@ -249,7 +249,7 @@ public class Refactor {
 
   /** wait the 'Move item' form is closed */
   public void waitMoveItemFormIsClosed() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
         .until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(Locators.MOVE_ITEM_FORM)));
   }
 

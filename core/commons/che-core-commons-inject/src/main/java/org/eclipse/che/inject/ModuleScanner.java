@@ -14,6 +14,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Module;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ServiceLoader;
 import java.util.Set;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
@@ -30,6 +31,11 @@ public class ModuleScanner implements ServletContainerInitializer {
   @VisibleForTesting static final List<Module> modules = new ArrayList<>();
 
   public static List<Module> findModules() {
+    // also search if classes are provided through service loader mechanism
+    // It's useful when the scanning is disabled or ServletContainerInitializer is disabled.
+    // onStartup may not be called at all so it's another way of plugging modules.
+    ServiceLoader<ModuleFinder> moduleFinderServiceLoader = ServiceLoader.load(ModuleFinder.class);
+    moduleFinderServiceLoader.forEach(moduleFinder -> modules.addAll(moduleFinder.getModules()));
     return new ArrayList<>(modules);
   }
 

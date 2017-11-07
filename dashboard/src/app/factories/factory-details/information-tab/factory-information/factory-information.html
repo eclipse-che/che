@@ -10,17 +10,19 @@
       Red Hat, Inc. - initial API and implementation
 
 -->
-<div class="factory-information" ng-if="factoryInformationController.copyOriginFactory">
+<div class="factory-information"
+     ng-if="factoryInformationController.copyOriginFactory">
   <!-- Name -->
   <che-label-container che-label-name="Name">
     <div layout="column" class="factory-information-input">
-      <ng-form name="factoryInformationForm">
+      <ng-form name="factoryInformationController.factoryInformationForm">
         <che-input che-form="factoryInformationForm"
-                   che-name="name"
+                   che-name="factoryName"
                    che-place-holder="Name of the factory"
                    aria-label="Name of the factory"
                    ng-model="factoryInformationController.copyOriginFactory.name"
-                   ng-change="factoryInformationController.updateName($value, factoryInformationForm)"
+                   ng-change="factoryInformationController.updateFactoryName($value)"
+                   ng-model-options="{ allowInvalid: true }"
                    ng-trim
                    ng-minlength="3"
                    ng-maxlength="20"
@@ -75,27 +77,31 @@
       <md-radio-button value="from-stack">Configure recipe from a stack</md-radio-button>
     </md-radio-group>
     <div ng-if="factoryInformationController.stackRecipeMode === 'from-stack'">
-      <workspace-select-stack workspace-stack-on-change="factoryInformationController.onWorkspaceStackChanged(config, stackId)"
-                              workspace-name="factoryInformationController.workspaceName"
-                              environment-name="factoryInformationController.environmentName"
-                              workspace-imported-recipe="factoryInformationController.workspaceImportedRecipe"></workspace-select-stack>
-      <che-button-primary che-button-title="Save" class="save-stack-button"
-                          ng-click="factoryInformationController.saveStack()"></che-button-primary>
+      <ng-form name="factoryInformationController.factoryInformationForm">
+        <workspace-select-stack workspace-stack-on-change="factoryInformationController.onWorkspaceStackChanged(config, stackId)"
+                                workspace-name="factoryInformationController.workspaceName"
+                                environment-name="factoryInformationController.environmentName"
+                                workspace-imported-recipe="factoryInformationController.workspaceImportedRecipe"></workspace-select-stack>
+        <che-button-primary che-button-title="Save" class="save-stack-button"
+                            ng-click="factoryInformationController.saveStack()"></che-button-primary>
+      </ng-form>
     </div>
   </che-label-container>
 
   <che-label-container che-label-name="Workspace"
                        che-label-description="A workspace contains projects and runtime environments.">
+
     <!--Workspace name-->
     <che-label-container che-label-name="Name">
-      <ng-form name="factoryInformationForm">
+      <ng-form name="factoryInformationController.factoryInformationForm">
         <div class="factory-information-input">
           <che-input che-form="factoryInformationForm"
-                     che-name="name"
+                     che-name="workspaceName"
                      che-place-holder="Name of the workspace"
                      aria-label="Name of the workspace"
                      ng-model="factoryInformationController.copyOriginFactory.workspace.name"
-                     ng-change="factoryInformationController.updateFactory(factoryInformationForm)"
+                     ng-change="factoryInformationController.updateWorkspaceName($value)"
+                     ng-model-options="{ allowInvalid: true }"
                      required
                      ng-minlength="3"
                      ng-maxlength="20"
@@ -111,9 +117,10 @@
         </div>
       </ng-form>
     </che-label-container>
+
     <!--Workspace RAM-->
     <che-label-container che-label-name="RAM">
-      <ng-form name="factoryInformationForm">
+      <ng-form name="factoryInformationController.factoryInformationForm">
         <div data-ng-repeat="(environmentKey, environmentValue) in factoryInformationController.copyOriginFactory.workspace.environments">
           <span ng-if="factoryInformationController.getObjectKeys(factoryInformationController.copyOriginFactory.workspace.environments).length > 1"
                 class="workspace-environment-name">ENVIRONMENT: {{environmentKey}}</span>
@@ -124,7 +131,7 @@
                 <span ng-if="factoryInformationController.getObjectKeys(environmentValue.machines).length > 1">MACHINE: {{machineKey}}</span>
                 <che-workspace-ram-allocation-slider
                         ng-model="machineValue.attributes.memoryLimitBytes"
-                        che-on-change="factoryInformationController.updateFactory(factoryInformationForm)"></che-workspace-ram-allocation-slider>
+                        che-on-change="factoryInformationController.updateFactory()"></che-workspace-ram-allocation-slider>
               </div>
             </div>
           </div>
@@ -137,7 +144,7 @@
   <che-label-container che-label-name="Configure Commands"
                        che-label-description="Commands are processes that are invoked by users from a dropdown in the IDE.">
     <cdvy-factory-command cdvy-factory-object="factoryInformationController.copyOriginFactory"
-                          cdvy-on-change="factoryInformationController.updateFactory(factoryInformationForm)"></cdvy-factory-command>
+                          cdvy-on-change="factoryInformationController.updateFactory()"></cdvy-factory-command>
   </che-label-container>
 
   <!-- Configure actions -->
@@ -152,7 +159,7 @@
     <cdvy-factory-action-box cdvy-lifecycle="onProjectsLoaded"
                              cdvy-callback-controller="factoryInformationController"
                              cdvy-factory-object="factoryInformationController.copyOriginFactory"
-                             cdvy-on-change="factoryInformationController.updateFactory(factoryInformationForm)"></cdvy-factory-action-box>
+                             cdvy-on-change="factoryInformationController.updateFactory()"></cdvy-factory-action-box>
   </che-label-container>
 
   <!-- Configuration -->
@@ -165,7 +172,7 @@
           <textarea ui-codemirror="factoryInformationController.editorOptions"
                     ng-model="factoryInformationController.factoryContent"
                     aria-label="Factory configuration editor"
-                    ng-focus="factoryInformationController.factoryEditorOnFocus()"></textarea>
+                    ng-change="factoryInformationController.factoryEditorOnChange()"></textarea>
         </div>
       </md-content>
       <div layout="row" flex>

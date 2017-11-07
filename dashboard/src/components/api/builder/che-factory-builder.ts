@@ -77,6 +77,32 @@ export class CheFactoryBuilder {
   }
 
   /**
+   * Sets the command.
+   *
+   * @param {string} commandName
+   * @param {string} commandLine
+   * @returns {CheFactoryBuilder}
+   */
+  withCommand(commandName: string, commandLine: string): CheFactoryBuilder {
+    const command = {
+      commandLine: commandLine,
+      name: commandName,
+      attributes: {
+        previewUrl: ''
+      },
+      type: 'custom'
+    };
+    if (!this.factory.workspace) {
+      this.factory.workspace = {} as che.IWorkspaceConfig;
+    }
+    if (!this.factory.workspace.commands) {
+      this.factory.workspace.commands = [];
+    }
+    this.factory.workspace.commands.push(command);
+    return this;
+  }
+
+  /**
    * Build the factory
    * @return {che.IFactory}
    */
