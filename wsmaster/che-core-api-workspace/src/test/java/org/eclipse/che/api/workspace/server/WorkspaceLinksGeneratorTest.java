@@ -22,10 +22,13 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import javax.ws.rs.core.UriBuilder;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.core.rest.ServiceContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
+import org.everrest.core.impl.uri.UriBuilderImpl;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -35,6 +38,9 @@ import org.testng.annotations.Test;
 /** Tests {@link org.eclipse.che.api.workspace.server.WorkspaceLinksGenerator}. */
 @Listeners(MockitoTestNGListener.class)
 public class WorkspaceLinksGeneratorTest {
+  private static final String URI_BASE = "http://localhost/api";
+
+  @Mock private ServiceContext serviceContextMock;
 
   @Mock private WorkspaceRuntimes runtimes;
 
@@ -56,8 +62,12 @@ public class WorkspaceLinksGeneratorTest {
     when(runtimeCtx.getOutputChannel()).thenReturn(URI.create("ws://localhost/output/websocket"));
     when(runtimes.getRuntimeContext(workspace.getId())).thenReturn(Optional.of(runtimeCtx));
 
-    linksGenerator =
-        new WorkspaceLinksGenerator(runtimes, "http://localhost/api", "ws://localhost");
+    final UriBuilder uriBuilder = new UriBuilderImpl();
+    uriBuilder.uri(URI_BASE);
+    when(serviceContextMock.getServiceUriBuilder()).thenReturn(uriBuilder);
+    when(serviceContextMock.getBaseUriBuilder()).thenReturn(uriBuilder);
+
+    linksGenerator = new WorkspaceLinksGenerator(runtimes, "ws://localhost");
 
     expectedStoppedLinks = new HashMap<>();
     expectedStoppedLinks.put(LINK_REL_SELF, "http://localhost/api/workspace/my-workspace");
@@ -73,13 +83,13 @@ public class WorkspaceLinksGeneratorTest {
   public void genOfRunningWorkspaceLinks() throws Exception {
     when(workspace.getStatus()).thenReturn(WorkspaceStatus.RUNNING);
 
-    assertEquals(linksGenerator.genLinks(workspace), expectedRunningLinks);
+    assertEquals(linksGenerator.genLinks(workspace, serviceContextMock), expectedRunningLinks);
   }
 
   @Test
   public void genOfStoppedWorkspaceLinks() throws Exception {
     when(workspace.getStatus()).thenReturn(WorkspaceStatus.STOPPED);
 
-    assertEquals(linksGenerator.genLinks(workspace), expectedStoppedLinks);
+    assertEquals(linksGenerator.genLinks(workspace, serviceContextMock), expectedStoppedLinks);
   }
 }
