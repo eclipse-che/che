@@ -33,29 +33,29 @@ import org.testng.annotations.Test;
  *
  * @author Ann Shumilova
  */
-public class OrganizationListTest {
+public class OrganizationListViewsTest {
   private List<OrganizationDto> organizations;
-  private OrganizationDto organization;
+
+  @Inject
+  @Named("admin")
+  private TestOrganizationServiceClient testOrganizationServiceClient;
 
   @Inject private OrganizationListPage organizationListPage;
   @Inject private NavigationBar navigationBar;
   @Inject private Dashboard dashboard;
   @Inject private AdminTestUser adminTestUser;
 
-  @Inject
-  @Named("admin")
-  private TestOrganizationServiceClient testOrganizationServiceClient;
-
   @BeforeClass
   public void setUp() throws Exception {
-    organization = testOrganizationServiceClient.create(NameGenerator.generate("organization", 5));
+    testOrganizationServiceClient.create(NameGenerator.generate("organization", 5));
     organizations = testOrganizationServiceClient.getAll();
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    testOrganizationServiceClient.deleteById(organization.getId());
+    for (OrganizationDto organization : organizations)
+      testOrganizationServiceClient.deleteById(organization.getId());
   }
 
   @Test

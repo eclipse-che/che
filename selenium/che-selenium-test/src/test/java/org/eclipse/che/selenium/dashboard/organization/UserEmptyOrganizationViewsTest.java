@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.dashboard.organization;
 
+import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 
@@ -21,11 +22,11 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
- * Test validates organization views for simple user being a member of any organization.
+ * Test validates organization views for simple user.
  *
  * @author Ann Shumilova
  */
-public class UserEmptyOrganizationTest {
+public class UserEmptyOrganizationViewsTest {
   @Inject private OrganizationListPage organizationListPage;
   @Inject private NavigationBar navigationBar;
   @Inject private Dashboard dashboard;
@@ -38,11 +39,11 @@ public class UserEmptyOrganizationTest {
   @Test
   public void testOrganizationListComponents() {
     navigationBar.waitNavigationBar();
-    navigationBar.clickOnMenu(NavigationBar.MenuItem.ORGANIZATIONS);
+    navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsEmptyList();
 
-    assertEquals(navigationBar.getMenuCounterValue(NavigationBar.MenuItem.ORGANIZATIONS), 0);
+    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), 0);
     assertEquals(organizationListPage.getOrganizationsToolbarTitle(), "Organizations");
     assertFalse(organizationListPage.isAddOrganizationButtonVisible());
     assertFalse(organizationListPage.isSearchInputVisible());

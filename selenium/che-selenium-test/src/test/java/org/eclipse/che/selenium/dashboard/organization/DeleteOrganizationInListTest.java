@@ -43,20 +43,19 @@ public class DeleteOrganizationInListTest {
   private List<OrganizationDto> organizations;
   private OrganizationDto organization;
 
+  @Inject
+  @Named("admin")
+  private TestOrganizationServiceClient testOrganizationServiceClient;
+
   @Inject private OrganizationListPage organizationListPage;
   @Inject private NavigationBar navigationBar;
   @Inject private ConfirmDialog confirmDialog;
   @Inject private AdminTestUser adminTestUser;
   @Inject private Dashboard dashboard;
 
-  @Inject
-  @Named("admin")
-  private TestOrganizationServiceClient testOrganizationServiceClient;
-
   @BeforeClass
   public void setUp() throws Exception {
     organization = testOrganizationServiceClient.create(ORGANIZATION_NAME);
-    testOrganizationServiceClient.create(generate("organization", 7));
     testOrganizationServiceClient.create(generate("organization", 7));
     testOrganizationServiceClient.create(generate("organization", 7));
     organizations = testOrganizationServiceClient.getAll();

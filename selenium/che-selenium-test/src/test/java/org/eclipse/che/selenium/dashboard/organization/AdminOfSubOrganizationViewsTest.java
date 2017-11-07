@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.dashboard.organization;
 
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
 import static org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.ACTIONS;
 import static org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.AVAILABLE_RAM;
@@ -24,12 +25,9 @@ import static org.testng.Assert.assertTrue;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.util.ArrayList;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
-import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.dashboard.CheMultiuserAdminDashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage;
@@ -39,55 +37,52 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
- * Test validates organization views for admin of the organization.
+ * Test validates organization views for admin of the sub-organization.
  *
  * @author Ann Shumilova
  */
-public class AdminOfParentOrganizationTest {
+public class AdminOfSubOrganizationViewsTest {
+  private static final String PARENT_ORG_NAME = generate("organization", 5);
+  private static final String CHILD_ORG_NAME = generate("organization", 5);
 
   private OrganizationDto parentOrganization;
   private OrganizationDto childOrganization;
-
-  @Inject private OrganizationListPage organizationListPage;
-  @Inject private OrganizationPage organizationPage;
-  @Inject private NavigationBar navigationBar;
-  @Inject private CheMultiuserAdminDashboard dashboard;
-
-  @Inject private TestUser testUser;
-  @Inject private AdminTestUser adminTestUser;
 
   @Inject
   @Named("admin")
   private TestOrganizationServiceClient testOrganizationServiceClient;
 
+  @Inject private OrganizationListPage organizationListPage;
+  @Inject private OrganizationPage organizationPage;
+  @Inject private NavigationBar navigationBar;
+  @Inject private CheMultiuserAdminDashboard dashboard;
+  @Inject private TestUser testUser;
+
   @BeforeClass
   public void setUp() throws Exception {
-    testOrganizationServiceClient.create(NameGenerator.generate("organization", 5));
-    parentOrganization =
-        testOrganizationServiceClient.create(NameGenerator.generate("organization", 5));
+    parentOrganization = testOrganizationServiceClient.create(PARENT_ORG_NAME);
     childOrganization =
-        testOrganizationServiceClient.create(
-            NameGenerator.generate("organization", 5), parentOrganization.getId());
+        testOrganizationServiceClient.create(CHILD_ORG_NAME, parentOrganization.getId());
 
-    testOrganizationServiceClient.addAdmin(parentOrganization.getId(), testUser.getId());
-    testOrganizationServiceClient.addMember(childOrganization.getId(), testUser.getId());
+    testOrganizationServiceClient.addMember(parentOrganization.getId(), testUser.getId());
+    testOrganizationServiceClient.addAdmin(childOrganization.getId(), testUser.getId());
     dashboard.open(testUser.getName(), testUser.getPassword());
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    testOrganizationServiceClient.deleteById(childOrganization.getId());
-    testOrganizationServiceClient.deleteById(parentOrganization.getId());
+    for (OrganizationDto organization : testOrganizationServiceClient.getAll())
+      testOrganizationServiceClient.deleteById(organization.getId());
   }
 
   @Test
   public void testOrganizationListComponents() {
-    navigationBar.waitNavigationBar();
     int organizationsCount = 2;
+
+    navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
-    WaitUtils.sleepQuietly(3);
 
     assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), organizationsCount);
     assertEquals(organizationListPage.getOrganizationsToolbarTitle(), "Organizations");
@@ -104,6 +99,7 @@ public class AdminOfParentOrganizationTest {
     assertTrue(headers.contains(AVAILABLE_RAM.getTitle()));
     assertTrue(headers.contains(SUB_ORGANIZATIONS.getTitle()));
     assertTrue(headers.contains(ACTIONS.getTitle()));
+
     assertTrue(
         organizationListPage.getValues(NAME).contains(parentOrganization.getQualifiedName()));
     assertTrue(organizationListPage.getValues(NAME).contains(childOrganization.getQualifiedName()));
@@ -114,21 +110,21 @@ public class AdminOfParentOrganizationTest {
     organizationListPage.clickOnOrganization(parentOrganization.getName());
 
     organizationPage.waitOrganizationName(parentOrganization.getName());
-    assertFalse(organizationPage.isOrganizationNameReadonly());
+    assertTrue(organizationPage.isOrganizationNameReadonly());
     assertTrue(organizationPage.isWorkspaceCapReadonly());
     assertTrue(organizationPage.isRunningCapReadonly());
     assertTrue(organizationPage.isRAMCapReadonly());
     assertTrue(organizationPage.isWorkspaceCapReadonly());
-    assertTrue(organizationPage.isDeleteButtonVisible());
+    assertFalse(organizationPage.isDeleteButtonVisible());
 
     organizationPage.clickMembersTab();
     organizationPage.waitMembersList();
-    assertTrue(organizationPage.isAddMemberButtonVisible());
+    assertFalse(organizationPage.isAddMemberButtonVisible());
 
     organizationPage.clickSubOrganizationsTab();
     organizationListPage.waitForOrganizationsList();
     assertFalse(organizationListPage.isAddOrganizationButtonVisible());
-    assertTrue(organizationListPage.isAddSubOrganizationButtonVisible());
+    assertFalse(organizationListPage.isAddSubOrganizationButtonVisible());
     assertTrue(organizationListPage.getValues(NAME).contains(childOrganization.getQualifiedName()));
 
     organizationPage.clickBackButton();
@@ -141,24 +137,24 @@ public class AdminOfParentOrganizationTest {
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
-    WaitUtils.sleepQuietly(3);
     organizationListPage.clickOnOrganization(childOrganization.getQualifiedName());
+
     organizationPage.waitOrganizationTitle(childOrganization.getQualifiedName());
-    assertTrue(organizationPage.isOrganizationNameReadonly());
-    assertFalse(organizationPage.isWorkspaceCapReadonly());
-    assertFalse(organizationPage.isRunningCapReadonly());
-    assertFalse(organizationPage.isRAMCapReadonly());
-    assertFalse(organizationPage.isWorkspaceCapReadonly());
-    assertFalse(organizationPage.isDeleteButtonVisible());
+    assertFalse(organizationPage.isOrganizationNameReadonly());
+    assertTrue(organizationPage.isWorkspaceCapReadonly());
+    assertTrue(organizationPage.isRunningCapReadonly());
+    assertTrue(organizationPage.isRAMCapReadonly());
+    assertTrue(organizationPage.isWorkspaceCapReadonly());
+    assertTrue(organizationPage.isDeleteButtonVisible());
 
     organizationPage.clickMembersTab();
     organizationPage.waitMembersList();
-    assertFalse(organizationPage.isAddMemberButtonVisible());
+    assertTrue(organizationPage.isAddMemberButtonVisible());
 
     organizationPage.clickSubOrganizationsTab();
     organizationListPage.waitForSubOrganizationsEmptyList();
     assertFalse(organizationListPage.isAddOrganizationButtonVisible());
-    assertFalse(organizationListPage.isAddSubOrganizationButtonVisible());
+    assertTrue(organizationListPage.isAddSubOrganizationButtonVisible());
 
     organizationPage.clickBackButton();
     organizationPage.waitOrganizationName(parentOrganization.getName());

@@ -10,13 +10,13 @@
  */
 package org.eclipse.che.selenium.dashboard.organization;
 
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import java.util.List;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
@@ -35,67 +35,63 @@ import org.testng.annotations.Test;
  * @author Ann Shumilova
  */
 public class FilterOrganizationTest {
-  private List<OrganizationDto> organizations;
-  private String organizationName;
-
-  @Inject private OrganizationListPage organizationListPage;
-  @Inject private OrganizationPage organizationPage;
-  @Inject private NavigationBar navigationBar;
-  @Inject private Dashboard dashboard;
-  @Inject private AddOrganization addOrganization;
-  @Inject private AdminTestUser adminTestUser;
+  private static final String ORGANIZATION_NAME = generate("organization", 5);
 
   @Inject
   @Named("admin")
   private TestOrganizationServiceClient testOrganizationServiceClient;
 
+  @Inject private OrganizationListPage organizationListPage;
+  @Inject private OrganizationPage organizationPage;
+  @Inject private AddOrganization addOrganization;
+  @Inject private NavigationBar navigationBar;
+  @Inject private AdminTestUser adminTestUser;
+  @Inject private Dashboard dashboard;
+
   @BeforeClass
   public void setUp() throws Exception {
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
-
-    organizationName = NameGenerator.generate("organization", 5);
-    organizations = testOrganizationServiceClient.getAll();
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    testOrganizationServiceClient.deleteByName(organizationName);
+    for (OrganizationDto organization : testOrganizationServiceClient.getAll())
+      testOrganizationServiceClient.deleteById(organization.getId());
   }
 
   @Test
   public void testOrganizationListFiler() {
-    int organizationsCount = organizations.size();
+    int organizationsCount = 1;
 
+    // Create a new organization
     navigationBar.waitNavigationBar();
-    navigationBar.clickOnMenu(NavigationBar.MenuItem.ORGANIZATIONS);
+    navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.clickAddOrganizationButton();
-
     addOrganization.waitAddOrganization();
-    addOrganization.setOrganizationName(organizationName);
+    addOrganization.setOrganizationName(ORGANIZATION_NAME);
     addOrganization.checkAddOrganizationButtonEnabled();
     addOrganization.clickCreateOrganizationButton();
-    organizationPage.waitOrganizationTitle(organizationName);
+    organizationPage.waitOrganizationTitle(ORGANIZATION_NAME);
 
-    assertEquals(
-        navigationBar.getMenuCounterValue(NavigationBar.MenuItem.ORGANIZATIONS),
-        organizationsCount + 1);
-    navigationBar.clickOnMenu(NavigationBar.MenuItem.ORGANIZATIONS);
+    // Test that created organization exist and count of organizations increased
+    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), organizationsCount);
+    navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
-    assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount + 1);
+    assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount);
     assertTrue(
         organizationListPage
             .getValues(OrganizationListPage.OrganizationListHeader.NAME)
-            .contains(organizationName));
+            .contains(ORGANIZATION_NAME));
 
-    // Tests search:
-    organizationListPage.typeInSearchInput(organizationName);
-    assertEquals(organizationListPage.getOrganizationListItemCount(), 1);
-    organizationListPage.typeInSearchInput(organizationName + "test");
+    // Tests search organization feature
+    organizationListPage.typeInSearchInput(ORGANIZATION_NAME);
+    assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount);
+    organizationListPage.typeInSearchInput(ORGANIZATION_NAME + "test");
     organizationListPage.waitForOrganizationsList();
     assertEquals(organizationListPage.getOrganizationListItemCount(), 0);
     organizationListPage.clearSearchInput();
-    assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount + 1);
+    assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount);
   }
 }
