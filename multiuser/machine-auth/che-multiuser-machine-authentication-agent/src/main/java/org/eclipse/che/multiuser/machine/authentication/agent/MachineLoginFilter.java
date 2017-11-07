@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.eclipse.che.api.core.ApiException;
-import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.user.shared.dto.UserDto;
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
@@ -95,7 +95,7 @@ public class MachineLoginFilter implements Filter {
       final HttpSession httpSession = httpRequest.getSession(true);
       httpSession.setAttribute("principal", machineUser);
       chain.doFilter(request, response);
-    } catch (NotFoundException nfEx) {
+    } catch (UnauthorizedException nfEx) {
       ((HttpServletResponse) response)
           .sendError(
               HttpServletResponse.SC_UNAUTHORIZED,

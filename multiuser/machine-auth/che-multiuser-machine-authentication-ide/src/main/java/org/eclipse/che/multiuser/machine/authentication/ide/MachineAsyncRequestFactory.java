@@ -76,8 +76,7 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory {
     if (currentWorkspace == null || !isWsAgentStarted(currentWorkspace)) {
       return false; // ws-agent not started
     }
-    final boolean contains = url.contains(nullToEmpty(appContext.getWsAgentServerApiEndpoint()));
-    return contains;
+    return url.contains(nullToEmpty(appContext.getWsAgentServerApiEndpoint()));
   }
 
   private boolean isWsAgentStarted(WorkspaceImpl workspace) {
