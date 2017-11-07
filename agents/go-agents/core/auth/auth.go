@@ -106,7 +106,7 @@ func authenticateOnMaster(apiEndpoint string, tokenParam string) error {
 	if tokenParam == "" {
 		return rest.Unauthorized(errors.New("Authentication failed: missing 'token' query parameter"))
 	}
-	req, err := http.NewRequest("GET", apiEndpoint+"/machine/token/user/"+tokenParam, nil)
+	req, err := http.NewRequest("GET", apiEndpoint+"/user/", nil)
 	if err != nil {
 		return rest.Unauthorized(err)
 	}

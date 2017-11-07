@@ -8,21 +8,23 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.deploy;
+package org.eclipse.che.wsagent.server;
 
 import com.google.inject.servlet.ServletModule;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.multiuser.machine.authentication.agent.MachineLoginFilter;
 
-/**
- * Single-user version Che specific bindings
- *
- * @author Max Shaposhnik (mshaposh@redhat.com)
- */
+/** Provide bindings of security && authentication filters necessary for multi-user Che */
 @DynaModule
-public class CheWsMasterServletModule extends ServletModule {
-
+public class WsAgentAuthServletModule extends ServletModule {
   @Override
   protected void configureServlets() {
-    filter("/*").through(org.eclipse.che.api.local.filters.EnvironmentInitializationFilter.class);
+    if (Boolean.valueOf(System.getenv("CHE_AUTH_ENABLED"))) {
+      configureMultiUserMode();
+    }
+  }
+
+  private void configureMultiUserMode() {
+    filter("/*").through(MachineLoginFilter.class);
   }
 }

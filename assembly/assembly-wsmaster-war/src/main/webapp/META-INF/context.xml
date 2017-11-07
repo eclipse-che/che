@@ -20,7 +20,12 @@
       pluggabilityScan=""></JarScanFilter>
   </JarScanner>
 
-  <Resource name="jdbc/che" auth="Container"
+  <Resource name="jdbc/che-h2" auth="Container"
     type="javax.sql.DataSource"
     factory="org.eclipse.che.core.db.h2.H2SQLJndiDataSourceFactory"/>
+    
+  <Resource name="jdbc/che-pg" auth="Container"
+     type="javax.sql.DataSource"
+     factory="org.eclipse.che.core.db.postgresql.PostgreSQLJndiDataSourceFactory"/>
+              
 </Context>
