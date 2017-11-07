@@ -234,14 +234,14 @@ export class DiagnosticsWorkspaceStartCheck {
       });
 
       this.cheJsonRpcMasterApi.subscribeEnvironmentStatus(workspace.id, (message: any) => {
-        if (message.eventType === 'DESTROYED' && message.workspaceId === workspace.id) {
+        if (message.eventType === 'DESTROYED' && message.identity.workspaceId === workspace.id) {
           diagnosticCallback.error('Error while starting the workspace : Workspace has been destroyed', 'Please check the diagnostic logs.');
         }
-        if (message.eventType === 'ERROR' && message.workspaceId === workspace.id) {
+        if (message.eventType === 'ERROR' && message.identity.workspaceId === workspace.id) {
           diagnosticCallback.error('Error while starting the workspace : ' + JSON.stringify(message));
         }
 
-        if (message.eventType === 'RUNNING' && message.workspaceId === workspace.id && message.machineName === 'dev-machine') {
+        if (message.eventType === 'RUNNING' && message.identity.workspaceId === workspace.id && message.machineName === 'dev-machine') {
           this.machineCallback.stateRunning('RUNNING');
         }
 
@@ -282,7 +282,7 @@ export class DiagnosticsWorkspaceStartCheck {
         diagnosticCallback.addContent(message);
       });
 
-      this.cheJsonRpcMasterApi.subscribeEnvironmentOutput(workspace.id, (message: any) => {
+      this.cheJsonRpcMasterApi.subscribeWsAgentOutput(workspace.id, (message: any) => {
         const content = message.text;
         diagnosticCallback.addContent(content);
 
