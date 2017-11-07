@@ -26,7 +26,8 @@ unset PACKAGES
 command -v tar >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" tar"; }
 command -v curl >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" curl"; }
 
-AGENT_BINARIES_URI=http://download.eclipse.org/jdtls/snapshots/jdt-language-server-latest.tar.gz
+DOWNLOAD_AGENT_BINARIES_URI='${WORKSPACE_MASTER_URI}/agent-binaries/jdt.ls.tar.gz'
+
 CHE_DIR=$HOME/che
 LS_DIR=${CHE_DIR}/ls-java
 LS_LAUNCHER=${LS_DIR}/launch.sh
@@ -121,10 +122,16 @@ fi
 
 
 #######################
-### Install Json LS ###
+### Install JDT LS ###
 #######################
 
-curl -sL ${AGENT_BINARIES_URI} | tar xzf - -C ${LS_DIR}
+# Compute URI of workspace master
+WORKSPACE_MASTER_URI=$(echo $CHE_API | cut -d / -f 1-3)
+
+## Evaluate variables now that prefix is defined
+eval "DOWNLOAD_AGENT_BINARIES_URI=${DOWNLOAD_AGENT_BINARIES_URI}"
+
+curl -sL ${DOWNLOAD_AGENT_BINARIES_URI} | tar xzf - -C ${LS_DIR}
 
 touch ${LS_LAUNCHER}
 chmod +x ${LS_LAUNCHER}
