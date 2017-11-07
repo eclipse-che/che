@@ -60,10 +60,30 @@ public class BreakpointConditionTest {
   }
 
   @Test
+  public void shouldStopByHitCount() throws Exception {
+    debugger.addBreakpoint(
+        new BreakpointImpl(
+            new LocationImpl("/test/src/org/eclipse/BreakpointsByConditionTest.java", 19, "/test"),
+            true,
+            new BreakpointConfigurationImpl(3)));
+
+    DebuggerEvent debuggerEvent = events.take();
+    assertTrue(debuggerEvent instanceof BreakpointActivatedEvent);
+
+    debugger.resume(new ResumeActionImpl());
+
+    debuggerEvent = events.take();
+    assertTrue(debuggerEvent instanceof SuspendEvent);
+
+    assertEquals("2", debugger.evaluate("i"));
+    assertEquals("2", debugger.evaluate("k"));
+  }
+
+  @Test(priority = 1)
   public void shouldStopByCondition() throws Exception {
     Breakpoint breakpoint =
         new BreakpointImpl(
-            new LocationImpl("/test/src/org/eclipse/BreakpointsByConditionTest.java", 19, "/test"),
+            new LocationImpl("/test/src/org/eclipse/BreakpointsByConditionTest.java", 24, "/test"),
             true,
             new BreakpointConfigurationImpl("i==5"));
 

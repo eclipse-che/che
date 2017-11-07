@@ -90,10 +90,10 @@ public class SuspendPolicyTest {
             true,
             new BreakpointConfigurationImpl(SuspendPolicy.THREAD)));
 
-    debugger.resume(new ResumeActionImpl());
-
     DebuggerEvent debuggerEvent = events.take();
     assertTrue(debuggerEvent instanceof BreakpointActivatedEvent);
+
+    debugger.resume(new ResumeActionImpl());
 
     debuggerEvent = events.take();
     assertTrue(debuggerEvent instanceof SuspendEvent);

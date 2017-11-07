@@ -248,7 +248,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
     }
 
     try {
-      EventRequest request = requestManager.createBreakpointRequest(location);
+      BreakpointRequest request = requestManager.createBreakpointRequest(location);
 
       BreakpointConfiguration conf = breakpoint.getBreakpointConfiguration();
       if (conf != null && conf.getSuspendPolicy() != null) {
@@ -266,9 +266,16 @@ public class JavaDebugger implements EventsHandler, Debugger {
         request.setSuspendPolicy(EventRequest.SUSPEND_ALL);
       }
 
-      if (conf != null && conf.getCondition() != null && !conf.getCondition().isEmpty()) {
+      if (conf != null
+          && conf.isConditionEnabled()
+          && conf.getCondition() != null
+          && !conf.getCondition().isEmpty()) {
         ExpressionParser parser = ExpressionParser.newInstance(conf.getCondition());
         request.putProperty("org.eclipse.che.ide.java.debug.condition.expression.parser", parser);
+      }
+
+      if (conf != null && conf.isHitCountEnabled() && conf.getHitCount() > 0) {
+        request.addCountFilter(conf.getHitCount());
       }
 
       request.setEnabled(true);

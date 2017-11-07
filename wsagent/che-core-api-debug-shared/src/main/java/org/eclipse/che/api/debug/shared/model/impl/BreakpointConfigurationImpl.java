@@ -40,6 +40,10 @@ public class BreakpointConfigurationImpl implements BreakpointConfiguration {
     this(true, condition, false, 0, null);
   }
 
+  public BreakpointConfigurationImpl(int hitCount) {
+    this(false, null, true, hitCount, null);
+  }
+
   public BreakpointConfigurationImpl(SuspendPolicy suspendPolicy) {
     this(false, null, false, 0, suspendPolicy);
   }
