@@ -11,10 +11,7 @@
 package org.eclipse.che.plugin.debugger.ide.debug;
 
 import static java.util.Collections.emptyList;
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
 import com.google.gwt.core.client.Scheduler;
@@ -26,6 +23,7 @@ import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.MutableVariable;
@@ -40,7 +38,6 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.BreakpointManagerObserver;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
@@ -226,7 +223,22 @@ public class DebuggerPresenter extends BasePresenter
   }
 
   protected void updateBreakpoints() {
-    view.setBreakpoints(breakpointManager.getBreakpointList());
+    List<Breakpoint> breakpoints = new ArrayList<>(breakpointManager.getAll());
+    breakpoints.sort(
+        (o1, o2) -> {
+          Location location1 = o1.getLocation();
+          Location location2 = o2.getLocation();
+          int compare = location1.getTarget().compareTo(location2.getTarget());
+          return (compare == 0 ? location1.getLineNumber() - location2.getLineNumber() : compare);
+        });
+    view.setBreakpoints(
+        breakpoints
+            .stream()
+            .map(
+                breakpoint ->
+                    new DebuggerView.ActiveBreakpointWrapper(
+                        breakpoint, breakpointManager.isActive(breakpoint)))
+            .collect(Collectors.toList()));
   }
 
   protected void updateThreadDump() {
@@ -359,32 +371,10 @@ public class DebuggerPresenter extends BasePresenter
   }
 
   @Override
-  public void onDebuggerAttached(
-      final DebuggerDescriptor debuggerDescriptor, Promise<Void> connect) {
-
-    final String address = debuggerDescriptor.getAddress();
-    final StatusNotification notification =
-        notificationManager.notify(constant.debuggerConnectingTitle(address), PROGRESS, FLOAT_MODE);
-
-    connect
-        .then(
-            aVoid -> {
-              DebuggerPresenter.this.debuggerDescriptor = debuggerDescriptor;
-
-              notification.setTitle(constant.debuggerConnectedTitle());
-              notification.setContent(constant.debuggerConnectedDescription(address));
-              notification.setStatus(SUCCESS);
-
-              view.setVMName(debuggerDescriptor.getInfo());
-              showDebuggerPanel();
-            })
-        .catchError(
-            error -> {
-              notification.setTitle(
-                  constant.failedToConnectToRemoteDebuggerDescription(address, error.getMessage()));
-              notification.setStatus(FAIL);
-              notification.setDisplayMode(FLOAT_MODE);
-            });
+  public void onDebuggerAttached(final DebuggerDescriptor debuggerDescriptor) {
+    this.debuggerDescriptor = debuggerDescriptor;
+    view.setVMName(debuggerDescriptor.getInfo());
+    showDebuggerPanel();
   }
 
   @Override
@@ -400,6 +390,11 @@ public class DebuggerPresenter extends BasePresenter
 
   @Override
   public void onBreakpointAdded(Breakpoint breakpoint) {
+    updateBreakpoints();
+  }
+
+  @Override
+  public void onBreakpointUpdated(Breakpoint breakpoint) {
     updateBreakpoints();
   }
 

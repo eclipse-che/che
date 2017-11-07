@@ -123,7 +123,7 @@ checkParameters() {
                 echo "[TEST] Proper way to use --test parameter:";
                 echo -e "[TEST] \t--test=DialogAboutTest";
                 echo -e "[TEST] \t--test=org.eclipse.che.selenium.miscellaneous.DialogAboutTest";
-                echo -e "[TEST] \t--test=org.eclipse.che.selenium.miscellaneous.*";
+                echo -e "[TEST] \t--test=org.eclipse.che.selenium.miscellaneous.**";
                 exit 1;
             }
 

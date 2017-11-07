@@ -24,6 +24,9 @@ public interface BreakpointConfigurationView
   interface ActionDelegate {
     /** Apply changes. */
     void onApplyClicked();
+
+    /** Discard changes */
+    void onCloseClicked();
   }
 
   void showDialog();
@@ -33,4 +36,6 @@ public interface BreakpointConfigurationView
   void setBreakpoint(Breakpoint breakpoint);
 
   String getBreakpointCondition();
+
+  boolean isBreakpointEnabled();
 }

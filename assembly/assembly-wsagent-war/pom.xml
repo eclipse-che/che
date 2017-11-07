@@ -174,7 +174,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                  <scanWarDependencies>true</scanWarDependencies>
+                    <scanWarDependencies>true</scanWarDependencies>
                 </configuration>
             </plugin>
             <plugin>

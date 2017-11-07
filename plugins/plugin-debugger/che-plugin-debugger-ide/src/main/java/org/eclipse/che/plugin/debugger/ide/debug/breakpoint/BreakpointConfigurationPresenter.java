@@ -48,6 +48,13 @@ public class BreakpointConfigurationPresenter
         Strings.isNullOrEmpty(view.getBreakpointCondition())
             ? null
             : view.getBreakpointCondition());
+    breakpoint.setEnabled(view.isBreakpointEnabled());
+
     breakpointManager.update(breakpoint);
+  }
+
+  @Override
+  public void onCloseClicked() {
+    view.close();
   }
 }

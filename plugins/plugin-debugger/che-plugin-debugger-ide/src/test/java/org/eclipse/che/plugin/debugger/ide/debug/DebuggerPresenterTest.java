@@ -202,7 +202,7 @@ public class DebuggerPresenterTest extends BaseTest {
             nullable(StatusNotification.DisplayMode.class)))
         .thenReturn(mock(StatusNotification.class));
 
-    presenter.onDebuggerAttached(debuggerDescriptor, promiseVoid);
+    presenter.onDebuggerAttached(debuggerDescriptor);
 
     verify(promiseVoid).then(operationVoidCaptor.capture());
     operationVoidCaptor.getValue().apply(null);

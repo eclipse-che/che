@@ -21,6 +21,22 @@
     box-sizing: border-box;
 }
 
+.breakpoint.disabled {
+    background-color: rgba(251, 76, 76, 0.4);
+}
+
+.breakpoint.disabled.condition {
+    background-color: rgba(251, 76, 76, 0.4);
+}
+
+.breakpoint.disabled.condition:after {
+    content: "?";
+    position: absolute;
+    bottom: 0px;
+    line-height: 8px;
+    font-size: 8px;
+}
+
 .breakpoint.inactive {
     background-color: rgba(144, 144, 144, 0.4);
 }
@@ -33,9 +49,8 @@
     content: "?";
     position: absolute;
     bottom: 0px;
-    left: 0px;
-    line-height: 7px;
-    font-size: 7px;
+    line-height: 8px;
+    font-size: 8px;
 }
 
 .breakpoint.active {
@@ -50,8 +65,7 @@
     content: "?";
     position: absolute;
     bottom: 0px;
-    left: 0px;
-    line-height: 7px;
-    font-size: 7px;
+    line-height: 8px;
+    font-size: 8px;
 }
 
