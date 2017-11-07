@@ -156,7 +156,7 @@ public class Consoles {
   }
 
   public void checkReferenceList(String id, String expectedText) {
-    updateProjDriverWait.until(textToBePresentInElementLocated(By.id(id), expectedText));
+    redrawDriverWait.until(textToBePresentInElementLocated(By.id(id), expectedText));
   }
 
   public void waitReferenceIsNotPresent(String referenceId) {

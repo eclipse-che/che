@@ -1867,7 +1867,7 @@
         </pluginManagement>
         <plugins>
             <plugin>
-                <!-- Configuration for launching GWT Super DevMode with gwt:codeserver -->
+                <!-- Configuration for launching GWT Super DevMode -->
                 <groupId>net.ltgt.gwt.maven</groupId>
                 <artifactId>gwt-maven-plugin</artifactId>
                 <inherited>false</inherited>
@@ -1875,10 +1875,6 @@
                     <codeserverArgs>
                         <arg>-noprecompile</arg>
                         <arg>-noincremental</arg>
-                        <!-- For che-in-che development, the CodeServer launched
-                             inside a container must be reachable at local machine. -->
-                        <arg>-bindAddress</arg>
-                        <arg>0.0.0.0</arg>
                     </codeserverArgs>
                     <jvmArgs>
                         <arg>${gwt.compiler.jvmArgs.Xss}</arg>
@@ -1899,6 +1895,25 @@
                 <mdep.analyze.skip>true</mdep.analyze.skip>
                 <skipTests>true</skipTests>
             </properties>
+        </profile>
+        <!-- Profile for launching GWT Super DevMode in Che IDE (inside a container) -->
+        <profile>
+            <id>sdm-in-che</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>net.ltgt.gwt.maven</groupId>
+                        <artifactId>gwt-maven-plugin</artifactId>
+                        <configuration>
+                            <codeserverArgs combine.children="append">
+                                <!-- CodeServer launched inside a container must be reachable at host machine -->
+                                <arg>-bindAddress</arg>
+                                <arg>0.0.0.0</arg>
+                            </codeserverArgs>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 </project>

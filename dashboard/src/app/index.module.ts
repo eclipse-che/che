@@ -112,7 +112,7 @@ angular.element(document).ready(() => {
   }).catch((error: any) => {
     console.error('Keycloak initialization failed with error: ', error);
   }).then(() => {
-    angular.resumeBootstrap();
+    (angular as any).resumeBootstrap();
   });
 });
 

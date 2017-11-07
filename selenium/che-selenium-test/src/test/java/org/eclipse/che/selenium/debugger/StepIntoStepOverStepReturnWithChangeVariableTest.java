@@ -124,7 +124,7 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
     editor.waitActiveBreakpoint(34);
     String appUrl =
         workspaceServiceClient
-                .getServerFromDevMachineBySymbolicName(ws.getId(), "8080/tcp")
+                .getServerFromDevMachineBySymbolicName(ws.getId(), "tomcat8")
                 .getUrl()
                 .replace("tcp", "http")
             + "/spring/guess";
@@ -163,6 +163,7 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
         .activeElement()
         .sendKeys(Keys.SHIFT.toString() + Keys.F9.toString());
     editor.waitActiveBreakpoint(26);
+    seleniumWebDriver.navigate().refresh();
   }
 
   private void buildProjectAndOpenMainClass() {
