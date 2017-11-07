@@ -64,7 +64,7 @@
           "type": "custom"
         },
         {
-          "commandLine": "cd /projects/che && mvn gwt:codeserver -pl :che-ide-gwt-app -am -Pfast",
+          "commandLine": "cd /projects/che && mvn gwt:codeserver -pl :che-ide-gwt-app -am -Pfast,sdm-in-che",
           "name": "GWT SDM",
           "type": "gwt_sdm_che",
           "attributes": {
