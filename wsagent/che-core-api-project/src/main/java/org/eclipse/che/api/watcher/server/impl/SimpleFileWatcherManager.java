@@ -50,12 +50,12 @@ public class SimpleFileWatcherManager implements FileWatcherManager {
 
   @Override
   public void suspend() {
-    service.suspend();
+    //    service.suspend();
   }
 
   @Override
   public void resume() {
-    service.resume();
+    //    service.resume();
   }
 
   @Override
