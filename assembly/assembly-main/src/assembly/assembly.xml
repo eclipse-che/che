@@ -68,6 +68,15 @@
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
             <outputDirectory>lib</outputDirectory>
+            <outputFileNameMapping>jdt.ls.tar.gz</outputFileNameMapping>
+            <includes>
+                <include>org.eclipse.che.ls.jdt:jdt.ls.extension.product</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>lib</outputDirectory>
             <outputFileNameMapping>ws-agent.tar.gz</outputFileNameMapping>
             <includes>
                 <include>org.eclipse.che:assembly-wsagent-server</include>
