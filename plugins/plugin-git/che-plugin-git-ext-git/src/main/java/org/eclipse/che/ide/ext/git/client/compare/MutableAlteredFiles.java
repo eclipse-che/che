@@ -52,7 +52,7 @@ public class MutableAlteredFiles extends AlteredFiles {
   }
 
   /**
-   * Adds a file to altered file list. If given file is already exists does nothing.
+   * Adds or updates a file in altered file list. If given file is already exists does nothing.
    *
    * @param file full path to file and its name relatively to project root
    * @param status git status of the file
@@ -63,8 +63,10 @@ public class MutableAlteredFiles extends AlteredFiles {
       return false;
     }
 
-    alteredFilesStatuses.put(file, status);
-    alteredFilesList.add(file);
+    if (alteredFilesStatuses.put(file, status) == null) {
+      // it's not a status change, new file was added
+      alteredFilesList.add(file);
+    }
     return true;
   }
 

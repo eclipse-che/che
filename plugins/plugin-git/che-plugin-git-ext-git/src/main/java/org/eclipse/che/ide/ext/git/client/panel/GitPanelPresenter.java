@@ -72,7 +72,7 @@ public class GitPanelPresenter extends BasePresenter
   private final GitLocalizationConstant locale;
 
   private boolean initialized;
-  private Map<String, MutableAlteredFiles> changes;
+  private Map<String, MutableAlteredFiles> changes; // project name -> changes
   private String selectedProjectName;
 
   @Inject
@@ -237,21 +237,9 @@ public class GitPanelPresenter extends BasePresenter
                 new MutableAlteredFiles(
                     findProjectByName(newProjectName), changes.remove(oldProjectName));
 
-            // TODO uncomment last two lines abd delete this code after fixing of events problem:
-            // It is fired: Added at first, then Renamed for project under rename, sometimes twice.
-            view.removeRepository(oldProjectName);
             changes.put(newProjectName, alteredFiles);
-            view.updateRepositoryChanges(newProjectName, alteredFiles.getFilesQuantity());
-
-            // changes.put(newProjectName, alteredFiles);
-            // view.renameRepository(oldProjectName, newProjectName);
+            view.renameRepository(oldProjectName, newProjectName);
           } else {
-            // TODO delete this if statement code. There is a bug when Create project event is fired
-            // twice.
-            if (changes.containsKey(resource.getName())) {
-              return;
-            }
-
             // project created
             changes.put(resource.getName(), new MutableAlteredFiles(resource.asProject()));
             view.addRepository(resource.getName());
@@ -260,6 +248,29 @@ public class GitPanelPresenter extends BasePresenter
           // project deleted
           changes.remove(resource.getName());
           view.removeRepository(resource.getName());
+        }
+      }
+    } else {
+      // handle deletion of an item
+      if (delta.getKind() == ResourceDelta.REMOVED) {
+        String pathToItem = delta.getResource().getLocation().toString();
+        String projectName = extractProjectName(pathToItem);
+        MutableAlteredFiles alteredFiles = changes.get(projectName);
+        if (alteredFiles == null) {
+          // project doesn't have a git repository
+          return;
+        }
+        String itemRelativePath = removeProjectName(pathToItem);
+
+        if (alteredFiles.getStatusByFilePath(itemRelativePath) != Status.ADDED) {
+          alteredFiles.addFile(itemRelativePath, Status.DELETED);
+        } else {
+          alteredFiles.removeFile(itemRelativePath);
+        }
+
+        view.updateRepositoryChanges(projectName, alteredFiles.getFilesQuantity());
+        if (projectName.equals(selectedProjectName)) {
+          updateChangedFiles(alteredFiles);
         }
       }
     }

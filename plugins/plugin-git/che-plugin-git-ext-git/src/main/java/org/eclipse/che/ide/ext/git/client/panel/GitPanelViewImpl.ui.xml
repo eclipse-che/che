@@ -19,7 +19,7 @@
   <ui:with field='gitResources' type='org.eclipse.che.ide.ext.git.client.GitResources'/>
   <ui:with field='locale' type='org.eclipse.che.ide.ext.git.client.GitLocalizationConstant'/>
 
-  <g:VerticalPanel addStyleNames="{gitResources.gitPanelCss.verticalItems}">
+  <g:VerticalPanel addStyleNames="{gitResources.gitPanelCss.verticalItems}" debugId="git-panel-content">
     <g:FlowPanel addStyleNames="{gitResources.gitPanelCss.topIndent} {gitResources.gitPanelCss.bottomIndent}">
       <g:HorizontalPanel>
         <svg:SVGImage resource="{gitResources.repository}" height="16px"/>

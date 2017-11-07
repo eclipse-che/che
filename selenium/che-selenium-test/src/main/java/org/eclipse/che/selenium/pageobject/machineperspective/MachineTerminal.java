@@ -170,6 +170,19 @@ public class MachineTerminal {
     loader.waitOnClosed();
   }
 
+  /**
+   * Types and executes given command in terminal.
+   *
+   * @param command text to run in terminal
+   */
+  public void sendCommandIntoTerminal(String command) {
+    selectFocusToActiveTerminal();
+    defaultTermContainer
+        .findElement(By.tagName("textarea"))
+        .sendKeys(command + Keys.ENTER.toString());
+    loader.waitOnClosed();
+  }
+
   /** select default terminal tab */
   public void selectTerminalTab() {
     waitTerminalTab();

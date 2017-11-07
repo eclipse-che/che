@@ -153,6 +153,12 @@ public class ProjectExplorer {
         .click();
   }
 
+  /** Clicks on project explorer tab and waits its appearance. */
+  public void openPanel() {
+    clickOnProjectExplorerTabInTheLeftPanel();
+    waitProjectExplorer();
+  }
+
   /** wait appearance of the IDE Project Explorer */
   public void waitProjectExplorer() {
     new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
@@ -413,7 +419,7 @@ public class ProjectExplorer {
    *
    * @param path
    */
-  public void scrollAndselectItem(String path) {
+  public void scrollAndSelectItem(String path) {
     waitItem(path);
     String locator = "//div[@path='/" + path + "']/div";
     WebElement item = seleniumWebDriver.findElement(By.xpath(locator));
