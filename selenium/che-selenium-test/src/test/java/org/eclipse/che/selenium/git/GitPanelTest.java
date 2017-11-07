@@ -21,7 +21,6 @@ import com.google.inject.name.Named;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
@@ -64,7 +63,6 @@ public class GitPanelTest {
   private String gitHubUsername;
 
   @Inject private SeleniumWebDriver seleniumWebDriver;
-  @Inject private ActionsFactory actionsFactory;
   @Inject private TestUser productUser;
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
