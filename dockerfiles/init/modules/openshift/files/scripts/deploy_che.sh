@@ -390,7 +390,7 @@ fi
 echo
 echo "[CHE] Deploying Che on ${OPENSHIFT_FLAVOR} (image ${CHE_IMAGE})"
 
-MULTI_USER_REPLACEMENT_STRING="          - name: \"CHE_WORKSPACE_LOGS\"
+CHE_SERVER_CONFIGURATION="          - name: \"CHE_WORKSPACE_LOGS\"
             value: \"${CHE_WORKSPACE_LOGS}\"
           - name: \"CHE_KEYCLOAK_AUTH__SERVER__URL\"
             value: \"${CHE_KEYCLOAK_AUTH__SERVER__URL}\"
@@ -435,7 +435,7 @@ cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     if [ "${ENABLE_SSL}" == "false" ]; then sed "s/    che-secure-external-urls: \"true\"/    che-secure-external-urls: \"false\"/" ; else cat -; fi | \
     if [ "${ENABLE_SSL}" == "false" ]; then grep -v -e "tls:" -e "insecureEdgeTerminationPolicy: Redirect" -e "termination: edge" ; else cat -; fi | \
     if [ "${K8S_VERSION_PRIOR_TO_1_6}" == "true" ]; then sed "s/    che-openshift-precreate-subpaths: \"false\"/    che-openshift-precreate-subpaths: \"true\"/"  ; else cat -; fi | \
-    append_after_match "env:" "${MULTI_USER_REPLACEMENT_STRING}" | \
+    append_after_match "env:" "${CHE_SERVER_CONFIGURATION}" | \
     oc apply --force=true -f -
 echo
 
