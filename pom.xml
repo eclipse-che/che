@@ -49,6 +49,7 @@
         <che.docs.version>6.0.0-M2-SNAPSHOT</che.docs.version>
         <che.lib.version>6.0.0-M2-SNAPSHOT</che.lib.version>
         <che.version>6.0.0-M2-SNAPSHOT</che.version>
+        <che.ls.jdt.version>0.0.1-SNAPSHOT</che.ls.jdt.version>
         <specification.version>1.0-beta2</specification.version>
     </properties>
     <dependencyManagement>
@@ -800,6 +801,12 @@
                 <groupId>org.eclipse.che.lib</groupId>
                 <artifactId>org-eclipse-jdt-core-repack</artifactId>
                 <version>${che.lib.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.ls.jdt</groupId>
+                <artifactId>jdt.ls.extension.product</artifactId>
+                <version>${che.ls.jdt.version}</version>
+                <type>tar.gz</type>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.multiuser</groupId>
