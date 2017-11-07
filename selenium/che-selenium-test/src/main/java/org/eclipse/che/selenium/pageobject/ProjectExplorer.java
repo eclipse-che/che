@@ -427,6 +427,8 @@ public class ProjectExplorer {
    */
   public void openItemByPath(String path) {
     waitItem(path);
+    selectItem(path);
+    waitItemIsSelected(path);
     String locator = "//div[@path='/%s']/div";
     WebElement item =
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
