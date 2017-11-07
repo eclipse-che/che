@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.resources.impl;
 
 import static com.google.common.base.Optional.absent;
-import static com.google.common.base.Optional.fromNullable;
 import static com.google.common.base.Optional.of;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -105,6 +104,7 @@ import org.eclipse.che.ide.util.Arrays;
  */
 @Beta
 public final class ResourceManager {
+
   /** Describes zero depth level for the descendants. */
   private static final int DEPTH_ZERO = 0;
 
@@ -769,6 +769,7 @@ public final class ResourceManager {
               public Resource[] apply(TreeElement tree) throws FunctionException {
 
                 class Visitor implements ResourceVisitor {
+
                   Resource[] resources;
 
                   private int size = 0; // size of total items
@@ -946,28 +947,45 @@ public final class ResourceManager {
     }
   }
 
-  private Promise<Optional<Resource>> findResource(final Path absolutePath, boolean quiet) {
-    return ps.getItem(absolutePath)
+  private Promise<Optional<Resource>> doFindResource(Path path) {
+    return ps.getTree(path.parent(), 1, true)
         .thenPromise(
-            itemReference -> {
-              final Resource resource = newResourceFrom(itemReference);
+            treeElement -> {
+              java.util.Optional<Resource> optionalResource =
+                  treeElement
+                      .getChildren()
+                      .stream()
+                      .map(TreeElement::getNode)
+                      .map(
+                          reference -> {
+                            Resource resource = newResourceFrom(reference);
+                            store.register(resource);
 
-              store.register(resource);
+                            if (resource.isProject()) {
+                              inspectProject(resource.asProject());
+                            }
 
-              if (resource.isProject()) {
-                inspectProject(resource.asProject());
-              }
+                            return resource;
+                          })
+                      .filter(resource -> resource.getLocation().equals(path))
+                      .findFirst();
 
-              return promises.resolve(fromNullable(resource));
+              return promises.resolve(Optional.fromNullable(optionalResource.orElse(null)));
             })
-        .catchErrorPromise(
-            arg -> {
-              if (!quiet) {
-                throw new IllegalStateException(arg.getCause());
-              }
+        .catchErrorPromise(error -> promises.resolve(absent()));
+  }
 
-              return promises.resolve(absent());
-            });
+  private Promise<Optional<Resource>> findResource(final Path absolutePath, boolean quiet) {
+    String[] segments = absolutePath.segments();
+
+    Promise<Optional<Resource>> chain = promises.resolve(null);
+
+    for (int i = 0; i <= segments.length; i++) {
+      Path pathToRetrieve = absolutePath.removeLastSegments(segments.length - i);
+      chain = chain.thenPromise(__ -> doFindResource(pathToRetrieve));
+    }
+
+    return chain;
   }
 
   private Promise<Optional<Resource>> findResourceForExternalOperation(
@@ -1330,10 +1348,12 @@ public final class ResourceManager {
   }
 
   interface ResourceVisitor {
+
     void visit(Resource resource);
   }
 
   public interface ResourceFactory {
+
     ProjectImpl newProjectImpl(ProjectConfig reference, ResourceManager resourceManager);
 
     FolderImpl newFolderImpl(Path path, ResourceManager resourceManager);
@@ -1343,6 +1363,7 @@ public final class ResourceManager {
   }
 
   public interface ResourceManagerFactory {
+
     ResourceManager newResourceManager(DevMachine devMachine);
   }
 }
