@@ -35,6 +35,10 @@ public interface WsPathUtils {
       return ROOT;
     }
 
+    if (wsPath.endsWith(SEPARATOR)) {
+      wsPath = wsPath.substring(0, wsPath.length() - 1);
+    }
+
     return wsPath.substring(wsPath.lastIndexOf(SEPARATOR) + 1);
   }
 
@@ -49,6 +53,10 @@ public interface WsPathUtils {
 
     if (isRoot(wsPath)) {
       throw new IllegalArgumentException("Can't get parent of root");
+    }
+
+    if (wsPath.endsWith(SEPARATOR)) {
+      wsPath = wsPath.substring(0, wsPath.length() - 1);
     }
 
     int lastSeparatorPosition = wsPath.lastIndexOf(SEPARATOR);
