@@ -59,8 +59,6 @@ public class RenameOrganizationTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
-
     parentOrganization =
         testOrganizationServiceClient.create(NameGenerator.generate("organization", 5));
     childOrganization =
@@ -71,7 +69,6 @@ public class RenameOrganizationTest {
     testOrganizationServiceClient.addAdmin(parentOrganization.getId(), testUser.getId());
     testOrganizationServiceClient.addAdmin(childOrganization.getId(), testUser.getId());
 
-    dashboard.logout();
     dashboard.open(testUser.getName(), testUser.getPassword());
   }
 

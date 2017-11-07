@@ -22,7 +22,7 @@ interface ITestScope extends ng.IScope {
  * Test of the FactoryInformation directive
  * @author Oleksii Kurinnyi
  */
-fdescribe('FactoryInformation >', () => {
+describe('FactoryInformation >', () => {
 
   let $scope: ITestScope;
 
