@@ -21,25 +21,22 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.workspace.infrastructure.openshift.Constants;
+import org.eclipse.che.workspace.infrastructure.openshift.Names;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 
 /**
- * Changes names of OpenShift pods by adding the workspace identifier to the prefix also generates
- * OpenShift routes names with prefix 'route' see {@link NameGenerator#generate(String, int)}.
+ * Makes names of OpenShift pods and routes unique whole namespace by {@link Names}.
  *
  * <p>Original names will be stored in {@link Constants#CHE_ORIGINAL_NAME_LABEL} label of renamed
  * object.
  *
  * @author Anton Korneta
+ * @see Names#uniquePodName(String, String)
+ * @see Names#uniqueRouteName()
  */
 @Singleton
 public class UniqueNamesProvisioner implements ConfigurationProvisioner {
-
-  public static final String ROUTE_PREFIX = "route";
-  public static final int ROUTE_PREFIX_SIZE = 8;
-  public static final char SEPARATOR = '.';
 
   @Override
   public void provision(
@@ -51,7 +48,7 @@ public class UniqueNamesProvisioner implements ConfigurationProvisioner {
     for (Pod pod : pods) {
       final ObjectMeta podMeta = pod.getMetadata();
       putLabel(pod, Constants.CHE_ORIGINAL_NAME_LABEL, podMeta.getName());
-      final String podName = workspaceId + SEPARATOR + podMeta.getName();
+      final String podName = Names.uniquePodName(podMeta.getName(), workspaceId);
       podMeta.setName(podName);
       osEnv.getPods().put(podName, pod);
     }
@@ -60,7 +57,7 @@ public class UniqueNamesProvisioner implements ConfigurationProvisioner {
     for (Route route : routes) {
       final ObjectMeta routeMeta = route.getMetadata();
       putLabel(route, Constants.CHE_ORIGINAL_NAME_LABEL, routeMeta.getName());
-      final String routeName = NameGenerator.generate(ROUTE_PREFIX, ROUTE_PREFIX_SIZE);
+      final String routeName = Names.uniqueRouteName();
       routeMeta.setName(routeName);
       osEnv.getRoutes().put(routeName, route);
     }

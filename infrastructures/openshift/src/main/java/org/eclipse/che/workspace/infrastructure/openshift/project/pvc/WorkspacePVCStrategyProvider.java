@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.openshift.project;
+package org.eclipse.che.workspace.infrastructure.openshift.project.pvc;
 
 import static java.lang.String.format;
 
