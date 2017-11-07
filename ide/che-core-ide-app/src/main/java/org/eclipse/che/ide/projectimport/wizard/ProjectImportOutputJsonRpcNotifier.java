@@ -13,9 +13,7 @@ package org.eclipse.che.ide.projectimport.wizard;
 import static com.google.common.base.Strings.nullToEmpty;
 import static org.eclipse.che.api.project.shared.Constants.EVENT_IMPORT_OUTPUT_PROGRESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.*;
 
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -72,17 +70,19 @@ public class ProjectImportOutputJsonRpcNotifier implements ProjectNotificationSu
     this.projectName = projectName;
     this.singletonNotification = notification;
 
-    configurator
-        .newConfiguration()
-        .methodName(EVENT_IMPORT_OUTPUT_PROGRESS)
-        .paramsAsDto(ImportProgressRecordDto.class)
-        .noResult()
-        .withConsumer(
-            progressRecord -> {
-              singletonNotification.setTitle(
-                  locale.importingProject(ProjectImportOutputJsonRpcNotifier.this.projectName));
-              singletonNotification.setContent(nullToEmpty(progressRecord.getLine()));
-            });
+    if (!requestHandlerManager.isRegistered(EVENT_IMPORT_OUTPUT_PROGRESS)) {
+      configurator
+          .newConfiguration()
+          .methodName(EVENT_IMPORT_OUTPUT_PROGRESS)
+          .paramsAsDto(ImportProgressRecordDto.class)
+          .noResult()
+          .withConsumer(
+              progressRecord -> {
+                singletonNotification.setTitle(
+                    locale.importingProject(ProjectImportOutputJsonRpcNotifier.this.projectName));
+                singletonNotification.setContent(nullToEmpty(progressRecord.getLine()));
+              });
+    }
   }
 
   @Override
