@@ -65,24 +65,24 @@ public class ProjectImportOutputJsonRpcNotifier implements ProjectNotificationSu
             singletonNotification.setContent("");
           }
         });
-
-    configurator
-        .newConfiguration()
-        .methodName(EVENT_IMPORT_OUTPUT_PROGRESS)
-        .paramsAsDto(ImportProgressRecordDto.class)
-        .noResult()
-        .withConsumer(this::processProgressRecord);
-  }
-
-  private void processProgressRecord(ImportProgressRecordDto progressRecordDto) {
-    singletonNotification.setTitle(locale.importingProject(projectName));
-    singletonNotification.setContent(nullToEmpty(progressRecordDto.getLine()));
   }
 
   @Override
   public void subscribe(String projectName, StatusNotification notification) {
     this.projectName = projectName;
     this.singletonNotification = notification;
+
+    configurator
+        .newConfiguration()
+        .methodName(EVENT_IMPORT_OUTPUT_PROGRESS)
+        .paramsAsDto(ImportProgressRecordDto.class)
+        .noResult()
+        .withConsumer(
+            progressRecord -> {
+              singletonNotification.setTitle(
+                  locale.importingProject(ProjectImportOutputJsonRpcNotifier.this.projectName));
+              singletonNotification.setContent(nullToEmpty(progressRecord.getLine()));
+            });
   }
 
   @Override
