@@ -58,9 +58,9 @@ public class BreakpointItemRender
             + ":"
             + breakpoint.getLocation().getLineNumber()
             + "\">");
-    if (breakpoint.getCondition() != null) {
-      sb.appendHtmlConstant("?");
-    }
+//    if (breakpoint.getCondition() != null) {
+//      sb.appendHtmlConstant("?");
+//    }
     sb.appendHtmlConstant("</div>");
 
     sb.appendHtmlConstant("</td>");

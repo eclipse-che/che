@@ -49,6 +49,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.action.ResumeActionDto;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
+import org.eclipse.che.api.debug.shared.model.BreakpointConfiguration;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
@@ -247,22 +248,36 @@ public class JavaDebugger implements EventsHandler, Debugger {
     }
 
     try {
-      EventRequest breakPointRequest = requestManager.createBreakpointRequest(location);
-      breakPointRequest.setSuspendPolicy(EventRequest.SUSPEND_ALL);
-      String expression = breakpoint.getCondition();
-      if (!(expression == null || expression.isEmpty())) {
-        ExpressionParser parser = ExpressionParser.newInstance(expression);
-        breakPointRequest.putProperty(
-            "org.eclipse.che.ide.java.debug.condition.expression.parser", parser);
+      EventRequest request = requestManager.createBreakpointRequest(location);
+
+      BreakpointConfiguration conf = breakpoint.getBreakpointConfiguration();
+      if (conf != null && conf.getSuspendPolicy() != null) {
+        switch (conf.getSuspendPolicy()) {
+          case ALL:
+            request.setSuspendPolicy(EventRequest.SUSPEND_ALL);
+            break;
+          case THREAD:
+            request.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
+            break;
+          default:
+            request.setSuspendPolicy(EventRequest.SUSPEND_NONE);
+        }
+      } else {
+        request.setSuspendPolicy(EventRequest.SUSPEND_ALL);
       }
-      breakPointRequest.setEnabled(true);
+
+      if (conf != null && conf.getCondition() != null && !conf.getCondition().isEmpty()) {
+        ExpressionParser parser = ExpressionParser.newInstance(conf.getCondition());
+        request.putProperty("org.eclipse.che.ide.java.debug.condition.expression.parser", parser);
+      }
+
+      request.setEnabled(true);
     } catch (NativeMethodException | IllegalThreadStateException | InvalidRequestStateException e) {
       throw new DebuggerException(e.getMessage(), e);
     }
 
     debuggerCallback.onEvent(
-        new BreakpointActivatedEventImpl(
-            new BreakpointImpl(breakpoint.getLocation(), true, breakpoint.getCondition())));
+        new BreakpointActivatedEventImpl(new BreakpointImpl(breakpoint.getLocation())));
 
     LOG.debug("Add breakpoint: {}", location);
   }

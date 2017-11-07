@@ -68,7 +68,7 @@ public class BreakpointRendererImpl implements BreakpointRenderer {
   public void addBreakpointMark(int lineNumber, LineChangeAction action) {
     if (hasGutter != null) {
 
-      Element newElement = createBreakpointMarks(true, null, false);
+      Element newElement = createDefaultBreakpointMark(false);
       Element existedElement = hasGutter.getGutterItem(lineNumber, BREAKPOINTS_GUTTER);
       if (existedElement != null) {
         hasGutter.setGutterItem(lineNumber, BREAKPOINTS_GUTTER, newElement);
@@ -90,8 +90,7 @@ public class BreakpointRendererImpl implements BreakpointRenderer {
     if (hasGutter != null) {
       int lineNumber = breakpoint.getLocation().getLineNumber() - 1;
 
-      Element newElement =
-          createBreakpointMarks(breakpoint.isEnabled(), breakpoint.getCondition(), active);
+      Element newElement = createBreakpointMarks(breakpoint, active);
       Element existedElement = hasGutter.getGutterItem(lineNumber, BREAKPOINTS_GUTTER);
 
       if (existedElement != null) {
@@ -124,7 +123,7 @@ public class BreakpointRendererImpl implements BreakpointRenderer {
   @Override
   public void setBreakpointActive(int lineNumber, boolean active) {
     if (hasGutter != null) {
-      Element newElement = createBreakpointMarks(true, null, true);
+      Element newElement = createDefaultBreakpointMark(active);
       Element existedElement = hasGutter.getGutterItem(lineNumber, BREAKPOINTS_GUTTER);
       if (existedElement != null) {
         hasGutter.setGutterItem(lineNumber, BREAKPOINTS_GUTTER, newElement);
@@ -141,13 +140,12 @@ public class BreakpointRendererImpl implements BreakpointRenderer {
     }
   }
 
-  private Element createBreakpointMarks(
-      boolean isEnabled, @Nullable String condition, boolean active) {
+  private Element createBreakpointMarks(Breakpoint breakpoint, boolean active) {
     BreakpointResources.Css css = breakpointResources.getCss();
 
     List<String> styles = new ArrayList<>();
     styles.add(css.breakpoint());
-    if (!isEnabled) {
+    if (!breakpoint.isEnabled()) {
       styles.add(css.disabled());
     } else if (active) {
       styles.add(css.active());
@@ -155,16 +153,21 @@ public class BreakpointRendererImpl implements BreakpointRenderer {
       styles.add(css.inactive());
     }
 
-    if (condition != null) {
-      styles.add(css.condition());
-    }
+    //    if (condition != null) {
+    //      styles.add(css.condition());
+    //    }
 
     DivElement element = Elements.createDivElement(styles.stream().toArray(String[]::new));
-    if (condition != null) {
-      element.setTitle("Condition: " + condition);
-    }
+    //    if (condition != null) {
+    //      element.setTitle("Condition: " + condition);
+    //    }
 
     return element;
+  }
+
+  private Element createDefaultBreakpointMark(boolean active) {
+    BreakpointResources.Css css = breakpointResources.getCss();
+    return Elements.createDivElement(css.breakpoint(), active ? css.active() : css.inactive());
   }
 
   @Override

@@ -10,15 +10,12 @@
  */
 package org.eclipse.che.api.debug.shared.model;
 
-/** @author Anatoliy Bazko */
-public interface Breakpoint {
-  /** The location of the breakpoint. */
-  Location getLocation();
-
-  /** Indicates if it is enabled or not. */
-  boolean isEnabled();
-
-  void setEnabled(boolean enabled);
-
-  BreakpointConfiguration getBreakpointConfiguration();
+/** @author Anatolii Bazko */
+public enum SuspendPolicy {
+  /** Suspend no threads when the breakpoint hit */
+  NONE,
+  /** Suspend only the thread where the breakpoint hit */
+  THREAD,
+  /** Suspend all threads when the breakpoint hit */
+  ALL
 }

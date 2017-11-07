@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.jdb.server.util;
 
 import static java.lang.System.getProperty;
 import static java.util.Collections.singletonList;
+import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import com.sun.jdi.ThreadReference;
@@ -22,9 +23,15 @@ import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.SuspendPolicy;
 import org.eclipse.che.api.debug.shared.model.ThreadState;
+import org.eclipse.che.api.debug.shared.model.event.BreakpointActivatedEvent;
 import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
 import org.eclipse.che.api.debug.shared.model.event.SuspendEvent;
+import org.eclipse.che.api.debug.shared.model.impl.BreakpointConfigurationImpl;
+import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
+import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
+import org.eclipse.che.api.debug.shared.model.impl.action.ResumeActionImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.StartActionImpl;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 import org.eclipse.che.plugin.jdb.server.JavaDebugger;

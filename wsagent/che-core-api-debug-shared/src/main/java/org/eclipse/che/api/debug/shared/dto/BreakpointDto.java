@@ -11,26 +11,31 @@
 package org.eclipse.che.api.debug.shared.dto;
 
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
+import org.eclipse.che.api.debug.shared.model.BreakpointConfiguration;
 import org.eclipse.che.dto.shared.DTO;
 
 /** @author andrew00x */
 @DTO
 public interface BreakpointDto extends Breakpoint {
+  @Override
   LocationDto getLocation();
 
   void setLocation(LocationDto location);
 
   BreakpointDto withLocation(LocationDto location);
 
+  @Override
   boolean isEnabled();
 
+  @Override
   void setEnabled(boolean enabled);
 
   BreakpointDto withEnabled(boolean enabled);
 
-  String getCondition();
+  @Override
+  BreakpointConfigurationDto getBreakpointConfiguration();
 
-  void setCondition(String condition);
+  void setBreakpointConfiguration(BreakpointConfigurationDto breakpointConfigurationDto);
 
-  BreakpointDto withCondition(String condition);
+  BreakpointDto withBreakpointConfiguration(BreakpointConfigurationDto breakpointConfigurationDto);
 }

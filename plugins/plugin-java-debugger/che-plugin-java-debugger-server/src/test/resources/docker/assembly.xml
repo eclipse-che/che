@@ -18,7 +18,7 @@
             <outputDirectory>./org/eclipse</outputDirectory>
         </file>
         <file>
-            <source>${project.build.testOutputDirectory}/workspace/test/src/org/eclipse/ThreadDumpTest2.java</source>
+            <source>${project.build.testOutputDirectory}/workspace/test/src/org/eclipse/SuspendPolicyTest.java</source>
             <outputDirectory>./org/eclipse</outputDirectory>
         </file>
         <file>
