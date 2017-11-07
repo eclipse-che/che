@@ -56,7 +56,7 @@ public class FileWatcherManagerTest {
             fileWatcherExcludePatternsRegistry);
   }
 
-  @Test()
+  @Test
   public void shouldSuspendService() throws Exception {
     manager.suspend();
 
