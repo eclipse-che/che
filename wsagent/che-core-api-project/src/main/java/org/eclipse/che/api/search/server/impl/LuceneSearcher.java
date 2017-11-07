@@ -17,6 +17,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.che.api.fs.server.WsPathUtils.nameOf;
 import static org.eclipse.che.commons.lang.IoUtil.deleteRecursive;
 
+import com.google.common.io.CharStreams;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.io.File;
 import java.io.IOException;
@@ -24,11 +25,7 @@ import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -52,15 +49,7 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
-import org.apache.lucene.search.BooleanClause;
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.PrefixQuery;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.SearcherFactory;
-import org.apache.lucene.search.SearcherManager;
-import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.*;
 import org.apache.lucene.search.highlight.QueryScorer;
 import org.apache.lucene.search.highlight.TokenSources;
 import org.apache.lucene.store.Directory;
@@ -466,10 +455,9 @@ public class LuceneSearcher implements Searcher {
     doc.add(new TextField(NAME_FIELD, name, Field.Store.YES));
     if (reader != null) {
       try {
-        doc.add(
-            new TextField(
-                TEXT_FIELD, org.apache.commons.io.IOUtils.toString(reader), Field.Store.YES));
+        doc.add(new TextField(TEXT_FIELD, CharStreams.toString(reader), Field.Store.YES));
       } catch (IOException e) {
+        LOG.error("Can't index file: {}", wsPath);
         throw new ServerException(e.getLocalizedMessage(), e);
       }
     }
