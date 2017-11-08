@@ -275,7 +275,7 @@ public class ProjectServiceApi {
         projectManager
             .getClosest(wsPath)
             .orElseThrow(() -> new NotFoundException("Can't find parent project for file"))
-            .getName();
+            .getPath();
 
     eventService.publish(
         new ProjectItemModifiedEvent(
@@ -313,7 +313,7 @@ public class ProjectServiceApi {
         projectManager
             .getClosest(wsPath)
             .orElseThrow(() -> new NotFoundException("Can't find parent project"))
-            .getName();
+            .getPath();
 
     eventService.publish(
         new ProjectItemModifiedEvent(
@@ -371,7 +371,7 @@ public class ProjectServiceApi {
         projectManager
             .getClosest(wsPath)
             .orElseThrow(() -> new NotFoundException("Can't find parent project for file"))
-            .getName();
+            .getPath();
 
     eventService.publish(new ProjectItemModifiedEvent(UPDATED, project, wsPath, false));
 
