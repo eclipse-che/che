@@ -25,11 +25,14 @@ public class BreakpointImpl implements Breakpoint {
       Location location, boolean enabled, BreakpointConfiguration breakpointConfiguration) {
     this.location = location;
     this.enabled = enabled;
-    this.breakpointConfiguration = breakpointConfiguration;
+    this.breakpointConfiguration =
+        breakpointConfiguration == null
+            ? new BreakpointConfigurationImpl()
+            : breakpointConfiguration;
   }
 
   public BreakpointImpl(Location location) {
-    this(location, true, null);
+    this(location, true, new BreakpointConfigurationImpl());
   }
 
   @Override

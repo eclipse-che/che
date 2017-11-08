@@ -35,6 +35,10 @@ public class BreakpointConfigurationImpl implements BreakpointConfiguration {
     this.suspendPolicy = suspendPolicy;
   }
 
+  public BreakpointConfigurationImpl() {
+    this(false, null, false, 0, SuspendPolicy.ALL);
+  }
+
   public BreakpointConfigurationImpl(String condition) {
     this(true, condition, false, 0, null);
   }

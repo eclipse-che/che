@@ -42,14 +42,11 @@ public class BreakpointConfigurationPresenter
   @Override
   public void onApplyClicked() {
     view.close();
-    //
-    //    breakpoint.setCondition(
-    //        Strings.isNullOrEmpty(view.getBreakpointCondition())
-    //            ? null
-    //            : view.getBreakpointCondition());
-    //    breakpoint.setEnabled(view.isBreakpointEnabled());
 
-    breakpointManager.update(breakpoint);
+    breakpoint.setEnabled(view.isBreakpointEnabled());
+    view.getBreakpointConfiguration();
+
+    //    breakpointManager.update(breakpoint);
   }
 
   @Override

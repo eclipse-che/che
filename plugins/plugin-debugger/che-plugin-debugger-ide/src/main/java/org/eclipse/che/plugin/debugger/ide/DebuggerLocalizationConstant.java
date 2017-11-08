@@ -250,6 +250,18 @@ public interface DebuggerLocalizationConstant extends com.google.gwt.i18n.client
   @Key("view.breakpointConfiguration.applyButton")
   String viewBreakpointConfigurationApplyButton();
 
+  @Key("view.breakpointConfiguration.suspend")
+  String viewBreakpointConfigurationSuspend();
+
+  @Key("view.breakpointConfiguration.suspend.all")
+  String viewBreakpointConfigurationSuspendAll();
+
+  @Key("view.breakpointConfiguration.suspend.thread")
+  String viewBreakpointConfigurationSuspendThread();
+
+  @Key("view.breakpointConfiguration.suspend.none")
+  String viewBreakpointConfigurationSuspendNone();
+
   @Key("add.watch.expression")
   String addWatchExpression();
 
