@@ -44,7 +44,7 @@
         "type": "mvn",
         "commandLine": "mvn -f ${current.project.path} clean install -DskipTests \ncp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war \n$TOMCAT_HOME/bin/catalina.sh run 2>&1",
         "attributes": {
-          "previewUrl": "http://${server.port.8080}",
+          "previewUrl": "${server.tomcat8}",
           "goal": "Run"
         }
       },
@@ -53,7 +53,7 @@
         "type": "mvn",
         "commandLine": "mvn -f ${current.project.path} clean install -DskipTests \ncp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war \n$TOMCAT_HOME/bin/catalina.sh jpda run 2>&1",
         "attributes": {
-          "previewUrl": "http://${server.port.8080}",
+          "previewUrl": "${server.tomcat8}",
           "goal": "Debug"
         }
       }
@@ -172,7 +172,7 @@
         "type": "custom",
         "commandLine": "mvn -f ${current.project.path} clean install",
         "attributes": {
-          "previewUrl": "http://${server.port.6080}",
+          "previewUrl": "${server.VNC}",
           "goal": "Run"
         }
       }
@@ -208,7 +208,7 @@
         "type": "custom",
         "commandLine": "mvn -f ${current.project.path} clean install",
         "attributes": {
-          "previewUrl": "http://${server.port.6080}",
+          "previewUrl": "${server.VNC}",
           "goal": "Run"
         }
       }
@@ -244,7 +244,7 @@
         "type": "custom",
         "commandLine": "cd ${current.project.path} \ngo get -d \ngo run main.go",
         "attributes": {
-          "previewUrl": "http://${server.port.8080}",
+          "previewUrl": "${server.8080/tcp}",
           "goal": "Run"
         }
       }
@@ -397,7 +397,7 @@
         "type": "custom",
         "commandLine": "cd ${current.project.path} \nsudo virtualenv /env \nsudo pip install -r requirements.txt \npython main.py",
         "attributes": {
-          "previewUrl": "http://${server.port.8080}",
+          "previewUrl": "${server.8080/tcp}",
           "goal": "Run"
         }
       }
@@ -433,7 +433,7 @@
         "type": "custom",
         "commandLine": "cd ${GAE} \n./dev_appserver.py 2>&1 --skip_sdk_update_check true --host=0.0.0.0 --admin_host=0.0.0.0 ${current.project.path}",
         "attributes": {
-          "previewUrl": "http://${server.port.8080}",
+          "previewUrl": "${server.8080/tcp}",
           "goal": "Run"
         }
       }
@@ -478,7 +478,7 @@
         "type": "custom",
         "commandLine": "cd ${current.project.path} \nrails server -b 0.0.0.0",
         "attributes": {
-          "previewUrl": "http://${server.port.3000}",
+          "previewUrl": "${server.3000/tcp}",
           "goal": "Run"
         }
       }
@@ -553,7 +553,7 @@
         "type": "custom",
         "commandLine": "cd ${current.project.path} \nnode app/app.js",
         "attributes": {
-          "previewUrl": "http://${server.port.3000}",
+          "previewUrl": "${server.3000/tcp}",
           "goal": "Run"
         }
       }
@@ -598,7 +598,7 @@
         "type": "custom",
         "commandLine": "cd ${current.project.path} \ngrunt server",
         "attributes": {
-          "previewUrl": "http://${server.port.8003}",
+          "previewUrl": "${server.angular}",
           "goal": "Run"
         }
       }
@@ -646,7 +646,7 @@
         "type": "custom",
         "commandLine": "$TOMCAT_HOME/bin/catalina.sh run 2>&1",
         "attributes": {
-          "previewUrl": "http://${server.port.8080}",
+          "previewUrl": "${server.tomcat8}",
           "goal": "Run"
         }
       },
@@ -664,7 +664,7 @@
         "type": "mvn",
         "commandLine": "mvn -f ${current.project.path} clean install \ncp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war \n$TOMCAT_HOME/bin/catalina.sh run 2>&1",
         "attributes": {
-          "previewUrl": "http://${server.port.8080}",
+          "previewUrl": "${server.tomcat8}",
           "goal": "Run"
         }
       },
@@ -673,7 +673,7 @@
         "type": "mvn",
         "commandLine": "mvn -f ${current.project.path} clean install \ncp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war \n$TOMCAT_HOME/bin/catalina.sh jpda run 2>&1",
         "attributes": {
-          "previewUrl": "http://${server.port.8080}",
+          "previewUrl": "${server.tomcat8}",
           "goal": "Debug"
         }
       }
@@ -757,7 +757,7 @@
         "type": "custom",
         "commandLine": "cd ${current.project.path} \ngrunt serve",
         "attributes": {
-          "previewUrl": "http://${server.port.9000}",
+          "previewUrl": "${server.9000/tcp}",
           "goal": "Run"
         }
       }
@@ -793,7 +793,7 @@
         "type": "custom",
         "commandLine": "sudo service apache2 start \nsudo tail -f /var/log/apache2/access.log -f /var/log/apache2/error.log",
         "attributes": {
-          "previewUrl": "http://${server.port.80}/${current.project.relpath}",
+          "previewUrl": "${server.80/tcp}/${current.project.relpath}",
           "goal": "Run"
         }
       },
@@ -811,7 +811,7 @@
         "type": "custom",
         "commandLine": "sudo service apache2 restart",
         "attributes": {
-          "previewUrl": "http://${server.port.80}/${current.project.relpath}",
+          "previewUrl": "${server.80/tcp}/${current.project.relpath}",
           "goal": "Run"
         }
       }
@@ -848,7 +848,7 @@
         "type": "custom",
         "commandLine": "cd ${GAE} \n./dev_appserver.py 2>&1 --php_executable_path=/usr/bin/php5-cgi --skip_sdk_update_check true --host=0.0.0.0 --admin_host=0.0.0.0 ${current.project.path}",
         "attributes": {
-          "previewUrl": "http://${server.port.8080}",
+          "previewUrl": "${server.8080/tcp}",
           "goal": "Run"
         }
       }
@@ -939,7 +939,7 @@
         "type": "custom",
         "commandLine": "cd ${current.project.path} \ndotnet run",
         "attributes": {
-          "previewUrl": "http://${server.port.5000}",
+          "previewUrl": "${server.dot.net.server}",
           "goal": "Run"
         }
       }
@@ -984,7 +984,7 @@
         "type": "custom",
         "commandLine": "$TOMEE_HOME/bin/catalina.sh run 2>&1",
         "attributes": {
-          "previewUrl": "http://${server.port.8080}",
+          "previewUrl": "${server.tomcat8}",
           "goal": "Run"
         }
       },
@@ -1002,7 +1002,7 @@
         "type": "mvn",
         "commandLine": "mvn -f ${current.project.path} clean install \ncp ${current.project.path}/target/*.war $TOMEE_HOME/webapps/ROOT.war \n$TOMEE_HOME/bin/catalina.sh run 2>&1",
         "attributes": {
-          "previewUrl": "http://${server.port.8080}",
+          "previewUrl": "${server.tomcat8}",
           "goal": "Run"
         }
       },
@@ -1011,7 +1011,7 @@
         "type": "mvn",
         "commandLine": "mvn -f ${current.project.path} clean install \ncp ${current.project.path}/target/*.war $TOMEE_HOME/webapps/ROOT.war \n$TOMEE_HOME/bin/catalina.sh jpda run 2>&1",
         "attributes": {
-          "previewUrl": "http://${server.port.8080}",
+          "previewUrl": "${server.tomcat8}",
           "goal": "Debug"
         }
       }

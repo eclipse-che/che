@@ -26,52 +26,52 @@ export class DiagnosticPart {
   /**
    * An optional subtitle of this part.
    */
-  subtitle : string;
+  subtitle: string;
 
   /**
    * The current state of this category
    */
-  state : DiagnosticPartState;
+  state: DiagnosticPartState;
 
   /**
    * Display icon of this part.
    */
-  icon : string;
+  icon: string;
 
   /**
    * All items attached to this category.
    */
-  private items : Array<DiagnosticItem>;
+  private items: Array<DiagnosticItem>;
 
   /**
    * All callbacks attached to this category.
    */
-  private callbacks : Array<DiagnosticCallback>;
+  private callbacks: Array<DiagnosticCallback>;
 
   /**
    * Current promises of all callbacks
    */
-  private callbackPromises : Array<ng.IPromise>;
+  private callbackPromises: Array<ng.IPromise<any>>;
 
   /**
    * Number of callbacks (tests) that have finished.
    */
-  private nbEndedCallbacks : number;
+  private nbEndedCallbacks: number;
 
   /**
    * Number of callbacks (tests) that have been successful.
    */
-  private nbSuccessCallbacks : number;
+  private nbSuccessCallbacks: number;
 
   /**
    * Number of callbacks that had errors
    */
-  private nbErrorCallbacks : number;
+  private nbErrorCallbacks: number;
 
   /**
    * Callbacks that have ended
    */
-  private callbacksEnded : Array<DiagnosticCallback>;
+  private callbacksEnded: Array<DiagnosticCallback>;
 
   /**
    * Constructor.
@@ -80,7 +80,7 @@ export class DiagnosticPart {
     this.items = new Array<DiagnosticItem>();
     this.callbacks = new Array<DiagnosticCallback>();
     this.callbacksEnded = new Array<DiagnosticCallback>();
-    this.callbackPromises = new Array<ng.IPromise>();
+    this.callbackPromises = new Array<ng.IPromise<any>>();
     this.nbEndedCallbacks = 0;
     this.nbSuccessCallbacks = 0;
     this.nbErrorCallbacks = 0;
@@ -88,17 +88,17 @@ export class DiagnosticPart {
 
   /**
    * Add an item to this part.
-   * @param item the item to add
+   * @param {DiagnosticItem} item the item to add
    */
-  addItem(item : DiagnosticItem) : void {
+  addItem(item: DiagnosticItem): void {
     this.items.push(item);
   }
 
   /**
    * Test callback to add to this part
-   * @param callback the test callback to add.
+   * @param {DiagnosticCallback} callback the test callback to add.
    */
-  addCallback(callback: DiagnosticCallback) : void {
+  addCallback(callback: DiagnosticCallback): void {
 
     callback.getPromise().then(() => {
       this.nbSuccessCallbacks++;
@@ -121,7 +121,7 @@ export class DiagnosticPart {
    * Checks the state of the part
    * @returns {boolean} true if state is READY
    */
-  public isReady() : boolean {
+  public isReady(): boolean {
     return DiagnosticPartState.READY === this.state;
   }
 
@@ -129,7 +129,7 @@ export class DiagnosticPart {
    * Checks the state of the part
    * @returns {boolean} true if state is IN_PROGRESS
    */
-  public isInProgress() : boolean {
+  public isInProgress(): boolean {
     return DiagnosticPartState.IN_PROGRESS === this.state;
   }
 
@@ -137,7 +137,7 @@ export class DiagnosticPart {
    * Checks the state of the part
    * @returns {boolean} true if state is SUCCESS
    */
-  public isSuccess() : boolean {
+  public isSuccess(): boolean {
     return DiagnosticPartState.SUCCESS === this.state;
   }
 
@@ -145,7 +145,7 @@ export class DiagnosticPart {
    * Checks the state of the part
    * @returns {boolean} true if state is FAILURE
    */
-  public isFailure() : boolean {
+  public isFailure(): boolean {
     return DiagnosticPartState.FAILURE === this.state;
   }
 
@@ -153,33 +153,33 @@ export class DiagnosticPart {
    * Checks the state of the part
    * @returns {boolean} true if state is ERROR
    */
-  public isError() : boolean {
+  public isError(): boolean {
     return DiagnosticPartState.ERROR === this.state;
   }
 
   /**
    * Convert state to friendly text.
-   * @returns {any}
+   * @returns {string}
    */
-  public stateToText() : string {
+  public stateToText(): string {
     switch (this.state) {
       case DiagnosticPartState.READY :
-        return "READY (planned)";
+        return 'READY (planned)';
       case DiagnosticPartState.IN_PROGRESS :
-        return "IN PROGRESS";
+        return 'IN PROGRESS';
       case DiagnosticPartState.SUCCESS :
-        return "SUCCESS";
+        return 'SUCCESS';
       case DiagnosticPartState.FAILURE :
-        return "FAILURE";
+        return 'FAILURE';
       case DiagnosticPartState.ERROR :
-        return "ERROR"
+        return 'ERROR';
     }
   }
 
   /**
    * Clear the values
    */
-  clear() : void {
+  clear(): void {
     this.nbEndedCallbacks = 0;
     this.nbSuccessCallbacks = 0;
     this.nbErrorCallbacks = 0;
@@ -193,7 +193,7 @@ export class DiagnosticPart {
    * Gets the total number of callbacks
    * @returns {number}
    */
-  public getNumberOfCallbacks() : number {
+  public getNumberOfCallbacks(): number {
     return this.callbacks.length;
   }
 
@@ -201,7 +201,7 @@ export class DiagnosticPart {
    * Gets the total number of ended callbacks
    * @returns {number}
    */
-  public getNumberOfEndedCallbacks() : number {
+  public getNumberOfEndedCallbacks(): number {
     return this.nbEndedCallbacks;
   }
 

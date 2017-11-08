@@ -145,6 +145,7 @@
                                     <artifactId>che-wsagent-core</artifactId>
                                     <version>${project.version}</version>
                                     <type>war</type>
+                                    <destFileName>che-wsagent-core-${project.version}.war</destFileName>
                                     <outputDirectory>${project.build.directory}/local-repo/org/eclipse/che/core/che-wsagent-core/${project.version}</outputDirectory>
                                 </artifactItem>
                             </artifactItems>

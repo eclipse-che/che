@@ -26,7 +26,7 @@ public class BreakpointImpl implements Breakpoint {
   }
 
   public BreakpointImpl(Location location) {
-    this(location, false, null);
+    this(location, true, null);
   }
 
   @Override
@@ -37,6 +37,11 @@ public class BreakpointImpl implements Breakpoint {
   @Override
   public boolean isEnabled() {
     return enabled;
+  }
+
+  @Override
+  public void setEnabled(boolean enabled) {
+    this.enabled = enabled;
   }
 
   @Override

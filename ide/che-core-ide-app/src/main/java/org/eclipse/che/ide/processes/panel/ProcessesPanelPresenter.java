@@ -58,6 +58,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
+import org.eclipse.che.ide.api.command.CommandsLoadedEvent;
 import org.eclipse.che.ide.api.command.exec.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.command.exec.ProcessFinishedEvent;
 import org.eclipse.che.ide.api.command.exec.dto.GetProcessLogsResponseDto;
@@ -124,7 +125,8 @@ public class ProcessesPanelPresenter extends BasePresenter
         EnvironmentOutputEvent.Handler,
         DownloadWorkspaceOutputEvent.Handler,
         PartStackStateChangedEvent.Handler,
-        BasicIDEInitializedEvent.Handler {
+        BasicIDEInitializedEvent.Handler,
+        CommandsLoadedEvent.CommandsLoadedHandler {
 
   public static final String SSH_PORT = "22";
   private static final String DEFAULT_TERMINAL_NAME = "Terminal";
@@ -217,6 +219,7 @@ public class ProcessesPanelPresenter extends BasePresenter
     eventBus.addHandler(TerminalAgentServerRunningEvent.TYPE, this);
     eventBus.addHandler(ExecAgentServerRunningEvent.TYPE, this);
     eventBus.addHandler(EnvironmentOutputEvent.TYPE, this);
+    eventBus.addHandler(CommandsLoadedEvent.getType(), this);
     eventBus.addHandler(DownloadWorkspaceOutputEvent.TYPE, this);
     eventBus.addHandler(PartStackStateChangedEvent.TYPE, this);
     eventBus.addHandler(
@@ -1035,10 +1038,6 @@ public class ProcessesPanelPresenter extends BasePresenter
     }
 
     if (appContext.getWorkspace().getStatus() == RUNNING) {
-      for (MachineImpl machine : getMachines()) {
-        restoreProcessesState(machine.getName());
-      }
-
       selectDevMachine();
       TerminalOptionsJso options = TerminalOptionsJso.createDefault().withFocusOnOpen(false);
       newTerminal(options);
@@ -1061,6 +1060,13 @@ public class ProcessesPanelPresenter extends BasePresenter
   @Override
   public void onExecAgentServerRunning(ExecAgentServerRunningEvent event) {
     restoreProcessesState(event.getMachineName());
+  }
+
+  @Override
+  public void onCommandsLoaded(CommandsLoadedEvent event) {
+    if (appContext.getWorkspace().getStatus() == RUNNING) {
+      getMachines().stream().map(MachineImpl::getName).forEach(this::restoreProcessesState);
+    }
   }
 
   private void restoreProcessesState(String machineName) {

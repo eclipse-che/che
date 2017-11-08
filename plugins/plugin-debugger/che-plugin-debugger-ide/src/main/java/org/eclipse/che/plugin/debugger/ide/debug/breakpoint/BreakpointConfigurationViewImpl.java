@@ -14,6 +14,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.UIObject;
@@ -38,8 +39,7 @@ public class BreakpointConfigurationViewImpl extends Window implements Breakpoin
 
   @UiField Label breakpointLocation;
   @UiField TextArea breakpointCondition;
-
-  private final Button applyButton;
+  @UiField CheckBox enabled;
 
   private ActionDelegate delegate;
 
@@ -49,14 +49,20 @@ public class BreakpointConfigurationViewImpl extends Window implements Breakpoin
 
     this.setWidget(widget);
     this.setTitle(locale.breakpointConfigurationTitle());
+    ensureDebugId("breakpoint-configuration-window");
 
-    applyButton =
+    Button closeButton =
+        createButton(
+            locale.evaluateExpressionViewCloseButtonTitle(),
+            UIObject.DEBUG_ID_PREFIX + "close-btn",
+            clickEvent -> delegate.onCloseClicked());
+    addButtonToFooter(closeButton);
+
+    Button applyButton =
         createButton(
             locale.viewBreakpointConfigurationApplyButton(),
             UIObject.DEBUG_ID_PREFIX + "apply-btn",
             clickEvent -> delegate.onApplyClicked());
-
-    ensureDebugId("breakpoint-configuration-window");
     addButtonToFooter(applyButton);
   }
 
@@ -92,10 +98,17 @@ public class BreakpointConfigurationViewImpl extends Window implements Breakpoin
     } else {
       breakpointCondition.setText("");
     }
+
+    enabled.setValue(breakpoint.isEnabled());
   }
 
   @Override
   public String getBreakpointCondition() {
     return breakpointCondition.getText();
+  }
+
+  @Override
+  public boolean isBreakpointEnabled() {
+    return enabled.getValue();
   }
 }

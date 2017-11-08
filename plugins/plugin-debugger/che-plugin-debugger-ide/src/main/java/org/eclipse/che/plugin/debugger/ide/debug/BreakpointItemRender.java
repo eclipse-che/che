@@ -14,10 +14,9 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import elemental.dom.Element;
 import elemental.html.TableCellElement;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
+import org.eclipse.che.ide.debug.BreakpointResources;
 import org.eclipse.che.ide.ui.list.SimpleList;
 import org.eclipse.che.ide.util.dom.Elements;
-import org.eclipse.che.plugin.debugger.ide.DebuggerResources;
-import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
  * Renders breakpoint item the panel.
@@ -25,35 +24,55 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  * @see Breakpoint
  * @author Anatolii Bazko
  */
-public class BreakpointItemRender extends SimpleList.ListItemRenderer<Breakpoint> {
+public class BreakpointItemRender
+    extends SimpleList.ListItemRenderer<DebuggerView.ActiveBreakpointWrapper> {
 
-  private final DebuggerResources debuggerResources;
+  private final BreakpointResources breakpointResources;
 
-  public BreakpointItemRender(DebuggerResources debuggerResources) {
-    this.debuggerResources = debuggerResources;
+  public BreakpointItemRender(BreakpointResources breakpointResources) {
+    this.breakpointResources = breakpointResources;
   }
 
   @Override
-  public void render(Element itemElement, Breakpoint itemData) {
+  public void render(Element itemElement, DebuggerView.ActiveBreakpointWrapper breakpointWrapper) {
+    Breakpoint breakpoint = breakpointWrapper.getBreakpoint();
+    BreakpointResources.Css css = breakpointResources.getCss();
+
     TableCellElement label = Elements.createTDElement();
 
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
     // Add icon
     sb.appendHtmlConstant("<table><tr><td>");
-    SVGResource icon = debuggerResources.breakpoint();
-    if (icon != null) {
-      sb.appendHtmlConstant("<img src=\"" + icon.getSafeUri().asString() + "\">");
+    sb.appendHtmlConstant("<div class=\"");
+    if (!breakpoint.isEnabled()) {
+      sb.appendHtmlConstant(css.breakpoint() + " " + css.disabled());
+    } else if (breakpointWrapper.isActive()) {
+      sb.appendHtmlConstant(css.breakpoint() + " " + css.active());
+    } else {
+      sb.appendHtmlConstant(css.breakpoint() + " " + css.inactive());
     }
+    sb.appendHtmlConstant("\" style=\"height: 14px; width: 14px; text-align: center\"");
+    sb.appendHtmlConstant(
+        " id=\""
+            + breakpoint.getLocation().getTarget()
+            + ":"
+            + breakpoint.getLocation().getLineNumber()
+            + "\">");
+    if (breakpoint.getCondition() != null) {
+      sb.appendHtmlConstant("?");
+    }
+    sb.appendHtmlConstant("</div>");
+
     sb.appendHtmlConstant("</td>");
 
     // Add title
     sb.appendHtmlConstant("<td>");
 
-    String path = itemData.getLocation().getTarget();
+    String path = breakpoint.getLocation().getTarget();
     sb.appendEscaped(
         path.substring(path.lastIndexOf("/") + 1)
             + ":"
-            + String.valueOf(itemData.getLocation().getLineNumber()));
+            + String.valueOf(breakpoint.getLocation().getLineNumber()));
     sb.appendHtmlConstant("</td></tr></table>");
 
     label.setInnerHTML(sb.toSafeHtml().asString());

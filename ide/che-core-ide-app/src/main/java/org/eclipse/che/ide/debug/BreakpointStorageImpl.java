@@ -201,6 +201,7 @@ public class BreakpointStorageImpl implements BreakpointStorage {
     return dtoFactory
         .createDto(BreakpointDto.class)
         .withLocation(locationDto)
+        .withEnabled(breakpoint.isEnabled())
         .withCondition(breakpoint.getCondition());
   }
 }

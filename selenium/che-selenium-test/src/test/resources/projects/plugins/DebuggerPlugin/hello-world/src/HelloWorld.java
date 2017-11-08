@@ -10,9 +10,14 @@
  */
 public class HelloWorld {
 
-    public static void main(String[] arg) {
-        for (int i = 0; i < 10; i++) {
-            System.out.println(i);
-        }
+  public static void main(String[] arg) {
+    for (int i = 0; i < 10; i++) {
+      System.out.println(i);
     }
+
+    int j = 0;
+    System.out.println(j);
+    int k = 1;
+    System.out.println(k);
+  }
 }

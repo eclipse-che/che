@@ -178,8 +178,8 @@ fi
 # --------------------------------------------------------
 DEFAULT_COMMAND="deploy"
 COMMAND=${COMMAND:-${DEFAULT_COMMAND}}
-CHE_MULTI_USER=${CHE_MULTI_USER:-"false"}
-if [ "${CHE_MULTI_USER}" == "true" ]; then
+CHE_MULTIUSER=${CHE_MULTIUSER:-"false"}
+if [ "${CHE_MULTIUSER}" == "true" ]; then
   DEFAULT_CHE_KEYCLOAK_DISABLED="false"
   CHE_DEDICATED_KEYCLOAK=${CHE_DEDICATED_KEYCLOAK:-"true"}
   DEFAULT_CHE_IMAGE_REPO="docker.io/eclipse/che-server-multiuser"
@@ -188,6 +188,8 @@ else
   CHE_DEDICATED_KEYCLOAK="false"
   DEFAULT_CHE_IMAGE_REPO="docker.io/eclipse/che-server"
 fi
+CHE_OAUTH_GITHUB_CLIENTID=${CHE_OAUTH_GITHUB_CLIENTID:-}
+CHE_OAUTH_GITHUB_CLIENTSECRET=${CHE_OAUTH_GITHUB_CLIENTSECRET:-}
 CHE_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT:-${DEFAULT_CHE_OPENSHIFT_PROJECT}}
 DEFAULT_CHE_INFRA_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT}
 CHE_INFRA_OPENSHIFT_PROJECT=${CHE_INFRA_OPENSHIFT_PROJECT:-${DEFAULT_CHE_INFRA_OPENSHIFT_PROJECT}}
@@ -303,7 +305,7 @@ fi
 
 COMMAND_DIR=$(dirname "$0")
 
-if [ "${CHE_MULTI_USER}" == "true" ]; then
+if [ "${CHE_MULTIUSER}" == "true" ]; then
     if [ "${CHE_DEDICATED_KEYCLOAK}" == "true" ]; then
         "${COMMAND_DIR}"/multi-user/deploy_postgres_and_keycloak.sh
     else
@@ -388,7 +390,7 @@ fi
 echo
 echo "[CHE] Deploying Che on ${OPENSHIFT_FLAVOR} (image ${CHE_IMAGE})"
 
-MULTI_USER_REPLACEMENT_STRING="          - name: \"CHE_WORKSPACE_LOGS\"
+CHE_SERVER_CONFIGURATION="          - name: \"CHE_WORKSPACE_LOGS\"
             value: \"${CHE_WORKSPACE_LOGS}\"
           - name: \"CHE_KEYCLOAK_AUTH__SERVER__URL\"
             value: \"${CHE_KEYCLOAK_AUTH__SERVER__URL}\"
@@ -397,7 +399,13 @@ MULTI_USER_REPLACEMENT_STRING="          - name: \"CHE_WORKSPACE_LOGS\"
           - name: \"CHE_KEYCLOAK_CLIENT__ID\"
             value: \"${CHE_KEYCLOAK_CLIENT__ID}\"
           - name: \"CHE_HOST\"
-            value: \"${CHE_HOST}\""
+            value: \"${CHE_HOST}\"
+          - name: \"CHE_MULTIUSER\"
+            value: \"${CHE_MULTIUSER}\"
+          - name: \"CHE_OAUTH_GITHUB_CLIENTID\"
+            value: \"${CHE_OAUTH_GITHUB_CLIENTID}\"
+          - name: \"CHE_OAUTH_GITHUB_CLIENTSECRET\"
+            value: \"${CHE_OAUTH_GITHUB_CLIENTSECRET}\""
 
 DEFAULT_CHE_DEPLOYMENT_FILE_PATH=./che-openshift.yml
 CHE_DEPLOYMENT_FILE_PATH=${CHE_DEPLOYMENT_FILE_PATH:-${DEFAULT_CHE_DEPLOYMENT_FILE_PATH}}
@@ -427,7 +435,7 @@ cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     if [ "${ENABLE_SSL}" == "false" ]; then sed "s/    che-secure-external-urls: \"true\"/    che-secure-external-urls: \"false\"/" ; else cat -; fi | \
     if [ "${ENABLE_SSL}" == "false" ]; then grep -v -e "tls:" -e "insecureEdgeTerminationPolicy: Redirect" -e "termination: edge" ; else cat -; fi | \
     if [ "${K8S_VERSION_PRIOR_TO_1_6}" == "true" ]; then sed "s/    che-openshift-precreate-subpaths: \"false\"/    che-openshift-precreate-subpaths: \"true\"/"  ; else cat -; fi | \
-    append_after_match "env:" "${MULTI_USER_REPLACEMENT_STRING}" | \
+    append_after_match "env:" "${CHE_SERVER_CONFIGURATION}" | \
     oc apply --force=true -f -
 echo
 

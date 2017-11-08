@@ -92,7 +92,7 @@ public final class Presentation {
    * @return svg image resource
    */
   public Element getImageElement() {
-    return imageElement;
+    return imageElement == null ? null : (Element) imageElement.cloneNode(true);
   }
 
   /**
