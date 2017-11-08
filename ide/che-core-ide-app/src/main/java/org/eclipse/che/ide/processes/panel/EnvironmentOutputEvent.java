@@ -26,7 +26,7 @@ public class EnvironmentOutputEvent extends GwtEvent<EnvironmentOutputEvent.Hand
      *
      * @param event
      */
-    void onEnvironmentOutputEvent(EnvironmentOutputEvent event);
+    void onEnvironmentOutput(EnvironmentOutputEvent event);
   }
 
   public static final Type<EnvironmentOutputEvent.Handler> TYPE = new Type<>();
@@ -57,6 +57,6 @@ public class EnvironmentOutputEvent extends GwtEvent<EnvironmentOutputEvent.Hand
 
   @Override
   protected void dispatch(Handler handler) {
-    handler.onEnvironmentOutputEvent(this);
+    handler.onEnvironmentOutput(this);
   }
 }

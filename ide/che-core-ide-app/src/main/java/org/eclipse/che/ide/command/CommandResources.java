@@ -71,7 +71,9 @@ public interface CommandResources extends ClientBundle {
   interface ToolbarCSS extends CssResource {
     String toolbarButton();
 
-    String processesListLabel();
+    String processesListExecLabel();
+
+    String processesListLoadLabel();
 
     String processWidgetText();
 
@@ -84,6 +86,12 @@ public interface CommandResources extends ClientBundle {
     String processWidgetActionButton();
 
     String previewUrlWidget();
+
+    String loaderPanel();
+
+    String loaderPanelLabel();
+
+    String loaderPanelProgressBar();
   }
 
   interface EditorCSS extends CssResource {
