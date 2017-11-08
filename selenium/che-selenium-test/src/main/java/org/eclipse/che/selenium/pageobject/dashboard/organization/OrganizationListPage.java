@@ -256,7 +256,6 @@ public class OrganizationListPage {
     String locator = String.format(Locators.ORGANIZATION_XPATH, name);
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)));
-
     seleniumWebDriver.findElement(By.xpath(locator)).click();
   }
 

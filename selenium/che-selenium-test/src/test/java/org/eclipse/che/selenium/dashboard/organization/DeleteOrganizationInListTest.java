@@ -42,6 +42,7 @@ public class DeleteOrganizationInListTest {
 
   private List<OrganizationDto> organizations;
   private OrganizationDto organization;
+  private int organizationsCount;
 
   @Inject
   @Named("admin")
@@ -58,8 +59,10 @@ public class DeleteOrganizationInListTest {
     organization = testOrganizationServiceClient.create(ORGANIZATION_NAME);
     testOrganizationServiceClient.create(generate("organization", 7));
     testOrganizationServiceClient.create(generate("organization", 7));
+    testOrganizationServiceClient.create(generate("organization", 7));
     organizations = testOrganizationServiceClient.getAll();
 
+    organizationsCount = organizations.size();
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
   }
 
@@ -71,8 +74,6 @@ public class DeleteOrganizationInListTest {
 
   @Test
   public void testOrganizationDeletionFromList() {
-    int organizationsCount = organizations.size();
-
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
@@ -103,15 +104,25 @@ public class DeleteOrganizationInListTest {
     confirmDialog.waitClosed();
     assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount);
 
-    // Delete organization
-    organizationListPage.clickOnDeleteButton(organization.getName());
+    // Delete all organizations
+    for (OrganizationDto org : organizations) {
+      deleteOrganization(org.getName());
+    }
+    // Check that all organization deleted
+    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), 0);
+  }
+
+  private void deleteOrganization(String organizationName) {
+    organizationListPage.clickOnDeleteButton(organizationName);
     confirmDialog.waitOpened();
     confirmDialog.clickConfirm();
     confirmDialog.waitClosed();
     organizationListPage.waitForOrganizationsList();
-    WaitUtils.sleepQuietly(3);
-    assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount - 1);
-    assertFalse(organizationListPage.getValues(NAME).contains(organization.getName()));
-    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), organizationsCount - 1);
+    organizationsCount = organizationsCount - 1;
+
+    WaitUtils.sleepQuietly(1);
+    assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount);
+    assertFalse(organizationListPage.getValues(NAME).contains(organizationName));
+    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), organizationsCount);
   }
 }

@@ -19,6 +19,7 @@ import com.google.inject.name.Named;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.dashboard.ConfirmDialog;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
@@ -88,6 +89,7 @@ public class DeleteOrganizationTest {
     confirmDialog.waitClosed();
 
     // Test that organization deleted
+    WaitUtils.sleepQuietly(1);
     organizationListPage.waitForOrganizationsList();
     organizationListPage.waitForOrganizationIsRemoved(childOrganization.getQualifiedName());
     assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), 1);

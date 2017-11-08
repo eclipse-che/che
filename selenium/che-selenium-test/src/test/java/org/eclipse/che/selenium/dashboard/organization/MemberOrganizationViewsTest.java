@@ -12,6 +12,12 @@ package org.eclipse.che.selenium.dashboard.organization;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
+import static org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.ACTIONS;
+import static org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.AVAILABLE_RAM;
+import static org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.MEMBERS;
+import static org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.NAME;
+import static org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.SUB_ORGANIZATIONS;
+import static org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.TOTAL_RAM;
 import static org.testng.Assert.*;
 
 import com.google.inject.Inject;
@@ -40,7 +46,7 @@ public class MemberOrganizationViewsTest {
 
   private List<OrganizationDto> organizations;
   private OrganizationDto parentOrganization;
-  private OrganizationDto childOrganization;
+  private OrganizationDto subOrganization;
 
   @Inject
   @Named("admin")
@@ -55,12 +61,12 @@ public class MemberOrganizationViewsTest {
   @BeforeClass
   public void setUp() throws Exception {
     parentOrganization = testOrganizationServiceClient.create(PARENT_ORG_NAME);
-    childOrganization =
+    subOrganization =
         testOrganizationServiceClient.create(CHILD_ORG_NAME, parentOrganization.getId());
-    testOrganizationServiceClient.addMember(parentOrganization.getId(), testUser.getId());
-    testOrganizationServiceClient.addMember(childOrganization.getId(), testUser.getId());
-    organizations = testOrganizationServiceClient.getAll();
 
+    testOrganizationServiceClient.addMember(parentOrganization.getId(), testUser.getId());
+    testOrganizationServiceClient.addMember(subOrganization.getId(), testUser.getId());
+    organizations = testOrganizationServiceClient.getAll();
     dashboard.open(testUser.getName(), testUser.getPassword());
   }
 
@@ -79,7 +85,7 @@ public class MemberOrganizationViewsTest {
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
 
-    // Test UI views of organizations list
+    // Test UI views of organizations list for member of organization
     assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), organizationsCount);
     assertEquals(organizationListPage.getOrganizationsToolbarTitle(), "Organizations");
     assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), organizationsCount);
@@ -89,14 +95,12 @@ public class MemberOrganizationViewsTest {
 
     // Check all headers are present:
     ArrayList<String> headers = organizationListPage.getOrganizationListHeaders();
-    assertTrue(headers.contains(OrganizationListPage.OrganizationListHeader.NAME.getTitle()));
-    assertTrue(headers.contains(OrganizationListPage.OrganizationListHeader.MEMBERS.getTitle()));
-    assertTrue(headers.contains(OrganizationListPage.OrganizationListHeader.TOTAL_RAM.getTitle()));
-    assertTrue(
-        headers.contains(OrganizationListPage.OrganizationListHeader.AVAILABLE_RAM.getTitle()));
-    assertTrue(
-        headers.contains(OrganizationListPage.OrganizationListHeader.SUB_ORGANIZATIONS.getTitle()));
-    assertTrue(headers.contains(OrganizationListPage.OrganizationListHeader.ACTIONS.getTitle()));
+    assertTrue(headers.contains(NAME.getTitle()));
+    assertTrue(headers.contains(MEMBERS.getTitle()));
+    assertTrue(headers.contains(TOTAL_RAM.getTitle()));
+    assertTrue(headers.contains(AVAILABLE_RAM.getTitle()));
+    assertTrue(headers.contains(SUB_ORGANIZATIONS.getTitle()));
+    assertTrue(headers.contains(ACTIONS.getTitle()));
 
     assertTrue(
         organizationListPage
@@ -105,11 +109,16 @@ public class MemberOrganizationViewsTest {
     assertTrue(
         organizationListPage
             .getValues(OrganizationListPage.OrganizationListHeader.NAME)
-            .contains(childOrganization.getQualifiedName()));
+            .contains(subOrganization.getQualifiedName()));
   }
 
   @Test
   public void testParentOrganization() {
+    navigationBar.waitNavigationBar();
+    navigationBar.clickOnMenu(ORGANIZATIONS);
+    organizationListPage.waitForOrganizationsToolbar();
+    organizationListPage.waitForOrganizationsList();
+
     organizationListPage.clickOnOrganization(parentOrganization.getName());
     organizationPage.waitOrganizationName(parentOrganization.getName());
 
@@ -131,25 +140,11 @@ public class MemberOrganizationViewsTest {
     organizationListPage.waitForOrganizationsList();
     assertFalse(organizationListPage.isAddOrganizationButtonVisible());
     assertFalse(organizationListPage.isAddSubOrganizationButtonVisible());
-    assertTrue(
-        organizationListPage
-            .getValues(OrganizationListPage.OrganizationListHeader.NAME)
-            .contains(childOrganization.getQualifiedName()));
+    assertTrue(organizationListPage.getValues(NAME).contains(subOrganization.getQualifiedName()));
 
-    organizationPage.clickBackButton();
-    organizationListPage.waitForOrganizationsList();
-    assertEquals(organizationListPage.getOrganizationListItemCount(), 2);
-  }
-
-  @Test
-  public void testChildOrganization() {
-    navigationBar.clickOnMenu(ORGANIZATIONS);
-    organizationListPage.waitForOrganizationsToolbar();
-    organizationListPage.waitForOrganizationsList();
-    organizationListPage.clickOnOrganization(childOrganization.getQualifiedName());
-    organizationPage.waitOrganizationName(childOrganization.getName());
-
-    // Test UI for member of child organization
+    // Test UI for member of sub organization
+    organizationListPage.clickOnOrganization(subOrganization.getQualifiedName());
+    organizationPage.waitOrganizationName(subOrganization.getName());
     assertTrue(organizationPage.isOrganizationNameReadonly());
     assertTrue(organizationPage.isWorkspaceCapReadonly());
     assertTrue(organizationPage.isRunningCapReadonly());
@@ -157,12 +152,12 @@ public class MemberOrganizationViewsTest {
     assertTrue(organizationPage.isWorkspaceCapReadonly());
     assertFalse(organizationPage.isDeleteButtonVisible());
 
-    // Test UI views of organization Members tab
+    // Test UI views of sub-organization Members tab
     organizationPage.clickMembersTab();
     organizationPage.waitMembersList();
     assertFalse(organizationPage.isAddMemberButtonVisible());
 
-    // Test UI views of organization Sub-Organizations tab
+    // Test UI views of Sub-Organizations tab
     organizationPage.clickSubOrganizationsTab();
     organizationListPage.waitForSubOrganizationsEmptyList();
     assertFalse(organizationListPage.isAddOrganizationButtonVisible());

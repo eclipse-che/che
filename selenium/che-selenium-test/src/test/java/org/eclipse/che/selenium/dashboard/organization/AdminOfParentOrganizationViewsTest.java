@@ -27,9 +27,7 @@ import com.google.inject.name.Named;
 import java.util.ArrayList;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
-import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.dashboard.CheMultiuserAdminDashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage;
@@ -59,16 +57,15 @@ public class AdminOfParentOrganizationViewsTest {
   @Inject private NavigationBar navigationBar;
   @Inject private CheMultiuserAdminDashboard dashboard;
   @Inject private TestUser testUser;
-  @Inject private AdminTestUser adminTestUser;
 
   @BeforeClass
   public void setUp() throws Exception {
     parentOrganization = testOrganizationServiceClient.create(PARENT_ORG_NAME);
     childOrganization =
         testOrganizationServiceClient.create(CHILD_ORG_NAME, parentOrganization.getId());
-
     testOrganizationServiceClient.addAdmin(parentOrganization.getId(), testUser.getId());
     testOrganizationServiceClient.addMember(childOrganization.getId(), testUser.getId());
+
     dashboard.open(testUser.getName(), testUser.getPassword());
   }
 
@@ -79,15 +76,15 @@ public class AdminOfParentOrganizationViewsTest {
   }
 
   @Test
-  public void testOrganizationListComponents() {
+  public void organizationListComponentsTest() {
     int organizationsCount = 2;
 
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
-    WaitUtils.sleepQuietly(3);
 
+    // Test UI views of organizations list
     assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), organizationsCount);
     assertEquals(organizationListPage.getOrganizationsToolbarTitle(), "Organizations");
     assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), organizationsCount);
@@ -109,9 +106,13 @@ public class AdminOfParentOrganizationViewsTest {
   }
 
   @Test
-  public void testParentOrganization() {
-    organizationListPage.clickOnOrganization(parentOrganization.getName());
+  public void parentOrganizationViewsTest() {
+    navigationBar.waitNavigationBar();
+    navigationBar.clickOnMenu(ORGANIZATIONS);
+    organizationListPage.waitForOrganizationsToolbar();
+    organizationListPage.waitForOrganizationsList();
 
+    organizationListPage.clickOnOrganization(parentOrganization.getName());
     organizationPage.waitOrganizationName(parentOrganization.getName());
     assertFalse(organizationPage.isOrganizationNameReadonly());
     assertTrue(organizationPage.isWorkspaceCapReadonly());
@@ -129,18 +130,6 @@ public class AdminOfParentOrganizationViewsTest {
     assertFalse(organizationListPage.isAddOrganizationButtonVisible());
     assertTrue(organizationListPage.isAddSubOrganizationButtonVisible());
     assertTrue(organizationListPage.getValues(NAME).contains(childOrganization.getQualifiedName()));
-
-    organizationPage.clickBackButton();
-    organizationListPage.waitForOrganizationsList();
-    assertEquals(organizationListPage.getOrganizationListItemCount(), 2);
-  }
-
-  @Test
-  public void testChildOrganization() {
-    navigationBar.clickOnMenu(ORGANIZATIONS);
-    organizationListPage.waitForOrganizationsToolbar();
-    organizationListPage.waitForOrganizationsList();
-    WaitUtils.sleepQuietly(3);
 
     organizationListPage.clickOnOrganization(childOrganization.getQualifiedName());
     organizationPage.waitOrganizationTitle(childOrganization.getQualifiedName());

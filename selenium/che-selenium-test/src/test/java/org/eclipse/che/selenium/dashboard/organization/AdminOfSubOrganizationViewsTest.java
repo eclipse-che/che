@@ -63,9 +63,9 @@ public class AdminOfSubOrganizationViewsTest {
     parentOrganization = testOrganizationServiceClient.create(PARENT_ORG_NAME);
     childOrganization =
         testOrganizationServiceClient.create(CHILD_ORG_NAME, parentOrganization.getId());
-
     testOrganizationServiceClient.addMember(parentOrganization.getId(), testUser.getId());
     testOrganizationServiceClient.addAdmin(childOrganization.getId(), testUser.getId());
+
     dashboard.open(testUser.getName(), testUser.getPassword());
   }
 
@@ -76,7 +76,7 @@ public class AdminOfSubOrganizationViewsTest {
   }
 
   @Test
-  public void testOrganizationListComponents() {
+  public void organizationListComponentsTest() {
     int organizationsCount = 2;
 
     navigationBar.waitNavigationBar();
@@ -84,6 +84,7 @@ public class AdminOfSubOrganizationViewsTest {
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
 
+    // Test UI views of organizations list
     assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), organizationsCount);
     assertEquals(organizationListPage.getOrganizationsToolbarTitle(), "Organizations");
     assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), organizationsCount);
@@ -106,15 +107,18 @@ public class AdminOfSubOrganizationViewsTest {
   }
 
   @Test
-  public void testParentOrganization() {
-    organizationListPage.clickOnOrganization(parentOrganization.getName());
+  public void parentOrganizationViewsTest() {
+    navigationBar.waitNavigationBar();
+    navigationBar.clickOnMenu(ORGANIZATIONS);
+    organizationListPage.waitForOrganizationsToolbar();
+    organizationListPage.waitForOrganizationsList();
 
+    organizationListPage.clickOnOrganization(parentOrganization.getName());
     organizationPage.waitOrganizationName(parentOrganization.getName());
     assertTrue(organizationPage.isOrganizationNameReadonly());
     assertTrue(organizationPage.isWorkspaceCapReadonly());
     assertTrue(organizationPage.isRunningCapReadonly());
     assertTrue(organizationPage.isRAMCapReadonly());
-    assertTrue(organizationPage.isWorkspaceCapReadonly());
     assertFalse(organizationPage.isDeleteButtonVisible());
 
     organizationPage.clickMembersTab();
@@ -127,18 +131,7 @@ public class AdminOfSubOrganizationViewsTest {
     assertFalse(organizationListPage.isAddSubOrganizationButtonVisible());
     assertTrue(organizationListPage.getValues(NAME).contains(childOrganization.getQualifiedName()));
 
-    organizationPage.clickBackButton();
-    organizationListPage.waitForOrganizationsList();
-    assertEquals(organizationListPage.getOrganizationListItemCount(), 2);
-  }
-
-  @Test
-  public void testChildOrganization() {
-    navigationBar.clickOnMenu(ORGANIZATIONS);
-    organizationListPage.waitForOrganizationsToolbar();
-    organizationListPage.waitForOrganizationsList();
     organizationListPage.clickOnOrganization(childOrganization.getQualifiedName());
-
     organizationPage.waitOrganizationTitle(childOrganization.getQualifiedName());
     assertFalse(organizationPage.isOrganizationNameReadonly());
     assertTrue(organizationPage.isWorkspaceCapReadonly());
