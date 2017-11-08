@@ -86,7 +86,7 @@ public class TraefikCreateContainerInterceptor implements MethodInterceptor {
 
     // Now merge all labels
     final Map<String, String> allLabels = new HashMap<>(containerLabels);
-    if(imageLabels !=  null) {
+    if (imageLabels != null) {
         // If image has some labels, merge them
         allLabels.putAll(imageLabels);
     }
