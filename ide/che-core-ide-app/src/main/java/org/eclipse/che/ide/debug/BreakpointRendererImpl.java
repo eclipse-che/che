@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.ide.debug;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.ide.api.editor.gutter.Gutters.BREAKPOINTS_GUTTER;
 
 import com.google.inject.assistedinject.Assisted;
@@ -19,7 +20,7 @@ import elemental.html.DivElement;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
-import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.api.debug.shared.model.BreakpointConfiguration;
 import org.eclipse.che.ide.api.debug.BreakpointRenderer;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.gutter.Gutter;
@@ -153,15 +154,33 @@ public class BreakpointRendererImpl implements BreakpointRenderer {
       styles.add(css.inactive());
     }
 
-    //    if (condition != null) {
-    //      styles.add(css.condition());
-    //    }
+    BreakpointConfiguration conf = breakpoint.getBreakpointConfiguration();
+    boolean hasCondition =
+        conf != null
+            && ((conf.isConditionEnabled() && !isNullOrEmpty(conf.getCondition()))
+                || (conf.isHitCountEnabled() && conf.getHitCount() != 0));
+
+    if (hasCondition) {
+      styles.add(css.condition());
+    }
+
+    StringBuilder title = new StringBuilder();
+    if (conf != null) {
+      if (conf.isConditionEnabled() && !isNullOrEmpty(conf.getCondition())) {
+        title.append("Condition: ").append(conf.getCondition()).append('\n');
+      }
+
+      if (conf.isHitCountEnabled() && conf.getHitCount() != 0) {
+        title.append("Hit count: ").append(conf.getHitCount()).append('\n');
+      }
+
+      if (conf.getSuspendPolicy() != null) {
+        title.append("Suspend: ").append(conf.getSuspendPolicy().toString().toLowerCase());
+      }
+    }
 
     DivElement element = Elements.createDivElement(styles.stream().toArray(String[]::new));
-    //    if (condition != null) {
-    //      element.setTitle("Condition: " + condition);
-    //    }
-
+    element.setTitle(title.toString());
     return element;
   }
 

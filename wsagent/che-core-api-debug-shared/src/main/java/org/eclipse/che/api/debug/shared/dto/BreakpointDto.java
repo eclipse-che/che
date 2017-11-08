@@ -11,7 +11,6 @@
 package org.eclipse.che.api.debug.shared.dto;
 
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
-import org.eclipse.che.api.debug.shared.model.BreakpointConfiguration;
 import org.eclipse.che.dto.shared.DTO;
 
 /** @author andrew00x */

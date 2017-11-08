@@ -14,9 +14,12 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import elemental.dom.Element;
 import elemental.html.TableCellElement;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
+import org.eclipse.che.api.debug.shared.model.BreakpointConfiguration;
 import org.eclipse.che.ide.debug.BreakpointResources;
 import org.eclipse.che.ide.ui.list.SimpleList;
 import org.eclipse.che.ide.util.dom.Elements;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * Renders breakpoint item the panel.
@@ -36,6 +39,7 @@ public class BreakpointItemRender
   @Override
   public void render(Element itemElement, DebuggerView.ActiveBreakpointWrapper breakpointWrapper) {
     Breakpoint breakpoint = breakpointWrapper.getBreakpoint();
+    BreakpointConfiguration conf = breakpoint.getBreakpointConfiguration();
     BreakpointResources.Css css = breakpointResources.getCss();
 
     TableCellElement label = Elements.createTDElement();
@@ -58,9 +62,14 @@ public class BreakpointItemRender
             + ":"
             + breakpoint.getLocation().getLineNumber()
             + "\">");
-//    if (breakpoint.getCondition() != null) {
-//      sb.appendHtmlConstant("?");
-//    }
+
+    boolean hasCondition =
+        conf != null
+            && ((conf.isConditionEnabled() && !isNullOrEmpty(conf.getCondition()))
+                || (conf.isHitCountEnabled() && conf.getHitCount() != 0));
+    if (hasCondition) {
+      sb.appendHtmlConstant("?");
+    }
     sb.appendHtmlConstant("</div>");
 
     sb.appendHtmlConstant("</td>");

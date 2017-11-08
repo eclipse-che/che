@@ -497,7 +497,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
       BreakpointDto breakpointDto = dtoFactory.createDto(BreakpointDto.class);
       breakpointDto.setLocation(toDto(breakpoint.getLocation()));
       breakpointDto.setEnabled(breakpoint.isEnabled());
-//      breakpointDto.setCondition(breakpoint.getCondition());
+      //      breakpointDto.setCondition(breakpoint.getCondition());
 
       breakpoints.add(breakpointDto);
     }
@@ -859,7 +859,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
         .createDto(BreakpointDto.class)
         .withLocation(toDto(breakpoint.getLocation()))
         .withEnabled(true);
-//        .withCondition(breakpoint.getCondition());
+    //        .withCondition(breakpoint.getCondition());
   }
 
   protected abstract DebuggerDescriptor toDescriptor(Map<String, String> connectionProperties);

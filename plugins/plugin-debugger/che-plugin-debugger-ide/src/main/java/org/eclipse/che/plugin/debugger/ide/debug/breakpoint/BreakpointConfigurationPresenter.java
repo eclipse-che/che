@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.plugin.debugger.ide.debug.breakpoint;
 
-import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
@@ -43,12 +42,12 @@ public class BreakpointConfigurationPresenter
   @Override
   public void onApplyClicked() {
     view.close();
-//
-//    breakpoint.setCondition(
-//        Strings.isNullOrEmpty(view.getBreakpointCondition())
-//            ? null
-//            : view.getBreakpointCondition());
-//    breakpoint.setEnabled(view.isBreakpointEnabled());
+    //
+    //    breakpoint.setCondition(
+    //        Strings.isNullOrEmpty(view.getBreakpointCondition())
+    //            ? null
+    //            : view.getBreakpointCondition());
+    //    breakpoint.setEnabled(view.isBreakpointEnabled());
 
     breakpointManager.update(breakpoint);
   }
