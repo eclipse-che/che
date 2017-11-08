@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.workspace.server.WorkspaceSubjectRegistry;
 import org.eclipse.che.plugin.docker.client.DockerApiVersionPathPrefixProvider;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
 import org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver;
@@ -59,6 +60,7 @@ public class OpenShiftConnectorTest {
   @Mock private OpenShiftPvcHelper openShiftPvcHelper;
   @Mock private OpenShiftRouteCreator openShiftRouteCreator;
   @Mock private OpenShiftDeploymentCleaner openShiftDeploymentCleaner;
+  @Mock private WorkspaceSubjectRegistry workspaceSubjectRegistry;
 
   private OpenShiftConnector openShiftConnector;
 
@@ -77,6 +79,7 @@ public class OpenShiftConnectorTest {
             openShiftRouteCreator,
             openShiftDeploymentCleaner,
             eventService,
+            workspaceSubjectRegistry,
             CHE_DEFAULT_SERVER_EXTERNAL_ADDRESS,
             null,
             CHE_DEFAULT_OPENSHIFT_PROJECT_NAME,

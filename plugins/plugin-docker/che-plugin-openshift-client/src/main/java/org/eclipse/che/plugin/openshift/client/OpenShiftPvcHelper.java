@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.plugin.openshift.client.exception.OpenShiftException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,6 +101,7 @@ public class OpenShiftPvcHelper {
    * @see Command
    */
   protected boolean createJobPod(
+      Subject subject,
       String workspacesPvcName,
       String projectNamespace,
       String jobNamePrefix,
