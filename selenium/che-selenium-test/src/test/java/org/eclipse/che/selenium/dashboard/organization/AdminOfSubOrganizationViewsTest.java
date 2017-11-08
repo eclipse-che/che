@@ -113,6 +113,7 @@ public class AdminOfSubOrganizationViewsTest {
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
 
+    // Open parent organization and check member permissions
     organizationListPage.clickOnOrganization(parentOrganization.getName());
     organizationPage.waitOrganizationName(parentOrganization.getName());
     assertTrue(organizationPage.isOrganizationNameReadonly());
@@ -121,16 +122,19 @@ public class AdminOfSubOrganizationViewsTest {
     assertTrue(organizationPage.isRAMCapReadonly());
     assertFalse(organizationPage.isDeleteButtonVisible());
 
+    // Test UI views of the Members tab
     organizationPage.clickMembersTab();
     organizationPage.waitMembersList();
     assertFalse(organizationPage.isAddMemberButtonVisible());
 
+    // Test UI views of the Sub-Organizations tab
     organizationPage.clickSubOrganizationsTab();
     organizationListPage.waitForOrganizationsList();
     assertFalse(organizationListPage.isAddOrganizationButtonVisible());
     assertFalse(organizationListPage.isAddSubOrganizationButtonVisible());
     assertTrue(organizationListPage.getValues(NAME).contains(childOrganization.getQualifiedName()));
 
+    // Create a suborganization and test admin permissions
     organizationListPage.clickOnOrganization(childOrganization.getQualifiedName());
     organizationPage.waitOrganizationTitle(childOrganization.getQualifiedName());
     assertFalse(organizationPage.isOrganizationNameReadonly());
@@ -140,15 +144,18 @@ public class AdminOfSubOrganizationViewsTest {
     assertTrue(organizationPage.isWorkspaceCapReadonly());
     assertTrue(organizationPage.isDeleteButtonVisible());
 
+    // Test UI views of the Members tab
     organizationPage.clickMembersTab();
     organizationPage.waitMembersList();
     assertTrue(organizationPage.isAddMemberButtonVisible());
 
+    // Test UI views of the Sub-Organizations tab
     organizationPage.clickSubOrganizationsTab();
     organizationListPage.waitForSubOrganizationsEmptyList();
     assertFalse(organizationListPage.isAddOrganizationButtonVisible());
     assertTrue(organizationListPage.isAddSubOrganizationButtonVisible());
 
+    // Back to the parent organization
     organizationPage.clickBackButton();
     organizationPage.waitOrganizationName(parentOrganization.getName());
   }

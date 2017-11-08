@@ -23,7 +23,6 @@ import java.util.List;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.dashboard.ConfirmDialog;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
@@ -33,7 +32,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
- * Test validates organization creation and actions on it in the list of organizations.
+ * Test validates deleting organizations from the list of organizations.
  *
  * @author Ann Shumilova
  */
@@ -74,12 +73,12 @@ public class DeleteOrganizationInListTest {
 
   @Test
   public void testOrganizationDeletionFromList() {
+    // Open the Organization list and check that created organization exist
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), organizationsCount);
     navigationBar.clickOnMenu(ORGANIZATIONS);
-
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
     assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount);
@@ -97,17 +96,17 @@ public class DeleteOrganizationInListTest {
     confirmDialog.closeDialog();
     confirmDialog.waitClosed();
     assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount);
-
     organizationListPage.clickOnDeleteButton(organization.getName());
     confirmDialog.waitOpened();
     confirmDialog.clickCancel();
     confirmDialog.waitClosed();
     assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount);
 
-    // Delete all organizations
+    // Delete all organizations from the Organization list
     for (OrganizationDto org : organizations) {
       deleteOrganization(org.getName());
     }
+
     // Check that all organization deleted
     assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), 0);
   }
@@ -120,7 +119,7 @@ public class DeleteOrganizationInListTest {
     organizationListPage.waitForOrganizationsList();
     organizationsCount = organizationsCount - 1;
 
-    WaitUtils.sleepQuietly(1);
+    // Test that organization deleted
     assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount);
     assertFalse(organizationListPage.getValues(NAME).contains(organizationName));
     assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), organizationsCount);

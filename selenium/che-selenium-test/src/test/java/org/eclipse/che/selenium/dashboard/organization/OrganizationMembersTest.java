@@ -32,8 +32,8 @@ import org.testng.annotations.Test;
 
 /** @author Sergey Skorik */
 public class OrganizationMembersTest {
-  private static final String PRE_CREATED_ORG_NAME = generate("orgX", 6);
-  private static final String NEW_ORG_NAME = generate("orgY", 6);
+  private static final String PRE_CREATED_ORG_NAME = generate("organization", 5);
+  private static final String NEW_ORG_NAME = generate("organization", 5);
 
   private OrganizationDto organization;
   private String memberEmail;

@@ -73,7 +73,7 @@ public class FilterOrganizationTest {
   public void testOrganizationListFiler() {
     int organizationsCount = organizations.size();
 
-    // Test that organizations exist
+    // Test that organization exist
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
@@ -81,12 +81,13 @@ public class FilterOrganizationTest {
     assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount);
     assertTrue(organizationListPage.getValues(NAME).contains(ORGANIZATION_NAME));
 
-    // Tests search organization feature
+    // Tests filter the organization by full organization name
     organizationListPage.typeInSearchInput(ORGANIZATION_NAME);
     organizationListPage.waitForOrganizationsList();
     assertTrue(organizationListPage.getValues(NAME).contains(ORGANIZATION_NAME));
     assertEquals(organizationListPage.getOrganizationListItemCount(), 1);
 
+    // Tests filter the organization by part of organization name
     organizationListPage.clearSearchInput();
     organizationListPage.typeInSearchInput(
         ORGANIZATION_NAME.substring(ORGANIZATION_NAME.length() / 2));
@@ -94,6 +95,7 @@ public class FilterOrganizationTest {
     assertTrue(organizationListPage.getValues(NAME).contains(ORGANIZATION_NAME));
     assertEquals(organizationListPage.getOrganizationListItemCount(), 1);
 
+    // Test filter the organization by wrong name
     organizationListPage.clearSearchInput();
     organizationListPage.typeInSearchInput(ORGANIZATION_NAME + "test");
     organizationListPage.waitForOrganizationsList();

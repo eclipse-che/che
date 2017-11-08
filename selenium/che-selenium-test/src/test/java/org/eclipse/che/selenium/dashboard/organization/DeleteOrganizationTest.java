@@ -19,7 +19,6 @@ import com.google.inject.name.Named;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.dashboard.ConfirmDialog;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
@@ -30,7 +29,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
- * Test validates organization deletion.
+ * Test validates organization deletion from the Settings tab by the Delete button
  *
  * @author Ann Shumilova
  */
@@ -69,7 +68,7 @@ public class DeleteOrganizationTest {
   }
 
   @Test
-  public void testSubOrganizationDelete() {
+  public void testSubOrganizationDeletion() {
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
@@ -77,7 +76,7 @@ public class DeleteOrganizationTest {
     organizationListPage.clickOnOrganization(childOrganization.getQualifiedName());
     organizationPage.waitOrganizationName(childOrganization.getName());
 
-    // Delete organization
+    // Delete parent organization from the Settings tab by the Delete button
     organizationPage.clickDeleteOrganizationButton();
     confirmDialog.waitOpened();
     assertEquals(confirmDialog.getTitle(), "Delete organization");
@@ -89,7 +88,6 @@ public class DeleteOrganizationTest {
     confirmDialog.waitClosed();
 
     // Test that organization deleted
-    WaitUtils.sleepQuietly(1);
     organizationListPage.waitForOrganizationsList();
     organizationListPage.waitForOrganizationIsRemoved(childOrganization.getQualifiedName());
     assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), 1);
@@ -104,18 +102,19 @@ public class DeleteOrganizationTest {
     organizationListPage.waitForOrganizationsList();
     organizationListPage.clickOnOrganization(parentOrganization.getName());
     organizationPage.waitOrganizationName(parentOrganization.getName());
+
+    // Delete parent organization from the Settings tab by the Delete button
     organizationPage.clickDeleteOrganizationButton();
     confirmDialog.waitOpened();
-
     assertEquals(confirmDialog.getTitle(), "Delete organization");
     assertEquals(
         confirmDialog.getMessage(),
         "Would you like to delete organization '" + parentOrganization.getName() + "'?");
     assertEquals(confirmDialog.getConfirmButtonTitle(), "Delete");
-
     confirmDialog.clickConfirm();
     confirmDialog.waitClosed();
 
+    // Test that organization deleted
     organizationListPage.waitForOrganizationsEmptyList();
     assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), 0);
   }

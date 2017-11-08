@@ -21,7 +21,6 @@ import com.google.inject.name.Named;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.organization.AddOrganization;
@@ -77,7 +76,7 @@ public class CreateOrganizationTest {
     addOrganization.clickCreateOrganizationButton();
     organizationPage.waitOrganizationTitle(ORGANIZATION_NAME);
 
-    // Test that created organization exist and count of organizations increased
+    // Test that created organization exists and count of organizations increased
     assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), organizationsCount);
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
@@ -89,7 +88,6 @@ public class CreateOrganizationTest {
     organizationListPage.clickOnOrganization(ORGANIZATION_NAME);
     organizationPage.waitOrganizationName(ORGANIZATION_NAME);
     organizationPage.clickSubOrganizationsTab();
-    WaitUtils.sleepQuietly(1);
     organizationListPage.waitForOrganizationsList();
     organizationPage.clickAddSuborganizationButton();
     addOrganization.waitAddSubOrganization();

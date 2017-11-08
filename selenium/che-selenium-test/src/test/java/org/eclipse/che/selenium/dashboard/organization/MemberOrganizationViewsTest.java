@@ -102,14 +102,10 @@ public class MemberOrganizationViewsTest {
     assertTrue(headers.contains(SUB_ORGANIZATIONS.getTitle()));
     assertTrue(headers.contains(ACTIONS.getTitle()));
 
+    // Test that all created organizations exits in the Organization list
     assertTrue(
-        organizationListPage
-            .getValues(OrganizationListPage.OrganizationListHeader.NAME)
-            .contains(parentOrganization.getQualifiedName()));
-    assertTrue(
-        organizationListPage
-            .getValues(OrganizationListPage.OrganizationListHeader.NAME)
-            .contains(subOrganization.getQualifiedName()));
+        organizationListPage.getValues(NAME).contains(parentOrganization.getQualifiedName()));
+    assertTrue(organizationListPage.getValues(NAME).contains(subOrganization.getQualifiedName()));
   }
 
   @Test
@@ -119,10 +115,9 @@ public class MemberOrganizationViewsTest {
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
 
+    // Open parent organization and check system member permissions
     organizationListPage.clickOnOrganization(parentOrganization.getName());
     organizationPage.waitOrganizationName(parentOrganization.getName());
-
-    // Test UI for member of parent organization
     assertTrue(organizationPage.isOrganizationNameReadonly());
     assertTrue(organizationPage.isWorkspaceCapReadonly());
     assertTrue(organizationPage.isRunningCapReadonly());
@@ -130,19 +125,19 @@ public class MemberOrganizationViewsTest {
     assertTrue(organizationPage.isWorkspaceCapReadonly());
     assertFalse(organizationPage.isDeleteButtonVisible());
 
-    // Test UI views of organization Members tab
+    // Test UI views of the Members tab
     organizationPage.clickMembersTab();
     organizationPage.waitMembersList();
     assertFalse(organizationPage.isAddMemberButtonVisible());
 
-    // Test UI views of organization Sub-Organizations tab
+    // Test UI views of the Sub-Organizations tab
     organizationPage.clickSubOrganizationsTab();
     organizationListPage.waitForOrganizationsList();
     assertFalse(organizationListPage.isAddOrganizationButtonVisible());
     assertFalse(organizationListPage.isAddSubOrganizationButtonVisible());
     assertTrue(organizationListPage.getValues(NAME).contains(subOrganization.getQualifiedName()));
 
-    // Test UI for member of sub organization
+    // Create a suborganization and test system member permissions
     organizationListPage.clickOnOrganization(subOrganization.getQualifiedName());
     organizationPage.waitOrganizationName(subOrganization.getName());
     assertTrue(organizationPage.isOrganizationNameReadonly());
@@ -163,6 +158,7 @@ public class MemberOrganizationViewsTest {
     assertFalse(organizationListPage.isAddOrganizationButtonVisible());
     assertFalse(organizationListPage.isAddSubOrganizationButtonVisible());
 
+    // Back to the parent organization
     organizationPage.clickBackButton();
     organizationPage.waitOrganizationName(parentOrganization.getName());
   }

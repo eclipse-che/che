@@ -12,6 +12,7 @@ package org.eclipse.che.selenium.dashboard.organization;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
+import static org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.NAME;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertEquals;
@@ -39,7 +40,8 @@ import org.testng.annotations.Test;
 public class RenameOrganizationTest {
   private static final String PARENT_ORG_NAME = generate("organization", 5);
   private static final String CHILD_ORG_NAME = generate("organization", 5);
-  private static final String NEW_ORG_NAME = generate("organization", 5);
+  private static final String NEW_PARENT_ORG_NAME = generate("organization", 5);
+  private static final String NEW_CHILD_ORG_NAME = generate("organization", 5);
 
   private OrganizationDto parentOrganization;
   private OrganizationDto childOrganization;
@@ -81,65 +83,58 @@ public class RenameOrganizationTest {
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
 
+    // Open the parent organization and try to set is not valid name
     organizationListPage.clickOnOrganization(parentOrganization.getName());
     organizationPage.waitOrganizationTitle(parentOrganization.getName());
     organizationPage.setOrganizationName(" ");
     editMode.waitDisplayed();
     assertFalse(editMode.isSaveEnabled());
-
     editMode.clickCancel();
     editMode.waitHidden();
     assertEquals(parentOrganization.getName(), organizationPage.getOrganizationName());
 
-    organizationPage.setOrganizationName(NEW_ORG_NAME);
+    // Test renaming of the parent organization
+    organizationPage.setOrganizationName(NEW_PARENT_ORG_NAME);
     editMode.waitDisplayed();
     assertTrue(editMode.isSaveEnabled());
     editMode.clickSave();
     editMode.waitHidden();
-    organizationPage.waitOrganizationTitle(NEW_ORG_NAME);
-    assertEquals(NEW_ORG_NAME, organizationPage.getOrganizationName());
+    organizationPage.waitOrganizationTitle(NEW_PARENT_ORG_NAME);
+    assertEquals(NEW_PARENT_ORG_NAME, organizationPage.getOrganizationName());
   }
 
   @Test(priority = 2)
   public void testSubOrganizationRename() {
-    String organizationPath = NEW_ORG_NAME + "/" + childOrganization.getName();
-    String newName = generate("newname", 5);
-    String path = NEW_ORG_NAME + "/" + newName;
+    String organizationPath = NEW_PARENT_ORG_NAME + "/" + CHILD_ORG_NAME;
+    String path = NEW_PARENT_ORG_NAME + "/" + NEW_CHILD_ORG_NAME;
 
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
+
+    // Test renaming of the sub-organization
     organizationListPage.clickOnOrganization(organizationPath);
     organizationPage.waitOrganizationTitle(organizationPath);
-    organizationPage.setOrganizationName(newName);
+    organizationPage.setOrganizationName(NEW_CHILD_ORG_NAME);
     editMode.waitDisplayed();
     assertTrue(editMode.isSaveEnabled());
-
     editMode.clickSave();
     editMode.waitHidden();
-
     organizationPage.waitOrganizationTitle(path);
-    assertEquals(organizationPage.getOrganizationName(), newName);
+    assertEquals(organizationPage.getOrganizationName(), NEW_CHILD_ORG_NAME);
 
+    // Back to the parent organization and test that the sub-organization renamed
     organizationPage.clickBackButton();
-    organizationPage.waitOrganizationTitle(NEW_ORG_NAME);
+    organizationPage.waitOrganizationTitle(NEW_PARENT_ORG_NAME);
     organizationPage.clickSubOrganizationsTab();
     organizationListPage.waitForOrganizationsList();
-    assertTrue(
-        organizationListPage
-            .getValues(OrganizationListPage.OrganizationListHeader.NAME)
-            .contains(path));
+    assertTrue(organizationListPage.getValues(NAME).contains(path));
 
+    // Back to the Organizations list and test that the organizations renamed
     organizationPage.clickBackButton();
     organizationListPage.waitForOrganizationsList();
-    assertTrue(
-        organizationListPage
-            .getValues(OrganizationListPage.OrganizationListHeader.NAME)
-            .contains(path));
-    assertTrue(
-        organizationListPage
-            .getValues(OrganizationListPage.OrganizationListHeader.NAME)
-            .contains(NEW_ORG_NAME));
+    assertTrue(organizationListPage.getValues(NAME).contains(path));
+    assertTrue(organizationListPage.getValues(NAME).contains(NEW_PARENT_ORG_NAME));
   }
 }
