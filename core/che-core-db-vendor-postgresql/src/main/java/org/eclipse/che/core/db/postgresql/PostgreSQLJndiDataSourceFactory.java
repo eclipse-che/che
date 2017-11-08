@@ -21,13 +21,13 @@ import org.eclipse.che.core.db.JNDIDataSourceFactory;
  */
 public class PostgreSQLJndiDataSourceFactory extends JNDIDataSourceFactory {
 
-  public static final String DEFAULT_USERNAME = "pgche";
-  public static final String DEFAULT_PASSWORD = "pgchepassword";
-  public static final String DEFAULT_URL = "jdbc:postgresql://postgres:5432/dbche";
-  public static final String DEFAULT_DRIVER__CLASS__NAME = "org.postgresql.Driver";
-  public static final String DEFAULT_MAX__TOTAL = "20";
-  public static final String DEFAULT_MAX__IDLE = "2";
-  public static final String DEFAULT_MAX__WAIT__MILLIS = "-1";
+  private static final String DEFAULT_USERNAME = "pgche";
+  private static final String DEFAULT_PASSWORD = "pgchepassword";
+  private static final String DEFAULT_URL = "jdbc:postgresql://postgres:5432/dbche";
+  private static final String DEFAULT_DRIVER__CLASS__NAME = "org.postgresql.Driver";
+  private static final String DEFAULT_MAX__TOTAL = "20";
+  private static final String DEFAULT_MAX__IDLE = "2";
+  private static final String DEFAULT_MAX__WAIT__MILLIS = "-1";
 
   public PostgreSQLJndiDataSourceFactory() throws Exception {
     super(

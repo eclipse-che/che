@@ -10,59 +10,32 @@
  */
 package org.eclipse.che.api;
 
-import static com.google.common.base.MoreObjects.firstNonNull;
-
-import org.eclipse.che.core.db.JNDIDataSourceFactory;
+import java.util.Hashtable;
+import javax.naming.Context;
+import javax.naming.Name;
+import javax.naming.spi.ObjectFactory;
 import org.eclipse.che.core.db.h2.H2SQLJndiDataSourceFactory;
 import org.eclipse.che.core.db.postgresql.PostgreSQLJndiDataSourceFactory;
 
 /**
- * Creates appropriate JNDI data source factory depending on system variable.
+ * Creates appropriate JNDI data source factory instance depending on system variable.
  *
  * @author Max Shaposhnik (mshaposh@redhat.com)
  */
-public class CommonJndiDataSourceFactory extends JNDIDataSourceFactory {
+public class CommonJndiDataSourceFactory implements ObjectFactory {
+
+  private final ObjectFactory delegate;
 
   public CommonJndiDataSourceFactory() throws Exception {
-    super(
-        firstNonNull(
-            System.getenv("CHE_JDBC_USERNAME"),
-            isMultiuser()
-                ? PostgreSQLJndiDataSourceFactory.DEFAULT_USERNAME
-                : H2SQLJndiDataSourceFactory.DEFAULT_USERNAME),
-        firstNonNull(
-            System.getenv("CHE_JDBC_PASSWORD"),
-            isMultiuser()
-                ? PostgreSQLJndiDataSourceFactory.DEFAULT_PASSWORD
-                : H2SQLJndiDataSourceFactory.DEFAULT_PASSWORD),
-        firstNonNull(
-            System.getenv("CHE_JDBC_URL"),
-            isMultiuser()
-                ? PostgreSQLJndiDataSourceFactory.DEFAULT_URL
-                : H2SQLJndiDataSourceFactory.DEFAULT_URL),
-        firstNonNull(
-            System.getenv("CHE_JDBC_DRIVER__CLASS__NAME"),
-            isMultiuser()
-                ? PostgreSQLJndiDataSourceFactory.DEFAULT_DRIVER__CLASS__NAME
-                : H2SQLJndiDataSourceFactory.DEFAULT_DRIVER__CLASS__NAME),
-        firstNonNull(
-            System.getenv("CHE_JDBC_MAX__TOTAL"),
-            isMultiuser()
-                ? PostgreSQLJndiDataSourceFactory.DEFAULT_MAX__TOTAL
-                : H2SQLJndiDataSourceFactory.DEFAULT_MAX__TOTAL),
-        firstNonNull(
-            System.getenv("CHE_JDBC_MAX__IDLE"),
-            isMultiuser()
-                ? PostgreSQLJndiDataSourceFactory.DEFAULT_MAX__IDLE
-                : H2SQLJndiDataSourceFactory.DEFAULT_MAX__IDLE),
-        firstNonNull(
-            System.getenv("CHE_JDBC_MAX__WAIT__MILLIS"),
-            isMultiuser()
-                ? PostgreSQLJndiDataSourceFactory.DEFAULT_MAX__WAIT__MILLIS
-                : H2SQLJndiDataSourceFactory.DEFAULT_MAX__WAIT__MILLIS));
+    delegate =
+        Boolean.valueOf(System.getenv("CHE_MULTIUSER"))
+            ? new PostgreSQLJndiDataSourceFactory()
+            : new H2SQLJndiDataSourceFactory();
   }
 
-  private static Boolean isMultiuser() {
-    return Boolean.valueOf(System.getenv("CHE_MULTIUSER"));
+  @Override
+  public Object getObjectInstance(Object o, Name name, Context context, Hashtable<?, ?> hashtable)
+      throws Exception {
+    return delegate.getObjectInstance(o, name, context, hashtable);
   }
 }
