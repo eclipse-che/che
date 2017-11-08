@@ -29,6 +29,27 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.slf4j.Logger;
 
+/**
+ * This class allows maintaining a link between a started workspace and the user who started it.
+ * This also allows updating, at any time, the user informations (<code>Subject</code>) of users
+ * that started workspaces.
+ *
+ * <p></br>
+ *
+ * <p>In particular, this allows having access to the up-to-date connection information (userName
+ * and Keycloak token) of the user that was used when creating a workspace.
+ *
+ * <p>This is required for all the use-cases where these user informations would be necessary to
+ * perform batch-like operations on the user workspaces (such as idling, stop at shutdown, etc ...).
+ *
+ * <p></br>
+ *
+ * <p>An example of such use-case is the multi-tenant scenario when deployment is done to Openshift:
+ * the user connection informations are required to have access to the Openshift cluster / namespace
+ * where the workspace has been created.
+ *
+ * @author David Festal
+ */
 @Singleton
 public class WorkspaceSubjectRegistry implements EventSubscriber<WorkspaceStatusEvent> {
 
@@ -80,6 +101,12 @@ public class WorkspaceSubjectRegistry implements EventSubscriber<WorkspaceStatus
     }
   }
 
+  /*
+   * If some workspaces have been started by the userId contained
+   * in this <code>Subject</code>, then the subject (with
+   * the userName and token) is updated in the workspace-to-subject
+   * cache for all these workspaces.
+   */
   public void updateSubject(Subject subject) {
     String token = subject != null ? subject.getToken() : null;
     if (token != null && token.startsWith("machine")) {
