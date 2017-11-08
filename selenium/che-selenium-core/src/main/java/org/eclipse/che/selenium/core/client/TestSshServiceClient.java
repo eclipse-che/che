@@ -73,19 +73,19 @@ public class TestSshServiceClient {
   }
 
   public void deleteVCSKey(String keyName) throws Exception {
-    requestFactory
-        .fromUrl(apiEndpoint + "ssh/" + VCS_SERVICE + "/?name=" + keyName)
-        .useDeleteMethod()
-        .request();
+    try {
+      requestFactory
+          .fromUrl(apiEndpoint + "ssh/" + VCS_SERVICE + "/?name=" + keyName)
+          .useDeleteMethod()
+          .request();
+    } catch (NotFoundException e) {
+      // ignore absence of key for github.com
+      LOG.info("Ssh key for " + GITHUB_COM + " is absent.");
+    }
   }
 
   public synchronized void updateGithubKey() throws Exception {
-    try {
-      deleteVCSKey(GITHUB_COM);
-    } catch (NotFoundException e) {
-      // ignore absence of key for github.com
-      LOG.debug("Ssh key for " + GITHUB_COM + " is absent.");
-    }
+    deleteVCSKey(GITHUB_COM);
 
     try {
       String publicKey = generateVCSKey(GITHUB_COM);
@@ -93,7 +93,7 @@ public class TestSshServiceClient {
           gitHubUsername, gitHubPassword, publicKey, "Eclipse Che Key");
     } catch (ConflictException e) {
       // ignore if ssh-key for github.com has already existed
-      LOG.debug("Ssh key for " + GITHUB_COM + " has already existed.");
+      LOG.info("Ssh key for " + GITHUB_COM + " has already existed.");
       return;
     }
 
