@@ -49,7 +49,7 @@ public class GitPanel {
     String REPOSITORIES_LIST_ID = "gwt-debug-git-panel-repositories";
     String REPOSITORIES =
         "//div[@id=\"" + REPOSITORIES_LIST_ID + "\"]/child::div[@id[starts-with(.,\"gwt-uid-\")]]";
-    String CHANGED_FILES_CONTAINER_ID = "gwt-debug-git-compare-changed_files";
+    String CHANGED_FILES_CONTAINER_ID = "gwt-debug-git-panel-changed_files";
 
     String REPOSITORY_BY_NAME = REPOSITORIES + "//div[text()=\"%s\"]";
     String CHANGES_LABEL_BY_REPOSITORY_NAME =

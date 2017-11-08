@@ -27,7 +27,7 @@
       </g:HorizontalPanel>
       <che:smartTree.Tree ui:field="repositoriesList" debugId="git-panel-repositories"/>
     </g:FlowPanel>
-    <g:SimplePanel ui:field="changesPanel" debugId="git-panel-changedFiles" addStyleNames="{gitResources.gitPanelCss.fullHeight}"/>
+    <g:SimplePanel ui:field="changesPanel" debugId="git-panel-changed_files" addStyleNames="{gitResources.gitPanelCss.fullHeight}"/>
   </g:VerticalPanel>
 
 </ui:UiBinder>
