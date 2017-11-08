@@ -57,6 +57,14 @@ public class MediaTypesExcludeMatcher implements PathMatcher {
 
   @Override
   public boolean matches(Path fsPath) {
+    if (!fsPath.toFile().exists()) {
+      return false;
+    }
+
+    if (!fsPath.toFile().isFile()) {
+      return false;
+    }
+
     String wsPath = pathTransformer.transform(fsPath);
 
     MediaType mimeType;
