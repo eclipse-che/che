@@ -129,7 +129,7 @@ public class GitPanelPresenter extends BasePresenter
     this.changes = new HashMap<>();
 
     for (Project project : appContext.getProjects()) {
-      if (projectUnderGit(project)) {
+      if (isProjectUnderGit(project)) {
         view.addRepository(project.getName());
         reloadRepositoryData(project);
       }
@@ -227,7 +227,7 @@ public class GitPanelPresenter extends BasePresenter
     Resource resource = delta.getResource();
     if (resource.isProject() && resource.getLocation().segmentCount() == 1) {
       // resource is a root project
-      if (projectUnderGit(resource.asProject())) {
+      if (isProjectUnderGit(resource.asProject())) {
         if (delta.getKind() == ResourceDelta.ADDED) {
           if ((delta.getFlags() & (MOVED_FROM | MOVED_TO)) != 0) {
             // project renamed
@@ -338,7 +338,7 @@ public class GitPanelPresenter extends BasePresenter
    */
   private void updateRepositoryData(String projectName) {
     Project project = findProjectByName(projectName);
-    if (project != null && projectUnderGit(project)) {
+    if (project != null && isProjectUnderGit(project)) {
       reloadRepositoryData(project);
     }
   }
@@ -354,7 +354,7 @@ public class GitPanelPresenter extends BasePresenter
   }
 
   /** Returns true if given project is under git version control system, false otherwise. */
-  private boolean projectUnderGit(Project project) {
+  private boolean isProjectUnderGit(Project project) {
     return VCS_GIT.equals(project.getAttribute("vcs.provider.name"));
   }
 }
