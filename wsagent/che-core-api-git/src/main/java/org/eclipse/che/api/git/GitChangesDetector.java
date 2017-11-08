@@ -20,7 +20,6 @@ import static org.eclipse.che.api.git.shared.FileChangedEventDto.Status.UNTRACKE
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.slf4j.LoggerFactory.getLogger;
 
-import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -129,19 +128,16 @@ public class GitChangesDetector {
                 .orElseThrow(() -> new NotFoundException("Can't find project"));
 
         String projectWsPath = project.getPath();
-        Path projectFsPath = pathTransformer.transform(projectWsPath);
-        String stringifiedProjectFsPath = projectFsPath.toString();
-        Status status =
-            gitConnectionFactory
-                .getConnection(projectWsPath)
-                .status(singletonList(stringifiedProjectFsPath));
+        String projectFsPath = pathTransformer.transform(projectWsPath).toString();
+        GitConnection gitConnection = gitConnectionFactory.getConnection(projectFsPath);
+        Status status = gitConnection.status(singletonList(itemPath));
         FileChangedEventDto.Status fileStatus;
-        if (status.getAdded().contains(stringifiedProjectFsPath)) {
+        if (status.getAdded().contains(itemPath)) {
           fileStatus = ADDED;
-        } else if (status.getUntracked().contains(stringifiedProjectFsPath)) {
+        } else if (status.getUntracked().contains(itemPath)) {
           fileStatus = UNTRACKED;
-        } else if (status.getModified().contains(stringifiedProjectFsPath)
-            || status.getChanged().contains(stringifiedProjectFsPath)) {
+        } else if (status.getModified().contains(itemPath)
+            || status.getChanged().contains(itemPath)) {
           fileStatus = MODIFIED;
         } else {
           fileStatus = NOT_MODIFIED;
@@ -153,12 +149,9 @@ public class GitChangesDetector {
             .methodName(OUTGOING_METHOD)
             .paramsAsDto(
                 newDto(FileChangedEventDto.class)
-                    .withPath(stringifiedProjectFsPath)
+                    .withPath(wsPath)
                     .withStatus(fileStatus)
-                    .withEditedRegions(
-                        gitConnectionFactory
-                            .getConnection(stringifiedProjectFsPath)
-                            .getEditedRegions(itemPath)))
+                    .withEditedRegions(gitConnection.getEditedRegions(itemPath)))
             .sendAndSkipResult();
       } catch (NotFoundException | ServerException e) {
         String errorMessage = e.getMessage();
