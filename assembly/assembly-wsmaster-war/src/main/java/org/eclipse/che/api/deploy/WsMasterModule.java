@@ -209,20 +209,21 @@ public class WsMasterModule extends AbstractModule {
     persistenceProperties.put(PersistenceUnitProperties.TARGET_SERVER, "None");
     persistenceProperties.put(PersistenceUnitProperties.LOGGING_LOGGER, "DefaultLogger");
     persistenceProperties.put(PersistenceUnitProperties.LOGGING_LEVEL, "SEVERE");
+    persistenceProperties.put(
+        PersistenceUnitProperties.NON_JTA_DATASOURCE, "java:/comp/env/jdbc/che");
+
+    bindConstant().annotatedWith(Names.named("jndi.datasource.name")).to("java:/comp/env/jdbc/che");
 
     if (Boolean.valueOf(System.getenv("CHE_MULTIUSER"))) {
       persistenceProperties.put(
           PersistenceUnitProperties.EXCEPTION_HANDLER_CLASS,
           "org.eclipse.che.core.db.postgresql.jpa.eclipselink.PostgreSqlExceptionHandler");
-      persistenceProperties.put(
-          PersistenceUnitProperties.NON_JTA_DATASOURCE, "java:/comp/env/jdbc/che-pg");
+
       configureMultiUserMode();
     } else {
       persistenceProperties.put(
           PersistenceUnitProperties.EXCEPTION_HANDLER_CLASS,
           "org.eclipse.che.core.db.h2.jpa.eclipselink.H2ExceptionHandler");
-      persistenceProperties.put(
-          PersistenceUnitProperties.NON_JTA_DATASOURCE, "java:/comp/env/jdbc/che-h2");
       configureSingleUserMode();
     }
 
@@ -255,9 +256,6 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.api.user.server.CheUserCreator.class);
 
     bindConstant().annotatedWith(Names.named("che.agents.auth_enabled")).to(false);
-    bindConstant()
-        .annotatedWith(Names.named("db.jndi.datasource.name"))
-        .to("java:/comp/env/jdbc/che-h2");
   }
 
   private void configureMultiUserMode() {
@@ -302,9 +300,5 @@ public class WsMasterModule extends AbstractModule {
     bind(PermissionChecker.class).to(PermissionCheckerImpl.class);
 
     bindConstant().annotatedWith(Names.named("che.agents.auth_enabled")).to(true);
-
-    bindConstant()
-        .annotatedWith(Names.named("db.jndi.datasource.name"))
-        .to("java:/comp/env/jdbc/che-pg");
   }
 }

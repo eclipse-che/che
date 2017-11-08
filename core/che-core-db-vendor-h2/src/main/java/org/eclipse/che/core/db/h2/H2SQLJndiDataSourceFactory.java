@@ -21,13 +21,13 @@ import org.eclipse.che.core.db.JNDIDataSourceFactory;
  */
 public class H2SQLJndiDataSourceFactory extends JNDIDataSourceFactory {
 
-  private static final String DEFAULT_USERNAME = "";
-  private static final String DEFAULT_PASSWORD = "";
-  private static final String DEFAULT_URL = "jdbc:h2:che";
-  private static final String DEFAULT_DRIVER__CLASS__NAME = "org.h2.Driver";
-  private static final String DEFAULT_MAX__TOTAL = "8";
-  private static final String DEFAULT_MAX__IDLE = "2";
-  private static final String DEFAULT_MAX__WAIT__MILLIS = "-1";
+  public static final String DEFAULT_USERNAME = "";
+  public static final String DEFAULT_PASSWORD = "";
+  public static final String DEFAULT_URL = "jdbc:h2:che";
+  public static final String DEFAULT_DRIVER__CLASS__NAME = "org.h2.Driver";
+  public static final String DEFAULT_MAX__TOTAL = "8";
+  public static final String DEFAULT_MAX__IDLE = "2";
+  public static final String DEFAULT_MAX__WAIT__MILLIS = "-1";
 
   public H2SQLJndiDataSourceFactory() throws Exception {
     super(
