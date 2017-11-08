@@ -47,8 +47,7 @@ if [ "${CHE_SERVER_URL}" == "" ]; then
   fi
 fi
 DEFAULT_CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD=true
-oc set env buildconfig/keycloak-for-che CHE_SERVER_URL=${CHE_SERVER_URL}
-oc set env buildconfig/keycloak-for-che CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD=${CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD:-${DEFAULT_CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD}}
+oc set env buildconfig/keycloak-for-che CHE_SERVER_URL=${CHE_SERVER_URL} CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD=${CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD:-${DEFAULT_CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD}}
 # This waiting is needed because start-build fails without it
 sleep 3s
 oc start-build keycloak-for-che
