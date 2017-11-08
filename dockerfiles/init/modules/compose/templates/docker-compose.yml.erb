@@ -12,11 +12,7 @@ services:
   # CHE
   ########################
   che:
-<% if scope.lookupvar('che::che_multiuser') == 'true' -%>
-    image: <%= ENV["IMAGE_CHE_MULTIUSER"] %>
-<% else -%>
     image: <%= ENV["IMAGE_CHE"] %>
-<% end -%>
     env_file:
 <% if @compose_file_for_containers == true -%>
       - '<%= ENV["CHE_CONTAINER_ROOT"] %>/instance/config/che/che.env'
@@ -64,6 +60,9 @@ services:
       traefik.che.frontend.entryPoints: "http"
       traefik.che.port: "<%= scope.lookupvar('che::che_port') -%>"
       traefik.che.frontend.rule: "PathPrefix:/"
+      <% if scope.lookupvar('che::che_multiuser') == 'true' -%>
+      traefik.che.docker.network: "che_default"
+      <% end -%>
 <% end -%>
     restart: always
     container_name: <%= ENV["CHE_CONTAINER_NAME"] %>

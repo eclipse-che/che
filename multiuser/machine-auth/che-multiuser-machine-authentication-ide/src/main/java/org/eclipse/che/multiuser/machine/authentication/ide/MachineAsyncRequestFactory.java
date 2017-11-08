@@ -16,16 +16,12 @@ import static com.google.common.base.Strings.nullToEmpty;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.Response;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.Optional;
-import javax.annotation.PostConstruct;
-import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
@@ -35,7 +31,6 @@ import org.eclipse.che.ide.rest.AsyncRequest;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.Unmarshallable;
-import org.eclipse.che.multiuser.machine.authentication.shared.dto.MachineTokenDto;
 
 /**
  * Looks at the request and substitutes an appropriate implementation.
@@ -43,65 +38,31 @@ import org.eclipse.che.multiuser.machine.authentication.shared.dto.MachineTokenD
  * @author Anton Korneta
  */
 @Singleton
-public class MachineAsyncRequestFactory extends AsyncRequestFactory
-    implements WorkspaceStoppedEvent.Handler {
+public class MachineAsyncRequestFactory extends AsyncRequestFactory {
   private static final String CSRF_TOKEN_HEADER_NAME = "X-CSRF-Token";
 
-  private final Provider<MachineTokenServiceClient> machineTokenServiceProvider;
-  private final AppContext appContext;
-
-  private String machineToken;
+  private AppContext appContext;
   private String csrfToken;
 
   @Inject
   public MachineAsyncRequestFactory(
-      DtoFactory dtoFactory,
-      Provider<MachineTokenServiceClient> machineTokenServiceProvider,
-      AppContext appContext,
-      EventBus eventBus) {
+      DtoFactory dtoFactory, AppContext appContext, EventBus eventBus) {
     super(dtoFactory);
-    this.machineTokenServiceProvider = machineTokenServiceProvider;
     this.appContext = appContext;
-    eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
-  }
-
-  @PostConstruct
-  private void init() {
-    requestCsrfToken();
   }
 
   @Override
   protected AsyncRequest newAsyncRequest(RequestBuilder.Method method, String url, boolean async) {
     if (isWsAgentRequest(url)) {
-      return new MachineAsyncRequest(method, url, async, getMachineToken());
+      final String machineToken = appContext.getWorkspace().getRuntime().getMachineToken();
+      if (!isNullOrEmpty(machineToken)) {
+        return new MachineAsyncRequest(method, url, false, machineToken);
+      }
     }
     if (isModifyingMethod(method)) {
       return new CsrfPreventingAsyncModifyingRequest(method, url, async);
     }
     return super.newAsyncRequest(method, url, async);
-  }
-
-  private Promise<String> getMachineToken() {
-    if (!isNullOrEmpty(machineToken)) {
-      return Promises.resolve(machineToken);
-    } else {
-      return machineTokenServiceProvider
-          .get()
-          .getMachineToken()
-          .then(
-              (Function<MachineTokenDto, String>)
-                  tokenDto -> {
-                    machineToken = tokenDto.getMachineToken();
-                    return machineToken;
-                  });
-    }
-  }
-
-  // since the machine token lives with the workspace runtime,
-  // we need to invalidate it on stopping workspace.
-  @Override
-  public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
-    machineToken = null;
   }
 
   /**
@@ -119,6 +80,9 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory
   }
 
   private boolean isWsAgentStarted(WorkspaceImpl workspace) {
+    if (workspace == null) {
+      return false;
+    }
     RuntimeImpl runtime = workspace.getRuntime();
     if (runtime == null) {
       return false;

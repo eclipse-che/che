@@ -58,6 +58,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
+import org.eclipse.che.ide.api.command.CommandsLoadedEvent;
 import org.eclipse.che.ide.api.command.exec.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.command.exec.ProcessFinishedEvent;
 import org.eclipse.che.ide.api.command.exec.dto.GetProcessLogsResponseDto;
@@ -95,6 +96,7 @@ import org.eclipse.che.ide.processes.ProcessTreeNodeSelectedEvent;
 import org.eclipse.che.ide.processes.actions.AddTabMenuFactory;
 import org.eclipse.che.ide.processes.actions.ConsoleTreeContextMenu;
 import org.eclipse.che.ide.processes.actions.ConsoleTreeContextMenuFactory;
+import org.eclipse.che.ide.processes.loading.WorkspaceLoadingTracker;
 import org.eclipse.che.ide.processes.runtime.RuntimeInfo;
 import org.eclipse.che.ide.processes.runtime.RuntimeInfoLocalization;
 import org.eclipse.che.ide.processes.runtime.RuntimeInfoProvider;
@@ -124,7 +126,8 @@ public class ProcessesPanelPresenter extends BasePresenter
         EnvironmentOutputEvent.Handler,
         DownloadWorkspaceOutputEvent.Handler,
         PartStackStateChangedEvent.Handler,
-        BasicIDEInitializedEvent.Handler {
+        BasicIDEInitializedEvent.Handler,
+        CommandsLoadedEvent.CommandsLoadedHandler {
 
   public static final String SSH_PORT = "22";
   private static final String DEFAULT_TERMINAL_NAME = "Terminal";
@@ -178,7 +181,8 @@ public class ProcessesPanelPresenter extends BasePresenter
       Provider<MacroProcessor> macroProcessorProvider,
       RuntimeInfoWidgetFactory runtimeInfoWidgetFactory,
       RuntimeInfoProvider runtimeInfoProvider,
-      RuntimeInfoLocalization runtimeInfoLocalization) {
+      RuntimeInfoLocalization runtimeInfoLocalization,
+      Provider<WorkspaceLoadingTracker> workspaceLoadingTrackerProvider) {
     this.view = view;
     this.localizationConstant = localizationConstant;
     this.resources = resources;
@@ -217,11 +221,14 @@ public class ProcessesPanelPresenter extends BasePresenter
     eventBus.addHandler(TerminalAgentServerRunningEvent.TYPE, this);
     eventBus.addHandler(ExecAgentServerRunningEvent.TYPE, this);
     eventBus.addHandler(EnvironmentOutputEvent.TYPE, this);
+    eventBus.addHandler(CommandsLoadedEvent.getType(), this);
     eventBus.addHandler(DownloadWorkspaceOutputEvent.TYPE, this);
     eventBus.addHandler(PartStackStateChangedEvent.TYPE, this);
     eventBus.addHandler(
         ActivateProcessOutputEvent.TYPE, event -> setActiveProcessOutput(event.getPid()));
     eventBus.addHandler(BasicIDEInitializedEvent.TYPE, this);
+
+    Scheduler.get().scheduleDeferred(() -> workspaceLoadingTrackerProvider.get().startTracking());
 
     Scheduler.get().scheduleDeferred(this::updateMachineList);
   }
@@ -901,7 +908,7 @@ public class ProcessesPanelPresenter extends BasePresenter
     // TODO (spi ide): for now SSH server's status is always UNKNOWN.
     // So check ws-agent's status till SSH server's status fixed.
     newMachineNode.setSshServerRunning(
-        isServerRunning(machineName, /*SERVER_SSH_REFERENCE*/ SERVER_WS_AGENT_HTTP_REFERENCE));
+        isServerRunning(machineName, SERVER_WS_AGENT_HTTP_REFERENCE));
     for (ProcessTreeNode child : children) {
       child.setParent(newMachineNode);
     }
@@ -945,7 +952,7 @@ public class ProcessesPanelPresenter extends BasePresenter
   }
 
   @Override
-  public void onEnvironmentOutputEvent(EnvironmentOutputEvent event) {
+  public void onEnvironmentOutput(EnvironmentOutputEvent event) {
     printMachineOutput(event.getMachineName(), event.getContent());
   }
 
@@ -1035,10 +1042,6 @@ public class ProcessesPanelPresenter extends BasePresenter
     }
 
     if (appContext.getWorkspace().getStatus() == RUNNING) {
-      for (MachineImpl machine : getMachines()) {
-        restoreProcessesState(machine.getName());
-      }
-
       selectDevMachine();
       TerminalOptionsJso options = TerminalOptionsJso.createDefault().withFocusOnOpen(false);
       newTerminal(options);
@@ -1061,6 +1064,13 @@ public class ProcessesPanelPresenter extends BasePresenter
   @Override
   public void onExecAgentServerRunning(ExecAgentServerRunningEvent event) {
     restoreProcessesState(event.getMachineName());
+  }
+
+  @Override
+  public void onCommandsLoaded(CommandsLoadedEvent event) {
+    if (appContext.getWorkspace().getStatus() == RUNNING) {
+      getMachines().stream().map(MachineImpl::getName).forEach(this::restoreProcessesState);
+    }
   }
 
   private void restoreProcessesState(String machineName) {

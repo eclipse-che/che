@@ -82,6 +82,7 @@ import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.storage.LocalStorage;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 import org.eclipse.che.plugin.debugger.ide.BaseTest;
+import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -141,6 +142,7 @@ public class DebuggerTest extends BaseTest {
   @Mock private BreakpointDto breakpointDto;
   @Mock private Optional<Project> optional;
   @Mock private WorkspaceImpl workspace;
+  @Mock private DebuggerLocalizationConstant constant;
 
   @Captor private ArgumentCaptor<WorkspaceRunningEvent.Handler> workspaceRunningHandlerCaptor;
   @Captor private ArgumentCaptor<Operation<PromiseError>> operationPromiseErrorCaptor;
@@ -194,6 +196,7 @@ public class DebuggerTest extends BaseTest {
                 debuggerManager,
                 notificationManager,
                 appContext,
+                constant,
                 "id",
                 debuggerLocationHandlerManager));
     doReturn(promiseInfo).when(service).getSessionInfo(SESSION_ID);
@@ -254,7 +257,7 @@ public class DebuggerTest extends BaseTest {
       verify(promiseError).getCause();
     }
 
-    verify(observer).onDebuggerAttached(debuggerDescriptor, promiseVoid);
+    verify(observer).onDebuggerAttached(debuggerDescriptor);
 
     assertTrue(debugger.isConnected());
     verify(localStorage)
@@ -611,6 +614,7 @@ public class DebuggerTest extends BaseTest {
         DebuggerManager debuggerManager,
         NotificationManager notificationManager,
         AppContext appContext,
+        DebuggerLocalizationConstant constant,
         String id,
         DebuggerLocationHandlerManager debuggerLocationHandlerManager) {
       super(
@@ -624,6 +628,7 @@ public class DebuggerTest extends BaseTest {
           notificationManager,
           appContext,
           breakpointManager,
+          constant,
           requestHandlerManager,
           debuggerLocationHandlerManager,
           id);

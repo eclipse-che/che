@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.ide.bootstrap;
 
-import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.api.promises.client.Operation;
@@ -41,8 +40,6 @@ public class IdeBootstrap {
           .then(
               aVoid -> {
                 extensionInitializer.startExtensions();
-
-                Scheduler.get().scheduleDeferred(this::notifyShowIDE);
               })
           .catchError(handleError())
           .catchError(handleErrorFallback());
@@ -56,7 +53,6 @@ public class IdeBootstrap {
     return err -> {
       dialogFactory.createMessageDialog("IDE initialization failed", err.getMessage(), null).show();
       Log.error(IdeBootstrap.class, err);
-      notifyShowIDE();
     };
   }
 
@@ -65,11 +61,6 @@ public class IdeBootstrap {
     return err -> onInitializationFailed(err.getMessage());
   }
 
-  /** Informs parent window (e.g. Dashboard) that IDE application is ready to be shown. */
-  private native void notifyShowIDE() /*-{
-        $wnd.parent.postMessage("show-ide", "*");
-    }-*/;
-
   /**
    * Tries to call initializationFailed function which is defined in IDE.jsp for handling IDE
    * initialization errors.
@@ -77,7 +68,6 @@ public class IdeBootstrap {
   private native void onInitializationFailed(String reason) /*-{
         try {
             $wnd.IDE.eventHandlers.initializationFailed(reason);
-            this.@org.eclipse.che.ide.bootstrap.IdeBootstrap::notifyShowIDE()();
         } catch (e) {
             console.log(e.message);
         }

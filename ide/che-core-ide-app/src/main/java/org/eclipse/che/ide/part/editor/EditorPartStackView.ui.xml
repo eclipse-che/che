@@ -30,8 +30,9 @@
             top: 0px;
             height: 23px;
             left: 0px;
-            right: 34px;
+            right: 32px;
             overflow: hidden;
+            background-color: editorTabsBackgroundColor;
         }
 
         .tabsPanel > div {
@@ -61,11 +62,13 @@
             height: 23px;
             right: 0px;
             width: 32px;
+            background-color: editorTabsBackgroundColor;
         }
 
         .menuPanel > div {
             position: absolute;
-
+            left: 0px;
+            top: 0px;
         }
 
     </ui:style>

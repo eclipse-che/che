@@ -15,7 +15,6 @@
              xsi:schemaLocation="http://java.sun.com/xml/ns/persistence persistence_1_0.xsd" version="1.0">
     <persistence-unit name="main" transaction-type="RESOURCE_LOCAL">
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-        <non-jta-data-source>java:/comp/env/jdbc/che</non-jta-data-source>
 
         <class>org.eclipse.che.account.spi.AccountImpl</class>
         <class>org.eclipse.che.api.user.server.model.impl.UserImpl</class>
@@ -53,13 +52,19 @@
 
         <class>org.eclipse.che.api.installer.server.model.impl.InstallerImpl</class>
         <class>org.eclipse.che.api.installer.server.model.impl.InstallerServerConfigImpl</class>
+        
+        <class>org.eclipse.che.multiuser.api.permission.server.model.impl.SystemPermissionsImpl</class>
+        <class>org.eclipse.che.multiuser.api.permission.server.model.impl.AbstractPermissions</class>
+        <class>org.eclipse.che.multiuser.permission.workspace.server.model.impl.WorkerImpl</class>
+        <class>org.eclipse.che.multiuser.permission.workspace.server.stack.StackPermissionsImpl</class>
+        
+        <class>org.eclipse.che.multiuser.resource.spi.impl.FreeResourcesLimitImpl</class>
+        <class>org.eclipse.che.multiuser.resource.spi.impl.ResourceImpl</class>
+
+        <class>org.eclipse.che.multiuser.organization.spi.impl.OrganizationImpl</class>
+        <class>org.eclipse.che.multiuser.organization.spi.impl.MemberImpl</class>
+        <class>org.eclipse.che.multiuser.organization.spi.impl.OrganizationDistributedResourcesImpl</class>
 
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
-        <properties>
-            <property name="eclipselink.exception-handler" value="org.eclipse.che.core.db.h2.jpa.eclipselink.H2ExceptionHandler"/>
-            <property name="eclipselink.target-server" value="None"/>
-            <property name="eclipselink.logging.logger" value="DefaultLogger"/>
-            <property name="eclipselink.logging.level" value="SEVERE"/>
-        </properties>
     </persistence-unit>
 </persistence>

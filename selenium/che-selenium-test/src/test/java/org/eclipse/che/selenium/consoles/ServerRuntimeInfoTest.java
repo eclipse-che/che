@@ -44,24 +44,24 @@ public class ServerRuntimeInfoTest {
 
     List<String> expectedReferenceList =
         Lists.newArrayList(
+            "codeserver",
+            "tomcat8",
+            "tomcat8-debug",
             "wsagent/ws",
             "exec-agent/ws",
             "wsagent/http",
-            "8080/tcp",
             "exec-agent/http",
+            "wsagent-debug",
             "ssh",
-            "9876/tcp",
-            "4403/tcp",
-            "8000/tcp",
             "terminal");
 
     for (int i = 0; i < expectedReferenceList.size(); i++) {
       String referenceId = "gwt-debug-runtime-info-reference-" + i;
-
       consoles.checkReferenceList(referenceId, expectedReferenceList.get(i));
     }
 
     consoles.clickOnHideInternalServers();
-    consoles.waitReferenceIsNotPresent("gwt-debug-runtime-info-reference-0");
+    consoles.waitReferenceIsNotPresent("gwt-debug-runtime-info-reference-3");
+    consoles.waitReferenceIsNotPresent("gwt-debug-runtime-info-reference-6");
   }
 }

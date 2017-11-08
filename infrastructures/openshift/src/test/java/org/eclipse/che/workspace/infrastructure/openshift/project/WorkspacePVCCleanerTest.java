@@ -24,6 +24,8 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.shared.event.WorkspaceRemovedEvent;
+import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.WorkspacePVCCleaner;
+import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.WorkspacePVCStrategy;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
