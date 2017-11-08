@@ -31,7 +31,7 @@
             margin-left: 10px;
             margin-top: 0px;
             margin-bottom: 0px;
-            margin-right: 0px;
+            margin-right: 10px;
         }
 
         .content *[rel="step-name"] {
@@ -65,34 +65,30 @@
     <g:HTMLPanel styleName="{style.panel}">
         <pre class="{style.content}">
 
-<pre ui:field="waitingWorkspaceTitle" style="display: none;">Waiting workspace machines to be booted...</pre>
+<pre ui:field="waitingWorkspaceTitle" style="display: none;"><br/>Waiting workspace machines to be booted...</pre>
 
 <pre ui:field="preparingWorkspaceRuntime" style="display: none;">
------------------------------------------------------------------------
-
+<hr style="border: none; border-top: 1px solid rgba(160, 169, 183, 0.2);" />
 <pre rel="step-name">Preparing workspace runtimes:</pre> Retrieving workspace's stacks...
 <pre ui:field="preparingWorkspaceRuntimeItems">
 <pre>  - <pre rel="machine-name"></pre> | image <pre rel="image-name"></pre> | <pre rel="progress"></pre> <pre rel="progress-value"></pre></pre>
 </pre></pre>
 <pre ui:field="startingWorkspaceRuntimes" style="display: none;">
------------------------------------------------------------------------
-
+<hr style="border: none; border-top: 1px solid rgba(160, 169, 183, 0.2);" />
 <pre rel="step-name">Starting workspace runtimes:</pre> Creating and starting containers...
 <pre ui:field="startingWorkspaceRuntimesItems">
 <pre>  - <pre rel="machine-name"></pre> | image <pre rel="image-name"></pre> | <pre rel="progress"></pre> <pre rel="progress-value"></pre></pre>
 </pre></pre><pre ui:field="initializingWorkspaceAgents" style="display:none;">
------------------------------------------------------------------------
+<hr style="border: none; border-top: 1px solid rgba(160, 169, 183, 0.2);" />
 <pre rel="step-name">Initializing exec agents:</pre> Installing and starting exec agents in containers...
 <pre>  - <pre rel="machine-name"></pre> | image <pre rel="image-name"></pre> | <pre rel="progress"></pre> <pre rel="progress-value"></pre></pre>
 </pre>
 <pre ui:field="workspaceStarted" style="display: none;">
------------------------------------------------------------------------
-
+<hr style="border: none; border-top: 1px solid rgba(160, 169, 183, 0.2);" />
 <pre rel="done">Workspace successfully started</pre>
 
------------------------------------------------------------------------
-</pre>
-        </pre>
+<hr style="border: none; border-top: 1px solid rgba(160, 169, 183, 0.2);" />
+</pre></pre>
     </g:HTMLPanel>
 
 </ui:UiBinder>
