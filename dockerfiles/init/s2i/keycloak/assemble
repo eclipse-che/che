@@ -49,6 +49,6 @@ sed -e "/\"requiredActions\" : \[ \],/d" > $(pwd)/keycloak/realms/che-users-0.js
 cp -v /tmp/src/realms/master-realm.json.erb $(pwd)/keycloak/realms/master-realm.json && \
 cp -v /tmp/src/realms/master-users-0.json.erb $(pwd)/keycloak/realms/master-users-0.json
 
-if [ "${CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD}" == "false" ];then
-   sed -i '' -e "s#\"UPDATE_PASSWORD\"##" $(pwd)/keycloak/realms/che-users-0.json
+if [ "${CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD}" == "false" ]; then
+   sed -i -e "s#\"UPDATE_PASSWORD\"##" $(pwd)/keycloak/realms/che-users-0.json
 fi
