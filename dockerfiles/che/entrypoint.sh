@@ -159,10 +159,6 @@ call_catalina () {
   export JAVA_OPTS="${JAVA_OPTS} -Dport.http=${CHE_PORT} -Dche.home=${CHE_HOME}"
   export SERVER_PORT=${CHE_PORT}
 
-  # On java9 runtime, enable activation and JAXB API
-  JAVA_VERSION=$(java -version 2>&1 | head -n 1 | cut -d'"' -f2 | cut -d'.' -f1 | sed 's/[^0-9]*//g')
-  [ "$JAVA_VERSION" -ge 9 ] && JAVA_OPTS="$JAVA_OPTS --add-modules java.activation --add-modules java.xml.bind"
-
   # Launch the Che application server, passing in command line parameters
   if [[ "${CHE_DEBUG_SERVER}" == true ]]; then
     "${ASSEMBLY_BIN_DIR}"/catalina.sh jpda ${CHE_SERVER_ACTION}
