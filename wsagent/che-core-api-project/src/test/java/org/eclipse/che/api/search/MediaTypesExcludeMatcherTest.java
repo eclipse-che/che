@@ -45,35 +45,35 @@ public class MediaTypesExcludeMatcherTest {
     when(pathTransformer.transform(WS_PATH)).thenReturn(path);
   }
 
-  @Test
+  @Test(enabled = false)
   public void shouldMatchEmptyFile() throws Exception {
     when(fsManager.read(anyString())).thenReturn(toInputStream(""));
 
     assertTrue(mediaTypesExcludeMatcher.matches(path));
   }
 
-  @Test
+  @Test(enabled = false)
   public void shouldNotMatchTextFile() throws Exception {
     when(fsManager.read(anyString())).thenReturn(toInputStream("to be or not to be"));
 
     assertFalse(mediaTypesExcludeMatcher.matches(path));
   }
 
-  @Test
+  @Test(enabled = false)
   public void shouldNotMatchHtmlFile() throws Exception {
     when(fsManager.read(anyString())).thenReturn(toInputStream("<html><head></head></html>"));
 
     assertFalse(mediaTypesExcludeMatcher.matches(path));
   }
 
-  @Test
+  @Test(enabled = false)
   public void shouldNotMatchJavaFile() throws Exception {
     when(fsManager.read(anyString())).thenReturn(toInputStream("public class SomeClass {}"));
 
     assertFalse(mediaTypesExcludeMatcher.matches(path));
   }
 
-  @Test
+  @Test(enabled = false)
   public void shouldNotMatchMarkUpFile() throws Exception {
     when(fsManager.read(anyString())).thenReturn(toInputStream("<a><b/></a>"));
 
