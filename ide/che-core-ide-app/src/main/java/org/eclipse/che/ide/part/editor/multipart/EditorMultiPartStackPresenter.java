@@ -63,13 +63,13 @@ public class EditorMultiPartStackPresenter
 
     eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
 
-    eventBus.addHandler(WorkspaceStoppingEvent.TYPE, event -> view.setLoadingMode(true));
-    eventBus.addHandler(WorkspaceStoppedEvent.TYPE, event -> view.setLoadingMode(true));
-    eventBus.addHandler(WorkspaceStartingEvent.TYPE, event -> view.setLoadingMode(true));
-    eventBus.addHandler(WorkspaceRunningEvent.TYPE, event -> view.setLoadingMode(false));
+    eventBus.addHandler(WorkspaceStoppingEvent.TYPE, event -> view.showPlaceholder(true));
+    eventBus.addHandler(WorkspaceStoppedEvent.TYPE, event -> view.showPlaceholder(true));
+    eventBus.addHandler(WorkspaceStartingEvent.TYPE, event -> view.showPlaceholder(true));
+    eventBus.addHandler(WorkspaceRunningEvent.TYPE, event -> view.showPlaceholder(false));
 
     if (WorkspaceStatus.RUNNING != appContext.getWorkspace().getStatus()) {
-      view.setLoadingMode(true);
+      view.showPlaceholder(true);
     }
   }
 

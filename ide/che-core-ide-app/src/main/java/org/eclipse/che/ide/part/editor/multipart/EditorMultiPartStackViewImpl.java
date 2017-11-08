@@ -121,8 +121,8 @@ public class EditorMultiPartStackViewImpl extends ResizeComposite
   }
 
   @Override
-  public void setLoadingMode(boolean loadingMode) {
-    if (loadingMode) {
+  public void showPlaceholder(boolean placeholder) {
+    if (placeholder) {
       if (!editorPlaceholderWidget.getElement().hasParentElement()) {
         getElement().appendChild(editorPlaceholderWidget.getElement());
       }

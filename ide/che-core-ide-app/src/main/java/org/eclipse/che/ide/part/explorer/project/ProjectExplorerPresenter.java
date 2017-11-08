@@ -129,13 +129,13 @@ public class ProjectExplorerPresenter extends BasePresenter
     eventBus.addHandler(MarkerChangedEvent.getType(), this);
     eventBus.addHandler(SyntheticNodeUpdateEvent.getType(), this);
     eventBus.addHandler(WorkspaceStoppedEvent.TYPE, event -> getTree().getNodeStorage().clear());
-    eventBus.addHandler(WorkspaceRunningEvent.TYPE, event -> view.setLoadingMode(false));
-    eventBus.addHandler(WorkspaceStoppedEvent.TYPE, event -> view.setLoadingMode(true));
-    eventBus.addHandler(WorkspaceStartingEvent.TYPE, event -> view.setLoadingMode(true));
-    eventBus.addHandler(WorkspaceStoppingEvent.TYPE, event -> view.setLoadingMode(true));
+    eventBus.addHandler(WorkspaceRunningEvent.TYPE, event -> view.showPlaceholder(false));
+    eventBus.addHandler(WorkspaceStoppedEvent.TYPE, event -> view.showPlaceholder(true));
+    eventBus.addHandler(WorkspaceStartingEvent.TYPE, event -> view.showPlaceholder(true));
+    eventBus.addHandler(WorkspaceStoppingEvent.TYPE, event -> view.showPlaceholder(true));
 
     if (WorkspaceStatus.RUNNING != appContext.getWorkspace().getStatus()) {
-      view.setLoadingMode(true);
+      view.showPlaceholder(true);
     }
 
     view.getTree()

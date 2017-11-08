@@ -91,11 +91,11 @@ public interface ProjectExplorerView extends View<ProjectExplorerView.ActionDele
   Tree getTree();
 
   /**
-   * Sets loading mode for project explorer area.
+   * Shows placeholder instead projects tree while the workspace is loading.
    *
-   * @param loadingMode <b>true</b> turns on loading mode
+   * @param placeholder <b>true</b> to show placeholder
    */
-  void setLoadingMode(boolean loadingMode);
+  void showPlaceholder(boolean placeholder);
 
   interface ActionDelegate extends BaseActionDelegate {}
 }

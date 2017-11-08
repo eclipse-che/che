@@ -57,9 +57,9 @@ public interface EditorMultiPartStackView extends IsWidget {
   EditorMultiPartStackState getState();
 
   /**
-   * Sets loading mode for editor area.
+   * Shows placeholder instead editor area while the workspace is loading.
    *
-   * @param loadingMode <b>true</b> turns on loading mode
+   * @param placeholder <b>true</b> to show placeholder
    */
-  void setLoadingMode(boolean loadingMode);
+  void showPlaceholder(boolean placeholder);
 }

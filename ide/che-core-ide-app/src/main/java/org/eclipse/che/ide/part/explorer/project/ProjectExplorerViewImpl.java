@@ -272,8 +272,8 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
   }
 
   @Override
-  public void setLoadingMode(boolean loadingMode) {
-    if (loadingMode) {
+  public void showPlaceholder(boolean placeholder) {
+    if (placeholder) {
       if (!projectExplorerPlaceholderWidget.getElement().hasParentElement()) {
         getElement().appendChild(projectExplorerPlaceholderWidget.getElement());
       }
