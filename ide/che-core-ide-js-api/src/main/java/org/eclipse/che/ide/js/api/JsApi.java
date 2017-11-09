@@ -26,7 +26,7 @@ import org.eclipse.che.ide.js.api.resources.ImageRegistry;
 @JsType(namespace = JsPackage.GLOBAL, name = "che")
 public class JsApi {
 
-  @JsIgnore private static JsApi bootstrap;
+  @JsIgnore private static JsApi instance;
 
   @JsProperty private final ActionManager actionManager;
 
@@ -37,27 +37,21 @@ public class JsApi {
   public JsApi(ActionManager actionManager, ImageRegistry imageRegistry) {
     this.actionManager = actionManager;
     this.imageRegistry = imageRegistry;
-    bootstrap = this;
-  }
-
-  @JsMethod(name = "api")
-  public static JsApi getBootstrap() {
-    return bootstrap;
+    instance = this;
   }
 
   @JsIgnore
-  public void initApi() {
-    //    new Timer() {
-    //      @Override
-    //      public void run() {
-    //        ScriptInjector.fromUrl("/_app/plugins/FirstJsGWTPlugin/FirstJsGWTPlugin.nocache.js")
-    //            .inject();
-    //        ScriptElement element = Browser.getWindow().getDocument().createScriptElement();
-    //        element.setSrc("/_app/plugins/FirstJsGWTPlugin/FirstJsGWTPlugin.nocache.js");
-    //        element.setType("text/javascript");
-    //        element.setLang("javascript");
-    //        Browser.getDocument().getHead().appendChild(element);
-    //      }
-    //    }.schedule(2000);
+  public ActionManager getActionManager() {
+    return actionManager;
+  }
+
+  @JsIgnore
+  public ImageRegistry getImageRegistry() {
+    return imageRegistry;
+  }
+
+  @JsMethod(name = "api")
+  public static JsApi getApi() {
+    return instance;
   }
 }

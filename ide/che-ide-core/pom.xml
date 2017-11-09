@@ -95,6 +95,12 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-ide-js-api</artifactId>
+            <version>${project.version}</version>
+            <type>gwt-lib</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-orion-editor</artifactId>
             <type>gwt-lib</type>
         </dependency>

@@ -13,8 +13,21 @@ package org.eclipse.che.ide.js.api.action;
 
 import jsinterop.annotations.JsFunction;
 
-/** @author Yevhen Vydolob */
+/**
+ * Functional interface for update function
+ *
+ * @author Yevhen Vydolob */
 @JsFunction
+@FunctionalInterface
 public interface UpdateAction {
+
+  /**
+   * Updates the state of the action.
+   * This method can be called frequently, for
+   * instance, if an action is added to a toolbar, it will be updated twice a second. This means
+   * that this method is supposed to work really fast, no real work should be done at this phase.
+   *
+   * @param actionData the action state data
+   */
   void updateAction(ActionData actionData);
 }

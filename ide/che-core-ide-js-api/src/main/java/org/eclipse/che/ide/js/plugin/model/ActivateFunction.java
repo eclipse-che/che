@@ -9,16 +9,26 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 
-package org.eclipse.che.ide.js.api.action;
+package org.eclipse.che.ide.js.plugin.model;
 
+import com.google.gwt.core.client.JavaScriptObject;
 import jsinterop.annotations.JsFunction;
+import jsinterop.annotations.JsOverlay;
+import org.eclipse.che.ide.js.api.JsApi;
 
 /**
- * Functional interface for perform function
+ * Functional interface for plugin activate function
  *
- * @author Yevhen Vydolob */
+ * @author Yevhen Vydolob
+ */
 @JsFunction
 @FunctionalInterface
-public interface PerformAction {
-  void performAction(ActionData actionData);
+public interface ActivateFunction {
+
+  @JsOverlay
+  static ActivateFunction of(JavaScriptObject o) {
+    return o.cast();
+  }
+
+  void activate(JsApi api);
 }

@@ -38,6 +38,6 @@ public class PluginException extends RuntimeException {
     if (message == null) {
       message = "";
     }
-    return message +="{Plugin: " + pluginId + "}";
+    return message += "{Plugin: " + pluginId + "}";
   }
 }

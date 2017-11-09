@@ -20,11 +20,11 @@ import jsinterop.annotations.JsType;
  *
  * @author Yevhen Vydolob
  */
-@JsType
+@JsType(isNative = true)
 public interface ImageRegistry {
 
   /**
-   * Register image url. Path should be relative to plugin 'package.json' file
+   * Register image url.
    *
    * @param id the image id
    * @param url the image url

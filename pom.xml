@@ -61,7 +61,7 @@
             <dependency>
                 <groupId>com.google.jsinterop</groupId>
                 <artifactId>jsinterop-annotations</artifactId>
-                <version>1.0.1</version>
+                <version>1.0.2</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.tomcat</groupId>
@@ -671,6 +671,12 @@
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-ide-js-api</artifactId>
                 <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-ide-js-api</artifactId>
+                <version>${che.version}</version>
+                <type>gwt-lib</type>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
@@ -1890,7 +1896,11 @@
                     <codeserverArgs>
                         <arg>-noprecompile</arg>
                         <arg>-noincremental</arg>
+                        <arg>-generateJsInteropExports</arg>
                     </codeserverArgs>
+                    <compilerArgs>
+                        <arg>-generateJsInteropExports</arg>
+                    </compilerArgs>
                     <jvmArgs>
                         <arg>${gwt.compiler.jvmArgs.Xss}</arg>
                         <arg>${gwt.compiler.jvmArgs.Xmx}</arg>

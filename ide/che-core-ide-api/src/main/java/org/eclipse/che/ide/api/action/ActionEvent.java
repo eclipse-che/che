@@ -15,7 +15,7 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.che.commons.annotation.Nullable;
 
 /**
- * Container for the information necessary to execute or update an {@link BaseAction}.
+ * Container for the information necessary to execute or update an {@link Action}.
  *
  * @author Evgen Vidolob
  * @author Dmitry Shnurenko

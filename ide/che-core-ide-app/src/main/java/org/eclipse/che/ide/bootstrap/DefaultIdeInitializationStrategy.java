@@ -130,7 +130,6 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
   }
 
   private Promise<Void> initJsPlugins() {
-    jsApiBootstrapProvider.get().initApi();
     return pluginManagerProvider.get().loadPlugins();
   }
 

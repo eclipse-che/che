@@ -14,7 +14,11 @@ package org.eclipse.che.ide.js.api.action;
 import com.google.gwt.dom.client.Element;
 import jsinterop.annotations.JsType;
 
-/** @author Yevhen Vydolob */
+/**
+ * Container for the information necessary to execute or update an action
+ *
+ * @author Yevhen Vydolob
+ */
 @JsType
 public class ActionData {
 

@@ -11,7 +11,6 @@
 
 package org.eclipse.che.ide.js.plugin;
 
-import com.google.gwt.core.client.ScriptInjector;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import elemental.json.JsonArray;
 import elemental.json.JsonFactory;
@@ -27,9 +26,13 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.js.api.JsApi;
 import org.eclipse.che.ide.js.impl.action.JsActionManager;
 import org.eclipse.che.ide.js.impl.resources.ImageRegistryImpl;
+import org.eclipse.che.ide.js.plugin.model.ActivateFunction;
 import org.eclipse.che.ide.js.plugin.model.PluginContributions;
 import org.eclipse.che.ide.js.plugin.model.PluginManifest;
+import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.requirejs.RequireJsLoader;
+import org.eclipse.che.requirejs.RequirejsModule;
+import org.eclipse.che.requirejs.conf.RequirejsConfig;
 
 /** @author Yevhen Vydolob */
 @Singleton
@@ -100,61 +103,42 @@ public class PluginManager {
   private void doLoadPlugin(AsyncCallback<Void> callback, Iterator<PluginManifest> iterator) {
     if (iterator.hasNext()) {
       PluginManifest pluginManifest = iterator.next();
-      //      RequirejsConfig config = RequirejsConfig.create();
-      String baseUrl = appContext.getMasterApiEndpoint() + "/plugin/";
-      ScriptInjector.fromUrl(
-              baseUrl
-                  + pluginManifest.getPublisher()
-                  + "."
-                  + pluginManifest.getName()
-                  + "-"
-                  + pluginManifest.getVersion()
-                  + "/"
-                  + pluginManifest.getMain())
-          .setWindow(ScriptInjector.TOP_WINDOW)
-          .inject();
-      doLoadPlugin(callback, iterator);
-      //      config.setBaseUrl(baseUrl);
-      //      requireJs.require(
-      //          modules ->
-      //              requireJs.require(
-      //                  namedModules -> {
-      //                    for (int i = 0; i < namedModules.length(); i++) {
-      //                      RequirejsModule module = namedModules.get(i);
-      //                      try {
-      //                        Plugin.of(module).activate(jsApi);
-      //                      } catch (Throwable throwable) {
-      //                        Log.error(getClass(), throwable);
-      //                      }
-      //                    }
-      //
-      //                    doLoadPlugin(callback, iterator);
-      //                  },
-      //                  error -> {
-      //                    Log.error(getClass(), error);
-      //                    callback.onFailure(new
-      // PluginException(error.getMessage(),pluginManifest.getPluginId()));
-      //                  },
-      //                  config,
-      //                  new String[] {pluginManifest.getPluginId()},
-      //                  new String[] {pluginManifest.getPluginId()}),
-      //          error -> {
-      //            Log.error(getClass(), error);
-      //            callback.onFailure(new
-      // PluginException(error.getMessage(),pluginManifest.getPluginId()));
-      //          },
-      //          config,
-      //          new String[] {
-      //            pluginManifest.getPublisher()
-      //                + "."
-      //                + pluginManifest.getName()
-      //                + "-"
-      //                + pluginManifest.getVersion()
-      //                + "/"
-      //                + pluginManifest.getMain().substring(0,
-      // pluginManifest.getMain().lastIndexOf("."))
-      //          },
-      //          new String[] {pluginManifest.getPublisher() + "." + pluginManifest.getName()});
+      RequirejsConfig config = RequirejsConfig.create();
+      String baseUrl =
+          appContext.getMasterApiEndpoint()
+              + "/plugin/"
+              + pluginManifest.getPublisher()
+              + "."
+              + pluginManifest.getName()
+              + "-"
+              + pluginManifest.getVersion();
+      config.setBaseUrl(baseUrl);
+      requireJs.require(
+          modules -> {
+            // Log.error(getClass(), modules);
+            for (int i = 0; i < modules.length(); i++) {
+              RequirejsModule module = modules.get(i);
+              try {
+                ActivateFunction.of(module).activate(jsApi);
+              } catch (Throwable throwable) {
+                Log.error(getClass(), throwable);
+                callback.onFailure(
+                    new PluginException(
+                        "Can't initialize plugin", pluginManifest.getPluginId(), throwable));
+              }
+            }
+
+            doLoadPlugin(callback, iterator);
+          },
+          error -> {
+            Log.error(getClass(), error);
+            doLoadPlugin(callback, iterator);
+          },
+          config,
+          new String[] {
+            pluginManifest.getMain().substring(0, pluginManifest.getMain().lastIndexOf("."))
+          },
+          new String[0]);
     } else {
       callback.onSuccess(null);
     }
