@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.Widget;
 import java.util.Comparator;
 import java.util.List;
 import javax.inject.Inject;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
@@ -120,6 +121,7 @@ public class GitPanelViewImpl extends BaseView<ActionDelegate> implements GitPan
   }
 
   @Override
+  @Nullable
   public String getSelectedRepository() {
     List<Node> selection = repositoriesList.getSelectionModel().getSelectedNodes();
     if (selection.isEmpty()) {

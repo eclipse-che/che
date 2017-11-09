@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.ide.ext.git.client.panel;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelView;
@@ -51,6 +52,7 @@ public interface GitPanelView extends View<GitPanelView.ActionDelegate> {
    * Returns repository which is selected in the repositories list. If nothing selected null will be
    * returned.
    */
+  @Nullable
   String getSelectedRepository();
 
   /** Embed changed files panel ui */

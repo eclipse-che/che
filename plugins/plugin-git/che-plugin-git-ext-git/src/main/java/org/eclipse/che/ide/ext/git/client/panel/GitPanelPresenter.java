@@ -28,6 +28,7 @@ import org.eclipse.che.api.git.shared.RepositoryDeletedEventDto;
 import org.eclipse.che.api.git.shared.RepositoryInitializedEventDto;
 import org.eclipse.che.api.git.shared.StatusChangedEventDto;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.PartStackType;
@@ -47,6 +48,7 @@ import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
 import org.eclipse.che.ide.ext.git.client.compare.MutableAlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelPresenter;
+import org.eclipse.che.ide.resource.Path;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
@@ -73,7 +75,6 @@ public class GitPanelPresenter extends BasePresenter
 
   private boolean initialized;
   private Map<String, MutableAlteredFiles> changes; // project name -> changes
-  private String selectedProjectName;
 
   @Inject
   public GitPanelPresenter(
@@ -117,7 +118,7 @@ public class GitPanelPresenter extends BasePresenter
   @Override
   public void onOpen() {
     if (!initialized) {
-      loadPanelData();
+      exposeGitRepositories();
       registerEventHandlers();
 
       initialized = true;
@@ -125,7 +126,7 @@ public class GitPanelPresenter extends BasePresenter
   }
 
   /** Queries from server all data needed to initialize the panel. */
-  private void loadPanelData() {
+  private void exposeGitRepositories() {
     this.changes = new HashMap<>();
 
     for (Project project : appContext.getProjects()) {
@@ -194,25 +195,19 @@ public class GitPanelPresenter extends BasePresenter
   }
 
   @Override
-  public void onFileChanged(String endpointId, FileChangedEventDto dto) {
-    String projectName = extractProjectName(dto.getPath());
+  public void onFileChanged(String endpointId, FileChangedEventDto fileChangedEvent) {
+    String projectName = extractProjectName(fileChangedEvent.getPath());
     MutableAlteredFiles alteredFiles = changes.get(projectName);
 
-    switch (dto.getStatus()) {
+    switch (fileChangedEvent.getStatus()) {
       case MODIFIED:
-        if (alteredFiles.addFile(removeProjectName(dto.getPath()), Status.MODIFIED)) {
-          view.updateRepositoryChanges(projectName, alteredFiles.getFilesQuantity());
-          if (projectName.equals(selectedProjectName)) {
-            updateChangedFiles(alteredFiles);
-          }
+        if (alteredFiles.addFile(removeProjectName(fileChangedEvent.getPath()), Status.MODIFIED)) {
+          updateRepositoryChangesView(projectName, alteredFiles);
         }
         break;
       case NOT_MODIFIED:
-        if (alteredFiles.removeFile(removeProjectName(dto.getPath()))) {
-          view.updateRepositoryChanges(projectName, alteredFiles.getFilesQuantity());
-          if (projectName.equals(selectedProjectName)) {
-            updateChangedFiles(alteredFiles);
-          }
+        if (alteredFiles.removeFile(removeProjectName(fileChangedEvent.getPath()))) {
+          updateRepositoryChangesView(projectName, alteredFiles);
         }
         break;
       default:
@@ -220,7 +215,7 @@ public class GitPanelPresenter extends BasePresenter
     }
   }
 
-  /** Handles creation and deletion of projects. */
+  /** Handles creation and deletion of projects. Handles deletion of files. */
   @Override
   public void onResourceChanged(ResourceChangedEvent event) {
     ResourceDelta delta = event.getDelta();
@@ -251,29 +246,31 @@ public class GitPanelPresenter extends BasePresenter
         }
       }
     } else {
-      // handle deletion of an item
+      // a node changed
       if (delta.getKind() == ResourceDelta.REMOVED) {
-        String pathToItem = delta.getResource().getLocation().toString();
-        String projectName = extractProjectName(pathToItem);
-        MutableAlteredFiles alteredFiles = changes.get(projectName);
-        if (alteredFiles == null) {
-          // project doesn't have a git repository
-          return;
-        }
-        String itemRelativePath = removeProjectName(pathToItem);
-
-        if (alteredFiles.getStatusByFilePath(itemRelativePath) != Status.ADDED) {
-          alteredFiles.addFile(itemRelativePath, Status.DELETED);
-        } else {
-          alteredFiles.removeFile(itemRelativePath);
-        }
-
-        view.updateRepositoryChanges(projectName, alteredFiles.getFilesQuantity());
-        if (projectName.equals(selectedProjectName)) {
-          updateChangedFiles(alteredFiles);
-        }
+        onItemDeleted(delta);
       }
     }
+  }
+
+  /** Analyzes deleted item in project explorer tree and updates the panel if necessary. */
+  private void onItemDeleted(ResourceDelta delta) {
+    Path pathToItem = delta.getResource().getLocation();
+    String projectName = pathToItem.segment(0);
+    MutableAlteredFiles alteredFiles = changes.get(projectName);
+    if (alteredFiles == null) {
+      // project doesn't have a git repository
+      return;
+    }
+    String itemRelativePath = pathToItem.removeFirstSegments(1).toString();
+
+    if (alteredFiles.getStatusByFilePath(itemRelativePath) != Status.ADDED) {
+      alteredFiles.addFile(itemRelativePath, Status.DELETED);
+    } else {
+      alteredFiles.removeFile(itemRelativePath);
+    }
+
+    updateRepositoryChangesView(projectName, alteredFiles);
   }
 
   @Override
@@ -293,14 +290,28 @@ public class GitPanelPresenter extends BasePresenter
   }
 
   @Override
-  public void onGitStatusChanged(String endpointId, StatusChangedEventDto dto) {
-    updateRepositoryData(dto.getProjectName());
+  public void onGitStatusChanged(String endpointId, StatusChangedEventDto statusChangedEvent) {
+    updateRepositoryData(statusChangedEvent.getProjectName());
   }
 
   @Override
-  public void onGitCheckout(String endpointId, GitCheckoutEventDto dto) {
+  public void onGitCheckout(String endpointId, GitCheckoutEventDto gitCheckoutEvent) {
     // this update is needed to correctly handle checkout with force
-    updateRepositoryData(dto.getProjectName());
+    updateRepositoryData(gitCheckoutEvent.getProjectName());
+  }
+
+  @Override
+  public void onRepositorySelectionChanged(String selectedProjectName) {
+    if (selectedProjectName == null) {
+      updateChangedFiles(new MutableAlteredFiles(null));
+      return;
+    }
+
+    AlteredFiles alteredFilesToShow = changes.get(selectedProjectName);
+    if (alteredFilesToShow == null) {
+      alteredFilesToShow = new MutableAlteredFiles(null);
+    }
+    updateChangedFiles(alteredFilesToShow);
   }
 
   /** Removes first segment from given path. */
@@ -313,19 +324,17 @@ public class GitPanelPresenter extends BasePresenter
     return path.substring(1, path.indexOf('/', 1));
   }
 
-  @Override
-  public void onRepositorySelectionChanged(String selectedProjectName) {
-    this.selectedProjectName = selectedProjectName;
-    if (selectedProjectName == null) {
-      updateChangedFiles(new MutableAlteredFiles(null));
-      return;
+  /**
+   * Updates project status on git panel.
+   *
+   * @param projectName name of repository
+   * @param alteredFiles changed files
+   */
+  private void updateRepositoryChangesView(String projectName, AlteredFiles alteredFiles) {
+    view.updateRepositoryChanges(projectName, alteredFiles.getFilesQuantity());
+    if (projectName.equals(view.getSelectedRepository())) {
+      updateChangedFiles(alteredFiles);
     }
-
-    AlteredFiles alteredFilesToShow = changes.get(selectedProjectName);
-    if (alteredFilesToShow == null) {
-      alteredFilesToShow = new MutableAlteredFiles(null);
-    }
-    updateChangedFiles(alteredFilesToShow);
   }
 
   private void updateChangedFiles(AlteredFiles alteredFiles) {
@@ -344,6 +353,7 @@ public class GitPanelPresenter extends BasePresenter
   }
 
   /** Returns project by its name or null if project with specified name doesn't exist. */
+  @Nullable
   private Project findProjectByName(String projectName) {
     for (Project project : appContext.getProjects()) {
       if (projectName.equals(project.getName())) {

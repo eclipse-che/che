@@ -31,7 +31,7 @@ public class MutableAlteredFiles extends AlteredFiles {
   }
 
   /**
-   * Created mutable altered files list based on changes from another project.
+   * Creates mutable altered files list based on changes from another project.
    *
    * @param project the project under diff operation
    * @param alteredFiles changes from another project
