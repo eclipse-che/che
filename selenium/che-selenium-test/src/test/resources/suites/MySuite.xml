@@ -18,41 +18,6 @@
 
   <test name="all">
     <classes>
-      <class name="org.eclipse.che.selenium.editor.autocomplete.EditorMemberActiveLineForOpenedTabTest"/>
-      <class name="org.eclipse.che.selenium.editor.autocomplete.EditorValidationTest"/>
-      <class name="org.eclipse.che.selenium.editor.autocomplete.FormatterTest">
-        <methods>
-          <exclude name="formatterTest"/>
-        </methods>
-      </class>
-      <class name="org.eclipse.che.selenium.editor.autocomplete.InheritClassTest"/>
-      <class name="org.eclipse.che.selenium.editor.autocomplete.JavaDocPopupTest"/>
-      <class name="org.eclipse.che.selenium.editor.autocomplete.OpenDeclarationTest"/>
-      <class name="org.eclipse.che.selenium.editor.autocomplete.QuickFixAndCodeAssistantFeaturesTest"/>
-      <class name="org.eclipse.che.selenium.editor.autocomplete.ShowHintsCommandTest"/>
-      <class name="org.eclipse.che.selenium.editor.CheckReplaceFeatureInEditorTest"/>
-      <class name="org.eclipse.che.selenium.editor.CheckRestoringSplitEditorTest">
-        <methods>
-          <exclude name="checkRestoringStateSplittedEditor"/>
-        </methods>
-      </class>
-      <class name="org.eclipse.che.selenium.editor.CheckSearchFeatureInEditorTest"/>
-      <class name="org.eclipse.che.selenium.editor.CheckWorkingWithTabByUsingTabListTest"/>
-      <class name="org.eclipse.che.selenium.editor.CheckWorkingWithTabsByUsingContextMenuTest"/>
-      <class name="org.eclipse.che.selenium.editor.ContextMenuEditorTest">
-        <methods>
-          <exclude name="checkClose"/>
-          <exclude name="checkFind"/>
-          <exclude name="checkFormatContextMenu"/>
-          <exclude name="checkNaviFileStructure"/>
-          <exclude name="checkOpenDeclaration"/>
-          <exclude name="checkQuickDocumentation"/>
-          <exclude name="checkQuickFix"/>
-          <exclude name="checkRefactoring"/>
-          <exclude name="checkUndoRedo"/>
-        </methods>
-      </class>
-      <class name="org.eclipse.che.selenium.editor.SplitEditorFeatureTest"/>
       <class name="org.eclipse.che.selenium.factory.CheckFactoryWithPerUserCreatePolicyTest"/>
       <class name="org.eclipse.che.selenium.factory.CheckFactoryWithPerClickCreatePolicyTest"/>
       <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithKeepDirectory"/>
@@ -81,7 +46,7 @@
           <exclude name="createFactoryFromDashBoard"/>
         </methods>
       </class>
-      <class name="org.eclipse.che.selenium.factory.CreateFactoryFromUiWithKeepDirTest"/>
+      <!--<class name="org.eclipse.che.selenium.factory.CreateFactoryFromUiWithKeepDirTest"/>-->
       <class name="org.eclipse.che.selenium.factory.CheckFactoryWithSparseCheckoutTest"/>
     </classes>
   </test>

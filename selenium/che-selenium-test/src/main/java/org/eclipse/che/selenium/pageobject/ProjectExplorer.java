@@ -17,6 +17,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MULTIPLE;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.pageobject.ProjectExplorer.ProjectExplorerOptionsMenuItem.REFRESH_MAIN;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -108,11 +109,11 @@ public class ProjectExplorer {
   }
 
   public interface ProjectExplorerOptionsMenuItem {
-    String MAXIMIZE = "contextMenu/Maximize";
-    String MINIMIZE = "contextMenu/Minimize";
-    String COLLAPSE_ALL = "contextMenu/Collapse All";
-    String REFRESH_MAIN = "contextMenu/Refresh 'main'";
-    String LINK_WITH_EDITOR = "contextMenu/Link with editor";
+    String MAXIMIZE = "gwt-debug-contextMenu/Maximize";
+    String HIDE = "gwt-debug-contextMenu/Hide";
+    String COLLAPSE_ALL = "gwt-debug-contextMenu/collapseAll";
+    String REFRESH_MAIN = "gwt-debug-contextMenu/refreshPathAction";
+    String LINK_WITH_EDITOR = "gwt-debug-contextMenu/linkWithEditor";
   }
 
   @FindBy(id = Locators.PROJECT_EXPLORER_TREE_ITEMS)
@@ -149,7 +150,7 @@ public class ProjectExplorer {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             ExpectedConditions.elementToBeClickable(
-                By.xpath(String.format("//nobr[@id='%s']", menuID))))
+                By.xpath(String.format("//tr[@id='%s']", menuID))))
         .click();
   }
 
@@ -351,9 +352,9 @@ public class ProjectExplorer {
    */
   public void selectItem(String path) {
     String locator = "//div[@path='/" + path + "']/div";
-    waitItem(path);
-    WebElement item = seleniumWebDriver.findElement(By.xpath(locator));
-    item.click();
+    new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
+        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)))
+        .click();
   }
 
   /**
@@ -426,30 +427,44 @@ public class ProjectExplorer {
    * @param path
    */
   public void openItemByPath(String path) {
+    LOG.debug("===========>>>>  openItemByPath 1");
     waitItem(path);
+    LOG.debug("===========>>>>  openItemByPath 2");
     selectItem(path);
+    LOG.debug("===========>>>>  openItemByPath 3");
     waitItemIsSelected(path);
+    LOG.debug("===========>>>>  openItemByPath 4");
     String locator = "//div[@path='/%s']/div";
     WebElement item =
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
             .until(
                 ExpectedConditions.visibilityOfElementLocated(
                     By.xpath(String.format(locator, path))));
+    LOG.debug("===========>>>>  openItemByPath 5");
     try {
-
+      LOG.debug("===========>>>>  openItemByPath try 1");
       item.click();
+      LOG.debug("===========>>>>  openItemByPath try 2");
       waitItemIsSelected(path);
-      actionsFactory.createAction(seleniumWebDriver).doubleClick(item).perform();
+      LOG.debug("===========>>>>  openItemByPath try 3");
+      actionsFactory.createAction(seleniumWebDriver).doubleClick(item).build().perform();
+      LOG.debug("===========>>>>  openItemByPath try 4");
     }
     // sometimes an element in the project explorer may be is not attached to the DOM. We should
     // refresh all items.
     catch (StaleElementReferenceException ex) {
       LOG.error(ex.getLocalizedMessage(), ex);
+      LOG.debug("===========>>>>  openItemByPath catch 1");
       clickOnRefreshTreeButton();
+      LOG.debug("===========>>>>  openItemByPath catch 1");
       waitItem(path);
+      LOG.debug("===========>>>>  openItemByPath catch 1");
       item.click();
+      LOG.debug("===========>>>>  openItemByPath catch 1");
       waitItemIsSelected(path);
+      LOG.debug("===========>>>>  openItemByPath catch 1");
       actionsFactory.createAction(seleniumWebDriver).doubleClick(item).perform();
+      LOG.debug("===========>>>>  openItemByPath catch 1");
     }
     loader.waitOnClosed();
   }
@@ -671,9 +686,8 @@ public class ProjectExplorer {
 
   /** wait refresh button and click this one */
   public void clickOnRefreshTreeButton() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(refreshProjectButton))
-        .click();
+    clickOnProjectExplorerOptionsButton();
+    clickOnOptionsMenuItem(REFRESH_MAIN);
   }
 
   public void clickOnImportProjectLink(int userTimeout) {
