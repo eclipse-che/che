@@ -27,7 +27,6 @@ import java.nio.file.WatchService;
 import java.util.function.Consumer;
 import org.eclipse.che.api.search.server.excludes.DotCheExcludeMatcher;
 import org.eclipse.che.api.search.server.excludes.DotNumberSignExcludeMatcher;
-import org.eclipse.che.api.search.server.excludes.MediaTypesExcludeMatcher;
 import org.eclipse.che.api.watcher.server.detectors.EditorFileOperationHandler;
 import org.eclipse.che.api.watcher.server.detectors.EditorFileTracker;
 import org.eclipse.che.api.watcher.server.detectors.ProjectTreeTracker;
@@ -46,7 +45,6 @@ public class FileWatcherApiModule extends AbstractModule {
     Multibinder<PathMatcher> fileWatcherExcludes =
         newSetBinder(
             binder(), PathMatcher.class, Names.named("che.user.workspaces.storage.excludes"));
-    fileWatcherExcludes.addBinding().to(MediaTypesExcludeMatcher.class);
     fileWatcherExcludes.addBinding().to(DotCheExcludeMatcher.class);
     fileWatcherExcludes.addBinding().to(DotNumberSignExcludeMatcher.class);
 
