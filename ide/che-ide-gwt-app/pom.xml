@@ -39,6 +39,16 @@
             <type>gwt-lib</type>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-keycloak-ide</artifactId>
+            <type>gwt-lib</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-machine-authentication-ide</artifactId>
+            <type>gwt-lib</type>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-activity-ide</artifactId>
             <type>gwt-lib</type>
@@ -359,6 +369,31 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>compilation-mappings-properties</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <length property="compilation-mappings-properties" mode="each">
+                                    <fileset dir="${project.build.directory}/${project.artifactId}-${project.version}/_app">
+                                        <include name="**/*.cache.js"/>
+                                    </fileset>
+                                </length>
+                                <echo append="false" file="${project.build.directory}/${project.artifactId}-${project.version}/_app/compilation-mappings.properties">${compilation-mappings-properties}</echo>
+                                <replace file="${project.build.directory}/${project.artifactId}-${project.version}/_app/compilation-mappings.properties" token="${project.build.directory}/${project.artifactId}-${project.version}/_app/" value=""/>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>
+

@@ -508,6 +508,13 @@ public interface Theme {
    */
   String editorPanelBackgroundColor();
 
+  /**
+   * Background color for editor tabs panel.
+   *
+   * @return the color
+   */
+  String editorTabsBackgroundColor();
+
   /** @return border color for editor panel */
   String editorPanelBorderColor();
 
