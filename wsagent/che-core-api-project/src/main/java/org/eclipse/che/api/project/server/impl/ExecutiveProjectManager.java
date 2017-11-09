@@ -199,6 +199,12 @@ public class ExecutiveProjectManager implements ProjectManager {
       throws ServerException, ForbiddenException, NotFoundException, ConflictException {
     fsManager.delete(wsPath);
 
+    projectConfigRegistry
+            .getAll(wsPath)
+            .stream()
+            .map(RegisteredProject::getPath)
+            .forEach(projectConfigRegistry::remove);
+
     return projectConfigRegistry.remove(wsPath);
   }
 
