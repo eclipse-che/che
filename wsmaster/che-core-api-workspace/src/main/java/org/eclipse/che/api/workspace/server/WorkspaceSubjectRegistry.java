@@ -78,8 +78,11 @@ public class WorkspaceSubjectRegistry implements EventSubscriber<WorkspaceStatus
     if (WorkspaceStatusEvent.EventType.STARTING.equals(event.getEventType())) {
       Subject subject = EnvironmentContext.getCurrent().getSubject();
       if (subject == Subject.ANONYMOUS) {
-        LOG.warn("Workspace {} is being started by the 'anonymous' user.", workspaceId);
-        return;
+        throw new IllegalStateException(
+            "Workspace "
+                + workspaceId
+                + " is being started by the 'Anonymous' user.\n"
+                + "This shouldn't happen, and workspaces should always be created by a real user.");
       }
       userIdToWorkspaces.put(subject.getUserId(), workspaceId);
       updateSubject(subject);
