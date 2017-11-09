@@ -32,6 +32,7 @@ public class DockerContainerConfig {
   private String cpuSet;
   private List<String> dependsOn;
   private List<String> dns;
+  private List<String> securityOpt;
   private List<String> entrypoint;
   private Map<String, String> environment;
   private List<String> expose;
@@ -69,6 +70,9 @@ public class DockerContainerConfig {
     }
     if (container.getDns() != null) {
       dns = new ArrayList<>(container.getDns());
+    }
+    if (container.getSecurityOpt() != null) {
+      securityOpt = new ArrayList<>(container.getSecurityOpt());
     }
     if (container.getEntrypoint() != null) {
       entrypoint = new ArrayList<>(container.getEntrypoint());
@@ -423,6 +427,21 @@ public class DockerContainerConfig {
     return this;
   }
 
+  public List<String> getSecurityOpt() {
+    if (securityOpt == null) {
+      securityOpt = new ArrayList<>();
+    }
+    return securityOpt;
+  }
+
+  public DockerContainerConfig setSecurityOpt(List<String> securityOpt) {
+    if (securityOpt != null) {
+      securityOpt = new ArrayList<>(securityOpt);
+    }
+    this.securityOpt = securityOpt;
+    return this;
+  }
+
   public List<String> getExtraHosts() {
     if (extraHosts == null) {
       extraHosts = new ArrayList<>();
@@ -515,6 +534,7 @@ public class DockerContainerConfig {
         && Objects.equals(getCpuSet(), that.getCpuSet())
         && Objects.equals(getDependsOn(), that.getDependsOn())
         && Objects.equals(getDns(), that.getDns())
+        && Objects.equals(getSecurityOpt(), that.getSecurityOpt())
         && Objects.equals(getEntrypoint(), that.getEntrypoint())
         && Objects.equals(getEnvironment(), that.getEnvironment())
         && Objects.equals(getExpose(), that.getExpose())
@@ -546,6 +566,7 @@ public class DockerContainerConfig {
         getCpuSet(),
         getDependsOn(),
         getDns(),
+        getSecurityOpt(),
         getEntrypoint(),
         getEnvironment(),
         getExpose(),
@@ -615,6 +636,8 @@ public class DockerContainerConfig {
         + networks
         + ", ports="
         + ports
+        + ", SecurityOpt="
+        + securityOpt
         + ", volumes="
         + volumes
         + ", volumesFrom="

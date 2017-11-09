@@ -333,14 +333,20 @@ public class ContainerConfig {
     return this;
   }
 
+  /*
+   * There is no "SecurityOpts" in the docker specification, only "HostConfig":{"SecurityOpt":[]}.
+   */
+  @Deprecated
   public String[] getSecurityOpts() {
     return securityOpts;
   }
 
+  @Deprecated
   public void setSecurityOpts(String[] securityOpts) {
     this.securityOpts = securityOpts;
   }
 
+  @Deprecated
   public ContainerConfig withSecurityOpts(String[] securityOpts) {
     this.securityOpts = securityOpts;
     return this;

@@ -27,6 +27,18 @@ public interface ProcessesListView extends View<ProcessesListView.ActionDelegate
   /** Informs view that the specified {@code process} has been stopped. */
   void processStopped(Process process);
 
+  /** Switches widget into loading mode. */
+  void setLoadMode();
+
+  /** Sets new value of progress bar for loading mode. */
+  void setLoadingProgress(int percents);
+
+  /** Sets new text for loading mode. */
+  void setLoadingMessage(String message);
+
+  /** Switches widget into execution mode. */
+  void setExecMode();
+
   interface ActionDelegate {
 
     /** Called when process has been chosen. */

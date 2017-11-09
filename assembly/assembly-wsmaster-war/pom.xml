@@ -174,6 +174,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-db-vendor-postgresql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-ide-stacks</artifactId>
         </dependency>
         <dependency>
@@ -203,6 +207,58 @@
         <dependency>
             <groupId>org.eclipse.che.lib</groupId>
             <artifactId>che-swagger-module</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-api-authorization-impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-api-organization</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-api-resource</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-keycloak-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-keycloak-token-provider</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-machine-authentication</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-permission-factory</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-permission-resource</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-permission-system</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-permission-user</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-permission-workspace</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-personal-account</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-sql-schema</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
@@ -247,6 +303,10 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

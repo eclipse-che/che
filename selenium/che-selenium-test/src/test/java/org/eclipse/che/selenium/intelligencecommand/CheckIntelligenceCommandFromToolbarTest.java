@@ -13,7 +13,6 @@ package org.eclipse.che.selenium.intelligencecommand;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MULTIPLE;
-import static org.eclipse.che.selenium.core.constant.TestWorkspaceConstants.RUNNING_WORKSPACE_MESS;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -67,7 +66,6 @@ public class CheckIntelligenceCommandFromToolbarTest {
     checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
     consoles.waitExpectedTextIntoConsole(" Server startup in");
     seleniumWebDriver.navigate().refresh();
-    notificationsPanel.waitExpectedMessageOnProgressPanelAndClosed(RUNNING_WORKSPACE_MESS);
     projectExplorer.waitProjectExplorer();
     consoles.clickOnPreviewUrl();
     checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
@@ -86,7 +84,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
     checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
     Assert.assertTrue(commandsToolbar.getTimerValue().matches("\\d\\d:\\d\\d"));
     Assert.assertTrue(commandsToolbar.getNumOfProcessCounter().equals("#2"));
-    commandsToolbar.clickOnPreviewCommandBtnAndSelectUrl("dev-machine:8080");
+    commandsToolbar.clickOnPreviewCommandBtnAndSelectUrl("dev-machine:tomcat8");
     checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
     commandsToolbar.clickExecStopBtn();
     commandsToolbar.clickWithHoldAndLaunchDebuCmdFromList(PROJECT_NAME + ": debug");

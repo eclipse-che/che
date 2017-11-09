@@ -112,6 +112,14 @@
                 </excludes>
             </unpackOptions>
         </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>lib</outputDirectory>
+            <includes>
+                <include>org.postgresql:postgresql</include>
+            </includes>
+        </dependencySet>
     </dependencySets>
     <fileSets>
         <fileSet>
@@ -132,6 +140,10 @@
               <include>LICENSE</include>
               <include>README</include>
            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>${project.build.directory}/keycloak/</directory>
+            <outputDirectory>tomcat/lib</outputDirectory>
         </fileSet>
     </fileSets>
       <files>
