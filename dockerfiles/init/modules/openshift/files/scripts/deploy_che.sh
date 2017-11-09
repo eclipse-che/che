@@ -267,7 +267,7 @@ echo "done!"
 # -------------------------------------------------------------
 if [ "${COMMAND}" == "cleanup" ]; then
   echo "[CHE] Stopping the Che server..."
-  oc scale --replicas=0 --timeout=3h dc che
+  oc scale --replicas=0 --timeout=3m dc che
   echo "[CHE] Deleting all OpenShift objects..."
   oc delete all --all 
   echo "[CHE] Cleanup successfully started. Use \"oc get all\" to verify that all resources have been deleted."
