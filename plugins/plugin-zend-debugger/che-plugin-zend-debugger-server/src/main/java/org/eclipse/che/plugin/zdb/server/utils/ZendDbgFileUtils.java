@@ -11,7 +11,9 @@ package org.eclipse.che.plugin.zdb.server.utils;
 
 import com.google.inject.Singleton;
 import javax.inject.Inject;
-import org.eclipse.che.api.fs.server.PathTransformer;
+import javax.inject.Provider;
+import org.eclipse.che.api.fs.server.FsManager;
+import org.eclipse.che.api.project.server.ProjectManager;
 
 /**
  * Zend debug utils.
@@ -21,19 +23,13 @@ import org.eclipse.che.api.fs.server.PathTransformer;
 @Singleton
 public class ZendDbgFileUtils {
 
-  private final PathTransformer pathTransformer;
+  public static Provider<ProjectManager> projectManagerProvider;
+  public static Provider<FsManager> fsManagerProvider;
 
   @Inject
-  public ZendDbgFileUtils(PathTransformer pathTransformer) {
-    this.pathTransformer = pathTransformer;
-  }
-
-  /**
-   * Returns local file absolute path.
-   *
-   * @return local file absolute path
-   */
-  public String findAbsolutePath(String wsPath) {
-    return pathTransformer.transform(wsPath).toString();
+  public ZendDbgFileUtils(
+      Provider<ProjectManager> projectManagerProvider, Provider<FsManager> fsManagerProvider) {
+    ZendDbgFileUtils.projectManagerProvider = projectManagerProvider;
+    ZendDbgFileUtils.fsManagerProvider = fsManagerProvider;
   }
 }

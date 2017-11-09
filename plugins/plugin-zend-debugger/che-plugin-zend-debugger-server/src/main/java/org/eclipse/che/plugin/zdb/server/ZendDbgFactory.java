@@ -16,6 +16,7 @@ import org.eclipse.che.api.debugger.server.Debugger;
 import org.eclipse.che.api.debugger.server.DebuggerFactory;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 import org.eclipse.che.plugin.zdb.server.connection.ZendDbgSettings;
+import org.eclipse.che.plugin.zdb.server.utils.ZendDbgFileUtils;
 
 /**
  * Zend debugger for PHP factory.
@@ -74,18 +75,11 @@ public class ZendDbgFactory implements DebuggerFactory {
 
     boolean useSslEncryption = Boolean.valueOf(useSslEncryptionProp);
 
-    //        return new ZendDebugger(
-    //            new ZendDbgSettings(debugPort, clientHostIPProp, breakAtFirstLine,
-    // useSslEncryption),
-    //            new ZendDbgLocationHandler(pathResolver, fsManager, projectManager),
-    //            debuggerCallback,
-    //            pathResolver,
-    //            projectManager,
-    //            fsManager);
-
     return new ZendDebugger(
         new ZendDbgSettings(debugPort, clientHostIPProp, breakAtFirstLine, useSslEncryption),
-        new ZendDbgLocationHandler(null, null),
+        new ZendDbgLocationHandler(
+            ZendDbgFileUtils.fsManagerProvider.get(),
+            ZendDbgFileUtils.projectManagerProvider.get()),
         debuggerCallback,
         null);
   }
