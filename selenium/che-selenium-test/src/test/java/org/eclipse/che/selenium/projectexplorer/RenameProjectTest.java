@@ -55,7 +55,6 @@ public class RenameProjectTest {
   public void renameProjectTest() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.selectItem(PROJECT_NAME);
 
     // Rename project from context menu
     projectExplorer.selectItem(PROJECT_NAME);
