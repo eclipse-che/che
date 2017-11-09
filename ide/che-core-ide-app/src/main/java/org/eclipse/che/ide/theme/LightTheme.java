@@ -1300,6 +1300,11 @@ public class LightTheme implements Theme {
   }
 
   @Override
+  public String checkBoxIndeterminateIconColor() {
+    return "#b7b7b7";
+  }
+
+  @Override
   public String checkBoxFontColor() {
     return this.getTextFieldColor();
   }

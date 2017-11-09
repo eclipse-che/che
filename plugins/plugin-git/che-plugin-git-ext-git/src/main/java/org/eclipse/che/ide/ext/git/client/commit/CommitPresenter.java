@@ -40,7 +40,8 @@ import org.eclipse.che.ide.ext.git.client.DateTimeFormatter;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
-import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelPresenter;
+import org.eclipse.che.ide.ext.git.client.compare.selectablechangespanel.SelectableChangesPanelPresenter;
+import org.eclipse.che.ide.ext.git.client.compare.selectablechangespanel.SelectionCallBack;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
@@ -55,10 +56,10 @@ import org.eclipse.che.ide.ui.dialogs.DialogFactory;
  * @author Igor Vinokur
  */
 @Singleton
-public class CommitPresenter implements CommitView.ActionDelegate {
+public class CommitPresenter implements CommitView.ActionDelegate, SelectionCallBack {
   private static final String COMMIT_COMMAND_NAME = "Git commit";
 
-  private final ChangesPanelPresenter changesPanelPresenter;
+  private final SelectableChangesPanelPresenter selectableChangesPanelPresenter;
   private final DialogFactory dialogFactory;
   private final AppContext appContext;
   private final CommitView view;
@@ -70,14 +71,12 @@ public class CommitPresenter implements CommitView.ActionDelegate {
   private final ProcessesPanelPresenter consolesPanelPresenter;
 
   private Project project;
-  private List<String> allFiles;
-  private List<String> filesToCommit;
 
   @Inject
   public CommitPresenter(
       CommitView view,
       GitServiceClient service,
-      ChangesPanelPresenter changesPanelPresenter,
+      SelectableChangesPanelPresenter selectableChangesPanelPresenter,
       GitLocalizationConstant constant,
       NotificationManager notificationManager,
       DialogFactory dialogFactory,
@@ -86,7 +85,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
       GitOutputConsoleFactory gitOutputConsoleFactory,
       ProcessesPanelPresenter processesPanelPresenter) {
     this.view = view;
-    this.changesPanelPresenter = changesPanelPresenter;
+    this.selectableChangesPanelPresenter = selectableChangesPanelPresenter;
     this.dialogFactory = dialogFactory;
     this.appContext = appContext;
     this.dateTimeFormatter = dateTimeFormatter;
@@ -97,8 +96,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
     this.constant = constant;
     this.notificationManager = notificationManager;
 
-    this.filesToCommit = new ArrayList<>();
-    this.view.setChangesPanelView(changesPanelPresenter.getView());
+    this.view.setChangesPanelView(selectableChangesPanelPresenter.getView());
   }
 
   public void showDialog(Project project) {
@@ -174,14 +172,12 @@ public class CommitPresenter implements CommitView.ActionDelegate {
 
   private void show(@Nullable String diff) {
     AlteredFiles alteredFiles = new AlteredFiles(project, diff);
-    filesToCommit.clear();
-    allFiles = alteredFiles.getAlteredFilesList();
 
     view.setEnableCommitButton(!view.getMessage().isEmpty());
     view.focusInMessageField();
     view.showDialog();
-    changesPanelPresenter.show(alteredFiles);
-    view.setMarkedCheckBoxes(
+    selectableChangesPanelPresenter.show(alteredFiles, this);
+    selectableChangesPanelPresenter.setMarkedCheckBoxes(
         stream(appContext.getResources())
             .map(resource -> resource.getLocation().removeFirstSegments(1))
             .collect(Collectors.toSet()));
@@ -218,9 +214,10 @@ public class CommitPresenter implements CommitView.ActionDelegate {
   }
 
   private Path[] getFilesToCommitArray() {
-    Path[] filesToCommitArray = new Path[filesToCommit.size()];
-    filesToCommit.forEach(
-        file -> filesToCommitArray[filesToCommit.indexOf(file)] = Path.valueOf(file));
+    List<String> selectedFiles = selectableChangesPanelPresenter.getSelectedFiles();
+    Path[] filesToCommitArray = new Path[selectedFiles.size()];
+    selectedFiles.forEach(
+        file -> filesToCommitArray[selectedFiles.indexOf(file)] = Path.valueOf(file));
 
     return filesToCommitArray;
   }
@@ -249,7 +246,13 @@ public class CommitPresenter implements CommitView.ActionDelegate {
   @Override
   public void onValueChanged() {
     view.setEnableCommitButton(
-        !view.getMessage().isEmpty() && (!filesToCommit.isEmpty() || view.isAmend()));
+        !view.getMessage().isEmpty()
+            && (!selectableChangesPanelPresenter.getSelectedFiles().isEmpty() || view.isAmend()));
+  }
+
+  @Override
+  public void onSelectionChanged() {
+    onValueChanged();
   }
 
   @Override
@@ -278,20 +281,6 @@ public class CommitPresenter implements CommitView.ActionDelegate {
                 notificationManager.notify(constant.logFailed(), FAIL, NOT_EMERGE_MODE);
               }
             });
-  }
-
-  @Override
-  public void onFileNodeCheckBoxValueChanged(Path path, boolean newCheckBoxValue) {
-    if (newCheckBoxValue) {
-      filesToCommit.add(path.toString());
-    } else {
-      filesToCommit.remove(path.toString());
-    }
-  }
-
-  @Override
-  public List<String> getChangedFiles() {
-    return allFiles;
   }
 
   private void onCommitSuccess(@NotNull final Revision revision) {
