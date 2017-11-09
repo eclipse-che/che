@@ -20,6 +20,10 @@ import com.google.gwt.inject.client.multibindings.GinMapBinder;
 import com.google.inject.Singleton;
 import org.eclipse.che.ide.processes.actions.AddTabMenuFactory;
 import org.eclipse.che.ide.processes.actions.ConsoleTreeContextMenuFactory;
+import org.eclipse.che.ide.processes.loading.WorkspaceLoadingTracker;
+import org.eclipse.che.ide.processes.loading.WorkspaceLoadingTrackerImpl;
+import org.eclipse.che.ide.processes.loading.WorkspaceLoadingTrackerView;
+import org.eclipse.che.ide.processes.loading.WorkspaceLoadingTrackerViewImpl;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelView;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelViewImpl;
 
@@ -27,7 +31,11 @@ import org.eclipse.che.ide.processes.panel.ProcessesPanelViewImpl;
 public class ProcessesGinModule extends AbstractGinModule {
   @Override
   protected void configure() {
+    bind(WorkspaceLoadingTracker.class).to(WorkspaceLoadingTrackerImpl.class).in(Singleton.class);
     bind(ProcessesPanelView.class).to(ProcessesPanelViewImpl.class).in(Singleton.class);
+    bind(WorkspaceLoadingTrackerView.class)
+        .to(WorkspaceLoadingTrackerViewImpl.class)
+        .in(Singleton.class);
     install(new GinFactoryModuleBuilder().build(ConsoleTreeContextMenuFactory.class));
     install(new GinFactoryModuleBuilder().build(AddTabMenuFactory.class));
 

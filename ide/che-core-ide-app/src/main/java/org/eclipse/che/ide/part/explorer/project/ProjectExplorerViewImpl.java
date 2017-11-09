@@ -58,16 +58,21 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
 
   private static final String PROJECT_TREE_WIDGET_ID = "projectTree";
 
+  private ProjectExplorerPlaceholderWidget projectExplorerPlaceholderWidget;
+
   @Inject
   public ProjectExplorerViewImpl(
       final ContextMenu contextMenu,
       final CoreLocalizationConstant coreLocalizationConstant,
       final Set<NodeInterceptor> nodeInterceptorSet,
       final SkipHiddenNodesInterceptor skipHiddenNodesInterceptor,
-      final EmptyTreePanel emptyTreePanel) {
+      final EmptyTreePanel emptyTreePanel,
+      final ProjectExplorerPlaceholderWidget projectExplorerPlaceholderWidget) {
     this.skipHiddenNodesInterceptor = skipHiddenNodesInterceptor;
 
     setTitle(coreLocalizationConstant.projectExplorerTitleBarText());
+
+    this.projectExplorerPlaceholderWidget = projectExplorerPlaceholderWidget;
 
     NodeStorage nodeStorage = new NodeStorage();
 
@@ -263,6 +268,19 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
         }
       }
       return element;
+    }
+  }
+
+  @Override
+  public void showPlaceholder(boolean placeholder) {
+    if (placeholder) {
+      if (!projectExplorerPlaceholderWidget.getElement().hasParentElement()) {
+        getElement().appendChild(projectExplorerPlaceholderWidget.getElement());
+      }
+    } else {
+      if (projectExplorerPlaceholderWidget.getElement().hasParentElement()) {
+        getElement().removeChild(projectExplorerPlaceholderWidget.getElement());
+      }
     }
   }
 }

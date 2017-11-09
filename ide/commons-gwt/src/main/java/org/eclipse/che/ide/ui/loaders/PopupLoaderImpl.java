@@ -67,9 +67,6 @@ public class PopupLoaderImpl extends Composite implements PopupLoader {
     titleLabel.setText(title);
     descriptionLabel.setText(description);
 
-    // Start show animation
-    getElement().addClassName("inDown");
-
     // Attach to the root
     RootPanel.get().add(this);
 

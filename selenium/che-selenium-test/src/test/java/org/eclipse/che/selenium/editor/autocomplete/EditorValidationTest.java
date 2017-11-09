@@ -75,6 +75,7 @@ public class EditorValidationTest {
     editor.setCursorToLine(28);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor("\n");
+    editor.waitAllMarkersDisappear(ERROR_MARKER);
     editor.typeTextIntoEditor(TEXT_FOR_WARNING);
     editor.waitMarkerInPosition(WARNING_MARKER, 29);
     editor.waitAnnotationCodeAssistIsClosed();

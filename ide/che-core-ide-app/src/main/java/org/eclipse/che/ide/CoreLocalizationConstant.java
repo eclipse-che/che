@@ -1216,4 +1216,19 @@ public interface CoreLocalizationConstant extends Messages {
 
   @Key("failed.to.find.machine")
   String failedToFindMachine(String machineId);
+
+  @Key("menu.loader.machineStarting")
+  String menuLoaderMachineStarting(String machine);
+
+  @Key("menu.loader.machineRunning")
+  String menuLoaderMachineRunning(String machine);
+
+  @Key("menu.loader.workspaceStarted")
+  String menuLoaderWorkspaceStarted();
+
+  @Key("menu.loader.waitingWorkspace")
+  String menuLoaderWaitingWorkspace();
+
+  @Key("menu.loader.pullingImage")
+  String menuLoaderPullingImage(String image);
 }
