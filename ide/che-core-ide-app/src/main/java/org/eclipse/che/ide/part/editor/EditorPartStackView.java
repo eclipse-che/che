@@ -162,7 +162,7 @@ public class EditorPartStackView extends ResizeComposite
    */
   public void addPaneMenuButton(@NotNull EditorPaneMenu editorPaneMenu) {
     this.editorPaneMenu = editorPaneMenu;
-    tabsPanel.add(editorPaneMenu);
+    menuPanel.add(editorPaneMenu);
   }
 
   /** {@inheritDoc} */

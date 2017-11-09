@@ -18,6 +18,8 @@ public interface Breakpoint {
   /** Indicates if it is enabled or not. */
   boolean isEnabled();
 
+  void setEnabled(boolean enabled);
+
   /** The condition. */
   String getCondition();
 

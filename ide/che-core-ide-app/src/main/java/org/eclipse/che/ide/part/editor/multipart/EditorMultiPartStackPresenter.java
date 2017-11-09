@@ -18,7 +18,9 @@ import com.google.web.bindery.event.shared.EventBus;
 import java.util.LinkedList;
 import java.util.List;
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.parts.ActivePartChangedEvent;
@@ -28,6 +30,10 @@ import org.eclipse.che.ide.api.parts.EditorMultiPartStackState;
 import org.eclipse.che.ide.api.parts.EditorPartStack;
 import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.api.parts.PartPresenter;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppingEvent;
 
 /**
  * Presenter to control the displaying of multi editors.
@@ -49,12 +55,22 @@ public class EditorMultiPartStackPresenter
   public EditorMultiPartStackPresenter(
       EventBus eventBus,
       EditorMultiPartStackView view,
-      Provider<EditorPartStack> editorPartStackFactory) {
+      Provider<EditorPartStack> editorPartStackFactory,
+      AppContext appContext) {
     this.view = view;
     this.editorPartStackFactory = editorPartStackFactory;
     this.partStackPresenters = new LinkedList<>();
 
     eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
+
+    eventBus.addHandler(WorkspaceStoppingEvent.TYPE, event -> view.showPlaceholder(true));
+    eventBus.addHandler(WorkspaceStoppedEvent.TYPE, event -> view.showPlaceholder(true));
+    eventBus.addHandler(WorkspaceStartingEvent.TYPE, event -> view.showPlaceholder(true));
+    eventBus.addHandler(WorkspaceRunningEvent.TYPE, event -> view.showPlaceholder(false));
+
+    if (WorkspaceStatus.RUNNING != appContext.getWorkspace().getStatus()) {
+      view.showPlaceholder(true);
+    }
   }
 
   @Override

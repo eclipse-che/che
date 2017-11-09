@@ -20,11 +20,14 @@ import static org.openqa.selenium.By.id;
 import static org.openqa.selenium.By.tagName;
 import static org.openqa.selenium.By.xpath;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
+import static org.testng.Assert.assertEquals;
 
 import com.google.common.base.Function;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -106,7 +109,9 @@ public class DebugPanel {
   private interface BreakpointsPanel {
     String ID = "gwt-debug-debugger-breakpointsPanel";
     String BREAKPOINT_ITEM = "//div[@id='gwt-debug-debugger-breakpointsPanel']//td[text()='%s']";
-    String CONTEXT_MENU = "gwt-debug-contextMenu/breakpointSettings";
+    String CONTEXT_MENU_CONFIGURE_BREAKPOINT = "contextMenu/Configure";
+    String CONTEXT_MENU_DISABLE_BREAKPOINT = "contextMenu/Disable";
+    String CONTEXT_MENU_DELETE_BREAKPOINT = "contextMenu/Delete";
   }
 
   private interface BreakpointConfigurationWindow {
@@ -114,6 +119,12 @@ public class DebugPanel {
         "//div[@id='gwt-debug-breakpoint-configuration-window']//textarea[@id='gwt-debug-breakpoint-condition-text']";
     String APPLY_BTN =
         "//div[@id='gwt-debug-breakpoint-configuration-window']//button[@id='gwt-debug-apply-btn']";
+  }
+
+  public enum BreakpointState {
+    ACTIVE,
+    INACTIVE,
+    DISABLED
   }
 
   @FindBy(id = BreakpointsPanel.ID)
@@ -498,7 +509,7 @@ public class DebugPanel {
 
     seleniumWebDriver
         .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(id(BreakpointsPanel.CONTEXT_MENU)))
+        .until(visibilityOfElementLocated(id(BreakpointsPanel.CONTEXT_MENU_CONFIGURE_BREAKPOINT)))
         .click();
 
     seleniumWebDriver
@@ -526,5 +537,84 @@ public class DebugPanel {
         .doubleClick(seleniumWebDriver.findElement(xpath(breakpointItem)))
         .build()
         .perform();
+  }
+
+  public void disableBreakpoint(String fileName, int lineNumber) {
+    String breakpointItem = format(BreakpointsPanel.BREAKPOINT_ITEM, fileName + ":" + lineNumber);
+
+    seleniumWebDriver
+        .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(xpath(breakpointItem)));
+
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .contextClick(seleniumWebDriver.findElement(xpath(breakpointItem)))
+        .build()
+        .perform();
+
+    seleniumWebDriver
+        .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(id(BreakpointsPanel.CONTEXT_MENU_DISABLE_BREAKPOINT)))
+        .click();
+  }
+
+  public void deleteBreakpoint(String fileName, int lineNumber) {
+    String breakpointItem = format(BreakpointsPanel.BREAKPOINT_ITEM, fileName + ":" + lineNumber);
+
+    seleniumWebDriver
+        .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(xpath(breakpointItem)));
+
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .contextClick(seleniumWebDriver.findElement(xpath(breakpointItem)))
+        .build()
+        .perform();
+
+    seleniumWebDriver
+        .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(id(BreakpointsPanel.CONTEXT_MENU_DELETE_BREAKPOINT)))
+        .click();
+  }
+
+  public List<String> getAllBreakpoints() {
+    return Stream.of(
+            seleniumWebDriver
+                .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+                .until(visibilityOfElementLocated(id(BreakpointsPanel.ID)))
+                .getText()
+                .split("\n"))
+        .filter(s -> !s.equals("?"))
+        .collect(Collectors.toList());
+  }
+
+  public void waitBreakpointState(
+      String filePath, int lineNumber, BreakpointState state, boolean conditional) {
+
+    String brkClass = "breakpoint";
+    switch (state) {
+      case ACTIVE:
+        brkClass += " active";
+        break;
+      case INACTIVE:
+        brkClass += " inactive";
+        break;
+      default:
+        brkClass += " disabled";
+    }
+
+    WebElement webElement =
+        seleniumWebDriver
+            .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+            .until(
+                visibilityOfElementLocated(
+                    xpath(
+                        format(
+                            "//div[@id='gwt-debug-debugger-breakpointsPanel']//div[@id='%s' and @class='%s']",
+                            filePath + ":" + lineNumber, brkClass))));
+
+    if (conditional) {
+      assertEquals(webElement.getText(), "?");
+    }
   }
 }

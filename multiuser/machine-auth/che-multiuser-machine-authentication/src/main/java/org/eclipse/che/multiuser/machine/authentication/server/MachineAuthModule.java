@@ -31,8 +31,6 @@ public class MachineAuthModule extends AbstractModule {
     bindInterceptor(subclassesOf(WorkspaceRuntimes.class), names("startAsync"), tokenInterceptor);
 
     bind(MachineSessionInvalidator.class).asEagerSingleton();
-    bind(MachineTokenPermissionsFilter.class);
-    bind(MachineTokenService.class);
 
     bind(MachineTokenProvider.class).to(MachineTokenProviderImpl.class);
   }

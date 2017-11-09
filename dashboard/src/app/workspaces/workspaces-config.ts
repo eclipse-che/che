@@ -147,6 +147,8 @@ import {EditMachineServerDialogController} from './workspace-details/workspace-m
 import {MachineAgents} from './workspace-details/workspace-machine-agents/machine-agents.directive';
 import {MachineAgentsController} from './workspace-details/workspace-machine-agents/machine-agents.controller';
 import {CheWorkspace} from '../../components/api/workspace/che-workspace.factory';
+import {WorkspaceWarnings} from './workspace-details/warnings/workspace-warnings.directive';
+import {WorkspaceWarningsController} from './workspace-details/warnings/workspace-warnings.controller';
 
 /**
  * @ngdoc controller
@@ -176,6 +178,9 @@ export class WorkspacesConfig {
 
     register.directive('cheWorkspaceStatus', CheWorkspaceStatus);
     register.controller('WorkspaceStatusController', WorkspaceStatusController);
+
+    register.directive('workspaceWarnings', WorkspaceWarnings);
+    register.controller('WorkspaceWarningsController', WorkspaceWarningsController);
 
     register.directive('workspaceEditModeOverlay', WorkspaceEditModeOverlay);
     register.directive('workspaceEditModeToolbarButton', WorkspaceEditModeToolbarButton);

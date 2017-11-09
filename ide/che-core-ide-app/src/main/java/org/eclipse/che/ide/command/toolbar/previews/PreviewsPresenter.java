@@ -20,6 +20,7 @@ import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
+import org.eclipse.che.ide.api.command.CommandsLoadedEvent;
 import org.eclipse.che.ide.api.command.exec.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.command.exec.ProcessFinishedEvent;
 import org.eclipse.che.ide.api.command.exec.ProcessStartedEvent;
@@ -28,7 +29,6 @@ import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
-import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 import org.eclipse.che.ide.command.toolbar.ToolbarMessages;
 import org.eclipse.che.ide.util.browser.BrowserUtils;
 
@@ -67,7 +67,7 @@ public class PreviewsPresenter implements Presenter, PreviewsView.ActionDelegate
     eventBus.addHandler(ProcessStartedEvent.TYPE, event -> updateView());
     eventBus.addHandler(ProcessFinishedEvent.TYPE, event -> updateView());
     eventBus.addHandler(WorkspaceStoppedEvent.TYPE, e -> updateView());
-    eventBus.addHandler(BasicIDEInitializedEvent.TYPE, e -> updateView());
+    eventBus.addHandler(CommandsLoadedEvent.getType(), e -> updateView());
   }
 
   /** Updates view with the preview URLs of running processes. */

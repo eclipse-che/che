@@ -14,6 +14,8 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
 import com.google.common.base.Strings;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -57,16 +59,14 @@ import org.eclipse.che.api.debug.shared.model.action.Action;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.promises.client.Function;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.JsPromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
 import org.eclipse.che.ide.debug.Debugger;
@@ -78,6 +78,7 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.util.storage.LocalStorage;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
+import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
 
 /**
  * The common debugger.
@@ -109,6 +110,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   private final BreakpointManager breakpointManager;
   private final String debuggerType;
   private final RequestHandlerManager requestHandlerManager;
+  private final DebuggerLocalizationConstant constant;
 
   private DebugSessionDto debugSessionDto;
   private Location currentLocation;
@@ -125,6 +127,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
       NotificationManager notificationManager,
       AppContext appContext,
       BreakpointManager breakpointManager,
+      DebuggerLocalizationConstant constant,
       RequestHandlerManager requestHandlerManager,
       DebuggerLocationHandlerManager debuggerLocationHandlerManager,
       String type) {
@@ -137,6 +140,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     this.debuggerManager = debuggerManager;
     this.notificationManager = notificationManager;
     this.breakpointManager = breakpointManager;
+    this.constant = constant;
     this.observers = new ArrayList<>();
     this.debuggerType = type;
     this.requestHandlerManager = requestHandlerManager;
@@ -169,7 +173,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
               DebuggerDescriptor debuggerDescriptor = new DebuggerDescriptor(info, address);
 
               for (DebuggerObserver observer : observers) {
-                observer.onDebuggerAttached(debuggerDescriptor, Promises.resolve(null));
+                observer.onDebuggerAttached(debuggerDescriptor);
               }
 
               for (BreakpointDto breakpoint : debugSessionDto.getBreakpoints()) {
@@ -444,45 +448,55 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     Promise<DebugSessionDto> connect = service.connect(debuggerType, connectionProperties);
     final DebuggerDescriptor debuggerDescriptor = toDescriptor(connectionProperties);
 
-    Promise<Void> promise =
-        connect
-            .then(
-                (Function<DebugSessionDto, Void>)
-                    debugSession -> {
-                      DebuggerInfo debuggerInfo = debugSession.getDebuggerInfo();
-                      debuggerDescriptor.setInfo(
-                          debuggerInfo.getName() + " " + debuggerInfo.getVersion());
+    final StatusNotification notification =
+        notificationManager.notify(
+            constant.debuggerConnectingTitle(debuggerDescriptor.getAddress()),
+            PROGRESS,
+            FLOAT_MODE);
 
-                      setDebugSession(debugSession);
-                      preserveDebuggerState();
+    return connect
+        .then(
+            (Function<DebugSessionDto, Void>)
+                debugSession -> {
+                  DebuggerInfo debuggerInfo = debugSession.getDebuggerInfo();
+                  debuggerDescriptor.setInfo(
+                      debuggerInfo.getName() + " " + debuggerInfo.getVersion());
 
-                      subscribeToDebuggerEvents();
-                      startCheckingEvents();
+                  setDebugSession(debugSession);
+                  preserveDebuggerState();
 
-                      startDebugger(debugSession);
+                  subscribeToDebuggerEvents();
+                  startCheckingEvents();
 
-                      return null;
-                    })
-            .catchError(
-                (Operation<PromiseError>)
-                    error -> {
-                      Log.error(AbstractDebugger.class, error.getMessage());
-                      throw new OperationException(error.getCause());
-                    });
+                  for (DebuggerObserver observer : observers) {
+                    observer.onDebuggerAttached(debuggerDescriptor);
+                  }
 
-    for (DebuggerObserver observer : observers) {
-      observer.onDebuggerAttached(debuggerDescriptor, promise);
-    }
+                  startDebugger(debugSession);
 
-    return promise;
+                  notification.setTitle(constant.debuggerConnectedTitle());
+                  notification.setContent(
+                      constant.debuggerConnectedDescription(debuggerDescriptor.getAddress()));
+                  notification.setStatus(SUCCESS);
+
+                  return null;
+                })
+        .catchError(
+            error -> {
+              notification.setTitle(
+                  constant.failedToConnectToRemoteDebuggerDescription(
+                      debuggerDescriptor.getAddress(), error.getMessage()));
+              notification.setStatus(FAIL);
+              notification.setDisplayMode(FLOAT_MODE);
+            });
   }
 
   protected void startDebugger(final DebugSessionDto debugSessionDto) {
     List<BreakpointDto> breakpoints = new ArrayList<>();
-    for (Breakpoint breakpoint : breakpointManager.getBreakpointList()) {
+    for (Breakpoint breakpoint : breakpointManager.getAll()) {
       BreakpointDto breakpointDto = dtoFactory.createDto(BreakpointDto.class);
       breakpointDto.setLocation(toDto(breakpoint.getLocation()));
-      breakpointDto.setEnabled(true);
+      breakpointDto.setEnabled(breakpoint.isEnabled());
       breakpointDto.setCondition(breakpoint.getCondition());
 
       breakpoints.add(breakpointDto);

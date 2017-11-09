@@ -30,6 +30,7 @@ import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
+import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
 import org.eclipse.che.plugin.debugger.ide.debug.AbstractDebugger;
 import org.eclipse.che.plugin.debugger.ide.debug.DebuggerLocationHandlerManager;
 
@@ -57,6 +58,7 @@ public class GdbDebugger extends AbstractDebugger {
       NotificationManager notificationManager,
       BreakpointManager breakpointManager,
       AppContext appContext,
+      DebuggerLocalizationConstant constant,
       RequestHandlerManager requestHandlerManager,
       DebuggerLocationHandlerManager debuggerLocationHandlerManager) {
 
@@ -71,6 +73,7 @@ public class GdbDebugger extends AbstractDebugger {
         notificationManager,
         appContext,
         breakpointManager,
+        constant,
         requestHandlerManager,
         debuggerLocationHandlerManager,
         ID);

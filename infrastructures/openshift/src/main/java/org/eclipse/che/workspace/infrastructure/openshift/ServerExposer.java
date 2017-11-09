@@ -127,7 +127,7 @@ public class ServerExposer {
     Service service =
         new ServiceBuilder()
             .withName(generate(SERVER_PREFIX, SERVER_UNIQUE_PART_SIZE) + '-' + machineName)
-            .withSelectorEntry(CHE_ORIGINAL_NAME_LABEL, machineName.split("/")[0])
+            .withSelectorEntry(CHE_ORIGINAL_NAME_LABEL, Names.podName(machineName))
             .withPorts(new ArrayList<>(portToServicePort.values()))
             .build();
 

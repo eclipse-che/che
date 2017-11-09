@@ -19,6 +19,10 @@ public class KeycloakSecurityTokenProvider extends SecurityTokenProvider {
 
   @Override
   public Promise<String> getSecurityToken() {
-    return keycloakProvider.getUpdatedToken(5);
+    if (keycloakProvider.isKeycloakDisabled()) {
+      return super.getSecurityToken();
+    } else {
+      return keycloakProvider.getUpdatedToken(5);
+    }
   }
 }
