@@ -241,6 +241,5 @@ public class AskForValueDialog {
   /** launch the 'Rename project' form by keyboard */
   public void launchFindFormByKeyboard() {
     actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.SHIFT, Keys.F6).perform();
-    actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.SHIFT).perform();
   }
 }

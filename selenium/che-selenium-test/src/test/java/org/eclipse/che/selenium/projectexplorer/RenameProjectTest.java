@@ -23,7 +23,6 @@ import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.Ide;
-import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.testng.annotations.BeforeClass;
@@ -38,7 +37,6 @@ public class RenameProjectTest {
   @Inject private AskForValueDialog askForValueDialog;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private TestWorkspace testWorkspace;
-  @Inject private Loader loader;
   @Inject private Menu menu;
   @Inject private Ide ide;
 
@@ -59,19 +57,6 @@ public class RenameProjectTest {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.selectItem(PROJECT_NAME);
 
-    // Test that the Rename project dialog is started from menu
-    menu.runCommand(Edit.EDIT, Edit.RENAME);
-    askForValueDialog.waitFormToOpen();
-    askForValueDialog.clickCancelBtn();
-    askForValueDialog.waitFormToClose();
-
-    // Test that the Rename project dialog is started by SHIFT + F6 keys
-    projectExplorer.selectItem(PROJECT_NAME);
-    askForValueDialog.launchFindFormByKeyboard();
-    askForValueDialog.waitFormToOpen();
-    askForValueDialog.clickCancelBtn();
-    askForValueDialog.waitFormToClose();
-
     // Rename project from context menu
     projectExplorer.selectItem(PROJECT_NAME);
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME);
@@ -86,5 +71,19 @@ public class RenameProjectTest {
     projectExplorer.waitItem(NEW_PROJECT_NAME);
     projectExplorer.waitItemIsDisappeared(PROJECT_NAME);
     projectExplorer.waitFolderDefinedTypeOfFolderByPath(NEW_PROJECT_NAME, PROJECT_FOLDER);
+
+    // Test that the Rename project dialog is started from menu
+    projectExplorer.selectItem(NEW_PROJECT_NAME);
+    menu.runCommand(Edit.EDIT, Edit.RENAME);
+    askForValueDialog.waitFormToOpen();
+    askForValueDialog.clickCancelBtn();
+    askForValueDialog.waitFormToClose();
+
+    // Test that the Rename project dialog is started by SHIFT + F6 keys
+    projectExplorer.selectItem(NEW_PROJECT_NAME);
+    askForValueDialog.launchFindFormByKeyboard();
+    askForValueDialog.waitFormToOpen();
+    askForValueDialog.clickCancelBtn();
+    askForValueDialog.waitFormToClose();
   }
 }
