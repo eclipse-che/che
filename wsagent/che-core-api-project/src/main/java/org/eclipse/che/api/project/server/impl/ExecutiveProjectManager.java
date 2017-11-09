@@ -200,10 +200,10 @@ public class ExecutiveProjectManager implements ProjectManager {
     fsManager.delete(wsPath);
 
     projectConfigRegistry
-            .getAll(wsPath)
-            .stream()
-            .map(RegisteredProject::getPath)
-            .forEach(projectConfigRegistry::remove);
+        .getAll(wsPath)
+        .stream()
+        .map(RegisteredProject::getPath)
+        .forEach(projectConfigRegistry::remove);
 
     return projectConfigRegistry.remove(wsPath);
   }
