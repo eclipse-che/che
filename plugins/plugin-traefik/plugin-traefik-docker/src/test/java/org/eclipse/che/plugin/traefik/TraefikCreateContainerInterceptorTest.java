@@ -115,6 +115,16 @@ public class TraefikCreateContainerInterceptorTest {
   }
 
   @Test
+  public void testRulesWithNullImageLabels() throws Throwable {
+    when(imageInfoConfig.getLabels()).thenReturn(null);
+    containerLabels.put("foo1", "bar");
+
+    traefikCreateContainerInterceptor.invoke(methodInvocation);
+
+    Assert.assertFalse(containerLabels.containsKey("traefik.service-tomcat8.frontend.rule"));
+  }
+
+  @Test
   public void testRules() throws Throwable {
     containerLabels.put("foo1", "bar");
     containerLabels.put("foo1/dummy", "bar");
