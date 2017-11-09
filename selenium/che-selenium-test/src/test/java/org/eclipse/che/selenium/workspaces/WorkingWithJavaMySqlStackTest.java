@@ -101,7 +101,7 @@ public class WorkingWithJavaMySqlStackTest {
     loader.waitOnClosed();
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME, 600);
-    projectExplorer.waitItem(PROJECT_NAME);
+    projectExplorer.selectItem(PROJECT_NAME);
     projectExplorer.expandPathInProjectExplorer(
         PROJECT_NAME + "/src/main/java/org.springframework.samples.petclinic");
     projectExplorer.expandPathInProjectExplorer(
