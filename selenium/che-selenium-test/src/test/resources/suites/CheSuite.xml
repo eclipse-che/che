@@ -11,14 +11,13 @@
 
 -->
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
-<suite name="Eclipse Che selenium tests"
+<suite name="Multi-thread Eclipse Che tests"
        verbose="10"
        parallel="classes"
        thread-count="4">
 
     <test name="all">
         <classes>
-          <class name="org.eclipse.che.selenium.addsshkey.AddSshKeyForGitHubTest"/>
           <class name="org.eclipse.che.selenium.assistant.CheckFindActionFeatureInCheTest">
             <methods>
               <exclude name="checkSearchActionsForAllItemsTest"/>

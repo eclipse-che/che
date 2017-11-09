@@ -11,13 +11,14 @@
 
 -->
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
-<suite name="Eclipse Che selenium tests to execute all the methods in the same 'test' tag in the same thread"
+<suite name="One-thread Eclipse Che selenium tests"
        verbose="10"
-       parallel="tests"
+       parallel="classes"
        thread-count="1">
 
-    <test name="git">
+    <test name="all">
         <classes>
+            <class name="org.eclipse.che.selenium.addsshkey.AddSshKeyForGitHubTest"/>
             <class name="org.eclipse.che.selenium.git.AddFilesToIndexTest"/>
             <class name="org.eclipse.che.selenium.git.AmendCommitTest"/>
             <class name="org.eclipse.che.selenium.git.CheckoutBranchTest"/>

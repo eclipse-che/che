@@ -140,6 +140,9 @@ public abstract class SeleniumTestHandler
 
   @Override
   public void onStart(ISuite suite) {
+    isCleanUpCompleted.set(false);
+    runningTests.clear();
+
     Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
 
     Injector injector = createInjector(getParentModules());
