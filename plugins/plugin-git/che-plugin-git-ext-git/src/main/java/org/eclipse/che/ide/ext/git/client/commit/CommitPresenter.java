@@ -251,7 +251,7 @@ public class CommitPresenter implements CommitView.ActionDelegate, SelectionCall
   }
 
   @Override
-  public void onSelectionChanged() {
+  public void onSelectionChanged(Path path, boolean isChecked) {
     onValueChanged();
   }
 

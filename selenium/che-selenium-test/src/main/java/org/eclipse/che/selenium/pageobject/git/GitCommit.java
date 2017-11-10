@@ -145,7 +145,7 @@ public class GitCommit {
    * @param itemName name of the item
    */
   public void waitItemCheckBoxToBeIndeterminate(String itemName) {
-    new WebDriverWait(seleniumWebDriver, 5)
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             (ExpectedCondition<Boolean>)
                 webDriver ->

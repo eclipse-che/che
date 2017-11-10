@@ -70,6 +70,6 @@ public class SelectableChangesPanelPresenter extends ChangesPanelPresenter
     } else {
       selectedFiles.remove(path.toString());
     }
-    selectionCallBack.onSelectionChanged();
+    selectionCallBack.onSelectionChanged(path, newCheckBoxValue);
   }
 }

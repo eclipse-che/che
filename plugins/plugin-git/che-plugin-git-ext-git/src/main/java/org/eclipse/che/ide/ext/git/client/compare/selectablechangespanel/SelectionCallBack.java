@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.ide.ext.git.client.compare.selectablechangespanel;
 
+import org.eclipse.che.ide.resource.Path;
+
 /**
  * Delegates select action into {@link SelectableChangesPanelPresenter}.
  *
@@ -17,6 +19,10 @@ package org.eclipse.che.ide.ext.git.client.compare.selectablechangespanel;
  */
 public interface SelectionCallBack {
 
-  /** Is called when item check-box changed selection state. */
-  void onSelectionChanged();
+  /**
+   * Is called when item check-box changed selection state.
+   * @param path path of the selected item
+   * @param isChecked checkbox selection state
+   */
+  void onSelectionChanged(Path path, boolean isChecked);
 }

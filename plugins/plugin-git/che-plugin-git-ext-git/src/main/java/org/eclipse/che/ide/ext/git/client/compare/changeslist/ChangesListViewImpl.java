@@ -23,7 +23,6 @@ import org.eclipse.che.ide.ui.window.Window;
  *
  * @author Igor Vinokur
  */
-@Singleton
 public class ChangesListViewImpl extends Window implements ChangesListView {
 
   private final GitLocalizationConstant locale;
