@@ -64,12 +64,17 @@ public class SelectableChangesPanelPresenter extends ChangesPanelPresenter
   }
 
   @Override
-  public void onFileNodeCheckBoxValueChanged(Path path, boolean newCheckBoxValue) {
-    if (newCheckBoxValue) {
+  public void refreshNodes() {
+    view.refreshNodes();
+  }
+
+  @Override
+  public void onFileNodeCheckBoxValueChanged(Path path, boolean isSelected) {
+    if (isSelected) {
       selectedFiles.add(path.toString());
     } else {
       selectedFiles.remove(path.toString());
     }
-    selectionCallBack.onSelectionChanged(path, newCheckBoxValue);
+    selectionCallBack.onSelectionChanged(path, isSelected);
   }
 }

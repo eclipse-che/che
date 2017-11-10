@@ -21,6 +21,7 @@ public interface SelectionCallBack {
 
   /**
    * Is called when item check-box changed selection state.
+   *
    * @param path path of the selected item
    * @param isChecked checkbox selection state
    */

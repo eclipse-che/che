@@ -25,6 +25,9 @@ public interface SelectableChangesPanelView extends ChangesPanelView {
   /** Needs for delegating actions into {@link SelectableChangesPanelPresenter}. */
   interface ActionDelegate {
 
+    /** Refresh all nodes in the panel. */
+    void refreshNodes();
+
     /** Is called when item check-box changed selection state. */
     void onFileNodeCheckBoxValueChanged(Path path, boolean newCheckBoxValue);
 

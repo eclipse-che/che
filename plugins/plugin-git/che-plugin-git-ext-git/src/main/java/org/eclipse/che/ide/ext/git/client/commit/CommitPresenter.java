@@ -21,6 +21,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMod
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
+import static org.eclipse.che.ide.resource.Path.valueOf;
 import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 import com.google.inject.Inject;
@@ -186,7 +187,7 @@ public class CommitPresenter implements CommitView.ActionDelegate, SelectionCall
   @Override
   public void onCommitClicked() {
     Path location = project.getLocation();
-    Path[] filesToCommitArray = getFilesToCommitArray();
+    Path[] filesToCommitArray = getFilesToCommit();
 
     service
         .add(location, false, filesToCommitArray)
@@ -213,13 +214,14 @@ public class CommitPresenter implements CommitView.ActionDelegate, SelectionCall
             });
   }
 
-  private Path[] getFilesToCommitArray() {
+  private Path[] getFilesToCommit() {
     List<String> selectedFiles = selectableChangesPanelPresenter.getSelectedFiles();
-    Path[] filesToCommitArray = new Path[selectedFiles.size()];
-    selectedFiles.forEach(
-        file -> filesToCommitArray[selectedFiles.indexOf(file)] = Path.valueOf(file));
-
-    return filesToCommitArray;
+    int selectedFilesSize = selectedFiles.size();
+    Path[] filesToCommit = new Path[selectedFilesSize];
+    for (int i = 0; i < selectedFilesSize; i++) {
+      filesToCommit[i] = valueOf(selectedFiles.get(i));
+    }
+    return filesToCommit;
   }
 
   private void push(Path location) {
