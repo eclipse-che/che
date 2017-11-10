@@ -19,6 +19,7 @@ import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -106,24 +107,37 @@ public class MenuWidget extends Composite implements Menu {
 
   public void showList() {
     int x = getAbsoluteLeft() + getOffsetWidth() - 6;
-    int y = getAbsoluteTop() + 19;
-
     popupPanel.show();
     popupPanel.getElement().getStyle().setProperty("position", "absolute");
     popupPanel.getElement().getStyle().clearProperty("left");
     popupPanel.getElement().getStyle().setProperty("right", "calc(100% - " + x + "px");
-    popupPanel.getElement().getStyle().setProperty("top", "" + y + "px");
+    adjustTopPosition();
   }
 
   @Override
   public void addListItem(MenuItem menuItem) {
     menuItem.setDelegate(itemDelegate);
     listPanel.add(menuItem);
+    adjustTopPosition();
   }
 
   @Override
   public void removeListItem(MenuItem menuItem) {
     listPanel.remove(menuItem);
+    adjustTopPosition();
+  }
+
+  /** Fix top value if need. Need in case if bottom part of menu not display */
+  private void adjustTopPosition() {
+    int totalHeight = listPanel.getWidgetCount() * 19; // 19 height of menu item
+    int y = getAbsoluteTop() + 19 + totalHeight;
+    if (y > Window.getClientHeight()) {
+      y = getAbsoluteTop() - 8 - totalHeight; // 8 need some correction for looking good in UI
+      popupPanel.getElement().getStyle().clearProperty("top");
+    } else {
+      y = getAbsoluteTop() + 19;
+    }
+    popupPanel.getElement().getStyle().setProperty("top", "" + y + "px");
   }
 
   @Override
