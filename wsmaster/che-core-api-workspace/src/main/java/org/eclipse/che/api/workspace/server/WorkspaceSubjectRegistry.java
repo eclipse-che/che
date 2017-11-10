@@ -71,8 +71,8 @@ public class WorkspaceSubjectRegistry implements EventSubscriber<WorkspaceStatus
 
     String workspaceId = event.getWorkspaceId();
     if (WorkspaceStatusEvent.EventType.STOPPED.equals(event.getEventType())) {
-      workspaceOwners.remove(workspaceId);
       while (userIdToWorkspaces.values().remove(workspaceId)) {}
+      workspaceOwners.remove(workspaceId);
     }
 
     if (WorkspaceStatusEvent.EventType.STARTING.equals(event.getEventType())) {
@@ -127,5 +127,13 @@ public class WorkspaceSubjectRegistry implements EventSubscriber<WorkspaceStatus
     } finally {
       lock.readLock().unlock();
     }
+  }
+
+  /*
+   * Only for tests
+   */
+  @VisibleForTesting
+  boolean isUserKnown(String userId) {
+    return userIdToWorkspaces.containsKey(userId);
   }
 }

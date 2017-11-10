@@ -140,9 +140,13 @@ public class WorkspaceSubjectRegistryTest {
     when(event.getWorkspaceId()).thenReturn(workspaceId2);
     workspaceSubjectRegistry.onEvent(event);
 
+    assertTrue(workspaceSubjectRegistry.isUserKnown(workspaceStarter.getUserId()));
+
     when(event.getEventType()).thenReturn(WorkspaceStatusEvent.EventType.STOPPED);
     when(event.getWorkspaceId()).thenReturn(workspaceId1);
     workspaceSubjectRegistry.onEvent(event);
+
+    assertFalse(workspaceSubjectRegistry.isUserKnown(workspaceStarter.getUserId()));
 
     assertNull(workspaceSubjectRegistry.getWorkspaceStarter(workspaceId1) == null);
     assertNull(workspaceSubjectRegistry.getWorkspaceStarter(workspaceId2) == null);
