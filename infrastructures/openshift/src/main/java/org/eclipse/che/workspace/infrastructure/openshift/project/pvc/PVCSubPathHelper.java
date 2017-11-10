@@ -140,12 +140,10 @@ public class PVCSubPathHelper {
       }
     } catch (InfrastructureException ex) {
       LOG.error(
-          "Unable to perform '"
-              + Arrays.toString(command)
-              + "' command for the workspace '"
-              + workspaceId
-              + "'.",
-          ex);
+          "Unable to perform '{}' command for the workspace '{}' cause: '{}'",
+          Arrays.toString(command),
+          workspaceId,
+          ex.getMessage());
     } finally {
       if (pods != null) {
         try {
