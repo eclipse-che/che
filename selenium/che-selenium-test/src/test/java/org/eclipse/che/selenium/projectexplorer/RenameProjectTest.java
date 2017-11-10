@@ -31,7 +31,7 @@ import org.testng.annotations.Test;
 /** @author Andrey Chizhikov */
 public class RenameProjectTest {
   private static final String PROJECT_NAME = generate("project", 5);
-  private static final String NEW_PROJECT_NAME = generate("project", 5);
+  private static final String NEW_PROJECT_NAME = generate("new-project", 5);
 
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private AskForValueDialog askForValueDialog;
