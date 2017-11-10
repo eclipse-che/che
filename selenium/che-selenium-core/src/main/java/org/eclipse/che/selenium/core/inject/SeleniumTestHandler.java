@@ -345,9 +345,9 @@ public abstract class SeleniumTestHandler
     String filename = NameGenerator.generate(testName + "_", 8) + ".html";
     try {
       String pageSource = webDriver.getPageSource();
-      Path dmpDirectory = Paths.get("target/htmldump", filename);
-      Files.createDirectories(dmpDirectory.getParent());
-      Files.write(dmpDirectory, pageSource.getBytes(), StandardOpenOption.CREATE);
+      Path dumpDirectory = Paths.get("target/htmldumps", filename);
+      Files.createDirectories(dumpDirectory.getParent());
+      Files.write(dumpDirectory, pageSource.getBytes(), StandardOpenOption.CREATE);
     } catch (WebDriverException | IOException e) {
       LOG.error(format("Can't dump of html source for test %s", testName), e);
     }

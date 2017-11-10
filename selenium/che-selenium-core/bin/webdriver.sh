@@ -357,10 +357,10 @@ prepareTestSuite() {
 
     TESTS_SCOPE="-DrunSuite=${TMP_SUITE_PATH}"
 
-    if [[ ${TEST_INCLUSION} == ${TEST_INCLUSION_STABLE} || ${TEST_INCLUSION} == ${TEST_INCLUSION_STABLE_AND_UNSTABLE} ]]; then
-        # set number of threads directly in the suite
-        sed -i -e "s#thread-count=\"[^\"]*\"#thread-count=\"${THREADS}\"#" "$TMP_SUITE_PATH"
+    # set number of threads directly in the suite
+    sed -i -e "s#thread-count=\"[^\"]*\"#thread-count=\"${THREADS}\"#" "$TMP_SUITE_PATH"
 
+    if [[ ${TEST_INCLUSION} == ${TEST_INCLUSION_STABLE_AND_UNSTABLE} ]]; then
         if [[ ${TEST_INCLUSION} == ${TEST_INCLUSION_STABLE_AND_UNSTABLE} ]]; then
             # remove "<methods>" tags from temporary suite
             methodsSectionNumber=$(grep -oe "<methods>" <<< echo "$TMP_SUITE_PATH" | wc -l);
@@ -369,13 +369,15 @@ prepareTestSuite() {
                 sed -i -e '1h;2,$H;$!d;g' -e "s/\(<class.*\)<methods>.*<\/methods>\(.*<\/class>\)/\1\2/" "$TMP_SUITE_PATH"
             done
         fi
-
     elif [[ ${TEST_INCLUSION} == ${TEST_INCLUSION_UNSTABLE} ]]; then
         # replace "<exclude>"  on "<include>" tags in temporary suite
         sed -i "s/<exclude/<include/" "$TMP_SUITE_PATH"
 
         # remove "<class ... />" tags
         sed -i "s/<class.*\/>//" "$TMP_SUITE_PATH"
+
+        # remove sub-suites in order to not having unstable tests there and get rid of stable/unstable model soon
+        sed -i -i -e '1h;2,$H;$!d;g' -e "s/<suite-files>.*<\/suite-files>//" "$TMP_SUITE_PATH"
     fi
 }
 
@@ -744,6 +746,7 @@ rerunTests() {
         local fails=$(fetchFailedTests)
         local failsClasses=$(getTestClasses ${fails[*]})
         local tmpScreenshots=${TMP_DIR}"/qa/screenshots"
+        local tmpHtmldumps=${TMP_DIR}"/qa/htmldumps"
         local tmpReports=${TMP_DIR}"/qa/reports"
         local originalScreenshots="target/screenshots"
 
