@@ -10,20 +10,14 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker;
 
-import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
-import org.eclipse.che.infrastructure.docker.client.DockerFileException;
 import org.eclipse.che.infrastructure.docker.client.DockerRegistryAuthResolver;
-import org.eclipse.che.infrastructure.docker.client.parser.DockerImageIdentifier;
-import org.eclipse.che.infrastructure.docker.client.parser.DockerImageIdentifierParser;
-import org.eclipse.che.workspace.infrastructure.docker.snapshot.MachineSource;
-import org.eclipse.che.workspace.infrastructure.docker.snapshot.MachineSourceImpl;
 
 /**
  * Set of helper methods that identifies docker image properties
  *
  * @author Florent Benoit
  */
-public class DockerMachineSource extends MachineSourceImpl {
+public class DockerMachineSource {
 
   /** image type support with recipe script being the name of the repository + image name */
   public static final String DOCKER_IMAGE_TYPE = "image";
@@ -41,36 +35,6 @@ public class DockerMachineSource extends MachineSourceImpl {
   private String digest;
 
   /**
-   * Build a dedicated docker image source based on a given machine source object.
-   *
-   * @param machineSource the machine source used to parse data.
-   */
-  public DockerMachineSource(MachineSource machineSource) throws InternalInfrastructureException {
-    // check type
-    if (!DOCKER_IMAGE_TYPE.equals(machineSource.getType())) {
-      throw new InternalInfrastructureException(
-          "Docker machine source can only be built with '" + DOCKER_IMAGE_TYPE + "' type");
-    }
-    setType(DOCKER_IMAGE_TYPE);
-
-    // parse location
-    final DockerImageIdentifier dockerImageIdentifier;
-    try {
-      dockerImageIdentifier = DockerImageIdentifierParser.parse(machineSource.getLocation());
-    } catch (DockerFileException e) {
-      throw new InternalInfrastructureException(
-          "Try to build a docker machine source with an invalid location/content. It is not in the expected format",
-          e);
-    }
-
-    // populate
-    this.registry = dockerImageIdentifier.getRegistry();
-    this.repository = dockerImageIdentifier.getRepository();
-    this.tag = dockerImageIdentifier.getTag();
-    this.digest = dockerImageIdentifier.getDigest();
-  }
-
-  /**
    * Build image source based on given arguments
    *
    * @param repository as for example codenvy/ubuntu_jdk8
@@ -78,7 +42,6 @@ public class DockerMachineSource extends MachineSourceImpl {
   public DockerMachineSource(String repository) {
     super();
     this.repository = repository;
-    setType(DOCKER_IMAGE_TYPE);
   }
 
   /**

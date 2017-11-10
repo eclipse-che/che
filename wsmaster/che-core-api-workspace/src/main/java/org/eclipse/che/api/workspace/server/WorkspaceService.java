@@ -293,7 +293,6 @@ public class WorkspaceService extends Service {
   public void delete(@ApiParam("The workspace id") @PathParam("id") String id)
       throws BadRequestException, ServerException, NotFoundException, ConflictException,
           ForbiddenException {
-    // workspaceManager.removeSnapshots(id);
     workspaceManager.removeWorkspace(id);
   }
 
@@ -320,14 +319,12 @@ public class WorkspaceService extends Service {
       @ApiParam("The workspace id") @PathParam("id") String workspaceId,
       @ApiParam("The name of the workspace environment that should be used for start")
           @QueryParam("environment")
-          String envName,
-      @ApiParam("Restore workspace from snapshot") @QueryParam("restore") Boolean restore)
+          String envName)
       throws ServerException, BadRequestException, NotFoundException, ForbiddenException,
           ConflictException {
 
-    Map<String, String> options = new HashMap<>();
-    if (restore != null) options.put("restore", restore.toString());
-    return asDtoWithLinksAndToken(workspaceManager.startWorkspace(workspaceId, envName, options));
+    return asDtoWithLinksAndToken(
+        workspaceManager.startWorkspace(workspaceId, envName, emptyMap()));
   }
 
   @POST
@@ -396,16 +393,9 @@ public class WorkspaceService extends Service {
     @ApiResponse(code = 403, message = "The user is not workspace owner"),
     @ApiResponse(code = 500, message = "Internal server error occurred")
   })
-  public void stop(
-      @ApiParam("The workspace id") @PathParam("id") String id,
-      @ApiParam("Whether to snapshot workspace before stopping it") @QueryParam("create-snapshot")
-          Boolean createSnapshot)
+  public void stop(@ApiParam("The workspace id") @PathParam("id") String id)
       throws ForbiddenException, NotFoundException, ServerException, ConflictException {
-    Map<String, String> options = new HashMap<>();
-    if (createSnapshot != null) {
-      options.put("create-snapshot", createSnapshot.toString());
-    }
-    workspaceManager.stopWorkspace(id, options);
+    workspaceManager.stopWorkspace(id, emptyMap());
   }
 
   @POST

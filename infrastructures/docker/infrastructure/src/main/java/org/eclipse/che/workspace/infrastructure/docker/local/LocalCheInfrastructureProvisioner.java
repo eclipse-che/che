@@ -26,7 +26,6 @@ import org.eclipse.che.workspace.infrastructure.docker.provisioner.env.EnvVarsCo
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.labels.RuntimeLabelsProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.memory.MemoryAttributeConverter;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.server.ServersConverter;
-import org.eclipse.che.workspace.infrastructure.docker.provisioner.snapshot.ExcludeFoldersFromSnapshotProvisioner;
 
 /**
  * Infrastructure provisioner that apply needed configuration to docker containers to run it
@@ -38,7 +37,6 @@ import org.eclipse.che.workspace.infrastructure.docker.provisioner.snapshot.Excl
 public class LocalCheInfrastructureProvisioner implements InfrastructureProvisioner {
 
   private final ContainerSystemSettingsProvisionersApplier dockerSettingsProvisioners;
-  private final ExcludeFoldersFromSnapshotProvisioner snapshotVolumeProvisioner;
   private final ProjectsVolumeProvisioner projectsVolumeProvisioner;
   private final LocalInstallersBinariesVolumeProvisioner installersBinariesVolumeProvisioner;
   private final RuntimeLabelsProvisioner runtimeLabelsProvisioner;
@@ -51,7 +49,6 @@ public class LocalCheInfrastructureProvisioner implements InfrastructureProvisio
   @Inject
   public LocalCheInfrastructureProvisioner(
       ContainerSystemSettingsProvisionersApplier dockerSettingsProvisioners,
-      ExcludeFoldersFromSnapshotProvisioner snapshotVolumeProvisioner,
       ProjectsVolumeProvisioner projectsVolumeProvisioner,
       LocalInstallersBinariesVolumeProvisioner installersBinariesVolumeProvisioner,
       RuntimeLabelsProvisioner runtimeLabelsProvisioner,
@@ -62,7 +59,6 @@ public class LocalCheInfrastructureProvisioner implements InfrastructureProvisio
       MemoryAttributeConverter memoryAttributeConverter) {
 
     this.dockerSettingsProvisioners = dockerSettingsProvisioners;
-    this.snapshotVolumeProvisioner = snapshotVolumeProvisioner;
     this.projectsVolumeProvisioner = projectsVolumeProvisioner;
     this.installersBinariesVolumeProvisioner = installersBinariesVolumeProvisioner;
     this.runtimeLabelsProvisioner = runtimeLabelsProvisioner;
@@ -85,7 +81,6 @@ public class LocalCheInfrastructureProvisioner implements InfrastructureProvisio
     memoryAttributeConverter.provision(envConfig, internalEnv, identity);
     // 3 stage - add docker env items
     runtimeLabelsProvisioner.provision(envConfig, internalEnv, identity);
-    snapshotVolumeProvisioner.provision(envConfig, internalEnv, identity);
     installersBinariesVolumeProvisioner.provision(envConfig, internalEnv, identity);
     projectsVolumeProvisioner.provision(envConfig, internalEnv, identity);
     dockerApiEnvProvisioner.provision(envConfig, internalEnv, identity);

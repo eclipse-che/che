@@ -8,14 +8,11 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.docker.snapshot;
+package org.eclipse.che.workspace.infrastructure.docker;
 
-import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
-import org.eclipse.che.workspace.infrastructure.docker.DockerMachineSource;
-import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
@@ -28,8 +25,6 @@ import org.testng.annotations.Test;
  */
 @Listeners(MockitoTestNGListener.class)
 public class DockerMachineSourceTest {
-
-  @Mock private MachineSource machineSource;
 
   @DataProvider(name = "image-ids")
   public Object[][] messageProvider() {
@@ -84,13 +79,6 @@ public class DockerMachineSourceTest {
         new DockerMachineSource(repository).withTag(tag).withRegistry(registry).withDigest(digest);
     assertEquals(source1.getLocation(), location);
 
-    DockerMachineSource source2 = new DockerMachineSource(source1);
-    assertEquals(source2.getLocation(), location);
-    assertEquals(source2.getRegistry(), registry);
-    assertEquals(source2.getRepository(), repository);
-    assertEquals(source2.getTag(), tag);
-    assertEquals(source2.getDigest(), digest);
-
     DockerMachineSource source3 = new DockerMachineSource(repository);
     source3.setTag(tag);
     source3.setRegistry(registry);
@@ -98,18 +86,12 @@ public class DockerMachineSourceTest {
     assertEquals(source3.getLocation(), location);
   }
 
-  /** Check valid source type */
-  @Test(expectedExceptions = InternalInfrastructureException.class)
-  public void testInvalidSourceType() throws InternalInfrastructureException {
-    when(machineSource.getType()).thenReturn("invalid");
-    new DockerMachineSource(machineSource);
-  }
-
-  /** Check invalid format */
-  @Test(expectedExceptions = InternalInfrastructureException.class)
-  public void testInvalidFormat() throws InternalInfrastructureException {
-    when(machineSource.getType()).thenReturn("image");
-    when(machineSource.getLocation()).thenReturn("@image");
-    new DockerMachineSource(machineSource);
-  }
+  //  TODO: that should be checked in DockerMachineStarter
+  //  /** Check invalid format */
+  //  @Test(expectedExceptions = InternalInfrastructureException.class)
+  //  public void testInvalidFormat() throws InternalInfrastructureException {
+  //    when(machineSource.getType()).thenReturn("image");
+  //    when(machineSource.getLocation()).thenReturn("@image");
+  //    new DockerMachineSource(machineSource);
+  //  }
 }
