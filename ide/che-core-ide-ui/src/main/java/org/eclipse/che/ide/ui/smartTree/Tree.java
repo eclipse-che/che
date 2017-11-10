@@ -859,13 +859,9 @@ public class Tree extends FocusWidget
       return;
     }
 
-    if (!(node instanceof HasNewPresentation || node instanceof HasPresentation)) {
-      return;
-    }
-
     if (node instanceof HasPresentation) {
       ((HasPresentation) node).getPresentation(true); // update presentation
-    } else {
+    } else if (node instanceof HasNewPresentation) {
       ((HasNewPresentation) node).getPresentation(); // update presentation
     }
     Element el =

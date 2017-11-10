@@ -62,7 +62,7 @@ public class ChangesListViewImpl extends Window implements ChangesListView {
   @Override
   public void setChangesPanelView(ChangesPanelView changesPanelView) {
     FlowPanel flowPanel = new FlowPanel();
-    flowPanel.ensureDebugId("git-compare-window-changed_files");
+    flowPanel.ensureDebugId("git-compare-window-changed-files");
     flowPanel.setWidth("600px");
     flowPanel.setHeight("345px");
     flowPanel.add((Widget) changesPanelView);

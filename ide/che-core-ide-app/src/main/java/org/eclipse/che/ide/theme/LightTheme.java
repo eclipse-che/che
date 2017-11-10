@@ -1649,6 +1649,16 @@ public class LightTheme implements Theme {
     return "rgba(27, 27, 27, 0.10)";
   }
 
+  @Override
+  public String gitPanelRepositoryChangesLabelColor() {
+    return "#252a38";
+  }
+
+  @Override
+  public String gitPanelRepositoryChangesLabelBackgroundColor() {
+    return "#969fad";
+  }
+
   /**
    * ******************************************************************************************
    *

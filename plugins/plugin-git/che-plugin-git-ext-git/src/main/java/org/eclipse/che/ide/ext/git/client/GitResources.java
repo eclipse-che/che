@@ -34,19 +34,14 @@ public interface GitResources extends ClientBundle {
   }
 
   interface GitPanelCss extends CssResource {
-    @ClassName("git-panel-full-height")
     String fullHeight();
 
-    @ClassName("git-panel-panel-top-indent")
     String topIndent();
 
-    @ClassName("git-panel-panel-bottom-indent")
     String bottomIndent();
 
-    @ClassName("git-panel-vertical-items")
     String verticalItems();
 
-    @ClassName("git-panel-repository-changes-label")
     String repositoryChangesLabel();
   }
 
