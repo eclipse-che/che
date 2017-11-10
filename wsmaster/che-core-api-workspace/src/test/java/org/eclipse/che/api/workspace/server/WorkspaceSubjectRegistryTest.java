@@ -12,25 +12,15 @@ package org.eclipse.che.api.workspace.server;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
-import java.util.Collection;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-import org.eclipse.che.api.agent.server.AgentRegistry;
-import org.eclipse.che.api.agent.server.impl.AgentSorter;
-import org.eclipse.che.api.agent.server.launcher.AgentLauncherFactory;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.environment.server.CheEnvironmentEngine;
-import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
-import org.eclipse.che.api.machine.server.spi.SnapshotDao;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceRuntimeImpl;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -45,34 +35,23 @@ import org.testng.annotations.Test;
 public class WorkspaceSubjectRegistryTest {
 
   @Spy private EventService eventService;
-  @Mock private CheEnvironmentEngine envEngine;
-  @Mock private AgentSorter agentSorter;
-  @Mock private AgentLauncherFactory launcherFactory;
-  @Mock private AgentRegistry agentRegistry;
-  @Mock private WorkspaceSharedPool sharedPool;
-  @Mock private SnapshotDao snapshotDao;
-  @Mock private Future<WorkspaceRuntimeImpl> runtimeFuture;
-  @Mock private WorkspaceRuntimes.StartTask startTask;
   @Mock private WorkspaceStatusEvent event;
-
-  @Captor private ArgumentCaptor<WorkspaceStatusEvent> eventCaptor;
-  @Captor private ArgumentCaptor<Callable<?>> taskCaptor;
-  @Captor private ArgumentCaptor<Collection<SnapshotImpl>> snapshotsCaptor;
 
   private WorkspaceSubjectRegistry workspaceSubjectRegistry;
 
   @BeforeMethod
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
-    workspaceSubjectRegistry = Mockito.spy(new WorkspaceSubjectRegistry(eventService));
+    workspaceSubjectRegistry = new WorkspaceSubjectRegistry(eventService);
   }
 
   @Test
   public void shouldSubscribeToEventService() throws Exception {
-    workspaceSubjectRegistry.subscribe();
-    verify(eventService).subscribe(workspaceSubjectRegistry);
+    WorkspaceSubjectRegistry spiedWorkspaceSubjectRegistry = Mockito.spy(workspaceSubjectRegistry);
+    spiedWorkspaceSubjectRegistry.subscribe();
+    verify(eventService).subscribe(spiedWorkspaceSubjectRegistry);
     eventService.publish(event);
-    verify(workspaceSubjectRegistry).onEvent(event);
+    verify(spiedWorkspaceSubjectRegistry).onEvent(event);
   }
 
   @Test
