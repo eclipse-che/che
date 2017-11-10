@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.workspaces;
 
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
+
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
@@ -18,7 +20,6 @@ import org.eclipse.che.selenium.core.constant.TestStacksConstants;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
@@ -41,7 +42,6 @@ public class CreateWorkspaceOnDashboardTest {
   @Inject private DashboardWorkspace dashboardWorkspace;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
-  @Inject private ToastLoader toastLoader;
 
   @AfterClass
   public void tearDown() throws Exception {
@@ -61,9 +61,8 @@ public class CreateWorkspaceOnDashboardTest {
     createWorkspace.setMachineRAM("2");
     createWorkspace.clickCreate();
     seleniumWebDriver.switchFromDashboardIframeToIde();
-    toastLoader.waitExpectedTextInToastLoader("Starting workspace runtime.", 60);
     projectExplorer.waitProjectExplorer();
-    loader.waitOnClosed();
+    terminal.waitTerminalConsole(LOADER_TIMEOUT_SEC);
     terminal.waitTerminalTab();
   }
 }
