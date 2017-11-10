@@ -10,24 +10,10 @@
  */
 package org.eclipse.che.selenium.pageobject.debug;
 
-import static java.lang.String.format;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MINIMUM_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
-import static org.openqa.selenium.By.cssSelector;
-import static org.openqa.selenium.By.id;
-import static org.openqa.selenium.By.tagName;
-import static org.openqa.selenium.By.xpath;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
-import static org.testng.Assert.assertEquals;
-
 import com.google.common.base.Function;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -44,6 +30,22 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.lang.String.format;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MINIMUM_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.openqa.selenium.By.cssSelector;
+import static org.openqa.selenium.By.id;
+import static org.openqa.selenium.By.tagName;
+import static org.openqa.selenium.By.xpath;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
+import static org.testng.Assert.assertEquals;
 
 /**
  * Page Object for Debugger panel.
@@ -116,7 +118,9 @@ public class DebugPanel {
 
   private interface BreakpointConfigurationWindow {
     String BREAKPOINT_CONDITION_TEXT =
-        "//div[@id='gwt-debug-breakpoint-configuration-window']//textarea[@id='gwt-debug-breakpoint-condition-text']";
+        "//div[@id='gwt-debug-breakpoint-configuration-window']//input[@id='gwt-debug-breakpoint-condition-text']";
+    String BREAKPOINT_CONDITION_ENABLED =
+        "//div[@id='gwt-debug-breakpoint-configuration-window']//label[@id='gwt-debug-breakpoint-condition-enabled-label']";
     String APPLY_BTN =
         "//div[@id='gwt-debug-breakpoint-configuration-window']//button[@id='gwt-debug-apply-btn']";
   }
@@ -510,6 +514,13 @@ public class DebugPanel {
     seleniumWebDriver
         .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(id(BreakpointsPanel.CONTEXT_MENU_CONFIGURE_BREAKPOINT)))
+        .click();
+
+    seleniumWebDriver
+        .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            visibilityOfElementLocated(
+                xpath(BreakpointConfigurationWindow.BREAKPOINT_CONDITION_ENABLED)))
         .click();
 
     seleniumWebDriver
