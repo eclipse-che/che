@@ -20,11 +20,13 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
+import java.util.Map;
 import javax.inject.Named;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.Names;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProjectFactory;
 
 /**
  * Provides common PVC for each workspace in one OpenShift project.
@@ -47,6 +49,7 @@ public class CommonPVCStrategy implements WorkspacePVCStrategy {
   private final String pvcAccessMode;
   private final String projectsPath;
   private final PVCSubPathHelper pvcSubPathHelper;
+  private final OpenShiftProjectFactory factory;
 
   @Inject
   public CommonPVCStrategy(
@@ -54,28 +57,28 @@ public class CommonPVCStrategy implements WorkspacePVCStrategy {
       @Named("che.infra.openshift.pvc.quantity") String pvcQuantity,
       @Named("che.infra.openshift.pvc.access_mode") String pvcAccessMode,
       @Named("che.workspace.projects.storage") String projectFolderPath,
-      PVCSubPathHelper pvcSubPathHelper) {
+      PVCSubPathHelper pvcSubPathHelper,
+      OpenShiftProjectFactory factory) {
     this.pvcName = pvcName;
     this.pvcQuantity = pvcQuantity;
     this.pvcAccessMode = pvcAccessMode;
     this.projectsPath =
         projectFolderPath.startsWith("/") ? projectFolderPath : '/' + projectFolderPath;
     this.pvcSubPathHelper = pvcSubPathHelper;
+    this.factory = factory;
   }
 
   @Override
   public void prepare(InternalEnvironment env, OpenShiftEnvironment osEnv, String workspaceId)
       throws InfrastructureException {
-    final String subPath = workspaceId + projectsPath;
-    pvcSubPathHelper.createDirs(workspaceId, subPath);
-    final PersistentVolumeClaim pvc = osEnv.getPersistentVolumeClaims().get(pvcName);
-    if (pvc != null) {
-      return;
-    }
     final String machineWithSources =
         getWsAgentServerMachine(env)
             .orElseThrow(() -> new InfrastructureException("Machine with ws-agent not found"));
-    osEnv.getPersistentVolumeClaims().put(pvcName, newPVC(pvcName, pvcAccessMode, pvcQuantity));
+    final Map<String, PersistentVolumeClaim> claims = osEnv.getPersistentVolumeClaims();
+    claims.put(pvcName, newPVC(pvcName, pvcAccessMode, pvcQuantity));
+    factory.create(workspaceId).persistentVolumeClaims().createIfNotExist(claims.values());
+    final String subPath = workspaceId + projectsPath;
+    pvcSubPathHelper.createDirs(workspaceId, subPath);
     for (Pod pod : osEnv.getPods().values()) {
       final PodSpec podSpec = pod.getSpec();
       for (Container container : podSpec.getContainers()) {
