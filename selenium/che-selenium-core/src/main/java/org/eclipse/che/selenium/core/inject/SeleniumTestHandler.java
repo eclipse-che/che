@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.core.inject;
 
 import static com.google.inject.Guice.createInjector;
+import static java.lang.Runtime.getRuntime;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 
@@ -107,6 +108,10 @@ public abstract class SeleniumTestHandler
 
   private static AtomicBoolean isCleanUpCompleted = new AtomicBoolean();
 
+  public SeleniumTestHandler() {
+    getRuntime().addShutdownHook(new Thread(this::shutdown));
+  }
+
   @Override
   public void onTestStart(ITestResult result) {}
 
@@ -142,8 +147,6 @@ public abstract class SeleniumTestHandler
   public void onStart(ISuite suite) {
     isCleanUpCompleted.set(false);
     runningTests.clear();
-
-    Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
 
     Injector injector = createInjector(getParentModules());
     injector.injectMembers(this);
