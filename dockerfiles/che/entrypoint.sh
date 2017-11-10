@@ -98,9 +98,6 @@ set_environment_variables () {
     CHE_HOME=$(echo /"${CHE_HOME}" | sed  's|\\|/|g' | sed 's|:||g')
   fi
 
-  # All Eclipse Che variables has to be set as environment variables.
-  unset CHE_LOCAL_CONF_DIR
-
   # Sets the location of the application server and its executables
   # Internal property - should generally not be overridden
   export CATALINA_HOME="${CHE_HOME}/tomcat"
