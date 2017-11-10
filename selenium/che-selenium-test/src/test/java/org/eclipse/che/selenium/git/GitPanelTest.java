@@ -44,6 +44,9 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Mykola Morhun */
+// This test is disabled because git panel isn't ready for production and hidden
+// Git panel epic: https://github.com/eclipse/che/issues/5128
+// Issue: https://github.com/eclipse/che/issues/7022
 public class GitPanelTest {
 
   private static final String JAVA_PLAIN_NON_GIT_PROJECT_NAME = "non-git-java-project";
@@ -121,7 +124,7 @@ public class GitPanelTest {
     commitAllChangesInProject(JAVA_SPRING_GIT_PROJECT_NAME, "initial commit");
   }
 
-  @Test(priority = 1)
+  @Test(priority = 1, enabled = false)
   public void checkProjectsInGitPanel() {
     gitPanel.openPanel();
     // check that only projects under git is shown
@@ -131,7 +134,7 @@ public class GitPanelTest {
     assertFalse(gitPanel.isRepositoryPresent(JAVA_PLAIN_NON_GIT_PROJECT_NAME));
   }
 
-  @Test(priority = 2)
+  @Test(priority = 2, enabled = false)
   public void checkChangesNumber() {
     projectExplorer.openPanel();
 
@@ -148,7 +151,7 @@ public class GitPanelTest {
     gitPanel.waitRepositoryToHaveChanges(JAVA_SPRING_GIT_PROJECT_NAME, 4);
   }
 
-  @Test(priority = 3)
+  @Test(priority = 3, enabled = false)
   public void shouldUpdateLabelsDynamically() {
     // check label update
     final String JAVA_SPRING_EDITED_FILE1_NAME_FILENAME =
@@ -173,7 +176,7 @@ public class GitPanelTest {
     gitPanel.waitRepositoryToHaveChanges(NODE_JS_GIT_PROJECT_NAME, 1);
   }
 
-  @Test(priority = 4)
+  @Test(priority = 4, enabled = false)
   public void checkChangedFilesList() {
     gitPanel.selectRepository(NODE_JS_GIT_PROJECT_NAME);
     assertEquals(gitPanel.getRepositoryChanges(NODE_JS_GIT_PROJECT_NAME), 1);
@@ -187,7 +190,7 @@ public class GitPanelTest {
     gitPanel.waitFileInChangesList(JAVA_SPRING_ADDED_FILE_NAME);
   }
 
-  @Test(priority = 5)
+  @Test(priority = 5, enabled = false)
   public void shouldShowDiffOfChangedItem() {
     gitPanel.selectRepository(JAVA_SPRING_GIT_PROJECT_NAME);
 
@@ -202,7 +205,7 @@ public class GitPanelTest {
     gitCompare.waitGitCompareFormIsClosed();
   }
 
-  @Test(priority = 6)
+  @Test(priority = 6, enabled = false)
   public void shouldAddNewRepositoryIntoPanelWhenNewProjectUnderGitCreated() {
     assertEquals(gitPanel.countRepositories(), 2);
     projectExplorer.openPanel();
@@ -215,7 +218,7 @@ public class GitPanelTest {
     assertTrue(gitPanel.isRepositoryPresent(NEW_PROJECT_NAME));
   }
 
-  @Test(priority = 7)
+  @Test(priority = 7, enabled = false)
   public void shouldRemoveRepositoryFromPanelWhenProjectUnderGitDeleted() {
     projectExplorer.openPanel();
 
@@ -231,7 +234,7 @@ public class GitPanelTest {
     assertFalse(gitPanel.isRepositoryPresent(NEW_PROJECT_NAME));
   }
 
-  @Test(priority = 8)
+  @Test(priority = 8, enabled = false)
   public void shouldRemoveRepositoryFromPanelWhenGitRepositoryDeletedFromProject() {
     projectExplorer.openPanel();
 
@@ -247,7 +250,7 @@ public class GitPanelTest {
     assertTrue(gitPanel.isRepositoryPresent(JAVA_SPRING_GIT_PROJECT_NAME));
   }
 
-  @Test(priority = 9)
+  @Test(priority = 9, enabled = false)
   public void shouldAddNewRepositoryIntoPanelWhenProjectAddedUnderGit() {
     assertEquals(gitPanel.countRepositories(), 1);
     projectExplorer.openPanel();
@@ -264,7 +267,7 @@ public class GitPanelTest {
     assertTrue(gitPanel.isRepositoryPresent(JAVA_SPRING_GIT_PROJECT_NAME));
   }
 
-  @Test(priority = 10)
+  @Test(priority = 10, enabled = false)
   public void shouldRenameRepositoryWhenProjectUnderGitRenamed() {
     projectExplorer.openPanel();
 
@@ -284,7 +287,7 @@ public class GitPanelTest {
     assertEquals(gitPanel.getRepositoryChanges(RENAMED_JAVA_SPRING_GIT_PROJECT_NAME), 4);
   }
 
-  @Test(priority = 11)
+  @Test(priority = 11, enabled = false)
   public void shouldDisplayCleanRepositoryAfterCommit() {
     assertFalse(gitPanel.isRepositoryClean(RENAMED_JAVA_SPRING_GIT_PROJECT_NAME));
     projectExplorer.openPanel();
@@ -295,7 +298,7 @@ public class GitPanelTest {
     gitPanel.waitRepositoryToBeClean(RENAMED_JAVA_SPRING_GIT_PROJECT_NAME);
   }
 
-  @Test(priority = 12)
+  @Test(priority = 12, enabled = false)
   public void shouldUpdatePanelIfFilesChangedFromExternalSource() {
     projectExplorer.openPanel();
 
@@ -324,7 +327,7 @@ public class GitPanelTest {
     gitPanel.waitFileInChangesList(JAVA_SPRING_ADDED_FILE_NAME);
   }
 
-  @Test(priority = 13)
+  @Test(priority = 13, enabled = false)
   public void shouldOpenGitPanelWithHotKey() {
     assertEquals(gitPanel.countRepositories(), 2);
 

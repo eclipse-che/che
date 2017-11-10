@@ -31,7 +31,6 @@ import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.api.resources.Project;
@@ -101,9 +100,11 @@ public class GitPanelPresenter extends BasePresenter
     this.view.setDelegate(this);
     this.view.setChangesPanelView(this.changesPanelPresenter.getView());
 
-    if (partStack == null || !partStack.containsPart(this)) {
-      workspaceAgent.openPart(this, PartStackType.NAVIGATION);
-    }
+    // TODO uncomment actionPerformed in ToggleGitPanelAction
+    // TODO uncomment to show git panel
+    // if (partStack == null || !partStack.containsPart(this)) {
+    //   workspaceAgent.openPart(this, PartStackType.NAVIGATION);
+    // }
 
     this.initialized = false;
   }

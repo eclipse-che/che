@@ -26,10 +26,11 @@ public class ToggleGitPanelAction extends BaseAction {
 
   @Override
   public void actionPerformed(ActionEvent e) {
-    if (gitPanelPresenter.isOpened()) {
-      gitPanelPresenter.hide();
-    } else {
-      gitPanelPresenter.show();
-    }
+    // TODO uncomment to enable shortcut to show git panel
+    // if (gitPanelPresenter.isOpened()) {
+    //   gitPanelPresenter.hide();
+    // } else {
+    //   gitPanelPresenter.show();
+    // }
   }
 }
