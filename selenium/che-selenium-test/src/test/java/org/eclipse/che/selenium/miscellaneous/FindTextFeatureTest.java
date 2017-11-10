@@ -120,8 +120,6 @@ public class FindTextFeatureTest {
     terminal.selectTerminalTab();
     createFileInTerminal(fileNameCreatedFromTerminal);
     WaitUtils.sleepQuietly(TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC);
-    projectExplorer.selectItem(
-        PROJECT_NAME); // TODO it is a workaround, see: https://github.com/eclipse/che/issues/6370,
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.FIND);
     findText.waitFindTextMainFormIsOpen();
     findText.typeTextIntoFindField("Filesystem");
