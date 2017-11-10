@@ -20,6 +20,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
+import org.eclipse.che.workspace.infrastructure.openshift.Names;
 import org.eclipse.che.workspace.infrastructure.openshift.ServerExposer;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.ConfigurationProvisioner;
@@ -42,13 +43,13 @@ public class ServersConverter implements ConfigurationProvisioner {
       throws InfrastructureException {
 
     for (Pod podConfig : osEnv.getPods().values()) {
-      final String podName = podConfig.getMetadata().getName();
       final PodSpec podSpec = podConfig.getSpec();
       for (Container containerConfig : podSpec.getContainers()) {
-        String machineName = podName + '/' + containerConfig.getName();
+        String machineName = Names.machineName(podConfig, containerConfig);
         InternalMachineConfig machineConfig = environment.getMachines().get(machineName);
         if (machineConfig != null && !machineConfig.getServers().isEmpty()) {
-          ServerExposer serverExposer = new ServerExposer(machineName, containerConfig, osEnv);
+          ServerExposer serverExposer =
+              new ServerExposer(machineName, podConfig, containerConfig, osEnv);
           serverExposer.expose(machineConfig.getServers());
         }
       }
