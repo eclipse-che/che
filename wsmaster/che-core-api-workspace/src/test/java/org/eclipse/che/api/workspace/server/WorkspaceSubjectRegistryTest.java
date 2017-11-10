@@ -75,6 +75,7 @@ public class WorkspaceSubjectRegistryTest {
     verify(workspaceSubjectRegistry).onEvent(event);
   }
 
+  @Test
   public void shouldAddSubjectOnStartingEvent() throws Exception {
     final String workspaceId = "myWorkspaceId";
     when(event.getEventType()).thenReturn(WorkspaceStatusEvent.EventType.STARTING);
@@ -94,6 +95,7 @@ public class WorkspaceSubjectRegistryTest {
     workspaceSubjectRegistry.onEvent(event);
   }
 
+  @Test
   public void shouldUpdateSubjectWithSameId() throws Exception {
     final String workspaceId = "myWorkspaceId";
     when(event.getEventType()).thenReturn(WorkspaceStatusEvent.EventType.STARTING);
@@ -107,6 +109,7 @@ public class WorkspaceSubjectRegistryTest {
     assertTrue(workspaceSubjectRegistry.getWorkspaceStarter(workspaceId) == updatedSubject);
   }
 
+  @Test
   public void shouldNotUpdateSubjectWithDifferentId() throws Exception {
     final String workspaceId = "myWorkspaceId";
     when(event.getEventType()).thenReturn(WorkspaceStatusEvent.EventType.STARTING);
@@ -120,6 +123,7 @@ public class WorkspaceSubjectRegistryTest {
     assertTrue(workspaceSubjectRegistry.getWorkspaceStarter(workspaceId) == workspaceStarter);
   }
 
+  @Test
   public void shouldRemoveUsersOnWorkspaceStop() throws Exception {
     final String workspaceId1 = "myWorkspaceId";
     final String workspaceId2 = "myWorkspaceId2";
@@ -148,7 +152,7 @@ public class WorkspaceSubjectRegistryTest {
 
     assertFalse(workspaceSubjectRegistry.isUserKnown(workspaceStarter.getUserId()));
 
-    assertNull(workspaceSubjectRegistry.getWorkspaceStarter(workspaceId1) == null);
-    assertNull(workspaceSubjectRegistry.getWorkspaceStarter(workspaceId2) == null);
+    assertNull(workspaceSubjectRegistry.getWorkspaceStarter(workspaceId1));
+    assertNull(workspaceSubjectRegistry.getWorkspaceStarter(workspaceId2));
   }
 }
