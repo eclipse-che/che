@@ -52,22 +52,7 @@ public class FileWatcherManagerTest {
             rootFolder.getRoot(),
             fileWatcherByPathValue,
             fileWatcherByPathMatcher,
-            service,
             fileWatcherExcludePatternsRegistry);
-  }
-
-  @Test
-  public void shouldSuspendService() throws Exception {
-    manager.suspend();
-
-    //    verify(service).suspend();
-  }
-
-  @Test
-  public void shouldResumeService() throws Exception {
-    manager.resume();
-
-    //    verify(service).resume();
   }
 
   @Test

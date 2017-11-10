@@ -249,27 +249,6 @@ public class FileWatcherService {
     }
   }
 
-  /**
-   * Resumes service after it was in suspended state. If method is called when the service is
-   * already not in a suspended state nothing happens.
-   */
-  void resume() {
-    if (suspended.compareAndSet(true, false)) {
-      LOG.debug("Resuming service.");
-    }
-  }
-
-  /**
-   * Temporary suspends service of generating any events. Events received by service in suspended
-   * state are totally skipped. If method is called when the service is already in a suspended state
-   * nothing happens.
-   */
-  void suspend() {
-    if (suspended.compareAndSet(false, true)) {
-      LOG.debug("Suspending service.");
-    }
-  }
-
   private void run() {
     suspended.compareAndSet(true, false);
     running.compareAndSet(false, true);

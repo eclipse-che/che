@@ -61,7 +61,7 @@ public class ValidatingFsManagerTest {
 
   @Mock private FsOperations fsOperations;
   @Mock private PathTransformer pathTransformer;
-  @Mock private SuspendingFsManager suspendingFsManager;
+  @Mock private ExecutiveFsManager executiveFsManager;
   @InjectMocks private ValidatingFsManager validatingFsManager;
 
   @Mock private BiConsumer<InputStream, OutputStream> updater;
@@ -94,7 +94,7 @@ public class ValidatingFsManagerTest {
 
     validatingFsManager.createFile(WS_PATH, false, false);
 
-    verify(suspendingFsManager).createFile(WS_PATH, false, false);
+    verify(executiveFsManager).createFile(WS_PATH, false, false);
   }
 
   @Test(expectedExceptions = ConflictException.class)
@@ -136,7 +136,7 @@ public class ValidatingFsManagerTest {
 
     validatingFsManager.createDir(WS_PATH, false, false);
 
-    verify(suspendingFsManager).createDir(WS_PATH, false, false);
+    verify(executiveFsManager).createDir(WS_PATH, false, false);
   }
 
   @Test(expectedExceptions = ConflictException.class)
@@ -178,7 +178,7 @@ public class ValidatingFsManagerTest {
 
     validatingFsManager.read(WS_PATH);
 
-    verify(suspendingFsManager).read(WS_PATH);
+    verify(executiveFsManager).read(WS_PATH);
   }
 
   @Test(expectedExceptions = NotFoundException.class)
@@ -202,7 +202,7 @@ public class ValidatingFsManagerTest {
 
     validatingFsManager.zip(WS_PATH);
 
-    verify(suspendingFsManager).zip(WS_PATH);
+    verify(executiveFsManager).zip(WS_PATH);
   }
 
   @Test(expectedExceptions = NotFoundException.class)
@@ -219,7 +219,7 @@ public class ValidatingFsManagerTest {
 
     validatingFsManager.unzip(WS_PATH, INPUT_STREAM, false, false, false);
 
-    verify(suspendingFsManager).unzip(WS_PATH, INPUT_STREAM, false, false, false);
+    verify(executiveFsManager).unzip(WS_PATH, INPUT_STREAM, false, false, false);
   }
 
   @Test(expectedExceptions = NotFoundException.class)
@@ -252,7 +252,7 @@ public class ValidatingFsManagerTest {
 
     validatingFsManager.update(WS_PATH, INPUT_STREAM);
 
-    verify(suspendingFsManager).update(WS_PATH, INPUT_STREAM);
+    verify(executiveFsManager).update(WS_PATH, INPUT_STREAM);
   }
 
   @Test(expectedExceptions = NotFoundException.class)
@@ -286,7 +286,7 @@ public class ValidatingFsManagerTest {
 
     validatingFsManager.update(WS_PATH, updater);
 
-    verify(suspendingFsManager).update(WS_PATH, updater);
+    verify(executiveFsManager).update(WS_PATH, updater);
   }
 
   @Test(expectedExceptions = NotFoundException.class)
@@ -319,7 +319,7 @@ public class ValidatingFsManagerTest {
 
     validatingFsManager.delete(WS_PATH, false);
 
-    verify(suspendingFsManager).delete(WS_PATH, false);
+    verify(executiveFsManager).delete(WS_PATH, false);
   }
 
   @Test(expectedExceptions = NotFoundException.class)
@@ -344,7 +344,7 @@ public class ValidatingFsManagerTest {
 
     validatingFsManager.copy(SRC_WS_PATH, DST_WS_PATH, false, false);
 
-    verify(suspendingFsManager).copy(SRC_WS_PATH, DST_WS_PATH, false, false);
+    verify(executiveFsManager).copy(SRC_WS_PATH, DST_WS_PATH, false, false);
   }
 
   @Test(expectedExceptions = NotFoundException.class)
@@ -400,7 +400,7 @@ public class ValidatingFsManagerTest {
 
     validatingFsManager.move(SRC_WS_PATH, DST_WS_PATH, false, false);
 
-    verify(suspendingFsManager).move(SRC_WS_PATH, DST_WS_PATH, false, false);
+    verify(executiveFsManager).move(SRC_WS_PATH, DST_WS_PATH, false, false);
   }
 
   @Test(expectedExceptions = NotFoundException.class)
@@ -452,97 +452,97 @@ public class ValidatingFsManagerTest {
   public void shouldCallSuspendingFsManagerOnGetFileNames() throws Exception {
     validatingFsManager.getFileWsPaths(WS_PATH);
 
-    verify(suspendingFsManager).getFileWsPaths(WS_PATH);
+    verify(executiveFsManager).getFileWsPaths(WS_PATH);
   }
 
   @Test
   public void shouldCallSuspendingFsManagerOnGetDirNames() throws Exception {
     validatingFsManager.getDirNames(WS_PATH);
 
-    verify(suspendingFsManager).getDirNames(WS_PATH);
+    verify(executiveFsManager).getDirNames(WS_PATH);
   }
 
   @Test
   public void shouldCallSuspendingFsManagerOnGetFileWsPaths() throws Exception {
     validatingFsManager.getFileWsPaths(WS_PATH);
 
-    verify(suspendingFsManager).getFileWsPaths(WS_PATH);
+    verify(executiveFsManager).getFileWsPaths(WS_PATH);
   }
 
   @Test
   public void shouldCallSuspendingFsManagerOnGetDirWsPaths() throws Exception {
     validatingFsManager.getDirWsPaths(WS_PATH);
 
-    verify(suspendingFsManager).getDirWsPaths(WS_PATH);
+    verify(executiveFsManager).getDirWsPaths(WS_PATH);
   }
 
   @Test
   public void shouldCallSuspendingFsManagerOnGetAllChildrenNames() throws Exception {
     validatingFsManager.getAllChildrenNames(WS_PATH);
 
-    verify(suspendingFsManager).getAllChildrenNames(WS_PATH);
+    verify(executiveFsManager).getAllChildrenNames(WS_PATH);
   }
 
   @Test
   public void shouldCallSuspendingFsManagerOnGetAllChildrenWsPaths() throws Exception {
     validatingFsManager.getAllChildrenWsPaths(WS_PATH);
 
-    verify(suspendingFsManager).getAllChildrenWsPaths(WS_PATH);
+    verify(executiveFsManager).getAllChildrenWsPaths(WS_PATH);
   }
 
   @Test
   public void shouldCallSuspendingFsManagerOnIsDir() throws Exception {
     validatingFsManager.isDir(WS_PATH);
 
-    verify(suspendingFsManager).isDir(WS_PATH);
+    verify(executiveFsManager).isDir(WS_PATH);
   }
 
   @Test
   public void shouldCallSuspendingFsManagerOnIsFile() throws Exception {
     validatingFsManager.isFile(WS_PATH);
 
-    verify(suspendingFsManager).isFile(WS_PATH);
+    verify(executiveFsManager).isFile(WS_PATH);
   }
 
   @Test
   public void shouldCallSuspendingFsManagerOnExists() throws Exception {
     validatingFsManager.exists(WS_PATH);
 
-    verify(suspendingFsManager).exists(WS_PATH);
+    verify(executiveFsManager).exists(WS_PATH);
   }
 
   @Test
   public void shouldCallSuspendingFsManagerOnExistsAsDir() throws Exception {
     validatingFsManager.existsAsDir(WS_PATH);
 
-    verify(suspendingFsManager).existsAsDir(WS_PATH);
+    verify(executiveFsManager).existsAsDir(WS_PATH);
   }
 
   @Test
   public void shouldCallSuspendingFsManagerOnExistsAsFile() throws Exception {
     validatingFsManager.existsAsFile(WS_PATH);
 
-    verify(suspendingFsManager).existsAsFile(WS_PATH);
+    verify(executiveFsManager).existsAsFile(WS_PATH);
   }
 
   @Test
   public void shouldCallSuspendingFsManagerOnLastModified() throws Exception {
     validatingFsManager.lastModified(WS_PATH);
 
-    verify(suspendingFsManager).lastModified(WS_PATH);
+    verify(executiveFsManager).lastModified(WS_PATH);
   }
 
   @Test
   public void shouldCallSuspendingFsManagerOnLength() throws Exception {
     validatingFsManager.length(WS_PATH);
 
-    verify(suspendingFsManager).length(WS_PATH);
+    verify(executiveFsManager).length(WS_PATH);
   }
 
   @Test
   public void shouldCallSuspendingFsManagerOnToIoFile() throws Exception {
     validatingFsManager.toIoFile(WS_PATH);
 
-    verify(suspendingFsManager).toIoFile(WS_PATH);
+    verify(executiveFsManager).toIoFile(WS_PATH);
   }
 }

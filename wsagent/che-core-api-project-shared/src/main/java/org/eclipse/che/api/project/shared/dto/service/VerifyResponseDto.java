@@ -10,13 +10,12 @@
  */
 package org.eclipse.che.api.project.shared.dto.service;
 
-import java.util.List;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface VerifyResponseDto {
-  List<SourceEstimation> getSourceEstimations();
+  SourceEstimation getSourceEstimation();
 
-  void setSourceEstimations(List<SourceEstimation> sourceEstimations);
+  void setSourceEstimation(SourceEstimation sourceEstimation);
 }

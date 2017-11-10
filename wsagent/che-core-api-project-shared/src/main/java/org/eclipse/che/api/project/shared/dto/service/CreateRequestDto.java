@@ -10,16 +10,19 @@
  */
 package org.eclipse.che.api.project.shared.dto.service;
 
-import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface CreateRequestDto {
-  List<ProjectConfigDto> getProjectConfigs();
+  String getWsPath();
 
-  void setProjectConfigs(List<ProjectConfigDto> projectConfigs);
+  void setWsPath(String wsPath);
+
+  ProjectConfigDto getConfig();
+
+  void setConfig(ProjectConfigDto config);
 
   Map<String, String> getOptions();
 

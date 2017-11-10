@@ -10,13 +10,12 @@
  */
 package org.eclipse.che.api.project.shared.dto.service;
 
-import java.util.List;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface ImportResponseDto {
-  List<ProjectConfigDto> getProjectConfigs();
+  ProjectConfigDto getConfig();
 
-  void setProjectConfigs(List<ProjectConfigDto> projectConfigs);
+  void setConfig(ProjectConfigDto config);
 }

@@ -109,15 +109,11 @@ public class ProjectTreeTracker {
           {
             LOG.debug("Received project tree tracking operation SUSPEND trigger.");
 
-            fileWatcherManager.suspend();
-
             break;
           }
         case RESUME:
           {
             LOG.debug("Received project tree tracking operation RESUME trigger.");
-
-            fileWatcherManager.resume();
 
             break;
           }

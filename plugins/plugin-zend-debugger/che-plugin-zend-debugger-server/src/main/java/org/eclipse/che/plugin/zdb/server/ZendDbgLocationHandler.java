@@ -9,16 +9,15 @@
  */
 package org.eclipse.che.plugin.zdb.server;
 
+import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
+import static org.eclipse.che.api.fs.server.WsPathUtils.nameOf;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.ProjectManager;
-
-import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
-import static org.eclipse.che.api.fs.server.WsPathUtils.nameOf;
 
 /**
  * Zend debugger location handler. This class is responsible for bidirectional mapping/converting

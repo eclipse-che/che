@@ -16,7 +16,7 @@ import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface RecognizeResponseDto {
-  List<List<SourceEstimation>> getSourceEstimations();
+  List<SourceEstimation> getSourceEstimations();
 
-  void setSourceEstimations(List<List<SourceEstimation>> sourceEstimations);
+  void setSourceEstimations(List<SourceEstimation> sourceEstimations);
 }

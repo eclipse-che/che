@@ -134,15 +134,11 @@ public class EditorFileTracker {
         {
           LOG.debug("Received file tracking operation SUSPEND trigger.");
 
-          fileWatcherManager.suspend();
-
           break;
         }
       case RESUME:
         {
           LOG.debug("Received file tracking operation RESUME trigger.");
-
-          fileWatcherManager.resume();
 
           break;
         }

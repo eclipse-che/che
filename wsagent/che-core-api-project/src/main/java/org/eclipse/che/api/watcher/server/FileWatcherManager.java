@@ -17,12 +17,6 @@ import java.util.function.Consumer;
 /** Facade for all dynamic file watcher system related operations. */
 public interface FileWatcherManager {
 
-  /** Suspend dynamic file watching system. If already suspended does nothing */
-  void suspend();
-
-  /** Resume dynamic file watching system. If already resumed does nothing */
-  void resume();
-
   /**
    * Start watching a file system item by specifying its path. If path points to a file than only
    * file related events are taken into account, if path points to a folder than all folder entries

@@ -13,13 +13,13 @@ import static org.eclipse.che.plugin.composer.shared.Constants.COMPOSER_PROJECT_
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.concurrent.TimeoutException;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
 import org.eclipse.che.plugin.composer.server.executor.ComposerCommandExecutor;
 
@@ -27,17 +27,20 @@ import org.eclipse.che.plugin.composer.server.executor.ComposerCommandExecutor;
 public class ComposerProjectInitializer implements ProjectInitHandler {
 
   private ComposerCommandExecutor commandExecutor;
+  private PathTransformer pathTransformer;
 
   @Inject
-  public ComposerProjectInitializer(ComposerCommandExecutor commandExecutor) {
+  public ComposerProjectInitializer(
+      ComposerCommandExecutor commandExecutor, PathTransformer pathTransformer) {
     this.commandExecutor = commandExecutor;
+    this.pathTransformer = pathTransformer;
   }
 
   @Override
   public void onProjectInitialized(String projectWsPath)
       throws ServerException, ForbiddenException, ConflictException, NotFoundException {
     String[] commandLine = {"composer", "install"};
-    Path path = Paths.get("/projects/", projectWsPath);
+    Path path = pathTransformer.transform(projectWsPath);
     try {
       commandExecutor.execute(commandLine, path.toFile());
     } catch (TimeoutException | IOException | InterruptedException e) {

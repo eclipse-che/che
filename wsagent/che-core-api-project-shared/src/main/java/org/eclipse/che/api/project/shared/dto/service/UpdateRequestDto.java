@@ -10,18 +10,21 @@
  */
 package org.eclipse.che.api.project.shared.dto.service;
 
-import java.util.List;
-import org.eclipse.che.api.project.shared.dto.ProjectMatcherDto;
+import java.util.Map;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface UpdateRequestDto {
-  List<ProjectMatcherDto> getProjectMatchers();
+  String getWsPath();
 
-  void setProjectMatchers(List<ProjectMatcherDto> projectMatcherDtos);
+  void setWsPath(String wsPath);
 
-  List<ProjectConfigDto> getProjectConfigs();
+  ProjectConfigDto getConfig();
 
-  void setProjectConfigs(List<ProjectConfigDto> projectConfigs);
+  void setConfig(ProjectConfigDto config);
+
+  Map<String, String> getOptions();
+
+  void setOptions(Map<String, String> options);
 }

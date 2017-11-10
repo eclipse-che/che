@@ -31,13 +31,13 @@ public class ValidatingFsManager implements FsManager {
 
   private final FsOperations fsOperations;
   private final PathTransformer pathTransformer;
-  private final SuspendingFsManager suspendingFsManager;
+  private final FsManager suspendingFsManager;
 
   @Inject
   public ValidatingFsManager(
       FsOperations fsOperations,
       PathTransformer pathTransformer,
-      SuspendingFsManager suspendingFsManager) {
+      ExecutiveFsManager suspendingFsManager) {
     this.fsOperations = fsOperations;
     this.pathTransformer = pathTransformer;
     this.suspendingFsManager = suspendingFsManager;

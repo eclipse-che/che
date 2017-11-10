@@ -10,18 +10,16 @@
  */
 package org.eclipse.che.api.project.shared.dto.service;
 
-import java.util.List;
-import org.eclipse.che.api.project.shared.dto.ProjectMatcherDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface ImportRequestDto {
-  List<ProjectMatcherDto> getProjectMatchers();
+  String getWsPath();
 
-  void setProjectMatchers(List<ProjectMatcherDto> projectMatcherDtos);
+  void setWsPath(String wsPath);
 
-  List<SourceStorageDto> getSourceStorages();
+  SourceStorageDto getSourceStorage();
 
-  void setSourceStorages(List<SourceStorageDto> sourceStorages);
+  void setSourceStorage(SourceStorageDto sourceStorage);
 }

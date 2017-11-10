@@ -123,18 +123,6 @@ public final class Model {
     return readFrom(requireNonNull(path.toFile(), "Required not null model"));
   }
 
-  //  /**
-  //   * Reads model from given virtual file.
-  //   *
-  //   * @param file virtual file to read model from
-  //   * @return fetched model
-  //   */
-  //  public static Model readFrom(String file)
-  //      throws ServerException, ForbiddenException, IOException {
-  //    requireNonNull(file, "Required not null virtual file");
-  //    return fetchModel(XMLTree.from(file.getContent()));
-  //  }
-
   /**
    * Creates new pom xml model with root "project" element.
    *
@@ -895,15 +883,6 @@ public final class Model {
   public void writeTo(File file) throws IOException {
     tree.writeTo(file);
   }
-
-  //  /**
-  //   * Updates virtual file content
-  //   *
-  //   * @param file virtual file which content should be updated
-  //   */
-  //  public void writeTo(VirtualFile file) throws ServerException, ForbiddenException {
-  //    file.updateContent(new ByteArrayInputStream(tree.getBytes()), null);
-  //  }
 
   /**
    * Updates associated with model pom file content

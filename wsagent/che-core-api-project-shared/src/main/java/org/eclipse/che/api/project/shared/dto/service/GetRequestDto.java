@@ -10,12 +10,11 @@
  */
 package org.eclipse.che.api.project.shared.dto.service;
 
-import org.eclipse.che.api.project.shared.dto.ProjectMatcherDto;
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface GetRequestDto {
-  ProjectMatcherDto getProjectMatcher();
+  String getWsPath();
 
-  void setProjectMatcher(ProjectMatcherDto projectMatcherDto);
+  void setWsPath(String wsPath);
 }

@@ -30,7 +30,6 @@ public class SimpleFileWatcherManager implements FileWatcherManager {
 
   private final FileWatcherByPathValue fileWatcherByPathValue;
   private final FileWatcherByPathMatcher fileWatcherByPathMatcher;
-  private final FileWatcherService service;
   private final Path root;
   private final FileWatcherExcludePatternsRegistry excludePatternsRegistry;
 
@@ -39,23 +38,11 @@ public class SimpleFileWatcherManager implements FileWatcherManager {
       @Named("che.user.workspaces.storage") File root,
       FileWatcherByPathValue watcherByPathValue,
       FileWatcherByPathMatcher watcherByPathMatcher,
-      FileWatcherService service,
       FileWatcherExcludePatternsRegistry excludePatternsRegistry) {
     this.fileWatcherByPathMatcher = watcherByPathMatcher;
     this.fileWatcherByPathValue = watcherByPathValue;
-    this.service = service;
     this.root = root.toPath().normalize().toAbsolutePath();
     this.excludePatternsRegistry = excludePatternsRegistry;
-  }
-
-  @Override
-  public void suspend() {
-    //    service.suspend();
-  }
-
-  @Override
-  public void resume() {
-    //    service.resume();
   }
 
   @Override
