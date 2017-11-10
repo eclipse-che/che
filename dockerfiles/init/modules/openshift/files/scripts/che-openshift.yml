@@ -256,11 +256,6 @@ items:
               configMapKeyRef:
                 key: workspace-storage-create-folders
                 name: che
-          - name: CHE_LOCAL_CONF_DIR
-            valueFrom:
-              configMapKeyRef:
-                key: local-conf-dir
-                name: che
           - name: CHE_OPENSHIFT_PROJECT
             valueFrom:
               fieldRef:

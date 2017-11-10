@@ -27,7 +27,6 @@ Variables:
     CHE_SERVER_ACTION                   Another way to set the [COMMAND] to [run | start | stop]
     CHE_PORT                            The port the Che server will listen on
     CHE_IP                              The IP address of the host - must be set if remote clients connecting
-    CHE_LOCAL_CONF_DIR                  If set, will load user defined che.properties from folder
     CHE_BLOCKING_ENTROPY                Starts Tomcat with blocking entropy: -Djava.security.egd=file:/dev/./urandom
     CHE_LAUNCH_DOCKER_REGISTRY          If true, uses Docker registry to save ws snapshots instead of disk
     CHE_REGISTRY_HOST                   Hostname of Docker registry to launch, otherwise 'localhost'
@@ -99,10 +98,8 @@ set_environment_variables () {
     CHE_HOME=$(echo /"${CHE_HOME}" | sed  's|\\|/|g' | sed 's|:||g')
   fi
 
-  # Che configuration directory - where user defined *.properties lives
-  if [ -z "${CHE_LOCAL_CONF_DIR}" ]; then
-    export CHE_LOCAL_CONF_DIR="${CHE_HOME}/conf/"
-  fi
+  # All Eclipse Che variables has to be set as environment variables.
+  unset CHE_LOCAL_CONF_DIR
 
   # Sets the location of the application server and its executables
   # Internal property - should generally not be overridden
@@ -216,19 +213,6 @@ init() {
     echo "Using embedded assembly..."
     export CHE_HOME=$(echo /home/user/eclipse-che/)
   fi
-
-  # Che configuration directory - where user defined *.properties lives
-  if [ -z "${CHE_LOCAL_CONF_DIR}" ]; then
-      ### Are we using the included assembly or did user provide their own?
-      if [ ! -f $CHE_LOCAL_CONF_DIR/*.properties ]; then
-        echo "!!!"
-        echo "!!! Error: Could not find $CHE_LOCAL_CONF_DIR/*.properties."
-        echo "!!! Error: Did you use CHE_LOCAL_CONF_DIR with a typo?"
-        echo "!!!"
-        exit 1
-      fi
-  fi
-
 
   ### We need to discover the host mount provided by the user for `/data`
   export CHE_DATA="/data"
