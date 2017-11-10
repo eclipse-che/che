@@ -13,17 +13,13 @@ import {IEnvironmentManagerMachine} from '../../../../components/api/environment
 import {EnvironmentManager} from '../../../../components/api/environment/environment-manager';
 import {CheAgent} from '../../../../components/api/che-agent.factory';
 
-export interface IAgentItem {
-  id: string;
-  name: string;
-  description: string;
+export interface IAgentItem extends che.IAgent {
   isEnabled: boolean;
-  [propName: string]: any;
 }
 
 /** List of the locked agents which shouldn't be switched by user */
 const LOCKED_AGENTS: Array<string> = ['org.eclipse.che.ws-agent', 'com.codenvy.rsync_in_machine', 'com.codenvy.external_rsync'];
-
+const LATEST: string = 'latest';
 /**
  * @ngdoc controller
  * @name machine.agents.controller:MachineAgentsController
@@ -74,7 +70,7 @@ export class MachineAgentsController {
   buildAgentsList(): void {
     const agents = this.cheAgent.getAgents();
     this.agentsList = agents.map((agentItem: IAgentItem) => {
-      agentItem.isEnabled = this.isEnabled(agentItem.id);
+      this.checkEnabled(agentItem);
       return agentItem;
     });
   }
@@ -103,11 +99,50 @@ export class MachineAgentsController {
   }
 
   /**
-   * Returns true if the agent is enabled.
-   * @param agentId {string}
-   * @returns {boolean}
+   * Checks agent enabled.
+   *
+   * @param agentItem {IAgentItem}
    */
-  isEnabled(agentId: string): boolean {
-    return (this.agents.indexOf(agentId) !== -1);
+  checkEnabled(agentItem: IAgentItem): void {
+    for (let i = 0; i < this.agents.length; i++) {
+      let agent = this.agents[i];
+      // Try to extract agent's version in format id:version:
+      let groups = agent.match(/[^:]+(:(.+)){0,1}/);
+      let id;
+      let version = null;
+      if (groups && groups.length === 3) {
+        id = groups[0];
+        version = groups[2];
+      } else {
+        id = agent;
+      }
+
+      // Compare by id and version, if no version - consider as latest:
+      if (agentItem.id === id && agentItem.version === version) {
+        agentItem.isEnabled = true;
+        return;
+      } else if (agentItem.id === id && (!version || version === LATEST)) {
+        let latestAgent = this.cheAgent.getAgent(id);
+        if (latestAgent && latestAgent.version === agentItem.version) {
+          agentItem.isEnabled = true;
+          return;
+        } else if (!latestAgent) {
+          this.fetchAgentLatestVersion(agentItem);
+        }
+      }
+    };
+
+    agentItem.isEnabled = false;
+  }
+
+  /**
+   * Fetch the agent by id of the latest version and compare with provided one.
+   *
+   * @param {IAgentItem} agentItem agent to check on latest version
+   */
+  private fetchAgentLatestVersion(agentItem: IAgentItem): void {
+    this.cheAgent.fetchAgent(agentItem.id).then((agent: che.IAgent) => {
+      agentItem.isEnabled = agentItem.version === agent.version;
+    });
   }
 }

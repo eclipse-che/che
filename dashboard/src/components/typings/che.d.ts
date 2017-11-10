@@ -355,6 +355,17 @@ declare namespace che {
     url: string;
   }
 
+  export interface IAgent {
+    id: string;
+    name: string;
+    version: string;
+    description: string;
+    properties: any;
+    script: string;
+    servers: { [serverName: string]: IEnvironmentMachineServer };
+    dependencies: string[];
+  }
+
   export interface IProjectSource {
     location: string;
     parameters?: {
