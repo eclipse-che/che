@@ -15,7 +15,9 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRA
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -45,6 +47,8 @@ public class AskForValueDialog {
       "//*[@id='gwt-debug-newJavaSourceFileView-typeField' ]//option[@value='Interface']";
   private static final String ENUM_ITEM =
       "//*[@id='gwt-debug-newJavaSourceFileView-typeField' ]//option[@value='Enum']";
+
+  private final ActionsFactory actionsFactory;
 
   public enum JavaFiles {
     CLASS,
@@ -95,9 +99,11 @@ public class AskForValueDialog {
   private final Loader loader;
 
   @Inject
-  public AskForValueDialog(SeleniumWebDriver seleniumWebDriver, Loader loader) {
+  public AskForValueDialog(
+      SeleniumWebDriver seleniumWebDriver, Loader loader, ActionsFactory actionsFactory) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
+    this.actionsFactory = actionsFactory;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -230,5 +236,10 @@ public class AskForValueDialog {
     } catch (NoSuchElementException ex) {
       return false;
     }
+  }
+
+  /** launch the 'Rename project' form by keyboard */
+  public void launchFindFormByKeyboard() {
+    actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.SHIFT, Keys.F6).perform();
   }
 }
