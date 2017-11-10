@@ -11,6 +11,7 @@
 package org.eclipse.che.plugin.openshift.client;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
@@ -25,9 +26,11 @@ import java.util.List;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.workspace.server.WorkspaceSubjectRegistry;
 import org.eclipse.che.api.workspace.server.event.ServerIdleEvent;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.plugin.openshift.client.exception.OpenShiftException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -43,6 +46,8 @@ public class OpenShiftWorkspaceFilesCleanerTest {
 
   @Mock private OpenShiftPvcHelper pvcHelper;
   @Mock private ServerIdleEvent serverIdleEvent;
+  @Mock private OpenshiftWorkspaceEnvironmentProvider workspaceEnvironmentProvider;
+  @Mock private WorkspaceSubjectRegistry workspaceSubjectRegistry;
   private EventService eventService;
   private OpenShiftWorkspaceFilesCleaner cleaner;
 
@@ -50,10 +55,21 @@ public class OpenShiftWorkspaceFilesCleanerTest {
   public void setup() {
     OpenShiftWorkspaceFilesCleaner.clearDeleteQueue();
     MockitoAnnotations.initMocks(this);
+    when(workspaceEnvironmentProvider.areWorkspacesExternal()).thenReturn(false);
+    try {
+      when(workspaceEnvironmentProvider.getWorkspacesOpenshiftNamespace(null))
+          .thenReturn(CHE_OPENSHIFT_PROJECT);
+    } catch (OpenShiftException e) {
+      e.printStackTrace();
+    }
     eventService = new EventService();
     cleaner =
         new OpenShiftWorkspaceFilesCleaner(
-            eventService, pvcHelper, CHE_OPENSHIFT_PROJECT, WORKSPACES_PVC_NAME);
+            eventService,
+            pvcHelper,
+            workspaceEnvironmentProvider,
+            workspaceSubjectRegistry,
+            WORKSPACES_PVC_NAME);
   }
 
   @Test
@@ -67,6 +83,7 @@ public class OpenShiftWorkspaceFilesCleanerTest {
     // Then
     verify(pvcHelper, never())
         .createJobPod(
+            isNull(),
             anyString(),
             anyString(),
             anyString(),
@@ -86,6 +103,7 @@ public class OpenShiftWorkspaceFilesCleanerTest {
     // Then
     verify(pvcHelper, times(1))
         .createJobPod(
+            isNull(),
             anyString(),
             anyString(),
             anyString(),
@@ -109,6 +127,7 @@ public class OpenShiftWorkspaceFilesCleanerTest {
     // Then
     verify(pvcHelper, times(1))
         .createJobPod(
+            isNull(),
             anyString(),
             anyString(),
             anyString(),
@@ -137,6 +156,7 @@ public class OpenShiftWorkspaceFilesCleanerTest {
     // Then
     verify(pvcHelper, times(1))
         .createJobPod(
+            isNull(),
             anyString(),
             anyString(),
             anyString(),
@@ -149,6 +169,7 @@ public class OpenShiftWorkspaceFilesCleanerTest {
     // Then
     verify(pvcHelper, times(2))
         .createJobPod(
+            isNull(),
             anyString(),
             anyString(),
             anyString(),
@@ -169,6 +190,7 @@ public class OpenShiftWorkspaceFilesCleanerTest {
     // Then
     verify(pvcHelper, times(1))
         .createJobPod(
+            isNull(),
             eq(WORKSPACES_PVC_NAME),
             eq(CHE_OPENSHIFT_PROJECT),
             anyString(),

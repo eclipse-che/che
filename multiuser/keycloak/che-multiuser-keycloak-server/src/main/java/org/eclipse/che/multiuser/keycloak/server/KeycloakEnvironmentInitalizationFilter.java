@@ -33,6 +33,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
+import org.eclipse.che.api.workspace.server.WorkspaceSubjectRegistry;
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
@@ -51,15 +52,18 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
   private final UserManager userManager;
   private final RequestTokenExtractor tokenExtractor;
   private final PermissionChecker permissionChecker;
+  private final WorkspaceSubjectRegistry workspaceSubjectRegistry;
 
   @Inject
   public KeycloakEnvironmentInitalizationFilter(
       UserManager userManager,
       RequestTokenExtractor tokenExtractor,
-      PermissionChecker permissionChecker) {
+      PermissionChecker permissionChecker,
+      WorkspaceSubjectRegistry workspaceSubjectRegistry) {
     this.userManager = userManager;
     this.tokenExtractor = tokenExtractor;
     this.permissionChecker = permissionChecker;
+    this.workspaceSubjectRegistry = workspaceSubjectRegistry;
   }
 
   @Override
@@ -91,6 +95,7 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
         subject =
             new AuthorizedSubject(
                 new SubjectImpl(user.getName(), user.getId(), token, false), permissionChecker);
+        workspaceSubjectRegistry.updateSubject(subject);
         session.setAttribute("che_subject", subject);
       } catch (ServerException | ConflictException e) {
         throw new ServletException(

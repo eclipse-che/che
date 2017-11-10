@@ -27,6 +27,7 @@ public class KubernetesExecHolder {
 
   private String[] command;
   private String podName;
+  private String containerId;
 
   public KubernetesExecHolder withCommand(String[] command) {
     this.command = command;
@@ -38,12 +39,21 @@ public class KubernetesExecHolder {
     return this;
   }
 
+  public KubernetesExecHolder withContainerId(String containerId) {
+    this.containerId = containerId;
+    return this;
+  }
+
   public String[] getCommand() {
     return command;
   }
 
   public String getPod() {
     return podName;
+  }
+
+  public String getContainerId() {
+    return containerId;
   }
 
   public String toString() {

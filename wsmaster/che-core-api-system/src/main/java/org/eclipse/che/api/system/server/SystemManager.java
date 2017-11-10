@@ -106,6 +106,7 @@ public class SystemManager {
   @PreDestroy
   @VisibleForTesting
   void shutdown() throws InterruptedException {
+    LOG.debug("Synchronous shutdown requested");
     if (!statusRef.compareAndSet(RUNNING, PREPARING_TO_SHUTDOWN)) {
       shutdownLatch.await();
     } else {

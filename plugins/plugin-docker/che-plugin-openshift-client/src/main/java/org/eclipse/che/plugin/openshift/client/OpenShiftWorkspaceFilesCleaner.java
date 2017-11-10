@@ -15,6 +15,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,7 +27,10 @@ import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner;
+import org.eclipse.che.api.workspace.server.WorkspaceSubjectRegistry;
 import org.eclipse.che.api.workspace.server.event.ServerIdleEvent;
+import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.plugin.openshift.client.exception.OpenShiftException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +52,8 @@ public class OpenShiftWorkspaceFilesCleaner implements WorkspaceFilesCleaner {
 
   private static final Logger LOG = LoggerFactory.getLogger(OpenShiftConnector.class);
   private static final Set<String> deleteQueue = ConcurrentHashMap.newKeySet();
-  private final String projectNamespace;
+  private OpenshiftWorkspaceEnvironmentProvider workspaceEnvironmentProvider;
+  private WorkspaceSubjectRegistry workspaceSubjectRegistry;
   private final String workspacesPvcName;
   private final OpenShiftPvcHelper openShiftPvcHelper;
 
@@ -56,22 +61,27 @@ public class OpenShiftWorkspaceFilesCleaner implements WorkspaceFilesCleaner {
   public OpenShiftWorkspaceFilesCleaner(
       EventService eventService,
       OpenShiftPvcHelper openShiftPvcHelper,
-      @Named("che.openshift.project") String projectNamespace,
+      OpenshiftWorkspaceEnvironmentProvider workspaceEnvironmentProvider,
+      WorkspaceSubjectRegistry workspaceSubjectRegistry,
       @Named("che.openshift.workspaces.pvc.name") String workspacesPvcName) {
-    this.projectNamespace = projectNamespace;
+    this.workspaceEnvironmentProvider = workspaceEnvironmentProvider;
     this.workspacesPvcName = workspacesPvcName;
     this.openShiftPvcHelper = openShiftPvcHelper;
-    eventService.subscribe(
-        new EventSubscriber<ServerIdleEvent>() {
-          @Override
-          public void onEvent(ServerIdleEvent event) {
-            try {
-              deleteWorkspacesInQueue(event);
-            } catch (OpenShiftException e) {
-              LOG.warn("Error while deleting the workspaces", e);
+    this.workspaceSubjectRegistry = workspaceSubjectRegistry;
+
+    if (!workspaceEnvironmentProvider.areWorkspacesExternal()) {
+      eventService.subscribe(
+          new EventSubscriber<ServerIdleEvent>() {
+            @Override
+            public void onEvent(ServerIdleEvent event) {
+              try {
+                deleteWorkspacesInQueue(event);
+              } catch (OpenShiftException e) {
+                LOG.warn("Error while deleting the workspaces", e);
+              }
             }
-          }
-        });
+          });
+    }
   }
 
   @Override
@@ -81,24 +91,40 @@ public class OpenShiftWorkspaceFilesCleaner implements WorkspaceFilesCleaner {
       LOG.error("Could not get workspace name for files removal.");
       return;
     }
-    deleteQueue.add(workspaceName);
+    if (workspaceEnvironmentProvider.areWorkspacesExternal()) {
+      String workspaceId = workspace.getId();
+      LOG.info("Synchronously deleting workspace {} on PVC {}", workspaceId, workspacesPvcName);
+      Subject subject = workspaceSubjectRegistry.getWorkspaceStarter(workspaceId);
+      if (subject == null) {
+        subject = EnvironmentContext.getCurrent().getSubject();
+      }
+      deleteWorkspacesOnPvc(Arrays.asList(workspaceName), subject);
+    } else {
+      deleteQueue.add(workspaceName);
+    }
   }
 
   private void deleteWorkspacesInQueue(ServerIdleEvent event) throws OpenShiftException {
     List<String> deleteQueueCopy = new ArrayList<>(deleteQueue);
-    String[] dirsToDelete = deleteQueueCopy.toArray(new String[deleteQueueCopy.size()]);
+    if (deleteWorkspacesOnPvc(deleteQueueCopy, null)) {
+      deleteQueue.removeAll(deleteQueueCopy);
+    }
+  }
 
-    LOG.info("Deleting {} workspaces on PVC {}", deleteQueueCopy.size(), workspacesPvcName);
+  private boolean deleteWorkspacesOnPvc(List<String> deleteQueue, Subject subject)
+      throws OpenShiftException {
+    String[] dirsToDelete = deleteQueue.toArray(new String[deleteQueue.size()]);
+
+    LOG.info("Deleting {} workspaces on PVC {}", deleteQueue.size(), workspacesPvcName);
     boolean successful =
         openShiftPvcHelper.createJobPod(
+            subject,
             workspacesPvcName,
-            projectNamespace,
+            workspaceEnvironmentProvider.getWorkspacesOpenshiftNamespace(subject),
             "delete-",
             OpenShiftPvcHelper.Command.REMOVE,
             dirsToDelete);
-    if (successful) {
-      deleteQueue.removeAll(deleteQueueCopy);
-    }
+    return successful;
   }
 
   /** Clears the list of workspace directories to be deleted. Necessary for testing. */
