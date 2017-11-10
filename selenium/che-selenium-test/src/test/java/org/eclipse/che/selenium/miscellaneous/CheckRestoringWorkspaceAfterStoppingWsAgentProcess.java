@@ -29,7 +29,6 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -51,7 +50,6 @@ public class CheckRestoringWorkspaceAfterStoppingWsAgentProcess {
   @Inject private TestUser defaultTestUser;
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
-  @Inject private ToastLoader toastLoader;
   @Inject private MachineTerminal terminal;
   @Inject private Consoles consoles;
   @Inject private TestCommandServiceClient testCommandServiceClient;
@@ -79,7 +77,7 @@ public class CheckRestoringWorkspaceAfterStoppingWsAgentProcess {
   public void checkRestoreWsAgentByApi() throws Exception {
     String expectedMessageOInDialog =
         "Workspace agent is no longer responding. To fix the problem, restart the workspace.";
-    toastLoader.waitAppeareanceAndClosing();
+    projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     terminal.waitTerminalTab();
     projectExplorer.invokeCommandWithContextMenu(
