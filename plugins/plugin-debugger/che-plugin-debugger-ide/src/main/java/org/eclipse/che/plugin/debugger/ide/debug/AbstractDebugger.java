@@ -10,10 +10,22 @@
  */
 package org.eclipse.che.plugin.debugger.ide.debug;
 
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
+import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
+
 import com.google.common.base.Strings;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
@@ -33,7 +45,6 @@ import org.eclipse.che.api.debug.shared.dto.action.StepOutActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepOverActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.SuspendActionDto;
 import org.eclipse.che.api.debug.shared.dto.event.BreakpointActivatedEventDto;
-import org.eclipse.che.api.debug.shared.dto.event.DebuggerEventDto;
 import org.eclipse.che.api.debug.shared.dto.event.DisconnectEventDto;
 import org.eclipse.che.api.debug.shared.dto.event.SuspendEventDto;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
@@ -46,6 +57,7 @@ import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.action.Action;
+import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.promises.client.Function;
@@ -70,20 +82,6 @@ import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.util.storage.LocalStorage;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
-
-import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
-import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
 /**
  * The common debugger.
@@ -119,7 +117,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   private final PromiseProvider promiseProvider;
 
   private DebugSessionDto debugSessionDto;
-  private Location currentLocation;
+  private SuspendEventDto suspendEventDto;
   private BreakpointDto disposableBreakpoint;
 
   public AbstractDebugger(
@@ -188,17 +186,18 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                 onBreakpointActivated(breakpoint.getLocation());
               }
 
-              if (currentLocation != null) {
+              if (suspendEventDto != null) {
                 debuggerLocationHandlerManager
-                    .getOrDefault(currentLocation)
+                    .getOrDefault(suspendEventDto.getLocation())
                     .find(
-                        currentLocation,
+                        suspendEventDto.getLocation(),
                         new AsyncCallback<VirtualFile>() {
                           @Override
                           public void onFailure(Throwable caught) {
                             for (DebuggerObserver observer : observers) {
                               observer.onBreakpointStopped(
-                                  currentLocation.getTarget(), currentLocation);
+                                  suspendEventDto.getLocation().getTarget(),
+                                  suspendEventDto.getLocation());
                             }
                           }
 
@@ -206,7 +205,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                           public void onSuccess(VirtualFile result) {
                             for (DebuggerObserver observer : observers) {
                               observer.onBreakpointStopped(
-                                  result.getLocation().toString(), currentLocation);
+                                  result.getLocation().toString(), suspendEventDto.getLocation());
                             }
                           }
                         });
@@ -220,12 +219,12 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
             });
   }
 
-  private void onEventListReceived(@NotNull DebuggerEventDto event) {
+  private void onEventListReceived(@NotNull DebuggerEvent event) {
 
     switch (event.getType()) {
       case SUSPEND:
-        currentLocation = ((SuspendEventDto) event).getLocation();
-        open(currentLocation);
+        suspendEventDto = ((SuspendEventDto) event);
+        open(suspendEventDto.getLocation());
         removeDisposableBreakpoint();
         break;
       case BREAKPOINT_ACTIVATED:
@@ -553,11 +552,12 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
       for (DebuggerObserver observer : observers) {
         observer.onPreStepInto();
       }
-      removeCurrentLocation();
-      preserveDebuggerState();
-
       StepIntoActionDto action = dtoFactory.createDto(StepIntoActionDto.class);
       action.setType(Action.TYPE.STEP_INTO);
+      action.setSuspendPolicy(suspendEventDto.getSuspendPolicy());
+
+      removeCurrentLocation();
+      preserveDebuggerState();
 
       Promise<Void> promise = service.stepInto(debugSessionDto.getId(), action);
       promise.catchError(
@@ -573,11 +573,12 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
       for (DebuggerObserver observer : observers) {
         observer.onPreStepOver();
       }
-      removeCurrentLocation();
-      preserveDebuggerState();
-
       StepOverActionDto action = dtoFactory.createDto(StepOverActionDto.class);
       action.setType(Action.TYPE.STEP_OVER);
+      action.setSuspendPolicy(suspendEventDto.getSuspendPolicy());
+
+      preserveDebuggerState();
+      removeCurrentLocation();
 
       Promise<Void> promise = service.stepOver(debugSessionDto.getId(), action);
       promise.catchError(
@@ -593,11 +594,12 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
       for (DebuggerObserver observer : observers) {
         observer.onPreStepOut();
       }
-      removeCurrentLocation();
-      preserveDebuggerState();
-
       StepOutActionDto action = dtoFactory.createDto(StepOutActionDto.class);
       action.setType(Action.TYPE.STEP_OUT);
+      action.setSuspendPolicy(suspendEventDto.getSuspendPolicy());
+
+      removeCurrentLocation();
+      preserveDebuggerState();
 
       Promise<Void> promise = service.stepOut(debugSessionDto.getId(), action);
       promise.catchError(
@@ -613,11 +615,11 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
       for (DebuggerObserver observer : observers) {
         observer.onPreResume();
       }
-      removeCurrentLocation();
-      preserveDebuggerState();
-
       ResumeActionDto action = dtoFactory.createDto(ResumeActionDto.class);
       action.setType(Action.TYPE.RESUME);
+
+      removeCurrentLocation();
+      preserveDebuggerState();
 
       Promise<Void> promise = service.resume(debugSessionDto.getId(), action);
       promise.catchError(
@@ -714,7 +716,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
 
   @Override
   public boolean isSuspended() {
-    return isConnected() && currentLocation != null;
+    return isConnected() && suspendEventDto != null;
   }
 
   @Override
@@ -742,7 +744,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   }
 
   private void removeCurrentLocation() {
-    currentLocation = null;
+    suspendEventDto = null;
   }
 
   private void invalidateDisposableBreakpoint() {
@@ -764,10 +766,10 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     } else {
       localStorage.setItem(LOCAL_STORAGE_DEBUGGER_SESSION_KEY, dtoFactory.toJson(debugSessionDto));
 
-      if (currentLocation == null) {
+      if (suspendEventDto == null) {
         localStorage.setItem(LOCAL_STORAGE_DEBUGGER_STATE_KEY, "");
       } else {
-        localStorage.setItem(LOCAL_STORAGE_DEBUGGER_STATE_KEY, dtoFactory.toJson(currentLocation));
+        localStorage.setItem(LOCAL_STORAGE_DEBUGGER_STATE_KEY, dtoFactory.toJson(suspendEventDto));
       }
 
       if (disposableBreakpoint == null) {
@@ -801,7 +803,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
 
     data = localStorage.getItem(LOCAL_STORAGE_DEBUGGER_STATE_KEY);
     if (!Strings.isNullOrEmpty(data)) {
-      currentLocation = dtoFactory.createDtoFromJson(data, LocationDto.class);
+      suspendEventDto = dtoFactory.createDtoFromJson(data, SuspendEventDto.class);
     }
 
     data = localStorage.getItem(LOCAL_STORAGE_DEBUGGER_DISPOSABLE_BREAKPOINT_KEY);

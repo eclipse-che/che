@@ -54,6 +54,7 @@ import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
+import org.eclipse.che.api.debug.shared.model.SuspendPolicy;
 import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.ThreadStatus;
 import org.eclipse.che.api.debug.shared.model.Variable;
@@ -252,16 +253,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
 
       BreakpointConfiguration conf = breakpoint.getBreakpointConfiguration();
       if (conf != null && conf.getSuspendPolicy() != null) {
-        switch (conf.getSuspendPolicy()) {
-          case ALL:
-            request.setSuspendPolicy(EventRequest.SUSPEND_ALL);
-            break;
-          case THREAD:
-            request.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
-            break;
-          default:
-            request.setSuspendPolicy(EventRequest.SUSPEND_NONE);
-        }
+        request.setSuspendPolicy(toSuspendEventRequest(conf.getSuspendPolicy()));
       } else {
         request.setSuspendPolicy(EventRequest.SUSPEND_ALL);
       }
@@ -612,7 +604,8 @@ public class JavaDebugger implements EventsHandler, Debugger {
 
         Location location = new JdbLocation(event.thread().frame(0));
 
-        debuggerCallback.onEvent(new SuspendEventImpl(location));
+        SuspendPolicy suspendPolicy = toSuspendPolicy(event.request().suspendPolicy());
+        debuggerCallback.onEvent(new SuspendEventImpl(location, suspendPolicy));
       } catch (IncompatibleThreadStateException e) {
         return true;
       }
@@ -625,12 +618,14 @@ public class JavaDebugger implements EventsHandler, Debugger {
   }
 
   private boolean processStepEvent(com.sun.jdi.event.StepEvent event) throws DebuggerException {
+    event.request().suspendPolicy();
     setCurrentThread(event.thread());
 
     try {
       StackFrame jdiFrame = event.thread().frame(0);
       JdbLocation jdbLocation = new JdbLocation(jdiFrame);
-      debuggerCallback.onEvent(new SuspendEventImpl(jdbLocation));
+      SuspendPolicy suspendPolicy = toSuspendPolicy(event.request().suspendPolicy());
+      debuggerCallback.onEvent(new SuspendEventImpl(jdbLocation, suspendPolicy));
       return false;
     } catch (IncompatibleThreadStateException e) {
       invalidateCurrentThread();
@@ -670,20 +665,20 @@ public class JavaDebugger implements EventsHandler, Debugger {
 
   @Override
   public void stepOver(StepOverAction action) throws DebuggerException {
-    doStep(StepRequest.STEP_OVER);
+    doStep(StepRequest.STEP_OVER, action.getSuspendPolicy());
   }
 
   @Override
   public void stepInto(StepIntoAction action) throws DebuggerException {
-    doStep(StepRequest.STEP_INTO);
+    doStep(StepRequest.STEP_INTO, action.getSuspendPolicy());
   }
 
   @Override
   public void stepOut(StepOutAction action) throws DebuggerException {
-    doStep(StepRequest.STEP_OUT);
+    doStep(StepRequest.STEP_OUT, action.getSuspendPolicy());
   }
 
-  private void doStep(int depth) throws DebuggerException {
+  private void doStep(int depth, SuspendPolicy suspendPolicy) throws DebuggerException {
     lock.lock();
     try {
       clearSteps();
@@ -691,6 +686,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
       StepRequest request =
           getEventManager().createStepRequest(getCurrentThread(), StepRequest.STEP_LINE, depth);
       request.addCountFilter(1);
+      request.setSuspendPolicy(toSuspendEventRequest(suspendPolicy));
       request.enable();
 
       resume(newDto(ResumeActionDto.class));
@@ -812,6 +808,28 @@ public class JavaDebugger implements EventsHandler, Debugger {
         return ThreadStatus.NOT_STARTED;
       default:
         return ThreadStatus.UNKNOWN;
+    }
+  }
+
+  private SuspendPolicy toSuspendPolicy(int suspendEventRequest) {
+    switch (suspendEventRequest) {
+      case EventRequest.SUSPEND_EVENT_THREAD:
+        return SuspendPolicy.THREAD;
+      case EventRequest.SUSPEND_NONE:
+        return SuspendPolicy.NONE;
+      default:
+        return SuspendPolicy.ALL;
+    }
+  }
+
+  private int toSuspendEventRequest(SuspendPolicy suspendPolicy) {
+    switch (suspendPolicy) {
+      case NONE:
+        return EventRequest.SUSPEND_NONE;
+      case THREAD:
+        return EventRequest.SUSPEND_EVENT_THREAD;
+      default:
+        return EventRequest.SUSPEND_ALL;
     }
   }
 }
