@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.plugin.debugger.ide.debug;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import elemental.dom.Element;
 import elemental.html.TableCellElement;
@@ -18,8 +20,6 @@ import org.eclipse.che.api.debug.shared.model.BreakpointConfiguration;
 import org.eclipse.che.ide.debug.BreakpointResources;
 import org.eclipse.che.ide.ui.list.SimpleList;
 import org.eclipse.che.ide.util.dom.Elements;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * Renders breakpoint item the panel.

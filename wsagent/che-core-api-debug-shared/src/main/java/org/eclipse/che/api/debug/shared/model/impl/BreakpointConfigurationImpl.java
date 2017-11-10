@@ -51,6 +51,15 @@ public class BreakpointConfigurationImpl implements BreakpointConfiguration {
     this(false, null, false, 0, suspendPolicy);
   }
 
+  public BreakpointConfigurationImpl(BreakpointConfiguration breakpointConfiguration) {
+    this(
+        breakpointConfiguration.isConditionEnabled(),
+        breakpointConfiguration.getCondition(),
+        breakpointConfiguration.isHitCountEnabled(),
+        breakpointConfiguration.getHitCount(),
+        breakpointConfiguration.getSuspendPolicy());
+  }
+
   @Override
   public boolean isConditionEnabled() {
     return isConditionEnabled;

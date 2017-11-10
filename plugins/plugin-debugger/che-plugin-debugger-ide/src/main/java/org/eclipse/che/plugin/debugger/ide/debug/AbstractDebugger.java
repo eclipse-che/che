@@ -10,25 +10,14 @@
  */
 package org.eclipse.che.plugin.debugger.ide.debug;
 
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
-import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
-
 import com.google.common.base.Strings;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import javax.validation.constraints.NotNull;
+
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.debug.shared.dto.BreakpointConfigurationDto;
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
 import org.eclipse.che.api.debug.shared.dto.LocationDto;
@@ -48,6 +37,7 @@ import org.eclipse.che.api.debug.shared.dto.event.DebuggerEventDto;
 import org.eclipse.che.api.debug.shared.dto.event.DisconnectEventDto;
 import org.eclipse.che.api.debug.shared.dto.event.SuspendEventDto;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
+import org.eclipse.che.api.debug.shared.model.BreakpointConfiguration;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.Method;
@@ -60,6 +50,7 @@ import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.api.promises.client.js.JsPromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -79,6 +70,20 @@ import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.util.storage.LocalStorage;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
+
+import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
+import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
 /**
  * The common debugger.
@@ -111,6 +116,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   private final String debuggerType;
   private final RequestHandlerManager requestHandlerManager;
   private final DebuggerLocalizationConstant constant;
+  private final PromiseProvider promiseProvider;
 
   private DebugSessionDto debugSessionDto;
   private Location currentLocation;
@@ -130,6 +136,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
       DebuggerLocalizationConstant constant,
       RequestHandlerManager requestHandlerManager,
       DebuggerLocationHandlerManager debuggerLocationHandlerManager,
+      PromiseProvider promiseProvider,
       String type) {
     this.service = service;
     this.transmitter = transmitter;
@@ -141,6 +148,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     this.notificationManager = notificationManager;
     this.breakpointManager = breakpointManager;
     this.constant = constant;
+    this.promiseProvider = promiseProvider;
     this.observers = new ArrayList<>();
     this.debuggerType = type;
     this.requestHandlerManager = requestHandlerManager;
@@ -431,12 +439,17 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   }
 
   @Override
-  public Promise<List<BreakpointDto>> getAllBreakpoints() {
+  public Promise<List<? extends Breakpoint>> getAllBreakpoints() {
     if (!isConnected()) {
       return Promises.reject(JsPromiseError.create("Debugger is not connected"));
     }
 
-    return service.getAllBreakpoints(debugSessionDto.getId());
+    return service
+        .getAllBreakpoints(debugSessionDto.getId())
+        .thenPromise(
+            breakpoints ->
+                promiseProvider.resolve(
+                    breakpoints.stream().map(BreakpointImpl::new).collect(Collectors.toList())));
   }
 
   @Override
@@ -492,15 +505,8 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   }
 
   protected void startDebugger(final DebugSessionDto debugSessionDto) {
-    List<BreakpointDto> breakpoints = new ArrayList<>();
-    for (Breakpoint breakpoint : breakpointManager.getAll()) {
-      BreakpointDto breakpointDto = dtoFactory.createDto(BreakpointDto.class);
-      breakpointDto.setLocation(toDto(breakpoint.getLocation()));
-      breakpointDto.setEnabled(breakpoint.isEnabled());
-      //      breakpointDto.setCondition(breakpoint.getCondition());
-
-      breakpoints.add(breakpointDto);
-    }
+    List<BreakpointDto> breakpoints =
+        breakpointManager.getAll().stream().map(this::toDto).collect(Collectors.toList());
 
     StartActionDto action = dtoFactory.createDto(StartActionDto.class);
     action.setType(Action.TYPE.START);
@@ -854,12 +860,25 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
         .withThreadId(location.getThreadId());
   }
 
+  protected BreakpointConfigurationDto toDto(BreakpointConfiguration breakpointConfiguration) {
+    return dtoFactory
+        .createDto(BreakpointConfigurationDto.class)
+        .withSuspendPolicy(breakpointConfiguration.getSuspendPolicy())
+        .withHitCount(breakpointConfiguration.getHitCount())
+        .withCondition(breakpointConfiguration.getCondition())
+        .withConditionEnabled(breakpointConfiguration.isConditionEnabled())
+        .withHitCountEnabled(breakpointConfiguration.isHitCountEnabled());
+  }
+
   protected BreakpointDto toDto(Breakpoint breakpoint) {
     return dtoFactory
         .createDto(BreakpointDto.class)
         .withLocation(toDto(breakpoint.getLocation()))
-        .withEnabled(true);
-    //        .withCondition(breakpoint.getCondition());
+        .withEnabled(true)
+        .withBreakpointConfiguration(
+            breakpoint.getBreakpointConfiguration() == null
+                ? null
+                : toDto(breakpoint.getBreakpointConfiguration()));
   }
 
   protected abstract DebuggerDescriptor toDescriptor(Map<String, String> connectionProperties);

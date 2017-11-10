@@ -13,6 +13,7 @@ package org.eclipse.che.plugin.debugger.ide.debug.breakpoint;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
+import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 
 /** @author Anatolii Bazko */
@@ -44,9 +45,8 @@ public class BreakpointConfigurationPresenter
     view.close();
 
     breakpoint.setEnabled(view.isBreakpointEnabled());
-    view.getBreakpointConfiguration();
-
-    //    breakpointManager.update(breakpoint);
+    ((BreakpointImpl) breakpoint).setBreakpointConfiguration(view.getBreakpointConfiguration());
+    breakpointManager.update(breakpoint);
   }
 
   @Override

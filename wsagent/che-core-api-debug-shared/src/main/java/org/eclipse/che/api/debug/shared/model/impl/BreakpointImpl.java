@@ -35,6 +35,10 @@ public class BreakpointImpl implements Breakpoint {
     this(location, true, new BreakpointConfigurationImpl());
   }
 
+  public BreakpointImpl(Breakpoint breakpoint) {
+    this(breakpoint.getLocation(), breakpoint.isEnabled(), breakpoint.getBreakpointConfiguration());
+  }
+
   @Override
   public Location getLocation() {
     return location;

@@ -16,10 +16,6 @@
     <ui:with field='locale' type='org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant'/>
     <ui:with field='coreRes' type='org.eclipse.che.ide.Resources'/>
     <ui:style>
-        .location {
-            font-weight: bold;
-        }
-
         .condition {
             margin-left: 5px;
             width: 310px;
@@ -43,18 +39,13 @@
             margin-left: 55px;
         }
     </ui:style>
-    <g:DockLayoutPanel unit="PX" width="400PX" height="115PX" debugId="breakpoint-configuration-panel">
-        <g:north size="20">
-            <g:FlowPanel>
-                <g:Label ui:field="breakpointLocation" width="100%" debugId="breakpoint-location-label" addStyleNames="{style.location}"/>
-            </g:FlowPanel>
-        </g:north>
-        <g:north size="20">
+    <g:DockLayoutPanel unit="PX" width="400PX" height="105PX" debugId="breakpoint-configuration-panel">
+        <g:north size="25">
             <g:FlowPanel>
                 <g:CheckBox ui:field="enabled" text="{locale.viewBreakpointConfigurationEnabled}" debugId="breakpoint-enabled"/>
             </g:FlowPanel>
         </g:north>
-        <g:north size="20">
+        <g:north size="25">
             <g:FlowPanel>
                 <g:Label text="{locale.viewBreakpointConfigurationSuspend}" addStyleNames="{style.suspendLabel}"/>
                 <g:RadioButton name="suspend" ui:field="breakpointSuspendNone" text="{locale.viewBreakpointConfigurationSuspendNone}"

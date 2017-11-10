@@ -26,6 +26,7 @@ import org.eclipse.che.api.debug.shared.dto.LocationDto;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.BreakpointConfiguration;
 import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.BreakpointStorage;
@@ -164,7 +165,11 @@ public class BreakpointStorageImpl implements BreakpointStorage {
       return emptyList();
     }
 
-    return dtoFactory.createListDtoFromJson(json, BreakpointDto.class);
+    return dtoFactory
+        .createListDtoFromJson(json, BreakpointDto.class)
+        .stream()
+        .map(BreakpointImpl::new)
+        .collect(Collectors.toList());
   }
 
   /**

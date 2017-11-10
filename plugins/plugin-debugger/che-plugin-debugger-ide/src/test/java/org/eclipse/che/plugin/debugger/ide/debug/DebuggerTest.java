@@ -10,31 +10,10 @@
  */
 package org.eclipse.che.plugin.debugger.ide.debug;
 
-import static junit.framework.TestCase.assertEquals;
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Answers.RETURNS_DEEP_STUBS;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyObject;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Mockito.RETURNS_SMART_NULLS;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import com.google.common.base.Optional;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
-import java.util.List;
-import java.util.Map;
+
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
@@ -64,6 +43,7 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
@@ -95,6 +75,29 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.internal.creation.MockSettingsImpl;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+
+import java.util.List;
+import java.util.Map;
+
+import static junit.framework.TestCase.assertEquals;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Answers.RETURNS_DEEP_STUBS;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.RETURNS_SMART_NULLS;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Testing {@link AbstractDebugger} functionality.
@@ -143,6 +146,7 @@ public class DebuggerTest extends BaseTest {
   @Mock private Optional<Project> optional;
   @Mock private WorkspaceImpl workspace;
   @Mock private DebuggerLocalizationConstant constant;
+  @Mock private PromiseProvider promiseProvider;
 
   @Captor private ArgumentCaptor<WorkspaceRunningEvent.Handler> workspaceRunningHandlerCaptor;
   @Captor private ArgumentCaptor<Operation<PromiseError>> operationPromiseErrorCaptor;
@@ -198,7 +202,8 @@ public class DebuggerTest extends BaseTest {
                 appContext,
                 constant,
                 "id",
-                debuggerLocationHandlerManager));
+                debuggerLocationHandlerManager,
+                promiseProvider));
     doReturn(promiseInfo).when(service).getSessionInfo(SESSION_ID);
     doReturn(promiseInfo).when(promiseInfo).then(any(Operation.class));
 
@@ -616,7 +621,8 @@ public class DebuggerTest extends BaseTest {
         AppContext appContext,
         DebuggerLocalizationConstant constant,
         String id,
-        DebuggerLocationHandlerManager debuggerLocationHandlerManager) {
+        DebuggerLocationHandlerManager debuggerLocationHandlerManager,
+        PromiseProvider promiseProvider) {
       super(
           service,
           transmitter,
@@ -631,6 +637,7 @@ public class DebuggerTest extends BaseTest {
           constant,
           requestHandlerManager,
           debuggerLocationHandlerManager,
+          promiseProvider,
           id);
     }
 

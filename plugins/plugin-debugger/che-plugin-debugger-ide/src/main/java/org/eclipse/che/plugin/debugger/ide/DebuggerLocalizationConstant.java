@@ -237,6 +237,9 @@ public interface DebuggerLocalizationConstant extends com.google.gwt.i18n.client
   @Key("debugger.frames.title")
   String debuggerFramesTitle();
 
+  @Key("debugger.threadNotSuspend")
+  String debuggerThreadNotSuspend();
+
   /* Breakpoint Configuration */
   @Key("view.breakpointConfiguration.condition")
   String viewBreakpointConfigurationCondition();

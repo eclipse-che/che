@@ -10,19 +10,17 @@
  */
 package org.eclipse.che.plugin.debugger.ide.debug.breakpoint;
 
-import com.google.common.base.Strings;
+import static com.google.common.base.Strings.nullToEmpty;
+import static java.lang.String.valueOf;
+
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RadioButton;
-import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
@@ -37,9 +35,6 @@ import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.window.Window;
 import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
 
-import static com.google.common.base.Strings.nullToEmpty;
-import static java.lang.String.valueOf;
-
 /** @author Anatolii Bazko */
 @Singleton
 public class BreakpointConfigurationViewImpl extends Window implements BreakpointConfigurationView {
@@ -51,7 +46,6 @@ public class BreakpointConfigurationViewImpl extends Window implements Breakpoin
       GWT.create(BreakpointConfigurationViewImpl.BreakpointConfigurationViewImplUiBinder.class);
 
   @UiField CheckBox enabled;
-  @UiField Label breakpointLocation;
   @UiField CheckBox breakpointConditionEnabled;
   @UiField TextBox breakpointCondition;
   @UiField CheckBox hitCountEnabled;
@@ -110,7 +104,7 @@ public class BreakpointConfigurationViewImpl extends Window implements Breakpoin
         .append(Path.valueOf(location.getTarget()).lastSegment())
         .append(":")
         .append(location.getLineNumber());
-    breakpointLocation.setText(labelText.toString());
+    setTitle(labelText.toString());
 
     enabled.setValue(breakpoint.isEnabled());
 
