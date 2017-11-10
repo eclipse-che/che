@@ -208,6 +208,7 @@ public class GitPanelTest {
     projectExplorer.openPanel();
 
     createProject(NEW_PROJECT_NAME, Wizard.SamplesName.CONSOLE_JAVA_SIMPLE);
+    projectExplorer.selectItem(NEW_PROJECT_NAME);
 
     gitPanel.openPanel();
     gitPanel.waitRepositories(3);
