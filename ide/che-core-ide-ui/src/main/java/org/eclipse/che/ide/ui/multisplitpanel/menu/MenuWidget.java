@@ -46,7 +46,6 @@ public class MenuWidget extends Composite implements Menu {
 
   private ActionDelegate delegate;
   private long closeTime;
-  private int itemsInMenu;
 
   private MenuItem.ActionDelegate itemDelegate =
       new MenuItem.ActionDelegate() {
@@ -112,32 +111,28 @@ public class MenuWidget extends Composite implements Menu {
     popupPanel.getElement().getStyle().setProperty("position", "absolute");
     popupPanel.getElement().getStyle().clearProperty("left");
     popupPanel.getElement().getStyle().setProperty("right", "calc(100% - " + x + "px");
-    fixPositionIfNeed();
+    adjustTopPosition();
   }
 
   @Override
   public void addListItem(MenuItem menuItem) {
-    itemsInMenu++;
     menuItem.setDelegate(itemDelegate);
     listPanel.add(menuItem);
-    fixPositionIfNeed();
+    adjustTopPosition();
   }
 
   @Override
   public void removeListItem(MenuItem menuItem) {
-    itemsInMenu--;
     listPanel.remove(menuItem);
-    fixPositionIfNeed();
+    adjustTopPosition();
   }
 
-  /**
-   * Fix top value if need. Need in case if bottom part of menu not display
-   */
-  private void fixPositionIfNeed() {
-    int totalHeight = itemsInMenu * 19; //19 height of menu item
+  /** Fix top value if need. Need in case if bottom part of menu not display */
+  private void adjustTopPosition() {
+    int totalHeight = listPanel.getWidgetCount() * 19; // 19 height of menu item
     int y = getAbsoluteTop() + 19 + totalHeight;
     if (y > Window.getClientHeight()) {
-      y = getAbsoluteTop() - 8 - totalHeight; //8 need some correction for looking good in UI
+      y = getAbsoluteTop() - 8 - totalHeight; // 8 need some correction for looking good in UI
       popupPanel.getElement().getStyle().clearProperty("top");
     } else {
       y = getAbsoluteTop() + 19;
