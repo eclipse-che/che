@@ -35,6 +35,7 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
+import org.eclipse.che.selenium.pageobject.git.Git;
 import org.eclipse.che.selenium.pageobject.git.GitCompare;
 import org.eclipse.che.selenium.pageobject.git.GitPanel;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
@@ -79,7 +80,7 @@ public class GitPanelTest {
   @Inject private AskDialog askDialog;
   @Inject private AskForValueDialog askForValueDialog;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
-  @Inject private org.eclipse.che.selenium.pageobject.git.Git git;
+  @Inject private Git git;
   @Inject private GitCompare gitCompare;
   @Inject private GitPanel gitPanel;
 
