@@ -8,27 +8,27 @@ items:
     labels:
       app: che
       provider: fabric8
-      version: 1.0.293
-      group: io.fabric8.online.apps
+      version: 2.0.52
+      group: io.fabric8.tenant.apps
     name: che
 - apiVersion: v1
   kind: Service
   metadata:
     annotations:
       fabric8.io/app-menu: development
-      fabric8.io/git-commit: 3abe9e3deb93fc2ee3b0e905850a40d09b22dbbc
-      fabric8.io/scm-con-url: scm:git:git@github.com:fabric8io/fabric8-online.git/apps/che
-      fabric8.io/scm-url: http://github.com/fabric8io/fabric8-online/apps/che
-      fabric8.io/iconUrl: https://cdn.rawgit.com/fabric8io/fabric8-online/master/apps/che/src/main/fabric8/icon.png
-      fabric8.io/git-branch: release-v1.0.293
-      fabric8.io/scm-devcon-url: scm:git:git@github.com:fabric8io/fabric8-online.git/apps/che
-      fabric8.io/scm-tag: fabric8-online-2.0.1
+      fabric8.io/git-commit: 3ef7c12b7582d966086edecff600421873f3d836
+      fabric8.io/scm-con-url: scm:git:git@github.com:fabric8io/tenant-che.git/tenant-che-apps/che
+      fabric8.io/scm-url: http://github.com/fabric8io/tenant-che/tenant-che-apps/che
+      fabric8.io/iconUrl: https://cdn.rawgit.com/fabric8io/tenant-che/tenant-che-apps/che/master/apps/che/src/main/fabric8/icon.png
+      fabric8.io/git-branch: release-v2.0.52
+      fabric8.io/scm-devcon-url: scm:git:git@github.com:fabric8io/tenant-che.git/tenant-che-apps/che
+      fabric8.io/scm-tag: fabric8io/tenant-che-1.0.0
     labels:
       app: che
       provider: fabric8
       expose: "false"
-      version: 1.0.293
-      group: io.fabric8.online.apps
+      version: 2.0.52
+      group: io.fabric8.tenant.apps
     name: che-host
   spec:
     ports:
@@ -39,15 +39,15 @@ items:
     selector:
       app: che
       provider: fabric8
-      group: io.fabric8.online.apps
+      group: io.fabric8.tenant.apps
 - apiVersion: v1
   kind: PersistentVolumeClaim
   metadata:
     labels:
       app: che
       provider: fabric8
-      version: 1.0.293
-      group: io.fabric8.online.apps
+      version: 2.0.52
+      group: io.fabric8.tenant.apps
     name: che-data-volume
   spec:
     accessModes:
@@ -61,8 +61,8 @@ items:
     labels:
       app: che
       provider: fabric8
-      version: 1.0.293
-      group: io.fabric8.online.apps
+      version: 2.0.52
+      group: io.fabric8.tenant.apps
     name: claim-che-workspace
   spec:
     accessModes:
@@ -76,8 +76,8 @@ items:
     labels:
       app: che
       provider: fabric8
-      version: 1.0.293
-      group: io.fabric8.online.apps
+      version: 2.0.52
+      group: io.fabric8.tenant.apps
     name: che
   data:
     CHE_INFRASTRUCTURE_ACTIVE: openshift
@@ -111,8 +111,8 @@ items:
     port: "8080"
     remote-debugging-enabled: "false"
     che-oauth-github-forceactivation: "true"
-    workspaces-memory-limit: 2300Mi
-    workspaces-memory-request: 1500Mi
+    workspaces-memory-limit: 1900Mi
+    workspaces-memory-request: 1100Mi
     enable-workspaces-autostart: "false"
     keycloak-oso-endpoint: ${KEYCLOAK_OSO_ENDPOINT}
     keycloak-github-endpoint: ${KEYCLOAK_GITHUB_ENDPOINT}
@@ -124,50 +124,54 @@ items:
     che-server-timeout-ms: "3600000"
     che-openshift-precreate-subpaths: "false"
     che-workspace-auto-snapshot: "false"
-- apiVersion: v1
+    che-keycloak-auth-server-url: ${CHE_KEYCLOAK_AUTH__SERVER__URL}
+    che-keycloak-realm: ${CHE_KEYCLOAK_REALM}
+    che-keycloak-client-id: ${CHE_KEYCLOAK_CLIENT__ID}
+- apiVersion: apps.openshift.io/v1
   kind: DeploymentConfig
   metadata:
     annotations:
-      fabric8.io/git-commit: 3abe9e3deb93fc2ee3b0e905850a40d09b22dbbc
-      fabric8.io/metrics-path: dashboard/file/kubernetes-pods.json/?var-project=che&var-version=1.0.293
-      fabric8.io/scm-con-url: scm:git:git@github.com:fabric8io/fabric8-online.git/apps/che
-      fabric8.io/scm-url: http://github.com/fabric8io/fabric8-online/apps/che
-      fabric8.io/iconUrl: https://cdn.rawgit.com/fabric8io/fabric8-online/master/apps/che/src/main/fabric8/icon.png
-      fabric8.io/git-branch: release-v1.0.293
-      fabric8.io/scm-devcon-url: scm:git:git@github.com:fabric8io/fabric8-online.git/apps/che
-      fabric8.io/scm-tag: fabric8-online-2.0.1
+      fabric8.io/git-commit: 3ef7c12b7582d966086edecff600421873f3d836
+      fabric8.io/metrics-path: dashboard/file/kubernetes-pods.json/?var-project=che&var-version=2.0.52
+      fabric8.io/scm-con-url: scm:git:git@github.com:fabric8io/tenant-che.git/tenant-che-apps/che
+      fabric8.io/scm-url: http://github.com/fabric8io/tenant-che/tenant-che-apps/che
+      fabric8.io/iconUrl: https://cdn.rawgit.com/fabric8io/tenant-che/tenant-che-apps/che/master/apps/che/src/main/fabric8/icon.png
+      fabric8.io/git-branch: release-v2.0.52
+      fabric8.io/scm-devcon-url: scm:git:git@github.com:fabric8io/tenant-che.git/tenant-che-apps/che
+      fabric8.io/scm-tag: fabric8io/tenant-che-1.0.0
     labels:
       app: che
       provider: fabric8
-      version: 1.0.293
-      group: io.fabric8.online.apps
+      version: 2.0.52
+      group: io.fabric8.tenant.apps
     name: che
   spec:
     replicas: 1
+    revisionHistoryLimit: 2
     selector:
       app: che
       provider: fabric8
-      group: io.fabric8.online.apps
+      group: io.fabric8.tenant.apps
     strategy:
       recreateParams:
-        timeoutSeconds: 3600
+        timeoutSeconds: 10000
       type: Recreate
     template:
       metadata:
         annotations:
-          fabric8.io/git-commit: 3abe9e3deb93fc2ee3b0e905850a40d09b22dbbc
-          fabric8.io/metrics-path: dashboard/file/kubernetes-pods.json/?var-project=che&var-version=1.0.293
-          fabric8.io/scm-con-url: scm:git:git@github.com:fabric8io/fabric8-online.git/apps/che
-          fabric8.io/scm-url: http://github.com/fabric8io/fabric8-online/apps/che
-          fabric8.io/iconUrl: https://cdn.rawgit.com/fabric8io/fabric8-online/master/apps/che/src/main/fabric8/icon.png
-          fabric8.io/git-branch: release-v1.0.293
-          fabric8.io/scm-devcon-url: scm:git:git@github.com:fabric8io/fabric8-online.git/apps/che
-          fabric8.io/scm-tag: fabric8-online-2.0.1
+          fabric8.io/git-commit: 3ef7c12b7582d966086edecff600421873f3d836
+          fabric8.io/metrics-path: dashboard/file/kubernetes-pods.json/?var-project=che&var-version=2.0.52
+          fabric8.io/scm-con-url: scm:git:git@github.com:fabric8io/tenant-che.git/tenant-che-apps/che
+          fabric8.io/scm-url: http://github.com/fabric8io/tenant-che/tenant-che-apps/che
+          fabric8.io/iconUrl: https://cdn.rawgit.com/fabric8io/tenant-che/tenant-che-apps/che/master/apps/che/src/main/fabric8/icon.png
+          fabric8.io/git-branch: release-v2.0.52
+          fabric8.io/scm-devcon-url: scm:git:git@github.com:fabric8io/tenant-che.git/tenant-che-apps/che
+          fabric8.io/scm-tag: fabric8io/tenant-che-1.0.0
         labels:
           app: che
           provider: fabric8
-          version: 1.0.293
-          group: io.fabric8.online.apps
+          version: 2.0.52
+          group: io.fabric8.tenant.apps
       spec:
         containers:
         - env:
@@ -335,7 +339,7 @@ items:
               configMapKeyRef:
                 key: workspaces-memory-request
                 name: che
-          - name: CHE_WORKSPACE_AUTO_START
+          - name: CHE_WORKSPACE_AUTO__START
             valueFrom:
               configMapKeyRef:
                 key: enable-workspaces-autostart
@@ -390,7 +394,22 @@ items:
               configMapKeyRef:
                 key: che-workspace-auto-snapshot
                 name: che
-          image: rhche/che-server:96acc83-fabric8-87a202e
+          - name: CHE_KEYCLOAK_AUTH__SERVER__URL
+            valueFrom:
+              configMapKeyRef:
+                key: che-keycloak-auth-server-url
+                name: che
+          - name: CHE_KEYCLOAK_REALM
+            valueFrom:
+              configMapKeyRef:
+                key: che-keycloak-realm
+                name: che
+          - name: CHE_KEYCLOAK_CLIENT__ID
+            valueFrom:
+              configMapKeyRef:
+                key: che-keycloak-client-id
+                name: che
+          image: registry.devshift.net/che/che:291ebd9-fabric8-e470151
           imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:
@@ -410,11 +429,11 @@ items:
               path: /api/system/state
               port: 8080
               scheme: HTTP
-            initialDelaySeconds: 60
-            timeoutSeconds: 10
+            initialDelaySeconds: 15
+            timeoutSeconds: 60
           resources:
             limits:
-              memory: 700Mi
+              memory: 600Mi
             requests:
               memory: 256Mi
           volumeMounts:
@@ -433,8 +452,8 @@ items:
     labels:
       app: che
       provider: fabric8
-      version: 1.0.293
-      group: io.fabric8.online.apps
+      version: 2.0.52
+      group: io.fabric8.tenant.apps
     name: che
   spec:
     tls:
