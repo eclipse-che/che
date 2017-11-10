@@ -12,21 +12,18 @@ package org.eclipse.che.workspace.infrastructure.openshift;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
-import static java.util.stream.Collectors.toSet;
 import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_ORIGINAL_NAME_LABEL;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
-import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.openshift.api.model.Route;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import javax.inject.Inject;
@@ -94,7 +91,6 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
   protected void internalStart(Map<String, String> startOptions) throws InfrastructureException {
     try {
       final OpenShiftEnvironment osEnv = getContext().getOpenShiftEnvironment();
-      prepareOpenShiftPVCs(osEnv.getPersistentVolumeClaims());
 
       List<Service> createdServices = new ArrayList<>();
       for (Service service : osEnv.getServices().values()) {
@@ -246,23 +242,6 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
                 project);
         machines.put(machine.getName(), machine);
         sendStartingEvent(machine.getName());
-      }
-    }
-  }
-
-  private void prepareOpenShiftPVCs(Map<String, PersistentVolumeClaim> pvcs)
-      throws InfrastructureException {
-    Set<String> existing =
-        project
-            .persistentVolumeClaims()
-            .get()
-            .stream()
-            .map(p -> p.getMetadata().getName())
-            .collect(toSet());
-
-    for (Map.Entry<String, PersistentVolumeClaim> pvcEntry : pvcs.entrySet()) {
-      if (!existing.contains(pvcEntry.getKey())) {
-        project.persistentVolumeClaims().create(pvcEntry.getValue());
       }
     }
   }

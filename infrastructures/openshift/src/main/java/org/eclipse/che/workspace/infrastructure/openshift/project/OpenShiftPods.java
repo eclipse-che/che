@@ -333,6 +333,29 @@ public class OpenShiftPods {
   }
 
   /**
+   * Deletes pod with given name.
+   *
+   * <p>Note that this method will mark OpenShift pod as interrupted and then will wait until pod
+   * will be killed.
+   *
+   * @param name name of pod to remove
+   * @throws InfrastructureException when {@link Thread} is interrupted while command executing
+   * @throws InfrastructureException when any other exception occurs
+   */
+  public void delete(String name) throws InfrastructureException {
+    try {
+      doDelete(name).get();
+    } catch (InterruptedException ex) {
+      Thread.currentThread().interrupt();
+      throw new InfrastructureException(
+          "Interrupted while waiting for pod removal. " + ex.getMessage());
+    } catch (ExecutionException ex) {
+      throw new InfrastructureException(
+          "Error occurred while waiting for pod removal. " + ex.getMessage());
+    }
+  }
+
+  /**
    * Deletes all existing pods.
    *
    * <p>Note that this method will mark OpenShift pods as interrupted and then will wait until all
@@ -351,29 +374,37 @@ public class OpenShiftPods {
               .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)
               .list()
               .getItems();
-      List<CompletableFuture> deleteFutures = new ArrayList<>();
+      final List<CompletableFuture> deleteFutures = new ArrayList<>();
       for (Pod pod : pods) {
-        PodResource<Pod, DoneablePod> podResource =
-            client.pods().inNamespace(namespace).withName(pod.getMetadata().getName());
-        CompletableFuture<Void> deleteFuture = new CompletableFuture<>();
-        deleteFutures.add(deleteFuture);
-        podResource.watch(new DeleteWatcher(deleteFuture));
-        podResource.delete();
+        deleteFutures.add(doDelete(pod.getMetadata().getName()));
       }
-      CompletableFuture<Void> allRemoved =
+      final CompletableFuture<Void> removed =
           allOf(deleteFutures.toArray(new CompletableFuture[deleteFutures.size()]));
       try {
-        allRemoved.get();
+        removed.get();
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
         throw new InfrastructureException(
-            "Interrupted while waiting for workspace stop. " + e.getMessage());
+            "Interrupted while waiting for pod removal. " + e.getMessage());
       } catch (ExecutionException e) {
         throw new InfrastructureException(
             "Error occurred while waiting for pod removing. " + e.getMessage());
       }
     } catch (KubernetesClientException e) {
       throw new InfrastructureException(e.getMessage(), e);
+    }
+  }
+
+  private CompletableFuture<Void> doDelete(String name) throws InfrastructureException {
+    try (OpenShiftClient client = clientFactory.create()) {
+      final PodResource<Pod, DoneablePod> podResource =
+          client.pods().inNamespace(namespace).withName(name);
+      final CompletableFuture<Void> deleteFuture = new CompletableFuture<>();
+      podResource.watch(new DeleteWatcher(deleteFuture));
+      podResource.delete();
+      return deleteFuture;
+    } catch (KubernetesClientException ex) {
+      throw new InfrastructureException(ex.getMessage(), ex);
     }
   }
 

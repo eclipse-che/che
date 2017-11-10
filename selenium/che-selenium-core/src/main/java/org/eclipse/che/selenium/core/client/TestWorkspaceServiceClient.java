@@ -225,7 +225,7 @@ public class TestWorkspaceServiceClient {
   }
 
   /** Gets workspace by its id. */
-  public Workspace getById(String workspaceId) throws Exception {
+  public WorkspaceDto getById(String workspaceId) throws Exception {
     return requestFactory.fromUrl(getIdBasedUrl(workspaceId)).request().asDto(WorkspaceDto.class);
   }
 
