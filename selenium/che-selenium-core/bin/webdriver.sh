@@ -741,41 +741,14 @@ rerunTests() {
         echo -e "[TEST] "${YELLOW}" Rerunning failed tests in one thread, attempt #"${rerun}${NO_COLOUR}
         echo "[TEST]"
 
-        local fails=$(fetchFailedTests)
-        local failsClasses=$(getTestClasses ${fails[*]})
-        local tmpScreenshots=${TMP_DIR}"/qa/screenshots"
-        local tmpHtmldumps=${TMP_DIR}"/qa/htmldumps"
-        local tmpReports=${TMP_DIR}"/qa/reports"
-        local originalScreenshots="target/screenshots"
-
-        rm -rf ${tmpScreenshots} ${tmpReports}
-        mkdir -p ${tmpScreenshots} ${tmpReports}
-
-        rm -rf ${originalScreenshots}
-
         defineTestsScope "--failed-tests"
         runTests
-
-        if [[ -f ${TESTNG_FAILED_SUITE} ]]; then
-            # preserve failed test info
-            cp ${originalScreenshots}/*.png ${tmpScreenshots}
-            cp ${FAILSAFE_DIR}/TEST-*.xml ${tmpReports}
-            cp ${FAILSAFE_DIR}/*.txt ${tmpReports}
-        fi
-
-        # restore info
-        rm -rf ${FAILSAFE_DIR}
-        mkdir -p ${FAILSAFE_DIR}
-        rm -rf ${originalScreenshots}
-        cp -r ${tmpScreenshots} ${originalScreenshots}
-        cp ${tmpReports}/* ${FAILSAFE_DIR}
 
         if [[ ${rerun} < ${MAX_RERUN} ]]; then
             rerunTests $(($rerun+1)) $@
         fi
     fi
 }
-
 
 # Finds regressions and generates testng-failed.xml suite bases on them.
 generateTestNgFailedReport() {
