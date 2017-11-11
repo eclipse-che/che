@@ -361,14 +361,12 @@ prepareTestSuite() {
     sed -i -e "s#thread-count=\"[^\"]*\"#thread-count=\"${THREADS}\"#" "$TMP_SUITE_PATH"
 
     if [[ ${TEST_INCLUSION} == ${TEST_INCLUSION_STABLE_AND_UNSTABLE} ]]; then
-        if [[ ${TEST_INCLUSION} == ${TEST_INCLUSION_STABLE_AND_UNSTABLE} ]]; then
-            # remove "<methods>" tags from temporary suite
-            methodsSectionNumber=$(grep -oe "<methods>" <<< echo "$TMP_SUITE_PATH" | wc -l);
+        # remove "<methods>" tags from temporary suite
+        methodsSectionNumber=$(grep -oe "<methods>" <<< echo "$TMP_SUITE_PATH" | wc -l);
 
-            for (( c=1; c<=$methodsSectionNumber; c++ )); do
-                sed -i -e '1h;2,$H;$!d;g' -e "s/\(<class.*\)<methods>.*<\/methods>\(.*<\/class>\)/\1\2/" "$TMP_SUITE_PATH"
-            done
-        fi
+        for (( c=1; c<=$methodsSectionNumber; c++ )); do
+            sed -i -e '1h;2,$H;$!d;g' -e "s/\(<class.*\)<methods>.*<\/methods>\(.*<\/class>\)/\1\2/" "$TMP_SUITE_PATH"
+        done
     elif [[ ${TEST_INCLUSION} == ${TEST_INCLUSION_UNSTABLE} ]]; then
         # replace "<exclude>"  on "<include>" tags in temporary suite
         sed -i "s/<exclude/<include/" "$TMP_SUITE_PATH"
