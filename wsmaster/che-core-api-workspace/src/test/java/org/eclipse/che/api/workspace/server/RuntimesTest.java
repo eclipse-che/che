@@ -41,7 +41,6 @@ public class RuntimesTest {
   //    @Mock
   //    private WorkspaceSharedPool  sharedPool;
   //    @Mock
-  //    private SnapshotDao          snapshotDao;
   //
   //    private RuntimeInfrastructure infra;
   //
@@ -49,8 +48,6 @@ public class RuntimesTest {
   //    private ArgumentCaptor<WorkspaceStatusEvent>     eventCaptor;
   //    @Captor
   //    private ArgumentCaptor<Callable>                 taskCaptor;
-  //    @Captor
-  //    private ArgumentCaptor<Collection<SnapshotImpl>> snapshotsCaptor;
   //
   //    private WorkspaceRuntimes runtimes;
   //
@@ -591,130 +588,6 @@ public class RuntimesTest {
   //        assertEquals(actualWorkspaces, expectedWorkspaces);
   //    }
   //
-  //    @Test
-  //    public void changesStatusFromRunningToSnapshotting() throws Exception {
-  //        final WorkspaceImpl workspace = createWorkspace();
-  //        runtimes.start(workspace, workspace.getConfig().getDefaultEnv(), false);
-  //
-  //        runtimes.snapshotAsync(workspace.getId());
-  //
-  //        assertEquals(runtimes.get(workspace.getId()).getRuntimeStatus(),
-  // WorkspaceStatus.SNAPSHOTTING);
-  //    }
-  //
-  //    @Test
-  //    public void changesStatusFromSnapshottingToRunning() throws Exception {
-  //        final WorkspaceImpl workspace = createWorkspace();
-  //        runtimes.start(workspace, workspace.getConfig().getDefaultEnv(), false);
-  //
-  //        runtimes.snapshotAsync(workspace.getId());
-  //
-  //        captureAsyncTaskAndExecuteSynchronously();
-  //        assertEquals(runtimes.get(workspace.getId()).getRuntimeStatus(),
-  // WorkspaceStatus.RUNNING);
-  //    }
-  //
-  //    @Test(expectedExceptions = NotFoundException.class,
-  //          expectedExceptionsMessageRegExp = "Workspace with id 'non-existing' is not running")
-  //    public void throwsNotFoundExceptionWhenBeginningSnapshottingForNonExistingWorkspace() throws
-  // Exception {
-  //        runtimes.snapshot("non-existing");
-  //    }
-  //
-  //    @Test(expectedExceptions = ConflictException.class,
-  //          expectedExceptionsMessageRegExp = "Workspace with id '.*' is not 'RUNNING', it's
-  // status is 'SNAPSHOTTING'")
-  //    public void throwsConflictExceptionWhenBeginningSnapshottingForNotRunningWorkspace() throws
-  // Exception {
-  //        final WorkspaceImpl workspace = createWorkspace();
-  //        runtimes.start(workspace, workspace.getConfig().getDefaultEnv(), false);
-  //
-  //        runtimes.snapshotAsync(workspace.getId());
-  //        runtimes.snapshotAsync(workspace.getId());
-  //    }
-  //
-  //    @Test(expectedExceptions = ServerException.class, expectedExceptionsMessageRegExp = "can't
-  // save")
-  //    public void failsToCreateSnapshotWhenDevMachineSnapshottingFailed() throws Exception {
-  //        final WorkspaceImpl workspace = createWorkspace();
-  //        runtimes.start(workspace, workspace.getConfig().getDefaultEnv(), false);
-  //        when(envEngine.saveSnapshot(any(), any())).thenThrow(new ServerException("can't save"));
-  //
-  //        try {
-  //            runtimes.snapshot(workspace.getId());
-  //        } catch (Exception x) {
-  //            verify(eventService).publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
-  //                                                   .withWorkspaceId(workspace.getId())
-  //                                                   .withStatus(WorkspaceStatus.SNAPSHOTTING)
-  //                                                   .withPrevStatus(WorkspaceStatus.RUNNING)
-  //                                                   .withEventType(EventType.SNAPSHOT_CREATING));
-  //            verify(eventService).publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
-  //                                                   .withWorkspaceId(workspace.getId())
-  //                                                   .withError("can't save")
-  //                                                   .withStatus(WorkspaceStatus.RUNNING)
-  //                                                   .withPrevStatus(WorkspaceStatus.SNAPSHOTTING)
-  //
-  // .withEventType(EventType.SNAPSHOT_CREATION_ERROR));
-  //            throw x;
-  //        }
-  //    }
-  //
-  //    @Test(expectedExceptions = ServerException.class, expectedExceptionsMessageRegExp = "test")
-  //    public void removesNewlyCreatedSnapshotsWhenFailedToSaveTheirsMetadata() throws Exception {
-  //        WorkspaceImpl workspace = createWorkspace();
-  //        runtimes.start(workspace, workspace.getConfig().getDefaultEnv(), false);
-  //        doThrow(new SnapshotException("test")).when(snapshotDao)
-  //                                              .replaceSnapshots(any(), any(), any());
-  //        SnapshotImpl snapshot = mock(SnapshotImpl.class);
-  //        when(envEngine.saveSnapshot(any(), any())).thenReturn(snapshot);
-  //
-  //        try {
-  //            runtimes.snapshot(workspace.getId());
-  //        } catch (Exception x) {
-  //            verify(eventService).publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
-  //                                                   .withStatus(WorkspaceStatus.SNAPSHOTTING)
-  //                                                   .withEventType(EventType.SNAPSHOT_CREATING)
-  //                                                   .withPrevStatus(WorkspaceStatus.RUNNING)
-  //                                                   .withWorkspaceId(workspace.getId()));
-  //            verify(eventService).publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
-  //                                                   .withStatus(WorkspaceStatus.RUNNING)
-  //
-  // .withEventType(EventType.SNAPSHOT_CREATION_ERROR)
-  //                                                   .withWorkspaceId(workspace.getId())
-  //                                                   .withPrevStatus(WorkspaceStatus.SNAPSHOTTING)
-  //                                                   .withError("test"));
-  //            verify(snapshotDao).replaceSnapshots(any(),
-  //                                                 any(),
-  //                                                 snapshotsCaptor.capture());
-  //            verify(envEngine,
-  // times(snapshotsCaptor.getValue().size())).removeSnapshot(snapshot);
-  //            throw x;
-  //        }
-  //    }
-  //
-  //    @Test
-  //    public void removesOldSnapshotsWhenNewSnapshotsMetadataSuccessfullySaved() throws Exception
-  // {
-  //        WorkspaceImpl workspace = createWorkspace();
-  //        runtimes.start(workspace, workspace.getConfig().getDefaultEnv(), false);
-  //        SnapshotImpl oldSnapshot = mock(SnapshotImpl.class);
-  //        doReturn((singletonList(oldSnapshot))).when(snapshotDao)
-  //                                              .replaceSnapshots(any(), any(), any());
-  //
-  //        runtimes.snapshot(workspace.getId());
-  //
-  //        verify(eventService).publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
-  //                                               .withStatus(WorkspaceStatus.SNAPSHOTTING)
-  //                                               .withEventType(EventType.SNAPSHOT_CREATING)
-  //                                               .withPrevStatus(WorkspaceStatus.RUNNING)
-  //                                               .withWorkspaceId(workspace.getId()));
-  //        verify(eventService).publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
-  //                                               .withStatus(WorkspaceStatus.RUNNING)
-  //                                               .withEventType(EventType.SNAPSHOT_CREATED)
-  //                                               .withPrevStatus(WorkspaceStatus.SNAPSHOTTING)
-  //                                               .withWorkspaceId(workspace.getId()));
-  //        verify(envEngine).removeSnapshot(oldSnapshot);
-  //    }
   //
   //    private static Instance createMachine(boolean isDev) {
   //        return createMachine(createConfig(isDev));
