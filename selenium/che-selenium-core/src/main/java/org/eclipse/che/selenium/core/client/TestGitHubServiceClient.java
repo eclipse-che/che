@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.selenium.core.client;
 
-import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;

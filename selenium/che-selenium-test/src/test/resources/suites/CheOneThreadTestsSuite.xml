@@ -27,12 +27,13 @@
             <class name="org.eclipse.che.selenium.git.CheckoutToRemoteBranchWhichAlreadyHasLinkedLocalBranchTest"/>
             <class name="org.eclipse.che.selenium.git.CommitFilesByMultiSelectTest"/>
             <class name="org.eclipse.che.selenium.git.CommitFilesTest"/>
-            <class name="org.eclipse.che.selenium.git.GitColorsTest"/>
-            <class name="org.eclipse.che.selenium.git.GitChangeMarkersTest"/>
             <class name="org.eclipse.che.selenium.git.CreateAndDeleteLocalBranchTest"/>
             <class name="org.eclipse.che.selenium.git.FetchUpdatesAndMergeRemoteBranchIntoLocalTest"/>
+            <class name="org.eclipse.che.selenium.git.GitChangeMarkersTest"/>
+            <class name="org.eclipse.che.selenium.git.GitColorsTest"/>
             <class name="org.eclipse.che.selenium.git.GitCompareTest"/>
             <class name="org.eclipse.che.selenium.git.GitPullTest"/>
+            <class name="org.eclipse.che.selenium.git.ImportProjectIntoSpecifiedBranchTest"/>
             <class name="org.eclipse.che.selenium.git.ImportRecursiveSubmoduleTest"/>
             <class name="org.eclipse.che.selenium.git.InitializeAndDeleteLocalRepositoryTest"/>
             <class name="org.eclipse.che.selenium.git.KeepDirectoryGitImportTest"/>
@@ -40,8 +41,8 @@
             <class name="org.eclipse.che.selenium.git.PullRequestPluginWithForkTest"/>
             <class name="org.eclipse.che.selenium.git.PushChangeNotUpdatedRepoTest"/>
             <class name="org.eclipse.che.selenium.git.PushingChangesTest"/>
-            <class name="org.eclipse.che.selenium.git.WorkingWithPullConflictsTest"/>
             <class name="org.eclipse.che.selenium.git.RevertCommitTest"/>
+            <class name="org.eclipse.che.selenium.git.WorkingWithPullConflictsTest"/>
         </classes>
     </test>
 </suite>
