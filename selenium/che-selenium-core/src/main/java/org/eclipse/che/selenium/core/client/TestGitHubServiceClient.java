@@ -193,7 +193,7 @@ public class TestGitHubServiceClient {
           .request();
     }
 
-    LOG.debug(format("Application grants '%s' were removed from github.com", grandsId));
+    LOG.debug("Application grants '{}' were removed from github.com", grandsId);
   }
 
   public String getName(final String username, final String password)
