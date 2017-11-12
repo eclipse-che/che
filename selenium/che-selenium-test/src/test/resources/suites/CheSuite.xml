@@ -189,6 +189,16 @@
               <exclude name="checkIsNotExcludeOperationEventAboutIgnoreFile"/>
             </methods>
           </class>
+          <class name="org.eclipse.che.selenium.git.AddFilesToIndexTest"/>
+          <class name="org.eclipse.che.selenium.git.AmendCommitTest"/>
+          <class name="org.eclipse.che.selenium.git.CheckoutBranchTest"/>
+          <class name="org.eclipse.che.selenium.git.CommitFilesByMultiSelectTest"/>
+          <class name="org.eclipse.che.selenium.git.CommitFilesTest"/>
+          <class name="org.eclipse.che.selenium.git.CreateAndDeleteLocalBranchTest"/>
+          <class name="org.eclipse.che.selenium.git.GitChangeMarkersTest"/>
+          <class name="org.eclipse.che.selenium.git.GitColorsTest"/>
+          <class name="org.eclipse.che.selenium.git.GitCompareTest"/>
+          <class name="org.eclipse.che.selenium.git.InitializeAndDeleteLocalRepositoryTest"/>
           <class name="org.eclipse.che.selenium.gwt.CheckSimpleGwtAppTest"/>
           <class name="org.eclipse.che.selenium.intelligencecommand.MacrosCommandsEditorTest"/>
           <class name="org.eclipse.che.selenium.intelligencecommand.AutocompleteCommandsEditorTest"/>
