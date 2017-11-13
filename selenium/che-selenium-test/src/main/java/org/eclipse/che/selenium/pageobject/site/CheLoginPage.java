@@ -19,6 +19,7 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -50,11 +51,12 @@ public class CheLoginPage implements LoginPage {
   @Override
   public void login(String username, String password) {
     waitOnOpen();
-    usernameInput.clear();
-    usernameInput.sendKeys(username);
-    passwordInput.clear();
-    passwordInput.sendKeys(password);
-    loginButton.click();
+
+    rewrite(usernameInput, username);
+
+    rewrite(passwordInput, password);
+
+    clickLoginButton();
     waitOnClose();
   }
 
@@ -69,6 +71,16 @@ public class CheLoginPage implements LoginPage {
     return true;
   }
 
+  private void rewrite(WebElement field, String value) {
+    field.clear();
+    field.sendKeys(value);
+    waitTextIsPresent(field, value);
+  }
+
+  private void clickLoginButton() {
+    webDriverWait.until(ExpectedConditions.visibilityOf(loginButton)).click();
+  }
+
   private void waitOnOpen() {
     webDriverWait.until(ExpectedConditions.visibilityOf(loginButton));
   }
@@ -77,5 +89,11 @@ public class CheLoginPage implements LoginPage {
     webDriverWait.until(
         ExpectedConditions.invisibilityOfAllElements(
             ImmutableList.of(loginButton, passwordInput, usernameInput)));
+  }
+
+  private void waitTextIsPresent(WebElement webElement, String expectedText) {
+    webDriverWait.until(
+        (ExpectedCondition<Boolean>)
+            driver -> webElement.getAttribute("value").equals(expectedText));
   }
 }
