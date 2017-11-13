@@ -36,6 +36,7 @@ public interface GitCheckoutEvent extends GitEvent {
 
   GitCheckoutEvent withWorkspaceId(String workspaceId);
 
+  @Override
   String getProjectName();
 
   void setProjectName(String projectName);

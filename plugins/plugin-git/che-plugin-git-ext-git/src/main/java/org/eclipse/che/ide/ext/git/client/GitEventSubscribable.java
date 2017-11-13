@@ -8,9 +8,12 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.git.shared.event;
+package org.eclipse.che.ide.ext.git.client;
 
-public interface GitEvent {
-  /** Returns name of project in which the event was fired. */
-  String getProjectName();
+/** Defines client side git events listener, which notifies about them its subscribers. */
+public interface GitEventSubscribable {
+
+  void addSubscriber(GitEventsSubscriber subscriber);
+
+  void removeSubscriber(GitEventsSubscriber subscriber);
 }
