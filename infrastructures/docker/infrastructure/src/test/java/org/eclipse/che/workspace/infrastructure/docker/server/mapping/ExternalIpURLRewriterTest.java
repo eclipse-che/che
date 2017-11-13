@@ -12,6 +12,7 @@ package org.eclipse.che.workspace.infrastructure.docker.server.mapping;
 
 import static org.testng.Assert.assertEquals;
 
+import org.eclipse.che.api.workspace.server.ExternalIpURLRewriter;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;

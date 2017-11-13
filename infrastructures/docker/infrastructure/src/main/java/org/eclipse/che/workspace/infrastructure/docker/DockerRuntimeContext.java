@@ -19,6 +19,7 @@ import java.util.List;
 import javax.inject.Named;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.workspace.server.ExternalIpURLRewriter;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
@@ -41,6 +42,7 @@ public class DockerRuntimeContext extends RuntimeContext {
 
   private final DockerEnvironment dockerEnvironment;
   private final List<String> orderedContainers;
+  private final ExternalIpURLRewriter urlRewriter;
   private final String websocketOutputEndpoint;
   private final DockerRuntimeFactory runtimeFactory;
   private final DockerContainers containers;
@@ -58,12 +60,14 @@ public class DockerRuntimeContext extends RuntimeContext {
       DockerContainers containers,
       DockerSharedPool sharedPool,
       RuntimeConsistencyChecker consistencyChecker,
+      ExternalIpURLRewriter urlRewriter,
       @Named("che.websocket.endpoint") String cheWebsocketEndpoint)
       throws InfrastructureException, ValidationException {
 
     super(environment, identity, infrastructure);
     this.dockerEnvironment = dockerEnv;
     this.orderedContainers = ImmutableList.copyOf(containersOrder);
+    this.urlRewriter = urlRewriter;
     this.websocketOutputEndpoint = cheWebsocketEndpoint;
     this.runtimeFactory = runtimeFactory;
     this.containers = containers;
@@ -84,7 +88,7 @@ public class DockerRuntimeContext extends RuntimeContext {
   @Override
   public URI getOutputChannel() throws InfrastructureException {
     try {
-      return URI.create(websocketOutputEndpoint);
+      return URI.create(urlRewriter.rewriteURL(getIdentity(), null, websocketOutputEndpoint));
     } catch (IllegalArgumentException ex) {
       throw new InternalInfrastructureException(
           "Failed to get the output channel because: " + ex.getLocalizedMessage());
