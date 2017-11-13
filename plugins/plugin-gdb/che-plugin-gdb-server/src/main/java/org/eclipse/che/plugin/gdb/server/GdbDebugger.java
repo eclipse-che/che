@@ -32,6 +32,7 @@ import org.eclipse.che.api.debug.shared.model.action.StepIntoAction;
 import org.eclipse.che.api.debug.shared.model.action.StepOutAction;
 import org.eclipse.che.api.debug.shared.model.action.StepOverAction;
 import org.eclipse.che.api.debug.shared.model.impl.DebuggerInfoImpl;
+import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
 import org.eclipse.che.api.debug.shared.model.impl.StackFrameDumpImpl;
 import org.eclipse.che.api.debug.shared.model.impl.VariableImpl;
@@ -179,7 +180,7 @@ public class GdbDebugger implements Debugger {
   @Override
   public void addBreakpoint(Breakpoint breakpoint) throws DebuggerException {
     try {
-      Location location = breakpoint.getLocation();
+      Location location = toAbsoluteLocation(breakpoint.getLocation());
       if (location.getTarget() == null) {
         gdb.breakpoint(location.getLineNumber());
       } else {
@@ -448,5 +449,19 @@ public class GdbDebugger implements Debugger {
     } catch (IOException | GdbParseException | InterruptedException e) {
       throw new DebuggerException("Can't dump stack frame. " + e.getMessage(), e);
     }
+  }
+
+  /** Changes location target to absolute path. */
+  private Location toAbsoluteLocation(Location location)
+      throws InterruptedException, GdbParseException, GdbTerminatedException, IOException {
+    String workDirFullPath = gdb.workDir().getWorkDir();
+    return new LocationImpl(
+        workDirFullPath + location.getTarget(),
+        location.getLineNumber(),
+        location.isExternalResource(),
+        location.getExternalResourceId(),
+        location.getResourceProjectPath(),
+        location.getMethod(),
+        location.getThreadId());
   }
 }
