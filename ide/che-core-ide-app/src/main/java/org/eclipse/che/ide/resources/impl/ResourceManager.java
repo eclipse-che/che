@@ -951,26 +951,23 @@ public final class ResourceManager {
     return ps.getTree(path.parent(), 1, true)
         .thenPromise(
             treeElement -> {
-              java.util.Optional<Resource> optionalResource =
-                  treeElement
-                      .getChildren()
-                      .stream()
-                      .map(TreeElement::getNode)
-                      .map(
-                          reference -> {
-                            Resource resource = newResourceFrom(reference);
-                            store.register(resource);
+              Resource resource = null;
 
-                            if (resource.isProject()) {
-                              inspectProject(resource.asProject());
-                            }
+              for (TreeElement nodeElement : treeElement.getChildren()) {
+                ItemReference reference = nodeElement.getNode();
+                Resource tempResource = newResourceFrom(reference);
+                store.register(tempResource);
 
-                            return resource;
-                          })
-                      .filter(resource -> resource.getLocation().equals(path))
-                      .findFirst();
+                if (tempResource.isProject()) {
+                  inspectProject(tempResource.asProject());
+                }
 
-              return promises.resolve(Optional.fromNullable(optionalResource.orElse(null)));
+                if (tempResource.getLocation().equals(path)) {
+                  resource = tempResource;
+                }
+              }
+
+              return promises.resolve(Optional.fromNullable(resource));
             })
         .catchErrorPromise(error -> promises.resolve(absent()));
   }
