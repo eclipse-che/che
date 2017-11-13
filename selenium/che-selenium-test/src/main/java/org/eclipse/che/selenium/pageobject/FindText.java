@@ -16,9 +16,12 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRA
 import com.google.common.base.Predicate;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
@@ -491,10 +494,12 @@ public class FindText {
   }
 
   public Boolean checkNextPageButtonIsEnabled() {
+    WaitUtils.sleepQuietly(1);
     return seleniumWebDriver.findElement(By.id(Locators.NEXT_BUTTON)).isEnabled();
   }
 
   public Boolean checkPreviousPageButtonIsEnabled() {
+    WaitUtils.sleepQuietly(1);
     return seleniumWebDriver.findElement(By.id(Locators.PREVIOUS_BUTTON)).isEnabled();
   }
 
@@ -505,5 +510,23 @@ public class FindText {
                 By.xpath(String.format(Locators.FILE_NODE, pathToFile))))
         .click();
     actionsFactory.createAction(seleniumWebDriver).doubleClick().perform();
+  }
+
+  public int getFoundOccurencesOnPage() {
+    List<String> results = new ArrayList<>(Arrays.asList(getResults().split(" ")));
+
+    return Integer.parseInt(results.get(0));
+  }
+
+  public int getFoundFilesOnPage() {
+    List<String> results = new ArrayList<>(Arrays.asList(getResults().split(" ")));
+
+    return Integer.parseInt(results.get(4));
+  }
+
+  public int getTotalFilesCount() {
+    List<String> results = new ArrayList<>(Arrays.asList(getResults().split(" ")));
+
+    return Integer.parseInt(results.get(results.size() - 1));
   }
 }
