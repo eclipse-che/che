@@ -10,3 +10,6 @@
 --
 
 DROP TABLE snapshot;
+
+DELETE FROM workspace_attributes
+   WHERE attributes_key = 'snapshotted_at';

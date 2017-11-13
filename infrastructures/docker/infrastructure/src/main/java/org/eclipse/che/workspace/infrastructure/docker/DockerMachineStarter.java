@@ -347,24 +347,19 @@ public class DockerMachineStarter {
               "Machine creation failed. Machine source is invalid. No repository is defined. Found '%s'.",
               dockerImageIdentifier.getRepository()));
     }
-
-    DockerMachineSource dockerMachineSource =
-        new DockerMachineSource(dockerImageIdentifier.getRepository())
-            .withTag(dockerImageIdentifier.getTag())
-            .withDigest(dockerImageIdentifier.getDigest())
-            .withRegistry(dockerImageIdentifier.getRegistry());
     try {
-      boolean isImageExistLocally = isDockerImageExistLocally(dockerMachineSource.getRepository());
+      boolean isImageExistLocally =
+          isDockerImageExistLocally(dockerImageIdentifier.getRepository());
       if (doForcePullImage || !isImageExistLocally) {
         PullParams pullParams =
-            PullParams.create(dockerMachineSource.getRepository())
-                .withTag(MoreObjects.firstNonNull(dockerMachineSource.getTag(), LATEST_TAG))
-                .withRegistry(dockerMachineSource.getRegistry())
+            PullParams.create(dockerImageIdentifier.getRepository())
+                .withTag(MoreObjects.firstNonNull(dockerImageIdentifier.getTag(), LATEST_TAG))
+                .withRegistry(dockerImageIdentifier.getRegistry())
                 .withAuthConfigs(dockerCredentials.getCredentials());
         docker.pull(pullParams, progressMonitor);
       }
 
-      String fullNameOfPulledImage = dockerMachineSource.getLocation(false);
+      String fullNameOfPulledImage = container.getImage();
       try {
         // tag image with generated name to allow sysadmin recognize it
         docker.tag(TagParams.create(fullNameOfPulledImage, machineImageName));
