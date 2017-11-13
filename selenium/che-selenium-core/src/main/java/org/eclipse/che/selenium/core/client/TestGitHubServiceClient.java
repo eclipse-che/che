@@ -10,11 +10,10 @@
  */
 package org.eclipse.che.selenium.core.client;
 
-import static java.lang.String.*;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
-import static org.slf4j.LoggerFactory.*;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.reflect.TypeToken;
@@ -193,7 +192,7 @@ public class TestGitHubServiceClient {
           .request();
     }
 
-    LOG.debug(format("Application grants '%s' were removed from github.com", grandsId));
+    LOG.debug("Application grants '{}' were removed from github.com", grandsId);
   }
 
   public String getName(final String username, final String password)

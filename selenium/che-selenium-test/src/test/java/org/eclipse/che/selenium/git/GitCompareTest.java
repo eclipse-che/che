@@ -13,7 +13,7 @@ package org.eclipse.che.selenium.git;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.client.TestSshServiceClient;
+import org.eclipse.che.selenium.core.client.TestGitHubKeyUploader;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestGitConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
@@ -59,11 +59,11 @@ public class GitCompareTest {
   @Inject private AskDialog askDialog;
   @Inject private WarningDialog warningDialog;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
-  @Inject private TestSshServiceClient testSshServiceClient;
+  @Inject private TestGitHubKeyUploader testGitHubKeyUploader;
 
   @BeforeClass
   public void prepare() throws Exception {
-    testSshServiceClient.updateGithubKey();
+    testGitHubKeyUploader.updateGithubKey();
     testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
 
     ide.open(ws);

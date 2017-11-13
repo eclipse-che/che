@@ -11,38 +11,27 @@
 
 -->
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
-<suite name="Eclipse Che selenium tests to execute all the methods in the same 'test' tag in the same thread"
+<suite name="One-thread Eclipse Che selenium tests"
        verbose="10"
-       parallel="tests"
+       parallel="classes"
        thread-count="1">
 
-    <test name="git">
+    <test name="all">
         <classes>
-            <class name="org.eclipse.che.selenium.git.AddFilesToIndexTest"/>
-            <class name="org.eclipse.che.selenium.git.AmendCommitTest"/>
-            <class name="org.eclipse.che.selenium.git.CheckoutBranchTest"/>
             <class name="org.eclipse.che.selenium.git.CheckoutReferenceTest"/>
             <class name="org.eclipse.che.selenium.git.CheckoutToRemoteBranchTest"/>
             <class name="org.eclipse.che.selenium.git.CheckoutToRemoteBranchWhichAlreadyHasLinkedLocalBranchTest"/>
-            <class name="org.eclipse.che.selenium.git.CommitFilesByMultiSelectTest"/>
-            <class name="org.eclipse.che.selenium.git.CommitFilesTest"/>
-            <class name="org.eclipse.che.selenium.git.GitColorsTest"/>
-            <class name="org.eclipse.che.selenium.git.GitChangeMarkersTest"/>
-            <class name="org.eclipse.che.selenium.git.CreateAndDeleteLocalBranchTest"/>
             <class name="org.eclipse.che.selenium.git.FetchUpdatesAndMergeRemoteBranchIntoLocalTest"/>
-            <class name="org.eclipse.che.selenium.git.GitCompareTest"/>
             <class name="org.eclipse.che.selenium.git.GitPullTest"/>
+            <class name="org.eclipse.che.selenium.git.ImportProjectIntoSpecifiedBranchTest"/>
             <class name="org.eclipse.che.selenium.git.ImportRecursiveSubmoduleTest"/>
-            <class name="org.eclipse.che.selenium.git.ImportRecursiveSubmoduleTest"/>
-            <class name="org.eclipse.che.selenium.git.InitializeAndDeleteLocalRepositoryTest"/>
             <class name="org.eclipse.che.selenium.git.KeepDirectoryGitImportTest"/>
             <class name="org.eclipse.che.selenium.git.PullRequestPluginTest"/>
             <class name="org.eclipse.che.selenium.git.PullRequestPluginWithForkTest"/>
             <class name="org.eclipse.che.selenium.git.PushChangeNotUpdatedRepoTest"/>
             <class name="org.eclipse.che.selenium.git.PushingChangesTest"/>
-            <class name="org.eclipse.che.selenium.git.WorkingWithPullConflictsTest"/>
             <class name="org.eclipse.che.selenium.git.RevertCommitTest"/>
-            <class name="org.eclipse.che.selenium.gwt.CheckSimpleGwtAppTest"/>
+            <class name="org.eclipse.che.selenium.git.WorkingWithPullConflictsTest"/>
         </classes>
     </test>
 </suite>

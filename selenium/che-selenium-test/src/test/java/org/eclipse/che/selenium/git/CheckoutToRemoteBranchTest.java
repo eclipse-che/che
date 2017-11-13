@@ -14,8 +14,9 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.util.Date;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.client.TestGitHubKeyUploader;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.client.TestSshServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestGitConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
@@ -75,13 +76,14 @@ public class CheckoutToRemoteBranchTest {
   @Inject private NotificationsPopupPanel notifications;
   @Inject private ImportProjectFromLocation importFromLocation;
   @Inject private Wizard projectWizard;
-  @Inject private TestSshServiceClient testSshServiceClient;
+  @Inject private TestGitHubKeyUploader testGitHubKeyUploader;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
 
   @BeforeClass
   public void prepare() throws Exception {
-    testSshServiceClient.updateGithubKey();
+    testGitHubKeyUploader.updateGithubKey();
     testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
     ide.open(ws);
   }
