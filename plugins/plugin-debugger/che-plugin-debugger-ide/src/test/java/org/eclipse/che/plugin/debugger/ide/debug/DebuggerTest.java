@@ -14,14 +14,13 @@ import static junit.framework.TestCase.assertEquals;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.RETURNS_SMART_NULLS;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -38,8 +37,6 @@ import java.util.Map;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.api.core.jsonrpc.commons.reception.ConsumerConfiguratorOneToNone;
-import org.eclipse.che.api.core.jsonrpc.commons.reception.ResultConfiguratorFromOne;
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
 import org.eclipse.che.api.debug.shared.dto.LocationDto;
@@ -48,7 +45,6 @@ import org.eclipse.che.api.debug.shared.dto.StackFrameDumpDto;
 import org.eclipse.che.api.debug.shared.dto.VariableDto;
 import org.eclipse.che.api.debug.shared.dto.VariablePathDto;
 import org.eclipse.che.api.debug.shared.dto.action.ResumeActionDto;
-import org.eclipse.che.api.debug.shared.dto.action.StartActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepIntoActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepOutActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepOverActionDto;
@@ -62,7 +58,6 @@ import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.PromiseProvider;
@@ -71,6 +66,7 @@ import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
@@ -185,6 +181,13 @@ public class DebuggerTest extends BaseTest {
         .when(dtoFactory)
         .createDtoFromJson(anyString(), eq(DebugSessionDto.class));
 
+    doReturn(mock(StatusNotification.class))
+        .when(notificationManager)
+        .notify(
+            anyString(),
+            any(StatusNotification.Status.class),
+            any(StatusNotification.DisplayMode.class));
+
     doReturn(Path.valueOf(PATH)).when(file).getLocation();
 
     debugger =
@@ -218,48 +221,25 @@ public class DebuggerTest extends BaseTest {
 
   @Test
   public void testAttachDebugger() throws Exception {
+    doNothing().when(debugger).subscribeToDebuggerEvents();
+    doNothing().when(debugger).startCheckingEvents();
     debugger.setDebugSession(null);
 
     final String debugSessionJson = "debugSession";
     doReturn(debugSessionJson).when(dtoFactory).toJson(debugSessionDto);
-    doReturn(mock(StartActionDto.class)).when(dtoFactory).createDto(StartActionDto.class);
-
     Map<String, String> connectionProperties = mock(Map.class);
     Promise<DebugSessionDto> promiseDebuggerInfo = mock(Promise.class);
-
-    org.eclipse.che.api.core.jsonrpc.commons.reception.MethodNameConfigurator
-        methodNameConfigurator =
-            mock(org.eclipse.che.api.core.jsonrpc.commons.reception.MethodNameConfigurator.class);
-    org.eclipse.che.api.core.jsonrpc.commons.reception.ParamsConfigurator paramsConfigurator =
-        mock(org.eclipse.che.api.core.jsonrpc.commons.reception.ParamsConfigurator.class);
-
-    ResultConfiguratorFromOne resultConfiguratorFromOne = mock(ResultConfiguratorFromOne.class);
-    ConsumerConfiguratorOneToNone operationConfiguratorOneToNone =
-        mock(ConsumerConfiguratorOneToNone.class);
-
-    doReturn(methodNameConfigurator).when(configurator).newConfiguration();
-    doReturn(paramsConfigurator).when(methodNameConfigurator).methodName(anyString());
-    doReturn(resultConfiguratorFromOne).when(paramsConfigurator).paramsAsDto(anyObject());
-    doReturn(operationConfiguratorOneToNone).when(resultConfiguratorFromOne).noResult();
 
     doReturn(promiseDebuggerInfo).when(service).connect("id", connectionProperties);
     doReturn(promiseVoid).when(promiseDebuggerInfo).then((Function<DebugSessionDto, Void>) any());
     doReturn(promiseVoid).when(promiseVoid).catchError((Operation<PromiseError>) any());
 
     Promise<Void> result = debugger.connect(connectionProperties);
+
     assertEquals(promiseVoid, result);
 
     verify(promiseDebuggerInfo).then(argumentCaptorFunctionJavaDebugSessionVoid.capture());
     argumentCaptorFunctionJavaDebugSessionVoid.getValue().apply(debugSessionDto);
-
-    verify(promiseVoid).catchError(operationPromiseErrorCaptor.capture());
-    try {
-      operationPromiseErrorCaptor.getValue().apply(promiseError);
-      fail("Operation Exception expected");
-    } catch (OperationException e) {
-      verify(promiseError).getMessage();
-      verify(promiseError).getCause();
-    }
 
     verify(observer).onDebuggerAttached(debuggerDescriptor);
 

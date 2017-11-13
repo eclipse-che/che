@@ -141,13 +141,11 @@ public class DebuggerPresenterTest extends BaseTest {
 
   @Test
   public void shouldUpdateStackFrameDumpAndVariablesOnNewSelectedThread() throws Exception {
-    //    doNothing().when(presenter).updateStackFrameDump(THREAD_ID);
     doNothing().when(presenter).refreshVariables(THREAD_ID, 0);
 
     presenter.onSelectedThread(THREAD_ID);
 
-    //    verify(presenter).updateStackFrameDump(THREAD_ID);
-    verify(presenter).refreshVariables(THREAD_ID, 0);
+    verify(presenter).refreshView(THREAD_ID);
   }
 
   @Test
@@ -165,15 +163,12 @@ public class DebuggerPresenterTest extends BaseTest {
     doReturn(THREAD_ID).when(executionPoint).getThreadId();
     doReturn(promiseThreadDump).when(debugger).getThreadDump();
     doReturn(promiseThreadDump).when(promiseThreadDump).then((Operation<List<ThreadState>>) any());
-    //    doNothing().when(presenter).updateStackFrameDump(THREAD_ID);
-    doNothing().when(presenter).refreshVariables(THREAD_ID, 0);
 
     presenter.onBreakpointStopped(null, executionPoint);
 
     verify(promiseThreadDump).then(operationThreadDumpCaptor.capture());
     operationThreadDumpCaptor.getValue().apply(threadDump);
-    //    verify(presenter).updateStackFrameDump(THREAD_ID);
-    verify(presenter).refreshVariables(THREAD_ID, 0);
+    verify(presenter).refreshView();
     verify(view).setThreadDump(eq(threadDump), anyLong());
   }
 
@@ -204,8 +199,6 @@ public class DebuggerPresenterTest extends BaseTest {
 
     presenter.onDebuggerAttached(debuggerDescriptor);
 
-    verify(promiseVoid).then(operationVoidCaptor.capture());
-    operationVoidCaptor.getValue().apply(null);
     verify(presenter).showDebuggerPanel();
     verify(view).setVMName("info");
   }

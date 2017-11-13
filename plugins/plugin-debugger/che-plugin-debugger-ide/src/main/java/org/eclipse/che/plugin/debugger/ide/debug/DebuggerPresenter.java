@@ -283,7 +283,7 @@ public class DebuggerPresenter extends BasePresenter
     }
   }
 
-  private void refreshView() {
+  protected void refreshView() {
     Debugger debugger = debuggerManager.getActiveDebugger();
     if (debugger != null && debugger.isSuspended()) {
       debugger
@@ -305,7 +305,7 @@ public class DebuggerPresenter extends BasePresenter
     }
   }
 
-  private void refreshView(long threadId) {
+  protected void refreshView(long threadId) {
     ThreadState threadState = threadDump.get(threadId);
     if (threadState == null) {
       view.setFrames(Collections.emptyList());
