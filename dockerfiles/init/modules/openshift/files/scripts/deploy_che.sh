@@ -392,12 +392,6 @@ echo "[CHE] Deploying Che on ${OPENSHIFT_FLAVOR} (image ${CHE_IMAGE})"
 
 CHE_SERVER_CONFIGURATION="          - name: \"CHE_WORKSPACE_LOGS\"
             value: \"${CHE_WORKSPACE_LOGS}\"
-          - name: \"CHE_KEYCLOAK_AUTH__SERVER__URL\"
-            value: \"${CHE_KEYCLOAK_AUTH__SERVER__URL}\"
-          - name: \"CHE_KEYCLOAK_REALM\"
-            value: \"${CHE_KEYCLOAK_REALM}\"
-          - name: \"CHE_KEYCLOAK_CLIENT__ID\"
-            value: \"${CHE_KEYCLOAK_CLIENT__ID}\"
           - name: \"CHE_HOST\"
             value: \"${CHE_HOST}\"
           - name: \"CHE_MULTIUSER\"
@@ -425,6 +419,9 @@ cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     sed "s|    CHE_HOST: \${DEFAULT_OPENSHIFT_NAMESPACE_URL}|    CHE_HOST: che-${OPENSHIFT_NAMESPACE_URL}|" | \
     sed "s|    CHE_API: http://\${DEFAULT_OPENSHIFT_NAMESPACE_URL}/api|    CHE_API: ${HTTP_PROTOCOL}://che-${OPENSHIFT_NAMESPACE_URL}/api|" | \
     sed "s|    CHE_INFRA_OPENSHIFT_PVC_STRATEGY:.*|    CHE_INFRA_OPENSHIFT_PVC_STRATEGY: ${CHE_INFRA_OPENSHIFT_PVC_STRATEGY}|" | \
+    sed "s|    che-keycloak-auth-server-url:.*|    che-keycloak-auth-server-url: ${CHE_KEYCLOAK_AUTH__SERVER__URL}|" | \
+    sed "s|    che-keycloak-realm:.*|    che-keycloak-realm: ${CHE_KEYCLOAK_REALM}|" | \
+    sed "s|    che-keycloak-client-id:.*|    che-keycloak-client-id: ${CHE_KEYCLOAK_CLIENT__ID}|" | \
     if [ "${CHE_INFRA_OPENSHIFT_OAUTH__TOKEN+x}" ]; then sed "s|    CHE_INFRA_OPENSHIFT_OAUTH__TOKEN:.*|    CHE_INFRA_OPENSHIFT_OAUTH__TOKEN: ${CHE_INFRA_OPENSHIFT_OAUTH__TOKEN}|"; else cat -;  fi | \
     if [ "${CHE_INFRA_OPENSHIFT_USERNAME+x}" ]; then sed "s|    CHE_INFRA_OPENSHIFT_USERNAME:.*|    CHE_INFRA_OPENSHIFT_USERNAME: ${CHE_INFRA_OPENSHIFT_USERNAME}|"; else cat -;  fi | \
     if [ "${CHE_INFRA_OPENSHIFT_PASSWORD+x}" ]; then sed "s|    CHE_INFRA_OPENSHIFT_PASSWORD:.*|    CHE_INFRA_OPENSHIFT_PASSWORD: ${CHE_INFRA_OPENSHIFT_PASSWORD}|"; else cat -;  fi | \

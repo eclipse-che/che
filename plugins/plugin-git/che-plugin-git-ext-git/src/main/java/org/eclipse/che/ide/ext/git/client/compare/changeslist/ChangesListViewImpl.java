@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.ext.git.client.compare.changeslist;
 
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
@@ -23,7 +24,6 @@ import org.eclipse.che.ide.ui.window.Window;
  * @author Igor Vinokur
  */
 public class ChangesListViewImpl extends Window implements ChangesListView {
-
   private final GitLocalizationConstant locale;
 
   private ActionDelegate delegate;
@@ -59,7 +59,12 @@ public class ChangesListViewImpl extends Window implements ChangesListView {
 
   @Override
   public void setChangesPanelView(ChangesPanelView changesPanelView) {
-    this.setWidget((Widget) changesPanelView);
+    FlowPanel flowPanel = new FlowPanel();
+    flowPanel.ensureDebugId("git-compare-window-changed-files");
+    flowPanel.setWidth("600px");
+    flowPanel.setHeight("345px");
+    flowPanel.add((Widget) changesPanelView);
+    this.setWidget(flowPanel);
   }
 
   private void createButtons() {

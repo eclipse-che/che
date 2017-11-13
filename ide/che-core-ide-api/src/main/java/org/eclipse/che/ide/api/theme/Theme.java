@@ -1583,6 +1583,10 @@ public interface Theme {
 
   String editorPreferenceCategoryBackgroundColor();
 
+  String gitPanelRepositoryChangesLabelColor();
+
+  String gitPanelRepositoryChangesLabelBackgroundColor();
+
   /**
    * ******************************************************************************************
    *
