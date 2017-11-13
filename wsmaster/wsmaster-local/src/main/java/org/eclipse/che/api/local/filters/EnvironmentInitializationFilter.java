@@ -12,6 +12,7 @@ package org.eclipse.che.api.local.filters;
 
 import java.io.IOException;
 import java.security.Principal;
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -22,6 +23,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpSession;
+import org.eclipse.che.api.workspace.server.WorkspaceSubjectRegistry;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
@@ -34,6 +36,8 @@ import org.eclipse.che.commons.subject.SubjectImpl;
 @Singleton
 public class EnvironmentInitializationFilter implements Filter {
 
+  @Inject private WorkspaceSubjectRegistry workspaceSubjectRegistry;
+
   @Override
   public void init(FilterConfig filterConfig) throws ServletException {}
 
@@ -45,6 +49,7 @@ public class EnvironmentInitializationFilter implements Filter {
     Subject subject = new SubjectImpl("che", "che", "dummy_token", false);
     HttpSession session = httpRequest.getSession();
     session.setAttribute("codenvy_user", subject);
+    workspaceSubjectRegistry.updateSubject(subject);
 
     final EnvironmentContext environmentContext = EnvironmentContext.getCurrent();
 
