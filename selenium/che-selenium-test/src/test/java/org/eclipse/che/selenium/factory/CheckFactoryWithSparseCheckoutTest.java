@@ -63,10 +63,11 @@ public class CheckFactoryWithSparseCheckoutTest {
 
   @Test
   public void acceptFactoryWithSparseCheckout() throws Exception {
-    testFactory.authenticateAndOpen(ide.driver());
+    testFactory.authenticateAndOpen(seleniumWebDriver);
 
     seleniumWebDriver.switchFromDashboardIframeToIde();
     projectExplorer.waitProjectExplorer();
+    projectExplorer.waitItem(PROJECT_NAME);
     notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed(
         "Project " + PROJECT_NAME + " imported");
     projectExplorer.waitItem(PROJECT_NAME);

@@ -31,6 +31,8 @@ import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
 public class DirectUrlFactoryWithRootFolder {
+  private static final String EXPECTED_PROJECT = "quickstart";
+
   @Inject
   @Named("github.username")
   private String gitHubUsername;
@@ -59,8 +61,7 @@ public class DirectUrlFactoryWithRootFolder {
 
   @Test
   public void factoryWithDirectUrlWithRootFolder() throws Exception {
-    String expectedProject = "quickstart";
-    String expectedMessInTheEventsPanel = "Project " + expectedProject + " imported";
+    String expectedMessInTheEventsPanel = "Project " + EXPECTED_PROJECT + " imported";
     List<String> expectedItemsAfterClonning =
         Arrays.asList(
             "CHANGELOG.md",
@@ -82,10 +83,11 @@ public class DirectUrlFactoryWithRootFolder {
     testFactoryWithRootFolder.authenticateAndOpen(seleniumWebDriver);
     seleniumWebDriver.switchFromDashboardIframeToIde();
     projectExplorer.waitProjectExplorer();
+    projectExplorer.waitItem(EXPECTED_PROJECT);
     notificationsPopupPanel.waitProgressPopupPanelClose();
     events.clickEventLogBtn();
     events.waitExpectedMessage(expectedMessInTheEventsPanel);
-    projectExplorer.openItemByPath(expectedProject);
+    projectExplorer.openItemByPath(EXPECTED_PROJECT);
 
     String currentWsId =
         workspaceServiceClient

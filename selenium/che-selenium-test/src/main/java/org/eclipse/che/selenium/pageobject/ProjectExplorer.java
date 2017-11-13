@@ -447,7 +447,7 @@ public class ProjectExplorer {
       LOG.debug("===========>>>>  openItemByPath try 2");
       waitItemIsSelected(path);
       LOG.debug("===========>>>>  openItemByPath try 3");
-      actionsFactory.createAction(seleniumWebDriver).doubleClick(item).build().perform();
+      actionsFactory.createAction(seleniumWebDriver).doubleClick().perform();
       LOG.debug("===========>>>>  openItemByPath try 4");
     }
     // sometimes an element in the project explorer may be is not attached to the DOM. We should
