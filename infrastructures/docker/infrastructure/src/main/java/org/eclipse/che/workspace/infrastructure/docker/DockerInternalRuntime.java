@@ -17,23 +17,18 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
-import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.URLRewriter;
-import org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil;
 import org.eclipse.che.api.workspace.server.hc.ServersChecker;
 import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
 import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
@@ -46,23 +41,14 @@ import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.ServerStatusEvent;
 import org.eclipse.che.dto.server.DtoFactory;
-import org.eclipse.che.infrastructure.docker.client.ProgressMonitor;
 import org.eclipse.che.infrastructure.docker.client.json.ContainerListEntry;
 import org.eclipse.che.workspace.infrastructure.docker.bootstrap.DockerBootstrapperFactory;
-import org.eclipse.che.workspace.infrastructure.docker.exception.SourceNotFoundException;
 import org.eclipse.che.workspace.infrastructure.docker.logs.MachineLoggersFactory;
-import org.eclipse.che.workspace.infrastructure.docker.model.DockerBuildContext;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.monit.AbnormalMachineStopHandler;
 import org.eclipse.che.workspace.infrastructure.docker.monit.DockerMachineStopDetector;
 import org.eclipse.che.workspace.infrastructure.docker.network.NetworkLifecycle;
-import org.eclipse.che.workspace.infrastructure.docker.registry.DockerRegistryClient;
 import org.eclipse.che.workspace.infrastructure.docker.server.mapping.ExternalIpURLRewriter;
-import org.eclipse.che.workspace.infrastructure.docker.snapshot.MachineSource;
-import org.eclipse.che.workspace.infrastructure.docker.snapshot.MachineSourceImpl;
-import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotDao;
-import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotException;
-import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotImpl;
 import org.slf4j.Logger;
 
 /** @author Alexander Garagatyi */
@@ -74,8 +60,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
   private final Map<String, String> properties;
   private final NetworkLifecycle networks;
   private final DockerMachineStarter containerStarter;
-  private final SnapshotDao snapshotDao;
-  private final DockerRegistryClient dockerRegistryClient;
   private final EventService eventService;
   private final DockerBootstrapperFactory bootstrapperFactory;
   private final ServersCheckerFactory serverCheckerFactory;
@@ -91,8 +75,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
       ExternalIpURLRewriter urlRewriter,
       NetworkLifecycle networks,
       DockerMachineStarter machineStarter,
-      SnapshotDao snapshotDao,
-      DockerRegistryClient dockerRegistryClient,
       EventService eventService,
       DockerBootstrapperFactory bootstrapperFactory,
       ServersCheckerFactory serverCheckerFactory,
@@ -103,8 +85,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         false, // <- non running
         networks,
         machineStarter,
-        snapshotDao,
-        dockerRegistryClient,
         eventService,
         bootstrapperFactory,
         serverCheckerFactory,
@@ -122,8 +102,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
       ExternalIpURLRewriter urlRewriter,
       NetworkLifecycle networks,
       DockerMachineStarter machineStarter,
-      SnapshotDao snapshotDao,
-      DockerRegistryClient dockerRegistryClient,
       EventService eventService,
       DockerBootstrapperFactory bootstrapperFactory,
       ServersCheckerFactory serverCheckerFactory,
@@ -137,8 +115,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         true, // <- running
         networks,
         machineStarter,
-        snapshotDao,
-        dockerRegistryClient,
         eventService,
         bootstrapperFactory,
         serverCheckerFactory,
@@ -160,8 +136,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
       boolean running,
       NetworkLifecycle networks,
       DockerMachineStarter machineStarter,
-      SnapshotDao snapshotDao,
-      DockerRegistryClient dockerRegistryClient,
       EventService eventService,
       DockerBootstrapperFactory bootstrapperFactory,
       ServersCheckerFactory serverCheckerFactory,
@@ -169,8 +143,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     super(context, urlRewriter, running);
     this.networks = networks;
     this.containerStarter = machineStarter;
-    this.snapshotDao = snapshotDao;
-    this.dockerRegistryClient = dockerRegistryClient;
     this.eventService = eventService;
     this.bootstrapperFactory = bootstrapperFactory;
     this.serverCheckerFactory = serverCheckerFactory;
@@ -187,17 +159,12 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     try {
       networks.createNetwork(getContext().getDockerEnvironment().getNetwork());
 
-      final boolean restore = isRestoreEnabled(startOptions);
       for (String machineName : getContext().getOrderedContainers()) {
         checkInterruption();
         final DockerContainerConfig config = machineName2config.get(machineName);
         sendStartingEvent(machineName);
         try {
-          if (restore) {
-            restoreMachine(machineName, config);
-          } else {
-            startMachine(machineName, config);
-          }
+          startMachine(machineName, config);
           sendRunningEvent(machineName);
         } catch (InfrastructureException e) {
           sendFailedEvent(machineName, e.getMessage());
@@ -262,25 +229,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     return Collections.unmodifiableMap(properties);
   }
 
-  private void restoreMachine(String name, DockerContainerConfig originalConfig)
-      throws InfrastructureException, InterruptedException {
-    RuntimeIdentity identity = getContext().getIdentity();
-    try {
-      SnapshotImpl snapshot =
-          snapshotDao.getSnapshot(identity.getWorkspaceId(), identity.getEnvName(), name);
-      startMachine(name, configForSnapshot(snapshot, originalConfig));
-    } catch (NotFoundException | SourceNotFoundException x) {
-      LOG.warn(
-          "Snapshot for machine '{}:{}:{}' is missing, machine will be started from source",
-          identity.getWorkspaceId(),
-          identity.getEnvName(),
-          name);
-      startMachine(name, originalConfig);
-    } catch (SnapshotException x) {
-      throw new InternalInfrastructureException(x);
-    }
-  }
-
   /** Checks servers availability on all the machines. */
   void checkServers() throws InfrastructureException {
     for (Map.Entry<String, ? extends DockerMachine> entry :
@@ -331,16 +279,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     }
   }
 
-  // TODO support configuration properties as well
-  private boolean isRestoreEnabled(Map<String, String> startOpts) {
-    return Boolean.parseBoolean(startOpts.get("restore"));
-  }
-
-  // TODO support configuration properties as well
-  private boolean isSnapshotEnabled(Map<String, String> stopOpts) {
-    return stopOpts != null && Boolean.parseBoolean(stopOpts.get("create-snapshot"));
-  }
-
   // TODO stream bootstrapper logs as well
   private void streamLogsAsync(String name, String containerId) {
     containerStarter.readContainerLogsInSeparateThread(
@@ -376,46 +314,8 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     }
   }
 
-  private DockerContainerConfig configForSnapshot(
-      SnapshotImpl snapshot, DockerContainerConfig originCfg)
-      throws NotFoundException, SnapshotException {
-    MachineSourceImpl machineSource = snapshot.getMachineSource();
-    // Snapshot image location has SHA-256 digest which needs to be removed,
-    // otherwise it will be pulled without tag and cause problems
-    String imageName = machineSource.getLocation();
-    if (imageName.contains("@sha256:")) {
-      machineSource.setLocation(imageName.substring(0, imageName.indexOf('@')));
-    }
-    return normalizeSource(originCfg, machineSource);
-  }
-
-  private DockerContainerConfig normalizeSource(
-      DockerContainerConfig containerConfig, MachineSource machineSource) {
-    DockerContainerConfig containerWithNormalizedSource =
-        new DockerContainerConfig(containerConfig);
-    if ("image".equals(machineSource.getType())) {
-      containerWithNormalizedSource.setBuild(null);
-      containerWithNormalizedSource.setImage(machineSource.getLocation());
-    } else {
-      // dockerfile
-      containerWithNormalizedSource.setImage(null);
-      if (machineSource.getContent() != null) {
-        containerWithNormalizedSource.setBuild(
-            new DockerBuildContext(null, null, machineSource.getContent(), null));
-      } else {
-        containerWithNormalizedSource.setBuild(
-            new DockerBuildContext(machineSource.getLocation(), null, null, null));
-      }
-    }
-    return containerWithNormalizedSource;
-  }
-
   private void destroyRuntime(Map<String, String> stopOptions) throws InfrastructureException {
     Map<String, DockerMachine> machines = startSynchronizer.removeMachines();
-    if (isSnapshotEnabled(stopOptions)) {
-      // TODO send other runtime statuses? Which ones? STARTING, STOPPING, RUNNING, STOPPED?
-      snapshotMachines(machines);
-    }
     for (Map.Entry<String, DockerMachine> entry : machines.entrySet()) {
       destroyMachineQuietly(entry.getKey(), entry.getValue());
       sendStoppedEvent(entry.getKey());
@@ -434,89 +334,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
               "Error occurs on destroying of docker machine '%s' in workspace '%s'. Container '%s'",
               machineName, getContext().getIdentity().getWorkspaceId(), machine.getContainer()),
           e);
-    }
-  }
-
-  /**
-   * Prepare snapshots of all active machines.
-   *
-   * @param machines the active machines map
-   */
-  private void snapshotMachines(Map<String, DockerMachine> machines)
-      throws InternalInfrastructureException {
-    List<SnapshotImpl> newSnapshots = new ArrayList<>();
-    final RuntimeIdentity identity = getContext().getIdentity();
-    // TODO do we need dev machine flag at all?
-    String devMachineName =
-        WsAgentMachineFinderUtil.getWsAgentServerMachine(getContext().getEnvironment())
-            .orElseThrow(
-                () -> new InternalInfrastructureException("Machine with wsagent is not found"));
-
-    for (Map.Entry<String, DockerMachine> dockerMachineEntry : machines.entrySet()) {
-      SnapshotImpl snapshot =
-          SnapshotImpl.builder()
-              .generateId()
-              .setType("docker") // TODO: do we need that at all?
-              .setWorkspaceId(identity.getWorkspaceId())
-              .setDescription(identity.getEnvName())
-              .setDev(devMachineName.equals(dockerMachineEntry.getKey()))
-              .setEnvName(identity.getEnvName())
-              .setMachineName(dockerMachineEntry.getKey())
-              .useCurrentCreationDate()
-              .build();
-      try {
-        ProgressMonitor monitor = loggers.newProgressMonitor(dockerMachineEntry.getKey(), identity);
-        DockerMachineSource machineSource = dockerMachineEntry.getValue().saveToSnapshot(monitor);
-        snapshot.setMachineSource(new MachineSourceImpl(machineSource));
-        newSnapshots.add(snapshot);
-      } catch (SnapshotException e) {
-        LOG.error(
-            format(
-                "Error occurs on snapshotting of docker machine '%s' in workspace '%s'. Container '%s'",
-                dockerMachineEntry.getKey(),
-                identity.getWorkspaceId(),
-                dockerMachineEntry.getValue().getContainer()),
-            e);
-      }
-    }
-    try {
-      List<SnapshotImpl> removed =
-          snapshotDao.replaceSnapshots(
-              identity.getWorkspaceId(), identity.getEnvName(), newSnapshots);
-      if (!removed.isEmpty()) {
-        LOG.info(
-            "Removing old snapshots binaries, workspace id '{}', snapshots to remove '{}'",
-            identity.getWorkspaceId(),
-            removed.size());
-        removeBinaries(removed);
-      }
-    } catch (SnapshotException e) {
-      LOG.error(
-          format(
-              "Couldn't remove existing snapshots metadata for workspace '%s'",
-              identity.getWorkspaceId()),
-          e);
-      removeBinaries(newSnapshots);
-    }
-  }
-
-  /**
-   * Removes binaries of all the snapshots, continues to remove snapshots if removal of binaries for
-   * a single snapshot fails.
-   *
-   * @param snapshots the list of snapshots to remove binaries
-   */
-  private void removeBinaries(Collection<? extends SnapshotImpl> snapshots) {
-    for (SnapshotImpl snapshot : snapshots) {
-      try {
-        dockerRegistryClient.removeInstanceSnapshot(snapshot.getMachineSource());
-      } catch (SnapshotException x) {
-        LOG.error(
-            format(
-                "Couldn't remove snapshot '%s', workspace id '%s'",
-                snapshot.getId(), snapshot.getWorkspaceId()),
-            x);
-      }
     }
   }
 
