@@ -15,6 +15,7 @@ import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOI
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
 import com.google.common.base.Strings;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -482,14 +483,13 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                   for (DebuggerObserver observer : observers) {
                     observer.onDebuggerAttached(debuggerDescriptor);
                   }
-                  //
-                  //                  startDebugger(debugSession);
-                  //
-                  //                  notification.setTitle(constant.debuggerConnectedTitle());
-                  //                  notification.setContent(
-                  //
-                  // constant.debuggerConnectedDescription(debuggerDescriptor.getAddress()));
-                  //                  notification.setStatus(SUCCESS);
+
+                  startDebugger(debugSession);
+
+                  notification.setTitle(constant.debuggerConnectedTitle());
+                  notification.setContent(
+                      constant.debuggerConnectedDescription(debuggerDescriptor.getAddress()));
+                  notification.setStatus(SUCCESS);
 
                   return null;
                 })
