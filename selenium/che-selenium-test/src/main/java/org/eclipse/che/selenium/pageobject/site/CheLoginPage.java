@@ -64,10 +64,6 @@ public class CheLoginPage implements LoginPage {
     waitOnClose();
   }
 
-  private void clickLoginButton() {
-    webDriverWait.until(ExpectedConditions.visibilityOf(loginButton)).click();
-  }
-
   @Override
   public boolean isOpened() {
     try {
@@ -77,6 +73,10 @@ public class CheLoginPage implements LoginPage {
     }
 
     return true;
+  }
+
+  private void clickLoginButton() {
+    webDriverWait.until(ExpectedConditions.visibilityOf(loginButton)).click();
   }
 
   private void waitOnOpen() {
