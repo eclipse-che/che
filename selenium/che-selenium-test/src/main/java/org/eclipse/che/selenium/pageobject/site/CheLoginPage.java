@@ -52,13 +52,9 @@ public class CheLoginPage implements LoginPage {
   public void login(String username, String password) {
     waitOnOpen();
 
-    usernameInput.clear();
-    usernameInput.sendKeys(username);
-    waitTextIsPresent(usernameInput, username);
+    rewrite(usernameInput, username);
 
-    passwordInput.clear();
-    passwordInput.sendKeys(password);
-    waitTextIsPresent(passwordInput, password);
+    rewrite(passwordInput, password);
 
     clickLoginButton();
     waitOnClose();
@@ -73,6 +69,12 @@ public class CheLoginPage implements LoginPage {
     }
 
     return true;
+  }
+
+  private void rewrite(WebElement field, String value) {
+    field.clear();
+    field.sendKeys(value);
+    waitTextIsPresent(field, value);
   }
 
   private void clickLoginButton() {
