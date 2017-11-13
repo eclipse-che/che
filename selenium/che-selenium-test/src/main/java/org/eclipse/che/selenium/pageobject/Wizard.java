@@ -75,6 +75,7 @@ public class Wizard {
 
   public interface SamplesName {
     String WEB_JAVA_SPRING = "web-java-spring";
+    String CONSOLE_JAVA_SIMPLE = "console-java-simple";
     String ASP_DOT_NET_WEB_SIMPLE = "dotnet-web-simple";
     String WEB_JAVA_PETCLINIC = "web-java-petclinic";
   }
