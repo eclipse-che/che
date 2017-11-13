@@ -71,19 +71,21 @@ public class WorkspaceLinksGenerator {
             .build()
             .toString());
     if (workspace.getStatus() != WorkspaceStatus.STOPPED) {
-      addRuntimeLinks(links, workspace.getId());
+      addRuntimeLinks(links, workspace.getId(), uriBuilder.build().getHost());
     }
 
     return links;
   }
 
-  private void addRuntimeLinks(Map<String, String> links, String workspaceId)
+  private void addRuntimeLinks(Map<String, String> links, String workspaceId, String host)
       throws ServerException {
     Optional<RuntimeContext> ctxOpt = workspaceRuntimes.getRuntimeContext(workspaceId);
     if (ctxOpt.isPresent()) {
       try {
         links.put(LINK_REL_ENVIRONMENT_OUTPUT_CHANNEL, ctxOpt.get().getOutputChannel().toString());
-        links.put(LINK_REL_ENVIRONMENT_STATUS_CHANNEL, cheWebsocketEndpoint);
+        links.put(
+            LINK_REL_ENVIRONMENT_STATUS_CHANNEL,
+            UriBuilder.fromUri(cheWebsocketEndpoint).host(host).build().toString());
       } catch (InfrastructureException x) {
         throw new ServerException(x.getMessage(), x);
       }
