@@ -14,22 +14,20 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
-import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.workspace.WsAgentMachineUtil;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
-import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 
 /** Represents an item for displaying in the 'Previews' list. */
 class PreviewUrl {
 
-  private final AppContext appContext;
-
   private final String url;
   private final String displayName;
+  private final WsAgentMachineUtil wsAgentMachineUtil;
 
-  PreviewUrl(String url, AppContext appContext) {
+  PreviewUrl(String url, WsAgentMachineUtil wsAgentMachineUtil) {
     this.url = url;
-    this.appContext = appContext;
     this.displayName = getDisplayNameForPreviewUrl(url);
+    this.wsAgentMachineUtil = wsAgentMachineUtil;
   }
 
   /** Returns actual preview URL. */
@@ -46,8 +44,7 @@ class PreviewUrl {
   }
 
   private String getDisplayNameForPreviewUrl(String previewUrl) {
-    final WorkspaceImpl workspace = appContext.getWorkspace();
-    final Optional<MachineImpl> devMachine = workspace.getDevMachine();
+    final Optional<MachineImpl> devMachine = wsAgentMachineUtil.getWsAgentServerMachine();
 
     if (!devMachine.isPresent()) {
       return previewUrl;

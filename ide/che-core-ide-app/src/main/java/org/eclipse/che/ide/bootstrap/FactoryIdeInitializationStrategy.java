@@ -30,7 +30,7 @@ import org.eclipse.che.ide.api.theme.ThemeAgent;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.context.BrowserAddress;
-import org.eclipse.che.ide.context.QueryParameters;
+import org.eclipse.che.ide.QueryParameters;
 import org.eclipse.che.ide.core.StandardComponentInitializer;
 import org.eclipse.che.ide.preferences.StyleInjector;
 import org.eclipse.che.ide.statepersistance.AppStateManager;
