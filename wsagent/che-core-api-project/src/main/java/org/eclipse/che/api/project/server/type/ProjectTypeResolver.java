@@ -12,7 +12,15 @@ package org.eclipse.che.api.project.server.type;
 
 import org.eclipse.che.api.core.model.project.type.ProjectType;
 
+/** Resolves project type */
 public interface ProjectTypeResolver {
 
+  /**
+   * Resolve type for specified project
+   *
+   * @param type project type
+   * @param wsPath absolute workspace path of a project
+   * @return
+   */
   ProjectTypeResolution resolve(ProjectType type, String wsPath);
 }

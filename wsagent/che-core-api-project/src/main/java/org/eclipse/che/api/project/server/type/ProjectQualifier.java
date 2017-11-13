@@ -14,9 +14,18 @@ import java.util.List;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 
+/** Qualifies a project according to registered project types */
 public interface ProjectQualifier {
   ProjectTypeResolution qualify(String wsPath, String projectTypeId)
       throws ServerException, NotFoundException;
 
+  /**
+   * Qualify a project
+   *
+   * @param wsPath absolute workspace path of a project
+   * @return
+   * @throws ServerException is thrown if an error happened during operation execution
+   * @throws NotFoundException is throw if there is not project located at specified path
+   */
   List<ProjectTypeResolution> qualify(String wsPath) throws ServerException, NotFoundException;
 }

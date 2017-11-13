@@ -12,9 +12,22 @@ package org.eclipse.che.api.fs.server;
 
 import java.nio.file.Path;
 
+/** Transform workspace paths to file system paths */
 public interface PathTransformer {
 
+  /**
+   * Transform workspace path to file system path
+   *
+   * @param wsPath absolute workspace path
+   * @return
+   */
   Path transform(String wsPath);
 
+  /**
+   * Transform file system path to workspace path
+   *
+   * @param fsPath file system apth
+   * @return
+   */
   String transform(Path fsPath);
 }

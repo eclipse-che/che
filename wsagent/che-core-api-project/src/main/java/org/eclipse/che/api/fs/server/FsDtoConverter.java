@@ -15,6 +15,7 @@ import java.util.Set;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 
+/** Converts file system items to DTOs */
 public interface FsDtoConverter {
 
   ItemReference asDto(String wsPath) throws NotFoundException;

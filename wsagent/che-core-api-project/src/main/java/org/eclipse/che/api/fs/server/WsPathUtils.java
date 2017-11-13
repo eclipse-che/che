@@ -12,16 +12,29 @@ package org.eclipse.che.api.fs.server;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
+/** Utility class for workspace path related manipulations */
 public interface WsPathUtils {
 
   String ROOT = "/";
 
   String SEPARATOR = "/";
 
+  /**
+   * Show if a path is root path
+   *
+   * @param wsPath absolute workspace path
+   * @return
+   */
   static boolean isRoot(String wsPath) {
     return ROOT.equals(wsPath);
   }
 
+  /**
+   * Get name component of a path
+   *
+   * @param wsPath absolute workspace path
+   * @return
+   */
   static String nameOf(String wsPath) {
     if (isNullOrEmpty(wsPath)) {
       throw new IllegalArgumentException("Can't get name of empty path or null");
@@ -42,6 +55,12 @@ public interface WsPathUtils {
     return wsPath.substring(wsPath.lastIndexOf(SEPARATOR) + 1);
   }
 
+  /**
+   * Get parent component of a path
+   *
+   * @param wsPath absolute workspace path
+   * @return
+   */
   static String parentOf(String wsPath) {
     if (isNullOrEmpty(wsPath)) {
       throw new IllegalArgumentException("Can't get parent of empty path or null");
@@ -67,6 +86,13 @@ public interface WsPathUtils {
     }
   }
 
+  /**
+   * Resolve the path with the name
+   *
+   * @param wsPath absolute workspace path
+   * @param name name
+   * @return
+   */
   static String resolve(String wsPath, String name) {
     if (isNullOrEmpty(wsPath)) {
       throw new IllegalArgumentException("Can't resolve for parent that is empty or null");
@@ -83,10 +109,22 @@ public interface WsPathUtils {
     return wsPath.endsWith(SEPARATOR) ? wsPath + name : wsPath + SEPARATOR + name;
   }
 
+  /**
+   * Make a path absolute
+   *
+   * @param wsPath relative workspace path
+   * @return
+   */
   static String absolutize(String wsPath) {
     return wsPath.startsWith(ROOT) ? wsPath : ROOT + wsPath;
   }
 
+  /**
+   * Show if workspace path is absolute
+   *
+   * @param wsPath workspace path
+   * @return
+   */
   static boolean isAbsolute(String wsPath) {
     return wsPath.startsWith(ROOT);
   }
