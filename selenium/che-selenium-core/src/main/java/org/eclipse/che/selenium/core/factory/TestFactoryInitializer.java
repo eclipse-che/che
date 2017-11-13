@@ -54,7 +54,7 @@ public class TestFactoryInitializer {
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private Entrance entrance;
 
-  @javax.inject.Inject
+  @Inject
   @Named("che.selenium.infrastructure")
   private String infrastructure;
 
