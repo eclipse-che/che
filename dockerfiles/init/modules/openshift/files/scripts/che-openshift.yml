@@ -123,7 +123,6 @@ items:
     che-secure-external-urls: "true"
     che-server-timeout-ms: "3600000"
     che-openshift-precreate-subpaths: "false"
-    che-workspace-auto-snapshot: "false"
     che-keycloak-auth-server-url: ${CHE_KEYCLOAK_AUTH__SERVER__URL}
     che-keycloak-realm: ${CHE_KEYCLOAK_REALM}
     che-keycloak-client-id: ${CHE_KEYCLOAK_CLIENT__ID}
@@ -383,11 +382,6 @@ items:
             valueFrom:
               configMapKeyRef:
                 key: keycloak-disabled
-                name: che
-          - name: CHE_WORKSPACE_AUTO__SNAPSHOT
-            valueFrom:
-              configMapKeyRef:
-                key: che-workspace-auto-snapshot
                 name: che
           - name: CHE_KEYCLOAK_AUTH__SERVER__URL
             valueFrom:

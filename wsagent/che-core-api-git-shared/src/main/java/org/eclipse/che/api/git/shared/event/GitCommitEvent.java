@@ -37,4 +37,11 @@ public interface GitCommitEvent extends GitEvent {
   void setModifiedFiles(Map<String, List<EditedRegion>> modifiedFiles);
 
   GitCommitEvent withModifiedFiles(Map<String, List<EditedRegion>> modifiedFiles);
+
+  @Override
+  String getProjectName();
+
+  void setProjectName(String projectName);
+
+  GitCommitEvent withProjectName(String projectName);
 }

@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.git;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.client.TestGitHubKeyUploader;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestGitConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
@@ -58,12 +59,16 @@ public class GitCompareTest {
   @Inject private AskDialog askDialog;
   @Inject private WarningDialog warningDialog;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
+  @Inject private TestGitHubKeyUploader testGitHubKeyUploader;
 
   @BeforeClass
   public void prepare() throws Exception {
+    testGitHubKeyUploader.updateGithubKey();
     testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
+
     ide.open(ws);
     projectExplorer.waitProjectExplorer();
+
     String repoUrl = "https://github.com/" + gitHubUsername + "/spring-project-for-compare.git";
     git.importJavaApp(repoUrl, PROJECT_NAME, Wizard.TypeProject.MAVEN);
     createBranch();

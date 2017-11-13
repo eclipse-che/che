@@ -23,7 +23,7 @@
 
     <g:DockLayoutPanel unit="PX" width="600px" height="500px">
         <g:north size="350" addStyleNames="{style.emptyBorder}">
-            <g:FlowPanel ui:field="changesPanel"/>
+            <g:FlowPanel ui:field="changesPanel" debugId="git-commit-changed-files"/>
         </g:north>
         <g:center size="50" addStyleNames="{style.emptyBorder}">
             <g:CheckBox ui:field="amend" HTML="{locale.commitAmendFieldTitle}" debugId="git-commit-amend"/>

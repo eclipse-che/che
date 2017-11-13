@@ -78,7 +78,7 @@ public class GenericsTest {
 
     loader.waitOnClosed();
     setFieldsForTest("testGenerics2");
-    projectExplorer.scrollAndselectItem(pathToCurrentPackage + "/A.java");
+    projectExplorer.scrollAndSelectItem(pathToCurrentPackage + "/A.java");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     Assert.assertEquals(editor.getVisibleTextFromEditor(), contentFromInA);
     editor.waitTextIntoEditor(contentFromInA);

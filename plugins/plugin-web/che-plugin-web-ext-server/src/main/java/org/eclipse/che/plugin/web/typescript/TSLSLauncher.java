@@ -29,7 +29,7 @@ import org.eclipse.lsp4j.services.LanguageServer;
 @Singleton
 public class TSLSLauncher extends LanguageServerLauncherTemplate {
 
-  private static final String REGEX = ".*\\.ts";
+  private static final String REGEX = ".*\\.(ts|tsx)";
   private static final LanguageServerDescription DESCRIPTION = createServerDescription();
 
   private final Path launchScript;

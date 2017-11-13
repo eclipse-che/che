@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.ext.git.client;
+package org.eclipse.che.ide.ext.git.client.plugins;
 
 import static org.eclipse.che.ide.api.editor.gutter.Gutters.VCS_CHANGE_MARKERS_GUTTER;
 
@@ -18,6 +18,7 @@ import elemental.html.DivElement;
 import org.eclipse.che.api.git.shared.EditedRegionType;
 import org.eclipse.che.ide.api.editor.gutter.Gutter;
 import org.eclipse.che.ide.api.vcs.VcsChangeMarkerRender;
+import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.eclipse.che.ide.util.dom.Elements;
 
 public class GitChangeMarkerRender implements VcsChangeMarkerRender {
