@@ -125,7 +125,7 @@
     font-size: 0.85em;
     outline: none;
     overflow-y: auto;
-    padding-bottom: 1px;
+    padding-bottom: 2px;
 }
 
 .tree:focus {
