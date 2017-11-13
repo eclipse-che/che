@@ -18,6 +18,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
+import com.google.common.collect.ImmutableMap;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
@@ -91,5 +92,30 @@ public class WorkspaceLinksGeneratorTest {
     when(workspace.getStatus()).thenReturn(WorkspaceStatus.STOPPED);
 
     assertEquals(linksGenerator.genLinks(workspace, serviceContextMock), expectedStoppedLinks);
+  }
+
+  @Test
+  public void genOfDifferentUrl() throws Exception {
+    // given
+    UriBuilder uriBuilder = new UriBuilderImpl();
+    uriBuilder.uri("https://mydomain:7345/api");
+    when(serviceContextMock.getServiceUriBuilder()).thenReturn(uriBuilder);
+    when(serviceContextMock.getBaseUriBuilder()).thenReturn(uriBuilder);
+
+    linksGenerator = new WorkspaceLinksGenerator(runtimes, "ws://localhost");
+    // when
+    Map<String, String> actual = linksGenerator.genLinks(workspace, serviceContextMock);
+    // then
+    expectedRunningLinks =
+        ImmutableMap.of(
+            LINK_REL_SELF,
+            "https://mydomain:7345/api/workspace/my-workspace",
+            LINK_REL_IDE_URL,
+            "https://mydomain:7345/my-namespace/my-name",
+            LINK_REL_ENVIRONMENT_STATUS_CHANNEL,
+            "wss://mydomain:7345",
+            LINK_REL_ENVIRONMENT_OUTPUT_CHANNEL,
+            "ws://localhost/output/websocket");
+    assertEquals(actual, expectedRunningLinks);
   }
 }

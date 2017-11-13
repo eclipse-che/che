@@ -15,6 +15,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_ENVIRONMEN
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_IDE_URL;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_SELF;
 
+import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -73,21 +74,28 @@ public class WorkspaceLinksGenerator {
             .build()
             .toString());
     if (workspace.getStatus() != WorkspaceStatus.STOPPED) {
-      addRuntimeLinks(links, workspace.getId(), uriBuilder.clone().build().getHost());
+      addRuntimeLinks(links, workspace.getId(), serviceContext);
     }
 
     return links;
   }
 
-  private void addRuntimeLinks(Map<String, String> links, String workspaceId, String host)
+  private void addRuntimeLinks(
+      Map<String, String> links, String workspaceId, ServiceContext serviceContext)
       throws ServerException {
     Optional<RuntimeContext> ctxOpt = workspaceRuntimes.getRuntimeContext(workspaceId);
     if (ctxOpt.isPresent()) {
+      URI uri = serviceContext.getServiceUriBuilder().build();
       try {
         links.put(LINK_REL_ENVIRONMENT_OUTPUT_CHANNEL, ctxOpt.get().getOutputChannel().toString());
         links.put(
             LINK_REL_ENVIRONMENT_STATUS_CHANNEL,
-            UriBuilder.fromUri(cheWebsocketEndpoint).host(host).build().toString());
+            UriBuilder.fromUri(cheWebsocketEndpoint)
+                .scheme(uri.getScheme().equals("https") ? "wss" : "ws")
+                .host(uri.getHost())
+                .port(uri.getPort())
+                .build()
+                .toString());
       } catch (InfrastructureException x) {
         throw new ServerException(x.getMessage(), x);
       }
