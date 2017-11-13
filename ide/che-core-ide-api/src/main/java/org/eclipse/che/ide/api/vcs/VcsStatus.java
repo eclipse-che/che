@@ -39,10 +39,10 @@ public enum VcsStatus {
       case ADDED:
         return Style.getVcsStatusAddedColor();
       case NOT_MODIFIED:
-        return Style.getMainFontColor();
-      default:
         return null;
     }
+
+    return null;
   }
 
   public static VcsStatus from(String value) {

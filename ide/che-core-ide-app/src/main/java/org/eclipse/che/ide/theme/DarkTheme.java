@@ -219,7 +219,7 @@ public class DarkTheme implements Theme {
 
   @Override
   public String getDisabledMenuColor() {
-    return "#707070";
+    return "#e4e4e4";
   }
 
   @Override
@@ -734,7 +734,7 @@ public class DarkTheme implements Theme {
 
   @Override
   public String getMainMenuSelectedBkgColor() {
-    return "#2e3a45";
+    return "#383f53";
   }
 
   @Override
@@ -754,7 +754,7 @@ public class DarkTheme implements Theme {
 
   @Override
   public String getMainMenuFontSelectedColor() {
-    return "#4a90e2";
+    return "#CCD1D8";
   }
 
   @Override
@@ -1039,7 +1039,7 @@ public class DarkTheme implements Theme {
 
   @Override
   public String getPopupHotKeyColor() {
-    return "#d5d5d7";
+    return "#c3c3c3";
   }
 
   @Override

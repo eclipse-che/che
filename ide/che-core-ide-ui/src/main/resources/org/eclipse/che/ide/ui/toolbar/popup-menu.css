@@ -18,7 +18,7 @@
 }
 
 .popupMenuTable {
-    border: 1px solid popupBorderColor;
+    border: none;
     position: relative;
     table-layout: fixed;
     left: 0px;
@@ -40,7 +40,7 @@
 .popupMenuHotKeyFieldDisabled,
 .popupMenuSubMenuField,
 .popupMenuSubMenuFieldDisabled {
-    height: 20px;
+    height: 24px;
     cursor: default;
     font-weight: normal;
     font-style: normal;
@@ -102,7 +102,7 @@
     height: menuIconSize;
     font-size: menuIconSize;
     line-height: menuIconSize;
-    margin-top: 2px;
+    margin-top: 4px;
     display: inline-block;
     color: toolbarIconColor;
 }
@@ -171,6 +171,7 @@
 .popupMenuSubMenuFieldDisabled svg {
     color: disabledMenuItemColor;
     fill: disabledMenuItemColor;
+    opacity: 0.3;
 }
 
 .popupMenuSubMenuFieldDisabled path {
