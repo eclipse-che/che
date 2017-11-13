@@ -45,12 +45,12 @@ public class CheckFindActionFeatureInCheTest {
       "Branches... [Ctrl+B]  GitCommandGroup\n" + "Checkout Reference...  GitCommandGroup";
 
   private static final String FIRST_EXPECTED_ITEMS_WITH_ENABLED_NONE_MENU_ACTIONS_CHECKBOX =
-      "Configuration \n"
-          + "Update Project Configuration...  Project\n"
+      "Update Project Configuration...  Project\n"
+          + "Configure \n"
           + "Configure Classpath  Project\n"
           + "Edit Debug Configurations... [Alt+Shift+F9]  Run\n"
           + "Import From Codenvy Config...  Project\n"
-          + "breakpointConfiguration";
+          + "breakpointConfiguration ";
 
   private static final String SECOND_EXPECTED_ITEMS_WITH_ENABLED_NONE_MENU_ACTIONS_CHECKBOX =
       "Commands \n" + "Commands \n" + "Commands Palette [Shift+F10]  Run";
