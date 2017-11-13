@@ -32,7 +32,6 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.DtoConverter;
-import org.eclipse.che.api.workspace.server.ExternalIpURLRewriter;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil;
 import org.eclipse.che.api.workspace.server.hc.ServersChecker;
@@ -58,6 +57,7 @@ import org.eclipse.che.workspace.infrastructure.docker.monit.AbnormalMachineStop
 import org.eclipse.che.workspace.infrastructure.docker.monit.DockerMachineStopDetector;
 import org.eclipse.che.workspace.infrastructure.docker.network.NetworkLifecycle;
 import org.eclipse.che.workspace.infrastructure.docker.registry.DockerRegistryClient;
+import org.eclipse.che.workspace.infrastructure.docker.server.mapping.ExternalIpURLRewriter;
 import org.eclipse.che.workspace.infrastructure.docker.snapshot.MachineSource;
 import org.eclipse.che.workspace.infrastructure.docker.snapshot.MachineSourceImpl;
 import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotDao;

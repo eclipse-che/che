@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.workspace.server;
+package org.eclipse.che.workspace.infrastructure.docker.server.mapping;
 
 import static java.lang.String.format;
 
@@ -18,20 +18,19 @@ import javax.inject.Named;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriBuilderException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.che.workspace.infrastructure.docker.DockerRuntimeInfrastructure;
 
 /**
- * {@link URLRewriter} needed for to handle specific cases of running containers. </br> For example,
- * containers in MacOS, Windows, etc.
+ * {@link URLRewriter} needed for {@link DockerRuntimeInfrastructure} to handle specific cases of
+ * running containers. </br> For example, containers in MacOS, Windows, etc.
  *
  * @author Alexander Garagatyi
  */
 public class ExternalIpURLRewriter implements URLRewriter {
-  private static final Logger LOG = LoggerFactory.getLogger(ExternalIpURLRewriter.class);
   static final String EXTERNAL_IP_PROPERTY = "che.docker.ip.external";
 
   private final String externalIpOfContainers;
@@ -50,7 +49,7 @@ public class ExternalIpURLRewriter implements URLRewriter {
   @Override
   public String rewriteURL(@Nullable RuntimeIdentity identity, @Nullable String name, String url)
       throws InfrastructureException {
-    LOG.info("externalIpOfContainers {}  in url {} ", externalIpOfContainers, url);
+
     if (externalIpOfContainers != null) {
       try {
         URI uri = UriBuilder.fromUri(url).host(externalIpOfContainers).build();
@@ -62,7 +61,6 @@ public class ExternalIpURLRewriter implements URLRewriter {
                 externalIpOfContainers, url, e.getMessage()));
       }
     }
-    LOG.info("externalIpOfContainers {}  out url {} ", externalIpOfContainers, url);
     return url;
   }
 }

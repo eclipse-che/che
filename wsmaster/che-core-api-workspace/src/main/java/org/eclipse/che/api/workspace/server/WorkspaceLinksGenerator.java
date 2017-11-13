@@ -39,16 +39,13 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 public class WorkspaceLinksGenerator {
 
   private final WorkspaceRuntimes workspaceRuntimes;
-  private ExternalIpURLRewriter urlRewriter;
   private final String cheWebsocketEndpoint;
 
   @Inject
   public WorkspaceLinksGenerator(
       WorkspaceRuntimes workspaceRuntimes,
-      ExternalIpURLRewriter urlRewriter,
       @Named("che.websocket.endpoint") String cheWebsocketEndpoint) {
     this.workspaceRuntimes = workspaceRuntimes;
-    this.urlRewriter = urlRewriter;
     this.cheWebsocketEndpoint = cheWebsocketEndpoint;
   }
 
@@ -85,12 +82,8 @@ public class WorkspaceLinksGenerator {
     Optional<RuntimeContext> ctxOpt = workspaceRuntimes.getRuntimeContext(workspaceId);
     if (ctxOpt.isPresent()) {
       try {
-        RuntimeContext runtimeContext = ctxOpt.get();
-        links.put(
-            LINK_REL_ENVIRONMENT_OUTPUT_CHANNEL, runtimeContext.getOutputChannel().toString());
-        links.put(
-            LINK_REL_ENVIRONMENT_STATUS_CHANNEL,
-            urlRewriter.rewriteURL(runtimeContext.getIdentity(), null, cheWebsocketEndpoint));
+        links.put(LINK_REL_ENVIRONMENT_OUTPUT_CHANNEL, ctxOpt.get().getOutputChannel().toString());
+        links.put(LINK_REL_ENVIRONMENT_STATUS_CHANNEL, cheWebsocketEndpoint);
       } catch (InfrastructureException x) {
         throw new ServerException(x.getMessage(), x);
       }

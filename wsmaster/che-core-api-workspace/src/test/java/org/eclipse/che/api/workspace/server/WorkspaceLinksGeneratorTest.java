@@ -67,8 +67,7 @@ public class WorkspaceLinksGeneratorTest {
     when(serviceContextMock.getServiceUriBuilder()).thenReturn(uriBuilder);
     when(serviceContextMock.getBaseUriBuilder()).thenReturn(uriBuilder);
 
-    linksGenerator =
-        new WorkspaceLinksGenerator(runtimes, new ExternalIpURLRewriter(null), "ws://localhost");
+    linksGenerator = new WorkspaceLinksGenerator(runtimes, "ws://localhost");
 
     expectedStoppedLinks = new HashMap<>();
     expectedStoppedLinks.put(LINK_REL_SELF, "http://localhost/api/workspace/my-workspace");
@@ -92,18 +91,5 @@ public class WorkspaceLinksGeneratorTest {
     when(workspace.getStatus()).thenReturn(WorkspaceStatus.STOPPED);
 
     assertEquals(linksGenerator.genLinks(workspace, serviceContextMock), expectedStoppedLinks);
-  }
-
-  @Test
-  public void genOfRunningWorkspaceStatusChanelLinks() throws Exception {
-    // given
-    linksGenerator =
-        new WorkspaceLinksGenerator(
-            runtimes, new ExternalIpURLRewriter("172.19.20.18"), "ws://localhost");
-    when(workspace.getStatus()).thenReturn(WorkspaceStatus.RUNNING);
-    // when
-    Map<String, String> actual = linksGenerator.genLinks(workspace, serviceContextMock);
-
-    assertEquals(actual.get(LINK_REL_ENVIRONMENT_STATUS_CHANNEL), "ws://172.19.20.18");
   }
 }
