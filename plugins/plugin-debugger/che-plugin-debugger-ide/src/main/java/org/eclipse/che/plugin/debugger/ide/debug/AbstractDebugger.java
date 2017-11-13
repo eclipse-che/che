@@ -485,12 +485,10 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                   }
 
                   startDebugger(debugSession);
-
                   notification.setTitle(constant.debuggerConnectedTitle());
                   notification.setContent(
                       constant.debuggerConnectedDescription(debuggerDescriptor.getAddress()));
                   notification.setStatus(SUCCESS);
-
                   return null;
                 })
         .catchError(

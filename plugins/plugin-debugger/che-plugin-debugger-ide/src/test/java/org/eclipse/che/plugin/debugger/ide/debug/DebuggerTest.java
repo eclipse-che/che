@@ -152,8 +152,6 @@ public class DebuggerTest extends BaseTest {
   private ArgumentCaptor<Function<DebugSessionDto, Void>>
       argumentCaptorFunctionJavaDebugSessionVoid;
 
-  @Captor private ArgumentCaptor<Operation<DebuggerInfo>> argumentCaptorOperationJavaDebuggerInfo;
-
   public DebuggerDescriptor debuggerDescriptor;
 
   private AbstractDebugger debugger;
@@ -181,13 +179,6 @@ public class DebuggerTest extends BaseTest {
         .when(dtoFactory)
         .createDtoFromJson(anyString(), eq(DebugSessionDto.class));
 
-    doReturn(mock(StatusNotification.class))
-        .when(notificationManager)
-        .notify(
-            anyString(),
-            any(StatusNotification.Status.class),
-            any(StatusNotification.DisplayMode.class));
-
     doReturn(Path.valueOf(PATH)).when(file).getLocation();
 
     debugger =
@@ -208,6 +199,9 @@ public class DebuggerTest extends BaseTest {
                 promiseProvider));
     doReturn(promiseInfo).when(service).getSessionInfo(SESSION_ID);
     doReturn(promiseInfo).when(promiseInfo).then(any(Operation.class));
+    when(notificationManager.notify(
+            any(), any(StatusNotification.Status.class), any(StatusNotification.DisplayMode.class)))
+        .thenReturn(mock(StatusNotification.class));
 
     verify(eventBus)
         .addHandler(eq(WorkspaceRunningEvent.TYPE), workspaceRunningHandlerCaptor.capture());
@@ -223,6 +217,7 @@ public class DebuggerTest extends BaseTest {
   public void testAttachDebugger() throws Exception {
     doNothing().when(debugger).subscribeToDebuggerEvents();
     doNothing().when(debugger).startCheckingEvents();
+    doNothing().when(debugger).startDebugger(any(DebugSessionDto.class));
     debugger.setDebugSession(null);
 
     final String debugSessionJson = "debugSession";
