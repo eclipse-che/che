@@ -58,6 +58,7 @@ public class WorkspaceLinksGenerator {
     links.put(
         LINK_REL_SELF,
         uriBuilder
+            .clone()
             .path(WorkspaceService.class)
             .path(WorkspaceService.class, "getByKey")
             .build(workspace.getId())
@@ -65,13 +66,14 @@ public class WorkspaceLinksGenerator {
     links.put(
         LINK_REL_IDE_URL,
         uriBuilder
+            .clone()
             .replacePath("")
             .path(workspace.getNamespace())
             .path(workspace.getConfig().getName())
             .build()
             .toString());
     if (workspace.getStatus() != WorkspaceStatus.STOPPED) {
-      addRuntimeLinks(links, workspace.getId(), uriBuilder.build().getHost());
+      addRuntimeLinks(links, workspace.getId(), uriBuilder.clone().build().getHost());
     }
 
     return links;
