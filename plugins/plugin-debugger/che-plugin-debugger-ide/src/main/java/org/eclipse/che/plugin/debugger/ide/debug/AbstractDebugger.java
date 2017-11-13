@@ -738,6 +738,10 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     this.debugSessionDto = debugSessionDto;
   }
 
+  protected void setSuspendEvent(SuspendEventDto suspendEventDto) {
+    this.suspendEventDto = suspendEventDto;
+  }
+
   private void invalidateDebugSession() {
     this.debugSessionDto = null;
     this.removeCurrentLocation();

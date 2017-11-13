@@ -90,7 +90,8 @@
                             </g:north>
                             <g:center>
                                 <g:FlowPanel>
-                                    <g:FlowPanel ui:field="threadNotSuspendedPlaceHolder" addStyleNames="{style.placeHolder}">
+                                    <g:FlowPanel ui:field="threadNotSuspendedPlaceHolder" addStyleNames="{style.placeHolder}"
+                                                 debugId="thread-not-suspended">
                                         <g:Label text="{locale.debuggerThreadNotSuspend}"/>
                                     </g:FlowPanel>
                                     <g:ScrollPanel addStyleNames="{coreRes.coreCss.simpleListContainer}"

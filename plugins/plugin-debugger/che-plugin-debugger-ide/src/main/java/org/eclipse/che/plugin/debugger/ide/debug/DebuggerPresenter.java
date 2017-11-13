@@ -261,6 +261,8 @@ public class DebuggerPresenter extends BasePresenter
   }
 
   protected void refreshVariables(long threadId, int frameIndex) {
+    view.removeAllVariables();
+
     Debugger debugger = debuggerManager.getActiveDebugger();
     if (debugger != null && debugger.isSuspended()) {
       Promise<? extends StackFrameDump> promise = debugger.getStackFrameDump(threadId, frameIndex);

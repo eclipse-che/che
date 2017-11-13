@@ -52,6 +52,7 @@ import org.eclipse.che.api.debug.shared.dto.action.StartActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepIntoActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepOutActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepOverActionDto;
+import org.eclipse.che.api.debug.shared.dto.event.SuspendEventDto;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Location;
@@ -113,7 +114,6 @@ public class DebuggerTest extends BaseTest {
   private static final long THREAD_ID = 1;
   private static final int FRAME_INDEX = 0;
 
-  public static final int LINE_NUMBER = 20;
   public static final String PATH = "test/src/main/java/Test.java";
 
   @Mock private DebuggerServiceClient service;
@@ -145,6 +145,7 @@ public class DebuggerTest extends BaseTest {
   @Mock private WorkspaceImpl workspace;
   @Mock private DebuggerLocalizationConstant constant;
   @Mock private PromiseProvider promiseProvider;
+  @Mock private SuspendEventDto suspendEventDto;
 
   @Captor private ArgumentCaptor<WorkspaceRunningEvent.Handler> workspaceRunningHandlerCaptor;
   @Captor private ArgumentCaptor<Operation<PromiseError>> operationPromiseErrorCaptor;
@@ -332,9 +333,9 @@ public class DebuggerTest extends BaseTest {
   @Test
   public void testStepInto() throws Exception {
     StepIntoActionDto stepIntoAction = mock(StepIntoActionDto.class);
-
     doReturn(promiseVoid).when(service).stepInto(SESSION_ID, stepIntoAction);
     doReturn(stepIntoAction).when(dtoFactory).createDto(StepIntoActionDto.class);
+    debugger.setSuspendEvent(suspendEventDto);
 
     debugger.stepInto();
 
@@ -357,9 +358,9 @@ public class DebuggerTest extends BaseTest {
   @Test
   public void testStepOver() throws Exception {
     StepOverActionDto stepOverAction = mock(StepOverActionDto.class);
-
     doReturn(promiseVoid).when(service).stepOver(SESSION_ID, stepOverAction);
     doReturn(stepOverAction).when(dtoFactory).createDto(StepOverActionDto.class);
+    debugger.setSuspendEvent(suspendEventDto);
 
     debugger.stepOver();
 
@@ -382,16 +383,14 @@ public class DebuggerTest extends BaseTest {
   @Test
   public void testStepOut() throws Exception {
     StepOutActionDto stepOutAction = mock(StepOutActionDto.class);
-
     doReturn(promiseVoid).when(service).stepOut(SESSION_ID, stepOutAction);
     doReturn(stepOutAction).when(dtoFactory).createDto(StepOutActionDto.class);
+    debugger.setSuspendEvent(suspendEventDto);
 
     debugger.stepOut();
 
     verify(observer).onPreStepOut();
-
     assertTrue(debugger.isConnected());
-
     verify(promiseVoid).catchError(operationPromiseErrorCaptor.capture());
     operationPromiseErrorCaptor.getValue().apply(promiseError);
     verify(promiseError).getCause();
