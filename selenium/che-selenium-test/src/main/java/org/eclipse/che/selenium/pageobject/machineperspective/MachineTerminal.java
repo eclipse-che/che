@@ -76,8 +76,21 @@ public class MachineTerminal {
     new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC).until(visibilityOf(defaultTermTab));
   }
 
-  /** wait default terminal tab */
-  public void waitTerminalTab(int termNumber) {
+  /**
+   * wait default terminal tab
+   *
+   * @param timeWait time of waiting terminal container in seconds
+   */
+  public void waitTerminalTab(int timeWait) {
+    new WebDriverWait(seleniumWebDriver, timeWait).until(visibilityOf(defaultTermTab));
+  }
+
+  /**
+   * wait terminal tab with number
+   *
+   * @param termNumber number of terminal
+   */
+  public void waitNumberTerminalTab(int termNumber) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(By.xpath(getTerminalTabXPath(termNumber))));
   }
