@@ -15,7 +15,6 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import javax.inject.Named;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
@@ -39,8 +38,7 @@ public class OpenShiftProjectFactory {
     this.clientFactory = clientFactory;
   }
 
-  public OpenShiftProject create(RuntimeIdentity identity) throws InfrastructureException {
-    final String workspaceId = identity.getWorkspaceId();
+  public OpenShiftProject create(String workspaceId) throws InfrastructureException {
     final String projectName = isNullOrEmpty(this.projectName) ? workspaceId : this.projectName;
     return new OpenShiftProject(clientFactory, projectName, workspaceId);
   }

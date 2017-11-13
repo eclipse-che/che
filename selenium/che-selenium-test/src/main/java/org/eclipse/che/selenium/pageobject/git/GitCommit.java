@@ -45,7 +45,7 @@ public class GitCommit {
     String BRANCHES_DROPDOWN =
         "//span[@id='gwt-debug-push-after-commit-check-box']/following-sibling::select";
     String TREE_ITEM_CHECK_BOX =
-        "//div[@id='gwt-debug-git-compare-changed_files']"
+        "//div[@id='gwt-debug-git-commit-changed-files']"
             + "//div[text()='%s']/ancestor::div[1]/preceding-sibling::span";
   }
 

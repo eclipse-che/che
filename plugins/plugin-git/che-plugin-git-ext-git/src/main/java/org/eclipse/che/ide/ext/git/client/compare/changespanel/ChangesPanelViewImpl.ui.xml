@@ -25,7 +25,7 @@
         }
     </ui:style>
 
-    <g:DockLayoutPanel unit="PX" width="600px" height="345px">
+    <g:DockLayoutPanel width="100%" height="100%">
         <g:north size="25">
             <g:FlowPanel>
                 <g:Button ui:field="changeViewModeButton" addStyleNames="{style.button}"/>
@@ -34,7 +34,7 @@
             </g:FlowPanel>
         </g:north>
         <g:center>
-            <g:LayoutPanel ui:field="changesPanel" addStyleNames="{res.gitCSS.simpleListContainer}" debugId="git-compare-changed_files"/>
+            <g:LayoutPanel ui:field="changesPanel" addStyleNames="{res.gitCSS.simpleListContainer}"/>
         </g:center>
     </g:DockLayoutPanel>
 </ui:UiBinder>

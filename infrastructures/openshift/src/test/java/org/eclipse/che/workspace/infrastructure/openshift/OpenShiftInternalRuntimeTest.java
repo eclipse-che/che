@@ -10,8 +10,8 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift;
 
-import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.FAILED;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.STARTING;
@@ -40,7 +40,6 @@ import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.IntOrStringBuilder;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
-import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.Service;
@@ -73,7 +72,6 @@ import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.bootstrapper.OpenShiftBootstrapper;
 import org.eclipse.che.workspace.infrastructure.openshift.bootstrapper.OpenShiftBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
-import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftPersistentVolumeClaims;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftPods;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftRoutes;
@@ -97,7 +95,6 @@ public class OpenShiftInternalRuntimeTest {
   private static final int NOT_EXPOSED_PORT_1 = 4411;
 
   private static final String WORKSPACE_ID = "workspace123";
-  private static final String PVC_NAME = "che-workspace-data";
   private static final String POD_NAME = "app";
   private static final String ROUTE_NAME = "test-route";
   private static final String SERVICE_NAME = "test-service";
@@ -118,7 +115,6 @@ public class OpenShiftInternalRuntimeTest {
   @Mock private OpenShiftBootstrapperFactory bootstrapperFactory;
   @Mock private OpenShiftEnvironment osEnv;
   @Mock private OpenShiftProject project;
-  @Mock private OpenShiftPersistentVolumeClaims pvcs;
   @Mock private OpenShiftServices services;
   @Mock private OpenShiftRoutes routes;
   @Mock private OpenShiftPods pods;
@@ -145,12 +141,9 @@ public class OpenShiftInternalRuntimeTest {
     when(serverCheckerFactory.create(any(), anyString(), any())).thenReturn(serversChecker);
     when(context.getIdentity()).thenReturn(IDENTITY);
     doNothing().when(project).cleanUp();
-    doReturn(ImmutableMap.of(PVC_NAME, mockPvc())).when(osEnv).getPersistentVolumeClaims();
-    when(project.persistentVolumeClaims()).thenReturn(pvcs);
     when(project.services()).thenReturn(services);
     when(project.routes()).thenReturn(routes);
     when(project.pods()).thenReturn(pods);
-    when(pvcs.get()).thenReturn(emptyList());
     when(bootstrapperFactory.create(any(), anyListOf(Installer.class), any()))
         .thenReturn(bootstrapper);
     when(context.getEnvironment()).thenReturn(environment);
@@ -173,9 +166,9 @@ public class OpenShiftInternalRuntimeTest {
 
     internalRuntime.internalStart(emptyMap());
 
-    verify(pods, times(1)).create(any());
-    verify(routes, times(1)).create(any());
-    verify(services, times(1)).create(any());
+    verify(pods).create(any());
+    verify(routes).create(any());
+    verify(services).create(any());
     verify(bootstrapper, times(2)).bootstrap();
     verify(eventService, times(4)).publish(any());
     verifyEventsOrder(
@@ -188,33 +181,15 @@ public class OpenShiftInternalRuntimeTest {
     verify(serversChecker, times(2)).startAsync(any());
   }
 
-  @Test(expectedExceptions = InfrastructureException.class)
-  public void throwsInfrastructureExceptionWhenPVCsCreationFailed() throws Exception {
-    doNothing().when(project).cleanUp();
-    doThrow(InfrastructureException.class).when(pvcs).get();
-
-    try {
-      internalRuntime.internalStart(emptyMap());
-    } catch (Exception rethrow) {
-      verify(project, times(1)).cleanUp();
-      verify(project, never()).services();
-      verify(project, never()).routes();
-      verify(project, never()).pods();
-      throw rethrow;
-    }
-  }
-
   @Test(expectedExceptions = InternalInfrastructureException.class)
   public void throwsInternalInfrastructureExceptionWhenRuntimeErrorOccurs() throws Exception {
     doNothing().when(project).cleanUp();
-    final OpenShiftPersistentVolumeClaims pvcs = mock(OpenShiftPersistentVolumeClaims.class);
-    when(project.persistentVolumeClaims()).thenReturn(pvcs);
-    doThrow(RuntimeException.class).when(pvcs).create(any(PersistentVolumeClaim.class));
+    when(osEnv.getServices()).thenThrow(new RuntimeException("error"));
 
     try {
       internalRuntime.internalStart(emptyMap());
     } catch (Exception rethrow) {
-      verify(project, times(1)).cleanUp();
+      verify(project).cleanUp();
       verify(project, never()).services();
       verify(project, never()).routes();
       verify(project, never()).pods();
@@ -237,10 +212,10 @@ public class OpenShiftInternalRuntimeTest {
     try {
       internalRuntime.internalStart(emptyMap());
     } catch (Exception rethrow) {
-      verify(pods, times(1)).create(any());
-      verify(routes, times(1)).create(any());
-      verify(services, times(1)).create(any());
-      verify(bootstrapper, times(1)).bootstrap();
+      verify(pods).create(any());
+      verify(routes).create(any());
+      verify(services).create(any());
+      verify(bootstrapper).bootstrap();
       verify(eventService, times(3)).publish(any());
       verifyEventsOrder(
           newEvent(M1_NAME, STARTING), newEvent(M2_NAME, STARTING), newEvent(M1_NAME, FAILED));
@@ -251,13 +226,15 @@ public class OpenShiftInternalRuntimeTest {
   @Test(expectedExceptions = InfrastructureException.class)
   public void throwsInfrastructureExceptionWhenErrorOccursAndCleanupFailed() throws Exception {
     doNothing().doThrow(InfrastructureException.class).when(project).cleanUp();
-    doThrow(InfrastructureException.class).when(pvcs).get();
+    when(osEnv.getServices()).thenReturn(singletonMap("testService", mock(Service.class)));
+    when(services.create(any())).thenThrow(new InfrastructureException("service creation failed"));
+    doThrow(InfrastructureException.class).when(project).services();
 
     try {
       internalRuntime.internalStart(emptyMap());
     } catch (Exception rethrow) {
-      verify(project, times(1)).cleanUp();
-      verify(project, never()).services();
+      verify(project).cleanUp();
+      verify(project).services();
       verify(project, never()).routes();
       verify(project, never()).pods();
       throw rethrow;
@@ -278,11 +255,11 @@ public class OpenShiftInternalRuntimeTest {
     try {
       internalRuntime.internalStart(emptyMap());
     } catch (Exception rethrow) {
-      verify(project, times(1)).cleanUp();
-      verify(pods, times(1)).create(any());
-      verify(routes, times(1)).create(any());
-      verify(services, times(1)).create(any());
-      verify(bootstrapper, times(1)).bootstrap();
+      verify(project).cleanUp();
+      verify(pods).create(any());
+      verify(routes).create(any());
+      verify(services).create(any());
+      verify(bootstrapper).bootstrap();
       verifyEventsOrder(newEvent(M1_NAME, STARTING));
       throw rethrow;
     }
@@ -294,7 +271,7 @@ public class OpenShiftInternalRuntimeTest {
 
     internalRuntime.internalStop(emptyMap());
 
-    verify(project, times(1)).cleanUp();
+    verify(project).cleanUp();
   }
 
   @Test(expectedExceptions = InfrastructureException.class)
@@ -360,12 +337,6 @@ public class OpenShiftInternalRuntimeTest {
     when(pod.getMetadata().getLabels())
         .thenReturn(ImmutableMap.of(POD_SELECTOR, POD_NAME, CHE_ORIGINAL_NAME_LABEL, POD_NAME));
     return pod;
-  }
-
-  private static PersistentVolumeClaim mockPvc() {
-    final PersistentVolumeClaim pvc = mock(PersistentVolumeClaim.class);
-    mockName(PVC_NAME, pvc);
-    return pvc;
   }
 
   private static Service mockService() {

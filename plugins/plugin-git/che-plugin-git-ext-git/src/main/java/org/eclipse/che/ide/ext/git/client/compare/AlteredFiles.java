@@ -28,9 +28,9 @@ import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
  */
 public class AlteredFiles {
 
-  private final Project project;
-  private final LinkedHashMap<String, Status> alteredFilesStatuses;
-  private final List<String> alteredFilesList;
+  protected final Project project;
+  protected final LinkedHashMap<String, Status> alteredFilesStatuses;
+  protected final List<String> alteredFilesList;
 
   /**
    * Parses raw git diff string and creates advanced representation.

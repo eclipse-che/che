@@ -67,6 +67,6 @@ public class OpenShiftRuntimeContext extends RuntimeContext {
 
   @Override
   public InternalRuntime getRuntime() throws InfrastructureException {
-    return runtimeFactory.create(this, projectFactory.create(getIdentity()));
+    return runtimeFactory.create(this, projectFactory.create(getIdentity().getWorkspaceId()));
   }
 }
