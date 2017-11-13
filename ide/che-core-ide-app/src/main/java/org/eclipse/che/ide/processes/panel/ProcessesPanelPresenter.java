@@ -71,7 +71,7 @@ import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
-import org.eclipse.che.ide.api.workspace.WsAgentMachineUtil;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
 import org.eclipse.che.ide.api.workspace.event.ExecAgentServerRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.MachineRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.MachineStartingEvent;
@@ -154,7 +154,7 @@ public class ProcessesPanelPresenter extends BasePresenter
   private final RuntimeInfoWidgetFactory runtimeInfoWidgetFactory;
   private final RuntimeInfoProvider runtimeInfoProvider;
   private final RuntimeInfoLocalization runtimeInfoLocalization;
-  private final WsAgentMachineUtil wsAgentMachineUtil;
+  private final WsAgentServerUtil wsAgentServerUtil;
   private final EventBus eventBus;
   private final Map<String, ProcessTreeNode> machineNodes;
   ProcessTreeNode rootNode;
@@ -184,7 +184,7 @@ public class ProcessesPanelPresenter extends BasePresenter
       RuntimeInfoProvider runtimeInfoProvider,
       RuntimeInfoLocalization runtimeInfoLocalization,
       Provider<WorkspaceLoadingTracker> workspaceLoadingTrackerProvider,
-      WsAgentMachineUtil wsAgentMachineUtil) {
+      WsAgentServerUtil wsAgentServerUtil) {
     this.view = view;
     this.localizationConstant = localizationConstant;
     this.resources = resources;
@@ -205,7 +205,7 @@ public class ProcessesPanelPresenter extends BasePresenter
     this.runtimeInfoWidgetFactory = runtimeInfoWidgetFactory;
     this.runtimeInfoProvider = runtimeInfoProvider;
     this.runtimeInfoLocalization = runtimeInfoLocalization;
-    this.wsAgentMachineUtil = wsAgentMachineUtil;
+    this.wsAgentServerUtil = wsAgentServerUtil;
 
     machineNodes = new HashMap<>();
     machines = new HashMap<>();
@@ -247,7 +247,7 @@ public class ProcessesPanelPresenter extends BasePresenter
       return;
     }
 
-    Optional<MachineImpl> wsAgentServerMachine = wsAgentMachineUtil.getWsAgentServerMachine();
+    Optional<MachineImpl> wsAgentServerMachine = wsAgentServerUtil.getWsAgentServerMachine();
 
     wsAgentServerMachine.ifPresent(
         machine -> {
@@ -336,7 +336,7 @@ public class ProcessesPanelPresenter extends BasePresenter
   public void newTerminal(TerminalOptionsJso options) {
     final ProcessTreeNode selectedTreeNode = view.getSelectedTreeNode();
 
-    final Optional<MachineImpl> devMachine = wsAgentMachineUtil.getWsAgentServerMachine();
+    final Optional<MachineImpl> devMachine = wsAgentServerUtil.getWsAgentServerMachine();
 
     if (selectedTreeNode == null && devMachine.isPresent()) {
       onAddTerminal(devMachine.get().getName(), options);
@@ -365,7 +365,7 @@ public class ProcessesPanelPresenter extends BasePresenter
 
   /** Selects dev machine. */
   private void selectDevMachine() {
-    Optional<MachineImpl> devMachine = wsAgentMachineUtil.getWsAgentServerMachine();
+    Optional<MachineImpl> devMachine = wsAgentServerUtil.getWsAgentServerMachine();
     if (!devMachine.isPresent()) {
       return;
     }
@@ -600,7 +600,7 @@ public class ProcessesPanelPresenter extends BasePresenter
   }
 
   public void addCommandOutput(OutputConsole outputConsole) {
-    Optional<MachineImpl> devMachine = wsAgentMachineUtil.getWsAgentServerMachine();
+    Optional<MachineImpl> devMachine = wsAgentServerUtil.getWsAgentServerMachine();
     devMachine.ifPresent(machine -> addCommandOutput(machine.getName(), outputConsole));
   }
 
@@ -907,7 +907,7 @@ public class ProcessesPanelPresenter extends BasePresenter
     machineNode.setTerminalServerRunning(isServerRunning(machineName, SERVER_TERMINAL_REFERENCE));
 
     // rely on "wsagent" server's status since "ssh" server's status is always UNKNOWN
-    String wsAgentServerRef = wsAgentMachineUtil.getWsAgentHttpServerReference();
+    String wsAgentServerRef = wsAgentServerUtil.getWsAgentHttpServerReference();
     machineNode.setSshServerRunning(isServerRunning(machineName, wsAgentServerRef));
 
     for (ProcessTreeNode child : children) {
@@ -964,7 +964,7 @@ public class ProcessesPanelPresenter extends BasePresenter
       return;
     }
 
-    Optional<MachineImpl> wsAgentServerMachine = wsAgentMachineUtil.getWsAgentServerMachine();
+    Optional<MachineImpl> wsAgentServerMachine = wsAgentServerUtil.getWsAgentServerMachine();
 
     ProcessTreeNode machineToSelect = null;
     if (wsAgentServerMachine.isPresent()) {
@@ -1047,7 +1047,7 @@ public class ProcessesPanelPresenter extends BasePresenter
   @Override
   public void onTerminalAgentServerRunning(TerminalAgentServerRunningEvent event) {
     // open terminal automatically for dev-machine only
-    Optional<MachineImpl> devMachine = wsAgentMachineUtil.getWsAgentServerMachine();
+    Optional<MachineImpl> devMachine = wsAgentServerUtil.getWsAgentServerMachine();
 
     if (devMachine.isPresent() && event.getMachineName().equals(devMachine.get().getName())) {
       provideMachineNode(event.getMachineName(), true);
@@ -1345,7 +1345,7 @@ public class ProcessesPanelPresenter extends BasePresenter
 
   @Override
   public void onDownloadWorkspaceOutput(DownloadWorkspaceOutputEvent event) {
-    Optional<MachineImpl> devMachine = wsAgentMachineUtil.getWsAgentServerMachine();
+    Optional<MachineImpl> devMachine = wsAgentServerUtil.getWsAgentServerMachine();
 
     if (!devMachine.isPresent()) {
       return;

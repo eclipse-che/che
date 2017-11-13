@@ -17,7 +17,7 @@ import com.google.inject.Singleton;
 import java.util.List;
 import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.workspace.WsAgentMachineUtil;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.AsyncRequest;
 import org.eclipse.che.ide.rest.HTTPHeader;
@@ -35,8 +35,8 @@ public class KeycloakAsyncRequestFactory extends MachineAsyncRequestFactory {
       KeycloakProvider keycloakProvider,
       DtoFactory dtoFactory,
       AppContext appContext,
-      WsAgentMachineUtil wsAgentMachineUtil) {
-    super(dtoFactory, appContext, wsAgentMachineUtil);
+      WsAgentServerUtil wsAgentServerUtil) {
+    super(dtoFactory, appContext, wsAgentServerUtil);
     this.dtoFactory = dtoFactory;
     this.keycloakProvider = keycloakProvider;
   }

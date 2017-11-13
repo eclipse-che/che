@@ -19,7 +19,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.ide.api.workspace.WsAgentMachineUtil;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
 import org.eclipse.che.ide.api.workspace.event.WsAgentServerRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.WsAgentServerStoppedEvent;
 import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
@@ -36,7 +36,7 @@ public class ProjectImportNotificationSubscriber {
 
   @Inject
   public ProjectImportNotificationSubscriber(
-      EventBus eventBus, RequestTransmitter transmitter, WsAgentMachineUtil wsAgentMachineUtil) {
+      EventBus eventBus, RequestTransmitter transmitter, WsAgentServerUtil wsAgentServerUtil) {
     this.transmitter = transmitter;
 
     eventBus.addHandler(WsAgentServerRunningEvent.TYPE, event -> subscribe());
@@ -45,7 +45,7 @@ public class ProjectImportNotificationSubscriber {
     eventBus.addHandler(
         BasicIDEInitializedEvent.TYPE,
         event ->
-            wsAgentMachineUtil
+            wsAgentServerUtil
                 .getWsAgentHttpServer()
                 .ifPresent(
                     server -> {

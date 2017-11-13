@@ -22,7 +22,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.workspace.shared.dto.event.ServerStatusEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.workspace.WsAgentMachineUtil;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
 import org.eclipse.che.ide.api.workspace.event.ExecAgentServerRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.ExecAgentServerStoppedEvent;
 import org.eclipse.che.ide.api.workspace.event.ServerRunningEvent;
@@ -45,7 +45,7 @@ class ServerStatusEventHandler {
   private final WorkspaceServiceClient workspaceServiceClient;
   private final AppContext appContext;
   private final EventBus eventBus;
-  private final WsAgentMachineUtil wsAgentMachineUtil;
+  private final WsAgentServerUtil wsAgentServerUtil;
 
   @Inject
   ServerStatusEventHandler(
@@ -53,11 +53,11 @@ class ServerStatusEventHandler {
       WorkspaceServiceClient workspaceServiceClient,
       AppContext appContext,
       EventBus eventBus,
-      WsAgentMachineUtil wsAgentMachineUtil) {
+      WsAgentServerUtil wsAgentServerUtil) {
     this.workspaceServiceClient = workspaceServiceClient;
     this.appContext = appContext;
     this.eventBus = eventBus;
-    this.wsAgentMachineUtil = wsAgentMachineUtil;
+    this.wsAgentServerUtil = wsAgentServerUtil;
 
     configurator
         .newConfiguration()
@@ -81,7 +81,7 @@ class ServerStatusEventHandler {
               // Because AppContext always must return an actual workspace model.
               ((AppContextImpl) appContext).setWorkspace(workspace);
 
-              String wsAgentHttpServerRef = wsAgentMachineUtil.getWsAgentHttpServerReference();
+              String wsAgentHttpServerRef = wsAgentServerUtil.getWsAgentHttpServerReference();
 
               if (event.getStatus() == RUNNING) {
                 eventBus.fireEvent(

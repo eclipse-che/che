@@ -21,7 +21,7 @@ import java.util.Optional;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.workspace.WsAgentMachineUtil;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.commons.exception.UnmarshallerException;
@@ -41,15 +41,15 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory {
   private static final String CSRF_TOKEN_HEADER_NAME = "X-CSRF-Token";
 
   private AppContext appContext;
-  private WsAgentMachineUtil wsAgentMachineUtil;
+  private WsAgentServerUtil wsAgentServerUtil;
   private String csrfToken;
 
   @Inject
   public MachineAsyncRequestFactory(
-      DtoFactory dtoFactory, AppContext appContext, WsAgentMachineUtil wsAgentMachineUtil) {
+      DtoFactory dtoFactory, AppContext appContext, WsAgentServerUtil wsAgentServerUtil) {
     super(dtoFactory);
     this.appContext = appContext;
-    this.wsAgentMachineUtil = wsAgentMachineUtil;
+    this.wsAgentServerUtil = wsAgentServerUtil;
   }
 
   @Override
@@ -81,7 +81,7 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory {
   }
 
   private boolean isWsAgentStarted() {
-    Optional<MachineImpl> devMachine = wsAgentMachineUtil.getWsAgentServerMachine();
+    Optional<MachineImpl> devMachine = wsAgentServerUtil.getWsAgentServerMachine();
 
     return devMachine.isPresent();
   }

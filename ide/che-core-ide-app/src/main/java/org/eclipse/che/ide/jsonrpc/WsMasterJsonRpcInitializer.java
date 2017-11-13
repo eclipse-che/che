@@ -34,7 +34,7 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.jsonrpc.SubscriptionManagerClient;
-import org.eclipse.che.ide.api.workspace.WsAgentMachineUtil;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
 import org.eclipse.che.ide.api.workspace.event.ExecAgentServerRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.ServerRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.TerminalAgentServerRunningEvent;
@@ -61,7 +61,7 @@ public class WsMasterJsonRpcInitializer {
   private final SubscriptionManagerClient subscriptionManagerClient;
   private final WorkspaceServiceClient workspaceServiceClient;
   private final SecurityTokenProvider securityTokenProvider;
-  private final WsAgentMachineUtil wsAgentMachineUtil;
+  private final WsAgentServerUtil wsAgentServerUtil;
 
   @Inject
   public WsMasterJsonRpcInitializer(
@@ -72,7 +72,7 @@ public class WsMasterJsonRpcInitializer {
       SubscriptionManagerClient subscriptionManagerClient,
       WorkspaceServiceClient workspaceServiceClient,
       SecurityTokenProvider securityTokenProvider,
-      WsAgentMachineUtil wsAgentMachineUtil) {
+      WsAgentServerUtil wsAgentServerUtil) {
     this.initializer = initializer;
     this.requestTransmitter = requestTransmitter;
     this.appContext = appContext;
@@ -80,7 +80,7 @@ public class WsMasterJsonRpcInitializer {
     this.subscriptionManagerClient = subscriptionManagerClient;
     this.workspaceServiceClient = workspaceServiceClient;
     this.securityTokenProvider = securityTokenProvider;
-    this.wsAgentMachineUtil = wsAgentMachineUtil;
+    this.wsAgentServerUtil = wsAgentServerUtil;
 
     eventBus.addHandler(BasicIDEInitializedEvent.TYPE, e -> initialize());
     eventBus.addHandler(WorkspaceStartingEvent.TYPE, e -> initialize());
@@ -214,7 +214,7 @@ public class WsMasterJsonRpcInitializer {
     if (server.getStatus() == RUNNING) {
       eventBus.fireEvent(new ServerRunningEvent(server.getName(), machine.getName()));
 
-      String wsAgentHttpServerRef = wsAgentMachineUtil.getWsAgentHttpServerReference();
+      String wsAgentHttpServerRef = wsAgentServerUtil.getWsAgentHttpServerReference();
       // fire events for the often used servers
       if (wsAgentHttpServerRef.equals(server.getName())) {
         eventBus.fireEvent(new WsAgentServerRunningEvent(machine.getName()));

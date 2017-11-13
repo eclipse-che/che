@@ -26,7 +26,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.macro.BaseMacro;
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.macro.MacroRegistry;
-import org.eclipse.che.ide.api.workspace.WsAgentMachineUtil;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
@@ -46,7 +46,7 @@ public class ServerAddressMacroRegistrar {
 
   private final Provider<MacroRegistry> macroRegistryProvider;
   private final AppContext appContext;
-  private final WsAgentMachineUtil wsAgentMachineUtil;
+  private final WsAgentServerUtil wsAgentServerUtil;
 
   private Set<Macro> macros;
 
@@ -55,10 +55,10 @@ public class ServerAddressMacroRegistrar {
       EventBus eventBus,
       Provider<MacroRegistry> macroRegistryProvider,
       AppContext appContext,
-      WsAgentMachineUtil wsAgentMachineUtil) {
+      WsAgentServerUtil wsAgentServerUtil) {
     this.macroRegistryProvider = macroRegistryProvider;
     this.appContext = appContext;
-    this.wsAgentMachineUtil = wsAgentMachineUtil;
+    this.wsAgentServerUtil = wsAgentServerUtil;
 
     eventBus.addHandler(
         BasicIDEInitializedEvent.TYPE,
@@ -79,7 +79,7 @@ public class ServerAddressMacroRegistrar {
   }
 
   private void registerMacros() {
-    final Optional<MachineImpl> devMachine = wsAgentMachineUtil.getWsAgentServerMachine();
+    final Optional<MachineImpl> devMachine = wsAgentServerUtil.getWsAgentServerMachine();
 
     if (devMachine.isPresent()) {
       macros = getMacros(devMachine.get());

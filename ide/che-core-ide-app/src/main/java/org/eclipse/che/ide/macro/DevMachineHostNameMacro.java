@@ -18,7 +18,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.macro.Macro;
-import org.eclipse.che.ide.api.workspace.WsAgentMachineUtil;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 
 /**
@@ -32,13 +32,13 @@ public class DevMachineHostNameMacro implements Macro {
   private static final String KEY = "${machine.dev.hostname}";
 
   private final CoreLocalizationConstant localizationConstants;
-  private final WsAgentMachineUtil wsAgentMachineUtil;
+  private final WsAgentServerUtil wsAgentServerUtil;
 
   @Inject
   public DevMachineHostNameMacro(
-      CoreLocalizationConstant localizationConstants, WsAgentMachineUtil wsAgentMachineUtil) {
+      CoreLocalizationConstant localizationConstants, WsAgentServerUtil wsAgentServerUtil) {
     this.localizationConstants = localizationConstants;
-    this.wsAgentMachineUtil = wsAgentMachineUtil;
+    this.wsAgentServerUtil = wsAgentServerUtil;
   }
 
   @NotNull
@@ -57,7 +57,7 @@ public class DevMachineHostNameMacro implements Macro {
   public Promise<String> expand() {
     String value = "";
 
-    Optional<MachineImpl> devMachine = wsAgentMachineUtil.getWsAgentServerMachine();
+    Optional<MachineImpl> devMachine = wsAgentServerUtil.getWsAgentServerMachine();
 
     if (devMachine.isPresent()) {
       String hostName = devMachine.get().getProperties().get("config.hostname");

@@ -24,7 +24,7 @@ import java.util.Set;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.workspace.WsAgentMachineUtil;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
 import org.eclipse.che.ide.api.workspace.event.WsAgentServerRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.WsAgentServerStoppedEvent;
 import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
@@ -41,7 +41,7 @@ public class WsAgentJsonRpcInitializer {
   private final JsonRpcInitializer initializer;
   private final RequestTransmitter requestTransmitter;
   private final AgentURLModifier agentURLModifier;
-  private final WsAgentMachineUtil wsAgentMachineUtil;
+  private final WsAgentServerUtil wsAgentServerUtil;
 
   @Inject
   public WsAgentJsonRpcInitializer(
@@ -50,12 +50,12 @@ public class WsAgentJsonRpcInitializer {
       EventBus eventBus,
       RequestTransmitter requestTransmitter,
       AgentURLModifier agentURLModifier,
-      WsAgentMachineUtil wsAgentMachineUtil) {
+      WsAgentServerUtil wsAgentServerUtil) {
     this.appContext = appContext;
     this.initializer = initializer;
     this.requestTransmitter = requestTransmitter;
     this.agentURLModifier = agentURLModifier;
-    this.wsAgentMachineUtil = wsAgentMachineUtil;
+    this.wsAgentServerUtil = wsAgentServerUtil;
 
     eventBus.addHandler(WsAgentServerRunningEvent.TYPE, event -> initializeJsonRpcService());
     eventBus.addHandler(
@@ -97,7 +97,7 @@ public class WsAgentJsonRpcInitializer {
       return; // workspace is stopped
     }
 
-    wsAgentMachineUtil
+    wsAgentServerUtil
         .getWsAgentWebSocketServer()
         .ifPresent(
             server -> {

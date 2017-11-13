@@ -51,7 +51,7 @@ import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.selection.SelectionChangedEvent;
 import org.eclipse.che.ide.api.selection.SelectionChangedHandler;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
-import org.eclipse.che.ide.api.workspace.WsAgentMachineUtil;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppingEvent;
 import org.eclipse.che.ide.api.workspace.model.ServerImpl;
@@ -80,7 +80,7 @@ public class AppContextImpl implements AppContext, SelectionChangedHandler, Reso
   private final ResourceManager.ResourceManagerFactory resourceManagerFactory;
   private final Provider<EditorAgent> editorAgentProvider;
   private final Provider<AppStateManager> appStateManager;
-  private final WsAgentMachineUtil wsAgentMachineUtil;
+  private final WsAgentServerUtil wsAgentServerUtil;
 
   private final List<Project> rootProjects = newArrayList();
   private final List<Resource> selectedResources = newArrayList();
@@ -107,12 +107,12 @@ public class AppContextImpl implements AppContext, SelectionChangedHandler, Reso
       ResourceManager.ResourceManagerFactory resourceManagerFactory,
       Provider<EditorAgent> editorAgentProvider,
       Provider<AppStateManager> appStateManager,
-      WsAgentMachineUtil wsAgentMachineUtil) {
+      WsAgentServerUtil wsAgentServerUtil) {
     this.eventBus = eventBus;
     this.resourceManagerFactory = resourceManagerFactory;
     this.editorAgentProvider = editorAgentProvider;
     this.appStateManager = appStateManager;
-    this.wsAgentMachineUtil = wsAgentMachineUtil;
+    this.wsAgentServerUtil = wsAgentServerUtil;
     this.startAppActions = new ArrayList<>();
 
     projectsInImport = new ArrayList<>();
@@ -424,7 +424,7 @@ public class AppContextImpl implements AppContext, SelectionChangedHandler, Reso
 
   @Override
   public String getWsAgentServerApiEndpoint() {
-    Optional<ServerImpl> server = wsAgentMachineUtil.getWsAgentHttpServer();
+    Optional<ServerImpl> server = wsAgentServerUtil.getWsAgentHttpServer();
 
     if (server.isPresent()) {
       return server.get().getUrl();
