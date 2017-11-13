@@ -38,6 +38,9 @@ public class DockerMachine implements Machine {
 
   private static final Logger LOG = getLogger(DockerMachine.class);
 
+  /** Name of the latest tag used in Docker image. */
+  public static final String LATEST_TAG = "latest";
+
   /**
    * Default HOSTNAME that will be added in all docker containers that are started. This host will
    * container the Docker host's ip reachable inside the container.
