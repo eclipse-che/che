@@ -357,25 +357,25 @@ prepareTestSuite() {
 
     TESTS_SCOPE="-DrunSuite=${TMP_SUITE_PATH}"
 
-    if [[ ${TEST_INCLUSION} == ${TEST_INCLUSION_STABLE} || ${TEST_INCLUSION} == ${TEST_INCLUSION_STABLE_AND_UNSTABLE} ]]; then
-        # set number of threads directly in the suite
-        sed -i -e "s#thread-count=\"[^\"]*\"#thread-count=\"${THREADS}\"#" "$TMP_SUITE_PATH"
+    # set number of threads directly in the suite
+    sed -i -e "s#thread-count=\"[^\"]*\"#thread-count=\"${THREADS}\"#" "$TMP_SUITE_PATH"
 
-        if [[ ${TEST_INCLUSION} == ${TEST_INCLUSION_STABLE_AND_UNSTABLE} ]]; then
-            # remove "<methods>" tags from temporary suite
-            methodsSectionNumber=$(grep -oe "<methods>" <<< echo "$TMP_SUITE_PATH" | wc -l);
+    if [[ ${TEST_INCLUSION} == ${TEST_INCLUSION_STABLE_AND_UNSTABLE} ]]; then
+        # remove "<methods>" tags from temporary suite
+        methodsSectionNumber=$(grep -oe "<methods>" <<< echo "$TMP_SUITE_PATH" | wc -l);
 
-            for (( c=1; c<=$methodsSectionNumber; c++ )); do
-                sed -i -e '1h;2,$H;$!d;g' -e "s/\(<class.*\)<methods>.*<\/methods>\(.*<\/class>\)/\1\2/" "$TMP_SUITE_PATH"
-            done
-        fi
-
+        for (( c=1; c<=$methodsSectionNumber; c++ )); do
+            sed -i -e '1h;2,$H;$!d;g' -e "s/\(<class.*\)<methods>.*<\/methods>\(.*<\/class>\)/\1\2/" "$TMP_SUITE_PATH"
+        done
     elif [[ ${TEST_INCLUSION} == ${TEST_INCLUSION_UNSTABLE} ]]; then
         # replace "<exclude>"  on "<include>" tags in temporary suite
         sed -i "s/<exclude/<include/" "$TMP_SUITE_PATH"
 
         # remove "<class ... />" tags
         sed -i "s/<class.*\/>//" "$TMP_SUITE_PATH"
+
+        # remove sub-suites in order to not having unstable tests there and get rid of stable/unstable model soon
+        sed -i -i -e '1h;2,$H;$!d;g' -e "s/<suite-files>.*<\/suite-files>//" "$TMP_SUITE_PATH"
     fi
 }
 
@@ -741,40 +741,14 @@ rerunTests() {
         echo -e "[TEST] "${YELLOW}" Rerunning failed tests in one thread, attempt #"${rerun}${NO_COLOUR}
         echo "[TEST]"
 
-        local fails=$(fetchFailedTests)
-        local failsClasses=$(getTestClasses ${fails[*]})
-        local tmpScreenshots=${TMP_DIR}"/qa/screenshots"
-        local tmpReports=${TMP_DIR}"/qa/reports"
-        local originalScreenshots="target/screenshots"
-
-        rm -rf ${tmpScreenshots} ${tmpReports}
-        mkdir -p ${tmpScreenshots} ${tmpReports}
-
-        rm -rf ${originalScreenshots}
-
         defineTestsScope "--failed-tests"
         runTests
-
-        if [[ -f ${TESTNG_FAILED_SUITE} ]]; then
-            # preserve failed test info
-            cp ${originalScreenshots}/*.png ${tmpScreenshots}
-            cp ${FAILSAFE_DIR}/TEST-*.xml ${tmpReports}
-            cp ${FAILSAFE_DIR}/*.txt ${tmpReports}
-        fi
-
-        # restore info
-        rm -rf ${FAILSAFE_DIR}
-        mkdir -p ${FAILSAFE_DIR}
-        rm -rf ${originalScreenshots}
-        cp -r ${tmpScreenshots} ${originalScreenshots}
-        cp ${tmpReports}/* ${FAILSAFE_DIR}
 
         if [[ ${rerun} < ${MAX_RERUN} ]]; then
             rerunTests $(($rerun+1)) $@
         fi
     fi
 }
-
 
 # Finds regressions and generates testng-failed.xml suite bases on them.
 generateTestNgFailedReport() {
@@ -862,7 +836,7 @@ storeTestReport() {
     if [[ -f ${TMP_SUITE_PATH} ]]; then
         cp ${TMP_SUITE_PATH} target/suite;
     fi
-    zip -qr ${report} target/screenshots target/site target/failsafe-reports target/log target/bin target/suite
+    zip -qr ${report} target/screenshots target/htmldumps target/site target/failsafe-reports target/log target/bin target/suite
 
     echo -e "[TEST] Tests results and reports are saved to ${BLUE}${report}${NO_COLOUR}"
     echo "[TEST]"
