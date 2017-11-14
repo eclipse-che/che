@@ -53,7 +53,7 @@ public class ChangesPanelPresenter implements ChangesPanelView.ActionDelegate {
    * Show panel with changed files. If empty map with changed files is received, all buttons would
    * be disabled.
    *
-   * @param changedFiles Map with files and their status
+   * @param changedFiles altered files to show
    */
   public void show(AlteredFiles changedFiles) {
     this.changedFiles = changedFiles;

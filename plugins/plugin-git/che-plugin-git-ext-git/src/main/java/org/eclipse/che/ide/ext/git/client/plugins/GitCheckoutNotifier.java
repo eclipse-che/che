@@ -8,19 +8,20 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.ext.git.client;
+package org.eclipse.che.ide.ext.git.client.plugins;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
-import javax.inject.Singleton;
-import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto.Type;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.ext.git.client.GitEventSubscribable;
+import org.eclipse.che.ide.ext.git.client.GitEventsSubscriber;
 import org.eclipse.che.ide.resources.impl.ResourceManager;
 import org.eclipse.che.ide.util.loging.Log;
 
@@ -32,33 +33,26 @@ import org.eclipse.che.ide.util.loging.Log;
  * in {@link ResourceManager}.
  */
 @Singleton
-public class GitCheckoutHandler {
+public class GitCheckoutNotifier implements GitEventsSubscriber {
+
   private final Provider<NotificationManager> notificationManagerProvider;
   private final AppContext appContext;
 
   @Inject
-  public GitCheckoutHandler(
+  public GitCheckoutNotifier(
+      GitEventSubscribable subscribeToGitEvents,
       Provider<NotificationManager> notificationManagerProvider,
-      RequestHandlerConfigurator configurator,
       AppContext appContext) {
     this.notificationManagerProvider = notificationManagerProvider;
     this.appContext = appContext;
 
-    configureHandler(configurator);
+    subscribeToGitEvents.addSubscriber(this);
   }
 
-  private void configureHandler(RequestHandlerConfigurator configurator) {
-    configurator
-        .newConfiguration()
-        .methodName("event/git-checkout")
-        .paramsAsDto(GitCheckoutEventDto.class)
-        .noResult()
-        .withBiConsumer(this::apply);
-  }
-
-  public void apply(String endpointId, GitCheckoutEventDto dto) {
-    final Type type = dto.getType();
-    final String name = dto.getName();
+  @Override
+  public void onGitCheckout(String endpointId, GitCheckoutEventDto gitCheckoutEventDto) {
+    final Type type = gitCheckoutEventDto.getType();
+    final String name = gitCheckoutEventDto.getName();
 
     switch (type) {
       case BRANCH:

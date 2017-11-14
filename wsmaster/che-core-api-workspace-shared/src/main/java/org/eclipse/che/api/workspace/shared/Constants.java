@@ -23,8 +23,6 @@ public final class Constants {
   public static final String LINK_REL_ENVIRONMENT_STATUS_CHANNEL = "environment/statusChannel";
 
   public static final String WORKSPACE_STOPPED_BY = "stopped_by";
-  public static final String AUTO_CREATE_SNAPSHOT = "auto_snapshot";
-  public static final String AUTO_RESTORE_FROM_SNAPSHOT = "auto_restore";
 
   public static final String LINK_REL_CREATE_STACK = "create stack";
   public static final String LINK_REL_UPDATE_STACK = "update stack";
@@ -33,20 +31,12 @@ public final class Constants {
   public static final String LINK_REL_GET_STACKS_BY_CREATOR = "get stacks by creator";
   public static final String LINK_REL_SEARCH_STACKS = "search stacks";
 
-  public static final String LINK_REL_REMOVE_RECIPE = "remove recipe";
-  public static final String LINK_REL_GET_RECIPE_SCRIPT = "get recipe script";
-  public static final String LINK_REL_CREATE_RECIPE = "create recipe";
-  public static final String LINK_REL_SEARCH_RECIPES = "search recipes";
-  public static final String LINK_REL_UPDATE_RECIPE = "update recipe";
-
   public static final String LINK_REL_GET_ICON = "get icon link";
   public static final String LINK_REL_UPLOAD_ICON = "upload icon link";
   public static final String LINK_REL_DELETE_ICON = "delete icon link";
 
   public static final String WS_AGENT_PROCESS_NAME = "CheWsAgent";
 
-  public static final String CHE_WORKSPACE_AUTO_SNAPSHOT = "che.workspace.auto_snapshot";
-  public static final String CHE_WORKSPACE_AUTO_RESTORE = "che.workspace.auto_restore";
   public static final String CHE_WORKSPACE_AUTO_START = "che.workspace.auto_start";
 
   public static final String COMMAND_PREVIEW_URL_ATTRIBUTE_NAME = "previewUrl";

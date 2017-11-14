@@ -2068,9 +2068,7 @@
                 }
               },
               "attributes" : {
-                "memoryLimitBytes": "2147483648",
-                "auto_snapshot": "true",
-                "auto_restore": "true"
+                "memoryLimitBytes": "2147483648"
 
               }
             }

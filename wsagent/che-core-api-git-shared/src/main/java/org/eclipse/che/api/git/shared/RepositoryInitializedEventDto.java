@@ -8,18 +8,17 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.docker.snapshot;
+package org.eclipse.che.api.git.shared;
 
-/** @author gazarenkov */
-@Deprecated
-public interface MachineSource {
+import org.eclipse.che.dto.shared.DTO;
 
-  /** Returns dockerfile, image, ssh-config, etc */
-  String getType();
+/** @author Mykola Morhun */
+@DTO
+public interface RepositoryInitializedEventDto {
+  /** Name of project in which git repository was initialized. */
+  String getProjectName();
 
-  /** Returns URL or ID */
-  String getLocation();
+  void setProjectName(String projectName);
 
-  /** @return content of the machine source. No need to use an external link. */
-  String getContent();
+  RepositoryInitializedEventDto withProjectName(String projectName);
 }

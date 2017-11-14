@@ -26,6 +26,7 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.infrastructure.docker.client.json.ContainerListEntry;
 import org.eclipse.che.workspace.infrastructure.docker.container.DockerContainers;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
+import org.eclipse.che.workspace.infrastructure.docker.server.mapping.ExternalIpURLRewriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +42,7 @@ public class DockerRuntimeContext extends RuntimeContext {
 
   private final DockerEnvironment dockerEnvironment;
   private final List<String> orderedContainers;
+  private final ExternalIpURLRewriter urlRewriter;
   private final String websocketOutputEndpoint;
   private final DockerRuntimeFactory runtimeFactory;
   private final DockerContainers containers;
@@ -58,12 +60,14 @@ public class DockerRuntimeContext extends RuntimeContext {
       DockerContainers containers,
       DockerSharedPool sharedPool,
       RuntimeConsistencyChecker consistencyChecker,
+      ExternalIpURLRewriter urlRewriter,
       @Named("che.websocket.endpoint") String cheWebsocketEndpoint)
       throws InfrastructureException, ValidationException {
 
     super(environment, identity, infrastructure);
     this.dockerEnvironment = dockerEnv;
     this.orderedContainers = ImmutableList.copyOf(containersOrder);
+    this.urlRewriter = urlRewriter;
     this.websocketOutputEndpoint = cheWebsocketEndpoint;
     this.runtimeFactory = runtimeFactory;
     this.containers = containers;
@@ -84,7 +88,7 @@ public class DockerRuntimeContext extends RuntimeContext {
   @Override
   public URI getOutputChannel() throws InfrastructureException {
     try {
-      return URI.create(websocketOutputEndpoint);
+      return URI.create(urlRewriter.rewriteURL(getIdentity(), null, websocketOutputEndpoint));
     } catch (IllegalArgumentException ex) {
       throw new InternalInfrastructureException(
           "Failed to get the output channel because: " + ex.getLocalizedMessage());

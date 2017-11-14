@@ -90,22 +90,20 @@ public class TestWorkspaceServiceClient {
   }
 
   /** Sends stop workspace request. */
-  private void sendStopRequest(String workspaceName, String userName, boolean createSnapshot)
-      throws Exception {
+  private void sendStopRequest(String workspaceName, String userName) throws Exception {
     if (!exists(workspaceName, userName)) {
       return;
     }
 
     Workspace workspace = getByName(workspaceName, userName);
-    String apiUrl =
-        getIdBasedUrl(workspace.getId()) + "/runtime/?create-snapshot=" + valueOf(createSnapshot);
+    String apiUrl = getIdBasedUrl(workspace.getId()) + "/runtime/";
 
     requestFactory.fromUrl(apiUrl).useDeleteMethod().request();
   }
 
   /** Stops workspace. */
-  public void stop(String workspaceName, String userName, boolean createSnapshot) throws Exception {
-    sendStopRequest(workspaceName, userName, createSnapshot);
+  public void stop(String workspaceName, String userName) throws Exception {
+    sendStopRequest(workspaceName, userName);
     waitStatus(workspaceName, userName, STOPPED);
   }
 
@@ -145,7 +143,7 @@ public class TestWorkspaceServiceClient {
 
     Workspace workspace = getByName(workspaceName, userName);
     if (workspace.getStatus() != STOPPED) {
-      stop(workspaceName, userName, false);
+      stop(workspaceName, userName);
     }
 
     requestFactory.fromUrl(getIdBasedUrl(workspace.getId())).useDeleteMethod().request();

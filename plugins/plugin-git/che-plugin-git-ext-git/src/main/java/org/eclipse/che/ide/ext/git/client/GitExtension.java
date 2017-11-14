@@ -44,6 +44,7 @@ import org.eclipse.che.ide.ext.git.client.action.ShowBranchesAction;
 import org.eclipse.che.ide.ext.git.client.action.ShowMergeAction;
 import org.eclipse.che.ide.ext.git.client.action.ShowRemoteAction;
 import org.eclipse.che.ide.ext.git.client.action.ShowStatusAction;
+import org.eclipse.che.ide.ext.git.client.action.ToggleGitPanelAction;
 import org.vectomatic.dom.svg.ui.SVGImage;
 
 /**
@@ -67,6 +68,8 @@ public class GitExtension {
 
   public static final String NEXT_DIFF_ACTION_ID = "nextDiff";
   public static final String PREV_DIFF_ACTION_ID = "prevDiff";
+
+  public static final String GIT_PANEL_ACTION_ID = "gitPanel";
 
   @Inject
   public GitExtension(
@@ -96,10 +99,12 @@ public class GitExtension {
       NextDiffAction nextDiffAction,
       PreviousDiffAction previousDiffAction,
       KeyBindingAgent keyBinding,
+      ToggleGitPanelAction gitPanelAction,
       GitNotificationsSubscriber gitNotificationsSubscriber) {
     gitNotificationsSubscriber.subscribe();
 
     resources.gitCSS().ensureInjected();
+    resources.gitPanelCss().ensureInjected();
 
     DefaultActionGroup mainMenu = (DefaultActionGroup) actionManager.getAction(GROUP_MAIN_MENU);
 
@@ -202,6 +207,8 @@ public class GitExtension {
     actionManager.registerAction(NEXT_DIFF_ACTION_ID, nextDiffAction);
     actionManager.registerAction(PREV_DIFF_ACTION_ID, previousDiffAction);
 
+    actionManager.registerAction(GIT_PANEL_ACTION_ID, gitPanelAction);
+
     keyBinding
         .getGlobal()
         .addKey(new KeyBuilder().action().alt().charCode('d').build(), GIT_COMPARE_WITH_LATEST);
@@ -224,5 +231,9 @@ public class GitExtension {
     keyBinding
         .getGlobal()
         .addKey(new KeyBuilder().alt().charCode(',').build(), PREV_DIFF_ACTION_ID);
+
+    keyBinding
+        .getGlobal()
+        .addKey(new KeyBuilder().alt().charCode('g').build(), GIT_PANEL_ACTION_ID);
   }
 }
