@@ -10,10 +10,14 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.project;
 
+import static java.util.stream.Collectors.toSet;
+
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.openshift.client.OpenShiftClient;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 
@@ -57,6 +61,23 @@ public class OpenShiftPersistentVolumeClaims {
       return client.persistentVolumeClaims().inNamespace(namespace).list().getItems();
     } catch (KubernetesClientException e) {
       throw new InfrastructureException(e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Creates all PVCs which are not present in current OpenShift project.
+   *
+   * @param toCreate collection of PVCs to create
+   * @throws InfrastructureException when any error occurs while creation
+   */
+  public void createIfNotExist(Collection<PersistentVolumeClaim> toCreate)
+      throws InfrastructureException {
+    final Set<String> existing =
+        get().stream().map(p -> p.getMetadata().getName()).collect(toSet());
+    for (PersistentVolumeClaim pvc : toCreate) {
+      if (!existing.contains(pvc.getMetadata().getName())) {
+        create(pvc);
+      }
     }
   }
 }

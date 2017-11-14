@@ -313,16 +313,21 @@ public class AppContextImpl implements AppContext, SelectionChangedHandler, Reso
       return;
     }
 
-    selectedResources.clear();
+    List<Resource> tempSelectedResources = newArrayList();
 
     if (selection != null) {
       for (Object o : selection.getAllElements()) {
         if (o instanceof HasDataObject && ((HasDataObject) o).getData() instanceof Resource) {
-          selectedResources.add((Resource) ((HasDataObject) o).getData());
+          tempSelectedResources.add((Resource) ((HasDataObject) o).getData());
         } else if (o instanceof Resource) {
-          selectedResources.add((Resource) o);
+          tempSelectedResources.add((Resource) o);
         }
       }
+    }
+
+    if (!tempSelectedResources.isEmpty()) {
+      selectedResources.clear();
+      selectedResources.addAll(tempSelectedResources);
     }
   }
 

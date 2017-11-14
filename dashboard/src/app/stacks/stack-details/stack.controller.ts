@@ -457,8 +457,6 @@ export class StackController {
       let bodyEl = this.$document.find('body');
       let testPopupEl: string = '<che-modal-popup id="' + STACK_TEST_POPUP_ID + '" ' +
         'title="Testing Stack: ' + stack.name + '" on-close="stackController.closeStackTestPopup()">' +
-        '<div ng-hide="stackController.showIDE" class="main-page-loader">' +
-        '<div class="ide-page-loader-content"><img ng-src="{{branding.loaderURL}}"></div></div>' +
         '<iframe ng-show="stackController.showIDE" class="ide-page-frame" ' +
         'src="' + tmpWorkspaceIdeUrl.toString() + '"></iframe></che-modal-popup>';
       this.cheUIElementsInjectorService.injectAdditionalElement(bodyEl, testPopupEl, this.$scope);

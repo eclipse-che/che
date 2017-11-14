@@ -194,12 +194,6 @@ public class CascadeRemovalTest {
                 when(wR.hasRuntime(anyString())).thenReturn(false);
                 bind(WorkspaceRuntimes.class).toInstance(wR);
                 bind(AccountManager.class);
-                bind(Boolean.class)
-                    .annotatedWith(Names.named("che.workspace.auto_snapshot"))
-                    .toInstance(false);
-                bind(Boolean.class)
-                    .annotatedWith(Names.named("che.workspace.auto_restore"))
-                    .toInstance(false);
                 bind(WorkspaceSharedPool.class)
                     .toInstance(new WorkspaceSharedPool("cached", null, null));
               }

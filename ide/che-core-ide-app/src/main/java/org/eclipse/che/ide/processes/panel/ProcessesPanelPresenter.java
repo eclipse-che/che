@@ -96,6 +96,7 @@ import org.eclipse.che.ide.processes.ProcessTreeNodeSelectedEvent;
 import org.eclipse.che.ide.processes.actions.AddTabMenuFactory;
 import org.eclipse.che.ide.processes.actions.ConsoleTreeContextMenu;
 import org.eclipse.che.ide.processes.actions.ConsoleTreeContextMenuFactory;
+import org.eclipse.che.ide.processes.loading.WorkspaceLoadingTracker;
 import org.eclipse.che.ide.processes.runtime.RuntimeInfo;
 import org.eclipse.che.ide.processes.runtime.RuntimeInfoLocalization;
 import org.eclipse.che.ide.processes.runtime.RuntimeInfoProvider;
@@ -180,7 +181,8 @@ public class ProcessesPanelPresenter extends BasePresenter
       Provider<MacroProcessor> macroProcessorProvider,
       RuntimeInfoWidgetFactory runtimeInfoWidgetFactory,
       RuntimeInfoProvider runtimeInfoProvider,
-      RuntimeInfoLocalization runtimeInfoLocalization) {
+      RuntimeInfoLocalization runtimeInfoLocalization,
+      Provider<WorkspaceLoadingTracker> workspaceLoadingTrackerProvider) {
     this.view = view;
     this.localizationConstant = localizationConstant;
     this.resources = resources;
@@ -225,6 +227,8 @@ public class ProcessesPanelPresenter extends BasePresenter
     eventBus.addHandler(
         ActivateProcessOutputEvent.TYPE, event -> setActiveProcessOutput(event.getPid()));
     eventBus.addHandler(BasicIDEInitializedEvent.TYPE, this);
+
+    Scheduler.get().scheduleDeferred(() -> workspaceLoadingTrackerProvider.get().startTracking());
 
     Scheduler.get().scheduleDeferred(this::updateMachineList);
   }
@@ -904,7 +908,7 @@ public class ProcessesPanelPresenter extends BasePresenter
     // TODO (spi ide): for now SSH server's status is always UNKNOWN.
     // So check ws-agent's status till SSH server's status fixed.
     newMachineNode.setSshServerRunning(
-        isServerRunning(machineName, /*SERVER_SSH_REFERENCE*/ SERVER_WS_AGENT_HTTP_REFERENCE));
+        isServerRunning(machineName, SERVER_WS_AGENT_HTTP_REFERENCE));
     for (ProcessTreeNode child : children) {
       child.setParent(newMachineNode);
     }
@@ -948,7 +952,7 @@ public class ProcessesPanelPresenter extends BasePresenter
   }
 
   @Override
-  public void onEnvironmentOutputEvent(EnvironmentOutputEvent event) {
+  public void onEnvironmentOutput(EnvironmentOutputEvent event) {
     printMachineOutput(event.getMachineName(), event.getContent());
   }
 

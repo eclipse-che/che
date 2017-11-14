@@ -169,6 +169,9 @@ init_global_vars() {
   CHE_USER="${CHE_USER:-${DEFAULT_CHE_USER}}"
 
   CHE_USER_GROUPS=""
+
+  UNAME_R=${UNAME_R:-$(uname -r)}
+
 }
 
 usage() {

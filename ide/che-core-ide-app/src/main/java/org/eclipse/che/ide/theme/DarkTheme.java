@@ -458,6 +458,11 @@ public class DarkTheme implements Theme {
   }
 
   @Override
+  public String editorTabsBackgroundColor() {
+    return "#1e2331";
+  }
+
+  @Override
   public String editorPanelBorderColor() {
     return getEditorBackgroundColor();
   }
@@ -1670,6 +1675,16 @@ public class DarkTheme implements Theme {
   @Override
   public String editorPreferenceCategoryBackgroundColor() {
     return "rgba(215, 215, 215, 0.10)";
+  }
+
+  @Override
+  public String gitPanelRepositoryChangesLabelColor() {
+    return "#252a38";
+  }
+
+  @Override
+  public String gitPanelRepositoryChangesLabelBackgroundColor() {
+    return "#969fad";
   }
 
   /**

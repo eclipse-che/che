@@ -319,7 +319,8 @@ public class GitService {
     fsManager.delete(dotGitWsPath);
 
     projectManager.removeType(projectPath, GitProjectType.TYPE_ID);
-    eventService.publish(newDto(GitRepositoryDeletedEvent.class));
+    eventService.publish(
+        newDto(GitRepositoryDeletedEvent.class).withProjectName(project.getName()));
   }
 
   @GET

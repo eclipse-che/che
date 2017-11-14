@@ -129,21 +129,13 @@
                 <exclude>bin/*.bat</exclude>
             </excludes>
        </fileSet>
-        <fileSet>
-            <directory>${project.parent.basedir}/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/codenvy</directory>
-            <outputDirectory>conf</outputDirectory>
-        </fileSet>
-        <fileSet>
+       <fileSet>
             <directory>${project.basedir}/src/assembly</directory>
             <outputDirectory></outputDirectory>
             <includes>
               <include>LICENSE</include>
               <include>README</include>
            </includes>
-        </fileSet>
-        <fileSet>
-            <directory>${project.build.directory}/keycloak/</directory>
-            <outputDirectory>tomcat/lib</outputDirectory>
         </fileSet>
     </fileSets>
       <files>

@@ -116,13 +116,14 @@ public class GitCheckoutDetector {
         String content = fsManager.readAsString(it);
         Type type = content.contains("ref:") ? BRANCH : REVISION;
         String name = type == REVISION ? content : PATTERN.split(content)[1];
+        String project = it.substring(1, it.indexOf('/', 1));
 
         // Update project attributes with new git values
 
         String wsPath = absolutize(it.split("/")[1]);
         projectManager.setType(wsPath, GitProjectType.TYPE_ID, true);
 
-        endpointIds.forEach(transmitConsumer(type, name));
+        endpointIds.forEach(transmitConsumer(type, name, project));
 
       } catch (ServerException | ForbiddenException e) {
         LOG.error("Error trying to read {} file and broadcast it", it, e);
@@ -132,13 +133,17 @@ public class GitCheckoutDetector {
     };
   }
 
-  private Consumer<String> transmitConsumer(Type type, String name) {
+  private Consumer<String> transmitConsumer(Type type, String name, String project) {
     return id ->
         transmitter
             .newRequest()
             .endpointId(id)
             .methodName(OUTGOING_METHOD)
-            .paramsAsDto(newDto(GitCheckoutEventDto.class).withName(name).withType(type))
+            .paramsAsDto(
+                newDto(GitCheckoutEventDto.class)
+                    .withName(name)
+                    .withType(type)
+                    .withProjectName(project))
             .sendAndSkipResult();
   }
 }
