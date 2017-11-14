@@ -512,21 +512,20 @@ public class FindText {
     actionsFactory.createAction(seleniumWebDriver).doubleClick().perform();
   }
 
-  public int getFoundOccurencesOnPage() {
+  /** get number of found occurrences in a page */
+  public int getFoundOccurrencesNumberOnPage() {
     List<String> results = new ArrayList<>(Arrays.asList(getResults().split(" ")));
-
     return Integer.parseInt(results.get(0));
   }
 
-  public int getFoundFilesOnPage() {
+  /** get number of found files in a page */
+  public int getFoundFilesNumberOnPage() {
     List<String> results = new ArrayList<>(Arrays.asList(getResults().split(" ")));
-
     return Integer.parseInt(results.get(4));
   }
 
-  public int getTotalFilesCount() {
+  public int getTotalFoundFilesNumber() {
     List<String> results = new ArrayList<>(Arrays.asList(getResults().split(" ")));
-
     return Integer.parseInt(results.get(results.size() - 1));
   }
 }

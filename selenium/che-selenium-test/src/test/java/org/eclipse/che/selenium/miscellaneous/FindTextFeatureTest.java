@@ -128,7 +128,7 @@ public class FindTextFeatureTest {
     createFileInTerminal(fileNameCreatedFromTerminal);
     WaitUtils.sleepQuietly(LOAD_PAGE_TIMEOUT_SEC);
 
-    // Check that this file found by "Filesystem" text
+    // Check that created from terminal file found by "Filesystem" text
     menu.runCommand(EDIT, FIND);
     findText.waitFindTextMainFormIsOpen();
     findText.typeTextIntoFindField("Filesystem");
@@ -150,7 +150,7 @@ public class FindTextFeatureTest {
     createFileFromAPI(PROJECT_NAME, fileNameCreatedFromAPI, content);
     WaitUtils.sleepQuietly(LOAD_PAGE_TIMEOUT_SEC);
 
-    // Check that this file found by "Feature" text
+    // Check that created from API file found by "Feature" text
     projectExplorer.selectItem(PROJECT_NAME);
     menu.runCommand(EDIT, FIND);
     findText.waitFindTextMainFormIsOpen();
@@ -208,6 +208,7 @@ public class FindTextFeatureTest {
     findText.clickFindTab();
     findText.waitFindInfoPanelIsOpen();
 
+    // Find files with 'String' text. Open 'guess_num.jsp' file and check cursor position
     projectExplorer.selectItem(PROJECT_NAME);
     findText.launchFindFormByKeyboard();
     findText.waitFindTextMainFormIsOpen();
@@ -239,6 +240,7 @@ public class FindTextFeatureTest {
     findText.clickFindTab();
     findText.waitFindInfoPanelIsOpen();
 
+    // Open 'SayHello.java' file and check cursor position
     findText.selectItemInFindInfoPanel(
         pathToQuessNumFile,
         "25:    java.lang.String attempt = (java.lang.String)request.getAttribute(\"num\");");
@@ -322,9 +324,9 @@ public class FindTextFeatureTest {
 
     projectExplorer.waitProjectExplorer();
     projectExplorer.selectItem(PROJECT_NAME);
-
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.selectItem(path1);
+
     menu.runCommand(EDIT, FIND);
     findText.waitFindTextMainFormIsOpen();
     findText.typeTextIntoFindField("uess");
@@ -375,7 +377,7 @@ public class FindTextFeatureTest {
     projectExplorer.waitProjectExplorer();
     projectExplorer.selectItem(PROJECT_NAME);
 
-    // Find text with *.java file mask
+    // Find text with '*.java' file mask
     menu.runCommand(EDIT, FIND);
     findText.waitFindTextMainFormIsOpen();
     findText.typeTextIntoFindField("String");
@@ -388,7 +390,7 @@ public class FindTextFeatureTest {
     findText.waitExpectedTextInFindInfoPanel(asList(expectedText1.split("\n")));
     findText.waitExpectedTextIsNotPresentInFindInfoPanel(expectedText2);
 
-    // Find text with *.jsp file mask
+    // Find text with '*.jsp' file mask
     projectExplorer.selectItem(PROJECT_NAME);
     findText.launchFindFormByKeyboard();
     findText.waitFindTextMainFormIsOpen();
@@ -426,7 +428,6 @@ public class FindTextFeatureTest {
     menu.runCommand(WORKSPACE, CREATE_PROJECT);
     wizard.selectProjectAndCreate(WEB_JAVA_PETCLINIC, "web-java-petclinic");
     notificationsPopupPanel.waitProgressPopupPanelClose();
-    loader.waitOnClosed();
     projectExplorer.selectItem("web-java-petclinic");
     projectExplorer.openItemByPath("web-java-petclinic");
     findText.launchFindFormByKeyboard();
@@ -439,25 +440,25 @@ public class FindTextFeatureTest {
     // Check move page buttons status on the first page
     Assert.assertTrue(findText.checkNextPageButtonIsEnabled());
     Assert.assertFalse(findText.checkPreviousPageButtonIsEnabled());
-    sumOfFoundFiles += findText.getFoundFilesOnPage();
-    sumOfFoundOccurrences += findText.getFoundOccurencesOnPage();
+    sumOfFoundFiles += findText.getFoundFilesNumberOnPage();
+    sumOfFoundOccurrences += findText.getFoundOccurrencesNumberOnPage();
     findText.clickOnNextPageButton();
 
     // Check move page buttons status on the second page
     Assert.assertTrue(findText.checkNextPageButtonIsEnabled());
     Assert.assertTrue(findText.checkPreviousPageButtonIsEnabled());
-    sumOfFoundFiles += findText.getFoundFilesOnPage();
-    sumOfFoundOccurrences += findText.getFoundOccurencesOnPage();
+    sumOfFoundFiles += findText.getFoundFilesNumberOnPage();
+    sumOfFoundOccurrences += findText.getFoundOccurrencesNumberOnPage();
     findText.clickOnNextPageButton();
 
     // Check move page buttons status on the third page
     Assert.assertFalse(findText.checkNextPageButtonIsEnabled());
     Assert.assertTrue(findText.checkPreviousPageButtonIsEnabled());
-    sumOfFoundFiles += findText.getFoundFilesOnPage();
-    sumOfFoundOccurrences += findText.getFoundOccurencesOnPage();
+    sumOfFoundFiles += findText.getFoundFilesNumberOnPage();
+    sumOfFoundOccurrences += findText.getFoundOccurrencesNumberOnPage();
 
-    // Check that sums of found files and occurrences correct
-    Assert.assertEquals(sumOfFoundFiles, findText.getTotalFilesCount());
+    // Checking that sums of found files and occurrences correct
+    Assert.assertEquals(sumOfFoundFiles, findText.getTotalFoundFilesNumber());
     Assert.assertEquals(sumOfFoundOccurrences, SUM_FOUND_OCCURRENCES);
 
     // Check results on the third page
