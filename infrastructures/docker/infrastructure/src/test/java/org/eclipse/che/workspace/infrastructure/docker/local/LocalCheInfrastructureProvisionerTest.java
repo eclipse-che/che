@@ -24,7 +24,6 @@ import org.eclipse.che.workspace.infrastructure.docker.provisioner.env.EnvVarsCo
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.labels.RuntimeLabelsProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.memory.MemoryAttributeConverter;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.server.ServersConverter;
-import org.eclipse.che.workspace.infrastructure.docker.provisioner.snapshot.ExcludeFoldersFromSnapshotProvisioner;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -38,7 +37,6 @@ import org.testng.annotations.Test;
 public class LocalCheInfrastructureProvisionerTest {
 
   @Mock private ContainerSystemSettingsProvisionersApplier settingsProvisioners;
-  @Mock private ExcludeFoldersFromSnapshotProvisioner snapshotProvisioner;
   @Mock private ProjectsVolumeProvisioner projectsVolumeProvisioner;
   @Mock private LocalInstallersBinariesVolumeProvisioner installerConfigProvisioner;
   @Mock private RuntimeLabelsProvisioner labelsProvisioner;
@@ -60,7 +58,6 @@ public class LocalCheInfrastructureProvisionerTest {
     provisioner =
         new LocalCheInfrastructureProvisioner(
             settingsProvisioners,
-            snapshotProvisioner,
             projectsVolumeProvisioner,
             installerConfigProvisioner,
             labelsProvisioner,
@@ -73,7 +70,6 @@ public class LocalCheInfrastructureProvisionerTest {
     allInnerProvisioners =
         new Object[] {
           settingsProvisioners,
-          snapshotProvisioner,
           projectsVolumeProvisioner,
           installerConfigProvisioner,
           labelsProvisioner,
@@ -103,9 +99,6 @@ public class LocalCheInfrastructureProvisionerTest {
         .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
     inOrder
         .verify(labelsProvisioner)
-        .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
-    inOrder
-        .verify(snapshotProvisioner)
         .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
     inOrder
         .verify(installerConfigProvisioner)
