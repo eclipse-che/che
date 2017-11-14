@@ -367,7 +367,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   @Override
   public Promise<List<ThreadStateDto>> getThreadDump() {
     if (!isConnected()) {
-      return Promises.reject(JsPromiseError.create("Debugger is not connected"));
+      promiseProvider.reject("Debugger is not connected");
     }
 
     return service.getThreadDump(debugSessionDto.getId());
@@ -379,32 +379,33 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   }
 
   @Override
-  public void addBreakpoint(final Breakpoint breakpoint) {
-    if (isConnected()) {
-      Promise<Void> promise = service.addBreakpoint(debugSessionDto.getId(), toDto(breakpoint));
-      promise
-          .then(
-              it -> {
-                for (DebuggerObserver observer : observers) {
-                  observer.onBreakpointAdded(breakpoint);
-                }
-              })
-          .catchError(
-              error -> {
-                Log.error(AbstractDebugger.class, error.getMessage());
-              });
+  public Promise<Void> addBreakpoint(final Breakpoint breakpoint) {
+    if (!isConnected()) {
+      promiseProvider.reject("Debugger is not connected");
     }
+
+    return service
+        .addBreakpoint(debugSessionDto.getId(), toDto(breakpoint))
+        .then(
+            it -> {
+              for (DebuggerObserver observer : observers) {
+                observer.onBreakpointAdded(breakpoint);
+              }
+            })
+        .catchError(
+            error -> {
+              Log.error(AbstractDebugger.class, error.getMessage());
+            });
   }
 
   @Override
-  public void deleteBreakpoint(final Breakpoint breakpoint) {
+  public Promise<Void> deleteBreakpoint(final Breakpoint breakpoint) {
     if (!isConnected()) {
-      return;
+      promiseProvider.reject("Debugger is not connected");
     }
 
-    Promise<Void> promise =
-        service.deleteBreakpoint(debugSessionDto.getId(), toDto(breakpoint.getLocation()));
-    promise
+    return service
+        .deleteBreakpoint(debugSessionDto.getId(), toDto(breakpoint.getLocation()))
         .then(
             it -> {
               for (DebuggerObserver observer : observers) {
@@ -418,13 +419,13 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   }
 
   @Override
-  public void deleteAllBreakpoints() {
+  public Promise<Void> deleteAllBreakpoints() {
     if (!isConnected()) {
-      return;
+      promiseProvider.reject("Debugger is not connected");
     }
-    Promise<Void> promise = service.deleteAllBreakpoints(debugSessionDto.getId());
 
-    promise
+    return service
+        .deleteAllBreakpoints(debugSessionDto.getId())
         .then(
             it -> {
               for (DebuggerObserver observer : observers) {
@@ -440,7 +441,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   @Override
   public Promise<List<? extends Breakpoint>> getAllBreakpoints() {
     if (!isConnected()) {
-      return Promises.reject(JsPromiseError.create("Debugger is not connected"));
+      promiseProvider.reject("Debugger is not connected");
     }
 
     return service

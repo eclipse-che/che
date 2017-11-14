@@ -823,6 +823,10 @@ public class JavaDebugger implements EventsHandler, Debugger {
   }
 
   private int toSuspendEventRequest(SuspendPolicy suspendPolicy) {
+    if (suspendPolicy == null) {
+      return EventRequest.SUSPEND_ALL;
+    }
+
     switch (suspendPolicy) {
       case NONE:
         return EventRequest.SUSPEND_NONE;

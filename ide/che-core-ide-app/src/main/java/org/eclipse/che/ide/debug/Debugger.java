@@ -41,17 +41,17 @@ public interface Debugger extends DebuggerObservable {
    *
    * @param breakpoint the breakpoint to add
    */
-  void addBreakpoint(Breakpoint breakpoint);
+  Promise<Void> addBreakpoint(Breakpoint breakpoint);
 
   /**
    * Deletes the given breakpoint on server.
    *
    * @param breakpoint the breakpoint to delete
    */
-  void deleteBreakpoint(Breakpoint breakpoint);
+  Promise<Void> deleteBreakpoint(Breakpoint breakpoint);
 
   /** Deletes all breakpoints. */
-  void deleteAllBreakpoints();
+  Promise<Void> deleteAllBreakpoints();
 
   /** Returns breakpoints. */
   Promise<List<? extends Breakpoint>> getAllBreakpoints();

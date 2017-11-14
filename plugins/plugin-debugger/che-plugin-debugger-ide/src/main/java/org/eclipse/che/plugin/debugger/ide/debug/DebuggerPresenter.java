@@ -395,6 +395,7 @@ public class DebuggerPresenter extends BasePresenter
         constant.debuggerDisconnectedTitle(), content, SUCCESS, NOT_EMERGE_MODE);
 
     clearView();
+    refreshBreakpoints();
   }
 
   @Override

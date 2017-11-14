@@ -85,6 +85,7 @@ public class DebugPanel {
     String THREADS_LIST_ID = "gwt-debug-debugger-threads-list";
     String VARIABLES_TREE_ID = "gwt-debug-debugger-tree";
     String VARIABLES_TREE_SELECT_NODE = "//div[@id='" + VARIABLES_TREE_ID + "']//div[text()='%s']";
+    String EXECUTION_POINT = "gwt-debug-execution-point";
   }
 
   private interface LocatorsTextAreaDialogWindow {
@@ -543,25 +544,28 @@ public class DebugPanel {
           .sendKeys(breakpointConfiguration.getCondition());
     }
 
-    switch (breakpointConfiguration.getSuspendPolicy()) {
-      case ALL:
-        seleniumWebDriver
-            .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-            .until(visibilityOfElementLocated(xpath(BreakpointConfigurationWindow.SUSPEND_ALL)))
-            .click();
-        break;
-      case THREAD:
-        seleniumWebDriver
-            .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-            .until(visibilityOfElementLocated(xpath(BreakpointConfigurationWindow.SUSPEND_THREAD)))
-            .click();
-        break;
-      default:
-        seleniumWebDriver
-            .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-            .until(visibilityOfElementLocated(xpath(BreakpointConfigurationWindow.SUSPEND_NONE)))
-            .click();
-        break;
+    if (breakpointConfiguration.getSuspendPolicy() != null) {
+      switch (breakpointConfiguration.getSuspendPolicy()) {
+        case ALL:
+          seleniumWebDriver
+              .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+              .until(visibilityOfElementLocated(xpath(BreakpointConfigurationWindow.SUSPEND_ALL)))
+              .click();
+          break;
+        case THREAD:
+          seleniumWebDriver
+              .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+              .until(
+                  visibilityOfElementLocated(xpath(BreakpointConfigurationWindow.SUSPEND_THREAD)))
+              .click();
+          break;
+        default:
+          seleniumWebDriver
+              .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+              .until(visibilityOfElementLocated(xpath(BreakpointConfigurationWindow.SUSPEND_NONE)))
+              .click();
+          break;
+      }
     }
 
     seleniumWebDriver
@@ -673,5 +677,12 @@ public class DebugPanel {
     seleniumWebDriver
         .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(invisibilityOfElementLocated(id(FramesPanel.THREAD_NOT_SUSPENDED_HOLDER)));
+  }
+
+  public String getExecutionPoint() {
+    return seleniumWebDriver
+        .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(id(Locators.EXECUTION_POINT)))
+        .getText();
   }
 }

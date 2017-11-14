@@ -22,6 +22,7 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
@@ -83,12 +84,12 @@ public class GdbDebugger extends AbstractDebugger {
   }
 
   @Override
-  public void addBreakpoint(final Breakpoint breakpoint) {
+  public Promise<Void> addBreakpoint(final Breakpoint breakpoint) {
     if (isConnected() && !isSuspended()) {
       notificationManager.notify(locale.messageSuspendToActivateBreakpoints(), FAIL, FLOAT_MODE);
     }
 
-    super.addBreakpoint(breakpoint);
+    return super.addBreakpoint(breakpoint);
   }
 
   @Override

@@ -80,7 +80,7 @@
                         <g:DockLayoutPanel unit="PX" width="100%" height="100%">
                             <g:north size="40">
                                 <g:FlowPanel>
-                                    <g:Label ui:field="executionPoint" addStyleNames="{style.executionPoint}"/>
+                                    <g:Label ui:field="executionPoint" addStyleNames="{style.executionPoint}" debugId="execution-point"/>
                                     <g:Label text="{locale.debuggerFramesTitle}" addStyleNames="{style.alignLeft}"/>
                                 </g:FlowPanel>
                             </g:north>

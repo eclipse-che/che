@@ -199,7 +199,7 @@ public class BreakpointManagerImpl
   }
 
   @Override
-  public void update(Breakpoint breakpoint) {
+  public void update(final Breakpoint breakpoint) {
     breakpointStorage.update(breakpoint);
     activeBreakpoints.remove(breakpoint);
 
@@ -211,10 +211,14 @@ public class BreakpointManagerImpl
 
     Debugger debugger = debuggerManager.getActiveDebugger();
     if (debugger != null) {
-      debugger.deleteBreakpoint(breakpoint);
-      if (breakpoint.isEnabled()) {
-        debugger.addBreakpoint(breakpoint);
-      }
+      debugger
+          .deleteBreakpoint(breakpoint)
+          .then(
+              success -> {
+                if (breakpoint.isEnabled()) {
+                  debugger.addBreakpoint(breakpoint);
+                }
+              });
     }
 
     for (BreakpointManagerObserver observer : observers) {

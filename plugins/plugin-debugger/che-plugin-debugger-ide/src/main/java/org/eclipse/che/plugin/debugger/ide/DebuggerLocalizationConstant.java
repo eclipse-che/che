@@ -121,9 +121,6 @@ public interface DebuggerLocalizationConstant extends com.google.gwt.i18n.client
   @Key("showHideDebuggerPanelDescription")
   String showHideDebuggerPanelDescription();
 
-  @Key("breakpointConfigurationDescription")
-  String breakpointConfigurationDescription();
-
   @Key("enableBreakpointDescription")
   String enableBreakpointDescription();
 
@@ -154,9 +151,6 @@ public interface DebuggerLocalizationConstant extends com.google.gwt.i18n.client
 
   @Key("failed.to.connect.to.remote.debugger.description")
   String failedToConnectToRemoteDebuggerDescription(String address, String cause);
-
-  @Key("failed.to.get.variable.value.title")
-  String failedToGetVariableValueTitle();
 
   /* ChangeValueView */
   @Key("view.breakpoint.configuration.title")
