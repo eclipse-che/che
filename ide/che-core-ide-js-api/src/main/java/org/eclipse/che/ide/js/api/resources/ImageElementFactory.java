@@ -15,8 +15,9 @@ import com.google.gwt.dom.client.Element;
 import jsinterop.annotations.JsFunction;
 
 /**
- * Factory to create some image Element, for example it's may be from GWT Image/SVG resource.
- * Should return new element each time called.
+ * Factory to create some image Element, for example it's may be from GWT Image/SVG resource. Should
+ * return new element each time called.
+ *
  * @author Yevhen Vydolob
  */
 @JsFunction

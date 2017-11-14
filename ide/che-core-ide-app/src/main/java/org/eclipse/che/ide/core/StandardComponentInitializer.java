@@ -110,6 +110,7 @@ import org.eclipse.che.ide.command.editor.CommandEditorProvider;
 import org.eclipse.che.ide.command.palette.ShowCommandsPaletteAction;
 import org.eclipse.che.ide.imageviewer.ImageViewerProvider;
 import org.eclipse.che.ide.imageviewer.PreviewImageAction;
+import org.eclipse.che.ide.js.plugin.action.DisablePluginsAction;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.eclipse.che.ide.newresource.NewFileAction;
 import org.eclipse.che.ide.newresource.NewFolderAction;
@@ -344,6 +345,8 @@ public class StandardComponentInitializer {
   @Inject private CollapseAllAction collapseAllAction;
 
   @Inject private PerspectiveManager perspectiveManager;
+
+  @Inject private DisablePluginsAction disablePluginsAction;
 
   @Inject
   @Named("XMLFileType")
@@ -610,6 +613,9 @@ public class StandardComponentInitializer {
     // Compose Help menu
     DefaultActionGroup helpGroup = (DefaultActionGroup) actionManager.getAction(GROUP_HELP);
     helpGroup.addSeparator();
+
+    actionManager.registerAction("disablePlugins", disablePluginsAction);
+    helpGroup.add(disablePluginsAction);
 
     // Processes panel actions
     actionManager.registerAction("stopWorkspace", stopWorkspaceAction);

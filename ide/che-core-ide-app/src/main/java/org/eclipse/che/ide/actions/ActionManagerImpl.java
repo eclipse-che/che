@@ -67,6 +67,14 @@ public class ActionManagerImpl implements ActionManager {
     registerDefaultActionGroups();
   }
 
+  private static void reportActionError(final String pluginId, final String message) {
+    if (pluginId == null) {
+      Log.error(ActionManagerImpl.class, message);
+    } else {
+      Log.error(ActionManagerImpl.class, pluginId, message);
+    }
+  }
+
   private void registerDefaultActionGroups() {
     // register default action groups for main menu
     DefaultActionGroup mainMenu = new DefaultActionGroup(this);
@@ -166,14 +174,6 @@ public class ActionManagerImpl implements ActionManager {
     registerAction(IdeActions.GROUP_RIGHT_STATUS_PANEL, rightStatusPanelGroup);
   }
 
-  private static void reportActionError(final String pluginId, final String message) {
-    if (pluginId == null) {
-      Log.error(ActionManagerImpl.class, message);
-    } else {
-      Log.error(ActionManagerImpl.class, pluginId, message);
-    }
-  }
-
   @Override
   public Action getAction(String id) {
     return getActionImpl(id, false);
@@ -224,6 +224,11 @@ public class ActionManagerImpl implements ActionManager {
         action.actionPerformed(actionEvent);
       }
     }
+  }
+
+  @Override
+  public boolean hasAction(String actionId) {
+    return myId2Action.containsKey(actionId);
   }
 
   /**

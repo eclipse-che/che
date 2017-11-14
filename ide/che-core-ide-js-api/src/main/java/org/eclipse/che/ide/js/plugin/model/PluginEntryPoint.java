@@ -12,23 +12,22 @@
 package org.eclipse.che.ide.js.plugin.model;
 
 import com.google.gwt.core.client.JavaScriptObject;
-import jsinterop.annotations.JsFunction;
 import jsinterop.annotations.JsOverlay;
+import jsinterop.annotations.JsType;
 import org.eclipse.che.ide.js.api.context.PluginContext;
 
 /**
- * Functional interface for plugin activate function
- *
  * @author Yevhen Vydolob
  */
-@JsFunction
-@FunctionalInterface
-public interface ActivateFunction {
-
-  @JsOverlay
-  static ActivateFunction of(JavaScriptObject o) {
-    return o.cast();
-  }
+@JsType(isNative = true)
+public interface PluginEntryPoint {
 
   void activate(PluginContext ctx);
+
+  void deactivate(PluginContext ctx);
+
+  @JsOverlay
+  static PluginEntryPoint of(JavaScriptObject o) {
+    return o.cast();
+  }
 }

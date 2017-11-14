@@ -13,6 +13,7 @@ package org.eclipse.che.ide.js.api.resources;
 
 import com.google.gwt.dom.client.Element;
 import jsinterop.annotations.JsType;
+import org.eclipse.che.ide.js.api.Disposable;
 
 /**
  * Holds and manages all IDE icon resources, each resource mapped to their id. We support 3 way to
@@ -29,7 +30,7 @@ public interface ImageRegistry {
    * @param id the image id
    * @param url the image url
    */
-  void registerUrl(String id, String url);
+  Disposable registerUrl(String id, String url);
 
   /**
    * Register image html. For example html may be some FontAwesome icon
@@ -37,15 +38,16 @@ public interface ImageRegistry {
    * @param id the image id
    * @param html the image html
    */
-  void registerHtml(String id, String html);
+  Disposable registerHtml(String id, String html);
 
   /**
-   * Register image factory. Factory may provided by GWT plugin which use ClientBundle for images
+   * Register image factory.Register image factory. For example : factory may provided by GWT plugin
+   * which use ClientBundle for images or plugin may construct image element manually.
    *
    * @param id the image id
    * @param factory the image factory
    */
-  void registerFactory(String id, ImageElementFactory factory);
+  Disposable registerFactory(String id, ImageElementFactory factory);
 
   /**
    * Returns new image element each time

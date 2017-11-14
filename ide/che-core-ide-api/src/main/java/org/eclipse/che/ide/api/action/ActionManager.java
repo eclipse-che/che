@@ -114,4 +114,12 @@ public interface ActionManager {
    * @param parameters the parameters which are used for the action invocation
    */
   void performAction(String actionId, Map<String, String> parameters);
+
+  /**
+   * Checks is action with provided id registered
+   *
+   * @param actionId the ID to check
+   * @return true if action with ID is registered, false otherwise
+   */
+  boolean hasAction(String actionId);
 }

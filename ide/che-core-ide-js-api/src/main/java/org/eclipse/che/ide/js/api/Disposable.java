@@ -9,17 +9,18 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 
-package org.eclipse.che.ide.js.api.action;
+package org.eclipse.che.ide.js.api;
 
-import jsinterop.annotations.JsFunction;
+import jsinterop.annotations.JsType;
 
 /**
- * Functional interface for perform function
+ * Some type that can be dispose, like event listener, some resource, action
  *
  * @author Yevhen Vydolob
  */
-@JsFunction
-@FunctionalInterface
-public interface PerformAction {
-  void performAction();
+@JsType
+public interface Disposable {
+
+  /** Dispose this object */
+  void dispose();
 }

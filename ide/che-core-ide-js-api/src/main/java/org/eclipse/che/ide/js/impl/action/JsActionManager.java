@@ -16,6 +16,7 @@ import elemental.json.JsonObject;
 import elemental.json.JsonType;
 import elemental.json.JsonValue;
 import java.util.List;
+import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.ide.api.action.Action;
@@ -23,9 +24,11 @@ import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.constraints.Anchor;
 import org.eclipse.che.ide.api.constraints.Constraints;
+import org.eclipse.che.ide.js.api.Disposable;
 import org.eclipse.che.ide.js.api.action.ActionManager;
 import org.eclipse.che.ide.js.api.action.PerformAction;
 import org.eclipse.che.ide.js.api.action.UpdateAction;
+import org.eclipse.che.ide.js.api.context.PluginContext;
 import org.eclipse.che.ide.js.api.resources.ImageRegistry;
 import org.eclipse.che.ide.js.plugin.model.PluginManifest;
 
@@ -44,7 +47,7 @@ public class JsActionManager implements ActionManager {
   }
 
   @Override
-  public void registerAction(
+  public Disposable registerAction(
       String actionId, UpdateAction updateAction, PerformAction performAction) {
 
     Action action = actionManager.getAction(actionId);
@@ -53,35 +56,45 @@ public class JsActionManager implements ActionManager {
       jsAction.setUpdateAction(updateAction);
       jsAction.setPerformAction(performAction);
     }
+    return () -> {
+      if (actionManager.hasAction(actionId)) {
+        actionManager.unregisterAction(actionId);
+      }
+    };
   }
 
-  @Override
-  public void addActionToGroup(String actionId, String groupId) {}
-
-  public void registerPluginActions(List<PluginManifest> plugins) {
+  public void registerPluginActions(
+      List<PluginManifest> plugins, Map<String, PluginContext> activePlugins) {
     for (PluginManifest plugin : plugins) {
       if (plugin.getContributions().getActions() != null) {
-        handlePluginActions(plugin.getContributions().getActions(), plugin.getPluginId());
+        PluginContext context = activePlugins.get(plugin.getPluginId());
+        handlePluginActions(plugin.getContributions().getActions(), plugin.getPluginId(), context);
       }
     }
   }
 
-  private void handlePluginActions(JsonArray actions, String pluginId) {
+  private void handlePluginActions(JsonArray actions, String pluginId, PluginContext context) {
     for (int i = 0; i < actions.length(); i++) {
       JsonObject object = actions.getObject(i);
       if (object.hasKey("action")) {
-        handleAction(object.getObject("action"), pluginId);
+        handleAction(object.getObject("action"), pluginId, context);
       } else if (object.hasKey("group")) {
-        handleGroup(object.getObject("group"), pluginId);
+        handleGroup(object.getObject("group"), pluginId, context);
       }
       // ignore others
     }
   }
 
-  private Action handleGroup(JsonObject group, String pluginId) {
+  private Action handleGroup(JsonObject group, String pluginId, PluginContext context) {
     String id = group.getString("id");
     JsActionGroup actionGroup = new JsActionGroup(actionManager, imageRegistry);
     actionManager.registerAction(id, actionGroup, pluginId);
+    context.addDisposable(
+        () -> {
+          if (actionManager.hasAction(id)) {
+            actionManager.unregisterAction(id);
+          }
+        });
     Presentation presentation = actionGroup.getTemplatePresentation();
     if (group.hasKey("text")) {
       presentation.setText(group.getString("text"));
@@ -99,16 +112,17 @@ public class JsActionManager implements ActionManager {
     }
 
     if (group.hasKey("addToGroup")) {
-      addActionToGroup(actionGroup, group.getObject("addToGroup"));
+      addActionToGroup(actionGroup, group.getObject("addToGroup"), context);
     }
 
     if (group.hasKey("actions")) {
-      handleGroupActions(actionGroup, group.getArray("actions"), pluginId);
+      handleGroupActions(actionGroup, group.getArray("actions"), pluginId, context);
     }
     return actionGroup;
   }
 
-  private void handleGroupActions(JsActionGroup parentGroup, JsonArray actions, String pluginId) {
+  private void handleGroupActions(
+      JsActionGroup parentGroup, JsonArray actions, String pluginId, PluginContext context) {
     for (int i = 0; i < actions.length(); i++) {
       JsonValue jsonValue = actions.get(i);
       if (jsonValue.getType() == JsonType.STRING) {
@@ -118,22 +132,28 @@ public class JsActionManager implements ActionManager {
       } else if (jsonValue.getType() == JsonType.OBJECT) {
         JsonObject item = (JsonObject) jsonValue;
         if (item.hasKey("action")) {
-          Action action = handleAction(item.getObject("action"), pluginId);
+          Action action = handleAction(item.getObject("action"), pluginId, context);
           parentGroup.add(action);
+
+          context.addDisposable(() -> parentGroup.remove(action));
+
         } else if (item.hasKey("group")) {
-          Action group = handleGroup(item.getObject("group"), pluginId);
+          Action group = handleGroup(item.getObject("group"), pluginId, context);
           parentGroup.add(group);
+          context.addDisposable(() -> parentGroup.remove(group));
+
         } else if (item.hasKey("reference")) {
           Action reference = actionManager.getAction(item.getString("reference"));
           if (reference != null) {
             parentGroup.add(reference);
+            context.addDisposable(() -> parentGroup.remove(reference));
           }
         }
       }
     }
   }
 
-  private Action handleAction(JsonObject action, String pluginId) {
+  private Action handleAction(JsonObject action, String pluginId, PluginContext context) {
     String id = action.getString("id");
     String text = action.getString("text");
     String description = null;
@@ -146,16 +166,22 @@ public class JsActionManager implements ActionManager {
     }
     JsAction jsAction = new JsAction(text, description, imageId, imageRegistry);
     actionManager.registerAction(id, jsAction, pluginId);
+    context.addDisposable(
+        () -> {
+          if (actionManager.hasAction(id)) {
+            actionManager.unregisterAction(id);
+          }
+        });
     if (action.hasKey("addToGroup")) {
       JsonValue addToGroup = action.get("addToGroup");
       if (addToGroup.getType() == JsonType.ARRAY) {
         JsonArray groups = (JsonArray) addToGroup;
         for (int i = 0; i < groups.length(); i++) {
           JsonObject object = groups.getObject(i);
-          addActionToGroup(jsAction, object);
+          addActionToGroup(jsAction, object, context);
         }
       } else if (addToGroup.getType() == JsonType.OBJECT) {
-        addActionToGroup(jsAction, (JsonObject) addToGroup);
+        addActionToGroup(jsAction, (JsonObject) addToGroup, context);
       }
     }
 
@@ -166,7 +192,7 @@ public class JsActionManager implements ActionManager {
     return jsAction;
   }
 
-  private void addActionToGroup(Action action, JsonObject addToGroup) {
+  private void addActionToGroup(Action action, JsonObject addToGroup, PluginContext context) {
     String groupId = addToGroup.getString("groupId");
     Action actionGroup = actionManager.getAction(groupId);
     if (actionGroup != null) {
@@ -183,6 +209,7 @@ public class JsActionManager implements ActionManager {
       }
 
       group.add(action, new Constraints(anchor, relativeId));
+      context.addDisposable(() -> group.remove(action));
     }
   }
 }

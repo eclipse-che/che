@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Singleton;
+import org.eclipse.che.ide.js.api.Disposable;
+import org.eclipse.che.ide.js.api.context.PluginContext;
 import org.eclipse.che.ide.js.api.resources.ImageElementFactory;
 import org.eclipse.che.ide.js.api.resources.ImageRegistry;
 import org.eclipse.che.ide.js.plugin.model.PluginManifest;
@@ -31,12 +33,13 @@ public class ImageRegistryImpl implements ImageRegistry {
   private Map<String, ImageFactory> imageFactories = new HashMap<>();
 
   @Override
-  public void registerUrl(String id, String url) {
+  public Disposable registerUrl(String id, String url) {
     imageFactories.put(id, () -> new Image(url).getElement());
+    return () -> imageFactories.remove(id);
   }
 
   @Override
-  public void registerHtml(String id, String html) {
+  public Disposable registerHtml(String id, String html) {
     imageFactories.put(
         id,
         () -> {
@@ -45,11 +48,13 @@ public class ImageRegistryImpl implements ImageRegistry {
           template.setInnerHTML(html);
           return template.getFirstChildElement();
         });
+    return () -> imageFactories.remove(id);
   }
 
   @Override
-  public void registerFactory(String id, ImageElementFactory factory) {
+  public Disposable registerFactory(String id, ImageElementFactory factory) {
     imageFactories.put(id, factory::create);
+    return () -> imageFactories.remove(id);
   }
 
   @Override
@@ -60,21 +65,26 @@ public class ImageRegistryImpl implements ImageRegistry {
     return null;
   }
 
-  public void registerPluginImages(List<PluginManifest> plugins) {
+  public void registerPluginImages(
+      List<PluginManifest> plugins, Map<String, PluginContext> activePlugins) {
     for (PluginManifest plugin : plugins) {
       if (plugin.getContributions().getImages() != null) {
-        handlePluginImages(plugin.getContributions().getImages());
+        PluginContext context = activePlugins.get(plugin.getPluginId());
+        handlePluginImages(plugin.getContributions().getImages(), context);
       }
     }
   }
 
-  private void handlePluginImages(JsonArray images) {
+  private void handlePluginImages(JsonArray images, PluginContext context) {
     for (int i = 0; i < images.length(); i++) {
       JsonObject imageObject = images.getObject(i);
       if (imageObject.hasKey("html")) {
-        registerHtml(imageObject.getString("id"), imageObject.getString("html"));
+        context.addDisposable(
+            registerHtml(imageObject.getString("id"), imageObject.getString("html")));
+
       } else if (imageObject.hasKey("url")) {
-        registerUrl(imageObject.getString("id"), imageObject.getString("url"));
+        context.addDisposable(
+            registerUrl(imageObject.getString("id"), imageObject.getString("url")));
       }
     }
   }

@@ -40,16 +40,6 @@ public class JsApi {
     instance = this;
   }
 
-  @JsIgnore
-  public ActionManager getActionManager() {
-    return actionManager;
-  }
-
-  @JsIgnore
-  public ImageRegistry getImageRegistry() {
-    return imageRegistry;
-  }
-
   @JsMethod(name = "api")
   public static JsApi getApi() {
     return instance;

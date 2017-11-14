@@ -61,8 +61,7 @@ public class JsAction extends BaseAction {
     if (performAction == null) {
       return;
     }
-    Presentation presentation = e.getPresentation();
-    performAction.performAction(getData(presentation));
+    performAction.performAction();
   }
 
   private ActionData getData(Presentation presentation) {

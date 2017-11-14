@@ -12,18 +12,19 @@
 package org.eclipse.che.ide.js.api.action;
 
 import jsinterop.annotations.JsType;
+import org.eclipse.che.ide.js.api.Disposable;
 
-/**
- * A manager for actions. Used to register action handlers.
- */
+/** A manager for actions. Used to register action handlers. */
 @JsType(isNative = true)
 public interface ActionManager {
 
   /**
    * Register action handlers.
+   *
    * @param actionId the action id
    * @param updateAction the update handler
    * @param performAction the perform handler
    */
-  void registerAction(String actionId, UpdateAction updateAction, PerformAction performAction);
+  Disposable registerAction(
+      String actionId, UpdateAction updateAction, PerformAction performAction);
 }

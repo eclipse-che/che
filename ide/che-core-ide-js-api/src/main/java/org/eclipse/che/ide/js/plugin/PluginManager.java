@@ -12,22 +12,28 @@
 package org.eclipse.che.ide.js.plugin;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import elemental.js.util.JsArrayOf;
 import elemental.json.JsonArray;
 import elemental.json.JsonFactory;
 import elemental.json.JsonObject;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.js.api.Disposable;
 import org.eclipse.che.ide.js.api.JsApi;
+import org.eclipse.che.ide.js.api.context.PluginContext;
 import org.eclipse.che.ide.js.impl.action.JsActionManager;
 import org.eclipse.che.ide.js.impl.resources.ImageRegistryImpl;
 import org.eclipse.che.ide.js.plugin.model.ActivateFunction;
 import org.eclipse.che.ide.js.plugin.model.PluginContributions;
+import org.eclipse.che.ide.js.plugin.model.PluginEntryPoint;
 import org.eclipse.che.ide.js.plugin.model.PluginManifest;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.requirejs.RequireJsLoader;
@@ -47,6 +53,7 @@ public class PluginManager {
   private final ImageRegistryImpl imageRegistry;
   private final JsApi jsApi;
   private final List<PluginManifest> plugins = new ArrayList<>();
+  private final Map<String, PluginContext> activePlugins = new HashMap<>();
 
   @Inject
   public PluginManager(
@@ -88,8 +95,8 @@ public class PluginManager {
   private void handlePluginMeta(AsyncCallback<Void> callback, List<String> arg) {
     try {
       parsePluginMeta(arg);
-      imageRegistry.registerPluginImages(plugins);
-      jsActionManager.registerPluginActions(plugins);
+      imageRegistry.registerPluginImages(plugins, activePlugins);
+      jsActionManager.registerPluginActions(plugins, activePlugins);
       doLoadPlugins(callback);
     } catch (PluginException e) {
       callback.onFailure(e);
@@ -119,7 +126,8 @@ public class PluginManager {
             for (int i = 0; i < modules.length(); i++) {
               RequirejsModule module = modules.get(i);
               try {
-                ActivateFunction.of(module).activate(jsApi);
+                PluginContext context = activePlugins.get(pluginManifest.getPluginId());
+                PluginEntryPoint.of(module).activate(context);
               } catch (Throwable throwable) {
                 Log.error(getClass(), throwable);
                 callback.onFailure(
@@ -168,7 +176,7 @@ public class PluginManager {
         images = jsonFactory.createArray();
       }
       PluginContributions contributions = new PluginContributions(actions, images);
-      plugins.add(
+      PluginManifest manifest =
           new PluginManifest(
               name,
               publisher,
@@ -177,7 +185,9 @@ public class PluginManager {
               description,
               main,
               pluginDependencies,
-              contributions));
+              contributions);
+      plugins.add(manifest);
+      activePlugins.put(manifest.getPluginId(), new PluginContext(jsApi));
     }
   }
 
@@ -188,5 +198,15 @@ public class PluginManager {
     }
 
     return result;
+  }
+
+  public void disablePlugin() {
+    activePlugins.forEach(
+        (s, pluginContext) -> {
+          JsArrayOf<Disposable> disposables = pluginContext.getDisposables();
+          for (int i = 0; i < disposables.length(); i++) {
+            disposables.get(i).dispose();
+          }
+        });
   }
 }
