@@ -69,6 +69,10 @@ public class TestSshServiceClient {
     deleteKey(VCS_SERVICE, keyName);
   }
 
+  public void deleteMachineKey(String keyName) throws Exception {
+    deleteKey(MACHINE_SERVICE, keyName);
+  }
+
   private void deleteKey(String serviceName, String keyName) throws Exception {
     try {
       requestFactory
