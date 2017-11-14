@@ -1,0 +1,37 @@
+<!--
+
+    Copyright (c) 2012-2017 Red Hat, Inc.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="One-thread Eclipse Che selenium tests"
+       verbose="10"
+       parallel="classes"
+       thread-count="1">
+
+    <test name="all">
+        <classes>
+            <class name="org.eclipse.che.selenium.git.CheckoutReferenceTest"/>
+            <class name="org.eclipse.che.selenium.git.CheckoutToRemoteBranchTest"/>
+            <class name="org.eclipse.che.selenium.git.CheckoutToRemoteBranchWhichAlreadyHasLinkedLocalBranchTest"/>
+            <class name="org.eclipse.che.selenium.git.FetchUpdatesAndMergeRemoteBranchIntoLocalTest"/>
+            <class name="org.eclipse.che.selenium.git.GitPullTest"/>
+            <class name="org.eclipse.che.selenium.git.ImportProjectIntoSpecifiedBranchTest"/>
+            <class name="org.eclipse.che.selenium.git.ImportRecursiveSubmoduleTest"/>
+            <class name="org.eclipse.che.selenium.git.KeepDirectoryGitImportTest"/>
+            <class name="org.eclipse.che.selenium.git.PullRequestPluginTest"/>
+            <class name="org.eclipse.che.selenium.git.PullRequestPluginWithForkTest"/>
+            <class name="org.eclipse.che.selenium.git.PushChangeNotUpdatedRepoTest"/>
+            <class name="org.eclipse.che.selenium.git.PushingChangesTest"/>
+            <class name="org.eclipse.che.selenium.git.RevertCommitTest"/>
+            <class name="org.eclipse.che.selenium.git.WorkingWithPullConflictsTest"/>
+        </classes>
+    </test>
+</suite>

@@ -21,6 +21,7 @@ public class HostConfig {
   private LxcConfParam[] lxcConf;
   private boolean publishAllPorts;
   private boolean privileged;
+  private String[] securityOpt;
   private String[] dns;
   private String[] dnsSearch;
   private String[] extraHosts;
@@ -70,6 +71,19 @@ public class HostConfig {
 
   public void setPrivileged(boolean privileged) {
     this.privileged = privileged;
+  }
+
+  public String[] getSecurityOpt() {
+    return securityOpt;
+  }
+
+  public void setSecurityOpt(String[] securityOpt) {
+    this.securityOpt = securityOpt;
+  }
+
+  public HostConfig withSecurityOpt(String[] securityOpt) {
+    this.securityOpt = securityOpt;
+    return this;
   }
 
   public Map<String, PortBinding[]> getPortBindings() {
@@ -501,6 +515,8 @@ public class HostConfig {
         + readonlyRootfs
         + ", ulimits="
         + Arrays.toString(ulimits)
+        + ", SecurityOpt="
+        + Arrays.toString(securityOpt)
         + ", portBindings="
         + portBindings
         + ", memorySwappiness="

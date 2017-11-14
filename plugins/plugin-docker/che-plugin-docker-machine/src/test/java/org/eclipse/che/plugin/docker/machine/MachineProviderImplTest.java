@@ -24,6 +24,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -388,6 +389,27 @@ public class MachineProviderImplTest {
         ArgumentCaptor.forClass(CreateContainerParams.class);
     verify(dockerConnector).createContainer(argumentCaptor.capture());
     assertTrue(argumentCaptor.getValue().getContainerConfig().getHostConfig().isPrivileged());
+  }
+
+  @Test(dataProvider = "securityOptTestProvider")
+  public void shouldSetSecurityOptOnContainerCreation(String[] securityOpt) throws Exception {
+    provider = new MachineProviderBuilder().setSecurityOpt(securityOpt).build();
+
+    createInstanceFromRecipe();
+
+    ArgumentCaptor<CreateContainerParams> argumentCaptor =
+        ArgumentCaptor.forClass(CreateContainerParams.class);
+    verify(dockerConnector).createContainer(argumentCaptor.capture());
+    assertEqualsNoOrder(
+        argumentCaptor.getValue().getContainerConfig().getHostConfig().getSecurityOpt(),
+        securityOpt);
+  }
+
+  @DataProvider(name = "securityOptTestProvider")
+  public static Object[][] securityOptTestProvider() {
+    return new Object[][] {
+      {new String[] {}}, {new String[] {"seccomp:unconfined"}}, {null},
+    };
   }
 
   @Test
@@ -1818,6 +1840,7 @@ public class MachineProviderImplTest {
     private Set<Set<String>> extraHosts;
     private boolean doForcePullImage;
     private boolean privilegedMode;
+    private SecurityOptProvider securityOptProvider;
     private int pidsLimit;
     private Set<String> devMachineEnvVars;
     private Set<String> allMachineEnvVars;
@@ -1845,6 +1868,7 @@ public class MachineProviderImplTest {
       extraHosts = emptySet();
       memorySwapMultiplier = MEMORY_SWAP_MULTIPLIER;
       pidsLimit = -1;
+      this.securityOptProvider = mock(SecurityOptProvider.class);
     }
 
     public MachineProviderBuilder setDevMachineEnvVars(Set<String> devMachineEnvVars) {
@@ -1922,6 +1946,13 @@ public class MachineProviderImplTest {
       return this;
     }
 
+    public MachineProviderBuilder setSecurityOpt(String[] securityOpt) {
+      SecurityOptProvider mock = mock(SecurityOptProvider.class);
+      when(mock.get()).thenReturn(securityOpt);
+      this.securityOptProvider = mock;
+      return this;
+    }
+
     public MachineProviderBuilder setCpuPeriod(long cpuPeriod) {
       this.cpuPeriod = cpuPeriod;
       return this;
@@ -1953,6 +1984,7 @@ public class MachineProviderImplTest {
                   allMachineVolumes,
                   doForcePullImage,
                   privilegedMode,
+                  securityOptProvider,
                   pidsLimit,
                   devMachineEnvVars,
                   allMachineEnvVars,

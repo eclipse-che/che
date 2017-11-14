@@ -341,7 +341,9 @@ get_che_server_container_id() {
 }
 
 is_docker_for_mac_or_windows() {
-  if uname -r | grep -q 'moby'; then
+  if uname -r | grep -q 'linuxkit'; then
+    return 0
+  elif uname -r | grep -q 'moby'; then
     return 0
   else
     return 1

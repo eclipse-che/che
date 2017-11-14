@@ -159,7 +159,9 @@ has_docker_for_windows_client(){
 
 is_docker_for_windows() {
 #  debug $FUNCNAME
-  if uname -r | grep -q 'moby' && has_docker_for_windows_client; then
+  if $(echo ${UNAME_R} | grep -q 'linuxkit') && has_docker_for_windows_client; then
+    return 0
+  elif $(echo ${UNAME_R} | grep -q 'moby') && has_docker_for_windows_client; then
     return 0
   else
     return 1
@@ -168,7 +170,9 @@ is_docker_for_windows() {
 
 is_docker_for_mac() {
 #  debug $FUNCNAME
-  if uname -r | grep -q 'moby' && ! has_docker_for_windows_client; then
+  if $(echo ${UNAME_R} | grep -q 'linuxkit') && ! has_docker_for_windows_client; then
+    return 0
+  elif $(echo ${UNAME_R} | grep -q 'moby') && ! has_docker_for_windows_client; then
     return 0
   else
     return 1

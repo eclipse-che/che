@@ -15,6 +15,8 @@ import io.fabric8.openshift.client.OpenShiftConfigBuilder;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.plugin.openshift.client.exception.OpenShiftException;
 
 @Singleton
@@ -28,12 +30,20 @@ public class OpenshiftWorkspaceEnvironmentProvider {
     this.openShiftCheProjectName = openShiftCheProjectName;
   }
 
-  public Config getWorkspacesOpenshiftConfig() throws OpenShiftException {
+  public Config getWorkspacesOpenshiftConfig(Subject subject) throws OpenShiftException {
     return new OpenShiftConfigBuilder().build();
   }
 
-  public String getWorkspacesOpenshiftNamespace() throws OpenShiftException {
+  public final Config getWorkspacesOpenshiftConfig() throws OpenShiftException {
+    return getWorkspacesOpenshiftConfig(EnvironmentContext.getCurrent().getSubject());
+  }
+
+  public String getWorkspacesOpenshiftNamespace(Subject subject) throws OpenShiftException {
     return openShiftCheProjectName;
+  }
+
+  public final String getWorkspacesOpenshiftNamespace() throws OpenShiftException {
+    return getWorkspacesOpenshiftNamespace(EnvironmentContext.getCurrent().getSubject());
   }
 
   public Boolean areWorkspacesExternal() {
