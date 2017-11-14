@@ -777,13 +777,14 @@ public class WorkspaceService extends Service {
 
   private List<WorkspaceDto> withLinks(List<WorkspaceDto> workspaces) throws ServerException {
     for (WorkspaceDto workspace : workspaces) {
-      workspace.setLinks(linksGenerator.genLinks(workspace));
+      workspace.setLinks(linksGenerator.genLinks(workspace, getServiceContext()));
     }
     return workspaces;
   }
 
   private WorkspaceDto asDtoWithLinksAndToken(Workspace workspace) throws ServerException {
-    WorkspaceDto workspaceDto = asDto(workspace).withLinks(linksGenerator.genLinks(workspace));
+    WorkspaceDto workspaceDto =
+        asDto(workspace).withLinks(linksGenerator.genLinks(workspace, getServiceContext()));
 
     RuntimeDto runtimeDto = workspaceDto.getRuntime();
     if (runtimeDto != null) {
