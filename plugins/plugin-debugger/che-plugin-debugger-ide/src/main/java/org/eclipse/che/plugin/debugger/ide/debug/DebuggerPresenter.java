@@ -312,6 +312,7 @@ public class DebuggerPresenter extends BasePresenter
       view.setThreadNotSuspendPlaceHolderVisible(false);
       refreshVariables(threadId, 0);
       refreshWatchExpressions(threadId, 0);
+      return;
     }
 
     view.setThreadNotSuspendPlaceHolderVisible(!threadState.isSuspended());
