@@ -200,30 +200,29 @@ public class BreakpointManagerImpl
 
   @Override
   public void update(final Breakpoint breakpoint) {
+    breakpointStorage.update(breakpoint);
+    activeBreakpoints.remove(breakpoint);
+
+    BreakpointRenderer renderer =
+        getBreakpointRendererForFile(breakpoint.getLocation().getTarget());
+    if (renderer != null) {
+      renderer.setBreakpointMark(breakpoint, false, BreakpointManagerImpl.this::onLineChange);
+    }
+
     Debugger debugger = debuggerManager.getActiveDebugger();
     if (debugger != null) {
       debugger
           .deleteBreakpoint(breakpoint)
           .then(
               success -> {
-                activeBreakpoints.remove(breakpoint);
-                breakpointStorage.update(breakpoint);
-
-                BreakpointRenderer renderer =
-                    getBreakpointRendererForFile(breakpoint.getLocation().getTarget());
-                if (renderer != null) {
-                  renderer.setBreakpointMark(
-                      breakpoint, false, BreakpointManagerImpl.this::onLineChange);
-                }
-
                 if (breakpoint.isEnabled()) {
                   debugger.addBreakpoint(breakpoint);
                 }
-
-                for (BreakpointManagerObserver observer : observers) {
-                  observer.onBreakpointUpdated(breakpoint);
-                }
               });
+    }
+
+    for (BreakpointManagerObserver observer : observers) {
+      observer.onBreakpointUpdated(breakpoint);
     }
   }
 
