@@ -428,8 +428,9 @@ public class FindTextFeatureTest {
     menu.runCommand(WORKSPACE, CREATE_PROJECT);
     wizard.selectProjectAndCreate(WEB_JAVA_PETCLINIC, "web-java-petclinic");
     notificationsPopupPanel.waitProgressPopupPanelClose();
+    projectExplorer.waitItem("web-java-petclinic");
     projectExplorer.selectItem("web-java-petclinic");
-    projectExplorer.openItemByPath("web-java-petclinic");
+
     findText.launchFindFormByKeyboard();
     findText.waitFindTextMainFormIsOpen();
     findText.typeTextIntoFindField("Str");
