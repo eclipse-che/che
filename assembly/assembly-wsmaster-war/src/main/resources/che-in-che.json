@@ -64,7 +64,7 @@
           "type": "Run"
         },
         {
-          "commandLine": "cd ${current.project.path} && mvn gwt:codeserver -pl :che-ide-gwt-app -am -Pfast,sdm-in-che Dskip-enforce -Dskip-validate-sources -Dmaven.main.skip -Dmaven.resources.skip -Dmaven.buildNumber.skip",
+          "commandLine": "cd ${current.project.path} && mvn gwt:codeserver -pl :assembly-ide-war -am -Pfast,sdm-in-che -Dskip-enforce -Dskip-validate-sources -Dmaven.main.skip -Dmaven.resources.skip -Dche.dto.skip -Dskip-enforce -Dskip-validate-sources -Psdm-in-che",
           "name": "GWT SDM",
           "type": "gwt_sdm_che",
           "attributes": {
