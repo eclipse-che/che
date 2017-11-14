@@ -39,14 +39,10 @@ public class DockerRegistryChecker {
   @Named("che.docker.registry")
   private String machineDockerRegistry;
 
-  @Inject
-  @Named("che.docker.registry_for_snapshots")
-  private boolean snapshotUseRegistry;
-
   /** Checks that registry is available and if it is not - logs warning message. */
   @PostConstruct
   private void checkRegistryIsAvailable() throws IOException {
-    if (snapshotUseRegistry && !isNullOrEmpty(machineDockerRegistry)) {
+    if (!isNullOrEmpty(machineDockerRegistry)) {
       String registryUrl = "http://" + machineDockerRegistry;
 
       LOG.info("Probing registry '{}'", registryUrl);

@@ -7,28 +7,12 @@ items:
   metadata:
     labels:
       app: che
-      provider: fabric8
-      version: 2.0.52
-      group: io.fabric8.tenant.apps
     name: che
 - apiVersion: v1
   kind: Service
   metadata:
-    annotations:
-      fabric8.io/app-menu: development
-      fabric8.io/git-commit: 3ef7c12b7582d966086edecff600421873f3d836
-      fabric8.io/scm-con-url: scm:git:git@github.com:fabric8io/tenant-che.git/tenant-che-apps/che
-      fabric8.io/scm-url: http://github.com/fabric8io/tenant-che/tenant-che-apps/che
-      fabric8.io/iconUrl: https://cdn.rawgit.com/fabric8io/tenant-che/tenant-che-apps/che/master/apps/che/src/main/fabric8/icon.png
-      fabric8.io/git-branch: release-v2.0.52
-      fabric8.io/scm-devcon-url: scm:git:git@github.com:fabric8io/tenant-che.git/tenant-che-apps/che
-      fabric8.io/scm-tag: fabric8io/tenant-che-1.0.0
     labels:
       app: che
-      provider: fabric8
-      expose: "false"
-      version: 2.0.52
-      group: io.fabric8.tenant.apps
     name: che-host
   spec:
     ports:
@@ -38,16 +22,11 @@ items:
       targetPort: 8080
     selector:
       app: che
-      provider: fabric8
-      group: io.fabric8.tenant.apps
 - apiVersion: v1
   kind: PersistentVolumeClaim
   metadata:
     labels:
       app: che
-      provider: fabric8
-      version: 2.0.52
-      group: io.fabric8.tenant.apps
     name: che-data-volume
   spec:
     accessModes:
@@ -60,9 +39,6 @@ items:
   metadata:
     labels:
       app: che
-      provider: fabric8
-      version: 2.0.52
-      group: io.fabric8.tenant.apps
     name: claim-che-workspace
   spec:
     accessModes:
@@ -75,11 +51,9 @@ items:
   metadata:
     labels:
       app: che
-      provider: fabric8
-      version: 2.0.52
-      group: io.fabric8.tenant.apps
     name: che
   data:
+    CHE_MULTIUSER: "false"
     CHE_INFRASTRUCTURE_ACTIVE: openshift
     CHE_INFRA_OPENSHIFT_MASTER__URL: ""
     CHE_INFRA_OPENSHIFT_USERNAME: ""
@@ -95,86 +69,74 @@ items:
     CHE_HOST: ${DEFAULT_OPENSHIFT_NAMESPACE_URL}
     CHE_WEBSOCKET_ENDPOINT:  ws://${DEFAULT_OPENSHIFT_NAMESPACE_URL}/api/websocket
     CHE_PORT: "8080"
-    DOCKER_HOST: tcp://172.18.0.1:2375
-    hostname-http: ${PROJECT_NAME}-che.${DOMAIN}
-    workspace-storage: /home/user/che/workspaces
-    workspace-storage-create-folders: "false"
-    local-conf-dir: /etc/conf
-    openshift-serviceaccountname: che
-    che-server-evaluation-strategy: docker-local-custom
-    che.logs.dir: /data/logs
-    che.docker.server_evaluation_strategy.custom.template: <serverName>-<if(isDevMachine)><workspaceIdWithoutPrefix><else><machineName><endif>-<externalAddress>
-    che.docker.server_evaluation_strategy.custom.external.protocol: https
-    che.predefined.stacks.reload_on_start: "true"
-    log-level: INFO
-    docker-connector: openshift
-    port: "8080"
-    remote-debugging-enabled: "false"
-    che-oauth-github-forceactivation: "true"
-    workspaces-memory-limit: 1900Mi
-    workspaces-memory-request: 1100Mi
-    enable-workspaces-autostart: "false"
-    keycloak-oso-endpoint: ${KEYCLOAK_OSO_ENDPOINT}
-    keycloak-github-endpoint: ${KEYCLOAK_GITHUB_ENDPOINT}
-    keycloak-disabled: "false"
-    che-server-java-opts: -XX:+UseG1GC -XX:+UseStringDeduplication -XX:MinHeapFreeRatio=20 -XX:MaxHeapFreeRatio=40 -XX:MaxRAM=700m -Xms256m
-    che-workspaces-java-opts: -XX:+UseG1GC -XX:+UseStringDeduplication -XX:MinHeapFreeRatio=20 -XX:MaxHeapFreeRatio=40 -XX:MaxRAM=1300m -Xms256m
-    che-openshift-secure-routes: "true"
-    che-secure-external-urls: "true"
-    che-server-timeout-ms: "3600000"
-    che-openshift-precreate-subpaths: "false"
-    che-workspace-auto-snapshot: "false"
-    che-keycloak-auth-server-url: ${CHE_KEYCLOAK_AUTH__SERVER__URL}
-    che-keycloak-realm: ${CHE_KEYCLOAK_REALM}
-    che-keycloak-client-id: ${CHE_KEYCLOAK_CLIENT__ID}
+    CHE_LOCAL_CONF_DIR: /etc/conf
+    CHE_LOGS_DIR: /data/logs
+    CHE_PREDEFINED_STACKS_RELOAD__ON__START: "true"
+    CHE_LOG_LEVEL: INFO
+    CHE_PORT: "8080"
+    CHE_OAUTH_GITHUB_FORCEACTIVATION: "true"
+    CHE_WORKSPACE_AUTO_START: "false"
+    CHE_KEYCLOAK_OSO_ENDPOINT: ${CHE_KEYCLOAK_OSO_ENDPOINT}
+    CHE_KEYCLOAK_GITHUB_ENDPOINT: ${KEYCLOAK_GITHUB_ENDPOINT}
+    CHE_SERVER_JAVA_OPTS: -XX:+UseG1GC -XX:+UseStringDeduplication -XX:MinHeapFreeRatio=20 -XX:MaxHeapFreeRatio=40 -XX:MaxRAM=700m -Xms256m
+    CHE_WORKSPACE_JAVA_OPTIONS: -XX:+UseG1GC -XX:+UseStringDeduplication -XX:MinHeapFreeRatio=20 -XX:MaxHeapFreeRatio=40 -XX:MaxRAM=1300m -Xms256m
+    CHE_KEYCLOAK_AUTH__SERVER__URL: ${CHE_KEYCLOAK_AUTH__SERVER__URL}
+    CHE_KEYCLOAK_REALM: ${CHE_KEYCLOAK_REALM}
+    CHE_KEYCLOAK_CLIENT__ID: ${CHE_KEYCLOAK_CLIENT__ID}
+    CHE_OAUTH_GITHUB_CLIENTID: ${CHE_OAUTH_GITHUB_CLIENTID}
+    CHE_OAUTH_GITHUB_CLIENTSECRET: ${CHE_OAUTH_GITHUB_CLIENTSECRET}
 - apiVersion: apps.openshift.io/v1
   kind: DeploymentConfig
   metadata:
-    annotations:
-      fabric8.io/git-commit: 3ef7c12b7582d966086edecff600421873f3d836
-      fabric8.io/metrics-path: dashboard/file/kubernetes-pods.json/?var-project=che&var-version=2.0.52
-      fabric8.io/scm-con-url: scm:git:git@github.com:fabric8io/tenant-che.git/tenant-che-apps/che
-      fabric8.io/scm-url: http://github.com/fabric8io/tenant-che/tenant-che-apps/che
-      fabric8.io/iconUrl: https://cdn.rawgit.com/fabric8io/tenant-che/tenant-che-apps/che/master/apps/che/src/main/fabric8/icon.png
-      fabric8.io/git-branch: release-v2.0.52
-      fabric8.io/scm-devcon-url: scm:git:git@github.com:fabric8io/tenant-che.git/tenant-che-apps/che
-      fabric8.io/scm-tag: fabric8io/tenant-che-1.0.0
     labels:
       app: che
-      provider: fabric8
-      version: 2.0.52
-      group: io.fabric8.tenant.apps
     name: che
   spec:
     replicas: 1
     revisionHistoryLimit: 2
     selector:
       app: che
-      provider: fabric8
-      group: io.fabric8.tenant.apps
     strategy:
       recreateParams:
         timeoutSeconds: 10000
       type: Recreate
     template:
       metadata:
-        annotations:
-          fabric8.io/git-commit: 3ef7c12b7582d966086edecff600421873f3d836
-          fabric8.io/metrics-path: dashboard/file/kubernetes-pods.json/?var-project=che&var-version=2.0.52
-          fabric8.io/scm-con-url: scm:git:git@github.com:fabric8io/tenant-che.git/tenant-che-apps/che
-          fabric8.io/scm-url: http://github.com/fabric8io/tenant-che/tenant-che-apps/che
-          fabric8.io/iconUrl: https://cdn.rawgit.com/fabric8io/tenant-che/tenant-che-apps/che/master/apps/che/src/main/fabric8/icon.png
-          fabric8.io/git-branch: release-v2.0.52
-          fabric8.io/scm-devcon-url: scm:git:git@github.com:fabric8io/tenant-che.git/tenant-che-apps/che
-          fabric8.io/scm-tag: fabric8io/tenant-che-1.0.0
         labels:
           app: che
-          provider: fabric8
-          version: 2.0.52
-          group: io.fabric8.tenant.apps
       spec:
         containers:
         - env:
+          - name: CHE_OAUTH_GITHUB_CLIENTID
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_OAUTH_GITHUB_CLIENTID
+                name: che
+          - name: CHE_OAUTH_GITHUB_CLIENTSECRET
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_OAUTH_GITHUB_CLIENTSECRET
+                name: che
+          - name: CHE_MULTIUSER
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_MULTIUSER
+                name: che
+          - name: CHE_KEYCLOAK_AUTH__SERVER__URL
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_KEYCLOAK_AUTH__SERVER__URL
+                name: che
+          - name: CHE_KEYCLOAK_REALM
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_KEYCLOAK_REALM
+                name: che
+          - name: CHE_KEYCLOAK_CLIENT__ID
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_KEYCLOAK_CLIENT__ID
+                name: che
           - name: CHE_INFRA_OPENSHIFT_MASTER__URL
             valueFrom:
               configMapKeyRef:
@@ -230,74 +192,35 @@ items:
               configMapKeyRef:
                 key: CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL
                 name: che
-          - name: DOCKER_HOST
-            valueFrom:
-              configMapKeyRef:
-                key: DOCKER_HOST
-                name: che
           - name: CHE_WEBSOCKET_ENDPOINT
             valueFrom:
               configMapKeyRef:
                 key: CHE_WEBSOCKET_ENDPOINT
                 name: che
-          - name: CHE_DOCKER_IP_EXTERNAL
-            valueFrom:
-              configMapKeyRef:
-                key: hostname-http
-                name: che
-          - name: CHE_WORKSPACE_STORAGE
-            valueFrom:
-              configMapKeyRef:
-                key: workspace-storage
-                name: che
           - name: CHE_LOGS_DIR
             valueFrom:
               configMapKeyRef:
-                key: che.logs.dir
+                key: CHE_LOGS_DIR
                 name: che
-          - name: CHE_WORKSPACE_STORAGE_CREATE_FOLDERS
+          - name: CHE_LOCAL_CONF_DIR
             valueFrom:
               configMapKeyRef:
-                key: workspace-storage-create-folders
-                name: che
-          - name: CHE_OPENSHIFT_PROJECT
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
-          - name: CHE_OPENSHIFT_SERVICEACCOUNTNAME
-            valueFrom:
-              configMapKeyRef:
-                key: openshift-serviceaccountname
-                name: che
-          - name: CHE_DOCKER_SERVER__EVALUATION__STRATEGY
-            valueFrom:
-              configMapKeyRef:
-                key: che-server-evaluation-strategy
-                name: che
-          - name: CHE_DOCKER_SERVER__EVALUATION__STRATEGY_CUSTOM_TEMPLATE
-            valueFrom:
-              configMapKeyRef:
-                key: che.docker.server_evaluation_strategy.custom.template
-                name: che
-          - name: CHE_DOCKER_SERVER__EVALUATION__STRATEGY_CUSTOM_EXTERNAL_PROTOCOL
-            valueFrom:
-              configMapKeyRef:
-                key: che.docker.server_evaluation_strategy.custom.external.protocol
+                key: CHE_LOCAL_CONF_DIR
                 name: che
           - name: CHE_PREDEFINED_STACKS_RELOAD__ON__START
             valueFrom:
               configMapKeyRef:
-                key: che.predefined.stacks.reload_on_start
+                key: CHE_PREDEFINED_STACKS_RELOAD__ON__START
                 name: che
           - name: CHE_LOG_LEVEL
             valueFrom:
               configMapKeyRef:
-                key: log-level
+                key: CHE_LOG_LEVEL
                 name: che
           - name: CHE_PORT
             valueFrom:
               configMapKeyRef:
-                key: port
+                key: CHE_PORT
                 name: che
           - name: CHE_HOST
             valueFrom:
@@ -309,100 +232,50 @@ items:
               configMapKeyRef:
                 key: CHE_API
                 name: che
-          - name: CHE_DOCKER_CONNECTOR
-            valueFrom:
-              configMapKeyRef:
-                key: docker-connector
-                name: che
-          - name: CHE_DEBUG_SERVER
-            valueFrom:
-              configMapKeyRef:
-                key: remote-debugging-enabled
-                name: che
           - name: CHE_OAUTH_GITHUB_FORCEACTIVATION
             valueFrom:
               configMapKeyRef:
-                key: che-oauth-github-forceactivation
-                name: che
-          - name: CHE_OPENSHIFT_WORKSPACE_MEMORY_OVERRIDE
-            valueFrom:
-              configMapKeyRef:
-                key: workspaces-memory-limit
-                name: che
-          - name: CHE_OPENSHIFT_WORKSPACE_MEMORY_REQUEST
-            valueFrom:
-              configMapKeyRef:
-                key: workspaces-memory-request
+                key: CHE_OAUTH_GITHUB_FORCEACTIVATION
                 name: che
           - name: CHE_WORKSPACE_AUTO__START
             valueFrom:
               configMapKeyRef:
-                key: enable-workspaces-autostart
+                key: CHE_WORKSPACE_AUTO_START
                 name: che
           - name: JAVA_OPTS
             valueFrom:
               configMapKeyRef:
-                key: che-server-java-opts
+                key: CHE_SERVER_JAVA_OPTS
                 name: che
           - name: CHE_WORKSPACE_JAVA_OPTIONS
             valueFrom:
               configMapKeyRef:
-                key: che-workspaces-java-opts
-                name: che
-          - name: CHE_OPENSHIFT_SECURE_ROUTES
-            valueFrom:
-              configMapKeyRef:
-                key: che-openshift-secure-routes
-                name: che
-          - name: CHE_DOCKER_SERVER__EVALUATION__STRATEGY_SECURE_EXTERNAL_URLS
-            valueFrom:
-              configMapKeyRef:
-                key: che-secure-external-urls
-                name: che
-          - name: CHE_OPENSHIFT_SERVER_INACTIVE_STOP_TIMEOUT_MS
-            valueFrom:
-              configMapKeyRef:
-                key: che-server-timeout-ms
-                name: che
-          - name: CHE_OPENSHIFT_PRECREATE_WORKSPACE_DIRS
-            valueFrom:
-              configMapKeyRef:
-                key: che-openshift-precreate-subpaths
+                key: CHE_WORKSPACE_JAVA_OPTIONS
                 name: che
           - name: CHE_KEYCLOAK_OSO_ENDPOINT
             valueFrom:
               configMapKeyRef:
-                key: keycloak-oso-endpoint
+                key: CHE_KEYCLOAK_OSO_ENDPOINT
                 name: che
           - name: CHE_KEYCLOAK_GITHUB_ENDPOINT
             valueFrom:
               configMapKeyRef:
-                key: keycloak-github-endpoint
-                name: che
-          - name: CHE_KEYCLOAK_DISABLED
-            valueFrom:
-              configMapKeyRef:
-                key: keycloak-disabled
-                name: che
-          - name: CHE_WORKSPACE_AUTO__SNAPSHOT
-            valueFrom:
-              configMapKeyRef:
-                key: che-workspace-auto-snapshot
+                key: CHE_KEYCLOAK_GITHUB_ENDPOINT
                 name: che
           - name: CHE_KEYCLOAK_AUTH__SERVER__URL
             valueFrom:
               configMapKeyRef:
-                key: che-keycloak-auth-server-url
+                key: CHE_KEYCLOAK_AUTH__SERVER__URL
                 name: che
           - name: CHE_KEYCLOAK_REALM
             valueFrom:
               configMapKeyRef:
-                key: che-keycloak-realm
+                key: CHE_KEYCLOAK_REALM
                 name: che
           - name: CHE_KEYCLOAK_CLIENT__ID
             valueFrom:
               configMapKeyRef:
-                key: che-keycloak-client-id
+                key: CHE_KEYCLOAK_CLIENT__ID
                 name: che
           image: registry.devshift.net/che/che:291ebd9-fabric8-e470151
           imagePullPolicy: IfNotPresent
@@ -446,9 +319,6 @@ items:
   metadata:
     labels:
       app: che
-      provider: fabric8
-      version: 2.0.52
-      group: io.fabric8.tenant.apps
     name: che
   spec:
     tls:

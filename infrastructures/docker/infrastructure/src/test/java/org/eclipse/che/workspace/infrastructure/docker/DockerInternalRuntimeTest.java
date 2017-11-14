@@ -58,9 +58,7 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConf
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.monit.AbnormalMachineStopHandler;
 import org.eclipse.che.workspace.infrastructure.docker.network.NetworkLifecycle;
-import org.eclipse.che.workspace.infrastructure.docker.registry.DockerRegistryClient;
 import org.eclipse.che.workspace.infrastructure.docker.server.mapping.ExternalIpURLRewriter;
-import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotDao;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -123,8 +121,6 @@ public class DockerInternalRuntimeTest {
             mock(ExternalIpURLRewriter.class),
             networks,
             starter,
-            mock(SnapshotDao.class),
-            mock(DockerRegistryClient.class),
             eventService,
             bootstrapperFactory,
             serversCheckerFactory,

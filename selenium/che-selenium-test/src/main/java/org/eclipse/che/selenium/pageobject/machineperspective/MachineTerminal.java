@@ -71,18 +71,31 @@ public class MachineTerminal {
   @FindBy(xpath = Locators.TERMINAL_CONSOLE_CONTAINER_XPATH)
   WebElement defaultTermContainer;
 
-  /** wait default terminal tab */
+  /** waits default terminal tab */
   public void waitTerminalTab() {
     new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC).until(visibilityOf(defaultTermTab));
   }
 
-  /** wait default terminal tab */
-  public void waitTerminalTab(int termNumber) {
+  /**
+   * waits default terminal tab
+   *
+   * @param timeWait time of waiting terminal container in seconds
+   */
+  public void waitTerminalTab(int timeWait) {
+    new WebDriverWait(seleniumWebDriver, timeWait).until(visibilityOf(defaultTermTab));
+  }
+
+  /**
+   * waits terminal tab with number
+   *
+   * @param termNumber number of terminal
+   */
+  public void waitNumberTerminalTab(int termNumber) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(By.xpath(getTerminalTabXPath(termNumber))));
   }
 
-  /** wait appearance the main terminal container */
+  /** waits appearance the main terminal container */
   public void waitTerminalConsole() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(visibilityOf(defaultTermContainer));
@@ -98,7 +111,7 @@ public class MachineTerminal {
   }
 
   /**
-   * wait appearance the main terminal container
+   * waits appearance the main terminal container
    *
    * @param timeWait time of waiting terminal container in seconds
    */
@@ -106,7 +119,7 @@ public class MachineTerminal {
     new WebDriverWait(seleniumWebDriver, timeWait).until(visibilityOf(defaultTermContainer));
   }
 
-  /** wait appearance the main terminal container */
+  /** gets visible text from terminal container */
   public String getVisibleTextFromTerminal() {
     return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(visibilityOf(defaultTermContainer))
@@ -114,7 +127,7 @@ public class MachineTerminal {
   }
 
   /**
-   * wait text into the terminal
+   * waits text into the terminal
    *
    * @param expectedText expected text into terminal
    */
@@ -124,7 +137,7 @@ public class MachineTerminal {
   }
 
   /**
-   * wait expected text is not present in the terminal
+   * waits expected text is not present in the terminal
    *
    * @param expectedText expected text
    */
@@ -136,7 +149,7 @@ public class MachineTerminal {
   }
 
   /**
-   * wait text into the terminal
+   * waits text into the terminal
    *
    * @param expectedText expected text into terminal
    * @param definedTimeout timeout in seconds defined with user

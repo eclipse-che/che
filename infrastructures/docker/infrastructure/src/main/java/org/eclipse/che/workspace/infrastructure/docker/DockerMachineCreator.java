@@ -31,8 +31,6 @@ public class DockerMachineCreator {
 
   private final DockerConnector docker;
   private final String registry;
-  private final boolean snapshotUseRegistry;
-  private final String registryNamespace;
   private final String internalDockerIP;
   private final DockerMachineStopDetector dockerMachineStopDetector;
 
@@ -40,14 +38,10 @@ public class DockerMachineCreator {
   public DockerMachineCreator(
       DockerConnector docker,
       @Named("che.docker.registry") String registry,
-      @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry,
-      @Named("che.docker.namespace") @Nullable String registryNamespace,
       @Named("che.docker.ip") @Nullable String internalDockerIP,
       DockerMachineStopDetector dockerMachineStopDetector) {
     this.docker = docker;
     this.registry = registry;
-    this.snapshotUseRegistry = snapshotUseRegistry;
-    this.registryNamespace = registryNamespace;
     this.internalDockerIP = internalDockerIP;
     this.dockerMachineStopDetector = dockerMachineStopDetector;
   }
@@ -79,8 +73,6 @@ public class DockerMachineCreator {
         docker,
         new ServersMapper(hostname).map(networkSettings.getPorts(), configs),
         registry,
-        snapshotUseRegistry,
-        registryNamespace,
         dockerMachineStopDetector);
   }
 }
