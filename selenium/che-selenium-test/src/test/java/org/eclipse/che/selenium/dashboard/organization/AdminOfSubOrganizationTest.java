@@ -41,9 +41,9 @@ import org.testng.annotations.Test;
  *
  * @author Ann Shumilova
  */
-public class AdminOfSubOrganizationViewsTest {
-  private static final String PARENT_ORG_NAME = generate("organization", 5);
-  private static final String CHILD_ORG_NAME = generate("organization", 5);
+public class AdminOfSubOrganizationTest {
+  private static final String PARENT_ORG_NAME = generate("parent-org", 5);
+  private static final String CHILD_ORG_NAME = generate("child-org", 5);
 
   private OrganizationDto parentOrganization;
   private OrganizationDto childOrganization;
@@ -71,8 +71,8 @@ public class AdminOfSubOrganizationViewsTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    for (OrganizationDto organization : testOrganizationServiceClient.getAll())
-      testOrganizationServiceClient.deleteById(organization.getId());
+    testOrganizationServiceClient.deleteById(parentOrganization.getId());
+    testOrganizationServiceClient.deleteById(childOrganization.getId());
   }
 
   @Test
@@ -88,7 +88,7 @@ public class AdminOfSubOrganizationViewsTest {
     assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), organizationsCount);
     assertEquals(organizationListPage.getOrganizationsToolbarTitle(), "Organizations");
     assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), organizationsCount);
-    assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount);
+    assertTrue(organizationListPage.getOrganizationListItemCount() >= organizationsCount);
     assertFalse(organizationListPage.isAddOrganizationButtonVisible());
     assertTrue(organizationListPage.isSearchInputVisible());
 

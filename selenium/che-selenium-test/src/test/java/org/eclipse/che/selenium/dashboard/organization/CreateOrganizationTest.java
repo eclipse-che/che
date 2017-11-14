@@ -18,7 +18,6 @@ import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
@@ -57,18 +56,19 @@ public class CreateOrganizationTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    for (OrganizationDto organization : testOrganizationServiceClient.getAll())
-      testOrganizationServiceClient.deleteById(organization.getId());
+    testOrganizationServiceClient.deleteByName(SUB_ORGANIZATION_NAME);
+    testOrganizationServiceClient.deleteByName(ORGANIZATION_NAME);
   }
 
   @Test
   public void createOrganizationTest() {
     int organizationsCount = 1;
 
-    // Create a new organization
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
+
+    // Create a new organization
     organizationListPage.clickAddOrganizationButton();
     addOrganization.waitAddOrganization();
     addOrganization.setOrganizationName(ORGANIZATION_NAME);
@@ -81,12 +81,13 @@ public class CreateOrganizationTest {
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
-    assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount);
+    assertTrue(organizationListPage.getOrganizationListItemCount() >= organizationsCount);
     assertTrue(organizationListPage.getValues(NAME).contains(ORGANIZATION_NAME));
 
-    // Create sub-organization
     organizationListPage.clickOnOrganization(ORGANIZATION_NAME);
     organizationPage.waitOrganizationName(ORGANIZATION_NAME);
+
+    // Create sub-organization
     organizationPage.clickSubOrganizationsTab();
     organizationListPage.waitForOrganizationsList();
     organizationPage.clickAddSuborganizationButton();

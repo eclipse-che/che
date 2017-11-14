@@ -26,7 +26,7 @@ import org.testng.annotations.Test;
  *
  * @author Ann Shumilova
  */
-public class UserEmptyOrganizationViewsTest {
+public class UserEmptyOrganizationTest {
   @Inject private OrganizationListPage organizationListPage;
   @Inject private NavigationBar navigationBar;
   @Inject private Dashboard dashboard;

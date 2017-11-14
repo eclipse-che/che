@@ -38,10 +38,10 @@ import org.testng.annotations.Test;
  * @author Ann Shumilova
  */
 public class RenameOrganizationTest {
-  private static final String PARENT_ORG_NAME = generate("organization", 5);
-  private static final String CHILD_ORG_NAME = generate("organization", 5);
-  private static final String NEW_PARENT_ORG_NAME = generate("organization", 5);
-  private static final String NEW_CHILD_ORG_NAME = generate("organization", 5);
+  private static final String PARENT_ORG_NAME = generate("parent-org", 5);
+  private static final String CHILD_ORG_NAME = generate("child-org", 5);
+  private static final String NEW_PARENT_ORG_NAME = generate("new-parent-org", 5);
+  private static final String NEW_CHILD_ORG_NAME = generate("new-child-org", 5);
 
   private OrganizationDto parentOrganization;
   private OrganizationDto childOrganization;
@@ -63,7 +63,6 @@ public class RenameOrganizationTest {
     parentOrganization = testOrganizationServiceClient.create(PARENT_ORG_NAME);
     childOrganization =
         testOrganizationServiceClient.create(CHILD_ORG_NAME, parentOrganization.getId());
-
     testOrganizationServiceClient.addAdmin(parentOrganization.getId(), testUser.getId());
     testOrganizationServiceClient.addAdmin(childOrganization.getId(), testUser.getId());
 
@@ -72,8 +71,8 @@ public class RenameOrganizationTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    for (OrganizationDto organization : testOrganizationServiceClient.getAll())
-      testOrganizationServiceClient.deleteById(organization.getId());
+    testOrganizationServiceClient.deleteById(parentOrganization.getId());
+    testOrganizationServiceClient.deleteById(childOrganization.getId());
   }
 
   @Test(priority = 1)
@@ -83,7 +82,15 @@ public class RenameOrganizationTest {
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
 
-    // Open the parent organization and try to set is not valid name
+    // Check organization renaming with name just ' '
+    renameOrganizationWithInvalidName(" ");
+
+    // Check organization renaming with name more than 20 symbols
+    renameOrganizationWithInvalidName(generate("organization-name", 10));
+
+    // Check organization renaming with name that contains invalid characters
+    renameOrganizationWithInvalidName("_organization$");
+
     organizationListPage.clickOnOrganization(parentOrganization.getName());
     organizationPage.waitOrganizationTitle(parentOrganization.getName());
     organizationPage.setOrganizationName(" ");
@@ -136,5 +143,16 @@ public class RenameOrganizationTest {
     organizationListPage.waitForOrganizationsList();
     assertTrue(organizationListPage.getValues(NAME).contains(path));
     assertTrue(organizationListPage.getValues(NAME).contains(NEW_PARENT_ORG_NAME));
+  }
+
+  private void renameOrganizationWithInvalidName(String organizationName) {
+    organizationListPage.clickOnOrganization(parentOrganization.getName());
+    organizationPage.waitOrganizationTitle(parentOrganization.getName());
+    organizationPage.setOrganizationName(organizationName);
+    editMode.waitDisplayed();
+    assertFalse(editMode.isSaveEnabled());
+    editMode.clickCancel();
+    editMode.waitHidden();
+    assertEquals(parentOrganization.getName(), organizationPage.getOrganizationName());
   }
 }

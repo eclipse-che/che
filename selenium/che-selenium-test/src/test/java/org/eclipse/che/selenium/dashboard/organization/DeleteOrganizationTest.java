@@ -13,9 +13,12 @@ package org.eclipse.che.selenium.dashboard.organization;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import java.util.ArrayList;
+import java.util.List;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
@@ -37,6 +40,7 @@ public class DeleteOrganizationTest {
   private static final String PARENT_ORG_NAME = generate("organization", 5);
   private static final String CHILD_ORG_NAME = generate("organization", 5);
 
+  private List<OrganizationDto> organizations = new ArrayList<>();
   private OrganizationDto parentOrganization;
   private OrganizationDto childOrganization;
 
@@ -57,13 +61,15 @@ public class DeleteOrganizationTest {
     childOrganization = testOrganizationServiceClient.create(CHILD_ORG_NAME);
     testOrganizationServiceClient.addAdmin(parentOrganization.getId(), testUser.getId());
     testOrganizationServiceClient.addAdmin(childOrganization.getId(), testUser.getId());
+    organizations.add(parentOrganization);
+    organizations.add(childOrganization);
 
     dashboard.open(testUser.getName(), testUser.getPassword());
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    for (OrganizationDto organization : testOrganizationServiceClient.getAll())
+    for (OrganizationDto organization : organizations)
       testOrganizationServiceClient.deleteById(organization.getId());
   }
 
@@ -91,7 +97,7 @@ public class DeleteOrganizationTest {
     organizationListPage.waitForOrganizationsList();
     organizationListPage.waitForOrganizationIsRemoved(childOrganization.getQualifiedName());
     assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), 1);
-    assertEquals(organizationListPage.getOrganizationListItemCount(), 1);
+    assertTrue(organizationListPage.getOrganizationListItemCount() >= 1);
   }
 
   @Test(priority = 1)

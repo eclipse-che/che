@@ -33,7 +33,7 @@ import org.testng.annotations.Test;
 /** @author Sergey Skorik */
 public class OrganizationMembersTest {
   private static final String PRE_CREATED_ORG_NAME = generate("organization", 5);
-  private static final String NEW_ORG_NAME = generate("organization", 5);
+  private static final String NEW_ORG_NAME = generate("new-org", 5);
 
   private OrganizationDto organization;
   private String memberEmail;
@@ -63,8 +63,8 @@ public class OrganizationMembersTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    for (OrganizationDto organization : testOrganizationServiceClient.getAll())
-      testOrganizationServiceClient.deleteById(organization.getId());
+    testOrganizationServiceClient.deleteByName(PRE_CREATED_ORG_NAME);
+    testOrganizationServiceClient.deleteByName(NEW_ORG_NAME);
   }
 
   @Test
