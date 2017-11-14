@@ -335,30 +335,28 @@ public final class ResourceManager {
   Promise<Folder> createFolder(final Container parent, final String name) {
     final Path path = Path.valueOf(name);
 
-    return findResource(parent.getLocation().append(path), true)
+    Optional<Resource> existed = store.getResource(parent.getLocation().append(name));
+
+    if (existed.isPresent()) {
+      return promises.reject(new IllegalStateException("Resource already exists"));
+    }
+
+    if (parent.getLocation().isRoot()) {
+      return promises.reject(
+          new IllegalArgumentException("Failed to create folder in workspace root"));
+    }
+
+    if (path.segmentCount() == 1 && !checkFolderName(name)) {
+      return promises.reject(new IllegalArgumentException("Invalid folder name"));
+    }
+
+    return ps.createFolder(parent.getLocation().append(name))
         .thenPromise(
-            resource -> {
-              if (resource.isPresent()) {
-                return promises.reject(new IllegalStateException("Resource already exists"));
-              }
+            reference -> {
+              final Resource createdFolder = newResourceFrom(reference);
+              store.register(createdFolder);
 
-              if (parent.getLocation().isRoot()) {
-                return promises.reject(
-                    new IllegalArgumentException("Failed to create folder in workspace root"));
-              }
-
-              if (path.segmentCount() == 1 && !checkFolderName(name)) {
-                return promises.reject(new IllegalArgumentException("Invalid folder name"));
-              }
-
-              return ps.createFolder(parent.getLocation().append(name))
-                  .thenPromise(
-                      reference -> {
-                        final Resource createdFolder = newResourceFrom(reference);
-                        store.register(createdFolder);
-
-                        return promises.resolve(createdFolder.asFolder());
-                      });
+              return promises.resolve(createdFolder.asFolder());
             });
   }
 
@@ -367,26 +365,24 @@ public final class ResourceManager {
       return promises.reject(new IllegalArgumentException("Invalid file name"));
     }
 
-    return findResource(parent.getLocation().append(name), true)
+    Optional<Resource> existed = store.getResource(parent.getLocation().append(name));
+
+    if (existed.isPresent()) {
+      return promises.reject(new IllegalStateException("Resource already exists"));
+    }
+
+    if (parent.getLocation().isRoot()) {
+      return promises.reject(
+          new IllegalArgumentException("Failed to create file in workspace root"));
+    }
+
+    return ps.createFile(parent.getLocation().append(name), content)
         .thenPromise(
-            resource -> {
-              if (resource.isPresent()) {
-                return promises.reject(new IllegalStateException("Resource already exists"));
-              }
+            reference -> {
+              final Resource createdFile = newResourceFrom(reference);
+              store.register(createdFile);
 
-              if (parent.getLocation().isRoot()) {
-                return promises.reject(
-                    new IllegalArgumentException("Failed to create file in workspace root"));
-              }
-
-              return ps.createFile(parent.getLocation().append(name), content)
-                  .thenPromise(
-                      reference -> {
-                        final Resource createdFile = newResourceFrom(reference);
-                        store.register(createdFile);
-
-                        return promises.resolve(createdFile.asFile());
-                      });
+              return promises.resolve(createdFile.asFile());
             });
   }
 
