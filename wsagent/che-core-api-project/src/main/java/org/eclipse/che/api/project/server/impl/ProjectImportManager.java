@@ -13,7 +13,6 @@ package org.eclipse.che.api.project.server.impl;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.io.File.separator;
 import static java.util.stream.Collectors.toSet;
-import static org.eclipse.che.api.fs.server.WsPathUtils.isRoot;
 import static org.eclipse.che.api.fs.server.WsPathUtils.parentOf;
 
 import java.io.IOException;
@@ -141,7 +140,7 @@ public class ProjectImportManager {
         }
 
         String projectParentWsPath = parentOf(projectWsPath);
-        if (!isRoot(projectParentWsPath) || !fsManager.existsAsDir(projectParentWsPath)) {
+        if (!fsManager.existsAsDir(projectParentWsPath)) {
           throw new NotFoundException("The parent '" + projectParentWsPath + "' does not exist.");
         }
 
