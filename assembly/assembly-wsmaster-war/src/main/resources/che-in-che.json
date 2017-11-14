@@ -23,7 +23,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "eclipse/che-dev:nightly"
+      "origin": "ksmster/che-in-che"
     },
     "workspaceConfig": {
       "environments": {
@@ -49,7 +49,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/che-dev:nightly",
+            "location": "ksmster/che-in-che",
             "type": "dockerimage"
           }
         }
@@ -59,12 +59,12 @@
       "description": null,
       "commands": [
         {
-          "commandLine": "mvn clean install -DskipIntegrationTests=true -Pnative -f ${current.project.path}",
+          "commandLine": "cd ${current.project.path} && mvn clean install  -Pnative",
           "name": "Build project",
-          "type": "custom"
+          "type": "Run"
         },
         {
-          "commandLine": "cd /projects/che && mvn gwt:codeserver -pl :che-ide-gwt-app -am -Pfast,sdm-in-che",
+          "commandLine": "cd ${current.project.path} && mvn gwt:codeserver -pl :che-ide-gwt-app -am -Pfast,sdm-in-che Dskip-enforce -Dskip-validate-sources -Dmaven.main.skip -Dmaven.resources.skip -Dmaven.buildNumber.skip",
           "name": "GWT SDM",
           "type": "gwt_sdm_che",
           "attributes": {
