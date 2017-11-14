@@ -309,10 +309,10 @@ public class DebuggerPresenter extends BasePresenter
     ThreadState threadState = threadDump.get(threadId);
     if (threadState == null) {
       view.setFrames(Collections.emptyList());
-      view.removeAllVariables();
       view.setThreadNotSuspendPlaceHolderVisible(false);
+      refreshVariables(threadId, 0);
+      refreshWatchExpressions(threadId, 0);
       invalidateExpressions("");
-      return;
     }
 
     view.setThreadNotSuspendPlaceHolderVisible(!threadState.isSuspended());
