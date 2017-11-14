@@ -55,4 +55,6 @@ Just add a Maven dependency on the appropriate artifact (gwt-lib) to the `che-id
 In case the added artifact represents Che's sub-project, dependency should be declared with `<type>gwt-lib</type>` or `<classifier>sources</classifier>` to be able to use it with Super DevMode.
 
 ## GWT Super DevMode
-To launch GWT Super DevMode run the command `mvn gwt:codeserver -pl :che-ide-gwt-app -am -Pfast` from the root folder of the Che project.
+To launch GWT Super DevMode run the following command from the root folder of the Che project:
+
+```mvn gwt:codeserver -pl :che-ide-gwt-app -am -Dmaven.main.skip -Dmaven.resources.skip -Dche.dto.skip -Dskip-enforce -Dskip-validate-sources```.
