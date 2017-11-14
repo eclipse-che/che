@@ -218,11 +218,11 @@ public class BreakpointManagerImpl
                 if (breakpoint.isEnabled()) {
                   debugger.addBreakpoint(breakpoint);
                 }
-              });
-    }
 
-    for (BreakpointManagerObserver observer : observers) {
-      observer.onBreakpointUpdated(breakpoint);
+                for (BreakpointManagerObserver observer : observers) {
+                  observer.onBreakpointUpdated(breakpoint);
+                }
+              });
     }
   }
 
