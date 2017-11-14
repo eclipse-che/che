@@ -74,6 +74,7 @@ items:
     CHE_PREDEFINED_STACKS_RELOAD__ON__START: "true"
     CHE_LOG_LEVEL: INFO
     CHE_PORT: "8080"
+    CHE_DEBUG_SERVER: "false"
     CHE_OAUTH_GITHUB_FORCEACTIVATION: "true"
     CHE_WORKSPACE_AUTO_START: "false"
     CHE_KEYCLOAK_OSO_ENDPOINT: ${CHE_KEYCLOAK_OSO_ENDPOINT}
@@ -221,6 +222,11 @@ items:
             valueFrom:
               configMapKeyRef:
                 key: CHE_PORT
+                name: che
+          - name: CHE_DEBUG_SERVER
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_DEBUG_SERVER
                 name: che
           - name: CHE_HOST
             valueFrom:
