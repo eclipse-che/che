@@ -71,7 +71,7 @@ public class CheckFactoryWithSincePolicyTest {
     warningDialog.waitWaitWarnDialogWindowWithSpecifiedTextMess(EXPIRE_MESSAGE);
 
     // wait until factory becomes avaialble
-    while (System.currentTimeMillis() <= INIT_TIME + ADDITIONAL_TIME + 5000) {
+    while (System.currentTimeMillis() <= INIT_TIME + ADDITIONAL_TIME + 20000) {
       WaitUtils.sleepQuietly(1);
     }
 

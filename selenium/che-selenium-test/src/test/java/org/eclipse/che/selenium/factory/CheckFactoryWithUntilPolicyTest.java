@@ -69,7 +69,7 @@ public class CheckFactoryWithUntilPolicyTest {
     dashboard.open();
     testFactory.open(seleniumWebDriver);
     seleniumWebDriver.switchFromDashboardIframeToIde();
-    while (System.currentTimeMillis() <= INIT_TIME + ADDITIONAL_TIME + 5000) {
+    while (System.currentTimeMillis() <= INIT_TIME + ADDITIONAL_TIME + 20000) {
       if (warningDialog.isPresent()) {
         warningDialog.clickOkBtn();
         fail("Factory expired before the until period");
