@@ -18,6 +18,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MULTI
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.ProjectExplorerOptionsMenuItem.REFRESH_MAIN;
+import static org.eclipse.che.selenium.pageobject.ProjectExplorer.ProjectExplorerOptionsMenuItem.REFRESH_MAIN;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -57,6 +58,8 @@ public class ProjectExplorer {
   private final NavigateToFile navigateToFile;
   private final Menu menu;
   private final CodenvyEditor editor;
+  private WebDriverWait loadPageTimeout;
+  private WebDriverWait redrawUiElementsWait;
 
   @Inject
   public ProjectExplorer(
@@ -72,6 +75,8 @@ public class ProjectExplorer {
     this.navigateToFile = navigateToFile;
     this.menu = menu;
     this.editor = editor;
+    loadPageTimeout = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
+    redrawUiElementsWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -97,7 +102,8 @@ public class ProjectExplorer {
     String GO_BACK_BUTTON = "gwt-debug-goBackButton";
     String COLLAPSE_ALL_BUTTON = "gwt-debug-collapseAllButton";
     String ALL_PROJECTS_XPATH = "//div[@path=@project]";
-    String REFRESH_BUTTON_ID = "gwt-debug-refreshSelectedPath";
+    String MENU_BUTTON_PART_STACK_ID = "gwt-debug-menuButton";
+    String REFRESH_CONTEXT_MENU_ID = "gwt-debug-contextMenu/refreshPathAction";
     String PROJECT_EXPLORER_TAB_IN_THE_LEFT_PANEL =
         "//div[@id='gwt-debug-navPanel']//div[@id='gwt-debug-partButton-Projects']";
   }
@@ -131,14 +137,17 @@ public class ProjectExplorer {
   @FindBy(xpath = Locators.ALL_PROJECTS_XPATH)
   WebElement allProjects;
 
-  @FindBy(id = Locators.REFRESH_BUTTON_ID)
-  WebElement refreshProjectButton;
+  @FindBy(id = Locators.MENU_BUTTON_PART_STACK_ID)
+  WebElement refreshButtonPartStack;
+
+  @FindBy(id = Locators.REFRESH_CONTEXT_MENU_ID)
+  WebElement refreshContextMenuItem;
 
   @FindBy(xpath = Locators.PROJECT_EXPLORER_TAB_IN_THE_LEFT_PANEL)
   WebElement projectExplorerTabInTheLeftPanel;
 
   public void clickOnProjectExplorerOptionsButton() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    redrawUiElementsWait
         .until(
             ExpectedConditions.visibilityOfElementLocated(
                 By.xpath(
@@ -147,7 +156,7 @@ public class ProjectExplorer {
   }
 
   public void clickOnOptionsMenuItem(String menuID) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    redrawUiElementsWait
         .until(
             ExpectedConditions.elementToBeClickable(
                 By.xpath(String.format("//tr[@id='%s']", menuID))))
@@ -168,9 +177,7 @@ public class ProjectExplorer {
 
   /** press on the project explorer tab */
   public void clickOnProjectExplorerTab() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(projectExplorerTab))
-        .click();
+    redrawUiElementsWait.until(ExpectedConditions.visibilityOf(projectExplorerTab)).click();
   }
 
   /**
@@ -274,43 +281,39 @@ public class ProjectExplorer {
   }
 
   public void waitYellowNode(String path) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(
-                    String.format(
-                        "//div[@id='gwt-debug-projectTree']//div[@path='/%s']/descendant::div[@style='%s']",
-                        path, "color: #e0b91d;"))));
+    redrawUiElementsWait.until(
+        ExpectedConditions.visibilityOfElementLocated(
+            By.xpath(
+                String.format(
+                    "//div[@id='gwt-debug-projectTree']//div[@path='/%s']/descendant::div[@style='%s']",
+                    path, "color: #e0b91d;"))));
   }
 
   public void waitGreenNode(String path) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(
-                    String.format(
-                        "//div[@id='gwt-debug-projectTree']//div[@path='/%s']/descendant::div[@style='%s']",
-                        path, "color: #72ad42;"))));
+    redrawUiElementsWait.until(
+        ExpectedConditions.visibilityOfElementLocated(
+            By.xpath(
+                String.format(
+                    "//div[@id='gwt-debug-projectTree']//div[@path='/%s']/descendant::div[@style='%s']",
+                    path, "color: #72ad42;"))));
   }
 
   public void waitBlueNode(String path) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(
-                    String.format(
-                        "//div[@id='gwt-debug-projectTree']//div[@path='/%s']/descendant::div[@style='%s']",
-                        path, "color: #3193d4;"))));
+    redrawUiElementsWait.until(
+        ExpectedConditions.visibilityOfElementLocated(
+            By.xpath(
+                String.format(
+                    "//div[@id='gwt-debug-projectTree']//div[@path='/%s']/descendant::div[@style='%s']",
+                    path, "color: #3193d4;"))));
   }
 
   public void waitDefaultColorNode(String path) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(
-                    String.format(
-                        "//div[@id='gwt-debug-projectTree']//div[@path='/%s']/descendant::div[@style='%s']",
-                        path, "opacity:1;"))));
+    redrawUiElementsWait.until(
+        ExpectedConditions.visibilityOfElementLocated(
+            By.xpath(
+                String.format(
+                    "//div[@id='gwt-debug-projectTree']//div[@path='/%s']/descendant::div[@style='%s']",
+                    path, "opacity:1;"))));
   }
 
   /**
@@ -322,8 +325,7 @@ public class ProjectExplorer {
    */
   public void waitItemInVisibleArea(String item) {
     String locator = String.format("//div[@id='gwt-debug-projectTree']//div[text()='%s']", item);
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)));
+    loadPageTimeout.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)));
   }
 
   /**
@@ -346,8 +348,7 @@ public class ProjectExplorer {
    * @param item
    */
   public void waitItemIsNotPresentVisibleArea(String item) {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.invisibilityOfElementLocated(By.name(item)));
+    loadPageTimeout.until(ExpectedConditions.invisibilityOfElementLocated(By.name(item)));
   }
 
   /**
@@ -387,7 +388,7 @@ public class ProjectExplorer {
    */
   public void selectVisibleItem(String item) {
     String locator = "//div[@name='" + item + "']/div";
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    redrawUiElementsWait
         .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)))
         .click();
   }
@@ -442,10 +443,8 @@ public class ProjectExplorer {
     LOG.debug("===========>>>>  openItemByPath 4");
     String locator = "//div[@path='/%s']/div";
     WebElement item =
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-            .until(
-                ExpectedConditions.visibilityOfElementLocated(
-                    By.xpath(String.format(locator, path))));
+        redrawUiElementsWait.until(
+            ExpectedConditions.visibilityOfElementLocated(By.xpath(String.format(locator, path))));
     LOG.debug("===========>>>>  openItemByPath 5");
     try {
       LOG.debug("===========>>>>  openItemByPath try 1");
@@ -500,8 +499,7 @@ public class ProjectExplorer {
    */
   public void openVisiblePackage(String packageName) {
     String locator = "//div[text()='" + packageName + "']";
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)));
+    loadPageTimeout.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)));
     WebElement visiblePacksge = seleniumWebDriver.findElement(By.xpath(locator));
     actionsFactory.createAction(seleniumWebDriver).doubleClick(visiblePacksge).perform();
   }
@@ -531,8 +529,7 @@ public class ProjectExplorer {
             + "']/div/*[local-name() = 'svg' and @id='"
             + typeFolder
             + "']";
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)));
+    loadPageTimeout.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)));
   }
 
   /**
@@ -555,8 +552,7 @@ public class ProjectExplorer {
    */
   public void openContextMenuByPathSelectedItem(String path) {
     String locator = "//div[@path='/" + path + "']/div";
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)));
+    loadPageTimeout.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)));
     WebElement node = seleniumWebDriver.findElement(By.xpath(locator));
     node.click();
     Actions act = actionsFactory.createAction(seleniumWebDriver);
@@ -577,9 +573,7 @@ public class ProjectExplorer {
    * @param item
    */
   public void clickOnItemInContextMenu(String item) {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.id(item)))
-        .click();
+    loadPageTimeout.until(ExpectedConditions.visibilityOfElementLocated(By.id(item))).click();
   }
 
   /**
@@ -596,8 +590,8 @@ public class ProjectExplorer {
   }
 
   public void waitContextMenuPopUpClosed() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.CONTEXT_MENU_ID)));
+    loadPageTimeout.until(
+        ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.CONTEXT_MENU_ID)));
   }
 
   /**
@@ -620,8 +614,7 @@ public class ProjectExplorer {
 
   /** click on the 'go back' in the project explorer */
   public void clickGoBackButton() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.elementToBeClickable(goBackBtn));
+    loadPageTimeout.until(ExpectedConditions.elementToBeClickable(goBackBtn));
     goBackBtn.click();
   }
 
@@ -645,10 +638,9 @@ public class ProjectExplorer {
    */
   public List<String> getNamesAllProjects() {
     List<WebElement> projects =
-        new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-            .until(
-                ExpectedConditions.visibilityOfAllElementsLocatedBy(
-                    By.xpath(Locators.ALL_PROJECTS_XPATH)));
+        loadPageTimeout.until(
+            ExpectedConditions.visibilityOfAllElementsLocatedBy(
+                By.xpath(Locators.ALL_PROJECTS_XPATH)));
     return projects
         .stream()
         .map((webElement) -> webElement.getAttribute("name"))
@@ -707,7 +699,7 @@ public class ProjectExplorer {
   }
 
   public void clickOnProjectExplorerTabInTheLeftPanel() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    redrawUiElementsWait
         .until(ExpectedConditions.visibilityOf(projectExplorerTabInTheLeftPanel))
         .click();
   }
