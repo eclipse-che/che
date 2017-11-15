@@ -89,7 +89,7 @@ public class NodeJsDebugTest {
 
     // disconnect session, check highlighter is disappear
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.RESUME_BTN_ID);
-    new WebDriverWait(ide.driver(), REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             ExpectedConditions.invisibilityOfElementLocated(
                 By.xpath("//div[text()='{/app.js:13} ']")));

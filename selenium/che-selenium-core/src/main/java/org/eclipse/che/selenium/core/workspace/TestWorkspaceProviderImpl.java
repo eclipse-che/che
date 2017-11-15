@@ -166,6 +166,7 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
         .collect(Collectors.toList());
   }
 
+  @SuppressWarnings("FutureReturnValueIgnored")
   private void initializePool() {
     LOG.info("Initialize workspace pool with {} entries.", poolSize);
     testWorkspaceQueue = new ArrayBlockingQueue<>(poolSize);
