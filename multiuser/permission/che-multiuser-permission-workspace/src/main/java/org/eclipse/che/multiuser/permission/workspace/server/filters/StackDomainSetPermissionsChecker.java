@@ -12,7 +12,6 @@ package org.eclipse.che.multiuser.permission.workspace.server.filters;
 
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.multiuser.api.permission.server.SystemDomain.MANAGE_SYSTEM_ACTION;
-import static org.eclipse.che.multiuser.permission.workspace.server.stack.StackDomain.DOMAIN_ID;
 import static org.eclipse.che.multiuser.permission.workspace.server.stack.StackDomain.READ;
 import static org.eclipse.che.multiuser.permission.workspace.server.stack.StackDomain.SEARCH;
 import static org.eclipse.che.multiuser.permission.workspace.server.stack.StackDomain.getActions;
@@ -23,6 +22,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.multiuser.api.permission.server.SystemDomain;
 import org.eclipse.che.multiuser.api.permission.server.filter.check.DefaultSetPermissionsChecker;
 import org.eclipse.che.multiuser.api.permission.server.filter.check.SetPermissionsChecker;
 import org.eclipse.che.multiuser.api.permission.shared.model.Permissions;
@@ -54,7 +54,7 @@ public class StackDomainSetPermissionsChecker implements SetPermissionsChecker {
     // public search is supported only for admins
     if (EnvironmentContext.getCurrent()
         .getSubject()
-        .hasPermission(DOMAIN_ID, null, MANAGE_SYSTEM_ACTION)) {
+        .hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_SYSTEM_ACTION)) {
       unsupportedPublicActions.remove(SEARCH);
     } else {
       defaultChecker.check(permissions);
