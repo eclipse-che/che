@@ -20,6 +20,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -46,6 +47,7 @@ import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.api.resources.VirtualFile;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
@@ -72,7 +74,10 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  */
 @Singleton
 public class DebuggerPresenter extends BasePresenter
-    implements DebuggerView.ActionDelegate, DebuggerManagerObserver, BreakpointManagerObserver {
+    implements DebuggerView.ActionDelegate,
+        DebuggerManagerObserver,
+        BreakpointManagerObserver,
+        WorkspaceStoppedEvent.Handler {
   private static final String TITLE = "Debug";
 
   private final DebuggerResources debuggerResources;
@@ -105,7 +110,8 @@ public class DebuggerPresenter extends BasePresenter
       final DebuggerManager debuggerManager,
       final WorkspaceAgent workspaceAgent,
       final DebuggerLocationHandlerManager resourceHandlerManager,
-      final BreakpointContextMenuFactory breakpointContextMenuFactory) {
+      final BreakpointContextMenuFactory breakpointContextMenuFactory,
+      final EventBus eventBus) {
     this.view = view;
     this.debuggerResources = debuggerResources;
     this.debuggerToolbar = debuggerToolbar;
@@ -127,6 +133,8 @@ public class DebuggerPresenter extends BasePresenter
 
     this.watchExpressions = new ArrayList<>();
     this.threadDump = new HashMap<>();
+
+    eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
 
     clearView();
     refreshBreakpoints();
@@ -481,6 +489,7 @@ public class DebuggerPresenter extends BasePresenter
     clearExecutionPoint();
     debuggerDescriptor = null;
     view.setVMName(null);
+    view.setBreakpoints(emptyList());
   }
 
   private boolean isSameSelection(long threadId, int frameIndex) {
@@ -560,5 +569,10 @@ public class DebuggerPresenter extends BasePresenter
               @Override
               public void onSuccess(VirtualFile result) {}
             });
+  }
+
+  @Override
+  public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
+    clearView();
   }
 }
