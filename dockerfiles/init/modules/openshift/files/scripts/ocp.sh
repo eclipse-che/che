@@ -14,12 +14,20 @@ LOCAL_IP_ADDRESS=$(detectIP)
 if [[ "$OSTYPE" == "darwin"* ]]; then
     DEFAULT_OC_PUBLIC_HOSTNAME="$LOCAL_IP_ADDRESS"
     DEFAULT_OC_PUBLIC_IP="$LOCAL_IP_ADDRESS"
+    DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.6.0/openshift-origin-client-tools-v3.6.0-c4dd4cf-mac.zip"
+    DEFAULT_JQ_BINARY_DOWNLOAD_URL="https://github.com/stedolan/jq/releases/download/jq-1.5/jq-osx-amd64"
 else
     DEFAULT_OC_PUBLIC_HOSTNAME="$LOCAL_IP_ADDRESS"
     DEFAULT_OC_PUBLIC_IP="$LOCAL_IP_ADDRESS"
+    DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.6.0/openshift-origin-client-tools-v3.6.0-c4dd4cf-linux-64bit.tar.gz"
+    DEFAULT_JQ_BINARY_DOWNLOAD_URL="https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64"
 fi
+
 export OC_PUBLIC_HOSTNAME=${OC_PUBLIC_HOSTNAME:-${DEFAULT_OC_PUBLIC_HOSTNAME}}
 export OC_PUBLIC_IP=${OC_PUBLIC_IP:-${DEFAULT_OC_PUBLIC_IP}}
+
+export OC_BINARY_DOWNLOAD_URL=${OC_BINARY_DOWNLOAD_URL:-${DEFAULT_OC_BINARY_DOWNLOAD_URL}}
+export JQ_BINARY_DOWNLOAD_URL=${JQ_BINARY_DOWNLOAD_URL:-${DEFAULT_JQ_BINARY_DOWNLOAD_URL}}
 
 DEFAULT_CHE_MULTIUSER="false"
 export CHE_MULTIUSER=${CHE_MULTIUSER:-${DEFAULT_CHE_MULTIUSER}}
@@ -55,36 +63,34 @@ export IMAGE_INIT=${IMAGE_INIT:-${DEFAULT_IMAGE_INIT}}:${CHE_IMAGE_TAG}
 
 DEFAULT_CONFIG_DIR="/tmp/che-config"
 export CONFIG_DIR=${CONFIG_DIR:-${DEFAULT_CONFIG_DIR}}
+
 }
 
 get_tools() {
     TOOLS_DIR="/tmp"
+    OC_BINARY="$TOOLS_DIR/oc"
+    JQ_BINARY="$TOOLS_DIR/jq"
+    #OS specific extract archives
     if [[ "$OSTYPE" == "darwin"* ]]; then
-        OC_PACKAGE="openshift-origin-client-tools-v3.6.0-c4dd4cf-mac.zip"
-        JQ_PACKAGE="jq-osx-amd64"
+        OC_PACKAGE="openshift-origin-client-tools.zip"
         ARCH="unzip -d $TOOLS_DIR"
         EXTRA_ARGS=""
     else
-        OC_PACKAGE="openshift-origin-client-tools-v3.6.0-c4dd4cf-linux-64bit.tar.gz"
-        JQ_PACKAGE="jq-linux64"
+        OC_PACKAGE="openshift-origin-client-tools.tar.gz"
         ARCH="tar --strip 1 -xzf"
         EXTRA_ARGS="-C $TOOLS_DIR"
     fi
-    OC_URL=https://github.com/openshift/origin/releases/download/v3.6.0/$OC_PACKAGE
-    JQ_URL=https://github.com/stedolan/jq/releases/download/jq-1.5/$JQ_PACKAGE
-    OC_BINARY="$TOOLS_DIR/oc"
-    JQ_BINARY="$TOOLS_DIR/jq"
 
     if [ ! -f $OC_BINARY ]; then
         echo "download oc client..."
-        wget -q -O $TOOLS_DIR/$OC_PACKAGE $OC_URL
+        wget -q -O $TOOLS_DIR/$OC_PACKAGE $OC_BINARY_DOWNLOAD_URL
         eval "$ARCH" "$TOOLS_DIR"/"$OC_PACKAGE" "$EXTRA_ARGS" &>/dev/null
         rm -rf "$TOOLS_DIR"/README.md "$TOOLS_DIR"/LICENSE "${TOOLS_DIR:-/tmp}"/"$OC_PACKAGE"
     fi
 
     if [ ! -f $JQ_BINARY ]; then
         echo "download jq..."
-        wget -q -O $JQ_BINARY $JQ_URL
+        wget -q -O $JQ_BINARY $JQ_BINARY_DOWNLOAD_URL
         chmod +x $JQ_BINARY
     fi
     export PATH=${PATH}:${TOOLS_DIR}
@@ -191,7 +197,6 @@ parse_args() {
       CHE_MULTIUSER=true
     fi
 
-    init
 
     for i in "${@}"
     do
@@ -212,5 +217,6 @@ parse_args() {
     done
 }
 
+init
 get_tools
 parse_args "$@"
