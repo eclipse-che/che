@@ -68,8 +68,9 @@ public class DeleteOrganizationInListTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    for (OrganizationDto organization : organizations)
+    for (OrganizationDto organization : organizations) {
       testOrganizationServiceClient.deleteById(organization.getId());
+    }
   }
 
   @Test
