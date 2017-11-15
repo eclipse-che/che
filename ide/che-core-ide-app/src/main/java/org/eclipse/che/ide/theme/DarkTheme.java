@@ -1329,7 +1329,7 @@ public class DarkTheme implements Theme {
 
   @Override
   public String checkBoxIndeterminateIconColor() {
-    return "#707070";
+    return this.getDisabledMenuColor();
   }
 
   @Override
