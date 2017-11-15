@@ -89,7 +89,7 @@
           }
         },
         {
-          "commandLine": "cd /home/user/tomcat8/bin && ./catalina.sh run",
+          "commandLine": "cd /home/user/tomcat8/bin && export SERVER_PORT=8080 && ./catalina.sh run",
           "name": "Tomcat8-IDE Start",
           "type": "custom",
           "attributes": {
