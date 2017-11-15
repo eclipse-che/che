@@ -34,8 +34,8 @@ public class CheckFactoryWithUntilPolicyTest {
   private static final String FACTORY_NAME = NameGenerator.generate("untilPolicy", 3);
   private static final String EXPIRE_MESSAGE =
       "Unable to load Factory: This Factory has expired due to time restrictions applied by its owner. Please, contact owner for more information.";
-  private static final long INIT_TIME = System.currentTimeMillis();
   private static final int ADDITIONAL_TIME = 60000;
+  private static long initTime;
 
   @Inject private ProjectExplorer projectExplorer;
   @Inject private TestFactoryInitializer testFactoryInitializer;
@@ -49,8 +49,8 @@ public class CheckFactoryWithUntilPolicyTest {
   public void setUp() throws Exception {
     TestFactoryInitializer.TestFactoryBuilder factoryBuilder =
         testFactoryInitializer.fromTemplate(FactoryTemplate.MINIMAL);
-    long INIT_TIME = System.currentTimeMillis();
-    factoryBuilder.setPolicies(newDto(PoliciesDto.class).withUntil(INIT_TIME + ADDITIONAL_TIME));
+    initTime = System.currentTimeMillis();
+    factoryBuilder.setPolicies(newDto(PoliciesDto.class).withUntil(initTime + ADDITIONAL_TIME));
     factoryBuilder.setName(FACTORY_NAME);
     testFactory = factoryBuilder.build();
   }
@@ -66,10 +66,7 @@ public class CheckFactoryWithUntilPolicyTest {
     seleniumWebDriver.switchFromDashboardIframeToIde();
 
     // first
-    dashboard.open();
-    testFactory.open(seleniumWebDriver);
-    seleniumWebDriver.switchFromDashboardIframeToIde();
-    while (System.currentTimeMillis() <= INIT_TIME + ADDITIONAL_TIME + 20000) {
+    while (System.currentTimeMillis() <= initTime + ADDITIONAL_TIME + 10000) {
       if (warningDialog.isPresent()) {
         warningDialog.clickOkBtn();
         fail("Factory expired before the until period");

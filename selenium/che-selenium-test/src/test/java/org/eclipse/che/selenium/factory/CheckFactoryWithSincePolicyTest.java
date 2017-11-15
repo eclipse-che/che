@@ -35,8 +35,8 @@ public class CheckFactoryWithSincePolicyTest {
   private static final String EXPIRE_MESSAGE =
       "Unable to load Factory: This Factory is not yet valid due to time restrictions applied"
           + " by its owner. Please, contact owner for more information.";
-  private static final long INIT_TIME = System.currentTimeMillis();
   private static final int ADDITIONAL_TIME = 60000;
+  private static long initTime;
 
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Ide ide;
@@ -51,7 +51,7 @@ public class CheckFactoryWithSincePolicyTest {
   public void setUp() throws Exception {
     TestFactoryInitializer.TestFactoryBuilder factoryBuilder =
         testFactoryInitializer.fromTemplate(FactoryTemplate.MINIMAL);
-    long initTime = System.currentTimeMillis();
+    initTime = System.currentTimeMillis();
     factoryBuilder.setPolicies(newDto(PoliciesDto.class).withSince(initTime + ADDITIONAL_TIME));
     factoryBuilder.setName(FACTORY_NAME);
     testFactory = factoryBuilder.build();
@@ -71,7 +71,7 @@ public class CheckFactoryWithSincePolicyTest {
     warningDialog.waitWaitWarnDialogWindowWithSpecifiedTextMess(EXPIRE_MESSAGE);
 
     // wait until factory becomes avaialble
-    while (System.currentTimeMillis() <= INIT_TIME + ADDITIONAL_TIME + 20000) {
+    while (System.currentTimeMillis() <= initTime + ADDITIONAL_TIME + 10000) {
       WaitUtils.sleepQuietly(1);
     }
 
