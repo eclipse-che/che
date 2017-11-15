@@ -9,13 +9,14 @@
 set -e
 
 init() {
+LOCAL_IP_ADDRESS=$(detectIP)
 #OS specific defaults
 if [[ "$OSTYPE" == "darwin"* ]]; then
-    DEFAULT_OC_PUBLIC_HOSTNAME="192.168.65.2"
-    DEFAULT_OC_PUBLIC_IP="192.168.65.2"
+    DEFAULT_OC_PUBLIC_HOSTNAME="$LOCAL_IP_ADDRESS"
+    DEFAULT_OC_PUBLIC_IP="$LOCAL_IP_ADDRESS"
 else
-    DEFAULT_OC_PUBLIC_HOSTNAME="127.0.0.1"
-    DEFAULT_OC_PUBLIC_IP="127.0.0.1"
+    DEFAULT_OC_PUBLIC_HOSTNAME="$LOCAL_IP_ADDRESS"
+    DEFAULT_OC_PUBLIC_IP="$LOCAL_IP_ADDRESS"
 fi
 export OC_PUBLIC_HOSTNAME=${OC_PUBLIC_HOSTNAME:-${DEFAULT_OC_PUBLIC_HOSTNAME}}
 export OC_PUBLIC_IP=${OC_PUBLIC_IP:-${DEFAULT_OC_PUBLIC_IP}}
@@ -160,6 +161,10 @@ destroy_ocp() {
     $OC_BINARY delete pvc --all
     $OC_BINARY delete all --all
     $OC_BINARY cluster down
+}
+
+detectIP() {
+    docker run --rm --net host eclipse/che-ip:nightly
 }
 
 parse_args() {
