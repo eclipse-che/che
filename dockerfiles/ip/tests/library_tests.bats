@@ -95,6 +95,17 @@ check_ip_result() {
    assert_success
 }
 
+@test "Check isDocker4Mac/Win is true (new docker releases)" {
+   # GIVEN
+   UNAME_R="4.9.44-linuxkit-aufs"
+
+   # WHEN
+   run is_docker4MacOrWin
+
+   # THEN
+   assert_success
+}
+
 @test "Check isDocker4Mac/Win on Linux is false" {
    # GIVEN
    UNAME_R="4.4.0-21-generic"

@@ -22,6 +22,8 @@ import java.util.Arrays;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
+import org.eclipse.che.selenium.core.client.TestGitHubKeyUploader;
+import org.eclipse.che.selenium.core.client.TestSshServiceClient;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -44,6 +46,7 @@ public class Preferences {
   private final AskForValueDialog askForValueDialog;
   private final GitHub gitHub;
   private final SeleniumWebDriver seleniumWebDriver;
+  private final TestSshServiceClient testSshServiceClient;
 
   @Inject
   public Preferences(
@@ -52,13 +55,15 @@ public class Preferences {
       ActionsFactory actionsFactory,
       AskDialog askDialog,
       AskForValueDialog askForValueDialog,
-      GitHub github) {
+      GitHub github,
+      TestSshServiceClient testSshServiceClient) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
     this.actionsFactory = actionsFactory;
     this.askDialog = askDialog;
     this.askForValueDialog = askForValueDialog;
     this.gitHub = github;
+    this.testSshServiceClient = testSshServiceClient;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -103,7 +108,7 @@ public class Preferences {
   }
 
   public interface DropDownSshKeysMenu {
-    String SSH_Keystore = "VCS";
+    String VCS = "VCS";
     String MACHINE = "Machine";
   }
 
@@ -530,8 +535,10 @@ public class Preferences {
 
   public void regenerateAndUploadSshKeyOnGithub(String githubUsername, String githubPassword)
       throws Exception {
-    waitMenuInCollapsedDropdown(Preferences.DropDownSshKeysMenu.SSH_Keystore);
-    selectDroppedMenuByName(Preferences.DropDownSshKeysMenu.SSH_Keystore);
+    testSshServiceClient.deleteVCSKey(TestGitHubKeyUploader.GITHUB_COM);
+
+    waitMenuInCollapsedDropdown(Preferences.DropDownSshKeysMenu.VCS);
+    selectDroppedMenuByName(Preferences.DropDownSshKeysMenu.VCS);
 
     loader.waitOnClosed();
 
