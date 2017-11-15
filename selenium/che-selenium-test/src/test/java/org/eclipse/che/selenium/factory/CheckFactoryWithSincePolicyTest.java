@@ -36,7 +36,7 @@ public class CheckFactoryWithSincePolicyTest {
   private static final String EXPIRE_MESSAGE =
       "Unable to load Factory: This Factory is not yet valid due to time restrictions applied"
           + " by its owner. Please, contact owner for more information.";
-  private static final int ADDITIONAL_TIME = 60000;
+  private static final int ADDITIONAL_TIME = 120000;
   private static long initTime;
 
   @Inject private ProjectExplorer projectExplorer;
@@ -69,9 +69,11 @@ public class CheckFactoryWithSincePolicyTest {
     testFactory.authenticateAndOpen(seleniumWebDriver);
     seleniumWebDriver.switchFromDashboardIframeToIde();
 
-    if (System.currentTimeMillis() > initTime + ADDITIONAL_TIME + 10000) {
-      Assert.fail("Factory started very long time and next steps does not make sense");
+    if (System.currentTimeMillis() > initTime + ADDITIONAL_TIME) {
+      Assert.fail(
+          "Factory started longer then additional time and next test steps does not make sense");
     }
+
     warningDialog.waitWaitWarnDialogWindowWithSpecifiedTextMess(EXPIRE_MESSAGE);
 
     // wait until factory becomes avaialble

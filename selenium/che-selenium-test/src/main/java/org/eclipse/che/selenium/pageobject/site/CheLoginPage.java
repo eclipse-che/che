@@ -72,8 +72,9 @@ public class CheLoginPage implements LoginPage {
   }
 
   private void rewrite(WebElement field, String value) {
-    field.clear();
-    field.sendKeys(value);
+    webDriverWait.until(ExpectedConditions.visibilityOf(field)).clear();
+    waitTextIsPresent(field, "");
+    webDriverWait.until(ExpectedConditions.visibilityOf(field)).sendKeys(value);
     waitTextIsPresent(field, value);
   }
 
@@ -82,7 +83,9 @@ public class CheLoginPage implements LoginPage {
   }
 
   private void waitOnOpen() {
-    webDriverWait.until(ExpectedConditions.visibilityOf(loginButton));
+    webDriverWait.until(
+        ExpectedConditions.visibilityOfAllElements(
+            ImmutableList.of(loginButton, passwordInput, usernameInput)));
   }
 
   private void waitOnClose() {

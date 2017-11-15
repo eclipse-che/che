@@ -66,8 +66,9 @@ public class CheckFactoryWithUntilPolicyTest {
     testFactory.authenticateAndOpen(seleniumWebDriver);
     seleniumWebDriver.switchFromDashboardIframeToIde();
 
-    if (System.currentTimeMillis() > initTime + ADDITIONAL_TIME + 10000) {
-      Assert.fail("Factory started very long time and next steps does not make sense");
+    if (System.currentTimeMillis() > initTime + ADDITIONAL_TIME) {
+      Assert.fail(
+          "Factory started longer then additional time and next test steps does not make sense");
     }
 
     // first
