@@ -108,26 +108,27 @@ public class NavigateToFileTest {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
     selectFileFromNavigate("A", FILE_JAVA + PATH_TO_JAVA_FILE, FILES_A_SYMBOL);
+    editor.waitActiveEditor();
     editor.waitTabIsPresent("AppController");
-    editor.waitActiveEditor();
     editor.closeFileByNameWithSaving("AppController");
-    editor.waitWhileFileIsClosed("AppController");
-    selectFileFromNavigate("p", FILE_XML + PATH_TO_README_FILE, FILES_P_SYMBOL);
-    editor.waitTabIsPresent("qa-spring-sample");
-    editor.waitActiveEditor();
-    editor.closeFileByNameWithSaving("qa-spring-sample");
-    editor.waitWhileFileIsClosed("qa-spring-sample");
-    selectFileFromNavigate("i", FILE_JSP + PATH_TO_JSP_FILE);
-    editor.waitTabIsPresent("index.jsp");
-    editor.waitActiveEditor();
-    editor.closeFileByNameWithSaving("index.jsp");
-    editor.waitWhileFileIsClosed("index.jsp");
-    selectFileFromNavigateLaunchByKeyboard("R", FILE_README + PATH_TO_README_FILE);
-    editor.waitTabIsPresent("README.md");
-    editor.waitActiveEditor();
-    editor.closeFileByNameWithSaving("README.md");
-    editor.waitWhileFileIsClosed("README.md");
-    loader.waitOnClosed();
+    //    selectFileFromNavigate("i", FILE_JAVA + PATH_TO_JAVA_FILE, FILES_I_SYMBOL);
+    //    selectFileFromNavigate("R", FILE_JAVA + PATH_TO_JAVA_FILE, FILES_R_SYMBOL);
+    //    selectFileFromNavigate("p", FILE_XML + PATH_TO_README_FILE, FILES_P_SYMBOL);
+    //    editor.waitTabIsPresent("qa-spring-sample");
+    //    editor.waitActiveEditor();
+    //    editor.closeFileByNameWithSaving("qa-spring-sample");
+    //    editor.waitWhileFileIsClosed("qa-spring-sample");
+    //    selectFileFromNavigate("i", FILE_JSP + PATH_TO_JSP_FILE);
+    //    editor.waitTabIsPresent("index.jsp");
+    //    editor.waitActiveEditor();
+    //    editor.closeFileByNameWithSaving("index.jsp");
+    //    editor.waitWhileFileIsClosed("index.jsp");
+    //    selectFileFromNavigateLaunchByKeyboard("R", FILE_README + PATH_TO_README_FILE);
+    //    editor.waitTabIsPresent("README.md");
+    //    editor.waitActiveEditor();
+    //    editor.closeFileByNameWithSaving("README.md");
+    //    editor.waitWhileFileIsClosed("README.md");
+    //    loader.waitOnClosed();
 
     // Open the project two and check function 'Navigate To File'
     projectExplorer.waitItem(PROJECT_NAME_2);
@@ -141,7 +142,7 @@ public class NavigateToFileTest {
     selectFileFromNavigate("i", FILE_JSP + PATH_2_TO_JSP_FILE);
     editor.waitTabIsPresent("index.jsp");
     editor.waitActiveEditor();
-    selectFileFromNavigateLaunchByKeyboard("R", FILE_README + PATH_2_TO_README_FILE);
+    //  selectFileFromNavigateLaunchByKeyboard("R", FILE_README + PATH_2_TO_README_FILE);
     editor.waitTabIsPresent("README.md");
     editor.waitActiveEditor();
     editor.closeAllTabsByContextMenu();
@@ -201,7 +202,7 @@ public class NavigateToFileTest {
     navigateToFile.waitFormToClose();
   }
 
-  private void selectFileFromNavigate(String symbol, String pathName, List<String> files) {
+  private void selectFileFromNavigate(String symbol, String path, List<String> files) {
     loader.waitOnClosed();
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
@@ -214,7 +215,7 @@ public class NavigateToFileTest {
     for (String listFiles : files) {
       navigateToFile.waitListOfFilesNames(listFiles);
     }
-    navigateToFile.selectFileByFullName(pathName);
+    navigateToFile.selectFileByFullName(path);
     navigateToFile.waitFormToClose();
   }
 
@@ -223,19 +224,18 @@ public class NavigateToFileTest {
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.NAVIGATE_TO_FILE);
+    typeStringToNavigateFieldAndCheckResult(symbol, pathName);
+  }
+
+  private void typeStringToNavigateFieldAndCheckResult(String symbol, String pathName) {
     navigateToFile.waitFormToOpen();
     loader.waitOnClosed();
     navigateToFile.typeSymbolInFileNameField(symbol);
-    loader.waitOnClosed();
-    navigateToFile.waitFileNamePopUp();
-    for (String listFiles : FILES_I_SYMBOL) {
-      navigateToFile.waitListOfFilesNames(listFiles);
-    }
-    navigateToFile.selectFileByFullName(pathName);
-    navigateToFile.waitFormToClose();
+    //    typeStringToNavigateFieldAndCheckResult()
   }
 
-  private void selectFileFromNavigateLaunchByKeyboard(String symbol, String pathName) {
+  private void selectFileFromNavigateLaunchByKeyboard(
+      String symbol, String pathName, List<String> expectedMatchedItems) {
     loader.waitOnClosed();
     navigateToFile.launchNavigateToFileByKeyboard();
     navigateToFile.waitFormToOpen();
@@ -243,8 +243,8 @@ public class NavigateToFileTest {
     navigateToFile.typeSymbolInFileNameField(symbol);
     loader.waitOnClosed();
     navigateToFile.waitFileNamePopUp();
-    for (String listFiles : FILES_R_SYMBOL) {
-      navigateToFile.waitListOfFilesNames(listFiles);
+    for (String item : expectedMatchedItems) {
+      navigateToFile.waitListOfFilesNames(item);
     }
     navigateToFile.selectFileByFullName(pathName);
     navigateToFile.waitFormToClose();
