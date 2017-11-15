@@ -32,6 +32,7 @@ import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.entrance.Entrance;
@@ -52,6 +53,7 @@ public class TestFactoryInitializer {
   @Inject private TestFactoryServiceClient testFactoryServiceClient;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private Entrance entrance;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
 
   /**
    * Initialize {@link TestFactory} base upon template.
@@ -91,7 +93,8 @@ public class TestFactoryInitializer {
         dashboardUrlProvider,
         testFactoryServiceClient,
         workspaceServiceClient,
-        entrance);
+        entrance,
+        seleniumWebDriver);
   }
 
   /** Builder for {@link TestFactory}. */
@@ -111,7 +114,8 @@ public class TestFactoryInitializer {
           dashboardUrlProvider,
           testFactoryServiceClient,
           workspaceServiceClient,
-          entrance);
+          entrance,
+          seleniumWebDriver);
     }
 
     @Override

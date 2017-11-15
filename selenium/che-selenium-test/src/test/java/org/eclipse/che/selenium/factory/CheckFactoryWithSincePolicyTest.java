@@ -22,7 +22,6 @@ import org.eclipse.che.selenium.core.factory.FactoryTemplate;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
-import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.PopupDialogsBrowser;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
@@ -42,7 +41,6 @@ public class CheckFactoryWithSincePolicyTest {
   private static final int ADDITIONAL_TIME = 60000;
 
   @Inject private ProjectExplorer projectExplorer;
-  @Inject private Ide ide;
   @Inject private TestFactoryInitializer testFactoryInitializer;
   @Inject private PopupDialogsBrowser popupDialogsBrowser;
   @Inject private Dashboard dashboard;
@@ -69,14 +67,14 @@ public class CheckFactoryWithSincePolicyTest {
   public void checkFactoryAcceptingWithSincePolicy() throws Exception {
     // check factory now, make sure its restricted
     dashboard.open();
-    testFactory.open(ide.driver());
+    testFactory.open(seleniumWebDriver);
 
     // driver.get(factoryUrl);
-    new WebDriverWait(ide.driver(), PREPARING_WS_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, PREPARING_WS_TIMEOUT_SEC)
         .until(ExpectedConditions.alertIsPresent());
     assertTrue(
-        ide.driver().switchTo().alert().getText().contains(ALERT_EXPIRE_MESSAGE),
-        "actual message: " + ide.driver().switchTo().alert().getText());
+        seleniumWebDriver.switchTo().alert().getText().contains(ALERT_EXPIRE_MESSAGE),
+        "actual message: " + seleniumWebDriver.switchTo().alert().getText());
     popupDialogsBrowser.acceptAlert();
 
     // wait until factory becomes avaialble
@@ -85,7 +83,7 @@ public class CheckFactoryWithSincePolicyTest {
     }
 
     // check again
-    testFactory.open(ide.driver());
+    testFactory.open(seleniumWebDriver);
     seleniumWebDriver.switchFromDashboardIframeToIde();
     projectExplorer.waitProjectExplorer();
   }
