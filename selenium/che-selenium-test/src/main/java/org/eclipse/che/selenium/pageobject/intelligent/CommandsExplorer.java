@@ -143,7 +143,7 @@ public class CommandsExplorer {
   public void clickAddCommandButton(String goalName) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
-            ExpectedConditions.elementToBeClickable(
+            ExpectedConditions.visibilityOfElementLocated(
                 By.xpath(String.format(Locators.ADD_COMMAND_BUTTON_LOCATOR, goalName))))
         .click();
   }
@@ -172,7 +172,7 @@ public class CommandsExplorer {
    */
   public void selectCommandByName(String commandName) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.elementToBeClickable(getCommandByName(commandName)));
+        .until(ExpectedConditions.visibilityOf(getCommandByName(commandName)));
     new Actions(seleniumWebDriver).doubleClick(getCommandByName(commandName)).build().perform();
   }
 
@@ -188,7 +188,7 @@ public class CommandsExplorer {
     loader.waitOnClosed();
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
-            ExpectedConditions.elementToBeClickable(
+            ExpectedConditions.visibilityOfElementLocated(
                 By.xpath(
                     "//div[@id='command_"
                         + commandName
@@ -200,12 +200,12 @@ public class CommandsExplorer {
     selectCommandByName(commandName);
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
-            ExpectedConditions.elementToBeClickable(
+            ExpectedConditions.visibilityOfElementLocated(
                 By.xpath("//div[@id='command_" + commandName + "']")))
         .click();
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
-            ExpectedConditions.elementToBeClickable(
+            ExpectedConditions.visibilityOfElementLocated(
                 By.xpath(
                     "//div[@id='command_"
                         + commandName
@@ -215,7 +215,7 @@ public class CommandsExplorer {
 
   public void runCommandByName(String commandName) {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.elementToBeClickable(getCommandByName(commandName)));
+        .until(ExpectedConditions.visibilityOf(getCommandByName(commandName)));
     new Actions(seleniumWebDriver).doubleClick(getCommandByName(commandName)).build().perform();
     commandsEditor.waitActiveEditor();
     commandsEditor.clickOnRunButton();
@@ -223,17 +223,16 @@ public class CommandsExplorer {
   }
 
   public void deleteCommandByName(String commandName) {
-    waitCommandExplorerIsOpened();
     selectCommandByName(commandName);
     loader.waitOnClosed();
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
-            ExpectedConditions.elementToBeClickable(
+            ExpectedConditions.visibilityOfElementLocated(
                 By.xpath("//div[@id='command_" + commandName + "']")))
         .click();
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
-            ExpectedConditions.elementToBeClickable(
+            ExpectedConditions.visibilityOfElementLocated(
                 By.xpath(
                     "//div[@id='command_"
                         + commandName
