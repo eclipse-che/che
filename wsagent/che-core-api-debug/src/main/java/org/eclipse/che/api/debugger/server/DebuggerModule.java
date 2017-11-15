@@ -26,7 +26,6 @@ public class DebuggerModule extends AbstractModule {
   protected void configure() {
     bind(DebuggerManager.class);
     bind(DebuggerService.class);
-    bind(DebuggerWebSocketMessenger.class);
     bind(DebuggerJsonRpcMessenger.class);
 
     bind(DebuggerActionProvider.class);

@@ -62,7 +62,6 @@ public class CreateWorkspaceOnDashboardTest {
     createWorkspace.clickCreate();
     seleniumWebDriver.switchFromDashboardIframeToIde();
     projectExplorer.waitProjectExplorer();
-    terminal.waitTerminalConsole(LOADER_TIMEOUT_SEC);
-    terminal.waitTerminalTab();
+    terminal.waitTerminalTab(LOADER_TIMEOUT_SEC);
   }
 }

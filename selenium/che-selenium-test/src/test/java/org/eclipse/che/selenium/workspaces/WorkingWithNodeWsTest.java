@@ -86,6 +86,8 @@ public class WorkingWithNodeWsTest {
     loader.waitOnClosed();
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(NODE_JS_PROJECT_NAME);
+    loader.waitOnClosed();
+    projectExplorer.selectItem(NODE_JS_PROJECT_NAME);
     projectExplorer.openItemByPath(NODE_JS_PROJECT_NAME);
     projectExplorer.waitItem(NODE_JS_PROJECT_NAME + "/app");
     projectExplorer.openItemByPath(NODE_JS_PROJECT_NAME + "/app");
