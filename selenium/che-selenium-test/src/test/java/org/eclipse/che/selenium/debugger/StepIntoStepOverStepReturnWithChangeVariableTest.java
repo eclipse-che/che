@@ -163,7 +163,6 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
         .activeElement()
         .sendKeys(Keys.SHIFT.toString() + Keys.F9.toString());
     editor.waitActiveBreakpoint(26);
-    seleniumWebDriver.navigate().refresh();
   }
 
   private void buildProjectAndOpenMainClass() {
