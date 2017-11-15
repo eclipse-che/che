@@ -8,11 +8,9 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.addsshkey;
+package org.eclipse.che.selenium.git;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
-import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -25,7 +23,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Kuznetsov Mihail */
-public class AddSshKeyForGitHubTest {
+public class SetGitCommitterTest {
 
   @Inject private TestUser defaultUser;
   @Inject private TestWorkspace testWorkspace;
@@ -35,23 +33,13 @@ public class AddSshKeyForGitHubTest {
   @Inject private Menu menu;
   @Inject private Preferences preferences;
 
-  @Inject
-  @Named("github.username")
-  private String gitHubUsername;
-
-  @Inject
-  @Named("github.password")
-  private String gitHubPassword;
-
-  @Inject private TestGitHubServiceClient gitHubClientService;
-
   @BeforeClass
   public void setUp() throws Exception {
     ide.open(testWorkspace);
   }
 
   @Test
-  public void generateKey() throws Exception {
+  public void testCommitterSettings() throws Exception {
     loader.waitOnClosed();
     notificationsPopupPanel.waitProgressPopupPanelClose();
     loader.waitOnClosed();
@@ -60,15 +48,11 @@ public class AddSshKeyForGitHubTest {
         TestMenuCommandsConstants.Profile.PREFERENCES);
     preferences.waitPreferencesForm();
 
-    // set data of a committer
     preferences.waitMenuInCollapsedDropdown(
         Preferences.DropDownGitCommitterInformationMenu.COMMITTER);
     preferences.selectDroppedMenuByName(Preferences.DropDownGitCommitterInformationMenu.COMMITTER);
-    preferences.typeAndWaitNameCommitter(gitHubUsername);
+    preferences.typeAndWaitNameCommitter(defaultUser.getName());
     preferences.typeAndWaitEmailCommitter(defaultUser.getEmail());
     preferences.clickOnOkBtn();
-
-    gitHubClientService.deleteAllGrants(gitHubUsername, gitHubPassword);
-    preferences.regenerateAndUploadSshKeyOnGithub(gitHubUsername, gitHubPassword);
   }
 }

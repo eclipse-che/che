@@ -21,23 +21,6 @@
 
 set -e
 
-# ----------------
-# helper functions
-# ----------------
-
-# append_after_match allows to append content after matching line
-# this is needed to append content of yaml files
-# first arg is mathing string, second string to insert after match
-append_after_match() {
-    while IFS= read -r line
-    do
-      printf '%s\n' "$line"
-      if [[ "$line" == *"$1"* ]];then
-          printf '%s\n' "$2"
-      fi
-    done < /dev/stdin
-}
-
 # --------------
 # Print Che logo 
 # --------------
@@ -114,105 +97,92 @@ if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
   # ----------------------
   # Set minishift configuration
   # ----------------------
+  DEFAULT_CHE_INFRA_OPENSHIFT_PROJECT=""
+  DEFAULT_CHE_INFRA_OPENSHIFT_PVC_STRATEGY="unique"
+  DEFAULT_CHE_INFRA_OPENSHIFT_USERNAME="developer"
+  DEFAULT_CHE_INFRA_OPENSHIFT_PASSWORD="developer"
   DEFAULT_OPENSHIFT_ENDPOINT="https://${MINISHIFT_IP}:8443/"
   DEFAULT_OPENSHIFT_USERNAME="developer"
   DEFAULT_OPENSHIFT_PASSWORD="developer"
   DEFAULT_CHE_OPENSHIFT_PROJECT="eclipse-che"
-  CHE_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT:-${DEFAULT_CHE_OPENSHIFT_PROJECT}}
   DEFAULT_OPENSHIFT_NAMESPACE_URL="${CHE_OPENSHIFT_PROJECT}.${MINISHIFT_IP}.nip.io"
   DEFAULT_CHE_DEBUGGING_ENABLED="true"
   DEFAULT_OC_SKIP_TLS="true"
   DEFAULT_CHE_APPLY_RESOURCE_QUOTAS="false"
   DEFAULT_IMAGE_PULL_POLICY="IfNotPresent"
-  DEFAULT_K8S_VERSION_PRIOR_TO_1_6="true"
   DEFAULT_ENABLE_SSL="false"
   DEFAULT_CHE_LOG_LEVEL="INFO"
-  DEFAULT_WORKSPACE_MEMORY_LIMIT="1300Mi"
-  DEFAULT_WORKSPACE_MEMORY_REQUEST="500Mi"
   DEFAULT_CHE_PREDEFINED_STACKS_RELOAD="false"
 elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
   # ----------------------
   # Set osio configuration
   # ----------------------
   if [ -z "${OPENSHIFT_TOKEN+x}" ]; then echo "[CHE] **ERROR** Env var OPENSHIFT_TOKEN is unset. You need to set it with your OSO token to continue. To retrieve your token: https://console.starter-us-east-2.openshift.com/console/command-line. Aborting"; exit 1; fi
-
+  DEFAULT_CHE_INFRA_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT:-${DEFAULT_CHE_OPENSHIFT_PROJECT}}
+  DEFAULT_CHE_INFRA_OPENSHIFT_PVC_STRATEGY="common"
+  DEFAULT_CHE_INFRA_OPENSHIFT_USERNAME=""
+  DEFAULT_CHE_INFRA_OPENSHIFT_PASSWORD=""
   DEFAULT_OPENSHIFT_ENDPOINT="https://api.starter-us-east-2.openshift.com"
   DEFAULT_CHE_OPENSHIFT_PROJECT="$(oc get projects -o=custom-columns=NAME:.metadata.name --no-headers | grep "\\-che$")"
-  CHE_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT:-${DEFAULT_CHE_OPENSHIFT_PROJECT}}
   DEFAULT_OPENSHIFT_NAMESPACE_URL="${CHE_OPENSHIFT_PROJECT}.8a09.starter-us-east-2.openshiftapps.com"
-  DEFAULT_CHE_KEYCLOAK_DISABLED="false"
   DEFAULT_CHE_DEBUGGING_ENABLED="false"
   DEFAULT_OC_SKIP_TLS="false"
-  DEFAULT_K8S_VERSION_PRIOR_TO_1_6="false"
   DEFAULT_ENABLE_SSL="true"
   DEFAULT_CHE_LOG_LEVEL="INFO"
-  # ----------------------------------------------------------------------
-  # Unset values that should not be set for particular flavor of OpenShift
-  # ----------------------------------------------------------------------
-  unset CHE_INFRA_OPENSHIFT_OAUTH__TOKEN
-  unset CHE_INFRA_OPENSHIFT_USERNAME
-  unset CHE_INFRA_OPENSHIFT_PASSWORD
-  unset WORKSPACE_MEMORY_LIMIT
-  unset WORKSPACE_MEMORY_REQUEST
-  unset CHE_PREDEFINED_STACKS_RELOAD
+  DEFAULT_CHE_PREDEFINED_STACKS_RELOAD="true"
 elif [ "${OPENSHIFT_FLAVOR}" == "ocp" ]; then
   # ----------------------
   # Set ocp configuration
   # ----------------------
+  DEFAULT_CHE_INFRA_OPENSHIFT_PROJECT=""
+  DEFAULT_CHE_INFRA_OPENSHIFT_PVC_STRATEGY="unique"
+  DEFAULT_CHE_INFRA_OPENSHIFT_USERNAME="developer"
+  DEFAULT_CHE_INFRA_OPENSHIFT_PASSWORD="developer"
   DEFAULT_CHE_OPENSHIFT_PROJECT="eclipse-che"
   DEFAULT_CHE_DEBUGGING_ENABLED="false"
   DEFAULT_OC_SKIP_TLS="false"
-  DEFAULT_K8S_VERSION_PRIOR_TO_1_6="true"
   DEFAULT_ENABLE_SSL="true"
   DEFAULT_CHE_LOG_LEVEL="INFO"
-  # ----------------------------------------------------------------------
-  # Unset values that should not be set for particular flavor of OpenShift
-  # ----------------------------------------------------------------------
-  unset WORKSPACE_MEMORY_LIMIT
-  unset WORKSPACE_MEMORY_REQUEST
-  unset CHE_PREDEFINED_STACKS_RELOAD
+  DEFAULT_CHE_PREDEFINED_STACKS_RELOAD="true"
 fi
 
 # --------------------------------------------------------
 # Set configuration common to any flavor of OpenShift
 # --------------------------------------------------------
+CHE_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT:-${DEFAULT_CHE_OPENSHIFT_PROJECT}}
 DEFAULT_COMMAND="deploy"
+DEFAULT_CHE_MULTIUSER="false"
+DEFAULT_CHE_IMAGE_REPO="docker.io/eclipse/che-server"
+DEFAULT_CHE_IMAGE_TAG="che6"
+DEFAULT_CHE_KEYCLOAK_OSO_ENDPOINT="https://sso.openshift.io/auth/realms/fabric8/broker/openshift-v3/token"
+DEFAULT_KEYCLOAK_GITHUB_ENDPOINT="https://sso.openshift.io/auth/realms/fabric8/broker/github/token"
+
 COMMAND=${COMMAND:-${DEFAULT_COMMAND}}
-CHE_MULTIUSER=${CHE_MULTIUSER:-"false"}
+CHE_MULTIUSER=${CHE_MULTIUSER:-${DEFAULT_CHE_MULTIUSER}}
 if [ "${CHE_MULTIUSER}" == "true" ]; then
-  DEFAULT_CHE_KEYCLOAK_DISABLED="false"
   CHE_DEDICATED_KEYCLOAK=${CHE_DEDICATED_KEYCLOAK:-"true"}
-  DEFAULT_CHE_IMAGE_REPO="docker.io/eclipse/che-server-multiuser"
 else
-  DEFAULT_CHE_KEYCLOAK_DISABLED="true"
   CHE_DEDICATED_KEYCLOAK="false"
-  DEFAULT_CHE_IMAGE_REPO="docker.io/eclipse/che-server"
 fi
+
 CHE_OAUTH_GITHUB_CLIENTID=${CHE_OAUTH_GITHUB_CLIENTID:-}
 CHE_OAUTH_GITHUB_CLIENTSECRET=${CHE_OAUTH_GITHUB_CLIENTSECRET:-}
-CHE_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT:-${DEFAULT_CHE_OPENSHIFT_PROJECT}}
-DEFAULT_CHE_INFRA_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT}
 CHE_INFRA_OPENSHIFT_PROJECT=${CHE_INFRA_OPENSHIFT_PROJECT:-${DEFAULT_CHE_INFRA_OPENSHIFT_PROJECT}}
+CHE_INFRA_OPENSHIFT_USERNAME=${CHE_INFRA_OPENSHIFT_USERNAME:-${DEFAULT_CHE_INFRA_OPENSHIFT_USERNAME}}
+CHE_INFRA_OPENSHIFT_PASSWORD=${CHE_INFRA_OPENSHIFT_PASSWORD:-${DEFAULT_CHE_INFRA_OPENSHIFT_PASSWORD}}
 OPENSHIFT_NAMESPACE_URL=${OPENSHIFT_NAMESPACE_URL:-${DEFAULT_OPENSHIFT_NAMESPACE_URL}}
-K8S_VERSION_PRIOR_TO_1_6=${K8S_VERSION_PRIOR_TO_1_6:-${DEFAULT_K8S_VERSION_PRIOR_TO_1_6}}
 CHE_LOG_LEVEL=${CHE_LOG_LEVEL:-${DEFAULT_CHE_LOG_LEVEL}}
 ENABLE_SSL=${ENABLE_SSL:-${DEFAULT_ENABLE_SSL}}
-WORKSPACE_MEMORY_LIMIT=${WORKSPACE_MEMORY_LIMIT:-${DEFAULT_WORKSPACE_MEMORY_LIMIT}}
 WORKSPACE_MEMORY_REQUEST=${WORKSPACE_MEMORY_REQUEST:-${DEFAULT_WORKSPACE_MEMORY_REQUEST}}
 CHE_PREDEFINED_STACKS_RELOAD=${CHE_PREDEFINED_STACKS_RELOAD:-${DEFAULT_CHE_PREDEFINED_STACKS_RELOAD}}
 OPENSHIFT_ENDPOINT=${OPENSHIFT_ENDPOINT:-${DEFAULT_OPENSHIFT_ENDPOINT}}
 OPENSHIFT_USERNAME=${OPENSHIFT_USERNAME:-${DEFAULT_OPENSHIFT_USERNAME}}
 OPENSHIFT_PASSWORD=${OPENSHIFT_PASSWORD:-${DEFAULT_OPENSHIFT_PASSWORD}}
-CHE_KEYCLOAK_DISABLED=${CHE_KEYCLOAK_DISABLED:-${DEFAULT_CHE_KEYCLOAK_DISABLED}}
 CHE_DEBUGGING_ENABLED=${CHE_DEBUGGING_ENABLED:-${DEFAULT_CHE_DEBUGGING_ENABLED}}
 OC_SKIP_TLS=${OC_SKIP_TLS:-${DEFAULT_OC_SKIP_TLS}}
 CHE_APPLY_RESOURCE_QUOTAS=${CHE_APPLY_RESOURCE_QUOTAS:-${DEFAULT_CHE_APPLY_RESOURCE_QUOTAS}}
 IMAGE_PULL_POLICY=${IMAGE_PULL_POLICY:-${DEFAULT_IMAGE_PULL_POLICY}}
-DEFAULT_CHE_INFRA_OPENSHIFT_PVC_STRATEGY="common"
 CHE_INFRA_OPENSHIFT_PVC_STRATEGY=${CHE_INFRA_OPENSHIFT_PVC_STRATEGY:-${DEFAULT_CHE_INFRA_OPENSHIFT_PVC_STRATEGY}}
-# TODO move this env variable as a config map in the deployment config
-# as soon as the 'che-multiuser' branch is merged to master
-CHE_WORKSPACE_LOGS="/data/logs/machine/logs"
 CHE_HOST="${OPENSHIFT_NAMESPACE_URL}"
 if [ "${ENABLE_SSL}" == "true" ]; then
     HTTP_PROTOCOL="https"
@@ -222,23 +192,20 @@ else
     WS_PROTOCOL="ws"
 fi
 CHE_IMAGE_REPO=${CHE_IMAGE_REPO:-${DEFAULT_CHE_IMAGE_REPO}}
-DEFAULT_CHE_IMAGE_TAG="che6"
 CHE_IMAGE_TAG=${CHE_IMAGE_TAG:-${DEFAULT_CHE_IMAGE_TAG}}
 CHE_IMAGE="${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}"
 # Escape slashes in CHE_IMAGE to use it with sed later
 # e.g. docker.io/rhchestage => docker.io\/rhchestage
 CHE_IMAGE_SANITIZED=$(echo "${CHE_IMAGE}" | sed 's/\//\\\//g')
 # Keycloak production endpoints are used by default
-DEFAULT_KEYCLOAK_OSO_ENDPOINT="https://sso.openshift.io/auth/realms/fabric8/broker/openshift-v3/token"
-KEYCLOAK_OSO_ENDPOINT=${KEYCLOAK_OSO_ENDPOINT:-${DEFAULT_KEYCLOAK_OSO_ENDPOINT}}
-DEFAULT_KEYCLOAK_GITHUB_ENDPOINT="https://sso.openshift.io/auth/realms/fabric8/broker/github/token"
+CHE_KEYCLOAK_OSO_ENDPOINT=${CHE_KEYCLOAK_OSO_ENDPOINT:-${DEFAULT_CHE_KEYCLOAK_OSO_ENDPOINT}}
 KEYCLOAK_GITHUB_ENDPOINT=${KEYCLOAK_GITHUB_ENDPOINT:-${DEFAULT_KEYCLOAK_GITHUB_ENDPOINT}}
 
 # ---------------------------------------
 # Verify that we have all env var are set
 # ---------------------------------------
-if ([ -z "${OPENSHIFT_USERNAME+x}" ] || 
-    [ -z "${OPENSHIFT_PASSWORD+x}" ]) && 
+if ([ -z "${OPENSHIFT_USERNAME+x}" ] ||
+    [ -z "${OPENSHIFT_PASSWORD+x}" ]) &&
     [ -z "${OPENSHIFT_TOKEN+x}" ]; then echo "[CHE] **ERROR** Env var OPENSHIFT_USERNAME, OPENSHIFT_PASSWORD and OPENSHIFT_TOKEN are unset. You need to set username/password or token to continue. Aborting"; exit 1; fi
 
 if [ -z "${OPENSHIFT_ENDPOINT+x}" ]; then echo "[CHE] **ERROR**Env var OPENSHIFT_ENDPOINT is unset. You need to set it to continue. Aborting"; exit 1; fi
@@ -390,49 +357,33 @@ fi
 echo
 echo "[CHE] Deploying Che on ${OPENSHIFT_FLAVOR} (image ${CHE_IMAGE})"
 
-CHE_SERVER_CONFIGURATION="          - name: \"CHE_WORKSPACE_LOGS\"
-            value: \"${CHE_WORKSPACE_LOGS}\"
-          - name: \"CHE_HOST\"
-            value: \"${CHE_HOST}\"
-          - name: \"CHE_MULTIUSER\"
-            value: \"${CHE_MULTIUSER}\"
-          - name: \"CHE_OAUTH_GITHUB_CLIENTID\"
-            value: \"${CHE_OAUTH_GITHUB_CLIENTID}\"
-          - name: \"CHE_OAUTH_GITHUB_CLIENTSECRET\"
-            value: \"${CHE_OAUTH_GITHUB_CLIENTSECRET}\""
 
 DEFAULT_CHE_DEPLOYMENT_FILE_PATH=./che-openshift.yml
 CHE_DEPLOYMENT_FILE_PATH=${CHE_DEPLOYMENT_FILE_PATH:-${DEFAULT_CHE_DEPLOYMENT_FILE_PATH}}
 cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     sed "s/          image:.*/          image: \"${CHE_IMAGE_SANITIZED}\"/" | \
     sed "s/          imagePullPolicy:.*/          imagePullPolicy: \"${IMAGE_PULL_POLICY}\"/" | \
-    if [ ! -z "${OPENSHIFT_NAMESPACE_URL+x}" ]; then sed "s/    hostname-http:.*/    hostname-http: ${OPENSHIFT_NAMESPACE_URL}/" ; else cat -; fi | \
-    sed "s|    keycloak-oso-endpoint:.*|    keycloak-oso-endpoint: ${KEYCLOAK_OSO_ENDPOINT}|" | \
-    sed "s|    keycloak-github-endpoint:.*|    keycloak-github-endpoint: ${KEYCLOAK_GITHUB_ENDPOINT}|" | \
-    if [ "${CHE_KEYCLOAK_DISABLED}" == "true" ]; then sed "s/    keycloak-disabled: \"false\"/    keycloak-disabled: \"true\"/" ; else cat -; fi | \
-    if [ ! -z "${WORKSPACE_MEMORY_LIMIT}" ]; then sed "s/    workspaces-memory-limit: 2300Mi/    workspaces-memory-limit: ${WORKSPACE_MEMORY_LIMIT}/" ; else cat -; fi | \
-    if [ ! -z "${WORKSPACE_MEMORY_REQUEST}" ]; then sed "s/    workspaces-memory-request: 1500Mi/    workspaces-memory-request: ${WORKSPACE_MEMORY_REQUEST}/" ; else cat -; fi | \
-    if [ ! -z "${CHE_PREDEFINED_STACKS_RELOAD}" ]; then sed "s/    che.predefined.stacks.reload_on_start: \"true\"/    che.predefined.stacks.reload_on_start: \"${CHE_PREDEFINED_STACKS_RELOAD}\"/" ; else cat -; fi | \
-    sed "s|    CHE_INFRA_OPENSHIFT_PROJECT:.*|    CHE_INFRA_OPENSHIFT_PROJECT: ${CHE_INFRA_OPENSHIFT_PROJECT}|" | \
+    sed "s|    CHE_KEYCLOAK_OSO_ENDPOINT:.*|    CHE_KEYCLOAK_OSO_ENDPOINT: ${CHE_KEYCLOAK_OSO_ENDPOINT}|" | \
+    sed "s|    CHE_KEYCLOAK_GITHUB_ENDPOINT:.*|    CHE_KEYCLOAK_GITHUB_ENDPOINT: ${KEYCLOAK_GITHUB_ENDPOINT}|" | \
+    sed "s/    CHE_PREDEFINED_STACKS_RELOAD__ON__START:.*/    CHE_PREDEFINED_STACKS_RELOAD__ON__START: \"${CHE_PREDEFINED_STACKS_RELOAD}\"/" | \
+    sed "s|    CHE_INFRA_OPENSHIFT_PROJECT:.*|    CHE_INFRA_OPENSHIFT_PROJECT: \"${CHE_INFRA_OPENSHIFT_PROJECT}\"|" | \
     sed "s|    CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL:.*|    CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL: ${HTTP_PROTOCOL}://che-${OPENSHIFT_NAMESPACE_URL}/agent-binaries/linux_amd64/bootstrapper/bootstrapper|" | \
     sed "s|    CHE_WEBSOCKET_ENDPOINT:.*|    CHE_WEBSOCKET_ENDPOINT: ${WS_PROTOCOL}://che-${OPENSHIFT_NAMESPACE_URL}/api/websocket|" | \
-    sed "s|    CHE_HOST: \${DEFAULT_OPENSHIFT_NAMESPACE_URL}|    CHE_HOST: che-${OPENSHIFT_NAMESPACE_URL}|" | \
-    sed "s|    CHE_API: http://\${DEFAULT_OPENSHIFT_NAMESPACE_URL}/api|    CHE_API: ${HTTP_PROTOCOL}://che-${OPENSHIFT_NAMESPACE_URL}/api|" | \
+    sed "s/    CHE_MULTIUSER:.*/    CHE_MULTIUSER: \"${CHE_MULTIUSER}\"/" | \
+    sed "s|    CHE_HOST:.*|    CHE_HOST: che-${OPENSHIFT_NAMESPACE_URL}|" | \
+    sed "s|    CHE_API:.*|    CHE_API: ${HTTP_PROTOCOL}://che-${OPENSHIFT_NAMESPACE_URL}/api|" | \
     sed "s|    CHE_INFRA_OPENSHIFT_PVC_STRATEGY:.*|    CHE_INFRA_OPENSHIFT_PVC_STRATEGY: ${CHE_INFRA_OPENSHIFT_PVC_STRATEGY}|" | \
-    sed "s|    che-keycloak-auth-server-url:.*|    che-keycloak-auth-server-url: ${CHE_KEYCLOAK_AUTH__SERVER__URL}|" | \
-    sed "s|    che-keycloak-realm:.*|    che-keycloak-realm: ${CHE_KEYCLOAK_REALM}|" | \
-    sed "s|    che-keycloak-client-id:.*|    che-keycloak-client-id: ${CHE_KEYCLOAK_CLIENT__ID}|" | \
+    sed "s|    CHE_KEYCLOAK_AUTH__SERVER__URL:.*|    CHE_KEYCLOAK_AUTH__SERVER__URL: ${CHE_KEYCLOAK_AUTH__SERVER__URL}|" | \
+    sed "s|    CHE_KEYCLOAK_REALM:.*|    CHE_KEYCLOAK_REALM: ${CHE_KEYCLOAK_REALM}|" | \
+    sed "s|    CHE_KEYCLOAK_CLIENT__ID:.*|    CHE_KEYCLOAK_CLIENT__ID: ${CHE_KEYCLOAK_CLIENT__ID}|" | \
+    sed "s|    CHE_OAUTH_GITHUB_CLIENTID:.*|    CHE_OAUTH_GITHUB_CLIENTID: ${CHE_OAUTH_GITHUB_CLIENTID}|" | \
+    sed "s|    CHE_OAUTH_GITHUB_CLIENTSECRET:.*|    CHE_OAUTH_GITHUB_CLIENTSECRET: ${CHE_OAUTH_GITHUB_CLIENTSECRET}|" | \
     if [ "${CHE_INFRA_OPENSHIFT_OAUTH__TOKEN+x}" ]; then sed "s|    CHE_INFRA_OPENSHIFT_OAUTH__TOKEN:.*|    CHE_INFRA_OPENSHIFT_OAUTH__TOKEN: ${CHE_INFRA_OPENSHIFT_OAUTH__TOKEN}|"; else cat -;  fi | \
     if [ "${CHE_INFRA_OPENSHIFT_USERNAME+x}" ]; then sed "s|    CHE_INFRA_OPENSHIFT_USERNAME:.*|    CHE_INFRA_OPENSHIFT_USERNAME: ${CHE_INFRA_OPENSHIFT_USERNAME}|"; else cat -;  fi | \
     if [ "${CHE_INFRA_OPENSHIFT_PASSWORD+x}" ]; then sed "s|    CHE_INFRA_OPENSHIFT_PASSWORD:.*|    CHE_INFRA_OPENSHIFT_PASSWORD: ${CHE_INFRA_OPENSHIFT_PASSWORD}|"; else cat -;  fi | \
-    if [ "${CHE_LOG_LEVEL}" == "DEBUG" ]; then sed "s/    log-level: \"INFO\"/    log-level: \"DEBUG\"/" ; else cat -; fi | \
-    if [ "${CHE_DEBUGGING_ENABLED}" == "true" ]; then sed "s/    remote-debugging-enabled: \"false\"/    remote-debugging-enabled: \"${CHE_DEBUGGING_ENABLED}\"/"; else cat -; fi | \
-    if [ "${ENABLE_SSL}" == "false" ]; then sed "s/    CHE_INFRA_OPENSHIFT_TLS__ENABLED: \"true\"/    CHE_INFRA_OPENSHIFT_TLS__ENABLED: \"false\"/" ; else cat -; fi | \
-    if [ "${ENABLE_SSL}" == "false" ]; then sed "s/    che-openshift-secure-routes: \"true\"/    che-openshift-secure-routes: \"false\"/" ; else cat -; fi | \
-    if [ "${ENABLE_SSL}" == "false" ]; then sed "s/    che-secure-external-urls: \"true\"/    che-secure-external-urls: \"false\"/" ; else cat -; fi | \
+    sed "s/    CHE_LOG_LEVEL:.*/    CHE_LOG_LEVEL: \"${CHE_LOG_LEVEL}\"/" | \
+    sed "s/    CHE_INFRA_OPENSHIFT_TLS__ENABLED:.*/    CHE_INFRA_OPENSHIFT_TLS__ENABLED: \"${ENABLE_SSL}\"/" | \
     if [ "${ENABLE_SSL}" == "false" ]; then grep -v -e "tls:" -e "insecureEdgeTerminationPolicy: Redirect" -e "termination: edge" ; else cat -; fi | \
-    if [ "${K8S_VERSION_PRIOR_TO_1_6}" == "true" ]; then sed "s/    che-openshift-precreate-subpaths: \"false\"/    che-openshift-precreate-subpaths: \"true\"/"  ; else cat -; fi | \
-    append_after_match "env:" "${CHE_SERVER_CONFIGURATION}" | \
     oc apply --force=true -f -
 echo
 

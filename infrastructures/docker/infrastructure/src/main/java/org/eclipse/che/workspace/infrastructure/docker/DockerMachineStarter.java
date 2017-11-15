@@ -38,7 +38,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -47,6 +46,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.infrastructure.docker.client.DockerConnector;
+import org.eclipse.che.infrastructure.docker.client.DockerFileException;
 import org.eclipse.che.infrastructure.docker.client.LogMessage;
 import org.eclipse.che.infrastructure.docker.client.MessageProcessor;
 import org.eclipse.che.infrastructure.docker.client.ProgressMonitor;
@@ -69,16 +69,16 @@ import org.eclipse.che.infrastructure.docker.client.params.GetContainerLogsParam
 import org.eclipse.che.infrastructure.docker.client.params.ListImagesParams;
 import org.eclipse.che.infrastructure.docker.client.params.PullParams;
 import org.eclipse.che.infrastructure.docker.client.params.RemoveContainerParams;
-import org.eclipse.che.infrastructure.docker.client.params.RemoveImageParams;
 import org.eclipse.che.infrastructure.docker.client.params.StartContainerParams;
 import org.eclipse.che.infrastructure.docker.client.params.TagParams;
 import org.eclipse.che.infrastructure.docker.client.params.network.ConnectContainerToNetworkParams;
+import org.eclipse.che.infrastructure.docker.client.parser.DockerImageIdentifier;
+import org.eclipse.che.infrastructure.docker.client.parser.DockerImageIdentifierParser;
 import org.eclipse.che.workspace.infrastructure.docker.exception.SourceNotFoundException;
 import org.eclipse.che.workspace.infrastructure.docker.logs.MachineLoggersFactory;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.monit.AbnormalMachineStopHandler;
 import org.eclipse.che.workspace.infrastructure.docker.monit.DockerMachineStopDetector;
-import org.eclipse.che.workspace.infrastructure.docker.snapshot.MachineSourceImpl;
 import org.slf4j.Logger;
 
 /*
@@ -123,11 +123,6 @@ import org.slf4j.Logger;
  */
 public class DockerMachineStarter {
   private static final Logger LOG = getLogger(DockerMachineStarter.class);
-  /** Prefix of image repository, used to identify that the image is a machine saved to snapshot. */
-  public static final String MACHINE_SNAPSHOT_PREFIX = "machine_snapshot_";
-
-  public static final Pattern SNAPSHOT_LOCATION_PATTERN =
-      Pattern.compile("(.+/)?" + MACHINE_SNAPSHOT_PREFIX + ".+");
 
   private static final String CONTAINER_EXITED_ERROR =
       "We detected that a machine exited unexpectedly. "
@@ -161,7 +156,6 @@ public class DockerMachineStarter {
   private final ExecutorService executor;
   private final DockerMachineStopDetector dockerInstanceStopDetector;
   private final boolean doForcePullImage;
-  private final boolean snapshotUseRegistry;
   private final MachineLoggersFactory machineLoggerFactory;
   private final DockerMachineCreator machineCreator;
 
@@ -171,7 +165,6 @@ public class DockerMachineStarter {
       UserSpecificDockerRegistryCredentialsProvider dockerCredentials,
       DockerMachineStopDetector dockerMachineStopDetector,
       @Named("che.docker.always_pull_image") boolean doForcePullImage,
-      @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry,
       MachineLoggersFactory machineLogger,
       DockerMachineCreator machineCreator) {
     this.machineCreator = machineCreator;
@@ -181,7 +174,6 @@ public class DockerMachineStarter {
     this.dockerCredentials = dockerCredentials;
     this.dockerInstanceStopDetector = dockerMachineStopDetector;
     this.doForcePullImage = doForcePullImage;
-    this.snapshotUseRegistry = snapshotUseRegistry;
     this.machineLoggerFactory = machineLogger;
     // single point of failure in case of highly loaded system
     executor =
@@ -341,40 +333,38 @@ public class DockerMachineStarter {
   protected void pullImage(
       DockerContainerConfig container, String machineImageName, ProgressMonitor progressMonitor)
       throws InternalInfrastructureException, SourceNotFoundException {
-    DockerMachineSource dockerMachineSource =
-        new DockerMachineSource(new MachineSourceImpl("image").setLocation(container.getImage()));
-    if (dockerMachineSource.getRepository() == null) {
+    final DockerImageIdentifier dockerImageIdentifier;
+    try {
+      dockerImageIdentifier = DockerImageIdentifierParser.parse(container.getImage());
+    } catch (DockerFileException e) {
+      throw new InternalInfrastructureException(
+          "Try to build a docker machine source with an invalid location/content. It is not in the expected format",
+          e);
+    }
+    if (dockerImageIdentifier.getRepository() == null) {
       throw new InternalInfrastructureException(
           format(
               "Machine creation failed. Machine source is invalid. No repository is defined. Found '%s'.",
-              dockerMachineSource));
+              dockerImageIdentifier.getRepository()));
     }
-
     try {
-      boolean isSnapshot =
-          SNAPSHOT_LOCATION_PATTERN.matcher(dockerMachineSource.getLocation()).matches();
-      boolean isImageExistLocally = isDockerImageExistLocally(dockerMachineSource.getRepository());
-      if ((!isSnapshot && (doForcePullImage || !isImageExistLocally))
-          || (isSnapshot && snapshotUseRegistry)) {
+      boolean isImageExistLocally =
+          isDockerImageExistLocally(dockerImageIdentifier.getRepository());
+      if (doForcePullImage || !isImageExistLocally) {
         PullParams pullParams =
-            PullParams.create(dockerMachineSource.getRepository())
-                .withTag(MoreObjects.firstNonNull(dockerMachineSource.getTag(), LATEST_TAG))
-                .withRegistry(dockerMachineSource.getRegistry())
+            PullParams.create(dockerImageIdentifier.getRepository())
+                .withTag(MoreObjects.firstNonNull(dockerImageIdentifier.getTag(), LATEST_TAG))
+                .withRegistry(dockerImageIdentifier.getRegistry())
                 .withAuthConfigs(dockerCredentials.getCredentials());
         docker.pull(pullParams, progressMonitor);
       }
 
-      String fullNameOfPulledImage = dockerMachineSource.getLocation(false);
+      String fullNameOfPulledImage = container.getImage();
       try {
         // tag image with generated name to allow sysadmin recognize it
         docker.tag(TagParams.create(fullNameOfPulledImage, machineImageName));
       } catch (ImageNotFoundException nfEx) {
         throw new SourceNotFoundException(nfEx.getLocalizedMessage(), nfEx);
-      }
-
-      // remove unneeded tag if restoring snapshot from registry
-      if (isSnapshot && snapshotUseRegistry) {
-        docker.removeImage(RemoveImageParams.create(fullNameOfPulledImage).withForce(false));
       }
     } catch (IOException e) {
       throw new InternalInfrastructureException(
