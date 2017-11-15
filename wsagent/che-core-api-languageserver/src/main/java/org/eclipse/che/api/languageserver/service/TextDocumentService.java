@@ -1,9 +1,12 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc. All rights reserved. This program and the accompanying
- * materials are made available under the terms of the Eclipse Public License v1.0 which accompanies
- * this distribution, and is available at http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2012-2017 Red Hat, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: Red Hat, Inc. - initial API and implementation
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.api.languageserver.service;
 
@@ -55,7 +58,6 @@ import org.eclipse.che.api.languageserver.shared.model.ExtendedTextDocumentEdit;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedTextEdit;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedWorkspaceEdit;
 import org.eclipse.che.api.languageserver.shared.model.RenameResult;
-import org.eclipse.che.api.languageserver.shared.util.Constants;
 import org.eclipse.che.api.languageserver.util.LSOperation;
 import org.eclipse.che.api.languageserver.util.OperationUtil;
 import org.eclipse.jface.text.BadLocationException;
@@ -385,7 +387,7 @@ public class TextDocumentService {
                 InitializedLanguageServer element, List<? extends Location> locations) {
               locations.forEach(
                   o -> {
-                    Location extendedLocation = fixLocation(element, o);
+                    Location extendedLocation = LanguageServiceUtils.fixLocation(o);
                     result.add(new LocationDto(extendedLocation));
                   });
               return true;
@@ -433,7 +435,7 @@ public class TextDocumentService {
                 InitializedLanguageServer element, List<? extends Location> locations) {
               locations.forEach(
                   o -> {
-                    result.add(new LocationDto(fixLocation(element, o)));
+                    result.add(new LocationDto(LanguageServiceUtils.fixLocation(o)));
                   });
               return true;
             }
@@ -980,12 +982,5 @@ public class TextDocumentService {
 
   private boolean truish(Boolean b) {
     return b != null && b;
-  }
-
-  private Location fixLocation(InitializedLanguageServer element, Location o) {
-    if (LanguageServiceUtils.isProjectUri(o.getUri())) {
-      o.setUri(Constants.CHE_WKSP_SCHEME + removePrefixUri(o.getUri()));
-    }
-    return o;
   }
 }

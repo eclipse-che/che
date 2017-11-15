@@ -11,7 +11,9 @@
 package org.eclipse.che.api.languageserver.service;
 
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
+import org.eclipse.che.api.languageserver.shared.util.Constants;
 import org.eclipse.che.api.vfs.Path;
+import org.eclipse.lsp4j.Location;
 
 /** Language service service utilities */
 public class LanguageServiceUtils {
@@ -56,5 +58,12 @@ public class LanguageServiceUtils {
       throw new LanguageServerException("Not a project URI: " + fileUri);
     }
     return path.subPath(0, 2).toString();
+  }
+
+  public static Location fixLocation(Location o) {
+    if (isProjectUri(o.getUri())) {
+      o.setUri(Constants.CHE_WKSP_SCHEME + removePrefixUri(o.getUri()));
+    }
+    return o;
   }
 }

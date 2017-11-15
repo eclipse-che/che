@@ -283,7 +283,7 @@ public class TextDocumentServiceClient {
         (resolve, reject) ->
             requestTransmitter
                 .newRequest()
-                .endpointId("ws-agent")
+                .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                 .methodName("textDocument/fileContent")
                 .paramsAsString(uri)
                 .sendAndReceiveResultAsString()
