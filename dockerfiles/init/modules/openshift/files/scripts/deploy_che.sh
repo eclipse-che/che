@@ -204,8 +204,8 @@ KEYCLOAK_GITHUB_ENDPOINT=${KEYCLOAK_GITHUB_ENDPOINT:-${DEFAULT_KEYCLOAK_GITHUB_E
 # ---------------------------------------
 # Verify that we have all env var are set
 # ---------------------------------------
-if ([ -z "${OPENSHIFT_USERNAME+x}" ] || 
-    [ -z "${OPENSHIFT_PASSWORD+x}" ]) && 
+if ([ -z "${OPENSHIFT_USERNAME+x}" ] ||
+    [ -z "${OPENSHIFT_PASSWORD+x}" ]) &&
     [ -z "${OPENSHIFT_TOKEN+x}" ]; then echo "[CHE] **ERROR** Env var OPENSHIFT_USERNAME, OPENSHIFT_PASSWORD and OPENSHIFT_TOKEN are unset. You need to set username/password or token to continue. Aborting"; exit 1; fi
 
 if [ -z "${OPENSHIFT_ENDPOINT+x}" ]; then echo "[CHE] **ERROR**Env var OPENSHIFT_ENDPOINT is unset. You need to set it to continue. Aborting"; exit 1; fi
@@ -366,7 +366,7 @@ cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     sed "s|    CHE_KEYCLOAK_OSO_ENDPOINT:.*|    CHE_KEYCLOAK_OSO_ENDPOINT: ${CHE_KEYCLOAK_OSO_ENDPOINT}|" | \
     sed "s|    CHE_KEYCLOAK_GITHUB_ENDPOINT:.*|    CHE_KEYCLOAK_GITHUB_ENDPOINT: ${KEYCLOAK_GITHUB_ENDPOINT}|" | \
     sed "s/    CHE_PREDEFINED_STACKS_RELOAD__ON__START:.*/    CHE_PREDEFINED_STACKS_RELOAD__ON__START: \"${CHE_PREDEFINED_STACKS_RELOAD}\"/" | \
-    sed "s|    CHE_INFRA_OPENSHIFT_PROJECT:.*|    CHE_INFRA_OPENSHIFT_PROJECT: ${CHE_INFRA_OPENSHIFT_PROJECT}|" | \
+    sed "s|    CHE_INFRA_OPENSHIFT_PROJECT:.*|    CHE_INFRA_OPENSHIFT_PROJECT: \"${CHE_INFRA_OPENSHIFT_PROJECT}\"|" | \
     sed "s|    CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL:.*|    CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL: ${HTTP_PROTOCOL}://che-${OPENSHIFT_NAMESPACE_URL}/agent-binaries/linux_amd64/bootstrapper/bootstrapper|" | \
     sed "s|    CHE_WEBSOCKET_ENDPOINT:.*|    CHE_WEBSOCKET_ENDPOINT: ${WS_PROTOCOL}://che-${OPENSHIFT_NAMESPACE_URL}/api/websocket|" | \
     sed "s/    CHE_MULTIUSER:.*/    CHE_MULTIUSER: \"${CHE_MULTIUSER}\"/" | \
