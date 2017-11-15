@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -109,10 +108,7 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
       createPods(createdServices, createdRoutes);
       bootstrapMachines();
 
-    } catch (InfrastructureException
-        | RuntimeException
-        | InterruptedException
-        | ExecutionException e) {
+    } catch (InfrastructureException | RuntimeException | InterruptedException e) {
       LOG.error("Failed to start of OpenShift runtime. " + e.getMessage());
       boolean interrupted = Thread.interrupted() || e instanceof InterruptedException;
       try {
@@ -132,8 +128,13 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
     }
   }
 
-  private void bootstrapMachines()
-      throws InfrastructureException, InterruptedException, ExecutionException {
+  /**
+   * Bootstraps machines in parallel.
+   *
+   * @throws InfrastructureException when any error occurs while bootstrapping machines
+   * @throws InterruptedException when machines bootstrapping was interrupted
+   */
+  private void bootstrapMachines() throws InfrastructureException, InterruptedException {
     CompletableFuture<InfrastructureException> firstFailed = new CompletableFuture<>();
     List<CompletableFuture> checkMachines = new ArrayList<>(machines.size());
     for (OpenShiftMachine machine : machines.values()) {
