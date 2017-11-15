@@ -66,18 +66,19 @@ public class DebuggerJsonRpcMessenger implements EventSubscriber<DebuggerMessage
   public void onEvent(DebuggerMessage event) {
     switch (event.getDebuggerEvent().getType()) {
       case SUSPEND:
-        final LocationDto location = asDto(((SuspendEvent) event.getDebuggerEvent()).getLocation());
-        final SuspendEventDto suspendEvent =
+        SuspendEvent suspendEvent = (SuspendEvent) event.getDebuggerEvent();
+        final SuspendEventDto suspendEventDto =
             newDto(SuspendEventDto.class)
                 .withType(DebuggerEvent.TYPE.SUSPEND)
-                .withLocation(location);
+                .withLocation(asDto(suspendEvent.getLocation()))
+                .withSuspendPolicy(suspendEvent.getSuspendPolicy());
         endpointIds.forEach(
             it ->
                 transmitter
                     .newRequest()
                     .endpointId(it)
                     .methodName(EVENT_DEBUGGER_MESSAGE_SUSPEND)
-                    .paramsAsDto(suspendEvent)
+                    .paramsAsDto(suspendEventDto)
                     .sendAndSkipResult());
         break;
       case BREAKPOINT_ACTIVATED:
