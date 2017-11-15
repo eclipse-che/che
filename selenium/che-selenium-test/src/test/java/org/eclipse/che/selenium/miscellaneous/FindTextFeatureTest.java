@@ -439,6 +439,7 @@ public class FindTextFeatureTest {
     findText.waitFindInfoPanelIsOpen();
 
     // Check move page buttons status on the first page
+    findText.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
     Assert.assertTrue(findText.checkNextPageButtonIsEnabled());
     Assert.assertFalse(findText.checkPreviousPageButtonIsEnabled());
     sumOfFoundFiles += findText.getFoundFilesNumberOnPage();
@@ -446,6 +447,7 @@ public class FindTextFeatureTest {
     findText.clickOnNextPageButton();
 
     // Check move page buttons status on the second page
+    findText.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
     Assert.assertTrue(findText.checkNextPageButtonIsEnabled());
     Assert.assertTrue(findText.checkPreviousPageButtonIsEnabled());
     sumOfFoundFiles += findText.getFoundFilesNumberOnPage();
@@ -453,6 +455,7 @@ public class FindTextFeatureTest {
     findText.clickOnNextPageButton();
 
     // Check move page buttons status on the third page
+    findText.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
     Assert.assertFalse(findText.checkNextPageButtonIsEnabled());
     Assert.assertTrue(findText.checkPreviousPageButtonIsEnabled());
     sumOfFoundFiles += findText.getFoundFilesNumberOnPage();
