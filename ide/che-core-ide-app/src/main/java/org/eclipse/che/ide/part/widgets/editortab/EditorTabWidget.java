@@ -110,6 +110,8 @@ public class EditorTabWidget extends Composite
     this.file = relatedEditorPart.getEditorInput().getFile();
     this.icon = relatedEditorPart.getTitleImage();
     this.title.setText(relatedEditorPart.getTitle());
+    //add "path" attribute describe full project path for opened file, will be use full for testing
+    this.title.getElement().setAttribute("path", file.getLocation().toString());
     this.id = title + UUID.uuid(4);
 
     iconPanel.add(getIcon());
