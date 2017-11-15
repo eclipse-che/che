@@ -358,6 +358,8 @@ public class ProjectExplorer {
    */
   public void selectItem(String path) {
     String locator = "//div[@path='/" + path + "']/div/div";
+
+    waitItem(path);
     new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
         .until(ExpectedConditions.elementToBeClickable(By.xpath(locator)))
         .click();
@@ -448,6 +450,7 @@ public class ProjectExplorer {
       waitItemIsSelected(path);
       LOG.debug("===========>>>>  openItemByPath try 3");
       action.moveToElement(getProjectExplorerElement(path)).perform();
+      waitItem(path);
       action.doubleClick(getProjectExplorerElement(path)).perform();
       LOG.debug("===========>>>>  openItemByPath try 4");
     }
@@ -465,6 +468,7 @@ public class ProjectExplorer {
       waitItemIsSelected(path);
       LOG.debug("===========>>>>  openItemByPath catch 5");
       action.moveToElement(getProjectExplorerElement(path)).perform();
+      waitItem(path);
       action.doubleClick(getProjectExplorerElement(path)).perform();
       LOG.debug("===========>>>>  openItemByPath catch 6");
     }
