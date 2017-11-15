@@ -82,7 +82,7 @@ public class CommitPresenterTest extends BaseTest {
                 gitOutputConsoleFactory,
                 processesPanelPresenter));
 
-    when(view.getMessage()).thenReturn(EMPTY_TEXT);
+    when(view.getCommitMessage()).thenReturn(EMPTY_TEXT);
 
     Resource resource = mock(Resource.class);
     when(appContext.getResources()).thenReturn(new Resource[] {});
@@ -169,7 +169,7 @@ public class CommitPresenterTest extends BaseTest {
     verify(selectableChangesPanelPresenter).show(eq(alteredFiles));
     verify(view).focusInMessageField();
     verify(view).setEnableCommitButton(eq(DISABLE_BUTTON));
-    verify(view).getMessage();
+    verify(view).getCommitMessage();
     verify(view).showDialog();
   }
 
@@ -197,13 +197,13 @@ public class CommitPresenterTest extends BaseTest {
     verify(selectableChangesPanelPresenter).show(eq(alteredFiles));
     verify(view).focusInMessageField();
     verify(view).setEnableCommitButton(eq(DISABLE_BUTTON));
-    verify(view).getMessage();
+    verify(view).getCommitMessage();
     verify(view).showDialog();
   }
 
   @Test
   public void shouldEnableCommitButton() throws Exception {
-    when(view.getMessage()).thenReturn("foo");
+    when(view.getCommitMessage()).thenReturn("foo");
 
     presenter.showDialog(project);
     verify(stringPromise).then(stringCaptor.capture());
@@ -223,7 +223,7 @@ public class CommitPresenterTest extends BaseTest {
 
   @Test
   public void shouldDisableCommitButtonOnEmptyMessage() throws Exception {
-    when(view.getMessage()).thenReturn(EMPTY_TEXT);
+    when(view.getCommitMessage()).thenReturn(EMPTY_TEXT);
 
     presenter.onValueChanged();
 
@@ -232,7 +232,7 @@ public class CommitPresenterTest extends BaseTest {
 
   @Test
   public void shouldEnableCommitButtonOnAmendAndNoFilesChecked() throws Exception {
-    when(view.getMessage()).thenReturn(COMMIT_TEXT);
+    when(view.getCommitMessage()).thenReturn(COMMIT_TEXT);
     when(view.isAmend()).thenReturn(true);
 
     presenter.onValueChanged();

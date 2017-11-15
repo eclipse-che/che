@@ -41,9 +41,9 @@ public interface CommitView extends View<CommitView.ActionDelegate> {
     void setAmendCommitMessage();
   }
 
-  /** @return entered message */
+  /** Returns entered commit message */
   @NotNull
-  String getMessage();
+  String getCommitMessage();
 
   /** Returns selected remote branch from branches drop-down list. */
   String getRemoteBranch();

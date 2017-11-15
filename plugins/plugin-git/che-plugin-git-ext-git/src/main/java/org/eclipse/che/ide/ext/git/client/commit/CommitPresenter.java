@@ -174,7 +174,7 @@ public class CommitPresenter implements CommitView.ActionDelegate, SelectionCall
   private void show(@Nullable String diff) {
     AlteredFiles alteredFiles = new AlteredFiles(project, diff);
 
-    view.setEnableCommitButton(!view.getMessage().isEmpty());
+    view.setEnableCommitButton(!view.getCommitMessage().isEmpty());
     view.focusInMessageField();
     view.showDialog();
     selectableChangesPanelPresenter.show(alteredFiles, this);
@@ -194,7 +194,7 @@ public class CommitPresenter implements CommitView.ActionDelegate, SelectionCall
         .then(
             arg -> {
               service
-                  .commit(location, view.getMessage(), view.isAmend(), filesToCommitArray)
+                  .commit(location, view.getCommitMessage(), view.isAmend(), filesToCommitArray)
                   .then(
                       revision -> {
                         onCommitSuccess(revision);
@@ -248,7 +248,7 @@ public class CommitPresenter implements CommitView.ActionDelegate, SelectionCall
   @Override
   public void onValueChanged() {
     view.setEnableCommitButton(
-        !view.getMessage().isEmpty()
+        !view.getCommitMessage().isEmpty()
             && (!selectableChangesPanelPresenter.getSelectedFiles().isEmpty() || view.isAmend()));
   }
 

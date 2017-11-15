@@ -52,12 +52,20 @@ class CheckBoxRender extends DefaultPresentationRenderer<Node> {
     final InputElement checkBoxInputElement =
         (InputElement) checkBoxElement.getElementsByTagName("input").getItem(0);
 
-    // Set check-box state.
     final Path nodePath =
         node instanceof ChangedFileNode
             ? Path.valueOf(node.getName())
             : ((ChangedFolderNode) node).getPath();
+    setCheckBoxState(nodePath, checkBoxInputElement);
+    setCheckBoxClickHandler(nodePath, checkBoxElement, checkBoxInputElement.isChecked());
 
+    // Paste check-box element to node container.
+    nodeContainer.insertAfter(checkBoxElement, nodeContainer.getFirstChild());
+
+    return rootContainer;
+  }
+
+  private void setCheckBoxState(Path nodePath, InputElement checkBoxInputElement) {
     if (indeterminate.contains(nodePath)) {
       checkBoxInputElement.setId(checkBoxInputElement.getId() + "-indeterminate");
       setIndeterminate(checkBoxInputElement);
@@ -67,34 +75,30 @@ class CheckBoxRender extends DefaultPresentationRenderer<Node> {
     } else {
       checkBoxInputElement.setId(checkBoxInputElement.getId() + "-unchecked");
     }
+  }
 
-    // Add check-box click handler.
+  private void setCheckBoxClickHandler(Path nodePath, Element checkBoxElement, boolean isChecked) {
     Event.sinkEvents(checkBoxElement, Event.ONCLICK);
     Event.setEventListener(
         checkBoxElement,
         event -> {
           if (Event.ONCLICK == event.getTypeInt()
               && event.getTarget().getTagName().equalsIgnoreCase("label")) {
-            handleCheckBoxSelection(nodePath, checkBoxInputElement.isChecked());
+            handleCheckBoxSelection(nodePath, isChecked);
             delegate.refreshNodes();
           }
         });
-
-    // Paste check-box element to node container.
-    nodeContainer.insertAfter(checkBoxElement, nodeContainer.getFirstChild());
-
-    return rootContainer;
   }
+
+  private native void setIndeterminate(Element checkbox) /*-{
+        checkbox.indeterminate = true;
+    }-*/;
 
   void setNodePaths(Set<Path> paths) {
     allNodePaths = paths;
     unselected.clear();
     unselected.addAll(paths);
   }
-
-  private native void setIndeterminate(Element checkbox) /*-{
-        checkbox.indeterminate = true;
-    }-*/;
 
   /**
    * Mark all related to node check-boxes checked or unchecked according to node path and value.
@@ -109,7 +113,7 @@ class CheckBoxRender extends DefaultPresentationRenderer<Node> {
             path ->
                 !(path.equals(nodePath) || path.isEmpty())
                     && path.isPrefixOf(nodePath)
-                    && !hasSelectedChildes(path))
+                    && !hasSelectedChildren(path))
         .forEach(path -> handleCheckBoxState(path, value));
 
     allNodePaths
@@ -130,14 +134,14 @@ class CheckBoxRender extends DefaultPresentationRenderer<Node> {
       delegate.onFileNodeCheckBoxValueChanged(path, !isChecked);
     }
 
-    if (hasSelectedChildes(path) && !hasAllSelectedChildes(path)) {
+    if (hasSelectedChildren(path) && !hasAllSelectedChildren(path)) {
       indeterminate.add(path);
     } else {
       indeterminate.remove(path);
     }
   }
 
-  private boolean hasSelectedChildes(Path givenPath) {
+  private boolean hasSelectedChildren(Path givenPath) {
     return allNodePaths
         .stream()
         .anyMatch(
@@ -147,7 +151,7 @@ class CheckBoxRender extends DefaultPresentationRenderer<Node> {
                     && !unselected.contains(path));
   }
 
-  private boolean hasAllSelectedChildes(Path givenPath) {
+  private boolean hasAllSelectedChildren(Path givenPath) {
     return allNodePaths
         .stream()
         .filter(path -> !(path.equals(givenPath)) && givenPath.isPrefixOf(path))

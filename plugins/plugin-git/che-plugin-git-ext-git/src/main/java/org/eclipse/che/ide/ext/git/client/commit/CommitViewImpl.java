@@ -115,7 +115,7 @@ public class CommitViewImpl extends Window implements CommitView {
 
   @NotNull
   @Override
-  public String getMessage() {
+  public String getCommitMessage() {
     return message.getText();
   }
 
