@@ -105,8 +105,8 @@ public class RenameOrganizationTest {
 
   @Test(priority = 1)
   public void testSubOrganizationRename() {
-    String organizationPath = NEW_PARENT_ORG_NAME + "/" + CHILD_ORG_NAME;
-    String path = NEW_PARENT_ORG_NAME + "/" + NEW_CHILD_ORG_NAME;
+    String suborganizationName = NEW_PARENT_ORG_NAME + "/" + CHILD_ORG_NAME;
+    String newSubOrganizationName = NEW_PARENT_ORG_NAME + "/" + NEW_CHILD_ORG_NAME;
 
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(ORGANIZATIONS);
@@ -114,14 +114,14 @@ public class RenameOrganizationTest {
     organizationListPage.waitForOrganizationsList();
 
     // Test renaming of the sub-organization
-    organizationListPage.clickOnOrganization(organizationPath);
-    organizationPage.waitOrganizationTitle(organizationPath);
+    organizationListPage.clickOnOrganization(suborganizationName);
+    organizationPage.waitOrganizationTitle(suborganizationName);
     organizationPage.setOrganizationName(NEW_CHILD_ORG_NAME);
     editMode.waitDisplayed();
     assertTrue(editMode.isSaveEnabled());
     editMode.clickSave();
     editMode.waitHidden();
-    organizationPage.waitOrganizationTitle(path);
+    organizationPage.waitOrganizationTitle(newSubOrganizationName);
     assertEquals(organizationPage.getOrganizationName(), NEW_CHILD_ORG_NAME);
 
     // Back to the parent organization and test that the sub-organization renamed
@@ -129,12 +129,12 @@ public class RenameOrganizationTest {
     organizationPage.waitOrganizationTitle(NEW_PARENT_ORG_NAME);
     organizationPage.clickSubOrganizationsTab();
     organizationListPage.waitForOrganizationsList();
-    assertTrue(organizationListPage.getValues(NAME).contains(path));
+    assertTrue(organizationListPage.getValues(NAME).contains(newSubOrganizationName));
 
     // Back to the Organizations list and test that the organizations renamed
     organizationPage.clickBackButton();
     organizationListPage.waitForOrganizationsList();
-    assertTrue(organizationListPage.getValues(NAME).contains(path));
+    assertTrue(organizationListPage.getValues(NAME).contains(newSubOrganizationName));
     assertTrue(organizationListPage.getValues(NAME).contains(NEW_PARENT_ORG_NAME));
   }
 

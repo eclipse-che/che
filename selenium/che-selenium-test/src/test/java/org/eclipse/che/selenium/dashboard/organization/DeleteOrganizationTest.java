@@ -37,8 +37,8 @@ import org.testng.annotations.Test;
  * @author Ann Shumilova
  */
 public class DeleteOrganizationTest {
-  private static final String PARENT_ORG_NAME = generate("organization", 5);
-  private static final String CHILD_ORG_NAME = generate("organization", 5);
+  private static final String PARENT_ORG_NAME = generate("parent-org", 5);
+  private static final String CHILD_ORG_NAME = generate("child-org", 5);
 
   private List<OrganizationDto> organizations = new ArrayList<>();
   private OrganizationDto parentOrganization;
