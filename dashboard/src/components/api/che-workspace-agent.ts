@@ -42,7 +42,7 @@ export class CheWorkspaceAgent {
   /**
    * Default constructor that is using resource
    */
-  constructor($resource: ng.resource.IResourceService, $q: ng.IQService, $websocket: ng.websocket.IWebSocketProvider,
+  constructor($resource: ng.resource.IResourceService, $q: ng.IQService, $websocket: any,
               workspaceAgentData: IWorkspaceAgentData) {
     this.$resource = $resource;
     this.workspaceAgentData = workspaceAgentData;

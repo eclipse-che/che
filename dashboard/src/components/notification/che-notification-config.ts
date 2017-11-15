@@ -15,7 +15,7 @@ import {ApplicationNotifications} from './application-notifications.factory';
 
 export class CheNotificationConfig {
 
-  constructor(register) {
+  constructor(register: che.IRegisterService) {
     register.factory('cheNotification', CheNotification);
     register.factory('applicationNotifications', ApplicationNotifications);
   }

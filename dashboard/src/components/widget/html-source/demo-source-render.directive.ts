@@ -47,7 +47,7 @@ export class DemoSourceRender {
     this.$compile = $compile;
   }
 
-  template(element: ng.IAugmentedJQuery) {
+  template(element: ng.IAugmentedJQuery): string {
     let source, demoElement;
     if (element.prop('tagName') === 'TEXTAREA') {
       source = element.html();
