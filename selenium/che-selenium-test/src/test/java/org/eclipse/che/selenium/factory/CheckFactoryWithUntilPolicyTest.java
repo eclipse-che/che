@@ -35,7 +35,7 @@ public class CheckFactoryWithUntilPolicyTest {
   private static final String FACTORY_NAME = NameGenerator.generate("untilPolicy", 3);
   private static final String EXPIRE_MESSAGE =
       "Unable to load Factory: This Factory has expired due to time restrictions applied by its owner. Please, contact owner for more information.";
-  private static final int ADDITIONAL_TIME = 60000;
+  private static final int ADDITIONAL_TIME = 120000;
   private static long initTime;
 
   @Inject private ProjectExplorer projectExplorer;
