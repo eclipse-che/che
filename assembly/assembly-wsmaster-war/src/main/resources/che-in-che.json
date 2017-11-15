@@ -38,23 +38,24 @@
                 "org.eclipse.che.ls.js-ts"
               ],
               "servers": {
+                "dev-wsagent/wsagent": {
+                  "path": "wsagent",
+                  "protocol": "ws",
+                  "port": "8087"
+                },
                 "GWT-CodeServer": {
                   "protocol": "http",
                   "port": "9876"
                 },
-                "Traefik-stat": {
-                  "protocol": "http",
-                  "port": "8086"
-                },
                 "IDE-agent-server": {
+                  "protocol": "http",
+                  "port": "8085"
+                },
+                "dev-wsagent/http": {
+                  "path": "api",
                   "protocol": "http",
                   "port": "8087"
                 },
-                "IDE-server": {
-                  "protocol": "http",
-                  "port": "8085"
-                }
-              },
               "attributes": {
                 "memoryLimitBytes": "7516192768"
               }
@@ -107,21 +108,21 @@
           }
         },
         {
-          "commandLine": "cp ${current.project.path}/assembly/assembly-ide-war/target/*.war /home/user/tomcat8/webapps/IDE.war",
-          "name": "Deploy IDE",
-          "type": "custom",
-          "attributes": {
-            "goal": "Run",
-            "previewUrl": "${server.IDE-server}/che/che-in-che"
-          }
-        },
-        {
           "commandLine": "cp ${current.project.path}/assembly/assembly-wsagent-war/target/*.war /home/user/tomcat8/webapps/ROOT.war",
           "name": "Deploy Workspace Agent",
           "type": "custom",
           "attributes": {
             "goal": "Run",
-            "previewUrl": "${server.IDE-server}/che/che-in-che"
+            "previewUrl": "${server.IDE-agent-server}/che/che-in-che"
+          }
+        },
+        {
+          "commandLine": "cp ${current.project.path}/assembly/assembly-ide-war/target/*.war /home/user/tomcat8/webapps/ide.war",
+          "name": "Deploy IDE",
+          "type": "custom",
+          "attributes": {
+            "goal": "Run",
+            "previewUrl": "${server.IDE-agent-server}/che/che-in-che"
           }
         }
       ]
