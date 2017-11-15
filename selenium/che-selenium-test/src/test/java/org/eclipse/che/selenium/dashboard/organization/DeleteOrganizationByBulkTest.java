@@ -113,6 +113,6 @@ public class DeleteOrganizationByBulkTest {
     assertTrue(organizationListPage.getOrganizationListItemCount() >= 0);
     assertFalse(organizationListPage.getValues(NAME).contains(ORG_NAME1));
     assertFalse(organizationListPage.getValues(NAME).contains(ORG_NAME2));
-    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), 0);
+    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) >= 0);
   }
 }

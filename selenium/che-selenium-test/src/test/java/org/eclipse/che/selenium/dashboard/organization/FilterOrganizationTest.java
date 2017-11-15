@@ -13,7 +13,6 @@ package org.eclipse.che.selenium.dashboard.organization;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
 import static org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.NAME;
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
@@ -77,7 +76,7 @@ public class FilterOrganizationTest {
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
-    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), organizationsCount);
+    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) >= organizationsCount);
     assertTrue(organizationListPage.getOrganizationListItemCount() >= organizationsCount);
     assertTrue(organizationListPage.getValues(NAME).contains(ORGANIZATION_NAME));
 

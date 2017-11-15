@@ -82,21 +82,13 @@ public class DeleteOrganizationTest {
     organizationListPage.clickOnOrganization(childOrganization.getQualifiedName());
     organizationPage.waitOrganizationName(childOrganization.getName());
 
-    // Delete parent organization from the Settings tab by the Delete button
-    organizationPage.clickDeleteOrganizationButton();
-    confirmDialog.waitOpened();
-    assertEquals(confirmDialog.getTitle(), "Delete organization");
-    assertEquals(
-        confirmDialog.getMessage(),
-        "Would you like to delete organization '" + childOrganization.getName() + "'?");
-    assertEquals(confirmDialog.getConfirmButtonTitle(), "Delete");
-    confirmDialog.clickConfirm();
-    confirmDialog.waitClosed();
+    // Delete the sub-organization from the Settings tab by the Delete button
+    deleteOrganization(childOrganization.getName());
 
-    // Test that organization deleted
+    // Test that the organization deleted
     organizationListPage.waitForOrganizationsList();
     organizationListPage.waitForOrganizationIsRemoved(childOrganization.getQualifiedName());
-    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), 1);
+    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) >= 1);
     assertTrue(organizationListPage.getOrganizationListItemCount() >= 1);
   }
 
@@ -109,19 +101,23 @@ public class DeleteOrganizationTest {
     organizationListPage.clickOnOrganization(parentOrganization.getName());
     organizationPage.waitOrganizationName(parentOrganization.getName());
 
-    // Delete parent organization from the Settings tab by the Delete button
+    // Delete the parent organization from the Settings tab by the Delete button
+    deleteOrganization(parentOrganization.getName());
+
+    // Test that the organization deleted
+    organizationListPage.waitForOrganizationsEmptyList();
+    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) >= 0);
+  }
+
+  private void deleteOrganization(String organizationName) {
     organizationPage.clickDeleteOrganizationButton();
     confirmDialog.waitOpened();
     assertEquals(confirmDialog.getTitle(), "Delete organization");
     assertEquals(
         confirmDialog.getMessage(),
-        "Would you like to delete organization '" + parentOrganization.getName() + "'?");
+        "Would you like to delete organization '" + organizationName + "'?");
     assertEquals(confirmDialog.getConfirmButtonTitle(), "Delete");
     confirmDialog.clickConfirm();
     confirmDialog.waitClosed();
-
-    // Test that organization deleted
-    organizationListPage.waitForOrganizationsEmptyList();
-    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), 0);
   }
 }

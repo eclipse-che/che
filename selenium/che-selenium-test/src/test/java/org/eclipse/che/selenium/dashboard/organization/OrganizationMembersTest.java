@@ -63,8 +63,7 @@ public class OrganizationMembersTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    testOrganizationServiceClient.deleteByName(PRE_CREATED_ORG_NAME);
-    testOrganizationServiceClient.deleteByName(NEW_ORG_NAME);
+    testOrganizationServiceClient.deleteById(organization.getId());
   }
 
   @Test

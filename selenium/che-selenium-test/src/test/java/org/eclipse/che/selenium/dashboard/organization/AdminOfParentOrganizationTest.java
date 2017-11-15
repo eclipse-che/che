@@ -71,8 +71,8 @@ public class AdminOfParentOrganizationTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    testOrganizationServiceClient.deleteById(parentOrganization.getId());
     testOrganizationServiceClient.deleteById(childOrganization.getId());
+    testOrganizationServiceClient.deleteById(parentOrganization.getId());
   }
 
   @Test
@@ -85,9 +85,9 @@ public class AdminOfParentOrganizationTest {
     organizationListPage.waitForOrganizationsList();
 
     // Test UI views of organizations list
-    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), organizationsCount);
+    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) >= organizationsCount);
     assertEquals(organizationListPage.getOrganizationsToolbarTitle(), "Organizations");
-    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), organizationsCount);
+    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) >= organizationsCount);
     assertTrue(organizationListPage.getOrganizationListItemCount() >= organizationsCount);
     assertFalse(organizationListPage.isAddOrganizationButtonVisible());
     assertTrue(organizationListPage.isSearchInputVisible());

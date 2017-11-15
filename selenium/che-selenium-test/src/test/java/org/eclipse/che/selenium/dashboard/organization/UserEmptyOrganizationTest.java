@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.dashboard.organization;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
@@ -44,7 +45,7 @@ public class UserEmptyOrganizationTest {
     organizationListPage.waitForOrganizationsEmptyList();
 
     // Test UI views of organizations list for simple user
-    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), 0);
+    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) >= 0);
     assertEquals(organizationListPage.getOrganizationsToolbarTitle(), "Organizations");
     assertFalse(organizationListPage.isAddOrganizationButtonVisible());
     assertFalse(organizationListPage.isSearchInputVisible());

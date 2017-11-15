@@ -13,7 +13,6 @@ package org.eclipse.che.selenium.dashboard.organization;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
 import static org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.NAME;
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
@@ -56,7 +55,6 @@ public class CreateOrganizationTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    testOrganizationServiceClient.deleteByName(SUB_ORGANIZATION_NAME);
     testOrganizationServiceClient.deleteByName(ORGANIZATION_NAME);
   }
 
@@ -77,7 +75,7 @@ public class CreateOrganizationTest {
     organizationPage.waitOrganizationTitle(ORGANIZATION_NAME);
 
     // Test that created organization exists and count of organizations increased
-    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), organizationsCount);
+    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) >= organizationsCount);
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();

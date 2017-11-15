@@ -69,8 +69,8 @@ public class MemberOrganizationTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    testOrganizationServiceClient.deleteById(parentOrganization.getId());
     testOrganizationServiceClient.deleteById(subOrganization.getId());
+    testOrganizationServiceClient.deleteById(parentOrganization.getId());
   }
 
   @Test
@@ -83,9 +83,9 @@ public class MemberOrganizationTest {
     organizationListPage.waitForOrganizationsList();
 
     // Test UI views of organizations list for member of organization
-    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), organizationsCount);
+    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) >= organizationsCount);
     assertEquals(organizationListPage.getOrganizationsToolbarTitle(), "Organizations");
-    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), organizationsCount);
+    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) >= organizationsCount);
     assertTrue(organizationListPage.getOrganizationListItemCount() >= organizationsCount);
     assertFalse(organizationListPage.isAddOrganizationButtonVisible());
     assertTrue(organizationListPage.isSearchInputVisible());

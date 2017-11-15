@@ -71,8 +71,8 @@ public class RenameOrganizationTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    testOrganizationServiceClient.deleteById(parentOrganization.getId());
     testOrganizationServiceClient.deleteById(childOrganization.getId());
+    testOrganizationServiceClient.deleteById(parentOrganization.getId());
   }
 
   @Test(priority = 1)
@@ -81,6 +81,7 @@ public class RenameOrganizationTest {
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
+    organizationListPage.clickOnOrganization(parentOrganization.getName());
 
     // Check organization renaming with name just ' '
     renameOrganizationWithInvalidName(" ");
@@ -91,16 +92,8 @@ public class RenameOrganizationTest {
     // Check organization renaming with name that contains invalid characters
     renameOrganizationWithInvalidName("_organization$");
 
-    organizationListPage.clickOnOrganization(parentOrganization.getName());
-    organizationPage.waitOrganizationTitle(parentOrganization.getName());
-    organizationPage.setOrganizationName(" ");
-    editMode.waitDisplayed();
-    assertFalse(editMode.isSaveEnabled());
-    editMode.clickCancel();
-    editMode.waitHidden();
-    assertEquals(parentOrganization.getName(), organizationPage.getOrganizationName());
-
     // Test renaming of the parent organization
+    organizationPage.waitOrganizationTitle(parentOrganization.getName());
     organizationPage.setOrganizationName(NEW_PARENT_ORG_NAME);
     editMode.waitDisplayed();
     assertTrue(editMode.isSaveEnabled());
@@ -146,7 +139,6 @@ public class RenameOrganizationTest {
   }
 
   private void renameOrganizationWithInvalidName(String organizationName) {
-    organizationListPage.clickOnOrganization(parentOrganization.getName());
     organizationPage.waitOrganizationTitle(parentOrganization.getName());
     organizationPage.setOrganizationName(organizationName);
     editMode.waitDisplayed();

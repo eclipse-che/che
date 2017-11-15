@@ -70,8 +70,8 @@ public class SystemAdminOrganizationTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    testOrganizationServiceClient.deleteById(parentOrganization.getId());
     testOrganizationServiceClient.deleteById(childOrganization.getId());
+    testOrganizationServiceClient.deleteById(parentOrganization.getId());
   }
 
   @Test
@@ -84,9 +84,9 @@ public class SystemAdminOrganizationTest {
     organizationListPage.waitForOrganizationsList();
 
     // Test UI views of organizations list
-    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), organizationsCount);
+    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) >= organizationsCount);
     assertEquals(organizationListPage.getOrganizationsToolbarTitle(), "Organizations");
-    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), organizationsCount);
+    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) >= organizationsCount);
     assertTrue(organizationListPage.getOrganizationListItemCount() >= organizationsCount);
     assertTrue(organizationListPage.isAddOrganizationButtonVisible());
     assertTrue(organizationListPage.isSearchInputVisible());
