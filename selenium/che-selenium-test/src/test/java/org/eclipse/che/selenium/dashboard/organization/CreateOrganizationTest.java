@@ -34,8 +34,8 @@ import org.testng.annotations.Test;
  * @author Ann Shumilova
  */
 public class CreateOrganizationTest {
-  private static final String ORGANIZATION_NAME = generate("organization", 5);
-  private static final String SUB_ORGANIZATION_NAME = generate("organization", 5);
+  private static final String ORGANIZATION_NAME = generate("organization", 4);
+  private static final String SUB_ORGANIZATION_NAME = generate("sub-organization", 4);
 
   @Inject
   @Named("admin")
@@ -59,7 +59,7 @@ public class CreateOrganizationTest {
   }
 
   @Test
-  public void createOrganizationTest() {
+  public void testCreateOrganization() {
     int organizationsCount = 1;
 
     navigationBar.waitNavigationBar();
@@ -72,10 +72,12 @@ public class CreateOrganizationTest {
     addOrganization.setOrganizationName(ORGANIZATION_NAME);
     addOrganization.checkAddOrganizationButtonEnabled();
     addOrganization.clickCreateOrganizationButton();
+    addOrganization.waitAddOrganizationButtonIsNotVisible();
     organizationPage.waitOrganizationTitle(ORGANIZATION_NAME);
 
     // Test that created organization exists and count of organizations increased
     assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) >= organizationsCount);
+    navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
@@ -93,6 +95,7 @@ public class CreateOrganizationTest {
     addOrganization.setOrganizationName(SUB_ORGANIZATION_NAME);
     addOrganization.checkAddOrganizationButtonEnabled();
     addOrganization.clickCreateOrganizationButton();
+    addOrganization.waitAddOrganizationButtonIsNotVisible();
     organizationPage.waitOrganizationTitle(ORGANIZATION_NAME + "/" + SUB_ORGANIZATION_NAME);
   }
 }

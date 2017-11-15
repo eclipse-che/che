@@ -76,7 +76,7 @@ public class AdminOfParentOrganizationTest {
   }
 
   @Test
-  public void organizationListComponentsTest() {
+  public void testOrganizationListComponents() {
     int organizationsCount = 2;
 
     navigationBar.waitNavigationBar();
@@ -106,7 +106,7 @@ public class AdminOfParentOrganizationTest {
   }
 
   @Test
-  public void parentOrganizationViewsTest() {
+  public void testOrganizationViews() {
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();

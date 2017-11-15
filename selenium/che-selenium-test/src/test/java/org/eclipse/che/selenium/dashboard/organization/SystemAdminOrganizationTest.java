@@ -75,7 +75,7 @@ public class SystemAdminOrganizationTest {
   }
 
   @Test
-  public void organizationListComponentsTest() {
+  public void testOrganizationListComponents() {
     int organizationsCount = 1;
 
     navigationBar.waitNavigationBar();
@@ -105,7 +105,7 @@ public class SystemAdminOrganizationTest {
   }
 
   @Test
-  public void organizationViewsTest() {
+  public void testOrganizationViews() {
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();

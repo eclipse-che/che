@@ -64,6 +64,7 @@ public class OrganizationMembersTest {
   @AfterClass
   public void tearDown() throws Exception {
     testOrganizationServiceClient.deleteById(organization.getId());
+    testOrganizationServiceClient.deleteByName(NEW_ORG_NAME);
   }
 
   @Test
@@ -125,6 +126,7 @@ public class OrganizationMembersTest {
     addOrganization.waitAddOrganization();
     loader.waitOnClosed();
     addOrganization.clickCreateOrganizationButton();
+    addOrganization.waitAddOrganizationButtonIsNotVisible();
 
     // Check that organization is created and the added member exists in the Members tab
     organizationPage.waitOrganizationName(NEW_ORG_NAME);

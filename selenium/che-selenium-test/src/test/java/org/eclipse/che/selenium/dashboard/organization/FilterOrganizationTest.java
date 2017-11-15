@@ -73,6 +73,7 @@ public class FilterOrganizationTest {
     int organizationsCount = organizations.size();
 
     // Test that organization exist
+    navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();

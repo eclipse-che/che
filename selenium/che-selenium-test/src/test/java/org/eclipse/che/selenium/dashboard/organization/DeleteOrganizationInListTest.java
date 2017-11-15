@@ -78,10 +78,8 @@ public class DeleteOrganizationInListTest {
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
-    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) >= organizationsCount);
-    navigationBar.clickOnMenu(ORGANIZATIONS);
-    organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
+    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) >= organizationsCount);
     assertTrue(organizationListPage.getOrganizationListItemCount() >= organizationsCount);
     assertTrue(organizationListPage.getValues(NAME).contains(organization.getName()));
 

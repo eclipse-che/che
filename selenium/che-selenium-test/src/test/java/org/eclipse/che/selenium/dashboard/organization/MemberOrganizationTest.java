@@ -106,7 +106,7 @@ public class MemberOrganizationTest {
   }
 
   @Test
-  public void testParentOrganization() {
+  public void testOrganizationViews() {
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();

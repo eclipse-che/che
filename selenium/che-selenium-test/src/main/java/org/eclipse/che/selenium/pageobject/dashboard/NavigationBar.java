@@ -76,6 +76,8 @@ public class NavigationBar {
 
   public void clickOnMenu(MenuItem menuItem) {
     String locator = String.format(Locators.MENU_ITEM_XPATH, menuItem.title);
+
+    waitNavigationBar();
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(By.xpath(locator)));
     seleniumWebDriver.findElement(By.xpath(locator)).click();

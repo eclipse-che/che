@@ -75,7 +75,7 @@ public class RenameOrganizationTest {
     testOrganizationServiceClient.deleteById(parentOrganization.getId());
   }
 
-  @Test(priority = 1)
+  @Test
   public void testParentOrganizationRename() {
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(ORGANIZATIONS);
@@ -103,7 +103,7 @@ public class RenameOrganizationTest {
     assertEquals(NEW_PARENT_ORG_NAME, organizationPage.getOrganizationName());
   }
 
-  @Test(priority = 2)
+  @Test(priority = 1)
   public void testSubOrganizationRename() {
     String organizationPath = NEW_PARENT_ORG_NAME + "/" + CHILD_ORG_NAME;
     String path = NEW_PARENT_ORG_NAME + "/" + NEW_CHILD_ORG_NAME;

@@ -75,8 +75,6 @@ public class DeleteOrganizationByBulkTest {
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
-    navigationBar.clickOnMenu(ORGANIZATIONS);
-    organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
     assertTrue(organizationListPage.getOrganizationListItemCount() >= organizationsCount);
     assertTrue(organizationListPage.getValues(NAME).contains(ORG_NAME1));
