@@ -24,7 +24,10 @@ import io.fabric8.openshift.api.model.Route;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -101,25 +104,15 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
       for (Route route : osEnv.getRoutes().values()) {
         createdRoutes.add(project.routes().create(route));
       }
-
       registerAbnormalStopHandler();
       registerContainersEventsPublisher();
-
       createPods(createdServices, createdRoutes);
+      bootstrapMachines();
 
-      // TODO Rework it to parallel waiting https://github.com/eclipse/che/issues/7067
-      for (OpenShiftMachine machine : machines.values()) {
-        try {
-          machine.waitRunning(machineStartTimeoutMin);
-          bootstrapMachine(machine);
-          checkMachineServers(machine);
-          sendRunningEvent(machine.getName());
-        } catch (InfrastructureException rethrow) {
-          sendFailedEvent(machine.getName(), rethrow.getMessage());
-          throw rethrow;
-        }
-      }
-    } catch (InfrastructureException | RuntimeException | InterruptedException e) {
+    } catch (InfrastructureException
+        | RuntimeException
+        | InterruptedException
+        | ExecutionException e) {
       LOG.error("Failed to start of OpenShift runtime. " + e.getMessage());
       boolean interrupted = Thread.interrupted() || e instanceof InterruptedException;
       try {
@@ -133,8 +126,52 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
         throw e;
       } catch (InfrastructureException rethrow) {
         throw rethrow;
-      } catch (Exception wrap) {
-        throw new InternalInfrastructureException(e.getMessage(), wrap);
+      } catch (Throwable thr) {
+        throw new InternalInfrastructureException(
+            "Machine bootstrapping failed: " + thr.getMessage(), thr);
+      }
+    }
+  }
+
+  private void bootstrapMachines()
+      throws InfrastructureException, InterruptedException, ExecutionException {
+    CompletableFuture<InfrastructureException> firstFailed = new CompletableFuture<>();
+    List<CompletableFuture> checkMachines = new ArrayList<>(machines.size());
+    for (OpenShiftMachine machine : machines.values()) {
+      checkMachines.add(
+          CompletableFuture.runAsync(
+                  () -> {
+                    try {
+                      machine.waitRunning(machineStartTimeoutMin);
+                      bootstrapMachine(machine);
+                      checkMachineServers(machine);
+                    } catch (InfrastructureException ex) {
+                      sendFailedEvent(machine.getName(), ex.getMessage());
+                      firstFailed.completeExceptionally(ex);
+                      throw new CompletionException(ex);
+                    } catch (InterruptedException ei) {
+                      throw new CompletionException(ei);
+                    }
+                  })
+              .thenAccept(
+                  a -> {
+                    if (!firstFailed.isCompletedExceptionally()) {
+                      sendRunningEvent(machine.getName());
+                    }
+                  }));
+    }
+
+    CompletableFuture<Void> allAvailable =
+        CompletableFuture.allOf(checkMachines.toArray(new CompletableFuture[0]));
+    try {
+      CompletableFuture.anyOf(allAvailable, firstFailed).join();
+    } catch (CompletionException e) {
+      if (firstFailed.isDone()) {
+        throw firstFailed.join();
+      } else if (e.getCause() instanceof InterruptedException) {
+        throw (InterruptedException) e.getCause();
+      } else {
+        throw new InfrastructureException(e.getCause().getMessage(), e.getCause());
       }
     }
   }

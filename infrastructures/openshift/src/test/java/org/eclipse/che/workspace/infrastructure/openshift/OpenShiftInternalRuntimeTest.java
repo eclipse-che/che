@@ -28,7 +28,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
 import com.google.common.collect.ImmutableList;
@@ -51,7 +50,6 @@ import io.fabric8.openshift.api.model.RouteSpec;
 import io.fabric8.openshift.api.model.RouteTargetReference;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -171,7 +169,7 @@ public class OpenShiftInternalRuntimeTest {
     verify(services).create(any());
     verify(bootstrapper, times(2)).bootstrap();
     verify(eventService, times(4)).publish(any());
-    verifyEventsOrder(
+    verifyEventsPresent(
         newEvent(M1_NAME, STARTING),
         newEvent(M2_NAME, STARTING),
         newEvent(M1_NAME, RUNNING),
@@ -215,10 +213,11 @@ public class OpenShiftInternalRuntimeTest {
       verify(pods).create(any());
       verify(routes).create(any());
       verify(services).create(any());
-      verify(bootstrapper).bootstrap();
-      verify(eventService, times(3)).publish(any());
-      verifyEventsOrder(
-          newEvent(M1_NAME, STARTING), newEvent(M2_NAME, STARTING), newEvent(M1_NAME, FAILED));
+      verifyEventsPresent(
+          newEvent(M1_NAME, STARTING),
+          newEvent(M2_NAME, STARTING),
+          newEvent(M1_NAME, FAILED),
+          newEvent(M2_NAME, FAILED));
       throw rethrow;
     }
   }
@@ -260,7 +259,7 @@ public class OpenShiftInternalRuntimeTest {
       verify(routes).create(any());
       verify(services).create(any());
       verify(bootstrapper).bootstrap();
-      verifyEventsOrder(newEvent(M1_NAME, STARTING));
+      verifyEventsPresent(newEvent(M1_NAME, STARTING));
       throw rethrow;
     }
   }
@@ -298,16 +297,14 @@ public class OpenShiftInternalRuntimeTest {
         .withEventType(status);
   }
 
-  private void verifyEventsOrder(MachineStatusEvent... expectedEvents) {
-    final Iterator<MachineStatusEvent> actualEvents = captureEvents().iterator();
+  private void verifyEventsPresent(MachineStatusEvent... expectedEvents) {
+    final List<MachineStatusEvent> actualEvents = captureEvents();
     for (MachineStatusEvent expected : expectedEvents) {
-      if (!actualEvents.hasNext()) {
-        fail("It is expected to receive machine status events");
+      if (!actualEvents.remove(expected)) {
+        fail("Expected machine status events wasn't send");
       }
-      final MachineStatusEvent actual = actualEvents.next();
-      assertEquals(actual, expected);
     }
-    if (actualEvents.hasNext()) {
+    if (!actualEvents.isEmpty()) {
       fail("No more events expected");
     }
   }
