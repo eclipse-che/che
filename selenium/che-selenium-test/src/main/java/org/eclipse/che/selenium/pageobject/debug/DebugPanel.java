@@ -44,8 +44,6 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Page Object for Debugger panel.
@@ -55,8 +53,6 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton
 public class DebugPanel {
-
-  private static final Logger LOG = LoggerFactory.getLogger(DebugPanel.class);
 
   private SeleniumWebDriver seleniumWebDriver;
   private Loader loader;
@@ -433,7 +429,6 @@ public class DebugPanel {
       try {
         removeAllBreakpoints();
       } catch (WebDriverException ex) {
-        LOG.error(ex.getLocalizedMessage(), ex);
         seleniumWebDriver.navigate().refresh();
         clickOnButton(DebuggerActionButtons.REMOVE_ALL_BREAKPOINTS);
       }
