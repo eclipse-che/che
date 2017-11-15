@@ -440,18 +440,16 @@ public class ProjectExplorer {
     LOG.debug("===========>>>>  openItemByPath 3");
     waitItemIsSelected(path);
     LOG.debug("===========>>>>  openItemByPath 4");
-    String locator = "//div[@path='/%s']/div";
-    WebElement item =
-        redrawUiElementsWait.until(
-            ExpectedConditions.elementToBeClickable(By.xpath(String.format(locator, path))));
-    LOG.debug("===========>>>>  openItemByPath 5");
     try {
       LOG.debug("===========>>>>  openItemByPath try 1");
-      item.click();
+      getProjectExplorerElement(path).click();
       LOG.debug("===========>>>>  openItemByPath try 2");
       waitItemIsSelected(path);
       LOG.debug("===========>>>>  openItemByPath try 3");
-      actionsFactory.createAction(seleniumWebDriver).doubleClick().perform();
+      actionsFactory
+          .createAction(seleniumWebDriver)
+          .doubleClick(getProjectExplorerElement(path))
+          .perform();
       LOG.debug("===========>>>>  openItemByPath try 4");
     }
     // sometimes an element in the project explorer may be is not attached to the DOM. We should
@@ -460,17 +458,26 @@ public class ProjectExplorer {
       LOG.error(ex.getLocalizedMessage(), ex);
       LOG.debug("===========>>>>  openItemByPath catch 1");
       clickOnRefreshTreeButton();
-      LOG.debug("===========>>>>  openItemByPath catch 1");
+      LOG.debug("===========>>>>  openItemByPath catch 2");
       waitItem(path);
-      LOG.debug("===========>>>>  openItemByPath catch 1");
-      item.click();
-      LOG.debug("===========>>>>  openItemByPath catch 1");
+      LOG.debug("===========>>>>  openItemByPath catch 3");
+      getProjectExplorerElement(path).click();
+      LOG.debug("===========>>>>  openItemByPath catch 4");
       waitItemIsSelected(path);
-      LOG.debug("===========>>>>  openItemByPath catch 1");
-      actionsFactory.createAction(seleniumWebDriver).doubleClick(item).perform();
-      LOG.debug("===========>>>>  openItemByPath catch 1");
+      LOG.debug("===========>>>>  openItemByPath catch 5");
+      actionsFactory
+          .createAction(seleniumWebDriver)
+          .doubleClick(getProjectExplorerElement(path))
+          .perform();
+      LOG.debug("===========>>>>  openItemByPath catch 6");
     }
     loader.waitOnClosed();
+  }
+
+  private WebElement getProjectExplorerElement(String path) {
+    String locator = "//div[@path='/%s']/div/div";
+    return redrawUiElementsWait.until(
+        ExpectedConditions.elementToBeClickable(By.xpath(String.format(locator, path))));
   }
 
   /**
