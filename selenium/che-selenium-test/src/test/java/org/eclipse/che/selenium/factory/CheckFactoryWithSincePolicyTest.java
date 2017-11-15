@@ -25,6 +25,7 @@ import org.eclipse.che.selenium.pageobject.PopupDialogsBrowser;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.WarningDialog;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -65,9 +66,12 @@ public class CheckFactoryWithSincePolicyTest {
   @Test
   public void checkFactoryAcceptingWithSincePolicy() throws Exception {
     // check factory now, make sure its restricted
-    dashboard.open();
-    testFactory.open(seleniumWebDriver);
+    testFactory.authenticateAndOpen(seleniumWebDriver);
     seleniumWebDriver.switchFromDashboardIframeToIde();
+
+    if (System.currentTimeMillis() > initTime + ADDITIONAL_TIME + 10000) {
+      Assert.fail("Factory started very long time and next steps does not make sense");
+    }
     warningDialog.waitWaitWarnDialogWindowWithSpecifiedTextMess(EXPIRE_MESSAGE);
 
     // wait until factory becomes avaialble

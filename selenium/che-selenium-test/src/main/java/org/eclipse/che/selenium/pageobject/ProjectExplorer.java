@@ -357,7 +357,7 @@ public class ProjectExplorer {
    * @param path full path to project item
    */
   public void selectItem(String path) {
-    String locator = "//div[@path='/" + path + "']/div";
+    String locator = "//div[@path='/" + path + "']/div/div";
     new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
         .until(ExpectedConditions.elementToBeClickable(By.xpath(locator)))
         .click();

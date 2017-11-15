@@ -25,6 +25,7 @@ import org.eclipse.che.selenium.pageobject.PopupDialogsBrowser;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.WarningDialog;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -64,6 +65,10 @@ public class CheckFactoryWithUntilPolicyTest {
   public void checkFactoryAcceptingWithUntilPolicy() throws Exception {
     testFactory.authenticateAndOpen(seleniumWebDriver);
     seleniumWebDriver.switchFromDashboardIframeToIde();
+
+    if (System.currentTimeMillis() > initTime + ADDITIONAL_TIME + 10000) {
+      Assert.fail("Factory started very long time and next steps does not make sense");
+    }
 
     // first
     while (System.currentTimeMillis() <= initTime + ADDITIONAL_TIME + 10000) {
