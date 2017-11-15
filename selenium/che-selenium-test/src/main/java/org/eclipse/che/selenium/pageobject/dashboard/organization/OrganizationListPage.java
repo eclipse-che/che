@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.pageobject.dashboard.organization;
 
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
@@ -175,7 +176,7 @@ public class OrganizationListPage {
   public boolean isAddOrganizationButtonVisible() {
     List<WebElement> elements =
         seleniumWebDriver.findElements(By.xpath(Locators.ADD_ORGANIZATION_BUTTON_XPATH));
-    return elements.isEmpty() ? false : elements.get(0).isDisplayed();
+    return !elements.isEmpty() && elements.get(0).isDisplayed();
   }
 
   /**
@@ -186,7 +187,7 @@ public class OrganizationListPage {
   public boolean isAddSubOrganizationButtonVisible() {
     List<WebElement> elements =
         seleniumWebDriver.findElements(By.xpath(Locators.ADD_SUB_ORGANIZATION_BUTTON_XPATH));
-    return elements.isEmpty() ? false : elements.get(0).isDisplayed();
+    return !elements.isEmpty() && elements.get(0).isDisplayed();
   }
 
   /**
@@ -216,6 +217,8 @@ public class OrganizationListPage {
 
   /** Clicks on Add Organization button. */
   public void clickAddOrganizationButton() {
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOf(addOrganizationButton));
     addOrganizationButton.click();
   }
 
@@ -253,23 +256,23 @@ public class OrganizationListPage {
     String locator = String.format(Locators.ORGANIZATION_XPATH, name);
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)));
-
     seleniumWebDriver.findElement(By.xpath(locator)).click();
   }
 
   public void clickOnDeleteButton(String name) {
-    int index = getOrganizationIndex(name);
-    String locator = String.format(Locators.ORGANIZATION_DELETE_XPATH, index);
+    String locator = String.format(Locators.ORGANIZATION_DELETE_XPATH, getOrganizationIndex(name));
     seleniumWebDriver.findElement(By.xpath(locator)).click();
   }
 
   public void clickCheckbox(String name) {
-    int index = getOrganizationIndex(name);
-    String locator = String.format(Locators.ORGANIZATION_CHECKBOX_XPATH, index);
+    String locator =
+        String.format(Locators.ORGANIZATION_CHECKBOX_XPATH, getOrganizationIndex(name));
     seleniumWebDriver.findElement(By.xpath(locator)).click();
   }
 
   public void clickBulkDeleteButton() {
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOf(bulkDeleteButton));
     bulkDeleteButton.click();
   }
 
@@ -293,6 +296,8 @@ public class OrganizationListPage {
    * @param value
    */
   public void typeInSearchInput(String value) {
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOf(searchInput));
     searchInput.click();
     searchInput.sendKeys(value);
   }

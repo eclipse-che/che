@@ -81,12 +81,12 @@ public class NavigationBar {
     seleniumWebDriver.findElement(By.xpath(locator)).click();
   }
 
-  public String getMenuCounterValue(MenuItem menuItem) {
+  public int getMenuCounterValue(MenuItem menuItem) {
     String locator =
         String.format(Locators.MENU_ITEM_XPATH, menuItem.title) + Locators.COUNTER_XPATH;
     String counter = seleniumWebDriver.findElement(By.xpath(locator)).getText();
     counter = counter.trim().replace("(", "").replace(")", "");
-    return counter.equals("") ? "0" : counter;
+    return counter.equals("") ? 0 : Integer.parseInt(counter);
   }
 
   public List<WebElement> getTeamListItems() {
