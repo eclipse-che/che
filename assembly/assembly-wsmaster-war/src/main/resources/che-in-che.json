@@ -107,8 +107,17 @@
           }
         },
         {
-          "commandLine": "cp ${current.project.path}/assembly/assembly-ide-war/target/*.war /home/user/tomcat8/webapps/ROOT.war",
+          "commandLine": "cp ${current.project.path}/assembly/assembly-ide-war/target/*.war /home/user/tomcat8/webapps/IDE.war",
           "name": "Deploy IDE",
+          "type": "custom",
+          "attributes": {
+            "goal": "Run",
+            "previewUrl": "${server.IDE-server}/che/che-in-che"
+          }
+        },
+        {
+          "commandLine": "cp ${current.project.path}/assembly/assembly-wsagent-war/target/*.war /home/user/tomcat8/webapps/ROOT.war",
+          "name": "Deploy Workspace Agent",
           "type": "custom",
           "attributes": {
             "goal": "Run",
