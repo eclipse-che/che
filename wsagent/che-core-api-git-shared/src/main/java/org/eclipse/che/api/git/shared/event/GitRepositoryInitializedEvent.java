@@ -10,21 +10,20 @@
  */
 package org.eclipse.che.api.git.shared.event;
 
-import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
  * Event for indicating that Git repository initialized.
  *
- * @author Igor Vinokur.
+ * @author Igor Vinokur
+ * @author Mykola Morhun
  */
 @DTO
 public interface GitRepositoryInitializedEvent extends GitEvent {
+  @Override
+  String getProjectName();
 
-  /** Returns Git status */
-  Status getStatus();
+  void setProjectName(String projectName);
 
-  void setStatus(Status status);
-
-  GitRepositoryInitializedEvent withStatus(Status status);
+  GitRepositoryInitializedEvent withProjectName(String projectName);
 }

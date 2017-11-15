@@ -15,6 +15,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_ENVIRONMEN
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_IDE_URL;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_SELF;
 
+import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -25,6 +26,7 @@ import javax.ws.rs.core.UriBuilder;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.core.rest.ServiceContext;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 
@@ -38,52 +40,62 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 public class WorkspaceLinksGenerator {
 
   private final WorkspaceRuntimes workspaceRuntimes;
-  private final String cheApiEndpoint;
   private final String cheWebsocketEndpoint;
 
   @Inject
   public WorkspaceLinksGenerator(
       WorkspaceRuntimes workspaceRuntimes,
-      @Named("che.api") String cheApiEndpoint,
       @Named("che.websocket.endpoint") String cheWebsocketEndpoint) {
     this.workspaceRuntimes = workspaceRuntimes;
-    this.cheApiEndpoint = cheApiEndpoint;
     this.cheWebsocketEndpoint = cheWebsocketEndpoint;
   }
 
   /** Returns 'rel -> url' map of links for the given workspace. */
-  public Map<String, String> genLinks(Workspace workspace) throws ServerException {
+  public Map<String, String> genLinks(Workspace workspace, ServiceContext serviceContext)
+      throws ServerException {
+    final UriBuilder uriBuilder = serviceContext.getServiceUriBuilder();
     final LinkedHashMap<String, String> links = new LinkedHashMap<>();
 
     links.put(
         LINK_REL_SELF,
-        UriBuilder.fromUri(cheApiEndpoint)
+        uriBuilder
+            .clone()
             .path(WorkspaceService.class)
             .path(WorkspaceService.class, "getByKey")
             .build(workspace.getId())
             .toString());
     links.put(
         LINK_REL_IDE_URL,
-        UriBuilder.fromUri(cheApiEndpoint)
+        uriBuilder
+            .clone()
             .replacePath("")
             .path(workspace.getNamespace())
             .path(workspace.getConfig().getName())
             .build()
             .toString());
     if (workspace.getStatus() != WorkspaceStatus.STOPPED) {
-      addRuntimeLinks(links, workspace.getId());
+      addRuntimeLinks(links, workspace.getId(), serviceContext);
     }
 
     return links;
   }
 
-  private void addRuntimeLinks(Map<String, String> links, String workspaceId)
+  private void addRuntimeLinks(
+      Map<String, String> links, String workspaceId, ServiceContext serviceContext)
       throws ServerException {
     Optional<RuntimeContext> ctxOpt = workspaceRuntimes.getRuntimeContext(workspaceId);
     if (ctxOpt.isPresent()) {
+      URI uri = serviceContext.getServiceUriBuilder().build();
       try {
         links.put(LINK_REL_ENVIRONMENT_OUTPUT_CHANNEL, ctxOpt.get().getOutputChannel().toString());
-        links.put(LINK_REL_ENVIRONMENT_STATUS_CHANNEL, cheWebsocketEndpoint);
+        links.put(
+            LINK_REL_ENVIRONMENT_STATUS_CHANNEL,
+            UriBuilder.fromUri(cheWebsocketEndpoint)
+                .scheme(uri.getScheme().equals("https") ? "wss" : "ws")
+                .host(uri.getHost())
+                .port(uri.getPort())
+                .build()
+                .toString());
       } catch (InfrastructureException x) {
         throw new ServerException(x.getMessage(), x);
       }

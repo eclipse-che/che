@@ -21,7 +21,6 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.WorkspaceManager.UPDATED_ATTRIBUTE_NAME;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -64,6 +63,7 @@ import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
@@ -577,7 +577,7 @@ public class WorkspaceManagerTest {
 
   private RuntimeContext mockContext(RuntimeIdentity identity) throws Exception {
     RuntimeContext context = mock(RuntimeContext.class);
-    doReturn(context).when(infrastructure).prepare(eq(identity), anyObject());
+    doReturn(context).when(infrastructure).prepare(eq(identity), any(InternalEnvironment.class));
     when(context.getInfrastructure()).thenReturn(infrastructure);
     when(context.getIdentity()).thenReturn(identity);
     return context;

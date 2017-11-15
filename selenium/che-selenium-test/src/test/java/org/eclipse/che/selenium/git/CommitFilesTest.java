@@ -148,7 +148,9 @@ public class CommitFilesTest {
     loader.waitOnClosed();
     refactor.typeAndWaitNewName("org.eclipse.de");
     refactor.sendKeysIntoField("v.exam");
-    refactor.sendKeysIntoField("ples");
+    refactor.sendKeysIntoField("pl");
+    refactor.sendKeysIntoField("es");
+    refactor.sendKeysIntoField("");
     refactor.waitTextIntoNewNameField(NEW_NAME_PACKAGE);
     refactor.clickOkButtonRefactorForm();
     projectExplorer.selectItem(PROJECT_NAME);

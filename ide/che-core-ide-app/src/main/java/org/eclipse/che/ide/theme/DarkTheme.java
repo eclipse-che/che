@@ -1677,6 +1677,16 @@ public class DarkTheme implements Theme {
     return "rgba(215, 215, 215, 0.10)";
   }
 
+  @Override
+  public String gitPanelRepositoryChangesLabelColor() {
+    return "#252a38";
+  }
+
+  @Override
+  public String gitPanelRepositoryChangesLabelBackgroundColor() {
+    return "#969fad";
+  }
+
   /**
    * ******************************************************************************************
    *

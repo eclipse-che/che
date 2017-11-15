@@ -50,7 +50,7 @@ public class GitStatusChangedDetector {
   private static final String INDEX_FILE = "index";
   private static final String ORIG_HEAD_FILE = "ORIG_HEAD";
   private static final String INCOMING_METHOD = "track/git-index";
-  private static final String OUTGOING_METHOD = "event/git/statusChanged";
+  private static final String OUTGOING_METHOD = "event/git/status-changed";
 
   private final RequestTransmitter transmitter;
   private final FileWatcherManager manager;
@@ -146,7 +146,10 @@ public class GitStatusChangedDetector {
         }
 
         StatusChangedEventDto statusChangeEventDto =
-            newDto(StatusChangedEventDto.class).withStatus(status).withModifiedFiles(modifiedFiles);
+            newDto(StatusChangedEventDto.class)
+                .withProjectName(connection.getWorkingDir().getName())
+                .withStatus(status)
+                .withModifiedFiles(modifiedFiles);
         transmitter
             .newRequest()
             .endpointId(id)
