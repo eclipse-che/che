@@ -254,17 +254,5 @@ public final class DtoConverter {
         .withOwner(identity.getOwner());
   }
 
-  //    /** Converts {@link Snapshot} to {@link SnapshotDto}. */
-  //    public static SnapshotDto asDto(Snapshot snapshot) {
-  //        return newDto(SnapshotDto.class).withId(snapshot.getId())
-  //                                        .withCreationDate(snapshot.getCreationDate())
-  //                                        .withDescription(snapshot.getDescription())
-  //                                        .withDev(snapshot.isDev())
-  //                                        .withType(snapshot.getType())
-  //                                        .withWorkspaceId(snapshot.getWorkspaceId())
-  //                                        .withEnvName(snapshot.getEnvName())
-  //                                        .withMachineName(snapshot.getMachineName());
-  //    }
-
   private DtoConverter() {}
 }

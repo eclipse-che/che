@@ -273,15 +273,7 @@ public class WorkspaceManager {
    *
    * @param workspaceId identifier of workspace which should be started
    * @param envName name of environment or null, when default environment should be used
-   * @param options if <code>true</code> workspace will be restored from snapshot if snapshot
-   *     exists, otherwise (if snapshot does not exist) workspace will be started from default
-   *     source. If <code>false</code> workspace will be started from default source, even if
-   *     auto-restore is enabled and snapshot exists. If <code>null</code> workspace will be
-   *     restored from snapshot only if workspace has `auto-restore` attribute set to <code>true
-   *     </code>, or system wide parameter `auto-restore` is enabled and snapshot exists.
-   *     <p>This parameter has the highest priority to define if it is needed to restore from
-   *     snapshot or not. If it is not defined workspace `auto-restore` attribute will be checked,
-   *     then if last is not defined system wide `auto-restore` parameter will be checked.
+   * @param options possible startup options
    * @return starting workspace
    * @throws NullPointerException when {@code workspaceId} is null
    * @throws NotFoundException when workspace with given {@code workspaceId} doesn't exist
@@ -292,11 +284,6 @@ public class WorkspaceManager {
       throws NotFoundException, ServerException, ConflictException {
     requireNonNull(workspaceId, "Required non-null workspace id");
     final WorkspaceImpl workspace = workspaceDao.get(workspaceId);
-    // final String restoreAttr = workspace.getAttributes().get(AUTO_RESTORE_FROM_SNAPSHOT);
-    // final boolean autoRestore = restoreAttr == null ? defaultAutoRestore :
-    // parseBoolean(restoreAttr);
-    // startAsync(workspace, envName, firstNonNull(restore, autoRestore));
-    // && !getSnapshot(workspaceId).isEmpty());
     startAsync(workspace, envName, options);
     return normalizeState(workspace, true);
   }
