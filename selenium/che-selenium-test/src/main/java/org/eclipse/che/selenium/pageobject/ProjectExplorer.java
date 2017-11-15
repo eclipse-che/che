@@ -464,8 +464,8 @@ public class ProjectExplorer {
       LOG.debug("===========>>>>  openItemByPath catch 4");
       waitItemIsSelected(path);
       LOG.debug("===========>>>>  openItemByPath catch 5");
-      action.doubleClick(getProjectExplorerElement(path));
-      action.build().perform();
+      action.moveToElement(getProjectExplorerElement(path)).perform();
+      action.doubleClick(getProjectExplorerElement(path)).perform();
       LOG.debug("===========>>>>  openItemByPath catch 6");
     }
     loader.waitOnClosed();
