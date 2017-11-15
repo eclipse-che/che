@@ -434,6 +434,7 @@ public class ProjectExplorer {
    */
   public void openItemByPath(String path) {
     LOG.debug("===========>>>>  openItemByPath 1");
+    Actions action = actionsFactory.createAction(seleniumWebDriver);
     waitItem(path);
     LOG.debug("===========>>>>  openItemByPath 2");
     selectItem(path);
@@ -446,10 +447,8 @@ public class ProjectExplorer {
       LOG.debug("===========>>>>  openItemByPath try 2");
       waitItemIsSelected(path);
       LOG.debug("===========>>>>  openItemByPath try 3");
-      actionsFactory
-          .createAction(seleniumWebDriver)
-          .doubleClick(getProjectExplorerElement(path))
-          .perform();
+      action.moveToElement(getProjectExplorerElement(path)).perform();
+      action.doubleClick(getProjectExplorerElement(path)).perform();
       LOG.debug("===========>>>>  openItemByPath try 4");
     }
     // sometimes an element in the project explorer may be is not attached to the DOM. We should
@@ -465,10 +464,8 @@ public class ProjectExplorer {
       LOG.debug("===========>>>>  openItemByPath catch 4");
       waitItemIsSelected(path);
       LOG.debug("===========>>>>  openItemByPath catch 5");
-      actionsFactory
-          .createAction(seleniumWebDriver)
-          .doubleClick(getProjectExplorerElement(path))
-          .perform();
+      action.doubleClick(getProjectExplorerElement(path));
+      action.build().perform();
       LOG.debug("===========>>>>  openItemByPath catch 6");
     }
     loader.waitOnClosed();
