@@ -126,9 +126,8 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
         throw e;
       } catch (InfrastructureException rethrow) {
         throw rethrow;
-      } catch (Throwable thr) {
-        throw new InternalInfrastructureException(
-            "Machine bootstrapping failed: " + thr.getMessage(), thr);
+      } catch (Exception wrap) {
+        throw new InternalInfrastructureException(e.getMessage(), wrap);
       }
     }
   }
