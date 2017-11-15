@@ -22,9 +22,12 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collections;
 import java.util.List;
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
+import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.data.NodeInterceptor;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
 
@@ -50,7 +53,14 @@ public final class FileStructureView
   public FileStructureView(NodeFactory nodeFactory) {
     this.nodeFactory = nodeFactory;
 
-    NodeStorage storage = new NodeStorage(item -> String.valueOf(item.hashCode()));
+    NodeStorage storage =
+        new NodeStorage(
+            new NodeUniqueKeyProvider() {
+              @Override
+              public String getKey(@NotNull Node item) {
+                return String.valueOf(item.hashCode());
+              }
+            });
     NodeLoader loader = new NodeLoader(Collections.<NodeInterceptor>emptySet());
     tree = new FileStructureTree(storage, loader);
     UI_BINDER.createAndBindUi(this);
