@@ -1639,6 +1639,16 @@ public class JsTheme implements Theme {
   }
 
   @Override
+  public String gitPanelRepositoryChangesLabelColor() {
+    return theme.getString("gitPanelRepositoryChangesLabelColor");
+  }
+
+  @Override
+  public String gitPanelRepositoryChangesLabelBackgroundColor() {
+    return theme.getString("gitPanelRepositoryChangesLabelBackgroundColor");
+  }
+
+  @Override
   public String resourceMonitorBarBackground() {
     return theme.getString("resourceMonitorBarBackground");
   }
