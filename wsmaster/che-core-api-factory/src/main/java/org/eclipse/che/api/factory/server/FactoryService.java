@@ -151,10 +151,7 @@ public class FactoryService extends Service {
   @Produces(APPLICATION_JSON)
   @ApiOperation(
     value = "Get factory by its identifier",
-    notes =
-        "If validate parameter is not specified, retrieved factory wont be validated."
-            + " This method is going to be deprecated or limited in scope in 6.0 GA "
-            + " since it's not optimized on backend performance "
+    notes = "If validate parameter is not specified, retrieved factory wont be validated"
   )
   @ApiResponses({
     @ApiResponse(code = 200, message = "Response contains requested factory entry"),
@@ -187,7 +184,11 @@ public class FactoryService extends Service {
     value =
         "Get factory by attribute, "
             + "the attribute must match one of the Factory model fields with type 'String', "
-            + "e.g. (factory.name, factory.creator.name)",
+            + "e.g. (factory.name, factory.creator.name)"
+            + " This method is going to be deprecated or limited in scope in 6.0 GA "
+            + "since it's not optimized on backend performance. "
+            +"Expected parameters creator.userId=? or name=?."
+      ,
     notes =
         "If specify more than one value for a single query parameter then will be taken the first one"
   )
@@ -214,16 +215,23 @@ public class FactoryService extends Service {
             .map(entry -> Pair.of(entry.getKey(), entry.getValue().iterator().next()))
             .collect(toList());
     checkArgument(!query.isEmpty(), "Query must contain at least one attribute");
+
+    for (Pair<String, String> pair : query) {
+      if (!pair.first.equals("creator.userId") && !pair.first.equals("name")) {
+        LOG.warn(
+            "Method factory.find is going to be removed or limited in scope in 6.0 GA."
+                + " Requested attributes {}, skipCount {}, maxItems {}",
+            query,
+            skip,
+            maxItems);
+        break;
+      }
+    }
+
     final List<FactoryDto> factories = new ArrayList<>();
     for (Factory factory : factoryManager.getByAttribute(maxItems, skipCount, query)) {
       factories.add(injectLinks(asDto(factory)));
     }
-    LOG.warn(
-        "Method factory.find is going to be removed or limited in scope in 6.0 GA."
-            + " Requested attributes {}, skipCount {}, maxItems {}",
-        query,
-        skip,
-        maxItems);
     return factories;
   }
 
