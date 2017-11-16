@@ -76,8 +76,7 @@ public class CheckFactoryWithSparseCheckoutTest {
 
     events.clickEventLogBtn();
     events.waitOpened();
-    notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed(
-        "Project " + PROJECT_NAME + " imported");
+    events.waitExpectedMessage("Project " + PROJECT_NAME + " imported");
 
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
