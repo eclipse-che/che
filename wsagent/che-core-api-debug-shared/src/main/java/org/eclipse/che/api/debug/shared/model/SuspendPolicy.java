@@ -8,11 +8,14 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.debug.shared.model.action;
+package org.eclipse.che.api.debug.shared.model;
 
-import org.eclipse.che.api.debug.shared.model.SuspendPolicy;
-
-/** @author Anatoliy Bazko */
-public interface StepIntoAction extends Action {
-  SuspendPolicy getSuspendPolicy();
+/** @author Anatolii Bazko */
+public enum SuspendPolicy {
+  /** Suspend no threads when the breakpoint hit */
+  NONE,
+  /** Suspend only the thread where the breakpoint hit */
+  THREAD,
+  /** Suspend all threads when the breakpoint hit */
+  ALL
 }

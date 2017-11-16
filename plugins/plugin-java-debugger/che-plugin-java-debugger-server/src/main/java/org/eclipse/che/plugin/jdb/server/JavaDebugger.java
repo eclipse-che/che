@@ -49,10 +49,12 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.action.ResumeActionDto;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
+import org.eclipse.che.api.debug.shared.model.BreakpointConfiguration;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
+import org.eclipse.che.api.debug.shared.model.SuspendPolicy;
 import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.ThreadStatus;
 import org.eclipse.che.api.debug.shared.model.Variable;
@@ -247,22 +249,34 @@ public class JavaDebugger implements EventsHandler, Debugger {
     }
 
     try {
-      EventRequest breakPointRequest = requestManager.createBreakpointRequest(location);
-      breakPointRequest.setSuspendPolicy(EventRequest.SUSPEND_ALL);
-      String expression = breakpoint.getCondition();
-      if (!(expression == null || expression.isEmpty())) {
-        ExpressionParser parser = ExpressionParser.newInstance(expression);
-        breakPointRequest.putProperty(
-            "org.eclipse.che.ide.java.debug.condition.expression.parser", parser);
+      BreakpointRequest request = requestManager.createBreakpointRequest(location);
+
+      BreakpointConfiguration conf = breakpoint.getBreakpointConfiguration();
+      if (conf != null && conf.getSuspendPolicy() != null) {
+        request.setSuspendPolicy(toSuspendEventRequest(conf.getSuspendPolicy()));
+      } else {
+        request.setSuspendPolicy(EventRequest.SUSPEND_ALL);
       }
-      breakPointRequest.setEnabled(true);
+
+      if (conf != null
+          && conf.isConditionEnabled()
+          && conf.getCondition() != null
+          && !conf.getCondition().isEmpty()) {
+        ExpressionParser parser = ExpressionParser.newInstance(conf.getCondition());
+        request.putProperty("org.eclipse.che.ide.java.debug.condition.expression.parser", parser);
+      }
+
+      if (conf != null && conf.isHitCountEnabled() && conf.getHitCount() > 0) {
+        request.addCountFilter(conf.getHitCount());
+      }
+
+      request.setEnabled(true);
     } catch (NativeMethodException | IllegalThreadStateException | InvalidRequestStateException e) {
       throw new DebuggerException(e.getMessage(), e);
     }
 
     debuggerCallback.onEvent(
-        new BreakpointActivatedEventImpl(
-            new BreakpointImpl(breakpoint.getLocation(), true, breakpoint.getCondition())));
+        new BreakpointActivatedEventImpl(new BreakpointImpl(breakpoint.getLocation())));
 
     LOG.debug("Add breakpoint: {}", location);
   }
@@ -590,7 +604,8 @@ public class JavaDebugger implements EventsHandler, Debugger {
 
         Location location = new JdbLocation(event.thread().frame(0));
 
-        debuggerCallback.onEvent(new SuspendEventImpl(location));
+        SuspendPolicy suspendPolicy = toSuspendPolicy(event.request().suspendPolicy());
+        debuggerCallback.onEvent(new SuspendEventImpl(location, suspendPolicy));
       } catch (IncompatibleThreadStateException e) {
         return true;
       }
@@ -603,12 +618,14 @@ public class JavaDebugger implements EventsHandler, Debugger {
   }
 
   private boolean processStepEvent(com.sun.jdi.event.StepEvent event) throws DebuggerException {
+    event.request().suspendPolicy();
     setCurrentThread(event.thread());
 
     try {
       StackFrame jdiFrame = event.thread().frame(0);
       JdbLocation jdbLocation = new JdbLocation(jdiFrame);
-      debuggerCallback.onEvent(new SuspendEventImpl(jdbLocation));
+      SuspendPolicy suspendPolicy = toSuspendPolicy(event.request().suspendPolicy());
+      debuggerCallback.onEvent(new SuspendEventImpl(jdbLocation, suspendPolicy));
       return false;
     } catch (IncompatibleThreadStateException e) {
       invalidateCurrentThread();
@@ -648,20 +665,20 @@ public class JavaDebugger implements EventsHandler, Debugger {
 
   @Override
   public void stepOver(StepOverAction action) throws DebuggerException {
-    doStep(StepRequest.STEP_OVER);
+    doStep(StepRequest.STEP_OVER, action.getSuspendPolicy());
   }
 
   @Override
   public void stepInto(StepIntoAction action) throws DebuggerException {
-    doStep(StepRequest.STEP_INTO);
+    doStep(StepRequest.STEP_INTO, action.getSuspendPolicy());
   }
 
   @Override
   public void stepOut(StepOutAction action) throws DebuggerException {
-    doStep(StepRequest.STEP_OUT);
+    doStep(StepRequest.STEP_OUT, action.getSuspendPolicy());
   }
 
-  private void doStep(int depth) throws DebuggerException {
+  private void doStep(int depth, SuspendPolicy suspendPolicy) throws DebuggerException {
     lock.lock();
     try {
       clearSteps();
@@ -669,6 +686,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
       StepRequest request =
           getEventManager().createStepRequest(getCurrentThread(), StepRequest.STEP_LINE, depth);
       request.addCountFilter(1);
+      request.setSuspendPolicy(toSuspendEventRequest(suspendPolicy));
       request.enable();
 
       resume(newDto(ResumeActionDto.class));
@@ -790,6 +808,32 @@ public class JavaDebugger implements EventsHandler, Debugger {
         return ThreadStatus.NOT_STARTED;
       default:
         return ThreadStatus.UNKNOWN;
+    }
+  }
+
+  private SuspendPolicy toSuspendPolicy(int suspendEventRequest) {
+    switch (suspendEventRequest) {
+      case EventRequest.SUSPEND_EVENT_THREAD:
+        return SuspendPolicy.THREAD;
+      case EventRequest.SUSPEND_NONE:
+        return SuspendPolicy.NONE;
+      default:
+        return SuspendPolicy.ALL;
+    }
+  }
+
+  private int toSuspendEventRequest(SuspendPolicy suspendPolicy) {
+    if (suspendPolicy == null) {
+      return EventRequest.SUSPEND_ALL;
+    }
+
+    switch (suspendPolicy) {
+      case NONE:
+        return EventRequest.SUSPEND_NONE;
+      case THREAD:
+        return EventRequest.SUSPEND_EVENT_THREAD;
+      default:
+        return EventRequest.SUSPEND_ALL;
     }
   }
 }

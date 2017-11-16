@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.debugger;
 
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.testng.Assert.assertEquals;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -18,6 +19,7 @@ import java.nio.file.Paths;
 import java.util.concurrent.ExecutionException;
 import org.eclipse.che.commons.json.JsonParseException;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
@@ -31,7 +33,6 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.debug.DebugPanel;
 import org.eclipse.che.selenium.pageobject.debug.NodeJsDebugConfig;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
@@ -57,6 +58,7 @@ public class NodeJsDebugTest {
   @Inject private NotificationsPopupPanel notifications;
   @Inject private Menu menu;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -103,9 +105,8 @@ public class NodeJsDebugTest {
 
   /** @return 'Che-debug-configurations' values from browser storage */
   private String getDataAboutDebugSessionFromStorage() {
-    JavascriptExecutor js = (JavascriptExecutor) ide.driver();
     String injectedJsScript = "return window.localStorage.getItem('che-debug-configurations');";
-    return js.executeScript(injectedJsScript).toString();
+    return seleniumWebDriver.executeScript(injectedJsScript).toString();
   }
 
   /** Check step into, step over and step out feature */
@@ -118,10 +119,7 @@ public class NodeJsDebugTest {
     debugPanel.waitDebugHighlightedText("return \"HELLO\";");
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_OUT);
     debugPanel.waitDebugHighlightedText("var c=\"some add value\" + b;");
-    new WebDriverWait(ide.driver(), REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath("//div[text()='{app.js:13} ']")));
+    assertEquals(debugPanel.getExecutionPoint(), "app.js:13");
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_OVER);
   }
 

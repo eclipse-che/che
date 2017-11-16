@@ -29,6 +29,7 @@ import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
+import org.eclipse.che.api.debug.shared.model.SuspendPolicy;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.action.ResumeAction;
@@ -386,7 +387,7 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
     // Convert DBG location from engine to VFS location
     Location vfsLocation = debugLocationHandler.convertToVFS(dbgLocation);
     // Send suspend event
-    debugCallback.onEvent(new SuspendEventImpl(vfsLocation));
+    debugCallback.onEvent(new SuspendEventImpl(vfsLocation, SuspendPolicy.ALL));
   }
 
   private void handleScriptEnded(ScriptEndedNotification notification) {
