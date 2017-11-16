@@ -54,13 +54,7 @@ public final class FileStructureView
     this.nodeFactory = nodeFactory;
 
     NodeStorage storage =
-        new NodeStorage(
-            new NodeUniqueKeyProvider() {
-              @Override
-              public String getKey(@NotNull Node item) {
-                return String.valueOf(item.hashCode());
-              }
-            });
+        new NodeStorage(item->String.valueOf(item.hashCode()));
     NodeLoader loader = new NodeLoader(Collections.<NodeInterceptor>emptySet());
     tree = new FileStructureTree(storage, loader);
     UI_BINDER.createAndBindUi(this);

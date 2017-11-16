@@ -74,11 +74,6 @@ public final class FileStructureWindow extends Window
   }
 
   @Override
-  public void hide() {
-    super.hide();
-  }
-
-  @Override
   public void setDelegate(ElementSelectionDelegate<ExtendedSymbolInformation> delegate) {
     view.setDelegate(delegate);
   }
