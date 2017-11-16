@@ -10,6 +10,9 @@
  */
 package org.eclipse.che.api.workspace.server;
 
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.emptySet;
+import static java.util.Collections.singleton;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -18,38 +21,32 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.AssertJUnit.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
-import org.eclipse.che.api.core.model.workspace.Warning;
+import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
-import org.eclipse.che.api.workspace.server.spi.environment.RecipeRetriever;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
 import org.eclipse.che.core.db.DBInitializer;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -61,6 +58,8 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class WorkspaceRuntimesTest {
 
+  private static final String TEST_ENVIRONMENT_TYPE = "test";
+
   @Mock private EventService eventService;
 
   @Mock private WorkspaceDao workspaceDao;
@@ -69,24 +68,19 @@ public class WorkspaceRuntimesTest {
 
   @Mock private WorkspaceSharedPool sharedPool;
 
-  @Mock private InstallerRegistry installerRegistry;
-
-  @Mock private RecipeRetriever recipeRetriever;
-
   private RuntimeInfrastructure infrastructure;
-  private InternalEnvironmentFactory environmentFactory;
+  @Mock private InternalEnvironmentFactory<InternalEnvironment> testEnvFactory;
   private WorkspaceRuntimes runtimes;
 
   @BeforeMethod
   public void setUp() throws Exception {
-    infrastructure = spy(new TestInfrastructure(installerRegistry, recipeRetriever));
-    environmentFactory = spy(new TestEnvironmentFactory(installerRegistry, recipeRetriever));
+    infrastructure = spy(new TestInfrastructure());
 
     runtimes =
         new WorkspaceRuntimes(
             eventService,
-            Collections.singletonMap("type1", environmentFactory),
-            Collections.singleton(infrastructure),
+            ImmutableMap.of(TEST_ENVIRONMENT_TYPE, testEnvFactory),
+            singleton(infrastructure),
             sharedPool,
             workspaceDao,
             dbInitializer);
@@ -100,6 +94,7 @@ public class WorkspaceRuntimesTest {
     RuntimeContext context = mockContext(identity);
     when(context.getRuntime()).thenReturn(new TestInternalRuntime(context));
     doReturn(context).when(infrastructure).prepare(eq(identity), any());
+    doReturn(mock(InternalEnvironment.class)).when(testEnvFactory).create(any());
 
     // try recover
     runtimes.recoverOne(infrastructure, identity);
@@ -124,7 +119,7 @@ public class WorkspaceRuntimesTest {
   public void runtimeIsNotRecoveredIfNoEnvironmentFound() throws Exception {
     RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "me");
     WorkspaceImpl workspace = mockWorkspace(identity);
-    when(workspace.getConfig().getEnvironments()).thenReturn(Collections.emptyMap());
+    when(workspace.getConfig().getEnvironments()).thenReturn(emptyMap());
 
     // try recover
     runtimes.recoverOne(infrastructure, identity);
@@ -137,7 +132,11 @@ public class WorkspaceRuntimesTest {
     RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "me");
 
     mockWorkspace(identity);
-    doThrow(new InfrastructureException("oops!")).when(infrastructure).prepare(eq(identity), any());
+    InternalEnvironment internalEnvironment = mock(InternalEnvironment.class);
+    doReturn(internalEnvironment).when(testEnvFactory).create(any(Environment.class));
+    doThrow(new InfrastructureException("oops!"))
+        .when(infrastructure)
+        .prepare(eq(identity), any(InternalEnvironment.class));
 
     // try recover
     runtimes.recoverOne(infrastructure, identity);
@@ -157,7 +156,6 @@ public class WorkspaceRuntimesTest {
     Map<String, Machine> r1machines = ImmutableMap.of("m1", mock(Machine.class));
     InternalRuntime runtime1 = spy(new TestInternalRuntime(context, r1machines));
     when(context.getRuntime()).thenReturn(runtime1);
-    doReturn(context).when(infrastructure).prepare(eq(identity), any());
     runtimes.recoverOne(infrastructure, identity);
 
     // runtime 2 must not be saved
@@ -176,17 +174,10 @@ public class WorkspaceRuntimesTest {
 
   @Test
   public void doesNotRecoverTheSameInfraTwice() throws Exception {
-    TestInfrastructure infra =
-        spy(new TestInfrastructure(installerRegistry, recipeRetriever, "test1", "test2"));
+    TestInfrastructure infra = spy(new TestInfrastructure("test1", "test2"));
 
     new WorkspaceRuntimes(
-            eventService,
-            Collections.singletonMap(
-                "test", new TestEnvironmentFactory(installerRegistry, recipeRetriever)),
-            Collections.singleton(infra),
-            sharedPool,
-            workspaceDao,
-            dbInitializer)
+            eventService, emptyMap(), singleton(infra), sharedPool, workspaceDao, dbInitializer)
         .recover();
 
     verify(infra).getIdentities();
@@ -196,7 +187,7 @@ public class WorkspaceRuntimesTest {
       throws ValidationException, InfrastructureException {
     RuntimeContext context = mock(RuntimeContext.class);
     InternalEnvironment internalEnvironment = mock(InternalEnvironment.class);
-    //    doReturn(internalEnvironment).when(infrastructure).estimate(anyObject());
+    doReturn(internalEnvironment).when(testEnvFactory).create(any(Environment.class));
     doReturn(context).when(infrastructure).prepare(eq(identity), eq(internalEnvironment));
     when(context.getInfrastructure()).thenReturn(infrastructure);
     when(context.getIdentity()).thenReturn(identity);
@@ -207,7 +198,7 @@ public class WorkspaceRuntimesTest {
       throws NotFoundException, ServerException {
     EnvironmentImpl environment = mock(EnvironmentImpl.class);
     when(environment.getRecipe())
-        .thenReturn(new RecipeImpl("type1", "contentType1", "content1", null));
+        .thenReturn(new RecipeImpl(TEST_ENVIRONMENT_TYPE, "contentType1", "content1", null));
 
     WorkspaceConfigImpl config = mock(WorkspaceConfigImpl.class);
     when(config.getEnvironments()).thenReturn(ImmutableMap.of(identity.getEnvName(), environment));
@@ -221,51 +212,25 @@ public class WorkspaceRuntimesTest {
     return workspace;
   }
 
-  private static class TestEnvironmentFactory extends InternalEnvironmentFactory {
-
-    public TestEnvironmentFactory(
-        InstallerRegistry installerRegistry, RecipeRetriever recipeRetriever) {
-      super(installerRegistry, recipeRetriever);
-    }
-
-    @Override
-    protected InternalEnvironment create(Map<String, InternalMachineConfig> machines,
-        InternalRecipe recipe, List<Warning> warnings)
-        throws InfrastructureException, ValidationException {
-      return new TestInternalEnvironment(machines, recipe, warnings);
-    }
-  }
-
-  private static class TestInternalEnvironment extends InternalEnvironment {
-
-    public TestInternalEnvironment(
-        Map<String, InternalMachineConfig> machines,
-        InternalRecipe recipe,
-        List<Warning> warnings) {
-      super(machines, recipe, warnings);
-    }
-  }
-
   private static class TestInfrastructure extends RuntimeInfrastructure {
-    public TestInfrastructure(
-        InstallerRegistry installerRegistry, RecipeRetriever recipeRetriever) {
-      this(installerRegistry, recipeRetriever, "test");
+
+    public TestInfrastructure() {
+      this("test");
     }
 
-    public TestInfrastructure(
-        InstallerRegistry installerRegistry, RecipeRetriever recipeRetriever, String... types) {
-      super("test", Arrays.asList(types), null);
+    public TestInfrastructure(String... types) {
+      super("test", Arrays.asList(types), null, emptySet());
     }
-
 
     @Override
-    public RuntimeContext prepare(RuntimeIdentity id, InternalEnvironment environment)
+    public RuntimeContext internalPrepare(RuntimeIdentity id, InternalEnvironment environment)
         throws InfrastructureException {
       throw new UnsupportedOperationException();
     }
   }
 
   private static class TestInternalRuntime extends InternalRuntime<RuntimeContext> {
+
     final Map<String, Machine> machines;
 
     TestInternalRuntime(RuntimeContext context, Map<String, Machine> machines) {
@@ -274,7 +239,7 @@ public class WorkspaceRuntimesTest {
     }
 
     TestInternalRuntime(RuntimeContext context) {
-      this(context, Collections.emptyMap());
+      this(context, emptyMap());
     }
 
     @Override
@@ -284,7 +249,7 @@ public class WorkspaceRuntimesTest {
 
     @Override
     public Map<String, String> getProperties() {
-      return Collections.emptyMap();
+      return emptyMap();
     }
 
     @Override
