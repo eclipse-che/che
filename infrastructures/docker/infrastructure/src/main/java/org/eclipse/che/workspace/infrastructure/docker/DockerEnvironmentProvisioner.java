@@ -12,7 +12,6 @@ package org.eclipse.che.workspace.infrastructure.docker;
 
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
 /**
@@ -20,16 +19,14 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
  *
  * @author Alexander Garagatyi
  */
-public interface InfrastructureProvisioner {
+public interface DockerEnvironmentProvisioner {
   /**
    * Modifies environment config and internal environment representation with everything needed for
    * infrastructure of workspace.
    *
-   * @param environment configuration of environment
    * @param internalEnv internal environment representation
    * @throws InfrastructureException if any error occurs
    */
-  void provision(
-      InternalEnvironment environment, DockerEnvironment internalEnv, RuntimeIdentity identity)
+  void provision(DockerEnvironment internalEnv, RuntimeIdentity identity)
       throws InfrastructureException;
 }

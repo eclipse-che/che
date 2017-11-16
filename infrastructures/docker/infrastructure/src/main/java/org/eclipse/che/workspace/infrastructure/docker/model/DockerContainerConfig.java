@@ -270,15 +270,15 @@ public class DockerContainerConfig {
   }
 
   /**
-   * Expose ports without publishing them to the host machine - they’ll only be accessible to linked
-   * containers.
+   * Immutable expose ports list without publishing them to the host machine - they’ll only be
+   * accessible to linked containers.
    *
    * <p>Only the internal port can be specified. <br>
    * Examples:
    *
    * <ul>
-   *   <li>3000
-   *   <li>8000
+   *   <li>3000/tcp
+   *   <li>8000/udp
    * </ul>
    */
   public Set<String> getExpose() {
@@ -299,6 +299,13 @@ public class DockerContainerConfig {
               .collect(Collectors.toCollection(HashSet::new));
     }
     return this;
+  }
+
+  public void addExpose(String exposeToAdd) {
+    if (expose == null) {
+      expose = new HashSet<>();
+    }
+    expose.add(normalizeExposeValue(exposeToAdd));
   }
 
   private String normalizeExposeValue(String expose) {

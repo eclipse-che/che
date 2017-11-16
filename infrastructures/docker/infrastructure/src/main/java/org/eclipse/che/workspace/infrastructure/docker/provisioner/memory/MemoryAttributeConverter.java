@@ -16,21 +16,19 @@ import java.util.Map.Entry;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
-import org.eclipse.che.workspace.infrastructure.docker.InfrastructureProvisioner;
+import org.eclipse.che.workspace.infrastructure.docker.DockerEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
 /** @author Alexander Garagatyi */
-public class MemoryAttributeConverter implements InfrastructureProvisioner {
+public class MemoryAttributeConverter implements DockerEnvironmentProvisioner {
 
   @Override
-  public void provision(
-      InternalEnvironment environment, DockerEnvironment internalEnv, RuntimeIdentity identity)
+  public void provision(DockerEnvironment internalEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
     for (Entry<String, ? extends InternalMachineConfig> machineEntry :
-        environment.getMachines().entrySet()) {
+        internalEnv.getMachines().entrySet()) {
       String machineName = machineEntry.getKey();
       InternalMachineConfig machineConfig = machineEntry.getValue();
 

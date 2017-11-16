@@ -18,24 +18,20 @@ import java.util.Map;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.container.ContainerNameGenerator;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
 /** @author Alexander Garagatyi */
-public class EnvironmentNormalizer {
+public class DockerEnvironmentNormalizer {
   private final ContainerNameGenerator containerNameGenerator;
 
   @Inject
-  public EnvironmentNormalizer(ContainerNameGenerator containerNameGenerator) {
+  public DockerEnvironmentNormalizer(ContainerNameGenerator containerNameGenerator) {
     this.containerNameGenerator = containerNameGenerator;
   }
 
-  public void normalize(
-      InternalEnvironment environment,
-      DockerEnvironment dockerEnvironment,
-      RuntimeIdentity identity)
+  public void normalize(DockerEnvironment dockerEnvironment, RuntimeIdentity identity)
       throws InfrastructureException {
 
     String networkId = identity.getWorkspaceId() + "_" + identity.getEnvName();

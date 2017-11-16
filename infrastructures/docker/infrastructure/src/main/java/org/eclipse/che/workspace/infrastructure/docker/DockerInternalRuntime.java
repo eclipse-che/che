@@ -34,9 +34,9 @@ import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
 import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.RuntimeStartInterruptedException;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.ServerStatusEvent;
@@ -154,14 +154,14 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
   @Override
   protected void internalStart(Map<String, String> startOptions) throws InfrastructureException {
     startSynchronizer.setStartThread();
-    Map<String, DockerContainerConfig> machineName2config =
-        getContext().getDockerEnvironment().getContainers();
     try {
-      networks.createNetwork(getContext().getDockerEnvironment().getNetwork());
+      networks.createNetwork(getContext().getEnvironment().getNetwork());
 
-      for (String machineName : getContext().getOrderedContainers()) {
+      for (Map.Entry<String, DockerContainerConfig> containerEntry :
+          getContext().getEnvironment().getContainers().entrySet()) {
         checkInterruption();
-        final DockerContainerConfig config = machineName2config.get(machineName);
+        String machineName = containerEntry.getKey();
+        final DockerContainerConfig config = containerEntry.getValue();
         sendStartingEvent(machineName);
         try {
           startMachine(machineName, config);
@@ -247,7 +247,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
 
     DockerMachine machine =
         containerStarter.startContainer(
-            getContext().getDockerEnvironment().getNetwork(),
+            getContext().getEnvironment().getNetwork(),
             name,
             containerConfig,
             getContext().getIdentity(),
@@ -260,7 +260,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
       destroyMachineQuietly(name, machine);
       throw e;
     }
-    if (!machineCfg.getInstallers().isEmpty()) {
+    if (machineCfg != null && !machineCfg.getInstallers().isEmpty()) {
       bootstrapperFactory
           .create(name, getContext().getIdentity(), machineCfg.getInstallers(), machine)
           .bootstrap();
@@ -321,7 +321,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
       sendStoppedEvent(entry.getKey());
     }
     // TODO what happens when context throws exception here
-    networks.destroyNetwork(getContext().getDockerEnvironment().getNetwork());
+    networks.destroyNetwork(getContext().getEnvironment().getNetwork());
   }
 
   /** Destroys specified machine with suppressing exception that occurs while destroying. */

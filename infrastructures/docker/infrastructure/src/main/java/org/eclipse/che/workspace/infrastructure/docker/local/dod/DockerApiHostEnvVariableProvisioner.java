@@ -17,7 +17,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.infrastructure.docker.client.DockerConnectorConfiguration;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
@@ -47,8 +46,7 @@ public class DockerApiHostEnvVariableProvisioner implements ConfigurationProvisi
   }
 
   @Override
-  public void provision(
-      InternalEnvironment envConfig, DockerEnvironment internalEnv, RuntimeIdentity identity)
+  public void provision(DockerEnvironment internalEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
     if (value != null) {

@@ -10,12 +10,10 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker.model;
 
-import static java.util.stream.Collectors.toMap;
-
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -29,7 +27,7 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
  * @author Alexander Garagatyi
  */
 public class DockerEnvironment extends InternalEnvironment {
-  private Map<String, DockerContainerConfig> containers;
+  private LinkedHashMap<String, DockerContainerConfig> containers;
   private String network;
 
   public DockerEnvironment() {}
@@ -43,7 +41,7 @@ public class DockerEnvironment extends InternalEnvironment {
       InternalRecipe recipe,
       Map<String, InternalMachineConfig> machines,
       List<Warning> warnings,
-      Map<String, DockerContainerConfig> containers,
+      LinkedHashMap<String, DockerContainerConfig> containers,
       String network)
       throws InfrastructureException {
     super(recipe, machines, warnings);
@@ -54,27 +52,26 @@ public class DockerEnvironment extends InternalEnvironment {
   public DockerEnvironment(DockerEnvironment environment) throws InfrastructureException {
     super(environment.getRecipe(), environment.getMachines(), environment.getWarnings());
     if (environment.getContainers() != null) {
-      containers =
-          environment
-              .getContainers()
-              .entrySet()
-              .stream()
-              .collect(
-                  toMap(Map.Entry::getKey, entry -> new DockerContainerConfig(entry.getValue())));
+      containers = new LinkedHashMap<>();
+      for (Entry<String, DockerContainerConfig> containerEntry :
+          environment.getContainers().entrySet()) {
+        containers.put(
+            containerEntry.getKey(), new DockerContainerConfig(containerEntry.getValue()));
+      }
     }
   }
 
   /** Ordered mapping of containers names to containers configuration. */
-  public Map<String, DockerContainerConfig> getContainers() {
+  public LinkedHashMap<String, DockerContainerConfig> getContainers() {
     if (containers == null) {
       containers = new LinkedHashMap<>();
     }
     return containers;
   }
 
-  public DockerEnvironment setContainers(Map<String, DockerContainerConfig> containers) {
+  public DockerEnvironment setContainers(LinkedHashMap<String, DockerContainerConfig> containers) {
     if (containers != null) {
-      containers = new HashMap<>(containers);
+      containers = new LinkedHashMap<>(containers);
     }
     this.containers = containers;
     return this;

@@ -13,8 +13,7 @@ package org.eclipse.che.workspace.infrastructure.docker.provisioner.env;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
-import org.eclipse.che.workspace.infrastructure.docker.InfrastructureProvisioner;
+import org.eclipse.che.workspace.infrastructure.docker.DockerEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
 /**
@@ -22,14 +21,13 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
  *
  * @author Alexander Garagatyi
  */
-public class EnvVarsConverter implements InfrastructureProvisioner {
+public class EnvVarsConverter implements DockerEnvironmentProvisioner {
 
   @Override
-  public void provision(
-      InternalEnvironment environment, DockerEnvironment internalEnv, RuntimeIdentity identity)
+  public void provision(DockerEnvironment internalEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
-    environment
+    internalEnv
         .getMachines()
         .forEach(
             (machineName, machineConfig) ->

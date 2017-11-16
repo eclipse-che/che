@@ -16,7 +16,6 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.inject.CheBootstrap;
 import org.eclipse.che.workspace.infrastructure.docker.local.server.DockerExtConfBindingProvider;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
@@ -40,8 +39,7 @@ public class WsAgentServerConfigProvisioner implements ConfigurationProvisioner 
   }
 
   @Override
-  public void provision(
-      InternalEnvironment envConfig, DockerEnvironment internalEnv, RuntimeIdentity identity)
+  public void provision(DockerEnvironment internalEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
     if (extConfBinding == null) {
@@ -49,7 +47,7 @@ public class WsAgentServerConfigProvisioner implements ConfigurationProvisioner 
       return;
     }
     Optional<String> devMachineOptional =
-        WsAgentMachineFinderUtil.getWsAgentServerMachine(envConfig);
+        WsAgentMachineFinderUtil.getWsAgentServerMachine(internalEnv);
     if (!devMachineOptional.isPresent()) {
       // no wsagent server found - do nothing
       return;

@@ -10,23 +10,23 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker;
 
+import static java.lang.String.format;
+
+import com.google.common.base.Joiner;
 import com.google.inject.Inject;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
-import org.eclipse.che.workspace.infrastructure.docker.container.ContainersStartStrategy;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.container.DockerContainers;
-import org.eclipse.che.workspace.infrastructure.docker.environment.DockerConfigSourceSpecificEnvironmentParser;
-import org.eclipse.che.workspace.infrastructure.docker.environment.EnvironmentNormalizer;
-import org.eclipse.che.workspace.infrastructure.docker.environment.compose.ComposeInternalEnvironment;
-import org.eclipse.che.workspace.infrastructure.docker.environment.dockerfile.DockerfileInternalEnvironment;
-import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerimageInternalEnvironment;
+import org.eclipse.che.workspace.infrastructure.docker.environment.DockerEnvironmentNormalizer;
+import org.eclipse.che.workspace.infrastructure.docker.environment.convert.DockerEnvironmentConverter;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
 /**
@@ -37,65 +37,62 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
  */
 public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
 
-  private final ContainersStartStrategy startStrategy;
-  private final InfrastructureProvisioner infrastructureProvisioner;
-  private final EnvironmentNormalizer environmentNormalizer;
+  public static String NAME = "docker";
+
+  private final Map<String, DockerEnvironmentConverter> envConverters;
+  private final DockerEnvironmentProvisioner dockerEnvProvisioner;
+  private final DockerEnvironmentNormalizer dockerEnvNormalizer;
   private final DockerRuntimeContextFactory contextFactory;
   private final DockerContainers containers;
 
   @Inject
   public DockerRuntimeInfrastructure(
-      ContainersStartStrategy startStrategy,
-      InfrastructureProvisioner infrastructureProvisioner,
-      EnvironmentNormalizer environmentNormalizer,
-      Map<String, DockerConfigSourceSpecificEnvironmentParser> environmentParsers,
+      EventService eventService,
+      Map<String, DockerEnvironmentConverter> envConverters,
+      DockerEnvironmentProvisioner dockerEnvProvisioner,
+      DockerEnvironmentNormalizer dockerEnvNormalizer,
       DockerRuntimeContextFactory contextFactory,
       DockerContainers containers,
-      EventService eventService) {
-    super("docker", environmentParsers.keySet(), eventService);
-    this.startStrategy = startStrategy;
-    this.infrastructureProvisioner = infrastructureProvisioner;
-    this.environmentNormalizer = environmentNormalizer;
+      Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners) {
+    super(NAME, envConverters.keySet(), eventService, internalEnvironmentProvisioners);
+    this.envConverters = envConverters;
+    this.dockerEnvProvisioner = dockerEnvProvisioner;
+    this.dockerEnvNormalizer = dockerEnvNormalizer;
     this.contextFactory = contextFactory;
     this.containers = containers;
   }
 
   @Override
-  public DockerRuntimeContext prepare(RuntimeIdentity identity, InternalEnvironment environment)
+  protected RuntimeContext internalPrepare(
+      RuntimeIdentity identity, InternalEnvironment environment)
       throws ValidationException, InfrastructureException {
-
-    DockerEnvironment dockerEnvironment;
-    String type = environment.getRecipe().getType();
-    switch (type) {
-      case "dockerfile":
-        dockerEnvironment = ((DockerfileInternalEnvironment) environment).getDockerEnvironment();
-        break;
-      case "dockerimage":
-        dockerEnvironment = ((DockerimageInternalEnvironment) environment).getDockerEnvironment();
-        break;
-      case "compose":
-        dockerEnvironment = ((ComposeInternalEnvironment) environment).getComposeEnvironment();
-        break;
-      default:
-        throw new InfrastructureException("Recipe type is not allowed " + type);
-    }
+    DockerEnvironment dockerEnvironment = convertToDockerEnv(environment);
 
     // modify environment with everything needed to use docker machines on particular (cloud)
     // infrastructure
-    infrastructureProvisioner.provision(environment, dockerEnvironment, identity);
-    // check that containers start order can be resolved
-    // NOTE: it should be performed before environmentNormalizer.normalize because normalization
-    // changes links, volumes from which will fail order evaluation
-    // It can be changed after reimplementing strategy to respect normalization
-    List<String> containersOrder = startStrategy.order(dockerEnvironment);
-    // normalize env to provide environment description with absolutely everything expected in
-    environmentNormalizer.normalize(environment, dockerEnvironment, identity);
+    dockerEnvProvisioner.provision(dockerEnvironment, identity);
 
-    return contextFactory.create(this, identity, environment, dockerEnvironment, containersOrder);
+    // normalize env to provide environment description with absolutely everything expected in
+    dockerEnvNormalizer.normalize(dockerEnvironment, identity);
+
+    return contextFactory.create(this, identity, dockerEnvironment);
   }
 
   @Override
   public Set<RuntimeIdentity> getIdentities() throws InfrastructureException {
     return containers.findIdentities();
+  }
+
+  private DockerEnvironment convertToDockerEnv(InternalEnvironment sourceEnv)
+      throws ValidationException {
+    String recipeType = sourceEnv.getRecipe().getType();
+    DockerEnvironmentConverter converter = envConverters.get(recipeType);
+    if (converter == null) {
+      throw new ValidationException(
+          format(
+              "Environment type '%s' is not supported. Supported environment types: %s",
+              recipeType, Joiner.on(", ").join(envConverters.keySet())));
+    }
+    return converter.convert(sourceEnv);
   }
 }

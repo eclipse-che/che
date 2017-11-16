@@ -14,8 +14,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
-import org.eclipse.che.workspace.infrastructure.docker.InfrastructureProvisioner;
+import org.eclipse.che.workspace.infrastructure.docker.DockerEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.local.dod.DockerApiHostEnvVariableProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.local.installer.LocalInstallersBinariesVolumeProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.local.installer.WsAgentServerConfigProvisioner;
@@ -34,7 +33,7 @@ import org.eclipse.che.workspace.infrastructure.docker.provisioner.server.Server
  * @author Alexander Garagatyi
  */
 @Singleton
-public class LocalCheInfrastructureProvisioner implements InfrastructureProvisioner {
+public class LocalCheDockerEnvironmentProvisioner implements DockerEnvironmentProvisioner {
 
   private final ContainerSystemSettingsProvisionersApplier dockerSettingsProvisioners;
   private final ProjectsVolumeProvisioner projectsVolumeProvisioner;
@@ -47,7 +46,7 @@ public class LocalCheInfrastructureProvisioner implements InfrastructureProvisio
   private final MemoryAttributeConverter memoryAttributeConverter;
 
   @Inject
-  public LocalCheInfrastructureProvisioner(
+  public LocalCheDockerEnvironmentProvisioner(
       ContainerSystemSettingsProvisionersApplier dockerSettingsProvisioners,
       ProjectsVolumeProvisioner projectsVolumeProvisioner,
       LocalInstallersBinariesVolumeProvisioner installersBinariesVolumeProvisioner,
@@ -70,22 +69,21 @@ public class LocalCheInfrastructureProvisioner implements InfrastructureProvisio
   }
 
   @Override
-  public void provision(
-      InternalEnvironment envConfig, DockerEnvironment internalEnv, RuntimeIdentity identity)
+  public void provision(DockerEnvironment internalEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
     // 1 stage - add Che business logic items to Che model env
     // 2 stage - converting Che model env to docker env
-    serversConverter.provision(envConfig, internalEnv, identity);
-    envVarsConverter.provision(envConfig, internalEnv, identity);
-    memoryAttributeConverter.provision(envConfig, internalEnv, identity);
+    serversConverter.provision(internalEnv, identity);
+    envVarsConverter.provision(internalEnv, identity);
+    memoryAttributeConverter.provision(internalEnv, identity);
     // 3 stage - add docker env items
-    runtimeLabelsProvisioner.provision(envConfig, internalEnv, identity);
-    installersBinariesVolumeProvisioner.provision(envConfig, internalEnv, identity);
-    projectsVolumeProvisioner.provision(envConfig, internalEnv, identity);
-    dockerApiEnvProvisioner.provision(envConfig, internalEnv, identity);
-    wsAgentServerConfigProvisioner.provision(envConfig, internalEnv, identity);
-    dockerSettingsProvisioners.provision(envConfig, internalEnv, identity);
-    dockerApiEnvProvisioner.provision(envConfig, internalEnv, identity);
+    runtimeLabelsProvisioner.provision(internalEnv, identity);
+    installersBinariesVolumeProvisioner.provision(internalEnv, identity);
+    projectsVolumeProvisioner.provision(internalEnv, identity);
+    dockerApiEnvProvisioner.provision(internalEnv, identity);
+    wsAgentServerConfigProvisioner.provision(internalEnv, identity);
+    dockerSettingsProvisioners.provision(internalEnv, identity);
+    dockerApiEnvProvisioner.provision(internalEnv, identity);
   }
 }
