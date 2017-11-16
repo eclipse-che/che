@@ -19,6 +19,7 @@ import java.util.List;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
+import org.eclipse.che.api.debug.shared.model.SuspendPolicy;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
@@ -62,11 +63,11 @@ public class ZendDbgSessionTest extends AbstractZendDbgSessionTest {
   public void testStepping() throws Exception {
     triggerSession(dbgHelloFile, getDbgSettings(true, false));
     awaitSuspend(dbgHelloFile, 2);
-    debugger.stepOver(new StepOverActionImpl());
+    debugger.stepOver(new StepOverActionImpl(SuspendPolicy.ALL));
     awaitSuspend(dbgHelloFile, 4);
-    debugger.stepInto(new StepIntoActionImpl());
+    debugger.stepInto(new StepIntoActionImpl(SuspendPolicy.ALL));
     awaitSuspend(dbgClassesFile, 9);
-    debugger.stepOut(new StepOutActionImpl());
+    debugger.stepOut(new StepOutActionImpl(SuspendPolicy.ALL));
     awaitSuspend(dbgHelloFile, 4);
   }
 

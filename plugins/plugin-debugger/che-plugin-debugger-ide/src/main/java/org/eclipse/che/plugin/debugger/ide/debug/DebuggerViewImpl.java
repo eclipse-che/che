@@ -18,6 +18,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -90,6 +91,7 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
 
   @UiField ListBox threads;
   @UiField ScrollPanel framesPanel;
+  @UiField FlowPanel threadNotSuspendedPlaceHolder;
 
   private final SimpleList<ActiveBreakpointWrapper> breakpoints;
   private final SimpleList<StackFrameDump> frames;
@@ -152,11 +154,9 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
     StringBuilder labelText = new StringBuilder();
     if (location != null) {
       labelText
-          .append("{")
           .append(Path.valueOf(location.getTarget()).lastSegment())
           .append(":")
-          .append(location.getLineNumber())
-          .append("} ");
+          .append(location.getLineNumber());
     }
     executionPoint.getElement().addClassName(coreRes.coreCss().defaultFont());
     executionPoint.setText(labelText.toString());
@@ -326,6 +326,10 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
   @Override
   public int getSelectedFrameIndex() {
     return frames.getSelectionModel().getSelectedIndex();
+  }
+
+  public void setThreadNotSuspendPlaceHolderVisible(boolean visible) {
+    threadNotSuspendedPlaceHolder.setVisible(visible);
   }
 
   @UiHandler({"threads"})

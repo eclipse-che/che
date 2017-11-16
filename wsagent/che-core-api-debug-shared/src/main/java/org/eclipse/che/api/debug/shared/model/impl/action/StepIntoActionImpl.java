@@ -10,12 +10,21 @@
  */
 package org.eclipse.che.api.debug.shared.model.impl.action;
 
+import org.eclipse.che.api.debug.shared.model.SuspendPolicy;
 import org.eclipse.che.api.debug.shared.model.action.Action;
 import org.eclipse.che.api.debug.shared.model.action.StepIntoAction;
 
 /** @author Anatoliy Bazko */
 public class StepIntoActionImpl extends ActionImpl implements StepIntoAction {
-  public StepIntoActionImpl() {
+  private final SuspendPolicy suspendPolicy;
+
+  public StepIntoActionImpl(SuspendPolicy suspendPolicy) {
     super(Action.TYPE.STEP_INTO);
+    this.suspendPolicy = suspendPolicy;
+  }
+
+  @Override
+  public SuspendPolicy getSuspendPolicy() {
+    return suspendPolicy;
   }
 }

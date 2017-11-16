@@ -41,14 +41,10 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** @author Zaryana Dombrovskaya */
 @Singleton
 public class ProjectExplorer {
-
-  private static final Logger LOG = LoggerFactory.getLogger(ProjectExplorer.class);
 
   private final SeleniumWebDriver seleniumWebDriver;
   private final Loader loader;
@@ -438,7 +434,6 @@ public class ProjectExplorer {
         redrawUiElementsWait.until(
             ExpectedConditions.visibilityOfElementLocated(By.xpath(String.format(locator, path))));
     try {
-
       item.click();
       waitItemIsSelected(path);
       actionsFactory.createAction(seleniumWebDriver).doubleClick(item).perform();
@@ -446,7 +441,6 @@ public class ProjectExplorer {
     // sometimes an element in the project explorer may be is not attached to the DOM. We should
     // refresh all items.
     catch (StaleElementReferenceException ex) {
-      LOG.error(ex.getLocalizedMessage(), ex);
       clickOnRefreshTreeButton();
       waitItem(path);
       item.click();

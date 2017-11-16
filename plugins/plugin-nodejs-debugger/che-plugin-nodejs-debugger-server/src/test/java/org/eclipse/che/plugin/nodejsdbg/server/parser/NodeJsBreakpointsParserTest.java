@@ -55,7 +55,7 @@ public class NodeJsBreakpointsParserTest {
     Breakpoint breakpoint = breakpoints.get(0);
     assertEquals(breakpoint.getLocation().getLineNumber(), 2);
     assertEquals(breakpoint.getLocation().getTarget(), "scriptId:63");
-    assertNull(breakpoint.getCondition());
+    assertNull(breakpoint.getBreakpointConfiguration());
     assertTrue(breakpoint.isEnabled());
   }
 
@@ -85,7 +85,7 @@ public class NodeJsBreakpointsParserTest {
     assertEquals(breakpoint.getLocation().getLineNumber(), 2);
     assertEquals(
         breakpoint.getLocation().getTarget(), "scriptRegExp:^(.*[\\/\\\\])?df3dfasdfs\\.js$");
-    assertNull(breakpoint.getCondition());
+    assertNull(breakpoint.getBreakpointConfiguration());
     assertTrue(breakpoint.isEnabled());
   }
 }

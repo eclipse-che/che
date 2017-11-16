@@ -14,17 +14,12 @@
  * Defines a directive for Loader
  * @author Oleksii Kurinnyi
  */
-export class CheLoader {
+export class CheLoader implements ng.IDirective {
 
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor() {
-    this.restrict = 'E';
-    this.replace = true;
-    this.template = '<div ng-transclude class="che-loader"></div>';
+  restrict = 'E';
+  replace = true;
+  template = '<div ng-transclude class="che-loader"></div>';
 
-    this.transclude = true;
-  }
+  transclude = true;
+
 }
