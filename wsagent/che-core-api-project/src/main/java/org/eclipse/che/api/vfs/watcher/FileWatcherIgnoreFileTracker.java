@@ -16,7 +16,6 @@ import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.exists;
-import static java.nio.file.Files.isDirectory;
 import static java.nio.file.Files.lines;
 import static java.nio.file.Files.write;
 import static java.nio.file.StandardOpenOption.APPEND;
@@ -30,7 +29,6 @@ import static org.eclipse.che.api.vfs.watcher.FileWatcherUtils.toNormalPath;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.PathMatcher;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,10 +36,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -53,7 +49,6 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.project.server.VirtualFileEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,7 +79,6 @@ public class FileWatcherIgnoreFileTracker {
   private final Provider<ProjectManager> projectManagerProvider;
   private final RequestHandlerConfigurator configurator;
   private final Path root;
-  private int fileWatchingOperationID;
 
   @Inject
   public FileWatcherIgnoreFileTracker(
@@ -103,14 +97,8 @@ public class FileWatcherIgnoreFileTracker {
   @PostConstruct
   public void initialize() {
     configureHandlers();
-    startTrackingIgnoreFile();
     readExcludesFromIgnoreFiles();
     addFileWatcherExcludesMatcher();
-  }
-
-  @PreDestroy
-  public void stopWatching() {
-    fileWatcherManager.unRegisterByMatcher(fileWatchingOperationID);
   }
 
   private void configureHandlers() {
@@ -137,15 +125,14 @@ public class FileWatcherIgnoreFileTracker {
         .methodName(ADD_TO_EXCLUDES)
         .paramsAsListOfString()
         .resultAsBoolean()
-        .withFunction((endpointId, pathsToExclude) -> addExcludesToIgnoreFile(pathsToExclude));
+        .withFunction((endpointId, pathsToExclude) -> addExcludes(pathsToExclude));
 
     configurator
         .newConfiguration()
         .methodName(REMOVE_FROM_EXCLUDES)
         .paramsAsListOfString()
         .resultAsBoolean()
-        .withFunction(
-            (endpointId, excludesToRemove) -> removeExcludesFromIgnoreFile(excludesToRemove));
+        .withFunction((endpointId, excludesToRemove) -> removeExcludes(excludesToRemove));
   }
 
   private void readExcludesFromIgnoreFiles() {
@@ -153,58 +140,18 @@ public class FileWatcherIgnoreFileTracker {
       projectManagerProvider
           .get()
           .getProjects()
-          .stream()
-          .map(this::getFileWatcherIgnoreFileLocation)
-          .forEach(this::fillUpExcludesFromIgnoreFile);
+          .forEach(
+              project -> {
+                FolderEntry baseFolder = project.getBaseFolder();
+                if (baseFolder != null) {
+                  String ignoreFileLocation =
+                      baseFolder.getPath().toString() + FILE_WATCHER_IGNORE_FILE_PATH;
+                  fillUpExcludesFromIgnoreFile(ignoreFileLocation);
+                }
+              });
     } catch (ServerException e) {
       LOG.debug("Can not fill up file watcher excludes: " + e.getLocalizedMessage());
     }
-  }
-
-  private String getFileWatcherIgnoreFileLocation(RegisteredProject project) {
-    FolderEntry baseFolder = project.getBaseFolder();
-    return baseFolder == null
-        ? ""
-        : baseFolder.getPath().toString() + FILE_WATCHER_IGNORE_FILE_PATH;
-  }
-
-  private void startTrackingIgnoreFile() {
-    fileWatcherManager.addIncludeMatcher(getIgnoreFileMatcher());
-    fileWatchingOperationID =
-        fileWatcherManager.registerByMatcher(
-            getIgnoreFileMatcher(), getCreateConsumer(), getModifyConsumer(), getDeleteConsumer());
-  }
-
-  private PathMatcher getIgnoreFileMatcher() {
-    return path ->
-        !isDirectory(path)
-            && FILE_WATCHER_IGNORE_FILE_NAME.equals(path.getFileName().toString())
-            && CHE_DIR.equals(path.getParent().getFileName().toString());
-  }
-
-  private Consumer<String> getCreateConsumer() {
-    return getModifyConsumer();
-  }
-
-  private Consumer<String> getModifyConsumer() {
-    return location -> {
-      Path path = toNormalPath(root, location);
-      if (getIgnoreFileMatcher().matches(path)) {
-        fillUpExcludesFromIgnoreFile(location);
-        notifyAboutIgnoreFileChanges();
-      }
-    };
-  }
-
-  private Consumer<String> getDeleteConsumer() {
-    return location -> {
-      Path path = toNormalPath(root, location);
-      if (getIgnoreFileMatcher().matches(path)) {
-        Path projectPath = path.getParent().getParent();
-        excludes.remove(projectPath);
-        notifyAboutIgnoreFileChanges();
-      }
-    };
   }
 
   private void addFileWatcherExcludesMatcher() {
@@ -248,39 +195,76 @@ public class FileWatcherIgnoreFileTracker {
     }
   }
 
-  private boolean addExcludesToIgnoreFile(List<String> pathsToExclude) {
-    boolean isRemoved =
-        pathsToExclude.removeIf(
-            location -> {
-              Path pathToExclude = toNormalPath(root, location);
-              return excludes
-                  .values()
-                  .stream()
-                  .flatMap(Collection::stream)
-                  .anyMatch(path -> path.equals(pathToExclude));
-            });
-
+  private boolean addExcludes(List<String> pathsToExclude) {
+    Map<Path, Set<Path>> groupedExcludes = groupExcludes(pathsToExclude);
     if (pathsToExclude.isEmpty()) {
       return false;
     }
 
-    Map<Path, Set<String>> excludesToWrite = groupExcludes(pathsToExclude);
-    excludesToWrite
+    groupedExcludes
         .keySet()
         .forEach(
-            ignoreFilePath ->
-                writeExcludesToIgnoreFile(ignoreFilePath, excludesToWrite.get(ignoreFilePath)));
-    return !isRemoved;
+            projectPath -> {
+              excludes.putIfAbsent(projectPath, new HashSet<>());
+
+              Set<Path> projectExcludes = excludes.get(projectPath);
+              Set<Path> excludesForAdding = groupedExcludes.get(projectPath);
+
+              excludesForAdding.removeIf(projectExcludes::contains);
+              projectExcludes.addAll(excludesForAdding);
+
+              writeExcludesToIgnoreFile(projectPath, excludesForAdding);
+            });
+
+    notifyAboutIgnoreFileChanges();
+    return true;
   }
 
-  private void writeExcludesToIgnoreFile(Path ignoreFilePath, Set<String> locationsToExclude) {
+  private boolean removeExcludes(List<String> pathsToRemove) {
+    Map<Path, Set<Path>> groupedExcludes = groupExcludes(pathsToRemove);
+    if (groupedExcludes.isEmpty()) {
+      return false;
+    }
+
+    groupedExcludes
+        .keySet()
+        .forEach(
+            projectPath -> {
+              excludes.putIfAbsent(projectPath, new HashSet<>());
+
+              Set<Path> excludesToRemove = groupedExcludes.get(projectPath);
+              Set<Path> projectExcludes = excludes.get(projectPath);
+
+              projectExcludes.removeIf(excludesToRemove::contains);
+
+              removeExcludes(projectPath, excludesToRemove);
+            });
+
+    notifyAboutIgnoreFileChanges();
+    return true;
+  }
+
+  private Set<String> prepareToWrite(Path projectPath, Set<Path> pathsToExclude) {
+    return pathsToExclude
+        .stream()
+        .map(
+            pathToExclude ->
+                pathToExclude.equals(projectPath)
+                    ? "/"
+                    : projectPath.relativize(pathToExclude).toString())
+        .collect(toSet());
+  }
+
+  private void writeExcludesToIgnoreFile(Path projectPath, Set<Path> pathsToExclude) {
+    Path ignoreFilePath = toNormalPath(projectPath, FILE_WATCHER_IGNORE_FILE_PATH);
     try {
       Path cheDir = ignoreFilePath.getParent();
       if (!exists(cheDir)) {
         createDirectories(cheDir);
       }
 
-      write(ignoreFilePath, locationsToExclude, UTF_8, CREATE, APPEND);
+      Set<String> excludesToWrite = prepareToWrite(projectPath, pathsToExclude);
+      write(ignoreFilePath, excludesToWrite, UTF_8, CREATE, APPEND);
     } catch (IOException e) {
       String errorMessage = "Can not add paths to File Watcher excludes ";
 
@@ -290,39 +274,24 @@ public class FileWatcherIgnoreFileTracker {
     }
   }
 
-  private boolean removeExcludesFromIgnoreFile(List<String> pathsToRemove) {
-    Map<Path, Set<String>> excludesToRemove = groupExcludes(pathsToRemove);
-    if (excludesToRemove.isEmpty()) {
-      return false;
-    }
-
-    excludesToRemove
-        .keySet()
-        .forEach(
-            ignoreFilePath ->
-                removeExcludesFromIgnoreFile(ignoreFilePath, excludesToRemove.get(ignoreFilePath)));
-    return true;
-  }
-
-  private void removeExcludesFromIgnoreFile(Path ignoreFilePath, Set<String> pathsToExclude) {
+  private void removeExcludes(Path projectPath, Set<Path> pathsToExclude) {
+    Path ignoreFilePath = toNormalPath(projectPath, FILE_WATCHER_IGNORE_FILE_PATH);
     if (!exists(ignoreFilePath)) {
-      throw new JsonRpcException(
-          400,
-          "Can not remove paths from File Watcher excludes: ignore file is not found by path "
-              + ignoreFilePath);
+      return;
     }
 
+    Set<String> excludesToRemove = prepareToWrite(projectPath, pathsToExclude);
     try (Stream<String> lines = lines(ignoreFilePath)) {
-      Set<String> projectExcludes =
+      Set<String> excludesToWrite =
           lines
               .filter(
                   line -> {
                     String location = line.trim();
-                    return !location.isEmpty() && !pathsToExclude.contains(location);
+                    return !location.isEmpty() && !excludesToRemove.contains(location);
                   })
               .collect(toSet());
 
-      write(ignoreFilePath, projectExcludes, UTF_8);
+      write(ignoreFilePath, excludesToWrite, UTF_8);
     } catch (IOException e) {
       String errorMessage = "Can not remove paths from File Watcher excludes ";
 
@@ -332,8 +301,8 @@ public class FileWatcherIgnoreFileTracker {
     }
   }
 
-  private Map<Path, Set<String>> groupExcludes(List<String> locationsToExclude) {
-    Map<Path, Set<String>> groupedExcludes = new HashMap<>();
+  private Map<Path, Set<Path>> groupExcludes(List<String> locationsToExclude) {
+    Map<Path, Set<Path>> groupedExcludes = new HashMap<>();
     try {
       for (String location : locationsToExclude) {
         if (isNullOrEmpty(location)) {
@@ -353,15 +322,9 @@ public class FileWatcherIgnoreFileTracker {
 
         Path pathToExclude = toNormalPath(root, location);
         Path projectPath = toNormalPath(root, projectLocation);
-        Path ignoreFilePath = toNormalPath(root, projectLocation + FILE_WATCHER_IGNORE_FILE_PATH);
 
-        Set<String> excludesToWrite =
-            groupedExcludes.computeIfAbsent(ignoreFilePath, k -> new HashSet<>());
-        String excludeToWrite =
-            pathToExclude.equals(projectPath)
-                ? "/"
-                : projectPath.relativize(pathToExclude).toString();
-        excludesToWrite.add(excludeToWrite);
+        groupedExcludes.putIfAbsent(projectPath, new HashSet<>());
+        groupedExcludes.get(projectPath).add(pathToExclude);
       }
     } catch (NotFoundException e) {
       String errorMessage = "Can not add path to File Watcher excludes: " + e.getLocalizedMessage();
