@@ -98,6 +98,10 @@
             <artifactId>che-core-orion-editor</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.ls.jdt</groupId>
+            <artifactId>jdt.ls.extension.api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.lsp4j</groupId>
             <artifactId>org.eclipse.lsp4j</artifactId>
             <exclusions>

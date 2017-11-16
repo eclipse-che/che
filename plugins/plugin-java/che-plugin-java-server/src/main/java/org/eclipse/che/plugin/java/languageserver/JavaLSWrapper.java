@@ -14,6 +14,8 @@ import java.lang.reflect.Proxy;
 import java.util.concurrent.CompletableFuture;
 import org.eclipse.che.api.languageserver.service.FileContentAccess;
 import org.eclipse.che.api.languageserver.util.DynamicWrapper;
+import org.eclipse.lsp4j.InitializeParams;
+import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.services.TextDocumentService;
 
 public class JavaLSWrapper {
@@ -25,6 +27,16 @@ public class JavaLSWrapper {
 
   public CompletableFuture<String> getFileContent(String uri) {
     return wrapped.classFileContents(new org.eclipse.lsp4j.TextDocumentIdentifier(uri));
+  }
+
+  public CompletableFuture<InitializeResult> initialize(InitializeParams params) {
+    return wrapped
+        .initialize(params)
+        .thenApply(
+            result -> {
+              result.getCapabilities().setDocumentSymbolProvider(false);
+              return result;
+            });
   }
 
   public TextDocumentService getTextDocumentService() {
