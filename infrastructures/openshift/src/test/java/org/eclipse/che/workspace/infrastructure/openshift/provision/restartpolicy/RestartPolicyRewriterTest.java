@@ -31,7 +31,6 @@ import java.util.List;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -44,10 +43,10 @@ import org.testng.annotations.Test;
 /** @author Alexander Garagatyi */
 @Listeners(MockitoTestNGListener.class)
 public class RestartPolicyRewriterTest {
+
   private static final String TEST_POD_NAME = "app";
   private static final String ALWAYS_RESTART_POLICY = "Always";
 
-  @Mock private InternalEnvironment environment;
   @Mock private OpenShiftEnvironment osEnv;
   @Mock private RuntimeIdentity runtimeIdentity;
   @InjectMocks private RestartPolicyRewriter restartPolicyRewriter;
@@ -59,7 +58,7 @@ public class RestartPolicyRewriterTest {
     when(osEnv.getPods())
         .thenReturn(singletonMap(TEST_POD_NAME, newPod(TEST_POD_NAME, ALWAYS_RESTART_POLICY)));
 
-    restartPolicyRewriter.provision(environment, osEnv, runtimeIdentity);
+    restartPolicyRewriter.provision(osEnv, runtimeIdentity);
 
     assertEquals(
         osEnv.getPods().get(TEST_POD_NAME).getSpec().getRestartPolicy(), DEFAULT_RESTART_POLICY);
@@ -93,7 +92,7 @@ public class RestartPolicyRewriterTest {
   }
 
   private List<Warning> captureWarnings() {
-    verify(environment, atLeastOnce()).addWarning(warningCaptor.capture());
+    verify(osEnv, atLeastOnce()).addWarning(warningCaptor.capture());
     return warningCaptor.getAllValues();
   }
 }

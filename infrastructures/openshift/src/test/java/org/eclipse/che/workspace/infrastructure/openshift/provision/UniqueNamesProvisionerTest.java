@@ -24,7 +24,6 @@ import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.api.model.RouteBuilder;
 import java.util.HashMap;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -44,7 +43,6 @@ public class UniqueNamesProvisionerTest {
   private static final String POD_NAME = "testPod";
   private static final String ROUTE_NAME = "testRoute";
 
-  @Mock private InternalEnvironment environment;
   @Mock private OpenShiftEnvironment osEnv;
   @Mock private RuntimeIdentity runtimeIdentity;
 
@@ -63,7 +61,7 @@ public class UniqueNamesProvisionerTest {
     pods.put(POD_NAME, pod);
     doReturn(pods).when(osEnv).getPods();
 
-    uniqueNamesProvisioner.provision(environment, osEnv, runtimeIdentity);
+    uniqueNamesProvisioner.provision(osEnv, runtimeIdentity);
 
     ObjectMeta podMetadata = pod.getMetadata();
     assertNotEquals(podMetadata.getName(), POD_NAME);
@@ -77,7 +75,7 @@ public class UniqueNamesProvisionerTest {
     routes.put(POD_NAME, route);
     doReturn(routes).when(osEnv).getRoutes();
 
-    uniqueNamesProvisioner.provision(environment, osEnv, runtimeIdentity);
+    uniqueNamesProvisioner.provision(osEnv, runtimeIdentity);
 
     final ObjectMeta routeData = route.getMetadata();
     assertNotEquals(routeData.getName(), ROUTE_NAME);

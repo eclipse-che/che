@@ -15,7 +15,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.WorkspacePVCStrategy;
 import org.mockito.Mock;
@@ -34,7 +33,6 @@ public class PersistentVolumeClaimProvisionerTest {
 
   private static final String WORKSPACE_ID = "workspace132";
 
-  @Mock private InternalEnvironment environment;
   @Mock private OpenShiftEnvironment osEnv;
   @Mock private RuntimeIdentity runtimeIdentity;
   @Mock private WorkspacePVCStrategy pvcStrategy;
@@ -49,17 +47,17 @@ public class PersistentVolumeClaimProvisionerTest {
 
   @Test
   public void doNothingWhenPvcDisabled() throws Exception {
-    provisioner.provision(environment, osEnv, runtimeIdentity);
+    provisioner.provision(osEnv, runtimeIdentity);
 
     verify(runtimeIdentity, never()).getWorkspaceId();
-    verify(environment, never()).getMachines();
+    verify(osEnv, never()).getMachines();
   }
 
   @Test
   public void testPrepareWorkspacePVCUsingConfiguredStrategy() throws Exception {
     provisioner = new PersistentVolumeClaimProvisioner(true, pvcStrategy);
-    provisioner.provision(environment, osEnv, runtimeIdentity);
+    provisioner.provision(osEnv, runtimeIdentity);
 
-    verify(pvcStrategy).prepare(environment, osEnv, WORKSPACE_ID);
+    verify(pvcStrategy).prepare(osEnv, WORKSPACE_ID);
   }
 }

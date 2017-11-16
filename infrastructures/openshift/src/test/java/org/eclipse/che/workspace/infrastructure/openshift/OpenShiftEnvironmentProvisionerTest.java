@@ -14,7 +14,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.env.EnvVarsConverter;
@@ -30,16 +29,15 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 /**
- * Tests {@link OpenShiftInfrastructureProvisioner}.
+ * Tests {@link OpenShiftEnvironmentProvisioner}.
  *
  * @author Anton Korneta
  */
 @Listeners(MockitoTestNGListener.class)
-public class OpenShiftInfrastructureProvisionerTest {
+public class OpenShiftEnvironmentProvisionerTest {
 
   @Mock private PersistentVolumeClaimProvisioner pvcProvisioner;
   @Mock private UniqueNamesProvisioner uniqueNamesProvisioner;
-  @Mock private InternalEnvironment environment;
   @Mock private OpenShiftEnvironment osEnv;
   @Mock private RuntimeIdentity runtimeIdentity;
   @Mock private TlsRouteProvisioner tlsRouteProvisioner;
@@ -47,14 +45,14 @@ public class OpenShiftInfrastructureProvisionerTest {
   @Mock private ServersConverter serversProvisioner;
   @Mock private RestartPolicyRewriter restartPolicyRewriter;
 
-  private OpenShiftInfrastructureProvisioner osInfraProvisioner;
+  private OpenShiftEnvironmentProvisioner osInfraProvisioner;
 
   private InOrder provisionOrder;
 
   @BeforeMethod
   public void setUp() {
     osInfraProvisioner =
-        new OpenShiftInfrastructureProvisioner(
+        new OpenShiftEnvironmentProvisioner(
             pvcProvisioner,
             uniqueNamesProvisioner,
             tlsRouteProvisioner,
@@ -73,26 +71,14 @@ public class OpenShiftInfrastructureProvisionerTest {
 
   @Test
   public void performsOrderedProvisioning() throws Exception {
-    osInfraProvisioner.provision(environment, osEnv, runtimeIdentity);
+    osInfraProvisioner.provision(osEnv, runtimeIdentity);
 
-    provisionOrder
-        .verify(serversProvisioner)
-        .provision(eq(environment), eq(osEnv), eq(runtimeIdentity));
-    provisionOrder
-        .verify(envVarsProvisioner)
-        .provision(eq(environment), eq(osEnv), eq(runtimeIdentity));
-    provisionOrder
-        .verify(restartPolicyRewriter)
-        .provision(eq(environment), eq(osEnv), eq(runtimeIdentity));
-    provisionOrder
-        .verify(pvcProvisioner)
-        .provision(eq(environment), eq(osEnv), eq(runtimeIdentity));
-    provisionOrder
-        .verify(uniqueNamesProvisioner)
-        .provision(eq(environment), eq(osEnv), eq(runtimeIdentity));
-    provisionOrder
-        .verify(tlsRouteProvisioner)
-        .provision(eq(environment), eq(osEnv), eq(runtimeIdentity));
+    provisionOrder.verify(serversProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
+    provisionOrder.verify(envVarsProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
+    provisionOrder.verify(restartPolicyRewriter).provision(eq(osEnv), eq(runtimeIdentity));
+    provisionOrder.verify(pvcProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
+    provisionOrder.verify(uniqueNamesProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
+    provisionOrder.verify(tlsRouteProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verifyNoMoreInteractions();
   }
 }

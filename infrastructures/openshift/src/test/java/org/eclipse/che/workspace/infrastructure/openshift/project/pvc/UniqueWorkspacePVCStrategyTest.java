@@ -38,7 +38,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
@@ -70,7 +69,6 @@ public class UniqueWorkspacePVCStrategyTest {
   private static final String PVC_ACCESS_MODE = "RWO";
   private static final String PROJECT_FOLDER_PATH = "/projects";
 
-  @Mock private InternalEnvironment env;
   @Mock private OpenShiftEnvironment osEnv;
   @Mock private OpenShiftClientFactory clientFactory;
   @Mock private OpenShiftClient client;
@@ -98,7 +96,7 @@ public class UniqueWorkspacePVCStrategyTest {
     final InternalMachineConfig machine = mock(InternalMachineConfig.class);
     when(machine.getServers())
         .thenReturn(singletonMap(SERVER_WS_AGENT_HTTP_REFERENCE, mock(ServerConfig.class)));
-    when(env.getMachines()).thenReturn(singletonMap(MACHINE_NAME, machine));
+    when(osEnv.getMachines()).thenReturn(singletonMap(MACHINE_NAME, machine));
     when(factory.create(WORKSPACE_ID)).thenReturn(osProject);
     when(osProject.persistentVolumeClaims()).thenReturn(osPVCs);
   }
@@ -110,7 +108,7 @@ public class UniqueWorkspacePVCStrategyTest {
     claims.put(PVC_UNIQUE_NAME, provisioned);
     when(osEnv.getPersistentVolumeClaims()).thenReturn(claims);
 
-    uniqueWorkspacePVCStrategy.prepare(env, osEnv, WORKSPACE_ID);
+    uniqueWorkspacePVCStrategy.prepare(osEnv, WORKSPACE_ID);
 
     verify(factory).create(WORKSPACE_ID);
     assertNotEquals(osEnv.getPersistentVolumeClaims().get(PVC_UNIQUE_NAME), provisioned);
@@ -120,7 +118,7 @@ public class UniqueWorkspacePVCStrategyTest {
   public void throwInfrastructureExceptionWhenPVCCreationFailed() throws Exception {
     doThrow(InfrastructureException.class).when(osPVCs).createIfNotExist(any());
 
-    uniqueWorkspacePVCStrategy.prepare(env, osEnv, WORKSPACE_ID);
+    uniqueWorkspacePVCStrategy.prepare(osEnv, WORKSPACE_ID);
   }
 
   @Test
@@ -134,7 +132,7 @@ public class UniqueWorkspacePVCStrategyTest {
     when(container.getName()).thenReturn(CONTAINER_NAME);
     when(container.getVolumeMounts()).thenReturn(new ArrayList<>());
 
-    uniqueWorkspacePVCStrategy.prepare(env, osEnv, WORKSPACE_ID);
+    uniqueWorkspacePVCStrategy.prepare(osEnv, WORKSPACE_ID);
 
     verify(container).getVolumeMounts();
     verify(podSpec).getVolumes();
@@ -155,7 +153,7 @@ public class UniqueWorkspacePVCStrategyTest {
     when(podSpec.getContainers()).thenReturn(singletonList(container));
     when(container.getName()).thenReturn("test");
 
-    uniqueWorkspacePVCStrategy.prepare(env, osEnv, WORKSPACE_ID);
+    uniqueWorkspacePVCStrategy.prepare(osEnv, WORKSPACE_ID);
 
     verify(container, never()).getVolumeMounts();
     verify(podSpec, never()).getVolumes();

@@ -38,7 +38,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftPersistentVolumeClaims;
@@ -70,7 +69,6 @@ public class CommonPVCStrategyTest {
   @Mock private Pod pod;
   @Mock private PodSpec podSpec;
   @Mock private Container container;
-  @Mock private InternalEnvironment env;
   @Mock private OpenShiftEnvironment osEnv;
   @Mock private PVCSubPathHelper pvcSubPathHelper;
   @Mock private OpenShiftProjectFactory factory;
@@ -92,7 +90,7 @@ public class CommonPVCStrategyTest {
     final InternalMachineConfig machine = mock(InternalMachineConfig.class);
     when(machine.getServers())
         .thenReturn(singletonMap(SERVER_WS_AGENT_HTTP_REFERENCE, mock(ServerConfig.class)));
-    when(env.getMachines()).thenReturn(singletonMap(MACHINE_NAME, machine));
+    when(osEnv.getMachines()).thenReturn(singletonMap(MACHINE_NAME, machine));
     doNothing().when(pvcSubPathHelper).execute(any(), any(), any());
     when(osEnv.getPersistentVolumeClaims()).thenReturn(new HashMap<>());
     when(pvcSubPathHelper.removeDirsAsync(anyString(), any(String.class)))
@@ -103,9 +101,9 @@ public class CommonPVCStrategyTest {
 
   @Test(expectedExceptions = InfrastructureException.class)
   public void throwsInfrastructureExceptionWhenMachineWithWsAgentNotFound() throws Exception {
-    when(env.getMachines()).thenReturn(emptyMap());
+    when(osEnv.getMachines()).thenReturn(emptyMap());
 
-    commonPVCStrategy.prepare(env, osEnv, WORKSPACE_ID);
+    commonPVCStrategy.prepare(osEnv, WORKSPACE_ID);
   }
 
   @Test
@@ -119,7 +117,7 @@ public class CommonPVCStrategyTest {
     when(container.getName()).thenReturn(CONTAINER_NAME);
     when(container.getVolumeMounts()).thenReturn(new ArrayList<>());
 
-    commonPVCStrategy.prepare(env, osEnv, WORKSPACE_ID);
+    commonPVCStrategy.prepare(osEnv, WORKSPACE_ID);
 
     verify(container).getVolumeMounts();
     verify(podSpec).getVolumes();
@@ -137,7 +135,7 @@ public class CommonPVCStrategyTest {
     claims.put(PVC_NAME, provisioned);
     when(osEnv.getPersistentVolumeClaims()).thenReturn(claims);
 
-    commonPVCStrategy.prepare(env, osEnv, WORKSPACE_ID);
+    commonPVCStrategy.prepare(osEnv, WORKSPACE_ID);
 
     verify(factory).create(WORKSPACE_ID);
     assertNotEquals(osEnv.getPersistentVolumeClaims().get(PVC_NAME), provisioned);
@@ -147,14 +145,14 @@ public class CommonPVCStrategyTest {
   public void throwInfrastructureExceptionWhenOsProjectCreationFailed() throws Exception {
     when(factory.create(any())).thenThrow(new InfrastructureException("Project creation failed"));
 
-    commonPVCStrategy.prepare(env, osEnv, WORKSPACE_ID);
+    commonPVCStrategy.prepare(osEnv, WORKSPACE_ID);
   }
 
   @Test(expectedExceptions = InfrastructureException.class)
   public void throwInfrastructureExceptionWhenPVCCreationFailed() throws Exception {
     doThrow(InfrastructureException.class).when(osPVCs).createIfNotExist(any());
 
-    commonPVCStrategy.prepare(env, osEnv, WORKSPACE_ID);
+    commonPVCStrategy.prepare(osEnv, WORKSPACE_ID);
   }
 
   @Test
@@ -168,7 +166,7 @@ public class CommonPVCStrategyTest {
     when(podSpec.getContainers()).thenReturn(singletonList(container));
     when(container.getName()).thenReturn("container");
 
-    commonPVCStrategy.prepare(env, osEnv, WORKSPACE_ID);
+    commonPVCStrategy.prepare(osEnv, WORKSPACE_ID);
 
     verify(container, never()).getVolumeMounts();
     verify(podSpec, never()).getVolumes();
