@@ -23,6 +23,7 @@ import java.util.Map;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
+import org.eclipse.che.api.languageserver.registry.DocumentFilter;
 import org.eclipse.che.api.languageserver.registry.LanguageServerDescription;
 import org.eclipse.che.api.languageserver.registry.ServerInitializerObserver;
 import org.eclipse.che.api.languageserver.service.FileContentAccess;
@@ -108,8 +109,8 @@ public class JavaLanguageServerLauncher extends LanguageServerLauncherTemplate
     LanguageServerDescription description =
         new LanguageServerDescription(
             "org.eclipse.che.plugin.java.languageserver",
-            Arrays.asList("javaSource"),
-            Collections.emptyList(),
+            Arrays.asList("javaSource", "javaClass"),
+            Collections.singletonList(new DocumentFilter(null, null, "jdt")),
             Arrays.asList(
                 "glob:**/*.java",
                 "glob:**/pom.xml",
