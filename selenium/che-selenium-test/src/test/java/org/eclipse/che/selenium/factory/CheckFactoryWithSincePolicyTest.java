@@ -66,7 +66,8 @@ public class CheckFactoryWithSincePolicyTest {
   @Test
   public void checkFactoryAcceptingWithSincePolicy() throws Exception {
     // check factory now, make sure its restricted
-    testFactory.authenticateAndOpen(seleniumWebDriver);
+    dashboard.open();
+    testFactory.open(seleniumWebDriver);
     seleniumWebDriver.switchFromDashboardIframeToIde();
 
     if (System.currentTimeMillis() > initTime + ADDITIONAL_TIME) {

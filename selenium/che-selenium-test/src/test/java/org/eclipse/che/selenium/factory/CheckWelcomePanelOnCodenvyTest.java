@@ -75,7 +75,7 @@ public class CheckWelcomePanelOnCodenvyTest {
   @Test
   public void shouldAppearsWelcomePanelAfterUsingFactory() throws Exception {
     dashboard.open();
-    testFactory.open(ide.driver());
+    testFactory.open(seleniumWebDriver);
     seleniumWebDriver.switchFromDashboardIframeToIde();
     projectExplorer.waitItem("Spring");
     checkWelcomePanel();

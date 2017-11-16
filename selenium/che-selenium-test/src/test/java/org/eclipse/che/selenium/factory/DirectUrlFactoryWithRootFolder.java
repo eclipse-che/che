@@ -25,6 +25,7 @@ import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -45,6 +46,7 @@ public class DirectUrlFactoryWithRootFolder {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestProjectServiceClient projectServiceClient;
+  @Inject private Dashboard dashboard;
 
   private TestFactory testFactoryWithRootFolder;
 
@@ -80,7 +82,9 @@ public class DirectUrlFactoryWithRootFolder {
             "tslint.json",
             "typings.json",
             "wallaby.js");
-    testFactoryWithRootFolder.authenticateAndOpen(seleniumWebDriver);
+
+    dashboard.open();
+    testFactoryWithRootFolder.open(seleniumWebDriver);
     seleniumWebDriver.switchFromDashboardIframeToIde();
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(EXPECTED_PROJECT);

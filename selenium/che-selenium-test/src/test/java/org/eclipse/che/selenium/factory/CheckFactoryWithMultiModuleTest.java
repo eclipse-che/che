@@ -66,7 +66,8 @@ public class CheckFactoryWithMultiModuleTest {
 
   @Test
   public void checkFactoryProcessing() throws Exception {
-    testFactory.authenticateAndOpen(seleniumWebDriver);
+    dashboard.open();
+    testFactory.open(seleniumWebDriver);
     seleniumWebDriver.switchFromDashboardIframeToIde();
     projectExplorer.waitProjectExplorer();
     notifications.waitExpectedMessageOnProgressPanelAndClosed(

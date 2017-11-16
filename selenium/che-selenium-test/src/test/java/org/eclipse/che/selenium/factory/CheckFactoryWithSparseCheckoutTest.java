@@ -18,9 +18,11 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.factory.FactoryTemplate;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
+import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -32,6 +34,8 @@ public class CheckFactoryWithSparseCheckoutTest {
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
+  @Inject private Events events;
+  @Inject private Dashboard dashboard;
 
   @Inject
   @Named("github.username")
@@ -63,13 +67,18 @@ public class CheckFactoryWithSparseCheckoutTest {
 
   @Test
   public void acceptFactoryWithSparseCheckout() throws Exception {
-    testFactory.authenticateAndOpen(seleniumWebDriver);
+    dashboard.open();
+    testFactory.open(seleniumWebDriver);
 
     seleniumWebDriver.switchFromDashboardIframeToIde();
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
+
+    events.clickEventLogBtn();
+    events.waitOpened();
     notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed(
         "Project " + PROJECT_NAME + " imported");
+
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
     projectExplorer.waitItem(PROJECT_NAME + "/my-lib");
