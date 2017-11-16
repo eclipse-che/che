@@ -11,11 +11,10 @@
 package org.eclipse.che.selenium.dashboard.organization;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import java.util.Arrays;
-import java.util.List;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
@@ -32,13 +31,16 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Sergey Skorik */
-public class OrganizationTest {
+public class OrganizationMembersTest {
+  private static final String PRE_CREATED_ORG_NAME = generate("organization", 5);
+  private static final String NEW_ORG_NAME = generate("new-org", 5);
 
-  private static final String PRE_CREATED_ORG_NAME = generate("orgX", 6);
-  private static final String NEW_ORG_NAME = generate("orgY", 6);
-
-  private List<String> emailsList;
   private OrganizationDto organization;
+  private String memberEmail;
+
+  @Inject
+  @Named("admin")
+  private TestOrganizationServiceClient testOrganizationServiceClient;
 
   @Inject private OrganizationListPage organizationListPage;
   @Inject private OrganizationPage organizationPage;
@@ -46,79 +48,65 @@ public class OrganizationTest {
   @Inject private AddOrganization addOrganization;
   @Inject private AddMember addMember;
   @Inject private Loader loader;
-
-  @Inject
-  @Named("admin")
-  private TestOrganizationServiceClient testOrganizationServiceClient;
-
   @Inject private Dashboard dashboard;
   @Inject private TestUser testUser;
   @Inject private AdminTestUser adminTestUser;
 
   @BeforeClass
   public void setUp() throws Exception {
-    emailsList = Arrays.asList(testUser.getEmail());
+    memberEmail = testUser.getEmail();
 
     organization = testOrganizationServiceClient.create(PRE_CREATED_ORG_NAME);
     testOrganizationServiceClient.addAdmin(organization.getId(), adminTestUser.getId());
-
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    testOrganizationServiceClient.deleteByName(PRE_CREATED_ORG_NAME);
+    testOrganizationServiceClient.deleteById(organization.getId());
     testOrganizationServiceClient.deleteByName(NEW_ORG_NAME);
   }
 
   @Test
   public void testOperationsWithMembersInExistsOrganization() {
     navigationBar.waitNavigationBar();
-    navigationBar.clickOnMenu(NavigationBar.MenuItem.ORGANIZATIONS);
+    navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
     organizationListPage.clickOnOrganization(organization.getQualifiedName());
     organizationPage.waitOrganizationName(PRE_CREATED_ORG_NAME);
 
-    // Add members to a members list ad 'Admin'
+    // Add members to a members list as 'Admin'
     loader.waitOnClosed();
     organizationPage.clickMembersTab();
-    for (String email : emailsList) {
-      organizationPage.clickAddMemberButton();
-      addMember.waitAddMemberWidget();
-      addMember.setMembersEmail(email);
-      addMember.clickAdminButton();
-      addMember.clickAddButton();
-      organizationPage.checkMemberExistsInMembersList(email);
-    }
-
-    // Search members from the members list
-    for (String email : emailsList) {
-      organizationPage.clearSearchField();
-      String memberName = organizationPage.getMembersNameByEmail(email);
-      organizationPage.searchMembers(memberName.substring(0, (memberName.length() / 2)));
-      organizationPage.checkMemberExistsInMembersList(email);
-    }
-    organizationPage.clearSearchField();
+    organizationPage.clickAddMemberButton();
+    addMember.waitAddMemberWidget();
+    addMember.setMembersEmail(memberEmail);
+    addMember.clickAdminButton();
+    addMember.clickAddButton();
+    organizationPage.checkMemberExistsInMembersList(memberEmail);
 
     // Change the members role to 'Members'
-    for (String email : emailsList) {
-      loader.waitOnClosed();
-      addMember.clickEditPermissionsButton(email);
-      addMember.clickMemberButton();
-      addMember.clickSaveButton();
-    }
+    loader.waitOnClosed();
+    addMember.clickEditPermissionsButton(memberEmail);
+    addMember.clickMemberButton();
+    addMember.clickSaveButton();
+
+    // Search members from the members list
+    organizationPage.clearSearchField();
+    String memberName = organizationPage.getMembersNameByEmail(memberEmail);
+    organizationPage.searchMembers(memberName.substring(0, (memberName.length() / 2)));
+    organizationPage.checkMemberExistsInMembersList(memberEmail);
+    organizationPage.clearSearchField();
 
     // Delete the members from the members list
-    for (String email : emailsList) {
-      organizationPage.deleteMember(email);
-    }
+    organizationPage.deleteMember(memberEmail);
   }
 
   @Test
   public void testAddingMembersToNewOrganization() {
     navigationBar.waitNavigationBar();
-    navigationBar.clickOnMenu(NavigationBar.MenuItem.ORGANIZATIONS);
+    navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
 
@@ -138,6 +126,7 @@ public class OrganizationTest {
     addOrganization.waitAddOrganization();
     loader.waitOnClosed();
     addOrganization.clickCreateOrganizationButton();
+    addOrganization.waitAddOrganizationButtonIsNotVisible();
 
     // Check that organization is created and the added member exists in the Members tab
     organizationPage.waitOrganizationName(NEW_ORG_NAME);
