@@ -42,7 +42,6 @@ spec:
           tcpSocket:
             port: 5432
           timeoutSeconds: 1
-        name: postgres
         readinessProbe:
           exec:
             command:
