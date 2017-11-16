@@ -20,4 +20,4 @@
     </parent>
     <artifactId>ls-java-agent</artifactId>
     <name>Language Server Java Agent</name>
- </project>
+</project>
