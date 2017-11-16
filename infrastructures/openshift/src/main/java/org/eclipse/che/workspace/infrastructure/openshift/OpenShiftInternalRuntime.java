@@ -27,6 +27,8 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -135,8 +137,8 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
    * @throws InterruptedException when machines bootstrapping was interrupted
    */
   private void bootstrapMachines() throws InfrastructureException, InterruptedException {
-    CompletableFuture<InfrastructureException> firstFailed = new CompletableFuture<>();
     List<CompletableFuture> checkMachines = new ArrayList<>(machines.size());
+    final ExecutorService executorService = Executors.newCachedThreadPool();
     for (OpenShiftMachine machine : machines.values()) {
       checkMachines.add(
           CompletableFuture.runAsync(
@@ -146,30 +148,24 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
                       bootstrapMachine(machine);
                       checkMachineServers(machine);
                     } catch (InfrastructureException ex) {
+                      executorService.shutdownNow();
                       sendFailedEvent(machine.getName(), ex.getMessage());
-                      firstFailed.completeExceptionally(ex);
                       throw new CompletionException(ex);
                     } catch (InterruptedException ei) {
+                      executorService.shutdownNow();
                       throw new CompletionException(ei);
                     }
-                  })
-              .thenAccept(
-                  a -> {
-                    if (!firstFailed.isCompletedExceptionally()) {
-                      sendRunningEvent(machine.getName());
-                    }
-                  }));
+                  },
+                  executorService)
+              .thenAccept(a -> sendRunningEvent(machine.getName())));
     }
-
-    CompletableFuture<Void> allAvailable =
-        CompletableFuture.allOf(checkMachines.toArray(new CompletableFuture[0]));
     try {
-      CompletableFuture.anyOf(allAvailable, firstFailed).join();
+      CompletableFuture.allOf(checkMachines.toArray(new CompletableFuture[0])).join();
     } catch (CompletionException e) {
-      if (firstFailed.isDone()) {
-        throw firstFailed.join();
-      } else if (e.getCause() instanceof InterruptedException) {
+      if (e.getCause() instanceof InterruptedException) {
         throw (InterruptedException) e.getCause();
+      } else if (e.getCause() instanceof InfrastructureException) {
+        throw (InfrastructureException) e.getCause();
       } else {
         throw new InfrastructureException(e.getCause().getMessage(), e.getCause());
       }
