@@ -10,10 +10,9 @@
  */
 package org.eclipse.che.selenium.mavenplugin;
 
-import java.io.File;
 import java.util.stream.Stream;
 import javax.inject.Inject;
-import org.apache.commons.io.FileUtils;
+import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.selenium.core.constant.TestBuildConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -62,11 +61,11 @@ public class CheckGeneratingMavenArchetypeTest {
     expectedItems.forEach(projectExplorer::waitItem);
     projectExplorer.openItemByPath(NAME_OF_ARTIFACT + "/pom.xml");
 
-    File file =
-        new File(
-            CheckGeneratingMavenArchetypeTest.class
-                .getResource("pom-quick-start-archetype-context")
-                .getFile());
-    editor.waitTextIntoEditor(FileUtils.readFileToString(file));
+    String pathToExpectedContentOfPom =
+        CheckGeneratingMavenArchetypeTest.class
+            .getResource("pom-quick-start-archetype-context")
+            .getFile();
+    editor.waitTextIntoEditor(
+        IoUtil.readAndCloseQuietly(IoUtil.getResource(pathToExpectedContentOfPom)));
   }
 }
