@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <!--
 
     Copyright (c) 2012-2017 Red Hat, Inc.
@@ -11,11 +10,7 @@
       Red Hat, Inc. - initial API and implementation
 
 -->
-<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.7.0//EN" "http://gwtproject.org/doctype/2.7.0/gwt-module.dtd">
-<module>
-	<inherits name="org.eclipse.che.jdt.ls.extension.api.JdtlsExtension"/>
-    <source path="client"/>
-    <source path="shared"/>
-    <source path="jdt"/>
-    <source path="dto"/>
-</module>
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g="urn:import:org.eclipse.che.plugin.languageserver.ide.filestructure">
+    <g:FileStructureTree ui:field="tree" debugId="file-structure-mainPanel" />
+</ui:UiBinder>

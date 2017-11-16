@@ -20,8 +20,6 @@ import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionList;
-import org.eclipse.che.api.languageserver.shared.model.ExtendedLocation;
-import org.eclipse.che.api.languageserver.shared.model.FileContentParameters;
 import org.eclipse.che.api.languageserver.shared.model.RenameResult;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
@@ -39,6 +37,7 @@ import org.eclipse.lsp4j.DocumentOnTypeFormattingParams;
 import org.eclipse.lsp4j.DocumentRangeFormattingParams;
 import org.eclipse.lsp4j.DocumentSymbolParams;
 import org.eclipse.lsp4j.Hover;
+import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.ReferenceParams;
 import org.eclipse.lsp4j.RenameParams;
 import org.eclipse.lsp4j.SignatureHelp;
@@ -97,8 +96,8 @@ public class TextDocumentServiceClient {
    * @param params
    * @return
    */
-  public Promise<List<ExtendedLocation>> references(ReferenceParams params) {
-    return transmitDtoAndReceiveDtoList(params, "textDocument/references", ExtendedLocation.class);
+  public Promise<List<Location>> references(ReferenceParams params) {
+    return transmitDtoAndReceiveDtoList(params, "textDocument/references", Location.class);
   }
 
   /**
@@ -107,8 +106,8 @@ public class TextDocumentServiceClient {
    * @param params
    * @return
    */
-  public Promise<List<ExtendedLocation>> definition(TextDocumentPositionParams params) {
-    return transmitDtoAndReceiveDtoList(params, "textDocument/definition", ExtendedLocation.class);
+  public Promise<List<Location>> definition(TextDocumentPositionParams params) {
+    return transmitDtoAndReceiveDtoList(params, "textDocument/definition", Location.class);
   }
 
   /**
@@ -279,14 +278,14 @@ public class TextDocumentServiceClient {
     };
   }
 
-  public Promise<String> getFileContent(FileContentParameters params) {
+  public Promise<String> getFileContent(String uri) {
     return Promises.create(
         (resolve, reject) ->
             requestTransmitter
                 .newRequest()
-                .endpointId("ws-agent")
+                .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                 .methodName("textDocument/fileContent")
-                .paramsAsDto(params)
+                .paramsAsString(uri)
                 .sendAndReceiveResultAsString()
                 .onSuccess(resolve::apply)
                 .onFailure(error -> reject.apply(getPromiseError(error))));

@@ -14,17 +14,23 @@ import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.eclipse.che.api.languageserver.shared.util.Constants;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.ide.DelayedTask;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.OpenEditorCallbackImpl;
+import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.text.TextRange;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.plugin.languageserver.ide.location.LanguageServerFile;
+import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
+import org.eclipse.lsp4j.Location;
+import org.eclipse.lsp4j.Range;
 
 /**
  * Util class, helps to open file by path in editor
@@ -36,11 +42,16 @@ public class OpenFileInEditorHelper {
 
   private final EditorAgent editorAgent;
   private final AppContext appContext;
+  private final TextDocumentServiceClient textDocumentService;
 
   @Inject
-  public OpenFileInEditorHelper(EditorAgent editorAgent, AppContext appContext) {
+  public OpenFileInEditorHelper(
+      EditorAgent editorAgent,
+      AppContext appContext,
+      TextDocumentServiceClient textDocumentService) {
     this.editorAgent = editorAgent;
     this.appContext = appContext;
+    this.textDocumentService = textDocumentService;
   }
 
   public void openPath(final String filePath, final TextRange selectionRange) {
@@ -107,6 +118,20 @@ public class OpenFileInEditorHelper {
           editor.activate(); // force set focus to the editor
         }
       }.delay(100);
+    }
+  }
+
+  public void openLocation(Location location) {
+    Range range = location.getRange();
+    String uri = location.getUri();
+    TextRange selectionRange =
+        new TextRange(
+            new TextPosition(range.getStart().getLine(), range.getStart().getCharacter()),
+            new TextPosition(range.getEnd().getLine(), range.getEnd().getCharacter()));
+    if (uri.startsWith(Constants.CHE_WKSP_SCHEME)) {
+      openPath(location.getUri().substring(Constants.CHE_WKSP_SCHEME.length()), selectionRange);
+    } else {
+      openFile(new LanguageServerFile(textDocumentService, location), selectionRange);
     }
   }
 }
