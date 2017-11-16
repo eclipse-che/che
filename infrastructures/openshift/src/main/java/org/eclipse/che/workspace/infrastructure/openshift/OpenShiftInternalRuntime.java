@@ -148,7 +148,8 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
       checkMachines.add(CompletableFuture.runAsync(task, pool.getExecutor()));
     }
     try {
-      CompletableFuture.allOf(checkMachines.toArray(new CompletableFuture[0])).join();
+      CompletableFuture.allOf(checkMachines.toArray(new CompletableFuture[checkMachines.size()]))
+          .join();
     } catch (CompletionException e) {
       tasks.forEach(BootstrapMachineTask::interrupt);
       if (e.getCause() instanceof InterruptedException) {
