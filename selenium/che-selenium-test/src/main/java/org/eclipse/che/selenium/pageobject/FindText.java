@@ -508,9 +508,9 @@ public class FindText {
   }
 
   public static class SearchFileResult {
-    private int occurrencesFoundOnPage;
-    private int filesFoundOnPage;
-    private int totalFilesFound;
+    private final int occurrencesFoundOnPage;
+    private final int filesFoundOnPage;
+    private final int totalFilesFound;
 
     private SearchFileResult(String results) {
       occurrencesFoundOnPage = Integer.parseInt(results.split(" ")[0]);
