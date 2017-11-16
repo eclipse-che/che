@@ -471,7 +471,7 @@ public class FindText {
     loader.waitOnClosed();
   }
 
-  public String getResults() {
+  public String getFindInfoResults() {
     loader.waitOnClosed();
     return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOfElementLocated(By.id(Locators.SEARCH_RESULTS)))
@@ -507,17 +507,36 @@ public class FindText {
     actionsFactory.createAction(seleniumWebDriver).doubleClick().perform();
   }
 
-  /** get number of found occurrences in a page */
-  public int getFoundOccurrencesNumberOnPage() {
-    return Integer.parseInt(getResults().split(" ")[0]);
+  public static class SearchFileResult {
+    private int occurrencesFoundOnPage;
+    private int filesFoundOnPage;
+    private int totalFilesFound;
+
+    private SearchFileResult(String results) {
+      occurrencesFoundOnPage = Integer.parseInt(results.split(" ")[0]);
+      filesFoundOnPage = Integer.parseInt(results.split(" ")[4]);
+      totalFilesFound = Integer.parseInt(results.substring(results.lastIndexOf(" ") + 1));
+    }
+
+    public int getFoundOccurrencesOnPage() {
+      return occurrencesFoundOnPage;
+    }
+
+    public int getFoundFilesOnPage() {
+      return filesFoundOnPage;
+    }
+
+    public int getTotalNumberFoundFiles() {
+      return totalFilesFound;
+    }
   }
 
-  /** get number of found files in a page */
-  public int getFoundFilesNumberOnPage() {
-    return Integer.parseInt(getResults().split(" ")[4]);
-  }
+  public SearchFileResult getResults() {
+    String text =
+        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+            .until(ExpectedConditions.visibilityOfElementLocated(By.id(Locators.SEARCH_RESULTS)))
+            .getText();
 
-  public int getTotalFoundFilesNumber() {
-    return Integer.parseInt(getResults().substring(getResults().lastIndexOf(" ") + 1));
+    return new SearchFileResult(text);
   }
 }

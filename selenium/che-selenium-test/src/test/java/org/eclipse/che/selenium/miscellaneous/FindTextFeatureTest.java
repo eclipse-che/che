@@ -21,9 +21,6 @@ import static org.eclipse.che.selenium.pageobject.Wizard.SamplesName.WEB_JAVA_PE
 import static org.openqa.selenium.Keys.ARROW_DOWN;
 import static org.openqa.selenium.Keys.ARROW_RIGHT;
 import static org.openqa.selenium.Keys.ENTER;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -44,6 +41,7 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -146,7 +144,7 @@ public class FindTextFeatureTest {
         "1:   Filesystem 1K-blocks Used Available Use% Mounted on");
     findText.sendCommandByKeyboardInFindInfoPanel(ENTER.toString());
     editor.waitActiveTabFileName(fileNameCreatedFromTerminal);
-    assertEquals(editor.getPositionOfLine(), 1);
+    Assert.assertEquals(editor.getPositionOfLine(), 1);
 
     // Create a file from API
     createFileFromAPI(PROJECT_NAME, fileNameCreatedFromAPI, content);
@@ -168,7 +166,7 @@ public class FindTextFeatureTest {
         format("/%s/readme.api", PROJECT_NAME), "1:   FindTextFeatureTest");
     findText.sendCommandByKeyboardInFindInfoPanel(ENTER.toString());
     editor.waitActiveTabFileName(fileNameCreatedFromAPI);
-    assertEquals(editor.getPositionOfLine(), 1);
+    Assert.assertEquals(editor.getPositionOfLine(), 1);
 
     editor.closeAllTabsByContextMenu();
   }
@@ -235,7 +233,7 @@ public class FindTextFeatureTest {
     editor.waitActiveEditor();
     editor.waitActiveTabFileName("guess_num.jsp");
     editor.waitTextIntoEditor("String");
-    assertEquals(editor.getPositionOfLine(), 25);
+    Assert.assertEquals(editor.getPositionOfLine(), 25);
 
     // Check that the Find Info panel state restored
     findText.clickHideBtnFindInfoPanel();
@@ -258,7 +256,7 @@ public class FindTextFeatureTest {
     editor.waitActiveEditor();
     editor.waitActiveTabFileName("SayHello");
     editor.waitTextIntoEditor("String");
-    assertEquals(editor.getPositionOfLine(), 20);
+    Assert.assertEquals(editor.getPositionOfLine(), 20);
 
     editor.closeAllTabsByContextMenu();
   }
@@ -442,51 +440,51 @@ public class FindTextFeatureTest {
 
     // Check move page buttons status on the first page
     findText.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
-    assertTrue(findText.checkNextPageButtonIsEnabled());
-    assertFalse(findText.checkPreviousPageButtonIsEnabled());
-    sumOfFoundFiles += findText.getFoundFilesNumberOnPage();
-    sumOfFoundOccurrences += findText.getFoundOccurrencesNumberOnPage();
+    Assert.assertTrue(findText.checkNextPageButtonIsEnabled());
+    Assert.assertFalse(findText.checkPreviousPageButtonIsEnabled());
+    sumOfFoundFiles += findText.getResults().getFoundFilesOnPage();
+    sumOfFoundOccurrences += findText.getResults().getFoundOccurrencesOnPage();
     findText.clickOnNextPageButton();
 
     // Check move page buttons status on the second page
     findText.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
-    assertTrue(findText.checkNextPageButtonIsEnabled());
-    assertTrue(findText.checkPreviousPageButtonIsEnabled());
-    sumOfFoundFiles += findText.getFoundFilesNumberOnPage();
-    sumOfFoundOccurrences += findText.getFoundOccurrencesNumberOnPage();
+    Assert.assertTrue(findText.checkNextPageButtonIsEnabled());
+    Assert.assertTrue(findText.checkPreviousPageButtonIsEnabled());
+    sumOfFoundFiles += findText.getResults().getFoundFilesOnPage();
+    sumOfFoundOccurrences += findText.getResults().getFoundOccurrencesOnPage();
     findText.clickOnNextPageButton();
 
     // Check move page buttons status on the third page
     findText.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
-    assertFalse(findText.checkNextPageButtonIsEnabled());
-    assertTrue(findText.checkPreviousPageButtonIsEnabled());
-    sumOfFoundFiles += findText.getFoundFilesNumberOnPage();
-    sumOfFoundOccurrences += findText.getFoundOccurrencesNumberOnPage();
+    Assert.assertFalse(findText.checkNextPageButtonIsEnabled());
+    Assert.assertTrue(findText.checkPreviousPageButtonIsEnabled());
+    sumOfFoundFiles += findText.getResults().getFoundFilesOnPage();
+    sumOfFoundOccurrences += findText.getResults().getFoundOccurrencesOnPage();
 
     // Checking that sums of found files and occurrences correct
-    assertEquals(sumOfFoundFiles, findText.getTotalFoundFilesNumber());
-    assertEquals(sumOfFoundOccurrences, SUM_FOUND_OCCURRENCES);
+    Assert.assertEquals(sumOfFoundFiles, findText.getResults().getTotalNumberFoundFiles());
+    Assert.assertEquals(sumOfFoundOccurrences, SUM_FOUND_OCCURRENCES);
 
     // Check results on the third page
-    assertEquals(findText.getResults(), resultsOnThirdPage);
+    Assert.assertEquals(findText.getResults(), resultsOnThirdPage);
     findText.openFileNodeByDoubleClick(path3);
     findText.waitExpectedTextInFindInfoPanel(expectedText3);
 
     // Check results on the second page
     findText.clickOnPreviousPageButton();
-    assertEquals(findText.getResults(), resultsOnSecondPage);
+    Assert.assertEquals(findText.getResults(), resultsOnSecondPage);
     findText.openFileNodeByDoubleClick(path2);
     findText.waitExpectedTextInFindInfoPanel(expectedText2);
 
     // Check results on the first page. Open a file and check cursor position
     findText.clickOnPreviousPageButton();
-    assertEquals(findText.getResults(), resultsOnFirstPage);
+    Assert.assertEquals(findText.getResults(), resultsOnFirstPage);
     findText.openFileNodeByDoubleClick(path1);
     findText.waitExpectedTextInFindInfoPanel(expectedText1);
     findText.selectItemInFindInfoPanelByDoubleClick(path1, expectedText1);
     editor.waitActiveEditor();
     editor.waitActiveTabFileName("spring-petclinic");
-    assertEquals(editor.getPositionOfLine(), 62);
+    Assert.assertEquals(editor.getPositionOfLine(), 62);
 
     editor.closeAllTabsByContextMenu();
   }
