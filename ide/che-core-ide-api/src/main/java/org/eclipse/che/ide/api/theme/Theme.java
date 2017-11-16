@@ -19,12 +19,6 @@ package org.eclipse.che.ide.api.theme;
  */
 public interface Theme {
 
-  /** @return the theme id */
-  String getId();
-
-  /** @return the description of the theme */
-  String getDescription();
-
   /**
    * Global background color.
    *
@@ -245,12 +239,12 @@ public interface Theme {
    */
   String getMainFontColor();
 
-  /**
-   * Background color of the {@link com.google.gwt.user.client.ui.RadioButton}
-   *
-   * @return the color
-   */
-  String getRadioButtonBackgroundColor();
+  //  /**
+  //   * Background color of the {@link com.google.gwt.user.client.ui.RadioButton}
+  //   *
+  //   * @return the color
+  //   */
+  //  String getRadioButtonBackgroundColor();
 
   /**
    * Background color of the disabled menu item

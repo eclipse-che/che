@@ -13,8 +13,8 @@ package org.eclipse.che.ide.theme;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Singleton;
-import org.eclipse.che.ide.api.theme.Theme;
 import org.eclipse.che.ide.api.theme.ThemeAgent;
+import org.eclipse.che.ide.api.theme.ThemeProvider;
 
 /** GIN module for configuring Theme API components. */
 public class ThemeApiModule extends AbstractGinModule {
@@ -24,8 +24,9 @@ public class ThemeApiModule extends AbstractGinModule {
     bind(ThemeAgent.class).to(ThemeAgentImpl.class).in(Singleton.class);
     bind(ThemeAgent.class).asEagerSingleton();
 
-    GinMultibinder<Theme> themeBinder = GinMultibinder.newSetBinder(binder(), Theme.class);
-    themeBinder.addBinding().to(DarkTheme.class);
-    themeBinder.addBinding().to(LightTheme.class);
+    GinMultibinder<ThemeProvider> themeBinder =
+        GinMultibinder.newSetBinder(binder(), ThemeProvider.class);
+    themeBinder.addBinding().to(DarkThemeProvider.class);
+    themeBinder.addBinding().to(LightThemeProvider.class);
   }
 }

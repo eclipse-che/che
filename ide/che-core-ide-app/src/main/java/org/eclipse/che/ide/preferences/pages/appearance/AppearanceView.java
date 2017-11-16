@@ -12,12 +12,12 @@ package org.eclipse.che.ide.preferences.pages.appearance;
 
 import java.util.List;
 import org.eclipse.che.ide.api.mvp.View;
-import org.eclipse.che.ide.api.theme.Theme;
+import org.eclipse.che.ide.api.theme.ThemeProvider;
 
 /** @author Evgen Vidolob */
 public interface AppearanceView extends View<AppearanceView.ActionDelegate> {
 
-  void setThemes(List<Theme> themes, String currentThemeId);
+  void setThemes(List<ThemeProvider> themes, String currentThemeId);
 
   interface ActionDelegate {
 

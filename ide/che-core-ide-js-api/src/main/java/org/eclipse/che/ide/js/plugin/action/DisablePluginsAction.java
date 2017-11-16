@@ -17,9 +17,7 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.js.plugin.PluginManager;
 
-/**
- * @author Yevhen Vydolob
- */
+/** @author Yevhen Vydolob */
 @Singleton
 public class DisablePluginsAction extends BaseAction {
 

@@ -36,10 +36,6 @@ public class Style {
     return theme.loaderProgressStatusColor();
   }
 
-  public static String getRadioButtonBackgroundColor() {
-    return theme.getRadioButtonBackgroundColor();
-  }
-
   public static String getDeisabledMenuColor() {
     return theme.getDisabledMenuColor();
   }

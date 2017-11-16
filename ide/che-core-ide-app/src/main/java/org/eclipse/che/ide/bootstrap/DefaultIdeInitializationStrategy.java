@@ -26,6 +26,7 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.theme.ThemeAgent;
@@ -68,6 +69,7 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
   protected final DialogFactory dialogFactory;
   private final Provider<JsApi> jsApiBootstrapProvider;
   private final Provider<PluginManager> pluginManagerProvider;
+  private final PromiseProvider promiseProvider;
 
   @Inject
   DefaultIdeInitializationStrategy(
@@ -83,7 +85,8 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
       EventBus eventBus,
       DialogFactory dialogFactory,
       Provider<JsApi> jsApiBootstrapProvider,
-      Provider<PluginManager> pluginManagerProvider) {
+      Provider<PluginManager> pluginManagerProvider,
+      PromiseProvider promiseProvider) {
     this.workspaceServiceClient = workspaceServiceClient;
     this.appContext = appContext;
     this.browserAddress = browserAddress;
@@ -97,6 +100,7 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
     this.dialogFactory = dialogFactory;
     this.jsApiBootstrapProvider = jsApiBootstrapProvider;
     this.pluginManagerProvider = pluginManagerProvider;
+    this.promiseProvider = promiseProvider;
   }
 
   @Override
@@ -116,9 +120,9 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
                   // Prevent further initialization steps.
                   throw new OperationException(err.getMessage(), err.getCause());
                 })
-        .then(initUI())
-        .thenPromise(aVoid -> initAppContext())
         .thenPromise(aVoid -> initJsPlugins())
+        .thenPromise(aVoid -> initUI())
+        .thenPromise(aVoid -> initAppContext())
         .then(showUI())
         .then(
             arg -> {
@@ -138,11 +142,12 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
     return workspaceServiceClient.getWorkspace(browserAddress.getWorkspaceKey());
   }
 
-  private Operation<Void> initUI() {
-    return aVoid -> {
-      ((ThemeAgentImpl) themeAgent).applyUserTheme();
-      styleInjector.inject();
-    };
+  private Promise<Void> initUI() {
+    return promiseProvider.create(
+        callback -> {
+          ((ThemeAgentImpl) themeAgent).applyUserTheme(callback);
+          styleInjector.inject();
+        });
   }
 
   protected Promise<Void> initAppContext() {

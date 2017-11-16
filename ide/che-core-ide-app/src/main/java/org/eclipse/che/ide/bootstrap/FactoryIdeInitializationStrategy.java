@@ -24,6 +24,7 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.factory.FactoryServiceClient;
 import org.eclipse.che.ide.api.theme.ThemeAgent;
@@ -66,7 +67,8 @@ class FactoryIdeInitializationStrategy extends DefaultIdeInitializationStrategy 
       DialogFactory dialogFactory,
       FactoryServiceClient factoryServiceClient,
       Provider<JsApi> jsApiBootstrapProvider,
-      Provider<PluginManager> pluginManagerProvider) {
+      Provider<PluginManager> pluginManagerProvider,
+      PromiseProvider promiseProvider) {
     super(
         workspaceServiceClient,
         appContext,
@@ -80,7 +82,8 @@ class FactoryIdeInitializationStrategy extends DefaultIdeInitializationStrategy 
         eventBus,
         dialogFactory,
         jsApiBootstrapProvider,
-        pluginManagerProvider);
+        pluginManagerProvider,
+        promiseProvider);
 
     this.queryParameters = queryParameters;
     this.factoryServiceClient = factoryServiceClient;

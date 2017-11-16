@@ -18,7 +18,9 @@ import org.eclipse.che.ide.js.api.JsApi;
 
 /**
  * The plugin context object. Passed as argument in plugin activate function
- * @author Yevhen Vydolob */
+ *
+ * @author Yevhen Vydolob
+ */
 @JsType
 public class PluginContext {
 

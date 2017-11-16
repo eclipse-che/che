@@ -17,18 +17,6 @@ import org.eclipse.che.ide.api.theme.Theme;
 @Singleton
 public class DarkTheme implements Theme {
 
-  public static final String DARK_THEME_ID = "DarkTheme";
-
-  @Override
-  public String getId() {
-    return DARK_THEME_ID;
-  }
-
-  @Override
-  public String getDescription() {
-    return "Dark Theme";
-  }
-
   @Override
   public String backgroundColor() {
     return "#21252b";
@@ -445,11 +433,6 @@ public class DarkTheme implements Theme {
   @Override
   public String getPrimaryButtonDisabledFontColor() {
     return "rgba(165, 165, 165, 0.4)";
-  }
-
-  @Override
-  public String getRadioButtonBackgroundColor() {
-    return "#BDBDBD";
   }
 
   @Override

@@ -18,10 +18,12 @@ public class PluginContributions {
 
   private final JsonArray actions;
   private final JsonArray images;
+  private final JsonArray themes;
 
-  public PluginContributions(JsonArray actions, JsonArray images) {
+  public PluginContributions(JsonArray actions, JsonArray images, JsonArray themes) {
     this.actions = actions;
     this.images = images;
+    this.themes = themes;
   }
 
   public JsonArray getActions() {
@@ -30,5 +32,9 @@ public class PluginContributions {
 
   public JsonArray getImages() {
     return images;
+  }
+
+  public JsonArray getThemes() {
+    return themes;
   }
 }

@@ -18,7 +18,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import java.util.List;
-import org.eclipse.che.ide.api.theme.Theme;
+import org.eclipse.che.ide.api.theme.ThemeProvider;
 import org.eclipse.che.ide.ui.listbox.CustomListBox;
 
 /** @author Evgen Vidolob */
@@ -45,10 +45,10 @@ public class AppearanceViewImpl implements AppearanceView {
   }
 
   @Override
-  public void setThemes(List<Theme> themes, String currentThemeId) {
+  public void setThemes(List<ThemeProvider> themes, String currentThemeId) {
     themeBox.clear();
 
-    for (Theme t : themes) {
+    for (ThemeProvider t : themes) {
       themeBox.addItem(t.getDescription(), t.getId());
       if (t.getId().equals(currentThemeId)) {
         themeBox.setSelectedIndex(themes.indexOf(t));

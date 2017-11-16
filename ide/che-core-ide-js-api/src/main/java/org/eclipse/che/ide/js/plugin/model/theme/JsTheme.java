@@ -8,1711 +8,1703 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.theme;
 
-import com.google.inject.Singleton;
+package org.eclipse.che.ide.js.plugin.model.theme;
+
+import elemental.json.JsonObject;
 import org.eclipse.che.ide.api.theme.Theme;
 
-/** @author Evgen Vidolob */
-@Singleton
-public class LightTheme implements Theme {
+/** @author Yevhen Vydolob */
+public class JsTheme implements Theme {
+
+  private final JsonObject theme;
+
+  public JsTheme(JsonObject theme) {
+    this.theme = theme;
+  }
 
   @Override
   public String backgroundColor() {
-    return "#D6D6D9";
+    return theme.getString("backgroundColor");
   }
 
   @Override
   public String getLogoFill() {
-    return "inherit";
+    return theme.getString("logoFill");
   }
 
   @Override
   public String hoverBackgroundColor() {
-    return "#D4E8FF";
+    return theme.getString("hoverBackgroundColor");
   }
 
   @Override
   public String keyboardSelectionBackgroundColor() {
-    return "#C3DEFF";
+    return theme.getString("keyboardSelectionBackgroundColor");
   }
 
   @Override
   public String selectionBackground() {
-    return "#C3DEFF";
+    return theme.getString("selectionBackground");
   }
 
   @Override
   public String inputSelectionBackground() {
-    return "#b1d7fe";
+    return theme.getString("inputSelectionBackground");
   }
 
   @Override
   public String inactiveSelectionBackground() {
-    return "rgba(73,143,225,0.40)";
+    return theme.getString("inactiveSelectionBackground");
   }
 
   @Override
   public String inactiveTabBackground() {
-    return "#D6D6D9";
+    return theme.getString("inactiveTabBackground");
   }
 
   @Override
   public String inactiveTabBorderColor() {
-    return "#D6D6D9";
+    return theme.getString("inactiveTabBorderColor");
   }
 
   @Override
   public String activeTabBackground() {
-    return "#ffffff";
+    return theme.getString("activeTabBackground");
   }
 
   @Override
   public String activeTabBorderColor() {
-    return "#8E8E8E";
+    return theme.getString("activeTabBorderColor");
   }
 
   @Override
   public String activeTabTextColor() {
-    return "#555555";
+    return theme.getString("activeTabTextColor");
   }
 
   @Override
   public String activeTabTextShadow() {
-    return "none";
+    return theme.getString("activeTabTextShadow");
   }
 
   @Override
   public String activeTabIconColor() {
-    return "#1A68AF";
+    return theme.getString("activeTabIconColor");
   }
 
   @Override
   public String tabTextColor() {
-    return "#555555";
+    return theme.getString("tabTextColor");
   }
 
   @Override
   public String hoveredTabTextColor() {
-    return "#333333";
-  }
-
-  @Override
-  public String tabsPanelBackground() {
-    return "#D6D6D9";
-  }
-
-  @Override
-  public String tabBorderColor() {
-    return "#8E8E8E";
-  }
-
-  @Override
-  public String tabUnderlineColor() {
-    return "rgb(70,102,149)";
-  }
-
-  @Override
-  public String activeEditorTabBackgroundColor() {
-    return "rgb(197, 197, 197)";
-  }
-
-  @Override
-  public String editorReadonlyTabBackgroundColor() {
-    return "#d4d4be";
-  }
-
-  @Override
-  public String activeEditorReadonlyTabBackgroundColor() {
-    return "#ffffe4";
+    return theme.getString("hoveredTabTextColor");
   }
 
   @Override
   public String getEditorTabIconColor() {
-    return "#555555";
+    return theme.getString("editorTabIconColor");
+  }
+
+  @Override
+  public String activeEditorTabBackgroundColor() {
+    return theme.getString("activeEditorTabBackgroundColor");
+  }
+
+  @Override
+  public String editorReadonlyTabBackgroundColor() {
+    return theme.getString("editorReadonlyTabBackgroundColor");
+  }
+
+  @Override
+  public String activeEditorReadonlyTabBackgroundColor() {
+    return theme.getString("activeEditorReadonlyTabBackgroundColor");
   }
 
   @Override
   public String focusedEditorTabBackgroundColor() {
-    return "#FFFFFF";
+    return theme.getString("focusedEditorTabBackgroundColor");
   }
 
   @Override
   public String focusedEditorTabBorderBottomColor() {
-    return "#4EABFF";
+    return theme.getString("focusedEditorTabBorderBottomColor");
+  }
+
+  @Override
+  public String tabsPanelBackground() {
+    return theme.getString("tabsPanelBackground");
+  }
+
+  @Override
+  public String tabBorderColor() {
+    return theme.getString("tabBorderColor");
+  }
+
+  @Override
+  public String tabUnderlineColor() {
+    return theme.getString("tabUnderlineColor");
   }
 
   @Override
   public String partBackground() {
-    return "#ffffff";
+    return theme.getString("partBackground");
   }
 
   @Override
   public String partToolbar() {
-    return "#D6D6D6";
+    return theme.getString("partToolbar");
   }
 
   @Override
   public String partToolbarActive() {
-    return "rgba(195,222,255,1)";
+    return theme.getString("partToolbarActive");
   }
 
   @Override
   public String partToolbarShadow() {
-    return "#bdbdbd";
+    return theme.getString("partToolbarShadow");
   }
 
   @Override
   public String partToolbarSeparatorTopColor() {
-    return "#FFFFFF";
+    return theme.getString("partToolbarSeparatorTopColor");
   }
 
   @Override
   public String partToolbarSeparatorBottomColor() {
-    return "#AAAAAA";
+    return theme.getString("partToolbarSeparatorBottomColor");
   }
 
   @Override
   public String getMainFontColor() {
-    return "#222222";
+    return theme.getString("mainFontColor");
   }
 
   @Override
   public String getDisabledMenuColor() {
-    return "#AAAAAA";
+    return theme.getString("disabledMenuColor");
   }
 
   @Override
   public String getCommandsToolbarBackgroundColor() {
-    return "#bcbdbf";
+    return theme.getString("commandsToolbarBackgroundColor");
   }
 
   @Override
   public String getCommandsToolbarProcessesLabelBackground() {
-    return "#d0d0d0";
+    return theme.getString("commandsToolbarProcessesLabelBackground");
   }
 
   @Override
   public String getCommandsToolbarProcessesLabelBorder() {
-    return "solid 0.6px #818181";
+    return theme.getString("commandsToolbarProcessesLabelBorder");
   }
 
   @Override
   public String getCommandsToolbarMachineNameColor() {
-    return "#737373";
+    return theme.getString("commandsToolbarMachineNameColor");
   }
 
   @Override
   public String getCommandsToolbarCommandNameColor() {
-    return "#737373";
+    return theme.getString("commandsToolbarCommandNameColor");
   }
 
   @Override
   public String getCommandEditorProjectsTableHeaderColor() {
-    return "#ddd";
+    return theme.getString("commandEditorProjectsTableHeaderColor");
   }
 
   @Override
   public String getCommandEditorProjectsTableRowColor() {
-    return "#ffffff";
+    return theme.getString("commandEditorProjectsTableRowColor");
   }
 
   @Override
   public String getCommandEditorProjectSwitcherBorder() {
-    return "solid 1px #979797";
+    return theme.getString("commandEditorProjectSwitcherBorder");
   }
 
   @Override
   public String getDialogContentBackground() {
-    return "#FFFFFF";
+    return theme.getString("dialogContentBackground");
   }
 
   @Override
   public String getDropdownListBackground() {
-    return "#ffffff";
+    return theme.getString("dropdownListBackground");
   }
 
   @Override
   public String getHoveredDropdownListBackground() {
-    return "#ffffff";
+    return theme.getString("hoveredDropdownListBackground");
   }
 
   @Override
   public String getActiveDropdownListBackground() {
-    return "#ffffff";
+    return theme.getString("activeDropdownListBackground");
   }
 
   @Override
   public String getDropdownListBorder() {
-    return "solid 0.6px #818181";
+    return theme.getString("dropdownListBorder");
   }
 
   @Override
   public String getDropdownListButtonColor() {
-    return "#737373";
+    return theme.getString("dropdownListButtonColor");
   }
 
   @Override
   public String getMenuButtonBackground() {
-    return "#ffffff";
+    return theme.getString("menuButtonBackground");
   }
 
   @Override
   public String getHoveredMenuButtonBackground() {
-    return "#ffffff";
+    return theme.getString("hoveredMenuButtonBackground");
   }
 
   @Override
   public String getActiveMenuButtonBackground() {
-    return "#ffffff";
+    return theme.getString("activeMenuButtonBackground");
   }
 
   @Override
   public String getMenuButtonBorder() {
-    return "solid 0.6px #818181";
+    return theme.getString("menuButtonBorder");
   }
 
   @Override
   public String toolbarControllerBackground() {
-    return "#cacacc";
+    return theme.getString("toolbarControllerBackground");
   }
 
   @Override
   public String toolbarControllerLeftColor() {
-    return "#8E8E8E";
+    return theme.getString("toolbarControllerLeftColor");
   }
 
   @Override
   public String toolbarControllerTopColor() {
-    return "#8E8E8E";
+    return theme.getString("toolbarControllerTopColor");
   }
 
   @Override
   public String getButtonBackground() {
-    return "#5A5A5A";
+    return theme.getString("buttonBackground");
   }
 
   @Override
   public String getButtonBorderColor() {
-    return "#161819";
+    return theme.getString("buttonBorderColor");
   }
 
   @Override
   public String getButtonFontColor() {
-    return "#ECECEC";
+    return theme.getString("buttonFontColor");
   }
 
   @Override
   public String getButtonHoverBackground() {
-    return "rgba(0,0,0,0.7)";
+    return theme.getString("buttonHoverBackground");
   }
 
   @Override
   public String getButtonHoverBorderColor() {
-    return "#E9E9E9";
+    return theme.getString("buttonHoverBorderColor");
   }
 
   @Override
   public String getButtonHoverFontColor() {
-    return "#FFFFFF";
+    return theme.getString("buttonHoverFontColor");
   }
 
   @Override
   public String getButtonClickedBackground() {
-    return "rgba(0,0,0,0.8)";
+    return theme.getString("buttonClickedBackground");
   }
 
   @Override
   public String getButtonClickedBorderColor() {
-    return "#161819";
+    return theme.getString("buttonClickedBorderColor");
   }
 
   @Override
   public String getButtonClickedFontColor() {
-    return "#FFFFFF";
+    return theme.getString("buttonClickedFontColor");
   }
 
   @Override
   public String getButtonDisabledBackground() {
-    return "rgba(129, 129, 129, 0.2)";
+    return theme.getString("buttonDisabledBackground");
   }
 
   @Override
   public String getButtonDisabledBorderColor() {
-    return "#CECBCB";
+    return theme.getString("buttonDisabledBorderColor");
   }
 
   @Override
   public String getButtonDisabledFontColor() {
-    return "#999595";
+    return theme.getString("buttonDisabledFontColor");
   }
 
   @Override
   public String getPrimaryButtonBackground() {
-    return "#4A90E2";
+    return theme.getString("primaryButtonBackground");
   }
 
   @Override
   public String getPrimaryButtonBorderColor() {
-    return "#161819";
+    return theme.getString("primaryButtonBorderColor");
   }
 
   @Override
   public String getPrimaryButtonFontColor() {
-    return "#ECECEC";
+    return theme.getString("primaryButtonFontColor");
   }
 
   @Override
   public String getPrimaryButtonHoverBackground() {
-    return "#4484D0";
+    return theme.getString("primaryButtonHoverBackground");
   }
 
   @Override
   public String getPrimaryButtonHoverBorderColor() {
-    return "#E9E9E9";
+    return theme.getString("primaryButtonHoverBorderColor");
   }
 
   @Override
   public String getPrimaryButtonHoverFontColor() {
-    return "#FFFFFF";
+    return theme.getString("primaryButtonHoverFontColor");
   }
 
   @Override
   public String getPrimaryButtonClickedBackground() {
-    return "#3b73b4";
+    return theme.getString("primaryButtonClickedBackground");
   }
 
   @Override
   public String getPrimaryButtonClickedBorderColor() {
-    return "#14354C";
+    return theme.getString("primaryButtonClickedBorderColor");
   }
 
   @Override
   public String getPrimaryButtonClickedFontColor() {
-    return "#FFFFFF";
+    return theme.getString("primaryButtonClickedFontColor");
   }
 
   @Override
   public String getPrimaryButtonDisabledBackground() {
-    return "rgba(128, 177, 234, 0.62)";
+    return theme.getString("primaryButtonDisabledBackground");
   }
 
   @Override
   public String getPrimaryButtonDisabledBorderColor() {
-    return "#A8C6EA";
+    return theme.getString("primaryButtonDisabledBorderColor");
   }
 
   @Override
   public String getPrimaryButtonDisabledFontColor() {
-    return "rgba(120, 120, 119, 0.6)";
+    return theme.getString("primaryButtonDisabledFontColor");
   }
 
   @Override
   public String getSocialButtonColor() {
-    return "#ffffff";
+    return theme.getString("socialButtonColor");
   }
 
   @Override
   public String editorPanelBackgroundColor() {
-    return "#D6D6D9";
+    return theme.getString("editorPanelBackgroundColor");
   }
 
   @Override
   public String editorTabsBackgroundColor() {
-    return "#D6D6D9";
+    return theme.getString("editorTabsBackgroundColor");
   }
 
   @Override
   public String editorPanelBorderColor() {
-    return tabBorderColor();
+    return theme.getString("editorPanelBorderColor");
   }
 
   @Override
   public String getEditorBackgroundColor() {
-    return "white";
+    return theme.getString("editorBackgroundColor");
   }
 
   @Override
   public String getEditorCurrentLineColor() {
-    return "rgba(215, 215, 215, 0.45)";
+    return theme.getString("editorCurrentLineColor");
   }
 
   @Override
   public String getEditorDefaultFontColor() {
-    return "black";
+    return theme.getString("editorDefaultFontColor");
   }
 
   @Override
   public String getEditorSelectionColor() {
-    return "#d4e2ff";
+    return theme.getString("editorSelectionColor");
   }
 
   @Override
   public String getEditorInactiveSelectionColor() {
-    return "#d4d4d4";
+    return theme.getString("editorInactiveSelectionColor");
   }
 
   @Override
   public String getEditorCursorColor() {
-    return "black";
+    return theme.getString("editorCursorColor");
   }
 
   @Override
   public String getEditorGutterColor() {
-    return "#eee";
+    return theme.getString("editorGutterColor");
   }
 
   @Override
   public String getEditorKeyWord() {
-    return "#708";
+    return theme.getString("editorKeyWord");
   }
 
   @Override
   public String getEditorAtom() {
-    return "#219";
+    return theme.getString("editorAtom");
   }
 
   @Override
   public String getEditorNumber() {
-    return "#164";
+    return theme.getString("editorNumber");
   }
 
   @Override
   public String getEditorDef() {
-    return "#00f";
+    return theme.getString("editorDef");
   }
 
   @Override
   public String getEditorVariable() {
-    return "black";
+    return theme.getString("editorVariable");
   }
 
   @Override
   public String getEditorVariable2() {
-    return "#05a";
+    return theme.getString("editorVariable2");
   }
 
   @Override
   public String getEditorProperty() {
-    return "black";
+    return theme.getString("editorProperty");
   }
 
   @Override
   public String getEditorOperator() {
-    return "black";
+    return theme.getString("editorOperator");
   }
 
   @Override
   public String getEditorComment() {
-    return "#a50";
+    return theme.getString("editorComment");
   }
 
   @Override
   public String getEditorString() {
-    return "#a11";
+    return theme.getString("editorString");
   }
 
   @Override
   public String getEditorMeta() {
-    return "#049";
+    return theme.getString("editorMeta");
   }
 
   @Override
   public String getEditorError() {
-    return "#f00";
+    return theme.getString("editorError");
   }
 
   @Override
   public String getEditorBuiltin() {
-    return "#30a";
+    return theme.getString("editorBuiltin");
   }
 
   @Override
   public String getEditorTag() {
-    return "#170";
+    return theme.getString("editorTag");
   }
 
   @Override
   public String getEditorAttribute() {
-    return "#00c";
+    return theme.getString("editorAttribute");
   }
 
   @Override
   public String getEditorString2() {
-    return "#f50";
+    return theme.getString("editorString2");
   }
 
   @Override
   public String completionPopupBackgroundColor() {
-    return "#FFFFFF";
+    return theme.getString("completionPopupBackgroundColor");
   }
 
   @Override
   public String completionPopupBorderColor() {
-    return "#A5A5A5";
+    return theme.getString("completionPopupBorderColor");
   }
 
   @Override
   public String completionPopupHeaderBackgroundColor() {
-    return "#F2F2F2";
+    return theme.getString("completionPopupHeaderBackgroundColor");
   }
 
   @Override
   public String completionPopupHeaderTextColor() {
-    return "#909090";
+    return theme.getString("completionPopupHeaderTextColor");
   }
 
   @Override
   public String completionPopupSelectedItemBackgroundColor() {
-    return "rgba(0, 0, 0, 0.12)";
+    return theme.getString("completionPopupSelectedItemBackgroundColor");
   }
 
   @Override
   public String completionPopupItemTextColor() {
-    return "#555555";
+    return theme.getString("completionPopupItemTextColor");
   }
 
   @Override
   public String completionPopupItemSubtitleTextColor() {
-    return "#909090";
+    return theme.getString("completionPopupItemSubtitleTextColor");
   }
 
   @Override
   public String completionPopupItemHighlightTextColor() {
-    return "#1A68AF";
+    return theme.getString("completionPopupItemHighlightTextColor");
   }
 
   @Override
   public String getWindowContentBackground() {
-    return "#ECECEC";
+    return theme.getString("windowContentBackground");
   }
 
   @Override
   public String getWindowContentFontColor() {
-    return "#333333";
+    return theme.getString("windowContentFontColor");
   }
 
   @Override
   public String getWindowShadowColor() {
-    return "rgba(0, 0, 0, 0.50)";
+    return theme.getString("windowShadowColor");
   }
 
   @Override
   public String getWindowHeaderBackground() {
-    return "#F5F5F5";
+    return theme.getString("windowHeaderBackground");
   }
 
   @Override
   public String getWindowHeaderBorderColor() {
-    return "#1A68AF";
+    return theme.getString("windowHeaderBorderColor");
   }
 
   @Override
   public String getWindowFooterBackground() {
-    return "#ECECEC";
+    return theme.getString("windowFooterBackground");
   }
 
   @Override
   public String getWindowFooterBorderColor() {
-    return "#A4A4A4";
+    return theme.getString("windowFooterBorderColor");
   }
 
   @Override
   public String getWindowSeparatorColor() {
-    return "#A4A4A4";
+    return theme.getString("windowSeparatorColor");
   }
 
   @Override
   public String getWindowTitleFontColor() {
-    return "#555555";
+    return theme.getString("windowTitleFontColor");
   }
 
   @Override
   public String getWizardStepsColor() {
-    return "#DBDBDB";
+    return theme.getString("wizardStepsColor");
   }
 
   @Override
   public String getWizardStepsBorderColor() {
-    return "#BDBDBD";
-  }
-
-  @Override
-  public String getWelcomeFontColor() {
-    return "#5E5E5E";
-  }
-
-  @Override
-  public String getCaptionFontColor() {
-    return "#888888";
-  }
-
-  @Override
-  public String consolePanelColor() {
-    return tabsPanelBackground();
-  }
-
-  @Override
-  public String getStatusPanelColor() {
-    return tabsPanelBackground();
-  }
-
-  @Override
-  public String getCellOddRowColor() {
-    return "#f3f7fb";
-  }
-
-  @Override
-  public String getCellOddEvenColor() {
-    return "#ffffff";
-  }
-
-  @Override
-  public String getCellKeyboardSelectedRowColor() {
-    return "#ffc";
-  }
-
-  @Override
-  public String getCellHoveredRow() {
-    return "#eee";
-  }
-
-  @Override
-  public String getMainMenuBkgColor() {
-    return "#cacacc";
-  }
-
-  @Override
-  public String mainMenuDelimiterBackground() {
-    return "#ececec";
-  }
-
-  @Override
-  public String getMainMenuSelectedBkgColor() {
-    return "#ffffff";
-  }
-
-  @Override
-  public String getMainMenuSelectedBorderColor() {
-    return "#a4a4a4";
-  }
-
-  @Override
-  public String getMainMenuFontColor() {
-    return "#3c3c3c;";
-  }
-
-  @Override
-  public String getMainMenuFontHoverColor() {
-    return "#333333";
-  }
-
-  @Override
-  public String getMainMenuFontSelectedColor() {
-    return "#1a68af";
-  }
-
-  @Override
-  public String getNotableButtonTopColor() {
-    return "#dbdbdb";
-  }
-
-  @Override
-  public String getNotableButtonColor() {
-    return "#2d6ba3";
-  }
-
-  @Override
-  public String tabBorderShadow() {
-    return "rgba(198, 205, 209, 0.5)";
-  }
-
-  @Override
-  public String treeTextFileColor() {
-    return "#7b7b7b";
-  }
-
-  @Override
-  public String treeTextFolderColor() {
-    return "#606060";
-  }
-
-  @Override
-  public String treeTextShadow() {
-    return "rgba(255, 255, 255, 0.5)";
-  }
-
-  @Override
-  public String treeIconFileColor() {
-    return "#606060";
-  }
-
-  @Override
-  public String getToolbarActionGroupShadowColor() {
-    return "#c5c5c5";
-  }
-
-  @Override
-  public String getToolbarActionGroupBackgroundColor() {
-    return "#ffffff";
-  }
-
-  @Override
-  public String getToolbarActionGroupBorderColor() {
-    return "#afafaf";
-  }
-
-  @Override
-  public String getToolbarBackgroundImage() {
-    return this.getMenuBackgroundImage();
-  }
-
-  @Override
-  public String getToolbarBackgroundColor() {
-    return " #EAEAEA";
-  }
-
-  @Override
-  public String getToolbarIconColor() {
-    return iconColor();
-  }
-
-  @Override
-  public String getToolbarHoverIconColor() {
-    return "#565656";
-  }
-
-  @Override
-  public String getToolbarSelectedIconFilter() {
-    return "brightness(80%)";
-  }
-
-  @Override
-  public String getTooltipBackgroundColor() {
-    return "#FFFFFF";
-  }
-
-  @Override
-  public String getPerspectiveSwitcherBackgroundColor() {
-    return "#1a68af";
-  }
-
-  @Override
-  public String getSelectCommandActionIconColor() {
-    return "#1a68af";
-  }
-
-  @Override
-  public String getSelectCommandActionIconBackgroundColor() {
-    return "#e9e9e9";
-  }
-
-  @Override
-  public String getSelectCommandActionColor() {
-    return "#555555";
-  }
-
-  @Override
-  public String getSelectCommandActionHoverColor() {
-    return "#565656";
-  }
-
-  @Override
-  public String progressColor() {
-    return "#000000";
-  }
-
-  @Override
-  public String getSuccessEventColor() {
-    return "#7dc878";
-  }
-
-  @Override
-  public String getErrorEventColor() {
-    return "#e25252";
-  }
-
-  @Override
-  public String getDelimeterColor() {
-    return "#2f2f2f";
-  }
-
-  @Override
-  public String getLinkColor() {
-    return "#acacac";
+    return theme.getString("wizardStepsBorderColor");
   }
 
   @Override
   public String getFactoryLinkColor() {
-    return "#60abe0";
+    return theme.getString("factoryLinkColor");
+  }
+
+  @Override
+  public String getWelcomeFontColor() {
+    return theme.getString("welcomeFontColor");
+  }
+
+  @Override
+  public String getCaptionFontColor() {
+    return theme.getString("captionFontColor");
+  }
+
+  @Override
+  public String consolePanelColor() {
+    return theme.getString("consolePanelColor");
+  }
+
+  @Override
+  public String getStatusPanelColor() {
+    return theme.getString("statusPanelColor");
+  }
+
+  @Override
+  public String getCellOddRowColor() {
+    return theme.getString("cellOddRowColor");
+  }
+
+  @Override
+  public String getCellOddEvenColor() {
+    return theme.getString("cellOddEvenColor");
+  }
+
+  @Override
+  public String getCellKeyboardSelectedRowColor() {
+    return theme.getString("cellKeyboardSelectedRowColor");
+  }
+
+  @Override
+  public String getCellHoveredRow() {
+    return theme.getString("cellHoveredRow");
+  }
+
+  @Override
+  public String getMainMenuBkgColor() {
+    return theme.getString("mainMenuBkgColor");
+  }
+
+  @Override
+  public String mainMenuDelimiterBackground() {
+    return theme.getString("mainMenuDelimiterBackground");
+  }
+
+  @Override
+  public String getMainMenuSelectedBkgColor() {
+    return theme.getString("mainMenuSelectedBkgColor");
+  }
+
+  @Override
+  public String getMainMenuSelectedBorderColor() {
+    return theme.getString("mainMenuSelectedBorderColor");
+  }
+
+  @Override
+  public String getMainMenuFontColor() {
+    return theme.getString("mainMenuFontColor");
+  }
+
+  @Override
+  public String getMainMenuFontHoverColor() {
+    return theme.getString("mainMenuFontHoverColor");
+  }
+
+  @Override
+  public String getMainMenuFontSelectedColor() {
+    return theme.getString("mainMenuFontSelectedColor");
+  }
+
+  @Override
+  public String getNotableButtonTopColor() {
+    return theme.getString("notableButtonTopColor");
+  }
+
+  @Override
+  public String getNotableButtonColor() {
+    return theme.getString("notableButtonColor");
+  }
+
+  @Override
+  public String tabBorderShadow() {
+    return theme.getString("tabBorderShadow");
+  }
+
+  @Override
+  public String treeTextFileColor() {
+    return theme.getString("treeTextFileColor");
+  }
+
+  @Override
+  public String treeTextFolderColor() {
+    return theme.getString("treeTextFolderColor");
+  }
+
+  @Override
+  public String treeTextShadow() {
+    return theme.getString("treeTextShadow");
+  }
+
+  @Override
+  public String treeIconFileColor() {
+    return theme.getString("treeIconFileColor");
+  }
+
+  @Override
+  public String getToolbarActionGroupShadowColor() {
+    return theme.getString("toolbarActionGroupShadowColor");
+  }
+
+  @Override
+  public String getToolbarActionGroupBackgroundColor() {
+    return theme.getString("toolbarActionGroupBackgroundColor");
+  }
+
+  @Override
+  public String getToolbarActionGroupBorderColor() {
+    return theme.getString("toolbarActionGroupBorderColor");
+  }
+
+  @Override
+  public String getToolbarBackgroundImage() {
+    return theme.getString("toolbarBackgroundImage");
+  }
+
+  @Override
+  public String getToolbarBackgroundColor() {
+    return theme.getString("toolbarBackgroundColor");
+  }
+
+  @Override
+  public String getToolbarIconColor() {
+    return theme.getString("toolbarIconColor");
+  }
+
+  @Override
+  public String getToolbarHoverIconColor() {
+    return theme.getString("toolbarHoverIconColor");
+  }
+
+  @Override
+  public String getToolbarSelectedIconFilter() {
+    return theme.getString("toolbarSelectedIconFilter");
+  }
+
+  @Override
+  public String getTooltipBackgroundColor() {
+    return theme.getString("tooltipBackgroundColor");
+  }
+
+  @Override
+  public String getPerspectiveSwitcherBackgroundColor() {
+    return theme.getString("perspectiveSwitcherBackgroundColor");
+  }
+
+  @Override
+  public String getSelectCommandActionIconColor() {
+    return theme.getString("selectCommandActionIconColor");
+  }
+
+  @Override
+  public String getSelectCommandActionIconBackgroundColor() {
+    return theme.getString("selectCommandActionIconBackgroundColor");
+  }
+
+  @Override
+  public String getSelectCommandActionColor() {
+    return theme.getString("selectCommandActionColor");
+  }
+
+  @Override
+  public String getSelectCommandActionHoverColor() {
+    return theme.getString("selectCommandActionHoverColor");
+  }
+
+  @Override
+  public String progressColor() {
+    return theme.getString("progressColor");
+  }
+
+  @Override
+  public String getSuccessEventColor() {
+    return theme.getString("successEventColor");
+  }
+
+  @Override
+  public String getErrorEventColor() {
+    return theme.getString("errorEventColor");
+  }
+
+  @Override
+  public String getLinkColor() {
+    return theme.getString("linkColor");
+  }
+
+  @Override
+  public String getDelimeterColor() {
+    return theme.getString("delimeterColor");
   }
 
   @Override
   public String processTreeBackgroundColor() {
-    return "white";
+    return theme.getString("processTreeBackgroundColor");
   }
 
   @Override
   public String consolesToolbarBackground() {
-    return "#D6D6D9";
+    return theme.getString("consolesToolbarBackground");
   }
 
   @Override
   public String colsolesToolbarBorderColor() {
-    return "#8e8e8e";
+    return theme.getString("colsolesToolbarBorderColor");
   }
 
   @Override
   public String consolesToolbarButtonColor() {
-    return "#aaaaaa";
+    return theme.getString("consolesToolbarButtonColor");
   }
 
   @Override
   public String consolesToolbarHoveredButtonColor() {
-    return "#e0e0e0";
+    return theme.getString("consolesToolbarHoveredButtonColor");
   }
 
   @Override
   public String consolesToolbarDisabledButtonColor() {
-    return "#777777";
+    return theme.getString("consolesToolbarDisabledButtonColor");
   }
 
   @Override
   public String consolesToolbarToggledButtonColor() {
-    return "rgba(0, 0, 0, 0.6)";
+    return theme.getString("consolesToolbarToggledButtonColor");
   }
 
   @Override
   public String processTreeDevLabel() {
-    return "white";
+    return theme.getString("processTreeDevLabel");
   }
 
   @Override
   public String outputBackgroundColor() {
-    return "white";
+    return theme.getString("outputBackgroundColor");
   }
 
   @Override
   public String getOutputFontColor() {
-    return "#5c5c5c";
+    return theme.getString("outputFontColor");
   }
 
   @Override
   public String getOutputLinkColor() {
-    return "#1266B1";
+    return theme.getString("outputLinkColor");
   }
 
   @Override
   public String getEditorInfoBackgroundColor() {
-    return "#ddd";
+    return theme.getString("editorInfoBackgroundColor");
   }
 
   @Override
   public String editorInfoTextColor() {
-    return "#5c5c5c";
+    return theme.getString("editorInfoTextColor");
   }
 
   @Override
   public String getEditorInfoBorderColor() {
-    return "#bdbdbd";
+    return theme.getString("editorInfoBorderColor");
   }
 
   @Override
   public String getEditorInfoBorderShadowColor() {
-    return "#f0f0f0";
+    return theme.getString("editorInfoBorderShadowColor");
   }
 
   @Override
   public String getEditorLineNumberColor() {
-    return "#888888";
+    return theme.getString("editorLineNumberColor");
   }
 
   @Override
   public String editorGutterLineNumberBackgroundColor() {
-    return "#F6F6F6";
+    return theme.getString("editorGutterLineNumberBackgroundColor");
   }
 
   @Override
   public String getEditorSeparatorColor() {
-    return "#888888";
-  }
-
-  @Override
-  public String getBlueIconColor() {
-    return "#1a68af";
-  }
-
-  @Override
-  public String getRedIconColor() {
-    return "#CF405F";
+    return theme.getString("editorSeparatorColor");
   }
 
   @Override
   public String getSplitterSmallBorderColor() {
-    return "#8E8E8E";
+    return theme.getString("splitterSmallBorderColor");
   }
 
   @Override
   public String getSplitterLargeBorderColor() {
-    return "#E1E1E1";
+    return theme.getString("splitterLargeBorderColor");
   }
 
   @Override
   public String getBadgeBackgroundColor() {
-    return "rgb(78, 171, 255)";
+    return theme.getString("badgeBackgroundColor");
   }
 
   @Override
   public String getBadgeFontColor() {
-    return "white";
+    return theme.getString("badgeFontColor");
   }
 
   @Override
   public String processBadgeBorderColor() {
-    return "white";
+    return theme.getString("processBadgeBorderColor");
+  }
+
+  @Override
+  public String getBlueIconColor() {
+    return theme.getString("blueIconColor");
+  }
+
+  @Override
+  public String getRedIconColor() {
+    return theme.getString("redIconColor");
   }
 
   @Override
   public String getPopupBkgColor() {
-    return "#ececec";
+    return theme.getString("popupBkgColor");
   }
 
   @Override
   public String getPopupBorderColor() {
-    return "#a4a4a4";
+    return theme.getString("popupBorderColor");
   }
 
   @Override
   public String getPopupShadowColor() {
-    return "rgba(0, 0, 0, 0.30)";
+    return theme.getString("popupShadowColor");
   }
 
   @Override
   public String getPopupHoverColor() {
-    return "rgba(0, 0, 0, 0.12)";
+    return theme.getString("popupHoverColor");
   }
 
   @Override
   public String getPopupHotKeyColor() {
-    return "#222222";
+    return theme.getString("popupHotKeyColor");
   }
 
   @Override
   public String getTextFieldTitleColor() {
-    return "#555555";
+    return theme.getString("textFieldTitleColor");
   }
 
   @Override
   public String getTextFieldColor() {
-    return "#909090";
+    return theme.getString("textFieldColor");
   }
 
   @Override
   public String getTextFieldBackgroundColor() {
-    return "#ffffff";
+    return theme.getString("textFieldBackgroundColor");
   }
 
   @Override
   public String getTextFieldFocusedColor() {
-    return "#727272";
+    return theme.getString("textFieldFocusedColor");
   }
 
   @Override
   public String getTextFieldFocusedBackgroundColor() {
-    return "#ffffff";
+    return theme.getString("textFieldFocusedBackgroundColor");
   }
 
   @Override
   public String getTextFieldDisabledColor() {
-    return "#b9b9b9";
+    return theme.getString("textFieldDisabledColor");
   }
 
   @Override
   public String getTextFieldDisabledBackgroundColor() {
-    return "#ffffff";
+    return theme.getString("textFieldDisabledBackgroundColor");
   }
 
   @Override
   public String getTextFieldBorderColor() {
-    return "#e1e1e1";
+    return theme.getString("textFieldBorderColor");
   }
 
   @Override
   public String getMenuBackgroundColor() {
-    return "inherit";
+    return theme.getString("menuBackgroundColor");
   }
 
   @Override
   public String getMenuBackgroundImage() {
-    return "linear-gradient( -180deg, #d3d3d4 0%, #bdbec0 100%)";
+    return theme.getString("menuBackgroundImage");
   }
 
   @Override
   public String getPanelBackgroundColor() {
-    return "#d6d6d9";
+    return theme.getString("panelBackgroundColor");
   }
 
   @Override
   public String getPrimaryHighlightColor() {
-    return "#1a68af";
+    return theme.getString("primaryHighlightColor");
   }
 
   @Override
   public String iconColor() {
-    return "#7c7c7c";
+    return theme.getString("iconColor");
   }
 
   @Override
   public String activeIconColor() {
-    return "#3E3A3A";
+    return theme.getString("activeIconColor");
   }
 
   @Override
   public String getSeparatorColor() {
-    return "#8e8e8e";
+    return theme.getString("separatorColor");
   }
 
   @Override
   public String getErrorColor() {
-    return "#C34d4d";
+    return theme.getString("errorColor");
   }
 
   @Override
   public String getSuccessColor() {
-    return "#43A700";
+    return theme.getString("successColor");
   }
 
   @Override
   public String getListBoxHoverBackgroundColor() {
-    return this.getPopupHoverColor();
+    return theme.getString("listBoxHoverBackgroundColor");
   }
 
   @Override
   public String getListBoxColor() {
-    return this.getTextFieldColor();
+    return theme.getString("listBoxColor");
   }
 
   @Override
   public String getListBoxDisabledColor() {
-    return this.getTextFieldDisabledColor();
+    return theme.getString("listBoxDisabledColor");
   }
 
   @Override
   public String getListBoxDisabledBackgroundColor() {
-    return this.getTextFieldDisabledBackgroundColor();
+    return theme.getString("listBoxDisabledBackgroundColor");
   }
 
   @Override
   public String getListBoxDropdownBackgroundColor() {
-    return "#ECECEC";
+    return theme.getString("listBoxDropdownBackgroundColor");
   }
 
   @Override
   public String listBoxDropdownShadowColor() {
-    return "0 1px 1px 0 rgba(0, 0, 0, 0.1)";
+    return theme.getString("listBoxDropdownShadowColor");
   }
 
   @Override
   public String categoriesListHeaderTextColor() {
-    return this.getTextFieldTitleColor();
+    return theme.getString("categoriesListHeaderTextColor");
   }
 
   @Override
   public String categoriesListHeaderIconColor() {
-    return this.getTextFieldTitleColor();
+    return theme.getString("categoriesListHeaderIconColor");
   }
 
   @Override
   public String categoriesListHeaderBackgroundColor() {
-    return this.getPopupBkgColor();
+    return theme.getString("categoriesListHeaderBackgroundColor");
   }
 
   @Override
   public String categoriesListItemTextColor() {
-    return this.getTextFieldColor();
+    return theme.getString("categoriesListItemTextColor");
   }
 
   @Override
   public String categoriesListItemBackgroundColor() {
-    return this.getTextFieldFocusedBackgroundColor();
+    return theme.getString("categoriesListItemBackgroundColor");
   }
 
   @Override
   public String scrollbarBorderColor() {
-    return "rgba(59, 59, 59, 0.3)";
+    return theme.getString("scrollbarBorderColor");
   }
 
   @Override
   public String scrollbarBackgroundColor() {
-    return "rgba(27, 27, 27, 0.10)";
+    return theme.getString("scrollbarBackgroundColor");
   }
 
   @Override
   public String scrollbarHoverBackgroundColor() {
-    return "rgba(27, 27, 27, 0.15)";
+    return theme.getString("scrollbarHoverBackgroundColor");
   }
 
   @Override
   public String matchingSearchBlockBackgroundColor() {
-    return "rgb(169, 183, 198)";
+    return theme.getString("matchingSearchBlockBackgroundColor");
   }
 
   @Override
   public String matchingSearchBlockBorderColor() {
-    return "#555555";
+    return theme.getString("matchingSearchBlockBorderColor");
   }
 
   @Override
   public String currentSearchBlockBackgroundColor() {
-    return "rgb(78, 171, 255)";
+    return theme.getString("currentSearchBlockBackgroundColor");
   }
 
   @Override
   public String currentSearchBlockBorderColor() {
-    return "#1a68af";
+    return theme.getString("currentSearchBlockBorderColor");
   }
 
   @Override
   public String openedFilesDropdownButtonBackground() {
-    return "#e4e4e4";
+    return theme.getString("openedFilesDropdownButtonBackground");
   }
 
   @Override
   public String openedFilesDropdownButtonBorderColor() {
-    return "#8e8e8e";
+    return theme.getString("openedFilesDropdownButtonBorderColor");
   }
 
   @Override
   public String openedFilesDropdownButtonShadowColor() {
-    return "rgba(0, 0, 0, 0.15)";
+    return theme.getString("openedFilesDropdownButtonShadowColor");
   }
 
   @Override
   public String openedFilesDropdownButtonIconColor() {
-    return "#8E8E8E";
+    return theme.getString("openedFilesDropdownButtonIconColor");
   }
 
   @Override
   public String openedFilesDropdownButtonHoverIconColor() {
-    return "#5A5A5A";
+    return theme.getString("openedFilesDropdownButtonHoverIconColor");
   }
 
   @Override
   public String openedFilesDropdownButtonActiveBackground() {
-    return "#FFFFFF";
+    return theme.getString("openedFilesDropdownButtonActiveBackground");
   }
 
   @Override
   public String openedFilesDropdownButtonActiveBorderColor() {
-    return "#8E8E8E";
+    return theme.getString("openedFilesDropdownButtonActiveBorderColor");
   }
 
   @Override
   public String openedFilesDropdownListBackgroundColor() {
-    return "#ECECEC";
+    return theme.getString("openedFilesDropdownListBackgroundColor");
   }
 
   @Override
   public String openedFilesDropdownListBorderColor() {
-    return "#A4A4A4";
+    return theme.getString("openedFilesDropdownListBorderColor");
   }
 
   @Override
   public String openedFilesDropdownListShadowColor() {
-    return "rgba(0, 0, 0, 0.30)";
+    return theme.getString("openedFilesDropdownListShadowColor");
   }
 
   @Override
   public String openedFilesDropdownListTextColor() {
-    return "#555555";
+    return theme.getString("openedFilesDropdownListTextColor");
   }
 
   @Override
   public String openedFilesDropdownListCloseButtonColor() {
-    return "#8E8E8E";
+    return theme.getString("openedFilesDropdownListCloseButtonColor");
   }
 
   @Override
   public String openedFilesDropdownListHoverBackgroundColor() {
-    return "rgba(0, 0, 0, 0.12)";
+    return theme.getString("openedFilesDropdownListHoverBackgroundColor");
   }
 
   @Override
   public String openedFilesDropdownListHoverTextColor() {
-    return "#8E8E8E";
+    return theme.getString("openedFilesDropdownListHoverTextColor");
   }
 
   @Override
   public String radioButtonIconColor() {
-    return this.getBlueIconColor();
+    return theme.getString("radioButtonIconColor");
   }
 
   @Override
   public String radioButtonBorderColor() {
-    return "#E1E1E1";
+    return theme.getString("radioButtonBorderColor");
   }
 
   @Override
   public String radioButtonBackgroundColor() {
-    return this.getTextFieldBackgroundColor();
+    return theme.getString("radioButtonBackgroundColor");
   }
 
   @Override
   public String radioButtonFontColor() {
-    return this.getTextFieldColor();
+    return theme.getString("radioButtonFontColor");
   }
 
   @Override
   public String radioButtonDisabledFontColor() {
-    return this.getTextFieldDisabledColor();
+    return theme.getString("radioButtonDisabledFontColor");
   }
 
   @Override
   public String radioButtonDisabledIconColor() {
-    return "#727272";
+    return theme.getString("radioButtonDisabledIconColor");
   }
 
   @Override
   public String radioButtonDisabledBackgroundColor() {
-    return "#F3F3F3";
+    return theme.getString("radioButtonDisabledBackgroundColor");
   }
 
   @Override
   public String checkBoxIconColor() {
-    return this.getBlueIconColor();
+    return theme.getString("checkBoxIconColor");
   }
 
   @Override
   public String checkBoxFontColor() {
-    return this.getTextFieldColor();
+    return theme.getString("checkBoxFontColor");
   }
 
   @Override
   public String checkBoxBorderColor() {
-    return this.radioButtonBorderColor();
+    return theme.getString("checkBoxBorderColor");
   }
 
   @Override
   public String checkBoxBackgroundColor() {
-    return this.getTextFieldBackgroundColor();
+    return theme.getString("checkBoxBackgroundColor");
   }
 
   @Override
   public String checkBoxDisabledIconColor() {
-    return this.radioButtonDisabledIconColor();
+    return theme.getString("checkBoxDisabledIconColor");
   }
 
   @Override
   public String checkBoxDisabledFontColor() {
-    return this.getTextFieldDisabledColor();
+    return theme.getString("checkBoxDisabledFontColor");
   }
 
   @Override
   public String checkBoxDisabledBackgroundColor() {
-    return this.radioButtonDisabledBackgroundColor();
+    return theme.getString("checkBoxDisabledBackgroundColor");
   }
 
   @Override
   public String treeExpandArrowColor() {
-    return "#5D5D5D";
+    return theme.getString("treeExpandArrowColor");
   }
 
   @Override
   public String treeExpandArrowShadow() {
-    return "1px 1px 0 rgba(0, 0, 0, 0.1)";
+    return theme.getString("treeExpandArrowShadow");
   }
 
   @Override
   public String projectExplorerJointContainerFill() {
-    return "#5D5D5D";
+    return theme.getString("projectExplorerJointContainerFill");
   }
 
   @Override
   public String projectExplorerJointContainerShadow() {
-    return "drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.1))";
+    return theme.getString("projectExplorerJointContainerShadow");
   }
 
   @Override
   public String projectExplorerPresentableTextShadow() {
-    return "none";
+    return theme.getString("projectExplorerPresentableTextShadow");
   }
 
   @Override
   public String projectExplorerInfoTextShadow() {
-    return "none";
+    return theme.getString("projectExplorerInfoTextShadow");
   }
 
   @Override
   public String projectExplorerSelectedRowBackground() {
-    return "rgba(0, 0, 0, 0.2)";
-  }
-
-  @Override
-  public String projectExplorerHoverRowBackground() {
-    return "rgba(0, 0, 0, 0.12)";
+    return theme.getString("projectExplorerSelectedRowBackground");
   }
 
   @Override
   public String projectExplorerSelectedRowBorder() {
-    return "#555";
+    return theme.getString("projectExplorerSelectedRowBorder");
+  }
+
+  @Override
+  public String projectExplorerHoverRowBackground() {
+    return theme.getString("projectExplorerHoverRowBackground");
   }
 
   @Override
   public String projectExplorerHoverRowBorder() {
-    return "#7b7b7b";
+    return theme.getString("projectExplorerHoverRowBorder");
   }
 
   @Override
   public String projectExplorerVcsHead() {
-    return "#7A8088";
+    return theme.getString("projectExplorerVcsHead");
   }
 
   @Override
   public String loaderExpanderColor() {
-    return "#555555";
+    return theme.getString("loaderExpanderColor");
   }
 
   @Override
   public String loaderIconBackgroundColor() {
-    return "#e9e9e9";
+    return theme.getString("loaderIconBackgroundColor");
   }
 
   @Override
   public String loaderProgressStatusColor() {
-    return "#1a68af";
+    return theme.getString("loaderProgressStatusColor");
   }
 
   @Override
   public String placeholderColor() {
-    return "#727272";
+    return theme.getString("placeholderColor");
   }
 
   @Override
   public String categoryHeaderButtonHoverColor() {
-    return this.getToolbarHoverIconColor();
+    return theme.getString("categoryHeaderButtonHoverColor");
   }
 
   @Override
   public String categoryHeaderButtonColor() {
-    return this.getToolbarIconColor();
+    return theme.getString("categoryHeaderButtonColor");
   }
 
   @Override
   public String categoryElementButtonHoverColor() {
-    return this.getBlueIconColor();
+    return theme.getString("categoryElementButtonHoverColor");
   }
 
   @Override
   public String categoryElementButtonColor() {
-    return this.getPrimaryButtonBackground();
+    return theme.getString("categoryElementButtonColor");
   }
 
   @Override
   public String categorySelectElementBackgroundColor() {
-    return "#E7F2FF";
+    return theme.getString("categorySelectElementBackgroundColor");
   }
 
   @Override
   public String categorySelectElementColor() {
-    return this.getPrimaryButtonBackground();
+    return theme.getString("categorySelectElementColor");
   }
 
   @Override
   public String notificationPopupSuccessBackground() {
-    return "#31b993";
+    return theme.getString("notificationPopupSuccessBackground");
   }
 
   @Override
   public String notificationPopupFailBackground() {
-    return "#c34d4d";
+    return theme.getString("notificationPopupFailBackground");
   }
 
   @Override
   public String notificationPopupProgressBackground() {
-    return "#9b9b9b";
+    return theme.getString("notificationPopupProgressBackground");
   }
 
   @Override
   public String notificationPopupWarningBackground() {
-    return "#F0AD4E";
+    return theme.getString("notificationPopupWarningBackground");
   }
 
   @Override
   public String notificationPopupPanelShadow() {
-    return "0 0 7px rgba(0,0,0,0.2)";
+    return theme.getString("notificationPopupPanelShadow");
   }
 
   @Override
   public String notificationPopupIconSuccessFill() {
-    return "#31b993";
+    return theme.getString("notificationPopupIconSuccessFill");
   }
 
   @Override
   public String notificationPopupIconFailFill() {
-    return "#c34d4d";
+    return theme.getString("notificationPopupIconFailFill");
   }
 
   @Override
   public String notificationPopupIconProgressFill() {
-    return "#9b9b9b";
+    return theme.getString("notificationPopupIconProgressFill");
   }
 
   @Override
   public String notificationPopupIconWarningFill() {
-    return "#F0AD4E";
+    return theme.getString("notificationPopupIconWarningFill");
   }
 
   @Override
   public String notificationPopupIconSvgFill() {
-    return "#FFFFFF";
+    return theme.getString("notificationPopupIconSvgFill");
   }
 
   @Override
   public String notificationPopupTextColor() {
-    return "#FFFFFF";
+    return theme.getString("notificationPopupTextColor");
   }
 
   @Override
   public String closeNotificationButtonColor() {
-    return "#7b7b7b";
+    return theme.getString("closeNotificationButtonColor");
   }
 
   @Override
   public String closeNotificationHoveredButtonColor() {
-    return "#333333";
+    return theme.getString("closeNotificationHoveredButtonColor");
   }
 
   @Override
   public String projectExplorerReadonlyItemBackground() {
-    return "#ffffe4";
+    return theme.getString("projectExplorerReadonlyItemBackground");
   }
 
   @Override
   public String projectExplorerTestItemBackground() {
-    return "#effae7";
+    return theme.getString("projectExplorerTestItemBackground");
   }
 
   @Override
   public String editorTabPinBackgroundColor() {
-    return "#6AAF32";
+    return theme.getString("editorTabPinBackgroundColor");
   }
 
   @Override
   public String editorTabPinDropShadow() {
-    return "drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.4))";
+    return theme.getString("editorTabPinDropShadow");
   }
 
   @Override
   public String loaderBackgroundColor() {
-    return "#fff";
+    return theme.getString("loaderBackgroundColor");
   }
 
   @Override
   public String loaderBorderColor() {
-    return "#a5a5a5";
+    return theme.getString("loaderBorderColor");
   }
 
   @Override
   public String loaderBoxShadow() {
-    return "0 2px 7px rgba(0,0,0,0.4)";
+    return theme.getString("loaderBoxShadow");
   }
 
   @Override
   public String loaderSVGFill() {
-    return "#4990e2";
+    return theme.getString("loaderSVGFill");
   }
 
   @Override
   public String loaderLabelColor() {
-    return "#6c5455";
+    return theme.getString("loaderLabelColor");
   }
 
   @Override
   public String outputBoxShadow() {
-    return "inset 0px 37px 8px -35px rgba(0,0,0,0.25)";
+    return theme.getString("outputBoxShadow");
   }
 
   @Override
   public String toolButtonColor() {
-    return "#7b7b7b";
+    return theme.getString("toolButtonColor");
   }
 
   @Override
   public String toolButtonHoverColor() {
-    return "#333333";
+    return theme.getString("toolButtonHoverColor");
   }
 
   @Override
   public String toolButtonActiveBorder() {
-    return "1px solid #8E8E8E";
+    return theme.getString("toolButtonActiveBorder");
   }
 
   @Override
   public String toolButtonHoverBackgroundColor() {
-    return "#BDBEC0";
+    return theme.getString("toolButtonHoverBackgroundColor");
   }
 
   @Override
   public String toolButtonActiveBackgroundColor() {
-    return "#AFAFB0";
+    return theme.getString("toolButtonActiveBackgroundColor");
   }
 
   @Override
   public String toolButtonActiveColor() {
-    return "#4eabff";
+    return theme.getString("toolButtonActiveColor");
   }
 
   @Override
   public String toolButtonHoverBoxShadow() {
-    return "none";
+    return theme.getString("toolButtonHoverBoxShadow");
   }
 
   @Override
   public String toolButtonActiveBoxShadow() {
-    return "inset 1px 1px 0 0 #6F6E6E";
+    return theme.getString("toolButtonActiveBoxShadow");
   }
 
   @Override
   public String vcsConsoleStagedFilesColor() {
-    return "green";
+    return theme.getString("vcsConsoleStagedFilesColor");
   }
 
   @Override
   public String vcsConsoleUnstagedFilesColor() {
-    return "red";
+    return theme.getString("vcsConsoleUnstagedFilesColor");
   }
 
   @Override
   public String vcsConsoleErrorColor() {
-    return "red";
+    return theme.getString("vcsConsoleErrorColor");
   }
 
   @Override
   public String vcsConsoleModifiedFilesColor() {
-    return "#FF7F50";
+    return theme.getString("vcsConsoleModifiedFilesColor");
   }
 
   @Override
   public String vcsConsoleChangesLineNumbersColor() {
-    return "#66CCFF";
+    return theme.getString("vcsConsoleChangesLineNumbersColor");
   }
 
   @Override
   public String vcsStatusAddedColor() {
-    return "#0a7700";
+    return theme.getString("vcsStatusAddedColor");
   }
 
   @Override
   public String vcsStatusModifiedColor() {
-    return "#0768B0";
+    return theme.getString("vcsStatusModifiedColor");
   }
 
   @Override
   public String vcsStatusUntrackedColor() {
-    return "#ab8900";
+    return theme.getString("vcsStatusUntrackedColor");
   }
 
   @Override
   public String vcsChangeMarkerInsertionColor() {
-    return "#0a7700";
+    return theme.getString("vcsChangeMarkerInsertionColor");
   }
 
   @Override
   public String vcsChangeMarkerModificationColor() {
-    return "#ab8900";
+    return theme.getString("vcsChangeMarkerModificationColor");
   }
 
   @Override
   public String vcsChangeMarkerDeletionColor() {
-    return "#888888";
+    return theme.getString("vcsChangeMarkerDeletionColor");
   }
 
   @Override
   public String editorPreferenceCategoryBackgroundColor() {
-    return "rgba(27, 27, 27, 0.10)";
+    return theme.getString("editorPreferenceCategoryBackgroundColor");
   }
 
-  /**
-   * ******************************************************************************************
-   *
-   * <p>Resource monitors
-   *
-   * <p>******************************************************************************************
-   */
   @Override
   public String resourceMonitorBarBackground() {
-    return "#e0e0e0";
+    return theme.getString("resourceMonitorBarBackground");
   }
 
-  /**
-   * ******************************************************************************************
-   *
-   * <p>Popup Loader
-   *
-   * <p>******************************************************************************************
-   */
   @Override
   public String popupLoaderBackgroundColor() {
-    return "white";
+    return theme.getString("popupLoaderBackgroundColor");
   }
 
   @Override
   public String popupLoaderBorderColor() {
-    return "#466695";
+    return theme.getString("popupLoaderBorderColor");
   }
 
   @Override
   public String popupLoaderShadow() {
-    return "0 0 7px rgba(0,0,0,0.2)";
+    return theme.getString("popupLoaderShadow");
   }
 
   @Override
   public String popupLoaderTitleColor() {
-    return "#353535";
+    return theme.getString("popupLoaderTitleColor");
   }
 
   @Override
   public String popupLoaderTextColor() {
-    return "#999999";
+    return theme.getString("popupLoaderTextColor");
   }
 
   @Override
   public String cellTableHrefColor() {
-    return "rgb(97, 183, 239)";
+    return theme.getString("cellTableHrefColor");
   }
 
   @Override
   public String cellTableHeaderColor() {
-    return "#555555";
+    return theme.getString("cellTableHeaderColor");
   }
 
   @Override
   public String cellTableHeaderBackground() {
-    return "#CCCCCC";
+    return theme.getString("cellTableHeaderBackground");
   }
 
   @Override
   public String cellTableOddRowBackground() {
-    return "#D6D6D6";
+    return theme.getString("cellTableOddRowBackground");
   }
 
   @Override
   public String cellTableEvenRowBackground() {
-    return "rgba(214, 214, 214, 0.8)";
+    return theme.getString("cellTableEvenRowBackground");
   }
 
   @Override
   public String cellTableCellColor() {
-    return "#666666";
+    return theme.getString("cellTableCellColor");
   }
 
   @Override
   public String findResultsBackground() {
-    return "#c1be9e";
+    return theme.getString("findResultsBackground");
   }
 
   @Override
   public String findResultsTextColor() {
-    return "#272727";
+    return theme.getString("findResultsTextColor");
   }
 }

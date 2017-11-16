@@ -12,6 +12,7 @@ package org.eclipse.che.ide.theme;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.storage.client.Storage;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,8 +22,8 @@ import java.util.Set;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.theme.Style;
-import org.eclipse.che.ide.api.theme.Theme;
 import org.eclipse.che.ide.api.theme.ThemeAgent;
+import org.eclipse.che.ide.api.theme.ThemeProvider;
 import org.eclipse.che.ide.preferences.PreferencesManagerImpl;
 
 /**
@@ -36,44 +37,47 @@ public class ThemeAgentImpl implements ThemeAgent {
   public static final String PREF_IDE_THEME = "ide.theme";
 
   private final PreferencesManager preferencesManager;
-  private final Theme defaultTheme;
+  private final ThemeProvider defaultTheme;
 
-  private Map<String, Theme> themes;
+  private Map<String, ThemeProvider> themes;
   private String currentThemeId;
 
   @Inject
-  public ThemeAgentImpl(DarkTheme darkTheme, PreferencesManagerImpl preferencesManager) {
+  public ThemeAgentImpl(
+      DarkThemeProvider darkThemeProvider,
+      DarkTheme darkTheme,
+      PreferencesManagerImpl preferencesManager) {
     this.preferencesManager = preferencesManager;
-    defaultTheme = darkTheme;
+    defaultTheme = darkThemeProvider;
 
     themes = new HashMap<>();
 
-    Style.theme = defaultTheme;
+    Style.theme = darkTheme;
   }
 
   @Inject
-  private void registerThemes(Set<Theme> themes) {
+  private void registerThemes(Set<ThemeProvider> themes) {
     themes.forEach(this::addTheme);
   }
 
-  private void addTheme(@NotNull Theme theme) {
+  public void addTheme(@NotNull ThemeProvider theme) {
     themes.put(theme.getId(), theme);
   }
 
   @Override
-  public Theme getTheme(@NotNull String themeId) {
+  public ThemeProvider getTheme(@NotNull String themeId) {
     if (themes.containsKey(themeId)) return themes.get(themeId);
 
     return defaultTheme;
   }
 
   @Override
-  public Theme getDefault() {
+  public ThemeProvider getDefault() {
     return defaultTheme;
   }
 
   @Override
-  public List<Theme> getThemes() {
+  public List<ThemeProvider> getThemes() {
     return new ArrayList<>(themes.values());
   }
 
@@ -93,8 +97,8 @@ public class ThemeAgentImpl implements ThemeAgent {
    * style of IDE).
    */
   public native void setCurrentThemeId(String id) /*-{
-        this.@org.eclipse.che.ide.theme.ThemeAgentImpl::currentThemeId = id;
-        @org.eclipse.che.ide.api.theme.Style::theme = this.@org.eclipse.che.ide.theme.ThemeAgentImpl::getTheme(Ljava/lang/String;)(id);
+//        this.@org.eclipse.che.ide.theme.ThemeAgentImpl::currentThemeId = id;
+//        @org.eclipse.che.ide.api.theme.Style::theme = this.@org.eclipse.che.ide.theme.ThemeAgentImpl::getTheme(Ljava/lang/String;)(id);
 
         if (typeof(Storage) !== "undefined") {
             localStorage.setItem(@org.eclipse.che.ide.theme.ThemeAgentImpl::THEME_STORAGE, id);
@@ -105,12 +109,23 @@ public class ThemeAgentImpl implements ThemeAgent {
         }
     }-*/;
 
-  public void applyUserTheme() {
+  public void applyUserTheme(AsyncCallback<Void> callback) {
     String storedThemeId = preferencesManager.getValue(PREF_IDE_THEME);
     storedThemeId = storedThemeId != null ? storedThemeId : getCurrentThemeId();
-    final Theme themeToSet = storedThemeId != null ? getTheme(storedThemeId) : getDefault();
-    setCurrentThemeId(themeToSet.getId());
-
-    Document.get().getBody().getStyle().setBackgroundColor(Style.theme.backgroundColor());
+    final ThemeProvider themeToSet = storedThemeId != null ? getTheme(storedThemeId) : getDefault();
+    themeToSet
+        .loadTheme()
+        .then(
+            theme -> {
+              currentThemeId = themeToSet.getId();
+              Style.theme = theme;
+              setCurrentThemeId(themeToSet.getId());
+              Document.get().getBody().getStyle().setBackgroundColor(Style.theme.backgroundColor());
+              callback.onSuccess(null);
+            })
+        .catchError(
+            err -> {
+              callback.onFailure(err.getCause());
+            });
   }
 }

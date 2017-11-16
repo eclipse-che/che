@@ -26,15 +26,17 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.theme.ThemeAgent;
 import org.eclipse.che.ide.js.api.Disposable;
 import org.eclipse.che.ide.js.api.JsApi;
 import org.eclipse.che.ide.js.api.context.PluginContext;
 import org.eclipse.che.ide.js.impl.action.JsActionManager;
 import org.eclipse.che.ide.js.impl.resources.ImageRegistryImpl;
-import org.eclipse.che.ide.js.plugin.model.ActivateFunction;
 import org.eclipse.che.ide.js.plugin.model.PluginContributions;
 import org.eclipse.che.ide.js.plugin.model.PluginEntryPoint;
 import org.eclipse.che.ide.js.plugin.model.PluginManifest;
+import org.eclipse.che.ide.js.plugin.model.theme.JsThemeProvider;
+import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.requirejs.RequireJsLoader;
 import org.eclipse.che.requirejs.RequirejsModule;
@@ -51,6 +53,8 @@ public class PluginManager {
   private final AppContext appContext;
   private final JsActionManager jsActionManager;
   private final ImageRegistryImpl imageRegistry;
+  private final ThemeAgent themeAgent;
+  private final AsyncRequestFactory asyncRequestFactory;
   private final JsApi jsApi;
   private final List<PluginManifest> plugins = new ArrayList<>();
   private final Map<String, PluginContext> activePlugins = new HashMap<>();
@@ -64,6 +68,8 @@ public class PluginManager {
       AppContext appContext,
       JsActionManager jsActionManager,
       ImageRegistryImpl imageRegistry,
+      ThemeAgent themeAgent,
+      AsyncRequestFactory asyncRequestFactory,
       JsApi jsApi) {
     this.client = client;
     this.promiseProvider = promiseProvider;
@@ -72,6 +78,8 @@ public class PluginManager {
     this.appContext = appContext;
     this.jsActionManager = jsActionManager;
     this.imageRegistry = imageRegistry;
+    this.themeAgent = themeAgent;
+    this.asyncRequestFactory = asyncRequestFactory;
     this.jsApi = jsApi;
   }
 
@@ -97,9 +105,27 @@ public class PluginManager {
       parsePluginMeta(arg);
       imageRegistry.registerPluginImages(plugins, activePlugins);
       jsActionManager.registerPluginActions(plugins, activePlugins);
+      handleTheme(plugins);
       doLoadPlugins(callback);
     } catch (PluginException e) {
       callback.onFailure(e);
+    }
+  }
+
+  private void handleTheme(List<PluginManifest> plugins) {
+    for (PluginManifest plugin : plugins) {
+      JsonArray themes = plugin.getContributions().getThemes();
+      for (int i = 0; i < themes.length(); i++) {
+        JsonObject themeObject = themes.getObject(i);
+        String id = themeObject.getString("id");
+        String description = themeObject.getString("description");
+        String path = themeObject.getString("path");
+        String baseUrl = getPluginBaseUrl(plugin);
+        JsThemeProvider themeProvider =
+            new JsThemeProvider(
+                id, description, baseUrl + "/" + path, promiseProvider, asyncRequestFactory);
+        themeAgent.addTheme(themeProvider);
+      }
     }
   }
 
@@ -111,14 +137,7 @@ public class PluginManager {
     if (iterator.hasNext()) {
       PluginManifest pluginManifest = iterator.next();
       RequirejsConfig config = RequirejsConfig.create();
-      String baseUrl =
-          appContext.getMasterApiEndpoint()
-              + "/plugin/"
-              + pluginManifest.getPublisher()
-              + "."
-              + pluginManifest.getName()
-              + "-"
-              + pluginManifest.getVersion();
+      String baseUrl = getPluginBaseUrl(pluginManifest);
       config.setBaseUrl(baseUrl);
       requireJs.require(
           modules -> {
@@ -152,6 +171,16 @@ public class PluginManager {
     }
   }
 
+  private String getPluginBaseUrl(PluginManifest pluginManifest) {
+    return appContext.getMasterApiEndpoint()
+        + "/plugin/"
+        + pluginManifest.getPublisher()
+        + "."
+        + pluginManifest.getName()
+        + "-"
+        + pluginManifest.getVersion();
+  }
+
   private void parsePluginMeta(List<String> pluginList) {
     for (String meta : pluginList) {
       JsonObject parse = jsonFactory.parse(meta);
@@ -175,7 +204,13 @@ public class PluginManager {
       } else {
         images = jsonFactory.createArray();
       }
-      PluginContributions contributions = new PluginContributions(actions, images);
+      JsonArray themes;
+      if (contributes.hasKey("themes")) {
+        themes = contributes.getArray("themes");
+      } else {
+        themes = jsonFactory.createArray();
+      }
+      PluginContributions contributions = new PluginContributions(actions, images, themes);
       PluginManifest manifest =
           new PluginManifest(
               name,

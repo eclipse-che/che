@@ -232,7 +232,6 @@
 @eval welcomeFontColor org.eclipse.che.ide.api.theme.Style.getWelcomeFontColor();
 @eval captionFontColor org.eclipse.che.ide.api.theme.Style.getCaptionFontColor();
 @eval factoryLinkColor org.eclipse.che.ide.api.theme.Style.getFactoryLinkColor();
-@eval radioButtonBackgroundColor org.eclipse.che.ide.api.theme.Style.getRadioButtonBackgroundColor();
 @eval disabledMenuItemColor org.eclipse.che.ide.api.theme.Style.getDeisabledMenuColor();
 
 /*Commands toolbar*/

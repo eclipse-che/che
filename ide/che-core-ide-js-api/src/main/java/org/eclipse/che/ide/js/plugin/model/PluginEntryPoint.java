@@ -16,18 +16,16 @@ import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsType;
 import org.eclipse.che.ide.js.api.context.PluginContext;
 
-/**
- * @author Yevhen Vydolob
- */
+/** @author Yevhen Vydolob */
 @JsType(isNative = true)
 public interface PluginEntryPoint {
-
-  void activate(PluginContext ctx);
-
-  void deactivate(PluginContext ctx);
 
   @JsOverlay
   static PluginEntryPoint of(JavaScriptObject o) {
     return o.cast();
   }
+
+  void activate(PluginContext ctx);
+
+  void deactivate(PluginContext ctx);
 }

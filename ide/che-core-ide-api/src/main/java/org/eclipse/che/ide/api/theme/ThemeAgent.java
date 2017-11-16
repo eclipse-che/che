@@ -25,14 +25,16 @@ public interface ThemeAgent {
    * @return theme with theme id or default theme if theme not found
    */
   @NotNull
-  Theme getTheme(@NotNull String themeId);
+  ThemeProvider getTheme(@NotNull String themeId);
 
   /** @return default theme */
-  Theme getDefault();
+  ThemeProvider getDefault();
 
   /** @return all known themes */
-  List<Theme> getThemes();
+  List<ThemeProvider> getThemes();
 
   /** @return current theme */
   String getCurrentThemeId();
+
+  void addTheme(ThemeProvider theme);
 }
