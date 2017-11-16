@@ -14,26 +14,19 @@
  * Defines a directive for creating text info container.
  * @author Oleksii Orel
  */
-export class CheTextInfo {
+export class CheTextInfo implements ng.IDirective {
 
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor() {
-    this.restrict = 'E';
-    this.replace = true;
-    this.transclude = false;
-    this.templateUrl = 'components/widget/text-info/che-text-info.html';
+  restrict = 'E';
+  replace = true;
+  transclude = false;
+  templateUrl = 'components/widget/text-info/che-text-info.html';
 
-    // scope values
-    this.scope = {
-      textValue: '=cheText',
-      hrefValue: '=cheHref',
-      labelName: '@cheLabelName',
-      copyClipboard: '=cheCopyClipboard'
-    };
-
-  }
+  // scope values
+  scope = {
+    textValue: '=cheText',
+    hrefValue: '=cheHref',
+    labelName: '@cheLabelName',
+    copyClipboard: '=cheCopyClipboard'
+  };
 
 }

@@ -32,6 +32,7 @@ import {InterceptorConfig} from './interceptor/interceptor-config';
 export class ComponentsConfig {
 
   constructor(register: che.IRegisterService) {
+    /* tslint:disable */
     new ApiConfig(register);
     new AttributeConfig(register);
     new FilterConfig(register);
@@ -45,8 +46,8 @@ export class ComponentsConfig {
     new WidgetConfig(register);
     new CheErrorMessagesConfig(register);
     new ServiceConfig(register);
-
     new InterceptorConfig(register);
+    /* tslint:enable */
 
     register.directive('cheStepsContainer', CheStepsContainer);
 

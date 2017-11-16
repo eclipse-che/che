@@ -8,8 +8,8 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-import {CheSsh} from './che-ssh.factory';
 'use strict';
+import {CheSsh} from './che-ssh.factory';
 import {CheWorkspace} from './workspace/che-workspace.factory';
 import {CheProfile} from './che-profile.factory';
 import {CheFactory} from './che-factory.factory';

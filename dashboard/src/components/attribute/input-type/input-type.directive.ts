@@ -14,12 +14,12 @@
  * Defines a directive to allow to enter only specified subset of symbols.
  * @author Oleksii Kurinnyi
  */
-export abstract class CheInputType {
-  private restrict: string = 'A';
+export abstract class CheInputType implements ng.IDirective {
+  restrict: string = 'A';
 
-  link($scope: ng.IScope, $element: ng.IAugmentedJQuery, attrs: {cheInputType: string, [prop: string]: string}): void {
+  link($scope: ng.IScope, $element: ng.IAugmentedJQuery): void {
 
-    $element.on('keydown', (event: KeyboardEvent) => {
+    $element.on('keydown', (event: JQueryEventObject) => {
       // escape, enter, tab
       if (event.keyCode === 27 || event.keyCode === 13 || event.keyCode === 9) {
         return true;

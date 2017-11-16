@@ -16,39 +16,40 @@
  */
 export class CheProjectTypeAttributeDescriptorBuilder {
 
+  private attribute: any;
+
   constructor() {
     this.attribute = {};
     this.attribute.values = [];
   }
 
-  withName(name) {
+  withName(name: string): CheProjectTypeAttributeDescriptorBuilder {
   this.attribute.name = name;
     return this;
   }
 
-  withRequired(required) {
+  withRequired(required: boolean): CheProjectTypeAttributeDescriptorBuilder {
     this.attribute.required = required;
     return this;
   }
 
-  withVariable(variable) {
+  withVariable(variable: any): CheProjectTypeAttributeDescriptorBuilder {
     this.attribute.variable = variable;
     return this;
   }
 
-  withDescription(description) {
+  withDescription(description: string): CheProjectTypeAttributeDescriptorBuilder {
     this.attribute.description = description;
     return this;
   }
 
-  withValues(values) {
+  withValues(values: any): CheProjectTypeAttributeDescriptorBuilder {
     this.attribute.values = values;
     return this;
   }
 
-  build() {
+  build(): any {
     return this.attribute;
   }
-
 
 }
