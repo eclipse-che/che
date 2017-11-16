@@ -15,6 +15,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.editor.gutter.Gutter;
 import org.eclipse.che.ide.api.vcs.VcsChangeMarkerRender;
 import org.eclipse.che.ide.api.vcs.VcsChangeMarkerRenderFactory;
+import org.eclipse.che.ide.ext.git.client.plugins.GitChangeMarkerRender;
 
 /**
  * Git implementation of {@link VcsChangeMarkerRenderFactory}

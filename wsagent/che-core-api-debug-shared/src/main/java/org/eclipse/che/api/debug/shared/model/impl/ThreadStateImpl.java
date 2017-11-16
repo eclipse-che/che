@@ -11,6 +11,7 @@
 package org.eclipse.che.api.debug.shared.model.impl;
 
 import com.google.common.base.Objects;
+import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.ThreadState;
@@ -36,7 +37,7 @@ public class ThreadStateImpl implements ThreadState {
     this.groupName = groupName;
     this.status = status;
     this.isSuspended = isSuspended;
-    this.frames = frames;
+    this.frames = frames != null ? frames : new ArrayList<>();
     this.id = id;
   }
 

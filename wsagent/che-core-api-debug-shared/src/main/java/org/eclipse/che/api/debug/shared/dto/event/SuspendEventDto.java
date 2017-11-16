@@ -11,20 +11,31 @@
 package org.eclipse.che.api.debug.shared.dto.event;
 
 import org.eclipse.che.api.debug.shared.dto.LocationDto;
+import org.eclipse.che.api.debug.shared.model.SuspendPolicy;
+import org.eclipse.che.api.debug.shared.model.event.SuspendEvent;
 import org.eclipse.che.dto.shared.DTO;
 
 /** @author andrew00x */
 @DTO
-public interface SuspendEventDto extends DebuggerEventDto {
+public interface SuspendEventDto extends SuspendEvent, DebuggerEventDto {
+  @Override
   TYPE getType();
 
   void setType(TYPE type);
 
   SuspendEventDto withType(TYPE type);
 
+  @Override
   LocationDto getLocation();
 
   void setLocation(LocationDto location);
 
   SuspendEventDto withLocation(LocationDto location);
+
+  @Override
+  SuspendPolicy getSuspendPolicy();
+
+  void setSuspendPolicy(SuspendPolicy suspendPolicy);
+
+  SuspendEventDto withSuspendPolicy(SuspendPolicy suspendPolicy);
 }

@@ -10,5 +10,9 @@
  */
 package org.eclipse.che.api.debug.shared.model.action;
 
+import org.eclipse.che.api.debug.shared.model.SuspendPolicy;
+
 /** @author Anatoliy Bazko */
-public interface StepIntoAction extends Action {}
+public interface StepIntoAction extends Action {
+  SuspendPolicy getSuspendPolicy();
+}

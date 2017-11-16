@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
@@ -331,7 +332,8 @@ public class Consoles {
 
   /** wait a preview url into 'Consoles' */
   public void waitPreviewUrlIsPresent() {
-    redrawDriverWait.until(visibilityOf(previewUrl));
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOf(previewUrl));
   }
 
   /** wait a preview url is not present into 'Consoles' */
