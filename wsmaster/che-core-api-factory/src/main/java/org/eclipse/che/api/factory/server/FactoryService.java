@@ -151,7 +151,10 @@ public class FactoryService extends Service {
   @Produces(APPLICATION_JSON)
   @ApiOperation(
     value = "Get factory by its identifier",
-    notes = "If validate parameter is not specified, retrieved factory wont be validated"
+    notes =
+        "If validate parameter is not specified, retrieved factory wont be validated."
+            + " This method is going to be deprecated or limited in scope in 6.0 GA "
+            + " since it's not optimized on backend performance "
   )
   @ApiResponses({
     @ApiResponse(code = 200, message = "Response contains requested factory entry"),
@@ -196,6 +199,7 @@ public class FactoryService extends Service {
     ),
     @ApiResponse(code = 500, message = "Internal server error")
   })
+  @Deprecated
   public List<FactoryDto> getFactoryByAttribute(
       @DefaultValue("0") @QueryParam("skipCount") Integer skipCount,
       @DefaultValue("30") @QueryParam("maxItems") Integer maxItems,
@@ -214,6 +218,12 @@ public class FactoryService extends Service {
     for (Factory factory : factoryManager.getByAttribute(maxItems, skipCount, query)) {
       factories.add(injectLinks(asDto(factory)));
     }
+    LOG.warn(
+        "Method factory.find is going to be removed or limited in scope in 6.0 GA."
+            + " Requested attributes {}, skipCount {}, maxItems {}",
+        query,
+        skip,
+        maxItems);
     return factories;
   }
 
