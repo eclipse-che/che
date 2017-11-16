@@ -17,6 +17,7 @@ import com.google.inject.multibindings.Multibinder;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionService;
 import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerLauncher;
 
 /** @author Anatolii Bazko */
@@ -27,6 +28,7 @@ public class JavaModule extends AbstractModule {
 
   @Override
   protected void configure() {
+    bind(JavaLanguageServerExtensionService.class).asEagerSingleton();
     Multibinder.newSetBinder(binder(), LanguageServerLauncher.class)
         .addBinding()
         .toInstance(new JavaLanguageServerLauncher());
