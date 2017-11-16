@@ -10,24 +10,21 @@
  */
 package org.eclipse.che.plugin.languageserver.ide.location;
 
-import org.eclipse.che.api.languageserver.shared.dto.DtoClientImpls.FileContentParametersDto;
-import org.eclipse.che.api.languageserver.shared.model.ExtendedLocation;
-import org.eclipse.che.api.languageserver.shared.model.FileContentParameters;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
+import org.eclipse.lsp4j.Location;
 
 public class LanguageServerFile implements VirtualFile {
-  private final ExtendedLocation location;
+  private final Location location;
   private final Path path;
   private final TextDocumentServiceClient textDocumentService;
 
-  public LanguageServerFile(
-      TextDocumentServiceClient textDocumentService, ExtendedLocation location) {
+  public LanguageServerFile(TextDocumentServiceClient textDocumentService, Location location) {
     this.textDocumentService = textDocumentService;
     this.location = location;
-    this.path = new Path(location.getLocation().getUri().substring("file://".length()));
+    this.path = new Path(location.getUri().substring("file://".length()));
   }
 
   @Override
@@ -57,10 +54,7 @@ public class LanguageServerFile implements VirtualFile {
 
   @Override
   public Promise<String> getContent() {
-    return textDocumentService.getFileContent(
-        new FileContentParametersDto(
-            new FileContentParameters(
-                location.getLanguageServerId(), location.getLocation().getUri())));
+    return textDocumentService.getFileContent(location.getUri());
   }
 
   @Override

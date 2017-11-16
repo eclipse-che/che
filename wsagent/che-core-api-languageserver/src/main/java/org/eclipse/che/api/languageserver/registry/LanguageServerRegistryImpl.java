@@ -28,9 +28,11 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.PreDestroy;
@@ -363,6 +365,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
     String projectPath = extractProjectPath(fileUri);
     String wsPath = absolutize(LanguageServiceUtils.removePrefixUri(fileUri));
     LanguageDescription language = languageRecognizer.recognizeByPath(wsPath);
+    String languageId = language == null ? null : language.getLanguageId();
     if (projectPath == null || language == null) {
       return Collections.emptyList();
     }
@@ -374,8 +377,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
           .getLauncher()
           .getLaunchingStrategy()
           .isApplicable(server.getLaunchKey(), fileUri)) {
-        int score =
-            matchScore(server.getLauncher().getDescription(), fileUri, language.getLanguageId());
+        int score = matchScore(server.getLauncher().getDescription(), fileUri, languageId);
         if (score > 0) {
           List<InitializedLanguageServer> list = result.get(score);
           if (list == null) {
@@ -491,6 +493,15 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
     } catch (IOException | ApiException e) {
       LOG.error("Did not manage to get workspace configuration: {}", workspaceId, e);
     }
+  }
+
+  public Optional<InitializedLanguageServer> findServer(
+      Predicate<InitializedLanguageServer> condition) {
+    ArrayList<InitializedLanguageServer> arrayList = new ArrayList<>(initializedServers.size());
+    synchronized (initializedServers) {
+      arrayList.addAll(initializedServers);
+    }
+    return arrayList.stream().filter(condition).findFirst();
   }
 
   public void addObserver(ServerInitializerObserver observer) {
