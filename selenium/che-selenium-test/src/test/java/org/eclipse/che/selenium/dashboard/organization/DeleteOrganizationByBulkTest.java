@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.dashboard.organization;
 
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
 import static org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.NAME;
 import static org.testng.Assert.assertEquals;
@@ -18,8 +19,8 @@ import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import java.util.ArrayList;
 import java.util.List;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
@@ -27,8 +28,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.ConfirmDialog;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -38,88 +37,81 @@ import org.testng.annotations.Test;
  *
  * @author Ann Shumilova
  */
-public class BulkOrganizationDeletionTest {
-  private static final Logger LOG = LoggerFactory.getLogger(BulkOrganizationDeletionTest.class);
+public class DeleteOrganizationByBulkTest {
+  private static final String ORG_NAME1 = generate("organization1", 5);
+  private static final String ORG_NAME2 = generate("organization2", 5);
 
-  private List<OrganizationDto> organizations;
-  private OrganizationDto organization1;
-  private OrganizationDto organization2;
-
-  @Inject private OrganizationListPage organizationListPage;
-  @Inject private NavigationBar navigationBar;
-  @Inject private ConfirmDialog confirmDialog;
-  @Inject private Dashboard dashboard;
+  private List<OrganizationDto> organizations = new ArrayList<>();
 
   @Inject
   @Named("admin")
   private TestOrganizationServiceClient testOrganizationServiceClient;
 
+  @Inject private OrganizationListPage organizationListPage;
   @Inject private AdminTestUser adminTestUser;
+  @Inject private NavigationBar navigationBar;
+  @Inject private ConfirmDialog confirmDialog;
+  @Inject private Dashboard dashboard;
 
   @BeforeClass
   public void setUp() throws Exception {
+    organizations.add(testOrganizationServiceClient.create(ORG_NAME1));
+    organizations.add(testOrganizationServiceClient.create(ORG_NAME2));
+
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
-
-    String organizationName1 = NameGenerator.generate("organization", 5);
-    String organizationName2 = NameGenerator.generate("organization", 5);
-
-    organization1 = testOrganizationServiceClient.create(organizationName1);
-    organization2 = testOrganizationServiceClient.create(organizationName2);
-    organizations = testOrganizationServiceClient.getAll();
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    testOrganizationServiceClient.deleteById(organization1.getId());
-    testOrganizationServiceClient.deleteById(organization2.getId());
+    for (OrganizationDto organization : organizations) {
+      testOrganizationServiceClient.deleteById(organization.getId());
+    }
   }
 
   @Test
   public void testOrganizationBulkDeletion() {
-    navigationBar.waitNavigationBar();
     int organizationsCount = organizations.size();
 
-    navigationBar.clickOnMenu(ORGANIZATIONS);
-    organizationListPage.waitForOrganizationsToolbar();
+    // Check that created organization exist
+    navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
-    assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount);
-    assertTrue(organizationListPage.getValues(NAME).contains(organization1.getName()));
-    assertTrue(organizationListPage.getValues(NAME).contains(organization2.getName()));
+    assertTrue(organizationListPage.getOrganizationListItemCount() >= organizationsCount);
+    assertTrue(organizationListPage.getValues(NAME).contains(ORG_NAME1));
+    assertTrue(organizationListPage.getValues(NAME).contains(ORG_NAME2));
 
-    // Tests delete:
+    // Tests the Bulk Delete feature
     assertFalse(organizationListPage.isBulkDeleteVisible());
-    organizationListPage.clickCheckbox(organization1.getName());
-    organizationListPage.clickCheckbox(organization2.getName());
+    organizationListPage.clickCheckbox(ORG_NAME1);
+    organizationListPage.clickCheckbox(ORG_NAME2);
     assertTrue(organizationListPage.isBulkDeleteVisible());
-    organizationListPage.clickCheckbox(organization1.getName());
-    organizationListPage.clickCheckbox(organization2.getName());
+    organizationListPage.clickCheckbox(ORG_NAME1);
+    organizationListPage.clickCheckbox(ORG_NAME2);
     assertFalse(organizationListPage.isBulkDeleteVisible());
-    organizationListPage.clickCheckbox(organization1.getName());
-    organizationListPage.clickCheckbox(organization2.getName());
+    organizationListPage.clickCheckbox(ORG_NAME1);
+    organizationListPage.clickCheckbox(ORG_NAME2);
     assertTrue(organizationListPage.isBulkDeleteVisible());
 
+    // Delete all organizations by the Bulk Delete feature
     organizationListPage.clickBulkDeleteButton();
     confirmDialog.waitOpened();
     assertEquals(confirmDialog.getTitle(), "Delete organizations");
     assertEquals(
         confirmDialog.getMessage(),
-        String.format("Would you like to delete these %s organizations?", 2));
+        String.format("Would you like to delete these %s organizations?", organizationsCount));
     assertEquals(confirmDialog.getConfirmButtonTitle(), "Delete");
     assertEquals(confirmDialog.getCancelButtonTitle(), "Close");
     confirmDialog.clickConfirm();
-
     confirmDialog.waitClosed();
     organizationListPage.waitForOrganizationsList();
 
-    organizationListPage.waitForOrganizationIsRemoved(organization1.getName());
-    organizationListPage.waitForOrganizationIsRemoved(organization2.getName());
-
-    assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount - 2);
-    assertFalse(organizationListPage.getValues(NAME).contains(organization1.getName()));
-    assertFalse(organizationListPage.getValues(NAME).contains(organization2.getName()));
-    assertEquals(
-        navigationBar.getMenuCounterValue(ORGANIZATIONS), String.valueOf(organizationsCount - 2));
+    // Test that all organization removed
+    organizationListPage.waitForOrganizationIsRemoved(ORG_NAME1);
+    organizationListPage.waitForOrganizationIsRemoved(ORG_NAME2);
+    assertTrue(organizationListPage.getOrganizationListItemCount() >= 0);
+    assertFalse(organizationListPage.getValues(NAME).contains(ORG_NAME1));
+    assertFalse(organizationListPage.getValues(NAME).contains(ORG_NAME2));
+    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) >= 0);
   }
 }
