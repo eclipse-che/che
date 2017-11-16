@@ -164,7 +164,6 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
   private class BootstrapMachineTask implements Runnable {
 
     private OpenShiftMachine machine;
-    private boolean isInterrupted = false;
 
     BootstrapMachineTask(OpenShiftMachine machine) {
       this.machine = machine;
@@ -172,7 +171,7 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
 
     @Override
     public void run() {
-      if (isInterrupted) {
+      if (Thread.interrupted()) {
         return;
       }
       try {
@@ -189,7 +188,6 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
     }
 
     public void interrupt() {
-      this.isInterrupted = true;
       Thread.currentThread().interrupt();
     }
   }
