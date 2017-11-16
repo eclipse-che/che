@@ -58,6 +58,7 @@ import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.installer.shared.model.Installer;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.URLRewriter;
+import org.eclipse.che.api.workspace.server.WorkspaceSharedPool;
 import org.eclipse.che.api.workspace.server.hc.ServersChecker;
 import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
@@ -134,7 +135,8 @@ public class OpenShiftInternalRuntimeTest {
             bootstrapperFactory,
             serverCheckerFactory,
             context,
-            project);
+            project,
+            new WorkspaceSharedPool("cached", null, null));
     when(context.getOpenShiftEnvironment()).thenReturn(osEnv);
     when(serverCheckerFactory.create(any(), anyString(), any())).thenReturn(serversChecker);
     when(context.getIdentity()).thenReturn(IDENTITY);
