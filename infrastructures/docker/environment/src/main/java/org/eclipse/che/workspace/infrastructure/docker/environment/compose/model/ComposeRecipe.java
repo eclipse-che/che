@@ -20,13 +20,13 @@ import java.util.stream.Collectors;
  *
  * @author Alexander Garagatyi
  */
-public class ComposeEnvironment {
+public class ComposeRecipe {
   private String version;
   private Map<String, ComposeService> services;
 
-  public ComposeEnvironment() {}
+  public ComposeRecipe() {}
 
-  public ComposeEnvironment(ComposeEnvironment environment) {
+  public ComposeRecipe(ComposeRecipe environment) {
     version = environment.getVersion();
     if (environment.getServices() != null) {
       services =
@@ -49,7 +49,7 @@ public class ComposeEnvironment {
     this.version = version;
   }
 
-  public ComposeEnvironment withVersion(String version) {
+  public ComposeRecipe withVersion(String version) {
     this.version = version;
     return this;
   }
@@ -66,7 +66,7 @@ public class ComposeEnvironment {
     this.services = services;
   }
 
-  public ComposeEnvironment withServices(Map<String, ComposeService> services) {
+  public ComposeRecipe withServices(Map<String, ComposeService> services) {
     this.services = services;
     return this;
   }
@@ -74,8 +74,8 @@ public class ComposeEnvironment {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof ComposeEnvironment)) return false;
-    ComposeEnvironment that = (ComposeEnvironment) o;
+    if (!(o instanceof ComposeRecipe)) return false;
+    ComposeRecipe that = (ComposeRecipe) o;
     return Objects.equals(version, that.version) && Objects.equals(services, that.services);
   }
 
@@ -86,6 +86,6 @@ public class ComposeEnvironment {
 
   @Override
   public String toString() {
-    return "ComposeEnvironment{" + "version='" + version + '\'' + ", services=" + services + '}';
+    return "ComposeRecipe{" + "version='" + version + '\'' + ", services=" + services + '}';
   }
 }

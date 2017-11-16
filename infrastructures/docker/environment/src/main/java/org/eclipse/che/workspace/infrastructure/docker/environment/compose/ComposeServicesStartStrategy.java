@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.docker.container;
+package org.eclipse.che.workspace.infrastructure.docker.environment.compose;
 
 import static java.lang.String.format;
 
@@ -17,14 +17,14 @@ import com.google.common.collect.Sets;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.eclipse.che.api.core.ValidationException;
-import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
-import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
+import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeService;
 
 /**
  * Finds order of Che containers to start that respects dependencies between containers.
@@ -32,74 +32,81 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
  * @author Alexander Garagatyi
  * @author Alexander Andrienko
  */
-public class ContainersStartStrategy {
+public class ComposeServicesStartStrategy {
   /**
-   * Resolves order of start for machines in an environment.
+   * Resolves order of start for compose services in an environment.
    *
-   * @throws ValidationException if order of machines can not be calculated
+   * @throws ValidationException if order of services can not be calculated
    */
-  public List<String> order(DockerEnvironment environment) throws ValidationException {
+  public LinkedHashMap<String, ComposeService> order(Map<String, ComposeService> services)
+      throws ValidationException {
 
-    Map<String, Integer> weights = weightMachines(environment.getContainers());
+    Map<String, Integer> weights = weightServices(services);
+    List<String> orderedServicesNames = sortByWeight(weights);
 
-    return sortByWeight(weights);
+    LinkedHashMap<String, ComposeService> orderedServices = new LinkedHashMap<>();
+    for (String serviceName : orderedServicesNames) {
+      orderedServices.put(serviceName, services.get(serviceName));
+    }
+
+    return orderedServices;
   }
 
   /**
-   * Returns mapping of names of machines to its weights in dependency graph.
+   * Returns mapping of names of services to its weights in dependency graph.
    *
-   * @throws ValidationException if weights of machines can not be calculated
+   * @throws ValidationException if weights of services can not be calculated
    */
-  private Map<String, Integer> weightMachines(Map<String, DockerContainerConfig> containers)
+  private Map<String, Integer> weightServices(Map<String, ComposeService> services)
       throws ValidationException {
 
     HashMap<String, Integer> weights = new HashMap<>();
 
-    // create machines dependency graph
-    Map<String, Set<String>> dependencies = new HashMap<>(containers.size());
-    for (Map.Entry<String, DockerContainerConfig> containerEntry : containers.entrySet()) {
-      DockerContainerConfig container = containerEntry.getValue();
+    // create services dependency graph
+    Map<String, Set<String>> dependencies = new HashMap<>(services.size());
+    for (Map.Entry<String, ComposeService> containerEntry : services.entrySet()) {
+      ComposeService service = containerEntry.getValue();
 
-      Set<String> machineDependencies =
+      Set<String> serviceDependencies =
           Sets.newHashSetWithExpectedSize(
-              container.getDependsOn().size()
-                  + container.getLinks().size()
-                  + container.getVolumesFrom().size());
+              service.getDependsOn().size()
+                  + service.getLinks().size()
+                  + service.getVolumesFrom().size());
 
-      for (String dependsOn : container.getDependsOn()) {
+      for (String dependsOn : service.getDependsOn()) {
         checkDependency(
-            dependsOn, containerEntry.getKey(), containers, "A machine can not depend on itself");
-        machineDependencies.add(dependsOn);
+            dependsOn, containerEntry.getKey(), services, "A service can not depend on itself");
+        serviceDependencies.add(dependsOn);
       }
 
       // links also counts as dependencies
-      for (String link : container.getLinks()) {
+      for (String link : service.getLinks()) {
         String dependency = getContainerFromLink(link);
         checkDependency(
-            dependency, containerEntry.getKey(), containers, "A machine can not link to itself");
-        machineDependencies.add(dependency);
+            dependency, containerEntry.getKey(), services, "A service can not link to itself");
+        serviceDependencies.add(dependency);
       }
       // volumesFrom also counts as dependencies
-      for (String volumesFrom : container.getVolumesFrom()) {
+      for (String volumesFrom : service.getVolumesFrom()) {
         String dependency = getContainerFromVolumesFrom(volumesFrom);
         checkDependency(
             dependency,
             containerEntry.getKey(),
-            containers,
-            "A machine can not contain 'volumes_from' to itself");
-        machineDependencies.add(dependency);
+            services,
+            "A service can not contain 'volumes_from' to itself");
+        serviceDependencies.add(dependency);
       }
-      dependencies.put(containerEntry.getKey(), machineDependencies);
+      dependencies.put(containerEntry.getKey(), serviceDependencies);
     }
 
-    // Find weight of each machine in graph.
-    // Weight of machine is calculated as sum of all weights of machines it depends on.
+    // Find weight of each service in graph.
+    // Weight of service is calculated as sum of all weights of services it depends on.
     // Nodes with no dependencies gets weight 0
     while (!dependencies.isEmpty()) {
       int previousSize = dependencies.size();
       for (Iterator<Map.Entry<String, Set<String>>> it = dependencies.entrySet().iterator();
           it.hasNext(); ) {
-        // process not yet processed machines only
+        // process not yet processed services only
         Map.Entry<String, Set<String>> containerEntry = it.next();
         String container = containerEntry.getKey();
         Set<String> containerDependencies = containerEntry.getValue();
@@ -109,9 +116,9 @@ public class ContainersStartStrategy {
           weights.put(container, 0);
           it.remove();
         } else {
-          // machine has dependencies - check if it has not weighted dependencies
+          // service has dependencies - check if it has not weighted dependencies
           if (weights.keySet().containsAll(containerDependencies)) {
-            // all connections are weighted - lets evaluate current machine
+            // all connections are weighted - lets evaluate current service
             Optional<String> maxWeight =
                 containerDependencies.stream().max(Comparator.comparing(weights::get));
             // optional can't be empty because size of the list is checked above
@@ -123,7 +130,7 @@ public class ContainersStartStrategy {
       }
       if (dependencies.size() == previousSize) {
         throw new ValidationException(
-            "Launch order of machines '"
+            "Launch order of services '"
                 + Joiner.on(", ").join(dependencies.keySet())
                 + "' can't be evaluated. Circular dependency.");
       }
@@ -138,7 +145,7 @@ public class ContainersStartStrategy {
     if (link != null) {
       String[] split = container.split(":");
       if (split.length > 2) {
-        throw new ValidationException(format("Container link '%s' is invalid", link));
+        throw new ValidationException(format("Service link '%s' is invalid", link));
       }
       container = split[0];
     }
@@ -154,8 +161,7 @@ public class ContainersStartStrategy {
     if (volumesFrom != null) {
       String[] split = container.split(":");
       if (split.length > 2) {
-        throw new ValidationException(
-            format("Container volumes_from '%s' is invalid", volumesFrom));
+        throw new ValidationException(format("Service volumes_from '%s' is invalid", volumesFrom));
       }
       container = split[0];
     }
@@ -174,7 +180,7 @@ public class ContainersStartStrategy {
   private void checkDependency(
       String dependency,
       String containerName,
-      Map<String, DockerContainerConfig> containers,
+      Map<String, ComposeService> containers,
       String errorMessage)
       throws ValidationException {
     if (containerName.equals(dependency)) {
@@ -183,7 +189,7 @@ public class ContainersStartStrategy {
     if (!containers.containsKey(dependency)) {
       throw new ValidationException(
           format(
-              "Dependency '%s' in machine '%s' points to unknown machine.",
+              "Dependency '%s' in service '%s' points to unknown service.",
               dependency, containerName));
     }
   }

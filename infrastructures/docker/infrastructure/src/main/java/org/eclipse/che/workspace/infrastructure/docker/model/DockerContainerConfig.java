@@ -10,13 +10,16 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker.model;
 
+import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.eclipse.che.commons.annotation.Nullable;
 
 /**
@@ -37,7 +40,7 @@ public class DockerContainerConfig {
   private List<String> securityOpt;
   private List<String> entrypoint;
   private Map<String, String> environment;
-  private Set<String> expose = new HashSet<>();
+  private Set<String> expose;
   private List<String> extraHosts;
   private String id;
   private String image;
@@ -82,7 +85,9 @@ public class DockerContainerConfig {
     if (container.getEnvironment() != null) {
       environment = new HashMap<>(container.getEnvironment());
     }
+
     setExpose(container.getExpose());
+
     if (container.getExtraHosts() != null) {
       extraHosts = new ArrayList<>(container.getExtraHosts());
     }
@@ -277,19 +282,27 @@ public class DockerContainerConfig {
    * </ul>
    */
   public Set<String> getExpose() {
-    return expose;
+    if (expose == null) {
+      return Collections.emptySet();
+    }
+    return ImmutableSet.copyOf(expose);
   }
 
   public DockerContainerConfig setExpose(Set<String> expose) {
-    for(String exp : expose) {
-      addExpose(exp);
+    if (expose == null) {
+      this.expose = null;
+    } else {
+      this.expose =
+          expose
+              .stream()
+              .map(this::normalizeExposeValue)
+              .collect(Collectors.toCollection(HashSet::new));
     }
     return this;
   }
 
-  public DockerContainerConfig addExpose(String exposeToAdd) {
-    expose.add(exposeToAdd.contains("/") ? exposeToAdd : exposeToAdd + "/tcp");
-    return this;
+  private String normalizeExposeValue(String expose) {
+    return expose.contains("/") ? expose : expose + "/tcp";
   }
 
   /**

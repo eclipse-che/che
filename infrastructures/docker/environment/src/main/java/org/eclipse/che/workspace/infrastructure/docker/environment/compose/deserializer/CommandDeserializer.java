@@ -24,7 +24,7 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.eclipse.che.workspace.infrastructure.docker.environment.compose.ComposeEnvironmentParser;
+import org.eclipse.che.workspace.infrastructure.docker.environment.compose.ComposeEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeService;
 
 /**
@@ -54,7 +54,7 @@ import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model
  * </pre>
  * </ul>
  *
- * See more for parsing compose file {@link ComposeEnvironmentParser}.
+ * See more for parsing compose file {@link ComposeEnvironmentFactory}.
  *
  * <p>Note: this deserializer works for json too.
  *

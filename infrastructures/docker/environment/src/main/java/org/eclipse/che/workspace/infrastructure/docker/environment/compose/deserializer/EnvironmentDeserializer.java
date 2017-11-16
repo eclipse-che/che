@@ -13,7 +13,6 @@ package org.eclipse.che.workspace.infrastructure.docker.environment.compose.dese
 import static java.lang.String.format;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import java.io.IOException;
@@ -33,7 +32,7 @@ public class EnvironmentDeserializer extends JsonDeserializer<Map<String, String
 
   @Override
   public Map<String, String> deserialize(JsonParser jsonParser, DeserializationContext ctxt)
-      throws IOException, JsonProcessingException {
+      throws IOException {
     Object environment = jsonParser.readValueAs(Object.class);
 
     /* Parse dictionary in view of:

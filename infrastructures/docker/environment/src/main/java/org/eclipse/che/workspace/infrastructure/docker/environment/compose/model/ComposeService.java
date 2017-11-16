@@ -12,13 +12,16 @@ package org.eclipse.che.workspace.infrastructure.docker.environment.compose.mode
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.deserializer.CommandDeserializer;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.deserializer.EnvironmentDeserializer;
 
@@ -43,7 +46,7 @@ public class ComposeService {
   @JsonDeserialize(using = EnvironmentDeserializer.class)
   private Map<String, String> environment;
 
-  private Set<String> expose = new HashSet<>();
+  private Set<String> expose;
   private List<String> ports;
   private Map<String, String> labels;
   private List<String> links;
@@ -84,6 +87,7 @@ public class ComposeService {
     if (service.getLabels() != null) {
       labels = new HashMap<>(service.getLabels());
     }
+
     this.setExpose(service.getExpose());
 
     if (service.getPorts() != null) {
@@ -256,32 +260,43 @@ public class ComposeService {
   }
 
   /**
-   * Expose ports without publishing them to the host machine - they’ll only be accessible to linked
-   * services.
+   * Immutable expose ports list without publishing them to the host machine - they’ll only be
+   * accessible to linked services.
    *
    * <p>Only the internal port can be specified. <br>
    * Examples:
    *
    * <ul>
-   *   <li>3000
-   *   <li>8000
+   *   <li>3000/tcp
+   *   <li>8000/udp
    * </ul>
    */
   public Set<String> getExpose() {
-//    if (expose == null) {
-//      expose = new ArrayList<>();
-//    }
-    return expose;
+    if (expose == null) {
+      return Collections.emptySet();
+    }
+    return ImmutableSet.copyOf(expose);
   }
 
   public void setExpose(Set<String> expose) {
-    for(String exp : expose) {
-      addExpose(exp);
+    if (expose == null) {
+      this.expose = null;
+    } else {
+      this.expose =
+          expose
+              .stream()
+              .map(this::normalizeExposeValue)
+              .collect(Collectors.toCollection(HashSet::new));
     }
   }
 
-  public void addExpose(String exposeToAdd) {
-    expose.add(exposeToAdd.contains("/") ? exposeToAdd : exposeToAdd + "/tcp");
+  private String normalizeExposeValue(String expose) {
+    return expose.contains("/") ? expose : expose + "/tcp";
+  }
+
+  public ComposeService withExpose(Set<String> expose) {
+    setExpose(expose);
+    return this;
   }
 
   /**
