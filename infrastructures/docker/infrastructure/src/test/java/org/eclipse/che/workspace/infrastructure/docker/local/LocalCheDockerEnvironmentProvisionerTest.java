@@ -13,7 +13,6 @@ package org.eclipse.che.workspace.infrastructure.docker.local;
 import static org.mockito.ArgumentMatchers.eq;
 
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.local.dod.DockerApiHostEnvVariableProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.local.installer.LocalInstallersBinariesVolumeProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.local.installer.WsAgentServerConfigProvisioner;
@@ -34,14 +33,13 @@ import org.testng.annotations.Test;
 
 /** @author Alexander Garagatyi */
 @Listeners(MockitoTestNGListener.class)
-public class LocalCheInfrastructureProvisionerTest {
+public class LocalCheDockerEnvironmentProvisionerTest {
 
   @Mock private ContainerSystemSettingsProvisionersApplier settingsProvisioners;
   @Mock private ProjectsVolumeProvisioner projectsVolumeProvisioner;
   @Mock private LocalInstallersBinariesVolumeProvisioner installerConfigProvisioner;
   @Mock private RuntimeLabelsProvisioner labelsProvisioner;
   @Mock private DockerApiHostEnvVariableProvisioner dockerApiEnvProvisioner;
-  @Mock private InternalEnvironment environment;
   @Mock private DockerEnvironment dockerEnvironment;
   @Mock private RuntimeIdentity runtimeIdentity;
   @Mock private WsAgentServerConfigProvisioner wsAgentServerConfigProvisioner;
@@ -49,14 +47,14 @@ public class LocalCheInfrastructureProvisionerTest {
   @Mock private EnvVarsConverter envVarsConverter;
   @Mock private MemoryAttributeConverter memoryAttributeConverter;
 
-  private LocalCheInfrastructureProvisioner provisioner;
+  private LocalCheDockerEnvironmentProvisioner provisioner;
 
   private Object[] allInnerProvisioners;
 
   @BeforeMethod
   public void setUp() throws Exception {
     provisioner =
-        new LocalCheInfrastructureProvisioner(
+        new LocalCheDockerEnvironmentProvisioner(
             settingsProvisioners,
             projectsVolumeProvisioner,
             installerConfigProvisioner,
@@ -84,37 +82,23 @@ public class LocalCheInfrastructureProvisionerTest {
   @Test
   public void shouldCallProvisionersInSpecificOrder() throws Exception {
     // when
-    provisioner.provision(environment, dockerEnvironment, runtimeIdentity);
+    provisioner.provision(dockerEnvironment, runtimeIdentity);
 
     // then
     InOrder inOrder = Mockito.inOrder((Object[]) allInnerProvisioners);
-    inOrder
-        .verify(serversConverter)
-        .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
-    inOrder
-        .verify(envVarsConverter)
-        .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
-    inOrder
-        .verify(memoryAttributeConverter)
-        .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
-    inOrder
-        .verify(labelsProvisioner)
-        .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
+    inOrder.verify(serversConverter).provision(eq(dockerEnvironment), eq(runtimeIdentity));
+    inOrder.verify(envVarsConverter).provision(eq(dockerEnvironment), eq(runtimeIdentity));
+    inOrder.verify(memoryAttributeConverter).provision(eq(dockerEnvironment), eq(runtimeIdentity));
+    inOrder.verify(labelsProvisioner).provision(eq(dockerEnvironment), eq(runtimeIdentity));
     inOrder
         .verify(installerConfigProvisioner)
-        .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
-    inOrder
-        .verify(projectsVolumeProvisioner)
-        .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
+        .provision(eq(dockerEnvironment), eq(runtimeIdentity));
+    inOrder.verify(projectsVolumeProvisioner).provision(eq(dockerEnvironment), eq(runtimeIdentity));
     inOrder
         .verify(wsAgentServerConfigProvisioner)
-        .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
-    inOrder
-        .verify(settingsProvisioners)
-        .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
-    inOrder
-        .verify(dockerApiEnvProvisioner)
-        .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
+        .provision(eq(dockerEnvironment), eq(runtimeIdentity));
+    inOrder.verify(settingsProvisioners).provision(eq(dockerEnvironment), eq(runtimeIdentity));
+    inOrder.verify(dockerApiEnvProvisioner).provision(eq(dockerEnvironment), eq(runtimeIdentity));
     inOrder.verifyNoMoreInteractions();
   }
 }

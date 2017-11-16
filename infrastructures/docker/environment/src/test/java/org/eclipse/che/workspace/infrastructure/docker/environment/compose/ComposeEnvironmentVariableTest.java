@@ -19,7 +19,7 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.deserializer.EnvironmentDeserializer;
-import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeEnvironment;
+import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeRecipe;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeService;
 import org.mockito.InjectMocks;
 import org.mockito.testng.MockitoTestNGListener;
@@ -29,23 +29,21 @@ import org.testng.annotations.Test;
 
 /**
  * Test deserialization field {@link ComposeService#environment} by {@link EnvironmentDeserializer}
- * in the {@link ComposeEnvironmentParser}.
+ * in the {@link ComposeEnvironmentFactory}.
  *
  * @author Dmytro Nochevnov
  */
 @Listeners(MockitoTestNGListener.class)
-public class EnvironmentDeserializerTest {
-
-  @InjectMocks private ComposeEnvironmentParser parser;
+public class ComposeEnvironmentVariableTest {
+  @InjectMocks private ComposeEnvironmentFactory factory;
 
   @Test(dataProvider = "correctContentTestData")
   public void testCorrectContentParsing(String content, Map<String, String> expected)
       throws Exception {
-    ComposeEnvironment cheServicesEnvironment = parser.parse(content, "application/x-yaml");
+    ComposeRecipe composeRecipe = factory.doParse(content);
 
     // then
-    assertEquals(
-        cheServicesEnvironment.getServices().get("dev-machine").getEnvironment(), expected);
+    assertEquals(composeRecipe.getServices().get("dev-machine").getEnvironment(), expected);
   }
 
   @DataProvider
@@ -70,8 +68,8 @@ public class EnvironmentDeserializerTest {
             + " dev-machine: \n"
             + "  image: codenvy/ubuntu_jdk8\n"
             + "  environment:\n"
-            + "   MYSQL_ROOT_PASSWORD: ",
-        ImmutableMap.of("MYSQL_ROOT_PASSWORD", null)
+            + "   MYSQL_ROOT_PASSWORD: \"\"",
+        ImmutableMap.of("MYSQL_ROOT_PASSWORD", "")
       },
 
       // dictionary format, value of variable contains colon sign
@@ -128,7 +126,7 @@ public class EnvironmentDeserializerTest {
   @Test(dataProvider = "incorrectContentTestData")
   public void shouldThrowError(String content, String errorPattern) throws Exception {
     try {
-      parser.parse(content, "application/x-yaml");
+      factory.doParse(content);
     } catch (ValidationException e) {
       assertTrue(
           e.getMessage().matches(errorPattern),

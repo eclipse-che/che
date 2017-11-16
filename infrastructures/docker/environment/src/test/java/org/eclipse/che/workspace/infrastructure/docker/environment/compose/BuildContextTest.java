@@ -15,7 +15,7 @@ import static org.testng.Assert.assertEquals;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeEnvironment;
+import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeRecipe;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeService;
 import org.mockito.InjectMocks;
 import org.mockito.testng.MockitoTestNGListener;
@@ -23,14 +23,14 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 /**
- * Test deserialization field {@link ComposeService#build} in the {@link ComposeEnvironmentParser}.
+ * Test deserialization field {@link ComposeService#build} in the {@link ComposeEnvironmentFactory}.
  *
  * @author Mario Loriedo
  */
 @Listeners(MockitoTestNGListener.class)
 public class BuildContextTest {
 
-  @InjectMocks private ComposeEnvironmentParser parser;
+  @InjectMocks private ComposeEnvironmentFactory factory;
 
   @Test
   public void shouldParseBuildArgsWhenProvided() throws Exception {
@@ -53,11 +53,10 @@ public class BuildContextTest {
         };
 
     // when
-    ComposeEnvironment composeEnvironment = parser.parse(recipeContent, "application/x-yaml");
+    ComposeRecipe composeRecipe = factory.doParse(recipeContent);
 
     // then
-    assertEquals(
-        composeEnvironment.getServices().get("dev-machine").getBuild().getArgs(), expected);
+    assertEquals(composeRecipe.getServices().get("dev-machine").getBuild().getArgs(), expected);
   }
 
   @Test
@@ -66,11 +65,11 @@ public class BuildContextTest {
     String recipeContent = "services:\n" + " dev-machine:\n" + "  build:\n" + "   context: .\n";
 
     // when
-    ComposeEnvironment composeEnvironment = parser.parse(recipeContent, "application/x-yaml");
+    ComposeRecipe composeRecipe = factory.doParse(recipeContent);
 
     // then
     assertEquals(
         Collections.emptyMap(),
-        composeEnvironment.getServices().get("dev-machine").getBuild().getArgs());
+        composeRecipe.getServices().get("dev-machine").getBuild().getArgs());
   }
 }

@@ -8,9 +8,11 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage;
+package org.eclipse.che.workspace.infrastructure.docker.environment.convert;
 
+import static com.google.common.collect.Maps.*;
 import static java.util.Collections.singletonMap;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
@@ -19,6 +21,8 @@ import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
+import org.eclipse.che.workspace.infrastructure.docker.environment.dockerfile.DockerfileEnvironment;
+import org.eclipse.che.workspace.infrastructure.docker.model.DockerBuildContext;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.mockito.Mock;
@@ -32,22 +36,23 @@ import org.testng.annotations.Test;
  * @author Alexander Andrienko
  */
 @Listeners(MockitoTestNGListener.class)
-public class DockerImageEnvironmentParserTest {
+public class DockerfileEnvironmentConverterTest {
+
   private static final String DEFAULT_MACHINE_NAME = "dev-machine";
-  private static final String DEFAULT_DOCKER_IMAGE = "codenvy/ubuntu_jdk8";
+  private static final String DEFAULT_DOCKERFILE = "FROM codenvy/ubuntu_jdk8\n";
 
-  @Mock InternalEnvironment environment;
-  @Mock InternalRecipe recipe;
-  @Mock InternalMachineConfig machineConfig;
+  @Mock private DockerfileEnvironment environment;
+  @Mock private InternalRecipe recipe;
+  @Mock private InternalMachineConfig machineConfig;
 
-  public DockerImageEnvironmentParser parser = new DockerImageEnvironmentParser();
+  private DockerfileEnvironmentConverter converter = new DockerfileEnvironmentConverter();
 
   @BeforeMethod
   public void setUp() throws Exception {
     when(environment.getRecipe()).thenReturn(recipe);
     when(environment.getMachines()).thenReturn(singletonMap(DEFAULT_MACHINE_NAME, machineConfig));
-    when(recipe.getType()).thenReturn(DockerImageEnvironmentParser.TYPE);
-    when(recipe.getContent()).thenReturn(DEFAULT_DOCKER_IMAGE);
+    when(recipe.getType()).thenReturn(DockerfileEnvironment.TYPE);
+    when(environment.getDockerfileContent()).thenReturn(DEFAULT_DOCKERFILE);
   }
 
   @Test(
@@ -62,18 +67,23 @@ public class DockerImageEnvironmentParserTest {
             ImmutableMap.of(DEFAULT_MACHINE_NAME, machineConfig, "anotherMachine", machineConfig));
 
     // when
-    parser.parse(environment);
+    converter.convert(environment);
   }
 
   @Test
-  public void shouldBeAbleToParseDockerImageEnvironment() throws Exception {
+  public void shouldBeAbleToParseDockerfileEnvironment() throws Exception {
     // given
-    DockerContainerConfig container = new DockerContainerConfig().setImage(DEFAULT_DOCKER_IMAGE);
+    DockerContainerConfig container =
+        new DockerContainerConfig()
+            .setBuild(new DockerBuildContext().setDockerfileContent(DEFAULT_DOCKERFILE));
     DockerEnvironment expected =
-        new DockerEnvironment().setContainers(singletonMap(DEFAULT_MACHINE_NAME, container));
+        new DockerEnvironment()
+            .setContainers(newLinkedHashMap(singletonMap(DEFAULT_MACHINE_NAME, container)));
+    expected.setMachines(singletonMap(DEFAULT_MACHINE_NAME, machineConfig));
+    expected.setRecipe(recipe);
 
     // when
-    DockerEnvironment actual = parser.parse(environment);
+    DockerEnvironment actual = converter.convert(environment);
 
     // then
     assertEquals(actual, expected);
@@ -81,15 +91,11 @@ public class DockerImageEnvironmentParserTest {
 
   @Test(
     expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Docker image environment parser doesn't support recipe type 'dockerfile'"
+    expectedExceptionsMessageRegExp = "The specified environment is not dockerfile environment"
   )
   public void shouldThrowExceptionInCaseEnvironmentContainsNotSupportedRecipeType()
       throws Exception {
-    // given
-    when(recipe.getType()).thenReturn("dockerfile");
-
     // when
-    parser.parse(environment);
+    converter.convert(mock(InternalEnvironment.class));
   }
 }

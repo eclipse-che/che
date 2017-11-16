@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.FAILED;
@@ -32,9 +33,9 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -45,10 +46,9 @@ import org.eclipse.che.api.workspace.server.hc.ServersChecker;
 import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.RuntimeStartInterruptedException;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.workspace.infrastructure.docker.bootstrap.DockerBootstrapper;
@@ -93,25 +93,22 @@ public class DockerInternalRuntimeTest {
     MockitoAnnotations.initMocks(this);
     final DockerContainerConfig config1 = new DockerContainerConfig();
     final DockerContainerConfig config2 = new DockerContainerConfig();
-    final DockerEnvironment environment = new DockerEnvironment();
     final InternalMachineConfig internalMachineCfg1 = mock(InternalMachineConfig.class);
     when(internalMachineCfg1.getInstallers()).thenReturn(singletonList(newInstaller(1)));
     final InternalMachineConfig internalMachineCfg2 = mock(InternalMachineConfig.class);
     when(internalMachineCfg2.getInstallers()).thenReturn(singletonList(newInstaller(2)));
-    environment.setContainers(ImmutableMap.of(DEV_MACHINE, config1, DB_MACHINE, config2));
+
+    ImmutableMap<String, InternalMachineConfig> machines =
+        ImmutableMap.of(DEV_MACHINE, internalMachineCfg1, DB_MACHINE, internalMachineCfg2);
+    final DockerEnvironment environment = new DockerEnvironment(null, machines, emptyList());
+    environment.setContainers(
+        Maps.newLinkedHashMap(ImmutableMap.of(DEV_MACHINE, config1, DB_MACHINE, config2)));
+
+    when(runtimeContext.getEnvironment()).thenReturn(environment);
 
     doNothing().when(networks).createNetwork(nullable(String.class));
     when(runtimeContext.getIdentity()).thenReturn(IDENTITY);
-    when(runtimeContext.getDockerEnvironment()).thenReturn(environment);
-    final LinkedList<String> orderedContainers = new LinkedList<>();
-    orderedContainers.add(DEV_MACHINE);
-    orderedContainers.add(DB_MACHINE);
-    when(runtimeContext.getOrderedContainers()).thenReturn(orderedContainers);
-    InternalEnvironment internalEnvironment = mock(InternalEnvironment.class);
-    when(runtimeContext.getEnvironment()).thenReturn(internalEnvironment);
-    when(internalEnvironment.getMachines())
-        .thenReturn(
-            ImmutableMap.of(DEV_MACHINE, internalMachineCfg1, DB_MACHINE, internalMachineCfg2));
+    when(runtimeContext.getEnvironment()).thenReturn(environment);
     ServersCheckerFactory serversCheckerFactory = mock(ServersCheckerFactory.class);
     when(serversCheckerFactory.create(any(), nullable(String.class), any()))
         .thenReturn(mock(ServersChecker.class));

@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.deserializer.CommandDeserializer;
-import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeEnvironment;
+import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeRecipe;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeService;
 import org.mockito.InjectMocks;
 import org.mockito.testng.MockitoTestNGListener;
@@ -32,14 +32,14 @@ import org.testng.annotations.Test;
 
 /**
  * Test deserialization field {@link ComposeService#command} by {@link CommandDeserializer} in the
- * {@link ComposeEnvironmentParser}.
+ * {@link ComposeEnvironmentFactory}.
  *
  * @author Alexander Andrienko
  */
 @Listeners(MockitoTestNGListener.class)
 public class CommandDeserializerTest {
 
-  @InjectMocks private ComposeEnvironmentParser composeEnvironmentParser;
+  @InjectMocks private ComposeEnvironmentFactory composeEnvFactory;
 
   private static final String RECIPE_WITHOUT_COMMAND_VALUE =
       "services:\n"
@@ -57,18 +57,17 @@ public class CommandDeserializerTest {
   public void composeServiceCommandShouldBeParsedSuccessfully(
       String command, List<String> commandWords, int commandNumberOfWords) throws Exception {
     String content = format(RECIPE_WITHOUT_COMMAND_VALUE, command);
-    ComposeEnvironment composeEnvironment =
-        composeEnvironmentParser.parse(content, "application/x-yaml");
+    ComposeRecipe composeRecipe = composeEnvFactory.doParse(content);
 
-    assertEquals(composeEnvironment.getServices().size(), 1);
-    ComposeService service = composeEnvironment.getServices().get("machine1");
+    assertEquals(composeRecipe.getServices().size(), 1);
+    ComposeService service = composeRecipe.getServices().get("machine1");
     assertEquals(service.getImage(), "codenvy/mysql");
     assertEquals(service.getMemLimit().longValue(), 2147483648L);
     Map<String, String> environment = service.getEnvironment();
     assertEquals(environment.size(), 2);
     assertEquals(environment.get("MYSQL_USER"), "petclinic");
     assertEquals(environment.get("MYSQL_PASSWORD"), "password");
-    assertTrue(service.getExpose().containsAll(asList("4403", "5502")));
+    assertTrue(service.getExpose().containsAll(asList("4403/tcp", "5502/tcp")));
 
     assertEquals(service.getCommand(), commandWords);
   }
@@ -135,7 +134,7 @@ public class CommandDeserializerTest {
     String content = format(RECIPE_WITHOUT_COMMAND_VALUE, command);
 
     try {
-      composeEnvironmentParser.parse(content, "application/x-yaml");
+      composeEnvFactory.doParse(content);
     } catch (Exception e) {
       System.out.println(e.getLocalizedMessage());
       throw e;
@@ -161,7 +160,7 @@ public class CommandDeserializerTest {
   public void symbolsShouldBeInvalidForYaml(InvalidSymbolCommand command) throws Exception {
     String content = format(RECIPE_WITHOUT_COMMAND_VALUE, command.getCommand());
     try {
-      composeEnvironmentParser.parse(content, "application/x-yaml");
+      composeEnvFactory.doParse(content);
       // it should fail.
       fail("The command " + command.getCommand() + " has invalid symbol and it should fail");
     } catch (ReaderException e) {
