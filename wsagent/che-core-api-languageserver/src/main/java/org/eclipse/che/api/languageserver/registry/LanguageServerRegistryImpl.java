@@ -24,9 +24,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.PreDestroy;
@@ -299,6 +301,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
   public List<Collection<InitializedLanguageServer>> getApplicableLanguageServers(String fileUri)
       throws LanguageServerException {
     LanguageDescription language = findLanguage(fileUri);
+    String languageId = language == null ? null : language.getLanguageId();
 
     Map<Integer, List<InitializedLanguageServer>> result = new HashMap<>();
 
@@ -307,8 +310,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
           .getLauncher()
           .getLaunchingStrategy()
           .isApplicable(server.getLaunchKey(), fileUri)) {
-        int score =
-            matchScore(server.getLauncher().getDescription(), fileUri, language.getLanguageId());
+        int score = matchScore(server.getLauncher().getDescription(), fileUri, languageId);
         if (score > 0) {
           List<InitializedLanguageServer> list = result.get(score);
           if (list == null) {
@@ -404,6 +406,15 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
       }
     }
     return null;
+  }
+
+  public Optional<InitializedLanguageServer> findServer(
+      Predicate<InitializedLanguageServer> condition) {
+    ArrayList<InitializedLanguageServer> arrayList = new ArrayList<>(initializedServers.size());
+    synchronized (initializedServers) {
+      arrayList.addAll(initializedServers);
+    }
+    return arrayList.stream().filter(condition).findFirst();
   }
 
   public void addObserver(ServerInitializerObserver observer) {
