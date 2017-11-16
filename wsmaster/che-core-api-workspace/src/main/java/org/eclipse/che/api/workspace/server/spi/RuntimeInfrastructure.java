@@ -19,6 +19,7 @@ import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 
 /**
  * Starting point of describing the contract which infrastructure provider should implement for
@@ -30,12 +31,18 @@ public abstract class RuntimeInfrastructure {
   private final Set<String> recipeTypes;
   private final String name;
   private final EventService eventService;
+  private final Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners;
 
-  public RuntimeInfrastructure(String name, Collection<String> types, EventService eventService) {
+  public RuntimeInfrastructure(
+      String name,
+      Collection<String> types,
+      EventService eventService,
+      Set<InternalEnvironmentProvisioner> internalEnvProvisioners) {
     Preconditions.checkArgument(!types.isEmpty());
     this.name = Objects.requireNonNull(name);
-    this.recipeTypes = ImmutableSet.copyOf(types);
     this.eventService = eventService;
+    this.recipeTypes = ImmutableSet.copyOf(types);
+    this.internalEnvironmentProvisioners = internalEnvProvisioners;
   }
 
   /** Returns the name of this runtime infrastructure. */
@@ -74,7 +81,7 @@ public abstract class RuntimeInfrastructure {
   /**
    * Making Runtime is a two phase process. On the first phase implementation MUST prepare
    * RuntimeContext, this is supposedly "fast" method On the second phase Runtime is created with
-   * RuntimeContext.start() which is supposedly "long" method
+   * RuntimeContext.start() which is supposedly "long" method.
    *
    * @param id the RuntimeIdentity
    * @param environment incoming internal environment
@@ -82,6 +89,25 @@ public abstract class RuntimeInfrastructure {
    * @throws ValidationException if incoming environment is not valid
    * @throws InfrastructureException if any other error occurred
    */
-  public abstract RuntimeContext prepare(RuntimeIdentity id, InternalEnvironment environment)
+  public RuntimeContext prepare(RuntimeIdentity id, InternalEnvironment environment)
+      throws ValidationException, InfrastructureException {
+    for (InternalEnvironmentProvisioner provisioner : internalEnvironmentProvisioners) {
+      provisioner.provision(id, environment);
+    }
+    return internalPrepare(id, environment);
+  }
+
+  /**
+   * An Infrastructure implementation should be able to prepare RuntimeContext. This method is not
+   * supposed to be called by clients of class {@link RuntimeInfrastructure}.
+   *
+   * @param id the RuntimeIdentity
+   * @param environment incoming internal environment
+   * @return new RuntimeContext object
+   * @throws ValidationException if incoming environment is not valid
+   * @throws InfrastructureException if any other error occurred
+   */
+  protected abstract RuntimeContext internalPrepare(
+      RuntimeIdentity id, InternalEnvironment environment)
       throws ValidationException, InfrastructureException;
 }

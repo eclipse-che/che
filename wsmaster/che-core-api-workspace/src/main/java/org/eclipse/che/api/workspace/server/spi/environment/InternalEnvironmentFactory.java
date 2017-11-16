@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.api.workspace.server.spi.environment;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,53 +29,68 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 
 /**
- * Factory for Environment specific internal representation Related but not really bound to some
- * specific Infrastructure to let Infrastructure apply multiple different implementations, some of
- * which can be considered as a "native format", while others as rather "supported, adopted formats"
+ * Creates a valid instance of InternalEnvironment.
  *
- * <p>Expected to be bound as a MapBinder with unique String as a key, like: MapBinder<String,
- * InternalEnvironmentFactory> environmentFactories = MapBinder.newMapBinder(binder(), String.class,
- * InternalEnvironmentFactory.class);
- * environmentFactories.addBinding("uniq_name").to(SubclassOfInternalEnvironmentFactory.class);
+ * <p>Expected to be bound with a MapBinder with unique String key that contains recipe type, like:
+ *
+ * <pre>
+ *   MapBinder<String, InternalEnvironmentFactory> envFactories =
+ *       MapBinder.newMapBinder(binder(), String.class, InternalEnvironmentFactory.class);
+ *   envFactories.addBinding("recipe_type_1").to(SubclassOfInternalEnvironmentFactory.class);
+ * </pre>
  *
  * @author gazarenkov
+ * @author Sergii Leshchenko
  */
-public abstract class InternalEnvironmentFactory {
+public abstract class InternalEnvironmentFactory<T extends InternalEnvironment> {
 
-  protected final InstallerRegistry installerRegistry;
-  protected final RecipeRetriever recipeRetriever;
+  private final InstallerRegistry installerRegistry;
+  private final RecipeRetriever recipeRetriever;
+  private final MachineConfigsValidator machinesValidator;
 
   public InternalEnvironmentFactory(
-      InstallerRegistry installerRegistry, RecipeRetriever recipeRetriever) {
+      InstallerRegistry installerRegistry,
+      RecipeRetriever recipeRetriever,
+      MachineConfigsValidator machinesValidator) {
     this.installerRegistry = installerRegistry;
     this.recipeRetriever = recipeRetriever;
+    this.machinesValidator = machinesValidator;
   }
 
   /**
-   * validates internals of Environment and creates instance of InternalEnvironment
-   * ideally it should be final but needed to be owerriden for Dockerimage type workaround
+   * Creates a valid instance of InternalEnvironment.
    *
-   * @param environment the environment
-   * @return InternalEnvironment
-   * @throws InfrastructureException if infrastructure specific error occures
+   * <p>To construct a valid instance it performs the following actions:
+   *
+   * <ul>
+   *   <li>download recipe content if it is needed;
+   *   <li>retrieve the configured installers from installers registry;
+   *   <li>normalize servers port by adding default protocol in port if it is absent;
+   *   <li>validate the environment machines;
+   *   <li>invoke implementation specific method that should validate and parse recipe;
+   * </ul>
+   *
+   * @param sourceEnv the environment
+   * @return InternalEnvironment a valid InternalEnvironment instance
+   * @throws InfrastructureException if exception occurs on recipe downloading
+   * @throws InfrastructureException if infrastructure specific error occurs
    * @throws ValidationException if validation fails
    */
-  public InternalEnvironment create(final Environment environment)
-      throws InfrastructureException, ValidationException {
+  public T create(final Environment sourceEnv) throws InfrastructureException, ValidationException {
 
     Map<String, InternalMachineConfig> machines = new HashMap<>();
     List<Warning> warnings = new ArrayList<>();
+    if (sourceEnv.getWarnings() != null) {
+      warnings.addAll(sourceEnv.getWarnings());
+    }
 
-    InternalRecipe recipe = recipeRetriever.getRecipe(environment.getRecipe());
-
-    if(environment.getMachines().isEmpty())
-      throw new ValidationException("No machines defined");
+    InternalRecipe recipe = recipeRetriever.getRecipe(sourceEnv.getRecipe());
 
     for (Map.Entry<String, ? extends MachineConfig> machineEntry :
-        environment.getMachines().entrySet()) {
+        sourceEnv.getMachines().entrySet()) {
       MachineConfig machineConfig = machineEntry.getValue();
 
-      List<Installer> installers = null;
+      List<Installer> installers;
       try {
         installers = installerRegistry.getOrderedInstallers(machineConfig.getInstallers());
       } catch (InstallerException e) {
@@ -90,24 +106,27 @@ public abstract class InternalEnvironmentFactory {
               machineConfig.getAttributes()));
     }
 
-    return create(machines, recipe, warnings);
+    machinesValidator.validate(machines);
+
+    return doCreate(recipe, machines, warnings);
   }
 
   /**
-   * Implementation validates recipe and creates specific InternalEnvironment
+   * Implementation validates downloaded recipe and creates specific InternalEnvironment.
    *
-   * @param machines InternalMachineConfigs
-   * @param recipe recipe
+   * @param recipe downloaded recipe
+   * @param machines machines configuration
    * @param warnings list of warnings
-   * @throws InfrastructureException if infrastructure specific error occures
-   * @throws ValidationException if validation fails
    * @return InternalEnvironment
+   * @throws InfrastructureException if infrastructure specific error occurs
+   * @throws ValidationException if validation fails
    */
-  protected abstract InternalEnvironment create(
-      Map<String, InternalMachineConfig> machines, InternalRecipe recipe, List<Warning> warnings)
+  protected abstract T doCreate(
+      InternalRecipe recipe, Map<String, InternalMachineConfig> machines, List<Warning> warnings)
       throws InfrastructureException, ValidationException;
 
-  private Map<String, ServerConfig> normalizeServers(Map<String, ? extends ServerConfig> servers) {
+  @VisibleForTesting
+  Map<String, ServerConfig> normalizeServers(Map<String, ? extends ServerConfig> servers) {
     return servers
         .entrySet()
         .stream()

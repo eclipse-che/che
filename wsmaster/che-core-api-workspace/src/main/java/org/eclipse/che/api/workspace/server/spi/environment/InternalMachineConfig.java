@@ -20,7 +20,14 @@ import org.eclipse.che.api.installer.shared.model.Installer;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 
 /**
- * "pre-processed" Machine Config. To use inside infrastructure
+ * Machine Config to use inside infrastructure.
+ *
+ * <p>It contains:
+ *
+ * <ul>
+ *   <li>retrieved full information about installers;
+ *   <li>normalized server configs.
+ * </ul>
  *
  * @author gazarenkov
  */

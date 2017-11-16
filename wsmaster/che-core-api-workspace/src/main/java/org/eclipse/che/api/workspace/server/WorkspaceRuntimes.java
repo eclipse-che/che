@@ -49,14 +49,14 @@ import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.RuntimeStartInterruptedException;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -129,13 +129,12 @@ public class WorkspaceRuntimes {
 
   public void validate(Environment environment)
       throws NotFoundException, InfrastructureException, ValidationException {
-
     String type = environment.getRecipe().getType();
     if (!infraByRecipe.containsKey(type)) {
       throw new NotFoundException("Infrastructure not found for type: " + type);
     }
-    environmentFactory(type).create(environment);
-
+    // try to create internal environment to check if the specified environment is valid
+    createInternalEnvironment(environment);
   }
 
   /**
@@ -219,9 +218,8 @@ public class WorkspaceRuntimes {
     RuntimeIdentity runtimeId =
         new RuntimeIdentityImpl(workspaceId, envName, subject.getUserName());
     try {
-      InternalEnvironment internalEnvironment = environmentFactory(environment.getRecipe().getType())
-          .create(environment);
-      RuntimeContext runtimeContext = infra.prepare(runtimeId, internalEnvironment);
+      InternalEnvironment internalEnv = createInternalEnvironment(environment);
+      RuntimeContext runtimeContext = infra.prepare(runtimeId, internalEnv);
 
       InternalRuntime runtime = runtimeContext.getRuntime();
       if (runtime == null) {
@@ -476,9 +474,8 @@ public class WorkspaceRuntimes {
 
     InternalRuntime runtime;
     try {
-      InternalEnvironment internalEnvironment = environmentFactory(environment.getRecipe().getType())
-          .create(environment);
-      runtime = infra.prepare(identity, internalEnvironment).getRuntime();
+      InternalEnvironment internalEnv = createInternalEnvironment(environment);
+      runtime = infra.prepare(identity, internalEnv).getRuntime();
     } catch (InfrastructureException | ValidationException | NotFoundException x) {
       LOG.error(
           "Couldn't recover runtime '{}:{}'. Error: {}",
@@ -575,11 +572,15 @@ public class WorkspaceRuntimes {
     return Optional.of(state.runtime.getContext());
   }
 
-  private InternalEnvironmentFactory environmentFactory(String recipeType) throws NotFoundException {
+  private InternalEnvironment createInternalEnvironment(Environment environment)
+      throws InfrastructureException, ValidationException, NotFoundException {
+    String recipeType = environment.getRecipe().getType();
     InternalEnvironmentFactory factory = environmentFactories.get(recipeType);
-    if(factory == null)
-      throw new NotFoundException(format("InternalEnvironmentFactory not configured for recipe type: '%s'", recipeType));
-    return factory;
+    if (factory == null) {
+      throw new NotFoundException(
+          format("InternalEnvironmentFactory is not configured for recipe type: '%s'", recipeType));
+    }
+    return factory.create(environment);
   }
 
   private String sessionUserNameOr(String nameIfNoUser) {

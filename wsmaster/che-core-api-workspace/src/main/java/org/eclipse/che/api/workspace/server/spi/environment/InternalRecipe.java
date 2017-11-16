@@ -12,6 +12,7 @@ package org.eclipse.che.api.workspace.server.spi.environment;
 
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
+import org.eclipse.che.commons.annotation.Nullable;
 
 /**
  * Recipe of {@link Environment} with content either provided by {@link Recipe#getContent()} or
@@ -32,14 +33,18 @@ public class InternalRecipe {
     this.content = content;
   }
 
+  /** Type of the recipe. It is mandatory. */
   public String getType() {
     return type;
   }
 
+  /** Content type. It is optional. */
+  @Nullable
   public String getContentType() {
     return contentType;
   }
 
+  /** The context of the recipe. It is mandatory. */
   public String getContent() {
     return content;
   }

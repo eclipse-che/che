@@ -57,6 +57,7 @@ public class RecipeRetriever {
    */
   public InternalRecipe getRecipe(Recipe recipe) throws InfrastructureException {
     Objects.requireNonNull(recipe, "Recipe should not be null");
+    Objects.requireNonNull(recipe.getType(), "Recipe type should not be null");
     return new InternalRecipe(recipe.getType(), recipe.getContentType(), retrieveContent(recipe));
   }
 
