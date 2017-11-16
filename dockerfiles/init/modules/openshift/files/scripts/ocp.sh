@@ -9,7 +9,9 @@
 set -e
 
 init() {
+
 LOCAL_IP_ADDRESS=$(detectIP)
+
 #OS specific defaults
 if [[ "$OSTYPE" == "darwin"* ]]; then
     DEFAULT_OC_PUBLIC_HOSTNAME="$LOCAL_IP_ADDRESS"
@@ -212,6 +214,14 @@ parse_args() {
            --deploy-che)
                deploy_che_to_ocp
                shift
+           ;;
+           --multiuser)
+               shift
+           ;;
+           *)
+               echo "You've passed wrong arg!"
+               echo -e "$HELP"
+               exit 1
            ;;
         esac
     done
