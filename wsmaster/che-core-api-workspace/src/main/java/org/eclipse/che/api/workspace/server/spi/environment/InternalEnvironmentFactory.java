@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.workspace.server.spi;
+package org.eclipse.che.api.workspace.server.spi.environment;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +25,7 @@ import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.installer.server.exception.InstallerException;
 import org.eclipse.che.api.installer.shared.model.Installer;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 
 /**
  * Factory for Environment specific internal representation Related but not really bound to some

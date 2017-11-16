@@ -13,6 +13,7 @@ package org.eclipse.che.api.workspace.server.spi;
 import java.net.URI;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 
 /**
  * A Context for running Workspace's Runtime

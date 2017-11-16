@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.workspace.server.spi;
+package org.eclipse.che.api.workspace.server.spi.environment;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.installer.shared.model.Installer;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 
 /**
  * "pre-processed" Machine Config. To use inside infrastructure

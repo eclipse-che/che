@@ -40,7 +40,7 @@ import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
-import org.eclipse.che.api.workspace.server.spi.RecipeRetriever;
+import org.eclipse.che.api.workspace.server.spi.environment.RecipeRetriever;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;

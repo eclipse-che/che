@@ -14,7 +14,7 @@ import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.InfrastructureProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.Labels;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;

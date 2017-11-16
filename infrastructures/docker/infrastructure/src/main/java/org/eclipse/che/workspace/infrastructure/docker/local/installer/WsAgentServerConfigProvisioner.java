@@ -16,7 +16,7 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.inject.CheBootstrap;
 import org.eclipse.che.workspace.infrastructure.docker.local.server.DockerExtConfBindingProvider;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;

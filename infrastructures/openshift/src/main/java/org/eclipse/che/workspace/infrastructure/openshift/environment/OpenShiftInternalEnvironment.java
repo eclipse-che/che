@@ -17,9 +17,9 @@ import io.fabric8.openshift.api.model.Route;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.Warning;
-import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
-import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
-import org.eclipse.che.api.workspace.server.spi.InternalRecipe;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
 
 /** @author Sergii Leshchenko */
 public class OpenShiftInternalEnvironment extends InternalEnvironment {

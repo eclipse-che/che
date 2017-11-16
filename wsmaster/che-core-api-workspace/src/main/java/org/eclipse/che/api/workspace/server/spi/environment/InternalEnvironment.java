@@ -8,13 +8,14 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.workspace.server.spi;
+package org.eclipse.che.api.workspace.server.spi.environment;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 
 /**
  * Representation of {@link Environment} which holds internal representations of environment

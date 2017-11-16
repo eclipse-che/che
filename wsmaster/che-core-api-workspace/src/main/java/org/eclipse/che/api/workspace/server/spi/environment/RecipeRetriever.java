@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.workspace.server.spi;
+package org.eclipse.che.api.workspace.server.spi.environment;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -25,6 +25,7 @@ import javax.inject.Named;
 import javax.ws.rs.core.UriBuilder;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
 import org.eclipse.che.api.core.util.FileCleaner;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.slf4j.Logger;

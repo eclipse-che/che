@@ -30,11 +30,11 @@ import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
-import org.eclipse.che.api.workspace.server.spi.InternalEnvironmentFactory;
-import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
-import org.eclipse.che.api.workspace.server.spi.InternalRecipe;
-import org.eclipse.che.api.workspace.server.spi.RecipeRetriever;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
+import org.eclipse.che.api.workspace.server.spi.environment.RecipeRetriever;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 
 /** @author Sergii Leshchenko */
