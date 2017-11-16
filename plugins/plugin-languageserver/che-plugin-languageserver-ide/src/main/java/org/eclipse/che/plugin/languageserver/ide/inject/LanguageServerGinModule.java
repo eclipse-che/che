@@ -46,6 +46,9 @@ public class LanguageServerGinModule extends AbstractGinModule {
     install(new GinFactoryModuleBuilder().build(LanguageServerReconcileStrategyFactory.class));
     install(new GinFactoryModuleBuilder().build(LanguageServerSignatureHelpFactory.class));
     install(new GinFactoryModuleBuilder().build(RenameNodeFactory.class));
+    install(
+        new GinFactoryModuleBuilder()
+            .build(org.eclipse.che.plugin.languageserver.ide.filestructure.NodeFactory.class));
 
     bind(PublishDiagnosticsReceiver.class).asEagerSingleton();
     bind(ShowMessageJsonRpcReceiver.class).asEagerSingleton();
