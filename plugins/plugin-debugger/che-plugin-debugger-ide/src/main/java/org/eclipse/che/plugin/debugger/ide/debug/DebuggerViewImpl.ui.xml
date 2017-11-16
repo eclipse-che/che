@@ -17,6 +17,9 @@
     <ui:with field='locale' type='org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant'/>
     <ui:with field='coreRes' type='org.eclipse.che.ide.Resources'/>
     <ui:style>
+        .executionPoint {
+            font-weight: bold;
+        }
 
         .alignLeft {
             float: left;
@@ -38,6 +41,14 @@
 
         .marginBottom {
             margin-bottom: 10px;
+        }
+
+        .placeHolder {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 100%;
         }
     </ui:style>
     <g:DockLayoutPanel unit="PX" width="100%" height="100%">
@@ -69,7 +80,7 @@
                         <g:DockLayoutPanel unit="PX" width="100%" height="100%">
                             <g:north size="40">
                                 <g:FlowPanel>
-                                    <g:Label ui:field="executionPoint"/>
+                                    <g:Label ui:field="executionPoint" addStyleNames="{style.executionPoint}" debugId="execution-point"/>
                                     <g:Label text="{locale.debuggerFramesTitle}" addStyleNames="{style.alignLeft}"/>
                                 </g:FlowPanel>
                             </g:north>
@@ -78,8 +89,14 @@
                                            debugId="debugger-threads-list" width="100%" ui:field="threads"/>
                             </g:north>
                             <g:center>
-                                <g:ScrollPanel addStyleNames="{coreRes.coreCss.simpleListContainer}"
-                                               debugId="debugger-frames-list" width="100%" ui:field="framesPanel"/>
+                                <g:FlowPanel>
+                                    <g:FlowPanel ui:field="threadNotSuspendedPlaceHolder" addStyleNames="{style.placeHolder}"
+                                                 debugId="thread-not-suspended">
+                                        <g:Label text="{locale.debuggerThreadNotSuspend}"/>
+                                    </g:FlowPanel>
+                                    <g:ScrollPanel addStyleNames="{coreRes.coreCss.simpleListContainer}"
+                                                   debugId="debugger-frames-list" width="100%" ui:field="framesPanel"/>
+                                </g:FlowPanel>
                             </g:center>
                         </g:DockLayoutPanel>
                     </g:FlowPanel>

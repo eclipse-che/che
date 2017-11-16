@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.ide.debug;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.ide.api.editor.gutter.Gutters.BREAKPOINTS_GUTTER;
 
 import com.google.inject.assistedinject.Assisted;
@@ -19,7 +20,7 @@ import elemental.html.DivElement;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
-import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.api.debug.shared.model.BreakpointConfiguration;
 import org.eclipse.che.ide.api.debug.BreakpointRenderer;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.gutter.Gutter;
@@ -68,7 +69,7 @@ public class BreakpointRendererImpl implements BreakpointRenderer {
   public void addBreakpointMark(int lineNumber, LineChangeAction action) {
     if (hasGutter != null) {
 
-      Element newElement = createBreakpointMarks(true, null, false);
+      Element newElement = createDefaultBreakpointMark(false);
       Element existedElement = hasGutter.getGutterItem(lineNumber, BREAKPOINTS_GUTTER);
       if (existedElement != null) {
         hasGutter.setGutterItem(lineNumber, BREAKPOINTS_GUTTER, newElement);
@@ -90,8 +91,7 @@ public class BreakpointRendererImpl implements BreakpointRenderer {
     if (hasGutter != null) {
       int lineNumber = breakpoint.getLocation().getLineNumber() - 1;
 
-      Element newElement =
-          createBreakpointMarks(breakpoint.isEnabled(), breakpoint.getCondition(), active);
+      Element newElement = createBreakpointMarks(breakpoint, active);
       Element existedElement = hasGutter.getGutterItem(lineNumber, BREAKPOINTS_GUTTER);
 
       if (existedElement != null) {
@@ -124,7 +124,7 @@ public class BreakpointRendererImpl implements BreakpointRenderer {
   @Override
   public void setBreakpointActive(int lineNumber, boolean active) {
     if (hasGutter != null) {
-      Element newElement = createBreakpointMarks(true, null, true);
+      Element newElement = createDefaultBreakpointMark(active);
       Element existedElement = hasGutter.getGutterItem(lineNumber, BREAKPOINTS_GUTTER);
       if (existedElement != null) {
         hasGutter.setGutterItem(lineNumber, BREAKPOINTS_GUTTER, newElement);
@@ -141,13 +141,12 @@ public class BreakpointRendererImpl implements BreakpointRenderer {
     }
   }
 
-  private Element createBreakpointMarks(
-      boolean isEnabled, @Nullable String condition, boolean active) {
+  private Element createBreakpointMarks(Breakpoint breakpoint, boolean active) {
     BreakpointResources.Css css = breakpointResources.getCss();
 
     List<String> styles = new ArrayList<>();
     styles.add(css.breakpoint());
-    if (!isEnabled) {
+    if (!breakpoint.isEnabled()) {
       styles.add(css.disabled());
     } else if (active) {
       styles.add(css.active());
@@ -155,16 +154,39 @@ public class BreakpointRendererImpl implements BreakpointRenderer {
       styles.add(css.inactive());
     }
 
-    if (condition != null) {
+    BreakpointConfiguration conf = breakpoint.getBreakpointConfiguration();
+    boolean hasCondition =
+        conf != null
+            && ((conf.isConditionEnabled() && !isNullOrEmpty(conf.getCondition()))
+                || (conf.isHitCountEnabled() && conf.getHitCount() != 0));
+
+    if (hasCondition) {
       styles.add(css.condition());
     }
 
-    DivElement element = Elements.createDivElement(styles.stream().toArray(String[]::new));
-    if (condition != null) {
-      element.setTitle("Condition: " + condition);
+    StringBuilder title = new StringBuilder();
+    if (conf != null) {
+      if (conf.isConditionEnabled() && !isNullOrEmpty(conf.getCondition())) {
+        title.append("Condition: ").append(conf.getCondition()).append('\n');
+      }
+
+      if (conf.isHitCountEnabled() && conf.getHitCount() != 0) {
+        title.append("Hit count: ").append(conf.getHitCount()).append('\n');
+      }
+
+      if (conf.getSuspendPolicy() != null) {
+        title.append("Suspend: ").append(conf.getSuspendPolicy().toString().toLowerCase());
+      }
     }
 
+    DivElement element = Elements.createDivElement(styles.stream().toArray(String[]::new));
+    element.setTitle(title.toString());
     return element;
+  }
+
+  private Element createDefaultBreakpointMark(boolean active) {
+    BreakpointResources.Css css = breakpointResources.getCss();
+    return Elements.createDivElement(css.breakpoint(), active ? css.active() : css.inactive());
   }
 
   @Override

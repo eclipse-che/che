@@ -11,18 +11,19 @@
 package org.eclipse.che.plugin.jdb.server;
 
 import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.ensureSuspendAtDesiredLocation;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.findMainThreadId;
 import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.startJavaDebugger;
 import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.terminateVirtualMachineQuietly;
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.SuspendPolicy;
+import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.event.BreakpointActivatedEvent;
 import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
-import org.eclipse.che.api.debug.shared.model.event.DisconnectEvent;
 import org.eclipse.che.api.debug.shared.model.event.SuspendEvent;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointConfigurationImpl;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
@@ -33,61 +34,50 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-/** @author Anatolii Bazko */
-public class BreakpointConditionTest {
-
+/**
+ * Test thread dump feature when none of threads are suspended.
+ *
+ * @author Anatolii Bazko
+ */
+public class SuspendPolicyTest {
   private JavaDebugger debugger;
-  private BlockingQueue<DebuggerEvent> events;
+  private BlockingQueue<DebuggerEvent> events = new ArrayBlockingQueue<>(10);
 
   @BeforeClass
   public void setUp() throws Exception {
     ProjectApiUtils.ensure();
 
     Location location =
-        new LocationImpl("/test/src/org/eclipse/BreakpointsByConditionTest.java", 17, "/test");
+        new LocationImpl("/test/src/org/eclipse/SuspendPolicyTest.java", 15, "/test");
 
     events = new ArrayBlockingQueue<>(10);
-    debugger = startJavaDebugger(new BreakpointImpl(location), events);
+    debugger =
+        startJavaDebugger(
+            new BreakpointImpl(location, true, new BreakpointConfigurationImpl(SuspendPolicy.ALL)),
+            events);
 
     ensureSuspendAtDesiredLocation(location, events);
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    if (debugger != null) {
-      terminateVirtualMachineQuietly(debugger);
-    }
+    terminateVirtualMachineQuietly(debugger);
   }
 
   @Test
-  public void shouldStopByHitCount() throws Exception {
-    debugger.addBreakpoint(
-        new BreakpointImpl(
-            new LocationImpl("/test/src/org/eclipse/BreakpointsByConditionTest.java", 19, "/test"),
-            true,
-            new BreakpointConfigurationImpl(3)));
-
-    DebuggerEvent debuggerEvent = events.take();
-    assertTrue(debuggerEvent instanceof BreakpointActivatedEvent);
-
-    debugger.resume(new ResumeActionImpl());
-
-    debuggerEvent = events.take();
-    assertTrue(debuggerEvent instanceof SuspendEvent);
-
-    assertEquals("2", debugger.evaluate("i"));
-    assertEquals("2", debugger.evaluate("k"));
+  public void shouldReturnStackFrameDumpForAllThreads() throws Exception {
+    for (ThreadState threadState : debugger.getThreadDump()) {
+      assertTrue(threadState.isSuspended());
+    }
   }
 
   @Test(priority = 1)
-  public void shouldStopByCondition() throws Exception {
-    Breakpoint breakpoint =
+  public void shouldReturnStackFrameDumpOnlyForSuspendedThread() throws Exception {
+    debugger.addBreakpoint(
         new BreakpointImpl(
-            new LocationImpl("/test/src/org/eclipse/BreakpointsByConditionTest.java", 24, "/test"),
+            new LocationImpl("/test/src/org/eclipse/SuspendPolicyTest.java", 16, "/test"),
             true,
-            new BreakpointConfigurationImpl("i==5"));
-
-    debugger.addBreakpoint(breakpoint);
+            new BreakpointConfigurationImpl(SuspendPolicy.THREAD)));
 
     DebuggerEvent debuggerEvent = events.take();
     assertTrue(debuggerEvent instanceof BreakpointActivatedEvent);
@@ -97,12 +87,22 @@ public class BreakpointConditionTest {
     debuggerEvent = events.take();
     assertTrue(debuggerEvent instanceof SuspendEvent);
 
-    assertEquals("5", debugger.evaluate("i"));
-    assertEquals("4", debugger.evaluate("k"));
+    long mainThreadId = findMainThreadId(debugger);
+    for (ThreadState threadState : debugger.getThreadDump()) {
+      if (threadState.getId() == mainThreadId) {
+        assertTrue(threadState.isSuspended());
+      } else {
+        assertFalse(threadState.isSuspended());
+      }
+    }
+  }
 
+  @Test(priority = 3)
+  public void allThreadsShouldBeResumedWhenApplicationIsRun() throws Exception {
     debugger.resume(new ResumeActionImpl());
 
-    debuggerEvent = events.take();
-    assertTrue(debuggerEvent instanceof DisconnectEvent);
+    for (ThreadState threadState : debugger.getThreadDump()) {
+      assertFalse(threadState.isSuspended());
+    }
   }
 }

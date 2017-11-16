@@ -15,6 +15,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 import java.util.List;
 import java.util.Objects;
+import org.eclipse.che.api.debug.shared.dto.BreakpointConfigurationDto;
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
 import org.eclipse.che.api.debug.shared.dto.DebuggerInfoDto;
@@ -31,6 +32,7 @@ import org.eclipse.che.api.debug.shared.dto.event.DebuggerEventDto;
 import org.eclipse.che.api.debug.shared.dto.event.DisconnectEventDto;
 import org.eclipse.che.api.debug.shared.dto.event.SuspendEventDto;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
+import org.eclipse.che.api.debug.shared.model.BreakpointConfiguration;
 import org.eclipse.che.api.debug.shared.model.DebugSession;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Field;
@@ -71,9 +73,21 @@ public final class DtoConverter {
 
   public static BreakpointDto asDto(Breakpoint breakpoint) {
     return newDto(BreakpointDto.class)
-        .withCondition(breakpoint.getCondition())
+        .withBreakpointConfiguration(
+            breakpoint.getBreakpointConfiguration() == null
+                ? null
+                : asDto(breakpoint.getBreakpointConfiguration()))
         .withEnabled(breakpoint.isEnabled())
         .withLocation(asDto(breakpoint.getLocation()));
+  }
+
+  public static BreakpointConfigurationDto asDto(BreakpointConfiguration breakpointConfiguration) {
+    return newDto(BreakpointConfigurationDto.class)
+        .withSuspendPolicy(breakpointConfiguration.getSuspendPolicy())
+        .withHitCount(breakpointConfiguration.getHitCount())
+        .withCondition(breakpointConfiguration.getCondition())
+        .withConditionEnabled(breakpointConfiguration.isConditionEnabled())
+        .withHitCountEnabled(breakpointConfiguration.isHitCountEnabled());
   }
 
   public static MethodDto asDto(Method method) {

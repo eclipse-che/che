@@ -10,17 +10,21 @@
  */
 package org.eclipse.che.api.debug.shared.model.impl.event;
 
+import com.google.common.base.Objects;
 import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.SuspendPolicy;
 import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
 import org.eclipse.che.api.debug.shared.model.event.SuspendEvent;
 
 /** @author Anatoliy Bazko */
 public class SuspendEventImpl extends DebuggerEventImpl implements SuspendEvent {
   private final Location location;
+  private final SuspendPolicy suspendPolicy;
 
-  public SuspendEventImpl(Location location) {
+  public SuspendEventImpl(Location location, SuspendPolicy suspendPolicy) {
     super(DebuggerEvent.TYPE.SUSPEND);
     this.location = location;
+    this.suspendPolicy = suspendPolicy;
   }
 
   @Override
@@ -29,20 +33,26 @@ public class SuspendEventImpl extends DebuggerEventImpl implements SuspendEvent 
   }
 
   @Override
+  public SuspendPolicy getSuspendPolicy() {
+    return suspendPolicy;
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (!(o instanceof SuspendEventImpl)) return false;
     if (!super.equals(o)) return false;
-
     SuspendEventImpl that = (SuspendEventImpl) o;
-
-    return !(location != null ? !location.equals(that.location) : that.location != null);
+    return Objects.equal(location, that.location) && suspendPolicy == that.suspendPolicy;
   }
 
   @Override
   public int hashCode() {
-    int result = super.hashCode();
-    result = 31 * result + (location != null ? location.hashCode() : 0);
-    return result;
+    return Objects.hashCode(super.hashCode(), location, suspendPolicy);
+  }
+
+  @Override
+  public String toString() {
+    return "SuspendEventImpl{" + "location=" + location + ", suspendPolicy=" + suspendPolicy + '}';
   }
 }

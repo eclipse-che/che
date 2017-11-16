@@ -20,8 +20,5 @@ public interface Breakpoint {
 
   void setEnabled(boolean enabled);
 
-  /** The condition. */
-  String getCondition();
-
-  void setCondition(String condition);
+  BreakpointConfiguration getBreakpointConfiguration();
 }
