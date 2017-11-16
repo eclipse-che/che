@@ -17,7 +17,7 @@ import io.fabric8.kubernetes.api.model.PodSpec;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftInternalEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.ConfigurationProvisioner;
 
 /**
@@ -29,7 +29,7 @@ public class RestartPolicyRewriter implements ConfigurationProvisioner {
   static final String DEFAULT_RESTART_POLICY = "Never";
 
   @Override
-  public void provision(OpenShiftInternalEnvironment osEnv, RuntimeIdentity identity)
+  public void provision(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
     for (Pod podConfig : osEnv.getPods().values()) {
@@ -39,8 +39,7 @@ public class RestartPolicyRewriter implements ConfigurationProvisioner {
     }
   }
 
-  private void rewriteRestartPolicy(
-      PodSpec podSpec, String podName, OpenShiftInternalEnvironment env) {
+  private void rewriteRestartPolicy(PodSpec podSpec, String podName, OpenShiftEnvironment env) {
     final String restartPolicy = podSpec.getRestartPolicy();
 
     if (restartPolicy != null && !DEFAULT_RESTART_POLICY.equalsIgnoreCase(restartPolicy)) {

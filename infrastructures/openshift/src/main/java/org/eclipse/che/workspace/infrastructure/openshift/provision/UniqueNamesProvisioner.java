@@ -22,7 +22,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.openshift.Constants;
 import org.eclipse.che.workspace.infrastructure.openshift.Names;
-import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftInternalEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 
 /**
  * Makes names of OpenShift pods and routes unique whole namespace by {@link Names}.
@@ -38,7 +38,7 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftI
 public class UniqueNamesProvisioner implements ConfigurationProvisioner {
 
   @Override
-  public void provision(OpenShiftInternalEnvironment osEnv, RuntimeIdentity identity)
+  public void provision(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException {
     final String workspaceId = identity.getWorkspaceId();
     final Set<Pod> pods = new HashSet<>(osEnv.getPods().values());

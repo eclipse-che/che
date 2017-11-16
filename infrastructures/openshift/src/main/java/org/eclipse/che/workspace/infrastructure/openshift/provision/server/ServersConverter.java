@@ -18,10 +18,10 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.workspace.infrastructure.openshift.Names;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
+import org.eclipse.che.workspace.infrastructure.openshift.Names;
 import org.eclipse.che.workspace.infrastructure.openshift.ServerExposer;
-import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftInternalEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.ConfigurationProvisioner;
 
 /**
@@ -37,7 +37,7 @@ import org.eclipse.che.workspace.infrastructure.openshift.provision.Configuratio
 public class ServersConverter implements ConfigurationProvisioner {
 
   @Override
-  public void provision(OpenShiftInternalEnvironment osEnv, RuntimeIdentity identity)
+  public void provision(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
     for (Pod podConfig : osEnv.getPods().values()) {

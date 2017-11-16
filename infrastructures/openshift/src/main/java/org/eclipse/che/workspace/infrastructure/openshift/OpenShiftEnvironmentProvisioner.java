@@ -14,7 +14,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftInternalEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.env.EnvVarsConverter;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.restartpolicy.RestartPolicyRewriter;
@@ -30,7 +30,7 @@ import org.eclipse.che.workspace.infrastructure.openshift.provision.volume.Persi
  * @author Alexander Garagatyi
  */
 @Singleton
-public class OpenShiftInfrastructureProvisioner {
+public class OpenShiftEnvironmentProvisioner {
 
   private final PersistentVolumeClaimProvisioner persistentVolumeClaimProvisioner;
   private final UniqueNamesProvisioner uniqueNamesProvisioner;
@@ -40,7 +40,7 @@ public class OpenShiftInfrastructureProvisioner {
   private final RestartPolicyRewriter restartPolicyRewriter;
 
   @Inject
-  public OpenShiftInfrastructureProvisioner(
+  public OpenShiftEnvironmentProvisioner(
       PersistentVolumeClaimProvisioner projectVolumeProvisioner,
       UniqueNamesProvisioner uniqueNamesProvisioner,
       TlsRouteProvisioner tlsRouteProvisioner,
@@ -55,7 +55,7 @@ public class OpenShiftInfrastructureProvisioner {
     this.restartPolicyRewriter = restartPolicyRewriter;
   }
 
-  public void provision(OpenShiftInternalEnvironment osEnv, RuntimeIdentity identity)
+  public void provision(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException {
     // 1 stage - converting Che model env to OpenShift env
     serversConverter.provision(osEnv, identity);

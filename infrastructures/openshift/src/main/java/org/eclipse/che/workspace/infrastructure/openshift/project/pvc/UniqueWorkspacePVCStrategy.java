@@ -24,7 +24,6 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.openshift.Names;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
@@ -73,10 +72,10 @@ public class UniqueWorkspacePVCStrategy implements WorkspacePVCStrategy {
   }
 
   @Override
-  public void prepare(InternalEnvironment env, OpenShiftEnvironment osEnv, String workspaceId)
+  public void prepare(OpenShiftEnvironment osEnv, String workspaceId)
       throws InfrastructureException {
     final String machineWithSources =
-        getWsAgentServerMachine(env)
+        getWsAgentServerMachine(osEnv)
             .orElseThrow(() -> new InfrastructureException("Machine with ws-agent not found"));
     final String pvcUniqueName = pvcName + '-' + workspaceId;
     final Map<String, PersistentVolumeClaim> claims = osEnv.getPersistentVolumeClaims();

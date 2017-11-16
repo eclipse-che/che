@@ -17,18 +17,15 @@ import javax.inject.Named;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProjectFactory;
 
 /** @author Sergii Leshchenko */
-public class OpenShiftRuntimeContext extends RuntimeContext {
+public class OpenShiftRuntimeContext extends RuntimeContext<OpenShiftEnvironment> {
 
-  private final OpenShiftEnvironment openShiftEnvironment;
   private final OpenShiftRuntimeFactory runtimeFactory;
   private final OpenShiftProjectFactory projectFactory;
   private final String websocketOutputEndpoint;
@@ -38,21 +35,14 @@ public class OpenShiftRuntimeContext extends RuntimeContext {
       @Named("che.websocket.endpoint") String cheWebsocketEndpoint,
       OpenShiftProjectFactory projectFactory,
       OpenShiftRuntimeFactory runtimeFactory,
-      @Assisted InternalEnvironment environment,
       @Assisted OpenShiftEnvironment openShiftEnvironment,
       @Assisted RuntimeIdentity identity,
       @Assisted RuntimeInfrastructure infrastructure)
       throws ValidationException, InfrastructureException {
-    super(environment, identity, infrastructure);
+    super(openShiftEnvironment, identity, infrastructure);
     this.projectFactory = projectFactory;
     this.runtimeFactory = runtimeFactory;
-    this.openShiftEnvironment = openShiftEnvironment;
     this.websocketOutputEndpoint = cheWebsocketEndpoint;
-  }
-
-  /** Returns OpenShift environment which based on normalized context environment configuration. */
-  public OpenShiftEnvironment getOpenShiftEnvironment() {
-    return openShiftEnvironment;
   }
 
   @Override
@@ -66,7 +56,7 @@ public class OpenShiftRuntimeContext extends RuntimeContext {
   }
 
   @Override
-  public InternalRuntime getRuntime() throws InfrastructureException {
+  public OpenShiftInternalRuntime getRuntime() throws InfrastructureException {
     return runtimeFactory.create(this, projectFactory.create(getIdentity().getWorkspaceId()));
   }
 }
