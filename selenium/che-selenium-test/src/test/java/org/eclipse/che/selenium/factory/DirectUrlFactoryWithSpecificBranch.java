@@ -28,6 +28,7 @@ import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
@@ -48,6 +49,7 @@ public class DirectUrlFactoryWithSpecificBranch {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Dashboard dashboard;
 
   private TestFactory testFactoryWithSpecificBranch;
   private static final Logger LOG =
@@ -69,7 +71,8 @@ public class DirectUrlFactoryWithSpecificBranch {
 
   @Test
   public void factoryWithDirectUrlWithSpecificBranch() throws Exception {
-    testFactoryWithSpecificBranch.authenticateAndOpen(seleniumWebDriver);
+    dashboard.open();
+    testFactoryWithSpecificBranch.open(seleniumWebDriver);
     seleniumWebDriver.switchFromDashboardIframeToIde();
     projectExplorer.waitProjectExplorer();
     notificationsPopupPanel.waitProgressPopupPanelClose();
