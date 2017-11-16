@@ -300,6 +300,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
   public List<Collection<InitializedLanguageServer>> getApplicableLanguageServers(String fileUri)
       throws LanguageServerException {
     LanguageDescription language = findLanguage(fileUri);
+    String languageId = language == null ? null : language.getLanguageId();
 
     Map<Integer, List<InitializedLanguageServer>> result = new HashMap<>();
 
@@ -308,8 +309,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
           .getLauncher()
           .getLaunchingStrategy()
           .isApplicable(server.getLaunchKey(), fileUri)) {
-        int score =
-            matchScore(server.getLauncher().getDescription(), fileUri, language.getLanguageId());
+        int score = matchScore(server.getLauncher().getDescription(), fileUri, languageId);
         if (score > 0) {
           List<InitializedLanguageServer> list = result.get(score);
           if (list == null) {
