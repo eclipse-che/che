@@ -25,6 +25,8 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.languageserver.messager.ShowMessageJsonRpcTransmitter;
 import org.eclipse.che.api.languageserver.registry.CheLanguageClient;
 import org.eclipse.che.api.languageserver.registry.LanguageServerDescription;
+import org.eclipse.lsp4j.ClientCapabilities;
+import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.MessageActionItem;
 import org.eclipse.lsp4j.MessageType;
 import org.eclipse.lsp4j.ShowMessageRequestParams;
@@ -74,6 +76,10 @@ public class ShowMessageRequestTest {
 
     CheLanguageClient client = new CheLanguageClient(eventService, transmitter, "id");
     server = launcher.launch("file:///tmp", client);
+    InitializeParams params = new InitializeParams();
+    params.setRootUri("file:///tmp");
+    params.setCapabilities(new ClientCapabilities());
+    server.initialize(params);
     ArgumentCaptor<ShowMessageRequestParams> captor =
         ArgumentCaptor.forClass(ShowMessageRequestParams.class);
     verify(transmitter, timeout(1500)).sendShowMessageRequest(captor.capture());
