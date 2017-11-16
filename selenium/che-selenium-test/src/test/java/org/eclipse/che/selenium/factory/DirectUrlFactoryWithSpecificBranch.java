@@ -17,6 +17,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.util.List;
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
@@ -27,6 +28,8 @@ import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -47,6 +50,8 @@ public class DirectUrlFactoryWithSpecificBranch {
   @Inject private TestProjectServiceClient testProjectServiceClient;
 
   private TestFactory testFactoryWithSpecificBranch;
+  private static final Logger LOG =
+      LoggerFactory.getLogger(DirectUrlFactoryWithSpecificBranch.class);
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -70,27 +75,64 @@ public class DirectUrlFactoryWithSpecificBranch {
     notificationsPopupPanel.waitProgressPopupPanelClose();
     events.clickEventLogBtn();
 
+    Workspace testWorkspace = workspaceServiceClient.getByName(gitHubUsername, testUser.getName());
+
+    logWorkspaceStatus(testWorkspace);
+
     events.waitExpectedMessage("Project gitPullTest imported", UPDATING_PROJECT_TIMEOUT_SEC);
+
+    logWorkspaceStatus(testWorkspace);
+
     events.waitExpectedMessage(
         "Successfully configured and cloned source code of gitPullTest.",
         UPDATING_PROJECT_TIMEOUT_SEC);
+
+    logWorkspaceStatus(testWorkspace);
+
     events.waitExpectedMessage(
         "Project: gitPullTest | cloned from: gitPullTest | remote branch: refs/remotes/origin/contrib-12092015 | local branch: contrib-12092015",
         UPDATING_PROJECT_TIMEOUT_SEC);
+
+    logWorkspaceStatus(testWorkspace);
+
     projectExplorer.expandPathInProjectExplorer("gitPullTest/my-lib");
+
+    logWorkspaceStatus(testWorkspace);
+
     projectExplorer.waitItem("gitPullTest/my-lib/pom.xml");
+
+    logWorkspaceStatus(testWorkspace);
 
     String wsId =
         workspaceServiceClient
             .getByName(seleniumWebDriver.getWorkspaceNameFromBrowserUrl(), testUser.getName())
             .getId();
 
+    logWorkspaceStatus(testWorkspace);
+
     List<String> visibleItems = projectExplorer.getNamesOfAllOpenItems();
     assertTrue(
         visibleItems.containsAll(
             ImmutableList.of("gitPullTest", "my-lib", "my-webapp", "src", "pom.xml")));
 
+    logWorkspaceStatus(testWorkspace);
+
     String projectType = testProjectServiceClient.getFirstProject(wsId).getType();
+
+    logWorkspaceStatus(testWorkspace);
+
     assertTrue(projectType.equals("blank"));
+
+    logWorkspaceStatus(testWorkspace);
+  }
+
+  private void logWorkspaceStatus(Workspace workspace) {
+    try {
+      LOG.debug("============>>>>>   " + workspace.getStatus().toString());
+    } catch (Exception ex) {
+      LOG.debug(
+          "************************    "
+              + "unhandled exeption in the \"logWorkspaceStatus method\"");
+    }
   }
 }
