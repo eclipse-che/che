@@ -12,6 +12,8 @@ package org.eclipse.che.api.languageserver.registry;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.lsp4j.ServerCapabilities;
@@ -41,4 +43,6 @@ public interface LanguageServerRegistry extends Observable<ServerInitializerObse
   ServerCapabilities getCapabilities(String fileUri) throws LanguageServerException;
 
   InitializedLanguageServer getServer(String id);
+
+  Optional<InitializedLanguageServer> findServer(Predicate<InitializedLanguageServer> condition);
 }
