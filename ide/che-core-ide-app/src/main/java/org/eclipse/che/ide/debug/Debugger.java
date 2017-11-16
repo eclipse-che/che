@@ -12,7 +12,6 @@ package org.eclipse.che.ide.debug;
 
 import java.util.List;
 import java.util.Map;
-import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.ThreadStateDto;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.Location;
@@ -42,20 +41,20 @@ public interface Debugger extends DebuggerObservable {
    *
    * @param breakpoint the breakpoint to add
    */
-  void addBreakpoint(Breakpoint breakpoint);
+  Promise<Void> addBreakpoint(Breakpoint breakpoint);
 
   /**
    * Deletes the given breakpoint on server.
    *
    * @param breakpoint the breakpoint to delete
    */
-  void deleteBreakpoint(Breakpoint breakpoint);
+  Promise<Void> deleteBreakpoint(Breakpoint breakpoint);
 
   /** Deletes all breakpoints. */
-  void deleteAllBreakpoints();
+  Promise<Void> deleteAllBreakpoints();
 
   /** Returns breakpoints. */
-  Promise<List<BreakpointDto>> getAllBreakpoints();
+  Promise<List<? extends Breakpoint>> getAllBreakpoints();
 
   /**
    * Connects to server.

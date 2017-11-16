@@ -94,10 +94,10 @@ describe('CheProfile', () => {
         .build();
 
       // setup backend
-      cheBackend.setAttributes(testProfile.atributes);
+      cheBackend.setAttributes(testProfile.attributes);
       cheBackend.setup();
 
-      factory.setAttributes(testProfile.atributes);
+      factory.setAttributes(testProfile.attributes);
 
       httpBackend.expectPUT('/api/profile/attributes');
 
@@ -118,7 +118,7 @@ describe('CheProfile', () => {
 
       factory.setAttributes(testProfile.attributes, testProfile.userId);
 
-      httpBackend.expectPUT(`/api/profile/${testProfile.id}/attributes`);
+      httpBackend.expectPUT(`/api/profile/${testProfile.userId}/attributes`);
 
       httpBackend.flush();
 

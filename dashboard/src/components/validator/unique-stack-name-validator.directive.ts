@@ -9,45 +9,53 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import {CheAPI} from '../api/che-api.factory';
+
+interface IUniqueStackNameValidatorAttributes extends ng.IAttributes {
+  uniqueStackName: string;
+}
 
 /**
  * Defines a directive for checking whether stack name already exists.
  *
  * @author Ann Shumilova
  */
-export class UniqueStackNameValidator {
+export class UniqueStackNameValidator implements ng.IDirective {
+  restrict = 'A';
+  require = 'ngModel';
+
+  cheAPI: CheAPI;
+  $q: ng.IQService;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor (cheAPI, $q) {
+  constructor (cheAPI: CheAPI, $q: ng.IQService) {
     this.cheAPI = cheAPI;
     this.$q = $q;
-    this.restrict='A';
-    this.require = 'ngModel';
   }
 
   /**
    * Check that the name of stack is unique
    */
-  link($scope, element, attributes, ngModel) {
+  link($scope: ng.IScope, $element: ng.IAugmentedJQuery, $attributes: ng.IAttributes, $ngModelCtrl: ng.INgModelController) {
 
     // validate only input element
-    if ('input' === element[0].localName) {
+    if ('input' === $element[0].localName) {
 
-      ngModel.$asyncValidators.uniqueStackName = (modelValue) => {
+      ($ngModelCtrl.$asyncValidators as any).uniqueStackName = (modelValue: string) => {
 
         // create promise
-        var deferred = this.$q.defer();
+        const deferred = this.$q.defer();
 
         // parent scope ?
-        var scopingTest = $scope.$parent;
+        let scopingTest = $scope.$parent;
         if (!scopingTest) {
           scopingTest = $scope;
         }
 
-        let currentStackName = scopingTest.$eval(attributes.uniqueStackName),
+        let currentStackName = scopingTest.$eval(($attributes as any).uniqueStackName),
           stacks = this.cheAPI.getStack().getStacks();
         if (stacks.length) {
           for (let i = 0; i < stacks.length; i++) {

@@ -11,6 +11,7 @@
 package org.eclipse.che.api.debug.shared.model.event;
 
 import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.SuspendPolicy;
 
 /**
  * Event is generated when debugger suspended at some location.
@@ -19,4 +20,6 @@ import org.eclipse.che.api.debug.shared.model.Location;
  */
 public interface SuspendEvent extends DebuggerEvent {
   Location getLocation();
+
+  SuspendPolicy getSuspendPolicy();
 }

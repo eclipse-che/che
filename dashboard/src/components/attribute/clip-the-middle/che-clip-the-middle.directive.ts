@@ -10,6 +10,10 @@
  */
 'use strict';
 
+interface ICheClipTheMiddleAttributes extends ng.IAttributes {
+  str: string;
+}
+
 /**
  * @ngdoc directive
  * @name components.directive:cheClipTheMiddle
@@ -30,7 +34,7 @@ export class CheClipTheMiddle implements ng.IDirective {
   restrict: string = 'AE';
   replace: boolean = true;
 
-  template($element: ng.IAugmentedJQuery): void {
+  template($element: ng.IAugmentedJQuery): string {
     const str = $element.text();
     return `
 <div data-str="${str}" class="che-clip-the-middle">
@@ -40,7 +44,7 @@ export class CheClipTheMiddle implements ng.IDirective {
     `;
   }
 
-  link($scope: ng.IScope, $element: ng.IAugmentedJQuery, $attrs: ng.IAttributes): void {
+  link($scope: ng.IScope, $element: ng.IAugmentedJQuery, $attrs: ICheClipTheMiddleAttributes): void {
     const str = $attrs.str,
       strStart = str.substr(0, str.length - 3),
       strEnd = str.substr(str.length - 3, 3);

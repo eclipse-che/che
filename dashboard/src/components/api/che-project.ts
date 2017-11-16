@@ -109,11 +109,11 @@ export class CheProject {
    * @returns {string} a name
    */
   getFullName(profile: che.IProfile): string {
-    var firstName = profile.attributes.firstName;
+    let firstName = profile.attributes.firstName;
     if (!firstName) {
       firstName = '';
     }
-    var lastName = profile.attributes.lastName;
+    let lastName = profile.attributes.lastName;
     if (!lastName) {
       lastName = '';
     }
@@ -127,12 +127,12 @@ export class CheProject {
    * @returns {ng.IPromise<any>}
    */
   fetchProjectDetails(workspaceId: string, projectPath: string): ng.IPromise<any> {
-    //TODO why we cannot use project path
+    // todo why we cannot use project path
     let projectName = projectPath[0] === '/' ? projectPath.slice(1) : projectPath;
     let promise = this.remoteProjectsAPI.details({path: projectName}).$promise;
 
     // check if it was OK or not
-    let parsedResultPromise = promise.then((projectDetails) => {
+    let parsedResultPromise = promise.then((projectDetails: any) => {
       if (projectDetails) {
         projectDetails.workspaceId = workspaceId;
         this.projectDetailsMap.set(projectPath, projectDetails);
@@ -185,7 +185,7 @@ export class CheProject {
   fetchEstimate(projectPath: string, projectType: string): ng.IPromise<any> {
     let projectName = projectPath[0] === '/' ? projectPath.slice(1) : projectPath;
     let promise = this.remoteProjectsAPI.estimate({path: projectName, type: projectType}).$promise;
-    let parsedResultPromise = promise.then((estimate) => {
+    let parsedResultPromise = promise.then((estimate: any) => {
       if (estimate) {
         this.estimateMap.set(projectName + projectType, estimate);
       }
@@ -210,7 +210,7 @@ export class CheProject {
   fetchResolve(projectPath: string): ng.IPromise<any> {
     let projectName = projectPath[0] === '/' ? projectPath.slice(1) : projectPath;
     let promise = this.remoteProjectsAPI.resolve({path: projectName}).$promise;
-    let parsedResultPromise = promise.then((resolve) => {
+    let parsedResultPromise = promise.then((resolve: any) => {
       if (resolve) {
         this.resolveMap.set(projectName, resolve);
       }

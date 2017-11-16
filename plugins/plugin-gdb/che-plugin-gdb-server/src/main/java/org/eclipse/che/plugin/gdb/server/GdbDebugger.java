@@ -24,6 +24,7 @@ import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
+import org.eclipse.che.api.debug.shared.model.SuspendPolicy;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.action.ResumeAction;
@@ -259,7 +260,7 @@ public class GdbDebugger implements Debugger {
 
       if (breakpoint != null) {
         currentLocation = breakpoint.getLocation();
-        debuggerCallback.onEvent(new SuspendEventImpl(breakpoint.getLocation()));
+        debuggerCallback.onEvent(new SuspendEventImpl(breakpoint.getLocation(), SuspendPolicy.ALL));
       } else {
         GdbInfoProgram gdbInfoProgram = gdb.infoProgram();
         if (gdbInfoProgram.getStoppedAddress() == null) {
@@ -278,7 +279,7 @@ public class GdbDebugger implements Debugger {
   public void suspend() throws DebuggerException {
     try {
       currentLocation = gdb.suspend(file, isRemoteConnection());
-      debuggerCallback.onEvent(new SuspendEventImpl(currentLocation));
+      debuggerCallback.onEvent(new SuspendEventImpl(currentLocation, SuspendPolicy.ALL));
     } catch (IOException | InterruptedException e) {
       throw new DebuggerException("Can not suspend debugger session. " + e.getMessage(), e);
     }
@@ -298,7 +299,7 @@ public class GdbDebugger implements Debugger {
       }
 
       currentLocation = gdbInfoLine.getLocation();
-      debuggerCallback.onEvent(new SuspendEventImpl(gdbInfoLine.getLocation()));
+      debuggerCallback.onEvent(new SuspendEventImpl(gdbInfoLine.getLocation(), SuspendPolicy.ALL));
     } catch (GdbTerminatedException e) {
       disconnect();
       throw e;
@@ -317,7 +318,7 @@ public class GdbDebugger implements Debugger {
       }
 
       currentLocation = gdbInfoLine.getLocation();
-      debuggerCallback.onEvent(new SuspendEventImpl(gdbInfoLine.getLocation()));
+      debuggerCallback.onEvent(new SuspendEventImpl(gdbInfoLine.getLocation(), SuspendPolicy.ALL));
     } catch (GdbTerminatedException e) {
       disconnect();
       throw e;
@@ -336,7 +337,7 @@ public class GdbDebugger implements Debugger {
       }
 
       currentLocation = gdbInfoLine.getLocation();
-      debuggerCallback.onEvent(new SuspendEventImpl(gdbInfoLine.getLocation()));
+      debuggerCallback.onEvent(new SuspendEventImpl(gdbInfoLine.getLocation(), SuspendPolicy.ALL));
     } catch (GdbTerminatedException e) {
       disconnect();
       throw e;
@@ -353,7 +354,7 @@ public class GdbDebugger implements Debugger {
 
       if (breakpoint != null) {
         currentLocation = breakpoint.getLocation();
-        debuggerCallback.onEvent(new SuspendEventImpl(breakpoint.getLocation()));
+        debuggerCallback.onEvent(new SuspendEventImpl(breakpoint.getLocation(), SuspendPolicy.ALL));
       } else {
         GdbInfoProgram gdbInfoProgram = gdb.infoProgram();
         if (gdbInfoProgram.getStoppedAddress() == null) {

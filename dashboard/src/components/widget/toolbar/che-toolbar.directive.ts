@@ -10,6 +10,25 @@
  */
 'use strict';
 
+interface ICheToolbarAttributes extends ng.IAttributes {
+  cheTitle: string;
+  cheTitleIconsController: any;
+  cheButtonHref: string;
+  cheButtonHrefTarget: string;
+  cheButtonName: string;
+  cheButtonIcon: string;
+  cheAddButtonName: string;
+  cheButtonOnClick: Function;
+  cheButtonDisabled: boolean;
+  cheAddButtonHref: string;
+  cheBreadcrumbTitle: string;
+  cheBreadcrumbHref: string;
+  cheSearchPlaceholder: string;
+  cheSearchModel: any;
+  cheDropdownMenu: any;
+  theme: string;
+}
+
 /**
  * @ngdoc directive
  * @name components.directive:cheToolbar
@@ -33,17 +52,17 @@
  *   <che-toolbar che-title="hello"></che-toolbar>
  *
  * @example
- <example module="userDashboard">
- <file name="index.html">
- <che-toolbar che-title="Hello"
- che-button-name="My Button"
- che-button-href="http://www.eclipse.org/che"
- che-breadcrumb-title="My Breadcrumb"
- che-breadcrumb-href="http://www.eclipse.org/che"
- che-subheader-title="subtitle"
- ></che-toolbar>
- </file>
- </example>
+ * <example module="userDashboard">
+ *   <file name="index.html">
+ *     <che-toolbar che-title="Hello"
+ *     che-button-name="My Button"
+ *     che-button-href="http://www.eclipse.org/che"
+ *     che-breadcrumb-title="My Breadcrumb"
+ *     che-breadcrumb-href="http://www.eclipse.org/che"
+ *     che-subheader-title="subtitle"
+ *     ></che-toolbar>
+ *   </file>
+ * </example>
  * @author Florent Benoit
  */
 export class CheToolbar {
@@ -63,37 +82,37 @@ export class CheToolbar {
 
   /**
    * Template for the current toolbar
-   * @param element
-   * @param attrs
+   * @param $element
+   * @param $attrs
    * @returns {string} the template
    */
-  template(element, attrs) {
-    var title = attrs.cheTitle;
-    var titleController = attrs.cheTitleIconsController;
-    var buttonHref = attrs.cheButtonHref;
-    var buttonHrefTarget = attrs.cheButtonHrefTarget;
-    var buttonName = attrs.cheButtonName;
-    var buttonIcon = attrs.cheButtonIcon;
-    var addButtonName = attrs.cheAddButtonName;
-    var buttonOnClick = attrs.cheButtonOnClick;
-    var buttonDisabled = attrs.cheButtonDisabled;
-    var addButtonHref = attrs.cheAddButtonHref;
+  template($element: ng.IAugmentedJQuery, $attrs: ICheToolbarAttributes): string {
+    const title = $attrs.cheTitle;
+    const titleController = $attrs.cheTitleIconsController;
+    const buttonHref = $attrs.cheButtonHref;
+    const buttonHrefTarget = $attrs.cheButtonHrefTarget;
+    const buttonName = $attrs.cheButtonName;
+    const buttonIcon = $attrs.cheButtonIcon;
+    const addButtonName = $attrs.cheAddButtonName;
+    const buttonOnClick = $attrs.cheButtonOnClick;
+    const buttonDisabled = $attrs.cheButtonDisabled;
+    const addButtonHref = $attrs.cheAddButtonHref;
 
-    var breadcrumbTitle = attrs.cheBreadcrumbTitle;
-    var breadcrumbHref = attrs.cheBreadcrumbHref;
+    const breadcrumbTitle = $attrs.cheBreadcrumbTitle;
+    const breadcrumbHref = $attrs.cheBreadcrumbHref;
 
-    var searchPlaceholder = attrs.cheSearchPlaceholder;
-    var searchModel = attrs.cheSearchModel;
+    const searchPlaceholder = $attrs.cheSearchPlaceholder;
+    const searchModel = $attrs.cheSearchModel;
 
-    var dropdownMenu = attrs.cheDropdownMenu;
-    var id = title.replace(/[\W\s]/g, '_');
-    var theme = attrs.theme;
+    const dropdownMenu = $attrs.cheDropdownMenu;
+    const id = title.replace(/[\W\s]/g, '_');
+    let theme = $attrs.theme;
 
     if (!theme) {
       theme = 'toolbar-theme';
     }
 
-    var template = '<div class=\"che-toolbar\"><md-toolbar md-theme=\"' + theme + '\">\n'
+    let template = '<div class=\"che-toolbar\"><md-toolbar md-theme=\"' + theme + '\">\n'
       + '<div layout=\"row\" layout-align=\"start center\" flex>';
 
     if (breadcrumbHref) {

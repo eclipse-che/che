@@ -18,76 +18,79 @@
  */
 export class ChePanelCtrl {
 
+  $scope: ng.IScope;
+
+  collapse: boolean;
+  locked: boolean;
+  disabled: boolean;
+  id: string;
+
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($scope) {
+  constructor($scope: ng.IScope) {
     this.collapse = false;
-
 
     // in lock mode, we're unable to toggle and see the content
     this.locked = false;
 
     this.id = '';
 
-
     this.$scope = $scope;
-
   }
 
   /**
    * Sets the id
    * @param id
    */
-  setId(id) {
+  setId(id: string): void {
     this.id = id;
 
     // listener on events
-    this.$scope.$on('chePanel:toggle', (event, data) => {
+    this.$scope.$on('chePanel:toggle', (event: ng.IAngularEvent, data: any) => {
       if (data === this.id) {
         this.toggle();
       }
     });
 
-    this.$scope.$on('chePanel:lock', (event, data) => {
+    this.$scope.$on('chePanel:lock', (event: ng.IAngularEvent, data: any) => {
       if (data === this.id) {
         this.lock();
       }
     });
 
-    this.$scope.$on('chePanel:collapse', (event, data) => {
+    this.$scope.$on('chePanel:collapse', (event: ng.IAngularEvent, data: any) => {
       if (data === this.id) {
         this.collapse = true;
       }
     });
 
-    this.$scope.$on('chePanel:disabled', (event, data) => {
+    this.$scope.$on('chePanel:disabled', (event: ng.IAngularEvent, data: any) => {
       if (data && (data.id === this.id)) {
         this.disabled = data.disabled;
       }
     });
   }
 
-
   /**
    * @returns true if the panel is collapsed.
    */
-  isCollapsed() {
+  isCollapsed(): boolean {
     return this.collapse;
   }
 
   /**
    * Toggle the collapsed mode
    */
-  toggle() {
+  toggle(): void {
     this.collapse = !this.collapse;
   }
 
   /**
    * @returns {string} the icon to display
    */
-  getToggleIcon() {
+  getToggleIcon(): string {
     if (this.locked) {
       return '';
     }
@@ -99,10 +102,9 @@ export class ChePanelCtrl {
     }
   }
 
-  lock() {
+  lock(): void {
     this.collapse = true;
     this.locked = true;
   }
-
 
 }

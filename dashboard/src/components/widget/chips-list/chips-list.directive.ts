@@ -19,13 +19,7 @@ export class CheChipsList {
   transclude: boolean = true;
   require: string = 'ngModel';
 
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor() { }
-
-  template() {
+  template(): string {
     return `<md-chips class="che-chips-list">
       <md-chip-template >
         <div class="tag-text">{{$chip}}</div>
@@ -36,11 +30,11 @@ export class CheChipsList {
     </md-chips>`;
   }
 
-  compile(element, attrs) {
-    let keys = Object.keys(attrs);
+  compile($element: ng.IAugmentedJQuery, $attrs: ng.IAttributes) {
+    let keys = Object.keys($attrs);
 
     // search the md-chips element
-    let mdChipsElement = element.find('md-chips');
+    let mdChipsElement = $element.find('md-chips');
 
     keys.forEach((key: string) => {
 
@@ -52,7 +46,7 @@ export class CheChipsList {
       if (key.indexOf('che') === 0) {
         return;
       }
-      let value = attrs[key];
+      let value = $attrs[key];
 
       // handle empty values as boolean
       if (value === '') {
@@ -60,7 +54,7 @@ export class CheChipsList {
       }
 
       // set the value of the attribute
-      mdChipsElement.attr(attrs.$attr[key], value);
+      mdChipsElement.attr($attrs.$attr[key], value);
 
       // it needs to use DOM element method to set custom value of boolean attribute
       // because jQuery's 'attr' method substitutes this value with name of attribute
@@ -68,7 +62,7 @@ export class CheChipsList {
         mdChipsElement[0].setAttribute(key, value);
       }
 
-      element.removeAttr(attrs.$attr[key]);
+      $element.removeAttr($attrs.$attr[key]);
 
     });
   }
