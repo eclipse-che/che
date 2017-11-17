@@ -26,7 +26,6 @@ import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.gdb.server.exception.GdbException;
-import org.eclipse.che.plugin.gdb.server.exception.GdbParseException;
 import org.eclipse.che.plugin.gdb.server.exception.GdbTerminatedException;
 import org.eclipse.che.plugin.gdb.server.parser.GdbBacktrace;
 import org.eclipse.che.plugin.gdb.server.parser.GdbBreak;
@@ -46,7 +45,6 @@ import org.eclipse.che.plugin.gdb.server.parser.GdbPrint;
 import org.eclipse.che.plugin.gdb.server.parser.GdbRun;
 import org.eclipse.che.plugin.gdb.server.parser.GdbTargetRemote;
 import org.eclipse.che.plugin.gdb.server.parser.GdbVersion;
-import org.eclipse.che.plugin.gdb.server.parser.GdbWorkDir;
 import org.eclipse.che.plugin.gdb.server.parser.ProcessInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -293,12 +291,6 @@ public class Gdb extends GdbProcess {
   public GdbInfoProgram infoProgram() throws IOException, InterruptedException, DebuggerException {
     GdbOutput gdbOutput = sendCommand("info program");
     return GdbInfoProgram.parse(gdbOutput);
-  }
-
-  public GdbWorkDir workDir()
-      throws InterruptedException, IOException, GdbTerminatedException, GdbParseException {
-    GdbOutput gdbOutput = sendCommand("pwd");
-    return GdbWorkDir.parse(gdbOutput);
   }
 
   private GdbOutput sendCommand(String command)
