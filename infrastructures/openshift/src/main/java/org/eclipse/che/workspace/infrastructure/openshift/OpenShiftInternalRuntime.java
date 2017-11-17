@@ -25,9 +25,9 @@ import io.fabric8.openshift.api.model.Route;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import javax.inject.Inject;
@@ -151,7 +151,7 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
     for (OpenShiftMachine machine : machines.values()) {
       BootstrapMachineTask task = new BootstrapMachineTask(machine);
       tasks.add(task);
-      checkMachines.add(CompletableFuture.runAsync(task, pool.getExecutor()));
+      checkMachines.add(pool.runAsync(task));
     }
     try {
       CompletableFuture.allOf(checkMachines.toArray(new CompletableFuture[checkMachines.size()]))
@@ -163,7 +163,7 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
       } else if (e.getCause() instanceof InfrastructureException) {
         throw (InfrastructureException) e.getCause();
       } else {
-        throw new InfrastructureException(e.getCause().getMessage(), e.getCause());
+        throw new InternalInfrastructureException(e.getCause().getMessage(), e.getCause());
       }
     }
   }
