@@ -64,7 +64,7 @@ import org.eclipse.che.selenium.pageobject.PageObjectsInjectorImpl;
  */
 public class CheSeleniumSuiteModule extends AbstractModule {
 
-  private static final String CHE_MULTIUSER_VARIABLE = "CHE_MULTIUSER";
+  public static final String CHE_MULTIUSER_VARIABLE = "CHE_MULTIUSER";
 
   @Override
   public void configure() {

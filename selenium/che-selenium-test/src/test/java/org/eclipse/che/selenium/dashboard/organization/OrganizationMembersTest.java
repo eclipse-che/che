@@ -16,6 +16,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuIt
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
+import org.eclipse.che.selenium.core.annotation.Multiuser;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
@@ -31,6 +32,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Sergey Skorik */
+@Multiuser
 public class OrganizationMembersTest {
   private static final String PRE_CREATED_ORG_NAME = generate("organization", 5);
   private static final String NEW_ORG_NAME = generate("new-org", 5);

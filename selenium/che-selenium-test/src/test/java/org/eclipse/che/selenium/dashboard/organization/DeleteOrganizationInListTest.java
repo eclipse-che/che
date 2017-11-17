@@ -22,6 +22,7 @@ import com.google.inject.name.Named;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
+import org.eclipse.che.selenium.core.annotation.Multiuser;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.ConfirmDialog;
@@ -37,6 +38,7 @@ import org.testng.annotations.Test;
  *
  * @author Ann Shumilova
  */
+@Multiuser
 public class DeleteOrganizationInListTest {
   private static final String ORGANIZATION_NAME = generate("organization", 7);
 

@@ -18,19 +18,14 @@ import org.eclipse.che.selenium.core.CheSeleniumWebDriverRelatedModule;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.entrance.Entrance;
 import org.eclipse.che.selenium.core.pageobject.PageObjectsInjector;
+import org.eclipse.che.selenium.core.provider.CheTestIsMultiuserProvider;
 import org.eclipse.che.selenium.pageobject.site.CheLoginPage;
 
 /** @author Dmytro Nochevnov */
 @Singleton
 public class PageObjectsInjectorImpl extends PageObjectsInjector {
-
-  private static final String CHE_MULTIUSER = "che.multiuser";
-
   @Inject private CheSeleniumWebDriverRelatedModule cheSeleniumWebDriverRelatedModule;
-
-  @Inject
-  @javax.inject.Named(CHE_MULTIUSER)
-  boolean isMultiuser;
+  @Inject private CheTestIsMultiuserProvider cheTestIsMultiuserProvider;
 
   @Override
   public Map<Class<?>, Object> getDependenciesWithWebdriver(SeleniumWebDriver seleniumWebDriver) {
@@ -38,7 +33,7 @@ public class PageObjectsInjectorImpl extends PageObjectsInjector {
     dependencies.put(
         Entrance.class,
         cheSeleniumWebDriverRelatedModule.getEntrance(
-            isMultiuser, new CheLoginPage(seleniumWebDriver), seleniumWebDriver));
+            cheTestIsMultiuserProvider, new CheLoginPage(seleniumWebDriver), seleniumWebDriver));
 
     return dependencies;
   }

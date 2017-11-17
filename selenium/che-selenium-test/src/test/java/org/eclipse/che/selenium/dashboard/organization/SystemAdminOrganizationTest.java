@@ -26,6 +26,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.util.ArrayList;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
+import org.eclipse.che.selenium.core.annotation.Multiuser;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.CheMultiuserAdminDashboard;
@@ -41,6 +42,7 @@ import org.testng.annotations.Test;
  *
  * @author Ann Shumilova
  */
+@Multiuser
 public class SystemAdminOrganizationTest {
   private static final String PARENT_ORG_NAME = generate("parent-org", 5);
   private static final String CHILD_ORG_NAME = generate("child-org", 5);

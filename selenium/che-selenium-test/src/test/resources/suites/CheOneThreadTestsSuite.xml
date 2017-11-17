@@ -18,6 +18,7 @@
 
     <test name="all">
         <classes>
+            <class name="org.eclipse.che.selenium.dashboard.organization.UserEmptyOrganizationTest"/>
             <class name="org.eclipse.che.selenium.git.CheckoutReferenceTest"/>
             <class name="org.eclipse.che.selenium.git.CheckoutToRemoteBranchTest"/>
             <class name="org.eclipse.che.selenium.git.CheckoutToRemoteBranchWhichAlreadyHasLinkedLocalBranchTest"/>

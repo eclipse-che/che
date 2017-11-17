@@ -17,6 +17,7 @@ import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import org.eclipse.che.selenium.core.annotation.Multiuser;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
@@ -33,6 +34,7 @@ import org.testng.annotations.Test;
  *
  * @author Ann Shumilova
  */
+@Multiuser
 public class CreateOrganizationTest {
   private static final String ORGANIZATION_NAME = generate("organization", 4);
   private static final String SUB_ORGANIZATION_NAME = generate("sub-organization", 4);

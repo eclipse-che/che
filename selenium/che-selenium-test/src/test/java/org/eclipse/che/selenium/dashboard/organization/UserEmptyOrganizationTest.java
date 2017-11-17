@@ -16,6 +16,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
+import org.eclipse.che.selenium.core.annotation.Multiuser;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage;
@@ -27,6 +28,7 @@ import org.testng.annotations.Test;
  *
  * @author Ann Shumilova
  */
+@Multiuser
 public class UserEmptyOrganizationTest {
   @Inject private OrganizationListPage organizationListPage;
   @Inject private NavigationBar navigationBar;
