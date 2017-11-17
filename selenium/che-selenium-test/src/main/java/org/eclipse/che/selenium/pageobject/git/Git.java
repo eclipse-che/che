@@ -793,6 +793,16 @@ public class Git {
     stream(itemName).forEach(gitCommit::waitItemCheckBoxToBeUnSelected);
   }
 
+  /**
+   * Wait for item check-box in the 'Git changed files tree panel' in 'Commit' window to be
+   * indeterminate.
+   *
+   * @param itemName name of the item
+   */
+  public void waitItemCheckBoxToBeIndeterminateInCommitWindow(String... itemName) {
+    stream(itemName).forEach(gitCommit::waitItemCheckBoxToBeIndeterminate);
+  }
+
   /** Wait 'Reset to commit' window is open */
   public void waitResetWindowOpen() {
     gitReset.waitOpen();

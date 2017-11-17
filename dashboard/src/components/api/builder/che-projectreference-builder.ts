@@ -15,6 +15,7 @@
  * @author Florent Benoit
  */
 export class CheProjectReferenceBuilder {
+  private projectReference: any;
 
   /**
    * Default constructor.
@@ -23,13 +24,12 @@ export class CheProjectReferenceBuilder {
     this.projectReference = {};
   }
 
-
   /**
    * Sets the name of the project reference
-   * @param name the name to use
+   * @param {string} name the name to use
    * @returns {CheProjectReferenceBuilder}
    */
-  withName(name) {
+  withName(name: string): CheProjectReferenceBuilder {
     this.projectReference.name = name;
     return this;
   }
@@ -38,10 +38,9 @@ export class CheProjectReferenceBuilder {
    * Build the project reference
    * @returns {CheProjectReferenceBuilder.projectReference|*}
    */
-  build() {
+  build(): CheProjectReferenceBuilder {
     return this.projectReference;
   }
-
 
 }
 

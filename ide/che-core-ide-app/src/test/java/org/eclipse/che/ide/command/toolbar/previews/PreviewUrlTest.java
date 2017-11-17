@@ -17,10 +17,9 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.api.workspace.model.ServerImpl;
-import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,7 +34,7 @@ public class PreviewUrlTest {
   private static final String MACHINE_NAME = "dev-machine";
   private static final String SERVER_PORT = "8080";
 
-  @Mock private AppContext appContext;
+  @Mock private WsAgentServerUtil wsAgentServerUtil;
 
   private PreviewUrl previewUrl;
 
@@ -51,11 +50,9 @@ public class PreviewUrlTest {
     when(devMachine.getName()).thenReturn(MACHINE_NAME);
     when(devMachine.getServers()).thenReturn(servers);
 
-    WorkspaceImpl workspace = mock(WorkspaceImpl.class);
-    when(workspace.getDevMachine()).thenReturn(Optional.of(devMachine));
-    when(appContext.getWorkspace()).thenReturn(workspace);
+    when(wsAgentServerUtil.getWsAgentServerMachine()).thenReturn(Optional.of(devMachine));
 
-    previewUrl = new PreviewUrl(PREVIEW_URL, appContext);
+    previewUrl = new PreviewUrl(PREVIEW_URL, wsAgentServerUtil);
   }
 
   @Test

@@ -395,6 +395,7 @@
 
 /*CheckBox*/
 @eval checkBoxIconColor org.eclipse.che.ide.api.theme.Style.theme.checkBoxIconColor();
+@eval checkBoxIndeterminateIconColor org.eclipse.che.ide.api.theme.Style.theme.checkBoxIndeterminateIconColor();
 @eval checkBoxFontColor org.eclipse.che.ide.api.theme.Style.theme.checkBoxFontColor();
 @eval checkBoxBorderColor org.eclipse.che.ide.api.theme.Style.theme.checkBoxBorderColor();
 @eval checkBoxBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.checkBoxBackgroundColor();

@@ -20,7 +20,6 @@ import org.eclipse.che.selenium.core.factory.FactoryTemplate;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
-import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.PopupDialogsBrowser;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.WarningDialog;
@@ -39,7 +38,6 @@ public class CheckFactoryWithSincePolicyTest {
   private static final int ADDITIONAL_TIME = 60000;
 
   @Inject private ProjectExplorer projectExplorer;
-  @Inject private Ide ide;
   @Inject private TestFactoryInitializer testFactoryInitializer;
   @Inject private PopupDialogsBrowser popupDialogsBrowser;
   @Inject private Dashboard dashboard;

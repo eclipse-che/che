@@ -14,26 +14,20 @@
  * Defines the super class for for all buttons
  * @author Florent Benoit
  */
-export class CheButtonDropdown {
+export class CheButtonDropdown implements ng.IDirective {
 
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor() {
-    this.restrict = 'E';
-    this.bindToController = true;
-    this.templateUrl = 'components/widget/button-dropdown/che-button-dropdown.html';
-    this.controller = 'CheButtonDropdownCtrl';
-    this.controllerAs = 'cheButtonDropdownCtrl';
+  restrict = 'E';
+  bindToController = true;
+  templateUrl = 'components/widget/button-dropdown/che-button-dropdown.html';
+  controller = 'CheButtonDropdownCtrl';
+  controllerAs = 'cheButtonDropdownCtrl';
 
-    // scope values
-    this.scope = {
-      labelText: '@cheButtonDropdownLabel',
-      href: '@cheButtonDropdownHref',
-      ctrl: '=cheButtonDropdownController',
-      isDisabled: '=cheDisabled'
-    };
-  }
+  // scope values
+  scope = {
+    labelText: '@cheButtonDropdownLabel',
+    href: '@cheButtonDropdownHref',
+    ctrl: '=cheButtonDropdownController',
+    isDisabled: '=cheDisabled'
+  };
 
 }

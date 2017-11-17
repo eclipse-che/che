@@ -9,8 +9,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-
-/*global FormData, XMLHttpRequest */
+import {ICheDropZoneEventObject} from './che-dropzone.directive';
 
 /**
  * @ngdoc controller
@@ -19,51 +18,56 @@
  * @author Florent Benoit
  */
 export class CheDropZoneCtrl {
+  $scope: ng.IScope;
+  lodash: any;
+  HOVER_KO_CLASS = 'che-dropzone-hover-ko';
+  HOVER_OK_CLASS = 'che-dropzone-hover-ok';
+  errorMessage: string = null;
+  dropClass: string;
+  waitingDrop: boolean;
+  progressUploadPercent: number;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($scope, lodash) {
+  constructor($scope: ng.IScope, lodash: any) {
     this.$scope = $scope;
     this.lodash = lodash;
-    this.HOVER_KO_CLASS = 'che-dropzone-hover-ko';
-    this.HOVER_OK_CLASS = 'che-dropzone-hover-ok';
-    this.errorMessage = null;
   }
 
-  dropCallback(evt) {
+  dropCallback(evt: ICheDropZoneEventObject): void {
     evt.stopPropagation();
     evt.preventDefault();
 
     // handle files
-    var files = evt.dataTransfer.files;
+    const files = evt.dataTransfer.files;
     if (files.length > 0) {
       // needs to upload the file
       let formData = new FormData();
-      for (var i = 0; i < files.length; i++) {
+      for (let i = 0; i < files.length; i++) {
         formData.append('uploadedFile', files[i]);
       }
 
-      var xhr = new XMLHttpRequest();
-      xhr.upload.addEventListener('progress', (evt) => {
-        this.uploadProgress(evt, files);
+      const xhr = new XMLHttpRequest();
+      xhr.upload.addEventListener('progress', (evt: ICheDropZoneEventObject) => {
+        this.uploadProgress(evt);
       });
-      xhr.upload.addEventListener('load', (evt) => {
+      xhr.upload.addEventListener('load', (evt: ICheDropZoneEventObject) => {
         this.uploadLoad(evt, files);
       });
-      xhr.upload.addEventListener('error', (evt) => {
-        this.uploadError(evt, files);
+      xhr.upload.addEventListener('error', (evt: ICheDropZoneEventObject) => {
+        this.uploadError();
       });
-      xhr.upload.addEventListener('abort', (evt) => {
-        this.uploadAbort(evt, files);
+      xhr.upload.addEventListener('abort', (evt: ICheDropZoneEventObject) => {
+        this.uploadAbort();
       });
       xhr.open('POST', '/admin/upload');
       xhr.send(formData);
       return;
     }
 
-    var url = evt.dataTransfer.getData('URL');
+    const url = evt.dataTransfer.getData('URL');
     if (url == null) {
       this.$scope.$apply(() => {
         this.dropClass = this.HOVER_KO_CLASS;
@@ -72,17 +76,15 @@ export class CheDropZoneCtrl {
     }
 
     this.handleUrl(url);
-
   }
-
 
   /**
    * Handle the url during the drop
    * @param url
    */
-  handleUrl(url) {
+  handleUrl(url: string): void {
 
-    let delegateController = this.$scope.cheDropZoneCtrl.callbackController;
+    let delegateController = (this.$scope as any).cheDropZoneCtrl.callbackController;
 
     // promise
     let acceptPromise = delegateController.dropzoneAcceptURL(url);
@@ -95,7 +97,7 @@ export class CheDropZoneCtrl {
     acceptPromise.then(() => {
       this.waitingDrop = false;
       this.dropClass = '';
-    }, (error) => {
+    }, (error: any) => {
       this.waitingDrop = false;
       this.dropClass = this.HOVER_KO_CLASS;
       if (error.data && error.data.message) {
@@ -111,7 +113,7 @@ export class CheDropZoneCtrl {
   /**
    * Callback when we have the progress status
    */
-  uploadProgress(evt) {
+  uploadProgress(evt: ICheDropZoneEventObject): void {
     this.$scope.$apply(() => {
       if (evt.lengthComputable) {
         this.progressUploadPercent = Math.round(evt.loaded * 100 / evt.total);
@@ -122,9 +124,9 @@ export class CheDropZoneCtrl {
   /**
    * Callback when upload to the remote servlet has been done
    */
-  uploadLoad(evt, files) {
+  uploadLoad(evt: ICheDropZoneEventObject, files: any[]): void {
     // upload is OK then we need to upload every files
-    for (var i = 0; i < files.length; i++) {
+    for (let i = 0; i < files.length; i++) {
       this.handleUrl('upload:' + files[i].name);
     }
   }
@@ -132,7 +134,7 @@ export class CheDropZoneCtrl {
   /**
    * Callback when we have the error
    */
-  uploadError() {
+  uploadError(): void {
     this.$scope.$apply(() => {
       this.waitingDrop = false;
       this.dropClass = this.HOVER_KO_CLASS;
@@ -143,7 +145,7 @@ export class CheDropZoneCtrl {
   /**
    * Callback when we have aborting of the upload
    */
-  uploadAbort() {
+  uploadAbort(): void {
     this.$scope.$apply(() => {
       this.waitingDrop = false;
       this.dropClass = this.HOVER_KO_CLASS;
@@ -151,15 +153,13 @@ export class CheDropZoneCtrl {
     });
   }
 
-
-  dragoverCallback(evt) {
-
+  dragoverCallback(evt: ICheDropZoneEventObject): void {
     evt.stopPropagation();
     evt.preventDefault();
-    var okFiles = evt.dataTransfer && evt.dataTransfer && evt.dataTransfer.types && this.lodash.indexOf(evt.dataTransfer.types, 'Files') >= 0;
-    var okURI = evt.dataTransfer && evt.dataTransfer && evt.dataTransfer.types && this.lodash.indexOf(evt.dataTransfer.types, 'text/uri-list') >= 0;
+    const okFiles = evt.dataTransfer && evt.dataTransfer && evt.dataTransfer.types && this.lodash.indexOf(evt.dataTransfer.types, 'Files') >= 0;
+    const okURI = evt.dataTransfer && evt.dataTransfer && evt.dataTransfer.types && this.lodash.indexOf(evt.dataTransfer.types, 'text/uri-list') >= 0;
 
-    var ok = okFiles || okURI;
+    const ok = okFiles || okURI;
 
     this.$scope.$apply(() => {
       if (ok) {
@@ -170,17 +170,15 @@ export class CheDropZoneCtrl {
     });
   }
 
-
-  dragEnterCallback(evt) {
+  dragEnterCallback(evt: ICheDropZoneEventObject): void {
     this.cleanup(evt);
   }
 
-  dragLeaveCallback(evt) {
+  dragLeaveCallback(evt: ICheDropZoneEventObject): void {
     this.cleanup(evt);
   }
 
-
-  cleanup(evt) {
+  cleanup(evt: ICheDropZoneEventObject): void {
     evt.stopPropagation();
     evt.preventDefault();
     this.$scope.$apply(() => {
@@ -189,7 +187,6 @@ export class CheDropZoneCtrl {
       this.errorMessage = '';
     });
   }
-
 
 }
 

@@ -54,7 +54,7 @@ export class ApplicationNotifications {
    * @param removeOnRead if <code>true</code> - should be removed after has been shown to user
    * @returns {{notification}} notification
    */
-  addErrorNotification(title: string, content: string, removeOnRead = true): any {
+  addErrorNotification(title: string, content: string, removeOnRead: boolean = true): any {
     return this._addNotification('error', title, content, removeOnRead);
   }
 
@@ -66,7 +66,7 @@ export class ApplicationNotifications {
    * @param removeOnRead if <code>true</code> - should be removed after has been shown to user
    * @returns {{notification}} notification
    */
-  addWarningNotification(title: string, content: string, removeOnRead = true): any {
+  addWarningNotification(title: string, content: string, removeOnRead: boolean = true): any {
     return this._addNotification('warning', title, content, removeOnRead);
   }
 
@@ -78,7 +78,7 @@ export class ApplicationNotifications {
    * @param removeOnRead if <code>true</code> - should be removed after has been shown to user
    * @returns {{notification}} notification
    */
-  addInfoNotification(title: string, content: string, removeOnRead = true): any {
+  addInfoNotification(title: string, content: string, removeOnRead: boolean = true): any {
     return this._addNotification('info', title, content, removeOnRead);
   }
 
