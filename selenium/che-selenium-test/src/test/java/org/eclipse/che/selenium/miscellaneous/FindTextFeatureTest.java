@@ -21,6 +21,9 @@ import static org.eclipse.che.selenium.pageobject.Wizard.SamplesName.WEB_JAVA_PE
 import static org.openqa.selenium.Keys.ARROW_DOWN;
 import static org.openqa.selenium.Keys.ARROW_RIGHT;
 import static org.openqa.selenium.Keys.ENTER;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -34,6 +37,7 @@ import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.ConfigureClasspath;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.FindText;
+import org.eclipse.che.selenium.pageobject.FindText.SearchFileResult;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -41,7 +45,6 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -59,7 +62,7 @@ public class FindTextFeatureTest {
   @Inject private Menu menu;
   @Inject private ConfigureClasspath configureClasspath;
   @Inject private MachineTerminal terminal;
-  @Inject private FindText findText;
+  @Inject private FindText findTextPage;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private Consoles consoles;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
@@ -83,15 +86,15 @@ public class FindTextFeatureTest {
 
     // Open the Find Text form from menu
     menu.runCommand(EDIT, FIND);
-    findText.waitFindTextMainFormIsOpen();
-    findText.waitSearchBtnMainFormIsDisabled();
-    findText.closeFindTextMainForm();
+    findTextPage.waitFindTextMainFormIsOpen();
+    findTextPage.waitSearchBtnMainFormIsDisabled();
+    findTextPage.closeFindTextMainForm();
 
     // Open the Find Text form by keyboard
-    findText.launchFindFormByKeyboard();
-    findText.waitFindTextMainFormIsOpen();
-    findText.waitSearchBtnMainFormIsDisabled();
-    findText.closeFindTextFormByEscape();
+    findTextPage.launchFindFormByKeyboard();
+    findTextPage.waitFindTextMainFormIsOpen();
+    findTextPage.waitSearchBtnMainFormIsDisabled();
+    findTextPage.closeFindTextFormByEscape();
   }
 
   @Test
@@ -130,21 +133,21 @@ public class FindTextFeatureTest {
 
     // Check that created from terminal file found by "Filesystem" text
     menu.runCommand(EDIT, FIND);
-    findText.waitFindTextMainFormIsOpen();
-    findText.typeTextIntoFindField("Filesystem");
-    findText.waitTextIntoFindField("Filesystem");
-    findText.setAndWaitWholeWordCheckbox(false);
-    findText.waitPathIntoRootField("/" + PROJECT_NAME);
-    findText.clickOnSearchButtonMainForm();
-    findText.waitFindInfoPanelIsOpen();
-    findText.sendCommandByKeyboardInFindInfoPanel(ARROW_RIGHT.toString());
-    findText.waitExpectedTextInFindInfoPanel(asList(expectedText1.split("\n")));
-    findText.selectItemInFindInfoPanel(
+    findTextPage.waitFindTextMainFormIsOpen();
+    findTextPage.typeTextIntoFindField("Filesystem");
+    findTextPage.waitTextIntoFindField("Filesystem");
+    findTextPage.setAndWaitWholeWordCheckbox(false);
+    findTextPage.waitPathIntoRootField("/" + PROJECT_NAME);
+    findTextPage.clickOnSearchButtonMainForm();
+    findTextPage.waitFindInfoPanelIsOpen();
+    findTextPage.sendCommandByKeyboardInFindInfoPanel(ARROW_RIGHT.toString());
+    findTextPage.waitExpectedTextInFindInfoPanel(asList(expectedText1.split("\n")));
+    findTextPage.selectItemInFindInfoPanel(
         format("/%s/readme.con", PROJECT_NAME),
         "1:   Filesystem 1K-blocks Used Available Use% Mounted on");
-    findText.sendCommandByKeyboardInFindInfoPanel(ENTER.toString());
+    findTextPage.sendCommandByKeyboardInFindInfoPanel(ENTER.toString());
     editor.waitActiveTabFileName(fileNameCreatedFromTerminal);
-    Assert.assertEquals(editor.getPositionOfLine(), 1);
+    assertEquals(editor.getPositionOfLine(), 1);
 
     // Create a file from API
     createFileFromAPI(PROJECT_NAME, fileNameCreatedFromAPI, content);
@@ -153,20 +156,20 @@ public class FindTextFeatureTest {
     // Check that created from API file found by "Feature" text
     projectExplorer.selectItem(PROJECT_NAME);
     menu.runCommand(EDIT, FIND);
-    findText.waitFindTextMainFormIsOpen();
-    findText.typeTextIntoFindField("Feature");
-    findText.waitTextIntoFindField("Feature");
-    findText.setAndWaitWholeWordCheckbox(false);
-    findText.waitPathIntoRootField("/" + PROJECT_NAME);
-    findText.clickOnSearchButtonMainForm();
-    findText.waitFindInfoPanelIsOpen();
-    findText.sendCommandByKeyboardInFindInfoPanel(ARROW_RIGHT.toString());
-    findText.waitExpectedTextInFindInfoPanel(asList(expectedText2.split("\n")));
-    findText.selectItemInFindInfoPanel(
+    findTextPage.waitFindTextMainFormIsOpen();
+    findTextPage.typeTextIntoFindField("Feature");
+    findTextPage.waitTextIntoFindField("Feature");
+    findTextPage.setAndWaitWholeWordCheckbox(false);
+    findTextPage.waitPathIntoRootField("/" + PROJECT_NAME);
+    findTextPage.clickOnSearchButtonMainForm();
+    findTextPage.waitFindInfoPanelIsOpen();
+    findTextPage.sendCommandByKeyboardInFindInfoPanel(ARROW_RIGHT.toString());
+    findTextPage.waitExpectedTextInFindInfoPanel(asList(expectedText2.split("\n")));
+    findTextPage.selectItemInFindInfoPanel(
         format("/%s/readme.api", PROJECT_NAME), "1:   FindTextFeatureTest");
-    findText.sendCommandByKeyboardInFindInfoPanel(ENTER.toString());
+    findTextPage.sendCommandByKeyboardInFindInfoPanel(ENTER.toString());
     editor.waitActiveTabFileName(fileNameCreatedFromAPI);
-    Assert.assertEquals(editor.getPositionOfLine(), 1);
+    assertEquals(editor.getPositionOfLine(), 1);
 
     editor.closeAllTabsByContextMenu();
   }
@@ -196,67 +199,67 @@ public class FindTextFeatureTest {
 
     // Check that no occurrences found
     menu.runCommand(EDIT, FIND);
-    findText.waitFindTextMainFormIsOpen();
-    findText.waitSearchBtnMainFormIsDisabled();
-    findText.typeTextIntoFindField("dddhhh");
-    findText.waitTextIntoFindField("dddhhh");
+    findTextPage.waitFindTextMainFormIsOpen();
+    findTextPage.waitSearchBtnMainFormIsDisabled();
+    findTextPage.typeTextIntoFindField("dddhhh");
+    findTextPage.waitTextIntoFindField("dddhhh");
     loader.waitOnClosed();
-    findText.clickOnSearchButtonMainForm();
-    findText.waitFindInfoPanelIsOpen();
-    findText.waitExpectedTextInFindInfoPanel(findNothing);
-    findText.clickHideBtnFindInfoPanel();
-    findText.clickFindTab();
-    findText.waitFindInfoPanelIsOpen();
+    findTextPage.clickOnSearchButtonMainForm();
+    findTextPage.waitFindInfoPanelIsOpen();
+    findTextPage.waitExpectedTextInFindInfoPanel(findNothing);
+    findTextPage.clickHideBtnFindInfoPanel();
+    findTextPage.clickFindTab();
+    findTextPage.waitFindInfoPanelIsOpen();
 
     // Find files with 'String' text. Open 'guess_num.jsp' file and check cursor position
     projectExplorer.selectItem(PROJECT_NAME);
-    findText.launchFindFormByKeyboard();
-    findText.waitFindTextMainFormIsOpen();
-    findText.typeTextIntoFindField("String");
-    findText.waitTextIntoFindField("String");
-    findText.setAndWaitStateSearchRootCheckbox(false);
-    findText.waitPathIntoRootField("/" + PROJECT_NAME);
-    findText.clickOnSearchButtonMainForm();
-    findText.waitFindInfoPanelIsOpen();
-    findText.waitExpectedTextInFindInfoPanel(asList(expectedText.split("\n")));
-    findText.sendCommandByKeyboardInFindInfoPanel(ARROW_RIGHT.toString());
-    findText.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
-    findText.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
-    findText.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
-    findText.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
-    findText.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
-    findText.sendCommandByKeyboardInFindInfoPanel(ARROW_RIGHT.toString());
-    findText.selectItemInFindInfoPanel(
+    findTextPage.launchFindFormByKeyboard();
+    findTextPage.waitFindTextMainFormIsOpen();
+    findTextPage.typeTextIntoFindField("String");
+    findTextPage.waitTextIntoFindField("String");
+    findTextPage.setAndWaitStateSearchRootCheckbox(false);
+    findTextPage.waitPathIntoRootField("/" + PROJECT_NAME);
+    findTextPage.clickOnSearchButtonMainForm();
+    findTextPage.waitFindInfoPanelIsOpen();
+    findTextPage.waitExpectedTextInFindInfoPanel(asList(expectedText.split("\n")));
+    findTextPage.sendCommandByKeyboardInFindInfoPanel(ARROW_RIGHT.toString());
+    findTextPage.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
+    findTextPage.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
+    findTextPage.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
+    findTextPage.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
+    findTextPage.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
+    findTextPage.sendCommandByKeyboardInFindInfoPanel(ARROW_RIGHT.toString());
+    findTextPage.selectItemInFindInfoPanel(
         pathToQuessNumFile,
         "25:    java.lang.String attempt = (java.lang.String)request.getAttribute(\"num\");");
-    findText.sendCommandByKeyboardInFindInfoPanel(ENTER.toString());
+    findTextPage.sendCommandByKeyboardInFindInfoPanel(ENTER.toString());
     editor.waitActiveEditor();
     editor.waitActiveTabFileName("guess_num.jsp");
     editor.waitTextIntoEditor("String");
-    Assert.assertEquals(editor.getPositionOfLine(), 25);
+    assertEquals(editor.getPositionOfLine(), 25);
 
     // Check that the Find Info panel state restored
-    findText.clickHideBtnFindInfoPanel();
-    findText.clickFindTab();
-    findText.waitFindInfoPanelIsOpen();
+    findTextPage.clickHideBtnFindInfoPanel();
+    findTextPage.clickFindTab();
+    findTextPage.waitFindInfoPanelIsOpen();
 
     // Open 'SayHello.java' file and check cursor position
-    findText.selectItemInFindInfoPanel(
+    findTextPage.selectItemInFindInfoPanel(
         pathToQuessNumFile,
         "25:    java.lang.String attempt = (java.lang.String)request.getAttribute(\"num\");");
-    findText.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
-    findText.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
-    findText.sendCommandByKeyboardInFindInfoPanel(ARROW_RIGHT.toString());
-    findText.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
-    findText.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
-    findText.sendCommandByKeyboardInFindInfoPanel(ARROW_RIGHT.toString());
-    findText.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
-    findText.selectItemInFindInfoPanelByDoubleClick(
+    findTextPage.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
+    findTextPage.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
+    findTextPage.sendCommandByKeyboardInFindInfoPanel(ARROW_RIGHT.toString());
+    findTextPage.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
+    findTextPage.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
+    findTextPage.sendCommandByKeyboardInFindInfoPanel(ARROW_RIGHT.toString());
+    findTextPage.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
+    findTextPage.selectItemInFindInfoPanelByDoubleClick(
         pathToSayHelloFile, "20:    public String sayHello(String name)");
     editor.waitActiveEditor();
     editor.waitActiveTabFileName("SayHello");
     editor.waitTextIntoEditor("String");
-    Assert.assertEquals(editor.getPositionOfLine(), 20);
+    assertEquals(editor.getPositionOfLine(), 20);
 
     editor.closeAllTabsByContextMenu();
   }
@@ -280,27 +283,27 @@ public class FindTextFeatureTest {
     projectExplorer.selectItem(PROJECT_NAME);
 
     // Find text with whole world feature is disabled
-    findText.launchFindFormByKeyboard();
-    findText.waitFindTextMainFormIsOpen();
-    findText.typeTextIntoFindField("uess");
-    findText.waitTextIntoFindField("uess");
-    findText.setAndWaitWholeWordCheckbox(false);
-    findText.waitPathIntoRootField("/" + PROJECT_NAME);
-    findText.clickOnSearchButtonMainForm();
-    findText.waitFindInfoPanelIsOpen();
-    findText.waitExpectedTextInFindInfoPanel(asList(expectedText.split("\n")));
+    findTextPage.launchFindFormByKeyboard();
+    findTextPage.waitFindTextMainFormIsOpen();
+    findTextPage.typeTextIntoFindField("uess");
+    findTextPage.waitTextIntoFindField("uess");
+    findTextPage.setAndWaitWholeWordCheckbox(false);
+    findTextPage.waitPathIntoRootField("/" + PROJECT_NAME);
+    findTextPage.clickOnSearchButtonMainForm();
+    findTextPage.waitFindInfoPanelIsOpen();
+    findTextPage.waitExpectedTextInFindInfoPanel(asList(expectedText.split("\n")));
 
     // Find text with whole world feature is enabled
     projectExplorer.selectItem(PROJECT_NAME);
     menu.runCommand(EDIT, FIND);
-    findText.waitFindTextMainFormIsOpen();
-    findText.typeTextIntoFindField("uess");
-    findText.waitTextIntoFindField("uess");
-    findText.setAndWaitWholeWordCheckbox(true);
-    findText.waitPathIntoRootField("/" + PROJECT_NAME);
-    findText.clickOnSearchButtonMainForm();
-    findText.waitFindInfoPanelIsOpen();
-    findText.waitExpectedTextInFindInfoPanel("No results found for\n'uess'\n");
+    findTextPage.waitFindTextMainFormIsOpen();
+    findTextPage.typeTextIntoFindField("uess");
+    findTextPage.waitTextIntoFindField("uess");
+    findTextPage.setAndWaitWholeWordCheckbox(true);
+    findTextPage.waitPathIntoRootField("/" + PROJECT_NAME);
+    findTextPage.clickOnSearchButtonMainForm();
+    findTextPage.waitFindInfoPanelIsOpen();
+    findTextPage.waitExpectedTextInFindInfoPanel("No results found for\n'uess'\n");
   }
 
   @Test
@@ -328,31 +331,31 @@ public class FindTextFeatureTest {
     projectExplorer.selectItem(path1);
 
     menu.runCommand(EDIT, FIND);
-    findText.waitFindTextMainFormIsOpen();
-    findText.typeTextIntoFindField("uess");
-    findText.waitTextIntoFindField("uess");
-    findText.setAndWaitStateSearchRootCheckbox(false);
-    findText.waitPathIntoRootField("/" + path1);
-    findText.clickOnSearchButtonMainForm();
-    findText.waitExpectedTextInFindInfoPanel(asList(expectedText1.split("\n")));
+    findTextPage.waitFindTextMainFormIsOpen();
+    findTextPage.typeTextIntoFindField("uess");
+    findTextPage.waitTextIntoFindField("uess");
+    findTextPage.setAndWaitStateSearchRootCheckbox(false);
+    findTextPage.waitPathIntoRootField("/" + path1);
+    findTextPage.clickOnSearchButtonMainForm();
+    findTextPage.waitExpectedTextInFindInfoPanel(asList(expectedText1.split("\n")));
 
     projectExplorer.selectItem(PROJECT_NAME);
-    findText.launchFindFormByKeyboard();
-    findText.waitFindTextMainFormIsOpen();
-    findText.typeTextIntoFindField("hello");
-    findText.waitTextIntoFindField("hello");
-    findText.setAndWaitStateSearchRootCheckbox(true);
-    findText.clickSearchDirectoryBtn();
+    findTextPage.launchFindFormByKeyboard();
+    findTextPage.waitFindTextMainFormIsOpen();
+    findTextPage.typeTextIntoFindField("hello");
+    findTextPage.waitTextIntoFindField("hello");
+    findTextPage.setAndWaitStateSearchRootCheckbox(true);
+    findTextPage.clickSearchDirectoryBtn();
     configureClasspath.waitSelectPathFormIsOpen();
     configureClasspath.openItemInSelectPathForm(PROJECT_NAME);
     configureClasspath.waitItemInSelectPathForm("my-lib");
     configureClasspath.waitItemInSelectPathForm("my-webapp");
     configureClasspath.selectItemInSelectPathForm("my-lib");
     configureClasspath.clickOkBtnSelectPathForm();
-    findText.waitPathIntoRootField(path2);
-    findText.clickOnSearchButtonMainForm();
-    findText.waitFindInfoPanelIsOpen();
-    findText.waitExpectedTextInFindInfoPanel(asList(expectedText2.split("\n")));
+    findTextPage.waitPathIntoRootField(path2);
+    findTextPage.clickOnSearchButtonMainForm();
+    findTextPage.waitFindInfoPanelIsOpen();
+    findTextPage.waitExpectedTextInFindInfoPanel(asList(expectedText2.split("\n")));
   }
 
   @Test
@@ -379,34 +382,35 @@ public class FindTextFeatureTest {
 
     // Find text with '*.java' file mask
     menu.runCommand(EDIT, FIND);
-    findText.waitFindTextMainFormIsOpen();
-    findText.typeTextIntoFindField("String");
-    findText.waitTextIntoFindField("String");
-    findText.setAndWaitFileMaskCheckbox(true);
-    findText.typeTextIntoFileNameFilter("*.java");
-    findText.waitTextIntoFileNameFilter("*.java");
-    findText.clickOnSearchButtonMainForm();
-    findText.waitFindInfoPanelIsOpen();
-    findText.waitExpectedTextInFindInfoPanel(asList(expectedText1.split("\n")));
-    findText.waitExpectedTextIsNotPresentInFindInfoPanel(expectedText2);
+    findTextPage.waitFindTextMainFormIsOpen();
+    findTextPage.typeTextIntoFindField("String");
+    findTextPage.waitTextIntoFindField("String");
+    findTextPage.setAndWaitFileMaskCheckbox(true);
+    findTextPage.typeTextIntoFileNameFilter("*.java");
+    findTextPage.waitTextIntoFileNameFilter("*.java");
+    findTextPage.clickOnSearchButtonMainForm();
+    findTextPage.waitFindInfoPanelIsOpen();
+    findTextPage.waitExpectedTextInFindInfoPanel(asList(expectedText1.split("\n")));
+    findTextPage.waitExpectedTextIsNotPresentInFindInfoPanel(expectedText2);
 
     // Find text with '*.jsp' file mask
     projectExplorer.selectItem(PROJECT_NAME);
-    findText.launchFindFormByKeyboard();
-    findText.waitFindTextMainFormIsOpen();
-    findText.typeTextIntoFindField("String");
-    findText.waitTextIntoFindField("String");
-    findText.setAndWaitFileMaskCheckbox(true);
-    findText.typeTextIntoFileNameFilter("*.jsp");
-    findText.waitTextIntoFileNameFilter("*.jsp");
-    findText.clickOnSearchButtonMainForm();
-    findText.waitFindInfoPanelIsOpen();
-    findText.waitExpectedTextIsNotPresentInFindInfoPanel(expectedText1);
-    findText.waitExpectedTextInFindInfoPanel(asList(expectedText2.split("\n")));
+    findTextPage.launchFindFormByKeyboard();
+    findTextPage.waitFindTextMainFormIsOpen();
+    findTextPage.typeTextIntoFindField("String");
+    findTextPage.waitTextIntoFindField("String");
+    findTextPage.setAndWaitFileMaskCheckbox(true);
+    findTextPage.typeTextIntoFileNameFilter("*.jsp");
+    findTextPage.waitTextIntoFileNameFilter("*.jsp");
+    findTextPage.clickOnSearchButtonMainForm();
+    findTextPage.waitFindInfoPanelIsOpen();
+    findTextPage.waitExpectedTextIsNotPresentInFindInfoPanel(expectedText1);
+    findTextPage.waitExpectedTextInFindInfoPanel(asList(expectedText2.split("\n")));
   }
 
   @Test
   public void checkTextResultsPagination() {
+    SearchFileResult searchFileResult;
     int sumOfFoundOccurrences = 0;
     int sumOfFoundFiles = 0;
     String path1 = "/web-java-petclinic/pom.xml";
@@ -431,60 +435,63 @@ public class FindTextFeatureTest {
     projectExplorer.waitItem("web-java-petclinic");
     projectExplorer.selectItem("web-java-petclinic");
 
-    findText.launchFindFormByKeyboard();
-    findText.waitFindTextMainFormIsOpen();
-    findText.typeTextIntoFindField("Str");
-    findText.waitTextIntoFindField("Str");
-    findText.clickOnSearchButtonMainForm();
-    findText.waitFindInfoPanelIsOpen();
+    findTextPage.launchFindFormByKeyboard();
+    findTextPage.waitFindTextMainFormIsOpen();
+    findTextPage.typeTextIntoFindField("Str");
+    findTextPage.waitTextIntoFindField("Str");
+    findTextPage.clickOnSearchButtonMainForm();
+    findTextPage.waitFindInfoPanelIsOpen();
 
     // Check move page buttons status on the first page
-    findText.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
-    Assert.assertTrue(findText.checkNextPageButtonIsEnabled());
-    Assert.assertFalse(findText.checkPreviousPageButtonIsEnabled());
-    sumOfFoundFiles += findText.getResults().getFoundFilesOnPage();
-    sumOfFoundOccurrences += findText.getResults().getFoundOccurrencesOnPage();
-    findText.clickOnNextPageButton();
+    findTextPage.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
+    assertTrue(findTextPage.checkNextPageButtonIsEnabled());
+    assertFalse(findTextPage.checkPreviousPageButtonIsEnabled());
+    searchFileResult = findTextPage.getResults();
+    sumOfFoundFiles += searchFileResult.getFoundFilesOnPage();
+    sumOfFoundOccurrences += searchFileResult.getFoundOccurrencesOnPage();
+    findTextPage.clickOnNextPageButton();
 
     // Check move page buttons status on the second page
-    findText.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
-    Assert.assertTrue(findText.checkNextPageButtonIsEnabled());
-    Assert.assertTrue(findText.checkPreviousPageButtonIsEnabled());
-    sumOfFoundFiles += findText.getResults().getFoundFilesOnPage();
-    sumOfFoundOccurrences += findText.getResults().getFoundOccurrencesOnPage();
-    findText.clickOnNextPageButton();
+    findTextPage.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
+    assertTrue(findTextPage.checkNextPageButtonIsEnabled());
+    assertTrue(findTextPage.checkPreviousPageButtonIsEnabled());
+    searchFileResult = findTextPage.getResults();
+    sumOfFoundFiles += searchFileResult.getFoundFilesOnPage();
+    sumOfFoundOccurrences += searchFileResult.getFoundOccurrencesOnPage();
+    findTextPage.clickOnNextPageButton();
 
     // Check move page buttons status on the third page
-    findText.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
-    Assert.assertFalse(findText.checkNextPageButtonIsEnabled());
-    Assert.assertTrue(findText.checkPreviousPageButtonIsEnabled());
-    sumOfFoundFiles += findText.getResults().getFoundFilesOnPage();
-    sumOfFoundOccurrences += findText.getResults().getFoundOccurrencesOnPage();
+    findTextPage.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
+    assertFalse(findTextPage.checkNextPageButtonIsEnabled());
+    assertTrue(findTextPage.checkPreviousPageButtonIsEnabled());
+    searchFileResult = findTextPage.getResults();
+    sumOfFoundFiles += searchFileResult.getFoundFilesOnPage();
+    sumOfFoundOccurrences += searchFileResult.getFoundOccurrencesOnPage();
 
     // Checking that sums of found files and occurrences correct
-    Assert.assertEquals(sumOfFoundFiles, findText.getResults().getTotalNumberFoundFiles());
-    Assert.assertEquals(sumOfFoundOccurrences, SUM_FOUND_OCCURRENCES);
+    assertEquals(sumOfFoundFiles, findTextPage.getResults().getTotalNumberFoundFiles());
+    assertEquals(sumOfFoundOccurrences, SUM_FOUND_OCCURRENCES);
 
     // Check results on the third page
-    Assert.assertEquals(findText.getResults(), resultsOnThirdPage);
-    findText.openFileNodeByDoubleClick(path3);
-    findText.waitExpectedTextInFindInfoPanel(expectedText3);
+    assertEquals(findTextPage.getFindInfoResults(), resultsOnThirdPage);
+    findTextPage.openFileNodeByDoubleClick(path3);
+    findTextPage.waitExpectedTextInFindInfoPanel(expectedText3);
 
     // Check results on the second page
-    findText.clickOnPreviousPageButton();
-    Assert.assertEquals(findText.getResults(), resultsOnSecondPage);
-    findText.openFileNodeByDoubleClick(path2);
-    findText.waitExpectedTextInFindInfoPanel(expectedText2);
+    findTextPage.clickOnPreviousPageButton();
+    assertEquals(findTextPage.getFindInfoResults(), resultsOnSecondPage);
+    findTextPage.openFileNodeByDoubleClick(path2);
+    findTextPage.waitExpectedTextInFindInfoPanel(expectedText2);
 
     // Check results on the first page. Open a file and check cursor position
-    findText.clickOnPreviousPageButton();
-    Assert.assertEquals(findText.getResults(), resultsOnFirstPage);
-    findText.openFileNodeByDoubleClick(path1);
-    findText.waitExpectedTextInFindInfoPanel(expectedText1);
-    findText.selectItemInFindInfoPanelByDoubleClick(path1, expectedText1);
+    findTextPage.clickOnPreviousPageButton();
+    assertEquals(findTextPage.getFindInfoResults(), resultsOnFirstPage);
+    findTextPage.openFileNodeByDoubleClick(path1);
+    findTextPage.waitExpectedTextInFindInfoPanel(expectedText1);
+    findTextPage.selectItemInFindInfoPanelByDoubleClick(path1, expectedText1);
     editor.waitActiveEditor();
     editor.waitActiveTabFileName("spring-petclinic");
-    Assert.assertEquals(editor.getPositionOfLine(), 62);
+    assertEquals(editor.getPositionOfLine(), 62);
 
     editor.closeAllTabsByContextMenu();
   }
