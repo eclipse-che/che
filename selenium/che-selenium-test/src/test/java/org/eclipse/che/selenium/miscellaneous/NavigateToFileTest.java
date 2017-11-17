@@ -10,14 +10,9 @@
  */
 package org.eclipse.che.selenium.miscellaneous;
 
-import static org.testng.AssertJUnit.assertFalse;
-
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
-import java.net.URL;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
+
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestGitConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
@@ -34,9 +29,18 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.git.Git;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.openqa.selenium.Keys;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import java.net.URL;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import static org.testng.AssertJUnit.assertFalse;
 
 /** Created by aleksandr shmaraev on 10.12.15 */
 public class NavigateToFileTest {
@@ -103,14 +107,14 @@ public class NavigateToFileTest {
   }
 
   @Test(dataProvider = "dataForSearching")
-  public void checkNavigateToFileFunction(String navigatingValue, List<String> expectedValues) {
+  public void checkNavigateToFileWitFirstProject(
+      String inputValueForChecking, Map<Integer, String> expectedValues) {
     // Open the project one and check function 'Navigate To File'
-
-    openFoundItemAndCheckResult(navigatingValue, expectedValues, 0);
-
+    launchNavigateToFileAndCheckResults(inputValueForChecking, expectedValues, 1);
+   // launchNavigateToFileAndCheckResults(inputValueForChecking, expectedValues, 1);
     //    selectFileFromNavigate("i", FILE_JAVA + PATH_TO_JAVA_FILE, FILES_I_SYMBOL);
     //    selectFileFromNavigate("R", FILE_JAVA + PATH_TO_JAVA_FILE, FILES_R_SYMBOL);
-    //    selectFileFromNavigate("p", FILE_XML + PATH_TO_README_FILE, FILES_P_SYMBOL);
+
     //    editor.waitTabIsPresent("qa-spring-sample");
     //    editor.waitActiveEditor();
     //    editor.closeFileByNameWithSaving("qa-spring-sample");
@@ -199,10 +203,20 @@ public class NavigateToFileTest {
     navigateToFile.waitFormToClose();
   }
 
-  private void openFoundItemAndCheckResult(
-      String navigatingValue, List<String> expectedItems, final int numItem) {
-    String nameOfExpectedOpenedTab = expectedItems.get(numItem).split(" ")[0].replace(".java", "");
-    String pathTocurrentItem = expectedItems.get(numItem).split(" ")[1];
+  private void launchNavigateToFileAndCheckResults(
+      String navigatingValue,
+      Map<Integer, String> expectedItems,
+      final int numValueFromDropDawnList) {
+
+    // extract the path (without opened class)
+    String pathFromDropDawnForChecking = expectedItems.get(numValueFromDropDawnList).split(" ")[1];
+
+
+    String nameOfTheOpenedFileWithExtension = expectedItems.get(numValueFromDropDawnList).split(" ")[0];
+
+    // extract the name of opened files that display in a tab (the ".java" extension are not shown in tabs)
+    String nameOfTheOpenedFileInTheTab = nameOfTheOpenedFileWithExtension.replace(".java","");
+
     loader.waitOnClosed();
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
@@ -212,14 +226,14 @@ public class NavigateToFileTest {
     navigateToFile.typeSymbolInFileNameField(navigatingValue);
     loader.waitOnClosed();
     waitExpectedItemsInNavigateToFileDropdawn(expectedItems);
-    navigateToFile.selectFileByName(pathTocurrentItem);
+    navigateToFile.selectFileByName(pathFromDropDawnForChecking);
     editor.waitActiveEditor();
-    editor.getAssociatedPathFromTheTab(nameOfExpectedOpenedTab);
-    editor.closeFileByNameWithSaving(nameOfExpectedOpenedTab);
+    editor.getAssociatedPathFromTheTab(nameOfTheOpenedFileInTheTab);
+    editor.closeFileByNameWithSaving(nameOfTheOpenedFileInTheTab);
   }
 
-  private void waitExpectedItemsInNavigateToFileDropdawn(List<String> expectedItems) {
-    expectedItems.forEach(item -> navigateToFile.waitListOfFilesNames(item));
+  private void waitExpectedItemsInNavigateToFileDropdawn(Map<Integer, String> expectedItems) {
+    expectedItems.forEach((k, v) -> navigateToFile.waitListOfFilesNames(v.toString()));
   }
 
   // --------------------------------------------------------
@@ -289,12 +303,22 @@ public class NavigateToFileTest {
     return new Object[][] {
       {
         "A",
-        ImmutableList.of(
-            "AppController.java (/NavigateFile/src/main/java/org/eclipse/qa/examples)",
-            "AppController.java (/NavigateFile_2/src/main/java/org/eclipse/qa/examples)")
-      },
-      // {SECOND_ACTION_NAME, SECOND_EXPECTED_ITEMS_WITH_DISABLED_NONE_MENU_ACTIONS_CHECKBOX},
-      // {THIRD_ACTION_NAME, THIRD_EXPECTED_ITEMS_WITH_DISABLED_NONE_MENU_ACTIONS_CHECKBOX}
+        ImmutableMap.of(
+            1, "AppController.java (/NavigateFile/src/main/java/org/eclipse/qa/examples)",
+            2, "AppController.java (/NavigateFile_2/src/main/java/org/eclipse/qa/examples)")
+      }
+//      {
+//        "i",
+//        ImmutableMap.of(
+//            1, "AppController.java (/NavigateFile/src/main/java/org/eclipse/qa/examples)",
+//            2, "AppController.java (/NavigateFile_2/src/main/java/org/eclipse/qa/examples)")
+//      },
+//      {
+//        "p",
+//        ImmutableMap.of(
+//            1, "AppController.java (/NavigateFile/src/main/java/org/eclipse/qa/examples)",
+//            2, "AppController.java (/NavigateFile_2/src/main/java/org/eclipse/qa/examples)")
+//      }
     };
   }
 }
