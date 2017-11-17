@@ -20,10 +20,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.eclipse.che.api.debug.shared.dto.BreakpointConfigurationDto;
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.LocationDto;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
+import org.eclipse.che.api.debug.shared.model.BreakpointConfiguration;
 import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.BreakpointStorage;
@@ -162,7 +165,11 @@ public class BreakpointStorageImpl implements BreakpointStorage {
       return emptyList();
     }
 
-    return dtoFactory.createListDtoFromJson(json, BreakpointDto.class);
+    return dtoFactory
+        .createListDtoFromJson(json, BreakpointDto.class)
+        .stream()
+        .map(BreakpointImpl::new)
+        .collect(Collectors.toList());
   }
 
   /**
@@ -187,8 +194,19 @@ public class BreakpointStorageImpl implements BreakpointStorage {
   }
 
   private BreakpointDto toDto(Breakpoint breakpoint) {
-    Location location = breakpoint.getLocation();
+    BreakpointConfiguration breakpointConfiguration = breakpoint.getBreakpointConfiguration();
+    BreakpointConfigurationDto breakpointConfigurationDto =
+        breakpointConfiguration == null
+            ? null
+            : dtoFactory
+                .createDto(BreakpointConfigurationDto.class)
+                .withSuspendPolicy(breakpointConfiguration.getSuspendPolicy())
+                .withHitCount(breakpointConfiguration.getHitCount())
+                .withCondition(breakpointConfiguration.getCondition())
+                .withConditionEnabled(breakpointConfiguration.isConditionEnabled())
+                .withHitCountEnabled(breakpointConfiguration.isHitCountEnabled());
 
+    Location location = breakpoint.getLocation();
     LocationDto locationDto =
         dtoFactory
             .createDto(LocationDto.class)
@@ -202,6 +220,6 @@ public class BreakpointStorageImpl implements BreakpointStorage {
         .createDto(BreakpointDto.class)
         .withLocation(locationDto)
         .withEnabled(breakpoint.isEnabled())
-        .withCondition(breakpoint.getCondition());
+        .withBreakpointConfiguration(breakpointConfigurationDto);
   }
 }

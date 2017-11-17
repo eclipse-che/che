@@ -20,7 +20,7 @@ import {WebsocketClient} from './websocket-client';
  */
 export class CheJsonRpcApi {
   private $q: ng.IQService;
-  private $websocket: ng.websocket.IWebSocketProvider;
+  private $websocket: any;
   private $log: ng.ILogService;
   private jsonRpcApiConnection: Map<string, CheJsonRpcMasterApi>;
 
@@ -28,7 +28,7 @@ export class CheJsonRpcApi {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($q: ng.IQService, $websocket: ng.websocket.IWebSocketProvider, $log: ng.ILogService) {
+  constructor($q: ng.IQService, $websocket: any, $log: ng.ILogService) {
     this.$q = $q;
     this.$websocket = $websocket;
     this.$log = $log;

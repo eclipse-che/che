@@ -14,10 +14,9 @@ import {CheIdeFetcher} from './che-ide-fetcher.service';
 
 export class CheIdeFetcherConfig {
 
-  constructor(register) {
+  constructor(register: che.IRegisterService) {
 
-  register.factory('cheIdeFetcher', CheIdeFetcher);
-
+    register.factory('cheIdeFetcher', CheIdeFetcher);
 
   }
 }

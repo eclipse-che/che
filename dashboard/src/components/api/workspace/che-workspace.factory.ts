@@ -56,7 +56,7 @@ export class CheWorkspace {
   private $http: ng.IHttpService;
   private $q: ng.IQService;
   private $log: ng.ILogService;
-  private $websocket: ng.websocket.IWebSocketProvider;
+  private $websocket: any;
   private cheJsonRpcMasterApi: CheJsonRpcMasterApi;
   private listeners: Array<any>;
   private workspaceStatuses: Array<string>;
@@ -85,7 +85,7 @@ export class CheWorkspace {
    * @ngInject for Dependency injection
    */
   constructor($resource: ng.resource.IResourceService, $http: ng.IHttpService, $q: ng.IQService, cheJsonRpcApi: CheJsonRpcApi,
-              $websocket: ng.websocket.IWebSocketProvider, $location: ng.ILocationService, proxySettings : string, userDashboardConfig: any,
+              $websocket: any, $location: ng.ILocationService, proxySettings : string, userDashboardConfig: any,
               lodash: any, cheEnvironmentRegistry: CheEnvironmentRegistry, $log: ng.ILogService, cheBranding: CheBranding, keycloakAuth: any) {
     this.workspaceStatuses = ['RUNNING', 'STOPPED', 'PAUSED', 'STARTING', 'STOPPING', 'ERROR'];
     // keep resource

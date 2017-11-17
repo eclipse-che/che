@@ -21,6 +21,7 @@ import static org.testng.Assert.assertEquals;
 import com.google.inject.Inject;
 import java.nio.file.Paths;
 import java.util.List;
+import org.eclipse.che.api.debug.shared.model.impl.BreakpointConfigurationImpl;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
@@ -115,7 +116,8 @@ public class ConditionalBreakpointsTest {
     editor.setBreakpoint(15);
     editor.waitInactiveBreakpoint(15);
 
-    debugPanel.makeBreakpointConditional("HelloWorld.java", 15, "i == 3");
+    debugPanel.configureBreakpoint(
+        "HelloWorld.java", 15, new BreakpointConfigurationImpl("i == 3"));
     editor.waitConditionalBreakpoint(15, false);
 
     projectExplorer.selectItem(PROJECT);

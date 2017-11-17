@@ -8,18 +8,14 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.docker.snapshot;
+package org.eclipse.che.api.debug.shared.model;
 
-/** @author gazarenkov */
-@Deprecated
-public interface MachineSource {
-
-  /** Returns dockerfile, image, ssh-config, etc */
-  String getType();
-
-  /** Returns URL or ID */
-  String getLocation();
-
-  /** @return content of the machine source. No need to use an external link. */
-  String getContent();
+/** @author Anatolii Bazko */
+public enum SuspendPolicy {
+  /** Suspend no threads when the breakpoint hit */
+  NONE,
+  /** Suspend only the thread where the breakpoint hit */
+  THREAD,
+  /** Suspend all threads when the breakpoint hit */
+  ALL
 }

@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.FAILED;
@@ -29,6 +30,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import com.google.common.collect.ImmutableList;
@@ -53,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
@@ -67,8 +70,10 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
+import org.eclipse.che.api.workspace.shared.dto.event.MachineLogEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInternalRuntime.MachineLogsPublisher;
 import org.eclipse.che.workspace.infrastructure.openshift.bootstrapper.OpenShiftBootstrapper;
 import org.eclipse.che.workspace.infrastructure.openshift.bootstrapper.OpenShiftBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
@@ -76,6 +81,7 @@ import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftPods;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftRoutes;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftServices;
+import org.eclipse.che.workspace.infrastructure.openshift.project.event.ContainerEvent;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -92,7 +98,7 @@ public class OpenShiftInternalRuntimeTest {
 
   private static final int EXPOSED_PORT_1 = 4401;
   private static final int EXPOSED_PORT_2 = 8081;
-  private static final int NOT_EXPOSED_PORT_1 = 4411;
+  private static final int INTERNAL_PORT = 4411;
 
   private static final String WORKSPACE_ID = "workspace123";
   private static final String POD_NAME = "app";
@@ -121,9 +127,12 @@ public class OpenShiftInternalRuntimeTest {
   @Mock private OpenShiftBootstrapper bootstrapper;
   @Mock private InternalEnvironment environment;
 
-  @Captor private ArgumentCaptor<MachineStatusEvent> eventCaptor;
+  @Captor private ArgumentCaptor<MachineStatusEvent> machineStatusEventCaptor;
 
   private OpenShiftInternalRuntime internalRuntime;
+
+  private Map<String, Service> allServices;
+  private Map<String, Route> allRoutes;
 
   @BeforeMethod
   public void setup() throws Exception {
@@ -150,19 +159,26 @@ public class OpenShiftInternalRuntimeTest {
     doReturn(ImmutableMap.of(M1_NAME, mockMachine(), M2_NAME, mockMachine()))
         .when(environment)
         .getMachines();
+    allServices = ImmutableMap.of(SERVICE_NAME, mockService());
+    allRoutes = ImmutableMap.of(SERVICE_NAME, mockRoute());
+    final Container container = mockContainer(CONTAINER_NAME_1, EXPOSED_PORT_1, INTERNAL_PORT);
+    final ImmutableMap<String, Pod> allPods =
+        ImmutableMap.of(POD_NAME, mockPod(ImmutableList.of(container)));
+    when(services.create(any())).thenAnswer(a -> a.getArguments()[0]);
+    when(routes.create(any())).thenAnswer(a -> a.getArguments()[0]);
+    when(pods.create(any())).thenAnswer(a -> a.getArguments()[0]);
+    when(osEnv.getServices()).thenReturn(allServices);
+    when(osEnv.getRoutes()).thenReturn(allRoutes);
+    when(osEnv.getPods()).thenReturn(allPods);
   }
 
   @Test
   public void startsOpenShiftEnvironment() throws Exception {
-    final Container c1 = mockContainer(CONTAINER_NAME_1, EXPOSED_PORT_1);
-    final Container c2 = mockContainer(CONTAINER_NAME_2, EXPOSED_PORT_2, NOT_EXPOSED_PORT_1);
-    doReturn(ImmutableMap.of(SERVICE_NAME, mockService())).when(osEnv).getServices();
-    doReturn(ImmutableMap.of(SERVICE_NAME, mockRoute())).when(osEnv).getRoutes();
-    when(services.create(any())).thenAnswer(a -> a.getArguments()[0]);
-    when(routes.create(any())).thenAnswer(a -> a.getArguments()[0]);
-    doReturn(ImmutableMap.of(POD_NAME, mockPod(ImmutableList.of(c1, c2)))).when(osEnv).getPods();
-    when(pods.create(any())).thenAnswer(a -> a.getArguments()[0]);
-    doNothing().when(bootstrapper).bootstrap();
+    final Container container1 = mockContainer(CONTAINER_NAME_1, EXPOSED_PORT_1);
+    final Container container2 = mockContainer(CONTAINER_NAME_2, EXPOSED_PORT_2, INTERNAL_PORT);
+    final ImmutableMap<String, Pod> allPods =
+        ImmutableMap.of(POD_NAME, mockPod(ImmutableList.of(container1, container2)));
+    when(osEnv.getPods()).thenReturn(allPods);
 
     internalRuntime.internalStart(emptyMap());
 
@@ -184,7 +200,7 @@ public class OpenShiftInternalRuntimeTest {
   @Test(expectedExceptions = InternalInfrastructureException.class)
   public void throwsInternalInfrastructureExceptionWhenRuntimeErrorOccurs() throws Exception {
     doNothing().when(project).cleanUp();
-    when(osEnv.getServices()).thenThrow(new RuntimeException("error"));
+    when(osEnv.getServices()).thenThrow(new RuntimeException());
 
     try {
       internalRuntime.internalStart(emptyMap());
@@ -199,14 +215,11 @@ public class OpenShiftInternalRuntimeTest {
 
   @Test(expectedExceptions = InfrastructureException.class)
   public void stopsWaitingAllMachineStartWhenOneMachineStartFailed() throws Exception {
-    final Container c1 = mockContainer(CONTAINER_NAME_1, EXPOSED_PORT_1);
-    final Container c2 = mockContainer(CONTAINER_NAME_2, EXPOSED_PORT_2, NOT_EXPOSED_PORT_1);
-    doReturn(ImmutableMap.of(SERVICE_NAME, mockService())).when(osEnv).getServices();
-    doReturn(ImmutableMap.of(SERVICE_NAME, mockRoute())).when(osEnv).getRoutes();
-    when(services.create(any())).thenAnswer(a -> a.getArguments()[0]);
-    when(routes.create(any())).thenAnswer(a -> a.getArguments()[0]);
-    doReturn(ImmutableMap.of(POD_NAME, mockPod(ImmutableList.of(c1, c2)))).when(osEnv).getPods();
-    when(pods.create(any())).thenAnswer(a -> a.getArguments()[0]);
+    final Container container1 = mockContainer(CONTAINER_NAME_1, EXPOSED_PORT_1);
+    final Container container2 = mockContainer(CONTAINER_NAME_2, EXPOSED_PORT_2, INTERNAL_PORT);
+    final ImmutableMap<String, Pod> allPods =
+        ImmutableMap.of(POD_NAME, mockPod(ImmutableList.of(container1, container2)));
+    when(osEnv.getPods()).thenReturn(allPods);
     doThrow(InfrastructureException.class).when(bootstrapper).bootstrap();
 
     try {
@@ -243,13 +256,6 @@ public class OpenShiftInternalRuntimeTest {
 
   @Test(expectedExceptions = InfrastructureException.class)
   public void throwsInfrastructureExceptionWhenBootstrapInterrupted() throws Exception {
-    final Container c = mockContainer(CONTAINER_NAME_1, EXPOSED_PORT_1, NOT_EXPOSED_PORT_1);
-    doReturn(ImmutableMap.of(SERVICE_NAME, mockService())).when(osEnv).getServices();
-    doReturn(ImmutableMap.of(SERVICE_NAME, mockRoute())).when(osEnv).getRoutes();
-    when(services.create(any())).thenAnswer(a -> a.getArguments()[0]);
-    when(routes.create(any())).thenAnswer(a -> a.getArguments()[0]);
-    doReturn(ImmutableMap.of(POD_NAME, mockPod(ImmutableList.of(c)))).when(osEnv).getPods();
-    when(pods.create(any())).thenAnswer(a -> a.getArguments()[0]);
     doThrow(InterruptedException.class).when(bootstrapper).bootstrap();
 
     try {
@@ -291,6 +297,34 @@ public class OpenShiftInternalRuntimeTest {
     verify(project, never()).pods();
   }
 
+  @Test
+  public void testRepublishContainerOutputAsMachineLogEvents() throws Exception {
+    final MachineLogsPublisher logsPublisher = internalRuntime.new MachineLogsPublisher();
+    final ContainerEvent out1 = mockContainerEvent("pulling image", "07/07/2007 19:01:22");
+    final ContainerEvent out2 = mockContainerEvent("image pulled", "07/07/2007 19:08:53");
+    final ArgumentCaptor<MachineLogEvent> captor = ArgumentCaptor.forClass(MachineLogEvent.class);
+
+    internalRuntime.createPods(
+        newArrayList(allServices.values()), newArrayList(allRoutes.values()));
+    logsPublisher.handle(out1);
+    logsPublisher.handle(out2);
+
+    verify(eventService, atLeastOnce()).publish(captor.capture());
+    final ImmutableList<MachineLogEvent> machineLogs =
+        ImmutableList.of(asMachineLogEvent(out1), asMachineLogEvent(out2));
+    assertTrue(captor.getAllValues().containsAll(machineLogs));
+  }
+
+  @Test
+  public void testDoNotPublishForeignMachineOutput() throws Exception {
+    final MachineLogsPublisher logsPublisher = internalRuntime.new MachineLogsPublisher();
+    final ContainerEvent out1 = mockContainerEvent("folder created", "33/03/2033 19:01:06");
+
+    logsPublisher.handle(out1);
+
+    verify(eventService, never()).publish(any());
+  }
+
   private static MachineStatusEvent newEvent(String machineName, MachineStatus status) {
     return DtoFactory.newDto(MachineStatusEvent.class)
         .withIdentity(DtoConverter.asDto(IDENTITY))
@@ -313,8 +347,8 @@ public class OpenShiftInternalRuntimeTest {
   }
 
   private List<MachineStatusEvent> captureEvents() {
-    verify(eventService, atLeastOnce()).publish(eventCaptor.capture());
-    return eventCaptor.getAllValues();
+    verify(eventService, atLeastOnce()).publish(machineStatusEventCaptor.capture());
+    return machineStatusEventCaptor.getAllValues();
   }
 
   private static Container mockContainer(String name, int... ports) {
@@ -378,6 +412,23 @@ public class OpenShiftInternalRuntimeTest {
     when(mock.getMetadata()).thenReturn(metadata);
     when(metadata.getName()).thenReturn(name);
     return metadata;
+  }
+
+  private static ContainerEvent mockContainerEvent(String message, String time) {
+    final ContainerEvent event = mock(ContainerEvent.class);
+    when(event.getPodName()).thenReturn(POD_NAME);
+    when(event.getContainerName()).thenReturn(CONTAINER_NAME_1);
+    when(event.getMessage()).thenReturn(message);
+    when(event.getTime()).thenReturn(time);
+    return event;
+  }
+
+  private static MachineLogEvent asMachineLogEvent(ContainerEvent event) {
+    return DtoFactory.newDto(MachineLogEvent.class)
+        .withRuntimeId(DtoConverter.asDto(IDENTITY))
+        .withText(event.getMessage())
+        .withTime(event.getTime())
+        .withMachineName(event.getPodName() + '/' + event.getContainerName());
   }
 
   private static IntOrString intOrString(int port) {

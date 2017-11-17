@@ -14,7 +14,6 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
-import static org.eclipse.che.workspace.infrastructure.openshift.Names.machineName;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
@@ -63,7 +62,7 @@ public class CommonPVCStrategyTest {
   private static final String PVC_NAME = "che-claim";
   private static final String POD_NAME = "main";
   private static final String CONTAINER_NAME = "app";
-  private static final String MACHINE_NAME = machineName(POD_NAME, CONTAINER_NAME);
+  private static final String MACHINE_NAME = POD_NAME + '/' + CONTAINER_NAME;
   private static final String PVC_QUANTITY = "10Gi";
   private static final String PVC_ACCESS_MODE = "RWO";
   private static final String PROJECT_FOLDER_PATH = "/projects";
