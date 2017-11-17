@@ -28,6 +28,7 @@ public class TestFactory {
   private final TestWorkspaceServiceClient workspaceServiceClient;
   private final Entrance entrance;
   private final String factoryUrl;
+  private final SeleniumWebDriver seleniumWebDriver;
 
   public TestFactory(
       String factoryUrl,
@@ -36,7 +37,8 @@ public class TestFactory {
       TestDashboardUrlProvider dashboardUrl,
       TestFactoryServiceClient factoryServiceClient,
       TestWorkspaceServiceClient workspaceServiceClient,
-      Entrance entrance) {
+      Entrance entrance,
+      SeleniumWebDriver seleniumWebDriver) {
     this.factoryDto = factoryDto;
     this.owner = owner;
     this.factoryUrl = factoryUrl;
@@ -44,13 +46,15 @@ public class TestFactory {
     this.testFactoryServiceClient = factoryServiceClient;
     this.workspaceServiceClient = workspaceServiceClient;
     this.entrance = entrance;
+    this.seleniumWebDriver = seleniumWebDriver;
   }
 
-  /** Adds authentication token into the browser and opens factory url. */
-  public void authenticateAndOpen(SeleniumWebDriver driver) throws Exception {
-    driver.get(dashboardUrl.get().toString());
+  /** Login to factory and open it by url. */
+  public void authenticateAndOpen() throws Exception {
+    seleniumWebDriver.get(dashboardUrl.get().toString());
     entrance.login(owner);
-    driver.get(factoryUrl);
+    seleniumWebDriver.get(factoryUrl);
+    seleniumWebDriver.switchFromDashboardIframeToIde();
   }
 
   /** Opens factory url. */

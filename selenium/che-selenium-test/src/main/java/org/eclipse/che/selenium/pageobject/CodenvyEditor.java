@@ -209,7 +209,7 @@ public class CodenvyEditor {
     SPLIT_VERTICALLY("contextMenu/Split Pane In Two Columns"),
     SPIT_HORISONTALLY("contextMenu/Split Pane In Two Rows");
 
-    private String id;
+    private final String id;
 
     TabAction(String id) {
       this.id = id;

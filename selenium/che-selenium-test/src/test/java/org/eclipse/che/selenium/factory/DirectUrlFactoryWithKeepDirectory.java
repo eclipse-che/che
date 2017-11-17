@@ -61,8 +61,7 @@ public class DirectUrlFactoryWithKeepDirectory {
 
   @Test
   public void factoryWithDirectUrlWithKeepDirectory() throws Exception {
-    testFactoryWithKeepDir.authenticateAndOpen(seleniumWebDriver);
-    seleniumWebDriver.switchFromDashboardIframeToIde();
+    testFactoryWithKeepDir.authenticateAndOpen();
     projectExplorer.waitProjectExplorer();
     notificationsPopupPanel.waitProgressPopupPanelClose();
     events.clickProjectEventsTab();

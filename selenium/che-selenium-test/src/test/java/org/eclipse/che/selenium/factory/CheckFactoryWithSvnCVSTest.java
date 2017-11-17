@@ -96,11 +96,10 @@ public class CheckFactoryWithSvnCVSTest {
         Arrays.asList("commit-test", "copy", "move", "properties-test", "newfile", "test");
 
     // when
-    testFactory.authenticateAndOpen(ide.driver());
-    seleniumWebDriver.switchFromDashboardIframeToIde();
+    testFactory.authenticateAndOpen();
 
     // then
-    new WebDriverWait(ide.driver(), LOADER_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
                 By.xpath("//div[text()='SVN Authentication']")));

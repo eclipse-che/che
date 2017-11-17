@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
@@ -60,6 +61,7 @@ public class ConvertToProjectWithPomFileTest {
   @Inject private InformationDialog informationDialog;
   @Inject private ActionsFactory actionsFactory;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -102,10 +104,10 @@ public class ConvertToProjectWithPomFileTest {
     editor.waitActiveEditor();
     loader.waitOnClosed();
     editor.deleteAllContent();
-    actionsFactory.createAction(ide.driver()).sendKeys(EXPECTED_TEXT).perform();
+    actionsFactory.createAction(seleniumWebDriver).sendKeys(EXPECTED_TEXT).perform();
     editor.waitTextIntoEditor(EXPECTED_TEXT);
     editor.closeAllTabs();
-    ide.driver().navigate().refresh();
+    seleniumWebDriver.navigate().refresh();
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitFolderDefinedTypeOfFolderByPath(PATH_TO_POM_FILE, "simpleFolder");
   }

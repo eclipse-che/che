@@ -18,6 +18,7 @@ import java.nio.file.Paths;
 import java.util.concurrent.ExecutionException;
 import org.eclipse.che.commons.json.JsonParseException;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
@@ -57,6 +58,7 @@ public class NodeJsDebugTest {
   @Inject private NotificationsPopupPanel notifications;
   @Inject private Menu menu;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -87,7 +89,7 @@ public class NodeJsDebugTest {
 
     // disconnect session, check highlighter is disappear
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.RESUME_BTN_ID);
-    new WebDriverWait(ide.driver(), REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             ExpectedConditions.invisibilityOfElementLocated(
                 By.xpath("//div[text()='{/app.js:13} ']")));
@@ -103,7 +105,7 @@ public class NodeJsDebugTest {
 
   /** @return 'Che-debug-configurations' values from browser storage */
   private String getDataAboutDebugSessionFromStorage() {
-    JavascriptExecutor js = (JavascriptExecutor) ide.driver();
+    JavascriptExecutor js = (JavascriptExecutor) seleniumWebDriver;
     String injectedJsScript = "return window.localStorage.getItem('che-debug-configurations');";
     return js.executeScript(injectedJsScript).toString();
   }
@@ -118,7 +120,7 @@ public class NodeJsDebugTest {
     debugPanel.waitDebugHighlightedText("return \"HELLO\";");
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_OUT);
     debugPanel.waitDebugHighlightedText("var c=\"some add value\" + b;");
-    new WebDriverWait(ide.driver(), REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
                 By.xpath("//div[text()='{app.js:13} ']")));
