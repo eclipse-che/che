@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.context;
+package org.eclipse.che.ide;
 
 import com.google.gwt.user.client.Window;
 import java.util.HashMap;
