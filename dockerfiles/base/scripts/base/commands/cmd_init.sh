@@ -73,7 +73,7 @@ cmd_init() {
     warning "($CHE_MINI_PRODUCT_NAME init): 'nightly' installations cannot be upgraded to non-nightly versions"
   fi
 
-  if ! skip_pull && ! is_fast; then
+  if ! skip_pull; then
       cmd_lifecycle download $FORCE_UPDATE
   fi
 
