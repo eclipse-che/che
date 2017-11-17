@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
+import org.eclipse.che.api.core.model.workspace.config.Volume;
 import org.eclipse.che.api.installer.shared.model.Installer;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 
@@ -36,12 +37,14 @@ public class InternalMachineConfig {
   private final Map<String, ServerConfig> servers;
   private final Map<String, String> env;
   private final Map<String, String> attributes;
+  private final Map<String, Volume> volumes;
 
   InternalMachineConfig(
       List<Installer> installers,
       Map<String, ? extends ServerConfig> servers,
       Map<String, String> env,
-      Map<String, String> attributes)
+      Map<String, String> attributes,
+      Map<String, ? extends Volume> volumes)
       throws InfrastructureException {
     this.servers = new HashMap<>();
     if (servers != null) {
@@ -61,6 +64,11 @@ public class InternalMachineConfig {
     this.attributes = new HashMap<>();
     if (attributes != null) {
       this.attributes.putAll(attributes);
+    }
+
+    this.volumes = new HashMap<>();
+    if (volumes != null) {
+      this.volumes.putAll(volumes);
     }
   }
 
@@ -82,5 +90,10 @@ public class InternalMachineConfig {
   /** Returns modifiable map of machine attributes. */
   public Map<String, String> getAttributes() {
     return attributes;
+  }
+
+  /** Returns modifiable map of machine volumes. */
+  public Map<String, Volume> getVolumes() {
+    return volumes;
   }
 }

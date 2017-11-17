@@ -115,7 +115,7 @@ public class InternalEnvironmentFactoryTest {
     doReturn(normalizedServers).when(environmentFactory).normalizeServers(any());
 
     ImmutableMap<String, ServerConfigImpl> sourceServers = ImmutableMap.of("server", server);
-    MachineConfigImpl machineConfig = new MachineConfigImpl(null, sourceServers, null, null);
+    MachineConfigImpl machineConfig = new MachineConfigImpl(null, sourceServers, null, null, null);
 
     EnvironmentImpl env =
         new EnvironmentImpl(null, ImmutableMap.of("machine", machineConfig), null);
@@ -138,7 +138,7 @@ public class InternalEnvironmentFactoryTest {
     ImmutableMap<String, String> sourceEnv = ImmutableMap.of("CHE_API", "localhost");
     ImmutableMap<String, String> sourceAttributes = ImmutableMap.of("attribute", "value");
     MachineConfigImpl machineConfig =
-        new MachineConfigImpl(null, null, sourceEnv, sourceAttributes);
+        new MachineConfigImpl(null, null, sourceEnv, sourceAttributes, null);
 
     EnvironmentImpl env =
         new EnvironmentImpl(null, ImmutableMap.of("machine", machineConfig), sourceWarnings);
