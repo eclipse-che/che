@@ -187,8 +187,7 @@ public class FactoryService extends Service {
             + "e.g. (factory.name, factory.creator.name)"
             + " This method is going to be deprecated or limited in scope in 6.0 GA "
             + "since it's not optimized on backend performance. "
-            +"Expected parameters creator.userId=? or name=?."
-      ,
+            + "Expected parameters creator.userId=? or name=?.",
     notes =
         "If specify more than one value for a single query parameter then will be taken the first one"
   )
