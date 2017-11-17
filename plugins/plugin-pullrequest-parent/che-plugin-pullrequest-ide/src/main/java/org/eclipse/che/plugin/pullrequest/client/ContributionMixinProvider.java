@@ -27,7 +27,7 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.promises.client.js.Promises;
+import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.factory.FactoryAcceptedEvent;
 import org.eclipse.che.ide.api.factory.FactoryAcceptedHandler;
@@ -63,6 +63,8 @@ public class ContributionMixinProvider {
   private final WorkflowExecutor workflowExecutor;
   private final VcsServiceProvider vcsServiceProvider;
   private final VcsHostingServiceProvider vcsHostingServiceProvider;
+  private final PromiseProvider promiseProvider;
+  private final ContributeMessages contributeMessages;
 
   private HandlerRegistration handlerRegistration;
 
@@ -70,13 +72,15 @@ public class ContributionMixinProvider {
 
   @Inject
   public ContributionMixinProvider(
-      EventBus eventBus,
-      AppContext appContext,
-      WorkspaceAgent workspaceAgent,
-      ContributePartPresenter contributePart,
-      WorkflowExecutor workflowExecutor,
-      VcsServiceProvider vcsServiceProvider,
-      VcsHostingServiceProvider vcsHostingServiceProvider) {
+          EventBus eventBus,
+          AppContext appContext,
+          WorkspaceAgent workspaceAgent,
+          ContributePartPresenter contributePart,
+          WorkflowExecutor workflowExecutor,
+          VcsServiceProvider vcsServiceProvider,
+          VcsHostingServiceProvider vcsHostingServiceProvider,
+          PromiseProvider promiseProvider,
+          ContributeMessages contributeMessages) {
     this.eventBus = eventBus;
     this.appContext = appContext;
     this.workspaceAgent = workspaceAgent;
@@ -84,6 +88,8 @@ public class ContributionMixinProvider {
     this.workflowExecutor = workflowExecutor;
     this.vcsServiceProvider = vcsServiceProvider;
     this.vcsHostingServiceProvider = vcsHostingServiceProvider;
+    this.promiseProvider = promiseProvider;
+    this.contributeMessages = contributeMessages;
 
     if (appContext.getFactory() != null) {
       handlerRegistration =
@@ -135,10 +141,11 @@ public class ContributionMixinProvider {
     if (rootProject == null) {
       if (toolingPartStack.containsPart(contributePart)) {
         invalidateContext(lastSelected);
-        hidePart();
+        contributePart.showStub(contributeMessages.stubTextProjectNotProvideVSC()); // todo
       }
     } else if (hasVcsService(rootProject)) {
-
+      // todo maybe not here...
+      contributePart.hideStub();
       if (hasContributionMixin(rootProject)) {
 
         vcsHostingServiceProvider
@@ -176,7 +183,7 @@ public class ContributionMixinProvider {
                               public void apply(final PromiseError error)
                                   throws OperationException {
                                 invalidateContext(rootProject);
-                                hidePart();
+                                contributePart.showStub("Failed to display " + error.getMessage()); //todo
                               }
                             });
                   }
@@ -186,14 +193,14 @@ public class ContributionMixinProvider {
                   @Override
                   public void apply(final PromiseError error) throws OperationException {
                     invalidateContext(rootProject);
-                    hidePart();
+                    contributePart.showStub("Some error" + error); // todo
                   }
                 });
       }
 
     } else {
       invalidateContext(rootProject);
-      hidePart();
+      contributePart.showStub(contributeMessages.stubTextProjectNotProvideVSC()); // todo
     }
 
     lastSelected = rootProject;
@@ -204,11 +211,6 @@ public class ContributionMixinProvider {
     if (context.isPresent()) {
       workflowExecutor.invalidateContext(context.get().getProject());
     }
-  }
-
-  private void hidePart() {
-    workspaceAgent.hidePart(contributePart);
-    workspaceAgent.removePart(contributePart);
   }
 
   private void addPart(PartStack partStack) {
@@ -232,7 +234,7 @@ public class ContributionMixinProvider {
     final VcsService vcsService = vcsServiceProvider.getVcsService(project);
 
     if (vcsService == null || project.getMixins().contains(CONTRIBUTION_PROJECT_TYPE_ID)) {
-      return Promises.resolve(project);
+      return promiseProvider.resolve(project);
     }
 
     return vcsService

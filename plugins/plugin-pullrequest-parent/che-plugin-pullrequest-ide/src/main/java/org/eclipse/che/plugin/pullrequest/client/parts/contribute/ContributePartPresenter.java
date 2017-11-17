@@ -472,6 +472,7 @@ public class ContributePartPresenter extends BasePresenter
 
   @Override
   public void onContextChanged(final Context context) {
+    Log.info(getClass(), "context changed");
     restore(context);
   }
 
@@ -495,6 +496,14 @@ public class ContributePartPresenter extends BasePresenter
   @Override
   public void onContextInvalidated(Context context) {
     resetView();
+  }
+
+  public void showStub(String stubContent) {
+    view.showStub(stubContent);
+  }
+
+  public void hideStub() {
+    view.hideStub();
   }
 
   /**

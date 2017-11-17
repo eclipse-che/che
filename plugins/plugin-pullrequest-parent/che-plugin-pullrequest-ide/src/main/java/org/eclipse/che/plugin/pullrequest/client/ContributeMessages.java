@@ -250,4 +250,7 @@ public interface ContributeMessages extends Messages {
 
   @Key("contributor.extension.default.commit.description")
   String contributorExtensionDefaultCommitDescription(String branchName, String contributionTitle);
+
+  @Key("stub.text.project.not.provide.VSC")
+  String stubTextProjectNotProvideVSC();
 }

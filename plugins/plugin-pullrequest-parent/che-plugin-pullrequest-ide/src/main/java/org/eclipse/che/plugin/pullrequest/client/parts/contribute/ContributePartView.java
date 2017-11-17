@@ -143,6 +143,14 @@ public interface ContributePartView extends View<ContributePartView.ActionDelega
    */
   void showNewContributionSection(String vcsHostName);
 
+  /**
+   * Shows stub with {@code content}
+   * @param content to display in the stub
+   */
+  void showStub(String content);
+
+  void hideStub();
+
   /** Hide the new contribution section. */
   void hideNewContributionSection();
 

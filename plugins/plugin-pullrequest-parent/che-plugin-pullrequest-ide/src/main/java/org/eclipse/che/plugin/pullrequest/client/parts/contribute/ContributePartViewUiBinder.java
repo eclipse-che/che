@@ -12,10 +12,10 @@ package org.eclipse.che.plugin.pullrequest.client.parts.contribute;
 
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiTemplate;
-import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * {@link com.google.gwt.uibinder.client.UiBinder} interface for the configure contribution dialog.
  */
 @UiTemplate("ContributePartViewImpl.ui.xml")
-public interface ContributePartViewUiBinder extends UiBinder<ScrollPanel, ContributePartViewImpl> {}
+public interface ContributePartViewUiBinder extends UiBinder<Widget, ContributePartViewImpl> {}
