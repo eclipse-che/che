@@ -36,7 +36,6 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Action;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -357,12 +356,23 @@ public class ProjectExplorer {
    * @param path full path to project item
    */
   public void selectItem(String path) {
-    String locator = "//div[@path='/" + path + "']/div/div";
+    String locator = "//div[@path='/" + path + "']/div";
 
     waitItem(path);
-    new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
-        .until(ExpectedConditions.elementToBeClickable(By.xpath(locator)))
-        .click();
+    try {
+      new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
+          .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)))
+          .click();
+    } catch (StaleElementReferenceException ex) {
+      LOG.error(ex.getLocalizedMessage(), ex);
+
+      waitProjectExplorer();
+      clickOnRefreshTreeButton();
+      waitItem(path);
+      new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
+          .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)))
+          .click();
+    }
   }
 
   /**
@@ -377,8 +387,20 @@ public class ProjectExplorer {
   public void selectItem(String path, int timeoutForWaitingItem) {
     String locator = "//div[@path='/" + path + "']/div";
     waitItem(path, timeoutForWaitingItem);
-    WebElement item = seleniumWebDriver.findElement(By.xpath(locator));
-    item.click();
+    try {
+      new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
+          .until(ExpectedConditions.elementToBeClickable(By.xpath(locator)))
+          .click();
+    } catch (StaleElementReferenceException ex) {
+      LOG.error(ex.getLocalizedMessage(), ex);
+
+      waitProjectExplorer();
+      clickOnRefreshTreeButton();
+      waitItem(path);
+      new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
+          .until(ExpectedConditions.elementToBeClickable(By.xpath(locator)))
+          .click();
+    }
   }
 
   /**
@@ -450,8 +472,7 @@ public class ProjectExplorer {
       waitItemIsSelected(path);
       LOG.debug("===========>>>>  openItemByPath try 3");
       action.moveToElement(getProjectExplorerElement(path)).perform();
-      waitItem(path);
-      action.doubleClick(getProjectExplorerElement(path)).perform();
+      action.doubleClick().perform();
       LOG.debug("===========>>>>  openItemByPath try 4");
     }
     // sometimes an element in the project explorer may be is not attached to the DOM. We should
@@ -468,17 +489,16 @@ public class ProjectExplorer {
       waitItemIsSelected(path);
       LOG.debug("===========>>>>  openItemByPath catch 5");
       action.moveToElement(getProjectExplorerElement(path)).perform();
-      waitItem(path);
-      action.doubleClick(getProjectExplorerElement(path)).perform();
+      action.doubleClick().perform();
       LOG.debug("===========>>>>  openItemByPath catch 6");
     }
     loader.waitOnClosed();
   }
 
   private WebElement getProjectExplorerElement(String path) {
-    String locator = "//div[@path='/%s']/div/div";
+    String locator = "//div[@path='/%s']/div";
     return redrawUiElementsWait.until(
-        ExpectedConditions.elementToBeClickable(By.xpath(String.format(locator, path))));
+        ExpectedConditions.visibilityOfElementLocated(By.xpath(String.format(locator, path))));
   }
 
   /**
@@ -558,13 +578,13 @@ public class ProjectExplorer {
    * @param path
    */
   public void openContextMenuByPathSelectedItem(String path) {
-    String locator = "//div[@path='/" + path + "']/div";
-    loadPageTimeout.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)));
-    WebElement node = seleniumWebDriver.findElement(By.xpath(locator));
-    node.click();
-    Actions act = actionsFactory.createAction(seleniumWebDriver);
-    Action rClick = act.contextClick(node).build();
-    rClick.perform();
+    waitItem(path);
+    selectItem(path);
+    waitItemIsSelected(path);
+
+    Actions action = actionsFactory.createAction(seleniumWebDriver);
+    action.moveToElement(getProjectExplorerElement(path)).contextClick().perform();
+
     waitContextMenu();
   }
 
@@ -715,11 +735,11 @@ public class ProjectExplorer {
   public void invokeCommandWithContextMenu(
       String commandsGoal, String pathToItem, String commandName) {
     String commandNameLocator = "//tr[@id[contains(.,'%s')]]";
-    selectItem(pathToItem);
 
     try {
       openContextMenuByPathSelectedItem(pathToItem);
     } catch (NoSuchElementException e) {
+      clickOnRefreshTreeButton();
       openContextMenuByPathSelectedItem(
           pathToItem); // there context menu may not be opened from the first try
     }
