@@ -181,7 +181,7 @@ public class GdbDebugger implements Debugger {
   @Override
   public void addBreakpoint(Breakpoint breakpoint) throws DebuggerException {
     try {
-      Location location = toAbsoluteLocation(breakpoint.getLocation());
+      Location location = relativeToWorkDir(breakpoint.getLocation());
       if (location.getTarget() == null) {
         gdb.breakpoint(location.getLineNumber());
       } else {
@@ -452,17 +452,20 @@ public class GdbDebugger implements Debugger {
     }
   }
 
-  /** Changes location target to absolute path. */
-  private Location toAbsoluteLocation(Location location)
+  private Location relativeToWorkDir(Location location)
       throws InterruptedException, GdbParseException, GdbTerminatedException, IOException {
-    String workDirFullPath = gdb.workDir().getWorkDir();
-    return new LocationImpl(
-        workDirFullPath + location.getTarget(),
-        location.getLineNumber(),
-        location.isExternalResource(),
-        location.getExternalResourceId(),
-        location.getResourceProjectPath(),
-        location.getMethod(),
-        location.getThreadId());
+    String targetFilePath = location.getTarget();
+    if (targetFilePath.startsWith("/")) {
+      return new LocationImpl(
+          targetFilePath.substring(1),
+          location.getLineNumber(),
+          location.isExternalResource(),
+          location.getExternalResourceId(),
+          location.getResourceProjectPath(),
+          location.getMethod(),
+          location.getThreadId());
+    } else {
+      return location;
+    }
   }
 }
