@@ -50,12 +50,12 @@
             <artifactId>che-core-commons-lang</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.lib</groupId>
-            <artifactId>org-eclipse-jdt-core-repack</artifactId>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-java-server</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-testing-classpath</artifactId>
+            <artifactId>che-plugin-testing-base</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
