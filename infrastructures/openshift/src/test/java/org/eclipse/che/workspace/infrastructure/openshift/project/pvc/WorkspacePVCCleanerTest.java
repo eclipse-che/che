@@ -41,7 +41,7 @@ public class WorkspacePVCCleanerTest {
   private static final String WORKSPACE_ID = "workspace132";
   private static final String PROJECT_NAME = "che";
 
-  @Mock private WorkspacePVCStrategy pvcStrategy;
+  @Mock private WorkspaceVolumesStrategy pvcStrategy;
   @Mock private EventService eventService;
 
   private WorkspacePVCCleaner workspacePVCCleaner;

@@ -14,17 +14,17 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 
 /**
- * Defines a basic set of operations for workspace PVC strategies.
+ * Defines a basic set of operations for workspace volume provisioning strategies.
  *
  * @author Anton Korneta
  */
-public interface WorkspacePVCStrategy {
+public interface WorkspaceVolumesStrategy {
 
   /**
-   * Prepares PVC for backup of workspace data on a specific machine and in strategy specific way.
+   * Prepares volumes for backup of workspace data on a specific machine in a strategy specific way.
    *
    * @param osEnv OpenShift environment that changes as a result of preparation
-   * @param workspaceId the workspace identifier for which PVC will be prepared
+   * @param workspaceId the workspace identifier for which volumes will be prepared
    * @throws InfrastructureException when any error while preparation occurs
    */
   void prepare(OpenShiftEnvironment osEnv, String workspaceId) throws InfrastructureException;

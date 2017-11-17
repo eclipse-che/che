@@ -10,19 +10,21 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.project.pvc;
 
-import static org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil.getWsAgentServerMachine;
 import static org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftObjectUtil.newPVC;
 import static org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftObjectUtil.newVolume;
 import static org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftObjectUtil.newVolumeMount;
 
 import com.google.inject.Inject;
 import io.fabric8.kubernetes.api.model.Container;
-import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Map.Entry;
+import java.util.Set;
 import javax.inject.Named;
+import org.eclipse.che.api.core.model.workspace.config.Volume;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.workspace.infrastructure.openshift.Names;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProjectFactory;
@@ -38,15 +40,15 @@ import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProje
  * configuration and Che configuration limits.
  *
  * @author Anton Korneta
+ * @author Alexander Garagatyi
  */
-public class CommonPVCStrategy implements WorkspacePVCStrategy {
+public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
 
   public static final String COMMON_STRATEGY = "common";
 
   private final String pvcQuantity;
   private final String pvcName;
   private final String pvcAccessMode;
-  private final String projectsPath;
   private final PVCSubPathHelper pvcSubPathHelper;
   private final OpenShiftProjectFactory factory;
 
@@ -55,14 +57,11 @@ public class CommonPVCStrategy implements WorkspacePVCStrategy {
       @Named("che.infra.openshift.pvc.name") String pvcName,
       @Named("che.infra.openshift.pvc.quantity") String pvcQuantity,
       @Named("che.infra.openshift.pvc.access_mode") String pvcAccessMode,
-      @Named("che.workspace.projects.storage") String projectFolderPath,
       PVCSubPathHelper pvcSubPathHelper,
       OpenShiftProjectFactory factory) {
     this.pvcName = pvcName;
     this.pvcQuantity = pvcQuantity;
     this.pvcAccessMode = pvcAccessMode;
-    this.projectsPath =
-        projectFolderPath.startsWith("/") ? projectFolderPath : '/' + projectFolderPath;
     this.pvcSubPathHelper = pvcSubPathHelper;
     this.factory = factory;
   }
@@ -70,29 +69,66 @@ public class CommonPVCStrategy implements WorkspacePVCStrategy {
   @Override
   public void prepare(OpenShiftEnvironment osEnv, String workspaceId)
       throws InfrastructureException {
-    final String machineWithSources =
-        getWsAgentServerMachine(osEnv)
-            .orElseThrow(() -> new InfrastructureException("Machine with ws-agent not found"));
-    final Map<String, PersistentVolumeClaim> claims = osEnv.getPersistentVolumeClaims();
-    claims.put(pvcName, newPVC(pvcName, pvcAccessMode, pvcQuantity));
-    factory.create(workspaceId).persistentVolumeClaims().createIfNotExist(claims.values());
-    final String subPath = workspaceId + projectsPath;
-    pvcSubPathHelper.createDirs(workspaceId, subPath);
+    Set<String> subPaths = new HashSet<>();
+    osEnv.getPersistentVolumeClaims().put(pvcName, newPVC(pvcName, pvcAccessMode, pvcQuantity));
+    factory
+        .create(workspaceId)
+        .persistentVolumeClaims()
+        .createIfNotExist(osEnv.getPersistentVolumeClaims().values());
+
     for (Pod pod : osEnv.getPods().values()) {
-      final PodSpec podSpec = pod.getSpec();
+      PodSpec podSpec = pod.getSpec();
       for (Container container : podSpec.getContainers()) {
-        final String machine = Names.machineName(pod, container);
-        if (machine.equals(machineWithSources)) {
-          container.getVolumeMounts().add(newVolumeMount(pvcName, projectsPath, subPath));
-          podSpec.getVolumes().add(newVolume(pvcName, pvcName));
-          return;
-        }
+        String machineName = Names.machineName(pod, container);
+        InternalMachineConfig machineConfig = osEnv.getMachines().get(machineName);
+        addMachineVolumes(workspaceId, subPaths, podSpec, container, machineConfig);
       }
+    }
+    if (!subPaths.isEmpty()) {
+      pvcSubPathHelper.createDirs(workspaceId, subPaths.toArray(new String[subPaths.size()]));
     }
   }
 
   @Override
   public void cleanup(String workspaceId) throws InfrastructureException {
-    pvcSubPathHelper.removeDirsAsync(workspaceId, workspaceId);
+    pvcSubPathHelper.removeDirsAsync(workspaceId, getWorkspaceSubPath(workspaceId));
+  }
+
+  private void addMachineVolumes(
+      String workspaceId,
+      Set<String> subPaths,
+      PodSpec podSpec,
+      Container container,
+      InternalMachineConfig machineConfig) {
+    if (machineConfig == null || machineConfig.getVolumes().isEmpty()) {
+      return;
+    }
+    for (Entry<String, Volume> volumeEntry : machineConfig.getVolumes().entrySet()) {
+      String volumePath = volumeEntry.getValue().getPath();
+      String subPath = getVolumeSubPath(workspaceId, volumeEntry.getKey());
+      subPaths.add(subPath);
+
+      container.getVolumeMounts().add(newVolumeMount(pvcName, volumePath, subPath));
+      addVolumeIfNeeded(podSpec);
+    }
+  }
+
+  private void addVolumeIfNeeded(PodSpec podSpec) {
+    if (podSpec.getVolumes().stream().noneMatch(volume -> volume.getName().equals(pvcName))) {
+
+      podSpec.getVolumes().add(newVolume(pvcName, pvcName));
+    }
+  }
+
+  /** Get sub-path that holds all the volumes of a particular workspace */
+  private String getWorkspaceSubPath(String workspaceId) {
+    return workspaceId;
+  }
+
+  /** Get sub-path for particular volume in a particular workspace */
+  private String getVolumeSubPath(String workspaceId, String volumeName) {
+    // this path should correlate with path returned by method getWorkspaceSubPath
+    // because this logic is used to correctly cleanup sub-paths related to a workspace
+    return getWorkspaceSubPath(workspaceId) + '/' + volumeName;
   }
 }

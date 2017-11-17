@@ -20,7 +20,7 @@ import org.eclipse.che.workspace.infrastructure.openshift.provision.env.EnvVarsC
 import org.eclipse.che.workspace.infrastructure.openshift.provision.restartpolicy.RestartPolicyRewriter;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.route.TlsRouteProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.server.ServersConverter;
-import org.eclipse.che.workspace.infrastructure.openshift.provision.volume.PersistentVolumeClaimProvisioner;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.volume.VolumesProvisioner;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -36,7 +36,7 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class OpenShiftEnvironmentProvisionerTest {
 
-  @Mock private PersistentVolumeClaimProvisioner pvcProvisioner;
+  @Mock private VolumesProvisioner volumesProvisioner;
   @Mock private UniqueNamesProvisioner uniqueNamesProvisioner;
   @Mock private OpenShiftEnvironment osEnv;
   @Mock private RuntimeIdentity runtimeIdentity;
@@ -53,7 +53,7 @@ public class OpenShiftEnvironmentProvisionerTest {
   public void setUp() {
     osInfraProvisioner =
         new OpenShiftEnvironmentProvisioner(
-            pvcProvisioner,
+            volumesProvisioner,
             uniqueNamesProvisioner,
             tlsRouteProvisioner,
             serversProvisioner,
@@ -61,7 +61,7 @@ public class OpenShiftEnvironmentProvisionerTest {
             restartPolicyRewriter);
     provisionOrder =
         inOrder(
-            pvcProvisioner,
+            volumesProvisioner,
             uniqueNamesProvisioner,
             tlsRouteProvisioner,
             serversProvisioner,
@@ -75,8 +75,8 @@ public class OpenShiftEnvironmentProvisionerTest {
 
     provisionOrder.verify(serversProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(envVarsProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
+    provisionOrder.verify(volumesProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(restartPolicyRewriter).provision(eq(osEnv), eq(runtimeIdentity));
-    provisionOrder.verify(pvcProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(uniqueNamesProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(tlsRouteProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verifyNoMoreInteractions();

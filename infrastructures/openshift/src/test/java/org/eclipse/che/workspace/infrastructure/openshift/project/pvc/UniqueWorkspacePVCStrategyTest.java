@@ -10,15 +10,14 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.project.pvc;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
-import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
 import static org.eclipse.che.workspace.infrastructure.openshift.project.pvc.CommonPVCStrategyTest.mockName;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
@@ -36,7 +35,8 @@ import io.fabric8.openshift.client.OpenShiftClient;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
+import org.eclipse.che.api.core.model.workspace.config.Volume;
+import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
@@ -63,11 +63,17 @@ public class UniqueWorkspacePVCStrategyTest {
   private static final String PVC_NAME = "che-claim";
   private static final String PVC_UNIQUE_NAME = PVC_NAME + '-' + WORKSPACE_ID;
   private static final String POD_NAME = "main";
+  private static final String POD_NAME_2 = "second";
   private static final String CONTAINER_NAME = "app";
+  private static final String CONTAINER_NAME_2 = "db";
+  private static final String CONTAINER_NAME_3 = "app2";
   private static final String MACHINE_NAME = POD_NAME + '/' + CONTAINER_NAME;
+  private static final String MACHINE_NAME_2 = POD_NAME + '/' + CONTAINER_NAME_2;
+  private static final String MACHINE_NAME_3 = POD_NAME_2 + '/' + CONTAINER_NAME_3;
   private static final String PVC_QUANTITY = "10Gi";
   private static final String PVC_ACCESS_MODE = "RWO";
-  private static final String PROJECT_FOLDER_PATH = "/projects";
+  private static final String VOLUME_1_NAME = "vol1";
+  private static final String VOLUME_2_NAME = "vol2";
 
   @Mock private OpenShiftEnvironment osEnv;
   @Mock private OpenShiftClientFactory clientFactory;
@@ -76,8 +82,12 @@ public class UniqueWorkspacePVCStrategyTest {
   @Mock private OpenShiftProject osProject;
   @Mock private OpenShiftPersistentVolumeClaims osPVCs;
   @Mock private Pod pod;
+  @Mock private Pod pod2;
   @Mock private PodSpec podSpec;
+  @Mock private PodSpec podSpec2;
   @Mock private Container container;
+  @Mock private Container container2;
+  @Mock private Container container3;
 
   private UniqueWorkspacePVCStrategy uniqueWorkspacePVCStrategy;
 
@@ -85,33 +95,66 @@ public class UniqueWorkspacePVCStrategyTest {
   public void setup() throws Exception {
     uniqueWorkspacePVCStrategy =
         new UniqueWorkspacePVCStrategy(
-            PROJECT_NAME,
-            PVC_NAME,
-            PVC_QUANTITY,
-            PVC_ACCESS_MODE,
-            PROJECT_FOLDER_PATH,
-            clientFactory,
-            factory);
+            PROJECT_NAME, PVC_NAME, PVC_QUANTITY, PVC_ACCESS_MODE, clientFactory, factory);
     when(clientFactory.create()).thenReturn(client);
-    final InternalMachineConfig machine = mock(InternalMachineConfig.class);
-    when(machine.getServers())
-        .thenReturn(singletonMap(SERVER_WS_AGENT_HTTP_REFERENCE, mock(ServerConfig.class)));
-    when(osEnv.getMachines()).thenReturn(singletonMap(MACHINE_NAME, machine));
+
+    Map<String, InternalMachineConfig> machines = new HashMap<>();
+    InternalMachineConfig machine1 = mock(InternalMachineConfig.class);
+    Map<String, Volume> volumes1 = new HashMap<>();
+    volumes1.put(VOLUME_1_NAME, new VolumeImpl().withPath("/path"));
+    volumes1.put(VOLUME_2_NAME, new VolumeImpl().withPath("/path2"));
+    when(machine1.getVolumes()).thenReturn(volumes1);
+    machines.put(MACHINE_NAME, machine1);
+    InternalMachineConfig machine2 = mock(InternalMachineConfig.class);
+    Map<String, Volume> volumes2 = new HashMap<>();
+    volumes2.put(VOLUME_2_NAME, new VolumeImpl().withPath("/path2"));
+    when(machine2.getVolumes()).thenReturn(volumes2);
+    machines.put(MACHINE_NAME_2, machine2);
+    InternalMachineConfig machine3 = mock(InternalMachineConfig.class);
+    Map<String, Volume> volumes3 = new HashMap<>();
+    volumes3.put(VOLUME_1_NAME, new VolumeImpl().withPath("/path"));
+    when(machine3.getVolumes()).thenReturn(volumes3);
+    machines.put(MACHINE_NAME_3, machine3);
+    when(osEnv.getMachines()).thenReturn(machines);
+
+    Map<String, Pod> pods = new HashMap<>();
+    pods.put(POD_NAME, pod);
+    pods.put(POD_NAME_2, pod2);
+    when(osEnv.getPods()).thenReturn(pods);
+
+    when(pod.getSpec()).thenReturn(podSpec);
+    when(pod2.getSpec()).thenReturn(podSpec2);
+    when(podSpec.getContainers()).thenReturn(asList(container, container2));
+    when(podSpec2.getContainers()).thenReturn(singletonList(container3));
+    when(podSpec.getVolumes()).thenReturn(new ArrayList<>());
+    when(podSpec2.getVolumes()).thenReturn(new ArrayList<>());
+    when(container.getName()).thenReturn(CONTAINER_NAME);
+    when(container2.getName()).thenReturn(CONTAINER_NAME_2);
+    when(container3.getName()).thenReturn(CONTAINER_NAME_3);
+    when(container.getVolumeMounts()).thenReturn(new ArrayList<>());
+    when(container2.getVolumeMounts()).thenReturn(new ArrayList<>());
+    when(container3.getVolumeMounts()).thenReturn(new ArrayList<>());
+
     when(factory.create(WORKSPACE_ID)).thenReturn(osProject);
+
     when(osProject.persistentVolumeClaims()).thenReturn(osPVCs);
+
+    mockName(pod, POD_NAME);
+    mockName(pod2, POD_NAME_2);
   }
 
   @Test
   public void testReplacePVCWhenItsAlreadyInOsEnvironment() throws Exception {
     final Map<String, PersistentVolumeClaim> claims = new HashMap<>();
     final PersistentVolumeClaim provisioned = mock(PersistentVolumeClaim.class);
-    claims.put(PVC_UNIQUE_NAME, provisioned);
+    claims.put(PVC_UNIQUE_NAME + '-' + VOLUME_1_NAME, provisioned);
     when(osEnv.getPersistentVolumeClaims()).thenReturn(claims);
 
     uniqueWorkspacePVCStrategy.prepare(osEnv, WORKSPACE_ID);
 
     verify(factory).create(WORKSPACE_ID);
-    assertNotEquals(osEnv.getPersistentVolumeClaims().get(PVC_UNIQUE_NAME), provisioned);
+    assertNotEquals(
+        osEnv.getPersistentVolumeClaims().get(PVC_UNIQUE_NAME + '-' + VOLUME_1_NAME), provisioned);
   }
 
   @Test(expectedExceptions = InfrastructureException.class)
@@ -123,40 +166,26 @@ public class UniqueWorkspacePVCStrategyTest {
 
   @Test
   public void addPVCWithUniqueNameToOsEnv() throws Exception {
-    mockName(pod, POD_NAME);
-    when(pod.getSpec()).thenReturn(podSpec);
     when(osEnv.getPersistentVolumeClaims()).thenReturn(new HashMap<>());
-    when(osEnv.getPods()).thenReturn(singletonMap(POD_NAME, pod));
-    when(podSpec.getContainers()).thenReturn(singletonList(container));
-    when(podSpec.getVolumes()).thenReturn(new ArrayList<>());
-    when(container.getName()).thenReturn(CONTAINER_NAME);
-    when(container.getVolumeMounts()).thenReturn(new ArrayList<>());
 
     uniqueWorkspacePVCStrategy.prepare(osEnv, WORKSPACE_ID);
 
-    verify(container).getVolumeMounts();
-    verify(podSpec).getVolumes();
+    verify(container, times(2)).getVolumeMounts();
+    verify(container2).getVolumeMounts();
+    verify(container3).getVolumeMounts();
+    // 2x on each volume in pod 1
+    verify(podSpec, times(6)).getVolumes();
+    verify(podSpec2, times(2)).getVolumes();
     assertFalse(podSpec.getVolumes().isEmpty());
+    assertFalse(podSpec2.getVolumes().isEmpty());
     assertFalse(container.getVolumeMounts().isEmpty());
+    assertFalse(container2.getVolumeMounts().isEmpty());
+    assertFalse(container3.getVolumeMounts().isEmpty());
     assertFalse(osEnv.getPersistentVolumeClaims().isEmpty());
-    assertTrue(osEnv.getPersistentVolumeClaims().containsKey(PVC_UNIQUE_NAME));
-  }
-
-  @Test
-  public void testDoNothingWhenNoMachineWithWsAgentFoundInOsEnvironment() throws Exception {
-    final Pod pod = mock(Pod.class);
-    final PodSpec podSpec = mock(PodSpec.class);
-    final Container container = mock(Container.class);
-    mockName(pod, "pod1");
-    when(pod.getSpec()).thenReturn(podSpec);
-    when(osEnv.getPods()).thenReturn(singletonMap("pod1", pod));
-    when(podSpec.getContainers()).thenReturn(singletonList(container));
-    when(container.getName()).thenReturn("test");
-
-    uniqueWorkspacePVCStrategy.prepare(osEnv, WORKSPACE_ID);
-
-    verify(container, never()).getVolumeMounts();
-    verify(podSpec, never()).getVolumes();
+    assertTrue(
+        osEnv.getPersistentVolumeClaims().containsKey(PVC_UNIQUE_NAME + '-' + VOLUME_1_NAME));
+    assertTrue(
+        osEnv.getPersistentVolumeClaims().containsKey(PVC_UNIQUE_NAME + '-' + VOLUME_2_NAME));
   }
 
   @Test
