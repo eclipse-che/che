@@ -465,7 +465,7 @@ public class FindText {
     loader.waitOnClosed();
   }
 
-  public String getResults() {
+  public String getFindInfoResults() {
     loader.waitOnClosed();
     return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOfElementLocated(By.id(Locators.SEARCH_RESULTS)))
@@ -499,5 +499,38 @@ public class FindText {
                 By.xpath(String.format(Locators.FILE_NODE, pathToFile))))
         .click();
     actionsFactory.createAction(seleniumWebDriver).doubleClick().perform();
+  }
+
+  public static class SearchFileResult {
+    private final int occurrencesFoundOnPage;
+    private final int filesFoundOnPage;
+    private final int totalFilesFound;
+
+    private SearchFileResult(String results) {
+      occurrencesFoundOnPage = Integer.parseInt(results.split(" ")[0]);
+      filesFoundOnPage = Integer.parseInt(results.split(" ")[4]);
+      totalFilesFound = Integer.parseInt(results.substring(results.lastIndexOf(" ") + 1));
+    }
+
+    public int getFoundOccurrencesOnPage() {
+      return occurrencesFoundOnPage;
+    }
+
+    public int getFoundFilesOnPage() {
+      return filesFoundOnPage;
+    }
+
+    public int getTotalNumberFoundFiles() {
+      return totalFilesFound;
+    }
+  }
+
+  public SearchFileResult getResults() {
+    String text =
+        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+            .until(ExpectedConditions.visibilityOfElementLocated(By.id(Locators.SEARCH_RESULTS)))
+            .getText();
+
+    return new SearchFileResult(text);
   }
 }
