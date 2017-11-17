@@ -12,6 +12,7 @@ package org.eclipse.che.selenium.miscellaneous;
 
 import static org.testng.AssertJUnit.assertFalse;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -34,6 +35,7 @@ import org.eclipse.che.selenium.pageobject.git.Git;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /** Created by aleksandr shmaraev on 10.12.15 */
@@ -55,10 +57,6 @@ public class NavigateToFileTest {
   private static final String FILE_CREATED_FROM_API = "createdFrom.api";
   private static final String FILE_CREATED_FROM_CONSOLE = "createdFrom.con";
 
-  private static final List<String> FILES_A_SYMBOL =
-      Arrays.asList(
-          "AppController.java (/NavigateFile/src/main/java/org/eclipse/qa/examples)",
-          "AppController.java (/NavigateFile_2/src/main/java/org/eclipse/qa/examples)");
   private static final List<String> FILES_P_SYMBOL =
       Arrays.asList("pom.xml (/NavigateFile_2)", "pom.xml (/NavigateFile)");
   private static final List<String> FILES_I_SYMBOL =
@@ -99,18 +97,17 @@ public class NavigateToFileTest {
         PROJECT_NAME_2,
         ProjectTemplates.MAVEN_SIMPLE);
     ide.open(workspace);
-  }
-
-  @Test
-  public void checkNavigateToFileFunction() {
-    // Open the project one and check function 'Navigate To File'
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.openItemByPath(PROJECT_NAME);
-    selectFileFromNavigate("A", FILE_JAVA + PATH_TO_JAVA_FILE, FILES_A_SYMBOL);
-    editor.waitActiveEditor();
-    editor.waitTabIsPresent("AppController");
-    editor.closeFileByNameWithSaving("AppController");
+    projectExplorer.waitItem(PROJECT_NAME_2);
+  }
+
+  @Test(dataProvider = "dataForSearching")
+  public void checkNavigateToFileFunction(String navigatingValue, List<String> expectedValues) {
+    // Open the project one and check function 'Navigate To File'
+
+    openFoundItemAndCheckResult(navigatingValue, expectedValues, 0);
+
     //    selectFileFromNavigate("i", FILE_JAVA + PATH_TO_JAVA_FILE, FILES_I_SYMBOL);
     //    selectFileFromNavigate("R", FILE_JAVA + PATH_TO_JAVA_FILE, FILES_R_SYMBOL);
     //    selectFileFromNavigate("p", FILE_XML + PATH_TO_README_FILE, FILES_P_SYMBOL);
@@ -130,33 +127,33 @@ public class NavigateToFileTest {
     //    editor.waitWhileFileIsClosed("README.md");
     //    loader.waitOnClosed();
 
-    // Open the project two and check function 'Navigate To File'
-    projectExplorer.waitItem(PROJECT_NAME_2);
-    projectExplorer.openItemByPath(PROJECT_NAME_2);
-    selectFileFromNavigate("A", FILE_JAVA + PATH_2_TO_JAVA_FILE, FILES_A_SYMBOL);
-    editor.waitTabIsPresent("AppController");
-    editor.waitActiveEditor();
-    selectFileFromNavigate("p", FILE_XML + PATH_2_TO_README_FILE, FILES_P_SYMBOL);
-    editor.waitTabIsPresent("qa-spring-sample");
-    editor.waitActiveEditor();
-    selectFileFromNavigate("i", FILE_JSP + PATH_2_TO_JSP_FILE);
-    editor.waitTabIsPresent("index.jsp");
-    editor.waitActiveEditor();
-    //  selectFileFromNavigateLaunchByKeyboard("R", FILE_README + PATH_2_TO_README_FILE);
-    editor.waitTabIsPresent("README.md");
-    editor.waitActiveEditor();
-    editor.closeAllTabsByContextMenu();
-
-    // Check that form is closed by pressing ESC button
-    menu.runCommand(
-        TestMenuCommandsConstants.Assistant.ASSISTANT,
-        TestMenuCommandsConstants.Assistant.NAVIGATE_TO_FILE);
-    navigateToFile.waitFormToOpen();
-    navigateToFile.closeNavigateToFileForm();
-    navigateToFile.waitFormToClose();
+    //    // Open the project two and check function 'Navigate To File'
+    //    projectExplorer.waitItem(PROJECT_NAME_2);
+    //    projectExplorer.openItemByPath(PROJECT_NAME_2);
+    //    //    selectFileFromNavigate("A", FILE_JAVA + PATH_2_TO_JAVA_FILE, FILES_A_SYMBOL);
+    //    editor.waitTabIsPresent("AppController");
+    //    editor.waitActiveEditor();
+    //    selectFileFromNavigate("p", FILE_XML + PATH_2_TO_README_FILE, FILES_P_SYMBOL);
+    //    editor.waitTabIsPresent("qa-spring-sample");
+    //    editor.waitActiveEditor();
+    //    selectFileFromNavigate("i", FILE_JSP + PATH_2_TO_JSP_FILE);
+    //    editor.waitTabIsPresent("index.jsp");
+    //    editor.waitActiveEditor();
+    //    //  selectFileFromNavigateLaunchByKeyboard("R", FILE_README + PATH_2_TO_README_FILE);
+    //    editor.waitTabIsPresent("README.md");
+    //    editor.waitActiveEditor();
+    //    editor.closeAllTabsByContextMenu();
+    //
+    //    // Check that form is closed by pressing ESC button
+    //    menu.runCommand(
+    //        TestMenuCommandsConstants.Assistant.ASSISTANT,
+    //        TestMenuCommandsConstants.Assistant.NAVIGATE_TO_FILE);
+    //    navigateToFile.waitFormToOpen();
+    //    navigateToFile.closeNavigateToFileForm();
+    //    navigateToFile.waitFormToClose();
   }
 
-  @Test
+  // @Test
   public void checkNavigateToFileFunctionWithJustCreatedFiles() throws Exception {
     String content = "NavigateToFileTest";
 
@@ -177,7 +174,7 @@ public class NavigateToFileTest {
     editor.closeFileByNameWithSaving(FILE_CREATED_FROM_CONSOLE);
   }
 
-  @Test
+  // @Test
   public void checkNavigateToFileFunctionWithFilesFromHiddenFolders() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
@@ -202,6 +199,31 @@ public class NavigateToFileTest {
     navigateToFile.waitFormToClose();
   }
 
+  private void openFoundItemAndCheckResult(
+      String navigatingValue, List<String> expectedItems, final int numItem) {
+    String nameOfExpectedOpenedTab = expectedItems.get(numItem).split(" ")[0].replace(".java", "");
+    String pathTocurrentItem = expectedItems.get(numItem).split(" ")[1];
+    loader.waitOnClosed();
+    menu.runCommand(
+        TestMenuCommandsConstants.Assistant.ASSISTANT,
+        TestMenuCommandsConstants.Assistant.NAVIGATE_TO_FILE);
+    navigateToFile.waitFormToOpen();
+    loader.waitOnClosed();
+    navigateToFile.typeSymbolInFileNameField(navigatingValue);
+    loader.waitOnClosed();
+    waitExpectedItemsInNavigateToFileDropdawn(expectedItems);
+    navigateToFile.selectFileByName(pathTocurrentItem);
+    editor.waitActiveEditor();
+    editor.getAssociatedPathFromTheTab(nameOfExpectedOpenedTab);
+    editor.closeFileByNameWithSaving(nameOfExpectedOpenedTab);
+  }
+
+  private void waitExpectedItemsInNavigateToFileDropdawn(List<String> expectedItems) {
+    expectedItems.forEach(item -> navigateToFile.waitListOfFilesNames(item));
+  }
+
+  // --------------------------------------------------------
+
   private void selectFileFromNavigate(String symbol, String path, List<String> files) {
     loader.waitOnClosed();
     menu.runCommand(
@@ -216,7 +238,6 @@ public class NavigateToFileTest {
       navigateToFile.waitListOfFilesNames(listFiles);
     }
     navigateToFile.selectFileByFullName(path);
-    navigateToFile.waitFormToClose();
   }
 
   private void selectFileFromNavigate(String symbol, String pathName) {
@@ -231,6 +252,7 @@ public class NavigateToFileTest {
     navigateToFile.waitFormToOpen();
     loader.waitOnClosed();
     navigateToFile.typeSymbolInFileNameField(symbol);
+
     //    typeStringToNavigateFieldAndCheckResult()
   }
 
@@ -260,5 +282,19 @@ public class NavigateToFileTest {
     terminal.typeIntoTerminal("cat " + fileName + Keys.ENTER);
     terminal.typeIntoTerminal("ls" + Keys.ENTER);
     terminal.waitExpectedTextIntoTerminal(fileName);
+  }
+
+  @DataProvider
+  private Object[][] dataForSearching() {
+    return new Object[][] {
+      {
+        "A",
+        ImmutableList.of(
+            "AppController.java (/NavigateFile/src/main/java/org/eclipse/qa/examples)",
+            "AppController.java (/NavigateFile_2/src/main/java/org/eclipse/qa/examples)")
+      },
+      // {SECOND_ACTION_NAME, SECOND_EXPECTED_ITEMS_WITH_DISABLED_NONE_MENU_ACTIONS_CHECKBOX},
+      // {THIRD_ACTION_NAME, THIRD_EXPECTED_ITEMS_WITH_DISABLED_NONE_MENU_ACTIONS_CHECKBOX}
+    };
   }
 }

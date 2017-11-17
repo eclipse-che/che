@@ -1070,6 +1070,14 @@ public class CodenvyEditor {
     loader.waitOnClosed();
   }
 
+  public String getAssociatedPathFromTheTab(String nameOfOpenedFile) {
+    return redrawDriverWait
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(String.format(Locators.TAB_FILE_NAME_XPATH, nameOfOpenedFile))))
+        .getAttribute("path");
+  }
+
   /**
    * wait tab with expected name is present
    *
