@@ -165,6 +165,8 @@ public interface DebuggerView extends View<DebuggerView.ActionDelegate> {
   /** Returns selected frame index inside thread or -1 if there is no selection. */
   int getSelectedFrameIndex();
 
+  void setThreadNotSuspendPlaceHolderVisible(boolean visible);
+
   /** Returns debugger toolbar panel widget. */
   AcceptsOneWidget getDebuggerToolbarPanel();
 

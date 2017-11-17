@@ -9,7 +9,8 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-
+import {ChePreferences} from '../../api/che-preferences.factory';
+import {ICheLearmMoreAttributes} from './che-learn-more.directive';
 
 /**
  * @ngdoc controller
@@ -18,12 +19,22 @@
  * @author Florent Benoit
  */
 export class CheLearnMoreCtrl {
+  $scope: ng.IScope;
+  $element: ng.IAugmentedJQuery;
+  $attrs: ICheLearmMoreAttributes;
+  $compile: ng.ICompileService;
+  chePreferences: ChePreferences;
+
+  items: any[];
+  WIDGET_PREFERENCES_PREFIX: string;
+  currentIndex: number;
+  stateIcons: any[];
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($scope, $element, $attrs, $compile, chePreferences) {
+  constructor($scope: ng.IScope, $element: ng.IAugmentedJQuery, $attrs: ICheLearmMoreAttributes, $compile: ng.ICompileService, chePreferences: ChePreferences) {
     this.items = [];
 
     this.WIDGET_PREFERENCES_PREFIX = 'learn-widget-';
@@ -33,16 +44,14 @@ export class CheLearnMoreCtrl {
     // current index is first one
     this.currentIndex = 0;
 
-
     let preferences = this.chePreferences.getPreferences();
     let promise = preferences.$promise;
 
     promise.then(() => {
       let selectedIndexInPreferences = preferences[this.WIDGET_PREFERENCES_PREFIX + 'selected-index'];
       if (selectedIndexInPreferences) {
-        this.currentIndex = parseInt(selectedIndexInPreferences);
+        this.currentIndex = parseInt(selectedIndexInPreferences, 10);
       }
-
     });
 
     // by default, all icons are disabled
@@ -54,22 +63,21 @@ export class CheLearnMoreCtrl {
     this.$compile = $compile;
 
     // listener on events
-    this.$scope.$on('cheLearnMore:updateState', (event, data) => {
+    this.$scope.$on('cheLearnMore:updateState', (event: ng.IAngularEvent, data: any) => {
       this.updateState(data);
     });
 
     this.compileTemplate();
-
   }
 
   /**
-   *Compile the template and wrap it
+   * Compile the template and wrap it
    */
-  compileTemplate () {
-    var template = this.$attrs.$cheLearnMoreTemplate;
+  compileTemplate(): void {
+    const template = this.$attrs.$cheLearnMoreTemplate;
 
-    var data  = this.$element[ 0 ].getElementsByTagName('che-learn-more-data')[ 0 ];
-    var element  = angular.element(data);
+    const data  = this.$element[ 0 ].getElementsByTagName('che-learn-more-data')[ 0 ];
+    const element  = angular.element(data);
     element.html(template);
     this.$compile(element.contents())(this.$scope.$parent);
 
@@ -77,7 +85,7 @@ export class CheLearnMoreCtrl {
     delete this.$attrs.$cheLearnMoreTemplate;
   }
 
-  updateState(data) {
+  updateState(data: any): void {
 
     // check key of data
     let key = data.key;
@@ -85,7 +93,7 @@ export class CheLearnMoreCtrl {
 
     // built-in key
     let checkKey = this.WIDGET_PREFERENCES_PREFIX + key;
-    var properties = {};
+    const properties = {};
     properties[checkKey] = value;
     this.chePreferences.updatePreferences(properties);
 
@@ -93,8 +101,7 @@ export class CheLearnMoreCtrl {
     this.stateIcons[key] = value;
   }
 
-
-  insertItem(item) {
+  insertItem(item: any): void {
 
     // check if item has been done or not (if there is a key)
     let key = item.key;
@@ -124,19 +131,16 @@ export class CheLearnMoreCtrl {
 
   }
 
-
-  isSelectedItem(index) {
+  isSelectedItem(index: number): boolean {
     return index === this.currentIndex;
   }
 
-
-  isItemCompleted(key) {
+  isItemCompleted(key: string): void {
     let val = this.stateIcons[key];
     return val;
   }
 
-
-  setCurrentIndex(currentIndex) {
+  setCurrentIndex(currentIndex: number): void {
     this.currentIndex = currentIndex;
 
     // update preferences

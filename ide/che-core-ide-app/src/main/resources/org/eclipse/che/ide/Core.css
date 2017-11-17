@@ -101,6 +101,13 @@ input::selection {
     color: checkBoxIconColor;
 }
 
+.gwt-CheckBox input:indeterminate + label::before {
+    content: "\2714";
+    font-size: 14px;
+    font-weight: normal;
+    color: checkBoxIndeterminateIconColor;
+}
+
 .gwt-CheckBox input[disabled] + label {
     color: checkBoxDisabledFontColor;
 }

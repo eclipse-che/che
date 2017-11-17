@@ -30,8 +30,8 @@ public enum TestStacksConstants {
   PYTHON("python-default", "Python"),
   RAILS("rails-default", "Rails");
 
-  private String id;
-  private String name;
+  private final String id;
+  private final String name;
 
   TestStacksConstants(String id, String name) {
     this.id = id;

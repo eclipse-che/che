@@ -17,8 +17,8 @@
 
 export abstract class HttpInterceptorBase {
   constructor() {
-    ['request', 'requestError', 'response', 'responseError'].forEach((method) => {
-      if(this[method]) {
+    ['request', 'requestError', 'response', 'responseError'].forEach((method: string) => {
+      if (this[method]) {
         this[method] = this[method].bind(this);
       }
     });

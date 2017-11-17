@@ -23,12 +23,9 @@ import static java.nio.file.StandardOpenOption.APPEND;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-import static org.eclipse.che.api.fs.server.WsPathUtils.resolve;
+import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
 import static org.eclipse.che.api.project.shared.Constants.CHE_DIR;
-import static org.eclipse.che.api.watcher.server.impl.FileWatcherUtils.toInternalPath;
-import static org.eclipse.che.api.watcher.server.impl.FileWatcherUtils.toNormalPath;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
@@ -44,16 +41,15 @@ import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.api.watcher.server.FileWatcherManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +62,6 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton
 public class FileWatcherIgnoreFileTracker {
-
   private static final Logger LOG = LoggerFactory.getLogger(FileWatcherIgnoreFileTracker.class);
   private static final String FILE_WATCHER_IGNORE_FILE_NAME = "fileWatcherIgnore";
   private static final String FILE_WATCHER_IGNORE_FILE_PATH =
@@ -85,7 +80,6 @@ public class FileWatcherIgnoreFileTracker {
   private final ProjectManager projectManager;
   private final PathTransformer pathTransformer;
   private final RequestHandlerConfigurator configurator;
-  private final Path root;
   private int fileWatchingOperationID;
 
   @Inject
@@ -94,14 +88,12 @@ public class FileWatcherIgnoreFileTracker {
       RequestTransmitter transmitter,
       PathTransformer pathTransformer,
       RequestHandlerConfigurator configurator,
-      ProjectManager projectManager,
-      @Named("che.user.workspaces.storage") File root) {
+      ProjectManager projectManager) {
     this.pathTransformer = pathTransformer;
     this.projectManager = projectManager;
     this.transmitter = transmitter;
     this.fileWatcherManager = fileWatcherManager;
     this.configurator = configurator;
-    this.root = root.toPath().normalize().toAbsolutePath();
   }
 
   @PostConstruct
@@ -160,11 +152,9 @@ public class FileWatcherIgnoreFileTracker {
         .forEach(this::fillUpExcludesFromIgnoreFile);
   }
 
-  private String getFileWatcherIgnoreFileLocation(RegisteredProject project) {
-    ;
-    return isNullOrEmpty(project.getPath())
-        ? ""
-        : resolve(project.getPath(), FILE_WATCHER_IGNORE_FILE_PATH);
+  private String getFileWatcherIgnoreFileLocation(ProjectConfig project) {
+    String wsPath = project.getPath();
+    return wsPath == null ? "" : absolutize(wsPath) + FILE_WATCHER_IGNORE_FILE_PATH;
   }
 
   private void startTrackingIgnoreFile() {
@@ -187,8 +177,8 @@ public class FileWatcherIgnoreFileTracker {
 
   private Consumer<String> getModifyConsumer() {
     return location -> {
-      Path path = toNormalPath(root, location);
-      if (getIgnoreFileMatcher().matches(path)) {
+      Path fsPath = pathTransformer.transform(location);
+      if (getIgnoreFileMatcher().matches(fsPath)) {
         fillUpExcludesFromIgnoreFile(location);
         notifyAboutIgnoreFileChanges();
       }
@@ -197,9 +187,9 @@ public class FileWatcherIgnoreFileTracker {
 
   private Consumer<String> getDeleteConsumer() {
     return location -> {
-      Path path = toNormalPath(root, location);
-      if (getIgnoreFileMatcher().matches(path)) {
-        Path projectPath = path.getParent().getParent();
+      Path fsPath = pathTransformer.transform(location);
+      if (getIgnoreFileMatcher().matches(fsPath)) {
+        Path projectPath = fsPath.getParent().getParent();
         excludes.remove(projectPath);
         notifyAboutIgnoreFileChanges();
       }
@@ -216,7 +206,7 @@ public class FileWatcherIgnoreFileTracker {
       return;
     }
 
-    Path ignoreFilePath = toNormalPath(root, ignoreFileLocation);
+    Path ignoreFilePath = pathTransformer.transform(ignoreFileLocation);
     if (!exists(ignoreFilePath)) {
       return;
     }
@@ -251,7 +241,7 @@ public class FileWatcherIgnoreFileTracker {
     boolean isRemoved =
         pathsToExclude.removeIf(
             location -> {
-              Path pathToExclude = toNormalPath(root, location);
+              Path pathToExclude = pathTransformer.transform(location);
               return excludes
                   .values()
                   .stream()
@@ -349,9 +339,10 @@ public class FileWatcherIgnoreFileTracker {
           throw new ServerException("The project is not recognized for " + location);
         }
 
-        Path pathToExclude = toNormalPath(root, location);
-        Path projectPath = toNormalPath(root, projectLocation);
-        Path ignoreFilePath = toNormalPath(root, projectLocation + FILE_WATCHER_IGNORE_FILE_PATH);
+        Path pathToExclude = pathTransformer.transform(location);
+        Path projectPath = pathTransformer.transform(projectLocation);
+        Path ignoreFilePath =
+            pathTransformer.transform(projectLocation + FILE_WATCHER_IGNORE_FILE_PATH);
 
         Set<String> excludesToWrite =
             groupedExcludes.computeIfAbsent(ignoreFilePath, k -> new HashSet<>());
@@ -384,8 +375,7 @@ public class FileWatcherIgnoreFileTracker {
             .keySet()
             .stream()
             .flatMap(
-                projectPath ->
-                    excludes.get(projectPath).stream().map(path -> toInternalPath(root, path)))
+                projectPath -> excludes.get(projectPath).stream().map(pathTransformer::transform))
             .collect(toList());
     if (ignoreFileExcludes.isEmpty()) {
       endpointIds.forEach(

@@ -13,7 +13,6 @@ package org.eclipse.che.ide.context;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.addAll;
-import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_FROM;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_TO;
@@ -52,10 +51,9 @@ import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.selection.SelectionChangedEvent;
 import org.eclipse.che.ide.api.selection.SelectionChangedHandler;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppingEvent;
-import org.eclipse.che.ide.api.workspace.model.MachineImpl;
-import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
 import org.eclipse.che.ide.api.workspace.model.ServerImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.project.node.SyntheticNode;
@@ -82,6 +80,7 @@ public class AppContextImpl implements AppContext, SelectionChangedHandler, Reso
   private final ResourceManager.ResourceManagerFactory resourceManagerFactory;
   private final Provider<EditorAgent> editorAgentProvider;
   private final Provider<AppStateManager> appStateManager;
+  private final Provider<WsAgentServerUtil> wsAgentServerUtilProvider;
 
   private final List<Project> rootProjects = newArrayList();
   private final List<Resource> selectedResources = newArrayList();
@@ -107,11 +106,13 @@ public class AppContextImpl implements AppContext, SelectionChangedHandler, Reso
       EventBus eventBus,
       ResourceManager.ResourceManagerFactory resourceManagerFactory,
       Provider<EditorAgent> editorAgentProvider,
-      Provider<AppStateManager> appStateManager) {
+      Provider<AppStateManager> appStateManager,
+      Provider<WsAgentServerUtil> wsAgentServerUtilProvider) {
     this.eventBus = eventBus;
     this.resourceManagerFactory = resourceManagerFactory;
     this.editorAgentProvider = editorAgentProvider;
     this.appStateManager = appStateManager;
+    this.wsAgentServerUtilProvider = wsAgentServerUtilProvider;
     this.startAppActions = new ArrayList<>();
 
     projectsInImport = new ArrayList<>();
@@ -423,19 +424,13 @@ public class AppContextImpl implements AppContext, SelectionChangedHandler, Reso
 
   @Override
   public String getWsAgentServerApiEndpoint() {
-    RuntimeImpl runtime = getWorkspace().getRuntime();
-    Optional<MachineImpl> devMachine = runtime.getDevMachine();
+    Optional<ServerImpl> server = wsAgentServerUtilProvider.get().getWsAgentHttpServer();
 
-    if (devMachine.isPresent()) {
-      Optional<ServerImpl> wsAgentServer =
-          devMachine.get().getServerByName(SERVER_WS_AGENT_HTTP_REFERENCE);
-
-      if (wsAgentServer.isPresent()) {
-        return wsAgentServer.get().getUrl();
-      }
+    if (server.isPresent()) {
+      return server.get().getUrl();
     }
 
-    throw new RuntimeException("ws-agent server doesn't exist");
+    throw new RuntimeException("wsagent server doesn't exist");
   }
 
   @Override

@@ -18,11 +18,10 @@ import java.util.List;
 import java.util.Map;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
-import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.util.Pair;
 
 /**
@@ -36,7 +35,7 @@ public class JavaDebugConfigurationPagePresenter
         DebugConfigurationPage<DebugConfiguration> {
 
   private final JavaDebugConfigurationPageView view;
-  private final AppContext appContext;
+  private final WsAgentServerUtil wsAgentServerUtil;
 
   private DebugConfiguration editedConfiguration;
   private String originHost;
@@ -45,9 +44,9 @@ public class JavaDebugConfigurationPagePresenter
 
   @Inject
   public JavaDebugConfigurationPagePresenter(
-      JavaDebugConfigurationPageView view, AppContext appContext) {
+      JavaDebugConfigurationPageView view, WsAgentServerUtil wsAgentServerUtil) {
     this.view = view;
-    this.appContext = appContext;
+    this.wsAgentServerUtil = wsAgentServerUtil;
 
     view.setDelegate(this);
   }
@@ -74,8 +73,9 @@ public class JavaDebugConfigurationPagePresenter
   }
 
   private void setPortsList() {
-    WorkspaceImpl workspace = appContext.getWorkspace();
-    workspace.getDevMachine().ifPresent(machine -> view.setPortsList(extractPortsList(machine)));
+    wsAgentServerUtil
+        .getWsAgentServerMachine()
+        .ifPresent(machine -> view.setPortsList(extractPortsList(machine)));
   }
 
   /** Extracts list of ports available for connecting to the remote debugger. */

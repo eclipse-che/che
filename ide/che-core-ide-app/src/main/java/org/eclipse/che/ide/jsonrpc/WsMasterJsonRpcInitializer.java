@@ -20,7 +20,6 @@ import static org.eclipse.che.api.workspace.shared.Constants.MACHINE_STATUS_CHAN
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_EXEC_AGENT_HTTP_REFERENCE;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_STATUS_CHANGED_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_TERMINAL_REFERENCE;
-import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STATUS_CHANGED_METHOD;
 import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_MASTER_JSON_RPC_ENDPOINT_ID;
 
@@ -35,6 +34,7 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.jsonrpc.SubscriptionManagerClient;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
 import org.eclipse.che.ide.api.workspace.event.ExecAgentServerRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.ServerRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.TerminalAgentServerRunningEvent;
@@ -61,6 +61,7 @@ public class WsMasterJsonRpcInitializer {
   private final SubscriptionManagerClient subscriptionManagerClient;
   private final WorkspaceServiceClient workspaceServiceClient;
   private final SecurityTokenProvider securityTokenProvider;
+  private final WsAgentServerUtil wsAgentServerUtil;
 
   @Inject
   public WsMasterJsonRpcInitializer(
@@ -70,7 +71,8 @@ public class WsMasterJsonRpcInitializer {
       EventBus eventBus,
       SubscriptionManagerClient subscriptionManagerClient,
       WorkspaceServiceClient workspaceServiceClient,
-      SecurityTokenProvider securityTokenProvider) {
+      SecurityTokenProvider securityTokenProvider,
+      WsAgentServerUtil wsAgentServerUtil) {
     this.initializer = initializer;
     this.requestTransmitter = requestTransmitter;
     this.appContext = appContext;
@@ -78,6 +80,7 @@ public class WsMasterJsonRpcInitializer {
     this.subscriptionManagerClient = subscriptionManagerClient;
     this.workspaceServiceClient = workspaceServiceClient;
     this.securityTokenProvider = securityTokenProvider;
+    this.wsAgentServerUtil = wsAgentServerUtil;
 
     eventBus.addHandler(BasicIDEInitializedEvent.TYPE, e -> initialize());
     eventBus.addHandler(WorkspaceStartingEvent.TYPE, e -> initialize());
@@ -211,8 +214,9 @@ public class WsMasterJsonRpcInitializer {
     if (server.getStatus() == RUNNING) {
       eventBus.fireEvent(new ServerRunningEvent(server.getName(), machine.getName()));
 
+      String wsAgentHttpServerRef = wsAgentServerUtil.getWsAgentHttpServerReference();
       // fire events for the often used servers
-      if (SERVER_WS_AGENT_HTTP_REFERENCE.equals(server.getName())) {
+      if (wsAgentHttpServerRef.equals(server.getName())) {
         eventBus.fireEvent(new WsAgentServerRunningEvent(machine.getName()));
       } else if (SERVER_TERMINAL_REFERENCE.equals(server.getName())) {
         eventBus.fireEvent(new TerminalAgentServerRunningEvent(machine.getName()));

@@ -112,4 +112,10 @@ public class AddOrganization {
         .until(ExpectedConditions.visibilityOf(createOrganizationButton))
         .isEnabled();
   }
+
+  public void waitAddOrganizationButtonIsNotVisible() {
+    redrawUiElementsTimeout.until(
+        ExpectedConditions.invisibilityOfElementLocated(
+            By.xpath(Locators.CREATE_ORGANIZATION_BUTTON)));
+  }
 }

@@ -64,7 +64,7 @@
           "type": "custom"
         },
         {
-          "commandLine": "cd /projects/che && mvn gwt:codeserver -pl :che-ide-gwt-app -am -Pfast,sdm-in-che",
+          "commandLine": "cd /projects/che && mvn gwt:codeserver -pl :che-ide-gwt-app -am -Dmaven.main.skip -Dmaven.resources.skip -Dche.dto.skip -Dskip-enforce -Dskip-validate-sources -Psdm-in-che",
           "name": "GWT SDM",
           "type": "gwt_sdm_che",
           "attributes": {
