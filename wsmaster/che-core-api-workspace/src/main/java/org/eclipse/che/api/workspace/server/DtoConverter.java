@@ -26,6 +26,7 @@ import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
+import org.eclipse.che.api.core.model.workspace.config.Volume;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
@@ -41,6 +42,7 @@ import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
 import org.eclipse.che.api.workspace.shared.dto.ServerConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ServerDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
+import org.eclipse.che.api.workspace.shared.dto.VolumeDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackComponentDto;
@@ -204,6 +206,14 @@ public final class DtoConverter {
     if (machine.getAttributes() != null) {
       machineDto.setAttributes(machine.getAttributes());
     }
+    if (machine.getVolumes() != null) {
+      machineDto.setVolumes(
+          machine
+              .getVolumes()
+              .entrySet()
+              .stream()
+              .collect(toMap(Map.Entry::getKey, entry -> asDto(entry.getValue()))));
+    }
     return machineDto;
   }
 
@@ -252,6 +262,11 @@ public final class DtoConverter {
         .withWorkspaceId(identity.getWorkspaceId())
         .withEnvName(identity.getEnvName())
         .withOwner(identity.getOwner());
+  }
+
+  /** Converts {@link Volume} to {@link VolumeDto}. */
+  public static VolumeDto asDto(Volume volume) {
+    return newDto(VolumeDto.class).withPath(volume.getPath());
   }
 
   private DtoConverter() {}

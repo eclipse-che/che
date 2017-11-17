@@ -46,6 +46,7 @@ import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
+import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
@@ -554,6 +555,12 @@ public class WorkspaceDaoTest {
     exMachine1.setInstallers(ImmutableList.of("agent5", "agent4"));
     exMachine1.setAttributes(singletonMap("att1", "val"));
     exMachine1.setEnv(ImmutableMap.of("CHE_ENV1", "value", "CHE_ENV2", "value"));
+    exMachine1.setVolumes(
+        ImmutableMap.of(
+            "vol1",
+            new VolumeImpl().withPath("/path/1"),
+            "vol2",
+            new VolumeImpl().withPath("/path/2")));
 
     final MachineConfigImpl exMachine2 = new MachineConfigImpl();
     final ServerConfigImpl serverConf3 = new ServerConfigImpl("2333", "https", "path3");
@@ -562,6 +569,7 @@ public class WorkspaceDaoTest {
     exMachine2.setInstallers(ImmutableList.of("agent2", "agent1"));
     exMachine2.setAttributes(singletonMap("att1", "val"));
     exMachine2.setEnv(singletonMap("CHE_ENV2", "value"));
+    exMachine2.setVolumes(ImmutableMap.of("vol2", new VolumeImpl().withPath("/path/2")));
 
     final MachineConfigImpl exMachine3 = new MachineConfigImpl();
     final ServerConfigImpl serverConf5 = new ServerConfigImpl("2333", "https", "path5");
@@ -569,6 +577,7 @@ public class WorkspaceDaoTest {
     exMachine3.setInstallers(ImmutableList.of("agent6", "agent2"));
     exMachine3.setAttributes(singletonMap("att1", "val"));
     exMachine3.setEnv(singletonMap("CHE_ENV3", "value"));
+    exMachine3.setVolumes(ImmutableMap.of("vol3", new VolumeImpl().withPath("/path/3")));
 
     // Environments
     final RecipeImpl recipe1 = new RecipeImpl();
