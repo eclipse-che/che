@@ -16,28 +16,30 @@
  */
 export class CheProjectTypeBuilder {
 
+  private type: any;
+
   constructor() {
     this.type = {};
     this.type.attributeDescriptors = [];
 
   }
 
-  withAttributeDescriptors(attributeDescriptors) {
+  withAttributeDescriptors(attributeDescriptors: any): CheProjectTypeBuilder {
     this.type.attributeDescriptors = attributeDescriptors;
     return this;
   }
 
-  withDisplayname(name) {
+  withDisplayname(name: string): CheProjectTypeBuilder {
   this.type.displayName = name;
     return this;
   }
 
-  withId(id) {
+  withId(id: string): CheProjectTypeBuilder {
     this.type.id = id;
     return this;
   }
 
-  build() {
+  build(): any {
     return this.type;
   }
 

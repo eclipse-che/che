@@ -36,10 +36,8 @@ public class EnvVarsConverter implements ConfigurationProvisioner {
       throws InfrastructureException {
 
     for (Pod pod : osEnv.getPods().values()) {
-      String podName = pod.getMetadata().getName();
       for (Container container : pod.getSpec().getContainers()) {
-        String containerName = container.getName();
-        String machineName = Names.machineName(podName, containerName);
+        String machineName = Names.machineName(pod, container);
         InternalMachineConfig machineConf = environment.getMachines().get(machineName);
 
         if (machineConf != null) {

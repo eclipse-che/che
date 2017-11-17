@@ -44,7 +44,15 @@ echo ""
 
 echo -n "[CHE] Fetching the list of new Che stacks..."
 #new_stacks_json=$(curl -X GET -s --header 'Accept: application/json' "${NEW_STACKS_URL}" | sed 's/\\\"//g' | sed 's/\"com\.redhat\.bayesian\.lsp\"//g' | sed 's/ws-agent\",/ws-agent\"/g')
-new_stacks_json=$(curl -X GET -s --header 'Accept: application/json' "${NEW_STACKS_URL}" | sed 's/\"com\.redhat\.bayesian\.lsp\"//g' | sed 's/ws-agent\",/ws-agent\"/g')
+new_stacks_json=$(curl -X GET -s --header 'Accept: application/json' "${NEW_STACKS_URL}" | jq "def walk(f):
+  . as \$in
+  | if type == \"object\" then
+      reduce keys_unsorted[] as \$key
+        ( {}; . + { (\$key):  (\$in[\$key] | walk(f)) } ) | f
+  elif type == \"array\" then map( walk(f) ) | f
+  else f
+  end;
+  walk( if type == \"array\" then map(select(. != \"com.redhat.bayesian.lsp\")) else . end )")
 echo "done."
 
 echo "[CHE] These stacks will be added."

@@ -13,7 +13,6 @@ package org.eclipse.che.workspace.infrastructure.openshift.project.pvc;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
-import static org.eclipse.che.workspace.infrastructure.openshift.Names.machineName;
 import static org.eclipse.che.workspace.infrastructure.openshift.project.pvc.CommonPVCStrategyTest.mockName;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
@@ -66,7 +65,7 @@ public class UniqueWorkspacePVCStrategyTest {
   private static final String PVC_UNIQUE_NAME = PVC_NAME + '-' + WORKSPACE_ID;
   private static final String POD_NAME = "main";
   private static final String CONTAINER_NAME = "app";
-  private static final String MACHINE_NAME = machineName(POD_NAME, CONTAINER_NAME);
+  private static final String MACHINE_NAME = POD_NAME + '/' + CONTAINER_NAME;
   private static final String PVC_QUANTITY = "10Gi";
   private static final String PVC_ACCESS_MODE = "RWO";
   private static final String PROJECT_FOLDER_PATH = "/projects";

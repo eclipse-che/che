@@ -10,12 +10,21 @@
  */
 package org.eclipse.che.api.debug.shared.model.impl.action;
 
+import org.eclipse.che.api.debug.shared.model.SuspendPolicy;
 import org.eclipse.che.api.debug.shared.model.action.Action;
 import org.eclipse.che.api.debug.shared.model.action.StepOutAction;
 
 /** @author Anatoliy Bazko */
 public class StepOutActionImpl extends ActionImpl implements StepOutAction {
-  public StepOutActionImpl() {
+  private final SuspendPolicy suspendPolicy;
+
+  public StepOutActionImpl(SuspendPolicy suspendPolicy) {
     super(Action.TYPE.STEP_OUT);
+    this.suspendPolicy = suspendPolicy;
+  }
+
+  @Override
+  public SuspendPolicy getSuspendPolicy() {
+    return suspendPolicy;
   }
 }

@@ -19,6 +19,7 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerPort;
 import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
 import io.fabric8.kubernetes.api.model.IntOrString;
+import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.ServicePortBuilder;
@@ -101,11 +102,13 @@ public class ServerExposer {
 
   private final String machineName;
   private final Container container;
+  private final Pod pod;
   private final OpenShiftEnvironment openShiftEnvironment;
 
   public ServerExposer(
-      String machineName, Container container, OpenShiftEnvironment openShiftEnvironment) {
+      String machineName, Pod pod, Container container, OpenShiftEnvironment openShiftEnvironment) {
     this.machineName = machineName;
+    this.pod = pod;
     this.container = container;
     this.openShiftEnvironment = openShiftEnvironment;
   }
@@ -127,7 +130,7 @@ public class ServerExposer {
     Service service =
         new ServiceBuilder()
             .withName(generate(SERVER_PREFIX, SERVER_UNIQUE_PART_SIZE) + '-' + machineName)
-            .withSelectorEntry(CHE_ORIGINAL_NAME_LABEL, Names.podName(machineName))
+            .withSelectorEntry(CHE_ORIGINAL_NAME_LABEL, pod.getMetadata().getName())
             .withPorts(new ArrayList<>(portToServicePort.values()))
             .build();
 

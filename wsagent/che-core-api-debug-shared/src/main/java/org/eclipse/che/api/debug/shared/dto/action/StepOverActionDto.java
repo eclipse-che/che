@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.api.debug.shared.dto.action;
 
+import org.eclipse.che.api.debug.shared.model.SuspendPolicy;
 import org.eclipse.che.api.debug.shared.model.action.StepOverAction;
 import org.eclipse.che.dto.shared.DTO;
 
@@ -21,4 +22,11 @@ public interface StepOverActionDto extends ActionDto, StepOverAction {
   void setType(TYPE type);
 
   StepOverActionDto withType(TYPE type);
+
+  @Override
+  SuspendPolicy getSuspendPolicy();
+
+  void setSuspendPolicy(SuspendPolicy suspendPolicy);
+
+  StepOverActionDto withSuspendPolicy(SuspendPolicy suspendPolicy);
 }

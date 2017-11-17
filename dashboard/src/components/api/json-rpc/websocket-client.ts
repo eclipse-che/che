@@ -18,11 +18,11 @@ import {ICommunicationClient} from './json-rpc-client';
  */
 export class WebsocketClient implements ICommunicationClient {
   onResponse: Function;
-  private $websocket: ng.websocket.IWebSocketProvider;
+  private $websocket: any;
   private $q: ng.IQService;
   private websocketStream;
 
-  constructor ($websocket: ng.websocket.IWebSocketProvider, $q: ng.IQService) {
+  constructor ($websocket: any, $q: ng.IQService) {
     this.$websocket = $websocket;
     this.$q = $q;
   }

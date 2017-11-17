@@ -12,18 +12,20 @@ package org.eclipse.che.workspace.infrastructure.openshift;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
-import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_ORIGINAL_NAME_LABEL;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.client.Watcher.Action;
 import io.fabric8.openshift.api.model.Route;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import javax.inject.Inject;
@@ -47,6 +49,9 @@ import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.bootstrapper.OpenShiftBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
+import org.eclipse.che.workspace.infrastructure.openshift.project.event.ContainerEvent;
+import org.eclipse.che.workspace.infrastructure.openshift.project.event.ContainerEventHandler;
+import org.eclipse.che.workspace.infrastructure.openshift.project.event.PodActionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,9 +106,8 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
       for (Route route : osEnv.getRoutes().values()) {
         createdRoutes.add(project.routes().create(route));
       }
-
-      registerAbnormalStopHandler();
-      registerContainersEventsPublisher();
+      project.pods().watch(new AbnormalStopHandler());
+      project.pods().watchContainers(new MachineLogsPublisher());
 
       createPods(createdServices, createdRoutes);
 
@@ -154,37 +158,6 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
     return emptyMap();
   }
 
-  private void registerAbnormalStopHandler() throws InfrastructureException {
-    project
-        .pods()
-        .watch(
-            (action, pod) -> {
-              if (pod.getStatus() != null && POD_FAILED_STATUS.equals(pod.getStatus().getPhase())) {
-                try {
-                  internalStop(emptyMap());
-                } catch (InfrastructureException ex) {
-                  LOG.error("OpenShift environment stop failed cause '{}'", ex.getMessage());
-                } finally {
-                  sendRuntimeStoppedEvent(
-                      format("Pod '%s' was abnormally stopped", pod.getMetadata().getName()));
-                }
-              }
-            });
-  }
-
-  private void registerContainersEventsPublisher() throws InfrastructureException {
-    project
-        .pods()
-        .watchContainers(
-            event ->
-                eventService.publish(
-                    DtoFactory.newDto(MachineLogEvent.class)
-                        .withMachineName(event.getMachineName())
-                        .withRuntimeId(DtoConverter.asDto(getContext().getIdentity()))
-                        .withText(event.getMessage())
-                        .withTime(event.getTime())));
-  }
-
   /**
    * Bootstraps machine.
    *
@@ -225,17 +198,16 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
    * @param routes created OpenShift routes
    * @throws InfrastructureException when any error occurs while creating OpenShift pods
    */
-  private void createPods(List<Service> services, List<Route> routes)
-      throws InfrastructureException {
+  @VisibleForTesting
+  void createPods(List<Service> services, List<Route> routes) throws InfrastructureException {
     final ServerResolver serverResolver = ServerResolver.of(services, routes);
     for (Pod toCreate : getContext().getOpenShiftEnvironment().getPods().values()) {
       final Pod createdPod = project.pods().create(toCreate);
       final ObjectMeta podMetadata = createdPod.getMetadata();
       for (Container container : createdPod.getSpec().getContainers()) {
-        String podOriginalName = podMetadata.getLabels().get(CHE_ORIGINAL_NAME_LABEL);
         OpenShiftMachine machine =
             new OpenShiftMachine(
-                Names.machineName(podOriginalName, container.getName()),
+                Names.machineName(toCreate, container),
                 podMetadata.getName(),
                 container.getName(),
                 serverResolver.resolve(createdPod, container),
@@ -306,5 +278,46 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
             .withPrevStatus(RUNTIME_RUNNING_STATE)
             .withFailed(true)
             .withError(errorMsg));
+  }
+
+  /** Listens container's events and publish them as machine logs. */
+  class MachineLogsPublisher implements ContainerEventHandler {
+
+    @Override
+    public void handle(ContainerEvent event) {
+      final String podName = event.getPodName();
+      final String containerName = event.getContainerName();
+      for (Entry<String, OpenShiftMachine> entry : machines.entrySet()) {
+        final OpenShiftMachine machine = entry.getValue();
+        if (machine.getPodName().equals(podName)
+            && machine.getContainerName().equals(containerName)) {
+          eventService.publish(
+              DtoFactory.newDto(MachineLogEvent.class)
+                  .withMachineName(entry.getKey())
+                  .withRuntimeId(DtoConverter.asDto(getContext().getIdentity()))
+                  .withText(event.getMessage())
+                  .withTime(event.getTime()));
+          return;
+        }
+      }
+    }
+  }
+
+  /** Stops runtime if one of the pods was abnormally stopped. */
+  class AbnormalStopHandler implements PodActionHandler {
+
+    @Override
+    public void handle(Action action, Pod pod) {
+      if (pod.getStatus() != null && POD_FAILED_STATUS.equals(pod.getStatus().getPhase())) {
+        try {
+          internalStop(emptyMap());
+        } catch (InfrastructureException ex) {
+          LOG.error("OpenShift environment stop failed cause '{}'", ex.getMessage());
+        } finally {
+          sendRuntimeStoppedEvent(
+              format("Pod '%s' was abnormally stopped", pod.getMetadata().getName()));
+        }
+      }
+    }
   }
 }

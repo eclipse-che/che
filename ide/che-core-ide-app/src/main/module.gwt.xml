@@ -19,6 +19,8 @@
     </generate-with>
     <stylesheet src="https://fonts.googleapis.com/css?family=Open+Sans"></stylesheet>
 
+    <set-configuration-property name="devModeUrlWhitelistRegexp" value=".*" />
+
     <inherits name="com.google.gwt.user.User"/>
     <inherits name="elemental.Elemental"/>
     <inherits name="org.eclipse.che.ide.Commons"/>

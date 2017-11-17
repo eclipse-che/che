@@ -10,6 +10,8 @@
  */
 'use strict';
 
+declare const uiCodemirrorDirective: any;
+
 export class CodeMirrorConstant {
 
   constructor(register: che.IRegisterService) {

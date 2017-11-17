@@ -11,6 +11,7 @@
 'use strict';
 
 import {CheHttpBackend} from './che-http-backend';
+import {CheAPIBuilder} from '../builder/che-api-builder.factory';
 
 /**
  * This class is providing helper methods for simulating a fake HTTP backend simulating
@@ -20,22 +21,19 @@ export class CheHttpBackendProviderFactory {
 
   /**
    * Build a new Che backend based on the given http backend.
-   * @param $httpBackend the backend on which to add calls
+   * @param {ng.IHttpBackendService} $httpBackend the backend on which to add calls
+   * @param {CheAPIBuilder} cheAPIBuilder
    * @returns {CheHttpBackend} the new instance
    */
-  buildBackend($httpBackend, cheAPIBuilder) {
+  buildBackend($httpBackend: ng.IHttpBackendService, cheAPIBuilder: CheAPIBuilder) {
 
     // first, add pass through
     $httpBackend.whenGET(new RegExp('components.*')).passThrough();
     $httpBackend.whenGET(new RegExp('^app.*')).passThrough();
 
-
     // return instance
     return new CheHttpBackend($httpBackend, cheAPIBuilder);
-
-
   }
-
 
 }
 

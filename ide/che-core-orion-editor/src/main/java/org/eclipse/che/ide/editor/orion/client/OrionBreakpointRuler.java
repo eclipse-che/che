@@ -171,8 +171,9 @@ public class OrionBreakpointRuler implements Gutter {
     annotation.setType(CHE_BREAKPOINT);
     annotation.setStart(lineStart);
     annotation.setEnd(lineStart);
-    annotation.setTitle(element.getTitle());
-
+    annotation.setTitle(" "); // empty title is required to display html
+    String hint = element.getTitle().replace("\n", "<br>").replace(" ", "&nbsp;");
+    annotation.setHtml("<div>" + hint + "</div>");
     return annotation;
   }
 

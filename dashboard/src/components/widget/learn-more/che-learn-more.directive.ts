@@ -10,6 +10,10 @@
  */
 'use strict';
 
+export interface ICheLearmMoreAttributes extends ng.IAttributes {
+  $cheLearnMoreTemplate: any;
+}
+
 /**
  * @ngdoc directive
  * @name components.directive:cheLearnMore
@@ -22,38 +26,28 @@
  *
  * @author Florent Benoit
  */
-export class CheLearnMore {
+export class CheLearnMore implements ng.IDirective {
 
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor() {
-    this.restrict = 'E';
-    //this.replace= true;
-    //this.transclude= true;
-    this.bindToController = true;
+  restrict = 'E';
+  bindToController = true;
 
+  controller = 'CheLearnMoreCtrl';
+  controllerAs = 'cheLearnMoreCtrl';
 
-    this.controller = 'CheLearnMoreCtrl';
-    this.controllerAs = 'cheLearnMoreCtrl';
-
-    this.scope = {
-      title: '@cheTitle'
-    };
-  }
-
+  scope = {
+    title: '@cheTitle'
+  };
 
   /**
    * Template for the current toolbar
-   * @param element
-   * @param attrs
+   * @param $element
+   * @param $attrs
    * @returns {string} the template
    */
-  template(element, attrs) {
+  template($element: ng.IAugmentedJQuery, $attrs: ICheLearmMoreAttributes) {
 
     // keep the current value into the attributes
-    attrs['$cheLearnMoreTemplate'] = element.html();
+    $attrs.$cheLearnMoreTemplate = $element.html();
 
     var template = '<md-card class="che-learn-more-panel" md-theme="default">'
       + '<div layout="row" class="che-learn-more-titlebox" layout-align="start center">'
@@ -74,6 +68,5 @@ export class CheLearnMore {
       + '</che-learn-more-wrapper></md-card-content></md-card>';
     return template;
   }
-
 
 }
