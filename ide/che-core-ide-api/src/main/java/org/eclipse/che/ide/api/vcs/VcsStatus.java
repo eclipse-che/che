@@ -40,9 +40,9 @@ public enum VcsStatus {
         return Style.getVcsStatusAddedColor();
       case NOT_MODIFIED:
         return null;
+      default:
+        return null;
     }
-
-    return null;
   }
 
   public static VcsStatus from(String value) {
