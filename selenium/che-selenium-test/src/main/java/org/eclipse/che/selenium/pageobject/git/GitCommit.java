@@ -140,6 +140,24 @@ public class GitCommit {
   }
 
   /**
+   * Wait for item check-box in the 'Git changed files tree panel' to be indeterminate.
+   *
+   * @param itemName name of the item
+   */
+  public void waitItemCheckBoxToBeIndeterminate(String itemName) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            (ExpectedCondition<Boolean>)
+                webDriver ->
+                    seleniumWebDriver
+                        .findElement(
+                            By.xpath(
+                                String.format(Locators.TREE_ITEM_CHECK_BOX + "//input", itemName)))
+                        .getAttribute("id")
+                        .endsWith("indeterminate"));
+  }
+
+  /**
    * Wait for item check-box in the 'Git changed files tree panel' to be unselected.
    *
    * @param itemName name of the item

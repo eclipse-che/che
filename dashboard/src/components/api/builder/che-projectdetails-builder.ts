@@ -16,13 +16,13 @@
  */
 export class CheProjectDetailsBuilder {
 
+  private projectDetails: che.IProjectTemplate;
+
   /**
    * Default constructor.
    */
   constructor() {
-    this.projectDetails = {};
-    this.projectDetails.creationDate = new Date().getTime();
-    this.projectDetails.modificationDate = new Date().getTime();
+    this.projectDetails = {} as che.IProjectTemplate;
     this.projectDetails.mixins = [];
     this.projectDetails.problems = [];
     this.projectDetails.description = '';
@@ -30,62 +30,50 @@ export class CheProjectDetailsBuilder {
 
   /**
    * Sets workspaceId
-   * @param workspaceId the workspace ID
+   * @param {string} workspaceId the workspace ID
    * @returns {CheProjectDetailsBuilder}
    */
-  withWorkspaceId(workspaceId) {
+  withWorkspaceId(workspaceId: string): CheProjectDetailsBuilder {
     this.projectDetails.workspaceId = workspaceId;
     return this;
   }
 
   /**
    * Sets workspaceName
-   * @param workspaceName the workspace name
+   * @param {string} workspaceName the workspace name
    * @returns {CheProjectDetailsBuilder}
    */
-  withWorkspaceName(workspaceName) {
+  withWorkspaceName(workspaceName: string): CheProjectDetailsBuilder {
     this.projectDetails.workspaceName = workspaceName;
     return this;
   }
 
   /**
    * Sets Name
-   * @param Name the project's name
+   * @param {string} name the project's name
    * @returns {CheProjectDetailsBuilder}
    */
-  withName(name) {
+  withName(name: string): CheProjectDetailsBuilder {
     this.projectDetails.name = name;
     return this;
   }
 
   /**
-   * Sets permissions
-   * @param permissions the project's permissions
-   * @returns {CheProjectDetailsBuilder}
-   */
-  withPermissions(permissions) {
-    this.projectDetails.permissions = permissions;
-    return this;
-  }
-
-  /**
    * Sets type
-   * @param type the project's type
+   * @param {string} type the project's type
    * @returns {CheProjectDetailsBuilder}
    */
-  withType(type) {
+  withType(type: string): CheProjectDetailsBuilder {
     this.projectDetails.type = type;
     return this;
   }
-
 
   /**
    * Build the project details
    * @returns {CheProjectDetailsBuilder.projectDetails|*}
    */
-  build() {
+  build(): che.IProjectTemplate {
     return this.projectDetails;
   }
-
 
 }

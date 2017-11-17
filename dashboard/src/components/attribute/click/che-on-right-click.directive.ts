@@ -10,6 +10,10 @@
  */
 'use strict';
 
+interface ICheOnRightClickAttributes extends ng.IAttributes {
+  cheOnRightClick: () => void;
+}
+
 /**
  * @ngdoc directive
  * @name components.directive:cheOnRightClick
@@ -25,26 +29,19 @@
  *
  * @author Oleksii Kurinnyi
  */
-export class CheOnRightClick {
-
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor() {
-    this.restrict = 'A';
-  }
+export class CheOnRightClick implements ng.IDirective {
+  restrict = 'A';
 
   /**
    * Keep reference to the model controller
    */
-  link($scope, $element, attrs) {
-    $element.bind('contextmenu', (event) => {
+  link($scope: ng.IScope, $element: ng.IAugmentedJQuery, $attrs: ICheOnRightClickAttributes): void {
+    $element.on('contextmenu', (event: JQueryEventObject) => {
       event.stopPropagation();
       event.preventDefault();
 
       $scope.$apply(() => {
-        $scope.$eval(attrs.cheOnRightClick);
+        $scope.$eval($attrs.cheOnRightClick);
       });
     });
   }

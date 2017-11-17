@@ -9,6 +9,18 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import {CheDropZoneCtrl} from './che-dropzone.controller';
+
+export interface ICheDropZoneEventObject extends JQueryEventObject {
+  dataTransfer: {
+    files: any[];
+    getData: (key: string) => string;
+    types: string[];
+  };
+  lengthComputable: boolean;
+  loaded: number;
+  total: number;
+}
 
 /**
  * @ngdoc directive
@@ -26,42 +38,32 @@
  *   <che-dropzone></che-dropzone>
  *
  * @example
- <example module="userDashboard">
- <file name="index.html">
- <che-dropzone>This is a drag and drop zone</che-dropzone>
- </file>
- </example>
+ * <example module="userDashboard">
+ *   <file name="index.html">
+ *     <che-dropzone>This is a drag and drop zone</che-dropzone>
+ *   </file>
+ * </example>
  * @author Florent Benoit
  */
-export class CheDropZone {
+export class CheDropZone implements ng.IDirective {
+  restrict = 'E';
+  transclude = true;
+  bindToController = true;
+  replace = true;
 
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor () {
-    this.restrict = 'E';
-    this.transclude = true;
-    this.bindToController = true;
-    this.replace = true;
+  controller = 'CheDropZoneCtrl';
+  controllerAs = 'cheDropZoneCtrl';
 
-    this.controller = 'CheDropZoneCtrl';
-    this.controllerAs = 'cheDropZoneCtrl';
-
-
-    this.scope = {
-      callbackController: '=cheCallbackController'
-    };
-
-  }
-
+  scope = {
+    callbackController: '=cheCallbackController'
+  };
 
   /**
    * Template for the current drop zone
    * @returns {string} the template
    */
-  template(){
-    var template = '<div ng-class="cheDropZoneCtrl.dropClass" class="che-dropzone" flex layout="row" layout-align="center center">'
+  template (): string {
+    const template = '<div ng-class="cheDropZoneCtrl.dropClass" class="che-dropzone" flex layout="row" layout-align="center center">'
       + '<div>Drag and drop a plug-in</div>'
       + '<div ng-show="cheDropZoneCtrl.errorMessage">{{cheDropZoneCtrl.errorMessage}}</div>'
       + '<md-progress-circular ng-show="cheDropZoneCtrl.waitingDrop" md-theme="maincontent-theme" md-mode="indeterminate">'
@@ -69,30 +71,26 @@ export class CheDropZone {
     return template;
   }
 
-
-
   /**
    * Keep reference to the model controller
    */
-  link($scope, element, attributes, controller) {
-    let innerElement = element[0];
+  link($scope: ng.IScope, $element: ng.IAugmentedJQuery, $attributes: ng.IAttributes, $controller: CheDropZoneCtrl) {
+    let innerElement = $element[0];
 
-    innerElement.addEventListener('dragenter', (evt) =>  {
-      controller.dragEnterCallback(evt);
+    innerElement.addEventListener('dragenter', (evt: ICheDropZoneEventObject) =>  {
+      $controller.dragEnterCallback(evt);
     });
 
-    innerElement.addEventListener('dragleave', (evt) =>  {
-      controller.dragLeaveCallback(evt);
+    innerElement.addEventListener('dragleave', (evt: ICheDropZoneEventObject) =>  {
+      $controller.dragLeaveCallback(evt);
     });
-    innerElement.addEventListener('dragover', (evt) =>  {
-      controller.dragoverCallback(evt);
-    });
-
-    innerElement.addEventListener('drop', (evt) =>  {
-      controller.dropCallback(evt);
+    innerElement.addEventListener('dragover', (evt: ICheDropZoneEventObject) =>  {
+      $controller.dragoverCallback(evt);
     });
 
-
+    innerElement.addEventListener('drop', (evt: ICheDropZoneEventObject) =>  {
+      $controller.dropCallback(evt);
+    });
   }
 
 }

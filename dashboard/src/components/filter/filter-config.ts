@@ -15,10 +15,8 @@ import {ChangeMemoryUnitFilter} from './change-memory-unit/change-memory-unit.fi
 export class FilterConfig {
 
   constructor(register: che.IRegisterService) {
-
-    new CheNumberRoundFilter(register);
-    new ChangeMemoryUnitFilter(register);
-
+    register.filter('numberRound', CheNumberRoundFilter.filter);
+    register.filter('changeMemoryUnit', ChangeMemoryUnitFilter.filter);
   }
 
 }

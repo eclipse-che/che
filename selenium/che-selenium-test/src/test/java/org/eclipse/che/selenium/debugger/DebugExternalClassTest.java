@@ -121,35 +121,6 @@ public class DebugExternalClassTest {
   }
 
   @Test
-  public void shouldDebugJreClass() {
-    // when
-    editor.setInactiveBreakpoint(19);
-    menu.runCommandByXpath(
-        TestMenuCommandsConstants.Run.RUN_MENU,
-        TestMenuCommandsConstants.Run.DEBUG,
-        debugConfig.getXpathToІRunDebugCommand(PROJECT));
-
-    notifications.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
-    editor.waitActiveBreakpoint(19);
-    debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_INTO);
-
-    // then
-    editor.waitActiveTabFileName("Logger"); // there should be class "Logger" opened
-    debugPanel.waitDebugHighlightedText(
-        "    "); // we can't rely on concrete code of external library which can be changed in
-    // future
-    debugPanel.waitTextInVariablesPanel(
-        "=\"Info from java logger\""); // there should be at least parameter with value "Info from
-    // java logger"
-
-    // when
-    debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.RESUME_BTN_ID);
-
-    // then
-    editor.waitActiveTabFileName("SimpleLogger");
-  }
-
-  @Test(priority = 1)
   public void shouldDebugMavenArtifactClassWithSources() {
     // when
     editor.setInactiveBreakpoint(23);
@@ -189,7 +160,7 @@ public class DebugExternalClassTest {
         "        org.apache.log4j.Logger log4jLogger = org.apache.log4j.Logger.getLogger(SimpleLogger.class);");
   }
 
-  @Test(priority = 2)
+  @Test(priority = 1)
   public void shouldHandleDebugOfMavenArtifactWithoutSources() {
     // when
     editor.setInactiveBreakpoint(27);

@@ -381,13 +381,13 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <length property="compilation-mappings-properties" mode="each">
+                                <length mode="each" property="compilation-mappings-properties">
                                     <fileset dir="${project.build.directory}/${project.artifactId}-${project.version}/_app">
-                                        <include name="**/*.cache.js"/>
+                                        <include name="**/*.cache.js" />
                                     </fileset>
                                 </length>
                                 <echo append="false" file="${project.build.directory}/${project.artifactId}-${project.version}/_app/compilation-mappings.properties">${compilation-mappings-properties}</echo>
-                                <replace file="${project.build.directory}/${project.artifactId}-${project.version}/_app/compilation-mappings.properties" token="${project.build.directory}/${project.artifactId}-${project.version}/_app/" value=""/>
+                                <replace file="${project.build.directory}/${project.artifactId}-${project.version}/_app/compilation-mappings.properties" token="${project.build.directory}/${project.artifactId}-${project.version}/_app/" value="" />
                             </tasks>
                         </configuration>
                     </execution>
@@ -396,4 +396,3 @@
         </plugins>
     </build>
 </project>
-
