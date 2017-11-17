@@ -57,10 +57,10 @@ public class BranchPresenterTest extends BaseTest {
   @Captor private ArgumentCaptor<InputCallback> inputCallbackCaptor;
   @Captor private ArgumentCaptor<ConfirmCallback> confirmCallbackCaptor;
 
-  public static final String BRANCH_NAME = "branchName";
-  public static final String REMOTE_BRANCH_NAME = "origin/branchName";
-  public static final boolean IS_REMOTE = true;
-  public static final boolean IS_ACTIVE = true;
+  private static final String BRANCH_NAME = "branchName";
+  private static final String REMOTE_BRANCH_NAME = "origin/branchName";
+  private static final boolean IS_REMOTE = true;
+  private static final boolean IS_ACTIVE = true;
   @Mock private BranchView view;
   @Mock private Branch selectedBranch;
   @Mock private DialogFactory dialogFactory;
@@ -79,7 +79,6 @@ public class BranchPresenterTest extends BaseTest {
             dtoFactory,
             service,
             constant,
-            appContext,
             notificationManager,
             gitOutputConsoleFactory,
             processesPanelPresenter,
@@ -164,7 +163,7 @@ public class BranchPresenterTest extends BaseTest {
 
   @Test
   public void testOnCloseClicked() throws Exception {
-    presenter.onCloseClicked();
+    presenter.onClose();
 
     verify(view).close();
   }

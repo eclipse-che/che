@@ -22,9 +22,9 @@ import org.eclipse.che.ide.api.mvp.View;
  */
 public interface BranchView extends View<BranchView.ActionDelegate> {
   /** Needs for delegate some function into Branch view. */
-  public interface ActionDelegate {
-    /** Performs any actions appropriate in response to the user having pressed the Close button. */
-    void onCloseClicked();
+  interface ActionDelegate {
+    /** Performs any actions appropriate in response to the user having pressed the Close action. */
+    void onClose();
 
     /**
      * Performs any actions appropriate in response to the user having pressed the Rename button.
@@ -56,8 +56,13 @@ public interface BranchView extends View<BranchView.ActionDelegate> {
     /** Performs any action in response to the user do not have any selected branch. */
     void onBranchUnselected();
 
-    /** Performs any action in response to the user having selected branch filter. */
-    void onFilterValueChanged();
+    /**
+     * Performs any action in response to the user having selected branch filter (local/remote/all).
+     */
+    void onLocalRemoteFilterChanged();
+
+    /** Is called when search filter is updated */
+    void onSearchFilterChanged(String filter);
   }
 
   /**
@@ -96,4 +101,14 @@ public interface BranchView extends View<BranchView.ActionDelegate> {
 
   /** Show dialog. */
   void showDialogIfClosed();
+
+  /**
+   * Set new content to search filter label.
+   *
+   * @param text text to set
+   */
+  void setTextToSearchFilterLabel(String text);
+
+  /** Clear search filter. */
+  void clearSearchFilter();
 }
