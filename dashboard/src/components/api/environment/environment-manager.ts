@@ -137,6 +137,7 @@ export abstract class EnvironmentManager {
       newEnvironment.machines[machineName].attributes.memoryLimitBytes = machine.attributes ? machine.attributes.memoryLimitBytes : '1073741824';
       newEnvironment.machines[machineName].installers = angular.copy(machine.installers);
       newEnvironment.machines[machineName].servers = angular.copy(machine.servers);
+      newEnvironment.machines[machineName].volumes = angular.copy(machine.volumes);
     });
 
     return newEnvironment;
