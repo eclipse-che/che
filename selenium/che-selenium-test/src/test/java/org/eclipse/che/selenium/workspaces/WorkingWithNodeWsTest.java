@@ -132,15 +132,15 @@ public class WorkingWithNodeWsTest {
 
   /** check main elements of the AngularJS-Yeoman */
   public void checkAngularYeomanAppl() {
-    new WebDriverWait(ide.driver(), LOAD_PAGE_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
                 By.xpath("//h1[text()=\"'Allo, 'Allo!\"]")));
-    new WebDriverWait(ide.driver(), LOAD_PAGE_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
                 By.xpath("//img[@src='images/yeoman.png']")));
-    new WebDriverWait(ide.driver(), LOAD_PAGE_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOfElementLocated(By.linkText("Splendid!")))
         .click();
   }

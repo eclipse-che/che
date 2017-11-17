@@ -62,8 +62,7 @@ public class DirectUrlFactoryWithSpecificBranch {
 
   @Test
   public void factoryWithDirectUrlWithSpecificBranch() throws Exception {
-    testFactoryWithSpecificBranch.authenticateAndOpen(seleniumWebDriver);
-    seleniumWebDriver.switchFromDashboardIframeToIde();
+    testFactoryWithSpecificBranch.authenticateAndOpen();
     projectExplorer.waitProjectExplorer();
     notificationsPopupPanel.waitProgressPopupPanelClose();
     events.clickEventLogBtn();
