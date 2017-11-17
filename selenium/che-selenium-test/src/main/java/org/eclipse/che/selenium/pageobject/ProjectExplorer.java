@@ -156,7 +156,7 @@ public class ProjectExplorer {
   public void clickOnOptionsMenuItem(String menuID) {
     redrawUiElementsWait
         .until(
-            ExpectedConditions.elementToBeClickable(
+            ExpectedConditions.visibilityOfElementLocated(
                 By.xpath(String.format("//tr[@id='%s']", menuID))))
         .click();
   }
@@ -389,7 +389,7 @@ public class ProjectExplorer {
     waitItem(path, timeoutForWaitingItem);
     try {
       new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
-          .until(ExpectedConditions.elementToBeClickable(By.xpath(locator)))
+          .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)))
           .click();
     } catch (StaleElementReferenceException ex) {
       LOG.error(ex.getLocalizedMessage(), ex);
@@ -398,7 +398,7 @@ public class ProjectExplorer {
       clickOnRefreshTreeButton();
       waitItem(path);
       new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
-          .until(ExpectedConditions.elementToBeClickable(By.xpath(locator)))
+          .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)))
           .click();
     }
   }
@@ -446,9 +446,11 @@ public class ProjectExplorer {
    */
   public void scrollAndSelectItem(String path) {
     waitItem(path);
-    String locator = "//div[@path='/" + path + "']/div";
-    WebElement item = seleniumWebDriver.findElement(By.xpath(locator));
-    actionsFactory.createAction(seleniumWebDriver).moveToElement(item).click().perform();
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .moveToElement(getProjectExplorerElement(path))
+        .click()
+        .perform();
   }
 
   /**
