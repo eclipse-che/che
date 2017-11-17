@@ -14,21 +14,16 @@
  * Defines a directive for the title of list.
  * @author Florent Benoit
  */
-export class CheListTitle {
+export class CheListTitle implements ng.IDirective {
 
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor () {
-    this.restrict='E';
-    this.replace= true;
-    this.transclude= true;
-    this.templateUrl = 'components/widget/list/che-list-title.html';
+  restrict = 'E';
+  replace = true;
+  transclude = true;
+  templateUrl = 'components/widget/list/che-list-title.html';
 
-    // scope values
-    this.scope = {
-      icon:'@cheIcon'
-    };
-  }
+  // scope values
+  scope = {
+    icon: '@cheIcon'
+  };
+
 }

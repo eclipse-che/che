@@ -37,7 +37,7 @@ export class CheProfile {
 
   private profile: che.IProfile;
   private profileIdMap: Map<string, che.IProfile>;
-  private remoteProfileAPI: IProfileResource<che.IProfile>;
+  private remoteProfileAPI: any;
 
   /**
    * Default constructor that is using resource
@@ -51,7 +51,7 @@ export class CheProfile {
     this.$http = $http;
 
     // remote call
-    this.remoteProfileAPI = <IProfileResource<che.IProfile>>this.$resource('/api/profile', {}, {
+    this.remoteProfileAPI = this.$resource('/api/profile', {}, {
       getById: {method: 'GET', url: '/api/profile/:userId'},
       setAttributes: {method: 'PUT', url: '/api/profile/attributes'},
       setAttributesById: {method: 'PUT', url: '/api/profile/:userId/attributes'}
@@ -87,7 +87,7 @@ export class CheProfile {
    * Gets the profile data
    * @returns {ng.IPromise<che.IProfile>} the promise
    */
-  fetchProfile(): ng.IPromise<che.IProfile> {
+  fetchProfile(): che.IProfile {
     if (this.profile && !this.profile.$resolved) {
       return this.profile;
     }
@@ -108,13 +108,14 @@ export class CheProfile {
       if (error && error.status === 304) {
         return this.profile;
       }
-      return this.$q.reject(error);
+      return null;
     });
   }
 
   /**
    * Set the profile attributes data
-   * @param attributes {che.IProfileAttributes}
+   * @param {che.IProfileAttributes} attributes
+   * @param {string=} userId
    * @returns {ng.IPromise<any>} the promise
    */
   setAttributes(attributes: che.IProfileAttributes, userId?: string): ng.IPromise<any> {
@@ -146,7 +147,7 @@ export class CheProfile {
       if (error && error.status === 304) {
         return this.profileIdMap.get(userId);
       }
-      return this.$q.reject(error);
+      return null;
     });
   }
 

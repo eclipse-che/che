@@ -103,19 +103,28 @@ public class CommitFilesTest {
     projectExplorer.selectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
     git.clickItemCheckBoxInCommitWindow("webapp");
+    git.waitItemCheckBoxToBeIndeterminateInCommitWindow("src/main");
     git.waitItemCheckBoxToBeUnSelectedInCommitWindow(
         "webapp", "WEB-INF", "jsp", "guess_num.jsp", "web.xml", "spring-servlet.xml", "index.jsp");
 
     // select folder and check that all child nodes are also selected
     git.clickItemCheckBoxInCommitWindow("webapp");
     git.waitItemCheckBoxToBeSelectedInCommitWindow(
-        "webapp", "WEB-INF", "jsp", "guess_num.jsp", "web.xml", "spring-servlet.xml", "index.jsp");
+        "src/main",
+        "webapp",
+        "WEB-INF",
+        "jsp",
+        "guess_num.jsp",
+        "web.xml",
+        "spring-servlet.xml",
+        "index.jsp");
 
     // unselect folder, select nested file, check that all parent folders of the file are also
     // selected
     git.clickItemCheckBoxInCommitWindow("webapp");
     git.clickItemCheckBoxInCommitWindow("guess_num.jsp");
-    git.waitItemCheckBoxToBeSelectedInCommitWindow("webapp", "WEB-INF", "jsp", "guess_num.jsp");
+    git.waitItemCheckBoxToBeIndeterminateInCommitWindow("src/main", "webapp", "WEB-INF");
+    git.waitItemCheckBoxToBeSelectedInCommitWindow("jsp", "guess_num.jsp");
     git.waitItemCheckBoxToBeUnSelectedInCommitWindow("web.xml", "spring-servlet.xml", "index.jsp");
 
     // unselect nested file, check that all parent folders of the file are also unselected
@@ -127,7 +136,7 @@ public class CommitFilesTest {
     // unselected file and his folder
     git.clickItemCheckBoxInCommitWindow("webapp");
     git.clickItemCheckBoxInCommitWindow("guess_num.jsp");
-    git.waitItemCheckBoxToBeSelectedInCommitWindow("webapp", "WEB-INF");
+    git.waitItemCheckBoxToBeIndeterminateInCommitWindow("webapp", "WEB-INF");
     git.waitItemCheckBoxToBeUnSelectedInCommitWindow("jsp", "guess_num.jsp");
     git.waitItemCheckBoxToBeSelectedInCommitWindow("web.xml", "spring-servlet.xml", "index.jsp");
 

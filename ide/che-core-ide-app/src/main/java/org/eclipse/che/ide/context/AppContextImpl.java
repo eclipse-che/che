@@ -80,7 +80,7 @@ public class AppContextImpl implements AppContext, SelectionChangedHandler, Reso
   private final ResourceManager.ResourceManagerFactory resourceManagerFactory;
   private final Provider<EditorAgent> editorAgentProvider;
   private final Provider<AppStateManager> appStateManager;
-  private final WsAgentServerUtil wsAgentServerUtil;
+  private final Provider<WsAgentServerUtil> wsAgentServerUtilProvider;
 
   private final List<Project> rootProjects = newArrayList();
   private final List<Resource> selectedResources = newArrayList();
@@ -107,12 +107,12 @@ public class AppContextImpl implements AppContext, SelectionChangedHandler, Reso
       ResourceManager.ResourceManagerFactory resourceManagerFactory,
       Provider<EditorAgent> editorAgentProvider,
       Provider<AppStateManager> appStateManager,
-      WsAgentServerUtil wsAgentServerUtil) {
+      Provider<WsAgentServerUtil> wsAgentServerUtilProvider) {
     this.eventBus = eventBus;
     this.resourceManagerFactory = resourceManagerFactory;
     this.editorAgentProvider = editorAgentProvider;
     this.appStateManager = appStateManager;
-    this.wsAgentServerUtil = wsAgentServerUtil;
+    this.wsAgentServerUtilProvider = wsAgentServerUtilProvider;
     this.startAppActions = new ArrayList<>();
 
     projectsInImport = new ArrayList<>();
@@ -424,7 +424,7 @@ public class AppContextImpl implements AppContext, SelectionChangedHandler, Reso
 
   @Override
   public String getWsAgentServerApiEndpoint() {
-    Optional<ServerImpl> server = wsAgentServerUtil.getWsAgentHttpServer();
+    Optional<ServerImpl> server = wsAgentServerUtilProvider.get().getWsAgentHttpServer();
 
     if (server.isPresent()) {
       return server.get().getUrl();

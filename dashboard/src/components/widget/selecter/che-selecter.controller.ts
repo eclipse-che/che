@@ -9,6 +9,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import {ICheSelecterScope} from './che-selecter.directive';
 
 /**
  * This class is handling the controller for the selecter
@@ -16,21 +17,25 @@
  */
 export class CheSelecterCtrl {
 
+  $scope: ICheSelecterScope;
+
+  globalSelecterName: string;
+  selectedValuesByKey: Map<string, any>;
+
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($scope) {
+  constructor($scope: ICheSelecterScope) {
     this.$scope = $scope;
     this.globalSelecterName = 'unknown';
     this.selectedValuesByKey = new Map();
   }
 
-
   /**
    * perform sharing state in an upper scope as it may be shared
    */
-  select(globalSelecterName, name) {
+  select(globalSelecterName: string, name: string): void {
     this.globalSelecterName = globalSelecterName;
     this.$scope.$parent.$parent[globalSelecterName + '.selecterSelected'] = name;
 
@@ -49,21 +54,19 @@ export class CheSelecterCtrl {
 
   /**
    * Sets the default type for the given category
-   * @param category the category to use
-   * @param types the available types
+   * @param {string} key
+   * @param values
    */
-  initType(key, values) {
+  initType(key: string, values: any): void {
     // set with first value
     this.selectedValuesByKey.set(key, values[0].id);
-
   }
 
   /**
    * Event when select operation is called
-   * @param category the key of t
-   * @param values
+   * @param {string} key
    */
-  onChangeType(key) {
+  onChangeType(key: string): void {
 
     // look at the model and define the value
     if (this.$scope.valueModel) {

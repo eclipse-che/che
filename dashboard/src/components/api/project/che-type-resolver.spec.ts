@@ -273,6 +273,7 @@ describe('CheTypeResolver', () => {
           path: '/test-application',
           type: 'blank',
           description: 'A hello world test application.',
+          source: {} as che.IProjectSource,
           attributes: {}
         }
       };
