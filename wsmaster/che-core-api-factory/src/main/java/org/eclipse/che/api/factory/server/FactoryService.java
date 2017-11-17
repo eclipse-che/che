@@ -184,7 +184,11 @@ public class FactoryService extends Service {
     value =
         "Get factory by attribute, "
             + "the attribute must match one of the Factory model fields with type 'String', "
-            + "e.g. (factory.name, factory.creator.name)",
+            + "e.g. (factory.name, factory.creator.name)"
+            + " This method is going to be deprecated or limited in scope in 6.0 GA "
+            + "since it's not optimized on backend performance. "
+            +"Expected parameters creator.userId=? or name=?."
+      ,
     notes =
         "If specify more than one value for a single query parameter then will be taken the first one"
   )
@@ -196,6 +200,7 @@ public class FactoryService extends Service {
     ),
     @ApiResponse(code = 500, message = "Internal server error")
   })
+  @Deprecated
   public List<FactoryDto> getFactoryByAttribute(
       @DefaultValue("0") @QueryParam("skipCount") Integer skipCount,
       @DefaultValue("30") @QueryParam("maxItems") Integer maxItems,
@@ -210,6 +215,19 @@ public class FactoryService extends Service {
             .map(entry -> Pair.of(entry.getKey(), entry.getValue().iterator().next()))
             .collect(toList());
     checkArgument(!query.isEmpty(), "Query must contain at least one attribute");
+
+    for (Pair<String, String> pair : query) {
+      if (!pair.first.equals("creator.userId") && !pair.first.equals("name")) {
+        LOG.warn(
+            "Method factory.find is going to be removed or limited in scope in 6.0 GA."
+                + " Requested attributes {}, skipCount {}, maxItems {}",
+            query,
+            skip,
+            maxItems);
+        break;
+      }
+    }
+
     final List<FactoryDto> factories = new ArrayList<>();
     for (Factory factory : factoryManager.getByAttribute(maxItems, skipCount, query)) {
       factories.add(injectLinks(asDto(factory)));
