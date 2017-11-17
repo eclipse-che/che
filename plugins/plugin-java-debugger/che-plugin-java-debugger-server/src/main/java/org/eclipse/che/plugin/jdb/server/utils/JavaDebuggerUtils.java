@@ -183,7 +183,7 @@ public class JavaDebuggerUtils {
     }
 
     if (fqn == null) {
-      throw new DebuggerException("Unable to calculate breakpoint location");
+      return location.getTarget();
     }
 
     IType outerClass;
