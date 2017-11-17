@@ -29,7 +29,6 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.git.Git;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.openqa.selenium.Keys;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -111,7 +110,7 @@ public class NavigateToFileTest {
       String inputValueForChecking, Map<Integer, String> expectedValues) {
     // Open the project one and check function 'Navigate To File'
     launchNavigateToFileAndCheckResults(inputValueForChecking, expectedValues, 1);
-   // launchNavigateToFileAndCheckResults(inputValueForChecking, expectedValues, 1);
+    // launchNavigateToFileAndCheckResults(inputValueForChecking, expectedValues, 1);
     //    selectFileFromNavigate("i", FILE_JAVA + PATH_TO_JAVA_FILE, FILES_I_SYMBOL);
     //    selectFileFromNavigate("R", FILE_JAVA + PATH_TO_JAVA_FILE, FILES_R_SYMBOL);
 
@@ -211,11 +210,11 @@ public class NavigateToFileTest {
     // extract the path (without opened class)
     String pathFromDropDawnForChecking = expectedItems.get(numValueFromDropDawnList).split(" ")[1];
 
-
-    String nameOfTheOpenedFileWithExtension = expectedItems.get(numValueFromDropDawnList).split(" ")[0];
+    String nameOfTheOpenedFileWithExtension =
+        expectedItems.get(numValueFromDropDawnList).split(" ")[0];
 
     // extract the name of opened files that display in a tab (the ".java" extension are not shown in tabs)
-    String nameOfTheOpenedFileInTheTab = nameOfTheOpenedFileWithExtension.replace(".java","");
+    String nameOfTheOpenedFileInTheTab = nameOfTheOpenedFileWithExtension.replace(".java", "");
 
     loader.waitOnClosed();
     menu.runCommand(
@@ -306,19 +305,19 @@ public class NavigateToFileTest {
         ImmutableMap.of(
             1, "AppController.java (/NavigateFile/src/main/java/org/eclipse/qa/examples)",
             2, "AppController.java (/NavigateFile_2/src/main/java/org/eclipse/qa/examples)")
+      },
+      {
+        "i",
+        ImmutableMap.of(
+            1, "index.jsp (/NavigateFile/src/main/webapp)",
+            2, "index.jsp (/NavigateFile_2/src/main/webapp)")
+      },
+      {
+        "R",
+        ImmutableMap.of(
+            1, "README.md (/NavigateFile)",
+            2, "README.md (/NavigateFile_2)")
       }
-//      {
-//        "i",
-//        ImmutableMap.of(
-//            1, "AppController.java (/NavigateFile/src/main/java/org/eclipse/qa/examples)",
-//            2, "AppController.java (/NavigateFile_2/src/main/java/org/eclipse/qa/examples)")
-//      },
-//      {
-//        "p",
-//        ImmutableMap.of(
-//            1, "AppController.java (/NavigateFile/src/main/java/org/eclipse/qa/examples)",
-//            2, "AppController.java (/NavigateFile_2/src/main/java/org/eclipse/qa/examples)")
-//      }
     };
   }
 }
