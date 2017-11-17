@@ -14,16 +14,17 @@ import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
-import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_WEBSOCKET_REFERENCE;
 import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 
 import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
+import java.util.Optional;
 import java.util.Set;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
 import org.eclipse.che.ide.api.workspace.event.WsAgentServerRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.WsAgentServerStoppedEvent;
 import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
@@ -40,6 +41,7 @@ public class WsAgentJsonRpcInitializer {
   private final JsonRpcInitializer initializer;
   private final RequestTransmitter requestTransmitter;
   private final AgentURLModifier agentURLModifier;
+  private final WsAgentServerUtil wsAgentServerUtil;
 
   @Inject
   public WsAgentJsonRpcInitializer(
@@ -47,11 +49,13 @@ public class WsAgentJsonRpcInitializer {
       AppContext appContext,
       EventBus eventBus,
       RequestTransmitter requestTransmitter,
-      AgentURLModifier agentURLModifier) {
+      AgentURLModifier agentURLModifier,
+      WsAgentServerUtil wsAgentServerUtil) {
     this.appContext = appContext;
     this.initializer = initializer;
     this.requestTransmitter = requestTransmitter;
     this.agentURLModifier = agentURLModifier;
+    this.wsAgentServerUtil = wsAgentServerUtil;
 
     eventBus.addHandler(WsAgentServerRunningEvent.TYPE, event -> initializeJsonRpcService());
     eventBus.addHandler(
@@ -93,31 +97,22 @@ public class WsAgentJsonRpcInitializer {
       return; // workspace is stopped
     }
 
-    runtime
-        .getDevMachine()
+    wsAgentServerUtil
+        .getWsAgentWebSocketServer()
         .ifPresent(
-            devMachine -> {
-              devMachine
-                  .getServerByName(SERVER_WS_AGENT_WEBSOCKET_REFERENCE)
-                  .ifPresent(
-                      server -> {
-                        String wsAgentWebSocketUrl = agentURLModifier.modify(server.getUrl());
-                        String separator = wsAgentWebSocketUrl.contains("?") ? "&" : "?";
-                        String queryParams =
-                            appContext
-                                .getApplicationWebsocketId()
-                                .map(id -> separator + "clientId=" + id)
-                                .orElse("");
-                        Set<Runnable> initActions =
-                            appContext.getApplicationWebsocketId().isPresent()
-                                ? emptySet()
-                                : singleton(this::processWsId);
+            server -> {
+              String wsAgentWebSocketUrl = agentURLModifier.modify(server.getUrl());
+              String separator = wsAgentWebSocketUrl.contains("?") ? "&" : "?";
+              Optional<String> applicationWebSocketId = appContext.getApplicationWebsocketId();
+              String queryParams =
+                  applicationWebSocketId.map(id -> separator + "clientId=" + id).orElse("");
+              Set<Runnable> initActions =
+                  applicationWebSocketId.isPresent() ? emptySet() : singleton(this::processWsId);
 
-                        initializer.initialize(
-                            WS_AGENT_JSON_RPC_ENDPOINT_ID,
-                            singletonMap("url", wsAgentWebSocketUrl + queryParams),
-                            initActions);
-                      });
+              initializer.initialize(
+                  WS_AGENT_JSON_RPC_ENDPOINT_ID,
+                  singletonMap("url", wsAgentWebSocketUrl + queryParams),
+                  initActions);
             });
   }
 

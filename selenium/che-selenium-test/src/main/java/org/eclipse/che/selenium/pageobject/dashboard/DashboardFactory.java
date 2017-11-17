@@ -40,7 +40,8 @@ public class DashboardFactory {
     WORKSPACES("Workspace"),
     CONFIG_FILE("Config File"),
     TEMPLATE("Template");
-    private String type;
+
+    private final String type;
 
     SourcesTypes(String type) {
       this.type = type;
