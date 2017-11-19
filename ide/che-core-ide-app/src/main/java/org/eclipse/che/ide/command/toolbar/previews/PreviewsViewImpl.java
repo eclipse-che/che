@@ -20,7 +20,7 @@ import com.google.inject.Singleton;
 import elemental.dom.Element;
 import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
 import org.eclipse.che.ide.command.toolbar.ToolbarMessages;
 import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.ui.dropdown.BaseListItem;
@@ -38,14 +38,14 @@ public class PreviewsViewImpl implements PreviewsView {
   private final NoPreviewsItem noPreviewsItem;
   private final NoPreviewsItemRenderer noPreviewsItemRenderer;
   private final ToolbarMessages messages;
-  private final AppContext appContext;
+  private final WsAgentServerUtil wsAgentServerUtil;
 
   private ActionDelegate delegate;
 
   @Inject
-  public PreviewsViewImpl(ToolbarMessages messages, AppContext appContext) {
+  public PreviewsViewImpl(ToolbarMessages messages, WsAgentServerUtil wsAgentServerUtil) {
     this.messages = messages;
-    this.appContext = appContext;
+    this.wsAgentServerUtil = wsAgentServerUtil;
 
     listItems = new HashMap<>();
 
@@ -93,7 +93,7 @@ public class PreviewsViewImpl implements PreviewsView {
       return;
     }
 
-    final PreviewUrl displayablePreviewUrl = new PreviewUrl(previewUrl, appContext);
+    final PreviewUrl displayablePreviewUrl = new PreviewUrl(previewUrl, wsAgentServerUtil);
     final BaseListItem<PreviewUrl> listItem = new BaseListItem<>(displayablePreviewUrl);
     final PreviewUrlItemRenderer renderer = new PreviewUrlItemRenderer(listItem);
 

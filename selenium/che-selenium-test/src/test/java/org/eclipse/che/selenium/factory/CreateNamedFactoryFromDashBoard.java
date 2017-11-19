@@ -75,7 +75,7 @@ public class CreateNamedFactoryFromDashBoard {
 
   @Test
   public void createFactoryFromDashBoard() throws ExecutionException, InterruptedException {
-    String currentWin = ide.driver().getWindowHandle();
+    String currentWin = seleniumWebDriver.getWindowHandle();
     dashboard.open();
     dashboardFactory.selectFactoryOnNavBar();
     dashboardFactory.waitAllFactoriesPage();

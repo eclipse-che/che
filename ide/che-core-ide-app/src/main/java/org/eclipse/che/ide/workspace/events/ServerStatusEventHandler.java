@@ -15,7 +15,6 @@ import static org.eclipse.che.api.core.model.workspace.runtime.ServerStatus.STOP
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_EXEC_AGENT_HTTP_REFERENCE;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_STATUS_CHANGED_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_TERMINAL_REFERENCE;
-import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -23,6 +22,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.workspace.shared.dto.event.ServerStatusEvent;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
 import org.eclipse.che.ide.api.workspace.event.ExecAgentServerRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.ExecAgentServerStoppedEvent;
 import org.eclipse.che.ide.api.workspace.event.ServerRunningEvent;
@@ -45,16 +45,19 @@ class ServerStatusEventHandler {
   private final WorkspaceServiceClient workspaceServiceClient;
   private final AppContext appContext;
   private final EventBus eventBus;
+  private final WsAgentServerUtil wsAgentServerUtil;
 
   @Inject
   ServerStatusEventHandler(
       RequestHandlerConfigurator configurator,
       WorkspaceServiceClient workspaceServiceClient,
       AppContext appContext,
-      EventBus eventBus) {
+      EventBus eventBus,
+      WsAgentServerUtil wsAgentServerUtil) {
     this.workspaceServiceClient = workspaceServiceClient;
     this.appContext = appContext;
     this.eventBus = eventBus;
+    this.wsAgentServerUtil = wsAgentServerUtil;
 
     configurator
         .newConfiguration()
@@ -78,12 +81,14 @@ class ServerStatusEventHandler {
               // Because AppContext always must return an actual workspace model.
               ((AppContextImpl) appContext).setWorkspace(workspace);
 
+              String wsAgentHttpServerRef = wsAgentServerUtil.getWsAgentHttpServerReference();
+
               if (event.getStatus() == RUNNING) {
                 eventBus.fireEvent(
                     new ServerRunningEvent(event.getServerName(), event.getMachineName()));
 
                 // fire events for the often used servers
-                if (SERVER_WS_AGENT_HTTP_REFERENCE.equals(event.getServerName())) {
+                if (wsAgentHttpServerRef.equals(event.getServerName())) {
                   eventBus.fireEvent(new WsAgentServerRunningEvent(event.getMachineName()));
                 } else if (SERVER_TERMINAL_REFERENCE.equals(event.getServerName())) {
                   eventBus.fireEvent(new TerminalAgentServerRunningEvent(event.getMachineName()));
@@ -95,7 +100,7 @@ class ServerStatusEventHandler {
                     new ServerStoppedEvent(event.getServerName(), event.getMachineName()));
 
                 // fire events for the often used servers
-                if (SERVER_WS_AGENT_HTTP_REFERENCE.equals(event.getServerName())) {
+                if (wsAgentHttpServerRef.equals(event.getServerName())) {
                   eventBus.fireEvent(new WsAgentServerStoppedEvent(event.getMachineName()));
                 } else if (SERVER_TERMINAL_REFERENCE.equals(event.getServerName())) {
                   eventBus.fireEvent(new TerminalAgentServerStoppedEvent(event.getMachineName()));

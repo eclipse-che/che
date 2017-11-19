@@ -39,11 +39,11 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 public class WorkspaceValidator {
 
   /**
-   * Must contain [3, 20] characters, first and last character is letter or digit, available
+   * Must contain [3, 100] characters, first and last character is letter or digit, available
    * characters {A-Za-z0-9.-_}.
    */
   private static final Pattern WS_NAME =
-      Pattern.compile("[a-zA-Z0-9][-_.a-zA-Z0-9]{1,18}[a-zA-Z0-9]");
+      Pattern.compile("[a-zA-Z0-9][-_.a-zA-Z0-9]{1,98}[a-zA-Z0-9]");
 
   private final WorkspaceRuntimes runtimes;
 
@@ -69,7 +69,7 @@ public class WorkspaceValidator {
     checkNotNull(config.getName(), "Workspace name required");
     check(
         WS_NAME.matcher(config.getName()).matches(),
-        "Incorrect workspace name, it must be between 3 and 20 characters and may contain digits, "
+        "Incorrect workspace name, it must be between 3 and 100 characters and may contain digits, "
             + "latin letters, underscores, dots, dashes and must start and end only with digits, "
             + "latin letters or underscores");
 

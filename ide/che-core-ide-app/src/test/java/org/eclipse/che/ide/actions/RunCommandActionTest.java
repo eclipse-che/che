@@ -22,12 +22,11 @@ import java.util.Collections;
 import java.util.Optional;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
-import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,7 +46,7 @@ public class RunCommandActionTest {
   @Mock private CoreLocalizationConstant locale;
   @Mock private ActionEvent event;
   @Mock private CommandImpl command;
-  @Mock private AppContext appContext;
+  @Mock private WsAgentServerUtil wsAgentServerUtil;
 
   @InjectMocks private RunCommandAction action;
 
@@ -68,10 +67,8 @@ public class RunCommandActionTest {
   public void actionShouldBePerformed() {
     when(event.getParameters()).thenReturn(Collections.singletonMap(NAME_PROPERTY, "MCI"));
 
-    WorkspaceImpl workspace = mock(WorkspaceImpl.class);
     MachineImpl machine = mock(MachineImpl.class);
-    when(workspace.getDevMachine()).thenReturn(Optional.of(machine));
-    when(appContext.getWorkspace()).thenReturn(workspace);
+    when(wsAgentServerUtil.getWsAgentServerMachine()).thenReturn(Optional.of(machine));
 
     action.actionPerformed(event);
 

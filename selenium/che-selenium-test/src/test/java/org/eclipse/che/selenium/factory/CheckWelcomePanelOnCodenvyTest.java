@@ -47,7 +47,8 @@ public class CheckWelcomePanelOnCodenvyTest {
   @BeforeClass
   public void setUp() throws Exception {
     String urlToContentWelcomePanel = "https://codenvy.io/docs/admin-guide/runbook/index.html";
-    webDriverWait = new WebDriverWait(ide.driver(), TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC);
+    webDriverWait =
+        new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC);
     TestFactoryInitializer.TestFactoryBuilder factoryBuilder =
         testFactoryInitializer.fromTemplate(FactoryTemplate.MINIMAL);
     factoryBuilder.withIde(

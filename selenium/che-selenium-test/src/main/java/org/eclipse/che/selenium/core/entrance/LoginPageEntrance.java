@@ -35,6 +35,7 @@ public class LoginPageEntrance implements Entrance {
    *
    * @param user
    */
+  @Override
   public void login(TestUser user) {
     if (loginPage.isOpened()) {
       loginPage.login(user.getName(), user.getPassword());

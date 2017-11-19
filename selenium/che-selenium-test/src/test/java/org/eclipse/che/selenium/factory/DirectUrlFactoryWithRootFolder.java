@@ -82,10 +82,7 @@ public class DirectUrlFactoryWithRootFolder {
             "tslint.json",
             "typings.json",
             "wallaby.js");
-
-    dashboard.open();
-    testFactoryWithRootFolder.open(seleniumWebDriver);
-    seleniumWebDriver.switchFromDashboardIframeToIde();
+    testFactoryWithRootFolder.authenticateAndOpen();
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(EXPECTED_PROJECT);
     notificationsPopupPanel.waitProgressPopupPanelClose();

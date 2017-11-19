@@ -14,12 +14,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.factory.FactoryTemplate;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
 import org.eclipse.che.selenium.pageobject.Events;
-import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
@@ -31,7 +29,6 @@ import org.testng.annotations.Test;
 public class CheckFactoryWithSparseCheckoutTest {
   private static final String PROJECT_NAME = "java-multimodule2";
 
-  @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private Events events;
@@ -42,7 +39,6 @@ public class CheckFactoryWithSparseCheckoutTest {
   private String gitHubUsername;
 
   @Inject private TestFactoryInitializer testFactoryInitializer;
-  @Inject private SeleniumWebDriver seleniumWebDriver;
 
   private TestFactory testFactory;
 
@@ -67,10 +63,7 @@ public class CheckFactoryWithSparseCheckoutTest {
 
   @Test
   public void acceptFactoryWithSparseCheckout() throws Exception {
-    dashboard.open();
-    testFactory.open(seleniumWebDriver);
-
-    seleniumWebDriver.switchFromDashboardIframeToIde();
+    testFactory.authenticateAndOpen();
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
 
