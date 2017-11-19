@@ -121,7 +121,7 @@ public class FailParametersTest {
     return result;
   }
 
-  private class TestParams {
+  private static class TestParams {
     private String nameTest;
     private int strCursorPosition;
     private int lineCursorPosition;

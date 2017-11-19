@@ -12,7 +12,6 @@ package org.eclipse.che.selenium.pageobject.debug;
 
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
@@ -33,7 +32,6 @@ public abstract class AbstractDebugConfig {
 
   protected final SeleniumWebDriver seleniumWebDriver;
 
-  @Inject
   public AbstractDebugConfig(SeleniumWebDriver seleniumWebDriver) {
     this.seleniumWebDriver = seleniumWebDriver;
     PageFactory.initElements(seleniumWebDriver, this);

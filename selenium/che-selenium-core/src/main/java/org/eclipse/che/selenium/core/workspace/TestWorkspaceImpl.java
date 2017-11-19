@@ -95,6 +95,7 @@ public class TestWorkspaceImpl implements TestWorkspace {
 
   @PreDestroy
   @Override
+  @SuppressWarnings("FutureReturnValueIgnored")
   public void delete() {
     future.thenAccept(
         aVoid -> {
