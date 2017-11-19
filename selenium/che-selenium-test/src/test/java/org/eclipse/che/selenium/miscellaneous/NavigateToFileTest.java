@@ -46,33 +46,8 @@ import org.testng.annotations.Test;
 public class NavigateToFileTest {
   private static final String PROJECT_NAME = "NavigateFile";
   private static final String PROJECT_NAME_2 = "NavigateFile_2";
-  private static final String PATH_TO_JAVA_FILE =
-      "(/NavigateFile/src/main/java/org/eclipse/qa/examples)";
-  private static final String PATH_TO_JSP_FILE = "(/NavigateFile/src/main/webapp)";
-  private static final String PATH_TO_README_FILE = "(/NavigateFile)";
-  private static final String PATH_2_TO_JAVA_FILE =
-      "(/NavigateFile_2/src/main/java/org/eclipse/qa/examples)";
-  private static final String PATH_2_TO_JSP_FILE = "(/NavigateFile_2/src/main/webapp)";
-  private static final String PATH_2_TO_README_FILE = "(/NavigateFile_2)";
-  private static final String FILE_JAVA = "AppController.java";
-  private static final String FILE_XML = "pom.xml";
-  private static final String FILE_README = "README.md";
-  private static final String FILE_JSP = "index.jsp";
-  private static final String FILE_CREATED_FROM_API = "createdFrom.api";
   private static final String FILE_CREATED_FROM_CONSOLE = "createdFrom.con";
   private static final String COMMAND_FOR_FILE_CREATION = "create-file";
-  private static final List<String> FILES_P_SYMBOL =
-      Arrays.asList("pom.xml (/NavigateFile_2)", "pom.xml (/NavigateFile)");
-  private static final List<String> FILES_I_SYMBOL =
-      Arrays.asList(
-          "index.jsp (/NavigateFile/src/main/webapp)",
-          "index.jsp (/NavigateFile_2/src/main/webapp)");
-  private static final List<String> FILES_R_SYMBOL =
-      Arrays.asList("README.md (/NavigateFile)", "README.md (/NavigateFile_2)");
-  private static final List<String> FILES_C_SYMBOL =
-      Arrays.asList(
-          "classpath (/NavigateFile_2/.che)", "classpath (/NavigateFile/.che)",
-          "createdFrom.con (/NavigateFile_2)", "createdFrom.api (/NavigateFile)");
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
@@ -199,53 +174,6 @@ public class NavigateToFileTest {
     expectedItems.forEach((k, v) -> navigateToFile.waitListOfFilesNames(v.toString()));
   }
 
-  // --------------------------------------------------------
-
-  private void selectFileFromNavigate(String symbol, String path, List<String> files) {
-    loader.waitOnClosed();
-    menu.runCommand(
-        TestMenuCommandsConstants.Assistant.ASSISTANT,
-        TestMenuCommandsConstants.Assistant.NAVIGATE_TO_FILE);
-    navigateToFile.waitFormToOpen();
-    loader.waitOnClosed();
-    navigateToFile.typeSymbolInFileNameField(symbol);
-    loader.waitOnClosed();
-    navigateToFile.waitFileNamePopUp();
-    for (String listFiles : files) {
-      navigateToFile.waitListOfFilesNames(listFiles);
-    }
-    navigateToFile.selectFileByFullName(path);
-  }
-
-  private void typeStringToNavigateFieldAndCheckResult(String symbol, String pathName) {
-    navigateToFile.waitFormToOpen();
-    loader.waitOnClosed();
-    navigateToFile.typeSymbolInFileNameField(symbol);
-
-    //    typeStringToNavigateFieldAndCheckResult()
-  }
-
-  private void selectFileFromNavigateLaunchByKeyboard(
-      String symbol, String pathName, List<String> expectedMatchedItems) {
-    loader.waitOnClosed();
-    navigateToFile.launchNavigateToFileByKeyboard();
-    navigateToFile.waitFormToOpen();
-    loader.waitOnClosed();
-    navigateToFile.typeSymbolInFileNameField(symbol);
-    loader.waitOnClosed();
-    navigateToFile.waitFileNamePopUp();
-    for (String item : expectedMatchedItems) {
-      navigateToFile.waitListOfFilesNames(item);
-    }
-    navigateToFile.selectFileByFullName(pathName);
-    navigateToFile.waitFormToClose();
-  }
-
-  private void createFileFromAPI(String path, String fileName, String content) throws Exception {
-    testProjectServiceClient.createFileInProject(workspace.getId(), path, fileName, content);
-  }
-
-  private void createFileByCommand(String projectName, String fileName) {}
 
   @DataProvider
   private Object[][] dataForCheckingTheSameFileInDifferentProjects() {
