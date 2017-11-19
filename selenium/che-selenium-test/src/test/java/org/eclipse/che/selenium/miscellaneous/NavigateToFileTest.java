@@ -10,10 +10,19 @@
  */
 package org.eclipse.che.selenium.miscellaneous;
 
+import static java.lang.Math.random;
+import static org.testng.AssertJUnit.assertFalse;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
-
+import java.net.URL;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import org.eclipse.che.selenium.core.constant.TestCommandsConstants;
 import org.eclipse.che.selenium.core.constant.TestGitConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
@@ -27,19 +36,11 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NavigateToFile;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.git.Git;
+import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
-import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import java.net.URL;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
-import static org.testng.AssertJUnit.assertFalse;
 
 /** Created by aleksandr shmaraev on 10.12.15 */
 public class NavigateToFileTest {
@@ -59,7 +60,7 @@ public class NavigateToFileTest {
   private static final String FILE_JSP = "index.jsp";
   private static final String FILE_CREATED_FROM_API = "createdFrom.api";
   private static final String FILE_CREATED_FROM_CONSOLE = "createdFrom.con";
-
+  private static final String COMMAND_FOR_FILE_CREATION = "create-file";
   private static final List<String> FILES_P_SYMBOL =
       Arrays.asList("pom.xml (/NavigateFile_2)", "pom.xml (/NavigateFile)");
   private static final List<String> FILES_I_SYMBOL =
@@ -84,6 +85,8 @@ public class NavigateToFileTest {
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private Git git;
   @Inject private AskDialog askDialog;
+  @Inject private TestCommandServiceClient testCommandServiceClient;
+  @Inject private CommandsPalette commandsPalette;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -99,6 +102,11 @@ public class NavigateToFileTest {
         Paths.get(resource.toURI()),
         PROJECT_NAME_2,
         ProjectTemplates.MAVEN_SIMPLE);
+    testCommandServiceClient.createCommand(
+        "cd " + "/projects/" + PROJECT_NAME_2 + "&& touch " + FILE_CREATED_FROM_CONSOLE,
+        COMMAND_FOR_FILE_CREATION,
+        TestCommandsConstants.CUSTOM,
+        workspace.getId());
     ide.open(workspace);
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
@@ -110,74 +118,29 @@ public class NavigateToFileTest {
       String inputValueForChecking, Map<Integer, String> expectedValues) {
     // Open the project one and check function 'Navigate To File'
     launchNavigateToFileAndCheckResults(inputValueForChecking, expectedValues, 1);
-    // launchNavigateToFileAndCheckResults(inputValueForChecking, expectedValues, 1);
-    //    selectFileFromNavigate("i", FILE_JAVA + PATH_TO_JAVA_FILE, FILES_I_SYMBOL);
-    //    selectFileFromNavigate("R", FILE_JAVA + PATH_TO_JAVA_FILE, FILES_R_SYMBOL);
-
-    //    editor.waitTabIsPresent("qa-spring-sample");
-    //    editor.waitActiveEditor();
-    //    editor.closeFileByNameWithSaving("qa-spring-sample");
-    //    editor.waitWhileFileIsClosed("qa-spring-sample");
-    //    selectFileFromNavigate("i", FILE_JSP + PATH_TO_JSP_FILE);
-    //    editor.waitTabIsPresent("index.jsp");
-    //    editor.waitActiveEditor();
-    //    editor.closeFileByNameWithSaving("index.jsp");
-    //    editor.waitWhileFileIsClosed("index.jsp");
-    //    selectFileFromNavigateLaunchByKeyboard("R", FILE_README + PATH_TO_README_FILE);
-    //    editor.waitTabIsPresent("README.md");
-    //    editor.waitActiveEditor();
-    //    editor.closeFileByNameWithSaving("README.md");
-    //    editor.waitWhileFileIsClosed("README.md");
-    //    loader.waitOnClosed();
-
-    //    // Open the project two and check function 'Navigate To File'
-    //    projectExplorer.waitItem(PROJECT_NAME_2);
-    //    projectExplorer.openItemByPath(PROJECT_NAME_2);
-    //    //    selectFileFromNavigate("A", FILE_JAVA + PATH_2_TO_JAVA_FILE, FILES_A_SYMBOL);
-    //    editor.waitTabIsPresent("AppController");
-    //    editor.waitActiveEditor();
-    //    selectFileFromNavigate("p", FILE_XML + PATH_2_TO_README_FILE, FILES_P_SYMBOL);
-    //    editor.waitTabIsPresent("qa-spring-sample");
-    //    editor.waitActiveEditor();
-    //    selectFileFromNavigate("i", FILE_JSP + PATH_2_TO_JSP_FILE);
-    //    editor.waitTabIsPresent("index.jsp");
-    //    editor.waitActiveEditor();
-    //    //  selectFileFromNavigateLaunchByKeyboard("R", FILE_README + PATH_2_TO_README_FILE);
-    //    editor.waitTabIsPresent("README.md");
-    //    editor.waitActiveEditor();
-    //    editor.closeAllTabsByContextMenu();
-    //
-    //    // Check that form is closed by pressing ESC button
-    //    menu.runCommand(
-    //        TestMenuCommandsConstants.Assistant.ASSISTANT,
-    //        TestMenuCommandsConstants.Assistant.NAVIGATE_TO_FILE);
-    //    navigateToFile.waitFormToOpen();
-    //    navigateToFile.closeNavigateToFileForm();
-    //    navigateToFile.waitFormToClose();
   }
 
-  // @Test
-  public void checkNavigateToFileFunctionWithJustCreatedFiles() throws Exception {
+  @Test(dataProvider = "dataForSearching")
+  public void checkNavigateToFileWitSecondProject(
+      String inputValueForChecking, Map<Integer, String> expectedValues) {
+    launchNavigateToFileAndCheckResults(inputValueForChecking, expectedValues, 2);
+  }
+
+  @Test(dataProvider = "dataForCheckingFilesCreatedWithoutIDE")
+  public void checkNavigateToFileFunctionWithJustCreatedFiles(
+      String inputValueForChecking, Map<Integer, String> expectedValues) throws Exception {
+    final int maxTimeoutForUpdatingIndexes = 10;
     String content = "NavigateToFileTest";
-
-    projectExplorer.waitProjectExplorer();
-    projectExplorer.waitItem(PROJECT_NAME);
-    createFileFromAPI(PROJECT_NAME, FILE_CREATED_FROM_API, content);
-    terminal.waitTerminalTab();
-    terminal.selectTerminalTab();
-    createFileInTerminal(PROJECT_NAME_2, FILE_CREATED_FROM_CONSOLE);
-    WaitUtils.sleepQuietly(10);
-    selectFileFromNavigate("c", FILE_CREATED_FROM_API + PATH_TO_README_FILE, FILES_C_SYMBOL);
-    editor.waitTabIsPresent(FILE_CREATED_FROM_API);
-    editor.waitActiveEditor();
-    editor.closeFileByNameWithSaving(FILE_CREATED_FROM_API);
-    selectFileFromNavigate("c", FILE_CREATED_FROM_CONSOLE + PATH_2_TO_README_FILE, FILES_C_SYMBOL);
-    editor.waitTabIsPresent(FILE_CREATED_FROM_CONSOLE);
-    editor.waitActiveEditor();
-    editor.closeFileByNameWithSaving(FILE_CREATED_FROM_CONSOLE);
+    testProjectServiceClient.createFileInProject(
+        workspace.getId(), PROJECT_NAME, expectedValues.get(1).split(" ")[0], content);
+    commandsPalette.openCommandPalette();
+    commandsPalette.startCommandByDoubleClick(COMMAND_FOR_FILE_CREATION);
+    WaitUtils.sleepQuietly(maxTimeoutForUpdatingIndexes);
+    int randomItemFromList = (int) random() * 2 + 1;
+    launchNavigateToFileAndCheckResults(inputValueForChecking, expectedValues, randomItemFromList);
   }
 
-  // @Test
+  @Test
   public void checkNavigateToFileFunctionWithFilesFromHiddenFolders() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
@@ -213,7 +176,8 @@ public class NavigateToFileTest {
     String nameOfTheOpenedFileWithExtension =
         expectedItems.get(numValueFromDropDawnList).split(" ")[0];
 
-    // extract the name of opened files that display in a tab (the ".java" extension are not shown in tabs)
+    // extract the name of opened files that display in a tab (the ".java" extension are not shown
+    // in tabs)
     String nameOfTheOpenedFileInTheTab = nameOfTheOpenedFileWithExtension.replace(".java", "");
 
     loader.waitOnClosed();
@@ -253,14 +217,6 @@ public class NavigateToFileTest {
     navigateToFile.selectFileByFullName(path);
   }
 
-  private void selectFileFromNavigate(String symbol, String pathName) {
-    loader.waitOnClosed();
-    menu.runCommand(
-        TestMenuCommandsConstants.Assistant.ASSISTANT,
-        TestMenuCommandsConstants.Assistant.NAVIGATE_TO_FILE);
-    typeStringToNavigateFieldAndCheckResult(symbol, pathName);
-  }
-
   private void typeStringToNavigateFieldAndCheckResult(String symbol, String pathName) {
     navigateToFile.waitFormToOpen();
     loader.waitOnClosed();
@@ -289,16 +245,10 @@ public class NavigateToFileTest {
     testProjectServiceClient.createFileInProject(workspace.getId(), path, fileName, content);
   }
 
-  private void createFileInTerminal(String projectName, String fileName) {
-    terminal.typeIntoTerminal("cd " + projectName + Keys.ENTER);
-    terminal.typeIntoTerminal("ls -als > " + fileName + Keys.ENTER);
-    terminal.typeIntoTerminal("cat " + fileName + Keys.ENTER);
-    terminal.typeIntoTerminal("ls" + Keys.ENTER);
-    terminal.waitExpectedTextIntoTerminal(fileName);
-  }
+  private void createFileByCommand(String projectName, String fileName) {}
 
   @DataProvider
-  private Object[][] dataForSearching() {
+  private Object[][] dataForCheckingTheSameFileInDifferentProjects() {
     return new Object[][] {
       {
         "A",
@@ -317,6 +267,17 @@ public class NavigateToFileTest {
         ImmutableMap.of(
             1, "README.md (/NavigateFile)",
             2, "README.md (/NavigateFile_2)")
+      }
+    };
+  }
+
+  @DataProvider
+  private Object[][] dataForCheckingFilesCreatedWithoutIDE() {
+    return new Object[][] {
+      {
+        "c",
+        ImmutableMap.of(
+            1, "createdFrom.api (/NavigateFile)", 2, "createdFrom.con (/NavigateFile_2)")
       }
     };
   }
