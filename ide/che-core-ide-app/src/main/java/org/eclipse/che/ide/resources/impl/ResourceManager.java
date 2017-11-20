@@ -38,7 +38,6 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
-import elemental.util.ArrayOf;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -1169,45 +1168,38 @@ public final class ResourceManager {
   }
 
   protected Promise<ResourceDelta[]> synchronize(final ResourceDelta[] deltas) {
-    List<Promise<Void>> promisesToResolve = new ArrayList<>(deltas.length);
+    Promise<Void> chain = promises.resolve(null);
+
     for (final ResourceDelta delta : deltas) {
       if (delta.getKind() == ADDED) {
         if (delta.getFlags() == (MOVED_FROM | MOVED_TO)) {
-          promisesToResolve.add(onExternalDeltaMoved(delta));
+          chain = chain.thenPromise(ignored -> onExternalDeltaMoved(delta));
         } else {
-          promisesToResolve.add(onExternalDeltaAdded(delta));
+          chain = chain.thenPromise(ignored -> onExternalDeltaAdded(delta));
         }
       } else if (delta.getKind() == REMOVED) {
-        promisesToResolve.add(onExternalDeltaRemoved(delta));
-
+        chain = chain.thenPromise(ignored -> onExternalDeltaRemoved(delta));
       } else if (delta.getKind() == UPDATED) {
-        promisesToResolve.add(onExternalDeltaUpdated(delta));
+        chain = chain.thenPromise(ignored -> onExternalDeltaUpdated(delta));
       }
     }
-
-    Promise<ArrayOf<?>> promise =
-        promises.all2(promisesToResolve.toArray(new Promise[promisesToResolve.size()]));
-    return promise.then((Function<ArrayOf<?>, ResourceDelta[]>) arg -> deltas);
+    return chain.thenPromise(ignored -> promises.resolve(deltas));
   }
 
   private Promise<Void> onExternalDeltaMoved(final ResourceDelta delta) {
     final Optional<Resource> toRemove = store.getResource(delta.getFromPath());
     store.dispose(delta.getFromPath(), true);
 
-    return findResourceForExternalOperation(delta.getToPath(), true)
+    return findResource(delta.getToPath(), true)
         .thenPromise(
             resource -> {
               if (resource.isPresent() && toRemove.isPresent()) {
-                Resource intercepted = resource.get();
-
-                if (!store.getResource(intercepted.getLocation()).isPresent()) {
-                  store.register(intercepted);
-                }
-
                 eventBus.fireEvent(
                     new ResourceChangedEvent(
                         new ResourceDeltaImpl(
-                            intercepted, toRemove.get(), ADDED | MOVED_FROM | MOVED_TO | DERIVED)));
+                            resource.get(),
+                            toRemove.get(),
+                            ADDED | MOVED_FROM | MOVED_TO | DERIVED)));
               }
 
               return promises.resolve(null);
@@ -1238,18 +1230,13 @@ public final class ResourceManager {
               });
     }
 
-    return findResourceForExternalOperation(delta.getToPath(), true)
+    return findResource(delta.getToPath(), true)
         .thenPromise(
             resource -> {
               if (resource.isPresent()) {
-                Resource intercepted = resource.get();
-
-                if (!store.getResource(intercepted.getLocation()).isPresent()) {
-                  store.register(intercepted);
-                }
-
                 eventBus.fireEvent(
-                    new ResourceChangedEvent(new ResourceDeltaImpl(intercepted, ADDED | DERIVED)));
+                    new ResourceChangedEvent(
+                        new ResourceDeltaImpl(resource.get(), ADDED | DERIVED)));
               }
 
               return promises.resolve(null);
@@ -1263,7 +1250,7 @@ public final class ResourceManager {
       return promises.resolve(null);
     }
 
-    return findResourceForExternalOperation(delta.getToPath(), true)
+    return findResource(delta.getToPath(), true)
         .thenPromise(
             resource -> {
               if (resource.isPresent()) {
