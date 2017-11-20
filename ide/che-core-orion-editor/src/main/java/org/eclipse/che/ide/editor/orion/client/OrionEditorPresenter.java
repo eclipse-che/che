@@ -1155,7 +1155,9 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
               initializeChangeMarkersRender()
                   .then(
                       arg -> {
-                        openEditorCallback.onEditorOpened(OrionEditorPresenter.this);
+                        Scheduler.get()
+                            .scheduleDeferred(
+                                () -> openEditorCallback.onEditorOpened(OrionEditorPresenter.this));
                       });
             }
           });

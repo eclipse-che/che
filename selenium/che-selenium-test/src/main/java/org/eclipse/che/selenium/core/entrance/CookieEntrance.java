@@ -36,6 +36,7 @@ public class CookieEntrance implements Entrance {
    *
    * @param user
    */
+  @Override
   public void login(TestUser user) {
     Cookie accessKey = new Cookie("session-access-key", user.getAuthToken());
     seleniumWebDriver.manage().addCookie(accessKey);

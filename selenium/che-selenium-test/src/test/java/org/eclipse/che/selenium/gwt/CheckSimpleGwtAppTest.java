@@ -20,6 +20,7 @@ import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
@@ -52,6 +53,7 @@ public class CheckSimpleGwtAppTest {
   @Inject private TestCommandServiceClient testCommandServiceClient;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
 
   private String projectName;
 
@@ -100,9 +102,9 @@ public class CheckSimpleGwtAppTest {
 
     String url =
         workspaceServiceClient.getServerByExposedPort(testWorkspace.getId(), "9876/tcp").getUrl();
-    ide.driver().get(url);
+    seleniumWebDriver.get(url);
 
-    new WebDriverWait(ide.driver(), REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             ExpectedConditions.textToBePresentInElementLocated(
                 By.tagName("body"), expectedTextOnCodeServerPage));

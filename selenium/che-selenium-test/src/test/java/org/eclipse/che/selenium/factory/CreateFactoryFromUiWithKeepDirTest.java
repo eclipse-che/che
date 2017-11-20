@@ -120,7 +120,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
   }
 
   private void createFactoryAndSwitchToWs() throws IOException {
-    String currentWin = ide.driver().getWindowHandle();
+    String currentWin = seleniumWebDriver.getWindowHandle();
     menu.runCommand(WORKSPACE, CREATE_FACTORY);
     factoryWidget.waitOpen();
     factoryWidget.typeNameFactory(FACTORY_NAME);
@@ -133,7 +133,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
     try {
       projectExplorer.waitProjectExplorer(80);
     } catch (org.openqa.selenium.TimeoutException ex) {
-      ide.driver().switchTo().defaultContent();
+      seleniumWebDriver.switchTo().defaultContent();
       projectExplorer.waitProjectExplorer(50);
     }
     events.clickProjectEventsTab();

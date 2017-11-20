@@ -13,7 +13,6 @@ package org.eclipse.che.selenium.pageobject.intelligent;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MULTIPLE;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
-import com.google.common.base.Function;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.concurrent.TimeUnit;
@@ -36,6 +35,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 /** @author */
 @Singleton
 public class CommandsToolbar {
+
   private WebDriverWait appearanceWait;
   private WebDriverWait redrawWait;
 
@@ -51,6 +51,7 @@ public class CommandsToolbar {
 
   /** Class introduce Xpath locators for Commands Toolbar */
   private static final class Locators {
+
     static final String COMMANDS_TOOLBAR_SELECT = "gwt-debug-command_toolbar-button_Run";
     static final String EXECUTE_COMMAND_TOOLBAR = "gwt-debug-dropdown-processes";
     static final String COMMAND_DROPDAWN = "//div[@class='popupContent']//div[text()='%s']";
@@ -98,11 +99,7 @@ public class CommandsToolbar {
   @FindBy(id = Locators.DEBUG_COMMAND_DROPDAWN)
   WebElement debugCommandBtn;
 
-  /**
-   * expand exec dropdawn list
-   *
-   * @param commandName
-   */
+  /** expand exec dropdawn list */
   public void selectProcessFromExecDropDawnAndStop(String commandName) {
     clickOnExecDropDawn();
     appearanceWait
@@ -176,11 +173,7 @@ public class CommandsToolbar {
         .click();
   }
 
-  /**
-   * wait appearance of process timer on commands toolbar and try to get value of the timer
-   *
-   * @return
-   */
+  /** wait appearance of process timer on commands toolbar and try to get value of the timer */
   public String getTimerValue() {
     Wait<WebDriver> wait =
         new FluentWait<WebDriver>(seleniumWebDriver)
@@ -188,14 +181,7 @@ public class CommandsToolbar {
             .pollingEvery(200, TimeUnit.MILLISECONDS)
             .ignoring(StaleElementReferenceException.class);
 
-    String timerVal =
-        wait.until(
-            new Function<WebDriver, String>() {
-              public String apply(WebDriver driver) {
-                return driver.findElement(By.id(Locators.TIMER_LOCATOR)).getText();
-              }
-            });
-    return timerVal;
+    return wait.until(driver -> driver.findElement(By.id(Locators.TIMER_LOCATOR)).getText());
   }
 
   public String getNumOfProcessCounter() {

@@ -84,7 +84,7 @@ public class CheckOpenFileFeatureTest {
     dashboard.waitNotificationIsOpen();
     dashboard.waitNotificationIsClosed();
     dashboardFactory.clickOnOpenFactory();
-    String currentWin = ide.driver().getWindowHandle();
+    String currentWin = seleniumWebDriver.getWindowHandle();
     seleniumWebDriver.switchToNoneCurrentWindow(currentWin);
     loadingBehaviorPage.waitWhileLoadPageIsClosed();
     seleniumWebDriver.switchFromDashboardIframeToIde();
