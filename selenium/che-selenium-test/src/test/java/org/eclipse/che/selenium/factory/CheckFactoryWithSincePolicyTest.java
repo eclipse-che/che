@@ -11,8 +11,6 @@
 package org.eclipse.che.selenium.factory;
 
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
-import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import org.eclipse.che.api.factory.shared.dto.PoliciesDto;
@@ -24,9 +22,9 @@ import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.PopupDialogsBrowser;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.WarningDialog;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -34,26 +32,28 @@ import org.testng.annotations.Test;
 /** @author Mihail Kuznyetsov */
 public class CheckFactoryWithSincePolicyTest {
   private static final String FACTORY_NAME = NameGenerator.generate("sincePolicy", 3);
-  private static final String ALERT_EXPIRE_MESSAGE =
-      "Error: This Factory is not yet valid due to time restrictions applied"
+  private static final String EXPIRE_MESSAGE =
+      "Unable to load Factory: This Factory is not yet valid due to time restrictions applied"
           + " by its owner. Please, contact owner for more information.";
-  private static final long INIT_TIME = System.currentTimeMillis();
-  private static final int ADDITIONAL_TIME = 60000;
+  private static final int FACTORY_INACTIVITY_TIME = 120000;
+  private static final int ADDITIONAL_TIME = 10000;
+  private static long initTime;
 
   @Inject private ProjectExplorer projectExplorer;
   @Inject private TestFactoryInitializer testFactoryInitializer;
   @Inject private PopupDialogsBrowser popupDialogsBrowser;
   @Inject private Dashboard dashboard;
   @Inject private SeleniumWebDriver seleniumWebDriver;
-
+  @Inject private WarningDialog warningDialog;
   private TestFactory testFactory;
 
   @BeforeClass
   public void setUp() throws Exception {
     TestFactoryInitializer.TestFactoryBuilder factoryBuilder =
         testFactoryInitializer.fromTemplate(FactoryTemplate.MINIMAL);
-    long initTime = System.currentTimeMillis();
-    factoryBuilder.setPolicies(newDto(PoliciesDto.class).withSince(initTime + ADDITIONAL_TIME));
+    initTime = System.currentTimeMillis();
+    factoryBuilder.setPolicies(
+        newDto(PoliciesDto.class).withSince(initTime + FACTORY_INACTIVITY_TIME));
     factoryBuilder.setName(FACTORY_NAME);
     testFactory = factoryBuilder.build();
   }
@@ -68,17 +68,17 @@ public class CheckFactoryWithSincePolicyTest {
     // check factory now, make sure its restricted
     dashboard.open();
     testFactory.open(seleniumWebDriver);
+    seleniumWebDriver.switchFromDashboardIframeToIde();
 
-    // driver.get(factoryUrl);
-    new WebDriverWait(seleniumWebDriver, PREPARING_WS_TIMEOUT_SEC)
-        .until(ExpectedConditions.alertIsPresent());
-    assertTrue(
-        seleniumWebDriver.switchTo().alert().getText().contains(ALERT_EXPIRE_MESSAGE),
-        "actual message: " + seleniumWebDriver.switchTo().alert().getText());
-    popupDialogsBrowser.acceptAlert();
+    if (System.currentTimeMillis() > initTime + FACTORY_INACTIVITY_TIME) {
+      Assert.fail(
+          "Factory started longer then additional time and next test steps does not make sense");
+    }
+
+    warningDialog.waitWaitWarnDialogWindowWithSpecifiedTextMess(EXPIRE_MESSAGE);
 
     // wait until factory becomes avaialble
-    while (System.currentTimeMillis() <= INIT_TIME + ADDITIONAL_TIME) {
+    while (System.currentTimeMillis() <= initTime + FACTORY_INACTIVITY_TIME + ADDITIONAL_TIME) {
       WaitUtils.sleepQuietly(1);
     }
 
@@ -86,5 +86,6 @@ public class CheckFactoryWithSincePolicyTest {
     testFactory.open(seleniumWebDriver);
     seleniumWebDriver.switchFromDashboardIframeToIde();
     projectExplorer.waitProjectExplorer();
+    warningDialog.waitWaitClosingWarnDialogWindow();
   }
 }
