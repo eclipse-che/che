@@ -14,27 +14,21 @@
  * Defines a directive for creating List Items that can be checked.
  * @author Ann Shumilova
  */
-export class CheListItemChecked {
+export class CheListItemChecked implements ng.IDirective {
 
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor() {
-    this.restrict = 'E';
-    this.replace = true;
-    this.transclude = true;
-    this.templateUrl = 'components/widget/list/che-list-item-checked.html';
+  restrict = 'E';
+  replace = true;
+  transclude = true;
+  templateUrl = 'components/widget/list/che-list-item-checked.html';
 
-    // we require ngModel as we want to use it inside our directive
-    this.require = ['ngModel'];
+  // we require ngModel as we want to use it inside our directive
+  require = ['ngModel'];
 
-    // scope values
-    this.scope = {
-      valueModel: '=?ngModel',
-      icon: '@?cheIcon',
-      ariaLabel: '@cheAriaLabelCheckbox'
-    };
-  }
+  // scope values
+  scope = {
+    valueModel: '=?ngModel',
+    icon: '@?cheIcon',
+    ariaLabel: '@cheAriaLabelCheckbox'
+  };
 
 }

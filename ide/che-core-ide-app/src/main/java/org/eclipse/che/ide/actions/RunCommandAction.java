@@ -14,10 +14,9 @@ import com.google.inject.Inject;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.BaseAction;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandManager;
-import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
 import org.eclipse.che.ide.util.loging.Log;
 
 /**
@@ -31,7 +30,7 @@ public class RunCommandAction extends BaseAction {
 
   private final CommandManager commandManager;
   private final CommandExecutor commandExecutor;
-  private final AppContext appContext;
+  private final WsAgentServerUtil wsAgentServerUtil;
   private final CoreLocalizationConstant localizationConstant;
 
   @Inject
@@ -39,11 +38,11 @@ public class RunCommandAction extends BaseAction {
       CommandManager commandManager,
       CoreLocalizationConstant localizationConstant,
       CommandExecutor commandExecutor,
-      AppContext appContext) {
+      WsAgentServerUtil wsAgentServerUtil) {
     this.commandManager = commandManager;
     this.localizationConstant = localizationConstant;
     this.commandExecutor = commandExecutor;
-    this.appContext = appContext;
+    this.wsAgentServerUtil = wsAgentServerUtil;
   }
 
   @Override
@@ -59,9 +58,8 @@ public class RunCommandAction extends BaseAction {
       return;
     }
 
-    final WorkspaceImpl workspace = appContext.getWorkspace();
-    workspace
-        .getDevMachine()
+    wsAgentServerUtil
+        .getWsAgentServerMachine()
         .ifPresent(
             m ->
                 commandManager

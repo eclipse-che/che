@@ -9,6 +9,9 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import {CheWorkspace} from './workspace/che-workspace.factory';
+import {CheAPIBuilder} from './builder/che-api-builder.factory';
+import {CheHttpBackend} from './test/che-http-backend';
 
 /**
  * Test of the CheSvn
@@ -16,26 +19,21 @@
 describe('CheSvn', function () {
 
   /**
-   * User Factory for the test
-   */
-  var factory;
-
-  /**
    * API builder.
    */
-  var apiBuilder;
+  let apiBuilder;
 
-  var workspace;
+  let workspace;
 
   /**
    * Backend for handling http operations
    */
-  var httpBackend;
+  let httpBackend;
 
   /**
    * Che backend
    */
-  var cheBackend;
+  let cheBackend;
 
   /**
    *  setup module
@@ -45,7 +43,9 @@ describe('CheSvn', function () {
   /**
    * Inject factory and http backend
    */
-  beforeEach(inject(function (cheWorkspace, cheAPIBuilder, cheHttpBackend) {
+  beforeEach(inject(function (cheWorkspace: CheWorkspace,
+                              cheAPIBuilder: CheAPIBuilder,
+                              cheHttpBackend: CheHttpBackend) {
     workspace = cheWorkspace;
     apiBuilder = cheAPIBuilder;
     cheBackend = cheHttpBackend;

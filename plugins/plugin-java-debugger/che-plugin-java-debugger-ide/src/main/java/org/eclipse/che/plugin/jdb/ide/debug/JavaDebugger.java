@@ -19,6 +19,7 @@ import java.util.Map;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
@@ -54,7 +55,8 @@ public class JavaDebugger extends AbstractDebugger {
       AppContext appContext,
       DebuggerLocalizationConstant constant,
       RequestHandlerManager requestHandlerManager,
-      DebuggerLocationHandlerManager debuggerLocationHandlerManager) {
+      DebuggerLocationHandlerManager debuggerLocationHandlerManager,
+      PromiseProvider promiseProvider) {
     super(
         service,
         transmitter,
@@ -69,6 +71,7 @@ public class JavaDebugger extends AbstractDebugger {
         constant,
         requestHandlerManager,
         debuggerLocationHandlerManager,
+        promiseProvider,
         ID);
   }
 

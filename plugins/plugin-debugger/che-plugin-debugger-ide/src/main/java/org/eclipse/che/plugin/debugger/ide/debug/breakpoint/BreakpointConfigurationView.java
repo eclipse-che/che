@@ -11,6 +11,7 @@
 package org.eclipse.che.plugin.debugger.ide.debug.breakpoint;
 
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
+import org.eclipse.che.api.debug.shared.model.BreakpointConfiguration;
 import org.eclipse.che.ide.api.mvp.View;
 
 /**
@@ -35,7 +36,7 @@ public interface BreakpointConfigurationView
 
   void setBreakpoint(Breakpoint breakpoint);
 
-  String getBreakpointCondition();
+  BreakpointConfiguration getBreakpointConfiguration();
 
   boolean isBreakpointEnabled();
 }

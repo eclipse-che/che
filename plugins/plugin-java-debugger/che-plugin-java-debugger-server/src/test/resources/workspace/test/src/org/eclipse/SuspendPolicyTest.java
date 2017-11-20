@@ -10,11 +10,11 @@
  */
 package org.eclipse;
 
-public class ThreadDumpTest2 {
-
- public static void main(String[] args) throws Exception {
- for (; ; ) {
-
-}
-    }
+public class SuspendPolicyTest {
+  public static void main(String[] args) throws Exception {
+    int i = 0;
+    int j = 0;
+    int k = 0;
+    for (; ; ) {}
+  }
 }

@@ -67,7 +67,7 @@ initVariables() {
     [[ -z ${CUR_DIR+x} ]] && { CUR_DIR=$(cd "$(dirname "$0")"; pwd); }
 
     [[ -z ${API_SUFFIX+x} ]] && { API_SUFFIX="/api/"; }
-    [[ -z ${BASE_ACTUAL_RESULTS_URL+x} ]] && { BASE_ACTUAL_RESULTS_URL="https://ci.codenvycorp.com/view/qa/job/che-integration-tests/"; }
+    [[ -z ${BASE_ACTUAL_RESULTS_URL+x} ]] && { BASE_ACTUAL_RESULTS_URL="https://ci.codenvycorp.com/view/qa/job/che-integration-tests-che6/"; }
 
     MODE="grid"
     GRID_OPTIONS="-Dgrid.mode=true"

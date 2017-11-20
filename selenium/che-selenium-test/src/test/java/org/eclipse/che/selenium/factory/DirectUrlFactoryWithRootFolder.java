@@ -79,8 +79,7 @@ public class DirectUrlFactoryWithRootFolder {
             "tslint.json",
             "typings.json",
             "wallaby.js");
-    testFactoryWithRootFolder.authenticateAndOpen(seleniumWebDriver);
-    seleniumWebDriver.switchFromDashboardIframeToIde();
+    testFactoryWithRootFolder.authenticateAndOpen();
     projectExplorer.waitProjectExplorer();
     notificationsPopupPanel.waitProgressPopupPanelClose();
     events.clickEventLogBtn();

@@ -27,6 +27,7 @@ import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
+import org.eclipse.che.api.debug.shared.model.SuspendPolicy;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.event.BreakpointActivatedEvent;
@@ -112,7 +113,7 @@ public class GdbDebuggerTest {
 
   private void stepOut() throws DebuggerException, InterruptedException {
     try {
-      gdbDebugger.stepOut(new StepOutActionImpl());
+      gdbDebugger.stepOut(new StepOutActionImpl(SuspendPolicy.ALL));
     } catch (DebuggerException e) {
       // ignore
     }
@@ -122,7 +123,7 @@ public class GdbDebuggerTest {
   }
 
   private void stepOver() throws DebuggerException, InterruptedException {
-    gdbDebugger.stepOver(new StepOverActionImpl());
+    gdbDebugger.stepOver(new StepOverActionImpl(SuspendPolicy.ALL));
 
     DebuggerEvent debuggerEvent = events.take();
     assertTrue(debuggerEvent instanceof SuspendEvent);
@@ -131,7 +132,7 @@ public class GdbDebuggerTest {
     assertEquals(suspendEvent.getLocation().getTarget(), "h.cpp");
     assertEquals(suspendEvent.getLocation().getLineNumber(), 5);
 
-    gdbDebugger.stepOver(new StepOverActionImpl());
+    gdbDebugger.stepOver(new StepOverActionImpl(SuspendPolicy.ALL));
 
     debuggerEvent = events.take();
     assertTrue(debuggerEvent instanceof SuspendEvent);
@@ -140,7 +141,7 @@ public class GdbDebuggerTest {
     assertEquals(suspendEvent.getLocation().getTarget(), "h.cpp");
     assertEquals(suspendEvent.getLocation().getLineNumber(), 6);
 
-    gdbDebugger.stepOver(new StepOverActionImpl());
+    gdbDebugger.stepOver(new StepOverActionImpl(SuspendPolicy.ALL));
 
     debuggerEvent = events.take();
     assertTrue(debuggerEvent instanceof SuspendEvent);
