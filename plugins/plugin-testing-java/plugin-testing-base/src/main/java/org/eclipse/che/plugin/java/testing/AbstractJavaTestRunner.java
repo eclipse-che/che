@@ -23,7 +23,7 @@ import org.eclipse.che.api.testing.server.framework.TestRunner;
 import org.eclipse.che.api.testing.shared.TestDetectionContext;
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.api.testing.shared.TestPosition;
-import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionManager;
+import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionService;
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.TestPositionDto;
 
 /**
@@ -32,17 +32,24 @@ import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.TestPositio
  */
 public abstract class AbstractJavaTestRunner implements TestRunner {
   private int debugPort = -1;
-  private JavaLanguageServerExtensionManager extensionManager;
+  private JavaLanguageServerExtensionService extensionService;
+  private String testMethodAnnotation;
+  private String testClassAnnotation;
 
-  public AbstractJavaTestRunner(JavaLanguageServerExtensionManager extensionManager) {
-    this.extensionManager = extensionManager;
+  public AbstractJavaTestRunner(
+      JavaLanguageServerExtensionService extensionService,
+      String testMethodAnnotation,
+      String testClassAnnotation) {
+    this.extensionService = extensionService;
+    this.testMethodAnnotation = testMethodAnnotation;
+    this.testClassAnnotation = testClassAnnotation;
   }
 
   @Override
   public List<TestPosition> detectTests(TestDetectionContext context) {
     List<TestPositionDto> testPositionDtos =
-        extensionManager.detectTest(
-            prefixURI(context.getFilePath()), getTestAnnotation(), context.getOffset());
+        extensionService.detectTest(
+            prefixURI(context.getFilePath()), testMethodAnnotation, context.getOffset());
 
     return testPositionDtos
         .stream()
@@ -57,44 +64,38 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
         .collect(Collectors.toList());
   }
 
-  /** Returns import of test annotation */
-  protected abstract String getTestAnnotation();
-
   /**
    * Finds tests which should be ran.
    *
    * @param context information about test runner
-   * @param methodAnnotation java annotation which describes test method in the test framework
-   * @param classAnnotation java annotation which describes test class in the test framework
    * @return list of full qualified names of test classes. If it is the declaration of a test method
    *     it should be: parent fqn + '#' + method name (a.b.c.ClassName#methodName)
    */
-  protected List<String> findTests(
-      TestExecutionContext context, String methodAnnotation, String classAnnotation) {
-    return executeFindTestsCommand(context, methodAnnotation, classAnnotation);
+  protected List<String> findTests(TestExecutionContext context) {
+    return executeFindTestsCommand(context, testMethodAnnotation, testClassAnnotation);
   }
 
   protected List<String> getResolvedClassPaths(TestExecutionContext context) {
-    return extensionManager.getResolvedClasspath(prefixURI(context.getProjectPath()));
+    return extensionService.getResolvedClasspath(prefixURI(context.getProjectPath()));
   }
 
   private List<String> executeFindTestsCommand(
       TestExecutionContext context, String methodAnnotation, String classAnnotation) {
     switch (context.getContextType()) {
       case PROJECT:
-        return extensionManager.findTestsFromProject(
+        return extensionService.findTestsFromProject(
             prefixURI(context.getProjectPath()), methodAnnotation, classAnnotation);
       case FILE:
-        return extensionManager.findTestsInFile(
+        return extensionService.findTestsInFile(
             prefixURI(context.getFilePath()), methodAnnotation, classAnnotation);
       case FOLDER:
-        return extensionManager.findTestsFromFolder(
+        return extensionService.findTestsFromFolder(
             prefixURI(context.getFilePath()), methodAnnotation, classAnnotation);
       case SET:
-        return extensionManager.findTestsFromSet(
+        return extensionService.findTestsFromSet(
             methodAnnotation, classAnnotation, context.getListOfTestClasses());
       case CURSOR_POSITION:
-        return extensionManager.findTestsByCursorPosition(
+        return extensionService.findTestsByCursorPosition(
             prefixURI(context.getFilePath()),
             methodAnnotation,
             classAnnotation,

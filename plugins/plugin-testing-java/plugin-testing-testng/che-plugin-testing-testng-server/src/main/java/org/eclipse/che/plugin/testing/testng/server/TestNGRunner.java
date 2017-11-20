@@ -30,32 +30,32 @@ import org.eclipse.che.commons.lang.execution.CommandLine;
 import org.eclipse.che.commons.lang.execution.ExecutionException;
 import org.eclipse.che.commons.lang.execution.JavaParameters;
 import org.eclipse.che.commons.lang.execution.ProcessHandler;
-import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionManager;
+import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionService;
 import org.eclipse.che.plugin.java.testing.AbstractJavaTestRunner;
 import org.eclipse.che.plugin.java.testing.ClasspathUtil;
-import org.eclipse.che.plugin.java.testing.JavaTestAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** TestNG implementation for the test runner service. */
 public class TestNGRunner extends AbstractJavaTestRunner {
-  private static final String TESTNG_NAME = "testng";
   private static final Logger LOG = LoggerFactory.getLogger(TestNGRunner.class);
+  private static final String TESTNG_NAME = "testng";
   private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
   private static final String TEST_OUTPUT_FOLDER = "/test-output";
+  private static final String TEST_METHOD_ANNOTATION = "org.testng.annotations.Test";
 
   private String workspacePath;
-  private JavaLanguageServerExtensionManager extensionManager;
+  private JavaLanguageServerExtensionService extensionService;
   private final TestNGSuiteUtil suiteUtil;
 
   @Inject
   public TestNGRunner(
       @Named("che.user.workspaces.storage") String workspacePath,
-      JavaLanguageServerExtensionManager extensionManager,
+      JavaLanguageServerExtensionService extensionService,
       TestNGSuiteUtil suiteUtil) {
-    super(extensionManager);
+    super(extensionService, TEST_METHOD_ANNOTATION, "");
     this.workspacePath = workspacePath;
-    this.extensionManager = extensionManager;
+    this.extensionService = extensionService;
     this.suiteUtil = suiteUtil;
   }
 
@@ -103,7 +103,7 @@ public class TestNGRunner extends AbstractJavaTestRunner {
   }
 
   private String getOutputDirectory(TestExecutionContext context) {
-    String outputDir = extensionManager.getOutputDir(prefixURI(context.getProjectPath()));
+    String outputDir = extensionService.getOutputDir(prefixURI(context.getProjectPath()));
 
     if (isNullOrEmpty(outputDir)) {
       return workspacePath + context.getProjectPath() + TEST_OUTPUT_FOLDER;
@@ -117,7 +117,7 @@ public class TestNGRunner extends AbstractJavaTestRunner {
     if (!isNullOrEmpty(filePath) && filePath.endsWith(".xml")) {
       return suiteUtil.writeSuite(System.getProperty(JAVA_IO_TMPDIR), filePath);
     }
-    List<String> testSuite = findTests(context, JavaTestAnnotations.TESTNG_TEST.getName(), "");
+    List<String> testSuite = findTests(context);
 
     Map<String, List<String>> classes = buildTestNgSuite(testSuite, context);
 
@@ -172,10 +172,5 @@ public class TestNGRunner extends AbstractJavaTestRunner {
   @Override
   public String getName() {
     return TESTNG_NAME;
-  }
-
-  @Override
-  protected String getTestAnnotation() {
-    return JavaTestAnnotations.TESTNG_TEST.getName();
   }
 }

@@ -20,10 +20,9 @@ import org.eclipse.che.commons.lang.execution.ExecutionException;
 import org.eclipse.che.commons.lang.execution.JavaParameters;
 import org.eclipse.che.commons.lang.execution.ProcessHandler;
 import org.eclipse.che.junit.junit4.CheJUnitCoreRunner;
-import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionManager;
+import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionService;
 import org.eclipse.che.plugin.java.testing.AbstractJavaTestRunner;
 import org.eclipse.che.plugin.java.testing.ClasspathUtil;
-import org.eclipse.che.plugin.java.testing.JavaTestAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,14 +32,16 @@ public class JUnit4TestRunner extends AbstractJavaTestRunner {
 
   private static final String JUNIT_TEST_NAME = "junit";
   private static final String MAIN_CLASS_NAME = "org.eclipse.che.junit.junit4.CheJUnitLauncher";
+  private static final String TEST_METHOD_ANNOTATION = "org.junit.Test";
+  private static final String TEST_CLASS_ANNOTATION = "org.junit.runner.RunWith";
 
   private String workspacePath;
 
   @Inject
   public JUnit4TestRunner(
       @Named("che.user.workspaces.storage") String workspacePath,
-      JavaLanguageServerExtensionManager extensionManager) {
-    super(extensionManager);
+      JavaLanguageServerExtensionService extensionService) {
+    super(extensionService, TEST_METHOD_ANNOTATION, TEST_CLASS_ANNOTATION);
     this.workspacePath = workspacePath;
   }
 
@@ -52,11 +53,6 @@ public class JUnit4TestRunner extends AbstractJavaTestRunner {
   @Override
   public String getName() {
     return JUNIT_TEST_NAME;
-  }
-
-  @Override
-  protected String getTestAnnotation() {
-    return JavaTestAnnotations.JUNIT4X_TEST.getName();
   }
 
   private ProcessHandler startTestProcess(TestExecutionContext context) {
@@ -72,11 +68,7 @@ public class JUnit4TestRunner extends AbstractJavaTestRunner {
     classPath.add(ClasspathUtil.getJarPathForClass(CheJUnitCoreRunner.class));
     parameters.getClassPath().addAll(classPath);
 
-    List<String> suite =
-        findTests(
-            context,
-            JavaTestAnnotations.JUNIT4X_TEST.getName(),
-            JavaTestAnnotations.JUNIT4X_RUN_WITH.getName());
+    List<String> suite = findTests(context);
     for (String element : suite) {
       parameters.getParametersList().add(element);
     }
