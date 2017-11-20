@@ -32,11 +32,13 @@ describe('ComposeEnvironmentManager', () => {
           'another-machine': {
             'attributes': {'memoryLimitBytes': '2147483648'},
             'servers': {},
+            'volumes': {},
             'installers': []
           },
           'db': {
             'attributes': {},
             'servers': {},
+            'volumes': {},
             'installers': []
           },
           'dev-machine': {
@@ -44,6 +46,9 @@ describe('ComposeEnvironmentManager', () => {
             'servers': {
               '1024/tcp': {'port': '1024', 'properties': {}, 'protocol': 'http', 'path': ''},
               '1025/tcp': {'port': '1025', 'properties': {}, 'protocol': 'http', 'path': ''}
+            },
+            'volumes': {
+              'volume1': {'path': '/some/path'},
             },
             'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
           }
@@ -94,14 +99,19 @@ describe('ComposeEnvironmentManager', () => {
           'another-machine': {
             'attributes': {'memoryLimitBytes': '2147483648'},
             'servers': {},
+            'volumes': {},
             'installers': []
           },
-          'db': {'attributes': {}, 'servers': {}, 'installers': []},
+          'db': {'attributes': {}, 'servers': {}, 'volumes': {}, 'installers': []},
           'dev-machine': {
             'attributes': {'memoryLimitBytes': '5368709120'},
             'servers': {
               '1024/tcp': {'port': '1024', 'properties': {}, 'protocol': 'http', 'path': ''},
               '1025/tcp': {'port': '1025', 'properties': {}, 'protocol': 'http', 'path': ''}
+            },
+            'volumes': {
+              'vol1': {'path': '/some/path'},
+              'm22': {'path': '/home/user/.m2/repository'}
             },
             'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
           }
@@ -185,6 +195,7 @@ describe('ComposeEnvironmentManager', () => {
         'machines': {
           'dev-machine': {
             'servers': {},
+            'volumes': {},
             'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh'],
             'attributes': {'memoryLimitBytes': '2147483648'}
           }

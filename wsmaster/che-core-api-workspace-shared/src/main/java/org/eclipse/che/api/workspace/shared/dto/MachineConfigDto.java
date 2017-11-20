@@ -52,4 +52,12 @@ public interface MachineConfigDto extends MachineConfig {
   void setAttributes(Map<String, String> attributes);
 
   MachineConfigDto withAttributes(Map<String, String> attributes);
+
+  @Override
+  @FactoryParameter(obligation = OPTIONAL)
+  Map<String, VolumeDto> getVolumes();
+
+  void setVolumes(Map<String, VolumeDto> volumes);
+
+  MachineConfigDto withVolumes(Map<String, VolumeDto> volumes);
 }

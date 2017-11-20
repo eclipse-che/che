@@ -27,8 +27,8 @@ import org.eclipse.che.workspace.infrastructure.openshift.project.RemoveProjectO
 import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.CommonPVCStrategy;
 import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.UniqueWorkspacePVCStrategy;
 import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.WorkspacePVCCleaner;
-import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.WorkspacePVCStrategy;
-import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.WorkspacePVCStrategyProvider;
+import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.WorkspaceVolumeStrategyProvider;
+import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftCheApiEnvVarProvider;
 
 /** @author Sergii Leshchenko */
@@ -52,10 +52,10 @@ public class OpenShiftInfraModule extends AbstractModule {
 
     bind(CheApiEnvVarProvider.class).to(OpenShiftCheApiEnvVarProvider.class);
 
-    MapBinder<String, WorkspacePVCStrategy> pvcStrategies =
-        MapBinder.newMapBinder(binder(), String.class, WorkspacePVCStrategy.class);
-    pvcStrategies.addBinding(COMMON_STRATEGY).to(CommonPVCStrategy.class);
-    pvcStrategies.addBinding(UNIQUE_STRATEGY).to(UniqueWorkspacePVCStrategy.class);
-    bind(WorkspacePVCStrategy.class).toProvider(WorkspacePVCStrategyProvider.class);
+    MapBinder<String, WorkspaceVolumesStrategy> volumesStrategies =
+        MapBinder.newMapBinder(binder(), String.class, WorkspaceVolumesStrategy.class);
+    volumesStrategies.addBinding(COMMON_STRATEGY).to(CommonPVCStrategy.class);
+    volumesStrategies.addBinding(UNIQUE_STRATEGY).to(UniqueWorkspacePVCStrategy.class);
+    bind(WorkspaceVolumesStrategy.class).toProvider(WorkspaceVolumeStrategyProvider.class);
   }
 }

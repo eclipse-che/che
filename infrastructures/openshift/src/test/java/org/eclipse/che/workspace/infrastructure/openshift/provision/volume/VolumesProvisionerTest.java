@@ -16,7 +16,7 @@ import static org.mockito.Mockito.when;
 
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
-import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.WorkspacePVCStrategy;
+import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.WorkspaceVolumesStrategy;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -24,25 +24,25 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 /**
- * Tests {@link PersistentVolumeClaimProvisioner}.
+ * Tests {@link VolumesProvisioner}.
  *
  * @author Anton Korneta
  */
 @Listeners(MockitoTestNGListener.class)
-public class PersistentVolumeClaimProvisionerTest {
+public class VolumesProvisionerTest {
 
   private static final String WORKSPACE_ID = "workspace132";
 
   @Mock private OpenShiftEnvironment osEnv;
   @Mock private RuntimeIdentity runtimeIdentity;
-  @Mock private WorkspacePVCStrategy pvcStrategy;
+  @Mock private WorkspaceVolumesStrategy volumeStrategy;
 
-  private PersistentVolumeClaimProvisioner provisioner;
+  private VolumesProvisioner provisioner;
 
   @BeforeMethod
   public void setup() {
     when(runtimeIdentity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
-    provisioner = new PersistentVolumeClaimProvisioner(false, pvcStrategy);
+    provisioner = new VolumesProvisioner(false, volumeStrategy);
   }
 
   @Test
@@ -55,9 +55,9 @@ public class PersistentVolumeClaimProvisionerTest {
 
   @Test
   public void testPrepareWorkspacePVCUsingConfiguredStrategy() throws Exception {
-    provisioner = new PersistentVolumeClaimProvisioner(true, pvcStrategy);
+    provisioner = new VolumesProvisioner(true, volumeStrategy);
     provisioner.provision(osEnv, runtimeIdentity);
 
-    verify(pvcStrategy).prepare(osEnv, WORKSPACE_ID);
+    verify(volumeStrategy).prepare(osEnv, WORKSPACE_ID);
   }
 }

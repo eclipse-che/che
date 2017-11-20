@@ -19,22 +19,22 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 
 /**
- * Provides implementation of {@link WorkspacePVCStrategy} for configured value.
+ * Provides implementation of {@link WorkspaceVolumesStrategy} for configured value.
  *
  * @author Anton Korneta
  */
 @Singleton
-public class WorkspacePVCStrategyProvider implements Provider<WorkspacePVCStrategy> {
+public class WorkspaceVolumeStrategyProvider implements Provider<WorkspaceVolumesStrategy> {
 
-  private final WorkspacePVCStrategy pvcStrategy;
+  private final WorkspaceVolumesStrategy volumeStrategy;
 
   @Inject
-  public WorkspacePVCStrategyProvider(
+  public WorkspaceVolumeStrategyProvider(
       @Named("che.infra.openshift.pvc.strategy") String strategy,
-      Map<String, WorkspacePVCStrategy> strategies) {
-    final WorkspacePVCStrategy pvcStrategy = strategies.get(strategy);
-    if (pvcStrategy != null) {
-      this.pvcStrategy = pvcStrategy;
+      Map<String, WorkspaceVolumesStrategy> strategies) {
+    final WorkspaceVolumesStrategy volumeStrategy = strategies.get(strategy);
+    if (volumeStrategy != null) {
+      this.volumeStrategy = volumeStrategy;
     } else {
       throw new IllegalArgumentException(
           format("Unsupported PVC strategy '%s' configured", strategy));
@@ -42,7 +42,7 @@ public class WorkspacePVCStrategyProvider implements Provider<WorkspacePVCStrate
   }
 
   @Override
-  public WorkspacePVCStrategy get() {
-    return pvcStrategy;
+  public WorkspaceVolumesStrategy get() {
+    return volumeStrategy;
   }
 }

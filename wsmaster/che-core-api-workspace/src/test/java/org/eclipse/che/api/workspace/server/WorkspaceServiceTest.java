@@ -915,7 +915,8 @@ public class WorkspaceServiceTest {
             singletonList("org.eclipse.che.ws-agent"),
             null,
             singletonMap("CHE_ENV", "value"),
-            singletonMap(MEMORY_LIMIT_ATTRIBUTE, "10000"));
+            singletonMap(MEMORY_LIMIT_ATTRIBUTE, "10000"),
+            emptyMap());
 
     return DtoConverter.asDto(
         new EnvironmentImpl(

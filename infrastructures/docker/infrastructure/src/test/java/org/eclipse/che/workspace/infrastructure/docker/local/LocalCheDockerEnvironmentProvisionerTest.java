@@ -16,13 +16,14 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.docker.local.dod.DockerApiHostEnvVariableProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.local.installer.LocalInstallersBinariesVolumeProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.local.installer.WsAgentServerConfigProvisioner;
-import org.eclipse.che.workspace.infrastructure.docker.local.projects.ProjectsVolumeProvisioner;
+import org.eclipse.che.workspace.infrastructure.docker.local.projects.BindMountProjectsVolumeProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.ContainerSystemSettingsProvisionersApplier;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.env.EnvVarsConverter;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.labels.RuntimeLabelsProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.memory.MemoryAttributeConverter;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.server.ServersConverter;
+import org.eclipse.che.workspace.infrastructure.docker.provisioner.volume.VolumesConverter;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -36,7 +37,7 @@ import org.testng.annotations.Test;
 public class LocalCheDockerEnvironmentProvisionerTest {
 
   @Mock private ContainerSystemSettingsProvisionersApplier settingsProvisioners;
-  @Mock private ProjectsVolumeProvisioner projectsVolumeProvisioner;
+  @Mock private BindMountProjectsVolumeProvisioner projectsVolumeProvisioner;
   @Mock private LocalInstallersBinariesVolumeProvisioner installerConfigProvisioner;
   @Mock private RuntimeLabelsProvisioner labelsProvisioner;
   @Mock private DockerApiHostEnvVariableProvisioner dockerApiEnvProvisioner;
@@ -46,6 +47,7 @@ public class LocalCheDockerEnvironmentProvisionerTest {
   @Mock private ServersConverter serversConverter;
   @Mock private EnvVarsConverter envVarsConverter;
   @Mock private MemoryAttributeConverter memoryAttributeConverter;
+  @Mock private VolumesConverter volumesConverter;
 
   private LocalCheDockerEnvironmentProvisioner provisioner;
 
@@ -63,7 +65,8 @@ public class LocalCheDockerEnvironmentProvisionerTest {
             wsAgentServerConfigProvisioner,
             serversConverter,
             envVarsConverter,
-            memoryAttributeConverter);
+            memoryAttributeConverter,
+            volumesConverter);
 
     allInnerProvisioners =
         new Object[] {
@@ -75,7 +78,8 @@ public class LocalCheDockerEnvironmentProvisionerTest {
           wsAgentServerConfigProvisioner,
           serversConverter,
           envVarsConverter,
-          memoryAttributeConverter
+          memoryAttributeConverter,
+          volumesConverter
         };
   }
 
@@ -88,6 +92,7 @@ public class LocalCheDockerEnvironmentProvisionerTest {
     InOrder inOrder = Mockito.inOrder((Object[]) allInnerProvisioners);
     inOrder.verify(serversConverter).provision(eq(dockerEnvironment), eq(runtimeIdentity));
     inOrder.verify(envVarsConverter).provision(eq(dockerEnvironment), eq(runtimeIdentity));
+    inOrder.verify(volumesConverter).provision(eq(dockerEnvironment), eq(runtimeIdentity));
     inOrder.verify(memoryAttributeConverter).provision(eq(dockerEnvironment), eq(runtimeIdentity));
     inOrder.verify(labelsProvisioner).provision(eq(dockerEnvironment), eq(runtimeIdentity));
     inOrder

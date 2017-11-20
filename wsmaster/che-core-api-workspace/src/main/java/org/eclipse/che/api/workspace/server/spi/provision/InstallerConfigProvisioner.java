@@ -27,16 +27,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Applies OpenShift specific properties of the installers to {@link InternalMachineConfig}.
+ * Applies properties of the installers to {@link InternalMachineConfig}.
  *
  * <p>This class must be called before environment is started, otherwise changing configuration has
  * no effect.
  *
  * <p>This class performs following changes to environment: <br>
- * - adds environment variables which are specified in properties of installer configuration. The
- * environment property contains environment variables in the following format:
- * "env1=value1,env2=value2,..."; <br>
- * - add servers that is declared by configure installers.
+ * - adds environment variables defined in properties of installers configuration. The environment
+ * property contains environment variables in the following format: "env1=value1,env2=value2,...";
+ * <br>
+ * - add servers defined in installers configuration.
  *
  * @author Sergii Leshchenko
  */

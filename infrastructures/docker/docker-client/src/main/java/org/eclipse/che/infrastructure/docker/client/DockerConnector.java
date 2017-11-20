@@ -60,6 +60,7 @@ import org.eclipse.che.infrastructure.docker.client.exception.DockerException;
 import org.eclipse.che.infrastructure.docker.client.exception.ExecNotFoundException;
 import org.eclipse.che.infrastructure.docker.client.exception.ImageNotFoundException;
 import org.eclipse.che.infrastructure.docker.client.exception.NetworkNotFoundException;
+import org.eclipse.che.infrastructure.docker.client.exception.VolumeNotFoundException;
 import org.eclipse.che.infrastructure.docker.client.json.ContainerCommitted;
 import org.eclipse.che.infrastructure.docker.client.json.ContainerCreated;
 import org.eclipse.che.infrastructure.docker.client.json.ContainerExitStatus;
@@ -81,6 +82,7 @@ import org.eclipse.che.infrastructure.docker.client.json.Version;
 import org.eclipse.che.infrastructure.docker.client.json.network.ConnectContainer;
 import org.eclipse.che.infrastructure.docker.client.json.network.DisconnectContainer;
 import org.eclipse.che.infrastructure.docker.client.json.network.Network;
+import org.eclipse.che.infrastructure.docker.client.json.volume.Volumes;
 import org.eclipse.che.infrastructure.docker.client.params.AttachContainerParams;
 import org.eclipse.che.infrastructure.docker.client.params.BuildImageParams;
 import org.eclipse.che.infrastructure.docker.client.params.CommitParams;
@@ -112,6 +114,8 @@ import org.eclipse.che.infrastructure.docker.client.params.network.DisconnectCon
 import org.eclipse.che.infrastructure.docker.client.params.network.GetNetworksParams;
 import org.eclipse.che.infrastructure.docker.client.params.network.InspectNetworkParams;
 import org.eclipse.che.infrastructure.docker.client.params.network.RemoveNetworkParams;
+import org.eclipse.che.infrastructure.docker.client.params.volume.GetVolumesParams;
+import org.eclipse.che.infrastructure.docker.client.params.volume.RemoveVolumeParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1383,6 +1387,74 @@ public class DockerConnector {
       int status = response.getStatus();
       if (status == NOT_FOUND.getStatusCode()) {
         throw new NetworkNotFoundException(readAndCloseQuietly(response.getInputStream()));
+      }
+      if (status / 100 != 2) {
+        throw getDockerException(response);
+      }
+    }
+  }
+
+  /**
+   * Returns all volumes.
+   *
+   * @return object that contains list of volumes in the system
+   * @throws IOException when a problem occurs with docker api calls
+   */
+  public Volumes getVolumes() throws IOException {
+    return getVolumes(GetVolumesParams.create());
+  }
+
+  /**
+   * Returns volumes filtered by provided params.
+   *
+   * @return object that contains list of volumes in the system
+   * @throws IOException when a problem occurs with docker api calls
+   */
+  public Volumes getVolumes(GetVolumesParams params) throws IOException {
+    final Filters filters = params.getFilters();
+
+    try (DockerConnection connection =
+        connectionFactory
+            .openConnection(dockerDaemonUri)
+            .method("GET")
+            .path(apiVersionPathPrefix + "/volumes")) {
+      if (filters != null) {
+        connection.query("filters", urlPathSegmentEscaper().escape(toJson(filters.getFilters())));
+      }
+      DockerResponse response = connection.request();
+      if (response.getStatus() / 100 != 2) {
+        throw getDockerException(response);
+      }
+      return parseResponseStreamAndClose(response.getInputStream(), Volumes.class);
+    }
+  }
+
+  /**
+   * Removes a volume that matches provided name.
+   *
+   * @throws VolumeNotFoundException if volume is not found
+   * @throws IOException when a problem occurs with docker api calls
+   */
+  public void removeVolume(String volumeName) throws IOException {
+    removeVolume(RemoveVolumeParams.create(volumeName));
+  }
+
+  /**
+   * Removes a volume that matches provided params.
+   *
+   * @throws VolumeNotFoundException if volume is not found
+   * @throws IOException when a problem occurs with docker api calls
+   */
+  public void removeVolume(RemoveVolumeParams params) throws IOException {
+    try (DockerConnection connection =
+        connectionFactory
+            .openConnection(dockerDaemonUri)
+            .method("DELETE")
+            .path(apiVersionPathPrefix + "/volumes/" + params.getVolumeName())) {
+      final DockerResponse response = connection.request();
+      int status = response.getStatus();
+      if (status == NOT_FOUND.getStatusCode()) {
+        throw new VolumeNotFoundException(readAndCloseQuietly(response.getInputStream()));
       }
       if (status / 100 != 2) {
         throw getDockerException(response);

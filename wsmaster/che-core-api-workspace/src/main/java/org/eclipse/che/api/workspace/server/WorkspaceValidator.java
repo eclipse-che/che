@@ -28,6 +28,7 @@ import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
+import org.eclipse.che.api.core.model.workspace.config.Volume;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 
 /**
@@ -44,6 +45,9 @@ public class WorkspaceValidator {
    */
   private static final Pattern WS_NAME =
       Pattern.compile("[a-zA-Z0-9][-_.a-zA-Z0-9]{1,98}[a-zA-Z0-9]");
+
+  private static final Pattern VOLUME_NAME = Pattern.compile("[a-z][a-z0-9]{1,18}");
+  private static final Pattern VOLUME_PATH = Pattern.compile("/.+");
 
   private final WorkspaceRuntimes runtimes;
 
@@ -145,6 +149,27 @@ public class WorkspaceValidator {
                 "Value '%s' of attribute '%s' in machine '%s' is illegal",
                 memoryAttribute, MEMORY_LIMIT_ATTRIBUTE, name));
       }
+    }
+
+    for (Entry<String, ? extends Volume> volumeEntry : machine.getVolumes().entrySet()) {
+      String volumeName = volumeEntry.getKey();
+      check(
+          VOLUME_NAME.matcher(volumeName).matches(),
+          "Volume name '%s' in machine '%s' is invalid",
+          volumeName,
+          name);
+      Volume volume = volumeEntry.getValue();
+      check(
+          volume != null && !isNullOrEmpty(volume.getPath()),
+          "Path of volume '%s' in machine '%s' is invalid. It should not be empty",
+          volumeName,
+          name);
+      check(
+          VOLUME_PATH.matcher(volume.getPath()).matches(),
+          "Path '%s' of volume '%s' in machine '%s' is invalid. It should be absolute",
+          volume.getPath(),
+          volumeName,
+          name);
     }
   }
 

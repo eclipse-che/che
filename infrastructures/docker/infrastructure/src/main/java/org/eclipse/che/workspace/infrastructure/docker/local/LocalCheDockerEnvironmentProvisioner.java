@@ -18,13 +18,14 @@ import org.eclipse.che.workspace.infrastructure.docker.DockerEnvironmentProvisio
 import org.eclipse.che.workspace.infrastructure.docker.local.dod.DockerApiHostEnvVariableProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.local.installer.LocalInstallersBinariesVolumeProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.local.installer.WsAgentServerConfigProvisioner;
-import org.eclipse.che.workspace.infrastructure.docker.local.projects.ProjectsVolumeProvisioner;
+import org.eclipse.che.workspace.infrastructure.docker.local.projects.BindMountProjectsVolumeProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.ContainerSystemSettingsProvisionersApplier;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.env.EnvVarsConverter;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.labels.RuntimeLabelsProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.memory.MemoryAttributeConverter;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.server.ServersConverter;
+import org.eclipse.che.workspace.infrastructure.docker.provisioner.volume.VolumesConverter;
 
 /**
  * Infrastructure provisioner that apply needed configuration to docker containers to run it
@@ -36,7 +37,7 @@ import org.eclipse.che.workspace.infrastructure.docker.provisioner.server.Server
 public class LocalCheDockerEnvironmentProvisioner implements DockerEnvironmentProvisioner {
 
   private final ContainerSystemSettingsProvisionersApplier dockerSettingsProvisioners;
-  private final ProjectsVolumeProvisioner projectsVolumeProvisioner;
+  private final BindMountProjectsVolumeProvisioner hostMountingProjectsVolumeProvisioner;
   private final LocalInstallersBinariesVolumeProvisioner installersBinariesVolumeProvisioner;
   private final RuntimeLabelsProvisioner runtimeLabelsProvisioner;
   private final DockerApiHostEnvVariableProvisioner dockerApiEnvProvisioner;
@@ -44,21 +45,23 @@ public class LocalCheDockerEnvironmentProvisioner implements DockerEnvironmentPr
   private final ServersConverter serversConverter;
   private final EnvVarsConverter envVarsConverter;
   private final MemoryAttributeConverter memoryAttributeConverter;
+  private final VolumesConverter volumesConverter;
 
   @Inject
   public LocalCheDockerEnvironmentProvisioner(
       ContainerSystemSettingsProvisionersApplier dockerSettingsProvisioners,
-      ProjectsVolumeProvisioner projectsVolumeProvisioner,
+      BindMountProjectsVolumeProvisioner hostMountingProjectsVolumeProvisioner,
       LocalInstallersBinariesVolumeProvisioner installersBinariesVolumeProvisioner,
       RuntimeLabelsProvisioner runtimeLabelsProvisioner,
       DockerApiHostEnvVariableProvisioner dockerApiEnvProvisioner,
       WsAgentServerConfigProvisioner wsAgentServerConfigProvisioner,
       ServersConverter serversConverter,
       EnvVarsConverter envVarsConverter,
-      MemoryAttributeConverter memoryAttributeConverter) {
+      MemoryAttributeConverter memoryAttributeConverter,
+      VolumesConverter volumesConverter) {
 
     this.dockerSettingsProvisioners = dockerSettingsProvisioners;
-    this.projectsVolumeProvisioner = projectsVolumeProvisioner;
+    this.hostMountingProjectsVolumeProvisioner = hostMountingProjectsVolumeProvisioner;
     this.installersBinariesVolumeProvisioner = installersBinariesVolumeProvisioner;
     this.runtimeLabelsProvisioner = runtimeLabelsProvisioner;
     this.dockerApiEnvProvisioner = dockerApiEnvProvisioner;
@@ -66,21 +69,23 @@ public class LocalCheDockerEnvironmentProvisioner implements DockerEnvironmentPr
     this.serversConverter = serversConverter;
     this.envVarsConverter = envVarsConverter;
     this.memoryAttributeConverter = memoryAttributeConverter;
+    this.volumesConverter = volumesConverter;
   }
 
   @Override
   public void provision(DockerEnvironment internalEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
-    // 1 stage - add Che business logic items to Che model env
-    // 2 stage - converting Che model env to docker env
+    // 1 stage - converting Che model env to docker env
     serversConverter.provision(internalEnv, identity);
     envVarsConverter.provision(internalEnv, identity);
+    volumesConverter.provision(internalEnv, identity);
     memoryAttributeConverter.provision(internalEnv, identity);
-    // 3 stage - add docker env items
+
+    // 2 stage - add/modify docker env items
     runtimeLabelsProvisioner.provision(internalEnv, identity);
     installersBinariesVolumeProvisioner.provision(internalEnv, identity);
-    projectsVolumeProvisioner.provision(internalEnv, identity);
+    hostMountingProjectsVolumeProvisioner.provision(internalEnv, identity);
     dockerApiEnvProvisioner.provision(internalEnv, identity);
     wsAgentServerConfigProvisioner.provision(internalEnv, identity);
     dockerSettingsProvisioners.provision(internalEnv, identity);

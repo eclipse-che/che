@@ -20,7 +20,7 @@ import org.eclipse.che.workspace.infrastructure.openshift.provision.env.EnvVarsC
 import org.eclipse.che.workspace.infrastructure.openshift.provision.restartpolicy.RestartPolicyRewriter;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.route.TlsRouteProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.server.ServersConverter;
-import org.eclipse.che.workspace.infrastructure.openshift.provision.volume.PersistentVolumeClaimProvisioner;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.volume.VolumesProvisioner;
 
 /**
  * Applies the set of configurations to the OpenShift environment and environment configuration with
@@ -32,7 +32,7 @@ import org.eclipse.che.workspace.infrastructure.openshift.provision.volume.Persi
 @Singleton
 public class OpenShiftEnvironmentProvisioner {
 
-  private final PersistentVolumeClaimProvisioner persistentVolumeClaimProvisioner;
+  private final VolumesProvisioner volumesProvisioner;
   private final UniqueNamesProvisioner uniqueNamesProvisioner;
   private final TlsRouteProvisioner tlsRouteProvisioner;
   private final ServersConverter serversConverter;
@@ -41,13 +41,13 @@ public class OpenShiftEnvironmentProvisioner {
 
   @Inject
   public OpenShiftEnvironmentProvisioner(
-      PersistentVolumeClaimProvisioner projectVolumeProvisioner,
+      VolumesProvisioner volumesProvisioner,
       UniqueNamesProvisioner uniqueNamesProvisioner,
       TlsRouteProvisioner tlsRouteProvisioner,
       ServersConverter serversConverter,
       EnvVarsConverter envVarsConverter,
       RestartPolicyRewriter restartPolicyRewriter) {
-    this.persistentVolumeClaimProvisioner = projectVolumeProvisioner;
+    this.volumesProvisioner = volumesProvisioner;
     this.uniqueNamesProvisioner = uniqueNamesProvisioner;
     this.tlsRouteProvisioner = tlsRouteProvisioner;
     this.serversConverter = serversConverter;
@@ -60,10 +60,10 @@ public class OpenShiftEnvironmentProvisioner {
     // 1 stage - converting Che model env to OpenShift env
     serversConverter.provision(osEnv, identity);
     envVarsConverter.provision(osEnv, identity);
+    volumesProvisioner.provision(osEnv, identity);
 
     // 2 stage - add OpenShift env items
     restartPolicyRewriter.provision(osEnv, identity);
-    persistentVolumeClaimProvisioner.provision(osEnv, identity);
     uniqueNamesProvisioner.provision(osEnv, identity);
     tlsRouteProvisioner.provision(osEnv, identity);
   }

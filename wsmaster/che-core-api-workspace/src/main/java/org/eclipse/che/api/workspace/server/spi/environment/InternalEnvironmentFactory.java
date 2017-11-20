@@ -103,7 +103,8 @@ public abstract class InternalEnvironmentFactory<T extends InternalEnvironment> 
               installers,
               normalizeServers(machineConfig.getServers()),
               machineConfig.getEnv(),
-              machineConfig.getAttributes()));
+              machineConfig.getAttributes(),
+              machineConfig.getVolumes()));
     }
 
     machinesValidator.validate(machines);
