@@ -144,6 +144,16 @@ public class ProjectExplorer {
   @FindBy(xpath = Locators.PROJECT_EXPLORER_TAB_IN_THE_LEFT_PANEL)
   WebElement projectExplorerTabInTheLeftPanel;
 
+  /**
+   * @param path path to item in Project Explorer
+   * @return item by path
+   */
+  private WebElement getProjectExplorerItem(String path) {
+    String locator = "//div[@path='/%s']/div";
+    return redrawUiElementsWait.until(
+        ExpectedConditions.visibilityOfElementLocated(By.xpath(String.format(locator, path))));
+  }
+
   public void clickOnProjectExplorerOptionsButton() {
     redrawUiElementsWait
         .until(
@@ -448,7 +458,7 @@ public class ProjectExplorer {
     waitItem(path);
     actionsFactory
         .createAction(seleniumWebDriver)
-        .moveToElement(getProjectExplorerElement(path))
+        .moveToElement(getProjectExplorerItem(path))
         .click()
         .perform();
   }
@@ -459,48 +469,29 @@ public class ProjectExplorer {
    * @param path
    */
   public void openItemByPath(String path) {
-    LOG.debug("===========>>>>  openItemByPath 1");
     Actions action = actionsFactory.createAction(seleniumWebDriver);
     waitItem(path);
-    LOG.debug("===========>>>>  openItemByPath 2");
     selectItem(path);
-    LOG.debug("===========>>>>  openItemByPath 3");
     waitItemIsSelected(path);
-    LOG.debug("===========>>>>  openItemByPath 4");
+
     try {
-      LOG.debug("===========>>>>  openItemByPath try 1");
-      getProjectExplorerElement(path).click();
-      LOG.debug("===========>>>>  openItemByPath try 2");
+      getProjectExplorerItem(path).click();
       waitItemIsSelected(path);
-      LOG.debug("===========>>>>  openItemByPath try 3");
-      action.moveToElement(getProjectExplorerElement(path)).perform();
+      action.moveToElement(getProjectExplorerItem(path)).perform();
       action.doubleClick().perform();
-      LOG.debug("===========>>>>  openItemByPath try 4");
     }
     // sometimes an element in the project explorer may be is not attached to the DOM. We should
     // refresh all items.
     catch (StaleElementReferenceException ex) {
       LOG.error(ex.getLocalizedMessage(), ex);
-      LOG.debug("===========>>>>  openItemByPath catch 1");
       clickOnRefreshTreeButton();
-      LOG.debug("===========>>>>  openItemByPath catch 2");
       waitItem(path);
-      LOG.debug("===========>>>>  openItemByPath catch 3");
-      getProjectExplorerElement(path).click();
-      LOG.debug("===========>>>>  openItemByPath catch 4");
+      getProjectExplorerItem(path).click();
       waitItemIsSelected(path);
-      LOG.debug("===========>>>>  openItemByPath catch 5");
-      action.moveToElement(getProjectExplorerElement(path)).perform();
+      action.moveToElement(getProjectExplorerItem(path)).perform();
       action.doubleClick().perform();
-      LOG.debug("===========>>>>  openItemByPath catch 6");
     }
     loader.waitOnClosed();
-  }
-
-  private WebElement getProjectExplorerElement(String path) {
-    String locator = "//div[@path='/%s']/div";
-    return redrawUiElementsWait.until(
-        ExpectedConditions.visibilityOfElementLocated(By.xpath(String.format(locator, path))));
   }
 
   /**
@@ -585,7 +576,7 @@ public class ProjectExplorer {
     waitItemIsSelected(path);
 
     Actions action = actionsFactory.createAction(seleniumWebDriver);
-    action.moveToElement(getProjectExplorerElement(path)).contextClick().perform();
+    action.moveToElement(getProjectExplorerItem(path)).contextClick().perform();
 
     waitContextMenu();
   }
