@@ -65,7 +65,7 @@ public class CheckWorkingWithTabByUsingTabListTest {
     projectExplorer.quickExpandWithJavaScript();
     loader.waitOnClosed();
     openTabsInEditor();
-    editor.changeWidthWindowForEditor(900);
+
     editor.openTabList();
     editor.waitTabIsPresentInTabList(NAME_TO_JAVA_CLASS);
     editor.waitTabIsPresentInTabList(NAME_TO_CSS);
