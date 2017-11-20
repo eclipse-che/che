@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.resources.impl;
 
 import static com.google.common.base.Optional.absent;
-import static com.google.common.base.Optional.fromNullable;
 import static com.google.common.base.Optional.of;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -105,6 +104,7 @@ import org.eclipse.che.ide.util.Arrays;
  */
 @Beta
 public final class ResourceManager {
+
   /** Describes zero depth level for the descendants. */
   private static final int DEPTH_ZERO = 0;
 
@@ -335,30 +335,28 @@ public final class ResourceManager {
   Promise<Folder> createFolder(final Container parent, final String name) {
     final Path path = Path.valueOf(name);
 
-    return findResource(parent.getLocation().append(path), true)
+    Optional<Resource> existed = store.getResource(parent.getLocation().append(name));
+
+    if (existed.isPresent()) {
+      return promises.reject(new IllegalStateException("Resource already exists"));
+    }
+
+    if (parent.getLocation().isRoot()) {
+      return promises.reject(
+          new IllegalArgumentException("Failed to create folder in workspace root"));
+    }
+
+    if (path.segmentCount() == 1 && !checkFolderName(name)) {
+      return promises.reject(new IllegalArgumentException("Invalid folder name"));
+    }
+
+    return ps.createFolder(parent.getLocation().append(name))
         .thenPromise(
-            resource -> {
-              if (resource.isPresent()) {
-                return promises.reject(new IllegalStateException("Resource already exists"));
-              }
+            reference -> {
+              final Resource createdFolder = newResourceFrom(reference);
+              store.register(createdFolder);
 
-              if (parent.getLocation().isRoot()) {
-                return promises.reject(
-                    new IllegalArgumentException("Failed to create folder in workspace root"));
-              }
-
-              if (path.segmentCount() == 1 && !checkFolderName(name)) {
-                return promises.reject(new IllegalArgumentException("Invalid folder name"));
-              }
-
-              return ps.createFolder(parent.getLocation().append(name))
-                  .thenPromise(
-                      reference -> {
-                        final Resource createdFolder = newResourceFrom(reference);
-                        store.register(createdFolder);
-
-                        return promises.resolve(createdFolder.asFolder());
-                      });
+              return promises.resolve(createdFolder.asFolder());
             });
   }
 
@@ -367,26 +365,24 @@ public final class ResourceManager {
       return promises.reject(new IllegalArgumentException("Invalid file name"));
     }
 
-    return findResource(parent.getLocation().append(name), true)
+    Optional<Resource> existed = store.getResource(parent.getLocation().append(name));
+
+    if (existed.isPresent()) {
+      return promises.reject(new IllegalStateException("Resource already exists"));
+    }
+
+    if (parent.getLocation().isRoot()) {
+      return promises.reject(
+          new IllegalArgumentException("Failed to create file in workspace root"));
+    }
+
+    return ps.createFile(parent.getLocation().append(name), content)
         .thenPromise(
-            resource -> {
-              if (resource.isPresent()) {
-                return promises.reject(new IllegalStateException("Resource already exists"));
-              }
+            reference -> {
+              final Resource createdFile = newResourceFrom(reference);
+              store.register(createdFile);
 
-              if (parent.getLocation().isRoot()) {
-                return promises.reject(
-                    new IllegalArgumentException("Failed to create file in workspace root"));
-              }
-
-              return ps.createFile(parent.getLocation().append(name), content)
-                  .thenPromise(
-                      reference -> {
-                        final Resource createdFile = newResourceFrom(reference);
-                        store.register(createdFile);
-
-                        return promises.resolve(createdFile.asFile());
-                      });
+              return promises.resolve(createdFile.asFile());
             });
   }
 
@@ -769,6 +765,7 @@ public final class ResourceManager {
               public Resource[] apply(TreeElement tree) throws FunctionException {
 
                 class Visitor implements ResourceVisitor {
+
                   Resource[] resources;
 
                   private int size = 0; // size of total items
@@ -946,28 +943,42 @@ public final class ResourceManager {
     }
   }
 
-  private Promise<Optional<Resource>> findResource(final Path absolutePath, boolean quiet) {
-    return ps.getItem(absolutePath)
+  private Promise<Optional<Resource>> doFindResource(Path path) {
+    return ps.getTree(path.parent(), 1, true)
         .thenPromise(
-            itemReference -> {
-              final Resource resource = newResourceFrom(itemReference);
+            treeElement -> {
+              Resource resource = null;
 
-              store.register(resource);
+              for (TreeElement nodeElement : treeElement.getChildren()) {
+                ItemReference reference = nodeElement.getNode();
+                Resource tempResource = newResourceFrom(reference);
+                store.register(tempResource);
 
-              if (resource.isProject()) {
-                inspectProject(resource.asProject());
+                if (tempResource.isProject()) {
+                  inspectProject(tempResource.asProject());
+                }
+
+                if (tempResource.getLocation().equals(path)) {
+                  resource = tempResource;
+                }
               }
 
-              return promises.resolve(fromNullable(resource));
+              return promises.resolve(Optional.fromNullable(resource));
             })
-        .catchErrorPromise(
-            arg -> {
-              if (!quiet) {
-                throw new IllegalStateException(arg.getCause());
-              }
+        .catchErrorPromise(error -> promises.resolve(absent()));
+  }
 
-              return promises.resolve(absent());
-            });
+  private Promise<Optional<Resource>> findResource(final Path absolutePath, boolean quiet) {
+    String[] segments = absolutePath.segments();
+
+    Promise<Optional<Resource>> chain = promises.resolve(null);
+
+    for (int i = 0; i <= segments.length; i++) {
+      Path pathToRetrieve = absolutePath.removeLastSegments(segments.length - i);
+      chain = chain.thenPromise(__ -> doFindResource(pathToRetrieve));
+    }
+
+    return chain;
   }
 
   private Promise<Optional<Resource>> findResourceForExternalOperation(
@@ -1330,10 +1341,12 @@ public final class ResourceManager {
   }
 
   interface ResourceVisitor {
+
     void visit(Resource resource);
   }
 
   public interface ResourceFactory {
+
     ProjectImpl newProjectImpl(ProjectConfig reference, ResourceManager resourceManager);
 
     FolderImpl newFolderImpl(Path path, ResourceManager resourceManager);
@@ -1343,6 +1356,7 @@ public final class ResourceManager {
   }
 
   public interface ResourceManagerFactory {
+
     ResourceManager newResourceManager(DevMachine devMachine);
   }
 }
