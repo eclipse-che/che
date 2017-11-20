@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import javax.inject.Inject;
@@ -35,7 +37,8 @@ import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.DtoConverter;
-import org.eclipse.che.api.workspace.server.URLRewriter;
+import org.eclipse.che.api.workspace.server.URLRewriter.NoOpURLRewriter;
+import org.eclipse.che.api.workspace.server.WorkspaceSharedPool;
 import org.eclipse.che.api.workspace.server.hc.ServersChecker;
 import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -73,22 +76,25 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
   private final Map<String, OpenShiftMachine> machines;
   private final int machineStartTimeoutMin;
   private final OpenShiftProject project;
+  private final WorkspaceSharedPool pool;
 
   @Inject
   public OpenShiftInternalRuntime(
       @Named("che.infra.openshift.machine_start_timeout_min") int machineStartTimeoutMin,
-      URLRewriter.NoOpURLRewriter urlRewriter,
+      NoOpURLRewriter urlRewriter,
       EventService eventService,
       OpenShiftBootstrapperFactory bootstrapperFactory,
       ServersCheckerFactory serverCheckerFactory,
       @Assisted OpenShiftRuntimeContext context,
-      @Assisted OpenShiftProject project) {
+      @Assisted OpenShiftProject project,
+      WorkspaceSharedPool pool) {
     super(context, urlRewriter, false);
     this.eventService = eventService;
     this.bootstrapperFactory = bootstrapperFactory;
     this.serverCheckerFactory = serverCheckerFactory;
     this.machineStartTimeoutMin = machineStartTimeoutMin;
     this.project = project;
+    this.pool = pool;
     this.machines = new ConcurrentHashMap<>();
   }
 
@@ -110,19 +116,8 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
       project.pods().watchContainers(new MachineLogsPublisher());
 
       createPods(createdServices, createdRoutes);
+      bootstrapMachines();
 
-      // TODO Rework it to parallel waiting https://github.com/eclipse/che/issues/7067
-      for (OpenShiftMachine machine : machines.values()) {
-        try {
-          machine.waitRunning(machineStartTimeoutMin);
-          bootstrapMachine(machine);
-          checkMachineServers(machine);
-          sendRunningEvent(machine.getName());
-        } catch (InfrastructureException rethrow) {
-          sendFailedEvent(machine.getName(), rethrow.getMessage());
-          throw rethrow;
-        }
-      }
     } catch (InfrastructureException | RuntimeException | InterruptedException e) {
       LOG.error("Failed to start of OpenShift runtime. " + e.getMessage());
       boolean interrupted = Thread.interrupted() || e instanceof InterruptedException;
@@ -140,6 +135,67 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
       } catch (Exception wrap) {
         throw new InternalInfrastructureException(e.getMessage(), wrap);
       }
+    }
+  }
+
+  /**
+   * Bootstraps machines in parallel.
+   *
+   * @throws InfrastructureException when any error occurs while bootstrapping machines
+   * @throws InterruptedException when machines bootstrapping was interrupted
+   */
+  private void bootstrapMachines() throws InfrastructureException, InterruptedException {
+    List<CompletableFuture> checkMachines = new ArrayList<>(machines.size());
+    List<BootstrapMachineTask> tasks = new ArrayList<>(machines.size());
+
+    for (OpenShiftMachine machine : machines.values()) {
+      BootstrapMachineTask task = new BootstrapMachineTask(machine);
+      tasks.add(task);
+      checkMachines.add(pool.runAsync(task));
+    }
+    try {
+      CompletableFuture.allOf(checkMachines.toArray(new CompletableFuture[checkMachines.size()]))
+          .join();
+    } catch (CompletionException e) {
+      tasks.forEach(BootstrapMachineTask::interrupt);
+      if (e.getCause() instanceof InterruptedException) {
+        throw (InterruptedException) e.getCause();
+      } else if (e.getCause() instanceof InfrastructureException) {
+        throw (InfrastructureException) e.getCause();
+      } else {
+        throw new InternalInfrastructureException(e.getCause().getMessage(), e.getCause());
+      }
+    }
+  }
+
+  private class BootstrapMachineTask implements Runnable {
+
+    private OpenShiftMachine machine;
+
+    BootstrapMachineTask(OpenShiftMachine machine) {
+      this.machine = machine;
+    }
+
+    @Override
+    public void run() {
+      if (Thread.interrupted()) {
+        return;
+      }
+      try {
+        machine.waitRunning(machineStartTimeoutMin);
+        bootstrapMachine(machine);
+        checkMachineServers(machine);
+        sendRunningEvent(machine.getName());
+      } catch (InfrastructureException ex) {
+        sendFailedEvent(machine.getName(), ex.getMessage());
+        throw new CompletionException(ex);
+      } catch (InterruptedException ei) {
+        throw new CompletionException(ei);
+      }
+    }
+
+    public void interrupt() {
+      Thread.currentThread().interrupt();
     }
   }
 
