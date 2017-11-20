@@ -17,8 +17,6 @@ import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import java.util.ArrayList;
-import java.util.List;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
 import org.eclipse.che.selenium.core.annotation.Multiuser;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
@@ -39,10 +37,9 @@ import org.testng.annotations.Test;
  */
 @Multiuser
 public class DeleteOrganizationTest {
-  private static final String PARENT_ORG_NAME = generate("parent-org", 5);
-  private static final String CHILD_ORG_NAME = generate("child-org", 5);
+  private static final String PARENT_ORG_NAME = generate("parent-org-", 5);
+  private static final String CHILD_ORG_NAME = generate("child-org-", 5);
 
-  private List<OrganizationDto> organizations = new ArrayList<>();
   private OrganizationDto parentOrganization;
   private OrganizationDto childOrganization;
 
@@ -59,20 +56,24 @@ public class DeleteOrganizationTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    parentOrganization = testOrganizationServiceClient.create(PARENT_ORG_NAME);
-    childOrganization = testOrganizationServiceClient.create(CHILD_ORG_NAME);
-    testOrganizationServiceClient.addAdmin(parentOrganization.getId(), testUser.getId());
-    testOrganizationServiceClient.addAdmin(childOrganization.getId(), testUser.getId());
-    organizations.add(parentOrganization);
-    organizations.add(childOrganization);
+    try {
+      parentOrganization = testOrganizationServiceClient.create(PARENT_ORG_NAME);
+      childOrganization = testOrganizationServiceClient.create(CHILD_ORG_NAME);
+      testOrganizationServiceClient.addAdmin(parentOrganization.getId(), testUser.getId());
+      testOrganizationServiceClient.addAdmin(childOrganization.getId(), testUser.getId());
 
-    dashboard.open(testUser.getName(), testUser.getPassword());
+      dashboard.open(testUser.getName(), testUser.getPassword());
+    } catch (Exception e) {
+      // remove test organizations in case of error because TestNG skips @AfterClass method here
+      tearDown();
+      throw e;
+    }
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    testOrganizationServiceClient.deleteById(childOrganization.getId());
-    testOrganizationServiceClient.deleteById(parentOrganization.getId());
+    testOrganizationServiceClient.deleteByName(CHILD_ORG_NAME);
+    testOrganizationServiceClient.deleteByName(PARENT_ORG_NAME);
   }
 
   @Test
@@ -90,8 +91,8 @@ public class DeleteOrganizationTest {
     // Test that the organization deleted
     organizationListPage.waitForOrganizationsList();
     organizationListPage.waitForOrganizationIsRemoved(childOrganization.getQualifiedName());
-    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) >= 1);
-    assertTrue(organizationListPage.getOrganizationListItemCount() >= 1);
+    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) == 1);
+    assertTrue(organizationListPage.getOrganizationListItemCount() == 1);
   }
 
   @Test(priority = 1)
@@ -107,7 +108,7 @@ public class DeleteOrganizationTest {
     deleteOrganization(parentOrganization.getName());
 
     // Test that the organization deleted
-    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) >= 0);
+    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) == 0);
   }
 
   private void deleteOrganization(String organizationName) {

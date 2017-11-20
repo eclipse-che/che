@@ -47,7 +47,7 @@ public class UserEmptyOrganizationTest {
     organizationListPage.waitForOrganizationsEmptyList();
 
     // Test UI views of organizations list for simple user
-    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) >= 0);
+    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) == 0);
     assertEquals(organizationListPage.getOrganizationsToolbarTitle(), "Organizations");
     assertFalse(organizationListPage.isAddOrganizationButtonVisible());
     assertFalse(organizationListPage.isSearchInputVisible());

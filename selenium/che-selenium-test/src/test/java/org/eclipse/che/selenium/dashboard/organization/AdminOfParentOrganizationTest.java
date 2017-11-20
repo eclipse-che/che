@@ -44,8 +44,8 @@ import org.testng.annotations.Test;
  */
 @Multiuser
 public class AdminOfParentOrganizationTest {
-  private static final String PARENT_ORG_NAME = generate("parent-org", 5);
-  private static final String CHILD_ORG_NAME = generate("child-org", 5);
+  private static final String PARENT_ORG_NAME = generate("parent-org-", 5);
+  private static final String CHILD_ORG_NAME = generate("child-org-", 5);
 
   private OrganizationDto parentOrganization;
   private OrganizationDto childOrganization;
@@ -62,19 +62,25 @@ public class AdminOfParentOrganizationTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    parentOrganization = testOrganizationServiceClient.create(PARENT_ORG_NAME);
-    childOrganization =
-        testOrganizationServiceClient.create(CHILD_ORG_NAME, parentOrganization.getId());
-    testOrganizationServiceClient.addAdmin(parentOrganization.getId(), testUser.getId());
-    testOrganizationServiceClient.addMember(childOrganization.getId(), testUser.getId());
+    try {
+      parentOrganization = testOrganizationServiceClient.create(PARENT_ORG_NAME);
+      childOrganization =
+          testOrganizationServiceClient.create(CHILD_ORG_NAME, parentOrganization.getId());
+      testOrganizationServiceClient.addAdmin(parentOrganization.getId(), testUser.getId());
+      testOrganizationServiceClient.addMember(childOrganization.getId(), testUser.getId());
 
-    dashboard.open(testUser.getName(), testUser.getPassword());
+      dashboard.open(testUser.getName(), testUser.getPassword());
+    } catch (Exception e) {
+      // remove test organizations in case of error because TestNG skips @AfterClass method here
+      tearDown();
+      throw e;
+    }
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    testOrganizationServiceClient.deleteById(childOrganization.getId());
-    testOrganizationServiceClient.deleteById(parentOrganization.getId());
+    testOrganizationServiceClient.deleteByName(CHILD_ORG_NAME);
+    testOrganizationServiceClient.deleteByName(PARENT_ORG_NAME);
   }
 
   @Test

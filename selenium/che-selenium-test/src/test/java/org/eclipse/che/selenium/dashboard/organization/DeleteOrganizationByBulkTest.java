@@ -19,9 +19,6 @@ import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import java.util.ArrayList;
-import java.util.List;
-import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
 import org.eclipse.che.selenium.core.annotation.Multiuser;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
@@ -40,10 +37,9 @@ import org.testng.annotations.Test;
  */
 @Multiuser
 public class DeleteOrganizationByBulkTest {
-  private static final String ORG_NAME1 = generate("organization1", 5);
-  private static final String ORG_NAME2 = generate("organization2", 5);
-
-  private List<OrganizationDto> organizations = new ArrayList<>();
+  private static final String ORG1_NAME = generate("org1-", 5);
+  private static final String ORG2_NAME = generate("org2-", 5);
+  private static final int ORGANIZATIONS_NUMBER = 2;
 
   @Inject
   @Named("admin")
@@ -57,42 +53,45 @@ public class DeleteOrganizationByBulkTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    organizations.add(testOrganizationServiceClient.create(ORG_NAME1));
-    organizations.add(testOrganizationServiceClient.create(ORG_NAME2));
+    try {
+      testOrganizationServiceClient.create(ORG1_NAME);
+      testOrganizationServiceClient.create(ORG2_NAME);
 
-    dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
+      dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
+    } catch (Exception e) {
+      // remove test organizations in case of error because TestNG skips @AfterClass method here
+      tearDown();
+      throw e;
+    }
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    for (OrganizationDto organization : organizations) {
-      testOrganizationServiceClient.deleteById(organization.getId());
-    }
+    testOrganizationServiceClient.deleteByName(ORG1_NAME);
+    testOrganizationServiceClient.deleteByName(ORG2_NAME);
   }
 
   @Test
   public void testOrganizationBulkDeletion() {
-    int organizationsCount = organizations.size();
-
     // Check that created organization exist
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
-    assertTrue(organizationListPage.getOrganizationListItemCount() >= organizationsCount);
-    assertTrue(organizationListPage.getValues(NAME).contains(ORG_NAME1));
-    assertTrue(organizationListPage.getValues(NAME).contains(ORG_NAME2));
+    assertTrue(organizationListPage.getOrganizationListItemCount() == ORGANIZATIONS_NUMBER);
+    assertTrue(organizationListPage.getValues(NAME).contains(ORG1_NAME));
+    assertTrue(organizationListPage.getValues(NAME).contains(ORG2_NAME));
 
     // Tests the Bulk Delete feature
     assertFalse(organizationListPage.isBulkDeleteVisible());
-    organizationListPage.clickCheckbox(ORG_NAME1);
-    organizationListPage.clickCheckbox(ORG_NAME2);
+    organizationListPage.clickCheckbox(ORG1_NAME);
+    organizationListPage.clickCheckbox(ORG2_NAME);
     assertTrue(organizationListPage.isBulkDeleteVisible());
-    organizationListPage.clickCheckbox(ORG_NAME1);
-    organizationListPage.clickCheckbox(ORG_NAME2);
+    organizationListPage.clickCheckbox(ORG1_NAME);
+    organizationListPage.clickCheckbox(ORG2_NAME);
     assertFalse(organizationListPage.isBulkDeleteVisible());
-    organizationListPage.clickCheckbox(ORG_NAME1);
-    organizationListPage.clickCheckbox(ORG_NAME2);
+    organizationListPage.clickCheckbox(ORG1_NAME);
+    organizationListPage.clickCheckbox(ORG2_NAME);
     assertTrue(organizationListPage.isBulkDeleteVisible());
 
     // Delete all organizations by the Bulk Delete feature
@@ -101,7 +100,7 @@ public class DeleteOrganizationByBulkTest {
     assertEquals(confirmDialog.getTitle(), "Delete organizations");
     assertEquals(
         confirmDialog.getMessage(),
-        String.format("Would you like to delete these %s organizations?", organizationsCount));
+        String.format("Would you like to delete these %s organizations?", ORGANIZATIONS_NUMBER));
     assertEquals(confirmDialog.getConfirmButtonTitle(), "Delete");
     assertEquals(confirmDialog.getCancelButtonTitle(), "Close");
     confirmDialog.clickConfirm();
@@ -109,11 +108,11 @@ public class DeleteOrganizationByBulkTest {
     organizationListPage.waitForOrganizationsList();
 
     // Test that all organization removed
-    organizationListPage.waitForOrganizationIsRemoved(ORG_NAME1);
-    organizationListPage.waitForOrganizationIsRemoved(ORG_NAME2);
-    assertTrue(organizationListPage.getOrganizationListItemCount() >= 0);
-    assertFalse(organizationListPage.getValues(NAME).contains(ORG_NAME1));
-    assertFalse(organizationListPage.getValues(NAME).contains(ORG_NAME2));
-    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) >= 0);
+    organizationListPage.waitForOrganizationIsRemoved(ORG1_NAME);
+    organizationListPage.waitForOrganizationIsRemoved(ORG2_NAME);
+    assertTrue(organizationListPage.getOrganizationListItemCount() == 0);
+    assertFalse(organizationListPage.getValues(NAME).contains(ORG1_NAME));
+    assertFalse(organizationListPage.getValues(NAME).contains(ORG2_NAME));
+    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) == 0);
   }
 }

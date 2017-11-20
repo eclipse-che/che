@@ -17,9 +17,6 @@ import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import java.util.ArrayList;
-import java.util.List;
-import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
 import org.eclipse.che.selenium.core.annotation.Multiuser;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
@@ -39,9 +36,11 @@ import org.testng.annotations.Test;
  */
 @Multiuser
 public class FilterOrganizationTest {
-  private static final String ORGANIZATION_NAME = generate("organization", 5);
-
-  private List<OrganizationDto> organizations = new ArrayList<>();
+  private static final String ORG1_NAME = generate("org1-", 7);
+  private static final String ORG2_NAME = generate("org2-", 7);
+  private static final String ORG3_NAME = generate("org3-", 7);
+  private static final String ORG4_NAME = generate("org4-", 7);
+  private static final int ORGANIZATIONS_NUMBER = 4;
 
   @Inject
   @Named("admin")
@@ -56,55 +55,59 @@ public class FilterOrganizationTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    organizations.add(testOrganizationServiceClient.create(ORGANIZATION_NAME));
-    organizations.add(testOrganizationServiceClient.create(generate("organization", 7)));
-    organizations.add(testOrganizationServiceClient.create(generate("organization", 7)));
-    organizations.add(testOrganizationServiceClient.create(generate("organization", 7)));
+    try {
+      testOrganizationServiceClient.create(ORG1_NAME);
+      testOrganizationServiceClient.create(ORG2_NAME);
+      testOrganizationServiceClient.create(ORG3_NAME);
+      testOrganizationServiceClient.create(ORG4_NAME);
 
-    dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
+      dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
+    } catch (Exception e) {
+      // remove test organizations in case of error because TestNG skips @AfterClass method here
+      tearDown();
+      throw e;
+    }
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    for (OrganizationDto organization : organizations) {
-      testOrganizationServiceClient.deleteById(organization.getId());
-    }
+    testOrganizationServiceClient.deleteByName(ORG1_NAME);
+    testOrganizationServiceClient.deleteByName(ORG2_NAME);
+    testOrganizationServiceClient.deleteByName(ORG3_NAME);
+    testOrganizationServiceClient.deleteByName(ORG4_NAME);
   }
 
   @Test
   public void testOrganizationListFiler() {
-    int organizationsCount = organizations.size();
-
     // Test that organization exist
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
-    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) >= organizationsCount);
-    assertTrue(organizationListPage.getOrganizationListItemCount() >= organizationsCount);
-    assertTrue(organizationListPage.getValues(NAME).contains(ORGANIZATION_NAME));
+    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) == ORGANIZATIONS_NUMBER);
+    assertTrue(organizationListPage.getOrganizationListItemCount() == ORGANIZATIONS_NUMBER);
+    assertTrue(organizationListPage.getValues(NAME).contains(ORG1_NAME));
 
     // Tests filter the organization by full organization name
-    organizationListPage.typeInSearchInput(ORGANIZATION_NAME);
+    organizationListPage.typeInSearchInput(ORG1_NAME);
     organizationListPage.waitForOrganizationsList();
-    assertTrue(organizationListPage.getValues(NAME).contains(ORGANIZATION_NAME));
-    assertTrue(organizationListPage.getOrganizationListItemCount() >= 1);
+    assertTrue(organizationListPage.getValues(NAME).contains(ORG1_NAME));
+    assertTrue(organizationListPage.getOrganizationListItemCount() == 1);
 
     // Tests filter the organization by part of organization name
     organizationListPage.clearSearchInput();
-    organizationListPage.typeInSearchInput(
-        ORGANIZATION_NAME.substring(ORGANIZATION_NAME.length() / 2));
+    organizationListPage.typeInSearchInput(ORG1_NAME.substring(ORG1_NAME.length() / 2));
     organizationListPage.waitForOrganizationsList();
-    assertTrue(organizationListPage.getValues(NAME).contains(ORGANIZATION_NAME));
-    assertTrue(organizationListPage.getOrganizationListItemCount() >= 1);
+    assertTrue(organizationListPage.getValues(NAME).contains(ORG1_NAME));
+    assertTrue(organizationListPage.getOrganizationListItemCount() == 1);
 
     // Test filter the organization by wrong name
     organizationListPage.clearSearchInput();
-    organizationListPage.typeInSearchInput(ORGANIZATION_NAME + "wrong_name");
+    organizationListPage.typeInSearchInput(ORG1_NAME + "_wrong_name");
     organizationListPage.waitForOrganizationsList();
-    assertTrue(organizationListPage.getOrganizationListItemCount() >= 0);
+    assertTrue(organizationListPage.getOrganizationListItemCount() == 0);
 
     organizationListPage.clearSearchInput();
-    assertTrue(organizationListPage.getOrganizationListItemCount() >= organizationsCount);
+    assertTrue(organizationListPage.getOrganizationListItemCount() == ORGANIZATIONS_NUMBER);
   }
 }

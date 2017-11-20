@@ -34,8 +34,8 @@ import org.testng.annotations.Test;
 /** @author Sergey Skorik */
 @Multiuser
 public class OrganizationMembersTest {
-  private static final String PRE_CREATED_ORG_NAME = generate("organization", 5);
-  private static final String NEW_ORG_NAME = generate("new-org", 5);
+  private static final String PRE_CREATED_ORG_NAME = generate("org-", 5);
+  private static final String NEW_ORG_NAME = generate("new-org-", 5);
 
   private OrganizationDto organization;
   private String memberEmail;
@@ -56,17 +56,23 @@ public class OrganizationMembersTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    memberEmail = testUser.getEmail();
+    try {
+      memberEmail = testUser.getEmail();
 
-    organization = testOrganizationServiceClient.create(PRE_CREATED_ORG_NAME);
-    testOrganizationServiceClient.addAdmin(organization.getId(), adminTestUser.getId());
-    dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
+      organization = testOrganizationServiceClient.create(PRE_CREATED_ORG_NAME);
+      testOrganizationServiceClient.addAdmin(organization.getId(), adminTestUser.getId());
+      dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
+    } catch (Exception e) {
+      // remove test organizations in case of error because TestNG skips @AfterClass method here
+      tearDown();
+      throw e;
+    }
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    testOrganizationServiceClient.deleteById(organization.getId());
     testOrganizationServiceClient.deleteByName(NEW_ORG_NAME);
+    testOrganizationServiceClient.deleteByName(PRE_CREATED_ORG_NAME);
   }
 
   @Test

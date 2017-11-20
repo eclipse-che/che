@@ -44,8 +44,9 @@ import org.testng.annotations.Test;
  */
 @Multiuser
 public class SystemAdminOrganizationTest {
-  private static final String PARENT_ORG_NAME = generate("parent-org", 5);
-  private static final String CHILD_ORG_NAME = generate("child-org", 5);
+  private static final String PARENT_ORG_NAME = generate("parent-org-", 5);
+  private static final String CHILD_ORG_NAME = generate("child-org-", 5);
+  private static final int ORGANIZATIONS_NUMBER = 1;
 
   private OrganizationDto parentOrganization;
   private OrganizationDto childOrganization;
@@ -62,34 +63,38 @@ public class SystemAdminOrganizationTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    parentOrganization = testOrganizationServiceClient.create(PARENT_ORG_NAME);
-    childOrganization =
-        testOrganizationServiceClient.create(CHILD_ORG_NAME, parentOrganization.getId());
-    testOrganizationServiceClient.addAdmin(parentOrganization.getId(), adminTestUser.getId());
+    try {
+      parentOrganization = testOrganizationServiceClient.create(PARENT_ORG_NAME);
+      childOrganization =
+          testOrganizationServiceClient.create(CHILD_ORG_NAME, parentOrganization.getId());
+      testOrganizationServiceClient.addAdmin(parentOrganization.getId(), adminTestUser.getId());
 
-    dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
+      dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
+    } catch (Exception e) {
+      // remove test organizations in case of error because TestNG skips @AfterClass method here
+      tearDown();
+      throw e;
+    }
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    testOrganizationServiceClient.deleteById(childOrganization.getId());
-    testOrganizationServiceClient.deleteById(parentOrganization.getId());
+    testOrganizationServiceClient.deleteByName(CHILD_ORG_NAME);
+    testOrganizationServiceClient.deleteByName(PARENT_ORG_NAME);
   }
 
   @Test
   public void testOrganizationListComponents() {
-    int organizationsCount = 1;
-
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
 
     // Test UI views of organizations list
-    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) >= organizationsCount);
+    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) == ORGANIZATIONS_NUMBER);
     assertEquals(organizationListPage.getOrganizationsToolbarTitle(), "Organizations");
-    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) >= organizationsCount);
-    assertTrue(organizationListPage.getOrganizationListItemCount() >= organizationsCount);
+    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) == ORGANIZATIONS_NUMBER);
+    assertTrue(organizationListPage.getOrganizationListItemCount() == ORGANIZATIONS_NUMBER);
     assertTrue(organizationListPage.isAddOrganizationButtonVisible());
     assertTrue(organizationListPage.isSearchInputVisible());
 
@@ -134,7 +139,7 @@ public class SystemAdminOrganizationTest {
     assertTrue(organizationListPage.isAddSubOrganizationButtonVisible());
     assertTrue(organizationListPage.getValues(NAME).contains(childOrganization.getQualifiedName()));
 
-    // Create a suborganization and test system admin permissions
+    // Create a sub-organization and test system admin permissions
     organizationListPage.clickOnOrganization(childOrganization.getQualifiedName());
     organizationPage.waitOrganizationTitle(childOrganization.getQualifiedName());
     assertFalse(organizationPage.isOrganizationNameReadonly());

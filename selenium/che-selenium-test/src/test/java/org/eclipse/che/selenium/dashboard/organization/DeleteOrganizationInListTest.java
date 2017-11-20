@@ -19,9 +19,6 @@ import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import java.util.ArrayList;
-import java.util.List;
-import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
 import org.eclipse.che.selenium.core.annotation.Multiuser;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
@@ -40,11 +37,12 @@ import org.testng.annotations.Test;
  */
 @Multiuser
 public class DeleteOrganizationInListTest {
-  private static final String ORGANIZATION_NAME = generate("organization", 7);
 
-  private List<OrganizationDto> organizations = new ArrayList<>();
-  private OrganizationDto organization;
-  private int organizationsCount;
+  private static final String ORG1_NAME = generate("org1-", 7);
+  private static final String ORG2_NAME = generate("org2-", 7);
+  private static final String ORG3_NAME = generate("org3-", 7);
+  private static final String ORG4_NAME = generate("org4-", 7);
+  private static final int ORGANIZATIONS_NUMBER = 4;
 
   @Inject
   @Named("admin")
@@ -58,21 +56,25 @@ public class DeleteOrganizationInListTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    organization = testOrganizationServiceClient.create(ORGANIZATION_NAME);
-    organizations.add(organization);
-    organizations.add(testOrganizationServiceClient.create(generate("organization", 7)));
-    organizations.add(testOrganizationServiceClient.create(generate("organization", 7)));
-    organizations.add(testOrganizationServiceClient.create(generate("organization", 7)));
-
-    organizationsCount = organizations.size();
-    dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
+    try {
+      testOrganizationServiceClient.create(ORG1_NAME);
+      testOrganizationServiceClient.create(ORG2_NAME);
+      testOrganizationServiceClient.create(ORG3_NAME);
+      testOrganizationServiceClient.create(ORG4_NAME);
+      dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
+    } catch (Exception e) {
+      // remove test organizations in case of error because TestNG skips @AfterClass method here
+      tearDown();
+      throw e;
+    }
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    for (OrganizationDto organization : organizations) {
-      testOrganizationServiceClient.deleteById(organization.getId());
-    }
+    testOrganizationServiceClient.deleteByName(ORG1_NAME);
+    testOrganizationServiceClient.deleteByName(ORG2_NAME);
+    testOrganizationServiceClient.deleteByName(ORG3_NAME);
+    testOrganizationServiceClient.deleteByName(ORG4_NAME);
   }
 
   @Test
@@ -82,35 +84,36 @@ public class DeleteOrganizationInListTest {
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
-    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) >= organizationsCount);
-    assertTrue(organizationListPage.getOrganizationListItemCount() >= organizationsCount);
-    assertTrue(organizationListPage.getValues(NAME).contains(organization.getName()));
+    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) == ORGANIZATIONS_NUMBER);
+    assertTrue(organizationListPage.getOrganizationListItemCount() == ORGANIZATIONS_NUMBER);
+    assertTrue(organizationListPage.getValues(NAME).contains(ORG1_NAME));
 
     // Tests the Delete organization dialog
-    organizationListPage.clickOnDeleteButton(organization.getName());
+    organizationListPage.clickOnDeleteButton(ORG1_NAME);
     confirmDialog.waitOpened();
     assertEquals(confirmDialog.getTitle(), "Delete organization");
     assertEquals(
         confirmDialog.getMessage(),
-        String.format("Would you like to delete organization '%s'?", organization.getName()));
+        String.format("Would you like to delete organization '%s'?", ORG1_NAME));
     assertEquals(confirmDialog.getConfirmButtonTitle(), "Delete");
     assertEquals(confirmDialog.getCancelButtonTitle(), "Close");
     confirmDialog.closeDialog();
     confirmDialog.waitClosed();
-    assertTrue(organizationListPage.getOrganizationListItemCount() >= organizationsCount);
-    organizationListPage.clickOnDeleteButton(organization.getName());
+    assertTrue(organizationListPage.getOrganizationListItemCount() == ORGANIZATIONS_NUMBER);
+    organizationListPage.clickOnDeleteButton(ORG1_NAME);
     confirmDialog.waitOpened();
     confirmDialog.clickCancel();
     confirmDialog.waitClosed();
-    assertTrue(organizationListPage.getOrganizationListItemCount() >= organizationsCount);
+    assertTrue(organizationListPage.getOrganizationListItemCount() == ORGANIZATIONS_NUMBER);
 
     // Delete all organizations from the Organization list
-    for (OrganizationDto org : organizations) {
-      deleteOrganization(org.getName());
-    }
+    deleteOrganization(ORG1_NAME);
+    deleteOrganization(ORG2_NAME);
+    deleteOrganization(ORG3_NAME);
+    deleteOrganization(ORG4_NAME);
 
     // Check that all organization deleted
-    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) >= 0);
+    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) == 0);
   }
 
   private void deleteOrganization(String organizationName) {
@@ -119,11 +122,10 @@ public class DeleteOrganizationInListTest {
     confirmDialog.clickConfirm();
     confirmDialog.waitClosed();
     organizationListPage.waitForOrganizationsList();
-    organizationsCount = organizationsCount - 1;
 
     // Test that organization deleted
-    assertTrue(organizationListPage.getOrganizationListItemCount() >= organizationsCount);
+    assertTrue(organizationListPage.getOrganizationListItemCount() == ORGANIZATIONS_NUMBER - 1);
     assertFalse(organizationListPage.getValues(NAME).contains(organizationName));
-    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) >= organizationsCount);
+    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) == ORGANIZATIONS_NUMBER - 1);
   }
 }

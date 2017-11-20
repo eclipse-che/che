@@ -36,8 +36,9 @@ import org.testng.annotations.Test;
  */
 @Multiuser
 public class CreateOrganizationTest {
-  private static final String ORGANIZATION_NAME = generate("organization", 4);
-  private static final String SUB_ORGANIZATION_NAME = generate("sub-organization", 4);
+  private static final String PARENT_ORG_NAME = generate("parent-org-", 4);
+  private static final String CHILD_ORG_NAME = generate("child-org-", 4);
+  private static final int ORGANIZATIONS_NUMBER = 2;
 
   @Inject
   @Named("admin")
@@ -57,13 +58,12 @@ public class CreateOrganizationTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    testOrganizationServiceClient.deleteByName(ORGANIZATION_NAME);
+    testOrganizationServiceClient.deleteByName(CHILD_ORG_NAME);
+    testOrganizationServiceClient.deleteByName(PARENT_ORG_NAME);
   }
 
   @Test
   public void testCreateOrganization() {
-    int organizationsCount = 1;
-
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
@@ -71,33 +71,33 @@ public class CreateOrganizationTest {
     // Create a new organization
     organizationListPage.clickAddOrganizationButton();
     addOrganization.waitAddOrganization();
-    addOrganization.setOrganizationName(ORGANIZATION_NAME);
+    addOrganization.setOrganizationName(PARENT_ORG_NAME);
     addOrganization.checkAddOrganizationButtonEnabled();
     addOrganization.clickCreateOrganizationButton();
     addOrganization.waitAddOrganizationButtonIsNotVisible();
-    organizationPage.waitOrganizationTitle(ORGANIZATION_NAME);
+    organizationPage.waitOrganizationTitle(PARENT_ORG_NAME);
 
     // Test that created organization exists and count of organizations increased
-    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) >= organizationsCount);
+    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) == ORGANIZATIONS_NUMBER - 1);
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
-    assertTrue(organizationListPage.getOrganizationListItemCount() >= organizationsCount);
-    assertTrue(organizationListPage.getValues(NAME).contains(ORGANIZATION_NAME));
+    assertTrue(organizationListPage.getOrganizationListItemCount() == ORGANIZATIONS_NUMBER - 1);
+    assertTrue(organizationListPage.getValues(NAME).contains(PARENT_ORG_NAME));
 
-    organizationListPage.clickOnOrganization(ORGANIZATION_NAME);
-    organizationPage.waitOrganizationName(ORGANIZATION_NAME);
+    organizationListPage.clickOnOrganization(PARENT_ORG_NAME);
+    organizationPage.waitOrganizationName(PARENT_ORG_NAME);
 
     // Create sub-organization
     organizationPage.clickSubOrganizationsTab();
     organizationListPage.waitForOrganizationsList();
     organizationPage.clickAddSuborganizationButton();
     addOrganization.waitAddSubOrganization();
-    addOrganization.setOrganizationName(SUB_ORGANIZATION_NAME);
+    addOrganization.setOrganizationName(CHILD_ORG_NAME);
     addOrganization.checkAddOrganizationButtonEnabled();
     addOrganization.clickCreateOrganizationButton();
     addOrganization.waitAddOrganizationButtonIsNotVisible();
-    organizationPage.waitOrganizationTitle(ORGANIZATION_NAME + "/" + SUB_ORGANIZATION_NAME);
+    organizationPage.waitOrganizationTitle(PARENT_ORG_NAME + "/" + CHILD_ORG_NAME);
   }
 }

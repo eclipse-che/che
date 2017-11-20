@@ -95,19 +95,19 @@ public class CheTestTestOrganizationServiceClientImpl implements TestOrganizatio
 
     try {
       requestFactory.fromUrl(apiUrl).useDeleteMethod().request();
+      LOG.debug("Organization with id='{}' removed", id);
     } catch (NotFoundException e) {
       // ignore if there is no organization of certain id
     }
-
-    LOG.debug("Organization with id='{}' removed", id);
   }
 
   @Override
   public void deleteByName(String name) throws Exception {
-    OrganizationDto organization = get(name);
-
-    if (organization != null) {
-      deleteById(organization.getId());
+    try {
+      String organizationId = get(name).getId();
+      deleteById(organizationId);
+    } catch (NotFoundException e) {
+      // ignore if there is no organization of certain id
     }
   }
 
