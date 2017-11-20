@@ -199,6 +199,7 @@ public class Dashboard {
   public void open() {
     seleniumWebDriver.get(testDashboardUrlProvider.get().toString());
     entrance.login(defaultUser);
+    waitDashboardToolbarTitle();
   }
 
   /** Open dashboard with provided username and password */

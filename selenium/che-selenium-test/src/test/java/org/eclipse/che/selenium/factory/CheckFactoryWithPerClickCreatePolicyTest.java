@@ -51,9 +51,8 @@ public class CheckFactoryWithPerClickCreatePolicyTest {
 
   @Test
   public void checkFactoryAcceptingWithPerClickPolicy() throws Exception {
-    dashboard.open();
-
     // accept factory
+    dashboard.open();
     testFactory.open(seleniumWebDriver);
 
     seleniumWebDriver.switchFromDashboardIframeToIde();
