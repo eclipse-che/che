@@ -1231,4 +1231,16 @@ public interface CoreLocalizationConstant extends Messages {
 
   @Key("menu.loader.pullingImage")
   String menuLoaderPullingImage(String image);
+
+  @Key("gwt_recompile.action.title")
+  String gwtRecompileActionTitle();
+
+  @Key("gwt_recompile.dialog.title")
+  String gwtRecompileDialogTitle();
+
+  @Key("gwt_recompile.dialog.message.recompiling")
+  String gwtRecompileDialogRecompilingMessage(String host);
+
+  @Key("gwt_recompile.dialog.message.no_server")
+  String gwtRecompileDialogNoServerMessage();
 }

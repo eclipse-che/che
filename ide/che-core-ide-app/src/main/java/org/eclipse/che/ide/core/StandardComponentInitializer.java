@@ -62,6 +62,7 @@ import org.eclipse.che.ide.actions.EditFileAction;
 import org.eclipse.che.ide.actions.ExpandEditorAction;
 import org.eclipse.che.ide.actions.FormatterAction;
 import org.eclipse.che.ide.actions.FullTextSearchAction;
+import org.eclipse.che.ide.devmode.GWTRecompileAction;
 import org.eclipse.che.ide.actions.GoIntoAction;
 import org.eclipse.che.ide.actions.HotKeysListAction;
 import org.eclipse.che.ide.actions.ImportProjectAction;
@@ -341,6 +342,8 @@ public class StandardComponentInitializer {
 
   @Inject private RemoveFromFileWatcherExcludesAction removeFromFileWatcherExcludesAction;
 
+  @Inject private GWTRecompileAction gwtRecompileAction;
+
   @Inject private CollapseAllAction collapseAllAction;
 
   @Inject private PerspectiveManager perspectiveManager;
@@ -600,6 +603,10 @@ public class StandardComponentInitializer {
     actionManager.registerAction("downloadItemAction", downloadResourceAction);
     actionManager.registerAction(NAVIGATE_TO_FILE, navigateToFileAction);
     assistantGroup.add(navigateToFileAction);
+
+    assistantGroup.addSeparator();
+    actionManager.registerAction("gwtRecompileAction", gwtRecompileAction);
+    assistantGroup.add(gwtRecompileAction);
 
     // Compose Profile menu
     DefaultActionGroup profileGroup = (DefaultActionGroup) actionManager.getAction(GROUP_PROFILE);
