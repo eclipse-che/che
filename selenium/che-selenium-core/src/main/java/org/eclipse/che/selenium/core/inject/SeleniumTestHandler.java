@@ -80,6 +80,7 @@ public abstract class SeleniumTestHandler
     implements ITestListener, ISuiteListener, IInvokedMethodListener, IAnnotationTransformer {
 
   private static final Logger LOG = LoggerFactory.getLogger(SeleniumTestHandler.class);
+  private static final AtomicBoolean isCleanUpCompleted = new AtomicBoolean();
 
   @Inject
   @Named("tests.screenshot_dir")
@@ -106,11 +107,13 @@ public abstract class SeleniumTestHandler
   @Inject private TestUser defaultTestUser;
   @Inject private TestWorkspaceProvider testWorkspaceProvider;
 
+  private final Injector injector;
   private final Map<Long, Object> runningTests = new ConcurrentHashMap<>();
 
-  private static AtomicBoolean isCleanUpCompleted = new AtomicBoolean();
-
   public SeleniumTestHandler() {
+    injector = createInjector(getParentModules());
+    injector.injectMembers(this);
+
     getRuntime().addShutdownHook(new Thread(this::shutdown));
   }
 
@@ -149,9 +152,6 @@ public abstract class SeleniumTestHandler
   public void onStart(ISuite suite) {
     isCleanUpCompleted.set(false);
     runningTests.clear();
-
-    Injector injector = createInjector(getParentModules());
-    injector.injectMembers(this);
 
     suite.setParentInjector(injector);
   }

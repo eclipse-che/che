@@ -10,11 +10,9 @@
  */
 package org.eclipse.che.selenium.core;
 
-import static java.lang.Boolean.parseBoolean;
-import static java.lang.System.getenv;
-import static org.eclipse.che.selenium.core.CheSeleniumSuiteModule.CHE_MULTIUSER_VARIABLE;
-
+import com.google.inject.Inject;
 import com.google.inject.Module;
+import com.google.inject.name.Named;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -25,7 +23,9 @@ import org.testng.annotations.ITestAnnotation;
 
 /** @author Anatolii Bazko */
 public class CheSeleniumTestHandler extends SeleniumTestHandler {
-  private static final boolean isMultiuser = parseBoolean(getenv().get(CHE_MULTIUSER_VARIABLE));
+  @Inject
+  @Named("che.multiuser")
+  private boolean isMultiuser;
 
   @Override
   public List<Module> getParentModules() {
