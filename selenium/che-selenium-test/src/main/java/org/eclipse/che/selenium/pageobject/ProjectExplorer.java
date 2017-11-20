@@ -374,7 +374,7 @@ public class ProjectExplorer {
           .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)))
           .click();
     }
-    // sometimes an element in the project explorer may be is not attached to the DOM. We should
+    // sometimes an element in the project explorer may not be attached to the DOM. We should
     // refresh all items.
     catch (StaleElementReferenceException ex) {
       LOG.warn(ex.getLocalizedMessage(), ex);
@@ -405,7 +405,7 @@ public class ProjectExplorer {
           .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)))
           .click();
     }
-    // sometimes an element in the project explorer may be is not attached to the DOM. We should
+    // sometimes an element in the project explorer may not be attached to the DOM. We should
     // refresh all items.
     catch (StaleElementReferenceException ex) {
       LOG.warn(ex.getLocalizedMessage(), ex);
@@ -486,7 +486,7 @@ public class ProjectExplorer {
       action.moveToElement(getProjectExplorerItem(path)).perform();
       action.doubleClick().perform();
     }
-    // sometimes an element in the project explorer may be is not attached to the DOM. We should
+    // sometimes an element in the project explorer may not be attached to the DOM. We should
     // refresh all items.
     catch (StaleElementReferenceException ex) {
       LOG.warn(ex.getLocalizedMessage(), ex);
@@ -537,7 +537,7 @@ public class ProjectExplorer {
    * @param pathToItem full path to item in the codenvy project explorer
    */
   public void waitDisappearItemByPath(String pathToItem) {
-    String locator = "//div[@path='/" + pathToItem + "']";
+    String locator = "//div[@path='/" + pathToItem + "']/div";
     new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
         .until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(locator)));
   }
@@ -565,7 +565,7 @@ public class ProjectExplorer {
    * @param pathToItem full path to item in the codenvy project explorer
    */
   public void waitRemoveItemsByPath(String pathToItem) {
-    String locator = "//div[@path='/" + pathToItem + "']";
+    String locator = "//div[@path='/" + pathToItem + "']/div";
     new WebDriverWait(seleniumWebDriver, 10)
         .until(
             ExpectedConditions.not(
