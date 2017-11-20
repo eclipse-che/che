@@ -46,7 +46,7 @@ public class JUnit4TestRunner extends AbstractJavaTestRunner {
   }
 
   @Override
-  public ProcessHandler execute(TestExecutionContext context) {
+  public ProcessHandler execute(TestExecutionContext context) throws ExecutionException {
     return startTestProcess(context);
   }
 
@@ -55,7 +55,7 @@ public class JUnit4TestRunner extends AbstractJavaTestRunner {
     return JUNIT_TEST_NAME;
   }
 
-  private ProcessHandler startTestProcess(TestExecutionContext context) {
+  private ProcessHandler startTestProcess(TestExecutionContext context) throws ExecutionException {
     JavaParameters parameters = new JavaParameters();
     parameters.setJavaExecutable(System.getProperty("java.home") + "/bin/java");
     parameters.setMainClassName(MAIN_CLASS_NAME);
@@ -80,12 +80,6 @@ public class JUnit4TestRunner extends AbstractJavaTestRunner {
           .add("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=" + getDebugPort());
     }
     CommandLine command = parameters.createCommand();
-    try {
-      return new ProcessHandler(command.createProcess());
-    } catch (ExecutionException e) {
-      LOG.error("Can't run JUnit JVM", e);
-    }
-
-    return null;
+    return new ProcessHandler(command.createProcess());
   }
 }

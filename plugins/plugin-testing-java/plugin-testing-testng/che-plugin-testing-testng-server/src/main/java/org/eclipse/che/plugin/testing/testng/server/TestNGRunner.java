@@ -61,11 +61,11 @@ public class TestNGRunner extends AbstractJavaTestRunner {
 
   @Override
   @Nullable
-  public ProcessHandler execute(TestExecutionContext context) {
+  public ProcessHandler execute(TestExecutionContext context) throws ExecutionException {
     return startTestProcess(context);
   }
 
-  private ProcessHandler startTestProcess(TestExecutionContext context) {
+  private ProcessHandler startTestProcess(TestExecutionContext context) throws ExecutionException {
     File suiteFile = createSuite(context);
     if (suiteFile == null) {
       throw new RuntimeException("Can't create TestNG suite xml file.");
@@ -93,13 +93,7 @@ public class TestNGRunner extends AbstractJavaTestRunner {
           .add("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=" + getDebugPort());
     }
     CommandLine command = parameters.createCommand();
-    try {
-      return new ProcessHandler(command.createProcess());
-    } catch (ExecutionException e) {
-      LOG.error("Can't run TestNG JVM", e);
-    }
-
-    return null;
+    return new ProcessHandler(command.createProcess());
   }
 
   private String getOutputDirectory(TestExecutionContext context) {
