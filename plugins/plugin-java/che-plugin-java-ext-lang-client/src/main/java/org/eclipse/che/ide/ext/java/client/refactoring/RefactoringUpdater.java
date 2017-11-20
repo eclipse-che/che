@@ -97,7 +97,7 @@ public class RefactoringUpdater {
     final List<String> pathChanged = new ArrayList<>();
     for (ChangeInfo change : changes) {
 
-      //in some cases incoming change might be a null
+      // in some cases incoming change might be a null
       if (change.getName() == null) {
         continue;
       }
