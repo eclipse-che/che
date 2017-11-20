@@ -38,9 +38,12 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.TypeNameMatch;
 import org.eclipse.jdt.core.search.TypeNameMatchRequestor;
+import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.core.JavaModel;
 import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.core.JavaProject;
+import org.eclipse.jdt.internal.core.SourceMethod;
+import org.eclipse.jdt.internal.core.SourceType;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IRegion;
@@ -184,7 +187,7 @@ public class JavaDebuggerUtils {
     }
 
     IType outerClass;
-    IMember iMember;
+    IJavaElement iMember;
     try {
       outerClass = project.findType(fqn);
 
@@ -220,8 +223,21 @@ public class JavaDebuggerUtils {
     if (iMember instanceof IType) {
       return ((IType) iMember).getFullyQualifiedName();
     }
+
     if (iMember != null) {
-      return iMember.getDeclaringType().getFullyQualifiedName();
+      fqn = ((IMember) iMember).getDeclaringType().getFullyQualifiedName();
+      while (!(iMember instanceof CompilationUnit)) {
+        if (iMember instanceof SourceType
+            && !((SourceType) iMember).isAnonymous()
+            && iMember.getParent() instanceof SourceMethod) {
+
+          fqn = fqn.replace("$" + iMember.getElementName(), "$1" + iMember.getElementName());
+        }
+
+        iMember = iMember.getParent();
+      }
+
+      return fqn;
     }
 
     throw new DebuggerException("Unable to calculate breakpoint location");
