@@ -29,6 +29,8 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.git.shared.EditedRegion;
 import org.eclipse.che.api.git.shared.Status;
@@ -43,7 +45,7 @@ import org.slf4j.Logger;
  *
  * @author Igor Vinokur
  */
-public class GitStatusChangedDetector {
+public class GitStatusChangedDetector implements EventSubscriber<StatusChangedEventDto> {
 
   private static final Logger LOG = getLogger(GitStatusChangedDetector.class);
 
@@ -58,6 +60,7 @@ public class GitStatusChangedDetector {
   private final PathTransformer pathTransformer;
   private final ProjectManager projectManager;
   private final GitConnectionFactory gitConnectionFactory;
+  private final EventService eventService;
 
   private final Set<String> endpointIds = newConcurrentHashSet();
 
@@ -70,12 +73,14 @@ public class GitStatusChangedDetector {
       FileWatcherManager manager,
       PathTransformer pathTransformer,
       ProjectManager projectManager,
-      GitConnectionFactory gitConnectionFactory) {
+      GitConnectionFactory gitConnectionFactory,
+      EventService eventService) {
     this.transmitter = transmitter;
     this.manager = manager;
     this.pathTransformer = pathTransformer;
     this.projectManager = projectManager;
     this.gitConnectionFactory = gitConnectionFactory;
+    this.eventService = eventService;
   }
 
   @Inject
@@ -96,12 +101,16 @@ public class GitStatusChangedDetector {
     origHeadId =
         manager.registerByMatcher(
             origHeadMatcher(), fsEventConsumer(), fsEventConsumer(), deleteConsumer());
+
+    eventService.subscribe(this);
   }
 
   @PreDestroy
   public void stopWatchers() {
     manager.unRegisterByMatcher(indexId);
     manager.unRegisterByMatcher(origHeadId);
+
+    eventService.unsubscribe(this);
   }
 
   private PathMatcher origHeadMatcher() {
@@ -164,12 +173,8 @@ public class GitStatusChangedDetector {
                 .withProjectName(connection.getWorkingDir().getName())
                 .withStatus(status)
                 .withModifiedFiles(modifiedFiles);
-        transmitter
-            .newRequest()
-            .endpointId(id)
-            .methodName(OUTGOING_METHOD)
-            .paramsAsDto(statusChangeEventDto)
-            .sendAndSkipResult();
+
+        transmit(statusChangeEventDto, id);
       } catch (ServerException | NotFoundException e) {
         String errorMessage = e.getMessage();
         if (!("Not a git repository".equals(errorMessage))) {
@@ -177,5 +182,21 @@ public class GitStatusChangedDetector {
         }
       }
     };
+  }
+
+  @Override
+  public void onEvent(StatusChangedEventDto event) {
+    for (String id : endpointIds) {
+      transmit(event, id);
+    }
+  }
+
+  private void transmit(StatusChangedEventDto statusChangedEventDto, String id) {
+    transmitter
+        .newRequest()
+        .endpointId(id)
+        .methodName(OUTGOING_METHOD)
+        .paramsAsDto(statusChangedEventDto)
+        .sendAndSkipResult();
   }
 }
