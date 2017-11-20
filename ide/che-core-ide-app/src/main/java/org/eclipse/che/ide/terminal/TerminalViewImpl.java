@@ -16,9 +16,10 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ResizeLayoutPanel;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import javax.validation.constraints.NotNull;
 
@@ -27,14 +28,14 @@ import javax.validation.constraints.NotNull;
  *
  * @author Dmitry Shnurenko
  */
-final class TerminalViewImpl extends Composite implements TerminalView, Focusable {
+final class TerminalViewImpl extends Composite implements TerminalView, Focusable, RequiresResize {
 
   interface TerminalViewImplUiBinder extends UiBinder<Widget, TerminalViewImpl> {}
 
   private static final TerminalViewImplUiBinder UI_BINDER =
       GWT.create(TerminalViewImplUiBinder.class);
 
-  @UiField ResizeLayoutPanel terminalPanel;
+  @UiField FlowPanel terminalPanel;
 
   @UiField Label unavailableLabel;
 
@@ -69,13 +70,6 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
     terminalElement.getFirstChildElement().getStyle().clearProperty("backgroundColor");
     terminalElement.getFirstChildElement().getStyle().clearProperty("color");
     terminalElement.getStyle().clearProperty("opacity");
-
-    terminalPanel.addResizeHandler(
-        resizeEvent -> {
-          if (terminalElement != null && isVisible()) {
-            resizeTimer.schedule(200);
-          }
-        });
   }
 
   /** {@inheritDoc} */
@@ -85,6 +79,19 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
     unavailableLabel.setVisible(true);
 
     terminalPanel.setVisible(false);
+  }
+
+  /**
+   * Resize {@link TerminalJso} to current widget size. To improve performance we should resize only
+   * visible terminals, because "resize terminal" is quite expensive operation. When you click on
+   * the tab to activate hidden terminal this method will be executed too, so terminal will be
+   * resized anyway.
+   */
+  @Override
+  public void onResize() {
+    if (terminalElement != null && isVisible()) {
+      resizeTimer.schedule(200);
+    }
   }
 
   private Timer resizeTimer =

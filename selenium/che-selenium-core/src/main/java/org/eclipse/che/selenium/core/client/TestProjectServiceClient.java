@@ -97,7 +97,7 @@ public class TestProjectServiceClient {
   public void importZipProject(
       String workspaceId, Path zipFile, String projectName, String template) throws Exception {
     String url = getWsAgentUrl(workspaceId) + "/import/" + projectName;
-    createFolder(workspaceId, projectName);
+    //    createFolder(workspaceId, projectName);
 
     HttpURLConnection httpConnection = null;
     try {

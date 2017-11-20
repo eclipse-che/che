@@ -40,10 +40,6 @@ public class Style {
     return theme.getRadioButtonBackgroundColor();
   }
 
-  public static String getDeisabledMenuColor() {
-    return theme.getDisabledMenuColor();
-  }
-
   public static String getCommandsToolbarBackgroundColor() {
     return theme.getCommandsToolbarBackgroundColor();
   }

@@ -35,9 +35,29 @@ public class Constants {
   public static final String COMMANDS_ATTRIBUTE_NAME = "commands";
   public static final String COMMANDS_ATTRIBUTE_DESCRIPTION = "Project-related commands";
 
-  public static final String EVENT_IMPORT_OUTPUT_SUBSCRIBE = "importProject/subscribe";
-  public static final String EVENT_IMPORT_OUTPUT_UN_SUBSCRIBE = "importProject/unSubscribe";
   public static final String EVENT_IMPORT_OUTPUT_PROGRESS = "importProject/progress";
 
+  public static final String WS_PATH_STRICT = "WS_PATH_STRICT";
+
   private Constants() {}
+
+  public static class Services {
+
+    public static final String PROJECT_GET = "project/get";
+    public static final String PROJECT_CREATE = "project/create";
+    public static final String PROJECT_UPDATE = "project/update";
+    public static final String PROJECT_DELETE = "project/delete";
+    public static final String PROJECT_RECOGNIZE = "project/recognize";
+    public static final String PROJECT_VERIFY = "project/verify";
+    public static final String PROJECT_IMPORT = "project/import";
+
+    public static final int NOT_FOUND = -27100;
+    public static final int BAD_REQUEST = -27101;
+    public static final int CONFLICT = -27102;
+    public static final int FORBIDDEN = -27103;
+    public static final int SERVER_ERROR = -27104;
+    public static final int UNAUTHORIZED = -27105;
+
+    private Services() {}
+  }
 }

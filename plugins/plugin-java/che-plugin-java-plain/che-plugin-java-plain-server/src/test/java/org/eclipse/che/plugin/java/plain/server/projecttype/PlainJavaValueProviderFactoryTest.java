@@ -10,98 +10,67 @@
  */
 package org.eclipse.che.plugin.java.plain.server.projecttype;
 
-import static org.eclipse.che.ide.ext.java.shared.Constants.OUTPUT_FOLDER;
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
-import static org.fest.assertions.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
-import com.google.inject.Provider;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.eclipse.che.api.project.server.FileEntry;
-import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.ProjectRegistry;
-import org.eclipse.che.api.project.server.RegisteredProject;
-import org.eclipse.che.api.vfs.Path;
-import org.eclipse.che.plugin.java.plain.server.BaseTest;
+import java.util.Optional;
+import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.impl.RegisteredProject;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 /** @author Valeriy Svydenko */
 @Listeners(value = {MockitoTestNGListener.class})
-public class PlainJavaValueProviderFactoryTest extends BaseTest {
-  @InjectMocks PlainJavaValueProviderFactory plainJavaValueProviderFactory;
+public class PlainJavaValueProviderFactoryTest {
 
-  @Mock private FolderEntry rootProjectFolder;
-  @Mock private FileEntry fileEntry;
-  @Mock private Provider<ProjectRegistry> projectRegistryProvider;
+  private static final String PROJECT_PATH = "ws/path";
 
-  @BeforeMethod
-  public void setUp() throws Exception {
-    when(fileEntry.getName()).thenReturn("Main.java");
-    when(rootProjectFolder.getChildFiles()).thenReturn(Collections.singletonList(fileEntry));
-    when(rootProjectFolder.getProject()).thenReturn("project");
-  }
+  @InjectMocks private PlainJavaValueProviderFactory plainJavaValueProviderFactory;
+  @Mock private Map<String, List<String>> attributes;
+  @Mock private ProjectManager projectManager;
+  @Mock private RegisteredProject registeredProject;
+  @Captor private ArgumentCaptor<List<String>> captor;
 
   @Test
   public void attributeShouldBeSet() throws Exception {
-    Map<String, List<String>> attributes = new HashMap<>();
-    RegisteredProject registeredProject = mock(RegisteredProject.class);
-    ProjectRegistry pr = mock(ProjectRegistry.class);
-
-    when(projectRegistryProvider.get()).thenReturn(pr);
-    when(pr.getProject(anyString())).thenReturn(registeredProject);
+    when(projectManager.get(PROJECT_PATH)).thenReturn(Optional.of(registeredProject));
     when(registeredProject.getAttributes()).thenReturn(attributes);
-    plainJavaValueProviderFactory
-        .newInstance(rootProjectFolder)
-        .setValues(SOURCE_FOLDER, Collections.singletonList("src"));
+    when(registeredProject.getPath()).thenReturn(PROJECT_PATH);
 
-    assertThat(attributes.get(SOURCE_FOLDER).contains("src"));
+    plainJavaValueProviderFactory
+        .newInstance(PROJECT_PATH)
+        .setValues(SOURCE_FOLDER, singletonList("src"));
+
+    verify(attributes).put(SOURCE_FOLDER, singletonList("src"));
   }
 
   @Test
   public void newValueOfAttributeShouldBeAdded() throws Exception {
-    Map<String, List<String>> attributes = new HashMap<>();
-
-    attributes.put(SOURCE_FOLDER, Arrays.asList("src1", "src2"));
-    RegisteredProject registeredProject = mock(RegisteredProject.class);
-    ProjectRegistry pr = mock(ProjectRegistry.class);
-
-    when(projectRegistryProvider.get()).thenReturn(pr);
-    when(pr.getProject(anyString())).thenReturn(registeredProject);
+    when(projectManager.get(PROJECT_PATH)).thenReturn(Optional.of(registeredProject));
     when(registeredProject.getAttributes()).thenReturn(attributes);
-    List<String> sources = new ArrayList<>();
-    sources.add("src3");
-    plainJavaValueProviderFactory.newInstance(rootProjectFolder).setValues(SOURCE_FOLDER, sources);
+    when(attributes.containsKey(SOURCE_FOLDER)).thenReturn(true);
+    when(attributes.get(SOURCE_FOLDER)).thenReturn(Arrays.asList("src1", "src2"));
 
-    assertThat(attributes.get(SOURCE_FOLDER).containsAll(Arrays.asList("src3", "src1", "src2")));
-  }
+    plainJavaValueProviderFactory
+        .newInstance(PROJECT_PATH)
+        .setValues(SOURCE_FOLDER, singletonList("src3"));
 
-  @Test
-  public void sourceFolderShouldBeReturned() throws Exception {
-    when(rootProjectFolder.getPath()).thenReturn(Path.of("project"));
+    verify(attributes).put(eq(SOURCE_FOLDER), captor.capture());
 
-    assertThat(
-            plainJavaValueProviderFactory.newInstance(rootProjectFolder).getValues(SOURCE_FOLDER))
-        .contains("/project");
-  }
-
-  @Test
-  public void outputFolderShouldBeReturned() throws Exception {
-    when(rootProjectFolder.getPath()).thenReturn(Path.of("/project"));
-
-    assertThat(
-            plainJavaValueProviderFactory.newInstance(rootProjectFolder).getValues(OUTPUT_FOLDER))
-        .contains("bin");
+    assertEquals(captor.getValue().size(), 3);
+    assertTrue(captor.getValue().containsAll(Arrays.asList("src1", "src2", "src3")));
   }
 }

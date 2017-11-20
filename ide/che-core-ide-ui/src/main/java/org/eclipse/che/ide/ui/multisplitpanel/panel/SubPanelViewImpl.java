@@ -198,7 +198,12 @@ public class SubPanelViewImpl extends Composite
     widgets2Tabs.put(widget, tab);
 
     tabsPanel.insert(tab, tabsPanel.getWidgetIndex(plusPanel));
+
+    Widget visibleWidget = widgetsPanel.getVisibleWidget();
     widgetsPanel.setWidget(widget.getWidget());
+    if (visibleWidget != null) {
+      widgetsPanel.showWidget(visibleWidget);
+    }
 
     // add item to drop-down menu
     final MenuItemWidget listItemWidget = new MenuItemWidget(tab, removable);

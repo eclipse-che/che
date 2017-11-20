@@ -10,7 +10,10 @@
  */
 package org.eclipse.che.plugin.maven.server.rest;
 
+import static java.util.Collections.emptyList;
 import static javax.ws.rs.core.MediaType.TEXT_XML;
+import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
+import static org.eclipse.che.api.fs.server.WsPathUtils.resolve;
 
 import com.google.inject.Inject;
 import io.swagger.annotations.ApiOperation;
@@ -19,7 +22,6 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.io.File;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.ws.rs.GET;
@@ -32,12 +34,13 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.fs.server.FsManager;
+import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.languageserver.registry.InitializedLanguageServer;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
-import org.eclipse.che.api.project.server.ProjectRegistry;
-import org.eclipse.che.api.project.server.RegisteredProject;
-import org.eclipse.che.api.project.server.VirtualFileEntry;
+import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.maven.server.MavenTerminal;
 import org.eclipse.che.plugin.maven.lsp.MavenLanguageServer;
 import org.eclipse.che.plugin.maven.server.MavenServerWrapper;
@@ -57,16 +60,19 @@ import org.eclipse.core.resources.IWorkspace;
  */
 @Path("/maven/server")
 public class MavenServerService {
+
   private final MavenWrapperManager wrapperManager;
-  private final ProjectRegistry projectRegistry;
+  private final ProjectManager projectManager;
   private final MavenWorkspace mavenWorkspace;
   private final EclipseWorkspaceProvider eclipseWorkspaceProvider;
+  private final PathTransformer pathTransformer;
+  private final FsManager fsManager;
 
   @Inject private MavenProgressNotifier notifier;
 
   @Inject private MavenTerminal terminal;
 
-  @Inject private MavenProjectManager projectManager;
+  @Inject private MavenProjectManager mavenProjectManager;
 
   @Inject private ClasspathManager classpathManager;
 
@@ -75,14 +81,18 @@ public class MavenServerService {
   @Inject
   public MavenServerService(
       MavenWrapperManager wrapperManager,
-      ProjectRegistry projectRegistry,
+      ProjectManager projectManager,
       MavenWorkspace mavenWorkspace,
-      EclipseWorkspaceProvider eclipseWorkspaceProvider) {
+      EclipseWorkspaceProvider eclipseWorkspaceProvider,
+      PathTransformer pathTransformer,
+      FsManager fsManager) {
 
     this.wrapperManager = wrapperManager;
-    this.projectRegistry = projectRegistry;
+    this.projectManager = projectManager;
     this.mavenWorkspace = mavenWorkspace;
     this.eclipseWorkspaceProvider = eclipseWorkspaceProvider;
+    this.pathTransformer = pathTransformer;
+    this.fsManager = fsManager;
   }
 
   /**
@@ -99,22 +109,24 @@ public class MavenServerService {
   @Produces(TEXT_XML)
   public String getEffectivePom(@QueryParam("projectpath") String projectPath)
       throws ServerException, NotFoundException, ForbiddenException {
-    RegisteredProject project = projectRegistry.getProject(projectPath);
-    if (project == null) {
-      throw new NotFoundException("Project " + projectPath + " doesn't exist");
-    }
+    String projectWsPath = absolutize(projectPath);
+
+    RegisteredProject project =
+        projectManager
+            .get(projectWsPath)
+            .orElseThrow(() -> new NotFoundException("Can't find project: " + projectWsPath));
 
     MavenServerWrapper mavenServer =
         wrapperManager.getMavenServer(MavenWrapperManager.ServerType.DOWNLOAD);
 
     try {
-      mavenServer.customize(projectManager.copyWorkspaceCache(), terminal, notifier, false, false);
-      VirtualFileEntry pomFile = project.getBaseFolder().getChild("pom.xml");
-      if (pomFile == null) {
+      mavenServer.customize(
+          mavenProjectManager.copyWorkspaceCache(), terminal, notifier, false, false);
+      String pomWsPath = resolve(projectWsPath, "pom.xml");
+      if (!fsManager.existsAsFile(pomWsPath)) {
         throw new NotFoundException("pom.xml doesn't exist");
       }
-      return mavenServer.getEffectivePom(
-          pomFile.getVirtualFile().toIoFile(), Collections.emptyList(), Collections.emptyList());
+      return mavenServer.getEffectivePom(fsManager.toIoFile(pomWsPath), emptyList(), emptyList());
     } finally {
       wrapperManager.release(mavenServer);
     }

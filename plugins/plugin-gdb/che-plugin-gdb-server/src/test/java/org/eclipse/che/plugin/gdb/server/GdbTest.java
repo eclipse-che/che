@@ -18,7 +18,10 @@ import static org.testng.Assert.assertTrue;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
+import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 import org.eclipse.che.plugin.gdb.server.parser.GdbContinue;
 import org.eclipse.che.plugin.gdb.server.parser.GdbInfoBreak;
@@ -38,11 +41,15 @@ public class GdbTest {
   private String file;
   private Path sourceDirectory;
   private Gdb gdb;
+  private BlockingQueue<DebuggerEvent> events;
+  private int port;
 
   @BeforeClass
   public void beforeClass() throws Exception {
     file = GdbTest.class.getResource("/hello").getFile();
     sourceDirectory = Paths.get(GdbTest.class.getResource("/h.cpp").getFile());
+    port = Integer.parseInt(System.getProperty("debug.port"));
+    events = new ArrayBlockingQueue<>(10);
   }
 
   @BeforeMethod
@@ -75,12 +82,9 @@ public class GdbTest {
 
   @Test
   public void testTargetRemote() throws Exception {
-    GdbServer gdbServer = GdbServer.start("localhost", 1111, file);
-
+    gdb.file(file);
+    gdb.targetRemote("localhost", port);
     try {
-      gdb.file(file);
-      gdb.targetRemote("localhost", 1111);
-
       gdb.breakpoint(7);
 
       GdbContinue gdbContinue = gdb.cont();
@@ -90,7 +94,7 @@ public class GdbTest {
       assertEquals(breakpoint.getLocation().getTarget(), "h.cpp");
       assertEquals(breakpoint.getLocation().getLineNumber(), 7);
     } finally {
-      gdbServer.stop();
+      gdb.finish();
     }
   }
 
