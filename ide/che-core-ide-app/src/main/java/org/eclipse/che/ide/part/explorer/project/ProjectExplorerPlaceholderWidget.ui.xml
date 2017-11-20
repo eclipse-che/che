@@ -37,8 +37,17 @@
             border-top: 1px solid transparent;
             overflow: hidden;
             animation-name: projectExplorerFadeIn;
-            animation-duration: 0.2s;
+            animation-duration: 0.1s;
             animation-fill-mode: both;
+        }
+
+        @keyframes projectExplorerFadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
         }
 
         .first {
@@ -53,15 +62,7 @@
             background-color: #2b3140;
             left: 13px;
             top: 3px;
-        }
-
-        @keyframes projectExplorerFadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
+            opacity: 0.8;
         }
 
         .text {
@@ -73,26 +74,9 @@
             top: 8px;
             background-color: #333846;
             background-size: 800px 104px;
-            background-image: -webkit-linear-gradient(left, #333846 0%, #262a37 20%, #333846 40%, #333846 100%);
             background-repeat: no-repeat;
             background-position: 827px;
-            animation-duration: 5s;
-            animation-iteration-count: infinite;
-            animation-name: projectExplorerPlaceHolderAnimation;
-        }
-
-        @keyframes projectExplorerPlaceHolderAnimation {
-            0% {
-                background-position: -1500px 0;
-            }
-
-            40% {
-                background-position: 1500px 0;
-            }
-
-            100% {
-                background-position: 1500px 0;
-            }
+            opacity: 0.5;
         }
 
         .shifted .icon {
@@ -111,7 +95,7 @@
             <div class="{style.row} {style.shifted}" style="animation-delay: 0.15s;" ><div class="{style.icon}" /><div class="{style.text}" /></div>
         <div class="{style.row}" style="animation-delay: 0.20s;"><div class="{style.icon}" /><div class="{style.text}" /></div>
         <div class="{style.row}" style="animation-delay: 0.25s;"><div class="{style.icon}" /><div class="{style.text}" /></div>
-        <div class="{style.row}" style="animation-delay: 0.30s;"><div class="{style.icon}" style="opacity: 0.5;" /><div class="{style.text}" style="opacity: 0.5;" /></div>
+        <div class="{style.row}" style="animation-delay: 0.30s;"><div class="{style.icon}" /><div class="{style.text}" /></div>
     </g:HTMLPanel>
 
 </ui:UiBinder>

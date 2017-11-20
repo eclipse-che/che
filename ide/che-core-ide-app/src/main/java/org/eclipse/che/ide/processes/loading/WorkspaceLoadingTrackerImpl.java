@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.ide.processes.loading;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -20,7 +21,6 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.event.MachineRunningEvent;
-import org.eclipse.che.ide.api.workspace.event.MachineStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
 import org.eclipse.che.ide.api.workspace.model.EnvironmentImpl;
 import org.eclipse.che.ide.api.workspace.model.MachineConfigImpl;
@@ -44,7 +44,6 @@ public class WorkspaceLoadingTrackerImpl
   /** Docker image. */
   private class Image {
     private String machineName;
-    private String sha256;
     private String dockerImage;
     private Map<String, Chunk> chunks;
     private boolean downloaded;
@@ -56,14 +55,6 @@ public class WorkspaceLoadingTrackerImpl
 
     public String getMachineName() {
       return machineName;
-    }
-
-    public void setSha256(String sha256) {
-      this.sha256 = sha256;
-    }
-
-    public String getSha256() {
-      return sha256;
     }
 
     public void setDockerImage(String dockerImage) {
@@ -121,31 +112,18 @@ public class WorkspaceLoadingTrackerImpl
 
     eventBus.addHandler(
         WorkspaceRunningEvent.TYPE,
-        new WorkspaceRunningEvent.Handler() {
-          @Override
-          public void onWorkspaceRunning(WorkspaceRunningEvent event) {
-            onWorkspaceRunnning();
-          }
-        });
-
-    eventBus.addHandler(
-        MachineStartingEvent.TYPE,
-        new MachineStartingEvent.Handler() {
-          @Override
-          public void onMachineStarting(MachineStartingEvent event) {}
+        event -> {
+          onWorkspaceRunnning();
         });
 
     eventBus.addHandler(
         MachineRunningEvent.TYPE,
-        new MachineRunningEvent.Handler() {
-          @Override
-          public void onMachineRunning(MachineRunningEvent event) {
-            view.onMachineRunning(event.getMachine().getName());
-            processesListView.setLoadingMessage(
-                localizationConstant.menuLoaderMachineRunning(event.getMachine().getName()));
-            percentage += delta;
-            processesListView.setLoadingProgress(percentage);
-          }
+        event -> {
+          view.onMachineRunning(event.getMachine().getName());
+          processesListView.setLoadingMessage(
+              localizationConstant.menuLoaderMachineRunning(event.getMachine().getName()));
+          percentage += delta;
+          processesListView.setLoadingProgress(percentage);
         });
   }
 
@@ -157,6 +135,12 @@ public class WorkspaceLoadingTrackerImpl
     view.onWorkspaceStarted();
     processesListView.setLoadingMessage(localizationConstant.menuLoaderWorkspaceStarted());
     processesListView.setLoadingProgress(100);
+
+    Scheduler.get()
+        .scheduleDeferred(
+            () -> {
+              ((ProcessesPanelView) processesPanelPresenter.getView()).showProcessOutput("*");
+            });
 
     /* Delay in switching to command execution mode */
     new Timer() {
@@ -198,8 +182,6 @@ public class WorkspaceLoadingTrackerImpl
 
   @Override
   public void onEnvironmentOutput(EnvironmentOutputEvent event) {
-    ((ProcessesPanelView) processesPanelPresenter.getView()).showProcessOutput("*");
-
     Image machine = images.get(event.getMachineName());
     if (machine == null) {
       return;
@@ -215,7 +197,12 @@ public class WorkspaceLoadingTrackerImpl
 
   private void handleDockerOutput(Image machine, String text) {
     try {
-      if (dockerPullingStarted(machine, text)) {
+      if (dockerPullingLatest(machine, text)) {
+        // [DOCKER] latest: Pulling from eclipse/ubuntu_jdk8
+        // Indicates the latest version is being downloading and contains image URL
+        return;
+
+      } else if (dockerPullingStarted(machine, text)) {
         // [DOCKER] sha256:40a6dd3c1f3af152d834e66fdf1dbca722dbc8ab4e98e157251c5179e8a6aa44: Pulling
         // from docker.io/eclipse/ubuntu_jdk8
         // Containing image SHA and image URL
@@ -248,6 +235,26 @@ public class WorkspaceLoadingTrackerImpl
   }
 
   /**
+   * [DOCKER] latest: Pulling from eclipse/ubuntu_jdk8
+   *
+   * @param machine
+   * @param text
+   * @return
+   */
+  private boolean dockerPullingLatest(Image machine, String text) {
+    if (!text.startsWith("[DOCKER] latest: Pulling from ")) {
+      return false;
+    }
+
+    String dockerImage = text.substring("[DOCKER] latest: Pulling from ".length()).trim();
+    machine.setDockerImage(dockerImage);
+    view.setMachineImage(machine.getMachineName(), dockerImage);
+    processesListView.setLoadingMessage(localizationConstant.menuLoaderPullingImage(dockerImage));
+
+    return true;
+  }
+
+  /**
    * [DOCKER] sha256:40a6dd3c1f3af152d834e66fdf1dbca722dbc8ab4e98e157251c5179e8a6aa44: Pulling from
    * docker.io/eclipse/ubuntu_jdk8
    *
@@ -261,9 +268,6 @@ public class WorkspaceLoadingTrackerImpl
     }
 
     String[] parts = text.split(":");
-
-    String sha256 = parts[1];
-    machine.setSha256(sha256);
 
     String dockerImage = parts[2];
     if (dockerImage.startsWith(" Pulling from ")) {
@@ -288,14 +292,9 @@ public class WorkspaceLoadingTrackerImpl
       return false;
     }
 
-    String[] parts = text.split(":");
-    String sha256 = parts[2].trim();
+    machine.setDownloaded(true);
 
-    if (sha256.equals(machine.getSha256())) {
-      machine.setDownloaded(true);
-      view.onPullingComplete(machine.getMachineName());
-    }
-
+    view.onPullingComplete(machine.getMachineName());
     view.startWorkspaceMachines();
     view.startWorkspaceMachine(machine.getMachineName(), machine.getDockerImage());
     processesListView.setLoadingMessage(
@@ -398,15 +397,30 @@ public class WorkspaceLoadingTrackerImpl
     value = value.toUpperCase();
     long size = 0;
 
-    if (value.endsWith(" B")) {
-      value = value.substring(0, value.length() - 2);
-      size = Long.parseLong(value);
-    } else if (value.endsWith(" KB")) {
+    if (value.endsWith(" GB")) {
       value = value.substring(0, value.length() - 3);
-      size = (long) (Double.parseDouble(value) * 1024);
+      size = (long) (Double.parseDouble(value) * 1024 * 1024 * 1024);
+    } else if (value.endsWith("GB")) {
+      value = value.substring(0, value.length() - 2);
+      size = (long) (Double.parseDouble(value) * 1024 * 1024 * 1024);
     } else if (value.endsWith(" MB")) {
       value = value.substring(0, value.length() - 3);
       size = (long) (Double.parseDouble(value) * 1024 * 1024);
+    } else if (value.endsWith("MB")) {
+      value = value.substring(0, value.length() - 2);
+      size = (long) (Double.parseDouble(value) * 1024 * 1024);
+    } else if (value.endsWith(" KB")) {
+      value = value.substring(0, value.length() - 3);
+      size = (long) (Double.parseDouble(value) * 1024);
+    } else if (value.endsWith("KB")) {
+      value = value.substring(0, value.length() - 2);
+      size = (long) (Double.parseDouble(value) * 1024);
+    } else if (value.endsWith(" B")) {
+      value = value.substring(0, value.length() - 2);
+      size = Long.parseLong(value);
+    } else if (value.endsWith("B")) {
+      value = value.substring(0, value.length() - 1);
+      size = Long.parseLong(value);
     }
 
     return size;
