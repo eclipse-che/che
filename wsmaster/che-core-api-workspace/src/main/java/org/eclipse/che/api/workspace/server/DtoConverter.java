@@ -17,7 +17,9 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.eclipse.che.api.core.model.workspace.Runtime;
+import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.config.Command;
@@ -26,6 +28,7 @@ import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
+import org.eclipse.che.api.core.model.workspace.config.Volume;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
@@ -41,6 +44,8 @@ import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
 import org.eclipse.che.api.workspace.shared.dto.ServerConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ServerDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
+import org.eclipse.che.api.workspace.shared.dto.VolumeDto;
+import org.eclipse.che.api.workspace.shared.dto.WarningDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackComponentDto;
@@ -48,7 +53,6 @@ import org.eclipse.che.api.workspace.shared.dto.stack.StackDto;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackSourceDto;
 import org.eclipse.che.api.workspace.shared.stack.Stack;
 import org.eclipse.che.api.workspace.shared.stack.StackSource;
-import org.eclipse.che.dto.server.DtoFactory;
 
 /**
  * Helps to convert to/from DTOs related to workspace.
@@ -204,6 +208,14 @@ public final class DtoConverter {
     if (machine.getAttributes() != null) {
       machineDto.setAttributes(machine.getAttributes());
     }
+    if (machine.getVolumes() != null) {
+      machineDto.setVolumes(
+          machine
+              .getVolumes()
+              .entrySet()
+              .stream()
+              .collect(toMap(Map.Entry::getKey, entry -> asDto(entry.getValue()))));
+    }
     return machineDto;
   }
 
@@ -243,15 +255,27 @@ public final class DtoConverter {
     }
 
     runtimeDto.setMachines(machineDtos);
+    runtimeDto.setWarnings(
+        runtime.getWarnings().stream().map(DtoConverter::asDto).collect(Collectors.toList()));
     return runtimeDto;
   }
 
   /** Converts {@link RuntimeIdentity} to {@link RuntimeIdentityDto}. */
   public static RuntimeIdentityDto asDto(RuntimeIdentity identity) {
-    return DtoFactory.newDto(RuntimeIdentityDto.class)
+    return newDto(RuntimeIdentityDto.class)
         .withWorkspaceId(identity.getWorkspaceId())
         .withEnvName(identity.getEnvName())
         .withOwner(identity.getOwner());
+  }
+
+  /** Converts {@link Volume} to {@link VolumeDto}. */
+  public static VolumeDto asDto(Volume volume) {
+    return newDto(VolumeDto.class).withPath(volume.getPath());
+  }
+
+  /** Converts {@link Warning} to {@link WarningDto}. */
+  public static WarningDto asDto(Warning warning) {
+    return newDto(WarningDto.class).withCode(warning.getCode()).withMessage(warning.getMessage());
   }
 
   private DtoConverter() {}

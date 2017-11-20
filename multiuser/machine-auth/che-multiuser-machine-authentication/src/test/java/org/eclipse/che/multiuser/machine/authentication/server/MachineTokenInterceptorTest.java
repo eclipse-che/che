@@ -21,6 +21,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import com.google.inject.spi.ConstructorBinding;
@@ -32,6 +33,7 @@ import org.eclipse.che.api.workspace.server.WorkspaceSharedPool;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
@@ -75,6 +77,9 @@ public class MachineTokenInterceptorTest {
             bind(MachineTokenRegistry.class).toInstance(tokenRegistry);
 
             Multibinder.newSetBinder(binder(), RuntimeInfrastructure.class);
+            MapBinder.newMapBinder(binder(), String.class, InternalEnvironmentFactory.class);
+
+            MapBinder.newMapBinder(binder(), String.class, InternalEnvironmentFactory.class);
 
             bind(WorkspaceRuntimes.class);
 

@@ -18,7 +18,8 @@ import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiEnvVarProvid
 import org.eclipse.che.infrastructure.docker.client.DockerRegistryDynamicAuthResolver;
 import org.eclipse.che.infrastructure.docker.client.NoOpDockerRegistryDynamicAuthResolverImpl;
 import org.eclipse.che.workspace.infrastructure.docker.bootstrap.DockerBootstrapperFactory;
-import org.eclipse.che.workspace.infrastructure.docker.environment.DockerEnvironmentTypeModule;
+import org.eclipse.che.workspace.infrastructure.docker.environment.DockerEnvironmentsModule;
+import org.eclipse.che.workspace.infrastructure.docker.environment.convert.DockerEnvironmentConvertersModule;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.ContainerSystemSettingsProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.ContainerSystemSettingsProvisioningModule;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.cgroup.CGroupParentProvisioner;
@@ -51,7 +52,8 @@ public class DockerInfraModule extends AbstractModule {
     settingsProvisioners.addBinding().to(CpuLimitsProvisioner.class);
     settingsProvisioners.addBinding().to(PrivilegedModeProvisioner.class);
 
-    install(new DockerEnvironmentTypeModule());
+    install(new DockerEnvironmentsModule());
+    install(new DockerEnvironmentConvertersModule());
     install(new ContainerSystemSettingsProvisioningModule());
 
     bind(CheApiEnvVarProvider.class).to(DockerCheApiEnvVarProvider.class);

@@ -44,4 +44,7 @@ public interface MachineConfig {
 
   /** Returns attributes of resources of machine. */
   Map<String, String> getAttributes();
+
+  /** Returns volumes of machine */
+  Map<String, ? extends Volume> getVolumes();
 }
