@@ -25,6 +25,7 @@
     <name>Infrastructure :: Docker :: Parent</name>
     <modules>
         <module>docker-client</module>
+        <module>environment</module>
         <module>infrastructure</module>
     </modules>
     <properties>

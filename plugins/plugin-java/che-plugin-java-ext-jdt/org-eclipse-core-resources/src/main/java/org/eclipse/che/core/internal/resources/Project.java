@@ -13,7 +13,8 @@ package org.eclipse.che.core.internal.resources;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
-import org.eclipse.che.api.project.server.RegisteredProject;
+import java.util.Optional;
+import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.core.resources.IBuildConfiguration;
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IContainer;
@@ -142,13 +143,13 @@ public class Project extends Container implements IProject {
 
       @Override
       public String[] getNatureIds() {
-        RegisteredProject project = workspace.getProjectRegistry().getProject(path.toString());
-        if (project == null) {
+        Optional<RegisteredProject> project = workspace.getProjectRegistry().get(path.toString());
+        if (!project.isPresent()) {
           ResourcesPlugin.log(
               new Status(IStatus.ERROR, "resource", "Can't find project: " + path.toOSString()));
           return new String[0];
         }
-        Map<String, List<String>> attributes = project.getAttributes();
+        Map<String, List<String>> attributes = project.get().getAttributes();
         String language = "";
         if (attributes.containsKey("language")) {
           language = attributes.get("language").get(0);

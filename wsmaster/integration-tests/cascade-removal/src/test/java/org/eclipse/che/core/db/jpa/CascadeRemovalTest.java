@@ -71,6 +71,7 @@ import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
+import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
@@ -160,7 +161,8 @@ public class CascadeRemovalTest {
                             StackImpl.class,
                             CommandImpl.class,
                             RecipeImpl.class,
-                            SshPairImpl.class)
+                            SshPairImpl.class,
+                            VolumeImpl.class)
                         .addEntityClass(
                             "org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")
                         .setExceptionHandler(H2ExceptionHandler.class)
@@ -187,6 +189,7 @@ public class CascadeRemovalTest {
                     spy(
                         new WorkspaceRuntimes(
                             mock(EventService.class),
+                            Collections.emptyMap(),
                             Collections.emptySet(),
                             mock(WorkspaceSharedPool.class),
                             mock(WorkspaceDao.class),

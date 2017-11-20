@@ -232,6 +232,7 @@ public class WorkspaceManager {
       throws ConflictException, ServerException, NotFoundException, ValidationException {
     requireNonNull(id, "Required non-null workspace id");
     requireNonNull(update, "Required non-null workspace update");
+    requireNonNull(update.getConfig(), "Required non-null workspace configuration update");
     validator.validateConfig(update.getConfig());
     validator.validateAttributes(update.getAttributes());
 

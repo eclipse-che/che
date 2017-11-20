@@ -14,8 +14,7 @@ import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
-import org.eclipse.che.workspace.infrastructure.docker.InfrastructureProvisioner;
+import org.eclipse.che.workspace.infrastructure.docker.DockerEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.Labels;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
@@ -28,18 +27,17 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
  *
  * @author Alexander Garagatyi
  */
-public class ServersConverter implements InfrastructureProvisioner {
+public class ServersConverter implements DockerEnvironmentProvisioner {
 
   @Override
-  public void provision(
-      InternalEnvironment environment, DockerEnvironment internalEnv, RuntimeIdentity identity)
+  public void provision(DockerEnvironment environment, RuntimeIdentity identity)
       throws InfrastructureException {
 
     environment
         .getMachines()
         .forEach(
             (machineName, machineConfig) -> {
-              DockerContainerConfig container = internalEnv.getContainers().get(machineName);
+              DockerContainerConfig container = environment.getContainers().get(machineName);
 
               container
                   .getLabels()
@@ -50,7 +48,7 @@ public class ServersConverter implements InfrastructureProvisioner {
                   .forEach(
                       (key, value) -> {
                         container.getPorts().add(value.getPort());
-                        container.getExpose().add(value.getPort());
+                        container.addExpose(value.getPort());
                       });
             });
   }

@@ -39,13 +39,13 @@ public class WorkspacePVCCleaner {
 
   private final boolean pvcEnabled;
   private final String projectName;
-  private final WorkspacePVCStrategy strategy;
+  private final WorkspaceVolumesStrategy strategy;
 
   @Inject
   public WorkspacePVCCleaner(
       @Named("che.infra.openshift.pvc.enabled") boolean pvcEnabled,
       @Nullable @Named("che.infra.openshift.project") String projectName,
-      WorkspacePVCStrategy pvcStrategy) {
+      WorkspaceVolumesStrategy pvcStrategy) {
     this.pvcEnabled = pvcEnabled;
     this.projectName = projectName;
     this.strategy = pvcStrategy;
@@ -63,7 +63,7 @@ public class WorkspacePVCCleaner {
                 strategy.cleanup(workspaceId);
               } catch (InfrastructureException ex) {
                 LOG.error(
-                    "Failed to cleanup workspace '{}' data cause: {}",
+                    "Failed to cleanup workspace '{}' data. Cause: {}",
                     workspaceId,
                     ex.getMessage());
               }

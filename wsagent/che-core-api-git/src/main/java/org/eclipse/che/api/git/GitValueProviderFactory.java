@@ -10,20 +10,21 @@
  */
 package org.eclipse.che.api.git;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.git.GitProjectType.GIT_CURRENT_HEAD_NAME;
 import static org.eclipse.che.api.git.GitProjectType.GIT_REPOSITORY_REMOTES;
 import static org.eclipse.che.api.git.GitProjectType.VCS_PROVIDER_NAME;
 
 import com.google.inject.Inject;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ApiException;
+import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.git.params.LogParams;
 import org.eclipse.che.api.git.shared.Remote;
-import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.type.ReadonlyValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
@@ -33,21 +34,25 @@ import org.eclipse.che.api.project.server.type.ValueStorageException;
 @Singleton
 public class GitValueProviderFactory implements ValueProviderFactory {
 
+  @Inject private PathTransformer pathTransformer;
+
   @Inject private GitConnectionFactory gitConnectionFactory;
 
   @Override
-  public ValueProvider newInstance(final FolderEntry folder) {
+  public ValueProvider newInstance(String wsPath) {
     return new ReadonlyValueProvider() {
       @Override
       public List<String> getValues(String attributeName) throws ValueStorageException {
-        if (folder == null) {
-          return Collections.emptyList();
+        if (isNullOrEmpty(wsPath)) {
+          return emptyList();
         }
-        try (GitConnection gitConnection =
-            gitConnectionFactory.getConnection(resolveLocalPath(folder))) {
+
+        String fsPath = pathTransformer.transform(wsPath).toString();
+
+        try (GitConnection gitConnection = gitConnectionFactory.getConnection(fsPath)) {
           // check whether the folder belongs to git repository
           if (!gitConnection.isInsideWorkTree()) {
-            return Collections.emptyList();
+            return emptyList();
           }
 
           switch (attributeName) {
@@ -70,16 +75,12 @@ public class GitValueProviderFactory implements ValueProviderFactory {
                   .map(Remote::getUrl)
                   .collect(Collectors.toList());
             default:
-              return Collections.emptyList();
+              return emptyList();
           }
         } catch (ApiException e) {
           throw new ValueStorageException(e.getMessage());
         }
       }
     };
-  }
-
-  private String resolveLocalPath(FolderEntry folder) throws ApiException {
-    return folder.getVirtualFile().toIoFile().getAbsolutePath();
   }
 }

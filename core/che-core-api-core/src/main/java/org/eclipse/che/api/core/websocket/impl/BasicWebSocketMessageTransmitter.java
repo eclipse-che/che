@@ -43,7 +43,11 @@ public class BasicWebSocketMessageTransmitter implements WebSocketMessageTransmi
 
   @Override
   public synchronized void transmit(String endpointId, String message) {
-    final Optional<Session> sessionOptional = registry.get(endpointId);
+    Optional<Session> sessionOptional = registry.get(endpointId);
+
+    if (!sessionOptional.isPresent()) {
+      sessionOptional = registry.getByPartialMatch(endpointId).stream().findFirst();
+    }
 
     if (!sessionOptional.isPresent() || !sessionOptional.get().isOpen()) {
       LOG.debug("Session is not registered or closed, adding message to pending");

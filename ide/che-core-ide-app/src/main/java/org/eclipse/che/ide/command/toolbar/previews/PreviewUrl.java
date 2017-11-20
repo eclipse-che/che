@@ -26,8 +26,8 @@ class PreviewUrl {
 
   PreviewUrl(String url, WsAgentServerUtil wsAgentServerUtil) {
     this.url = url;
-    this.displayName = getDisplayNameForPreviewUrl(url);
     this.wsAgentServerUtil = wsAgentServerUtil;
+    this.displayName = getDisplayNameForPreviewUrl(url);
   }
 
   /** Returns actual preview URL. */

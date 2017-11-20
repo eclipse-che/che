@@ -10,17 +10,18 @@
  */
 package org.eclipse.che.plugin.nodejs.generator;
 
+import static org.eclipse.che.api.fs.server.WsPathUtils.resolve;
+
 import com.google.inject.Inject;
+import java.io.InputStream;
 import java.util.Map;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.project.server.FolderEntry;
+import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.type.AttributeValue;
-import org.eclipse.che.api.vfs.Path;
-import org.eclipse.che.api.vfs.VirtualFileSystem;
-import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 import org.eclipse.che.plugin.nodejs.shared.Constants;
 
 /**
@@ -30,19 +31,23 @@ import org.eclipse.che.plugin.nodejs.shared.Constants;
  */
 public class NodeJsProjectGenerator implements CreateProjectHandler {
 
-  @Inject private VirtualFileSystemProvider virtualFileSystemProvider;
+  private final FsManager fsManager;
 
-  private static final String FILE_NAME = "hello.js";
+  @Inject
+  public NodeJsProjectGenerator(FsManager fsManager) {
+    this.fsManager = fsManager;
+  }
 
   @Override
   public void onCreateProject(
-      Path projectPath, Map<String, AttributeValue> attributes, Map<String, String> options)
-      throws ForbiddenException, ConflictException, ServerException {
+      String projectWsPath, Map<String, AttributeValue> attributes, Map<String, String> options)
+      throws ForbiddenException, ConflictException, ServerException, NotFoundException {
 
-    VirtualFileSystem vfs = virtualFileSystemProvider.getVirtualFileSystem();
-    FolderEntry baseFolder = new FolderEntry(vfs.getRoot().createFolder(projectPath.toString()));
-    baseFolder.createFile(
-        FILE_NAME, getClass().getClassLoader().getResourceAsStream("files/default_node_content"));
+    fsManager.createDir(projectWsPath);
+    InputStream inputStream =
+        getClass().getClassLoader().getResourceAsStream("files/default_node_content");
+    String wsPath = resolve(projectWsPath, "hello.js");
+    fsManager.createFile(wsPath, inputStream);
   }
 
   @Override

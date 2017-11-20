@@ -19,7 +19,6 @@ import io.fabric8.openshift.api.model.Route;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -34,14 +33,13 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class TlsRouteProvisionerTest {
 
-  @Mock private InternalEnvironment environment;
   @Mock private OpenShiftEnvironment osEnv;
   @Mock private RuntimeIdentity runtimeIdentity;
 
   @Test
   public void doNothingWhenTlsDisabled() throws Exception {
     TlsRouteProvisioner tlsProvisioner = new TlsRouteProvisioner(false);
-    tlsProvisioner.provision(environment, osEnv, runtimeIdentity);
+    tlsProvisioner.provision(osEnv, runtimeIdentity);
     verify(osEnv, never()).getRoutes();
   }
 
@@ -50,7 +48,7 @@ public class TlsRouteProvisionerTest {
     TlsRouteProvisioner tlsProvisioner = new TlsRouteProvisioner(true);
     final Map<String, Route> routes = new HashMap<>();
     when(osEnv.getRoutes()).thenReturn(routes);
-    tlsProvisioner.provision(environment, osEnv, runtimeIdentity);
+    tlsProvisioner.provision(osEnv, runtimeIdentity);
     verify(osEnv, times(1)).getRoutes();
   }
 }

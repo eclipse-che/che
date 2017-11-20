@@ -20,13 +20,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.util.CommandLine;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.ProcessUtil;
 import org.eclipse.che.api.core.util.SystemInfo;
-import org.eclipse.che.api.vfs.VirtualFile;
 
 /**
  * A smattering of useful methods to work with the Maven POM.
@@ -199,12 +196,6 @@ public class MavenUtils {
   }
 
   /** Get source directories. */
-  public static List<String> getSourceDirectories(VirtualFile pom)
-      throws ServerException, IOException, ForbiddenException {
-    return getSourceDirectories(Model.readFrom(pom));
-  }
-
-  /** Get source directories. */
   public static List<String> getSourceDirectories(java.io.File pom) throws IOException {
     return getSourceDirectories(Model.readFrom(pom));
   }
@@ -224,12 +215,6 @@ public class MavenUtils {
       list.add("src/test/resources");
     }
     return list;
-  }
-
-  /** Get resource directories. */
-  public static List<String> getResourceDirectories(VirtualFile pom)
-      throws ServerException, IOException, ForbiddenException {
-    return getResourceDirectories(Model.readFrom(pom));
   }
 
   /** Get resource directories. */
