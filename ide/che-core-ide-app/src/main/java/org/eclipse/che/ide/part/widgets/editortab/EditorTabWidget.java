@@ -261,7 +261,11 @@ public class EditorTabWidget extends Composite
 
   @Override
   public void setTitleColor(String color) {
-    this.title.getElement().getStyle().setColor(color);
+    if (color == null || color.isEmpty()) {
+      title.getElement().getStyle().clearColor();
+    } else {
+      title.getElement().getStyle().setColor(color);
+    }
   }
 
   @Override

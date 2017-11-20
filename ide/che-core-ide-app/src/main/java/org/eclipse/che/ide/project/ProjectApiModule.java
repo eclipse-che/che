@@ -20,7 +20,6 @@ import org.eclipse.che.ide.api.project.type.wizard.PreSelectedProjectTypeManager
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistrar;
 import org.eclipse.che.ide.projectimport.InitialProjectImporter;
-import org.eclipse.che.ide.projectimport.ProjectImportNotificationSubscriber;
 import org.eclipse.che.ide.projectimport.wizard.ImportProjectNotificationSubscriberFactory;
 import org.eclipse.che.ide.projectimport.wizard.ImportWizardFactory;
 import org.eclipse.che.ide.projectimport.wizard.ProjectImportOutputJsonRpcNotifier;
@@ -74,8 +73,6 @@ public class ProjectApiModule extends AbstractGinModule {
             .implement(
                 ProjectNotificationSubscriber.class, ProjectImportOutputJsonRpcNotifier.class)
             .build(ImportProjectNotificationSubscriberFactory.class));
-
-    bind(ProjectImportNotificationSubscriber.class).asEagerSingleton();
 
     bind(WorkspaceProjectsSyncer.class).asEagerSingleton();
   }

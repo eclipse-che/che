@@ -13,6 +13,8 @@ package org.eclipse.che.plugin.github.server;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.fs.server.FsManager;
+import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.git.GitConnectionFactory;
 import org.eclipse.che.api.git.GitProjectImporter;
 
@@ -22,8 +24,11 @@ public class GitHubProjectImporter extends GitProjectImporter {
 
   @Inject
   public GitHubProjectImporter(
-      GitConnectionFactory gitConnectionFactory, EventService eventService) {
-    super(gitConnectionFactory, eventService);
+      GitConnectionFactory gitConnectionFactory,
+      EventService eventService,
+      FsManager fsManager,
+      PathTransformer pathTransformer) {
+    super(gitConnectionFactory, eventService, fsManager, pathTransformer);
   }
 
   @Override

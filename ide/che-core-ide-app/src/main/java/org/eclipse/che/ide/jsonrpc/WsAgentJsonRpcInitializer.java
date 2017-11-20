@@ -103,7 +103,7 @@ public class WsAgentJsonRpcInitializer {
             server -> {
               String wsAgentWebSocketUrl = agentURLModifier.modify(server.getUrl());
               String separator = wsAgentWebSocketUrl.contains("?") ? "&" : "?";
-              Optional<String> applicationWebSocketId = appContext.getApplicationWebsocketId();
+              Optional<String> applicationWebSocketId = appContext.getApplicationId();
               String queryParams =
                   applicationWebSocketId.map(id -> separator + "clientId=" + id).orElse("");
               Set<Runnable> initActions =

@@ -10,17 +10,12 @@
  */
 package org.eclipse.che.api.project.server.type;
 
-import static com.google.common.collect.Maps.newHashMap;
-import static java.lang.String.format;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.project.type.Attribute;
 import org.eclipse.che.api.core.model.project.type.ProjectType;
-import org.eclipse.che.api.core.model.project.type.Value;
-import org.eclipse.che.api.project.server.FolderEntry;
 
 /** @author gazarenkov */
 public abstract class ProjectTypeDef implements ProjectType {
@@ -165,65 +160,5 @@ public abstract class ProjectTypeDef implements ProjectType {
 
   void addAncestor(String ancestor) {
     this.ancestors.add(ancestor);
-  }
-
-  public ProjectTypeResolution resolveSources(FolderEntry projectFolder) {
-    Map<String, Value> matchAttrs = new HashMap<>();
-    for (Map.Entry<String, Attribute> entry : attributes.entrySet()) {
-      Attribute attr = entry.getValue();
-      String name = entry.getKey();
-      if (attr.isVariable()) {
-        Variable var = (Variable) attr;
-        ValueProviderFactory factory = var.getValueProviderFactory();
-        if (factory != null) {
-
-          Value value;
-          String errorMessage = "";
-          try {
-            value = new AttributeValue(factory.newInstance(projectFolder).getValues(name));
-          } catch (ValueStorageException e) {
-            value = null;
-            errorMessage = e.getLocalizedMessage();
-          }
-
-          if (value == null || value.isEmpty()) {
-            if (var.isRequired()) {
-              // this PT is not match
-              errorMessage =
-                  errorMessage.isEmpty()
-                      ? format("Value for required attribute %s is not initialized", name)
-                      : errorMessage;
-              return new DefaultResolution(id, errorMessage);
-            }
-          } else {
-            // add one more matched attribute
-            matchAttrs.put(name, value);
-          }
-        }
-      }
-    }
-
-    return new DefaultResolution(id, matchAttrs, true);
-  }
-
-  public static class DefaultResolution extends ProjectTypeResolution {
-
-    private boolean match;
-
-    public DefaultResolution(String type, Map<String, Value> attributes, boolean match) {
-      super(type, attributes);
-      this.match = match;
-    }
-
-    /** Use this one when source code not matches project type requirements */
-    public DefaultResolution(String type, String resolution) {
-      super(type, newHashMap(), resolution);
-      this.match = false;
-    }
-
-    @Override
-    public boolean matched() {
-      return match;
-    }
   }
 }

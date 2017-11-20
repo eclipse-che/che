@@ -15,11 +15,10 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.project.server.FolderEntry;
 
 /** @author Vitaly Parfonov */
 public interface PostImportProjectHandler extends ProjectHandler {
 
-  void onProjectImported(FolderEntry projectFolder)
+  void onProjectImported(String wsPath)
       throws ForbiddenException, ConflictException, ServerException, IOException, NotFoundException;
 }

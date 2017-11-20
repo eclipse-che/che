@@ -12,7 +12,7 @@ package org.eclipse.che.plugin.github.server.inject;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
-import org.eclipse.che.api.project.server.importer.ProjectImporter;
+import org.eclipse.che.api.project.server.ProjectImporter;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.github.server.GitHubDTOFactory;
 import org.eclipse.che.plugin.github.server.GitHubFactory;
