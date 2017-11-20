@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.selenium.miscellaneous;
 
-import static java.lang.Math.random;
 import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
 import static org.testng.Assert.assertTrue;
 
@@ -19,6 +18,8 @@ import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
+
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestCommandsConstants;
@@ -44,10 +45,10 @@ public class NavigateToFileTest {
   private static final String PROJECT_NAME = "NavigateFile";
   private static final String PROJECT_NAME_2 = "NavigateFile_2";
   private static final String FILE_CREATED_FROM_CONSOLE = "createdFrom.con";
-  private static final String COMMAND_FOR_FILE_CREATION = "create-file";
+  private static final String COMMAND_FOR_FILE_CREATION = "createFile";
   private static final String HIDDEN_FOLDER_NAME = ".hiddenFolder";
-  private static final String HIDDEN_FILE_NAME = ".hidden-file";
-  private static final String FILE_IN_HIDDEN_FOLDER = "innerfile.css";
+  private static final String HIDDEN_FILE_NAME = ".hiddenFile";
+  private static final String FILE_IN_HIDDEN_FOLDER = "innerFile.css";
   private static final int MAX_TIMEOUT_FOR_UPDATING_INDEXES = 10;
 
   @Inject private TestWorkspace workspace;
@@ -79,7 +80,7 @@ public class NavigateToFileTest {
         PROJECT_NAME_2,
         ProjectTemplates.MAVEN_SIMPLE);
     testCommandServiceClient.createCommand(
-        String.format("cd /projects/%s && touch %s", PROJECT_NAME_2, FILE_CREATED_FROM_CONSOLE),
+        String.format("touch /projects/%s/%s", PROJECT_NAME_2, FILE_CREATED_FROM_CONSOLE),
         COMMAND_FOR_FILE_CREATION,
         TestCommandsConstants.CUSTOM,
         workspace.getId());
@@ -90,7 +91,7 @@ public class NavigateToFileTest {
   }
 
   @Test(dataProvider = "dataForCheckingTheSameFileInDifferentProjects")
-  public void shouldDoNavigateToFileForFirstProject(
+  public void shouldNavigateToFileForFirstProject(
       String inputValueForChecking, Map<Integer, String> expectedValues) {
     // Open the project one and check function 'Navigate To File'
     launchNavigateToFileAndCheckResults(inputValueForChecking, expectedValues, 1);
@@ -112,7 +113,7 @@ public class NavigateToFileTest {
     commandsPalette.openCommandPalette();
     commandsPalette.startCommandByDoubleClick(COMMAND_FOR_FILE_CREATION);
     sleepQuietly(MAX_TIMEOUT_FOR_UPDATING_INDEXES);
-    int randomItemFromList = (int) random() * 2 + 1;
+    int randomItemFromList = ThreadLocalRandom.current().nextInt(1, 2);
     launchNavigateToFileAndCheckResults(inputValueForChecking, expectedValues, randomItemFromList);
   }
 
@@ -147,12 +148,12 @@ public class NavigateToFileTest {
     // extract the path (without opened class)
     String pathFromDropDawnForChecking = expectedItems.get(numValueFromDropDawnList).split(" ")[1];
 
-    String nameOfTheOpenedFileWithExtension =
+    String openedFileWithExtension =
         expectedItems.get(numValueFromDropDawnList).split(" ")[0];
 
     // extract the name of opened files that display in a tab (the ".java" extension are not shown
     // in tabs)
-    String nameOfTheOpenedFileInTheTab = nameOfTheOpenedFileWithExtension.replace(".java", "");
+    String nameOfTheOpenedFileInTheTab = openedFileWithExtension.replace(".java", "");
     launchNavigateToFileFromUIAndTypeValue(navigatingValue);
     waitExpectedItemsInNavigateToFileDropdawn(expectedItems);
     navigateToFile.selectFileByName(pathFromDropDawnForChecking);
@@ -173,7 +174,7 @@ public class NavigateToFileTest {
   }
 
   private void waitExpectedItemsInNavigateToFileDropdawn(Map<Integer, String> expectedItems) {
-    expectedItems.forEach((k, v) -> navigateToFile.waitListOfFilesNames(v.toString()));
+    expectedItems.values().stream().map(it->it.toString()).forEach(it->navigateToFile.waitListOfFilesNames(it));
   }
 
   @DataProvider
