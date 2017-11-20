@@ -472,7 +472,6 @@ public class ContributePartPresenter extends BasePresenter
 
   @Override
   public void onContextChanged(final Context context) {
-    Log.info(getClass(), "context changed");
     restore(context);
   }
 
