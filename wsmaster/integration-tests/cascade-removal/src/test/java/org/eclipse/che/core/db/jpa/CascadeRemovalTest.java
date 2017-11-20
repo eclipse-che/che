@@ -187,6 +187,7 @@ public class CascadeRemovalTest {
                     spy(
                         new WorkspaceRuntimes(
                             mock(EventService.class),
+                            Collections.emptyMap(),
                             Collections.emptySet(),
                             mock(WorkspaceSharedPool.class),
                             mock(WorkspaceDao.class),

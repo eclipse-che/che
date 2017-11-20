@@ -18,8 +18,11 @@ import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
 import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiEnvVarProvider;
 import org.eclipse.che.workspace.infrastructure.openshift.bootstrapper.OpenShiftBootstrapperFactory;
+import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.project.RemoveProjectOnWorkspaceRemove;
 import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.CommonPVCStrategy;
 import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.UniqueWorkspacePVCStrategy;
@@ -32,6 +35,10 @@ import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftChe
 public class OpenShiftInfraModule extends AbstractModule {
   @Override
   protected void configure() {
+    MapBinder<String, InternalEnvironmentFactory> factories =
+        MapBinder.newMapBinder(binder(), String.class, InternalEnvironmentFactory.class);
+
+    factories.addBinding(OpenShiftEnvironment.TYPE).to(OpenShiftEnvironmentFactory.class);
 
     Multibinder<RuntimeInfrastructure> infrastructures =
         Multibinder.newSetBinder(binder(), RuntimeInfrastructure.class);

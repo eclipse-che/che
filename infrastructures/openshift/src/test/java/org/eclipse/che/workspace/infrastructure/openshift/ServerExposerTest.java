@@ -52,7 +52,7 @@ public class ServerExposerTest {
   private Container container;
 
   @BeforeMethod
-  public void setUp() {
+  public void setUp() throws Exception {
     container = new ContainerBuilder().withName("main").build();
     Pod pod =
         new PodBuilder()

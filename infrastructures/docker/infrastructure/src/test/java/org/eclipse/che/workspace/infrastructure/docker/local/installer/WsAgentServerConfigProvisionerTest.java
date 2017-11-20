@@ -20,8 +20,7 @@ import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
-import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
-import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.inject.CheBootstrap;
 import org.eclipse.che.workspace.infrastructure.docker.local.server.DockerExtConfBindingProvider;
@@ -44,13 +43,11 @@ public class WsAgentServerConfigProvisionerTest {
   @Mock private DockerExtConfBindingProvider extConfBindingProvider;
 
   private WsAgentServerConfigProvisioner provisioner;
-  private InternalEnvironment envConfig;
   private DockerEnvironment dockerEnv;
 
   @BeforeMethod
   public void setUp() throws Exception {
-    envConfig = createEnvironment(MACHINE_1_NAME, MACHINE_1_NAME);
-    dockerEnv = createDockerEnvironment(MACHINE_1_NAME);
+    dockerEnv = createDockerEnvironment(MACHINE_1_NAME, MACHINE_1_NAME);
     provisioner = new WsAgentServerConfigProvisioner(extConfBindingProvider);
   }
 
@@ -71,7 +68,7 @@ public class WsAgentServerConfigProvisionerTest {
     expectedContainerConfig.getVolumes().add(volumeValue);
 
     // when
-    provisioner.provision(envConfig, dockerEnv, RUNTIME_IDENTITY);
+    provisioner.provision(dockerEnv, RUNTIME_IDENTITY);
 
     // then
     assertEquals(dockerEnv, expectedDockerEnv);
@@ -84,7 +81,7 @@ public class WsAgentServerConfigProvisionerTest {
     DockerEnvironment expectedDockerEnv = new DockerEnvironment(dockerEnv);
 
     // when
-    provisioner.provision(envConfig, dockerEnv, RUNTIME_IDENTITY);
+    provisioner.provision(dockerEnv, RUNTIME_IDENTITY);
 
     // then
     assertEquals(dockerEnv, expectedDockerEnv);
@@ -94,14 +91,14 @@ public class WsAgentServerConfigProvisionerTest {
   public void shouldNotAddNeitherExtConfVolumeNorEnvVarIfMachineDoesNotHaveServerButHasInstaller()
       throws Exception {
     // given
+    dockerEnv = createDockerEnvironment(MACHINE_1_NAME, MACHINE_2_NAME, MACHINE_1_NAME);
     DockerEnvironment expectedDockerEnv = new DockerEnvironment(dockerEnv);
-    envConfig = createEnvironment(MACHINE_1_NAME, MACHINE_2_NAME, MACHINE_1_NAME);
-    InternalMachineConfig machine = envConfig.getMachines().get(MACHINE_1_NAME);
+    InternalMachineConfig machine = dockerEnv.getMachines().get(MACHINE_1_NAME);
     when(machine.getServers())
         .thenReturn(singletonMap(Constants.SERVER_WS_AGENT_HTTP_REFERENCE, new ServerConfigImpl()));
 
     // when
-    provisioner.provision(envConfig, dockerEnv, RUNTIME_IDENTITY);
+    provisioner.provision(dockerEnv, RUNTIME_IDENTITY);
 
     // then
     assertEquals(dockerEnv, expectedDockerEnv);
@@ -114,21 +111,19 @@ public class WsAgentServerConfigProvisionerTest {
     when(extConfBindingProvider.get()).thenReturn(volumeValue);
     provisioner = new WsAgentServerConfigProvisioner(extConfBindingProvider);
 
-    envConfig = createEnvironment(MACHINE_1_NAME, MACHINE_2_NAME, MACHINE_1_NAME);
-    dockerEnv = createDockerEnvironment(MACHINE_1_NAME, MACHINE_2_NAME);
+    dockerEnv = createDockerEnvironment(MACHINE_1_NAME, MACHINE_2_NAME, MACHINE_1_NAME);
     DockerContainerConfig expectedContainerConfig =
         new DockerContainerConfig(dockerEnv.getContainers().get(MACHINE_2_NAME));
 
     // when
-    provisioner.provision(envConfig, dockerEnv, RUNTIME_IDENTITY);
+    provisioner.provision(dockerEnv, RUNTIME_IDENTITY);
 
     // then
     assertEquals(dockerEnv.getContainers().get(MACHINE_2_NAME), expectedContainerConfig);
   }
 
-  private InternalEnvironment createEnvironment(
+  private DockerEnvironment createDockerEnvironment(
       String nameOfMachineWithWsagentServer, String... machinesNames) {
-
     Map<String, InternalMachineConfig> machines = new HashMap<>();
     for (String machineName : machinesNames) {
       InternalMachineConfig machine = mock(InternalMachineConfig.class);
@@ -139,16 +134,12 @@ public class WsAgentServerConfigProvisionerTest {
                 singletonMap(Constants.SERVER_WS_AGENT_HTTP_REFERENCE, new ServerConfigImpl()));
       }
     }
-    InternalEnvironment environment = mock(InternalEnvironment.class);
-    when(environment.getMachines()).thenReturn(machines);
-    return environment;
-  }
 
-  private DockerEnvironment createDockerEnvironment(String... machinesNames) {
-    DockerEnvironment environment = new DockerEnvironment();
+    DockerEnvironment environment = new DockerEnvironment(null, machines, null);
     for (String machineName : machinesNames) {
       environment.getContainers().put(machineName, new DockerContainerConfig());
     }
+
     return environment;
   }
 }

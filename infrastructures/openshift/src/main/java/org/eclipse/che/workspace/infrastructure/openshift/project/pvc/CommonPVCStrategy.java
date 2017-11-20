@@ -23,7 +23,6 @@ import io.fabric8.kubernetes.api.model.PodSpec;
 import java.util.Map;
 import javax.inject.Named;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.Names;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProjectFactory;
@@ -69,10 +68,10 @@ public class CommonPVCStrategy implements WorkspacePVCStrategy {
   }
 
   @Override
-  public void prepare(InternalEnvironment env, OpenShiftEnvironment osEnv, String workspaceId)
+  public void prepare(OpenShiftEnvironment osEnv, String workspaceId)
       throws InfrastructureException {
     final String machineWithSources =
-        getWsAgentServerMachine(env)
+        getWsAgentServerMachine(osEnv)
             .orElseThrow(() -> new InfrastructureException("Machine with ws-agent not found"));
     final Map<String, PersistentVolumeClaim> claims = osEnv.getPersistentVolumeClaims();
     claims.put(pvcName, newPVC(pvcName, pvcAccessMode, pvcQuantity));

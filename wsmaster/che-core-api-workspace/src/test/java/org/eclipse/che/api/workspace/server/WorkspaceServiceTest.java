@@ -26,7 +26,6 @@ import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -135,7 +134,7 @@ public class WorkspaceServiceTest {
         new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class), TEST_ACCOUNT), workspace);
     verify(wsManager)
         .createWorkspace(
-            anyObject(),
+            any(),
             eq("test"),
             eq(
                 ImmutableMap.of(
@@ -171,7 +170,7 @@ public class WorkspaceServiceTest {
         new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class), TEST_ACCOUNT), workspace);
     verify(wsManager)
         .createWorkspace(
-            anyObject(),
+            any(),
             eq(NAMESPACE),
             eq(
                 ImmutableMap.of(
@@ -204,7 +203,7 @@ public class WorkspaceServiceTest {
     verify(wsManager).startWorkspace(workspace.getId(), null, emptyMap());
     verify(wsManager)
         .createWorkspace(
-            anyObject(),
+            any(),
             anyString(),
             eq(
                 ImmutableMap.of(
@@ -481,8 +480,7 @@ public class WorkspaceServiceTest {
   @Test
   public void shouldStartWorkspaceFromConfig() throws Exception {
     final WorkspaceImpl workspace = createWorkspace(createConfigDto());
-    when(wsManager.startWorkspace(anyObject(), anyString(), anyBoolean(), any()))
-        .thenReturn(workspace);
+    when(wsManager.startWorkspace(any(), anyString(), anyBoolean(), any())).thenReturn(workspace);
     when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
     final WorkspaceDto workspaceDto = DtoConverter.asDto(workspace);
 
@@ -503,8 +501,7 @@ public class WorkspaceServiceTest {
   public void shouldUseUsernameAsNamespaceWhenStartingWorkspaceFromConfigWithoutNamespace()
       throws Exception {
     final WorkspaceImpl workspace = createWorkspace(createConfigDto());
-    when(wsManager.startWorkspace(anyObject(), anyString(), anyBoolean(), any()))
-        .thenReturn(workspace);
+    when(wsManager.startWorkspace(any(), anyString(), anyBoolean(), any())).thenReturn(workspace);
     when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
     final WorkspaceDto workspaceDto = DtoConverter.asDto(workspace);
 
@@ -941,7 +938,7 @@ public class WorkspaceServiceTest {
 
   @Filter
   public static class EnvironmentFilter implements RequestFilter {
-
+    @Override
     public void doFilter(GenericContainerRequest request) {
       EnvironmentContext.getCurrent()
           .setSubject(new SubjectImpl(NAMESPACE, USER_ID, "token", false));

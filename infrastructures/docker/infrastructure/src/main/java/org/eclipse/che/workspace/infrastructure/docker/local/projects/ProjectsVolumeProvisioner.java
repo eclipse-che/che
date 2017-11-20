@@ -22,7 +22,6 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.util.SystemInfo;
 import org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
@@ -63,11 +62,10 @@ public class ProjectsVolumeProvisioner implements ConfigurationProvisioner {
   }
 
   @Override
-  public void provision(
-      InternalEnvironment envConfig, DockerEnvironment internalEnv, RuntimeIdentity identity)
+  public void provision(DockerEnvironment internalEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
-    Optional<String> devMachineOpt = WsAgentMachineFinderUtil.getWsAgentServerMachine(envConfig);
+    Optional<String> devMachineOpt = WsAgentMachineFinderUtil.getWsAgentServerMachine(internalEnv);
     if (!devMachineOpt.isPresent()) {
       // should not happen
       // no wsagent - no projects volume is needed
