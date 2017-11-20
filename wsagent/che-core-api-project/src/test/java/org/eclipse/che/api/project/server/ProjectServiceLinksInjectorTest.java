@@ -27,6 +27,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 import org.eclipse.che.api.core.rest.ServiceContext;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
+import org.eclipse.che.api.project.server.impl.ProjectServiceLinksInjector;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.dto.server.DtoFactory;

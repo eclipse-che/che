@@ -18,14 +18,12 @@ import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants
 import static org.eclipse.jdt.core.IClasspathEntry.CPE_SOURCE;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.ProjectRegistry;
+import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.type.SettableValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
@@ -44,18 +42,25 @@ import org.eclipse.jdt.internal.core.JavaModelManager;
  */
 @Singleton
 public class PlainJavaValueProviderFactory implements ValueProviderFactory {
-  @Inject private Provider<ProjectRegistry> projectRegistryProvider;
+
+  private final ProjectManager projectManager;
+
+  @Inject
+  public PlainJavaValueProviderFactory(ProjectManager projectManager) {
+    this.projectManager = projectManager;
+  }
 
   @Override
-  public ValueProvider newInstance(FolderEntry projectFolder) {
-    return new PlainJavaValueProvider(projectFolder);
+  public ValueProvider newInstance(String wsPath) {
+    return new PlainJavaValueProvider(wsPath);
   }
 
   private class PlainJavaValueProvider extends SettableValueProvider {
-    private FolderEntry projectFolder;
 
-    PlainJavaValueProvider(FolderEntry projectFolder) {
-      this.projectFolder = projectFolder;
+    private String wsPath;
+
+    PlainJavaValueProvider(String wsPath) {
+      this.wsPath = wsPath;
     }
 
     @Override
@@ -71,7 +76,11 @@ public class PlainJavaValueProviderFactory implements ValueProviderFactory {
     @Override
     public void setValues(String attributeName, List<String> values) throws ValueStorageException {
       Map<String, List<String>> attributes =
-          projectRegistryProvider.get().getProject(projectFolder.getProject()).getAttributes();
+          projectManager
+              .get(wsPath)
+              .orElseThrow(() -> new ValueStorageException("Can't get project"))
+              .getAttributes();
+
       if (attributes.containsKey(attributeName)) {
         attributes.put(
             attributeName,
@@ -83,15 +92,13 @@ public class PlainJavaValueProviderFactory implements ValueProviderFactory {
     }
 
     private List<String> getOutputFolder() throws ValueStorageException {
-      String projectPath = projectFolder.getPath().toString();
-
       JavaModel model = JavaModelManager.getJavaModelManager().getJavaModel();
-      IJavaProject project = model.getJavaProject(projectPath);
+      IJavaProject project = model.getJavaProject(wsPath);
 
       try {
         String outputDirPath = project.getOutputLocation().toOSString();
-        return outputDirPath.startsWith(projectPath)
-            ? singletonList(outputDirPath.substring(projectPath.length() + 1))
+        return outputDirPath.startsWith(wsPath)
+            ? singletonList(outputDirPath.substring(wsPath.length() + 1))
             : singletonList(outputDirPath);
       } catch (JavaModelException e) {
         throw new ValueStorageException("Can't get output location: " + e.getMessage());
@@ -101,19 +108,17 @@ public class PlainJavaValueProviderFactory implements ValueProviderFactory {
     private List<String> getSourceFolders() throws ValueStorageException {
       List<String> sourceFolders = new ArrayList<>();
 
-      String projectPath = projectFolder.getPath().toString();
-
       JavaModel model = JavaModelManager.getJavaModelManager().getJavaModel();
-      IJavaProject project = model.getJavaProject(projectPath);
+      IJavaProject project = model.getJavaProject(wsPath);
 
       try {
         IClasspathEntry[] classpath = project.getRawClasspath();
 
         for (IClasspathEntry entry : classpath) {
           String entryPath = entry.getPath().toOSString();
-          if (CPE_SOURCE == entry.getEntryKind() && !entryPath.equals(projectPath)) {
-            if (entryPath.startsWith(projectPath)) {
-              sourceFolders.add(entryPath.substring(projectPath.length() + 1));
+          if (CPE_SOURCE == entry.getEntryKind() && !entryPath.equals(wsPath)) {
+            if (entryPath.startsWith(wsPath)) {
+              sourceFolders.add(entryPath.substring(wsPath.length() + 1));
             } else {
               sourceFolders.add(entryPath);
             }
