@@ -13,6 +13,7 @@ package org.eclipse.che.api.git;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.api.core.ErrorCodes.FAILED_CHECKOUT;
 import static org.eclipse.che.api.core.ErrorCodes.FAILED_CHECKOUT_WITH_START_POINT;
+import static org.eclipse.che.api.fs.server.WsPathUtils.nameOf;
 import static org.eclipse.che.api.git.GitBasicAuthenticationCredentialsProvider.clearCredentials;
 import static org.eclipse.che.api.git.GitBasicAuthenticationCredentialsProvider.setCurrentCredentials;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_ALL;
@@ -30,14 +31,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 import org.eclipse.che.WorkspaceIdProvider;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.util.LineConsumerFactory;
+import org.eclipse.che.api.core.util.LineConsumer;
+import org.eclipse.che.api.fs.server.FsManager;
+import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.params.CheckoutParams;
 import org.eclipse.che.api.git.params.CloneParams;
@@ -45,8 +50,7 @@ import org.eclipse.che.api.git.params.FetchParams;
 import org.eclipse.che.api.git.params.RemoteAddParams;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.event.GitCheckoutEvent;
-import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.importer.ProjectImporter;
+import org.eclipse.che.api.project.server.ProjectImporter;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.slf4j.Logger;
@@ -60,11 +64,19 @@ public class GitProjectImporter implements ProjectImporter {
 
   private final GitConnectionFactory gitConnectionFactory;
   private final EventService eventService;
+  private final FsManager fsManager;
+  private final PathTransformer pathTransformer;
 
   @Inject
-  public GitProjectImporter(GitConnectionFactory gitConnectionFactory, EventService eventService) {
+  public GitProjectImporter(
+      GitConnectionFactory gitConnectionFactory,
+      EventService eventService,
+      FsManager fsManager,
+      PathTransformer pathTransformer) {
     this.gitConnectionFactory = gitConnectionFactory;
     this.eventService = eventService;
+    this.fsManager = fsManager;
+    this.pathTransformer = pathTransformer;
   }
 
   @Override
@@ -84,22 +96,25 @@ public class GitProjectImporter implements ProjectImporter {
 
   /** {@inheritDoc} */
   @Override
-  public ImporterCategory getCategory() {
-    return ImporterCategory.SOURCE_CONTROL;
+  public SourceCategory getSourceCategory() {
+    return SourceCategory.VCS;
   }
 
   @Override
-  public void importSources(FolderEntry baseFolder, SourceStorage storage)
+  public void doImport(SourceStorage src, String dst)
       throws ForbiddenException, ConflictException, UnauthorizedException, IOException,
-          ServerException {
-    importSources(baseFolder, storage, LineConsumerFactory.NULL);
+          ServerException, NotFoundException {
+    doImport(src, dst, null);
   }
 
   @Override
-  public void importSources(
-      FolderEntry baseFolder, SourceStorage storage, LineConsumerFactory consumerFactory)
+  public void doImport(SourceStorage src, String dst, Supplier<LineConsumer> supplier)
       throws ForbiddenException, ConflictException, UnauthorizedException, IOException,
-          ServerException {
+          ServerException, NotFoundException {
+    if (supplier == null) {
+      supplier = () -> LineConsumer.DEV_NULL;
+    }
+
     GitConnection git = null;
     boolean credentialsHaveBeenSet = false;
     try {
@@ -122,7 +137,7 @@ public class GitProjectImporter implements ProjectImporter {
       boolean recursiveEnabled = false;
       boolean convertToTopLevelProject = false;
 
-      Map<String, String> parameters = storage.getParameters();
+      Map<String, String> parameters = src.getParameters();
       if (parameters != null) {
         commitId = parameters.get("commitId");
         branch = parameters.get("branch");
@@ -144,17 +159,17 @@ public class GitProjectImporter implements ProjectImporter {
               Boolean.parseBoolean(parameters.get("convertToTopLevelProject"));
         }
         branchMerge = parameters.get("branchMerge");
-        final String user = storage.getParameters().remove("username");
-        final String pass = storage.getParameters().remove("password");
+        final String user = src.getParameters().remove("username");
+        final String pass = src.getParameters().remove("password");
         if (user != null && pass != null) {
           credentialsHaveBeenSet = true;
           setCurrentCredentials(user, pass);
         }
       }
       // Get path to local file. Git works with local filesystem only.
-      final String localPath = baseFolder.getVirtualFile().toIoFile().getAbsolutePath();
-      final String location = storage.getLocation();
-      final String projectName = baseFolder.getName();
+      final String localPath = pathTransformer.transform(dst).toString();
+      final String location = src.getLocation();
+      final String projectName = nameOf(dst);
 
       // Converting steps
       // 1. Clone to temporary folder on same device with /projects
@@ -164,9 +179,9 @@ public class GitProjectImporter implements ProjectImporter {
       // otherwise we will have to replace atomic move with copy-delete operation.
       if (convertToTopLevelProject) {
         File tempDir = new File(new File(localPath).getParent(), NameGenerator.generate(".che", 6));
-        git = gitConnectionFactory.getConnection(tempDir, consumerFactory);
+        git = gitConnectionFactory.getConnection(tempDir, supplier::get);
       } else {
-        git = gitConnectionFactory.getConnection(localPath, consumerFactory);
+        git = gitConnectionFactory.getConnection(localPath, supplier::get);
       }
 
       if (keepDir != null) {
@@ -175,7 +190,7 @@ public class GitProjectImporter implements ProjectImporter {
           git.checkout(CheckoutParams.create(branch));
         }
       } else {
-        if (baseFolder.getChildren().size() == 0) {
+        if (fsManager.getAllChildrenNames(dst).isEmpty()) {
           cloneRepository(git, "origin", location, recursiveEnabled);
           if (commitId != null) {
             checkoutCommit(git, commitId);

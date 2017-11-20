@@ -23,20 +23,19 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.PreDestroy;
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.eclipse.che.api.project.server.EditorWorkingCopy;
-import org.eclipse.che.api.project.server.EditorWorkingCopyManager;
-import org.eclipse.che.api.project.server.EditorWorkingCopyUpdatedEvent;
+import org.eclipse.che.api.editor.server.impl.EditorWorkingCopy;
+import org.eclipse.che.api.editor.server.impl.EditorWorkingCopyManager;
+import org.eclipse.che.api.editor.server.impl.EditorWorkingCopyUpdatedEvent;
 import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.VirtualFileEntry;
+import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.api.project.shared.dto.EditorChangesDto;
 import org.eclipse.che.api.project.shared.dto.ServerError;
 import org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto;
 import org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type;
-import org.eclipse.che.api.vfs.impl.file.event.detectors.FileTrackingOperationEvent;
+import org.eclipse.che.api.watcher.server.detectors.FileTrackingOperationEvent;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.ide.ext.java.shared.dto.HighlightedPosition;
@@ -71,6 +70,7 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton
 public class JavaReconciler {
+
   private static final Logger LOG = LoggerFactory.getLogger(JavaReconciler.class);
   private static final JavaModel JAVA_MODEL = JavaModelManager.getJavaModelManager().getJavaModel();
   private static final String RECONCILE_ERROR_METHOD = "event:java-reconcile-error";
@@ -213,12 +213,13 @@ public class JavaReconciler {
         case START:
           {
             String filePath = operation.getPath();
-            VirtualFileEntry fileEntry = projectManager.getProjectsRoot().getChild(filePath);
-            if (fileEntry == null) {
-              throw new NotFoundException("The file is not found by path " + filePath);
-            }
+            RegisteredProject project =
+                projectManager
+                    .getClosest(filePath)
+                    .orElseThrow(
+                        () -> new NotFoundException("The file is not found by path " + filePath));
 
-            String projectPath = fileEntry.getProject();
+            String projectPath = project.getPath();
             if (isNullOrEmpty(projectPath)) {
               throw new NotFoundException("The project is not recognized for " + filePath);
             }
@@ -244,12 +245,6 @@ public class JavaReconciler {
             break;
           }
       }
-    } catch (ServerException e) {
-      String errorMessage = "Can not handle file operation: " + e.getMessage();
-
-      LOG.error(errorMessage);
-
-      transmitError(500, errorMessage, endpointId);
     } catch (NotFoundException e) {
       String errorMessage = "Can not handle file operation: " + e.getMessage();
 
@@ -390,6 +385,16 @@ public class JavaReconciler {
     return type;
   }
 
+  enum Mode {
+    /** The state when the reconciler is turned on. */
+    ACTIVATED,
+    /**
+     * The state when the reconciler is turned off for processing reconcile operation (while java
+     * refactoring in progress, for example)
+     */
+    DEACTIVATED
+  }
+
   private class ProblemRequestor implements IProblemRequestor {
 
     private List<IProblem> problems = new ArrayList<>();
@@ -413,15 +418,5 @@ public class JavaReconciler {
     public void reset() {
       problems.clear();
     }
-  }
-
-  enum Mode {
-    /** The state when the reconciler is turned on. */
-    ACTIVATED,
-    /**
-     * The state when the reconciler is turned off for processing reconcile operation (while java
-     * refactoring in progress, for example)
-     */
-    DEACTIVATED
   }
 }

@@ -128,7 +128,7 @@ public class CppProjectDebuggingTest {
 
     // then
     debugPanel.waitDebugHighlightedText("  std::cout << hello.sayHello(\"man\") << std::endl;");
-    debugPanel.waitTextInVariablesPanel("hello: {<No data fields>}");
+    debugPanel.waitTextInVariablesPanel("hello={<No data fields>}");
   }
 
   private String getXpathForDebugConfigurationMenuItem() {

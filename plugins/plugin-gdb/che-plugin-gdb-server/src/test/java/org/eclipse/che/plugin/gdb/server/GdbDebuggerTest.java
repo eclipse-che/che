@@ -45,9 +45,7 @@ import org.eclipse.che.api.debug.shared.model.impl.action.StepOutActionImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.StepOverActionImpl;
 import org.eclipse.che.api.debugger.server.Debugger;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /** @author Anatoliy Bazko */
@@ -55,25 +53,14 @@ public class GdbDebuggerTest {
 
   private String file;
   private Path sourceDirectory;
-  private GdbServer gdbServer;
   private Debugger gdbDebugger;
   private BlockingQueue<DebuggerEvent> events;
 
   @BeforeClass
   public void beforeClass() throws Exception {
     file = GdbTest.class.getResource("/hello").getFile();
-    sourceDirectory = Paths.get(GdbTest.class.getResource("/h.cpp").getFile());
+    sourceDirectory = Paths.get(GdbTest.class.getResource("/h.cpp").getFile()).getParent();
     events = new ArrayBlockingQueue<>(10);
-  }
-
-  @BeforeMethod
-  public void setUp() throws Exception {
-    gdbServer = GdbServer.start("localhost", 1111, file);
-  }
-
-  @AfterMethod
-  public void tearDown() throws Exception {
-    gdbServer.stop();
   }
 
   @Test
@@ -82,7 +69,7 @@ public class GdbDebuggerTest {
     addBreakpoint();
     startDebugger();
     doSetAndGetValues();
-    //        stepInto();
+    // stepInto();
     stepOver();
     stepOut();
     resume();
@@ -217,16 +204,18 @@ public class GdbDebuggerTest {
   }
 
   private void initializeDebugger() throws DebuggerException {
+    final String gdbPort = System.getProperty("debug.port");
+
     Map<String, String> properties =
         ImmutableMap.of(
             "host",
             "localhost",
             "port",
-            "1111",
+            gdbPort,
             "binary",
             file,
             "sources",
-            sourceDirectory.getParent().toString());
+            sourceDirectory.toString());
 
     GdbDebuggerFactory gdbDebuggerFactory = new GdbDebuggerFactory();
     gdbDebugger = gdbDebuggerFactory.create(properties, events::add);
@@ -235,7 +224,7 @@ public class GdbDebuggerTest {
 
     assertEquals(debuggerInfo.getFile(), file);
     assertEquals(debuggerInfo.getHost(), "localhost");
-    assertEquals(debuggerInfo.getPort(), 1111);
+    assertEquals(debuggerInfo.getPort(), Integer.parseInt(gdbPort));
     assertNotNull(debuggerInfo.getName());
     assertNotNull(debuggerInfo.getVersion());
   }

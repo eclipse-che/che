@@ -10,33 +10,38 @@
  */
 package org.eclipse.che.plugin.php.projecttype;
 
+import static org.eclipse.che.api.fs.server.WsPathUtils.resolve;
+
 import com.google.inject.Inject;
+import java.io.InputStream;
 import java.util.Map;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.project.server.FolderEntry;
+import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.type.AttributeValue;
-import org.eclipse.che.api.vfs.Path;
-import org.eclipse.che.api.vfs.VirtualFileSystem;
-import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 import org.eclipse.che.plugin.php.shared.Constants;
 
 public class PhpProjectGenerator implements CreateProjectHandler {
 
-  @Inject private VirtualFileSystemProvider virtualFileSystemProvider;
+  private final FsManager fsManager;
 
-  private static final String FILE_NAME = "hello.php";
+  @Inject
+  public PhpProjectGenerator(FsManager fsManager) {
+    this.fsManager = fsManager;
+  }
 
   @Override
   public void onCreateProject(
-      Path projectPath, Map<String, AttributeValue> attributes, Map<String, String> options)
-      throws ForbiddenException, ConflictException, ServerException {
-    VirtualFileSystem vfs = virtualFileSystemProvider.getVirtualFileSystem();
-    FolderEntry baseFolder = new FolderEntry(vfs.getRoot().createFolder(projectPath.toString()));
-    baseFolder.createFile(
-        FILE_NAME, getClass().getClassLoader().getResourceAsStream("files/default_php_content"));
+      String projectWsPath, Map<String, AttributeValue> attributes, Map<String, String> options)
+      throws ForbiddenException, ConflictException, ServerException, NotFoundException {
+    fsManager.createDir(projectWsPath);
+    InputStream inputStream =
+        getClass().getClassLoader().getResourceAsStream("files/default_php_content");
+    String wsPath = resolve(projectWsPath, "hello.php");
+    fsManager.createFile(wsPath, inputStream);
   }
 
   @Override

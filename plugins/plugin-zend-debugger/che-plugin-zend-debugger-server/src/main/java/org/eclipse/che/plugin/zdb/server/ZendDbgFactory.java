@@ -16,6 +16,7 @@ import org.eclipse.che.api.debugger.server.Debugger;
 import org.eclipse.che.api.debugger.server.DebuggerFactory;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 import org.eclipse.che.plugin.zdb.server.connection.ZendDbgSettings;
+import org.eclipse.che.plugin.zdb.server.utils.ZendDbgFileUtils;
 
 /**
  * Zend debugger for PHP factory.
@@ -76,7 +77,10 @@ public class ZendDbgFactory implements DebuggerFactory {
 
     return new ZendDebugger(
         new ZendDbgSettings(debugPort, clientHostIPProp, breakAtFirstLine, useSslEncryption),
-        new ZendDbgLocationHandler(),
-        debuggerCallback);
+        new ZendDbgLocationHandler(
+            ZendDbgFileUtils.fsManagerProvider.get(),
+            ZendDbgFileUtils.projectManagerProvider.get()),
+        debuggerCallback,
+        null);
   }
 }

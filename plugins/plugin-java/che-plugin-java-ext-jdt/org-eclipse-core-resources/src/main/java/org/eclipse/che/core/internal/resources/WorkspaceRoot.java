@@ -11,12 +11,12 @@
 package org.eclipse.che.core.internal.resources;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.eclipse.che.api.project.server.ProjectRegistry;
-import org.eclipse.che.api.project.server.RegisteredProject;
+import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -99,9 +99,9 @@ public class WorkspaceRoot extends Container implements IWorkspaceRoot {
 
   @Override
   public IProject[] getProjects() {
-    ProjectRegistry projectRegistry = workspace.getProjectRegistry();
-    List<IProject> projects = new ArrayList<>();
-    List<RegisteredProject> rootProjects = projectRegistry.getProjects();
+    ProjectManager projectManager = workspace.getProjectRegistry();
+    Set<IProject> projects = new HashSet<>();
+    Set<RegisteredProject> rootProjects = projectManager.getAll();
     for (RegisteredProject rootProject : rootProjects) {
       Project project = new Project(new Path(rootProject.getPath()), workspace);
 
