@@ -76,16 +76,16 @@ public class ContributionMixinProvider {
 
   @Inject
   public ContributionMixinProvider(
-          EventBus eventBus,
-          AppContext appContext,
-          WorkspaceAgent workspaceAgent,
-          ContributePartPresenter contributePart,
-          WorkflowExecutor workflowExecutor,
-          VcsServiceProvider vcsServiceProvider,
-          VcsHostingServiceProvider vcsHostingServiceProvider,
-          PromiseProvider promiseProvider,
-          ContributeMessages contributeMessages,
-          NotificationManager notificationManager) {
+      EventBus eventBus,
+      AppContext appContext,
+      WorkspaceAgent workspaceAgent,
+      ContributePartPresenter contributePart,
+      WorkflowExecutor workflowExecutor,
+      VcsServiceProvider vcsServiceProvider,
+      VcsHostingServiceProvider vcsHostingServiceProvider,
+      PromiseProvider promiseProvider,
+      ContributeMessages contributeMessages,
+      NotificationManager notificationManager) {
     this.eventBus = eventBus;
     this.appContext = appContext;
     this.workspaceAgent = workspaceAgent;
@@ -189,7 +189,11 @@ public class ContributionMixinProvider {
                               public void apply(final PromiseError error)
                                   throws OperationException {
                                 invalidateContext(rootProject);
-                                notificationManager.notify(contributeMessages.failedToApplyVSCMixin(rootProject.getName(), error.getMessage()) , FAIL, FLOAT_MODE);
+                                notificationManager.notify(
+                                    contributeMessages.failedToApplyVSCMixin(
+                                        rootProject.getName(), error.getMessage()),
+                                    FAIL,
+                                    FLOAT_MODE);
                                 contributePart.showStub(contributeMessages.unexpectedError());
                               }
                             });
@@ -200,7 +204,11 @@ public class ContributionMixinProvider {
                   @Override
                   public void apply(final PromiseError error) throws OperationException {
                     invalidateContext(rootProject);
-                    notificationManager.notify(contributeMessages.failedToGetVSCService(rootProject.getName(), error.getMessage()), FAIL, FLOAT_MODE);
+                    notificationManager.notify(
+                        contributeMessages.failedToGetVSCService(
+                            rootProject.getName(), error.getMessage()),
+                        FAIL,
+                        FLOAT_MODE);
                     contributePart.showStub(contributeMessages.unexpectedError());
                   }
                 });

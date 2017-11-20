@@ -53,12 +53,11 @@ public class ContributePartViewImpl extends BaseView<ContributePartView.ActionDe
 
   /** The status component. */
   private final StatusSteps statusSteps;
+
   private final StatusText statusText;
 
-  @UiField
-  ScrollPanel contributePanel;
-  @UiField
-  FlowPanel stubPanel;
+  @UiField ScrollPanel contributePanel;
+  @UiField FlowPanel stubPanel;
 
   /** The contribute button. */
   @UiField Button contributeButton;
@@ -359,7 +358,6 @@ public class ContributePartViewImpl extends BaseView<ContributePartView.ActionDe
   public void hideStub() {
     contributePanel.setVisible(true);
     stubPanel.setVisible(false);
-    // todo repaint ?
   }
 
   @Override
