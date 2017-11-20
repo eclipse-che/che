@@ -622,12 +622,6 @@ public class Tree extends FocusWidget
       return Joint.NONE;
     }
 
-    if (getNodeDescriptor(node) != null
-        && getNodeDescriptor(node).isLoaded()
-        && nodeStorage.getChildCount(node) == 0) {
-      return Joint.NONE;
-    }
-
     return getNodeDescriptor(node).isExpanded() ? Joint.EXPANDED : Joint.COLLAPSED;
   }
 
