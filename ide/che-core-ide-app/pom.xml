@@ -163,6 +163,10 @@
             <type>gwt-lib</type>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-ide-ui</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.che.lib</groupId>
             <artifactId>che-terminal-client</artifactId>
         </dependency>
@@ -226,10 +230,6 @@
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
-      <dependency>
-        <groupId>org.eclipse.che.core</groupId>
-        <artifactId>che-core-ide-ui</artifactId>
-      </dependency>
     </dependencies>
     <build>
         <resources>

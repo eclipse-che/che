@@ -17,6 +17,7 @@ import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakConfigurationService;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakTokenValidator;
 import org.eclipse.che.multiuser.keycloak.server.dao.KeycloakProfileDao;
+import org.eclipse.che.multiuser.keycloak.server.oauth2.KeycloakOAuthAuthenticationService;
 
 public class KeycloakModule extends AbstractModule {
   @Override
@@ -26,6 +27,7 @@ public class KeycloakModule extends AbstractModule {
         .to(org.eclipse.che.multiuser.keycloak.server.KeycloakHttpJsonRequestFactory.class);
     bind(TokenValidator.class).to(KeycloakTokenValidator.class);
     bind(KeycloakConfigurationService.class);
+    bind(KeycloakOAuthAuthenticationService.class);
 
     bind(ProfileDao.class).to(KeycloakProfileDao.class);
   }

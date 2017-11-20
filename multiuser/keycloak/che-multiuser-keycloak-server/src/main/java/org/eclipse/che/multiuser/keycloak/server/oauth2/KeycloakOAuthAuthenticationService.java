@@ -13,10 +13,11 @@ package org.eclipse.che.multiuser.keycloak.server.oauth2;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.AUTH_SERVER_URL_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.REALM_SETTING;
 
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.impl.DefaultClaims;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
@@ -42,9 +43,10 @@ import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.annotations.Required;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakSettings;
+import org.keycloak.common.util.Base64Url;
 import org.keycloak.common.util.KeycloakUriBuilder;
 
-/** @author Max Shaposhnik (mshaposh@redhat.com) */
+@Path("/oauth")
 public class KeycloakOAuthAuthenticationService {
   @Context UriInfo uriInfo;
 
@@ -67,33 +69,30 @@ public class KeycloakOAuthAuthenticationService {
       @Context HttpServletRequest request)
       throws ForbiddenException, BadRequestException {
 
-    //    KeycloakSecurityContext session =
-    //        (KeycloakSecurityContext)
-    // request.getAttribute(KeycloakSecurityContext.class.getName());
-    //    AccessToken token = session.getToken();
     Jwt jwtToken = (Jwt) request.getAttribute("token");
     if (jwtToken == null) {
       throw new BadRequestException("No token provided.");
     }
-    Claims token = (Claims) jwtToken.getBody();
-    // String clientId = token.getIssuedFor();
-    String nonce = UUID.randomUUID().toString();
-    MessageDigest md = null;
+    DefaultClaims token = (DefaultClaims) jwtToken.getBody();
+    final String clientId = token.getAudience();
+    final String nonce = UUID.randomUUID().toString();
+    final String sessionState = token.get("session_state", String.class);
+    MessageDigest md;
     try {
       md = MessageDigest.getInstance("SHA-256");
     } catch (NoSuchAlgorithmException e) {
       throw new RuntimeException(e);
     }
-    // String input = nonce + token.getSessionState() + clientId + oauthProvider;
-    // byte[] check = md.digest(input.getBytes(StandardCharsets.UTF_8));
-    // String hash = Base64Url.encode(check);
-    // request.getSession().setAttribute("hash", hash);
+    final String input = nonce + sessionState + clientId + oauthProvider;
+    byte[] check = md.digest(input.getBytes(StandardCharsets.UTF_8));
+    final String hash = Base64Url.encode(check);
+    request.getSession().setAttribute("hash", hash); // TODO: for what?
     String accountLinkUrl =
         KeycloakUriBuilder.fromUri(keycloakConfiguration.get().get(AUTH_SERVER_URL_SETTING))
             .path("/realms/{realm}/broker/{provider}/link")
             .queryParam("nonce", nonce)
-            //      .queryParam("hash", hash)
-            //      .queryParam("client_id", clientId)
+            .queryParam("hash", hash)
+            .queryParam("client_id", clientId)
             .queryParam("redirect_uri", redirectAfterLogin)
             .build(keycloakConfiguration.get().get(REALM_SETTING), oauthProvider)
             .toString();

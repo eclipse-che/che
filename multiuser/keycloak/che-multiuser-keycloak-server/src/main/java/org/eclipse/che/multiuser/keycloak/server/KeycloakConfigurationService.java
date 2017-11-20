@@ -22,7 +22,7 @@ import org.eclipse.che.api.core.rest.Service;
 
 /**
  * Endpoint which provides keycloak public client authentication information (such as URL, realm,
- * cliend_id).
+ * client_id).
  *
  * @author Max Shaposhnik (mshaposh@redhat.com)
  */
