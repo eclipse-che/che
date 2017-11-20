@@ -973,7 +973,7 @@ public final class ResourceManager {
 
     for (int i = 0; i <= segments.length; i++) {
       Path pathToRetrieve = absolutePath.removeLastSegments(segments.length - i);
-      chain = chain.thenPromise(__ -> doFindResource(pathToRetrieve));
+      chain = chain.thenPromise(ignored -> doFindResource(pathToRetrieve));
     }
 
     return chain;
