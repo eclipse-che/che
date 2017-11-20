@@ -12,6 +12,8 @@ package org.eclipse.che.plugin.pullrequest.client;
 
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.api.constraints.Constraints.FIRST;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.parts.PartStackType.TOOLING;
 import static org.eclipse.che.plugin.pullrequest.shared.ContributionProjectTypeConstants.CONTRIBUTE_TO_BRANCH_VARIABLE_NAME;
 import static org.eclipse.che.plugin.pullrequest.shared.ContributionProjectTypeConstants.CONTRIBUTION_PROJECT_TYPE_ID;
@@ -31,6 +33,7 @@ import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.factory.FactoryAcceptedEvent;
 import org.eclipse.che.ide.api.factory.FactoryAcceptedHandler;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
@@ -65,6 +68,7 @@ public class ContributionMixinProvider {
   private final VcsHostingServiceProvider vcsHostingServiceProvider;
   private final PromiseProvider promiseProvider;
   private final ContributeMessages contributeMessages;
+  private final NotificationManager notificationManager;
 
   private HandlerRegistration handlerRegistration;
 
@@ -80,7 +84,8 @@ public class ContributionMixinProvider {
           VcsServiceProvider vcsServiceProvider,
           VcsHostingServiceProvider vcsHostingServiceProvider,
           PromiseProvider promiseProvider,
-          ContributeMessages contributeMessages) {
+          ContributeMessages contributeMessages,
+          NotificationManager notificationManager) {
     this.eventBus = eventBus;
     this.appContext = appContext;
     this.workspaceAgent = workspaceAgent;
@@ -90,6 +95,7 @@ public class ContributionMixinProvider {
     this.vcsHostingServiceProvider = vcsHostingServiceProvider;
     this.promiseProvider = promiseProvider;
     this.contributeMessages = contributeMessages;
+    this.notificationManager = notificationManager;
 
     if (appContext.getFactory() != null) {
       handlerRegistration =
@@ -141,10 +147,10 @@ public class ContributionMixinProvider {
     if (rootProject == null) {
       if (toolingPartStack.containsPart(contributePart)) {
         invalidateContext(lastSelected);
-        contributePart.showStub(contributeMessages.stubTextProjectNotProvideVSC()); // todo
+        contributePart.showStub(contributeMessages.stubTextProjectNotProvideVSC());
       }
     } else if (hasVcsService(rootProject)) {
-      // todo maybe not here...
+
       contributePart.hideStub();
       if (hasContributionMixin(rootProject)) {
 
@@ -183,7 +189,8 @@ public class ContributionMixinProvider {
                               public void apply(final PromiseError error)
                                   throws OperationException {
                                 invalidateContext(rootProject);
-                                contributePart.showStub("Failed to display " + error.getMessage()); //todo
+                                notificationManager.notify(contributeMessages.failedToApplyVSCMixin(rootProject.getName(), error.getMessage()) , FAIL, FLOAT_MODE);
+                                contributePart.showStub(contributeMessages.unexpectedError());
                               }
                             });
                   }
@@ -193,14 +200,15 @@ public class ContributionMixinProvider {
                   @Override
                   public void apply(final PromiseError error) throws OperationException {
                     invalidateContext(rootProject);
-                    contributePart.showStub("Some error" + error); // todo
+                    notificationManager.notify(contributeMessages.failedToGetVSCService(rootProject.getName(), error.getMessage()), FAIL, FLOAT_MODE);
+                    contributePart.showStub(contributeMessages.unexpectedError());
                   }
                 });
       }
 
     } else {
       invalidateContext(rootProject);
-      contributePart.showStub(contributeMessages.stubTextProjectNotProvideVSC()); // todo
+      contributePart.showStub(contributeMessages.stubTextProjectNotProvideVSC());
     }
 
     lastSelected = rootProject;

@@ -251,6 +251,15 @@ public interface ContributeMessages extends Messages {
   @Key("contributor.extension.default.commit.description")
   String contributorExtensionDefaultCommitDescription(String branchName, String contributionTitle);
 
-  @Key("stub.text.project.not.provide.VSC")
+  @Key("stub.text.project.not.provide.vsc")
   String stubTextProjectNotProvideVSC();
+
+  @Key("stub.text.unexpected.error")
+  String unexpectedError();
+
+  @Key("failed.to.get.vsc.service")
+  String failedToGetVSCService(String project, String cause);
+
+  @Key("failed.to.apply.vsc.mixin")
+  String failedToApplyVSCMixin(String project, String cause);
 }
