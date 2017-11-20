@@ -17,9 +17,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestCommandsConstants;
@@ -48,6 +48,10 @@ public class NavigateToFileTest {
   private static final String PROJECT_NAME_2 = "NavigateFile_2";
   private static final String FILE_CREATED_FROM_CONSOLE = "createdFrom.con";
   private static final String COMMAND_FOR_FILE_CREATION = "create-file";
+  private static final String HIDDEN_FOLDER_NAME = ".hiddenFolder";
+  private static final String HIDDEN_FILE_NAME = ".hidden-file";
+  private static final String FILE_IN_HIDDEN_FOLDER = "innerfile.css";
+  private static final String FILE_IN_HIDDEN_FOLDER_2 = "innerfile.js";
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
@@ -102,7 +106,7 @@ public class NavigateToFileTest {
   }
 
   @Test(dataProvider = "dataForCheckingFilesCreatedWithoutIDE")
-  public void checkNavigateToFileFunctionWithJustCreatedFiles(
+  public void checkNavigateToFileFeatureWithJustCreatedFiles(
       String inputValueForChecking, Map<Integer, String> expectedValues) throws Exception {
     final int maxTimeoutForUpdatingIndexes = 10;
     String content = "NavigateToFileTest";
@@ -116,8 +120,8 @@ public class NavigateToFileTest {
   }
 
   @Test
-  public void checkNavigateToFileFunctionWithFilesFromHiddenFolders() {
-    projectExplorer.waitProjectExplorer();
+  public void checkNavigateToFileWithHiddenFilesAndFolders() {
+
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.selectItem(PROJECT_NAME);
     menu.runCommand(
@@ -138,6 +142,12 @@ public class NavigateToFileTest {
     assertFalse(navigateToFile.isFilenameSuggested("HEAD (/NavigateFile/.git)"));
     navigateToFile.closeNavigateToFileForm();
     navigateToFile.waitFormToClose();
+  }
+
+
+
+  private void addHiddenFoldersAndFileThroughProjectService() throws Exception {
+    testProjectServiceClient.createFolder(workspace.getId(), HIDDEN_FOLDER_NAME);
   }
 
   private void launchNavigateToFileAndCheckResults(
