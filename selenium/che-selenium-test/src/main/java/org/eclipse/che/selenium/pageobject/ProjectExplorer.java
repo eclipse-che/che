@@ -149,9 +149,9 @@ public class ProjectExplorer {
    * @return item by path
    */
   private WebElement getProjectExplorerItem(String path) {
-    String locator = "//div[@path='/%s']/div";
     return redrawUiElementsWait.until(
-        ExpectedConditions.visibilityOfElementLocated(By.xpath(String.format(locator, path))));
+        ExpectedConditions.visibilityOfElementLocated(
+            By.xpath(String.format("//div[@path='/%s']/div", path))));
   }
 
   public void clickOnProjectExplorerOptionsButton() {
@@ -216,7 +216,7 @@ public class ProjectExplorer {
    * @param path
    */
   public void waitItem(String path) {
-    String locator = "//div[@path='/%s']";
+    String locator = "//div[@path='/%s']/div";
     loader.waitOnClosed();
     new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC)
         .until(ExpectedConditions.presenceOfElementLocated(By.xpath(String.format(locator, path))));
@@ -232,7 +232,7 @@ public class ProjectExplorer {
    * @param timeout user timeout
    */
   public void waitItem(String path, int timeout) {
-    String locator = "//div[@path='/" + path + "']";
+    String locator = "//div[@path='/" + path + "']/div";
     new WebDriverWait(seleniumWebDriver, timeout)
         .until(ExpectedConditions.presenceOfElementLocated(By.xpath(locator)));
   }
@@ -373,8 +373,11 @@ public class ProjectExplorer {
       new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
           .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)))
           .click();
-    } catch (StaleElementReferenceException ex) {
-      LOG.error(ex.getLocalizedMessage(), ex);
+    }
+    // sometimes an element in the project explorer may be is not attached to the DOM. We should
+    // refresh all items.
+    catch (StaleElementReferenceException ex) {
+      LOG.warn(ex.getLocalizedMessage(), ex);
 
       waitProjectExplorer();
       clickOnRefreshTreeButton();
@@ -401,8 +404,11 @@ public class ProjectExplorer {
       new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
           .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)))
           .click();
-    } catch (StaleElementReferenceException ex) {
-      LOG.error(ex.getLocalizedMessage(), ex);
+    }
+    // sometimes an element in the project explorer may be is not attached to the DOM. We should
+    // refresh all items.
+    catch (StaleElementReferenceException ex) {
+      LOG.warn(ex.getLocalizedMessage(), ex);
 
       waitProjectExplorer();
       clickOnRefreshTreeButton();
@@ -483,7 +489,8 @@ public class ProjectExplorer {
     // sometimes an element in the project explorer may be is not attached to the DOM. We should
     // refresh all items.
     catch (StaleElementReferenceException ex) {
-      LOG.error(ex.getLocalizedMessage(), ex);
+      LOG.warn(ex.getLocalizedMessage(), ex);
+
       clickOnRefreshTreeButton();
       waitItem(path);
       getProjectExplorerItem(path).click();

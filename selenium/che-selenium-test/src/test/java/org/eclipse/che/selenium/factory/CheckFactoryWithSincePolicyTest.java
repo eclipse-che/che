@@ -35,7 +35,8 @@ public class CheckFactoryWithSincePolicyTest {
   private static final String EXPIRE_MESSAGE =
       "Unable to load Factory: This Factory is not yet valid due to time restrictions applied"
           + " by its owner. Please, contact owner for more information.";
-  private static final int ADDITIONAL_TIME = 120000;
+  private static final int FACTORY_IN_ACTIVITY_TIME = 120000;
+  private static final int ADDITIONAL_TIME = 10000;
   private static long initTime;
 
   @Inject private ProjectExplorer projectExplorer;
@@ -51,7 +52,8 @@ public class CheckFactoryWithSincePolicyTest {
     TestFactoryInitializer.TestFactoryBuilder factoryBuilder =
         testFactoryInitializer.fromTemplate(FactoryTemplate.MINIMAL);
     initTime = System.currentTimeMillis();
-    factoryBuilder.setPolicies(newDto(PoliciesDto.class).withSince(initTime + ADDITIONAL_TIME));
+    factoryBuilder.setPolicies(
+        newDto(PoliciesDto.class).withSince(initTime + FACTORY_IN_ACTIVITY_TIME));
     factoryBuilder.setName(FACTORY_NAME);
     testFactory = factoryBuilder.build();
   }
@@ -68,7 +70,7 @@ public class CheckFactoryWithSincePolicyTest {
     testFactory.open(seleniumWebDriver);
     seleniumWebDriver.switchFromDashboardIframeToIde();
 
-    if (System.currentTimeMillis() > initTime + ADDITIONAL_TIME) {
+    if (System.currentTimeMillis() > initTime + FACTORY_IN_ACTIVITY_TIME) {
       Assert.fail(
           "Factory started longer then additional time and next test steps does not make sense");
     }
@@ -76,7 +78,7 @@ public class CheckFactoryWithSincePolicyTest {
     warningDialog.waitWaitWarnDialogWindowWithSpecifiedTextMess(EXPIRE_MESSAGE);
 
     // wait until factory becomes avaialble
-    while (System.currentTimeMillis() <= initTime + ADDITIONAL_TIME + 10000) {
+    while (System.currentTimeMillis() <= initTime + FACTORY_IN_ACTIVITY_TIME + ADDITIONAL_TIME) {
       WaitUtils.sleepQuietly(1);
     }
 
