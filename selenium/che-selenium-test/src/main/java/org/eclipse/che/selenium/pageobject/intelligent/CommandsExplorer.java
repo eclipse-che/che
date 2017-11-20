@@ -187,6 +187,7 @@ public class CommandsExplorer {
         String.format(
             "//div[@id='command_%s' and contains(concat(' ', normalize-space(@class), ' '), ' selected')]",
             commandName);
+
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)));
   }
