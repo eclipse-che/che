@@ -150,12 +150,12 @@ public class FileTreeWalker {
     if (items.containsKey(path)) {
       Long lastModifiedStored = items.get(path);
       if (!lastModifiedActual.equals(lastModifiedStored)) {
-        updateConsumer.forEach(it -> it.accept(path));
         items.put(path, lastModifiedActual);
+        updateConsumer.forEach(it -> it.accept(path));
       }
     } else {
-      createConsumer.forEach(it -> it.accept(path));
       items.put(path, lastModifiedActual);
+      createConsumer.forEach(it -> it.accept(path));
     }
   }
 }

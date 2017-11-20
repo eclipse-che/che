@@ -11,7 +11,6 @@
 package org.eclipse.che.api.search.server.impl;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static java.nio.file.Files.newBufferedReader;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.che.api.fs.server.WsPathUtils.nameOf;
@@ -19,9 +18,8 @@ import static org.eclipse.che.commons.lang.IoUtil.deleteRecursive;
 
 import com.google.common.io.CharStreams;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import java.io.File;
-import java.io.IOException;
-import java.io.Reader;
+import java.io.*;
+import java.nio.charset.MalformedInputException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
@@ -398,11 +396,16 @@ public class LuceneSearcher implements Searcher {
       return;
     }
 
+    if (!isNotExcluded(fsPath)) {
+      return;
+    }
+
     String wsPath = pathTransformer.transform(fsPath);
 
-    try (Reader fContentReader = isNotExcluded(fsPath) ? newBufferedReader(fsPath) : null) {
+    try (Reader reader =
+        new BufferedReader(new InputStreamReader(new FileInputStream(fsPath.toFile()), "utf-8"))) {
       luceneIndexWriter.updateDocument(
-          new Term(PATH_FIELD, wsPath), createDocument(wsPath, fContentReader));
+          new Term(PATH_FIELD, wsPath), createDocument(wsPath, reader));
     } catch (OutOfMemoryError oome) {
       doTerminate();
       throw oome;
@@ -437,9 +440,19 @@ public class LuceneSearcher implements Searcher {
   }
 
   private void doUpdate(Term deleteTerm, Path fsPath) throws ServerException {
+    if (!fsPath.toFile().exists()) {
+      return;
+    }
+
+    if (!isNotExcluded(fsPath)) {
+      return;
+    }
+
     String wsPath = pathTransformer.transform(fsPath);
-    try (Reader fContentReader = isNotExcluded(fsPath) ? newBufferedReader(fsPath) : null) {
-      luceneIndexWriter.updateDocument(deleteTerm, createDocument(wsPath, fContentReader));
+
+    try (Reader reader =
+        new BufferedReader(new InputStreamReader(new FileInputStream(fsPath.toFile()), "utf-8"))) {
+      luceneIndexWriter.updateDocument(deleteTerm, createDocument(wsPath, reader));
     } catch (OutOfMemoryError oome) {
       doTerminate();
       throw oome;
@@ -453,13 +466,13 @@ public class LuceneSearcher implements Searcher {
     Document doc = new Document();
     doc.add(new StringField(PATH_FIELD, wsPath, Field.Store.YES));
     doc.add(new TextField(NAME_FIELD, name, Field.Store.YES));
-    if (reader != null) {
-      try {
-        doc.add(new TextField(TEXT_FIELD, CharStreams.toString(reader), Field.Store.YES));
-      } catch (IOException e) {
-        LOG.error("Can't index file: {}", wsPath);
-        throw new ServerException(e.getLocalizedMessage(), e);
-      }
+    try {
+      doc.add(new TextField(TEXT_FIELD, CharStreams.toString(reader), Field.Store.YES));
+    } catch (MalformedInputException e) {
+      LOG.warn("Can't index file: {}", wsPath);
+    } catch (IOException e) {
+      LOG.error("Can't index file: {}", wsPath);
+      throw new ServerException(e.getLocalizedMessage(), e);
     }
     return doc;
   }
