@@ -185,7 +185,7 @@ public class CommandsExplorer {
   public void waitCommandIsSelected(String commandName) {
     String locator =
         String.format(
-            "//div[@id='command_%s' and contains(concat(' ', normalize-space(@class), ' '), ' selected')]",
+            "//div[@id='command_%s' and contains(normalize-space(@class), 'selected')]",
             commandName);
 
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
