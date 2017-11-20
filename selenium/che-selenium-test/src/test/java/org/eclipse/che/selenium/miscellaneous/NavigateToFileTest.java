@@ -79,7 +79,7 @@ public class NavigateToFileTest {
         PROJECT_NAME_2,
         ProjectTemplates.MAVEN_SIMPLE);
     testCommandServiceClient.createCommand(
-        "cd " + "/projects/" + PROJECT_NAME_2 + "&& touch " + FILE_CREATED_FROM_CONSOLE,
+        String.format("cd /projects/%s && touch %s", PROJECT_NAME_2, FILE_CREATED_FROM_CONSOLE),
         COMMAND_FOR_FILE_CREATION,
         TestCommandsConstants.CUSTOM,
         workspace.getId());
