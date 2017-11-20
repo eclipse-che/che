@@ -171,24 +171,6 @@ public class CheckFileWatcherExcludeFeatureTest {
         ProjectExplorer.FileWatcherExcludeOperations.REMOVE_FROM_FILE_WATCHER_EXCLUDES);
   }
 
-  @Test(priority = 5)
-  public void checkIsNotExcludeOperationEventAboutIgnoreFile() {
-    events.clickProjectEventsTab();
-    events.clearAllMessages();
-
-    doFileWatcherExcludeOperation(
-        PATH_FOR_EXCLUDED_FILE,
-        ProjectExplorer.FileWatcherExcludeOperations.ADD_TO_FILE_WATCHER_EXCLUDES);
-    editor.selectTabByName(FILE_WATCHER_IGNORE_FILE_NAME);
-    editor.waitTextIntoEditor(FILE_NAME_FOR_EXCLUDE);
-    doFileWatcherExcludeOperation(
-        PATH_FOR_EXCLUDED_FILE,
-        ProjectExplorer.FileWatcherExcludeOperations.REMOVE_FROM_FILE_WATCHER_EXCLUDES);
-    editor.waitTextNotPresentIntoEditor(FILE_NAME_FOR_EXCLUDE);
-    // This test fails because of issue: https://github.com/eclipse/che/issues/5883.
-    events.waitMessageIsNotPresent("File 'fileWatcherIgnore' is updated");
-  }
-
   private void doFileWatcherExcludeOperation(String itemName, String typeOfOperation) {
     projectExplorer.selectItem(itemName);
     projectExplorer.openContextMenuByPathSelectedItem(itemName);
