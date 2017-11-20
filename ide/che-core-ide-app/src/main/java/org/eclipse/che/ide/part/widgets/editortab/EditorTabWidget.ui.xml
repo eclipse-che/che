@@ -87,7 +87,7 @@
             font-size: 9pt;
             font-family: "Helvetica Neue", "Myriad Pro", arial, Verdana, Verdana, sans-serif;
             line-height: 26px;
-            max-width: 250px;
+            max-width: 247px;
             overflow: hidden;
             text-overflow: ellipsis;
             padding-left: 3px;
