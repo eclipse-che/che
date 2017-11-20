@@ -11,22 +11,19 @@
 package org.eclipse.che.selenium.miscellaneous;
 
 import static java.lang.Math.random;
-import static org.testng.AssertJUnit.assertFalse;
+import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
+import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestCommandsConstants;
-import org.eclipse.che.selenium.core.constant.TestGitConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -51,7 +48,7 @@ public class NavigateToFileTest {
   private static final String HIDDEN_FOLDER_NAME = ".hiddenFolder";
   private static final String HIDDEN_FILE_NAME = ".hidden-file";
   private static final String FILE_IN_HIDDEN_FOLDER = "innerfile.css";
-  private static final String FILE_IN_HIDDEN_FOLDER_2 = "innerfile.js";
+  private static final int MAX_TIMEOUT_FOR_UPDATING_INDEXES = 10;
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
@@ -92,62 +89,54 @@ public class NavigateToFileTest {
     projectExplorer.waitItem(PROJECT_NAME_2);
   }
 
-  @Test(dataProvider = "dataForSearching")
-  public void checkNavigateToFileWitFirstProject(
+  @Test(dataProvider = "dataForCheckingTheSameFileInDifferentProjects")
+  public void shouldDoNavigateToFileForFirstProject(
       String inputValueForChecking, Map<Integer, String> expectedValues) {
     // Open the project one and check function 'Navigate To File'
     launchNavigateToFileAndCheckResults(inputValueForChecking, expectedValues, 1);
   }
 
-  @Test(dataProvider = "dataForSearching")
-  public void checkNavigateToFileWitSecondProject(
+  @Test(dataProvider = "dataForCheckingTheSameFileInDifferentProjects")
+  public void shouldDoNavigateToFileForSecondProject(
       String inputValueForChecking, Map<Integer, String> expectedValues) {
     launchNavigateToFileAndCheckResults(inputValueForChecking, expectedValues, 2);
   }
 
   @Test(dataProvider = "dataForCheckingFilesCreatedWithoutIDE")
-  public void checkNavigateToFileFeatureWithJustCreatedFiles(
+  public void shouldNavigateToFileWithJustCreatedFiles(
       String inputValueForChecking, Map<Integer, String> expectedValues) throws Exception {
-    final int maxTimeoutForUpdatingIndexes = 10;
+
     String content = "NavigateToFileTest";
     testProjectServiceClient.createFileInProject(
         workspace.getId(), PROJECT_NAME, expectedValues.get(1).split(" ")[0], content);
     commandsPalette.openCommandPalette();
     commandsPalette.startCommandByDoubleClick(COMMAND_FOR_FILE_CREATION);
-    WaitUtils.sleepQuietly(maxTimeoutForUpdatingIndexes);
+    sleepQuietly(MAX_TIMEOUT_FOR_UPDATING_INDEXES);
     int randomItemFromList = (int) random() * 2 + 1;
     launchNavigateToFileAndCheckResults(inputValueForChecking, expectedValues, randomItemFromList);
   }
 
   @Test
-  public void checkNavigateToFileWithHiddenFilesAndFolders() {
-
-    projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.selectItem(PROJECT_NAME);
-    menu.runCommand(
-        TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.INITIALIZE_REPOSITORY);
-    askDialog.acceptDialogWithText(
-        "Do you want to initialize the local repository " + PROJECT_NAME + "?");
-    loader.waitOnClosed();
-    git.waitGitStatusBarWithMess(TestGitConstants.GIT_INITIALIZED_SUCCESS);
-
-    // check that HEAD file from .git folder is not appear in list of found files
-    menu.runCommand(
-        TestMenuCommandsConstants.Assistant.ASSISTANT,
-        TestMenuCommandsConstants.Assistant.NAVIGATE_TO_FILE);
-    navigateToFile.waitFormToOpen();
-    navigateToFile.typeSymbolInFileNameField("H");
-    loader.waitOnClosed();
-    navigateToFile.waitFileNamePopUp();
-    assertFalse(navigateToFile.isFilenameSuggested("HEAD (/NavigateFile/.git)"));
+  public void shouldNotShownHiddenFilesAndFoldersInDropDown() throws Exception {
+    addHiddenFoldersAndFileThroughProjectService();
+    launchNavigateToFileFromUIAndTypeValue(FILE_IN_HIDDEN_FOLDER);
+    assertTrue(navigateToFile.getText().isEmpty());
     navigateToFile.closeNavigateToFileForm();
-    navigateToFile.waitFormToClose();
+    launchNavigateToFileFromUIAndTypeValue(HIDDEN_FILE_NAME);
+    assertTrue(navigateToFile.getText().isEmpty());
   }
 
-
-
   private void addHiddenFoldersAndFileThroughProjectService() throws Exception {
-    testProjectServiceClient.createFolder(workspace.getId(), HIDDEN_FOLDER_NAME);
+    testProjectServiceClient.createFolder(
+        workspace.getId(), PROJECT_NAME + "/" + HIDDEN_FOLDER_NAME);
+    testProjectServiceClient.createFileInProject(
+        workspace.getId(),
+        PROJECT_NAME + "/" + HIDDEN_FOLDER_NAME,
+        FILE_IN_HIDDEN_FOLDER,
+        "contentFile1");
+    testProjectServiceClient.createFileInProject(
+        workspace.getId(), PROJECT_NAME_2 + "/", HIDDEN_FILE_NAME, "content-of-hidden-file");
+    sleepQuietly(MAX_TIMEOUT_FOR_UPDATING_INDEXES);
   }
 
   private void launchNavigateToFileAndCheckResults(
@@ -164,7 +153,15 @@ public class NavigateToFileTest {
     // extract the name of opened files that display in a tab (the ".java" extension are not shown
     // in tabs)
     String nameOfTheOpenedFileInTheTab = nameOfTheOpenedFileWithExtension.replace(".java", "");
+    launchNavigateToFileFromUIAndTypeValue(navigatingValue);
+    waitExpectedItemsInNavigateToFileDropdawn(expectedItems);
+    navigateToFile.selectFileByName(pathFromDropDawnForChecking);
+    editor.waitActiveEditor();
+    editor.getAssociatedPathFromTheTab(nameOfTheOpenedFileInTheTab);
+    editor.closeFileByNameWithSaving(nameOfTheOpenedFileInTheTab);
+  }
 
+  private void launchNavigateToFileFromUIAndTypeValue(String navigatingValue) {
     loader.waitOnClosed();
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
@@ -173,17 +170,11 @@ public class NavigateToFileTest {
     loader.waitOnClosed();
     navigateToFile.typeSymbolInFileNameField(navigatingValue);
     loader.waitOnClosed();
-    waitExpectedItemsInNavigateToFileDropdawn(expectedItems);
-    navigateToFile.selectFileByName(pathFromDropDawnForChecking);
-    editor.waitActiveEditor();
-    editor.getAssociatedPathFromTheTab(nameOfTheOpenedFileInTheTab);
-    editor.closeFileByNameWithSaving(nameOfTheOpenedFileInTheTab);
   }
 
   private void waitExpectedItemsInNavigateToFileDropdawn(Map<Integer, String> expectedItems) {
     expectedItems.forEach((k, v) -> navigateToFile.waitListOfFilesNames(v.toString()));
   }
-
 
   @DataProvider
   private Object[][] dataForCheckingTheSameFileInDifferentProjects() {
