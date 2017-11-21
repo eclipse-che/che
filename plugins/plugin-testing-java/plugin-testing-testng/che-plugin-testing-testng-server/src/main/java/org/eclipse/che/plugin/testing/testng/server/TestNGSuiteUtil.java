@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.plugin.testing.testng.server;
 
+import static com.google.common.io.Files.write;
+
 import com.google.common.io.ByteStreams;
 import java.io.File;
 import java.io.IOException;
@@ -71,7 +73,7 @@ public class TestNGSuiteUtil {
 
     File result = new File(suitePath, "che-testng-suite.xml");
     try {
-      com.google.common.io.Files.write(suite.toXml().getBytes("UTF-8"), result);
+      write(suite.toXml().getBytes("UTF-8"), result);
     } catch (IOException e) {
       LOG.error("Can't write TestNG suite xml file.", e);
     }
@@ -82,7 +84,7 @@ public class TestNGSuiteUtil {
     File result = new File(suitePath, "che-testng-suite.xml");
     File file = new File(path);
     try (InputStream targetStream = FileUtils.openInputStream(file)) {
-      com.google.common.io.Files.write(ByteStreams.toByteArray(targetStream), result);
+      write(ByteStreams.toByteArray(targetStream), result);
     } catch (IOException e) {
       LOG.error("Can't write TestNG suite xml file.", e);
     }
