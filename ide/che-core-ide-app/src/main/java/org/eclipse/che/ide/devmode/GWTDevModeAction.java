@@ -16,21 +16,20 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.BaseAction;
 
-/** Action that invokes IDE GWT app recompilation in Super DevMode. */
 @Singleton
-public class GWTRecompileAction extends BaseAction {
+public class GWTDevModeAction extends BaseAction {
 
-  private final GWTRecompiler gwtRecompiler;
+  private final GWTDevMode gwtDevMode;
 
   @Inject
-  public GWTRecompileAction(CoreLocalizationConstant messages, GWTRecompiler gwtRecompiler) {
+  public GWTDevModeAction(CoreLocalizationConstant messages, GWTDevMode gwtDevMode) {
     super(messages.gwtRecompileActionTitle());
 
-    this.gwtRecompiler = gwtRecompiler;
+    this.gwtDevMode = gwtDevMode;
   }
 
   @Override
   public void actionPerformed(ActionEvent event) {
-    gwtRecompiler.recompile();
+    gwtDevMode.setUp();
   }
 }

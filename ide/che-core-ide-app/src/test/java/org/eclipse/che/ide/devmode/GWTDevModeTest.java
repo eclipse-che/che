@@ -1,0 +1,53 @@
+/*
+ * Copyright (c) 2012-2017 Red Hat, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
+package org.eclipse.che.ide.devmode;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+
+/** Tests for the {@link GWTDevMode}. */
+@RunWith(MockitoJUnitRunner.class)
+public class GWTDevModeTest {
+
+  @Mock WsAgentServerUtil wsAgentServerUtil;
+  @Mock DevModeScriptInjector devModeScriptInjector;
+  @Mock BookmarkletParams bookmarkletParams;
+  @Mock DialogFactory dialogFactory;
+  @Mock CoreLocalizationConstant messages;
+
+  @Mock Promise<Void> voidPromise;
+
+  @InjectMocks GWTDevMode devMode;
+
+  @Test
+  public void shouldSetUpDevMode() throws Exception {
+    when(voidPromise.then(any(Operation.class))).thenReturn(voidPromise);
+    when(devModeScriptInjector.inject(anyString())).thenReturn(voidPromise);
+
+    devMode.setUp();
+
+    verify(bookmarkletParams).setParams(anyString(), anyString());
+    verify(devModeScriptInjector).inject(anyString());
+  }
+}

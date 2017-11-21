@@ -26,41 +26,54 @@ import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.ui.dialogs.message.MessageDialog;
 
 /**
- * Helps to invoke IDE GWT app recompilation in Super DevMode.
+ * Helps to set-up Super DevMode for the current IDE GWT app.
  *
  * <p>It does not communicate with a GWT CodeServer directly in any way but relies on the {@code
  * dev_mode_on.js} script functionality from the {@code gwt-dev} library.
  */
 @Singleton
-public class GWTRecompiler {
+class GWTDevMode {
 
   private static final String LOCAL_CODE_SERVER_ADDRESS = "http://127.0.0.1:9876/";
   private static final String INT_CODE_SERVER_REF = "GWT-CodeServer";
+  private static final String IDE_GWT_APP_SHORT_NAME = "_app";
 
   private final WsAgentServerUtil wsAgentServerUtil;
+  private final DevModeScriptInjector devModeScriptInjector;
+  private final BookmarkletParams bookmarkletParams;
   private final DialogFactory dialogFactory;
   private final CoreLocalizationConstant messages;
 
   @Inject
-  public GWTRecompiler(
+  GWTDevMode(
       WsAgentServerUtil wsAgentServerUtil,
+      DevModeScriptInjector devModeScriptInjector,
+      BookmarkletParams bookmarkletParams,
       DialogFactory dialogFactory,
       CoreLocalizationConstant messages) {
     this.wsAgentServerUtil = wsAgentServerUtil;
+    this.devModeScriptInjector = devModeScriptInjector;
+    this.bookmarkletParams = bookmarkletParams;
     this.dialogFactory = dialogFactory;
     this.messages = messages;
   }
 
-  /** Invokes IDE GWT app recompilation at the Code Server. */
-  void recompile() {
+  /**
+   * Sets-up Super DevMode for the current IDE GWT app. Tries to use Code Server launched in a
+   * dev-machine or at a localhost depending on which one is launched.
+   */
+  void setUp() {
     String codeServerURL = getInternalCodeServerURL().orElse(LOCAL_CODE_SERVER_ADDRESS);
 
-    recompileWithMessages(codeServerURL);
+    setUpSuperDevModeWithUI(codeServerURL);
   }
 
   /**
-   * Returns the top-level URL of the GWT Code Server which is declared in the machine that contains
+   * Returns a top-level URL of the GWT Code Server which is declared in the machine that contains
    * the "wsagent" server.
+   *
+   * @return {@code Optional} with a top-level URL of the GWT Code Server or an empty {@code
+   *     Optional} if none
    */
   private Optional<String> getInternalCodeServerURL() {
     Optional<MachineImpl> wsAgentServerMachineOpt = wsAgentServerUtil.getWsAgentServerMachine();
@@ -83,18 +96,27 @@ public class GWTRecompiler {
     return Optional.empty();
   }
 
-  /** Invokes IDE GWT app recompilation at the specified Code Server. */
-  private void recompileWithMessages(String codeServerURL) {
+  /**
+   * Tries to set-up Super DevMode for the current IDE GWT app and shows an appropriate message to
+   * the user.
+   */
+  private void setUpSuperDevModeWithUI(String codeServerURL) {
     setUpSuperDevMode(codeServerURL)
         .then(showSuccessMessage(codeServerURL))
         .catchError(handleStartRecompilationError(codeServerURL));
   }
 
-  /** Tries to set up IDE GWT app to work in Super DevMode. */
+  /**
+   * Tries to set-up Super DevMode for the current IDE GWT app.
+   *
+   * @param codeServerURL URL of the Code Server URL to use
+   * @return promise that may be resolved if Super DevMode has been set up successfully or rejected
+   *     in case of any error while setting up Super DevMode
+   */
   private Promise<Void> setUpSuperDevMode(String codeServerURL) {
-    BookmarkletParamsHelper.setParams(codeServerURL);
+    bookmarkletParams.setParams(codeServerURL, IDE_GWT_APP_SHORT_NAME);
 
-    return DevModeScriptInjector.injectScript(codeServerURL);
+    return devModeScriptInjector.inject(codeServerURL);
   }
 
   private Operation<Void> showSuccessMessage(String codeServerURL) {
@@ -116,7 +138,7 @@ public class GWTRecompiler {
 
     return err -> {
       if (!isLocalhost) {
-        recompileWithMessages(LOCAL_CODE_SERVER_ADDRESS);
+        setUpSuperDevModeWithUI(LOCAL_CODE_SERVER_ADDRESS);
       } else {
         dialogFactory
             .createMessageDialog(

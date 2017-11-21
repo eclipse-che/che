@@ -12,19 +12,20 @@ package org.eclipse.che.ide.devmode;
 
 import static jsinterop.annotations.JsPackage.GLOBAL;
 
+import javax.inject.Singleton;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
 
-/** Helps to set the necessary parameters for GWT Code Server . */
-class BookmarkletParamsHelper {
+/** Helps to set-up the parameters for GWT Super DevMode. */
+@Singleton
+class BookmarkletParams {
 
-  private static final String IDE_GWT_APP_SHORT_NAME = "_app";
-
-  static void setParams(String codeServerURL) {
-    BookmarkletParams params = new BookmarkletParams();
+  /** Sets-up URL of the Code Server and GWT module name to recompile. */
+  void setParams(String codeServerURL, String moduleName) {
+    Params params = new Params();
     params.setServerURL(codeServerURL);
-    params.setModuleName(IDE_GWT_APP_SHORT_NAME);
+    params.setModuleName(moduleName);
 
     Window.setParams(params);
   }
@@ -37,7 +38,7 @@ class BookmarkletParamsHelper {
   }
 
   @JsType(isNative = true, name = "Object", namespace = GLOBAL)
-  private static class BookmarkletParams {
+  private static class Params {
 
     @JsProperty(name = "server_url")
     native void setServerURL(String serverURL);
