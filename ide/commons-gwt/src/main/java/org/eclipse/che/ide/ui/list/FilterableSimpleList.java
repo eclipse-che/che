@@ -100,7 +100,7 @@ public class FilterableSimpleList<M> extends FocusPanel {
         filterableItems
             .keySet()
             .stream()
-            .filter(name -> name.startsWith(filter.toString()))
+            .filter(name -> name.contains(filter.toString()))
             .map(name -> filterableItems.get(name))
             .collect(Collectors.toList()));
   }
