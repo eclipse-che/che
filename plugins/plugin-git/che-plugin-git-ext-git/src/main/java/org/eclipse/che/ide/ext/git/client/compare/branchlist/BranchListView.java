@@ -23,8 +23,8 @@ import org.eclipse.che.ide.api.mvp.View;
 public interface BranchListView extends View<BranchListView.ActionDelegate> {
   /** Needs for delegate some function into list of branches view. */
   interface ActionDelegate {
-    /** Performs any actions appropriate in response to the user having pressed the Close button. */
-    void onCloseClicked();
+    /** Performs any actions appropriate in response to the user having pressed the Close action. */
+    void onClose();
 
     /**
      * Performs any actions appropriate in response to the user having pressed the Compare button.
@@ -40,6 +40,9 @@ public interface BranchListView extends View<BranchListView.ActionDelegate> {
 
     /** Performs any action in response to the user do not have any selected branch. */
     void onBranchUnselected();
+
+    /** Is called when search filter is changed. */
+    void onSearchFilterChanged(String filter);
   }
 
   /**
@@ -67,4 +70,14 @@ public interface BranchListView extends View<BranchListView.ActionDelegate> {
 
   /** Show dialog. */
   void showDialog();
+
+  /**
+   * Set new content to search filter label.
+   *
+   * @param filter updated filter
+   */
+  void updateSearchFilterLabel(String filter);
+
+  /** Clear search filter. */
+  void clearSearchFilter();
 }

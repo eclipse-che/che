@@ -360,11 +360,14 @@ public interface GitLocalizationConstant extends Messages {
   @Key("view.branch.delete_ask")
   String branchDeleteAsk(String name);
 
-  @Key("view.branch.filter.label")
-  String branchFilterLabel();
+  @Key("view.branch.local_remote_filter.label")
+  String branchLocalRemoteFilterLabel();
 
   @Key("view.branch.title")
   String branchTitle();
+
+  @Key("view.branch.search_filter.label")
+  String branchSearchFilterLabel();
 
   // Commit
   @Key("view.commit.commit_message")
