@@ -118,7 +118,7 @@ public class NavigateToFileTest {
   }
 
   @Test
-  public void shouldNotShownHiddenFilesAndFoldersInDropDown() throws Exception {
+  public void shouldNotDisplayHiddenFilesAndFoldersInDropDown() throws Exception {
     addHiddenFoldersAndFileThroughProjectService();
     launchNavigateToFileFromUIAndTypeValue(FILE_IN_HIDDEN_FOLDER);
     assertTrue(navigateToFile.getText().isEmpty());
@@ -146,20 +146,20 @@ public class NavigateToFileTest {
       final int numValueFromDropDawnList) {
 
     // extract the path (without opened class)
-    String pathFromDropDawnForChecking = expectedItems.get(numValueFromDropDawnList).split(" ")[1];
+    String dropdownVerificationPath = expectedItems.get(numValueFromDropDawnList).split(" ")[1];
 
     String openedFileWithExtension =
         expectedItems.get(numValueFromDropDawnList).split(" ")[0];
 
     // extract the name of opened files that display in a tab (the ".java" extension are not shown
     // in tabs)
-    String nameOfTheOpenedFileInTheTab = openedFileWithExtension.replace(".java", "");
+    String openedFileNameInTheTab = openedFileWithExtension.replace(".java", "");
     launchNavigateToFileFromUIAndTypeValue(navigatingValue);
     waitExpectedItemsInNavigateToFileDropdawn(expectedItems);
-    navigateToFile.selectFileByName(pathFromDropDawnForChecking);
+    navigateToFile.selectFileByName(dropdownVerificationPath);
     editor.waitActiveEditor();
-    editor.getAssociatedPathFromTheTab(nameOfTheOpenedFileInTheTab);
-    editor.closeFileByNameWithSaving(nameOfTheOpenedFileInTheTab);
+    editor.getAssociatedPathFromTheTab(openedFileNameInTheTab);
+    editor.closeFileByNameWithSaving(openedFileNameInTheTab);
   }
 
   private void launchNavigateToFileFromUIAndTypeValue(String navigatingValue) {
