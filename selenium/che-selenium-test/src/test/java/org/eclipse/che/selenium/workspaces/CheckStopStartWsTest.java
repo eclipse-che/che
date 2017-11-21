@@ -48,8 +48,6 @@ public class CheckStopStartWsTest {
     toastLoader.waitExpectedTextInToastLoader("Workspace is not running", 60);
     toastLoader.clickOnStartButton();
     loader.waitOnClosed();
-    toastLoader.waitExpectedTextInToastLoader("Starting workspace runtime.", 20);
-    loader.waitOnClosed();
     projectExplorer.waitProjectExplorer();
     terminal.waitTerminalTab();
   }
