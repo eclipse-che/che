@@ -399,37 +399,25 @@ class JGitConnection implements GitConnection {
                 .map(Branch::getDisplayName)
                 .collect(Collectors.toList());
         if (!localBranches.contains(branchName)) {
-          List<Branch> branches = branchList(LIST_REMOTE);
-          List<String> remotes =
-              repository
-                  .getConfig()
-                  .getSubsections(ConfigConstants.CONFIG_KEY_REMOTE)
-                  .stream()
-                  .filter(
-                      remote ->
-                          branches
-                              .stream()
-                              .anyMatch(
-                                  branch ->
-                                      ("refs/remotes/" + remote + "/" + branchName)
-                                          .equals(branch.getName())))
-                  .collect(Collectors.toList());
-          if (remotes.size() > 1 || remotes.size() == 0) {
+          String remoteBranch = null;
+          for (String remote :
+              repository.getConfig().getSubsections(ConfigConstants.CONFIG_KEY_REMOTE)) {
+            Optional<Branch> remoteBranchOptional =
+                getRemoteBranch(branchList(LIST_REMOTE), remote, branchName);
+            if (remoteBranchOptional.isPresent() && remoteBranch == null) {
+              remoteBranch = remoteBranchOptional.get().getName();
+            } else if (remoteBranchOptional.isPresent()) {
+              throw new GitException(
+                  String.format(ERROR_CHECKOUT_BRANCH_NAME_NOT_FOUND, branchName));
+            }
+          }
+
+          if (remoteBranch == null) {
             throw new GitException(String.format(ERROR_CHECKOUT_BRANCH_NAME_NOT_FOUND, branchName));
           }
 
-          Optional<Branch> remoteBranch =
-              branches
-                  .stream()
-                  .filter(
-                      branch ->
-                          ("refs/remotes/" + remotes.get(0) + "/" + branchName)
-                              .equals(branch.getName()))
-                  .findFirst();
-          if (remoteBranch.isPresent()) {
-            checkoutCommand.setCreateBranch(true);
-            checkoutCommand.setStartPoint(remoteBranch.get().getName());
-          }
+          checkoutCommand.setCreateBranch(true);
+          checkoutCommand.setStartPoint(remoteBranch);
         }
       }
       if (trackBranch != null) {
@@ -460,6 +448,14 @@ class JGitConnection implements GitConnection {
       }
       throw new GitException(exception.getMessage(), exception);
     }
+  }
+
+  private Optional<Branch> getRemoteBranch(
+      List<Branch> remoteBranches, String remote, String branchName) {
+    return remoteBranches
+        .stream()
+        .filter(branch -> ("refs/remotes/" + remote + "/" + branchName).equals(branch.getName()))
+        .findFirst();
   }
 
   @Override
