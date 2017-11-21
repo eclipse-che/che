@@ -400,10 +400,10 @@ class JGitConnection implements GitConnection {
                 .collect(Collectors.toList());
         if (!localBranches.contains(branchName)) {
           List<Branch> branches = branchList(LIST_REMOTE);
-          Set<String> remotes =
-              repository.getConfig().getSubsections(ConfigConstants.CONFIG_KEY_REMOTE);
-          long count =
-              remotes
+          List<String> remotes =
+              repository
+                  .getConfig()
+                  .getSubsections(ConfigConstants.CONFIG_KEY_REMOTE)
                   .stream()
                   .filter(
                       remote ->
@@ -413,8 +413,8 @@ class JGitConnection implements GitConnection {
                                   branch ->
                                       ("refs/remotes/" + remote + "/" + branchName)
                                           .equals(branch.getName())))
-                  .count();
-          if (count > 1 || count == 0) {
+                  .collect(Collectors.toList());
+          if (remotes.size() > 1 || remotes.size() == 0) {
             throw new GitException(String.format(ERROR_CHECKOUT_BRANCH_NAME_NOT_FOUND, branchName));
           }
 
@@ -423,10 +423,8 @@ class JGitConnection implements GitConnection {
                   .stream()
                   .filter(
                       branch ->
-                          remotes
-                              .stream()
-                              .anyMatch(
-                                  remote -> branch.getName().endsWith(remote + "/" + branchName)))
+                          ("refs/remotes/" + remotes.get(0) + "/" + branchName)
+                              .equals(branch.getName()))
                   .findFirst();
           if (remoteBranch.isPresent()) {
             checkoutCommand.setCreateBranch(true);
