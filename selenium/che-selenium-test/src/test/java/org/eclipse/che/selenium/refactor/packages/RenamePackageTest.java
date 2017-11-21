@@ -236,7 +236,7 @@ public class RenamePackageTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(workspace);
-    console.clickOnProcessesTab();
+    console.closeProcessesArea();
     expandTestProject(PROJECT_NAME);
   }
 
