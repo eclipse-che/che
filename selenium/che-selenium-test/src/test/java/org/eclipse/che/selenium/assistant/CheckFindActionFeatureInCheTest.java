@@ -36,7 +36,7 @@ public class CheckFindActionFeatureInCheTest {
       "Update Project Configuration...  Project\n"
           + "Configure Classpath  Project\n"
           + "Edit Debug Configurations... [Alt+Shift+F9]  Run\n"
-          + "Import From Codenvy Config...  Project";
+          + "Import From Che Config...  Project";
 
   private static final String SECOND_EXPECTED_ITEMS_WITH_DISABLED_NONE_MENU_ACTIONS_CHECKBOX =
       "Commands Palette [Shift+F10]  Run";
@@ -49,7 +49,7 @@ public class CheckFindActionFeatureInCheTest {
           + "Configure \n"
           + "Configure Classpath  Project\n"
           + "Edit Debug Configurations... [Alt+Shift+F9]  Run\n"
-          + "Import From Codenvy Config...  Project\n"
+          + "Import From Che Config...  Project\n"
           + "breakpointConfiguration ";
 
   private static final String SECOND_EXPECTED_ITEMS_WITH_ENABLED_NONE_MENU_ACTIONS_CHECKBOX =
