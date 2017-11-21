@@ -407,11 +407,9 @@ public abstract class LuceneSearcher implements Searcher {
   }
 
   protected void addFile(VirtualFile virtualFile) throws ServerException {
-    if (virtualFile.exists()) {
+    if (virtualFile.exists() && shouldIndex(virtualFile)) {
       try (Reader fContentReader =
-          shouldIndexContent(virtualFile)
-              ? new BufferedReader(new InputStreamReader(virtualFile.getContent()))
-              : null) {
+          new BufferedReader(new InputStreamReader(virtualFile.getContent()))) {
         getIndexWriter()
             .updateDocument(
                 new Term(PATH_FIELD, virtualFile.getPath().toString()),
@@ -451,10 +449,12 @@ public abstract class LuceneSearcher implements Searcher {
   }
 
   protected void doUpdate(Term deleteTerm, VirtualFile virtualFile) throws ServerException {
+    if (!shouldIndex(virtualFile)) {
+      return;
+    }
+
     try (Reader fContentReader =
-        shouldIndexContent(virtualFile)
-            ? new BufferedReader(new InputStreamReader(virtualFile.getContent()))
-            : null) {
+        new BufferedReader(new InputStreamReader(virtualFile.getContent()))) {
       getIndexWriter().updateDocument(deleteTerm, createDocument(virtualFile, fContentReader));
     } catch (OutOfMemoryError oome) {
       close();
@@ -480,7 +480,7 @@ public abstract class LuceneSearcher implements Searcher {
     return doc;
   }
 
-  private boolean shouldIndexContent(VirtualFile virtualFile) {
+  private boolean shouldIndex(VirtualFile virtualFile) {
     for (VirtualFileFilter indexFilter : excludeFileIndexFilters) {
       if (indexFilter.accept(virtualFile)) {
         return false;
