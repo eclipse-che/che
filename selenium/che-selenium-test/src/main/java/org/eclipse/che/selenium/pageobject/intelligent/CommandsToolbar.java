@@ -35,7 +35,6 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 /** @author */
 @Singleton
 public class CommandsToolbar {
-
   private WebDriverWait appearanceWait;
   private WebDriverWait redrawWait;
 
@@ -51,7 +50,6 @@ public class CommandsToolbar {
 
   /** Class introduce Xpath locators for Commands Toolbar */
   private static final class Locators {
-
     static final String COMMANDS_TOOLBAR_SELECT = "gwt-debug-command_toolbar-button_Run";
     static final String EXECUTE_COMMAND_TOOLBAR = "gwt-debug-dropdown-processes";
     static final String COMMAND_DROPDAWN = "//div[@class='popupContent']//div[text()='%s']";
