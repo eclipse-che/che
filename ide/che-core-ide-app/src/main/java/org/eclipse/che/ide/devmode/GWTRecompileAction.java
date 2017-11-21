@@ -16,7 +16,7 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.BaseAction;
 
-/** Action that invokes IDE GWT app recompilation. */
+/** Action that invokes IDE GWT app recompilation in Super DevMode. */
 @Singleton
 public class GWTRecompileAction extends BaseAction {
 

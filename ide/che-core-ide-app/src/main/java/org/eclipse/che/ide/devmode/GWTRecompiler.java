@@ -15,14 +15,22 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.api.workspace.model.ServerImpl;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.ide.ui.dialogs.message.MessageDialog;
 
-/** relies on dev_mode_on.js functionality */
+/**
+ * Helps to invoke IDE GWT app recompilation in Super DevMode.
+ *
+ * <p>It does not communicate with a GWT CodeServer directly in any way but relies on the {@code
+ * dev_mode_on.js} script functionality from the {@code gwt-dev} library.
+ */
 @Singleton
 public class GWTRecompiler {
 
@@ -43,49 +51,11 @@ public class GWTRecompiler {
     this.messages = messages;
   }
 
-  /** Tries to set up IDE GWT app to work in Super DevMode. */
-  private Promise<Void> setUpSuperDevMode(String codeServerURL) {
-    BookmarkletParamsHelper.setParams(codeServerURL);
-
-    return DevModeScriptInjector.injectScript(codeServerURL);
-  }
-
   /** Invokes IDE GWT app recompilation at the Code Server. */
   void recompile() {
     String codeServerURL = getInternalCodeServerURL().orElse(LOCAL_CODE_SERVER_ADDRESS);
 
     recompileWithMessages(codeServerURL);
-  }
-
-  /** Invokes IDE GWT app recompilation at the specified Code Server. */
-  private void recompileWithMessages(String codeServerURL) {
-    boolean isLocalhost = codeServerURL.equals(LOCAL_CODE_SERVER_ADDRESS);
-
-    String successMessage =
-        isLocalhost
-            ? messages.gwtRecompileDialogRecompilingMessage("localhost")
-            : messages.gwtRecompileDialogRecompilingMessage("dev-machine");
-
-    setUpSuperDevMode(codeServerURL)
-        .then(
-            aVoid -> {
-              dialogFactory
-                  .createMessageDialog(messages.gwtRecompileDialogTitle(), successMessage, null)
-                  .show();
-            })
-        .catchError(
-            err -> {
-              if (!isLocalhost) {
-                recompileWithMessages(LOCAL_CODE_SERVER_ADDRESS);
-              } else {
-                dialogFactory
-                    .createMessageDialog(
-                        messages.gwtRecompileDialogTitle(),
-                        messages.gwtRecompileDialogNoServerMessage(),
-                        null)
-                    .show();
-              }
-            });
   }
 
   /**
@@ -111,5 +81,50 @@ public class GWTRecompiler {
     }
 
     return Optional.empty();
+  }
+
+  /** Invokes IDE GWT app recompilation at the specified Code Server. */
+  private void recompileWithMessages(String codeServerURL) {
+    setUpSuperDevMode(codeServerURL)
+        .then(showSuccessMessage(codeServerURL))
+        .catchError(handleStartRecompilationError(codeServerURL));
+  }
+
+  /** Tries to set up IDE GWT app to work in Super DevMode. */
+  private Promise<Void> setUpSuperDevMode(String codeServerURL) {
+    BookmarkletParamsHelper.setParams(codeServerURL);
+
+    return DevModeScriptInjector.injectScript(codeServerURL);
+  }
+
+  private Operation<Void> showSuccessMessage(String codeServerURL) {
+    boolean isLocalhost = codeServerURL.equals(LOCAL_CODE_SERVER_ADDRESS);
+
+    String message =
+        isLocalhost
+            ? messages.gwtRecompileDialogRecompilingMessage("localhost")
+            : messages.gwtRecompileDialogRecompilingMessage("dev-machine");
+
+    MessageDialog dialog =
+        dialogFactory.createMessageDialog(messages.gwtRecompileDialogTitle(), message, null);
+
+    return aVoid -> dialog.show();
+  }
+
+  private Operation<PromiseError> handleStartRecompilationError(String codeServerURL) {
+    boolean isLocalhost = codeServerURL.equals(LOCAL_CODE_SERVER_ADDRESS);
+
+    return err -> {
+      if (!isLocalhost) {
+        recompileWithMessages(LOCAL_CODE_SERVER_ADDRESS);
+      } else {
+        dialogFactory
+            .createMessageDialog(
+                messages.gwtRecompileDialogTitle(),
+                messages.gwtRecompileDialogNoServerMessage(),
+                null)
+            .show();
+      }
+    };
   }
 }
