@@ -261,6 +261,8 @@ class JGitConnection implements GitConnection {
 
   private static final String ERROR_CHECKOUT_BRANCH_NAME_EXISTS =
       "A branch named '%s' already exists.";
+  private static final String ERROR_CHECKOUT_BRANCH_NAME_NOT_FOUND =
+      "A branch named '%s' is not exist in local and remote repo or exists in more than one remote repos";
   private static final String ERROR_CHECKOUT_CONFLICT =
       "Checkout operation failed, the following files would be " + "overwritten by merge:";
 
@@ -362,12 +364,13 @@ class JGitConnection implements GitConnection {
   public void checkout(CheckoutParams params) throws GitException {
     CheckoutCommand checkoutCommand = getGit().checkout();
     String startPoint = params.getStartPoint();
-    String name = params.getName();
+    String branchName = params.getName();
     String trackBranch = params.getTrackBranch();
 
     // checkout files?
     List<String> files = params.getFiles();
-    boolean shouldCheckoutToFile = name != null && new File(getWorkingDir(), name).exists();
+    boolean shouldCheckoutToFile =
+        branchName != null && new File(getWorkingDir(), branchName).exists();
     if (shouldCheckoutToFile || !files.isEmpty()) {
       if (shouldCheckoutToFile) {
         checkoutCommand.addPath(params.getName());
@@ -379,7 +382,7 @@ class JGitConnection implements GitConnection {
       if (startPoint != null && trackBranch != null) {
         throw new GitException("Start point and track branch can not be used together.");
       }
-      if (params.isCreateNew() && name == null) {
+      if (params.isCreateNew() && branchName == null) {
         throw new GitException("Branch name must be set when createNew equals to true.");
       }
       if (startPoint != null) {
@@ -387,19 +390,43 @@ class JGitConnection implements GitConnection {
       }
       if (params.isCreateNew()) {
         checkoutCommand.setCreateBranch(true);
-        checkoutCommand.setName(name);
-      } else if (name != null) {
-        checkoutCommand.setName(name);
+        checkoutCommand.setName(branchName);
+      } else if (branchName != null) {
+        checkoutCommand.setName(branchName);
         List<String> localBranches =
             branchList(LIST_LOCAL)
                 .stream()
                 .map(Branch::getDisplayName)
                 .collect(Collectors.toList());
-        if (!localBranches.contains(name)) {
-          Optional<Branch> remoteBranch =
-              branchList(LIST_REMOTE)
+        if (!localBranches.contains(branchName)) {
+          List<Branch> branches = branchList(LIST_REMOTE);
+          Set<String> remotes =
+              repository.getConfig().getSubsections(ConfigConstants.CONFIG_KEY_REMOTE);
+          long count =
+              remotes
                   .stream()
-                  .filter(branch -> branch.getName().contains(name))
+                  .filter(
+                      remote ->
+                          branches
+                              .stream()
+                              .anyMatch(
+                                  branch ->
+                                      ("refs/remotes/" + remote + "/" + branchName)
+                                          .equals(branch.getName())))
+                  .count();
+          if (count > 1 || count == 0) {
+            throw new GitException(String.format(ERROR_CHECKOUT_BRANCH_NAME_NOT_FOUND, branchName));
+          }
+
+          Optional<Branch> remoteBranch =
+              branches
+                  .stream()
+                  .filter(
+                      branch ->
+                          remotes
+                              .stream()
+                              .anyMatch(
+                                  remote -> branch.getName().endsWith(remote + "/" + branchName)))
                   .findFirst();
           if (remoteBranch.isPresent()) {
             checkoutCommand.setCreateBranch(true);
@@ -408,7 +435,7 @@ class JGitConnection implements GitConnection {
         }
       }
       if (trackBranch != null) {
-        if (name == null) {
+        if (branchName == null) {
           checkoutCommand.setName(cleanRemoteName(trackBranch));
         }
         checkoutCommand.setCreateBranch(true);
@@ -431,7 +458,7 @@ class JGitConnection implements GitConnection {
         throw new GitException(
             format(
                 ERROR_CHECKOUT_BRANCH_NAME_EXISTS,
-                name != null ? name : cleanRemoteName(trackBranch)));
+                branchName != null ? branchName : cleanRemoteName(trackBranch)));
       }
       throw new GitException(exception.getMessage(), exception);
     }
