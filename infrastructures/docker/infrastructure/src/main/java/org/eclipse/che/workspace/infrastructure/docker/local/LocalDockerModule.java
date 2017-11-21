@@ -16,7 +16,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import org.eclipse.che.infrastructure.docker.client.DockerRegistryChecker;
-import org.eclipse.che.workspace.infrastructure.docker.InfrastructureProvisioner;
+import org.eclipse.che.workspace.infrastructure.docker.DockerEnvironmentProvisioner;
+import org.eclipse.che.workspace.infrastructure.docker.OnWorkspaceRemoveDataVolumeRemover;
 import org.eclipse.che.workspace.infrastructure.docker.local.installer.ExecInstallerInfrastructureProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.local.installer.TerminalInstallerInfrastructureProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.local.installer.WsAgentBinariesInfrastructureProvisioner;
@@ -31,10 +32,11 @@ public class LocalDockerModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(RemoveLocalProjectsFolderOnWorkspaceRemove.class).asEagerSingleton();
+    bind(OnWorkspaceRemoveDataVolumeRemover.class).asEagerSingleton();
 
     bind(DockerRegistryChecker.class).asEagerSingleton();
 
-    bind(InfrastructureProvisioner.class).to(LocalCheInfrastructureProvisioner.class);
+    bind(DockerEnvironmentProvisioner.class).to(LocalCheDockerEnvironmentProvisioner.class);
 
     Multibinder<ConfigurationProvisioner> localInstallersProvisioners =
         Multibinder.newSetBinder(

@@ -324,6 +324,9 @@ declare namespace che {
     servers?: {
       [serverRef: string]: IEnvironmentMachineServer
     };
+    volumes?: {
+      [volumeRef: string]: IEnvironmentMachineVolume
+    }
   }
 
   export interface IEnvironmentMachineServer {
@@ -331,6 +334,10 @@ declare namespace che {
     protocol: string;
     path?: string;
     properties?: any;
+  }
+
+  export interface IEnvironmentMachineVolume {
+    path: string;
   }
 
   export interface IWorkspaceRuntime {

@@ -10,13 +10,13 @@
  */
 package org.eclipse.che.infrastructure.docker.client;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -63,6 +63,7 @@ import org.eclipse.che.infrastructure.docker.client.exception.DockerException;
 import org.eclipse.che.infrastructure.docker.client.exception.ExecNotFoundException;
 import org.eclipse.che.infrastructure.docker.client.exception.ImageNotFoundException;
 import org.eclipse.che.infrastructure.docker.client.exception.NetworkNotFoundException;
+import org.eclipse.che.infrastructure.docker.client.exception.VolumeNotFoundException;
 import org.eclipse.che.infrastructure.docker.client.json.ContainerCommitted;
 import org.eclipse.che.infrastructure.docker.client.json.ContainerConfig;
 import org.eclipse.che.infrastructure.docker.client.json.ContainerCreated;
@@ -88,6 +89,8 @@ import org.eclipse.che.infrastructure.docker.client.json.network.IpamConfig;
 import org.eclipse.che.infrastructure.docker.client.json.network.Network;
 import org.eclipse.che.infrastructure.docker.client.json.network.NewIpamConfig;
 import org.eclipse.che.infrastructure.docker.client.json.network.NewNetwork;
+import org.eclipse.che.infrastructure.docker.client.json.volume.Volume;
+import org.eclipse.che.infrastructure.docker.client.json.volume.Volumes;
 import org.eclipse.che.infrastructure.docker.client.params.AttachContainerParams;
 import org.eclipse.che.infrastructure.docker.client.params.BuildImageParams;
 import org.eclipse.che.infrastructure.docker.client.params.CommitParams;
@@ -119,6 +122,8 @@ import org.eclipse.che.infrastructure.docker.client.params.network.DisconnectCon
 import org.eclipse.che.infrastructure.docker.client.params.network.GetNetworksParams;
 import org.eclipse.che.infrastructure.docker.client.params.network.InspectNetworkParams;
 import org.eclipse.che.infrastructure.docker.client.params.network.RemoveNetworkParams;
+import org.eclipse.che.infrastructure.docker.client.params.volume.GetVolumesParams;
+import org.eclipse.che.infrastructure.docker.client.params.volume.RemoveVolumeParams;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -402,7 +407,7 @@ public class DockerConnectorTest {
 
     List<ContainerListEntry> containers = dockerConnector.listContainers(listContainersParams);
 
-    verify(dockerConnection).query(eq("filters"), anyObject());
+    verify(dockerConnection).query(eq("filters"), any());
     assertEquals(containers, expectedListContainers);
   }
 
@@ -1885,7 +1890,7 @@ public class DockerConnectorTest {
     verify(dockerConnectionFactory).openConnection(nullable(URI.class));
     verify(dockerConnection).method(REQUEST_METHOD_GET);
     verify(dockerConnection).path("/networks");
-    verify(dockerConnection).query(eq("filters"), anyObject());
+    verify(dockerConnection).query(eq("filters"), any());
     verify(dockerConnection).request();
     verify(dockerResponse).getStatus();
     verify(dockerResponse).getInputStream();
@@ -2170,6 +2175,103 @@ public class DockerConnectorTest {
     dockerConnector.removeNetwork(removeNetworkParams);
   }
 
+  @Test(
+    expectedExceptions = VolumeNotFoundException.class,
+    expectedExceptionsMessageRegExp = "exc_message"
+  )
+  public void shouldThrowExceptionOnRemoveVolumeIfResponseCodeIsNot20x() throws Exception {
+    // given
+    doReturn(404).when(dockerResponse).getStatus();
+    ByteArrayInputStream inputStream = new ByteArrayInputStream("exc_message".getBytes());
+    doReturn(inputStream).when(dockerResponse).getInputStream();
+    RemoveVolumeParams removeVolumeParams = RemoveVolumeParams.create("volumeName");
+
+    // when
+    dockerConnector.removeVolume(removeVolumeParams);
+  }
+
+  @Test
+  public void shouldBeAbleToRemoveVolume() throws Exception {
+    // given
+    String volumeName = "net_id";
+    doNothing().when(dockerConnector).removeVolume(any(RemoveVolumeParams.class));
+
+    // when
+    dockerConnector.removeVolume(volumeName);
+
+    // then
+    verify(dockerConnector).removeVolume(volumeName);
+  }
+
+  @Test
+  public void shouldBeAbleToRemoveVolumeWithParams() throws Exception {
+    // given
+    String volumeName = "volume";
+    RemoveVolumeParams removeVolumeParams = RemoveVolumeParams.create(volumeName);
+
+    // when
+    dockerConnector.removeVolume(removeVolumeParams);
+
+    // then
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
+    verify(dockerConnection).method(REQUEST_METHOD_DELETE);
+    verify(dockerConnection).path("/volumes/" + volumeName);
+    verify(dockerConnection).request();
+    verify(dockerResponse).getStatus();
+  }
+
+  @Test
+  public void shouldBeAbleToGetVolumes() throws Exception {
+    // given
+    doReturn(inputStream).when(dockerResponse).getInputStream();
+    doReturn(createVolumes()).when(dockerConnector).getVolumes(any(GetVolumesParams.class));
+
+    // when
+    dockerConnector.getVolumes();
+
+    // then
+    verify(dockerConnector).getVolumes(eq(GetVolumesParams.create()));
+  }
+
+  @Test
+  public void shouldBeAbleToGetVolumesWithParams() throws Exception {
+    // given
+    Volumes originVolumes = createVolumes();
+    ByteArrayInputStream inputStream =
+        new ByteArrayInputStream(GSON.toJson(originVolumes).getBytes());
+    doReturn(inputStream).when(dockerResponse).getInputStream();
+    GetVolumesParams getVolumesParams =
+        GetVolumesParams.create().withFilters(new Filters().withFilter("key", "value1", "value2"));
+
+    // when
+    Volumes actual = dockerConnector.getVolumes(getVolumesParams);
+
+    // then
+    assertEquals(actual, originVolumes);
+    verify(dockerConnectionFactory).openConnection(nullable(URI.class));
+    verify(dockerConnection).method(REQUEST_METHOD_GET);
+    verify(dockerConnection).path("/volumes");
+    verify(dockerConnection).query(eq("filters"), any());
+    verify(dockerConnection).request();
+    verify(dockerResponse).getStatus();
+    verify(dockerResponse).getInputStream();
+  }
+
+  @Test(
+    expectedExceptions = DockerException.class,
+    expectedExceptionsMessageRegExp =
+        "Error response from docker API, status: 404, message: exc_message"
+  )
+  public void shouldThrowExceptionOnGetVolumesIfResponseCodeIsNot20x() throws Exception {
+    // given
+    doReturn(404).when(dockerResponse).getStatus();
+    ByteArrayInputStream inputStream = new ByteArrayInputStream("exc_message".getBytes());
+    doReturn(inputStream).when(dockerResponse).getInputStream();
+
+    // when
+    dockerConnector.getVolumes();
+  }
+
   private Network createNetwork() {
     return new Network()
         .withName("some_name")
@@ -2228,10 +2330,18 @@ public class DockerConnectorTest {
         .withEndpointConfig(
             new EndpointConfig()
                 .withLinks(new String[] {"link_1"})
-                .withAliases(new String[] {"alias_1"})
+                .withAliases("alias_1")
                 .withIPAMConfig(
                     new NewIpamConfig()
                         .withIPv4Address("ipv4_address")
                         .withIPv6Address("ipv6_address")));
+  }
+
+  private Volumes createVolumes() {
+    return new Volumes()
+        .withVolumes(
+            asList(
+                new Volume().withName("volume1"),
+                new Volume().withName("volume2").withDriver("driver1")));
   }
 }

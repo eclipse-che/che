@@ -65,8 +65,7 @@ public class EditorTabsColorizer implements GitEventsSubscriber {
             editor -> {
               VcsStatus vcsStatus = VcsStatus.from(dto.getStatus().toString());
               // set vcs status to editor file
-              ((File) editor.getEditorInput().getFile())
-                  .setVcsStatus(VcsStatus.from(dto.getStatus().toString()));
+              ((File) editor.getEditorInput().getFile()).setVcsStatus(vcsStatus);
               EditorTab tab = multiPartStackProvider.get().getTabByPart(editor);
               if (vcsStatus != null) {
                 tab.setTitleColor(vcsStatus.getColor());

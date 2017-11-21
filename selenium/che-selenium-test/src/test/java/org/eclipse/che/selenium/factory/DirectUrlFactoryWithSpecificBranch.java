@@ -57,7 +57,9 @@ public class DirectUrlFactoryWithSpecificBranch {
 
   @AfterClass
   public void tearDown() throws Exception {
-    testFactoryWithSpecificBranch.delete();
+    if (workspaceServiceClient.exists(gitHubUsername, testUser.getName())) {
+      testFactoryWithSpecificBranch.delete();
+    }
   }
 
   @Test

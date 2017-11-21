@@ -27,6 +27,7 @@ import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.RecipeDto;
 import org.eclipse.che.api.workspace.shared.dto.ServerConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.VolumeDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -238,6 +239,89 @@ public class WorkspaceValidatorTest {
   public void shouldFailValidationIfCommandLineIsEmpty() throws Exception {
     final WorkspaceConfigDto config = createConfig();
     config.getCommands().get(0).withCommandLine("");
+
+    wsValidator.validateConfig(config);
+  }
+
+  @Test(
+    expectedExceptions = ValidationException.class,
+    expectedExceptionsMessageRegExp = "Volume name '.*' in machine '.*' is invalid",
+    dataProvider = "illegalVolumeNameProvider"
+  )
+  public void shouldFailValidationIfVolumeNameDoesNotMatchCriteria(String volumeName)
+      throws Exception {
+    final WorkspaceConfigDto config = createConfig();
+    EnvironmentDto env = config.getEnvironments().values().iterator().next();
+    MachineConfigDto machine = env.getMachines().values().iterator().next();
+    machine.getVolumes().put(volumeName, newDto(VolumeDto.class).withPath("/path"));
+
+    wsValidator.validateConfig(config);
+  }
+
+  @DataProvider(name = "illegalVolumeNameProvider")
+  public static Object[][] illegalVolumeNameProvider() {
+    return new Object[][] {
+      {"0volume"},
+      {"CAPITAL"},
+      {"veryveryveryveryveryveryverylongname"},
+      {"volume/name"},
+      {"volume_name"},
+      {"volume-name"}
+    };
+  }
+
+  @Test(
+    expectedExceptions = ValidationException.class,
+    expectedExceptionsMessageRegExp =
+        "Path of volume '.*' in machine '.*' is invalid. It should not be empty"
+  )
+  public void shouldFailValidationIfVolumeValueIsEmpty() throws Exception {
+    final WorkspaceConfigDto config = createConfig();
+    EnvironmentDto env = config.getEnvironments().values().iterator().next();
+    MachineConfigDto machine = env.getMachines().values().iterator().next();
+    machine.getVolumes().put("volume1", null);
+
+    wsValidator.validateConfig(config);
+  }
+
+  @Test(
+    expectedExceptions = ValidationException.class,
+    expectedExceptionsMessageRegExp =
+        "Path of volume '.*' in machine '.*' is invalid. It should not be empty"
+  )
+  public void shouldFailValidationIfVolumePathIsEmpty() throws Exception {
+    final WorkspaceConfigDto config = createConfig();
+    EnvironmentDto env = config.getEnvironments().values().iterator().next();
+    MachineConfigDto machine = env.getMachines().values().iterator().next();
+    machine.getVolumes().put("volume1", newDto(VolumeDto.class).withPath(""));
+
+    wsValidator.validateConfig(config);
+  }
+
+  @Test(
+    expectedExceptions = ValidationException.class,
+    expectedExceptionsMessageRegExp =
+        "Path of volume '.*' in machine '.*' is invalid. It should not be empty"
+  )
+  public void shouldFailValidationIfVolumePathIsNull() throws Exception {
+    final WorkspaceConfigDto config = createConfig();
+    EnvironmentDto env = config.getEnvironments().values().iterator().next();
+    MachineConfigDto machine = env.getMachines().values().iterator().next();
+    machine.getVolumes().put("volume1", newDto(VolumeDto.class).withPath(null));
+
+    wsValidator.validateConfig(config);
+  }
+
+  @Test(
+    expectedExceptions = ValidationException.class,
+    expectedExceptionsMessageRegExp =
+        "Path '.*' of volume '.*' in machine '.*' is invalid. It should be absolute"
+  )
+  public void shouldFailValidationIfVolumePathIsNotAbsolute() throws Exception {
+    final WorkspaceConfigDto config = createConfig();
+    EnvironmentDto env = config.getEnvironments().values().iterator().next();
+    MachineConfigDto machine = env.getMachines().values().iterator().next();
+    machine.getVolumes().put("volume1", newDto(VolumeDto.class).withPath("not/absolute/path"));
 
     wsValidator.validateConfig(config);
   }
