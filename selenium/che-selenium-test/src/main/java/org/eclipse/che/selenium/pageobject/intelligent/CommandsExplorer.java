@@ -174,6 +174,22 @@ public class CommandsExplorer {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOf(getCommandByName(commandName)));
     new Actions(seleniumWebDriver).doubleClick(getCommandByName(commandName)).build().perform();
+    waitCommandIsSelected(commandName);
+  }
+
+  /**
+   * wait until command will be selected
+   *
+   * @param commandName visible name of command in the command explorer
+   */
+  public void waitCommandIsSelected(String commandName) {
+    String locator =
+        String.format(
+            "//div[@id='command_%s' and contains(normalize-space(@class), 'selected')]",
+            commandName);
+
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)));
   }
 
   public void waitCommandInExplorerByName(String commandName) {
@@ -225,6 +241,7 @@ public class CommandsExplorer {
   public void deleteCommandByName(String commandName) {
     selectCommandByName(commandName);
     loader.waitOnClosed();
+
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(

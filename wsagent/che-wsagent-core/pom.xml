@@ -43,6 +43,11 @@
             <artifactId>javax.inject</artifactId>
         </dependency>
         <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>${logstash.logback.encoder.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-core</artifactId>
         </dependency>
@@ -145,6 +150,7 @@
                             <ignoredDependencies>
                                 <ignoredDependency>org.everrest:everrest-core</ignoredDependency>
                                 <ignoredDependency>ch.qos.logback:logback-classic</ignoredDependency>
+                                <ignoredDependency>net.logstash.logback:logstash-logback-encoder</ignoredDependency>
                                 <ignoredDependency>org.slf4j:jul-to-slf4j</ignoredDependency>
                                 <ignoredDependency>org.slf4j:jcl-over-slf4j</ignoredDependency>
                                 <ignoredDependency>org.slf4j:log4j-over-slf4j</ignoredDependency>

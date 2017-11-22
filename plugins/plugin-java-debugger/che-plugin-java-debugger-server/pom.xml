@@ -175,7 +175,7 @@
     </build>
     <profiles>
         <profile>
-            <id>integration</id>
+            <id>java-tests</id>
             <activation>
                 <activeByDefault>false</activeByDefault>
             </activation>
