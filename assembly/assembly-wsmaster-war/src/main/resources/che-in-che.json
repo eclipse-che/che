@@ -60,7 +60,8 @@
                   "path": "api",
                   "protocol": "http",
                   "port": "8087"
-                },
+                }
+              },
               "attributes": {
                 "memoryLimitBytes": "7516192768"
               }
