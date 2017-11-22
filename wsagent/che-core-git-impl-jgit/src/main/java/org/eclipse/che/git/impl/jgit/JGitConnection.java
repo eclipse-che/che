@@ -400,10 +400,11 @@ class JGitConnection implements GitConnection {
                 .collect(Collectors.toList());
         if (!localBranches.contains(branchName)) {
           String remoteBranch = null;
+          List<Branch> remoteBranches = branchList(LIST_REMOTE);
           for (String remote :
               repository.getConfig().getSubsections(ConfigConstants.CONFIG_KEY_REMOTE)) {
             Optional<Branch> remoteBranchOptional =
-                getRemoteBranch(branchList(LIST_REMOTE), remote, branchName);
+                getRemoteBranch(remoteBranches, remote, branchName);
             if (remoteBranchOptional.isPresent() && remoteBranch == null) {
               remoteBranch = remoteBranchOptional.get().getName();
             } else if (remoteBranchOptional.isPresent()) {
