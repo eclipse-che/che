@@ -23,7 +23,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "ksmster/che-in-che"
+      "origin": "eclipse/che-dev:nightly"
     },
     "workspaceConfig": {
       "environments": {
@@ -62,7 +62,7 @@
             }
           },
           "recipe": {
-            "location": "ksmster/che-in-che",
+            "location": "eclipse/che-dev:nightly",
             "type": "dockerimage"
           }
         }
@@ -81,7 +81,7 @@
           }
         },
         {
-          "commandLine": "cd ${current.project.path} && mvn gwt:codeserver -pl :assembly-ide-war -am -Pfast,sdm-in-che -Dskip-enforce -Dskip-validate-sources -Dche.dto.skip -Dmaven.main.skip -Dmaven.resources.skip -Dmaven.buildNumber.skip",
+          "commandLine": "cd ${current.project.path} && mvn gwt:codeserver -pl :assembly-ide-war -am -Psdm-in-che -Dskip-enforce -Dskip-validate-sources -Dche.dto.skip -Dmaven.main.skip -Dmaven.resources.skip -Dmaven.buildNumber.skip",
           "name": "GWT SDM",
           "type": "gwt_sdm_che",
           "attributes": {
