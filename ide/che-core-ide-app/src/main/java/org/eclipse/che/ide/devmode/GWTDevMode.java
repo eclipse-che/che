@@ -34,9 +34,9 @@ import org.eclipse.che.ide.ui.dialogs.message.MessageDialog;
 @Singleton
 class GWTDevMode {
 
-  private static final String LOCAL_CODE_SERVER_ADDRESS = "http://127.0.0.1:9876/";
-  private static final String INT_CODE_SERVER_REF = "GWT-CodeServer";
-  private static final String IDE_GWT_APP_SHORT_NAME = "_app";
+  public static final String LOCAL_CODE_SERVER_ADDRESS = "http://127.0.0.1:9876/";
+  public static final String INT_CODE_SERVER_REF = "GWT-CodeServer";
+  public static final String IDE_GWT_APP_SHORT_NAME = "_app";
 
   private final WsAgentServerUtil wsAgentServerUtil;
   private final DevModeScriptInjector devModeScriptInjector;
@@ -88,7 +88,9 @@ class GWTDevMode {
         String codeServerUrl = codeServer.getUrl();
 
         if (!isNullOrEmpty(codeServerUrl)) {
-          return Optional.of(codeServerUrl + '/');
+          return codeServerUrl.endsWith("/")
+              ? Optional.of(codeServerUrl)
+              : Optional.of(codeServerUrl + '/');
         }
       }
     }
