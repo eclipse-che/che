@@ -35,8 +35,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev */
-public class CheckoutBranchTest {
-  private static final String PROJECT_NAME = NameGenerator.generate("CheckoutBranch_", 4);
+public class BranchTest {
+  private static final String PROJECT_NAME = NameGenerator.generate("Branch_", 4);
   private static final String APP_JAVA_PATH =
       "/src/main/java/org/eclipse/qa/examples/AppController.java";
   private static final String HELLO_JAVA_PATH = "/src/main/java/org/eclipse/qa/examples/Hello";
@@ -251,6 +251,21 @@ public class CheckoutBranchTest {
     events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
     checkShwithConflict();
+  }
+
+  @Test(priority = 1)
+  public void filterBranchesTest() {
+    menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.BRANCHES);
+    String defaultFilter = "Type from keyboard to filter branches";
+    git.waitBranchSearchFilerWithText(defaultFilter);
+    git.typeToBranchSearchFilter("newbranch");
+    git.waitBranchSearchFilerWithText("newbranch");
+    git.waitBranchInTheList("newbranch");
+    git.waitDisappearBranchName("master");
+    git.typeToBranchSearchFilter(Keys.ESCAPE.toString());
+    git.waitBranchSearchFilerWithText(defaultFilter);
+    git.waitBranchInTheList("master");
+    git.waitBranchInTheList("newbranch");
   }
 
   private void createBranch() throws Exception {
