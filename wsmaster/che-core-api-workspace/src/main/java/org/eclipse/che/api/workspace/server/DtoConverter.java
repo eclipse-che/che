@@ -216,6 +216,9 @@ public final class DtoConverter {
               .stream()
               .collect(toMap(Map.Entry::getKey, entry -> asDto(entry.getValue()))));
     }
+    if (machine.getEnv() != null) {
+      machineDto.setEnv(machine.getEnv());
+    }
     return machineDto;
   }
 
