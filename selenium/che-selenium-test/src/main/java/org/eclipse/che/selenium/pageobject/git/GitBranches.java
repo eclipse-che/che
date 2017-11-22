@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.pageobject.git;
 
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
@@ -46,6 +48,7 @@ public class GitBranches {
     String CLOSE_BTN_ID = "git-branches-close";
     String DELBRANCH_FORM = "//div[text()='Delete branch']/ancestor::div[3]"; // TODO CREATE ID
     String DELBRANCH_BUTN_OK = "ask-dialog-ok";
+    String SEARCH_FILTER_LABEL_ID = "gwt-debug-git-branches-search_filter";
   }
 
   @FindBy(id = Locators.MAIN_FORM_ID)
@@ -71,6 +74,9 @@ public class GitBranches {
 
   @FindBy(id = Locators.DELBRANCH_BUTN_OK)
   WebElement buttonOK;
+
+  @FindBy(id = Locators.SEARCH_FILTER_LABEL_ID)
+  WebElement searchFilterLabel;
 
   /** wait appearance of the IDE branches form */
   public void waitBranchesForm() {
@@ -246,5 +252,24 @@ public class GitBranches {
   /** click on rename button */
   public void clickRenameBtn() {
     renameBtn.click();
+  }
+
+  /**
+   * wait for the search filter label to be with given text.
+   *
+   * @param text text to check
+   */
+  public void waitSearchFilerWithText(String text) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.textToBePresentInElement(searchFilterLabel, text));
+  }
+
+  /**
+   * Type text to the branch search filter.
+   *
+   * @param text typed text
+   */
+  public void typeSearchFilter(String text) {
+    seleniumWebDriver.getKeyboard().sendKeys(text);
   }
 }

@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.Warning;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
@@ -49,8 +48,7 @@ public class OpenShiftEnvironment extends InternalEnvironment {
       Map<String, Pod> pods,
       Map<String, Service> services,
       Map<String, Route> routes,
-      Map<String, PersistentVolumeClaim> persistentVolumeClaims)
-      throws InfrastructureException {
+      Map<String, PersistentVolumeClaim> persistentVolumeClaims) {
     super(internalRecipe, machines, warnings);
     this.pods = pods;
     this.services = services;
@@ -124,7 +122,7 @@ public class OpenShiftEnvironment extends InternalEnvironment {
       return this;
     }
 
-    public OpenShiftEnvironment build() throws InfrastructureException {
+    public OpenShiftEnvironment build() {
       return new OpenShiftEnvironment(
           internalRecipe, machines, warnings, pods, services, routes, persistentVolumeClaims);
     }
