@@ -12,6 +12,9 @@ package org.eclipse.che.ide.devmode;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
+import elemental.client.Browser;
+import elemental.html.Storage;
+import elemental.html.Window;
 import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -66,6 +69,23 @@ class GWTDevMode {
     String codeServerURL = getInternalCodeServerURL().orElse(LOCAL_CODE_SERVER_ADDRESS);
 
     setUpSuperDevModeWithUI(codeServerURL);
+  }
+
+  /** Turn off Super DevMode for the current IDE GWT app. */
+  void off() {
+    Window window = Browser.getWindow();
+    Storage sessionStorage = window.getSessionStorage();
+
+    for (int i = 0; i < sessionStorage.getLength(); i++) {
+      String key = sessionStorage.key(i);
+
+      if (key.equals("__gwtDevModeHook:" + IDE_GWT_APP_SHORT_NAME)) {
+        sessionStorage.removeItem(key);
+        break;
+      }
+    }
+
+    window.getLocation().reload();
   }
 
   /**

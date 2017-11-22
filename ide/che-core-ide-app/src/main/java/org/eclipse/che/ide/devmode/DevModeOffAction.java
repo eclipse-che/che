@@ -17,19 +17,19 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.BaseAction;
 
 @Singleton
-public class GWTDevModeAction extends BaseAction {
+public class DevModeOffAction extends BaseAction {
 
   private final GWTDevMode gwtDevMode;
 
   @Inject
-  public GWTDevModeAction(CoreLocalizationConstant messages, GWTDevMode gwtDevMode) {
-    super(messages.gwtRecompileActionTitle());
+  public DevModeOffAction(CoreLocalizationConstant messages, GWTDevMode gwtDevMode) {
+    super(messages.gwtDevModeOffActionTitle());
 
     this.gwtDevMode = gwtDevMode;
   }
 
   @Override
   public void actionPerformed(ActionEvent event) {
-    gwtDevMode.setUp();
+    gwtDevMode.off();
   }
 }

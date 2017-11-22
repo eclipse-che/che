@@ -21,19 +21,19 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-/** Tests for the {@link GWTDevModeAction}. */
+/** Tests for the {@link DevModeOffAction}. */
 @RunWith(MockitoJUnitRunner.class)
-public class GWTDevModeActionTest {
+public class DevModeOffActionTest {
 
   @Mock CoreLocalizationConstant messages;
   @Mock GWTDevMode gwtDevMode;
 
-  @InjectMocks GWTDevModeAction action;
+  @InjectMocks DevModeOffAction action;
 
   @Test
-  public void shouldSetUpDevModeOnPerformingAction() throws Exception {
+  public void shouldTurnOffDevModeOnPerformingAction() throws Exception {
     action.actionPerformed(mock(ActionEvent.class));
 
-    verify(gwtDevMode).setUp();
+    verify(gwtDevMode).off();
   }
 }
