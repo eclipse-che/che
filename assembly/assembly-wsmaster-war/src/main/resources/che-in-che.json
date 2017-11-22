@@ -30,6 +30,11 @@
         "default": {
           "machines": {
             "dev-machine": {
+              "volumes": {
+                "m2": {
+                  "path": "/home/user/.m2/"
+                }
+              },
               "installers": [
                 "org.eclipse.che.exec",
                 "org.eclipse.che.terminal",
