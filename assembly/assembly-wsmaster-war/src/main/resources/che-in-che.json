@@ -119,7 +119,7 @@
           "type": "custom",
           "attributes": {
             "goal": "Run",
-            "previewUrl": "${server.IDE-agent-server}/che/che-in-che"
+            "previewUrl": "${server.IDE-agent-server}/che/che-in-che?wsagent-ref-prefix=dev-"
           }
         },
         {
@@ -128,7 +128,7 @@
           "type": "custom",
           "attributes": {
             "goal": "Run",
-            "previewUrl": "${server.IDE-agent-server}/che/che-in-che"
+            "previewUrl": "${server.IDE-agent-server}/che/che-in-che?wsagent-ref-prefix=dev-"
           }
         }
       ]
