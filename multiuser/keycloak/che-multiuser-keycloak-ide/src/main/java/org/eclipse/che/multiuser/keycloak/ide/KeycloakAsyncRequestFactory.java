@@ -14,10 +14,10 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 import java.util.List;
 import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.AsyncRequest;
 import org.eclipse.che.ide.rest.HTTPHeader;
@@ -35,8 +35,8 @@ public class KeycloakAsyncRequestFactory extends MachineAsyncRequestFactory {
       KeycloakProvider keycloakProvider,
       DtoFactory dtoFactory,
       AppContext appContext,
-      EventBus eventBus) {
-    super(dtoFactory, appContext, eventBus);
+      WsAgentServerUtil wsAgentServerUtil) {
+    super(dtoFactory, appContext, wsAgentServerUtil);
     this.dtoFactory = dtoFactory;
     this.keycloakProvider = keycloakProvider;
   }

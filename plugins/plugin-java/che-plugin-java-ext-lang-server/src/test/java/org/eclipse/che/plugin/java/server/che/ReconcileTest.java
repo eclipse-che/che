@@ -20,7 +20,9 @@ import java.nio.file.StandardOpenOption;
 import java.util.List;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.project.server.EditorWorkingCopyManager;
+import org.eclipse.che.api.editor.server.impl.EditorWorkingCopyManager;
+import org.eclipse.che.api.fs.server.FsManager;
+import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.ide.ext.java.shared.dto.HighlightedPosition;
 import org.eclipse.che.ide.ext.java.shared.dto.ReconcileResult;
 import org.eclipse.che.jdt.javaeditor.JavaReconciler;
@@ -60,8 +62,10 @@ public class ReconcileTest extends BaseTest {
   public void init() throws Exception {
     RequestTransmitter requestTransmitter = mock(RequestTransmitter.class);
     EventService eventService = new EventService();
+
     EditorWorkingCopyManager editorWorkingCopyManager =
-        new EditorWorkingCopyManager(null, eventService, requestTransmitter);
+        new EditorWorkingCopyManager(
+            eventService, requestTransmitter, mock(FsManager.class), mock(ProjectManager.class));
     reconciler =
         new JavaReconciler(
             new SemanticHighlightingReconciler(),

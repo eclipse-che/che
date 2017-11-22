@@ -39,7 +39,7 @@ public enum VcsStatus {
       case ADDED:
         return Style.getVcsStatusAddedColor();
       case NOT_MODIFIED:
-        return Style.getMainFontColor();
+        return null;
       default:
         return null;
     }

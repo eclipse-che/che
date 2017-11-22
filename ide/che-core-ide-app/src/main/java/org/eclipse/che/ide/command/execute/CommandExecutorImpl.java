@@ -68,7 +68,7 @@ public class CommandExecutorImpl implements CommandExecutor {
               final CommandOutputConsole console =
                   commandConsoleFactory.create(expandedCommand, machineName);
 
-              processesPanelPresenter.addCommandOutput(machineName, console);
+              processesPanelPresenter.addCommandOutput(machineName, console, true);
 
               execAgentClient
                   .startProcess(machineName, expandedCommand)

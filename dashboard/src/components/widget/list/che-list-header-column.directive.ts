@@ -10,6 +10,13 @@
  */
 'use strict';
 
+interface ICheListHeaderColumnScope extends ng.IScope {
+  sortItem: string;
+  sortValue: string;
+  updateSortValue: () => void;
+  onSortChange: (data: {sortValue: string}) => void;
+}
+
 /**
  * Defines a directive for creating header column.
  * @author Oleksii Orel
@@ -37,7 +44,7 @@ export class CheListHeaderColumn implements ng.IDirective {
     this.$timeout = $timeout;
   }
 
-  link($scope: ng.IScope) {
+  link($scope: ICheListHeaderColumnScope): void {
     $scope.updateSortValue = () => {
       if (!$scope.sortItem || $scope.sortItem.length === 0) {
         return;

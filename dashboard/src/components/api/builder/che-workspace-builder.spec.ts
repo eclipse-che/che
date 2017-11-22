@@ -18,7 +18,7 @@ import {CheAPIBuilder} from './che-api-builder.factory';
 describe('CheWorkspaceBuilder', () => {
 
 
-  var wkspBuilder;
+  let wkspBuilder;
 
   /**
    *  setup module

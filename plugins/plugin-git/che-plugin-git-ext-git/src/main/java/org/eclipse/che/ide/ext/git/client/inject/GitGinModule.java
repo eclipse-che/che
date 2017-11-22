@@ -38,6 +38,8 @@ import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelView;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelViewImpl;
 import org.eclipse.che.ide.ext.git.client.compare.revisionslist.RevisionListView;
 import org.eclipse.che.ide.ext.git.client.compare.revisionslist.RevisionListViewImpl;
+import org.eclipse.che.ide.ext.git.client.compare.selectablechangespanel.SelectableChangesPanelView;
+import org.eclipse.che.ide.ext.git.client.compare.selectablechangespanel.SelectableChangesPanelViewImpl;
 import org.eclipse.che.ide.ext.git.client.fetch.FetchView;
 import org.eclipse.che.ide.ext.git.client.fetch.FetchViewImpl;
 import org.eclipse.che.ide.ext.git.client.history.HistoryView;
@@ -117,6 +119,7 @@ public class GitGinModule extends AbstractGinModule {
     bind(GitEventSubscribable.class).to(GitEventsHandler.class).in(Singleton.class);
     bind(GitOutputPartView.class).to(GitOutputPartViewImpl.class);
     bind(ChangesPanelView.class).to(ChangesPanelViewImpl.class);
+    bind(SelectableChangesPanelView.class).to(SelectableChangesPanelViewImpl.class);
     install(
         new GinFactoryModuleBuilder()
             .implement(GitOutputConsole.class, GitOutputConsolePresenter.class)

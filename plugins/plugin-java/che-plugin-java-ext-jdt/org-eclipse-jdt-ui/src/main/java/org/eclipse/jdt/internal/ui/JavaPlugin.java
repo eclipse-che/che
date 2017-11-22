@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import org.eclipse.che.api.project.server.ProjectRegistry;
+import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.che.jface.text.templates.persistence.TemplateStore;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -140,14 +140,14 @@ public class JavaPlugin {
   private ImageDescriptorRegistry fImageDescriptorRegistry;
   private String settingsDir;
   private final ResourcesPlugin resourcesPlugin;
-  private final ProjectRegistry registry;
+  private final ProjectManager registry;
   private String cahPath;
 
   @Inject
   public JavaPlugin(
       @Named("che.jdt.settings.dir") String settingsDir,
       ResourcesPlugin resourcesPlugin,
-      ProjectRegistry registry) {
+      ProjectManager registry) {
     this.settingsDir = settingsDir;
     this.resourcesPlugin = resourcesPlugin;
     this.registry = registry;

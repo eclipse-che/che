@@ -57,13 +57,14 @@ public class DirectUrlFactoryWithSpecificBranch {
 
   @AfterClass
   public void tearDown() throws Exception {
-    testFactoryWithSpecificBranch.delete();
+    if (workspaceServiceClient.exists(gitHubUsername, testUser.getName())) {
+      testFactoryWithSpecificBranch.delete();
+    }
   }
 
   @Test
   public void factoryWithDirectUrlWithSpecificBranch() throws Exception {
-    testFactoryWithSpecificBranch.authenticateAndOpen(seleniumWebDriver);
-    seleniumWebDriver.switchFromDashboardIframeToIde();
+    testFactoryWithSpecificBranch.authenticateAndOpen();
     projectExplorer.waitProjectExplorer();
     notificationsPopupPanel.waitProgressPopupPanelClose();
     events.clickEventLogBtn();

@@ -17,8 +17,7 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
-import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.workspace.infrastructure.openshift.Names;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.ConfigurationProvisioner;
@@ -31,16 +30,13 @@ import org.eclipse.che.workspace.infrastructure.openshift.provision.Configuratio
 @Singleton
 public class EnvVarsConverter implements ConfigurationProvisioner {
   @Override
-  public void provision(
-      InternalEnvironment environment, OpenShiftEnvironment osEnv, RuntimeIdentity identity)
+  public void provision(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
     for (Pod pod : osEnv.getPods().values()) {
-      String podName = pod.getMetadata().getName();
       for (Container container : pod.getSpec().getContainers()) {
-        String containerName = container.getName();
-        String machineName = Names.machineName(podName, containerName);
-        InternalMachineConfig machineConf = environment.getMachines().get(machineName);
+        String machineName = Names.machineName(pod, container);
+        InternalMachineConfig machineConf = osEnv.getMachines().get(machineName);
 
         if (machineConf != null) {
           machineConf

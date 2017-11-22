@@ -62,14 +62,14 @@ public class PreviewHtmlFileTest {
   public void checkPreviewHtmlFile() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
-    currentWindow = ide.driver().getWindowHandle();
+    currentWindow = seleniumWebDriver.getWindowHandle();
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/file.html");
     projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.PREVIEW);
     seleniumWebDriver.switchToNoneCurrentWindow(currentWindow);
     checkWebElementsHtmlFile("//h1[text()='Hello, this is check!']");
-    ide.driver().close();
-    ide.driver().switchTo().window(currentWindow);
+    seleniumWebDriver.close();
+    seleniumWebDriver.switchTo().window(currentWindow);
 
     // type a content into editor and check it by preview feature
     projectExplorer.waitProjectExplorer();
@@ -85,7 +85,7 @@ public class PreviewHtmlFileTest {
     projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.PREVIEW);
     seleniumWebDriver.switchToNoneCurrentWindow(currentWindow);
     checkWebElementsHtmlFile("//h2[@style='color:red' and text()='Test content']");
-    ide.driver().switchTo().window(currentWindow);
+    seleniumWebDriver.switchTo().window(currentWindow);
     editor.setCursorToLine(19);
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor(Keys.ARROW_UP.toString());
@@ -95,12 +95,12 @@ public class PreviewHtmlFileTest {
     loader.waitOnClosed();
     checkWebElementsHtmlFile("//h2[@style='color:red' and text()='Test content']");
     loader.waitOnClosed();
-    ide.driver().navigate().refresh();
+    seleniumWebDriver.navigate().refresh();
     checkWebElementsHtmlFile("//b[text()='Content of file']");
   }
 
   public void checkWebElementsHtmlFile(String locator) {
-    new WebDriverWait(ide.driver(), LOADER_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)));
   }
 }

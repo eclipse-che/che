@@ -185,8 +185,7 @@ public class CodenvyEditor {
 
     public static final String DOWNLOAD_SOURCES_LINK = "//anchor[text()='Download sources']";
 
-    public static final String TAB_LIST_BUTTON =
-        "(//div[@id='gwt-debug-plusPanel'])[2]/following-sibling::div";
+    public static final String TAB_LIST_BUTTON = "gwt-debug-editorMenu";
     public static final String ITEM_TAB_LIST =
         "//div[@class='popupContent']//div[text()='%s']/parent::div";
 
@@ -216,7 +215,7 @@ public class CodenvyEditor {
     SPLIT_VERTICALLY("contextMenu/Split Pane In Two Columns"),
     SPIT_HORISONTALLY("contextMenu/Split Pane In Two Rows");
 
-    private String id;
+    private final String id;
 
     TabAction(String id) {
       this.id = id;
@@ -1010,7 +1009,7 @@ public class CodenvyEditor {
   }
 
   public void waitYellowTab(String fileName) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
                 By.xpath(
@@ -1036,15 +1035,26 @@ public class CodenvyEditor {
                         Locators.TAB_FILE_NAME_AND_STYLE, fileName, "color: rgb(49, 147, 212);"))));
   }
 
-  public void waitDefaultColorTab(String fileName) {
+  public void waitDefaultColorTab(final String fileName) {
+    waitActiveEditor();
+    boolean isEditorFocused =
+        !(seleniumWebDriver
+                .findElement(
+                    By.xpath(
+                        String.format(Locators.TAB_FILE_NAME_XPATH + "/parent::div", fileName)))
+                .getAttribute("focused")
+            == null);
+    final String currentStateEditorColor =
+        isEditorFocused ? "rgba(255, 255, 255, 1)" : "rgba(170, 170, 170, 1)";
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(
-                    String.format(
-                        Locators.TAB_FILE_NAME_AND_STYLE,
-                        fileName,
-                        "color: rgb(160, 169, 183);"))));
+            (ExpectedCondition<Boolean>)
+                webDriver ->
+                    seleniumWebDriver
+                        .findElement(
+                            By.xpath(String.format(Locators.TAB_FILE_NAME_XPATH, fileName)))
+                        .getCssValue("color")
+                        .equals(currentStateEditorColor));
   }
 
   /**
@@ -1068,6 +1078,14 @@ public class CodenvyEditor {
         visibilityOfAllElementsLocatedBy(
             By.xpath(String.format(Locators.TAB_FILE_NAME_XPATH, nameOfFile))));
     loader.waitOnClosed();
+  }
+
+  public String getAssociatedPathFromTheTab(String nameOfOpenedFile) {
+    return redrawDriverWait
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(String.format(Locators.TAB_FILE_NAME_XPATH, nameOfOpenedFile))))
+        .getAttribute("path");
   }
 
   /**
@@ -1612,7 +1630,7 @@ public class CodenvyEditor {
 
   /** Open list of the tabs Note: This possible if opened tabs don't fit in the tab bar. */
   public void openTabList() {
-    redrawDriverWait.until(visibilityOfElementLocated(By.xpath(Locators.TAB_LIST_BUTTON))).click();
+    redrawDriverWait.until(visibilityOfElementLocated(By.id(Locators.TAB_LIST_BUTTON))).click();
   }
 
   /**

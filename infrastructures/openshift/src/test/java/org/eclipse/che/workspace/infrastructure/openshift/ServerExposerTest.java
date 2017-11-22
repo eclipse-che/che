@@ -52,7 +52,7 @@ public class ServerExposerTest {
   private Container container;
 
   @BeforeMethod
-  public void setUp() {
+  public void setUp() throws Exception {
     container = new ContainerBuilder().withName("main").build();
     Pod pod =
         new PodBuilder()
@@ -66,7 +66,7 @@ public class ServerExposerTest {
 
     openShiftEnvironment =
         OpenShiftEnvironment.builder().setPods(ImmutableMap.of("pod", pod)).build();
-    this.serverExposer = new ServerExposer("pod/main", container, openShiftEnvironment);
+    this.serverExposer = new ServerExposer("pod/main", pod, container, openShiftEnvironment);
   }
 
   @Test

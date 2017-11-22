@@ -28,7 +28,7 @@
         .tabsPanel {
             position: absolute;
             top: 0px;
-            height: 23px;
+            height: 25px;
             left: 0px;
             right: 32px;
             overflow: hidden;
@@ -42,12 +42,12 @@
         .plusPanel {
             float: left;
             width: 23px;
-            height: 23px;
+            height: 25px;
             cursor: pointer;
             overflow: hidden;
-            line-height: 23px;
+            line-height: 25px;
             text-align: center;
-            font-size: 10px;
+            font-size: 7pt;
             opacity: 0.6;
             color: editorTabIconColor;
         }
@@ -74,12 +74,12 @@
     </ui:style>
 
     <g:DockLayoutPanel ui:field="parent" width="100%" height="100%">
-        <g:north size="23">
+        <g:north size="25">
             <g:FlowPanel styleName="{style.topPanel}">
                 <g:FlowPanel ui:field="tabsPanel" styleName="{style.tabsPanel}" debugId="multiSplitPanel-tabsPanel">
                     <g:FlowPanel ui:field="plusPanel" styleName="{style.plusPanel}" debugId="plusPanel"></g:FlowPanel>
                 </g:FlowPanel>
-                <g:FlowPanel ui:field="menuPanel" styleName="{style.menuPanel}"></g:FlowPanel>
+                <g:FlowPanel ui:field="menuPanel" debugId="menuPanel" styleName="{style.menuPanel}"></g:FlowPanel>
             </g:FlowPanel>
         </g:north>
         <g:center>

@@ -32,7 +32,7 @@ const DEFAULT_MAX_ITEMS = 15;
 export class CheFactory {
   private $resource: ng.resource.IResourceService;
   private $q: ng.IQService;
-  private lodash: _.LoDashStatic;
+  private lodash: any;
 
   private remoteFactoryAPI: IFactoriesResource<any>;
 
@@ -50,7 +50,7 @@ export class CheFactory {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($resource: ng.resource.IResourceService, $q: ng.IQService, lodash: _.LoDashStatic, cheUser: CheUser) {
+  constructor($resource: ng.resource.IResourceService, $q: ng.IQService, lodash: any, cheUser: CheUser) {
     // keep resource
     this.$resource = $resource;
     this.cheUser = cheUser;
@@ -406,7 +406,7 @@ export class CheFactory {
    * @return the factory content
    */
   getFactoryContentFromWorkspace(workspace: che.IWorkspace): any {
-    return this.factoryContentsByWorkspaceId.get(workspace.workspaceId);
+    return this.factoryContentsByWorkspaceId.get(workspace.id);
   }
 
   /**

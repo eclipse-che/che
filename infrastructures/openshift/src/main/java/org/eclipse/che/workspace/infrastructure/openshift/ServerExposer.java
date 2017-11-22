@@ -19,6 +19,7 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerPort;
 import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
 import io.fabric8.kubernetes.api.model.IntOrString;
+import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.ServicePortBuilder;
@@ -33,7 +34,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesProvisioner;
 
@@ -101,11 +101,13 @@ public class ServerExposer {
 
   private final String machineName;
   private final Container container;
+  private final Pod pod;
   private final OpenShiftEnvironment openShiftEnvironment;
 
   public ServerExposer(
-      String machineName, Container container, OpenShiftEnvironment openShiftEnvironment) {
+      String machineName, Pod pod, Container container, OpenShiftEnvironment openShiftEnvironment) {
     this.machineName = machineName;
+    this.pod = pod;
     this.container = container;
     this.openShiftEnvironment = openShiftEnvironment;
   }
@@ -118,8 +120,7 @@ public class ServerExposer {
    * UniqueNamesProvisioner}.
    *
    * @param servers servers to expose
-   * @see UniqueNamesProvisioner#provision(InternalEnvironment, OpenShiftEnvironment,
-   *     RuntimeIdentity)
+   * @see UniqueNamesProvisioner#provision(OpenShiftEnvironment, RuntimeIdentity)
    */
   public void expose(Map<String, ? extends ServerConfig> servers) {
     Map<String, ServicePort> portToServicePort = exposePort(servers.values());
@@ -127,7 +128,7 @@ public class ServerExposer {
     Service service =
         new ServiceBuilder()
             .withName(generate(SERVER_PREFIX, SERVER_UNIQUE_PART_SIZE) + '-' + machineName)
-            .withSelectorEntry(CHE_ORIGINAL_NAME_LABEL, Names.podName(machineName))
+            .withSelectorEntry(CHE_ORIGINAL_NAME_LABEL, pod.getMetadata().getName())
             .withPorts(new ArrayList<>(portToServicePort.values()))
             .build();
 

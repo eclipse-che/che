@@ -40,7 +40,7 @@ export class CheTypeResolver {
    * Fetch project types if it empty.
    * @returns {ng.IPromise<any>}
    */
-  fetchTypes(): ng.IPromise<Map<string, any>> {
+  fetchTypes(): ng.IPromise<any> {
     let deferredResolve = this.$q.defer();
     if (this.typesIds.size) {
       deferredResolve.resolve();
@@ -60,16 +60,16 @@ export class CheTypeResolver {
    * @returns {ng.IPromise<any>}
    */
   resolveImportProjectType(projectData: che.IImportProject): ng.IPromise<any> {
-    let projectDetails: che.IProject = this.getProjectDetails(projectData);
+    let projectDetails = this.getProjectDetails(projectData);
     return this.resolveProjectType(projectDetails);
   }
 
   /**
    * Resolve type for project.
-   * @param projectDetails{che.IProject}
+   * @param projectDetails{che.IProjectTemplate}
    * @returns {ng.IPromise<any>}
    */
-  resolveProjectType(projectDetails: che.IProject): ng.IPromise<any> {
+  resolveProjectType(projectDetails: che.IProjectTemplate): ng.IPromise<any> {
     return this.fetchTypes().then(() => {
       return this.autoCheckType(projectDetails, this.typesIds);
     }).then((projectDetails: che.IProject) => {
@@ -80,10 +80,10 @@ export class CheTypeResolver {
   /**
    * Gets project details from import project object.
    * @param projectData{che.IImportProject}
-   * @returns {che.IProject}
+   * @returns {che.IProjectTemplate}
    */
-  getProjectDetails(projectData: che.IImportProject): che.IProject {
-    let projectDetails: che.IProject = projectData.project;
+  getProjectDetails(projectData: che.IImportProject): che.IProjectTemplate {
+    let projectDetails = projectData.project;
     projectDetails.source = projectData.source;
     if (!projectDetails.attributes) {
       projectDetails.attributes = {};
@@ -93,11 +93,11 @@ export class CheTypeResolver {
 
   /**
    * Check project type and auto select one if needed.
-   * @param project{che.IProject}
+   * @param project{che.IProjectTemplate}
    * @param projectTypesByCategory{Map<string, any>}
    * @returns {ng.IPromise<any>}
    */
-  autoCheckType(project: che.IProject, projectTypesByCategory: Map<string, any>): ng.IPromise<any> {
+  autoCheckType(project: che.IProjectTemplate, projectTypesByCategory: Map<string, any>): ng.IPromise<any> {
     let deferredResolve = this.$q.defer();
     let projectDetails = angular.copy(project);
 

@@ -180,12 +180,11 @@ public class AddMember {
             .ignoring(StaleElementReferenceException.class);
 
     wait.until(
-        new Function<WebDriver, Boolean>() {
-          public Boolean apply(WebDriver driver) {
-            List<WebElement> elements = seleniumWebDriver.findElements(By.xpath(xpath));
-            return elements.isEmpty() || elements.get(0).isDisplayed() == false;
-          }
-        });
+        (Function<WebDriver, Boolean>)
+            driver -> {
+              List<WebElement> elements = seleniumWebDriver.findElements(By.xpath(xpath));
+              return elements.isEmpty() || elements.get(0).isDisplayed();
+            });
   }
 
   /**
@@ -205,24 +204,23 @@ public class AddMember {
     lastSize.put("width", 0);
 
     wait.until(
-        new Function<WebDriver, Boolean>() {
-          public Boolean apply(WebDriver driver) {
-            List<WebElement> elements = seleniumWebDriver.findElements(By.xpath(xpath));
-            if (elements.isEmpty()) {
-              return false;
-            }
+        (Function<WebDriver, Boolean>)
+            driver -> {
+              List<WebElement> elements = seleniumWebDriver.findElements(By.xpath(xpath));
+              if (elements.isEmpty()) {
+                return false;
+              }
 
-            Dimension size = elements.get(0).getSize();
-            if (lastSize.get("height") < size.getHeight()
-                || lastSize.get("width") < size.getHeight()) {
-              lastSize.put("height", size.getHeight());
-              lastSize.put("width", size.getWidth());
+              Dimension size = elements.get(0).getSize();
+              if (lastSize.get("height") < size.getHeight()
+                  || lastSize.get("width") < size.getHeight()) {
+                lastSize.put("height", size.getHeight());
+                lastSize.put("width", size.getWidth());
 
-              return false;
-            }
+                return false;
+              }
 
-            return true;
-          }
-        });
+              return true;
+            });
   }
 }

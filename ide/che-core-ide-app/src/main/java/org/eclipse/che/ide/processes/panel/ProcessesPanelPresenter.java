@@ -16,7 +16,6 @@ import static java.util.Collections.emptyList;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_SSH_REFERENCE;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_TERMINAL_REFERENCE;
-import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.processes.ProcessTreeNode.ProcessNodeType.COMMAND_NODE;
@@ -72,6 +71,7 @@ import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
 import org.eclipse.che.ide.api.workspace.event.ExecAgentServerRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.MachineRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.MachineStartingEvent;
@@ -154,6 +154,7 @@ public class ProcessesPanelPresenter extends BasePresenter
   private final RuntimeInfoWidgetFactory runtimeInfoWidgetFactory;
   private final RuntimeInfoProvider runtimeInfoProvider;
   private final RuntimeInfoLocalization runtimeInfoLocalization;
+  private final WsAgentServerUtil wsAgentServerUtil;
   private final EventBus eventBus;
   private final Map<String, ProcessTreeNode> machineNodes;
   ProcessTreeNode rootNode;
@@ -182,7 +183,8 @@ public class ProcessesPanelPresenter extends BasePresenter
       RuntimeInfoWidgetFactory runtimeInfoWidgetFactory,
       RuntimeInfoProvider runtimeInfoProvider,
       RuntimeInfoLocalization runtimeInfoLocalization,
-      Provider<WorkspaceLoadingTracker> workspaceLoadingTrackerProvider) {
+      Provider<WorkspaceLoadingTracker> workspaceLoadingTrackerProvider,
+      WsAgentServerUtil wsAgentServerUtil) {
     this.view = view;
     this.localizationConstant = localizationConstant;
     this.resources = resources;
@@ -203,6 +205,7 @@ public class ProcessesPanelPresenter extends BasePresenter
     this.runtimeInfoWidgetFactory = runtimeInfoWidgetFactory;
     this.runtimeInfoProvider = runtimeInfoProvider;
     this.runtimeInfoLocalization = runtimeInfoLocalization;
+    this.wsAgentServerUtil = wsAgentServerUtil;
 
     machineNodes = new HashMap<>();
     machines = new HashMap<>();
@@ -244,16 +247,16 @@ public class ProcessesPanelPresenter extends BasePresenter
       return;
     }
 
-    for (MachineImpl machine : machines) {
-      if (machine.getServerByName(SERVER_WS_AGENT_HTTP_REFERENCE).isPresent()) {
-        provideMachineNode(machine.getName(), true);
-        machines.remove(machine);
-        break;
-      }
-    }
+    Optional<MachineImpl> wsAgentServerMachine = wsAgentServerUtil.getWsAgentServerMachine();
+
+    wsAgentServerMachine.ifPresent(
+        machine -> {
+          provideMachineNode(machine.getName(), true, false);
+          machines.remove(machine);
+        });
 
     for (MachineImpl machine : machines) {
-      provideMachineNode(machine.getName(), true);
+      provideMachineNode(machine.getName(), true, false);
     }
 
     ProcessTreeNode machineToSelect = machineNodes.entrySet().iterator().next().getValue();
@@ -300,13 +303,13 @@ public class ProcessesPanelPresenter extends BasePresenter
 
   @Override
   public void onMachineStarting(MachineStartingEvent event) {
-    provideMachineNode(event.getMachine().getName(), false);
+    provideMachineNode(event.getMachine().getName(), false, false);
   }
 
   @Override
   public void onMachineRunning(MachineRunningEvent event) {
     machines.put(event.getMachine().getName(), event.getMachine());
-    provideMachineNode(event.getMachine().getName(), true);
+    provideMachineNode(event.getMachine().getName(), true, false);
   }
 
   @Override
@@ -331,13 +334,17 @@ public class ProcessesPanelPresenter extends BasePresenter
 
   /** Opens new terminal for the selected machine. */
   public void newTerminal(TerminalOptionsJso options) {
+    newTerminal(options, true);
+  }
+
+  /** Opens new terminal for the selected machine and activates terminal tab. */
+  public void newTerminal(TerminalOptionsJso options, boolean activate) {
     final ProcessTreeNode selectedTreeNode = view.getSelectedTreeNode();
 
-    final WorkspaceImpl workspace = appContext.getWorkspace();
-    final Optional<MachineImpl> devMachine = workspace.getDevMachine();
+    final Optional<MachineImpl> devMachine = wsAgentServerUtil.getWsAgentServerMachine();
 
     if (selectedTreeNode == null && devMachine.isPresent()) {
-      onAddTerminal(devMachine.get().getName(), options);
+      onAddTerminal(devMachine.get().getName(), options, activate);
       return;
     }
 
@@ -350,20 +357,20 @@ public class ProcessesPanelPresenter extends BasePresenter
 
     if (selectedTreeNode.getType() == MACHINE_NODE) {
       String machineName = (String) selectedTreeNode.getData();
-      onAddTerminal(machineName, options);
+      onAddTerminal(machineName, options, activate);
       return;
     }
 
     ProcessTreeNode parent = selectedTreeNode.getParent();
     if (parent != null && parent.getType() == MACHINE_NODE) {
       String machineName = (String) parent.getData();
-      onAddTerminal(machineName, options);
+      onAddTerminal(machineName, options, activate);
     }
   }
 
   /** Selects dev machine. */
   private void selectDevMachine() {
-    Optional<MachineImpl> devMachine = appContext.getWorkspace().getDevMachine();
+    Optional<MachineImpl> devMachine = wsAgentServerUtil.getWsAgentServerMachine();
     if (!devMachine.isPresent()) {
       return;
     }
@@ -406,9 +413,21 @@ public class ProcessesPanelPresenter extends BasePresenter
    * Adds new terminal to the processes panel
    *
    * @param machineId id of machine in which the terminal will be added
+   * @param options terminal options
    */
   @Override
   public void onAddTerminal(final String machineId, TerminalOptionsJso options) {
+    onAddTerminal(machineId, options, true);
+  }
+
+  /**
+   * Adds new terminal to the processes panel
+   *
+   * @param machineId id of machine in which the terminal will be added
+   * @param options terminal options
+   * @param activate activate terminal tab
+   */
+  public void onAddTerminal(final String machineId, TerminalOptionsJso options, boolean activate) {
     final MachineImpl machine = getMachine(machineId);
     if (machine == null) {
       notificationManager.notify(
@@ -420,7 +439,7 @@ public class ProcessesPanelPresenter extends BasePresenter
       return;
     }
 
-    final ProcessTreeNode machineTreeNode = provideMachineNode(machine.getName(), false);
+    final ProcessTreeNode machineTreeNode = provideMachineNode(machine.getName(), false, false);
     if (machineTreeNode == null) {
       return;
     }
@@ -431,7 +450,7 @@ public class ProcessesPanelPresenter extends BasePresenter
     final ProcessTreeNode terminalNode =
         new ProcessTreeNode(
             TERMINAL_NODE, machineTreeNode, terminalName, resources.terminalTreeIcon(), null);
-    addChildToMachineNode(terminalNode, machineTreeNode);
+    addChildToMachineNode(terminalNode, machineTreeNode, activate);
 
     final String terminalId = terminalNode.getId();
     terminals.put(terminalId, newTerminal);
@@ -466,7 +485,7 @@ public class ProcessesPanelPresenter extends BasePresenter
     }
 
     final OutputConsole defaultConsole = commandConsoleFactory.create("SSH");
-    addCommandOutput(machineId, defaultConsole);
+    addCommandOutput(machineId, defaultConsole, true);
 
     String sshServiceAddress = getSshServerAddress(machine.get());
     final String machineHost;
@@ -558,7 +577,7 @@ public class ProcessesPanelPresenter extends BasePresenter
     CompositeOutputConsole servers =
         commandConsoleFactory.create(
             widget, runtimeInfoLocalization.infoTabTitle(), resources.remote());
-    addCommandOutput(machineId, servers);
+    addCommandOutput(machineId, servers, true);
   }
 
   @Override
@@ -597,11 +616,14 @@ public class ProcessesPanelPresenter extends BasePresenter
     return null;
   }
 
+  /**
+   * Adds command node to process tree and displays command output
+   *
+   * @param outputConsole the console for command output
+   */
   public void addCommandOutput(OutputConsole outputConsole) {
-    final WorkspaceImpl workspace = appContext.getWorkspace();
-    final Optional<MachineImpl> devMachine = workspace.getDevMachine();
-
-    devMachine.ifPresent(machine -> addCommandOutput(machine.getName(), outputConsole));
+    Optional<MachineImpl> devMachine = wsAgentServerUtil.getWsAgentServerMachine();
+    devMachine.ifPresent(machine -> addCommandOutput(machine.getName(), outputConsole, true));
   }
 
   /**
@@ -609,8 +631,9 @@ public class ProcessesPanelPresenter extends BasePresenter
    *
    * @param machineId id of machine in which the command will be executed
    * @param outputConsole the console for command output
+   * @param activate activate terminal tab
    */
-  public void addCommandOutput(String machineId, OutputConsole outputConsole) {
+  public void addCommandOutput(String machineId, OutputConsole outputConsole, boolean activate) {
     ProcessTreeNode machineTreeNode = findTreeNodeById(machineId);
     if (machineTreeNode == null) {
       notificationManager.notify(
@@ -636,9 +659,9 @@ public class ProcessesPanelPresenter extends BasePresenter
         new ProcessTreeNode(
             COMMAND_NODE, machineTreeNode, outputConsoleTitle, outputConsole.getTitleIcon(), null);
     commandId = commandNode.getId();
-    addChildToMachineNode(commandNode, machineTreeNode);
+    addChildToMachineNode(commandNode, machineTreeNode, activate);
 
-    addOutputConsole(commandId, commandNode, outputConsole, false);
+    addOutputConsole(commandId, commandNode, outputConsole, false, activate);
 
     refreshStopButtonState(commandId);
     workspaceAgentProvider.get().setActivePart(this);
@@ -663,7 +686,8 @@ public class ProcessesPanelPresenter extends BasePresenter
       final String id,
       final ProcessTreeNode processNode,
       final OutputConsole outputConsole,
-      final boolean machineConsole) {
+      final boolean machineConsole,
+      final boolean activate) {
     consoles.put(id, outputConsole);
     consoleCommands.put(outputConsole, id);
 
@@ -676,8 +700,10 @@ public class ProcessesPanelPresenter extends BasePresenter
                 id, outputConsole.getTitle(), outputConsole.getTitleIcon(), widget, machineConsole);
             if (!MACHINE_NODE.equals(processNode.getType())) {
               ProcessTreeNode node = view.getNodeById(id);
-              view.selectNode(node);
-              notifyTreeNodeSelected(node);
+              if (activate) {
+                view.selectNode(node);
+                notifyTreeNodeSelected(node);
+              }
             }
           }
         });
@@ -812,10 +838,16 @@ public class ProcessesPanelPresenter extends BasePresenter
   }
 
   private void addChildToMachineNode(
-      final ProcessTreeNode childNode, final ProcessTreeNode machineTreeNode) {
+      final ProcessTreeNode childNode,
+      final ProcessTreeNode machineTreeNode,
+      final boolean activate) {
     machineTreeNode.getChildren().add(childNode);
     view.setProcessesData(rootNode);
-    view.selectNode(childNode);
+
+    if (activate) {
+      view.selectNode(childNode);
+    }
+
     notifyTreeNodeSelected(childNode);
   }
 
@@ -874,10 +906,12 @@ public class ProcessesPanelPresenter extends BasePresenter
    *
    * @param machineName name of the machine to creating node
    * @param replace existed node will be replaced when {@code replace} is {@code true}
+   * @param activate activate machine node
    * @return machine node
    */
   @Nullable
-  private ProcessTreeNode provideMachineNode(String machineName, boolean replace) {
+  private ProcessTreeNode provideMachineNode(
+      String machineName, boolean replace, boolean activate) {
     final ProcessTreeNode existedMachineNode = findTreeNodeById(machineName);
     if (!replace && existedMachineNode != null) {
       return existedMachineNode;
@@ -901,22 +935,23 @@ public class ProcessesPanelPresenter extends BasePresenter
       return null;
     }
 
-    final ProcessTreeNode newMachineNode =
+    ProcessTreeNode machineNode =
         new ProcessTreeNode(MACHINE_NODE, rootNode, machineName, null, children);
-    newMachineNode.setTerminalServerRunning(
-        isServerRunning(machineName, SERVER_TERMINAL_REFERENCE));
-    // TODO (spi ide): for now SSH server's status is always UNKNOWN.
-    // So check ws-agent's status till SSH server's status fixed.
-    newMachineNode.setSshServerRunning(
-        isServerRunning(machineName, SERVER_WS_AGENT_HTTP_REFERENCE));
+
+    machineNode.setTerminalServerRunning(isServerRunning(machineName, SERVER_TERMINAL_REFERENCE));
+
+    // rely on "wsagent" server's status since "ssh" server's status is always UNKNOWN
+    String wsAgentServerRef = wsAgentServerUtil.getWsAgentHttpServerReference();
+    machineNode.setSshServerRunning(isServerRunning(machineName, wsAgentServerRef));
+
     for (ProcessTreeNode child : children) {
-      child.setParent(newMachineNode);
+      child.setParent(machineNode);
     }
 
-    machineNodes.put(machineName, newMachineNode);
+    machineNodes.put(machineName, machineNode);
 
     // add to children
-    rootNode.getChildren().add(newMachineNode);
+    rootNode.getChildren().add(machineNode);
 
     // update the view
     view.setProcessesData(rootNode);
@@ -924,10 +959,10 @@ public class ProcessesPanelPresenter extends BasePresenter
     // add output for the machine if it is not exist
     if (!consoles.containsKey(machineName)) {
       OutputConsole outputConsole = commandConsoleFactory.create(machineName);
-      addOutputConsole(machineName, newMachineNode, outputConsole, true);
+      addOutputConsole(machineName, machineNode, outputConsole, true, activate);
     }
 
-    return newMachineNode;
+    return machineNode;
   }
 
   private List<MachineImpl> getMachines() {
@@ -957,45 +992,7 @@ public class ProcessesPanelPresenter extends BasePresenter
   }
 
   @Override
-  public void onWorkspaceRunning(WorkspaceRunningEvent event) {
-    List<MachineImpl> wsMachines = getMachines();
-    if (wsMachines.isEmpty()) {
-      return;
-    }
-
-    MachineImpl devMachine = null;
-    for (MachineImpl machine : wsMachines) {
-      if (machine.getServerByName(SERVER_WS_AGENT_HTTP_REFERENCE).isPresent()) {
-        devMachine = machine;
-        break;
-      }
-    }
-
-    ProcessTreeNode machineToSelect = null;
-    if (devMachine != null) {
-      machineToSelect = provideMachineNode(devMachine.getName(), true);
-      wsMachines.remove(devMachine);
-    }
-
-    for (MachineImpl machine : wsMachines) {
-      provideMachineNode(machine.getName(), true);
-    }
-
-    if (machineToSelect != null) {
-      view.selectNode(machineToSelect);
-      notifyTreeNodeSelected(machineToSelect);
-    } else if (!machineNodes.isEmpty()) {
-      machineToSelect = machineNodes.entrySet().iterator().next().getValue();
-      view.selectNode(machineToSelect);
-      notifyTreeNodeSelected(machineToSelect);
-    }
-
-    for (MachineImpl machine : machines.values()) {
-      if (!wsMachines.contains(machine)) {
-        provideMachineNode(machine.getName(), true);
-      }
-    }
-  }
+  public void onWorkspaceRunning(WorkspaceRunningEvent event) {}
 
   @Override
   public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
@@ -1051,13 +1048,13 @@ public class ProcessesPanelPresenter extends BasePresenter
   @Override
   public void onTerminalAgentServerRunning(TerminalAgentServerRunningEvent event) {
     // open terminal automatically for dev-machine only
-    Optional<MachineImpl> devMachine = appContext.getWorkspace().getDevMachine();
+    Optional<MachineImpl> devMachine = wsAgentServerUtil.getWsAgentServerMachine();
 
     if (devMachine.isPresent() && event.getMachineName().equals(devMachine.get().getName())) {
-      provideMachineNode(event.getMachineName(), true);
+      provideMachineNode(event.getMachineName(), true, false);
 
       TerminalOptionsJso options = TerminalOptionsJso.createDefault().withFocusOnOpen(false);
-      newTerminal(options);
+      newTerminal(options, false);
     }
   }
 
@@ -1109,7 +1106,7 @@ public class ProcessesPanelPresenter extends BasePresenter
                       getAndPrintProcessLogs(console, pid);
                       subscribeToProcess(console, pid);
 
-                      addCommandOutput(machineName, console);
+                      addCommandOutput(machineName, console, false);
                     } else {
                       final CommandImpl commandByName = commandOptional.get();
                       macroProcessorProvider
@@ -1133,7 +1130,7 @@ public class ProcessesPanelPresenter extends BasePresenter
                                   getAndPrintProcessLogs(console, pid);
                                   subscribeToProcess(console, pid);
 
-                                  addCommandOutput(machineName, console);
+                                  addCommandOutput(machineName, console, false);
                                 }
                               });
                     }
@@ -1235,7 +1232,7 @@ public class ProcessesPanelPresenter extends BasePresenter
     // Create a temporary machine node to display outputs.
 
     if (!consoles.containsKey(machineName)) {
-      provideMachineNode(machineName, true);
+      provideMachineNode(machineName, true, false);
     }
 
     OutputConsole console = consoles.get(machineName);
@@ -1349,13 +1346,13 @@ public class ProcessesPanelPresenter extends BasePresenter
 
   @Override
   public void onDownloadWorkspaceOutput(DownloadWorkspaceOutputEvent event) {
-    WorkspaceImpl workspace = appContext.getWorkspace();
-    Optional<MachineImpl> devMachine = workspace.getDevMachine();
+    Optional<MachineImpl> devMachine = wsAgentServerUtil.getWsAgentServerMachine();
 
     if (!devMachine.isPresent()) {
       return;
     }
 
+    WorkspaceImpl workspace = appContext.getWorkspace();
     String fileName =
         workspace.getNamespace()
             + "-"

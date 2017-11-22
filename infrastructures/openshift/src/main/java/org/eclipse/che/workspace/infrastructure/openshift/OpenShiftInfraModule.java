@@ -18,20 +18,30 @@ import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
 import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiEnvVarProvider;
+import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
+import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.bootstrapper.OpenShiftBootstrapperFactory;
+import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.project.RemoveProjectOnWorkspaceRemove;
 import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.CommonPVCStrategy;
 import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.UniqueWorkspacePVCStrategy;
 import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.WorkspacePVCCleaner;
-import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.WorkspacePVCStrategy;
-import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.WorkspacePVCStrategyProvider;
+import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.WorkspaceVolumeStrategyProvider;
+import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftCheApiEnvVarProvider;
 
 /** @author Sergii Leshchenko */
 public class OpenShiftInfraModule extends AbstractModule {
   @Override
   protected void configure() {
+    MapBinder<String, InternalEnvironmentFactory> factories =
+        MapBinder.newMapBinder(binder(), String.class, InternalEnvironmentFactory.class);
+
+    factories.addBinding(OpenShiftEnvironment.TYPE).to(OpenShiftEnvironmentFactory.class);
+    factories.addBinding(DockerImageEnvironment.TYPE).to(DockerImageEnvironmentFactory.class);
 
     Multibinder<RuntimeInfrastructure> infrastructures =
         Multibinder.newSetBinder(binder(), RuntimeInfrastructure.class);
@@ -45,10 +55,10 @@ public class OpenShiftInfraModule extends AbstractModule {
 
     bind(CheApiEnvVarProvider.class).to(OpenShiftCheApiEnvVarProvider.class);
 
-    MapBinder<String, WorkspacePVCStrategy> pvcStrategies =
-        MapBinder.newMapBinder(binder(), String.class, WorkspacePVCStrategy.class);
-    pvcStrategies.addBinding(COMMON_STRATEGY).to(CommonPVCStrategy.class);
-    pvcStrategies.addBinding(UNIQUE_STRATEGY).to(UniqueWorkspacePVCStrategy.class);
-    bind(WorkspacePVCStrategy.class).toProvider(WorkspacePVCStrategyProvider.class);
+    MapBinder<String, WorkspaceVolumesStrategy> volumesStrategies =
+        MapBinder.newMapBinder(binder(), String.class, WorkspaceVolumesStrategy.class);
+    volumesStrategies.addBinding(COMMON_STRATEGY).to(CommonPVCStrategy.class);
+    volumesStrategies.addBinding(UNIQUE_STRATEGY).to(UniqueWorkspacePVCStrategy.class);
+    bind(WorkspaceVolumesStrategy.class).toProvider(WorkspaceVolumeStrategyProvider.class);
   }
 }

@@ -10,8 +10,6 @@
  */
 'use strict';
 
-import {CheResourceLimits} from './che-resource-limits';
-
 interface IResourcesResource<T> extends ng.resource.IResourceClass<T> {
   distribute: any;
   getResources: any;
@@ -20,8 +18,6 @@ interface IResourcesResource<T> extends ng.resource.IResourceClass<T> {
   getAvailableResources: any;
   updateFreeResources: any;
 }
-
-const RAM_RESOURCE_TYPE: string = 'RAM';
 
 /**
  * This class is handling the organization's resources management API.
@@ -240,7 +236,7 @@ export class CheResourcesDistribution implements che.api.ICheResourcesDistributi
    * @param type type of resource
    * @returns {any} resource limit
    */
-  getOrganizationTotalResourceByType(organizationId: string, type: CheResourceLimits): any {
+  getOrganizationTotalResourceByType(organizationId: string, type: che.resource.resourceLimits): any {
     let resources = this.organizationTotalResources.get(organizationId);
     if (!resources) {
       return null;
@@ -258,7 +254,7 @@ export class CheResourcesDistribution implements che.api.ICheResourcesDistributi
    * @param type type of resource
    * @returns {any} resource limit
    */
-  getOrganizationAvailableResourceByType(organizationId: string, type: CheResourceLimits): any {
+  getOrganizationAvailableResourceByType(organizationId: string, type: che.resource.resourceLimits): any {
     let resources = this.organizationAvailableResources.get(organizationId);
     if (!resources) {
       return null;
@@ -276,7 +272,7 @@ export class CheResourcesDistribution implements che.api.ICheResourcesDistributi
    * @param type type of resource
    * @returns {any} resource limit
    */
-  getOrganizationResourceByType(organizationId: string, type: CheResourceLimits): any {
+  getOrganizationResourceByType(organizationId: string, type: che.resource.resourceLimits): any {
     let resources = this.organizationResources.get(organizationId);
     if (!resources) {
       return null;
@@ -295,9 +291,8 @@ export class CheResourcesDistribution implements che.api.ICheResourcesDistributi
    * @param value value to be set
    * @returns {any} modified
    */
-  setOrganizationResourceLimitByType(resources: any, type: CheResourceLimits, value: string): any {
+  setOrganizationResourceLimitByType(resources: any, type: che.resource.resourceLimits, value: string): any {
     resources = resources || [];
-
 
     let resource = this.lodash.find(resources, (resource: any) => {
       return resource.type === type.valueOf();

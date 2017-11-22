@@ -746,6 +746,11 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.infrastructure.docker</groupId>
+                <artifactId>docker-environment</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.infrastructure.docker</groupId>
                 <artifactId>infrastructure-docker</artifactId>
                 <version>${che.version}</version>
             </dependency>

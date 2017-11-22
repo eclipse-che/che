@@ -86,7 +86,7 @@ public class CheckRunCommandFeatureTest {
     dashboardFactory.enterParamValue(NAME_BUILD_COMMAND);
     dashboardFactory.clickAddOnAddAction();
     dashboardFactory.clickOnOpenFactory();
-    String currentWin = ide.driver().getWindowHandle();
+    String currentWin = seleniumWebDriver.getWindowHandle();
     seleniumWebDriver.switchToNoneCurrentWindow(currentWin);
     loadingBehaviorPage.waitWhileLoadPageIsClosed();
     seleniumWebDriver.switchFromDashboardIframeToIde();

@@ -45,6 +45,6 @@
 
     <g:FlowPanel styleName="{style.terminalView}">
         <g:Label ui:field="unavailableLabel" visible="false" text="{locale.terminalTryRestarting}" addStyleNames="{style.unavailable}"/>
-        <g:ResizeLayoutPanel ui:field="terminalPanel" styleName="{style.termPanel}"/>
+        <g:FlowPanel ui:field="terminalPanel" styleName="{style.termPanel}"/>
     </g:FlowPanel>
 </ui:UiBinder>

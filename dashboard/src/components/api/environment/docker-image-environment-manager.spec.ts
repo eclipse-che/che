@@ -11,7 +11,6 @@
 'use strict';
 
 import {DockerImageEnvironmentManager} from './docker-image-environment-manager';
-import IWorkspaceEnvironment = _che.IWorkspaceEnvironment;
 import {IEnvironmentManagerMachine, IEnvironmentManagerMachineServer} from './environment-manager-machine';
 
 /**
@@ -20,7 +19,7 @@ import {IEnvironmentManagerMachine, IEnvironmentManagerMachineServer} from './en
  */
 
 describe('DockerImageEnvironmentManager', () => {
-  let envManager: DockerImageEnvironmentManager, environment: IWorkspaceEnvironment, machines: IEnvironmentManagerMachine[];
+  let envManager: DockerImageEnvironmentManager, environment: che.IWorkspaceEnvironment, machines: IEnvironmentManagerMachine[];
 
   beforeEach(inject(($log: ng.ILogService) => {
     envManager = new DockerImageEnvironmentManager($log);
@@ -32,7 +31,13 @@ describe('DockerImageEnvironmentManager', () => {
             '10240/tcp': {
               'properties': {},
               'protocol': 'http',
-              'port': '10240'
+              'port': '10240',
+              'path': ''
+            }
+          },
+          'volumes': {
+            'volume1': {
+              'path': '/123'
             }
           }, 'installers': ['ws-agent', 'org.eclipse.che.ws-agent'], 'attributes': {'memoryLimitBytes': '16642998272'}
         }
@@ -58,9 +63,9 @@ describe('DockerImageEnvironmentManager', () => {
   it('should return servers', () => {
     let servers = envManager.getServers(machines[0]);
 
-    let expectedServers = <IEnvironmentManagerMachineServer>environment.machines['dev-machine'].servers;
+    let expectedServers = environment.machines['dev-machine'].servers;
     Object.keys(expectedServers).forEach((serverRef: string) => {
-      expectedServers[serverRef].userScope = true;
+      (expectedServers[serverRef] as IEnvironmentManagerMachineServer).userScope = true;
     });
 
     expect(servers).toEqual(expectedServers);

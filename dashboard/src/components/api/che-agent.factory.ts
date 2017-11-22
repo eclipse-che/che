@@ -40,7 +40,7 @@ export class CheAgent {
     // remote call
     this.remoteAgentAPI = <IAgentsResource<any>>this.$resource('/api/installer', {}, {
       getAgents: { method: 'GET', url: '/api/installer', isArray: true },
-      getAgent: {method: 'GET', url: 'api/installer/:id'}
+      getAgent: {method: 'GET', url: '/api/installer/:id'}
     });
   }
 
@@ -48,18 +48,18 @@ export class CheAgent {
    * Fetch the agents.
    */
   fetchAgents(): ng.IPromise<che.IAgent[]> {
-    var defer = this.$q.defer();
-    let promise = this.remoteAgentAPI.getAgents().$promise;
+    const defer = this.$q.defer();
+    const promise = this.remoteAgentAPI.getAgents().$promise;
 
-    promise.then((agents) => {
+    promise.then((agents: che.IAgent[]) => {
       // reset global list
       this.agents.length = 0;
 
-      agents.forEach((agent) => {
+      agents.forEach((agent: che.IAgent[]) => {
         this.agents.push(agent);
       });
       defer.resolve(this.agents);
-    }, (error) => {
+    }, (error: any) => {
       if (error.status != 304) {
         defer.reject(error);
       } else {
@@ -73,7 +73,7 @@ export class CheAgent {
   /**
    * Returns the list of all agents.
    *
-   * @returns {Array}
+   * @returns {che.IAgent[]}
    */
   getAgents(): che.IAgent[] {
     return this.agents;

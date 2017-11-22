@@ -29,6 +29,7 @@ describe('If recipe has content', () => {
         'dev-machine': {
           'attributes': {'memoryLimitBytes': '2147483648'},
           'servers': {},
+          'volumes': {},
           'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
         }
       },
@@ -106,6 +107,7 @@ describe('If recipe has location', () => {
       'machines': {
         'dev-machine': {
           'servers': {},
+          'volumes': {},
           'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh'],
           'attributes': {'memoryLimitBytes': '2147483648'}
         }

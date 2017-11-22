@@ -17,6 +17,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MULTIPLE;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.pageobject.ProjectExplorer.ProjectExplorerOptionsMenuItem.REFRESH_MAIN;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -35,16 +36,19 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Action;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** @author Zaryana Dombrovskaya */
 @Singleton
 public class ProjectExplorer {
+
+  private static final Logger LOG = LoggerFactory.getLogger(ProjectExplorer.class);
 
   private final SeleniumWebDriver seleniumWebDriver;
   private final Loader loader;
@@ -109,11 +113,11 @@ public class ProjectExplorer {
   }
 
   public interface ProjectExplorerOptionsMenuItem {
-    String MAXIMIZE = "contextMenu/Maximize";
-    String MINIMIZE = "contextMenu/Minimize";
-    String COLLAPSE_ALL = "contextMenu/Collapse All";
-    String REFRESH_MAIN = "contextMenu/Refresh 'main'";
-    String LINK_WITH_EDITOR = "contextMenu/Link with editor";
+    String MAXIMIZE = "gwt-debug-contextMenu/Maximize";
+    String HIDE = "gwt-debug-contextMenu/Hide";
+    String COLLAPSE_ALL = "gwt-debug-contextMenu/collapseAll";
+    String REFRESH_MAIN = "gwt-debug-contextMenu/refreshPathAction";
+    String LINK_WITH_EDITOR = "gwt-debug-contextMenu/linkWithEditor";
   }
 
   @FindBy(id = Locators.PROJECT_EXPLORER_TREE_ITEMS)
@@ -140,6 +144,16 @@ public class ProjectExplorer {
   @FindBy(xpath = Locators.PROJECT_EXPLORER_TAB_IN_THE_LEFT_PANEL)
   WebElement projectExplorerTabInTheLeftPanel;
 
+  /**
+   * @param path path to item in Project Explorer
+   * @return item by path
+   */
+  private WebElement getProjectExplorerItem(String path) {
+    return redrawUiElementsWait.until(
+        ExpectedConditions.visibilityOfElementLocated(
+            By.xpath(String.format("//div[@path='/%s']/div", path))));
+  }
+
   public void clickOnProjectExplorerOptionsButton() {
     redrawUiElementsWait
         .until(
@@ -152,8 +166,8 @@ public class ProjectExplorer {
   public void clickOnOptionsMenuItem(String menuID) {
     redrawUiElementsWait
         .until(
-            ExpectedConditions.elementToBeClickable(
-                By.xpath(String.format("//nobr[@id='%s']", menuID))))
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(String.format("//tr[@id='%s']", menuID))))
         .click();
   }
 
@@ -202,7 +216,7 @@ public class ProjectExplorer {
    * @param path
    */
   public void waitItem(String path) {
-    String locator = "//div[@path='/%s']";
+    String locator = "//div[@path='/%s']/div";
     loader.waitOnClosed();
     new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC)
         .until(ExpectedConditions.presenceOfElementLocated(By.xpath(String.format(locator, path))));
@@ -218,7 +232,7 @@ public class ProjectExplorer {
    * @param timeout user timeout
    */
   public void waitItem(String path, int timeout) {
-    String locator = "//div[@path='/" + path + "']";
+    String locator = "//div[@path='/" + path + "']/div";
     new WebDriverWait(seleniumWebDriver, timeout)
         .until(ExpectedConditions.presenceOfElementLocated(By.xpath(locator)));
   }
@@ -353,9 +367,25 @@ public class ProjectExplorer {
    */
   public void selectItem(String path) {
     String locator = "//div[@path='/" + path + "']/div";
+
     waitItem(path);
-    WebElement item = seleniumWebDriver.findElement(By.xpath(locator));
-    item.click();
+    try {
+      new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
+          .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)))
+          .click();
+    }
+    // sometimes an element in the project explorer may not be attached to the DOM. We should
+    // refresh all items.
+    catch (StaleElementReferenceException ex) {
+      LOG.warn(ex.getLocalizedMessage(), ex);
+
+      waitProjectExplorer();
+      clickOnRefreshTreeButton();
+      waitItem(path);
+      new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
+          .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)))
+          .click();
+    }
   }
 
   /**
@@ -370,8 +400,23 @@ public class ProjectExplorer {
   public void selectItem(String path, int timeoutForWaitingItem) {
     String locator = "//div[@path='/" + path + "']/div";
     waitItem(path, timeoutForWaitingItem);
-    WebElement item = seleniumWebDriver.findElement(By.xpath(locator));
-    item.click();
+    try {
+      new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
+          .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)))
+          .click();
+    }
+    // sometimes an element in the project explorer may not be attached to the DOM. We should
+    // refresh all items.
+    catch (StaleElementReferenceException ex) {
+      LOG.warn(ex.getLocalizedMessage(), ex);
+
+      waitProjectExplorer();
+      clickOnRefreshTreeButton();
+      waitItem(path);
+      new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
+          .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)))
+          .click();
+    }
   }
 
   /**
@@ -417,9 +462,11 @@ public class ProjectExplorer {
    */
   public void scrollAndSelectItem(String path) {
     waitItem(path);
-    String locator = "//div[@path='/" + path + "']/div";
-    WebElement item = seleniumWebDriver.findElement(By.xpath(locator));
-    actionsFactory.createAction(seleniumWebDriver).moveToElement(item).click().perform();
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .moveToElement(getProjectExplorerItem(path))
+        .click()
+        .perform();
   }
 
   /**
@@ -428,24 +475,28 @@ public class ProjectExplorer {
    * @param path
    */
   public void openItemByPath(String path) {
+    Actions action = actionsFactory.createAction(seleniumWebDriver);
     waitItem(path);
-    String locator = "//div[@path='/%s']/div";
-    WebElement item =
-        redrawUiElementsWait.until(
-            ExpectedConditions.visibilityOfElementLocated(By.xpath(String.format(locator, path))));
+    selectItem(path);
+    waitItemIsSelected(path);
+
     try {
-      item.click();
+      getProjectExplorerItem(path).click();
       waitItemIsSelected(path);
-      actionsFactory.createAction(seleniumWebDriver).doubleClick(item).perform();
+      action.moveToElement(getProjectExplorerItem(path)).perform();
+      action.doubleClick().perform();
     }
-    // sometimes an element in the project explorer may be is not attached to the DOM. We should
+    // sometimes an element in the project explorer may not be attached to the DOM. We should
     // refresh all items.
     catch (StaleElementReferenceException ex) {
+      LOG.warn(ex.getLocalizedMessage(), ex);
+
       clickOnRefreshTreeButton();
       waitItem(path);
-      item.click();
+      getProjectExplorerItem(path).click();
       waitItemIsSelected(path);
-      actionsFactory.createAction(seleniumWebDriver).doubleClick(item).perform();
+      action.moveToElement(getProjectExplorerItem(path)).perform();
+      action.doubleClick().perform();
     }
     loader.waitOnClosed();
   }
@@ -486,7 +537,7 @@ public class ProjectExplorer {
    * @param pathToItem full path to item in the codenvy project explorer
    */
   public void waitDisappearItemByPath(String pathToItem) {
-    String locator = "//div[@path='/" + pathToItem + "']";
+    String locator = "//div[@path='/" + pathToItem + "']/div";
     new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
         .until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(locator)));
   }
@@ -514,7 +565,7 @@ public class ProjectExplorer {
    * @param pathToItem full path to item in the codenvy project explorer
    */
   public void waitRemoveItemsByPath(String pathToItem) {
-    String locator = "//div[@path='/" + pathToItem + "']";
+    String locator = "//div[@path='/" + pathToItem + "']/div";
     new WebDriverWait(seleniumWebDriver, 10)
         .until(
             ExpectedConditions.not(
@@ -527,13 +578,13 @@ public class ProjectExplorer {
    * @param path
    */
   public void openContextMenuByPathSelectedItem(String path) {
-    String locator = "//div[@path='/" + path + "']/div";
-    loadPageTimeout.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)));
-    WebElement node = seleniumWebDriver.findElement(By.xpath(locator));
-    node.click();
-    Actions act = actionsFactory.createAction(seleniumWebDriver);
-    Action rClick = act.contextClick(node).build();
-    rClick.perform();
+    waitItem(path);
+    selectItem(path);
+    waitItemIsSelected(path);
+
+    Actions action = actionsFactory.createAction(seleniumWebDriver);
+    action.moveToElement(getProjectExplorerItem(path)).contextClick().perform();
+
     waitContextMenu();
   }
 
@@ -660,8 +711,8 @@ public class ProjectExplorer {
 
   /** wait refresh button and click this one */
   public void clickOnRefreshTreeButton() {
-    redrawUiElementsWait.until(ExpectedConditions.visibilityOf(refreshButtonPartStack)).click();
-    redrawUiElementsWait.until(ExpectedConditions.visibilityOf(refreshContextMenuItem)).click();
+    clickOnProjectExplorerOptionsButton();
+    clickOnOptionsMenuItem(REFRESH_MAIN);
   }
 
   public void clickOnImportProjectLink(int userTimeout) {
@@ -684,11 +735,11 @@ public class ProjectExplorer {
   public void invokeCommandWithContextMenu(
       String commandsGoal, String pathToItem, String commandName) {
     String commandNameLocator = "//tr[@id[contains(.,'%s')]]";
-    selectItem(pathToItem);
 
     try {
       openContextMenuByPathSelectedItem(pathToItem);
     } catch (NoSuchElementException e) {
+      clickOnRefreshTreeButton();
       openContextMenuByPathSelectedItem(
           pathToItem); // there context menu may not be opened from the first try
     }

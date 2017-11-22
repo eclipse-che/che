@@ -17,12 +17,12 @@ import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
 import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
 import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -110,9 +110,7 @@ public class ProjectServiceClientTest {
         new ProjectServiceClient(
             loaderFactory, requestFactory, dtoFactory, unmarshaller, appContext);
 
-    when(appContext.getWsAgentServerApiEndpoint()).thenReturn("http://127.0.0.3/api");
-
-    when(loaderFactory.newLoader(any())).thenReturn(messageLoader);
+    when(loaderFactory.newLoader(any(String.class))).thenReturn(messageLoader);
     when(asyncRequest.loader(messageLoader)).thenReturn(asyncRequest);
     when(asyncRequest.data(any(String.class))).thenReturn(asyncRequest);
     when(asyncRequest.send(unmarshallableItemRef)).thenReturn(itemRefPromise);
@@ -177,7 +175,7 @@ public class ProjectServiceClientTest {
     client.getProjects();
 
     verify(requestFactory).createGetRequest(any());
-    verify(asyncRequest).header(ACCEPT, MimeType.APPLICATION_JSON);
+    verify(asyncRequest).header(ACCEPT, APPLICATION_JSON);
     verify(unmarshaller).newListUnmarshaller(ProjectConfigDto.class);
     verify(asyncRequest).send(unmarshallablePrjsConf);
   }
@@ -189,7 +187,7 @@ public class ProjectServiceClientTest {
     client.estimate(resourcePath, prjType);
 
     verify(requestFactory).createGetRequest(any());
-    verify(asyncRequest).header(ACCEPT, MimeType.APPLICATION_JSON);
+    verify(asyncRequest).header(ACCEPT, APPLICATION_JSON);
     verify(loaderFactory).newLoader("Estimating project...");
     verify(asyncRequest).loader(messageLoader);
     verify(asyncRequest).send(unmarshallbleSourceEstimation);
@@ -200,7 +198,7 @@ public class ProjectServiceClientTest {
     client.resolveSources(resourcePath);
 
     verify(requestFactory).createGetRequest(any());
-    verify(asyncRequest).header(ACCEPT, MimeType.APPLICATION_JSON);
+    verify(asyncRequest).header(ACCEPT, APPLICATION_JSON);
     verify(loaderFactory).newLoader("Resolving sources...");
     verify(asyncRequest).loader(messageLoader);
     verify(unmarshaller).newListUnmarshaller(SourceEstimation.class);
@@ -229,7 +227,7 @@ public class ProjectServiceClientTest {
     client.search(expression);
 
     verify(requestFactory).createGetRequest(any());
-    verify(asyncRequest).header(ACCEPT, MimeType.APPLICATION_JSON);
+    verify(asyncRequest).header(ACCEPT, APPLICATION_JSON);
     verify(loaderFactory).newLoader("Searching...");
     verify(asyncRequest).loader(messageLoader);
     verify(unmarshaller).newUnmarshaller(ProjectSearchResponseDto.class);
@@ -243,7 +241,7 @@ public class ProjectServiceClientTest {
     client.createBatchProjects(configs);
 
     verify(requestFactory).createPostRequest(anyString(), prjsArgCaptor.capture());
-    verify(asyncRequest).header(ACCEPT, MimeType.APPLICATION_JSON);
+    verify(asyncRequest).header(ACCEPT, APPLICATION_JSON);
     verify(loaderFactory).newLoader("Creating project...");
     verify(asyncRequest).loader(messageLoader);
     verify(asyncRequest).send(unmarshallablePrjsConf);
@@ -259,7 +257,7 @@ public class ProjectServiceClientTest {
     client.createBatchProjects(configs);
 
     verify(requestFactory).createPostRequest(anyString(), prjsArgCaptor.capture());
-    verify(asyncRequest).header(ACCEPT, MimeType.APPLICATION_JSON);
+    verify(asyncRequest).header(ACCEPT, APPLICATION_JSON);
     verify(loaderFactory).newLoader("Creating the batch of projects...");
     verify(asyncRequest).loader(messageLoader);
     verify(asyncRequest).send(unmarshallablePrjsConf);
@@ -355,7 +353,7 @@ public class ProjectServiceClientTest {
     client.getTree(resourcePath, 2, true);
 
     verify(requestFactory).createGetRequest(any());
-    verify(asyncRequest).header(ACCEPT, MimeType.APPLICATION_JSON);
+    verify(asyncRequest).header(ACCEPT, APPLICATION_JSON);
     verify(unmarshaller).newUnmarshaller(TreeElement.class);
     verify(asyncRequest).send(unmarshallableTreeElem);
   }
@@ -365,7 +363,7 @@ public class ProjectServiceClientTest {
     client.getItem(resourcePath);
 
     verify(requestFactory).createGetRequest(any());
-    verify(asyncRequest).header(ACCEPT, MimeType.APPLICATION_JSON);
+    verify(asyncRequest).header(ACCEPT, APPLICATION_JSON);
     verify(loaderFactory).newLoader("Getting item...");
     verify(unmarshaller).newUnmarshaller(ItemReference.class);
     verify(asyncRequest).send(unmarshallableItemRef);
@@ -376,7 +374,7 @@ public class ProjectServiceClientTest {
     client.getProject(Path.valueOf(TEXT));
 
     verify(requestFactory).createGetRequest(any());
-    verify(asyncRequest).header(ACCEPT, MimeType.APPLICATION_JSON);
+    verify(asyncRequest).header(ACCEPT, APPLICATION_JSON);
     verify(loaderFactory).newLoader("Getting project...");
     verify(asyncRequest).loader(messageLoader);
     verify(unmarshaller).newUnmarshaller(ProjectConfigDto.class);
@@ -393,8 +391,8 @@ public class ProjectServiceClientTest {
     client.updateProject(prjConfig1);
 
     verify(requestFactory).createRequest(eq(PUT), anyString(), eq(prjConfig1), eq(false));
-    verify(asyncRequest).header(CONTENT_TYPE, MimeType.APPLICATION_JSON);
-    verify(asyncRequest).header(ACCEPT, MimeType.APPLICATION_JSON);
+    verify(asyncRequest).header(CONTENT_TYPE, APPLICATION_JSON);
+    verify(asyncRequest).header(ACCEPT, APPLICATION_JSON);
     verify(loaderFactory).newLoader("Updating project...");
     verify(asyncRequest).loader(messageLoader);
     verify(unmarshaller).newUnmarshaller(ProjectConfigDto.class);

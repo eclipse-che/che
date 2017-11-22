@@ -16,11 +16,14 @@
  */
 export class RouteHistory {
 
+  history: string[];
+
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($rootScope, $location) {
+  constructor($rootScope: ng.IRootScopeService,
+              $location: ng.ILocationService) {
     this.history = [];
     $rootScope.$on('$routeChangeSuccess', () => {
       this.history.push($location.path());
@@ -29,9 +32,9 @@ export class RouteHistory {
 
   /**
    * Add a new path on top of all existing paths
-   * @param path the path on which we will we redirecting when we pop current path
+   * @param {string} path the path on which we will we redirecting when we pop current path
    */
-  pushPath(path) {
+  pushPath(path: string): void {
     this.history.push(path);
   }
 

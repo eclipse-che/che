@@ -12,6 +12,13 @@
 
 import { CheInput } from './che-input.directive';
 
+interface ICheTextareaAttributes extends ng.IAttributes {
+  cheName: string;
+  cheLabelName: string;
+  chePlaceHolder: string;
+  chePattern: string;
+}
+
 /**
  * Defines a directive for creating textarea that are working either on desktop or on mobile devices.
  * It will change upon width of the screen
@@ -29,22 +36,22 @@ export class CheTextarea extends CheInput {
 
   /**
    * Template for the current toolbar
-   * @param element
-   * @param attrs
+   * @param $element
+   * @param $attrs
    * @returns {string} the template
    */
-  template(element, attrs) {
+  template($element: ng.IAugmentedJQuery, $attrs: ICheTextareaAttributes) {
 
-    var textareaName = attrs.cheName;
-    var labelName = attrs.cheLabelName || '';
-    var placeHolder = attrs.chePlaceHolder;
-    var pattern = attrs.chePattern;
+    const textareaName = $attrs.cheName;
+    const labelName = $attrs.cheLabelName || '';
+    const placeHolder = $attrs.chePlaceHolder;
+    const pattern = $attrs.chePattern;
 
-    var template = '<div class="che-input">'
+    let template = '<div class="che-input">'
       + '<md-input-container hide-gt-xs>'
       + '<label>' + labelName + '</label>'
       + '<textarea type="text" name="' + textareaName + '"';
-    if (attrs.chePattern) {
+    if ($attrs.chePattern) {
       template = template + ' pattern="' + pattern + '"';
     }
 
@@ -60,7 +67,7 @@ export class CheTextarea extends CheInput {
       + ''
       + '<div layout="column" class="che-input-desktop-value-column" flex="{{labelName ? 85 : \'none\'}}">'
       + '<textarea type="text" placeholder="' + placeHolder + '" ng-trim="false" name="desk' + textareaName + '" style="{{labelName ? \'width: 100%\' : \'\'}}"';
-    if (attrs.chePattern) {
+    if ($attrs.chePattern) {
       template = template + ' pattern="' + pattern + '"';
     }
 

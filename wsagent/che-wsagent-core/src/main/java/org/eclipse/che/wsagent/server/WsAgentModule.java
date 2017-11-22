@@ -29,6 +29,10 @@ public class WsAgentModule extends AbstractModule {
     install(new org.eclipse.che.api.core.rest.CoreRestModule());
     install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
     install(new org.eclipse.che.api.project.server.ProjectApiModule());
+    install(new org.eclipse.che.api.editor.server.EditorApiModule());
+    install(new org.eclipse.che.api.fs.server.FsApiModule());
+    install(new org.eclipse.che.api.search.server.SearchApiModule());
+    install(new org.eclipse.che.api.watcher.server.FileWatcherApiModule());
     install(new org.eclipse.che.commons.schedule.executor.ScheduleModule());
     install(new org.eclipse.che.plugin.ssh.key.SshModule());
     install(new org.eclipse.che.api.languageserver.LanguageServerModule());

@@ -198,7 +198,7 @@ export class StackValidationService {
    */
   getMachineValidation(machine: che.IEnvironmentMachine): che.IValidation {
     let mandatoryKeys: Array<string> = ['attributes'];
-    let additionalKeys: Array<string> = ['installers', 'servers', 'source', 'env'];
+    let additionalKeys: Array<string> = ['installers', 'servers', 'volumes', 'source', 'env'];
     let validKeys: Array<string> = mandatoryKeys.concat(additionalKeys);
     let errors: Array<string> = [];
     let isValid: boolean = true;

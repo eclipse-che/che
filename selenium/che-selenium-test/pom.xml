@@ -163,6 +163,56 @@
             <plugin>
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/*.md</exclude>
+                        <exclude>**/*.json</exclude>
+                        <exclude>**/.gitkeep</exclude>
+                        <exclude>**/.gitignore</exclude>
+                        <exclude>**/*.cc</exclude>
+                        <exclude>**/*.less</exclude>
+                        <exclude>**/.keep</exclude>
+                        <exclude>**/*.txt</exclude>
+                        <exclude>**/*.zip</exclude>
+                        <exclude>**/*.zip</exclude>
+                        <exclude>**/resources/**/.gitkeep</exclude>
+                        <exclude>**/resources/**/.keep</exclude>
+                        <exclude>**/resources/**/another</exclude>
+                        <exclude>**/resources/**/classpath</exclude>
+                        <exclude>**/resources/**/editor</exclude>
+                        <exclude>**/resources/**/errors-warnings</exclude>
+                        <exclude>**/resources/**/expected-test-after-download-sources</exclude>
+                        <exclude>**/resources/**/expected-test-before-download-sources</exclude>
+                        <exclude>**/resources/**/file.less</exclude>
+                        <exclude>**/resources/**/file</exclude>
+                        <exclude>**/resources/**/hello.cc</exclude>
+                        <exclude>**/resources/**/jar-module</exclude>
+                        <exclude>**/resources/**/LessFile.less</exclude>
+                        <exclude>**/resources/**/main</exclude>
+                        <exclude>**/resources/**/Makefile</exclude>
+                        <exclude>**/resources/**/new_file</exclude>
+                        <exclude>**/resources/**/pom-quick-start-archetype-context</exclude>
+                        <exclude>**/resources/**/README.md</exclude>
+                        <exclude>**/resources/**/replace-all</exclude>
+                        <exclude>**/resources/**/replace</exclude>
+                        <exclude>**/resources/**/some</exclude>
+                        <exclude>**/resources/**/SomeLess.less</exclude>
+                        <exclude>**/resources/**/tEst</exclude>
+                        <exclude>**/resources/**/TeST</exclude>
+                        <exclude>**/resources/**/TEST</exclude>
+                        <exclude>**/resources/**/tesT</exclude>
+                        <exclude>**/resources/**/TEst</exclude>
+                        <exclude>**/resources/**/tESt</exclude>
+                        <exclude>**/resources/**/Test</exclude>
+                        <exclude>**/resources/**/test</exclude>
+                        <exclude>**/resources/**/teSt</exclude>
+                        <exclude>**/resources/**/TeSt</exclude>
+                        <exclude>**/resources/**/text</exclude>
+                        <exclude>**/resources/**/war-module</exclude>
+                        <exclude>**/resources/**/README</exclude>
+                        <exclude>**/resources/**/embed-code</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

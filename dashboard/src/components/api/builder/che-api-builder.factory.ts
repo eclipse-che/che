@@ -43,7 +43,7 @@ export class CheAPIBuilder {
    * The Che Profile builder
    * @returns {CheProfileBuilder}
    */
-  getProfileBuilder() {
+  getProfileBuilder(): CheProfileBuilder {
     return new CheProfileBuilder();
   }
 

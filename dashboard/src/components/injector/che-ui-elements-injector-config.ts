@@ -9,12 +9,11 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-
-import {CheUIElementsInjectorService} from './che-ui-elements-injector.service';
+import {CheUIElementsInjectorService} from '../service/injector/che-ui-elements-injector.service';
 
 export class CheUIElementsInjectorConfig {
 
-  constructor(register) {
+  constructor(register: che.IRegisterService) {
     register.service('cheUIElementsInjectorService', CheUIElementsInjectorService);
   }
 }

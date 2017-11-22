@@ -211,9 +211,58 @@ public class MachineTerminal {
    */
   public void moveDownListTerminal(String item) {
     loader.waitOnClosed();
-    actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.END.toString()).perform();
+    typeIntoTerminal(Keys.END.toString());
     WaitUtils.sleepQuietly(2);
 
+    WebElement element =
+        seleniumWebDriver.findElement(
+            By.xpath(format("(//span[contains(text(), '%s')])[position()=1]", item)));
+
+    if (!element.getCssValue("background-color").equals(LINE_HIGHLIGHTED_GREEN)) {
+      typeIntoTerminal(Keys.ARROW_UP.toString());
+      element =
+          seleniumWebDriver.findElement(
+              By.xpath(format("(//span[contains(text(), '%s')])[position()=1]", item)));
+      WaitUtils.sleepQuietly(2);
+    }
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOf(element));
+    WebElement finalElement = element;
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            (WebDriver input) ->
+                finalElement.getCssValue("background-color").equals(LINE_HIGHLIGHTED_GREEN));
+  }
+
+  /**
+   * scroll terminal by pressing key 'PageDown'
+   *
+   * @param item is the name of the highlighted item
+   */
+  public void movePageDownListTerminal(String item) {
+    loader.waitOnClosed();
+    typeIntoTerminal(Keys.PAGE_DOWN.toString());
+    WaitUtils.sleepQuietly(2);
+    WebElement element =
+        seleniumWebDriver.findElement(
+            By.xpath(format("(//span[contains(text(), '%s')])[position()=1]", item)));
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOf(element));
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            (WebDriver input) ->
+                element.getCssValue("background-color").equals(LINE_HIGHLIGHTED_GREEN));
+  }
+
+  /**
+   * scroll terminal by pressing key 'PageUp'
+   *
+   * @param item is the name of the highlighted item
+   */
+  public void movePageUpListTerminal(String item) {
+    loader.waitOnClosed();
+    typeIntoTerminal(Keys.PAGE_UP.toString());
+    WaitUtils.sleepQuietly(2);
     WebElement element =
         seleniumWebDriver.findElement(
             By.xpath(format("(//span[contains(text(), '%s')])[position()=1]", item)));
@@ -232,7 +281,7 @@ public class MachineTerminal {
    */
   public void moveUpListTerminal(String item) {
     loader.waitOnClosed();
-    actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.HOME.toString()).perform();
+    typeIntoTerminal(Keys.HOME.toString());
     WaitUtils.sleepQuietly(2);
     WebElement element =
         seleniumWebDriver.findElement(

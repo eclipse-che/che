@@ -112,7 +112,7 @@ import org.slf4j.Logger;
  }
 
  2. Move the logic related to containers configuration modification to
- InfrastructureProvisioner implementation.
+ DockerEnvironmentProvisioner implementation.
 */
 
 /**

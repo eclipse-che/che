@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.plugin.java.server;
 
+import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -18,8 +20,9 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.eclipse.che.api.project.server.ProjectCreatedEvent;
-import org.eclipse.che.api.project.server.ProjectRegistry;
+import org.eclipse.che.api.fs.server.PathTransformer;
+import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.notification.ProjectCreatedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
 import org.eclipse.che.jdt.core.resources.ResourceChangedEvent;
@@ -37,21 +40,25 @@ import org.slf4j.LoggerFactory;
 /** @author Evgen Vidolob */
 @Singleton
 public class ProjectListeners {
+
   private static final Logger LOG = LoggerFactory.getLogger(ProjectListeners.class);
 
   private final File workspace;
-  private final ProjectRegistry projectRegistry;
+  private final ProjectManager projectRegistry;
   private final ProjectTypeRegistry projectTypeRegistry;
+  private final PathTransformer pathTransformer;
 
   @Inject
   public ProjectListeners(
       @Named("che.user.workspaces.storage") String workspacePath,
       EventService eventService,
-      ProjectRegistry projectRegistry,
-      ProjectTypeRegistry projectTypeRegistry) {
+      ProjectManager projectRegistry,
+      ProjectTypeRegistry projectTypeRegistry,
+      PathTransformer pathTransformer) {
     this.projectRegistry = projectRegistry;
     this.projectTypeRegistry = projectTypeRegistry;
     workspace = new File(workspacePath);
+    this.pathTransformer = pathTransformer;
     eventService.subscribe(new ProjectCreated());
     eventService.subscribe(
         new EventSubscriber<ProjectItemModifiedEvent>() {
@@ -89,7 +96,23 @@ public class ProjectListeners {
     }
   }
 
+  private boolean isJavaProject(String projectPath) {
+    try {
+      String wsPath = absolutize(projectPath);
+      ProjectConfig project =
+          projectRegistry
+              .get(wsPath)
+              .orElseThrow(() -> new NotFoundException("Can't find project"));
+      String type = project.getType();
+      return projectTypeRegistry.getProjectType(type).isTypeOf("java");
+    } catch (NotFoundException e) {
+      LOG.error("Can't find project " + projectPath, e);
+      return false;
+    }
+  }
+
   private class ProjectCreated implements EventSubscriber<ProjectCreatedEvent> {
+
     @Override
     public void onEvent(ProjectCreatedEvent event) {
       if (!isJavaProject(event.getProjectPath())) {
@@ -103,17 +126,6 @@ public class ProjectListeners {
         // catch all exceptions that may be happened
         LOG.error("Can't update java model " + event.getProjectPath(), t);
       }
-    }
-  }
-
-  private boolean isJavaProject(String projectPath) {
-    ProjectConfig project = projectRegistry.getProject(projectPath);
-    String type = project.getType();
-    try {
-      return projectTypeRegistry.getProjectType(type).isTypeOf("java");
-    } catch (NotFoundException e) {
-      LOG.error("Can't find project " + projectPath, e);
-      return false;
     }
   }
 }

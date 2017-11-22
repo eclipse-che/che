@@ -9,6 +9,9 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import {CheWorkspace} from '../api/workspace/che-workspace.factory';
+import {CheAPIBuilder} from '../api/builder/che-api-builder.factory';
+import {CheHttpBackend} from '../api/test/che-http-backend';
 
 /**
  * Test the workspace name uniqueness
@@ -16,33 +19,35 @@
  */
 
 describe('unique-workspace-name-validator', function() {
-  var $scope, form, $compiler;
+  let $scope, form, $compiler;
 
   /**
    * Workspace API
    */
-  var factoryWorkspace;
+  let factoryWorkspace;
 
   /**
    * API builder.
    */
-  var apiBuilder;
+  let apiBuilder;
 
   /**
    * Backend for handling http operations
    */
-  var httpBackend;
+  let httpBackend;
 
   /**
    * Che backend
    */
-  var cheBackend;
-
+  let cheBackend;
 
   beforeEach(angular.mock.module('userDashboard'));
 
-
-  beforeEach(inject(function($compile, $rootScope, cheWorkspace, cheAPIBuilder, cheHttpBackend, $document) {
+  beforeEach(inject(function($compile: ng.ICompileService,
+                             $rootScope: ng.IRootScopeService,
+                             cheWorkspace: CheWorkspace,
+                             cheAPIBuilder: CheAPIBuilder, cheHttpBackend: CheHttpBackend,
+                             $document: ng.IDocumentService) {
     $scope = $rootScope;
     $compiler = $compile;
     factoryWorkspace = cheWorkspace;
@@ -58,12 +63,12 @@ describe('unique-workspace-name-validator', function() {
     it('workspaceAlready exists', function() {
 
       // setup tests objects
-      var idWorkspace1 = 'idOfMyWorkspace1';
-      var nameWorkspace1 = 'testWorkspace1';
-      var workspace1 = apiBuilder.getWorkspaceBuilder().withName(nameWorkspace1).withId(idWorkspace1).build();
+      const idWorkspace1 = 'idOfMyWorkspace1';
+      const nameWorkspace1 = 'testWorkspace1';
+      const workspace1 = apiBuilder.getWorkspaceBuilder().withName(nameWorkspace1).withId(idWorkspace1).build();
 
-      var idWorkspace2 = 'idOfMyWorkspace2';
-      var workspace2 = apiBuilder.getWorkspaceBuilder().withId(idWorkspace2).build();
+      const idWorkspace2 = 'idOfMyWorkspace2';
+      const workspace2 = apiBuilder.getWorkspaceBuilder().withId(idWorkspace2).build();
 
       factoryWorkspace.fetchWorkspaces();
 
@@ -76,7 +81,7 @@ describe('unique-workspace-name-validator', function() {
 
       $scope.model = { workspaceName: null};
 
-      var element = angular.element(
+      const element = angular.element(
         '<form name="form">' +
         '<input ng-model="model.workspaceName" name="name" unique-workspace-name="workspace2.config.name" />' +
         '</form>'
@@ -94,13 +99,13 @@ describe('unique-workspace-name-validator', function() {
     it('workspace not yet defined', function() {
 
       // setup tests objects
-      var idWorkspace1 = 'idOfMyWorkspace1';
-      var nameWorkspace1 = 'testWorkspace1';
-      var workspace1 = apiBuilder.getWorkspaceBuilder().withName(nameWorkspace1).withId(idWorkspace1).build();
+      const idWorkspace1 = 'idOfMyWorkspace1';
+      const nameWorkspace1 = 'testWorkspace1';
+      const workspace1 = apiBuilder.getWorkspaceBuilder().withName(nameWorkspace1).withId(idWorkspace1).build();
 
-      var idWorkspace2 = 'idOfMyWorkspace2';
-      var nameWorkspace2 = 'testWorkspace2';
-      var workspace2 = apiBuilder.getWorkspaceBuilder().withName().withId(idWorkspace2).build();
+      const idWorkspace2 = 'idOfMyWorkspace2';
+      const nameWorkspace2 = 'testWorkspace2';
+      const workspace2 = apiBuilder.getWorkspaceBuilder().withName().withId(idWorkspace2).build();
 
       factoryWorkspace.fetchWorkspaces();
 
@@ -115,7 +120,7 @@ describe('unique-workspace-name-validator', function() {
 
       $scope.model = { workspaceName: null };
 
-      var element = angular.element(
+      const element = angular.element(
         '<form name="form">' +
         '<input ng-model="model.workspaceName" name="name" unique-workspace-name="workspace2.config.name" />' +
         '</form>'

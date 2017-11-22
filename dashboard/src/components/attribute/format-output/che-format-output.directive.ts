@@ -10,18 +10,26 @@
  */
 'use strict';
 
+interface ICheFormatOutputAttributes extends ng.IAttributes {
+  ngModel: string;
+}
+
 /**
  * Defines a directive for formatting output.
  * @author Ann Shumilova
  */
-export class CheFormatOutput {
+export class CheFormatOutput implements ng.IDirective {
+  restrict = 'A';
+
+  outputColors: any;
+  $compile: ng.ICompileService;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(jsonOutputColors, $compile) {
-    this.restrict = 'A';
+  constructor(jsonOutputColors: string,
+              $compile: ng.ICompileService) {
     this.outputColors = angular.fromJson(jsonOutputColors);
     this.$compile = $compile;
   }
@@ -29,22 +37,23 @@ export class CheFormatOutput {
   /**
    * Keep reference to the model controller
    */
-  link($scope, element, attr) {
-    $scope.$watch(attr.ngModel, (value) => {
+  link($scope: ng.IScope, $element: ng.IAugmentedJQuery, $attrs: ICheFormatOutputAttributes): void {
+    $scope.$watch(() => { return $attrs.ngModel; }, (value: string) => {
       if (!value || value.length === 0) {
         return;
       }
 
-      var regExp = new RegExp('\n', 'g');
-      var result = value.replace(regExp, '<br/>')
+      let regExp = new RegExp('\n', 'g');
+      let result = value.replace(regExp, '<br/>');
 
-      this.outputColors.forEach((outputColor) => {
+      this.outputColors.forEach((outputColor: any) => {
         regExp = new RegExp('\\[\\s*' + outputColor.type + '\\s*\\]', 'g');
-        result = result.replace(regExp, '[<span style=\"color: ' + outputColor.color + '\">' + outputColor.type + '</span>]')
+        result = result.replace(regExp, '[<span style=\"color: ' + outputColor.color + '\">' + outputColor.type + '</span>]');
       });
 
       result = '<span>' + result + '</span>';
-      element.html(this.$compile(result)($scope));
+
+      $element.html(this.$compile(result)($scope).html());
     });
   }
 }

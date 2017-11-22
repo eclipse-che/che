@@ -19,19 +19,26 @@ import java.util.Objects;
  * @author Sergii Leshchenko
  */
 public class ContainerEvent {
-  private final String machineName;
+  private final String podName;
+  private final String containerName;
   private final String message;
   private final String time;
 
-  public ContainerEvent(String machineName, String message, String time) {
-    this.machineName = machineName;
+  public ContainerEvent(String podName, String containerName, String message, String time) {
+    this.podName = podName;
+    this.containerName = containerName;
     this.message = message;
     this.time = time;
   }
 
-  /** Returns the name of the machine that produces the logs. */
-  public String getMachineName() {
-    return machineName;
+  /** Returns name of pod related to container. */
+  public String getPodName() {
+    return podName;
+  }
+
+  /** Returns container name which produced event. */
+  public String getContainerName() {
+    return containerName;
   }
 
   /** Returns the contents of the event. */
@@ -53,21 +60,25 @@ public class ContainerEvent {
       return false;
     }
     ContainerEvent that = (ContainerEvent) o;
-    return Objects.equals(machineName, that.machineName)
+    return Objects.equals(podName, that.podName)
+        && Objects.equals(containerName, that.containerName)
         && Objects.equals(message, that.message)
         && Objects.equals(time, that.time);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(machineName, message, time);
+    return Objects.hash(podName, containerName, message, time);
   }
 
   @Override
   public String toString() {
     return "ContainerEvent{"
-        + "machineName='"
-        + machineName
+        + "podName='"
+        + podName
+        + '\''
+        + ", containerName='"
+        + containerName
         + '\''
         + ", message='"
         + message

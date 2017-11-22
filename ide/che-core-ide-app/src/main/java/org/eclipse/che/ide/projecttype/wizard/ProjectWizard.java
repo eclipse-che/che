@@ -80,9 +80,14 @@ public class ProjectWizard extends AbstractWizard<MutableProjectConfig> {
           .then(onComplete(callback))
           .catchError(onFailure(callback));
     } else if (mode == UPDATE) {
+      String path =
+          dataObject.getPath().startsWith("/")
+              ? dataObject.getPath().substring(1)
+              : dataObject.getPath();
+
       appContext
           .getWorkspaceRoot()
-          .getContainer(Path.valueOf(dataObject.getPath()))
+          .getContainer(Path.valueOf(path))
           .then(
               optContainer -> {
                 checkState(optContainer.isPresent(), "Failed to update non existed path");

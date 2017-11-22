@@ -143,7 +143,7 @@
                                 <artifactItem>
                                     <groupId>org.eclipse.che.lib</groupId>
                                     <artifactId>che-test-ls</artifactId>
-                                    <version>${project.version}</version>
+                                    <version>${che.lib.version}</version>
                                     <type>tar.gz</type>
                                     <outputDirectory>${project.build.testOutputDirectory}/ls</outputDirectory>
                                     <destFileName>test-ls.tar.gz</destFileName>

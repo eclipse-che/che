@@ -17,7 +17,6 @@ import static org.eclipse.che.api.git.shared.FileChangedEventDto.Status.ADDED;
 import static org.eclipse.che.api.git.shared.FileChangedEventDto.Status.MODIFIED;
 import static org.eclipse.che.api.git.shared.FileChangedEventDto.Status.NOT_MODIFIED;
 import static org.eclipse.che.api.git.shared.FileChangedEventDto.Status.UNTRACKED;
-import static org.eclipse.che.api.vfs.watcher.FileWatcherManager.EMPTY_CONSUMER;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -27,15 +26,16 @@ import java.util.function.Consumer;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
-import javax.inject.Provider;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.git.shared.FileChangedEventDto;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
+import org.eclipse.che.api.project.server.impl.RegisteredProject;
+import org.eclipse.che.api.watcher.server.FileWatcherManager;
 import org.slf4j.Logger;
 
 /**
@@ -44,6 +44,7 @@ import org.slf4j.Logger;
  * @author Igor Vinokur
  */
 public class GitChangesDetector {
+
   private static final Logger LOG = getLogger(GitChangesDetector.class);
 
   private static final String GIT_DIR = ".git";
@@ -52,7 +53,8 @@ public class GitChangesDetector {
 
   private final RequestTransmitter transmitter;
   private final FileWatcherManager manager;
-  private final Provider<ProjectManager> projectManagerProvider;
+  private final ProjectManager projectManager;
+  private final PathTransformer pathTransformer;
   private final GitConnectionFactory gitConnectionFactory;
 
   private final Set<String> endpointIds = newConcurrentHashSet();
@@ -63,11 +65,13 @@ public class GitChangesDetector {
   public GitChangesDetector(
       RequestTransmitter transmitter,
       FileWatcherManager manager,
-      Provider<ProjectManager> projectManagerProvider,
+      ProjectManager projectManager,
+      PathTransformer pathTransformer,
       GitConnectionFactory gitConnectionFactory) {
     this.transmitter = transmitter;
     this.manager = manager;
-    this.projectManagerProvider = projectManagerProvider;
+    this.projectManager = projectManager;
+    this.pathTransformer = pathTransformer;
     this.gitConnectionFactory = gitConnectionFactory;
   }
 
@@ -105,28 +109,28 @@ public class GitChangesDetector {
   }
 
   private Consumer<String> deleteConsumer() {
-    return EMPTY_CONSUMER;
+    return it -> {};
   }
 
   private Consumer<String> fsEventConsumer() {
     return it -> endpointIds.forEach(transmitConsumer(it));
   }
 
-  private Consumer<String> transmitConsumer(String path) {
+  private Consumer<String> transmitConsumer(String wsPath) {
     return id -> {
       try {
-        String normalizedPath = path.startsWith("/") ? path.substring(1) : path;
+        String normalizedPath = wsPath.startsWith("/") ? wsPath.substring(1) : wsPath;
         String itemPath = normalizedPath.substring(normalizedPath.indexOf("/") + 1);
-        String projectPath =
-            projectManagerProvider
-                .get()
-                .getProject(normalizedPath.split("/")[0])
-                .getBaseFolder()
-                .getVirtualFile()
-                .toIoFile()
-                .getAbsolutePath();
-        GitConnection connection = gitConnectionFactory.getConnection(projectPath);
-        Status status = connection.status(singletonList(itemPath));
+
+        RegisteredProject project =
+            projectManager
+                .getClosest(wsPath)
+                .orElseThrow(() -> new NotFoundException("Can't find project"));
+
+        String projectWsPath = project.getPath();
+        String projectFsPath = pathTransformer.transform(projectWsPath).toString();
+        GitConnection gitConnection = gitConnectionFactory.getConnection(projectFsPath);
+        Status status = gitConnection.status(singletonList(itemPath));
         FileChangedEventDto.Status fileStatus;
         if (status.getAdded().contains(itemPath)) {
           fileStatus = ADDED;
@@ -145,10 +149,9 @@ public class GitChangesDetector {
             .methodName(OUTGOING_METHOD)
             .paramsAsDto(
                 newDto(FileChangedEventDto.class)
-                    .withPath(path)
+                    .withPath(wsPath)
                     .withStatus(fileStatus)
-                    .withEditedRegions(
-                        gitConnectionFactory.getConnection(projectPath).getEditedRegions(itemPath)))
+                    .withEditedRegions(gitConnection.getEditedRegions(itemPath)))
             .sendAndSkipResult();
       } catch (NotFoundException | ServerException e) {
         String errorMessage = e.getMessage();

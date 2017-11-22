@@ -54,23 +54,21 @@ describe('CheMultiTransclude >', () => {
   const part2 = '<che-button-default che-button-title="Click" name="myButton"></che-button-default>';
 
   function getCompiledElement() {
-    const element = $compile(
-      angular.element(
-        `<div>
-          <div che-multi-transclude>
-            <div che-multi-transclude-target="one"></div>
-            <div che-multi-transclude-target="two"></div>
-          </div>
-        </div>`
-      ), function($scope: ng.IScope, cloneAttachFn: ng.ICloneAttachFunction): ng.IAugmentedJQuery {
-        const transcludingContent: ng.IAugmentedJQuery = angular.element(
+    const transcludeFunc = function ($scope: ng.IScope, $cloneAttachFn: ng.ICloneAttachFunction): ng.IAugmentedJQuery {
+        const transcludingContent = angular.element(
           `<div che-multi-transclude-part="one">${part1}</div>
            <div che-multi-transclude-part="two">${part2}</div>`
         );
-        cloneAttachFn(transcludingContent, $scope);
+        $cloneAttachFn(transcludingContent, $scope);
         return transcludingContent;
-      }
-    )($rootScope);
+      },
+      element = $compile(
+        angular.element(
+          `<div><div che-multi-transclude>
+             <div che-multi-transclude-target="one"></div>
+             <div che-multi-transclude-target="two"></div>
+           </div></div>`
+        ), transcludeFunc as ng.ITranscludeFunction)($rootScope);
     $rootScope.$digest();
     return element;
   }

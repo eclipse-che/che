@@ -69,6 +69,7 @@ public class CheckFactoryWithMultiModuleTest {
     dashboard.open();
     testFactory.open(seleniumWebDriver);
     seleniumWebDriver.switchFromDashboardIframeToIde();
+    projectExplorer.waitProjectExplorer();
     notifications.waitExpectedMessageOnProgressPanelAndClosed(
         "Project " + PROJECT_NAME + " imported");
     projectExplorer.openItemByPath(PROJECT_NAME);

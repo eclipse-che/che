@@ -32,6 +32,7 @@ public class PageObjectsInjectorImpl extends PageObjectsInjector {
   @javax.inject.Named(CHE_MULTIUSER)
   boolean isMultiuser;
 
+  @Override
   public Map<Class<?>, Object> getDependenciesWithWebdriver(SeleniumWebDriver seleniumWebDriver) {
     Map<Class<?>, Object> dependencies = new HashMap<>();
     dependencies.put(

@@ -30,5 +30,12 @@ public final class Constants {
   /** The label that contains a value with workspace id to which object belongs to. */
   public static final String CHE_WORKSPACE_ID_LABEL = "che.workspace_id";
 
+  /**
+   * The annotation with the wildcard reserved for container name. Formatted annotation with the
+   * real container name is used to get machine name.
+   */
+  public static final String MACHINE_NAME_ANNOTATION_FMT =
+      "org.eclipse.che.container.%s.machine_name";
+
   private Constants() {}
 }

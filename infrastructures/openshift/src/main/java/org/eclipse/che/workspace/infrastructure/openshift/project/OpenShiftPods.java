@@ -41,7 +41,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import okhttp3.Response;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.workspace.infrastructure.openshift.Names;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.project.event.ContainerEvent;
 import org.eclipse.che.workspace.infrastructure.openshift.project.event.ContainerEventHandler;
@@ -248,12 +247,13 @@ public class OpenShiftPods {
                 Matcher containerFieldMatcher = CONTAINER_FIELD_PATH_PATTERN.matcher(fieldPath);
                 if (containerFieldMatcher.matches()) {
 
+                  String podName = involvedObject.getName();
                   String containerName = containerFieldMatcher.group(CONTAINER_NAME_GROUP);
-                  String podName = Names.originalPodName(involvedObject.getName(), workspaceId);
 
                   ContainerEvent containerEvent =
                       new ContainerEvent(
-                          Names.machineName(podName, containerName),
+                          podName,
+                          containerName,
                           event.getMessage(),
                           event.getMetadata().getCreationTimestamp());
                   containerEventsHandlers.forEach(h -> h.handle(containerEvent));

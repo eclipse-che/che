@@ -17,13 +17,12 @@ import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.Response;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 import java.util.Optional;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
-import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.commons.exception.UnmarshallerException;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -42,13 +41,15 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory {
   private static final String CSRF_TOKEN_HEADER_NAME = "X-CSRF-Token";
 
   private AppContext appContext;
+  private WsAgentServerUtil wsAgentServerUtil;
   private String csrfToken;
 
   @Inject
   public MachineAsyncRequestFactory(
-      DtoFactory dtoFactory, AppContext appContext, EventBus eventBus) {
+      DtoFactory dtoFactory, AppContext appContext, WsAgentServerUtil wsAgentServerUtil) {
     super(dtoFactory);
     this.appContext = appContext;
+    this.wsAgentServerUtil = wsAgentServerUtil;
   }
 
   @Override
@@ -73,22 +74,14 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory {
    */
   protected boolean isWsAgentRequest(String url) {
     WorkspaceImpl currentWorkspace = appContext.getWorkspace();
-    if (currentWorkspace == null || !isWsAgentStarted(currentWorkspace)) {
+    if (currentWorkspace == null || !isWsAgentStarted()) {
       return false; // ws-agent not started
     }
     return url.contains(nullToEmpty(appContext.getWsAgentServerApiEndpoint()));
   }
 
-  private boolean isWsAgentStarted(WorkspaceImpl workspace) {
-    if (workspace == null) {
-      return false;
-    }
-    RuntimeImpl runtime = workspace.getRuntime();
-    if (runtime == null) {
-      return false;
-    }
-
-    Optional<MachineImpl> devMachine = runtime.getDevMachine();
+  private boolean isWsAgentStarted() {
+    Optional<MachineImpl> devMachine = wsAgentServerUtil.getWsAgentServerMachine();
 
     return devMachine.isPresent();
   }
@@ -116,6 +109,12 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory {
             });
   }
 
+  private boolean isModifyingMethod(RequestBuilder.Method method) {
+    return method == RequestBuilder.POST
+        || method == RequestBuilder.PUT
+        || method == RequestBuilder.DELETE;
+  }
+
   private class CsrfPreventingAsyncModifyingRequest extends AsyncRequest {
 
     protected CsrfPreventingAsyncModifyingRequest(
@@ -136,11 +135,5 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory {
                 super.send(callback);
               });
     }
-  }
-
-  private boolean isModifyingMethod(RequestBuilder.Method method) {
-    return method == RequestBuilder.POST
-        || method == RequestBuilder.PUT
-        || method == RequestBuilder.DELETE;
   }
 }

@@ -13,22 +13,21 @@ package org.eclipse.che.api.workspace.server.spi;
 import java.net.URI;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 
 /**
- * A Context for running Workspace's Runtime
+ * A Context for Workspace's Runtime
  *
  * @author gazarenkov
  */
-public abstract class RuntimeContext {
+public abstract class RuntimeContext<T extends InternalEnvironment> {
 
-  private final InternalEnvironment environment;
+  private final T environment;
   private final RuntimeIdentity identity;
   private final RuntimeInfrastructure infrastructure;
 
   public RuntimeContext(
-      InternalEnvironment internalEnvironment,
-      RuntimeIdentity identity,
-      RuntimeInfrastructure infrastructure)
+      T internalEnvironment, RuntimeIdentity identity, RuntimeInfrastructure infrastructure)
       throws ValidationException, InfrastructureException {
     this.environment = internalEnvironment;
     this.identity = identity;
@@ -77,7 +76,7 @@ public abstract class RuntimeContext {
   }
 
   /** Returns {@link InternalEnvironment} runtime is based on */
-  public InternalEnvironment getEnvironment() {
+  public T getEnvironment() {
     return environment;
   }
 }

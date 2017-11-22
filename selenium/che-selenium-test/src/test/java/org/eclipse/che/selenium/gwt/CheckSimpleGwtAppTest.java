@@ -24,6 +24,7 @@ import java.nio.file.Paths;
 import org.eclipse.che.api.workspace.shared.dto.ServerConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
@@ -39,7 +40,6 @@ import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -61,6 +61,7 @@ public class CheckSimpleGwtAppTest {
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private WorkspaceDtoDeserializer workspaceDtoDeserializer;
   @Inject private TestUser testUser;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
   private String projectName;
 
   @BeforeClass
@@ -107,11 +108,6 @@ public class CheckSimpleGwtAppTest {
         testWorkspace.getId());
   }
 
-  @AfterClass
-  public void tearDown() {
-    testWorkspace.delete();
-  }
-
   @Test
   public void checkLaunchingCodeServer() throws Exception {
     ide.open(testWorkspace);
@@ -137,9 +133,9 @@ public class CheckSimpleGwtAppTest {
             .getServerFromDevMachineBySymbolicName(testWorkspace.getId(), GWT_CODESERVER_NAME)
             .getUrl()
             .replace("tcp", "http");
-    ide.driver().get(url);
+    seleniumWebDriver.get(url);
 
-    new WebDriverWait(ide.driver(), REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             ExpectedConditions.textToBePresentInElementLocated(
                 By.tagName("body"), expectedTextOnCodeServerPage));

@@ -39,11 +39,6 @@ public class Ide {
     this.entrance = entrance;
   }
 
-  @Deprecated
-  public SeleniumWebDriver driver() {
-    return seleniumWebDriver;
-  }
-
   public void open(TestWorkspace testWorkspace) throws Exception {
     URL workspaceUrl = testWorkspaceUrlResolver.resolve(testWorkspace);
     seleniumWebDriver.get(workspaceUrl.toString());

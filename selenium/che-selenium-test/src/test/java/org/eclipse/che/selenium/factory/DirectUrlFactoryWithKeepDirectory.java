@@ -26,6 +26,7 @@ import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -44,6 +45,7 @@ public class DirectUrlFactoryWithKeepDirectory {
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestProjectServiceClient projectServiceClient;
   @Inject private TestUser testUser;
+  @Inject private Dashboard dashboard;
 
   private TestFactory testFactoryWithKeepDir;
 
@@ -61,8 +63,7 @@ public class DirectUrlFactoryWithKeepDirectory {
 
   @Test
   public void factoryWithDirectUrlWithKeepDirectory() throws Exception {
-    testFactoryWithKeepDir.authenticateAndOpen(seleniumWebDriver);
-    seleniumWebDriver.switchFromDashboardIframeToIde();
+    testFactoryWithKeepDir.authenticateAndOpen();
     projectExplorer.waitProjectExplorer();
     notificationsPopupPanel.waitProgressPopupPanelClose();
     events.clickEventLogBtn();
