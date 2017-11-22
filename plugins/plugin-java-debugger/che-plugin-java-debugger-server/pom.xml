@@ -23,7 +23,6 @@
     <name>Che Plugin :: Java :: Java Debugger Server</name>
     <properties>
         <docker.showLogs>true</docker.showLogs>
-        <findbugs.excludeFilterFile>${project.build.testOutputDirectory}/findbugs-exclude.xml</findbugs.excludeFilterFile>
     </properties>
     <dependencies>
         <dependency>
@@ -180,7 +179,7 @@
     </build>
     <profiles>
         <profile>
-            <id>java-tests</id>
+            <id>integration</id>
             <activation>
                 <activeByDefault>false</activeByDefault>
             </activation>
