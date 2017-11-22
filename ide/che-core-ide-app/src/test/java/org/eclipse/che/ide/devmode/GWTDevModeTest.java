@@ -59,9 +59,7 @@ public class GWTDevModeTest {
 
   @Test
   public void shouldSetUpDevModeForInternalCodeServer() throws Exception {
-    when(codeServer.getUrl()).thenReturn(INT_CODE_SERVER_URL);
-    when(wsAgentMachine.getServerByName(INT_CODE_SERVER_REF)).thenReturn(Optional.of(codeServer));
-    when(wsAgentServerUtil.getWsAgentServerMachine()).thenReturn(Optional.of(wsAgentMachine));
+    mockInternalCodeServer();
 
     when(devModeScriptInjector.inject(anyString())).thenReturn(voidPromise);
     when(voidPromise.then(any(Operation.class))).thenReturn(voidPromise);
@@ -85,9 +83,7 @@ public class GWTDevModeTest {
 
   @Test
   public void shouldSetUpDevModeForLocalCodeServerIfFailedForInternalOne() throws Exception {
-    when(codeServer.getUrl()).thenReturn(INT_CODE_SERVER_URL);
-    when(wsAgentMachine.getServerByName(INT_CODE_SERVER_REF)).thenReturn(Optional.of(codeServer));
-    when(wsAgentServerUtil.getWsAgentServerMachine()).thenReturn(Optional.of(wsAgentMachine));
+    mockInternalCodeServer();
 
     when(devModeScriptInjector.inject(anyString())).thenReturn(voidPromise);
     when(voidPromise.then(any(Operation.class))).thenReturn(voidPromise);
@@ -102,5 +98,11 @@ public class GWTDevModeTest {
 
     verify(bookmarkletParams).setParams(INT_CODE_SERVER_URL, IDE_GWT_APP_SHORT_NAME);
     verify(devModeScriptInjector).inject(INT_CODE_SERVER_URL);
+  }
+
+  private void mockInternalCodeServer() {
+    when(codeServer.getUrl()).thenReturn(INT_CODE_SERVER_URL);
+    when(wsAgentMachine.getServerByName(INT_CODE_SERVER_REF)).thenReturn(Optional.of(codeServer));
+    when(wsAgentServerUtil.getWsAgentServerMachine()).thenReturn(Optional.of(wsAgentMachine));
   }
 }
