@@ -38,14 +38,18 @@ import org.eclipse.che.api.project.server.impl.ProjectServiceVcsStatusInjector;
 import org.eclipse.che.api.project.server.impl.WorkspaceProjectSynchronizer;
 import org.eclipse.che.api.search.server.SearchApiModule;
 import org.eclipse.che.api.watcher.server.FileWatcherApiModule;
+import org.eclipse.che.plugin.java.server.inject.JavaModule;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** @author Anatolii Bazko */
 public class ProjectApiUtils {
 
+  private static final Logger LOG = LoggerFactory.getLogger(ProjectApiUtils.class);
   private static final AtomicBoolean initialized = new AtomicBoolean();
 
   /** Ensures that project api has been initialized only once. */
@@ -53,7 +57,11 @@ public class ProjectApiUtils {
     if (!initialized.get()) {
       synchronized (initialized) {
         if (!initialized.get()) {
-          init();
+          try {
+            init();
+          } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+          }
           initialized.set(true);
         }
       }
@@ -121,6 +129,7 @@ public class ProjectApiUtils {
                 install(new EditorApiModule());
                 install(new FileWatcherApiModule());
                 install(new JsonRpcModule());
+                install(new JavaModule());
               }
             });
 
@@ -137,12 +146,12 @@ public class ProjectApiUtils {
             () -> fsManager);
     resourcesPlugin.start();
 
+    projectManager.create(new NewProjectConfigImpl("/test"), Collections.emptyMap());
+    projectManager.setType("/test", "java", false);
+
     JavaPlugin javaPlugin =
         new JavaPlugin(root.getAbsolutePath() + "/.settings", resourcesPlugin, projectManager);
     javaPlugin.start();
-
-    projectManager.create(new NewProjectConfigImpl("/test"), Collections.emptyMap());
-    projectManager.setType("/test", "java", false);
 
     JavaModelManager.getDeltaState().initializeRoots(true);
   }
