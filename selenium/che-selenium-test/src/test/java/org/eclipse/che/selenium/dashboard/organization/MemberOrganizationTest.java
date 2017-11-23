@@ -44,10 +44,12 @@ import org.testng.annotations.Test;
 public class MemberOrganizationTest {
   private static final String PARENT_ORG_NAME = generate("parent-org-", 5);
   private static final String CHILD_ORG_NAME = generate("child-org-", 5);
-  private static final int ORGANIZATIONS_NUMBER = 2;
+  private static final int TEST_ORG_NUMBER = 2;
 
   private OrganizationDto parentOrganization;
   private OrganizationDto subOrganization;
+
+  private int initialOrgNumber;
 
   @Inject
   @Named("admin")
@@ -61,6 +63,8 @@ public class MemberOrganizationTest {
 
   @BeforeClass
   public void setUp() throws Exception {
+    initialOrgNumber = testOrganizationServiceClient.getAll().size();
+
     try {
       parentOrganization = testOrganizationServiceClient.create(PARENT_ORG_NAME);
       subOrganization =
@@ -84,16 +88,17 @@ public class MemberOrganizationTest {
 
   @Test
   public void testOrganizationListComponents() {
+    int expectedOrgNumber = initialOrgNumber + TEST_ORG_NUMBER;
+
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
 
     // Test UI views of organizations list for member of organization
-    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) == ORGANIZATIONS_NUMBER);
     assertEquals(organizationListPage.getOrganizationsToolbarTitle(), "Organizations");
-    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) == ORGANIZATIONS_NUMBER);
-    assertTrue(organizationListPage.getOrganizationListItemCount() == ORGANIZATIONS_NUMBER);
+    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), expectedOrgNumber);
+    assertEquals(organizationListPage.getOrganizationListItemCount(), expectedOrgNumber);
     assertFalse(organizationListPage.isAddOrganizationButtonVisible());
     assertTrue(organizationListPage.isSearchInputVisible());
 

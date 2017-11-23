@@ -13,7 +13,6 @@ package org.eclipse.che.selenium.dashboard.organization;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -39,13 +38,19 @@ import org.testng.annotations.Test;
 public class DeleteOrganizationTest {
   private static final String PARENT_ORG_NAME = generate("parent-org-", 5);
   private static final String CHILD_ORG_NAME = generate("child-org-", 5);
+  private static final int TEST_ORG_NUMBER = 2;
 
   private OrganizationDto parentOrganization;
   private OrganizationDto childOrganization;
 
+  private int initialOrgNumber;
+  private int initialRootOrgNumber;
+
   @Inject
   @Named("admin")
-  private TestOrganizationServiceClient testOrganizationServiceClient;
+  private TestOrganizationServiceClient adminTestOrganizationServiceClient;
+
+  @Inject private TestOrganizationServiceClient userTestOrganizationServiceClient;
 
   @Inject private OrganizationListPage organizationListPage;
   @Inject private OrganizationPage organizationPage;
@@ -57,10 +62,10 @@ public class DeleteOrganizationTest {
   @BeforeClass
   public void setUp() throws Exception {
     try {
-      parentOrganization = testOrganizationServiceClient.create(PARENT_ORG_NAME);
-      childOrganization = testOrganizationServiceClient.create(CHILD_ORG_NAME);
-      testOrganizationServiceClient.addAdmin(parentOrganization.getId(), testUser.getId());
-      testOrganizationServiceClient.addAdmin(childOrganization.getId(), testUser.getId());
+      parentOrganization = adminTestOrganizationServiceClient.create(PARENT_ORG_NAME);
+      childOrganization = adminTestOrganizationServiceClient.create(CHILD_ORG_NAME);
+      adminTestOrganizationServiceClient.addAdmin(parentOrganization.getId(), testUser.getId());
+      adminTestOrganizationServiceClient.addAdmin(childOrganization.getId(), testUser.getId());
 
       dashboard.open(testUser.getName(), testUser.getPassword());
     } catch (Exception e) {
@@ -68,12 +73,14 @@ public class DeleteOrganizationTest {
       tearDown();
       throw e;
     }
+
+    initialOrgNumber = userTestOrganizationServiceClient.getAll().size();
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    testOrganizationServiceClient.deleteByName(CHILD_ORG_NAME);
-    testOrganizationServiceClient.deleteByName(PARENT_ORG_NAME);
+    adminTestOrganizationServiceClient.deleteByName(CHILD_ORG_NAME);
+    adminTestOrganizationServiceClient.deleteByName(PARENT_ORG_NAME);
   }
 
   @Test
@@ -91,8 +98,8 @@ public class DeleteOrganizationTest {
     // Test that the organization deleted
     organizationListPage.waitForOrganizationsList();
     organizationListPage.waitForOrganizationIsRemoved(childOrganization.getQualifiedName());
-    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) == 1);
-    assertTrue(organizationListPage.getOrganizationListItemCount() == 1);
+    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), initialOrgNumber - 1);
+    assertEquals(organizationListPage.getOrganizationListItemCount(), initialOrgNumber - 1);
   }
 
   @Test(priority = 1)
@@ -108,7 +115,7 @@ public class DeleteOrganizationTest {
     deleteOrganization(parentOrganization.getName());
 
     // Test that the organization deleted
-    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) == 0);
+    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), initialOrgNumber - 2);
   }
 
   private void deleteOrganization(String organizationName) {

@@ -122,7 +122,7 @@ public class CheSeleniumSuiteModule extends AbstractModule {
   public TestOrganizationServiceClient getAdminOrganizationServiceClient(
       TestApiEndpointUrlProvider apiEndpointUrlProvider,
       TestCheAdminHttpJsonRequestFactory requestFactory) {
-    return new CheTestTestOrganizationServiceClientImpl(apiEndpointUrlProvider, requestFactory);
+    return new TestOrganizationServiceClient(apiEndpointUrlProvider, requestFactory);
   }
 
   @Provides

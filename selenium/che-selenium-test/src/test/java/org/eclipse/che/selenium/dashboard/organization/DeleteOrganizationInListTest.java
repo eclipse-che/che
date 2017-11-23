@@ -16,6 +16,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.organization.Organiz
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -42,7 +43,9 @@ public class DeleteOrganizationInListTest {
   private static final String ORG2_NAME = generate("org2-", 7);
   private static final String ORG3_NAME = generate("org3-", 7);
   private static final String ORG4_NAME = generate("org4-", 7);
-  private static final int ORGANIZATIONS_NUMBER = 4;
+  private static final int TEST_ROOT_ORG_NUMBER = 4;
+
+  private int initialOrgNumber;
 
   @Inject
   @Named("admin")
@@ -67,6 +70,8 @@ public class DeleteOrganizationInListTest {
       tearDown();
       throw e;
     }
+
+    initialOrgNumber = testOrganizationServiceClient.getAllRoot().size();
   }
 
   @AfterClass
@@ -84,8 +89,15 @@ public class DeleteOrganizationInListTest {
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
-    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) == ORGANIZATIONS_NUMBER);
-    assertTrue(organizationListPage.getOrganizationListItemCount() == ORGANIZATIONS_NUMBER);
+    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), initialOrgNumber);
+
+    try {
+      assertEquals(organizationListPage.getOrganizationListItemCount(), initialOrgNumber);
+    } catch (AssertionError a) {
+      // remove try-catch block after https://github.com/eclipse/che/issues/7279 has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7279");
+    }
+
     assertTrue(organizationListPage.getValues(NAME).contains(ORG1_NAME));
 
     // Tests the Delete organization dialog
@@ -99,33 +111,43 @@ public class DeleteOrganizationInListTest {
     assertEquals(confirmDialog.getCancelButtonTitle(), "Close");
     confirmDialog.closeDialog();
     confirmDialog.waitClosed();
-    assertTrue(organizationListPage.getOrganizationListItemCount() == ORGANIZATIONS_NUMBER);
+
+    try {
+      assertEquals(organizationListPage.getOrganizationListItemCount(), initialOrgNumber);
+    } catch (AssertionError a) {
+      // remove try-catch block after https://github.com/eclipse/che/issues/7279 has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7279");
+    }
+
     organizationListPage.clickOnDeleteButton(ORG1_NAME);
     confirmDialog.waitOpened();
     confirmDialog.clickCancel();
     confirmDialog.waitClosed();
-    assertTrue(organizationListPage.getOrganizationListItemCount() == ORGANIZATIONS_NUMBER);
+    assertEquals(organizationListPage.getOrganizationListItemCount(), initialOrgNumber);
 
     // Delete all organizations from the Organization list
-    deleteOrganization(ORG1_NAME);
-    deleteOrganization(ORG2_NAME);
-    deleteOrganization(ORG3_NAME);
-    deleteOrganization(ORG4_NAME);
-
-    // Check that all organization deleted
-    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) == 0);
+    deleteOrganization(ORG1_NAME, initialOrgNumber - 1);
+    deleteOrganization(ORG2_NAME, initialOrgNumber - 2);
+    deleteOrganization(ORG3_NAME, initialOrgNumber - 3);
+    deleteOrganization(ORG4_NAME, initialOrgNumber - 4);
   }
 
-  private void deleteOrganization(String organizationName) {
-    organizationListPage.clickOnDeleteButton(organizationName);
+  private void deleteOrganization(String orgName, int remainedOrgNumber) {
+    organizationListPage.clickOnDeleteButton(orgName);
     confirmDialog.waitOpened();
     confirmDialog.clickConfirm();
     confirmDialog.waitClosed();
     organizationListPage.waitForOrganizationsList();
 
     // Test that organization deleted
-    assertTrue(organizationListPage.getOrganizationListItemCount() == ORGANIZATIONS_NUMBER - 1);
-    assertFalse(organizationListPage.getValues(NAME).contains(organizationName));
-    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) == ORGANIZATIONS_NUMBER - 1);
+    try {
+      assertEquals(organizationListPage.getOrganizationListItemCount(), remainedOrgNumber);
+    } catch (AssertionError a) {
+      // remove try-catch block after https://github.com/eclipse/che/issues/7279 has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7279");
+    }
+
+    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), remainedOrgNumber);
+    assertFalse(organizationListPage.getValues(NAME).contains(orgName));
   }
 }

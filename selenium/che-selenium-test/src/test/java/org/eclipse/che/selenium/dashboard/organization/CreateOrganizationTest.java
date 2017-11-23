@@ -13,7 +13,9 @@ package org.eclipse.che.selenium.dashboard.organization;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
 import static org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.NAME;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -38,7 +40,8 @@ import org.testng.annotations.Test;
 public class CreateOrganizationTest {
   private static final String PARENT_ORG_NAME = generate("parent-org-", 4);
   private static final String CHILD_ORG_NAME = generate("child-org-", 4);
-  private static final int ORGANIZATIONS_NUMBER = 2;
+
+  private int initialOrgNumber;
 
   @Inject
   @Named("admin")
@@ -53,6 +56,7 @@ public class CreateOrganizationTest {
 
   @BeforeClass
   public void setUp() throws Exception {
+    initialOrgNumber = testOrganizationServiceClient.getAllRoot().size();
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
   }
 
@@ -78,14 +82,20 @@ public class CreateOrganizationTest {
     organizationPage.waitOrganizationTitle(PARENT_ORG_NAME);
 
     // Test that created organization exists and count of organizations increased
-    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) == ORGANIZATIONS_NUMBER - 1);
+    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), initialOrgNumber + 1);
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
-    assertTrue(organizationListPage.getOrganizationListItemCount() == ORGANIZATIONS_NUMBER - 1);
-    assertTrue(organizationListPage.getValues(NAME).contains(PARENT_ORG_NAME));
 
+    try {
+      assertEquals(organizationListPage.getOrganizationListItemCount(), initialOrgNumber + 1);
+    } catch (AssertionError a) {
+      // remove try-catch block after https://github.com/eclipse/che/issues/7279 has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7279");
+    }
+
+    assertTrue(organizationListPage.getValues(NAME).contains(PARENT_ORG_NAME));
     organizationListPage.clickOnOrganization(PARENT_ORG_NAME);
     organizationPage.waitOrganizationName(PARENT_ORG_NAME);
 

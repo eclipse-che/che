@@ -17,6 +17,7 @@ import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.annotation.Multiuser;
+import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage;
@@ -30,12 +31,18 @@ import org.testng.annotations.Test;
  */
 @Multiuser
 public class UserEmptyOrganizationTest {
+
   @Inject private OrganizationListPage organizationListPage;
   @Inject private NavigationBar navigationBar;
   @Inject private Dashboard dashboard;
 
+  @Inject private TestOrganizationServiceClient testOrganizationServiceClient;
+
   @BeforeClass
-  public void setUp() {
+  public void setUp() throws Exception {
+    assertTrue(
+        testOrganizationServiceClient.getAll().isEmpty(),
+        "This test requires empty organization list inside the default user account.");
     dashboard.open();
   }
 

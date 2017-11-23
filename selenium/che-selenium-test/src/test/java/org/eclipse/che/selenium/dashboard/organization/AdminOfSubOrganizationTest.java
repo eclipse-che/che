@@ -21,6 +21,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.organization.Organiz
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -46,14 +47,17 @@ import org.testng.annotations.Test;
 public class AdminOfSubOrganizationTest {
   private static final String PARENT_ORG_NAME = generate("parent-org-", 5);
   private static final String CHILD_ORG_NAME = generate("child-org-", 5);
-  private static final int ORGANIZATIONS_NUMBER = 2;
 
   private OrganizationDto parentOrganization;
   private OrganizationDto childOrganization;
 
+  private int initialOrgNumber;
+
   @Inject
   @Named("admin")
-  private TestOrganizationServiceClient testOrganizationServiceClient;
+  private TestOrganizationServiceClient adminTestOrganizationServiceClient;
+
+  @Inject private TestOrganizationServiceClient userTestOrganizationServiceClient;
 
   @Inject private OrganizationListPage organizationListPage;
   @Inject private OrganizationPage organizationPage;
@@ -64,11 +68,11 @@ public class AdminOfSubOrganizationTest {
   @BeforeClass
   public void setUp() throws Exception {
     try {
-      parentOrganization = testOrganizationServiceClient.create(PARENT_ORG_NAME);
+      parentOrganization = adminTestOrganizationServiceClient.create(PARENT_ORG_NAME);
       childOrganization =
-          testOrganizationServiceClient.create(CHILD_ORG_NAME, parentOrganization.getId());
-      testOrganizationServiceClient.addMember(parentOrganization.getId(), testUser.getId());
-      testOrganizationServiceClient.addAdmin(childOrganization.getId(), testUser.getId());
+          adminTestOrganizationServiceClient.create(CHILD_ORG_NAME, parentOrganization.getId());
+      adminTestOrganizationServiceClient.addMember(parentOrganization.getId(), testUser.getId());
+      adminTestOrganizationServiceClient.addAdmin(childOrganization.getId(), testUser.getId());
 
       dashboard.open(testUser.getName(), testUser.getPassword());
     } catch (Exception e) {
@@ -76,12 +80,14 @@ public class AdminOfSubOrganizationTest {
       tearDown();
       throw e;
     }
+
+    initialOrgNumber = userTestOrganizationServiceClient.getAll().size();
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    testOrganizationServiceClient.deleteByName(CHILD_ORG_NAME);
-    testOrganizationServiceClient.deleteByName(PARENT_ORG_NAME);
+    adminTestOrganizationServiceClient.deleteByName(CHILD_ORG_NAME);
+    adminTestOrganizationServiceClient.deleteByName(PARENT_ORG_NAME);
   }
 
   @Test
@@ -92,10 +98,16 @@ public class AdminOfSubOrganizationTest {
     organizationListPage.waitForOrganizationsList();
 
     // Test UI views of organizations list
-    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) == ORGANIZATIONS_NUMBER);
     assertEquals(organizationListPage.getOrganizationsToolbarTitle(), "Organizations");
-    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) == ORGANIZATIONS_NUMBER);
-    assertTrue(organizationListPage.getOrganizationListItemCount() == ORGANIZATIONS_NUMBER);
+    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), initialOrgNumber);
+
+    try {
+      assertEquals(organizationListPage.getOrganizationListItemCount(), initialOrgNumber);
+    } catch (AssertionError a) {
+      // remove try-catch block after https://github.com/eclipse/che/issues/7279 has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7279");
+    }
+
     assertFalse(organizationListPage.isAddOrganizationButtonVisible());
     assertTrue(organizationListPage.isSearchInputVisible());
 

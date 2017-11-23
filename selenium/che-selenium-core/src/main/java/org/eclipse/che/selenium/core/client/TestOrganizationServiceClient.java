@@ -28,34 +28,32 @@ import org.slf4j.LoggerFactory;
 
 /** This util is handling the requests to Organization API. */
 @Singleton
-public class CheTestTestOrganizationServiceClientImpl implements TestOrganizationServiceClient {
-  private static final Logger LOG =
-      LoggerFactory.getLogger(CheTestTestOrganizationServiceClientImpl.class);
+public class TestOrganizationServiceClient {
+  private static final Logger LOG = LoggerFactory.getLogger(TestOrganizationServiceClient.class);
 
   private final String apiEndpoint;
   private final HttpJsonRequestFactory requestFactory;
 
   @Inject
-  public CheTestTestOrganizationServiceClientImpl(
+  public TestOrganizationServiceClient(
       TestApiEndpointUrlProvider apiEndpointUrlProvider, HttpJsonRequestFactory requestFactory) {
     this.apiEndpoint = apiEndpointUrlProvider.get().toString();
     this.requestFactory = requestFactory;
   }
 
-  @Override
   public List<OrganizationDto> getAll() throws Exception {
+    return requestFactory.fromUrl(getApiUrl()).request().asList(OrganizationDto.class);
+  }
+
+  public List<OrganizationDto> getAllRoot() throws Exception {
     return getAll(null);
   }
 
-  @Override
   public List<OrganizationDto> getAll(@Nullable String parent) throws Exception {
     List<OrganizationDto> organizations =
         requestFactory.fromUrl(getApiUrl()).request().asList(OrganizationDto.class);
 
-    if (parent == null) {
-      organizations.removeIf(o -> o.getParent() != null);
-    }
-
+    organizations.removeIf(o -> o.getParent() != parent);
     return organizations;
   }
 
@@ -63,7 +61,6 @@ public class CheTestTestOrganizationServiceClientImpl implements TestOrganizatio
     return apiEndpoint + "organization/";
   }
 
-  @Override
   public OrganizationDto create(String name, String parentId) throws Exception {
     OrganizationDto data = newDto(OrganizationDto.class).withName(name).withParent(parentId);
 
@@ -84,12 +81,10 @@ public class CheTestTestOrganizationServiceClientImpl implements TestOrganizatio
     return organizationDto;
   }
 
-  @Override
   public OrganizationDto create(String name) throws Exception {
     return create(name, null);
   }
 
-  @Override
   public void deleteById(String id) throws Exception {
     String apiUrl = format("%s%s", getApiUrl(), id);
 
@@ -101,7 +96,6 @@ public class CheTestTestOrganizationServiceClientImpl implements TestOrganizatio
     }
   }
 
-  @Override
   public void deleteByName(String name) throws Exception {
     try {
       String organizationId = get(name).getId();
@@ -111,7 +105,6 @@ public class CheTestTestOrganizationServiceClientImpl implements TestOrganizatio
     }
   }
 
-  @Override
   public void deleteAll(String user) throws Exception {
     getAll(user)
         .stream()
@@ -126,18 +119,15 @@ public class CheTestTestOrganizationServiceClientImpl implements TestOrganizatio
             });
   }
 
-  @Override
   public OrganizationDto get(String organizationName) throws Exception {
     String apiUrl = format("%sfind?name=%s", getApiUrl(), organizationName);
     return requestFactory.fromUrl(apiUrl).request().asDto(OrganizationDto.class);
   }
 
-  @Override
   public void addMember(String organizationId, String userId) throws Exception {
     addMember(organizationId, userId, asList("createWorkspaces"));
   }
 
-  @Override
   public void addAdmin(String organizationId, String userId) throws Exception {
     addMember(
         organizationId,
@@ -152,7 +142,6 @@ public class CheTestTestOrganizationServiceClientImpl implements TestOrganizatio
             "manageSuborganizations"));
   }
 
-  @Override
   public void addMember(String organizationId, String userId, List<String> actions)
       throws Exception {
     String apiUrl = apiEndpoint + "permissions";

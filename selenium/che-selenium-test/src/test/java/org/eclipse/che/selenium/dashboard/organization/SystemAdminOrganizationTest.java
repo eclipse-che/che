@@ -21,6 +21,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.organization.Organiz
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -46,7 +47,10 @@ import org.testng.annotations.Test;
 public class SystemAdminOrganizationTest {
   private static final String PARENT_ORG_NAME = generate("parent-org-", 5);
   private static final String CHILD_ORG_NAME = generate("child-org-", 5);
-  private static final int ORGANIZATIONS_NUMBER = 1;
+  private static final int TEST_PARENT_ORG_NUMBER = 1;
+
+  private int initialRootOrgNumber;
+  private int initialOrgNumber;
 
   private OrganizationDto parentOrganization;
   private OrganizationDto childOrganization;
@@ -75,6 +79,8 @@ public class SystemAdminOrganizationTest {
       tearDown();
       throw e;
     }
+
+    initialOrgNumber = testOrganizationServiceClient.getAllRoot().size();
   }
 
   @AfterClass
@@ -91,10 +97,17 @@ public class SystemAdminOrganizationTest {
     organizationListPage.waitForOrganizationsList();
 
     // Test UI views of organizations list
-    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) == ORGANIZATIONS_NUMBER);
     assertEquals(organizationListPage.getOrganizationsToolbarTitle(), "Organizations");
-    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) == ORGANIZATIONS_NUMBER);
-    assertTrue(organizationListPage.getOrganizationListItemCount() == ORGANIZATIONS_NUMBER);
+
+    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), initialOrgNumber);
+
+    try {
+      assertEquals(organizationListPage.getOrganizationListItemCount(), initialOrgNumber);
+    } catch (AssertionError t) {
+      // remove try-catch block after https://github.com/eclipse/che/issues/7279 has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7279");
+    }
+
     assertTrue(organizationListPage.isAddOrganizationButtonVisible());
     assertTrue(organizationListPage.isSearchInputVisible());
 
