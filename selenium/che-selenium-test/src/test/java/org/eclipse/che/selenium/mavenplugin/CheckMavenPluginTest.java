@@ -33,6 +33,8 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.git.Git;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -85,7 +87,13 @@ public class CheckMavenPluginTest {
     editor.typeTextIntoEditor("!--");
     editor.setCursorToDefinedLineAndChar(26, 32);
     editor.typeTextIntoEditor("--");
-    projectExplorer.waitFolderDefinedTypeOfFolderByPath(PROJECT_NAME + "/my-lib", SIMPLE_FOLDER);
+    try {
+      projectExplorer.waitFolderDefinedTypeOfFolderByPath(PROJECT_NAME + "/my-lib", SIMPLE_FOLDER);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      Assert.fail("Known issue https://github.com/eclipse/che/issues/7109");
+    }
+
     projectExplorer.waitFolderDefinedTypeOfFolderByPath(PROJECT_NAME + "/my-webapp", SIMPLE_FOLDER);
   }
 
@@ -119,7 +127,12 @@ public class CheckMavenPluginTest {
   private void enterClassNameViaAutocomplete() {
     editor.typeTextIntoEditor("Test");
     editor.launchAutocomplete();
-    editor.enterAutocompleteProposal("TestClass");
+    try {
+      editor.enterAutocompleteProposal("TestClass");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      Assert.fail("Known issue https://github.com/eclipse/che/issues/7109");
+    }
   }
 
   /**
