@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>6.0.0-M2-SNAPSHOT</version>
+        <version>6.0.0-M3-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>che-ide-gwt-app</artifactId>
@@ -319,26 +319,6 @@
                     <shortRevisionLength>16</shortRevisionLength>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>buildnumber</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <tasks>
-                                <echo append="false" file="${project.build.directory}/classes/org/eclipse/che/ide/ext/help/client/BuildInfo.properties">revision = ${revision}
-                                    buildTime = ${timestamp}
-                                    version = ${project.version}</echo>
-                            </tasks>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <!-- pass the generated sources to compiler:compile -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -388,6 +368,20 @@
                                 </length>
                                 <echo append="false" file="${project.build.directory}/${project.artifactId}-${project.version}/_app/compilation-mappings.properties">${compilation-mappings-properties}</echo>
                                 <replace file="${project.build.directory}/${project.artifactId}-${project.version}/_app/compilation-mappings.properties" token="${project.build.directory}/${project.artifactId}-${project.version}/_app/" value="" />
+                            </tasks>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>buildnumber</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <echo append="false" file="${project.build.directory}/classes/org/eclipse/che/ide/ext/help/client/BuildInfo.properties">revision = ${revision}
+                                    buildTime = ${timestamp}
+                                    version = ${project.version}</echo>
                             </tasks>
                         </configuration>
                     </execution>

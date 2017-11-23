@@ -57,7 +57,9 @@ SHELL_INTERPRETER="/bin/sh"
 
 mkdir -p ${CHE_DIR}
 ${SUDO} mkdir -p /projects
-${SUDO} sh -c "chown $(id -u -n) /projects"
+if is_current_user_sudoer; then
+  ${SUDO} sh -c "chown $(id -u -n) /projects"
+fi
 
 ########################
 ### Install packages ###

@@ -98,8 +98,10 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
   }
 
   @Override
-  public void onCloseClicked() {
+  public void onClose() {
     view.close();
+    view.updateSearchFilterLabel("");
+    view.clearSearchFilter();
   }
 
   @Override
@@ -152,6 +154,11 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
   public void onBranchUnselected() {
     selectedBranch = null;
     view.setEnableCompareButton(false);
+  }
+
+  @Override
+  public void onSearchFilterChanged(String filter) {
+    view.updateSearchFilterLabel(filter);
   }
 
   @Override
