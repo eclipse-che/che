@@ -32,6 +32,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.DashboardProject.Template;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace.TabNames;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
+import org.openqa.selenium.TimeoutException;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -262,7 +263,13 @@ public class WorkspaceDetailsTest {
 
   private void clickOnSaveButton() {
     dashboardWorkspace.clickOnSaveBtn();
-    dashboard.waitNotificationMessage("Workspace updated");
+    try {
+      dashboard.waitNotificationMessage("Workspace updated");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      Assert.fail("Known issue https://github.com/eclipse/che/issues/7178");
+    }
+
     dashboard.waitNotificationIsClosed();
   }
 
