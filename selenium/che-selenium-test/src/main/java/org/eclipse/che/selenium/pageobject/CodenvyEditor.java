@@ -25,6 +25,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentI
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -35,6 +36,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
@@ -53,6 +55,7 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.slf4j.Logger;
 
 /** @author Musienko Maxim */
 @Singleton
@@ -60,6 +63,7 @@ public class CodenvyEditor {
 
   public static final String CLOSE_ALL_TABS = "gwt-debug-contextMenu/closeAllEditors";
   public static final String VCS_RULER = "//div[@class='ruler vcs']/div";
+  public static final Logger LOG = getLogger(CodenvyEditor.class);
 
   public static final class EditorContextMenu {
     public static final String REFACTORING = "contextMenu/Refactoring";
@@ -194,6 +198,8 @@ public class CodenvyEditor {
         "//div[@class='breakpoint active' and text()='%d']";
     public static final String DEBUGGER_BREAKPOINT_CONDITION =
         "//div[@class='breakpoint %s condition' and text()='%d']";
+    public static final String DEBUGGER_BREAKPOINT_DISABLED =
+        "//div[@class='breakpoint disabled' and text()='%d']";
     public static final String JAVA_DOC_POPUP = "//div[@class='gwt-PopupPanel']//iframe";
     public static final String AUTOCOMPLETE_PROPOSAL_JAVA_DOC_POPUP =
         "//div//iframe[contains(@src, 'api/java/code-assist/compute/info?')]";
@@ -287,8 +293,10 @@ public class CodenvyEditor {
    * @param indexOfEditor index of editor that was split
    */
   public String getTextFromSplitEditor(int indexOfEditor) {
+    waitActiveEditor();
     List<WebElement> lines =
-        seleniumWebDriver.findElements(By.xpath(Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH));
+        elemDriverWait.until(
+            presenceOfAllElementsLocatedBy(By.xpath(Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH)));
     List<WebElement> inner = lines.get(indexOfEditor - 1).findElements(By.tagName("div"));
     return getTextFromOrionLines(inner);
   }
@@ -316,6 +324,14 @@ public class CodenvyEditor {
         .until(
             (ExpectedCondition<Boolean>)
                 driver -> getTextFromSplitEditor(numOfEditor).contains(expectedText));
+  }
+
+  public void waitTextIsNotPresentInDefinedSplitEditor(
+      int numOfEditor, final int customTimeout, String text) {
+    new WebDriverWait(seleniumWebDriver, customTimeout)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> !getTextFromSplitEditor(numOfEditor).contains(text));
   }
 
   /**
@@ -571,8 +587,7 @@ public class CodenvyEditor {
    * @param position is the number position
    */
   public void waitMarkerInPosition(String markerType, int position) {
-    loadPageDriverWait.until(
-        visibilityOfElementLocated(By.xpath(String.format(markerType, position))));
+    elemDriverWait.until(visibilityOfElementLocated(By.xpath(String.format(markerType, position))));
     setCursorToLine(position);
     expectedNumberOfActiveLine(position);
   }
@@ -994,7 +1009,7 @@ public class CodenvyEditor {
   }
 
   public void waitYellowTab(String fileName) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
                 By.xpath(
@@ -1199,6 +1214,12 @@ public class CodenvyEditor {
                     Locators.DEBUGGER_BREAKPOINT_CONDITION,
                     active ? "active" : "inactive",
                     lineNumber))));
+  }
+
+  public void waitDisabledBreakpoint(int lineNumber) {
+    redrawDriverWait.until(
+        visibilityOfElementLocated(
+            By.xpath(String.format(Locators.DEBUGGER_BREAKPOINT_DISABLED, lineNumber))));
   }
 
   /** wait while editor will be empty */
@@ -1678,34 +1699,40 @@ public class CodenvyEditor {
    */
   private String getTextFromOrionLines(List<WebElement> lines) {
     StringBuilder stringBuilder = new StringBuilder();
+
     try {
-      for (WebElement line : lines) {
-        List<WebElement> elements = line.findElements(By.tagName("span"));
-        elements.remove(elements.size() - 1);
-        for (WebElement elem : elements) {
-          stringBuilder.append(elem.getText());
-        }
-        stringBuilder.append("\n");
-      }
-      stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+      stringBuilder = waitLinesElementsPresenceAndGetText(lines);
     }
     // If an editor do not attached to the DOM (we will have state element exception). We wait
     // attaching 2 second and try to read text again.
     catch (WebDriverException ex) {
       WaitUtils.sleepQuietly(2);
-      stringBuilder.setLength(0);
-      for (WebElement line : lines) {
-        List<WebElement> elements = line.findElements(By.tagName("span"));
-        elements.remove(elements.size() - 1);
-        for (WebElement elem : elements) {
-          stringBuilder.append(elem.getText());
-        }
-        stringBuilder.append("\n");
-      }
-      stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-    }
 
+      stringBuilder.setLength(0);
+      stringBuilder = waitLinesElementsPresenceAndGetText(lines);
+    }
     return stringBuilder.toString();
+  }
+
+  private StringBuilder waitLinesElementsPresenceAndGetText(List<WebElement> lines) {
+    StringBuilder stringBuilder = new StringBuilder();
+
+    lines.forEach(
+        line -> {
+          List<WebElement> nestedElements = line.findElements(By.tagName("span"));
+
+          for (int a = 0; a < nestedElements.size(); a++) {
+            elemDriverWait.until(
+                ExpectedConditions.presenceOfNestedElementLocatedBy(
+                    line, By.xpath(String.format("span[%s]", a + 1))));
+          }
+
+          nestedElements.remove(nestedElements.size() - 1);
+          nestedElements.forEach(elem -> stringBuilder.append(elem.getText()));
+          stringBuilder.append("\n");
+        });
+
+    return stringBuilder.deleteCharAt(stringBuilder.length() - 1);
   }
 
   /** open context menu into editor */
@@ -1758,21 +1785,79 @@ public class CodenvyEditor {
    *     attribute of iframe of JavaDoc popup.
    */
   public String getAutocompleteProposalJavaDocHtml() throws IOException {
+    waitJavaDocPopupSrcAttributeIsNotEmpty();
+    return getJavaDocPopupText();
+  }
+
+  public void waitContextMenuJavaDocText(String expectedText) {
+    waitJavaDocPopupSrcAttributeIsNotEmpty();
+
+    loadPageDriverWait.until(
+        (ExpectedCondition<Boolean>)
+            driver -> {
+              String javaDocPopupHtmlText = "";
+              try {
+                javaDocPopupHtmlText = getJavaDocPopupText();
+              } catch (StaleElementReferenceException e) {
+                LOG.error(
+                    "Can not get java doc HTML text from autocomplete context menu in editor");
+              }
+              return javaDocPopupHtmlText.length() > 0
+                  && verifyJavaDoc(javaDocPopupHtmlText, expectedText);
+            });
+  }
+
+  private void waitJavaDocPopupSrcAttributeIsNotEmpty() {
     new FluentWait<>(seleniumWebDriver)
         .withTimeout(LOAD_PAGE_TIMEOUT_SEC * 2, SECONDS)
         .pollingEvery(LOAD_PAGE_TIMEOUT_SEC / 2, SECONDS)
         .ignoring(StaleElementReferenceException.class, NoSuchElementException.class)
         .until(ExpectedConditions.attributeToBeNotEmpty(autocompleteProposalJavaDocPopup, "src"));
+  }
 
-    URL connectionUrl = new URL(autocompleteProposalJavaDocPopup.getAttribute("src"));
-    HttpURLConnection connection = (HttpURLConnection) connectionUrl.openConnection();
-    connection.setRequestMethod("GET");
+  private String getJavaDocPopupText() {
+    HttpURLConnection connection = null;
 
-    try (BufferedReader br =
-        new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"))) {
-      return br.lines().collect(Collectors.joining());
+    try {
+      URL connectionUrl = new URL(getElementSrcLink(autocompleteProposalJavaDocPopup));
+      connection = (HttpURLConnection) connectionUrl.openConnection();
+      connection.setRequestMethod("GET");
+
+      return openStreamAndGetAllText(connection);
+
+    } catch (IOException e) {
+      LOG.error("Can not open connection for src link ");
     } finally {
-      connection.disconnect();
+      if (connection != null) connection.disconnect();
     }
+
+    return "";
+  }
+
+  private boolean verifyJavaDoc(String javaDocHtml, String regex) {
+    return Pattern.compile(regex, Pattern.DOTALL).matcher(javaDocHtml).matches();
+  }
+
+  private String getElementSrcLink(WebElement element) {
+    String srcLink = "";
+    try {
+      srcLink = element.getAttribute("src");
+    } catch (StaleElementReferenceException ex) {
+      LOG.error("src link in the context java doc window does not attached");
+    }
+    return srcLink;
+  }
+
+  private String openStreamAndGetAllText(HttpURLConnection httpURLConnection) {
+    if (httpURLConnection != null) {
+      try (BufferedReader br =
+          new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream(), "UTF-8"))) {
+        return br.lines().collect(Collectors.joining());
+
+      } catch (IOException ex) {
+        LOG.error("Can not get stream in openConnectionAndSetRequestMethod");
+      }
+    }
+    return "";
   }
 }

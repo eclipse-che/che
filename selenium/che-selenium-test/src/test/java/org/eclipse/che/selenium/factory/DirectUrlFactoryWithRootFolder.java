@@ -25,12 +25,15 @@ import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
 public class DirectUrlFactoryWithRootFolder {
+  private static final String EXPECTED_PROJECT = "quickstart";
+
   @Inject
   @Named("github.username")
   private String gitHubUsername;
@@ -43,6 +46,7 @@ public class DirectUrlFactoryWithRootFolder {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestProjectServiceClient projectServiceClient;
+  @Inject private Dashboard dashboard;
 
   private TestFactory testFactoryWithRootFolder;
 
@@ -59,8 +63,7 @@ public class DirectUrlFactoryWithRootFolder {
 
   @Test
   public void factoryWithDirectUrlWithRootFolder() throws Exception {
-    String expectedProject = "quickstart";
-    String expectedMessInTheEventsPanel = "Project " + expectedProject + " imported";
+    String expectedMessInTheEventsPanel = "Project " + EXPECTED_PROJECT + " imported";
     List<String> expectedItemsAfterClonning =
         Arrays.asList(
             "CHANGELOG.md",
@@ -81,10 +84,11 @@ public class DirectUrlFactoryWithRootFolder {
             "wallaby.js");
     testFactoryWithRootFolder.authenticateAndOpen();
     projectExplorer.waitProjectExplorer();
+    projectExplorer.waitItem(EXPECTED_PROJECT);
     notificationsPopupPanel.waitProgressPopupPanelClose();
     events.clickProjectEventsTab();
     events.waitExpectedMessage(expectedMessInTheEventsPanel);
-    projectExplorer.openItemByPath(expectedProject);
+    projectExplorer.openItemByPath(EXPECTED_PROJECT);
 
     String currentWsId =
         workspaceServiceClient

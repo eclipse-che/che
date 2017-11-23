@@ -11,8 +11,8 @@
 package org.eclipse.che.ide.ui.smartTree;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Comparator.comparingInt;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.gwt.event.shared.EventHandler;
@@ -28,16 +28,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.validation.constraints.NotNull;
-import org.eclipse.che.api.promises.client.Function;
-import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
+import org.eclipse.che.ide.ui.smartTree.Tree.Joint;
 import org.eclipse.che.ide.ui.smartTree.event.BeforeLoadEvent;
 import org.eclipse.che.ide.ui.smartTree.event.CancellableEvent;
 import org.eclipse.che.ide.ui.smartTree.event.LoadEvent;
@@ -73,12 +71,7 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
   private Set<NodeInterceptor> nodeInterceptors;
 
   private final Comparator<NodeInterceptor> priorityComparator =
-      new Comparator<NodeInterceptor>() {
-        @Override
-        public int compare(NodeInterceptor o1, NodeInterceptor o2) {
-          return o1.getPriority() - o2.getPriority();
-        }
-      };
+      comparingInt(NodeInterceptor::getPriority);
 
   /**
    * When caching is on nodes will be loaded from cache if they exist otherwise nodes will be loaded
@@ -104,7 +97,7 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
 
       // remove joint element if non-leaf node doesn't have any children
       if (!parent.isLeaf() && event.getReceivedNodes().isEmpty()) {
-        tree.getView().onJointChange(tree.getNodeDescriptor(parent), Tree.Joint.NONE);
+        tree.getView().onJointChange(tree.getNodeDescriptor(parent), Joint.EXPANDED);
       }
 
       NodeDescriptor requested = tree.getNodeDescriptor(parent);
@@ -140,7 +133,7 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
       // Iterate on nested descendants to make additional load request
       if (childRequested.remove(parent)) {
         for (Node node : tree.getNodeStorage().getChildren(parent)) {
-          if (tree.isExpanded(node)) {
+          if (tree.isExpanded(node) && !tree.getNodeDescriptor(node).getChildren().isEmpty()) {
             loadChildren(node, true);
           }
         }
@@ -187,16 +180,13 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
     Iterable<Node> newItems =
         Iterables.filter(
             loadedChildren,
-            new Predicate<Node>() {
-              @Override
-              public boolean apply(Node loadedChild) {
-                for (NodeDescriptor nodeDescriptor : existed) {
-                  if (nodeDescriptor.getNode().equals(loadedChild)) {
-                    return false;
-                  }
+            loadedChild -> {
+              for (NodeDescriptor nodeDescriptor : existed) {
+                if (nodeDescriptor.getNode().equals(loadedChild)) {
+                  return false;
                 }
-                return true;
               }
+              return true;
             });
 
     return Lists.newArrayList(newItems);
@@ -213,17 +203,14 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
     Iterable<NodeDescriptor> removedItems =
         Iterables.filter(
             existed,
-            new Predicate<NodeDescriptor>() {
-              @Override
-              public boolean apply(NodeDescriptor existedChild) {
-                boolean found = false;
-                for (Node loadedChild : loadedChildren) {
-                  if (existedChild.getNode().equals(loadedChild)) {
-                    found = true;
-                  }
+            existedChild -> {
+              boolean found = false;
+              for (Node loadedChild : loadedChildren) {
+                if (existedChild.getNode().equals(loadedChild)) {
+                  found = true;
                 }
-                return !found;
               }
+              return !found;
             });
 
     return Lists.newArrayList(removedItems);
@@ -266,14 +253,7 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
    * @return true if node has children, otherwise false
    */
   public Promise<Boolean> hasChildren(@NotNull Node node) {
-    return node.getChildren(false)
-        .thenPromise(
-            new Function<List<Node>, Promise<Boolean>>() {
-              @Override
-              public Promise<Boolean> apply(List<Node> children) throws FunctionException {
-                return Promises.resolve(!children.isEmpty());
-              }
-            });
+    return node.getChildren(false).thenPromise(children -> Promises.resolve(!children.isEmpty()));
   }
 
   /**
@@ -310,12 +290,9 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
    */
   @NotNull
   private Operation<PromiseError> onLoadFailure(@NotNull final Node parent) {
-    return new Operation<PromiseError>() {
-      @Override
-      public void apply(PromiseError t) throws OperationException {
-        childRequested.remove(parent);
-        fireEvent(new LoadExceptionEvent(parent, t.getCause()));
-      }
+    return error -> {
+      childRequested.remove(parent);
+      fireEvent(new LoadExceptionEvent(parent, error.getCause()));
     };
   }
 
@@ -386,18 +363,15 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
    */
   @NotNull
   private Operation<List<Node>> interceptChildren(@NotNull final Node parent) {
-    return new Operation<List<Node>>() {
-      @Override
-      public void apply(List<Node> children) throws OperationException {
-        if (nodeInterceptors.isEmpty()) {
-          onLoadSuccess(parent, children);
-        }
-
-        LinkedList<NodeInterceptor> sortedByPriorityQueue = new LinkedList<>(nodeInterceptors);
-        Collections.sort(sortedByPriorityQueue, priorityComparator);
-
-        iterate(sortedByPriorityQueue, parent, children);
+    return children -> {
+      if (nodeInterceptors.isEmpty()) {
+        onLoadSuccess(parent, children);
       }
+
+      LinkedList<NodeInterceptor> sortedByPriorityQueue = new LinkedList<>(nodeInterceptors);
+      sortedByPriorityQueue.sort(priorityComparator);
+
+      iterate(sortedByPriorityQueue, parent, children);
     };
   }
 
@@ -416,11 +390,8 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
     interceptor
         .intercept(parent, children)
         .then(
-            new Operation<List<Node>>() {
-              @Override
-              public void apply(List<Node> arg) throws OperationException {
-                iterate(deque, parent, arg);
-              }
+            childrenList -> {
+              iterate(deque, parent, childrenList);
             });
   }
 

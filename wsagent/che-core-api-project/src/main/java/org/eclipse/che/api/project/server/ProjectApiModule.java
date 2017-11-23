@@ -30,6 +30,9 @@ import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.importer.ProjectImportOutputJsonRpcRegistrar;
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
 import org.eclipse.che.api.project.server.importer.ProjectImportersService;
+import org.eclipse.che.api.project.server.matchers.DotCheMatcher;
+import org.eclipse.che.api.project.server.matchers.DotNumberSignMatcher;
+import org.eclipse.che.api.project.server.matchers.HiddenItemPathMatcher;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.eclipse.che.api.project.server.type.InitBaseProjectTypeHandler;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
@@ -87,7 +90,7 @@ public class ProjectApiModule extends AbstractModule {
 
     filtersMultibinder.addBinding().to(MediaTypeFilter.class);
 
-    Multibinder<PathMatcher> excludeMatcher =
+    Multibinder<PathMatcher> indexExcludesMatcher =
         newSetBinder(binder(), PathMatcher.class, Names.named("vfs.index_filter_matcher"));
     Multibinder<PathMatcher> fileWatcherExcludes =
         newSetBinder(
@@ -102,8 +105,13 @@ public class ProjectApiModule extends AbstractModule {
     bind(EditorWorkingCopyManager.class).asEagerSingleton();
     bind(FileWatcherIgnoreFileTracker.class).asEagerSingleton();
 
-    configureVfsFilters(excludeMatcher);
-    configureVfsFilters(fileWatcherExcludes);
+    indexExcludesMatcher.addBinding().to(DotCheMatcher.class);
+    indexExcludesMatcher.addBinding().to(DotNumberSignMatcher.class);
+    indexExcludesMatcher.addBinding().to(HiddenItemPathMatcher.class);
+
+    fileWatcherExcludes.addBinding().to(DotCheMatcher.class);
+    fileWatcherExcludes.addBinding().to(DotNumberSignMatcher.class);
+
     configureVfsEvent();
     configureTreeWalker();
   }
@@ -145,25 +153,6 @@ public class ProjectApiModule extends AbstractModule {
     fileDeleteConsumers.addBinding().to(FileWatcherByPathMatcher.class);
     directoryCreateConsumers.addBinding().to(FileWatcherByPathMatcher.class);
     directoryDeleteConsumers.addBinding().to(FileWatcherByPathMatcher.class);
-  }
-
-  private void configureVfsFilters(Multibinder<PathMatcher> excludeMatcher) {
-    addVfsFilter(excludeMatcher, ".che");
-    addVfsFilter(excludeMatcher, ".#");
-  }
-
-  private void addVfsFilter(Multibinder<PathMatcher> excludeMatcher, String filter) {
-    excludeMatcher
-        .addBinding()
-        .toInstance(
-            path -> {
-              for (Path pathElement : path) {
-                if (pathElement == null || filter.equals(pathElement.toString())) {
-                  return true;
-                }
-              }
-              return false;
-            });
   }
 
   private void configureVfsEvent() {

@@ -69,6 +69,8 @@ public class CheckIntelligenceCommandFromToolbarTest {
     seleniumWebDriver.navigate().refresh();
     notificationsPanel.waitExpectedMessageOnProgressPanelAndClosed(RUNNING_WORKSPACE_MESS);
     projectExplorer.waitProjectExplorer();
+    consoles.selectProcessByTabName(PROJECT_NAME + ": build and run");
+    consoles.waitExpectedTextIntoConsole(" Server startup in");
     consoles.clickOnPreviewUrl();
     checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
   }
