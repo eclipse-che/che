@@ -11,8 +11,8 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace.StateWorkspace.STARTING;
-import static org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace.StateWorkspace.STOPPING;
+import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.StateWorkspace.STARTING;
+import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.StateWorkspace.STOPPING;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
@@ -22,7 +22,8 @@ import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
+import org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails;
+import org.eclipse.che.selenium.pageobject.dashboard.Workspaces;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -39,10 +40,11 @@ public class RenameWorkspaceTest {
       ("The name has to be less than 101 characters long.");
 
   @Inject private Dashboard dashboard;
-  @Inject private DashboardWorkspace dashboardWorkspace;
+  @Inject private WorkspaceDetails workspaceDetails;
   @Inject private TestWorkspace ws;
   @Inject private TestUser user;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private Workspaces workspaces;
 
   private String workspaceName;
 
@@ -62,22 +64,22 @@ public class RenameWorkspaceTest {
   @Test
   public void renameNameWorkspaceTest() throws IOException {
     dashboard.selectWorkspacesItemOnDashboard();
-    dashboardWorkspace.waitToolbarTitleName("Workspaces");
-    dashboardWorkspace.selectWorkspaceItemName(workspaceName);
-    dashboardWorkspace.waitToolbarTitleName(workspaceName);
-    dashboardWorkspace.selectTabInWorspaceMenu(DashboardWorkspace.TabNames.OVERVIEW);
+    dashboard.waitToolbarTitleName("Workspaces");
+    workspaces.selectWorkspaceItemName(workspaceName);
+    workspaces.waitToolbarTitleName(workspaceName);
+    workspaceDetails.selectTabInWorspaceMenu(WorkspaceDetails.TabNames.OVERVIEW);
 
     // type name with 1 characters and check error message that this name is too short
-    dashboardWorkspace.enterNameWorkspace("w");
-    assertTrue(dashboardWorkspace.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_SHORT));
-    dashboardWorkspace.clickOnCancelBtn();
-    dashboardWorkspace.checkNameWorkspace(workspaceName);
+    workspaceDetails.enterNameWorkspace("w");
+    assertTrue(workspaceDetails.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_SHORT));
+    workspaceDetails.clickOnCancelBtn();
+    workspaceDetails.checkNameWorkspace(workspaceName);
 
     // type name with 101 characters and check error message that this name is too long
-    dashboardWorkspace.enterNameWorkspace(MAX_WORKSPACE_NAME + "a");
-    assertTrue(dashboardWorkspace.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_LONG));
-    dashboardWorkspace.clickOnCancelBtn();
-    dashboardWorkspace.checkNameWorkspace(workspaceName);
+    workspaceDetails.enterNameWorkspace(MAX_WORKSPACE_NAME + "a");
+    assertTrue(workspaceDetails.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_LONG));
+    workspaceDetails.clickOnCancelBtn();
+    workspaceDetails.checkNameWorkspace(workspaceName);
 
     // type a name with min possible size and check that the workspace renamed
     renameWorkspace(MIN_WORKSPACE_NAME);
@@ -87,17 +89,17 @@ public class RenameWorkspaceTest {
   }
 
   private void renameWorkspace(String name) {
-    dashboardWorkspace.enterNameWorkspace(name);
-    assertFalse(dashboardWorkspace.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_SHORT));
-    assertFalse(dashboardWorkspace.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_LONG));
+    workspaceDetails.enterNameWorkspace(name);
+    assertFalse(workspaceDetails.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_SHORT));
+    assertFalse(workspaceDetails.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_LONG));
     saveAndWaitWorkspaceRestarted();
-    dashboardWorkspace.checkNameWorkspace(name);
+    workspaceDetails.checkNameWorkspace(name);
   }
 
   private void saveAndWaitWorkspaceRestarted() {
-    dashboardWorkspace.clickOnSaveBtn();
-    dashboardWorkspace.checkStateOfWorkspace(STOPPING);
-    dashboardWorkspace.checkStateOfWorkspace(STARTING);
+    workspaceDetails.clickOnSaveBtn();
+    workspaceDetails.checkStateOfWorkspace(STOPPING);
+    workspaceDetails.checkStateOfWorkspace(STARTING);
     dashboard.waitNotificationMessage("Workspace updated");
     dashboard.waitNotificationIsClosed();
   }

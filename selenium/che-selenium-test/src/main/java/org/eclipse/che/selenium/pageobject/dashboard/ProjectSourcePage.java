@@ -69,7 +69,7 @@ public class ProjectSourcePage {
     String ZIP_SKIP_ROOT_XPATH = "zipSkipRootFolder-checkbox";
 
     // 'add selected projects' and 'cancel changes' buttons
-    String ADD_BUTTON = "addProject-button";
+    String ADD_PROJECT_BUTTON = "addProject-button";
     String CANCEL_BUTTON = "cancel-button";
   }
 
@@ -108,8 +108,8 @@ public class ProjectSourcePage {
   @FindBy(id = Locators.CANCEL_BUTTON)
   WebElement cancelButton;
 
-  @FindBy(id = Locators.ADD_BUTTON)
-  WebElement addButton;
+  @FindBy(id = Locators.ADD_PROJECT_BUTTON)
+  WebElement addProjectButton;
 
   public void clickOnAddOrImportProjectButton() {
     addOrImportProjectButton.click();
@@ -168,7 +168,7 @@ public class ProjectSourcePage {
   }
 
   public void clickOnAddProjectButton() {
-    addButton.click();
+    addProjectButton.click();
   }
 
   public void clickOnCancelProjectButton() {

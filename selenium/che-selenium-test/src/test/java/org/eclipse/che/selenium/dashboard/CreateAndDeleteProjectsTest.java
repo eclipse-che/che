@@ -26,9 +26,10 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardProject;
-import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
+import org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails;
+import org.eclipse.che.selenium.pageobject.dashboard.Workspaces;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -40,7 +41,7 @@ public class CreateAndDeleteProjectsTest {
 
   @Inject private Dashboard dashboard;
   @Inject private DashboardProject dashboardProject;
-  @Inject private DashboardWorkspace dashboardWorkspace;
+  @Inject private WorkspaceDetails workspaceDetails;
   @Inject private NavigationBar navigationBar;
   @Inject private CreateWorkspace createWorkspace;
   @Inject private ProjectSourcePage projectSourcePage;
@@ -51,6 +52,7 @@ public class CreateAndDeleteProjectsTest {
   @Inject private TestUser defaultTestUser;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private MavenPluginStatusBar mavenPluginStatusBar;
+  @Inject private Workspaces workspaces;
 
   @BeforeClass
   public void setUp() {
@@ -64,9 +66,9 @@ public class CreateAndDeleteProjectsTest {
 
   @Test
   public void createAndDeleteProjectTest() throws ExecutionException, InterruptedException {
-    navigationBar.waitNavigationBar();
-    navigationBar.clickOnMenu(NavigationBar.MenuItem.WORKSPACES);
-    dashboardWorkspace.clickOnNewWorkspaceBtn();
+    dashboard.waitDashboardToolbarTitle();
+    dashboard.selectWorkspacesItemOnDashboard();
+    workspaces.clickOnNewWorkspaceBtn();
     createWorkspace.waitToolbar();
 
     createWorkspace.selectStack(TestStacksConstants.JAVA.getId());
@@ -91,8 +93,8 @@ public class CreateAndDeleteProjectsTest {
 
     switchToWindow(dashboardWindow);
     dashboard.selectWorkspacesItemOnDashboard();
-    dashboardWorkspace.selectWorkspaceItemName(WORKSPACE);
-    dashboardWorkspace.selectTabInWorspaceMenu(DashboardWorkspace.TabNames.PROJECTS);
+    workspaces.selectWorkspaceItemName(WORKSPACE);
+    workspaceDetails.selectTabInWorspaceMenu(WorkspaceDetails.TabNames.PROJECTS);
     dashboardProject.waitProjectIsPresent(ProjectSourcePage.Template.WEB_JAVA_SPRING.value());
     dashboardProject.waitProjectIsPresent(ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE.value());
     dashboardProject.openSettingsForProjectByName(

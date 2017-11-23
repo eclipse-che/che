@@ -11,6 +11,8 @@
 package org.eclipse.che.selenium.pageobject.dashboard;
 
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -40,6 +42,7 @@ public class DashboardProject {
     String PROJECT_BY_NAME = "//div[contains(@ng-click, 'projectItem')]/span[text()='%s']";
     String DELETE_PROJECT = "//button/span[text()='Delete']";
     String DELETE_IT_PROJECT = "//che-button-primary[@che-button-title='Delete']/button";
+    String ADD_NEW_PROJECT_BUTTON = "//che-button-primary[@che-button-title='Add Project']/button";
   }
 
   /**
@@ -50,7 +53,7 @@ public class DashboardProject {
   public void waitProjectIsPresent(String projectName) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
-            ExpectedConditions.visibilityOfElementLocated(
+            visibilityOfElementLocated(
                 By.xpath(String.format(Locators.PROJECT_BY_NAME, projectName))));
   }
 
@@ -62,7 +65,7 @@ public class DashboardProject {
   public void waitProjectIsNotPresent(String projectName) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
-            ExpectedConditions.invisibilityOfElementLocated(
+            invisibilityOfElementLocated(
                 By.xpath(String.format(Locators.PROJECT_BY_NAME, projectName))));
   }
 
@@ -91,6 +94,13 @@ public class DashboardProject {
     WaitUtils.sleepQuietly(1);
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.DELETE_IT_PROJECT)))
+        .click();
+  }
+
+  /** click on the Add Project button */
+  public void clickOnAddNewProjectButton() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(By.xpath(Locators.ADD_NEW_PROJECT_BUTTON)))
         .click();
   }
 }

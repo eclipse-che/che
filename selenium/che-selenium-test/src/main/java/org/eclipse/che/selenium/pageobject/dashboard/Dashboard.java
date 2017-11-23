@@ -10,14 +10,16 @@
  */
 package org.eclipse.che.selenium.pageobject.dashboard;
 
+import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
-import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElement;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -35,7 +37,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Musienko Maxim */
@@ -83,8 +84,10 @@ public class Dashboard {
   }
 
   private interface Locators {
-    String DASHBOARD_TOOLBAR_TITLE = "div [aria-label='Dashboard']";
+    String DASHBOARD_TOOLBAR_TITLE = "//*[contains(@id,'navbar')]";
+    String NAVBAR_NOTIFICATION_CONTAINER = "navbarNotification-container";
     String COLLAPSE_DASH_NAVBAR_BTN = "ide-iframe-button-link";
+    String NOTIFICATION_CONTAINER = "che-notification-container";
 
     String DASHBOARD_ITEM = "dashboard-item";
     String WORKSPACES_ITEM = "workspaces-item";
@@ -93,14 +96,20 @@ public class Dashboard {
     String ADMINISTRATION_ITEM = "administration-item";
     String ORGANIZATIONS_ITEM = "organization-item";
 
-    String NOTIFICATION_CONTAINER = "che-notification-container";
-    String DEVELOPERS_FACE_XPATH = "//img[@class='developers-face']";
-    String USER_NAME = "//span[text()='%s']";
+    String RESENT_WS_NAVBAR = "//div[@class='admin-navbar-menu recent-workspaces']";
+    String LEFT_SIDE_BAR = "//div[@class='left-sidebar-container']";
+
+    String USER_PANEL = "navbarUser-panel";
+    String DEVELOPERS_FACE_XPATH = "developersFace";
+    String USER_NAME = "userName";
 
     String LICENSE_NAG_MESSAGE_XPATH = "//div[contains(@class, 'license-message')]";
+
+    String TOOLBAR_TITLE_NAME =
+        "//div[contains(@class,'che-toolbar')]//span[contains(text(),'%s')]";
   }
 
-  @FindBy(css = Locators.DASHBOARD_TOOLBAR_TITLE)
+  @FindBy(xpath = Locators.DASHBOARD_TOOLBAR_TITLE)
   WebElement dashboardTitle;
 
   @FindBy(id = Locators.COLLAPSE_DASH_NAVBAR_BTN)
@@ -118,8 +127,11 @@ public class Dashboard {
   @FindBy(id = Locators.FACTORIES_ITEM)
   WebElement factoriesItem;
 
-  @FindBy(xpath = Locators.DEVELOPERS_FACE_XPATH)
+  @FindBy(id = Locators.DEVELOPERS_FACE_XPATH)
   WebElement developersFace;
+
+  @FindBy(id = Locators.USER_NAME)
+  WebElement userName;
 
   @FindBy(id = Locators.NOTIFICATION_CONTAINER)
   WebElement notificationPopUp;
@@ -174,9 +186,7 @@ public class Dashboard {
   public void waitNotificationIsClosed() {
     WaitUtils.sleepQuietly(1);
     new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.invisibilityOfElementLocated(
-                By.id(Locators.NOTIFICATION_CONTAINER)));
+        .until(invisibilityOfElementLocated(By.id(Locators.NOTIFICATION_CONTAINER)));
   }
 
   /** wait opening of notification pop up */
@@ -194,11 +204,13 @@ public class Dashboard {
   /**
    * Wait user name is present on dashboard
    *
-   * @param userName name of user
+   * @param name name of user
    */
-  public void checkUserName(String userName) {
-    new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
-        .until(presenceOfElementLocated(By.xpath(String.format(Locators.USER_NAME, userName))));
+  public Boolean checkUserName(String name) {
+    return new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
+        .until(visibilityOf(userName))
+        .getText()
+        .equals(name);
   }
 
   /**
@@ -240,6 +252,27 @@ public class Dashboard {
     String redirectURL = logoutApiEndpoint + ":8080/dashboard/#/workspaces";
 
     seleniumWebDriver.navigate().to(logoutURL + "?redirect_uri=" + redirectURL);
+  }
+
+  /**
+   * Wait toolbar name is present on dashboard
+   *
+   * @param titleName name of user
+   */
+  public void waitToolbarTitleName(String titleName) {
+    new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
+        .until(
+            visibilityOfElementLocated(By.xpath(format(Locators.TOOLBAR_TITLE_NAME, titleName))));
+  }
+
+  /** Return true if workspaces present on the navigation panel */
+  public boolean workspacesIsPresent() {
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(By.xpath(Locators.LEFT_SIDE_BAR)));
+
+    List<WebElement> workspaces =
+        seleniumWebDriver.findElements(By.xpath(Locators.RESENT_WS_NAVBAR));
+    return !(workspaces.size() == 0);
   }
 
   @PreDestroy
