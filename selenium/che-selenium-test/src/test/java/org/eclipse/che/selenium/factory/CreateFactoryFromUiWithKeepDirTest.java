@@ -40,8 +40,10 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -137,8 +139,14 @@ public class CreateFactoryFromUiWithKeepDirTest {
       projectExplorer.waitProjectExplorer(50);
     }
     events.clickEventLogBtn();
-    events.waitExpectedMessage(CONFIGURING_PROJECT_AND_CLONING_SOURCE_CODE);
-    events.waitExpectedMessage("Project " + PROJECT_NAME + " imported");
+    try {
+      events.waitExpectedMessage(CONFIGURING_PROJECT_AND_CLONING_SOURCE_CODE);
+      events.waitExpectedMessage("Project " + PROJECT_NAME + " imported");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      Assert.fail("Known issue https://github.com/eclipse/che/issues/7253");
+    }
+
     projectExplorer.expandPathInProjectExplorerAndOpenFile(
         PROJECT_NAME + "/" + KEEPED_DIR + "/src" + "/main" + "/java/hello",
         "GreetingController.java");
