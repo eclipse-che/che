@@ -29,8 +29,10 @@ import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
@@ -113,7 +115,13 @@ public class WorkingWithNodeWsTest {
     consoles.waitPreviewUrlIsPresent();
     seleniumWebDriver.navigate().refresh();
     seleniumWebDriver.switchFromDashboardIframeToIde();
-    consoles.waitPreviewUrlIsPresent();
+    try {
+      consoles.waitPreviewUrlIsPresent();
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      Assert.fail("Known issue https://github.com/eclipse/che/issues/7072");
+    }
+
     projectExplorer.selectItem(NODE_JS_PROJECT_NAME);
     consoles.selectProcessInProcessConsoleTreeByName("web-nodejs-simple:run");
 
