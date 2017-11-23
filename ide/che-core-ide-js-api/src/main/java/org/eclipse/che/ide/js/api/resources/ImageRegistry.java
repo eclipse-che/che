@@ -21,7 +21,7 @@ import org.eclipse.che.ide.js.api.Disposable;
  *
  * @author Yevhen Vydolob
  */
-@JsType(isNative = true)
+@JsType
 public interface ImageRegistry {
 
   /**

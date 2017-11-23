@@ -15,7 +15,7 @@ import jsinterop.annotations.JsType;
 import org.eclipse.che.ide.js.api.Disposable;
 
 /** A manager for actions. Used to register action handlers. */
-@JsType(isNative = true)
+@JsType
 public interface ActionManager {
 
   /**

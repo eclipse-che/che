@@ -184,6 +184,11 @@ public class JsTheme implements Theme {
   }
 
   @Override
+  public String getRadioButtonBackgroundColor() {
+    return theme.getString("radioButtonBackgroundColor");
+  }
+
+  @Override
   public String getDisabledMenuColor() {
     return theme.getString("disabledMenuColor");
   }
@@ -1286,6 +1291,11 @@ public class JsTheme implements Theme {
   @Override
   public String checkBoxIconColor() {
     return theme.getString("checkBoxIconColor");
+  }
+
+  @Override
+  public String checkBoxIndeterminateIconColor() {
+    return theme.getString("checkBoxIndeterminateIconColor");
   }
 
   @Override

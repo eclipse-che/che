@@ -10,7 +10,10 @@
  */
 package org.eclipse.che.ide.api.parts;
 
+import jsinterop.annotations.JsType;
+
 /** Defines Part's position on the Screen */
+@JsType(namespace = "che.ide.parts")
 public enum PartStackType {
   /**
    * Contains navigation parts. Designed to navigate by project, types, classes and any other

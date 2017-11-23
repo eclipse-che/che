@@ -13,8 +13,10 @@ package org.eclipse.che.ide.js.impl;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import org.eclipse.che.ide.js.api.action.ActionManager;
+import org.eclipse.che.ide.js.api.parts.Workspace;
 import org.eclipse.che.ide.js.api.resources.ImageRegistry;
 import org.eclipse.che.ide.js.impl.action.JsActionManager;
+import org.eclipse.che.ide.js.impl.parts.JsWorkspace;
 import org.eclipse.che.ide.js.impl.resources.ImageRegistryImpl;
 
 /** */
@@ -24,5 +26,6 @@ public class JsApiModule extends AbstractGinModule {
   protected void configure() {
     bind(ActionManager.class).to(JsActionManager.class);
     bind(ImageRegistry.class).to(ImageRegistryImpl.class);
+    bind(Workspace.class).to(JsWorkspace.class);
   }
 }

@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.HasImageElement;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.events.EditorDirtyStateChangedEvent;
@@ -57,27 +58,21 @@ public class PartStackPresenter
 
   /** The minimum allowable size for the part. */
   private static final int MIN_PART_SIZE = 100;
-
+  protected final Map<TabItem, PartPresenter> parts;
+  protected final TabItemFactory tabItemFactory;
+  protected final PartStackView view;
+  protected final PropertyListener propertyListener;
   private final WorkBenchPartController workBenchPartController;
   private final PartsComparator partsComparator;
   private final Map<PartPresenter, Constraints> constraints;
   private final PartStackEventHandler partStackHandler;
   private final EventBus eventBus;
   private final PartMenu partMenu;
-
-  protected final Map<TabItem, PartPresenter> parts;
-  protected final TabItemFactory tabItemFactory;
-  protected final PartStackView view;
-  protected final PropertyListener propertyListener;
-
   protected PartPresenter activePart;
   protected TabItem activeTab;
-
+  protected double currentSize;
   private TabItem previousActiveTab;
   private PartPresenter previousActivePart;
-
-  protected double currentSize;
-
   private State state = State.HIDDEN;
 
   private ActionDelegate delegate;
@@ -164,10 +159,12 @@ public class PartStackPresenter
     part.addPropertyListener(propertyListener);
 
     PartButton partButton =
-        tabItemFactory
-            .createPartButton(part.getTitle())
-            .setTooltip(part.getTitleToolTip())
-            .setIcon(part.getTitleImage());
+        tabItemFactory.createPartButton(part.getTitle()).setTooltip(part.getTitleToolTip());
+    if (part instanceof HasImageElement) {
+      partButton.setIconElement(((HasImageElement) part).getImageElement());
+    } else {
+      partButton.setIcon(part.getTitleImage());
+    }
     partButton.setDelegate(this);
 
     parts.put(partButton, part);

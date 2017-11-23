@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.ide.part.widgets.partbutton;
 
+import com.google.gwt.dom.client.Element;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.mvp.View;
@@ -27,6 +28,8 @@ public interface PartButton extends View<PartButton.ActionDelegate>, TabItem {
 
   @NotNull
   PartButton setIcon(@Nullable SVGResource resource);
+
+  PartButton setIconElement(Element imageElement);
 
   interface ActionDelegate {
     void onTabClicked(@NotNull TabItem selectedTab);

@@ -106,7 +106,7 @@ public class PluginManager {
       imageRegistry.registerPluginImages(plugins, activePlugins);
       jsActionManager.registerPluginActions(plugins, activePlugins);
       handleTheme(plugins);
-      doLoadPlugins(callback);
+      callback.onSuccess(null);
     } catch (PluginException e) {
       callback.onFailure(e);
     }
@@ -137,8 +137,8 @@ public class PluginManager {
     if (iterator.hasNext()) {
       PluginManifest pluginManifest = iterator.next();
       RequirejsConfig config = RequirejsConfig.create();
-      String baseUrl = getPluginBaseUrl(pluginManifest);
-      config.setBaseUrl(baseUrl);
+//      String baseUrl = getPluginBaseUrl(pluginManifest);
+//      config.setBaseUrl(baseUrl);
       requireJs.require(
           modules -> {
             // Log.error(getClass(), modules);
@@ -163,7 +163,13 @@ public class PluginManager {
           },
           config,
           new String[] {
-            pluginManifest.getMain().substring(0, pluginManifest.getMain().lastIndexOf("."))
+              appContext.getMasterApiEndpoint()
+                  + "/plugin/"
+                  + pluginManifest.getPublisher()
+                  + "."
+                  + pluginManifest.getName()
+                  + "-"
+                  + pluginManifest.getVersion() + "/" + pluginManifest.getMain()/*.substring(0, pluginManifest.getMain().lastIndexOf("."))*/
           },
           new String[0]);
     } else {
@@ -243,5 +249,9 @@ public class PluginManager {
             disposables.get(i).dispose();
           }
         });
+  }
+
+  public Promise<Void> initPlugins() {
+    return promiseProvider.create(this::doLoadPlugins);
   }
 }

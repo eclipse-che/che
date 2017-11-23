@@ -19,6 +19,7 @@ import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
 import org.eclipse.che.ide.js.api.action.ActionManager;
+import org.eclipse.che.ide.js.api.parts.Workspace;
 import org.eclipse.che.ide.js.api.resources.ImageRegistry;
 
 /** */
@@ -32,11 +33,14 @@ public class JsApi {
 
   @JsProperty private final ImageRegistry imageRegistry;
 
+  @JsProperty private final Workspace workspace;
+
   @Inject
   @JsIgnore
-  public JsApi(ActionManager actionManager, ImageRegistry imageRegistry) {
+  public JsApi(ActionManager actionManager, ImageRegistry imageRegistry, Workspace workspace) {
     this.actionManager = actionManager;
     this.imageRegistry = imageRegistry;
+    this.workspace = workspace;
     instance = this;
   }
 

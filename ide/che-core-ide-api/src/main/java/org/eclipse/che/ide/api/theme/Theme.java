@@ -239,12 +239,12 @@ public interface Theme {
    */
   String getMainFontColor();
 
-  //  /**
-  //   * Background color of the {@link com.google.gwt.user.client.ui.RadioButton}
-  //   *
-  //   * @return the color
-  //   */
-  //  String getRadioButtonBackgroundColor();
+  /**
+   * Background color of the {@link com.google.gwt.user.client.ui.RadioButton}
+   *
+   * @return the color
+   */
+  String getRadioButtonBackgroundColor();
 
   /**
    * Background color of the disabled menu item

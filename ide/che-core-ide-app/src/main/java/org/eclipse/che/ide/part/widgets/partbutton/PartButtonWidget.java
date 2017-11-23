@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.part.widgets.partbutton;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
@@ -25,6 +26,7 @@ import com.google.inject.assistedinject.Assisted;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.parts.PartPresenter;
+import org.eclipse.che.ide.ui.ElementWidget;
 import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.ui.menu.PositionController;
 import org.vectomatic.dom.svg.ui.SVGImage;
@@ -51,6 +53,8 @@ public class PartButtonWidget extends Composite implements PartButton {
 
   private SVGResource tabIcon;
 
+  private Element imageElement;
+
   @Inject
   public PartButtonWidget(@Assisted String title) {
     initWidget(UI_BINDER.createAndBindUi(this));
@@ -69,7 +73,8 @@ public class PartButtonWidget extends Composite implements PartButton {
 
   @Override
   public Widget getIcon() {
-    return tabIcon != null ? new SVGImage(tabIcon) : null;
+    return tabIcon != null ? new SVGImage(tabIcon) : new ElementWidget(
+        (Element) imageElement.cloneNode(true));
   }
 
   private Tooltip tooltipHint;
@@ -100,6 +105,19 @@ public class PartButtonWidget extends Composite implements PartButton {
 
     if (tabIcon != null) {
       iconPanel.add(new SVGImage(tabIcon));
+    }
+
+    return this;
+  }
+
+  @Override
+  public PartButton setIconElement(Element imageElement) {
+    this.tabIcon = null;
+    this.imageElement = imageElement;
+    iconPanel.clear();
+
+    if (imageElement != null) {
+      iconPanel.add(new ElementWidget(imageElement));
     }
 
     return this;

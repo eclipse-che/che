@@ -120,10 +120,11 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
                   // Prevent further initialization steps.
                   throw new OperationException(err.getMessage(), err.getCause());
                 })
-        .thenPromise(aVoid -> initJsPlugins())
+        .thenPromise(aVoid -> loadJsPlugins())
         .thenPromise(aVoid -> initUI())
         .thenPromise(aVoid -> initAppContext())
         .then(showUI())
+        .thenPromise(aVoid -> initJsPlugins())
         .then(
             arg -> {
               WorkspaceImpl workspace = appContext.getWorkspace();
@@ -134,6 +135,10 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
   }
 
   private Promise<Void> initJsPlugins() {
+    return pluginManagerProvider.get().initPlugins();
+  }
+
+  private Promise<Void> loadJsPlugins() {
     return pluginManagerProvider.get().loadPlugins();
   }
 

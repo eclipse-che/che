@@ -178,6 +178,11 @@ public class LightTheme implements Theme {
   }
 
   @Override
+  public String getRadioButtonBackgroundColor() {
+    return "#BDBDBD";
+  }
+
+  @Override
   public String getDisabledMenuColor() {
     return "#AAAAAA";
   }

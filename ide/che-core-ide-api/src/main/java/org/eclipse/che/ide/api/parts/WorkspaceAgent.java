@@ -22,6 +22,12 @@ import org.eclipse.che.ide.api.extension.SDK;
 @SDK(title = "ide.api.ui.workspace")
 public interface WorkspaceAgent {
 
+  /**
+   * Sets passed part as active. Sets focus to part and open it.
+   *
+   * @param part part which will be active
+   * @param type type of part stack
+   */
   void setActivePart(@NotNull PartPresenter part, PartStackType type);
 
   /**
