@@ -26,6 +26,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.DevMachine;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.commons.exception.UnmarshallerException;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -42,7 +43,7 @@ import org.eclipse.che.multiuser.machine.authentication.shared.dto.MachineTokenD
  */
 @Singleton
 public class MachineAsyncRequestFactory extends AsyncRequestFactory
-    implements WorkspaceStoppedEvent.Handler {
+    implements WorkspaceStoppedEvent.Handler, WorkspaceStartedEvent.Handler {
   private static final String CSRF_TOKEN_HEADER_NAME = "X-CSRF-Token";
 
   private final Provider<MachineTokenServiceClient> machineTokenServiceProvider;
@@ -61,6 +62,7 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory
     super(dtoFactory);
     this.machineTokenServiceProvider = machineTokenServiceProvider;
     this.appContext = appContext;
+    eventBus.addHandler(WorkspaceStartedEvent.TYPE, this);
     eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
   }
 
@@ -94,6 +96,17 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory
                     return machineToken;
                   });
     }
+  }
+
+  @Override
+  public void onWorkspaceStarted(WorkspaceStartedEvent event) {
+    getMachineToken()
+        .then(
+            machineToken -> {
+              if (!isNullOrEmpty(machineToken)) {
+                appContext.getProperties().put("machineToken", machineToken);
+              }
+            });
   }
 
   // since the machine token lives with the workspace runtime,
