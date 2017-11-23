@@ -89,10 +89,10 @@ public class WorkingWithJavaMySqlStackTest {
     loader.waitOnClosed();
     createWorkspace.selectStack(TestStacksConstants.JAVA_MYSQL.getId());
     createWorkspace.typeWorkspaceName(WORKSPACE);
-    projectSourcePage.clickAddOrImportProjectButton();
+    projectSourcePage.clickOnAddOrImportProjectButton();
     projectSourcePage.selectSample(PROJECT_NAME);
-    projectSourcePage.clickAdd();
-    createWorkspace.clickCreate();
+    projectSourcePage.clickOnAddProjectButton();
+    createWorkspace.clickOnCreateWorkspaceButton();
     loader.waitOnClosed();
     seleniumWebDriver.switchFromDashboardIframeToIde(60);
 

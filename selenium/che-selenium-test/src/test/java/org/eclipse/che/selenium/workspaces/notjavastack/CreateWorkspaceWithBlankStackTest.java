@@ -63,7 +63,7 @@ public class CreateWorkspaceWithBlankStackTest {
     createWorkspace.typeWorkspaceName(WORKSPACE);
     createWorkspace.selectStack(TestStacksConstants.BLANK.getId());
     createWorkspace.setMachineRAM("2");
-    createWorkspace.clickCreate();
+    createWorkspace.clickOnCreateWorkspaceButton();
 
     dashboard.waitNotificationIsClosed();
     seleniumWebDriver.switchFromDashboardIframeToIde();

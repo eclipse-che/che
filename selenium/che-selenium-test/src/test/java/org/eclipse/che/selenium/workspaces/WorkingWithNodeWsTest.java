@@ -74,10 +74,10 @@ public class WorkingWithNodeWsTest {
     createWorkspace.waitToolbar();
     createWorkspace.selectStack(TestStacksConstants.NODE.getId());
     createWorkspace.typeWorkspaceName(WORKSPACE);
-    projectSourcePage.clickAddOrImportProjectButton();
+    projectSourcePage.clickOnAddOrImportProjectButton();
     projectSourcePage.selectSample(NODE_JS_PROJECT_NAME);
-    projectSourcePage.clickAdd();
-    createWorkspace.clickCreate();
+    projectSourcePage.clickOnAddProjectButton();
+    createWorkspace.clickOnCreateWorkspaceButton();
     loader.waitOnClosed();
     seleniumWebDriver.switchFromDashboardIframeToIde();
 

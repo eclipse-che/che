@@ -28,10 +28,10 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardProject;
-import org.eclipse.che.selenium.pageobject.dashboard.DashboardProject.Template;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace.TabNames;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
+import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -225,7 +225,7 @@ public class WorkspaceDetailsTest {
     clickOnSaveButton();
 
     // check that project exists(workspace will restart)
-    dashboardProject.waitProjectIsPresent(Template.WEB_JAVA_PETCLINIC.value());
+    dashboardProject.waitProjectIsPresent(ProjectSourcePage.Template.WEB_JAVA_PETCLINIC.value());
 
     // start the workspace and check that the new project exists
     dashboardWorkspace.clickOpenInIdeWsBtn();
@@ -233,7 +233,7 @@ public class WorkspaceDetailsTest {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.waitFolderDefinedTypeOfFolderByPath(
-        Template.WEB_JAVA_PETCLINIC.value(), PROJECT_FOLDER);
+        ProjectSourcePage.Template.WEB_JAVA_PETCLINIC.value(), PROJECT_FOLDER);
 
     // check that created machine exists in the Process Console tree
     consoles.waitProcessInProcessConsoleTree("machine");
@@ -277,7 +277,7 @@ public class WorkspaceDetailsTest {
     loader.waitOnClosed();
     createWorkspace.selectStack(TestStacksConstants.JAVA_MYSQL.getId());
     createWorkspace.typeWorkspaceName(WORKSPACE);
-    createWorkspace.clickCreate();
+    createWorkspace.clickOnCreateWorkspaceButton();
 
     seleniumWebDriver.switchFromDashboardIframeToIde(60);
     loader.waitOnClosed();

@@ -59,8 +59,11 @@ public class NavigationBar {
 
   private interface Locators {
     String NAVIGATION_BAR_XPATH = "//*[contains(@id,'navbar')]";
+
     String MENU_ITEM_XPATH = "//md-list-item//span[text()='%s']";
+
     String COUNTER_XPATH = "/following-sibling::span";
+
     String TEAMS_LIST_XPATH = "//*[contains(@class, 'navbar-teams-list')]//md-list-item";
   }
 

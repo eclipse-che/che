@@ -4,6 +4,7 @@
     <che-input-box ng-init="importZipProjectController.registerForm(importZipProjectForm)"
                    che-form="importZipProjectForm"
                    che-name="remoteZipURL"
+                   id="remoteZipURL-input"
                    che-label-name="Zip URL"
                    che-place-holder="Url of the zip file"
                    aria-label="Url of the zip file"
@@ -17,6 +18,7 @@
     <div layout="row" layout-align="left" class="skip-root-container">
       <div flex="20"></div>
       <md-checkbox ng-model="importZipProjectController.skipFirstLevel"
+                   id="zipSkipRootFolder-checkbox"
                    ng-change="importZipProjectController.onCheckboxChanged()"
                    aria-label="Skip the root folder of the archive">
         Skip the root folder of the archive

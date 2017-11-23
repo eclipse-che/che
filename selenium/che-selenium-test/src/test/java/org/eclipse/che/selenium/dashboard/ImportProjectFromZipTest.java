@@ -64,19 +64,15 @@ public class ImportProjectFromZipTest {
     createWorkspace.selectStack(TestStacksConstants.JAVA.getId());
     createWorkspace.typeWorkspaceName(WORKSPACE);
 
-    projectSourcePage.clickAddOrImportProjectButton();
-
+    projectSourcePage.clickOnAddOrImportProjectButton();
     projectSourcePage.selectSourceTab(ProjectSourcePage.Sources.ZIP);
-
     projectSourcePage.typeZipLocation(
         "https://github.com/iedexmain1/multimodule-project/archive/master.zip");
     projectSourcePage.skipRootFolder();
-    projectSourcePage.clickAdd();
+    projectSourcePage.clickOnAddProjectButton();
 
-    createWorkspace.clickCreate();
-
+    createWorkspace.clickOnCreateWorkspaceButton();
     seleniumWebDriver.switchFromDashboardIframeToIde();
-
     loader.waitOnClosed();
     explorer.waitItem(PROJECT_NAME);
     explorer.selectItem(PROJECT_NAME);

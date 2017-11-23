@@ -560,10 +560,6 @@ public class DashboardWorkspace {
         .click();
   }
 
-  public void clickNewProjectButtonOnDashboard() throws Exception {
-    dashboard.clickOnNewProjectLinkOnDashboard();
-  }
-
   public String getWsTimeoutMessage() {
     return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOf(wsTimeotMessage))

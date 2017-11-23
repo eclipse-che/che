@@ -1,5 +1,6 @@
 <che-toolbar che-title="New Workspace">
   <che-button-save-flat class="create-workspace-header-button"
+                        id="createWorkspace-button"
                         che-button-title="Create"
                         ng-click="createWorkspaceController.createWorkspace()"
                         ng-disabled="createWorkspaceController.isCreateButtonDisabled()"></che-button-save-flat>
@@ -23,6 +24,7 @@
         <che-input-box ng-init="createWorkspaceController.registerForm('name', workspaceNameForm)"
                        che-form="workspaceNameForm"
                        che-name="workspaceName"
+                       id="workspaceName-input"
                        che-place-holder="Name of the workspace"
                        aria-label="Name of the workspace"
                        ng-model="createWorkspaceController.workspaceName"

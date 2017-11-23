@@ -15,6 +15,8 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPEC
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElement;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 
 import com.google.inject.Inject;
@@ -64,39 +66,60 @@ public class Dashboard {
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
+  public enum MenuItem {
+    DASHBOARD("Dashboard"),
+    WORKSPACES("Workspaces"),
+    STACKS("Stacks"),
+    FACTORIES("Factories"),
+    USERS("Users"),
+    ORGANIZATIONS("Organizations"),
+    SETTINGS("Settings"),
+    CREATE_TEAM("Create Team");
+    private final String title;
+
+    MenuItem(String title) {
+      this.title = title;
+    }
+  }
+
   private interface Locators {
     String DASHBOARD_TOOLBAR_TITLE = "div [aria-label='Dashboard']";
-    String NEW_PROJECT_LINK = "//a[@href='#/create-project']/span[text()='Create Workspace']";
     String COLLAPSE_DASH_NAVBAR_BTN = "ide-iframe-button-link";
-    String DASHBOARD_ITEM_XPATH = "//a[@href='#/']//span[text()='Dashboard']";
-    String WORKSPACES_ITEM_XPATH = "//a[@href='#/workspaces']//span[text()='Workspaces']";
-    String FACTORIES_ITEM_XPATH = "//a[@href='#/factories']//span[text()='Factories']";
+
+    String DASHBOARD_ITEM = "dashboard-item";
+    String WORKSPACES_ITEM = "workspaces-item";
+    String STACKS_ITEM = "stacks-item";
+    String FACTORIES_ITEM = "factories-item";
+    String ADMINISTRATION_ITEM = "administration-item";
+    String ORGANIZATIONS_ITEM = "organization-item";
+
     String NOTIFICATION_CONTAINER = "che-notification-container";
     String DEVELOPERS_FACE_XPATH = "//img[@class='developers-face']";
     String USER_NAME = "//span[text()='%s']";
+
     String LICENSE_NAG_MESSAGE_XPATH = "//div[contains(@class, 'license-message')]";
   }
 
   @FindBy(css = Locators.DASHBOARD_TOOLBAR_TITLE)
   WebElement dashboardTitle;
 
-  @FindBy(xpath = Locators.NEW_PROJECT_LINK)
-  WebElement newProjectLink;
-
   @FindBy(id = Locators.COLLAPSE_DASH_NAVBAR_BTN)
   WebElement collapseDashNavbarBtn;
 
-  @FindBy(xpath = Locators.WORKSPACES_ITEM_XPATH)
+  @FindBy(id = Locators.DASHBOARD_ITEM)
+  WebElement dashboardItem;
+
+  @FindBy(id = Locators.WORKSPACES_ITEM)
   WebElement workspacesItem;
 
-  @FindBy(xpath = Locators.FACTORIES_ITEM_XPATH)
+  @FindBy(id = Locators.STACKS_ITEM)
+  WebElement stacksItem;
+
+  @FindBy(id = Locators.FACTORIES_ITEM)
   WebElement factoriesItem;
 
   @FindBy(xpath = Locators.DEVELOPERS_FACE_XPATH)
   WebElement developersFace;
-
-  @FindBy(xpath = Locators.DASHBOARD_ITEM_XPATH)
-  WebElement dashboardItem;
 
   @FindBy(id = Locators.NOTIFICATION_CONTAINER)
   WebElement notificationPopUp;
@@ -106,33 +129,34 @@ public class Dashboard {
 
   /** wait button with drop dawn icon (left top corner) */
   public void waitDashboardToolbarTitle() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(dashboardTitle));
-  }
-
-  public void clickOnNewProjectLinkOnDashboard() {
-    waitDashboardToolbarTitle();
-    newProjectLink.click();
-  }
-
-  /** click on the 'Workspaces' item on the dashboard */
-  public void selectWorkspacesItemOnDashboard() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(workspacesItem))
-        .click();
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC).until(visibilityOf(dashboardTitle));
   }
 
   /** click on the 'Dashboard' item on the dashboard */
   public void selectDashboardItemOnDashboard() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(dashboardItem))
+        .until(visibilityOf(dashboardItem))
+        .click();
+  }
+
+  /** click on the 'Workspaces' item on the dashboard */
+  public void selectWorkspacesItemOnDashboard() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOf(workspacesItem))
+        .click();
+  }
+
+  /** click on the 'Stacks' item on the dashboard */
+  public void selectStacksItemOnDashboard() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOf(stacksItem))
         .click();
   }
 
   /** click on the 'Factories' item on the dashboard */
   public void selectFactoriesOnDashbord() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(factoriesItem))
+        .until(visibilityOf(factoriesItem))
         .click();
   }
 
@@ -143,7 +167,7 @@ public class Dashboard {
    */
   public void waitNotificationMessage(String notification) {
     new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
-        .until(ExpectedConditions.textToBePresentInElement(notificationPopUp, notification));
+        .until(textToBePresentInElement(notificationPopUp, notification));
   }
 
   /** wait closing of notification pop up */
@@ -158,13 +182,13 @@ public class Dashboard {
   /** wait opening of notification pop up */
   public void waitNotificationIsOpen() {
     new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(notificationPopUp));
+        .until(visibilityOf(notificationPopUp));
   }
 
   /** Wait developer avatar is present on dashboard */
   public void waitDeveloperFaceImg() {
     new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
-        .until(ExpectedConditions.visibilityOf(developersFace));
+        .until(visibilityOf(developersFace));
   }
 
   /**
@@ -174,9 +198,7 @@ public class Dashboard {
    */
   public void checkUserName(String userName) {
     new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
-        .until(
-            ExpectedConditions.presenceOfElementLocated(
-                By.xpath(String.format(Locators.USER_NAME, userName))));
+        .until(presenceOfElementLocated(By.xpath(String.format(Locators.USER_NAME, userName))));
   }
 
   /**

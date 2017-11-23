@@ -64,13 +64,13 @@ public class ImportMavenProjectFromGitHubTest {
     createWorkspace.selectStack(TestStacksConstants.JAVA.getId());
     createWorkspace.typeWorkspaceName(WORKSPACE);
 
-    projectSourcePage.clickAddOrImportProjectButton();
+    projectSourcePage.clickOnAddOrImportProjectButton();
 
     projectSourcePage.selectSourceTab(ProjectSourcePage.Sources.GIT);
     projectSourcePage.typeGitRepositoryLocation("https://github.com/iedexmain1/guess-project.git");
-    projectSourcePage.clickAdd();
+    projectSourcePage.clickOnAddProjectButton();
 
-    createWorkspace.clickCreate();
+    createWorkspace.clickOnCreateWorkspaceButton();
 
     seleniumWebDriver.switchFromDashboardIframeToIde();
 
