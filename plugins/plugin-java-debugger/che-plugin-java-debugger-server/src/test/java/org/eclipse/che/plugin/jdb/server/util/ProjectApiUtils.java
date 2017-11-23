@@ -19,7 +19,6 @@ import com.google.inject.Injector;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.name.Names;
 import java.io.File;
-import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.eclipse.che.api.core.jsonrpc.commons.transmission.EndpointIdConfigurator;
@@ -31,21 +30,24 @@ import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.project.server.ProjectApiModule;
 import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.impl.NewProjectConfigImpl;
 import org.eclipse.che.api.project.server.impl.ProjectServiceApi;
 import org.eclipse.che.api.project.server.impl.ProjectServiceApiFactory;
 import org.eclipse.che.api.project.server.impl.ProjectServiceVcsStatusInjector;
 import org.eclipse.che.api.project.server.impl.WorkspaceProjectSynchronizer;
 import org.eclipse.che.api.search.server.SearchApiModule;
 import org.eclipse.che.api.watcher.server.FileWatcherApiModule;
+import org.eclipse.che.plugin.java.server.inject.JavaModule;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** @author Anatolii Bazko */
 public class ProjectApiUtils {
 
+  private static final Logger LOG = LoggerFactory.getLogger(ProjectApiUtils.class);
   private static final AtomicBoolean initialized = new AtomicBoolean();
 
   /** Ensures that project api has been initialized only once. */
@@ -53,7 +55,11 @@ public class ProjectApiUtils {
     if (!initialized.get()) {
       synchronized (initialized) {
         if (!initialized.get()) {
-          init();
+          try {
+            init();
+          } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+          }
           initialized.set(true);
         }
       }
@@ -121,6 +127,8 @@ public class ProjectApiUtils {
                 install(new EditorApiModule());
                 install(new FileWatcherApiModule());
                 install(new JsonRpcModule());
+                install(new JavaModule());
+                install(new SearchApiModule());
               }
             });
 
@@ -128,9 +136,11 @@ public class ProjectApiUtils {
     FsManager fsManager = injector.getInstance(FsManager.class);
     PathTransformer pathTransformer = injector.getInstance(PathTransformer.class);
 
+    projectManager.setType("/test", "java", false);
+
     ResourcesPlugin resourcesPlugin =
         new ResourcesPlugin(
-            "target/test-classes/workspace/index",
+            indexDir.getAbsolutePath(),
             root.getAbsolutePath(),
             () -> projectManager,
             () -> pathTransformer,
@@ -140,9 +150,6 @@ public class ProjectApiUtils {
     JavaPlugin javaPlugin =
         new JavaPlugin(root.getAbsolutePath() + "/.settings", resourcesPlugin, projectManager);
     javaPlugin.start();
-
-    projectManager.create(new NewProjectConfigImpl("/test"), Collections.emptyMap());
-    projectManager.setType("/test", "java", false);
 
     JavaModelManager.getDeltaState().initializeRoots(true);
   }
