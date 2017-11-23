@@ -20,6 +20,9 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -124,9 +127,22 @@ public class KeycloakOAuthAuthenticationService {
                       .toString())
               .request()
               .asString();
-      return DtoFactory.newDto(OAuthToken.class).withToken(token);
+      Map<String, String> params = splitQuery(token);
+      return DtoFactory.newDto(OAuthToken.class).withToken(params.get("access_token"))
+          .withScope(params.get("scope"));
     } catch (IOException e) {
       throw new ServerException(e.getMessage());
     }
+  }
+
+  private static Map<String, String> splitQuery(String query) {
+    Map<String, String> queryPairs = new HashMap<>();
+    Arrays.stream(query.split("&"))
+        .forEach(
+            p -> {
+              int delimiterIndex = p.indexOf("=");
+              queryPairs.put(p.substring(0, delimiterIndex), p.substring(delimiterIndex + 1));
+            });
+    return queryPairs;
   }
 }

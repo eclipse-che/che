@@ -10,10 +10,26 @@
  */
 package org.eclipse.che.ide.api.auth;
 
+import javax.inject.Inject;
 import org.eclipse.che.api.auth.shared.dto.OAuthToken;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
+import org.eclipse.che.ide.rest.AsyncRequestFactory;
 
 /** @author Sergii Leschenko */
-public interface OAuthServiceClient {
-  void getToken(String oauthProvider, AsyncRequestCallback<OAuthToken> callback);
+public class OAuthServiceClient {
+  private final AsyncRequestFactory asyncRequestFactory;
+  private final String restContext;
+
+  @Inject
+  public OAuthServiceClient(AppContext appContext, AsyncRequestFactory asyncRequestFactory) {
+    this.asyncRequestFactory = asyncRequestFactory;
+    this.restContext = appContext.getMasterApiEndpoint() + "/oauth";
+  }
+
+  public void getToken(String oauthProvider, AsyncRequestCallback<OAuthToken> callback) {
+    asyncRequestFactory
+        .createGetRequest(restContext + "/token?oauth_provider=" + oauthProvider)
+        .send(callback);
+  }
 }
