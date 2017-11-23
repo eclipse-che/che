@@ -263,8 +263,7 @@ public class CheckoutTest {
     dataProvider = "GitConnectionFactory",
     dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class,
     expectedExceptions = GitException.class,
-    expectedExceptionsMessageRegExp =
-        "A branch named 'new' is not exist in local and remote repo or exists in more than one remote repos"
+    expectedExceptionsMessageRegExp = "A branch named 'new' exists in more than one remote repos"
   )
   public void shouldThrowExceptionIfTheBranchIsPresentInSeveralRemotes(
       GitConnectionFactory connectionFactory)
@@ -287,29 +286,5 @@ public class CheckoutTest {
 
     // when
     connection.checkout(CheckoutParams.create("new"));
-  }
-
-  @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class,
-    expectedExceptions = GitException.class,
-    expectedExceptionsMessageRegExp =
-        "A branch named 'old' is not exist in local and remote repo or exists in more than one remote repos"
-  )
-  public void shouldThrowExceptionIfTheBranchIsNotPresent(GitConnectionFactory connectionFactory)
-      throws GitException, IOException, UnauthorizedException {
-    // given
-    GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
-
-    GitConnection remote1 = connectToGitRepositoryWithContent(connectionFactory, repository1);
-    remote1.checkout(CheckoutParams.create("new").withCreateNew(true));
-
-    connection.remoteAdd(
-        RemoteAddParams.create("origin", remote1.getWorkingDir().getAbsolutePath()));
-
-    connection.fetch(FetchParams.create("origin"));
-
-    // when
-    connection.checkout(CheckoutParams.create("old"));
   }
 }
