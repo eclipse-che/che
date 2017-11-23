@@ -355,7 +355,7 @@ public class ContributePartViewImpl extends BaseView<ContributePartView.ActionDe
   }
 
   @Override
-  public void hideStub() {
+  public void showContent() {
     contributePanel.setVisible(true);
     stubPanel.setVisible(false);
   }

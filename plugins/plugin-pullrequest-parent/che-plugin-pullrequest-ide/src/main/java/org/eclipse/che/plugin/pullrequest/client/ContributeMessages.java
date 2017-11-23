@@ -254,8 +254,11 @@ public interface ContributeMessages extends Messages {
   @Key("stub.text.project.not.provide.vsc")
   String stubTextProjectNotProvideVSC();
 
-  @Key("stub.text.unexpected.error")
-  String unexpectedError();
+  @Key("stub.text.project.is.not.selected")
+  String stubTextProjectIsNotSelected();
+
+  @Key("stub.text.nothing.to.show")
+  String stubTextNothingToShow();
 
   @Key("failed.to.get.vsc.service")
   String failedToGetVSCService(String project, String cause);

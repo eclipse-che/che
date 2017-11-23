@@ -501,8 +501,8 @@ public class ContributePartPresenter extends BasePresenter
     view.showStub(stubContent);
   }
 
-  public void hideStub() {
-    view.hideStub();
+  public void showContent() {
+    view.showContent();
   }
 
   /**

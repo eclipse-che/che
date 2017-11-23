@@ -12,8 +12,6 @@ package org.eclipse.che.plugin.pullrequest.client;
 
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.api.constraints.Constraints.FIRST;
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.parts.PartStackType.TOOLING;
 import static org.eclipse.che.plugin.pullrequest.shared.ContributionProjectTypeConstants.CONTRIBUTE_TO_BRANCH_VARIABLE_NAME;
 import static org.eclipse.che.plugin.pullrequest.shared.ContributionProjectTypeConstants.CONTRIBUTION_PROJECT_TYPE_ID;
@@ -41,6 +39,7 @@ import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.selection.SelectionChangedEvent;
 import org.eclipse.che.ide.api.selection.SelectionChangedHandler;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
+import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.pullrequest.client.parts.contribute.ContributePartPresenter;
 import org.eclipse.che.plugin.pullrequest.client.vcs.VcsService;
 import org.eclipse.che.plugin.pullrequest.client.vcs.VcsServiceProvider;
@@ -147,11 +146,11 @@ public class ContributionMixinProvider {
     if (rootProject == null) {
       if (toolingPartStack.containsPart(contributePart)) {
         invalidateContext(lastSelected);
-        contributePart.showStub(contributeMessages.stubTextProjectNotProvideVSC());
+        contributePart.showStub(contributeMessages.stubTextProjectIsNotSelected());
       }
     } else if (hasVcsService(rootProject)) {
 
-      contributePart.hideStub();
+      contributePart.showContent();
       if (hasContributionMixin(rootProject)) {
 
         vcsHostingServiceProvider
@@ -189,12 +188,11 @@ public class ContributionMixinProvider {
                               public void apply(final PromiseError error)
                                   throws OperationException {
                                 invalidateContext(rootProject);
-                                notificationManager.notify(
+                                Log.error(
+                                    getClass(),
                                     contributeMessages.failedToApplyVSCMixin(
-                                        rootProject.getName(), error.getMessage()),
-                                    FAIL,
-                                    FLOAT_MODE);
-                                contributePart.showStub(contributeMessages.unexpectedError());
+                                        rootProject.getName(), error.getMessage()));
+                                contributePart.showStub(contributeMessages.stubTextNothingToShow());
                               }
                             });
                   }
@@ -204,12 +202,11 @@ public class ContributionMixinProvider {
                   @Override
                   public void apply(final PromiseError error) throws OperationException {
                     invalidateContext(rootProject);
-                    notificationManager.notify(
+                    Log.error(
+                        getClass(),
                         contributeMessages.failedToGetVSCService(
-                            rootProject.getName(), error.getMessage()),
-                        FAIL,
-                        FLOAT_MODE);
-                    contributePart.showStub(contributeMessages.unexpectedError());
+                            rootProject.getName(), error.getMessage()));
+                    contributePart.showStub(contributeMessages.stubTextNothingToShow());
                   }
                 });
       }

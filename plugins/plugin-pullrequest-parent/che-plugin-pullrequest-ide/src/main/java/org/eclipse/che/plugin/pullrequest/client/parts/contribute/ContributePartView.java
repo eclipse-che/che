@@ -150,8 +150,8 @@ public interface ContributePartView extends View<ContributePartView.ActionDelega
    */
   void showStub(String content);
 
-  /** Hide stub. */
-  void hideStub();
+  /** Hide stub and show content panel. */
+  void showContent();
 
   /** Hide the new contribution section. */
   void hideNewContributionSection();
