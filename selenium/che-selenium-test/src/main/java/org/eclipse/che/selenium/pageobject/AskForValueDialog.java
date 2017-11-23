@@ -16,6 +16,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
+import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
@@ -137,7 +138,10 @@ public class AskForValueDialog {
   }
 
   public void typeAndWaitText(String text) {
-    input.sendKeys(text);
+    waitFormToOpen();
+    new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOf(input))
+        .sendKeys(text);
     waitInputNameContains(text);
   }
 
