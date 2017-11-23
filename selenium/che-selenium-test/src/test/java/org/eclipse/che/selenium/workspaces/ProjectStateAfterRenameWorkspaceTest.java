@@ -27,6 +27,8 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
+import org.openqa.selenium.TimeoutException;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -94,9 +96,15 @@ public class ProjectStateAfterRenameWorkspaceTest {
     dashboardWorkspace.clickOpenInIdeWsBtn();
     loader.waitOnClosed();
     seleniumWebDriver.switchFromDashboardIframeToIde();
-    projectExplorer.waitProjectExplorer();
-    projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/index.jsp");
+    try {
+      projectExplorer.waitProjectExplorer();
+      projectExplorer.waitItem(PROJECT_NAME);
+      projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/index.jsp");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      Assert.fail("Known issue https://github.com/eclipse/che/issues/3574");
+    }
+
     projectExplorer.waitItem(
         PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
     events.clickEventLogBtn();
