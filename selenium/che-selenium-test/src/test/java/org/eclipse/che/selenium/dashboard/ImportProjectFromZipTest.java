@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.dashboard;
 
+import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Sources.ZIP;
+
 import com.google.inject.Inject;
 import java.util.concurrent.ExecutionException;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -67,7 +69,7 @@ public class ImportProjectFromZipTest {
     createWorkspace.typeWorkspaceName(WORKSPACE);
 
     projectSourcePage.clickOnAddOrImportProjectButton();
-    projectSourcePage.selectSourceTab(ProjectSourcePage.Sources.ZIP);
+    projectSourcePage.selectSourceTab(ZIP);
     projectSourcePage.typeZipLocation(
         "https://github.com/iedexmain1/multimodule-project/archive/master.zip");
     projectSourcePage.skipRootFolder();

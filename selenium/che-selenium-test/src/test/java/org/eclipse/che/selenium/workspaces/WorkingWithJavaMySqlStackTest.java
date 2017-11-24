@@ -10,8 +10,14 @@
  */
 package org.eclipse.che.selenium.workspaces;
 
+import static org.eclipse.che.selenium.core.constant.TestBuildConstants.BUILD_SUCCESS;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.pageobject.ProjectExplorer.CommandsGoal.COMMON;
+import static org.eclipse.che.selenium.pageobject.ProjectExplorer.CommandsGoal.RUN;
+import static org.openqa.selenium.Keys.ENTER;
+import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
 import java.util.Arrays;
@@ -19,7 +25,6 @@ import java.util.List;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.constant.TestBuildConstants;
 import org.eclipse.che.selenium.core.constant.TestStacksConstants;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.AskDialog;
@@ -36,8 +41,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.Workspaces;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
@@ -45,7 +48,7 @@ import org.testng.annotations.Test;
 /** @author Aleksandr Shmaraev */
 public class WorkingWithJavaMySqlStackTest {
   private static final String WORKSPACE = NameGenerator.generate("java-mysql", 4);
-  private static final String PROJECT_NAME = "web-java-petclinic";
+  private static final String PROJECT_NAME = NameGenerator.generate("project", 4);
   private static final String PROCESS_NAME = PROJECT_NAME + ":build and deploy";
 
   private static final List<String> infoDataBases =
@@ -123,8 +126,7 @@ public class WorkingWithJavaMySqlStackTest {
     editor.waitActiveEditor();
 
     // select the db machine and perform 'show databases'
-    projectExplorer.invokeCommandWithContextMenu(
-        ProjectExplorer.CommandsGoal.COMMON, PROJECT_NAME, "show databases", "db");
+    projectExplorer.invokeCommandWithContextMenu(COMMON, PROJECT_NAME, "show databases", "db");
     loader.waitOnClosed();
     for (String text : infoDataBases) {
       consoles.waitExpectedTextIntoConsole(text);
@@ -132,11 +134,11 @@ public class WorkingWithJavaMySqlStackTest {
 
     // build and deploy the web application
     projectExplorer.invokeCommandWithContextMenu(
-        ProjectExplorer.CommandsGoal.RUN, PROJECT_NAME, "build and deploy", "dev-machine");
+        RUN, PROJECT_NAME, "build and deploy", "dev-machine");
     loader.waitOnClosed();
     consoles.waitTabNameProcessIsPresent(PROCESS_NAME);
     consoles.waitProcessInProcessConsoleTree(PROCESS_NAME);
-    consoles.waitExpectedTextIntoConsole(TestBuildConstants.BUILD_SUCCESS, 150);
+    consoles.waitExpectedTextIntoConsole(BUILD_SUCCESS, 150);
     consoles.waitExpectedTextIntoConsole("Server startup in", 200);
     consoles.waitPreviewUrlIsPresent();
 
@@ -157,19 +159,17 @@ public class WorkingWithJavaMySqlStackTest {
     consoles.selectProcessByTabName("Terminal");
     loader.waitOnClosed();
     terminal.typeIntoTerminal("ps ax | grep tomcat8");
-    terminal.typeIntoTerminal(Keys.ENTER.toString());
+    terminal.typeIntoTerminal(ENTER.toString());
     terminal.waitExpectedTextNotPresentTerminal("catalina.startup.Bootstrap start");
   }
 
   /** check main elements of the web-java-petclinic */
   private void checkWebJavaPetclinicAppl() {
     new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//h2[text()='Welcome']")));
+        .until(visibilityOfElementLocated(By.xpath("//h2[text()='Welcome']")));
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath("//div[@class='navbar-inner']")));
+        .until(visibilityOfElementLocated(By.xpath("//div[@class='navbar-inner']")));
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.presenceOfElementLocated(By.xpath("//table[@class='footer']")));
+        .until(presenceOfElementLocated(By.xpath("//table[@class='footer']")));
   }
 }

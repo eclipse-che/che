@@ -73,21 +73,10 @@ public class ProjectSourcePage {
     String CANCEL_BUTTON = "cancel-button";
   }
 
-  public enum Template {
-    WEB_JAVA_SPRING("web-java-spring"),
-    CONSOLE_JAVA_SIMPLE("console-java-simple"),
-    WEB_JAVA_PETCLINIC("web-java-petclinic");
-
-    private final String value;
-
-    Template(String value) {
-      this.value = value;
-    }
-
-    /** @return name of template displayed in dashboard. */
-    public String value() {
-      return value;
-    }
+  public interface Template {
+    String WEB_JAVA_SPRING = "web-java-spring";
+    String CONSOLE_JAVA_SIMPLE = "console-java-simple";
+    String WEB_JAVA_PETCLINIC = "web-java-petclinic";
   }
 
   @FindBy(id = Locators.ADD_OR_IMPORT_PROJECT_BUTTON)

@@ -10,6 +10,10 @@
  */
 package org.eclipse.che.selenium.dashboard;
 
+import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.StateWorkspace.RUNNING;
+import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.StateWorkspace.STOPPED;
+import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.TabNames.OVERVIEW;
+
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
@@ -40,10 +44,10 @@ public class DeleteStoppingWorkspaceTest {
     dashboard.waitToolbarTitleName("Workspaces");
     workspaces.selectWorkspaceItemName(workspaceName);
     workspaces.waitToolbarTitleName(workspaceName);
-    workspaceDetails.selectTabInWorspaceMenu(WorkspaceDetails.TabNames.OVERVIEW);
-    workspaceDetails.checkStateOfWorkspace(WorkspaceDetails.StateWorkspace.RUNNING);
+    workspaceDetails.selectTabInWorspaceMenu(OVERVIEW);
+    workspaceDetails.checkStateOfWorkspace(RUNNING);
     workspaceDetails.clickOnStopWorkspace();
-    workspaceDetails.checkStateOfWorkspace(WorkspaceDetails.StateWorkspace.STOPPED);
+    workspaceDetails.checkStateOfWorkspace(STOPPED);
     workspaceDetails.clickOnDeleteWorkspace();
     workspaceDetails.clickOnDeleteItInDialogWindow();
     workspaces.waitWorkspaceIsNotPresent(workspaceName);

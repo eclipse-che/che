@@ -518,6 +518,7 @@ public class WorkspaceDetails {
             invisibilityOfElementLocated(By.xpath(format(Locators.DEVELOPER_SHARE_ITEM, email))));
   }
 
+  // TODO            DIALOG BUTTONS
   public void clickOnEditDialogButton() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(By.xpath(Locators.EDIT_MACHINE_NAME_BUTTON)))

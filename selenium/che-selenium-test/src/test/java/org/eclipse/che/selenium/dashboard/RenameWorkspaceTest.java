@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.dashboard;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.StateWorkspace.STARTING;
 import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.StateWorkspace.STOPPING;
+import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.TabNames.OVERVIEW;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
@@ -67,7 +68,7 @@ public class RenameWorkspaceTest {
     dashboard.waitToolbarTitleName("Workspaces");
     workspaces.selectWorkspaceItemName(workspaceName);
     workspaces.waitToolbarTitleName(workspaceName);
-    workspaceDetails.selectTabInWorspaceMenu(WorkspaceDetails.TabNames.OVERVIEW);
+    workspaceDetails.selectTabInWorspaceMenu(OVERVIEW);
 
     // type name with 1 characters and check error message that this name is too short
     workspaceDetails.enterNameWorkspace("w");

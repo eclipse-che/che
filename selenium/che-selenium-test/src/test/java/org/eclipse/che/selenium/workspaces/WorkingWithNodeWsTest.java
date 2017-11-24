@@ -133,7 +133,7 @@ public class WorkingWithNodeWsTest {
   }
 
   /** check main elements of the AngularJS-Yeoman */
-  public void checkAngularYeomanAppl() {
+  private void checkAngularYeomanAppl() {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(

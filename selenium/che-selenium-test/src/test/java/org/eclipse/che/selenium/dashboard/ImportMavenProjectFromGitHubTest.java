@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.dashboard;
 
+import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Sources.GIT;
+
 import com.google.inject.Inject;
 import java.util.concurrent.ExecutionException;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -68,7 +70,7 @@ public class ImportMavenProjectFromGitHubTest {
 
     projectSourcePage.clickOnAddOrImportProjectButton();
 
-    projectSourcePage.selectSourceTab(ProjectSourcePage.Sources.GIT);
+    projectSourcePage.selectSourceTab(GIT);
     projectSourcePage.typeGitRepositoryLocation("https://github.com/iedexmain1/guess-project.git");
     projectSourcePage.clickOnAddProjectButton();
 

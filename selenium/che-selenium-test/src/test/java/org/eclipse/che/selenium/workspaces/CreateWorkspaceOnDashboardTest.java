@@ -10,13 +10,13 @@
  */
 package org.eclipse.che.selenium.workspaces;
 
+import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.constant.TestStacksConstants;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
@@ -61,7 +61,7 @@ public class CreateWorkspaceOnDashboardTest {
 
     createWorkspace.waitToolbar();
     createWorkspace.typeWorkspaceName(WORKSPACE);
-    createWorkspace.selectStack(TestStacksConstants.JAVA.getId());
+    createWorkspace.selectStack(JAVA.getId());
     createWorkspace.setMachineRAM("2");
     createWorkspace.clickOnCreateWorkspaceButton();
 

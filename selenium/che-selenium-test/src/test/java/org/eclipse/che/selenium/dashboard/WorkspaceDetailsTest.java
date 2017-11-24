@@ -11,9 +11,15 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
+import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.WEB_JAVA_PETCLINIC;
 import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.StateWorkspace.RUNNING;
 import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.StateWorkspace.STOPPED;
+import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.TabNames.ENV_VARIABLES;
+import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.TabNames.INSTALLERS;
+import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.TabNames.MACHINES;
 import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.TabNames.OVERVIEW;
+import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.TabNames.PROJECTS;
+import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.TabNames.SERVERS;
 
 import com.google.inject.Inject;
 import java.util.HashMap;
@@ -34,7 +40,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.DashboardProject;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails;
-import org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.TabNames;
 import org.eclipse.che.selenium.pageobject.dashboard.Workspaces;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -77,7 +82,7 @@ public class WorkspaceDetailsTest {
 
   @Test
   public void workingWithEnvVariables() {
-    workspaceDetails.selectTabInWorspaceMenu(TabNames.ENV_VARIABLES);
+    workspaceDetails.selectTabInWorspaceMenu(ENV_VARIABLES);
 
     // create a new variable, save changes and check it exists
     workspaceDetails.selectMachine("Environment variables", "dev-machine");
@@ -130,7 +135,7 @@ public class WorkspaceDetailsTest {
 
   @Test
   public void workingWithInstallers() {
-    workspaceDetails.selectTabInWorspaceMenu(TabNames.INSTALLERS);
+    workspaceDetails.selectTabInWorspaceMenu(INSTALLERS);
 
     // check all needed installers in dev-machine exist
     workspaceDetails.selectMachine("Workspace Installers", "dev-machine");
@@ -164,7 +169,7 @@ public class WorkspaceDetailsTest {
 
   @Test
   public void workingWithServers() {
-    workspaceDetails.selectTabInWorspaceMenu(TabNames.SERVERS);
+    workspaceDetails.selectTabInWorspaceMenu(SERVERS);
 
     // add a new server to db machine, save changes and check it exists
     workspaceDetails.selectMachine("Servers", "db");
@@ -197,7 +202,7 @@ public class WorkspaceDetailsTest {
     String machineName = "new_machine";
 
     // check that all machines of the Java-MySql stack created by default exist
-    workspaceDetails.selectTabInWorspaceMenu(TabNames.MACHINES);
+    workspaceDetails.selectTabInWorspaceMenu(MACHINES);
     workspaceDetails.checkMachineExists("db");
     workspaceDetails.checkMachineExists("dev-machine");
 
@@ -222,7 +227,7 @@ public class WorkspaceDetailsTest {
 
   @Test(priority = 1)
   public void workingWithProjects() {
-    workspaceDetails.selectTabInWorspaceMenu(TabNames.PROJECTS);
+    workspaceDetails.selectTabInWorspaceMenu(PROJECTS);
 
     // create a new project and save changes
     dashboardProject.clickOnAddNewProjectButton();
@@ -231,15 +236,14 @@ public class WorkspaceDetailsTest {
     clickOnSaveButton();
 
     // check that project exists(workspace will restart)
-    dashboardProject.waitProjectIsPresent(ProjectSourcePage.Template.WEB_JAVA_PETCLINIC.value());
+    dashboardProject.waitProjectIsPresent(WEB_JAVA_PETCLINIC);
 
     // start the workspace and check that the new project exists
     workspaceDetails.clickOpenInIdeWsBtn();
     seleniumWebDriver.switchFromDashboardIframeToIde();
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.waitFolderDefinedTypeOfFolderByPath(
-        ProjectSourcePage.Template.WEB_JAVA_PETCLINIC.value(), PROJECT_FOLDER);
+    projectExplorer.waitFolderDefinedTypeOfFolderByPath(WEB_JAVA_PETCLINIC, PROJECT_FOLDER);
 
     // check that created machine exists in the Process Console tree
     consoles.waitProcessInProcessConsoleTree("machine");
