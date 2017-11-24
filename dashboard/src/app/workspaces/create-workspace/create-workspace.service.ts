@@ -219,22 +219,6 @@ export class CreateWorkspaceSvc {
   }
 
   /**
-   * Creates bunch of projects.
-   *
-   * @param {string} workspaceId the workspace ID
-   * @param {Array<che.IProjectTemplate>} projectTemplates the list of project templates to create
-   * @return {IPromise<any>}
-   */
-  createProjects(workspaceId: string, projectTemplates: Array<che.IProjectTemplate>): ng.IPromise<any> {
-    if (projectTemplates.length === 0) {
-      return this.$q.reject();
-    }
-
-    const workspaceAgent = this.cheWorkspace.getWorkspaceAgent(workspaceId);
-    return workspaceAgent.getProject().createProjects(projectTemplates);
-  }
-
-  /**
    * Adds commands from the bunch of project templates to provided workspace config.
    *
    * @param {che.IWorkspaceConfig} workspaceConfig workspace config
@@ -250,54 +234,6 @@ export class CreateWorkspaceSvc {
         workspaceConfig.commands.push(command);
       });
     });
-  }
-
-  /**
-   * Adds bunch of commands for project in row.
-   * Returns resolved promise if all commands are imported properly, otherwise returns rejected promise with list of names of failed commands.
-   *
-   * @param {string} workspaceId the workspace ID
-   * @param {string} projectName the name of project
-   * @param {any[]} projectCommands the list of commands
-   * @return {IPromise<any>}
-   */
-  addCommands(workspaceId: string, projectName: string, projectCommands: any[]): ng.IPromise<any> {
-    const defer = this.$q.defer();
-    defer.resolve();
-    let accumulatorPromise = defer.promise;
-
-    if (projectCommands.length === 0) {
-      return accumulatorPromise;
-    }
-
-    const failedCommands = [];
-
-    accumulatorPromise = projectCommands.reduce((_accumulatorPromise: ng.IPromise<any>, command: any) => {
-      command.name = projectName + ':' + command.name;
-      return _accumulatorPromise.then(() => {
-        return this.cheWorkspace.addCommand(workspaceId, command);
-      }, (error: any) => {
-        failedCommands.push(command.name);
-        if (error && error.message) {
-          this.$log.error(`Adding of command "${command.name}" failed for project "${projectName}" with error: ${error}`);
-        }
-      });
-    }, accumulatorPromise);
-
-    return accumulatorPromise.then(() => {
-      if (failedCommands.length) {
-        return this.$q.reject(failedCommands);
-      }
-      return this.$q.when();
-    });
-  }
-
-  private getIDE(): any {
-    const jqIframe = this.$document.find('#ide-application-iframe');
-    if (!jqIframe || jqIframe.length === 0) {
-      return null;
-    }
-    return (jqIframe as any).contentWindow.IDE;
   }
 
 }

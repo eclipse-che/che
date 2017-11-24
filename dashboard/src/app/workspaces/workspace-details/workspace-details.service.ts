@@ -302,7 +302,7 @@ export class WorkspaceDetailsService {
         }
 
         // add commands
-        return this.createWorkspaceSvc.addProjectCommands(newWorkspace.id, projectTemplatesToAdd);
+        return this.createWorkspaceSvc.addProjectCommands(newWorkspace.config, projectTemplatesToAdd);
       }).then(() => {
         if (WorkspaceStatus[initStatus] === WorkspaceStatus.STOPPED || WorkspaceStatus[initStatus] === WorkspaceStatus.STOPPING) {
           // stop workspace
