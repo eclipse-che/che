@@ -10,9 +10,9 @@
  */
 package org.eclipse.che.selenium.dashboard;
 
-import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.StateWorkspace.RUNNING;
-import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.StateWorkspace.STOPPING;
-import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.TabNames.OVERVIEW;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetails.StateWorkspace.RUNNING;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetails.StateWorkspace.STOPPING;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetails.TabNames.OVERVIEW;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
@@ -20,8 +20,9 @@ import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.Workspaces;
+import org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetails;
+import org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetailsOverview;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -35,6 +36,7 @@ public class DeleteRunningWorkspaceTest {
   @Inject private TestUser user;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private Workspaces workspaces;
+  @Inject private WorkspaceDetailsOverview workspaceDetailsOverview;
 
   private String workspaceName;
 
@@ -51,8 +53,8 @@ public class DeleteRunningWorkspaceTest {
     workspaces.waitToolbarTitleName(workspaceName);
     workspaceDetails.selectTabInWorspaceMenu(OVERVIEW);
     workspaceDetails.checkStateOfWorkspace(RUNNING);
-    workspaceDetails.clickOnDeleteWorkspace();
-    workspaceDetails.clickOnDeleteItInDialogWindow();
+    workspaceDetailsOverview.clickOnDeleteWorkspace();
+    workspaceDetails.clickOnDeleteButtonInDialogWindow();
     workspaceDetails.checkStateOfWorkspace(STOPPING);
     dashboard.waitToolbarTitleName("Workspaces");
     workspaces.waitWorkspaceIsNotPresent(workspaceName);

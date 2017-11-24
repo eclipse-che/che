@@ -11,9 +11,9 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.StateWorkspace.STARTING;
-import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.StateWorkspace.STOPPING;
-import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.TabNames.OVERVIEW;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetails.StateWorkspace.STARTING;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetails.StateWorkspace.STOPPING;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetails.TabNames.OVERVIEW;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
@@ -23,8 +23,9 @@ import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.Workspaces;
+import org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetails;
+import org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetailsOverview;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -46,6 +47,7 @@ public class RenameWorkspaceTest {
   @Inject private TestUser user;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private Workspaces workspaces;
+  @Inject private WorkspaceDetailsOverview workspaceDetailsOverview;
 
   private String workspaceName;
 
@@ -71,16 +73,16 @@ public class RenameWorkspaceTest {
     workspaceDetails.selectTabInWorspaceMenu(OVERVIEW);
 
     // type name with 1 characters and check error message that this name is too short
-    workspaceDetails.enterNameWorkspace("w");
-    assertTrue(workspaceDetails.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_SHORT));
-    workspaceDetails.clickOnCancelBtn();
-    workspaceDetails.checkNameWorkspace(workspaceName);
+    workspaceDetailsOverview.enterNameWorkspace("w");
+    assertTrue(workspaceDetailsOverview.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_SHORT));
+    workspaceDetails.clickOnCancelChangesBtn();
+    workspaceDetailsOverview.checkNameWorkspace(workspaceName);
 
     // type name with 101 characters and check error message that this name is too long
-    workspaceDetails.enterNameWorkspace(MAX_WORKSPACE_NAME + "a");
-    assertTrue(workspaceDetails.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_LONG));
-    workspaceDetails.clickOnCancelBtn();
-    workspaceDetails.checkNameWorkspace(workspaceName);
+    workspaceDetailsOverview.enterNameWorkspace(MAX_WORKSPACE_NAME + "a");
+    assertTrue(workspaceDetailsOverview.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_LONG));
+    workspaceDetails.clickOnCancelChangesBtn();
+    workspaceDetailsOverview.checkNameWorkspace(workspaceName);
 
     // type a name with min possible size and check that the workspace renamed
     renameWorkspace(MIN_WORKSPACE_NAME);
@@ -90,15 +92,15 @@ public class RenameWorkspaceTest {
   }
 
   private void renameWorkspace(String name) {
-    workspaceDetails.enterNameWorkspace(name);
-    assertFalse(workspaceDetails.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_SHORT));
-    assertFalse(workspaceDetails.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_LONG));
+    workspaceDetailsOverview.enterNameWorkspace(name);
+    assertFalse(workspaceDetailsOverview.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_SHORT));
+    assertFalse(workspaceDetailsOverview.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_LONG));
     saveAndWaitWorkspaceRestarted();
-    workspaceDetails.checkNameWorkspace(name);
+    workspaceDetailsOverview.checkNameWorkspace(name);
   }
 
   private void saveAndWaitWorkspaceRestarted() {
-    workspaceDetails.clickOnSaveBtn();
+    workspaceDetails.clickOnSaveChangesBtn();
     workspaceDetails.checkStateOfWorkspace(STOPPING);
     workspaceDetails.checkStateOfWorkspace(STARTING);
     dashboard.waitNotificationMessage("Workspace updated");

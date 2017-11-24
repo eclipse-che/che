@@ -10,15 +10,16 @@
  */
 package org.eclipse.che.selenium.dashboard;
 
-import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.StateWorkspace.RUNNING;
-import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.StateWorkspace.STOPPED;
-import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.TabNames.OVERVIEW;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetails.StateWorkspace.RUNNING;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetails.StateWorkspace.STOPPED;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetails.TabNames.OVERVIEW;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.Workspaces;
+import org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetails;
+import org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetailsOverview;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -29,6 +30,7 @@ public class DeleteStoppingWorkspaceTest {
   @Inject private WorkspaceDetails workspaceDetails;
   @Inject private TestWorkspace ws;
   @Inject private Workspaces workspaces;
+  @Inject private WorkspaceDetailsOverview workspaceDetailsOverview;
 
   private String workspaceName;
 
@@ -48,8 +50,8 @@ public class DeleteStoppingWorkspaceTest {
     workspaceDetails.checkStateOfWorkspace(RUNNING);
     workspaceDetails.clickOnStopWorkspace();
     workspaceDetails.checkStateOfWorkspace(STOPPED);
-    workspaceDetails.clickOnDeleteWorkspace();
-    workspaceDetails.clickOnDeleteItInDialogWindow();
+    workspaceDetailsOverview.clickOnDeleteWorkspace();
+    workspaceDetails.clickOnDeleteButtonInDialogWindow();
     workspaces.waitWorkspaceIsNotPresent(workspaceName);
     dashboard.waitToolbarTitleName("Workspaces");
   }

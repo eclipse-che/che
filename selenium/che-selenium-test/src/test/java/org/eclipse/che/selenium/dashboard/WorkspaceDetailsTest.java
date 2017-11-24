@@ -12,14 +12,14 @@ package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.WEB_JAVA_PETCLINIC;
-import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.StateWorkspace.RUNNING;
-import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.StateWorkspace.STOPPED;
-import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.TabNames.ENV_VARIABLES;
-import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.TabNames.INSTALLERS;
-import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.TabNames.MACHINES;
-import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.TabNames.OVERVIEW;
-import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.TabNames.PROJECTS;
-import static org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails.TabNames.SERVERS;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetails.StateWorkspace.RUNNING;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetails.StateWorkspace.STOPPED;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetails.TabNames.ENV_VARIABLES;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetails.TabNames.INSTALLERS;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetails.TabNames.MACHINES;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetails.TabNames.OVERVIEW;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetails.TabNames.PROJECTS;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetails.TabNames.SERVERS;
 
 import com.google.inject.Inject;
 import java.util.HashMap;
@@ -36,11 +36,15 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.dashboard.DashboardProject;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
-import org.eclipse.che.selenium.pageobject.dashboard.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.Workspaces;
+import org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetails;
+import org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetailsEnvVariables;
+import org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetailsInstallers;
+import org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetailsMachines;
+import org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetailsProject;
+import org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetailsServers;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -64,10 +68,14 @@ public class WorkspaceDetailsTest {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
-  @Inject private DashboardProject dashboardProject;
+  @Inject private WorkspaceDetailsProject workspaceDetailsProject;
   @Inject private Consoles consoles;
   @Inject private Workspaces workspaces;
   @Inject private ProjectSourcePage projectSourcePage;
+  @Inject private WorkspaceDetailsMachines workspaceDetailsMachines;
+  @Inject private WorkspaceDetailsServers workspaceDetailsServers;
+  @Inject private WorkspaceDetailsInstallers workspaceDetailsInstallers;
+  @Inject private WorkspaceDetailsEnvVariables workspaceDetailsEnvVariables;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -85,36 +93,36 @@ public class WorkspaceDetailsTest {
     workspaceDetails.selectTabInWorspaceMenu(ENV_VARIABLES);
 
     // create a new variable, save changes and check it exists
-    workspaceDetails.selectMachine("Environment variables", "dev-machine");
-    workspaceDetails.clickOnAddEnvVariableButton();
-    workspaceDetails.checkAddNewEnvVarialbleDialogIsOpen();
-    workspaceDetails.addNewEnvironmentVariable("logi", "admin");
-    workspaceDetails.clickOnAddDialogButton();
+    workspaceDetailsMachines.selectMachine("Environment variables", "dev-machine");
+    workspaceDetailsEnvVariables.clickOnAddEnvVariableButton();
+    workspaceDetailsEnvVariables.checkAddNewEnvVarialbleDialogIsOpen();
+    workspaceDetailsEnvVariables.addNewEnvironmentVariable("logi", "admin");
+    workspaceDetails.clickOnAddButtonInDialogWindow();
     clickOnSaveButton();
-    Assert.assertTrue(workspaceDetails.checkEnvVariableExists("logi"));
+    Assert.assertTrue(workspaceDetailsEnvVariables.checkEnvVariableExists("logi"));
 
     // rename the variable, save changes and check it is renamed
-    Assert.assertTrue(workspaceDetails.checkValueExists("logi", "admin"));
-    workspaceDetails.clickOnEditEnvVariableButton("logi");
-    workspaceDetails.enterEnvVariableName("login");
-    workspaceDetails.clickOnUpdateDialogButton();
+    Assert.assertTrue(workspaceDetailsEnvVariables.checkValueExists("logi", "admin"));
+    workspaceDetailsEnvVariables.clickOnEditEnvVariableButton("logi");
+    workspaceDetailsEnvVariables.enterEnvVariableName("login");
+    workspaceDetails.clickOnUpdateButtonInDialogWindow();
     clickOnSaveButton();
-    Assert.assertTrue(workspaceDetails.checkValueExists("login", "admin"));
+    Assert.assertTrue(workspaceDetailsEnvVariables.checkValueExists("login", "admin"));
 
     // delete the variable, save changes and check it is not exists
-    workspaceDetails.clickOnEnvVariableCheckbox("login");
-    workspaceDetails.clickOnDeleteBtn();
-    workspaceDetails.clickOnDeleteDialogButton();
+    workspaceDetailsEnvVariables.clickOnEnvVariableCheckbox("login");
+    workspaceDetailsEnvVariables.clickOnDeleteEnvVariableButton("login");
+    workspaceDetails.clickOnDeleteButtonInDialogWindow();
     clickOnSaveButton();
-    workspaceDetails.checkValueIsNotExists("login", "admin");
+    workspaceDetailsEnvVariables.checkValueIsNotExists("login", "admin");
 
     // delete all variable from db machine, check they don't exist and save changes
-    workspaceDetails.selectMachine("Environment variables", "db");
+    workspaceDetailsMachines.selectMachine("Environment variables", "db");
     variables.forEach(
         (name, value) -> {
-          workspaceDetails.clickOnDeleteEnvVariableButton(name);
-          workspaceDetails.clickOnDeleteDialogButton();
-          workspaceDetails.checkValueIsNotExists(name, value);
+          workspaceDetailsEnvVariables.clickOnDeleteEnvVariableButton(name);
+          workspaceDetails.clickOnDeleteButtonInDialogWindow();
+          workspaceDetailsEnvVariables.checkValueIsNotExists(name, value);
         });
 
     clickOnSaveButton();
@@ -123,12 +131,12 @@ public class WorkspaceDetailsTest {
     variables.forEach(
         (name, value) -> {
           loader.waitOnClosed();
-          workspaceDetails.clickOnAddEnvVariableButton();
-          workspaceDetails.checkAddNewEnvVarialbleDialogIsOpen();
-          workspaceDetails.addNewEnvironmentVariable(name, value);
-          workspaceDetails.clickOnAddDialogButton();
-          Assert.assertTrue(workspaceDetails.checkEnvVariableExists(name));
-          Assert.assertTrue(workspaceDetails.checkValueExists(name, value));
+          workspaceDetailsEnvVariables.clickOnAddEnvVariableButton();
+          workspaceDetailsEnvVariables.checkAddNewEnvVarialbleDialogIsOpen();
+          workspaceDetailsEnvVariables.addNewEnvironmentVariable(name, value);
+          workspaceDetails.clickOnAddButtonInDialogWindow();
+          Assert.assertTrue(workspaceDetailsEnvVariables.checkEnvVariableExists(name));
+          Assert.assertTrue(workspaceDetailsEnvVariables.checkValueExists(name, value));
         });
     clickOnSaveButton();
   }
@@ -138,17 +146,17 @@ public class WorkspaceDetailsTest {
     workspaceDetails.selectTabInWorspaceMenu(INSTALLERS);
 
     // check all needed installers in dev-machine exist
-    workspaceDetails.selectMachine("Workspace Installers", "dev-machine");
+    workspaceDetailsMachines.selectMachine("Workspace Installers", "dev-machine");
     installers.forEach(
         (name, value) -> {
-          workspaceDetails.checkInstallerExists(name);
+          workspaceDetailsInstallers.checkInstallerExists(name);
         });
 
     // switch all installers and save changes
     installers.forEach(
         (name, value) -> {
-          Assert.assertEquals(workspaceDetails.getInstallerState(name), value);
-          workspaceDetails.switchInstallerState(name);
+          Assert.assertEquals(workspaceDetailsInstallers.getInstallerState(name), value);
+          workspaceDetailsInstallers.switchInstallerState(name);
           WaitUtils.sleepQuietly(1);
         });
     clickOnSaveButton();
@@ -157,13 +165,13 @@ public class WorkspaceDetailsTest {
     // Java-MySql stack)
     installers.forEach(
         (name, value) -> {
-          workspaceDetails.switchInstallerState(name);
+          workspaceDetailsInstallers.switchInstallerState(name);
           loader.waitOnClosed();
         });
     clickOnSaveButton();
     installers.forEach(
         (name, value) -> {
-          Assert.assertEquals(workspaceDetails.getInstallerState(name), value);
+          Assert.assertEquals(workspaceDetailsInstallers.getInstallerState(name), value);
         });
   }
 
@@ -172,29 +180,29 @@ public class WorkspaceDetailsTest {
     workspaceDetails.selectTabInWorspaceMenu(SERVERS);
 
     // add a new server to db machine, save changes and check it exists
-    workspaceDetails.selectMachine("Servers", "db");
-    workspaceDetails.clickOnAddServerButton();
-    workspaceDetails.waitAddServerDialogIsOpen();
-    workspaceDetails.enterReference("agen");
-    workspaceDetails.enterPort("8080");
-    workspaceDetails.enterProtocol("https");
-    workspaceDetails.clickOnAddDialogButton();
+    workspaceDetailsMachines.selectMachine("Servers", "db");
+    workspaceDetailsServers.clickOnAddServerButton();
+    workspaceDetailsServers.waitAddServerDialogIsOpen();
+    workspaceDetailsServers.enterReference("agen");
+    workspaceDetailsServers.enterPort("8080");
+    workspaceDetailsServers.enterProtocol("https");
+    workspaceDetails.clickOnAddButtonInDialogWindow();
     clickOnSaveButton();
-    workspaceDetails.checkServerExists("agen", "8080");
+    workspaceDetailsServers.checkServerExists("agen", "8080");
 
     // edit the server and check it exists
-    workspaceDetails.clickOnEditServerButton("agen");
-    workspaceDetails.enterReference("agent");
-    workspaceDetails.enterPort("80");
-    workspaceDetails.enterProtocol("http");
-    workspaceDetails.clickOnUpdateDialogButton();
-    workspaceDetails.checkServerExists("agent", "80");
+    workspaceDetailsServers.clickOnEditServerButton("agen");
+    workspaceDetailsServers.enterReference("agent");
+    workspaceDetailsServers.enterPort("80");
+    workspaceDetailsServers.enterProtocol("http");
+    workspaceDetails.clickOnUpdateButtonInDialogWindow();
+    workspaceDetailsServers.checkServerExists("agent", "80");
 
     // delete the server and check it is not exist
-    workspaceDetails.clickOnDeleteServerButton("agent");
-    workspaceDetails.clickOnDeleteDialogButton();
+    workspaceDetailsServers.clickOnDeleteServerButton("agent");
+    workspaceDetails.clickOnDeleteButtonInDialogWindow();
     clickOnSaveButton();
-    workspaceDetails.checkServerIsNotExists("agent", "80");
+    workspaceDetailsServers.checkServerIsNotExists("agent", "80");
   }
 
   @Test
@@ -203,25 +211,25 @@ public class WorkspaceDetailsTest {
 
     // check that all machines of the Java-MySql stack created by default exist
     workspaceDetails.selectTabInWorspaceMenu(MACHINES);
-    workspaceDetails.checkMachineExists("db");
-    workspaceDetails.checkMachineExists("dev-machine");
+    workspaceDetailsMachines.checkMachineExists("db");
+    workspaceDetailsMachines.checkMachineExists("dev-machine");
 
     // create a new machine, delete and check it is not exist
     createMachine(machineName);
-    workspaceDetails.clickOnDeleteMachineButton(machineName);
-    workspaceDetails.clickOnCloseDialogButton();
+    workspaceDetailsMachines.clickOnDeleteMachineButton(machineName);
+    workspaceDetails.clickOnCloseButtonInDialogWindow();
     loader.waitOnClosed();
-    workspaceDetails.clickOnDeleteMachineButton(machineName);
-    workspaceDetails.clickOnDeleteDialogButton();
-    workspaceDetails.checkMachineIsNotExists(machineName);
+    workspaceDetailsMachines.clickOnDeleteMachineButton(machineName);
+    workspaceDetails.clickOnDeleteButtonInDialogWindow();
+    workspaceDetailsMachines.checkMachineIsNotExists(machineName);
 
     // create a new machine, edit(change the name) and save changes
     createMachine(machineName);
-    workspaceDetails.clickOnEditMachineButton(machineName);
-    workspaceDetails.checkEditTheMachineDialogIsOpen();
-    workspaceDetails.setMachineNameInDialog("machine");
-    workspaceDetails.clickOnEditDialogButton();
-    workspaceDetails.checkMachineExists("machine");
+    workspaceDetailsMachines.clickOnEditMachineButton(machineName);
+    workspaceDetailsMachines.checkEditTheMachineDialogIsOpen();
+    workspaceDetailsMachines.setMachineNameInDialog("machine");
+    workspaceDetailsMachines.clickOnEditNameDialogButton();
+    workspaceDetailsMachines.checkMachineExists("machine");
     clickOnSaveButton();
   }
 
@@ -230,13 +238,13 @@ public class WorkspaceDetailsTest {
     workspaceDetails.selectTabInWorspaceMenu(PROJECTS);
 
     // create a new project and save changes
-    dashboardProject.clickOnAddNewProjectButton();
+    workspaceDetailsProject.clickOnAddNewProjectButton();
     projectSourcePage.selectSample(PROJECT_NAME);
     projectSourcePage.clickOnAddProjectButton();
     clickOnSaveButton();
 
     // check that project exists(workspace will restart)
-    dashboardProject.waitProjectIsPresent(WEB_JAVA_PETCLINIC);
+    workspaceDetailsProject.waitProjectIsPresent(WEB_JAVA_PETCLINIC);
 
     // start the workspace and check that the new project exists
     workspaceDetails.clickOpenInIdeWsBtn();
@@ -271,7 +279,7 @@ public class WorkspaceDetailsTest {
   }
 
   private void clickOnSaveButton() {
-    workspaceDetails.clickOnSaveBtn();
+    workspaceDetails.clickOnSaveChangesBtn();
     dashboard.waitNotificationMessage("Workspace updated");
     dashboard.waitNotificationIsClosed();
   }
@@ -307,10 +315,10 @@ public class WorkspaceDetailsTest {
 
   private void createMachine(String machineName) {
     // add new machine and check it exists
-    workspaceDetails.clickOnAddMachineButton();
-    workspaceDetails.checkAddNewMachineDialogIsOpen();
-    workspaceDetails.setMachineNameInDialog(machineName);
-    workspaceDetails.clickOnAddDialogButton();
-    workspaceDetails.checkMachineExists(machineName);
+    workspaceDetailsMachines.clickOnAddMachineButton();
+    workspaceDetailsMachines.checkAddNewMachineDialogIsOpen();
+    workspaceDetailsMachines.setMachineNameInDialog(machineName);
+    workspaceDetails.clickOnAddButtonInDialogWindow();
+    workspaceDetailsMachines.checkMachineExists(machineName);
   }
 }
