@@ -26,13 +26,13 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Musienko Maxim */
 @Singleton
-public class WorkspaceDetailsProject {
+public class WorkspaceDetailsProjects {
 
   private final SeleniumWebDriver seleniumWebDriver;
   private final Loader loader;
 
   @Inject
-  public WorkspaceDetailsProject(SeleniumWebDriver seleniumWebDriver, Loader loader) {
+  public WorkspaceDetailsProjects(SeleniumWebDriver seleniumWebDriver, Loader loader) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
     PageFactory.initElements(seleniumWebDriver, this);

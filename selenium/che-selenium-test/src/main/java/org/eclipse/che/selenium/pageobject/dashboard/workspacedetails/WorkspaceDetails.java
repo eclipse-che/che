@@ -92,7 +92,7 @@ public class WorkspaceDetails {
       SeleniumWebDriver seleniumWebDriver,
       Loader loader,
       Dashboard dashboard,
-      WorkspaceDetailsProject workspaceDetailsProject) {
+      WorkspaceDetailsProjects workspaceDetailsProjects) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
     this.dashboard = dashboard;

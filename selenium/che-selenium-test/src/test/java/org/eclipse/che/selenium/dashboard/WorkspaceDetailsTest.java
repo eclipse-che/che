@@ -43,7 +43,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceD
 import org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetailsEnvVariables;
 import org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetailsInstallers;
 import org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetailsMachines;
-import org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetailsProject;
+import org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetailsProjects;
 import org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetailsServers;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -68,7 +68,7 @@ public class WorkspaceDetailsTest {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
-  @Inject private WorkspaceDetailsProject workspaceDetailsProject;
+  @Inject private WorkspaceDetailsProjects workspaceDetailsProjects;
   @Inject private Consoles consoles;
   @Inject private Workspaces workspaces;
   @Inject private ProjectSourcePage projectSourcePage;
@@ -238,13 +238,13 @@ public class WorkspaceDetailsTest {
     workspaceDetails.selectTabInWorspaceMenu(PROJECTS);
 
     // create a new project and save changes
-    workspaceDetailsProject.clickOnAddNewProjectButton();
+    workspaceDetailsProjects.clickOnAddNewProjectButton();
     projectSourcePage.selectSample(PROJECT_NAME);
     projectSourcePage.clickOnAddProjectButton();
     clickOnSaveButton();
 
     // check that project exists(workspace will restart)
-    workspaceDetailsProject.waitProjectIsPresent(WEB_JAVA_PETCLINIC);
+    workspaceDetailsProjects.waitProjectIsPresent(WEB_JAVA_PETCLINIC);
 
     // start the workspace and check that the new project exists
     workspaceDetails.clickOpenInIdeWsBtn();
