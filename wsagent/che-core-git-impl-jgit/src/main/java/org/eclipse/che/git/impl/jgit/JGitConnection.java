@@ -398,21 +398,17 @@ class JGitConnection implements GitConnection {
                 .map(Branch::getDisplayName)
                 .collect(Collectors.toList());
         if (!localBranches.contains(name)) {
-          String remoteBranch = null;
-          List<Branch> remoteBranches = branchList(LIST_REMOTE);
-          for (String remote :
-              repository.getConfig().getSubsections(ConfigConstants.CONFIG_KEY_REMOTE)) {
-            Optional<Branch> remoteBranchOptional = getRemoteBranch(remoteBranches, remote, name);
-            if (remoteBranchOptional.isPresent() && remoteBranch == null) {
-              remoteBranch = remoteBranchOptional.get().getName();
-            } else if (remoteBranchOptional.isPresent()) {
-              throw new GitException(
-                  String.format(ERROR_CHECKOUT_BRANCH_NAME_EXISTS_IN_SEVERAL_REMOTES, name));
-            }
-          }
-          if (remoteBranch != null) {
+          List<Branch> remoteBranchesWithGivenName =
+              branchList(LIST_REMOTE)
+                  .stream()
+                  .filter(branch -> name.equals(branch.getName().split("/")[3]))
+                  .collect(Collectors.toList());
+          if (remoteBranchesWithGivenName.size() > 1) {
+            throw new GitException(
+                String.format(ERROR_CHECKOUT_BRANCH_NAME_EXISTS_IN_SEVERAL_REMOTES, name));
+          } else if (remoteBranchesWithGivenName.size() == 1) {
             checkoutCommand.setCreateBranch(true);
-            checkoutCommand.setStartPoint(remoteBranch);
+            checkoutCommand.setStartPoint(remoteBranchesWithGivenName.get(0).getName());
           }
         }
       }
@@ -444,14 +440,6 @@ class JGitConnection implements GitConnection {
       }
       throw new GitException(exception.getMessage(), exception);
     }
-  }
-
-  private Optional<Branch> getRemoteBranch(
-      List<Branch> remoteBranches, String remote, String branchName) {
-    return remoteBranches
-        .stream()
-        .filter(branch -> ("refs/remotes/" + remote + "/" + branchName).equals(branch.getName()))
-        .findFirst();
   }
 
   @Override
