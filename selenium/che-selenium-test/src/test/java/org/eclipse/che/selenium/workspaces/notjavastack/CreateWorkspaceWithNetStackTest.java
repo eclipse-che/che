@@ -10,8 +10,6 @@
  */
 package org.eclipse.che.selenium.workspaces.notjavastack;
 
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
-
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
@@ -73,7 +71,6 @@ public class CreateWorkspaceWithNetStackTest {
     seleniumWebDriver.switchFromDashboardIframeToIde();
 
     projectExplorer.waitProjectExplorer();
-    loader.waitOnClosed();
-    terminal.waitTerminalConsole(PREPARING_WS_TIMEOUT_SEC);
+    terminal.waitTerminalTab(60);
   }
 }

@@ -10,8 +10,6 @@
  */
 package org.eclipse.che.selenium.workspaces.notjavastack;
 
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
-
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
@@ -73,7 +71,6 @@ public class CreateWorkspaceWithNodeStackTest {
     seleniumWebDriver.switchFromDashboardIframeToIde();
 
     projectExplorer.waitProjectExplorer();
-    loader.waitOnClosed();
-    terminal.waitTerminalConsole(EXPECTED_MESS_IN_CONSOLE_SEC);
+    terminal.waitTerminalTab(60);
   }
 }
