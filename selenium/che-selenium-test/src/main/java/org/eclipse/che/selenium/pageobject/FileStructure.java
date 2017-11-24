@@ -105,6 +105,7 @@ public class FileStructure {
    * @param expText expected value
    */
   public void waitExpectedTextInFileStructure(String expText) {
+    loader.waitOnClosed();
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             new ExpectedCondition<Boolean>() {
