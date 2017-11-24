@@ -46,15 +46,15 @@ public class ToastLoader {
   }
 
   private interface Locators {
-    String MAIN_FORM_CSS = "div.inDown";
-    String START_BUTTON = "div.inDown button";
+    String MAIN_FORM = "gwt-debug-popupLoader";
+    String START_BUTTON = "//button[text()='Start']";
     String MAINFORM_WITH_TEXT_CONTAINER = "//div[text()='%s']";
   }
 
-  @FindBy(css = Locators.MAIN_FORM_CSS)
+  @FindBy(id = Locators.MAIN_FORM)
   WebElement mainForm;
 
-  @FindBy(css = Locators.START_BUTTON)
+  @FindBy(xpath = Locators.START_BUTTON)
   WebElement startBtn;
 
   /** wait appearance toast loader widget */
@@ -91,9 +91,7 @@ public class ToastLoader {
   /** wait for closing of widget */
   public void waitToastLoaderIsClosed() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.invisibilityOfElementLocated(
-                By.cssSelector(Locators.MAIN_FORM_CSS)));
+        .until(ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.MAIN_FORM)));
   }
 
   /**
@@ -103,9 +101,7 @@ public class ToastLoader {
    */
   public void waitToastLoaderIsClosed(int userTimeout) {
     new WebDriverWait(seleniumWebDriver, userTimeout)
-        .until(
-            ExpectedConditions.invisibilityOfElementLocated(
-                By.cssSelector(Locators.MAIN_FORM_CSS)));
+        .until(ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.MAIN_FORM)));
   }
 
   /** wait appearance the 'Toast widget' with some text, and wait disappearance this one */

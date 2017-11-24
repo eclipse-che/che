@@ -334,7 +334,7 @@ public class SimpleList<M> extends UiComponent<SimpleList.View> implements IsWid
 
   private HTML widget;
 
-  private SimpleList(
+  SimpleList(
       View view,
       Element container,
       Element itemHolder,

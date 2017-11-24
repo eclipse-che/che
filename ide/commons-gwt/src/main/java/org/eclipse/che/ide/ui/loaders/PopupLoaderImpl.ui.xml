@@ -81,7 +81,7 @@
 
     </ui:style>
 
-    <g:FlowPanel styleName="{style.main}">
+    <g:FlowPanel styleName="{style.main}" debugId="popupLoader">
         <g:Label ui:field="titleLabel" addStyleNames="{style.title}" />
         <g:Label ui:field="descriptionLabel" addStyleNames="{style.description}" />
         <g:FlowPanel ui:field="customWidget" styleName="{style.customWidget}" visible="false">

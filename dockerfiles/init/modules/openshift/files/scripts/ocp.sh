@@ -130,6 +130,8 @@ wait_ocp() {
 run_ocp() {
     $OC_BINARY cluster up --public-hostname="${OC_PUBLIC_HOSTNAME}" --routing-suffix="${OC_PUBLIC_IP}.nip.io"
     wait_ocp
+    $OC_BINARY login -u system:admin
+    $OC_BINARY create serviceaccount pv-recycler-controller -n openshift-infra
 }
 
 deploy_che_to_ocp() {

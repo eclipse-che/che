@@ -16,14 +16,13 @@
     <parent>
         <artifactId>che-plugin-java-debugger-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>6.0.0-M2-SNAPSHOT</version>
+        <version>6.0.0-M3-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-java-debugger-server</artifactId>
     <packaging>jar</packaging>
     <name>Che Plugin :: Java :: Java Debugger Server</name>
     <properties>
         <docker.showLogs>true</docker.showLogs>
-        <findbugs.excludeFilterFile>${project.build.testOutputDirectory}/findbugs-exclude.xml</findbugs.excludeFilterFile>
     </properties>
     <dependencies>
         <dependency>
@@ -109,6 +108,11 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <scope>test</scope>
@@ -175,7 +179,7 @@
     </build>
     <profiles>
         <profile>
-            <id>java-tests</id>
+            <id>integration</id>
             <activation>
                 <activeByDefault>false</activeByDefault>
             </activation>
