@@ -158,6 +158,7 @@ public class AskForValueDialog {
 
   public void typeTextInFieldName(String text) {
     loadPageWait.until(visibilityOf(inputNameJavaClass)).sendKeys(text);
+    waitTextInFieldName(text);
   }
 
   public void waitTextInFieldName(String expectedText) {
@@ -189,7 +190,6 @@ public class AskForValueDialog {
   public void createJavaFileByNameAndType(String name, JavaFiles javaFileType) {
     waitNewJavaClassOpen();
     typeTextInFieldName(name);
-    waitTextInFieldName(name);
 
     if (javaFileType == JavaFiles.INTERFACE) {
       selectInterfaceItemFromDropDown();
