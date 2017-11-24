@@ -18,6 +18,7 @@ import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextM
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.io.IOException;
@@ -43,7 +44,6 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -144,7 +144,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
       events.waitExpectedMessage("Project " + PROJECT_NAME + " imported");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      Assert.fail("Known issue https://github.com/eclipse/che/issues/7253");
+      fail("Known issue https://github.com/eclipse/che/issues/7253");
     }
 
     projectExplorer.expandPathInProjectExplorerAndOpenFile(

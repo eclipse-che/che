@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.projectexplorer;
 
+import static org.testng.Assert.fail;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -21,7 +23,6 @@ import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -86,8 +87,7 @@ public class CheckOnValidAndInvalidPackageNameTest {
     if (!askForValueDialog.waitErrorMessage()) {
       askForValueDialog.clickCancelBtn();
       askForValueDialog.waitFormToClose();
-      Assert.fail(
-          "Expected error message not shown , user able to create package with invalid name");
+      fail("Expected error message not shown , user able to create package with invalid name");
     }
     askForValueDialog.clickCancelBtn();
     askForValueDialog.waitFormToClose();
@@ -105,8 +105,7 @@ public class CheckOnValidAndInvalidPackageNameTest {
     if (!askForValueDialog.waitErrorMessage()) {
       askForValueDialog.clickCancelBtn();
       askForValueDialog.waitFormToClose();
-      Assert.fail(
-          "Expected error message not shown , user able to create package with invalid name");
+      fail("Expected error message not shown , user able to create package with invalid name");
     }
     askForValueDialog.clickCancelBtn();
     askForValueDialog.waitFormToClose();

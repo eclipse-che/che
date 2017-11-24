@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.filewatcher;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Edit.DELETE;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Edit.EDIT;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -33,7 +34,6 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
 import org.openqa.selenium.TimeoutException;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -192,7 +192,7 @@ public class RemoveFilesWithActiveTabs {
       event.waitExpectedMessage(expectedMessage, LOAD_PAGE_TIMEOUT_SEC);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      Assert.fail("Known issue https://github.com/eclipse/che/issues/7339");
+      fail("Known issue https://github.com/eclipse/che/issues/7339");
     }
   }
 }

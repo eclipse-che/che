@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.editor;
 
+import static org.testng.Assert.fail;
+
 import com.google.common.base.Joiner;
 import com.google.inject.Inject;
 import java.io.IOException;
@@ -33,7 +35,6 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.PopupDialogsBrowser;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.TimeoutException;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -98,7 +99,7 @@ public class CheckRestoringSplitEditorTest {
       projectExplorer.waitItemInVisibleArea(javaClassName);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      Assert.fail("Known issue https://github.com/eclipse/che/issues/7551");
+      fail("Known issue https://github.com/eclipse/che/issues/7551");
     }
 
     notificationsPopupPanel.waitPopUpPanelsIsClosed();

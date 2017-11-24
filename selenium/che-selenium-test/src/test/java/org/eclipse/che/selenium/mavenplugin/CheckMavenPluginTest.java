@@ -15,6 +15,7 @@ import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRIN
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.SIMPLE_FOLDER;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -34,7 +35,6 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.git.Git;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.TimeoutException;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -91,7 +91,7 @@ public class CheckMavenPluginTest {
       projectExplorer.waitFolderDefinedTypeOfFolderByPath(PROJECT_NAME + "/my-lib", SIMPLE_FOLDER);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      Assert.fail("Known issue https://github.com/eclipse/che/issues/7109");
+      fail("Known issue https://github.com/eclipse/che/issues/7109");
     }
 
     projectExplorer.waitFolderDefinedTypeOfFolderByPath(PROJECT_NAME + "/my-webapp", SIMPLE_FOLDER);
@@ -131,7 +131,7 @@ public class CheckMavenPluginTest {
       editor.enterAutocompleteProposal("TestClass");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      Assert.fail("Known issue https://github.com/eclipse/che/issues/7109");
+      fail("Known issue https://github.com/eclipse/che/issues/7109");
     }
   }
 

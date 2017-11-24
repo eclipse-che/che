@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.util.HashMap;
@@ -267,7 +268,7 @@ public class WorkspaceDetailsTest {
       dashboard.waitNotificationMessage("Workspace updated");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      Assert.fail("Known issue https://github.com/eclipse/che/issues/7178");
+      fail("Known issue https://github.com/eclipse/che/issues/7178");
     }
 
     dashboard.waitNotificationIsClosed();
