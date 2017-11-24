@@ -285,7 +285,7 @@ public class Consoles {
 
   /** click on the 'Hide' icon of the 'Processes' */
   public void closeProcessesArea() {
-    redrawDriverWait.until(visibilityOf(hideConsolesIcon)).click();
+    loadPageDriverWait.until(visibilityOf(hideConsolesIcon)).click();
   }
 
   /** click on open ssh terminal button in the consoles widget and wait opening terminal */
