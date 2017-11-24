@@ -20,12 +20,12 @@ import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.js.api.parts.Part;
-import org.eclipse.che.ide.js.api.parts.Workspace;
+import org.eclipse.che.ide.js.api.parts.PartManager;
 import org.eclipse.che.ide.js.api.resources.ImageRegistry;
 
 /** @author Yevhen Vydolob */
 @Singleton
-public class JsWorkspace implements Workspace {
+public class JsPartManager implements PartManager {
 
   private final Provider<WorkspaceAgent> workspaceAgent;
   private final ImageRegistry imageRegistry;
@@ -33,7 +33,7 @@ public class JsWorkspace implements Workspace {
   private final BiMap<Part, JsPartPresenter> presenters = HashBiMap.create();
 
   @Inject
-  public JsWorkspace(Provider<WorkspaceAgent> workspaceAgent, ImageRegistry imageRegistry) {
+  public JsPartManager(Provider<WorkspaceAgent> workspaceAgent, ImageRegistry imageRegistry) {
     this.workspaceAgent = workspaceAgent;
     this.imageRegistry = imageRegistry;
   }

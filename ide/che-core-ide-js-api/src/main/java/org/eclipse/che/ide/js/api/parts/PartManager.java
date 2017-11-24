@@ -21,7 +21,7 @@ import org.eclipse.che.ide.api.parts.PartStackType;
  * @author Yevhen Vydolob
  */
 @JsType
-public interface Workspace {
+public interface PartManager {
 
   /**
    * Sets passed part as active. Sets focus to part and open it.
