@@ -131,6 +131,7 @@ public class ConvertToProjectWithPomFileTest {
     projectExplorer.openContextMenuByPathSelectedItem(pathToFile);
     projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.NEW);
     projectExplorer.clickOnItemInContextMenu(type);
+    askForValueDialog.waitFormToOpen();
     askForValueDialog.typeAndWaitText(name);
     askForValueDialog.clickOkBtn();
   }

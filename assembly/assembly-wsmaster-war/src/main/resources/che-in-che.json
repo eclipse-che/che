@@ -23,7 +23,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "eclipse/che-dev:nightly"
+      "origin": "eclipse/che-dev:che6"
     },
     "workspaceConfig": {
       "environments": {
