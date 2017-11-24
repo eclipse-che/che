@@ -105,8 +105,8 @@ public class TestOrganizationServiceClient {
     }
   }
 
-  public void deleteAll(String user) throws Exception {
-    getAll(user)
+  public void deleteAll() throws Exception {
+    getAll()
         .stream()
         .filter(organization -> organization.getParent() != null)
         .forEach(
