@@ -18,6 +18,7 @@ import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_FOLD
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_PROJECT_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_IN_FILE_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TEST_BY_CURSOR_COMMAND;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_EFFECTIVE_POM_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_OUTPUT_DIR_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.RESOLVE_CLASSPATH_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.TEST_DETECT_COMMAND;
@@ -42,6 +43,7 @@ import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
 import org.eclipse.che.jdt.ls.extension.api.dto.FileStructureCommandParameters;
+import org.eclipse.che.jdt.ls.extension.api.dto.GetEffectivePomParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestFindParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPosition;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPositionParameters;
@@ -61,6 +63,10 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Mäder
  */
 public class JavaLanguageServerExtensionService {
+
+  private static final String FILE_STRUCTURE = "java/file-structure";
+  private static final String EFFECTIVE_POM = "java/effective-pom";
+
   private final Gson gson;
   private final LanguageServerRegistry registry;
 
@@ -85,10 +91,17 @@ public class JavaLanguageServerExtensionService {
   public void configureMethods() {
     requestHandler
         .newConfiguration()
-        .methodName("java/filestructure")
+        .methodName(FILE_STRUCTURE)
         .paramsAsDto(FileStructureCommandParameters.class)
         .resultAsListOfDto(ExtendedSymbolInformationDto.class)
         .withFunction(this::executeFileStructure);
+
+    requestHandler
+        .newConfiguration()
+        .methodName(EFFECTIVE_POM)
+        .paramsAsDto(GetEffectivePomParameters.class)
+        .resultAsString()
+        .withFunction(this::getEffectivePom);
   }
 
   /**
@@ -261,6 +274,18 @@ public class JavaLanguageServerExtensionService {
               })
           .map(ExtendedSymbolInformationDto::new)
           .collect(Collectors.toList());
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
+  }
+
+  public String getEffectivePom(GetEffectivePomParameters parameters) {
+    CompletableFuture<Object> result =
+        executeCommand(GET_EFFECTIVE_POM_COMMAND, singletonList(parameters));
+
+    Type targetClassType = new TypeToken<String>() {}.getType();
+    try {
+      return gson.fromJson(gson.toJson(result.get(30, TimeUnit.SECONDS)), targetClassType);
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }

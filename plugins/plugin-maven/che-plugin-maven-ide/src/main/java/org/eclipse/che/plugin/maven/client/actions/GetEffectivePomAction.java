@@ -21,9 +21,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collections;
 import javax.validation.constraints.NotNull;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -32,9 +29,11 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.SyntheticFile;
+import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
+import org.eclipse.che.jdt.ls.extension.api.dto.GetEffectivePomParameters;
 import org.eclipse.che.plugin.maven.client.MavenLocalizationConstant;
 import org.eclipse.che.plugin.maven.client.MavenResources;
-import org.eclipse.che.plugin.maven.client.service.MavenServerServiceClient;
 import org.eclipse.che.plugin.maven.shared.MavenAttributes;
 
 /**
@@ -44,10 +43,12 @@ import org.eclipse.che.plugin.maven.shared.MavenAttributes;
  */
 @Singleton
 public class GetEffectivePomAction extends AbstractPerspectiveAction {
+
   private final EditorAgent editorAgent;
   private final NotificationManager notificationManager;
-  private final MavenServerServiceClient mavenServerServiceClient;
+  private final JavaLanguageExtensionServiceClient javaLanguageExtensionServiceClient;
   private final AppContext appContext;
+  private final DtoFactory dtoFactory;
 
   @Inject
   public GetEffectivePomAction(
@@ -55,8 +56,9 @@ public class GetEffectivePomAction extends AbstractPerspectiveAction {
       MavenResources mavenResources,
       EditorAgent editorAgent,
       NotificationManager notificationManager,
-      MavenServerServiceClient mavenServerServiceClient,
-      AppContext appContext) {
+      JavaLanguageExtensionServiceClient javaLanguageExtensionServiceClient,
+      AppContext appContext,
+      DtoFactory dtoFactory) {
     super(
         Collections.singletonList(PROJECT_PERSPECTIVE_ID),
         constant.actionGetEffectivePomTitle(),
@@ -64,8 +66,9 @@ public class GetEffectivePomAction extends AbstractPerspectiveAction {
         mavenResources.maven());
     this.editorAgent = editorAgent;
     this.notificationManager = notificationManager;
-    this.mavenServerServiceClient = mavenServerServiceClient;
+    this.javaLanguageExtensionServiceClient = javaLanguageExtensionServiceClient;
     this.appContext = appContext;
+    this.dtoFactory = dtoFactory;
   }
 
   @Override
@@ -89,37 +92,34 @@ public class GetEffectivePomAction extends AbstractPerspectiveAction {
   @Override
   public void actionPerformed(ActionEvent e) {
     final Resource[] resources = appContext.getResources();
-
     checkState(resources != null && resources.length == 1);
 
     final Project project = resources[0].getRelatedProject().get();
-
     checkState(MAVEN_ID.equals(project.getType()));
 
-    mavenServerServiceClient
-        .getEffectivePom(project.getLocation().toString())
+    GetEffectivePomParameters paramsDto =
+        dtoFactory
+            .createDto(GetEffectivePomParameters.class)
+            .withProjectPath(project.getLocation().toString());
+
+    javaLanguageExtensionServiceClient
+        .effectivePom(paramsDto)
         .then(
-            new Operation<String>() {
-              @Override
-              public void apply(String content) throws OperationException {
-                editorAgent.openEditor(
-                    new SyntheticFile(
-                        "pom.xml",
-                        project.getAttributes().get(MavenAttributes.ARTIFACT_ID).get(0)
-                            + " [effective pom]",
-                        content));
-              }
+            content -> {
+              editorAgent.openEditor(
+                  new SyntheticFile(
+                      "pom.xml",
+                      project.getAttributes().get(MavenAttributes.ARTIFACT_ID).get(0)
+                          + " [effective pom]",
+                      content));
             })
         .catchError(
-            new Operation<PromiseError>() {
-              @Override
-              public void apply(PromiseError arg) throws OperationException {
-                notificationManager.notify(
-                    "Problem with generating effective pom file",
-                    arg.getMessage(),
-                    FAIL,
-                    EMERGE_MODE);
-              }
+            error -> {
+              notificationManager.notify(
+                  "Problem with generating effective pom file",
+                  error.getMessage(),
+                  FAIL,
+                  EMERGE_MODE);
             });
   }
 }

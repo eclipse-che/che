@@ -22,10 +22,17 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
 import org.eclipse.che.jdt.ls.extension.api.dto.FileStructureCommandParameters;
+import org.eclipse.che.jdt.ls.extension.api.dto.GetEffectivePomParameters;
 import org.eclipse.che.plugin.languageserver.ide.service.ServiceUtil;
 
 @Singleton
 public class JavaLanguageExtensionServiceClient {
+
+  private static final String FILE_STRUCTURE = "java/file-structure";
+  private static final int FILE_STRUCTURE_REQUEST_TIMEOUT = 10_000;
+  private static final String EFFECTIVE_POM = "java/effective-pom";
+  private static final int EFFECTIVE_POM_REQUEST_TIMEOUT = 30_000;
+
   private final RequestTransmitter requestTransmitter;
 
   @Inject
@@ -40,9 +47,10 @@ public class JavaLanguageExtensionServiceClient {
           requestTransmitter
               .newRequest()
               .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
-              .methodName("java/filestructure")
+              .methodName(FILE_STRUCTURE)
               .paramsAsDto(params)
-              .sendAndReceiveResultAsListOfDto(ExtendedSymbolInformation.class, 10000)
+              .sendAndReceiveResultAsListOfDto(
+                  ExtendedSymbolInformation.class, FILE_STRUCTURE_REQUEST_TIMEOUT)
               .onSuccess(resolve::apply)
               .onTimeout(
                   () -> {
@@ -66,5 +74,35 @@ public class JavaLanguageExtensionServiceClient {
                     reject.apply(ServiceUtil.getPromiseError(error));
                   });
         });
+  }
+
+  public Promise<String> effectivePom(GetEffectivePomParameters params) {
+    return Promises.create(
+        (resolve, reject) ->
+            requestTransmitter
+                .newRequest()
+                .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
+                .methodName(EFFECTIVE_POM)
+                .paramsAsDto(params)
+                .sendAndReceiveResultAsString(EFFECTIVE_POM_REQUEST_TIMEOUT)
+                .onSuccess(resolve::apply)
+                .onTimeout(
+                    () ->
+                        reject.apply(
+                            new PromiseError() {
+                              TimeoutException te =
+                                  new TimeoutException("Timeout while getting effective pom.");
+
+                              @Override
+                              public String getMessage() {
+                                return te.getMessage();
+                              }
+
+                              @Override
+                              public Throwable getCause() {
+                                return te;
+                              }
+                            }))
+                .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));
   }
 }
