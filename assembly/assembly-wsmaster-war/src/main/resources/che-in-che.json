@@ -9,7 +9,8 @@
       "Java",
       "JDK",
       "Maven",
-      "Git"
+      "Git",
+      "SDK"
     ],
     "components": [
       {
