@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.factory;
 
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.api.factory.shared.dto.PoliciesDto;
@@ -24,7 +25,6 @@ import org.eclipse.che.selenium.pageobject.PopupDialogsBrowser;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.WarningDialog;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -71,8 +71,7 @@ public class CheckFactoryWithSincePolicyTest {
     seleniumWebDriver.switchFromDashboardIframeToIde();
 
     if (System.currentTimeMillis() > initTime + FACTORY_INACTIVITY_TIME) {
-      Assert.fail(
-          "Factory started longer then additional time and next test steps does not make sense");
+      fail("Factory started longer then additional time and next test steps does not make sense");
     }
 
     warningDialog.waitWaitWarnDialogWindowWithSpecifiedTextMess(EXPIRE_MESSAGE);
