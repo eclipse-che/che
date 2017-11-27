@@ -87,25 +87,30 @@ public class TestWebElementRenderChecker {
   }
 
   private void waitElementIsStatic(FluentWait<WebDriver> webDriverWait, WebElement webElement) {
-    AtomicInteger beforeDimensionSumWithShift = new AtomicInteger(0);
+    AtomicInteger dimensionSum = new AtomicInteger(0);
 
     webDriverWait.until(
         (ExpectedCondition<Boolean>)
             driver -> {
-              Dimension afterDimension = getAndWaitWebElement(webElement).getSize();
+              Dimension dimension = getAndWaitWebElement(webElement).getSize();
 
-              if (dimensionsAreEquivalent(beforeDimensionSumWithShift, afterDimension)) {
+              if (dimensionsAreEquivalent(dimensionSum, dimension)) {
                 return true;
               } else {
-                beforeDimensionSumWithShift.set(getDimensionSumWithShift(afterDimension));
+                dimensionSum.set(getDimensionSumWithShift(dimension));
                 return false;
               }
             });
   }
 
+  /**
+   * height is multiplied because we must avoid the situation when, in fact, different parties will
+   * give the same sum
+   *
+   * @param dimension consist partial sizes
+   * @return partial sizes sum with shift
+   */
   private int getDimensionSumWithShift(Dimension dimension) {
-    // height is multiplied because we must avoid the situation when, in fact, different parties
-    // will give the same sum
     return dimension.getWidth() + (dimension.getHeight() * 10000);
   }
 
