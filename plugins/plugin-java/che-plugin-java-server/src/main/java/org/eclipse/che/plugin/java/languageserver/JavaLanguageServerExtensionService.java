@@ -10,6 +10,18 @@
  */
 package org.eclipse.che.plugin.java.languageserver;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.FILE_STRUCTURE_COMMAND;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_ENTRY_COMMAND;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_FOLDER_COMMAND;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_PROJECT_COMMAND;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_IN_FILE_COMMAND;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TEST_BY_CURSOR_COMMAND;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_OUTPUT_DIR_COMMAND;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.RESOLVE_CLASSPATH_COMMAND;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.TEST_DETECT_COMMAND;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -17,7 +29,6 @@ import com.google.gson.reflect.TypeToken;
 import com.google.inject.Inject;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -29,10 +40,13 @@ import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
-import org.eclipse.che.jdt.ls.extension.api.Commands;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
 import org.eclipse.che.jdt.ls.extension.api.dto.FileStructureCommandParameters;
+import org.eclipse.che.jdt.ls.extension.api.dto.TestFindParameters;
+import org.eclipse.che.jdt.ls.extension.api.dto.TestPosition;
+import org.eclipse.che.jdt.ls.extension.api.dto.TestPositionParameters;
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.ExtendedSymbolInformationDto;
+import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.TestPositionDto;
 import org.eclipse.lsp4j.ExecuteCommandParams;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.CollectionTypeAdapterFactory;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.EitherTypeAdapterFactory;
@@ -47,11 +61,12 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Mäder
  */
 public class JavaLanguageServerExtensionService {
+  private final Gson gson;
+  private final LanguageServerRegistry registry;
+
   private static final Logger LOG =
       LoggerFactory.getLogger(JavaLanguageServerExtensionService.class);
-  private final LanguageServerRegistry registry;
   private final RequestHandlerConfigurator requestHandler;
-  private final Gson gson;
 
   @Inject
   public JavaLanguageServerExtensionService(
@@ -73,25 +88,166 @@ public class JavaLanguageServerExtensionService {
         .methodName("java/filestructure")
         .paramsAsDto(FileStructureCommandParameters.class)
         .resultAsListOfDto(ExtendedSymbolInformationDto.class)
-        .withFunction(this::fileStructure);
+        .withFunction(this::executeFileStructure);
   }
 
-  private LanguageServer getLanguageServer() {
-    return registry
-        .findServer(server -> (server.getLauncher() instanceof JavaLanguageServerLauncher))
-        .get()
-        .getServer();
+  /**
+   * Compute output directory of the project.
+   *
+   * @param projectUri project URI
+   * @return output directory
+   */
+  public String getOutputDir(String projectUri) {
+    CompletableFuture<Object> result =
+        executeCommand(GET_OUTPUT_DIR_COMMAND, singletonList(projectUri));
+    Type targetClassType = new TypeToken<String>() {}.getType();
+    try {
+      return gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), targetClassType);
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
   }
 
-  private List<ExtendedSymbolInformationDto> fileStructure(FileStructureCommandParameters params) {
+  /**
+   * Detects test method by cursor position.
+   *
+   * @param fileUri file URI
+   * @param testAnnotation test method annotation
+   * @param cursorOffset cursor position
+   * @return test position {@link TestPosition}
+   */
+  public List<TestPositionDto> detectTest(String fileUri, String testAnnotation, int cursorOffset) {
+    TestPositionParameters parameters =
+        new TestPositionParameters(fileUri, testAnnotation, cursorOffset);
+    CompletableFuture<Object> result =
+        executeCommand(TEST_DETECT_COMMAND, singletonList(parameters));
+    Type targetClassType = new TypeToken<ArrayList<TestPosition>>() {}.getType();
+    try {
+      List<TestPosition> positions =
+          gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), targetClassType);
+      return positions.stream().map(TestPositionDto::new).collect(Collectors.toList());
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
+  }
+
+  /**
+   * Compute resolved classpath of the project.
+   *
+   * @param projectUri project URI
+   * @return resolved classpath
+   */
+  public List<String> getResolvedClasspath(String projectUri) {
+    CompletableFuture<Object> result =
+        executeCommand(RESOLVE_CLASSPATH_COMMAND, singletonList(projectUri));
+    Type targetClassType = new TypeToken<ArrayList<String>>() {}.getType();
+    try {
+      return gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), targetClassType);
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
+  }
+
+  /**
+   * Finds tests in the class.
+   *
+   * @param fileUri file URI
+   * @param methodAnnotation test method annotation
+   * @param classAnnotation test class runner annotation
+   * @return fqn of the class if it contains tests
+   */
+  public List<String> findTestsInFile(
+      String fileUri, String methodAnnotation, String classAnnotation) {
+    return executeFindTestsCommand(
+        FIND_TESTS_IN_FILE_COMMAND, fileUri, methodAnnotation, classAnnotation, 0, emptyList());
+  }
+
+  /**
+   * Finds tests in the project.
+   *
+   * @param projectUri project folder URI
+   * @param methodAnnotation test method annotation
+   * @param classAnnotation test class runner annotation
+   * @return list of fqns of the classes if they contain tests
+   */
+  public List<String> findTestsFromProject(
+      String projectUri, String methodAnnotation, String classAnnotation) {
+    return executeFindTestsCommand(
+        FIND_TESTS_FROM_PROJECT_COMMAND,
+        projectUri,
+        methodAnnotation,
+        classAnnotation,
+        0,
+        emptyList());
+  }
+
+  /**
+   * Finds tests in the folder.
+   *
+   * @param folderUri folder URI
+   * @param methodAnnotation test method annotation
+   * @param classAnnotation test class runner annotation
+   * @return list of fqns of the classes if they contain tests
+   */
+  public List<String> findTestsFromFolder(
+      String folderUri, String methodAnnotation, String classAnnotation) {
+    return executeFindTestsCommand(
+        FIND_TESTS_FROM_FOLDER_COMMAND,
+        folderUri,
+        methodAnnotation,
+        classAnnotation,
+        0,
+        emptyList());
+  }
+
+  /**
+   * Finds test by cursor position.
+   *
+   * @param fileUri URI of active file
+   * @param methodAnnotation test method annotation
+   * @param classAnnotation test class runner annotation
+   * @param offset cursor offset
+   * @return fqn of the classes if contains tests and cursor is outside of test method or returns
+   *     fqn#methodName if a method is test and cursor is in this method otherwise returns empty
+   *     list
+   */
+  public List<String> findTestsByCursorPosition(
+      String fileUri, String methodAnnotation, String classAnnotation, int offset) {
+    return executeFindTestsCommand(
+        FIND_TEST_BY_CURSOR_COMMAND,
+        fileUri,
+        methodAnnotation,
+        classAnnotation,
+        offset,
+        emptyList());
+  }
+
+  /**
+   * Finds fqns of test classes.
+   *
+   * @param methodAnnotation test method annotation
+   * @param classAnnotation test class runner annotation
+   * @param entry list of URI of test classes
+   * @return fqns of test classes
+   */
+  public List<String> findTestsFromSet(
+      String methodAnnotation, String classAnnotation, List<String> entry) {
+    return executeFindTestsCommand(
+        FIND_TESTS_FROM_ENTRY_COMMAND, "", methodAnnotation, classAnnotation, 0, entry);
+  }
+
+  /**
+   * Compute a file structure tree.
+   *
+   * @param params command parameters {@link FileStructureCommandParameters}
+   * @return file structure tree
+   */
+  public List<ExtendedSymbolInformationDto> executeFileStructure(
+      FileStructureCommandParameters params) {
     LOG.info("Requesting files structure for {}", params);
     params.setUri(LanguageServiceUtils.prefixURI(params.getUri()));
     CompletableFuture<Object> result =
-        getLanguageServer()
-            .getWorkspaceService()
-            .executeCommand(
-                new ExecuteCommandParams(
-                    Commands.FILE_STRUCTURE_COMMAND, Collections.singletonList(params)));
+        executeCommand(FILE_STRUCTURE_COMMAND, singletonList(params));
     Type targetClassType = new TypeToken<ArrayList<ExtendedSymbolInformation>>() {}.getType();
     try {
       List<ExtendedSymbolInformation> symbols =
@@ -108,6 +264,36 @@ public class JavaLanguageServerExtensionService {
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }
+  }
+
+  private List<String> executeFindTestsCommand(
+      String commandId,
+      String fileUri,
+      String methodAnnotation,
+      String projectAnnotation,
+      int offset,
+      List<String> classes) {
+    TestFindParameters parameters =
+        new TestFindParameters(fileUri, methodAnnotation, projectAnnotation, offset, classes);
+    CompletableFuture<Object> result = executeCommand(commandId, singletonList(parameters));
+    Type targetClassType = new TypeToken<ArrayList<String>>() {}.getType();
+    try {
+      return gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), targetClassType);
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
+  }
+
+  private LanguageServer getLanguageServer() {
+    return registry
+        .findServer(server -> (server.getLauncher() instanceof JavaLanguageServerLauncher))
+        .get()
+        .getServer();
+  }
+
+  private CompletableFuture<Object> executeCommand(String commandId, List<Object> parameters) {
+    ExecuteCommandParams params = new ExecuteCommandParams(commandId, parameters);
+    return getLanguageServer().getWorkspaceService().executeCommand(params);
   }
 
   private void fixLocation(ExtendedSymbolInformation symbol) {
