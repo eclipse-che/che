@@ -676,7 +676,9 @@ public class ContentAssistWidget implements EventListener {
   }
 
   private void update() {
-    int topVisibleItem = popupBodyElement.getScrollTop() / getItemHeight();
+    int scrollTop = popupBodyElement.getScrollTop();
+    int itemHeight = getItemHeight();
+    int topVisibleItem = scrollTop == 0 || itemHeight == 0 ? 0 : scrollTop / itemHeight;
     int topDOMItem = Math.max(0, topVisibleItem - (DOM_ITEMS_SIZE - getItemsPerPage()) / 2);
     int bottomDOMItem = Math.min(getTotalItems() - 1, topDOMItem + DOM_ITEMS_SIZE - 1);
     if (bottomDOMItem == getTotalItems() - 1) {
