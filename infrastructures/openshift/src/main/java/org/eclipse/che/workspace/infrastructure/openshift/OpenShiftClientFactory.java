@@ -18,6 +18,7 @@ import io.fabric8.openshift.client.OpenShiftConfig;
 import io.fabric8.openshift.client.OpenShiftConfigBuilder;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 
 /** @author Sergii Leshchenko */
@@ -54,7 +55,12 @@ public class OpenShiftClientFactory {
     config = configBuilder.build();
   }
 
-  public OpenShiftClient create() {
+  /**
+   * Creates instance of {@link OpenShiftClient}.
+   *
+   * @throws InfrastructureException if any error occurs on client instance creation.
+   */
+  public OpenShiftClient create() throws InfrastructureException {
     return new DefaultOpenShiftClient(config);
   }
 }
