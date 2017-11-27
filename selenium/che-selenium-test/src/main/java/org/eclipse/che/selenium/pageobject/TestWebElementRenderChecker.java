@@ -74,8 +74,7 @@ public class TestWebElementRenderChecker {
     waitElementIsRendered(getAndWaitWebElement(webElementXpath), seconds);
   }
 
-  private Boolean dimensionsAreEquivalent(
-      AtomicInteger dimensionSum, Dimension newDimension) {
+  private Boolean dimensionsAreEquivalent(AtomicInteger dimensionSum, Dimension newDimension) {
     return dimensionSum.get() == getDimensionSumWithShift(newDimension);
   }
 
