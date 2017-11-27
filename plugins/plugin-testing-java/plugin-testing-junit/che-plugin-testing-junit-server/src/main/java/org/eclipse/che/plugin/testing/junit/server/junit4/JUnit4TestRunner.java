@@ -13,7 +13,6 @@ package org.eclipse.che.plugin.testing.junit.server.junit4;
 import com.google.inject.name.Named;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import javax.inject.Inject;
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.commons.lang.execution.CommandLine;
@@ -21,16 +20,9 @@ import org.eclipse.che.commons.lang.execution.ExecutionException;
 import org.eclipse.che.commons.lang.execution.JavaParameters;
 import org.eclipse.che.commons.lang.execution.ProcessHandler;
 import org.eclipse.che.junit.junit4.CheJUnitCoreRunner;
+import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionService;
 import org.eclipse.che.plugin.java.testing.AbstractJavaTestRunner;
 import org.eclipse.che.plugin.java.testing.ClasspathUtil;
-import org.eclipse.che.plugin.java.testing.JavaTestAnnotations;
-import org.eclipse.che.plugin.java.testing.JavaTestFinder;
-import org.eclipse.che.plugin.java.testing.ProjectClasspathProvider;
-import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.JavaModelException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,30 +32,22 @@ public class JUnit4TestRunner extends AbstractJavaTestRunner {
 
   private static final String JUNIT_TEST_NAME = "junit";
   private static final String MAIN_CLASS_NAME = "org.eclipse.che.junit.junit4.CheJUnitLauncher";
+  private static final String TEST_METHOD_ANNOTATION = "org.junit.Test";
+  private static final String TEST_CLASS_ANNOTATION = "org.junit.runner.RunWith";
 
   private String workspacePath;
-  private JavaTestFinder javaTestFinder;
-  private ProjectClasspathProvider classpathProvider;
 
   @Inject
   public JUnit4TestRunner(
       @Named("che.user.workspaces.storage") String workspacePath,
-      JavaTestFinder javaTestFinder,
-      ProjectClasspathProvider classpathProvider) {
-    super(workspacePath, javaTestFinder);
+      JavaLanguageServerExtensionService extensionService) {
+    super(extensionService, TEST_METHOD_ANNOTATION, TEST_CLASS_ANNOTATION);
     this.workspacePath = workspacePath;
-    this.javaTestFinder = javaTestFinder;
-    this.classpathProvider = classpathProvider;
   }
 
   @Override
-  public ProcessHandler execute(TestExecutionContext context) {
-    IJavaProject javaProject = getJavaProject(context.getProjectPath());
-    if (javaProject.exists()) {
-      return startTestProcess(javaProject, context);
-    }
-
-    return null;
+  public ProcessHandler execute(TestExecutionContext context) throws ExecutionException {
+    return startTestProcess(context);
   }
 
   @Override
@@ -71,47 +55,20 @@ public class JUnit4TestRunner extends AbstractJavaTestRunner {
     return JUNIT_TEST_NAME;
   }
 
-  @Override
-  protected boolean isTestSuite(String filePath, IJavaProject project) {
-    return false;
-  }
-
-  @Override
-  public boolean isTestMethod(IMethod method, ICompilationUnit compilationUnit) {
-    try {
-      int flags = method.getFlags();
-      // 'V' is void signature
-      return !(method.isConstructor()
-              || !Flags.isPublic(flags)
-              || Flags.isAbstract(flags)
-              || Flags.isStatic(flags)
-              || !"V".equals(method.getReturnType()))
-          && javaTestFinder.isTest(
-              method, compilationUnit, JavaTestAnnotations.JUNIT4X_TEST.getName());
-
-    } catch (JavaModelException ignored) {
-      return false;
-    }
-  }
-
-  private ProcessHandler startTestProcess(IJavaProject javaProject, TestExecutionContext context) {
+  private ProcessHandler startTestProcess(TestExecutionContext context) throws ExecutionException {
     JavaParameters parameters = new JavaParameters();
     parameters.setJavaExecutable(System.getProperty("java.home") + "/bin/java");
     parameters.setMainClassName(MAIN_CLASS_NAME);
-    parameters.setWorkingDirectory(workspacePath + javaProject.getPath());
+    parameters.setWorkingDirectory(workspacePath + context.getProjectPath());
+
+    List<String> projectClasspath = getResolvedClassPaths(context);
 
     List<String> classPath = new ArrayList<>();
-    Set<String> projectClassPath = classpathProvider.getProjectClassPath(javaProject);
-    classPath.addAll(projectClassPath);
+    classPath.addAll(projectClasspath);
     classPath.add(ClasspathUtil.getJarPathForClass(CheJUnitCoreRunner.class));
     parameters.getClassPath().addAll(classPath);
 
-    List<String> suite =
-        findTests(
-            context,
-            javaProject,
-            JavaTestAnnotations.JUNIT4X_TEST.getName(),
-            JavaTestAnnotations.JUNIT4X_RUN_WITH.getName());
+    List<String> suite = findTests(context);
     for (String element : suite) {
       parameters.getParametersList().add(element);
     }
@@ -123,12 +80,6 @@ public class JUnit4TestRunner extends AbstractJavaTestRunner {
           .add("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=" + getDebugPort());
     }
     CommandLine command = parameters.createCommand();
-    try {
-      return new ProcessHandler(command.createProcess());
-    } catch (ExecutionException e) {
-      LOG.error("Can't run JUnit JVM", e);
-    }
-
-    return null;
+    return new ProcessHandler(command.createProcess());
   }
 }
