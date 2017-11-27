@@ -14,13 +14,13 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_
 
 import com.google.inject.Inject;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
@@ -34,7 +34,6 @@ public class TestWebElementRenderChecker {
   public TestWebElementRenderChecker(SeleniumWebDriver seleniumWebDriver) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loadPageWebDriverWait = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
-    PageFactory.initElements(seleniumWebDriver, this);
   }
 
   /**
@@ -44,9 +43,7 @@ public class TestWebElementRenderChecker {
    * @param seconds timeout for check
    */
   public void waitElementIsRendered(WebElement webElement, int seconds) {
-    FluentWait<WebDriver> waitElement = getFluentWait(seconds);
-
-    waitElementIsStatic(waitElement, webElement);
+    waitElementIsStatic(getFluentWait(seconds), webElement);
   }
 
   /**
@@ -64,11 +61,7 @@ public class TestWebElementRenderChecker {
    * @param webElementXpath list or context menu Xpath which need check
    */
   public void waitElementIsRendered(String webElementXpath) {
-    WebElement webElement =
-        loadPageWebDriverWait.until(
-            ExpectedConditions.visibilityOfElementLocated(By.xpath(webElementXpath)));
-
-    waitElementIsRendered(webElement);
+    waitElementIsRendered(getAndWaitWebElement(webElementXpath));
   }
 
   /**
@@ -78,17 +71,12 @@ public class TestWebElementRenderChecker {
    * @param seconds timeout for check
    */
   public void waitElementIsRendered(String webElementXpath, int seconds) {
-    WebElement webElement =
-        loadPageWebDriverWait.until(
-            ExpectedConditions.visibilityOfElementLocated(By.xpath(webElementXpath)));
-
-    waitElementIsRendered(webElement, seconds);
+    waitElementIsRendered(getAndWaitWebElement(webElementXpath), seconds);
   }
 
   private Boolean dimensionsAreEquivalent(
-      WebElementDimension beforeDimension, Dimension afterDimension) {
-    return beforeDimension.getWidth() == afterDimension.getWidth()
-        && beforeDimension.getHeight() == afterDimension.getHeight();
+      AtomicInteger beforePartiesSum, Dimension afterDimension) {
+    return beforePartiesSum.get() == getDimensionSumWithShift(afterDimension);
   }
 
   private FluentWait<WebDriver> getFluentWait(int seconds) {
@@ -99,54 +87,34 @@ public class TestWebElementRenderChecker {
   }
 
   private void waitElementIsStatic(FluentWait<WebDriver> webDriverWait, WebElement webElement) {
-    WebElementDimension beforeDimension = new WebElementDimension(0, 0);
+    AtomicInteger beforeDimensionSumWithShift = new AtomicInteger(0);
 
     webDriverWait.until(
         (ExpectedCondition<Boolean>)
             driver -> {
-              Dimension secondDimension =
-                  new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-                      .until(ExpectedConditions.visibilityOf(webElement))
-                      .getSize();
+              Dimension afterDimension = getAndWaitWebElement(webElement).getSize();
 
-              if (dimensionsAreEquivalent(beforeDimension, secondDimension)) {
+              if (dimensionsAreEquivalent(beforeDimensionSumWithShift, afterDimension)) {
                 return true;
               } else {
-                beforeDimension.setWidth(secondDimension.getWidth());
-                beforeDimension.setHeight(secondDimension.getHeight());
+                beforeDimensionSumWithShift.set(getDimensionSumWithShift(afterDimension));
                 return false;
               }
             });
   }
 
-  private class WebElementDimension {
-    private int width;
-    private int height;
+  private int getDimensionSumWithShift(Dimension dimension) {
+    // height is multiplied because we must avoid the situation when, in fact, different parties
+    // will give the same sum
+    return dimension.getWidth() + (dimension.getHeight() * 10000);
+  }
 
-    public WebElementDimension() {
-      this.width = 0;
-      this.height = 0;
-    }
+  private WebElement getAndWaitWebElement(String webElementXpath) {
+    return loadPageWebDriverWait.until(
+        ExpectedConditions.visibilityOfElementLocated(By.xpath(webElementXpath)));
+  }
 
-    public WebElementDimension(int width, int height) {
-      this.width = width;
-      this.height = height;
-    }
-
-    public int getWidth() {
-      return this.width;
-    }
-
-    public void setWidth(int width) {
-      this.width = width;
-    }
-
-    public int getHeight() {
-      return this.height;
-    }
-
-    public void setHeight(int height) {
-      this.height = height;
-    }
+  private WebElement getAndWaitWebElement(WebElement webElement) {
+    return loadPageWebDriverWait.until(ExpectedConditions.visibilityOf(webElement));
   }
 }
