@@ -27,8 +27,15 @@ import org.eclipse.che.commons.lang.execution.ProcessHandler;
  */
 public interface TestRunner {
 
+  /**
+   * Executes tests.
+   *
+   * @param context information about test execution
+   * @return handler for tests executing process
+   * @throws Exception if something happened before tests were executed
+   */
   @Nullable
-  ProcessHandler execute(TestExecutionContext context);
+  ProcessHandler execute(TestExecutionContext context) throws Exception;
 
   /**
    * The test runner framework will call this method to get the framework name for registration.

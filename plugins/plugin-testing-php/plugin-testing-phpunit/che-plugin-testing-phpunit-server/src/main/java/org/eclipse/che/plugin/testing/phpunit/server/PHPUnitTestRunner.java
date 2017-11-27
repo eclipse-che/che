@@ -12,6 +12,7 @@
 package org.eclipse.che.plugin.testing.phpunit.server;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -71,7 +72,7 @@ public class PHPUnitTestRunner implements TestRunner {
   }
 
   @Override
-  public ProcessHandler execute(TestExecutionContext context) {
+  public ProcessHandler execute(TestExecutionContext context) throws IOException {
     return testEngine.executeTests(context);
   }
 }
