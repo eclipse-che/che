@@ -814,7 +814,11 @@ public class ContentAssistWidget implements EventListener {
   }
 
   private int getItemsPerPage() {
-    return (int) Math.ceil((double) popupBodyElement.getClientHeight() / getItemHeight());
+    int itemHeight = getItemHeight();
+    if (itemHeight == 0) {
+      return 0;
+    }
+    return (int) Math.ceil((double) popupBodyElement.getClientHeight() / itemHeight);
   }
 
   private int getTotalItems() {
