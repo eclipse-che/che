@@ -14,80 +14,60 @@ package org.eclipse.che.plugin.testing.testng.server;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.prefixURI;
 
 import com.beust.jcommander.JCommander;
+import com.google.inject.name.Named;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import javax.inject.Inject;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.execution.CommandLine;
 import org.eclipse.che.commons.lang.execution.ExecutionException;
 import org.eclipse.che.commons.lang.execution.JavaParameters;
 import org.eclipse.che.commons.lang.execution.ProcessHandler;
+import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionService;
 import org.eclipse.che.plugin.java.testing.AbstractJavaTestRunner;
 import org.eclipse.che.plugin.java.testing.ClasspathUtil;
-import org.eclipse.che.plugin.java.testing.JavaTestAnnotations;
-import org.eclipse.che.plugin.java.testing.JavaTestFinder;
-import org.eclipse.che.plugin.java.testing.ProjectClasspathProvider;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xml.sax.SAXException;
 
 /** TestNG implementation for the test runner service. */
 public class TestNGRunner extends AbstractJavaTestRunner {
-  private static final String TESTNG_NAME = "testng";
   private static final Logger LOG = LoggerFactory.getLogger(TestNGRunner.class);
+  private static final String TESTNG_NAME = "testng";
   private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
+  private static final String TEST_OUTPUT_FOLDER = "/test-output";
+  private static final String TEST_METHOD_ANNOTATION = "org.testng.annotations.Test";
 
   private String workspacePath;
-  private JavaTestFinder javaTestFinder;
-  private final ProjectClasspathProvider classpathProvider;
+  private JavaLanguageServerExtensionService extensionService;
   private final TestNGSuiteUtil suiteUtil;
 
   @Inject
   public TestNGRunner(
-      RootDirPathProvider pathProvider,
-      JavaTestFinder javaTestFinder,
-      ProjectClasspathProvider classpathProvider,
+      @Named("che.user.workspaces.storage") String workspacePath,
+      JavaLanguageServerExtensionService extensionService,
       TestNGSuiteUtil suiteUtil) {
-    super(pathProvider.get(), javaTestFinder);
-    this.workspacePath = pathProvider.get();
-    this.javaTestFinder = javaTestFinder;
-    this.classpathProvider = classpathProvider;
+    super(extensionService, TEST_METHOD_ANNOTATION, "");
+    this.workspacePath = workspacePath;
+    this.extensionService = extensionService;
     this.suiteUtil = suiteUtil;
   }
 
   @Override
   @Nullable
-  public ProcessHandler execute(TestExecutionContext context) {
-    IJavaProject javaProject = getJavaProject(context.getProjectPath());
-    if (javaProject.exists()) {
-      return startTestProcess(javaProject, context);
-    }
-
-    return null;
+  public ProcessHandler execute(TestExecutionContext context) throws ExecutionException {
+    return startTestProcess(context);
   }
 
-  private ProcessHandler startTestProcess(IJavaProject javaProject, TestExecutionContext context) {
-    File suiteFile = createSuite(context, javaProject);
+  private ProcessHandler startTestProcess(TestExecutionContext context) throws ExecutionException {
+    File suiteFile = createSuite(context);
     if (suiteFile == null) {
       throw new RuntimeException("Can't create TestNG suite xml file.");
     }
@@ -95,12 +75,12 @@ public class TestNGRunner extends AbstractJavaTestRunner {
     JavaParameters parameters = new JavaParameters();
     parameters.setJavaExecutable(System.getProperty("java.home") + "/bin/java");
     parameters.setMainClassName("org.testng.CheTestNGLauncher");
-    String outputDirectory = getOutputDirectory(javaProject);
+    String outputDirectory = getOutputDirectory(context);
     parameters.getParametersList().add("-d", outputDirectory);
-    parameters.setWorkingDirectory(workspacePath + javaProject.getPath());
+    parameters.setWorkingDirectory(workspacePath + context.getProjectPath());
     List<String> classPath = new ArrayList<>();
-    Set<String> projectClassPath = classpathProvider.getProjectClassPath(javaProject);
-    classPath.addAll(projectClassPath);
+    List<String> resolvedClassPaths = getResolvedClassPaths(context);
+    classPath.addAll(resolvedClassPaths);
     classPath.add(ClasspathUtil.getJarPathForClass(org.testng.CheTestNG.class));
     classPath.add(ClasspathUtil.getJarPathForClass(JCommander.class));
     parameters.getClassPath().addAll(classPath);
@@ -114,30 +94,30 @@ public class TestNGRunner extends AbstractJavaTestRunner {
           .add("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=" + getDebugPort());
     }
     CommandLine command = parameters.createCommand();
-    try {
-      return new ProcessHandler(command.createProcess());
-    } catch (ExecutionException e) {
-      LOG.error("Can't run TestNG JVM", e);
-    }
-
-    return null;
+    return new ProcessHandler(command.createProcess());
   }
 
-  private File createSuite(TestExecutionContext context, IJavaProject javaProject) {
+  private String getOutputDirectory(TestExecutionContext context) {
+    String outputDir = extensionService.getOutputDir(prefixURI(context.getProjectPath()));
+
+    if (isNullOrEmpty(outputDir)) {
+      return workspacePath + context.getProjectPath() + TEST_OUTPUT_FOLDER;
+    } else {
+      return outputDir.substring(0, outputDir.lastIndexOf('/')) + TEST_OUTPUT_FOLDER;
+    }
+  }
+
+  private File createSuite(TestExecutionContext context) {
     String filePath = context.getFilePath();
     if (!isNullOrEmpty(filePath) && filePath.endsWith(".xml")) {
-      String path =
-          filePath.substring(javaProject.getPath().toString().length(), filePath.length());
-      IFile file = javaProject.getProject().getFile(path);
-      return suiteUtil.writeSuite(System.getProperty(JAVA_IO_TMPDIR), file);
+      return suiteUtil.writeSuite(System.getProperty(JAVA_IO_TMPDIR), filePath);
     }
-    List<String> testSuite =
-        findTests(context, javaProject, JavaTestAnnotations.TESTNG_TEST.getName(), "");
+    List<String> testSuite = findTests(context);
 
     Map<String, List<String>> classes = buildTestNgSuite(testSuite, context);
 
     return suiteUtil.writeSuite(
-        System.getProperty(JAVA_IO_TMPDIR), javaProject.getElementName(), classes);
+        System.getProperty(JAVA_IO_TMPDIR), context.getProjectPath(), classes);
   }
 
   private Map<String, List<String>> buildTestNgSuite(
@@ -187,38 +167,5 @@ public class TestNGRunner extends AbstractJavaTestRunner {
   @Override
   public String getName() {
     return TESTNG_NAME;
-  }
-
-  @Override
-  protected boolean isTestMethod(IMethod method, ICompilationUnit compilationUnit) {
-    return javaTestFinder.isTest(
-        method, compilationUnit, JavaTestAnnotations.TESTNG_TEST.getName());
-  }
-
-  @Override
-  protected boolean isTestSuite(String fileLocation, IJavaProject project) {
-    IPath projectPath = project.getPath();
-    IPath filePath = new Path(fileLocation);
-    if (!projectPath.isPrefixOf(filePath)) {
-      return false;
-    }
-
-    IFile file = project.getProject().getFile(filePath.makeRelativeTo(projectPath));
-    if (!file.exists()) {
-      return false;
-    }
-
-    SAXParserFactory factory = SAXParserFactory.newInstance();
-    TestNGSuiteParser suiteParser = new TestNGSuiteParser();
-    try {
-      SAXParser parser = factory.newSAXParser();
-      parser.parse(file.getContents(), suiteParser);
-    } catch (ParserConfigurationException | SAXException | IOException e) {
-      LOG.debug("It is not possible to parse file " + fileLocation);
-    } catch (CoreException e) {
-      LOG.error("It is not possible to read file " + fileLocation, e);
-    }
-
-    return suiteParser.isSuite();
   }
 }
