@@ -16,19 +16,16 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElem
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.pageobject.Loader;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class WorkspaceDetailsInstallers {
   private final SeleniumWebDriver seleniumWebDriver;
-  private final Loader loader;
 
   @Inject
-  public WorkspaceDetailsInstallers(SeleniumWebDriver seleniumWebDriver, Loader loader) {
+  public WorkspaceDetailsInstallers(SeleniumWebDriver seleniumWebDriver) {
     this.seleniumWebDriver = seleniumWebDriver;
-    this.loader = loader;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 

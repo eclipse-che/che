@@ -18,7 +18,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
-import org.eclipse.che.selenium.pageobject.Loader;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -29,12 +28,10 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class WorkspaceDetailsProjects {
 
   private final SeleniumWebDriver seleniumWebDriver;
-  private final Loader loader;
 
   @Inject
-  public WorkspaceDetailsProjects(SeleniumWebDriver seleniumWebDriver, Loader loader) {
+  public WorkspaceDetailsProjects(SeleniumWebDriver seleniumWebDriver) {
     this.seleniumWebDriver = seleniumWebDriver;
-    this.loader = loader;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 

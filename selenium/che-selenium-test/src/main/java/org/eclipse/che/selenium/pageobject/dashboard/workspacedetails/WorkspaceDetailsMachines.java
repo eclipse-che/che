@@ -59,7 +59,6 @@ public class WorkspaceDetailsMachines {
   @FindBy(xpath = Locators.RAM_WORKSPACE)
   WebElement ramWorkspace;
 
-  // TODO                    MACHINES
   public void selectMachine(String tabName, String machineName) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(

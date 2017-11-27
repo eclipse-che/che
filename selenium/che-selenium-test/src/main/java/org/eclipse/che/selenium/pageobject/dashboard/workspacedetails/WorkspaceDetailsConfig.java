@@ -12,20 +12,12 @@ package org.eclipse.che.selenium.pageobject.dashboard.workspacedetails;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.pageobject.Loader;
 import org.openqa.selenium.support.PageFactory;
 
 public class WorkspaceDetailsConfig {
 
   @Inject
-  public WorkspaceDetailsConfig(SeleniumWebDriver seleniumWebDriver, Loader loader) {
+  public WorkspaceDetailsConfig(SeleniumWebDriver seleniumWebDriver) {
     PageFactory.initElements(seleniumWebDriver, this);
-  }
-
-  private interface Locators {
-    String PROJECT_BY_NAME = "//div[contains(@ng-click, 'projectItem')]/span[text()='%s']";
-    String DELETE_PROJECT = "//button/span[text()='Delete']";
-    String DELETE_IT_PROJECT = "//che-button-primary[@che-button-title='Delete']/button";
-    String ADD_NEW_PROJECT_BUTTON = "//che-button-primary[@che-button-title='Add Project']/button";
   }
 }

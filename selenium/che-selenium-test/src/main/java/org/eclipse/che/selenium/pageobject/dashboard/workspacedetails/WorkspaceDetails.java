@@ -55,7 +55,6 @@ public class WorkspaceDetails {
   }
 
   private interface Locators {
-
     String WORKSPACE_STATE = "workspace-status";
     String RUN_WORKSPACE_BTN = "runButton";
     String STOP_WORKSPACE_BTN = "stopButton";
@@ -88,11 +87,7 @@ public class WorkspaceDetails {
   }
 
   @Inject
-  public WorkspaceDetails(
-      SeleniumWebDriver seleniumWebDriver,
-      Loader loader,
-      Dashboard dashboard,
-      WorkspaceDetailsProjects workspaceDetailsProjects) {
+  public WorkspaceDetails(SeleniumWebDriver seleniumWebDriver, Loader loader, Dashboard dashboard) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
     this.dashboard = dashboard;
@@ -167,7 +162,7 @@ public class WorkspaceDetails {
    *
    * @param tabName is the tab name into workspace menu
    */
-  public void selectTabInWorspaceMenu(String tabName) {
+  public void selectTabInWorkspaceMenu(String tabName) {
     loader.waitOnClosed();
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(By.xpath(format(Locators.TAB_NAMES_IN_WS, tabName))))

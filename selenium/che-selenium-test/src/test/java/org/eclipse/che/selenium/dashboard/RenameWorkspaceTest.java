@@ -70,7 +70,7 @@ public class RenameWorkspaceTest {
     dashboard.waitToolbarTitleName("Workspaces");
     workspaces.selectWorkspaceItemName(workspaceName);
     workspaces.waitToolbarTitleName(workspaceName);
-    workspaceDetails.selectTabInWorspaceMenu(OVERVIEW);
+    workspaceDetails.selectTabInWorkspaceMenu(OVERVIEW);
 
     // type name with 1 characters and check error message that this name is too short
     workspaceDetailsOverview.enterNameWorkspace("w");

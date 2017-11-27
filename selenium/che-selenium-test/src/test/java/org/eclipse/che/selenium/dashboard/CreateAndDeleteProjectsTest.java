@@ -95,7 +95,7 @@ public class CreateAndDeleteProjectsTest {
     switchToWindow(dashboardWindow);
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.selectWorkspaceItemName(WORKSPACE);
-    workspaceDetails.selectTabInWorspaceMenu(PROJECTS);
+    workspaceDetails.selectTabInWorkspaceMenu(PROJECTS);
     workspaceDetailsProjects.waitProjectIsPresent(WEB_JAVA_SPRING);
     workspaceDetailsProjects.waitProjectIsPresent(CONSOLE_JAVA_SIMPLE);
     workspaceDetailsProjects.openSettingsForProjectByName(WEB_JAVA_SPRING);

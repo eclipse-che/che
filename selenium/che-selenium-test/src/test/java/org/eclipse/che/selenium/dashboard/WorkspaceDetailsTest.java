@@ -90,7 +90,7 @@ public class WorkspaceDetailsTest {
 
   @Test
   public void workingWithEnvVariables() {
-    workspaceDetails.selectTabInWorspaceMenu(ENV_VARIABLES);
+    workspaceDetails.selectTabInWorkspaceMenu(ENV_VARIABLES);
 
     // create a new variable, save changes and check it exists
     workspaceDetailsMachines.selectMachine("Environment variables", "dev-machine");
@@ -143,7 +143,7 @@ public class WorkspaceDetailsTest {
 
   @Test
   public void workingWithInstallers() {
-    workspaceDetails.selectTabInWorspaceMenu(INSTALLERS);
+    workspaceDetails.selectTabInWorkspaceMenu(INSTALLERS);
 
     // check all needed installers in dev-machine exist
     workspaceDetailsMachines.selectMachine("Workspace Installers", "dev-machine");
@@ -177,7 +177,7 @@ public class WorkspaceDetailsTest {
 
   @Test
   public void workingWithServers() {
-    workspaceDetails.selectTabInWorspaceMenu(SERVERS);
+    workspaceDetails.selectTabInWorkspaceMenu(SERVERS);
 
     // add a new server to db machine, save changes and check it exists
     workspaceDetailsMachines.selectMachine("Servers", "db");
@@ -210,7 +210,7 @@ public class WorkspaceDetailsTest {
     String machineName = "new_machine";
 
     // check that all machines of the Java-MySql stack created by default exist
-    workspaceDetails.selectTabInWorspaceMenu(MACHINES);
+    workspaceDetails.selectTabInWorkspaceMenu(MACHINES);
     workspaceDetailsMachines.checkMachineExists("db");
     workspaceDetailsMachines.checkMachineExists("dev-machine");
 
@@ -235,7 +235,7 @@ public class WorkspaceDetailsTest {
 
   @Test(priority = 1)
   public void workingWithProjects() {
-    workspaceDetails.selectTabInWorspaceMenu(PROJECTS);
+    workspaceDetails.selectTabInWorkspaceMenu(PROJECTS);
 
     // create a new project and save changes
     workspaceDetailsProjects.clickOnAddNewProjectButton();
@@ -307,7 +307,7 @@ public class WorkspaceDetailsTest {
     dashboard.waitToolbarTitleName("Workspaces");
     workspaces.selectWorkspaceItemName(WORKSPACE);
     workspaces.waitToolbarTitleName(WORKSPACE);
-    workspaceDetails.selectTabInWorspaceMenu(OVERVIEW);
+    workspaceDetails.selectTabInWorkspaceMenu(OVERVIEW);
     workspaceDetails.checkStateOfWorkspace(RUNNING);
     workspaceDetails.clickOnStopWorkspace();
     workspaceDetails.checkStateOfWorkspace(STOPPED);

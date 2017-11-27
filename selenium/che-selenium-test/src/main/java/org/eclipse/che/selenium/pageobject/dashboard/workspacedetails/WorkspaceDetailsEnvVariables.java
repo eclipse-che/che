@@ -49,7 +49,6 @@ public class WorkspaceDetailsEnvVariables {
     String DELETE_ENV_VARIABLE = "//div[@delete-variable='%s']";
   }
 
-  // TODO                       ENV_VARIABLES
   public void clickOnAddEnvVariableButton() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(By.xpath(Locators.ADD_ENV_VARIABLE_BUTTON)))

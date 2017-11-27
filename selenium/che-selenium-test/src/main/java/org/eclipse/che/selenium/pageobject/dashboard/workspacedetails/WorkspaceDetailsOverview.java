@@ -20,7 +20,6 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElem
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.pageobject.Loader;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -29,21 +28,17 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class WorkspaceDetailsOverview {
   private final SeleniumWebDriver seleniumWebDriver;
-  private final Loader loader;
 
   @Inject
-  public WorkspaceDetailsOverview(SeleniumWebDriver seleniumWebDriver, Loader loader) {
+  public WorkspaceDetailsOverview(SeleniumWebDriver seleniumWebDriver) {
     this.seleniumWebDriver = seleniumWebDriver;
-    this.loader = loader;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
   private interface Locators {
     String NAME_WORKSPACE_INPUT = "//input[@placeholder='Name of the workspace *']";
     String DELETE_WORKSPACE_BTN = "//button/span[text()='Delete']";
-
     String WORKSPACE_TITLE = "//div[contains(@class,'toolbar-info')]/span[text()='%s']";
-
     String EXPORT_WORKSPACE_BTN =
         "//button[contains(@class, 'che-button')]/span[text()='Export as a file']";
     String DOWNLOAD_WORKSPACE_BTN = "//che-button-default[@che-button-title='download']";

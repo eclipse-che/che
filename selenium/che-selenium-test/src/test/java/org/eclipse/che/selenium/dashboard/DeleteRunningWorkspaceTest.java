@@ -51,7 +51,7 @@ public class DeleteRunningWorkspaceTest {
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.selectWorkspaceItemName(workspaceName);
     workspaces.waitToolbarTitleName(workspaceName);
-    workspaceDetails.selectTabInWorspaceMenu(OVERVIEW);
+    workspaceDetails.selectTabInWorkspaceMenu(OVERVIEW);
     workspaceDetails.checkStateOfWorkspace(RUNNING);
     workspaceDetailsOverview.clickOnDeleteWorkspace();
     workspaceDetails.clickOnDeleteButtonInDialogWindow();

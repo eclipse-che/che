@@ -18,24 +18,21 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElem
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.pageobject.Loader;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class WorkspaceDetailsShare {
   private final SeleniumWebDriver seleniumWebDriver;
-  private final Loader loader;
 
   @Inject
-  public WorkspaceDetailsShare(SeleniumWebDriver seleniumWebDriver, Loader loader) {
+  public WorkspaceDetailsShare(SeleniumWebDriver seleniumWebDriver) {
     this.seleniumWebDriver = seleniumWebDriver;
-    this.loader = loader;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
   private interface Locators {
-    String ADD_DEVLOPER_BTN = "//span[text()='Add Developer']";
+    String ADD_DEVELOPER_BTN = "//span[text()='Add Developer']";
     String REMOVE_DEVELOPER_ICON =
         "//span[text()='%s']//following::div[@tooltip='Remove member'][1]";
     String INPUT_SHARE_DIALOG = "//md-chips[contains(@class,'share-user-input')]//input";
@@ -51,7 +48,7 @@ public class WorkspaceDetailsShare {
    */
   public void addDeveloperToShareList(String email) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(By.xpath(Locators.ADD_DEVLOPER_BTN)))
+        .until(visibilityOfElementLocated(By.xpath(Locators.ADD_DEVELOPER_BTN)))
         .click();
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(By.xpath(Locators.INPUT_SHARE_DIALOG)))

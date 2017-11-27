@@ -12,17 +12,14 @@ package org.eclipse.che.selenium.pageobject.dashboard.workspacedetails;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.pageobject.Loader;
 import org.openqa.selenium.support.PageFactory;
 
 public class WorkspaceDetailsSsh {
   private final SeleniumWebDriver seleniumWebDriver;
-  private final Loader loader;
 
   @Inject
-  public WorkspaceDetailsSsh(SeleniumWebDriver seleniumWebDriver, Loader loader) {
+  public WorkspaceDetailsSsh(SeleniumWebDriver seleniumWebDriver) {
     this.seleniumWebDriver = seleniumWebDriver;
-    this.loader = loader;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 }
