@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
@@ -27,10 +28,15 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.everrest.core.impl.provider.json.JsonValue;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.FluentWait;
+import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Andrey Chizhikov */
@@ -67,9 +73,13 @@ public class Swagger {
 
   /** expand 'workspace' item */
   private void expandWorkSpaceItem() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.elementToBeClickable(workSpaceLink))
-        .click();
+    Wait fluentWait =
+        new FluentWait(seleniumWebDriver)
+            .withTimeout(LOAD_PAGE_TIMEOUT_SEC, SECONDS)
+            .pollingEvery(REDRAW_UI_ELEMENTS_TIMEOUT_SEC, SECONDS)
+            .ignoring(StaleElementReferenceException.class, NoSuchElementException.class);
+    fluentWait.until((ExpectedCondition<Boolean>) input -> workSpaceLink.isEnabled());
+    workSpaceLink.click();
   }
 
   /** collapse 'workspace' item */
