@@ -74,8 +74,8 @@ public class TestWebElementRenderChecker {
     waitElementIsRendered(getAndWaitWebElement(webElementXpath), seconds);
   }
 
-  private Boolean dimensionsAreEquivalent(AtomicInteger dimensionSum, Dimension newDimension) {
-    return dimensionSum.get() == getDimensionSumWithShift(newDimension);
+  private Boolean dimensionsAreEquivalent(AtomicInteger sizeHashCode, Dimension newDimension) {
+    return sizeHashCode.get() == getDimensionSumWithShift(newDimension);
   }
 
   private FluentWait<WebDriver> getFluentWait(int seconds) {
@@ -86,17 +86,17 @@ public class TestWebElementRenderChecker {
   }
 
   private void waitElementIsStatic(FluentWait<WebDriver> webDriverWait, WebElement webElement) {
-    AtomicInteger dimension = new AtomicInteger(0);
+    AtomicInteger sizeHashCode = new AtomicInteger(0);
 
     webDriverWait.until(
         (ExpectedCondition<Boolean>)
             driver -> {
               Dimension newDimension = getAndWaitWebElement(webElement).getSize();
 
-              if (dimensionsAreEquivalent(dimension, newDimension)) {
+              if (dimensionsAreEquivalent(sizeHashCode, newDimension)) {
                 return true;
               } else {
-                dimension.set(getDimensionSumWithShift(newDimension));
+                sizeHashCode.set(getDimensionSumWithShift(newDimension));
                 return false;
               }
             });
