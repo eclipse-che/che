@@ -75,8 +75,8 @@ public class TestWebElementRenderChecker {
   }
 
   private Boolean dimensionsAreEquivalent(
-      AtomicInteger beforePartiesSum, Dimension afterDimension) {
-    return beforePartiesSum.get() == getDimensionSumWithShift(afterDimension);
+      AtomicInteger dimensionSum, Dimension newDimension) {
+    return dimensionSum.get() == getDimensionSumWithShift(newDimension);
   }
 
   private FluentWait<WebDriver> getFluentWait(int seconds) {
@@ -87,17 +87,17 @@ public class TestWebElementRenderChecker {
   }
 
   private void waitElementIsStatic(FluentWait<WebDriver> webDriverWait, WebElement webElement) {
-    AtomicInteger dimensionSum = new AtomicInteger(0);
+    AtomicInteger dimension = new AtomicInteger(0);
 
     webDriverWait.until(
         (ExpectedCondition<Boolean>)
             driver -> {
-              Dimension dimension = getAndWaitWebElement(webElement).getSize();
+              Dimension newDimension = getAndWaitWebElement(webElement).getSize();
 
-              if (dimensionsAreEquivalent(dimensionSum, dimension)) {
+              if (dimensionsAreEquivalent(dimension, newDimension)) {
                 return true;
               } else {
-                dimensionSum.set(getDimensionSumWithShift(dimension));
+                dimension.set(getDimensionSumWithShift(newDimension));
                 return false;
               }
             });
@@ -105,7 +105,7 @@ public class TestWebElementRenderChecker {
 
   /**
    * height is multiplied because we must avoid the situation when, in fact, different parties will
-   * give the same sum
+   * give the same sum for example 15 + 25 == 25 + 15, but 15 + 25*10000 != 25 + 15*10000
    *
    * @param dimension consist partial sizes
    * @return partial sizes sum with shift
