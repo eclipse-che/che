@@ -46,7 +46,7 @@ public class PHPUnitTestEngine {
     this.projectsRoot = projectsRoot.toPath().normalize().toAbsolutePath();
   }
 
-  public ProcessHandler executeTests(TestExecutionContext context) {
+  public ProcessHandler executeTests(TestExecutionContext context) throws IOException {
     String projectPath = context.getProjectPath();
     String testTargetRelativePath = context.getFilePath();
     String projectAbsolutePath = ResourcesPlugin.getPathToWorkspace() + projectPath;
@@ -75,13 +75,7 @@ public class PHPUnitTestEngine {
             .directory(testTargetWorkingDirectory)
             .command(cmdRunTests.toShellCommand());
     pb.environment().put("ZEND_PHPUNIT_PORT", String.valueOf(PRINTER_PORT));
-    try {
-      return new ProcessHandler(pb.start());
-    } catch (IOException e) {
-      LOG.error("Can't run PHPUnit", e);
-    }
-
-    return null;
+    return new ProcessHandler(pb.start());
   }
 
   private File getPrinterFile() {
