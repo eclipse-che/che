@@ -12,13 +12,19 @@ package org.eclipse.che.plugin.languageserver.ide.editor;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.List;
+import java.util.Optional;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedPublishDiagnosticsParams;
+import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
 import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
+import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.resources.tree.ResourceNode;
+import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.lsp4j.Diagnostic;
 
 /** @author Anatolii Bazko */
@@ -26,15 +32,37 @@ import org.eclipse.lsp4j.Diagnostic;
 public class PublishDiagnosticsProcessor {
 
   private final EditorAgent editorAgent;
+  private final Tree tree;
 
   @Inject
-  public PublishDiagnosticsProcessor(EditorAgent editorAgent) {
+  public PublishDiagnosticsProcessor(
+      EditorAgent editorAgent, ProjectExplorerPresenter projectExplorer) {
     this.editorAgent = editorAgent;
+    this.tree = projectExplorer.getTree();
   }
 
-  public void processDiagnostics(ExtendedPublishDiagnosticsParams diagnosticsMessage) {
-    EditorPartPresenter openedEditor =
-        editorAgent.getOpenedEditor(new Path(diagnosticsMessage.getParams().getUri()));
+  public void processDiagnostics(List<ExtendedPublishDiagnosticsParams> diagnostics) {
+    tree.getNodeStorage()
+        .getAll()
+        .stream()
+        .filter(node -> node instanceof ResourceNode)
+        .forEach(node -> ((ResourceNode) node).getData().setHasError(false));
+    diagnostics.forEach(this::processDiagnostics);
+  }
+
+  private void processDiagnostics(ExtendedPublishDiagnosticsParams diagnosticsMessage) {
+    final Path path = Path.valueOf(diagnosticsMessage.getParams().getUri());
+    final Optional<Node> resource =
+        tree.getNodeStorage()
+            .getAll()
+            .stream()
+            .filter(
+                node -> node instanceof ResourceNode && ((ResourceNode) node).getData().isFile())
+            .filter(node -> path.equals(((ResourceNode) node).getData().asFile().getLocation()))
+            .findAny();
+    resource.ifPresent(node -> setHasError((ResourceNode) node));
+
+    EditorPartPresenter openedEditor = editorAgent.getOpenedEditor(path);
     // TODO add markers
     if (openedEditor == null) {
       return;
@@ -55,6 +83,14 @@ public class PublishDiagnosticsProcessor {
           collector.endReporting(languageServerId);
         }
       }
+    }
+  }
+
+  private void setHasError(ResourceNode node) {
+    node.getData().setHasError(true);
+    tree.refresh(node);
+    if (node.getParent() instanceof ResourceNode) {
+      setHasError((ResourceNode) node.getParent());
     }
   }
 }

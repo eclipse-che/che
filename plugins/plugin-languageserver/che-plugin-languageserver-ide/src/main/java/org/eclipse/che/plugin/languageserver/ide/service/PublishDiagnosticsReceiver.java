@@ -46,7 +46,7 @@ public class PublishDiagnosticsReceiver {
     configurator
         .newConfiguration()
         .methodName("textDocument/publishDiagnostics")
-        .paramsAsDto(ExtendedPublishDiagnosticsParams.class)
+        .paramsAsListOfDto(ExtendedPublishDiagnosticsParams.class)
         .noResult()
         .withConsumer(params -> provider.get().processDiagnostics(params));
   }

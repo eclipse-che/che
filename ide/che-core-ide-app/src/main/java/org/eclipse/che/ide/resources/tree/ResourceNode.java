@@ -199,14 +199,19 @@ public abstract class ResourceNode<R extends Resource> extends AbstractTreeNode
       }
     }
 
-    presentation.setPresentableTextCss(cssBuilder.toString());
-
     if (getData().isFile() && getData().asFile().getVcsStatus() != null) {
       VcsStatus vcsStatus = getData().asFile().getVcsStatus();
       if (vcsStatus != NOT_MODIFIED) {
-        presentation.setPresentableTextCss("color: " + vcsStatus.getColor() + ";");
+        cssBuilder.append("color: ").append(vcsStatus.getColor()).append(';');
       }
     }
+
+    if (getData().hasError()) {
+      // TODO improve CSS
+      cssBuilder.append("border-bottom: 1px dotted red; padding: 1px;");
+    }
+
+    presentation.setPresentableTextCss(cssBuilder.toString());
   }
 
   @Override
