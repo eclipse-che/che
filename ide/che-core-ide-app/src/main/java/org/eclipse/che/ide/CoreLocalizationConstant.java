@@ -1090,6 +1090,9 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("macro.current.project.path.description")
   String macroCurrentProjectPathDescription();
 
+  @Key("macro.current.project.eldest.parent.path.description")
+  String macroCurrentProjectEldestParentPathDescription();
+
   @Key("macro.current.project.relpath.description")
   String macroCurrentProjectRelpathDescription();
 
