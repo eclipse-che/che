@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker;
 
+import static java.util.Collections.emptyMap;
+
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -153,7 +155,8 @@ public final class Labels {
                 new ServerConfigImpl(
                     labels.get(String.format(SERVER_PORT_LABEL_FMT, ref)),
                     labels.get(String.format(SERVER_PROTOCOL_LABEL_FMT, ref)),
-                    labels.get(String.format(SERVER_PATH_LABEL_FMT, ref))));
+                    labels.get(String.format(SERVER_PATH_LABEL_FMT, ref)),
+                    emptyMap()));
           }
         }
       }

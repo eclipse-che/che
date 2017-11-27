@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker;
 
+import static java.util.Collections.emptyMap;
 import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
@@ -34,10 +35,14 @@ public class LabelsTest {
         Labels.newSerializer()
             .machineName("dev-machine")
             .runtimeId(new RuntimeIdentityImpl("workspace123", "my-env", "owner"))
-            .server("my-server1/http", new ServerConfigImpl("8000/tcp", "http", "/api/info"))
-            .server("my-server2", new ServerConfigImpl("8080/tcp", "ws", "/connect"))
-            .server("my-server3", new ServerConfigImpl("7070/tcp", "http", null))
-            .server("my.dot.separated.server", new ServerConfigImpl("9090/tcp", "http", null))
+            .server(
+                "my-server1/http",
+                new ServerConfigImpl("8000/tcp", "http", "/api/info", emptyMap()))
+            .server("my-server2", new ServerConfigImpl("8080/tcp", "ws", "/connect", emptyMap()))
+            .server("my-server3", new ServerConfigImpl("7070/tcp", "http", null, emptyMap()))
+            .server(
+                "my.dot.separated.server",
+                new ServerConfigImpl("9090/tcp", "http", null, emptyMap()))
             .labels();
     Map<String, String> expected =
         ImmutableMap.<String, String>builder()
@@ -84,10 +89,13 @@ public class LabelsTest {
 
     Labels.Deserializer deserializer = Labels.newDeserializer(labels);
     Map<String, ServerConfig> expectedServers = new HashMap<>();
-    expectedServers.put("my-server1/http", new ServerConfigImpl("8000/tcp", "http", "/api/info"));
-    expectedServers.put("my-server2", new ServerConfigImpl("8080/tcp", "ws", "/connect"));
-    expectedServers.put("my-server3", new ServerConfigImpl("7070/tcp", "http", null));
-    expectedServers.put("my.dot.separated.server", new ServerConfigImpl("9090/tcp", "http", null));
+    expectedServers.put(
+        "my-server1/http", new ServerConfigImpl("8000/tcp", "http", "/api/info", emptyMap()));
+    expectedServers.put(
+        "my-server2", new ServerConfigImpl("8080/tcp", "ws", "/connect", emptyMap()));
+    expectedServers.put("my-server3", new ServerConfigImpl("7070/tcp", "http", null, emptyMap()));
+    expectedServers.put(
+        "my.dot.separated.server", new ServerConfigImpl("9090/tcp", "http", null, emptyMap()));
 
     assertEquals(deserializer.machineName(), "dev-machine");
 

@@ -10,7 +10,9 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift;
 
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static org.eclipse.che.workspace.infrastructure.openshift.ServerExposer.SERVER_PREFIX;
 import static org.eclipse.che.workspace.infrastructure.openshift.ServerExposer.SERVER_UNIQUE_PART_SIZE;
 import static org.testng.Assert.assertEquals;
@@ -72,7 +74,8 @@ public class ServerExposerTest {
   @Test
   public void shouldExposeContainerPortAndCreateServiceAndRouteForServer() {
     // given
-    ServerConfigImpl httpServerConfig = new ServerConfigImpl("8080/tcp", "http", "/api");
+    ServerConfigImpl httpServerConfig =
+        new ServerConfigImpl("8080/tcp", "http", "/api", singletonMap("key", "value"));
     Map<String, ServerConfigImpl> serversToExpose =
         ImmutableMap.of("http-server", httpServerConfig);
 
@@ -80,15 +83,21 @@ public class ServerExposerTest {
     serverExposer.expose(serversToExpose);
 
     // then
-    assertThatServerIsExposed("http-server", "tcp", 8080, httpServerConfig);
+    assertThatServerIsExposed(
+        "http-server",
+        "tcp",
+        8080,
+        new ServerConfigImpl(httpServerConfig).withAttributes(emptyMap()));
   }
 
   @Test
   public void
       shouldExposeContainerPortAndCreateServiceAndRouteForServerWhenTwoServersHasTheSamePort() {
     // given
-    ServerConfigImpl httpServerConfig = new ServerConfigImpl("8080/tcp", "http", "/api");
-    ServerConfigImpl wsServerConfig = new ServerConfigImpl("8080/tcp", "ws", "/connect");
+    ServerConfigImpl httpServerConfig =
+        new ServerConfigImpl("8080/tcp", "http", "/api", singletonMap("key", "value"));
+    ServerConfigImpl wsServerConfig =
+        new ServerConfigImpl("8080/tcp", "ws", "/connect", singletonMap("key", "value"));
     Map<String, ServerConfigImpl> serversToExpose =
         ImmutableMap.of(
             "http-server", httpServerConfig,
@@ -100,16 +109,23 @@ public class ServerExposerTest {
     // then
     assertEquals(openShiftEnvironment.getServices().size(), 1);
     assertEquals(openShiftEnvironment.getRoutes().size(), 1);
-    assertThatServerIsExposed("http-server", "tcp", 8080, httpServerConfig);
-    assertThatServerIsExposed("ws-server", "tcp", 8080, wsServerConfig);
+    assertThatServerIsExposed(
+        "http-server",
+        "tcp",
+        8080,
+        new ServerConfigImpl(httpServerConfig).withAttributes(emptyMap()));
+    assertThatServerIsExposed(
+        "ws-server", "tcp", 8080, new ServerConfigImpl(wsServerConfig).withAttributes(emptyMap()));
   }
 
   @Test
   public void
       shouldExposeContainerPortsAndCreateServiceAndRoutesForServerWhenTwoServersHasDifferentPorts() {
     // given
-    ServerConfigImpl httpServerConfig = new ServerConfigImpl("8080/tcp", "http", "/api");
-    ServerConfigImpl wsServerConfig = new ServerConfigImpl("8081/tcp", "ws", "/connect");
+    ServerConfigImpl httpServerConfig =
+        new ServerConfigImpl("8080/tcp", "http", "/api", singletonMap("key", "value"));
+    ServerConfigImpl wsServerConfig =
+        new ServerConfigImpl("8081/tcp", "ws", "/connect", singletonMap("key", "value"));
     Map<String, ServerConfigImpl> serversToExpose =
         ImmutableMap.of(
             "http-server", httpServerConfig,
@@ -121,15 +137,21 @@ public class ServerExposerTest {
     // then
     assertEquals(openShiftEnvironment.getServices().size(), 1);
     assertEquals(openShiftEnvironment.getRoutes().size(), 2);
-    assertThatServerIsExposed("http-server", "tcp", 8080, httpServerConfig);
-    assertThatServerIsExposed("ws-server", "tcp", 8081, wsServerConfig);
+    assertThatServerIsExposed(
+        "http-server",
+        "tcp",
+        8080,
+        new ServerConfigImpl(httpServerConfig).withAttributes(emptyMap()));
+    assertThatServerIsExposed(
+        "ws-server", "tcp", 8081, new ServerConfigImpl(wsServerConfig).withAttributes(emptyMap()));
   }
 
   @Test
   public void
       shouldExposeTcpContainerPortsAndCreateServiceAndRouteForServerWhenProtocolIsMissedInPort() {
     // given
-    ServerConfigImpl httpServerConfig = new ServerConfigImpl("8080", "http", "/api");
+    ServerConfigImpl httpServerConfig =
+        new ServerConfigImpl("8080", "http", "/api", singletonMap("key", "value"));
     Map<String, ServerConfigImpl> serversToExpose =
         ImmutableMap.of("http-server", httpServerConfig);
 
@@ -139,13 +161,18 @@ public class ServerExposerTest {
     // then
     assertEquals(openShiftEnvironment.getServices().size(), 1);
     assertEquals(openShiftEnvironment.getRoutes().size(), 1);
-    assertThatServerIsExposed("http-server", "TCP", 8080, httpServerConfig);
+    assertThatServerIsExposed(
+        "http-server",
+        "TCP",
+        8080,
+        new ServerConfigImpl(httpServerConfig).withAttributes(emptyMap()));
   }
 
   @Test
   public void shouldNotAddAdditionalContainerPortWhenItIsAlreadyExposed() {
     // given
-    ServerConfigImpl httpServerConfig = new ServerConfigImpl("8080/tcp", "http", "/api");
+    ServerConfigImpl httpServerConfig =
+        new ServerConfigImpl("8080/tcp", "http", "/api", singletonMap("key", "value"));
     Map<String, ServerConfigImpl> serversToExpose =
         ImmutableMap.of("http-server", httpServerConfig);
     container.setPorts(
@@ -160,13 +187,18 @@ public class ServerExposerTest {
     serverExposer.expose(serversToExpose);
 
     // then
-    assertThatServerIsExposed("http-server", "tcp", 8080, httpServerConfig);
+    assertThatServerIsExposed(
+        "http-server",
+        "tcp",
+        8080,
+        new ServerConfigImpl(httpServerConfig).withAttributes(emptyMap()));
   }
 
   @Test
   public void shouldAddAdditionalContainerPortWhenThereIsTheSameButWithDifferentProtocol() {
     // given
-    ServerConfigImpl udpServerConfig = new ServerConfigImpl("8080/udp", "udp", "/api");
+    ServerConfigImpl udpServerConfig =
+        new ServerConfigImpl("8080/udp", "udp", "/api", singletonMap("key", "value"));
     Map<String, ServerConfigImpl> serversToExpose = ImmutableMap.of("server", udpServerConfig);
     container.setPorts(
         new ArrayList<>(
@@ -184,7 +216,8 @@ public class ServerExposerTest {
     assertEquals(container.getPorts().size(), 2);
     assertEquals(container.getPorts().get(1).getContainerPort(), new Integer(8080));
     assertEquals(container.getPorts().get(1).getProtocol(), "UDP");
-    assertThatServerIsExposed("server", "udp", 8080, udpServerConfig);
+    assertThatServerIsExposed(
+        "server", "udp", 8080, new ServerConfigImpl(udpServerConfig).withAttributes(emptyMap()));
   }
 
   private void assertThatServerIsExposed(

@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker.server.mapping;
 
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toMap;
 import static org.testng.Assert.assertEquals;
@@ -50,8 +51,8 @@ public class ServersMapperTest {
             "8080/tcp", "0.0.0.0:32080",
             "8081/tcp", "0.0.0.0:32081"),
         ImmutableMap.of(
-            "server1", new ServerConfigImpl("8080", "http", "no-slash-path"),
-            "server2", new ServerConfigImpl("8081", "http", "/slash-path")),
+            "server1", new ServerConfigImpl("8080", "http", "no-slash-path", emptyMap()),
+            "server2", new ServerConfigImpl("8081", "http", "/slash-path", emptyMap())),
         ImmutableMap.of(
             "server1", new ServerImpl("http://" + hostname + ":32080/no-slash-path"),
             "server2", new ServerImpl("http://" + hostname + ":32081/slash-path"))
@@ -59,8 +60,8 @@ public class ServersMapperTest {
       {
         ImmutableMap.of("8080/tcp", "0.0.0.0:32080"),
         ImmutableMap.of(
-            "server1", new ServerConfigImpl("8080", "http", "http-endpoint"),
-            "server2", new ServerConfigImpl("8080", "ws", "ws-endpoint")),
+            "server1", new ServerConfigImpl("8080", "http", "http-endpoint", emptyMap()),
+            "server2", new ServerConfigImpl("8080", "ws", "ws-endpoint", emptyMap())),
         ImmutableMap.of(
             "server1", new ServerImpl("http://" + hostname + ":32080/http-endpoint"),
             "server2", new ServerImpl("ws://" + hostname + ":32080/ws-endpoint"))
@@ -68,8 +69,8 @@ public class ServersMapperTest {
       {
         ImmutableMap.of("8080/tcp", "0.0.0.0:32080"),
         ImmutableMap.of(
-            "server1", new ServerConfigImpl("8080", "http", "http-endpoint"),
-            "server2", new ServerConfigImpl("8080/tcp", "ws", "ws-endpoint")),
+            "server1", new ServerConfigImpl("8080", "http", "http-endpoint", emptyMap()),
+            "server2", new ServerConfigImpl("8080/tcp", "ws", "ws-endpoint", emptyMap())),
         ImmutableMap.of(
             "server1", new ServerImpl("http://" + hostname + ":32080/http-endpoint"),
             "server2", new ServerImpl("ws://" + hostname + ":32080/ws-endpoint"))
@@ -97,9 +98,9 @@ public class ServersMapperTest {
             "2288/udp", "0.0.0.0:32288",
             "4401/tcp", "0.0.0.0:32401"),
         ImmutableMap.of(
-            "ws-master", new ServerConfigImpl("8080", "http", "/api"),
-            "exec-agent-api", new ServerConfigImpl("4401", "http", "/process"),
-            "exec-agent-ws", new ServerConfigImpl("4401", "ws", "/connect")),
+            "ws-master", new ServerConfigImpl("8080", "http", "/api", emptyMap()),
+            "exec-agent-api", new ServerConfigImpl("4401", "http", "/process", emptyMap()),
+            "exec-agent-ws", new ServerConfigImpl("4401", "ws", "/connect", emptyMap())),
         ImmutableMap.of(
             "ws-master", new ServerImpl("http://" + hostname + ":32080/api"),
             "exec-agent-api", new ServerImpl("http://" + hostname + ":32401/process"),

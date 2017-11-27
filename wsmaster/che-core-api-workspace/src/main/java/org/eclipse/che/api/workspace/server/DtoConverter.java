@@ -227,7 +227,8 @@ public final class DtoConverter {
     return newDto(ServerConfigDto.class)
         .withPort(serverConf.getPort())
         .withProtocol(serverConf.getProtocol())
-        .withPath(serverConf.getPath());
+        .withPath(serverConf.getPath())
+        .withAttributes(serverConf.getAttributes());
   }
 
   /** Converts {@link Runtime} to {@link RuntimeDto}. */

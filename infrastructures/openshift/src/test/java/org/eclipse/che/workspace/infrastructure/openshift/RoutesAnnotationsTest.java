@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift;
 
+import static java.util.Collections.emptyMap;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -29,9 +30,12 @@ public class RoutesAnnotationsTest {
   public void serialization() {
     Map<String, String> serialized =
         RoutesAnnotations.newSerializer()
-            .server("my-server1/http", new ServerConfigImpl("8000/tcp", "http", "/api/info"))
+            .server(
+                "my-server1/http",
+                new ServerConfigImpl("8000/tcp", "http", "/api/info", emptyMap()))
             .servers(
-                ImmutableMap.of("my-server2", new ServerConfigImpl("8080/tcp", "ws", "/connect")))
+                ImmutableMap.of(
+                    "my-server2", new ServerConfigImpl("8080/tcp", "ws", "/connect", emptyMap())))
             .annotations();
     Map<String, String> expected =
         ImmutableMap.<String, String>builder()

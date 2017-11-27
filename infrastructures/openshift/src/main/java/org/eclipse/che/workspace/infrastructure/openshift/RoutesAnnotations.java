@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift;
 
+import static java.util.Collections.emptyMap;
+
 import io.fabric8.openshift.api.model.Route;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -102,7 +104,8 @@ public class RoutesAnnotations {
                 new ServerConfigImpl(
                     annotations.get(String.format(SERVER_PORT_ANNOTATION_FMT, ref)),
                     annotations.get(String.format(SERVER_PROTOCOL_ANNOTATION_FMT, ref)),
-                    annotations.get(String.format(SERVER_PATH_ANNOTATION_FMT, ref))));
+                    annotations.get(String.format(SERVER_PATH_ANNOTATION_FMT, ref)),
+                    emptyMap()));
           }
         }
       }

@@ -139,6 +139,7 @@ public abstract class InternalEnvironmentFactory<T extends InternalEnvironment> 
     if (port != null && !port.contains("/")) {
       port = port + "/tcp";
     }
-    return new ServerConfigImpl(port, serverConfig.getProtocol(), serverConfig.getPath());
+    return new ServerConfigImpl(
+        port, serverConfig.getProtocol(), serverConfig.getPath(), serverConfig.getAttributes());
   }
 }

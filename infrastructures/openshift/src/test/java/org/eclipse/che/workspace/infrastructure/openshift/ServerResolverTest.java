@@ -50,7 +50,9 @@ public class ServerResolverTest {
     Route route =
         createRoute(
             "nonMatched",
-            ImmutableMap.of("http-server", new ServerConfigImpl("3054", "http", "/api")));
+            ImmutableMap.of(
+                "http-server",
+                new ServerConfigImpl("3054", "http", "/api", singletonMap("key", "value"))));
 
     ServerResolver serverResolver =
         ServerResolver.of(singletonList(nonMatchedByPodService), singletonList(route));
@@ -71,7 +73,9 @@ public class ServerResolverTest {
     Route route =
         createRoute(
             "nonMatched",
-            ImmutableMap.of("http-server", new ServerConfigImpl("3054", "http", "/api")));
+            ImmutableMap.of(
+                "http-server",
+                new ServerConfigImpl("3054", "http", "/api", singletonMap("key", "value"))));
 
     ServerResolver serverResolver =
         ServerResolver.of(singletonList(nonMatchedByPodService), singletonList(route));
@@ -92,9 +96,9 @@ public class ServerResolverTest {
             "matched",
             ImmutableMap.of(
                 "http-server",
-                new ServerConfigImpl("3054", "http", "/api"),
+                new ServerConfigImpl("3054", "http", "/api", singletonMap("key", "value")),
                 "ws-server",
-                new ServerConfigImpl("3054", "ws", "/connect")));
+                new ServerConfigImpl("3054", "ws", "/connect", singletonMap("key", "value"))));
 
     ServerResolver serverResolver =
         ServerResolver.of(singletonList(nonMatchedByPodService), singletonList(route));
@@ -114,7 +118,10 @@ public class ServerResolverTest {
         createService("matched", CONTAINER_PORT, singletonMap("kind", "web-app"));
     Route route =
         createRoute(
-            "matched", singletonMap("http-server", new ServerConfigImpl("3054", "http", null)));
+            "matched",
+            singletonMap(
+                "http-server",
+                new ServerConfigImpl("3054", "http", null, singletonMap("key", "value"))));
 
     ServerResolver serverResolver =
         ServerResolver.of(singletonList(nonMatchedByPodService), singletonList(route));
@@ -133,7 +140,10 @@ public class ServerResolverTest {
         createService("matched", CONTAINER_PORT, singletonMap("kind", "web-app"));
     Route route =
         createRoute(
-            "matched", singletonMap("http-server", new ServerConfigImpl("3054", "http", "")));
+            "matched",
+            singletonMap(
+                "http-server",
+                new ServerConfigImpl("3054", "http", "", singletonMap("key", "value"))));
 
     ServerResolver serverResolver =
         ServerResolver.of(singletonList(nonMatchedByPodService), singletonList(route));
@@ -152,7 +162,10 @@ public class ServerResolverTest {
         createService("matched", CONTAINER_PORT, singletonMap("kind", "web-app"));
     Route route =
         createRoute(
-            "matched", singletonMap("http-server", new ServerConfigImpl("3054", "http", "api")));
+            "matched",
+            singletonMap(
+                "http-server",
+                new ServerConfigImpl("3054", "http", "api", singletonMap("key", "value"))));
 
     ServerResolver serverResolver =
         ServerResolver.of(singletonList(nonMatchedByPodService), singletonList(route));

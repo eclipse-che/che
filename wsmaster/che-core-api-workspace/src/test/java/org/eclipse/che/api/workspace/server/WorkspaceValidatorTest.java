@@ -336,7 +336,10 @@ public class WorkspaceValidatorTest {
             .withServers(
                 singletonMap(
                     "ref1",
-                    newDto(ServerConfigDto.class).withPort("8080/tcp").withProtocol("https")))
+                    newDto(ServerConfigDto.class)
+                        .withPort("8080/tcp")
+                        .withProtocol("https")
+                        .withAttributes(singletonMap("key", "value"))))
             .withAttributes(new HashMap<>(singletonMap(MEMORY_LIMIT_ATTRIBUTE, "1000000")));
     EnvironmentDto env =
         newDto(EnvironmentDto.class)
