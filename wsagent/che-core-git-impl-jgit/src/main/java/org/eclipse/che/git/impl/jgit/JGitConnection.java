@@ -401,7 +401,11 @@ class JGitConnection implements GitConnection {
           List<Branch> remoteBranchesWithGivenName =
               branchList(LIST_REMOTE)
                   .stream()
-                  .filter(branch -> name.equals(branch.getName().split("/")[3]))
+                  .filter(
+                      branch -> {
+                        String branchName = branch.getName();
+                        return name.equals(branchName.substring(branchName.lastIndexOf("/") + 1));
+                      })
                   .collect(Collectors.toList());
           if (remoteBranchesWithGivenName.size() > 1) {
             throw new GitException(
