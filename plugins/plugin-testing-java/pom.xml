@@ -22,7 +22,7 @@
     <packaging>pom</packaging>
     <name>Che Plugin :: JAVA Testing :: Java Testing Parent</name>
     <modules>
-        <module>plugin-testing-classpath</module>
+        <module>plugin-testing-base</module>
         <module>plugin-testing-junit</module>
         <module>plugin-testing-testng</module>
     </modules>
