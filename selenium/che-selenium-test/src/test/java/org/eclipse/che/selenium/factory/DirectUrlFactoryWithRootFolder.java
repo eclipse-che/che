@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.factory;
 
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -26,6 +27,7 @@ import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -87,7 +89,13 @@ public class DirectUrlFactoryWithRootFolder {
     projectExplorer.waitItem(EXPECTED_PROJECT);
     notificationsPopupPanel.waitProgressPopupPanelClose();
     events.clickEventLogBtn();
-    events.waitExpectedMessage(expectedMessInTheEventsPanel);
+
+    try {
+      events.waitExpectedMessage(expectedMessInTheEventsPanel);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/6440");
+    }
     projectExplorer.openItemByPath(EXPECTED_PROJECT);
 
     String currentWsId =
