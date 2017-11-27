@@ -9,7 +9,8 @@
       "Java",
       "JDK",
       "Maven",
-      "Git"
+      "Git",
+      "SDK"
     ],
     "components": [
       {
@@ -23,7 +24,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "eclipse/che-dev:nightly"
+      "origin": "eclipse/che-dev:che6"
     },
     "workspaceConfig": {
       "environments": {
@@ -68,7 +69,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/che-dev:nightly",
+            "location": "eclipse/che-dev:che6",
             "type": "dockerimage"
           }
         }

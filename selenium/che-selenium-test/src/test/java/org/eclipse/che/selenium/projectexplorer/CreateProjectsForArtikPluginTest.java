@@ -148,6 +148,7 @@ public class CreateProjectsForArtikPluginTest {
     projectExplorer.openContextMenuByPathSelectedItem(projectName);
     projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.NEW);
     projectExplorer.clickOnItemInContextMenu(type);
+    askForValueDialog.waitFormToOpen();
     askForValueDialog.typeAndWaitText(fileName);
     askForValueDialog.clickOkBtn();
     loader.waitOnClosed();

@@ -1388,5 +1388,57 @@
     "tags": [
       "Wildfly Swarm"
     ]
+  },
+  {
+    "name": "che-ide-server-extension",
+    "displayName": "che-ide-server-extension",
+    "path": "/che-ide-server-extension",
+    "description": "A simple Che extension that brings a new UI menu item and REST service",
+    "projectType": "maven",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "java"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/che-samples/che-ide-server-extension.git",
+      "parameters": {}
+    },
+    "commands": [],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "SDK"
+    ]
+  },
+  {
+    "name": "che-ide-extension",
+    "displayName": "che-ide-extension",
+    "path": "/che-ide-extension",
+    "description": "A simple Che extension that brings a new UI menu item",
+    "projectType": "maven",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "java"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/che-samples/che-ide-extension.git",
+      "parameters": {}
+    },
+    "commands": [],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "SDK"
+    ]
   }
 ]
