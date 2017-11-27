@@ -91,7 +91,7 @@ public class ServerResolver {
       }
       ub.append(path);
     }
-    return new ServerImpl(ub.toString(), ServerStatus.UNKNOWN);
+    return new ServerImpl().withUrl(ub.toString()).withStatus(ServerStatus.UNKNOWN);
   }
 
   private List<Service> getMatchedServices(Pod pod, Container container) {

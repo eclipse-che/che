@@ -54,8 +54,8 @@ public class ServersMapperTest {
             "server1", new ServerConfigImpl("8080", "http", "no-slash-path", emptyMap()),
             "server2", new ServerConfigImpl("8081", "http", "/slash-path", emptyMap())),
         ImmutableMap.of(
-            "server1", new ServerImpl("http://" + hostname + ":32080/no-slash-path"),
-            "server2", new ServerImpl("http://" + hostname + ":32081/slash-path"))
+            "server1", new ServerImpl().withUrl("http://" + hostname + ":32080/no-slash-path"),
+            "server2", new ServerImpl().withUrl("http://" + hostname + ":32081/slash-path"))
       },
       {
         ImmutableMap.of("8080/tcp", "0.0.0.0:32080"),
@@ -63,8 +63,8 @@ public class ServersMapperTest {
             "server1", new ServerConfigImpl("8080", "http", "http-endpoint", emptyMap()),
             "server2", new ServerConfigImpl("8080", "ws", "ws-endpoint", emptyMap())),
         ImmutableMap.of(
-            "server1", new ServerImpl("http://" + hostname + ":32080/http-endpoint"),
-            "server2", new ServerImpl("ws://" + hostname + ":32080/ws-endpoint"))
+            "server1", new ServerImpl().withUrl("http://" + hostname + ":32080/http-endpoint"),
+            "server2", new ServerImpl().withUrl("ws://" + hostname + ":32080/ws-endpoint"))
       },
       {
         ImmutableMap.of("8080/tcp", "0.0.0.0:32080"),
@@ -72,13 +72,13 @@ public class ServersMapperTest {
             "server1", new ServerConfigImpl("8080", "http", "http-endpoint", emptyMap()),
             "server2", new ServerConfigImpl("8080/tcp", "ws", "ws-endpoint", emptyMap())),
         ImmutableMap.of(
-            "server1", new ServerImpl("http://" + hostname + ":32080/http-endpoint"),
-            "server2", new ServerImpl("ws://" + hostname + ":32080/ws-endpoint"))
+            "server1", new ServerImpl().withUrl("http://" + hostname + ":32080/http-endpoint"),
+            "server2", new ServerImpl().withUrl("ws://" + hostname + ":32080/ws-endpoint"))
       },
       {
         ImmutableMap.of("8080/tcp", "0.0.0.0:32080"),
         ImmutableMap.of(),
-        ImmutableMap.of("8080/tcp", new ServerImpl("tcp://" + hostname + ":32080"))
+        ImmutableMap.of("8080/tcp", new ServerImpl().withUrl("tcp://" + hostname + ":32080"))
       },
       {
         ImmutableMap.of(
@@ -87,9 +87,9 @@ public class ServersMapperTest {
             "8082", "0.0.0.0:32082"),
         ImmutableMap.of(),
         ImmutableMap.of(
-            "8080/tcp", new ServerImpl("tcp://" + hostname + ":32080"),
-            "8081/udp", new ServerImpl("udp://" + hostname + ":32081"),
-            "8082/tcp", new ServerImpl("tcp://" + hostname + ":32082"))
+            "8080/tcp", new ServerImpl().withUrl("tcp://" + hostname + ":32080"),
+            "8081/udp", new ServerImpl().withUrl("udp://" + hostname + ":32081"),
+            "8082/tcp", new ServerImpl().withUrl("tcp://" + hostname + ":32082"))
       },
       {
         ImmutableMap.of(
@@ -102,11 +102,11 @@ public class ServersMapperTest {
             "exec-agent-api", new ServerConfigImpl("4401", "http", "/process", emptyMap()),
             "exec-agent-ws", new ServerConfigImpl("4401", "ws", "/connect", emptyMap())),
         ImmutableMap.of(
-            "ws-master", new ServerImpl("http://" + hostname + ":32080/api"),
-            "exec-agent-api", new ServerImpl("http://" + hostname + ":32401/process"),
-            "exec-agent-ws", new ServerImpl("ws://" + hostname + ":32401/connect"),
-            "8000/tcp", new ServerImpl("tcp://" + hostname + ":32000"),
-            "2288/udp", new ServerImpl("udp://" + hostname + ":32288"))
+            "ws-master", new ServerImpl().withUrl("http://" + hostname + ":32080/api"),
+            "exec-agent-api", new ServerImpl().withUrl("http://" + hostname + ":32401/process"),
+            "exec-agent-ws", new ServerImpl().withUrl("ws://" + hostname + ":32401/connect"),
+            "8000/tcp", new ServerImpl().withUrl("tcp://" + hostname + ":32000"),
+            "2288/udp", new ServerImpl().withUrl("udp://" + hostname + ":32288"))
       }
     };
   }

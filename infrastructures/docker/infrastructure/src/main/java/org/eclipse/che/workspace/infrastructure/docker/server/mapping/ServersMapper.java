@@ -83,11 +83,12 @@ public class ServersMapper {
       }
 
       if (refs == null) {
-        mapped.put(rawPort, new ServerImpl(makeUrl(port, null, null)));
+        mapped.put(rawPort, new ServerImpl().withUrl(makeUrl(port, null, null)));
       } else {
         for (String ref : refs) {
           ServerConfig cfg = configs.get(ref);
-          mapped.put(ref, new ServerImpl(makeUrl(port, cfg.getProtocol(), cfg.getPath())));
+          mapped.put(
+              ref, new ServerImpl().withUrl(makeUrl(port, cfg.getProtocol(), cfg.getPath())));
         }
       }
     }

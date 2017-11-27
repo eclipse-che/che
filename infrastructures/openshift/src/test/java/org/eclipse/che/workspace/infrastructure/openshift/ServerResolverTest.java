@@ -12,6 +12,7 @@ package org.eclipse.che.workspace.infrastructure.openshift;
 
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.eclipse.che.api.core.model.workspace.runtime.ServerStatus.UNKNOWN;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -106,8 +107,12 @@ public class ServerResolverTest {
     Map<String, ServerImpl> resolved = serverResolver.resolve(pod, container);
 
     assertEquals(resolved.size(), 2);
-    assertEquals(resolved.get("http-server"), new ServerImpl("http://localhost/api"));
-    assertEquals(resolved.get("ws-server"), new ServerImpl("ws://localhost/connect"));
+    assertEquals(
+        resolved.get("http-server"),
+        new ServerImpl().withUrl("http://localhost/api").withStatus(UNKNOWN));
+    assertEquals(
+        resolved.get("ws-server"),
+        new ServerImpl().withUrl("ws://localhost/connect").withStatus(UNKNOWN));
   }
 
   @Test
@@ -129,7 +134,9 @@ public class ServerResolverTest {
     Map<String, ServerImpl> resolved = serverResolver.resolve(pod, container);
 
     assertEquals(resolved.size(), 1);
-    assertEquals(resolved.get("http-server"), new ServerImpl("http://localhost"));
+    assertEquals(
+        resolved.get("http-server"),
+        new ServerImpl().withUrl("http://localhost").withStatus(UNKNOWN));
   }
 
   @Test
@@ -151,7 +158,9 @@ public class ServerResolverTest {
     Map<String, ServerImpl> resolved = serverResolver.resolve(pod, container);
 
     assertEquals(resolved.size(), 1);
-    assertEquals(resolved.get("http-server"), new ServerImpl("http://localhost"));
+    assertEquals(
+        resolved.get("http-server"),
+        new ServerImpl().withUrl("http://localhost").withStatus(UNKNOWN));
   }
 
   @Test
@@ -173,7 +182,9 @@ public class ServerResolverTest {
     Map<String, ServerImpl> resolved = serverResolver.resolve(pod, container);
 
     assertEquals(resolved.size(), 1);
-    assertEquals(resolved.get("http-server"), new ServerImpl("http://localhost/api"));
+    assertEquals(
+        resolved.get("http-server"),
+        new ServerImpl().withUrl("http://localhost/api").withStatus(UNKNOWN));
   }
 
   private Pod createPod(Map<String, String> labels) {

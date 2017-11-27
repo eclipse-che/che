@@ -14,7 +14,6 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -236,31 +235,19 @@ public final class DtoConverter {
     if (runtime == null) {
       return null;
     }
-    final RuntimeDto runtimeDto = newDto(RuntimeDto.class).withActiveEnv(runtime.getActiveEnv());
-
-    Map<String, ? extends Machine> machines = runtime.getMachines();
-    Map<String, MachineDto> machineDtos = new HashMap<>();
-    for (Map.Entry<String, ? extends Machine> m : machines.entrySet()) {
-
-      Map<String, ServerDto> serverDtos = new HashMap<>();
-      for (Map.Entry<String, ? extends Server> s : m.getValue().getServers().entrySet()) {
-        ServerDto sDto =
-            newDto(ServerDto.class)
-                .withUrl(s.getValue().getUrl())
-                .withStatus(s.getValue().getStatus());
-        serverDtos.put(s.getKey(), sDto);
-      }
-
-      MachineDto mDto =
-          newDto(MachineDto.class)
-              .withProperties(m.getValue().getProperties())
-              .withServers(serverDtos);
-      machineDtos.put(m.getKey(), mDto);
+    RuntimeDto runtimeDto = newDto(RuntimeDto.class).withActiveEnv(runtime.getActiveEnv());
+    if (runtime.getMachines() != null) {
+      runtimeDto.setMachines(
+          runtime
+              .getMachines()
+              .entrySet()
+              .stream()
+              .collect(toMap(Map.Entry::getKey, entry -> asDto(entry.getValue()))));
     }
-
-    runtimeDto.setMachines(machineDtos);
-    runtimeDto.setWarnings(
-        runtime.getWarnings().stream().map(DtoConverter::asDto).collect(Collectors.toList()));
+    if (runtime.getWarnings() != null) {
+      runtimeDto.setWarnings(
+          runtime.getWarnings().stream().map(DtoConverter::asDto).collect(Collectors.toList()));
+    }
     return runtimeDto;
   }
 
@@ -280,6 +267,28 @@ public final class DtoConverter {
   /** Converts {@link Warning} to {@link WarningDto}. */
   public static WarningDto asDto(Warning warning) {
     return newDto(WarningDto.class).withCode(warning.getCode()).withMessage(warning.getMessage());
+  }
+
+  /** Converts {@link Server} to {@link ServerDto}. */
+  public static ServerDto asDto(Server server) {
+    return newDto(ServerDto.class)
+        .withUrl(server.getUrl())
+        .withStatus(server.getStatus())
+        .withAttributes(server.getAttributes());
+  }
+
+  /** Converts {@link Machine} to {@link MachineDto}. */
+  public static MachineDto asDto(Machine machine) {
+    MachineDto machineDto = newDto(MachineDto.class).withProperties(machine.getProperties());
+    if (machine.getServers() != null) {
+      machineDto.withServers(
+          machine
+              .getServers()
+              .entrySet()
+              .stream()
+              .collect(toMap(Map.Entry::getKey, entry -> asDto(entry.getValue()))));
+    }
+    return machineDto;
   }
 
   private DtoConverter() {}
