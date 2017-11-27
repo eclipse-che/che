@@ -61,7 +61,7 @@ public class TestOrganizationServiceClient {
     return apiEndpoint + "organization/";
   }
 
-  public OrganizationDto create(String name, String parentId) throws Exception {
+  public OrganizationDto create(String name, @Nullable String parentId) throws Exception {
     OrganizationDto data = newDto(OrganizationDto.class).withName(name).withParent(parentId);
 
     OrganizationDto organizationDto =
@@ -73,7 +73,7 @@ public class TestOrganizationServiceClient {
             .asDto(OrganizationDto.class);
 
     LOG.debug(
-        "Organization with name='{}', id='{}' and parent's id='{}' created",
+        "Organization with name='{}', id='{}', parent's id='{}' created",
         name,
         organizationDto.getId(),
         parentId);

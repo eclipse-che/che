@@ -90,10 +90,6 @@
             <artifactId>che-core-commons-lang</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.multiuser</groupId>
-            <artifactId>che-multiuser-api-organization-shared</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.che.selenium</groupId>
             <artifactId>che-selenium-core</artifactId>
         </dependency>

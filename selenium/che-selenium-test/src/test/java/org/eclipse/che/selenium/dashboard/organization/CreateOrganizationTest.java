@@ -38,8 +38,8 @@ import org.testng.annotations.Test;
  */
 @Multiuser
 public class CreateOrganizationTest {
-  private static final String PARENT_ORG_NAME = generate("parent-org-", 4);
-  private static final String CHILD_ORG_NAME = generate("child-org-", 4);
+  private static final String PARENT_ORG_NAME = generate("parent-", 4);
+  private static final String CHILD_ORG_NAME = generate("child-", 4);
 
   private int initialOrgNumber;
 
@@ -92,7 +92,7 @@ public class CreateOrganizationTest {
       assertEquals(organizationListPage.getOrganizationListItemCount(), initialOrgNumber + 1);
     } catch (AssertionError a) {
       // remove try-catch block after https://github.com/eclipse/che/issues/7279 has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7279");
+      fail("Known issue https://github.com/eclipse/che/issues/7279", a);
     }
 
     assertTrue(organizationListPage.getValues(NAME).contains(PARENT_ORG_NAME));

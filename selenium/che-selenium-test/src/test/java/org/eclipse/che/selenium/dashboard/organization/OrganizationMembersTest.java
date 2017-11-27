@@ -16,9 +16,10 @@ import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
 import org.eclipse.che.selenium.core.annotation.Multiuser;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
+import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
+import org.eclipse.che.selenium.core.organization.TestOrganization;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.Loader;
@@ -36,11 +37,9 @@ import org.testng.annotations.Test;
 /** @author Sergey Skorik */
 @Multiuser
 public class OrganizationMembersTest {
-  private static final String PRE_CREATED_ORG_NAME = generate("org-", 5);
   private static final String NEW_ORG_NAME = generate("new-org-", 5);
 
-  private OrganizationDto organization;
-  private String memberEmail;
+  @InjectTestOrganization private TestOrganization organization;
 
   @Inject
   @Named("admin")
@@ -58,23 +57,13 @@ public class OrganizationMembersTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    try {
-      memberEmail = testUser.getEmail();
-
-      organization = testOrganizationServiceClient.create(PRE_CREATED_ORG_NAME);
-      testOrganizationServiceClient.addAdmin(organization.getId(), adminTestUser.getId());
-      dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
-    } catch (Exception e) {
-      // remove test organizations in case of error because TestNG skips @AfterClass method here
-      tearDown();
-      throw e;
-    }
+    organization.addAdmin(adminTestUser.getId());
+    dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
   }
 
   @AfterClass
   public void tearDown() throws Exception {
     testOrganizationServiceClient.deleteByName(NEW_ORG_NAME);
-    testOrganizationServiceClient.deleteByName(PRE_CREATED_ORG_NAME);
   }
 
   @Test
@@ -84,37 +73,37 @@ public class OrganizationMembersTest {
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
     organizationListPage.clickOnOrganization(organization.getQualifiedName());
-    organizationPage.waitOrganizationName(PRE_CREATED_ORG_NAME);
+    organizationPage.waitOrganizationName(organization.getName());
 
     // Add members to a members list as 'Admin'
     loader.waitOnClosed();
     organizationPage.clickMembersTab();
     organizationPage.clickAddMemberButton();
     addMember.waitAddMemberWidget();
-    addMember.setMembersEmail(memberEmail);
+    addMember.setMembersEmail(testUser.getEmail());
     addMember.clickAdminButton();
     addMember.clickAddButton();
-    organizationPage.checkMemberExistsInMembersList(memberEmail);
+    organizationPage.checkMemberExistsInMembersList(testUser.getEmail());
 
     // Change the members role to 'Members'
     loader.waitOnClosed();
-    addMember.clickEditPermissionsButton(memberEmail);
+    addMember.clickEditPermissionsButton(testUser.getEmail());
     addMember.clickMemberButton();
     addMember.clickSaveButton();
 
     // Search members from the members list
     organizationPage.clearSearchField();
-    String memberName = organizationPage.getMembersNameByEmail(memberEmail);
+    String memberName = organizationPage.getMembersNameByEmail(testUser.getEmail());
     organizationPage.searchMembers(memberName.substring(0, (memberName.length() / 2)));
-    organizationPage.checkMemberExistsInMembersList(memberEmail);
+    organizationPage.checkMemberExistsInMembersList(testUser.getEmail());
     organizationPage.clearSearchField();
 
     // Delete the members from the members list
     try {
-      organizationPage.deleteMember(memberEmail);
+      organizationPage.deleteMember(testUser.getEmail());
     } catch (TimeoutException e) {
       // remove try-catch block after the issue has been resolved
-      fail("Known issue https://github.com/codenvy/codenvy/issues/2473");
+      fail("Known issue https://github.com/codenvy/codenvy/issues/2473", e);
     }
   }
 

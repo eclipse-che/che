@@ -18,10 +18,9 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
-import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
 import org.eclipse.che.selenium.core.annotation.Multiuser;
-import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
+import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
+import org.eclipse.che.selenium.core.organization.TestOrganization;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
@@ -29,7 +28,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.EditMode;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage;
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationPage;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -40,10 +38,8 @@ import org.testng.annotations.Test;
  */
 @Multiuser
 public class RenameOrganizationTest {
-  private static final String PARENT_ORG_NAME = generate("parent-org-", 5);
-  private static final String CHILD_ORG_NAME = generate("child-org-", 5);
-  private static final String NEW_PARENT_ORG_NAME = generate("new-parent-org-", 5);
-  private static final String NEW_CHILD_ORG_NAME = generate("new-child-org-", 5);
+  private static final String NEW_PARENT_ORG_NAME = generate("new-parent-", 5);
+  private static final String NEW_CHILD_ORG_NAME = generate("new-child-", 5);
 
   // more than 20 symbols
   private static final String TOO_LONG_ORG_NAME = generate("too-long-org-name-", 10);
@@ -51,9 +47,11 @@ public class RenameOrganizationTest {
   private static final String EMPTY_ORGANIZATION_NAME = " ";
   private static final String ORG_NAME_WITH_INVALID_CHARS = "_organization$";
 
-  @Inject
-  @Named("admin")
-  private TestOrganizationServiceClient testOrganizationServiceClient;
+  @InjectTestOrganization(prefix = "parentOrg")
+  private TestOrganization parentOrg;
+
+  @InjectTestOrganization(parentPrefix = "parentOrg")
+  private TestOrganization childOrg;
 
   @Inject private OrganizationListPage organizationListPage;
   @Inject private OrganizationPage organizationPage;
@@ -65,28 +63,10 @@ public class RenameOrganizationTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    try {
-      OrganizationDto parentOrg = testOrganizationServiceClient.create(PARENT_ORG_NAME);
-      testOrganizationServiceClient.addAdmin(parentOrg.getId(), testUser.getId());
+    parentOrg.addAdmin(testUser.getId());
+    childOrg.addAdmin(testUser.getId());
 
-      OrganizationDto childOrg =
-          testOrganizationServiceClient.create(CHILD_ORG_NAME, parentOrg.getId());
-      testOrganizationServiceClient.addAdmin(childOrg.getId(), testUser.getId());
-
-      dashboard.open(testUser.getName(), testUser.getPassword());
-    } catch (Exception e) {
-      // remove test organizations in case of error because TestNG skips @AfterClass method here
-      tearDown();
-      throw e;
-    }
-  }
-
-  @AfterClass
-  public void tearDown() throws Exception {
-    testOrganizationServiceClient.deleteByName(NEW_CHILD_ORG_NAME);
-    testOrganizationServiceClient.deleteByName(NEW_PARENT_ORG_NAME);
-    testOrganizationServiceClient.deleteByName(CHILD_ORG_NAME);
-    testOrganizationServiceClient.deleteByName(PARENT_ORG_NAME);
+    dashboard.open(testUser.getName(), testUser.getPassword());
   }
 
   @Test
@@ -95,7 +75,7 @@ public class RenameOrganizationTest {
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
-    organizationListPage.clickOnOrganization(PARENT_ORG_NAME);
+    organizationListPage.clickOnOrganization(parentOrg.getName());
 
     // Check organization renaming with name just ' '
     renameOrganizationWithInvalidName(EMPTY_ORGANIZATION_NAME);
@@ -107,7 +87,7 @@ public class RenameOrganizationTest {
     renameOrganizationWithInvalidName(ORG_NAME_WITH_INVALID_CHARS);
 
     // Test renaming of the parent organization
-    organizationPage.waitOrganizationTitle(PARENT_ORG_NAME);
+    organizationPage.waitOrganizationTitle(parentOrg.getName());
     organizationPage.setOrganizationName(NEW_PARENT_ORG_NAME);
     editMode.waitDisplayed();
     assertTrue(editMode.isSaveEnabled());
@@ -119,7 +99,7 @@ public class RenameOrganizationTest {
 
   @Test(priority = 1)
   public void testSubOrganizationRename() {
-    String childOrgQualifiedName = NEW_PARENT_ORG_NAME + "/" + CHILD_ORG_NAME;
+    String childOrgQualifiedName = NEW_PARENT_ORG_NAME + "/" + childOrg.getName();
     String newChildOrgQualifiedName = NEW_PARENT_ORG_NAME + "/" + NEW_CHILD_ORG_NAME;
 
     navigationBar.waitNavigationBar();
@@ -153,12 +133,12 @@ public class RenameOrganizationTest {
   }
 
   private void renameOrganizationWithInvalidName(String organizationName) {
-    organizationPage.waitOrganizationTitle(PARENT_ORG_NAME);
+    organizationPage.waitOrganizationTitle(parentOrg.getName());
     organizationPage.setOrganizationName(organizationName);
     editMode.waitDisplayed();
     assertFalse(editMode.isSaveEnabled());
     editMode.clickCancel();
     editMode.waitHidden();
-    assertEquals(PARENT_ORG_NAME, organizationPage.getOrganizationName());
+    assertEquals(parentOrg.getName(), organizationPage.getOrganizationName());
   }
 }

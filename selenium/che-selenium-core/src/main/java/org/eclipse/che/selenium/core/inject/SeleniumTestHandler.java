@@ -45,6 +45,7 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.constant.TestBrowser;
+import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.pageobject.InjectPageObject;
 import org.eclipse.che.selenium.core.pageobject.PageObjectsInjector;
 import org.eclipse.che.selenium.core.user.InjectTestUser;
@@ -271,6 +272,7 @@ public abstract class SeleniumTestHandler
         || f.isAnnotationPresent(javax.inject.Inject.class)
         || f.isAnnotationPresent(InjectTestUser.class)
         || f.isAnnotationPresent(InjectTestWorkspace.class)
+        || f.isAnnotationPresent(InjectTestOrganization.class)
         || f.isAnnotationPresent(InjectPageObject.class);
   }
 
