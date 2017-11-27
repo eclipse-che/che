@@ -46,7 +46,11 @@ public class PublishDiagnosticsProcessor {
         .getAll()
         .stream()
         .filter(node -> node instanceof ResourceNode)
-        .forEach(node -> ((ResourceNode) node).getData().setHasError(false));
+        .forEach(
+            node -> {
+              ((ResourceNode) node).getData().setHasError(false);
+              tree.refresh(node);
+            });
     diagnostics.forEach(this::processDiagnostics);
   }
 
