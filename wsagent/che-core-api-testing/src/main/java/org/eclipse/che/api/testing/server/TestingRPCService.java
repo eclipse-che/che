@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.testing.server.framework.TestFrameworkRegistry;
@@ -75,7 +76,12 @@ public class TestingRPCService {
       if (outputTransmitter != null) {
         outputTransmitter.stop();
       }
-      ProcessHandler processHandler = testRunner.execute(context);
+      ProcessHandler processHandler;
+      try {
+        processHandler = testRunner.execute(context);
+      } catch (Exception e) {
+        throw new JsonRpcException(-27104, e.getMessage());
+      }
       outputTransmitter =
           new TestMessagesOutputTransmitter(processHandler, requestTransmitter, endpoint);
       if (context.isDebugModeEnable()) {
