@@ -130,6 +130,7 @@ public class CreateNewNotJavaFilesFromContextMenuTest {
     projectExplorer.openContextMenuByPathSelectedItem(PATH_TO_FILES);
     projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.NEW);
     projectExplorer.clickOnItemInContextMenu(type);
+    askForValueDialog.waitFormToOpen();
     askForValueDialog.typeAndWaitText(name);
     askForValueDialog.clickOkBtn();
     loader.waitOnClosed();
