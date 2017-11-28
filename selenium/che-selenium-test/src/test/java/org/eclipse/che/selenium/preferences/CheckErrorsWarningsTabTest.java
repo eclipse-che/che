@@ -48,7 +48,6 @@ public class CheckErrorsWarningsTabTest {
       NameGenerator.generate(CheckErrorsWarningsTabTest.class.getSimpleName(), 4);
   private static final String PATH_TO_CLASS_IN_SPRING_PACKAGE =
       PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java";
-
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
@@ -98,13 +97,13 @@ public class CheckErrorsWarningsTabTest {
     consoles.closeProcessesArea();
     menu.runCommand(TestMenuCommandsConstants.Profile.PROFILE_MENU, PREFERENCES);
     changeAllSettingsInErrorsWarningsTab(Preferences.DropDownValueForErrorWaitingWidget.WARNING);
-    Assert.assertEquals(editor.getQuantityMarkers(WARNING_MARKER_OVERVIEW), 14);
+    Assert.assertEquals(editor.getQuantityMarkers(WARNING_MARKER_OVERVIEW), 13);
     Assert.assertEquals(editor.getQuantityMarkers(WARNING_MARKER), 22);
 
     editor.waitAnnotationsAreNotPresent(ERROR_MARKER_OVERVIEW);
     menu.runCommand(TestMenuCommandsConstants.Profile.PROFILE_MENU, PREFERENCES);
     changeAllSettingsInErrorsWarningsTab(Preferences.DropDownValueForErrorWaitingWidget.ERROR);
-    Assert.assertEquals(editor.getQuantityMarkers(ERROR_MARKER_OVERVIEW), 14);
+    Assert.assertEquals(editor.getQuantityMarkers(ERROR_MARKER_OVERVIEW), 13);
     Assert.assertEquals(editor.getQuantityMarkers(ERROR_MARKER), 22);
     editor.waitAnnotationsAreNotPresent(WARNING_MARKER_OVERVIEW);
     menu.runCommand(TestMenuCommandsConstants.Profile.PROFILE_MENU, PREFERENCES);
