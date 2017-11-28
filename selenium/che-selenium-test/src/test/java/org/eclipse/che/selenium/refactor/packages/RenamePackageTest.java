@@ -240,6 +240,8 @@ public class RenamePackageTest {
   public void closeForm() {
     if (refactor.isWidgetOpened()) {
       refactor.clickCancelButtonRefactorForm();
+    }
+    if (editor.anyTabIsOpen()) {
       editor.closeAllTabs();
     }
   }
@@ -413,7 +415,7 @@ public class RenamePackageTest {
     loader.waitOnClosed();
     refactor.typeAndWaitFileNamePatterns("*.txt");
     loader.waitOnClosed();
-    refactor.clickOkButtonRefactorForm();
+    clickOkButtonIntoRefactorForm();
     refactor.waitRenamePackageFormIsClosed();
     loader.waitOnClosed();
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/test4/r");
@@ -514,7 +516,7 @@ public class RenamePackageTest {
     refactor.sendKeysIntoField("");
     waitTextInNewNameField("test7.q");
     loader.waitOnClosed();
-    refactor.clickOkButtonRefactorForm();
+    clickOkButtonIntoRefactorForm();
     loader.waitOnClosed();
     refactor.waitRenamePackageFormIsClosed();
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/test7/q");
@@ -698,7 +700,16 @@ public class RenamePackageTest {
       refactor.waitTextIntoNewNameField(expectedText);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7500");
+      fail("Known issue https://github.com/eclipse/che/issues/7500", ex);
+    }
+  }
+
+  private void clickOkButtonIntoRefactorForm() {
+    try {
+      refactor.clickOkButtonRefactorForm();
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7500", ex);
     }
   }
 }
