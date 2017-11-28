@@ -72,6 +72,7 @@ public class ProjectExplorer {
   private final NavigateToFile navigateToFile;
   private final Menu menu;
   private final CodenvyEditor editor;
+  private final TestWebElementRenderChecker testWebElementRenderChecker;
   private WebDriverWait loadPageTimeout;
   private WebDriverWait redrawUiElementsWait;
 
@@ -82,13 +83,15 @@ public class ProjectExplorer {
       ActionsFactory actionsFactory,
       NavigateToFile navigateToFile,
       Menu menu,
-      CodenvyEditor editor) {
+      CodenvyEditor editor,
+      TestWebElementRenderChecker testWebElementRenderChecker) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
     this.actionsFactory = actionsFactory;
     this.navigateToFile = navigateToFile;
     this.menu = menu;
     this.editor = editor;
+    this.testWebElementRenderChecker = testWebElementRenderChecker;
     loadPageTimeout = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
     redrawUiElementsWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     PageFactory.initElements(seleniumWebDriver, this);
@@ -597,6 +600,9 @@ public class ProjectExplorer {
 
   /** wait for context menu. */
   public void waitContextMenu() {
+    testWebElementRenderChecker.waitElementIsRendered(
+        "//tr[@id='gwt-debug-contextMenu/newGroup']/parent::tbody");
+
     new WebDriverWait(seleniumWebDriver, WIDGET_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(By.id(CONTEXT_MENU_ID)));
   }
