@@ -22,6 +22,7 @@ import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_OUTPUT_DIR_COMMA
 import static org.eclipse.che.jdt.ls.extension.api.Commands.RESOLVE_CLASSPATH_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.TEST_DETECT_COMMAND;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -29,7 +30,9 @@ import com.google.gson.reflect.TypeToken;
 import com.google.inject.Inject;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -40,8 +43,10 @@ import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
+import org.eclipse.che.jdt.ls.extension.api.Commands;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
 import org.eclipse.che.jdt.ls.extension.api.dto.FileStructureCommandParameters;
+import org.eclipse.che.jdt.ls.extension.api.dto.LocationParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestFindParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPosition;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPositionParameters;
@@ -300,6 +305,40 @@ public class JavaLanguageServerExtensionService {
     LanguageServiceUtils.fixLocation(symbol.getInfo().getLocation());
     for (ExtendedSymbolInformation child : symbol.getChildren()) {
       fixLocation(child);
+    }
+  }
+
+  public String debuggerLocationToFqn(LocationParameters params) {
+    CompletableFuture<Object> result =
+        getLanguageServer()
+            .getWorkspaceService()
+            .executeCommand(
+                new ExecuteCommandParams(
+                    Commands.LOCATION_TO_FQN_COMMAND, Collections.singletonList(params)));
+
+    try {
+      return (String) result.get();
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  public List<LocationParameters> fqnToDebuggerLocation(String fqn, Integer lineNumber) {
+    CompletableFuture<Object> result =
+        getLanguageServer()
+            .getWorkspaceService()
+            .executeCommand(
+                new ExecuteCommandParams(
+                    Commands.FQN_TO_LOCATION_COMMAND,
+                    ImmutableList.of(fqn, lineNumber.toString())));
+
+    try {
+      return gson.fromJson(
+          gson.toJson(result.get()),
+          new com.google.common.reflect.TypeToken<List<LocationParameters>>() {}.getType());
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
     }
   }
 }

@@ -21,6 +21,7 @@ import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
+import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionService;
 
 /**
  * /** {@link org.eclipse.che.api.debug.shared.model.StackFrameDump} implementation for Java
@@ -36,9 +37,10 @@ public class JdbStackFrame implements StackFrameDump {
   private final AtomicReference<List<Variable>> variables;
   private final Location location;
 
-  public JdbStackFrame(com.sun.jdi.StackFrame jdiStackFrame) {
+  public JdbStackFrame(
+      JavaLanguageServerExtensionService languageServer, com.sun.jdi.StackFrame jdiStackFrame) {
     this.jdiStackFrame = jdiStackFrame;
-    this.location = new JdbLocation(jdiStackFrame);
+    this.location = new JdbLocation(languageServer, jdiStackFrame);
     this.variables = new AtomicReference<>();
     this.fields = new AtomicReference<>();
   }

@@ -22,7 +22,9 @@ import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestBuildConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.core.workspace.WorkspaceTemplate;
 import org.eclipse.che.selenium.pageobject.*;
 import org.eclipse.che.selenium.pageobject.debug.DebugPanel;
 import org.eclipse.che.selenium.pageobject.debug.JavaDebugConfig;
@@ -72,6 +74,9 @@ public class RunToCursorTest {
     commandsPalette.startCommandByDoubleClick("build");
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PROJECT + "/src/App.java");
+    consoles.selectProcessByTabName("dev-machine");
+    consoles.waitExpectedTextIntoConsole("Started: Ready");
+
     editor.setBreakpoint(14);
     debugPanel.openDebugPanel();
 
