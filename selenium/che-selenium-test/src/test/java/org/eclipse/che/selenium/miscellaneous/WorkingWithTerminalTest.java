@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.miscellaneous;
 
 import static java.lang.String.valueOf;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -27,6 +28,7 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
@@ -156,13 +158,18 @@ public class WorkingWithTerminalTest {
   public void shouldScrollIntoTerminal() throws InterruptedException {
     openMC("/");
 
-    // check scrolling of the terminal
-    terminal.movePageDownListTerminal("opt");
-    terminal.moveDownListTerminal(".dockerenv");
-    terminal.waitExpectedTextIntoTerminal(".dockerenv");
-    terminal.movePageUpListTerminal("projects");
-    terminal.moveUpListTerminal("bin");
-    terminal.waitExpectedTextIntoTerminal("bin");
+    try {
+      // check scrolling of the terminal
+      terminal.movePageDownListTerminal("opt");
+      terminal.moveDownListTerminal(".dockerenv");
+      terminal.waitExpectedTextIntoTerminal(".dockerenv");
+      terminal.movePageUpListTerminal("projects");
+      terminal.moveUpListTerminal("bin");
+      terminal.waitExpectedTextIntoTerminal("bin");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7592");
+    }
   }
 
   @Test(priority = 3)
@@ -173,20 +180,26 @@ public class WorkingWithTerminalTest {
     for (String partOfContent : CHECK_MC_OPENING) {
       terminal.waitExpectedTextIntoTerminal(partOfContent);
     }
-    // check resize of the terminal
-    terminal.waitExpectedTextNotPresentTerminal(".dockerenv");
-    consoles.clickOnMaximizePanelIcon();
-    loader.waitOnClosed();
-    for (String partOfContent : CHECK_MC_OPENING) {
-      terminal.waitExpectedTextIntoTerminal(partOfContent);
+
+    try {
+      // check resize of the terminal
+      terminal.waitExpectedTextNotPresentTerminal(".dockerenv");
+      consoles.clickOnMaximizePanelIcon();
+      loader.waitOnClosed();
+      for (String partOfContent : CHECK_MC_OPENING) {
+        terminal.waitExpectedTextIntoTerminal(partOfContent);
+      }
+      terminal.waitExpectedTextIntoTerminal(".dockerenv");
+      consoles.clickOnMaximizePanelIcon();
+      loader.waitOnClosed();
+      for (String partOfContent : CHECK_MC_OPENING) {
+        terminal.waitExpectedTextIntoTerminal(partOfContent);
+      }
+      terminal.waitExpectedTextNotPresentTerminal(".dockerenv");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7592");
     }
-    terminal.waitExpectedTextIntoTerminal(".dockerenv");
-    consoles.clickOnMaximizePanelIcon();
-    loader.waitOnClosed();
-    for (String partOfContent : CHECK_MC_OPENING) {
-      terminal.waitExpectedTextIntoTerminal(partOfContent);
-    }
-    terminal.waitExpectedTextNotPresentTerminal(".dockerenv");
   }
 
   @Test(priority = 4)
@@ -203,10 +216,16 @@ public class WorkingWithTerminalTest {
     terminal.typeIntoTerminal(Keys.ARROW_DOWN.toString());
     terminal.typeIntoTerminal(Keys.ENTER.toString());
 
-    // check the home content of the midnight commander
-    for (String partOfContent : CHECK_MC_OPENING) {
-      terminal.waitExpectedTextIntoTerminal(partOfContent);
+    try {
+      // check the home content of the midnight commander
+      for (String partOfContent : CHECK_MC_OPENING) {
+        terminal.waitExpectedTextIntoTerminal(partOfContent);
+      }
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7592");
     }
+
     terminal.typeIntoTerminal(Keys.F10.toString());
   }
 
