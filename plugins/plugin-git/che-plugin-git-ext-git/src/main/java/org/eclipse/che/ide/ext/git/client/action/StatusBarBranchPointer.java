@@ -39,6 +39,8 @@ import org.vectomatic.dom.svg.ui.SVGImage;
 @Beta
 public class StatusBarBranchPointer extends BaseAction implements CustomComponentAction {
 
+  public static final String GIT_CURRENT_HEAD_NAME = "git.current.head.name";
+
   private final AppContext appContext;
   private final GitResources resources;
   private final BranchPresenter branchPresenter;
@@ -69,29 +71,23 @@ public class StatusBarBranchPointer extends BaseAction implements CustomComponen
     panel.clear();
 
     Project project = appContext.getRootProject();
-    if (project == null) {
-      return;
+    if (project != null && project.getAttributes().containsKey(GIT_CURRENT_HEAD_NAME)) {
+      Label projectNameLabel = new Label(project.getName());
+      projectNameLabel.ensureDebugId("statusBarProjectBranchRepositoryName");
+      projectNameLabel.getElement().getStyle().setMarginLeft(5., Unit.PX);
+      panel.add(projectNameLabel);
+
+      SVGImage branchIcon = new SVGImage(resources.checkoutReference());
+      branchIcon.getSvgElement().getStyle().setMarginLeft(5., Unit.PX);
+      panel.add(branchIcon);
+
+      Label headLabel = new Label(project.getAttribute(GIT_CURRENT_HEAD_NAME));
+      headLabel.ensureDebugId("statusBarProjectBranchName");
+      Style headLabelStyle = headLabel.getElement().getStyle();
+      headLabelStyle.setCursor(Cursor.POINTER);
+      headLabelStyle.setMarginLeft(5., Unit.PX);
+      headLabel.addClickHandler(event -> branchPresenter.showBranches(project));
+      panel.add(headLabel);
     }
-
-    Label projectNameLabel = new Label(project.getName());
-    projectNameLabel.ensureDebugId("statusBarProjectBranchRepositoryName");
-    projectNameLabel.getElement().getStyle().setMarginLeft(5., Unit.PX);
-    panel.add(projectNameLabel);
-
-    String head = project.getAttribute("git.current.head.name");
-    if (head == null) {
-      return;
-    }
-
-    SVGImage branchIcon = new SVGImage(resources.checkoutReference());
-    branchIcon.getSvgElement().getStyle().setMarginLeft(5., Unit.PX);
-    Label headLabel = new Label(head);
-    headLabel.ensureDebugId("statusBarProjectBranchName");
-    Style headLabelStyle = headLabel.getElement().getStyle();
-    headLabelStyle.setCursor(Cursor.POINTER);
-    headLabelStyle.setMarginLeft(5., Unit.PX);
-    headLabel.addClickHandler(event -> branchPresenter.showBranches(project));
-    panel.add(branchIcon);
-    panel.add(headLabel);
   }
 }
