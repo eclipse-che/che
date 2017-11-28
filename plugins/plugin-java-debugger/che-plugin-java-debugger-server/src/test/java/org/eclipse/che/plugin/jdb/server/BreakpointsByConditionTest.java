@@ -10,9 +10,9 @@
  */
 package org.eclipse.che.plugin.jdb.server;
 
-import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.ensureSuspendAtDesiredLocation;
-import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.startJavaDebugger;
-import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.terminateVirtualMachineQuietly;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerTestUtils.ensureDebuggerSuspendAtLocation;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerTestUtils.startJavaDebugger;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerTestUtils.terminateVirtualMachineQuietly;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -27,35 +27,22 @@ import org.eclipse.che.api.debug.shared.model.event.SuspendEvent;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.ResumeActionImpl;
-import org.eclipse.che.plugin.jdb.server.util.ProjectApiUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Anatolii Bazko */
-public class BreakpointConditionTest {
+public class BreakpointsByConditionTest {
 
   private JavaDebugger debugger;
-  private BlockingQueue<DebuggerEvent> events;
+  private BlockingQueue<DebuggerEvent> events = new ArrayBlockingQueue<>(10);
 
   @BeforeClass
   public void setUp() throws Exception {
-    ProjectApiUtils.ensure();
-
     Location location =
-        new LocationImpl(
-            "/test/src/org/eclipse/BreakpointsByConditionTest.java",
-            17,
-            false,
-            -1,
-            "/test",
-            null,
-            -1);
-
-    events = new ArrayBlockingQueue<>(10);
+        new LocationImpl("/test/src/org/eclipse/BreakpointsByConditionTest.java", 17, "/test");
     debugger = startJavaDebugger(new BreakpointImpl(location), events);
-
-    ensureSuspendAtDesiredLocation(location, events);
+    ensureDebuggerSuspendAtLocation(location, events);
   }
 
   @AfterClass

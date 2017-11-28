@@ -21,6 +21,7 @@ import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TEST_BY_CURSOR_
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_OUTPUT_DIR_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.RESOLVE_CLASSPATH_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.TEST_DETECT_COMMAND;
+import com.google.common.collect.ImmutableList;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -45,6 +46,7 @@ import org.eclipse.che.jdt.ls.extension.api.dto.FileStructureCommandParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestFindParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPosition;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPositionParameters;
+import org.eclipse.che.jdt.ls.extension.api.dto.LocationParameters;
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.ExtendedSymbolInformationDto;
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.TestPositionDto;
 import org.eclipse.lsp4j.ExecuteCommandParams;
@@ -300,6 +302,36 @@ public class JavaLanguageServerExtensionService {
     LanguageServiceUtils.fixLocation(symbol.getInfo().getLocation());
     for (ExtendedSymbolInformation child : symbol.getChildren()) {
       fixLocation(child);
+    }
+  }
+
+  public String debuggerLocationToFqn(LocationParameters params) {
+    CompletableFuture<Object> result =
+        getLanguageServer()
+            .getWorkspaceService()
+            .executeCommand(
+                new ExecuteCommandParams(
+                    Commands.LOCATION_TO_FQN_COMMAND, Collections.singletonList(params)));
+
+    try {
+      return (String) result.get();
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
+  }
+
+  public LocationParameters fqnToDebuggerLocation(String fqn, Integer lineNumber) {
+    CompletableFuture<Object> result =
+        getLanguageServer()
+            .getWorkspaceService()
+            .executeCommand(
+                new ExecuteCommandParams(
+                    Commands.FQN_TO_LOCATION_COMMAND, ImmutableList.of(fqn, lineNumber)));
+
+    try {
+      return (LocationParameters) result.get();
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
     }
   }
 }

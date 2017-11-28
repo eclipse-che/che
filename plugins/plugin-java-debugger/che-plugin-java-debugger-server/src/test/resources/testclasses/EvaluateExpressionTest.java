@@ -10,15 +10,14 @@
  */
 package org.eclipse;
 
-public class EvaluateExpressionTest1 {
-    public static void main(String[] args) throws Exception {
-        int i = 1;
-        do1(i);
-    }
+public class EvaluateExpressionTest {
+  public static void main(String[] args) throws Exception {
+    int i = 1;
+    do1(i);
+  }
 
-    private static void do1(int i) {
-        i = 2;
-        System.out.println("Set breakpoint here.");
-    }
+  private static void do1(int i) {
+    i = 2;
+    System.out.println("Set breakpoint here.");
+  }
 }
-
