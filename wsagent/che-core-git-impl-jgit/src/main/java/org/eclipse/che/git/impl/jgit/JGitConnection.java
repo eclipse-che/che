@@ -261,6 +261,8 @@ class JGitConnection implements GitConnection {
 
   private static final String ERROR_CHECKOUT_BRANCH_NAME_EXISTS =
       "A branch named '%s' already exists.";
+  private static final String ERROR_CHECKOUT_BRANCH_NAME_EXISTS_IN_SEVERAL_REMOTES =
+      "A branch named '%s' exists in more than one remote repos";
   private static final String ERROR_CHECKOUT_CONFLICT =
       "Checkout operation failed, the following files would be " + "overwritten by merge:";
 
@@ -396,14 +398,21 @@ class JGitConnection implements GitConnection {
                 .map(Branch::getDisplayName)
                 .collect(Collectors.toList());
         if (!localBranches.contains(name)) {
-          Optional<Branch> remoteBranch =
+          List<Branch> remoteBranchesWithGivenName =
               branchList(LIST_REMOTE)
                   .stream()
-                  .filter(branch -> branch.getName().contains(name))
-                  .findFirst();
-          if (remoteBranch.isPresent()) {
+                  .filter(
+                      branch -> {
+                        String branchName = branch.getName();
+                        return name.equals(branchName.substring(branchName.lastIndexOf("/") + 1));
+                      })
+                  .collect(Collectors.toList());
+          if (remoteBranchesWithGivenName.size() > 1) {
+            throw new GitException(
+                String.format(ERROR_CHECKOUT_BRANCH_NAME_EXISTS_IN_SEVERAL_REMOTES, name));
+          } else if (remoteBranchesWithGivenName.size() == 1) {
             checkoutCommand.setCreateBranch(true);
-            checkoutCommand.setStartPoint(remoteBranch.get().getName());
+            checkoutCommand.setStartPoint(remoteBranchesWithGivenName.get(0).getName());
           }
         }
       }

@@ -58,7 +58,7 @@
 
         .iconPanel {
             float: left;
-            width: 26px;
+            width: 30px;
             height: 22px;
             overflow: hidden;
         }
