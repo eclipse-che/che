@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.plugin.jdb.server.util;
 
+import static java.util.Collections.singletonList;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 
@@ -18,6 +19,8 @@ import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.jdt.ls.extension.api.dto.LocationParameters;
 import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionService;
 import org.mockito.Mockito;
+
+import java.util.List;
 
 /** @author Anatolii Bazko */
 public class JavaLanguageServerExtensionStub extends JavaLanguageServerExtensionService {
@@ -43,16 +46,17 @@ public class JavaLanguageServerExtensionStub extends JavaLanguageServerExtension
   }
 
   @Override
-  public LocationParameters fqnToDebuggerLocation(String fqn, Integer lineNumber) {
+  public List<LocationParameters> fqnToDebuggerLocation(String fqn, Integer lineNumber) {
     int innerClassStartPos = fqn.indexOf("$");
     if (innerClassStartPos != -1) {
       fqn = fqn.substring(0, innerClassStartPos);
     }
 
     if (fqn.startsWith("org.eclipse")) {
-      return new LocationParameters(SRC + fqn.replace(".", "/") + ".java", lineNumber, "/test");
+      return singletonList(
+          new LocationParameters(SRC + fqn.replace(".", "/") + ".java", lineNumber, "/test"));
     } else {
-      return new LocationParameters(fqn, lineNumber, null);
+      return singletonList(new LocationParameters(fqn, lineNumber, null));
     }
   }
 }

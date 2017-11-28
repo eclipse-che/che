@@ -32,6 +32,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -322,16 +323,20 @@ public class JavaLanguageServerExtensionService {
     }
   }
 
-  public LocationParameters fqnToDebuggerLocation(String fqn, Integer lineNumber) {
+  @SuppressWarnings("unchecked")
+  public List<LocationParameters> fqnToDebuggerLocation(String fqn, Integer lineNumber) {
     CompletableFuture<Object> result =
         getLanguageServer()
             .getWorkspaceService()
             .executeCommand(
                 new ExecuteCommandParams(
-                    Commands.FQN_TO_LOCATION_COMMAND, ImmutableList.of(fqn, lineNumber)));
+                    Commands.FQN_TO_LOCATION_COMMAND,
+                    ImmutableList.of(fqn, lineNumber.toString())));
 
     try {
-      return (LocationParameters) result.get();
+      return gson.fromJson(
+          gson.toJson(result.get()),
+          new com.google.common.reflect.TypeToken<List<LocationParameters>>() {}.getType());
     } catch (JsonSyntaxException | InterruptedException | ExecutionException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }
