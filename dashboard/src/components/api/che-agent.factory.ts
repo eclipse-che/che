@@ -40,7 +40,7 @@ export class CheAgent {
     // remote call
     this.remoteAgentAPI = <IAgentsResource<any>>this.$resource('/api/installer', {}, {
       getAgents: { method: 'GET', url: '/api/installer', isArray: true },
-      getAgent: {method: 'GET', url: 'api/installer/:id'}
+      getAgent: {method: 'GET', url: '/api/installer/:id'}
     });
   }
 

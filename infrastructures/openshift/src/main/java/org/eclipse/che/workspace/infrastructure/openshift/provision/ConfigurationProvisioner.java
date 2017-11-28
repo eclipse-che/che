@@ -12,7 +12,6 @@ package org.eclipse.che.workspace.infrastructure.openshift.provision;
 
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfrastructure;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 
@@ -27,12 +26,10 @@ public interface ConfigurationProvisioner {
   /**
    * Configures the OpenShift environment and workspace environment with infrastructure needs.
    *
-   * @param environment configuration of environment
    * @param osEnv OpenShift environment
    * @param identity runtime identity
    * @throws InfrastructureException when any error occurs
    */
-  void provision(
-      InternalEnvironment environment, OpenShiftEnvironment osEnv, RuntimeIdentity identity)
+  void provision(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException;
 }

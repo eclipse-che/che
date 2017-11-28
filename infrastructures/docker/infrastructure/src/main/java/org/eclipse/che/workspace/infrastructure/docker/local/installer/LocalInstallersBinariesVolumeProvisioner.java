@@ -15,7 +15,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.ConfigurationProvisioner;
 
@@ -39,12 +38,11 @@ public class LocalInstallersBinariesVolumeProvisioner implements ConfigurationPr
   }
 
   @Override
-  public void provision(
-      InternalEnvironment envConfig, DockerEnvironment internalEnv, RuntimeIdentity identity)
+  public void provision(DockerEnvironment internalEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
     for (ConfigurationProvisioner infrastructureProvisioner : localInstallerProvisioners) {
-      infrastructureProvisioner.provision(envConfig, internalEnv, identity);
+      infrastructureProvisioner.provision(internalEnv, identity);
     }
   }
 }

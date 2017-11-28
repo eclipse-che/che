@@ -10,13 +10,14 @@
  */
 package org.eclipse.che.selenium.refactor.packages;
 
+import static org.testng.Assert.fail;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -25,20 +26,16 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-/**
- * @author Aleksandr Shmaraev TODO Part of test methods are fail. See issue -
- *     https://github.com/eclipse/che/issues/4979
- */
+/** @author Aleksandr Shmaraev */
 public class RenamePackageTest {
 
   private static String PROJECT_NAME = NameGenerator.generate("CheckRenamePackageProject-", 4);
-  private static final Logger LOG = LoggerFactory.getLogger(RenamePackageTest.class);
 
   // TODO move all data from this fields into resources. See Utils.readContentFromFile, for example
   // RenameMethodInInterfaceTest
@@ -224,6 +221,7 @@ public class RenamePackageTest {
   @Inject private Refactor refactor;
   @Inject private Menu menu;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private MachineTerminal terminal;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -234,6 +232,7 @@ public class RenamePackageTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(workspace);
+    terminal.waitTerminalTab();
     expandTestProject(PROJECT_NAME);
   }
 
@@ -278,7 +277,7 @@ public class RenamePackageTest {
     refactor.typeAndWaitNewName("tes");
     refactor.sendKeysIntoField("t0.p");
     refactor.sendKeysIntoField("1");
-    refactor.waitTextIntoNewNameField("test0.p1");
+    waitTextInNewNameField("test0.p1");
     loader.waitOnClosed();
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     refactor.setAndWaitStateRenameSubpackagesCheckbox(false);
@@ -304,7 +303,7 @@ public class RenamePackageTest {
     refactor.typeAndWaitNewName("tes");
     refactor.sendKeysIntoField("t1.p");
     refactor.sendKeysIntoField("1");
-    refactor.waitTextIntoNewNameField("test1.p1");
+    waitTextInNewNameField("test1.p1");
     loader.waitOnClosed();
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     refactor.setAndWaitStateRenameSubpackagesCheckbox(false);
@@ -336,7 +335,7 @@ public class RenamePackageTest {
     refactor.typeAndWaitNewName("tes");
     refactor.sendKeysIntoField("t2.p");
     refactor.sendKeysIntoField("1");
-    refactor.waitTextIntoNewNameField("test2.p1");
+    waitTextInNewNameField("test2.p1");
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     refactor.setAndWaitStateRenameSubpackagesCheckbox(true);
     refactor.setAndWaitStateUpdateNonJavaFilesCheckbox(false);
@@ -366,7 +365,7 @@ public class RenamePackageTest {
     refactor.sendKeysIntoField("st");
     refactor.sendKeysIntoField("3.r");
     refactor.sendKeysIntoField("");
-    refactor.waitTextIntoNewNameField("test3.r");
+    waitTextInNewNameField("test3.r");
     loader.waitOnClosed();
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     refactor.setAndWaitStateRenameSubpackagesCheckbox(false);
@@ -410,7 +409,7 @@ public class RenamePackageTest {
     refactor.sendKeysIntoField("st");
     refactor.sendKeysIntoField("4.q");
     refactor.sendKeysIntoField("");
-    refactor.waitTextIntoNewNameField("test4.q");
+    waitTextInNewNameField("test4.q");
     loader.waitOnClosed();
     refactor.typeAndWaitFileNamePatterns("*.txt");
     loader.waitOnClosed();
@@ -420,11 +419,6 @@ public class RenamePackageTest {
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/test4/r");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/test4/q");
     projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/test4/r");
-
-    // TODO this is temporary solution, because tree is not refresh
-    projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/src/main/java/test4/r");
-    projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.REFRESH);
-
     projectExplorer.waitItemIsDisappeared(PROJECT_NAME + "/src/main/java/test4/r/p1");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test4/q/A.java");
     loader.waitOnClosed();
@@ -452,7 +446,7 @@ public class RenamePackageTest {
     refactor.typeAndWaitNewName("tes");
     refactor.sendKeysIntoField("t5.p");
     refactor.sendKeysIntoField("1");
-    refactor.waitTextIntoNewNameField("test5.p1");
+    waitTextInNewNameField("test5.p1");
     loader.waitOnClosed();
     refactor.setAndWaitStateUpdateNonJavaFilesCheckbox(false);
     refactor.setAndWaitStateUpdateReferencesCheckbox(false);
@@ -478,7 +472,7 @@ public class RenamePackageTest {
     refactor.typeAndWaitNewName("tes");
     refactor.sendKeysIntoField("t6.p");
     refactor.sendKeysIntoField("1");
-    refactor.waitTextIntoNewNameField("test6.p1");
+    waitTextInNewNameField("test6.p1");
     refactor.setAndWaitStateUpdateReferencesCheckbox(false);
     refactor.setAndWaitStateRenameSubpackagesCheckbox(false);
     refactor.setAndWaitStateUpdateNonJavaFilesCheckbox(false);
@@ -518,7 +512,7 @@ public class RenamePackageTest {
     refactor.sendKeysIntoField("t");
     refactor.sendKeysIntoField("7.q");
     refactor.sendKeysIntoField("");
-    refactor.waitTextIntoNewNameField("test7.q");
+    waitTextInNewNameField("test7.q");
     loader.waitOnClosed();
     refactor.clickOkButtonRefactorForm();
     loader.waitOnClosed();
@@ -547,7 +541,7 @@ public class RenamePackageTest {
     refactor.typeAndWaitNewName("non");
     refactor.sendKeysIntoField("ja");
     refactor.sendKeysIntoField("va");
-    refactor.waitTextIntoNewNameField("nonjava");
+    waitTextInNewNameField("nonjava");
     loader.waitOnClosed();
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     refactor.setAndWaitStateRenameSubpackagesCheckbox(true);
@@ -583,7 +577,7 @@ public class RenamePackageTest {
     refactor.typeAndWaitNewName("yo");
     refactor.sendKeysIntoField("u");
     refactor.sendKeysIntoField("r");
-    refactor.waitTextIntoNewNameField("your");
+    waitTextInNewNameField("your");
     loader.waitOnClosed();
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     refactor.setAndWaitStateRenameSubpackagesCheckbox(true);
@@ -617,7 +611,7 @@ public class RenamePackageTest {
     refactor.sendKeysIntoField("ur.pa");
     refactor.sendKeysIntoField("c");
     refactor.sendKeysIntoField("k");
-    refactor.waitTextIntoNewNameField("your.pack");
+    waitTextInNewNameField("your.pack");
     loader.waitOnClosed();
     refactor.clickOkButtonRefactorForm();
     loader.waitOnClosed();
@@ -645,7 +639,7 @@ public class RenamePackageTest {
     refactor.sendKeysIntoField("r_.pa");
     refactor.sendKeysIntoField("c");
     refactor.sendKeysIntoField("k");
-    refactor.waitTextIntoNewNameField("your_.pack");
+    waitTextInNewNameField("your_.pack");
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     refactor.setAndWaitStateRenameSubpackagesCheckbox(true);
     refactor.setAndWaitStateUpdateNonJavaFilesCheckbox(false);
@@ -672,7 +666,7 @@ public class RenamePackageTest {
     refactor.typeAndWaitNewName("mi");
     refactor.sendKeysIntoField("n");
     refactor.sendKeysIntoField("e");
-    refactor.waitTextIntoNewNameField("mine");
+    waitTextInNewNameField("mine");
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     refactor.setAndWaitStateRenameSubpackagesCheckbox(false);
     refactor.setAndWaitStateUpdateNonJavaFilesCheckbox(true);
@@ -697,5 +691,14 @@ public class RenamePackageTest {
     projectExplorer.openItemByPath(projectName + "/src/main/java");
     projectExplorer.waitItem(projectName + "/src/main/java/org/eclipse/qa/examples");
     loader.waitOnClosed();
+  }
+
+  private void waitTextInNewNameField(String expectedText) {
+    try {
+      refactor.waitTextIntoNewNameField(expectedText);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7500");
+    }
   }
 }

@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-agent-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>6.0.0-M2-SNAPSHOT</version>
+        <version>6.0.0-M3-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-api-languageserver</artifactId>
     <packaging>jar</packaging>
@@ -143,7 +143,7 @@
                                 <artifactItem>
                                     <groupId>org.eclipse.che.lib</groupId>
                                     <artifactId>che-test-ls</artifactId>
-                                    <version>${project.version}</version>
+                                    <version>${che.lib.version}</version>
                                     <type>tar.gz</type>
                                     <outputDirectory>${project.build.testOutputDirectory}/ls</outputDirectory>
                                     <destFileName>test-ls.tar.gz</destFileName>

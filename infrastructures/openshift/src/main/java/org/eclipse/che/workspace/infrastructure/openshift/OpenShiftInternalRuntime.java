@@ -41,6 +41,7 @@ import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineLogEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeStatusEvent;
@@ -95,7 +96,7 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
   @Override
   protected void internalStart(Map<String, String> startOptions) throws InfrastructureException {
     try {
-      final OpenShiftEnvironment osEnv = getContext().getOpenShiftEnvironment();
+      final OpenShiftEnvironment osEnv = getContext().getEnvironment();
 
       List<Service> createdServices = new ArrayList<>();
       for (Service service : osEnv.getServices().values()) {
@@ -124,7 +125,10 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
         }
       }
     } catch (InfrastructureException | RuntimeException | InterruptedException e) {
-      LOG.error("Failed to start of OpenShift runtime. " + e.getMessage());
+      LOG.warn(
+          "Failed to start OpenShift runtime of workspace {}. Cause: {}",
+          getContext().getIdentity().getWorkspaceId(),
+          e.getMessage());
       boolean interrupted = Thread.interrupted() || e instanceof InterruptedException;
       try {
         project.cleanUp();
@@ -167,12 +171,12 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
    */
   private void bootstrapMachine(OpenShiftMachine machine)
       throws InfrastructureException, InterruptedException {
-    bootstrapperFactory
-        .create(
-            getContext().getIdentity(),
-            getContext().getEnvironment().getMachines().get(machine.getName()).getInstallers(),
-            machine)
-        .bootstrap();
+    InternalMachineConfig machineConfig =
+        getContext().getEnvironment().getMachines().get(machine.getName());
+    if (machineConfig != null && !machineConfig.getInstallers().isEmpty())
+      bootstrapperFactory
+          .create(getContext().getIdentity(), machineConfig.getInstallers(), machine)
+          .bootstrap();
   }
 
   /**
@@ -201,7 +205,7 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
   @VisibleForTesting
   void createPods(List<Service> services, List<Route> routes) throws InfrastructureException {
     final ServerResolver serverResolver = ServerResolver.of(services, routes);
-    for (Pod toCreate : getContext().getOpenShiftEnvironment().getPods().values()) {
+    for (Pod toCreate : getContext().getEnvironment().getPods().values()) {
       final Pod createdPod = project.pods().create(toCreate);
       final ObjectMeta podMetadata = createdPod.getMetadata();
       for (Container container : createdPod.getSpec().getContainers()) {

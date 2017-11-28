@@ -11,7 +11,6 @@
 package org.eclipse.che.api.workspace.server.hc;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.after;
@@ -176,7 +175,7 @@ public class ServersCheckerTest {
     expectedExceptionsMessageRegExp = "oops!"
   )
   public void throwsExceptionIfAnyServerIsNotAvailable() throws InfrastructureException {
-    doThrow(new InfrastructureException("oops!")).when(connectionChecker).checkOnce(anyObject());
+    doThrow(new InfrastructureException("oops!")).when(connectionChecker).checkOnce(any());
 
     checker.checkOnce(ref -> {});
   }

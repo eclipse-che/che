@@ -24,6 +24,7 @@ import org.eclipse.che.api.search.server.consumers.IndexedFileDeleteConsumer;
 import org.eclipse.che.api.search.server.consumers.IndexedFileUpdateConsumer;
 import org.eclipse.che.api.search.server.excludes.DotCheExcludeMatcher;
 import org.eclipse.che.api.search.server.excludes.DotNumberSignExcludeMatcher;
+import org.eclipse.che.api.search.server.excludes.HiddenItemPathMatcher;
 import org.eclipse.che.api.search.server.excludes.MediaTypesExcludeMatcher;
 import org.eclipse.che.api.search.server.impl.LuceneSearcher;
 
@@ -38,6 +39,7 @@ public class SearchApiModule extends AbstractModule {
     excludeMatcher.addBinding().to(MediaTypesExcludeMatcher.class);
     excludeMatcher.addBinding().to(DotCheExcludeMatcher.class);
     excludeMatcher.addBinding().to(DotNumberSignExcludeMatcher.class);
+    excludeMatcher.addBinding().to(HiddenItemPathMatcher.class);
 
     newSetBinder(binder(), new TypeLiteral<Consumer<Path>>() {}, Names.named("che.fs.file.create"))
         .addBinding()

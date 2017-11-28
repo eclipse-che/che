@@ -21,7 +21,6 @@ import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.BranchListMode;
 import org.eclipse.che.api.git.shared.CheckoutRequest;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -54,7 +53,6 @@ public class BranchPresenter implements BranchView.ActionDelegate {
   private final DialogFactory dialogFactory;
   private final GitServiceClient service;
   private final GitLocalizationConstant constant;
-  private final AppContext appContext;
   private final NotificationManager notificationManager;
 
   private Branch selectedBranch;
@@ -62,12 +60,11 @@ public class BranchPresenter implements BranchView.ActionDelegate {
 
   /** Create presenter. */
   @Inject
-  public BranchPresenter(
+  BranchPresenter(
       BranchView view,
       DtoFactory dtoFactory,
       GitServiceClient service,
       GitLocalizationConstant constant,
-      AppContext appContext,
       NotificationManager notificationManager,
       GitOutputConsoleFactory gitOutputConsoleFactory,
       ProcessesPanelPresenter processesPanelPresenter,
@@ -80,7 +77,6 @@ public class BranchPresenter implements BranchView.ActionDelegate {
     this.view.setDelegate(this);
     this.service = service;
     this.constant = constant;
-    this.appContext = appContext;
     this.notificationManager = notificationManager;
   }
 
@@ -91,8 +87,10 @@ public class BranchPresenter implements BranchView.ActionDelegate {
   }
 
   @Override
-  public void onCloseClicked() {
+  public void onClose() {
     view.close();
+    view.setTextToSearchFilterLabel("");
+    view.clearSearchFilter();
   }
 
   @Override
@@ -240,8 +238,13 @@ public class BranchPresenter implements BranchView.ActionDelegate {
   }
 
   @Override
-  public void onFilterValueChanged() {
+  public void onLocalRemoteFilterChanged() {
     getBranches();
+  }
+
+  @Override
+  public void onSearchFilterChanged(String filter) {
+    view.setTextToSearchFilterLabel(filter);
   }
 
   @Override

@@ -99,7 +99,7 @@ elif echo ${LINUX_TYPE} | grep -qi "ubuntu"; then
         ${SUDO} apt-get -y install ${PACKAGES};
     }
 
-    let RELEASE_NAME="trusty"
+    RELEASE_NAME="trusty"
     {
         if echo ${LINUX_VERSION} | grep -qi "14.04"; then
             RELEASE_NAME="trusty"

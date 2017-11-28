@@ -26,6 +26,7 @@ import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.wizard.Wizard;
+import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -57,6 +58,7 @@ public class ProjectImporterTest {
   @Mock private Promise<Project> importPromise;
   @Mock private Project importedProject;
   @Mock private OAuthServiceClient oAuthServiceClient;
+  @Mock private DtoUnmarshallerFactory unmarshallerFactory;
 
   @Captor private ArgumentCaptor<Function<Project, Promise<Project>>> importProjectCaptor;
 
@@ -85,6 +87,7 @@ public class ProjectImporterTest {
             resolver,
             null,
             null,
+            unmarshallerFactory,
             oAuthServiceClient);
   }
 

@@ -45,6 +45,7 @@ import org.eclipse.che.ide.api.workspace.model.SourceStorageImpl;
 import org.eclipse.che.ide.projectimport.AbstractImporter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
+import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.dialogs.askcredentials.AskCredentialsDialog;
 import org.eclipse.che.ide.util.ExceptionUtils;
 import org.eclipse.che.security.oauth.OAuthStatus;
@@ -61,6 +62,7 @@ public class ProjectImporter extends AbstractImporter {
   private final AskCredentialsDialog credentialsDialog;
   private final OAuth2AuthenticatorRegistry oAuth2AuthenticatorRegistry;
   private final OAuthServiceClient oAuthServiceClient;
+  private final DtoUnmarshallerFactory unmarshallerFactory;
 
   @Inject
   public ProjectImporter(
@@ -70,11 +72,13 @@ public class ProjectImporter extends AbstractImporter {
       ProjectResolver projectResolver,
       AskCredentialsDialog credentialsDialog,
       OAuth2AuthenticatorRegistry oAuth2AuthenticatorRegistry,
+      DtoUnmarshallerFactory unmarshaller,
       OAuthServiceClient oAuthServiceClient) {
     super(appContext, subscriberFactory);
     this.localizationConstant = localizationConstant;
     this.projectResolver = projectResolver;
     this.credentialsDialog = credentialsDialog;
+    this.unmarshallerFactory = unmarshaller;
     this.oAuth2AuthenticatorRegistry = oAuth2AuthenticatorRegistry;
     this.oAuthServiceClient = oAuthServiceClient;
   }
@@ -217,7 +221,8 @@ public class ProjectImporter extends AbstractImporter {
                     if (!result.equals(OAuthStatus.NOT_PERFORMED)) {
                       oAuthServiceClient.getToken(
                           providerName,
-                          new AsyncRequestCallback<OAuthToken>() {
+                          new AsyncRequestCallback<OAuthToken>(
+                              unmarshallerFactory.newUnmarshaller(OAuthToken.class)) {
                             @Override
                             protected void onSuccess(OAuthToken result) {
                               final SourceStorageImpl copySourceStorage =

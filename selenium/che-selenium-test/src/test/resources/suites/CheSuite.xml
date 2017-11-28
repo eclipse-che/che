@@ -191,7 +191,7 @@
           </class>
           <class name="org.eclipse.che.selenium.git.AddFilesToIndexTest"/>
           <class name="org.eclipse.che.selenium.git.AmendCommitTest"/>
-          <class name="org.eclipse.che.selenium.git.CheckoutBranchTest"/>
+          <class name="org.eclipse.che.selenium.git.BranchTest"/>
           <class name="org.eclipse.che.selenium.git.CommitFilesByMultiSelectTest"/>
           <class name="org.eclipse.che.selenium.git.CommitFilesTest"/>
           <class name="org.eclipse.che.selenium.git.CreateAndDeleteLocalBranchTest"/>

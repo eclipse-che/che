@@ -31,9 +31,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Listener for removing projects files after {@code WorkspaceRemovedEvent}.
+ * Listener for removing projects files from host after {@code WorkspaceRemovedEvent}.
  *
- * <p>Note that projects folder won't be removed if host projects holder is configured.
+ * <p>Note that projects folder won't be removed if host projects holder is not configured - this
+ * listener is useful when Che master and Che workspaces are on the same host.
  *
  * @author Alexander Andrienko
  * @author Sergii Leshchenko
