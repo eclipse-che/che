@@ -32,6 +32,11 @@ import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
 import org.eclipse.che.api.project.shared.NewProjectConfig;
 
+/**
+ * Preforms preliminary project manager method parameters validation and on success passes execution
+ * further. In current implementation next functional unit in a call chain is {@link
+ * SynchronizingProjectManager}. On validation failure corresponding exception is thrown.
+ */
 @Singleton
 public class ValidatingProjectManager implements ProjectManager {
 

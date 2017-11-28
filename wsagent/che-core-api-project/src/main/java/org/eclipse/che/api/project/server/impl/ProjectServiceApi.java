@@ -84,6 +84,10 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.dto.server.DtoFactory;
 
+/**
+ * Project service REST API back end. This class' methods are called from the {@link
+ * ProjectService}.
+ */
 public class ProjectServiceApi {
 
   private static Tika TIKA;
@@ -121,6 +125,7 @@ public class ProjectServiceApi {
     this.transmitter = transmitter;
   }
 
+  /** Get list of projects */
   public List<ProjectConfigDto> getProjects()
       throws IOException, ServerException, ConflictException, ForbiddenException {
 
@@ -132,6 +137,7 @@ public class ProjectServiceApi {
         .collect(Collectors.toList());
   }
 
+  /** Get project specified by the following workspace path */
   public ProjectConfigDto getProject(String wsPath)
       throws NotFoundException, ForbiddenException, ServerException, ConflictException {
     wsPath = absolutize(wsPath);
@@ -143,6 +149,7 @@ public class ProjectServiceApi {
         .orElseThrow(() -> new NotFoundException("Project is not found"));
   }
 
+  /** Create project with specified project configuration */
   public ProjectConfigDto createProject(UriInfo uriInfo, ProjectConfigDto projectConfig)
       throws ConflictException, ForbiddenException, ServerException, NotFoundException,
           BadRequestException {
@@ -163,6 +170,7 @@ public class ProjectServiceApi {
     return injectedLinks;
   }
 
+  /** Create projects with specified configurations for a client with specified identifier */
   public List<ProjectConfigDto> createBatchProjects(
       List<NewProjectConfigDto> projectConfigs, boolean rewrite, String clientId)
       throws ConflictException, ForbiddenException, ServerException, NotFoundException, IOException,
@@ -188,6 +196,7 @@ public class ProjectServiceApi {
     return new ArrayList<>(result);
   }
 
+  /** Update project specified by workspace path with new configuration */
   public ProjectConfigDto updateProject(String wsPath, ProjectConfigDto projectConfigDto)
       throws NotFoundException, ConflictException, ForbiddenException, ServerException, IOException,
           BadRequestException {
@@ -199,6 +208,7 @@ public class ProjectServiceApi {
     return asDto(updated);
   }
 
+  /** Delete project with specified workspace path */
   public void delete(String wsPath)
       throws NotFoundException, ForbiddenException, ConflictException, ServerException {
     wsPath = absolutize(wsPath);
@@ -210,6 +220,7 @@ public class ProjectServiceApi {
     }
   }
 
+  /** Analyze if project defined by specific workspace path is of specified type */
   public SourceEstimation estimateProject(String wsPath, String projectType)
       throws NotFoundException, ForbiddenException, ServerException, ConflictException {
     wsPath = absolutize(wsPath);
@@ -230,6 +241,7 @@ public class ProjectServiceApi {
         .withAttributes(attributes);
   }
 
+  /** Get list of types that corresponds to a project with specified workspace paths */
   public List<SourceEstimation> resolveSources(String wsPath)
       throws NotFoundException, ForbiddenException, ServerException, ConflictException {
     wsPath = absolutize(wsPath);
@@ -255,6 +267,7 @@ public class ProjectServiceApi {
         .collect(toList());
   }
 
+  /** Import project from specified source storage to specified location */
   public void importProject(
       String wsPath, boolean force, String clientId, SourceStorageDto sourceStorage)
       throws ConflictException, ForbiddenException, UnauthorizedException, IOException,
@@ -265,6 +278,7 @@ public class ProjectServiceApi {
     projectManager.doImport(wsPath, sourceStorage, force, jsonRpcImportConsumer(clientId));
   }
 
+  /** Create file with specified path, name and content */
   public Response createFile(String parentWsPath, String fileName, InputStream content)
       throws NotFoundException, ConflictException, ForbiddenException, ServerException {
     parentWsPath = absolutize(parentWsPath);
@@ -296,6 +310,7 @@ public class ProjectServiceApi {
     return Response.created(location).entity(asDtoWithVcsStatusAndLinks).build();
   }
 
+  /** Create folder under specified path */
   public Response createFolder(String wsPath)
       throws ConflictException, ForbiddenException, ServerException, NotFoundException {
     wsPath = absolutize(wsPath);
@@ -324,6 +339,7 @@ public class ProjectServiceApi {
         .build();
   }
 
+  /** Upload file under specified path and form data */
   public Response uploadFile(String parentWsPath, Iterator<FileItem> formData)
       throws NotFoundException, ConflictException, ForbiddenException, ServerException {
     parentWsPath = absolutize(parentWsPath);
@@ -338,6 +354,7 @@ public class ProjectServiceApi {
     return Response.ok("", MediaType.TEXT_HTML).build();
   }
 
+  /** Upload a folder from zip represented by form data to a specified location */
   public Response uploadFolderFromZip(String wsPath, Iterator<FileItem> formData)
       throws ServerException, ConflictException, ForbiddenException, NotFoundException {
     wsPath = absolutize(wsPath);
@@ -349,6 +366,7 @@ public class ProjectServiceApi {
     return Response.ok("", MediaType.TEXT_HTML).build();
   }
 
+  /** Get file with specified location */
   public Response getFile(String wsPath)
       throws IOException, NotFoundException, ForbiddenException, ServerException,
           ConflictException {
@@ -361,6 +379,7 @@ public class ProjectServiceApi {
     return Response.ok().entity(inputStream).type(type).build();
   }
 
+  /** Update file with specified location and content */
   public Response updateFile(String wsPath, InputStream content)
       throws NotFoundException, ForbiddenException, ServerException, ConflictException {
     wsPath = absolutize(wsPath);
@@ -378,6 +397,7 @@ public class ProjectServiceApi {
     return Response.ok().build();
   }
 
+  /** Copy file system item from specified source location to specified destination location */
   public Response copy(String wsPath, String newParentWsPath, CopyOptions copyOptions)
       throws NotFoundException, ForbiddenException, ConflictException, ServerException {
     String srcWsPath = absolutize(wsPath);
@@ -422,6 +442,7 @@ public class ProjectServiceApi {
     }
   }
 
+  /** Move file system item from specified source location to specified destination location */
   public Response move(String wsPath, String newParentWsPath, MoveOptions moveOptions)
       throws NotFoundException, ForbiddenException, ConflictException, ServerException {
     wsPath = absolutize(wsPath);
@@ -465,6 +486,7 @@ public class ProjectServiceApi {
     }
   }
 
+  /** Upload file from zip represented as form data into specified location */
   public List<SourceEstimation> uploadProjectFromZip(
       String wsPath, boolean force, Iterator<FileItem> formData)
       throws ServerException, ConflictException, ForbiddenException, NotFoundException,
@@ -478,6 +500,7 @@ public class ProjectServiceApi {
     return resolveSources(wsPath);
   }
 
+  /** Import zipped data into specified location */
   public Response importZip(String wsPath, InputStream zip, Boolean skipFirstLevel)
       throws NotFoundException, ConflictException, ForbiddenException, ServerException {
     wsPath = absolutize(wsPath);
@@ -496,6 +519,7 @@ public class ProjectServiceApi {
         .build();
   }
 
+  /** Zip content under specified location */
   public InputStream exportZip(String wsPath)
       throws NotFoundException, ForbiddenException, ServerException, ConflictException {
     wsPath = absolutize(wsPath);
@@ -519,6 +543,7 @@ public class ProjectServiceApi {
         .build();
   }
 
+  /** Get children list defined by specified location */
   public List<ItemReference> getChildren(String wsPath)
       throws NotFoundException, ForbiddenException, ServerException, IOException {
     wsPath = absolutize(wsPath);
@@ -535,6 +560,7 @@ public class ProjectServiceApi {
     return vcsStatusInjector.injectVcsStatus(result);
   }
 
+  /** Get file system tree under specified location and depth */
   public TreeElement getTree(String wsPath, int depth, boolean includeFiles)
       throws NotFoundException, ForbiddenException, ServerException {
     wsPath = absolutize(wsPath);
@@ -546,6 +572,7 @@ public class ProjectServiceApi {
         .withChildren(getTreeRecursively(wsPath, depth, includeFiles));
   }
 
+  /** Get file system item defined by specific location */
   public ItemReference getItem(String wsPath)
       throws NotFoundException, ForbiddenException, ServerException {
     wsPath = absolutize(wsPath);
@@ -556,6 +583,15 @@ public class ProjectServiceApi {
         : injectFolderLinks(asDto);
   }
 
+  /**
+   * Preform search with specified parameters
+   *
+   * @param wsPath search root
+   * @param name file name
+   * @param text text
+   * @param maxItems maximum number of items
+   * @param skipCount number of items to be skipped
+   */
   public ProjectSearchResponseDto search(
       String wsPath, String name, String text, int maxItems, int skipCount)
       throws NotFoundException, ForbiddenException, ConflictException, ServerException {
