@@ -11,11 +11,13 @@
           <div flex layout="row" layout-align="start center" class="che-list-item-details">
             <che-list-header-column flex="10" layout="column" layout-align="center start"
                                     che-column-title="State"></che-list-header-column>
-            <che-list-header-column flex="30" layout="column" layout-align="center start"
+            <che-list-header-column flex="25" layout="column" layout-align="center start"
                                     che-sort-value="machineAgentsController.agentOrderBy"
                                     che-sort-item="name"
                                     che-column-title="Installer"></che-list-header-column>
-            <che-list-header-column flex="60" layout="column" layout-align="center start"
+            <che-list-header-column flex="15" layout="column" layout-align="center start"
+                                    che-column-title="Version"></che-list-header-column>
+            <che-list-header-column flex="50" layout="column" layout-align="center start"
                                     che-column-title="Description"></che-list-header-column>
           </div>
         </div>
@@ -42,11 +44,15 @@
                   </md-switch>
                 </div>
                 <!-- Name -->
-                <div flex="30">
+                <div flex="25">
                   <span class="che-list-item-name" agent-name="{{agentItem.name}}">{{agentItem.name}}</span>
                 </div>
+                <!-- Version -->
+                <div flex="15">
+                  <span class="che-list-item-name" agent-version="{{agentItem.version}}">{{agentItem.version}}</span>
+                </div>
                 <!-- Description -->
-                <div flex="60">
+                <div flex="50">
                   <span class="che-list-item-secondary" agent-description="{{agentItem.description}}">{{agentItem.description}}</span>
                 </div>
               </div>

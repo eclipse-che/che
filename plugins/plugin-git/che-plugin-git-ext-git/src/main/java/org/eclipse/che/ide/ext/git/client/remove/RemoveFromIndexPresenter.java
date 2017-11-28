@@ -99,9 +99,9 @@ public class RemoveFromIndexPresenter implements RemoveFromIndexView.ActionDeleg
         .remove(project.getLocation(), toRelativePaths(resources), view.isRemoved())
         .then(
             ignored -> {
-              console.print(constant.removeFilesSuccessfull());
+              console.print(constant.removeFilesSuccessful());
               consolesPanelPresenter.addCommandOutput(console);
-              notificationManager.notify(constant.removeFilesSuccessfull());
+              notificationManager.notify(constant.removeFilesSuccessful());
 
               project.synchronize();
             })

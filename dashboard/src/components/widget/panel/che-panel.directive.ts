@@ -9,6 +9,18 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import {ChePanelCtrl} from './che-panel.controller';
+
+interface IChePanelAttributes extends ng.IAttributes {
+  cheLockMode: boolean;
+  cheCollapse: boolean;
+  chePanelId: string;
+  cheDisabled: boolean;
+  cheToggle: boolean;
+  cheTitleIcon: string;
+  cheTitleSvgIcon: string;
+  cheTooltip: string;
+}
 
 /**
  * @ngdoc directive
@@ -30,93 +42,85 @@
  *   <che-panel che-title="hello"></che-panel>
  *
  * @example
- <example module="cheDashboard">
- <file name="index.html">
- <che-panel che-title-icon="fa fa-lock" che-title="hello">This is simple text</che-panel>
- </file>
- </example>
+ * <example module="cheDashboard">
+ *   <file name="index.html">
+ *     <che-panel che-title-icon="fa fa-lock" che-title="hello">This is simple text</che-panel>
+ *   </file>
+ * </example>
  * @author Florent Benoit
  */
 export class ChePanel {
 
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor() {
-    this.restrict = 'E';
-    this.replace = true;
-    this.transclude = true;
-    this.bindToController = true;
+  restrict = 'E';
+  replace = true;
+  transclude = true;
+  bindToController = true;
 
-    this.controller = 'ChePanelCtrl';
-    this.controllerAs = 'chePanelCtrl';
+  controller = 'ChePanelCtrl';
+  controllerAs = 'chePanelCtrl';
 
-    this.scope = {
-      svgIcon: '@cheTitleSvgIcon',
-      tooltip: '@?cheTooltip',
-      title: '@cheTitle',
-      disabled: '@cheDisabled'
-    };
-  }
+  scope = {
+    svgIcon: '@cheTitleSvgIcon',
+    tooltip: '@?cheTooltip',
+    title: '@cheTitle',
+    disabled: '@cheDisabled'
+  };
 
   /**
    * Defines id of the controller and apply some initial settings
    */
-
-  link(scope, element, attributes, controller) {
+  link($scope: ng.IScope, $element: ng.IAugmentedJQuery, $attributes: IChePanelAttributes, controller: ChePanelCtrl): void {
 
     // special mode
-    if (attributes['cheLockMode']) {
+    if ($attributes.cheLockMode) {
       controller.lock();
     }
 
     // special mode
-    if (attributes['cheCollapse']) {
+    if ($attributes.cheCollapse) {
       controller.collapse = true;
     }
 
     // set id
-    if (attributes['chePanelId']) {
-      controller.setId(attributes['chePanelId']);
+    if ($attributes.chePanelId) {
+      controller.setId($attributes.chePanelId);
     }
 
     // disabled
-    if (attributes['cheDisabled']) {
+    if ($attributes.cheDisabled) {
       controller.disabled = true;
     }
   }
 
-
   /**
    * Template for the current toolbar
-   * @param element
-   * @param attrs
+   * @param $element
+   * @param $attrs
    * @returns {string} the template
    */
-  template(element, attrs) {
+  template($element: ng.IAugmentedJQuery, $attrs: IChePanelAttributes): string {
 
     var template = '<md-card class="che-panel" md-theme="default">'
       + '<div layout="row" class="che-panel-titlebox" layout-align="start center">'
       + '<div class="che-panel-title" layout="row" layout-align="start center"'
-      + (attrs['cheToggle'] ? ' ng-click="chePanelCtrl.toggle()">' : '>');
+      + ($attrs.cheToggle ? ' ng-click="chePanelCtrl.toggle()">' : '>');
 
-    if (attrs['cheTitleIcon']) {
-      template = template + '<span class="che-panel-title-icon ' + attrs['cheTitleIcon'] + '"></span>';
+    if ($attrs.cheTitleIcon) {
+      template = template + '<span class="che-panel-title-icon ' + $attrs.cheTitleIcon + '"></span>';
     }
-    if (attrs['cheTitleSvgIcon']) {
+    if ($attrs.cheTitleSvgIcon) {
       template = template + '<md-icon md-svg-src="' + '{{chePanelCtrl.svgIcon}}' + '"></md-icon>';
     }
 
     template = template + '{{chePanelCtrl.title}}</div>';
-    if (attrs['cheTooltip']) {
+    if ($attrs.cheTooltip) {
       template = template + '<div><i class="fa fa-info-circle che-panel-title-tooltip-icon" tooltip-placement="right" uib-tooltip="{{chePanelCtrl.tooltip}}"></i></div>';
     }
 
     template = template + '<div flex layout="column"><div class="che-panel-title-top">&nbsp;</div><div class="che-panel-title-bottom">&nbsp;</div></div>';
 
 
-    if (attrs['cheToggle']) {
+    if ($attrs.cheToggle) {
       template = template + '<i class="{{chePanelCtrl.getToggleIcon()}}" ng-click="chePanelCtrl.toggle()"></i>';
     }
 

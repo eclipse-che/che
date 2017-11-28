@@ -53,6 +53,14 @@ public class OpenShiftMachine implements Machine {
     return machineName;
   }
 
+  public String getPodName() {
+    return podName;
+  }
+
+  public String getContainerName() {
+    return containerName;
+  }
+
   @Override
   public Map<String, String> getProperties() {
     return emptyMap();

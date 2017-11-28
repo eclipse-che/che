@@ -30,6 +30,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
+import org.eclipse.che.api.core.model.workspace.config.Volume;
 
 /** @author Alexander Garagatyi */
 @Entity(name = "ExternalMachine")
@@ -72,13 +73,19 @@ public class MachineConfigImpl implements MachineConfig {
   @MapKeyColumn(name = "servers_key")
   private Map<String, ServerConfigImpl> servers;
 
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+  @JoinColumn(name = "machine_id")
+  @MapKeyColumn(name = "name")
+  private Map<String, VolumeImpl> volumes;
+
   public MachineConfigImpl() {}
 
   public MachineConfigImpl(
       List<String> installers,
       Map<String, ? extends ServerConfig> servers,
       Map<String, String> env,
-      Map<String, String> attributes) {
+      Map<String, String> attributes,
+      Map<String, ? extends Volume> volumes) {
     if (installers != null) {
       this.installers = new ArrayList<>(installers);
     }
@@ -97,10 +104,23 @@ public class MachineConfigImpl implements MachineConfig {
     if (attributes != null) {
       this.attributes = new HashMap<>(attributes);
     }
+    if (volumes != null) {
+      this.volumes =
+          volumes
+              .entrySet()
+              .stream()
+              .collect(
+                  Collectors.toMap(Map.Entry::getKey, entry -> new VolumeImpl(entry.getValue())));
+    }
   }
 
   public MachineConfigImpl(MachineConfig machine) {
-    this(machine.getInstallers(), machine.getServers(), machine.getEnv(), machine.getAttributes());
+    this(
+        machine.getInstallers(),
+        machine.getServers(),
+        machine.getEnv(),
+        machine.getAttributes(),
+        machine.getVolumes());
   }
 
   @Override
@@ -172,6 +192,23 @@ public class MachineConfigImpl implements MachineConfig {
   }
 
   @Override
+  public Map<String, VolumeImpl> getVolumes() {
+    if (volumes == null) {
+      volumes = new HashMap<>();
+    }
+    return volumes;
+  }
+
+  public void setVolumes(Map<String, VolumeImpl> volumes) {
+    this.volumes = volumes;
+  }
+
+  public MachineConfigImpl withVolumes(Map<String, VolumeImpl> volumes) {
+    this.volumes = volumes;
+    return this;
+  }
+
+  @Override
   public boolean equals(Object obj) {
     if (this == obj) {
       return true;
@@ -184,7 +221,8 @@ public class MachineConfigImpl implements MachineConfig {
         && getInstallers().equals(that.getInstallers())
         && getEnv().equals(that.getEnv())
         && getAttributes().equals(that.getAttributes())
-        && getServers().equals(that.getServers());
+        && getServers().equals(that.getServers())
+        && getVolumes().equals(that.getVolumes());
   }
 
   @Override
@@ -195,6 +233,7 @@ public class MachineConfigImpl implements MachineConfig {
     hash = 31 * hash + getEnv().hashCode();
     hash = 31 * hash + getAttributes().hashCode();
     hash = 31 * hash + getServers().hashCode();
+    hash = 31 * hash + getVolumes().hashCode();
     return hash;
   }
 
@@ -211,6 +250,8 @@ public class MachineConfigImpl implements MachineConfig {
         + attributes
         + ", servers="
         + servers
+        + ", volumes="
+        + volumes
         + '}';
   }
 }

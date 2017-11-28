@@ -435,6 +435,11 @@ public class LightTheme implements Theme {
   }
 
   @Override
+  public String editorTabsBackgroundColor() {
+    return "#D6D6D9";
+  }
+
+  @Override
   public String editorPanelBorderColor() {
     return tabBorderColor();
   }
@@ -1295,6 +1300,11 @@ public class LightTheme implements Theme {
   }
 
   @Override
+  public String checkBoxIndeterminateIconColor() {
+    return "#b7b7b7";
+  }
+
+  @Override
   public String checkBoxFontColor() {
     return this.getTextFieldColor();
   }
@@ -1642,6 +1652,16 @@ public class LightTheme implements Theme {
   @Override
   public String editorPreferenceCategoryBackgroundColor() {
     return "rgba(27, 27, 27, 0.10)";
+  }
+
+  @Override
+  public String gitPanelRepositoryChangesLabelColor() {
+    return "#252a38";
+  }
+
+  @Override
+  public String gitPanelRepositoryChangesLabelBackgroundColor() {
+    return "#969fad";
   }
 
   /**

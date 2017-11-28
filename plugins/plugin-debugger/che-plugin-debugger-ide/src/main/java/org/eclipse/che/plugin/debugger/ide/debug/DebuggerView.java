@@ -132,9 +132,9 @@ public interface DebuggerView extends View<DebuggerView.ActionDelegate> {
   /**
    * Sets breakpoints.
    *
-   * @param breakPoints available breakpoints
+   * @param breakpoints available breakpoints
    */
-  void setBreakpoints(@NotNull List<Breakpoint> breakPoints);
+  void setBreakpoints(@NotNull List<ActiveBreakpointWrapper> breakpoints);
 
   /**
    * Sets thread dump and select the thread with {@link ThreadState#getId()} equal to {@code
@@ -165,9 +165,32 @@ public interface DebuggerView extends View<DebuggerView.ActionDelegate> {
   /** Returns selected frame index inside thread or -1 if there is no selection. */
   int getSelectedFrameIndex();
 
+  void setThreadNotSuspendPlaceHolderVisible(boolean visible);
+
   /** Returns debugger toolbar panel widget. */
   AcceptsOneWidget getDebuggerToolbarPanel();
 
   /** Returns debugger watch toolbar panel widget. */
   AcceptsOneWidget getDebuggerWatchToolbarPanel();
+
+  /*
+   * Wraps breakpoint and its state.
+   */
+  class ActiveBreakpointWrapper {
+    private Breakpoint breakpoint;
+    private boolean active;
+
+    public ActiveBreakpointWrapper(Breakpoint breakpoint, boolean active) {
+      this.breakpoint = breakpoint;
+      this.active = active;
+    }
+
+    public Breakpoint getBreakpoint() {
+      return breakpoint;
+    }
+
+    public boolean isActive() {
+      return active;
+    }
+  }
 }

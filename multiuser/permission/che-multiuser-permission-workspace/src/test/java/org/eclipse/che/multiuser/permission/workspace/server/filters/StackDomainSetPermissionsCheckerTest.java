@@ -13,13 +13,12 @@ package org.eclipse.che.multiuser.permission.workspace.server.filters;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.multiuser.api.permission.server.SystemDomain.MANAGE_SYSTEM_ACTION;
 import static org.eclipse.che.multiuser.permission.workspace.server.stack.StackDomain.DELETE;
-import static org.eclipse.che.multiuser.permission.workspace.server.stack.StackDomain.DOMAIN_ID;
 import static org.eclipse.che.multiuser.permission.workspace.server.stack.StackDomain.READ;
 import static org.eclipse.che.multiuser.permission.workspace.server.stack.StackDomain.SEARCH;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -27,8 +26,10 @@ import com.google.common.collect.ImmutableList;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
+import org.eclipse.che.multiuser.api.permission.server.SystemDomain;
 import org.eclipse.che.multiuser.api.permission.server.filter.check.DefaultSetPermissionsChecker;
 import org.eclipse.che.multiuser.api.permission.shared.model.Permissions;
+import org.eclipse.che.multiuser.permission.workspace.server.stack.StackDomain;
 import org.eclipse.che.multiuser.permission.workspace.server.stack.StackPermissionsImpl;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -72,7 +73,7 @@ public class StackDomainSetPermissionsCheckerTest {
 
     stackSetPermChecker.check(permissions);
 
-    verify(defaultChecker, times(1)).check(permissions);
+    verify(defaultChecker).check(permissions);
   }
 
   @Test(expectedExceptions = ForbiddenException.class)
@@ -88,11 +89,11 @@ public class StackDomainSetPermissionsCheckerTest {
   @Test
   public void permitsToSetPublicPermissionsWithSearchActionForAdmin() throws Exception {
     final Permissions permissions = new StackPermissionsImpl("*", "stack73", singletonList(SEARCH));
-    when(subj.hasPermission(DOMAIN_ID, null, MANAGE_SYSTEM_ACTION)).thenReturn(true);
+    when(subj.hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_SYSTEM_ACTION)).thenReturn(true);
 
     stackSetPermChecker.check(permissions);
 
-    verify(subj, times(1)).hasPermission(DOMAIN_ID, null, MANAGE_SYSTEM_ACTION);
+    verify(subj).hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_SYSTEM_ACTION);
     verify(defaultChecker, never()).check(permissions);
   }
 
@@ -104,24 +105,24 @@ public class StackDomainSetPermissionsCheckerTest {
       throws Exception {
     final Permissions permissions =
         new StackPermissionsImpl("*", "stack73", ImmutableList.of(SEARCH, DELETE));
-    when(subj.hasPermission(DOMAIN_ID, null, MANAGE_SYSTEM_ACTION)).thenReturn(true);
+    when(subj.hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_SYSTEM_ACTION)).thenReturn(true);
 
     stackSetPermChecker.check(permissions);
 
-    verify(subj, times(1)).hasPermission(DOMAIN_ID, null, MANAGE_SYSTEM_ACTION);
+    verify(subj).hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_SYSTEM_ACTION);
     verify(defaultChecker, never()).check(permissions);
   }
 
   @Test
   public void permitsToSetPublicPermissionsWithReadActionForNonAdminUser() throws Exception {
     final Permissions permissions = new StackPermissionsImpl("*", "stack73", singletonList(READ));
-    when(subj.hasPermission(DOMAIN_ID, null, MANAGE_SYSTEM_ACTION)).thenReturn(false);
+    when(subj.hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_SYSTEM_ACTION)).thenReturn(false);
     doNothing().when(defaultChecker).check(permissions);
 
     stackSetPermChecker.check(permissions);
 
-    verify(subj, times(1)).hasPermission(DOMAIN_ID, null, MANAGE_SYSTEM_ACTION);
-    verify(defaultChecker, times(1)).check(permissions);
+    verify(subj).hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_SYSTEM_ACTION);
+    verify(defaultChecker).check(permissions);
   }
 
   @Test(
@@ -131,25 +132,37 @@ public class StackDomainSetPermissionsCheckerTest {
   public void throwsForbiddenExceptionWhenSetPublicPermissionsWithUnsupportedActionByNonAdminUser()
       throws Exception {
     final Permissions permissions = new StackPermissionsImpl("*", "stack73", singletonList(DELETE));
-    when(subj.hasPermission(DOMAIN_ID, null, MANAGE_SYSTEM_ACTION)).thenReturn(false);
+    when(subj.hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_SYSTEM_ACTION)).thenReturn(false);
     doNothing().when(defaultChecker).check(permissions);
 
     stackSetPermChecker.check(permissions);
 
-    verify(subj, times(1)).hasPermission(DOMAIN_ID, null, MANAGE_SYSTEM_ACTION);
-    verify(defaultChecker, times(1)).check(permissions);
+    verify(subj).hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_SYSTEM_ACTION);
+    verify(defaultChecker).check(permissions);
   }
 
   @Test(expectedExceptions = ForbiddenException.class)
   public void throwsForbiddenExceptionWhenSetPublicPermissionsByNonAdminUserFailedOnDefaultCheck()
       throws Exception {
     final Permissions permissions = new StackPermissionsImpl("*", "stack73", singletonList(READ));
-    when(subj.hasPermission(DOMAIN_ID, null, MANAGE_SYSTEM_ACTION)).thenReturn(false);
+    when(subj.hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_SYSTEM_ACTION)).thenReturn(false);
     doThrow(ForbiddenException.class).when(defaultChecker).check(permissions);
 
     stackSetPermChecker.check(permissions);
 
-    verify(subj, times(1)).hasPermission(DOMAIN_ID, null, MANAGE_SYSTEM_ACTION);
-    verify(defaultChecker, times(1)).check(permissions);
+    verify(subj).hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_SYSTEM_ACTION);
+    verify(defaultChecker).check(permissions);
+  }
+
+  @Test(expectedExceptions = ForbiddenException.class)
+  public void throwsExceptionWhenChecksAdminPermissionsWithWrongDomainOnSetPermission()
+      throws Exception {
+    final Permissions permissions = new StackPermissionsImpl("*", "stack73", singletonList(SEARCH));
+    when(subj.hasPermission(StackDomain.DOMAIN_ID, null, MANAGE_SYSTEM_ACTION)).thenReturn(false);
+
+    stackSetPermChecker.check(permissions);
+
+    verify(subj).hasPermission(any(), any(), MANAGE_SYSTEM_ACTION);
+    verify(defaultChecker).check(permissions);
   }
 }

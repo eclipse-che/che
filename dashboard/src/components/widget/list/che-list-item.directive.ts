@@ -14,16 +14,11 @@
  * Defines a directive for creating List Items.
  * @author Ann Shumilova
  */
-export class CheListItem {
+export class CheListItem implements ng.IDirective {
 
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor () {
-    this.restrict='E';
-    this.replace= true;
-    this.transclude= true;
-    this.templateUrl = 'components/widget/list/che-list-item.html';
-  }
+  restrict = 'E';
+  replace = true;
+  transclude = true;
+  templateUrl = 'components/widget/list/che-list-item.html';
+
 }

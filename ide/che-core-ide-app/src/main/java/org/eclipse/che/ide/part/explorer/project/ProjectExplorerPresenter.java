@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
@@ -50,7 +51,10 @@ import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.api.resources.marker.MarkerChangedEvent;
 import org.eclipse.che.ide.api.resources.marker.MarkerChangedEvent.MarkerChangedHandler;
 import org.eclipse.che.ide.api.selection.Selection;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppingEvent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerView.ActionDelegate;
 import org.eclipse.che.ide.project.node.SyntheticNode;
@@ -125,6 +129,14 @@ public class ProjectExplorerPresenter extends BasePresenter
     eventBus.addHandler(MarkerChangedEvent.getType(), this);
     eventBus.addHandler(SyntheticNodeUpdateEvent.getType(), this);
     eventBus.addHandler(WorkspaceStoppedEvent.TYPE, event -> getTree().getNodeStorage().clear());
+    eventBus.addHandler(WorkspaceRunningEvent.TYPE, event -> view.showPlaceholder(false));
+    eventBus.addHandler(WorkspaceStoppedEvent.TYPE, event -> view.showPlaceholder(true));
+    eventBus.addHandler(WorkspaceStartingEvent.TYPE, event -> view.showPlaceholder(true));
+    eventBus.addHandler(WorkspaceStoppingEvent.TYPE, event -> view.showPlaceholder(true));
+
+    if (WorkspaceStatus.RUNNING != appContext.getWorkspace().getStatus()) {
+      view.showPlaceholder(true);
+    }
 
     view.getTree()
         .getSelectionModel()

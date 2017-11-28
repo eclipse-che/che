@@ -24,28 +24,28 @@ export class DiagnosticItem {
   /**
    * Message used to be displayed after the title of the item.
    */
-  public message : string;
+  public message: string;
 
   /**
    * State of the current item.
    */
-  public state : DiagnosticCallbackState;
+  public state: DiagnosticCallbackState;
 
   /**
    * Content is extra verbose stuff that could be displayed as part of the logs of the item.
    */
-  public content : string;
+  public content: string;
 
   /**
    * Hint to report to the end-user. Something that could be helpful regarding the item.
    */
-  public hint : string;
+  public hint: string;
 
   /**
    * Checks the state of the item
    * @returns {boolean} true if state is OK
    */
-  public isOk() : boolean {
+  public isOk(): boolean {
     return DiagnosticCallbackState.OK === this.state;
   }
 
@@ -53,7 +53,7 @@ export class DiagnosticItem {
    * Checks the state of the item
    * @returns {boolean} true if state is OK
    */
-  public isSuccess() : boolean {
+  public isSuccess(): boolean {
     return DiagnosticCallbackState.OK === this.state;
   }
 
@@ -61,7 +61,7 @@ export class DiagnosticItem {
    * Checks the state of the item
    * @returns {boolean} true if state is ERROR
    */
-  public isError() : boolean {
+  public isError(): boolean {
     return DiagnosticCallbackState.ERROR === this.state;
   }
 
@@ -69,7 +69,7 @@ export class DiagnosticItem {
    * Checks the state of the item
    * @returns {boolean} true if state is FAILURE
    */
-  public isFailure() : boolean {
+  public isFailure(): boolean {
     return DiagnosticCallbackState.FAILURE === this.state;
   }
 
@@ -77,7 +77,7 @@ export class DiagnosticItem {
    * Checks the state of the item
    * @returns {boolean} true if state is RUNNING
    */
-  public isRunning() : boolean{
+  public isRunning(): boolean {
     return DiagnosticCallbackState.RUNNING === this.state;
   }
 
@@ -85,7 +85,7 @@ export class DiagnosticItem {
    * Checks the state of the item
    * @returns {boolean} true if state is HINT
    */
-  public isHint() : boolean {
+  public isHint(): boolean {
     return DiagnosticCallbackState.HINT === this.state;
   }
 
@@ -93,18 +93,18 @@ export class DiagnosticItem {
    * Convert state to friendly text.
    * @returns {any}
    */
-  public stateToText() : string {
+  public stateToText(): string {
     switch (this.state) {
       case DiagnosticCallbackState.RUNNING :
-        return "STATE_RUNNING";
+        return 'STATE_RUNNING';
       case DiagnosticCallbackState.HINT :
-        return "HINT";
+        return 'HINT';
       case DiagnosticCallbackState.OK :
-        return "SUCCESS";
+        return 'SUCCESS';
       case DiagnosticCallbackState.FAILURE :
-        return "FAILURE";
+        return 'FAILURE';
       case DiagnosticCallbackState.ERROR :
-        return "ERROR"
+        return 'ERROR';
     }
   }
 

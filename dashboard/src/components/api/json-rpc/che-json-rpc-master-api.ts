@@ -9,7 +9,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {CheJsonRpcApiClient, IChannel} from './che-json-rpc-api-service';
+import {CheJsonRpcApiClient} from './che-json-rpc-api-service';
 import {ICommunicationClient} from './json-rpc-client';
 
 enum MasterChannels {

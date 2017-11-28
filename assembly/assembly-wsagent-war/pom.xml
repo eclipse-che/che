@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>6.0.0-M2-SNAPSHOT</version>
+        <version>6.0.0-M3-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-wsagent-war</artifactId>
     <packaging>war</packaging>
@@ -30,6 +30,10 @@
         <dependency>
             <groupId>org.eclipse.che.lib</groupId>
             <artifactId>che-swagger-module</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-machine-authentication-agent</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
@@ -174,7 +178,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                  <scanWarDependencies>true</scanWarDependencies>
+                    <scanWarDependencies>true</scanWarDependencies>
                 </configuration>
             </plugin>
             <plugin>

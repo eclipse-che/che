@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Random;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
@@ -56,6 +57,7 @@ public class RenameVirtualMethodsTest {
   @Inject private Refactor refactor;
   @Inject private AskDialog askDialog;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
 
   @BeforeClass
   public void setup() throws Exception {
@@ -88,7 +90,7 @@ public class RenameVirtualMethodsTest {
           refactor.clickCancelButtonRefactorForm();
         } catch (Exception ex) {
           ex.printStackTrace();
-          ide.driver().navigate().refresh();
+          seleniumWebDriver.navigate().refresh();
         }
       }
       editor.closeAllTabs();

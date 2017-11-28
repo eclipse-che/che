@@ -18,7 +18,8 @@ import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiEnvVarProvid
 import org.eclipse.che.infrastructure.docker.client.DockerRegistryDynamicAuthResolver;
 import org.eclipse.che.infrastructure.docker.client.NoOpDockerRegistryDynamicAuthResolverImpl;
 import org.eclipse.che.workspace.infrastructure.docker.bootstrap.DockerBootstrapperFactory;
-import org.eclipse.che.workspace.infrastructure.docker.environment.DockerEnvironmentTypeModule;
+import org.eclipse.che.workspace.infrastructure.docker.environment.DockerEnvironmentsModule;
+import org.eclipse.che.workspace.infrastructure.docker.environment.convert.DockerEnvironmentConvertersModule;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.ContainerSystemSettingsProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.ContainerSystemSettingsProvisioningModule;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.cgroup.CGroupParentProvisioner;
@@ -30,9 +31,8 @@ import org.eclipse.che.workspace.infrastructure.docker.provisioner.limits.ram.De
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.limits.swap.SwapLimitProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.priviliged.PrivilegedModeProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.proxy.ProxySettingsProvisioner;
+import org.eclipse.che.workspace.infrastructure.docker.provisioner.securityopt.SecurityOptProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.volume.ExtraVolumesProvisioner;
-import org.eclipse.che.workspace.infrastructure.docker.snapshot.JpaSnapshotDao;
-import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotDao;
 
 /** @author Alexander Garagatyi */
 public class DockerInfraModule extends AbstractModule {
@@ -41,6 +41,7 @@ public class DockerInfraModule extends AbstractModule {
     Multibinder<ContainerSystemSettingsProvisioner> settingsProvisioners =
         Multibinder.newSetBinder(binder(), ContainerSystemSettingsProvisioner.class);
     settingsProvisioners.addBinding().to(DnsSettingsProvisioner.class);
+    settingsProvisioners.addBinding().to(SecurityOptProvisioner.class);
     settingsProvisioners.addBinding().to(ExtraHostsProvisioner.class);
     settingsProvisioners.addBinding().to(ProxySettingsProvisioner.class);
     settingsProvisioners.addBinding().to(ExtraVolumesProvisioner.class);
@@ -51,7 +52,8 @@ public class DockerInfraModule extends AbstractModule {
     settingsProvisioners.addBinding().to(CpuLimitsProvisioner.class);
     settingsProvisioners.addBinding().to(PrivilegedModeProvisioner.class);
 
-    install(new DockerEnvironmentTypeModule());
+    install(new DockerEnvironmentsModule());
+    install(new DockerEnvironmentConvertersModule());
     install(new ContainerSystemSettingsProvisioningModule());
 
     bind(CheApiEnvVarProvider.class).to(DockerCheApiEnvVarProvider.class);
@@ -66,9 +68,5 @@ public class DockerInfraModule extends AbstractModule {
     install(new FactoryModuleBuilder().build(DockerRuntimeFactory.class));
     install(new FactoryModuleBuilder().build(DockerBootstrapperFactory.class));
     install(new FactoryModuleBuilder().build(DockerRuntimeContextFactory.class));
-
-    bind(SnapshotDao.class).to(JpaSnapshotDao.class);
-    bind(JpaSnapshotDao.RemoveSnapshotsBeforeWorkspaceRemovedEventSubscriber.class)
-        .asEagerSingleton();
   }
 }

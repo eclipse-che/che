@@ -19,6 +19,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
 import elemental.json.Json;
 import elemental.json.JsonFactory;
+import org.eclipse.che.ide.QueryParameters;
 import org.eclipse.che.ide.actions.ActionApiModule;
 import org.eclipse.che.ide.api.ProductInfoDataProvider;
 import org.eclipse.che.ide.api.ProductInfoDataProviderImpl;
@@ -95,6 +96,7 @@ public class CoreGinModule extends AbstractGinModule {
     install(new ClipboardModule());
 
     bind(AppContextImpl.class).asEagerSingleton();
+    bind(QueryParameters.class).asEagerSingleton();
 
     install(new EditorApiModule());
     install(new EditorPreferencesModule());

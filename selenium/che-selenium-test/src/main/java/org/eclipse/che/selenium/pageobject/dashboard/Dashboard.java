@@ -30,7 +30,6 @@ import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.site.LoginPage;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -200,6 +199,7 @@ public class Dashboard {
   public void open() {
     seleniumWebDriver.get(testDashboardUrlProvider.get().toString());
     entrance.login(defaultUser);
+    waitDashboardToolbarTitle();
   }
 
   /** Open dashboard with provided username and password */
@@ -218,10 +218,6 @@ public class Dashboard {
     String redirectURL = logoutApiEndpoint + ":8080/dashboard/#/workspaces";
 
     seleniumWebDriver.navigate().to(logoutURL + "?redirect_uri=" + redirectURL);
-  }
-
-  public WebDriver driver() {
-    return seleniumWebDriver;
   }
 
   @PreDestroy

@@ -84,7 +84,7 @@ public class PullRequestPanel {
     FORK_CREATED("Fork created"),
     BRANCH_PUSHED_ON_YOUR_FORK("Branch pushed on your fork");
 
-    private String message;
+    private final String message;
 
     Status(String message) {
       this.message = message;

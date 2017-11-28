@@ -22,6 +22,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.SuspendPolicy;
 import org.eclipse.che.api.debug.shared.model.event.BreakpointActivatedEvent;
 import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
 import org.eclipse.che.api.debug.shared.model.event.DisconnectEvent;
@@ -106,7 +107,7 @@ public class JavaDebuggerTest {
     assertEquals(location.getExternalResourceId(), -1);
     assertEquals(location.getResourceProjectPath(), "/test");
 
-    debugger.stepInto(new StepIntoActionImpl());
+    debugger.stepInto(new StepIntoActionImpl(SuspendPolicy.ALL));
 
     debuggerEvent = events.take();
     assertTrue(debuggerEvent instanceof SuspendEvent);
@@ -114,7 +115,7 @@ public class JavaDebuggerTest {
     assertEquals(location.getTarget(), "/test/src/com/HelloWorld.java");
     assertEquals(location.getLineNumber(), 28);
 
-    debugger.stepOut(new StepOutActionImpl());
+    debugger.stepOut(new StepOutActionImpl(SuspendPolicy.ALL));
 
     debuggerEvent = events.take();
     assertTrue(debuggerEvent instanceof SuspendEvent);
@@ -122,7 +123,7 @@ public class JavaDebuggerTest {
     assertEquals(location.getTarget(), "/test/src/com/HelloWorld.java");
     assertEquals(location.getLineNumber(), 20);
 
-    debugger.stepOver(new StepOverActionImpl());
+    debugger.stepOver(new StepOverActionImpl(SuspendPolicy.ALL));
 
     debuggerEvent = events.take();
     assertTrue(debuggerEvent instanceof SuspendEvent);
@@ -130,7 +131,7 @@ public class JavaDebuggerTest {
     assertEquals(location.getTarget(), "/test/src/com/HelloWorld.java");
     assertEquals(location.getLineNumber(), 21);
 
-    debugger.stepOver(new StepOverActionImpl());
+    debugger.stepOver(new StepOverActionImpl(SuspendPolicy.ALL));
 
     debuggerEvent = events.take();
     assertTrue(debuggerEvent instanceof SuspendEvent);
@@ -138,7 +139,7 @@ public class JavaDebuggerTest {
     assertEquals(location.getTarget(), "/test/src/com/HelloWorld.java");
     assertEquals(location.getLineNumber(), 23);
 
-    debugger.stepOver(new StepOverActionImpl());
+    debugger.stepOver(new StepOverActionImpl(SuspendPolicy.ALL));
 
     debuggerEvent = events.take();
     assertTrue(debuggerEvent instanceof SuspendEvent);

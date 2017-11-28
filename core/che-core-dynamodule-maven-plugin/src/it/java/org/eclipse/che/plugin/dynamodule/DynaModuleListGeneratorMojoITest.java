@@ -84,7 +84,7 @@ public class DynaModuleListGeneratorMojoITest {
         // search generated guice module list file
         Path p = this.buildDirectory;
         final int maxDepth = 10;
-        Stream<Path> matches = java.nio.file.Files.find(p, maxDepth, (path, basicFileAttributes) -> path.getFileName().toString().equals(GENERATED_GUICE_FILE));
+        Stream<Path> matches = java.nio.file.Files.find(p, maxDepth, (path, basicFileAttributes) -> (path.getFileName().toString().equals(GENERATED_GUICE_FILE) && path.toString().contains("testModuleListGenerated")));
 
         // take first
         Optional<Path> optionalPath = matches.findFirst();

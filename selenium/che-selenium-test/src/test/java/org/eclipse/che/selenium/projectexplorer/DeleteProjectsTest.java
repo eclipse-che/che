@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.projectexplorer;
 
+import static org.testng.Assert.fail;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -28,7 +30,6 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.TimeoutException;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -136,7 +137,7 @@ public class DeleteProjectsTest {
   private void checkErrorMessageNotPresentInConsole() {
     try {
       consoles.waitExpectedTextIntoConsole("[ERROR]", 7);
-      Assert.fail("Error message is present in console");
+      fail("Error message is present in console");
     } catch (TimeoutException ex) {
     }
   }

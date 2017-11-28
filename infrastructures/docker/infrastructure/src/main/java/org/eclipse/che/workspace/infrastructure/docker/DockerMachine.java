@@ -10,8 +10,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker;
 
-import static java.lang.String.format;
-import static org.eclipse.che.workspace.infrastructure.docker.registry.DockerRegistryClient.MACHINE_SNAPSHOT_PREFIX;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.IOException;
@@ -23,21 +21,16 @@ import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.infrastructure.docker.client.DockerConnector;
 import org.eclipse.che.infrastructure.docker.client.Exec;
 import org.eclipse.che.infrastructure.docker.client.LogMessage;
 import org.eclipse.che.infrastructure.docker.client.MessageProcessor;
-import org.eclipse.che.infrastructure.docker.client.ProgressMonitor;
-import org.eclipse.che.infrastructure.docker.client.params.CommitParams;
 import org.eclipse.che.infrastructure.docker.client.params.CreateExecParams;
-import org.eclipse.che.infrastructure.docker.client.params.PushParams;
 import org.eclipse.che.infrastructure.docker.client.params.PutResourceParams;
 import org.eclipse.che.infrastructure.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.infrastructure.docker.client.params.RemoveImageParams;
 import org.eclipse.che.infrastructure.docker.client.params.StartExecParams;
 import org.eclipse.che.workspace.infrastructure.docker.monit.DockerMachineStopDetector;
-import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotException;
 import org.slf4j.Logger;
 
 /** @author Alexander Garagatyi */
@@ -59,8 +52,6 @@ public class DockerMachine implements Machine {
   private final String image;
   private final DockerMachineStopDetector dockerMachineStopDetector;
   private final String registry;
-  private final String registryNamespace;
-  private final boolean snapshotUseRegistry;
   private final Map<String, ServerImpl> servers;
 
   public DockerMachine(
@@ -69,15 +60,11 @@ public class DockerMachine implements Machine {
       DockerConnector docker,
       Map<String, ServerImpl> servers,
       String registry,
-      boolean snapshotUseRegistry,
-      String registryNamespace,
       DockerMachineStopDetector dockerMachineStopDetector) {
     this.container = containerId;
     this.docker = docker;
     this.image = image;
     this.registry = registry;
-    this.registryNamespace = registryNamespace;
-    this.snapshotUseRegistry = snapshotUseRegistry;
     this.dockerMachineStopDetector = dockerMachineStopDetector;
     this.servers = servers;
   }
@@ -160,62 +147,8 @@ public class DockerMachine implements Machine {
         + ", registry='"
         + registry
         + '\''
-        + ", registryNamespace='"
-        + registryNamespace
-        + '\''
-        + ", snapshotUseRegistry='"
-        + snapshotUseRegistry
         + ", container="
         + container
         + '}';
-  }
-
-  public DockerMachineSource saveToSnapshot(ProgressMonitor progressMonitor)
-      throws SnapshotException {
-    try {
-      String image = generateRepository();
-      if (!snapshotUseRegistry) {
-        commitContainer(image, LATEST_TAG);
-        return new DockerMachineSource(image).withTag(LATEST_TAG);
-      }
-
-      PushParams pushParams = PushParams.create(image).withRegistry(registry).withTag(LATEST_TAG);
-
-      final String fullRepo = pushParams.getFullRepo();
-      commitContainer(fullRepo, LATEST_TAG);
-      // TODO fix this workaround. Docker image is not visible after commit when using swarm
-      Thread.sleep(2000);
-      final String digest = docker.push(pushParams, progressMonitor);
-      docker.removeImage(RemoveImageParams.create(fullRepo).withForce(false));
-      return new DockerMachineSource(image)
-          .withRegistry(registry)
-          .withDigest(digest)
-          .withTag(LATEST_TAG);
-    } catch (IOException ioEx) {
-      throw new SnapshotException(ioEx);
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-      throw new SnapshotException(e.getLocalizedMessage(), e);
-    }
-  }
-
-  protected void commitContainer(String repository, String tag) throws IOException {
-    String comment =
-        format("Suspended at %1$ta %1$tb %1$td %1$tT %1$tZ %1$tY", System.currentTimeMillis());
-    // !! We SHOULD NOT pause container before commit because all execs will fail
-    // to push image to private registry it should be tagged with registry in repo name
-    // https://docs.docker.com/reference/api/docker_remote_api_v1.16/#push-an-image-on-the-registry
-    docker.commit(
-        CommitParams.create(container)
-            .withRepository(repository)
-            .withTag(tag)
-            .withComment(comment));
-  }
-
-  private String generateRepository() {
-    if (registryNamespace != null) {
-      return registryNamespace + '/' + MACHINE_SNAPSHOT_PREFIX + NameGenerator.generate(null, 16);
-    }
-    return MACHINE_SNAPSHOT_PREFIX + NameGenerator.generate(null, 16);
   }
 }

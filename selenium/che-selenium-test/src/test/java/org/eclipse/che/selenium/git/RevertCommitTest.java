@@ -17,10 +17,8 @@ import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
-import org.eclipse.che.selenium.core.client.TestSshServiceClient;
+import org.eclipse.che.selenium.core.client.TestGitHubKeyUploader;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -52,17 +50,15 @@ public class RevertCommitTest {
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Menu menu;
   @Inject private org.eclipse.che.selenium.pageobject.git.Git git;
-  @Inject private TestSshServiceClient testSshServiceClient;
+  @Inject private TestGitHubKeyUploader testGitHubKeyUploader;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
-  @Inject private TestGitHubServiceClient gitHubClientService;
   @Inject private GitRevertCommit gitRevertCommit;
   @Inject private GitStatusBar gitStatusBar;
 
   @BeforeClass
   public void prepare() throws Exception {
-    uploadSshKey();
+    testGitHubKeyUploader.updateGithubKey();
     testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
-
     ide.open(ws);
 
     git.importJavaApp(
@@ -91,14 +87,5 @@ public class RevertCommitTest {
 
     assertEquals(gitRevertCommit.getTopCommitAuthor(), gitHubUsername);
     assertTrue(gitRevertCommit.getTopCommitComment().contains("Revert \"" + comment + "\""));
-  }
-
-  private void uploadSshKey() throws Exception {
-    try {
-      String publicKey = testSshServiceClient.generateGithubKey();
-      gitHubClientService.uploadPublicKey(gitHubUsername, gitHubPassword, publicKey);
-    } catch (ConflictException ignored) {
-      // already generated
-    }
   }
 }

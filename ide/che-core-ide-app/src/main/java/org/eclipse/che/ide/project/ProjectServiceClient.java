@@ -160,6 +160,9 @@ public class ProjectServiceClient {
   public Promise<Void> importProject(Path path, SourceStorageDto source) {
     String url = getBaseUrl() + IMPORT + encodePath(path);
 
+    url += url.contains("?") ? "&" : "?";
+    url += "clientId=" + appContext.getApplicationId().orElse("");
+
     return reqFactory.createPostRequest(url, source).header(CONTENT_TYPE, APPLICATION_JSON).send();
   }
 
@@ -230,6 +233,7 @@ public class ProjectServiceClient {
     for (String key : options.keySet()) {
       urlBuilder.setParameter(key, options.get(key));
     }
+    urlBuilder.setParameter("clientId", appContext.getApplicationId().orElse(""));
     return reqFactory
         .createPostRequest(urlBuilder.buildString(), configuration)
         .header(ACCEPT, APPLICATION_JSON)
@@ -259,7 +263,11 @@ public class ProjectServiceClient {
    */
   public Promise<List<ProjectConfigDto>> createBatchProjects(
       List<NewProjectConfigDto> configurations) {
-    final String url = getBaseUrl() + BATCH_PROJECTS;
+    String url = getBaseUrl() + BATCH_PROJECTS;
+
+    url += url.contains("?") ? "&" : "?";
+    url += "clientId=" + appContext.getApplicationId().orElse("");
+
     final String loaderMessage =
         configurations.size() > 1 ? "Creating the batch of projects..." : "Creating project...";
     return reqFactory

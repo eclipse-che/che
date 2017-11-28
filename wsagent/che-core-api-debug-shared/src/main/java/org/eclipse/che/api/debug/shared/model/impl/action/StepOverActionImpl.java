@@ -10,12 +10,21 @@
  */
 package org.eclipse.che.api.debug.shared.model.impl.action;
 
+import org.eclipse.che.api.debug.shared.model.SuspendPolicy;
 import org.eclipse.che.api.debug.shared.model.action.Action;
 import org.eclipse.che.api.debug.shared.model.action.StepOverAction;
 
 /** @author Anatoliy Bazko */
 public class StepOverActionImpl extends ActionImpl implements StepOverAction {
-  public StepOverActionImpl() {
+  private final SuspendPolicy suspendPolicy;
+
+  public StepOverActionImpl(SuspendPolicy suspendPolicy) {
     super(Action.TYPE.STEP_OVER);
+    this.suspendPolicy = suspendPolicy;
+  }
+
+  @Override
+  public SuspendPolicy getSuspendPolicy() {
+    return suspendPolicy;
   }
 }

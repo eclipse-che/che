@@ -12,7 +12,6 @@ package org.eclipse.che.ide.api.workspace.model;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -72,18 +71,6 @@ public class RuntimeImpl implements Runtime {
       machines = new HashMap<>();
     }
     return machines;
-  }
-
-  /**
-   * Returns a dev-machine or an empty {@code Optional} if none. Dev-machine is a machine where
-   * ws-agent server is running.
-   */
-  public Optional<MachineImpl> getDevMachine() {
-    return getMachines()
-        .values()
-        .stream()
-        .filter(m -> m.getServerByName(SERVER_WS_AGENT_HTTP_REFERENCE).isPresent())
-        .findAny();
   }
 
   public Optional<MachineImpl> getMachineByName(String name) {

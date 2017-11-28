@@ -248,8 +248,6 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     processWidgets.put(processId, widgetToShow);
 
     widget2TreeNodes.put(widgetToShow.getWidget(), processTreeNodes.get(processId));
-
-    showProcessOutput(processId);
   }
 
   @Override

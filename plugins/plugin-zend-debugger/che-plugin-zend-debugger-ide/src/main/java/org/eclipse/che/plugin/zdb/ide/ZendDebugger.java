@@ -15,6 +15,7 @@ import java.util.Map;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
@@ -23,6 +24,7 @@ import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
+import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
 import org.eclipse.che.plugin.debugger.ide.debug.AbstractDebugger;
 import org.eclipse.che.plugin.debugger.ide.debug.DebuggerLocationHandlerManager;
 import org.eclipse.che.plugin.zdb.ide.configuration.ZendDbgConfigurationType;
@@ -48,8 +50,10 @@ public class ZendDebugger extends AbstractDebugger {
       AppContext appContext,
       DebuggerManager debuggerManager,
       BreakpointManager breakpointManager,
+      DebuggerLocalizationConstant constant,
       RequestHandlerManager requestHandlerManager,
-      DebuggerLocationHandlerManager debuggerLocationHandlerManager) {
+      DebuggerLocationHandlerManager debuggerLocationHandlerManager,
+      PromiseProvider promiseProvider) {
     super(
         service,
         transmitter,
@@ -61,8 +65,10 @@ public class ZendDebugger extends AbstractDebugger {
         notificationManager,
         appContext,
         breakpointManager,
+        constant,
         requestHandlerManager,
         debuggerLocationHandlerManager,
+        promiseProvider,
         ID);
   }
 

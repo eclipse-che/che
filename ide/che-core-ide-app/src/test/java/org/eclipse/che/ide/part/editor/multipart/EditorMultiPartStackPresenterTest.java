@@ -24,12 +24,15 @@ import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.Event;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.editor.AbstractEditorPresenter;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.parts.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.parts.EditorPartStack;
 import org.eclipse.che.ide.api.parts.PartPresenter;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.part.editor.EditorPartStackPresenter;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,6 +50,9 @@ public class EditorMultiPartStackPresenterTest {
   // constructor mocks
   @Mock private EditorMultiPartStackView view;
   @Mock private EventBus eventBus;
+  @Mock private AppContext appContext;
+  @Mock private WorkspaceImpl workspace;
+
   @Mock private Provider<EditorPartStack> editorPartStackProvider;
 
   // additional mocks
@@ -64,8 +70,11 @@ public class EditorMultiPartStackPresenterTest {
     when(editorPartStack.containsPart(partPresenter1)).thenReturn(true);
     when(eventBus.addHandler((Event.Type<Object>) anyObject(), anyObject()))
         .thenReturn(handlerRegistration);
+    when(appContext.getWorkspace()).thenReturn(workspace);
+    when(appContext.getWorkspace().getStatus()).thenReturn(WorkspaceStatus.RUNNING);
 
-    presenter = new EditorMultiPartStackPresenter(eventBus, view, editorPartStackProvider);
+    presenter =
+        new EditorMultiPartStackPresenter(eventBus, view, editorPartStackProvider, appContext);
   }
 
   @Test

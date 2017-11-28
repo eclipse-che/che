@@ -10,18 +10,22 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Vitaliy Gulyy */
@@ -45,6 +49,8 @@ public class AskForValueDialog {
       "//*[@id='gwt-debug-newJavaSourceFileView-typeField' ]//option[@value='Interface']";
   private static final String ENUM_ITEM =
       "//*[@id='gwt-debug-newJavaSourceFileView-typeField' ]//option[@value='Enum']";
+
+  private final ActionsFactory actionsFactory;
 
   public enum JavaFiles {
     CLASS,
@@ -92,88 +98,93 @@ public class AskForValueDialog {
   WebElement errorLabelJava;
 
   private final SeleniumWebDriver seleniumWebDriver;
+  private final WebDriverWait loadPageWait;
+  private final WebDriverWait redrawElementWait;
   private final Loader loader;
 
   @Inject
-  public AskForValueDialog(SeleniumWebDriver seleniumWebDriver, Loader loader) {
+  public AskForValueDialog(
+      SeleniumWebDriver seleniumWebDriver, Loader loader, ActionsFactory actionsFactory) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
+    this.actionsFactory = actionsFactory;
+    this.loadPageWait = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
+    this.redrawElementWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
   public void waitFormToOpen() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(form));
+    redrawElementWait.until(visibilityOf(form));
   }
 
   public void waitFormToClose() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.invisibilityOfElementLocated(By.id(ASK_FOR_VALUE_FORM)));
+    redrawElementWait.until(invisibilityOfElementLocated(By.id(ASK_FOR_VALUE_FORM)));
     loader.waitOnClosed();
   }
 
   /** click ok button */
   public void clickOkBtn() {
-    okBtn.click();
+    loadPageWait.until(visibilityOf(okBtn)).click();
     waitFormToClose();
   }
 
   /** click cancel button */
   public void clickCancelBtn() {
-    cancelBtn.click();
+    loadPageWait.until(visibilityOf(cancelBtn)).click();
     waitFormToClose();
   }
 
   public void clickCancelButtonJava() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(cancelButtonJava))
-        .click();
+    redrawElementWait.until(visibilityOf(cancelButtonJava)).click();
   }
 
   public void typeAndWaitText(String text) {
-    input.sendKeys(text);
+    loadPageWait.until(visibilityOf(input)).sendKeys(text);
     waitInputNameContains(text);
   }
 
   public void waitNewJavaClassOpen() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(newJavaClass));
+    redrawElementWait.until(visibilityOf(newJavaClass));
   }
 
   public void waitNewJavaClassClose() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.invisibilityOfElementLocated(By.id(NEW_JAVA_CLASS_FORM)));
+    redrawElementWait.until(invisibilityOfElementLocated(By.id(NEW_JAVA_CLASS_FORM)));
   }
 
   public void clickOkBtnNewJavaClass() {
-    okBtnnewJavaClass.click();
+    loadPageWait.until(visibilityOf(okBtnnewJavaClass)).click();
     loader.waitOnClosed();
   }
 
   public void typeTextInFieldName(String text) {
-    inputNameJavaClass.sendKeys(text);
+    loadPageWait.until(visibilityOf(inputNameJavaClass)).sendKeys(text);
+    waitTextInFieldName(text);
+  }
+
+  public void waitTextInFieldName(String expectedText) {
+    loadPageWait.until(
+        (ExpectedCondition<Boolean>)
+            driver ->
+                loadPageWait
+                    .until(visibilityOf(inputNameJavaClass))
+                    .getAttribute("value")
+                    .contains(expectedText));
   }
 
   public void deleteNameFromDialog() {
-    input.clear();
+    loadPageWait.until(visibilityOf(input)).clear();
   }
 
   /** select interface item from dropdown */
   public void selectInterfaceItemFromDropDown() {
-    new WebDriverWait(seleniumWebDriver, 7).until(ExpectedConditions.visibilityOf(type));
-    type.click();
-    new WebDriverWait(seleniumWebDriver, 7)
-        .until(ExpectedConditions.elementToBeClickable(By.xpath(INTERFACE_ITEM)));
-    interfaceItem.click();
+    loadPageWait.until(visibilityOf(type)).click();
+    loadPageWait.until(visibilityOf(interfaceItem)).click();
   }
 
   /** select enum item from dropdown */
   public void selectEnumItemFromDropDown() {
-    new WebDriverWait(seleniumWebDriver, 7).until(ExpectedConditions.visibilityOf(type));
-    type.click();
-    new WebDriverWait(seleniumWebDriver, 7)
-        .until(ExpectedConditions.elementToBeClickable(By.xpath(ENUM_ITEM)));
-    enumItem.click();
+    loadPageWait.until(visibilityOf(type)).click();
+    loadPageWait.until(visibilityOf(enumItem)).click();
   }
 
   public void createJavaFileByNameAndType(String name, JavaFiles javaFileType) {
@@ -193,14 +204,13 @@ public class AskForValueDialog {
 
   /** wait expected text */
   public void waitInputNameContains(final String expectedText) {
-    new WebDriverWait(seleniumWebDriver, 3)
-        .until(
-            (ExpectedCondition<Boolean>)
-                webDriver ->
-                    seleniumWebDriver
-                        .findElement(By.id(INPUT))
-                        .getAttribute("value")
-                        .contains(expectedText));
+    loadPageWait.until(
+        (ExpectedCondition<Boolean>)
+            webDriver ->
+                seleniumWebDriver
+                    .findElement(By.id(INPUT))
+                    .getAttribute("value")
+                    .contains(expectedText));
   }
 
   public void createNotJavaFileByName(String name) {
@@ -211,17 +221,17 @@ public class AskForValueDialog {
   /** clear the input box */
   public void clearInput() {
     waitFormToOpen();
-    input.clear();
+    loadPageWait.until(visibilityOf(input)).clear();
   }
 
   /** Wait for error message */
   public boolean waitErrorMessage() {
-    new WebDriverWait(seleniumWebDriver, 5).until(ExpectedConditions.visibilityOf(errorLabel));
+    loadPageWait.until(visibilityOf(errorLabel));
     return "Name is invalid".equals(errorLabel.getText());
   }
 
   public void waitErrorMessageInJavaClass() {
-    new WebDriverWait(seleniumWebDriver, 5).until(ExpectedConditions.visibilityOf(errorLabelJava));
+    loadPageWait.until(visibilityOf(errorLabelJava));
   }
 
   public boolean isWidgetNewJavaClassIsOpened() {
@@ -230,5 +240,10 @@ public class AskForValueDialog {
     } catch (NoSuchElementException ex) {
       return false;
     }
+  }
+
+  /** launch the 'Rename project' form by keyboard */
+  public void launchFindFormByKeyboard() {
+    actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.SHIFT, Keys.F6).perform();
   }
 }

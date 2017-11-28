@@ -98,13 +98,6 @@ public class WorkspaceImpl implements Workspace {
   @JoinColumn(name = "accountid", nullable = false)
   private AccountImpl account;
 
-  // This mapping is for explicit constraint between
-  // snapshots and workspace, it's impossible to do so on snapshot side
-  // as workspace and machine are different modules and cyclic reference will appear.
-  //    @OneToMany(fetch = FetchType.LAZY)
-  //    @JoinColumn(name = "workspaceId", insertable = false, updatable = false)
-  //    private List<SnapshotImpl> snapshots;
-
   @Transient private WorkspaceStatus status;
 
   @Transient private Runtime runtime;

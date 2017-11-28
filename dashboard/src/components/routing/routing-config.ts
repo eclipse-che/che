@@ -15,7 +15,7 @@ import {RouteHistory} from './route-history.service';
 
 export class RoutingConfig {
 
-  constructor(register) {
+  constructor(register: che.IRegisterService) {
 
     register.factory('routingRedirect', RoutingRedirect);
 

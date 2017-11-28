@@ -12,7 +12,7 @@ package org.eclipse.che.selenium.pageobject;
 
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -133,7 +133,7 @@ public class NotificationsPopupPanel {
 
   /** wait disappearance of notification popups */
   public void waitPopUpPanelsIsClosed() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, WIDGET_TIMEOUT_SEC)
         .until(ExpectedConditions.invisibilityOfElementLocated(By.id(PROGRESS_POPUP_PANEL_ID)));
   }
 }

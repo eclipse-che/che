@@ -64,7 +64,7 @@ public class GdbBacktrace {
         if (matcher.find()) {
           final int frameNumber = Integer.parseInt(matcher.group(1));
           final String libraryLocation = matcher.group(2);
-          final Location location = new LocationImpl(libraryLocation);
+          final Location location = new LocationImpl(libraryLocation, -1);
           frames.put(frameNumber, location);
         }
 

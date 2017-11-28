@@ -173,6 +173,8 @@ public class OrganizationPage {
 
   public void waitOrganizationName(String name) {
     redrawUiElementsTimeout.until(
+        ExpectedConditions.attributeToBeNotEmpty(organizationName, "value"));
+    redrawUiElementsTimeout.until(
         (WebDriver driver) ->
             driver
                 .findElement(By.xpath(Locators.ORGANIZATION_NAME))

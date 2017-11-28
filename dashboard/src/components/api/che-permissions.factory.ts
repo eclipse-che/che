@@ -210,8 +210,8 @@ export class ChePermissions implements che.api.IChePermissions {
   }
 
   private updateUserServices(systemPermissions: che.api.ISystemPermissions): void {
-    let isManageUsers: boolean = systemPermissions && systemPermissions.actions.includes('manageUsers');
-    let isManageSystem: boolean = systemPermissions && systemPermissions.actions.includes('manageSystem');
+    let isManageUsers: boolean = systemPermissions && systemPermissions.actions.indexOf('manageUsers') !== -1;
+    let isManageSystem: boolean = systemPermissions && systemPermissions.actions.indexOf('manageSystem') !== -1;
 
     this.userServices.hasUserService = isManageUsers;
     this.userServices.hasUserProfileService = isManageUsers;

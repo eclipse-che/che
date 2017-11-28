@@ -10,9 +10,8 @@
  */
 'use strict';
 
-
 import {CheHttpBackend} from './che-http-backend';
-
+import {CheAPIBuilder} from '../builder/che-api-builder.factory';
 
 /**
  * This class is providing helper methods for simulating a fake HTTP backend simulating
@@ -24,7 +23,8 @@ export class CheHttpBackendFactory extends CheHttpBackend {
    * Default constructor
    * @ngInject for Dependency injection
    */
-  constructor($httpBackend, cheAPIBuilder) {
+  constructor($httpBackend: ng.IHttpBackendService,
+              cheAPIBuilder: CheAPIBuilder) {
     super($httpBackend, cheAPIBuilder);
   }
 

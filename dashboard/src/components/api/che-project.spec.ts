@@ -9,28 +9,30 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import {CheAPIBuilder} from './builder/che-api-builder.factory';
+import {CheWorkspace} from './workspace/che-workspace.factory';
+import {CheHttpBackend} from './test/che-http-backend';
 
 describe('CheProject', function () {
   /**
    * Workspace for the test
    */
-  var workspace;
+  let workspace;
 
   /**
    * Backend for handling http operations
    */
-  var httpBackend;
+  let httpBackend;
 
   /**
    * Che backend
    */
-  var cheBackend;
+  let cheBackend;
 
   /**
    * API builder.
    */
-  var apiBuilder;
-
+  let apiBuilder;
 
   /**
    *  setup module
@@ -40,7 +42,9 @@ describe('CheProject', function () {
   /**
    * Inject factory and http backend
    */
-  beforeEach(inject(function (cheAPIBuilder, cheWorkspace, cheHttpBackend) {
+  beforeEach(inject(function (cheAPIBuilder: CheAPIBuilder,
+                              cheWorkspace: CheWorkspace,
+                              cheHttpBackend: CheHttpBackend) {
     apiBuilder = cheAPIBuilder;
     cheBackend = cheHttpBackend;
     workspace = cheWorkspace;

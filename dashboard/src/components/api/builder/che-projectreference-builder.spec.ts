@@ -19,13 +19,12 @@ describe('CheProjectReferenceBuilder', function(){
   /**
    * For creating builders.
    */
-  var apiBuilder;
+  let apiBuilder;
 
   /**
    *  setup module
    */
   beforeEach(angular.mock.module('userDashboard'));
-
 
   /**
    * Inject builder
@@ -39,17 +38,14 @@ describe('CheProjectReferenceBuilder', function(){
    */
   it('check builder', function() {
 
-    var projectReferenceBuilder = apiBuilder.getProjectReferenceBuilder();
+    const projectReferenceBuilder = apiBuilder.getProjectReferenceBuilder();
 
-    var name = 'myProject';
-    var projectReference = projectReferenceBuilder.withName(name).build();
-
+    const name = 'myProject';
+    const projectReference = projectReferenceBuilder.withName(name).build();
 
     // check values
     expect(projectReference.name).toEqual(name);
 
   });
-
-
 
 });

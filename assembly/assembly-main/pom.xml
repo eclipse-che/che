@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>6.0.0-M2-SNAPSHOT</version>
+        <version>6.0.0-M3-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-main</artifactId>
     <packaging>pom</packaging>
@@ -90,6 +90,10 @@
             <artifactId>che-plugin-sdk-tools</artifactId>
             <type>jar</type>
             <classifier>jar-with-dependencies</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
         </dependency>
     </dependencies>
     <build>

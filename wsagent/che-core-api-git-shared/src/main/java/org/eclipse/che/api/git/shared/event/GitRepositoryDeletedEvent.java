@@ -18,4 +18,11 @@ import org.eclipse.che.dto.shared.DTO;
  * @author Igor Vinokur.
  */
 @DTO
-public interface GitRepositoryDeletedEvent extends GitEvent {}
+public interface GitRepositoryDeletedEvent extends GitEvent {
+  @Override
+  String getProjectName();
+
+  void setProjectName(String projectName);
+
+  GitRepositoryDeletedEvent withProjectName(String projectName);
+}

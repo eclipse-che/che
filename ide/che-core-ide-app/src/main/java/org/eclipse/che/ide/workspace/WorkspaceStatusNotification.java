@@ -77,7 +77,7 @@ class WorkspaceStatusNotification implements PopupLoader.ActionDelegate {
           WorkspaceStatus status = appContext.getWorkspace().getStatus();
 
           if (status == STARTING) {
-            show(STARTING_WORKSPACE_RUNTIME);
+            setSuccess(WORKSPACE_STOPPED);
           } else if (status == STOPPING) {
             show(STOPPING_WORKSPACE);
           }
@@ -87,7 +87,6 @@ class WorkspaceStatusNotification implements PopupLoader.ActionDelegate {
         WorkspaceStartingEvent.TYPE,
         e -> {
           setSuccess(WORKSPACE_STOPPED);
-          show(STARTING_WORKSPACE_RUNTIME);
         });
 
     eventBus.addHandler(WorkspaceRunningEvent.TYPE, e -> setSuccess(STARTING_WORKSPACE_RUNTIME));

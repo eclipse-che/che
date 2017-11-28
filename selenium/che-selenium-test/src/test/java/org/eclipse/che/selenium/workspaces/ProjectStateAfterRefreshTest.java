@@ -92,7 +92,9 @@ public class ProjectStateAfterRefreshTest {
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/WEB-INF/jsp");
     projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
     editor.waitActiveEditor();
+    projectExplorer.waitProjectExplorer();
     seleniumWebDriver.navigate().refresh();
+    projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     editor.waitTabIsPresent("qa-spring-sample");
     projectExplorer.waitItem(PROJECT_NAME + "/pom.xml");

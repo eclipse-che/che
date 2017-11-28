@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.core.inject;
 
 import static com.google.inject.Guice.createInjector;
+import static java.lang.Runtime.getRuntime;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 
@@ -24,6 +25,7 @@ import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -107,6 +109,10 @@ public abstract class SeleniumTestHandler
 
   private static AtomicBoolean isCleanUpCompleted = new AtomicBoolean();
 
+  public SeleniumTestHandler() {
+    getRuntime().addShutdownHook(new Thread(this::shutdown));
+  }
+
   @Override
   public void onTestStart(ITestResult result) {}
 
@@ -140,7 +146,8 @@ public abstract class SeleniumTestHandler
 
   @Override
   public void onStart(ISuite suite) {
-    Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
+    isCleanUpCompleted.set(false);
+    runningTests.clear();
 
     Injector injector = createInjector(getParentModules());
     injector.injectMembers(this);
@@ -342,9 +349,10 @@ public abstract class SeleniumTestHandler
     String filename = NameGenerator.generate(testName + "_", 8) + ".html";
     try {
       String pageSource = webDriver.getPageSource();
-      Path dmpDirectory = Paths.get("target/htmldump", filename);
-      Files.createDirectories(dmpDirectory.getParent());
-      Files.write(dmpDirectory, pageSource.getBytes(), StandardOpenOption.CREATE);
+      Path dumpDirectory = Paths.get("target/htmldumps", filename);
+      Files.createDirectories(dumpDirectory.getParent());
+      Files.write(
+          dumpDirectory, pageSource.getBytes(Charset.forName("UTF-8")), StandardOpenOption.CREATE);
     } catch (WebDriverException | IOException e) {
       LOG.error(format("Can't dump of html source for test %s", testName), e);
     }

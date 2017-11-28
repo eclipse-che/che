@@ -22,6 +22,7 @@ public class HostConfig {
   private boolean publishAllPorts;
   private boolean privileged;
   private String[] dns;
+  private String[] securityOpt;
   private String[] dnsSearch;
   private String[] extraHosts;
   private String[] volumesFrom;
@@ -236,6 +237,19 @@ public class HostConfig {
 
   public HostConfig withDns(String[] dns) {
     this.dns = dns;
+    return this;
+  }
+
+  public String[] getSecurityOpt() {
+    return securityOpt;
+  }
+
+  public void setSecurityOpt(String[] securityOpt) {
+    this.securityOpt = securityOpt;
+  }
+
+  public HostConfig withSecurityOpt(String[] securityOpt) {
+    this.securityOpt = securityOpt;
     return this;
   }
 
@@ -501,6 +515,8 @@ public class HostConfig {
         + readonlyRootfs
         + ", ulimits="
         + Arrays.toString(ulimits)
+        + ", SecurityOpt="
+        + Arrays.toString(securityOpt)
         + ", portBindings="
         + portBindings
         + ", memorySwappiness="

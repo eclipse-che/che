@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker;
 
-import com.google.common.collect.ImmutableList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import java.net.URI;
@@ -20,12 +19,12 @@ import javax.inject.Named;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.infrastructure.docker.client.json.ContainerListEntry;
 import org.eclipse.che.workspace.infrastructure.docker.container.DockerContainers;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
+import org.eclipse.che.workspace.infrastructure.docker.server.mapping.ExternalIpURLRewriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,12 +34,11 @@ import org.slf4j.LoggerFactory;
  * @author Alexander Garagatyi
  * @author Yevhenii Voievodin
  */
-public class DockerRuntimeContext extends RuntimeContext {
+public class DockerRuntimeContext extends RuntimeContext<DockerEnvironment> {
 
   private static final Logger LOG = LoggerFactory.getLogger(DockerRuntimeContext.class);
 
-  private final DockerEnvironment dockerEnvironment;
-  private final List<String> orderedContainers;
+  private final ExternalIpURLRewriter urlRewriter;
   private final String websocketOutputEndpoint;
   private final DockerRuntimeFactory runtimeFactory;
   private final DockerContainers containers;
@@ -51,19 +49,17 @@ public class DockerRuntimeContext extends RuntimeContext {
   public DockerRuntimeContext(
       @Assisted DockerRuntimeInfrastructure infrastructure,
       @Assisted RuntimeIdentity identity,
-      @Assisted InternalEnvironment environment,
       @Assisted DockerEnvironment dockerEnv,
-      @Assisted List<String> containersOrder,
       DockerRuntimeFactory runtimeFactory,
       DockerContainers containers,
       DockerSharedPool sharedPool,
       RuntimeConsistencyChecker consistencyChecker,
+      ExternalIpURLRewriter urlRewriter,
       @Named("che.websocket.endpoint") String cheWebsocketEndpoint)
       throws InfrastructureException, ValidationException {
 
-    super(environment, identity, infrastructure);
-    this.dockerEnvironment = dockerEnv;
-    this.orderedContainers = ImmutableList.copyOf(containersOrder);
+    super(dockerEnv, identity, infrastructure);
+    this.urlRewriter = urlRewriter;
     this.websocketOutputEndpoint = cheWebsocketEndpoint;
     this.runtimeFactory = runtimeFactory;
     this.containers = containers;
@@ -71,20 +67,10 @@ public class DockerRuntimeContext extends RuntimeContext {
     this.consistencyChecker = consistencyChecker;
   }
 
-  /** Returns docker environment which based on normalized context environment configuration. */
-  public DockerEnvironment getDockerEnvironment() {
-    return dockerEnvironment;
-  }
-
-  /** Returns the list of the ordered containers, machines must be started in the same order. */
-  public List<String> getOrderedContainers() {
-    return orderedContainers;
-  }
-
   @Override
   public URI getOutputChannel() throws InfrastructureException {
     try {
-      return URI.create(websocketOutputEndpoint);
+      return URI.create(urlRewriter.rewriteURL(getIdentity(), null, websocketOutputEndpoint));
     } catch (IllegalArgumentException ex) {
       throw new InternalInfrastructureException(
           "Failed to get the output channel because: " + ex.getLocalizedMessage());

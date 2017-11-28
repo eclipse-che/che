@@ -166,6 +166,8 @@ generate_configuration_with_puppet() {
     var2=$(echo $element | cut -f2 -d=)
 
     if [[ $var1 == CHE_* ]] ||
+       [[ $var1 == IMAGE_* ]]  ||
+       [[ $var1 == *_IMAGE_* ]]  ||
        [[ $var1 == ${CHE_PRODUCT_NAME}_* ]]; then
       WRITE_PARAMETERS+=" -e \"$var1=$var2\""
     fi

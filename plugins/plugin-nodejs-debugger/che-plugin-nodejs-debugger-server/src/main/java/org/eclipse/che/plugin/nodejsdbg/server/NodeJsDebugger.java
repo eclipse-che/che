@@ -20,6 +20,7 @@ import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
+import org.eclipse.che.api.debug.shared.model.SuspendPolicy;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.action.ResumeAction;
@@ -278,12 +279,13 @@ public class NodeJsDebugger implements Debugger, NodeJsProcessObserver {
   public boolean onOutputProduced(NodeJsOutput nodeJsOutput) throws NodeJsDebuggerException {
     if (NodeJsStepParser.INSTANCE.match(nodeJsOutput)) {
       SuspendEventImpl suspendEvent =
-          new SuspendEventImpl(NodeJsStepParser.INSTANCE.parse(nodeJsOutput));
+          new SuspendEventImpl(NodeJsStepParser.INSTANCE.parse(nodeJsOutput), SuspendPolicy.ALL);
       debuggerCallback.onEvent(suspendEvent);
 
     } else if (NodeJsBackTraceParser.INSTANCE.match(nodeJsOutput)) {
       SuspendEventImpl suspendEvent =
-          new SuspendEventImpl(NodeJsBackTraceParser.INSTANCE.parse(nodeJsOutput));
+          new SuspendEventImpl(
+              NodeJsBackTraceParser.INSTANCE.parse(nodeJsOutput), SuspendPolicy.ALL);
       debuggerCallback.onEvent(suspendEvent);
 
     } else if (DEBUG_TIMED_OUT_MSG.equals(nodeJsOutput.getOutput())) {

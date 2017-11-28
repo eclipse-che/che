@@ -20,12 +20,6 @@ export abstract class CheButton {
   bindToController: boolean = true;
 
   /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor () {}
-
-  /**
    * Template for the current toolbar
    * @param element
    * @param attrs

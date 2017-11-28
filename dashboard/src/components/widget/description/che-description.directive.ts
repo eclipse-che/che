@@ -15,24 +15,18 @@
  *
  * @author Ann Shumilova
  */
-export class CheDescription {
+export class CheDescription implements ng.IDirective {
 
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor() {
-    this.restrict = 'E';
+  restrict = 'E';
 
-    this.replace = true;
-    this.transclude = true;
-    this.templateUrl = 'components/widget/description/che-description.html';
+  replace = true;
+  transclude = true;
+  templateUrl = 'components/widget/description/che-description.html';
 
-    // scope values
-    this.scope = {
-      linkTitle: '@?cheLinkTitle',
-      link: '@?cheLink'
-    };
-  }
+  // scope values
+  scope = {
+    linkTitle: '@?cheLinkTitle',
+    link: '@?cheLink'
+  };
 
 }

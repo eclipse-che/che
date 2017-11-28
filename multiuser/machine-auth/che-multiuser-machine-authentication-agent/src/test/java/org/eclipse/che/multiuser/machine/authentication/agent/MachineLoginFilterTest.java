@@ -22,8 +22,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.core.HttpHeaders;
-import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
@@ -152,7 +152,7 @@ public class MachineLoginFilterTest {
     // mocking for setting the principal in http session
     doNothing().when(sessionMock).setAttribute(anyString(), any());
     when(httpJsonRequestMock.request())
-        .thenThrow(new NotFoundException("User with token " + MACHINE_TOKEN + " Not found"));
+        .thenThrow(new UnauthorizedException("Token " + MACHINE_TOKEN + " Not found"));
 
     machineLoginFilter.doFilter(
         getRequestMock(null, MACHINE_TOKEN), servletResponseMock, chainMock);

@@ -508,6 +508,13 @@ public interface Theme {
    */
   String editorPanelBackgroundColor();
 
+  /**
+   * Background color for editor tabs panel.
+   *
+   * @return the color
+   */
+  String editorTabsBackgroundColor();
+
   /** @return border color for editor panel */
   String editorPanelBorderColor();
 
@@ -1369,6 +1376,8 @@ public interface Theme {
    */
   String checkBoxIconColor();
 
+  String checkBoxIndeterminateIconColor();
+
   String checkBoxFontColor();
 
   String checkBoxBorderColor();
@@ -1573,6 +1582,10 @@ public interface Theme {
   String vcsChangeMarkerDeletionColor();
 
   String editorPreferenceCategoryBackgroundColor();
+
+  String gitPanelRepositoryChangesLabelColor();
+
+  String gitPanelRepositoryChangesLabelBackgroundColor();
 
   /**
    * ******************************************************************************************

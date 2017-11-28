@@ -12,10 +12,8 @@ package org.eclipse.che.selenium.git;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
-import org.eclipse.che.selenium.core.client.TestSshServiceClient;
+import org.eclipse.che.selenium.core.client.TestGitHubKeyUploader;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Events;
@@ -63,18 +61,11 @@ public class CheckoutReferenceTest {
   @Inject private Loader loader;
   @Inject private ImportProjectFromLocation importFromLocation;
   @Inject private Wizard projectWizard;
-  @Inject private TestSshServiceClient testSshServiceClient;
-  @Inject private TestGitHubServiceClient gitHubClientService;
+  @Inject private TestGitHubKeyUploader testGitHubKeyUploader;
 
   @BeforeClass
   public void prepare() throws Exception {
-    try {
-      String publicKey = testSshServiceClient.generateGithubKey();
-      gitHubClientService.uploadPublicKey(gitHubUsername, gitHubPassword, publicKey);
-    } catch (ConflictException ignored) {
-      // already generated
-    }
-
+    testGitHubKeyUploader.updateGithubKey();
     ide.open(ws);
   }
 

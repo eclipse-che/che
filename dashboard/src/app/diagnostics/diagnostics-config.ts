@@ -23,7 +23,7 @@ import {DiagnosticsRunningWorkspaceCheck} from './test/diagnostics-workspace-che
  */
 export class DiagnosticsConfig {
 
-  constructor(register) {
+  constructor(register: che.IRegisterService) {
 
     register.factory('diagnosticsWebsocketWsMaster', DiagnosticsWebsocketWsMaster);
     register.factory('diagnosticsWorkspaceStartCheck', DiagnosticsWorkspaceStartCheck);
@@ -33,7 +33,7 @@ export class DiagnosticsConfig {
     register.controller('DiagnosticsController', DiagnosticsController);
 
     // config routes
-    register.app.config(($routeProvider) => {
+    register.app.config(($routeProvider: che.route.IRouteProvider) => {
       $routeProvider.accessWhen('/diagnostic', {
         title: 'Diagnostic',
         templateUrl: 'app/diagnostics/diagnostics.html'

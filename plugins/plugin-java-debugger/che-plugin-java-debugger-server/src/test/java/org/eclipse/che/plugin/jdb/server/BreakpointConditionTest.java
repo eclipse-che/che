@@ -24,6 +24,7 @@ import org.eclipse.che.api.debug.shared.model.event.BreakpointActivatedEvent;
 import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
 import org.eclipse.che.api.debug.shared.model.event.DisconnectEvent;
 import org.eclipse.che.api.debug.shared.model.event.SuspendEvent;
+import org.eclipse.che.api.debug.shared.model.impl.BreakpointConfigurationImpl;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.ResumeActionImpl;
@@ -43,14 +44,7 @@ public class BreakpointConditionTest {
     ProjectApiUtils.ensure();
 
     Location location =
-        new LocationImpl(
-            "/test/src/org/eclipse/BreakpointsByConditionTest.java",
-            17,
-            false,
-            -1,
-            "/test",
-            null,
-            -1);
+        new LocationImpl("/test/src/org/eclipse/BreakpointsByConditionTest.java", 17, "/test");
 
     events = new ArrayBlockingQueue<>(10);
     debugger = startJavaDebugger(new BreakpointImpl(location), events);
@@ -66,19 +60,32 @@ public class BreakpointConditionTest {
   }
 
   @Test
+  public void shouldStopByHitCount() throws Exception {
+    debugger.addBreakpoint(
+        new BreakpointImpl(
+            new LocationImpl("/test/src/org/eclipse/BreakpointsByConditionTest.java", 19, "/test"),
+            true,
+            new BreakpointConfigurationImpl(3)));
+
+    DebuggerEvent debuggerEvent = events.take();
+    assertTrue(debuggerEvent instanceof BreakpointActivatedEvent);
+
+    debugger.resume(new ResumeActionImpl());
+
+    debuggerEvent = events.take();
+    assertTrue(debuggerEvent instanceof SuspendEvent);
+
+    assertEquals("2", debugger.evaluate("i"));
+    assertEquals("2", debugger.evaluate("k"));
+  }
+
+  @Test(priority = 1)
   public void shouldStopByCondition() throws Exception {
     Breakpoint breakpoint =
         new BreakpointImpl(
-            new LocationImpl(
-                "/test/src/org/eclipse/BreakpointsByConditionTest.java",
-                19,
-                false,
-                -1,
-                "/test",
-                null,
-                -1),
+            new LocationImpl("/test/src/org/eclipse/BreakpointsByConditionTest.java", 24, "/test"),
             true,
-            "i==5");
+            new BreakpointConfigurationImpl("i==5"));
 
     debugger.addBreakpoint(breakpoint);
 

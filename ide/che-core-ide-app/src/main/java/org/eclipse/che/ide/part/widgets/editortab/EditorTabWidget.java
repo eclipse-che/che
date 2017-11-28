@@ -110,6 +110,8 @@ public class EditorTabWidget extends Composite
     this.file = relatedEditorPart.getEditorInput().getFile();
     this.icon = relatedEditorPart.getTitleImage();
     this.title.setText(relatedEditorPart.getTitle());
+    // add "path" attribute describing the full path of opened file, will be used full for testing
+    this.title.getElement().setAttribute("path", file.getLocation().toString());
     this.id = title + UUID.uuid(4);
 
     iconPanel.add(getIcon());
@@ -261,7 +263,11 @@ public class EditorTabWidget extends Composite
 
   @Override
   public void setTitleColor(String color) {
-    this.title.getElement().getStyle().setColor(color);
+    if (color == null || color.isEmpty()) {
+      title.getElement().getStyle().clearColor();
+    } else {
+      title.getElement().getStyle().setColor(color);
+    }
   }
 
   @Override

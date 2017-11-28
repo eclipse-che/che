@@ -90,5 +90,12 @@ public interface ProjectExplorerView extends View<ProjectExplorerView.ActionDele
 
   Tree getTree();
 
+  /**
+   * Shows placeholder instead projects tree while the workspace is loading.
+   *
+   * @param placeholder <b>true</b> to show placeholder
+   */
+  void showPlaceholder(boolean placeholder);
+
   interface ActionDelegate extends BaseActionDelegate {}
 }

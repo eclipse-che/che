@@ -98,7 +98,7 @@ public class PullRequestPluginTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    webDriverWait = new WebDriverWait(ide.driver(), LOAD_PAGE_TIMEOUT_SEC);
+    webDriverWait = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
     ide.open(testWorkspace);
     // add committer info
     testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
@@ -156,6 +156,7 @@ public class PullRequestPluginTest {
   @Test(priority = 1)
   public void createPullRequest() {
     explorer.waitItem(FIRST_PROJECT_NAME);
+    explorer.selectItem(FIRST_PROJECT_NAME);
     explorer.openItemByPath(FIRST_PROJECT_NAME);
     explorer.openItemByPath(FIRST_PROJECT_NAME + "/README.md");
 
@@ -208,7 +209,7 @@ public class PullRequestPluginTest {
 
   @Test(priority = 3)
   public void checkFactoryOnGitHub() {
-    String currentWindow = ide.driver().getWindowHandle();
+    String currentWindow = seleniumWebDriver.getWindowHandle();
     pullRequestPanel.openPullRequestOnGitHub();
     seleniumWebDriver.switchToNoneCurrentWindow(currentWindow);
     checkGitHubUserPage();
@@ -218,6 +219,7 @@ public class PullRequestPluginTest {
     explorer.waitProjectExplorer();
     explorer.waitItem(FIRST_PROJECT_NAME);
     explorer.waitItem(SECOND_PROJECT_NAME);
+    explorer.selectItem(FIRST_PROJECT_NAME);
     explorer.openItemByPath(FIRST_PROJECT_NAME);
     explorer.openItemByPath(FIRST_PROJECT_NAME + "/README.md");
     editor.waitActiveEditor();

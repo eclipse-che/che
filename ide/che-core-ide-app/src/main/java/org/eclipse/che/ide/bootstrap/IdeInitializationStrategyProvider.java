@@ -13,7 +13,7 @@ package org.eclipse.che.ide.bootstrap;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import org.eclipse.che.ide.context.QueryParameters;
+import org.eclipse.che.ide.QueryParameters;
 
 /**
  * Provides {@link IdeInitializationStrategy} depending on the loading mode (default or factory).

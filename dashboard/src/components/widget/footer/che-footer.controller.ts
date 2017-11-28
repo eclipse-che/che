@@ -17,12 +17,6 @@
  * @author Ann Shumilova
  */
 export class CheFooterController {
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor() {
-  }
 
   /**
    * Returns 'Make a wish' email subject.

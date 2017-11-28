@@ -16,18 +16,23 @@
  * @author Florent Benoit
  */
 export class CheButtonDropdownCtrl {
+  $timeout: ng.ITimeoutService;
+  $window: ng.IWindowService;
+
+  showDropdown: boolean;
+  isDisabled: boolean;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($timeout, $window) {
+  constructor($timeout: ng.ITimeoutService, $window: ng.IWindowService) {
     this.$timeout = $timeout;
     this.showDropdown = false;
     this.$window = $window;
   }
 
-  toggleDropDown() {
+  toggleDropDown(): void {
     if (this.isDisabled) {
       this.showDropdown = false;
       return;
@@ -36,13 +41,13 @@ export class CheButtonDropdownCtrl {
     this.showDropdown = !this.showDropdown;
   }
 
-  disableDropDown() {
+  disableDropDown(): void {
     this.$timeout(() => {
       this.showDropdown = false;
     }, 300);
   }
 
-  redirect(newPath) {
+  redirect(newPath: string): void {
     if (!newPath || this.isDisabled) {
       return;
     }

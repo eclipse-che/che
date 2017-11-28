@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.resources.impl;
 
 import static com.google.common.base.Optional.absent;
-import static com.google.common.base.Optional.fromNullable;
 import static com.google.common.base.Optional.of;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -39,7 +38,6 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
-import elemental.util.ArrayOf;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -103,6 +101,7 @@ import org.eclipse.che.ide.util.Arrays;
  */
 @Beta
 public final class ResourceManager {
+
   /** Describes zero depth level for the descendants. */
   private static final int DEPTH_ZERO = 0;
 
@@ -333,30 +332,28 @@ public final class ResourceManager {
   Promise<Folder> createFolder(final Container parent, final String name) {
     final Path path = Path.valueOf(name);
 
-    return findResource(parent.getLocation().append(path), true)
+    Optional<Resource> existed = store.getResource(parent.getLocation().append(name));
+
+    if (existed.isPresent()) {
+      return promises.reject(new IllegalStateException("Resource already exists"));
+    }
+
+    if (parent.getLocation().isRoot()) {
+      return promises.reject(
+          new IllegalArgumentException("Failed to create folder in workspace root"));
+    }
+
+    if (path.segmentCount() == 1 && !checkFolderName(name)) {
+      return promises.reject(new IllegalArgumentException("Invalid folder name"));
+    }
+
+    return ps.createFolder(parent.getLocation().append(name))
         .thenPromise(
-            resource -> {
-              if (resource.isPresent()) {
-                return promises.reject(new IllegalStateException("Resource already exists"));
-              }
+            reference -> {
+              final Resource createdFolder = newResourceFrom(reference);
+              store.register(createdFolder);
 
-              if (parent.getLocation().isRoot()) {
-                return promises.reject(
-                    new IllegalArgumentException("Failed to create folder in workspace root"));
-              }
-
-              if (path.segmentCount() == 1 && !checkFolderName(name)) {
-                return promises.reject(new IllegalArgumentException("Invalid folder name"));
-              }
-
-              return ps.createFolder(parent.getLocation().append(name))
-                  .thenPromise(
-                      reference -> {
-                        final Resource createdFolder = newResourceFrom(reference);
-                        store.register(createdFolder);
-
-                        return promises.resolve(createdFolder.asFolder());
-                      });
+              return promises.resolve(createdFolder.asFolder());
             });
   }
 
@@ -365,26 +362,24 @@ public final class ResourceManager {
       return promises.reject(new IllegalArgumentException("Invalid file name"));
     }
 
-    return findResource(parent.getLocation().append(name), true)
+    Optional<Resource> existed = store.getResource(parent.getLocation().append(name));
+
+    if (existed.isPresent()) {
+      return promises.reject(new IllegalStateException("Resource already exists"));
+    }
+
+    if (parent.getLocation().isRoot()) {
+      return promises.reject(
+          new IllegalArgumentException("Failed to create file in workspace root"));
+    }
+
+    return ps.createFile(parent.getLocation().append(name), content)
         .thenPromise(
-            resource -> {
-              if (resource.isPresent()) {
-                return promises.reject(new IllegalStateException("Resource already exists"));
-              }
+            reference -> {
+              final Resource createdFile = newResourceFrom(reference);
+              store.register(createdFile);
 
-              if (parent.getLocation().isRoot()) {
-                return promises.reject(
-                    new IllegalArgumentException("Failed to create file in workspace root"));
-              }
-
-              return ps.createFile(parent.getLocation().append(name), content)
-                  .thenPromise(
-                      reference -> {
-                        final Resource createdFile = newResourceFrom(reference);
-                        store.register(createdFile);
-
-                        return promises.resolve(createdFile.asFile());
-                      });
+              return promises.resolve(createdFile.asFile());
             });
   }
 
@@ -767,6 +762,7 @@ public final class ResourceManager {
               public Resource[] apply(TreeElement tree) throws FunctionException {
 
                 class Visitor implements ResourceVisitor {
+
                   Resource[] resources;
 
                   private int size = 0; // size of total items
@@ -944,28 +940,42 @@ public final class ResourceManager {
     }
   }
 
-  private Promise<Optional<Resource>> findResource(final Path absolutePath, boolean quiet) {
-    return ps.getItem(absolutePath)
+  private Promise<Optional<Resource>> doFindResource(Path path) {
+    return ps.getTree(path.parent(), 1, true)
         .thenPromise(
-            itemReference -> {
-              final Resource resource = newResourceFrom(itemReference);
+            treeElement -> {
+              Resource resource = null;
 
-              store.register(resource);
+              for (TreeElement nodeElement : treeElement.getChildren()) {
+                ItemReference reference = nodeElement.getNode();
+                Resource tempResource = newResourceFrom(reference);
+                store.register(tempResource);
 
-              if (resource.isProject()) {
-                inspectProject(resource.asProject());
+                if (tempResource.isProject()) {
+                  inspectProject(tempResource.asProject());
+                }
+
+                if (tempResource.getLocation().equals(path)) {
+                  resource = tempResource;
+                }
               }
 
-              return promises.resolve(fromNullable(resource));
+              return promises.resolve(Optional.fromNullable(resource));
             })
-        .catchErrorPromise(
-            arg -> {
-              if (!quiet) {
-                throw new IllegalStateException(arg.getCause());
-              }
+        .catchErrorPromise(error -> promises.resolve(absent()));
+  }
 
-              return promises.resolve(absent());
-            });
+  private Promise<Optional<Resource>> findResource(final Path absolutePath, boolean quiet) {
+    String[] segments = absolutePath.segments();
+
+    Promise<Optional<Resource>> chain = promises.resolve(null);
+
+    for (int i = 0; i <= segments.length; i++) {
+      Path pathToRetrieve = absolutePath.removeLastSegments(segments.length - i);
+      chain = chain.thenPromise(ignored -> doFindResource(pathToRetrieve));
+    }
+
+    return chain;
   }
 
   private Promise<Optional<Resource>> findResourceForExternalOperation(
@@ -1158,45 +1168,38 @@ public final class ResourceManager {
   }
 
   protected Promise<ResourceDelta[]> synchronize(final ResourceDelta[] deltas) {
-    List<Promise<Void>> promisesToResolve = new ArrayList<>(deltas.length);
+    Promise<Void> chain = promises.resolve(null);
+
     for (final ResourceDelta delta : deltas) {
       if (delta.getKind() == ADDED) {
         if (delta.getFlags() == (MOVED_FROM | MOVED_TO)) {
-          promisesToResolve.add(onExternalDeltaMoved(delta));
+          chain = chain.thenPromise(ignored -> onExternalDeltaMoved(delta));
         } else {
-          promisesToResolve.add(onExternalDeltaAdded(delta));
+          chain = chain.thenPromise(ignored -> onExternalDeltaAdded(delta));
         }
       } else if (delta.getKind() == REMOVED) {
-        promisesToResolve.add(onExternalDeltaRemoved(delta));
-
+        chain = chain.thenPromise(ignored -> onExternalDeltaRemoved(delta));
       } else if (delta.getKind() == UPDATED) {
-        promisesToResolve.add(onExternalDeltaUpdated(delta));
+        chain = chain.thenPromise(ignored -> onExternalDeltaUpdated(delta));
       }
     }
-
-    Promise<ArrayOf<?>> promise =
-        promises.all2(promisesToResolve.toArray(new Promise[promisesToResolve.size()]));
-    return promise.then((Function<ArrayOf<?>, ResourceDelta[]>) arg -> deltas);
+    return chain.thenPromise(ignored -> promises.resolve(deltas));
   }
 
   private Promise<Void> onExternalDeltaMoved(final ResourceDelta delta) {
     final Optional<Resource> toRemove = store.getResource(delta.getFromPath());
     store.dispose(delta.getFromPath(), true);
 
-    return findResourceForExternalOperation(delta.getToPath(), true)
+    return findResource(delta.getToPath(), true)
         .thenPromise(
             resource -> {
               if (resource.isPresent() && toRemove.isPresent()) {
-                Resource intercepted = resource.get();
-
-                if (!store.getResource(intercepted.getLocation()).isPresent()) {
-                  store.register(intercepted);
-                }
-
                 eventBus.fireEvent(
                     new ResourceChangedEvent(
                         new ResourceDeltaImpl(
-                            intercepted, toRemove.get(), ADDED | MOVED_FROM | MOVED_TO | DERIVED)));
+                            resource.get(),
+                            toRemove.get(),
+                            ADDED | MOVED_FROM | MOVED_TO | DERIVED)));
               }
 
               return promises.resolve(null);
@@ -1227,18 +1230,13 @@ public final class ResourceManager {
               });
     }
 
-    return findResourceForExternalOperation(delta.getToPath(), true)
+    return findResource(delta.getToPath(), true)
         .thenPromise(
             resource -> {
               if (resource.isPresent()) {
-                Resource intercepted = resource.get();
-
-                if (!store.getResource(intercepted.getLocation()).isPresent()) {
-                  store.register(intercepted);
-                }
-
                 eventBus.fireEvent(
-                    new ResourceChangedEvent(new ResourceDeltaImpl(intercepted, ADDED | DERIVED)));
+                    new ResourceChangedEvent(
+                        new ResourceDeltaImpl(resource.get(), ADDED | DERIVED)));
               }
 
               return promises.resolve(null);
@@ -1252,7 +1250,7 @@ public final class ResourceManager {
       return promises.resolve(null);
     }
 
-    return findResourceForExternalOperation(delta.getToPath(), true)
+    return findResource(delta.getToPath(), true)
         .thenPromise(
             resource -> {
               if (resource.isPresent()) {
@@ -1328,10 +1326,12 @@ public final class ResourceManager {
   }
 
   interface ResourceVisitor {
+
     void visit(Resource resource);
   }
 
   public interface ResourceFactory {
+
     ProjectImpl newProjectImpl(ProjectConfig reference, ResourceManager resourceManager);
 
     FolderImpl newFolderImpl(Path path, ResourceManager resourceManager);

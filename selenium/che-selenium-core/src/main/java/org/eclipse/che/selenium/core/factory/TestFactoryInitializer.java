@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.List;
+import javax.inject.Named;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
@@ -32,6 +33,7 @@ import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.entrance.Entrance;
@@ -52,6 +54,11 @@ public class TestFactoryInitializer {
   @Inject private TestFactoryServiceClient testFactoryServiceClient;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private Entrance entrance;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
+
+  @Inject
+  @Named("che.selenium.infrastructure")
+  private String infrastructure;
 
   /**
    * Initialize {@link TestFactory} base upon template.
@@ -60,8 +67,9 @@ public class TestFactoryInitializer {
    */
   public TestFactoryBuilder fromTemplate(String template) throws Exception {
     String name = NameGenerator.generate("factory", 6);
-
-    InputStream resource = TestFactory.class.getResourceAsStream("/templates/factory/" + template);
+    InputStream resource =
+        TestFactory.class.getResourceAsStream(
+            format("/templates/factory/%s/%s", infrastructure, template));
     if (resource == null) {
       throw new IOException(format("Factory template '%s' not found", template));
     }
@@ -91,7 +99,8 @@ public class TestFactoryInitializer {
         dashboardUrlProvider,
         testFactoryServiceClient,
         workspaceServiceClient,
-        entrance);
+        entrance,
+        seleniumWebDriver);
   }
 
   /** Builder for {@link TestFactory}. */
@@ -111,7 +120,8 @@ public class TestFactoryInitializer {
           dashboardUrlProvider,
           testFactoryServiceClient,
           workspaceServiceClient,
-          entrance);
+          entrance,
+          seleniumWebDriver);
     }
 
     @Override

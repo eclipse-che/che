@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.workspaces;
 
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
+
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -48,9 +50,7 @@ public class CheckStopStartWsTest {
     toastLoader.waitExpectedTextInToastLoader("Workspace is not running", 60);
     toastLoader.clickOnStartButton();
     loader.waitOnClosed();
-    toastLoader.waitExpectedTextInToastLoader("Starting workspace runtime.", 20);
-    loader.waitOnClosed();
     projectExplorer.waitProjectExplorer();
-    terminal.waitTerminalTab();
+    terminal.waitTerminalTab(LOADER_TIMEOUT_SEC);
   }
 }

@@ -86,12 +86,9 @@ public class WorkspaceMasterJsonRpcInitializer {
                   separator
                       + "token="
                       + token
-                      + appContext
-                          .getApplicationWebsocketId()
-                          .map(id -> "&clientId=" + id)
-                          .orElse("");
+                      + appContext.getApplicationId().map(id -> "&clientId=" + id).orElse("");
               Set<Runnable> initActions =
-                  appContext.getApplicationWebsocketId().isPresent()
+                  appContext.getApplicationId().isPresent()
                       ? emptySet()
                       : singleton(WorkspaceMasterJsonRpcInitializer.this::processWsId);
 

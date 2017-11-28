@@ -247,7 +247,7 @@ public class WorkspacePermissionsFilterTest {
 
     assertEquals(response.getStatusCode(), 204);
     verify(superPrivilegesChecker).hasSuperPrivileges();
-    verify(workspaceService).stop(eq("workspace123"), any());
+    verify(workspaceService).stop(eq("workspace123"));
     verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("run"));
   }
 
@@ -268,7 +268,7 @@ public class WorkspacePermissionsFilterTest {
 
     assertEquals(response.getStatusCode(), 204);
     verify(superPrivilegesChecker).hasSuperPrivileges();
-    verify(workspaceService).stop(eq("workspace123"), any());
+    verify(workspaceService).stop(eq("workspace123"));
     verify(subject, never()).hasPermission(eq("workspace"), eq("workspace123"), eq("run"));
   }
 
@@ -286,8 +286,7 @@ public class WorkspacePermissionsFilterTest {
             .post(SECURE_PATH + "/workspace/{id}/runtime");
 
     assertEquals(response.getStatusCode(), 204);
-    verify(workspaceService)
-        .startById(eq("workspace123"), nullable(String.class), nullable(Boolean.class));
+    verify(workspaceService).startById(eq("workspace123"), nullable(String.class));
     verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("run"));
   }
 

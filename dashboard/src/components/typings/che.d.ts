@@ -20,6 +20,8 @@ declare namespace che {
     wantTokeepLoader: boolean;
     waitingLoaded: boolean;
     currentPage: string;
+    productVersion: string;
+    branding: any;
   }
 
   export namespace api {
@@ -303,7 +305,7 @@ declare namespace che {
       [machineName: string]: IEnvironmentMachine
     };
     recipe: IRecipe;
-    warnings: IWorkspaceWarning[];
+    warnings?: IWorkspaceWarning[];
   }
 
   export interface IRecipe {
@@ -322,11 +324,19 @@ declare namespace che {
     servers?: {
       [serverRef: string]: IEnvironmentMachineServer
     };
+    volumes?: {
+      [volumeRef: string]: IEnvironmentMachineVolume
+    }
   }
 
   export interface IEnvironmentMachineServer {
     port: string|number;
     protocol: string;
+    path?: string;
+    properties?: any;
+  }
+
+  export interface IEnvironmentMachineVolume {
     path: string;
   }
 
@@ -352,7 +362,22 @@ declare namespace che {
 
   export interface IWorkspaceRuntimeMachineServer {
     status: string;
+    port: string;
     url: string;
+    ref: string;
+    protocol: string;
+    path: string;
+  }
+
+  export interface IAgent {
+    id: string;
+    name: string;
+    version: string;
+    description: string;
+    properties: any;
+    script: string;
+    servers: { [serverName: string]: IEnvironmentMachineServer };
+    dependencies: string[];
   }
 
   export interface IProjectSource {
@@ -370,9 +395,9 @@ declare namespace che {
     source: IProjectSource;
     path?: string;
     commands?: Array<IWorkspaceCommand>;
-    mixins: Array<any>;
-    modules: Array<any>;
-    problems: Array<any>;
+    mixins?: Array<any>;
+    modules?: Array<any>;
+    problems?: Array<any>;
     projectType?: string;
     type?: string;
     tags?: Array<string>;
@@ -419,12 +444,11 @@ declare namespace che {
       [propName: string]: string | number;
   }
 
-  export interface IProfile extends ng.resource.IResourceClass<any> {
+  export interface IProfile extends ng.resource.IResource<any> {
     attributes?: IProfileAttributes;
     email: string;
     links?: Array<any>;
     userId: string;
-    $promise?: any;
   }
 
   export interface INamespace {
@@ -451,11 +475,10 @@ declare namespace che {
     v: string;
     workspace: IWorkspaceConfig;
     creator: any;
-    links?: any;
     ide?: any;
     button?: any;
     policies?: any;
-    links: string[];
+    links?: string[];
   }
 
   export interface IRegistry {

@@ -44,11 +44,11 @@ public class DeleteAllBreakpointsAction extends AbstractPerspectiveAction {
 
   @Override
   public void actionPerformed(ActionEvent e) {
-    breakpointManager.deleteAllBreakpoints();
+    breakpointManager.deleteAll();
   }
 
   @Override
   public void updateInPerspective(ActionEvent event) {
-    event.getPresentation().setEnabled(!breakpointManager.getBreakpointList().isEmpty());
+    event.getPresentation().setEnabled(!breakpointManager.getAll().isEmpty());
   }
 }

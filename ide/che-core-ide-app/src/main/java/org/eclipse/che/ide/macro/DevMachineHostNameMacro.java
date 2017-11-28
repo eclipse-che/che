@@ -17,10 +17,9 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.macro.Macro;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
-import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 
 /**
  * Provides dev-machine's host name.
@@ -32,14 +31,14 @@ public class DevMachineHostNameMacro implements Macro {
 
   private static final String KEY = "${machine.dev.hostname}";
 
-  private final AppContext appContext;
   private final CoreLocalizationConstant localizationConstants;
+  private final WsAgentServerUtil wsAgentServerUtil;
 
   @Inject
   public DevMachineHostNameMacro(
-      AppContext appContext, CoreLocalizationConstant localizationConstants) {
-    this.appContext = appContext;
+      CoreLocalizationConstant localizationConstants, WsAgentServerUtil wsAgentServerUtil) {
     this.localizationConstants = localizationConstants;
+    this.wsAgentServerUtil = wsAgentServerUtil;
   }
 
   @NotNull
@@ -58,8 +57,7 @@ public class DevMachineHostNameMacro implements Macro {
   public Promise<String> expand() {
     String value = "";
 
-    WorkspaceImpl workspace = appContext.getWorkspace();
-    Optional<MachineImpl> devMachine = workspace.getDevMachine();
+    Optional<MachineImpl> devMachine = wsAgentServerUtil.getWsAgentServerMachine();
 
     if (devMachine.isPresent()) {
       String hostName = devMachine.get().getProperties().get("config.hostname");

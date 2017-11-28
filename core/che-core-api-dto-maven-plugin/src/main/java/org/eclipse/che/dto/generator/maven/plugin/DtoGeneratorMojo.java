@@ -33,7 +33,17 @@ public class DtoGeneratorMojo extends AbstractMojo {
   @Parameter(property = "impl", required = true)
   private String impl;
 
+  /** A flag to disable generation of the DTOs. */
+  @Parameter(property = "che.dto.skip", defaultValue = "false")
+  private boolean skip;
+
+  @Override
   public void execute() throws MojoExecutionException {
+    if (skip) {
+      getLog().info("Skipping the execution");
+      return;
+    }
+
     DtoGenerator dtoGenerator = new DtoGenerator();
     dtoGenerator.setPackageBase(outputDirectory);
     String genFileName = genClassName.replace('.', File.separatorChar) + ".java";

@@ -10,11 +10,16 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker.model;
 
+import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.eclipse.che.commons.annotation.Nullable;
 
 /**
@@ -32,9 +37,10 @@ public class DockerContainerConfig {
   private String cpuSet;
   private List<String> dependsOn;
   private List<String> dns;
+  private List<String> securityOpt;
   private List<String> entrypoint;
   private Map<String, String> environment;
-  private List<String> expose;
+  private Set<String> expose;
   private List<String> extraHosts;
   private String id;
   private String image;
@@ -70,15 +76,18 @@ public class DockerContainerConfig {
     if (container.getDns() != null) {
       dns = new ArrayList<>(container.getDns());
     }
+    if (container.getSecurityOpt() != null) {
+      securityOpt = new ArrayList<>(container.getSecurityOpt());
+    }
     if (container.getEntrypoint() != null) {
       entrypoint = new ArrayList<>(container.getEntrypoint());
     }
     if (container.getEnvironment() != null) {
       environment = new HashMap<>(container.getEnvironment());
     }
-    if (container.getExpose() != null) {
-      expose = new ArrayList<>(container.getExpose());
-    }
+
+    setExpose(container.getExpose());
+
     if (container.getExtraHosts() != null) {
       extraHosts = new ArrayList<>(container.getExtraHosts());
     }
@@ -261,30 +270,46 @@ public class DockerContainerConfig {
   }
 
   /**
-   * Expose ports without publishing them to the host machine - they’ll only be accessible to linked
-   * containers.
+   * Immutable expose ports list without publishing them to the host machine - they’ll only be
+   * accessible to linked containers.
    *
    * <p>Only the internal port can be specified. <br>
    * Examples:
    *
    * <ul>
-   *   <li>3000
-   *   <li>8000
+   *   <li>3000/tcp
+   *   <li>8000/udp
    * </ul>
    */
-  public List<String> getExpose() {
+  public Set<String> getExpose() {
     if (expose == null) {
-      expose = new ArrayList<>();
+      return Collections.emptySet();
     }
-    return expose;
+    return ImmutableSet.copyOf(expose);
   }
 
-  public DockerContainerConfig setExpose(List<String> expose) {
-    if (expose != null) {
-      expose = new ArrayList<>(expose);
+  public DockerContainerConfig setExpose(Set<String> expose) {
+    if (expose == null) {
+      this.expose = null;
+    } else {
+      this.expose =
+          expose
+              .stream()
+              .map(this::normalizeExposeValue)
+              .collect(Collectors.toCollection(HashSet::new));
     }
-    this.expose = expose;
     return this;
+  }
+
+  public void addExpose(String exposeToAdd) {
+    if (expose == null) {
+      expose = new HashSet<>();
+    }
+    expose.add(normalizeExposeValue(exposeToAdd));
+  }
+
+  private String normalizeExposeValue(String expose) {
+    return expose.contains("/") ? expose : expose + "/tcp";
   }
 
   /**
@@ -423,6 +448,21 @@ public class DockerContainerConfig {
     return this;
   }
 
+  public List<String> getSecurityOpt() {
+    if (securityOpt == null) {
+      securityOpt = new ArrayList<>();
+    }
+    return securityOpt;
+  }
+
+  public DockerContainerConfig setSecurityOpt(List<String> securityOpt) {
+    if (securityOpt != null) {
+      securityOpt = new ArrayList<>(securityOpt);
+    }
+    this.securityOpt = securityOpt;
+    return this;
+  }
+
   public List<String> getExtraHosts() {
     if (extraHosts == null) {
       extraHosts = new ArrayList<>();
@@ -515,6 +555,7 @@ public class DockerContainerConfig {
         && Objects.equals(getCpuSet(), that.getCpuSet())
         && Objects.equals(getDependsOn(), that.getDependsOn())
         && Objects.equals(getDns(), that.getDns())
+        && Objects.equals(getSecurityOpt(), that.getSecurityOpt())
         && Objects.equals(getEntrypoint(), that.getEntrypoint())
         && Objects.equals(getEnvironment(), that.getEnvironment())
         && Objects.equals(getExpose(), that.getExpose())
@@ -546,6 +587,7 @@ public class DockerContainerConfig {
         getCpuSet(),
         getDependsOn(),
         getDns(),
+        getSecurityOpt(),
         getEntrypoint(),
         getEnvironment(),
         getExpose(),
@@ -615,6 +657,8 @@ public class DockerContainerConfig {
         + networks
         + ", ports="
         + ports
+        + ", SecurityOpt="
+        + securityOpt
         + ", volumes="
         + volumes
         + ", volumesFrom="

@@ -10,6 +10,10 @@
  */
 'use strict';
 
+interface ICheAutoScrollAttributes extends ng.IAttributes {
+  ngModel: any;
+}
+
 /**
  * @ngdoc directive
  * @name components.directive:cheAutoScroll
@@ -26,25 +30,27 @@
  * @author Florent Benoit
  */
 export class CheAutoScroll {
+  restrict = 'A';
 
-    /**
-     * Default constructor that is using resource
-     * @ngInject for Dependency injection
-     */
-    constructor($timeout) {
-        this.$timeout = $timeout;
-        this.restrict = 'A';
-    }
+  $timeout: ng.ITimeoutService;
 
-    /**
-     * Keep reference to the model controller
-     */
-    link($scope, element, attr) {
-        $scope.$watch(attr.ngModel, () => {
-            this.$timeout(() => {
-                element[0].scrollTop = element[0].scrollHeight;
-            });
-        }, true);
-    }
+  /**
+   * Default constructor that is using resource
+   * @ngInject for Dependency injection
+   */
+  constructor($timeout: ng.ITimeoutService) {
+    this.$timeout = $timeout;
+  }
+
+  /**
+   * Keep reference to the model controller
+   */
+  link($scope: ng.IScope, $element: ng.IAugmentedJQuery, $attrs: ICheAutoScrollAttributes) {
+    $scope.$watch($attrs.ngModel, () => {
+      this.$timeout(() => {
+        $element[0].scrollTop = $element[0].scrollHeight;
+      });
+    }, true);
+  }
 
 }

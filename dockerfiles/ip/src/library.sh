@@ -28,7 +28,9 @@ is_boot2docker() {
 # Global variables used inside this function :
 #   ${UNAME_R} : output of $(uname -r)
 is_docker4MacOrWin() {
-  if $(echo ${UNAME_R} | grep -q 'moby'); then
+  if $(echo ${UNAME_R} | grep -q 'linuxkit'); then
+    return 0
+  elif $(echo ${UNAME_R} | grep -q 'moby'); then
     return 0
   else
     return 1

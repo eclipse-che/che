@@ -22,5 +22,5 @@
 
   <Resource name="jdbc/che" auth="Container"
     type="javax.sql.DataSource"
-    factory="org.eclipse.che.core.db.h2.H2SQLJndiDataSourceFactory"/>
+    factory="org.eclipse.che.api.CommonJndiDataSourceFactory"/>
 </Context>

@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.miscellaneous;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -37,6 +38,7 @@ public class CheckCreatingProjectInEmptyWsTest {
   @Inject private Wizard wizard;
   @Inject private ImportProjectFromLocation importProjectFromLocation;
   @Inject private ActionsFactory actionsFactory;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -54,22 +56,22 @@ public class CheckCreatingProjectInEmptyWsTest {
 
     projectExplorer.clickOnEmptyAreaOfProjectTree(1);
     try {
-      actionsFactory.createAction(ide.driver()).sendKeys(Keys.ALT.toString() + "x").perform();
+      actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.ALT.toString() + "x").perform();
       wizard.closeWithIcon();
     } catch (org.openqa.selenium.TimeoutException e) {
-      actionsFactory.createAction(ide.driver()).sendKeys(Keys.ALT.toString() + "x").perform();
+      actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.ALT.toString() + "x").perform();
       wizard.closeWithIcon();
     }
     projectExplorer.clickOnEmptyAreaOfProjectTree(1);
     try {
       actionsFactory
-          .createAction(ide.driver())
+          .createAction(seleniumWebDriver)
           .sendKeys(Keys.ALT.toString() + Keys.SHIFT.toString() + "A")
           .perform();
       importProjectFromLocation.closeWithIcon();
     } catch (org.openqa.selenium.TimeoutException e) {
       actionsFactory
-          .createAction(ide.driver())
+          .createAction(seleniumWebDriver)
           .sendKeys(Keys.ALT.toString() + Keys.SHIFT.toString() + "A")
           .perform();
       importProjectFromLocation.closeWithIcon();
@@ -78,7 +80,7 @@ public class CheckCreatingProjectInEmptyWsTest {
 
   @Test(priority = 1)
   public void checkImportAndCreatingFromEditorPanel() {
-    WebDriverWait waitForWebElements = new WebDriverWait(ide.driver(), LOAD_PAGE_TIMEOUT_SEC);
+    WebDriverWait waitForWebElements = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
     String locatorToEditorContaiPaineId =
         "//div[@id='gwt-debug-editorMultiPartStack-contentPanel']";
     String locatorToImportProjectLnk =
@@ -101,26 +103,26 @@ public class CheckCreatingProjectInEmptyWsTest {
             ExpectedConditions.visibilityOfElementLocated((By.xpath(locatorToEditorContaiPaineId))))
         .click();
     try {
-      actionsFactory.createAction(ide.driver()).sendKeys(Keys.ALT.toString() + "x").perform();
+      actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.ALT.toString() + "x").perform();
       wizard.closeWithIcon();
     } catch (org.openqa.selenium.TimeoutException e) {
-      actionsFactory.createAction(ide.driver()).sendKeys(Keys.ALT.toString() + "x").perform();
+      actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.ALT.toString() + "x").perform();
       wizard.closeWithIcon();
     }
     waitForWebElements
         .until(
             ExpectedConditions.visibilityOf(
-                ide.driver().findElement(By.xpath(locatorToEditorContaiPaineId))))
+                seleniumWebDriver.findElement(By.xpath(locatorToEditorContaiPaineId))))
         .click();
     try {
       actionsFactory
-          .createAction(ide.driver())
+          .createAction(seleniumWebDriver)
           .sendKeys(Keys.ALT.toString() + Keys.SHIFT.toString() + "A")
           .perform();
       importProjectFromLocation.closeWithIcon();
     } catch (org.openqa.selenium.TimeoutException e) {
       actionsFactory
-          .createAction(ide.driver())
+          .createAction(seleniumWebDriver)
           .sendKeys(Keys.ALT.toString() + Keys.SHIFT.toString() + "A")
           .perform();
       importProjectFromLocation.closeWithIcon();

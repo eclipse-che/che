@@ -122,7 +122,7 @@ public class ChangeVariableWithEvaluatingTest {
         TestMenuCommandsConstants.Run.DEBUG + "/" + PROJECT_NAME_CHANGE_VARIABLE);
     String appUrl =
         workspaceServiceClient
-                .getServerFromDevMachineBySymbolicName(ws.getId(), "8080/tcp")
+                .getServerFromDevMachineBySymbolicName(ws.getId(), "tomcat8")
                 .getUrl()
                 .replace("tcp", "http")
             + "/spring/guess";

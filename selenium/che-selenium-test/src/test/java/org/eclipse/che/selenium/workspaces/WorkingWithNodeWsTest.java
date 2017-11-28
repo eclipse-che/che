@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.workspaces;
 
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -29,6 +30,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.AfterClass;
@@ -86,6 +88,8 @@ public class WorkingWithNodeWsTest {
     loader.waitOnClosed();
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(NODE_JS_PROJECT_NAME);
+    loader.waitOnClosed();
+    projectExplorer.selectItem(NODE_JS_PROJECT_NAME);
     projectExplorer.openItemByPath(NODE_JS_PROJECT_NAME);
     projectExplorer.waitItem(NODE_JS_PROJECT_NAME + "/app");
     projectExplorer.openItemByPath(NODE_JS_PROJECT_NAME + "/app");
@@ -111,7 +115,13 @@ public class WorkingWithNodeWsTest {
     consoles.waitPreviewUrlIsPresent();
     seleniumWebDriver.navigate().refresh();
     seleniumWebDriver.switchFromDashboardIframeToIde();
-    consoles.waitPreviewUrlIsPresent();
+    try {
+      consoles.waitPreviewUrlIsPresent();
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7072");
+    }
+
     projectExplorer.selectItem(NODE_JS_PROJECT_NAME);
     consoles.selectProcessInProcessConsoleTreeByName("web-nodejs-simple:run");
 
@@ -130,15 +140,15 @@ public class WorkingWithNodeWsTest {
 
   /** check main elements of the AngularJS-Yeoman */
   public void checkAngularYeomanAppl() {
-    new WebDriverWait(ide.driver(), LOAD_PAGE_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
                 By.xpath("//h1[text()=\"'Allo, 'Allo!\"]")));
-    new WebDriverWait(ide.driver(), LOAD_PAGE_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
                 By.xpath("//img[@src='images/yeoman.png']")));
-    new WebDriverWait(ide.driver(), LOAD_PAGE_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOfElementLocated(By.linkText("Splendid!")))
         .click();
   }

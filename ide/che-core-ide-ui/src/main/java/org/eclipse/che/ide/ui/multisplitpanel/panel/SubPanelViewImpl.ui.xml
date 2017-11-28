@@ -22,7 +22,7 @@
             box-sizing: border-box;
             border-bottom: 1px solid editorPanelBorderColor;
             overflow: hidden;
-            background-color: editorPanelBackgroundColor;
+            background-color: editorTabsBackgroundColor;
         }
 
         .tabsPanel {
@@ -61,7 +61,6 @@
 
         .menuPanel > div {
             position: absolute;
-
         }
 
     </ui:style>

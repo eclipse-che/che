@@ -14,6 +14,10 @@
             "8000/tcp" : {
               "port" : "8000",
               "protocol" : "http"
+            },
+            "80/tcp" : {
+              "port" : "80",
+              "protocol" : "http"
             }
           },
           "installers": [
@@ -54,7 +58,7 @@
       "commandLine": "sudo service apache2 start && sudo tail -f /var/log/apache2/access.log -f /var/log/apache2/error.log",
       "name": "start apache",
       "attributes": {
-        "previewUrl": "http://${server.port.80}/${current.project.relpath}"
+        "previewUrl": "${server.80/tcp}/${current.project.relpath}"
       },
       "type": "custom"
     },
@@ -70,7 +74,7 @@
       "commandLine": "sudo service apache2 restart",
       "name": "restart apache",
       "attributes": {
-        "previewUrl": "http://${server.port.80}/${current.project.relpath}"
+        "previewUrl": "${server.80/tcp}/${current.project.relpath}"
       },
       "type": "custom"
     }

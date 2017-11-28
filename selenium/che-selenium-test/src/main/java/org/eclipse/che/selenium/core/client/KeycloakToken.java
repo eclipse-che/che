@@ -68,7 +68,7 @@ public class KeycloakToken {
     this.refreshDetails = refreshDetails;
   }
 
-  class TokenDetails {
+  static class TokenDetails {
     @SerializedName("exp")
     private long expiresAt;
 

@@ -110,11 +110,7 @@ init_global_vars() {
   DEFAULT_CHE_CLI_LOG="true"
   CHE_CLI_LOG=${CLI_LOG:-${DEFAULT_CHE_CLI_LOG}}
 
-  if [ -z "${CHE_MULTIUSER:-}" ]; then
-    DEFAULT_CHE_ASSEMBLY_IN_REPO_MODULE_NAME="assembly/assembly-main"
-  else
-    DEFAULT_CHE_ASSEMBLY_IN_REPO_MODULE_NAME="assembly-multiuser/assembly-main"
-  fi
+  DEFAULT_CHE_ASSEMBLY_IN_REPO_MODULE_NAME="assembly/assembly-main"
   CHE_ASSEMBLY_IN_REPO_MODULE_NAME=${CHE_ASSEMBLY_IN_REPO_MODULE_NAME:-${DEFAULT_CHE_ASSEMBLY_IN_REPO_MODULE_NAME}}
 
   DEFAULT_CHE_ASSEMBLY_IN_REPO="${DEFAULT_CHE_ASSEMBLY_IN_REPO_MODULE_NAME}/target/eclipse-che*/eclipse-che-*"
@@ -173,6 +169,9 @@ init_global_vars() {
   CHE_USER="${CHE_USER:-${DEFAULT_CHE_USER}}"
 
   CHE_USER_GROUPS=""
+
+  UNAME_R=${UNAME_R:-$(uname -r)}
+
 }
 
 usage() {

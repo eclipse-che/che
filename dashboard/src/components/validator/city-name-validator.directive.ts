@@ -15,16 +15,16 @@
  *
  * @author Oleksii Kurinnyi
  */
-export class CityNameValidator {
+export class CityNameValidator implements ng.IDirective {
   restrict: string = 'A';
   require: string = 'ngModel';
 
-  cityNameRE: RegExp = new RegExp(/^(?:[a-zA-Z\u00A0-\u024F]+(?:\. |-| |'))*[a-zA-Z\u00A0-\u024F]+$/);
+  cityNameRE: RegExp = new RegExp(`^(?:[a-zA-Z\u00A0-\u024F]+(?:\. |-| |'))*[a-zA-Z\u00A0-\u024F]+$`);
 
-  link($scope, element, attrs, ctrl) {
+  link($scope: ng.IRootScopeService, $element: ng.IAugmentedJQuery, $attrs: ng.IAttributes, $ctrl: ng.INgModelController) {
     // validate only input element
-    if ('input' === element[0].localName) {
-      ctrl.$validators.cityNameValidator = (modelValue: string) => {
+    if ('input' === $element[0].localName) {
+      ($ctrl.$validators as any).cityNameValidator = (modelValue: string) => {
         return this.cityNameRE.test(modelValue);
       };
     }

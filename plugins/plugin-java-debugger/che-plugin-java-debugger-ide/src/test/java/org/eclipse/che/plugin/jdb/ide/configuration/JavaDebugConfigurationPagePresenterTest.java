@@ -21,12 +21,11 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.api.workspace.model.ServerImpl;
-import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -43,9 +42,8 @@ public class JavaDebugConfigurationPagePresenterTest {
   private static final int PORT = 8000;
 
   @Mock private JavaDebugConfigurationPageView pageView;
-  @Mock private AppContext appContext;
+  @Mock private WsAgentServerUtil wsAgentServerUtil;
   @Mock private MachineImpl devMachine;
-  @Mock private WorkspaceImpl workspace;
 
   @Mock private DebugConfiguration configuration;
 
@@ -62,8 +60,7 @@ public class JavaDebugConfigurationPagePresenterTest {
     servers.put("8000/tcp", server);
     when(devMachine.getServers()).thenReturn(servers);
 
-    when(workspace.getDevMachine()).thenReturn(Optional.of(devMachine));
-    when(appContext.getWorkspace()).thenReturn(workspace);
+    when(wsAgentServerUtil.getWsAgentServerMachine()).thenReturn(Optional.of(devMachine));
     when(devMachine.getName()).thenReturn("devMachine");
 
     pagePresenter.resetFrom(configuration);

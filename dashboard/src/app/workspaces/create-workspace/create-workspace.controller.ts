@@ -286,7 +286,8 @@ export class CreateWorkspaceController {
       this.stack.workspaceConfig.environments[environmentName] = newEnvironment;
     }
     let attributes = {stackId: this.stack.id};
-    this.createWorkspaceSvc.createWorkspace(this.stack.workspaceConfig, attributes);
+    let workspaceConfig = angular.copy(this.stack.workspaceConfig);
+    this.createWorkspaceSvc.createWorkspace(workspaceConfig, attributes);
   }
 
 }

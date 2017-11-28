@@ -13,7 +13,6 @@ package org.eclipse.che.ide.api.workspace.model;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
@@ -167,16 +166,6 @@ public class WorkspaceImpl implements Workspace {
   @Override
   public RuntimeImpl getRuntime() {
     return runtime;
-  }
-
-  /**
-   * Shorthand for {@link RuntimeImpl#getDevMachine()}. Allows to avoid checking whether runtime is
-   * exists or not. Returns an empty {@code Optional} if workspace doesn't have a runtime.
-   *
-   * @see RuntimeImpl#getDevMachine()
-   */
-  public Optional<MachineImpl> getDevMachine() {
-    return getRuntime() != null ? getRuntime().getDevMachine() : Optional.empty();
   }
 
   @Override

@@ -11,7 +11,6 @@
 package org.eclipse.che.selenium.miscellaneous;
 
 import static java.lang.String.valueOf;
-import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -43,8 +42,8 @@ public class WorkingWithTerminalTest {
   private static final Logger LOG = LoggerFactory.getLogger(WorkingWithTerminalTest.class);
 
   private static final String[] CHECK_MC_OPENING = {
-    "Left", "File", "Command", "Options", "Right", "Name", "/bin", "/boot", "/dev", "/etc", "/home",
-    "/lib", "/lib64", "/bin", "1Help", "2Menu", "3View", "4Edit", "5Copy", "6RenMov", "7Mkdir",
+    "Left", "File", "Command", "Options", "Right", "Name", "bin", "dev", "etc", "home",
+    "lib", "lib64", "bin", "1Help", "2Menu", "3View", "4Edit", "5Copy", "6RenMov", "7Mkdir",
     "8Delete", "9PullDn", "10Quit"
   };
 
@@ -158,10 +157,12 @@ public class WorkingWithTerminalTest {
     openMC("/");
 
     // check scrolling of the terminal
+    terminal.movePageDownListTerminal("opt");
     terminal.moveDownListTerminal(".dockerenv");
     terminal.waitExpectedTextIntoTerminal(".dockerenv");
-    terminal.moveUpListTerminal("/bin");
-    terminal.waitExpectedTextIntoTerminal("/bin");
+    terminal.movePageUpListTerminal("projects");
+    terminal.moveUpListTerminal("bin");
+    terminal.waitExpectedTextIntoTerminal("bin");
   }
 
   @Test(priority = 3)
@@ -176,9 +177,15 @@ public class WorkingWithTerminalTest {
     terminal.waitExpectedTextNotPresentTerminal(".dockerenv");
     consoles.clickOnMaximizePanelIcon();
     loader.waitOnClosed();
+    for (String partOfContent : CHECK_MC_OPENING) {
+      terminal.waitExpectedTextIntoTerminal(partOfContent);
+    }
     terminal.waitExpectedTextIntoTerminal(".dockerenv");
     consoles.clickOnMaximizePanelIcon();
     loader.waitOnClosed();
+    for (String partOfContent : CHECK_MC_OPENING) {
+      terminal.waitExpectedTextIntoTerminal(partOfContent);
+    }
     terminal.waitExpectedTextNotPresentTerminal(".dockerenv");
   }
 
@@ -208,11 +215,11 @@ public class WorkingWithTerminalTest {
     terminal.typeIntoTerminal("cd ~" + Keys.ENTER);
     terminal.typeIntoTerminal("ls" + Keys.ENTER);
     terminal.waitTerminalIsNotEmpty();
-    terminal.waitExpectedTextIntoTerminal("apache-maven-3.3.9");
+    terminal.waitExpectedTextIntoTerminal("che");
     terminal.typeIntoTerminal("touch testfile0.txt" + Keys.ENTER);
 
     terminal.typeIntoTerminal("ls" + Keys.ENTER);
-    terminal.waitExpectedTextIntoTerminal("apache-maven-3.3.9");
+    terminal.waitExpectedTextIntoTerminal("che");
     terminal.waitExpectedTextIntoTerminal("che");
     terminal.waitExpectedTextIntoTerminal("testfile0.txt");
     terminal.waitExpectedTextIntoTerminal("tomcat8");
@@ -243,8 +250,7 @@ public class WorkingWithTerminalTest {
     terminal.waitExpectedTextNotPresentTerminal("clear");
 
     terminal.waitTerminalIsNotEmpty();
-    String terminalContent = terminal.getVisibleTextFromTerminal().trim();
-    assertTrue(terminalContent.matches("^(user@)[a-z0-9]{12}(:/\\$)$"));
+    terminal.waitExpectedTextIntoTerminal("user@");
   }
 
   @Test(priority = 8)
@@ -256,8 +262,7 @@ public class WorkingWithTerminalTest {
     terminal.waitExpectedTextNotPresentTerminal("reset");
 
     terminal.waitTerminalIsNotEmpty();
-    String terminalContent = terminal.getVisibleTextFromTerminal().trim();
-    assertTrue(terminalContent.matches("^(user@)[a-z0-9]{12}(:/\\$)$"));
+    terminal.waitExpectedTextIntoTerminal("user@");
   }
 
   @Test(priority = 9)
@@ -298,16 +303,19 @@ public class WorkingWithTerminalTest {
 
   @Test(priority = 11)
   public void shouldViewFolderIntoMC() {
+    terminal.waitTerminalTab();
+    consoles.clickOnMaximizePanelIcon();
     openMC("/");
 
     // select bin folder and view this folder by "F3" key
-    terminal.waitExpectedTextIntoTerminal("/bin");
+    terminal.waitExpectedTextIntoTerminal("bin");
     terminal.typeIntoTerminal(Keys.HOME.toString() + Keys.F3.toString());
     for (String partOfContent : VIEW_BIN_FOLDER) {
       terminal.waitExpectedTextIntoTerminal(partOfContent);
     }
     terminal.typeIntoTerminal("cd ~" + Keys.ENTER);
     terminal.waitExpectedTextIntoTerminal(".cache");
+    consoles.clickOnMaximizePanelIcon();
   }
 
   @Test(priority = 12)
@@ -325,8 +333,7 @@ public class WorkingWithTerminalTest {
     // select editor
     terminal.typeIntoTerminal(valueOf(1) + Keys.ENTER);
 
-    terminal.waitExpectedTextIntoTerminal(
-        "README.md          " + "[----]  0 L:[  1+ 0   1/  1] *(0   /  21b) 0035 0x023");
+    terminal.waitExpectedTextIntoTerminal("README.md");
     terminal.typeIntoTerminal("<!-some comment->");
     terminal.typeIntoTerminal(
         "" + Keys.HOME + Keys.ARROW_RIGHT + Keys.ARROW_RIGHT + Keys.ARROW_RIGHT + Keys.DELETE);

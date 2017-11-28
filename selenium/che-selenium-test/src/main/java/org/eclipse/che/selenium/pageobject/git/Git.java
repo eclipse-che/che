@@ -156,6 +156,25 @@ public class Git {
     loader.waitOnClosed();
   }
 
+  /**
+   * wait for the branch search filter label to be with given text.
+   *
+   * @param text text to check
+   */
+  public void waitBranchSearchFilerWithText(String text) {
+    gitBranchesForm.waitBranchesForm();
+    gitBranchesForm.waitSearchFilerWithText(text);
+  }
+
+  /**
+   * Type text to the branch search filter.
+   *
+   * @param text typed text
+   */
+  public void typeToBranchSearchFilter(String text) {
+    gitBranchesForm.typeSearchFilter(text);
+  }
+
   /** click on Close button and wait while form will be closed */
   public void closeBranchesForm() {
     gitBranchesForm.clickCloseBtn();
@@ -791,6 +810,16 @@ public class Git {
    */
   public void waitItemCheckBoxToBeUnSelectedInCommitWindow(String... itemName) {
     stream(itemName).forEach(gitCommit::waitItemCheckBoxToBeUnSelected);
+  }
+
+  /**
+   * Wait for item check-box in the 'Git changed files tree panel' in 'Commit' window to be
+   * indeterminate.
+   *
+   * @param itemName name of the item
+   */
+  public void waitItemCheckBoxToBeIndeterminateInCommitWindow(String... itemName) {
+    stream(itemName).forEach(gitCommit::waitItemCheckBoxToBeIndeterminate);
   }
 
   /** Wait 'Reset to commit' window is open */

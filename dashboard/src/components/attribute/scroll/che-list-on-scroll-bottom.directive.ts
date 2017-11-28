@@ -10,27 +10,25 @@
  */
 'use strict';
 
+interface ICheListOnScrollBottomAttributes extends ng.IAttributes {
+  cheListOnScrollBottom: any;
+}
+
 /**
  * Defines a directive for a scrolled to bottom list event.
  * @author Michail Kuznyetsov
  */
 export class CheListOnScrollBottom {
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor () {
-    this.restrict='A';
-  }
+  restrict = 'A';
 
   /**
    * Check if scroll has reached the bottom
    */
-  link(scope, element, attrs) {
-    var raw = element[0];
-    element.bind('scroll', function () {
+  link($scope: ng.IScope, $element: ng.IAugmentedJQuery, $attrs: ICheListOnScrollBottomAttributes) {
+    const raw = $element[0];
+    $element.bind('scroll', function () {
       if (raw.scrollTop + raw.offsetHeight - raw.scrollHeight >= 0) {
-        scope.$apply(attrs.cheListOnScrollBottom);
+        $scope.$apply($attrs.cheListOnScrollBottom);
       }
     });
   }

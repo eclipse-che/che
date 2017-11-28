@@ -189,7 +189,7 @@ public interface AppContext {
    *
    * @return identifier
    */
-  Optional<String> getApplicationWebsocketId();
+  Optional<String> getApplicationId();
 
   /**
    * Sets web application identifier. Most obvious use - to distinguish web applications on server

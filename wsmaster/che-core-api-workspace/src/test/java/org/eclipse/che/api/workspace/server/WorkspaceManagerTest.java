@@ -21,7 +21,6 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.WorkspaceManager.UPDATED_ATTRIBUTE_NAME;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -68,6 +67,7 @@ import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
@@ -558,7 +558,8 @@ public class WorkspaceManagerTest {
             singletonList("org.eclipse.che.ws-agent"),
             null,
             singletonMap("CHE_ENV", "value"),
-            singletonMap(MEMORY_LIMIT_ATTRIBUTE, "10000"));
+            singletonMap(MEMORY_LIMIT_ATTRIBUTE, "10000"),
+            emptyMap());
     EnvironmentImpl environment =
         new EnvironmentImpl(
             new RecipeImpl("type", "contentType", "content", null),
@@ -577,7 +578,7 @@ public class WorkspaceManagerTest {
 
   private RuntimeContext mockContext(RuntimeIdentity identity) throws Exception {
     RuntimeContext context = mock(RuntimeContext.class);
-    doReturn(context).when(infrastructure).prepare(eq(identity), anyObject());
+    doReturn(context).when(infrastructure).prepare(eq(identity), any(InternalEnvironment.class));
     when(context.getInfrastructure()).thenReturn(infrastructure);
     when(context.getIdentity()).thenReturn(identity);
     return context;
