@@ -161,45 +161,48 @@ public class WorkingWithTerminalTest {
     try {
       // check scrolling of the terminal
       terminal.movePageDownListTerminal("opt");
-      terminal.moveDownListTerminal(".dockerenv");
-      terminal.waitExpectedTextIntoTerminal(".dockerenv");
-      terminal.movePageUpListTerminal("projects");
-      terminal.moveUpListTerminal("bin");
-      terminal.waitExpectedTextIntoTerminal("bin");
+
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7592");
+      fail("Known issue https://github.com/eclipse/che/issues/7592", ex);
     }
+
+    terminal.moveDownListTerminal(".dockerenv");
+    terminal.waitExpectedTextIntoTerminal(".dockerenv");
+    terminal.movePageUpListTerminal("projects");
+    terminal.moveUpListTerminal("bin");
+    terminal.waitExpectedTextIntoTerminal("bin");
   }
 
   @Test(priority = 3)
   public void shouldResizeTerminal() {
     openMC("/");
 
-    // check the root content of the midnight commander
+    try {
+      // check the root content of the midnight commander
+      for (String partOfContent : CHECK_MC_OPENING) {
+        terminal.waitExpectedTextIntoTerminal(partOfContent);
+      }
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7592", ex);
+    }
+
+    terminal.waitExpectedTextNotPresentTerminal(".dockerenv");
+    consoles.clickOnMaximizePanelIcon();
+    loader.waitOnClosed();
+
+    // check resize of the terminal
     for (String partOfContent : CHECK_MC_OPENING) {
       terminal.waitExpectedTextIntoTerminal(partOfContent);
     }
-
-    try {
-      // check resize of the terminal
-      terminal.waitExpectedTextNotPresentTerminal(".dockerenv");
-      consoles.clickOnMaximizePanelIcon();
-      loader.waitOnClosed();
-      for (String partOfContent : CHECK_MC_OPENING) {
-        terminal.waitExpectedTextIntoTerminal(partOfContent);
-      }
-      terminal.waitExpectedTextIntoTerminal(".dockerenv");
-      consoles.clickOnMaximizePanelIcon();
-      loader.waitOnClosed();
-      for (String partOfContent : CHECK_MC_OPENING) {
-        terminal.waitExpectedTextIntoTerminal(partOfContent);
-      }
-      terminal.waitExpectedTextNotPresentTerminal(".dockerenv");
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7592");
+    terminal.waitExpectedTextIntoTerminal(".dockerenv");
+    consoles.clickOnMaximizePanelIcon();
+    loader.waitOnClosed();
+    for (String partOfContent : CHECK_MC_OPENING) {
+      terminal.waitExpectedTextIntoTerminal(partOfContent);
     }
+    terminal.waitExpectedTextNotPresentTerminal(".dockerenv");
   }
 
   @Test(priority = 4)
@@ -223,7 +226,7 @@ public class WorkingWithTerminalTest {
       }
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7592");
+      fail("Known issue https://github.com/eclipse/che/issues/7592", ex);
     }
 
     terminal.typeIntoTerminal(Keys.F10.toString());
