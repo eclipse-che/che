@@ -181,6 +181,7 @@ public class StandardComponentInitializer {
   public static final String SHOW_REFERENCE = "showReference";
   public static final String SHOW_COMMANDS_PALETTE = "showCommandsPalette";
   public static final String NEW_TERMINAL = "newTerminal";
+  public static final String STOP_WORKSPACE = "stopWorkspace";
 
   public interface ParserResource extends ClientBundle {
     @Source("org/eclipse/che/ide/blank.svg")
@@ -612,7 +613,7 @@ public class StandardComponentInitializer {
     helpGroup.addSeparator();
 
     // Processes panel actions
-    actionManager.registerAction("stopWorkspace", stopWorkspaceAction);
+    actionManager.registerAction(STOP_WORKSPACE, stopWorkspaceAction);
     actionManager.registerAction("runCommand", runCommandAction);
     actionManager.registerAction("newTerminal", newTerminalAction);
 

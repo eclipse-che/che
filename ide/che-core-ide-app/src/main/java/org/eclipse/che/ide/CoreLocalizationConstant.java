@@ -1231,4 +1231,16 @@ public interface CoreLocalizationConstant extends Messages {
 
   @Key("menu.loader.pullingImage")
   String menuLoaderPullingImage(String image);
+
+  @Key("ws.agent.lost.connection.dialog.title")
+  String wsAgentNotRespondingDialogTitle();
+
+  @Key("ws.agent.lost.connection.dialog.message")
+  String wsAgentNotRespondingDialogMessage();
+
+  @Key("ws.agent.lost.connection.dialog.restart")
+  String wsAgentNotRespondingDialogRestart();
+
+  @Key("ws.agent.lost.connection.dialog.close")
+  String wsAgentNotRespondingDialogClose();
 }

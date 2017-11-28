@@ -36,5 +36,6 @@ public class CheWsAgentModule extends AbstractModule {
     bind(String.class)
         .annotatedWith(Names.named("wsagent.endpoint"))
         .toProvider(WsAgentURLProvider.class);
+    bind(WsAgentWebSocketConnectionKeeper.class).asEagerSingleton();
   }
 }

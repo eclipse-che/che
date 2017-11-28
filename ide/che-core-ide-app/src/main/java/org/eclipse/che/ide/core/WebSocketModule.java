@@ -35,6 +35,8 @@ public class WebSocketModule extends AbstractGinModule {
     bind(WebSocketMessageTransmitter.class).to(BasicWebSocketMessageTransmitter.class);
     bind(WebSocketMessageReceiver.class).to(JsonRpcMessageReceiver.class);
 
+    bind(WsAgentWebSocketConnectionTracker.class).asEagerSingleton();
+
     install(
         new GinFactoryModuleBuilder()
             .implement(WebSocketConnection.class, DelayableWebSocketConnection.class)
