@@ -72,7 +72,7 @@ public class TestOrganizationServiceClient {
             .request()
             .asDto(OrganizationDto.class);
 
-    LOG.debug(
+    LOG.info(
         "Organization with name='{}', id='{}', parent's id='{}' created",
         name,
         organizationDto.getId(),
@@ -90,7 +90,7 @@ public class TestOrganizationServiceClient {
 
     try {
       requestFactory.fromUrl(apiUrl).useDeleteMethod().request();
-      LOG.debug("Organization with id='{}' removed", id);
+      LOG.info("Organization with id='{}' removed", id);
     } catch (NotFoundException e) {
       // ignore if there is no organization of certain id
     }
