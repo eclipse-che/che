@@ -24,7 +24,6 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.promises.client.Function;
-import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.debug.HasLocation;
@@ -37,10 +36,9 @@ import org.eclipse.che.ide.api.resources.ResourceChangedEvent.ResourceChangedHan
 import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.theme.Style;
+import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
-import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationService;
-import org.eclipse.che.ide.ext.java.shared.JarEntry;
-import org.eclipse.che.ide.ext.java.shared.dto.ClassContent;
+import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
 import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.project.shared.NodesResources;
 import org.eclipse.che.ide.resource.Path;
@@ -48,6 +46,9 @@ import org.eclipse.che.ide.ui.smartTree.data.HasAction;
 import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.data.settings.NodeSettings;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
+import org.eclipse.che.jdt.ls.extension.api.dto.ClassContent;
+import org.eclipse.che.jdt.ls.extension.api.dto.ExternalLibrariesParameters;
+import org.eclipse.che.jdt.ls.extension.api.dto.JarEntry;
 
 /**
  * It might be used for any jar content.
@@ -60,9 +61,10 @@ public class JarFileNode extends SyntheticNode<JarEntry>
 
   private final int libId;
   private final Path project;
+  private final JavaLanguageExtensionServiceClient service;
+  private final DtoFactory dtoFactory;
   private final JavaResources javaResources;
   private final NodesResources nodesResources;
-  private final JavaNavigationService service;
   private final EditorAgent editorAgent;
   private final EventBus eventBus;
 
@@ -76,17 +78,19 @@ public class JarFileNode extends SyntheticNode<JarEntry>
       @Assisted int libId,
       @Assisted Path project,
       @Assisted NodeSettings nodeSettings,
+      JavaLanguageExtensionServiceClient service,
+      DtoFactory dtoFactory,
       JavaResources javaResources,
       NodesResources nodesResources,
-      JavaNavigationService service,
       EditorAgent editorAgent,
       EventBus eventBus) {
     super(jarEntry, nodeSettings);
     this.libId = libId;
     this.project = project;
+    this.service = service;
+    this.dtoFactory = dtoFactory;
     this.javaResources = javaResources;
     this.nodesResources = nodesResources;
-    this.service = service;
     this.editorAgent = editorAgent;
     this.eventBus = eventBus;
 
@@ -168,28 +172,28 @@ public class JarFileNode extends SyntheticNode<JarEntry>
   /** {@inheritDoc} */
   @Override
   public Promise<String> getContent() {
+    ExternalLibrariesParameters params = dtoFactory.createDto(ExternalLibrariesParameters.class);
+    params.setProjectUri(project.toString());
+    params.setNodePath(getData().getPath());
     if (libId != -1) {
+      params.setNodeId(libId);
       return service
-          .getContent(project, libId, Path.valueOf(getData().getPath()))
+          .libraryNodeContentByPath(params)
           .then(
-              new Function<ClassContent, String>() {
-                @Override
-                public String apply(ClassContent result) throws FunctionException {
-                  JarFileNode.this.contentGenerated = result.isGenerated();
-                  return result.getContent();
-                }
-              });
+              (Function<ClassContent, String>)
+                  result -> {
+                    JarFileNode.this.contentGenerated = result.isGenerated();
+                    return result.getContent();
+                  });
     } else {
       return service
-          .getContent(project, getData().getPath())
+          .libraryNodeContentByFqn(params)
           .then(
-              new Function<ClassContent, String>() {
-                @Override
-                public String apply(ClassContent result) throws FunctionException {
-                  JarFileNode.this.contentGenerated = result.isGenerated();
-                  return result.getContent();
-                }
-              });
+              (Function<ClassContent, String>)
+                  result -> {
+                    JarFileNode.this.contentGenerated = result.isGenerated();
+                    return result.getContent();
+                  });
     }
   }
 

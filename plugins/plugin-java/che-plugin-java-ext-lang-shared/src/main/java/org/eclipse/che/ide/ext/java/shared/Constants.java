@@ -28,6 +28,15 @@ public final class Constants {
 
   public static final String JAVAC = "javac";
 
+  // JSON RPC methods
+  public static final String FILE_STRUCTURE = "java/filestructure";
+  public static final String EXTERNAL_LIBRARIES = "java/externalLibraries";
+  public static final String EXTERNAL_LIBRARIES_CHILDREN = "java/externalLibrariesChildren";
+  public static final String EXTERNAL_LIBRARY_CHILDREN = "java/libraryChildren";
+  public static final String EXTERNAL_LIBRARY_ENTRY = "java/libraryEntry";
+  public static final String EXTERNAL_CONTENT_NODE_BY_PATH = "java/libraryNodeContentByPath";
+  public static final String EXTERNAL_CONTENT_NODE_BY_FQN = "java/libraryNodeContentByFQN";
+
   private Constants() {
     throw new UnsupportedOperationException("Unused constructor.");
   }

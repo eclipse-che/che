@@ -12,12 +12,25 @@ package org.eclipse.che.plugin.java.languageserver;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_CONTENT_NODE_BY_FQN;
+import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_CONTENT_NODE_BY_PATH;
+import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARIES;
+import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARIES_CHILDREN;
+import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_CHILDREN;
+import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_ENTRY;
+import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FILE_STRUCTURE_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_ENTRY_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_FOLDER_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_PROJECT_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_IN_FILE_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TEST_BY_CURSOR_COMMAND;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_EXTERNAL_LIBRARIES_CHILDREN_COMMAND;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_EXTERNAL_LIBRARIES_COMMAND;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_LIBRARY_CHILDREN_COMMAND;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_LIBRARY_ENTRY_COMMAND;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_LIBRARY_NODE_CONTENT_BY_FQN_COMMAND;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_LIBRARY_NODE_CONTENT_BY_PATH_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_OUTPUT_DIR_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.RESOLVE_CLASSPATH_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.TEST_DETECT_COMMAND;
@@ -40,12 +53,19 @@ import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
+import org.eclipse.che.jdt.ls.extension.api.dto.ClassContent;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
+import org.eclipse.che.jdt.ls.extension.api.dto.ExternalLibrariesParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.FileStructureCommandParameters;
+import org.eclipse.che.jdt.ls.extension.api.dto.Jar;
+import org.eclipse.che.jdt.ls.extension.api.dto.JarEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestFindParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPosition;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPositionParameters;
+import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.ClassContentDto;
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.ExtendedSymbolInformationDto;
+import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.JarDto;
+import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.JarEntryDto;
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.TestPositionDto;
 import org.eclipse.lsp4j.ExecuteCommandParams;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.CollectionTypeAdapterFactory;
@@ -85,10 +105,52 @@ public class JavaLanguageServerExtensionService {
   public void configureMethods() {
     requestHandler
         .newConfiguration()
-        .methodName("java/filestructure")
+        .methodName(FILE_STRUCTURE)
         .paramsAsDto(FileStructureCommandParameters.class)
         .resultAsListOfDto(ExtendedSymbolInformationDto.class)
         .withFunction(this::executeFileStructure);
+
+    requestHandler
+        .newConfiguration()
+        .methodName(EXTERNAL_LIBRARIES)
+        .paramsAsDto(ExternalLibrariesParameters.class)
+        .resultAsListOfDto(JarDto.class)
+        .withFunction(this::getProjectExternalLibraries);
+
+    requestHandler
+        .newConfiguration()
+        .methodName(EXTERNAL_LIBRARIES_CHILDREN)
+        .paramsAsDto(ExternalLibrariesParameters.class)
+        .resultAsListOfDto(JarEntryDto.class)
+        .withFunction(this::getExternalLibrariesChildren);
+
+    requestHandler
+        .newConfiguration()
+        .methodName(EXTERNAL_LIBRARY_CHILDREN)
+        .paramsAsDto(ExternalLibrariesParameters.class)
+        .resultAsListOfDto(JarEntryDto.class)
+        .withFunction(this::getLibraryChildren);
+
+    requestHandler
+        .newConfiguration()
+        .methodName(EXTERNAL_LIBRARY_ENTRY)
+        .paramsAsDto(ExternalLibrariesParameters.class)
+        .resultAsDto(JarEntryDto.class)
+        .withFunction(this::getLibraryEntry);
+
+    requestHandler
+        .newConfiguration()
+        .methodName(EXTERNAL_CONTENT_NODE_BY_PATH)
+        .paramsAsDto(ExternalLibrariesParameters.class)
+        .resultAsDto(ClassContentDto.class)
+        .withFunction(this::getLibraryNodeContentByPath);
+
+    requestHandler
+        .newConfiguration()
+        .methodName(EXTERNAL_CONTENT_NODE_BY_FQN)
+        .paramsAsDto(ExternalLibrariesParameters.class)
+        .resultAsDto(ClassContentDto.class)
+        .withFunction(this::getLibraryNodeContentByFqn);
   }
 
   /**
@@ -261,6 +323,81 @@ public class JavaLanguageServerExtensionService {
               })
           .map(ExtendedSymbolInformationDto::new)
           .collect(Collectors.toList());
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
+  }
+
+  private List<JarDto> getProjectExternalLibraries(ExternalLibrariesParameters params) {
+    params.setProjectUri(LanguageServiceUtils.prefixURI(params.getProjectUri()));
+    CompletableFuture<Object> result =
+        executeCommand(GET_EXTERNAL_LIBRARIES_COMMAND, singletonList(params));
+    Type targetClassType = new TypeToken<ArrayList<Jar>>() {}.getType();
+    try {
+      return gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), targetClassType);
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
+  }
+
+  private List<JarEntryDto> getExternalLibrariesChildren(ExternalLibrariesParameters params) {
+    params.setProjectUri(LanguageServiceUtils.prefixURI(params.getProjectUri()));
+    CompletableFuture<Object> result =
+        executeCommand(GET_EXTERNAL_LIBRARIES_CHILDREN_COMMAND, singletonList(params));
+    Type targetClassType = new TypeToken<ArrayList<JarEntry>>() {}.getType();
+    try {
+      return gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), targetClassType);
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
+  }
+
+  private List<JarEntryDto> getLibraryChildren(ExternalLibrariesParameters params) {
+    params.setProjectUri(LanguageServiceUtils.prefixURI(params.getProjectUri()));
+    CompletableFuture<Object> result =
+        executeCommand(GET_LIBRARY_CHILDREN_COMMAND, singletonList(params));
+    Type targetClassType = new TypeToken<ArrayList<JarEntry>>() {}.getType();
+    try {
+      return gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), targetClassType);
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
+  }
+
+  private JarEntryDto getLibraryEntry(ExternalLibrariesParameters params) {
+    params.setProjectUri(LanguageServiceUtils.prefixURI(params.getProjectUri()));
+    CompletableFuture<Object> result =
+        executeCommand(GET_LIBRARY_ENTRY_COMMAND, singletonList(params));
+    Type targetClassType = new TypeToken<JarEntry>() {}.getType();
+    try {
+      return new JarEntryDto(
+          gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), targetClassType));
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
+  }
+
+  private ClassContentDto getLibraryNodeContentByPath(ExternalLibrariesParameters params) {
+    params.setProjectUri(LanguageServiceUtils.prefixURI(params.getProjectUri()));
+    CompletableFuture<Object> result =
+        executeCommand(GET_LIBRARY_NODE_CONTENT_BY_PATH_COMMAND, singletonList(params));
+    Type targetClassType = new TypeToken<ClassContent>() {}.getType();
+    try {
+      return new ClassContentDto(
+          gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), targetClassType));
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
+  }
+
+  private ClassContentDto getLibraryNodeContentByFqn(ExternalLibrariesParameters params) {
+    params.setProjectUri(LanguageServiceUtils.prefixURI(params.getProjectUri()));
+    CompletableFuture<Object> result =
+        executeCommand(GET_LIBRARY_NODE_CONTENT_BY_FQN_COMMAND, singletonList(params));
+    Type targetClassType = new TypeToken<ClassContent>() {}.getType();
+    try {
+      return new ClassContentDto(
+          gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), targetClassType));
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }
