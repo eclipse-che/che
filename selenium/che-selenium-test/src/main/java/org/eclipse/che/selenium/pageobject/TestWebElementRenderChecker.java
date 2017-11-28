@@ -75,7 +75,7 @@ public class TestWebElementRenderChecker {
   }
 
   private Boolean dimensionsAreEquivalent(AtomicInteger sizeHashCode, Dimension newDimension) {
-    return sizeHashCode.get() == getDimensionSumWithShift(newDimension);
+    return sizeHashCode.get() == getSizeHashCode(newDimension);
   }
 
   private FluentWait<WebDriver> getFluentWait(int seconds) {
@@ -86,7 +86,7 @@ public class TestWebElementRenderChecker {
   }
 
   private void waitElementIsStatic(FluentWait<WebDriver> webDriverWait, WebElement webElement) {
-    AtomicInteger sizeHashCode = new AtomicInteger(0);
+    AtomicInteger sizeHashCode = new AtomicInteger();
 
     webDriverWait.until(
         (ExpectedCondition<Boolean>)
@@ -96,7 +96,7 @@ public class TestWebElementRenderChecker {
               if (dimensionsAreEquivalent(sizeHashCode, newDimension)) {
                 return true;
               } else {
-                sizeHashCode.set(getDimensionSumWithShift(newDimension));
+                sizeHashCode.set(getSizeHashCode(newDimension));
                 return false;
               }
             });
@@ -109,7 +109,7 @@ public class TestWebElementRenderChecker {
    * @param dimension consist partial sizes
    * @return partial sizes sum with shift
    */
-  private int getDimensionSumWithShift(Dimension dimension) {
+  private int getSizeHashCode(Dimension dimension) {
     return dimension.getWidth() + (dimension.getHeight() * 10000);
   }
 
