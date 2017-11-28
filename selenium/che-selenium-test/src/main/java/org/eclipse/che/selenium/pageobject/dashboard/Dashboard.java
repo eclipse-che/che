@@ -85,7 +85,7 @@ public class Dashboard {
 
   private interface Locators {
     String DASHBOARD_TOOLBAR_TITLE = "//*[contains(@id,'navbar')]";
-    String NAVBAR_NOTIFICATION_CONTAINER = "navbarNotification-container";
+    String NAVBAR_NOTIFICATION_CONTAINER = "navbar-notification-container";
     String COLLAPSE_DASH_NAVBAR_BTN = "ide-iframe-button-link";
     String NOTIFICATION_CONTAINER = "che-notification-container";
 
@@ -99,9 +99,9 @@ public class Dashboard {
     String RESENT_WS_NAVBAR = "//div[@class='admin-navbar-menu recent-workspaces']";
     String LEFT_SIDE_BAR = "//div[@class='left-sidebar-container']";
 
-    String USER_PANEL = "navbarUser-panel";
-    String DEVELOPERS_FACE_XPATH = "developersFace";
-    String USER_NAME = "userName";
+    String USER_PANEL = "navbar-user-panel";
+    String DEVELOPERS_FACE_XPATH = "developers-face";
+    String USER_NAME = "user-name";
 
     String LICENSE_NAG_MESSAGE_XPATH = "//div[contains(@class, 'license-message')]";
 

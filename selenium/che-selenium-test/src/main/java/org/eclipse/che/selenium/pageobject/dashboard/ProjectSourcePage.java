@@ -52,7 +52,7 @@ public class ProjectSourcePage {
     String ADD_OR_IMPORT_PROJECT_BUTTON = "ADD_PROJECT";
 
     // project source selector(main form)
-    String PROJECT_SOURCE_SELECTOR = "projectSourceSelector";
+    String PROJECT_SOURCE_SELECTOR = "project-source-selector";
 
     // select type of project
     String SAMPLES_BUTTON = "%s-button";
@@ -64,12 +64,12 @@ public class ProjectSourcePage {
     String TEMPLATE_NAME = "//div[@name='template-name']";
     String TEMPLATE_DESCRIPTION = "//div[@name='template-description']";
 
-    String GIT_REPO_XPATH = "remoteGitURL-input";
-    String ZIP_XPATH = "remoteZipURL-input";
-    String ZIP_SKIP_ROOT_XPATH = "zipSkipRootFolder-checkbox";
+    String GIT_REPO_XPATH = "remote-git-url-input";
+    String ZIP_XPATH = "remote-zip-url-input";
+    String ZIP_SKIP_ROOT_XPATH = "zip-skip-root-folder-checkbox";
 
     // 'add selected projects' and 'cancel changes' buttons
-    String ADD_PROJECT_BUTTON = "addProject-button";
+    String ADD_PROJECT_BUTTON = "add-project-button";
     String CANCEL_BUTTON = "cancel-button";
   }
 

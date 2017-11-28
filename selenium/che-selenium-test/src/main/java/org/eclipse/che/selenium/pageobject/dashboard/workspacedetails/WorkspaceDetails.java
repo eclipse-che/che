@@ -56,9 +56,9 @@ public class WorkspaceDetails {
 
   private interface Locators {
     String WORKSPACE_STATE = "workspace-status";
-    String RUN_WORKSPACE_BTN = "runButton";
-    String STOP_WORKSPACE_BTN = "stopButton";
-    String OPEN_IN_IDE_WS_BTN = "openInIde-button";
+    String RUN_WORKSPACE_BTN = "run-workspace-button";
+    String STOP_WORKSPACE_BTN = "stop-workspace-button";
+    String OPEN_IN_IDE_WS_BTN = "open-in-ide-button";
     String TAB_NAMES_IN_WS = "//md-pagination-wrapper//span[text()='%s']";
     String SAVE_CHANGED_BUTTON = "//che-button-save-flat//span[text()='Save']";
     String CANCEL_CHANGES_BUTTON = "//che-button-cancel-flat//span[text()='Cancel']";

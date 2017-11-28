@@ -21,7 +21,7 @@
         <section class="navbar-top-logo logo-color-white" layout="column" layout-align="center left" ng-include="branding.logoText">
         </section>
         <div flex></div>
-        <navbar-notification id="navbarNotification-container"></navbar-notification>
+        <navbar-notification id="navbar-notification-container"></navbar-notification>
       </div>
 
       <md-divider md-theme="factory-theme"></md-divider>
@@ -139,12 +139,12 @@
                                     navbar-dropdown-items="navbarController.accountItems"
                                     navbar-dropdown-offset="15 -45">
                 <md-button ng-href="" layout-align="left">
-                  <div class="navbar-item navbar-identity" layout="row" layout-align="start center" id="navbarUser-panel">
+                  <div class="navbar-item navbar-identity" layout="row" layout-align="start center" id="navbar-user-panel">
 
                     <i class="navbar-icon" flex="none">
-                      <img class="developers-face" id="developersFace" gravatar-src="navbarController.profile.email"/>
+                      <img class="developers-face" id="developers-face" gravatar-src="navbarController.profile.email"/>
                     </i>
-                    <span flex style="text-align: left;" id="userName">{{navbarController.getUserName()}}</span>
+                    <span flex style="text-align: left;" id="user-name">{{navbarController.getUserName()}}</span>
                     <i class="fa fa-angle-up navbar-icon" aria-hidden="true"></i>
                   </div>
                 </md-button>

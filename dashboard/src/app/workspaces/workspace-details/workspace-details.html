@@ -10,7 +10,7 @@
                              on-stop-workspace="workspaceDetailsController.stopWorkspace()"
                              on-run-workspace="workspaceDetailsController.runWorkspace()"></workspace-status-button>
     <che-button-default ng-if="workspaceDetailsController.editMode === false"
-                        id="openInIde-button"
+                        id="open-in-ide-button"
                         che-button-title="Open"
                         href="#/ide/{{workspaceDetailsController.namespaceId}}/{{workspaceDetailsController.workspaceName}}"></che-button-default>
   </div>

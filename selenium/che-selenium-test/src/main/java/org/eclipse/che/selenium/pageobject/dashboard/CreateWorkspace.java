@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.pageobject.dashboard;
 
+import static java.lang.String.format;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
@@ -17,7 +19,6 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElem
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -39,19 +40,19 @@ public class CreateWorkspace {
 
   private interface Locators {
     String TOOLBAR_TITLE_ID = "New_Workspace";
-    String WORKSPACE_NAME_INPUT = "workspaceName-input";
+    String WORKSPACE_NAME_INPUT = "workspace-name-input";
 
-    String CREATE_BUTTON = "createWorkspace-button";
+    String CREATE_BUTTON = "create-workspace-button";
 
     // select stacks buttons
-    String SELECT_ALL_STACKS_TAB = "allStacks-button";
-    String SELECT_QUICK_START_STACKS_TAB = "quickStart-button";
-    String SELECT_SINGLE_MACHINE_STACKS_TAB = "singleMachine-button";
-    String SELECT_MULTI_MACHINE_STACKS_TAB = "multiMachine-button";
+    String SELECT_ALL_STACKS_TAB = "all-stacks-button";
+    String SELECT_QUICK_START_STACKS_TAB = "quick-start-button";
+    String SELECT_SINGLE_MACHINE_STACKS_TAB = "single-machine-button";
+    String SELECT_MULTI_MACHINE_STACKS_TAB = "multi-machine-button";
 
-    String ADD_STACK_BUTTON = "searchStack-input";
-    String FILTER_STACK_BUTTON = "searchStack-input";
-    String SEARCH_INPUT = "searchStack-input";
+    String ADD_STACK_BUTTON = "search-stack-input";
+    String FILTER_STACK_BUTTON = "search-stack-input";
+    String SEARCH_INPUT = "search-stack-input";
 
     String STACK_ROW_XPATH = "//div[@data-stack-id='%s']";
     String RAM_INPUT_XPATH = "//input[@name='memory']";
@@ -83,7 +84,7 @@ public class CreateWorkspace {
   WebElement selectMultiMachineStacksTab;
 
   public void waitToolbar() {
-    new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.LOADER_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(By.id(Locators.TOOLBAR_TITLE_ID)));
   }
 
@@ -93,7 +94,7 @@ public class CreateWorkspace {
 
   public void selectStack(String stackId) {
     WebElement stack =
-        seleniumWebDriver.findElement(By.xpath(String.format(Locators.STACK_ROW_XPATH, stackId)));
+        seleniumWebDriver.findElement(By.xpath(format(Locators.STACK_ROW_XPATH, stackId)));
     new Actions(seleniumWebDriver).moveToElement(stack).perform();
     stack.click();
   }
@@ -121,7 +122,7 @@ public class CreateWorkspace {
 
   public void setMachineRAM(String machine, String value) {
     WebElement ramInput =
-        seleniumWebDriver.findElement(By.id(String.format(Locators.MACHINE_RAM_ID, machine)));
+        seleniumWebDriver.findElement(By.id(format(Locators.MACHINE_RAM_ID, machine)));
     ramInput.clear();
     ramInput.sendKeys(value);
   }

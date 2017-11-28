@@ -10,16 +10,16 @@
                        md-theme="default"
                        flex-order="2" flex-order-gt-md="1">
       <che-toggle-joined-button che-title="All"
-                                id="allStacks-button"
+                                id="all-stacks-button"
                                 che-value="stackSelectorController.scope.ALL"></che-toggle-joined-button>
       <che-toggle-joined-button che-title="Quick Start"
-                                id="quickStart-button"
+                                id="quick-start-button"
                                 che-value="stackSelectorController.scope.QUICK_START"></che-toggle-joined-button>
       <che-toggle-joined-button che-title="Single Machine"
-                                id="singleMachine-button"
+                                id="single-machine-button"
                                 che-value="stackSelectorController.scope.SINGLE_MACHINE"></che-toggle-joined-button>
       <che-toggle-joined-button che-title="Multi Machine"
-                                id="multiMachine-button"
+                                id="multi-machine-button"
                                 che-value="stackSelectorController.scope.MULTI_MACHINE"></che-toggle-joined-button>
     </che-toggle-joined>
 
@@ -31,7 +31,7 @@
          layout="row"
          layout-align="start center" layout-align-gt-md="end center">
       <toggle-button-popover button-title="Filters"
-                             id="filterStacks-button"
+                             id="filter-stacks-button"
                              button-font-icon="fa fa-sliders"
                              che-popover-trigger-outside-click="true"
                              ng-class="{'stack-selector-active-tags-filter': stackSelectorController.selectedTags.length}">
@@ -41,12 +41,12 @@
         </che-stack-library-filter>
       </toggle-button-popover>
       <che-button-default che-button-title="Add Stack"
-                          id="addStack-button"
+                          id="add-stack-button"
                           che-button-icon="material-design icon-ic_add_24px"
                           name="addStack"
                           ng-click="stackSelectorController.onAddStack()"></che-button-default>
       <search-input search-placeholder="Search"
-                    id="searchStack-input"
+                    id="search-stack-input"
                     search-on-change="stackSelectorController.searchChanged(search)"></search-input>
     </div>
   </div>
