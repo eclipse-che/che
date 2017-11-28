@@ -35,20 +35,16 @@ import org.vectomatic.dom.svg.ui.SVGImage;
  * @author Vlad Zhukovskyi
  * @see ProcessTreeNodeRenderStrategy
  * @see HasAddTerminalClickHandler
- * @see HasPreviewSshClickHandler
  * @since 5.11.0
  */
 @Singleton
 public class MachineNodeRenderStrategy
-    implements ProcessTreeNodeRenderStrategy,
-        HasAddTerminalClickHandler,
-        HasPreviewSshClickHandler {
+    implements ProcessTreeNodeRenderStrategy, HasAddTerminalClickHandler {
   private final MachineResources resources;
   private final CoreLocalizationConstant locale;
   private final MachineMonitors machineMonitors;
 
   private AddTerminalClickHandler addTerminalClickHandler;
-  private PreviewSshClickHandler previewSshClickHandler;
 
   @Inject
   public MachineNodeRenderStrategy(
@@ -102,23 +98,6 @@ public class MachineNodeRenderStrategy
       newTerminalButton.addEventListener(Event.DBLCLICK, blockMouseListener, true);
     }
 
-    if (node.isSshServerRunning()) {
-      SpanElement sshButton = Elements.createSpanElement(resources.getCss().sshButton());
-      sshButton.setTextContent("SSH");
-      root.appendChild(sshButton);
-
-      sshButton.addEventListener(
-          Event.CLICK,
-          event -> {
-            if (previewSshClickHandler != null) {
-              previewSshClickHandler.onPreviewSshClick(machineName);
-            }
-          },
-          true);
-
-      Tooltip.create(sshButton, BOTTOM, MIDDLE, locale.connectViaSSH());
-    }
-
     Element monitorsElement = Elements.createSpanElement(resources.getCss().machineMonitors());
     root.appendChild(monitorsElement);
 
@@ -136,10 +115,5 @@ public class MachineNodeRenderStrategy
   @Override
   public void addAddTerminalClickHandler(AddTerminalClickHandler handler) {
     addTerminalClickHandler = handler;
-  }
-
-  @Override
-  public void addPreviewSshClickHandler(PreviewSshClickHandler handler) {
-    previewSshClickHandler = handler;
   }
 }

@@ -89,10 +89,6 @@ export class WorkspaceSshAction {
 
                 let agents:Array<string> = machineConfig.getInstallers();
 
-                if (agents.indexOf('org.eclipse.che.ssh') === -1) {
-                    return Promise.reject("The SSH agent (org.eclipse.che.ssh) has been disabled for this workspace.")
-                }
-
                 foundWorkspaceDTO = workspaceDto;
 
             }).then(() => {

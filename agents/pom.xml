@@ -28,7 +28,6 @@
         <module>go-agents</module>
         <module>exec</module>
         <module>terminal</module>
-        <module>ssh</module>
         <module>unison</module>
         <module>ls-json</module>
         <module>git-credentials</module>

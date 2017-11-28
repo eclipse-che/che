@@ -18,17 +18,12 @@ import {IEnvironmentManagerMachine, IEnvironmentManagerMachineServer} from './en
 
 const WS_AGENT_NAME: string = 'org.eclipse.che.ws-agent';
 const TERMINAL_AGENT_NAME: string = 'org.eclipse.che.terminal';
-const SSH_AGENT_NAME: string = 'org.eclipse.che.ssh';
 
 export abstract class EnvironmentManager {
   $log: ng.ILogService;
 
   constructor($log: ng.ILogService) {
     this.$log = $log;
-  }
-
-  get SSH_AGENT_NAME(): string {
-    return SSH_AGENT_NAME;
   }
 
   get TERMINAL_AGENT_NAME(): string {

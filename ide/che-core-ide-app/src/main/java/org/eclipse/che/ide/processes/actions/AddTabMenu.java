@@ -10,14 +10,12 @@
  */
 package org.eclipse.che.ide.processes.actions;
 
-import static org.eclipse.che.api.workspace.shared.Constants.SERVER_SSH_REFERENCE;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_TERMINAL_REFERENCE;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import java.util.Map;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionGroup;
 import org.eclipse.che.ide.api.action.ActionManager;
@@ -89,11 +87,6 @@ public class AddTabMenu extends ContextMenu {
         actionGroup.add(newTerminalMenuAction);
       }
 
-      if (machine.getServerByName(SERVER_SSH_REFERENCE).isPresent()) {
-        AddSSHMenuAction addSSHMenuAction = new AddSSHMenuAction(machine.getName());
-        actionGroup.add(addSSHMenuAction);
-      }
-
       ShowServersAction showServersAction = new ShowServersAction(machine.getName());
       actionGroup.add(showServersAction);
     }
@@ -118,22 +111,6 @@ public class AddTabMenu extends ContextMenu {
     @Override
     public void actionPerformed(ActionEvent e) {
       processesPanelPresenter.onAddTerminal(machineName, TerminalOptionsJso.createDefault());
-    }
-  }
-
-  /** Action to add new SSH tab. */
-  public class AddSSHMenuAction extends BaseAction {
-
-    private String machineName;
-
-    public AddSSHMenuAction(String machineName) {
-      super("SSH", "SSH", FontAwesome.RETWEET);
-      this.machineName = machineName;
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      processesPanelPresenter.onPreviewSsh(machineName);
     }
   }
 

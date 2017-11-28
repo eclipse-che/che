@@ -48,9 +48,6 @@ import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.ssh.shared.dto.SshPairDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -467,93 +464,6 @@ public class ProcessesPanelPresenter extends BasePresenter
   }
 
   @Override
-  public void onPreviewSsh(String machineId) {
-    ProcessTreeNode machineTreeNode = findTreeNodeById(machineId);
-    if (machineTreeNode == null || machineTreeNode.getType() != MACHINE_NODE) {
-      return;
-    }
-
-    String machineName = (String) machineTreeNode.getData();
-    RuntimeImpl runtime = appContext.getWorkspace().getRuntime();
-    if (runtime == null) {
-      return;
-    }
-
-    Optional<MachineImpl> machine = runtime.getMachineByName(machineName);
-    if (!machine.isPresent()) {
-      return;
-    }
-
-    final OutputConsole defaultConsole = commandConsoleFactory.create("SSH");
-    addCommandOutput(machineId, defaultConsole, true);
-
-    String sshServiceAddress = getSshServerAddress(machine.get());
-    final String machineHost;
-    final String sshPort;
-    if (sshServiceAddress != null) {
-      String[] parts = sshServiceAddress.split(":");
-      machineHost = parts[0];
-      sshPort = (parts.length == 2) ? parts[1] : SSH_PORT;
-    } else {
-      sshPort = SSH_PORT;
-      machineHost = "";
-    }
-
-    // user
-    final String userName;
-    String user = machine.get().getProperties().get("config.user");
-    if (isNullOrEmpty(user)) {
-      userName = "root";
-    } else {
-      userName = user;
-    }
-
-    // ssh key
-    final String workspaceName = appContext.getWorkspace().getConfig().getName();
-    Promise<SshPairDto> sshPairDtoPromise =
-        sshServiceClient.getPair("workspace", appContext.getWorkspaceId());
-
-    sshPairDtoPromise
-        .then(
-            new Operation<SshPairDto>() {
-              @Override
-              public void apply(SshPairDto sshPairDto) throws OperationException {
-                if (defaultConsole instanceof DefaultOutputConsole) {
-                  ((DefaultOutputConsole) defaultConsole).enableAutoScroll(false);
-                  ((DefaultOutputConsole) defaultConsole)
-                      .printText(
-                          localizationConstant.sshConnectInfo(
-                              machineName,
-                              machineHost,
-                              sshPort,
-                              workspaceName,
-                              userName,
-                              localizationConstant.sshConnectInfoPrivateKey(
-                                  sshPairDto.getPrivateKey())));
-                }
-              }
-            })
-        .catchError(
-            new Operation<PromiseError>() {
-              @Override
-              public void apply(PromiseError arg) throws OperationException {
-                if (defaultConsole instanceof DefaultOutputConsole) {
-                  ((DefaultOutputConsole) defaultConsole).enableAutoScroll(false);
-                  ((DefaultOutputConsole) defaultConsole)
-                      .printText(
-                          localizationConstant.sshConnectInfo(
-                              machineName,
-                              machineHost,
-                              sshPort,
-                              workspaceName,
-                              userName,
-                              localizationConstant.sshConnectInfoNoPrivateKey()));
-                }
-              }
-            });
-  }
-
-  @Override
   public void onPreviewServers(String machineId) {
     ProcessTreeNode machineTreeNode = findTreeNodeById(machineId);
     if (machineTreeNode == null || machineTreeNode.getType() != MACHINE_NODE) {
@@ -939,10 +849,6 @@ public class ProcessesPanelPresenter extends BasePresenter
         new ProcessTreeNode(MACHINE_NODE, rootNode, machineName, null, children);
 
     machineNode.setTerminalServerRunning(isServerRunning(machineName, SERVER_TERMINAL_REFERENCE));
-
-    // rely on "wsagent" server's status since "ssh" server's status is always UNKNOWN
-    String wsAgentServerRef = wsAgentServerUtil.getWsAgentHttpServerReference();
-    machineNode.setSshServerRunning(isServerRunning(machineName, wsAgentServerRef));
 
     for (ProcessTreeNode child : children) {
       child.setParent(machineNode);

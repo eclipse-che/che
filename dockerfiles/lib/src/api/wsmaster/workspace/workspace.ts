@@ -66,7 +66,6 @@ export class Workspace {
         devMachine.getInstallers().push("org.eclipse.che.exec");
         devMachine.getInstallers().push("org.eclipse.che.terminal");
         devMachine.getInstallers().push("org.eclipse.che.ws-agent");
-        devMachine.getInstallers().push("org.eclipse.che.ssh");
         devMachine.getAttributes().set("memoryLimitBytes", "2147483648");
 
         let defaultEnvironment : org.eclipse.che.api.workspace.shared.dto.EnvironmentDto = new org.eclipse.che.api.workspace.shared.dto.EnvironmentDtoImpl();

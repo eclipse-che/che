@@ -50,7 +50,7 @@ describe('ComposeEnvironmentManager', () => {
             'volumes': {
               'volume1': {'path': '/some/path'},
             },
-            'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
+            'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal']
           }
         },
         'recipe': {
@@ -113,7 +113,7 @@ describe('ComposeEnvironmentManager', () => {
               'vol1': {'path': '/some/path'},
               'm22': {'path': '/home/user/.m2/repository'}
             },
-            'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
+            'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal']
           }
         },
         'recipe': {
@@ -196,7 +196,7 @@ describe('ComposeEnvironmentManager', () => {
           'dev-machine': {
             'servers': {},
             'volumes': {},
-            'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh'],
+            'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal'],
             'attributes': {'memoryLimitBytes': '2147483648'}
           }
         },

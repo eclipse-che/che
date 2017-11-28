@@ -32,7 +32,7 @@ import org.eclipse.che.ide.ui.tree.BaseNodeRenderer;
  */
 @Singleton
 public class ProcessTreeRenderer extends BaseNodeRenderer<ProcessTreeNode>
-    implements HasAddTerminalClickHandler, HasPreviewSshClickHandler, HasStopProcessHandler {
+    implements HasAddTerminalClickHandler, HasStopProcessHandler {
 
   private final MachineResources resources;
   private final Map<String, ProcessTreeNodeRenderStrategy> renderStrategyMap;
@@ -83,18 +83,6 @@ public class ProcessTreeRenderer extends BaseNodeRenderer<ProcessTreeNode>
             strategy -> {
               if (strategy instanceof HasAddTerminalClickHandler) {
                 ((HasAddTerminalClickHandler) strategy).addAddTerminalClickHandler(handler);
-              }
-            });
-  }
-
-  @Override
-  public void addPreviewSshClickHandler(PreviewSshClickHandler handler) {
-    renderStrategyMap
-        .values()
-        .forEach(
-            strategy -> {
-              if (strategy instanceof HasPreviewSshClickHandler) {
-                ((HasPreviewSshClickHandler) strategy).addPreviewSshClickHandler(handler);
               }
             });
   }

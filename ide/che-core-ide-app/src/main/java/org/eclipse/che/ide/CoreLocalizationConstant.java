@@ -1120,21 +1120,6 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("messages.machine.not.found")
   String machineNotFound(String machineId);
 
-  @Key("ssh.connect.info")
-  String sshConnectInfo(
-      String machineName,
-      String machineHost,
-      String machinePort,
-      String workspaceName,
-      String userName,
-      String sshKeyDetails);
-
-  @Key("ssh.connect.ssh.key.available")
-  String sshConnectInfoPrivateKey(String privateKey);
-
-  @Key("ssh.connect.ssh.key.not.available")
-  String sshConnectInfoNoPrivateKey();
-
   @Key("failed.to.execute.command")
   String failedToExecuteCommand();
 

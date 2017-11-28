@@ -138,14 +138,6 @@ public class ProcessTreeNode {
     this.terminalServerRunning = terminalServerRunning;
   }
 
-  public boolean isSshServerRunning() {
-    return sshServerRunning;
-  }
-
-  public void setSshServerRunning(boolean sshServerRunning) {
-    this.sshServerRunning = sshServerRunning;
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
