@@ -1,14 +1,9 @@
 {
   "id": "org.eclipse.che.ssh",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "name": "SSH",
-  "description": "SSH server, key-pair generation",
+  "description": "Deprecated SSH server stub",
   "dependencies": [],
   "properties": {},
-  "servers": {
-    "ssh": {
-      "port": "22/tcp",
-      "protocol" : "ssh"
-    }
-  }
+  "servers": {}
 }
