@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.filewatcher;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Edit.DELETE;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Edit.EDIT;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -32,6 +33,7 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -114,7 +116,7 @@ public class RemoveFilesWithActiveTabs {
 
     confirmDeletion();
 
-    events2.waitExpectedMessage(expectedMessage, LOAD_PAGE_TIMEOUT_SEC);
+    waitExpectedMessageInEventPanel(events2, expectedMessage);
     editor2.waitTabIsNotPresent(deletedClass.replace(".java", ""));
     projectExplorer2.waitItemIsNotPresentVisibleArea(deletedClass);
   }
@@ -135,8 +137,8 @@ public class RemoveFilesWithActiveTabs {
 
     confirmDeletion();
 
-    events2.waitExpectedMessage(expectedMessage1, LOAD_PAGE_TIMEOUT_SEC);
-    events2.waitExpectedMessage(expectedMessage2, LOAD_PAGE_TIMEOUT_SEC);
+    waitExpectedMessageInEventPanel(events2, expectedMessage1);
+    waitExpectedMessageInEventPanel(events2, expectedMessage2);
     projectExplorer1.waitItemIsNotPresentVisibleArea(nameReadmeFile);
     projectExplorer1.waitItemIsNotPresentVisibleArea(nameFiletxt1);
     projectExplorer2.waitItemIsNotPresentVisibleArea(nameReadmeFile);
@@ -154,7 +156,7 @@ public class RemoveFilesWithActiveTabs {
 
     testProjectServiceClient.deleteResource(ws.getId(), PROJECT_NAME + "/" + nameFiletxt2);
 
-    events1.waitExpectedMessage(expectedMessage1, LOAD_PAGE_TIMEOUT_SEC);
+    waitExpectedMessageInEventPanel(events1, expectedMessage1);
     editor1.waitTabIsNotPresent(nameFiletxt2);
     projectExplorer2.openItemByPath(PROJECT_NAME + "/" + nameFiletxt3);
     editor2.waitTabIsPresent(nameFiletxt3);
@@ -162,7 +164,7 @@ public class RemoveFilesWithActiveTabs {
     testProjectServiceClient.deleteResource(ws.getId(), PROJECT_NAME + "/" + nameFiletxt3);
 
     editor2.waitTabIsNotPresent(nameFiletxt2);
-    events2.waitExpectedMessage(expectedMessage2, LOAD_PAGE_TIMEOUT_SEC);
+    waitExpectedMessageInEventPanel(events2, expectedMessage2);
   }
 
   /** Handles the IDE deletion dialog */
@@ -183,5 +185,14 @@ public class RemoveFilesWithActiveTabs {
 
     events1.clickEventLogBtn();
     events2.clickEventLogBtn();
+  }
+
+  private void waitExpectedMessageInEventPanel(Events event, String expectedMessage) {
+    try {
+      event.waitExpectedMessage(expectedMessage, LOAD_PAGE_TIMEOUT_SEC);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7339");
+    }
   }
 }

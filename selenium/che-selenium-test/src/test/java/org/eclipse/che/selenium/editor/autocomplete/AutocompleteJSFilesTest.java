@@ -79,6 +79,7 @@ public class AutocompleteJSFilesTest {
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.New.NEW,
         TestMenuCommandsConstants.Project.New.JAVASCRIPT_FILE);
+    askForValueDialog.waitFormToOpen();
     askForValueDialog.typeAndWaitText("newJsFile");
     askForValueDialog.clickOkBtn();
     loader.waitOnClosed();

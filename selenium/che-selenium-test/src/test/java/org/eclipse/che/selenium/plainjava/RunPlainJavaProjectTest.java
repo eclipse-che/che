@@ -172,6 +172,7 @@ public class RunPlainJavaProjectTest {
     projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.NEW);
     projectExplorer.clickOnNewContextMenuItem(
         TestProjectExplorerContextMenuConstants.SubMenuNew.FOLDER);
+    askForValueDialog.waitFormToOpen();
     askForValueDialog.typeAndWaitText("bin");
     askForValueDialog.clickOkBtn();
     loader.waitOnClosed();

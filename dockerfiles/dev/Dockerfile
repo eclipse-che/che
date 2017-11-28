@@ -31,10 +31,12 @@ RUN sudo yum -y update && \
 ENV TOMCAT_VERSION=8.5.23
 
 RUN mkdir $HOME/.m2 && \
-    mkdir /home/user/tomcat8 && \
-    wget -qO- "https://archive.apache.org/dist/tomcat/tomcat-8/v$TOMCAT_VERSION/bin/apache-tomcat-$TOMCAT_VERSION.tar.gz" | tar -zx --strip-components=1 -C /home/user/tomcat8 && \
-    rm -rf /home/user/tomcat8/webapps/* && \
-    echo "export MAVEN_OPTS=\$JAVA_OPTS" >> /home/user/.bashrc
+   wget -O  /home/user/tomcat8.zip "http://maven.codenvycorp.com/content/groups/public/org/eclipse/che/lib/che-tomcat8-slf4j-logback/6.0.0-M1/che-tomcat8-slf4j-logback-6.0.0-M1.zip" ;\
+   unzip   /home/user/tomcat8.zip -d /home/user/tomcat8;\
+   rm /home/user/tomcat8.zip;\
+   mkdir /home/user/tomcat8/webapps;\
+   sed -i -- 's/autoDeploy=\"false\"/autoDeploy=\"true\"/g' /home/user/tomcat8/conf/server.xml; \
+   echo "export MAVEN_OPTS=\$JAVA_OPTS" >> /home/user/.bashrc
 
 USER user
 
@@ -49,7 +51,15 @@ ENV LD_LIBRARY_PATH=/opt/rh/rh-nodejs6/root/usr/lib64${LD_LIBRARY_PATH:+:${LD_LI
  NODEJS_VERSION=6 \
  NPM_RUN=start \
  NPM_CONFIG_PREFIX=$HOME/.npm-global
+
 ENV PATH=$HOME/node_modules/.bin/:$HOME/.npm-global/bin/:$GOPATH/bin:$M2_HOME/bin:/opt/rh/rh-nodejs6/root/usr/bin:/usr/local/go/bin:$PATH
+
+
+RUN mkdir /home/user/traefik ;\
+    wget -O /home/user/traefik/traefik "https://github.com/containous/traefik/releases/download/v1.4.3/traefik_linux-amd64"; \
+    chmod +x /home/user/traefik/traefik
+COPY traefik.toml /home/user/traefik/
+
 
 RUN sudo mkdir /var/run/sshd
 RUN sudo  ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N '' && \
