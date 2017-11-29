@@ -1825,8 +1825,7 @@ public class CodenvyEditor {
               try {
                 javaDocPopupHtmlText = getJavaDocPopupText();
               } catch (StaleElementReferenceException e) {
-                LOG.error(
-                    "Can not get java doc HTML text from autocomplete context menu in editor");
+                LOG.warn("Can not get java doc HTML text from autocomplete context menu in editor");
               }
               return javaDocPopupHtmlText.length() > 0
                   && verifyJavaDoc(javaDocPopupHtmlText, expectedText);

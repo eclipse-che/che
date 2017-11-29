@@ -108,7 +108,7 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
   }
 
   @Override
-  public void cleanup(String workspaceId) {
+  public void cleanup(String workspaceId) throws InfrastructureException {
     try (OpenShiftClient client = clientFactory.create()) {
       final String pvcUniqueName = pvcName + '-' + workspaceId;
       client.persistentVolumeClaims().inNamespace(projectName).withName(pvcUniqueName).delete();
