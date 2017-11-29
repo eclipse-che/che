@@ -25,6 +25,7 @@ import org.eclipse.che.ide.api.action.CustomComponentAction;
 import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.eclipse.che.ide.ext.git.client.branch.BranchPresenter;
 import org.vectomatic.dom.svg.ui.SVGImage;
@@ -44,15 +45,20 @@ public class StatusBarBranchPointer extends BaseAction implements CustomComponen
   private final AppContext appContext;
   private final GitResources resources;
   private final BranchPresenter branchPresenter;
+  private final GitLocalizationConstant constant;
   private final HorizontalPanel panel;
 
   @Inject
   public StatusBarBranchPointer(
-      AppContext appContext, GitResources resources, BranchPresenter branchPresenter) {
+      AppContext appContext,
+      GitResources resources,
+      BranchPresenter branchPresenter,
+      GitLocalizationConstant constant) {
     super();
     this.appContext = appContext;
     this.resources = resources;
     this.branchPresenter = branchPresenter;
+    this.constant = constant;
 
     panel = new HorizontalPanel();
     panel.ensureDebugId("statusBarProjectBranchPointerPanel");
@@ -83,6 +89,7 @@ public class StatusBarBranchPointer extends BaseAction implements CustomComponen
 
       Label headLabel = new Label(project.getAttribute(GIT_CURRENT_HEAD_NAME));
       headLabel.ensureDebugId("statusBarProjectBranchName");
+      headLabel.setTitle(constant.branchesControlTitle());
       Style headLabelStyle = headLabel.getElement().getStyle();
       headLabelStyle.setCursor(Cursor.POINTER);
       headLabelStyle.setMarginLeft(5., Unit.PX);
