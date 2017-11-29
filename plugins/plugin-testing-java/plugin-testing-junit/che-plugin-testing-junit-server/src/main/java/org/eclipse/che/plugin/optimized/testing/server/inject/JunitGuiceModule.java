@@ -8,13 +8,13 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.testing.junit.server.inject;
+package org.eclipse.che.plugin.optimized.testing.server.inject;
 
 import static com.google.inject.multibindings.Multibinder.newSetBinder;
 
 import com.google.inject.AbstractModule;
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.plugin.testing.junit.server.junit4.JUnit4TestRunner;
+import org.eclipse.che.plugin.optimized.testing.server.junit4.JUnit4TestRunner;
 
 /** @author Mirage Abeysekara */
 @DynaModule

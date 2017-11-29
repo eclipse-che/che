@@ -1,0 +1,31 @@
+# Copyright (c) 2012-2017 Red Hat, Inc
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+
+mode: ordering
+strategies: new, changed, affected
+applyTo: surefire
+debug: true
+disable: false
+report:
+    enable: true
+scm:
+    range:
+      head: HEAD
+      tail: HEAD~2
+autocorrect: true
+customStrategies:
+    - smart.testing.strategy.cool=org.arquillian.smart.testing:strategy-cool:1.0.0
+    - smart.testing.strategy.experimental=org.arquillian.smart.testing:strategy-experimental:1.0.0
+strategiesConfiguration:
+    affected:
+      transitivity: true
+      exclusions:
+         - org.package.*
+         - org.arquillian.package.*
+      inclusions:
+         - org.package.exclude.*
+         - org.arquillian.package.exclude.*

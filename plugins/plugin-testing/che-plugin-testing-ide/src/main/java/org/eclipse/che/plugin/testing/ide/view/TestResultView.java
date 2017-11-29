@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.plugin.testing.ide.view;
 
+import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
 import org.eclipse.che.plugin.testing.ide.model.TestRootState;
@@ -30,6 +31,8 @@ public interface TestResultView
   void setVisible(boolean visible);
 
   TestRootState getRootState();
+
+  void setTestExecutionContext(TestExecutionContext testExecutionContext);
 
   interface ActionDelegate extends BaseActionDelegate {}
 }

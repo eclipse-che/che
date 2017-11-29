@@ -11,6 +11,7 @@
 package org.eclipse.che.api.testing.shared;
 
 import java.util.List;
+import java.util.Map;
 import org.eclipse.che.dto.shared.DTO;
 
 /** Context which provides information about test execution. */
@@ -52,12 +53,28 @@ public interface TestExecutionContext {
   /**
    * returns a list with paths of the test files relative to the project. The list should be
    * initialized when value of {@link ContextType} is {@link ContextType.SET}
-   *
-   * @param listOfTestClasses
    */
+  List<String> getListOfTestClasses();
+
   void setListOfTestClasses(List<String> listOfTestClasses);
 
-  List<String> getListOfTestClasses();
+  /**
+   * Returns map of additional parameters of this test context
+   *
+   * @return A map of additional parameters of this test context
+   */
+  Map<String, String> getTestContextParameters();
+
+  void setTestContextParameters(Map<String, String> testContextParameters);
+
+  /**
+   * Returns a name of the test finder to be used for gathering all test classes
+   *
+   * @return A name of the test finder to be used for gathering all test classes
+   */
+  String getTestFinderName();
+
+  void setTestFinderName(String testFinderName);
 
   enum ContextType {
     FILE,

@@ -184,7 +184,7 @@ public class TestState implements Printable {
     return result;
   }
 
-  private boolean hasFailedTest() {
+  public boolean hasFailedTest() {
     for (TestState child : getChildren()) {
       if (child.getDescription() == TestStateDescription.FAILED) {
         return true;
@@ -193,7 +193,7 @@ public class TestState implements Printable {
     return false;
   }
 
-  private boolean hasErrorTests() {
+  public boolean hasErrorTests() {
     for (TestState child : getChildren()) {
       if (child.getDescription() == TestStateDescription.ERROR) {
         return true;

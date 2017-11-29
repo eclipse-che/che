@@ -10,10 +10,11 @@
  */
 package org.ecipse.che.plugin.testing.testng.server;
 
-import static org.ecipse.che.plugin.testing.testng.server.TestSetUpUtil.addSourceContainer;
-import static org.ecipse.che.plugin.testing.testng.server.TestSetUpUtil.createJavaProject;
-import static org.ecipse.che.plugin.testing.testng.server.TestSetUpUtil.getTestNgClassPath;
+import static org.ecipse.che.plugin.testing.testng.server.TestSetUpUtil.*;
 import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,7 +24,8 @@ import org.eclipse.che.api.core.model.project.type.Value;
 import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.testing.shared.TestDetectionContext;
 import org.eclipse.che.api.testing.shared.TestPosition;
-import org.eclipse.che.plugin.java.testing.JavaTestFinder;
+import org.eclipse.che.plugin.java.testing.DefaultJavaTestFinder;
+import org.eclipse.che.plugin.java.testing.JavaTestFinderRegistry;
 import org.eclipse.che.plugin.testing.testng.server.TestNGRunner;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -38,13 +40,14 @@ import org.testng.annotations.Test;
 public class TestNGTestDiscoveryTest extends BaseTest {
 
   private IJavaProject javaProject;
-  private JavaTestFinder testNGTestFinder;
   private IPackageFragment packageFragment;
+  private JavaTestFinderRegistry finderRegistry;
 
   @BeforeMethod
   public void setUp() throws Exception {
     javaProject = createJavaProject("testDiscovery", "bin");
-    testNGTestFinder = new JavaTestFinder();
+    finderRegistry = mock(JavaTestFinderRegistry.class);
+    when(finderRegistry.getJavaTestFinder(any())).thenReturn(new DefaultJavaTestFinder());
     IPackageFragmentRoot packageFragmentRoot = addSourceContainer(javaProject, "src", "bin");
     javaProject.setRawClasspath(getTestNgClassPath("/testDiscovery/src"), null);
 
@@ -77,7 +80,7 @@ public class TestNGTestDiscoveryTest extends BaseTest {
         packageFragment.createCompilationUnit("T.java", buf.toString(), false, null);
 
     compilationUnit.reconcile(0, true, DefaultWorkingCopyOwner.PRIMARY, null);
-    TestNGRunner runner = new TestNGRunner("", testNGTestFinder, null, null);
+    TestNGRunner runner = new TestNGRunner("", null, null, finderRegistry);
 
     List<TestPosition> testPositions =
         runner.detectTests(
@@ -108,7 +111,7 @@ public class TestNGTestDiscoveryTest extends BaseTest {
         packageFragment.createCompilationUnit("T.java", buf.toString(), false, null);
 
     compilationUnit.reconcile(0, true, DefaultWorkingCopyOwner.PRIMARY, null);
-    TestNGRunner runner = new TestNGRunner("", testNGTestFinder, null, null);
+    TestNGRunner runner = new TestNGRunner("", null, null, finderRegistry);
 
     List<TestPosition> testPositions =
         runner.detectTests(
@@ -134,7 +137,7 @@ public class TestNGTestDiscoveryTest extends BaseTest {
         packageFragment.createCompilationUnit("T.java", buf.toString(), false, null);
 
     compilationUnit.reconcile(0, true, DefaultWorkingCopyOwner.PRIMARY, null);
-    TestNGRunner runner = new TestNGRunner("", testNGTestFinder, null, null);
+    TestNGRunner runner = new TestNGRunner("", null, null, finderRegistry);
 
     List<TestPosition> testPositions =
         runner.detectTests(
@@ -161,7 +164,7 @@ public class TestNGTestDiscoveryTest extends BaseTest {
         packageFragment.createCompilationUnit("T.java", buf.toString(), false, null);
 
     compilationUnit.reconcile(0, true, DefaultWorkingCopyOwner.PRIMARY, null);
-    TestNGRunner runner = new TestNGRunner("", testNGTestFinder, null, null);
+    TestNGRunner runner = new TestNGRunner("", null, null, finderRegistry);
 
     List<TestPosition> testPositions =
         runner.detectTests(
@@ -187,7 +190,7 @@ public class TestNGTestDiscoveryTest extends BaseTest {
         packageFragment.createCompilationUnit("T.java", buf.toString(), false, null);
 
     compilationUnit.reconcile(0, true, DefaultWorkingCopyOwner.PRIMARY, null);
-    TestNGRunner runner = new TestNGRunner("", testNGTestFinder, null, null);
+    TestNGRunner runner = new TestNGRunner("", null, null, finderRegistry);
 
     List<TestPosition> testPositions =
         runner.detectTests(

@@ -37,7 +37,8 @@ import org.eclipse.che.commons.lang.execution.ProcessHandler;
 import org.eclipse.che.plugin.java.testing.AbstractJavaTestRunner;
 import org.eclipse.che.plugin.java.testing.ClasspathUtil;
 import org.eclipse.che.plugin.java.testing.JavaTestAnnotations;
-import org.eclipse.che.plugin.java.testing.JavaTestFinder;
+import org.eclipse.che.plugin.java.testing.JavaTestFinderRegistry;
+import org.eclipse.che.plugin.java.testing.JavaTestHelper;
 import org.eclipse.che.plugin.java.testing.ProjectClasspathProvider;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -53,21 +54,18 @@ public class TestNGRunner extends AbstractJavaTestRunner {
   private static final String TESTNG_NAME = "testng";
   private static final Logger LOG = LoggerFactory.getLogger(TestNGRunner.class);
   private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
-
-  private String workspacePath;
-  private JavaTestFinder javaTestFinder;
   private final ProjectClasspathProvider classpathProvider;
   private final TestNGSuiteUtil suiteUtil;
+  private String workspacePath;
 
   @Inject
   public TestNGRunner(
       @Named("che.user.workspaces.storage") String workspacePath,
-      JavaTestFinder javaTestFinder,
       ProjectClasspathProvider classpathProvider,
-      TestNGSuiteUtil suiteUtil) {
-    super(workspacePath, javaTestFinder);
+      TestNGSuiteUtil suiteUtil,
+      JavaTestFinderRegistry javaTestFinderRegistry) {
+    super(workspacePath, javaTestFinderRegistry);
     this.workspacePath = workspacePath;
-    this.javaTestFinder = javaTestFinder;
     this.classpathProvider = classpathProvider;
     this.suiteUtil = suiteUtil;
   }
@@ -188,7 +186,7 @@ public class TestNGRunner extends AbstractJavaTestRunner {
 
   @Override
   protected boolean isTestMethod(IMethod method, ICompilationUnit compilationUnit) {
-    return javaTestFinder.isTest(
+    return JavaTestHelper.isTest(
         method, compilationUnit, JavaTestAnnotations.TESTNG_TEST.getName());
   }
 
