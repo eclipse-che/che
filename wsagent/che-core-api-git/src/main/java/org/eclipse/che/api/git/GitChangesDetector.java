@@ -10,8 +10,6 @@
  */
 package org.eclipse.che.api.git;
 
-import static com.google.common.collect.Sets.newConcurrentHashSet;
-import static java.nio.file.Files.isDirectory;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.git.shared.FileChangedEventDto.Status.ADDED;
 import static org.eclipse.che.api.git.shared.FileChangedEventDto.Status.MODIFIED;
@@ -21,20 +19,22 @@ import static org.eclipse.che.api.vfs.watcher.FileWatcherManager.EMPTY_CONSUMER;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.slf4j.LoggerFactory.getLogger;
 
-import java.nio.file.PathMatcher;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
-import javax.inject.Provider;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.git.shared.FileChangedEventDto;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto;
+import org.eclipse.che.api.vfs.impl.file.event.detectors.FileTrackingOperationEvent;
 import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
 import org.slf4j.Logger;
 
@@ -43,83 +43,123 @@ import org.slf4j.Logger;
  *
  * @author Igor Vinokur
  */
+@Singleton
 public class GitChangesDetector {
   private static final Logger LOG = getLogger(GitChangesDetector.class);
 
-  private static final String GIT_DIR = ".git";
-  private static final String INCOMING_METHOD = "track/git-change";
   private static final String OUTGOING_METHOD = "event/git-change";
 
   private final RequestTransmitter transmitter;
   private final FileWatcherManager manager;
-  private final Provider<ProjectManager> projectManagerProvider;
+  private final ProjectManager projectManager;
   private final GitConnectionFactory gitConnectionFactory;
+  private final EventService eventService;
+  private final EventSubscriber<FileTrackingOperationEvent> eventSubscriber;
 
-  private final Set<String> endpointIds = newConcurrentHashSet();
-
-  private int id;
+  private final Map<String, Integer> watchIdRegistry = new HashMap<>();
 
   @Inject
   public GitChangesDetector(
       RequestTransmitter transmitter,
       FileWatcherManager manager,
-      Provider<ProjectManager> projectManagerProvider,
-      GitConnectionFactory gitConnectionFactory) {
+      ProjectManager projectManager,
+      GitConnectionFactory gitConnectionFactory,
+      EventService eventService) {
     this.transmitter = transmitter;
     this.manager = manager;
-    this.projectManagerProvider = projectManagerProvider;
+    this.projectManager = projectManager;
     this.gitConnectionFactory = gitConnectionFactory;
+    this.eventService = eventService;
+
+    eventSubscriber =
+        new EventSubscriber<FileTrackingOperationEvent>() {
+          @Override
+          public void onEvent(FileTrackingOperationEvent event) {
+            onFileTrackingOperationReceived(
+                event.getEndpointId(), event.getFileTrackingOperation());
+          }
+        };
+    eventService.subscribe(eventSubscriber);
   }
 
-  @Inject
-  public void configureHandler(RequestHandlerConfigurator configurator) {
-    configurator
-        .newConfiguration()
-        .methodName(INCOMING_METHOD)
-        .noParams()
-        .noResult()
-        .withConsumer(endpointIds::add);
-  }
+  private void onFileTrackingOperationReceived(
+      String endpointId, FileTrackingOperationDto operation) {
+    FileTrackingOperationDto.Type type = operation.getType();
+    String path = operation.getPath();
+    String oldPath = operation.getOldPath();
 
-  @PostConstruct
-  public void startWatcher() {
-    id = manager.registerByMatcher(matcher(), createConsumer(), modifyConsumer(), deleteConsumer());
+    switch (type) {
+      case START:
+        {
+          String key = path + endpointId;
+          if (watchIdRegistry.containsKey(key)) {
+            return;
+          }
+          int id =
+              manager.registerByPath(
+                  path,
+                  createConsumer(endpointId, path),
+                  modifyConsumer(endpointId, path),
+                  deleteConsumer(endpointId, path));
+          watchIdRegistry.put(key, id);
+
+          break;
+        }
+      case STOP:
+        {
+          Integer id = watchIdRegistry.remove(path + endpointId);
+          if (id != null) {
+            manager.unRegisterByPath(id);
+          }
+
+          break;
+        }
+      case MOVE:
+        {
+          Integer oldId = watchIdRegistry.remove(oldPath + endpointId);
+          if (oldId != null) {
+            manager.unRegisterByPath(oldId);
+          }
+
+          int newId =
+              manager.registerByPath(
+                  path,
+                  createConsumer(endpointId, path),
+                  modifyConsumer(endpointId, path),
+                  deleteConsumer(endpointId, path));
+          watchIdRegistry.put(path + endpointId, newId);
+
+          break;
+        }
+      default:
+        break;
+    }
   }
 
   @PreDestroy
   public void stopWatcher() {
-    manager.unRegisterByMatcher(id);
+    eventService.unsubscribe(eventSubscriber);
   }
 
-  private PathMatcher matcher() {
-    return it ->
-        !(isDirectory(it) || GIT_DIR.equals(it.getNameCount() > 2 ? it.getName(2).toString() : ""));
+  private Consumer<String> createConsumer(String endpointId, String path) {
+    return fsEventConsumer(endpointId, path);
   }
 
-  private Consumer<String> createConsumer() {
-    return fsEventConsumer();
+  private Consumer<String> modifyConsumer(String endpointId, String path) {
+    return fsEventConsumer(endpointId, path);
   }
 
-  private Consumer<String> modifyConsumer() {
-    return fsEventConsumer();
-  }
-
-  private Consumer<String> deleteConsumer() {
+  private Consumer<String> deleteConsumer(String endpointId, String path) {
     return EMPTY_CONSUMER;
   }
 
-  private Consumer<String> fsEventConsumer() {
-    return it -> endpointIds.forEach(transmitConsumer(it));
-  }
-
-  private Consumer<String> transmitConsumer(String path) {
-    return id -> {
+  private Consumer<String> fsEventConsumer(String endpointId, String path) {
+    return it -> {
       try {
         String normalizedPath = path.startsWith("/") ? path.substring(1) : path;
         String itemPath = normalizedPath.substring(normalizedPath.indexOf("/") + 1);
         String projectPath =
-            projectManagerProvider
-                .get()
+            projectManager
                 .getProject(normalizedPath.split("/")[0])
                 .getBaseFolder()
                 .getVirtualFile()
@@ -141,7 +181,7 @@ public class GitChangesDetector {
 
         transmitter
             .newRequest()
-            .endpointId(id)
+            .endpointId(endpointId)
             .methodName(OUTGOING_METHOD)
             .paramsAsDto(
                 newDto(FileChangedEventDto.class)
