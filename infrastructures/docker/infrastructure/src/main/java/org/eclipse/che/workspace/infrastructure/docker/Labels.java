@@ -10,8 +10,9 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker;
 
-import static java.util.Collections.emptyMap;
-
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -39,10 +40,16 @@ public final class Labels {
   private static final String SERVER_PORT_LABEL_FMT = LABEL_PREFIX + "server.%s.port";
   private static final String SERVER_PROTOCOL_LABEL_FMT = LABEL_PREFIX + "server.%s.protocol";
   private static final String SERVER_PATH_LABEL_FMT = LABEL_PREFIX + "server.%s.path";
+  private static final String SERVER_ATTR_LABEL_FMT = LABEL_PREFIX + "server.%s.attributes";
 
   /** Pattern that matches server labels e.g. "org.eclipse.che.server.exec-agent.port". */
   private static final Pattern SERVER_LABEL_PATTERN =
       Pattern.compile("org\\.eclipse\\.che\\.server\\.(?<ref>[\\w-/.]+)\\..+");
+
+  private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
+  // used to avoid frequent creations of the object at runtime
+  private static final java.lang.reflect.Type mapTypeToken =
+      new TypeToken<Map<String, String>>() {}.getType();
 
   /** Creates new label serializer. */
   public static Serializer newSerializer() {
@@ -98,6 +105,9 @@ public final class Labels {
       labels.put(String.format(SERVER_PROTOCOL_LABEL_FMT, ref), server.getProtocol());
       if (server.getPath() != null) {
         labels.put(String.format(SERVER_PATH_LABEL_FMT, ref), server.getPath());
+      }
+      if (server.getAttributes() != null) {
+        labels.put(String.format(SERVER_ATTR_LABEL_FMT, ref), GSON.toJson(server.getAttributes()));
       }
       return this;
     }
@@ -156,7 +166,8 @@ public final class Labels {
                     labels.get(String.format(SERVER_PORT_LABEL_FMT, ref)),
                     labels.get(String.format(SERVER_PROTOCOL_LABEL_FMT, ref)),
                     labels.get(String.format(SERVER_PATH_LABEL_FMT, ref)),
-                    emptyMap()));
+                    GSON.fromJson(
+                        labels.get(String.format(SERVER_ATTR_LABEL_FMT, ref)), mapTypeToken)));
           }
         }
       }

@@ -88,7 +88,10 @@ public class ServersMapper {
         for (String ref : refs) {
           ServerConfig cfg = configs.get(ref);
           mapped.put(
-              ref, new ServerImpl().withUrl(makeUrl(port, cfg.getProtocol(), cfg.getPath())));
+              ref,
+              new ServerImpl()
+                  .withUrl(makeUrl(port, cfg.getProtocol(), cfg.getPath()))
+                  .withAttributes(cfg.getAttributes()));
         }
       }
     }

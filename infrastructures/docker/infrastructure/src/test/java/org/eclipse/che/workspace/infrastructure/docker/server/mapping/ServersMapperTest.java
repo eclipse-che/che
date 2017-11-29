@@ -12,6 +12,7 @@ package org.eclipse.che.workspace.infrastructure.docker.server.mapping;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
 import static org.testng.Assert.assertEquals;
 
@@ -27,6 +28,9 @@ import org.testng.annotations.Test;
 
 /** Tests {@link ServersMapper}. */
 public class ServersMapperTest {
+  static final Map<String, String> ONE_ATTRIBUTE_MAP = singletonMap("testAttr", "testValue");
+  static final Map<String, String> ATTRIBUTES_MAP =
+      ImmutableMap.of("testAttr", "testValue", "anotherTestAttr", "secondValue");
 
   private final String hostname = "localhost";
   private final ServersMapper mapper = new ServersMapper(hostname);
@@ -51,29 +55,47 @@ public class ServersMapperTest {
             "8080/tcp", "0.0.0.0:32080",
             "8081/tcp", "0.0.0.0:32081"),
         ImmutableMap.of(
-            "server1", new ServerConfigImpl("8080", "http", "no-slash-path", emptyMap()),
-            "server2", new ServerConfigImpl("8081", "http", "/slash-path", emptyMap())),
+            "server1", new ServerConfigImpl("8080", "http", "no-slash-path", ONE_ATTRIBUTE_MAP),
+            "server2", new ServerConfigImpl("8081", "http", "/slash-path", null)),
         ImmutableMap.of(
-            "server1", new ServerImpl().withUrl("http://" + hostname + ":32080/no-slash-path"),
-            "server2", new ServerImpl().withUrl("http://" + hostname + ":32081/slash-path"))
+            "server1",
+                new ServerImpl()
+                    .withUrl("http://" + hostname + ":32080/no-slash-path")
+                    .withAttributes(ONE_ATTRIBUTE_MAP),
+            "server2",
+                new ServerImpl()
+                    .withUrl("http://" + hostname + ":32081/slash-path")
+                    .withAttributes(emptyMap()))
       },
       {
         ImmutableMap.of("8080/tcp", "0.0.0.0:32080"),
         ImmutableMap.of(
             "server1", new ServerConfigImpl("8080", "http", "http-endpoint", emptyMap()),
-            "server2", new ServerConfigImpl("8080", "ws", "ws-endpoint", emptyMap())),
+            "server2", new ServerConfigImpl("8080", "ws", "ws-endpoint", ATTRIBUTES_MAP)),
         ImmutableMap.of(
-            "server1", new ServerImpl().withUrl("http://" + hostname + ":32080/http-endpoint"),
-            "server2", new ServerImpl().withUrl("ws://" + hostname + ":32080/ws-endpoint"))
+            "server1",
+                new ServerImpl()
+                    .withUrl("http://" + hostname + ":32080/http-endpoint")
+                    .withAttributes(emptyMap()),
+            "server2",
+                new ServerImpl()
+                    .withUrl("ws://" + hostname + ":32080/ws-endpoint")
+                    .withAttributes(ATTRIBUTES_MAP))
       },
       {
         ImmutableMap.of("8080/tcp", "0.0.0.0:32080"),
         ImmutableMap.of(
             "server1", new ServerConfigImpl("8080", "http", "http-endpoint", emptyMap()),
-            "server2", new ServerConfigImpl("8080/tcp", "ws", "ws-endpoint", emptyMap())),
+            "server2", new ServerConfigImpl("8080/tcp", "ws", "ws-endpoint", null)),
         ImmutableMap.of(
-            "server1", new ServerImpl().withUrl("http://" + hostname + ":32080/http-endpoint"),
-            "server2", new ServerImpl().withUrl("ws://" + hostname + ":32080/ws-endpoint"))
+            "server1",
+                new ServerImpl()
+                    .withUrl("http://" + hostname + ":32080/http-endpoint")
+                    .withAttributes(emptyMap()),
+            "server2",
+                new ServerImpl()
+                    .withUrl("ws://" + hostname + ":32080/ws-endpoint")
+                    .withAttributes(emptyMap()))
       },
       {
         ImmutableMap.of("8080/tcp", "0.0.0.0:32080"),
@@ -99,12 +121,21 @@ public class ServersMapperTest {
             "4401/tcp", "0.0.0.0:32401"),
         ImmutableMap.of(
             "ws-master", new ServerConfigImpl("8080", "http", "/api", emptyMap()),
-            "exec-agent-api", new ServerConfigImpl("4401", "http", "/process", emptyMap()),
-            "exec-agent-ws", new ServerConfigImpl("4401", "ws", "/connect", emptyMap())),
+            "exec-agent-api", new ServerConfigImpl("4401", "http", "/process", ONE_ATTRIBUTE_MAP),
+            "exec-agent-ws", new ServerConfigImpl("4401", "ws", "/connect", ATTRIBUTES_MAP)),
         ImmutableMap.of(
-            "ws-master", new ServerImpl().withUrl("http://" + hostname + ":32080/api"),
-            "exec-agent-api", new ServerImpl().withUrl("http://" + hostname + ":32401/process"),
-            "exec-agent-ws", new ServerImpl().withUrl("ws://" + hostname + ":32401/connect"),
+            "ws-master",
+                new ServerImpl()
+                    .withUrl("http://" + hostname + ":32080/api")
+                    .withAttributes(emptyMap()),
+            "exec-agent-api",
+                new ServerImpl()
+                    .withUrl("http://" + hostname + ":32401/process")
+                    .withAttributes(ONE_ATTRIBUTE_MAP),
+            "exec-agent-ws",
+                new ServerImpl()
+                    .withUrl("ws://" + hostname + ":32401/connect")
+                    .withAttributes(ATTRIBUTES_MAP),
             "8000/tcp", new ServerImpl().withUrl("tcp://" + hostname + ":32000"),
             "2288/udp", new ServerImpl().withUrl("udp://" + hostname + ":32288"))
       }

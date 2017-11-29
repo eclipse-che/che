@@ -11,9 +11,12 @@
 package org.eclipse.che.workspace.infrastructure.docker;
 
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonMap;
 import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
@@ -28,6 +31,10 @@ import org.testng.annotations.Test;
  * @author Yevhenii Voevodin
  */
 public class LabelsTest {
+  static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
+  static final Map<String, String> ATTRIBUTES = singletonMap("key", "value");
+  static final String STRING_ATTRIBUTES = GSON.toJson(ATTRIBUTES);
+  static final String STRING_EMPTY_ATTRIBUTES = GSON.toJson(emptyMap());
 
   @Test
   public void serialization() {
@@ -38,11 +45,11 @@ public class LabelsTest {
             .server(
                 "my-server1/http",
                 new ServerConfigImpl("8000/tcp", "http", "/api/info", emptyMap()))
-            .server("my-server2", new ServerConfigImpl("8080/tcp", "ws", "/connect", emptyMap()))
-            .server("my-server3", new ServerConfigImpl("7070/tcp", "http", null, emptyMap()))
+            .server("my-server2", new ServerConfigImpl("8080/tcp", "ws", "/connect", null))
+            .server("my-server3", new ServerConfigImpl("7070/tcp", "http", null, ATTRIBUTES))
             .server(
                 "my.dot.separated.server",
-                new ServerConfigImpl("9090/tcp", "http", null, emptyMap()))
+                new ServerConfigImpl("9090/tcp", "http", null, ATTRIBUTES))
             .labels();
     Map<String, String> expected =
         ImmutableMap.<String, String>builder()
@@ -53,13 +60,17 @@ public class LabelsTest {
             .put("org.eclipse.che.server.my-server1/http.port", "8000/tcp")
             .put("org.eclipse.che.server.my-server1/http.protocol", "http")
             .put("org.eclipse.che.server.my-server1/http.path", "/api/info")
+            .put("org.eclipse.che.server.my-server1/http.attributes", STRING_EMPTY_ATTRIBUTES)
             .put("org.eclipse.che.server.my-server2.port", "8080/tcp")
             .put("org.eclipse.che.server.my-server2.protocol", "ws")
             .put("org.eclipse.che.server.my-server2.path", "/connect")
+            .put("org.eclipse.che.server.my-server2.attributes", STRING_EMPTY_ATTRIBUTES)
             .put("org.eclipse.che.server.my-server3.port", "7070/tcp")
             .put("org.eclipse.che.server.my-server3.protocol", "http")
+            .put("org.eclipse.che.server.my-server3.attributes", STRING_ATTRIBUTES)
             .put("org.eclipse.che.server.my.dot.separated.server.port", "9090/tcp")
             .put("org.eclipse.che.server.my.dot.separated.server.protocol", "http")
+            .put("org.eclipse.che.server.my.dot.separated.server.attributes", STRING_ATTRIBUTES)
             .build();
 
     assertEquals(serialized, expected);
@@ -78,11 +89,14 @@ public class LabelsTest {
             .put("org.eclipse.che.server.my-server1/http.port", "8000/tcp")
             .put("org.eclipse.che.server.my-server1/http.protocol", "http")
             .put("org.eclipse.che.server.my-server1/http.path", "/api/info")
+            .put("org.eclipse.che.server.my-server1/http.attributes", STRING_ATTRIBUTES)
             .put("org.eclipse.che.server.my-server2.port", "8080/tcp")
             .put("org.eclipse.che.server.my-server2.protocol", "ws")
             .put("org.eclipse.che.server.my-server2.path", "/connect")
+            .put("org.eclipse.che.server.my-server2.attributes", STRING_EMPTY_ATTRIBUTES)
             .put("org.eclipse.che.server.my-server3.port", "7070/tcp")
             .put("org.eclipse.che.server.my-server3.protocol", "http")
+            .put("org.eclipse.che.server.my-server3.attributes", STRING_ATTRIBUTES)
             .put("org.eclipse.che.server.my.dot.separated.server.port", "9090/tcp")
             .put("org.eclipse.che.server.my.dot.separated.server.protocol", "http")
             .build();
@@ -90,12 +104,12 @@ public class LabelsTest {
     Labels.Deserializer deserializer = Labels.newDeserializer(labels);
     Map<String, ServerConfig> expectedServers = new HashMap<>();
     expectedServers.put(
-        "my-server1/http", new ServerConfigImpl("8000/tcp", "http", "/api/info", emptyMap()));
+        "my-server1/http", new ServerConfigImpl("8000/tcp", "http", "/api/info", ATTRIBUTES));
     expectedServers.put(
         "my-server2", new ServerConfigImpl("8080/tcp", "ws", "/connect", emptyMap()));
-    expectedServers.put("my-server3", new ServerConfigImpl("7070/tcp", "http", null, emptyMap()));
+    expectedServers.put("my-server3", new ServerConfigImpl("7070/tcp", "http", null, ATTRIBUTES));
     expectedServers.put(
-        "my.dot.separated.server", new ServerConfigImpl("9090/tcp", "http", null, emptyMap()));
+        "my.dot.separated.server", new ServerConfigImpl("9090/tcp", "http", null, null));
 
     assertEquals(deserializer.machineName(), "dev-machine");
 
