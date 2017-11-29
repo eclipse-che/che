@@ -61,8 +61,8 @@ public class ProjectSourcePage {
     String SAMPLE_CHECKBOX = "//div[@id='sample-%s']/md-checkbox";
 
     // sample project name and description(getText())
-    String TEMPLATE_NAME = "//div[@name='template-name']";
-    String TEMPLATE_DESCRIPTION = "//div[@name='template-description']";
+    String TEMPLATE_NAME = "//div[@template-name='%s']";
+    String TEMPLATE_DESCRIPTION = "//div[@template-description='%s']";
 
     String GIT_REPO_XPATH = "remote-git-url-input";
     String ZIP_XPATH = "remote-zip-url-input";

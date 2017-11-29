@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.pageobject.dashboard.workspacedetails;
+package org.eclipse.che.selenium.pageobject.dashboard.workspaces;
 
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;

@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.pageobject.dashboard.workspacedetails;
+package org.eclipse.che.selenium.pageobject.dashboard.workspaces;
 
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
@@ -25,12 +25,12 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Musienko Maxim */
 @Singleton
-public class WorkspaceDetailsProjects {
+public class WorkspaceProjects {
 
   private final SeleniumWebDriver seleniumWebDriver;
 
   @Inject
-  public WorkspaceDetailsProjects(SeleniumWebDriver seleniumWebDriver) {
+  public WorkspaceProjects(SeleniumWebDriver seleniumWebDriver) {
     this.seleniumWebDriver = seleniumWebDriver;
     PageFactory.initElements(seleniumWebDriver, this);
   }

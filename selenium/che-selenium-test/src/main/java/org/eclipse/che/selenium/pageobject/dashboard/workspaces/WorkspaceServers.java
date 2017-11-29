@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.pageobject.dashboard.workspacedetails;
+package org.eclipse.che.selenium.pageobject.dashboard.workspaces;
 
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
@@ -22,12 +22,12 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-public class WorkspaceDetailsServers {
+public class WorkspaceServers {
   private final SeleniumWebDriver seleniumWebDriver;
   private final Loader loader;
 
   @Inject
-  public WorkspaceDetailsServers(SeleniumWebDriver seleniumWebDriver, Loader loader) {
+  public WorkspaceServers(SeleniumWebDriver seleniumWebDriver, Loader loader) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
     PageFactory.initElements(seleniumWebDriver, this);

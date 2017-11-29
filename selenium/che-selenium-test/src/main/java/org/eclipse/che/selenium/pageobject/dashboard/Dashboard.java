@@ -84,7 +84,7 @@ public class Dashboard {
   }
 
   private interface Locators {
-    String DASHBOARD_TOOLBAR_TITLE = "//*[contains(@id,'navbar')]";
+    String DASHBOARD_TOOLBAR_TITLE = "navbar";
     String NAVBAR_NOTIFICATION_CONTAINER = "navbar-notification-container";
     String COLLAPSE_DASH_NAVBAR_BTN = "ide-iframe-button-link";
     String NOTIFICATION_CONTAINER = "che-notification-container";
@@ -109,7 +109,7 @@ public class Dashboard {
         "//div[contains(@class,'che-toolbar')]//span[contains(text(),'%s')]";
   }
 
-  @FindBy(xpath = Locators.DASHBOARD_TOOLBAR_TITLE)
+  @FindBy(id = Locators.DASHBOARD_TOOLBAR_TITLE)
   WebElement dashboardTitle;
 
   @FindBy(id = Locators.COLLAPSE_DASH_NAVBAR_BTN)

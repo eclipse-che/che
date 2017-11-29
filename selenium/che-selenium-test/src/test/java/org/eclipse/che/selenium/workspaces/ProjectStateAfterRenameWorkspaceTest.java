@@ -11,7 +11,7 @@
 package org.eclipse.che.selenium.workspaces;
 
 import static org.eclipse.che.selenium.core.constant.TestWorkspaceConstants.RUNNING_WORKSPACE_MESS;
-import static org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetails.StateWorkspace.RUNNING;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace.RUNNING;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -29,9 +29,9 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.dashboard.Workspaces;
-import org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetails;
-import org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetailsOverview;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -54,7 +54,7 @@ public class ProjectStateAfterRenameWorkspaceTest {
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private TestWorkspaceServiceClient testWorkspaceServiceClient;
   @Inject private Workspaces workspaces;
-  @Inject private WorkspaceDetailsOverview workspaceDetailsOverview;
+  @Inject private WorkspaceOverview workspaceOverview;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -94,10 +94,10 @@ public class ProjectStateAfterRenameWorkspaceTest {
     dashboard.waitToolbarTitleName("Workspaces");
 
     workspaces.selectWorkspaceItemName(testWorkspace.getName());
-    workspaceDetailsOverview.enterNameWorkspace(WORKSPACE_NEW_NAME);
+    workspaceOverview.enterNameWorkspace(WORKSPACE_NEW_NAME);
     workspaceDetails.clickOnSaveChangesBtn();
     workspaceDetails.checkStateOfWorkspace(RUNNING);
-    workspaceDetailsOverview.checkNameWorkspace(WORKSPACE_NEW_NAME);
+    workspaceOverview.checkNameWorkspace(WORKSPACE_NEW_NAME);
 
     // open the IDE, check state of the project
     workspaceDetails.clickOpenInIdeWsBtn();

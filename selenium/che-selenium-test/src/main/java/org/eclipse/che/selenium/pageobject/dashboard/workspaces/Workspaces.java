@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.pageobject.dashboard;
+package org.eclipse.che.selenium.pageobject.dashboard.workspaces;
 
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
@@ -21,6 +21,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElem
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;

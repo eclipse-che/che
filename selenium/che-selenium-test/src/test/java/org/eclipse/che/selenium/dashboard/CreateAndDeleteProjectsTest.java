@@ -13,7 +13,7 @@ package org.eclipse.che.selenium.dashboard;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.WEB_JAVA_SPRING;
-import static org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetails.TabNames.PROJECTS;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.PROJECTS;
 
 import com.google.inject.Inject;
 import java.util.concurrent.ExecutionException;
@@ -30,9 +30,9 @@ import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
-import org.eclipse.che.selenium.pageobject.dashboard.Workspaces;
-import org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetails;
-import org.eclipse.che.selenium.pageobject.dashboard.workspacedetails.WorkspaceDetailsProjects;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -43,7 +43,7 @@ public class CreateAndDeleteProjectsTest {
   private final String WORKSPACE = NameGenerator.generate("workspace", 4);
 
   @Inject private Dashboard dashboard;
-  @Inject private WorkspaceDetailsProjects workspaceDetailsProjects;
+  @Inject private WorkspaceProjects workspaceProjects;
   @Inject private WorkspaceDetails workspaceDetails;
   @Inject private NavigationBar navigationBar;
   @Inject private CreateWorkspace createWorkspace;
@@ -96,16 +96,16 @@ public class CreateAndDeleteProjectsTest {
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.selectWorkspaceItemName(WORKSPACE);
     workspaceDetails.selectTabInWorkspaceMenu(PROJECTS);
-    workspaceDetailsProjects.waitProjectIsPresent(WEB_JAVA_SPRING);
-    workspaceDetailsProjects.waitProjectIsPresent(CONSOLE_JAVA_SIMPLE);
-    workspaceDetailsProjects.openSettingsForProjectByName(WEB_JAVA_SPRING);
-    workspaceDetailsProjects.clickOnDeleteProject();
-    workspaceDetailsProjects.clickOnDeleteItInDialogWindow();
-    workspaceDetailsProjects.waitProjectIsNotPresent(WEB_JAVA_SPRING);
-    workspaceDetailsProjects.openSettingsForProjectByName(CONSOLE_JAVA_SIMPLE);
-    workspaceDetailsProjects.clickOnDeleteProject();
-    workspaceDetailsProjects.clickOnDeleteItInDialogWindow();
-    workspaceDetailsProjects.waitProjectIsNotPresent(CONSOLE_JAVA_SIMPLE);
+    workspaceProjects.waitProjectIsPresent(WEB_JAVA_SPRING);
+    workspaceProjects.waitProjectIsPresent(CONSOLE_JAVA_SIMPLE);
+    workspaceProjects.openSettingsForProjectByName(WEB_JAVA_SPRING);
+    workspaceProjects.clickOnDeleteProject();
+    workspaceProjects.clickOnDeleteItInDialogWindow();
+    workspaceProjects.waitProjectIsNotPresent(WEB_JAVA_SPRING);
+    workspaceProjects.openSettingsForProjectByName(CONSOLE_JAVA_SIMPLE);
+    workspaceProjects.clickOnDeleteProject();
+    workspaceProjects.clickOnDeleteItInDialogWindow();
+    workspaceProjects.waitProjectIsNotPresent(CONSOLE_JAVA_SIMPLE);
   }
 
   private void switchToWindow(String windowHandle) {

@@ -8,18 +8,16 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.pageobject.dashboard.workspacedetails;
+package org.eclipse.che.selenium.pageobject.dashboard.workspaces;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.openqa.selenium.support.PageFactory;
 
-public class WorkspaceDetailsSsh {
-  private final SeleniumWebDriver seleniumWebDriver;
+public class WorkspaceConfig {
 
   @Inject
-  public WorkspaceDetailsSsh(SeleniumWebDriver seleniumWebDriver) {
-    this.seleniumWebDriver = seleniumWebDriver;
+  public WorkspaceConfig(SeleniumWebDriver seleniumWebDriver) {
     PageFactory.initElements(seleniumWebDriver, this);
   }
 }
