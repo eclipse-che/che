@@ -10,11 +10,14 @@
  */
 package org.eclipse.che.selenium.git;
 
+import static org.testng.Assert.fail;
+
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestGitConstants;
@@ -29,10 +32,11 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.WarningDialog;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-/** Created by aleksandr shmaraev on 29.09.14. */
+/** @author aleksandr shmaraev */
 public class InitializeAndDeleteLocalRepositoryTest {
   private static final String PROJECT_NAME = NameGenerator.generate("InitAndDelLocalRepo-", 4);
   private static final String PATH_FOR_EXPAND =
@@ -62,6 +66,7 @@ public class InitializeAndDeleteLocalRepositoryTest {
   @Inject private WarningDialog warningDialog;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -73,8 +78,8 @@ public class InitializeAndDeleteLocalRepositoryTest {
     ide.open(ws);
   }
 
-  @Test
-  public void initializeLocalRepositoryTest() {
+  @Test(priority = 1)
+  public void initializeLocalRepository() {
     // Initialize git repository
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
@@ -86,6 +91,11 @@ public class InitializeAndDeleteLocalRepositoryTest {
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_INITIALIZED_SUCCESS);
     events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.GIT_INITIALIZED_SUCCESS);
+    menu.runCommand(TestMenuCommandsConstants.Git.GIT);
+    menu.waitCommandIsDisabledInMenu(TestMenuCommandsConstants.Git.INITIALIZE_REPOSITORY);
+    menu.runCommandByXpath(TestMenuCommandsConstants.Git.STATUS);
+    git.waitGitStatusBarWithMess("On branch master");
+    projectExplorer.selectItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PATH_FOR_EXPAND + "AppController.java");
     loader.waitOnClosed();
@@ -103,6 +113,10 @@ public class InitializeAndDeleteLocalRepositoryTest {
     git.waitTextInHistoryForm(COMMIT_MESSAGE);
     git.closeGitHistoryForm();
     git.waitHistoryFormToClose();
+  }
+
+  @Test(priority = 2)
+  public void deleteLocalRepository() {
 
     // Delete git repo
     menu.runCommand(
@@ -112,5 +126,14 @@ public class InitializeAndDeleteLocalRepositoryTest {
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_REPO_DELETE);
     events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.GIT_REPO_DELETE);
+    menu.runCommand(TestMenuCommandsConstants.Git.GIT);
+    try {
+      menu.waitCommandIsDisabledInMenu(TestMenuCommandsConstants.Git.DELETE_REPOSITORY);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7562");
+    }
+    seleniumWebDriver.navigate().refresh();
+    projectExplorer.waitItem(PATH_FOR_EXPAND + "AppController.java");
   }
 }

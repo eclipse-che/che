@@ -465,6 +465,16 @@ public class LightTheme implements Theme {
   }
 
   @Override
+  public String getEditorLinkedGroupColor() {
+    return "#5e5e5e";
+  }
+
+  @Override
+  public String getEditorLinkedGroupBackground() {
+    return "#b3dbff";
+  }
+
+  @Override
   public String getEditorInactiveSelectionColor() {
     return "#d4d4d4";
   }

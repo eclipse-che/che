@@ -29,7 +29,7 @@
         </encoder>
     </appender>
     
-    <logger name="org.openqa.selenium.remote" level="OFF"/>
+    <logger name="org.openqa.selenium.remote.ProtocolHandshake" level="OFF"/>
 
     <root level="INFO">
         <appender-ref ref="stdout"/>

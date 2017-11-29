@@ -35,6 +35,10 @@ public class FontAwesome {
   /** http://fortawesome.github.io/Font-Awesome/icon/cog/ */
   public static final String COG = "<i class=\"fa fa-cog\"></i>";
 
+  /** http://fontawesome.io/icon/caret-square-o-left/ */
+  public static final String CARET_SQUARE_O_LEFT =
+      "<i class=\"fa fa-caret-square-o-left\" aria-hidden=\"true\"></i>";
+
   /** http://fortawesome.github.io/Font-Awesome/icon/compress/ */
   public static final String COMPRESS = "<i class=\"fa fa-compress\"></i>";
 
