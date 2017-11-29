@@ -18,7 +18,7 @@ import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.RUN
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.STARTING;
 import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_ORIGINAL_NAME_LABEL;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyListOf;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
@@ -60,7 +60,6 @@ import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
-import org.eclipse.che.api.installer.shared.model.Installer;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.hc.ServersChecker;
@@ -151,8 +150,7 @@ public class OpenShiftInternalRuntimeTest {
     when(project.services()).thenReturn(services);
     when(project.routes()).thenReturn(routes);
     when(project.pods()).thenReturn(pods);
-    when(bootstrapperFactory.create(any(), anyListOf(Installer.class), any()))
-        .thenReturn(bootstrapper);
+    when(bootstrapperFactory.create(any(), anyList(), any())).thenReturn(bootstrapper);
     when(context.getEnvironment()).thenReturn(osEnv);
     doReturn(
             ImmutableMap.of(

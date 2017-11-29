@@ -395,7 +395,7 @@ public class ProjectExplorer {
     // sometimes an element in the project explorer may not be attached to the DOM. We should
     // refresh all items.
     catch (StaleElementReferenceException ex) {
-      LOG.warn(ex.getLocalizedMessage(), ex);
+      LOG.debug(ex.getLocalizedMessage(), ex);
 
       waitProjectExplorer();
       clickOnRefreshTreeButton();
@@ -419,7 +419,7 @@ public class ProjectExplorer {
     // sometimes an element in the project explorer may not be attached to the DOM. We should
     // refresh all items.
     catch (StaleElementReferenceException ex) {
-      LOG.warn(ex.getLocalizedMessage(), ex);
+      LOG.debug(ex.getLocalizedMessage(), ex);
 
       waitProjectExplorer();
       clickOnRefreshTreeButton();
@@ -503,7 +503,7 @@ public class ProjectExplorer {
     // sometimes an element in the project explorer may not be attached to the DOM. We should
     // refresh all items.
     catch (StaleElementReferenceException ex) {
-      LOG.warn(ex.getLocalizedMessage(), ex);
+      LOG.debug(ex.getLocalizedMessage(), ex);
 
       clickOnRefreshTreeButton();
       waitItem(path);
