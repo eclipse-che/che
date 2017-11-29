@@ -50,7 +50,7 @@ public class SwaggerTest {
       assertTrue(swagger.getWsNamesFromWorkspacePage().contains(workspace.getName()));
     } catch (IllegalStateException | StaleElementReferenceException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/6015");
+      fail("Known issue https://github.com/eclipse/che/issues/6015", ex);
     }
   }
 }
