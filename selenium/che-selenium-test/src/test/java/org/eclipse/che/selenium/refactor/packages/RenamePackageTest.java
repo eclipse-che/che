@@ -16,7 +16,6 @@ import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -32,10 +31,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-/**
- * @author Aleksandr Shmaraev TODO Part of test methods are fail. See issue -
- *     https://github.com/eclipse/che/issues/4979
- */
+/** @author Aleksandr Shmaraev */
 public class RenamePackageTest {
 
   private static String PROJECT_NAME = NameGenerator.generate("CheckRenamePackageProject-", 4);
@@ -236,6 +232,8 @@ public class RenamePackageTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(workspace);
+    projectExplorer.waitProjectExplorer();
+    projectExplorer.waitItem(PROJECT_NAME);
     console.clickOnProcessesTab();
     expandTestProject(PROJECT_NAME);
   }
@@ -423,11 +421,6 @@ public class RenamePackageTest {
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/test4/r");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/test4/q");
     projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/test4/r");
-
-    // TODO this is temporary solution, because tree is not refresh
-    projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/src/main/java/test4/r");
-    projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.REFRESH);
-
     projectExplorer.waitItemIsDisappeared(PROJECT_NAME + "/src/main/java/test4/r/p1");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test4/q/A.java");
     loader.waitOnClosed();
