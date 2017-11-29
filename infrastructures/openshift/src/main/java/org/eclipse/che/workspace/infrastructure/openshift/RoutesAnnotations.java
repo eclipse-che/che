@@ -10,8 +10,9 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift;
 
-import static java.util.Collections.emptyMap;
-
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import io.fabric8.openshift.api.model.Route;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -35,10 +36,17 @@ public class RoutesAnnotations {
   public static final String SERVER_PROTOCOL_ANNOTATION_FMT =
       ANNOTATION_PREFIX + "server.%s.protocol";
   public static final String SERVER_PATH_ANNOTATION_FMT = ANNOTATION_PREFIX + "server.%s.path";
+  public static final String SERVER_ATTR_ANNOTATION_FMT =
+      ANNOTATION_PREFIX + "server.%s.attributes";
 
   /** Pattern that matches server annotations e.g. "org.eclipse.che.server.exec-agent.port". */
   private static final Pattern SERVER_ANNOTATION_PATTERN =
       Pattern.compile("org\\.eclipse\\.che\\.server\\.(?<ref>[\\w-/]+)\\..+");
+
+  private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
+  // used to avoid frequent creations of the object at runtime
+  private static final java.lang.reflect.Type mapTypeToken =
+      new TypeToken<Map<String, String>>() {}.getType();
 
   /** Creates new annotations serializer. */
   public static Serializer newSerializer() {
@@ -67,6 +75,10 @@ public class RoutesAnnotations {
       annotations.put(String.format(SERVER_PROTOCOL_ANNOTATION_FMT, ref), server.getProtocol());
       if (server.getPath() != null) {
         annotations.put(String.format(SERVER_PATH_ANNOTATION_FMT, ref), server.getPath());
+      }
+      if (server.getAttributes() != null) {
+        annotations.put(
+            String.format(SERVER_ATTR_ANNOTATION_FMT, ref), GSON.toJson(server.getAttributes()));
       }
       return this;
     }
@@ -105,7 +117,9 @@ public class RoutesAnnotations {
                     annotations.get(String.format(SERVER_PORT_ANNOTATION_FMT, ref)),
                     annotations.get(String.format(SERVER_PROTOCOL_ANNOTATION_FMT, ref)),
                     annotations.get(String.format(SERVER_PATH_ANNOTATION_FMT, ref)),
-                    emptyMap()));
+                    GSON.fromJson(
+                        annotations.get(String.format(SERVER_ATTR_ANNOTATION_FMT, ref)),
+                        mapTypeToken)));
           }
         }
       }

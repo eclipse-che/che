@@ -71,13 +71,17 @@ public class ServerResolver {
                     servers.put(
                         name,
                         newServer(
-                            config.getProtocol(), route.getSpec().getHost(), config.getPath())));
+                            config.getProtocol(),
+                            route.getSpec().getHost(),
+                            config.getPath(),
+                            config.getAttributes())));
       }
     }
     return servers;
   }
 
-  private ServerImpl newServer(String protocol, String host, String path) {
+  private ServerImpl newServer(
+      String protocol, String host, String path, Map<String, String> attributes) {
     StringBuilder ub = new StringBuilder();
     if (protocol != null) {
       ub.append(protocol).append("://");
@@ -91,7 +95,10 @@ public class ServerResolver {
       }
       ub.append(path);
     }
-    return new ServerImpl().withUrl(ub.toString()).withStatus(ServerStatus.UNKNOWN);
+    return new ServerImpl()
+        .withUrl(ub.toString())
+        .withStatus(ServerStatus.UNKNOWN)
+        .withAttributes(attributes);
   }
 
   private List<Service> getMatchedServices(Pod pod, Container container) {
