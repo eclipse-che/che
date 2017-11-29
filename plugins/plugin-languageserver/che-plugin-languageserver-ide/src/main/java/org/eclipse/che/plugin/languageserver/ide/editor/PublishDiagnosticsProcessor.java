@@ -12,7 +12,6 @@ package org.eclipse.che.plugin.languageserver.ide.editor;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.List;
 import java.util.Optional;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedPublishDiagnosticsParams;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -40,21 +39,7 @@ public class PublishDiagnosticsProcessor {
     this.tree = projectExplorer.getTree();
   }
 
-  public void processDiagnostics(List<ExtendedPublishDiagnosticsParams> diagnostics) {
-    tree.getNodeStorage()
-        .getAll()
-        .stream()
-        .filter(node -> node instanceof ResourceNode)
-        .map(node -> ((ResourceNode) node))
-        .forEach(
-            node -> {
-              node.getData().setHasError(false);
-              tree.refresh(node);
-            });
-    diagnostics.forEach(this::processDiagnostics);
-  }
-
-  private void processDiagnostics(ExtendedPublishDiagnosticsParams diagnosticsMessage) {
+  public void processDiagnostics(ExtendedPublishDiagnosticsParams diagnosticsMessage) {
     final Path path = Path.valueOf(diagnosticsMessage.getParams().getUri());
     final Optional<ResourceNode> resource =
         tree.getNodeStorage()
