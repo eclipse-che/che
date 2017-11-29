@@ -15,7 +15,6 @@ import com.google.inject.Singleton;
 import java.util.List;
 import java.util.Optional;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedPublishDiagnosticsParams;
-import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
@@ -46,9 +45,10 @@ public class PublishDiagnosticsProcessor {
         .getAll()
         .stream()
         .filter(node -> node instanceof ResourceNode)
+        .map(node -> ((ResourceNode) node))
         .forEach(
             node -> {
-              ((ResourceNode) node).getData().setHasError(false);
+              node.getData().setHasError(false);
               tree.refresh(node);
             });
     diagnostics.forEach(this::processDiagnostics);
@@ -56,15 +56,16 @@ public class PublishDiagnosticsProcessor {
 
   private void processDiagnostics(ExtendedPublishDiagnosticsParams diagnosticsMessage) {
     final Path path = Path.valueOf(diagnosticsMessage.getParams().getUri());
-    final Optional<Node> resource =
+    final Optional<ResourceNode> resource =
         tree.getNodeStorage()
             .getAll()
             .stream()
-            .filter(
-                node -> node instanceof ResourceNode && ((ResourceNode) node).getData().isFile())
-            .filter(node -> path.equals(((ResourceNode) node).getData().asFile().getLocation()))
+            .filter(node -> node instanceof ResourceNode)
+            .map(node -> ((ResourceNode) node))
+            .filter(node -> node.getData().isFile())
+            .filter(node -> path.equals(node.getData().asFile().getLocation()))
             .findAny();
-    resource.ifPresent(node -> setHasError((ResourceNode) node));
+    resource.ifPresent(this::setHasError);
 
     EditorPartPresenter openedEditor = editorAgent.getOpenedEditor(path);
     // TODO add markers
