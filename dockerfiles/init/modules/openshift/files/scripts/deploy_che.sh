@@ -21,6 +21,28 @@
 
 set -e
 
+# ----------------
+# helper functions
+# ----------------
+
+# append_che_config_map allows to append content after matching line
+# this is needed to append content of yaml files
+# first arg is mathing string, second is a path to the file with parameters in KV format which will be inserted after match
+append_che_config_map() {
+    while IFS= read -r line
+    do
+      printf '%s\n' "$line"
+      if [[ "$line" == *"$1"* ]];then
+          while read l; do
+            #ignore comments and empty lines
+            if [[ "$l" != "#"* ]] && [[ ! -z "$l" ]]; then
+                printf '%s\n' "    $l"
+            fi
+          done <$2
+      fi
+    done < /dev/stdin
+}
+
 # --------------
 # Print Che logo 
 # --------------
@@ -165,8 +187,6 @@ else
   CHE_DEDICATED_KEYCLOAK="false"
 fi
 
-CHE_OAUTH_GITHUB_CLIENTID=${CHE_OAUTH_GITHUB_CLIENTID:-}
-CHE_OAUTH_GITHUB_CLIENTSECRET=${CHE_OAUTH_GITHUB_CLIENTSECRET:-}
 CHE_INFRA_OPENSHIFT_PROJECT=${CHE_INFRA_OPENSHIFT_PROJECT:-${DEFAULT_CHE_INFRA_OPENSHIFT_PROJECT}}
 CHE_INFRA_OPENSHIFT_USERNAME=${CHE_INFRA_OPENSHIFT_USERNAME:-${DEFAULT_CHE_INFRA_OPENSHIFT_USERNAME}}
 CHE_INFRA_OPENSHIFT_PASSWORD=${CHE_INFRA_OPENSHIFT_PASSWORD:-${DEFAULT_CHE_INFRA_OPENSHIFT_PASSWORD}}
@@ -357,9 +377,10 @@ fi
 echo
 echo "[CHE] Deploying Che on ${OPENSHIFT_FLAVOR} (image ${CHE_IMAGE})"
 
-
 DEFAULT_CHE_DEPLOYMENT_FILE_PATH=./che-openshift.yml
 CHE_DEPLOYMENT_FILE_PATH=${CHE_DEPLOYMENT_FILE_PATH:-${DEFAULT_CHE_DEPLOYMENT_FILE_PATH}}
+DEFAULT_CHE_EXTRA_CONFIG_MAP_FILE_PATH="$(pwd)/che-extra-config-map"
+CHE_EXTRA_CONFIG_MAP_FILE_PATH=${CHE_EXTRA_CONFIG_MAP_FILE_PATH:-${DEFAULT_CHE_EXTRA_CONFIG_MAP_FILE_PATH}}
 cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     sed "s/          image:.*/          image: \"${CHE_IMAGE_SANITIZED}\"/" | \
     sed "s/          imagePullPolicy:.*/          imagePullPolicy: \"${IMAGE_PULL_POLICY}\"/" | \
@@ -376,8 +397,7 @@ cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     sed "s|    CHE_KEYCLOAK_AUTH__SERVER__URL:.*|    CHE_KEYCLOAK_AUTH__SERVER__URL: \"${CHE_KEYCLOAK_AUTH__SERVER__URL}\"|" | \
     sed "s|    CHE_KEYCLOAK_REALM:.*|    CHE_KEYCLOAK_REALM: \"${CHE_KEYCLOAK_REALM}\"|" | \
     sed "s|    CHE_KEYCLOAK_CLIENT__ID:.*|    CHE_KEYCLOAK_CLIENT__ID: \"${CHE_KEYCLOAK_CLIENT__ID}\"|" | \
-    sed "s|    CHE_OAUTH_GITHUB_CLIENTID:.*|    CHE_OAUTH_GITHUB_CLIENTID: \"${CHE_OAUTH_GITHUB_CLIENTID}\"|" | \
-    sed "s|    CHE_OAUTH_GITHUB_CLIENTSECRET:.*|    CHE_OAUTH_GITHUB_CLIENTSECRET: \"${CHE_OAUTH_GITHUB_CLIENTSECRET}\"|" | \
+    append_che_config_map "#CHE_MASTER_PROPS" "${CHE_EXTRA_CONFIG_MAP_FILE_PATH}" | \
     sed "s/    CHE_DEBUG_SERVER:.*/    CHE_DEBUG_SERVER: \"${CHE_DEBUG_SERVER}\"/" | \
     if [ "${CHE_INFRA_OPENSHIFT_OAUTH__TOKEN+x}" ]; then sed "s|    CHE_INFRA_OPENSHIFT_OAUTH__TOKEN:.*|    CHE_INFRA_OPENSHIFT_OAUTH__TOKEN: \"${CHE_INFRA_OPENSHIFT_OAUTH__TOKEN}\"|"; else cat -;  fi | \
     if [ "${CHE_INFRA_OPENSHIFT_USERNAME+x}" ]; then sed "s|    CHE_INFRA_OPENSHIFT_USERNAME:.*|    CHE_INFRA_OPENSHIFT_USERNAME: \"${CHE_INFRA_OPENSHIFT_USERNAME}\"|"; else cat -;  fi | \

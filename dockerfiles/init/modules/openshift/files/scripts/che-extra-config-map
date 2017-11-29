@@ -1,0 +1,4 @@
+# put extra CHE server env vars here in following format:
+# KEY: value
+CHE_OAUTH_GITHUB_CLIENTID:
+CHE_OAUTH_GITHUB_CLIENTSECRET:
