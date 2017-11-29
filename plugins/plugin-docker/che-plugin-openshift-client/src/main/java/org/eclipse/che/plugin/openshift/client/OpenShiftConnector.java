@@ -1460,11 +1460,6 @@ public class OpenShiftConnector extends DockerConnector {
       String imageStreamTagName, Config openshiftConfig, String openshiftNamespace)
       throws IOException {
 
-    // Since repository + tag are limited to 63 chars, it's possible that the entire
-    // tag name did not fit, so we have to match a substring.
-    String imageTagTrimmed =
-        imageStreamTagName.length() > 20 ? imageStreamTagName.substring(0, 20) : imageStreamTagName;
-
     // Note: ideally, ImageStreamTags could be identified with a label, but it seems like
     // ImageStreamTags do not support labels.
     List<ImageStreamTag> imageStreams;
@@ -1478,7 +1473,14 @@ public class OpenShiftConnector extends DockerConnector {
     List<String> imageStreamTags =
         imageStreams
             .stream()
-            .filter(e -> e.getMetadata().getName().contains(imageTagTrimmed))
+            .filter(
+                e -> {
+                  String tagName =
+                      KubernetesStringUtils.getTagNameFromPullSpec(e.getMetadata().getName());
+                  return imageStreamTagName.length() >= tagName.length()
+                      ? imageStreamTagName.contains(tagName)
+                      : tagName.contains(imageStreamTagName);
+                })
             .map(e -> e.getMetadata().getName())
             .collect(Collectors.toList());
 
