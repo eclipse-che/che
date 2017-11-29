@@ -10,11 +10,11 @@
  */
 package org.eclipse.che.ide;
 
-import com.google.gwt.user.client.Window.Location;
+import static com.google.gwt.user.client.Window.Location.getParameter;
+import static com.google.gwt.user.client.Window.Location.getParameterMap;
+
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
@@ -26,14 +26,6 @@ import javax.inject.Singleton;
 @Singleton
 public class QueryParameters {
 
-  private final Map<String, List<String>> cachedParameters;
-
-  @Inject
-  public QueryParameters() {
-    // cache the query parameters because IDE changes window's location
-    cachedParameters = Location.getParameterMap();
-  }
-
   /**
    * Returns the query parameter by the specified name or empty string if parameter was not found.
    * Note that if multiple parameters have been specified with the same name, the last one will be
@@ -43,13 +35,9 @@ public class QueryParameters {
    * @return query parameter value
    */
   public String getByName(String name) {
-    List<String> paramsForName = cachedParameters.get(name);
+    String value = getParameter(name);
 
-    if (paramsForName == null) {
-      return "";
-    } else {
-      return paramsForName.get(paramsForName.size() - 1);
-    }
+    return value == null ? "" : value;
   }
 
   /**
@@ -63,9 +51,8 @@ public class QueryParameters {
    */
   public Map<String, String> getAll() {
     Map<String, String> parameters = new HashMap<>();
-    for (Map.Entry<String, List<String>> parametersEntry : cachedParameters.entrySet()) {
-      parameters.put(parametersEntry.getKey(), parametersEntry.getValue().get(0));
-    }
+    getParameterMap().forEach((key, value) -> parameters.put(key, value.get(0)));
+
     return parameters;
   }
 }
