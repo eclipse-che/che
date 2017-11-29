@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.java.languageserver;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.ide.ext.java.shared.Constants.CLASS_PATH_TREE;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_CONTENT_NODE_BY_FQN;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_CONTENT_NODE_BY_PATH;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARIES;
@@ -25,6 +26,7 @@ import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_FOLD
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_PROJECT_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_IN_FILE_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TEST_BY_CURSOR_COMMAND;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_CLASS_PATH_TREE_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_EXTERNAL_LIBRARIES_CHILDREN_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_EXTERNAL_LIBRARIES_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_LIBRARY_CHILDREN_COMMAND;
@@ -42,6 +44,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.inject.Inject;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -53,7 +56,10 @@ import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
+import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 import org.eclipse.che.jdt.ls.extension.api.dto.ClassContent;
+import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExternalLibrariesParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.FileStructureCommandParameters;
@@ -151,6 +157,13 @@ public class JavaLanguageServerExtensionService {
         .paramsAsDto(ExternalLibrariesParameters.class)
         .resultAsDto(ClassContentDto.class)
         .withFunction(this::getLibraryNodeContentByFqn);
+
+    requestHandler
+        .newConfiguration()
+        .methodName(CLASS_PATH_TREE)
+        .paramsAsString()
+        .resultAsListOfDto(ClasspathEntryDto.class)
+        .withFunction(this::getClasspathTree);
   }
 
   /**
@@ -362,6 +375,41 @@ public class JavaLanguageServerExtensionService {
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }
+  }
+
+  private List<ClasspathEntryDto> getClasspathTree(String projectPath) {
+    String projectUri = LanguageServiceUtils.prefixURI(projectPath);
+    CompletableFuture<Object> result =
+        executeCommand(GET_CLASS_PATH_TREE_COMMAND, singletonList(projectUri));
+    Type targetClassType = new TypeToken<ArrayList<ClasspathEntry>>() {}.getType();
+    try {
+      List<ClasspathEntry> classpathEntries =
+          gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), targetClassType);
+      return convertToClasspathEntryDto(classpathEntries);
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
+  }
+
+  private List<ClasspathEntryDto> convertToClasspathEntryDto(
+      List<ClasspathEntry> classpathEntries) {
+    List<ClasspathEntryDto> result = new LinkedList<>();
+    for (ClasspathEntry classpathEntry : classpathEntries) {
+      ClasspathEntryDto classpathEntryDto =
+          DtoFactory.newDto(ClasspathEntryDto.class)
+              .withEntryKind(classpathEntry.getEntryKind())
+              .withPath(classpathEntry.getPath());
+
+      List<ClasspathEntry> children = classpathEntry.getChildren();
+
+      if (children != null) {
+        classpathEntryDto.withExpandedEntries(convertToClasspathEntryDto(children));
+      }
+
+      result.add(classpathEntryDto);
+    }
+
+    return result;
   }
 
   private JarEntryDto getLibraryEntry(ExternalLibrariesParameters params) {

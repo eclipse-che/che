@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.ext.java.client.service;
 
 import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
+import static org.eclipse.che.ide.ext.java.shared.Constants.CLASS_PATH_TREE;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_CONTENT_NODE_BY_FQN;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_CONTENT_NODE_BY_PATH;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARIES;
@@ -28,6 +29,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.api.promises.client.js.RejectFunction;
+import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 import org.eclipse.che.jdt.ls.extension.api.dto.ClassContent;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExternalLibrariesParameters;
@@ -75,6 +77,26 @@ public class JavaLanguageExtensionServiceClient {
                 .methodName(EXTERNAL_LIBRARIES)
                 .paramsAsDto(params)
                 .sendAndReceiveResultAsListOfDto(Jar.class, 10000)
+                .onSuccess(resolve::apply)
+                .onTimeout(() -> onTimeout(reject))
+                .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));
+  }
+
+  /**
+   * Gets classpath structure.
+   *
+   * @param projectPath path to the project
+   * @return classpath structure
+   */
+  public Promise<List<ClasspathEntryDto>> classpathTree(String projectPath) {
+    return Promises.create(
+        (resolve, reject) ->
+            requestTransmitter
+                .newRequest()
+                .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
+                .methodName(CLASS_PATH_TREE)
+                .paramsAsString(projectPath)
+                .sendAndReceiveResultAsListOfDto(ClasspathEntryDto.class, 10000)
                 .onSuccess(resolve::apply)
                 .onTimeout(() -> onTimeout(reject))
                 .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));
