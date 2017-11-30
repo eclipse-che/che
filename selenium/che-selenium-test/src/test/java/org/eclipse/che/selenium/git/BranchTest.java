@@ -298,7 +298,6 @@ public class BranchTest {
     git.waitBranchInTheList(TEST_BRANCH);
     git.selectBranchAndClickCheckoutBtn(TEST_BRANCH);
     git.closeBranchesForm();
-    System.out.println(git.gitStatusBar.getTextStatus());
     git.waitGitStatusBarWithMess(CONFLICT_MESSAGE);
   }
 

@@ -10,11 +10,18 @@
  */
 package org.eclipse.che.api.installer.server.model.impl;
 
-import com.google.common.base.Objects;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.MapKeyColumn;
 import javax.persistence.Table;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 
@@ -37,18 +44,35 @@ public class InstallerServerConfigImpl implements ServerConfig {
   @Column(name = "path")
   private String path;
 
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(
+    name = "installer_serverconf_attributes",
+    joinColumns = @JoinColumn(name = "serverconf_id")
+  )
+  @MapKeyColumn(name = "attributes_key")
+  @Column(name = "attributes")
+  private Map<String, String> attributes;
+
   public InstallerServerConfigImpl() {}
 
-  public InstallerServerConfigImpl(String port, String protocol, String path) {
+  public InstallerServerConfigImpl(
+      String port, String protocol, String path, Map<String, String> attributes) {
     this.port = port;
     this.protocol = protocol;
     this.path = path;
+    if (attributes != null) {
+      this.attributes = new HashMap<>(attributes);
+    } else {
+      this.attributes = new HashMap<>();
+    }
   }
 
   public InstallerServerConfigImpl(ServerConfig serverConfig) {
-    this.port = serverConfig.getPort();
-    this.protocol = serverConfig.getProtocol();
-    this.path = serverConfig.getPath();
+    this(
+        serverConfig.getPort(),
+        serverConfig.getProtocol(),
+        serverConfig.getPath(),
+        serverConfig.getAttributes());
   }
 
   @Override
@@ -87,19 +111,40 @@ public class InstallerServerConfigImpl implements ServerConfig {
   }
 
   @Override
+  public Map<String, String> getAttributes() {
+    if (attributes == null) {
+      attributes = new HashMap<>();
+    }
+    return attributes;
+  }
+
+  public void setAttributes(Map<String, String> attributes) {
+    if (attributes != null) {
+      this.attributes = new HashMap<>(attributes);
+    } else {
+      this.attributes = new HashMap<>();
+    }
+  }
+
+  @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof InstallerServerConfigImpl)) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof InstallerServerConfigImpl)) {
+      return false;
+    }
     InstallerServerConfigImpl that = (InstallerServerConfigImpl) o;
-    return Objects.equal(id, that.id)
-        && Objects.equal(port, that.port)
-        && Objects.equal(protocol, that.protocol)
-        && Objects.equal(path, that.path);
+    return Objects.equals(getId(), that.getId())
+        && Objects.equals(getPort(), that.getPort())
+        && Objects.equals(getProtocol(), that.getProtocol())
+        && Objects.equals(getPath(), that.getPath())
+        && Objects.equals(getAttributes(), that.getAttributes());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(id, port, protocol, path);
+    return Objects.hash(getId(), getPort(), getProtocol(), getPath(), getAttributes());
   }
 
   @Override
@@ -116,6 +161,8 @@ public class InstallerServerConfigImpl implements ServerConfig {
         + ", path='"
         + path
         + '\''
+        + ", attributes="
+        + attributes
         + '}';
   }
 }

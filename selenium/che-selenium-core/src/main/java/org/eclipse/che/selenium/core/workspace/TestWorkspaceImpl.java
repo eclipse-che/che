@@ -52,10 +52,16 @@ public class TestWorkspaceImpl implements TestWorkspace {
         CompletableFuture.runAsync(
             () -> {
               try {
+
                 final Workspace ws =
                     workspaceServiceClient.createWorkspace(name, memoryInGB, GB, template);
+                long start = System.currentTimeMillis();
                 workspaceServiceClient.start(id.updateAndGet((s) -> ws.getId()), name, owner);
-                LOG.info("Workspace name='{}' id='{}' started.", name, ws.getId());
+                LOG.info(
+                    "Workspace name='{}' id='{}' started in {} sec.",
+                    name,
+                    ws.getId(),
+                    (System.currentTimeMillis() - start) / 1000);
               } catch (Exception e) {
                 String errorMessage = format("Workspace name='%s' start failed.", name);
                 LOG.error(errorMessage, e);

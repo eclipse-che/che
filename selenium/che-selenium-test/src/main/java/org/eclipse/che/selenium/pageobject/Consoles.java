@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
+import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
@@ -29,7 +30,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Aleksandr Shmaraev */
@@ -66,6 +66,16 @@ public class Consoles {
   public static final String SERVER_INFO_TABLE_CAPTION = "gwt-debug-runtimeInfoCellTableCaption";
   public static final String SERVER_INFO_HIDE_INTERNAL_CHECK_BOX =
       "gwt-debug-runtimeInfoHideServersCheckBox";
+  public static final String MACHINE_NAME =
+      "//div[@id='gwt-debug-process-tree']//span[text()= '%s']";
+  public static final String CONTEXT_MENU = "gwt-debug-contextMenu/commandsActionGroup";
+  public static final String COMMAND_NAME = "//tr[contains(@id,'command_%s')]";
+
+  public interface CommandsGoal {
+    String COMMON = "gwt-debug-contextMenu/Commands/goal_Common";
+    String BUILD = "gwt-debug-contextMenu/Commands/goal_Build";
+    String RUN = "gwt-debug-contextMenu/Commands/goal_Run";
+  }
 
   protected final SeleniumWebDriver seleniumWebDriver;
   private final Loader loader;
@@ -122,6 +132,9 @@ public class Consoles {
 
   @FindBy(id = SERVER_INFO_HIDE_INTERNAL_CHECK_BOX)
   WebElement serverInfoHideInternalCheckBox;
+
+  @FindBy(id = CONTEXT_MENU)
+  WebElement contextMenu;
 
   /**
    * click on consoles icon in side line and wait opening console area (terminal on other console )
@@ -190,7 +203,7 @@ public class Consoles {
    */
   public void closeProcessInProcessConsoleTreeByName(String nameProcess) {
     loadPageDriverWait
-        .until(visibilityOfElementLocated(By.xpath(String.format(CLOSE_PROCESS_ICON, nameProcess))))
+        .until(visibilityOfElementLocated(By.xpath(format(CLOSE_PROCESS_ICON, nameProcess))))
         .click();
   }
 
@@ -201,7 +214,7 @@ public class Consoles {
    */
   public void waitProcessInProcessConsoleTree(String nameProcess) {
     loadPageDriverWait.until(
-        visibilityOfElementLocated(By.xpath(String.format(PROCESS_NAME_XPATH, nameProcess))));
+        visibilityOfElementLocated(By.xpath(format(PROCESS_NAME_XPATH, nameProcess))));
   }
 
   /**
@@ -212,8 +225,7 @@ public class Consoles {
    */
   public void waitProcessInProcessConsoleTree(String nameProcess, int timeout) {
     new WebDriverWait(seleniumWebDriver, timeout)
-        .until(
-            visibilityOfElementLocated(By.xpath(String.format(PROCESS_NAME_XPATH, nameProcess))));
+        .until(visibilityOfElementLocated(By.xpath(format(PROCESS_NAME_XPATH, nameProcess))));
   }
 
   /**
@@ -223,7 +235,7 @@ public class Consoles {
    */
   public void waitProcessIsNotPresentInProcessConsoleTree(String nameProcess) {
     loadPageDriverWait.until(
-        invisibilityOfElementLocated(By.xpath(String.format(PROCESS_NAME_XPATH, nameProcess))));
+        invisibilityOfElementLocated(By.xpath(format(PROCESS_NAME_XPATH, nameProcess))));
   }
 
   /**
@@ -233,7 +245,7 @@ public class Consoles {
    */
   public void selectProcessInProcessConsoleTreeByName(String nameProcess) {
     loadPageDriverWait
-        .until(visibilityOfElementLocated(By.xpath(String.format(PROCESS_NAME_XPATH, nameProcess))))
+        .until(visibilityOfElementLocated(By.xpath(format(PROCESS_NAME_XPATH, nameProcess))))
         .click();
   }
 
@@ -245,8 +257,7 @@ public class Consoles {
   public void selectProcessByTabName(String tabNameProcess) {
     loader.waitOnClosed();
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            visibilityOfElementLocated(By.xpath(String.format(TAB_PROCESS_NAME, tabNameProcess))))
+        .until(visibilityOfElementLocated(By.xpath(format(TAB_PROCESS_NAME, tabNameProcess))))
         .click();
     loader.waitOnClosed();
   }
@@ -258,7 +269,7 @@ public class Consoles {
    */
   public void waitTabNameProcessIsPresent(String tabNameProcess) {
     redrawDriverWait.until(
-        visibilityOfElementLocated(By.xpath(String.format(TAB_PROCESS_NAME, tabNameProcess))));
+        visibilityOfElementLocated(By.xpath(format(TAB_PROCESS_NAME, tabNameProcess))));
   }
 
   /**
@@ -268,7 +279,7 @@ public class Consoles {
    */
   public void waitTabNameProcessIsNotPresent(String tabNameProcess) {
     redrawDriverWait.until(
-        invisibilityOfElementLocated(By.xpath(String.format(TAB_PROCESS_NAME, tabNameProcess))));
+        invisibilityOfElementLocated(By.xpath(format(TAB_PROCESS_NAME, tabNameProcess))));
   }
 
   /**
@@ -278,8 +289,7 @@ public class Consoles {
    */
   public void closeProcessByTabName(String tabNameProcess) {
     redrawDriverWait
-        .until(
-            elementToBeClickable(By.xpath(String.format(TAB_PROCESS_CLOSE_ICON, tabNameProcess))))
+        .until(elementToBeClickable(By.xpath(format(TAB_PROCESS_CLOSE_ICON, tabNameProcess))))
         .click();
   }
 
@@ -305,8 +315,7 @@ public class Consoles {
    * @param definedTimeout timeout in seconds defined with user
    */
   public void waitIsCommandConsoleOpened(int definedTimeout) {
-    new WebDriverWait(seleniumWebDriver, definedTimeout)
-        .until(ExpectedConditions.visibilityOf(consoleContainer));
+    new WebDriverWait(seleniumWebDriver, definedTimeout).until(visibilityOf(consoleContainer));
   }
 
   /** wait expected text into 'Command console' */
@@ -332,8 +341,7 @@ public class Consoles {
 
   /** wait a preview url into 'Consoles' */
   public void waitPreviewUrlIsPresent() {
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(previewUrl));
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC).until(visibilityOf(previewUrl));
   }
 
   /** wait a preview url is not present into 'Consoles' */
@@ -352,9 +360,26 @@ public class Consoles {
   }
 
   public void dragConsolesInDefinePosition(int verticalShiftInPixels) {
-    WebElement drag = redrawDriverWait.until(ExpectedConditions.visibilityOf(consolesPanelDrag));
+    WebElement drag = redrawDriverWait.until(visibilityOf(consolesPanelDrag));
     new Actions(seleniumWebDriver)
         .dragAndDropBy(drag, verticalShiftInPixels, verticalShiftInPixels)
         .perform();
+  }
+
+  public void startCommandFromProcessesArea(
+      String machineName, String commandGoal, String commandName) {
+    WebElement machine =
+        redrawDriverWait.until(
+            visibilityOfElementLocated(By.xpath(format(MACHINE_NAME, machineName))));
+    machine.click();
+
+    Actions action = new Actions(seleniumWebDriver);
+    action.moveToElement(machine).contextClick().perform();
+    redrawDriverWait.until(visibilityOf(contextMenu)).click();
+
+    redrawDriverWait.until(visibilityOfElementLocated(By.id(commandGoal))).click();
+    redrawDriverWait
+        .until(visibilityOfElementLocated(By.xpath(format(COMMAND_NAME, commandName))))
+        .click();
   }
 }
