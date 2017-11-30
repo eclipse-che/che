@@ -188,7 +188,11 @@ public class StackLoaderTest {
 
     Map<String, ServerConfigDto> servers = new HashMap<>();
     servers.put(
-        "server1Ref", newDto(ServerConfigDto.class).withPort("8080/tcp").withProtocol("http"));
+        "server1Ref",
+        newDto(ServerConfigDto.class)
+            .withPort("8080/tcp")
+            .withProtocol("http")
+            .withAttributes(singletonMap("key", "value")));
     Map<String, MachineConfigDto> machines = new HashMap<>();
     machines.put(
         "someMachineName",

@@ -13,6 +13,7 @@ package org.eclipse.che.git.impl;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
+import static org.eclipse.che.git.impl.GitTestUtil.connectToGitRepositoryWithContent;
 import static org.eclipse.che.git.impl.GitTestUtil.connectToInitializedGitRepository;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -30,6 +31,8 @@ import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.params.AddParams;
 import org.eclipse.che.api.git.params.CheckoutParams;
 import org.eclipse.che.api.git.params.CommitParams;
+import org.eclipse.che.api.git.params.FetchParams;
+import org.eclipse.che.api.git.params.RemoteAddParams;
 import org.eclipse.che.api.git.shared.AddRequest;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -41,10 +44,14 @@ public class CheckoutTest {
   private static final String SECOND_BRANCH_NAME = "secondBranch";
 
   private File repository;
+  private File repository1;
+  private File repository2;
 
   @BeforeMethod
   public void setUp() {
     repository = Files.createTempDir();
+    repository1 = Files.createTempDir();
+    repository2 = Files.createTempDir();
   }
 
   @AfterMethod
@@ -250,5 +257,34 @@ public class CheckoutTest {
     // then
     assertEquals(connection.branchList(null).size(), 3);
     assertTrue(new File(repository, "newfile").exists());
+  }
+
+  @Test(
+    dataProvider = "GitConnectionFactory",
+    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class,
+    expectedExceptions = GitException.class,
+    expectedExceptionsMessageRegExp = "A branch named 'new' exists in more than one remote repos"
+  )
+  public void shouldThrowExceptionIfTheBranchIsPresentInSeveralRemotes(
+      GitConnectionFactory connectionFactory)
+      throws GitException, IOException, UnauthorizedException {
+    // given
+    GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
+
+    GitConnection remote1 = connectToGitRepositoryWithContent(connectionFactory, repository1);
+    remote1.checkout(CheckoutParams.create("new").withCreateNew(true));
+
+    GitConnection remote2 = connectToGitRepositoryWithContent(connectionFactory, repository2);
+    remote2.checkout(CheckoutParams.create("new").withCreateNew(true));
+
+    connection.remoteAdd(
+        RemoteAddParams.create("origin", remote1.getWorkingDir().getAbsolutePath()));
+    connection.remoteAdd(RemoteAddParams.create("aaa", remote2.getWorkingDir().getAbsolutePath()));
+
+    connection.fetch(FetchParams.create("origin"));
+    connection.fetch(FetchParams.create("aaa"));
+
+    // when
+    connection.checkout(CheckoutParams.create("new"));
   }
 }

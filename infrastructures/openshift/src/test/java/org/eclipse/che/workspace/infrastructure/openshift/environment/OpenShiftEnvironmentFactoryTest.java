@@ -68,7 +68,7 @@ public class OpenShiftEnvironmentFactoryTest {
       serverGettable;
 
   @BeforeMethod
-  public void setup() {
+  public void setup() throws Exception {
     osEnvironmentFactory =
         new OpenShiftEnvironmentFactory(null, null, null, factory, osEnvValidator);
     when(factory.create()).thenReturn(client);

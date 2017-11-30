@@ -113,9 +113,6 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
         .then(showUI())
         .then(
             arg -> {
-              WorkspaceImpl workspace = appContext.getWorkspace();
-              browserAddress.setAddress(workspace.getNamespace(), workspace.getConfig().getName());
-
               eventBus.fireEvent(new BasicIDEInitializedEvent());
             });
   }

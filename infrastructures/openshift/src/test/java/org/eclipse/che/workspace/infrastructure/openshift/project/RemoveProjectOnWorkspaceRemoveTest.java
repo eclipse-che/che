@@ -41,7 +41,7 @@ public class RemoveProjectOnWorkspaceRemoveTest {
   private RemoveProjectOnWorkspaceRemove removeProjectOnWorkspaceRemove;
 
   @BeforeMethod
-  public void setUp() {
+  public void setUp() throws Exception {
     removeProjectOnWorkspaceRemove = spy(new RemoveProjectOnWorkspaceRemove(null, null));
 
     doNothing().when(removeProjectOnWorkspaceRemove).doRemoveProject(anyString());
@@ -59,7 +59,7 @@ public class RemoveProjectOnWorkspaceRemoveTest {
   }
 
   @Test
-  public void shouldRemoveProjectOnWorkspaceRemovedEvent() {
+  public void shouldRemoveProjectOnWorkspaceRemovedEvent() throws Exception {
     removeProjectOnWorkspaceRemove.onEvent(new WorkspaceRemovedEvent(workspace));
 
     verify(removeProjectOnWorkspaceRemove).doRemoveProject(WORKSPACE_ID);
