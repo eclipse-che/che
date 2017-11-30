@@ -134,8 +134,7 @@ public class CodenvyEditor {
 
     public static final String CONTEXT_MENU = "//div[@id='menu-lock-layer-id']/div[2]";
     public static final String EDITOR_TABS_PANEL = "gwt-debug-multiSplitPanel-tabsPanel";
-    public static final String ACTIVE_LINE_NUMBER =
-        "gwt-debug-cursorPosition";
+    public static final String ACTIVE_LINE_NUMBER = "gwt-debug-cursorPosition";
     public static final String POSITION_CURSOR_NUMBER =
         "//div[@id='gwt-debug-editorPartStack-contentPanel']//div[text()='%s']";
     public static final String ACTIVE_EDITOR_ENTRY_POINT =
