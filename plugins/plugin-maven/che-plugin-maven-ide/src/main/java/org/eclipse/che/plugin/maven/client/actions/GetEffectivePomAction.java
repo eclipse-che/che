@@ -16,7 +16,6 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ID;
 
-import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collections;
@@ -40,6 +39,7 @@ import org.eclipse.che.plugin.maven.shared.MavenAttributes;
  * Action for generating effective pom.
  *
  * @author Valeriy Svydenko
+ * @author Mykola Morhun
  */
 @Singleton
 public class GetEffectivePomAction extends AbstractPerspectiveAction {
@@ -80,27 +80,30 @@ public class GetEffectivePomAction extends AbstractPerspectiveAction {
       return;
     }
 
-    final Optional<Project> project = resource.getRelatedProject();
-    if (!project.isPresent()) {
+    final Project project = resource.getProject();
+    if (project == null) {
       event.getPresentation().setEnabledAndVisible(false);
       return;
     }
 
-    event.getPresentation().setEnabledAndVisible(project.get().isTypeOf(MAVEN_ID));
+    event.getPresentation().setEnabledAndVisible(project.isTypeOf(MAVEN_ID));
   }
 
   @Override
   public void actionPerformed(ActionEvent e) {
-    final Resource[] resources = appContext.getResources();
-    checkState(resources != null && resources.length == 1);
+    final Resource resource = appContext.getResource();
+    checkState(resource != null);
 
-    final Project project = resources[0].getRelatedProject().get();
+    final Project project = resource.getProject();
     checkState(MAVEN_ID.equals(project.getType()));
 
+    final String pathToProjectsDir = "/projects";
+    final String absolutePathToProjectPom =
+        pathToProjectsDir + project.getLocation().toString() + "/pom.xml";
     GetEffectivePomParameters paramsDto =
         dtoFactory
             .createDto(GetEffectivePomParameters.class)
-            .withProjectPath(project.getLocation().toString());
+            .withPathToProjectPom(absolutePathToProjectPom);
 
     javaLanguageExtensionServiceClient
         .effectivePom(paramsDto)
