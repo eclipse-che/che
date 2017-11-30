@@ -586,7 +586,7 @@ public class WorkspaceManagerTest {
     final Map<String, Machine> machines;
 
     TestInternalRuntime(RuntimeContext context, Map<String, Machine> machines) {
-      super(context, null, false);
+      super(context, null, null, false);
       this.machines = machines;
     }
 
