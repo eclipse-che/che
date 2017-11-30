@@ -381,8 +381,10 @@ public class WorkspaceDaoTest {
     newRecipe.setContentType("new-content-type");
     newRecipe.setContent("new-content");
     final MachineConfigImpl newMachine = new MachineConfigImpl();
-    final ServerConfigImpl serverConf1 = new ServerConfigImpl("2265", "http", "path1");
-    final ServerConfigImpl serverConf2 = new ServerConfigImpl("2266", "ftp", "path2");
+    final ServerConfigImpl serverConf1 =
+        new ServerConfigImpl("2265", "http", "path1", singletonMap("key", "value"));
+    final ServerConfigImpl serverConf2 =
+        new ServerConfigImpl("2266", "ftp", "path2", singletonMap("key", "value"));
     newMachine.setServers(ImmutableMap.of("ref1", serverConf1, "ref2", serverConf2));
     newMachine.setInstallers(ImmutableList.of("agent5", "agent4"));
     newMachine.setAttributes(singletonMap("att1", "val"));
@@ -408,7 +410,10 @@ public class WorkspaceDaoTest {
     existingMachine.getServers().clear();
     existingMachine
         .getServers()
-        .put("new-ref", new ServerConfigImpl("new-port", "new-protocol", "new-path"));
+        .put(
+            "new-ref",
+            new ServerConfigImpl(
+                "new-port", "new-protocol", "new-path", singletonMap("key", "value")));
     defaultEnv.getMachines().remove(machineNames.get(0));
     defaultEnv.getRecipe().setContent("updated-content");
     defaultEnv.getRecipe().setContentType("updated-content-type");
@@ -549,8 +554,10 @@ public class WorkspaceDaoTest {
 
     // OldMachine configs
     final MachineConfigImpl exMachine1 = new MachineConfigImpl();
-    final ServerConfigImpl serverConf1 = new ServerConfigImpl("2265", "http", "path1");
-    final ServerConfigImpl serverConf2 = new ServerConfigImpl("2266", "ftp", "path2");
+    final ServerConfigImpl serverConf1 =
+        new ServerConfigImpl("2265", "http", "path1", singletonMap("key", "value"));
+    final ServerConfigImpl serverConf2 =
+        new ServerConfigImpl("2266", "ftp", "path2", singletonMap("key", "value"));
     exMachine1.setServers(ImmutableMap.of("ref1", serverConf1, "ref2", serverConf2));
     exMachine1.setInstallers(ImmutableList.of("agent5", "agent4"));
     exMachine1.setAttributes(singletonMap("att1", "val"));
@@ -563,8 +570,10 @@ public class WorkspaceDaoTest {
             new VolumeImpl().withPath("/path/2")));
 
     final MachineConfigImpl exMachine2 = new MachineConfigImpl();
-    final ServerConfigImpl serverConf3 = new ServerConfigImpl("2333", "https", "path3");
-    final ServerConfigImpl serverConf4 = new ServerConfigImpl("2334", "wss", "path4");
+    final ServerConfigImpl serverConf3 =
+        new ServerConfigImpl("2333", "https", "path3", singletonMap("key", "value"));
+    final ServerConfigImpl serverConf4 =
+        new ServerConfigImpl("2334", "wss", "path4", singletonMap("key", "value"));
     exMachine2.setServers(ImmutableMap.of("ref1", serverConf3, "ref2", serverConf4));
     exMachine2.setInstallers(ImmutableList.of("agent2", "agent1"));
     exMachine2.setAttributes(singletonMap("att1", "val"));
@@ -572,7 +581,8 @@ public class WorkspaceDaoTest {
     exMachine2.setVolumes(ImmutableMap.of("vol2", new VolumeImpl().withPath("/path/2")));
 
     final MachineConfigImpl exMachine3 = new MachineConfigImpl();
-    final ServerConfigImpl serverConf5 = new ServerConfigImpl("2333", "https", "path5");
+    final ServerConfigImpl serverConf5 =
+        new ServerConfigImpl("2333", "https", "path5", singletonMap("key", "value"));
     exMachine3.setServers(singletonMap("ref1", serverConf5));
     exMachine3.setInstallers(ImmutableList.of("agent6", "agent2"));
     exMachine3.setAttributes(singletonMap("att1", "val"));
