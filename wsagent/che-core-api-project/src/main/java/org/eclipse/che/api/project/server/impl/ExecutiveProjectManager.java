@@ -47,6 +47,10 @@ import org.eclipse.che.api.project.server.type.ProjectQualifier;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
 import org.eclipse.che.api.project.shared.NewProjectConfig;
 
+/**
+ * Performs project related operations after project registry is synchronized and method parameters
+ * are validated.
+ */
 @Singleton
 public class ExecutiveProjectManager implements ProjectManager {
 

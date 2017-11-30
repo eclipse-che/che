@@ -26,6 +26,11 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.fs.server.PathTransformer;
 
+/**
+ * Preforms preliminary file system manager method parameters validation and on success passes
+ * execution further. In current implementation next functional unit in a call chain is {@link
+ * ExecutiveFsManager}. On validation failure corresponding exception is thrown.
+ */
 @Singleton
 public class ValidatingFsManager implements FsManager {
 
