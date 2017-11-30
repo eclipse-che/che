@@ -72,9 +72,6 @@ public class RunToCursorTest {
     commandsPalette.startCommandByDoubleClick("build");
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PROJECT + "/src/App.java");
-    consoles.selectProcessByTabName("dev-machine");
-    consoles.waitExpectedTextIntoConsole("Started: Ready");
-
     editor.setBreakpoint(14);
     debugPanel.openDebugPanel();
 

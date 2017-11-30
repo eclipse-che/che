@@ -341,14 +341,14 @@ public class JavaLanguageServerExtensionService {
               gson.toJson(result.get()),
               new com.google.common.reflect.TypeToken<
                   List<ResourceLocationParameters>>() {}.getType());
-      ResourceLocationParameters l = location.get(0);
+      ResourceLocationParameters rlp = location.get(0);
 
-      boolean externalResource = l.getLibId() != 0;
+      boolean externalResource = rlp.getLibId() != 0;
       return new LocationImpl(
-          externalResource ? l.getFqn() : removePrefixUri(l.getFileUri()),
+          externalResource ? rlp.getFqn() : removePrefixUri(rlp.getFileUri()),
           lineNumber,
           externalResource,
-          l.getLibId(),
+          rlp.getLibId(),
           null);
     } catch (JsonSyntaxException | InterruptedException | ExecutionException e) {
       throw new JsonRpcException(-27000, e.getMessage());
