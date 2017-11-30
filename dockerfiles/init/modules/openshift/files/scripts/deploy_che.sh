@@ -234,7 +234,7 @@ if ! oc get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
   if [ "${COMMAND}" == "cleanup" ] || [ "${COMMAND}" == "rollupdate" ]; then echo "**ERROR** project doesn't exist. Aborting"; exit 1; fi
   if [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then echo "**ERROR** project doesn't exist on OSIO. Aborting"; exit 1; fi
 
-  echo -n "no creating it..."
+  echo -n "Project does not exist...creating it..."
   oc new-project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null
 fi
 echo "done!"
