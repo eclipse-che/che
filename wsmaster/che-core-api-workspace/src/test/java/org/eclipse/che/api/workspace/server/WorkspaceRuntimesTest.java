@@ -12,14 +12,12 @@ package org.eclipse.che.api.workspace.server;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
-import static java.util.Collections.singleton;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -80,7 +78,7 @@ public class WorkspaceRuntimesTest {
         new WorkspaceRuntimes(
             eventService,
             ImmutableMap.of(TEST_ENVIRONMENT_TYPE, testEnvFactory),
-            singleton(infrastructure),
+            infrastructure,
             sharedPool,
             workspaceDao,
             dbInitializer);
@@ -170,17 +168,6 @@ public class WorkspaceRuntimesTest {
 
     assertNotNull(workspace.getRuntime());
     assertEquals(workspace.getRuntime().getMachines().keySet(), r1machines.keySet());
-  }
-
-  @Test
-  public void doesNotRecoverTheSameInfraTwice() throws Exception {
-    TestInfrastructure infra = spy(new TestInfrastructure("test1", "test2"));
-
-    new WorkspaceRuntimes(
-            eventService, emptyMap(), singleton(infra), sharedPool, workspaceDao, dbInitializer)
-        .recover();
-
-    verify(infra).getIdentities();
   }
 
   private RuntimeContext mockContext(RuntimeIdentity identity)

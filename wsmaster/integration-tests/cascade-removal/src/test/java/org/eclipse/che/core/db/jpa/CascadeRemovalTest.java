@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.core.db.jpa;
 
+import static java.util.Collections.emptySet;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createAccount;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createPreferences;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createProfile;
@@ -17,6 +18,7 @@ import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createSshPair;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createUser;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createWorkspace;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -75,6 +77,7 @@ import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
+import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.commons.test.db.H2DBTestServer;
 import org.eclipse.che.commons.test.db.PersistTestModuleBuilder;
@@ -185,12 +188,16 @@ public class CascadeRemovalTest {
                 install(new WorkspaceJpaModule());
                 bind(WorkspaceManager.class);
 
+                RuntimeInfrastructure infra = mock(RuntimeInfrastructure.class);
+                doReturn(emptySet()).when(infra).getRecipeTypes();
+                bind(RuntimeInfrastructure.class).toInstance(infra);
+
                 WorkspaceRuntimes wR =
                     spy(
                         new WorkspaceRuntimes(
                             mock(EventService.class),
                             Collections.emptyMap(),
-                            Collections.emptySet(),
+                            infra,
                             mock(WorkspaceSharedPool.class),
                             mock(WorkspaceDao.class),
                             mock(DBInitializer.class)));
