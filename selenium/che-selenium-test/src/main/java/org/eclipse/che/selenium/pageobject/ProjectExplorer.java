@@ -613,16 +613,25 @@ public class ProjectExplorer {
    * @param item
    */
   public void clickOnItemInContextMenu(String item) {
-    loadPageTimeout.until(visibilityOfElementLocated(By.id(item))).click();
+    loadPageTimeout
+        .until(
+            visibilityOfElementLocated(
+                By.xpath(String.format("//tr[@item-enabled='true']//nobr[@id='%s']", item))))
+        .click();
   }
 
+  // tr[@item-enabled='true' and @id='%s']
   /**
    * Click on item in 'New' menu
    *
    * @param item item form {@code SubMenuNew}
    */
   public void clickOnNewContextMenuItem(String item) {
-    loadPageTimeout.until(visibilityOfElementLocated(By.id(item))).click();
+    loadPageTimeout
+        .until(
+            visibilityOfElementLocated(
+                By.xpath(String.format("//tr[@item-enabled='true']//nobr[@id='%s']", item))))
+        .click();
 
     waitContextMenuPopUpClosed();
   }
@@ -642,6 +651,34 @@ public class ProjectExplorer {
     selectItem(path);
     waitItemIsSelected(path);
     actions.keyUp(Keys.CONTROL).perform();
+  }
+
+  /**
+   * perform the multi-select by Shift key
+   *
+   * @param path is the path to the selected item
+   */
+  public void selectMultiFilesByShiftKey(String path) {
+    Actions actions = actionsFactory.createAction(seleniumWebDriver);
+    actions.keyDown(Keys.SHIFT).perform();
+    selectItem(path);
+    waitItemIsSelected(path);
+    actions.keyUp(Keys.SHIFT).perform();
+  }
+
+  /**
+   * perform the multi-select by Shift key with check selected items
+   *
+   * @param clickItemPath is the path to the selected item
+   * @param selectedItemsPaths is the paths to the each selected items after click with shift button
+   */
+  public void selectMultiFilesByShiftKeyWithCheckMultiselection(
+      String clickItemPath, List<String> selectedItemsPaths) {
+    Actions actions = actionsFactory.createAction(seleniumWebDriver);
+    actions.keyDown(Keys.SHIFT).perform();
+    selectItem(clickItemPath);
+    waitAllItemsIsSelected(selectedItemsPaths);
+    actions.keyUp(Keys.SHIFT).perform();
   }
 
   /** click on the 'collapse all' in the project explorer */
@@ -943,5 +980,9 @@ public class ProjectExplorer {
                     String.format(
                         "//div[@path='/%s']/div[contains(concat(' ', normalize-space(@class), ' '), ' selected')]",
                         path))));
+  }
+
+  public void waitAllItemsIsSelected(List<String> paths) {
+    paths.forEach(path -> waitItemIsSelected(path));
   }
 }
