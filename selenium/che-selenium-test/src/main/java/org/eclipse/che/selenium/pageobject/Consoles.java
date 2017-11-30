@@ -67,7 +67,7 @@ public class Consoles {
   public static final String SERVER_INFO_HIDE_INTERNAL_CHECK_BOX =
       "gwt-debug-runtimeInfoHideServersCheckBox";
   public static final String MACHINE_NAME =
-      "//div[@id='gwt-debug-process-tree']//div//span[contains(text(), '%s')]";
+      "//div[@id='gwt-debug-process-tree']//span[text()= '%s']";
   public static final String CONTEXT_MENU = "gwt-debug-contextMenu/commandsActionGroup";
   public static final String COMMAND_NAME = "//tr[contains(@id,'command_%s')]";
 
