@@ -127,9 +127,6 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
         .thenPromise(aVoid -> initJsPlugins())
         .then(
             arg -> {
-              WorkspaceImpl workspace = appContext.getWorkspace();
-              browserAddress.setAddress(workspace.getNamespace(), workspace.getConfig().getName());
-
               eventBus.fireEvent(new BasicIDEInitializedEvent());
             });
   }

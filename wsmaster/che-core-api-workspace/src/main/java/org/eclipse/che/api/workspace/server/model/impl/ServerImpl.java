@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.api.workspace.server.model.impl;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
@@ -19,18 +21,18 @@ public class ServerImpl implements Server {
 
   private String url;
   private ServerStatus status;
+  private Map<String, String> attributes;
 
-  public ServerImpl(String url) {
-    this(url, ServerStatus.UNKNOWN);
-  }
-
-  public ServerImpl(String url, ServerStatus status) {
-    this.url = url;
-    this.status = status;
-  }
+  public ServerImpl() {}
 
   public ServerImpl(Server server) {
-    this(server.getUrl(), server.getStatus());
+    this.url = server.getUrl();
+    this.status = server.getStatus();
+    if (server.getAttributes() != null) {
+      this.attributes = new HashMap<>(server.getAttributes());
+    } else {
+      this.attributes = new HashMap<>();
+    }
   }
 
   @Override
@@ -42,6 +44,11 @@ public class ServerImpl implements Server {
     this.url = url;
   }
 
+  public ServerImpl withUrl(String url) {
+    this.url = url;
+    return this;
+  }
+
   @Override
   public ServerStatus getStatus() {
     return this.status;
@@ -51,28 +58,61 @@ public class ServerImpl implements Server {
     this.status = status;
   }
 
-  @Override
-  public String toString() {
-    return url;
+  public ServerImpl withStatus(ServerStatus status) {
+    this.status = status;
+    return this;
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
+  public Map<String, String> getAttributes() {
+    if (attributes == null) {
+      attributes = new HashMap<>();
+    }
+    return attributes;
+  }
+
+  public void setAttributes(Map<String, String> attributes) {
+    if (attributes != null) {
+      this.attributes = attributes;
+    } else {
+      this.attributes = new HashMap<>();
+    }
+  }
+
+  public ServerImpl withAttributes(Map<String, String> attributes) {
+    setAttributes(attributes);
+    return this;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
       return true;
     }
-    if (!(obj instanceof Server)) {
+    if (!(o instanceof ServerImpl)) {
       return false;
     }
-    final Server that = (Server) obj;
-    return Objects.equals(url, that.getUrl()) && Objects.equals(status, that.getStatus());
+    ServerImpl server = (ServerImpl) o;
+    return Objects.equals(getUrl(), server.getUrl())
+        && getStatus() == server.getStatus()
+        && Objects.equals(getAttributes(), server.getAttributes());
   }
 
   @Override
   public int hashCode() {
-    int hash = 7;
-    hash = 31 * hash + Objects.hashCode(url);
-    hash = 31 * hash + Objects.hashCode(status);
-    return hash;
+    return Objects.hash(getUrl(), getStatus(), getAttributes());
+  }
+
+  @Override
+  public String toString() {
+    return "ServerImpl{"
+        + "url='"
+        + url
+        + '\''
+        + ", status="
+        + status
+        + ", attributes="
+        + attributes
+        + '}';
   }
 }

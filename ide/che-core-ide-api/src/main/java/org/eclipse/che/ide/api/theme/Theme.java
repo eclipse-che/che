@@ -541,6 +541,20 @@ public interface Theme {
   String getEditorSelectionColor();
 
   /**
+   * Editor linked group color.
+   *
+   * @return the color
+   */
+  String getEditorLinkedGroupColor();
+
+  /**
+   * Editor linked group background color.
+   *
+   * @return the color
+   */
+  String getEditorLinkedGroupBackground();
+
+  /**
    * Editor inactive selection color(if focus not in browser)
    *
    * @return the color

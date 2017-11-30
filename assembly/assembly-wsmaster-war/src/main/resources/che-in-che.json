@@ -9,7 +9,8 @@
       "Java",
       "JDK",
       "Maven",
-      "Git"
+      "Git",
+      "SDK"
     ],
     "components": [
       {
@@ -23,24 +24,42 @@
     ],
     "source": {
       "type": "image",
-      "origin": "eclipse/che-dev:nightly"
+      "origin": "eclipse/che-dev:che6"
     },
     "workspaceConfig": {
       "environments": {
         "default": {
           "machines": {
             "dev-machine": {
+              "volumes": {
+                "m2": {
+                  "path": "/home/user/.m2/"
+                }
+              },
               "installers": [
                 "org.eclipse.che.exec",
                 "org.eclipse.che.terminal",
                 "org.eclipse.che.ws-agent",
-                "org.eclipse.che.ssh",
                 "org.eclipse.che.ls.js-ts"
               ],
               "servers": {
+                "dev-wsagent/wsagent": {
+                  "path": "wsagent",
+                  "protocol": "ws",
+                  "port": "8087"
+                },
                 "GWT-CodeServer": {
                   "protocol": "http",
                   "port": "9876"
+                },
+                "IDE-agent-server": {
+                  "protocol": "http",
+                  "port": "8085"
+                },
+                "dev-wsagent/http": {
+                  "path": "api",
+                  "protocol": "http",
+                  "port": "8087"
                 }
               },
               "attributes": {
@@ -49,7 +68,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/che-dev:nightly",
+            "location": "eclipse/che-dev:che6",
             "type": "dockerimage"
           }
         }
@@ -59,17 +78,66 @@
       "description": null,
       "commands": [
         {
-          "commandLine": "mvn clean install -DskipIntegrationTests=true -Pnative -f ${current.project.path}",
+          "commandLine": "cd ${current.project.path} && mvn clean install",
           "name": "Build project",
-          "type": "custom"
+          "type": "custom",
+          "attributes": {
+            "goal": "Run",
+            "previewUrl": ""
+          }
         },
         {
-          "commandLine": "cd /projects/che && mvn gwt:codeserver -pl :che-ide-gwt-app -am -Dmaven.main.skip -Dmaven.resources.skip -Dche.dto.skip -Dskip-enforce -Dskip-validate-sources -Psdm-in-che",
+          "commandLine": "cd ${current.project.eldest.parent.path}\n mvn gwt:codeserver -pl :assembly-ide-war -am -Psdm-in-che -Dskip-enforce -Dskip-validate-sources -Dche.dto.skip -Dmaven.main.skip -Dmaven.resources.skip -Dmaven.buildNumber.skip",
           "name": "GWT SDM",
           "type": "gwt_sdm_che",
           "attributes": {
-            "previewUrl": "",
-            "goal": "Run"
+            "goal": "Run",
+            "previewUrl": "${server.GWT-CodeServer}"
+          }
+        },
+        {
+          "commandLine": "cd /home/user/tomcat8/bin\n export SERVER_PORT=8080\n export JPDA_ADDRESS=9000\n ./catalina.sh jpda run",
+          "name": "Tomcat8-IDE Start",
+          "type": "custom",
+          "attributes": {
+            "goal": "Run",
+            "previewUrl": ""
+          }
+        },
+        {
+          "commandLine": "cd /home/user/traefik && ./traefik",
+          "name": "Traefik Start",
+          "type": "custom",
+          "attributes": {
+            "goal": "Run",
+            "previewUrl": ""
+          }
+        },
+        {
+          "commandLine": "cd ${current.project.eldest.parent.path}\n mvn clean install -pl :assembly-wsagent-war -am\n cp ${current.project.eldest.parent.path}/assembly/assembly-wsagent-war/target/*.war /home/user/tomcat8/webapps/ROOT.war",
+          "name": "Deploy Workspace Agent",
+          "type": "custom",
+          "attributes": {
+            "goal": "Run",
+            "previewUrl": "${server.IDE-agent-server}/${workspace.namespace}/${workspace.name}?wsagent-ref-prefix=dev-"
+          }
+        },
+        {
+          "commandLine": "cd ${current.project.eldest.parent.path}\n mvn clean install -pl :assembly-ide-war -am\n cp ${current.project.eldest.parent.path}/assembly/assembly-ide-war/target/*.war /home/user/tomcat8/webapps/ide.war",
+          "name": "Deploy IDE",
+          "type": "custom",
+          "attributes": {
+            "goal": "Run",
+            "previewUrl": "${server.IDE-agent-server}/${workspace.namespace}/${workspace.name}?wsagent-ref-prefix=dev-"
+          }
+        },
+        {
+          "commandLine": "cp ${current.project.path}/target/*.jar /home/user/tomcat8/webapps/ROOT/WEB-INF/lib/\n echo \"Artifact copied. It takes a few seconds for Tomcat to hot deploy it.\"",
+          "name": "Hot Deploy Workspace Agent",
+          "type": "custom",
+          "attributes": {
+            "goal": "Run",
+            "previewUrl": ""
           }
         }
       ]

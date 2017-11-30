@@ -101,13 +101,6 @@ public class RefactoringFeatureTest {
     doMoveRefactor();
     projectExplorer1.openItemByVisibleNameInExplorer(renamedClassName);
     events1.waitExpectedMessage(expectedMessAfterMove);
-    menu1.runCommand(
-        TestMenuCommandsConstants.Assistant.ASSISTANT,
-        TestMenuCommandsConstants.Assistant.NAVIGATE_TO_FILE);
-    projectExplorer1.expandToFileWithRevealResource(
-        renamedClassName, PATH_TO_GREETING_FILE.replace(originClassName, renamedClassName));
-    editor1.waitTabIsPresent(renamedClassName.replace(".java", ""));
-    editor1.waitActiveEditor();
   }
 
   private void checkWatching(String expectedMessAfterRename) {
@@ -135,6 +128,10 @@ public class RefactoringFeatureTest {
   }
 
   private void doMoveRefactor() {
+    String pathToRenamedItem =
+        String.format(
+            PROJECT_NAME + "%s%s", "/src/main/java/org/eclipse/qa/examples/", renamedClassName);
+    projectExplorer2.selectItem(pathToRenamedItem);
     menu2.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING,
@@ -142,7 +139,7 @@ public class RefactoringFeatureTest {
     refactorPanel2.waitMoveItemFormIsOpen();
     refactorPanel2.clickOnExpandIconTree(PROJECT_NAME);
     refactorPanel2.clickOnExpandIconTree("/src/main/java");
-    refactorPanel2.chooseDestinationForItem("com.codenvy.example.replace");
+    refactorPanel2.chooseDestinationForItem("com.move");
     refactorPanel2.clickOkButtonRefactorForm();
     refactorPanel2.waitMoveItemFormIsClosed();
   }
