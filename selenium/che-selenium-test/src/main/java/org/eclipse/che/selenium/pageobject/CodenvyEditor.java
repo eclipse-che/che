@@ -135,7 +135,7 @@ public class CodenvyEditor {
     public static final String CONTEXT_MENU = "//div[@id='menu-lock-layer-id']/div[2]";
     public static final String EDITOR_TABS_PANEL = "gwt-debug-multiSplitPanel-tabsPanel";
     public static final String ACTIVE_LINE_NUMBER =
-        "//div[@class='textviewSelection']/following::div[contains(text(),':')]";
+        "gwt-debug-cursorPosition";
     public static final String POSITION_CURSOR_NUMBER =
         "//div[@id='gwt-debug-editorPartStack-contentPanel']//div[text()='%s']";
     public static final String ACTIVE_EDITOR_ENTRY_POINT =
@@ -225,7 +225,7 @@ public class CodenvyEditor {
   @FindBy(id = Locators.EDITOR_TABS_PANEL)
   private WebElement editorTabsPanel;
 
-  @FindBy(xpath = Locators.ACTIVE_LINE_NUMBER)
+  @FindBy(id = Locators.ACTIVE_LINE_NUMBER)
   private WebElement activeLineNumber;
 
   @FindBy(xpath = Locators.AUTOCOMPLETE_CONTAINER)
