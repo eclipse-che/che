@@ -77,7 +77,7 @@ public abstract class InternalRuntime<T extends RuntimeContext> implements Runti
                 Map.Entry::getKey,
                 e ->
                     new MachineImpl(
-                        e.getValue().getProperties(),
+                        e.getValue().getAttributes(),
                         rewriteExternalServers(e.getValue().getServers()))));
   }
 

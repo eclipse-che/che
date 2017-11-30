@@ -49,7 +49,7 @@ public class WsAgentPingRequestFactoryTest {
   //
   //        when(httpJsonRequestFactory.fromUrl(anyString())).thenReturn(httpJsonRequest);
   //        when(httpJsonRequest.setMethod(HttpMethod.GET)).thenReturn(httpJsonRequest);
-  //        when(server.getProperties()).thenReturn(serverProperties);
+  //        when(server.getAttributes()).thenReturn(serverProperties);
   //        when(serverProperties.getInternalUrl()).thenReturn(WS_AGENT_SERVER_URL);
   //        when(devMachine.getRuntime()).thenReturn(machineRuntimeInfo);
   //        doReturn(servers).when(machineRuntimeInfo).getServers();
