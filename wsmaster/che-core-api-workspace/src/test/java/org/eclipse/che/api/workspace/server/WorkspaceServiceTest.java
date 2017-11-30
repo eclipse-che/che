@@ -12,7 +12,6 @@ package org.eclipse.che.api.workspace.server;
 
 import static com.jayway.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
@@ -921,8 +920,7 @@ public class WorkspaceServiceTest {
     return DtoConverter.asDto(
         new EnvironmentImpl(
             new RecipeImpl("type", "content-type", "content", null),
-            singletonMap("dev-machine", devMachine),
-            emptyList()));
+            singletonMap("dev-machine", devMachine)));
   }
 
   private static WorkspaceConfigDto createConfigDto() {

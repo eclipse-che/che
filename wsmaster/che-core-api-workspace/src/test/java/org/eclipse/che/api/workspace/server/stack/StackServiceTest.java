@@ -143,7 +143,7 @@ public class StackServiceTest {
     componentsImpl = singletonList(new StackComponentImpl(COMPONENT_NAME, COMPONENT_VERSION));
     stackSourceImpl = new StackSourceImpl(SOURCE_TYPE, SOURCE_ORIGIN);
     CommandImpl command = new CommandImpl(COMMAND_NAME, COMMAND_LINE, COMMAND_TYPE);
-    EnvironmentImpl environment = new EnvironmentImpl(null, null, null);
+    EnvironmentImpl environment = new EnvironmentImpl(null, null);
 
     WorkspaceConfigImpl workspaceConfig =
         WorkspaceConfigImpl.builder()
