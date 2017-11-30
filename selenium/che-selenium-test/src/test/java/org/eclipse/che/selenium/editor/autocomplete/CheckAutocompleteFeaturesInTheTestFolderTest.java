@@ -68,6 +68,7 @@ public class CheckAutocompleteFeaturesInTheTestFolderTest {
   }
 
   private void checkOpenDeclaration() {
+    editor.waitActiveEditor();
     editor.setCursorToDefinedLineAndChar(35, 21);
     editor.waitActiveEditor();
     editor.waitSpecifiedValueForLineAndChar(35, 21);

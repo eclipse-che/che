@@ -528,6 +528,7 @@ public class ProjectExplorer {
         .createAction(seleniumWebDriver)
         .doubleClick(waitItemInVisibleArea(visibleItem))
         .perform();
+    loader.waitOnClosed();
   }
 
   /**
