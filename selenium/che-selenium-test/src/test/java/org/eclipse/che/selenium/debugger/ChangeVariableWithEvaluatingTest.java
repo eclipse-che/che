@@ -159,6 +159,8 @@ public class ChangeVariableWithEvaluatingTest {
     commandsPalette.startCommandByDoubleClick(BUILD_COMMAND_NAME);
     consoles.waitExpectedTextIntoConsole(TestBuildConstants.BUILD_SUCCESS);
     projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
+    consoles.selectProcessByTabName("dev-machine");
+    consoles.waitExpectedTextIntoConsole("Started: Ready");
     editor.waitActiveEditor();
   }
 

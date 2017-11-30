@@ -12,6 +12,8 @@ package org.eclipse.che.plugin.java.languageserver;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.prefixURI;
+import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.removePrefixUri;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FILE_STRUCTURE_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_ENTRY_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_FOLDER_COMMAND;
@@ -30,9 +32,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.inject.Inject;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -41,6 +41,8 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
 import org.eclipse.che.jdt.ls.extension.api.Commands;
@@ -250,7 +252,7 @@ public class JavaLanguageServerExtensionService {
   public List<ExtendedSymbolInformationDto> executeFileStructure(
       FileStructureCommandParameters params) {
     LOG.info("Requesting files structure for {}", params);
-    params.setUri(LanguageServiceUtils.prefixURI(params.getUri()));
+    params.setUri(prefixURI(params.getUri()));
     CompletableFuture<Object> result =
         executeCommand(FILE_STRUCTURE_COMMAND, singletonList(params));
     Type targetClassType = new TypeToken<ArrayList<ExtendedSymbolInformation>>() {}.getType();
@@ -308,13 +310,14 @@ public class JavaLanguageServerExtensionService {
     }
   }
 
-  public String debuggerLocationToFqn(LocationParameters params) {
+  public String debuggerLocationToFqn(String filePath, int lineNumber) {
     CompletableFuture<Object> result =
         getLanguageServer()
             .getWorkspaceService()
             .executeCommand(
                 new ExecuteCommandParams(
-                    Commands.LOCATION_TO_FQN_COMMAND, Collections.singletonList(params)));
+                    Commands.LOCATION_TO_FQN_COMMAND,
+                    ImmutableList.of(prefixURI(filePath), String.valueOf(lineNumber))));
 
     try {
       return (String) result.get();
@@ -323,20 +326,29 @@ public class JavaLanguageServerExtensionService {
     }
   }
 
-  @SuppressWarnings("unchecked")
-  public List<LocationParameters> fqnToDebuggerLocation(String fqn, Integer lineNumber) {
+  public Location fqnToDebuggerLocation(String fqn, int lineNumber) {
     CompletableFuture<Object> result =
         getLanguageServer()
             .getWorkspaceService()
             .executeCommand(
                 new ExecuteCommandParams(
                     Commands.FQN_TO_LOCATION_COMMAND,
-                    ImmutableList.of(fqn, lineNumber.toString())));
+                    ImmutableList.of(fqn, String.valueOf(lineNumber))));
 
     try {
-      return gson.fromJson(
-          gson.toJson(result.get()),
-          new com.google.common.reflect.TypeToken<List<LocationParameters>>() {}.getType());
+      List<LocationParameters> location =
+          gson.fromJson(
+              gson.toJson(result.get()),
+              new com.google.common.reflect.TypeToken<List<LocationParameters>>() {}.getType());
+      LocationParameters l = location.get(0);
+
+      boolean externalResource = l.getLibId() != 0;
+      return new LocationImpl(
+          externalResource ? l.getFqn() : removePrefixUri(l.getFilePath()),
+          l.getLineNumber(),
+          externalResource,
+          l.getLibId(),
+          null);
     } catch (JsonSyntaxException | InterruptedException | ExecutionException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }

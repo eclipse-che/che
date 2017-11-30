@@ -70,7 +70,6 @@ import org.eclipse.che.api.debug.shared.model.impl.event.DisconnectEventImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.SuspendEventImpl;
 import org.eclipse.che.api.debugger.server.Debugger;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
-import org.eclipse.che.jdt.ls.extension.api.dto.LocationParameters;
 import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionService;
 import org.eclipse.che.plugin.jdb.server.expression.Evaluator;
 import org.eclipse.che.plugin.jdb.server.expression.ExpressionException;
@@ -217,10 +216,10 @@ public class JavaDebugger implements EventsHandler, Debugger {
 
   @Override
   public void addBreakpoint(Breakpoint breakpoint) throws DebuggerException {
-    final String className =
-        languageServer.debuggerLocationToFqn(toLocationParameters(breakpoint.getLocation()));
-
     final int lineNumber = breakpoint.getLocation().getLineNumber();
+    final String className =
+        languageServer.debuggerLocationToFqn(breakpoint.getLocation().getTarget(), lineNumber);
+
     List<ReferenceType> classes = vm.classesByName(className);
     // it may mean that class doesn't loaded by a target JVM yet
     if (classes.isEmpty()) {
@@ -328,7 +327,8 @@ public class JavaDebugger implements EventsHandler, Debugger {
 
   @Override
   public void deleteBreakpoint(Location location) throws DebuggerException {
-    final String className = languageServer.debuggerLocationToFqn(toLocationParameters(location));
+    final String className =
+        languageServer.debuggerLocationToFqn(location.getTarget(), location.getLineNumber());
 
     final int lineNumber = location.getLineNumber();
     EventRequestManager requestManager = getEventManager();
@@ -806,13 +806,5 @@ public class JavaDebugger implements EventsHandler, Debugger {
       default:
         return ThreadStatus.UNKNOWN;
     }
-  }
-
-  private LocationParameters toLocationParameters(Location location) {
-    return new LocationParameters(
-        location.getTarget(),
-        location.getLineNumber(),
-        location.getExternalResourceId(),
-        location.getResourceProjectPath());
   }
 }

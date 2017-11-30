@@ -16,6 +16,8 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationService;
 import org.eclipse.che.ide.ext.java.client.tree.JavaNodeFactory;
@@ -73,8 +75,20 @@ public class ExternalResourceLocationHandler extends FileResourceLocationHandler
 
     final String className = extractOuterClassFqn(location.getTarget());
     final int libId = location.getExternalResourceId();
-    final Path projectPath = new Path(location.getResourceProjectPath());
 
+    Resource resource = appContext.getResource();
+    if (resource == null) {
+      callback.onFailure(new IllegalStateException("Resource is undefined"));
+      return;
+    }
+
+    Project project = resource.getProject();
+    if (project == null) {
+      callback.onFailure(new IllegalStateException("Project is undefined"));
+      return;
+    }
+
+    Path projectPath = Path.valueOf(project.getPath());
     javaNavigationService
         .getEntry(projectPath, libId, className)
         .then(
