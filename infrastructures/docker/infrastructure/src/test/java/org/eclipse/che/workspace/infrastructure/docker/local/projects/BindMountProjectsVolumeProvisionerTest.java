@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker.local.projects;
 
+import static java.util.Collections.singletonMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -72,7 +73,7 @@ public class BindMountProjectsVolumeProvisionerTest {
         .thenReturn(
             Collections.singletonMap(
                 Constants.SERVER_WS_AGENT_HTTP_REFERENCE,
-                new ServerConfigImpl("8080", "http", "/api")));
+                new ServerConfigImpl("8080", "http", "/api", singletonMap("key", "value"))));
   }
 
   @Test

@@ -326,23 +326,28 @@ public class FactoryDaoTest {
 
     // Machine configs
     final MachineConfigImpl exMachine1 = new MachineConfigImpl();
-    final ServerConfigImpl serverConf1 = new ServerConfigImpl("2265", "http", "/path1");
-    final ServerConfigImpl serverConf2 = new ServerConfigImpl("2266", "ftp", "/path2");
+    final ServerConfigImpl serverConf1 =
+        new ServerConfigImpl("2265", "http", "/path1", singletonMap("key", "value"));
+    final ServerConfigImpl serverConf2 =
+        new ServerConfigImpl("2266", "ftp", "/path2", singletonMap("key", "value"));
     exMachine1.setServers(ImmutableMap.of("ref1", serverConf1, "ref2", serverConf2));
     exMachine1.setInstallers(ImmutableList.of("agent5", "agent4"));
     exMachine1.setAttributes(singletonMap("att1", "val"));
     exMachine1.setEnv(singletonMap("CHE_ENV", "value"));
 
     final MachineConfigImpl exMachine2 = new MachineConfigImpl();
-    final ServerConfigImpl serverConf3 = new ServerConfigImpl("2333", "https", "/path1");
-    final ServerConfigImpl serverConf4 = new ServerConfigImpl("2334", "wss", "/path2");
+    final ServerConfigImpl serverConf3 =
+        new ServerConfigImpl("2333", "https", "/path1", singletonMap("key", "value"));
+    final ServerConfigImpl serverConf4 =
+        new ServerConfigImpl("2334", "wss", "/path2", singletonMap("key", "value"));
     exMachine2.setServers(ImmutableMap.of("ref1", serverConf3, "ref2", serverConf4));
     exMachine2.setInstallers(ImmutableList.of("agent2", "agent1"));
     exMachine2.setAttributes(singletonMap("att1", "val"));
     exMachine2.setEnv(singletonMap("CHE_ENV2", "value"));
 
     final MachineConfigImpl exMachine3 = new MachineConfigImpl();
-    final ServerConfigImpl serverConf5 = new ServerConfigImpl("2333", "https", "/path3");
+    final ServerConfigImpl serverConf5 =
+        new ServerConfigImpl("2333", "https", "/path3", singletonMap("key", "value"));
     exMachine3.setServers(singletonMap("ref1", serverConf5));
     exMachine3.setInstallers(ImmutableList.of("agent6", "agent2"));
     exMachine3.setAttributes(singletonMap("att1", "val"));
