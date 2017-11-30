@@ -10,4 +10,9 @@
 #
 
 echo 'This installer has been deprecated'
-echo 'TODO what to do'
+echo 'You have to make sure that sshd demon is running in you internment.'
+echo 'Also you have to put your public key to ~/.ssh/.'
+echo "If you don't want to manage this keys each time you are staring workspace,"
+echo 'you can use volumes feature for ~/.ssh/ path'
+
+
