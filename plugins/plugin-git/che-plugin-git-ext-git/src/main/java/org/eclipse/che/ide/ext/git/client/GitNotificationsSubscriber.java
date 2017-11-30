@@ -46,7 +46,6 @@ public class GitNotificationsSubscriber {
 
   private void initialize() {
     initializeGitCheckoutWatcher();
-    initializeGitChangeWatcher();
     initializeGitIndexWatcher();
     initializeGitEventsWatcher();
   }
@@ -56,15 +55,6 @@ public class GitNotificationsSubscriber {
         .newRequest()
         .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
         .methodName("track/git-checkout")
-        .noParams()
-        .sendAndSkipResult();
-  }
-
-  private void initializeGitChangeWatcher() {
-    requestTransmitter
-        .newRequest()
-        .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
-        .methodName("track/git-change")
         .noParams()
         .sendAndSkipResult();
   }

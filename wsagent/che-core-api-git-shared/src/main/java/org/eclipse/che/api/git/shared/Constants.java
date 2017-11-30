@@ -14,6 +14,7 @@ package org.eclipse.che.api.git.shared;
 public class Constants {
   public static final int DEFAULT_PAGE_SIZE = 20;
   public static final String DEFAULT_PAGE_SIZE_QUERY_PARAM = "20";
+  public static final String EVENT_GIT_FILE_CHANGED = "event/git-change";
 
   private Constants() {}
 }
