@@ -48,7 +48,7 @@ import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
 import org.eclipse.che.jdt.ls.extension.api.Commands;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
 import org.eclipse.che.jdt.ls.extension.api.dto.FileStructureCommandParameters;
-import org.eclipse.che.jdt.ls.extension.api.dto.LocationParameters;
+import org.eclipse.che.jdt.ls.extension.api.dto.ResourceLocationParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestFindParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPosition;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPositionParameters;
@@ -316,7 +316,7 @@ public class JavaLanguageServerExtensionService {
             .getWorkspaceService()
             .executeCommand(
                 new ExecuteCommandParams(
-                    Commands.LOCATION_TO_FQN_COMMAND,
+                    Commands.IDENTIFY_FQN_IN_RESOURCE,
                     ImmutableList.of(prefixURI(filePath), String.valueOf(lineNumber))));
 
     try {
@@ -332,20 +332,21 @@ public class JavaLanguageServerExtensionService {
             .getWorkspaceService()
             .executeCommand(
                 new ExecuteCommandParams(
-                    Commands.FQN_TO_LOCATION_COMMAND,
+                    Commands.FIND_RESOURCES_BY_FQN,
                     ImmutableList.of(fqn, String.valueOf(lineNumber))));
 
     try {
-      List<LocationParameters> location =
+      List<ResourceLocationParameters> location =
           gson.fromJson(
               gson.toJson(result.get()),
-              new com.google.common.reflect.TypeToken<List<LocationParameters>>() {}.getType());
-      LocationParameters l = location.get(0);
+              new com.google.common.reflect.TypeToken<
+                  List<ResourceLocationParameters>>() {}.getType());
+      ResourceLocationParameters l = location.get(0);
 
       boolean externalResource = l.getLibId() != 0;
       return new LocationImpl(
-          externalResource ? l.getFqn() : removePrefixUri(l.getFilePath()),
-          l.getLineNumber(),
+          externalResource ? l.getFqn() : removePrefixUri(l.getFileUri()),
+          lineNumber,
           externalResource,
           l.getLibId(),
           null);
