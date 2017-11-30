@@ -44,7 +44,8 @@ public class DtoConverter {
     return newDto(ServerConfigDto.class)
         .withPort(serverConf.getPort())
         .withProtocol(serverConf.getProtocol())
-        .withPath(serverConf.getPath());
+        .withPath(serverConf.getPath())
+        .withAttributes(serverConf.getAttributes());
   }
 
   private DtoConverter() {}

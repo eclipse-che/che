@@ -10,8 +10,6 @@
  */
 package org.eclipse.che.api.workspace.server.model.impl;
 
-import static java.util.stream.Collectors.toMap;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -43,7 +41,10 @@ public class MachineImpl implements Machine {
           servers
               .entrySet()
               .stream()
-              .collect(toMap(Map.Entry::getKey, entry -> new ServerImpl(entry.getValue())));
+              .collect(
+                  HashMap::new,
+                  (map, entry) -> map.put(entry.getKey(), new ServerImpl(entry.getValue())),
+                  HashMap::putAll);
     }
   }
 

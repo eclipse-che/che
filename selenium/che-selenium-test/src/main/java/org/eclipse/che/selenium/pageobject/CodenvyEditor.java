@@ -1018,7 +1018,7 @@ public class CodenvyEditor {
   }
 
   public void waitGreenTab(String fileName) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
                 By.xpath(
@@ -1027,7 +1027,7 @@ public class CodenvyEditor {
   }
 
   public void waitBlueTab(String fileName) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
                 By.xpath(
@@ -1046,7 +1046,7 @@ public class CodenvyEditor {
             == null);
     final String currentStateEditorColor =
         isEditorFocused ? "rgba(255, 255, 255, 1)" : "rgba(170, 170, 170, 1)";
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
             (ExpectedCondition<Boolean>)
                 webDriver ->
@@ -1818,8 +1818,7 @@ public class CodenvyEditor {
               try {
                 javaDocPopupHtmlText = getJavaDocPopupText();
               } catch (StaleElementReferenceException e) {
-                LOG.error(
-                    "Can not get java doc HTML text from autocomplete context menu in editor");
+                LOG.warn("Can not get java doc HTML text from autocomplete context menu in editor");
               }
               return javaDocPopupHtmlText.length() > 0
                   && verifyJavaDoc(javaDocPopupHtmlText, expectedText);
@@ -1862,7 +1861,7 @@ public class CodenvyEditor {
     try {
       srcLink = element.getAttribute("src");
     } catch (StaleElementReferenceException ex) {
-      LOG.error("src link in the context java doc window does not attached");
+      LOG.warn("src link in the context java doc window does not attached");
     }
     return srcLink;
   }
