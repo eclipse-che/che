@@ -11,6 +11,7 @@
 package org.eclipse.che.api.workspace.server.spi.environment;
 
 import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
@@ -108,7 +109,8 @@ public class InternalEnvironmentFactoryTest {
   @Test
   public void shouldUseNormalizedServersWhileInternalEnvironmentCreation() throws Exception {
     // given
-    ServerConfigImpl server = new ServerConfigImpl("8080", "http", "/api");
+    ServerConfigImpl server =
+        new ServerConfigImpl("8080", "http", "/api", singletonMap("key", "value"));
 
     Map<String, ServerConfig> normalizedServers =
         ImmutableMap.of("server", mock(ServerConfig.class));
@@ -169,9 +171,12 @@ public class InternalEnvironmentFactoryTest {
 
   @Test
   public void normalizeServersProtocols() throws InfrastructureException {
-    ServerConfigImpl serverWithoutProtocol = new ServerConfigImpl("8080", "http", "/api");
-    ServerConfigImpl udpServer = new ServerConfigImpl("8080/udp", "http", "/api");
-    ServerConfigImpl normalizedServer = new ServerConfigImpl("8080/tcp", "http", "/api");
+    ServerConfigImpl serverWithoutProtocol =
+        new ServerConfigImpl("8080", "http", "/api", singletonMap("key", "value"));
+    ServerConfigImpl udpServer =
+        new ServerConfigImpl("8080/udp", "http", "/api", singletonMap("key", "value"));
+    ServerConfigImpl normalizedServer =
+        new ServerConfigImpl("8080/tcp", "http", "/api", singletonMap("key", "value"));
 
     Map<String, ServerConfig> servers = new HashMap<>();
     servers.put("serverWithoutProtocol", serverWithoutProtocol);

@@ -36,12 +36,7 @@ public class MachineImpl implements Machine {
               .collect(
                   HashMap::new,
                   (map, entry) ->
-                      map.put(
-                          entry.getKey(),
-                          new ServerImpl(
-                              entry.getKey(),
-                              entry.getValue().getUrl(),
-                              entry.getValue().getStatus())),
+                      map.put(entry.getKey(), new ServerImpl(entry.getKey(), entry.getValue())),
                   HashMap::putAll);
     }
   }
