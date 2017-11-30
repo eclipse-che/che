@@ -2451,7 +2451,7 @@
   "components": [],
   "source": {
     "type": "image",
-    "origin": "registry.centos.org/che-stacks/centos-git"
+    "origin": "registry.centos.org/che-stacks/centos-stack-base"
   },
   "workspaceConfig": {
     "environments": {
@@ -2470,7 +2470,7 @@
           }
         },
         "recipe": {
-          "location": "registry.centos.org/che-stacks/centos-git",
+          "location": "registry.centos.org/che-stacks/centos-stack-base",
           "type": "dockerimage"
         }
       }
