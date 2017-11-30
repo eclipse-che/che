@@ -12,6 +12,8 @@ package org.eclipse.che.plugin.java.languageserver;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.ide.ext.java.shared.Constants.EFFECTIVE_POM_REQUEST_TIMEOUT;
+import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE_REQUEST_TIMEOUT;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FILE_STRUCTURE_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_ENTRY_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_FOLDER_COMMAND;
@@ -60,7 +62,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This service makes custom commands in our jdt.ls extension available to clients.
  *
- * @author Thomas Mäder
+ * @author Thomas M?der
  */
 public class JavaLanguageServerExtensionService {
 
@@ -285,7 +287,9 @@ public class JavaLanguageServerExtensionService {
 
     Type targetClassType = new TypeToken<String>() {}.getType();
     try {
-      return gson.fromJson(gson.toJson(result.get(30, TimeUnit.SECONDS)), targetClassType);
+      return gson.fromJson(
+          gson.toJson(result.get(EFFECTIVE_POM_REQUEST_TIMEOUT, TimeUnit.SECONDS)),
+          targetClassType);
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }
@@ -303,7 +307,9 @@ public class JavaLanguageServerExtensionService {
     CompletableFuture<Object> result = executeCommand(commandId, singletonList(parameters));
     Type targetClassType = new TypeToken<ArrayList<String>>() {}.getType();
     try {
-      return gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), targetClassType);
+      return gson.fromJson(
+          gson.toJson(result.get(FILE_STRUCTURE_REQUEST_TIMEOUT, TimeUnit.SECONDS)),
+          targetClassType);
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }

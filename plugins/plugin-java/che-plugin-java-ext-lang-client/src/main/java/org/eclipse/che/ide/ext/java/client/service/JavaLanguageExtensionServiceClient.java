@@ -11,6 +11,8 @@
 package org.eclipse.che.ide.ext.java.client.service;
 
 import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
+import static org.eclipse.che.ide.ext.java.shared.Constants.EFFECTIVE_POM_REQUEST_TIMEOUT;
+import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE_REQUEST_TIMEOUT;
 
 import com.google.gwt.jsonp.client.TimeoutException;
 import com.google.inject.Inject;
@@ -29,9 +31,7 @@ import org.eclipse.che.plugin.languageserver.ide.service.ServiceUtil;
 public class JavaLanguageExtensionServiceClient {
 
   private static final String FILE_STRUCTURE = "java/file-structure";
-  private static final int FILE_STRUCTURE_REQUEST_TIMEOUT = 10_000;
   private static final String EFFECTIVE_POM = "java/effective-pom";
-  private static final int EFFECTIVE_POM_REQUEST_TIMEOUT = 30_000;
 
   private final RequestTransmitter requestTransmitter;
 
