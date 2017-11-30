@@ -230,7 +230,7 @@ public class ProjectImporter extends AbstractImporter {
                                       sourceStorage.getType(),
                                       sourceStorage.getLocation(),
                                       sourceStorage.getParameters());
-                              copySourceStorage.getParameters().put("username", "token");
+                              copySourceStorage.getParameters().put("username", result.getToken());
                               copySourceStorage.getParameters().put("password", result.getToken());
 
                               doImport(path, copySourceStorage)
