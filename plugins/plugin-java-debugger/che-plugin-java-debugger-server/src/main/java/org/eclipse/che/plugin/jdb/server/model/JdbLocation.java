@@ -13,6 +13,7 @@ package org.eclipse.che.plugin.jdb.server.model;
 import com.sun.jdi.StackFrame;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.Method;
+import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionService;
 
 /**
@@ -86,7 +87,11 @@ public class JdbLocation implements Location {
   }
 
   private Location getLocation(com.sun.jdi.Location jdiLocation) {
-    return languageServer.fqnToDebuggerLocation(
-        jdiLocation.declaringType().name(), jdiLocation.lineNumber());
+    try {
+      return languageServer.fqnToDebuggerLocation(
+          jdiLocation.declaringType().name(), jdiLocation.lineNumber());
+    } catch (Exception e) {
+      return new LocationImpl(jdiLocation.declaringType().name(), jdiLocation.lineNumber());
+    }
   }
 }
