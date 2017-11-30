@@ -133,7 +133,7 @@ public class TestFailTest {
       refactorPanel.typeNewName(newClassName);
       refactorPanel.clickOkButtonRefactorForm();
     } catch (WebDriverException ex) {
-      ex.printStackTrace();
+      LOG.warn(ex.getLocalizedMessage());
       refactorPanel.typeNewName(newClassName);
       refactorPanel.sendKeysIntoField(Keys.ARROW_LEFT.toString());
       refactorPanel.sendKeysIntoField(Keys.ARROW_LEFT.toString());
