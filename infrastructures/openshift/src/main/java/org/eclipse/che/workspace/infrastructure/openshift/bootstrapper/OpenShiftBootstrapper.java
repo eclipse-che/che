@@ -103,7 +103,10 @@ public class OpenShiftBootstrapper extends AbstractBootstrapper {
             + Integer.toString(installerTimeoutSeconds)
             + " -file "
             + BOOTSTRAPPER_DIR
-            + CONFIG_FILE);
+            + CONFIG_FILE
+            // redirects command output and makes the bootstrapping process detached,
+            // to avoid the holding of the socket connection for exec watcher.
+            + " &>/dev/null &");
   }
 
   private void injectBootstrapper() throws InfrastructureException {
