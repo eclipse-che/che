@@ -708,7 +708,8 @@ public class FactoryServiceTest {
     extendedMachine.setInstallers(singletonList("agent"));
     extendedMachine.setAttributes(singletonMap("att1", "value"));
     extendedMachine.setServers(
-        singletonMap("agent", new ServerConfigImpl("5555", "https", "path")));
+        singletonMap(
+            "agent", new ServerConfigImpl("5555", "https", "path", singletonMap("key", "value"))));
     env.setRecipe(environmentRecipe);
     env.setMachines(singletonMap("machine1", extendedMachine));
     return org.eclipse.che.api.workspace.server.DtoConverter.asDto(env);

@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.ide.ext.git.client;
 
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_LEFT_STATUS_PANEL;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_PROFILE;
 import static org.eclipse.che.ide.api.constraints.Anchor.BEFORE;
@@ -44,6 +45,7 @@ import org.eclipse.che.ide.ext.git.client.action.ShowBranchesAction;
 import org.eclipse.che.ide.ext.git.client.action.ShowMergeAction;
 import org.eclipse.che.ide.ext.git.client.action.ShowRemoteAction;
 import org.eclipse.che.ide.ext.git.client.action.ShowStatusAction;
+import org.eclipse.che.ide.ext.git.client.action.StatusBarBranchPointer;
 import org.eclipse.che.ide.ext.git.client.action.ToggleGitPanelAction;
 import org.vectomatic.dom.svg.ui.SVGImage;
 
@@ -100,7 +102,8 @@ public class GitExtension {
       PreviousDiffAction previousDiffAction,
       KeyBindingAgent keyBinding,
       ToggleGitPanelAction gitPanelAction,
-      GitNotificationsSubscriber gitNotificationsSubscriber) {
+      GitNotificationsSubscriber gitNotificationsSubscriber,
+      StatusBarBranchPointer statusBarBranchPointer) {
     gitNotificationsSubscriber.subscribe();
 
     resources.gitCSS().ensureInjected();
@@ -235,5 +238,9 @@ public class GitExtension {
     keyBinding
         .getGlobal()
         .addKey(new KeyBuilder().alt().charCode('g').build(), GIT_PANEL_ACTION_ID);
+
+    DefaultActionGroup rightStatusPanelGroup =
+        (DefaultActionGroup) actionManager.getAction(GROUP_LEFT_STATUS_PANEL);
+    rightStatusPanelGroup.add(statusBarBranchPointer);
   }
 }

@@ -13,6 +13,8 @@
 @eval matchingSearchBlockBorderColor org.eclipse.che.ide.api.theme.Style.theme.matchingSearchBlockBorderColor();
 @eval currentSearchBlockBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.currentSearchBlockBackgroundColor();
 @eval currentSearchBlockBorderColor org.eclipse.che.ide.api.theme.Style.theme.currentSearchBlockBorderColor();
+@eval editorLinkedGroupColor org.eclipse.che.ide.api.theme.Style.theme.getEditorLinkedGroupColor();
+@eval editorLinkedGroupBackground org.eclipse.che.ide.api.theme.Style.theme.getEditorLinkedGroupBackground();
 
 .orionCodenvy {
     font-family: editorFontFamily;
@@ -446,11 +448,13 @@
 }
 
 .orionCodenvy .annotationRange.currentLinkedGroup {
-    background-color: #000099;
+    color: editorLinkedGroupColor;
+    background-color: editorLinkedGroupBackground;
 }
 
 .orionCodenvy .annotationRange.selectedLinkedGroup {
-    background-color: #000099;
+    color: editorLinkedGroupColor;
+    background-color: editorLinkedGroupBackground;
 }
 
 .orionCodenvy .annotationLine.currentLine {

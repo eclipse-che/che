@@ -107,8 +107,9 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
       for (Route route : osEnv.getRoutes().values()) {
         createdRoutes.add(project.routes().create(route));
       }
-      project.pods().watch(new AbnormalStopHandler());
-      project.pods().watchContainers(new MachineLogsPublisher());
+      // TODO https://github.com/eclipse/che/issues/7653
+      // project.pods().watch(new AbnormalStopHandler());
+      // project.pods().watchContainers(new MachineLogsPublisher());
 
       createPods(createdServices, createdRoutes);
 

@@ -56,6 +56,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
+import org.testng.Assert;
 
 /** @author Musienko Maxim */
 @Singleton
@@ -1018,7 +1019,7 @@ public class CodenvyEditor {
   }
 
   public void waitGreenTab(String fileName) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
                 By.xpath(
@@ -1027,7 +1028,7 @@ public class CodenvyEditor {
   }
 
   public void waitBlueTab(String fileName) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
                 By.xpath(
@@ -1046,7 +1047,7 @@ public class CodenvyEditor {
             == null);
     final String currentStateEditorColor =
         isEditorFocused ? "rgba(255, 255, 255, 1)" : "rgba(170, 170, 170, 1)";
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
             (ExpectedCondition<Boolean>)
                 webDriver ->
@@ -1653,6 +1654,12 @@ public class CodenvyEditor {
         invisibilityOfElementLocated(By.xpath(String.format(Locators.ITEM_TAB_LIST, tabName))));
   }
 
+  public void waitCountTabsWithProvidedName(int countTabs, String tabName) {
+    loaderDriverWait.until(
+        (ExpectedCondition<Boolean>)
+            driver -> countTabs == getAllTabsWithProvidedName(tabName).size());
+  }
+
   /**
    * Click on tab in the tab list
    *
@@ -1818,8 +1825,7 @@ public class CodenvyEditor {
               try {
                 javaDocPopupHtmlText = getJavaDocPopupText();
               } catch (StaleElementReferenceException e) {
-                LOG.error(
-                    "Can not get java doc HTML text from autocomplete context menu in editor");
+                LOG.warn("Can not get java doc HTML text from autocomplete context menu in editor");
               }
               return javaDocPopupHtmlText.length() > 0
                   && verifyJavaDoc(javaDocPopupHtmlText, expectedText);
@@ -1862,7 +1868,7 @@ public class CodenvyEditor {
     try {
       srcLink = element.getAttribute("src");
     } catch (StaleElementReferenceException ex) {
-      LOG.error("src link in the context java doc window does not attached");
+      Assert.fail("src link in the context java doc window does not attached");
     }
     return srcLink;
   }
@@ -1878,5 +1884,14 @@ public class CodenvyEditor {
       }
     }
     return "";
+  }
+
+  private List<WebElement> getAllTabsWithProvidedName(String tabName) {
+    return loaderDriverWait.until(
+        visibilityOfAllElementsLocatedBy(
+            By.xpath(
+                String.format(
+                    "//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[text()='%s']",
+                    tabName))));
   }
 }
