@@ -345,7 +345,7 @@ public class CodenvyEditor {
       loadPageDriverWait.until(
           (ExpectedCondition<Boolean>) driver -> getVisibleTextFromEditor().contains(text));
     } catch (Exception ex) {
-      ex.printStackTrace();
+      LOG.warn(ex.getLocalizedMessage());
       WaitUtils.sleepQuietly(REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
       attachElemDriverWait.until(
           (ExpectedCondition<Boolean>) driver -> getVisibleTextFromEditor().contains(text));

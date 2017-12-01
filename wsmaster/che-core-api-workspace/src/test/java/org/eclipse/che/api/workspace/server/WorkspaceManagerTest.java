@@ -11,7 +11,6 @@
 package org.eclipse.che.api.workspace.server;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
@@ -385,7 +384,7 @@ public class WorkspaceManagerTest {
   @Test
   public void startsWorkspaceWithProvidedEnvironment() throws Exception {
     final WorkspaceConfigImpl config = createConfig();
-    final EnvironmentImpl environment = new EnvironmentImpl(null, emptyMap(), emptyList());
+    final EnvironmentImpl environment = new EnvironmentImpl(null, emptyMap());
     config.getEnvironments().put("non-default-env", environment);
     final WorkspaceImpl workspace = createAndMockWorkspace(config, NAMESPACE_1);
 
@@ -563,8 +562,7 @@ public class WorkspaceManagerTest {
     EnvironmentImpl environment =
         new EnvironmentImpl(
             new RecipeImpl("type", "contentType", "content", null),
-            singletonMap("dev-machine", machineConfig),
-            emptyList());
+            singletonMap("dev-machine", machineConfig));
     return WorkspaceConfigImpl.builder()
         .setName("dev-workspace")
         .setDefaultEnv("dev-env")
@@ -588,7 +586,7 @@ public class WorkspaceManagerTest {
     final Map<String, Machine> machines;
 
     TestInternalRuntime(RuntimeContext context, Map<String, Machine> machines) {
-      super(context, null, false);
+      super(context, null, null, false);
       this.machines = machines;
     }
 
