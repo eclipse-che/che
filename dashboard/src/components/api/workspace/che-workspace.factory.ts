@@ -17,8 +17,9 @@ import {DockerImageEnvironmentManager} from '../environment/docker-image-environ
 import {CheEnvironmentRegistry} from '../environment/che-environment-registry.factory';
 import {CheJsonRpcMasterApi} from '../json-rpc/che-json-rpc-master-api';
 import {CheJsonRpcApi} from '../json-rpc/che-json-rpc-api.factory';
-import {IObservableCallbackFn, Observable} from './../../utils/observable';
+import {IObservableCallbackFn, Observable} from '../../utils/observable';
 import {CheBranding} from '../../branding/che-branding.factory';
+import {OpenshiftEnvironmentManager} from '../environment/openshift-environment-manager';
 
 const WS_AGENT_HTTP_LINK: string = 'wsagent/http';
 const WS_AGENT_WS_LINK: string = 'wsagent/ws';
@@ -135,6 +136,7 @@ export class CheWorkspace {
     cheEnvironmentRegistry.addEnvironmentManager('compose', new ComposeEnvironmentManager($log));
     cheEnvironmentRegistry.addEnvironmentManager('dockerfile', new DockerFileEnvironmentManager($log));
     cheEnvironmentRegistry.addEnvironmentManager('dockerimage', new DockerImageEnvironmentManager($log));
+    cheEnvironmentRegistry.addEnvironmentManager('openshift', new OpenshiftEnvironmentManager($log));
 
     this.fetchWorkspaceSettings();
 
@@ -416,7 +418,7 @@ export class CheWorkspace {
         'machines': {
           'dev-machine': {
             'attributes': {'memoryLimitBytes': ram},
-            'agents': ['org.eclipse.che.ws-agent', 'org.eclipse.che.exec', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
+            'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.exec', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
           }
         }
       };
@@ -449,7 +451,7 @@ export class CheWorkspace {
         'name': 'ws-machine',
         'attributes': {'memoryLimitBytes': ram},
         'type': 'docker',
-        'agents': ['org.eclipse.che.ws-agent', 'org.eclipse.che.exec', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
+        'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.exec', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
       };
       defaultEnvironment.machines[devMachine.name] = devMachine;
     } else {
@@ -689,25 +691,30 @@ export class CheWorkspace {
   }
 
   private updateWorkspacesList(workspace: che.IWorkspace): void {
-    // add workspace if not temporary
-    if (!workspace.temporary) {
-      this.lodash.remove(this.workspaces, (_workspace: che.IWorkspace) => {
-        return _workspace.id === workspace.id;
-      });
-      this.workspaces.push(workspace);
-      // publish change
-      if (this.observables.has(workspace.id)) {
-        this.observables.get(workspace.id).publish(workspace);
-      }
+    if (workspace.temporary) {
+      this.workspacesById.set(workspace.id, workspace);
+      return;
     }
 
     const workspaceDetails = this.getWorkspaceById(workspace.id);
+
+    if (!workspaceDetails) {
+      this.workspacesById.set(workspace.id, workspace);
+    }
     if (workspaceDetails && WorkspaceStatus[workspaceDetails.status] === WorkspaceStatus.RUNNING && workspaceDetails.runtime && !workspace.runtime) {
-      const runtime = angular.copy(workspaceDetails.runtime);
-      this.workspacesById.set(workspace.id, workspace);
-      this.getWorkspaceById(workspace.id).runtime = runtime;
-    } else {
-      this.workspacesById.set(workspace.id, workspace);
+      workspace.runtime = angular.copy(workspaceDetails.runtime);
+    }
+    this.lodash.remove(this.workspaces, (_workspace: che.IWorkspace) => {
+      return _workspace.id === workspace.id;
+    });
+    this.workspaces.push(workspace);
+    // publish change
+    if (this.observables.has(workspace.id)) {
+      this.observables.get(workspace.id).publish(workspace);
+    }
+    if (!angular.equals(workspaceDetails, workspace)) {
+      this.fetchWorkspaceDetails(workspace.id);
+      return;
     }
 
     this.startUpdateWorkspaceStatus(workspace.id);
