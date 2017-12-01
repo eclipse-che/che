@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.ide.ext.machine.server.ssh;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -65,12 +64,14 @@ public class KeysInjector {
             final String workspaceId = identity.getWorkspaceId();
             final String owner = identity.getOwner();
             if (event.getEventType() == MachineStatus.RUNNING) {
-              try{
+              try {
                 List<SshPairImpl> sshPairs = sshManager.getPairs(owner, "machine");
-                final List<String> publicMachineKeys = sshPairs.stream()
-                    .filter(sshPair -> sshPair.getPublicKey() != null)
-                    .map(SshPairImpl::getPublicKey)
-                    .collect(Collectors.toList());
+                final List<String> publicMachineKeys =
+                    sshPairs
+                        .stream()
+                        .filter(sshPair -> sshPair.getPublicKey() != null)
+                        .map(SshPairImpl::getPublicKey)
+                        .collect(Collectors.toList());
                 SshPairImpl sshWorkspacePair = null;
                 try {
                   sshWorkspacePair = sshManager.getPair(owner, "workspace", workspaceId);
@@ -94,26 +95,27 @@ public class KeysInjector {
                 final String containerId = "machineid"; // TODO RETRIEVE MACHINE ID
                 StringBuilder command = new StringBuilder("mkdir ~/.ssh/ -p");
                 for (String publicKey : publicKeys) {
-                  command.append("&& echo '")
+                  command
+                      .append("&& echo '")
                       .append(publicKey)
                       .append("' >> ~/.ssh/authorized_keys");
                 }
 
-                final Exec exec = docker.createExec(CreateExecParams.create(containerId,
-                    new String[] {"/bin/bash",
-                        "-c",
-                        command.toString()})
-                    .withDetach(true));
-                docker.startExec(StartExecParams.create(exec.getId()), logMessage -> {
-                  if (logMessage.getType() == LogMessage.Type.STDERR) {
-                    // TODO write log
-                  }
-                });
-              }catch (Exception ex) {
+                final Exec exec =
+                    docker.createExec(
+                        CreateExecParams.create(
+                                containerId, new String[] {"/bin/bash", "-c", command.toString()})
+                            .withDetach(true));
+                docker.startExec(
+                    StartExecParams.create(exec.getId()),
+                    logMessage -> {
+                      if (logMessage.getType() == LogMessage.Type.STDERR) {
+                        // TODO write log
+                      }
+                    });
+              } catch (Exception ex) {
                 LOG.warn("ssh pair for machine {} not found");
               }
-
-
 
               /*final Instance machine;
               try {
