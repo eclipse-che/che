@@ -61,8 +61,6 @@ public class Consoles {
   public static final String PREVIEW_URL = "//div[@active]//a[@href]";
   public static final String COMMAND_CONSOLE_ID =
       "//div[@active]//div[@id='gwt-debug-commandConsoleLines']";
-  protected final SeleniumWebDriver seleniumWebDriver;
-  private final Loader loader;
   private static final String CONSOLE_PANEL_DRUGGER_CSS = "div.gwt-SplitLayoutPanel-VDragger";
   public static final String MACHINE_NAME =
       "//div[@id='gwt-debug-process-tree']//span[text()= '%s']";
@@ -74,6 +72,9 @@ public class Consoles {
     String BUILD = "gwt-debug-contextMenu/Commands/goal_Build";
     String RUN = "gwt-debug-contextMenu/Commands/goal_Run";
   }
+
+  protected final SeleniumWebDriver seleniumWebDriver;
+  private final Loader loader;
 
   @Inject
   public Consoles(SeleniumWebDriver seleniumWebDriver, Loader loader) {
