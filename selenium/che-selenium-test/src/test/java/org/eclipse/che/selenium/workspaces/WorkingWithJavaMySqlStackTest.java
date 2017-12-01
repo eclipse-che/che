@@ -10,8 +10,21 @@
  */
 package org.eclipse.che.selenium.workspaces;
 
+import static org.eclipse.che.selenium.core.constant.TestBuildConstants.BUILD_SUCCESS;
+import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA_MYSQL;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.pageobject.Consoles.CommandsGoal.COMMON;
+import static org.eclipse.che.selenium.pageobject.Consoles.CommandsGoal.RUN;
+import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.WORKSPACES;
+import static org.openqa.selenium.Keys.ENTER;
+import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.util.Arrays;
@@ -19,13 +32,9 @@ import java.util.List;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.constant.TestBuildConstants;
-import org.eclipse.che.selenium.core.constant.TestStacksConstants;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.AskDialog;
-import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
-import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
@@ -35,8 +44,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
@@ -45,19 +53,16 @@ import org.testng.annotations.Test;
 public class WorkingWithJavaMySqlStackTest {
   private static final String WORKSPACE = NameGenerator.generate("java-mysql", 4);
   private static final String PROJECT_NAME = "web-java-petclinic";
-  private static final String PROCESS_NAME = PROJECT_NAME + ":build and deploy";
+  private static final String BUILD_AND_DEPLOY_PROCESS = PROJECT_NAME + ":build and deploy";
 
   private static final List<String> infoDataBases =
       Arrays.asList("Database", "information_schema", "petclinic", "mysql");
   private static final String MSG_CLOSE_PROCESS =
-      "The process "
-          + PROJECT_NAME
-          + ":build and deploy will be terminated after closing console. Do you want to continue?";
-
-  private String currentWindow;
+      String.format(
+          "The process %s:build and deploy will be terminated after closing console. Do you want to continue?",
+          PROJECT_NAME);
 
   @Inject private TestUser defaultTestUser;
-  @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Loader loader;
   @Inject private Consoles consoles;
@@ -67,7 +72,6 @@ public class WorkingWithJavaMySqlStackTest {
   @Inject private Dashboard dashboard;
   @Inject private DashboardWorkspace dashboardWorkspace;
   @Inject private AskDialog askDialog;
-  @Inject private CodenvyEditor editor;
   @Inject private MachineTerminal terminal;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
@@ -79,95 +83,82 @@ public class WorkingWithJavaMySqlStackTest {
 
   @Test
   public void checkJavaMySqlAndRunApp() {
-    // create workspace and project
+    String currentWindow;
+
+    // create a workspace from the Java-MySql stack with the web-java-petclinic project
     dashboard.open();
     navigationBar.waitNavigationBar();
-    navigationBar.clickOnMenu(NavigationBar.MenuItem.WORKSPACES);
+    navigationBar.clickOnMenu(WORKSPACES);
     dashboardWorkspace.waitToolbarTitleName("Workspaces");
     dashboardWorkspace.clickOnNewWorkspaceBtn();
-
     createWorkspace.waitToolbar();
-    loader.waitOnClosed();
-    createWorkspace.selectStack(TestStacksConstants.JAVA_MYSQL.getId());
+    createWorkspace.selectStack(JAVA_MYSQL.getId());
     createWorkspace.typeWorkspaceName(WORKSPACE);
     projectSourcePage.clickAddOrImportProjectButton();
     projectSourcePage.selectSample(PROJECT_NAME);
     projectSourcePage.clickAdd();
-
     createWorkspace.clickCreate();
-    loader.waitOnClosed();
-    seleniumWebDriver.switchFromDashboardIframeToIde(60);
 
-    // expand the project
+    seleniumWebDriver.switchFromDashboardIframeToIde(LOADER_TIMEOUT_SEC);
     currentWindow = seleniumWebDriver.getWindowHandle();
-    loader.waitOnClosed();
     projectExplorer.waitProjectExplorer();
-    projectExplorer.waitItem(PROJECT_NAME, 600);
-    projectExplorer.expandPathInProjectExplorer(
-        PROJECT_NAME + "/src/main/java/org.springframework.samples.petclinic");
-    projectExplorer.expandPathInProjectExplorer(
-        PROJECT_NAME + "/src/test/java/org.springframework.samples.petclinic", 2);
-    projectExplorer.openItemByPath(
-        PROJECT_NAME + "/src/test/java/org/springframework/samples/petclinic/model");
-    projectExplorer.openItemByPath(
-        PROJECT_NAME
-            + "/src/test/java/org/springframework/samples/petclinic/model/OwnerTests.java");
-    editor.waitActiveEditor();
-    projectExplorer.openItemByPath(
-        PROJECT_NAME + "/src/main/java/org/springframework/samples/petclinic/service");
-    projectExplorer.openItemByPath(
-        PROJECT_NAME
-            + "/src/main/java/org/springframework/samples/petclinic/service/ClinicService.java");
-    editor.waitActiveEditor();
-
-    // select the db machine and perform 'show databases'
-    projectExplorer.invokeCommandWithContextMenu(
-        ProjectExplorer.CommandsGoal.COMMON, PROJECT_NAME, "show databases", "db");
+    projectExplorer.waitItem(PROJECT_NAME, APPLICATION_START_TIMEOUT_SEC);
     loader.waitOnClosed();
+    projectExplorer.selectItem(PROJECT_NAME);
+
+    // Select the db machine and perform 'show databases'
+    projectExplorer.invokeCommandWithContextMenu(COMMON, PROJECT_NAME, "show databases", "db");
+    consoles.waitTabNameProcessIsPresent("db");
     for (String text : infoDataBases) {
       consoles.waitExpectedTextIntoConsole(text);
     }
 
-    // build and deploy the web application
-    projectExplorer.invokeCommandWithContextMenu(
-        ProjectExplorer.CommandsGoal.RUN, PROJECT_NAME, "build and deploy", "dev-machine");
-    loader.waitOnClosed();
-    consoles.waitTabNameProcessIsPresent(PROCESS_NAME);
-    consoles.waitProcessInProcessConsoleTree(PROCESS_NAME);
-    consoles.waitExpectedTextIntoConsole(TestBuildConstants.BUILD_SUCCESS, 150);
-    consoles.waitExpectedTextIntoConsole("Server startup in", 200);
+    // Build and deploy the web application
+    projectExplorer.selectItem(PROJECT_NAME);
+    consoles.startCommandFromProcessesArea("dev-machine", RUN, BUILD_AND_DEPLOY_PROCESS);
+    consoles.waitTabNameProcessIsPresent(BUILD_AND_DEPLOY_PROCESS);
+    consoles.waitProcessInProcessConsoleTree(BUILD_AND_DEPLOY_PROCESS);
+    try {
+      consoles.waitExpectedTextIntoConsole("[INFO] Building petclinic ", ELEMENT_TIMEOUT_SEC);
+    } catch (TimeoutException ex) {
+      // Remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/6483", ex);
+    }
+    consoles.waitExpectedTextIntoConsole(BUILD_SUCCESS, UPDATING_PROJECT_TIMEOUT_SEC);
+    consoles.waitExpectedTextIntoConsole("Server startup in", PREPARING_WS_TIMEOUT_SEC);
     consoles.waitPreviewUrlIsPresent();
 
-    // run the application
-    loader.waitOnClosed();
+    // Run the application
     consoles.clickOnPreviewUrl();
     seleniumWebDriver.switchToNoneCurrentWindow(currentWindow);
     checkWebJavaPetclinicAppl();
     seleniumWebDriver.close();
     seleniumWebDriver.switchTo().window(currentWindow);
     seleniumWebDriver.switchFromDashboardIframeToIde();
-    consoles.waitProcessInProcessConsoleTree(PROCESS_NAME);
-    consoles.waitTabNameProcessIsPresent(PROCESS_NAME);
-    consoles.closeProcessByTabName(PROCESS_NAME);
+
+    // Close terminal tab for 'build and deploy' process
+    consoles.waitProcessInProcessConsoleTree(BUILD_AND_DEPLOY_PROCESS);
+    consoles.waitTabNameProcessIsPresent(BUILD_AND_DEPLOY_PROCESS);
+    consoles.closeProcessByTabName(BUILD_AND_DEPLOY_PROCESS);
     askDialog.acceptDialogWithText(MSG_CLOSE_PROCESS);
-    consoles.waitProcessIsNotPresentInProcessConsoleTree(PROCESS_NAME);
-    consoles.waitTabNameProcessIsNotPresent(PROCESS_NAME);
+    consoles.waitProcessIsNotPresentInProcessConsoleTree(BUILD_AND_DEPLOY_PROCESS);
+    consoles.waitTabNameProcessIsNotPresent(BUILD_AND_DEPLOY_PROCESS);
+
+    // Check that tomcat is not running
     consoles.selectProcessByTabName("Terminal");
     loader.waitOnClosed();
     terminal.typeIntoTerminal("ps ax | grep tomcat8");
-    terminal.typeIntoTerminal(Keys.ENTER.toString());
+    terminal.typeIntoTerminal(ENTER.toString());
     terminal.waitExpectedTextNotPresentTerminal("catalina.startup.Bootstrap start");
   }
 
   /** check main elements of the web-java-petclinic */
   private void checkWebJavaPetclinicAppl() {
     new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//h2[text()='Welcome']")));
+        .until(visibilityOfElementLocated(By.xpath("//h2[text()='Welcome']")));
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath("//div[@class='navbar-inner']")));
+        .until(visibilityOfElementLocated(By.xpath("//div[@class='navbar-inner']")));
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.presenceOfElementLocated(By.xpath("//table[@class='footer']")));
+        .until(presenceOfElementLocated(By.xpath("//table[@class='footer']")));
   }
 }
