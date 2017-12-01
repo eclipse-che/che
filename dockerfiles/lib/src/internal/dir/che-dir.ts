@@ -832,10 +832,6 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
         let defaultEnv : string = workspaceDto.getConfig().getDefaultEnv();
         let agents : Array<string> = workspaceDto.getConfig().getEnvironments().get(defaultEnv).getMachines().get("dev-machine").getInstallers();
 
-        if (agents.indexOf('org.eclipse.che.ssh') === - 1) {
-          return Promise.reject("The SSH agent (org.eclipse.che.ssh) has been disabled for this workspace.")
-        }
-
         let port: string = workspaceDto.getRuntime().getDevMachine().getRuntime().getServers().get("22/tcp").getAddress().split(":")[1];
         var spawn = require('child_process').spawn;
 

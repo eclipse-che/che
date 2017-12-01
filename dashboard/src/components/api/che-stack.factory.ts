@@ -79,7 +79,7 @@ export class CheStack {
             'machines': {
               'dev-machine': {
                 'installers': [
-                  'org.eclipse.che.exec', 'org.eclipse.che.terminal', 'org.eclipse.che.ws-agent', 'org.eclipse.che.ssh'
+                  'org.eclipse.che.exec', 'org.eclipse.che.terminal', 'org.eclipse.che.ws-agent'
                 ],
                 'servers': {},
                 'attributes': {

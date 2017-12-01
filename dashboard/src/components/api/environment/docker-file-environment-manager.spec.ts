@@ -30,7 +30,7 @@ describe('If recipe has content', () => {
           'attributes': {'memoryLimitBytes': '2147483648'},
           'servers': {},
           'volumes': {},
-          'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
+          'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal']
         }
       },
       'recipe': {
@@ -108,7 +108,7 @@ describe('If recipe has location', () => {
         'dev-machine': {
           'servers': {},
           'volumes': {},
-          'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh'],
+          'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal'],
           'attributes': {'memoryLimitBytes': '2147483648'}
         }
       },

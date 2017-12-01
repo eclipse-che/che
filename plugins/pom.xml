@@ -29,7 +29,6 @@
         <module>plugin-product-info</module>
         <module>plugin-help</module>
         <module>plugin-web</module>
-        <module>plugin-machine</module>
         <module>plugin-debugger</module>
         <module>plugin-java</module>
         <module>plugin-java-debugger</module>

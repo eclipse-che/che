@@ -55,7 +55,7 @@ export class CheFactoryTemplates {
             'machines': {
               'dev-machine': {
                 'installers': [
-                  'org.eclipse.che.terminal', 'org.eclipse.che.ws-agent', 'org.eclipse.che.ssh'
+                  'org.eclipse.che.terminal', 'org.eclipse.che.ws-agent'
                 ],
                 'servers': {},
                 'attributes': {
@@ -115,8 +115,7 @@ export class CheFactoryTemplates {
               'dev-machine': {
                 'installers': [
                   'org.eclipse.che.terminal',
-                  'org.eclipse.che.ws-agent',
-                  'org.eclipse.che.ssh'
+                  'org.eclipse.che.ws-agent'
                 ],
                 'servers': {},
                 'attributes': {

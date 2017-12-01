@@ -78,7 +78,7 @@ import javax.inject.Singleton;
  *              },
  *              "machines" : {
  *                  "dev-machine" : {
- *                      "installers" : [ "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh" ],
+ *                      "installers" : [ "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"],
  *                      "servers" : {
  *                          "some_reference" : {
  *                              "port" : "9090/udp",
@@ -155,7 +155,6 @@ public class WorkspaceConfigJsonAdapter {
     installers.add(new JsonPrimitive("org.eclipse.che.exec"));
     installers.add(new JsonPrimitive("org.eclipse.che.terminal"));
     installers.add(new JsonPrimitive("org.eclipse.che.ws-agent"));
-    installers.add(new JsonPrimitive("org.eclipse.che.ssh"));
     newMachine.add("installers", installers);
 
     // dev-machine ram

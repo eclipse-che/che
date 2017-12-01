@@ -104,7 +104,6 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
     renderer.addAddTerminalClickHandler(
         machineId -> delegate.onAddTerminal(machineId, TerminalOptionsJso.createDefault()));
-    renderer.addPreviewSshClickHandler(machineId -> delegate.onPreviewSsh(machineId));
     renderer.addStopProcessHandler(
         new StopProcessHandler() {
           @Override

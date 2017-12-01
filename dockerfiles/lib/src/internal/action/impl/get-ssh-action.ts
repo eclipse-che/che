@@ -71,10 +71,6 @@ export class GetSshDataAction {
                 let defaultEnv:string = workspaceDto.getConfig().getDefaultEnv();
                 let agents:Array<string> = workspaceDto.getConfig().getEnvironments().get(defaultEnv).getMachines().get("dev-machine").getInstallers();
 
-                if (agents.indexOf('org.eclipse.che.ssh') === -1) {
-                    return Promise.reject("The SSH agent (org.eclipse.che.ssh) has been disabled for this workspace.")
-                }
-
                 foundWorkspaceDTO = workspaceDto;
 
             }).then(() => {

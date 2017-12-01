@@ -29,7 +29,7 @@ const buildWorkspacesData = function() {
                     memoryLimitBytes: '2147483648'
                   },
                   servers: {},
-                  agents: ['org.eclipse.che.terminal', 'org.eclipse.che.ws-agent', 'org.eclipse.che.ssh', 'org.eclipse.che.exec'],
+                  agents: ['org.eclipse.che.terminal', 'org.eclipse.che.ws-agent',  'org.eclipse.che.exec'],
                   recipe: {
                     location: 'eclipse/ubuntu_jdk8',
                     type: 'dockerimage'

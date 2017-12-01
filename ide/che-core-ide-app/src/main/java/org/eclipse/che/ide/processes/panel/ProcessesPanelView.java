@@ -115,13 +115,6 @@ public interface ProcessesPanelView extends View<ProcessesPanelView.ActionDelega
     void onAddTerminal(String machineId, TerminalOptionsJso options);
 
     /**
-     * Will be called when user clicks 'Preview Ssh' button
-     *
-     * @param machineId id of machine in which ssh keys are located
-     */
-    void onPreviewSsh(String machineId);
-
-    /**
      * Opens a dedicate tab with bound servers to given machine.
      *
      * @param machineId id of the machine in which servers bound
