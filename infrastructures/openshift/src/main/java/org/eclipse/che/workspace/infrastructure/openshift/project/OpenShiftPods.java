@@ -24,7 +24,6 @@ import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.ExecListener;
 import io.fabric8.kubernetes.client.dsl.ExecWatch;
 import io.fabric8.kubernetes.client.dsl.PodResource;
-import io.fabric8.openshift.client.OpenShiftClient;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -65,6 +64,9 @@ public class OpenShiftPods {
   private static final Pattern CONTAINER_FIELD_PATH_PATTERN =
       Pattern.compile("spec.containers\\{(?<" + CONTAINER_NAME_GROUP + ">.*)}");
 
+  // TODO https://github.com/eclipse/che/issues/7656
+  public static final int POD_REMOVAL_TIMEOUT_MIN = 5;
+
   private static final String POD_OBJECT_KIND = "Pod";
 
   private final String namespace;
@@ -92,8 +94,8 @@ public class OpenShiftPods {
    */
   public Pod create(Pod pod) throws InfrastructureException {
     putLabel(pod, CHE_WORKSPACE_ID_LABEL, workspaceId);
-    try (OpenShiftClient client = clientFactory.create()) {
-      return client.pods().inNamespace(namespace).create(pod);
+    try {
+      return clientFactory.create().pods().inNamespace(namespace).create(pod);
     } catch (KubernetesClientException e) {
       throw new InfrastructureException(e.getMessage(), e);
     }
@@ -105,8 +107,9 @@ public class OpenShiftPods {
    * @throws InfrastructureException when any exception occurs
    */
   public List<Pod> get() throws InfrastructureException {
-    try (OpenShiftClient client = clientFactory.create()) {
-      return client
+    try {
+      return clientFactory
+          .create()
           .pods()
           .inNamespace(namespace)
           .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)
@@ -123,8 +126,9 @@ public class OpenShiftPods {
    * @throws InfrastructureException when any exception occurs
    */
   public Optional<Pod> get(String name) throws InfrastructureException {
-    try (OpenShiftClient client = clientFactory.create()) {
-      return Optional.ofNullable(client.pods().inNamespace(namespace).withName(name).get());
+    try {
+      return Optional.ofNullable(
+          clientFactory.create().pods().inNamespace(namespace).withName(name).get());
     } catch (KubernetesClientException e) {
       throw new InfrastructureException(e.getMessage(), e);
     }
@@ -145,9 +149,9 @@ public class OpenShiftPods {
       throws InfrastructureException {
     CompletableFuture<Pod> future = new CompletableFuture<>();
     Watch watch = null;
-    try (OpenShiftClient client = clientFactory.create()) {
+    try {
       PodResource<Pod, DoneablePod> podResource =
-          client.pods().inNamespace(namespace).withName(name);
+          clientFactory.create().pods().inNamespace(namespace).withName(name);
 
       watch =
           podResource.watch(
@@ -213,9 +217,10 @@ public class OpenShiftPods {
             @Override
             public void onClose(KubernetesClientException ignored) {}
           };
-      try (OpenShiftClient client = clientFactory.create()) {
+      try {
         podWatch =
-            client
+            clientFactory
+                .create()
                 .pods()
                 .inNamespace(namespace)
                 .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)
@@ -264,8 +269,8 @@ public class OpenShiftPods {
             @Override
             public void onClose(KubernetesClientException ignored) {}
           };
-      try (OpenShiftClient client = clientFactory.create()) {
-        containerWatch = client.events().inNamespace(namespace).watch(watcher);
+      try {
+        containerWatch = clientFactory.create().events().inNamespace(namespace).watch(watcher);
       } catch (KubernetesClientException ex) {
         throw new InfrastructureException(ex.getMessage());
       }
@@ -311,16 +316,16 @@ public class OpenShiftPods {
    */
   public void exec(String podName, String containerName, int timeoutMin, String[] command)
       throws InfrastructureException {
-    ExecWatchdog watchdog = new ExecWatchdog();
-    try (OpenShiftClient client = clientFactory.create();
-        ExecWatch watch =
-            client
-                .pods()
-                .inNamespace(namespace)
-                .withName(podName)
-                .inContainer(containerName)
-                .usingListener(watchdog)
-                .exec(encode(command))) {
+    final ExecWatchdog watchdog = new ExecWatchdog();
+    try (ExecWatch watch =
+        clientFactory
+            .create()
+            .pods()
+            .inNamespace(namespace)
+            .withName(podName)
+            .inContainer(containerName)
+            .usingListener(watchdog)
+            .exec(encode(command))) {
       try {
         watchdog.wait(timeoutMin, TimeUnit.MINUTES);
       } catch (InterruptedException e) {
@@ -340,11 +345,12 @@ public class OpenShiftPods {
    *
    * @param name name of pod to remove
    * @throws InfrastructureException when {@link Thread} is interrupted while command executing
+   * @throws InfrastructureException when pod removal timeout is reached
    * @throws InfrastructureException when any other exception occurs
    */
   public void delete(String name) throws InfrastructureException {
     try {
-      doDelete(name).get();
+      doDelete(name).get(POD_REMOVAL_TIMEOUT_MIN, TimeUnit.MINUTES);
     } catch (InterruptedException ex) {
       Thread.currentThread().interrupt();
       throw new InfrastructureException(
@@ -352,6 +358,8 @@ public class OpenShiftPods {
     } catch (ExecutionException ex) {
       throw new InfrastructureException(
           "Error occurred while waiting for pod removal. " + ex.getMessage());
+    } catch (TimeoutException ex) {
+      throw new InfrastructureException("Pod removal timeout reached " + ex.getMessage());
     }
   }
 
@@ -362,13 +370,15 @@ public class OpenShiftPods {
    * pods will be killed.
    *
    * @throws InfrastructureException when {@link Thread} is interrupted while command executing
+   * @throws InfrastructureException when pods removal timeout is reached
    * @throws InfrastructureException when any other exception occurs
    */
   public void delete() throws InfrastructureException {
-    try (OpenShiftClient client = clientFactory.create()) {
+    try {
       // pods are removed with some delay related to stopping of containers. It is need to wait them
       List<Pod> pods =
-          client
+          clientFactory
+              .create()
               .pods()
               .inNamespace(namespace)
               .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)
@@ -381,7 +391,7 @@ public class OpenShiftPods {
       final CompletableFuture<Void> removed =
           allOf(deleteFutures.toArray(new CompletableFuture[deleteFutures.size()]));
       try {
-        removed.get();
+        removed.get(POD_REMOVAL_TIMEOUT_MIN, TimeUnit.MINUTES);
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
         throw new InfrastructureException(
@@ -389,6 +399,8 @@ public class OpenShiftPods {
       } catch (ExecutionException e) {
         throw new InfrastructureException(
             "Error occurred while waiting for pod removing. " + e.getMessage());
+      } catch (TimeoutException ex) {
+        throw new InfrastructureException("Pods removal timeout reached " + ex.getMessage());
       }
     } catch (KubernetesClientException e) {
       throw new InfrastructureException(e.getMessage(), e);
@@ -396,13 +408,22 @@ public class OpenShiftPods {
   }
 
   private CompletableFuture<Void> doDelete(String name) throws InfrastructureException {
-    try (OpenShiftClient client = clientFactory.create()) {
+    try {
       final PodResource<Pod, DoneablePod> podResource =
-          client.pods().inNamespace(namespace).withName(name);
+          clientFactory.create().pods().inNamespace(namespace).withName(name);
       final CompletableFuture<Void> deleteFuture = new CompletableFuture<>();
-      podResource.watch(new DeleteWatcher(deleteFuture));
+      final Watch watch = podResource.watch(new DeleteWatcher(deleteFuture));
+
       podResource.delete();
-      return deleteFuture;
+
+      return deleteFuture.handle(
+          (v, e) -> {
+            if (e != null) {
+              LOG.warn("Failed to remove pod {} cause {}", name, e.getMessage());
+            }
+            watch.close();
+            return null;
+          });
     } catch (KubernetesClientException ex) {
       throw new InfrastructureException(ex.getMessage(), ex);
     }

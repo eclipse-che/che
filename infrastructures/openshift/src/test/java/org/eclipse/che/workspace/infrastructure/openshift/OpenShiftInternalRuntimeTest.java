@@ -288,16 +288,6 @@ public class OpenShiftInternalRuntimeTest {
     internalRuntime.internalStop(emptyMap());
   }
 
-  @Test(expectedExceptions = InfrastructureException.class)
-  public void throwsInfrastructureExceptionWhenMachineAbnormallyStopped() throws Exception {
-    doThrow(InfrastructureException.class).when(pods).watch(any());
-
-    internalRuntime.internalStart(emptyMap());
-
-    verify(project, times(2)).cleanUp();
-    verify(project, never()).pods();
-  }
-
   @Test
   public void testRepublishContainerOutputAsMachineLogEvents() throws Exception {
     final MachineLogsPublisher logsPublisher = internalRuntime.new MachineLogsPublisher();
