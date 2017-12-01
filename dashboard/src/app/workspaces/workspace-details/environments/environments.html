@@ -103,8 +103,8 @@
   <che-button-default class="add-machine-button"
                       che-button-title="Add" name="addButton"
                       ng-disabled="workspaceEnvironmentsController.recipe.type !== 'compose' || !workspaceEnvironmentsController.recipe.content"
-                      ng-click="workspaceEnvironmentsController.showAddMachineDialog($event)"></che-button-default>
+                      ng-click="workspaceEnvironmentsController.addMachine()"></che-button-default>
   <div class="recipe-warning-container" ng-show="workspaceEnvironmentsController.recipe.type !== 'compose' || !workspaceEnvironmentsController.recipe.content">
-    Add another machine by changing the environment type to <b>compose</b>
+    Add another machine by changing the environment type to <b>compose</b> or <b>openshift</b>
   </div>
 </div>
