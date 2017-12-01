@@ -53,7 +53,7 @@ import org.testng.annotations.Test;
 public class WorkingWithJavaMySqlStackTest {
   private static final String WORKSPACE = NameGenerator.generate("java-mysql", 4);
   private static final String PROJECT_NAME = "web-java-petclinic";
-  private static final String BUIL_AND_DEPLOY_PROCESS = PROJECT_NAME + ":build and deploy";
+  private static final String BUILD_AND_DEPLOY_PROCESS = PROJECT_NAME + ":build and deploy";
 
   private static final List<String> infoDataBases =
       Arrays.asList("Database", "information_schema", "petclinic", "mysql");
@@ -115,9 +115,9 @@ public class WorkingWithJavaMySqlStackTest {
 
     // Build and deploy the web application
     projectExplorer.selectItem(PROJECT_NAME);
-    consoles.startCommandFromProcessesArea("dev-machine", RUN, BUIL_AND_DEPLOY_PROCESS);
-    consoles.waitTabNameProcessIsPresent(BUIL_AND_DEPLOY_PROCESS);
-    consoles.waitProcessInProcessConsoleTree(BUIL_AND_DEPLOY_PROCESS);
+    consoles.startCommandFromProcessesArea("dev-machine", RUN, BUILD_AND_DEPLOY_PROCESS);
+    consoles.waitTabNameProcessIsPresent(BUILD_AND_DEPLOY_PROCESS);
+    consoles.waitProcessInProcessConsoleTree(BUILD_AND_DEPLOY_PROCESS);
     try {
       consoles.waitExpectedTextIntoConsole("[INFO] Building petclinic ", ELEMENT_TIMEOUT_SEC);
     } catch (TimeoutException ex) {
@@ -137,12 +137,12 @@ public class WorkingWithJavaMySqlStackTest {
     seleniumWebDriver.switchFromDashboardIframeToIde();
 
     // Close terminal tab for 'build and deploy' process
-    consoles.waitProcessInProcessConsoleTree(BUIL_AND_DEPLOY_PROCESS);
-    consoles.waitTabNameProcessIsPresent(BUIL_AND_DEPLOY_PROCESS);
-    consoles.closeProcessByTabName(BUIL_AND_DEPLOY_PROCESS);
+    consoles.waitProcessInProcessConsoleTree(BUILD_AND_DEPLOY_PROCESS);
+    consoles.waitTabNameProcessIsPresent(BUILD_AND_DEPLOY_PROCESS);
+    consoles.closeProcessByTabName(BUILD_AND_DEPLOY_PROCESS);
     askDialog.acceptDialogWithText(MSG_CLOSE_PROCESS);
-    consoles.waitProcessIsNotPresentInProcessConsoleTree(BUIL_AND_DEPLOY_PROCESS);
-    consoles.waitTabNameProcessIsNotPresent(BUIL_AND_DEPLOY_PROCESS);
+    consoles.waitProcessIsNotPresentInProcessConsoleTree(BUILD_AND_DEPLOY_PROCESS);
+    consoles.waitTabNameProcessIsNotPresent(BUILD_AND_DEPLOY_PROCESS);
 
     // Check that tomcat is not running
     consoles.selectProcessByTabName("Terminal");
