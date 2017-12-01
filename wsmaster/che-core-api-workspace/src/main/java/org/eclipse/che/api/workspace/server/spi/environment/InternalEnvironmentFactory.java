@@ -80,9 +80,6 @@ public abstract class InternalEnvironmentFactory<T extends InternalEnvironment> 
 
     Map<String, InternalMachineConfig> machines = new HashMap<>();
     List<Warning> warnings = new ArrayList<>();
-    if (sourceEnv.getWarnings() != null) {
-      warnings.addAll(sourceEnv.getWarnings());
-    }
 
     InternalRecipe recipe = recipeRetriever.getRecipe(sourceEnv.getRecipe());
 

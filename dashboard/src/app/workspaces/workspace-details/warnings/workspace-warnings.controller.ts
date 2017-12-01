@@ -12,7 +12,7 @@
 
 
 /**
- * This class is handling the controller for the workspace (environment and runtime) warnings container.
+ * This class is handling the controller for the workspace runtime warnings container.
  * @author Ann Shumilova
  */
 export class WorkspaceWarningsController {
@@ -31,11 +31,6 @@ export class WorkspaceWarningsController {
    */
   constructor() {
     this.warnings = [];
-
-    let environment = (this.workspace && this.workspace.config && this.workspace.config.defaultEnv) ? this.workspace.config.environments[this.workspace.config.defaultEnv] : null;
-    if (environment) {
-      this.warnings = this.warnings.concat(environment.warnings);
-    }
 
     if (this.workspace && this.workspace.runtime) {
       this.warnings = this.warnings.concat(this.workspace.runtime.warnings);

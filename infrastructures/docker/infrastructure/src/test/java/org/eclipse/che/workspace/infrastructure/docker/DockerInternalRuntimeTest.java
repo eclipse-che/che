@@ -115,6 +115,7 @@ public class DockerInternalRuntimeTest {
     dockerRuntime =
         new DockerInternalRuntime(
             runtimeContext,
+            emptyList(),
             mock(ExternalIpURLRewriter.class),
             networks,
             starter,

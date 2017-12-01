@@ -39,10 +39,14 @@ public abstract class InternalRuntime<T extends RuntimeContext> implements Runti
   private final List<Warning> warnings;
   private WorkspaceStatus status;
 
-  public InternalRuntime(T context, URLRewriter urlRewriter, boolean running) {
+  public InternalRuntime(
+      T context, URLRewriter urlRewriter, List<Warning> warnings, boolean running) {
     this.context = context;
     this.urlRewriter = urlRewriter;
     this.warnings = new CopyOnWriteArrayList<>();
+    if (warnings != null) {
+      this.warnings.addAll(warnings);
+    }
     if (running) {
       status = WorkspaceStatus.RUNNING;
     }

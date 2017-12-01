@@ -30,6 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
@@ -83,8 +84,9 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
       OpenShiftBootstrapperFactory bootstrapperFactory,
       ServersCheckerFactory serverCheckerFactory,
       @Assisted OpenShiftRuntimeContext context,
-      @Assisted OpenShiftProject project) {
-    super(context, urlRewriter, false);
+      @Assisted OpenShiftProject project,
+      @Assisted List<Warning> warnings) {
+    super(context, urlRewriter, warnings, false);
     this.eventService = eventService;
     this.bootstrapperFactory = bootstrapperFactory;
     this.serverCheckerFactory = serverCheckerFactory;
