@@ -68,5 +68,8 @@ public class DockerInfraModule extends AbstractModule {
     install(new FactoryModuleBuilder().build(DockerRuntimeFactory.class));
     install(new FactoryModuleBuilder().build(DockerBootstrapperFactory.class));
     install(new FactoryModuleBuilder().build(DockerRuntimeContextFactory.class));
+    bind(
+        org.eclipse.che.workspace.infrastructure.docker.monit.DockerAbandonedResourcesCleaner
+            .class);
   }
 }

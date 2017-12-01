@@ -12,6 +12,8 @@ package org.eclipse.che.ide.api.workspace.model;
 
 import static com.google.common.base.Strings.nullToEmpty;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 
@@ -20,15 +22,17 @@ public class ServerImpl implements Server {
   private String name;
   private String url;
   private ServerStatus status;
+  private Map<String, String> attributes;
 
-  public ServerImpl(String name, String url) {
-    this(name, url, ServerStatus.UNKNOWN);
-  }
-
-  public ServerImpl(String name, String url, ServerStatus status) {
+  public ServerImpl(String name, Server server) {
     this.name = name;
-    this.url = nullToEmpty(url); // some servers doesn't have URL
-    this.status = status;
+    this.url = nullToEmpty(server.getUrl()); // some servers doesn't have URL
+    this.status = server.getStatus();
+    if (server.getAttributes() != null) {
+      this.attributes = new HashMap<>(server.getAttributes());
+    } else {
+      this.attributes = new HashMap<>();
+    }
   }
 
   public String getName() {
@@ -43,5 +47,10 @@ public class ServerImpl implements Server {
   @Override
   public ServerStatus getStatus() {
     return this.status;
+  }
+
+  @Override
+  public Map<String, String> getAttributes() {
+    return attributes;
   }
 }

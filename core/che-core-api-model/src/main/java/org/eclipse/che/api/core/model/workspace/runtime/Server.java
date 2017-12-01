@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.api.core.model.workspace.runtime;
 
+import java.util.Map;
+
 /**
  * Server Runtime exposed by URL
  *
@@ -22,4 +24,7 @@ public interface Server {
 
   /** @return the status */
   ServerStatus getStatus();
+
+  /** Returns attributes of the server with some metadata */
+  Map<String, String> getAttributes();
 }
