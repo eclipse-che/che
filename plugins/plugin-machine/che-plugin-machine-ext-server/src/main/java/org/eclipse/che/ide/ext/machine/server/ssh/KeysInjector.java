@@ -10,15 +10,27 @@
  */
 package org.eclipse.che.ide.ext.machine.server.ssh;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.ssh.server.SshManager;
+import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
+import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.infrastructure.docker.client.DockerConnector;
+import org.eclipse.che.infrastructure.docker.client.Exec;
+import org.eclipse.che.infrastructure.docker.client.LogMessage;
+import org.eclipse.che.infrastructure.docker.client.params.CreateExecParams;
+import org.eclipse.che.infrastructure.docker.client.params.StartExecParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,18 +46,13 @@ public class KeysInjector {
   private final EventService eventService;
   private final DockerConnector docker;
   private final SshManager sshManager;
-  // TODO replace with WorkspaceManager
-  //    private final CheEnvironmentEngine environmentEngine;
 
   @Inject
   public KeysInjector(
-      EventService eventService, DockerConnector dockerConnector, SshManager sshManager
-      //                        CheEnvironmentEngine environmentEngine
-      ) {
+      EventService eventService, DockerConnector dockerConnector, SshManager sshManager) {
     this.eventService = eventService;
     this.docker = dockerConnector;
     this.sshManager = sshManager;
-    //        this.environmentEngine = environmentEngine;
   }
 
   @PostConstruct
@@ -54,7 +61,60 @@ public class KeysInjector {
         new EventSubscriber<MachineStatusEvent>() {
           @Override
           public void onEvent(MachineStatusEvent event) {
+            final RuntimeIdentityDto identity = event.getIdentity();
+            final String workspaceId = identity.getWorkspaceId();
+            final String owner = identity.getOwner();
             if (event.getEventType() == MachineStatus.RUNNING) {
+              try{
+                List<SshPairImpl> sshPairs = sshManager.getPairs(owner, "machine");
+                final List<String> publicMachineKeys = sshPairs.stream()
+                    .filter(sshPair -> sshPair.getPublicKey() != null)
+                    .map(SshPairImpl::getPublicKey)
+                    .collect(Collectors.toList());
+                SshPairImpl sshWorkspacePair = null;
+                try {
+                  sshWorkspacePair = sshManager.getPair(owner, "workspace", workspaceId);
+                } catch (ServerException | NotFoundException e) {
+                  LOG.debug("No ssh key associated to the workspace", e);
+                }
+                // build list of all pairs.
+                final List<String> publicKeys;
+                if (sshWorkspacePair != null && sshWorkspacePair.getPublicKey() != null) {
+                  publicKeys = new ArrayList<>(publicMachineKeys.size() + 1);
+                  publicKeys.add(sshWorkspacePair.getPublicKey());
+                  publicKeys.addAll(publicMachineKeys);
+                } else {
+                  publicKeys = publicMachineKeys;
+                }
+
+                if (publicKeys.isEmpty()) {
+                  return;
+                }
+
+                final String containerId = "machineid"; // TODO RETRIEVE MACHINE ID
+                StringBuilder command = new StringBuilder("mkdir ~/.ssh/ -p");
+                for (String publicKey : publicKeys) {
+                  command.append("&& echo '")
+                      .append(publicKey)
+                      .append("' >> ~/.ssh/authorized_keys");
+                }
+
+                final Exec exec = docker.createExec(CreateExecParams.create(containerId,
+                    new String[] {"/bin/bash",
+                        "-c",
+                        command.toString()})
+                    .withDetach(true));
+                docker.startExec(StartExecParams.create(exec.getId()), logMessage -> {
+                  if (logMessage.getType() == LogMessage.Type.STDERR) {
+                    // TODO write log
+                  }
+                });
+              }catch (Exception ex) {
+                LOG.warn("ssh pair for machine {} not found");
+              }
+
+
+
               /*final Instance machine;
               try {
                   machine = environmentEngine.getMachine(event.getWorkspaceId(),
