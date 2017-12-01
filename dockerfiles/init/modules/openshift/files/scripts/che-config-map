@@ -1,5 +1,5 @@
-# put extra CHE server env vars here in following format:
-# KEY: value
+# To put some extra CHE server configurations just add here CHE ENV vars following format:
+# KEY: "value"
 CHE_API: ${HTTP_PROTOCOL}://che-${OPENSHIFT_NAMESPACE_URL}/api
 CHE_DEBUG_SERVER: ${CHE_DEBUG_SERVER}
 CHE_HOST: che-${OPENSHIFT_NAMESPACE_URL}
