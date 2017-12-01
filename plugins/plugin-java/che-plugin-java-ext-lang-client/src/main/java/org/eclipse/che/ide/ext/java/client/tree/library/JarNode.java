@@ -10,6 +10,11 @@
  */
 package org.eclipse.che.ide.ext.java.client.tree.library;
 
+import static org.eclipse.che.ide.ext.java.client.tree.library.EntryType.CLASS_FILE;
+import static org.eclipse.che.ide.ext.java.client.tree.library.EntryType.FILE;
+import static org.eclipse.che.ide.ext.java.client.tree.library.EntryType.FOLDER;
+import static org.eclipse.che.ide.ext.java.client.tree.library.EntryType.PACKAGE;
+
 import com.google.common.annotations.Beta;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -72,13 +77,13 @@ public class JarNode extends SyntheticNode<Jar> {
                   List<Node> nodes = new ArrayList<>();
 
                   for (JarEntry entry : entries) {
-                    if ("FOLDER".equals(entry.getEntryType())
-                        || "PACKAGE".equals(entry.getEntryType())) {
+                    if (FOLDER.name().equals(entry.getEntryType())
+                        || PACKAGE.name().equals(entry.getEntryType())) {
                       nodes.add(
                           nodeFactory.newJarFolderNode(
                               entry, getData().getId(), project, getSettings()));
-                    } else if ("FILE".equals(entry.getEntryType())
-                        || "CLASS_FILE".equals(entry.getEntryType())) {
+                    } else if (FILE.name().equals(entry.getEntryType())
+                        || CLASS_FILE.name().equals(entry.getEntryType())) {
                       nodes.add(
                           nodeFactory.newJarFileNode(
                               entry, getData().getId(), project, getSettings()));
