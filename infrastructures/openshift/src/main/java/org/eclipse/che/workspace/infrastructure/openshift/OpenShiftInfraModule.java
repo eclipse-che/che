@@ -16,7 +16,6 @@ import static org.eclipse.che.workspace.infrastructure.openshift.project.pvc.Uni
 import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.MapBinder;
-import com.google.inject.multibindings.Multibinder;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
 import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiEnvVarProvider;
@@ -43,9 +42,7 @@ public class OpenShiftInfraModule extends AbstractModule {
     factories.addBinding(OpenShiftEnvironment.TYPE).to(OpenShiftEnvironmentFactory.class);
     factories.addBinding(DockerImageEnvironment.TYPE).to(DockerImageEnvironmentFactory.class);
 
-    Multibinder<RuntimeInfrastructure> infrastructures =
-        Multibinder.newSetBinder(binder(), RuntimeInfrastructure.class);
-    infrastructures.addBinding().to(OpenShiftInfrastructure.class);
+    bind(RuntimeInfrastructure.class).to(OpenShiftInfrastructure.class);
 
     install(new FactoryModuleBuilder().build(OpenShiftRuntimeContextFactory.class));
     install(new FactoryModuleBuilder().build(OpenShiftRuntimeFactory.class));
