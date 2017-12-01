@@ -83,7 +83,7 @@ export class NavBarSelected {
         delete this.$rootScope.selectedNavBarElement;
       }
       // select item
-      if (attrs['ngHref'] === path) {
+      if (attrs['href'] === path) {
         select(element);
       }
     });

@@ -50,11 +50,14 @@ export class WorkspaceEnvironmentsController {
 
   environmentOnChange: Function;
 
+  private $q: ng.IQService;
+
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor(private $q: ng.IQService, $scope: ng.IScope, $timeout: ng.ITimeoutService, $mdDialog: ng.material.IDialogService, cheEnvironmentRegistry: CheEnvironmentRegistry) {
+  constructor($q: ng.IQService, $scope: ng.IScope, $timeout: ng.ITimeoutService, $mdDialog: ng.material.IDialogService, cheEnvironmentRegistry: CheEnvironmentRegistry) {
+    this.$q = $q;
     this.$mdDialog = $mdDialog;
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;
 
@@ -161,8 +164,11 @@ export class WorkspaceEnvironmentsController {
    * @returns {ng.IPromise<any>}
    */
   changeMachineDev(machineName: string): ng.IPromise<any> {
+    const defer = this.$q.defer();
+
     if (!machineName) {
-      return this.$q.reject('Machine name is not defined.');
+      defer.reject('Machine name is not defined.');
+      return defer.promise;
     }
 
     // remove ws-agent from machine which is the dev machine now
@@ -176,7 +182,8 @@ export class WorkspaceEnvironmentsController {
       return machine.name === machineName;
     });
     if (!machine) {
-      return this.$q.reject('Machine is not found.')
+      defer.reject('Machine is not found.');
+      return defer.promise;
     }
 
     // add ws-agent to current machine agents list
@@ -188,9 +195,9 @@ export class WorkspaceEnvironmentsController {
 
     this.doUpdateEnvironments();
     this.init();
-    /*tslist: disable*/
-    return this.$q.resolve();
-    /*tslist: enable*/
+    defer.resolve();
+
+    return defer.promise;
   }
 
   /**
@@ -288,22 +295,22 @@ export class WorkspaceEnvironmentsController {
   }
 
   /**
-   * Show dialog to add a new machine to config
-   * @param $event {MouseEvent}
+   * Shows dialog to add a new one machine in to environment.
    */
-  showAddMachineDialog($event: MouseEvent): void {
+  addMachine(): void {
     this.$mdDialog.show({
-      targetEvent: $event,
-      controller: 'AddMachineDialogController',
-      controllerAs: 'addMachineDialogController',
+      controller: 'EditMachineDialogController',
+      controllerAs: 'editMachineDialogController',
       bindToController: true,
       clickOutsideToClose: true,
       locals: {
-        environmentKey: this.environmentName,
-        environments: this.workspaceConfig.environments,
-        callbackController: this
+        environment: this.workspaceConfig.environments[this.environmentName],
+        onChange: (environment: che.IWorkspaceEnvironment) => {
+          this.workspaceConfig.environments[this.environmentName] = environment;
+          this.setEnvironments(this.workspaceConfig.environments);
+        }
       },
-      templateUrl: 'app/workspaces/workspace-details/environments/add-machine-dialog/add-machine-dialog.html'
+      templateUrl: 'app/workspaces/workspace-details/workspace-machines/edit-machine-dialog/edit-machine-dialog.html'
     });
   }
 

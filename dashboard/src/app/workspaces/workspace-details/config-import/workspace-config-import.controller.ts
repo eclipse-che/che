@@ -64,9 +64,11 @@ export class WorkspaceConfigImportController {
       onLoad: (editor: any) => {
         $timeout(() => {
           editor.refresh();
-        }, 1000);
+        }, 500);
       }
     };
+
+    this.importWorkspaceJson = angular.toJson(this.workspaceConfig);
 
     $scope.$watch(() => { return this.workspaceConfig; }, () => {
       try {
@@ -92,6 +94,10 @@ export class WorkspaceConfigImportController {
 
   configValid(): boolean {
     return this.configValidationMessages.length === 0;
+  }
+
+  workspaceConfigValidation(): che.IValidation {
+     return this.validationService.getWorkspaceConfigValidation(angular.fromJson(this.importWorkspaceJson));
   }
 
   /**

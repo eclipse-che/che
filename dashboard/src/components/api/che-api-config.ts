@@ -39,6 +39,7 @@ import {CheResourcesDistribution} from './che-resources-distribution.factory';
 import {CheTeam} from './che-team.factory';
 import {CheTeamEventsManager} from './che-team-events-manager.factory';
 import {CheInvite} from './che-invite.factory';
+import {CheRecipe} from './recipe/che-recipe.factory';
 
 export class ApiConfig {
 
@@ -49,6 +50,7 @@ export class ApiConfig {
     register.factory('cheProfile', CheProfile);
     register.factory('chePreferences', ChePreferences);
     register.factory('cheWebsocket', CheWebsocket);
+    register.factory('cheRecipe', CheRecipe);
     register.factory('cheStack', CheStack);
     register.factory('cheHttpBackendProvider', CheHttpBackendProviderFactory);
     register.factory('cheHttpBackend', CheHttpBackendFactory);

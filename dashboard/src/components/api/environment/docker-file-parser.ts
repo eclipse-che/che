@@ -15,7 +15,7 @@
  * @author Oleksii Kurinnyi
  */
 
-interface IRecipeLine {
+export interface IRecipeLine {
   instruction?: string;
   argument?: string | string[];
   comment?: string;

@@ -64,7 +64,7 @@ export class CheStack {
    * @returns {che.IStack}
    */
   getStackTemplate(): che.IStack {
-    let stack = <che.IStack>{
+    const stack = <che.IStack>{
       'name': 'New Stack',
       'description': 'New Java Stack',
       'scope': 'general',
@@ -131,11 +131,11 @@ export class CheStack {
     let updatedPromise = promise.then((stacks: Array<che.IStack>) => {
       // reset global stacks list
       this.stacks.length = 0;
-      for (let member in this.stacksById) {
-        if (this.stacksById.hasOwnProperty(member)) {
-          delete this.stacksById[member];
+      Object.keys(this.stacksById).forEach((stacksId: string) => {
+        if (this.stacksById.hasOwnProperty(stacksId)) {
+          delete this.stacksById[stacksId];
         }
-      }
+      });
       // reset global stack names list
       this.usedStackNames.length = 0;
       stacks.forEach((stack: che.IStack) => {

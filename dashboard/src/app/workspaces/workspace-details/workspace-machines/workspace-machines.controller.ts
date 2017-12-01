@@ -15,6 +15,9 @@ import {ConfirmDialogService} from '../../../../components/service/confirm-dialo
 import {CheEnvironmentRegistry} from '../../../../components/api/environment/che-environment-registry.factory';
 import {IEnvironmentManagerMachine} from '../../../../components/api/environment/environment-manager-machine';
 import {WorkspaceDetailsService} from '../workspace-details.service';
+import {CheRecipeTypes} from '../../../../components/api/recipe/che-recipe-types';
+import {CheRecipeService} from '../che-recipe.service';
+import IRecipe = che.resource.IRecipe;
 
 
 type machine = {
@@ -98,16 +101,21 @@ export class WorkspaceMachinesController {
    * Callback which is called when change DEV machine.
    */
   private onDevChange: (machineName: string) => ng.IPromise<any>;
+  /**
+   * Environment recipe service.
+   */
+  private cheRecipeService: CheRecipeService;
 
   /**
    * Default constructor that is using resource injection.
    * @ngInject for Dependency injection
    */
-  constructor($q: ng.IQService, $log: ng.ILogService, $filter: ng.IFilterService, $scope: ng.IScope, $mdDialog: ng.material.IDialogService, confirmDialogService: ConfirmDialogService, $location: ng.ILocationService, cheEnvironmentRegistry: CheEnvironmentRegistry, cheListHelperFactory: che.widget.ICheListHelperFactory, workspaceDetailsService: WorkspaceDetailsService) {
+  constructor($q: ng.IQService, $log: ng.ILogService, $filter: ng.IFilterService, $scope: ng.IScope, $mdDialog: ng.material.IDialogService, confirmDialogService: ConfirmDialogService, cheRecipeService: CheRecipeService, $location: ng.ILocationService, cheEnvironmentRegistry: CheEnvironmentRegistry, cheListHelperFactory: che.widget.ICheListHelperFactory, workspaceDetailsService: WorkspaceDetailsService) {
     this.$q = $q;
     this.$log = $log;
     this.$filter = $filter;
     this.$mdDialog = $mdDialog;
+    this.cheRecipeService = cheRecipeService;
     this.confirmDialogService = confirmDialogService;
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;
 
@@ -131,12 +139,12 @@ export class WorkspaceMachinesController {
   }
 
   /**
-   * Returns true if the recipe type is compose.
+   * Returns true if the recipe type is scalable.
    *
    * @returns {boolean}
    */
-  isCompose(): boolean {
-    return this.environment && this.environment.recipe && this.environment.recipe.type === 'compose';
+  isScalable(): boolean {
+    return this.cheRecipeService.isScalable(this.environment.recipe);
   }
 
   /**
@@ -167,14 +175,14 @@ export class WorkspaceMachinesController {
       this.machinesList = [];
     } else {
       this.machinesList = this.machines.map((machine: IEnvironmentManagerMachine) => {
-        const source: any = this.environmentManager.getSource(machine),
-          memoryLimitBytes = this.environmentManager.getMemoryLimit(machine),
-          memoryLimitGBytesWithUnit = this.$filter('changeMemoryUnit')(memoryLimitBytes, [MemoryUnit[MemoryUnit.B], MemoryUnit[MemoryUnit.GB]]);
+        const source: any = this.environmentManager.getSource(machine);
+        const memoryLimitBytes = this.environmentManager.getMemoryLimit(machine);
+        const memoryLimitGBytes = memoryLimitBytes === -1 ? 0 : this.getNumber(this.$filter('changeMemoryUnit')(memoryLimitBytes, [MemoryUnit[MemoryUnit.B], MemoryUnit[MemoryUnit.GB]]));
         return <machine>{
           image: source && source.image ? source.image : '',
           name: machine.name,
           isDev: this.environmentManager.isDev(machine),
-          memoryLimitGBytes: this.getNumber(memoryLimitGBytesWithUnit)
+          memoryLimitGBytes: memoryLimitGBytes
         };
       });
     }
@@ -277,7 +285,7 @@ export class WorkspaceMachinesController {
   }
 
   /**
-   * Show dialog to edit the mashine or add a new one machine to the environment.
+   * Shows dialog to add/edit a environment machine.
    *
    * @param machineName {string}
    */
@@ -290,7 +298,13 @@ export class WorkspaceMachinesController {
       locals: {
         machineName: machineName,
         environment: this.environment,
-        onChange: this.updateEnvironment.bind(this)
+        onChange: (environment: che.IWorkspaceEnvironment) => {
+          this.workspaceDetails.config.environments[this.workspaceDetails.config.defaultEnv] = environment;
+          this.updateData(this.workspaceDetails);
+          if (angular.isFunction(this.onChange)) {
+            this.onChange();
+          }
+        }
       },
       templateUrl: 'app/workspaces/workspace-details/workspace-machines/edit-machine-dialog/edit-machine-dialog.html'
     });
@@ -380,7 +394,11 @@ export class WorkspaceMachinesController {
    * @return {number}
    */
   getNumber(memoryLimit: string): number {
-    const [, memoryLimitNumber] = /^([^\s]+)\s+[^\s]+$/.exec(memoryLimit);
+    const regExpExecArray = /^([^\s]+)\s+[^\s]+$/.exec(memoryLimit);
+    if (!angular.isArray(regExpExecArray)) {
+      return 0;
+    }
+    const [, memoryLimitNumber] = regExpExecArray;
     return parseFloat(memoryLimitNumber);
   }
 }

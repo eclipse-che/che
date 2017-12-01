@@ -17,6 +17,7 @@ import {CheFactoryTemplate} from './che-factory-template.factory';
 import {ChePreferences} from './che-preferences.factory';
 import {CheProjectTemplate} from './che-project-template.factory';
 import {CheService} from './che-service.factory';
+import {CheRecipe} from './recipe/che-recipe.factory';
 import {CheStack} from './che-stack.factory';
 import {CheOAuthProvider} from './che-o-auth-provider.factory';
 import {CheAgent} from './che-agent.factory';
@@ -37,6 +38,7 @@ export class CheAPI {
   private cheFactory: CheFactory;
   private cheFactoryTemplate: CheFactoryTemplate;
   private cheService: CheService;
+  private cheRecipe: CheRecipe;
   private cheStack: CheStack;
   private cheOAuthProvider: CheOAuthProvider;
   private cheAgent: CheAgent;
@@ -51,8 +53,8 @@ export class CheAPI {
    */
   constructor(cheWorkspace: CheWorkspace, cheFactory: CheFactory, cheFactoryTemplate: CheFactoryTemplate, cheProfile: CheProfile,
               chePreferences: ChePreferences, cheProjectTemplate: CheProjectTemplate, cheService: CheService,
-              cheStack: CheStack, cheOAuthProvider: CheOAuthProvider, cheAgent: CheAgent, cheSsh: CheSsh,
-              cheUser: CheUser, chePermissions: che.api.IChePermissions, cheOrganization: che.api.ICheOrganization) {
+              cheRecipe: CheRecipe, cheStack: CheStack, cheOAuthProvider: CheOAuthProvider,
+              cheAgent: CheAgent, cheSsh: CheSsh, cheUser: CheUser, chePermissions: che.api.IChePermissions, cheOrganization: che.api.ICheOrganization) {
     this.cheWorkspace = cheWorkspace;
     this.cheProfile = cheProfile;
     this.cheFactory = cheFactory;
@@ -60,6 +62,7 @@ export class CheAPI {
     this.chePreferences = chePreferences;
     this.cheProjectTemplate = cheProjectTemplate;
     this.cheService = cheService;
+    this.cheRecipe = cheRecipe;
     this.cheStack = cheStack;
     this.cheOAuthProvider = cheOAuthProvider;
     this.cheAgent = cheAgent;
@@ -115,6 +118,14 @@ export class CheAPI {
    */
   getService(): CheService {
     return this.cheService;
+  }
+
+  /**
+   * The Che Recipe API
+   * @returns {CheRecipe}
+   */
+  getRecipe(): CheRecipe {
+    return this.cheRecipe;
   }
 
   /**

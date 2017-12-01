@@ -161,7 +161,13 @@ declare namespace che {
       getValues(): any[];
     }
 
-  }
+    export interface ICheRecipeTypes {
+      DOCKERFILE: string;
+      DOCKERIMAGE: string;
+      COMPOSE: string;
+      OPENSHIFT: string;
+      getValues(): Array<string>;
+    }
 
   export namespace service {
 
@@ -309,6 +315,7 @@ declare namespace che {
   }
 
   export interface IRecipe {
+    id?: string;
     content?: string;
     location?: string;
     contentType?: string;
