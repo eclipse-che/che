@@ -139,8 +139,8 @@ run_ocp() {
 }
 
 deploy_che_to_ocp() {
-    #Repull init image only if DEFAULT_IMAGE_PULL_POLICY is set to Always
-    if [ $DEFAULT_IMAGE_PULL_POLICY == "Always" ]; then
+    #Repull init image only if IMAGE_PULL_POLICY is set to Always
+    if [ $IMAGE_PULL_POLICY == "Always" ]; then
         docker pull "$IMAGE_INIT"
     fi
     docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" eclipse/che-cli:${CHE_IMAGE_TAG} destroy --quiet --skip:pull --skip:nightly
