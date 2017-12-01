@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
+import static java.util.Arrays.asList;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.COMMANDS;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
@@ -39,7 +40,6 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElem
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
@@ -104,12 +104,13 @@ public class ProjectExplorer {
   }
 
   public interface PROJECT_EXPLORER_CONTEXT_MENU_MAVEN {
-    String REIMPORT = "contextMenu/Maven/Reimport";
+    String REIMPORT = "gwt-debug-contextMenu/Maven/reimportMavenDependenciesAction";
   }
 
   public interface FileWatcherExcludeOperations {
-    String ADD_TO_FILE_WATCHER_EXCLUDES = "contextMenu/Add to File Watcher excludes";
-    String REMOVE_FROM_FILE_WATCHER_EXCLUDES = "contextMenu/Remove from File Watcher excludes";
+    String ADD_TO_FILE_WATCHER_EXCLUDES = "gwt-debug-contextMenu/Add to File Watcher excludes";
+    String REMOVE_FROM_FILE_WATCHER_EXCLUDES =
+        "gwt-debug-contextMenu/Remove from File Watcher excludes";
   }
 
   protected interface Locators {
@@ -166,7 +167,7 @@ public class ProjectExplorer {
   /**
    * @param path path to item in Project Explorer
    * @param timeout timeout in seconds
-   * @return finded WebElement
+   * @return found WebElement
    */
   private WebElement getProjectExplorerItem(String path, int timeout) {
     return new WebDriverWait(seleniumWebDriver, timeout)
@@ -241,6 +242,7 @@ public class ProjectExplorer {
    * @param path
    */
   public void waitItem(String path) {
+    loader.waitOnClosed();
     new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
         .until(visibilityOfElementLocated(By.xpath(String.format("//div[@path='/%s']/div", path))));
   }
@@ -354,6 +356,7 @@ public class ProjectExplorer {
    * @param item
    */
   public WebElement waitItemInVisibleArea(String item) {
+    loader.waitOnClosed();
     return loadPageTimeout.until(
         visibilityOfElementLocated(
             By.xpath(String.format("//div[@id='gwt-debug-projectTree']//div[text()='%s']", item))));
@@ -367,6 +370,7 @@ public class ProjectExplorer {
    * @param item
    */
   public WebElement waitItemInVisibleArea(String item, final int timeOut) {
+    loader.waitOnClosed();
     return new WebDriverWait(seleniumWebDriver, timeOut)
         .until(visibilityOfElementLocated(By.name(item)));
   }
@@ -389,6 +393,7 @@ public class ProjectExplorer {
    * @param path full path to project item
    */
   public void selectItem(String path) {
+    waitItem(path);
     try {
       getProjectExplorerItem(path, EXPECTED_MESS_IN_CONSOLE_SEC).click();
     }
@@ -399,6 +404,7 @@ public class ProjectExplorer {
 
       waitProjectExplorer();
       clickOnRefreshTreeButton();
+      waitItem(path);
       getProjectExplorerItem(path, EXPECTED_MESS_IN_CONSOLE_SEC).click();
     }
   }
@@ -413,6 +419,7 @@ public class ProjectExplorer {
    *     tree
    */
   public void selectItem(String path, int timeoutForWaitingItem) {
+    waitItem(path);
     try {
       getProjectExplorerItem(path, timeoutForWaitingItem).click();
     }
@@ -423,6 +430,7 @@ public class ProjectExplorer {
 
       waitProjectExplorer();
       clickOnRefreshTreeButton();
+      waitItem(path);
       getProjectExplorerItem(path, EXPECTED_MESS_IN_CONSOLE_SEC).click();
     }
   }
@@ -490,13 +498,10 @@ public class ProjectExplorer {
    */
   public void openItemByPath(String path) {
     Actions action = actionsFactory.createAction(seleniumWebDriver);
-    waitItem(path);
     selectItem(path);
     waitItemIsSelected(path);
 
     try {
-      getProjectExplorerItem(path).click();
-      waitItemIsSelected(path);
       action.moveToElement(getProjectExplorerItem(path)).perform();
       action.doubleClick().perform();
     }
@@ -506,8 +511,7 @@ public class ProjectExplorer {
       LOG.debug(ex.getLocalizedMessage(), ex);
 
       clickOnRefreshTreeButton();
-      waitItem(path);
-      getProjectExplorerItem(path).click();
+      selectItem(path);
       waitItemIsSelected(path);
       action.moveToElement(getProjectExplorerItem(path)).perform();
       action.doubleClick().perform();
@@ -617,11 +621,10 @@ public class ProjectExplorer {
     loadPageTimeout
         .until(
             visibilityOfElementLocated(
-                By.xpath(String.format("//tr[@item-enabled='true']//nobr[@id='%s']", item))))
+                By.xpath(String.format("//tr[@item-enabled='true' and @id='%s']", item))))
         .click();
   }
 
-  // tr[@item-enabled='true' and @id='%s']
   /**
    * Click on item in 'New' menu
    *
@@ -631,7 +634,7 @@ public class ProjectExplorer {
     loadPageTimeout
         .until(
             visibilityOfElementLocated(
-                By.xpath(String.format("//tr[@item-enabled='true']//nobr[@id='%s']", item))))
+                By.xpath(String.format("//tr[@item-enabled='true' and @id='%s']", item))))
         .click();
 
     waitContextMenuPopUpClosed();
@@ -695,6 +698,7 @@ public class ProjectExplorer {
 
   /** launch the 'Refactor Rename' form by keyboard after select a package or Java class */
   public void launchRefactorByKeyboard() {
+    loader.waitOnClosed();
     actionsFactory
         .createAction(seleniumWebDriver)
         .keyDown(SHIFT)
@@ -705,6 +709,7 @@ public class ProjectExplorer {
 
   /** launch the 'Refactor Move' form by keyboard after select a package or Java class */
   public void launchRefactorMoveByKeyboard() {
+    loader.waitOnClosed();
     actionsFactory.createAction(seleniumWebDriver).sendKeys(F6).perform();
   }
 
@@ -727,7 +732,7 @@ public class ProjectExplorer {
    * @return list of items
    */
   public List<String> getNamesOfAllOpenItems() {
-    return Arrays.asList(projectExplorerTree.getText().split("\n"));
+    return asList(projectExplorerTree.getText().split("\n"));
   }
 
   /** perform right arrow key pressed in a browser */
@@ -984,6 +989,6 @@ public class ProjectExplorer {
   }
 
   public void waitAllItemsIsSelected(List<String> paths) {
-    paths.forEach(path -> waitItemIsSelected(path));
+    paths.forEach(this::waitItemIsSelected);
   }
 }
