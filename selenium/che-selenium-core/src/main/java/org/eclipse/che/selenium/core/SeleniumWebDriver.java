@@ -54,6 +54,7 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class SeleniumWebDriver
     implements Closeable, WebDriver, JavascriptExecutor, TakesScreenshot, HasInputDevices {
+
   private static final Logger LOG = LoggerFactory.getLogger(SeleniumWebDriver.class);
   private static final int MAX_ATTEMPTS = 5;
   private static final int DELAY_IN_SECONDS = 5;
@@ -226,7 +227,6 @@ public class SeleniumWebDriver
    * @param webDriverOfficialNotes address of official page with Google driver info
    * @return string with supported version range (for example, "36-40"), or null if version info
    *     doesn't found inside the official notes.
-   * @throws IOException
    */
   @Nullable
   private String readSupportedVersionInfoForGoogleDriver(URL webDriverOfficialNotes)
@@ -267,6 +267,13 @@ public class SeleniumWebDriver
     RemoteWebDriver driver = new RemoteWebDriver(webDriverUrl, capability);
     driver.manage().window().setSize(new Dimension(1920, 1080));
 
+    LOG.info(
+        format(
+            "Web driver (id='%s') window size = '%sx%s'",
+            driver.getSessionId(),
+            driver.manage().window().getSize().width,
+            driver.manage().window().getSize().height));
+
     return driver;
   }
 
@@ -283,8 +290,6 @@ public class SeleniumWebDriver
 
   /**
    * calculate name of workspace from browser url cut symbols from end of slash symbol ("/") to end
-   *
-   * @return
    */
   public String getWorkspaceNameFromBrowserUrl() {
     String currentUrl = getCurrentUrl();
@@ -294,8 +299,6 @@ public class SeleniumWebDriver
   /**
    * switch to the next browser window (this means that if opened 2 windows, and we are in the
    * window 1, we will be switched into the window 2 )
-   *
-   * @param currentWindowHandler
    */
   public void switchToNoneCurrentWindow(String currentWindowHandler) {
     waitOpenedSomeWin();
