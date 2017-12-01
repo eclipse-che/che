@@ -25,10 +25,9 @@ set -e
 # helper functions
 # ----------------
 
-# append_che_config_map allows to append content after matching line
-# this is needed to append content of yaml files
-# first arg is mathing string, second is a path to the file with parameters in KV format which will be inserted after match
-append_che_config_map() {
+# inject_che_config injects che configuration in ENV format in deploy config
+# first arg is a marker string, second is a path to the file with parameters in KV format which will be inserted after marker
+inject_che_config() {
     while IFS= read -r line
     do
       printf '%s\n' "$line"
@@ -36,7 +35,12 @@ append_che_config_map() {
           while read l; do
             #ignore comments and empty lines
             if [[ "$l" != "#"* ]] && [[ ! -z "$l" ]]; then
-                printf '%s\n' "    $l"
+                # properly extract key and value from config map file
+                KEY=$(echo $l | cut -d ' ' -f1 | cut -d ':' -f1)
+                VALUE=$(eval echo $l | cut -d ':' -f2- | cut -d ' ' -f2-)
+                # put key and value in proper format in to a yaml file after marker line
+                printf '%s\n' "          - name: $KEY"
+                printf '%s\n' "            value: \"$VALUE\""
             fi
           done <$2
       fi
@@ -385,31 +389,12 @@ echo "[CHE] Deploying Che on ${OPENSHIFT_FLAVOR} (image ${CHE_IMAGE})"
 
 DEFAULT_CHE_DEPLOYMENT_FILE_PATH=./che-openshift.yml
 CHE_DEPLOYMENT_FILE_PATH=${CHE_DEPLOYMENT_FILE_PATH:-${DEFAULT_CHE_DEPLOYMENT_FILE_PATH}}
-DEFAULT_CHE_EXTRA_CONFIG_MAP_FILE_PATH="$(pwd)/che-extra-config-map"
-CHE_EXTRA_CONFIG_MAP_FILE_PATH=${CHE_EXTRA_CONFIG_MAP_FILE_PATH:-${DEFAULT_CHE_EXTRA_CONFIG_MAP_FILE_PATH}}
+DEFAULT_CHE_CONFIG_MAP_FILE_PATH="$(pwd)/che-config-map"
+CHE_CONFIG_MAP_FILE_PATH=${CHE_CONFIG_MAP_FILE_PATH:-${DEFAULT_CHE_CONFIG_MAP_FILE_PATH}}
 cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     sed "s/          image:.*/          image: \"${CHE_IMAGE_SANITIZED}\"/" | \
     sed "s/          imagePullPolicy:.*/          imagePullPolicy: \"${IMAGE_PULL_POLICY}\"/" | \
-    sed "s|    CHE_KEYCLOAK_OSO_ENDPOINT:.*|    CHE_KEYCLOAK_OSO_ENDPOINT: \"${CHE_KEYCLOAK_OSO_ENDPOINT}\"|" | \
-    sed "s|    CHE_KEYCLOAK_GITHUB_ENDPOINT:.*|    CHE_KEYCLOAK_GITHUB_ENDPOINT: \"${KEYCLOAK_GITHUB_ENDPOINT}\"|" | \
-    sed "s/    CHE_PREDEFINED_STACKS_RELOAD__ON__START:.*/    CHE_PREDEFINED_STACKS_RELOAD__ON__START: \"${CHE_PREDEFINED_STACKS_RELOAD}\"/" | \
-    sed "s|    CHE_INFRA_OPENSHIFT_PROJECT:.*|    CHE_INFRA_OPENSHIFT_PROJECT: \"${CHE_INFRA_OPENSHIFT_PROJECT}\"|" | \
-    sed "s|    CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL:.*|    CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL: ${HTTP_PROTOCOL}://che-${OPENSHIFT_NAMESPACE_URL}/agent-binaries/linux_amd64/bootstrapper/bootstrapper|" | \
-    sed "s|    CHE_WEBSOCKET_ENDPOINT:.*|    CHE_WEBSOCKET_ENDPOINT: ${WS_PROTOCOL}://che-${OPENSHIFT_NAMESPACE_URL}/api/websocket|" | \
-    sed "s/    CHE_MULTIUSER:.*/    CHE_MULTIUSER: \"${CHE_MULTIUSER}\"/" | \
-    sed "s|    CHE_HOST:.*|    CHE_HOST: \"che-${OPENSHIFT_NAMESPACE_URL}\"|" | \
-    sed "s|    CHE_API:.*|    CHE_API: ${HTTP_PROTOCOL}://che-${OPENSHIFT_NAMESPACE_URL}/api|" | \
-    sed "s|    CHE_INFRA_OPENSHIFT_PVC_STRATEGY:.*|    CHE_INFRA_OPENSHIFT_PVC_STRATEGY: \"${CHE_INFRA_OPENSHIFT_PVC_STRATEGY}\"|" | \
-    sed "s|    CHE_KEYCLOAK_AUTH__SERVER__URL:.*|    CHE_KEYCLOAK_AUTH__SERVER__URL: \"${CHE_KEYCLOAK_AUTH__SERVER__URL}\"|" | \
-    sed "s|    CHE_KEYCLOAK_REALM:.*|    CHE_KEYCLOAK_REALM: \"${CHE_KEYCLOAK_REALM}\"|" | \
-    sed "s|    CHE_KEYCLOAK_CLIENT__ID:.*|    CHE_KEYCLOAK_CLIENT__ID: \"${CHE_KEYCLOAK_CLIENT__ID}\"|" | \
-    append_che_config_map "#CHE_MASTER_PROPS" "${CHE_EXTRA_CONFIG_MAP_FILE_PATH}" | \
-    sed "s/    CHE_DEBUG_SERVER:.*/    CHE_DEBUG_SERVER: \"${CHE_DEBUG_SERVER}\"/" | \
-    if [ "${CHE_INFRA_OPENSHIFT_OAUTH__TOKEN+x}" ]; then sed "s|    CHE_INFRA_OPENSHIFT_OAUTH__TOKEN:.*|    CHE_INFRA_OPENSHIFT_OAUTH__TOKEN: \"${CHE_INFRA_OPENSHIFT_OAUTH__TOKEN}\"|"; else cat -;  fi | \
-    if [ "${CHE_INFRA_OPENSHIFT_USERNAME+x}" ]; then sed "s|    CHE_INFRA_OPENSHIFT_USERNAME:.*|    CHE_INFRA_OPENSHIFT_USERNAME: \"${CHE_INFRA_OPENSHIFT_USERNAME}\"|"; else cat -;  fi | \
-    if [ "${CHE_INFRA_OPENSHIFT_PASSWORD+x}" ]; then sed "s|    CHE_INFRA_OPENSHIFT_PASSWORD:.*|    CHE_INFRA_OPENSHIFT_PASSWORD: \"${CHE_INFRA_OPENSHIFT_PASSWORD}\"|"; else cat -;  fi | \
-    sed "s/    CHE_LOG_LEVEL:.*/    CHE_LOG_LEVEL: \"${CHE_LOG_LEVEL}\"/" | \
-    sed "s/    CHE_INFRA_OPENSHIFT_TLS__ENABLED:.*/    CHE_INFRA_OPENSHIFT_TLS__ENABLED: \"${ENABLE_SSL}\"/" | \
+    inject_che_config "#CHE_MASTER_CONFIG" "${CHE_CONFIG_MAP_FILE_PATH}" | \
     if [ "${ENABLE_SSL}" == "false" ]; then grep -v -e "tls:" -e "insecureEdgeTerminationPolicy: Redirect" -e "termination: edge" ; else cat -; fi | \
     oc apply --force=true -f -
 echo
