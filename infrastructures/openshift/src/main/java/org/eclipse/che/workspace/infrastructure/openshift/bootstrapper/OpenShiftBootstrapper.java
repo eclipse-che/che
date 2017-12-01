@@ -38,6 +38,7 @@ public class OpenShiftBootstrapper extends AbstractBootstrapper {
   private static final String BOOTSTRAPPER_BASE_DIR = "/tmp/";
   private static final String BOOTSTRAPPER_DIR = BOOTSTRAPPER_BASE_DIR + "bootstrapper/";
   private static final String BOOTSTRAPPER_FILE = "bootstrapper";
+  private static final String BOOTSTRAPPER_LOG_FILE = "bootstrapper.log";
   private static final String CONFIG_FILE = "config.json";
 
   private final RuntimeIdentity runtimeIdentity;
@@ -106,7 +107,10 @@ public class OpenShiftBootstrapper extends AbstractBootstrapper {
             + CONFIG_FILE
             // redirects command output and makes the bootstrapping process detached,
             // to avoid the holding of the socket connection for exec watcher.
-            + " &>/dev/null &");
+            + " &>"
+            + BOOTSTRAPPER_DIR
+            + BOOTSTRAPPER_LOG_FILE
+            + " &");
   }
 
   private void injectBootstrapper() throws InfrastructureException {
