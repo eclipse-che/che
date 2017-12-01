@@ -26,7 +26,7 @@ public interface SshKeyUploader {
    * @throws IOException if an i/o error occurs
    * @throws UnauthorizedException if user is not authorized to access SSH key storage
    */
-  void uploadKey(String publicKey) throws IOException, UnauthorizedException;
+  void uploadKey(String publicKey, String oauthToken) throws IOException, UnauthorizedException;
 
   /**
    * Check if specified url matched to use current upload provider.

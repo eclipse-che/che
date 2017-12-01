@@ -33,13 +33,13 @@ import org.eclipse.che.plugin.github.shared.GitHubRepositoryList;
 import org.eclipse.che.plugin.github.shared.GitHubUser;
 
 /**
- * Implementation for {@link GitHubClientService}.
+ * Implementation for {@link GitHubServiceClient}.
  *
  * @author Oksana Vereshchaka
  * @author Stéphane Daviet
  */
 @Singleton
-public class GitHubClientServiceImpl implements GitHubClientService {
+public class GitHubServiceClientImpl implements GitHubServiceClient {
   private static final String LIST = "/list";
   private static final String LIST_ACCOUNT = "/list/account";
   private static final String LIST_ORG = "/list/org";
@@ -63,7 +63,7 @@ public class GitHubClientServiceImpl implements GitHubClientService {
   private final DtoUnmarshallerFactory dtoUnmarshallerFactory;
 
   @Inject
-  protected GitHubClientServiceImpl(
+  protected GitHubServiceClientImpl(
       LoaderFactory loaderFactory,
       AsyncRequestFactory asyncRequestFactory,
       AppContext appContext,
@@ -225,9 +225,13 @@ public class GitHubClientServiceImpl implements GitHubClientService {
 
   /** {@inheritDoc} */
   @Override
-  public void updatePublicKey(@NotNull AsyncRequestCallback<Void> callback) {
+  public void updatePublicKey(String oauthToken, @NotNull AsyncRequestCallback<Void> callback) {
     String url = baseUrl() + SSH_GEN;
-    asyncRequestFactory.createPostRequest(url, null).loader(loader).send(callback);
+    asyncRequestFactory
+        .createPostRequest(url, null)
+        .header("X-Oauth-Token", oauthToken)
+        .loader(loader)
+        .send(callback);
   }
 
   @Override

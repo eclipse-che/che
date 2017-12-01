@@ -16,12 +16,15 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.eclipse.che.api.auth.shared.dto.OAuthToken;
 import org.eclipse.che.ide.api.ProductInfoDataProvider;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.auth.OAuthServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.commons.exception.UnauthorizedException;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
+import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.dialogs.CancelCallback;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmCallback;
@@ -39,7 +42,7 @@ import org.eclipse.che.security.oauth.SecurityTokenProvider;
 @Singleton
 public class GitHubSshKeyUploader implements SshKeyUploader, OAuthCallback {
 
-  private final GitHubClientService gitHubService;
+  private final GitHubServiceClient gitHubService;
   private final String baseUrl;
   private final GitHubLocalizationConstant constant;
   private final NotificationManager notificationManager;
@@ -47,19 +50,23 @@ public class GitHubSshKeyUploader implements SshKeyUploader, OAuthCallback {
   private final DialogFactory dialogFactory;
   private final AppContext appContext;
   private final SecurityTokenProvider securityTokenProvider;
+  private final OAuthServiceClient oAuthServiceClient;
+  private final DtoUnmarshallerFactory unmarshallerFactory;
 
   private AsyncCallback<Void> callback;
   private String userId;
 
   @Inject
   public GitHubSshKeyUploader(
-      GitHubClientService gitHubService,
+      GitHubServiceClient gitHubService,
       GitHubLocalizationConstant constant,
       NotificationManager notificationManager,
       ProductInfoDataProvider productInfoDataProvider,
       DialogFactory dialogFactory,
       AppContext appContext,
-      SecurityTokenProvider securityTokenProvider) {
+      SecurityTokenProvider securityTokenProvider,
+      OAuthServiceClient oAuthServiceClient,
+      DtoUnmarshallerFactory unmarshallerFactory) {
     this.gitHubService = gitHubService;
     this.baseUrl = appContext.getMasterApiEndpoint();
     this.constant = constant;
@@ -68,6 +75,8 @@ public class GitHubSshKeyUploader implements SshKeyUploader, OAuthCallback {
     this.dialogFactory = dialogFactory;
     this.appContext = appContext;
     this.securityTokenProvider = securityTokenProvider;
+    this.oAuthServiceClient = oAuthServiceClient;
+    this.unmarshallerFactory = unmarshallerFactory;
   }
 
   /** {@inheritDoc} */
@@ -76,21 +85,35 @@ public class GitHubSshKeyUploader implements SshKeyUploader, OAuthCallback {
     this.callback = callback;
     this.userId = userId;
 
-    gitHubService.updatePublicKey(
-        new AsyncRequestCallback<Void>() {
+    oAuthServiceClient.getToken(
+        "github",
+        new AsyncRequestCallback<OAuthToken>(
+            unmarshallerFactory.newUnmarshaller(OAuthToken.class)) {
           @Override
-          protected void onSuccess(Void o) {
-            callback.onSuccess(o);
+          protected void onSuccess(OAuthToken result) {
+            gitHubService.updatePublicKey(
+                result.getToken(),
+                new AsyncRequestCallback<Void>() {
+                  @Override
+                  protected void onSuccess(Void o) {
+                    callback.onSuccess(o);
+                  }
+
+                  @Override
+                  protected void onFailure(Throwable e) {
+                    if (e instanceof UnauthorizedException) {
+                      oAuthLoginStart();
+                      return;
+                    }
+                    callback.onFailure(e);
+                  }
+                });
           }
 
           @Override
-          protected void onFailure(Throwable e) {
-            if (e instanceof UnauthorizedException) {
-              oAuthLoginStart();
-              return;
-            }
-
-            callback.onFailure(e);
+          protected void onFailure(Throwable exception) {
+            oAuthLoginStart();
+            return;
           }
         });
   }

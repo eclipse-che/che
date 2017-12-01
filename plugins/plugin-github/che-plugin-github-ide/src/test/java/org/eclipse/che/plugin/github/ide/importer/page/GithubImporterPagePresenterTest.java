@@ -51,8 +51,8 @@ import org.eclipse.che.ide.commons.exception.UnauthorizedException;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.plugin.github.ide.GitHubClientService;
 import org.eclipse.che.plugin.github.ide.GitHubLocalizationConstant;
+import org.eclipse.che.plugin.github.ide.GitHubServiceClient;
 import org.eclipse.che.plugin.github.ide.load.ProjectData;
 import org.eclipse.che.plugin.github.shared.GitHubRepository;
 import org.eclipse.che.plugin.github.shared.GitHubUser;
@@ -84,7 +84,7 @@ public class GithubImporterPagePresenterTest {
   @Mock private Wizard.UpdateDelegate updateDelegate;
   @Mock private DtoFactory dtoFactory;
   @Mock private GithubImporterPageView view;
-  @Mock private GitHubClientService gitHubClientService;
+  @Mock private GitHubServiceClient gitHubClientService;
   @Mock private DtoUnmarshallerFactory dtoUnmarshallerFactory;
   @Mock private NotificationManager notificationManager;
   @Mock private GitHubLocalizationConstant locale;

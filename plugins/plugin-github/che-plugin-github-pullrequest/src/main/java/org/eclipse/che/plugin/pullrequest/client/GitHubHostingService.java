@@ -29,7 +29,7 @@ import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.plugin.github.ide.GitHubClientService;
+import org.eclipse.che.plugin.github.ide.GitHubServiceClient;
 import org.eclipse.che.plugin.github.shared.GitHubPullRequest;
 import org.eclipse.che.plugin.github.shared.GitHubPullRequestCreationInput;
 import org.eclipse.che.plugin.github.shared.GitHubPullRequestList;
@@ -71,7 +71,7 @@ public class GitHubHostingService implements VcsHostingService {
 
   private final AppContext appContext;
   private final DtoFactory dtoFactory;
-  private final GitHubClientService gitHubClientService;
+  private final GitHubServiceClient gitHubClientService;
   private final HostingServiceTemplates templates;
   private final String baseUrl;
   private final SecurityTokenProvider securityTokenProvider;
@@ -80,7 +80,7 @@ public class GitHubHostingService implements VcsHostingService {
   public GitHubHostingService(
       @NotNull final AppContext appContext,
       @NotNull final DtoFactory dtoFactory,
-      @NotNull final GitHubClientService gitHubClientService,
+      @NotNull final GitHubServiceClient gitHubClientService,
       @NotNull final GitHubTemplates templates,
       SecurityTokenProvider securityTokenProvider) {
     this.appContext = appContext;

@@ -38,8 +38,8 @@ import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
 import org.eclipse.che.ide.commons.exception.UnauthorizedException;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.NameUtils;
-import org.eclipse.che.plugin.github.ide.GitHubClientService;
 import org.eclipse.che.plugin.github.ide.GitHubLocalizationConstant;
+import org.eclipse.che.plugin.github.ide.GitHubServiceClient;
 import org.eclipse.che.plugin.github.ide.load.ProjectData;
 import org.eclipse.che.plugin.github.shared.GitHubRepository;
 import org.eclipse.che.plugin.github.shared.GitHubUser;
@@ -65,7 +65,7 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<MutableProje
   private static final RegExp WHITE_SPACE = RegExp.compile("^\\s");
 
   private final DtoFactory dtoFactory;
-  private GitHubClientService gitHubClientService;
+  private GitHubServiceClient gitHubClientService;
   private Map<String, List<GitHubRepository>> repositories;
   private GitHubLocalizationConstant locale;
   private GithubImporterPageView view;
@@ -79,7 +79,7 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<MutableProje
   public GithubImporterPagePresenter(
       GithubImporterPageView view,
       OAuth2AuthenticatorRegistry gitHubAuthenticatorRegistry,
-      GitHubClientService gitHubClientService,
+      GitHubServiceClient gitHubClientService,
       DtoFactory dtoFactory,
       AppContext appContext,
       GitHubLocalizationConstant locale) {

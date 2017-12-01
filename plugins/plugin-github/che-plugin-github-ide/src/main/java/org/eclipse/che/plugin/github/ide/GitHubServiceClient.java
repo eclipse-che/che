@@ -30,7 +30,7 @@ import org.eclipse.che.plugin.github.shared.GitHubUser;
  * @author Oksana Vereshchaka
  * @author Kevin Pollet
  */
-public interface GitHubClientService {
+public interface GitHubServiceClient {
 
   /**
    * Get given repository information.
@@ -168,9 +168,10 @@ public interface GitHubClientService {
   /**
    * Generate and upload new public key if not exist on github.com.
    *
+   * @param oauthToken OAuth authorization token
    * @param callback callback called when operation is done.
    */
-  void updatePublicKey(@NotNull AsyncRequestCallback<Void> callback);
+  void updatePublicKey(String oauthToken, @NotNull AsyncRequestCallback<Void> callback);
 
   /**
    * Updates github pull request
