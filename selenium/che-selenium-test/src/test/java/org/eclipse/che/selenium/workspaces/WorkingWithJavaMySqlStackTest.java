@@ -11,10 +11,12 @@
 package org.eclipse.che.selenium.workspaces;
 
 import static org.eclipse.che.selenium.core.constant.TestBuildConstants.BUILD_SUCCESS;
+import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA_MYSQL;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.pageobject.ProjectExplorer.CommandsGoal.COMMON;
-import static org.eclipse.che.selenium.pageobject.ProjectExplorer.CommandsGoal.RUN;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
 import static org.openqa.selenium.Keys.ENTER;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
@@ -25,12 +27,9 @@ import java.util.List;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.constant.TestStacksConstants;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.AskDialog;
-import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
-import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
@@ -48,20 +47,17 @@ import org.testng.annotations.Test;
 /** @author Aleksandr Shmaraev */
 public class WorkingWithJavaMySqlStackTest {
   private static final String WORKSPACE = NameGenerator.generate("java-mysql", 4);
-  private static final String PROJECT_NAME = NameGenerator.generate("project", 4);
-  private static final String PROCESS_NAME = PROJECT_NAME + ":build and deploy";
+  private static final String PROJECT_NAME = "web-java-petclinic";
+  private static final String BUIL_AND_DEPLOY_PROCESS = PROJECT_NAME + ":build and deploy";
 
   private static final List<String> infoDataBases =
       Arrays.asList("Database", "information_schema", "petclinic", "mysql");
   private static final String MSG_CLOSE_PROCESS =
-      "The process "
-          + PROJECT_NAME
-          + ":build and deploy will be terminated after closing console. Do you want to continue?";
-
-  private String currentWindow;
+      String.format(
+          "The process %s:build and deploy will be terminated after closing console. Do you want to continue?",
+          PROJECT_NAME);
 
   @Inject private TestUser defaultTestUser;
-  @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Loader loader;
   @Inject private Consoles consoles;
@@ -71,7 +67,6 @@ public class WorkingWithJavaMySqlStackTest {
   @Inject private Dashboard dashboard;
   @Inject private WorkspaceDetails workspaceDetails;
   @Inject private AskDialog askDialog;
-  @Inject private CodenvyEditor editor;
   @Inject private MachineTerminal terminal;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
@@ -84,78 +79,61 @@ public class WorkingWithJavaMySqlStackTest {
 
   @Test
   public void checkJavaMySqlAndRunApp() {
-    // create workspace and project
+    String currentWindow;
+
+    // Create a workspace from the Java-MySql stack with the web-java-petclinic project
     dashboard.open();
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
     dashboard.waitToolbarTitleName("Workspaces");
     workspaces.clickOnNewWorkspaceBtn();
     createWorkspace.waitToolbar();
-    loader.waitOnClosed();
-    createWorkspace.selectStack(TestStacksConstants.JAVA_MYSQL.getId());
+    createWorkspace.selectStack(JAVA_MYSQL.getId());
     createWorkspace.typeWorkspaceName(WORKSPACE);
     projectSourcePage.clickOnAddOrImportProjectButton();
     projectSourcePage.selectSample(PROJECT_NAME);
     projectSourcePage.clickOnAddProjectButton();
     createWorkspace.clickOnCreateWorkspaceButton();
-    loader.waitOnClosed();
-    seleniumWebDriver.switchFromDashboardIframeToIde(60);
 
-    // expand the project
+    seleniumWebDriver.switchFromDashboardIframeToIde(LOADER_TIMEOUT_SEC);
     currentWindow = seleniumWebDriver.getWindowHandle();
-    loader.waitOnClosed();
     projectExplorer.waitProjectExplorer();
-    projectExplorer.waitItem(PROJECT_NAME, 600);
-    loader.waitOnClosed();
+    projectExplorer.waitItem(PROJECT_NAME, APPLICATION_START_TIMEOUT_SEC);
     projectExplorer.selectItem(PROJECT_NAME);
-    projectExplorer.expandPathInProjectExplorer(
-        PROJECT_NAME + "/src/main/java/org.springframework.samples.petclinic");
-    projectExplorer.expandPathInProjectExplorer(
-        PROJECT_NAME + "/src/test/java/org.springframework.samples.petclinic", 2);
-    projectExplorer.openItemByPath(
-        PROJECT_NAME + "/src/test/java/org/springframework/samples/petclinic/model");
-    projectExplorer.openItemByPath(
-        PROJECT_NAME
-            + "/src/test/java/org/springframework/samples/petclinic/model/OwnerTests.java");
-    editor.waitActiveEditor();
-    projectExplorer.openItemByPath(
-        PROJECT_NAME + "/src/main/java/org/springframework/samples/petclinic/service");
-    projectExplorer.openItemByPath(
-        PROJECT_NAME
-            + "/src/main/java/org/springframework/samples/petclinic/service/ClinicService.java");
-    editor.waitActiveEditor();
 
-    // select the db machine and perform 'show databases'
-    projectExplorer.invokeCommandWithContextMenu(COMMON, PROJECT_NAME, "show databases", "db");
-    loader.waitOnClosed();
+    // Select the db machine and perform 'show databases'
+    consoles.startCommandFromProcessesArea("db", Consoles.CommandsGoal.COMMON, "show databases");
+    consoles.waitTabNameProcessIsPresent("db");
     for (String text : infoDataBases) {
       consoles.waitExpectedTextIntoConsole(text);
     }
 
-    // build and deploy the web application
-    projectExplorer.invokeCommandWithContextMenu(
-        RUN, PROJECT_NAME, "build and deploy", "dev-machine");
-    loader.waitOnClosed();
-    consoles.waitTabNameProcessIsPresent(PROCESS_NAME);
-    consoles.waitProcessInProcessConsoleTree(PROCESS_NAME);
-    consoles.waitExpectedTextIntoConsole(BUILD_SUCCESS, 150);
-    consoles.waitExpectedTextIntoConsole("Server startup in", 200);
+    // Build and deploy the web application
+    consoles.startCommandFromProcessesArea(
+        "dev-machine", Consoles.CommandsGoal.RUN, BUIL_AND_DEPLOY_PROCESS);
+    consoles.waitTabNameProcessIsPresent(BUIL_AND_DEPLOY_PROCESS);
+    consoles.waitProcessInProcessConsoleTree(BUIL_AND_DEPLOY_PROCESS);
+    consoles.waitExpectedTextIntoConsole(BUILD_SUCCESS, UPDATING_PROJECT_TIMEOUT_SEC);
+    consoles.waitExpectedTextIntoConsole("Server startup in", PREPARING_WS_TIMEOUT_SEC);
     consoles.waitPreviewUrlIsPresent();
 
-    // run the application
-    loader.waitOnClosed();
+    // Run the application
     consoles.clickOnPreviewUrl();
     seleniumWebDriver.switchToNoneCurrentWindow(currentWindow);
     checkWebJavaPetclinicAppl();
     seleniumWebDriver.close();
     seleniumWebDriver.switchTo().window(currentWindow);
     seleniumWebDriver.switchFromDashboardIframeToIde();
-    consoles.waitProcessInProcessConsoleTree(PROCESS_NAME);
-    consoles.waitTabNameProcessIsPresent(PROCESS_NAME);
-    consoles.closeProcessByTabName(PROCESS_NAME);
+
+    // Close terminal tab for 'build and deploy' process
+    consoles.waitProcessInProcessConsoleTree(BUIL_AND_DEPLOY_PROCESS);
+    consoles.waitTabNameProcessIsPresent(BUIL_AND_DEPLOY_PROCESS);
+    consoles.closeProcessByTabName(BUIL_AND_DEPLOY_PROCESS);
     askDialog.acceptDialogWithText(MSG_CLOSE_PROCESS);
-    consoles.waitProcessIsNotPresentInProcessConsoleTree(PROCESS_NAME);
-    consoles.waitTabNameProcessIsNotPresent(PROCESS_NAME);
+    consoles.waitProcessIsNotPresentInProcessConsoleTree(BUIL_AND_DEPLOY_PROCESS);
+    consoles.waitTabNameProcessIsNotPresent(BUIL_AND_DEPLOY_PROCESS);
+
+    // Check that tomcat is not running
     consoles.selectProcessByTabName("Terminal");
     loader.waitOnClosed();
     terminal.typeIntoTerminal("ps ax | grep tomcat8");
@@ -163,7 +141,7 @@ public class WorkingWithJavaMySqlStackTest {
     terminal.waitExpectedTextNotPresentTerminal("catalina.startup.Bootstrap start");
   }
 
-  /** check main elements of the web-java-petclinic */
+  // Check main elements of the web-java-petclinic
   private void checkWebJavaPetclinicAppl() {
     new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(By.xpath("//h2[text()='Welcome']")));

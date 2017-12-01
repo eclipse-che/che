@@ -41,19 +41,14 @@ public class CreateWorkspace {
   private interface Locators {
     String TOOLBAR_TITLE_ID = "New_Workspace";
     String WORKSPACE_NAME_INPUT = "workspace-name-input";
-
     String CREATE_BUTTON = "create-workspace-button";
-
-    // select stacks buttons
     String SELECT_ALL_STACKS_TAB = "all-stacks-button";
     String SELECT_QUICK_START_STACKS_TAB = "quick-start-button";
     String SELECT_SINGLE_MACHINE_STACKS_TAB = "single-machine-button";
     String SELECT_MULTI_MACHINE_STACKS_TAB = "multi-machine-button";
-
     String ADD_STACK_BUTTON = "search-stack-input";
     String FILTER_STACK_BUTTON = "search-stack-input";
     String SEARCH_INPUT = "search-stack-input";
-
     String STACK_ROW_XPATH = "//div[@data-stack-id='%s']";
     String RAM_INPUT_XPATH = "//input[@name='memory']";
     String MACHINE_RAM_ID = "machine-%s-ram";

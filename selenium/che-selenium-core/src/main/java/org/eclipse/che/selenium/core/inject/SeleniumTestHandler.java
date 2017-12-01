@@ -13,7 +13,6 @@ package org.eclipse.che.selenium.core.inject;
 import static com.google.inject.Guice.createInjector;
 import static java.lang.Runtime.getRuntime;
 import static java.lang.String.format;
-import static java.util.Optional.ofNullable;
 
 import com.google.inject.Guice;
 import com.google.inject.Inject;
@@ -223,7 +222,19 @@ public abstract class SeleniumTestHandler
   /** Is invoked when test or configuration is finished. */
   private void onTestFinish(ITestResult result) {
     if (result.getStatus() == ITestResult.FAILURE || result.getStatus() == ITestResult.SKIP) {
-      ofNullable(result.getThrowable()).ifPresent(e -> LOG.error("" + e.getMessage(), e));
+      if (result.getThrowable() != null) {
+        LOG.error(
+            "Test {} method {} failed because {}",
+            result.getTestClass().getName(),
+            result.getMethod().getMethodName(),
+            result.getThrowable().getLocalizedMessage());
+        LOG.debug(result.getThrowable().getLocalizedMessage(), result.getThrowable());
+      } else {
+        LOG.error(
+            "Test {} method {} failed ",
+            result.getTestClass().getName(),
+            result.getMethod().getMethodName());
+      }
       captureScreenshot(result);
       captureHtmlSource(result);
     }

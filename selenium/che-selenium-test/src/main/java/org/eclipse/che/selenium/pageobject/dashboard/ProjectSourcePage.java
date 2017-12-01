@@ -50,25 +50,14 @@ public class ProjectSourcePage {
 
   private interface Locators {
     String ADD_OR_IMPORT_PROJECT_BUTTON = "ADD_PROJECT";
-
-    // project source selector(main form)
     String PROJECT_SOURCE_SELECTOR = "project-source-selector";
-
-    // select type of project
     String SAMPLES_BUTTON = "%s-button";
-
-    // checkbox for select sample project from list
     String SAMPLE_CHECKBOX = "//div[@id='sample-%s']/md-checkbox";
-
-    // sample project name and description(getText())
-    String TEMPLATE_NAME = "//div[@template-name='%s']";
-    String TEMPLATE_DESCRIPTION = "//div[@template-description='%s']";
-
+    String TEMPLATE_NAME = "//span[contains(@class,'template-selector-item-name')]";
+    String TEMPLATE_DESCRIPTION = "//span[contains(@class,'template-selector-item-description')]";
     String GIT_REPO_XPATH = "remote-git-url-input";
     String ZIP_XPATH = "remote-zip-url-input";
     String ZIP_SKIP_ROOT_XPATH = "zip-skip-root-folder-checkbox";
-
-    // 'add selected projects' and 'cancel changes' buttons
     String ADD_PROJECT_BUTTON = "add-project-button";
     String CANCEL_BUTTON = "cancel-button";
   }

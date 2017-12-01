@@ -38,10 +38,9 @@ public class OpenShiftProject {
     this.services = new OpenShiftServices(name, workspaceId, clientFactory);
     this.routes = new OpenShiftRoutes(name, workspaceId, clientFactory);
     this.pvcs = new OpenShiftPersistentVolumeClaims(name, clientFactory);
-    try (OpenShiftClient client = clientFactory.create()) {
-      if (get(name, client) == null) {
-        create(name, client);
-      }
+    final OpenShiftClient client = clientFactory.create();
+    if (get(name, client) == null) {
+      create(name, client);
     }
   }
 
@@ -67,7 +66,6 @@ public class OpenShiftProject {
 
   /** Removes all object except persistent volume claim inside project. */
   public void cleanUp() throws InfrastructureException {
-    pods.stopWatch();
     pods.delete();
     services.delete();
     routes.delete();

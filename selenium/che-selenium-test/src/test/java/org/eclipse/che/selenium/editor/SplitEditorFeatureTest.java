@@ -73,8 +73,11 @@ public class SplitEditorFeatureTest {
     editor.openContextMenuForTabByName(NAME_JAVA_CLASS);
     editor.runActionForTabFromContextMenu(TabAction.SPIT_HORISONTALLY);
 
+    editor.waitCountTabsWithProvidedName(2, NAME_JAVA_CLASS);
+
     editor.selectTabByIndexEditorWindowAndOpenMenu(0, NAME_JAVA_CLASS);
     editor.runActionForTabFromContextMenu(TabAction.SPLIT_VERTICALLY);
+    editor.waitCountTabsWithProvidedName(3, NAME_JAVA_CLASS);
 
     editor.selectTabByIndexEditorWindow(1, NAME_JAVA_CLASS);
     editor.waitActiveEditor();

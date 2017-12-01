@@ -16,7 +16,6 @@ import static org.eclipse.che.workspace.infrastructure.openshift.project.OpenShi
 
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-import io.fabric8.openshift.client.OpenShiftClient;
 import java.util.List;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
@@ -48,8 +47,8 @@ public class OpenShiftServices {
   public Service create(Service service) throws InfrastructureException {
     putLabel(service, CHE_WORKSPACE_ID_LABEL, workspaceId);
     putSelector(service, CHE_WORKSPACE_ID_LABEL, workspaceId);
-    try (OpenShiftClient client = clientFactory.create()) {
-      return client.services().inNamespace(namespace).create(service);
+    try {
+      return clientFactory.create().services().inNamespace(namespace).create(service);
     } catch (KubernetesClientException e) {
       throw new InfrastructureException(e.getMessage(), e);
     }
@@ -61,8 +60,9 @@ public class OpenShiftServices {
    * @throws InfrastructureException when any exception occurs
    */
   public List<Service> get() throws InfrastructureException {
-    try (OpenShiftClient client = clientFactory.create()) {
-      return client
+    try {
+      return clientFactory
+          .create()
           .services()
           .inNamespace(namespace)
           .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)
@@ -79,8 +79,9 @@ public class OpenShiftServices {
    * @throws InfrastructureException when any exception occurs
    */
   public void delete() throws InfrastructureException {
-    try (OpenShiftClient client = clientFactory.create()) {
-      client
+    try {
+      clientFactory
+          .create()
           .services()
           .inNamespace(namespace)
           .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)

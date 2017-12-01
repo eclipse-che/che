@@ -88,23 +88,18 @@ public class Dashboard {
     String NAVBAR_NOTIFICATION_CONTAINER = "navbar-notification-container";
     String COLLAPSE_DASH_NAVBAR_BTN = "ide-iframe-button-link";
     String NOTIFICATION_CONTAINER = "che-notification-container";
-
     String DASHBOARD_ITEM = "dashboard-item";
     String WORKSPACES_ITEM = "workspaces-item";
     String STACKS_ITEM = "stacks-item";
     String FACTORIES_ITEM = "factories-item";
     String ADMINISTRATION_ITEM = "administration-item";
     String ORGANIZATIONS_ITEM = "organization-item";
-
     String RESENT_WS_NAVBAR = "//div[@class='admin-navbar-menu recent-workspaces']";
     String LEFT_SIDE_BAR = "//div[@class='left-sidebar-container']";
-
     String USER_PANEL = "navbar-user-panel";
     String DEVELOPERS_FACE_XPATH = "developers-face";
     String USER_NAME = "user-name";
-
     String LICENSE_NAG_MESSAGE_XPATH = "//div[contains(@class, 'license-message')]";
-
     String TOOLBAR_TITLE_NAME =
         "//div[contains(@class,'che-toolbar')]//span[contains(text(),'%s')]";
   }
