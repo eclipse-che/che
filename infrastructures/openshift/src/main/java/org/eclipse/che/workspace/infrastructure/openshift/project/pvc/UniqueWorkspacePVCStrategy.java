@@ -18,7 +18,6 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
-import io.fabric8.openshift.client.OpenShiftClient;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.inject.Inject;
@@ -109,10 +108,13 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
 
   @Override
   public void cleanup(String workspaceId) throws InfrastructureException {
-    try (OpenShiftClient client = clientFactory.create()) {
-      final String pvcUniqueName = pvcName + '-' + workspaceId;
-      client.persistentVolumeClaims().inNamespace(projectName).withName(pvcUniqueName).delete();
-    }
+    final String pvcUniqueName = pvcName + '-' + workspaceId;
+    clientFactory
+        .create()
+        .persistentVolumeClaims()
+        .inNamespace(projectName)
+        .withName(pvcUniqueName)
+        .delete();
   }
 
   private void addVolumeIfNeeded(PodSpec podSpec, String pvcUniqueName) {

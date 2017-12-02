@@ -22,8 +22,8 @@ import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOPPED_B
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import java.util.HashMap;
-import java.util.HashSet;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Sets.SetView;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -78,20 +78,19 @@ public class WorkspaceRuntimes {
 
   private static final Logger LOG = LoggerFactory.getLogger(WorkspaceRuntimes.class);
 
-  private final ImmutableMap<String, RuntimeInfrastructure> infraByRecipe;
-
   private final ConcurrentMap<String, RuntimeState> runtimes;
   private final EventService eventService;
   private final WorkspaceSharedPool sharedPool;
   private final WorkspaceDao workspaceDao;
   private final AtomicBoolean isStartRefused;
   private final Map<String, InternalEnvironmentFactory> environmentFactories;
+  private final RuntimeInfrastructure infrastructure;
 
   @Inject
   public WorkspaceRuntimes(
       EventService eventService,
-      Map<String, InternalEnvironmentFactory> environmentFactories,
-      Set<RuntimeInfrastructure> infrastructures,
+      Map<String, InternalEnvironmentFactory> envFactories,
+      RuntimeInfrastructure infra,
       WorkspaceSharedPool sharedPool,
       WorkspaceDao workspaceDao,
       @SuppressWarnings("unused") DBInitializer ignored) {
@@ -100,25 +99,18 @@ public class WorkspaceRuntimes {
     this.sharedPool = sharedPool;
     this.workspaceDao = workspaceDao;
     this.isStartRefused = new AtomicBoolean(false);
+    this.infrastructure = infra;
+    this.environmentFactories = ImmutableMap.copyOf(envFactories);
 
-    // TODO: consider extracting to a strategy interface(1. pick the last, 2. fail with conflict)
-    Map<String, RuntimeInfrastructure> tmp = new HashMap<>();
-    for (RuntimeInfrastructure infra : infrastructures) {
-      for (String type : infra.getRecipeTypes()) {
-        LOG.info("Register infrastructure '{}' recipe type '{}'", infra.getName(), type);
-        RuntimeInfrastructure existingInfra = tmp.put(type, infra);
-        if (existingInfra != null) {
-          LOG.warn(
-              "Both '{}' and '{}' infrastructures support recipe of type '{}', infrastructure '{}' will be used",
-              infra.getName(),
-              existingInfra.getName(),
-              type,
-              infra.getName());
-        }
-      }
+    LOG.info("Configured factories for environments: '{}'", envFactories.keySet());
+    LOG.info("Registered infrastructure '{}'", infra.getName());
+    SetView<String> notSupportedByInfra =
+        Sets.difference(envFactories.keySet(), infra.getRecipeTypes());
+    if (!notSupportedByInfra.isEmpty()) {
+      LOG.warn(
+          "Configured environment(s) are not supported by infrastructure: '{}'",
+          notSupportedByInfra);
     }
-    infraByRecipe = ImmutableMap.copyOf(tmp);
-    this.environmentFactories = ImmutableMap.copyOf(environmentFactories);
   }
 
   @PostConstruct
@@ -130,7 +122,7 @@ public class WorkspaceRuntimes {
   public void validate(Environment environment)
       throws NotFoundException, InfrastructureException, ValidationException {
     String type = environment.getRecipe().getType();
-    if (!infraByRecipe.containsKey(type)) {
+    if (!infrastructure.getRecipeTypes().contains(type)) {
       throw new NotFoundException("Infrastructure not found for type: " + type);
     }
     // try to create internal environment to check if the specified environment is valid
@@ -197,15 +189,6 @@ public class WorkspaceRuntimes {
     requireNonNull(
         environment.getRecipe().getType(), "Recipe type should not be null " + workspaceId);
 
-    RuntimeInfrastructure infra = infraByRecipe.get(environment.getRecipe().getType());
-    if (infra == null) {
-      throw new NotFoundException(
-          "No infrastructure found of type: "
-              + environment.getRecipe().getType()
-              + " for workspace: "
-              + workspaceId);
-    }
-
     RuntimeState existingState = runtimes.get(workspaceId);
     if (existingState != null) {
       throw new ConflictException(
@@ -219,7 +202,7 @@ public class WorkspaceRuntimes {
         new RuntimeIdentityImpl(workspaceId, envName, subject.getUserName());
     try {
       InternalEnvironment internalEnv = createInternalEnvironment(environment);
-      RuntimeContext runtimeContext = infra.prepare(runtimeId, internalEnv);
+      RuntimeContext runtimeContext = infrastructure.prepare(runtimeId, internalEnv);
 
       InternalRuntime runtime = runtimeContext.getRuntime();
       if (runtime == null) {
@@ -428,25 +411,23 @@ public class WorkspaceRuntimes {
 
   @VisibleForTesting
   void recover() {
-    for (RuntimeInfrastructure infra : new HashSet<>(infraByRecipe.values())) {
-      try {
-        for (RuntimeIdentity identity : infra.getIdentities()) {
-          recoverOne(infra, identity);
-        }
-      } catch (UnsupportedOperationException x) {
-        LOG.warn("Not recoverable infrastructure: '{}'", infra.getName());
-      } catch (InternalInfrastructureException x) {
-        LOG.error(
-            format(
-                "An error occurred while attempted to recover runtimes using infrastructure '%s'",
-                infra.getName()),
-            x);
-      } catch (ServerException | InfrastructureException x) {
-        LOG.error(
-            "An error occurred while attempted to recover runtimes using infrastructure '{}'. Reason: '{}'",
-            infra.getName(),
-            x.getMessage());
+    try {
+      for (RuntimeIdentity identity : infrastructure.getIdentities()) {
+        recoverOne(infrastructure, identity);
       }
+    } catch (UnsupportedOperationException x) {
+      LOG.warn("Not recoverable infrastructure: '{}'", infrastructure.getName());
+    } catch (InternalInfrastructureException x) {
+      LOG.error(
+          format(
+              "An error occurred while attempted to recover runtimes using infrastructure '%s'",
+              infrastructure.getName()),
+          x);
+    } catch (ServerException | InfrastructureException x) {
+      LOG.error(
+          "An error occurred while attempted to recover runtimes using infrastructure '{}'. Reason: '{}'",
+          infrastructure.getName(),
+          x.getMessage());
     }
   }
 

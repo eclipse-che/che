@@ -58,9 +58,7 @@ public class DockerInfraModule extends AbstractModule {
 
     bind(CheApiEnvVarProvider.class).to(DockerCheApiEnvVarProvider.class);
 
-    Multibinder<RuntimeInfrastructure> mb =
-        Multibinder.newSetBinder(binder(), RuntimeInfrastructure.class);
-    mb.addBinding().to(DockerRuntimeInfrastructure.class);
+    bind(RuntimeInfrastructure.class).to(DockerRuntimeInfrastructure.class);
 
     bind(DockerRegistryDynamicAuthResolver.class)
         .to(NoOpDockerRegistryDynamicAuthResolverImpl.class);

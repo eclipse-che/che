@@ -305,7 +305,6 @@ declare namespace che {
       [machineName: string]: IEnvironmentMachine
     };
     recipe: IRecipe;
-    warnings?: IWorkspaceWarning[];
   }
 
   export interface IRecipe {
