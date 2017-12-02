@@ -292,7 +292,7 @@ public class ProjectExplorer {
   }
 
   public void waitYellowNode(String path) {
-    redrawUiElementsWait.until(
+    loadPageTimeout.until(
         ExpectedConditions.visibilityOfElementLocated(
             By.xpath(
                 String.format(
@@ -301,7 +301,7 @@ public class ProjectExplorer {
   }
 
   public void waitGreenNode(String path) {
-    redrawUiElementsWait.until(
+    loadPageTimeout.until(
         ExpectedConditions.visibilityOfElementLocated(
             By.xpath(
                 String.format(
@@ -310,7 +310,7 @@ public class ProjectExplorer {
   }
 
   public void waitBlueNode(String path) {
-    redrawUiElementsWait.until(
+    loadPageTimeout.until(
         ExpectedConditions.visibilityOfElementLocated(
             By.xpath(
                 String.format(
@@ -319,7 +319,7 @@ public class ProjectExplorer {
   }
 
   public void waitDefaultColorNode(String path) {
-    redrawUiElementsWait.until(
+    loadPageTimeout.until(
         ExpectedConditions.visibilityOfElementLocated(
             By.xpath(
                 String.format(
@@ -380,7 +380,7 @@ public class ProjectExplorer {
     // sometimes an element in the project explorer may not be attached to the DOM. We should
     // refresh all items.
     catch (StaleElementReferenceException ex) {
-      LOG.warn(ex.getLocalizedMessage(), ex);
+      LOG.debug(ex.getLocalizedMessage(), ex);
 
       waitProjectExplorer();
       clickOnRefreshTreeButton();
@@ -411,7 +411,7 @@ public class ProjectExplorer {
     // sometimes an element in the project explorer may not be attached to the DOM. We should
     // refresh all items.
     catch (StaleElementReferenceException ex) {
-      LOG.warn(ex.getLocalizedMessage(), ex);
+      LOG.debug(ex.getLocalizedMessage(), ex);
 
       waitProjectExplorer();
       clickOnRefreshTreeButton();
@@ -492,7 +492,7 @@ public class ProjectExplorer {
     // sometimes an element in the project explorer may not be attached to the DOM. We should
     // refresh all items.
     catch (StaleElementReferenceException ex) {
-      LOG.warn(ex.getLocalizedMessage(), ex);
+      LOG.debug(ex.getLocalizedMessage(), ex);
 
       clickOnRefreshTreeButton();
       waitItem(path);

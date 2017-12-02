@@ -12,7 +12,6 @@ package org.eclipse.che.api.workspace.shared.dto;
 
 import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.MANDATORY;
 
-import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.factory.FactoryParameter;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
@@ -37,11 +36,4 @@ public interface EnvironmentDto extends Environment {
   void setMachines(Map<String, MachineConfigDto> machines);
 
   EnvironmentDto withMachines(Map<String, MachineConfigDto> machines);
-
-  @Override
-  List<WarningDto> getWarnings();
-
-  void setWarnings(List<WarningDto> warnings);
-
-  EnvironmentDto withWarnings(List<WarningDto> warnings);
 }

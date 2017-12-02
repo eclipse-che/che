@@ -12,6 +12,7 @@ package org.eclipse.che.workspace.infrastructure.openshift;
 
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.eclipse.che.api.core.model.workspace.runtime.ServerStatus.UNKNOWN;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -37,6 +38,7 @@ import org.testng.annotations.Test;
  * @author Sergii Leshchenko
  */
 public class ServerResolverTest {
+  private static final Map<String, String> ATTRIBUTES_MAP = singletonMap("key", "value");
   private static final int CONTAINER_PORT = 3054;
   private static final String ROUTE_HOST = "localhost";
 
@@ -50,7 +52,8 @@ public class ServerResolverTest {
     Route route =
         createRoute(
             "nonMatched",
-            ImmutableMap.of("http-server", new ServerConfigImpl("3054", "http", "/api")));
+            ImmutableMap.of(
+                "http-server", new ServerConfigImpl("3054", "http", "/api", ATTRIBUTES_MAP)));
 
     ServerResolver serverResolver =
         ServerResolver.of(singletonList(nonMatchedByPodService), singletonList(route));
@@ -71,7 +74,8 @@ public class ServerResolverTest {
     Route route =
         createRoute(
             "nonMatched",
-            ImmutableMap.of("http-server", new ServerConfigImpl("3054", "http", "/api")));
+            ImmutableMap.of(
+                "http-server", new ServerConfigImpl("3054", "http", "/api", ATTRIBUTES_MAP)));
 
     ServerResolver serverResolver =
         ServerResolver.of(singletonList(nonMatchedByPodService), singletonList(route));
@@ -92,9 +96,9 @@ public class ServerResolverTest {
             "matched",
             ImmutableMap.of(
                 "http-server",
-                new ServerConfigImpl("3054", "http", "/api"),
+                new ServerConfigImpl("3054", "http", "/api", ATTRIBUTES_MAP),
                 "ws-server",
-                new ServerConfigImpl("3054", "ws", "/connect")));
+                new ServerConfigImpl("3054", "ws", "/connect", ATTRIBUTES_MAP)));
 
     ServerResolver serverResolver =
         ServerResolver.of(singletonList(nonMatchedByPodService), singletonList(route));
@@ -102,8 +106,18 @@ public class ServerResolverTest {
     Map<String, ServerImpl> resolved = serverResolver.resolve(pod, container);
 
     assertEquals(resolved.size(), 2);
-    assertEquals(resolved.get("http-server"), new ServerImpl("http://localhost/api"));
-    assertEquals(resolved.get("ws-server"), new ServerImpl("ws://localhost/connect"));
+    assertEquals(
+        resolved.get("http-server"),
+        new ServerImpl()
+            .withUrl("http://localhost/api")
+            .withStatus(UNKNOWN)
+            .withAttributes(ATTRIBUTES_MAP));
+    assertEquals(
+        resolved.get("ws-server"),
+        new ServerImpl()
+            .withUrl("ws://localhost/connect")
+            .withStatus(UNKNOWN)
+            .withAttributes(ATTRIBUTES_MAP));
   }
 
   @Test
@@ -114,7 +128,9 @@ public class ServerResolverTest {
         createService("matched", CONTAINER_PORT, singletonMap("kind", "web-app"));
     Route route =
         createRoute(
-            "matched", singletonMap("http-server", new ServerConfigImpl("3054", "http", null)));
+            "matched",
+            singletonMap(
+                "http-server", new ServerConfigImpl("3054", "http", null, ATTRIBUTES_MAP)));
 
     ServerResolver serverResolver =
         ServerResolver.of(singletonList(nonMatchedByPodService), singletonList(route));
@@ -122,7 +138,12 @@ public class ServerResolverTest {
     Map<String, ServerImpl> resolved = serverResolver.resolve(pod, container);
 
     assertEquals(resolved.size(), 1);
-    assertEquals(resolved.get("http-server"), new ServerImpl("http://localhost"));
+    assertEquals(
+        resolved.get("http-server"),
+        new ServerImpl()
+            .withUrl("http://localhost")
+            .withStatus(UNKNOWN)
+            .withAttributes(ATTRIBUTES_MAP));
   }
 
   @Test
@@ -133,7 +154,8 @@ public class ServerResolverTest {
         createService("matched", CONTAINER_PORT, singletonMap("kind", "web-app"));
     Route route =
         createRoute(
-            "matched", singletonMap("http-server", new ServerConfigImpl("3054", "http", "")));
+            "matched",
+            singletonMap("http-server", new ServerConfigImpl("3054", "http", "", ATTRIBUTES_MAP)));
 
     ServerResolver serverResolver =
         ServerResolver.of(singletonList(nonMatchedByPodService), singletonList(route));
@@ -141,7 +163,12 @@ public class ServerResolverTest {
     Map<String, ServerImpl> resolved = serverResolver.resolve(pod, container);
 
     assertEquals(resolved.size(), 1);
-    assertEquals(resolved.get("http-server"), new ServerImpl("http://localhost"));
+    assertEquals(
+        resolved.get("http-server"),
+        new ServerImpl()
+            .withUrl("http://localhost")
+            .withStatus(UNKNOWN)
+            .withAttributes(ATTRIBUTES_MAP));
   }
 
   @Test
@@ -152,7 +179,9 @@ public class ServerResolverTest {
         createService("matched", CONTAINER_PORT, singletonMap("kind", "web-app"));
     Route route =
         createRoute(
-            "matched", singletonMap("http-server", new ServerConfigImpl("3054", "http", "api")));
+            "matched",
+            singletonMap(
+                "http-server", new ServerConfigImpl("3054", "http", "api", ATTRIBUTES_MAP)));
 
     ServerResolver serverResolver =
         ServerResolver.of(singletonList(nonMatchedByPodService), singletonList(route));
@@ -160,7 +189,12 @@ public class ServerResolverTest {
     Map<String, ServerImpl> resolved = serverResolver.resolve(pod, container);
 
     assertEquals(resolved.size(), 1);
-    assertEquals(resolved.get("http-server"), new ServerImpl("http://localhost/api"));
+    assertEquals(
+        resolved.get("http-server"),
+        new ServerImpl()
+            .withUrl("http://localhost/api")
+            .withStatus(UNKNOWN)
+            .withAttributes(ATTRIBUTES_MAP));
   }
 
   private Pod createPod(Map<String, String> labels) {

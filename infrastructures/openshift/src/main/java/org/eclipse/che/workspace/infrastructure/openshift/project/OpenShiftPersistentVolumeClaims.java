@@ -14,7 +14,6 @@ import static java.util.stream.Collectors.toSet;
 
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-import io.fabric8.openshift.client.OpenShiftClient;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -44,8 +43,8 @@ public class OpenShiftPersistentVolumeClaims {
    * @throws InfrastructureException when any exception occurs
    */
   public PersistentVolumeClaim create(PersistentVolumeClaim pvc) throws InfrastructureException {
-    try (OpenShiftClient client = clientFactory.create()) {
-      return client.persistentVolumeClaims().inNamespace(namespace).create(pvc);
+    try {
+      return clientFactory.create().persistentVolumeClaims().inNamespace(namespace).create(pvc);
     } catch (KubernetesClientException e) {
       throw new InfrastructureException(e.getMessage(), e);
     }
@@ -57,8 +56,13 @@ public class OpenShiftPersistentVolumeClaims {
    * @throws InfrastructureException when any exception occurs
    */
   public List<PersistentVolumeClaim> get() throws InfrastructureException {
-    try (OpenShiftClient client = clientFactory.create()) {
-      return client.persistentVolumeClaims().inNamespace(namespace).list().getItems();
+    try {
+      return clientFactory
+          .create()
+          .persistentVolumeClaims()
+          .inNamespace(namespace)
+          .list()
+          .getItems();
     } catch (KubernetesClientException e) {
       throw new InfrastructureException(e.getMessage(), e);
     }
