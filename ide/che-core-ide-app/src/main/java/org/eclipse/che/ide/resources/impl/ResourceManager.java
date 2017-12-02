@@ -27,7 +27,6 @@ import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_TO;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.REMOVED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.SYNCHRONIZED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
-import static org.eclipse.che.ide.util.Arrays.add;
 import static org.eclipse.che.ide.util.Arrays.contains;
 import static org.eclipse.che.ide.util.Arrays.removeAll;
 import static org.eclipse.che.ide.util.NameUtils.checkFileName;
@@ -42,6 +41,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eclipse.che.api.core.model.project.ProjectProblem;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
@@ -55,7 +55,6 @@ import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.ProjectProblemDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.DeletedFilesController;
@@ -84,6 +83,7 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.project.ProjectServiceClient;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.Arrays;
+import org.eclipse.che.ide.util.loging.Log;
 
 /**
  * Acts as the service lay between the user interactions with resources and data transfer layer.
@@ -142,7 +142,7 @@ public final class ResourceManager {
   private ResourceStore store;
 
   /** Cached dto project configuration. */
-  private ProjectConfigDto[] cachedConfigs;
+  //  private ProjectConfigDto[] cachedConfigs;
 
   @Inject
   public ResourceManager(
@@ -189,11 +189,12 @@ public final class ResourceManager {
                   store.clear();
 
                   if (dtoConfigs.isEmpty()) {
-                    cachedConfigs = new ProjectConfigDto[0];
+                    //                    cachedConfigs = new ProjectConfigDto[0];
                     return NO_PROJECTS;
                   }
 
-                  cachedConfigs = dtoConfigs.toArray(new ProjectConfigDto[dtoConfigs.size()]);
+                  //                  cachedConfigs = dtoConfigs.toArray(new
+                  // ProjectConfigDto[dtoConfigs.size()]);
 
                   Project[] projects = NO_PROJECTS;
 
@@ -390,7 +391,7 @@ public final class ResourceManager {
         "Invalid project type");
 
     final Path path = Path.valueOf(createRequest.getBody().getPath());
-    return findResource(path, true)
+    return findResource(path)
         .thenPromise(
             resource -> {
               if (resource.isPresent()) {
@@ -417,9 +418,11 @@ public final class ResourceManager {
                               .thenPromise(
                                   updatedConfiguration -> {
                                     // cache new configs
-                                    cachedConfigs =
-                                        updatedConfiguration.toArray(
-                                            new ProjectConfigDto[updatedConfiguration.size()]);
+                                    //                                    cachedConfigs =
+                                    //
+                                    // updatedConfiguration.toArray(
+                                    //                                            new
+                                    // ProjectConfigDto[updatedConfiguration.size()]);
 
                                     for (ProjectConfigDto projectConfigDto : configList) {
                                       if (projectConfigDto.getPath().equals(path.toString())) {
@@ -495,7 +498,7 @@ public final class ResourceManager {
 
     final Path path = Path.valueOf(importRequest.getBody().getPath());
 
-    return findResource(path, true)
+    return findResource(path)
         .thenPromise(
             resource -> {
               final SourceStorage sourceStorage = importRequest.getBody().getSource();
@@ -513,7 +516,8 @@ public final class ResourceManager {
                               .then(
                                   (Function<ProjectConfigDto, Project>)
                                       config -> {
-                                        cachedConfigs = add(cachedConfigs, config);
+                                        //                                        cachedConfigs =
+                                        // add(cachedConfigs, config);
 
                                         Resource project =
                                             resourceFactory.newProjectImpl(
@@ -541,7 +545,7 @@ public final class ResourceManager {
       final Resource source, final Path destination, final boolean force) {
     checkArgument(!source.getLocation().isRoot(), "Workspace root is not allowed to be moved");
 
-    return findResource(destination, true)
+    return findResource(destination)
         .thenPromise(
             resource -> {
               checkState(
@@ -565,80 +569,34 @@ public final class ResourceManager {
                                 destination.lastSegment(),
                                 force)
                             .thenPromise(
-                                ignored -> {
-                                  if (source.isProject()
-                                      && source.getLocation().segmentCount() == 1) {
-                                    return ps.getProjects()
+                                ignored ->
+                                    findResource(destination)
                                         .then(
-                                            (Function<List<ProjectConfigDto>, Resource>)
-                                                updatedConfigs -> {
+                                            (Function<Optional<Resource>, Resource>)
+                                                movedResource -> {
+                                                  if (movedResource.isPresent()) {
+                                                    eventBus.fireEvent(
+                                                        new ResourceChangedEvent(
+                                                            new ResourceDeltaImpl(
+                                                                movedResource.get(),
+                                                                source,
+                                                                ADDED
+                                                                    | MOVED_FROM
+                                                                    | MOVED_TO
+                                                                    | DERIVED)));
+
+                                                    clientServerEventService
+                                                        .sendFileTrackingResumeEvent();
+
+                                                    return movedResource.get();
+                                                  }
+
                                                   clientServerEventService
                                                       .sendFileTrackingResumeEvent();
-
-                                                  // cache new configs
-                                                  cachedConfigs =
-                                                      updatedConfigs.toArray(
-                                                          new ProjectConfigDto
-                                                              [updatedConfigs.size()]);
-                                                  store.dispose(source.getLocation(), true);
-
-                                                  for (ProjectConfigDto projectConfigDto :
-                                                      cachedConfigs) {
-                                                    if (projectConfigDto
-                                                        .getPath()
-                                                        .equals(destination.toString())) {
-                                                      final Project newResource =
-                                                          resourceFactory.newProjectImpl(
-                                                              projectConfigDto,
-                                                              ResourceManager.this);
-                                                      store.register(newResource);
-                                                      eventBus.fireEvent(
-                                                          new ResourceChangedEvent(
-                                                              new ResourceDeltaImpl(
-                                                                  newResource,
-                                                                  source,
-                                                                  ADDED
-                                                                      | MOVED_FROM
-                                                                      | MOVED_TO
-                                                                      | DERIVED)));
-
-                                                      return newResource;
-                                                    }
-                                                  }
 
                                                   throw new IllegalStateException(
                                                       "Resource not found");
-                                                });
-                                  }
-
-                                  return findResource(destination, false)
-                                      .then(
-                                          (Function<Optional<Resource>, Resource>)
-                                              movedResource -> {
-                                                if (movedResource.isPresent()) {
-                                                  eventBus.fireEvent(
-                                                      new ResourceChangedEvent(
-                                                          new ResourceDeltaImpl(
-                                                              movedResource.get(),
-                                                              source,
-                                                              ADDED
-                                                                  | MOVED_FROM
-                                                                  | MOVED_TO
-                                                                  | DERIVED)));
-
-                                                  clientServerEventService
-                                                      .sendFileTrackingResumeEvent();
-
-                                                  return movedResource.get();
-                                                }
-
-                                                clientServerEventService
-                                                    .sendFileTrackingResumeEvent();
-
-                                                throw new IllegalStateException(
-                                                    "Resource not found");
-                                              });
-                                });
+                                                }));
                       });
             });
   }
@@ -647,7 +605,7 @@ public final class ResourceManager {
       final Resource source, final Path destination, final boolean force) {
     checkArgument(!source.getLocation().isRoot(), "Workspace root is not allowed to be copied");
 
-    return findResource(destination, true)
+    return findResource(destination)
         .thenPromise(
             resource -> {
               if (resource.isPresent() && !force) {
@@ -662,7 +620,7 @@ public final class ResourceManager {
                       source.getLocation(), destination.parent(), destination.lastSegment(), force)
                   .thenPromise(
                       ignored ->
-                          findResource(destination, false)
+                          findResource(destination)
                               .then(
                                   (Function<Optional<Resource>, Resource>)
                                       copiedResource -> {
@@ -859,7 +817,7 @@ public final class ResourceManager {
   }
 
   Promise<Optional<Container>> getContainer(final Path absolutePath) {
-    return findResource(absolutePath, false)
+    return findResource(absolutePath)
         .then(
             (Function<Optional<Resource>, Optional<Container>>)
                 optionalFolder -> {
@@ -882,7 +840,7 @@ public final class ResourceManager {
     }
 
     if (store.getResource(absolutePath.parent()).isPresent()) {
-      return findResource(absolutePath, true)
+      return findResource(absolutePath)
           .thenPromise(
               optionalFile -> {
                 if (optionalFile.isPresent()) {
@@ -895,7 +853,7 @@ public final class ResourceManager {
                 return promises.resolve(absent());
               });
     } else {
-      return findResourceForExternalOperation(absolutePath, true)
+      return findResourceForExternalOperation(absolutePath)
           .thenPromise(
               optionalFile -> {
                 if (optionalFile.isPresent()) {
@@ -957,6 +915,9 @@ public final class ResourceManager {
 
                 if (tempResource.getLocation().equals(path)) {
                   resource = tempResource;
+                  Log.info(getClass(), "fire update event for: " + resource);
+                  eventBus.fireEvent(
+                      new ResourceChangedEvent(new ResourceDeltaImpl(resource, UPDATED)));
                 }
               }
 
@@ -965,7 +926,7 @@ public final class ResourceManager {
         .catchErrorPromise(error -> promises.resolve(absent()));
   }
 
-  private Promise<Optional<Resource>> findResource(final Path absolutePath, boolean quiet) {
+  private Promise<Optional<Resource>> findResource(final Path absolutePath) {
     String[] segments = absolutePath.segments();
 
     Promise<Optional<Resource>> chain = promises.resolve(null);
@@ -978,8 +939,7 @@ public final class ResourceManager {
     return chain;
   }
 
-  private Promise<Optional<Resource>> findResourceForExternalOperation(
-      final Path absolutePath, boolean quiet) {
+  private Promise<Optional<Resource>> findResourceForExternalOperation(final Path absolutePath) {
     Promise<Void> derived = promises.resolve(null);
 
     for (int i = absolutePath.segmentCount() - 1; i > 0; i--) {
@@ -988,7 +948,7 @@ public final class ResourceManager {
       derived = derived.thenPromise(arg -> loadAndRegisterResources(pathToCache));
     }
 
-    return derived.thenPromise(ignored -> findResource(absolutePath, quiet));
+    return derived.thenPromise(ignored -> findResource(absolutePath));
   }
 
   private Promise<Void> loadAndRegisterResources(Path absolutePath) {
@@ -1018,15 +978,16 @@ public final class ResourceManager {
   }
 
   private void inspectProject(Project project) {
-    final Optional<ProjectConfigDto> optionalConfig = findProjectConfigDto(project.getLocation());
+    //    final Optional<ProjectConfigDto> optionalConfig =
+    // findProjectConfigDto(project.getLocation());
 
-    if (optionalConfig.isPresent()) {
-      final Optional<ProblemProjectMarker> optionalMarker = getProblemMarker(optionalConfig.get());
+    //    if (optionalConfig.isPresent()) {
+    final Optional<ProblemProjectMarker> optionalMarker = getProblemMarker(project);
 
-      if (optionalMarker.isPresent()) {
-        project.addMarker(optionalMarker.get());
-      }
+    if (optionalMarker.isPresent()) {
+      project.addMarker(optionalMarker.get());
     }
+    //    }
   }
 
   private boolean isResourceOpened(final Resource resource) {
@@ -1075,10 +1036,12 @@ public final class ResourceManager {
       case "folder":
         return resourceFactory.newFolderImpl(path, this);
       case "project":
-        final Optional<ProjectConfigDto> config = findProjectConfigDto(path);
+        //        final Optional<ProjectConfigDto> config = findProjectConfigDto(path);
 
-        if (config.isPresent()) {
-          return resourceFactory.newProjectImpl(config.get(), this);
+        ProjectConfigDto config = reference.getProjectConfig();
+
+        if (config != null) {
+          return resourceFactory.newProjectImpl(config, this);
         } else {
           return resourceFactory.newFolderImpl(path, this);
         }
@@ -1087,24 +1050,24 @@ public final class ResourceManager {
     }
   }
 
-  private Optional<ProjectConfigDto> findProjectConfigDto(final Path path) {
-    for (ProjectConfigDto config : cachedConfigs) {
-      if (Path.valueOf(config.getPath()).equals(path)) {
-        return of(config);
-      }
-    }
+  //  private Optional<ProjectConfigDto> findProjectConfigDto(final Path path) {
+  //    for (ProjectConfigDto config : cachedConfigs) {
+  //      if (Path.valueOf(config.getPath()).equals(path)) {
+  //        return of(config);
+  //      }
+  //    }
+  //
+  //    return absent();
+  //  }
 
-    return absent();
-  }
-
-  private Optional<ProblemProjectMarker> getProblemMarker(ProjectConfigDto projectConfigDto) {
-    List<ProjectProblemDto> problems = projectConfigDto.getProblems();
+  private Optional<ProblemProjectMarker> getProblemMarker(ProjectConfig projectConfigDto) {
+    List<? extends ProjectProblem> problems = projectConfigDto.getProblems();
     if (problems == null || problems.isEmpty()) {
       return absent();
     }
 
     Map<Integer, String> code2Message = new HashMap<>(problems.size());
-    for (ProjectProblemDto problem : problems) {
+    for (ProjectProblem problem : problems) {
       code2Message.put(problem.getCode(), problem.getMessage());
     }
 
@@ -1112,59 +1075,94 @@ public final class ResourceManager {
   }
 
   protected Promise<Resource[]> synchronize(final Container container) {
-    return ps.getProjects()
-        .thenPromise(
-            updatedConfiguration -> {
-              cachedConfigs =
-                  updatedConfiguration.toArray(new ProjectConfigDto[updatedConfiguration.size()]);
+    //    return ps.getProjects()
+    //        .thenPromise(
+    //            updatedConfiguration -> {
+    //              cachedConfigs =
+    //                  updatedConfiguration.toArray(new
+    // ProjectConfigDto[updatedConfiguration.size()]);
 
-              int maxDepth = 1;
+    int maxDepth = 1;
 
-              final Optional<Resource[]> descendants = store.getAll(container.getLocation());
+    final Optional<Resource[]> descendants = store.getAll(container.getLocation());
 
-              if (descendants.isPresent()) {
-                final Resource[] resources = descendants.get();
+    if (descendants.isPresent()) {
+      final Resource[] resources = descendants.get();
 
-                for (Resource resource : resources) {
-                  final int segCount =
-                      resource.getLocation().segmentCount()
-                          - container.getLocation().segmentCount();
+      for (Resource resource : resources) {
+        final int segCount =
+            resource.getLocation().segmentCount() - container.getLocation().segmentCount();
 
-                  if (segCount > maxDepth) {
-                    maxDepth = segCount;
-                  }
-                }
-              }
+        if (segCount > maxDepth) {
+          maxDepth = segCount;
+        }
+      }
+    }
 
-              final Container[] holder = new Container[] {container};
+    //              Container[] holder = new Container[] {container};
+    //              Optional<ProjectConfigDto> config =
+    // findProjectConfigDto(holder[0].getLocation());
 
-              if (holder[0].isProject()) {
-                final Optional<ProjectConfigDto> config =
-                    findProjectConfigDto(holder[0].getLocation());
+    //              if (container.isFolder() && config.isPresent()) {
+    //                 folder becomes a project
+    //                store.dispose(holder[0].getLocation(), false);
+    //                Project project =
+    //                    resourceFactory.newProjectImpl(config.get(), ResourceManager.this);
+    //                store.register(project);
+    //                holder[0] = project;
+    //              } else if (container.isProject() && !config.isPresent()) {
+    //                 project becomes a folder
+    //                store.dispose(holder[0].getLocation(), false);
+    //                Folder folder =
+    //                    resourceFactory.newFolderImpl(holder[0].getLocation(),
+    // ResourceManager.this);
+    //                store.register(folder);
+    //                holder[0] = folder;
+    //              }
 
-                if (config.isPresent()) {
+    //              Promise<Void> chain = promises.resolve(null);
+    //
+    //              if (descendants.isPresent()) {
+    //                for (Resource resource : descendants.get()) {
+    //                  chain =
+    //                      chain.thenPromise(
+    //                          ignored ->
+    //                              findResource(resource.getLocation(), false)
+    //                                  .thenPromise(optResource ->
+    // promises.resolve(null)));
+    //                }
+    //              }
+    //
+    //              return chain.thenPromise(ignored ->
+    // promises.resolve(descendants.get()));
 
-                  final ProjectImpl project =
-                      resourceFactory.newProjectImpl(config.get(), ResourceManager.this);
+    //              if (holder[0].isProject()) {
+    //                final Optional<ProjectConfigDto> config =
+    //                    findProjectConfigDto(holder[0].getLocation());
+    //
+    //                if (config.isPresent()) {
+    //                  store.dispose(holder[0].getLocation(), true);
+    //                  final ProjectImpl project =
+    //                      resourceFactory.newProjectImpl(config.get(),
+    // ResourceManager.this);
+    //
+    //                  store.register(project);
+    //                  holder[0] = project;
+    //                }
+    //              }
 
-                  store.register(project);
-                  holder[0] = project;
-                }
-              }
-
-              return getRemoteResources(holder[0], maxDepth, true)
-                  .then(
-                      (Function<Resource[], Resource[]>)
-                          resources -> {
-                            eventBus.fireEvent(
-                                new ResourceChangedEvent(
-                                    new ResourceDeltaImpl(holder[0], SYNCHRONIZED | DERIVED)));
-                            eventBus.fireEvent(
-                                new ResourceChangedEvent(
-                                    new ResourceDeltaImpl(holder[0], UPDATED)));
-                            return resources;
-                          });
-            });
+    return getRemoteResources(container, maxDepth, true)
+        .then(
+            (Function<Resource[], Resource[]>)
+                resources -> {
+                  eventBus.fireEvent(
+                      new ResourceChangedEvent(
+                          new ResourceDeltaImpl(container, SYNCHRONIZED | DERIVED)));
+                  eventBus.fireEvent(
+                      new ResourceChangedEvent(new ResourceDeltaImpl(container, UPDATED)));
+                  return resources;
+                });
+    //            });
   }
 
   protected Promise<ResourceDelta[]> synchronize(final ResourceDelta[] deltas) {
@@ -1190,7 +1188,7 @@ public final class ResourceManager {
     final Optional<Resource> toRemove = store.getResource(delta.getFromPath());
     store.dispose(delta.getFromPath(), true);
 
-    return findResource(delta.getToPath(), true)
+    return findResource(delta.getToPath())
         .thenPromise(
             resource -> {
               if (resource.isPresent() && toRemove.isPresent()) {
@@ -1207,30 +1205,35 @@ public final class ResourceManager {
   }
 
   private Promise<Void> onExternalDeltaAdded(final ResourceDelta delta) {
-    if (delta.getToPath().segmentCount() == 1) {
-      return ps.getProjects()
-          .thenPromise(
-              updatedConfiguration -> {
-                cachedConfigs =
-                    updatedConfiguration.toArray(new ProjectConfigDto[updatedConfiguration.size()]);
+    //    if (delta.getToPath().segmentCount() == 1) {
+    //      return ps.getProjects()
+    //          .thenPromise(
+    //              updatedConfiguration -> {
+    //                //                cachedConfigs =
+    //                //                    updatedConfiguration.toArray(new
+    //                // ProjectConfigDto[updatedConfiguration.size()]);
+    //                // todo refactor this
+    //                //                for (ProjectConfigDto config : cachedConfigs) {
+    //                //                  if
+    // (Path.valueOf(config.getPath()).equals(delta.getToPath())) {
+    //                //                    final Project project =
+    //                //                        resourceFactory.newProjectImpl(config,
+    //                // ResourceManager.this);
+    //                //
+    //                //                    store.register(project);
+    //                //
+    //                //                    eventBus.fireEvent(
+    //                //                        new ResourceChangedEvent(new
+    // ResourceDeltaImpl(project,
+    //                // ADDED)));
+    //                //                  }
+    //                //                }
+    //
+    //                return promises.resolve(null);
+    //              });
+    //    }
 
-                for (ProjectConfigDto config : cachedConfigs) {
-                  if (Path.valueOf(config.getPath()).equals(delta.getToPath())) {
-                    final Project project =
-                        resourceFactory.newProjectImpl(config, ResourceManager.this);
-
-                    store.register(project);
-
-                    eventBus.fireEvent(
-                        new ResourceChangedEvent(new ResourceDeltaImpl(project, ADDED)));
-                  }
-                }
-
-                return promises.resolve(null);
-              });
-    }
-
-    return findResource(delta.getToPath(), true)
+    return findResource(delta.getToPath())
         .thenPromise(
             resource -> {
               if (resource.isPresent()) {
@@ -1250,7 +1253,7 @@ public final class ResourceManager {
       return promises.resolve(null);
     }
 
-    return findResource(delta.getToPath(), true)
+    return findResource(delta.getToPath())
         .thenPromise(
             resource -> {
               if (resource.isPresent()) {

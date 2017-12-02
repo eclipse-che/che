@@ -17,12 +17,12 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.List;
 import java.util.Set;
-import org.eclipse.che.ide.DelayedTask;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.console.CommandConsoleFactory;
 import org.eclipse.che.ide.console.DefaultOutputConsole;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
+import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.maven.client.MavenJsonRpcHandler;
 import org.eclipse.che.plugin.maven.client.comunnication.progressor.background.BackgroundLoaderPresenter;
 import org.eclipse.che.plugin.maven.shared.dto.ArchetypeOutput;
@@ -117,25 +117,27 @@ public class MavenMessagesHandler {
     List<String> updatedProjects = dto.getUpdatedProjects();
     Set<String> projectToRefresh = computeUniqueHiLevelProjects(updatedProjects);
 
+    Log.info(getClass(), "projects to refresh: " + projectToRefresh.toString());
+
     // Temporary delay synchronization, because maven server sends update events in the same time,
     // when other synchronization call may be performed, such as rename project.
     // Will be reworked in nearest future, temporary solution.
-    new DelayedTask() {
-      @Override
-      public void onExecute() {
-        for (final String path : projectToRefresh) {
-          appContext
-              .getWorkspaceRoot()
-              .getContainer(path)
-              .then(
-                  container -> {
-                    if (container.isPresent()) {
-                      container.get().synchronize();
-                    }
-                  });
-        }
-      }
-    }.delay(3000);
+    //    new DelayedTask() {
+    //      @Override
+    //      public void onExecute() {
+    for (final String path : projectToRefresh) {
+      appContext
+          .getWorkspaceRoot()
+          .getContainer(path)
+          .then(
+              container -> {
+                if (container.isPresent()) {
+                  container.get().synchronize();
+                }
+              });
+    }
+    //      }
+    //    }.delay(100);
 
     pomEditorReconciler.reconcilePoms(updatedProjects);
   }
