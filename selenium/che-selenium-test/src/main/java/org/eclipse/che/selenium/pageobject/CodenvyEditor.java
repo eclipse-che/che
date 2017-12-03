@@ -259,6 +259,9 @@ public class CodenvyEditor {
   @FindBy(xpath = Locators.AUTOCOMPLETE_PROPOSAL_JAVA_DOC_POPUP)
   private WebElement autocompleteProposalJavaDocPopup;
 
+  @FindBy(xpath = Locators.ALL_TABS_XPATH)
+  private WebElement someOpenedTab;
+
   /**
    * wait active editor
    *
@@ -394,6 +397,19 @@ public class CodenvyEditor {
             visibilityOfElementLocated(
                 By.xpath(String.format(Locators.TAB_FILE_CLOSE_ICON, fileName))))
         .click();
+  }
+
+  /**
+   * checks if some tab is opened in the Editor
+   *
+   * @return true if any tab is open
+   */
+  public boolean isAnyTabsOpened() {
+    try {
+      return someOpenedTab.isDisplayed();
+    } catch (NoSuchElementException ex) {
+      return false;
+    }
   }
 
   /** get all open editor tabs and close this */
