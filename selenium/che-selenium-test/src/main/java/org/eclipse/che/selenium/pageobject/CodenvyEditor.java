@@ -260,7 +260,7 @@ public class CodenvyEditor {
   private WebElement autocompleteProposalJavaDocPopup;
 
   @FindBy(xpath = Locators.ALL_TABS_XPATH)
-  private WebElement anyOpenTab;
+  private WebElement someOpenedTab;
 
   /**
    * wait active editor
@@ -400,13 +400,13 @@ public class CodenvyEditor {
   }
 
   /**
-   * check any tab is open in the Editor
+   * checks if some tab is opened in the Editor
    *
    * @return true if any tab is open
    */
-  public boolean anyTabIsOpen() {
+  public boolean isAnyTabsOpened() {
     try {
-      return anyOpenTab.isDisplayed();
+      return someOpenedTab.isDisplayed();
     } catch (NoSuchElementException ex) {
       return false;
     }

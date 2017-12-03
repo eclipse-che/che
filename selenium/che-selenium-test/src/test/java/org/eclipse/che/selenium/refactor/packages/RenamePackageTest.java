@@ -241,7 +241,8 @@ public class RenamePackageTest {
     if (refactor.isWidgetOpened()) {
       refactor.clickCancelButtonRefactorForm();
     }
-    if (editor.anyTabIsOpen()) {
+
+    if (editor.isAnyTabsOpened()) {
       editor.closeAllTabs();
     }
   }
@@ -416,7 +417,7 @@ public class RenamePackageTest {
     refactor.typeAndWaitFileNamePatterns("*.txt");
     loader.waitOnClosed();
     clickOkButtonIntoRefactorForm();
-    refactor.waitRenamePackageFormIsClosed();
+    waitRenamePackageFormIsClosed();
     loader.waitOnClosed();
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/test4/r");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/test4/q");
@@ -675,7 +676,7 @@ public class RenamePackageTest {
     refactor.typeAndWaitFileNamePatterns("*.txt");
     loader.waitOnClosed();
     refactor.clickOkButtonRefactorForm();
-    refactor.waitRenamePackageFormIsClosed();
+    waitRenamePackageFormIsClosed();
     loader.waitOnClosed();
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/mine");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/mine/Textfile.txt");
@@ -710,6 +711,15 @@ public class RenamePackageTest {
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/7500", ex);
+    }
+  }
+
+  private void waitRenamePackageFormIsClosed() {
+    try {
+      refactor.waitRenamePackageFormIsClosed();
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7688", ex);
     }
   }
 }
