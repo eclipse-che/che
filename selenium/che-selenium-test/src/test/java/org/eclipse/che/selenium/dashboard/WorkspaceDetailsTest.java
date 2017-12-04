@@ -23,6 +23,9 @@ import static org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace.T
 import static org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace.TabNames.PROJECTS;
 import static org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace.TabNames.SERVERS;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.WORKSPACES;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import java.util.HashMap;
@@ -42,7 +45,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.DashboardProject;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
-import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -91,15 +93,15 @@ public class WorkspaceDetailsTest {
     dashboardWorkspace.addNewEnvironmentVariable("logi", "admin");
     dashboardWorkspace.clickOnAddDialogButton();
     clickOnSaveButton();
-    Assert.assertTrue(dashboardWorkspace.checkEnvVariableExists("logi"));
+    assertTrue(dashboardWorkspace.checkEnvVariableExists("logi"));
 
     // rename the variable, save changes and check it is renamed
-    Assert.assertTrue(dashboardWorkspace.checkValueExists("logi", "admin"));
+    assertTrue(dashboardWorkspace.checkValueExists("logi", "admin"));
     dashboardWorkspace.clickOnEditEnvVariableButton("logi");
     dashboardWorkspace.enterEnvVariableName("login");
     dashboardWorkspace.clickOnUpdateDialogButton();
     clickOnSaveButton();
-    Assert.assertTrue(dashboardWorkspace.checkValueExists("login", "admin"));
+    assertTrue(dashboardWorkspace.checkValueExists("login", "admin"));
 
     // delete the variable, save changes and check it is not exists
     dashboardWorkspace.clickOnEnvVariableCheckbox("login");
@@ -127,8 +129,8 @@ public class WorkspaceDetailsTest {
           dashboardWorkspace.checkAddNewEnvVarialbleDialogIsOpen();
           dashboardWorkspace.addNewEnvironmentVariable(name, value);
           dashboardWorkspace.clickOnAddDialogButton();
-          Assert.assertTrue(dashboardWorkspace.checkEnvVariableExists(name));
-          Assert.assertTrue(dashboardWorkspace.checkValueExists(name, value));
+          assertTrue(dashboardWorkspace.checkEnvVariableExists(name));
+          assertTrue(dashboardWorkspace.checkValueExists(name, value));
         });
     clickOnSaveButton();
   }
@@ -138,24 +140,23 @@ public class WorkspaceDetailsTest {
     dashboardWorkspace.selectTabInWorspaceMenu(INSTALLERS);
 
     // check both versions of the 'Workspace API' installer
-    Assert.assertTrue(dashboardWorkspace.getInstallerState("Workspace API", "1.0.1"));
-    Assert.assertFalse(dashboardWorkspace.getInstallerState("Workspace API", "1.0.0"));
-    dashboardWorkspace.switchInstallerState("Workspace API", "1.0.1");
-    dashboardWorkspace.switchInstallerState("Workspace API", "1.0.0");
-    Assert.assertTrue(dashboardWorkspace.getInstallerState("Workspace API", "1.0.1"));
-    Assert.assertFalse(dashboardWorkspace.getInstallerState("Workspace API", "1.0.0"));
+    assertTrue(dashboardWorkspace.isInstallerStateTurnedOn("Workspace API", "1.0.1"));
+    assertFalse(dashboardWorkspace.isInstallerStateTurnedOn("Workspace API", "1.0.0"));
+    assertTrue(dashboardWorkspace.isInstallerStateNotChangeable("Workspace API", "1.0.1"));
+    assertTrue(dashboardWorkspace.isInstallerStateNotChangeable("Workspace API", "1.0.0"));
 
     // check all needed installers in dev-machine exist
     dashboardWorkspace.selectMachine("Workspace Installers", "dev-machine");
     installers.forEach(
         (name, value) -> {
           dashboardWorkspace.checkInstallerExists(name);
+          assertFalse(dashboardWorkspace.isInstallerStateNotChangeable(name));
         });
 
     // switch all installers and save changes
     installers.forEach(
         (name, value) -> {
-          Assert.assertEquals(dashboardWorkspace.getInstallerState(name), value);
+          assertEquals(dashboardWorkspace.isInstallerStateTurnedOn(name), value);
           dashboardWorkspace.switchInstallerState(name);
           WaitUtils.sleepQuietly(1);
         });
@@ -171,7 +172,7 @@ public class WorkspaceDetailsTest {
     clickOnSaveButton();
     installers.forEach(
         (name, value) -> {
-          Assert.assertEquals(dashboardWorkspace.getInstallerState(name), value);
+          assertEquals(dashboardWorkspace.isInstallerStateTurnedOn(name), value);
         });
   }
 

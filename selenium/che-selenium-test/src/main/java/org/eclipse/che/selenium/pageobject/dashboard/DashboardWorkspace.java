@@ -823,7 +823,7 @@ public class DashboardWorkspace {
         .click();
   }
 
-  public Boolean getInstallerState(String installerName) {
+  public Boolean isInstallerStateTurnedOn(String installerName) {
     String state =
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
             .until(
@@ -834,7 +834,7 @@ public class DashboardWorkspace {
     return Boolean.parseBoolean(state);
   }
 
-  public Boolean getInstallerState(String installerName, String installerVersion) {
+  public Boolean isInstallerStateTurnedOn(String installerName, String installerVersion) {
     String state =
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
             .until(
@@ -846,6 +846,34 @@ public class DashboardWorkspace {
                             installerVersion,
                             installerName))))
             .getAttribute("aria-checked");
+
+    return Boolean.parseBoolean(state);
+  }
+
+  public Boolean isInstallerStateNotChangeable(String installerName) {
+    String state =
+        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+            .until(
+                ExpectedConditions.visibilityOfElementLocated(
+                    By.xpath(format(Locators.INSTALLER_STATE, installerName))))
+            .getAttribute("aria-disabled");
+
+    return Boolean.parseBoolean(state);
+  }
+
+  public Boolean isInstallerStateNotChangeable(String installerName, String installerVersion) {
+    String state;
+    state =
+        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+            .until(
+                ExpectedConditions.visibilityOfElementLocated(
+                    By.xpath(
+                        format(
+                            Locators.INSTALLER_VERSION_STATE,
+                            installerName,
+                            installerVersion,
+                            installerName))))
+            .getAttribute("aria-disabled");
 
     return Boolean.parseBoolean(state);
   }
