@@ -20,19 +20,14 @@ import com.google.inject.Singleton;
 import java.util.List;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.promises.client.js.JsPromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
 import org.eclipse.che.jdt.ls.extension.api.dto.FileStructureCommandParameters;
-import org.eclipse.che.jdt.ls.extension.api.dto.GetEffectivePomParameters;
 import org.eclipse.che.plugin.languageserver.ide.service.ServiceUtil;
 
 @Singleton
 public class JavaLanguageExtensionServiceClient {
-
-  private static final String FILE_STRUCTURE = "java/file-structure";
-  private static final String EFFECTIVE_POM = "java/effective-pom";
-
   private final RequestTransmitter requestTransmitter;
 
   @Inject
@@ -47,62 +42,37 @@ public class JavaLanguageExtensionServiceClient {
           requestTransmitter
               .newRequest()
               .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
-              .methodName(FILE_STRUCTURE)
+              .methodName("java/file-structure")
               .paramsAsDto(params)
               .sendAndReceiveResultAsListOfDto(
                   ExtendedSymbolInformation.class, FILE_STRUCTURE_REQUEST_TIMEOUT)
               .onSuccess(resolve::apply)
-              .onTimeout(
-                  () -> {
-                    reject.apply(
-                        new PromiseError() {
-                          TimeoutException t = new TimeoutException("Timeout");
-
-                          @Override
-                          public String getMessage() {
-                            return t.getMessage();
-                          }
-
-                          @Override
-                          public Throwable getCause() {
-                            return t;
-                          }
-                        });
-                  })
-              .onFailure(
-                  error -> {
-                    reject.apply(ServiceUtil.getPromiseError(error));
-                  });
+              .onTimeout(() -> reject.apply(JsPromiseError.create(new TimeoutException("Timeout"))))
+              .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error)));
         });
   }
 
-  public Promise<String> effectivePom(GetEffectivePomParameters params) {
+  /**
+   * Gets effective pom for maven project.
+   *
+   * @param pathToProject path to project relatively to projects root (e.g. /projects)
+   * @return effective pom
+   */
+  public Promise<String> effectivePom(String pathToProject) {
     return Promises.create(
         (resolve, reject) ->
             requestTransmitter
                 .newRequest()
                 .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
-                .methodName(EFFECTIVE_POM)
-                .paramsAsDto(params)
+                .methodName("java/effective-pom")
+                .paramsAsString(pathToProject)
                 .sendAndReceiveResultAsString(EFFECTIVE_POM_REQUEST_TIMEOUT)
                 .onSuccess(resolve::apply)
                 .onTimeout(
                     () ->
                         reject.apply(
-                            new PromiseError() {
-                              TimeoutException te =
-                                  new TimeoutException("Timeout while getting effective pom.");
-
-                              @Override
-                              public String getMessage() {
-                                return te.getMessage();
-                              }
-
-                              @Override
-                              public Throwable getCause() {
-                                return te;
-                              }
-                            }))
+                            JsPromiseError.create(
+                                new TimeoutException("Timeout while getting effective pom."))))
                 .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));
   }
 }

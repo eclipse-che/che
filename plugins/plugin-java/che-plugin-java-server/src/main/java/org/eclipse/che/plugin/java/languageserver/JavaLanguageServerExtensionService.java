@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.java.languageserver;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.prefixURI;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EFFECTIVE_POM_REQUEST_TIMEOUT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE_REQUEST_TIMEOUT;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FILE_STRUCTURE_COMMAND;
@@ -45,7 +46,6 @@ import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
 import org.eclipse.che.jdt.ls.extension.api.dto.FileStructureCommandParameters;
-import org.eclipse.che.jdt.ls.extension.api.dto.GetEffectivePomParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestFindParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPosition;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPositionParameters;
@@ -62,13 +62,9 @@ import org.slf4j.LoggerFactory;
 /**
  * This service makes custom commands in our jdt.ls extension available to clients.
  *
- * @author Thomas M?der
+ * @author Thomas Mäder
  */
 public class JavaLanguageServerExtensionService {
-
-  private static final String FILE_STRUCTURE = "java/file-structure";
-  private static final String EFFECTIVE_POM = "java/effective-pom";
-
   private final Gson gson;
   private final LanguageServerRegistry registry;
 
@@ -93,15 +89,15 @@ public class JavaLanguageServerExtensionService {
   public void configureMethods() {
     requestHandler
         .newConfiguration()
-        .methodName(FILE_STRUCTURE)
+        .methodName("java/file-structure")
         .paramsAsDto(FileStructureCommandParameters.class)
         .resultAsListOfDto(ExtendedSymbolInformationDto.class)
         .withFunction(this::executeFileStructure);
 
     requestHandler
         .newConfiguration()
-        .methodName(EFFECTIVE_POM)
-        .paramsAsDto(GetEffectivePomParameters.class)
+        .methodName("java/effective-pom")
+        .paramsAsString()
         .resultAsString()
         .withFunction(this::getEffectivePom);
   }
@@ -260,7 +256,7 @@ public class JavaLanguageServerExtensionService {
   public List<ExtendedSymbolInformationDto> executeFileStructure(
       FileStructureCommandParameters params) {
     LOG.info("Requesting files structure for {}", params);
-    params.setUri(LanguageServiceUtils.prefixURI(params.getUri()));
+    params.setUri(prefixURI(params.getUri()));
     CompletableFuture<Object> result =
         executeCommand(FILE_STRUCTURE_COMMAND, singletonList(params));
     Type targetClassType = new TypeToken<ArrayList<ExtendedSymbolInformation>>() {}.getType();
@@ -281,9 +277,17 @@ public class JavaLanguageServerExtensionService {
     }
   }
 
-  public String getEffectivePom(GetEffectivePomParameters parameters) {
+  /**
+   * Retrieves effective pom for specified project.
+   *
+   * @param projectPath path to project relatively to projects root (e.g. /projects)
+   * @return effective pom for given project
+   */
+  public String getEffectivePom(String projectPath) {
+    final String projectUri = prefixURI(projectPath);
+
     CompletableFuture<Object> result =
-        executeCommand(GET_EFFECTIVE_POM_COMMAND, singletonList(parameters));
+        executeCommand(GET_EFFECTIVE_POM_COMMAND, singletonList(projectUri));
 
     Type targetClassType = new TypeToken<String>() {}.getType();
     try {

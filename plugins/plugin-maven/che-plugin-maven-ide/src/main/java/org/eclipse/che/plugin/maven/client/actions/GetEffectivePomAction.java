@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.plugin.maven.client.actions;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
@@ -24,13 +25,15 @@ import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.editor.document.Document;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.SyntheticFile;
-import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
-import org.eclipse.che.jdt.ls.extension.api.dto.GetEffectivePomParameters;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.plugin.maven.client.MavenLocalizationConstant;
 import org.eclipse.che.plugin.maven.client.MavenResources;
 import org.eclipse.che.plugin.maven.shared.MavenAttributes;
@@ -48,7 +51,6 @@ public class GetEffectivePomAction extends AbstractPerspectiveAction {
   private final NotificationManager notificationManager;
   private final JavaLanguageExtensionServiceClient javaLanguageExtensionServiceClient;
   private final AppContext appContext;
-  private final DtoFactory dtoFactory;
 
   @Inject
   public GetEffectivePomAction(
@@ -57,8 +59,7 @@ public class GetEffectivePomAction extends AbstractPerspectiveAction {
       EditorAgent editorAgent,
       NotificationManager notificationManager,
       JavaLanguageExtensionServiceClient javaLanguageExtensionServiceClient,
-      AppContext appContext,
-      DtoFactory dtoFactory) {
+      AppContext appContext) {
     super(
         Collections.singletonList(PROJECT_PERSPECTIVE_ID),
         constant.actionGetEffectivePomTitle(),
@@ -68,12 +69,10 @@ public class GetEffectivePomAction extends AbstractPerspectiveAction {
     this.notificationManager = notificationManager;
     this.javaLanguageExtensionServiceClient = javaLanguageExtensionServiceClient;
     this.appContext = appContext;
-    this.dtoFactory = dtoFactory;
   }
 
   @Override
   public void updateInPerspective(@NotNull ActionEvent event) {
-
     final Resource resource = appContext.getResource();
     if (resource == null) {
       event.getPresentation().setEnabledAndVisible(false);
@@ -92,29 +91,16 @@ public class GetEffectivePomAction extends AbstractPerspectiveAction {
   @Override
   public void actionPerformed(ActionEvent e) {
     final Resource resource = appContext.getResource();
-    checkState(resource != null);
+    checkNotNull(resource);
 
     final Project project = resource.getProject();
     checkState(MAVEN_ID.equals(project.getType()));
 
-    final String pathToProjectsDir = "/projects";
-    final String absolutePathToProjectPom =
-        pathToProjectsDir + project.getLocation().toString() + "/pom.xml";
-    GetEffectivePomParameters paramsDto =
-        dtoFactory
-            .createDto(GetEffectivePomParameters.class)
-            .withPathToProjectPom(absolutePathToProjectPom);
-
     javaLanguageExtensionServiceClient
-        .effectivePom(paramsDto)
+        .effectivePom(project.getLocation().toString())
         .then(
             content -> {
-              editorAgent.openEditor(
-                  new SyntheticFile(
-                      "pom.xml",
-                      project.getAttributes().get(MavenAttributes.ARTIFACT_ID).get(0)
-                          + " [effective pom]",
-                      content));
+              showEffectivePomInEditor(project, content);
             })
         .catchError(
             error -> {
@@ -124,5 +110,36 @@ public class GetEffectivePomAction extends AbstractPerspectiveAction {
                   FAIL,
                   EMERGE_MODE);
             });
+  }
+
+  /**
+   * Shows or updates effective pom editor tab for specified project.
+   *
+   * @param project project for which effective pom was requested
+   * @param content effective pom
+   */
+  private void showEffectivePomInEditor(Project project, String content) {
+    final String artifactId = project.getAttributes().get(MavenAttributes.ARTIFACT_ID).get(0);
+    final String effectivePomPath = "synthetic-file-" + artifactId + "-pom.xml";
+
+    EditorPartPresenter effectivePomTab =
+        editorAgent.getOpenedEditor(Path.valueOf(effectivePomPath));
+
+    if (effectivePomTab == null) {
+      // open new editor tab
+      editorAgent.openEditor(
+          new SyntheticFile(effectivePomPath, artifactId + " [effective pom]", content));
+    } else {
+      // update opened tab
+      if (effectivePomTab instanceof TextEditor) {
+        Document document = ((TextEditor) effectivePomTab).getDocument();
+        document.replace(0, document.getContents().length(), content);
+        editorAgent.activateEditor(effectivePomTab);
+      } else {
+        editorAgent.closeEditor(effectivePomTab);
+        editorAgent.openEditor(
+            new SyntheticFile(effectivePomPath, artifactId + " [effective pom]", content));
+      }
+    }
   }
 }
