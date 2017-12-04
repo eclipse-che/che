@@ -17,9 +17,6 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADE
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.pageobject.Consoles.CommandsGoal.COMMON;
-import static org.eclipse.che.selenium.pageobject.Consoles.CommandsGoal.RUN;
-import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.WORKSPACES;
 import static org.openqa.selenium.Keys.ENTER;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
@@ -37,9 +34,10 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -67,11 +65,12 @@ public class WorkingWithJavaMySqlStackTest {
   @Inject private CreateWorkspace createWorkspace;
   @Inject private ProjectSourcePage projectSourcePage;
   @Inject private Dashboard dashboard;
-  @Inject private DashboardWorkspace dashboardWorkspace;
+  @Inject private WorkspaceDetails workspaceDetails;
   @Inject private AskDialog askDialog;
   @Inject private MachineTerminal terminal;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private Workspaces workspaces;
 
   @AfterClass
   public void tearDown() throws Exception {
@@ -82,19 +81,19 @@ public class WorkingWithJavaMySqlStackTest {
   public void checkJavaMySqlAndRunApp() {
     String currentWindow;
 
-    // create a workspace from the Java-MySql stack with the web-java-petclinic project
+    // Create a workspace from the Java-MySql stack with the web-java-petclinic project
     dashboard.open();
-    navigationBar.waitNavigationBar();
-    navigationBar.clickOnMenu(WORKSPACES);
-    dashboardWorkspace.waitToolbarTitleName("Workspaces");
-    dashboardWorkspace.clickOnNewWorkspaceBtn();
+    dashboard.waitDashboardToolbarTitle();
+    dashboard.selectWorkspacesItemOnDashboard();
+    dashboard.waitToolbarTitleName("Workspaces");
+    workspaces.clickOnNewWorkspaceBtn();
     createWorkspace.waitToolbar();
     createWorkspace.selectStack(JAVA_MYSQL.getId());
     createWorkspace.typeWorkspaceName(WORKSPACE);
-    projectSourcePage.clickAddOrImportProjectButton();
+    projectSourcePage.clickOnAddOrImportProjectButton();
     projectSourcePage.selectSample(PROJECT_NAME);
-    projectSourcePage.clickAdd();
-    createWorkspace.clickCreate();
+    projectSourcePage.clickOnAddProjectButton();
+    createWorkspace.clickOnCreateWorkspaceButton();
 
     seleniumWebDriver.switchFromDashboardIframeToIde(LOADER_TIMEOUT_SEC);
     currentWindow = seleniumWebDriver.getWindowHandle();
@@ -103,14 +102,15 @@ public class WorkingWithJavaMySqlStackTest {
     projectExplorer.selectItem(PROJECT_NAME);
 
     // Select the db machine and perform 'show databases'
-    consoles.startCommandFromProcessesArea("db", COMMON, "show databases");
+    consoles.startCommandFromProcessesArea("db", Consoles.CommandsGoal.COMMON, "show databases");
     consoles.waitTabNameProcessIsPresent("db");
     for (String text : infoDataBases) {
       consoles.waitExpectedTextIntoConsole(text);
     }
 
     // Build and deploy the web application
-    consoles.startCommandFromProcessesArea("dev-machine", RUN, BUIL_AND_DEPLOY_PROCESS);
+    consoles.startCommandFromProcessesArea(
+        "dev-machine", Consoles.CommandsGoal.RUN, BUIL_AND_DEPLOY_PROCESS);
     consoles.waitTabNameProcessIsPresent(BUIL_AND_DEPLOY_PROCESS);
     consoles.waitProcessInProcessConsoleTree(BUIL_AND_DEPLOY_PROCESS);
     consoles.waitExpectedTextIntoConsole(BUILD_SUCCESS, UPDATING_PROJECT_TIMEOUT_SEC);
@@ -141,7 +141,7 @@ public class WorkingWithJavaMySqlStackTest {
     terminal.waitExpectedTextNotPresentTerminal("catalina.startup.Bootstrap start");
   }
 
-  /** check main elements of the web-java-petclinic */
+  // Check main elements of the web-java-petclinic
   private void checkWebJavaPetclinicAppl() {
     new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(By.xpath("//h2[text()='Welcome']")));
