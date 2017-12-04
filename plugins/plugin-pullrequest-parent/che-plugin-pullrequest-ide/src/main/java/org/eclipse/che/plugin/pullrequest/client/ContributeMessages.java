@@ -251,11 +251,14 @@ public interface ContributeMessages extends Messages {
   @Key("contributor.extension.default.commit.description")
   String contributorExtensionDefaultCommitDescription(String branchName, String contributionTitle);
 
-  @Key("stub.text.project.not.provide.vsc")
-  String stubTextProjectNotProvideVSC();
+  @Key("stub.text.project.not.provide.supported.vsc")
+  String stubTextProjectNotProvideSupportedVSC();
 
   @Key("stub.text.project.is.not.selected")
   String stubTextProjectIsNotSelected();
+
+  @Key("stub.text.loading")
+  String stubTextLoading();
 
   @Key("stub.text.nothing.to.show")
   String stubTextNothingToShow();
@@ -265,4 +268,7 @@ public interface ContributeMessages extends Messages {
 
   @Key("failed.to.apply.vsc.mixin")
   String failedToApplyVSCMixin(String project, String cause);
+
+  @Key("stub.text.should.be.selected.only.one.project")
+  String stubTextShouldBeSelectedOnlyOneProject();
 }
