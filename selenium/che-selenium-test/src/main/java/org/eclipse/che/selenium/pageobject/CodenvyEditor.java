@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.*;
 import static org.openqa.selenium.support.ui.ExpectedConditions.*;
@@ -41,7 +42,6 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
-import org.testng.Assert;
 
 /** @author Musienko Maxim */
 @Singleton
@@ -1846,13 +1846,13 @@ public class CodenvyEditor {
   }
 
   private String getElementSrcLink(WebElement element) {
-    String srcLink = "";
-    try {
-      srcLink = element.getAttribute("src");
-    } catch (StaleElementReferenceException ex) {
-      Assert.fail("src link in the context java doc window does not attached");
-    }
-    return srcLink;
+    FluentWait<WebDriver> srcLinkWait =
+        new FluentWait<WebDriver>(seleniumWebDriver)
+            .withTimeout(LOAD_PAGE_TIMEOUT_SEC, SECONDS)
+            .pollingEvery(500, MILLISECONDS)
+            .ignoring(StaleElementReferenceException.class, NoSuchElementException.class);
+
+    return srcLinkWait.until((ExpectedCondition<String>) driver -> element.getAttribute("src"));
   }
 
   private String openStreamAndGetAllText(HttpURLConnection httpURLConnection) {
