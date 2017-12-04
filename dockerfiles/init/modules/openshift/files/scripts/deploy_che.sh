@@ -389,12 +389,12 @@ echo "[CHE] Deploying Che on ${OPENSHIFT_FLAVOR} (image ${CHE_IMAGE})"
 
 DEFAULT_CHE_DEPLOYMENT_FILE_PATH=./che-openshift.yml
 CHE_DEPLOYMENT_FILE_PATH=${CHE_DEPLOYMENT_FILE_PATH:-${DEFAULT_CHE_DEPLOYMENT_FILE_PATH}}
-DEFAULT_CHE_CONFIG_MAP_FILE_PATH=./che-configurations
-CHE_CONFIG_MAP_FILE_PATH=${CHE_CONFIG_MAP_FILE_PATH:-${DEFAULT_CHE_CONFIG_MAP_FILE_PATH}}
+DEFAULT_CHE_CONFIG_FILE_PATH=./che-config
+CHE_CONFIG_FILE_PATH=${CHE_CONFIG_FILE_PATH:-${DEFAULT_CHE_CONFIG_FILE_PATH}}
 cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     sed "s/          image:.*/          image: \"${CHE_IMAGE_SANITIZED}\"/" | \
     sed "s/          imagePullPolicy:.*/          imagePullPolicy: \"${IMAGE_PULL_POLICY}\"/" | \
-    inject_che_config "#CHE_MASTER_CONFIG" "${CHE_CONFIG_MAP_FILE_PATH}" | \
+    inject_che_config "#CHE_MASTER_CONFIG" "${CHE_CONFIG_FILE_PATH}" | \
     if [ "${ENABLE_SSL}" == "false" ]; then grep -v -e "tls:" -e "insecureEdgeTerminationPolicy: Redirect" -e "termination: edge" ; else cat -; fi | \
     oc apply --force=true -f -
 echo
