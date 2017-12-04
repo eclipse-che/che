@@ -339,6 +339,8 @@
                         <exclude>**/CSharpOutputCustomizerTest.java</exclude>
                         <exclude>**/CPPOutputCustomizer.java</exclude>
                         <exclude>**/CPPOutputCustomizerTest.java</exclude>
+                        <exclude>**/AnsiOutputStream.java</exclude>
+                        <exclude>**/HtmlAnsiOutputStream.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>

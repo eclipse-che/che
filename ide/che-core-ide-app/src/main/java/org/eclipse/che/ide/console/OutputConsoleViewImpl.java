@@ -29,7 +29,6 @@ import com.google.gwt.event.dom.client.ScrollHandler;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.DOM;
@@ -41,9 +40,11 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.FontAwesome;
+import org.eclipse.che.ide.console.jansi.HtmlAnsiOutputStream;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.util.Pair;
@@ -335,12 +336,22 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
         new SafeHtml() {
           @Override
           public String asString() {
+            String encoded;
+            try {
+              ByteArrayOutputStream os = new ByteArrayOutputStream();
+              // BufferedOutputStream bos = new BufferedOutputStream(os);
+              HtmlAnsiOutputStream html = new HtmlAnsiOutputStream(os);
+              html.write(text.getBytes());
+              html.close();
+              encoded = new String(os.toByteArray());
+            } catch (Exception e) {
+              encoded = e.getLocalizedMessage();
+            }
 
-            if (Strings.isNullOrEmpty(text)) {
+            if (Strings.isNullOrEmpty(encoded)) {
               return " ";
             }
 
-            String encoded = SafeHtmlUtils.htmlEscape(text);
             if (delegate != null) {
               if (delegate.getCustomizer() != null) {
                 if (delegate.getCustomizer().canCustomize(encoded)) {
