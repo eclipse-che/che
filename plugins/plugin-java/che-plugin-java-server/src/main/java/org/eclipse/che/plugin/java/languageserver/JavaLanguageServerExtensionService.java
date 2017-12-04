@@ -68,10 +68,7 @@ import org.eclipse.che.jdt.ls.extension.api.dto.JarEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestFindParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPosition;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPositionParameters;
-import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.ClassContentDto;
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.ExtendedSymbolInformationDto;
-import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.JarDto;
-import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.JarEntryDto;
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.TestPositionDto;
 import org.eclipse.lsp4j.ExecuteCommandParams;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.CollectionTypeAdapterFactory;
@@ -87,6 +84,8 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Mäder
  */
 public class JavaLanguageServerExtensionService {
+  private static final int TIMEOUT = 10;
+
   private final Gson gson;
   private final LanguageServerRegistry registry;
 
@@ -120,42 +119,42 @@ public class JavaLanguageServerExtensionService {
         .newConfiguration()
         .methodName(EXTERNAL_LIBRARIES)
         .paramsAsDto(ExternalLibrariesParameters.class)
-        .resultAsListOfDto(JarDto.class)
+        .resultAsListOfDto(Jar.class)
         .withFunction(this::getProjectExternalLibraries);
 
     requestHandler
         .newConfiguration()
         .methodName(EXTERNAL_LIBRARIES_CHILDREN)
         .paramsAsDto(ExternalLibrariesParameters.class)
-        .resultAsListOfDto(JarEntryDto.class)
+        .resultAsListOfDto(JarEntry.class)
         .withFunction(this::getExternalLibrariesChildren);
 
     requestHandler
         .newConfiguration()
         .methodName(EXTERNAL_LIBRARY_CHILDREN)
         .paramsAsDto(ExternalLibrariesParameters.class)
-        .resultAsListOfDto(JarEntryDto.class)
+        .resultAsListOfDto(JarEntry.class)
         .withFunction(this::getLibraryChildren);
 
     requestHandler
         .newConfiguration()
         .methodName(EXTERNAL_LIBRARY_ENTRY)
         .paramsAsDto(ExternalLibrariesParameters.class)
-        .resultAsDto(JarEntryDto.class)
+        .resultAsDto(JarEntry.class)
         .withFunction(this::getLibraryEntry);
 
     requestHandler
         .newConfiguration()
         .methodName(EXTERNAL_CONTENT_NODE_BY_PATH)
         .paramsAsDto(ExternalLibrariesParameters.class)
-        .resultAsDto(ClassContentDto.class)
+        .resultAsDto(ClassContent.class)
         .withFunction(this::getLibraryNodeContentByPath);
 
     requestHandler
         .newConfiguration()
         .methodName(EXTERNAL_CONTENT_NODE_BY_FQN)
         .paramsAsDto(ExternalLibrariesParameters.class)
-        .resultAsDto(ClassContentDto.class)
+        .resultAsDto(ClassContent.class)
         .withFunction(this::getLibraryNodeContentByFqn);
 
     requestHandler
@@ -177,7 +176,7 @@ public class JavaLanguageServerExtensionService {
         executeCommand(GET_OUTPUT_DIR_COMMAND, singletonList(projectUri));
     Type targetClassType = new TypeToken<String>() {}.getType();
     try {
-      return gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), targetClassType);
+      return gson.fromJson(gson.toJson(result.get(TIMEOUT, TimeUnit.SECONDS)), targetClassType);
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }
@@ -199,7 +198,7 @@ public class JavaLanguageServerExtensionService {
     Type targetClassType = new TypeToken<ArrayList<TestPosition>>() {}.getType();
     try {
       List<TestPosition> positions =
-          gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), targetClassType);
+          gson.fromJson(gson.toJson(result.get(TIMEOUT, TimeUnit.SECONDS)), targetClassType);
       return positions.stream().map(TestPositionDto::new).collect(Collectors.toList());
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
@@ -217,7 +216,7 @@ public class JavaLanguageServerExtensionService {
         executeCommand(RESOLVE_CLASSPATH_COMMAND, singletonList(projectUri));
     Type targetClassType = new TypeToken<ArrayList<String>>() {}.getType();
     try {
-      return gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), targetClassType);
+      return gson.fromJson(gson.toJson(result.get(TIMEOUT, TimeUnit.SECONDS)), targetClassType);
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }
@@ -317,7 +316,7 @@ public class JavaLanguageServerExtensionService {
    * @param params command parameters {@link FileStructureCommandParameters}
    * @return file structure tree
    */
-  public List<ExtendedSymbolInformationDto> executeFileStructure(
+  private List<ExtendedSymbolInformationDto> executeFileStructure(
       FileStructureCommandParameters params) {
     LOG.info("Requesting files structure for {}", params);
     params.setUri(LanguageServiceUtils.prefixURI(params.getUri()));
@@ -326,7 +325,7 @@ public class JavaLanguageServerExtensionService {
     Type targetClassType = new TypeToken<ArrayList<ExtendedSymbolInformation>>() {}.getType();
     try {
       List<ExtendedSymbolInformation> symbols =
-          gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), targetClassType);
+          gson.fromJson(gson.toJson(result.get(TIMEOUT, TimeUnit.SECONDS)), targetClassType);
       return symbols
           .stream()
           .map(
@@ -341,114 +340,47 @@ public class JavaLanguageServerExtensionService {
     }
   }
 
-  private List<JarDto> getProjectExternalLibraries(ExternalLibrariesParameters params) {
+  private List<Jar> getProjectExternalLibraries(ExternalLibrariesParameters params) {
     params.setProjectUri(LanguageServiceUtils.prefixURI(params.getProjectUri()));
-    CompletableFuture<Object> result =
-        executeCommand(GET_EXTERNAL_LIBRARIES_COMMAND, singletonList(params));
-    Type targetClassType = new TypeToken<ArrayList<Jar>>() {}.getType();
-    try {
-      return gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), targetClassType);
-    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
-      throw new JsonRpcException(-27000, e.getMessage());
-    }
+    Type type = new TypeToken<ArrayList<Jar>>() {}.getType();
+    return doGetList(GET_EXTERNAL_LIBRARIES_COMMAND, params, type);
   }
 
-  private List<JarEntryDto> getExternalLibrariesChildren(ExternalLibrariesParameters params) {
+  private List<JarEntry> getExternalLibrariesChildren(ExternalLibrariesParameters params) {
     params.setProjectUri(LanguageServiceUtils.prefixURI(params.getProjectUri()));
-    CompletableFuture<Object> result =
-        executeCommand(GET_EXTERNAL_LIBRARIES_CHILDREN_COMMAND, singletonList(params));
-    Type targetClassType = new TypeToken<ArrayList<JarEntry>>() {}.getType();
-    try {
-      return gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), targetClassType);
-    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
-      throw new JsonRpcException(-27000, e.getMessage());
-    }
+    Type type = new TypeToken<ArrayList<JarEntry>>() {}.getType();
+    return doGetList(GET_EXTERNAL_LIBRARIES_CHILDREN_COMMAND, params, type);
   }
 
-  private List<JarEntryDto> getLibraryChildren(ExternalLibrariesParameters params) {
+  private List<JarEntry> getLibraryChildren(ExternalLibrariesParameters params) {
     params.setProjectUri(LanguageServiceUtils.prefixURI(params.getProjectUri()));
-    CompletableFuture<Object> result =
-        executeCommand(GET_LIBRARY_CHILDREN_COMMAND, singletonList(params));
-    Type targetClassType = new TypeToken<ArrayList<JarEntry>>() {}.getType();
-    try {
-      return gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), targetClassType);
-    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
-      throw new JsonRpcException(-27000, e.getMessage());
-    }
+    Type type = new TypeToken<ArrayList<JarEntry>>() {}.getType();
+    return doGetList(GET_LIBRARY_CHILDREN_COMMAND, params, type);
   }
 
   private List<ClasspathEntryDto> getClasspathTree(String projectPath) {
     String projectUri = LanguageServiceUtils.prefixURI(projectPath);
-    CompletableFuture<Object> result =
-        executeCommand(GET_CLASS_PATH_TREE_COMMAND, singletonList(projectUri));
-    Type targetClassType = new TypeToken<ArrayList<ClasspathEntry>>() {}.getType();
-    try {
-      List<ClasspathEntry> classpathEntries =
-          gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), targetClassType);
-      return convertToClasspathEntryDto(classpathEntries);
-    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
-      throw new JsonRpcException(-27000, e.getMessage());
-    }
+    Type type = new TypeToken<ArrayList<ClasspathEntry>>() {}.getType();
+    List<ClasspathEntry> entries = doGetList(GET_CLASS_PATH_TREE_COMMAND, projectUri, type);
+    return convertToClasspathEntryDto(entries);
   }
 
-  private List<ClasspathEntryDto> convertToClasspathEntryDto(
-      List<ClasspathEntry> classpathEntries) {
-    List<ClasspathEntryDto> result = new LinkedList<>();
-    for (ClasspathEntry classpathEntry : classpathEntries) {
-      ClasspathEntryDto classpathEntryDto =
-          DtoFactory.newDto(ClasspathEntryDto.class)
-              .withEntryKind(classpathEntry.getEntryKind())
-              .withPath(classpathEntry.getPath());
-
-      List<ClasspathEntry> children = classpathEntry.getChildren();
-
-      if (children != null) {
-        classpathEntryDto.withExpandedEntries(convertToClasspathEntryDto(children));
-      }
-
-      result.add(classpathEntryDto);
-    }
-
-    return result;
-  }
-
-  private JarEntryDto getLibraryEntry(ExternalLibrariesParameters params) {
+  private JarEntry getLibraryEntry(ExternalLibrariesParameters params) {
     params.setProjectUri(LanguageServiceUtils.prefixURI(params.getProjectUri()));
-    CompletableFuture<Object> result =
-        executeCommand(GET_LIBRARY_ENTRY_COMMAND, singletonList(params));
-    Type targetClassType = new TypeToken<JarEntry>() {}.getType();
-    try {
-      return new JarEntryDto(
-          gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), targetClassType));
-    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
-      throw new JsonRpcException(-27000, e.getMessage());
-    }
+    Type type = new TypeToken<JarEntry>() {}.getType();
+    return doGetOne(GET_LIBRARY_ENTRY_COMMAND, params, type);
   }
 
-  private ClassContentDto getLibraryNodeContentByPath(ExternalLibrariesParameters params) {
+  private ClassContent getLibraryNodeContentByPath(ExternalLibrariesParameters params) {
     params.setProjectUri(LanguageServiceUtils.prefixURI(params.getProjectUri()));
-    CompletableFuture<Object> result =
-        executeCommand(GET_LIBRARY_NODE_CONTENT_BY_PATH_COMMAND, singletonList(params));
-    Type targetClassType = new TypeToken<ClassContent>() {}.getType();
-    try {
-      return new ClassContentDto(
-          gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), targetClassType));
-    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
-      throw new JsonRpcException(-27000, e.getMessage());
-    }
+    Type type = new TypeToken<ClassContent>() {}.getType();
+    return doGetOne(GET_LIBRARY_NODE_CONTENT_BY_PATH_COMMAND, params, type);
   }
 
-  private ClassContentDto getLibraryNodeContentByFqn(ExternalLibrariesParameters params) {
+  private ClassContent getLibraryNodeContentByFqn(ExternalLibrariesParameters params) {
     params.setProjectUri(LanguageServiceUtils.prefixURI(params.getProjectUri()));
-    CompletableFuture<Object> result =
-        executeCommand(GET_LIBRARY_NODE_CONTENT_BY_FQN_COMMAND, singletonList(params));
-    Type targetClassType = new TypeToken<ClassContent>() {}.getType();
-    try {
-      return new ClassContentDto(
-          gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), targetClassType));
-    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
-      throw new JsonRpcException(-27000, e.getMessage());
-    }
+    Type type = new TypeToken<ClassContent>() {}.getType();
+    return doGetOne(GET_LIBRARY_NODE_CONTENT_BY_FQN_COMMAND, params, type);
   }
 
   private List<String> executeFindTestsCommand(
@@ -460,10 +392,23 @@ public class JavaLanguageServerExtensionService {
       List<String> classes) {
     TestFindParameters parameters =
         new TestFindParameters(fileUri, methodAnnotation, projectAnnotation, offset, classes);
-    CompletableFuture<Object> result = executeCommand(commandId, singletonList(parameters));
-    Type targetClassType = new TypeToken<ArrayList<String>>() {}.getType();
+    Type type = new TypeToken<ArrayList<String>>() {}.getType();
+    return doGetList(commandId, parameters, type);
+  }
+
+  private <T, P> List<T> doGetList(String command, P params, Type type) {
+    CompletableFuture<Object> result = executeCommand(command, singletonList(params));
     try {
-      return gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), targetClassType);
+      return gson.fromJson(gson.toJson(result.get(TIMEOUT, TimeUnit.SECONDS)), type);
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
+  }
+
+  private <T, P> T doGetOne(String command, P params, Type type) {
+    CompletableFuture<Object> result = executeCommand(command, singletonList(params));
+    try {
+      return gson.fromJson(gson.toJson(result.get(TIMEOUT, TimeUnit.SECONDS)), type);
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }
@@ -486,5 +431,26 @@ public class JavaLanguageServerExtensionService {
     for (ExtendedSymbolInformation child : symbol.getChildren()) {
       fixLocation(child);
     }
+  }
+
+  private List<ClasspathEntryDto> convertToClasspathEntryDto(
+      List<ClasspathEntry> classpathEntries) {
+    List<ClasspathEntryDto> result = new LinkedList<>();
+    for (ClasspathEntry classpathEntry : classpathEntries) {
+      ClasspathEntryDto classpathEntryDto =
+          DtoFactory.newDto(ClasspathEntryDto.class)
+              .withEntryKind(classpathEntry.getEntryKind())
+              .withPath(classpathEntry.getPath());
+
+      List<ClasspathEntry> children = classpathEntry.getChildren();
+
+      if (children != null) {
+        classpathEntryDto.withExpandedEntries(convertToClasspathEntryDto(children));
+      }
+
+      result.add(classpathEntryDto);
+    }
+
+    return result;
   }
 }
