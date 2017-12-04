@@ -44,6 +44,7 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.constant.TestBrowser;
+import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.pageobject.InjectPageObject;
 import org.eclipse.che.selenium.core.pageobject.PageObjectsInjector;
 import org.eclipse.che.selenium.core.user.InjectTestUser;
@@ -55,6 +56,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.IAnnotationTransformer;
 import org.testng.IConfigurationListener;
 import org.testng.IInvokedMethod;
 import org.testng.IInvokedMethodListener;
@@ -72,12 +74,13 @@ import org.testng.TestException;
  * invoked twice.
  *
  * @author Anatolii Bazko
- * @author Dmitry Nochevnov
+ * @author Dmytro Nochevnov
  */
 public abstract class SeleniumTestHandler
-    implements ITestListener, ISuiteListener, IInvokedMethodListener {
+    implements ITestListener, ISuiteListener, IInvokedMethodListener, IAnnotationTransformer {
 
   private static final Logger LOG = LoggerFactory.getLogger(SeleniumTestHandler.class);
+  private static final AtomicBoolean isCleanUpCompleted = new AtomicBoolean();
 
   @Inject
   @Named("tests.screenshot_dir")
@@ -104,11 +107,13 @@ public abstract class SeleniumTestHandler
   @Inject private TestUser defaultTestUser;
   @Inject private TestWorkspaceProvider testWorkspaceProvider;
 
+  private final Injector injector;
   private final Map<Long, Object> runningTests = new ConcurrentHashMap<>();
 
-  private static AtomicBoolean isCleanUpCompleted = new AtomicBoolean();
-
   public SeleniumTestHandler() {
+    injector = createInjector(getParentModules());
+    injector.injectMembers(this);
+
     getRuntime().addShutdownHook(new Thread(this::shutdown));
   }
 
@@ -147,9 +152,6 @@ public abstract class SeleniumTestHandler
   public void onStart(ISuite suite) {
     isCleanUpCompleted.set(false);
     runningTests.clear();
-
-    Injector injector = createInjector(getParentModules());
-    injector.injectMembers(this);
 
     suite.setParentInjector(injector);
   }
@@ -281,6 +283,7 @@ public abstract class SeleniumTestHandler
         || f.isAnnotationPresent(javax.inject.Inject.class)
         || f.isAnnotationPresent(InjectTestUser.class)
         || f.isAnnotationPresent(InjectTestWorkspace.class)
+        || f.isAnnotationPresent(InjectTestOrganization.class)
         || f.isAnnotationPresent(InjectPageObject.class);
   }
 
