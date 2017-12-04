@@ -11,20 +11,8 @@
 package org.eclipse.che.selenium.pageobject;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ATTACHING_ELEM_TO_DOM_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
-import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
-import static org.openqa.selenium.support.ui.ExpectedConditions.frameToBeAvailableAndSwitchToIt;
-import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
-import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfAllElementsLocatedBy;
-import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
-import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementLocated;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.*;
+import static org.openqa.selenium.support.ui.ExpectedConditions.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import com.google.inject.Inject;
@@ -34,21 +22,18 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriverException;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.FindAll;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedCondition;
@@ -135,8 +120,7 @@ public class CodenvyEditor {
 
     public static final String CONTEXT_MENU = "//div[@id='menu-lock-layer-id']/div[2]";
     public static final String EDITOR_TABS_PANEL = "gwt-debug-multiSplitPanel-tabsPanel";
-    public static final String ACTIVE_LINE_NUMBER =
-        "//div[@class='textviewSelection']/following::div[contains(text(),':')]";
+    public static final String ACTIVE_LINE_NUMBER = "gwt-debug-cursorPosition";
     public static final String POSITION_CURSOR_NUMBER =
         "//div[@id='gwt-debug-editorPartStack-contentPanel']//div[text()='%s']";
     public static final String ACTIVE_EDITOR_ENTRY_POINT =
@@ -226,8 +210,8 @@ public class CodenvyEditor {
   @FindBy(id = Locators.EDITOR_TABS_PANEL)
   private WebElement editorTabsPanel;
 
-  @FindBy(xpath = Locators.ACTIVE_LINE_NUMBER)
-  private WebElement activeLineNumber;
+  @FindAll({@FindBy(id = Locators.ACTIVE_LINE_NUMBER)})
+  private List<WebElement> activeLineNumbers;
 
   @FindBy(xpath = Locators.AUTOCOMPLETE_CONTAINER)
   private WebElement autocompleteContainer;
@@ -1318,13 +1302,26 @@ public class CodenvyEditor {
         (ExpectedCondition<Boolean>) driver -> activeLineXpath.getText().contains(text));
   }
 
-  /** get number of current active line */
-  public int getNumberOfActiveLine() {
+  /** get positions of the current line and char */
+  public Pair<Integer, Integer> getCurrentCursorPositions() {
     waitActiveEditor();
-    int numberLine =
-        Integer.parseInt(
-            redrawDriverWait.until(visibilityOf(activeLineNumber)).getText().split(":")[0]);
-    return numberLine;
+    WebElement currentActiveElement =
+        activeLineNumbers.stream().filter(webElement -> webElement.isDisplayed()).findFirst().get();
+    int[] currentCursorPosition =
+        Arrays.asList(
+                redrawDriverWait.until(visibilityOf(currentActiveElement)).getText().split(":"))
+            .stream()
+            .mapToInt(Integer::parseInt)
+            .toArray();
+    Pair<Integer, Integer> cursorPosition =
+        new Pair<>(currentCursorPosition[0], currentCursorPosition[1]);
+    return cursorPosition;
+  }
+
+  /** get number of current active line */
+  public int getPositionOfLine() {
+    waitActiveEditor();
+    return getCurrentCursorPositions().first;
   }
 
   /**
@@ -1335,27 +1332,7 @@ public class CodenvyEditor {
   public void expectedNumberOfActiveLine(final int expectedLine) {
     waitActiveEditor();
     redrawDriverWait.until(
-        (ExpectedCondition<Boolean>) driver -> expectedLine == getNumberOfActiveLine());
-  }
-
-  /**
-   * get Line value for cursor from the codenvy - editor
-   *
-   * @return line value
-   */
-  public int getPositionOfLine() {
-    loadPageDriverWait.until(presenceOfAllElementsLocatedBy(By.xpath(Locators.ACTIVE_LINE_NUMBER)));
-    List<WebElement> numLines =
-        seleniumWebDriver.findElements(By.xpath(Locators.ACTIVE_LINE_NUMBER));
-    int numberLine = 0;
-    for (WebElement numLine : numLines) {
-      if (numLine.isDisplayed()) {
-        numberLine =
-            Integer.parseInt(redrawDriverWait.until(visibilityOf(numLine)).getText().split(":")[0]);
-        break;
-      }
-    }
-    return numberLine;
+        (ExpectedCondition<Boolean>) driver -> expectedLine == getPositionOfLine());
   }
 
   /**
@@ -1364,18 +1341,7 @@ public class CodenvyEditor {
    * @return char value
    */
   public int getPositionOfChar() {
-    loadPageDriverWait.until(presenceOfAllElementsLocatedBy(By.xpath(Locators.ACTIVE_LINE_NUMBER)));
-    List<WebElement> numLines =
-        seleniumWebDriver.findElements(By.xpath(Locators.ACTIVE_LINE_NUMBER));
-    int numberChar = 0;
-    for (WebElement numLine : numLines) {
-      if (numLine.isDisplayed()) {
-        numberChar =
-            Integer.parseInt(redrawDriverWait.until(visibilityOf(numLine)).getText().split(":")[1]);
-        break;
-      }
-    }
-    return numberChar;
+    return getCurrentCursorPositions().second;
   }
 
   /**
