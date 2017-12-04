@@ -128,7 +128,8 @@ public class KeycloakOAuthAuthenticationService {
               .request()
               .asString();
       Map<String, String> params = splitQuery(token);
-      return DtoFactory.newDto(OAuthToken.class).withToken(params.get("access_token"))
+      return DtoFactory.newDto(OAuthToken.class)
+          .withToken(params.get("access_token"))
           .withScope(params.get("scope"));
     } catch (IOException e) {
       throw new ServerException(e.getMessage());

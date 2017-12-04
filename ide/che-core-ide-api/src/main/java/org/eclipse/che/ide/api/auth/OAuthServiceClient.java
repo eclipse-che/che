@@ -12,9 +12,11 @@ package org.eclipse.che.ide.api.auth;
 
 import javax.inject.Inject;
 import org.eclipse.che.api.auth.shared.dto.OAuthToken;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
+import org.eclipse.che.ide.rest.Unmarshallable;
 
 /** @author Sergii Leschenko */
 public class OAuthServiceClient {
@@ -31,5 +33,12 @@ public class OAuthServiceClient {
     asyncRequestFactory
         .createGetRequest(restContext + "/token?oauth_provider=" + oauthProvider)
         .send(callback);
+  }
+
+  public Promise<OAuthToken> getToken(
+      String oauthProvider, Unmarshallable<OAuthToken> unmarshaller) {
+    return asyncRequestFactory
+        .createGetRequest(restContext + "/token?oauth_provider=" + oauthProvider)
+        .send(unmarshaller);
   }
 }
