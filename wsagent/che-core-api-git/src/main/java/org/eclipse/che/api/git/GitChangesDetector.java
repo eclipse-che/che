@@ -12,6 +12,7 @@ package org.eclipse.che.api.git;
 
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
+import static org.eclipse.che.api.git.shared.Constants.EVENT_GIT_FILE_CHANGED;
 import static org.eclipse.che.api.git.shared.FileChangedEventDto.Status.ADDED;
 import static org.eclipse.che.api.git.shared.FileChangedEventDto.Status.MODIFIED;
 import static org.eclipse.che.api.git.shared.FileChangedEventDto.Status.NOT_MODIFIED;
@@ -48,8 +49,6 @@ import org.slf4j.Logger;
 public class GitChangesDetector {
 
   private static final Logger LOG = getLogger(GitChangesDetector.class);
-
-  private static final String OUTGOING_METHOD = "event/git-change";
 
   private final RequestTransmitter transmitter;
   private final FileWatcherManager manager;
@@ -185,7 +184,7 @@ public class GitChangesDetector {
         transmitter
             .newRequest()
             .endpointId(endpointId)
-            .methodName(OUTGOING_METHOD)
+            .methodName(EVENT_GIT_FILE_CHANGED)
             .paramsAsDto(
                 newDto(FileChangedEventDto.class)
                     .withPath(wsPath)

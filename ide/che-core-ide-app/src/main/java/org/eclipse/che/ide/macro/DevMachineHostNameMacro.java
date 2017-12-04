@@ -60,7 +60,7 @@ public class DevMachineHostNameMacro implements Macro {
     Optional<MachineImpl> devMachine = wsAgentServerUtil.getWsAgentServerMachine();
 
     if (devMachine.isPresent()) {
-      String hostName = devMachine.get().getProperties().get("config.hostname");
+      String hostName = devMachine.get().getAttributes().get("config.hostname");
 
       if (hostName != null) {
         value = hostName;

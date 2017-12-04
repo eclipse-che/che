@@ -64,7 +64,7 @@ public class FontDimensionsCalculator {
         baseHeight = height;
         return true;
       } else if (baseWidth * widthFactor != width || baseHeight * heightFactor != height) {
-        widthFactor = width / baseWidth;
+        widthFactor = baseWidth == 0 ? 0 : width / baseWidth;
         heightFactor = height / baseHeight;
         return true;
       }

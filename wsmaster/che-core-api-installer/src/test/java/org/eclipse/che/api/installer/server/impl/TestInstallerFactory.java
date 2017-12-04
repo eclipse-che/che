@@ -31,7 +31,10 @@ public class TestInstallerFactory {
         singletonMap(
             generate("server"),
             new InstallerServerConfigImpl(
-                generate("port"), generate("protocol"), generate("path"))));
+                generate("port"),
+                generate("protocol"),
+                generate("path"),
+                singletonMap(generate("attr"), generate("value")))));
   }
 
   private static String generate(String prefix) {

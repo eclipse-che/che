@@ -42,7 +42,6 @@ public class WorkspaceProjectSynchronizer implements ProjectSynchronizer {
   private final HttpJsonRequestFactory httpJsonRequestFactory;
   private final WorkspaceSyncCommunication workspaceSyncCommunication;
 
-  private final String userToken;
   private final String apiEndpoint;
   private final String workspaceId;
 
@@ -59,11 +58,9 @@ public class WorkspaceProjectSynchronizer implements ProjectSynchronizer {
     this.projectConfigRegistry = projectConfigRegistry;
 
     this.workspaceId = System.getenv("CHE_WORKSPACE_ID");
-    this.userToken = System.getenv("USER_TOKEN");
 
     LOG.info("Workspace ID: " + workspaceId);
     LOG.info("API Endpoint: " + apiEndpoint);
-    LOG.info("User Token  : " + (userToken != null));
 
     // check connection
     try {
@@ -168,9 +165,6 @@ public class WorkspaceProjectSynchronizer implements ProjectSynchronizer {
         UriBuilder.fromUri(apiEndpoint)
             .path(WorkspaceService.class)
             .path(WorkspaceService.class, "addProject");
-    if (userToken != null) {
-      builder.queryParam("token", userToken);
-    }
     final String href = builder.build(workspaceId).toString();
     try {
       httpJsonRequestFactory.fromUrl(href).usePostMethod().setBody(asDto(project)).request();
@@ -186,9 +180,6 @@ public class WorkspaceProjectSynchronizer implements ProjectSynchronizer {
         UriBuilder.fromUri(apiEndpoint)
             .path(WorkspaceService.class)
             .path(WorkspaceService.class, "updateProject");
-    if (userToken != null) {
-      builder.queryParam("token", userToken);
-    }
     final String href =
         builder.build(new String[] {workspaceId, project.getPath()}, false).toString();
     try {
@@ -205,9 +196,7 @@ public class WorkspaceProjectSynchronizer implements ProjectSynchronizer {
         UriBuilder.fromUri(apiEndpoint)
             .path(WorkspaceService.class)
             .path(WorkspaceService.class, "deleteProject");
-    if (userToken != null) {
-      builder.queryParam("token", userToken);
-    }
+
     final String href =
         builder.build(new String[] {workspaceId, project.getPath()}, false).toString();
     try {
@@ -224,9 +213,6 @@ public class WorkspaceProjectSynchronizer implements ProjectSynchronizer {
         UriBuilder.fromUri(apiEndpoint)
             .path(WorkspaceService.class)
             .path(WorkspaceService.class, "getByKey");
-    if (userToken != null) {
-      builder.queryParam("token", userToken);
-    }
     final String href = builder.build(workspaceId).toString();
     try {
       return httpJsonRequestFactory

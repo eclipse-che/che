@@ -13,7 +13,6 @@ package org.eclipse.che.selenium.core.inject;
 import static com.google.inject.Guice.createInjector;
 import static java.lang.Runtime.getRuntime;
 import static java.lang.String.format;
-import static java.util.Optional.ofNullable;
 
 import com.google.inject.Guice;
 import com.google.inject.Inject;
@@ -45,6 +44,7 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.constant.TestBrowser;
+import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.pageobject.InjectPageObject;
 import org.eclipse.che.selenium.core.pageobject.PageObjectsInjector;
 import org.eclipse.che.selenium.core.user.InjectTestUser;
@@ -56,6 +56,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.IAnnotationTransformer;
 import org.testng.IConfigurationListener;
 import org.testng.IInvokedMethod;
 import org.testng.IInvokedMethodListener;
@@ -73,12 +74,13 @@ import org.testng.TestException;
  * invoked twice.
  *
  * @author Anatolii Bazko
- * @author Dmitry Nochevnov
+ * @author Dmytro Nochevnov
  */
 public abstract class SeleniumTestHandler
-    implements ITestListener, ISuiteListener, IInvokedMethodListener {
+    implements ITestListener, ISuiteListener, IInvokedMethodListener, IAnnotationTransformer {
 
   private static final Logger LOG = LoggerFactory.getLogger(SeleniumTestHandler.class);
+  private static final AtomicBoolean isCleanUpCompleted = new AtomicBoolean();
 
   @Inject
   @Named("tests.screenshot_dir")
@@ -105,11 +107,13 @@ public abstract class SeleniumTestHandler
   @Inject private TestUser defaultTestUser;
   @Inject private TestWorkspaceProvider testWorkspaceProvider;
 
+  private final Injector injector;
   private final Map<Long, Object> runningTests = new ConcurrentHashMap<>();
 
-  private static AtomicBoolean isCleanUpCompleted = new AtomicBoolean();
-
   public SeleniumTestHandler() {
+    injector = createInjector(getParentModules());
+    injector.injectMembers(this);
+
     getRuntime().addShutdownHook(new Thread(this::shutdown));
   }
 
@@ -148,9 +152,6 @@ public abstract class SeleniumTestHandler
   public void onStart(ISuite suite) {
     isCleanUpCompleted.set(false);
     runningTests.clear();
-
-    Injector injector = createInjector(getParentModules());
-    injector.injectMembers(this);
 
     suite.setParentInjector(injector);
   }
@@ -223,7 +224,19 @@ public abstract class SeleniumTestHandler
   /** Is invoked when test or configuration is finished. */
   private void onTestFinish(ITestResult result) {
     if (result.getStatus() == ITestResult.FAILURE || result.getStatus() == ITestResult.SKIP) {
-      ofNullable(result.getThrowable()).ifPresent(e -> LOG.error("" + e.getMessage(), e));
+      if (result.getThrowable() != null) {
+        LOG.error(
+            "Test {} method {} failed because {}",
+            result.getTestClass().getName(),
+            result.getMethod().getMethodName(),
+            result.getThrowable().getLocalizedMessage());
+        LOG.debug(result.getThrowable().getLocalizedMessage(), result.getThrowable());
+      } else {
+        LOG.error(
+            "Test {} method {} failed ",
+            result.getTestClass().getName(),
+            result.getMethod().getMethodName());
+      }
       captureScreenshot(result);
       captureHtmlSource(result);
     }
@@ -270,6 +283,7 @@ public abstract class SeleniumTestHandler
         || f.isAnnotationPresent(javax.inject.Inject.class)
         || f.isAnnotationPresent(InjectTestUser.class)
         || f.isAnnotationPresent(InjectTestWorkspace.class)
+        || f.isAnnotationPresent(InjectTestOrganization.class)
         || f.isAnnotationPresent(InjectPageObject.class);
   }
 

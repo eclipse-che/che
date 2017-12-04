@@ -113,8 +113,10 @@ public final class TestObjectsFactory {
     newRecipe.setContent("new-content");
 
     final MachineConfigImpl newMachine = new MachineConfigImpl();
-    final ServerConfigImpl serverConf1 = new ServerConfigImpl("2265", "http", "/path1");
-    final ServerConfigImpl serverConf2 = new ServerConfigImpl("2266", "ftp", "/path2");
+    final ServerConfigImpl serverConf1 =
+        new ServerConfigImpl("2265", "http", "/path1", singletonMap("key", "value"));
+    final ServerConfigImpl serverConf2 =
+        new ServerConfigImpl("2266", "ftp", "/path2", singletonMap("key", "value"));
     newMachine.setServers(ImmutableMap.of("ref1", serverConf1, "ref2", serverConf2));
     newMachine.setInstallers(ImmutableList.of("agent5", "agent4"));
     newMachine.setAttributes(singletonMap("att1", "val"));

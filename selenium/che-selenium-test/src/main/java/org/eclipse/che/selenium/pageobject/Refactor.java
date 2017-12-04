@@ -301,6 +301,9 @@ public class Refactor {
 
   /** click on the 'OK' button */
   public void clickOkButtonRefactorForm() {
+    String someFailMessage = "//div[@style='color: rgb(195, 77, 77);' and contains(text(), ' ')]";
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(someFailMessage)));
     String activeStateLocator = "//button[@id='move-accept-button' and not(@disabled)]";
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(activeStateLocator)))
