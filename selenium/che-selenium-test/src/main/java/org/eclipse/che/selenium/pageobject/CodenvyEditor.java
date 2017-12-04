@@ -1302,7 +1302,7 @@ public class CodenvyEditor {
         (ExpectedCondition<Boolean>) driver -> activeLineXpath.getText().contains(text));
   }
 
-  /** get number of current active line */
+  /** get positions of the current line and char */
   public Pair<Integer, Integer> getCurrentCursorPositions() {
     waitActiveEditor();
     WebElement currentActiveElement =
@@ -1313,9 +1313,9 @@ public class CodenvyEditor {
             .stream()
             .mapToInt(Integer::parseInt)
             .toArray();
-    Pair<Integer, Integer> numberLine =
+    Pair<Integer, Integer> cursorPosition =
         new Pair<>(currentCursorPosition[0], currentCursorPosition[1]);
-    return numberLine;
+    return cursorPosition;
   }
 
   /** get number of current active line */
