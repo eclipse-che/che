@@ -415,14 +415,12 @@ public class OpenShiftPods {
       final Watch watch = podResource.watch(new DeleteWatcher(deleteFuture));
 
       podResource.delete();
-
-      return deleteFuture.handle(
+      return deleteFuture.whenComplete(
           (v, e) -> {
             if (e != null) {
               LOG.warn("Failed to remove pod {} cause {}", name, e.getMessage());
             }
             watch.close();
-            return null;
           });
     } catch (KubernetesClientException ex) {
       throw new InfrastructureException(ex.getMessage(), ex);
@@ -458,7 +456,10 @@ public class OpenShiftPods {
 
     @Override
     public void onClose(KubernetesClientException e) {
-      future.completeExceptionally(e);
+      // if event about removing is received then this completion has no effect
+      future.completeExceptionally(
+          new RuntimeException(
+              "Webscoket connection is closed. But event about removing is not received.", e));
     }
   }
 

@@ -10,25 +10,24 @@
  */
 package org.eclipse.che.selenium.dashboard.organization;
 
-import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
 import static org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.NAME;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import java.util.ArrayList;
-import java.util.List;
-import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
+import org.eclipse.che.selenium.core.annotation.Multiuser;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
+import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
+import org.eclipse.che.selenium.core.organization.TestOrganization;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.ConfirmDialog;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -37,11 +36,14 @@ import org.testng.annotations.Test;
  *
  * @author Ann Shumilova
  */
+@Multiuser
 public class DeleteOrganizationByBulkTest {
-  private static final String ORG_NAME1 = generate("organization1", 5);
-  private static final String ORG_NAME2 = generate("organization2", 5);
+  private static final int TEST_ROOT_ORG_NUMBER = 2;
 
-  private List<OrganizationDto> organizations = new ArrayList<>();
+  private int initialOrgNumber;
+
+  @InjectTestOrganization private TestOrganization org1;
+  @InjectTestOrganization private TestOrganization org2;
 
   @Inject
   @Named("admin")
@@ -55,42 +57,38 @@ public class DeleteOrganizationByBulkTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    organizations.add(testOrganizationServiceClient.create(ORG_NAME1));
-    organizations.add(testOrganizationServiceClient.create(ORG_NAME2));
-
+    initialOrgNumber = testOrganizationServiceClient.getAllRoot().size();
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
-  }
-
-  @AfterClass
-  public void tearDown() throws Exception {
-    for (OrganizationDto organization : organizations) {
-      testOrganizationServiceClient.deleteById(organization.getId());
-    }
   }
 
   @Test
   public void testOrganizationBulkDeletion() {
-    int organizationsCount = organizations.size();
-
     // Check that created organization exist
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
-    assertTrue(organizationListPage.getOrganizationListItemCount() >= organizationsCount);
-    assertTrue(organizationListPage.getValues(NAME).contains(ORG_NAME1));
-    assertTrue(organizationListPage.getValues(NAME).contains(ORG_NAME2));
+
+    try {
+      assertEquals(organizationListPage.getOrganizationListItemCount(), initialOrgNumber);
+    } catch (AssertionError a) {
+      // remove try-catch block after https://github.com/eclipse/che/issues/7279 has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7279", a);
+    }
+
+    assertTrue(organizationListPage.getValues(NAME).contains(org1.getName()));
+    assertTrue(organizationListPage.getValues(NAME).contains(org2.getName()));
 
     // Tests the Bulk Delete feature
     assertFalse(organizationListPage.isBulkDeleteVisible());
-    organizationListPage.clickCheckbox(ORG_NAME1);
-    organizationListPage.clickCheckbox(ORG_NAME2);
+    organizationListPage.clickCheckbox(org1.getName());
+    organizationListPage.clickCheckbox(org2.getName());
     assertTrue(organizationListPage.isBulkDeleteVisible());
-    organizationListPage.clickCheckbox(ORG_NAME1);
-    organizationListPage.clickCheckbox(ORG_NAME2);
+    organizationListPage.clickCheckbox(org1.getName());
+    organizationListPage.clickCheckbox(org2.getName());
     assertFalse(organizationListPage.isBulkDeleteVisible());
-    organizationListPage.clickCheckbox(ORG_NAME1);
-    organizationListPage.clickCheckbox(ORG_NAME2);
+    organizationListPage.clickCheckbox(org1.getName());
+    organizationListPage.clickCheckbox(org2.getName());
     assertTrue(organizationListPage.isBulkDeleteVisible());
 
     // Delete all organizations by the Bulk Delete feature
@@ -99,7 +97,7 @@ public class DeleteOrganizationByBulkTest {
     assertEquals(confirmDialog.getTitle(), "Delete organizations");
     assertEquals(
         confirmDialog.getMessage(),
-        String.format("Would you like to delete these %s organizations?", organizationsCount));
+        String.format("Would you like to delete these %s organizations?", TEST_ROOT_ORG_NUMBER));
     assertEquals(confirmDialog.getConfirmButtonTitle(), "Delete");
     assertEquals(confirmDialog.getCancelButtonTitle(), "Close");
     confirmDialog.clickConfirm();
@@ -107,11 +105,21 @@ public class DeleteOrganizationByBulkTest {
     organizationListPage.waitForOrganizationsList();
 
     // Test that all organization removed
-    organizationListPage.waitForOrganizationIsRemoved(ORG_NAME1);
-    organizationListPage.waitForOrganizationIsRemoved(ORG_NAME2);
-    assertTrue(organizationListPage.getOrganizationListItemCount() >= 0);
-    assertFalse(organizationListPage.getValues(NAME).contains(ORG_NAME1));
-    assertFalse(organizationListPage.getValues(NAME).contains(ORG_NAME2));
-    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) >= 0);
+    organizationListPage.waitForOrganizationIsRemoved(org1.getName());
+    organizationListPage.waitForOrganizationIsRemoved(org2.getName());
+
+    try {
+      assertEquals(
+          organizationListPage.getOrganizationListItemCount(),
+          initialOrgNumber - TEST_ROOT_ORG_NUMBER);
+    } catch (AssertionError a) {
+      // remove try-catch block after https://github.com/eclipse/che/issues/7279 has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7279", a);
+    }
+
+    assertFalse(organizationListPage.getValues(NAME).contains(org1.getName()));
+    assertFalse(organizationListPage.getValues(NAME).contains(org2.getName()));
+    assertEquals(
+        navigationBar.getMenuCounterValue(ORGANIZATIONS), initialOrgNumber - TEST_ROOT_ORG_NUMBER);
   }
 }

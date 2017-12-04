@@ -117,7 +117,7 @@ public class Menu {
           .click();
 
     } catch (WebDriverException ex) {
-      LOG.error(ex.getLocalizedMessage(), ex);
+      LOG.warn(ex.getLocalizedMessage());
       WaitUtils.sleepQuietly(REDRAW_UI_ELEMENTS_TIMEOUT_SEC, TimeUnit.MILLISECONDS);
       redrawMenuItemsWait
           .until(ExpectedConditions.visibilityOfElementLocated(By.id(idTopMenuCommand)))

@@ -23,16 +23,16 @@ import org.eclipse.che.api.core.model.workspace.runtime.Server;
  */
 public class MachineImpl implements Machine {
 
-  private Map<String, String> properties;
+  private Map<String, String> attributes;
   private Map<String, ServerImpl> servers;
 
   public MachineImpl(Machine machineRuntime) {
-    this(machineRuntime.getProperties(), machineRuntime.getServers());
+    this(machineRuntime.getAttributes(), machineRuntime.getServers());
   }
 
-  public MachineImpl(Map<String, String> properties, Map<String, ? extends Server> servers) {
+  public MachineImpl(Map<String, String> attributes, Map<String, ? extends Server> servers) {
     this(servers);
-    this.properties = new HashMap<>(properties);
+    this.attributes = new HashMap<>(attributes);
   }
 
   public MachineImpl(Map<String, ? extends Server> servers) {
@@ -49,11 +49,11 @@ public class MachineImpl implements Machine {
   }
 
   @Override
-  public Map<String, String> getProperties() {
-    if (properties == null) {
-      properties = new HashMap<>();
+  public Map<String, String> getAttributes() {
+    if (attributes == null) {
+      attributes = new HashMap<>();
     }
-    return properties;
+    return attributes;
   }
 
   @Override
@@ -69,17 +69,17 @@ public class MachineImpl implements Machine {
     if (this == o) return true;
     if (!(o instanceof MachineImpl)) return false;
     MachineImpl machine = (MachineImpl) o;
-    return Objects.equals(getProperties(), machine.getProperties())
+    return Objects.equals(getAttributes(), machine.getAttributes())
         && Objects.equals(getServers(), machine.getServers());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getProperties(), getServers());
+    return Objects.hash(getAttributes(), getServers());
   }
 
   @Override
   public String toString() {
-    return "MachineImpl{" + "properties=" + properties + ", servers=" + servers + '}';
+    return "MachineImpl{" + "attributes=" + attributes + ", servers=" + servers + '}';
   }
 }

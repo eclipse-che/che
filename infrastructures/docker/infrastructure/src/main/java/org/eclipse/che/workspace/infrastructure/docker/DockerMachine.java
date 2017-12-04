@@ -70,7 +70,7 @@ public class DockerMachine implements Machine {
   }
 
   @Override
-  public Map<String, String> getProperties() {
+  public Map<String, String> getAttributes() {
     return Collections.emptyMap();
   }
 
