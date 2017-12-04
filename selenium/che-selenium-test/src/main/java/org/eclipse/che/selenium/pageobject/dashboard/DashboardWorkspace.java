@@ -151,6 +151,8 @@ public class DashboardWorkspace {
     String INSTALLER_NAME = "//span[@agent-name='%s']";
     String INSTALLER_DESCRIPTION = "//span[@agent-description='%s']";
     String INSTALLER_STATE = "//md-switch[@agent-switch='%s']";
+    String INSTALLER_VERSION_STATE =
+        "//div[@agent-item-name='%s' and @agent-item-version='%s']//md-switch[@agent-switch='%s']";
     String ADD_NEW_PROJECT_BUTTON = "//che-button-primary[@che-button-title='Add Project']/button";
     String ADD_PROJECT_BUTTON = "//che-button-primary[@name='addButton']/button";
     String SAMPLE_CHECKBOX_XPATH = "//md-checkbox[@aria-label='Sample %s']";
@@ -808,12 +810,41 @@ public class DashboardWorkspace {
         .click();
   }
 
+  public void switchInstallerState(String installerName, String installerVersion) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(
+                    format(
+                        Locators.INSTALLER_VERSION_STATE,
+                        installerName,
+                        installerVersion,
+                        installerName))))
+        .click();
+  }
+
   public Boolean getInstallerState(String installerName) {
     String state =
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
             .until(
                 ExpectedConditions.visibilityOfElementLocated(
                     By.xpath(format(Locators.INSTALLER_STATE, installerName))))
+            .getAttribute("aria-checked");
+
+    return Boolean.parseBoolean(state);
+  }
+
+  public Boolean getInstallerState(String installerName, String installerVersion) {
+    String state =
+        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+            .until(
+                ExpectedConditions.visibilityOfElementLocated(
+                    By.xpath(
+                        format(
+                            Locators.INSTALLER_VERSION_STATE,
+                            installerName,
+                            installerVersion,
+                            installerName))))
             .getAttribute("aria-checked");
 
     return Boolean.parseBoolean(state);

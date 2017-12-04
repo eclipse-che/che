@@ -10,7 +10,19 @@
  */
 package org.eclipse.che.selenium.dashboard;
 
+import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA_MYSQL;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
+import static org.eclipse.che.selenium.pageobject.dashboard.DashboardProject.Template.WEB_JAVA_PETCLINIC;
+import static org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace.StateWorkspace.RUNNING;
+import static org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace.StateWorkspace.STOPPED;
+import static org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace.TabNames.ENV_VARIABLES;
+import static org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace.TabNames.INSTALLERS;
+import static org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace.TabNames.MACHINES;
+import static org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace.TabNames.OVERVIEW;
+import static org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace.TabNames.PROJECTS;
+import static org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace.TabNames.SERVERS;
+import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.WORKSPACES;
 
 import com.google.inject.Inject;
 import java.util.HashMap;
@@ -18,7 +30,6 @@ import java.util.Map;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.constant.TestStacksConstants;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.Consoles;
@@ -28,10 +39,9 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardProject;
-import org.eclipse.che.selenium.pageobject.dashboard.DashboardProject.Template;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
-import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace.TabNames;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
+import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -57,6 +67,7 @@ public class WorkspaceDetailsTest {
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private DashboardProject dashboardProject;
   @Inject private Consoles consoles;
+  @Inject private MachineTerminal terminal;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -71,7 +82,7 @@ public class WorkspaceDetailsTest {
 
   @Test
   public void workingWithEnvVariables() {
-    dashboardWorkspace.selectTabInWorspaceMenu(TabNames.ENV_VARIABLES);
+    dashboardWorkspace.selectTabInWorspaceMenu(ENV_VARIABLES);
 
     // create a new variable, save changes and check it exists
     dashboardWorkspace.selectMachine("Environment variables", "dev-machine");
@@ -124,7 +135,15 @@ public class WorkspaceDetailsTest {
 
   @Test
   public void workingWithInstallers() {
-    dashboardWorkspace.selectTabInWorspaceMenu(TabNames.INSTALLERS);
+    dashboardWorkspace.selectTabInWorspaceMenu(INSTALLERS);
+
+    // check both versions of the 'Workspace API' installer
+    Assert.assertTrue(dashboardWorkspace.getInstallerState("Workspace API", "1.0.1"));
+    Assert.assertFalse(dashboardWorkspace.getInstallerState("Workspace API", "1.0.0"));
+    dashboardWorkspace.switchInstallerState("Workspace API", "1.0.1");
+    dashboardWorkspace.switchInstallerState("Workspace API", "1.0.0");
+    Assert.assertTrue(dashboardWorkspace.getInstallerState("Workspace API", "1.0.1"));
+    Assert.assertFalse(dashboardWorkspace.getInstallerState("Workspace API", "1.0.0"));
 
     // check all needed installers in dev-machine exist
     dashboardWorkspace.selectMachine("Workspace Installers", "dev-machine");
@@ -158,7 +177,7 @@ public class WorkspaceDetailsTest {
 
   @Test
   public void workingWithServers() {
-    dashboardWorkspace.selectTabInWorspaceMenu(TabNames.SERVERS);
+    dashboardWorkspace.selectTabInWorspaceMenu(SERVERS);
 
     // add a new server to db machine, save changes and check it exists
     dashboardWorkspace.selectMachine("Servers", "db");
@@ -191,7 +210,7 @@ public class WorkspaceDetailsTest {
     String machineName = "new_machine";
 
     // check that all machines of the Java-MySql stack created by default exist
-    dashboardWorkspace.selectTabInWorspaceMenu(TabNames.MACHINES);
+    dashboardWorkspace.selectTabInWorspaceMenu(MACHINES);
     dashboardWorkspace.checkMachineExists("db");
     dashboardWorkspace.checkMachineExists("dev-machine");
 
@@ -216,7 +235,7 @@ public class WorkspaceDetailsTest {
 
   @Test(priority = 1)
   public void workingWithProjects() {
-    dashboardWorkspace.selectTabInWorspaceMenu(TabNames.PROJECTS);
+    dashboardWorkspace.selectTabInWorspaceMenu(PROJECTS);
 
     // create a new project and save changes
     dashboardWorkspace.clickOnAddNewProjectButton();
@@ -225,15 +244,14 @@ public class WorkspaceDetailsTest {
     clickOnSaveButton();
 
     // check that project exists(workspace will restart)
-    dashboardProject.waitProjectIsPresent(Template.WEB_JAVA_PETCLINIC.value());
+    dashboardProject.waitProjectIsPresent(WEB_JAVA_PETCLINIC.value());
 
     // start the workspace and check that the new project exists
     dashboardWorkspace.clickOpenInIdeWsBtn();
     seleniumWebDriver.switchFromDashboardIframeToIde();
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.waitFolderDefinedTypeOfFolderByPath(
-        Template.WEB_JAVA_PETCLINIC.value(), PROJECT_FOLDER);
+    projectExplorer.waitFolderDefinedTypeOfFolderByPath(WEB_JAVA_PETCLINIC.value(), PROJECT_FOLDER);
 
     // check that created machine exists in the Process Console tree
     consoles.waitProcessInProcessConsoleTree("machine");
@@ -251,7 +269,6 @@ public class WorkspaceDetailsTest {
     installers.put("SSH", true);
     installers.put("Terminal", true);
     installers.put("TypeScript language server", false);
-    installers.put("Workspace API", true);
     installers.put("Yaml language server", false);
 
     variables.put("MYSQL_DATABASE", "petclinic");
@@ -270,18 +287,19 @@ public class WorkspaceDetailsTest {
     // create and start a workspace from the Java-MySql stack
     dashboard.open();
     navigationBar.waitNavigationBar();
-    navigationBar.clickOnMenu(NavigationBar.MenuItem.WORKSPACES);
+    navigationBar.clickOnMenu(WORKSPACES);
     dashboardWorkspace.waitToolbarTitleName("Workspaces");
     dashboardWorkspace.clickOnNewWorkspaceBtn();
     createWorkspace.waitToolbar();
     loader.waitOnClosed();
-    createWorkspace.selectStack(TestStacksConstants.JAVA_MYSQL.getId());
+    createWorkspace.selectStack(JAVA_MYSQL.getId());
     createWorkspace.typeWorkspaceName(WORKSPACE);
     createWorkspace.clickCreate();
 
     seleniumWebDriver.switchFromDashboardIframeToIde(60);
     loader.waitOnClosed();
     projectExplorer.waitProjectExplorer();
+    terminal.waitTerminalTab(LOADER_TIMEOUT_SEC);
 
     dashboard.open();
     dashboard.waitDashboardToolbarTitle();
@@ -289,10 +307,10 @@ public class WorkspaceDetailsTest {
     dashboardWorkspace.waitToolbarTitleName("Workspaces");
     dashboardWorkspace.selectWorkspaceItemName(WORKSPACE);
     dashboardWorkspace.waitToolbarTitleName(WORKSPACE);
-    dashboardWorkspace.selectTabInWorspaceMenu(TabNames.OVERVIEW);
-    dashboardWorkspace.checkStateOfWorkspace(DashboardWorkspace.StateWorkspace.RUNNING);
+    dashboardWorkspace.selectTabInWorspaceMenu(OVERVIEW);
+    dashboardWorkspace.checkStateOfWorkspace(RUNNING);
     dashboardWorkspace.clickOnStopWorkspace();
-    dashboardWorkspace.checkStateOfWorkspace(DashboardWorkspace.StateWorkspace.STOPPED);
+    dashboardWorkspace.checkStateOfWorkspace(STOPPED);
   }
 
   private void createMachine(String machineName) {
