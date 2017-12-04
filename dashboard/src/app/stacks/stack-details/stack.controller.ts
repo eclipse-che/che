@@ -237,8 +237,8 @@ export class StackController {
   /**
    * Updates stack name.
    */
-  updateStackName(): void {
-    this.stack.name = this.stackName;
+  updateStackName(name: string): void {
+    this.stack.name = name;
     this.updateJsonFromStack();
   }
 

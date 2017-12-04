@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.api.workspace.server.spi;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.runtime.ServerStatus.RUNNING;
@@ -377,7 +378,8 @@ public class InternalRuntimeTest {
         new MachineImpl(
             expectedProps,
             singletonMap(
-                expectedServerName, new ServerImpl(expectedServerUrl, expectedServerStatus)));
+                expectedServerName,
+                new ServerImpl().withUrl(expectedServerUrl).withStatus(expectedServerStatus)));
     HashMap<String, MachineImpl> result = new HashMap<>();
     result.put("m1", createMachine());
     result.put("m2", createMachine());
@@ -402,7 +404,10 @@ public class InternalRuntimeTest {
     assertTrue(actualMachine.getServers().containsKey(expectedServerName));
     assertEquals(
         actualMachine.getServers().get(expectedServerName),
-        new ServerImpl(expectedServerUrl, expectedServerStatus));
+        new ServerImpl()
+            .withUrl(expectedServerUrl)
+            .withStatus(expectedServerStatus)
+            .withAttributes(emptyMap()));
   }
 
   private void modifyMachines(
@@ -479,11 +484,11 @@ public class InternalRuntimeTest {
   }
 
   private static ServerImpl createServer(ServerStatus status) throws Exception {
-    return new ServerImpl("http://localhost:8080/", status);
+    return new ServerImpl().withUrl("http://localhost:8080/").withStatus(status);
   }
 
   private static ServerImpl createServer(String url) throws Exception {
-    return new ServerImpl(url, RUNNING);
+    return new ServerImpl().withUrl(url).withStatus(RUNNING);
   }
 
   private static MachineImpl rewriteURLs(MachineImpl machine) throws InfrastructureException {
@@ -574,17 +579,10 @@ public class InternalRuntimeTest {
   private static class TestInternalRuntime extends InternalRuntime<RuntimeContext> {
     public TestInternalRuntime(URLRewriter urlRewriter, boolean running)
         throws ValidationException, InfrastructureException {
-      /*super(new TestRuntimeContext(new EnvironmentImpl(new RecipeImpl("type", "contentType", "content", null),
-                                                 emptyMap(),
-                                                 null),
-                             new RuntimeIdentityImpl("ws", "env", "owner"),
-                             null,
-                             null),
-      urlRewriter,
-      running);*/
       super(
           new TestRuntimeContext(null, new RuntimeIdentityImpl("ws", "env", "owner"), null),
           urlRewriter,
+          emptyList(),
           running);
     }
 

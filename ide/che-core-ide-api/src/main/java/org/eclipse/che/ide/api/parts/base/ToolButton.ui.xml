@@ -40,8 +40,8 @@
         .button > div {
             display: block;
             position: absolute;
-            width: 8px;
-            height: 8px;
+            width: 13px;
+            height: 13px;
             top: 0;
             bottom: 0;
             left: 0;
@@ -52,8 +52,8 @@
             border: 1px solid transparent;
             border-radius: 3px;
             fill: toolButtonColor;
-            font-size: 8px;
-            line-height: 8px;
+            font-size: 13px;
+            line-height: 13px;
             text-align: center;
             color: toolButtonColor;
             white-space: nowrap;
