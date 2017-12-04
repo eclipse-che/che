@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.ide.api.workspace.model;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 
@@ -18,17 +20,26 @@ public class ServerConfigImpl implements ServerConfig {
   private String port;
   private String protocol;
   private String path;
+  private Map<String, String> attributes;
 
-  public ServerConfigImpl(String port, String protocol, String path) {
+  public ServerConfigImpl(
+      String port, String protocol, String path, Map<String, String> attributes) {
     this.port = port;
     this.protocol = protocol;
     this.path = path;
+    if (attributes != null) {
+      this.attributes = new HashMap<>(attributes);
+    } else {
+      this.attributes = new HashMap<>();
+    }
   }
 
   public ServerConfigImpl(ServerConfig serverConf) {
-    this.port = serverConf.getPort();
-    this.protocol = serverConf.getProtocol();
-    this.path = serverConf.getPath();
+    this(
+        serverConf.getPort(),
+        serverConf.getProtocol(),
+        serverConf.getPath(),
+        serverConf.getAttributes());
   }
 
   @Override
@@ -47,6 +58,11 @@ public class ServerConfigImpl implements ServerConfig {
   }
 
   @Override
+  public Map<String, String> getAttributes() {
+    return attributes;
+  }
+
+  @Override
   public boolean equals(Object obj) {
     if (this == obj) {
       return true;
@@ -57,6 +73,7 @@ public class ServerConfigImpl implements ServerConfig {
     final ServerConfigImpl that = (ServerConfigImpl) obj;
     return Objects.equals(port, that.port)
         && Objects.equals(protocol, that.protocol)
+        && Objects.equals(attributes, that.attributes)
         && getPath().equals(that.getPath());
   }
 
@@ -66,6 +83,7 @@ public class ServerConfigImpl implements ServerConfig {
     hash = 31 * hash + Objects.hashCode(port);
     hash = 31 * hash + Objects.hashCode(protocol);
     hash = 31 * hash + Objects.hashCode(path);
+    hash = 31 * hash + Objects.hashCode(attributes);
     return hash;
   }
 
@@ -78,8 +96,11 @@ public class ServerConfigImpl implements ServerConfig {
         + ", protocol='"
         + protocol
         + '\''
-        + ", path="
+        + ", path='"
         + path
+        + '\''
+        + ", attributes="
+        + attributes
         + '}';
   }
 }
