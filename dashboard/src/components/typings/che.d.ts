@@ -355,7 +355,7 @@ declare namespace che {
   }
 
   export interface IWorkspaceRuntimeMachine {
-    properties: { [propName: string]: string };
+    attributes: { [propName: string]: string };
     servers: { [serverName: string]: IWorkspaceRuntimeMachineServer };
   }
 
