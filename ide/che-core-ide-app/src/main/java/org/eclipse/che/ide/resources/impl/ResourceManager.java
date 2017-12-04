@@ -1082,7 +1082,7 @@ public final class ResourceManager {
     //                  updatedConfiguration.toArray(new
     // ProjectConfigDto[updatedConfiguration.size()]);
 
-    final int[] maxDepth = new int[]{1};
+    final int[] maxDepth = new int[] {1};
 
     final Optional<Resource[]> descendants = store.getAll(container.getLocation());
 
@@ -1099,21 +1099,26 @@ public final class ResourceManager {
       }
     }
 
-    return findResource(container.getLocation()).thenPromise(updatedContainer -> {
-      if (updatedContainer.isPresent()) {
-        return getRemoteResources(container, maxDepth[0], true)
-            .thenPromise(resources -> {
-              eventBus.fireEvent(
-                  new ResourceChangedEvent(
-                      new ResourceDeltaImpl(updatedContainer.get(), SYNCHRONIZED | DERIVED)));
-              eventBus.fireEvent(
-                  new ResourceChangedEvent(new ResourceDeltaImpl(updatedContainer.get(), UPDATED)));
-              return promises.resolve(resources);
-            });
-      }
+    return findResource(container.getLocation())
+        .thenPromise(
+            updatedContainer -> {
+              if (updatedContainer.isPresent()) {
+                return getRemoteResources(container, maxDepth[0], true)
+                    .thenPromise(
+                        resources -> {
+                          eventBus.fireEvent(
+                              new ResourceChangedEvent(
+                                  new ResourceDeltaImpl(
+                                      updatedContainer.get(), SYNCHRONIZED | DERIVED)));
+                          eventBus.fireEvent(
+                              new ResourceChangedEvent(
+                                  new ResourceDeltaImpl(updatedContainer.get(), UPDATED)));
+                          return promises.resolve(resources);
+                        });
+              }
 
-      return promises.resolve(null);
-    });
+              return promises.resolve(null);
+            });
 
     //              Container[] holder = new Container[] {container};
     //              Optional<ProjectConfigDto> config =
@@ -1166,7 +1171,6 @@ public final class ResourceManager {
     //                  holder[0] = project;
     //                }
     //              }
-
 
     //            });
   }
