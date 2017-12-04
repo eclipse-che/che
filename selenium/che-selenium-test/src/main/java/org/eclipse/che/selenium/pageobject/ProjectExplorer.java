@@ -292,7 +292,7 @@ public class ProjectExplorer {
   }
 
   public void waitYellowNode(String path) {
-    redrawUiElementsWait.until(
+    loadPageTimeout.until(
         ExpectedConditions.visibilityOfElementLocated(
             By.xpath(
                 String.format(
@@ -301,7 +301,7 @@ public class ProjectExplorer {
   }
 
   public void waitGreenNode(String path) {
-    redrawUiElementsWait.until(
+    loadPageTimeout.until(
         ExpectedConditions.visibilityOfElementLocated(
             By.xpath(
                 String.format(
@@ -310,7 +310,7 @@ public class ProjectExplorer {
   }
 
   public void waitBlueNode(String path) {
-    redrawUiElementsWait.until(
+    loadPageTimeout.until(
         ExpectedConditions.visibilityOfElementLocated(
             By.xpath(
                 String.format(
@@ -319,7 +319,7 @@ public class ProjectExplorer {
   }
 
   public void waitDefaultColorNode(String path) {
-    redrawUiElementsWait.until(
+    loadPageTimeout.until(
         ExpectedConditions.visibilityOfElementLocated(
             By.xpath(
                 String.format(

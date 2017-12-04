@@ -40,7 +40,10 @@ export OPENSHIFT_USERNAME=${OPENSHIFT_USERNAME:-${DEFAULT_OPENSHIFT_USERNAME}}
 DEFAULT_OPENSHIFT_PASSWORD="developer"
 export OPENSHIFT_PASSWORD=${OPENSHIFT_PASSWORD:-${DEFAULT_OPENSHIFT_PASSWORD}}
 
-DEFAULT_OPENSHIFT_NAMESPACE_URL="eclipse-che.${OC_PUBLIC_IP}.nip.io"
+DEFAULT_DNS_PROVIDER="nip.io"
+export DNS_PROVIDER=${DNS_PROVIDER:-${DEFAULT_DNS_PROVIDER}}
+
+DEFAULT_OPENSHIFT_NAMESPACE_URL="eclipse-che.${OC_PUBLIC_IP}.${DNS_PROVIDER}"
 export OPENSHIFT_NAMESPACE_URL=${OPENSHIFT_NAMESPACE_URL:-${DEFAULT_OPENSHIFT_NAMESPACE_URL}}
 
 export OPENSHIFT_FLAVOR="ocp"
@@ -128,7 +131,7 @@ wait_ocp() {
 }
 
 run_ocp() {
-    $OC_BINARY cluster up --public-hostname="${OC_PUBLIC_HOSTNAME}" --routing-suffix="${OC_PUBLIC_IP}.nip.io"
+    $OC_BINARY cluster up --public-hostname="${OC_PUBLIC_HOSTNAME}" --routing-suffix="${OC_PUBLIC_IP}.${DNS_PROVIDER}"
     wait_ocp
     $OC_BINARY login -u system:admin
     $OC_BINARY create serviceaccount pv-recycler-controller -n openshift-infra

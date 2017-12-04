@@ -22,7 +22,6 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.multibindings.MapBinder;
-import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import com.google.inject.spi.ConstructorBinding;
 import java.lang.reflect.Method;
@@ -76,7 +75,7 @@ public class MachineTokenInterceptorTest {
 
             bind(MachineTokenRegistry.class).toInstance(tokenRegistry);
 
-            Multibinder.newSetBinder(binder(), RuntimeInfrastructure.class);
+            bind(RuntimeInfrastructure.class).toInstance(mock(RuntimeInfrastructure.class));
             MapBinder.newMapBinder(binder(), String.class, InternalEnvironmentFactory.class);
 
             MapBinder.newMapBinder(binder(), String.class, InternalEnvironmentFactory.class);
