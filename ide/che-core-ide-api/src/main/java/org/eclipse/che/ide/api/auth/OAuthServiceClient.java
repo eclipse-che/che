@@ -16,17 +16,22 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
-import org.eclipse.che.ide.rest.Unmarshallable;
+import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 
-/** @author Sergii Leschenko */
+/** @author Sergii Leschenko
+ *  @author Max Shaposhnyk
+ */
 public class OAuthServiceClient {
   private final AsyncRequestFactory asyncRequestFactory;
   private final String restContext;
+  private final DtoUnmarshallerFactory unmarshallerFactory;
 
   @Inject
-  public OAuthServiceClient(AppContext appContext, AsyncRequestFactory asyncRequestFactory) {
+  public OAuthServiceClient(AppContext appContext, AsyncRequestFactory asyncRequestFactory,
+      DtoUnmarshallerFactory unmarshallerFactory) {
     this.asyncRequestFactory = asyncRequestFactory;
     this.restContext = appContext.getMasterApiEndpoint() + "/oauth";
+    this.unmarshallerFactory = unmarshallerFactory;
   }
 
   public void getToken(String oauthProvider, AsyncRequestCallback<OAuthToken> callback) {
@@ -35,10 +40,9 @@ public class OAuthServiceClient {
         .send(callback);
   }
 
-  public Promise<OAuthToken> getToken(
-      String oauthProvider, Unmarshallable<OAuthToken> unmarshaller) {
+  public Promise<OAuthToken> getToken(String oauthProvider) {
     return asyncRequestFactory
         .createGetRequest(restContext + "/token?oauth_provider=" + oauthProvider)
-        .send(unmarshaller);
+        .send(unmarshallerFactory.newUnmarshaller(OAuthToken.class));
   }
 }

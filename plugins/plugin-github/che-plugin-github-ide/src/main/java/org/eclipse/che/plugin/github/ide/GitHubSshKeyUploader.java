@@ -16,7 +16,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.eclipse.che.api.auth.shared.dto.OAuthToken;
 import org.eclipse.che.ide.api.ProductInfoDataProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.auth.OAuthServiceClient;
@@ -24,7 +23,6 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.commons.exception.UnauthorizedException;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.dialogs.CancelCallback;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmCallback;
@@ -51,7 +49,6 @@ public class GitHubSshKeyUploader implements SshKeyUploader, OAuthCallback {
   private final AppContext appContext;
   private final SecurityTokenProvider securityTokenProvider;
   private final OAuthServiceClient oAuthServiceClient;
-  private final DtoUnmarshallerFactory unmarshallerFactory;
 
   private AsyncCallback<Void> callback;
   private String userId;
@@ -65,8 +62,7 @@ public class GitHubSshKeyUploader implements SshKeyUploader, OAuthCallback {
       DialogFactory dialogFactory,
       AppContext appContext,
       SecurityTokenProvider securityTokenProvider,
-      OAuthServiceClient oAuthServiceClient,
-      DtoUnmarshallerFactory unmarshallerFactory) {
+      OAuthServiceClient oAuthServiceClient) {
     this.gitHubService = gitHubService;
     this.baseUrl = appContext.getMasterApiEndpoint();
     this.constant = constant;
@@ -76,7 +72,6 @@ public class GitHubSshKeyUploader implements SshKeyUploader, OAuthCallback {
     this.appContext = appContext;
     this.securityTokenProvider = securityTokenProvider;
     this.oAuthServiceClient = oAuthServiceClient;
-    this.unmarshallerFactory = unmarshallerFactory;
   }
 
   /** {@inheritDoc} */
@@ -85,7 +80,7 @@ public class GitHubSshKeyUploader implements SshKeyUploader, OAuthCallback {
     this.callback = callback;
     this.userId = userId;
 
-    oAuthServiceClient.getToken("github", unmarshallerFactory.newUnmarshaller(OAuthToken.class))
+    oAuthServiceClient.getToken("github")
         .then(result -> {
           gitHubService.updatePublicKey(
               result.getToken(),

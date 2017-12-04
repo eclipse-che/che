@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.validation.constraints.NotNull;
-import org.eclipse.che.api.auth.shared.dto.OAuthToken;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -35,7 +34,6 @@ import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
 import org.eclipse.che.ide.commons.exception.UnauthorizedException;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.util.NameUtils;
 import org.eclipse.che.plugin.github.ide.GitHubLocalizationConstant;
 import org.eclipse.che.plugin.github.ide.GitHubServiceClient;
@@ -72,7 +70,6 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<MutableProje
   private final AppContext appContext;
   private OAuth2Authenticator gitHubAuthenticator;
   private final OAuthServiceClient oAuthServiceClient;
-  private final DtoUnmarshallerFactory unmarshallerFactory;
 
   private boolean ignoreChanges;
 
@@ -84,8 +81,7 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<MutableProje
       DtoFactory dtoFactory,
       AppContext appContext,
       GitHubLocalizationConstant locale,
-      OAuthServiceClient oAuthServiceClient,
-      DtoUnmarshallerFactory unmarshallerFactory) {
+      OAuthServiceClient oAuthServiceClient) {
     this.view = view;
     this.baseUrl = appContext.getMasterApiEndpoint();
     this.appContext = appContext;
@@ -93,7 +89,6 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<MutableProje
     this.gitHubClientService = gitHubClientService;
     this.dtoFactory = dtoFactory;
     this.oAuthServiceClient = oAuthServiceClient;
-    this.unmarshallerFactory = unmarshallerFactory;
     this.view.setDelegate(this);
     this.locale = locale;
   }
@@ -266,9 +261,7 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<MutableProje
     showProcessing(true);
 
     oAuthServiceClient
-        .getToken(
-            gitHubAuthenticator.getProviderName(),
-            unmarshallerFactory.newUnmarshaller(OAuthToken.class))
+        .getToken(gitHubAuthenticator.getProviderName())
         .thenPromise(
             token ->
                 Promises.all(
