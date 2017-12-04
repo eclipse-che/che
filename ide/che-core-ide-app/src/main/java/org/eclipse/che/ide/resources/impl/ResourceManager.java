@@ -1082,7 +1082,7 @@ public final class ResourceManager {
     //                  updatedConfiguration.toArray(new
     // ProjectConfigDto[updatedConfiguration.size()]);
 
-    int maxDepth = 1;
+    final int[] maxDepth = new int[]{1};
 
     final Optional<Resource[]> descendants = store.getAll(container.getLocation());
 
@@ -1093,11 +1093,27 @@ public final class ResourceManager {
         final int segCount =
             resource.getLocation().segmentCount() - container.getLocation().segmentCount();
 
-        if (segCount > maxDepth) {
-          maxDepth = segCount;
+        if (segCount > maxDepth[0]) {
+          maxDepth[0] = segCount;
         }
       }
     }
+
+    return findResource(container.getLocation()).thenPromise(updatedContainer -> {
+      if (updatedContainer.isPresent()) {
+        return getRemoteResources(container, maxDepth[0], true)
+            .thenPromise(resources -> {
+              eventBus.fireEvent(
+                  new ResourceChangedEvent(
+                      new ResourceDeltaImpl(updatedContainer.get(), SYNCHRONIZED | DERIVED)));
+              eventBus.fireEvent(
+                  new ResourceChangedEvent(new ResourceDeltaImpl(updatedContainer.get(), UPDATED)));
+              return promises.resolve(resources);
+            });
+      }
+
+      return promises.resolve(null);
+    });
 
     //              Container[] holder = new Container[] {container};
     //              Optional<ProjectConfigDto> config =
@@ -1151,17 +1167,7 @@ public final class ResourceManager {
     //                }
     //              }
 
-    return getRemoteResources(container, maxDepth, true)
-        .then(
-            (Function<Resource[], Resource[]>)
-                resources -> {
-                  eventBus.fireEvent(
-                      new ResourceChangedEvent(
-                          new ResourceDeltaImpl(container, SYNCHRONIZED | DERIVED)));
-                  eventBus.fireEvent(
-                      new ResourceChangedEvent(new ResourceDeltaImpl(container, UPDATED)));
-                  return resources;
-                });
+
     //            });
   }
 
