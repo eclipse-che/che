@@ -97,7 +97,7 @@ public class FlywaySchemaInitializer implements SchemaInitializer {
       final DbSupport dbSupport = DbSupportFactory.createDbSupport(conn, true);
       final MetaDataTable mt =
           new MetaDataTableImpl(
-              dbSupport, dbSupport.getOriginalSchema().getTable(flyway.getTable()));
+              dbSupport, dbSupport.getOriginalSchema().getTable(flyway.getTable()), null);
       initResult.put(BARE_DB_INIT_PROPERTY_NAME, String.valueOf(!mt.hasAppliedMigrations()));
       final String productName = conn.getMetaData().getDatabaseProductName().toLowerCase();
       flyway.setResolvers(
