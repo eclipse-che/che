@@ -10,12 +10,15 @@
  */
 package org.eclipse.che.selenium.workspaces;
 
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.STOP_WORKSPACE;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -29,7 +32,7 @@ import org.testng.annotations.Test;
 
 /** @author Andrey chizhikov */
 public class ProjectStateAfterRefreshTest {
-  private static final String PROJECT_NAME = ProjectStateAfterRefreshTest.class.getSimpleName();
+  private static final String PROJECT_NAME = NameGenerator.generate("project", 5);
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
@@ -72,9 +75,7 @@ public class ProjectStateAfterRefreshTest {
     projectExplorer.waitProjectExplorer();
     projectExplorer.quickExpandWithJavaScript();
     openFilesInEditor();
-    menu.runCommand(
-        TestMenuCommandsConstants.Workspace.WORKSPACE,
-        TestMenuCommandsConstants.Workspace.STOP_WORKSPACE);
+    menu.runCommand(WORKSPACE, STOP_WORKSPACE);
     toastLoader.waitToastLoaderIsOpen();
     toastLoader.waitExpectedTextInToastLoader("Workspace is not running");
     toastLoader.clickOnStartButton();
@@ -86,6 +87,8 @@ public class ProjectStateAfterRefreshTest {
   @Test(priority = 2)
   public void checkRestoreStateOfProjectIfPomXmlFileOpened() throws Exception {
     projectExplorer.waitProjectExplorer();
+    projectExplorer.waitItem(PROJECT_NAME);
+    projectExplorer.selectItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.waitItem(PROJECT_NAME + "/pom.xml");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/WEB-INF");
@@ -93,7 +96,9 @@ public class ProjectStateAfterRefreshTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
     editor.waitActiveEditor();
     projectExplorer.waitProjectExplorer();
+
     seleniumWebDriver.navigate().refresh();
+
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     editor.waitTabIsPresent("qa-spring-sample");
