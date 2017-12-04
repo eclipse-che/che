@@ -399,7 +399,7 @@ public class InternalRuntimeTest {
     assertEquals(actualMachines.size(), expectedMachinesAmount);
     assertTrue(actualMachines.containsKey(expectedMachineName));
     Machine actualMachine = actualMachines.get(expectedMachineName);
-    assertEquals(actualMachine.getProperties().size(), expectedMachinePropsSize);
+    assertEquals(actualMachine.getAttributes().size(), expectedMachinePropsSize);
     assertEquals(actualMachine.getServers().size(), expectedMachineServersSize);
     assertTrue(actualMachine.getServers().containsKey(expectedServerName));
     assertEquals(
@@ -419,7 +419,7 @@ public class InternalRuntimeTest {
     originInternalMachines.put("newM", createMachine());
     MachineImpl originMachine = originInternalMachines.get(machineToModify);
     // change properties of origin server
-    originMachine.getProperties().put("new_prop", "new_value");
+    originMachine.getAttributes().put("new_prop", "new_value");
     // add new server in origin machine
     originMachine.getServers().put("newS", createServer(RUNNING));
     ServerImpl originServer = originMachine.getServers().get(serverToModify);
@@ -445,7 +445,7 @@ public class InternalRuntimeTest {
     machine1.getServers().put(badServerName, failingRewritingServer);
     internalMachines.put("m1", machine1);
     internalMachines.put("m2", machine2);
-    expectedMachines.put("m1", new MachineImpl(machine1.getProperties(), expectedServers));
+    expectedMachines.put("m1", new MachineImpl(machine1.getAttributes(), expectedServers));
     expectedMachines.put("m2", machine2);
     List<WarningImpl> expectedWarnings = new ArrayList<>();
     expectedWarnings.add(

@@ -23,7 +23,7 @@ exports.dockerimageStack = function () {
                 'machines': {
                   'dev-machine': {
                     'servers': {},
-                    'agents': ['org.eclipse.che.exec', 'org.eclipse.che.terminal', 'org.eclipse.che.ws-agent', 'org.eclipse.che.ssh'],
+                    'installers': ['org.eclipse.che.exec', 'org.eclipse.che.terminal', 'org.eclipse.che.ws-agent', 'org.eclipse.che.ssh'],
                     'attributes': {'memoryLimitBytes': '2147483648'}
                   }
                 }, 'recipe': {'location': 'eclipse/node', 'type': 'dockerimage'}
@@ -60,7 +60,7 @@ exports.dockerfileStack = function () {
                 'machines': {
                   'dev-machine': {
                     'servers': {},
-                    'agents': ['org.eclipse.che.ws-agent', 'org.eclipse.che.ssh', 'org.eclipse.che.exec', 'org.eclipse.che.terminal'],
+                    'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.ssh', 'org.eclipse.che.exec', 'org.eclipse.che.terminal'],
                     'attributes': {'memoryLimitBytes': '2147483648'}
                   }
                 }
@@ -97,7 +97,7 @@ exports.composefileStack = function () {
                 'machines': {
                   'db': {
                     'servers': {},
-                    'agents': [
+                    'installers': [
                       'org.eclipse.che.exec',
                       'org.eclipse.che.terminal'
                     ],
@@ -107,7 +107,7 @@ exports.composefileStack = function () {
                   },
                   'dev-machine': {
                     'servers': {},
-                    'agents': [
+                    'installers': [
                       'org.eclipse.che.exec',
                       'org.eclipse.che.terminal',
                       'org.eclipse.che.ws-agent',

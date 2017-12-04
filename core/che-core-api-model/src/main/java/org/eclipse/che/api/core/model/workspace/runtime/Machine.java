@@ -19,8 +19,8 @@ import java.util.Map;
  */
 public interface Machine {
 
-  /** Returns machine specific properties. */
-  Map<String, String> getProperties();
+  /** Returns machine specific attributes. */
+  Map<String, String> getAttributes();
 
   /**
    * Returns mapping of exposed ports to {@link Server}.

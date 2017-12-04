@@ -1,23 +1,13 @@
 <div layout="column" class="config-import">
   <ng-form name="workspaceConfigImportForm">
     <div class="config-editor">
-      <ui-codemirror ui-codemirror="workspaceConfigImportController.editorOptions"
-                     ng-model="workspaceConfigImportController.importWorkspaceJson"
-                     ng-change="workspaceConfigImportController.onChange()"
-                     ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 500, 'blur': 0 } }"
-      ></ui-codemirror>
-      <che-input che-form="workspaceConfigImportForm"
-                 che-name="configValidation"
-                 type="hidden"
-                 ng-model="workspaceConfigImportController.configErrorsNumber"
-                 custom-validator="workspaceConfigImportController.configValid()">
-      </che-input>
+      <che-editor editor-content="workspaceConfigImportController.importWorkspaceJson"
+                  editor-state="editorState"
+                  validator="workspaceConfigImportController.workspaceConfigValidation()"
+                  on-content-change="workspaceConfigImportController.onChange()"
+                  editor-mode="{{workspaceConfigImportController.editorOptions.mode}}"></che-editor>
     </div>
     <div layout="column">
-      <div class="error-message"
-           ng-repeat="configValidationMessage in workspaceConfigImportController.configValidationMessages">
-        {{configValidationMessage}}
-      </div>
       <!-- Other errors -->
       <div ng-if="workspaceConfigImportController.configValidationMessages.length===0">
         <!-- Settings tab errors -->

@@ -26,7 +26,7 @@
       <che-list class="machine-agents-list" flex
                 ng-if="machineAgentsController.agentsList && machineAgentsController.agentsList.length > 0">
         <div class="machine-agents-item"
-             ng-repeat="agentItem in machineAgentsController.agentsList | orderBy:machineAgentsController.agentOrderBy">
+             ng-repeat="agentItem in machineAgentsController.agentsList | orderBy:[machineAgentsController.agentOrderBy, '-version' ]">
           <che-list-item flex>
             <div flex="100"
                  layout="row"

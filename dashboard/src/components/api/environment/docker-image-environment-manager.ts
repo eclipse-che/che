@@ -21,7 +21,7 @@ import {IEnvironmentManagerMachine} from './environment-manager-machine';
  *     condevy/ubuntu_jdk8
  * </code>
  *
- * The recipe type is <code>dockerimage</code>. This environment can contain only one machine.
+ * The recipe type is <code>dockerimage</code>. This environment can contain only an image.
  * Machine is described by image and in machines attribute of the environment (machine configs).
  * The machine configs contain memoryLimitBytes in attributes, servers and agent.
  * Environment variables can not be set.
@@ -35,13 +35,39 @@ export class DockerImageEnvironmentManager extends EnvironmentManager {
   }
 
   /**
+   * Parses a dockerimages and returns an array of objects
+   *
+   * @param content {string} content of dockerfile
+   * @returns {Array<string>} a list of arguments
+   * @private
+   */
+  parseRecipe(content: string): Array<string> {
+    if (/\s/.test(content)) {
+      throw new TypeError('Cannot parse recipe image location');
+    }
+
+    return [content];
+  }
+
+  /**
+   * Dumps a list of arguments into dockerimages
+   *
+   * @param instructions {Array<string>} array of objects
+   * @returns {string} dockerfile
+   * @private
+   */
+  stringifyRecipe(instructions: Array<string>): string {
+
+    return instructions[0];
+  }
+
+  /**
    * Create a new default machine.
-   *
    * @param {che.IWorkspaceEnvironment} environment
-   *
+   * @param {string} image
    * @return {IEnvironmentManagerMachine}
    */
-  createNewDefaultMachine(environment: che.IWorkspaceEnvironment): IEnvironmentManagerMachine {
+  createNewDefaultMachine(environment: che.IWorkspaceEnvironment, image?: string): IEnvironmentManagerMachine {
     this.$log.error('EnvironmentManager: cannot create a new machine.');
     return null;
   }
@@ -75,12 +101,12 @@ export class DockerImageEnvironmentManager extends EnvironmentManager {
       });
 
       if (!machine) {
-        machine = {name: machineName};
+        machine = {name: machineName, recipe: this.parseRecipe(environment.recipe.location)};
         machines.push(machine);
+      } else {
+        machine.recipe = this.parseRecipe(environment.recipe.location);
       }
-
       angular.merge(machine, environment.machines[machineName]);
-      machine.recipe = environment.recipe;
     });
 
     return machines;
@@ -95,8 +121,7 @@ export class DockerImageEnvironmentManager extends EnvironmentManager {
    */
   getEnvironment(environment: che.IWorkspaceEnvironment, machines: IEnvironmentManagerMachine[]): che.IWorkspaceEnvironment {
     let newEnvironment = super.getEnvironment(environment, machines);
-
-    newEnvironment.recipe.location = machines[0].recipe.location;
+    newEnvironment.recipe.location = this.stringifyRecipe(machines[0].recipe);
 
     return newEnvironment;
   }
@@ -108,7 +133,7 @@ export class DockerImageEnvironmentManager extends EnvironmentManager {
    * @returns {{image: string}}
    */
   getSource(machine: IEnvironmentManagerMachine): any {
-    return {image: machine.recipe.location};
+    return {image: this.stringifyRecipe(machine.recipe)};
   }
 
   /**
@@ -118,15 +143,7 @@ export class DockerImageEnvironmentManager extends EnvironmentManager {
    * @param {String} image
    */
   setSource(machine: IEnvironmentManagerMachine, image: string): void {
-    machine.recipe.location = image;
-  }
-
-  /**
-   * @param {IEnvironmentManagerMachine} machine
-   * @param {Object} envVariables
-   */
-  setEnvVariables(machine: IEnvironmentManagerMachine, envVariables: any): void {
-    this.$log.warn('Cannot set environment variable');
+    machine.recipe = this.parseRecipe(image);
   }
 
 }
