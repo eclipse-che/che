@@ -11,6 +11,8 @@
 package org.eclipse.che.ide.ext.java.client.service;
 
 import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
+import static org.eclipse.che.ide.ext.java.shared.Constants.EFFECTIVE_POM_REQUEST_TIMEOUT;
+import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE_REQUEST_TIMEOUT;
 
 import com.google.gwt.jsonp.client.TimeoutException;
 import com.google.inject.Inject;
@@ -18,7 +20,7 @@ import com.google.inject.Singleton;
 import java.util.List;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.promises.client.js.JsPromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
 import org.eclipse.che.jdt.ls.extension.api.dto.FileStructureCommandParameters;
@@ -40,31 +42,37 @@ public class JavaLanguageExtensionServiceClient {
           requestTransmitter
               .newRequest()
               .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
-              .methodName("java/filestructure")
+              .methodName("java/file-structure")
               .paramsAsDto(params)
-              .sendAndReceiveResultAsListOfDto(ExtendedSymbolInformation.class, 10000)
+              .sendAndReceiveResultAsListOfDto(
+                  ExtendedSymbolInformation.class, FILE_STRUCTURE_REQUEST_TIMEOUT)
               .onSuccess(resolve::apply)
-              .onTimeout(
-                  () -> {
-                    reject.apply(
-                        new PromiseError() {
-                          TimeoutException t = new TimeoutException("Timeout");
-
-                          @Override
-                          public String getMessage() {
-                            return t.getMessage();
-                          }
-
-                          @Override
-                          public Throwable getCause() {
-                            return t;
-                          }
-                        });
-                  })
-              .onFailure(
-                  error -> {
-                    reject.apply(ServiceUtil.getPromiseError(error));
-                  });
+              .onTimeout(() -> reject.apply(JsPromiseError.create(new TimeoutException("Timeout"))))
+              .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error)));
         });
+  }
+
+  /**
+   * Gets effective pom for maven project.
+   *
+   * @param pathToProject path to project relatively to projects root (e.g. /projects)
+   * @return effective pom
+   */
+  public Promise<String> effectivePom(String pathToProject) {
+    return Promises.create(
+        (resolve, reject) ->
+            requestTransmitter
+                .newRequest()
+                .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
+                .methodName("java/effective-pom")
+                .paramsAsString(pathToProject)
+                .sendAndReceiveResultAsString(EFFECTIVE_POM_REQUEST_TIMEOUT)
+                .onSuccess(resolve::apply)
+                .onTimeout(
+                    () ->
+                        reject.apply(
+                            JsPromiseError.create(
+                                new TimeoutException("Timeout while getting effective pom."))))
+                .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));
   }
 }
