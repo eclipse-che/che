@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.workspaces;
 
+import static org.eclipse.che.selenium.core.constant.TestStacksConstants.NODE;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
@@ -22,7 +23,6 @@ import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.constant.TestStacksConstants;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.Consoles;
@@ -30,9 +30,10 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -56,10 +57,11 @@ public class WorkingWithNodeWsTest {
   @Inject private CreateWorkspace createWorkspace;
   @Inject private ProjectSourcePage projectSourcePage;
   @Inject private Dashboard dashboard;
-  @Inject private DashboardWorkspace dashboardWorkspace;
+  @Inject private WorkspaceDetails workspaceDetails;
   @Inject private AskDialog askDialog;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private Workspaces workspaces;
 
   @AfterClass
   public void tearDown() throws Exception {
@@ -70,19 +72,19 @@ public class WorkingWithNodeWsTest {
   public void checkNodeJsWsAndRunApp() {
     String currentWindow;
 
-    // create a workspace from the Node stack with the web-nodejs-simple project
+    // Create a workspace from the Node stack with the web-nodejs-simple project
     dashboard.open();
-    navigationBar.waitNavigationBar();
-    navigationBar.clickOnMenu(NavigationBar.MenuItem.WORKSPACES);
-    dashboardWorkspace.waitToolbarTitleName("Workspaces");
-    dashboardWorkspace.clickOnNewWorkspaceBtn();
+    dashboard.waitDashboardToolbarTitle();
+    dashboard.selectWorkspacesItemOnDashboard();
+    dashboard.waitToolbarTitleName("Workspaces");
+    workspaces.clickOnNewWorkspaceBtn();
     createWorkspace.waitToolbar();
-    createWorkspace.selectStack(TestStacksConstants.NODE.getId());
+    createWorkspace.selectStack(NODE.getId());
     createWorkspace.typeWorkspaceName(WORKSPACE);
-    projectSourcePage.clickAddOrImportProjectButton();
+    projectSourcePage.clickOnAddOrImportProjectButton();
     projectSourcePage.selectSample(PROJECT_NAME);
-    projectSourcePage.clickAdd();
-    createWorkspace.clickCreate();
+    projectSourcePage.clickOnAddProjectButton();
+    createWorkspace.clickOnCreateWorkspaceButton();
 
     seleniumWebDriver.switchFromDashboardIframeToIde();
     currentWindow = seleniumWebDriver.getWindowHandle();

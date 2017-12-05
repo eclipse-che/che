@@ -11,6 +11,9 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
+import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE;
+import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.WEB_JAVA_SPRING;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.PROJECTS;
 
 import com.google.inject.Inject;
 import java.util.concurrent.ExecutionException;
@@ -25,10 +28,11 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.dashboard.DashboardProject;
-import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -39,8 +43,8 @@ public class CreateAndDeleteProjectsTest {
   private final String WORKSPACE = NameGenerator.generate("workspace", 4);
 
   @Inject private Dashboard dashboard;
-  @Inject private DashboardProject dashboardProject;
-  @Inject private DashboardWorkspace dashboardWorkspace;
+  @Inject private WorkspaceProjects workspaceProjects;
+  @Inject private WorkspaceDetails workspaceDetails;
   @Inject private NavigationBar navigationBar;
   @Inject private CreateWorkspace createWorkspace;
   @Inject private ProjectSourcePage projectSourcePage;
@@ -51,6 +55,7 @@ public class CreateAndDeleteProjectsTest {
   @Inject private TestUser defaultTestUser;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private MavenPluginStatusBar mavenPluginStatusBar;
+  @Inject private Workspaces workspaces;
 
   @BeforeClass
   public void setUp() {
@@ -64,44 +69,43 @@ public class CreateAndDeleteProjectsTest {
 
   @Test
   public void createAndDeleteProjectTest() throws ExecutionException, InterruptedException {
-    navigationBar.waitNavigationBar();
-    navigationBar.clickOnMenu(NavigationBar.MenuItem.WORKSPACES);
-    dashboardWorkspace.clickOnNewWorkspaceBtn();
+    dashboard.waitDashboardToolbarTitle();
+    dashboard.selectWorkspacesItemOnDashboard();
+    workspaces.clickOnNewWorkspaceBtn();
     createWorkspace.waitToolbar();
+
     createWorkspace.selectStack(TestStacksConstants.JAVA.getId());
     createWorkspace.typeWorkspaceName(WORKSPACE);
-    projectSourcePage.clickAddOrImportProjectButton();
-    projectSourcePage.selectSample(DashboardProject.Template.WEB_JAVA_SPRING.value());
-    projectSourcePage.selectSample(DashboardProject.Template.CONSOLE_JAVA_SIMPLE.value());
-    projectSourcePage.clickAdd();
-    createWorkspace.clickCreate();
+    projectSourcePage.clickOnAddOrImportProjectButton();
+    projectSourcePage.selectSample(WEB_JAVA_SPRING);
+    projectSourcePage.selectSample(CONSOLE_JAVA_SIMPLE);
+    projectSourcePage.clickOnAddProjectButton();
+    createWorkspace.clickOnCreateWorkspaceButton();
+
     String dashboardWindow = seleniumWebDriver.getWindowHandle();
     seleniumWebDriver.switchFromDashboardIframeToIde();
     loader.waitOnClosed();
     explorer.waitProjectExplorer();
-    explorer.waitItem(DashboardProject.Template.CONSOLE_JAVA_SIMPLE.value());
+    explorer.waitItem(CONSOLE_JAVA_SIMPLE);
     notificationsPopupPanel.waitPopUpPanelsIsClosed();
     mavenPluginStatusBar.waitClosingInfoPanel();
-    explorer.waitFolderDefinedTypeOfFolderByPath(
-        DashboardProject.Template.CONSOLE_JAVA_SIMPLE.value(), PROJECT_FOLDER);
-    explorer.waitFolderDefinedTypeOfFolderByPath(
-        DashboardProject.Template.WEB_JAVA_SPRING.value(), PROJECT_FOLDER);
+    explorer.waitFolderDefinedTypeOfFolderByPath(CONSOLE_JAVA_SIMPLE, PROJECT_FOLDER);
+    explorer.waitFolderDefinedTypeOfFolderByPath(WEB_JAVA_SPRING, PROJECT_FOLDER);
+
     switchToWindow(dashboardWindow);
     dashboard.selectWorkspacesItemOnDashboard();
-    dashboardWorkspace.selectWorkspaceItemName(WORKSPACE);
-    dashboardWorkspace.selectTabInWorspaceMenu(DashboardWorkspace.TabNames.PROJECTS);
-    dashboardProject.waitProjectIsPresent(DashboardProject.Template.WEB_JAVA_SPRING.value());
-    dashboardProject.waitProjectIsPresent(DashboardProject.Template.CONSOLE_JAVA_SIMPLE.value());
-    dashboardProject.openSettingsForProjectByName(
-        DashboardProject.Template.WEB_JAVA_SPRING.value());
-    dashboardProject.clickOnDeleteProject();
-    dashboardProject.clickOnDeleteItInDialogWindow();
-    dashboardProject.waitProjectIsNotPresent(DashboardProject.Template.WEB_JAVA_SPRING.value());
-    dashboardProject.openSettingsForProjectByName(
-        DashboardProject.Template.CONSOLE_JAVA_SIMPLE.value());
-    dashboardProject.clickOnDeleteProject();
-    dashboardProject.clickOnDeleteItInDialogWindow();
-    dashboardProject.waitProjectIsNotPresent(DashboardProject.Template.CONSOLE_JAVA_SIMPLE.value());
+    workspaces.selectWorkspaceItemName(WORKSPACE);
+    workspaceDetails.selectTabInWorkspaceMenu(PROJECTS);
+    workspaceProjects.waitProjectIsPresent(WEB_JAVA_SPRING);
+    workspaceProjects.waitProjectIsPresent(CONSOLE_JAVA_SIMPLE);
+    workspaceProjects.openSettingsForProjectByName(WEB_JAVA_SPRING);
+    workspaceProjects.clickOnDeleteProject();
+    workspaceProjects.clickOnDeleteItInDialogWindow();
+    workspaceProjects.waitProjectIsNotPresent(WEB_JAVA_SPRING);
+    workspaceProjects.openSettingsForProjectByName(CONSOLE_JAVA_SIMPLE);
+    workspaceProjects.clickOnDeleteProject();
+    workspaceProjects.clickOnDeleteItInDialogWindow();
+    workspaceProjects.waitProjectIsNotPresent(CONSOLE_JAVA_SIMPLE);
   }
 
   private void switchToWindow(String windowHandle) {
