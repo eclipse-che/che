@@ -11,25 +11,30 @@
 package org.eclipse.che.ide.ext.git.client.push;
 
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.api.core.ErrorCodes.UNAUTHORIZED_GIT_OPERATION;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_LOCAL;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_REMOTE;
+import static org.eclipse.che.api.git.shared.ProviderInfo.PROVIDER_NAME;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 import static org.eclipse.che.ide.ext.git.client.compare.branchlist.BranchListPresenter.BRANCH_LIST_COMMAND_NAME;
 import static org.eclipse.che.ide.ext.git.client.remote.RemotePresenter.REMOTE_REPO_COMMAND_NAME;
+import static org.eclipse.che.ide.util.ExceptionUtils.getAttributes;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.BranchListMode;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.auth.OAuthServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Project;
@@ -42,6 +47,8 @@ import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
+import org.eclipse.che.ide.util.ExceptionUtils;
+import org.eclipse.che.ide.util.StringUtils;
 
 /**
  * Presenter for pushing changes to remote repository.
@@ -65,6 +72,7 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
   private final GitLocalizationConstant constant;
   private final NotificationManager notificationManager;
   private Project project;
+  private OAuthServiceClient oAuthServiceClient;
 
   @Inject
   public PushToRemotePresenter(
@@ -76,10 +84,12 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
       NotificationManager notificationManager,
       BranchSearcher branchSearcher,
       GitOutputConsoleFactory gitOutputConsoleFactory,
-      ProcessesPanelPresenter processesPanelPresenter) {
+      ProcessesPanelPresenter processesPanelPresenter,
+      OAuthServiceClient oAuthServiceClient) {
     this.dtoFactory = dtoFactory;
     this.branchSearcher = branchSearcher;
     this.view = view;
+    this.oAuthServiceClient = oAuthServiceClient;
     this.view.setDelegate(this);
     this.service = service;
     this.appContext = appContext;
@@ -306,10 +316,46 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
             })
         .catchError(
             error -> {
-              handleError(error.getCause(), notification, console);
-              processesPanelPresenter.addCommandOutput(console);
+              if (ExceptionUtils.getErrorCode(error.getCause()) == UNAUTHORIZED_GIT_OPERATION) {
+                Map<String, String> attributes = getAttributes(error.getCause());
+                String providerName = attributes.get(PROVIDER_NAME);
+                if (!StringUtils.isNullOrEmpty(providerName)) {
+                  pushAuthenticated(repository,  providerName, console, notification);
+                }
+              } else {
+                handleError(error.getCause(), notification, console);
+                processesPanelPresenter.addCommandOutput(console);
+              }
             });
     view.close();
+  }
+
+  protected void pushAuthenticated(final String repository, final String providerName,
+      GitOutputConsole console, StatusNotification notification) {
+        oAuthServiceClient.getToken(providerName)
+        .thenPromise(token -> service
+            .push(
+                project.getLocation(),
+                getRefs(),
+                repository,
+                view.isForcePushSelected(),
+                token.getToken(),
+                token.getToken()))
+        .then(
+            response -> {
+              console.print(response.getCommandOutput());
+              processesPanelPresenter.addCommandOutput(console);
+              notification.setStatus(SUCCESS);
+              if (response.getCommandOutput().contains("Everything up-to-date")) {
+                notification.setTitle(constant.pushUpToDate());
+              } else {
+                notification.setTitle(constant.pushSuccess(repository));
+              }
+            })
+        .catchError(error -> {
+          handleError(error.getCause(), notification, console);
+          processesPanelPresenter.addCommandOutput(console);
+        });
   }
 
   /** @return list of refs to push */

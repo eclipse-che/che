@@ -43,7 +43,6 @@ import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.wizard.Wizard;
 import org.eclipse.che.ide.commons.exception.UnauthorizedException;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.plugin.github.ide.GitHubLocalizationConstant;
 import org.eclipse.che.plugin.github.ide.GitHubServiceClient;
 import org.eclipse.che.plugin.github.ide.load.ProjectData;
@@ -80,7 +79,6 @@ public class GithubImporterPagePresenterTest {
   @Mock private OAuth2AuthenticatorRegistry gitHubAuthenticatorRegistry;
   @Mock private AppContext appContext;
   @Mock private OAuthServiceClient oAuthServiceClient;
-  @Mock private DtoUnmarshallerFactory unmarshallerFactory;
 
   private GithubImporterPagePresenter presenter;
 
@@ -101,8 +99,7 @@ public class GithubImporterPagePresenterTest {
                 dtoFactory,
                 appContext,
                 locale,
-                oAuthServiceClient,
-                unmarshallerFactory));
+                oAuthServiceClient));
     doReturn(Collections.singletonList(gitHubUser))
         .when(presenter)
         .toOrgList(nullable(JsArrayMixed.class));

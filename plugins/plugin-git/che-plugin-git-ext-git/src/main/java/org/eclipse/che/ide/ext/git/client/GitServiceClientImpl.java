@@ -227,6 +227,24 @@ public class GitServiceClientImpl implements GitServiceClient {
   }
 
   @Override
+  public Promise<PushResponse> push(
+      Path project, List<String> refSpec, String remote, boolean force, String username,
+      String password) {
+    PushRequest pushRequest =
+        dtoFactory
+            .createDto(PushRequest.class)
+            .withRemote(remote)
+            .withRefSpec(refSpec)
+            .withUsername(username)
+            .withPassword(password)
+            .withForce(force);
+    String url = getWsAgentBaseUrl() + PUSH + "?projectPath=" + encodePath(project);
+    return asyncRequestFactory
+        .createPostRequest(url, pushRequest)
+        .send(dtoUnmarshallerFactory.newUnmarshaller(PushResponse.class));
+  }
+
+  @Override
   public Promise<List<Remote>> remoteList(Path project, String remoteName, boolean verbose) {
     String params =
         "?projectPath="

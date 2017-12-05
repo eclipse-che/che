@@ -207,6 +207,21 @@ public interface GitServiceClient {
   Promise<PushResponse> push(Path project, List<String> refSpec, String remote, boolean force);
 
   /**
+   * Push changes from local repository to remote one (sends request over WebSocket).
+   *
+   * @param project project
+   * @param refSpec list of refspec to push
+   * @param remote remote repository name or url
+   * @param force push refuses to update a remote ref that is not an ancestor of the local ref used
+   *     to overwrite it. If <code>true</code> disables the check. This can cause the remote
+   *     repository to lose commits
+   * @param username username to perform vcs authorization
+   * @param password password to perform vcs authorization
+   */
+  Promise<PushResponse> push(Path project, List<String> refSpec, String remote, boolean force,
+      String username, String password);
+
+  /**
    * Clones one remote repository to local one (over WebSocket).
    *
    * @param project project (root of GIT repository)
