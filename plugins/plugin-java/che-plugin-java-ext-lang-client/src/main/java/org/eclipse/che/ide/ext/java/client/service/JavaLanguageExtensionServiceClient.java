@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.ide.ext.java.client.service;
 
+import static org.eclipse.che.api.promises.client.js.JsPromiseError.create;
 import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 import static org.eclipse.che.ide.ext.java.shared.Constants.CLASS_PATH_TREE;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_CONTENT_NODE_BY_FQN;
@@ -26,7 +27,6 @@ import com.google.inject.Singleton;
 import java.util.List;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.api.promises.client.js.RejectFunction;
 import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
@@ -204,18 +204,8 @@ public class JavaLanguageExtensionServiceClient {
 
   private void onTimeout(RejectFunction reject) {
     reject.apply(
-        new PromiseError() {
-          TimeoutException t = new TimeoutException("Timeout");
-
-          @Override
-          public String getMessage() {
-            return t.getMessage();
-          }
-
-          @Override
-          public Throwable getCause() {
-            return t;
-          }
-        });
+        create(
+            new TimeoutException(
+                "Looks like the language server is taking to long to respond, please try again in sometime.")));
   }
 }
