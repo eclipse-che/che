@@ -101,8 +101,7 @@ describe('FactoryInformation >', () => {
           recipe: {
             content: 'FROM test/image',
             type: 'dockerfile'
-          },
-          warnings: []
+          }
         }
       };
     const workspace = cheAPIBuilder.getWorkspaceBuilder()

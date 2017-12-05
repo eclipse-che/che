@@ -10,12 +10,14 @@
  */
 package org.eclipse.che.selenium.workspaces;
 
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.STOP_WORKSPACE;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -30,7 +32,7 @@ import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev on 10.03.16 */
 public class ProjectStateAfterWorkspaceRestartTest {
-  private static final String PROJECT_NAME = NameGenerator.generate("Spring_Simple", 4);
+  private static final String PROJECT_NAME = NameGenerator.generate("project", 4);
   private static final String EXP_TEXT_NOT_PRESENT =
       "@Override\n" + "   public ModelAndView handleRequest";
   private boolean passedState = false;
@@ -64,7 +66,7 @@ public class ProjectStateAfterWorkspaceRestartTest {
     // create workspace from dashboard
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
-    loader.waitOnClosed();
+    projectExplorer.selectItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/index.jsp");
     editor.waitActiveEditor();
@@ -74,9 +76,7 @@ public class ProjectStateAfterWorkspaceRestartTest {
     loader.waitOnClosed();
 
     // stop and start workspace
-    menu.runCommand(
-        TestMenuCommandsConstants.Workspace.WORKSPACE,
-        TestMenuCommandsConstants.Workspace.STOP_WORKSPACE);
+    menu.runCommand(WORKSPACE, STOP_WORKSPACE);
     loader.waitOnClosed();
     toastLoader.waitToastLoaderIsOpen();
     toastLoader.waitExpectedTextInToastLoader("Workspace is not running");

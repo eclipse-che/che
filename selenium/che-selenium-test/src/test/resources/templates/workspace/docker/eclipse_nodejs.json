@@ -9,8 +9,7 @@
           },
           "installers": [
             "org.eclipse.che.terminal",
-            "org.eclipse.che.ws-agent",
-            "org.eclipse.che.ssh"
+            "org.eclipse.che.ws-agent"
           ],
           "servers": {
             "3000/tcp" : {

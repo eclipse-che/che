@@ -31,7 +31,7 @@
     
     <logger name="org.openqa.selenium.remote.ProtocolHandshake" level="OFF"/>
 
-    <root level="INFO">
+    <root level="${che.logs.level:-INFO}">
         <appender-ref ref="stdout"/>
         <appender-ref ref="file"/>
     </root>

@@ -52,7 +52,6 @@ public class ServerRuntimeInfoTest {
             "wsagent/http",
             "exec-agent/http",
             "wsagent-debug",
-            "ssh",
             "terminal");
 
     for (int i = 0; i < expectedReferenceList.size(); i++) {
