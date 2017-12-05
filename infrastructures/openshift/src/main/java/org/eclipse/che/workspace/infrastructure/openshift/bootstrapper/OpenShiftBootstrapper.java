@@ -107,10 +107,10 @@ public class OpenShiftBootstrapper extends AbstractBootstrapper {
             + CONFIG_FILE
             // redirects command output and makes the bootstrapping process detached,
             // to avoid the holding of the socket connection for exec watcher.
-            + " &>"
+            + " > "
             + BOOTSTRAPPER_DIR
             + BOOTSTRAPPER_LOG_FILE
-            + " &");
+            + " 2>&1 &");
   }
 
   private void injectBootstrapper() throws InfrastructureException {
