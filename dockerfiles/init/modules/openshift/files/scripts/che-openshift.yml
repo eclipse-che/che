@@ -93,7 +93,7 @@ items:
             timeoutSeconds: 60
           resources:
             limits:
-              memory: 600Mi
+              memory: 512Mi
             requests:
               memory: 256Mi
           volumeMounts:
