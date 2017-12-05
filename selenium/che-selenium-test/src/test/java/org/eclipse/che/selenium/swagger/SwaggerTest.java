@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.swagger;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
+import com.google.gson.stream.MalformedJsonException;
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
@@ -48,9 +49,9 @@ public class SwaggerTest {
 
     try {
       assertTrue(swagger.getWsNamesFromWorkspacePage().contains(workspace.getName()));
-    } catch (IllegalStateException | StaleElementReferenceException ex) {
+    } catch (RuntimeException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/6015", ex);
+      fail("Known issue https://github.com/eclipse/che/issues/7705", ex);
     }
   }
 }
