@@ -29,6 +29,10 @@ public final class Constants {
 
   public static final String JAVAC = "javac";
 
+  // LS requests timeout constants
+  public static final int FILE_STRUCTURE_REQUEST_TIMEOUT = 10_000;
+  public static final int EFFECTIVE_POM_REQUEST_TIMEOUT = 30_000;
+
   private Constants() {
     throw new UnsupportedOperationException("Unused constructor.");
   }
