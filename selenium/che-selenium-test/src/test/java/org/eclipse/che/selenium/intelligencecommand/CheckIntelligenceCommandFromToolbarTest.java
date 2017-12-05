@@ -17,6 +17,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MULTI
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -62,6 +63,12 @@ public class CheckIntelligenceCommandFromToolbarTest {
     projectExplorer.waitItem(PROJECT_NAME);
     commandsToolbar.clickWithHoldAndLaunchCommandFromList(PROJECT_NAME + ": build and run");
     consoles.waitExpectedTextIntoConsole(" Server startup in");
+
+    String previewUrl = consoles.getPreviewUrl();
+    if (previewUrl.contains("route")) {
+      WaitUtils.sleepQuietly(10);
+    }
+
     consoles.clickOnPreviewUrl();
     checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
     consoles.waitExpectedTextIntoConsole(" Server startup in");
@@ -78,14 +85,26 @@ public class CheckIntelligenceCommandFromToolbarTest {
     projectExplorer.waitProjectExplorer();
     String currentWindow = seleniumWebDriver.getWindowHandle();
     commandsToolbar.clickExecStopBtn();
+
+    String previewUrl = consoles.getPreviewUrl();
+    String expectedText =
+        previewUrl.contains("route")
+            ? "Application is not available"
+            : "This site can’t be reached";
+
     consoles.clickOnPreviewUrl();
-    checkTestAppAndReturnToIde(currentWindow, "This site can’t be reached");
+    checkTestAppAndReturnToIde(currentWindow, expectedText);
     commandsToolbar.clickExecRerunBtn();
     consoles.waitExpectedTextIntoConsole(" Server startup in");
     consoles.clickOnPreviewUrl();
     checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
     Assert.assertTrue(commandsToolbar.getTimerValue().matches("\\d\\d:\\d\\d"));
     Assert.assertTrue(commandsToolbar.getNumOfProcessCounter().equals("#2"));
+
+    if (previewUrl.contains("route")) {
+      WaitUtils.sleepQuietly(10);
+    }
+
     commandsToolbar.clickOnPreviewCommandBtnAndSelectUrl("dev-machine:tomcat8");
     checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
     commandsToolbar.clickExecStopBtn();
