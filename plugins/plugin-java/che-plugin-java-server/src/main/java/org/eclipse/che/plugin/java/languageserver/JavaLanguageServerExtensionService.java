@@ -354,8 +354,8 @@ public class JavaLanguageServerExtensionService {
                     ImmutableList.of(prefixURI(filePath), String.valueOf(lineNumber))));
 
     try {
-      return (String) result.get();
-    } catch (JsonSyntaxException | InterruptedException | ExecutionException e) {
+      return (String) result.get(10, TimeUnit.SECONDS);
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }
   }
@@ -372,7 +372,7 @@ public class JavaLanguageServerExtensionService {
     try {
       List<ResourceLocationParameters> location =
           gson.fromJson(
-              gson.toJson(result.get()),
+              gson.toJson(result.get(10, TimeUnit.SECONDS)),
               new com.google.common.reflect.TypeToken<
                   List<ResourceLocationParameters>>() {}.getType());
       ResourceLocationParameters rlp = location.get(0);
@@ -384,7 +384,7 @@ public class JavaLanguageServerExtensionService {
           externalResource,
           rlp.getLibId(),
           null);
-    } catch (JsonSyntaxException | InterruptedException | ExecutionException e) {
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }
   }
