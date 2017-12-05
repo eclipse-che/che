@@ -12,12 +12,12 @@ package org.eclipse.che.selenium.pageobject.dashboard.workspaces;
 
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class WorkspaceInstallers {
@@ -31,38 +31,98 @@ public class WorkspaceInstallers {
 
   private interface Locators {
     String INSTALLER_NAME = "//span[@agent-name='%s']";
-    String INSTALLER_DESCRIPTION = "//span[@agent-description='%s']";
+    String INSTALLER_DESCRIPTION = "//div[@agent-item-name='%s']//span[@agent-description]";
     String INSTALLER_STATE = "//md-switch[@agent-switch='%s']";
+    String INSTALLER_VERSION_STATE =
+        "//div[@agent-item-name='%s' and @agent-item-version='%s']//md-switch[@agent-switch='%s']";
   }
 
   public void checkInstallerExists(String installerName) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
-            visibilityOfElementLocated(By.xpath(format(Locators.INSTALLER_NAME, installerName))));
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(format(Locators.INSTALLER_NAME, installerName))));
   }
 
   public void switchInstallerState(String installerName) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
-            visibilityOfElementLocated(By.xpath(format(Locators.INSTALLER_STATE, installerName))))
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(format(Locators.INSTALLER_STATE, installerName))))
         .click();
   }
 
-  public Boolean getInstallerState(String installerName) {
+  public void switchInstallerState(String installerName, String installerVersion) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(
+                    format(
+                        Locators.INSTALLER_VERSION_STATE,
+                        installerName,
+                        installerVersion,
+                        installerName))))
+        .click();
+  }
+
+  public Boolean isInstallerStateTurnedOn(String installerName) {
     String state =
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
             .until(
-                visibilityOfElementLocated(
+                ExpectedConditions.visibilityOfElementLocated(
                     By.xpath(format(Locators.INSTALLER_STATE, installerName))))
             .getAttribute("aria-checked");
 
     return Boolean.parseBoolean(state);
   }
 
-  public String checkInstallerDescription(String installerName) {
+  public Boolean isInstallerStateTurnedOn(String installerName, String installerVersion) {
+    String state =
+        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+            .until(
+                ExpectedConditions.visibilityOfElementLocated(
+                    By.xpath(
+                        format(
+                            Locators.INSTALLER_VERSION_STATE,
+                            installerName,
+                            installerVersion,
+                            installerName))))
+            .getAttribute("aria-checked");
+
+    return Boolean.parseBoolean(state);
+  }
+
+  public Boolean isInstallerStateNotChangeable(String installerName) {
+    String state =
+        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+            .until(
+                ExpectedConditions.visibilityOfElementLocated(
+                    By.xpath(format(Locators.INSTALLER_STATE, installerName))))
+            .getAttribute("aria-disabled");
+
+    return Boolean.parseBoolean(state);
+  }
+
+  public Boolean isInstallerStateNotChangeable(String installerName, String installerVersion) {
+    String state =
+        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+            .until(
+                ExpectedConditions.visibilityOfElementLocated(
+                    By.xpath(
+                        format(
+                            Locators.INSTALLER_VERSION_STATE,
+                            installerName,
+                            installerVersion,
+                            installerName))))
+            .getAttribute("aria-disabled");
+
+    return Boolean.parseBoolean(state);
+  }
+
+  public String getInstallerDescription(String installerName) {
     return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
-            visibilityOfElementLocated(
+            ExpectedConditions.visibilityOfElementLocated(
                 By.xpath(format(Locators.INSTALLER_DESCRIPTION, installerName))))
         .getText();
   }
