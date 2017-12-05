@@ -10,24 +10,30 @@
  */
 package org.eclipse.che.ide.ext.git.client.pull;
 
+import static org.eclipse.che.api.core.ErrorCodes.MERGE_CONFLICT;
+import static org.eclipse.che.api.core.ErrorCodes.UNAUTHORIZED_GIT_OPERATION;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_LOCAL;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_REMOTE;
+import static org.eclipse.che.api.git.shared.ProviderInfo.PROVIDER_NAME;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 import static org.eclipse.che.ide.ext.git.client.compare.branchlist.BranchListPresenter.BRANCH_LIST_COMMAND_NAME;
 import static org.eclipse.che.ide.ext.git.client.remote.RemotePresenter.REMOTE_REPO_COMMAND_NAME;
+import static org.eclipse.che.ide.util.ExceptionUtils.getAttributes;
 import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.Map;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.BranchListMode;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.auth.OAuthServiceClient;
 import org.eclipse.che.ide.api.notification.Notification;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
@@ -39,6 +45,7 @@ import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.ide.util.StringUtils;
 
 /**
  * Presenter pulling changes from remote repository.
@@ -63,6 +70,7 @@ public class PullPresenter implements PullView.ActionDelegate {
   private final ProcessesPanelPresenter consolesPanelPresenter;
 
   private Project project;
+  private OAuthServiceClient oauthServiceClient;
 
   @Inject
   public PullPresenter(
@@ -74,12 +82,14 @@ public class PullPresenter implements PullView.ActionDelegate {
       DialogFactory dialogFactory,
       BranchSearcher branchSearcher,
       GitOutputConsoleFactory gitOutputConsoleFactory,
-      ProcessesPanelPresenter processesPanelPresenter) {
+      ProcessesPanelPresenter processesPanelPresenter,
+      OAuthServiceClient oauthServiceClient) {
     this.view = view;
     this.dialogFactory = dialogFactory;
     this.branchSearcher = branchSearcher;
     this.gitOutputConsoleFactory = gitOutputConsoleFactory;
     this.consolesPanelPresenter = processesPanelPresenter;
+    this.oauthServiceClient = oauthServiceClient;
     this.view.setDelegate(this);
     this.service = service;
     this.constant = constant;
@@ -146,12 +156,11 @@ public class PullPresenter implements PullView.ActionDelegate {
 
     final StatusNotification notification =
         notificationManager.notify(constant.pullProcess(), PROGRESS, FLOAT_MODE);
-
+    GitOutputConsole console = gitOutputConsoleFactory.create(PULL_COMMAND_NAME);
     service
         .pull(project.getLocation(), getRefs(), view.getRepositoryName(), view.getRebase())
         .then(
             response -> {
-              GitOutputConsole console = gitOutputConsoleFactory.create(PULL_COMMAND_NAME);
               console.print(response.getCommandOutput(), GREEN_COLOR);
               consolesPanelPresenter.addCommandOutput(console);
               notification.setStatus(SUCCESS);
@@ -164,12 +173,43 @@ public class PullPresenter implements PullView.ActionDelegate {
             })
         .catchError(
             error -> {
-              notification.setStatus(FAIL);
-              if (getErrorCode(error.getCause()) == ErrorCodes.MERGE_CONFLICT) {
+              if (getErrorCode(error.getCause()) == MERGE_CONFLICT) {
                 project.synchronize();
+              } else if (getErrorCode(error.getCause()) == UNAUTHORIZED_GIT_OPERATION) {
+                Map<String, String> attributes = getAttributes(error.getCause());
+                String providerName = attributes.get(PROVIDER_NAME);
+                if (!StringUtils.isNullOrEmpty(providerName)) {
+                  pullAuthenticated(providerName, console, notification);
+                  return;
+                }
               }
+              notification.setStatus(FAIL);
               handleError(error.getCause(), PULL_COMMAND_NAME, notification);
             });
+  }
+
+  protected void pullAuthenticated(String providerName, GitOutputConsole console,
+      StatusNotification notification) {
+    oauthServiceClient.getToken(providerName)
+        .thenPromise(token ->
+            service
+                .pull(project.getLocation(), getRefs(), view.getRepositoryName(), view.getRebase(),
+                    token.getToken(), token.getToken()))
+        .then(response -> {
+          console.print(response.getCommandOutput(), GREEN_COLOR);
+          consolesPanelPresenter.addCommandOutput(console);
+          notification.setStatus(SUCCESS);
+          if (response.getCommandOutput().contains("Already up-to-date")) {
+            notification.setTitle(constant.pullUpToDate());
+          } else {
+            project.synchronize();
+            notification.setTitle(constant.pullSuccess(view.getRepositoryUrl()));
+          }
+        })
+        .catchError(error -> {
+          notification.setStatus(FAIL);
+          handleError(error.getCause(), PULL_COMMAND_NAME, notification);
+        });
   }
 
   /** @return list of refs to fetch */

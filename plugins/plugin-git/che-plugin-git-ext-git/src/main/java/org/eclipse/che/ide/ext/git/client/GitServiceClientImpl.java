@@ -420,6 +420,23 @@ public class GitServiceClientImpl implements GitServiceClient {
     return asyncRequestFactory.createPostRequest(url, fetchRequest).send();
   }
 
+
+  @Override
+  public Promise<Void> fetch(
+      Path project, String remote, List<String> refspec, boolean removeDeletedRefs, String username,
+      String password) {
+    FetchRequest fetchRequest =
+        dtoFactory
+            .createDto(FetchRequest.class)
+            .withRefSpec(refspec)
+            .withRemote(remote)
+            .withRemoveDeletedRefs(removeDeletedRefs)
+            .withUsername(username)
+            .withPassword(password);
+    String url = getWsAgentBaseUrl() + FETCH + "?projectPath=" + encodePath(project);
+    return asyncRequestFactory.createPostRequest(url, fetchRequest).send();
+  }
+
   @Override
   public Promise<PullResponse> pull(Path project, String refSpec, String remote, boolean rebase) {
     PullRequest pullRequest =
@@ -428,6 +445,23 @@ public class GitServiceClientImpl implements GitServiceClient {
             .withRemote(remote)
             .withRefSpec(refSpec)
             .withRebase(rebase);
+    String url = getWsAgentBaseUrl() + PULL + "?projectPath=" + encodePath(project);
+    return asyncRequestFactory
+        .createPostRequest(url, pullRequest)
+        .send(dtoUnmarshallerFactory.newUnmarshaller(PullResponse.class));
+  }
+
+  @Override
+  public Promise<PullResponse> pull(Path project, String refSpec, String remote, boolean rebase,
+      String username, String password) {
+    PullRequest pullRequest =
+        dtoFactory
+            .createDto(PullRequest.class)
+            .withRemote(remote)
+            .withRefSpec(refSpec)
+            .withRebase(rebase)
+            .withUsername(username)
+            .withPassword(password);
     String url = getWsAgentBaseUrl() + PULL + "?projectPath=" + encodePath(project);
     return asyncRequestFactory
         .createPostRequest(url, pullRequest)

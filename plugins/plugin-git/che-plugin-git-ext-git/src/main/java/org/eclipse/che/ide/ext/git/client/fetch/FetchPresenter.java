@@ -12,21 +12,27 @@ package org.eclipse.che.ide.ext.git.client.fetch;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.api.core.ErrorCodes.UNAUTHORIZED_GIT_OPERATION;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_LOCAL;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_REMOTE;
+import static org.eclipse.che.api.git.shared.ProviderInfo.PROVIDER_NAME;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
+import static org.eclipse.che.ide.util.ExceptionUtils.getAttributes;
+import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
+import java.util.Map;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.BranchListMode;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.auth.OAuthServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Project;
@@ -37,6 +43,7 @@ import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
+import org.eclipse.che.ide.util.StringUtils;
 
 /**
  * Presenter for fetching changes from remote repository.
@@ -59,6 +66,7 @@ public class FetchPresenter implements FetchView.ActionDelegate {
   private final GitLocalizationConstant constant;
 
   private Project project;
+  private OAuthServiceClient oauthServiceClient;
 
   @Inject
   public FetchPresenter(
@@ -70,12 +78,13 @@ public class FetchPresenter implements FetchView.ActionDelegate {
       NotificationManager notificationManager,
       BranchSearcher branchSearcher,
       GitOutputConsoleFactory gitOutputConsoleFactory,
-      ProcessesPanelPresenter processesPanelPresenter) {
+      ProcessesPanelPresenter processesPanelPresenter, OAuthServiceClient oauthServiceClient) {
     this.dtoFactory = dtoFactory;
     this.view = view;
     this.branchSearcher = branchSearcher;
     this.gitOutputConsoleFactory = gitOutputConsoleFactory;
     this.processesPanelPresenter = processesPanelPresenter;
+    this.oauthServiceClient = oauthServiceClient;
     this.view.setDelegate(this);
     this.service = service;
     this.appContext = appContext;
@@ -172,10 +181,41 @@ public class FetchPresenter implements FetchView.ActionDelegate {
             })
         .catchError(
             error -> {
+              if (getErrorCode(error.getCause()) == UNAUTHORIZED_GIT_OPERATION) {
+                Map<String, String> attributes = getAttributes(error.getCause());
+                String providerName = attributes.get(PROVIDER_NAME);
+                if (!StringUtils.isNullOrEmpty(providerName)) {
+                  fetchAuthenticated(providerName, remoteUrl, console, notification);
+                  return;
+                }
+              }
               handleError(error.getCause(), remoteUrl, notification, console);
               processesPanelPresenter.addCommandOutput(console);
             });
     view.close();
+  }
+
+
+  protected void fetchAuthenticated(String providerName, String remoteUrl, GitOutputConsole console,
+      StatusNotification notification) {
+    oauthServiceClient.getToken(providerName)
+        .thenPromise(token ->
+            service
+                .fetch(
+                    project.getLocation(), view.getRepositoryName(), getRefs(),
+                    view.isRemoveDeletedRefs(), token.getToken(), token.getToken()))
+        .then(
+            ignored -> {
+              console.print(constant.fetchSuccess(remoteUrl));
+              processesPanelPresenter.addCommandOutput(console);
+              notification.setStatus(SUCCESS);
+              notification.setTitle(constant.fetchSuccess(remoteUrl));
+            })
+        .catchError(
+            error -> {
+              handleError(error.getCause(), remoteUrl, notification, console);
+              processesPanelPresenter.addCommandOutput(console);
+            });
   }
 
   /** @return list of refs to fetch */

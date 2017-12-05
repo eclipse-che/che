@@ -254,9 +254,9 @@ public class CommitPresenter implements CommitView.ActionDelegate, SelectionCall
                 Map<String, String> attributes = getAttributes(error.getCause());
                 String providerName = attributes.get(PROVIDER_NAME);
                 if (!StringUtils.isNullOrEmpty(providerName)) {
-                  pushAuthenticated(location, branch, remote,  providerName);
+                  pushAuthenticated(location, branch, remote, providerName);
+                  return;
                 }
-              } else {
                 notificationManager.notify(constant.pushFail(), FAIL, FLOAT_MODE);
               }
             });
@@ -265,8 +265,8 @@ public class CommitPresenter implements CommitView.ActionDelegate, SelectionCall
   protected void pushAuthenticated(final Path location, final String branch, final String remote,
       final String providerName) {
     oAuthServiceClient.getToken(providerName)
-        .thenPromise(token -> service
-            .push(
+        .thenPromise(token ->
+            service.push(
                 location,
                 singletonList(branch),
                 remote,

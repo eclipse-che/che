@@ -320,12 +320,12 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
                 Map<String, String> attributes = getAttributes(error.getCause());
                 String providerName = attributes.get(PROVIDER_NAME);
                 if (!StringUtils.isNullOrEmpty(providerName)) {
-                  pushAuthenticated(repository,  providerName, console, notification);
+                  pushAuthenticated(repository, providerName, console, notification);
+                  return;
                 }
-              } else {
-                handleError(error.getCause(), notification, console);
-                processesPanelPresenter.addCommandOutput(console);
               }
+              handleError(error.getCause(), notification, console);
+              processesPanelPresenter.addCommandOutput(console);
             });
     view.close();
   }
