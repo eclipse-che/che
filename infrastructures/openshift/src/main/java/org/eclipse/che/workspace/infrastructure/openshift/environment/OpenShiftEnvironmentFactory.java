@@ -19,7 +19,6 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.openshift.api.model.DeploymentConfig;
 import io.fabric8.openshift.api.model.Route;
-import io.fabric8.openshift.client.OpenShiftClient;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -97,10 +96,8 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
                 + "application/x-yaml, text/yaml, text/x-yaml");
     }
 
-    KubernetesList list;
-    try (OpenShiftClient client = clientFactory.create()) {
-      list = client.lists().load(new ByteArrayInputStream(content.getBytes())).get();
-    }
+    final KubernetesList list =
+        clientFactory.create().lists().load(new ByteArrayInputStream(content.getBytes())).get();
 
     Map<String, Pod> pods = new HashMap<>();
     Map<String, Service> services = new HashMap<>();

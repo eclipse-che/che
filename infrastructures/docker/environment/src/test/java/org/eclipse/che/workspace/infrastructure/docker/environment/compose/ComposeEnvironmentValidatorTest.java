@@ -61,6 +61,7 @@ public class ComposeEnvironmentValidatorTest {
     when(server.getPort()).thenReturn("8080/tcp");
     when(server.getPath()).thenReturn("/some/path");
     when(server.getProtocol()).thenReturn("https");
+    when(server.getAttributes()).thenReturn(singletonMap("key", "value"));
   }
 
   @Test
@@ -74,7 +75,11 @@ public class ComposeEnvironmentValidatorTest {
         .thenReturn(
             newLinkedHashMap(ImmutableMap.of(MACHINE_NAME, service, machine2Name, container2)));
     ServerConfigImpl server =
-        new ServerConfigImpl().withPort("8080").withPath("/some/path").withProtocol("https");
+        new ServerConfigImpl()
+            .withPort("8080")
+            .withPath("/some/path")
+            .withProtocol("https")
+            .withAttributes(singletonMap("key", "value"));
     when(machineConfig.getServers())
         .thenReturn(singletonMap(Constants.SERVER_WS_AGENT_HTTP_REFERENCE, server));
     Map<String, String> attributes =

@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.api.workspace.shared.dto;
 
+import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.dto.shared.DTO;
@@ -33,4 +34,9 @@ public interface ServerDto extends Server {
   ServerStatus getStatus();
 
   ServerDto withStatus(ServerStatus status);
+
+  @Override
+  Map<String, String> getAttributes();
+
+  ServerDto withAttributes(Map<String, String> attributes);
 }
