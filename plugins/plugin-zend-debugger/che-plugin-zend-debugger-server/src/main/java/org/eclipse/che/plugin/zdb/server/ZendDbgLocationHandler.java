@@ -26,12 +26,12 @@ public class ZendDbgLocationHandler {
 
   public static final Location createVFS(
       String target, String resourceProjectPath, int lineNumber) {
-    return new LocationImpl(target, lineNumber, false, 0, resourceProjectPath, null, -1);
+    return new LocationImpl(target, lineNumber, false, null, resourceProjectPath, null, -1);
   }
 
   public static final Location createDBG(String resourcePath, int lineNumber) {
     return new LocationImpl(
-        Path.of(resourcePath).getName(), lineNumber, false, 0, resourcePath, null, -1);
+        Path.of(resourcePath).getName(), lineNumber, false, null, resourcePath, null, -1);
   }
 
   /**
@@ -53,7 +53,7 @@ public class ZendDbgLocationHandler {
         target,
         lineNumber,
         false,
-        0,
+        null,
         resourceProjectPath,
         dbgLocation.getMethod(),
         dbgLocation.getThreadId());
@@ -70,7 +70,7 @@ public class ZendDbgLocationHandler {
         "/projects" + vfsLocation.getTarget(),
         vfsLocation.getLineNumber(),
         false,
-        0,
+        null,
         vfsLocation.getResourceProjectPath(),
         null,
         -1);

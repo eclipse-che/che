@@ -60,7 +60,7 @@ public class BreakpointsByConditionTest {
                 "/test/src/org/eclipse/BreakpointsByConditionTest.java",
                 19,
                 false,
-                -1,
+                null,
                 "/test",
                 null,
                 -1),

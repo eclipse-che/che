@@ -46,7 +46,7 @@ public class ThreadDumpTest {
   public void setUp() throws Exception {
     Location location =
         new LocationImpl(
-            "/test/src/org/eclipse/ThreadDumpTest.java", 26, false, -1, "/test", null, -1);
+            "/test/src/org/eclipse/ThreadDumpTest.java", 26, false, null, "/test", null, -1);
     debugger = startJavaDebugger(new BreakpointImpl(location), events);
     ensureDebuggerSuspendAtLocation(location, events);
   }
