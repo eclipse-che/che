@@ -124,10 +124,10 @@ describe('If recipe has location', () => {
 
   describe('DockerFileEnvironmentManager', () => {
 
-    it('cannot edit environment variables', () => {
+    it('can edit environment variables always true', () => {
       let canEditEnvVariables = envManager.canEditEnvVariables(machines[0]);
 
-      expect(canEditEnvVariables).toBe(false);
+      expect(canEditEnvVariables).toBe(true);
     });
 
     it('should return servers', () => {

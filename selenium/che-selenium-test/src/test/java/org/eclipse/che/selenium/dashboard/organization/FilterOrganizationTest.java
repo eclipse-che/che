@@ -13,21 +13,22 @@ package org.eclipse.che.selenium.dashboard.organization;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
 import static org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.NAME;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import java.util.ArrayList;
-import java.util.List;
-import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
+import org.eclipse.che.selenium.core.annotation.Multiuser;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
+import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
+import org.eclipse.che.selenium.core.organization.TestOrganization;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.organization.AddOrganization;
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage;
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationPage;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -36,10 +37,13 @@ import org.testng.annotations.Test;
  *
  * @author Ann Shumilova
  */
+@Multiuser
 public class FilterOrganizationTest {
-  private static final String ORGANIZATION_NAME = generate("organization", 5);
+  private static final String WRONG_ORG_NAME = generate("wrong-org-", 7);
 
-  private List<OrganizationDto> organizations = new ArrayList<>();
+  private int initialOrgNumber;
+
+  @InjectTestOrganization private TestOrganization organization;
 
   @Inject
   @Named("admin")
@@ -54,55 +58,54 @@ public class FilterOrganizationTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    organizations.add(testOrganizationServiceClient.create(ORGANIZATION_NAME));
-    organizations.add(testOrganizationServiceClient.create(generate("organization", 7)));
-    organizations.add(testOrganizationServiceClient.create(generate("organization", 7)));
-    organizations.add(testOrganizationServiceClient.create(generate("organization", 7)));
-
+    initialOrgNumber = testOrganizationServiceClient.getAllRoot().size();
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
-  }
-
-  @AfterClass
-  public void tearDown() throws Exception {
-    for (OrganizationDto organization : organizations) {
-      testOrganizationServiceClient.deleteById(organization.getId());
-    }
   }
 
   @Test
   public void testOrganizationListFiler() {
-    int organizationsCount = organizations.size();
-
     // Test that organization exist
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
-    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) >= organizationsCount);
-    assertTrue(organizationListPage.getOrganizationListItemCount() >= organizationsCount);
-    assertTrue(organizationListPage.getValues(NAME).contains(ORGANIZATION_NAME));
+    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), initialOrgNumber);
+    try {
+      assertEquals(organizationListPage.getOrganizationListItemCount(), initialOrgNumber);
+    } catch (AssertionError a) {
+      // remove try-catch block after https://github.com/eclipse/che/issues/7279 has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7279", a);
+    }
+
+    assertTrue(organizationListPage.getValues(NAME).contains(organization.getName()));
 
     // Tests filter the organization by full organization name
-    organizationListPage.typeInSearchInput(ORGANIZATION_NAME);
+    organizationListPage.typeInSearchInput(organization.getName());
     organizationListPage.waitForOrganizationsList();
-    assertTrue(organizationListPage.getValues(NAME).contains(ORGANIZATION_NAME));
-    assertTrue(organizationListPage.getOrganizationListItemCount() >= 1);
+    assertTrue(organizationListPage.getValues(NAME).contains(organization.getName()));
+    assertEquals(organizationListPage.getOrganizationListItemCount(), 1);
 
     // Tests filter the organization by part of organization name
     organizationListPage.clearSearchInput();
     organizationListPage.typeInSearchInput(
-        ORGANIZATION_NAME.substring(ORGANIZATION_NAME.length() / 2));
+        organization.getName().substring(organization.getName().length() / 2));
     organizationListPage.waitForOrganizationsList();
-    assertTrue(organizationListPage.getValues(NAME).contains(ORGANIZATION_NAME));
-    assertTrue(organizationListPage.getOrganizationListItemCount() >= 1);
+    assertTrue(organizationListPage.getValues(NAME).contains(organization.getName()));
+    assertEquals(organizationListPage.getOrganizationListItemCount(), 1);
 
     // Test filter the organization by wrong name
     organizationListPage.clearSearchInput();
-    organizationListPage.typeInSearchInput(ORGANIZATION_NAME + "wrong_name");
+    organizationListPage.typeInSearchInput(WRONG_ORG_NAME);
     organizationListPage.waitForOrganizationsList();
-    assertTrue(organizationListPage.getOrganizationListItemCount() >= 0);
+    assertEquals(organizationListPage.getOrganizationListItemCount(), 0);
 
     organizationListPage.clearSearchInput();
-    assertTrue(organizationListPage.getOrganizationListItemCount() >= organizationsCount);
+
+    try {
+      assertEquals(organizationListPage.getOrganizationListItemCount(), initialOrgNumber);
+    } catch (AssertionError a) {
+      // remove try-catch block after https://github.com/eclipse/che/issues/7279 has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7279", a);
+    }
   }
 }

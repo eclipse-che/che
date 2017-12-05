@@ -74,7 +74,7 @@ public class KeysInjectorTest {
   //    public void setUp() throws Exception {
   //        final Map<String, String> metadataProperties = new HashMap<>();
   //        metadataProperties.put("id", CONTAINER_ID);
-  //        when(machineRuntime.getProperties()).thenReturn(metadataProperties);
+  //        when(machineRuntime.getAttributes()).thenReturn(metadataProperties);
   //
   //        when(environmentEngine.getMachine(WORKSPACE_ID, MACHINE_ID)).thenReturn(instance);
   //        when(instance.getOwner()).thenReturn(OWNER);

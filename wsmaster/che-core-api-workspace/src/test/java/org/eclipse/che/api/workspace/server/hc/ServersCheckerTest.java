@@ -64,9 +64,9 @@ public class ServersCheckerTest {
     servers = new HashMap<>();
     servers.putAll(
         ImmutableMap.of(
-            "wsagent/http", new ServerImpl("http://localhost"),
-            "exec-agent/http", new ServerImpl("http://localhost"),
-            "terminal", new ServerImpl("http://localhost")));
+            "wsagent/http", new ServerImpl().withUrl("http://localhost"),
+            "exec-agent/http", new ServerImpl().withUrl("http://localhost"),
+            "terminal", new ServerImpl().withUrl("http://localhost")));
 
     compFuture = new CompletableFuture<>();
 
@@ -90,7 +90,7 @@ public class ServersCheckerTest {
   @Test(timeOut = 1000)
   public void shouldUseMachineTokenWhenConstructionUrlToCheck() throws Exception {
     servers.clear();
-    servers.put("wsagent/http", new ServerImpl("http://localhost"));
+    servers.put("wsagent/http", new ServerImpl().withUrl("http://localhost"));
 
     checker.startAsync(readinessHandler);
     connectionChecker.getReportCompFuture().complete("wsagent/http");
@@ -133,8 +133,8 @@ public class ServersCheckerTest {
     servers.clear();
     servers.putAll(
         ImmutableMap.of(
-            "wsagent/http", new ServerImpl("http://localhost"),
-            "not-hardcoded", new ServerImpl("http://localhost")));
+            "wsagent/http", new ServerImpl().withUrl("http://localhost"),
+            "not-hardcoded", new ServerImpl().withUrl("http://localhost")));
 
     checker.startAsync(readinessHandler);
     connectionChecker.getReportCompFuture().complete("test_ref");

@@ -21,13 +21,13 @@ import org.eclipse.che.api.core.model.workspace.runtime.Server;
 public class MachineImpl implements Machine {
 
   private String name;
-  private Map<String, String> properties;
+  private Map<String, String> attributes;
   private Map<String, ServerImpl> servers;
 
   public MachineImpl(
-      String name, Map<String, String> properties, Map<String, ? extends Server> servers) {
+      String name, Map<String, String> attributes, Map<String, ? extends Server> servers) {
     this.name = name;
-    this.properties = new HashMap<>(properties);
+    this.attributes = new HashMap<>(attributes);
     if (servers != null) {
       this.servers =
           servers
@@ -36,18 +36,13 @@ public class MachineImpl implements Machine {
               .collect(
                   HashMap::new,
                   (map, entry) ->
-                      map.put(
-                          entry.getKey(),
-                          new ServerImpl(
-                              entry.getKey(),
-                              entry.getValue().getUrl(),
-                              entry.getValue().getStatus())),
+                      map.put(entry.getKey(), new ServerImpl(entry.getKey(), entry.getValue())),
                   HashMap::putAll);
     }
   }
 
   public MachineImpl(String name, Machine machine) {
-    this(name, machine.getProperties(), machine.getServers());
+    this(name, machine.getAttributes(), machine.getServers());
   }
 
   public String getName() {
@@ -55,11 +50,11 @@ public class MachineImpl implements Machine {
   }
 
   @Override
-  public Map<String, String> getProperties() {
-    if (properties == null) {
-      properties = new HashMap<>();
+  public Map<String, String> getAttributes() {
+    if (attributes == null) {
+      attributes = new HashMap<>();
     }
-    return properties;
+    return attributes;
   }
 
   @Override
@@ -79,17 +74,17 @@ public class MachineImpl implements Machine {
     if (this == o) return true;
     if (!(o instanceof MachineImpl)) return false;
     MachineImpl that = (MachineImpl) o;
-    return Objects.equals(getProperties(), that.getProperties())
+    return Objects.equals(getAttributes(), that.getAttributes())
         && Objects.equals(getServers(), that.getServers());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getProperties(), getServers());
+    return Objects.hash(getAttributes(), getServers());
   }
 
   @Override
   public String toString() {
-    return "MachineImpl{" + "properties=" + properties + ", servers=" + servers + '}';
+    return "MachineImpl{" + "attributes=" + attributes + ", servers=" + servers + '}';
   }
 }

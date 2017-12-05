@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.api.core.model.workspace.config;
 
+import java.util.Map;
 import org.eclipse.che.commons.annotation.Nullable;
 
 /**
@@ -52,4 +53,7 @@ public interface ServerConfig {
   /** Path used by server. */
   @Nullable
   String getPath();
+
+  /** Attributes of the server */
+  Map<String, String> getAttributes();
 }

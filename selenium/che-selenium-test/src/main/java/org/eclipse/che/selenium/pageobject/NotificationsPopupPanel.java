@@ -123,7 +123,7 @@ public class NotificationsPopupPanel {
               (ExpectedCondition<Boolean>)
                   input -> getAllMessagesFromProgressPopupPanel(timeout).contains(message));
     } catch (StaleElementReferenceException ex) {
-      LOG.error(ex.getLocalizedMessage(), ex);
+      LOG.debug(ex.getLocalizedMessage(), ex);
       WaitUtils.sleepQuietly(500, TimeUnit.MILLISECONDS);
       new WebDriverWait(seleniumWebDriver, timeout)
           .until(ExpectedConditions.textToBePresentInElement(progressPopupPanel, message));

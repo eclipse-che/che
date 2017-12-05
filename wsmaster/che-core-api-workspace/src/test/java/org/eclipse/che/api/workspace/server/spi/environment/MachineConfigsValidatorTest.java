@@ -113,7 +113,8 @@ public class MachineConfigsValidatorTest {
   )
   public void shouldFailIfServerPortIsInvalid(String servicePort) throws Exception {
     // given
-    ServerConfigImpl server = new ServerConfigImpl(servicePort, "https", "/some/path");
+    ServerConfigImpl server =
+        new ServerConfigImpl(servicePort, "https", "/some/path", singletonMap("key", "value"));
     when(machineConfig.getServers())
         .thenReturn(singletonMap(Constants.SERVER_WS_AGENT_HTTP_REFERENCE, server));
 
@@ -131,7 +132,8 @@ public class MachineConfigsValidatorTest {
   @Test(dataProvider = "validServerPorts")
   public void shouldNotFailIfServerPortIsValid(String servicePort) throws Exception {
     // given
-    ServerConfigImpl server = new ServerConfigImpl(servicePort, "https", "/some/path");
+    ServerConfigImpl server =
+        new ServerConfigImpl(servicePort, "https", "/some/path", singletonMap("key", "value"));
     when(machineConfig.getServers())
         .thenReturn(singletonMap(Constants.SERVER_WS_AGENT_HTTP_REFERENCE, server));
 
@@ -154,7 +156,8 @@ public class MachineConfigsValidatorTest {
   )
   public void shouldFailIfServerProtocolIsInvalid(String serviceProtocol) throws Exception {
     // given
-    ServerConfigImpl server = new ServerConfigImpl("8080", serviceProtocol, "/some/path");
+    ServerConfigImpl server =
+        new ServerConfigImpl("8080", serviceProtocol, "/some/path", singletonMap("key", "value"));
     when(machineConfig.getServers())
         .thenReturn(singletonMap(Constants.SERVER_WS_AGENT_HTTP_REFERENCE, server));
 
@@ -170,7 +173,8 @@ public class MachineConfigsValidatorTest {
   @Test(dataProvider = "validServerProtocols")
   public void shouldNotFailIfServerProtocolIsValid(String serviceProtocol) throws Exception {
     // given
-    ServerConfigImpl server = new ServerConfigImpl("8080", serviceProtocol, "/some/path");
+    ServerConfigImpl server =
+        new ServerConfigImpl("8080", serviceProtocol, "/some/path", singletonMap("key", "value"));
     when(machineConfig.getServers())
         .thenReturn(singletonMap(Constants.SERVER_WS_AGENT_HTTP_REFERENCE, server));
 
@@ -256,6 +260,8 @@ public class MachineConfigsValidatorTest {
   private static Map<String, ServerConfig> createServers(String... servers) {
     return Arrays.stream(servers)
         .collect(
-            Collectors.toMap(Function.identity(), s -> new ServerConfigImpl("8080", "http", "/")));
+            Collectors.toMap(
+                Function.identity(),
+                s -> new ServerConfigImpl("8080", "http", "/", singletonMap("key", "value"))));
   }
 }

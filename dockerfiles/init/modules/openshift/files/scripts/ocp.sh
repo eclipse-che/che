@@ -40,8 +40,12 @@ export OPENSHIFT_USERNAME=${OPENSHIFT_USERNAME:-${DEFAULT_OPENSHIFT_USERNAME}}
 DEFAULT_OPENSHIFT_PASSWORD="developer"
 export OPENSHIFT_PASSWORD=${OPENSHIFT_PASSWORD:-${DEFAULT_OPENSHIFT_PASSWORD}}
 
-DEFAULT_OPENSHIFT_NAMESPACE_URL="eclipse-che.${OC_PUBLIC_IP}.nip.io"
-export OPENSHIFT_NAMESPACE_URL=${OPENSHIFT_NAMESPACE_URL:-${DEFAULT_OPENSHIFT_NAMESPACE_URL}}
+DEFAULT_DNS_PROVIDER="nip.io"
+export DNS_PROVIDER=${DNS_PROVIDER:-${DEFAULT_DNS_PROVIDER}}
+
+export OPENSHIFT_ROUTING_SUFFIX="${OC_PUBLIC_IP}.${DNS_PROVIDER}"
+
+export CHE_OPENSHIFT_PROJECT="eclipse-che"
 
 export OPENSHIFT_FLAVOR="ocp"
 
@@ -128,15 +132,15 @@ wait_ocp() {
 }
 
 run_ocp() {
-    $OC_BINARY cluster up --public-hostname="${OC_PUBLIC_HOSTNAME}" --routing-suffix="${OC_PUBLIC_IP}.nip.io"
+    $OC_BINARY cluster up --public-hostname="${OC_PUBLIC_HOSTNAME}" --routing-suffix="${OC_PUBLIC_IP}.${DNS_PROVIDER}"
     wait_ocp
     $OC_BINARY login -u system:admin
     $OC_BINARY create serviceaccount pv-recycler-controller -n openshift-infra
 }
 
 deploy_che_to_ocp() {
-    #Repull init image only if DEFAULT_IMAGE_PULL_POLICY is set to Always
-    if [ $DEFAULT_IMAGE_PULL_POLICY == "Always" ]; then
+    #Repull init image only if IMAGE_PULL_POLICY is set to Always
+    if [ $IMAGE_PULL_POLICY == "Always" ]; then
         docker pull "$IMAGE_INIT"
     fi
     docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" eclipse/che-cli:${CHE_IMAGE_TAG} destroy --quiet --skip:pull --skip:nightly
@@ -147,7 +151,7 @@ deploy_che_to_ocp() {
 }
 
 server_is_booted() {
-  PING_URL="http://che-$OPENSHIFT_NAMESPACE_URL"
+  PING_URL="http://che-${CHE_OPENSHIFT_PROJECT}.${OPENSHIFT_ROUTING_SUFFIX}"
   HTTP_STATUS_CODE=$(curl -I -k "${PING_URL}" -s -o /dev/null --write-out '%{http_code}')
   if [[ "${HTTP_STATUS_CODE}" = "200" ]] || [[ "${HTTP_STATUS_CODE}" = "302" ]]; then
     return 0

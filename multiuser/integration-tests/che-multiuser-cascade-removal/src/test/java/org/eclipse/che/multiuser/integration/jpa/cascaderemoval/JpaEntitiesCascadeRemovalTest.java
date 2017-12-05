@@ -25,6 +25,7 @@ import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjec
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createWorker;
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createWorkspace;
 import static org.eclipse.che.multiuser.resource.spi.jpa.JpaFreeResourcesLimitDao.RemoveFreeResourcesLimitSubscriber;
+import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
@@ -226,7 +227,7 @@ public class JpaEntitiesCascadeRemovalTest {
                 bind(FreeResourcesLimitDao.class).to(JpaFreeResourcesLimitDao.class);
                 bind(RemoveFreeResourcesLimitSubscriber.class).asEagerSingleton();
                 bind(WorkspaceManager.class);
-                Multibinder.newSetBinder(binder(), RuntimeInfrastructure.class);
+                bind(RuntimeInfrastructure.class).toInstance(mock(RuntimeInfrastructure.class));
                 MapBinder.newMapBinder(binder(), String.class, InternalEnvironmentFactory.class);
                 bind(AccountManager.class);
                 bind(Boolean.class)

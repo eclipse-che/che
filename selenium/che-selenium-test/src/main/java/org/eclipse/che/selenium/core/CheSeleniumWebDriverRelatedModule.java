@@ -12,7 +12,7 @@ package org.eclipse.che.selenium.core;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
-import javax.inject.Named;
+import com.google.inject.name.Named;
 import org.eclipse.che.selenium.core.entrance.CookieEntrance;
 import org.eclipse.che.selenium.core.entrance.Entrance;
 import org.eclipse.che.selenium.core.entrance.LoginPageEntrance;
@@ -27,8 +27,6 @@ import org.eclipse.che.selenium.pageobject.site.LoginPage;
  */
 public class CheSeleniumWebDriverRelatedModule extends AbstractModule {
 
-  private static final String CHE_MULTIUSER = "che.multiuser";
-
   @Override
   protected void configure() {
     bind(LoginPage.class).to(CheLoginPage.class);
@@ -36,7 +34,7 @@ public class CheSeleniumWebDriverRelatedModule extends AbstractModule {
 
   @Provides
   public Entrance getEntrance(
-      @Named(CHE_MULTIUSER) boolean isMultiuser,
+      @Named("che.multiuser") boolean isMultiuser,
       LoginPage loginPage,
       SeleniumWebDriver seleniumWebDriver) {
     if (isMultiuser) {
