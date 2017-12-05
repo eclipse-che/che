@@ -67,7 +67,7 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
    * @param text text to be printed
    */
   public void printText(String text) {
-    view.print(text, text.endsWith("\r"));
+    view.print(text);
 
     for (ActionDelegate actionDelegate : actionDelegates) {
       actionDelegate.onConsoleOutput(this);
@@ -81,7 +81,7 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
    * @param color color of the text or NULL
    */
   public void printText(String text, String color) {
-    view.print(text, text.endsWith("\r"), color);
+    view.print(text, color);
 
     for (ActionDelegate actionDelegate : actionDelegates) {
       actionDelegate.onConsoleOutput(this);

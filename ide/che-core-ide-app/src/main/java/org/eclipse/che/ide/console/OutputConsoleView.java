@@ -37,20 +37,16 @@ public interface OutputConsoleView extends View<OutputConsoleView.ActionDelegate
    * Prints text.
    *
    * @param text text to print
-   * @param carriageReturn if {@code true} - next message should replace the current one, if {@code
-   *     false} - next message will be printed in a new line
    */
-  void print(String text, boolean carriageReturn);
+  void print(String text);
 
   /**
    * Prints colored text.
    *
    * @param text text to print
-   * @param carriageReturn if {@code true} - next message should replace the current one, if {@code
-   *     false} - next message will be printed in a new line
    * @param color color of the text or NULL
    */
-  void print(String text, boolean carriageReturn, String color);
+  void print(String text, String color);
 
   /**
    * Returns the console text.

@@ -137,9 +137,8 @@ public class CommandOutputConsolePresenter
   public Consumer<ProcessStdErrEventDto> getStdErrConsumer() {
     return event -> {
       String text = event.getText();
-      boolean carriageReturn = text.endsWith("\r");
       String color = "red";
-      view.print(text, carriageReturn, color);
+      view.print(text, color);
 
       for (ActionDelegate actionDelegate : actionDelegates) {
         actionDelegate.onConsoleOutput(CommandOutputConsolePresenter.this);
@@ -151,8 +150,7 @@ public class CommandOutputConsolePresenter
   public Consumer<ProcessStdOutEventDto> getStdOutConsumer() {
     return event -> {
       String stdOutMessage = event.getText();
-      boolean carriageReturn = stdOutMessage.endsWith("\r");
-      view.print(stdOutMessage, carriageReturn);
+      view.print(stdOutMessage);
 
       for (ActionDelegate actionDelegate : actionDelegates) {
         actionDelegate.onConsoleOutput(CommandOutputConsolePresenter.this);
@@ -189,7 +187,7 @@ public class CommandOutputConsolePresenter
 
   @Override
   public void printOutput(String output) {
-    view.print(output.replaceAll("\\[STDOUT\\] ", ""), false);
+    view.print(output.replaceAll("\\[STDOUT\\] ", ""));
   }
 
   @Override

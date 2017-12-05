@@ -185,13 +185,15 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
   }
 
   @Override
-  public void print(String text, boolean carriageReturn) {
+  public void print(String text) {
+    TerminalGeometryJso geometryJso = terminalJso.proposeGeometry();
+    Log.info(getClass(), "rows: " + geometryJso.getRows() + " cols: " + geometryJso.getCols());
     terminalJso.writeln(text);
   }
 
   // todo support coloring by control sequences...
   @Override
-  public void print(String text, boolean carriageReturn, String color) {
+  public void print(String text, String color) {
     terminalJso.writeln(text);
   }
 
