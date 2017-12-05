@@ -106,25 +106,26 @@ public class LocalProjectsFolderPathProvider {
     if (!isWindows && hostProjectsFolder != null) {
       return hostProjectsFolder;
     }
+    return doGetPathById(workspaceId);
+  }
+
+  public String getPathByName(String workspaceName, String workspaceNamespace) throws IOException {
+    if (!isWindows && hostProjectsFolder != null) {
+      return hostProjectsFolder;
+    }
+
     try {
-      Workspace workspace = workspaceDao.get(workspaceId);
-      String wsName = workspace.getConfig().getName();
-      return doGetPathByName(wsName);
+      Workspace workspace = workspaceDao.get(workspaceName, workspaceNamespace);
+      return getPath(workspace.getId());
     } catch (NotFoundException | ServerException e) {
       throw new IOException(e.getLocalizedMessage());
     }
   }
 
-  public String getPathByName(String workspaceName) throws IOException {
-    if (!isWindows && hostProjectsFolder != null) {
-      return hostProjectsFolder;
-    }
-    return doGetPathByName(workspaceName);
-  }
+  private String doGetPathById(String workspaceId) throws IOException {
 
-  private String doGetPathByName(String workspaceName) throws IOException {
     final String workspaceFolderPath =
-        Paths.get(workspacesMountPoint).resolve(workspaceName).toString();
+        Paths.get(workspacesMountPoint).resolve(workspaceId).toString();
     ensureExist(workspaceFolderPath, null);
     return workspaceFolderPath;
   }

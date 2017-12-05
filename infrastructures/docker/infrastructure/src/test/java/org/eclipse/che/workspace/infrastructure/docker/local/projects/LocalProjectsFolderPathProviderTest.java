@@ -37,6 +37,7 @@ public class LocalProjectsFolderPathProviderTest {
 
   private static final String WS_ID = "testWsId";
   private static final String WS_NAME = "testWsName";
+  private static final String WS_NAMESPACE = "che";
 
   @Mock private WorkspaceDao workspaceDao;
 
@@ -50,8 +51,11 @@ public class LocalProjectsFolderPathProviderTest {
     WorkspaceImpl workspace = mock(WorkspaceImpl.class);
     WorkspaceConfigImpl workspaceConfig = mock(WorkspaceConfigImpl.class);
     when(workspaceDao.get(WS_ID)).thenReturn(workspace);
+    when(workspaceDao.get(WS_NAME, WS_NAMESPACE)).thenReturn(workspace);
     when(workspace.getConfig()).thenReturn(workspaceConfig);
     when(workspaceConfig.getName()).thenReturn(WS_NAME);
+    when(workspace.getNamespace()).thenReturn(WS_NAMESPACE);
+    when(workspace.getId()).thenReturn(WS_ID);
 
     Path tempDirectory = Files.createTempDirectory(getClass().getSimpleName());
     workspacesRoot = tempDirectory.toString();
@@ -104,7 +108,7 @@ public class LocalProjectsFolderPathProviderTest {
 
   @Test
   public void worksIfWorkspaceFolderExists() throws Exception {
-    assertTrue(Paths.get(workspacesRoot, WS_NAME).toFile().mkdir());
+    assertTrue(Paths.get(workspacesRoot, WS_ID).toFile().mkdir());
     LocalProjectsFolderPathProvider provider =
         new LocalProjectsFolderPathProvider(
             workspacesRoot,
@@ -119,7 +123,7 @@ public class LocalProjectsFolderPathProviderTest {
     assertTrue(workspacesRootFile.exists());
     assertTrue(workspacesRootFile.isDirectory());
 
-    String providerPath = provider.getPath(WS_ID);
+    String providerPath = provider.getPathByName(WS_NAME, WS_NAMESPACE);
 
     assertTrue(new File(providerPath).exists());
     assertTrue(new File(providerPath).isDirectory());
@@ -159,7 +163,7 @@ public class LocalProjectsFolderPathProviderTest {
     String providerPath = provider.getPath(WS_ID);
 
     assertEquals(
-        providerPath, WindowsHostUtils.getCheHome().resolve("vfs").resolve(WS_NAME).toString());
+        providerPath, WindowsHostUtils.getCheHome().resolve("vfs").resolve(WS_ID).toString());
   }
 
   @Test
@@ -188,7 +192,7 @@ public class LocalProjectsFolderPathProviderTest {
     provider.init();
     String providerPath = provider.getPath(WS_ID);
 
-    assertEquals(providerPath, Paths.get(oldWorkspacesRoot, WS_NAME).toString());
+    assertEquals(providerPath, Paths.get(oldWorkspacesRoot, WS_ID).toString());
   }
 
   @Test(
@@ -196,7 +200,7 @@ public class LocalProjectsFolderPathProviderTest {
     expectedExceptionsMessageRegExp = "Workspace folder '.*' is not directory"
   )
   public void throwsExceptionIfFileIsFoundByWorkspacesPath() throws Exception {
-    assertTrue(Paths.get(workspacesRoot, WS_NAME).toFile().createNewFile());
+    assertTrue(Paths.get(workspacesRoot, WS_ID).toFile().createNewFile());
     LocalProjectsFolderPathProvider provider =
         new LocalProjectsFolderPathProvider(workspacesRoot, null, null, true, workspaceDao, false);
 
@@ -238,11 +242,12 @@ public class LocalProjectsFolderPathProviderTest {
     expectedExceptionsMessageRegExp = "expected test exception"
   )
   public void throwsIOExceptionIfWorkspaceRetrievalFails() throws Exception {
-    when(workspaceDao.get(WS_ID)).thenThrow(new ServerException("expected test exception"));
+    when(workspaceDao.get(WS_NAME, WS_NAMESPACE))
+        .thenThrow(new ServerException("expected test exception"));
     LocalProjectsFolderPathProvider provider =
         new LocalProjectsFolderPathProvider(workspacesRoot, null, null, false, workspaceDao, true);
 
     provider.init();
-    provider.getPath(WS_ID);
+    provider.getPathByName(WS_NAME, WS_NAMESPACE);
   }
 }

@@ -85,7 +85,8 @@ public class RemoveLocalProjectsFolderOnWorkspaceRemove
 
     String projectSourcesPath;
     try {
-      projectSourcesPath = workspaceFolderPathProvider.getPathByName(workspaceName);
+      projectSourcesPath =
+          workspaceFolderPathProvider.getPathByName(workspaceName, workspace.getNamespace());
     } catch (IOException e) {
       LOG.error(
           "Failed to evaluate projects files path for workspace with id: '{}'. Cause: '{}'",
