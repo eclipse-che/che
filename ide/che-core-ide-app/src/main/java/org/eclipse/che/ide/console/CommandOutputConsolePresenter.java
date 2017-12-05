@@ -20,8 +20,6 @@ import com.google.web.bindery.event.shared.EventBus;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandExecutor;
@@ -98,15 +96,7 @@ public class CommandOutputConsolePresenter
 
     final String previewUrl = command.getAttributes().get(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME);
     if (!isNullOrEmpty(previewUrl)) {
-      macroProcessor
-          .expandMacros(previewUrl)
-          .then(
-              new Operation<String>() {
-                @Override
-                public void apply(String arg) throws OperationException {
-                  view.showPreviewUrl(arg);
-                }
-              });
+      macroProcessor.expandMacros(previewUrl).then(view::showPreviewUrl);
     } else {
       view.hidePreview();
     }
@@ -175,7 +165,6 @@ public class CommandOutputConsolePresenter
     return event -> {
       finished = false;
       view.enableStopButton(true);
-      view.toggleScrollToEndButton(true);
 
       pid = event.getPid();
 
@@ -188,7 +177,6 @@ public class CommandOutputConsolePresenter
     return event -> {
       finished = true;
       view.enableStopButton(false);
-      view.toggleScrollToEndButton(false);
 
       eventBus.fireEvent(new ProcessFinishedEvent(pid, machineName));
     };
@@ -250,27 +238,6 @@ public class CommandOutputConsolePresenter
     for (ActionDelegate actionDelegate : actionDelegates) {
       actionDelegate.onDownloadOutput(this);
     }
-  }
-
-  @Override
-  public void wrapTextButtonClicked() {
-    wrapText = !wrapText;
-    view.wrapText(wrapText);
-    view.toggleWrapTextButton(wrapText);
-  }
-
-  @Override
-  public void scrollToBottomButtonClicked() {
-    followOutput = !followOutput;
-
-    view.toggleScrollToEndButton(followOutput);
-    view.enableAutoScroll(followOutput);
-  }
-
-  @Override
-  public void onOutputScrolled(boolean bottomReached) {
-    followOutput = bottomReached;
-    view.toggleScrollToEndButton(bottomReached);
   }
 
   /**

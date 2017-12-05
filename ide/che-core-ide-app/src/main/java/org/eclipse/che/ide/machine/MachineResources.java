@@ -48,12 +48,6 @@ public interface MachineResources extends ClientBundle {
   @Source("process/clear-outputs.svg")
   SVGResource clearOutputsIcon();
 
-  @Source("process/scroll-to-bottom.svg")
-  SVGResource scrollToBottomIcon();
-
-  @Source("process/line-wrap.svg")
-  SVGResource lineWrapIcon();
-
   @Source("edit-commands.svg")
   SVGResource editCommands();
 

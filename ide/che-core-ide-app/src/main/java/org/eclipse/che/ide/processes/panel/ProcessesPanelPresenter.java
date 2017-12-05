@@ -519,7 +519,6 @@ public class ProcessesPanelPresenter extends BasePresenter
               @Override
               public void apply(SshPairDto sshPairDto) throws OperationException {
                 if (defaultConsole instanceof DefaultOutputConsole) {
-                  ((DefaultOutputConsole) defaultConsole).enableAutoScroll(false);
                   ((DefaultOutputConsole) defaultConsole)
                       .printText(
                           localizationConstant.sshConnectInfo(
@@ -538,7 +537,6 @@ public class ProcessesPanelPresenter extends BasePresenter
               @Override
               public void apply(PromiseError arg) throws OperationException {
                 if (defaultConsole instanceof DefaultOutputConsole) {
-                  ((DefaultOutputConsole) defaultConsole).enableAutoScroll(false);
                   ((DefaultOutputConsole) defaultConsole)
                       .printText(
                           localizationConstant.sshConnectInfo(

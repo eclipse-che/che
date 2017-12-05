@@ -34,11 +34,6 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
 
   private final List<ActionDelegate> actionDelegates = new ArrayList<>();
 
-  private boolean wrapText;
-
-  /** Follow output when printing text */
-  private boolean followOutput = true;
-
   private OutputCustomizer customizer = null;
 
   @Inject
@@ -51,7 +46,6 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
     this.view = view;
     this.title = title;
     this.resources = resources;
-    this.view.enableAutoScroll(true);
 
     setCustomizer(
         new CompoundOutputCustomizer(
@@ -65,11 +59,6 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
     view.hidePreview();
     view.setReRunButtonVisible(false);
     view.setStopButtonVisible(false);
-  }
-
-  /** Enables auto scroll when output. */
-  public void enableAutoScroll(boolean enable) {
-    view.enableAutoScroll(enable);
   }
 
   /**
@@ -161,27 +150,6 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
     for (ActionDelegate actionDelegate : actionDelegates) {
       actionDelegate.onDownloadOutput(this);
     }
-  }
-
-  @Override
-  public void wrapTextButtonClicked() {
-    wrapText = !wrapText;
-    view.wrapText(wrapText);
-    view.toggleWrapTextButton(wrapText);
-  }
-
-  @Override
-  public void scrollToBottomButtonClicked() {
-    followOutput = !followOutput;
-
-    view.toggleScrollToEndButton(followOutput);
-    view.enableAutoScroll(followOutput);
-  }
-
-  @Override
-  public void onOutputScrolled(boolean bottomReached) {
-    followOutput = bottomReached;
-    view.toggleScrollToEndButton(bottomReached);
   }
 
   @Override

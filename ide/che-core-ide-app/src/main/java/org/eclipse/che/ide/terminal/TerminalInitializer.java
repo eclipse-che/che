@@ -17,7 +17,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
-import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.lib.terminal.client.TerminalResources;
 import org.eclipse.che.requirejs.RequireJsLoader;
 
@@ -25,15 +24,11 @@ import org.eclipse.che.requirejs.RequireJsLoader;
 @Singleton
 public class TerminalInitializer {
 
-  private final PerspectiveManager perspectiveManager;
-
   @Inject
   public TerminalInitializer(
       final TerminalResources terminalResources,
-      final PerspectiveManager perspectiveManager,
       final TerminalInitializePromiseHolder terminalModule,
       final RequireJsLoader requireJsLoader) {
-    this.perspectiveManager = perspectiveManager;
     terminalResources.getTerminalStyle().ensureInjected();
 
     Promise<Void> termInitPromise =

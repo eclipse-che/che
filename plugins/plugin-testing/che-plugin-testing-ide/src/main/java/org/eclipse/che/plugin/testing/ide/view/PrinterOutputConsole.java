@@ -14,17 +14,23 @@ import javax.inject.Inject;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.console.OutputConsoleViewImpl;
 import org.eclipse.che.ide.machine.MachineResources;
+import org.eclipse.che.ide.terminal.TerminalInitializePromiseHolder;
 import org.eclipse.che.plugin.testing.ide.model.Printable;
 import org.eclipse.che.plugin.testing.ide.model.Printer;
 import org.eclipse.che.plugin.testing.ide.model.TestState;
+import org.eclipse.che.requirejs.ModuleHolder;
 
 /** Represents an output console for test results. */
 public class PrinterOutputConsole extends OutputConsoleViewImpl implements Printer {
   private TestState currentTest;
 
   @Inject
-  public PrinterOutputConsole(MachineResources resources, CoreLocalizationConstant localization) {
-    super(resources, localization);
+  public PrinterOutputConsole(
+      MachineResources resources,
+      CoreLocalizationConstant localization,
+      TerminalInitializePromiseHolder promiseHolder,
+      ModuleHolder moduleHolder) {
+    super(moduleHolder, resources, localization, promiseHolder);
 
     reRunProcessButton.removeFromParent();
     stopProcessButton.removeFromParent();
@@ -42,7 +48,6 @@ public class PrinterOutputConsole extends OutputConsoleViewImpl implements Print
     } else {
       print(text, false);
     }
-    enableAutoScroll(true);
   }
 
   @Override

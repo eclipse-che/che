@@ -65,32 +65,8 @@ public interface OutputConsoleView extends View<OutputConsoleView.ActionDelegate
   /** Hides preview title and preview label. */
   void hidePreview();
 
-  /**
-   * Wraps text in the console.
-   *
-   * @param wrap set <code>true</code> to wrap the text
-   */
-  void wrapText(boolean wrap);
-
-  /** Enables auto scroll when output. */
-  void enableAutoScroll(boolean enable);
-
   /** Clears the console. */
   void clearConsole();
-
-  /**
-   * Toggles `Wrap text` button.
-   *
-   * @param toggle use <code>true</code> to toggle the button
-   */
-  void toggleWrapTextButton(boolean toggle);
-
-  /**
-   * Toggles `Scroll to the end` button.
-   *
-   * @param toggle use <code>true</code> to toggle the button
-   */
-  void toggleScrollToEndButton(boolean toggle);
 
   /**
    * Sets visibility for Re-Run button.
@@ -127,15 +103,6 @@ public interface OutputConsoleView extends View<OutputConsoleView.ActionDelegate
 
     /** Handle click on `Download outputs` button. */
     void downloadOutputsButtonClicked();
-
-    /** Handle click on `Wrap text` button. */
-    void wrapTextButtonClicked();
-
-    /** Handle click on `Scroll to end` button. */
-    void scrollToBottomButtonClicked();
-
-    /** Handle scrolling the output. */
-    void onOutputScrolled(boolean bottomReached);
 
     /** Returns the customizer for the console output */
     OutputCustomizer getCustomizer();

@@ -29,4 +29,9 @@ public class TerminalOptionsJso extends Jso {
         this.focusOnOpen = focusOnOpen;
         return this;
     }-*/;
+
+  public final native TerminalOptionsJso withScrollBack(int scrollBack) /*-{
+        this.scrollback = scrollBack;
+        return this;
+    }-*/;
 }
