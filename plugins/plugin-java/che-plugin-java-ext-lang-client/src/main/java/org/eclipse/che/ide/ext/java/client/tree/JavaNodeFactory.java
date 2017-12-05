@@ -32,7 +32,8 @@ public interface JavaNodeFactory extends NodeFactory {
   JarNode newJarNode(Jar jar, Path project, NodeSettings nodeSettings);
 
   JarFolderNode newJarFolderNode(
-      JarEntry jarEntry, int libId, Path project, NodeSettings nodeSettings);
+      JarEntry jarEntry, String libId, Path project, NodeSettings nodeSettings);
 
-  JarFileNode newJarFileNode(JarEntry jarEntry, int libId, Path project, NodeSettings nodeSettings);
+  JarFileNode newJarFileNode(
+      JarEntry jarEntry, String libId, Path project, NodeSettings nodeSettings);
 }

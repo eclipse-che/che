@@ -59,7 +59,7 @@ import org.eclipse.che.jdt.ls.extension.api.dto.JarEntry;
 public class JarFileNode extends SyntheticNode<JarEntry>
     implements VirtualFile, HasAction, FileEventHandler, ResourceChangedHandler, HasLocation {
 
-  private final int libId;
+  private final String libId;
   private final Path project;
   private final JavaLanguageExtensionServiceClient service;
   private final DtoFactory dtoFactory;
@@ -75,7 +75,7 @@ public class JarFileNode extends SyntheticNode<JarEntry>
   @Inject
   public JarFileNode(
       @Assisted JarEntry jarEntry,
-      @Assisted int libId,
+      @Assisted String libId,
       @Assisted Path project,
       @Assisted NodeSettings nodeSettings,
       JavaLanguageExtensionServiceClient service,
@@ -175,7 +175,7 @@ public class JarFileNode extends SyntheticNode<JarEntry>
     ExternalLibrariesParameters params = dtoFactory.createDto(ExternalLibrariesParameters.class);
     params.setProjectUri(project.toString());
     params.setNodePath(getData().getPath());
-    if (libId != -1) {
+    if (libId != null) {
       params.setNodeId(libId);
       return service
           .libraryNodeContentByPath(params)

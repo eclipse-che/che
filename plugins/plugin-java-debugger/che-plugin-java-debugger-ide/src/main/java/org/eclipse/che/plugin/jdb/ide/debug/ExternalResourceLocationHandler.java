@@ -53,7 +53,7 @@ public class ExternalResourceLocationHandler extends FileResourceLocationHandler
 
   @Override
   public boolean isSuitedFor(Location location) {
-    return location.isExternalResource() && location.getExternalResourceId() != 0;
+    return location.isExternalResource() && location.getExternalResourceId() != null;
   }
 
   @Override
@@ -77,7 +77,7 @@ public class ExternalResourceLocationHandler extends FileResourceLocationHandler
       final Location location, final AsyncCallback<VirtualFile> callback) {
 
     final String className = extractOuterClassFqn(location.getTarget());
-    final int libId = location.getExternalResourceId();
+    final String libId = location.getExternalResourceId();
     final Path projectPath = new Path(location.getResourceProjectPath());
 
     ExternalLibrariesParameters params = dtoFactory.createDto(ExternalLibrariesParameters.class);

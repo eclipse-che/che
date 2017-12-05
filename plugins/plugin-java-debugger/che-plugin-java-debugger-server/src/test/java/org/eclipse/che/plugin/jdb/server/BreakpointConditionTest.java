@@ -47,7 +47,7 @@ public class BreakpointConditionTest {
             "/test/src/org/eclipse/BreakpointsByConditionTest.java",
             17,
             false,
-            -1,
+            null,
             "/test",
             null,
             -1);
@@ -73,7 +73,7 @@ public class BreakpointConditionTest {
                 "/test/src/org/eclipse/BreakpointsByConditionTest.java",
                 19,
                 false,
-                -1,
+                null,
                 "/test",
                 null,
                 -1),

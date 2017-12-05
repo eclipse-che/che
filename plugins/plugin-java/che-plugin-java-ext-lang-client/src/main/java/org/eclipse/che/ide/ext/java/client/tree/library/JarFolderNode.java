@@ -41,7 +41,7 @@ import org.eclipse.che.jdt.ls.extension.api.dto.JarEntry;
 /** @author Vlad Zhukovskiy */
 @Beta
 public class JarFolderNode extends SyntheticNode<JarEntry> {
-  private final int libId;
+  private final String libId;
   private final Path project;
   private final JavaResources javaResources;
   private final NodesResources nodesResources;
@@ -52,7 +52,7 @@ public class JarFolderNode extends SyntheticNode<JarEntry> {
   @Inject
   public JarFolderNode(
       @Assisted JarEntry jarEntry,
-      @Assisted int libId,
+      @Assisted String libId,
       @Assisted Path project,
       @Assisted NodeSettings nodeSettings,
       JavaResources javaResources,
