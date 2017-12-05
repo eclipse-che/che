@@ -17,6 +17,8 @@
 
     <ui:style  src="org/eclipse/che/ide/api/ui/style.css">
 
+        @eval outputBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.outputBackgroundColor();
+
         /**
          * Toolbar on the left with buttons.
          */
@@ -179,6 +181,12 @@
             word-wrap: break-word;
         }
 
+        .verticalScroller {
+            overflow-y: hidden;
+            overflow-x: auto;
+            background-color: outputBackgroundColor;
+        }
+
     </ui:style>
 
     <g:DockLayoutPanel ui:field="consolePanel" unit="PX" width="100%" height="100%">
@@ -206,7 +214,9 @@
             </g:FlowPanel>
         </g:north>
         <g:center>
-            <g:FlowPanel width="100%" height="100%" ui:field="consoleLines" debugId="commandConsoleLines" />
+            <g:FlowPanel width="100%" height="100%" styleName="{style.verticalScroller}">
+                <g:FlowPanel height="100%" ui:field="consoleLines" debugId="commandConsoleLines" />
+            </g:FlowPanel>
         </g:center>
     </g:DockLayoutPanel>
 </ui:UiBinder>

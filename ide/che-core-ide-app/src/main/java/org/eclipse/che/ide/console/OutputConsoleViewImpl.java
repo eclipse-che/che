@@ -179,22 +179,31 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     resizeTimer.schedule(200);
   }
 
+  private int rows = 24;
+  private int cols;
+
   private void resize() {
     TerminalGeometryJso geometryJso = terminalJso.proposeGeometry();
-    terminalJso.resize(geometryJso.getCols(), geometryJso.getRows());
+    rows = geometryJso.getRows();
+
+    if (rows > 0 && cols > 0) {
+      terminalJso.resize(cols, rows);
+    }
   }
 
   @Override
   public void print(String text) {
-    TerminalGeometryJso geometryJso = terminalJso.proposeGeometry();
-    Log.info(getClass(), "rows: " + geometryJso.getRows() + " cols: " + geometryJso.getCols());
+    if (text.length() > cols) {
+      cols = text.length();
+      terminalJso.resize(cols, rows);
+    }
     terminalJso.writeln(text);
   }
 
-  // todo support coloring by control sequences...
   @Override
   public void print(String text, String color) {
-    terminalJso.writeln(text);
+    // todo handle colors...
+//    terminalJso.writeln(text);
   }
 
   @Override
