@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.api.parts;
 
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.extension.SDK;
 
@@ -68,6 +69,7 @@ public interface WorkspaceAgent {
    *
    * @return the active part
    */
+  @Nullable
   PartPresenter getActivePart();
 
   /**
