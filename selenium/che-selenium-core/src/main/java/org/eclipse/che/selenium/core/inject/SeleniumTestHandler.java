@@ -59,6 +59,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.IAnnotationTransformer;
 import org.testng.IConfigurationListener;
+import org.testng.IExecutionListener;
 import org.testng.IInvokedMethod;
 import org.testng.IInvokedMethodListener;
 import org.testng.ISuite;
@@ -78,7 +79,11 @@ import org.testng.TestException;
  * @author Dmytro Nochevnov
  */
 public abstract class SeleniumTestHandler
-    implements ITestListener, ISuiteListener, IInvokedMethodListener, IAnnotationTransformer {
+    implements ITestListener,
+        ISuiteListener,
+        IInvokedMethodListener,
+        IAnnotationTransformer,
+        IExecutionListener {
 
   private static final Logger LOG = LoggerFactory.getLogger(SeleniumTestHandler.class);
   private static final AtomicBoolean isCleanUpCompleted = new AtomicBoolean();
@@ -151,9 +156,7 @@ public abstract class SeleniumTestHandler
 
   @Override
   public void onStart(ISuite suite) {
-    isCleanUpCompleted.set(false);
     runningTests.clear();
-
     suite.setParentInjector(injector);
   }
 
@@ -169,9 +172,7 @@ public abstract class SeleniumTestHandler
   }
 
   @Override
-  public void onFinish(ISuite suite) {
-    shutdown();
-  }
+  public void onFinish(ISuite suite) {}
 
   @Override
   public void beforeInvocation(IInvokedMethod method, ITestResult testResult) {
@@ -208,6 +209,14 @@ public abstract class SeleniumTestHandler
 
   @Override
   public void afterInvocation(IInvokedMethod method, ITestResult result) {}
+
+  @Override
+  public void onExecutionStart() {}
+
+  @Override
+  public void onExecutionFinish() {
+    shutdown();
+  }
 
   /** Injects dependencies into the given test class using {@link Guice} and custom injectors. */
   private void injectDependencies(ITestContext testContext, Object testInstance) throws Exception {
