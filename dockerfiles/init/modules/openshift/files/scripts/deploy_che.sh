@@ -294,7 +294,7 @@ echo "done!"
 
 COMMAND_DIR=$(dirname "$0")
 
-if [[ "${CHE_MULTIUSER}" == "true" ]] && [[ "${COMMAND}" != *"rollupdate"* ]]; then
+if [[ "${CHE_MULTIUSER}" == "true" ]] && [[ "${COMMAND}" == "deploy" ]]; then
     if [ "${CHE_DEDICATED_KEYCLOAK}" == "true" ]; then
         "${COMMAND_DIR}"/multi-user/deploy_postgres_and_keycloak.sh
     else
