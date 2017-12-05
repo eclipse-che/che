@@ -372,8 +372,6 @@ public abstract class SeleniumTestHandler
 
   /** Cleans up test environment. */
   public void shutdown() {
-    LOG.info(">>>>> shutdown");
-
     if (isCleanUpCompleted.get()) {
       return;
     }
