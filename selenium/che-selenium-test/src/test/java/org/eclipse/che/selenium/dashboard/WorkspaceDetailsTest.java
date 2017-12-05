@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA_MYSQL;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.WEB_JAVA_PETCLINIC;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace.RUNNING;
@@ -120,18 +121,8 @@ public class WorkspaceDetailsTest {
     clickOnSaveButton();
     workspaceEnvVariables.checkValueIsNotExists("login", "admin");
 
-    // delete all variable from db machine, check they don't exist and save changes
     workspaceMachines.selectMachine("Environment variables", "db");
-    variables.forEach(
-        (name, value) -> {
-          workspaceEnvVariables.clickOnDeleteEnvVariableButton(name);
-          workspaceDetails.clickOnDeleteButtonInDialogWindow();
-          workspaceEnvVariables.checkValueIsNotExists(name, value);
-        });
-
-    clickOnSaveButton();
-
-    // restore variables to db machine, check they exist and save changes
+    // add variables to 'db' machine, check they exist and save changes
     variables.forEach(
         (name, value) -> {
           loader.waitOnClosed();
@@ -142,6 +133,16 @@ public class WorkspaceDetailsTest {
           assertTrue(workspaceEnvVariables.checkEnvVariableExists(name));
           assertTrue(workspaceEnvVariables.checkValueExists(name, value));
         });
+    clickOnSaveButton();
+
+    // delete all variables from the 'db' machine, check they don't exist and save changes
+    variables.forEach(
+        (name, value) -> {
+          workspaceEnvVariables.clickOnDeleteEnvVariableButton(name);
+          workspaceDetails.clickOnDeleteButtonInDialogWindow();
+          workspaceEnvVariables.checkValueIsNotExists(name, value);
+        });
+
     clickOnSaveButton();
   }
 
@@ -159,8 +160,6 @@ public class WorkspaceDetailsTest {
     workspaceMachines.selectMachine("Workspace Installers", "dev-machine");
     installers.forEach(
         (name, value) -> {
-          workspaceInstallers.checkInstallerExists(name);
-          assertFalse(workspaceInstallers.isInstallerStateNotChangeable(name));
           workspaceInstallers.checkInstallerExists(name);
         });
 
@@ -278,10 +277,10 @@ public class WorkspaceDetailsTest {
     installers.put("JSON language server", false);
     installers.put("PHP language server", false);
     installers.put("Python language server", false);
-    installers.put("SSH", true);
+    installers.put("Simple Test language server", false);
+    installers.put("SSH", false);
     installers.put("Terminal", true);
     installers.put("TypeScript language server", false);
-    installers.put("Workspace API", true);
     installers.put("Yaml language server", false);
 
     variables.put("MYSQL_DATABASE", "petclinic");
@@ -312,6 +311,7 @@ public class WorkspaceDetailsTest {
     seleniumWebDriver.switchFromDashboardIframeToIde(60);
     loader.waitOnClosed();
     projectExplorer.waitProjectExplorer();
+    terminal.waitTerminalTab(LOADER_TIMEOUT_SEC);
 
     dashboard.open();
     dashboard.waitDashboardToolbarTitle();
