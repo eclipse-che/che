@@ -11,8 +11,10 @@
 package org.eclipse.che.ide.api.app;
 
 import java.util.Map;
+import jsinterop.annotations.JsType;
 
 /** Describes the current user. */
+@JsType
 public interface CurrentUser {
 
   String getId();

@@ -137,11 +137,8 @@ public class PluginManager {
     if (iterator.hasNext()) {
       PluginManifest pluginManifest = iterator.next();
       RequirejsConfig config = RequirejsConfig.create();
-//      String baseUrl = getPluginBaseUrl(pluginManifest);
-//      config.setBaseUrl(baseUrl);
       requireJs.require(
           modules -> {
-            // Log.error(getClass(), modules);
             for (int i = 0; i < modules.length(); i++) {
               RequirejsModule module = modules.get(i);
               try {
@@ -163,13 +160,15 @@ public class PluginManager {
           },
           config,
           new String[] {
-              appContext.getMasterApiEndpoint()
-                  + "/plugin/"
-                  + pluginManifest.getPublisher()
-                  + "."
-                  + pluginManifest.getName()
-                  + "-"
-                  + pluginManifest.getVersion() + "/" + pluginManifest.getMain()/*.substring(0, pluginManifest.getMain().lastIndexOf("."))*/
+            appContext.getMasterApiEndpoint()
+                + "/plugin/"
+                + pluginManifest.getPublisher()
+                + "."
+                + pluginManifest.getName()
+                + "-"
+                + pluginManifest.getVersion()
+                + "/"
+                + pluginManifest.getMain()
           },
           new String[0]);
     } else {

@@ -459,6 +459,16 @@ public class JsTheme implements Theme {
   }
 
   @Override
+  public String getEditorLinkedGroupColor() {
+    return theme.getString("editorLinkedGroupColor");
+  }
+
+  @Override
+  public String getEditorLinkedGroupBackground() {
+    return theme.getString("editorLinkedGroupBackground");
+  }
+
+  @Override
   public String getEditorInactiveSelectionColor() {
     return theme.getString("editorInactiveSelectionColor");
   }

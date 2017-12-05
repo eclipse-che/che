@@ -48,11 +48,11 @@ public class ListenerManager<L> implements ListenerRegistrar<L> {
   }
 
   public static <L> ListenerManager<L> create() {
-    return new ListenerManager<L>(null);
+    return new ListenerManager<>(null);
   }
 
   public static <L> ListenerManager<L> create(RegistrationListener<L> registrationListener) {
-    return new ListenerManager<L>(registrationListener);
+    return new ListenerManager<>(registrationListener);
   }
 
   private boolean isDispatching;
@@ -85,20 +85,15 @@ public class ListenerManager<L> implements ListenerRegistrar<L> {
       }
     }
 
-    return new Remover() {
-      @Override
-      public void remove() {
-        ListenerManager.this.remove(listener);
-      }
-    };
+    return () -> remove(listener);
   }
 
   /** Dispatches this event to all listeners. */
   public void dispatch(final Dispatcher<L> dispatcher) {
     isDispatching = true;
     try {
-      for (int i = 0, n = listeners.size(); i < n; i++) {
-        dispatcher.dispatch(listeners.get(i));
+      for (L listener : listeners) {
+        dispatcher.dispatch(listener);
       }
     } finally {
       isDispatching = false;
@@ -139,15 +134,15 @@ public class ListenerManager<L> implements ListenerRegistrar<L> {
   }
 
   private void addQueuedListeners() {
-    for (int i = 0, n = queuedListenerAdditions.size(); i < n; i++) {
-      addListenerImpl(queuedListenerAdditions.get(i));
+    for (L queuedListenerAddition : queuedListenerAdditions) {
+      addListenerImpl(queuedListenerAddition);
     }
     queuedListenerAdditions.clear();
   }
 
   private void removeQueuedListeners() {
-    for (int i = 0, n = queuedListenerRemovals.size(); i < n; i++) {
-      removeListenerImpl(queuedListenerRemovals.get(i));
+    for (L queuedListenerRemoval : queuedListenerRemovals) {
+      removeListenerImpl(queuedListenerRemoval);
     }
     queuedListenerRemovals.clear();
   }

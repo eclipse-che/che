@@ -90,6 +90,7 @@ public class ImageRegistryImpl implements ImageRegistry {
   }
 
   interface ImageFactory {
+
     Element create();
   }
 }

@@ -58,6 +58,7 @@ public class PartStackPresenter
 
   /** The minimum allowable size for the part. */
   private static final int MIN_PART_SIZE = 100;
+
   protected final Map<TabItem, PartPresenter> parts;
   protected final TabItemFactory tabItemFactory;
   protected final PartStackView view;

@@ -9,18 +9,13 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 
-package org.eclipse.che.ide.js.api.action;
+package org.eclipse.che.ide.js.api.event;
 
 import jsinterop.annotations.JsFunction;
 
-/**
- * Functional interface for perform function
- *
- * @author Yevhen Vydolob
- */
+/** @author Yevhen Vydolob */
 @JsFunction
-@FunctionalInterface
-public interface PerformAction {
+public interface Listener<T> {
 
-  void performAction();
+  void on(T event);
 }

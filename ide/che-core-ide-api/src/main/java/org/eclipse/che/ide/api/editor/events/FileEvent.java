@@ -16,6 +16,7 @@ import static org.eclipse.che.ide.api.editor.events.FileEvent.FileOperation.SAVE
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
+import jsinterop.annotations.JsType;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
@@ -123,6 +124,7 @@ public class FileEvent extends GwtEvent<FileEvent.FileEventHandler> {
     handler.onFileOperation(this);
   }
 
+  @JsType(namespace = "che.ide.editor")
   public enum FileOperation {
     OPEN,
     SAVE,

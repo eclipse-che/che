@@ -37,25 +37,12 @@ public interface PartManager {
    */
   boolean isActivePart(Part part);
 
-  /**
-   * Opens given Part
-   *
-   * @param part
-   * @param type
-   */
+  /** Opens given Part */
   void openPart(Part part, PartStackType type);
 
-  /**
-   * Hides given Part
-   *
-   * @param part
-   */
+  /** Hides given Part */
   void hidePart(Part part);
 
-  /**
-   * Remove given Part
-   *
-   * @param part
-   */
+  /** Remove given Part */
   void removePart(Part part);
 }

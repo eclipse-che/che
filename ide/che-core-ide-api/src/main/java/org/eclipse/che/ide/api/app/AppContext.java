@@ -14,6 +14,8 @@ import com.google.common.annotations.Beta;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import jsinterop.annotations.JsIgnore;
+import jsinterop.annotations.JsType;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.ide.api.factory.model.FactoryImpl;
 import org.eclipse.che.ide.api.resources.Container;
@@ -31,6 +33,7 @@ import org.eclipse.che.ide.resource.Path;
  * @author Vlad Zhukovskyi
  * @author Yevhenii Voevodin
  */
+@JsType
 public interface AppContext {
 
   /**
@@ -40,6 +43,7 @@ public interface AppContext {
    * @since 4.4.0
    */
   @Beta
+  @JsIgnore
   Container getWorkspaceRoot();
 
   /**
@@ -51,6 +55,7 @@ public interface AppContext {
    * @since 4.4.0
    */
   @Beta
+  @JsIgnore
   Project[] getProjects();
 
   /**
@@ -69,6 +74,7 @@ public interface AppContext {
    * @since 4.4.0
    */
   @Beta
+  @JsIgnore
   Resource getResource();
 
   /**
@@ -87,6 +93,7 @@ public interface AppContext {
    * @since 4.4.0
    */
   @Beta
+  @JsIgnore
   Resource[] getResources();
 
   /**
@@ -113,6 +120,7 @@ public interface AppContext {
    * @deprecated use {@link WorkspaceConfigImpl#getName()}
    */
   @Deprecated
+  @JsIgnore
   String getWorkspaceName();
 
   /**
@@ -121,6 +129,7 @@ public interface AppContext {
    * @return the path to projects root.
    * @since 4.2.0
    */
+  @JsIgnore
   Path getProjectsRoot();
 
   /**
@@ -129,6 +138,7 @@ public interface AppContext {
    * @return the list of actions
    * @see StartUpAction
    */
+  @JsIgnore
   List<StartUpAction> getStartAppActions();
 
   /**
@@ -143,6 +153,7 @@ public interface AppContext {
    *
    * @return list of project paths
    */
+  @JsIgnore
   List<String> getImportingProjects();
 
   /**
@@ -150,6 +161,7 @@ public interface AppContext {
    *
    * @param pathToProject project path
    */
+  @JsIgnore
   void addProjectToImporting(String pathToProject);
 
   /**
@@ -157,6 +169,7 @@ public interface AppContext {
    *
    * @param pathToProject project path
    */
+  @JsIgnore
   void removeProjectFromImporting(String pathToProject);
 
   /**
@@ -165,11 +178,13 @@ public interface AppContext {
    *
    * @return loaded factory or {@code null}
    */
+  @JsIgnore
   FactoryImpl getFactory();
 
   String getWorkspaceId();
 
   /** Returns the current workspace. */
+  @JsIgnore
   WorkspaceImpl getWorkspace();
 
   /** Returns URL of Che Master API endpoint. */
@@ -189,12 +204,14 @@ public interface AppContext {
    *
    * @return identifier
    */
+  @JsIgnore
   Optional<String> getApplicationId();
 
   /**
    * Sets web application identifier. Most obvious use - to distinguish web applications on server
    * side (e.g. connected via websocket)
    */
+  @JsIgnore
   void setApplicationWebsocketId(String id);
 
   /**

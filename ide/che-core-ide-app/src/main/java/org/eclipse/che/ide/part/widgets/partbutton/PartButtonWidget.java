@@ -54,6 +54,7 @@ public class PartButtonWidget extends Composite implements PartButton {
   private SVGResource tabIcon;
 
   private Element imageElement;
+  private Tooltip tooltipHint;
 
   @Inject
   public PartButtonWidget(@Assisted String title) {
@@ -73,11 +74,10 @@ public class PartButtonWidget extends Composite implements PartButton {
 
   @Override
   public Widget getIcon() {
-    return tabIcon != null ? new SVGImage(tabIcon) : new ElementWidget(
-        (Element) imageElement.cloneNode(true));
+    return tabIcon != null
+        ? new SVGImage(tabIcon)
+        : new ElementWidget((Element) imageElement.cloneNode(true));
   }
-
-  private Tooltip tooltipHint;
 
   /** {@inheritDoc} */
   @NotNull

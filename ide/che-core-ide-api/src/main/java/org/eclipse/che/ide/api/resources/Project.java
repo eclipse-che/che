@@ -15,6 +15,8 @@ import com.google.common.base.MoreObjects;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import jsinterop.annotations.JsIgnore;
+import jsinterop.annotations.JsType;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.promises.client.Promise;
@@ -45,6 +47,7 @@ import org.eclipse.che.ide.api.resources.marker.Marker;
  * @since 4.4.0
  */
 @Beta
+@JsType
 public interface Project extends Container, ProjectConfig {
 
   /**
@@ -74,6 +77,7 @@ public interface Project extends Container, ProjectConfig {
    * @see ProjectRequest#send()
    * @since 4.4.0
    */
+  @JsIgnore
   ProjectRequest update();
 
   /**
@@ -120,6 +124,7 @@ public interface Project extends Container, ProjectConfig {
    * @return the {@link Promise} with source estimations
    * @since 4.4.0
    */
+  @JsIgnore
   Promise<List<SourceEstimation>> resolve();
 
   /**
