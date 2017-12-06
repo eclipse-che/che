@@ -61,6 +61,7 @@ import org.eclipse.lsp4j.ExecuteCommandParams;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.CollectionTypeAdapterFactory;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.EitherTypeAdapterFactory;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.EnumTypeAdapterFactory;
+import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -370,19 +371,19 @@ public class JavaLanguageServerExtensionService {
                     ImmutableList.of(fqn, String.valueOf(lineNumber))));
 
     try {
-      List<ResourceLocation> location =
+      List<Either<String, ResourceLocation>> location =
           gson.fromJson(
               gson.toJson(result.get(10, TimeUnit.SECONDS)),
-              new com.google.common.reflect.TypeToken<List<ResourceLocation>>() {}.getType());
-      ResourceLocation rlp = location.get(0);
+              new com.google.common.reflect.TypeToken<
+                  Either<String, ResourceLocation>>() {}.getType());
+      Either<String, ResourceLocation> l = location.get(0);
 
-      boolean externalResource = rlp.getLibId() != null;
-      return new LocationImpl(
-          externalResource ? rlp.getFqn() : removePrefixUri(rlp.getFileUri()),
-          lineNumber,
-          externalResource,
-          rlp.getLibId(),
-          null);
+      if (l.isLeft()) {
+        return new LocationImpl(l.getLeft(), lineNumber, null);
+      } else {
+        return new LocationImpl(
+            l.getRight().getFqn(), lineNumber, true, l.getRight().getLibId(), null);
+      }
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }
