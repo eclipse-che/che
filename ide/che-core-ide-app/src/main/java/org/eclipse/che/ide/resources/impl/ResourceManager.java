@@ -83,7 +83,6 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.project.ProjectServiceClient;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.Arrays;
-import org.eclipse.che.ide.util.loging.Log;
 
 /**
  * Acts as the service lay between the user interactions with resources and data transfer layer.
@@ -801,18 +800,15 @@ public final class ResourceManager {
 
   Promise<Optional<Container>> getContainer(final Path absolutePath) {
     return findResource(absolutePath)
-        .then(
-            (Function<Optional<Resource>, Optional<Container>>)
-                optionalFolder -> {
-                  if (optionalFolder.isPresent()) {
-                    final Resource resource = optionalFolder.get();
-                    checkState(resource instanceof Container, "Not a container");
+        .thenPromise(optResource -> {
+          if (optResource.isPresent()) {
+            Resource resource = optResource.get();
+            checkState(resource instanceof Container, "Not a container");
+            return promises.resolve(of((Container) resource));
+          }
 
-                    return of((Container) resource);
-                  }
-
-                  return absent();
-                });
+          return promises.resolve(absent());
+        });
   }
 
   protected Promise<Optional<File>> getFile(final Path absolutePath) {
