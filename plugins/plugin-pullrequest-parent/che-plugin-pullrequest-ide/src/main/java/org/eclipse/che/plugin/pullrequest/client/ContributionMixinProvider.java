@@ -134,7 +134,7 @@ public class ContributionMixinProvider {
       handleProjectWithVCS(rootProject);
     } else {
       invalidateContext(rootProject);
-      contributePart.showStub(messages.stubTextProjectNotProvideSupportedVSC());
+      contributePart.showStub(messages.stubTextProjectNotProvideSupportedVCS());
     }
     lastSelected = rootProject;
   }
@@ -167,7 +167,7 @@ public class ContributionMixinProvider {
           .catchError(
               err -> {
                 handleVCSError(
-                    prj, messages.failedToGetVSCService(prj.getName(), err.getMessage()));
+                    prj, messages.failedToGetVCSService(prj.getName(), err.getMessage()));
               });
     } else {
       vcsHostingServiceProvider
@@ -186,13 +186,13 @@ public class ContributionMixinProvider {
                     .catchError(
                         err -> {
                           handleVCSError(
-                              prj, messages.failedToApplyVSCMixin(prj.getName(), err.getMessage()));
+                              prj, messages.failedToApplyVCSMixin(prj.getName(), err.getMessage()));
                         });
               })
           .catchError(
               err -> {
                 handleVCSError(
-                    prj, messages.failedToGetVSCService(prj.getName(), err.getMessage()));
+                    prj, messages.failedToGetVCSService(prj.getName(), err.getMessage()));
               });
     }
   }
