@@ -36,7 +36,7 @@ export class EditEnvVariableDialogController {
     this.$mdDialog = $mdDialog;
 
     // build list of used names
-    this.usedNames = Object.keys(this.envVariables);
+    this.usedNames = angular.isObject(this.envVariables) ? Object.keys(this.envVariables) : [];
 
     if (this.toEdit) {
       this.name = this.toEdit;

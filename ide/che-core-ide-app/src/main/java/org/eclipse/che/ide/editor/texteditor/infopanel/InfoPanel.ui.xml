@@ -52,7 +52,7 @@
     </ui:style>
 
     <g:FlowPanel styleName="{style.infoPanel}">
-        <g:HTMLPanel ui:field="cursorPosition" styleName="{style.cursorPosition}"></g:HTMLPanel>
+        <g:HTMLPanel ui:field="cursorPosition" styleName="{style.cursorPosition}" debugId="cursorPosition"></g:HTMLPanel>
         <g:HTMLPanel ui:field="fileType" styleName="{style.fileType}"></g:HTMLPanel>
         <g:HTMLPanel ui:field="encoding" styleName="{style.encoding}">UTF-8</g:HTMLPanel>
     </g:FlowPanel>

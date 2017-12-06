@@ -10,20 +10,21 @@
  */
 package org.eclipse.che.selenium.workspaces;
 
+import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.constant.TestStacksConstants;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
@@ -39,9 +40,10 @@ public class CreateWorkspaceOnDashboardTest {
   @Inject private Loader loader;
   @Inject private MachineTerminal terminal;
   @Inject private Dashboard dashboard;
-  @Inject private DashboardWorkspace dashboardWorkspace;
+  @Inject private WorkspaceDetails workspaceDetails;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private Workspaces workspaces;
 
   @AfterClass
   public void tearDown() throws Exception {
@@ -51,16 +53,20 @@ public class CreateWorkspaceOnDashboardTest {
   @Test
   public void createWorkspaceOnDashboardTest() {
     dashboard.open();
-    navigationBar.waitNavigationBar();
-    navigationBar.clickOnMenu(NavigationBar.MenuItem.WORKSPACES);
-    dashboardWorkspace.waitToolbarTitleName("Workspaces");
-    dashboardWorkspace.clickOnNewWorkspaceBtn();
+    dashboard.waitDashboardToolbarTitle();
+    dashboard.selectWorkspacesItemOnDashboard();
+    dashboard.waitToolbarTitleName("Workspaces");
+
+    workspaces.clickOnNewWorkspaceBtn();
+
     createWorkspace.waitToolbar();
     createWorkspace.typeWorkspaceName(WORKSPACE);
-    createWorkspace.selectStack(TestStacksConstants.JAVA.getId());
+    createWorkspace.selectStack(JAVA.getId());
     createWorkspace.setMachineRAM("2");
-    createWorkspace.clickCreate();
+    createWorkspace.clickOnCreateWorkspaceButton();
+
     seleniumWebDriver.switchFromDashboardIframeToIde();
+
     projectExplorer.waitProjectExplorer();
     terminal.waitTerminalTab(LOADER_TIMEOUT_SEC);
   }
