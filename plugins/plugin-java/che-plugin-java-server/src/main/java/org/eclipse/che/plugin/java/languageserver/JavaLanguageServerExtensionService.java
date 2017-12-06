@@ -14,13 +14,13 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.prefixURI;
 import static org.eclipse.che.ide.ext.java.shared.Constants.CLASS_PATH_TREE;
+import static org.eclipse.che.ide.ext.java.shared.Constants.EFFECTIVE_POM_REQUEST_TIMEOUT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARIES;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARIES_CHILDREN;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_CHILDREN;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_ENTRY;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_NODE_CONTENT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE;
-import static org.eclipse.che.ide.ext.java.shared.Constants.REQUEST_TIMEOUT;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FILE_STRUCTURE_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_ENTRY_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_FOLDER_COMMAND;
@@ -355,7 +355,8 @@ public class JavaLanguageServerExtensionService {
     Type targetClassType = new TypeToken<String>() {}.getType();
     try {
       return gson.fromJson(
-          gson.toJson(result.get(REQUEST_TIMEOUT, TimeUnit.SECONDS)), targetClassType);
+          gson.toJson(result.get(EFFECTIVE_POM_REQUEST_TIMEOUT, TimeUnit.SECONDS)),
+          targetClassType);
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }

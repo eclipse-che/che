@@ -13,13 +13,13 @@ package org.eclipse.che.ide.ext.java.client.service;
 import static org.eclipse.che.api.promises.client.js.JsPromiseError.create;
 import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 import static org.eclipse.che.ide.ext.java.shared.Constants.CLASS_PATH_TREE;
+import static org.eclipse.che.ide.ext.java.shared.Constants.EFFECTIVE_POM_REQUEST_TIMEOUT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARIES;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARIES_CHILDREN;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_CHILDREN;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_ENTRY;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_NODE_CONTENT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE;
-import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE_REQUEST_TIMEOUT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REQUEST_TIMEOUT;
 
 import com.google.gwt.jsonp.client.TimeoutException;
@@ -56,8 +56,7 @@ public class JavaLanguageExtensionServiceClient {
               .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
               .methodName(FILE_STRUCTURE)
               .paramsAsDto(params)
-              .sendAndReceiveResultAsListOfDto(
-                  ExtendedSymbolInformation.class, FILE_STRUCTURE_REQUEST_TIMEOUT)
+              .sendAndReceiveResultAsListOfDto(ExtendedSymbolInformation.class, REQUEST_TIMEOUT)
               .onSuccess(resolve::apply)
               .onTimeout(() -> onTimeout(reject))
               .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error)));
@@ -78,7 +77,7 @@ public class JavaLanguageExtensionServiceClient {
                 .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                 .methodName("java/effective-pom")
                 .paramsAsString(pathToProject)
-                .sendAndReceiveResultAsString(REQUEST_TIMEOUT)
+                .sendAndReceiveResultAsString(EFFECTIVE_POM_REQUEST_TIMEOUT)
                 .onSuccess(resolve::apply)
                 .onTimeout(
                     () ->
