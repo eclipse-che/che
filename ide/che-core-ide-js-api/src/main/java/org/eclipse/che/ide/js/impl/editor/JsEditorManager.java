@@ -21,7 +21,6 @@ import org.eclipse.che.ide.js.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.js.api.editor.event.EditorOpenedEvent;
 import org.eclipse.che.ide.js.api.editor.event.FileOperationEvent;
 import org.eclipse.che.ide.js.api.event.Listener;
-import org.eclipse.che.ide.js.api.resources.VirtualFile;
 import org.eclipse.che.ide.util.ListenerManager;
 import org.eclipse.che.ide.util.ListenerRegistrar.Remover;
 
@@ -41,7 +40,7 @@ public class JsEditorManager implements EditorManager {
         FileEvent.TYPE,
         event -> {
           FileOperationEvent operationEvent =
-              new FileOperationEvent(new VirtualFile(event.getFile()), event.getOperationType());
+              new FileOperationEvent(event.getFile(), event.getOperationType());
           fileOperationListeners.dispatch(listener -> listener.on(operationEvent));
         });
 
@@ -49,7 +48,7 @@ public class JsEditorManager implements EditorManager {
         org.eclipse.che.ide.api.editor.EditorOpenedEvent.TYPE,
         event -> {
           EditorOpenedEvent openedEvent =
-              new EditorOpenedEvent(new VirtualFile(event.getFile()), new EditorPartPresenter() {});
+              new EditorOpenedEvent(event.getFile(), new EditorPartPresenter() {});
 
           editorOpenedListeners.dispatch(listener -> listener.on(openedEvent));
         });

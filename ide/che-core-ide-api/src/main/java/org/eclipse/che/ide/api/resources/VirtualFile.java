@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.ide.api.resources;
 
+import jsinterop.annotations.JsType;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.resource.Path;
 
@@ -22,6 +23,7 @@ import org.eclipse.che.ide.resource.Path;
  * @author Evgen Vidolob
  * @author Vlad Zhukovskyi
  */
+@JsType
 public interface VirtualFile {
 
   /**

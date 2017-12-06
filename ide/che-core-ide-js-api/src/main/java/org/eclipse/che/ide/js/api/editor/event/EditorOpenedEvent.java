@@ -13,8 +13,8 @@ package org.eclipse.che.ide.js.api.editor.event;
 
 import jsinterop.annotations.JsIgnore;
 import jsinterop.annotations.JsType;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.js.api.editor.EditorPartPresenter;
-import org.eclipse.che.ide.js.api.resources.VirtualFile;
 
 /** @author Yevhen Vydolob */
 @JsType

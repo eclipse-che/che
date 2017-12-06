@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.api.promises.client;
 
+import jsinterop.annotations.JsType;
+
 /**
  * Interface for a 'function'.
  *
@@ -18,6 +20,7 @@ package org.eclipse.che.api.promises.client;
  * @author Mickaël Leduque
  * @author Artem Zatsarynnyi
  */
+@JsType
 public interface Function<A, R> {
 
   /** Returns the result of applying this function to the given argument. */

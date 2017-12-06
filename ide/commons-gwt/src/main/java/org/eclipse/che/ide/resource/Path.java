@@ -19,6 +19,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import jsinterop.annotations.JsIgnore;
+import jsinterop.annotations.JsMethod;
+import jsinterop.annotations.JsType;
 
 /**
  * Client side implementation for the resource path.
@@ -34,13 +37,14 @@ import java.util.List;
  * @author Vlad Zhukovskyi
  * @since 4.0.0-RC7
  */
+@JsType(namespace = "che.ide.resource")
 public final class Path {
 
   /** Path separator character constant "/" used in paths. */
-  public static char SEPARATOR = '/';
+  public static final char SEPARATOR = '/';
 
   /** Device separator character constant ":" used in paths. */
-  public static char DEVICE_SEPARATOR = ':';
+  public static final char DEVICE_SEPARATOR = ':';
 
   /** masks for separator values */
   private static final int HAS_LEADING = 1;
@@ -91,13 +95,6 @@ public final class Path {
     return new Path(pathString);
   }
 
-  /* (Intentionally not included in javadoc)
-   * Private constructor.
-   */
-  private Path() {
-    // not allowed
-  }
-
   /**
    * Constructs a new path from the given string path. The string path must represent a valid file
    * system path on the local file system. The path is canonicalized and double slashes are removed
@@ -109,6 +106,7 @@ public final class Path {
    * @see #isValidPath(String)
    * @since 4.0.0-RC5
    */
+  @JsIgnore
   public Path(String fullPath) {
     initialize(null, fullPath);
   }
@@ -126,6 +124,7 @@ public final class Path {
    * @see #setDevice(String)
    * @since 4.0.0-RC5
    */
+  @JsIgnore
   public Path(String device, String path) {
     initialize(device, path);
   }
@@ -133,6 +132,7 @@ public final class Path {
   /* (Intentionally not included in javadoc)
    * Private constructor.
    */
+  @JsIgnore
   private Path(String device, String[] segments, int _separators) {
     // no segment validations are done for performance reasons
     this.segments = segments;
@@ -215,6 +215,7 @@ public final class Path {
    * @return the new path
    * @since 4.0.0-RC5
    */
+  @JsMethod(name = "appendPath")
   public Path append(Path path) {
     // optimize some easy cases
     if (path == null || path.segmentCount() == 0) return this;

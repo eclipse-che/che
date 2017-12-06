@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.api.promises.client;
 
+import jsinterop.annotations.JsType;
+
 /**
  * Interface for an 'operation', as a function without a return value, only side-effects, but
  * without the burden of having a callback with Void parameter.
@@ -18,6 +20,7 @@ package org.eclipse.che.api.promises.client;
  * @author Mickaël Leduque
  * @author Artem Zatsarynnyi
  */
+@JsType
 public interface Operation<A> {
 
   /** Apply this operation to the given argument. */
