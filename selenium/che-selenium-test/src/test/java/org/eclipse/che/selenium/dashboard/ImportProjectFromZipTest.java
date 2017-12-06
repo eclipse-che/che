@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.dashboard;
 
+import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Sources.ZIP;
+
 import com.google.inject.Inject;
 import java.util.concurrent.ExecutionException;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -21,9 +23,10 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -34,7 +37,7 @@ public class ImportProjectFromZipTest {
   private static final String PROJECT_NAME = "master";
 
   @Inject private Dashboard dashboard;
-  @Inject private DashboardWorkspace dashboardWorkspace;
+  @Inject private WorkspaceDetails workspaceDetails;
   @Inject private Loader loader;
   @Inject private ProjectExplorer explorer;
   @Inject private NavigationBar navigationBar;
@@ -43,6 +46,7 @@ public class ImportProjectFromZipTest {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestUser defaultTestUser;
+  @Inject private Workspaces workspaces;
 
   @BeforeClass
   public void setUp() {
@@ -56,27 +60,23 @@ public class ImportProjectFromZipTest {
 
   @Test
   public void importProjectFromZipTest() throws ExecutionException, InterruptedException {
-    navigationBar.waitNavigationBar();
-    navigationBar.clickOnMenu(NavigationBar.MenuItem.WORKSPACES);
+    dashboard.waitDashboardToolbarTitle();
+    dashboard.selectWorkspacesItemOnDashboard();
 
-    dashboardWorkspace.clickOnNewWorkspaceBtn();
+    workspaces.clickOnNewWorkspaceBtn();
     createWorkspace.waitToolbar();
     createWorkspace.selectStack(TestStacksConstants.JAVA.getId());
     createWorkspace.typeWorkspaceName(WORKSPACE);
 
-    projectSourcePage.clickAddOrImportProjectButton();
-
-    projectSourcePage.selectSourceTab(ProjectSourcePage.Sources.ZIP);
-
+    projectSourcePage.clickOnAddOrImportProjectButton();
+    projectSourcePage.selectSourceTab(ZIP);
     projectSourcePage.typeZipLocation(
         "https://github.com/iedexmain1/multimodule-project/archive/master.zip");
     projectSourcePage.skipRootFolder();
-    projectSourcePage.clickAdd();
+    projectSourcePage.clickOnAddProjectButton();
 
-    createWorkspace.clickCreate();
-
+    createWorkspace.clickOnCreateWorkspaceButton();
     seleniumWebDriver.switchFromDashboardIframeToIde();
-
     loader.waitOnClosed();
     explorer.waitItem(PROJECT_NAME);
     explorer.selectItem(PROJECT_NAME);
@@ -86,14 +86,11 @@ public class ImportProjectFromZipTest {
     explorer.clickOnItemInContextMenu(ProjectExplorerContextMenuConstants.MAVEN);
     explorer.clickOnItemInContextMenu(ProjectExplorer.PROJECT_EXPLORER_CONTEXT_MENU_MAVEN.REIMPORT);
     loader.waitOnClosed();
-
     explorer.openItemByPath(PROJECT_NAME);
-
     explorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/my-lib");
     explorer.clickOnItemInContextMenu(ProjectExplorerContextMenuConstants.MAVEN);
     explorer.clickOnItemInContextMenu(ProjectExplorer.PROJECT_EXPLORER_CONTEXT_MENU_MAVEN.REIMPORT);
     loader.waitOnClosed();
-
     explorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/my-webapp");
     explorer.clickOnItemInContextMenu(ProjectExplorerContextMenuConstants.MAVEN);
     explorer.clickOnItemInContextMenu(ProjectExplorer.PROJECT_EXPLORER_CONTEXT_MENU_MAVEN.REIMPORT);*/

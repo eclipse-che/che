@@ -10,7 +10,7 @@
       Red Hat, Inc. - initial API and implementation
 
 -->
-<div class="left-sidebar-container">
+<div class="left-sidebar-container" id="navbar">
   <md-toolbar class="flex-shrink-none">
     <md-progress-linear md-mode="indeterminate" ng-hide="navbarController.profile && navbarController.profile.userId"></md-progress-linear>
     <div ng-show="navbarController.profile && navbarController.profile.userId"
@@ -21,7 +21,7 @@
         <section class="navbar-top-logo logo-color-white" layout="column" layout-align="center left" ng-include="branding.logoText">
         </section>
         <div flex></div>
-        <navbar-notification></navbar-notification>
+        <navbar-notification id="navbar-notification-container"></navbar-notification>
       </div>
 
       <md-divider md-theme="factory-theme"></md-divider>
@@ -32,7 +32,7 @@
             <md-list-item flex class="navbar-subsection-item">
               <md-button nav-bar-selected flex che-reload-href href="{{navbarController.menuItemUrl.dashboard}}" layout-align="left"
                          target="_self">
-                <div class="navbar-item" layout="row" layout-align="start center">
+                <div class="navbar-item" layout="row" layout-align="start center" id="dashboard-item">
                   <md-icon md-font-icon="navbar-icon chefont cheico-dashboard" aria-label="Dashboard"></md-icon>
                   <span>Dashboard</span>
                 </div>
@@ -40,7 +40,7 @@
             </md-list-item>
             <md-list-item flex class="navbar-subsection-item">
               <md-button nav-bar-selected flex che-reload-href href="{{navbarController.menuItemUrl.workspaces}}" layout-align="left">
-                <div class="navbar-item" layout="row" layout-align="start center">
+                <div class="navbar-item" layout="row" layout-align="start center" id="workspaces-item">
                   <md-icon md-font-icon="navbar-icon chefont cheico-workspace"></md-icon>
                   <span>Workspaces</span>
                   <span class="navbar-number" ng-show="navbarController.getWorkspacesNumber()">&nbsp;({{navbarController.getWorkspacesNumber()}})</span>
@@ -50,7 +50,7 @@
             <md-list-item flex class="navbar-subsection-item">
               <md-button nav-bar-selected flex che-reload-href
                          href="{{navbarController.menuItemUrl.stacks}}" layout-align="left">
-                <div class="navbar-item" layout="row" layout-align="start center">
+                <div class="navbar-item" layout="row" layout-align="start center" id="stacks-item">
                   <md-icon md-font-icon="navbar-icon material-design icon-ic_inbox_24px"></md-icon>
                   <span>Stacks</span>
                 </div>
@@ -59,7 +59,7 @@
             <md-list-item flex class="navbar-subsection-item">
               <md-button nav-bar-selected flex che-reload-href
                          href="{{navbarController.menuItemUrl.factories}}" layout-align="left">
-                <div class="navbar-item" layout="row" layout-align="start center">
+                <div class="navbar-item" layout="row" layout-align="start center" id="factories-item">
                   <md-icon md-font-icon="navbar-icon chefont cheico-factory"></md-icon>
                   <span>Factories</span>
                   <span class="navbar-number" ng-show="navbarController.getFactoriesNumber()">&nbsp;({{navbarController.getFactoriesNumber()}})</span>
@@ -69,7 +69,7 @@
             <md-list-item flex class="navbar-subsection-item">
               <md-button nav-bar-selected flex che-reload-href
                          href="{{navbarController.menuItemUrl.administration}}" layout-align="left">
-                <div class="navbar-item" layout="row" layout-align="start center">
+                <div class="navbar-item" layout="row" layout-align="start center" id="administration-item">
                   <md-icon md-font-icon="navbar-icon material-design icon-ic_settings_24px"></md-icon>
                   <span>Administration</span>
                 </div>
@@ -78,7 +78,7 @@
             <md-list-item flex class="navbar-subsection-item" ng-if="navbarController.isPermissionServiceAvailable && !navbarController.userServices.hasInstallationManagerService && !navbarController.hasPersonalAccount">
               <md-button nav-bar-selected flex che-reload-href
                          href="{{navbarController.menuItemUrl.organizations}}" layout-align="left">
-                <div class="navbar-item" layout="row" layout-align="start center">
+                <div class="navbar-item" layout="row" layout-align="start center" id="organizations-item">
                   <md-icon md-font-icon="fa navbar-icon fa-sitemap"></md-icon>
                   <span>Organizations</span>
                   <span class="navbar-number" ng-show="navbarController.getOrganizationsNumber()">&nbsp;({{navbarController.getOrganizationsNumber()}})</span>
@@ -139,12 +139,12 @@
                                     navbar-dropdown-items="navbarController.accountItems"
                                     navbar-dropdown-offset="15 -45">
                 <md-button ng-href="" layout-align="left">
-                  <div class="navbar-item navbar-identity" layout="row" layout-align="start center">
+                  <div class="navbar-item navbar-identity" layout="row" layout-align="start center" id="navbar-user-panel">
 
                     <i class="navbar-icon" flex="none">
-                      <img class="developers-face" gravatar-src="navbarController.profile.email"/>
+                      <img class="developers-face" gravatar-src="navbarController.profile.email" id="developers-face" />
                     </i>
-                    <span flex style="text-align: left;">{{navbarController.getUserName()}}</span>
+                    <span flex style="text-align: left;" id="user-name">{{navbarController.getUserName()}}</span>
                     <i class="fa fa-angle-up navbar-icon" aria-hidden="true"></i>
                   </div>
                 </md-button>
