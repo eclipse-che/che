@@ -13,7 +13,6 @@ package org.eclipse.che.api.factory.server;
 import static com.jayway.restassured.RestAssured.given;
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
@@ -22,8 +21,6 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static org.eclipse.che.api.factory.server.DtoConverter.asDto;
 import static org.eclipse.che.api.factory.server.FactoryService.VALIDATE_QUERY_PARAMETER;
-import static org.eclipse.che.dto.server.DtoFactory.cloneDto;
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.mockito.ArgumentMatchers.any;
@@ -32,7 +29,6 @@ import static org.mockito.ArgumentMatchers.anyMapOf;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -45,7 +41,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
-import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -82,7 +77,6 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.shared.dto.CommandDto;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
-import org.eclipse.che.api.workspace.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -553,122 +547,6 @@ public class FactoryServiceTest {
 
     // check we call validator
     verify(acceptValidator).validateOnAccept(any());
-  }
-
-  @Test
-  public void shouldAddExecAgentOnSaveFactory() throws Exception {
-    final Factory factory = createFactory();
-    final FactoryDto factoryDto = asDto(factory, user);
-
-    EnvironmentDto environment = newDto(EnvironmentDto.class);
-    MachineConfigDto machine = newDto(MachineConfigDto.class);
-    factoryDto
-        .getWorkspace()
-        .setEnvironments(
-            ImmutableMap.of(
-                "e1",
-                    cloneDto(environment)
-                        .withMachines(
-                            ImmutableMap.of(
-                                "m1",
-                                    cloneDto(machine)
-                                        .withInstallers(
-                                            asList(
-                                                "org.eclipse.che.terminal",
-                                                "org.eclipse.che.ls.php",
-                                                "org.eclipse.che.ls.json")),
-                                "m2",
-                                    cloneDto(machine)
-                                        .withInstallers(
-                                            asList(
-                                                "org.eclipse.che.ls.php",
-                                                "org.eclipse.che.terminal",
-                                                "org.eclipse.che.ls.json")),
-                                "m3",
-                                    cloneDto(machine)
-                                        .withInstallers(
-                                            asList(
-                                                "org.eclipse.che.ls.php",
-                                                "org.eclipse.che.ls.json")))),
-                "e2",
-                    cloneDto(environment)
-                        .withMachines(
-                            ImmutableMap.of(
-                                "m4",
-                                    cloneDto(machine)
-                                        .withInstallers(
-                                            asList(
-                                                "org.eclipse.che.terminal",
-                                                "org.eclipse.che.ls.php",
-                                                "org.eclipse.che.ls.json")),
-                                "m5",
-                                    cloneDto(machine)
-                                        .withInstallers(
-                                            asList(
-                                                "org.eclipse.che.ls.php",
-                                                "org.eclipse.che.ls.json"))))));
-    Map<String, EnvironmentDto> expectedEnvs =
-        ImmutableMap.of(
-            "e1",
-                cloneDto(environment)
-                    .withMachines(
-                        ImmutableMap.of(
-                            "m1",
-                                cloneDto(machine)
-                                    .withInstallers(
-                                        asList(
-                                            "org.eclipse.che.terminal",
-                                            "org.eclipse.che.ls.php",
-                                            "org.eclipse.che.ls.json",
-                                            "org.eclipse.che.exec")),
-                            "m2",
-                                cloneDto(machine)
-                                    .withInstallers(
-                                        asList(
-                                            "org.eclipse.che.ls.php",
-                                            "org.eclipse.che.terminal",
-                                            "org.eclipse.che.ls.json",
-                                            "org.eclipse.che.exec")),
-                            "m3",
-                                cloneDto(machine)
-                                    .withInstallers(
-                                        asList(
-                                            "org.eclipse.che.ls.php", "org.eclipse.che.ls.json")))),
-            "e2",
-                cloneDto(environment)
-                    .withMachines(
-                        ImmutableMap.of(
-                            "m4",
-                                cloneDto(machine)
-                                    .withInstallers(
-                                        asList(
-                                            "org.eclipse.che.terminal",
-                                            "org.eclipse.che.ls.php",
-                                            "org.eclipse.che.ls.json",
-                                            "org.eclipse.che.exec")),
-                            "m5",
-                                cloneDto(machine)
-                                    .withInstallers(
-                                        asList(
-                                            "org.eclipse.che.ls.php",
-                                            "org.eclipse.che.ls.json")))));
-
-    when(factoryManager.saveFactory(any(FactoryDto.class)))
-        .thenAnswer(invocation -> new FactoryImpl((Factory) invocation.getArguments()[0]));
-    doReturn(factoryDto).when(factoryBuilderSpy).build(any(InputStream.class));
-    final Response response =
-        given()
-            .auth()
-            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-            .body(factoryDto.toString())
-            .contentType(APPLICATION_JSON)
-            .expect()
-            .statusCode(200)
-            .when()
-            .post(SERVICE_PATH);
-    final FactoryDto result = getFromResponse(response, FactoryDto.class);
-    Map<String, EnvironmentDto> actualEnvs = result.getWorkspace().getEnvironments();
-    assertEquals(actualEnvs, expectedEnvs);
   }
 
   private Factory createFactory() {

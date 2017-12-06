@@ -73,6 +73,8 @@ import {MachineAgents} from './workspace-machine-agents/machine-agents.directive
 import {CheWorkspace} from '../../../components/api/workspace/che-workspace.factory';
 import {WorkspaceConfigService} from '../workspace-config.service';
 import {CheRecipeService} from './che-recipe.service';
+import {CheProjectItem} from './workspace-projects/project-item/project-item.directive';
+import {ProjectItemCtrl} from './workspace-projects/project-item/project-item.controller';
 
 
 /**
@@ -95,6 +97,9 @@ export class WorkspaceDetailsConfig {
 
     register.service('cheRecipeService', CheRecipeService);
     register.service('workspaceDetailsService', WorkspaceDetailsService);
+
+    register.directive('cheProjectItem', CheProjectItem);
+    register.controller('ProjectItemCtrl', ProjectItemCtrl);
 
     register.controller('AddProjectPopoverController', AddProjectPopoverController);
     register.directive('addProjectPopover', AddProjectPopover);
