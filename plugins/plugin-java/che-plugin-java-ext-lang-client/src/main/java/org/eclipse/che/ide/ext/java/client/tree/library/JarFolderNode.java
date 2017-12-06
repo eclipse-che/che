@@ -107,7 +107,7 @@ public class JarFolderNode extends SyntheticNode<JarEntry> {
   public void updatePresentation(@NotNull NodePresentation presentation) {
     presentation.setPresentableText(getData().getName());
     presentation.setPresentableIcon(
-        "PACKAGE".equals(getData().getEntryType())
+        PACKAGE.name().equals(getData().getEntryType())
             ? javaResources.packageItem()
             : nodesResources.simpleFolder());
   }

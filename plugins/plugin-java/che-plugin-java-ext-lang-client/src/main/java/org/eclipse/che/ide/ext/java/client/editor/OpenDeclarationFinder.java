@@ -195,11 +195,11 @@ public class OpenDeclarationFinder {
         .libraryEntry(entryParams)
         .then(
             entry -> {
-              getBinaryContent(projectPath, descriptor, entry);
+              openBinaryContent(projectPath, descriptor, entry);
             });
   }
 
-  private void getBinaryContent(
+  private void openBinaryContent(
       Path projectPath, OpenDeclarationDescriptor descriptor, JarEntry entry) {
     ExternalLibrariesParameters params = dtoFactory.createDto(ExternalLibrariesParameters.class);
     params.setNodeId(descriptor.getLibId());
