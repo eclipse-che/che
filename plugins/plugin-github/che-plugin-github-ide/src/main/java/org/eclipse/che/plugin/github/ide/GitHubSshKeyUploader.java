@@ -23,9 +23,8 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.commons.exception.UnauthorizedException;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.ui.dialogs.CancelCallback;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
-import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmCallback;
+import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.ssh.key.client.SshKeyUploader;
 import org.eclipse.che.security.oauth.JsOAuthWindow;
 import org.eclipse.che.security.oauth.OAuthCallback;
@@ -96,14 +95,13 @@ public class GitHubSshKeyUploader implements SshKeyUploader, OAuthCallback {
                     oAuthLoginStart();
                     return;
                   }
+                  Log.error(getClass(), "OnFailure");
                   callback.onFailure(e);
                 }
               });
         })
         .catchError(error -> {
-          if (error instanceof UnauthorizedException) {
             oAuthLoginStart();
-          }
         });
   }
 
@@ -113,18 +111,8 @@ public class GitHubSshKeyUploader implements SshKeyUploader, OAuthCallback {
         .createConfirmDialog(
             constant.authorizationDialogTitle(),
             constant.authorizationDialogText(productInfoDataProvider.getName()),
-            new ConfirmCallback() {
-              @Override
-              public void accepted() {
-                showPopUp();
-              }
-            },
-            new CancelCallback() {
-              @Override
-              public void cancelled() {
-                callback.onFailure(new Exception(constant.authorizationRequestRejected()));
-              }
-            })
+            () -> showPopUp(),
+            () -> callback.onFailure(new Exception(constant.authorizationRequestRejected())))
         .show();
   }
 

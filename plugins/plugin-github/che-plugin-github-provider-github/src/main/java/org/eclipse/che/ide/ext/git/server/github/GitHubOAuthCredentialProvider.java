@@ -50,7 +50,7 @@ public class GitHubOAuthCredentialProvider extends GitBasicAuthenticationCredent
         UriBuilder.fromPath(authorizationServicePath)
             .queryParam("oauth_provider", OAUTH_PROVIDER_NAME)
             .queryParam("userId", EnvironmentContext.getCurrent().getSubject().getUserId())
-            .queryParam("scope", "repo")
+            .queryParam("scope", "repo,write:public_key")
             .build()
             .toString());
   }
