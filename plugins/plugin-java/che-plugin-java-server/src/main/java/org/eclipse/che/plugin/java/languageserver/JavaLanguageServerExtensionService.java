@@ -13,7 +13,6 @@ package org.eclipse.che.plugin.java.languageserver;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.ext.java.shared.Constants.CLASS_PATH_TREE;
-import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_CONTENT_NODE_BY_FQN;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_CONTENT_NODE_BY_PATH;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARIES;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARIES_CHILDREN;
@@ -31,7 +30,6 @@ import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_EXTERNAL_LIBRARI
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_EXTERNAL_LIBRARIES_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_LIBRARY_CHILDREN_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_LIBRARY_ENTRY_COMMAND;
-import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_LIBRARY_NODE_CONTENT_BY_FQN_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_LIBRARY_NODE_CONTENT_BY_PATH_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_OUTPUT_DIR_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.RESOLVE_CLASSPATH_COMMAND;
@@ -58,7 +56,6 @@ import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
-import org.eclipse.che.jdt.ls.extension.api.dto.ClassContent;
 import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExternalLibrariesParameters;
@@ -147,15 +144,8 @@ public class JavaLanguageServerExtensionService {
         .newConfiguration()
         .methodName(EXTERNAL_CONTENT_NODE_BY_PATH)
         .paramsAsDto(ExternalLibrariesParameters.class)
-        .resultAsDto(ClassContent.class)
+        .resultAsString()
         .withFunction(this::getLibraryNodeContentByPath);
-
-    requestHandler
-        .newConfiguration()
-        .methodName(EXTERNAL_CONTENT_NODE_BY_FQN)
-        .paramsAsDto(ExternalLibrariesParameters.class)
-        .resultAsDto(ClassContent.class)
-        .withFunction(this::getLibraryNodeContentByFqn);
 
     requestHandler
         .newConfiguration()
@@ -371,16 +361,10 @@ public class JavaLanguageServerExtensionService {
     return doGetOne(GET_LIBRARY_ENTRY_COMMAND, params, type);
   }
 
-  private ClassContent getLibraryNodeContentByPath(ExternalLibrariesParameters params) {
+  private String getLibraryNodeContentByPath(ExternalLibrariesParameters params) {
     params.setProjectUri(LanguageServiceUtils.prefixURI(params.getProjectUri()));
-    Type type = new TypeToken<ClassContent>() {}.getType();
+    Type type = new TypeToken<String>() {}.getType();
     return doGetOne(GET_LIBRARY_NODE_CONTENT_BY_PATH_COMMAND, params, type);
-  }
-
-  private ClassContent getLibraryNodeContentByFqn(ExternalLibrariesParameters params) {
-    params.setProjectUri(LanguageServiceUtils.prefixURI(params.getProjectUri()));
-    Type type = new TypeToken<ClassContent>() {}.getType();
-    return doGetOne(GET_LIBRARY_NODE_CONTENT_BY_FQN_COMMAND, params, type);
   }
 
   private List<String> executeFindTestsCommand(

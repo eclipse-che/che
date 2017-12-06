@@ -13,7 +13,6 @@ package org.eclipse.che.ide.ext.java.client.service;
 import static org.eclipse.che.api.promises.client.js.JsPromiseError.create;
 import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 import static org.eclipse.che.ide.ext.java.shared.Constants.CLASS_PATH_TREE;
-import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_CONTENT_NODE_BY_FQN;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_CONTENT_NODE_BY_PATH;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARIES;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARIES_CHILDREN;
@@ -30,7 +29,6 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.api.promises.client.js.RejectFunction;
 import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
-import org.eclipse.che.jdt.ls.extension.api.dto.ClassContent;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExternalLibrariesParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.FileStructureCommandParameters;
@@ -166,9 +164,9 @@ public class JavaLanguageExtensionServiceClient {
    * Gets content of the file from the library by file path.
    *
    * @param params external libraries parameters {@link ExternalLibrariesParameters}
-   * @return content {@link ClassContent}
+   * @return content of the file
    */
-  public Promise<ClassContent> libraryNodeContentByPath(ExternalLibrariesParameters params) {
+  public Promise<String> libraryNodeContentByPath(ExternalLibrariesParameters params) {
     return Promises.create(
         (resolve, reject) ->
             requestTransmitter
@@ -176,27 +174,7 @@ public class JavaLanguageExtensionServiceClient {
                 .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                 .methodName(EXTERNAL_CONTENT_NODE_BY_PATH)
                 .paramsAsDto(params)
-                .sendAndReceiveResultAsDto(ClassContent.class, 10000)
-                .onSuccess(resolve::apply)
-                .onTimeout(() -> onTimeout(reject))
-                .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));
-  }
-
-  /**
-   * Gets content of the file from the library by fqn.
-   *
-   * @param params external libraries parameters {@link ExternalLibrariesParameters}
-   * @return content {@link ClassContent}
-   */
-  public Promise<ClassContent> libraryNodeContentByFqn(ExternalLibrariesParameters params) {
-    return Promises.create(
-        (resolve, reject) ->
-            requestTransmitter
-                .newRequest()
-                .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
-                .methodName(EXTERNAL_CONTENT_NODE_BY_FQN)
-                .paramsAsDto(params)
-                .sendAndReceiveResultAsDto(ClassContent.class, 10000)
+                .sendAndReceiveResultAsString(10000)
                 .onSuccess(resolve::apply)
                 .onTimeout(() -> onTimeout(reject))
                 .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));

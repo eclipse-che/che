@@ -46,7 +46,6 @@ import org.eclipse.che.ide.ui.smartTree.data.HasAction;
 import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.data.settings.NodeSettings;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
-import org.eclipse.che.jdt.ls.extension.api.dto.ClassContent;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExternalLibrariesParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.JarEntry;
 
@@ -175,26 +174,10 @@ public class JarFileNode extends SyntheticNode<JarEntry>
     ExternalLibrariesParameters params = dtoFactory.createDto(ExternalLibrariesParameters.class);
     params.setProjectUri(project.toString());
     params.setNodePath(getData().getPath());
-    if (libId != null) {
-      params.setNodeId(libId);
-      return service
-          .libraryNodeContentByPath(params)
-          .then(
-              (Function<ClassContent, String>)
-                  result -> {
-                    JarFileNode.this.contentGenerated = result.isGenerated();
-                    return result.getContent();
-                  });
-    } else {
-      return service
-          .libraryNodeContentByFqn(params)
-          .then(
-              (Function<ClassContent, String>)
-                  result -> {
-                    JarFileNode.this.contentGenerated = result.isGenerated();
-                    return result.getContent();
-                  });
-    }
+    params.setNodeId(libId);
+    return service
+        .libraryNodeContentByPath(params)
+        .then((Function<String, String>) result -> result);
   }
 
   /** {@inheritDoc} */
